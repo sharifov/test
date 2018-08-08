@@ -1,0 +1,103 @@
+<?php
+use yii\widgets\ActiveForm;
+use frontend\models\LeadForm;
+use common\models\ProjectEmployeeAccess;
+use common\models\ClientPhone;
+use yii\helpers\Html;
+
+/**
+ * @var $this \yii\web\View
+ * @var $formPreferences ActiveForm
+ * @var $leadForm LeadForm
+ * @var $nr integer
+ * @var $newPhone ClientPhone
+ */
+
+$formId = sprintf('%s-form', $leadForm->getLeadPreferences()->formName());
+?>
+
+<?php $formPreferences = ActiveForm::begin([
+    'enableClientValidation' => false,
+    'id' => $formId
+]); ?>
+<div class="sidebar__section">
+    <h3 class="sidebar__subtitle">Lead Info</h3>
+    <div class="row">
+        <div class="col-md-6">
+            <?php if ($leadForm->getLead()->isNewRecord) : ?>
+                <?= $formPreferences->field($leadForm->getLead(), 'source_id')
+                    ->dropDownList(ProjectEmployeeAccess::getAllSourceByEmployee(), [
+                        'prompt' => 'Select'
+                    ])->label('Marketing Info:') ?>
+            <?php else : ?>
+                <div class="form-group field-lead-sub_source_id">
+                    <label class="control-label" for="lead-sub_source_id">Marketing Info:</label><br/>
+                    <?= sprintf('%s - [%s]',
+                        $leadForm->getLead()->source->name,
+                        $leadForm->getLead()->project->name) ?>
+                </div>
+            <?php endif; ?>
+        </div>
+        <div class="col-md-6">
+            <?php if ($leadForm->getLead()->uid == null): ?>
+                <?= $formPreferences->field($leadForm->getLead(), 'uid')
+                    ->textInput([
+                        'class' => 'form-control lead-form-input-element'
+                    ]) ?>
+            <?php else: ?>
+                <?= $formPreferences->field($leadForm->getLead(), 'uid')
+                    ->textInput(['readonly' => true]) ?>
+            <?php endif; ?>
+        </div>
+    </div>
+</div>
+<div class="sidebar__section">
+    <h3 class="sidebar__subtitle">Preferences</h3>
+    <div class="row">
+        <div class="col-md-6">
+            <?= $formPreferences->field($leadForm->getLeadPreferences(), 'market_price')
+                ->textInput([
+                    'class' => 'form-control lead-form-input-element'
+                ]) ?>
+        </div>
+        <div class="col-md-6">
+            <?= $formPreferences->field($leadForm->getLeadPreferences(), 'clients_budget')
+                ->textInput([
+                    'class' => 'form-control lead-form-input-element'
+                ]) ?>
+        </div>
+    </div>
+    <?= $formPreferences->field($leadForm->getLeadPreferences(), 'number_stops')
+        ->textInput([
+            'class' => 'form-control lead-form-input-element'
+        ]) ?>
+    <?= $formPreferences->field($leadForm->getLeadPreferences(), 'notes')
+        ->textarea([
+            'rows' => 7,
+            'class' => 'form-control lead-form-input-element'
+        ]) ?>
+</div>
+<?php ActiveForm::end(); ?>
+
+<div class="sidebar__section" id="user-actions-block"
+     style="display: <?= ($leadForm->getLead()->isNewRecord) ? 'none' : 'block' ?>;">
+    <div class="btn-wrapper">
+        <?= Html::button('<span class="btn-icon"><i class="fa fa-list"></i></span> View client actions', [
+            'id' => 'view-client-actions-btn',
+            'class' => 'btn btn-primary btn-with-icon'
+        ]) ?>
+    </div>
+</div>
+<?php
+if (!$leadForm->getLead()->isNewRecord &&
+    (Yii::$app->user->identity->getId() == $leadForm->getLead()->employee_id) || $leadForm->viewPermission
+) : ?>
+    <div class="sidebar__section" id="call-actions-block">
+        <div class="btn-wrapper">
+            <?= Html::button('<span class="btn-icon"><i class="fa fa-list"></i></span> View call actions', [
+                'id' => 'view-call-actions-btn',
+                'class' => 'btn btn-primary btn-with-icon'
+            ]) ?>
+        </div>
+    </div>
+<?php endif; ?>
