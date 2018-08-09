@@ -43,12 +43,12 @@ class m180808_113909_create_quotes_table extends Migration
             'id' => $this->primaryKey(),
             'quote_id' => $this->integer(),
             'passenger_type' => $this->string(),
-            'selling' => $this->float(2),
-            'net' => $this->float(2),
-            'fare' => $this->float(2),
-            'taxes' => $this->float(2),
-            'mark_up' => $this->float(2),
-            'extra_mark_up' => $this->float(2),
+            'selling' => $this->float(2)->defaultValue(0),
+            'net' => $this->float(2)->defaultValue(0),
+            'fare' => $this->float(2)->defaultValue(0),
+            'taxes' => $this->float(2)->defaultValue(0),
+            'mark_up' => $this->float(2)->defaultValue(0),
+            'extra_mark_up' => $this->float(2)->defaultValue(0),
             'created' => $this->dateTime()->defaultExpression('NOW()'),
             'updated' => $this->dateTime()->notNull()
         ], $tableOptions);
