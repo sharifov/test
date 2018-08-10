@@ -2,6 +2,7 @@
 /**
  * @var $leadForm LeadForm
  */
+
 use yii\bootstrap\Html;
 use frontend\models\LeadForm;
 
@@ -44,6 +45,14 @@ use frontend\models\LeadForm;
                 'leadForm' => $leadForm
             ]);
             ?>
+
+            <?php if (!$leadForm->getLead()->isNewRecord && count($leadForm->getLead()->getQuotes())) {
+                echo $this->render('partial/_quotes', [
+                    'quotes' => array_reverse($leadForm->getLead()->getQuotes()),
+                    'lead' => $leadForm->getLead()
+                ]);
+            } ?>
+
         </div>
     </div>
 

@@ -159,6 +159,21 @@ JS;
 </div>
 
 <div class="col-sm-6">
+    <?php if (!$model->isNewRecord) : ?>
+        <div class="panel panel-default">
+            <div class="panel-heading collapsing-heading">
+                <?= Html::a('Seller Contact Info <i class="collapsing-heading__arrow"></i>', '#seller-contact-info', [
+                    'data-toggle' => 'collapse',
+                    'class' => 'collapsing-heading__collapse-link'
+                ]) ?>
+            </div>
+            <div class="panel-body panel-collapse collapse in" id="seller-contact-info">
+                <?= $this->render('partial/_sellerContactInfo', [
+                    'model' => $model
+                ]) ?>
+            </div>
+        </div>
+    <?php endif; ?>
     <?= $this->render('partial/_activities', [
         'model' => $model
     ]) ?>

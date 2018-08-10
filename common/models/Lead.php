@@ -2,6 +2,7 @@
 
 namespace common\models;
 
+use common\components\EmailService;
 use Yii;
 
 /**
@@ -60,6 +61,55 @@ class Lead extends \yii\db\ActiveRecord
         return 'leads';
     }
 
+    public static function getBadges()
+    {
+        $badges = array_flip(self::getLeadQueueType());
+        foreach ($badges as $key => $value) {
+            $badges[$key] = 0;
+        }
+
+        return $badges;
+    }
+
+    public static function getLeadQueueType()
+    {
+        return [
+            'inbox', 'follow-up', 'processing',
+            'processing-all', 'booked', 'sold', 'trash'
+        ];
+    }
+
+    public static function getFlightType($flightType = null)
+    {
+        $mapping = [
+            self::TYPE_ROUND_TRIP => 'Round Trip',
+            self::TYPE_ONE_WAY => 'One Way',
+            self::TYPE_MULTI_DESTINATION => 'Multidestination'
+        ];
+
+        if ($flightType === null) {
+            return $mapping;
+        }
+
+        return isset($mapping[$flightType]) ? $mapping[$flightType] : $flightType;
+    }
+
+    public static function getCabin($cabin = null)
+    {
+        $mapping = [
+            self::CABIN_ECONOMY => 'Economy',
+            self::CABIN_PREMIUM => 'Premium eco',
+            self::CABIN_BUSINESS => 'Business',
+            self::CABIN_FIRST => 'First',
+        ];
+
+        if ($cabin === null) {
+            return $mapping;
+        }
+
+        return isset($mapping[$cabin]) ? $mapping[$cabin] : $cabin;
+    }
+
     /**
      * {@inheritdoc}
      */
@@ -102,6 +152,21 @@ class Lead extends \yii\db\ActiveRecord
             'created' => 'Created',
             'updated' => 'Updated',
         ];
+    }
+
+    public function getAppliedAlternativeQuotes()
+    {
+        foreach ($this->getQuotes() as $quote) {
+            if ($quote->status === $quote::STATUS_APPLIED) {
+                return $quote;
+            }
+        }
+        return null;
+    }
+
+    public function getQuotes()
+    {
+        return Quote::findAll(['lead_id' => $this->id]);
     }
 
     /**
@@ -152,55 +217,6 @@ class Lead extends \yii\db\ActiveRecord
         return $this->hasOne(Project::className(), ['id' => 'project_id']);
     }
 
-    public static function getLeadQueueType()
-    {
-        return [
-            'inbox', 'follow-up', 'processing',
-            'processing-all', 'booked', 'sold', 'trash'
-        ];
-    }
-
-    public static function getBadges()
-    {
-        $badges = array_flip(self::getLeadQueueType());
-        foreach ($badges as $key => $value) {
-            $badges[$key] = 0;
-        }
-
-        return $badges;
-    }
-
-    public static function getFlightType($flightType = null)
-    {
-        $mapping = [
-            self::TYPE_ROUND_TRIP => 'Round Trip',
-            self::TYPE_ONE_WAY => 'One Way',
-            self::TYPE_MULTI_DESTINATION => 'Multidestination'
-        ];
-
-        if ($flightType === null) {
-            return $mapping;
-        }
-
-        return isset($mapping[$flightType]) ? $mapping[$flightType] : $flightType;
-    }
-
-    public static function getCabin($cabin = null)
-    {
-        $mapping = [
-            self::CABIN_ECONOMY => 'Economy',
-            self::CABIN_PREMIUM => 'Premium eco',
-            self::CABIN_BUSINESS => 'Business',
-            self::CABIN_FIRST => 'First',
-        ];
-
-        if ($cabin === null) {
-            return $mapping;
-        }
-
-        return isset($mapping[$cabin]) ? $mapping[$cabin] : $cabin;
-    }
-
     public function beforeValidate()
     {
         $this->updated = date('Y-m-d H:i:s');
@@ -233,5 +249,114 @@ class Lead extends \yii\db\ActiveRecord
         }
 
         return $types;
+    }
+
+    public function sendEmail($quotes, $email)
+    {
+        $result = [
+            'status' => false,
+            'errors' => []
+        ];
+        $models = [];
+        foreach ($quotes as $quote) {
+            $model = Quote::findOne([
+                'uid' => $quote
+            ]);
+            if ($model !== null) {
+                $models[] = $model;
+            }
+        }
+
+        if (empty($models)) {
+            $result['errors'] = sprintf('Quotes not fond. UID: [%s]', implode(', ', $quotes));
+            return $result;
+        }
+
+        $key = sprintf('%s_%s', uniqid(), $email);
+        $fileName = sprintf('_%s_%s.php', str_replace(' ', '_', strtolower($this->source->project->name)), $key);
+        $path = sprintf('%s/tmpEmail/quote/%s', Yii::$app->getViewPath(), $fileName);
+
+        $template = ProjectEmailTemplate::findOne([
+            'type' => ProjectEmailTemplate::TYPE_EMAIL_OFFER,
+            'project_id' => $this->source->project_id
+        ]);
+
+        if ($template === null) {
+            $result['errors'] = sprintf('Email Template [%s] for project [%s] not fond.',
+                ProjectEmailTemplate::getTypes(ProjectEmailTemplate::TYPE_EMAIL_OFFER),
+                $this->source->project->name
+            );
+            return $result;
+        }
+
+        $view = $template->template;
+        $fp = fopen($path, "w");
+        chmod($path, 0777);
+        fwrite($fp, $view);
+        fclose($fp);
+
+        $view = sprintf('/tmpEmail/quote/%s', $fileName);
+
+        $airport = Airport::findIdentity($this->leadFlightSegments[0]->origin);
+        $origin = ($airport !== null)
+            ? $airport->city :
+            $this->leadFlightSegments[0]->origin;
+
+        $airport = Airport::findIdentity($this->leadFlightSegments[0]->destination);
+        $destination = ($airport !== null)
+            ? $airport->city
+            : $this->leadFlightSegments[0]->destination;
+
+        $tripType = Lead::getFlightType($this->trip_type);
+
+        $sellerContactInfo = EmployeeContactInfo::findOne([
+            'employee_id' => $this->employee->id,
+            'project_id' => $this->source->project_id
+        ]);
+
+        $body = Yii::$app->getView()->render($view, [
+            'origin' => $origin,
+            'destination' => $destination,
+            'quotes' => $models,
+            'project' => $this->source->project,
+            'agentName' => ucfirst($this->employee->username),
+            'employee' => $this->employee,
+            'tripType' => $tripType,
+            'sellerContactInfo' => $sellerContactInfo
+        ]);
+
+        if (!empty($template->layout_path)) {
+            $body = \Yii::$app->getView()->renderFile($template->layout_path, [
+                'project' => $this->source->project,
+                'agentName' => ucfirst($this->employee->username),
+                'employee' => $this->employee,
+                'sellerContactInfo' => $sellerContactInfo,
+                'body' => $body
+            ]);
+        }
+
+        $subject = ProjectEmailTemplate::getMessageBody($template->subject, [
+            'origin' => $origin,
+            'destination' => $destination
+        ]);
+
+        $credential = [
+            'email' => $sellerContactInfo->email_user,
+            'password' => $sellerContactInfo->email_pass,
+        ];
+
+        $errors = [];
+        $isSend = EmailService::send($email, $this->source->project, $credential, $subject, $body, $errors);
+        $message = ($isSend)
+            ? sprintf('Sending email - \'Offer\' succeeded! <br/>Emails: %s', implode(', ', [$email]))
+            : sprintf('Sending email - \'Offer\' failed! <br/>Emails: %s', implode(', ', [$email]));
+
+
+        $result['status'] =  $isSend;
+        $result['errors'] = $errors;
+
+        unlink($path);
+
+        return $result;
     }
 }

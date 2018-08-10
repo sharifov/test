@@ -1,4 +1,5 @@
 <?php
+
 namespace common\components;
 
 use common\models\ExpertSale;
@@ -42,7 +43,34 @@ class NavItem
                     ],
                     [
                         'label' => 'Settings',
-                        'url' => ['#']
+                        'linkOptions' => [
+                            'class' => 'dropdown-toggle',
+                            'data-toggle' => 'dropdown'
+                        ],
+                        'itemsOptions' => ['class' => 'dropdown-submenu'],
+                        'submenuOptions' => ['class' => 'dropdown-menu'],
+                        'items' => [
+                            [
+                                'label' => 'ACL',
+                                'url' => sprintf('%s/admin/settings/acl', Yii::$app->urlManager->getHostInfo())
+                            ],
+                            [
+                                'label' => 'Projects',
+                                'url' => sprintf('%s/admin/settings/projects', Yii::$app->urlManager->getHostInfo())
+                            ],
+                            [
+                                'label' => 'Airlines',
+                                'url' => sprintf('%s/admin/settings/airlines', Yii::$app->urlManager->getHostInfo())
+                            ],
+                            [
+                                'label' => 'Airports',
+                                'url' => sprintf('%s/admin/settings/airports', Yii::$app->urlManager->getHostInfo())
+                            ],
+                            [
+                                'label' => 'Logging',
+                                'url' => sprintf('%s/admin/settings/logging', Yii::$app->urlManager->getHostInfo())
+                            ],
+                        ]
                     ],
                 ];
             }

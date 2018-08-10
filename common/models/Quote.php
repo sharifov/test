@@ -61,13 +61,101 @@ class Quote extends \yii\db\ActiveRecord
         return 'quotes';
     }
 
+    public static function getGDSName($gds = null)
+    {
+        $mapping = [
+            self::GDS_SABRE => 'Sabre',
+            self::GDS_AMADEUS => 'Amadeus',
+            self::GDS_WORLDSPAN => 'Worldspan'
+        ];
+
+        if ($gds === null) {
+            return $mapping;
+        }
+
+        return isset($mapping[$gds]) ? $mapping[$gds] : $gds;
+    }
+
+    public static function createDump($flightSegments)
+    {
+        /**
+         * @var $flightSegments FlightSegment[]
+         */
+        $nr = 1;
+        $dump = [];
+        foreach ($flightSegments as $flightSegment) {
+            $daysName = self::getDayName($flightSegment->departureTime, $flightSegment->arrivalTime);
+
+            $segment = $nr++ . self::addSpace(1);
+            $segment .= $flightSegment->airlineCode;
+            $segment .= self::addSpace(4 - strlen($flightSegment->flightNumber)) . $flightSegment->flightNumber;
+            $segment .= $flightSegment->bookingClass . self::addSpace(1);
+
+            $departureDate = strtoupper(date('dM', strtotime($flightSegment->departureTime)));
+            $segment .= $departureDate . self::addSpace(1);
+
+            $segment .= $flightSegment->departureAirportCode . $flightSegment->destinationAirportCode . self::addSpace(1);
+
+            $segment .= empty($flightSegment->statusCode) ? '' : strtoupper($flightSegment->statusCode) . self::addSpace(1);
+
+            $time = substr(str_replace(' ', '', str_replace(':', '', date('g:i A', strtotime($flightSegment->departureTime)))), 0, -1);
+            $segment .= self::addSpace(5 - strlen($time)) . $time . self::addSpace(1);
+            $time = substr(str_replace(' ', '', str_replace(':', '', date('g:i A', strtotime($flightSegment->arrivalTime)))), 0, -1);
+            $segment .= (strlen($daysName) === 2)
+                ? self::addSpace(5 - strlen($time)) . $time . self::addSpace(1)
+                : self::addSpace(5 - strlen($time)) . $time . '+' . self::addSpace(1);
+
+            $arrivalDate = strtoupper(date('dM', strtotime($flightSegment->arrivalTime)));
+            $segment .= ($arrivalDate != $departureDate)
+                ? $arrivalDate . self::addSpace(1) : '';
+
+            $segment .= $daysName;
+            $dump[] = $segment;
+        }
+        return $dump;
+    }
+
+    private static function getDayName($departureTime, $arrivalTime)
+    {
+        $departureDay = substr(strtoupper(date('D', strtotime($departureTime))), 0, -1);
+        $arrivalDay = substr(strtoupper(date('D', strtotime($arrivalTime))), 0, -1);
+        if (strcmp($departureDay, $arrivalDay) === 0) {
+            return $departureDay;
+        }
+        return $departureDay . '/' . $arrivalDay;
+    }
+
+    private static function addSpace($n)
+    {
+        $space = '';
+        for ($i = 0; $i < $n; $i++) {
+            $space .= '&nbsp; ';
+        }
+        return $space;
+    }
+
+    public static function getElapsedTime($elapsedTime)
+    {
+        $h = $elapsedTime / 60;
+        if ($h > 0) {
+            $m = $elapsedTime % 60;
+            $elapsedTime = (int)$h . 'hr';
+            if ($m > 0) {
+                $elapsedTime = $elapsedTime . ' ' . $m . 'min';
+            } else {
+                $elapsedTime = $elapsedTime . ' 0min';
+            }
+        }
+        return $elapsedTime;
+    }
+
     /**
      * {@inheritdoc}
      */
     public function rules()
     {
         return [
-            [['uid', 'reservation_dump'], 'required'],
+            [['uid', 'reservation_dump', 'pcc', 'gds', 'main_airline_code'], 'required'],
             [['lead_id', 'employee_id', 'status', 'check_payment'], 'integer'],
             [['created', 'updated', 'reservation_dump'], 'safe'],
             [['uid', 'record_locator', 'pcc', 'cabin', 'gds', 'trip_type', 'main_airline_code', 'fare_type'], 'string', 'max' => 255],
@@ -128,6 +216,10 @@ class Quote extends \yii\db\ActiveRecord
     {
         $this->updated = date('Y-m-d H:i:s');
 
+        if ($this->isNewRecord) {
+            $this->status = self::STATUS_CREATED;
+        }
+
         parent::afterValidate();
     }
 
@@ -154,132 +246,6 @@ class Quote extends \yii\db\ActiveRecord
         }
 
         return parent::beforeValidate();
-    }
-
-    public static function getGDSName($gds = null)
-    {
-        $mapping = [
-            self::GDS_SABRE => 'Sabre',
-            self::GDS_AMADEUS => 'Amadeus',
-            self::GDS_WORLDSPAN => 'Worldspan'
-        ];
-
-        if ($gds === null) {
-            return $mapping;
-        }
-
-        return isset($mapping[$gds]) ? $mapping[$gds] : $gds;
-    }
-
-    public function getStatusLabel()
-    {
-        $label = '';
-        switch ($this->status) {
-            case self::STATUS_CREATED:
-                $label = '<span class="status-label label label-primary" data-toggle="tooltip" title="" data-original-title="">Created</span>';
-                break;
-            case self::STATUS_APPLIED:
-                $label = '<span class="status-label label label-success" data-toggle="tooltip" title="" data-original-title="">Applied</span>';
-                break;
-            case self::STATUS_DECLINED:
-                $label = '<span class="status-label label label-danger" data-toggle="tooltip" title="" data-original-title="">Declined</span>';
-                break;
-            case self::STATUS_SEND:
-                $label = '<span class="status-label label label-warning" data-toggle="tooltip" title="" data-original-title="">Sent to client</span>';
-                break;
-            case self::STATUS_OPENED:
-                $label = '<span class="status-label label label-gold" data-toggle="tooltip" title="" data-original-title="">Form opened</span>';
-                $label .= !empty($this->has_opened_date) ? sprintf(' %s', $this->has_opened_date) : '';
-                break;
-        }
-        return $label;
-    }
-
-    /**
-     * @param $newQuote self
-     * @param $lead Lead
-     * @return array|QuotePrice[]
-     */
-    public function cloneQuote(&$newQuote, $lead)
-    {
-
-        $prices = [];
-        foreach ($lead->getPaxTypes() as $type) {
-            $newQPrice = new QuotePrice();
-            foreach ($this->quotePrices as $qPrice) {
-                if ($qPrice->passenger_type == $type) {
-                    $newQPrice->attributes = $qPrice->attributes;
-                    break;
-                }
-            }
-            $newQPrice->id = 0;
-            $newQPrice->passenger_type = $type;
-            $prices[] = $newQPrice;
-        }
-        $newQuote->attributes = $this->attributes;
-        $newQuote->id = 0;
-        $newQuote->record_locator = null;
-        $newQuote->uid = null;
-        $newQuote->status = self::STATUS_CREATED;
-        return $prices;
-    }
-
-    public static function createDump($flightSegments)
-    {
-        /**
-         * @var $flightSegments FlightSegment[]
-         */
-        $nr = 1;
-        $dump = [];
-        foreach ($flightSegments as $flightSegment) {
-            $daysName = self::getDayName($flightSegment->departureTime, $flightSegment->arrivalTime);
-
-            $segment = $nr++ . self::addSpace(1);
-            $segment .= $flightSegment->airlineCode;
-            $segment .= self::addSpace(4 - strlen($flightSegment->flightNumber)) . $flightSegment->flightNumber;
-            $segment .= $flightSegment->bookingClass . self::addSpace(1);
-
-            $departureDate = strtoupper(date('dM', strtotime($flightSegment->departureTime)));
-            $segment .= $departureDate . self::addSpace(1);
-
-            $segment .= $flightSegment->departureAirportCode . $flightSegment->destinationAirportCode . self::addSpace(1);
-
-            $segment .= empty($flightSegment->statusCode) ? '' : strtoupper($flightSegment->statusCode) . self::addSpace(1);
-
-            $time = substr(str_replace(' ', '', str_replace(':', '', date('g:i A', strtotime($flightSegment->departureTime)))), 0, -1);
-            $segment .= self::addSpace(5 - strlen($time)) . $time . self::addSpace(1);
-            $time = substr(str_replace(' ', '', str_replace(':', '', date('g:i A', strtotime($flightSegment->arrivalTime)))), 0, -1);
-            $segment .= (strlen($daysName) === 2)
-                ? self::addSpace(5 - strlen($time)) . $time . self::addSpace(1)
-                : self::addSpace(5 - strlen($time)) . $time . '+' . self::addSpace(1);
-
-            $arrivalDate = strtoupper(date('dM', strtotime($flightSegment->arrivalTime)));
-            $segment .= ($arrivalDate != $departureDate)
-                ? $arrivalDate . self::addSpace(1) : '';
-
-            $segment .= $daysName;
-            $dump[] = $segment;
-        }
-        return $dump;
-    }
-
-    private static function getDayName($departureTime, $arrivalTime)
-    {
-        $departureDay = substr(strtoupper(date('D', strtotime($departureTime))), 0, -1);
-        $arrivalDay = substr(strtoupper(date('D', strtotime($arrivalTime))), 0, -1);
-        if (strcmp($departureDay, $arrivalDay) === 0) {
-            return $departureDay;
-        }
-        return $departureDay . '/' . $arrivalDay;
-    }
-
-    private static function addSpace($n)
-    {
-        $space = '';
-        for ($i = 0; $i < $n; $i++) {
-            $space .= '&nbsp; ';
-        }
-        return $space;
     }
 
     public static function parseDump($string, $validation = true, &$itinerary = [])
@@ -434,5 +400,198 @@ class Quote extends \yii\db\ActiveRecord
         }
 
         return $data;
+    }
+
+    public function getStatusLabel()
+    {
+        $label = '';
+        $date = $this->updated;
+        switch ($this->status) {
+            case self::STATUS_CREATED:
+                $label = '<span id="q-status-' . $this->uid . '" class="sl-quote__status status-label label label-primary" title="At ' . $date . '" data-toggle="tooltip">Created</span>';
+                break;
+            case self::STATUS_APPLIED:
+                $label = '<span id="q-status-' . $this->uid . '" class="sl-quote__status status-label label label-success" title="At ' . $date . '" data-toggle="tooltip">Booked</span>';
+                break;
+            case self::STATUS_DECLINED:
+                $label = '<span id="q-status-' . $this->uid . '" class="sl-quote__status status-label label label-danger" title="At ' . $date . '" data-toggle="tooltip">Declined</span>';
+                break;
+            case self::STATUS_SEND:
+                $label = '<span id="q-status-' . $this->uid . '" class="sl-quote__status status-label label label-warning" title="At ' . $date . '" data-toggle="tooltip">Sent to client</span>';
+                break;
+            case self::STATUS_OPENED:
+                $label = '<span id="q-status-' . $this->uid . '" class="sl-quote__status status-label label label-gold" title="At ' . $date . '" data-toggle="tooltip">Form opened</span>';
+                break;
+        }
+        return $label;
+    }
+
+    /**
+     * @param $newQuote self
+     * @param $lead Lead
+     * @return array|QuotePrice[]
+     */
+    public function cloneQuote(&$newQuote, $lead)
+    {
+
+        $prices = [];
+        foreach ($lead->getPaxTypes() as $type) {
+            $newQPrice = new QuotePrice();
+            foreach ($this->quotePrices as $qPrice) {
+                if ($qPrice->passenger_type == $type) {
+                    $newQPrice->attributes = $qPrice->attributes;
+                    break;
+                }
+            }
+            $newQPrice->id = 0;
+            $newQPrice->passenger_type = $type;
+            $prices[] = $newQPrice;
+        }
+        $newQuote->attributes = $this->attributes;
+        $newQuote->id = 0;
+        $newQuote->record_locator = null;
+        $newQuote->uid = null;
+        $newQuote->status = self::STATUS_CREATED;
+        return $prices;
+    }
+
+    /**
+     * @return Airline|null
+     */
+    public function getMainCarrier()
+    {
+        return Airline::findIdentity($this->main_airline_code);
+    }
+
+    public function getTrips(&$title = null)
+    {
+        $trips = [];
+        $tripIndex = 0;
+        $segments = self::parseDump($this->reservation_dump, false);
+        foreach ($segments as $key => $segment) {
+            $segment['cabin'] = $this->cabin;
+            if ($this->trip_type != Lead::TYPE_ONE_WAY) {
+                if ($key != 0) {
+                    $lastSegment = isset($segments[$key - 1])
+                        ? $segments[$key - 1] : $segments[$key];
+                    $isMoreOneDay = $this->isMoreOneDay($lastSegment['arrivalDateTime'], $segment['departureDateTime']);
+                    if ($isMoreOneDay) {
+                        $tripIndex = $tripIndex + 1;
+                    }
+                }
+            }
+            $segment['departureCountry'] = ($segment['departureCity'] !== null)
+                ? $segment['departureCity']->country : '';
+            $segment['arrivalCountry'] = ($segment['arrivalCity'] !== null)
+                ? $segment['arrivalCity']->country : '';
+            $segment['departureCity'] = ($segment['departureCity'] !== null)
+                ? $segment['departureCity']->city : '';
+            $segment['arrivalCity'] = ($segment['arrivalCity'] !== null)
+                ? $segment['arrivalCity']->city : '';
+            $trips[$tripIndex]['segments'][] = $segment;
+        }
+        foreach ($trips as $key => $trip) {
+            $routing = [];
+            $routing[] = $trip['segments'][0]['departureAirport'];
+
+            $trips[$key]['segments'][0]['layoverDuration'] = 0;
+
+            $firstSegment = $trip['segments'][0];
+            $lastSegment = $trip['segments'][count($trip['segments']) - 1];
+
+            $depCity = Airport::findIdentity($firstSegment['departureAirport']);
+            $arrCity = Airport::findIdentity($lastSegment['arrivalAirport']);
+
+            if ($depCity !== null && $arrCity !== null && $depCity->dst != $arrCity->dst) {
+                $flightDuration = ($lastSegment['arrivalDateTime']->getTimestamp() - $firstSegment['departureDateTime']->getTimestamp()) / 60;
+                $trips[$key]['totalDuration'] = intval($flightDuration) + (intval($depCity->dst) * 60) - (intval($arrCity->dst) * 60);
+            } else {
+                $trips[$key]['totalDuration'] = ($lastSegment['arrivalDateTime']->getTimestamp() - $firstSegment['departureDateTime']->getTimestamp()) / 60;
+            }
+
+            foreach ($trip['segments'] as $segment) {
+                $routing[] = $segment['arrivalAirport'];
+            }
+            $src = Airport::findIdentity($routing[min(array_keys($routing))]);
+            $dst = Airport::findIdentity($routing[max(array_keys($routing))]);
+            $trips[$key]['routing'] = implode('-', $routing);
+            $trips[$key]['title'] = sprintf('%s - %s',
+                ($src !== null) ? $src->city : $src,
+                ($dst !== null) ? $dst->city : $dst
+            );
+        }
+        if ($title !== null) {
+            if ($this->trip_type != Lead::TYPE_ONE_WAY) {
+                if ($this->trip_type == Lead::TYPE_ROUND_TRIP) {
+                    $exp = explode('-', $trips[0]['title']);
+                    if (isset($exp[0])) {
+                        $title = $trips[0]['title'] . ' - ' . $exp[0];
+                    }
+                } else {
+                    $title = sprintf('%s, %s', $trips[0]['title'], $trips[1]['title']);
+                }
+            } else {
+                $title = $trips[0]['title'];
+            }
+        }
+        return $trips;
+    }
+
+    private function isMoreOneDay(\DateTime $departureDateTime, \DateTime $arrivalDateTime)
+    {
+        $diff = $departureDateTime->diff($arrivalDateTime);
+        return ((int)sprintf('%d%d%d', $diff->y, $diff->m, $diff->d) >= 1)
+            ? true : false;
+    }
+
+    public function quotePrice()
+    {
+        $result = [
+            'detail' => [],
+            'tickets' => count($this->quotePrices),
+            'selling' => 0,
+            'amountPerPax' => 0,
+            'fare' => 0,
+            'mark_up' => 0,
+            'taxes' => 0,
+            'currency' => 'USD'
+        ];
+        foreach ($this->quotePrices as $price) {
+            $price->toFloat();
+            $price->roundValue();
+
+            if (!isset($result['detail'][$price->passenger_type]['selling'])) {
+                $result['detail'][$price->passenger_type]['selling'] = $price->selling;
+                $result['detail'][$price->passenger_type]['fare'] = $price->fare;
+                $result['detail'][$price->passenger_type]['taxes'] = $price->taxes + $price->mark_up + $price->extra_mark_up;
+                $result['detail'][$price->passenger_type]['tickets'] = 1;
+            } else {
+                $result['detail'][$price->passenger_type]['selling'] += $price->selling;
+                $result['detail'][$price->passenger_type]['fare'] += $price->fare;
+                $result['detail'][$price->passenger_type]['taxes'] += $price->taxes + $price->mark_up + $price->extra_mark_up;
+                $result['detail'][$price->passenger_type]['tickets'] += 1;
+            }
+
+            $result['selling'] += $price->selling;
+            $result['fare'] += $price->fare;
+            $result['mark_up'] += $price->mark_up + $price->extra_mark_up;
+            $result['taxes'] += $price->taxes;
+        }
+
+        foreach ($result['detail'] as $type => $item) {
+            if (empty($result['amountPerPax']) && $type == QuotePrice::PASSENGER_ADULT) {
+                $result['amountPerPax'] = ($item['selling'] / $item['tickets']);
+            }
+            $result['detail'][$type]['selling'] = ($item['selling'] / $item['tickets']);
+            $result['detail'][$type]['fare'] = ($item['fare'] / $item['tickets']);
+            $result['detail'][$type]['taxes'] = ($item['taxes'] / $item['tickets']);
+        }
+
+        $result['taxes'] = $result['taxes'] + $result['mark_up'];
+        $result['selling'] = round($result['selling'], 2);
+        $result['fare'] = round($result['fare'], 2);
+        $result['taxes'] = round($result['taxes'], 2);
+        $result['isCC'] = boolval(!$this->check_payment);
+        return $result;
     }
 }

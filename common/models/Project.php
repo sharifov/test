@@ -2,6 +2,7 @@
 
 namespace common\models;
 
+use common\models\local\ContactInfo;
 use Yii;
 
 /**
@@ -16,9 +17,12 @@ use Yii;
  * @property string $last_update
  *
  * @property Source[] $sources
+ * @property ContactInfo $contactInfo
  */
 class Project extends \yii\db\ActiveRecord
 {
+    public $contactInfo;
+
     /**
      * {@inheritdoc}
      */
@@ -62,5 +66,22 @@ class Project extends \yii\db\ActiveRecord
     public function getSources()
     {
         return $this->hasMany(Source::className(), ['project_id' => 'id']);
+    }
+
+    public function afterFind()
+    {
+        $this->contactInfo = new ContactInfo();
+        if (!empty($this->contact_info)) {
+            $this->contactInfo->attributes = json_decode($this->contact_info, true);
+        }
+        parent::afterFind();
+    }
+
+    /**
+     * @return ProjectEmailTemplate[]
+     */
+    public function getEmailTemplates()
+    {
+        return ProjectEmailTemplate::findAll(['project_id' => $this->id]);
     }
 }

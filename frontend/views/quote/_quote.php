@@ -14,7 +14,7 @@ use common\models\QuotePrice;
 use kartik\select2\Select2;
 use common\models\Airline;
 
-$altQuotePriceUrl = \yii\helpers\Url::to(['alt-quote/alt-price', 'altQuoteId' => $quote->id]);
+$quotePriceUrl = \yii\helpers\Url::to(['quote/calc-price', 'quoteId' => $quote->id]);
 $formID = sprintf('alt-quote-info-form-%d', $quote->id);
 
 $paxCntTypes = [
@@ -23,10 +23,143 @@ $paxCntTypes = [
     QuotePrice::PASSENGER_INFANT => $lead->infants
 ];
 
+$js = <<<JS
+    $('[data-toggle="tooltip"]').tooltip();
+    
+    $('.alt-quote-price').keyup(function (event) {
+        var key = event.keyCode ? event.keyCode : event.which;
+        validatePriceField($(this), key);
+    });
+    $('.alt-quote-price').change(function (event) {
+        if ($(this).val().length == 0) {
+            $(this).val(0);
+        }
+        var form = $('#$formID');
+        $.ajax({
+            type: 'post',
+            url: '$quotePriceUrl',
+            data: form.serialize(),
+            success: function (data) {
+                $.each(data, function( index, value ) {
+                    $('#'+index).val(value);
+                });
+            },
+            error: function (error) {			
+                console.log('Error: ' + error);			
+            }
+        });
+    });
+
+    /***  Cancel card  ***/
+    $('#cancel-alt-quote').click(function (e) {
+        e.preventDefault();
+        var editBlock = $('#$formID');
+        editBlock.parent().parent().removeClass('in');
+        editBlock.parent().html('');
+        $('#create-quote').modal('hide');
+        $('#create-quick-quote').modal('hide');
+    });
+    $('#cancel-confirm-quote').click(function (e) {
+        e.preventDefault();
+        $('#modal-confirm-alt-itinerary').modal('hide');
+    });
+    
+    function addEditAltQuote(form, url)
+    {
+        $('.field-error').each(function() {
+            $(this).removeClass('field-error');  
+        });
+        $('#preloader').removeClass('hidden');
+        $.ajax({
+            url: url,
+            type: form.attr("method"),
+            data: form.serialize(),
+            success: function (data) {
+                var itineraryErr = false;
+                $('#preloader').addClass('hidden');
+                if (data.success == false) {
+                    $.each(data.errors, function( index, value ) {
+                        $('#quote-'+index).addClass('field-error');
+                        if (index == 'reservation_dump') {
+                            itineraryErr = true;
+                        }
+                    });
+                    
+                    if (data.itinerary.length != 0) {
+                        if (Object.keys(data.errors).length == 1 && itineraryErr) {
+                            $('#modal-confirm-alt-itinerary .diff-itinerary__content').html('');
+                            $.each(data.itinerary, function( index, value ) {
+                                var divCh = $("<div/>").addClass("diff-itinerary__item").appendTo($('#modal-confirm-alt-itinerary .diff-itinerary__content'));
+                                divCh.html('<div class="diff-itinerary__conf-number">'+ value +'</div>')
+                            });
+                            $('#modal-confirm-alt-itinerary').modal('show');
+                        }
+                    }
+	            } else {
+                    if (data.save == true) {
+                         window.location.reload();
+                    } else {
+                        $('#modal-confirm-alt-itinerary .diff-itinerary__content').html('');
+                        $.each(data.itinerary, function( index, value ) {
+                            var divCh = $("<div/>").addClass("diff-itinerary__item").appendTo($('#modal-confirm-alt-itinerary .diff-itinerary__content'));
+                            divCh.html('<div class="diff-itinerary__conf-number">'+ value +'</div>')
+                        });
+                        $('#modal-confirm-alt-itinerary').modal('show');
+                    }
+	            }
+            },
+            error: function (error) {			
+                console.log('Error: ' + error);			
+            }
+        });
+    }
+    $('#save-alt-quote').click(function (e) {
+        e.preventDefault();
+        $('#alternativequote-status').val(1);
+        var form = $('#$formID');
+        addEditAltQuote(form, form.attr("action"));
+    });
+    $('#confirm-alt-quote').click(function (e) {
+        e.preventDefault();
+        $('#modal-confirm-alt-itinerary').modal('hide');
+        $('#alternativequote-status').val(1);
+        var form = $('#$formID');
+        addEditAltQuote(form, form.attr("action") + '?save=true');
+    });
+    
+    $('.clone-alt-price-by-type').click(function(e) {
+        e.preventDefault();
+        $(this).blur();
+        var priceIndex = $(this).data('price-index');
+        var paxType = $(this).data('type');
+        var list = {};
+        $('#price-index-' + priceIndex + ' input').each(function() {
+            var field = $(this).attr('id').split('-')[2];
+            if ($.inArray(field, ['net', 'fare', 'mark_up', 'oldparams', 'selling', 'taxes']) != -1) {
+                list[field] = $(this).val();
+            }
+        });
+        $('.pax-type-' + paxType).each(function(index) {
+            if (index != 0) {
+                $(this).find('input').each(function() {
+                    var field = $(this).attr('id').split('-')[2];
+                    for (var key in list) {
+                        if (field == key) {
+                            $(this).val(list[field]);
+                            break;
+                        }
+                    }
+                });
+            }
+        });
+    });
+JS;
+$this->registerJs($js);
+
 ?>
 
 <?php $form = ActiveForm::begin([
-    'action' => \yii\helpers\Url::to(['alt-quote/save']),
+    'action' => \yii\helpers\Url::to(['quote/save']),
     'errorCssClass' => '',
     'successCssClass' => '',
     'id' => $formID
@@ -79,6 +212,12 @@ $paxCntTypes = [
                             'template' => '{input}'
                         ])->hiddenInput() .
                         $form->field($price, '[' . $index . ']passenger_type', [
+                            'options' => [
+                                'tag' => false,
+                            ],
+                            'template' => '{input}'
+                        ])->hiddenInput() .
+                        $form->field($price, '[' . $index . ']oldParams', [
                             'options' => [
                                 'tag' => false,
                             ],

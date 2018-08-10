@@ -5,12 +5,11 @@ use backend\models\search\EmployeeForm;
 use common\controllers\DefaultController;
 use common\models\Employee;
 use common\models\EmployeeAcl;
+use common\models\EmployeeContactInfo;
 use common\models\ProjectEmployeeAccess;
 use Yii;
-use yii\data\ActiveDataProvider;
-use yii\filters\VerbFilter;
+use yii\bootstrap\Html;
 use yii\filters\AccessControl;
-use common\models\LoginForm;
 use yii\helpers\ArrayHelper;
 use yii\web\BadRequestHttpException;
 use yii\web\Response;
@@ -34,9 +33,63 @@ class EmployeeController extends DefaultController
                         'allow' => true,
                         'roles' => ['supervision'],
                     ],
+                    [
+                        'actions' => ['seller-contact-info'],
+                        'allow' => true,
+                        'roles' => ['agent'],
+                    ],
                 ],
             ],
         ];
+    }
+
+    public function actionSellerContactInfo($employeeId)
+    {
+        $roles = Yii::$app->user->identity->getRoles();
+        if (empty($roles)) {
+            return null;
+        } elseif (!in_array('admin', $roles) && Yii::$app->user->identity->getId() != $employeeId) {
+            return null;
+        }
+
+        if (Yii::$app->request->isPost && Yii::$app->request->isAjax) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            $result = [
+                'success' => true,
+                'errors' => []
+            ];
+            $errors = [];
+            $attrArr = Yii::$app->request->post('EmployeeContactInfo');
+            foreach ($attrArr as $key => $attr) {
+                $model = empty($attr['id'])
+                    ? null
+                    : EmployeeContactInfo::findOne(['id' => $attr['id']]);
+                if ($model === null) {
+                    $model = new EmployeeContactInfo();
+                }
+                $model->attributes = $attr;
+                if ($model->needSave()) {
+                    if (!$model->save()) {
+                        if ($model->hasErrors('email_user')) {
+                            $errors[Html::getInputId($model, '[' . $key . ']email_user')] = true;
+                        }
+                        if ($model->hasErrors('email_pass')) {
+                            $errors[Html::getInputId($model, '[' . $key . ']email_pass')] = true;
+                        }
+                        if ($model->hasErrors('direct_line')) {
+                            $errors[Html::getInputId($model, '[' . $key . ']direct_line')] = true;
+                        }
+                    }
+                }
+            }
+            if (!empty($errors)) {
+                $result['success'] = false;
+                $result['errors'] = $errors;
+            }
+            return $result;
+        }
+
+        return null;
     }
 
     public function actionAclRule($id = 0)
@@ -87,9 +140,11 @@ class EmployeeController extends DefaultController
         ]);
     }
 
+
     /**
      * @return string
      * @throws BadRequestHttpException
+     * @throws \yii\base\InvalidConfigException
      */
     public function actionUpdate()
     {
