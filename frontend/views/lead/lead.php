@@ -18,7 +18,7 @@ use frontend\models\LeadForm;
                     <?php if ($leadForm->getLead()->isNewRecord) : ?>
                         <span id="status-label"><span class="label status-label label-info">New</span></span>
                     <?php else : ?>
-
+                        <?= $leadForm->getLead()->getStatusLabel() ?>
                     <?php endif; ?>
                 </div>
             </div>

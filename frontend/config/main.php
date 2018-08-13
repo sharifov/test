@@ -50,6 +50,14 @@ return [
                     'pattern' => 'queue/<type:(inbox|follow-up|processing|processing-all|booked|sold|trash)>',
                     'route' => 'lead/queue',
                 ],
+                [
+                    'pattern' => 'lead/<type:(inbox|follow-up|processing|processing-all|booked|sold|trash)>/<id>',
+                    'route' => 'lead/quote',
+                ],
+                [
+                    'pattern' => 'take/<id>',
+                    'route' => 'lead/take',
+                ],
             ],
         ],
     ],

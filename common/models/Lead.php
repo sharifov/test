@@ -4,6 +4,10 @@ namespace common\models;
 
 use common\components\EmailService;
 use Yii;
+use yii\data\ActiveDataProvider;
+use yii\db\Query;
+use yii\helpers\ArrayHelper;
+use yii\helpers\Html;
 
 /**
  * This is the model class for table "leads".
@@ -21,8 +25,13 @@ use Yii;
  * @property int $children
  * @property int $infants
  * @property string $notes_for_experts
+ * @property string $request_ip
+ * @property string $offset_gmt
+ * @property string $request_ip_detail
+ * @property int $rating
  * @property string $created
  * @property string $updated
+ * @property string $snooze_for
  *
  * @property LeadFlightSegment[] $leadFlightSegments
  * @property LeadPreferences $leadPreferences
@@ -44,8 +53,9 @@ class Lead extends \yii\db\ActiveRecord
         STATUS_BOOKED = 3,
         STATUS_SOLD = 4,
         STATUS_FOLLOW_UP = 5,
-        STATUS_HOLD_ON = 6,
-        STATUS_TRASH = 7;
+        STATUS_ON_HOLD = 6,
+        STATUS_TRASH = 7,
+        STATUS_SNOOZE = 13;
 
     const
         CABIN_ECONOMY = 'E',
@@ -53,19 +63,83 @@ class Lead extends \yii\db\ActiveRecord
         CABIN_FIRST = 'F',
         CABIN_PREMIUM = 'P';
 
-    /**
-     * {@inheritdoc}
-     */
-    public static function tableName()
+    const
+        DIV_GRID_WITH_OUT_EMAIL = 1,
+        DIV_GRID_WITH_EMAIL = 2,
+        DIV_GRID_SEND_QUOTES = 3,
+        DIV_GRID_IN_SNOOZE = 4;
+
+    public static function getDivs($div = null)
     {
-        return 'leads';
+        $mapping = [
+            self::DIV_GRID_IN_SNOOZE => 'Leads in snooze',
+            self::DIV_GRID_WITH_OUT_EMAIL => 'Leads with out email',
+            self::DIV_GRID_WITH_EMAIL => 'Leads with email',
+            self::DIV_GRID_SEND_QUOTES => 'Leads with send quotes'
+        ];
+        if ($div === null) {
+            return $mapping;
+        } else {
+            return $mapping[$div];
+        }
     }
 
+    /**
+     * @return array|null
+     */
     public static function getBadges()
     {
         $badges = array_flip(self::getLeadQueueType());
+        $projectIds = array_keys(ProjectEmployeeAccess::getProjectsByEmployee());
+
         foreach ($badges as $key => $value) {
-            $badges[$key] = 0;
+            $status = [];
+            switch ($key) {
+                case 'inbox':
+                    $status[] = self::STATUS_PENDING;
+                    break;
+                case 'follow-up':
+                    $status[] = self::STATUS_FOLLOW_UP;
+                    break;
+                case 'booked':
+                    $status[] = self::STATUS_BOOKED;
+                    break;
+                case 'sold':
+                    $status[] = self::STATUS_SOLD;
+                    break;
+                case 'trash':
+                    $status[] = self::STATUS_TRASH;
+                    break;
+                default:
+                    $status = [
+                        self::STATUS_PROCESSING, self::STATUS_ON_HOLD,
+                        self::STATUS_SNOOZE
+                    ];
+                    break;
+            }
+
+            $query = self::find()
+                ->where(['IN', self::tableName() . '.status', $status])
+                ->andWhere(['IN', self::tableName() . '.project_id', $projectIds]);
+
+            if (Yii::$app->user->identity->role == 'agent' && in_array($key, ['trash'])) {
+                $badges[$key] = 0;
+                continue;
+            }
+
+            if (Yii::$app->user->identity->role == 'agent' && in_array($key, ['sold'])) {
+                $query->andWhere([
+                    'employee_id' => Yii::$app->user->identity->getId()
+                ]);
+            }
+
+            if (in_array($key, ['processing'])) {
+                $query->andWhere([
+                    'employee_id' => Yii::$app->user->identity->getId()
+                ]);
+            }
+
+            $badges[$key] = $query->count();
         }
 
         return $badges;
@@ -79,19 +153,203 @@ class Lead extends \yii\db\ActiveRecord
         ];
     }
 
-    public static function getFlightType($flightType = null)
+    /**
+     * {@inheritdoc}
+     */
+    public static function tableName()
     {
-        $mapping = [
-            self::TYPE_ROUND_TRIP => 'Round Trip',
-            self::TYPE_ONE_WAY => 'One Way',
-            self::TYPE_MULTI_DESTINATION => 'Multidestination'
-        ];
+        return 'leads';
+    }
 
-        if ($flightType === null) {
-            return $mapping;
+    public static function search($queue, $searchModel = null, $divGridBy = null)
+    {
+        $projectIds = array_keys(ProjectEmployeeAccess::getProjectsByEmployee());
+        $status = [];
+        switch ($queue) {
+            case 'inbox':
+                $status[] = self::STATUS_PENDING;
+                break;
+            case 'follow-up':
+                $status[] = self::STATUS_FOLLOW_UP;
+                break;
+            case 'booked':
+                $status[] = self::STATUS_BOOKED;
+                break;
+            case 'sold':
+                $status[] = self::STATUS_SOLD;
+                break;
+            case 'trash':
+                $status[] = self::STATUS_TRASH;
+                break;
+            default:
+                if ($divGridBy === self::DIV_GRID_IN_SNOOZE) {
+                    $status[] = self::STATUS_SNOOZE;
+                } else {
+                    $status = [self::STATUS_PROCESSING, self::STATUS_ON_HOLD];
+                }
+                break;
         }
 
-        return isset($mapping[$flightType]) ? $mapping[$flightType] : $flightType;
+
+        $query = self::find()
+            ->where(['IN', self::getTableSchema()->fullName . '.status', $status])
+            ->andWhere(['IN', self::getTableSchema()->fullName . '.project_id', $projectIds]);
+
+        if (Yii::$app->user->identity->role == 'agent' && in_array($queue, ['sold'])) {
+            $query->andWhere([
+                'employee_id' => Yii::$app->user->identity->getId()
+            ]);
+        }
+
+        if ($searchModel !== null && in_array($queue, ['processing-all', 'trash'])) {
+            $query->andFilterWhere([self::getTableSchema()->fullName . '.employee_id' => $searchModel->employee_id]);
+        }
+
+        if ($divGridBy !== null) {
+            switch ($divGridBy) {
+                case self::DIV_GRID_WITH_OUT_EMAIL:
+                    $query->join('LEFT JOIN', ClientEmail::tableName(), ClientEmail::tableName() . '.client_id = ' . Lead::tableName() . '.client_id');
+                    $query->andWhere(ClientEmail::tableName() . '.id IS NULL');
+                    break;
+                case self::DIV_GRID_WITH_EMAIL:
+                    $subQuery = new Query();
+                    $subQuery->select(['lead_id'])->from(Quote::tableName())->where(['IN', 'status', [
+                        Quote::STATUS_SEND,
+                        Quote::STATUS_OPENED,
+                        Quote::STATUS_APPLIED
+                    ]]);
+                    $query->join('INNER JOIN', ClientEmail::tableName(), ClientEmail::tableName() . '.client_id = ' . Lead::tableName() . '.client_id');
+                    $query->andWhere(['NOT IN', self::getTableSchema()->fullName . '.id', ArrayHelper::map($subQuery->all(), 'lead_id', 'lead_id')]);
+                    break;
+                case self::DIV_GRID_SEND_QUOTES:
+                    $subQuery = new Query();
+                    $subQuery->select(['lead_id'])->from(Quote::tableName())->where(['IN', 'status', [
+                        Quote::STATUS_SEND,
+                        Quote::STATUS_OPENED,
+                        Quote::STATUS_APPLIED
+                    ]]);
+                    $query->andWhere(['IN', self::getTableSchema()->fullName . '.id', ArrayHelper::map($subQuery->all(), 'lead_id', 'lead_id')]);
+                    break;
+            }
+        }
+
+        if (in_array($queue, ['follow-up'])) {
+            $showAll = Yii::$app->request->cookies->getValue(self::getCookiesKey(), true);
+            if (!$showAll) {
+                $query->andWhere(['NOT IN', self::getTableSchema()->fullName . '.id', self::unprocessedByAgentInFollowUp()]);
+            }
+        }
+
+        if (in_array($queue, ['processing'])) {
+            $query->andWhere([
+                'employee_id' => Yii::$app->user->identity->getId()
+            ]);
+        }
+
+        $query->distinct = true;
+        /*var_dump($query->createCommand()->rawSql);
+        echo '<br><br><br>';*/
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+            'pagination' => [
+                'pageSize' => 100,
+            ]
+        ]);
+
+        if ($queue != 'trash') {
+            $dataProvider->sort->defaultOrder = ['pending' => SORT_DESC];
+        } else {
+            $dataProvider->sort->defaultOrder = ['pending_in_trash' => SORT_DESC];
+            $dataProvider->sort->attributes['pending_in_trash'] = [
+                'asc' => [self::getTableSchema()->fullName . '.updated' => SORT_ASC],
+                'desc' => [self::getTableSchema()->fullName . '.updated' => SORT_DESC],
+            ];
+        }
+        $dataProvider->sort->attributes['last_activity'] = [
+            'asc' => ['notes_group.created' => SORT_DESC],
+            'desc' => ['notes_group.created' => SORT_ASC],
+        ];
+        $dataProvider->sort->attributes['pending'] = [
+            'asc' => [Lead::tableName() . '.created' => SORT_ASC],
+            'desc' => [Lead::tableName() . '.created' => SORT_DESC],
+        ];
+        $dataProvider->sort->attributes['rating'] = [
+            'asc' => [Lead::tableName() . '.rating' => SORT_ASC],
+            'desc' => [Lead::tableName() . '.rating' => SORT_DESC],
+        ];
+        $dataProvider->sort->attributes['sub_source_id'] = [
+            'asc' => [Lead::tableName() . '.sub_source_id' => SORT_DESC],
+            'desc' => [Lead::tableName() . '.sub_source_id' => SORT_ASC],
+        ];
+
+        return $dataProvider;
+    }
+
+    public static function getCookiesKey()
+    {
+        return sprintf('sale-unprocessed-followup-%d', Yii::$app->user->identity->getId());
+    }
+
+    public function getSnoozeCountdown()
+    {
+        if (!empty($this->snooze_for)) {
+            return $this->getCountdownTimer(new \DateTime($this->snooze_for), sprintf('snooze-countdown-%d', $this->id));
+        }
+        return '-';
+    }
+
+    public function getRating()
+    {
+        $checked1 = $checked2 = $checked3 = '';
+        if ($this->rating == 3) {
+            $checked3 = 'checked';
+        } elseif ($this->rating == 2) {
+            $checked2 = 'checked';
+        } elseif ($this->rating == 1) {
+            $checked1 = 'checked';
+        }
+
+        return '<fieldset class="rate-input-group">
+                    <input type="radio" name="rate-' . $this->id . '" id="rate-3-' . $this->id . '" value="3" ' . $checked3 . ' disabled>
+                    <label for="rate-3-' . $this->id . '"></label>
+                
+                    <input type="radio" name="rate-' . $this->id . '" id="rate-2-' . $this->id . '" value="2" ' . $checked2 . ' disabled>
+                    <label for="rate-2-' . $this->id . '"></label>
+                
+                    <input type="radio" name="rate-' . $this->id . '" id="rate-1-' . $this->id . '" value="1" ' . $checked1 . ' disabled>
+                    <label for="rate-1-' . $this->id . '"></label>
+                </fieldset>';
+    }
+
+    private function getCountdownTimer(\DateTime $expired, $spanId)
+    {
+        return '<span id="' . $spanId . '" data-toggle="tooltip" data-placement="right" data-original-title="' . $expired->format('Y-m-d H:i') . '"></span>
+                <script type="text/javascript">
+                    var expired = moment.tz("' . $expired->format('Y-m-d H:i:s') . '", "UTC");
+                    $("#' . $spanId . '").countdown(expired.toDate(), function(event) {
+                        if (event.elapsed == false) {
+                            $(this).text(
+                                event.strftime(\'%Dd %Hh %Mm\')
+                            );
+                        } else {
+                            $(this).text(
+                                event.strftime(\'On Wake\')
+                            ).addClass(\'text-success\');
+                        }
+                    });
+                </script>';
+    }
+
+    public static function unprocessedByAgentInFollowUp()
+    {
+        $subQuery = (new Query())
+            ->select(['lead_id'])->from(LeadFlow::tableName())
+            ->where([
+                'employee_id' => Yii::$app->user->identity->getId(),
+                'status' => self::STATUS_FOLLOW_UP
+            ]);
+        $subQuery->distinct = true;
+        return ArrayHelper::map($subQuery->all(), 'lead_id', 'lead_id');
     }
 
     public static function getCabin($cabin = null)
@@ -110,18 +368,93 @@ class Lead extends \yii\db\ActiveRecord
         return isset($mapping[$cabin]) ? $mapping[$cabin] : $cabin;
     }
 
+    public function getPendingAfterCreate()
+    {
+        $now = new \DateTime();
+        $created = new \DateTime($this->created);
+        return $this->diffFormat($now->diff($created));
+    }
+
+    protected function diffFormat(\DateInterval $interval)
+    {
+        $return = [];
+
+        if ($interval->format('%y') > 0) {
+            $return[] = $interval->format('%y') . 'y';
+        }
+        if ($interval->format('%m') > 0) {
+            $return[] = $interval->format('%m') . 'mh';
+        }
+        if ($interval->format('%d') > 0) {
+            $return[] = $interval->format('%d') . 'd';
+        }
+        if ($interval->format('%i') >= 0 && $interval->format('%h') >= 0) {
+            $return[] = $interval->format('%h') . 'h ' . $interval->format('%I') . 'm';
+        }
+
+        return implode(' ', $return);
+    }
+
+    public function getPendingInLastStatus()
+    {
+        $now = new \DateTime();
+        $updated = new \DateTime($this->updated);
+        return $this->diffFormat($now->diff($updated));
+    }
+
+    public static function getStatus($status)
+    {
+        $mapping = [
+            self::STATUS_PENDING => 'Pending',
+            self::STATUS_PROCESSING => 'Processing',
+            self::STATUS_FOLLOW_UP => 'Follow Up',
+            self::STATUS_ON_HOLD => 'Hold On',
+            self::STATUS_SOLD => 'Sold',
+            self::STATUS_TRASH => 'Trash',
+            self::STATUS_BOOKED => 'Booked',
+            self::STATUS_SNOOZE => 'Snooze',
+        ];
+
+        return $mapping[$status];
+    }
+
+    public function getStatusLabel($status = null)
+    {
+        $label = '';
+        $status = empty($status) ? $this->status : $status;
+        switch ($status) {
+            case self::STATUS_PENDING:
+                $label = '<span class="label status-label bg-light-brown">' . self::getStatus($status) . '</span>';
+                break;
+            case self::STATUS_SNOOZE:
+            case self::STATUS_PROCESSING:
+                $label = '<span class="label status-label bg-turquoise">' . self::getStatus($status) . '</span>';
+                break;
+            case self::STATUS_TRASH:
+            case self::STATUS_ON_HOLD:
+            case self::STATUS_FOLLOW_UP:
+                $label = '<span class="label status-label bg-blue">' . self::getStatus($status) . '</span>';
+                break;
+            case self::STATUS_SOLD:
+            case self::STATUS_BOOKED:
+                $label = '<span class="label status-label bg-green">' . self::getStatus($status) . '</span>';
+                break;
+        }
+        return $label;
+    }
+
     /**
      * {@inheritdoc}
      */
     public function rules()
     {
         return [
-            [['client_id', 'employee_id', 'status', 'project_id', 'source_id'], 'integer'],
+            [['client_id', 'employee_id', 'status', 'project_id', 'source_id', 'rating'], 'integer'],
             [['trip_type', 'cabin', 'updated', 'adults', 'children', 'infants', 'source_id'], 'required'],
             [['adults', 'children', 'infants'], 'integer', 'max' => 9],
             [['adults'], 'integer', 'min' => 1],
             [['notes_for_experts'], 'string'],
-            [['created', 'updated'], 'safe'],
+            [['created', 'updated', 'offset_gmt', 'request_ip', 'request_ip_detail', 'snooze_for'], 'safe'],
             [['uid'], 'string', 'max' => 255],
             [['trip_type'], 'string', 'max' => 2],
             [['cabin'], 'string', 'max' => 1],
@@ -154,6 +487,108 @@ class Lead extends \yii\db\ActiveRecord
         ];
     }
 
+    public function afterSave($insert, $changedAttributes)
+    {
+        parent::afterSave($insert, $changedAttributes);
+
+        if (empty($this->offset_gmt) && !empty($this->request_ip)) {
+            $jsonData = file_get_contents(Yii::$app->params['checkIpURL'] . $this->request_ip);
+            $data = json_decode($jsonData, true);
+            if (isset($data['meta']['code']) && $data['meta']['code'] == '200') {
+                if (isset($data['data']['datetime'])) {
+                    $this->offset_gmt = str_replace(':', '.', $data['data']['datetime']['offset_gmt']);
+                }
+                $this->request_ip_detail = json_encode($data['data']);
+                $this->update(false, ['offset_gmt', 'request_ip_detail']);
+            }
+        }
+    }
+
+    public function getClientTime()
+    {
+        $offset = '';
+        $spanId = sprintf('sale-client-time-%d', $this->id);
+        if (!empty($this->offset_gmt)) {
+            $offset = $this->offset_gmt;
+        } elseif (count($this->leadFlightSegments)) {
+            $firstSegment = $this->leadFlightSegments[0];
+            $airport = Airport::findIdentity($firstSegment->origin);
+            if ($airport !== null && !empty($airport->dst)) {
+                $offset = $airport->dst;
+            }
+        }
+
+        if (!empty($offset)) {
+            $content = '<span class="sale-client-time" id="' . $spanId . '" data-offset="' . $offset . '"></span>';
+            if (!empty($this->leads[0]->country_code)) {
+                $info = 'No info!';
+                $countryCode = 'N/A';
+                if (!empty($this->request_ip)) {
+                    if (!empty($this->request_ip_detail)) {
+                        $details = json_decode($this->request_ip_detail, true);
+                        $countryCode = isset($details['country_code'])
+                            ? $details['country_code']
+                            : $countryCode;
+                    }
+                    $info = sprintf('Country: <strong>%s</strong><br>IP: <strong>%s</strong>',
+                        strtoupper($countryCode),
+                        $this->request_ip);
+                }
+                $content .= '&nbsp;' . Html::tag('i', '', [
+                        'class' => 'flag flag__' . strtolower($countryCode),
+                        'style' => 'vertical-align: bottom;',
+                        'title' => '',
+                        'data-toggle' => 'tooltip',
+                        'data-placement' => 'right',
+                        'data-original-title' => $info,
+                        'data-html' => 'true'
+                    ]);
+            }
+            return $content;
+        }
+
+        return '';
+    }
+
+    /**
+     * @return array|Quote[]
+     */
+    public function getAltQuotes()
+    {
+        return Quote::find()->where(['lead_id' => $this->id])
+            ->orderBy('id DESC')->all();
+    }
+
+    public function getSentCount()
+    {
+        $data = Quote::find()
+            ->where(['lead_id' => $this->id, 'status' => [
+                Quote::STATUS_SEND,
+                Quote::STATUS_OPENED,
+                Quote::STATUS_APPLIED]
+            ])->all();
+        return count($data);
+    }
+
+    public function getLastActivity()
+    {
+        $notes = [];// $this->notes;
+        $now = new \DateTime();
+        $lastUpdate = new \DateTime($this->updated);
+        if (count($notes)) {
+            $last = $notes[max(array_keys($notes))];
+            $created = new \DateTime($last->created);
+            return ($lastUpdate->getTimestamp() > $created->getTimestamp())
+                ? $this->diffFormat($now->diff($lastUpdate))
+                : $this->diffFormat($now->diff($created));
+        } else {
+            return $this->diffFormat($now->diff($lastUpdate));
+        }
+    }
+
+    /**
+     * @return Quote|null
+     */
     public function getAppliedAlternativeQuotes()
     {
         foreach ($this->getQuotes() as $quote) {
@@ -352,11 +787,26 @@ class Lead extends \yii\db\ActiveRecord
             : sprintf('Sending email - \'Offer\' failed! <br/>Emails: %s', implode(', ', [$email]));
 
 
-        $result['status'] =  $isSend;
+        $result['status'] = $isSend;
         $result['errors'] = $errors;
 
         unlink($path);
 
         return $result;
+    }
+
+    public static function getFlightType($flightType = null)
+    {
+        $mapping = [
+            self::TYPE_ROUND_TRIP => 'Round Trip',
+            self::TYPE_ONE_WAY => 'One Way',
+            self::TYPE_MULTI_DESTINATION => 'Multidestination'
+        ];
+
+        if ($flightType === null) {
+            return $mapping;
+        }
+
+        return isset($mapping[$flightType]) ? $mapping[$flightType] : $flightType;
     }
 }

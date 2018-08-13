@@ -32,6 +32,8 @@ use yii\base\ErrorException;
  */
 class Quote extends \yii\db\ActiveRecord
 {
+    const SERVICE_FEE = 0.035;
+
     const
         GDS_SABRE = 'S',
         GDS_AMADEUS = 'A',

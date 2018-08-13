@@ -1,10 +1,17 @@
 <?php
+
 namespace backend\controllers;
 
+use backend\models\search\AirlineForm;
+use backend\models\search\AirportForm;
 use backend\models\search\EmployeeForm;
+use backend\models\search\GlobalAclForm;
+use backend\models\search\LogForm;
 use common\controllers\DefaultController;
 use common\models\Employee;
 use common\models\EmployeeAcl;
+use common\models\GlobalAcl;
+use common\models\Log;
 use common\models\Project;
 use common\models\ProjectEmailTemplate;
 use common\models\ProjectEmployeeAccess;
@@ -33,7 +40,8 @@ class SettingsController extends DefaultController
                 'rules' => [
                     [
                         'actions' => [
-                            'projects', 'airlines', 'airports', 'logging', 'acl', 'email-template'
+                            'projects', 'airlines', 'airports', 'logging', 'acl', 'email-template',
+                            'sync', 'view-log', 'acl-rule'
                         ],
                         'allow' => true,
                         'roles' => ['supervision'],
@@ -43,33 +51,64 @@ class SettingsController extends DefaultController
         ];
     }
 
-    public function actionAcl($id = 0)
+    public function actionSync($type)
+    {
+        Yii::$app->response->format = Response::FORMAT_JSON;
+        $response = [
+            'success' => false
+        ];
+
+        switch ($type) {
+            case 'projects':
+                exec(Yii::getAlias('@app') . '/yii sync/projects  > /dev/null');
+                $response['success'] = true;
+                break;
+            case 'airlines':
+                exec(Yii::getAlias('@app') . '/yii sync/airlines  > /dev/null');
+                $response['success'] = true;
+                break;
+            case 'airports':
+                exec(Yii::getAlias('@app') . '/yii sync/airports  > /dev/null');
+                $response['success'] = true;
+                break;
+        }
+
+        return $response;
+    }
+
+    public function actionAcl()
+    {
+        $this->view->title = sprintf('Global ACL - List');
+
+        $searchModel = new GlobalAclForm();
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+        $model = new GlobalAcl();
+
+        return $this->render('acls', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+            'model' => $model
+        ]);
+    }
+
+    public function actionAclRule($id = 0)
     {
         if (empty($id)) {
-            $model = new EmployeeAcl();
+            $model = new GlobalAcl();
         } else {
-            $model = EmployeeAcl::findOne(['id' => $id]);
+            $model = GlobalAcl::findOne(['id' => $id]);
         }
 
         if (Yii::$app->request->isPost) {
             $attr = Yii::$app->request->post($model->formName());
             $model->attributes = $attr;
-            if ($model->isNewRecord) {
-                $success = $model->save();
-                Yii::$app->response->format = Response::FORMAT_JSON;
-                $employee = Employee::findOne(['id' => $model->employee_id]);
-                return [
-                    'body' => $this->renderAjax('partial/_aclList', [
-                        'models' => $employee->employeeAcl,
-                    ]),
-                    'success' => $success
-                ];
+            if (!Yii::$app->request->isAjax) {
+                ($model->validate() && $model->save());
             } else {
                 return $model->save();
             }
         }
-
-        return null;
+        return $this->redirect(['settings/acl']);
     }
 
     public function actionEmailTemplate($id, $templateId)
@@ -172,9 +211,14 @@ class SettingsController extends DefaultController
      */
     public function actionAirlines()
     {
-        $this->view->title = sprintf('Employees - Profile');
+        $this->view->title = sprintf('Airlines - List');
 
-        return $this->render('list');
+        $searchModel = new AirlineForm();
+
+        return $this->render('airlines', [
+            'dataProvider' => $searchModel->search(Yii::$app->request->queryParams),
+            'searchModel' => $searchModel,
+        ]);
     }
 
     /**
@@ -182,9 +226,14 @@ class SettingsController extends DefaultController
      */
     public function actionAirports()
     {
-        $this->view->title = sprintf('Employees - Profile');
+        $this->view->title = sprintf('Airports - List');
 
-        return $this->render('list');
+        $searchModel = new AirportForm();
+
+        return $this->render('airports', [
+            'dataProvider' => $searchModel->search(Yii::$app->request->queryParams),
+            'searchModel' => $searchModel,
+        ]);
     }
 
     /**
@@ -192,8 +241,28 @@ class SettingsController extends DefaultController
      */
     public function actionLogging()
     {
-        $this->view->title = sprintf('Employees - Profile');
+        $this->view->title = sprintf('Logging - List');
 
-        return $this->render('list');
+        $searchModel = new LogForm();
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+
+        return $this->render('logs', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+        ]);
+    }
+
+    public function actionLogView($id, $delete = false)
+    {
+        $model = Log::findOne($id);
+
+        if ($delete) {
+            $model->delete();
+            return $this->redirect(['settings/logging']);
+        } else {
+            return $this->render('item/log', [
+                'model' => $model,
+            ]);
+        }
     }
 }

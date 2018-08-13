@@ -55,6 +55,27 @@ class ProjectEmployeeAccess extends \yii\db\ActiveRecord
         return $options;
     }
 
+    public static function getProjectsByEmployee()
+    {
+        /**
+         * @var $projects Project[]
+         */
+
+        $employeeId = Yii::$app->user->identity->getId();
+        if (Yii::$app->user->identity->role != 'admin') {
+            $access = ArrayHelper::map(self::find()->where(['employee_id' => $employeeId])->asArray()->all(), 'project_id', 'project_id');
+            $projects = Project::find()->where([
+                'id' => $access,
+                'closed' => false
+            ])->asArray()->all();
+        } else {
+            $projects = Project::find()->where([
+                'closed' => false
+            ])->asArray()->all();
+        }
+        return ArrayHelper::map($projects, 'id', 'name');
+    }
+
     /**
      * {@inheritdoc}
      */

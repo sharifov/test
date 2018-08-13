@@ -1,4 +1,5 @@
 <?php
+
 namespace frontend\controllers;
 
 use common\controllers\DefaultController;
@@ -29,11 +30,14 @@ class LeadController extends DefaultController
                 'class' => AccessControl::className(),
                 'rules' => [
                     [
-                        'actions' => ['queue', 'quote'],
+                        'actions' => ['queue', 'quote', 'take'],
                         'allow' => true,
                         'roles' => ['agent'],
                         'matchCallback' => function ($rule, $action) {
                             $type = Yii::$app->request->get('type');
+                            if ($type == 'trash' && Yii::$app->user->identity->role == 'agent') {
+                                return false;
+                            }
                             return in_array($type, Lead::getLeadQueueType());
                         },
                     ],
@@ -75,11 +79,82 @@ class LeadController extends DefaultController
         return parent::actionGetAirport($term);
     }
 
+    public function actionTake($id)
+    {
+        /**
+         * @var $inProcessing Lead
+         * @var $model Lead
+         */
+        $inProcessing = Lead::find()
+            ->where([
+                'employee_id' => Yii::$app->user->identity->getId(),
+                'status' => Lead::STATUS_PROCESSING
+            ])->one();
+        if ($inProcessing !== null) {
+            $inProcessing->status = Lead::STATUS_ON_HOLD;
+            $inProcessing->save();
+            $inProcessing = null;
+        }
+
+        $model = Lead::find()
+            ->where(['id' => $id])
+            ->andWhere(['IN', 'status', [
+                Lead::STATUS_PENDING,
+                Lead::STATUS_FOLLOW_UP,
+                Lead::STATUS_ON_HOLD
+            ]])->one();
+
+        if ($model === null) {
+            $lead = Lead::findOne(['id' => $id]);
+            /*if ($lead !== null) {
+                $reason = new Reason();
+                $reason->queue = 'processing-over';
+                return $this->renderAjax('/sales/_reason', [
+                    'reason' => $reason,
+                    'lead' => $lead
+                ]);
+            }*/
+            return null;
+        }
+
+        $model->employee_id = Yii::$app->user->identity->getId();
+        $model->status = Lead::STATUS_PROCESSING;
+        $model->save();
+
+        return $this->redirect([
+            'quote',
+            'type' => 'processing',
+            'id' => $model->id
+        ]);
+
+    }
+
     public function actionQueue($type)
     {
         $this->view->title = sprintf('Leads - %s Queue', ucfirst($type));
 
-        return $this->render('queue');
+        $searchModel = null;
+        if (in_array($type, ['processing-all', 'processing', 'follow-up'])) {
+            $dataProvider = [];
+            foreach (array_keys(Lead::getDivs()) as $div) {
+                if ($div == Lead::DIV_GRID_IN_SNOOZE && $type == 'follow-up') {
+                    continue;
+                }
+                if ($type == 'processing-all') {
+                    $searchModel = new Lead();
+                    $dataProvider[$div] = Lead::search($type, $searchModel, $div);
+                } else {
+                    $dataProvider[$div] = Lead::search($type, null, $div);
+                }
+            }
+        } else {
+            $dataProvider = Lead::search($type);
+        }
+
+        return $this->render('queue', [
+            'dataProvider' => $dataProvider,
+            'searchModel' => $searchModel
+        ]);
     }
 
     public function actionAddComment($type, $id)
@@ -114,7 +189,11 @@ class LeadController extends DefaultController
 
         if ($lead !== null) {
             $leadForm = new LeadForm($lead);
-
+            if ($leadForm->getLead()->status !== Lead::STATUS_PROCESSING ||
+                $leadForm->getLead()->employee_id != Yii::$app->user->identity->getId()
+            ) {
+                $leadForm->mode = $leadForm::VIEW_MODE;
+            }
             if (Yii::$app->request->isAjax) {
                 Yii::$app->response->format = Response::FORMAT_JSON;
                 $data = [

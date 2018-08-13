@@ -32,11 +32,12 @@ HTML;
     <div class="panel-body">
         <?php if (Yii::$app->user->identity->role == 'admin') : ?>
             <div class="mb-20">
-                <?= Html::a('Sync Project', Url::to([
-                    'settings/sync',
-                    'type' => 'projects'
-                ]), [
-                    'class' => 'btn-success btn',
+                <?= Html::a('Sync Project', '#', [
+                    'class' => 'btn-success btn sync',
+                    'data-url' => Url::to([
+                        'settings/sync',
+                        'type' => 'projects'
+                    ])
                 ]) ?>
             </div>
         <?php endif; ?>

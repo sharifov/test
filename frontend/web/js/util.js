@@ -22,3 +22,8 @@ function validatePriceField(element, key) {
         }
     }
 }
+
+$('.sync').click(function (e) {
+    e.preventDefault();
+    $.get( $(this).data('url'), function( data ) { });
+});
