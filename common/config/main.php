@@ -6,14 +6,14 @@ return [
     ],
     'vendorPath' => dirname(dirname(__DIR__)) . '/vendor',
     'components' => [
-        'log' => [
+        /*'log' => [
             'targets' => [
                 [
                     'class' => 'yii\log\DbTarget',
                     'levels' => ['error', 'warning'],
                 ]
             ],
-        ],
+        ],*/
         'cache' => [
             'class' => 'yii\caching\FileCache',
         ],

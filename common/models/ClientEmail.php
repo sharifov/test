@@ -37,7 +37,7 @@ class ClientEmail extends \yii\db\ActiveRecord
             [['client_id'], 'integer'],
             [['created', 'updated', 'comments'], 'safe'],
             [['email'], 'string', 'max' => 100],
-            [['client_id'], 'exist', 'skipOnError' => true, 'targetClass' => Client::className(), 'targetAttribute' => ['client_id' => 'id']],
+            [['client_id'], 'exist', 'skipOnError' => true, 'targetClass' => Client::class, 'targetAttribute' => ['client_id' => 'id']],
         ];
     }
 

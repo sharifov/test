@@ -31,10 +31,23 @@ return [
             'enableSession' => false
         ],
         'log' => [
+            'traceLevel' => 0,
             'targets' => [
                 [
                     'class' => 'yii\log\FileTarget',
                     'levels' => ['error', 'warning'],
+                ],
+                [
+                    'class' => 'yii\log\DbTarget',
+                    'levels' => ['error', 'warning'],
+                    'except' => [
+                        'yii\web\HttpException:404',
+                    ],
+                    'logVars' => [],
+                    'prefix' => function () {
+                        //$ip = $_SERVER['REMOTE_ADDR'];
+                        return "[console]";
+                    },
                 ],
             ],
         ],

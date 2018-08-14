@@ -69,6 +69,8 @@ class Lead extends \yii\db\ActiveRecord
         DIV_GRID_SEND_QUOTES = 3,
         DIV_GRID_IN_SNOOZE = 4;
 
+    CONST SCENARIO_API = 'scenario_api';
+
     public static function getDivs($div = null)
     {
         $mapping = [
@@ -450,7 +452,10 @@ class Lead extends \yii\db\ActiveRecord
     {
         return [
             [['client_id', 'employee_id', 'status', 'project_id', 'source_id', 'rating'], 'integer'],
-            [['trip_type', 'cabin', 'updated', 'adults', 'children', 'infants', 'source_id'], 'required'],
+            [['trip_type', 'cabin'], 'required'],
+
+            [['adults', 'children', 'infants', 'source_id'], 'required'], //'except' => self::SCENARIO_API],
+
             [['adults', 'children', 'infants'], 'integer', 'max' => 9],
             [['adults'], 'integer', 'min' => 1],
             [['notes_for_experts'], 'string'],
@@ -458,8 +463,8 @@ class Lead extends \yii\db\ActiveRecord
             [['uid'], 'string', 'max' => 255],
             [['trip_type'], 'string', 'max' => 2],
             [['cabin'], 'string', 'max' => 1],
-            [['client_id'], 'exist', 'skipOnError' => true, 'targetClass' => Client::className(), 'targetAttribute' => ['client_id' => 'id']],
-            [['employee_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::className(), 'targetAttribute' => ['employee_id' => 'id']],
+            [['client_id'], 'exist', 'skipOnError' => true, 'targetClass' => Client::class, 'targetAttribute' => ['client_id' => 'id']],
+            [['employee_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['employee_id' => 'id']],
         ];
     }
 
@@ -609,7 +614,7 @@ class Lead extends \yii\db\ActiveRecord
      */
     public function getLeadFlightSegments()
     {
-        return $this->hasMany(LeadFlightSegment::className(), ['lead_id' => 'id']);
+        return $this->hasMany(LeadFlightSegment::class, ['lead_id' => 'id']);
     }
 
     /**
@@ -617,7 +622,7 @@ class Lead extends \yii\db\ActiveRecord
      */
     public function getLeadPreferences()
     {
-        return $this->hasOne(LeadPreferences::className(), ['lead_id' => 'id']);
+        return $this->hasOne(LeadPreferences::class, ['lead_id' => 'id']);
     }
 
     /**
@@ -625,7 +630,7 @@ class Lead extends \yii\db\ActiveRecord
      */
     public function getClient()
     {
-        return $this->hasOne(Client::className(), ['id' => 'client_id']);
+        return $this->hasOne(Client::class, ['id' => 'client_id']);
     }
 
     /**
@@ -633,7 +638,7 @@ class Lead extends \yii\db\ActiveRecord
      */
     public function getEmployee()
     {
-        return $this->hasOne(Employee::className(), ['id' => 'employee_id']);
+        return $this->hasOne(Employee::class, ['id' => 'employee_id']);
     }
 
     /**
@@ -641,7 +646,7 @@ class Lead extends \yii\db\ActiveRecord
      */
     public function getSource()
     {
-        return $this->hasOne(Source::className(), ['id' => 'source_id']);
+        return $this->hasOne(Source::class, ['id' => 'source_id']);
     }
 
     /**
@@ -649,12 +654,17 @@ class Lead extends \yii\db\ActiveRecord
      */
     public function getProject()
     {
-        return $this->hasOne(Project::className(), ['id' => 'project_id']);
+        return $this->hasOne(Project::class, ['id' => 'project_id']);
     }
 
     public function beforeValidate()
     {
         $this->updated = date('Y-m-d H:i:s');
+
+        if($this->isNewRecord) {
+            $this->created = date('Y-m-d H:i:s');
+        }
+
         return parent::beforeValidate();
     }
 

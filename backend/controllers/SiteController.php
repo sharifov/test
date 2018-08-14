@@ -17,7 +17,7 @@ class SiteController extends DefaultController
     {
         $behaviors = [
             'access' => [
-                'class' => AccessControl::className(),
+                'class' => AccessControl::class,
                 'rules' => [
                     [
                         'actions' => ['index'],

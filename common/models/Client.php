@@ -60,7 +60,7 @@ class Client extends \yii\db\ActiveRecord
      */
     public function getClientEmails()
     {
-        return $this->hasMany(ClientEmail::className(), ['client_id' => 'id']);
+        return $this->hasMany(ClientEmail::class, ['client_id' => 'id']);
     }
 
     /**
@@ -68,7 +68,7 @@ class Client extends \yii\db\ActiveRecord
      */
     public function getClientPhones()
     {
-        return $this->hasMany(ClientPhone::className(), ['client_id' => 'id']);
+        return $this->hasMany(ClientPhone::class, ['client_id' => 'id']);
     }
 
     /**
@@ -76,7 +76,7 @@ class Client extends \yii\db\ActiveRecord
      */
     public function getLeads()
     {
-        return $this->hasMany(Lead::className(), ['client_id' => 'id']);
+        return $this->hasMany(Lead::class, ['client_id' => 'id']);
     }
 
     public function beforeValidate()

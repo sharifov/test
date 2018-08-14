@@ -41,7 +41,7 @@ class NavItem
                             ? ['admin/employee/list']
                             : ['employee/list']
                     ],
-                    [
+                    /*[
                         'label' => 'Settings',
                         'linkOptions' => [
                             'class' => 'dropdown-toggle',
@@ -70,8 +70,18 @@ class NavItem
                                 'label' => 'Logging',
                                 'url' => sprintf('%s/admin/settings/logging', Yii::$app->urlManager->getHostInfo())
                             ],
+
+                            [
+                                'label' => 'API Users',
+                                'url' => ['/api-user/index']
+                            ],
+
+                            [
+                                'label' => 'API Logs',
+                                'url' => ['/api-log/index']
+                            ],
                         ]
-                    ],
+                    ],*/
                 ];
             }
             $items[] = ['label' => 'Search Order', 'url' => ['search/index']];
@@ -79,6 +89,52 @@ class NavItem
                 'label' => '<i class="fa fa-bars"></i> Menu',
                 'items' => $items,
             ];
+
+
+            $menuItems[] = [
+                'label' => '<i class="fa fa-bars"></i> Settings',
+                'items' => [
+                    [
+                        'label' => 'ACL',
+                        'url' => sprintf('%s/admin/settings/acl', Yii::$app->urlManager->getHostInfo())
+                    ],
+                    [
+                        'label' => 'Projects',
+                        'url' => sprintf('%s/admin/settings/projects', Yii::$app->urlManager->getHostInfo())
+                    ],
+                    [
+                        'label' => 'Airlines',
+                        'url' => sprintf('%s/admin/settings/airlines', Yii::$app->urlManager->getHostInfo())
+                    ],
+                    [
+                        'label' => 'Airports',
+                        'url' => sprintf('%s/admin/settings/airports', Yii::$app->urlManager->getHostInfo())
+                    ],
+                    [
+                        'label' => 'Logging',
+                        'url' => sprintf('%s/admin/settings/logging', Yii::$app->urlManager->getHostInfo())
+                    ],
+
+                    [
+                        'label' => 'API Users',
+                        'url' => ['/api-user/index']
+                    ],
+
+                    [
+                        'label' => 'API Logs',
+                        'url' => ['/api-log/index']
+                    ],
+
+                    [
+                        'label' => 'Logs',
+                        'url' => ['/log/index']
+                    ],
+                ],
+            ];
+
+
+
+
             if (Yii::$app->user->identity->role != 'coach') {
                 $badges = Lead::getBadges();
                 $menuItems[] = '<li class="' . self::isActive('inbox') . '">'
