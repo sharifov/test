@@ -30,11 +30,24 @@ return [
             'name' => 'advanced-crm',
         ],
         'log' => [
-            'traceLevel' => YII_DEBUG ? 3 : 0,
+            'traceLevel' => 0,
             'targets' => [
                 [
                     'class' => 'yii\log\FileTarget',
                     'levels' => ['error', 'warning'],
+                ],
+                [
+                    'class' => 'yii\log\DbTarget',
+                    'levels' => ['error', 'warning'],
+                    'except' => [
+                        'yii\web\HttpException:404',
+                    ],
+                    'logVars' => [],
+                    'prefix' => function () {
+                        $userID = Yii::$app->user->isGuest ? '-' : Yii::$app->user->id;
+                        $ip = $_SERVER['REMOTE_ADDR'];
+                        return "[backend][$ip][$userID]";
+                    },
                 ],
             ],
         ],
@@ -47,10 +60,12 @@ return [
             'showScriptName' => false,
             'enableStrictParsing' => false,
             'rules' => [
+                '/'=>'site/index',
             ],
         ],
 
     ],
+    //'defaultRoute' => 'site/index',
     'as beforeRequest' => [
         'class' => 'common\components\EmployeeActivityLogging',
     ],

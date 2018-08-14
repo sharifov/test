@@ -1,0 +1,20 @@
+suite_namespace: webapi\tests\acceptance
+actor: AcceptanceTester
+modules:
+    enabled:
+        - WebDriver:
+            url: http://localhost:8080
+            browser: firefox
+        - Yii2:
+            part: init
+    config:
+        PhpBrowser:
+            url: http://api.bookair.zeit.test/
+        WebDriver:
+            url: http://api.bookair.zeit.test/
+            browser: firefox
+            delay: 1000
+            wait: 5
+            connection_timeout: 100
+            request_timeout: 100
+            windows_size: 800x600

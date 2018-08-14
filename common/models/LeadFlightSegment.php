@@ -43,7 +43,7 @@ class LeadFlightSegment extends \yii\db\ActiveRecord
             [['departure', 'created', 'updated', 'flexibility_type', 'flexibility', 'origin_label', 'destination_label'], 'safe'],
             [['origin_label', 'destination_label'], 'trim'],
             [['origin', 'destination'], 'string', 'max' => 3],
-            [['lead_id'], 'exist', 'skipOnError' => true, 'targetClass' => Lead::className(), 'targetAttribute' => ['lead_id' => 'id']],
+            [['lead_id'], 'exist', 'skipOnError' => true, 'targetClass' => Lead::class, 'targetAttribute' => ['lead_id' => 'id']],
         ];
     }
 
