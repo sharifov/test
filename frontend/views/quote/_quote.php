@@ -57,7 +57,9 @@ $js = <<<JS
         editBlock.parent().parent().removeClass('in');
         editBlock.parent().html('');
         $('#create-quote').modal('hide');
-        $('#create-quick-quote').modal('hide');
+        if ($(this).data('type') == 'search') {
+            $('#quick-search').modal('show');
+        }
     });
     $('#cancel-confirm-quote').click(function (e) {
         e.preventDefault();

@@ -2,6 +2,7 @@
 
 namespace frontend\controllers;
 
+use common\components\GTTGlobal;
 use common\models\local\ChangeMarkup;
 use common\controllers\DefaultController;
 use common\models\Lead;
@@ -30,7 +31,7 @@ class QuoteController extends DefaultController
                     [
                         'actions' => [
                             'create', 'save', 'send', 'decline', 'calc-price', 'extra-price',
-                            'send-quotes'
+                            'send-quotes', 'get-online-quotes'
                         ],
                         'allow' => true,
                         'roles' => ['agent'],
@@ -48,6 +49,88 @@ class QuoteController extends DefaultController
     public function actions()
     {
         return parent::actions();
+    }
+
+    public function actionGetOnlineQuotes($leadId)
+    {
+        $lead = Lead::findOne(['id' => $leadId]);
+        if (Yii::$app->request->isPost) {
+            $response = [
+                'success' => false,
+                'body' => ''
+            ];
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            $attr = Yii::$app->request->post();
+            if (isset($attr['gds']) && $lead !== null) {
+                if (isset($attr['itinerary-key']) && !empty($attr['itinerary-key'])) {
+                    $routings = Yii::$app->cache->get(sprintf('quick-search-%d-%d', $lead->id, Yii::$app->user->identity->getId()));
+                    $itinerary = null;
+                    if ($routings !== false) {
+                        foreach ($routings as $routing) {
+                            if ($routing['key'] == $attr['itinerary-key']) {
+                                $itinerary = $routing;
+                                break;
+                            }
+                        }
+                        if ($itinerary !== null) {
+                            $prices = [];
+                            $model = new Quote();
+                            $model->trip_type = $lead->trip_type;
+                            $model->check_payment = true;
+                            $model->id = 0;
+                            $model->lead_id = $lead->id;
+                            foreach ($lead->getPaxTypes() as $type) {
+                                $newQPrice = new QuotePrice();
+                                $newQPrice->createQPrice($type);
+                                if ($type == QuotePrice::PASSENGER_ADULT) {
+                                    $newQPrice->fare = $itinerary['adultBasePrice'];
+                                    $newQPrice->taxes = $itinerary['adultTax'];
+                                } elseif ($type == QuotePrice::PASSENGER_CHILD) {
+                                    $newQPrice->fare = $itinerary['childBasePrice'];
+                                    $newQPrice->taxes = $itinerary['childTax'];
+                                }
+                                $newQPrice->id = 0;
+                                $newQPrice::calculation($newQPrice);
+                                $newQPrice->toMoney();
+                                $prices[] = $newQPrice;
+                            }
+                            $model->main_airline_code = $itinerary['mainAirlineCode'];
+                            $model->reservation_dump = str_replace('&nbsp;', ' ', GTTGlobal::getItineraryDump($itinerary['trips']));
+                            $model->gds = $itinerary['gds'];
+                            $model->pcc = $itinerary['pcc'];
+
+                            $response['success'] = true;
+                            $response['body'] = $this->renderAjax('_quote', [
+                                'lead' => $lead,
+                                'quote' => $model,
+                                'prices' => $prices
+                            ]);
+                        }
+                    }
+                } else {
+                    $result = GTTGlobal::getOnlineQuotes($lead, $attr['gds']);
+                    $response['success'] = isset($result['airTicketListResponse']);
+                    if (isset($result['airTicketListResponse'])) {
+                        Yii::$app->cache->set(sprintf('quick-search-%d-%d', $lead->id, Yii::$app->user->identity->getId()), $result['airTicketListResponse']['routings'], 900);
+                        $response['body'] = $this->renderAjax('_onlineQuotesResult', [
+                            'alternativeQuotes' => $result['airTicketListResponse']['routings'],
+                            'lead' => $lead
+                        ]);
+                    } else {
+                        if (isset($result['hop2WsError'])) {
+                            foreach ($result['hop2WsError']['errors'] as $error) {
+                                $response['body'] .= $error['message'] . '<br/>';
+                            }
+                        } else {
+                            $response['body'] = 'Internal Server Error';
+                        }
+                    }
+                }
+            }
+            return $response;
+        }
+
+        return $this->renderAjax('_onlineQuotes');
     }
 
     public function actionSendQuotes()
@@ -198,7 +281,10 @@ class QuoteController extends DefaultController
                                 if ($price !== null) {
                                     $price->attributes = $quotePrice;
                                     $price->quote_id = $quote->id;
-                                    $price->save();
+                                    $price->toFloat();
+                                    if (!$price->save()) {
+                                        var_dump($price->getErrors());
+                                    }
                                 }
                             }
                         }

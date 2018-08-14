@@ -50,11 +50,12 @@ class Lead extends \yii\db\ActiveRecord
     const
         STATUS_PENDING = 1,
         STATUS_PROCESSING = 2,
-        STATUS_BOOKED = 3,
-        STATUS_SOLD = 4,
+        STATUS_REJECT = 4,
         STATUS_FOLLOW_UP = 5,
-        STATUS_ON_HOLD = 6,
-        STATUS_TRASH = 7,
+        STATUS_ON_HOLD = 8,
+        STATUS_SOLD = 10,
+        STATUS_TRASH = 11,
+        STATUS_BOOKED = 12,
         STATUS_SNOOZE = 13;
 
     const
@@ -575,14 +576,24 @@ class Lead extends \yii\db\ActiveRecord
         return count($data);
     }
 
+    /**
+     * @return Reason
+     */
+    public function lastReason()
+    {
+        return Reason::find()->orderBy('id desc')->one();
+    }
+
     public function getLastActivity()
     {
-        $notes = [];// $this->notes;
+        /**
+         * @var $note Note
+         */
+        $note = Note::find()->orderBy('id desc')->one();
         $now = new \DateTime();
         $lastUpdate = new \DateTime($this->updated);
-        if (count($notes)) {
-            $last = $notes[max(array_keys($notes))];
-            $created = new \DateTime($last->created);
+        if ($note !== null) {
+            $created = new \DateTime($note->created);
             return ($lastUpdate->getTimestamp() > $created->getTimestamp())
                 ? $this->diffFormat($now->diff($lastUpdate))
                 : $this->diffFormat($now->diff($created));

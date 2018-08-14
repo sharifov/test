@@ -186,7 +186,7 @@ $queueType = Yii::$app->request->get('type');
                 if ($quote !== null) {
                     $trips = $quote->getTrips();
                     $lastSegment = $trips[0]['segments'][count($trips[0]['segments']) - 1];
-                    return  sprintf('%s (%s)', $lastSegment['arrivalCity'], $lastSegment['arrivalAirport']);
+                    return sprintf('%s (%s)', $lastSegment['arrivalCity'], $lastSegment['arrivalAirport']);
                 }
                 return null;
             },
@@ -361,9 +361,9 @@ $queueType = Yii::$app->request->get('type');
                 /**
                  * @var $model Lead
                  */
-                $reason = [];//\yii\helpers\ArrayHelper::map($model->reasons, 'id', 'reason');
-                return (count($reason))
-                    ? $reason[max(array_keys($reason))] : '';
+                $reason = $model->lastReason();
+                return ($reason !== null)
+                    ? $reason->reason : '-';
             }
         ],
         [

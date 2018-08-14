@@ -4,18 +4,13 @@ namespace backend\controllers;
 
 use backend\models\search\AirlineForm;
 use backend\models\search\AirportForm;
-use backend\models\search\EmployeeForm;
 use backend\models\search\GlobalAclForm;
 use backend\models\search\LogForm;
 use common\controllers\DefaultController;
-use common\models\Employee;
-use common\models\EmployeeAcl;
 use common\models\GlobalAcl;
 use common\models\Log;
 use common\models\Project;
 use common\models\ProjectEmailTemplate;
-use common\models\ProjectEmployeeAccess;
-use phpDocumentor\Reflection\DocBlock\Tags\Var_;
 use Yii;
 use yii\data\ActiveDataProvider;
 use yii\filters\AccessControl;
@@ -252,7 +247,7 @@ class SettingsController extends DefaultController
         ]);
     }
 
-    public function actionLogView($id, $delete = false)
+    public function actionViewLog($id, $delete = false)
     {
         $model = Log::findOne($id);
 
