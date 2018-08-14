@@ -83,7 +83,25 @@ if ($leadForm->mode != $leadForm::VIEW_MODE) {
         }
         editBlock.find('.modal-body').html('');
         editBlock.find('.modal-body').load(url, function( response, status, xhr ) {
-            editBlock.modal('show');
+            $('#cancel-alt-quote').attr('data-type', 'direct');
+            editBlock.modal({
+              backdrop: 'static',
+              show: true
+            });
+        });
+    });
+    
+    /***  Quick search quotes ***/
+    $('#quick-search-quotes').click(function (e) {
+        e.preventDefault();
+        var url = $(this).data('url');
+        var editBlock = $('#quick-search');
+        editBlock.find('.modal-body').html('');
+        editBlock.find('.modal-body').load(url, function( response, status, xhr ) {
+            editBlock.modal({
+              backdrop: 'static',
+              show: true
+            });
         });
     });
 JS;
@@ -100,12 +118,20 @@ JS;
                 'id' => 'submit-lead-form-btn',
                 'class' => 'btn btn-primary btn-with-icon'
             ]);
-        } ?>
 
-        <?= Html::button('<span class="btn-icon"><i class="fa fa-plus"></i></span><span class="btn-text">Add Quote</span>', [
-            'class' => 'btn btn-success btn-with-icon add-clone-alt-quote',
-            'data-uid' => 0,
-            'data-url' => Url::to(['quote/create', 'leadId' => $leadForm->getLead()->id, 'qId' => 0]),
-        ]) ?>
+            if (!$leadForm->getLead()->isNewRecord) {
+                echo Html::button('<span class="btn-icon"><i class="fa fa-plus"></i></span><span class="btn-text">Add Quote</span>', [
+                    'class' => 'btn btn-success btn-with-icon add-clone-alt-quote',
+                    'data-uid' => 0,
+                    'data-url' => Url::to(['quote/create', 'leadId' => $leadForm->getLead()->id, 'qId' => 0]),
+                ]);
+
+                echo Html::button('<span class="btn-icon"><i class="fa fa-plus"></i></span><span class="btn-text">Quick Search Quote</span>', [
+                    'class' => 'btn btn-success btn-with-icon',
+                    'id' => 'quick-search-quotes',
+                    'data-url' => Url::to(['quote/get-online-quotes', 'leadId' => $leadForm->getLead()->id]),
+                ]);
+            }
+        } ?>
     </div>
 </div>

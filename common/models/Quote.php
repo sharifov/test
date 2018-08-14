@@ -447,6 +447,7 @@ class Quote extends \yii\db\ActiveRecord
             }
             $newQPrice->id = 0;
             $newQPrice->passenger_type = $type;
+            $newQPrice->toMoney();
             $prices[] = $newQPrice;
         }
         $newQuote->attributes = $this->attributes;

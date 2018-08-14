@@ -33,6 +33,20 @@ AppAsset::register($this);
     <?= $content ?>
 </main>
 
+<div class="modal modal-quote fade" id="quick-search" style="display: none;">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                Quick search quotes
+                <button type="button" class="close" data-dismiss="modal">
+                    <i class="fa fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body"></div>
+        </div>
+    </div>
+</div>
+
 <div class="modal modal-quote fade" id="create-quote" style="display: none;">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -51,6 +65,13 @@ AppAsset::register($this);
         </div>
     </div>
 </footer>
+
+<div id="preloader" class="overlay hidden">
+    <div class="preloader">
+        <span class="fa fa-spinner fa-pulse fa-3x fa-fw"></span>
+        <div class="preloader__text">Loading...</div>
+    </div>
+</div>
 
 <?php $this->endBody() ?>
 </body>
