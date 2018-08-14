@@ -3,6 +3,7 @@
 namespace common\models;
 
 use common\models\local\FlightSegment;
+use common\models\local\LeadLogMessage;
 use Yii;
 use yii\base\ErrorException;
 
@@ -248,6 +249,24 @@ class Quote extends \yii\db\ActiveRecord
         }
 
         return parent::beforeValidate();
+    }
+
+    public function afterSave($insert, $changedAttributes)
+    {
+        parent::afterSave($insert, $changedAttributes);
+
+        if (!$insert) {
+            //Add logs after changed model attributes
+            $leadLog = new LeadLog((new LeadLogMessage()));
+            $leadLog->logMessage->oldParams = $changedAttributes;
+            $leadLog->logMessage->newParams = array_intersect_key($this->attributes, $changedAttributes);
+            $leadLog->logMessage->title = ($insert)
+                ? 'Create' : 'Update';
+            $leadLog->logMessage->model = sprintf('%s (%s)', $this->formName(), $this->uid);
+            $leadLog->addLog([
+                'lead_id' => $this->lead_id,
+            ]);
+        }
     }
 
     public static function parseDump($string, $validation = true, &$itinerary = [])

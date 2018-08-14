@@ -2,6 +2,7 @@
 
 namespace common\models;
 
+use common\models\local\LeadLogMessage;
 use Yii;
 
 /**
@@ -67,5 +68,21 @@ class LeadPreferences extends \yii\db\ActiveRecord
     public function getLead()
     {
         return $this->hasOne(Lead::className(), ['id' => 'lead_id']);
+    }
+
+    public function afterSave($insert, $changedAttributes)
+    {
+        parent::afterSave($insert, $changedAttributes);
+
+        //Add logs after changed model attributes
+        $leadLog = new LeadLog((new LeadLogMessage()));
+        $leadLog->logMessage->oldParams = $changedAttributes;
+        $leadLog->logMessage->newParams = array_intersect_key($this->attributes, $changedAttributes);
+        $leadLog->logMessage->title = ($insert)
+            ? 'Create' : 'Update';
+        $leadLog->logMessage->model = $this->formName();
+        $leadLog->addLog([
+            'lead_id' => $this->lead_id,
+        ]);
     }
 }

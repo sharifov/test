@@ -218,13 +218,16 @@ $this->registerJs($js);
 
 <?php foreach ($quotes as $key => $quote): ?>
     <div class="panel panel-info panel-wrapper sl-quote" id="<?= $quote->uid ?>">
-        <div class="panel-heading">
-            <?= sprintf('%d. #%s Quote | Cabin Class: %s',
-                (count($quotes) - $key),
-                $quote->uid,
-                Lead::getCabin($quote->cabin)
-            ) ?>
-            <?= $quote->getStatusLabel() ?>
+        <div class="panel-heading collapsing-heading">
+            <a data-toggle="collapse" href="#quote-<?= $quote->uid ?>" class="collapsing-heading__collapse-link"
+               aria-expanded="true">
+                <?= sprintf('%d. #%s Quote | Cabin Class: %s',
+                    (count($quotes) - $key),
+                    $quote->uid,
+                    Lead::getCabin($quote->cabin)
+                ) ?>
+                <?= $quote->getStatusLabel() ?>
+            </a>
             <?php if ($lead->getAppliedAlternativeQuotes() === null) {
                 echo Html::button('<i class="fa fa-copy"></i>', [
                     'class' => 'btn btn-primary btn-sm sl-quote__clone add-clone-alt-quote',
@@ -240,7 +243,7 @@ $this->registerJs($js);
                 </div>
             <?php endif; ?>
         </div>
-        <div class="panel-body">
+        <div class="panel-body collapse in" id="quote-<?= $quote->uid ?>" aria-expanded="true" style="">
             <div class="sl-quote__content">
                 <div class="sl-quote__pricing">
                     <div class="row">

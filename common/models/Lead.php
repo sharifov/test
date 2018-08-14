@@ -3,6 +3,7 @@
 namespace common\models;
 
 use common\components\EmailService;
+use common\models\local\LeadLogMessage;
 use Yii;
 use yii\data\ActiveDataProvider;
 use yii\db\Query;
@@ -291,56 +292,6 @@ class Lead extends \yii\db\ActiveRecord
         return sprintf('sale-unprocessed-followup-%d', Yii::$app->user->identity->getId());
     }
 
-    public function getSnoozeCountdown()
-    {
-        if (!empty($this->snooze_for)) {
-            return $this->getCountdownTimer(new \DateTime($this->snooze_for), sprintf('snooze-countdown-%d', $this->id));
-        }
-        return '-';
-    }
-
-    public function getRating()
-    {
-        $checked1 = $checked2 = $checked3 = '';
-        if ($this->rating == 3) {
-            $checked3 = 'checked';
-        } elseif ($this->rating == 2) {
-            $checked2 = 'checked';
-        } elseif ($this->rating == 1) {
-            $checked1 = 'checked';
-        }
-
-        return '<fieldset class="rate-input-group">
-                    <input type="radio" name="rate-' . $this->id . '" id="rate-3-' . $this->id . '" value="3" ' . $checked3 . ' disabled>
-                    <label for="rate-3-' . $this->id . '"></label>
-                
-                    <input type="radio" name="rate-' . $this->id . '" id="rate-2-' . $this->id . '" value="2" ' . $checked2 . ' disabled>
-                    <label for="rate-2-' . $this->id . '"></label>
-                
-                    <input type="radio" name="rate-' . $this->id . '" id="rate-1-' . $this->id . '" value="1" ' . $checked1 . ' disabled>
-                    <label for="rate-1-' . $this->id . '"></label>
-                </fieldset>';
-    }
-
-    private function getCountdownTimer(\DateTime $expired, $spanId)
-    {
-        return '<span id="' . $spanId . '" data-toggle="tooltip" data-placement="right" data-original-title="' . $expired->format('Y-m-d H:i') . '"></span>
-                <script type="text/javascript">
-                    var expired = moment.tz("' . $expired->format('Y-m-d H:i:s') . '", "UTC");
-                    $("#' . $spanId . '").countdown(expired.toDate(), function(event) {
-                        if (event.elapsed == false) {
-                            $(this).text(
-                                event.strftime(\'%Dd %Hh %Mm\')
-                            );
-                        } else {
-                            $(this).text(
-                                event.strftime(\'On Wake\')
-                            ).addClass(\'text-success\');
-                        }
-                    });
-                </script>';
-    }
-
     public static function unprocessedByAgentInFollowUp()
     {
         $subQuery = (new Query())
@@ -367,6 +318,56 @@ class Lead extends \yii\db\ActiveRecord
         }
 
         return isset($mapping[$cabin]) ? $mapping[$cabin] : $cabin;
+    }
+
+    public function getSnoozeCountdown()
+    {
+        if (!empty($this->snooze_for)) {
+            return $this->getCountdownTimer(new \DateTime($this->snooze_for), sprintf('snooze-countdown-%d', $this->id));
+        }
+        return '-';
+    }
+
+    private function getCountdownTimer(\DateTime $expired, $spanId)
+    {
+        return '<span id="' . $spanId . '" data-toggle="tooltip" data-placement="right" data-original-title="' . $expired->format('Y-m-d H:i') . '"></span>
+                <script type="text/javascript">
+                    var expired = moment.tz("' . $expired->format('Y-m-d H:i:s') . '", "UTC");
+                    $("#' . $spanId . '").countdown(expired.toDate(), function(event) {
+                        if (event.elapsed == false) {
+                            $(this).text(
+                                event.strftime(\'%Dd %Hh %Mm\')
+                            );
+                        } else {
+                            $(this).text(
+                                event.strftime(\'On Wake\')
+                            ).addClass(\'text-success\');
+                        }
+                    });
+                </script>';
+    }
+
+    public function getRating()
+    {
+        $checked1 = $checked2 = $checked3 = '';
+        if ($this->rating == 3) {
+            $checked3 = 'checked';
+        } elseif ($this->rating == 2) {
+            $checked2 = 'checked';
+        } elseif ($this->rating == 1) {
+            $checked1 = 'checked';
+        }
+
+        return '<fieldset class="rate-input-group">
+                    <input type="radio" name="rate-' . $this->id . '" id="rate-3-' . $this->id . '" value="3" ' . $checked3 . ' disabled>
+                    <label for="rate-3-' . $this->id . '"></label>
+                
+                    <input type="radio" name="rate-' . $this->id . '" id="rate-2-' . $this->id . '" value="2" ' . $checked2 . ' disabled>
+                    <label for="rate-2-' . $this->id . '"></label>
+                
+                    <input type="radio" name="rate-' . $this->id . '" id="rate-1-' . $this->id . '" value="1" ' . $checked1 . ' disabled>
+                    <label for="rate-1-' . $this->id . '"></label>
+                </fieldset>';
     }
 
     public function getPendingAfterCreate()
@@ -403,22 +404,6 @@ class Lead extends \yii\db\ActiveRecord
         return $this->diffFormat($now->diff($updated));
     }
 
-    public static function getStatus($status)
-    {
-        $mapping = [
-            self::STATUS_PENDING => 'Pending',
-            self::STATUS_PROCESSING => 'Processing',
-            self::STATUS_FOLLOW_UP => 'Follow Up',
-            self::STATUS_ON_HOLD => 'Hold On',
-            self::STATUS_SOLD => 'Sold',
-            self::STATUS_TRASH => 'Trash',
-            self::STATUS_BOOKED => 'Booked',
-            self::STATUS_SNOOZE => 'Snooze',
-        ];
-
-        return $mapping[$status];
-    }
-
     public function getStatusLabel($status = null)
     {
         $label = '';
@@ -442,6 +427,22 @@ class Lead extends \yii\db\ActiveRecord
                 break;
         }
         return $label;
+    }
+
+    public static function getStatus($status)
+    {
+        $mapping = [
+            self::STATUS_PENDING => 'Pending',
+            self::STATUS_PROCESSING => 'Processing',
+            self::STATUS_FOLLOW_UP => 'Follow Up',
+            self::STATUS_ON_HOLD => 'Hold On',
+            self::STATUS_SOLD => 'Sold',
+            self::STATUS_TRASH => 'Trash',
+            self::STATUS_BOOKED => 'Booked',
+            self::STATUS_SNOOZE => 'Snooze',
+        ];
+
+        return $mapping[$status];
     }
 
     /**
@@ -503,6 +504,52 @@ class Lead extends \yii\db\ActiveRecord
                 $this->update(false, ['offset_gmt', 'request_ip_detail']);
             }
         }
+
+        if (!$insert) {
+            foreach (['updated', 'created'] as $item) {
+                if (in_array($item, array_keys($changedAttributes))) {
+                    unset($changedAttributes[$item]);
+                }
+            }
+            $flgUnActiveRequest = false;
+            if (isset($changedAttributes['adults']) && $changedAttributes['adults'] != $this->adults) {
+                $flgUnActiveRequest = true;
+            }
+            if (isset($changedAttributes['children']) && $changedAttributes['children'] != $this->children) {
+                $flgUnActiveRequest = true;
+            }
+            if (isset($changedAttributes['infants']) && $changedAttributes['infants'] != $this->infants) {
+                $flgUnActiveRequest = true;
+            }
+            if ($flgUnActiveRequest) {
+                foreach ($this->getAltQuotes() as $quote) {
+                    if ($quote->status != $quote::STATUS_APPLIED) {
+                        $quote->status = $quote::STATUS_DECLINED;
+                        $quote->save(false);
+                    }
+                }
+            }
+        }
+
+        //Add logs after changed model attributes
+        $leadLog = new LeadLog((new LeadLogMessage()));
+        $leadLog->logMessage->oldParams = $changedAttributes;
+        $leadLog->logMessage->newParams = array_intersect_key($this->attributes, $changedAttributes);
+        $leadLog->logMessage->title = ($insert)
+            ? 'Create' : 'Update';
+        $leadLog->logMessage->model = $this->formName();
+        $leadLog->addLog([
+            'lead_id' => $this->id,
+        ]);
+    }
+
+    /**
+     * @return array|Quote[]
+     */
+    public function getAltQuotes()
+    {
+        return Quote::find()->where(['lead_id' => $this->id])
+            ->orderBy('id DESC')->all();
     }
 
     public function getClientTime()
@@ -552,11 +599,20 @@ class Lead extends \yii\db\ActiveRecord
     }
 
     /**
-     * @return array|Quote[]
+     * @return array|Note[]
      */
-    public function getAltQuotes()
+    public function getNotes()
     {
-        return Quote::find()->where(['lead_id' => $this->id])
+        return Note::find()->where(['lead_id' => $this->id])
+            ->orderBy('id DESC')->all();
+    }
+
+    /**
+     * @return array|Note[]
+     */
+    public function getLogs()
+    {
+        return LeadLog::find()->where(['lead_id' => $this->id])
             ->orderBy('id DESC')->all();
     }
 

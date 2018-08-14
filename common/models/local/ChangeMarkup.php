@@ -1,6 +1,7 @@
 <?php
 namespace common\models\local;
 
+use common\models\LeadLog;
 use common\models\Quote;
 use yii\base\Exception;
 use yii\base\Model;
@@ -61,6 +62,7 @@ class ChangeMarkup extends Model
                 ]
             ];
             $cnt = $oldMarkup = 0;
+            $changedAttributes['selling'] = $this->quote->quotePrice()['selling'];
             foreach ($this->quote->quotePrices as $quotePrice) {
                 $oldMarkup += $quotePrice->extra_mark_up;
                 $quotePrice->toFloat();
@@ -85,12 +87,6 @@ class ChangeMarkup extends Model
                     $cnt++;
                 }
 
-                /*\Yii::$app->db->createCommand("UPDATE " . QuotePrice::tableName() . " SET sale_mark_up=:sale_mark_up WHERE alternative_quotes_id=:alternative_quotes_id AND passenger_id=:passenger_id", [
-                    ':alternative_quotes_id' => $alternativeQuotePrice->alternative_quotes_id,
-                    ':passenger_id' => $alternativeQuotePrice->passenger_id,
-                    ':sale_mark_up' => (float)str_replace(',', '', ($alternativeQuotePrice->sale_mark_up))
-                ])->execute();*/
-
                 $quotePrice->roundValue();
                 if (!$quotePrice->save()) {
                     $errors[] = $quotePrice->getErrors();
@@ -104,6 +100,17 @@ class ChangeMarkup extends Model
             $result['total']['markup'] = round($result['total']['markup'], 2);
             $result['actual']['markup'] = round(($result['actual']['markup'] / $cnt), 2);
             $result['actual']['sellingPrice'] = round(($result['actual']['sellingPrice'] / $cnt), 2);
+
+            //Add logs after changed model attributes
+            $leadLog = new LeadLog((new LeadLogMessage()));
+            $leadLog->logMessage->oldParams = $changedAttributes;
+            $newParams['selling'] = round($result['total']['sellingPrice'], 2);
+            $leadLog->logMessage->newParams = $newParams;
+            $leadLog->logMessage->title = 'Update';
+            $leadLog->logMessage->model = sprintf('%s (%s)', $this->quote->formName(), $this->quote->uid);
+            $leadLog->addLog([
+                'lead_id' => $this->quote->lead_id,
+            ]);
 
             if (!empty($errors)) {
                 $this->addError('quote_uid', $errors);

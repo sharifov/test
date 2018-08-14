@@ -13,14 +13,33 @@ use frontend\models\LeadForm;
         <div class="page-header__wrapper">
             <h2 class="page-header__title"><?= Html::encode($this->title) ?></h2>
             <div class="page-header__general">
-                <div class="page-header__general-item">
-                    <strong>Lead Status:</strong>
-                    <?php if ($leadForm->getLead()->isNewRecord) : ?>
+                <?php if ($leadForm->getLead()->isNewRecord) : ?>
+                    <div class="page-header__general-item">
+                        <strong>Lead Status:</strong>
                         <span id="status-label"><span class="label status-label label-info">New</span></span>
-                    <?php else : ?>
-                        <?= $leadForm->getLead()->getStatusLabel() ?>
+                    </div>
+                <?php else : ?>
+                    <?php if (!empty($leadForm->getLead()->employee_id)) : ?>
+                        <div class="page-header__general-item">
+                            <strong>Assigned to Agent: </strong>
+                            <?= $leadForm->getLead()->employee->username ?>
+                        </div>
                     <?php endif; ?>
-                </div>
+                    <div class="page-header__general-item">
+                        <strong>Rating:</strong>
+                        <?= $this->render('partial/_rating', [
+                            'lead' => $leadForm->getLead()
+                        ]) ?>
+                    </div>
+                    <div class="page-header__general-item">
+                        <strong>Client Time:</strong>
+                        <?= $leadForm->getLead()->getClientTime(); ?>
+                    </div>
+                    <div class="page-header__general-item">
+                        <strong>Lead Status:</strong>
+                        <?= $leadForm->getLead()->getStatusLabel() ?>
+                    </div>
+                <?php endif; ?>
             </div>
         </div>
     </div>
@@ -51,8 +70,16 @@ use frontend\models\LeadForm;
                     'quotes' => array_reverse($leadForm->getLead()->getQuotes()),
                     'lead' => $leadForm->getLead()
                 ]);
-            } ?>
 
+                echo $this->render('partial/_notes', [
+                    'notes' => $leadForm->getLead()->getNotes()
+                ]);
+
+                echo $this->render('partial/_leadLog', [
+                    'logs' => $leadForm->getLead()->getLogs()
+                ]);
+
+            } ?>
         </div>
     </div>
 

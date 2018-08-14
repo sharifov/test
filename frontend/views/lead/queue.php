@@ -29,6 +29,23 @@ $template = <<<HTML
 {items}
 HTML;
 
+$js = <<<JS
+    $('.take-processing-btn').click(function (e) {
+        e.preventDefault();
+        var url = $(this).attr('href');
+        if ($(this).data('status') == 2) {
+            var editBlock = $('#modal-error');
+            editBlock.find('.modal-body').html('');
+            editBlock.find('.modal-body').load(url, function( response, status, xhr ) {
+                editBlock.modal('show');
+            });
+        } else {
+            window.location = url;
+        }
+    });
+JS;
+$this->registerJs($js);
+
 $this->registerJsFile('/js/moment.min.js', [
     'position' => \yii\web\View::POS_HEAD,
     'depends' => [

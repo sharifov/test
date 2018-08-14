@@ -44,7 +44,10 @@ class LeadController extends DefaultController
                         },
                     ],
                     [
-                        'actions' => ['create', 'add-comment', 'change-state', 'unassign', 'take'],
+                        'actions' => [
+                            'create', 'add-comment', 'change-state', 'unassign', 'take',
+                            'set-rating'
+                        ],
                         'allow' => true,
                         'roles' => ['agent'],
                     ],
@@ -81,6 +84,22 @@ class LeadController extends DefaultController
         return parent::actionGetAirport($term);
     }
 
+    public function actionSetRating($id)
+    {
+        Yii::$app->response->format = Response::FORMAT_JSON;
+        $lead = Lead::findOne(['id' => $id]);
+        if ($lead !== null &&
+            $lead->status == Lead::STATUS_PROCESSING &&
+            Yii::$app->request->isPost
+        ) {
+            $rating = Yii::$app->request->post('rating', 0);
+            $lead->rating = $rating;
+            $lead->save(false);
+            return true;
+        }
+        return false;
+    }
+
     public function actionUnassign($id)
     {
         $model = Lead::findOne([
@@ -113,7 +132,6 @@ class LeadController extends DefaultController
                 $reason->lead_id = $model->id;
                 $reason->save();
                 if ($reason->queue == 'follow-up') {
-                    $queue = $reason->queue;
                     $model->status = $model::STATUS_FOLLOW_UP;
                     $model->employee_id = null;
                 } elseif ($reason->queue == 'trash') {
@@ -123,7 +141,6 @@ class LeadController extends DefaultController
                     $model->snooze_for = $modelAttr['snooze_for'];
                     $model->status = $model::STATUS_SNOOZE;
                 } elseif ($reason->queue == 'return') {
-                    $queue = 'trash';
                     $attrAgent = Yii::$app->request->post('agent', null);
                     if ($reason->returnToQueue == 'follow-up') {
                         $model->status = $model::STATUS_FOLLOW_UP;

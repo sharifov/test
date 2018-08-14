@@ -3,9 +3,11 @@
 namespace frontend\controllers;
 
 use common\components\GTTGlobal;
+use common\models\LeadLog;
 use common\models\local\ChangeMarkup;
 use common\controllers\DefaultController;
 use common\models\Lead;
+use common\models\local\LeadLogMessage;
 use common\models\Quote;
 use common\models\QuotePrice;
 use Yii;
@@ -79,6 +81,7 @@ class QuoteController extends DefaultController
                             $model->check_payment = true;
                             $model->id = 0;
                             $model->lead_id = $lead->id;
+                            $model->cabin = $lead->cabin;
                             foreach ($lead->getPaxTypes() as $type) {
                                 $newQPrice = new QuotePrice();
                                 $newQPrice->createQPrice($type);
@@ -265,6 +268,9 @@ class QuoteController extends DefaultController
                 $quote = empty($attr['Quote']['id'])
                     ? new Quote()
                     : Quote::findOne(['id' => $attr['Quote']['id']]);
+                $changedAttributes = $quote->attributes;
+                $changedAttributes['selling'] = ($quote->isNewRecord)
+                    ? 0 : $quote->quotePrice()['selling'];
                 if ($quote !== null) {
                     $quote->attributes = $attr['Quote'];
                     $lead = Lead::findOne(['id' => $quote->lead_id]);
@@ -274,6 +280,7 @@ class QuoteController extends DefaultController
                             $itinerary = $quote::createDump($quote->itinerary);
                             $quote->reservation_dump = str_replace('&nbsp;', ' ', implode("\n", $itinerary));
                             $quote->save();
+                            $selling = 0;
                             foreach ($attr['QuotePrice'] as $key => $quotePrice) {
                                 $price = empty($quotePrice['id'])
                                     ? new QuotePrice()
@@ -282,11 +289,24 @@ class QuoteController extends DefaultController
                                     $price->attributes = $quotePrice;
                                     $price->quote_id = $quote->id;
                                     $price->toFloat();
+                                    $selling += $price->selling;
                                     if (!$price->save()) {
                                         var_dump($price->getErrors());
                                     }
                                 }
                             }
+
+                            //Add logs after changed model attributes
+                            $leadLog = new LeadLog((new LeadLogMessage()));
+                            $leadLog->logMessage->oldParams = $changedAttributes;
+                            $newParams = array_intersect_key($quote->attributes, $changedAttributes);
+                            $newParams['selling'] = round($selling, 2);
+                            $leadLog->logMessage->newParams = $newParams;
+                            $leadLog->logMessage->title = ($quote->isNewRecord) ? 'Create' : 'Update';
+                            $leadLog->logMessage->model = sprintf('%s (%s)', $quote->formName(), $quote->uid);
+                            $leadLog->addLog([
+                                'lead_id' => $quote->lead_id,
+                            ]);
                         }
                         $response['success'] = $quote->validate();
                         $response['itinerary'] = $quote::createDump($quote->itinerary);
