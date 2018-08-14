@@ -7,6 +7,7 @@
 use frontend\models\LeadForm;
 use yii\helpers\Html;
 use yii\helpers\Url;
+use common\models\Lead;
 
 if ($leadForm->mode != $leadForm::VIEW_MODE) {
     $modelFormName = sprintf('%s-', strtolower($leadForm->formName()));
@@ -108,10 +109,129 @@ JS;
     $this->registerJs($js);
 }
 
+$js = <<<JS
+    /*** Change Lead Status ***/
+    $('.add-reason').click(function (e) {
+        e.preventDefault();
+        var url = $(this).data('url');
+        var editBlock = $('#modal-error');
+        editBlock.find('.modal-body').html('');
+        editBlock.find('.modal-body').load(url, function( response, status, xhr ) {
+            editBlock.modal('show');
+        });
+    });
+JS;
+$this->registerJs($js);
+
 ?>
 
 <div class="panel-main__header" id="actions-header">
     <div class="panel-main__actions">
+        <?php if (!$leadForm->getLead()->isNewRecord) {
+            $takeConditions = ($leadForm->mode != $leadForm::VIEW_MODE &&
+                in_array($leadForm->getLead()->status, [Lead::STATUS_ON_HOLD, Lead::STATUS_FOLLOW_UP, Lead::STATUS_PENDING, Lead::STATUS_PROCESSING]) &&
+                $leadForm->getLead()->getAppliedAlternativeQuotes() === null
+            );
+            $processingConditions = ($leadForm->getLead()->employee_id == Yii::$app->user->identity->getId() &&
+                $leadForm->getLead()->status == Lead::STATUS_PROCESSING &&
+                $leadForm->getLead()->getAppliedAlternativeQuotes() === null
+            );
+            $unSnoozeConditions = ($leadForm->getLead()->employee_id == Yii::$app->user->identity->getId() &&
+                $leadForm->getLead()->status == Lead::STATUS_SNOOZE
+            );
+            $unTrashConditions = ($leadForm->getLead()->status == Lead::STATUS_TRASH);
+            if ($takeConditions || $processingConditions || $unSnoozeConditions || $unTrashConditions) : ?>
+                <!--region BTN 'Unassign'-->
+                <div class="dropdown inline-block">
+                    <?= Html::a('<span class="btn-icon"><i class="fa fa-ellipsis-v"></i></span><span class="btn-text">Action</span>', null, [
+                        'class' => 'btn btn-default btn-with-icon',
+                        'data-toggle' => 'dropdown'
+                    ]) ?>
+                    <ul class="dropdown-menu" aria-labelledby="dLabel">
+                        <?php if ($takeConditions) : ?>
+                            <li>
+                                <?php
+                                if (in_array($leadForm->getLead()->status, [Lead::STATUS_PROCESSING, Lead::STATUS_ON_HOLD]) && $leadForm->getLead()->employee_id != Yii::$app->user->identity->getId()) {
+                                    echo Html::a('<i class="fa fa-share fa-rotate-0"></i> Take Over', Url::to([
+                                        'lead/take',
+                                        'id' => $leadForm->getLead()->id
+                                    ]), [
+                                        'class' => 'take-processing-btn',
+                                        'data-status' => $leadForm->getLead()->status
+                                    ]);
+                                } else if (($leadForm->getLead()->status == Lead::STATUS_ON_HOLD && $leadForm->getLead()->employee_id == Yii::$app->user->identity->getId()) ||
+                                    ($leadForm->getLead()->status == Lead::STATUS_PENDING)
+                                ) {
+                                    echo Html::a('<i class="fa fa-share fa-rotate-0"></i> Take', Url::to([
+                                        'lead/take',
+                                        'id' => $leadForm->getLead()->id
+                                    ]));
+                                }
+                                ?>
+                            </li>
+                        <?php endif; ?>
+
+                        <?php if ($processingConditions) : ?>
+                            <li>
+                                <?= Html::a('<i class="fa fa-share fa-rotate-180"></i></span> Hold On', '#', [
+                                    'class' => 'add-reason',
+                                    'data-url' => Url::to(['lead/change-state', 'queue' => 'processing', 'id' => $leadForm->getLead()->id]),
+                                ]) ?>
+                            </li>
+                            <li>
+                                <?= Html::a('<i class="fa fa-share-square fa-rotate-180"></i> Follow Up', '#', [
+                                    'class' => 'add-reason',
+                                    'data-url' => Url::to(['lead/change-state', 'queue' => 'follow-up', 'id' => $leadForm->getLead()->id]),
+                                ]) ?>
+                            </li>
+                            <li>
+                                <?= Html::a('<i class="fa fa-trash"></i> Trash', '#', [
+                                    'class' => 'add-reason',
+                                    'data-url' => Url::to(['lead/change-state', 'queue' => 'trash', 'id' => $leadForm->getLead()->id]),
+                                ]) ?>
+                            </li>
+                            <li>
+                                <?= Html::a('<i class="fa fa-clock-o"></i> Snooze', '#', [
+                                    'class' => 'add-reason',
+                                    'data-url' => Url::to(['lead/change-state', 'queue' => 'snooze', 'id' => $leadForm->getLead()->id]),
+                                ]) ?>
+                            </li>
+                            <li>
+                                <?= Html::a('<i class="fa fa-envelope"></i> Send email', '#', [
+                                    'id' => 'send-email-action'
+                                ]) ?>
+                            </li>
+                        <?php endif; ?>
+
+                        <?php if ($unSnoozeConditions) : ?>
+                            <li>
+                                <?= Html::a('<i class="fa fa-street-view"></i> On Wake', Url::to([
+                                    'lead/take',
+                                    'id' => $leadForm->getLead()->id
+                                ])) ?>
+                            </li>
+                        <?php endif; ?>
+
+                        <?php if ($unTrashConditions) : ?>
+                            <li>
+                                <?= Html::a('<i class="fa fa-share fa-rotate-180"></i> Return Lead', '#', [
+                                    'class' => 'add-reason',
+                                    'data-url' => \yii\helpers\Url::to(['lead/change-state', 'queue' => 'return', 'id' => $leadForm->getLead()->id]),
+                                ]) ?>
+                            </li>
+                            <li>
+                                <?= Html::a('<i class="fa fa-times"></i> Reject', '#', [
+                                    'class' => 'add-reason',
+                                    'data-url' => \yii\helpers\Url::to(['lead/change-state', 'queue' => 'reject', 'id' => $leadForm->getLead()->id]),
+                                ]) ?>
+                            </li>
+                        <?php endif; ?>
+                    </ul>
+                </div>
+                <!--endregion-->
+            <?php endif;
+        } ?>
+
         <?php if ($leadForm->mode != $leadForm::VIEW_MODE) {
             $title = '<span class="btn-icon"><i class="fa fa-check"></i></span><span class="btn-text">Save</span>';
             echo Html::submitButton($title, [

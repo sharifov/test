@@ -29,6 +29,24 @@ $template = <<<HTML
 {items}
 HTML;
 
+$this->registerJsFile('/js/moment.min.js', [
+    'position' => \yii\web\View::POS_HEAD,
+    'depends' => [
+        \yii\web\JqueryAsset::className()
+    ]
+]);
+$this->registerJsFile('/js/moment-timezone-with-data.min.js', [
+    'position' => \yii\web\View::POS_HEAD,
+    'depends' => [
+        \yii\web\JqueryAsset::className()
+    ]
+]);
+$this->registerJsFile('/js/jquery.countdown-2.2.0/jquery.countdown.min.js', [
+    'position' => \yii\web\View::POS_HEAD,
+    'depends' => [
+        \yii\web\JqueryAsset::className()
+    ]
+]);
 
 if (!is_array($dataProvider)) {
     echo $this->render('partial/_queueGrid', [

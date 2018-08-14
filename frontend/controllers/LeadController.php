@@ -6,6 +6,8 @@ use common\controllers\DefaultController;
 use common\models\ClientEmail;
 use common\models\ClientPhone;
 use common\models\Lead;
+use common\models\Note;
+use common\models\Reason;
 use frontend\models\LeadForm;
 use Yii;
 use yii\base\Model;
@@ -30,7 +32,7 @@ class LeadController extends DefaultController
                 'class' => AccessControl::className(),
                 'rules' => [
                     [
-                        'actions' => ['queue', 'quote', 'take'],
+                        'actions' => ['queue', 'quote'],
                         'allow' => true,
                         'roles' => ['agent'],
                         'matchCallback' => function ($rule, $action) {
@@ -42,7 +44,7 @@ class LeadController extends DefaultController
                         },
                     ],
                     [
-                        'actions' => ['create', 'add-comment'],
+                        'actions' => ['create', 'add-comment', 'change-state', 'unassign', 'take'],
                         'allow' => true,
                         'roles' => ['agent'],
                     ],
@@ -79,6 +81,102 @@ class LeadController extends DefaultController
         return parent::actionGetAirport($term);
     }
 
+    public function actionUnassign($id)
+    {
+        $model = Lead::findOne([
+            'id' => $id
+        ]);
+        if ($model !== null) {
+            $reason = new Reason();
+            $attr = Yii::$app->request->post($reason->formName());
+            if (empty($attr)) {
+                if ($attr['queue'] == 'processing') {
+                    $model->status = $model::STATUS_PROCESSING;
+                    $model->snooze_for = '';
+                    $model->save();
+                    return $this->redirect([
+                        'quote',
+                        'type' => 'processing',
+                        'id' => $model->id
+                    ]);
+                } elseif ($attr['queue'] == 'reject') {
+                    $model->status = $model::STATUS_REJECT;
+                    $model->save();
+                    return $this->redirect([
+                        'queue',
+                        'type' => 'trash'
+                    ]);
+                }
+            } else {
+                $reason->attributes = $attr;
+                $reason->employee_id = Yii::$app->user->identity->getId();
+                $reason->lead_id = $model->id;
+                $reason->save();
+                if ($reason->queue == 'follow-up') {
+                    $queue = $reason->queue;
+                    $model->status = $model::STATUS_FOLLOW_UP;
+                    $model->employee_id = null;
+                } elseif ($reason->queue == 'trash') {
+                    $model->status = $model::STATUS_TRASH;
+                } elseif ($reason->queue == 'snooze') {
+                    $modelAttr = Yii::$app->request->post($model->formName());
+                    $model->snooze_for = $modelAttr['snooze_for'];
+                    $model->status = $model::STATUS_SNOOZE;
+                } elseif ($reason->queue == 'return') {
+                    $queue = 'trash';
+                    $attrAgent = Yii::$app->request->post('agent', null);
+                    if ($reason->returnToQueue == 'follow-up') {
+                        $model->status = $model::STATUS_FOLLOW_UP;
+                    } elseif ($attrAgent !== null) {
+                        $model->employee_id = $attrAgent;
+                        $model->status = $model::STATUS_ON_HOLD;
+                    }
+                } elseif ($reason->queue == 'processing-over') {
+                    $model->status = $model::STATUS_PROCESSING;
+                    $lastAgent = $model->employee->username;
+                    $model->employee_id = $reason->employee_id;
+                    $model->save();
+
+                    $note = new Note();
+                    $note->employee_id = Yii::$app->user->identity->getId();
+                    $note->lead_id = $model->id;
+                    $note->message = sprintf('Take Over in PROCESSING status.<br>Reason: %s<br>Last Agent: %s',
+                        $reason->reason,
+                        $lastAgent
+                    );
+                    $note->save();
+
+                    return $this->redirect([
+                        'quote',
+                        'type' => 'processing',
+                        'id' => $model->id
+                    ]);
+                } else {
+                    $model->status = $model::STATUS_ON_HOLD;
+                }
+                $model->save();
+            }
+        }
+        return $this->redirect([
+            'queue',
+            'type' => 'inbox'
+        ]);
+    }
+
+    public function actionChangeState($id, $queue)
+    {
+        $lead = Lead::findOne(['id' => $id]);
+        if ($lead !== null) {
+            $reason = new Reason();
+            $reason->queue = $queue;
+            return $this->renderAjax('partial/_reason', [
+                'reason' => $reason,
+                'lead' => $lead
+            ]);
+        }
+        return null;
+    }
+
     public function actionTake($id)
     {
         /**
@@ -101,19 +199,20 @@ class LeadController extends DefaultController
             ->andWhere(['IN', 'status', [
                 Lead::STATUS_PENDING,
                 Lead::STATUS_FOLLOW_UP,
-                Lead::STATUS_ON_HOLD
+                Lead::STATUS_ON_HOLD,
+                Lead::STATUS_SNOOZE
             ]])->one();
 
         if ($model === null) {
             $lead = Lead::findOne(['id' => $id]);
-            /*if ($lead !== null) {
+            if ($lead !== null) {
                 $reason = new Reason();
                 $reason->queue = 'processing-over';
-                return $this->renderAjax('/sales/_reason', [
+                return $this->renderAjax('partial/_reason', [
                     'reason' => $reason,
                     'lead' => $lead
                 ]);
-            }*/
+            }
             return null;
         }
 
