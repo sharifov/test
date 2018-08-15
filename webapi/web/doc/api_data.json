@@ -349,6 +349,135 @@
   },
   {
     "type": "post",
+    "url": "/v1/lead/get",
+    "title": "Get Lead",
+    "version": "0.1.0",
+    "name": "GetLead",
+    "group": "Leads",
+    "permission": [
+      {
+        "name": "Authorized User"
+      }
+    ],
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "string",
+            "optional": false,
+            "field": "Authorization",
+            "description": "<p>Credentials <code>base64_encode(Username:Password)</code></p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Header-Example:",
+          "content": "{\n    \"Authorization\": \"Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==\",\n    \"Accept-Encoding\": \"Accept-Encoding: gzip, deflate\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "object",
+            "optional": false,
+            "field": "lead",
+            "description": "<p>Lead data array</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "int",
+            "optional": false,
+            "field": "lead.lead_id",
+            "description": "<p>Lead ID</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "int",
+            "optional": false,
+            "field": "lead.source_id",
+            "description": "<p>Source ID</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Request-Example:",
+          "content": "{\n   \"lead\": {\n       \"lead_id\": 302,\n       \"source_id\": 38,\n   }\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "Integer",
+            "optional": false,
+            "field": "response_id",
+            "description": "<p>Response Id</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "DateTime",
+            "optional": false,
+            "field": "request_dt",
+            "description": "<p>Request Date &amp; Time</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "DateTime",
+            "optional": false,
+            "field": "response_dt",
+            "description": "<p>Response Date &amp; Time</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Array",
+            "optional": false,
+            "field": "data",
+            "description": "<p>Data Array</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "HTTP/1.1 200 OK",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "fields": {
+        "Error 4xx": [
+          {
+            "group": "Error 4xx",
+            "optional": false,
+            "field": "UserNotFound",
+            "description": "<p>The id of the User was not found.</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Error-Response:",
+          "content": "HTTP/1.1 404 Not Found\n{\n    \"name\": \"Not Found\",\n    \"message\": \"Not found lead ID: 302\",\n    \"code\": 9,\n    \"status\": 404,\n    \"type\": \"yii\\\\web\\\\NotFoundHttpException\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "webapi/modules/v1/controllers/LeadController.php",
+    "groupTitle": "Leads"
+  },
+  {
+    "type": "post",
     "url": "/v1/lead/update",
     "title": "Update Lead",
     "version": "0.1.0",
@@ -657,5 +786,128 @@
     },
     "filename": "webapi/modules/v1/controllers/LeadController.php",
     "groupTitle": "Leads"
+  },
+  {
+    "type": "post",
+    "url": "/v1/quote/getinfo",
+    "title": "Get Quote",
+    "version": "0.1.0",
+    "name": "GetQuote",
+    "group": "Quotes",
+    "permission": [
+      {
+        "name": "Authorized User"
+      }
+    ],
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "string",
+            "optional": false,
+            "field": "Authorization",
+            "description": "<p>Credentials <code>base64_encode(Username:Password)</code></p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Header-Example:",
+          "content": "{\n    \"Authorization\": \"Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==\",\n    \"Accept-Encoding\": \"Accept-Encoding: gzip, deflate\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "13",
+            "optional": false,
+            "field": "uid",
+            "description": "<p>Quote UID</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": false,
+            "field": "apiKey",
+            "description": "<p>API Key</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Request-Example:",
+          "content": "{\n     \"uid\": \"5b6d03d61f078\",\n     \"apiKey\": \"d190c378e131ccfd8a889c8ee8994cb55f22fbeeb93f9b99007e8e7ecc24d0dd\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "Integer",
+            "optional": false,
+            "field": "response_id",
+            "description": "<p>Response Id</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "DateTime",
+            "optional": false,
+            "field": "request_dt",
+            "description": "<p>Request Date &amp; Time</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "DateTime",
+            "optional": false,
+            "field": "response_dt",
+            "description": "<p>Response Date &amp; Time</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Array",
+            "optional": false,
+            "field": "data",
+            "description": "<p>Data Array</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "HTTP/1.1 200 OK",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "fields": {
+        "Error 4xx": [
+          {
+            "group": "Error 4xx",
+            "optional": false,
+            "field": "UserNotFound",
+            "description": "<p>The id of the User was not found.</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Error-Response:",
+          "content": "HTTP/1.1 404 Not Found\n{\n    \"name\": \"Not Found\",\n    \"message\": \"Not found Quote UID: 30\",\n    \"code\": 2,\n    \"status\": 404,\n    \"type\": \"yii\\\\web\\\\NotFoundHttpException\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "webapi/modules/v1/controllers/QuoteController.php",
+    "groupTitle": "Quotes"
   }
 ]
