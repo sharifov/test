@@ -6,7 +6,6 @@ use common\models\ClientEmail;
 use common\models\ClientPhone;
 use common\models\Lead;
 use common\models\LeadFlightSegment;
-use common\models\Project;
 use webapi\models\ApiLead;
 use Yii;
 use yii\web\BadRequestHttpException;
@@ -32,163 +31,169 @@ class LeadController extends ApiBaseController
      *      "Accept-Encoding": "Accept-Encoding: gzip, deflate"
      *  }
      *
-     * @apiParam {object}           lead                                                 Trip data array
-     * @apiParam {object[]}         lead.emails                                         Array of Emails
-     * @apiParam {string{3}}            trip.flights.fl_origin_location_code                 Origin location Airport IATA-code
-     * @apiParam {string{3}}            trip.flights.fl_destination_location_code            Destination location Airport IATA-code
+     * @apiParam {object}           lead                                               Lead data array
+     * @apiParam {int}                  lead.source_id                                     Source ID
+     * @apiParam {int{1..9}}            lead.adults                                        Adult count
+     * @apiParam {string{1}=E-ECONOMY,B-BUSINESS,F-FIRST,P-PREMIUM}        lead.cabin                                         Cabin
+     * @apiParam {array[]}              lead.emails                                         Array of Emails (string)
+     * @apiParam {array[]}              lead.phones                                         Array of Phones (string)
+     * @apiParam {object[]}             lead.flights                                        Array of Flights
+     * @apiParam {string{3}}                                lead.flights.origin                 Flight Origin location Airport IATA-code
+     * @apiParam {string{3}}                                lead.flights.destination            Flight Destination location Airport IATA-code
+     * @apiParam {datetime{YYYY-MM-DD HH:II:SS}}            lead.flights.departure              Flight Departure DateTime (format YYYY-MM-DD HH:ii:ss)
+     * @apiParam {string{2}=OW-ONE_WAY,RT-ROUND_TRIP,MC-MULTI_DESTINATION}        [lead.trip_type]                                         Trip type (if empty - autocomplete)
+     * @apiParam {int=1-PENDING,2-PROCESSING,4-REJECT,5-FOLLOW_UP,8-ON_HOLD,10-SOLD,11-TRASH,12-BOOKED,13-SNOOZE}        [lead.status]                                       Status
      *
-     * @apiParam {object[]}             trip.flights.segments                                Array of Air segments
-     * @apiParam {string{3}}                trip.flights.segments.seg_departure_airport_code     Departure airport IATA-code
-     * @apiParam {string{3}}                trip.flights.segments.seg_arrival_airport_code       Arrival airport IATA-code
-     * @apiParam {datetime{YYYY-MM-DD HH:II:SS}}                 trip.flights.segments.seg_departure_dt       Departure DateTime (format YYYY-MM-DD HH:ii:ss)
-     * @apiParam {string{2}}                trip.flights.segments.seg_airline_code       Airline code
-     * @apiParam {string{3}}                trip.flights.segments.seg_flight_number       Flight number
-     * @apiParam {int=1-ECONOM,2-PREMIUM_ECONOM,3-BUSSINES,4-PREMIUM_BUSINESS,5-FIRST,6-PREMIUM_FIRST}            trip.flights.segments.seg_cabin_type_id       Cabin type Id
-     * @apiParam {string{1}=A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,S,T,U,V,W,X,Y,Z}                trip.flights.segments.seg_booking_class       Booking class
+     * @apiParam {int{0..9}}            [lead.children]                                      Children count
+     * @apiParam {int{0..9}}            [lead.infants]                                       Infant count
+     * @apiParam {string{40}}           [lead.uid]                                           UID value
+     * @apiParam {text}                 [lead.notes_for_experts]                             Notes for expert
+     * @apiParam {text}                 [lead.request_ip_detail]                             Request IP detail (autocomplete)
+     * @apiParam {string{50}}           [lead.request_ip]                                    Request IP
+     * @apiParam {int}                  [lead.snooze_for]                                    Snooze for
+     * @apiParam {int}                  [lead.rating]                                        Rating
      *
-     * @apiParam {object[]}         trip.passengers                                         Array of Passengers
-     * @apiParam {string{3..50}}            trip.passengers.pas_first_name                   First Name
-     * @apiParam {string{3..50}}            trip.passengers.pas_last_name                    Last Name
-     * @apiParam {int=1-ADULT,2-CHILDREN,3-INFANT,4-INFANT_WITH_SEAT,5-SPECIFIC_CHILD}            trip.passengers.pas_type_id                      Passenger Type Id
+     * @apiParam {string{3..100}}       [lead.client_first_name]                            Client first name
+     * @apiParam {string{3..100}}       [lead.client_last_name]                             Client last name
      *
-     * @apiParam {string{2}}            trip.passengers.pas_country                      Country code
-     * @apiParam {string{2}}            trip.passengers.pas_nationality                  Nationality Country code
-     * @apiParam {date{YYYY-MM-DD}}                 [trip.passengers.pas_dob]                        Date of birthday (format YYYY-MM-DD)
-     * @apiParam {int=1-Mail,2-Femail}            trip.passengers.pas_gender_id                    Gender Type Id
-     * @apiParam {string{20}}            [trip.passengers.pas_doc_number]                 Document number
-     * @apiParam {date{YYYY-MM-DD}}            [trip.passengers.pas_doc_expiration_date]        Document expiration date
      *
-     * @apiParam {string{50}}       trip.contact_phone                                   Contact Phone
-     * @apiParam {string{160}}      [trip.contact_email]                                 Contact Email
-     * @apiParam {int=1-SABRE,2-AMADEUS,3-TRAVELPORT}       [trip.gds_id]                Global Distribution System ID (Recommended GDS for Booking)
-     * @apiParam {decimal}          [trip.total_price]                                   Maximal total price in USD
      *
      * @apiParamExample {json} Request-Example:
      * {
-     *    "trip": {
+     *    "lead": {
      *        "flights": [
      *            {
-     *                "fl_origin_location_code": "KIV",
-     *                "fl_destination_location_code": "DME",
-     *                "segments": [
-     *                    {
-     *                        "seg_departure_airport_code": "KIV",
-     *                        "seg_arrival_airport_code": "DME",
-     *                        "seg_departure_dt": "2018-10-13 13:50:00",
-     *                        "seg_airline_code": "9U",
-     *                        "seg_flight_number": "171",
-     *                        "seg_cabin_type_id": "1",
-     *                        "seg_booking_class": "A"
-     *                    }
-     *                ]
-     *            }
-     *        ],
-     *        "passengers": [
-     *            {
-     *                "pas_first_name": "Alexandr",
-     *                "pas_last_name": "Ivanov",
-     *                "pas_type_id": "1",
-     *                "pas_country": "MD",
-     *                "pas_nationality": "MD",
-     *                "pas_dob": "1983-02-03",
-     *                "pas_gender_id": "1",
-     *                "pas_doc_number": "1234567890",
-     *                "pas_doc_expiration_date": "2020-01-01"
+     *                "origin": "KIV",
+     *                "destination": "DME",
+     *                "departure": "2018-10-13 13:50:00",
      *            },
      *            {
-     *                "pas_first_name": "Valentina",
-     *                "pas_last_name": "Petrova",
-     *                "pas_type_id": "2",
-     *                "pas_country": "US",
-     *                "pas_nationality": "UA",
-     *                "pas_dob": "1981-12-25",
-     *                "pas_gender_id": "2",
-     *                "pas_doc_number": "2345678901",
-     *                "pas_doc_expiration_date": "2020-01-01"
+     *                "origin": "DME",
+     *                "destination": "KIV",
+     *                "departure": "2018-10-18 10:54:00",
      *            }
      *        ],
-     *        "contact_phone": "248-111-123123",
-     *        "contact_email": "test-cod2018@gmail.com",
-     *        "gds_id": 1,
-     *        "total_price": 500.21
+     *        "emails": [
+     *          "email1@gmail.com",
+     *          "email2@gmail.com",
+     *        ],
+     *        "phones": [
+     *          "+373-69-487523",
+     *          "022-45-7895-89",
+     *        ],
+     *        "source_id": 38,
+     *        "adults": 1,
+     *        "client_first_name": "Alexandr",
+     *        "client_last_name": "Freeman"
      *    }
      * }
      *
      * @apiSuccess {Integer} response_id    Response Id
      * @apiSuccess {DateTime} request_dt    Request Date & Time
      * @apiSuccess {DateTime} response_dt   Response Date & Time
-     * @apiSuccess {Array} process  Process Array
      * @apiSuccess {Array} data Data Array
      *
      * @apiSuccessExample Success-Response:
      *     HTTP/1.1 200 OK
-     *      {
-     *         "status": 200,
-     *         "name": "Success",
-     *         "code": 0,
-     *         "message": "",
-     *         "data": {
-     *             "response": {
-     *                 "error": "",
-     *                 "error_code": 0,
-     *                 "rule_logs": [
-     *                     {
-     *                     "rs_id": 6,
-     *                     "rule_id": 4,
-     *                     "scheduler": true,
-     *                     "rule": true,
-     *                     "gds": "[\"1\"]"
-     *                     }
-     *                 ],
-     *                 "rule_id": 6,
-     *                 "gds_id": 1,
-     *                 "gds_pcc": "U2JF",
-     *                 "pnr": "JYTNYF",
-     *                 "total_price": "69.20",
-     *                 "trip_id": 246
-     *             },
-     *             "request": {
-     *                 "flights": [
-     *                     {
-     *                         "fl_origin_location_code": "LAX",
-     *                         "fl_destination_location_code": "DFW",
-     *                         "segments": [
-     *                             {
-     *                             "seg_departure_airport_code": "LAX",
-     *                             "seg_arrival_airport_code": "DFW",
-     *                             "seg_departure_dt": "2018-09-21 18:45:00",
-     *                             "seg_airline_code": "UA",
-     *                             "seg_flight_number": "5609",
-     *                             "seg_cabin_type_id": "1",
-     *                             "seg_booking_class": "N"
-     *                             }
-     *                         ]
-     *                     }
-     *                 ],
-     *                 "passengers": [
-     *                 {
-     *                 "pas_first_name": "Alexandr",
-     *                 "pas_last_name": "Ivanov",
-     *                 "pas_type_id": "1",
-     *                 "pas_country": "MD",
-     *                 "pas_nationality": "MD",
-     *                 "pas_dob": "1983-02-03",
-     *                 "pas_gender_id": "1",
-     *                 "pas_doc_number": "1234567890",
-     *                 "pas_doc_expiration_date": "2020-01-01"
-     *                 }
-     *                 ],
-     *                 "contact_phone": "248-111-123123",
-     *                 "contact_email": "ac@zeit.style"
-     *                 "gds_id": 1,
-     *                 "total_price": 500.21
-     *             }
-     *         },
-     *         "action": "v1/book/create",
-     *         "response_id": 298,
-     *         "request_dt": "2018-06-18 10:19:47",
-     *         "response_dt": "2018-06-18 10:20:06"
-     *      }
+    {
+        "status": 200,
+        "name": "Success",
+        "code": 0,
+        "message": "",
+        "data": {
+            "response": {
+                "lead": {
+                    "client_id": 11,
+                    "employee_id": null,
+                    "status": 1,
+                    "uid": "5b73b80eaf69b",
+                    "project_id": 6,
+                    "source_id": "38",
+                    "trip_type": "RT",
+                    "cabin": "E",
+                    "adults": "1",
+                    "children": 0,
+                    "infants": 0,
+                    "notes_for_experts": null,
+                    "created": "2018-08-15 05:20:14",
+                    "updated": "2018-08-15 05:20:14",
+                    "request_ip": "127.0.0.1",
+                    "request_ip_detail": "{\"ip\":\"127.0.0.1\",\"city\":\"North Pole\",\"postal\":\"99705\",\"state\":\"Alaska\",\"state_code\":\"AK\",\"country\":\"United States\",\"country_code\":\"US\",\"location\":\"64.7548317,-147.3431046\",\"timezone\":{\"id\":\"America\\/Anchorage\",\"location\":\"61.21805,-149.90028\",\"country_code\":\"US\",\"country_name\":\"United States of America\",\"iso3166_1_alpha_2\":\"US\",\"iso3166_1_alpha_3\":\"USA\",\"un_m49_code\":\"840\",\"itu\":\"USA\",\"marc\":\"xxu\",\"wmo\":\"US\",\"ds\":\"USA\",\"phone_prefix\":\"1\",\"fifa\":\"USA\",\"fips\":\"US\",\"gual\":\"259\",\"ioc\":\"USA\",\"currency_alpha_code\":\"USD\",\"currency_country_name\":\"UNITED STATES\",\"currency_minor_unit\":\"2\",\"currency_name\":\"US Dollar\",\"currency_code\":\"840\",\"independent\":\"Yes\",\"capital\":\"Washington\",\"continent\":\"NA\",\"tld\":\".us\",\"languages\":\"en-US,es-US,haw,fr\",\"geoname_id\":\"6252001\",\"edgar\":\"\"},\"datetime\":{\"date\":\"08\\/14\\/2018\",\"date_time\":\"08\\/14\\/2018 21:20:15\",\"date_time_txt\":\"Tuesday, August 14, 2018 21:20:15\",\"date_time_wti\":\"Tue, 14 Aug 2018 21:20:15 -0800\",\"date_time_ymd\":\"2018-08-14T21:20:15-08:00\",\"time\":\"21:20:15\",\"month\":\"8\",\"month_wilz\":\"08\",\"month_abbr\":\"Aug\",\"month_full\":\"August\",\"month_days\":\"31\",\"day\":\"14\",\"day_wilz\":\"14\",\"day_abbr\":\"Tue\",\"day_full\":\"Tuesday\",\"year\":\"2018\",\"year_abbr\":\"18\",\"hour_12_wolz\":\"9\",\"hour_12_wilz\":\"09\",\"hour_24_wolz\":\"21\",\"hour_24_wilz\":\"21\",\"hour_am_pm\":\"pm\",\"minutes\":\"20\",\"seconds\":\"15\",\"week\":\"33\",\"offset_seconds\":\"-28800\",\"offset_minutes\":\"-480\",\"offset_hours\":\"-8\",\"offset_gmt\":\"-08:00\",\"offset_tzid\":\"America\\/Anchorage\",\"offset_tzab\":\"AKDT\",\"offset_tzfull\":\"Alaska Daylight Time\",\"tz_string\":\"AKST+9AKDT,M3.2.0\\/2,M11.1.0\\/2\",\"dst\":\"true\",\"dst_observes\":\"true\",\"timeday_spe\":\"evening\",\"timeday_gen\":\"evening\"}}",
+                    "offset_gmt": "-08.00",
+                    "snooze_for": null,
+                    "rating": null,
+                    "id": 7
+                },
+                "flights": [
+                    {
+                        "origin": "BOS",
+                        "destination": "LGW",
+                        "departure": "2018-09-19"
+                    },
+                    {
+                        "origin": "LGW",
+                        "destination": "BOS",
+                        "departure": "2018-09-22"
+                    }
+                ],
+                "emails": [
+                    "chalpet@gmail.com",
+                    "chalpet2@gmail.com"
+                ],
+                "phones": [
+                    "+373-69-98-698",
+                    "+373-69-98-698"
+                ]
+            },
+            "request": {
+                "client_id": null,
+                "employee_id": null,
+                "status": null,
+                "uid": null,
+                "project_id": 6,
+                "source_id": "38",
+                "trip_type": null,
+                "cabin": null,
+                "adults": "1",
+                "children": null,
+                "infants": null,
+                "notes_for_experts": null,
+                "created": null,
+                "updated": null,
+                "request_ip": null,
+                "request_ip_detail": null,
+                "offset_gmt": null,
+                "snooze_for": null,
+                "rating": null,
+                "flights": [
+                    {
+                        "origin": "BOS",
+                        "destination": "LGW",
+                        "departure": "2018-09-19"
+                    },
+                    {
+                        "origin": "LGW",
+                        "destination": "BOS",
+                        "departure": "2018-09-22"
+                    }
+                ],
+                "emails": [
+                    "chalpet@gmail.com",
+                    "chalpet2@gmail.com"
+                ],
+                "phones": [
+                    "+373-69-98-698",
+                    "+373-69-98-698"
+                ],
+                "client_first_name": "Alexandr",
+                "client_last_name": "Freeman"
+            }
+        },
+        "action": "v1/lead/create",
+        "response_id": 42,
+        "request_dt": "2018-08-15 05:20:14",
+        "response_dt": "2018-08-15 05:20:15"
+    }
      *
      * @apiError UserNotFound The id of the User was not found.
      *
@@ -196,10 +201,10 @@ class LeadController extends ApiBaseController
      *      HTTP/1.1 422 Unprocessable entity
      *      {
      *          "name": "Unprocessable entity",
-     *          "message": "Passenger [0]: {\"pas_type_id\":[\"Type ID must be an integer.\"]}",
-     *          "code": 0,
+     *          "message": "Flight [0]: Destination should contain at most 3 characters.",
+     *          "code": 5,
      *          "status": 422,
-     *          "type": "yii\\web\\HttpException"
+     *          "type": "yii\\web\\UnprocessableEntityHttpException"
      *      }
      *
      *
@@ -230,12 +235,8 @@ class LeadController extends ApiBaseController
             throw new BadRequestHttpException('Not found Lead data on POST request', 6);
         }
 
-        //print_r(123); exit;
-
-
         $response = [];
         $transaction = Yii::$app->db->beginTransaction();
-
 
         $client = new Client();
 
@@ -254,9 +255,8 @@ class LeadController extends ApiBaseController
         $lead->attributes = $modelLead->attributes;
 
         $lead->client_id = $client->id;
-        $lead->status = Lead::STATUS_PENDING;
-        $lead->uid = uniqid();
-
+        if(!$lead->status) $lead->status = Lead::STATUS_PENDING;
+        if(!$lead->uid) $lead->uid = uniqid();
 
 
         if(!$lead->trip_type) $lead->trip_type = Lead::TYPE_ROUND_TRIP;
@@ -274,9 +274,7 @@ class LeadController extends ApiBaseController
 
         if(!$lead->children) $lead->children = 0;
         if(!$lead->infants) $lead->infants = 0;
-
-        $lead->request_ip = Yii::$app->request->remoteIP;
-
+        if(!$lead->request_ip) $lead->request_ip = Yii::$app->request->remoteIP;
 
 
         if($this->apiProject) $lead->project_id = $this->apiProject->id;
@@ -382,204 +380,6 @@ class LeadController extends ApiBaseController
         $responseData['data']['request']                = $modelLead;
 
 
-
-        $responseData = $apiLog->endApiLog($responseData);
-
-        if(isset($response['error']) && $response['error']) {
-            $json = @json_encode($response['error']);
-            if(isset($response['error_code']) && $response['error_code']) $error_code = $response['error_code'];
-            else $error_code = 0;
-            throw new UnprocessableEntityHttpException($json, $error_code);
-        }
-
-        return $responseData;
-    }
-
-
-
-
-    /**
-     *
-     * @api {post} /v1/book/info Get Booking info
-     * @apiVersion 0.1.0
-     * @apiName BookingInfo
-     * @apiGroup Booking
-     * @apiPermission Authorized User
-     *
-     * @apiHeader {string} Authorization    Credentials <code>base64_encode(Username:Password)</code>
-     * @apiHeaderExample {json} Header-Example:
-     *  {
-     *      "Authorization": "Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==",
-     *      "Accept-Encoding": "Accept-Encoding: gzip, deflate"
-     *  }
-     *
-     * @apiParam {object}                                   gds                 Object
-     * @apiParam {string{20}}                               gds.gds_pcc         Pseudo city code / Office Id / Organization
-     * @apiParam {int=1-SABRE,2-AMADEUS,3-TRAVELPORT}       gds.gds_id          Global Distribution System ID
-     * @apiParam {array}                                    data                Array of data field
-     * @apiParam {string{6}}                                data.pnr            PNR Code
-     *
-     *
-     * @apiParamExample {json} Request-Example:
-     *  {
-     *      "gds": {
-     *          "gds_pcc": "U2JF",
-     *          "gds_id": 1
-     *      },
-     *      "data": {
-     *          "pnr": "ABCDEF"
-     *      }
-     *  }
-     *
-     * @apiSuccess {Integer}    status          Status Id
-     * @apiSuccess {String}     name            Name
-     * @apiSuccess {Integer}    code            Code
-     * @apiSuccess {String}     message         Message
-     * @apiSuccess {Integer}    response_id     Response Id
-     * @apiSuccess {DateTime}   request_dt      Request Date & Time
-     * @apiSuccess {DateTime}   response_dt     Response Date & Time
-     * @apiSuccess {Array}      data            Data Array
-     *
-     * @apiSuccessExample Success-Response:
-     *     HTTP/1.1 200 OK
-     *{
-     *  "status": 200,
-     *  "name": "Success",
-     *  "code": 0,
-     *  "message": "",
-     *  "data": {
-     *      "response": {}
-     *      "request": {
-     *          "data": {
-     *              "pnr": "BTFARU"
-     *          },
-     *          "gds": {
-     *              "gds_id": "1",
-     *              "gds_pcc": "default"
-     *          }
-     *      }
-     *  },
-     *  "response_id": 229,
-     *  "request_dt": "2018-06-14 17:49:31",
-     *  "response_dt": "2018-06-14 17:49:36"
-     *}
-     *
-     *
-     * @apiError PostRequestNotFound    Not found POST request.
-     * @apiError PostRequestIsEmpty     POST data request is empty.
-     * @apiError TicketDataNotFound     Not found Ticket data on POST request.
-     *
-     * @apiErrorExample Error-Response:
-     *      HTTP/1.1 422 Unprocessable entity
-     *      {
-     *          "name": "Unprocessable entity",
-     *          "message": "\"SOAP Error AirTicketLLSRQ [ERR.SWS.HOST.ERROR_IN_RESPONSE]: Array\\n(\\n    [0] => UNABLE TO PROCESS - CORRECT\\/RETRY - 395\\n    [1] => ELECTRONIC TICKET\\/DOCUMENT EXISTS IN AIRLINE SYSTEM\\n)\\n\"",
-     *          "code": 0,
-     *          "status": 422,
-     *          "type": "yii\\web\\UnprocessableEntityHttpException"
-     *      }
-     *
-     *
-     * @return mixed
-     * @throws BadRequestHttpException
-     * @throws UnprocessableEntityHttpException
-     */
-    public function actionInfo()
-    {
-
-        $this->checkPost();
-        $apiLog = $this->startApiLog($this->action->uniqueId);
-
-        $modelData = new ApiData();
-        $modelGds = new ApiGds();
-
-        if($modelGds->load(Yii::$app->request->post())) {
-            if (!$modelGds->validate()) {
-                if ($errors = $modelGds->getErrors()) {
-                    throw new UnprocessableEntityHttpException($this->errorToString($errors), 3);
-                } else throw new UnprocessableEntityHttpException('Not validate GDS data', 3);
-            }
-        } else {
-            throw new BadRequestHttpException('Not found GDS data on POST request', 4);
-        }
-
-
-        if($modelData->load(Yii::$app->request->post())) {
-            if (!$modelData->validate()) {
-                if ($errors = $modelData->getErrors()) {
-                    throw new UnprocessableEntityHttpException($this->errorToString($errors), 5);
-                } else throw new UnprocessableEntityHttpException('Not validate GDS data', 5);
-            }
-        } else {
-            throw new BadRequestHttpException('Not found Data on POST request', 6);
-        }
-
-
-        $response = [];
-
-        try {
-
-            if ($modelGds->gds_id == Gds::GDS_SABRE) {
-
-                $gds = Yii::$app->sabre;
-                $initGds = $gds->initPcc($modelGds->gds_pcc);
-
-                if($initGds) {
-                    $response = $gds->getPnr($modelData->pnr);
-                } else {
-                    $response['error'] = 'Error: Not init Sabre GDS';
-                    $response['error_code'] = 37;
-                }
-
-            } else if ($modelGds->gds_id == Gds::GDS_AMADEUS) {
-
-                $gds = Yii::$app->amadeus;
-                $initGds = $gds->initPcc($modelGds->gds_pcc);
-                if($initGds) {
-                    $response = $gds->getPnr($modelData->pnr);
-                } else {
-                    $response['error'] = 'Error: Not init Amadeus GDS';
-                    $response['error_code'] = 38;
-                }
-
-            } else if ($modelGds->gds_id == Gds::GDS_TRAVELPORT) {
-
-                $gds = Yii::$app->travelport;
-                $initGds = $gds->initPcc($modelGds->gds_pcc);
-                if($initGds) {
-                    //$response = $gds->getPnr($modelData->pnr);
-                    $response = ['error' => 'travelport - Local Service is disabled'];
-                } else {
-                    $response['error'] = 'Error: Not init TravelPort GDS';
-                    $response['error_code'] = 39;
-                }
-
-            }
-
-        } catch (\Throwable $e) {
-
-            Yii::error($e->getTraceAsString(), 'API:book:info:try');
-            if(Yii::$app->request->get('debug')) $message = ($e->getTraceAsString());
-            else $message = $e->getMessage().' (code:'.$e->getCode().', line: '.$e->getLine().')';
-
-            $response['error'] = $message;
-            $response['error_code'] = 30;
-        }
-
-
-        if(isset($response['error']) && $response['error']) {
-
-        } else {
-            $responseData['status']     = 200;
-            $responseData['name']       = 'Success';
-            $responseData['code']       = 0;
-            $responseData['message']    = 'ok';
-        }
-
-
-        $responseData['data']['response']               = $response;
-        $responseData['data']['request']['data']        = $modelData;
-        $responseData['data']['request']['gds']         = $modelGds;
 
         $responseData = $apiLog->endApiLog($responseData);
 

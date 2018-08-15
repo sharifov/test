@@ -81,26 +81,24 @@ class ApiLead extends Model
     public function rules()
     {
         return [
-            [['source_id', 'adults'], 'required'],
-
+            [['source_id', 'adults', 'flights'], 'required'],
             [['source_id'], 'checkIsSource'],
             [['client_first_name', 'client_last_name'], 'string', 'max' => 100],
             [['emails'], 'each', 'rule' => ['email']],
             [['phones'], 'each', 'rule' => ['string', 'max' => 20]],
-            [['flights'], 'checkIsFlights'],
+            [['source_id'], 'checkEmailAndPhone'],
 
             [['adults', 'children', 'infants'], 'integer', 'min' => 0, 'max' => 9],
             [['adults'], 'integer', 'min' => 1],
-
             [['client_id', 'employee_id', 'status', 'project_id', 'source_id', 'adults', 'children', 'infants', 'rating'], 'integer'],
-
             [['notes_for_experts', 'request_ip_detail'], 'string'],
-            [['created', 'updated', 'snooze_for'], 'safe'],
+            [['created', 'updated', 'snooze_for', 'flights', 'emails', 'phones'], 'safe'],
             [['uid', 'request_ip', 'offset_gmt'], 'string', 'max' => 255],
             [['trip_type'], 'string', 'max' => 2],
             [['cabin'], 'string', 'max' => 1],
             [['client_id'], 'exist', 'skipOnError' => true, 'targetClass' => Client::class, 'targetAttribute' => ['client_id' => 'id']],
             [['employee_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['employee_id' => 'id']],
+            [['flights'], 'checkIsFlights'],
         ];
     }
 
@@ -130,14 +128,26 @@ class ApiLead extends Model
     }
 
 
-    public function checkIsSource($attribute, $params)
+    public function checkIsSource()
     {
         if (empty($this->source_id)) {
             $this->addError('source_id', "Source ID cannot be empty");
-        }
-        else {
+        } else {
             $source = Source::findOne(['id' => $this->source_id, 'project_id' => $this->project_id]);
             if(!$source) $this->addError('source_id', "Invalid Source ID (project: ".$this->project_id.")");
+        }
+    }
+
+
+    /**
+     *
+     */
+    public function checkEmailAndPhone()
+    {
+
+        if (empty($this->emails) || empty($this->phones)) {
+            $this->addError('emails', "Phones or Emails cannot be blank");
+            $this->addError('phones', "Phones or Emails cannot be blank");
         }
 
     }
