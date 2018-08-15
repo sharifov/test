@@ -37,6 +37,8 @@ class ApiBaseController extends Controller
     {
         $behaviors = parent::behaviors();
 
+        $apiKey = Yii::$app->request->post('apiKey');
+
         $behaviors['authenticator'] = [
             'class' => HttpBasicAuth::class,
         ];
@@ -48,24 +50,49 @@ class ApiBaseController extends Controller
             ],
         ];
 
-        $behaviors['authenticator']['auth'] = function ($username, $password) {
 
-            $apiUser = ApiUser::findOne([
-                'au_api_username' => $username
-            ]);
+        if($apiKey) {
 
-            if(!$apiUser) return NULL;
-            if(!$apiUser->validatePassword($password)) return NULL;
-            if(!$apiUser->au_enabled) {
-                throw new NotAcceptableHttpException('ApiUser is disabled', 10);
-            }
-            $apiProject = Project::findOne($apiUser->au_project_id);
+            $behaviors['authenticator']['auth'] = function () use ($apiKey) {
 
-            $this->apiUser = $apiUser;
-            $this->apiProject = $apiProject;
+                $apiProject = Project::find()->where(['api_key' => $apiKey])->one();
+                if(!$apiProject) return NULL;
+                $apiUser = ApiUser::findOne([
+                    'au_project_id' => $apiProject->id
+                ]);
 
-            return $apiUser;
-        };
+                if (!$apiUser) return NULL;
+                if (!$apiUser->au_enabled) {
+                    throw new NotAcceptableHttpException('ApiUser is disabled', 10);
+                }
+
+                $this->apiUser = $apiUser;
+                $this->apiProject = $apiProject;
+
+                return $apiUser;
+            };
+
+        } else {
+
+            $behaviors['authenticator']['auth'] = function ($username, $password) {
+
+                $apiUser = ApiUser::findOne([
+                    'au_api_username' => $username
+                ]);
+
+                if (!$apiUser) return NULL;
+                if (!$apiUser->validatePassword($password)) return NULL;
+                if (!$apiUser->au_enabled) {
+                    throw new NotAcceptableHttpException('ApiUser is disabled', 10);
+                }
+                $apiProject = Project::findOne($apiUser->au_project_id);
+
+                $this->apiUser = $apiUser;
+                $this->apiProject = $apiProject;
+
+                return $apiUser;
+            };
+        }
 
         $behaviors['access'] = [
             'class' => AccessControl::class,

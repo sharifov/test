@@ -11,7 +11,7 @@ use yii\base\Model;
 /**
  * This is the model class for table "leads".
  *
- * @property int $id
+ * @property int $lead_id
  * @property int $client_id
  * @property int $employee_id
  * @property int $status
@@ -36,12 +36,18 @@ use yii\base\Model;
  * @property array $phones
  * @property array $flights
  * @property array $client_first_name
+ * @property array $client_middle_name
  * @property array $client_last_name
  *
  */
 class ApiLead extends Model
 {
 
+    CONST SCENARIO_CREATE = 'create';
+    CONST SCENARIO_UPDATE = 'update';
+    CONST SCENARIO_GET = 'get';
+
+    public $lead_id;
     public $client_id;
     public $employee_id;
     public $status;
@@ -68,6 +74,9 @@ class ApiLead extends Model
 
     public $client_first_name;
     public $client_last_name;
+    public $client_middle_name;
+
+
 
 
     public function formName()
@@ -81,12 +90,17 @@ class ApiLead extends Model
     public function rules()
     {
         return [
-            [['source_id', 'adults', 'flights'], 'required'],
+            [['source_id'], 'required'],
+            [['lead_id'], 'required', 'on' => [self::SCENARIO_UPDATE, self::SCENARIO_GET]],
+            [['adults', 'flights'], 'required', 'except' => [self::SCENARIO_UPDATE, self::SCENARIO_GET]],
+
+            [['lead_id', 'source_id'], 'integer'],
+
             [['source_id'], 'checkIsSource'],
-            [['client_first_name', 'client_last_name'], 'string', 'max' => 100],
+            [['client_first_name', 'client_last_name', 'client_middle_name'], 'string', 'max' => 100],
             [['emails'], 'each', 'rule' => ['email']],
             [['phones'], 'each', 'rule' => ['string', 'max' => 20]],
-            [['source_id'], 'checkEmailAndPhone'],
+            [['source_id'], 'checkEmailAndPhone', 'except' => [self::SCENARIO_UPDATE, self::SCENARIO_GET]],
 
             [['adults', 'children', 'infants'], 'integer', 'min' => 0, 'max' => 9],
             [['adults'], 'integer', 'min' => 1],
@@ -101,6 +115,16 @@ class ApiLead extends Model
             [['flights'], 'checkIsFlights'],
         ];
     }
+
+    public function scenarios()
+    {
+        $scenarios = parent::scenarios();
+        $scenarios[self::SCENARIO_UPDATE] = ['lead_id', 'source_id', 'status', 'uid', 'trip_type', 'cabin', 'adults', 'children', 'infants', 'notes_for_experts', 'request_ip', 'request_ip_detail', 'offset_gmt', 'snooze_for', 'rating', 'flights', 'emails', 'phones',
+            'client_first_name', 'client_last_name', 'client_middle_name'];
+        $scenarios[self::SCENARIO_GET] = ['lead_id', 'source_id'];
+        return $scenarios;
+    }
+
 
     public function checkIsFlights($attribute, $params)
     {
@@ -159,7 +183,7 @@ class ApiLead extends Model
     public function attributeLabels()
     {
         return [
-            'id' => 'ID',
+            'lead_id' => 'Lead ID',
             'client_id' => 'Client ID',
             'employee_id' => 'Employee ID',
             'status' => 'Status',
@@ -185,8 +209,7 @@ class ApiLead extends Model
 
             'client_first_name' => 'Client first name',
             'client_last_name' => 'Client last name',
-
-
+            'client_middle_name'    => 'Client middle name',
         ];
     }
 

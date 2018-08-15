@@ -252,6 +252,7 @@ class Quote extends \yii\db\ActiveRecord
 
     public static function parseDump($string, $validation = true, &$itinerary = [])
     {
+
         $depCity = $arrCity = null;
         $data = [];
         $segmentCount = 0;

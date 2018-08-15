@@ -9,6 +9,7 @@ use common\models\LeadFlightSegment;
 use webapi\models\ApiLead;
 use Yii;
 use yii\web\BadRequestHttpException;
+use yii\web\NotFoundHttpException;
 use yii\web\UnprocessableEntityHttpException;
 
 
@@ -55,6 +56,7 @@ class LeadController extends ApiBaseController
      *
      * @apiParam {string{3..100}}       [lead.client_first_name]                            Client first name
      * @apiParam {string{3..100}}       [lead.client_last_name]                             Client last name
+     * @apiParam {string{3..100}}       [lead.client_middle_name]                           Client middle name
      *
      *
      *
@@ -220,6 +222,7 @@ class LeadController extends ApiBaseController
         $this->checkPost();
         $apiLog = $this->startApiLog($this->action->uniqueId);
         $modelLead = new ApiLead();
+        //$modelLead->scenario = ApiLead::SCENARIO_CREATE;
 
         //print_r($this->apiProject); exit;
 
@@ -244,6 +247,7 @@ class LeadController extends ApiBaseController
             else $client->first_name = 'ClientName';
 
         if($modelLead->client_last_name) $client->last_name = $modelLead->client_last_name;
+        if($modelLead->client_middle_name) $client->middle_name = $modelLead->client_middle_name;
 
         if(!$client->save()) {
             throw new UnprocessableEntityHttpException($this->errorToString($client->errors));
@@ -304,8 +308,6 @@ class LeadController extends ApiBaseController
                 if(!$flightModel->save()) {
                     Yii::error(print_r($flightModel->errors, true), 'API:Lead:create:LeadFlightSegment:save');
                     $transaction->rollBack();
-                } else {
-
                 }
             }
 
@@ -321,8 +323,6 @@ class LeadController extends ApiBaseController
                 if(!$emailModel->save()) {
                     Yii::error(print_r($emailModel->errors, true), 'API:Lead:create:ClientEmail:save');
                     $transaction->rollBack();
-                } else {
-
                 }
             }
 
@@ -337,9 +337,6 @@ class LeadController extends ApiBaseController
                 if(!$phoneModel->save()) {
                     Yii::error(print_r($phoneModel->errors, true), 'API:Lead:create:ClientPhone:save');
                     $transaction->rollBack();
-                } else {
-
-
                 }
             }
 
@@ -369,6 +366,281 @@ class LeadController extends ApiBaseController
         if(isset($response['error']) && $response['error']) {
 
         } else {
+            /*$responseData['status']     = 200;
+            $responseData['name']       = 'Success';
+            $responseData['code']       = 0;
+            $responseData['message']    = '';*/
+
+            $responseData['status'] = 'Success';
+            $responseData['errors'] = [];
+            $responseData['lead_id'] = $lead->id;
+            $responseData['client_id'] = $lead->client_id;
+        }
+
+        $responseData['data']['response']               = $response;
+        // $responseData['data']['request']                = $modelLead;
+
+
+        $responseData = $apiLog->endApiLog($responseData);
+
+        if(isset($response['error']) && $response['error']) {
+            $json = @json_encode($response['error']);
+            if(isset($response['error_code']) && $response['error_code']) $error_code = $response['error_code'];
+            else $error_code = 0;
+            throw new UnprocessableEntityHttpException($json, $error_code);
+        }
+
+        return $responseData;
+    }
+
+
+
+    /**
+     *
+     * @api {post} /v1/lead/update Update Lead
+     * @apiVersion 0.1.0
+     * @apiName UpdateLead
+     * @apiGroup Leads
+     * @apiPermission Authorized User
+     *
+     * @apiHeader {string} Authorization    Credentials <code>base64_encode(Username:Password)</code>
+     * @apiHeaderExample {json} Header-Example:
+     *  {
+     *      "Authorization": "Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==",
+     *      "Accept-Encoding": "Accept-Encoding: gzip, deflate"
+     *  }
+     *
+     * @apiParam {object}           lead                                               Lead data array
+     * @apiParam {int}                  lead.lead_id                                     Lead ID
+     * @apiParam {int}                  lead.source_id                                     Source ID
+     * @apiParam {int{1..9}}            lead.adults                                        Adult count
+     * @apiParam {string{1}=E-ECONOMY,B-BUSINESS,F-FIRST,P-PREMIUM}        lead.cabin                                         Cabin
+     * @apiParam {array[]}              lead.emails                                         Array of Emails (string)
+     * @apiParam {array[]}              lead.phones                                         Array of Phones (string)
+     * @apiParam {object[]}             lead.flights                                        Array of Flights
+     * @apiParam {string{3}}                                lead.flights.origin                 Flight Origin location Airport IATA-code
+     * @apiParam {string{3}}                                lead.flights.destination            Flight Destination location Airport IATA-code
+     * @apiParam {datetime{YYYY-MM-DD HH:II:SS}}            lead.flights.departure              Flight Departure DateTime (format YYYY-MM-DD HH:ii:ss)
+     * @apiParam {string{2}=OW-ONE_WAY,RT-ROUND_TRIP,MC-MULTI_DESTINATION}        [lead.trip_type]                                         Trip type (if empty - autocomplete)
+     * @apiParam {int=1-PENDING,2-PROCESSING,4-REJECT,5-FOLLOW_UP,8-ON_HOLD,10-SOLD,11-TRASH,12-BOOKED,13-SNOOZE}        [lead.status]                                       Status
+     *
+     * @apiParam {int{0..9}}            [lead.children]                                      Children count
+     * @apiParam {int{0..9}}            [lead.infants]                                       Infant count
+     * @apiParam {string{40}}           [lead.uid]                                           UID value
+     * @apiParam {text}                 [lead.notes_for_experts]                             Notes for expert
+     * @apiParam {text}                 [lead.request_ip_detail]                             Request IP detail (autocomplete)
+     * @apiParam {string{50}}           [lead.request_ip]                                    Request IP
+     * @apiParam {int}                  [lead.snooze_for]                                    Snooze for
+     * @apiParam {int}                  [lead.rating]                                        Rating
+     *
+     * @apiParam {string{3..100}}       [lead.client_first_name]                            Client first name
+     * @apiParam {string{3..100}}       [lead.client_last_name]                             Client last name
+     * @apiParam {string{3..100}}       [lead.client_middle_name]                           Client middle name
+     *
+     *
+     *
+     * @apiParamExample {json} Request-Example:
+     * {
+     *    "lead": {
+     *        "lead_id": 38,
+     *        "flights": [
+     *            {
+     *                "origin": "KIV",
+     *                "destination": "DME",
+     *                "departure": "2018-10-13 13:50:00",
+     *            },
+     *            {
+     *                "origin": "DME",
+     *                "destination": "KIV",
+     *                "departure": "2018-10-18 10:54:00",
+     *            }
+     *        ],
+     *        "emails": [
+     *          "email1@gmail.com",
+     *          "email2@gmail.com",
+     *        ],
+     *        "phones": [
+     *          "+373-69-487523",
+     *          "022-45-7895-89",
+     *        ],
+     *        "source_id": 38,
+     *        "adults": 1,
+     *        "client_first_name": "Alexandr",
+     *        "client_last_name": "Freeman"
+     *    }
+     * }
+     *
+     * @apiSuccess {Integer} response_id    Response Id
+     * @apiSuccess {DateTime} request_dt    Request Date & Time
+     * @apiSuccess {DateTime} response_dt   Response Date & Time
+     * @apiSuccess {Array} data Data Array
+     *
+     * @apiSuccessExample Success-Response:
+     *     HTTP/1.1 200 OK
+
+     *
+     * @apiError UserNotFound The id of the User was not found.
+     *
+     * @apiErrorExample Error-Response:
+     *      HTTP/1.1 422 Unprocessable entity
+     *      {
+     *          "name": "Unprocessable entity",
+     *          "message": "Flight [0]: Destination should contain at most 3 characters.",
+     *          "code": 5,
+     *          "status": 422,
+     *          "type": "yii\\web\\UnprocessableEntityHttpException"
+     *      }
+     *
+     *
+     * @return mixed
+     * @throws BadRequestHttpException
+     * @throws NotFoundHttpException
+     * @throws UnprocessableEntityHttpException
+     * @throws \yii\db\Exception
+     */
+
+    public function actionUpdate()
+    {
+
+        $this->checkPost();
+        $apiLog = $this->startApiLog($this->action->uniqueId);
+        $modelLead = new ApiLead();
+        $modelLead->scenario = ApiLead::SCENARIO_UPDATE;
+
+        //print_r($this->apiProject); exit;
+
+        if($this->apiProject) $modelLead->project_id = $this->apiProject->id;
+
+        if($modelLead->load(Yii::$app->request->post())) {
+            if (!$modelLead->validate()) {
+                if ($errors = $modelLead->getErrors()) {
+                    throw new UnprocessableEntityHttpException($this->errorToString($errors), 5);
+                } else throw new UnprocessableEntityHttpException('Not validate Api Lead data', 5);
+            }
+        } else {
+            throw new BadRequestHttpException('Not found Lead data on POST request', 6);
+        }
+
+        $lead = Lead::findOne($modelLead->lead_id);
+        if(!$lead) {
+            throw new NotFoundHttpException('Not found lead ID: '.$modelLead->lead_id, 9);
+        }
+
+        $response = [];
+        $transaction = Yii::$app->db->beginTransaction();
+
+
+
+        foreach ($modelLead->attributes as $attrKey => $attrValue) {
+            if($attrValue === null) continue;
+            if(isset($lead->$attrKey)) $lead->$attrKey = $attrValue;
+        }
+
+        $client = $lead->client;
+
+        if($modelLead->client_first_name || $modelLead->client_last_name || $modelLead->client_middle_name) {
+            if($client) {
+                if($modelLead->client_first_name) $client->first_name = $modelLead->client_first_name;
+                if($modelLead->client_last_name) $client->last_name = $modelLead->client_last_name;
+                if($modelLead->client_middle_name) $client->middle_name = $modelLead->client_middle_name;
+
+                $client->save();
+            }
+        }
+
+
+        if (!$lead->validate()) {
+            if ($errors = $lead->getErrors()) {
+                throw new UnprocessableEntityHttpException($this->errorToString($errors), 7);
+            } else throw new UnprocessableEntityHttpException('Not validate Lead data', 7);
+        }
+
+        if(!$lead->save()) {
+            Yii::error(print_r($lead->errors, true), 'API:Lead:update:Lead:save');
+            $transaction->rollBack();
+            throw new UnprocessableEntityHttpException($this->errorToString($modelLead->errors), 8);
+        }
+
+
+        if($modelLead->flights) {
+
+            LeadFlightSegment::deleteAll(['lead_id' => $lead->id]);
+
+            foreach ($modelLead->flights as $flight) {
+                $flightModel = new LeadFlightSegment();
+
+                $flightModel->lead_id = $lead->id;
+                $flightModel->origin = $flight['origin'];
+                $flightModel->destination = $flight['destination'];
+                $flightModel->departure = $flight['departure'];
+
+                if (!$flightModel->save()) {
+                    Yii::error(print_r($flightModel->errors, true), 'API:Lead:update:LeadFlightSegment:save');
+                    $transaction->rollBack();
+                }
+            }
+        }
+
+
+        if($modelLead->emails && $client) {
+            ClientEmail::deleteAll(['client_id' => $client->id]);
+            foreach ($modelLead->emails as $email) {
+                $emailModel = new ClientEmail();
+
+                $emailModel->client_id = $client->id;
+                $emailModel->email = $email;
+                $emailModel->created = date('Y-m-d H:i:s');
+
+                if (!$emailModel->save()) {
+                    Yii::error(print_r($emailModel->errors, true), 'API:Lead:update:ClientEmail:save');
+                    $transaction->rollBack();
+                }
+            }
+        }
+
+        if($modelLead->phones && $client) {
+            ClientPhone::deleteAll(['client_id' => $client->id]);
+            foreach ($modelLead->phones as $phone) {
+                $phoneModel = new ClientPhone();
+
+                $phoneModel->client_id = $client->id;
+                $phoneModel->phone = $phone;
+                $phoneModel->created = date('Y-m-d H:i:s');
+
+                if (!$phoneModel->save()) {
+                    Yii::error(print_r($phoneModel->errors, true), 'API:Lead:update:ClientPhone:save');
+                    $transaction->rollBack();
+                }
+            }
+        }
+
+        $transaction->commit();
+
+
+
+        try {
+            $response['lead'] = $lead;
+            $response['flights'] = $lead->leadFlightSegments;
+            $response['emails'] = $lead->client->clientEmails;
+            $response['phones'] = $lead->client->clientPhones;
+            $response['client'] = $lead->client;
+
+        } catch (\Throwable $e) {
+
+            $transaction->rollBack();
+            Yii::error($e->getTraceAsString(), 'API:lead:update:try');
+            if(Yii::$app->request->get('debug')) $message = ($e->getTraceAsString());
+            else $message = $e->getMessage().' (code:'.$e->getCode().', line: '.$e->getLine().')';
+
+            $response['error'] = $message;
+            $response['error_code'] = 30;
+
+        }
+
+
+        if(isset($response['error']) && $response['error']) {
+
+        } else {
             $responseData['status']     = 200;
             $responseData['name']       = 'Success';
             $responseData['code']       = 0;
@@ -379,6 +651,139 @@ class LeadController extends ApiBaseController
         $responseData['data']['response']               = $response;
         $responseData['data']['request']                = $modelLead;
 
+
+
+        $responseData = $apiLog->endApiLog($responseData);
+
+        if(isset($response['error']) && $response['error']) {
+            $json = @json_encode($response['error']);
+            if(isset($response['error_code']) && $response['error_code']) $error_code = $response['error_code'];
+            else $error_code = 0;
+            throw new UnprocessableEntityHttpException($json, $error_code);
+        }
+
+        return $responseData;
+    }
+
+
+    /**
+     *
+     * @api {post} /v1/lead/get Get Lead
+     * @apiVersion 0.1.0
+     * @apiName GetLead
+     * @apiGroup Leads
+     * @apiPermission Authorized User
+     *
+     * @apiHeader {string} Authorization    Credentials <code>base64_encode(Username:Password)</code>
+     * @apiHeaderExample {json} Header-Example:
+     *  {
+     *      "Authorization": "Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==",
+     *      "Accept-Encoding": "Accept-Encoding: gzip, deflate"
+     *  }
+     *
+     * @apiParam {object}           lead                                               Lead data array
+     * @apiParam {int}                  lead.lead_id                                   Lead ID
+     * @apiParam {int}                  lead.source_id                                 Source ID
+     *
+     *
+     * @apiParamExample {json} Request-Example:
+     * {
+     *    "lead": {
+     *        "lead_id": 302,
+     *        "source_id": 38,
+     *    }
+     * }
+     *
+     * @apiSuccess {Integer} response_id    Response Id
+     * @apiSuccess {DateTime} request_dt    Request Date & Time
+     * @apiSuccess {DateTime} response_dt   Response Date & Time
+     * @apiSuccess {Array} data Data Array
+     *
+     * @apiSuccessExample Success-Response:
+     *     HTTP/1.1 200 OK
+
+     *
+     * @apiError UserNotFound The id of the User was not found.
+     *
+     * @apiErrorExample Error-Response:
+     *      HTTP/1.1 404 Not Found
+     *      {
+     *          "name": "Not Found",
+     *          "message": "Not found lead ID: 302",
+     *          "code": 9,
+     *          "status": 404,
+     *          "type": "yii\\web\\NotFoundHttpException"
+     *      }
+     *
+     *
+     * @return mixed
+     * @throws BadRequestHttpException
+     * @throws NotFoundHttpException
+     * @throws UnprocessableEntityHttpException
+     */
+
+    public function actionGet()
+    {
+
+        $this->checkPost();
+        $apiLog = $this->startApiLog($this->action->uniqueId);
+
+
+
+        $modelLead = new ApiLead();
+        $modelLead->scenario = ApiLead::SCENARIO_GET;
+
+        //print_r($this->apiProject); exit;
+
+        if($this->apiProject) $modelLead->project_id = $this->apiProject->id;
+
+        if($modelLead->load(Yii::$app->request->post())) {
+            if (!$modelLead->validate()) {
+                if ($errors = $modelLead->getErrors()) {
+                    throw new UnprocessableEntityHttpException($this->errorToString($errors), 5);
+                } else throw new UnprocessableEntityHttpException('Not validate Api Lead data', 5);
+            }
+        } else {
+            throw new BadRequestHttpException('Not found Lead data on POST request', 6);
+        }
+
+        $lead = Lead::findOne($modelLead->lead_id);
+        if(!$lead) {
+            throw new NotFoundHttpException('Not found lead ID: '.$modelLead->lead_id, 9);
+        }
+
+        $response = [];
+
+        try {
+            $response['lead'] = $lead;
+            $response['flights'] = $lead->leadFlightSegments;
+            $response['emails'] = $lead->client->clientEmails;
+            $response['phones'] = $lead->client->clientPhones;
+            $response['client'] = $lead->client;
+
+        } catch (\Throwable $e) {
+
+            Yii::error($e->getTraceAsString(), 'API:lead:get:try');
+            if(Yii::$app->request->get('debug')) $message = ($e->getTraceAsString());
+            else $message = $e->getMessage().' (code:'.$e->getCode().', line: '.$e->getLine().')';
+
+            $response['error'] = $message;
+            $response['error_code'] = 30;
+        }
+
+
+        if(isset($response['error']) && $response['error']) {
+
+        } else {
+            $responseData['status']     = 200;
+            $responseData['name']       = 'Success';
+            $responseData['code']       = 0;
+            $responseData['message']    = '';
+        }
+
+
+        $responseData['data']['response']               = $response;
+        //$responseData['data']['request']                = $modelLead;
 
 
         $responseData = $apiLog->endApiLog($responseData);
