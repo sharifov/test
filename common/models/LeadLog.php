@@ -105,6 +105,15 @@ class LeadLog extends \yii\db\ActiveRecord
             $this->employee_id = (Yii::$app->user->isGuest)
                 ? null : Yii::$app->user->identity->getId();
         }
-        return $this->save();
+
+        if (!empty($this->logMessage->message)) {
+            return $this->save();
+        }
+
+        if (!empty($this->logMessage->oldParams)) {
+            return $this->save();
+        }
+
+        return false;
     }
 }

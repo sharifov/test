@@ -32,7 +32,7 @@ class QuoteController extends DefaultController
                 'rules' => [
                     [
                         'actions' => [
-                            'create', 'save', 'send', 'decline', 'calc-price', 'extra-price',
+                            'create', 'save', 'decline', 'calc-price', 'extra-price',
                             'send-quotes', 'get-online-quotes'
                         ],
                         'allow' => true,

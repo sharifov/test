@@ -6,7 +6,9 @@ use common\models\ClientEmail;
 use common\models\ClientPhone;
 use common\models\Lead;
 use common\models\LeadFlightSegment;
+use common\models\LeadLog;
 use common\models\LeadPreferences;
+use common\models\local\LeadLogMessage;
 use yii\base\Exception;
 use yii\base\Model;
 use yii\web\BadRequestHttpException;
@@ -187,13 +189,13 @@ class LeadForm extends Model
     public function setLead($leadModel)
     {
         if ($leadModel->isNewRecord) {
-            $leadModel->employee_id = \Yii::$app->user->identity->getId();
             $leadModel->trip_type = $leadModel::TYPE_ROUND_TRIP;
             $leadModel->cabin = $leadModel::CABIN_ECONOMY;
             $leadModel->adults = 1;
             $leadModel->children = 0;
             $leadModel->infants = 0;
             $leadModel->uid = uniqid();
+            $leadModel->status = Lead::STATUS_PENDING;
         }
         $this->_lead = $leadModel;
     }
@@ -250,11 +252,12 @@ class LeadForm extends Model
      */
     public function setClientEmail($clientEmail)
     {
-        foreach ($clientEmail as $email) {
+        $this->_clientEmail = [];
+        foreach ($clientEmail as $key => $email) {
             if (!$email->isNewRecord) {
                 $this->_clientEmail[$email->id] = $email;
             } else {
-                $this->_clientEmail[] = $email;
+                $this->_clientEmail[$key] = $email;
             }
         }
     }
@@ -272,11 +275,12 @@ class LeadForm extends Model
      */
     public function setClientPhone($clientPhone)
     {
-        foreach ($clientPhone as $phone) {
+        $this->_clientPhone = [];
+        foreach ($clientPhone as $key => $phone) {
             if (!$phone->isNewRecord) {
                 $this->_clientPhone[$phone->id] = $phone;
             } else {
-                $this->_clientPhone[] = $phone;
+                $this->_clientPhone[$key] = $phone;
             }
         }
     }

@@ -1,6 +1,7 @@
 <?php
 
 /* @var $this \yii\web\View */
+
 /* @var $content string */
 
 use frontend\assets\AppAsset;
@@ -34,13 +35,25 @@ AppAsset::register($this);
         <div class="container-fluid">
             <div class="page-header__wrapper">
                 <h2 class="page-header__title"><?= Yii::$app->params['appName'] ?></h2>
-                <?php
-                if (Yii::$app->controller->id == 'lead' && Yii::$app->controller->action->id = 'queue') :
+                <div class="page-header__general">
+                    <?php
+                    if (Yii::$app->controller->id == 'lead' && Yii::$app->controller->action->id = 'queue') {
+                        echo Html::a('Create New Lead', Url::to(['lead/create']), ['class' => 'btn btn-action']);
+                    }
+                    if (Yii::$app->controller->action->id = 'queue' && Yii::$app->request->get('type') == 'follow-up') {
+                        $showAll = Yii::$app->request->cookies->getValue(\common\models\Lead::getCookiesKey(), true);
+                        $btnClass = (!$showAll)
+                            ? 'btn-warning' : 'btn-success';
+                        $btnText = (!$showAll)
+                            ? 'Show All' : 'Show Unprocessed';
+                        $btnUrl = Url::to(['lead/unprocessed', 'show' => !$showAll]);
+                        echo Html::a($btnText, $btnUrl, [
+                            'class' => 'btn ' . $btnClass,
+                            'style' => 'margin-left: 10px;'
+                        ]);
+                    }
                     ?>
-                    <div class="page-header__general">
-                        <?= Html::a('Create New Lead', Url::to(['lead/create']), ['class' => 'btn btn-action']) ?>
-                    </div>
-                <?php endif; ?>
+                </div>
             </div>
         </div>
     </div>
@@ -48,7 +61,6 @@ AppAsset::register($this);
         <?= \yii\widgets\Breadcrumbs::widget([
             'links' => isset($this->params['breadcrumbs']) ? $this->params['breadcrumbs'] : [],
         ]) ?>
-        <?= Alert::widget() ?>
         <?= Alert::widget() ?>
         <?= $content ?>
     </div>
@@ -66,6 +78,21 @@ AppAsset::register($this);
                 <h4 class="modal-title"></h4>
             </div>
             <div class="modal-body"></div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL ERROR WINDOWS -->
+<div class="modal modal-danger fade in" id="modal-error" style="display: none;">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span>×</span></button>
+                <h4 class="modal-title">Attention!</h4>
+            </div>
+            <div class="modal-body">
+
+            </div>
         </div>
     </div>
 </div>

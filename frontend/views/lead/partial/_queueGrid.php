@@ -76,7 +76,7 @@ $queueType = Yii::$app->request->get('type');
             'label' => 'Sale ID',
             'visible' => (
                 Yii::$app->user->identity->role != 'agent' ||
-                !in_array($queueType, ['queue'])
+                !in_array($queueType, ['inbox'])
             ),
             'value' => function ($model) {
                 /**
@@ -458,7 +458,7 @@ $queueType = Yii::$app->request->get('type');
                         $buttons .= Html::a('Take Over', Url::to([
                             'lead/take',
                             'id' => $model->id,
-                            'hold-on' => true
+                            'over' => true
                         ]), [
                             'class' => 'btn btn-action btn-sm take-processing-btn',
                             'data-pjax' => 0,

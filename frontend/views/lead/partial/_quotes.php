@@ -216,11 +216,14 @@ $this->registerJs($js);
     <div></div>
 </div>
 
-<?php foreach ($quotes as $key => $quote): ?>
+<?php foreach ($quotes as $key => $quote):
+    $tagACollapseClass = ($quote->status == $quote::STATUS_DECLINED)
+        ? 'collapsing-heading__collapse-link collapsed'
+        : 'collapsing-heading__collapse-link';
+    ?>
     <div class="panel panel-info panel-wrapper sl-quote" id="<?= $quote->uid ?>">
         <div class="panel-heading collapsing-heading">
-            <a data-toggle="collapse" href="#quote-<?= $quote->uid ?>" class="collapsing-heading__collapse-link"
-               aria-expanded="true">
+            <a data-toggle="collapse" href="#quote-<?= $quote->uid ?>" class="<?= $tagACollapseClass ?>">
                 <?= sprintf('%d. #%s Quote | Cabin Class: %s',
                     (count($quotes) - $key),
                     $quote->uid,
@@ -243,7 +246,7 @@ $this->registerJs($js);
                 </div>
             <?php endif; ?>
         </div>
-        <div class="panel-body collapse in" id="quote-<?= $quote->uid ?>" aria-expanded="true" style="">
+        <div class="panel-body collapse <?= ($quote->status == $quote::STATUS_DECLINED) ? '' : 'in' ?>" id="quote-<?= $quote->uid ?>">
             <div class="sl-quote__content">
                 <div class="sl-quote__pricing">
                     <div class="row">

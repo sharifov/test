@@ -5,14 +5,20 @@ namespace frontend\controllers;
 use common\controllers\DefaultController;
 use common\models\ClientEmail;
 use common\models\ClientPhone;
+use common\models\EmployeeContactInfo;
 use common\models\Lead;
+use common\models\LeadFlow;
 use common\models\Note;
+use common\models\ProjectEmailTemplate;
 use common\models\Reason;
 use frontend\models\LeadForm;
+use frontend\models\SendEmailForm;
 use Yii;
 use yii\base\Model;
 use yii\helpers\ArrayHelper;
 use yii\filters\AccessControl;
+use yii\web\BadRequestHttpException;
+use yii\web\Cookie;
 use yii\web\Response;
 use yii\web\UnauthorizedHttpException;
 use yii\widgets\ActiveForm;
@@ -46,7 +52,7 @@ class LeadController extends DefaultController
                     [
                         'actions' => [
                             'create', 'add-comment', 'change-state', 'unassign', 'take',
-                            'set-rating'
+                            'set-rating', 'add-note', 'unprocessed', 'call-expert', 'send-email'
                         ],
                         'allow' => true,
                         'roles' => ['agent'],
@@ -82,6 +88,124 @@ class LeadController extends DefaultController
     public function actionGetAirport($term)
     {
         return parent::actionGetAirport($term);
+    }
+
+    public function actionSendEmail($id)
+    {
+        /**
+         * @var $lead Lead
+         */
+
+        $lead = Lead::findOne(['id' => $id]);
+        if ($lead !== null) {
+            $preview = false;
+            $sendEmailModel = new SendEmailForm();
+            $sendEmailModel->employee = $lead->employee;
+            $sendEmailModel->project = $lead->project;
+            $sellerContactInfo = EmployeeContactInfo::findOne([
+                'employee_id' => $sendEmailModel->employee->id,
+                'project_id' => $sendEmailModel->project->id
+            ]);
+            $templates = ProjectEmailTemplate::getTypesForSellers();
+            if (Yii::$app->request->isAjax) {
+                $sendEmailModel->type = Yii::$app->request->get('type');
+                $template = $sendEmailModel->getTemplate();
+                if (Yii::$app->request->isGet) {
+                    if ($template !== null) {
+                        $sendEmailModel->populate($template, $lead->client, $sellerContactInfo);
+                    }
+                } else {
+                    $attr = Yii::$app->request->post();
+                    if (isset($attr['extra_body']) && isset($attr['subject'])) {
+                        $sendEmailModel->extraBody = $attr['extra_body'];
+                        $sendEmailModel->subject = $attr['subject'];
+                        $preview = true;
+                    }
+                    if ($template !== null) {
+                        $sendEmailModel->populate($template, $lead->client, $sellerContactInfo);
+                    }
+                }
+                return $this->renderAjax('partial/_sendEmail', [
+                    'templates' => $templates,
+                    'sendEmailModel' => $sendEmailModel,
+                    'lead' => $lead,
+                    'preview' => $preview
+                ]);
+            }
+            if (Yii::$app->request->isPost) {
+                $attr = Yii::$app->request->post($sendEmailModel->formName());
+                $sendEmailModel->attributes = $attr;
+                $template = $sendEmailModel->getTemplate();
+                if ($template !== null) {
+                    $sendEmailModel->populate($template, $lead->client, $sellerContactInfo);
+                }
+                $isSent = $sendEmailModel->sentEmail($lead);
+                if ($isSent) {
+                    Yii::$app->getSession()->setFlash('success', sprintf('Sent email \'%s\' succeed.', $sendEmailModel->subject));
+                } else {
+                    Yii::$app->getSession()->setFlash('danger', sprintf('Sent email \'%s\' failed. Please verify your email or password from email!', $sendEmailModel->subject));
+                }
+                return $this->redirect([
+                    'quote',
+                    'type' => 'processing',
+                    'id' => $lead->id
+                ]);
+            } else {
+                return $this->renderAjax('partial/_sendEmail', [
+                    'templates' => $templates,
+                    'sendEmailModel' => $sendEmailModel,
+                    'lead' => $lead,
+                    'preview' => $preview
+                ]);
+            }
+        }
+        throw new BadRequestHttpException();
+    }
+
+    public function actionCallExpert($id)
+    {
+        $lead = Lead::findOne(['id' => $id]);
+        if ($lead !== null && !$lead->called_expert) {
+            $lead->called_expert = true;
+            if (!$lead->save()) {
+                Yii::$app->getSession()->setFlash('warning', print_r($lead->getErrors(), true));
+            } else {
+                Yii::$app->getSession()->setFlash('success', 'Call expert request succeeded');
+            }
+        }
+        return $this->redirect(Yii::$app->request->referrer);
+    }
+
+    public function actionUnprocessed($show)
+    {
+        if ($show) {
+            Yii::$app->response->cookies->remove(Lead::getCookiesKey());
+        } else {
+            Yii::$app->response->cookies->add(new Cookie([
+                'name' => Lead::getCookiesKey(),
+                'value' => false,
+                'expire' => strtotime('+1 day')
+            ]));
+        }
+        return $this->redirect([
+            'queue',
+            'type' => 'follow-up'
+        ]);
+    }
+
+    public function actionAddNote()
+    {
+        $lead = Lead::findOne(['id' => Yii::$app->request->get('id', 0)]);
+
+        if ($lead !== null && Yii::$app->request->isPost) {
+            $model = new Note();
+            $attr = Yii::$app->request->post($model->formName());
+            $model->attributes = $attr;
+            $model->employee_id = Yii::$app->user->identity->getId();
+            $model->lead_id = $lead->id;
+            $model->save();
+        }
+        return $this->redirect(Yii::$app->request->referrer);
     }
 
     public function actionSetRating($id)
@@ -221,16 +345,32 @@ class LeadController extends DefaultController
             ]])->one();
 
         if ($model === null) {
-            $lead = Lead::findOne(['id' => $id]);
-            if ($lead !== null) {
-                $reason = new Reason();
-                $reason->queue = 'processing-over';
-                return $this->renderAjax('partial/_reason', [
-                    'reason' => $reason,
-                    'lead' => $lead
-                ]);
+            if (Yii::$app->request->get('over', 0)) {
+                $lead = Lead::findOne(['id' => $id]);
+                if ($lead !== null) {
+                    $reason = new Reason();
+                    $reason->queue = 'processing-over';
+                    return $this->renderAjax('partial/_reason', [
+                        'reason' => $reason,
+                        'lead' => $lead
+                    ]);
+                }
+                return null;
+            } else {
+                Yii::$app->getSession()->setFlash('warning', 'Lead is unavailable to access now!');
+                return $this->redirect(Yii::$app->request->referrer);
             }
-            return null;
+        }
+
+        if ($model->status == Lead::STATUS_FOLLOW_UP) {
+            $checkProccessingByAgent = LeadFlow::findOne([
+                'lead_id' => $model->id,
+                'status' => $model::STATUS_PROCESSING,
+                'employee_id' => Yii::$app->user->identity->getId()
+            ]);
+            if ($checkProccessingByAgent === null) {
+                $model->called_expert = false;
+            }
         }
 
         $model->employee_id = Yii::$app->user->identity->getId();
@@ -362,6 +502,8 @@ class LeadController extends DefaultController
             }
 
             $errors = [];
+            $leadForm->getLead()->employee_id = \Yii::$app->user->identity->getId();
+            $leadForm->getLead()->status = Lead::STATUS_PROCESSING;
             if (empty($data['errors']) && $data['load'] && $leadForm->save($errors)) {
                 return $this->redirect([
                     'quote',

@@ -68,4 +68,15 @@ class LeadFlow extends \yii\db\ActiveRecord
     {
         return $this->hasOne(Lead::className(), ['id' => 'lead_id']);
     }
+
+    public static function addStateFlow(Lead $lead)
+    {
+        $stateFlow = new self();
+        $stateFlow->lead_id = $lead->id;
+        $stateFlow->status = $lead->status;
+        if (!is_a(\Yii::$app, 'yii\console\Application') && !Yii::$app->user->isGuest) {
+            $stateFlow->employee_id = Yii::$app->user->identity->getId();
+        }
+        return $stateFlow->save();
+    }
 }

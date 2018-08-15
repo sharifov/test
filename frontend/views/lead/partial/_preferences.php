@@ -1,4 +1,5 @@
 <?php
+
 use yii\widgets\ActiveForm;
 use frontend\models\LeadForm;
 use common\models\ProjectEmployeeAccess;
@@ -69,7 +70,9 @@ $formId = sprintf('%s-form', $leadForm->getLeadPreferences()->formName());
     </div>
     <?= $formPreferences->field($leadForm->getLeadPreferences(), 'number_stops')
         ->textInput([
-            'class' => 'form-control lead-form-input-element'
+            'class' => 'form-control lead-form-input-element',
+            'type' => 'number',
+            'min' => 0,
         ]) ?>
     <?= $formPreferences->field($leadForm->getLeadPreferences(), 'notes')
         ->textarea([

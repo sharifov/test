@@ -33,7 +33,7 @@ $js = <<<JS
     $('.take-processing-btn').click(function (e) {
         e.preventDefault();
         var url = $(this).attr('href');
-        if ($(this).data('status') == 2) {
+        if ($.inArray($(this).data('status'), [2, 8]) != -1) {
             var editBlock = $('#modal-error');
             editBlock.find('.modal-body').html('');
             editBlock.find('.modal-body').load(url, function( response, status, xhr ) {
@@ -74,20 +74,17 @@ if (!is_array($dataProvider)) {
     ]);
 } else {
     foreach ($dataProvider as $div => $dataProv) :
-        $collapse = ($div == Lead::DIV_GRID_WITH_OUT_EMAIL);
         ?>
         <div class="panel panel-main">
             <div class="panel panel-primary mb-0">
                 <div class="panel-heading collapsing-heading">
                     <a data-toggle="collapse" href="#sale-queue-<?= $div ?>"
-                       class="collapsing-heading__collapse-link <?= ($collapse) ? '' : 'collapsed' ?>"
-                       aria-expanded="<?= ($collapse) ? 'true' : 'false' ?>">
+                       class="collapsing-heading__collapse-link">
                         <?= sprintf('%s (%d)', Lead::getDivs($div), $dataProv->totalCount) ?>
                         <i class="collapsing-heading__arrow"></i>
                     </a>
                 </div>
-                <div class="collapse <?= ($collapse) ? 'in' : '' ?>" id="sale-queue-<?= $div ?>"
-                     aria-expanded="<?= ($collapse) ? 'true' : 'false' ?>">
+                <div class="collapse in" id="sale-queue-<?= $div ?>">
                     <div class="panel-body">
                         <?= $this->render('partial/_queueGrid', [
                             'template' => $template,
@@ -101,6 +98,5 @@ if (!is_array($dataProvider)) {
         </div>
     <?php endforeach;
 }
-
 ?>
 

@@ -33,6 +33,7 @@ use yii\helpers\Html;
  * @property string $created
  * @property string $updated
  * @property string $snooze_for
+ * @property boolean $called_expert
  *
  * @property LeadFlightSegment[] $leadFlightSegments
  * @property LeadPreferences $leadPreferences
@@ -461,7 +462,7 @@ class Lead extends \yii\db\ActiveRecord
             [['adults', 'children', 'infants'], 'integer', 'max' => 9],
             [['adults'], 'integer', 'min' => 1],
             [['notes_for_experts'], 'string'],
-            [['created', 'updated', 'offset_gmt', 'request_ip', 'request_ip_detail', 'snooze_for'], 'safe'],
+            [['created', 'updated', 'offset_gmt', 'request_ip', 'request_ip_detail', 'snooze_for', 'called_expert'], 'safe'],
             [['uid'], 'string', 'max' => 255],
             [['trip_type'], 'string', 'max' => 2],
             [['cabin'], 'string', 'max' => 1],
@@ -494,6 +495,7 @@ class Lead extends \yii\db\ActiveRecord
         ];
     }
 
+
     public function afterSave($insert, $changedAttributes)
     {
         parent::afterSave($insert, $changedAttributes);
@@ -507,6 +509,14 @@ class Lead extends \yii\db\ActiveRecord
                 }
                 $this->request_ip_detail = json_encode($data['data']);
                 $this->update(false, ['offset_gmt', 'request_ip_detail']);
+            }
+        }
+
+        if ($insert) {
+            LeadFlow::addStateFlow($this);
+        } else {
+            if (isset($changedAttributes['status']) && $changedAttributes['status'] != $this->status) {
+                LeadFlow::addStateFlow($this);
             }
         }
 
@@ -728,9 +738,13 @@ class Lead extends \yii\db\ActiveRecord
     {
         $this->updated = date('Y-m-d H:i:s');
 
-        if($this->isNewRecord) {
+        if ($this->isNewRecord) {
             $this->created = date('Y-m-d H:i:s');
         }
+
+        $this->adults = intval($this->adults);
+        $this->children = intval($this->children);
+        $this->infants = intval($this->infants);
 
         return parent::beforeValidate();
     }
@@ -860,9 +874,25 @@ class Lead extends \yii\db\ActiveRecord
         $errors = [];
         $isSend = EmailService::send($email, $this->source->project, $credential, $subject, $body, $errors);
         $message = ($isSend)
-            ? sprintf('Sending email - \'Offer\' succeeded! <br/>Emails: %s', implode(', ', [$email]))
-            : sprintf('Sending email - \'Offer\' failed! <br/>Emails: %s', implode(', ', [$email]));
+            ? sprintf('Sending email - \'Offer\' succeeded! <br/>Emails: %s <br/>Quotes: %s',
+                implode(', ', [$email]),
+                implode(', ', $quotes)
+            )
+            : sprintf('Sending email - \'Offer\' failed! <br/>Emails: %s <br/>Quotes: %s',
+                implode(', ', [$email]),
+                implode(', ', $quotes)
+            );
 
+        //Add logs after changed model attributes
+        $leadLog = new LeadLog((new LeadLogMessage()));
+        $leadLog->logMessage->message = empty($errors)
+            ? $message
+            : sprintf('%s <br/>Errors: %s', $message, print_r($errors, true));
+        $leadLog->logMessage->title = 'Send Quotes by Email';
+        $leadLog->logMessage->model = $this->formName();
+        $leadLog->addLog([
+            'lead_id' => $this->id,
+        ]);
 
         $result['status'] = $isSend;
         $result['errors'] = $errors;

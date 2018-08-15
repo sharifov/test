@@ -38,7 +38,7 @@ class LeadFlightSegment extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['lead_id'], 'integer'],
+            [['lead_id', 'flexibility'], 'integer'],
             [['origin', 'destination', 'departure'], 'required'],
             [['departure', 'created', 'updated', 'flexibility_type', 'flexibility', 'origin_label', 'destination_label'], 'safe'],
             [['origin_label', 'destination_label'], 'trim'],
@@ -99,6 +99,8 @@ class LeadFlightSegment extends \yii\db\ActiveRecord
                 ));
             }
         }
+
+        $this->flexibility = intval($this->flexibility);
 
         return parent::beforeValidate();
     }

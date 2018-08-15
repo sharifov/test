@@ -70,6 +70,15 @@ class LeadPreferences extends \yii\db\ActiveRecord
         return $this->hasOne(Lead::className(), ['id' => 'lead_id']);
     }
 
+    public function beforeValidate()
+    {
+        $this->clients_budget = floatval($this->clients_budget);
+        $this->market_price = floatval($this->market_price);
+        $this->number_stops = intval($this->number_stops);
+
+        return parent::beforeValidate();
+    }
+
     public function afterSave($insert, $changedAttributes)
     {
         parent::afterSave($insert, $changedAttributes);

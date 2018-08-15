@@ -60,6 +60,8 @@ use frontend\models\LeadForm;
         ?>
 
         <div class="sl-request-content">
+            <?= \common\widgets\Alert::widget() ?>
+
             <?= $this->render('partial/_flightDetails', [
                 'leadForm' => $leadForm
             ]);
@@ -70,7 +72,9 @@ use frontend\models\LeadForm;
                     'quotes' => array_reverse($leadForm->getLead()->getQuotes()),
                     'lead' => $leadForm->getLead()
                 ]);
+            } ?>
 
+            <?php if (!$leadForm->getLead()->isNewRecord) {
                 echo $this->render('partial/_notes', [
                     'notes' => $leadForm->getLead()->getNotes()
                 ]);
@@ -78,8 +82,8 @@ use frontend\models\LeadForm;
                 echo $this->render('partial/_leadLog', [
                     'logs' => $leadForm->getLead()->getLogs()
                 ]);
-
             } ?>
+
         </div>
     </div>
 
