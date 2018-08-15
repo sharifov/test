@@ -89,6 +89,24 @@ class Lead extends \yii\db\ActiveRecord
         }
     }
 
+    public function permissionsView()
+    {
+        if (Yii::$app->user->identity->role != 'admin') {
+            $access = ProjectEmployeeAccess::findOne([
+                'employee_id' => Yii::$app->user->identity->getId(),
+                'project_id' => $this->project_id
+            ]);
+            return ($access !== null);
+        } else {
+            return true;
+        }
+    }
+
+    public function getFlowTransition()
+    {
+        return LeadFlow::findAll(['lead_id' => $this->id]);
+    }
+
     /**
      * @return array|null
      */
@@ -489,7 +507,7 @@ class Lead extends \yii\db\ActiveRecord
             'adults' => 'Adults',
             'children' => 'Children',
             'infants' => 'Infants',
-            'notes_for_experts' => 'Notes For Experts',
+            'notes_for_experts' => 'Notes for Expert',
             'created' => 'Created',
             'updated' => 'Updated',
         ];

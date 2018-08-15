@@ -206,6 +206,6 @@ else :
     ?>
     <div class="row text-center">
         <p>Your <strong>Direct Line</strong> and/or <strong>Email password</strong> not set.</p>
-        <p>Click <?= Html::a('here', ['employee/profile'], ['target' => '_blank']) ?> to set this info!</p>
+        <p>Click <?= Html::a('here', ['site/profile'], ['target' => '_blank']) ?> to set this info!</p>
     </div>
 <?php endif; ?>

@@ -26,7 +26,7 @@ class LeadForm extends Model
      */
     public $mode;
     /**
-     * @var $mode string
+     * @var $viewPermission boolean
      */
     public $viewPermission = true;
     /**

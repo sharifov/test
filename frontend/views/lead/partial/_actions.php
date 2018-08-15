@@ -149,6 +149,20 @@ $js = <<<JS
             editBlock.modal('show');
         });
     });
+    
+    $('.take-processing-btn').click(function (e) {
+        e.preventDefault();
+        var url = $(this).attr('href');
+        if ($.inArray($(this).data('status'), [2, 8]) != -1) {
+            var editBlock = $('#modal-error');
+            editBlock.find('.modal-body').html('');
+            editBlock.find('.modal-body').load(url, function( response, status, xhr ) {
+                editBlock.modal('show');
+            });
+        } else {
+            window.location = url;
+        }
+    });
 JS;
 $this->registerJs($js);
 
@@ -157,7 +171,7 @@ $this->registerJs($js);
     <div class="panel-main__header" id="actions-header">
         <div class="panel-main__actions">
             <?php if (!$leadForm->getLead()->isNewRecord) {
-                $takeConditions = ($leadForm->mode != $leadForm::VIEW_MODE &&
+                $takeConditions = ($leadForm->viewPermission &&
                     in_array($leadForm->getLead()->status, [Lead::STATUS_ON_HOLD, Lead::STATUS_FOLLOW_UP, Lead::STATUS_PENDING, Lead::STATUS_PROCESSING]) &&
                     $leadForm->getLead()->getAppliedAlternativeQuotes() === null
                 );
@@ -183,13 +197,14 @@ $this->registerJs($js);
                                     if (in_array($leadForm->getLead()->status, [Lead::STATUS_PROCESSING, Lead::STATUS_ON_HOLD]) && $leadForm->getLead()->employee_id != Yii::$app->user->identity->getId()) {
                                         echo Html::a('<i class="fa fa-share fa-rotate-0"></i> Take Over', Url::to([
                                             'lead/take',
-                                            'id' => $leadForm->getLead()->id
+                                            'id' => $leadForm->getLead()->id,
+                                            'over' => true
                                         ]), [
                                             'class' => 'take-processing-btn',
                                             'data-status' => $leadForm->getLead()->status
                                         ]);
                                     } else if (($leadForm->getLead()->status == Lead::STATUS_ON_HOLD && $leadForm->getLead()->employee_id == Yii::$app->user->identity->getId()) ||
-                                        ($leadForm->getLead()->status == Lead::STATUS_PENDING)
+                                        in_array($leadForm->getLead()->status, [Lead::STATUS_PENDING, Lead::STATUS_FOLLOW_UP])
                                     ) {
                                         echo Html::a('<i class="fa fa-share fa-rotate-0"></i> Take', Url::to([
                                             'lead/take',

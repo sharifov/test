@@ -74,7 +74,7 @@ $formId = sprintf('%s-form', $leadForm->getLeadPreferences()->formName());
             'type' => 'number',
             'min' => 0,
         ]) ?>
-    <?= $formPreferences->field($leadForm->getLeadPreferences(), 'notes')
+    <?= $formPreferences->field($leadForm->getLead(), 'notes_for_experts')
         ->textarea([
             'rows' => 7,
             'class' => 'form-control lead-form-input-element'

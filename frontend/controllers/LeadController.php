@@ -362,6 +362,10 @@ class LeadController extends DefaultController
             }
         }
 
+        if (!$model->permissionsView()) {
+            throw new UnauthorizedHttpException('Not permissions view lead ID: ' . $id);
+        }
+
         if ($model->status == Lead::STATUS_FOLLOW_UP) {
             $checkProccessingByAgent = LeadFlow::findOne([
                 'lead_id' => $model->id,
@@ -398,6 +402,10 @@ class LeadController extends DefaultController
                 }
                 if ($type == 'processing-all') {
                     $searchModel = new Lead();
+                    $params = Yii::$app->request->queryParams;
+                    if (isset($params[$searchModel->formName()])) {
+                        $searchModel->employee_id = $params[$searchModel->formName()]['employee_id'];
+                    }
                     $dataProvider[$div] = Lead::search($type, $searchModel, $div);
                 } else {
                     $dataProvider[$div] = Lead::search($type, null, $div);
@@ -444,12 +452,16 @@ class LeadController extends DefaultController
         $lead = Lead::findOne(['id' => $id]);
 
         if ($lead !== null) {
+            if (!$lead->permissionsView()) {
+                throw new UnauthorizedHttpException('Not permissions view lead ID: ' . $id);
+            }
             $leadForm = new LeadForm($lead);
-            if ($leadForm->getLead()->status !== Lead::STATUS_PROCESSING ||
+            if ($leadForm->getLead()->status != Lead::STATUS_PROCESSING ||
                 $leadForm->getLead()->employee_id != Yii::$app->user->identity->getId()
             ) {
                 $leadForm->mode = $leadForm::VIEW_MODE;
             }
+
             if (Yii::$app->request->isAjax) {
                 Yii::$app->response->format = Response::FORMAT_JSON;
                 $data = [

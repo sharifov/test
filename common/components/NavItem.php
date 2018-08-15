@@ -85,6 +85,21 @@ class NavItem
                 ];
             }
             $items[] = ['label' => 'Search Order', 'url' => ['search/index']];
+            $items[] = [
+                'label' => 'Reports',
+                'linkOptions' => [
+                    'class' => 'dropdown-toggle',
+                    'data-toggle' => 'dropdown'
+                ],
+                'itemsOptions' => ['class' => 'dropdown-submenu'],
+                'submenuOptions' => ['class' => 'dropdown-menu'],
+                'items' => [
+                    [
+                        'label' => 'Sold',
+                        'url' => sprintf('%s/report/sold', Yii::$app->urlManager->getHostInfo())
+                    ],
+                ]
+            ];
             $menuItems[] = [
                 'label' => '<i class="fa fa-bars"></i> Menu',
                 'items' => $items,

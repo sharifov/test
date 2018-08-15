@@ -97,6 +97,20 @@ AppAsset::register($this);
     </div>
 </div>
 
+<div class="modal modal-events fade" id="modal-report-info" style="display: none;">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                Sold Leads
+                <button type="button" class="close" data-dismiss="modal">
+                    <i class="fa fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body"></div>
+        </div>
+    </div>
+</div>
+
 <footer class="footer">
     <div class="container">
         <div class="footer__copyright">
