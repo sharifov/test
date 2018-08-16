@@ -34,6 +34,7 @@ use yii\helpers\Html;
  * @property string $updated
  * @property string $snooze_for
  * @property boolean $called_expert
+ * @property string $discount_id
  *
  * @property LeadFlightSegment[] $leadFlightSegments
  * @property LeadPreferences $leadPreferences
@@ -87,24 +88,6 @@ class Lead extends \yii\db\ActiveRecord
         } else {
             return $mapping[$div];
         }
-    }
-
-    public function permissionsView()
-    {
-        if (Yii::$app->user->identity->role != 'admin') {
-            $access = ProjectEmployeeAccess::findOne([
-                'employee_id' => Yii::$app->user->identity->getId(),
-                'project_id' => $this->project_id
-            ]);
-            return ($access !== null);
-        } else {
-            return true;
-        }
-    }
-
-    public function getFlowTransition()
-    {
-        return LeadFlow::findAll(['lead_id' => $this->id]);
     }
 
     /**
@@ -341,6 +324,24 @@ class Lead extends \yii\db\ActiveRecord
         return isset($mapping[$cabin]) ? $mapping[$cabin] : $cabin;
     }
 
+    public function permissionsView()
+    {
+        if (Yii::$app->user->identity->role != 'admin') {
+            $access = ProjectEmployeeAccess::findOne([
+                'employee_id' => Yii::$app->user->identity->getId(),
+                'project_id' => $this->project_id
+            ]);
+            return ($access !== null);
+        } else {
+            return true;
+        }
+    }
+
+    public function getFlowTransition()
+    {
+        return LeadFlow::findAll(['lead_id' => $this->id]);
+    }
+
     public function getSnoozeCountdown()
     {
         if (!empty($this->snooze_for)) {
@@ -480,7 +481,8 @@ class Lead extends \yii\db\ActiveRecord
             [['adults', 'children', 'infants'], 'integer', 'max' => 9],
             [['adults'], 'integer', 'min' => 1],
             [['notes_for_experts'], 'string'],
-            [['created', 'updated', 'offset_gmt', 'request_ip', 'request_ip_detail', 'snooze_for', 'called_expert'], 'safe'],
+            [['created', 'updated', 'offset_gmt', 'request_ip', 'request_ip_detail', 'snooze_for',
+                'called_expert', 'discount_id'], 'safe'],
             [['uid'], 'string', 'max' => 255],
             [['trip_type'], 'string', 'max' => 2],
             [['cabin'], 'string', 'max' => 1],
