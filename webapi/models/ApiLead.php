@@ -169,7 +169,7 @@ class ApiLead extends Model
     public function checkEmailAndPhone()
     {
 
-        if (empty($this->emails) || empty($this->phones)) {
+        if (empty($this->emails) && empty($this->phones)) {
             $this->addError('emails', "Phones or Emails cannot be blank");
             $this->addError('phones', "Phones or Emails cannot be blank");
         }

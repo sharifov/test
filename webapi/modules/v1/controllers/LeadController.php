@@ -223,14 +223,66 @@ class LeadController extends ApiBaseController
 
         $this->checkPost();
         $apiLog = $this->startApiLog($this->action->uniqueId);
+
+
+        $lead = Yii::$app->request->post('Lead');
+
+        if($lead) {
+
+            if(isset($lead['client_id'])) {
+                unset($lead['client_id']);
+            }
+
+            $flights = Yii::$app->request->post('LeadFlights');
+            $client = Yii::$app->request->post('Client');
+
+            if ($client) {
+                if (isset($client['name']) && $client['name']) {
+                    $clientNameArr = explode(' ', $client['name']);
+                    if (isset($clientNameArr[1])) {
+                        $lead['client_first_name'] = $clientNameArr[0];
+                        $lead['client_last_name'] = $clientNameArr[1];
+                    } else {
+                        $lead['client_first_name'] = $client['name'];
+                    }
+                }
+
+                if (isset($client['phone']) && $client['phone']) {
+                    $lead['phones'][] = $client['phone'];
+                }
+
+                if (isset($client['email']) && $client['email']) {
+                    $lead['emails'][] = $client['email'];
+                }
+
+                if (isset($client['client_ip']) && $client['client_ip']) {
+                    $lead['request_ip_detail'] = $client['client_ip'];
+                }
+
+
+            }
+
+            $post['lead'] = $lead;
+            $post['lead']['flights'] = $flights;
+        } else {
+            $post = Yii::$app->request->post();
+        }
+
+
+
+
         $modelLead = new ApiLead();
         //$modelLead->scenario = ApiLead::SCENARIO_CREATE;
 
         //print_r($this->apiProject); exit;
 
-        if($this->apiProject) $modelLead->project_id = $this->apiProject->id;
+        //print_r($post); exit;
 
-        if($modelLead->load(Yii::$app->request->post())) {
+        if($this->apiProject) {
+            $modelLead->project_id = $this->apiProject->id;
+        }
+
+        if($modelLead->load($post)) {
             if (!$modelLead->validate()) {
                 if ($errors = $modelLead->getErrors()) {
                     throw new UnprocessableEntityHttpException($this->errorToString($errors), 5);
@@ -268,11 +320,15 @@ class LeadController extends ApiBaseController
         if(!$lead->trip_type) $lead->trip_type = Lead::TYPE_ROUND_TRIP;
 
         if($modelLead->flights) {
-            $flightCount = count( $modelLead->flights);
+            $flightCount = count($modelLead->flights);
 
-            if($flightCount == 1) $lead->trip_type = Lead::TYPE_ONE_WAY;
-                elseif($flightCount == 2) $lead->trip_type = Lead::TYPE_ROUND_TRIP;
-                    else $lead->trip_type = Lead::TYPE_MULTI_DESTINATION;
+            if($flightCount === 1) {
+                $lead->trip_type = Lead::TYPE_ONE_WAY;
+            } elseif($flightCount === 2) {
+                $lead->trip_type = Lead::TYPE_ROUND_TRIP;
+            } else {
+                $lead->trip_type = Lead::TYPE_MULTI_DESTINATION;
+            }
         }
 
 
@@ -298,7 +354,7 @@ class LeadController extends ApiBaseController
         }
 
 
-        if($modelLead->flights)
+        if($modelLead->flights) {
             foreach ($modelLead->flights as $flight) {
                 $flightModel = new LeadFlightSegment();
 
@@ -307,11 +363,12 @@ class LeadController extends ApiBaseController
                 $flightModel->destination = $flight['destination'];
                 $flightModel->departure = $flight['departure'];
 
-                if(!$flightModel->save()) {
+                if (!$flightModel->save()) {
                     Yii::error(print_r($flightModel->errors, true), 'API:Lead:create:LeadFlightSegment:save');
                     $transaction->rollBack();
                 }
             }
+        }
 
 
         if($modelLead->emails)
@@ -394,7 +451,6 @@ class LeadController extends ApiBaseController
 
         return $responseData;
     }
-
 
 
     /**
