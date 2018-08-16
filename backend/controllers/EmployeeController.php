@@ -1,4 +1,5 @@
 <?php
+
 namespace backend\controllers;
 
 use backend\models\search\EmployeeForm;
@@ -161,7 +162,9 @@ class EmployeeController extends DefaultController
             if (Yii::$app->request->isPost) {
                 $attr = Yii::$app->request->post($model->formName());
 
-                $availableProjects = array_keys(json_decode($attr['viewItemsEmployeeAccess'], true));
+                $availableProjects = isset($attr['viewItemsEmployeeAccess'])
+                    ? array_keys(json_decode($attr['viewItemsEmployeeAccess'], true))
+                    : [];
                 $newEmployeeAccess = isset($attr['employeeAccess'])
                     ? $attr['employeeAccess'] : [];
 
