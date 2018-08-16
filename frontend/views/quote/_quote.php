@@ -365,7 +365,7 @@ $this->registerJs($js);
                                 'tag' => false,
                             ],
                             'template' => '{input}'
-                        ])->widget(Select2::classname(), [
+                        ])->widget(Select2::class, [
                             'data' => Airline::getAirlinesMapping(true),
                             'options' => ['placeholder' => 'Select'],
                             'pluginOptions' => [

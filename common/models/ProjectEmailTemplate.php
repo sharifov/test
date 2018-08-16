@@ -118,7 +118,7 @@ class ProjectEmailTemplate extends \yii\db\ActiveRecord
             [['template'], 'string'],
             [['created', 'updated'], 'safe'],
             [['type', 'subject', 'layout_path'], 'string', 'max' => 255],
-            [['project_id'], 'exist', 'skipOnError' => true, 'targetClass' => Project::className(), 'targetAttribute' => ['project_id' => 'id']],
+            [['project_id'], 'exist', 'skipOnError' => true, 'targetClass' => Project::class, 'targetAttribute' => ['project_id' => 'id']],
         ];
     }
 
@@ -144,7 +144,7 @@ class ProjectEmailTemplate extends \yii\db\ActiveRecord
      */
     public function getProject()
     {
-        return $this->hasOne(Project::className(), ['id' => 'project_id']);
+        return $this->hasOne(Project::class, ['id' => 'project_id']);
     }
 
     public function afterValidate()

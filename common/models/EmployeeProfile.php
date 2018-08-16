@@ -36,7 +36,7 @@ class EmployeeProfile extends \yii\db\ActiveRecord
             [['profile_info'], 'string'],
             [['updated_at'], 'safe'],
             [['role'], 'string', 'max' => 255],
-            [['employee_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::className(), 'targetAttribute' => ['employee_id' => 'id']],
+            [['employee_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['employee_id' => 'id']],
         ];
     }
 
@@ -59,6 +59,6 @@ class EmployeeProfile extends \yii\db\ActiveRecord
      */
     public function getEmployee()
     {
-        return $this->hasOne(Employee::className(), ['id' => 'employee_id']);
+        return $this->hasOne(Employee::class, ['id' => 'employee_id']);
     }
 }

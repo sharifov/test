@@ -57,7 +57,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         //var_dump(\webapi\models\ApiUser::class); die;
 
 
-        if(Yii::$app->user && Yii::$app->user->identityClass == \webapi\models\ApiUser::class) {
+        if(Yii::$app->user && Yii::$app->user->identityClass === \webapi\models\ApiUser::class) {
             $this->role = null;
         } else {
             $roles = $this->getRoles();
@@ -83,7 +83,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
      */
     public function getEmployeeAcl()
     {
-        return $this->hasMany(EmployeeAcl::className(), ['employee_id' => 'id']);
+        return $this->hasMany(EmployeeAcl::class, ['employee_id' => 'id']);
     }
 
     /**
@@ -91,7 +91,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
      */
     public function getProjectEmployeeAccesses()
     {
-        return $this->hasMany(ProjectEmployeeAccess::className(), ['employee_id' => 'id']);
+        return $this->hasMany(ProjectEmployeeAccess::class, ['employee_id' => 'id']);
     }
 
     /**
@@ -217,7 +217,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
      */
     public function getEmployeeProfiles()
     {
-        return $this->hasMany(EmployeeProfile::className(), ['employee_id' => 'id']);
+        return $this->hasMany(EmployeeProfile::class, ['employee_id' => 'id']);
     }
 
     /**
@@ -225,7 +225,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
      */
     public function getLeads()
     {
-        return $this->hasMany(Lead::className(), ['employee_id' => 'id']);
+        return $this->hasMany(Lead::class, ['employee_id' => 'id']);
     }
 
     /**

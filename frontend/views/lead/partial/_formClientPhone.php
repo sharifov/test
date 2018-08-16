@@ -33,7 +33,7 @@ use borales\extensions\phoneInput\PhoneInput;
                 'class' => '',
             ],
             'template' => '{input}{error}'
-        ])->widget(PhoneInput::className(), [
+        ])->widget(PhoneInput::class, [
             'options' => [
                 'class' => 'form-control lead-form-input-element'
             ],

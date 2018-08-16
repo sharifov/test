@@ -91,7 +91,7 @@ $this->registerJs($js);
                                             ],
                                             'template' => '{input}'
                                         ])->widget(
-                                            DatePicker::className(), [
+                                            DatePicker::class, [
                                             'options' => [
                                                 'data-opened' => 'false'
                                             ],
@@ -122,7 +122,7 @@ $this->registerJs($js);
                                             ],
                                             'template' => '{input}'
                                         ])->widget(
-                                            DatePicker::className(), [
+                                            DatePicker::class, [
                                             'options' => [
                                                 'data-opened' => 'false'
                                             ],

@@ -34,8 +34,8 @@ class LeadFlow extends \yii\db\ActiveRecord
         return [
             [['created'], 'safe'],
             [['employee_id', 'lead_id', 'status'], 'integer'],
-            [['employee_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::className(), 'targetAttribute' => ['employee_id' => 'id']],
-            [['lead_id'], 'exist', 'skipOnError' => true, 'targetClass' => Lead::className(), 'targetAttribute' => ['lead_id' => 'id']],
+            [['employee_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['employee_id' => 'id']],
+            [['lead_id'], 'exist', 'skipOnError' => true, 'targetClass' => Lead::class, 'targetAttribute' => ['lead_id' => 'id']],
         ];
     }
 
@@ -58,7 +58,7 @@ class LeadFlow extends \yii\db\ActiveRecord
      */
     public function getEmployee()
     {
-        return $this->hasOne(Employee::className(), ['id' => 'employee_id']);
+        return $this->hasOne(Employee::class, ['id' => 'employee_id']);
     }
 
     /**
@@ -66,7 +66,7 @@ class LeadFlow extends \yii\db\ActiveRecord
      */
     public function getLead()
     {
-        return $this->hasOne(Lead::className(), ['id' => 'lead_id']);
+        return $this->hasOne(Lead::class, ['id' => 'lead_id']);
     }
 
     public static function addStateFlow(Lead $lead)

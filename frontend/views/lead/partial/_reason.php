@@ -80,7 +80,7 @@ $reasonForm = \yii\widgets\ActiveForm::begin([
         <?php if ($reason->queue == 'snooze') : ?>
             <div class="col-sm-6">
                 <?= $reasonForm->field($lead, 'snooze_for', ['template' => '{label}{input}'])->widget(
-                    \dosamigos\datetimepicker\DateTimePicker::className(), [
+                    \dosamigos\datetimepicker\DateTimePicker::class, [
                     'clientOptions' => [
                         'autoclose' => true,
                         "todayHighlight" => true,

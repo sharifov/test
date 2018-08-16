@@ -65,7 +65,7 @@ class Project extends \yii\db\ActiveRecord
      */
     public function getSources()
     {
-        return $this->hasMany(Source::className(), ['project_id' => 'id']);
+        return $this->hasMany(Source::class, ['project_id' => 'id']);
     }
 
     public function afterFind()

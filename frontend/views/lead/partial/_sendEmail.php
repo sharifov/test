@@ -126,7 +126,7 @@ if (!$alert) :
                 <?php $bodyPart = explode('{body}', $sendEmailModel->body) ?>
                 <?= $form->field($sendEmailModel, 'extraBody', [
                     'template' => '{label}<div class="mb-20" style="border: 1px solid; padding: 5px;">' . $bodyPart[0] . '{input}' . $bodyPart[1] . '</div>'
-                ])->widget(\dosamigos\ckeditor\CKEditor::className(), [
+                ])->widget(\dosamigos\ckeditor\CKEditor::class, [
                     'options' => [
                         'rows' => 6,
                         'readonly' => false

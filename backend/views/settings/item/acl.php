@@ -26,7 +26,7 @@ $idForm = sprintf('%s-ID', $model->formName());
         'class' => 'form-group'
     ],
     'template' => '{label}: {input}'
-])->widget(MaskedInput::className(), [
+])->widget(MaskedInput::class, [
     'clientOptions' => [
         'alias' => 'ip'
     ],

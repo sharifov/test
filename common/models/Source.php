@@ -34,7 +34,7 @@ class Source extends \yii\db\ActiveRecord
             [['project_id'], 'integer'],
             [['last_update'], 'safe'],
             [['name', 'cid'], 'string', 'max' => 255],
-            [['project_id'], 'exist', 'skipOnError' => true, 'targetClass' => Project::className(), 'targetAttribute' => ['project_id' => 'id']],
+            [['project_id'], 'exist', 'skipOnError' => true, 'targetClass' => Project::class, 'targetAttribute' => ['project_id' => 'id']],
         ];
     }
 
@@ -57,6 +57,6 @@ class Source extends \yii\db\ActiveRecord
      */
     public function getProject()
     {
-        return $this->hasOne(Project::className(), ['id' => 'project_id']);
+        return $this->hasOne(Project::class, ['id' => 'project_id']);
     }
 }

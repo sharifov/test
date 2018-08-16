@@ -37,7 +37,7 @@ class LeadController extends DefaultController
     {
         $behaviors = [
             'access' => [
-                'class' => AccessControl::className(),
+                'class' => AccessControl::class,
                 'rules' => [
                     [
                         'actions' => ['queue', 'quote'],

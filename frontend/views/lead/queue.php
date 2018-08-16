@@ -49,19 +49,19 @@ $this->registerJs($js);
 $this->registerJsFile('/js/moment.min.js', [
     'position' => \yii\web\View::POS_HEAD,
     'depends' => [
-        \yii\web\JqueryAsset::className()
+        \yii\web\JqueryAsset::class
     ]
 ]);
 $this->registerJsFile('/js/moment-timezone-with-data.min.js', [
     'position' => \yii\web\View::POS_HEAD,
     'depends' => [
-        \yii\web\JqueryAsset::className()
+        \yii\web\JqueryAsset::class
     ]
 ]);
 $this->registerJsFile('/js/jquery.countdown-2.2.0/jquery.countdown.min.js', [
     'position' => \yii\web\View::POS_HEAD,
     'depends' => [
-        \yii\web\JqueryAsset::className()
+        \yii\web\JqueryAsset::class
     ]
 ]);
 

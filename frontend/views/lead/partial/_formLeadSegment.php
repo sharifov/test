@@ -47,7 +47,7 @@ use yii\helpers\Url;
             'options' => [
                 'class' => 'sl-itinerary-form__option'
             ],
-        ])->widget(AutoComplete::classname(), [
+        ])->widget(AutoComplete::class, [
             'options' => [
                 'class' => 'origin form-control lead-form-input-element',
                 'placeholder' => 'From',
@@ -67,7 +67,7 @@ use yii\helpers\Url;
             'options' => [
                 'class' => 'sl-itinerary-form__option'
             ],
-        ])->widget(AutoComplete::classname(), [
+        ])->widget(AutoComplete::class, [
             'options' => [
                 'class' => 'destination form-control lead-form-input-element',
                 'placeholder' => 'From',
@@ -88,7 +88,7 @@ use yii\helpers\Url;
             'class' => 'sl-itinerary-form__option'
         ],
     ])->widget(
-        DatePicker::className(), [
+        DatePicker::class, [
         'options' => [
             'class' => 'depart-date form-control',
             'placeholder' => 'Departing Date',

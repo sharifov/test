@@ -425,7 +425,7 @@ class LeadForm extends Model
             }
         }
 
-        throw new BadRequestHttpException(sprintf('Unknown model % getModelClass()', self::className()));
+        throw new BadRequestHttpException(sprintf('Unknown model % getModelClass()', self::class));
     }
 
     /**

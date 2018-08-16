@@ -144,7 +144,7 @@ class LeadFlightSegment extends \yii\db\ActiveRecord
      */
     public function getLead()
     {
-        return $this->hasOne(Lead::className(), ['id' => 'lead_id']);
+        return $this->hasOne(Lead::class, ['id' => 'lead_id']);
     }
 
     public function afterValidate()

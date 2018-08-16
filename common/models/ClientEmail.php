@@ -60,7 +60,7 @@ class ClientEmail extends \yii\db\ActiveRecord
      */
     public function getClient()
     {
-        return $this->hasOne(Client::className(), ['id' => 'client_id']);
+        return $this->hasOne(Client::class, ['id' => 'client_id']);
     }
 
     public function beforeValidate()

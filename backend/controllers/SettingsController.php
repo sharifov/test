@@ -31,7 +31,7 @@ class SettingsController extends DefaultController
     {
         return [
             'access' => [
-                'class' => AccessControl::className(),
+                'class' => AccessControl::class,
                 'rules' => [
                     [
                         'actions' => [

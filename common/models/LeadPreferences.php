@@ -40,7 +40,7 @@ class LeadPreferences extends \yii\db\ActiveRecord
             [['notes'], 'string'],
             [['clients_budget', 'market_price'], 'number'],
             [['pref_language', 'pref_currency', 'pref_airline'], 'string', 'max' => 255],
-            [['lead_id'], 'exist', 'skipOnError' => true, 'targetClass' => Lead::className(), 'targetAttribute' => ['lead_id' => 'id']],
+            [['lead_id'], 'exist', 'skipOnError' => true, 'targetClass' => Lead::class, 'targetAttribute' => ['lead_id' => 'id']],
         ];
     }
 
@@ -67,7 +67,7 @@ class LeadPreferences extends \yii\db\ActiveRecord
      */
     public function getLead()
     {
-        return $this->hasOne(Lead::className(), ['id' => 'lead_id']);
+        return $this->hasOne(Lead::class, ['id' => 'lead_id']);
     }
 
     public function beforeValidate()

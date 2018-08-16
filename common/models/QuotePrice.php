@@ -108,7 +108,7 @@ class QuotePrice extends \yii\db\ActiveRecord
             [['selling', 'net', 'fare', 'taxes', 'mark_up', 'extra_mark_up'], 'number'],
             [['created', 'updated', 'oldParams'], 'safe'],
             [['passenger_type'], 'string', 'max' => 255],
-            [['quote_id'], 'exist', 'skipOnError' => true, 'targetClass' => Quote::className(), 'targetAttribute' => ['quote_id' => 'id']],
+            [['quote_id'], 'exist', 'skipOnError' => true, 'targetClass' => Quote::class, 'targetAttribute' => ['quote_id' => 'id']],
         ];
     }
 
@@ -137,7 +137,7 @@ class QuotePrice extends \yii\db\ActiveRecord
      */
     public function getQuote()
     {
-        return $this->hasOne(Quote::className(), ['id' => 'quote_id']);
+        return $this->hasOne(Quote::class, ['id' => 'quote_id']);
     }
 
     public function afterFind()

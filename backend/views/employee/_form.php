@@ -119,7 +119,7 @@ JS;
                                 ],
                                 'template' => '{label}: {input}',
                                 'enableClientValidation' => false
-                            ])->widget(MaskedInput::className(), [
+                            ])->widget(MaskedInput::class, [
                                 'clientOptions' => [
                                     'alias' => 'ip'
                                 ],

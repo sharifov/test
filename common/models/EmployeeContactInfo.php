@@ -39,8 +39,8 @@ class EmployeeContactInfo extends \yii\db\ActiveRecord
             [['employee_id', 'project_id'], 'integer'],
             [['created', 'updated'], 'safe'],
             [['email_user', 'email_pass', 'direct_line'], 'string', 'max' => 255],
-            [['employee_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::className(), 'targetAttribute' => ['employee_id' => 'id']],
-            [['project_id'], 'exist', 'skipOnError' => true, 'targetClass' => Project::className(), 'targetAttribute' => ['project_id' => 'id']],
+            [['employee_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['employee_id' => 'id']],
+            [['project_id'], 'exist', 'skipOnError' => true, 'targetClass' => Project::class, 'targetAttribute' => ['project_id' => 'id']],
         ];
     }
 
@@ -66,7 +66,7 @@ class EmployeeContactInfo extends \yii\db\ActiveRecord
      */
     public function getEmployee()
     {
-        return $this->hasOne(Employee::className(), ['id' => 'employee_id']);
+        return $this->hasOne(Employee::class, ['id' => 'employee_id']);
     }
 
     /**
@@ -74,7 +74,7 @@ class EmployeeContactInfo extends \yii\db\ActiveRecord
      */
     public function getProject()
     {
-        return $this->hasOne(Project::className(), ['id' => 'project_id']);
+        return $this->hasOne(Project::class, ['id' => 'project_id']);
     }
 
     public function afterValidate()

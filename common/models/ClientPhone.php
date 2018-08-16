@@ -36,7 +36,7 @@ class ClientPhone extends \yii\db\ActiveRecord
             [['client_id'], 'integer'],
             [['created', 'updated', 'comments'], 'safe'],
             [['phone'], 'string', 'max' => 100],
-            [['client_id'], 'exist', 'skipOnError' => true, 'targetClass' => Client::className(), 'targetAttribute' => ['client_id' => 'id']],
+            [['client_id'], 'exist', 'skipOnError' => true, 'targetClass' => Client::class, 'targetAttribute' => ['client_id' => 'id']],
         ];
     }
 
@@ -59,7 +59,7 @@ class ClientPhone extends \yii\db\ActiveRecord
      */
     public function getClient()
     {
-        return $this->hasOne(Client::className(), ['id' => 'client_id']);
+        return $this->hasOne(Client::class, ['id' => 'client_id']);
     }
 
     public function beforeValidate()
