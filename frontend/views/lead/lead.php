@@ -6,6 +6,47 @@
 use yii\bootstrap\Html;
 use frontend\models\LeadForm;
 
+if (!$leadForm->getLead()->isNewRecord) {
+    $checkUpdatesUrl = \yii\helpers\Url::to([
+        'lead/check-updates',
+        'leadId' => $leadForm->getLead()->id,
+        'lastUpdate' => date('Y-m-d H:i:s')
+    ]);
+
+    $js = <<<JS
+    function checkRequestUpdates(checkUrl) {  
+        $.get(checkUrl)
+            .done(function (data) {
+                if (data.logs.length != 0) {
+                    $('#agents-activity-logs').html(data.logs);
+                }
+                if (data.needRefresh) {
+                    var modal = $('#modal-error');
+                    modal.find('.modal-body').html(data.content);
+                    modal.modal({
+                        backdrop: 'static',
+                        show: true
+                    });
+                } else {
+                    setTimeout(function() {
+                        checkRequestUpdates(data.checkUpdatesUrl);
+                    }, 10000);
+                }
+            })
+            .fail(function () {
+                setTimeout(function() {
+                    checkRequestUpdates('$checkUpdatesUrl');
+                }, 10000);
+            });
+    }
+    setTimeout(function() {
+        checkRequestUpdates('$checkUpdatesUrl');
+    }, 10000);
+JS;
+
+    $this->registerJs($js);
+}
+
 ?>
 
 <div class="page-header">
@@ -74,15 +115,25 @@ use frontend\models\LeadForm;
                 ]);
             } ?>
 
-            <?php if (!$leadForm->getLead()->isNewRecord) {
-                echo $this->render('partial/_notes', [
+            <?php if (!$leadForm->getLead()->isNewRecord) : ?>
+                <?= $this->render('partial/_notes', [
                     'notes' => $leadForm->getLead()->getNotes()
-                ]);
-
-                echo $this->render('partial/_leadLog', [
-                    'logs' => $leadForm->getLead()->getLogs()
-                ]);
-            } ?>
+                ]); ?>
+                <div class="panel panel-neutral panel-wrapper history-block">
+                    <div class="panel-heading collapsing-heading">
+                        <a data-toggle="collapse" href="#agents-activity-logs" aria-expanded="false"
+                           class="collapsing-heading__collapse-link collapsed">
+                            Activity Logs
+                            <i class="collapsing-heading__arrow"></i>
+                        </a>
+                    </div>
+                    <div class="collapse" id="agents-activity-logs" aria-expanded="false" style="">
+                        <?= $this->render('partial/_leadLog', [
+                            'logs' => $leadForm->getLead()->getLogs()
+                        ]); ?>
+                    </div>
+                </div>
+            <?php endif; ?>
 
         </div>
     </div>

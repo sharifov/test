@@ -8,6 +8,7 @@ use common\models\ClientPhone;
 use common\models\EmployeeContactInfo;
 use common\models\Lead;
 use common\models\LeadFlow;
+use common\models\LeadLog;
 use common\models\Note;
 use common\models\ProjectEmailTemplate;
 use common\models\Reason;
@@ -17,6 +18,7 @@ use Yii;
 use yii\base\Model;
 use yii\helpers\ArrayHelper;
 use yii\filters\AccessControl;
+use yii\helpers\Url;
 use yii\web\BadRequestHttpException;
 use yii\web\Cookie;
 use yii\web\Response;
@@ -52,7 +54,8 @@ class LeadController extends DefaultController
                     [
                         'actions' => [
                             'create', 'add-comment', 'change-state', 'unassign', 'take',
-                            'set-rating', 'add-note', 'unprocessed', 'call-expert', 'send-email'
+                            'set-rating', 'add-note', 'unprocessed', 'call-expert', 'send-email',
+                            'check-updates'
                         ],
                         'allow' => true,
                         'roles' => ['agent'],
@@ -88,6 +91,49 @@ class LeadController extends DefaultController
     public function actionGetAirport($term)
     {
         return parent::actionGetAirport($term);
+    }
+
+    public function actionCheckUpdates($leadId, $lastUpdate)
+    {
+        Yii::$app->response->format = Response::FORMAT_JSON;
+        $response = [
+            'needRefresh' => false
+        ];
+        $model = Lead::findOne([
+            'id' => $leadId
+        ]);
+        if ($model !== null) {
+            $query = LeadLog::find()
+                ->where(['lead_id' => $leadId])
+                ->andWhere('created > :lastUpdate', [':lastUpdate' => $lastUpdate]);
+
+            $logs = $query->all();
+            if (count($logs)) {
+                $response['logs'] = $this->renderAjax('partial/_leadLog', [
+                    'logs' => $model->getLogs()
+                ]);
+                $response['checkUpdatesUrl'] = Url::to([
+                    'lead/check-updates',
+                    'leadId' => $leadId,
+                    'lastUpdate' => date('Y-m-d H:i:s'),
+                ]);
+                $response['content'] = $this->renderAjax('partial/_updateModal');
+            } else {
+                $response['logs'] = '';
+                $response['checkUpdatesUrl'] = Url::to([
+                    'lead/check-updates',
+                    'leadId' => $leadId,
+                    'lastUpdate' => $lastUpdate,
+                ]);
+            }
+            $needRefresh = $query->andWhere('employee_id <> :employee_id OR employee_id IS NULL', [
+                ':employee_id' => Yii::$app->user->identity->getId()
+            ])->all();
+
+            $response['needRefresh'] = count($needRefresh);
+        }
+
+        return $response;
     }
 
     public function actionSendEmail($id)
