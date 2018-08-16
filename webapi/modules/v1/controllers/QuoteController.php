@@ -15,7 +15,7 @@ class QuoteController extends ApiBaseController
 
     /**
      *
-     * @api {post} /v1/quote/getinfo Get Quote
+     * @api {post} /v1/quote/get-info Get Quote
      * @apiVersion 0.1.0
      * @apiName GetQuote
      * @apiGroup Quotes
@@ -28,8 +28,8 @@ class QuoteController extends ApiBaseController
      *      "Accept-Encoding": "Accept-Encoding: gzip, deflate"
      *  }
      *
-     * @apiParam {string{13}}           uid      Quote UID
-     * @apiParam {string}               apiKey   API Key for Project
+     * @apiParam {string{13}}       uid      Quote UID
+     * @apiParam {string}           [apiKey]   API Key for Project (if not use Basic-Authorization)
      *
      *
      * @apiParamExample {json} Request-Example:
@@ -38,10 +38,27 @@ class QuoteController extends ApiBaseController
      *      "apiKey": "d190c378e131ccfd8a889c8ee8994cb55f22fbeeb93f9b99007e8e7ecc24d0dd"
      * }
      *
-     * @apiSuccess {Integer} response_id    Response Id
+     * @apiSuccess {string} status    Status
+     * @apiSuccess {object} itinerary Itinerary List
+     *
+     * @apiSuccess {array} errors    Errors
+     * @apiSuccess {string} uid    Quote UID
+     * @apiSuccess {string} agentName    Agent Name
+     * @apiSuccess {string} agentEmail    Agent Email
+     * @apiSuccess {string} agentDirectLine    Agent DirectLine
+     *
+     * @apiSuccess {string} action    Action
+     * @apiSuccess {integer} response_id    Response Id
      * @apiSuccess {DateTime} request_dt    Request Date & Time
      * @apiSuccess {DateTime} response_dt   Response Date & Time
-     * @apiSuccess {Array} data Data Array
+     *
+     * "errors": [],
+    "uid": "5b7424e858e91",
+    "agentName": "admin",
+    "agentEmail": "assistant@wowfare.com",
+    "agentDirectLine": "+1 888 946 3882",
+    "action": "v1/quote/get-info",
+     *
      *
      * @apiSuccessExample Success-Response:
      *     HTTP/1.1 200 OK
