@@ -66,12 +66,19 @@ Migration (RBAC + LOG):
 Yii 2 Advanced Project Template is a skeleton [Yii 2](http://www.yiiframework.com/) application best for
 developing complex Web applications with multiple tiers.
 
-Hosts:
+Prod Hosts:
 -------------------
  - [https://sales.travelinsides.com](https://sales.travelinsides.com) - Frontend
  - [https://sales.travelinsides.com/admin](https://sales.travelinsides.com/admin) - Backend
  - [https://sales.api.travelinsides.com](https://sales.api.travelinsides.com) - API
  - [https://sales.api.travelinsides.com/doc/index.html](https://sales.api.travelinsides.com/doc/index.html) - API Documentation
+ 
+ Dev Hosts:
+ -------------------
+  - [https://sales.dev.travelinsides.com](https://sales.dev.travelinsides.com) - Frontend
+  - [https://sales.dev.travelinsides.com/admin](https://sales.dev.travelinsides.com/admin) - Backend
+  - [https://api-sales.dev.travelinsides.com](https://api-sales.dev.travelinsides.com) - API
+  - [https://api-sales.dev.travelinsides.com/doc/index.html](https://api-sales.dev.travelinsides.com/doc/index.html) - API Documentation
  
  Generate API Documentation (apiDoc):
  ```
