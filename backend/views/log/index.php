@@ -100,7 +100,8 @@ $this->params['breadcrumbs'][] = $this->title;
             //'prefix:ntext',
 //             'message:ntext',
 
-            ['class' => 'yii\grid\ActionColumn', 'template' => '{view} {delete}'],
+            //['class' => 'yii\grid\ActionColumn', 'template' => '{view} {delete}'],
+            ['class' => 'yii\grid\ActionColumn', 'template' => '{delete}'],
         ],
     ]); ?>
 

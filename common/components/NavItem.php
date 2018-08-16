@@ -105,49 +105,47 @@ class NavItem
                 'items' => $items,
             ];
 
+            if (!in_array(Yii::$app->user->identity->role, ['agent', 'coach'])) {
+                $menuItems[] = [
+                    'label' => '<i class="fa fa-bars"></i> Settings',
+                    'items' => [
+                        [
+                            'label' => 'ACL',
+                            'url' => sprintf('%s/admin/settings/acl', Yii::$app->urlManager->getHostInfo())
+                        ],
+                        [
+                            'label' => 'Projects',
+                            'url' => sprintf('%s/admin/settings/projects', Yii::$app->urlManager->getHostInfo())
+                        ],
+                        [
+                            'label' => 'Airlines',
+                            'url' => sprintf('%s/admin/settings/airlines', Yii::$app->urlManager->getHostInfo())
+                        ],
+                        [
+                            'label' => 'Airports',
+                            'url' => sprintf('%s/admin/settings/airports', Yii::$app->urlManager->getHostInfo())
+                        ],
+                        /*[
+                            'label' => 'Logging',
+                            'url' => sprintf('%s/admin/settings/logging', Yii::$app->urlManager->getHostInfo())
+                        ],*/
+                        [
+                            'label' => 'API Users',
+                            'url' => sprintf('%s/admin/api-user/index', Yii::$app->urlManager->getHostInfo())
+                        ],
 
-            $menuItems[] = [
-                'label' => '<i class="fa fa-bars"></i> Settings',
-                'items' => [
-                    [
-                        'label' => 'ACL',
-                        'url' => sprintf('%s/admin/settings/acl', Yii::$app->urlManager->getHostInfo())
-                    ],
-                    [
-                        'label' => 'Projects',
-                        'url' => sprintf('%s/admin/settings/projects', Yii::$app->urlManager->getHostInfo())
-                    ],
-                    [
-                        'label' => 'Airlines',
-                        'url' => sprintf('%s/admin/settings/airlines', Yii::$app->urlManager->getHostInfo())
-                    ],
-                    [
-                        'label' => 'Airports',
-                        'url' => sprintf('%s/admin/settings/airports', Yii::$app->urlManager->getHostInfo())
-                    ],
-                    [
-                        'label' => 'Logging',
-                        'url' => sprintf('%s/admin/settings/logging', Yii::$app->urlManager->getHostInfo())
-                    ],
+                        [
+                            'label' => 'API Logs',
+                            'url' => sprintf('%s/admin/api-log/index', Yii::$app->urlManager->getHostInfo())
+                        ],
 
-                    [
-                        'label' => 'API Users',
-                        'url' => ['/api-user/index']
+                        [
+                            'label' => 'Logs',
+                            'url' => sprintf('%s/admin/log/index', Yii::$app->urlManager->getHostInfo())
+                        ],
                     ],
-
-                    [
-                        'label' => 'API Logs',
-                        'url' => ['/api-log/index']
-                    ],
-
-                    [
-                        'label' => 'Logs',
-                        'url' => ['/log/index']
-                    ],
-                ],
-            ];
-
-
+                ];
+            }
 
 
             if (Yii::$app->user->identity->role != 'coach') {
