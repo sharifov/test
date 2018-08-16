@@ -263,7 +263,7 @@ class LeadController extends ApiBaseController
                 }
 
                 if (isset($client['client_ip']) && $client['client_ip']) {
-                    $lead['request_ip_detail'] = $client['client_ip'];
+                    $lead['request_ip'] = $client['client_ip'];
                 }
 
 
