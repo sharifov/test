@@ -35,6 +35,7 @@ use yii\helpers\Html;
  * @property string $snooze_for
  * @property boolean $called_expert
  * @property string $discount_id
+ * @property string $bo_flight_id
  *
  * @property LeadFlightSegment[] $leadFlightSegments
  * @property LeadPreferences $leadPreferences
@@ -482,7 +483,7 @@ class Lead extends \yii\db\ActiveRecord
             [['adults'], 'integer', 'min' => 1],
             [['notes_for_experts'], 'string'],
             [['created', 'updated', 'offset_gmt', 'request_ip', 'request_ip_detail', 'snooze_for',
-                'called_expert', 'discount_id'], 'safe'],
+                'called_expert', 'discount_id', 'bo_flight_id'], 'safe'],
             [['uid'], 'string', 'max' => 255],
             [['trip_type'], 'string', 'max' => 2],
             [['cabin'], 'string', 'max' => 1],
