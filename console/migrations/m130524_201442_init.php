@@ -148,8 +148,9 @@ class m130524_201442_init extends Migration
 
 
         $employee = new \common\models\Employee();
-        $employee->username = 'andrei.b';
-        $employee->email = 'ab@zeit.style';
+        $employee->username = 'admin';
+        $employee->email = 'admin@zeit.style';
+        $employee->acl_rules_activated = false;
         $employee->setPassword('admin');
         $employee->generateAuthKey();
         $employee->save(false);
