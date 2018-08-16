@@ -95,9 +95,17 @@
           {
             "group": "Parameter",
             "type": "int",
-            "optional": false,
+            "optional": true,
             "field": "lead.source_id",
             "description": "<p>Source ID</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "20",
+            "optional": false,
+            "field": "lead.sub_sources_code",
+            "description": "<p>Source Code</p>"
           },
           {
             "group": "Parameter",
@@ -259,6 +267,13 @@
           },
           {
             "group": "Parameter",
+            "type": "int",
+            "optional": true,
+            "field": "lead.discount_id",
+            "description": "<p>Discount Id</p>"
+          },
+          {
+            "group": "Parameter",
             "type": "string",
             "size": "3..100",
             "optional": true,
@@ -286,7 +301,7 @@
       "examples": [
         {
           "title": "Request-Example:",
-          "content": "{\n   \"apiKey\": \"d190c378e131ccfd8a889c8ee8994cb55f22fbeeb93f9b99007e8e7ecc24d0dd\",\n   \"lead\": {\n       \"flights\": [\n           {\n               \"origin\": \"KIV\",\n               \"destination\": \"DME\",\n               \"departure\": \"2018-10-13 13:50:00\",\n           },\n           {\n               \"origin\": \"DME\",\n               \"destination\": \"KIV\",\n               \"departure\": \"2018-10-18 10:54:00\",\n           }\n       ],\n       \"emails\": [\n         \"email1@gmail.com\",\n         \"email2@gmail.com\",\n       ],\n       \"phones\": [\n         \"+373-69-487523\",\n         \"022-45-7895-89\",\n       ],\n       \"source_id\": 38,\n       \"adults\": 1,\n       \"client_first_name\": \"Alexandr\",\n       \"client_last_name\": \"Freeman\"\n   }\n}",
+          "content": "{\n   \"apiKey\": \"d190c378e131ccfd8a889c8ee8994cb55f22fbeeb93f9b99007e8e7ecc24d0dd\",\n   \"lead\": {\n       \"flights\": [\n           {\n               \"origin\": \"KIV\",\n               \"destination\": \"DME\",\n               \"departure\": \"2018-10-13 13:50:00\",\n           },\n           {\n               \"origin\": \"DME\",\n               \"destination\": \"KIV\",\n               \"departure\": \"2018-10-18 10:54:00\",\n           }\n       ],\n       \"emails\": [\n         \"email1@gmail.com\",\n         \"email2@gmail.com\",\n       ],\n       \"phones\": [\n         \"+373-69-487523\",\n         \"022-45-7895-89\",\n       ],\n       \"source_id\": 38,\n       \"sub_sources_code\": \"BBM101\",\n       \"adults\": 1,\n       \"client_first_name\": \"Alexandr\",\n       \"client_last_name\": \"Freeman\"\n   }\n}",
           "type": "json"
         }
       ]

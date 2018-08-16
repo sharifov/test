@@ -31,6 +31,8 @@ use yii\base\Model;
  * @property string $offset_gmt
  * @property string $snooze_for
  * @property int $rating
+ * @property string $sub_sources_code
+ * @property int $discount_id
  *
  * @property array $emails
  * @property array $phones
@@ -67,6 +69,8 @@ class ApiLead extends Model
     public $offset_gmt;
     public $snooze_for;
     public $rating;
+    public $sub_sources_code;
+    public $discount_id;
 
     public $flights;
     public $emails;
@@ -90,13 +94,16 @@ class ApiLead extends Model
     public function rules()
     {
         return [
-            [['source_id'], 'required'],
+            //[['source_id'], 'required'],
             [['lead_id'], 'required', 'on' => [self::SCENARIO_UPDATE, self::SCENARIO_GET]],
             [['adults', 'flights'], 'required', 'except' => [self::SCENARIO_UPDATE, self::SCENARIO_GET]],
 
-            [['lead_id', 'source_id'], 'integer'],
+            [['lead_id', 'source_id', 'discount_id'], 'integer'],
+            [['sub_sources_code'], 'string', 'max' => 20],
 
+            [['sub_sources_code'], 'checkIsSourceCode'],
             [['source_id'], 'checkIsSource'],
+
             [['client_first_name', 'client_last_name', 'client_middle_name'], 'string', 'max' => 100],
             [['emails'], 'each', 'rule' => ['email']],
             [['phones'], 'each', 'rule' => ['string', 'max' => 20]],
@@ -119,9 +126,9 @@ class ApiLead extends Model
     public function scenarios()
     {
         $scenarios = parent::scenarios();
-        $scenarios[self::SCENARIO_UPDATE] = ['lead_id', 'source_id', 'status', 'uid', 'trip_type', 'cabin', 'adults', 'children', 'infants', 'notes_for_experts', 'request_ip', 'request_ip_detail', 'offset_gmt', 'snooze_for', 'rating', 'flights', 'emails', 'phones',
-            'client_first_name', 'client_last_name', 'client_middle_name'];
-        $scenarios[self::SCENARIO_GET] = ['lead_id', 'source_id'];
+        $scenarios[self::SCENARIO_UPDATE] = ['lead_id', 'status', 'uid', 'trip_type', 'cabin', 'adults', 'children', 'infants', 'notes_for_experts', 'request_ip', 'request_ip_detail', 'offset_gmt', 'snooze_for', 'rating', 'flights', 'emails', 'phones',
+            'client_first_name', 'client_last_name', 'client_middle_name', 'discount_id', 'sub_sources_code'];
+        $scenarios[self::SCENARIO_GET] = ['lead_id'];
         return $scenarios;
     }
 
@@ -162,6 +169,18 @@ class ApiLead extends Model
         }
     }
 
+    public function checkIsSourceCode()
+    {
+        if (!empty($this->sub_sources_code)) {
+            $source = Source::findOne(['cid' => $this->sub_sources_code, 'project_id' => $this->project_id]);
+            if(!$source) {
+                $this->addError('source_id', "Invalid Source Code (project: ".$this->project_id.")");
+            } else {
+                $this->source_id = $source->id;
+            }
+        }
+    }
+
 
     /**
      *
@@ -190,6 +209,9 @@ class ApiLead extends Model
             'uid' => 'Uid',
             'project_id' => 'Project ID',
             'source_id' => 'Source ID',
+            'sub_sources_code' => 'Source Code',
+            'discount_id' => 'Discount',
+
             'trip_type' => 'Trip Type',
             'cabin' => 'Cabin',
             'adults' => 'Adults',

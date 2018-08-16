@@ -34,7 +34,8 @@ class LeadController extends ApiBaseController
      *
      * @apiParam {string}           [apiKey]   API Key for Project (if not use Basic-Authorization)
      * @apiParam {object}           lead                                               Lead data array
-     * @apiParam {int}                  lead.source_id                                     Source ID
+     * @apiParam {int}                  [lead.source_id]                                   Source ID
+     * @apiParam {string{20}}           lead.sub_sources_code                              Source Code
      * @apiParam {int{1..9}}            lead.adults                                        Adult count
      * @apiParam {string{1}=E-ECONOMY,B-BUSINESS,F-FIRST,P-PREMIUM}        lead.cabin                                         Cabin
      * @apiParam {array[]}              lead.emails                                         Array of Emails (string)
@@ -54,6 +55,7 @@ class LeadController extends ApiBaseController
      * @apiParam {string{50}}           [lead.request_ip]                                    Request IP
      * @apiParam {int}                  [lead.snooze_for]                                    Snooze for
      * @apiParam {int}                  [lead.rating]                                        Rating
+     * @apiParam {int}                  [lead.discount_id]                                   Discount Id
      *
      * @apiParam {string{3..100}}       [lead.client_first_name]                            Client first name
      * @apiParam {string{3..100}}       [lead.client_last_name]                             Client last name
@@ -86,6 +88,7 @@ class LeadController extends ApiBaseController
      *          "022-45-7895-89",
      *        ],
      *        "source_id": 38,
+     *        "sub_sources_code": "BBM101",
      *        "adults": 1,
      *        "client_first_name": "Alexandr",
      *        "client_last_name": "Freeman"
@@ -231,6 +234,10 @@ class LeadController extends ApiBaseController
 
             if(isset($lead['client_id'])) {
                 unset($lead['client_id']);
+            }
+
+            if(isset($lead['source_id'])) {
+                unset($lead['source_id']);
             }
 
             $flights = Yii::$app->request->post('LeadFlights');
