@@ -54,8 +54,15 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     {
         parent::afterFind();
 
-        $roles = $this->getRoles();
-        $this->role = array_keys($roles)[0];
+        //var_dump(\webapi\models\ApiUser::class); die;
+
+
+        if(Yii::$app->user->isGuest || Yii::$app->user->identityClass == \webapi\models\ApiUser::class) {
+            $this->role = null;
+        } else {
+            $roles = $this->getRoles();
+            $this->role = array_keys($roles)[0];
+        }
 
         $this->deleted = !($this->status);
 

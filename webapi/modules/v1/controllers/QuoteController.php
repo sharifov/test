@@ -29,7 +29,7 @@ class QuoteController extends ApiBaseController
      *  }
      *
      * @apiParam {string{13}}           uid      Quote UID
-     * @apiParam {string}               apiKey   API Key
+     * @apiParam {string}               apiKey   API Key for Project
      *
      *
      * @apiParamExample {json} Request-Example:
@@ -45,6 +45,102 @@ class QuoteController extends ApiBaseController
      *
      * @apiSuccessExample Success-Response:
      *     HTTP/1.1 200 OK
+     *
+     *
+     * {
+        "status": "Success",
+        "itinerary": {
+            "tripType": "OW",
+            "mainCarrier": "WOW air",
+            "trips": [
+                {
+                    "segments": [
+                        {
+                            "carrier": "WW",
+                            "airlineName": "WOW air",
+                            "departureAirport": "BOS",
+                            "arrivalAirport": "KEF",
+                            "departureDateTime": {
+                                "date": "2018-09-19 19:00:00.000000",
+                                "timezone_type": 3,
+                                "timezone": "UTC"
+                            },
+                            "arrivalDateTime": {
+                                "date": "2018-09-20 04:30:00.000000",
+                                "timezone_type": 3,
+                                "timezone": "UTC"
+                            },
+                            "flightNumber": "126",
+                            "bookingClass": "O",
+                            "departureCity": "Boston",
+                            "arrivalCity": "Reykjavik",
+                            "flightDuration": 330,
+                            "layoverDuration": 0,
+                            "cabin": "E",
+                            "departureCountry": "United States",
+                            "arrivalCountry": "Iceland"
+                        },
+                        {
+                            "carrier": "WW",
+                            "airlineName": "WOW air",
+                            "departureAirport": "KEF",
+                            "arrivalAirport": "LGW",
+                            "departureDateTime": {
+                                "date": "2018-09-20 15:30:00.000000",
+                                "timezone_type": 3,
+                                "timezone": "UTC"
+                            },
+                            "arrivalDateTime": {
+                                "date": "2018-09-20 19:50:00.000000",
+                                "timezone_type": 3,
+                                "timezone": "UTC"
+                            },
+                            "flightNumber": "814",
+                            "bookingClass": "N",
+                            "departureCity": "Reykjavik",
+                            "arrivalCity": "London",
+                            "flightDuration": 200,
+                            "layoverDuration": 660,
+                            "cabin": "E",
+                            "departureCountry": "Iceland",
+                            "arrivalCountry": "United Kingdom"
+                        }
+                    ],
+                    "totalDuration": 1190,
+                    "routing": "BOS-KEF-LGW",
+                    "title": "Boston - London"
+                }
+            ],
+            "price": {
+                "detail": {
+                    "ADT": {
+                        "selling": 350.2,
+                        "fare": 237,
+                        "taxes": 113.2,
+                        "tickets": 1
+                    }
+                },
+                "tickets": 1,
+                "selling": 350.2,
+                "amountPerPax": 350.2,
+                "fare": 237,
+                "mark_up": 0,
+                "taxes": 113.2,
+                "currency": "USD",
+                "isCC": false
+            }
+        },
+        "errors": [],
+        "uid": "5b7424e858e91",
+        "agentName": "admin",
+        "agentEmail": "assistant@wowfare.com",
+        "agentDirectLine": "+1 888 946 3882",
+        "action": "v1/quote/get-info",
+        "response_id": 173,
+        "request_dt": "2018-08-16 06:42:03",
+        "response_dt": "2018-08-16 06:42:03"
+    }
+     *
      *
      * @apiError UserNotFound The id of the User was not found.
      *
@@ -66,8 +162,7 @@ class QuoteController extends ApiBaseController
      */
 
 
-
-    public function actionGetInfo()
+    public function actionGetInfo(): array
     {
 
         $this->checkPost();
@@ -95,21 +190,25 @@ class QuoteController extends ApiBaseController
 
         try {
 
-            $result['status'] = ($model->status != $model::STATUS_DECLINED) ? 'Success' : 'Failed';
+            $response['status'] = ($model->status != $model::STATUS_DECLINED) ? 'Success' : 'Failed';
 
             $sellerContactInfo = EmployeeContactInfo::findOne([
                 'employee_id' => $model->lead->employee_id,
                 'project_id' => $model->lead->project_id
             ]);
 
-            $result['agentName'] = $model->lead->employee->username;
-            $result['agentEmail'] = $sellerContactInfo ? $sellerContactInfo->email_user : $model->lead->project->contactInfo->email;
+            $response['uid'] = $uid;
 
-            $result['agentDirectLine'] = ($sellerContactInfo !== null) ? $sellerContactInfo->direct_line : sprintf('+1 %s', $model->lead->project->contactInfo->phone);
-            $result['itinerary']['tripType'] = $model->trip_type;
-            $result['itinerary']['mainCarrier'] = ($model->getMainCarrier()) ? $model->getMainCarrier()->name : $model->main_airline_code;
-            $result['itinerary']['trips'] = $model->getTrips();
-            $result['itinerary']['price'] = $model->quotePrice();
+            $response['agentName'] = $model->lead->employee->username;
+            $response['agentEmail'] = $sellerContactInfo ? $sellerContactInfo->email_user : $model->lead->project->contactInfo->email;
+
+            $response['agentDirectLine'] = ($sellerContactInfo !== null) ? $sellerContactInfo->direct_line : sprintf('+1 %s', $model->lead->project->contactInfo->phone);
+            $response['itinerary']['tripType'] = $model->trip_type;
+            $response['itinerary']['mainCarrier'] = ($model->getMainCarrier()) ? $model->getMainCarrier()->name : $model->main_airline_code;
+            $response['itinerary']['trips'] = $model->getTrips();
+            $response['itinerary']['price'] = $model->quotePrice();
+
+
 
             // TODO: Quote::STATUS_SEND
             /*if ($model->status == Quote::STATUS_SEND) {
@@ -126,6 +225,7 @@ class QuoteController extends ApiBaseController
             else $message = $e->getMessage().' (code:'.$e->getCode().', line: '.$e->getLine().')';
 
             $response['error'] = $message;
+            $response['errors'] = $message;
             $response['error_code'] = 30;
         }
 
