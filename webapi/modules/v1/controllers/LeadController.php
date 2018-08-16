@@ -32,6 +32,7 @@ class LeadController extends ApiBaseController
      *      "Accept-Encoding": "Accept-Encoding: gzip, deflate"
      *  }
      *
+     * @apiParam {string}           [apiKey]   API Key for Project (if not use Basic-Authorization)
      * @apiParam {object}           lead                                               Lead data array
      * @apiParam {int}                  lead.source_id                                     Source ID
      * @apiParam {int{1..9}}            lead.adults                                        Adult count
@@ -62,6 +63,7 @@ class LeadController extends ApiBaseController
      *
      * @apiParamExample {json} Request-Example:
      * {
+     *    "apiKey": "d190c378e131ccfd8a889c8ee8994cb55f22fbeeb93f9b99007e8e7ecc24d0dd",
      *    "lead": {
      *        "flights": [
      *            {
@@ -410,6 +412,7 @@ class LeadController extends ApiBaseController
      *      "Accept-Encoding": "Accept-Encoding: gzip, deflate"
      *  }
      *
+     * @apiParam {string}           [apiKey]   API Key for Project (if not use Basic-Authorization)
      * @apiParam {object}           lead                                               Lead data array
      * @apiParam {int}                  lead.lead_id                                     Lead ID
      * @apiParam {int}                  lead.source_id                                     Source ID
@@ -441,6 +444,7 @@ class LeadController extends ApiBaseController
      *
      * @apiParamExample {json} Request-Example:
      * {
+     *    "apiKey": "d190c378e131ccfd8a889c8ee8994cb55f22fbeeb93f9b99007e8e7ecc24d0dd",
      *    "lead": {
      *        "lead_id": 38,
      *        "flights": [
@@ -681,6 +685,7 @@ class LeadController extends ApiBaseController
      *      "Accept-Encoding": "Accept-Encoding: gzip, deflate"
      *  }
      *
+     * @apiParam {string}           [apiKey]   API Key for Project (if not use Basic-Authorization)
      * @apiParam {object}           lead                                               Lead data array
      * @apiParam {int}                  lead.lead_id                                   Lead ID
      * @apiParam {int}                  lead.source_id                                 Source ID
@@ -688,6 +693,7 @@ class LeadController extends ApiBaseController
      *
      * @apiParamExample {json} Request-Example:
      * {
+     *    "apiKey": "d190c378e131ccfd8a889c8ee8994cb55f22fbeeb93f9b99007e8e7ecc24d0dd",
      *    "lead": {
      *        "lead_id": 302,
      *        "source_id": 38,
