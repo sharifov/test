@@ -52,7 +52,7 @@ class SiteController extends DefaultController
     {
 
         $days = 30;
-        $dataStatsDone = Lead::find()->select("COUNT(*) AS done_count, DATE(created) AS created_date") //, SUM(tr_total_price) AS sum_price
+        $dataStatsDone = Lead::find()->select("COUNT(*) AS done_count, DATE(created) AS created_date")
         /*->where([
             'status' => [
                 Lead::STATUS_,
@@ -66,7 +66,7 @@ class SiteController extends DefaultController
 
 
             
-        $dataStatsPending = Lead::find()->select("COUNT(*) AS pending_count, DATE(created) AS created_date") //, SUM(tr_total_price) AS sum_price
+        $dataStatsPending = Lead::find()->select("COUNT(*) AS pending_count, DATE(created) AS created_date")
         ->where([
             'status' => [
                 Lead::STATUS_PENDING,
@@ -80,7 +80,7 @@ class SiteController extends DefaultController
 
 
 
-        $dataStatsBooked = Lead::find()->select("COUNT(*) AS book_count, DATE(created) AS created_date") //, SUM(tr_total_price) AS sum_price
+        $dataStatsBooked = Lead::find()->select("COUNT(*) AS book_count, DATE(created) AS created_date")
         ->where([
             'status' => [
                 Lead::STATUS_BOOKED,
@@ -92,7 +92,7 @@ class SiteController extends DefaultController
             ->limit(30)->asArray()->all();
 
 
-        $dataStatsSold = Lead::find()->select("COUNT(*) AS sold_count, DATE(created) AS created_date") //, SUM(tr_total_price) AS sum_price
+        $dataStatsSold = Lead::find()->select("COUNT(*) AS sold_count, DATE(created) AS created_date")
         ->where([
             'status' => [
                 Lead::STATUS_SOLD,
@@ -174,7 +174,6 @@ class SiteController extends DefaultController
                 Lead::STATUS_BOOKED,
             ],
         ])*/
-            //->andWhere("DATE(created) >= DATE(NOW() - interval '".$days." days')")
             ->andWhere(['>=', 'DATE(created)', date('Y-m-d', strtotime("-".$days." days"))])
             ->groupBy(['employee_id'])
             ->orderBy('cnt DESC')
@@ -187,17 +186,11 @@ class SiteController extends DefaultController
                 Lead::STATUS_SOLD,
             ],
         ])
-        //->andWhere("DATE(created) >= DATE(NOW() - interval '".$days." days')")
         ->andWhere(['>=', 'DATE(created)', date('Y-m-d', strtotime("-".$days." days"))])
             ->groupBy(['employee_id'])
             ->orderBy('cnt DESC')
             ->limit(30)->asArray()->all();
 
-
-         //print_r($dataEmployee); exit;
-
-
-        $dataEmployee = '';
 
         return $this->render('index', ['dataStats' => $dataStats, 'dataSources' => $dataSources, 'dataEmployee' => $dataEmployee, 'dataEmployeeSold' => $dataEmployeeSold]);
     }
