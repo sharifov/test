@@ -17,7 +17,7 @@ use Yii;
  * @property string $al_action
  *
  *
- * @property Trip[] $trips
+ * @property ApiUser[] $apiUser
  */
 class ApiLog extends \yii\db\ActiveRecord
 {
@@ -64,9 +64,9 @@ class ApiLog extends \yii\db\ActiveRecord
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getTrips()
+    public function getApiUser()
     {
-        return $this->hasMany(Trip::class, ['tr_api_log_id' => 'al_id']);
+        return $this->hasOne(ApiUser::class, ['au_id' => 'al_user_id']);
     }
 
     /**
