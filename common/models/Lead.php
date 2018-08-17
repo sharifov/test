@@ -937,4 +937,43 @@ class Lead extends \yii\db\ActiveRecord
 
         return isset($mapping[$flightType]) ? $mapping[$flightType] : $flightType;
     }
+
+    public function getLeadInformationForExpert()
+    {
+        $information = [
+            'trip_type' => $this->trip_type,
+            'cabin' => $this->cabin,
+            'adults' => $this->adults,
+            'children' => $this->children,
+            'infants' => $this->infants,
+            'notes_for_experts' => $this->notes_for_experts,
+            'pref_airline' => !empty($this->leadPreferences)
+                ? $this->leadPreferences->pref_airline : '',
+            'number_stops' => !empty($this->leadPreferences)
+                ? $this->leadPreferences->number_stops : '',
+            'clients_budget' => !empty($this->leadPreferences)
+                ? $this->leadPreferences->clients_budget : '',
+            'market_price' => !empty($this->leadPreferences)
+                ? $this->leadPreferences->market_price : '',
+            'itinerary' => []
+        ];
+
+        $itinerary = [];
+        foreach ($this->leadFlightSegments as $leadFlightSegment) {
+            $itinerary[] = [
+                'route' => sprintf('%s - %s', $leadFlightSegment->origin, $leadFlightSegment->destination),
+                'date' => $leadFlightSegment->departure
+            ];
+        }
+
+        $information['itinerary'] = $itinerary;
+
+        return [
+            'LeadRequest' => [
+                'uid' => $this->uid,
+                'market_info_id' => $this->source_id,
+                'information' => $information
+            ]
+        ];
+    }
 }

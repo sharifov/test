@@ -47,6 +47,10 @@ JS;
     $this->registerJs($js);
 }
 
+if (!$leadForm->getLead()->isNewRecord) {
+    echo \yii\helpers\Json::encode($leadForm->getLead()->getLeadInformationForExpert());
+}
+
 ?>
 
 <div class="page-header">
