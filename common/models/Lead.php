@@ -521,7 +521,7 @@ class Lead extends \yii\db\ActiveRecord
     {
         parent::afterSave($insert, $changedAttributes);
 
-        if (empty($this->offset_gmt) && !empty($this->request_ip)) {
+        /*if (empty($this->offset_gmt) && !empty($this->request_ip)) {
             $jsonData = file_get_contents(Yii::$app->params['checkIpURL'] . $this->request_ip);
             $data = json_decode($jsonData, true);
             if (isset($data['meta']['code']) && $data['meta']['code'] == '200') {
@@ -531,7 +531,7 @@ class Lead extends \yii\db\ActiveRecord
                 $this->request_ip_detail = json_encode($data['data']);
                 $this->update(false, ['offset_gmt', 'request_ip_detail']);
             }
-        }
+        }*/
 
         if ($insert) {
             LeadFlow::addStateFlow($this);
