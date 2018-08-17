@@ -159,36 +159,13 @@ class SiteController extends DefaultController
             }
         }
 
-
-
-
-
-        //print_r($dataStatsBooked);        exit;
-
         ksort($dataStats);
 
-        // VarDumper::dump($dataStatsDone, 10, true); exit;
-
-
-        //$dataStats = array_reverse($dataStats);
-
-        //$dataSources = [];
-
-
         $dataSources = ApiLog::find()->select('COUNT(*) AS cnt, al_user_id')
-            /*->where([
-                'tr_status_id' => [
-                    Trip::STATUS_DONE,
-                    Trip::STATUS_ARCHIVE
-                ],
-            ])*/
             ->andWhere(['>=', 'DATE(al_request_dt)', date('Y-m-d', strtotime("-".$days." days"))])
             ->groupBy(['al_user_id'])
             ->orderBy('cnt DESC')
             ->asArray()->all();
-
-
-
 
 
         $dataEmployee = Lead::find()->select("COUNT(*) AS cnt, employee_id") //, SUM(tr_total_price) AS sum_price
@@ -220,19 +197,7 @@ class SiteController extends DefaultController
          //print_r($dataEmployee); exit;
 
 
-        /*$dataGds2 = Trip::find()->select('COUNT(*) AS cnt, tr_gds_id')
-            ->where([
-                'tr_status_id' => [
-                    Trip::STATUS_ERROR,
-                    Trip::STATUS_INIT,
-                ],
-            ])
-            ->andWhere("tr_gds_id > 0 AND DATE(tr_created_dt) >= DATE(NOW() - interval '".$days." days')")
-            ->groupBy(['tr_gds_id'])
-            ->orderBy('cnt DESC')
-            ->asArray()->all();*/
-
-
+        $dataEmployee = '';
 
         return $this->render('index', ['dataStats' => $dataStats, 'dataSources' => $dataSources, 'dataEmployee' => $dataEmployee, 'dataEmployeeSold' => $dataEmployeeSold]);
     }

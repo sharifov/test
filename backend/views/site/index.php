@@ -1,4 +1,4 @@
-<?php
+<?
 
 /* @var $this yii\web\View */
 /* @var $dataStats [] */
@@ -12,7 +12,7 @@ $this->title = 'Dashboard';
 ?>
 <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 
-<?php
+<?
 $js = <<<JS
     google.charts.load('current', {packages: ['corechart', 'bar']});
 JS;
@@ -63,7 +63,7 @@ $this->registerJs($js, \yii\web\View::POS_READY);
 
 
 
-    <?php if ($dataStats): ?>
+    <? if ($dataStats): ?>
         <div class="row">
             <div class="col-md-12">
 
@@ -71,7 +71,7 @@ $this->registerJs($js, \yii\web\View::POS_READY);
                 <div id="chart_div"></div>
 
 
-                <?php
+                <?
                 $this->registerJs("google.charts.load('current', {'packages':['bar']}); google.charts.setOnLoadCallback(drawChart);", \yii\web\View::POS_READY);
                 ?>
 
@@ -116,119 +116,112 @@ $this->registerJs($js, \yii\web\View::POS_READY);
 
     <div class="row">
         <div class="col-md-12">
+            <div class="col-md-4">
+                <div id="chart_div_projects"></div>
+                <? if ($dataSources): ?>
 
-            <?php if ($dataSources): ?>
-                <div class="col-md-4">
-                    <div id="chart_div_projects"></div>
-                    <?php
-                    $this->registerJs('google.charts.setOnLoadCallback(drawBasic1);', \yii\web\View::POS_READY);
-                    ?>
+                        <?
+                        $this->registerJs('google.charts.setOnLoadCallback(drawBasic1);', \yii\web\View::POS_READY);
+                        ?>
 
-                    <script>
-                        function drawBasic1() {
-                            var data = google.visualization.arrayToDataTable([
-                                ['Project', 'Count'],
-                                <?php foreach($dataSources as $k => $item):
+                        <script>
+                            function drawBasic1() {
+                                var data = google.visualization.arrayToDataTable([
+                                    ['Project', 'Count'],
+                                    <? foreach($dataSources as $k => $item):
 
-                                    $user = \common\models\ApiUser::findOne($item['al_user_id']);
-                                    if(!$user) continue;
+                                        $user = \common\models\ApiUser::findOne($item['al_user_id']);
+                                        if(!$user) continue;
 
-                                    $project = $user->auProject;
-                                    if(!$project) continue;
+                                        $project = $user->auProject;
+                                        if(!$project) continue;
 
-                                ?>
-                                ['<?php
+                                    ?>
+                                    ['<? echo \yii\helpers\Html::encode($project->name).' (apiUser: '.$item['al_user_id'].')' ?>', <?=$item['cnt']?>],
+                                    <? endforeach;?>
+                                ]);
 
+                                var options = {
+                                    title: 'Project API Request stats - Last 30 days',
+                                    height: 400
+                                };
 
+                                var chart = new google.visualization.PieChart(document.getElementById('chart_div_projects'));
+                                chart.draw(data, options);
+                            }
+                        </script>
 
-                                    echo \yii\helpers\Html::encode($project->name).' (apiUser: '.$item['al_user_id'].')' ?>', <?=$item['cnt']?>],
-                                <? endforeach;?>
-                            ]);
-
-                            var options = {
-                                title: 'Project API Request stats - Last 30 days',
-                                height: 400
-                            };
-
-                            var chart = new google.visualization.PieChart(document.getElementById('chart_div_projects'));
-                            chart.draw(data, options);
-                        }
-                    </script>
-                </div>
-            <? endif; ?>
+                <? endif; ?>
+            </div>
 
 
+            <div class="col-md-4">
+                <div id="chart_div2"></div>
+                <? if($dataEmployee): ?>
 
-            <?php if ($dataEmployee): ?>
-                <div class="col-md-4">
-                    <div id="chart_div2"></div>
-                    <?php
-                    $this->registerJs('google.charts.setOnLoadCallback(drawBasic2);', \yii\web\View::POS_READY);
-                    ?>
+                        <?
+                            $this->registerJs('google.charts.setOnLoadCallback(drawBasic2);', \yii\web\View::POS_READY);
+                        ?>
 
-                    <script>
-                        function drawBasic2() {
-                            var data = google.visualization.arrayToDataTable([
-                                ['Employee', 'Count of leads'],
-                                <?php foreach($dataEmployee as $k => $item):
+                        <script>
+                            function drawBasic2() {
+                                var data = google.visualization.arrayToDataTable([
+                                    ['Employee', 'Count of leads'],
+                                    <? foreach($dataEmployee as $k => $item):
+                                        $employee = \common\models\Employee::find()->where(['id' => $item['employee_id']])->one();
+                                        if(!$employee) continue;
+
+                                    ?>
+                                    ['<? echo \yii\helpers\Html::encode($employee->username) ?>', <?=$item['cnt']?>],
+                                    <? endforeach;?>
+                                ]);
+
+                                var options = {
+                                    title: 'Employees & Leads - Last 30 days',
+                                    height: 400
+                                };
+
+                                var chart = new google.visualization.PieChart(document.getElementById('chart_div2'));
+                                chart.draw(data, options);
+                            }
+                        </script>
+
+                <? endif; ?>
+            </div>
+
+            <div class="col-md-4">
+                <div id="chart_div3"></div>
+                <? if ($dataEmployeeSold): ?>
+
+                        <?
+                            $this->registerJs('google.charts.setOnLoadCallback(drawBasic3);', \yii\web\View::POS_READY);
+                        ?>
+
+                        <script>
+                            function drawBasic3() {
+                                var data = google.visualization.arrayToDataTable([
+                                    ['Employee', 'Count of leads'],
+                                    <? foreach($dataEmployeeSold as $k => $item):
                                     $employee = \common\models\Employee::find()->where(['id' => $item['employee_id']])->one();
                                     if(!$employee) continue;
 
-                                ?>
-                                ['<?php
+                                    ?>
+                                    ['<? echo \yii\helpers\Html::encode($employee->username) ?>', <?=$item['cnt']?>],
+                                    <? endforeach;?>
+                                ]);
 
-                                    echo \yii\helpers\Html::encode($employee->username) ?>', <?=$item['cnt']?>],
-                                <? endforeach;?>
-                            ]);
+                                var options = {
+                                    title: 'Employees & Leads, status Sold - Last 30 days',
+                                    height: 400
+                                };
 
-                            var options = {
-                                title: 'Employees & Leads - Last 30 days',
-                                height: 400
-                            };
+                                var chart = new google.visualization.PieChart(document.getElementById('chart_div3'));
+                                chart.draw(data, options);
+                            }
+                        </script>
 
-                            var chart = new google.visualization.PieChart(document.getElementById('chart_div2'));
-                            chart.draw(data, options);
-                        }
-                    </script>
-                </div>
-            <? endif; ?>
-
-
-            <?php if ($dataEmployeeSold): ?>
-                <div class="col-md-4">
-                    <div id="chart_div3"></div>
-                    <?php
-                    $this->registerJs('google.charts.setOnLoadCallback(drawBasic3);', \yii\web\View::POS_READY);
-                    ?>
-
-                    <script>
-                        function drawBasic3() {
-                            var data = google.visualization.arrayToDataTable([
-                                ['Employee', 'Count of leads'],
-                                <?php foreach($dataEmployee as $k => $item):
-                                $employee = \common\models\Employee::find()->where(['id' => $item['employee_id']])->one();
-                                if(!$employee) continue;
-
-                                ?>
-                                ['<?php
-
-                                    echo \yii\helpers\Html::encode($employee->username) ?>', <?=$item['cnt']?>],
-                                <? endforeach;?>
-                            ]);
-
-                            var options = {
-                                title: 'Employees & Leads, status Sold - Last 30 days',
-                                height: 400
-                            };
-
-                            var chart = new google.visualization.PieChart(document.getElementById('chart_div3'));
-                            chart.draw(data, options);
-                        }
-                    </script>
-                </div>
-            <? endif; ?>
-
-
+                <? endif; ?>
+            </div>
 
 
         </div>
