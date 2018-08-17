@@ -521,17 +521,38 @@ class Lead extends \yii\db\ActiveRecord
     {
         parent::afterSave($insert, $changedAttributes);
 
-        /*if (empty($this->offset_gmt) && !empty($this->request_ip)) {
-            $jsonData = file_get_contents(Yii::$app->params['checkIpURL'] . $this->request_ip);
-            $data = json_decode($jsonData, true);
-            if (isset($data['meta']['code']) && $data['meta']['code'] == '200') {
-                if (isset($data['data']['datetime'])) {
-                    $this->offset_gmt = str_replace(':', '.', $data['data']['datetime']['offset_gmt']);
-                }
-                $this->request_ip_detail = json_encode($data['data']);
-                $this->update(false, ['offset_gmt', 'request_ip_detail']);
+        if (empty($this->offset_gmt) && !empty($this->request_ip)) {
+
+            $ctx = stream_context_create(['http'=>
+                ['timeout' => 5]  //Seconds
+            ]);
+
+            try {
+                //echo Yii::$app->params['checkIpURL']; exit;
+
+                $jsonData = file_get_contents(Yii::$app->params['checkIpURL'] . $this->request_ip, false, $ctx);
+
+
+
+            } catch (\Throwable $throwable) {
+                $jsonData = [];
             }
-        }*/
+
+            if($jsonData) {
+
+                $data = json_decode($jsonData, true);
+
+                //print_r($data); exit;
+
+                if (isset($data['meta']['code']) && $data['meta']['code'] == '200') {
+                    if (isset($data['data']['datetime'])) {
+                        $this->offset_gmt = str_replace(':', '.', $data['data']['datetime']['offset_gmt']);
+                    }
+                    $this->request_ip_detail = json_encode($data['data']);
+                    $this->update(false, ['offset_gmt', 'request_ip_detail']);
+                }
+            }
+        }
 
         if ($insert) {
             LeadFlow::addStateFlow($this);
