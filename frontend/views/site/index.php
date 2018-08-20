@@ -6,18 +6,22 @@ $this->title = 'Index';
 ?>
 <div class="site-index">
 
-    <div class="jumbotron">
-        <h1>Congratulations!</h1>
-
-        <p class="lead">You have successfully opened sales application.</p>
-
-    </div>
-
     <div class="body-content">
 
+        <h2>Dashboard</h2>
         <div class="row">
-            <div class="col-lg-4">
-                <h2>Sales</h2>
+            <div class="col-md-6">
+                <table class="table table-bordered">
+                    <tr>
+                        <th>Server Date Time</th>
+                        <td><?= date('Y-m-d H:i:s')?></td>
+
+                    </tr>
+                    <tr>
+                        <th>Local Date Time</th>
+                        <td><?= Yii::$app->formatter->asDatetime(time())?></td>
+                    </tr>
+                </table>
 
             </div>
 
