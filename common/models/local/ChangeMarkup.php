@@ -1,6 +1,7 @@
 <?php
 namespace common\models\local;
 
+use common\components\BackOffice;
 use common\models\LeadLog;
 use common\models\Quote;
 use yii\base\Exception;
@@ -116,6 +117,20 @@ class ChangeMarkup extends Model
                 $this->addError('quote_uid', $errors);
             } else {
                 $transaction->commit();
+
+                if ($this->quote->lead->called_expert) {
+                    $quote = Quote::findOne(['id' => $this->quote->id]);
+                    $data = $quote->getQuoteInformationForExpert(true);
+                    $response = BackOffice::sendRequest('lead/update-quote', 'POST', json_encode($data));
+                    if ($response['status'] != 'Success' || !empty($response['errors'])) {
+                        \Yii::$app->getSession()->setFlash('warning', sprintf(
+                            'Update info quote [%s] for expert failed! %s',
+                            $quote->uid,
+                            print_r($response['errors'], true)
+                        ));
+                    }
+                }
+
                 return $result;
             }
         } catch (Exception $ex) {

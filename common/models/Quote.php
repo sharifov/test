@@ -2,6 +2,7 @@
 
 namespace common\models;
 
+use common\components\BackOffice;
 use common\models\local\FlightSegment;
 use common\models\local\LeadLogMessage;
 use Yii;
@@ -26,6 +27,8 @@ use yii\base\ErrorException;
  * @property string $fare_type
  * @property string $created
  * @property string $updated
+ * @property boolean $created_by_seller
+ * @property string $employee_name
  *
  * @property QuotePrice[] $quotePrices
  * @property Employee $employee
@@ -160,7 +163,7 @@ class Quote extends \yii\db\ActiveRecord
         return [
             [['uid', 'reservation_dump', 'pcc', 'gds', 'main_airline_code'], 'required'],
             [['lead_id', 'employee_id', 'status', 'check_payment'], 'integer'],
-            [['created', 'updated', 'reservation_dump'], 'safe'],
+            [['created', 'updated', 'reservation_dump', 'created_by_seller', 'employee_name'], 'safe'],
             [['uid', 'record_locator', 'pcc', 'cabin', 'gds', 'trip_type', 'main_airline_code', 'fare_type'], 'string', 'max' => 255],
             [['employee_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['employee_id' => 'id']],
             [['lead_id'], 'exist', 'skipOnError' => true, 'targetClass' => Lead::class, 'targetAttribute' => ['lead_id' => 'id']],
@@ -249,24 +252,6 @@ class Quote extends \yii\db\ActiveRecord
         }
 
         return parent::beforeValidate();
-    }
-
-    public function afterSave($insert, $changedAttributes)
-    {
-        parent::afterSave($insert, $changedAttributes);
-
-        if (!$insert) {
-            //Add logs after changed model attributes
-            $leadLog = new LeadLog((new LeadLogMessage()));
-            $leadLog->logMessage->oldParams = $changedAttributes;
-            $leadLog->logMessage->newParams = array_intersect_key($this->attributes, $changedAttributes);
-            $leadLog->logMessage->title = ($insert)
-                ? 'Create' : 'Update';
-            $leadLog->logMessage->model = sprintf('%s (%s)', $this->formName(), $this->uid);
-            $leadLog->addLog([
-                'lead_id' => $this->lead_id,
-            ]);
-        }
     }
 
     public static function parseDump($string, $validation = true, &$itinerary = [])
@@ -422,6 +407,33 @@ class Quote extends \yii\db\ActiveRecord
         }
 
         return $data;
+    }
+
+    public function afterSave($insert, $changedAttributes)
+    {
+        parent::afterSave($insert, $changedAttributes);
+
+        if (!$insert) {
+            //Add logs after changed model attributes
+            $leadLog = new LeadLog((new LeadLogMessage()));
+            $leadLog->logMessage->oldParams = $changedAttributes;
+            $leadLog->logMessage->newParams = array_intersect_key($this->attributes, $changedAttributes);
+            $leadLog->logMessage->title = ($insert)
+                ? 'Create' : 'Update';
+            $leadLog->logMessage->model = sprintf('%s (%s)', $this->formName(), $this->uid);
+            $leadLog->addLog([
+                'lead_id' => $this->lead_id,
+            ]);
+
+            if ($this->lead->called_expert &&
+                $changedAttributes['status'] != $this->status &&
+                !in_array($this->status, [self::STATUS_APPLIED])
+            ) {
+                $quote = Quote::findOne(['id' => $this->id]);
+                $data = $quote->getQuoteInformationForExpert(true);
+                BackOffice::sendRequest('lead/update-quote', 'POST', json_encode($data));
+            }
+        }
     }
 
     public function getStatusLabel()
@@ -618,42 +630,59 @@ class Quote extends \yii\db\ActiveRecord
         return $result;
     }
 
-    public function getQuoteInformationForExpert()
+    public function getQuoteInformationForExpert($single = false)
     {
-        $information = [
-            'trip_type' => $this->trip_type,
+        $qInformation = [
+            'record_locator' => $this->record_locator,
+            'pcc' => $this->pcc,
             'cabin' => $this->cabin,
-            'adults' => $this->adults,
-            'children' => $this->children,
-            'infants' => $this->infants,
-            'notes_for_experts' => $this->notes_for_experts,
-            'pref_airline' => !empty($this->leadPreferences)
-                ? $this->leadPreferences->pref_airline : '',
-            'number_stops' => !empty($this->leadPreferences)
-                ? $this->leadPreferences->number_stops : '',
-            'clients_budget' => !empty($this->leadPreferences)
-                ? $this->leadPreferences->clients_budget : '',
-            'market_price' => !empty($this->leadPreferences)
-                ? $this->leadPreferences->market_price : '',
-            'itinerary' => []
+            'gds' => $this->gds,
+            'trip_type' => $this->trip_type,
+            'main_airline_code' => $this->main_airline_code,
+            'reservation_dump' => $this->reservation_dump,
+            'status' => $this->status,
+            'check_payment' => $this->check_payment,
+            'fare_type' => $this->fare_type,
+            'employee_name' => ($this->created_by_seller)
+                ? $this->employee->username : $this->employee_name
         ];
 
-        $itinerary = [];
-        foreach ($this->leadFlightSegments as $leadFlightSegment) {
-            $itinerary[] = [
-                'route' => sprintf('%s - %s', $leadFlightSegment->origin, $leadFlightSegment->destination),
-                'date' => $leadFlightSegment->departure
+        $pQInformation = [];
+        foreach ($this->quotePrices as $quotePrice) {
+            $pQInformation[] = [
+                'uid' => $quotePrice->uid,
+                'information' => [
+                    'passenger_type' => $quotePrice->passenger_type,
+                    'selling' => $quotePrice->selling,
+                    'net' => $quotePrice->net,
+                    'fare' => $quotePrice->fare,
+                    'taxes' => $quotePrice->taxes,
+                    'mark_up' => $quotePrice->mark_up,
+                    'extra_mark_up' => $quotePrice->extra_mark_up
+                ]
             ];
         }
 
-        $information['itinerary'] = $itinerary;
-
-        return [
-            'LeadRequest' => [
+        if (!$single) {
+            return [
                 'uid' => $this->uid,
-                'market_info_id' => $this->source_id,
-                'information' => $information
-            ]
-        ];
+                'created_by_seller' => $this->created_by_seller,
+                'information' => $qInformation,
+                'LeadQuotePrice' => $pQInformation
+            ];
+        } else {
+            return [
+                'LeadRequest' => [
+                    'uid' => $this->lead->uid,
+                    'market_info_id' => $this->lead->source->id
+                ],
+                'LeadQuote' => [
+                    'uid' => $this->uid,
+                    'created_by_seller' => $this->created_by_seller,
+                    'information' => $qInformation
+                ],
+                'LeadQuotePrice' => $pQInformation
+            ];
+        }
     }
 }

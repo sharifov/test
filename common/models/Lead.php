@@ -702,6 +702,9 @@ class Lead extends \yii\db\ActiveRecord
         return null;
     }
 
+    /**
+     * @return Quote[]
+     */
     public function getQuotes()
     {
         return Quote::findAll(['lead_id' => $this->id]);
@@ -965,15 +968,21 @@ class Lead extends \yii\db\ActiveRecord
                 'date' => $leadFlightSegment->departure
             ];
         }
-
         $information['itinerary'] = $itinerary;
 
+        $quoteArr = [];
+        foreach ($this->getQuotes() as $quote) {
+            $quoteArr[] = $quote->getQuoteInformationForExpert();
+        }
+
         return [
+            'call_expert' => false,
             'LeadRequest' => [
                 'uid' => $this->uid,
                 'market_info_id' => $this->source_id,
                 'information' => $information
-            ]
+            ],
+            'LeadQuotes' => $quoteArr
         ];
     }
 }

@@ -2,9 +2,14 @@
 
 namespace console\controllers;
 
+use common\components\BackOffice;
 use common\models\Airline;
 use common\models\Airport;
+use common\models\Employee;
+use common\models\EmployeeAcl;
+use common\models\EmployeeContactInfo;
 use common\models\Project;
+use common\models\ProjectEmployeeAccess;
 use common\models\Source;
 use yii\console\Controller;
 use Yii;
@@ -13,7 +18,7 @@ class SyncController extends Controller
 {
     public function actionProjects()
     {
-        $result = $this->sendRequest('default/projects');
+        $result = BackOffice::sendRequest('default/projects');
         if (isset($result['data'])) {
             foreach ($result['data'] as $projectId => $projectAttr) {
                 $project = Project::findOne(['id' => $projectId]);
@@ -43,7 +48,7 @@ class SyncController extends Controller
 
     public function actionAirports()
     {
-        $result = $this->sendRequest('default/airports');
+        $result = BackOffice::sendRequest('default/airports');
         if (isset($result['data'])) {
             foreach ($result['data'] as $airportId => $airportAttr) {
                 $airport = Airport::findOne(['id' => $airportId]);
@@ -62,7 +67,7 @@ class SyncController extends Controller
 
     public function actionAirlines()
     {
-        $result = $this->sendRequest('default/airlines');
+        $result = BackOffice::sendRequest('default/airlines');
         if (isset($result['data'])) {
             foreach ($result['data'] as $airlineId => $airlineAttr) {
                 $airline = Airline::findOne(['id' => $airlineId]);
@@ -79,37 +84,76 @@ class SyncController extends Controller
         }
     }
 
-    private function sendRequest($endpoint, $type = 'GET', $fields = null)
+    public function actionSellers()
     {
-        $url = sprintf('%s/%s', Yii::$app->params['sync']['serverUrl'], $endpoint);
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $url);
-        if ($type == 'POST') {
-            curl_setopt($ch, CURLOPT_POSTFIELDS, $fields);
-            curl_setopt($ch, CURLOPT_POST, true);
+        $data = ['projects' => [6]];
+        $result = BackOffice::sendRequest('old/sellers', 'POST', json_encode($data));
+        if (isset($result['data'])) {
+            foreach ($result['data'] as $empoloyeeId => $empoloyeeeAttr) {
+                $empoloyee = Employee::findOne(['id' => $empoloyeeId]);
+                if ($empoloyee === null) {
+                    $empoloyee = new Employee();
+                    $empoloyee->id = intval($empoloyeeId);
+                }
+                $empoloyee->attributes = $empoloyeeeAttr;
+                if (!$empoloyee->save()) {
+                    var_dump($empoloyee->getErrors());
+                    exit;
+                } else {
+
+                    $empoloyee->role = $empoloyeeeAttr['role'];
+                    $empoloyee->addRole(false);
+
+                    ProjectEmployeeAccess::deleteAll([
+                        'employee_id' => $empoloyee->id
+                    ]);
+
+                    foreach ($data['projects'] as $id) {
+                        $access = new ProjectEmployeeAccess();
+                        $access->employee_id = $empoloyee->id;
+                        $access->project_id = intval($id);
+                        $access->save();
+                    }
+
+                    echo 'Sync success Employee id: ' . $empoloyeeId . '. Role: ' . $empoloyee->role . PHP_EOL;
+                    if (!empty($empoloyeeeAttr['contactInfo'])) {
+                        foreach ($empoloyeeeAttr['contactInfo'] as $projectId => $attr) {
+                            $contactInfo = EmployeeContactInfo::findOne([
+                                'employee_id' => $empoloyeeId,
+                                'project_id' => $attr['project_id']
+                            ]);
+                            if ($contactInfo == null) {
+                                $contactInfo = new  EmployeeContactInfo();
+                            }
+                            $contactInfo->attributes = $attr;
+                            if (!$contactInfo->save()) {
+                                var_dump($contactInfo->getErrors());
+                                exit;
+                            }
+                            echo 'Sync success ContactInfo id: ' . $empoloyeeId . PHP_EOL;
+                        }
+                    }
+
+                    if (!empty($empoloyeeeAttr['aclRules'])) {
+                        foreach ($empoloyeeeAttr['aclRules'] as $key => $attr) {
+                            $acl = EmployeeAcl::findOne([
+                                'employee_id' => $empoloyee->id,
+                                'mask' => $attr['mask']
+                            ]);
+                            if ($acl == null) {
+                                $acl = new  EmployeeAcl();
+                            }
+                            $acl->attributes = $attr;
+                            if (!$acl->save()) {
+                                var_dump($acl->getErrors());
+                                exit;
+                            }
+                            echo 'Sync success Acl id: ' . $empoloyeeId . PHP_EOL;
+                        }
+                    }
+                }
+                echo 'Sync success: ' . $empoloyeeId . PHP_EOL;
+            }
         }
-        curl_setopt($ch, CURLOPT_VERBOSE, true);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, [
-            'Content-Type: application/json',
-            'version: ' . Yii::$app->params['sync']['ver'],
-            'signature: ' . $this->getSignature()
-        ]);
-        $result = curl_exec($ch);
-
-        Yii::warning(sprintf("Request:\n%s\n\nDump:\n%s\n\nResponse:\n%s",
-            print_r($fields, true),
-            print_r(curl_getinfo($ch), true),
-            print_r($result, true)
-        ), 'SyncController->actionProjects()');
-
-        return json_decode($result, true);
-    }
-
-    private function getSignature()
-    {
-        $expired = time() + 3600;
-        $md5 = md5(sprintf('%s:%s:%s', Yii::$app->params['sync']['apiKey'], Yii::$app->params['sync']['ver'], $expired));
-        return implode('.', [md5($md5), $expired, $md5]);
     }
 }

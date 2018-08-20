@@ -2,6 +2,7 @@
 
 namespace frontend\controllers;
 
+use common\components\BackOffice;
 use common\components\GTTGlobal;
 use common\models\LeadLog;
 use common\models\local\ChangeMarkup;
@@ -307,6 +308,19 @@ class QuoteController extends DefaultController
                             $leadLog->addLog([
                                 'lead_id' => $quote->lead_id,
                             ]);
+
+                            if ($lead->called_expert) {
+                                $quote = Quote::findOne(['id' => $quote->id]);
+                                $data = $quote->getQuoteInformationForExpert(true);
+                                $result = BackOffice::sendRequest('lead/update-quote', 'POST', json_encode($data));
+                                if ($result['status'] != 'Success' || !empty($result['errors'])) {
+                                    Yii::$app->getSession()->setFlash('warning', sprintf(
+                                        'Update info quote [%s] for expert failed! %s',
+                                        $quote->uid,
+                                        print_r($result['errors'], true)
+                                    ));
+                                }
+                            }
                         }
                         $response['success'] = $quote->validate();
                         $response['itinerary'] = $quote::createDump($quote->itinerary);

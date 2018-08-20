@@ -19,6 +19,7 @@ use Yii;
  * @property double $extra_mark_up
  * @property string $created
  * @property string $updated
+ * @property string $uid
  *
  * @property string $oldParams
  *
@@ -106,7 +107,7 @@ class QuotePrice extends \yii\db\ActiveRecord
         return [
             [['quote_id'], 'integer'],
             [['selling', 'net', 'fare', 'taxes', 'mark_up', 'extra_mark_up'], 'number'],
-            [['created', 'updated', 'oldParams'], 'safe'],
+            [['created', 'updated', 'oldParams', 'uid'], 'safe'],
             [['passenger_type'], 'string', 'max' => 255],
             [['quote_id'], 'exist', 'skipOnError' => true, 'targetClass' => Quote::class, 'targetAttribute' => ['quote_id' => 'id']],
         ];
@@ -150,6 +151,10 @@ class QuotePrice extends \yii\db\ActiveRecord
     public function afterValidate()
     {
         $this->updated = date('Y-m-d H:i:s');
+
+        if (empty($this->uid)) {
+            $this->uid = uniqid('seller.');
+        }
 
         parent::afterValidate();
     }

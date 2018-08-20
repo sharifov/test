@@ -165,7 +165,7 @@ class EmployeeController extends DefaultController
                 $availableProjects = isset($attr['viewItemsEmployeeAccess'])
                     ? array_keys(json_decode($attr['viewItemsEmployeeAccess'], true))
                     : [];
-                $newEmployeeAccess = isset($attr['employeeAccess'])
+                $newEmployeeAccess = (isset($attr['employeeAccess']) && !empty($attr['employeeAccess']))
                     ? $attr['employeeAccess'] : [];
 
                 $isNew = $model->prepareSave($attr);

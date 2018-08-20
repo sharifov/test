@@ -60,7 +60,7 @@ class LeadFlightSegment extends \yii\db\ActiveRecord
     {
         $this->updated = date('Y-m-d H:i:s');
 
-        if (empty($this->origin)) {
+        //if (!empty($this->origin_label)) {
             $this->origin_label = trim($this->origin_label);
             if (!empty($this->origin_label)) {
                 $regex = '/(.*)[(]+[A-Z]{3}+[)]$/';
@@ -78,9 +78,9 @@ class LeadFlightSegment extends \yii\db\ActiveRecord
                     $this->getAttributeLabel('origin_label')
                 ));
             }
-        }
+        //}
 
-        if (empty($this->destination)) {
+        //if (!empty($this->destination_label)) {
             $this->destination_label = trim($this->destination_label);
             if (!empty($this->destination_label)) {
                 $regex = '/(.*)[(]+[A-Z]{3}+[)]$/';
@@ -98,7 +98,7 @@ class LeadFlightSegment extends \yii\db\ActiveRecord
                     $this->getAttributeLabel('destination_label')
                 ));
             }
-        }
+        //}
 
         $this->flexibility = intval($this->flexibility);
 

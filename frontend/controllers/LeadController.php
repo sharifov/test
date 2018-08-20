@@ -2,6 +2,7 @@
 
 namespace frontend\controllers;
 
+use common\components\BackOffice;
 use common\controllers\DefaultController;
 use common\models\ClientEmail;
 use common\models\ClientPhone;
@@ -212,11 +213,15 @@ class LeadController extends DefaultController
     {
         $lead = Lead::findOne(['id' => $id]);
         if ($lead !== null && !$lead->called_expert) {
-            $lead->called_expert = true;
-            if (!$lead->save()) {
-                Yii::$app->getSession()->setFlash('warning', print_r($lead->getErrors(), true));
-            } else {
+            $data = $lead->getLeadInformationForExpert();
+            $data['call_expert'] = true;
+            $result = BackOffice::sendRequest('lead/update-lead', 'POST', json_encode($data));
+            if ($result['status'] == 'Success' && empty($result['errors'])) {
+                $lead->called_expert = true;
+                $lead->save();
                 Yii::$app->getSession()->setFlash('success', 'Call expert request succeeded');
+            } else {
+                Yii::$app->getSession()->setFlash('warning', print_r($result['errors'], true));
             }
         }
         return $this->redirect(Yii::$app->request->referrer);
@@ -521,6 +526,19 @@ class LeadController extends DefaultController
 
                 $errors = [];
                 if (empty($data['errors']) && $data['load'] && $leadForm->save($errors)) {
+
+                    if ($lead->called_expert) {
+                        $lead = Lead::findOne(['id' => $id]);
+                        $data = $lead->getLeadInformationForExpert();
+                        $result = BackOffice::sendRequest('lead/update-lead', 'POST', json_encode($data));
+                        if ($result['status'] != 'Success' || !empty($result['errors'])) {
+                            Yii::$app->getSession()->setFlash('warning', sprintf(
+                                'Update info lead for expert failed! %s',
+                                print_r($result['errors'], true)
+                            ));
+                        }
+                    }
+
                     return $this->redirect([
                         'quote',
                         'type' => 'processing',
