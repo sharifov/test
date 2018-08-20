@@ -5,7 +5,10 @@ use common\models\ApiLog;
 use common\models\ApiUser;
 use common\models\Project;
 use Yii;
+use yii\filters\auth\CompositeAuth;
 use yii\filters\auth\HttpBasicAuth;
+use yii\filters\auth\HttpBearerAuth;
+use yii\filters\auth\QueryParamAuth;
 use yii\filters\ContentNegotiator;
 use yii\rest\Controller;
 use yii\filters\AccessControl;
@@ -24,14 +27,19 @@ class ApiBaseController extends Controller
     public $apiUser;
     public $apiProject;
 
+    /**
+     *
+     */
     public function init()
     {
         parent::init();
         Yii::$app->user->enableSession = false;
     }
 
+
     /**
-     * @inheritdoc
+     * @return array
+     * @throws NotAcceptableHttpException
      */
     public function behaviors()
     {
@@ -39,9 +47,7 @@ class ApiBaseController extends Controller
 
         $apiKey = Yii::$app->request->post('apiKey');
 
-        $behaviors['authenticator'] = [
-            'class' => HttpBasicAuth::class,
-        ];
+
 
         $behaviors['contentNegotiator'] = [
             'class' => ContentNegotiator::class,
@@ -50,29 +56,40 @@ class ApiBaseController extends Controller
             ],
         ];
 
-
         if($apiKey) {
 
-            $behaviors['authenticator']['auth'] = function () use ($apiKey) {
-
-                $apiProject = Project::find()->where(['api_key' => $apiKey])->one();
-                if(!$apiProject) return NULL;
+            $apiUser = null;
+            $apiProject = Project::find()->where(['api_key' => $apiKey])->one();
+            if($apiProject) {
                 $apiUser = ApiUser::findOne([
                     'au_project_id' => $apiProject->id
                 ]);
 
-                if (!$apiUser) return NULL;
-                if (!$apiUser->au_enabled) {
-                    throw new NotAcceptableHttpException('ApiUser is disabled', 10);
+                if($apiUser) {
+
+                    if($apiUser->au_enabled) {
+                        $this->apiUser = $apiUser;
+                        $this->apiProject = $apiProject;
+                    } else {
+                        throw new NotAcceptableHttpException('ApiUser is disabled', 10);
+                    }
                 }
+            } else {
+                throw new NotAcceptableHttpException('Not init Project', 9);
+            }
 
-                $this->apiUser = $apiUser;
-                $this->apiProject = $apiProject;
+            if(!$apiUser) {
+                throw new NotAcceptableHttpException('Not init User', 8);
+            }
 
-                return $apiUser;
-            };
+            Yii::$app->getUser()->login($apiUser);
+
 
         } else {
+
+            $behaviors['authenticator'] = [
+                'class' => HttpBasicAuth::class,
+            ];
 
             $behaviors['authenticator']['auth'] = function ($username, $password) {
 
