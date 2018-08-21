@@ -85,7 +85,9 @@ class NavItem
                     ],*/
                 ];
             }
-            $items[] = ['label' => '<i class="fa fa-search"></i> Search Order', 'url' => ['search/index']];
+            $items[] = ['label' => '<i class="fa fa-search"></i> Search Order', 'url' => (!strpos(Yii::$app->request->baseUrl, 'admin'))
+                ? ['admin/leads/index']
+                : ['leads/index']];
             $items[] = [
                 'label' => '<i class="fa fa-bar-chart"></i> Reports',
                 'linkOptions' => [

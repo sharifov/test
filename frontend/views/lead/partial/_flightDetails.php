@@ -229,7 +229,7 @@ JS;
 
             <div class="btn-wrapper">
                 <?php
-                $hidden = ($leadForm->getLead()->trip_type != Lead::TYPE_MULTI_DESTINATION) ? 'hidden' : '';
+                $hidden = ($leadForm->getLead()->trip_type != Lead::TRIP_TYPE_MULTI_DESTINATION) ? 'hidden' : '';
                 $title = '<span class="btn-icon"><i class="fa fa-plus"></i></span><span>Add Flight</span>';
                 echo Html::button($title, [
                     'id' => 'lead-new-segment-button',

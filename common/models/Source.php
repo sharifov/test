@@ -3,6 +3,7 @@
 namespace common\models;
 
 use Yii;
+use yii\helpers\ArrayHelper;
 
 /**
  * This is the model class for table "sources".
@@ -58,5 +59,14 @@ class Source extends \yii\db\ActiveRecord
     public function getProject()
     {
         return $this->hasOne(Project::class, ['id' => 'project_id']);
+    }
+
+    /**
+     * @return array
+     */
+    public static function getList() : array
+    {
+        $data = self::find()->orderBy(['name' => SORT_ASC])->asArray()->all();
+        return ArrayHelper::map($data,'id', 'name', 'project_id');
     }
 }

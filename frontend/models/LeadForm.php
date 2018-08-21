@@ -187,7 +187,7 @@ class LeadForm extends Model
     public function setLead($leadModel)
     {
         if ($leadModel->isNewRecord) {
-            $leadModel->trip_type = $leadModel::TYPE_ROUND_TRIP;
+            $leadModel->trip_type = $leadModel::TRIP_TYPE_ROUND_TRIP;
             $leadModel->cabin = $leadModel::CABIN_ECONOMY;
             $leadModel->adults = 1;
             $leadModel->children = 0;
@@ -297,7 +297,7 @@ class LeadForm extends Model
                 $lead = $this->getLead();
                 $lead->client_id = $client->id;
                 if (count($this->getLeadFlightSegment()) == 1) {
-                    $lead->trip_type = Lead::TYPE_ONE_WAY;
+                    $lead->trip_type = Lead::TRIP_TYPE_ONE_WAY;
                 }
                 if (!$lead->save()) {
                     $hasErrors = true;
