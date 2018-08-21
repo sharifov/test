@@ -4,6 +4,7 @@ namespace common\models;
 
 use common\models\local\ContactInfo;
 use Yii;
+use yii\helpers\ArrayHelper;
 
 /**
  * This is the model class for table "projects".
@@ -83,5 +84,14 @@ class Project extends \yii\db\ActiveRecord
     public function getEmailTemplates()
     {
         return ProjectEmailTemplate::findAll(['project_id' => $this->id]);
+    }
+
+    /**
+     * @return array
+     */
+    public static function getList() : array
+    {
+        $data = self::find()->orderBy(['name' => SORT_ASC])->asArray()->all();
+        return ArrayHelper::map($data,'id', 'name');
     }
 }

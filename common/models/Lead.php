@@ -5,7 +5,10 @@ namespace common\models;
 use common\components\EmailService;
 use common\models\local\LeadLogMessage;
 use Yii;
+use yii\behaviors\TimestampBehavior;
 use yii\data\ActiveDataProvider;
+use yii\db\ActiveQuery;
+use yii\db\ActiveRecord;
 use yii\db\Query;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
@@ -44,14 +47,21 @@ use yii\helpers\Html;
  * @property Source $source
  * @property Project $project
  */
-class Lead extends \yii\db\ActiveRecord
+class Lead extends ActiveRecord
 {
-    const
-        TYPE_ONE_WAY = 'OW',
-        TYPE_ROUND_TRIP = 'RT',
-        TYPE_MULTI_DESTINATION = 'MC';
+    public CONST
+        TRIP_TYPE_ONE_WAY = 'OW',
+        TRIP_TYPE_ROUND_TRIP = 'RT',
+        TRIP_TYPE_MULTI_DESTINATION = 'MC';
 
-    const
+
+    public CONST TRIP_TYPE_LIST = [
+        self::TRIP_TYPE_ROUND_TRIP => 'Round Trip',
+        self::TRIP_TYPE_ONE_WAY => 'One Way',
+        self::TRIP_TYPE_MULTI_DESTINATION => 'Multidestination'
+    ];
+
+    public CONST
         STATUS_PENDING = 1,
         STATUS_PROCESSING = 2,
         STATUS_REJECT = 4,
@@ -62,19 +72,48 @@ class Lead extends \yii\db\ActiveRecord
         STATUS_BOOKED = 12,
         STATUS_SNOOZE = 13;
 
-    const
+    public CONST STATUS_LIST = [
+        self::STATUS_PENDING => 'Pending',
+        self::STATUS_PROCESSING => 'Processing',
+        self::STATUS_FOLLOW_UP => 'Follow Up',
+        self::STATUS_ON_HOLD => 'Hold On',
+        self::STATUS_SOLD => 'Sold',
+        self::STATUS_TRASH => 'Trash',
+        self::STATUS_BOOKED => 'Booked',
+        self::STATUS_SNOOZE => 'Snooze',
+    ];
+
+    public CONST STATUS_CLASS_LIST = [
+        self::STATUS_PENDING => 'pending',
+        self::STATUS_PROCESSING => 'processing',
+        self::STATUS_FOLLOW_UP => 'follow_up',
+        self::STATUS_ON_HOLD => 'on_hold',
+        self::STATUS_SOLD => 'sold',
+        self::STATUS_TRASH => 'trash',
+        self::STATUS_BOOKED => 'booked',
+        self::STATUS_SNOOZE => 'snooze',
+    ];
+
+    public CONST
         CABIN_ECONOMY = 'E',
         CABIN_BUSINESS = 'B',
         CABIN_FIRST = 'F',
         CABIN_PREMIUM = 'P';
 
-    const
+    public CONST CABIN_LIST = [
+        self::CABIN_ECONOMY => 'Economy',
+        self::CABIN_PREMIUM => 'Premium eco',
+        self::CABIN_BUSINESS => 'Business',
+        self::CABIN_FIRST => 'First',
+    ];
+
+    public CONST
         DIV_GRID_WITH_OUT_EMAIL = 1,
         DIV_GRID_WITH_EMAIL = 2,
         DIV_GRID_SEND_QUOTES = 3,
         DIV_GRID_IN_SNOOZE = 4;
 
-    CONST SCENARIO_API = 'scenario_api';
+    public CONST SCENARIO_API = 'scenario_api';
 
     public static function getDivs($div = null)
     {
@@ -311,18 +350,75 @@ class Lead extends \yii\db\ActiveRecord
 
     public static function getCabin($cabin = null)
     {
-        $mapping = [
-            self::CABIN_ECONOMY => 'Economy',
-            self::CABIN_PREMIUM => 'Premium eco',
-            self::CABIN_BUSINESS => 'Business',
-            self::CABIN_FIRST => 'First',
-        ];
+        $mapping = self::CABIN_LIST;
 
         if ($cabin === null) {
             return $mapping;
         }
 
         return isset($mapping[$cabin]) ? $mapping[$cabin] : $cabin;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function rules()
+    {
+        return [
+
+            [['trip_type', 'cabin'], 'required'],
+            [['adults', 'children', 'infants', 'source_id'], 'required'], //'except' => self::SCENARIO_API],
+
+            [['client_id', 'employee_id', 'status', 'project_id', 'source_id', 'rating'], 'integer'],
+            [['adults', 'children', 'infants'], 'integer', 'max' => 9],
+            [['adults'], 'integer', 'min' => 1],
+            [['notes_for_experts'], 'string'],
+            [['created', 'updated', 'offset_gmt', 'request_ip', 'request_ip_detail', 'snooze_for',
+                'called_expert', 'discount_id', 'bo_flight_id'], 'safe'],
+            [['uid'], 'string', 'max' => 255],
+            [['trip_type'], 'string', 'max' => 2],
+            [['cabin'], 'string', 'max' => 1],
+            [['client_id'], 'exist', 'skipOnError' => true, 'targetClass' => Client::class, 'targetAttribute' => ['client_id' => 'id']],
+            [['employee_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['employee_id' => 'id']],
+        ];
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function attributeLabels(): array
+    {
+        return [
+            'id' => 'ID',
+            'client_id' => 'Client ID',
+            'employee_id' => 'Employee ID',
+            'status' => 'Status',
+            'uid' => 'Uid',
+            'project_id' => 'Project ID',
+            'source_id' => 'Source ID',
+            'trip_type' => 'Trip Type',
+            'cabin' => 'Cabin',
+            'adults' => 'Adults',
+            'children' => 'Children',
+            'infants' => 'Infants',
+            'notes_for_experts' => 'Notes for Expert',
+            'created' => 'Created',
+            'updated' => 'Updated',
+        ];
+    }
+
+    public function behaviors(): array
+    {
+        return [
+            'timestamp' => [
+                'class' => TimestampBehavior::class,
+                'attributes' => [
+                    ActiveRecord::EVENT_BEFORE_INSERT => ['created', 'updated'],
+                    ActiveRecord::EVENT_BEFORE_UPDATE => ['updated'],
+                ],
+                'value' => date('Y-m-d H:i:s') //new Expression('NOW()'),
+            ],
+        ];
     }
 
     public function permissionsView()
@@ -452,68 +548,13 @@ class Lead extends \yii\db\ActiveRecord
         return $label;
     }
 
-    public static function getStatus($status)
-    {
-        $mapping = [
-            self::STATUS_PENDING => 'Pending',
-            self::STATUS_PROCESSING => 'Processing',
-            self::STATUS_FOLLOW_UP => 'Follow Up',
-            self::STATUS_ON_HOLD => 'Hold On',
-            self::STATUS_SOLD => 'Sold',
-            self::STATUS_TRASH => 'Trash',
-            self::STATUS_BOOKED => 'Booked',
-            self::STATUS_SNOOZE => 'Snooze',
-        ];
-
-        return $mapping[$status];
-    }
-
     /**
-     * {@inheritdoc}
+     * @param $status_id
+     * @return string
      */
-    public function rules()
+    public static function getStatus($status_id): string
     {
-        return [
-            [['client_id', 'employee_id', 'status', 'project_id', 'source_id', 'rating'], 'integer'],
-            [['trip_type', 'cabin'], 'required'],
-
-            [['adults', 'children', 'infants', 'source_id'], 'required'], //'except' => self::SCENARIO_API],
-
-            [['adults', 'children', 'infants'], 'integer', 'max' => 9],
-            [['adults'], 'integer', 'min' => 1],
-            [['notes_for_experts'], 'string'],
-            [['created', 'updated', 'offset_gmt', 'request_ip', 'request_ip_detail', 'snooze_for',
-                'called_expert', 'discount_id', 'bo_flight_id'], 'safe'],
-            [['uid'], 'string', 'max' => 255],
-            [['trip_type'], 'string', 'max' => 2],
-            [['cabin'], 'string', 'max' => 1],
-            [['client_id'], 'exist', 'skipOnError' => true, 'targetClass' => Client::class, 'targetAttribute' => ['client_id' => 'id']],
-            [['employee_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['employee_id' => 'id']],
-        ];
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function attributeLabels()
-    {
-        return [
-            'id' => 'ID',
-            'client_id' => 'Client ID',
-            'employee_id' => 'Employee ID',
-            'status' => 'Status',
-            'uid' => 'Uid',
-            'project_id' => 'Project ID',
-            'source_id' => 'Source ID',
-            'trip_type' => 'Trip Type',
-            'cabin' => 'Cabin',
-            'adults' => 'Adults',
-            'children' => 'Children',
-            'infants' => 'Infants',
-            'notes_for_experts' => 'Notes for Expert',
-            'created' => 'Created',
-            'updated' => 'Updated',
-        ];
+        return self::STATUS_LIST[$status_id] ?? '-';
     }
 
 
@@ -523,7 +564,7 @@ class Lead extends \yii\db\ActiveRecord
 
         if (empty($this->offset_gmt) && !empty($this->request_ip)) {
 
-            $ctx = stream_context_create(['http'=>
+            $ctx = stream_context_create(['http' =>
                 ['timeout' => 5]  //Seconds
             ]);
 
@@ -533,12 +574,11 @@ class Lead extends \yii\db\ActiveRecord
                 $jsonData = file_get_contents(Yii::$app->params['checkIpURL'] . $this->request_ip, false, $ctx);
 
 
-
             } catch (\Throwable $throwable) {
                 $jsonData = [];
             }
 
-            if($jsonData) {
+            if ($jsonData) {
 
                 $data = json_decode($jsonData, true);
 
@@ -734,7 +774,7 @@ class Lead extends \yii\db\ActiveRecord
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getLeadFlightSegments()
+    public function getLeadFlightSegments(): ActiveQuery
     {
         return $this->hasMany(LeadFlightSegment::class, ['lead_id' => 'id']);
     }
@@ -742,7 +782,7 @@ class Lead extends \yii\db\ActiveRecord
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getLeadPreferences()
+    public function getLeadPreferences(): ActiveQuery
     {
         return $this->hasOne(LeadPreferences::class, ['lead_id' => 'id']);
     }
@@ -750,7 +790,7 @@ class Lead extends \yii\db\ActiveRecord
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getClient()
+    public function getClient(): ActiveQuery
     {
         return $this->hasOne(Client::class, ['id' => 'client_id']);
     }
@@ -758,7 +798,7 @@ class Lead extends \yii\db\ActiveRecord
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getEmployee()
+    public function getEmployee(): ActiveQuery
     {
         return $this->hasOne(Employee::class, ['id' => 'employee_id']);
     }
@@ -766,7 +806,7 @@ class Lead extends \yii\db\ActiveRecord
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getSource()
+    public function getSource(): ActiveQuery
     {
         return $this->hasOne(Source::class, ['id' => 'source_id']);
     }
@@ -774,12 +814,39 @@ class Lead extends \yii\db\ActiveRecord
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getProject()
+    public function getProject(): ActiveQuery
     {
         return $this->hasOne(Project::class, ['id' => 'project_id']);
     }
 
-    public function beforeValidate()
+
+    public function beforeSave($insert): bool
+    {
+        if (parent::beforeSave($insert)) {
+
+            if ($insert) {
+                //$this->created = date('Y-m-d H:i:s');
+                if (!empty($this->project_id) && empty($this->source_id)) {
+                    $project = Project::findOne(['id' => $this->project_id]);
+                    if ($project !== null) {
+                        $this->source_id = $project->sources[0]->id;
+                    }
+                }
+            } else {
+                //$this->updated = date('Y-m-d H:i:s');
+            }
+
+            $this->adults = (int)$this->adults;
+            $this->children = (int)$this->children;
+            $this->infants = (int)$this->infants;
+
+            return true;
+        }
+        return false;
+    }
+
+
+    /*public function beforeValidate()
     {
         $this->updated = date('Y-m-d H:i:s');
 
@@ -798,7 +865,7 @@ class Lead extends \yii\db\ActiveRecord
         $this->infants = intval($this->infants);
 
         return parent::beforeValidate();
-    }
+    }*/
 
     public function afterValidate()
     {
@@ -955,11 +1022,7 @@ class Lead extends \yii\db\ActiveRecord
 
     public static function getFlightType($flightType = null)
     {
-        $mapping = [
-            self::TYPE_ROUND_TRIP => 'Round Trip',
-            self::TYPE_ONE_WAY => 'One Way',
-            self::TYPE_MULTI_DESTINATION => 'Multidestination'
-        ];
+        $mapping = self::TRIP_TYPE_LIST;
 
         if ($flightType === null) {
             return $mapping;
@@ -1012,5 +1075,14 @@ class Lead extends \yii\db\ActiveRecord
             ],
             'LeadQuotes' => $quoteArr
         ];
+    }
+
+    /**
+     * @return string
+     */
+    public function getLabelClass(): string
+    {
+        $class = self::STATUS_CLASS_LIST[$this->status] ?? 'default';
+        return 'label-' . $class;
     }
 }

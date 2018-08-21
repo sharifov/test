@@ -505,7 +505,7 @@ class Quote extends \yii\db\ActiveRecord
         $segments = self::parseDump($this->reservation_dump, false);
         foreach ($segments as $key => $segment) {
             $segment['cabin'] = $this->cabin;
-            if ($this->trip_type != Lead::TYPE_ONE_WAY) {
+            if ($this->trip_type != Lead::TRIP_TYPE_ONE_WAY) {
                 if ($key != 0) {
                     $lastSegment = isset($segments[$key - 1])
                         ? $segments[$key - 1] : $segments[$key];
@@ -556,8 +556,8 @@ class Quote extends \yii\db\ActiveRecord
             );
         }
         if ($title !== null) {
-            if ($this->trip_type != Lead::TYPE_ONE_WAY) {
-                if ($this->trip_type == Lead::TYPE_ROUND_TRIP) {
+            if ($this->trip_type != Lead::TRIP_TYPE_ONE_WAY) {
+                if ($this->trip_type == Lead::TRIP_TYPE_ROUND_TRIP) {
                     $exp = explode('-', $trips[0]['title']);
                     if (isset($exp[0])) {
                         $title = $trips[0]['title'] . ' - ' . $exp[0];

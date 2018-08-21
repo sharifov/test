@@ -14,7 +14,7 @@ class AppAsset extends AssetBundle
     public $css = [
         'css/font-awesome.css',
         'css/style.css?v=1.7',
-        'css/site.css?v=1.1',
+        'css/site.css?v=1.2',
     ];
     public $js = [
         '/js/util.js?v=1.5'

@@ -337,4 +337,13 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     {
         return ArrayHelper::map(Yii::$app->authManager->getRolesByUser($this->id), 'name', 'description');
     }
+
+    /**
+     * @return array
+     */
+    public static function getList() : array
+    {
+        $data = self::find()->orderBy(['username' => SORT_ASC])->asArray()->all();
+        return ArrayHelper::map($data,'id', 'username');
+    }
 }

@@ -32,7 +32,7 @@ class GTTGlobal
     public static function getOnlineQuotes(Lead $lead, $gdsCode)
     {
         $returned = '';
-        if ($lead->trip_type == Lead::TYPE_ROUND_TRIP) {
+        if ($lead->trip_type == Lead::TRIP_TYPE_ROUND_TRIP) {
             $returned = date('m/d/Y', strtotime($lead->leadFlightSegments[0]->departure));
         }
 
@@ -67,9 +67,9 @@ class GTTGlobal
     protected static function getType($type)
     {
         $mapping = [
-            Lead::TYPE_ROUND_TRIP => 'roundtrip',
-            Lead::TYPE_ONE_WAY => 'oneway',
-            Lead::TYPE_MULTI_DESTINATION => 'openjaw'
+            Lead::TRIP_TYPE_ROUND_TRIP => 'roundtrip',
+            Lead::TRIP_TYPE_ONE_WAY => 'oneway',
+            Lead::TRIP_TYPE_MULTI_DESTINATION => 'openjaw'
         ];
         return $mapping[$type];
     }
