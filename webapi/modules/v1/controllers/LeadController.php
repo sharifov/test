@@ -324,17 +324,17 @@ class LeadController extends ApiBaseController
         if(!$lead->uid) $lead->uid = uniqid();
 
 
-        if(!$lead->trip_type) $lead->trip_type = Lead::TYPE_ROUND_TRIP;
+        if(!$lead->trip_type) $lead->trip_type = Lead::TRIP_TYPE_ROUND_TRIP;
 
         if($modelLead->flights) {
             $flightCount = count($modelLead->flights);
 
             if($flightCount === 1) {
-                $lead->trip_type = Lead::TYPE_ONE_WAY;
+                $lead->trip_type = Lead::TRIP_TYPE_ONE_WAY;
             } elseif($flightCount === 2) {
-                $lead->trip_type = Lead::TYPE_ROUND_TRIP;
+                $lead->trip_type = Lead::TRIP_TYPE_ROUND_TRIP;
             } else {
-                $lead->trip_type = Lead::TYPE_MULTI_DESTINATION;
+                $lead->trip_type = Lead::TRIP_TYPE_MULTI_DESTINATION;
             }
         }
 
