@@ -985,7 +985,8 @@ class Lead extends \yii\db\ActiveRecord
                 ? $this->leadPreferences->clients_budget : '',
             'market_price' => !empty($this->leadPreferences)
                 ? $this->leadPreferences->market_price : '',
-            'itinerary' => []
+            'itinerary' => [],
+            'agent_name' => $this->employee->username
         ];
 
         $itinerary = [];
