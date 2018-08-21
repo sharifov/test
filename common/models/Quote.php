@@ -162,8 +162,8 @@ class Quote extends \yii\db\ActiveRecord
     {
         return [
             [['uid', 'reservation_dump', 'pcc', 'gds', 'main_airline_code'], 'required'],
-            [['lead_id', 'employee_id', 'status', 'check_payment'], 'integer'],
-            [['created', 'updated', 'reservation_dump', 'created_by_seller', 'employee_name'], 'safe'],
+            [['lead_id', 'status', 'check_payment'], 'integer'],
+            [['created', 'updated', 'reservation_dump', 'created_by_seller', 'employee_name', 'employee_id'], 'safe'],
             [['uid', 'record_locator', 'pcc', 'cabin', 'gds', 'trip_type', 'main_airline_code', 'fare_type'], 'string', 'max' => 255],
             [['employee_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['employee_id' => 'id']],
             [['lead_id'], 'exist', 'skipOnError' => true, 'targetClass' => Lead::class, 'targetAttribute' => ['lead_id' => 'id']],
@@ -232,8 +232,10 @@ class Quote extends \yii\db\ActiveRecord
     public function beforeValidate()
     {
         if ($this->isNewRecord) {
-            $this->uid = uniqid();
-            $this->employee_id = Yii::$app->user->identity->getId();
+            $this->uid = empty($this->uid) ? uniqid() : $this->uid;
+            if (!Yii::$app->user->isGuest && Yii::$app->user->identityClass != 'webapi\models\ApiUser') {
+                $this->employee_id = Yii::$app->user->identity->getId();
+            }
         }
 
         $dumpParser = self::parseDump($this->reservation_dump, true, $this->itinerary);
@@ -425,13 +427,15 @@ class Quote extends \yii\db\ActiveRecord
                 'lead_id' => $this->lead_id,
             ]);
 
-            if ($this->lead->called_expert &&
-                $changedAttributes['status'] != $this->status &&
-                !in_array($this->status, [self::STATUS_APPLIED])
-            ) {
-                $quote = Quote::findOne(['id' => $this->id]);
-                $data = $quote->getQuoteInformationForExpert(true);
-                BackOffice::sendRequest('lead/update-quote', 'POST', json_encode($data));
+            if (isset($changedAttributes['status'])) {
+                if ($this->lead->called_expert &&
+                    $changedAttributes['status'] != $this->status &&
+                    !in_array($this->status, [self::STATUS_APPLIED])
+                ) {
+                    $quote = Quote::findOne(['id' => $this->id]);
+                    $data = $quote->getQuoteInformationForExpert(true);
+                    BackOffice::sendRequest('lead/update-quote', 'POST', json_encode($data));
+                }
             }
         }
     }

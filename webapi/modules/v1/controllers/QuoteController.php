@@ -2,7 +2,9 @@
 namespace webapi\modules\v1\controllers;
 
 use common\models\EmployeeContactInfo;
+use common\models\Lead;
 use common\models\Quote;
+use common\models\QuotePrice;
 use Yii;
 use yii\web\BadRequestHttpException;
 use yii\web\NotFoundHttpException;
@@ -260,5 +262,182 @@ class QuoteController extends ApiBaseController
         return $responseData;
     }
 
+    /**
+     * @return mixed
+     * @throws BadRequestHttpException
+     * @throws NotFoundHttpException
+     * @throws UnprocessableEntityHttpException
+     * @throws \yii\db\Exception
+     */
+    public function actionUpdate()
+    {
+        $this->checkPost();
+        $apiLog = $this->startApiLog($this->action->uniqueId);
 
+        $quoteAttributes = Yii::$app->request->post((new Quote())->formName());
+        if (empty($quoteAttributes)) {
+            throw new BadRequestHttpException((new Quote())->formName() . ' is required', 1);
+        }
+
+        $model = Quote::findOne(['uid' => $quoteAttributes['uid']]);
+        if(!$model) {
+            throw new NotFoundHttpException('Not found Quote UID: '.$quoteAttributes['uid'], 2);
+        }
+
+        $response = [
+            'status' => 'Failed',
+            'errors' => []
+        ];
+
+        $transaction = Yii::$app->db->beginTransaction();
+        try {
+            $model->attributes = $quoteAttributes;
+            $model->save();
+
+            $quotePricesAttributes = Yii::$app->request->post((new QuotePrice())->formName());
+            if (!empty($quotePricesAttributes)) {
+                foreach ($quotePricesAttributes as $quotePriceAttributes) {
+                    $quotePrice = QuotePrice::findOne([
+                        'uid' => $quotePriceAttributes['uid']
+                    ]);
+                    if ($quotePrice) {
+                        $quotePrice->attributes = $quotePriceAttributes;
+                        if (!$quotePrice->save()) {
+                            $response['errors'][] = $quotePrice->getErrors();
+                        }
+                    }
+                }
+            }
+
+            if (!$model->hasErrors()) {
+                if ($model->status == Quote::STATUS_APPLIED) {
+                    $model->lead->status = Lead::STATUS_BOOKED;
+                    $model->lead->save();
+                }
+                $response['status'] = 'Success';
+                $transaction->commit();
+            } else {
+                $response['errors'][] = $model->getErrors();
+                $transaction->rollBack();
+            }
+        } catch (\Throwable $e) {
+
+            Yii::error($e->getTraceAsString(), 'API:Quote:update:try');
+            if(Yii::$app->request->get('debug')) $message = ($e->getTraceAsString());
+            else $message = $e->getMessage().' (code:'.$e->getCode().', line: '.$e->getLine().')';
+
+            $response['error'] = $message;
+            $response['errors'] = $message;
+            $response['error_code'] = 30;
+
+            $transaction->rollBack();
+        }
+
+        $responseData = $response;
+        $responseData = $apiLog->endApiLog($responseData);
+
+        if(isset($response['error']) && $response['error']) {
+            $json = @json_encode($response['error']);
+            if(isset($response['error_code']) && $response['error_code']) $error_code = $response['error_code'];
+            else $error_code = 0;
+            throw new UnprocessableEntityHttpException($json, $error_code);
+        }
+
+        return $responseData;
+    }
+
+    /**
+     * @return mixed
+     * @throws BadRequestHttpException
+     * @throws NotFoundHttpException
+     * @throws UnprocessableEntityHttpException
+     * @throws \yii\db\Exception
+     */
+    public function actionCreate()
+    {
+        $this->checkPost();
+        $apiLog = $this->startApiLog($this->action->uniqueId);
+
+        $quoteAttributes = Yii::$app->request->post((new Quote())->formName());
+        if (empty($quoteAttributes)) {
+            throw new BadRequestHttpException((new Quote())->formName() . ' is required', 1);
+        }
+
+        $leadAttributes = Yii::$app->request->post((new Lead())->formName());
+        if (empty($leadAttributes)) {
+            throw new BadRequestHttpException((new Lead())->formName() . ' is required', 1);
+        }
+
+        $lead = Lead::findOne([
+            'uid' => $leadAttributes['uid'],
+            'source_id' => $leadAttributes['market_info_id']
+        ]);
+        if(!$lead) {
+            throw new NotFoundHttpException('Not found Lead UID: '.$leadAttributes['uid'], 2);
+        }
+
+        $model = Quote::findOne(['uid' => $quoteAttributes['uid']]);
+        if($model) {
+            throw new NotFoundHttpException('Already Exist Quote UID: '.$quoteAttributes['uid'], 2);
+        } else {
+            $model = new Quote();
+        }
+
+        $response = [
+            'status' => 'Failed',
+            'errors' => []
+        ];
+
+        $transaction = Yii::$app->db->beginTransaction();
+        try {
+            $model->attributes = $quoteAttributes;
+            $model->lead_id = $lead->id;
+            $model->save();
+
+            $quotePricesAttributes = Yii::$app->request->post((new QuotePrice())->formName());
+            if (!empty($quotePricesAttributes)) {
+                foreach ($quotePricesAttributes as $quotePriceAttributes) {
+                    $quotePrice = new QuotePrice();
+                    if ($quotePrice) {
+                        $quotePrice->attributes = $quotePriceAttributes;
+                        $quotePrice->quote_id = $model->id;
+                        if (!$quotePrice->save()) {
+                            $response['errors'][] = $quotePrice->getErrors();
+                        }
+                    }
+                }
+            }
+
+            if (!$model->hasErrors()) {
+                $response['status'] = 'Success';
+                $transaction->commit();
+            } else {
+                $response['errors'][] = $model->getErrors();
+                $transaction->rollBack();
+            }
+        } catch (\Throwable $e) {
+
+            Yii::error($e->getTraceAsString(), 'API:Quote:create:try');
+            if(Yii::$app->request->get('debug')) $message = ($e->getTraceAsString());
+            else $message = $e->getMessage().' (code:'.$e->getCode().', line: '.$e->getLine().')';
+
+            $response['error'] = $message;
+            $response['errors'] = $message;
+            $response['error_code'] = 30;
+
+            $transaction->rollBack();
+        }
+
+        $responseData = $response;
+        $responseData = $apiLog->endApiLog($responseData);
+
+        if(isset($response['error']) && $response['error']) {
+            $json = @json_encode($response['error']);
+            if(isset($response['error_code']) && $response['error_code']) $error_code = $response['error_code'];
+            else $error_code = 0;
+            throw new UnprocessableEntityHttpException($json, $error_code);
+        }
+
+        return $responseData;
+    }
 }
