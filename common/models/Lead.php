@@ -917,18 +917,18 @@ class Lead extends ActiveRecord
         }
 
         $key = sprintf('%s_%s', uniqid(), $email);
-        $fileName = sprintf('_%s_%s.php', str_replace(' ', '_', strtolower($this->source->project->name)), $key);
+        $fileName = sprintf('_%s_%s.php', str_replace(' ', '_', strtolower($this->project->name)), $key);
         $path = sprintf('%s/tmpEmail/quote/%s', Yii::$app->getViewPath(), $fileName);
 
         $template = ProjectEmailTemplate::findOne([
             'type' => ProjectEmailTemplate::TYPE_EMAIL_OFFER,
-            'project_id' => $this->source->project_id
+            'project_id' => $this->project_id
         ]);
 
         if ($template === null) {
             $result['errors'] = sprintf('Email Template [%s] for project [%s] not fond.',
                 ProjectEmailTemplate::getTypes(ProjectEmailTemplate::TYPE_EMAIL_OFFER),
-                $this->source->project->name
+                $this->project->name
             );
             return $result;
         }
