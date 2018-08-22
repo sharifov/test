@@ -955,7 +955,7 @@ class Lead extends ActiveRecord
 
         $sellerContactInfo = EmployeeContactInfo::findOne([
             'employee_id' => $this->employee->id,
-            'project_id' => $this->source->project_id
+            'project_id' => $this->project_id
         ]);
 
         $body = Yii::$app->getView()->render($view, [
@@ -971,7 +971,7 @@ class Lead extends ActiveRecord
 
         if (!empty($template->layout_path)) {
             $body = \Yii::$app->getView()->renderFile($template->layout_path, [
-                'project' => $this->source->project,
+                'project' => $this->project,
                 'agentName' => ucfirst($this->employee->username),
                 'employee' => $this->employee,
                 'sellerContactInfo' => $sellerContactInfo,
