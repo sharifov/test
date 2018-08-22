@@ -912,7 +912,7 @@ class Lead extends ActiveRecord
         }
 
         if (empty($models)) {
-            $result['errors'] = sprintf('Quotes not fond. UID: [%s]', implode(', ', $quotes));
+            $result['errors'][] = sprintf('Quotes not fond. UID: [%s]', implode(', ', $quotes));
             return $result;
         }
 
@@ -926,7 +926,7 @@ class Lead extends ActiveRecord
         ]);
 
         if ($template === null) {
-            $result['errors'] = sprintf('Email Template [%s] for project [%s] not fond.',
+            $result['errors'][] = sprintf('Email Template [%s] for project [%s] not fond.',
                 ProjectEmailTemplate::getTypes(ProjectEmailTemplate::TYPE_EMAIL_OFFER),
                 $this->project->name
             );
