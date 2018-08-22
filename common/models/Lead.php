@@ -990,7 +990,7 @@ class Lead extends ActiveRecord
         ];
 
         $errors = [];
-        $isSend = EmailService::send($email, $this->source->project, $credential, $subject, $body, $errors);
+        $isSend = EmailService::send($email, $this->project, $credential, $subject, $body, $errors);
         $message = ($isSend)
             ? sprintf('Sending email - \'Offer\' succeeded! <br/>Emails: %s <br/>Quotes: %s',
                 implode(', ', [$email]),
