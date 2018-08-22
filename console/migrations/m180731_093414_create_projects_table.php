@@ -38,7 +38,7 @@ class m180731_093414_create_projects_table extends Migration
 
         $out = '';
         exec(dirname(Yii::getAlias('@app')) . '/yii sync/projects', $out);
-        echo $out . PHP_EOL;
+        var_dump($out);
     }
 
     /**
