@@ -905,7 +905,7 @@ class LeadController extends ApiBaseController
                     $aplliend = $lead->getAppliedAlternativeQuotes();
                     if ($aplliend !== null) {
                         $aplliend->record_locator = $leadAttributes['additional_information']['pnr'];
-                        $aplliend->save();
+                        $aplliend->save(false);
                         if ($aplliend->hasErrors()) {
                             $response['errors'][] = $aplliend->getErrors();
                         }
