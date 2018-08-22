@@ -33,7 +33,7 @@ HTML;
     <div class="panel-body">
         <?php if (Yii::$app->user->identity->role == 'admin') : ?>
             <div class="mb-20">
-                <?= Html::a('Sync Airlines', '#', [
+                <?= Html::a('Sync Airports', '#', [
                     'class' => 'btn-success btn sync',
                     'data-url' => Url::to([
                         'settings/sync',
