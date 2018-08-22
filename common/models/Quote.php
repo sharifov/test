@@ -7,6 +7,8 @@ use common\models\local\FlightSegment;
 use common\models\local\LeadLogMessage;
 use Yii;
 use yii\base\ErrorException;
+use yii\behaviors\TimestampBehavior;
+use yii\db\ActiveRecord;
 
 /**
  * This is the model class for table "quotes".
@@ -43,6 +45,12 @@ class Quote extends \yii\db\ActiveRecord
         GDS_AMADEUS = 'A',
         GDS_WORLDSPAN = 'W';
 
+    public CONST GDS_LIST = [
+        self::GDS_SABRE => 'Sabre',
+        self::GDS_AMADEUS => 'Amadeus',
+        self::GDS_WORLDSPAN => 'WorldSpan',
+    ];
+
     const
         FARE_TYPE_PUB = 'PUB',
         FARE_TYPE_SR = 'SR',
@@ -56,6 +64,15 @@ class Quote extends \yii\db\ActiveRecord
         STATUS_DECLINED = 3,
         STATUS_SEND = 4,
         STATUS_OPENED = 5;
+
+
+    public CONST STATUS_LIST = [
+        self::STATUS_CREATED => 'Created',
+        self::STATUS_APPLIED => 'Applied',
+        self::STATUS_DECLINED => 'Declined',
+        self::STATUS_SEND => 'Send',
+        self::STATUS_OPENED => 'Opened'
+    ];
 
     public $itinerary = [];
 
@@ -165,9 +182,36 @@ class Quote extends \yii\db\ActiveRecord
             [['lead_id', 'status', 'check_payment'], 'integer'],
             [['created', 'updated', 'reservation_dump', 'created_by_seller', 'employee_name', 'employee_id'], 'safe'],
             [['uid', 'record_locator', 'pcc', 'cabin', 'gds', 'trip_type', 'main_airline_code', 'fare_type'], 'string', 'max' => 255],
+
+            [['reservation_dump'], 'checkReservationDump'],
+            [['status'], 'checkStatus'],
+
             [['employee_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['employee_id' => 'id']],
             [['lead_id'], 'exist', 'skipOnError' => true, 'targetClass' => Lead::class, 'targetAttribute' => ['lead_id' => 'id']],
         ];
+    }
+
+
+    public function checkReservationDump()
+    {
+        $dumpParser = self::parseDump($this->reservation_dump, true, $this->itinerary);
+        if (empty($dumpParser)) {
+            $this->addError('reservation_dump', 'Incorrect reservation dump!');
+        }
+    }
+
+    public function checkStatus()
+    {
+        if ($this->lead_id && $this->status == self::STATUS_APPLIED) {
+            $applied = self::findOne([
+                'status' => self::STATUS_APPLIED,
+                'lead_id' => $this->lead_id
+            ]);
+
+            if ($applied) {
+                $this->addError('status', 'Exist applied quote!');
+            }
+        }
     }
 
     /**
@@ -191,6 +235,20 @@ class Quote extends \yii\db\ActiveRecord
             'fare_type' => 'Fare Type',
             'created' => 'Created',
             'updated' => 'Updated',
+        ];
+    }
+
+    public function behaviors() : array
+    {
+        return [
+            'timestamp' => [
+                'class' => TimestampBehavior::class,
+                'attributes' => [
+                    ActiveRecord::EVENT_BEFORE_INSERT => ['created', 'updated'],
+                    ActiveRecord::EVENT_BEFORE_UPDATE => ['updated'],
+                ],
+                'value' => date('Y-m-d H:i:s') //new Expression('NOW()'),
+            ],
         ];
     }
 
@@ -218,7 +276,35 @@ class Quote extends \yii\db\ActiveRecord
         return $this->hasOne(Lead::class, ['id' => 'lead_id']);
     }
 
-    public function afterValidate()
+
+
+//    public function beforeValidate()
+//    {
+//        if ($this->isNewRecord) {
+//            $this->uid = uniqid();
+//            $this->employee_id = Yii::$app->user->identity->getId();
+//        }
+//
+//        $dumpParser = self::parseDump($this->reservation_dump, true, $this->itinerary);
+//        if (empty($dumpParser)) {
+//            $this->addError('reservation_dump', 'Incorrect reservation dump!');
+//        }
+//
+//        if ($this->status == self::STATUS_APPLIED) {
+//            $applied = self::findOne([
+//                'status' => self::STATUS_APPLIED,
+//                'lead_id' => $this->lead_id
+//            ]);
+//            if ($applied !== null) {
+//                $this->addError('status', 'Exist applied quote!');
+//            }
+//        }
+//
+//        return parent::beforeValidate();
+//    }
+
+
+    /*public function afterValidate()
     {
         $this->updated = date('Y-m-d H:i:s');
 
@@ -227,9 +313,11 @@ class Quote extends \yii\db\ActiveRecord
         }
 
         parent::afterValidate();
-    }
+    }*/
 
-    public function beforeValidate()
+
+
+    public function beforeSave($insert) : bool
     {
         if ($this->isNewRecord) {
             $this->uid = empty($this->uid) ? uniqid() : $this->uid;
@@ -238,22 +326,27 @@ class Quote extends \yii\db\ActiveRecord
             }
         }
 
-        $dumpParser = self::parseDump($this->reservation_dump, true, $this->itinerary);
-        if (empty($dumpParser)) {
-            $this->addError('reservation_dump', 'Incorrect reservation dump!');
-        }
+        if (parent::beforeSave($insert)) {
 
-        if ($this->status == self::STATUS_APPLIED) {
-            $applied = self::findOne([
-                'status' => self::STATUS_APPLIED,
-                'lead_id' => $this->lead_id
-            ]);
-            if ($applied !== null) {
-                $this->addError('status', 'Exist applied quote!');
+
+            if ($insert) {
+                if(!$this->status) {
+                    $this->status = self::STATUS_CREATED;
+                }
+
+                if(!$this->uid) {
+                    $this->uid = uniqid();
+                }
+
+                if(!$this->employee_id && Yii::$app->user->id) {
+                    $this->employee_id = Yii::$app->user->id;
+                }
+
             }
-        }
 
-        return parent::beforeValidate();
+            return true;
+        }
+        return false;
     }
 
     public static function parseDump($string, $validation = true, &$itinerary = [])
@@ -417,15 +510,15 @@ class Quote extends \yii\db\ActiveRecord
 
         if (!$insert) {
             //Add logs after changed model attributes
-            $leadLog = new LeadLog((new LeadLogMessage()));
+            $leadLog = new LeadLog(new LeadLogMessage());
             $leadLog->logMessage->oldParams = $changedAttributes;
             $leadLog->logMessage->newParams = array_intersect_key($this->attributes, $changedAttributes);
-            $leadLog->logMessage->title = ($insert)
-                ? 'Create' : 'Update';
+            $leadLog->logMessage->title = $insert ? 'Create' : 'Update';
             $leadLog->logMessage->model = sprintf('%s (%s)', $this->formName(), $this->uid);
             $leadLog->addLog([
                 'lead_id' => $this->lead_id,
             ]);
+
 
             if (isset($changedAttributes['status'])) {
                 if ($this->lead->called_expert &&
@@ -581,6 +674,24 @@ class Quote extends \yii\db\ActiveRecord
         $diff = $departureDateTime->diff($arrivalDateTime);
         return ((int)sprintf('%d%d%d', $diff->y, $diff->m, $diff->d) >= 1)
             ? true : false;
+    }
+
+    /**
+     * @return string
+     */
+    public function getStatusName() : string
+    {
+        $statusName = self::STATUS_LIST[$this->status] ?? '-';
+        return $statusName;
+    }
+
+    /**
+     * @return string
+     */
+    public function getGdsName2() : string
+    {
+        $name = self::GDS_LIST[$this->gds] ?? '-';
+        return $name;
     }
 
     public function quotePrice()
