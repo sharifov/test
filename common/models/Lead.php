@@ -962,7 +962,7 @@ class Lead extends ActiveRecord
             'origin' => $origin,
             'destination' => $destination,
             'quotes' => $models,
-            'project' => $this->source->project,
+            'project' => $this->project,
             'agentName' => ucfirst($this->employee->username),
             'employee' => $this->employee,
             'tripType' => $tripType,
