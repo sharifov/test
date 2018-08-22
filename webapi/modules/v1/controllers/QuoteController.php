@@ -1,4 +1,5 @@
 <?php
+
 namespace webapi\modules\v1\controllers;
 
 use common\models\EmployeeContactInfo;
@@ -55,11 +56,11 @@ class QuoteController extends ApiBaseController
      * @apiSuccess {DateTime} response_dt   Response Date & Time
      *
      * "errors": [],
-    "uid": "5b7424e858e91",
-    "agentName": "admin",
-    "agentEmail": "assistant@wowfare.com",
-    "agentDirectLine": "+1 888 946 3882",
-    "action": "v1/quote/get-info",
+     * "uid": "5b7424e858e91",
+     * "agentName": "admin",
+     * "agentEmail": "assistant@wowfare.com",
+     * "agentDirectLine": "+1 888 946 3882",
+     * "action": "v1/quote/get-info",
      *
      *
      * @apiSuccessExample Success-Response:
@@ -67,98 +68,98 @@ class QuoteController extends ApiBaseController
      *
      *
      * {
-        "status": "Success",
-        "itinerary": {
-            "tripType": "OW",
-            "mainCarrier": "WOW air",
-            "trips": [
-                {
-                    "segments": [
-                        {
-                            "carrier": "WW",
-                            "airlineName": "WOW air",
-                            "departureAirport": "BOS",
-                            "arrivalAirport": "KEF",
-                            "departureDateTime": {
-                                "date": "2018-09-19 19:00:00.000000",
-                                "timezone_type": 3,
-                                "timezone": "UTC"
-                            },
-                            "arrivalDateTime": {
-                                "date": "2018-09-20 04:30:00.000000",
-                                "timezone_type": 3,
-                                "timezone": "UTC"
-                            },
-                            "flightNumber": "126",
-                            "bookingClass": "O",
-                            "departureCity": "Boston",
-                            "arrivalCity": "Reykjavik",
-                            "flightDuration": 330,
-                            "layoverDuration": 0,
-                            "cabin": "E",
-                            "departureCountry": "United States",
-                            "arrivalCountry": "Iceland"
-                        },
-                        {
-                            "carrier": "WW",
-                            "airlineName": "WOW air",
-                            "departureAirport": "KEF",
-                            "arrivalAirport": "LGW",
-                            "departureDateTime": {
-                                "date": "2018-09-20 15:30:00.000000",
-                                "timezone_type": 3,
-                                "timezone": "UTC"
-                            },
-                            "arrivalDateTime": {
-                                "date": "2018-09-20 19:50:00.000000",
-                                "timezone_type": 3,
-                                "timezone": "UTC"
-                            },
-                            "flightNumber": "814",
-                            "bookingClass": "N",
-                            "departureCity": "Reykjavik",
-                            "arrivalCity": "London",
-                            "flightDuration": 200,
-                            "layoverDuration": 660,
-                            "cabin": "E",
-                            "departureCountry": "Iceland",
-                            "arrivalCountry": "United Kingdom"
-                        }
-                    ],
-                    "totalDuration": 1190,
-                    "routing": "BOS-KEF-LGW",
-                    "title": "Boston - London"
-                }
-            ],
-            "price": {
-                "detail": {
-                    "ADT": {
-                        "selling": 350.2,
-                        "fare": 237,
-                        "taxes": 113.2,
-                        "tickets": 1
-                    }
-                },
-                "tickets": 1,
-                "selling": 350.2,
-                "amountPerPax": 350.2,
-                "fare": 237,
-                "mark_up": 0,
-                "taxes": 113.2,
-                "currency": "USD",
-                "isCC": false
-            }
-        },
-        "errors": [],
-        "uid": "5b7424e858e91",
-        "agentName": "admin",
-        "agentEmail": "assistant@wowfare.com",
-        "agentDirectLine": "+1 888 946 3882",
-        "action": "v1/quote/get-info",
-        "response_id": 173,
-        "request_dt": "2018-08-16 06:42:03",
-        "response_dt": "2018-08-16 06:42:03"
-    }
+     * "status": "Success",
+     * "itinerary": {
+     * "tripType": "OW",
+     * "mainCarrier": "WOW air",
+     * "trips": [
+     * {
+     * "segments": [
+     * {
+     * "carrier": "WW",
+     * "airlineName": "WOW air",
+     * "departureAirport": "BOS",
+     * "arrivalAirport": "KEF",
+     * "departureDateTime": {
+     * "date": "2018-09-19 19:00:00.000000",
+     * "timezone_type": 3,
+     * "timezone": "UTC"
+     * },
+     * "arrivalDateTime": {
+     * "date": "2018-09-20 04:30:00.000000",
+     * "timezone_type": 3,
+     * "timezone": "UTC"
+     * },
+     * "flightNumber": "126",
+     * "bookingClass": "O",
+     * "departureCity": "Boston",
+     * "arrivalCity": "Reykjavik",
+     * "flightDuration": 330,
+     * "layoverDuration": 0,
+     * "cabin": "E",
+     * "departureCountry": "United States",
+     * "arrivalCountry": "Iceland"
+     * },
+     * {
+     * "carrier": "WW",
+     * "airlineName": "WOW air",
+     * "departureAirport": "KEF",
+     * "arrivalAirport": "LGW",
+     * "departureDateTime": {
+     * "date": "2018-09-20 15:30:00.000000",
+     * "timezone_type": 3,
+     * "timezone": "UTC"
+     * },
+     * "arrivalDateTime": {
+     * "date": "2018-09-20 19:50:00.000000",
+     * "timezone_type": 3,
+     * "timezone": "UTC"
+     * },
+     * "flightNumber": "814",
+     * "bookingClass": "N",
+     * "departureCity": "Reykjavik",
+     * "arrivalCity": "London",
+     * "flightDuration": 200,
+     * "layoverDuration": 660,
+     * "cabin": "E",
+     * "departureCountry": "Iceland",
+     * "arrivalCountry": "United Kingdom"
+     * }
+     * ],
+     * "totalDuration": 1190,
+     * "routing": "BOS-KEF-LGW",
+     * "title": "Boston - London"
+     * }
+     * ],
+     * "price": {
+     * "detail": {
+     * "ADT": {
+     * "selling": 350.2,
+     * "fare": 237,
+     * "taxes": 113.2,
+     * "tickets": 1
+     * }
+     * },
+     * "tickets": 1,
+     * "selling": 350.2,
+     * "amountPerPax": 350.2,
+     * "fare": 237,
+     * "mark_up": 0,
+     * "taxes": 113.2,
+     * "currency": "USD",
+     * "isCC": false
+     * }
+     * },
+     * "errors": [],
+     * "uid": "5b7424e858e91",
+     * "agentName": "admin",
+     * "agentEmail": "assistant@wowfare.com",
+     * "agentDirectLine": "+1 888 946 3882",
+     * "action": "v1/quote/get-info",
+     * "response_id": 173,
+     * "request_dt": "2018-08-16 06:42:03",
+     * "response_dt": "2018-08-16 06:42:03"
+     * }
      *
      *
      * @apiError UserNotFound The id of the User was not found.
@@ -190,14 +191,14 @@ class QuoteController extends ApiBaseController
 
         $uid = Yii::$app->request->post('uid');
 
-        if(!$uid) {
+        if (!$uid) {
             throw new BadRequestHttpException('Not found UID on POST request', 1);
         }
 
         $model = Quote::find()->where(['uid' => $uid])->one();
 
-        if(!$model) {
-            throw new NotFoundHttpException('Not found Quote UID: '.$uid, 2);
+        if (!$model) {
+            throw new NotFoundHttpException('Not found Quote UID: ' . $uid, 2);
         }
 
 
@@ -228,7 +229,6 @@ class QuoteController extends ApiBaseController
             $response['itinerary']['price'] = $model->quotePrice();
 
 
-
             // TODO: Quote::STATUS_SEND
             /*if ($model->status == Quote::STATUS_SEND) {
                 $model->status = Quote::STATUS_OPENED;
@@ -240,8 +240,8 @@ class QuoteController extends ApiBaseController
         } catch (\Throwable $e) {
 
             Yii::error($e->getTraceAsString(), 'API:Quote:get:try');
-            if(Yii::$app->request->get('debug')) $message = ($e->getTraceAsString());
-            else $message = $e->getMessage().' (code:'.$e->getCode().', line: '.$e->getLine().')';
+            if (Yii::$app->request->get('debug')) $message = ($e->getTraceAsString());
+            else $message = $e->getMessage() . ' (code:' . $e->getCode() . ', line: ' . $e->getLine() . ')';
 
             $response['error'] = $message;
             $response['errors'] = $message;
@@ -252,9 +252,9 @@ class QuoteController extends ApiBaseController
         $responseData = $response;
         $responseData = $apiLog->endApiLog($responseData);
 
-        if(isset($response['error']) && $response['error']) {
+        if (isset($response['error']) && $response['error']) {
             $json = @json_encode($response['error']);
-            if(isset($response['error_code']) && $response['error_code']) $error_code = $response['error_code'];
+            if (isset($response['error_code']) && $response['error_code']) $error_code = $response['error_code'];
             else $error_code = 0;
             throw new UnprocessableEntityHttpException($json, $error_code);
         }
@@ -280,9 +280,11 @@ class QuoteController extends ApiBaseController
         }
 
         $model = Quote::findOne(['uid' => $quoteAttributes['uid']]);
-        if(!$model) {
-            throw new NotFoundHttpException('Not found Quote UID: '.$quoteAttributes['uid'], 2);
+        if (!$model) {
+            throw new NotFoundHttpException('Not found Quote UID: ' . $quoteAttributes['uid'], 2);
         }
+
+        $leadAttributes = Yii::$app->request->post((new Lead())->formName());
 
         $response = [
             'status' => 'Failed',
@@ -312,6 +314,9 @@ class QuoteController extends ApiBaseController
             if (!$model->hasErrors()) {
                 if ($model->status == Quote::STATUS_APPLIED) {
                     $model->lead->status = Lead::STATUS_BOOKED;
+                    if (!empty($leadAttributes) && isset($leadAttributes['bo_flight_id'])) {
+                        $model->lead->bo_flight_id = $leadAttributes['bo_flight_id'];
+                    }
                     $model->lead->save();
                 }
                 $response['status'] = 'Success';
@@ -323,8 +328,8 @@ class QuoteController extends ApiBaseController
         } catch (\Throwable $e) {
 
             Yii::error($e->getTraceAsString(), 'API:Quote:update:try');
-            if(Yii::$app->request->get('debug')) $message = ($e->getTraceAsString());
-            else $message = $e->getMessage().' (code:'.$e->getCode().', line: '.$e->getLine().')';
+            if (Yii::$app->request->get('debug')) $message = ($e->getTraceAsString());
+            else $message = $e->getMessage() . ' (code:' . $e->getCode() . ', line: ' . $e->getLine() . ')';
 
             $response['error'] = $message;
             $response['errors'] = $message;
@@ -336,9 +341,9 @@ class QuoteController extends ApiBaseController
         $responseData = $response;
         $responseData = $apiLog->endApiLog($responseData);
 
-        if(isset($response['error']) && $response['error']) {
+        if (isset($response['error']) && $response['error']) {
             $json = @json_encode($response['error']);
-            if(isset($response['error_code']) && $response['error_code']) $error_code = $response['error_code'];
+            if (isset($response['error_code']) && $response['error_code']) $error_code = $response['error_code'];
             else $error_code = 0;
             throw new UnprocessableEntityHttpException($json, $error_code);
         }
@@ -372,13 +377,13 @@ class QuoteController extends ApiBaseController
             'uid' => $leadAttributes['uid'],
             'source_id' => $leadAttributes['market_info_id']
         ]);
-        if(!$lead) {
-            throw new NotFoundHttpException('Not found Lead UID: '.$leadAttributes['uid'], 2);
+        if (!$lead) {
+            throw new NotFoundHttpException('Not found Lead UID: ' . $leadAttributes['uid'], 2);
         }
 
         $model = Quote::findOne(['uid' => $quoteAttributes['uid']]);
-        if($model) {
-            throw new NotFoundHttpException('Already Exist Quote UID: '.$quoteAttributes['uid'], 2);
+        if ($model) {
+            throw new NotFoundHttpException('Already Exist Quote UID: ' . $quoteAttributes['uid'], 2);
         } else {
             $model = new Quote();
         }
@@ -418,8 +423,8 @@ class QuoteController extends ApiBaseController
         } catch (\Throwable $e) {
 
             Yii::error($e->getTraceAsString(), 'API:Quote:create:try');
-            if(Yii::$app->request->get('debug')) $message = ($e->getTraceAsString());
-            else $message = $e->getMessage().' (code:'.$e->getCode().', line: '.$e->getLine().')';
+            if (Yii::$app->request->get('debug')) $message = ($e->getTraceAsString());
+            else $message = $e->getMessage() . ' (code:' . $e->getCode() . ', line: ' . $e->getLine() . ')';
 
             $response['error'] = $message;
             $response['errors'] = $message;
@@ -431,9 +436,9 @@ class QuoteController extends ApiBaseController
         $responseData = $response;
         $responseData = $apiLog->endApiLog($responseData);
 
-        if(isset($response['error']) && $response['error']) {
+        if (isset($response['error']) && $response['error']) {
             $json = @json_encode($response['error']);
-            if(isset($response['error_code']) && $response['error_code']) $error_code = $response['error_code'];
+            if (isset($response['error_code']) && $response['error_code']) $error_code = $response['error_code'];
             else $error_code = 0;
             throw new UnprocessableEntityHttpException($json, $error_code);
         }

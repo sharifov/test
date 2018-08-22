@@ -72,16 +72,21 @@ $queueType = Yii::$app->request->get('type');
             'format' => ['date', 'php:m/d/y h:i a'],
         ],
         [
-            'attribute' => 'flight_request_id',
-            'label' => 'Sale ID',
+            'attribute' => 'id',
+            'label' => in_array($queueType, ['booked', 'sold'])
+                ? 'Lead ID / Sale ID (BO)' : 'Sale ID',
             'visible' => (
                 Yii::$app->user->identity->role != 'agent' ||
                 !in_array($queueType, ['inbox'])
             ),
-            'value' => function ($model) {
+            'value' => function ($model) use ($queueType) {
                 /**
                  * @var $model Lead
                  */
+                if (in_array($queueType, ['booked', 'sold'])) {
+                    return sprintf('%d / %d', $model->id, $model->bo_flight_id);
+                }
+
                 return (!empty($model->id))
                     ? $model->id : '-';
             }
@@ -106,12 +111,9 @@ $queueType = Yii::$app->request->get('type');
                  * @var $model Lead
                  */
                 $content = [];
-                /*$tickets = \common\models\Ticket::findAll([
-                    'flight_request_id' => $model->flight_request_id,
-                ]);
-                foreach ($tickets as $ticket) {
-                    $content[] = sprintf('%s (%s)', $ticket->passenger->getFullName(), $ticket->passenger->type);
-                }*/
+                if (!empty($model->additionalInformationForm->passengers)) {
+                    $content = $model->additionalInformationForm->passengers;
+                }
                 return implode('<br/>', $content);
             },
             'format' => 'raw'
@@ -325,17 +327,17 @@ $queueType = Yii::$app->request->get('type');
                  * @var $model Lead
                  */
                 $labelVTF = '<span class="label label-danger"><i class="fa fa-times"></i></span>';
-                /*if ($model->flightRequest->verificationModel->status == \common\models\Team::STATUS_VERIFY) {
+                if (!empty($model->additionalInformationForm->vtf_processed)) {
                     $labelVTF = '<span class="label label-success"><i class="fa fa-check"></i></span>';
-                }*/
+                }
                 $labelTKT = '<span class="label label-danger"><i class="fa fa-times"></i></span>';
-                /*if ($model->flightRequest->ticketModel->status == \common\models\Team::STATUS_ISSUED) {
+                if (!empty($model->additionalInformationForm->tkt_processed)) {
                     $labelTKT = '<span class="label label-success"><i class="fa fa-check"></i></span>';
-                }*/
+                }
                 $labelEXP = '<span class="label label-danger"><i class="fa fa-times"></i></span>';
-                /*if ($model->flightRequest->expertModel->status == \common\models\Team::STATUS_CHECKED) {
+                if (!empty($model->additionalInformationForm->exp_processed)) {
                     $labelEXP = '<span class="label label-success"><i class="fa fa-check"></i></span>';
-                }*/
+                }
                 return 'VTF: ' . $labelVTF . ' TKT: ' . $labelTKT . ' EXP: ' . $labelEXP;
             },
             'format' => 'raw'

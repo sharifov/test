@@ -2,6 +2,7 @@
 
 namespace common\models;
 
+use backend\models\form\leads\LeadAdditionalInformation;
 use common\components\EmailService;
 use common\models\local\LeadLogMessage;
 use Yii;
@@ -39,6 +40,7 @@ use yii\helpers\Html;
  * @property boolean $called_expert
  * @property string $discount_id
  * @property string $bo_flight_id
+ * @property string $additional_information
  *
  * @property LeadFlightSegment[] $leadFlightSegments
  * @property LeadPreferences $leadPreferences
@@ -46,9 +48,13 @@ use yii\helpers\Html;
  * @property Employee $employee
  * @property Source $source
  * @property Project $project
+ *
+ * @property LeadAdditionalInformation $additionalInformationForm
  */
 class Lead extends ActiveRecord
 {
+    public $additionalInformationForm;
+
     public CONST
         TRIP_TYPE_ONE_WAY = 'OW',
         TRIP_TYPE_ROUND_TRIP = 'RT',
@@ -114,6 +120,13 @@ class Lead extends ActiveRecord
         DIV_GRID_IN_SNOOZE = 4;
 
     public CONST SCENARIO_API = 'scenario_api';
+
+    public function init()
+    {
+        parent::init();
+
+        $this->additionalInformationForm = new LeadAdditionalInformation();
+    }
 
     public static function getDivs($div = null)
     {
@@ -374,7 +387,7 @@ class Lead extends ActiveRecord
             [['adults'], 'integer', 'min' => 1],
             [['notes_for_experts'], 'string'],
             [['created', 'updated', 'offset_gmt', 'request_ip', 'request_ip_detail', 'snooze_for',
-                'called_expert', 'discount_id', 'bo_flight_id'], 'safe'],
+                'called_expert', 'discount_id', 'bo_flight_id', 'additional_information'], 'safe'],
             [['uid'], 'string', 'max' => 255],
             [['trip_type'], 'string', 'max' => 2],
             [['cabin'], 'string', 'max' => 1],
@@ -832,6 +845,14 @@ class Lead extends ActiveRecord
                         $this->source_id = $project->sources[0]->id;
                     }
                 }
+
+                $leadExistByUID = Lead::findOne([
+                    'uid' => $this->uid,
+                    'source_id' => $this->source_id
+                ]);
+                if ($leadExistByUID !== null) {
+                    $this->uid = uniqid();
+                }
             } else {
                 //$this->updated = date('Y-m-d H:i:s');
             }
@@ -876,7 +897,23 @@ class Lead extends ActiveRecord
             }
         }
 
+        if (is_array($this->additional_information)) {
+            $this->additional_information = json_encode($this->additional_information);
+        } else {
+            $this->additional_information = json_encode($this->additionalInformationForm->attributes);
+        }
+
         parent::afterValidate();
+    }
+
+    public function afterFind()
+    {
+        parent::afterFind();
+
+        if (!empty($this->additional_information)) {
+            $additionalInformationFormAttr = json_decode($this->additional_information, true);
+            $this->additionalInformationForm->setAttributes($additionalInformationFormAttr);
+        }
     }
 
     public function getPaxTypes()
