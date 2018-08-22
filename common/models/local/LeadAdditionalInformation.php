@@ -1,11 +1,11 @@
 <?php
-namespace backend\models\form\leads;
+namespace common\models\local;
 
 
 use yii\base\Model;
 
 /**
- * This is the model LeadRequestInformation.
+ * This is the model LeadAdditionalInformation.
  *
  * @property boolean $vtf_processed
  * @property boolean $tkt_processed

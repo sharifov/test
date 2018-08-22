@@ -2,8 +2,8 @@
 
 namespace common\models;
 
-use backend\models\form\leads\LeadAdditionalInformation;
 use common\components\EmailService;
+use common\models\local\LeadAdditionalInformation;
 use common\models\local\LeadLogMessage;
 use Yii;
 use yii\behaviors\TimestampBehavior;
