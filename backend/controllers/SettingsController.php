@@ -55,15 +55,15 @@ class SettingsController extends DefaultController
 
         switch ($type) {
             case 'projects':
-                exec(Yii::getAlias('@app') . '/yii sync/projects  > /dev/null');
+                exec('sudo ' . Yii::getAlias('@app') . '/yii sync/projects  > /dev/null');
                 $response['success'] = true;
                 break;
             case 'airlines':
-                exec(Yii::getAlias('@app') . '/yii sync/airlines  > /dev/null');
+                exec(Yii::getAlias('sudo ' . '@app') . '/yii sync/airlines  > /dev/null');
                 $response['success'] = true;
                 break;
             case 'airports':
-                exec(Yii::getAlias('@app') . '/yii sync/airports  > /dev/null');
+                exec(Yii::getAlias('sudo ' . '@app') . '/yii sync/airports  > /dev/null');
                 $response['success'] = true;
                 break;
         }
