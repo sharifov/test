@@ -3,25 +3,25 @@
 namespace backend\controllers;
 
 use common\controllers\DefaultController;
-use common\models\search\LeadSearch;
-use common\models\search\QuoteSearch;
 use Yii;
-use common\models\Lead;
+use common\models\Quote;
+use common\models\search\QuoteSearch;
 use yii\filters\AccessControl;
 use yii\helpers\ArrayHelper;
-use yii\helpers\VarDumper;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 
 /**
- * LeadsController implements the CRUD actions for Lead model.
+ * QuoteController implements the CRUD actions for Quote model.
  */
-class LeadsController extends DefaultController
+class QuoteController extends DefaultController
 {
     /**
      * {@inheritdoc}
      */
+
+
     public function behaviors()
     {
         $behaviors = [
@@ -52,13 +52,13 @@ class LeadsController extends DefaultController
     }
 
     /**
-     * Lists all Lead models.
+     * Lists all Quote models.
      * @return mixed
      */
     public function actionIndex()
     {
-        $searchModel = new LeadSearch();
-        $dataProvider = $searchModel->search2(Yii::$app->request->queryParams);
+        $searchModel = new QuoteSearch();
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
         return $this->render('index', [
             'searchModel' => $searchModel,
@@ -67,44 +67,26 @@ class LeadsController extends DefaultController
     }
 
     /**
-     * Displays a single Lead model.
+     * Displays a single Quote model.
      * @param integer $id
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
      */
     public function actionView($id)
     {
-
-        $model = $this->findModel($id);
-
-        $searchModel = new QuoteSearch();
-
-        $params = Yii::$app->request->queryParams;
-
-        //$dataProvider = $searchModel->search(Yii::$app->request->queryParams);
-
-        $params['QuoteSearch']['lead_id'] = $model->id;
-
-        $dataProvider = $searchModel->search($params);
-        //unset($searchModel);
-
-        // VarDumper::dump($quotes, 10, true);
-
         return $this->render('view', [
-            'model' => $model,
-            'searchModel' => $searchModel,
-            'dataProvider' => $dataProvider,
+            'model' => $this->findModel($id),
         ]);
     }
 
     /**
-     * Creates a new Lead model.
+     * Creates a new Quote model.
      * If creation is successful, the browser will be redirected to the 'view' page.
      * @return mixed
      */
     public function actionCreate()
     {
-        $model = new Lead();
+        $model = new Quote();
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
             return $this->redirect(['view', 'id' => $model->id]);
@@ -116,7 +98,7 @@ class LeadsController extends DefaultController
     }
 
     /**
-     * Updates an existing Lead model.
+     * Updates an existing Quote model.
      * If update is successful, the browser will be redirected to the 'view' page.
      * @param integer $id
      * @return mixed
@@ -136,7 +118,7 @@ class LeadsController extends DefaultController
     }
 
     /**
-     * Deletes an existing Lead model.
+     * Deletes an existing Quote model.
      * If deletion is successful, the browser will be redirected to the 'index' page.
      * @param integer $id
      * @return mixed
@@ -150,15 +132,15 @@ class LeadsController extends DefaultController
     }
 
     /**
-     * Finds the Lead model based on its primary key value.
+     * Finds the Quote model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
      * @param integer $id
-     * @return Lead the loaded model
+     * @return Quote the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
     protected function findModel($id)
     {
-        if (($model = Lead::findOne($id)) !== null) {
+        if (($model = Quote::findOne($id)) !== null) {
             return $model;
         }
 
