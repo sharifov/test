@@ -897,7 +897,7 @@ class LeadController extends ApiBaseController
 
             $lead->attributes = $leadAttributes;
             if (!$lead->save()) {
-                $response['errors'] = $lead->getErrors();
+                $response['errors'][] = $lead->getErrors();
                 $transaction->rollBack();
             } else {
 
@@ -906,6 +906,9 @@ class LeadController extends ApiBaseController
                     if ($aplliend !== null) {
                         $aplliend->record_locator = $leadAttributes['additional_information']['pnr'];
                         $aplliend->save();
+                        if ($aplliend->hasErrors()) {
+                            $response['errors'][] = $aplliend->getErrors();
+                        }
                     }
                 }
 

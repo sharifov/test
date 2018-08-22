@@ -769,7 +769,7 @@ class Lead extends ActiveRecord
     public function getAppliedAlternativeQuotes()
     {
         foreach ($this->getQuotes() as $quote) {
-            if ($quote->status === $quote::STATUS_APPLIED) {
+            if ($quote->status == $quote::STATUS_APPLIED) {
                 return $quote;
             }
         }
