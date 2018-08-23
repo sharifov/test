@@ -35,6 +35,10 @@ class m180731_093414_create_projects_table extends Migration
             'last_update' => $this->dateTime()->defaultExpression('NOW()')
         ], $tableOptions);
         $this->addForeignKey('fk-sources-projects', 'sources', 'project_id', 'projects', 'id', 'CASCADE');
+
+        $out = '';
+        exec(dirname(Yii::getAlias('@app')) . '/yii sync/projects', $out);
+        var_dump($out);
     }
 
     /**
