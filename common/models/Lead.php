@@ -787,12 +787,10 @@ class Lead extends ActiveRecord
      */
     public function getAppliedAlternativeQuotes()
     {
-        foreach ($this->getQuotes() as $quote) {
-            if ($quote->status == $quote::STATUS_APPLIED) {
-                return $quote;
-            }
-        }
-        return null;
+        return Quote::findOne([
+            'lead_id' => $this->id,
+            'status' => Quote::STATUS_APPLIED
+        ]);
     }
 
     /**
