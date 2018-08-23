@@ -19,6 +19,7 @@ use common\models\Project;
 use common\models\ProjectEmployeeAccess;
 use common\models\Quote;
 use common\models\QuotePrice;
+use common\models\Reason;
 use common\models\Source;
 use yii\console\Controller;
 use Yii;
@@ -349,6 +350,13 @@ class SyncController extends Controller
                                 ])->execute();
                             }
                         }
+                    }
+
+                    if (!empty($objects['Reason'])) {
+                        $reason = new Reason();
+                        $reason->attributes = $objects['Reason'];
+                        $reason->lead_id = $lead->id;
+                        $reason->save();
                     }
 
                     $lead->created = $objects['Lead']['created'];
