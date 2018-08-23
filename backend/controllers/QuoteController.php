@@ -3,6 +3,8 @@
 namespace backend\controllers;
 
 use common\controllers\DefaultController;
+use common\models\LeadFlightSegment;
+use common\models\search\QuotePriceSearch;
 use Yii;
 use common\models\Quote;
 use common\models\search\QuoteSearch;
@@ -74,9 +76,27 @@ class QuoteController extends DefaultController
      */
     public function actionView($id)
     {
+
+        $model = $this->findModel($id);
+
+        $searchModel = new QuotePriceSearch();
+
+        $params = Yii::$app->request->queryParams;
+
+        $params['QuotePriceSearch']['quote_id'] = $model->id;
+
+        $dataProvider = $searchModel->search($params);
+
+        //unset($searchModel);
+        // VarDumper::dump($quotes, 10, true);
+
         return $this->render('view', [
-            'model' => $this->findModel($id),
+            'model' => $model,
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
         ]);
+
+
     }
 
     /**

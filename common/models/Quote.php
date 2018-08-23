@@ -9,6 +9,7 @@ use Yii;
 use yii\base\ErrorException;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
+use yii\helpers\Html;
 
 /**
  * This is the model class for table "quotes".
@@ -33,14 +34,15 @@ use yii\db\ActiveRecord;
  * @property string $employee_name
  *
  * @property QuotePrice[] $quotePrices
+ * @property int $quotePricesCount
  * @property Employee $employee
  * @property Lead $lead
  */
 class Quote extends \yii\db\ActiveRecord
 {
-    const SERVICE_FEE = 0.035;
+    public const SERVICE_FEE = 0.035;
 
-    const
+    public const
         GDS_SABRE = 'S',
         GDS_AMADEUS = 'A',
         GDS_WORLDSPAN = 'W';
@@ -51,14 +53,14 @@ class Quote extends \yii\db\ActiveRecord
         self::GDS_WORLDSPAN => 'WorldSpan',
     ];
 
-    const
+    public const
         FARE_TYPE_PUB = 'PUB',
         FARE_TYPE_SR = 'SR',
         FARE_TYPE_SRU = 'SRU',
         FARE_TYPE_COMM = 'COMM',
         FARE_TYPE_PUBC = 'PUBC';
 
-    const
+    public const
         STATUS_CREATED = 1,
         STATUS_APPLIED = 2,
         STATUS_DECLINED = 3,
@@ -67,11 +69,19 @@ class Quote extends \yii\db\ActiveRecord
 
 
     public CONST STATUS_LIST = [
-        self::STATUS_CREATED => 'Created',
-        self::STATUS_APPLIED => 'Applied',
-        self::STATUS_DECLINED => 'Declined',
-        self::STATUS_SEND => 'Send',
-        self::STATUS_OPENED => 'Opened'
+        self::STATUS_CREATED    => 'Created',
+        self::STATUS_APPLIED    => 'Applied',
+        self::STATUS_DECLINED   => 'Declined',
+        self::STATUS_SEND       => 'Send',
+        self::STATUS_OPENED     => 'Opened'
+    ];
+
+    public CONST STATUS_CLASS_LIST = [
+        self::STATUS_CREATED    => 'lq-created',
+        self::STATUS_APPLIED    => 'lq-applied',
+        self::STATUS_DECLINED   => 'lq-declined',
+        self::STATUS_SEND       => 'lq-send',
+        self::STATUS_OPENED     => 'lq-opened'
     ];
 
     public $itinerary = [];
@@ -86,17 +96,21 @@ class Quote extends \yii\db\ActiveRecord
 
     public static function getGDSName($gds = null)
     {
-        $mapping = [
-            self::GDS_SABRE => 'Sabre',
-            self::GDS_AMADEUS => 'Amadeus',
-            self::GDS_WORLDSPAN => 'Worldspan'
-        ];
+        $mapping = self::GDS_LIST;
 
         if ($gds === null) {
             return $mapping;
         }
 
         return isset($mapping[$gds]) ? $mapping[$gds] : $gds;
+    }
+
+    /**
+     * @return string
+     */
+    public function getStatusLabelClass(): string
+    {
+        return self::STATUS_CLASS_LIST[$this->status] ?? 'label-default';
     }
 
     public static function createDump($flightSegments)
@@ -258,6 +272,14 @@ class Quote extends \yii\db\ActiveRecord
     public function getQuotePrices()
     {
         return $this->hasMany(QuotePrice::class, ['quote_id' => 'id']);
+    }
+
+    /**
+     * @return int
+     */
+    public function getQuotePricesCount() : int
+    {
+        return $this->hasMany(QuotePrice::class, ['quote_id' => 'id'])->count();
     }
 
     /**
@@ -676,12 +698,20 @@ class Quote extends \yii\db\ActiveRecord
             ? true : false;
     }
 
+
     /**
+     * @param bool $label
      * @return string
      */
-    public function getStatusName() : string
+    public function getStatusName(bool $label = false) : string
     {
         $statusName = self::STATUS_LIST[$this->status] ?? '-';
+
+        if($label) {
+            $class = $this->getStatusLabelClass();
+            $statusName = '<span class="label '.$class.'" style="font-size: 13px">' . Html::encode($statusName) . '</span>';
+        }
+
         return $statusName;
     }
 
