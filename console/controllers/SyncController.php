@@ -226,6 +226,7 @@ class SyncController extends Controller
                         var_dump($client->getErrors());
                         //exit;
                     }
+                    echo 'Sync success Client id: ' . $client->id . PHP_EOL;
 
                     //clear and add client email object
                     ClientEmail::deleteAll([
@@ -237,6 +238,7 @@ class SyncController extends Controller
                         $email->client_id = $client->id;
                         $email->save();
                     }
+                    echo 'Sync success ClientEmail id: ' . $client->id . PHP_EOL;
 
                     //clear and add client phone object
                     ClientPhone::deleteAll([
@@ -248,6 +250,7 @@ class SyncController extends Controller
                         $phone->client_id = $client->id;
                         $phone->save();
                     }
+                    echo 'Sync success ClientPhone id: ' . $client->id . PHP_EOL;
 
                     //add-edit lead object
                     $lead = Lead::findOne(['id' => $leadId]);
@@ -261,6 +264,7 @@ class SyncController extends Controller
                         var_dump($lead->getErrors());
                         //exit;
                     }
+                    echo 'Sync success Lead id: ' . $lead->id . PHP_EOL;
 
                     //edit-add preference object
                     $preference = LeadPreferences::findOne(['id' => $leadId]);
@@ -273,6 +277,7 @@ class SyncController extends Controller
                         var_dump($preference->getErrors());
                         //exit;
                     }
+                    echo 'Sync success LeadPreferences id: ' . $lead->id . PHP_EOL;
 
                     //clear and add leadFlightSegments object
                     LeadFlightSegment::deleteAll([
@@ -288,6 +293,7 @@ class SyncController extends Controller
                             // exit;
                         }
                     }
+                    echo 'Sync success LeadFlightSegment id: ' . $lead->id . PHP_EOL;
 
                     //clear and add notes object
                     Note::deleteAll([
@@ -310,6 +316,8 @@ class SyncController extends Controller
                         }
                         $note->created = $item['created'];
                         $note->update(false, ['created']);
+
+                        echo 'Sync success Note id: ' . $lead->id . PHP_EOL;
                     }
 
 
@@ -320,6 +328,7 @@ class SyncController extends Controller
                     foreach ($deleted as $d) {
                         $d->delete();
                     }
+                    echo 'Deleted success Quote id: ' . $lead->id . PHP_EOL;
                     foreach ($objects['Quotes'] as $item) {
                         $quote = new Quote();
                         $quote->attributes = $item;
@@ -353,6 +362,7 @@ class SyncController extends Controller
                                 ])->execute();
                             }
                         }
+                        echo 'Sync success Quote id: ' . $quote->id . PHP_EOL;
                     }
 
                     if (!empty($objects['Reason'])) {
@@ -360,6 +370,7 @@ class SyncController extends Controller
                         $reason->attributes = $objects['Reason'];
                         $reason->lead_id = $lead->id;
                         $reason->save();
+                        echo 'Sync success Reason id: ' . $lead->id . PHP_EOL;
                     }
 
                     $lead->created = $objects['Lead']['created'];
@@ -370,7 +381,7 @@ class SyncController extends Controller
                         ':id' => $lead->id
                     ])->execute();
 
-                    echo 'Sync success Lead id: ' . $lead->id . PHP_EOL;
+                    echo 'Sync FINAL success Lead id: ' . $lead->id . PHP_EOL;
                     sleep(1);
                 } catch (\Throwable $throwable) {
                     var_dump($throwable->getMessage());
