@@ -192,144 +192,149 @@ class SyncController extends Controller
         $result = BackOffice::sendRequest('old/leads' . $query);
         if (isset($result['data'])) {
             foreach ($result['data'] as $leadId => $objects) {
-                $leadId = intval($leadId);
-                //check if exist employee
-                if (empty($objects['Lead']['employee_id'])) {
-                    continue;
-                }
-                $employee = Employee::findOne(['id' => $objects['Lead']['employee_id']]);
-                if ($employee === null) {
-                    echo 'Need sync employee id: ' . $objects['Lead']['employee_id'] . PHP_EOL;
-                    $data = [
-                        'projects' => [6],
-                        'employeeID' => $objects['Lead']['employee_id']
-                    ];
-                    $result = BackOffice::sendRequest('old/sellers', 'POST', json_encode($data));
-                    $this->addSeller($result, $data);
-                }
-
-                //add-edit client object
-                $client = Client::findOne(['id' => $objects['Client']['id']]);
-                if ($client === null) {
-                    $client = new Client();
-                }
-                $client->attributes = $objects['Client'];
-                if (!$client->save()) {
-                    var_dump($client->getErrors());
-                    //exit;
-                }
-
-                //clear and add client email object
-                ClientEmail::deleteAll([
-                    'client_id' => $client->id
-                ]);
-                foreach ($objects['Emails'] as $item) {
-                    $email = new ClientEmail();
-                    $email->attributes = $item;
-                    $email->client_id = $client->id;
-                    $email->save();
-                }
-
-                //clear and add client phone object
-                ClientPhone::deleteAll([
-                    'client_id' => $client->id
-                ]);
-                foreach ($objects['Phones'] as $item) {
-                    $phone = new ClientPhone();
-                    $phone->attributes = $item;
-                    $phone->client_id = $client->id;
-                    $phone->save();
-                }
-
-                //add-edit lead object
-                $lead = Lead::findOne(['id' => $leadId]);
-                if ($lead === null) {
-                    $lead = new Lead();
-                }
-                $lead->attributes = $objects['Lead'];
-                $lead->client_id = $client->id;
-                $lead->id = $leadId;
-                if (!$lead->save()) {
-                    var_dump($lead->getErrors());
-                    //exit;
-                }
-
-                //edit-add preference object
-                $preference = LeadPreferences::findOne(['id' => $leadId]);
-                if ($preference === null) {
-                    $preference = new LeadPreferences();
-                }
-                $preference->attributes = $objects['Lead'];
-                $preference->lead_id = $lead->id;
-                if (!$preference->save()) {
-                    var_dump($preference->getErrors());
-                    //exit;
-                }
-
-                //clear and add leadFlightSegments object
-                LeadFlightSegment::deleteAll([
-                    'lead_id' => $lead->id
-                ]);
-                foreach ($objects['LeadFlightSegments'] as $item) {
-                    $segment = new LeadFlightSegment();
-                    $segment->attributes = $item;
-                    $segment->lead_id = $lead->id;
-                    $segment->save();
-                    if (!$segment->save()) {
-                        var_dump($segment->getErrors());
-                       // exit;
-                    }
-                }
-
-                //clear and add notes object
-                Note::deleteAll([
-                    'lead_id' => $lead->id
-                ]);
-                foreach ($objects['Notes'] as $item) {
-                    $note = new Note();
-                    $note->attributes = $item;
-
-                    $employeeNote = Employee::findOne(['id' => $note->employee_id]);
-                    if ($employeeNote == null) {
+                try {
+                    $leadId = intval($leadId);
+                    //check if exist employee
+                    if (empty($objects['Lead']['employee_id'])) {
                         continue;
                     }
+                    $employee = Employee::findOne(['id' => $objects['Lead']['employee_id']]);
+                    if ($employee === null) {
+                        echo 'Need sync employee id: ' . $objects['Lead']['employee_id'] . PHP_EOL;
+                        $data = [
+                            'projects' => [6],
+                            'employeeID' => $objects['Lead']['employee_id']
+                        ];
+                        $result = BackOffice::sendRequest('old/sellers', 'POST', json_encode($data));
+                        $this->addSeller($result, $data);
+                    }
 
-                    $note->lead_id = $lead->id;
-                    $note->save();
-                    if (!$note->save()) {
-                        var_dump($note->getErrors());
+                    //add-edit client object
+                    $client = Client::findOne(['id' => $objects['Client']['id']]);
+                    if ($client === null) {
+                        $client = new Client();
+                    }
+                    $client->attributes = $objects['Client'];
+                    if (!$client->save()) {
+                        var_dump($client->getErrors());
                         //exit;
                     }
-                }
 
+                    //clear and add client email object
+                    ClientEmail::deleteAll([
+                        'client_id' => $client->id
+                    ]);
+                    foreach ($objects['Emails'] as $item) {
+                        $email = new ClientEmail();
+                        $email->attributes = $item;
+                        $email->client_id = $client->id;
+                        $email->save();
+                    }
 
-                //clear and add quotes object
-                $deleted = Quote::findAll([
-                    'lead_id' => $lead->id
-                ]);
-                foreach ($deleted as $d) {
-                    $d->delete();
-                }
-                foreach ($objects['Quotes'] as $item) {
-                    $quote = new Quote();
-                    $quote->attributes = $item;
-                    $quote->lead_id = $lead->id;
-                    $quote->save();
-                    if (!$quote->save(false)) {
-                        echo 'LEAD: ' . $quote->lead_id . PHP_EOL;
-                        var_dump($quote->getErrors());
+                    //clear and add client phone object
+                    ClientPhone::deleteAll([
+                        'client_id' => $client->id
+                    ]);
+                    foreach ($objects['Phones'] as $item) {
+                        $phone = new ClientPhone();
+                        $phone->attributes = $item;
+                        $phone->client_id = $client->id;
+                        $phone->save();
+                    }
+
+                    //add-edit lead object
+                    $lead = Lead::findOne(['id' => $leadId]);
+                    if ($lead === null) {
+                        $lead = new Lead();
+                    }
+                    $lead->attributes = $objects['Lead'];
+                    $lead->client_id = $client->id;
+                    $lead->id = $leadId;
+                    if (!$lead->save()) {
+                        var_dump($lead->getErrors());
                         //exit;
-                    } else {
-                        foreach ($item['QuotePrices'] as $priceItem) {
-                            $quotePrice = new QuotePrice();
-                            $quotePrice->attributes = $priceItem;
-                            $quotePrice->quote_id = $quote->id;
-                            $quotePrice->save();
+                    }
+
+                    //edit-add preference object
+                    $preference = LeadPreferences::findOne(['id' => $leadId]);
+                    if ($preference === null) {
+                        $preference = new LeadPreferences();
+                    }
+                    $preference->attributes = $objects['Lead'];
+                    $preference->lead_id = $lead->id;
+                    if (!$preference->save()) {
+                        var_dump($preference->getErrors());
+                        //exit;
+                    }
+
+                    //clear and add leadFlightSegments object
+                    LeadFlightSegment::deleteAll([
+                        'lead_id' => $lead->id
+                    ]);
+                    foreach ($objects['LeadFlightSegments'] as $item) {
+                        $segment = new LeadFlightSegment();
+                        $segment->attributes = $item;
+                        $segment->lead_id = $lead->id;
+                        $segment->save();
+                        if (!$segment->save()) {
+                            var_dump($segment->getErrors());
+                            // exit;
                         }
                     }
-                }
 
-                echo 'Sync success Lead id: ' . $lead->id . PHP_EOL;
+                    //clear and add notes object
+                    Note::deleteAll([
+                        'lead_id' => $lead->id
+                    ]);
+                    foreach ($objects['Notes'] as $item) {
+                        $note = new Note();
+                        $note->attributes = $item;
+
+                        $employeeNote = Employee::findOne(['id' => $note->employee_id]);
+                        if ($employeeNote == null) {
+                            continue;
+                        }
+
+                        $note->lead_id = $lead->id;
+                        $note->save();
+                        if (!$note->save()) {
+                            var_dump($note->getErrors());
+                            //exit;
+                        }
+                    }
+
+
+                    //clear and add quotes object
+                    $deleted = Quote::findAll([
+                        'lead_id' => $lead->id
+                    ]);
+                    foreach ($deleted as $d) {
+                        $d->delete();
+                    }
+                    foreach ($objects['Quotes'] as $item) {
+                        $quote = new Quote();
+                        $quote->attributes = $item;
+                        $quote->lead_id = $lead->id;
+                        $quote->save();
+                        if (!$quote->save(false)) {
+                            echo 'LEAD: ' . $quote->lead_id . PHP_EOL;
+                            var_dump($quote->getErrors());
+                            //exit;
+                        } else {
+                            foreach ($item['QuotePrices'] as $priceItem) {
+                                $quotePrice = new QuotePrice();
+                                $quotePrice->attributes = $priceItem;
+                                $quotePrice->quote_id = $quote->id;
+                                $quotePrice->save();
+                            }
+                        }
+                    }
+
+                    echo 'Sync success Lead id: ' . $lead->id . PHP_EOL;
+                } catch (\Throwable $throwable) {
+                    var_dump($throwable->getMessage());
+                    var_dump($throwable->getTraceAsString());
+                }
             }
         }
     }
