@@ -98,9 +98,11 @@ $queueType = Yii::$app->request->get('type');
                 /**
                  * @var $model Lead
                  */
-                $quote = $model->getAppliedAlternativeQuotes();
+                /*$quote = $model->getAppliedAlternativeQuotes();
                 return ($quote !== null && !empty($quote->record_locator))
-                    ? $quote->record_locator : '-';
+                    ? $quote->record_locator : '-';*/
+                return ($quote !== null && !empty($quote->record_locator))
+                    ? $model->additionalInformationForm->pnr : '-';
             }
         ],
         [
