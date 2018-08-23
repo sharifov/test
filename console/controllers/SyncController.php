@@ -261,6 +261,7 @@ class SyncController extends Controller
                     $lead->client_id = $client->id;
                     $lead->id = $leadId;
                     $lead->additional_information = json_encode($lead->additional_information);
+                    echo 'Sync before Lead id: ' . $lead->id . PHP_EOL;
                     if (!$lead->save(false)) {
                         var_dump($lead->getErrors());
                         //exit;
