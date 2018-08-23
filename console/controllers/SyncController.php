@@ -274,7 +274,7 @@ class SyncController extends Controller
                     }
                     $preference->attributes = $objects['Lead'];
                     $preference->lead_id = $lead->id;
-                    if (!$preference->save()) {
+                    if (!$preference->save(false)) {
                         var_dump($preference->getErrors());
                         //exit;
                     }

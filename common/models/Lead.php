@@ -869,7 +869,7 @@ class Lead extends ActiveRecord
 
             if ($insert) {
                 //$this->created = date('Y-m-d H:i:s');
-                if (!empty($this->project_id) && empty($this->source_id)) {
+                /*if (!empty($this->project_id) && empty($this->source_id)) {
                     $project = Project::findOne(['id' => $this->project_id]);
                     if ($project !== null) {
                         $this->source_id = $project->sources[0]->id;
@@ -882,7 +882,7 @@ class Lead extends ActiveRecord
                 ]);
                 if ($leadExistByUID !== null) {
                     $this->uid = uniqid();
-                }
+                }*/
             } else {
                 //$this->updated = date('Y-m-d H:i:s');
             }
