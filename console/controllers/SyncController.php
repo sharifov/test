@@ -255,6 +255,10 @@ class SyncController extends Controller
                         //exit;
                     }
 
+                    $lead->created = $objects['Lead']['created'];
+                    $lead->updated = $objects['Lead']['updated'];
+                    $lead->updated(false, ['created', 'updated']);
+
                     //edit-add preference object
                     $preference = LeadPreferences::findOne(['id' => $leadId]);
                     if ($preference === null) {
@@ -301,6 +305,8 @@ class SyncController extends Controller
                             var_dump($note->getErrors());
                             //exit;
                         }
+                        $note->created = $item['created'];
+                        $note->updated(false, ['created']);
                     }
 
 
@@ -321,11 +327,17 @@ class SyncController extends Controller
                             var_dump($quote->getErrors());
                             //exit;
                         } else {
+                            $quote->created = $item['created'];
+                            $quote->updated = $item['updated'];
+                            $quote->updated(false, ['created', 'updated']);
                             foreach ($item['QuotePrices'] as $priceItem) {
                                 $quotePrice = new QuotePrice();
                                 $quotePrice->attributes = $priceItem;
                                 $quotePrice->quote_id = $quote->id;
                                 $quotePrice->save();
+                                $quotePrice->created = $priceItem['created'];
+                                $quotePrice->updated = $priceItem['updated'];
+                                $quotePrice->updated(false, ['created', 'updated']);
                             }
                         }
                     }
