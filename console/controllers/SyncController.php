@@ -171,9 +171,12 @@ class SyncController extends Controller
         }
     }
 
-    public function actionLeads($status = '', $projects = '')
+    public function actionLeads($status = '', $projects = '', $limit = 1000, $offset = 0)
     {
-        $attr = [];
+        $attr = [
+            'limit' => $limit,
+            'offset' => $offset,
+        ];
         if (!empty($status)) {
             $attr['status'] = $status;
         }
@@ -363,5 +366,7 @@ class SyncController extends Controller
                 }
             }
         }
+
+        var_dump($result['sql']);
     }
 }
