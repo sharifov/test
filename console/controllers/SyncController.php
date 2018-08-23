@@ -194,6 +194,9 @@ class SyncController extends Controller
         echo $query . PHP_EOL;
 
         $result = BackOffice::sendRequest('old/leads' . $query);
+
+        var_dump($result['sql']);
+
         if (isset($result['data'])) {
             foreach ($result['data'] as $leadId => $objects) {
                 try {
@@ -375,7 +378,5 @@ class SyncController extends Controller
                 }
             }
         }
-
-        var_dump($result['sql']);
     }
 }
