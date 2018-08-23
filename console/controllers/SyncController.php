@@ -255,10 +255,6 @@ class SyncController extends Controller
                         //exit;
                     }
 
-                    $lead->created = $objects['Lead']['created'];
-                    $lead->updated = $objects['Lead']['updated'];
-                    $lead->update(false, ['created', 'updated']);
-
                     //edit-add preference object
                     $preference = LeadPreferences::findOne(['id' => $leadId]);
                     if ($preference === null) {
@@ -342,6 +338,10 @@ class SyncController extends Controller
                         }
                     }
 
+                    $lead->created = $objects['Lead']['created'];
+                    $lead->updated = $objects['Lead']['updated'];
+                    $lead->update(false, ['created', 'updated']);
+                    
                     echo 'Sync success Lead id: ' . $lead->id . PHP_EOL;
                 } catch (\Throwable $throwable) {
                     var_dump($throwable->getMessage());
