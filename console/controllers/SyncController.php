@@ -260,7 +260,8 @@ class SyncController extends Controller
                     $lead->attributes = $objects['Lead'];
                     $lead->client_id = $client->id;
                     $lead->id = $leadId;
-                    if (!$lead->save()) {
+                    $lead->additional_information = json_encode($lead->additional_information);
+                    if (!$lead->save(false)) {
                         var_dump($lead->getErrors());
                         //exit;
                     }
