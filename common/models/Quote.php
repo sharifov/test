@@ -694,6 +694,15 @@ class Quote extends \yii\db\ActiveRecord
         return $name;
     }
 
+    public function beforeDelete()
+    {
+        foreach ($this->quotePrices as $quotePrice) {
+            $quotePrice->delete();
+        }
+
+        return parent::beforeDelete();
+    }
+
     public function quotePrice()
     {
         $result = [
