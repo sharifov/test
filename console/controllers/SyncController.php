@@ -216,7 +216,7 @@ class SyncController extends Controller
                 $client->attributes = $objects['Client'];
                 if (!$client->save()) {
                     var_dump($client->getErrors());
-                    exit;
+                    //exit;
                 }
 
                 //clear and add client email object
@@ -251,7 +251,7 @@ class SyncController extends Controller
                 $lead->id = $leadId;
                 if (!$lead->save()) {
                     var_dump($lead->getErrors());
-                    exit;
+                    //exit;
                 }
 
                 //edit-add preference object
@@ -263,7 +263,7 @@ class SyncController extends Controller
                 $preference->lead_id = $lead->id;
                 if (!$preference->save()) {
                     var_dump($preference->getErrors());
-                    exit;
+                    //exit;
                 }
 
                 //clear and add leadFlightSegments object
@@ -277,7 +277,7 @@ class SyncController extends Controller
                     $segment->save();
                     if (!$segment->save()) {
                         var_dump($segment->getErrors());
-                        exit;
+                       // exit;
                     }
                 }
 
@@ -298,7 +298,7 @@ class SyncController extends Controller
                     $note->save();
                     if (!$note->save()) {
                         var_dump($note->getErrors());
-                        exit;
+                        //exit;
                     }
                 }
 
@@ -318,7 +318,7 @@ class SyncController extends Controller
                     if (!$quote->save(false)) {
                         echo 'LEAD: ' . $quote->lead_id . PHP_EOL;
                         var_dump($quote->getErrors());
-                        exit;
+                        //exit;
                     } else {
                         foreach ($item['QuotePrices'] as $priceItem) {
                             $quotePrice = new QuotePrice();
