@@ -594,7 +594,7 @@ class Lead extends ActiveRecord
     {
         parent::afterSave($insert, $changedAttributes);
 
-        if (empty($this->offset_gmt) && !empty($this->request_ip)) {
+        /*if (empty($this->offset_gmt) && !empty($this->request_ip)) {
 
             $ctx = stream_context_create(['http' =>
                 ['timeout' => 5]  //Seconds
@@ -624,7 +624,7 @@ class Lead extends ActiveRecord
                     $this->update(false, ['offset_gmt', 'request_ip_detail']);
                 }
             }
-        }
+        }*/
 
         if ($insert) {
             LeadFlow::addStateFlow($this);
