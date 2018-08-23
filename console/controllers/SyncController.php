@@ -324,24 +324,38 @@ class SyncController extends Controller
                             //exit;
                         } else {
                             $quote->created = $item['created'];
-                            $quote->updated = $item['updated'];
-                            $quote->update(false, ['created', 'updated']);
+                            $quote->update(false, ['created']);
+
+                            Yii::$app->db->createCommand('UPDATE '.Quote::tableName().' SET updated = :updated WHERE id = :id', [
+                                ':updated' => $item['updated'],
+                                ':id' => $quote->id
+                            ])->execute();
+
                             foreach ($item['QuotePrices'] as $priceItem) {
                                 $quotePrice = new QuotePrice();
                                 $quotePrice->attributes = $priceItem;
                                 $quotePrice->quote_id = $quote->id;
                                 $quotePrice->save();
+
                                 $quotePrice->created = $priceItem['created'];
-                                $quotePrice->updated = $priceItem['updated'];
-                                $quotePrice->update(false, ['created', 'updated']);
+                                $quotePrice->update(false, ['created']);
+
+                                Yii::$app->db->createCommand('UPDATE '.QuotePrice::tableName().' SET updated = :updated WHERE id = :id', [
+                                    ':updated' => $priceItem['updated'],
+                                    ':id' => $quotePrice->id
+                                ])->execute();
                             }
                         }
                     }
 
                     $lead->created = $objects['Lead']['created'];
-                    $lead->updated = $objects['Lead']['updated'];
-                    $lead->update(false, ['created', 'updated']);
-                    
+                    $lead->update(false, ['created']);
+
+                    Yii::$app->db->createCommand('UPDATE '.Lead::tableName().' SET updated = :updated WHERE id = :id', [
+                        ':updated' => $objects['Lead']['updated'],
+                        ':id' => $lead->id
+                    ])->execute();
+
                     echo 'Sync success Lead id: ' . $lead->id . PHP_EOL;
                 } catch (\Throwable $throwable) {
                     var_dump($throwable->getMessage());
