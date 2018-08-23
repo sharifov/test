@@ -8,6 +8,9 @@ use yii\widgets\DetailView;
 /* @var $searchModel common\models\search\QuoteSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
+/* @var $searchModelSegments common\models\search\LeadFlightSegmentSearch */
+/* @var $dataProviderSegments yii\data\ActiveDataProvider */
+
 
 $this->title = 'Lead ID: ' . $model->id . ', UID: '.$model->uid;
 $this->params['breadcrumbs'][] = ['label' => 'Leads', 'url' => ['index']];
@@ -92,9 +95,9 @@ $this->params['breadcrumbs'][] = $this->title;
                     [
                         'attribute' => 'status',
                         'value' => function(\common\models\Lead $model) {
-                            return '<h4><span class="label '.$model->getLabelClass().'">'.\common\models\Lead::getStatus($model->status).'</span></h4>';
+                            return $model->getStatusName(true);
                         },
-                        'format' => 'raw',
+                        'format' => 'html',
 
                     ],
                     [
@@ -146,8 +149,23 @@ $this->params['breadcrumbs'][] = $this->title;
                     'children',
                     'infants',
                     'notes_for_experts:ntext',
-                    'created',
-                    'updated',
+
+
+                    [
+                        'attribute' => 'created',
+                        'value' => function(\common\models\Lead $model) {
+                            return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime($model->created, 'php:Y-m-d [H:i]');
+                        },
+                        'format' => 'html',
+                    ],
+
+                    [
+                        'attribute' => 'updated',
+                        'value' => function(\common\models\Lead $model) {
+                            return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime($model->updated, 'php:Y-m-d [H:i]');
+                        },
+                        'format' => 'html',
+                    ],
                 ],
             ]) ?>
         </div>
@@ -188,6 +206,73 @@ $this->params['breadcrumbs'][] = $this->title;
             <? endif;*/ ?>
         </div>
 
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <h3>Flight Segments:</h3>
+            <?php \yii\widgets\Pjax::begin(); ?>
+
+            <?= \yii\grid\GridView::widget([
+                'dataProvider' => $dataProviderSegments,
+                'filterModel' => $searchModelSegments,
+                'columns' => [
+                    'id',
+                    /*[
+                        'attribute' => 'lead_id',
+                        'format' => 'raw',
+                        'value' => function(\common\models\LeadFlightSegment $model) {
+                            return '<i class="fa fa-arrow-right"></i> '.Html::a('lead: '.$model->lead_id, ['leads/view', 'id' => $model->lead_id], ['target' => '_blank', 'data-pjax' => 0]);
+                        },
+                    ],*/
+                    'origin',
+                    'destination',
+                    [
+                        'attribute' => 'departure',
+                        'value' => function(\common\models\LeadFlightSegment $model) {
+                            return '<i class="fa fa-calendar"></i> '.date("Y-m-d", strtotime($model->departure));
+                        },
+                        'format' => 'html',
+                    ],
+                    [
+                        'attribute' => 'flexibility',
+                        'value' => function(\common\models\LeadFlightSegment $model) {
+                            return $model->flexibility;
+                        },
+                        'filter' => array_combine(range(0, 5), range(0, 5)),
+                    ],
+                    [
+                        'attribute' => 'flexibility_type',
+                        'value' => function(\common\models\LeadFlightSegment $model) {
+                            return $model->flexibility_type;
+                        },
+                        'filter' => \common\models\LeadFlightSegment::FLEX_TYPE_LIST
+                    ],
+                    [
+                        'attribute' => 'created',
+                        'value' => function(\common\models\LeadFlightSegment $model) {
+                            return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime($model->created, 'php:Y-m-d [H:i]');
+                        },
+                        'format' => 'html',
+                    ],
+
+                    [
+                        'attribute' => 'updated',
+                        'value' => function(\common\models\LeadFlightSegment $model) {
+                            return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime($model->updated, 'php:Y-m-d [H:i]');
+                        },
+                        'format' => 'html',
+                    ],
+
+                    'origin_label',
+                    'destination_label',
+
+                    ['class' => 'yii\grid\ActionColumn', 'template' => '{view}', 'controller' => 'lead-flight-segment'],
+                ],
+            ]); ?>
+
+            <?php \yii\widgets\Pjax::end(); ?>
+        </div>
     </div>
 
     <div class="row">
@@ -249,19 +334,58 @@ $this->params['breadcrumbs'][] = $this->title;
                 ],
                 //'trip_type',
                 'main_airline_code',
-                'reservation_dump:ntext',
+                //'reservation_dump:ntext',
+
+                [
+                    'attribute' => 'reservation_dump',
+                    'value' => function(\common\models\Quote $model) {
+                        return '<pre style="font-size: 9px">'. $model->reservation_dump . '</pre>';
+                    },
+                    'format' => 'html',
+                ],
+
                 //'status',
                 [
                     'attribute' => 'status',
                     'value' => function(\common\models\Quote $model) {
-                        return $model->getStatusName();
+                        return $model->getStatusName(true);
                     },
+                    'format' => 'html',
                     'filter' => \common\models\Quote::STATUS_LIST
                 ],
                 'check_payment:boolean',
                 'fare_type',
-                'created',
-                'updated',
+
+
+                [
+                    'header' => 'Prices',
+                    'value' => function(\common\models\Quote $model) {
+                        return $model->quotePricesCount ? Html::a($model->quotePricesCount, ['quote-price/index', "QuotePriceSearch[quote_id]" => $model->id], ['target' => '_blank', 'data-pjax' => 0]) : '-' ;
+                    },
+                    'format' => 'raw',
+                    'contentOptions' => ['class' => 'text-center'],
+                ],
+
+                //'created',
+                //'updated',
+
+                [
+                    'attribute' => 'created',
+                    'value' => function(\common\models\Quote $model) {
+                        return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime($model->created, 'php:Y-m-d [H:i]');
+                    },
+                    'format' => 'html',
+                ],
+
+                [
+                    'attribute' => 'updated',
+                    'value' => function(\common\models\Quote $model) {
+                        return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime($model->updated, 'php:Y-m-d [H:i]');
+                    },
+                    'format' => 'html',
+                ],
+
+                ['class' => 'yii\grid\ActionColumn', 'template' => '{view}', 'controller' => 'quote'],
 
                 //['class' => 'yii\grid\ActionColumn'],
             ],

@@ -17,33 +17,106 @@ $this->params['breadcrumbs'][] = $this->title;
     <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
 
     <p>
-        <?= Html::a('Create Quote', ['create'], ['class' => 'btn btn-success']) ?>
+        <?//= Html::a('Create Quote', ['create'], ['class' => 'btn btn-success']) ?>
     </p>
 
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'columns' => [
-            ['class' => 'yii\grid\SerialColumn'],
+            //['class' => 'yii\grid\SerialColumn'],
 
             'id',
             'uid',
-            'lead_id',
-            'employee_id',
+            [
+                'attribute' => 'lead_id',
+                'format' => 'raw',
+                'value' => function(\common\models\Quote $model) {
+                    return '<i class="fa fa-arrow-right"></i> '.Html::a('lead: '.$model->lead_id, ['leads/view', 'id' => $model->lead_id], ['target' => '_blank', 'data-pjax' => 0]);
+                },
+            ],
+            [
+                'attribute' => 'employee_id',
+                'format' => 'raw',
+                'value' => function(\common\models\Quote $model) {
+                    return $model->employee ? '<i class="fa fa-user"></i> '.$model->employee->username : '-';
+                },
+                'filter' => \common\models\Employee::getList()
+            ],
             'record_locator',
-            //'pcc',
-            //'cabin',
-            //'gds',
-            //'trip_type',
-            //'main_airline_code',
+
+
+            [
+                'attribute' => 'gds',
+                'value' => function(\common\models\Quote $model) {
+                    return '<i class="fa fa-plane"></i> '.$model->getGdsName2();
+                },
+                'format' => 'raw',
+                'filter' => \common\models\Quote::GDS_LIST
+            ],
+            'pcc',
+            [
+                'attribute' => 'trip_type',
+                'value' => function(\common\models\Quote $model) {
+                    return \common\models\Lead::getFlightType($model->trip_type) ?? '-';
+                },
+                'filter' => \common\models\Lead::TRIP_TYPE_LIST
+            ],
+            [
+                'attribute' => 'cabin',
+                'value' => function(\common\models\Quote $model) {
+                    return \common\models\Lead::getCabin($model->cabin) ?? '-';
+                },
+                'filter' => \common\models\Lead::CABIN_LIST
+            ],
+            'main_airline_code',
             //'reservation_dump:ntext',
-            //'status',
-            //'check_payment',
-            //'fare_type',
+            [
+                'attribute' => 'reservation_dump',
+                'value' => function(\common\models\Quote $model) {
+                    return '<pre style="font-size: 9px">'.$model->reservation_dump.'</pre>';
+                },
+                'format' => 'html',
+            ],
+            [
+                'attribute' => 'status',
+                'value' => function(\common\models\Quote $model) {
+                    return $model->getStatusName(true);
+                },
+                'format' => 'html',
+                'filter' => \common\models\Quote::STATUS_LIST
+            ],
+            'check_payment:boolean',
+            'fare_type',
+            [
+                'header' => 'Prices',
+                'value' => function(\common\models\Quote $model) {
+                    return $model->quotePricesCount ? Html::a($model->quotePricesCount, ['quote-price/index', "QuotePriceSearch[quote_id]" => $model->id], ['target' => '_blank', 'data-pjax' => 0]) : '-' ;
+                },
+                'format' => 'raw',
+                'contentOptions' => ['class' => 'text-center'],
+            ],
+
             //'created',
             //'updated',
 
-            ['class' => 'yii\grid\ActionColumn'],
+            [
+                'attribute' => 'created',
+                'value' => function(\common\models\Quote $model) {
+                    return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime($model->created, 'php:Y-m-d [H:i]');
+                },
+                'format' => 'html',
+            ],
+
+            [
+                'attribute' => 'updated',
+                'value' => function(\common\models\Quote $model) {
+                    return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime($model->updated, 'php:Y-m-d [H:i]');
+                },
+                'format' => 'html',
+            ],
+
+            ['class' => 'yii\grid\ActionColumn', 'template' => '{view}'],
         ],
     ]); ?>
     <?php Pjax::end(); ?>

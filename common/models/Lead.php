@@ -48,7 +48,8 @@ use yii\helpers\Html;
  * @property Employee $employee
  * @property Source $source
  * @property Project $project
- *
+ * @property int $quotesCount
+ * @property int $leadFlightSegmentsCount
  * @property LeadAdditionalInformation $additionalInformationForm
  */
 class Lead extends ActiveRecord
@@ -90,14 +91,14 @@ class Lead extends ActiveRecord
     ];
 
     public CONST STATUS_CLASS_LIST = [
-        self::STATUS_PENDING => 'pending',
-        self::STATUS_PROCESSING => 'processing',
-        self::STATUS_FOLLOW_UP => 'follow_up',
-        self::STATUS_ON_HOLD => 'on_hold',
-        self::STATUS_SOLD => 'sold',
-        self::STATUS_TRASH => 'trash',
-        self::STATUS_BOOKED => 'booked',
-        self::STATUS_SNOOZE => 'snooze',
+        self::STATUS_PENDING        => 'll-pending',
+        self::STATUS_PROCESSING     => 'll-processing',
+        self::STATUS_FOLLOW_UP      => 'll-follow_up',
+        self::STATUS_ON_HOLD        => 'll-on_hold',
+        self::STATUS_SOLD           => 'll-sold',
+        self::STATUS_TRASH          => 'll-trash',
+        self::STATUS_BOOKED         => 'll-booked',
+        self::STATUS_SNOOZE         => 'll-snooze',
     ];
 
     public CONST
@@ -571,6 +572,24 @@ class Lead extends ActiveRecord
     }
 
 
+    /**
+     * @param bool $label
+     * @return string
+     */
+    public function getStatusName(bool $label = false) : string
+    {
+        $statusName = self::STATUS_LIST[$this->status] ?? '-';
+
+        if($label) {
+            $class = $this->getStatusLabelClass();
+            $statusName = '<span class="label '.$class.'" style="font-size: 13px">' . Html::encode($statusName) . '</span>';
+        }
+
+        return $statusName;
+    }
+
+
+
     public function afterSave($insert, $changedAttributes)
     {
         parent::afterSave($insert, $changedAttributes);
@@ -784,12 +803,25 @@ class Lead extends ActiveRecord
         return Quote::findAll(['lead_id' => $this->id]);
     }
 
+    public function getQuotesCount(): int
+    {
+        return $this->hasMany(Quote::class, ['lead_id' => 'id'])->count();
+    }
+
     /**
      * @return \yii\db\ActiveQuery
      */
     public function getLeadFlightSegments(): ActiveQuery
     {
         return $this->hasMany(LeadFlightSegment::class, ['lead_id' => 'id']);
+    }
+
+    /**
+     * @return int
+     */
+    public function getLeadFlightSegmentsCount(): int
+    {
+        return $this->hasMany(LeadFlightSegment::class, ['lead_id' => 'id'])->count();
     }
 
     /**
@@ -1117,9 +1149,9 @@ class Lead extends ActiveRecord
     /**
      * @return string
      */
-    public function getLabelClass(): string
+    public function getStatusLabelClass(): string
     {
-        $class = self::STATUS_CLASS_LIST[$this->status] ?? 'default';
-        return 'label-' . $class;
+        return self::STATUS_CLASS_LIST[$this->status] ?? 'label-default';
     }
+
 }

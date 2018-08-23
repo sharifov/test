@@ -267,35 +267,58 @@ a.desc:after {
     color: #fff;
 }
 
+/* ----------------- LEAD STATUS CLASS -------------------------------- */
 
-.label-pending {
+.ll-pending {
     background-color: #efc24a;
 }
 
-.label-processing {
+.ll-processing {
     background-color: #659BE0;
 }
 
-.label-follow_up {
+.ll-follow_up {
     background-color: #ce8911;
 }
 
-.label-on_hold {
+.ll-on_hold {
     background-color: #d4846d;
 }
 
-.label-sold {
+.ll-sold {
     background-color: #5ca968;
 }
 
-.label-trash {
+.ll-trash {
     background-color: #8e99a5;
 }
 
-.label-booked {
+.ll-booked {
     background-color: #0BB094;
 }
 
-.label-snooze {
+.ll-snooze {
     background-color: #714E9C;
+}
+
+/* ----------------- QUOTE STATUS CLASS -------------------------------- */
+
+.lq-created {
+    background-color: #efc24a;
+}
+
+.lq-applied {
+    background-color: #659BE0;
+}
+
+.lq-declined {
+    background-color: #d4846d;
+}
+
+.lq-opened {
+    background-color: #5ca968;
+}
+
+.lq-send {
+    background-color: #0BB094;
 }
