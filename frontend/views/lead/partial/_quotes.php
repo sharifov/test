@@ -2,6 +2,7 @@
 /**
  * @var $quotes Quote[]
  * @var $lead Lead
+ * @var $leadForm LeadForm
  */
 
 use common\models\Quote;
@@ -9,12 +10,16 @@ use common\models\Lead;
 use yii\bootstrap\Html;
 use yii\helpers\Url;
 use common\models\Airline;
+use frontend\models\LeadForm;
 
 $extraPriceUrl = \yii\helpers\Url::to(['quote/extra-price']);
 $declineUrl = \yii\helpers\Url::to(['quote/decline']);
 $leadId = $lead->id;
 
-$js = <<<JS
+$appliedQuote = $lead->getAppliedAlternativeQuotes();
+
+if ($leadForm->mode != $leadForm::VIEW_MODE) {
+    $js = <<<JS
 
     $('[data-toggle="tooltip"]').tooltip();
     $(document).on('click', '.send-quotes-to-email', function () {
@@ -171,17 +176,18 @@ $js = <<<JS
         });
     });
 JS;
-$this->registerJs($js);
-
+    $this->registerJs($js);
+}
 ?>
 
-<div class="btn-wrapper pt-20 mb-20">
-    <?= Html::button('<i class="fa fa-eye-slash"></i>&nbsp;Declined Quotes', [
-        'class' => 'btn btn-primary btn-lg',
-        'id' => 'btn-declined-quotes',
-    ]) ?>
-    <!--Button Send-->
-    <span class="btn-group">
+<?php if ($leadForm->mode != $leadForm::VIEW_MODE) : ?>
+    <div class="btn-wrapper pt-20 mb-20">
+        <?= Html::button('<i class="fa fa-eye-slash"></i>&nbsp;Declined Quotes', [
+            'class' => 'btn btn-primary btn-lg',
+            'id' => 'btn-declined-quotes',
+        ]) ?>
+        <!--Button Send-->
+        <span class="btn-group">
             <?= Html::button('<i class="fa fa-send"></i>&nbsp;Send Quotes', [
                 'class' => 'btn btn-lg btn-success',
                 'id' => 'lg-btn-send-quotes',
@@ -194,36 +200,47 @@ $this->registerJs($js);
                 'data-original-title' => 'Select Emails',
             ]) ?>
         </span>
-    <div class="hidden js-pop-emails-content sl-popover-emails">
-        <label for="send-to-email" class="select-wrap-label mb-20" style="width:250px;">
-            <?= Html::dropDownList('send_to_email', null, [], [
-                'class' => 'form-control',
-                'id' => 'send-to-email'
-            ]) ?>
-        </label>
-        <div>
-            <?= Html::button('Send', [
-                'class' => 'btn btn-success send-quotes-to-email',
-                'id' => 'btn-send-quotes-email',
-                'data-url' => \yii\helpers\Url::to(['quote/send-quotes'])
-            ]) ?>
+        <div class="hidden js-pop-emails-content sl-popover-emails">
+            <label for="send-to-email" class="select-wrap-label mb-20" style="width:250px;">
+                <?= Html::dropDownList('send_to_email', null, [], [
+                    'class' => 'form-control',
+                    'id' => 'send-to-email'
+                ]) ?>
+            </label>
+            <div>
+                <?= Html::button('Send', [
+                    'class' => 'btn btn-success send-quotes-to-email',
+                    'id' => 'btn-send-quotes-email',
+                    'data-url' => \yii\helpers\Url::to(['quote/send-quotes'])
+                ]) ?>
+            </div>
         </div>
     </div>
-</div>
-<div id="sent-messages" class="alert hidden">
-    <i class="fa fa-exclamation-triangle hidden"></i>
-    <i class="fa fa-times-circle hidden"></i>
-    <div></div>
-</div>
-
+    <div id="sent-messages" class="alert hidden">
+        <i class="fa fa-exclamation-triangle hidden"></i>
+        <i class="fa fa-times-circle hidden"></i>
+        <div></div>
+    </div>
+<?php endif; ?>
 <?php foreach ($quotes as $key => $quote):
-    $tagACollapseClass = ($quote->status == $quote::STATUS_DECLINED)
-        ? 'collapsing-heading__collapse-link collapsed'
-        : 'collapsing-heading__collapse-link';
+    $collapsed = false;
+    $tagACollapseClass = '';
+    if (!empty($appliedQuote)) {
+        $collapsed = true;
+        $tagACollapseClass = 'collapsed';
+    }
+    if ($quote->status == $quote::STATUS_APPLIED) {
+        $collapsed = false;
+        $tagACollapseClass = '';
+    } else if ($quote->status == $quote::STATUS_DECLINED) {
+        $collapsed = true;
+        $tagACollapseClass = 'collapsed';
+    }
     ?>
     <div class="panel panel-info panel-wrapper sl-quote" id="<?= $quote->uid ?>">
         <div class="panel-heading collapsing-heading">
-            <a data-toggle="collapse" href="#quote-<?= $quote->uid ?>" class="<?= $tagACollapseClass ?>">
+            <a data-toggle="collapse" href="#quote-<?= $quote->uid ?>"
+               class="collapsing-heading__collapse-link <?= $tagACollapseClass ?>">
                 <?= sprintf('%d. #%s Quote | Cabin Class: %s',
                     (count($quotes) - $key),
                     $quote->uid,
@@ -238,7 +255,7 @@ $this->registerJs($js);
                     'data-url' => Url::to(['quote/create', 'leadId' => $lead->id, 'qId' => $quote->id])
                 ]);
             } ?>
-            <?php if (in_array($quote->status, [$quote::STATUS_CREATED, $quote::STATUS_SEND])) : ?>
+            <?php if ($leadForm->mode != $leadForm::VIEW_MODE && in_array($quote->status, [$quote::STATUS_CREATED, $quote::STATUS_SEND])) : ?>
                 <div class="custom-checkbox sl-quote__check">
                     <input class="quotes-uid" id="q<?= $quote->uid ?>" value="<?= $quote->uid ?>"
                            type="checkbox" name="quote[<?= $quote->uid ?>]">
@@ -246,7 +263,8 @@ $this->registerJs($js);
                 </div>
             <?php endif; ?>
         </div>
-        <div class="panel-body collapse <?= ($quote->status == $quote::STATUS_DECLINED) ? '' : 'in' ?>" id="quote-<?= $quote->uid ?>">
+        <div class="panel-body collapse <?= ($collapsed) ? '' : 'in' ?>"
+             id="quote-<?= $quote->uid ?>">
             <div class="sl-quote__content">
                 <div class="sl-quote__pricing">
                     <div class="row">

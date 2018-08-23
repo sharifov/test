@@ -193,8 +193,8 @@ class Quote extends \yii\db\ActiveRecord
     {
         return [
             [['uid', 'reservation_dump', 'pcc', 'gds', 'main_airline_code'], 'required'],
-            [['lead_id', 'employee_id', 'status', 'check_payment'], 'integer'],
-            [['created', 'updated', 'reservation_dump', 'created_by_seller', 'employee_name'], 'safe'],
+            [['lead_id', 'status', 'check_payment'], 'integer'],
+            [['created', 'updated', 'reservation_dump', 'created_by_seller', 'employee_name', 'employee_id'], 'safe'],
             [['uid', 'record_locator', 'pcc', 'cabin', 'gds', 'trip_type', 'main_airline_code', 'fare_type'], 'string', 'max' => 255],
 
             [['reservation_dump'], 'checkReservationDump'],
@@ -341,7 +341,15 @@ class Quote extends \yii\db\ActiveRecord
 
     public function beforeSave($insert) : bool
     {
+        if ($this->isNewRecord) {
+            $this->uid = empty($this->uid) ? uniqid() : $this->uid;
+            if (!Yii::$app->user->isGuest && Yii::$app->user->identityClass != 'webapi\models\ApiUser') {
+                $this->employee_id = Yii::$app->user->identity->getId();
+            }
+        }
+
         if (parent::beforeSave($insert)) {
+
 
             if ($insert) {
                 if(!$this->status) {
@@ -534,13 +542,15 @@ class Quote extends \yii\db\ActiveRecord
             ]);
 
 
-            if ($this->lead->called_expert &&
-                $changedAttributes['status'] != $this->status &&
-                !in_array($this->status, [self::STATUS_APPLIED])
-            ) {
-                $quote = Quote::findOne(['id' => $this->id]);
-                $data = $quote->getQuoteInformationForExpert(true);
-                BackOffice::sendRequest('lead/update-quote', 'POST', json_encode($data));
+            if (isset($changedAttributes['status'])) {
+                if ($this->lead->called_expert &&
+                    $changedAttributes['status'] != $this->status &&
+                    !in_array($this->status, [self::STATUS_APPLIED])
+                ) {
+                    $quote = Quote::findOne(['id' => $this->id]);
+                    $data = $quote->getQuoteInformationForExpert(true);
+                    BackOffice::sendRequest('lead/update-quote', 'POST', json_encode($data));
+                }
             }
         }
     }

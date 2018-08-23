@@ -3,6 +3,7 @@
 namespace common\models;
 
 use common\components\EmailService;
+use common\models\local\LeadAdditionalInformation;
 use common\models\local\LeadLogMessage;
 use Yii;
 use yii\behaviors\TimestampBehavior;
@@ -39,6 +40,7 @@ use yii\helpers\Html;
  * @property boolean $called_expert
  * @property string $discount_id
  * @property string $bo_flight_id
+ * @property string $additional_information
  *
  * @property LeadFlightSegment[] $leadFlightSegments
  * @property LeadPreferences $leadPreferences
@@ -48,9 +50,12 @@ use yii\helpers\Html;
  * @property Project $project
  * @property int $quotesCount
  * @property int $leadFlightSegmentsCount
+ * @property LeadAdditionalInformation $additionalInformationForm
  */
 class Lead extends ActiveRecord
 {
+    public $additionalInformationForm;
+
     public CONST
         TRIP_TYPE_ONE_WAY = 'OW',
         TRIP_TYPE_ROUND_TRIP = 'RT',
@@ -116,6 +121,13 @@ class Lead extends ActiveRecord
         DIV_GRID_IN_SNOOZE = 4;
 
     public CONST SCENARIO_API = 'scenario_api';
+
+    public function init()
+    {
+        parent::init();
+
+        $this->additionalInformationForm = new LeadAdditionalInformation();
+    }
 
     public static function getDivs($div = null)
     {
@@ -376,7 +388,7 @@ class Lead extends ActiveRecord
             [['adults'], 'integer', 'min' => 1],
             [['notes_for_experts'], 'string'],
             [['created', 'updated', 'offset_gmt', 'request_ip', 'request_ip_detail', 'snooze_for',
-                'called_expert', 'discount_id', 'bo_flight_id'], 'safe'],
+                'called_expert', 'discount_id', 'bo_flight_id', 'additional_information'], 'safe'],
             [['uid'], 'string', 'max' => 255],
             [['trip_type'], 'string', 'max' => 2],
             [['cabin'], 'string', 'max' => 1],
@@ -776,7 +788,7 @@ class Lead extends ActiveRecord
     public function getAppliedAlternativeQuotes()
     {
         foreach ($this->getQuotes() as $quote) {
-            if ($quote->status === $quote::STATUS_APPLIED) {
+            if ($quote->status == $quote::STATUS_APPLIED) {
                 return $quote;
             }
         }
@@ -865,6 +877,14 @@ class Lead extends ActiveRecord
                         $this->source_id = $project->sources[0]->id;
                     }
                 }
+
+                $leadExistByUID = Lead::findOne([
+                    'uid' => $this->uid,
+                    'source_id' => $this->source_id
+                ]);
+                if ($leadExistByUID !== null) {
+                    $this->uid = uniqid();
+                }
             } else {
                 //$this->updated = date('Y-m-d H:i:s');
             }
@@ -909,7 +929,23 @@ class Lead extends ActiveRecord
             }
         }
 
+        if (is_array($this->additional_information)) {
+            $this->additional_information = json_encode($this->additional_information);
+        } else {
+            $this->additional_information = json_encode($this->additionalInformationForm->attributes);
+        }
+
         parent::afterValidate();
+    }
+
+    public function afterFind()
+    {
+        parent::afterFind();
+
+        if (!empty($this->additional_information)) {
+            $additionalInformationFormAttr = json_decode($this->additional_information, true);
+            $this->additionalInformationForm->setAttributes($additionalInformationFormAttr);
+        }
     }
 
     public function getPaxTypes()
@@ -945,23 +981,23 @@ class Lead extends ActiveRecord
         }
 
         if (empty($models)) {
-            $result['errors'] = sprintf('Quotes not fond. UID: [%s]', implode(', ', $quotes));
+            $result['errors'][] = sprintf('Quotes not fond. UID: [%s]', implode(', ', $quotes));
             return $result;
         }
 
         $key = sprintf('%s_%s', uniqid(), $email);
-        $fileName = sprintf('_%s_%s.php', str_replace(' ', '_', strtolower($this->source->project->name)), $key);
+        $fileName = sprintf('_%s_%s.php', str_replace(' ', '_', strtolower($this->project->name)), $key);
         $path = sprintf('%s/tmpEmail/quote/%s', Yii::$app->getViewPath(), $fileName);
 
         $template = ProjectEmailTemplate::findOne([
             'type' => ProjectEmailTemplate::TYPE_EMAIL_OFFER,
-            'project_id' => $this->source->project_id
+            'project_id' => $this->project_id
         ]);
 
         if ($template === null) {
-            $result['errors'] = sprintf('Email Template [%s] for project [%s] not fond.',
+            $result['errors'][] = sprintf('Email Template [%s] for project [%s] not fond.',
                 ProjectEmailTemplate::getTypes(ProjectEmailTemplate::TYPE_EMAIL_OFFER),
-                $this->source->project->name
+                $this->project->name
             );
             return $result;
         }
@@ -988,14 +1024,14 @@ class Lead extends ActiveRecord
 
         $sellerContactInfo = EmployeeContactInfo::findOne([
             'employee_id' => $this->employee->id,
-            'project_id' => $this->source->project_id
+            'project_id' => $this->project_id
         ]);
 
         $body = Yii::$app->getView()->render($view, [
             'origin' => $origin,
             'destination' => $destination,
             'quotes' => $models,
-            'project' => $this->source->project,
+            'project' => $this->project,
             'agentName' => ucfirst($this->employee->username),
             'employee' => $this->employee,
             'tripType' => $tripType,
@@ -1004,7 +1040,7 @@ class Lead extends ActiveRecord
 
         if (!empty($template->layout_path)) {
             $body = \Yii::$app->getView()->renderFile($template->layout_path, [
-                'project' => $this->source->project,
+                'project' => $this->project,
                 'agentName' => ucfirst($this->employee->username),
                 'employee' => $this->employee,
                 'sellerContactInfo' => $sellerContactInfo,
@@ -1023,7 +1059,7 @@ class Lead extends ActiveRecord
         ];
 
         $errors = [];
-        $isSend = EmailService::send($email, $this->source->project, $credential, $subject, $body, $errors);
+        $isSend = EmailService::send($email, $this->project, $credential, $subject, $body, $errors);
         $message = ($isSend)
             ? sprintf('Sending email - \'Offer\' succeeded! <br/>Emails: %s <br/>Quotes: %s',
                 implode(', ', [$email]),

@@ -868,4 +868,78 @@ class LeadController extends ApiBaseController
     }
 
 
+    public function actionSoldUpdate()
+    {
+
+        $this->checkPost();
+        $apiLog = $this->startApiLog($this->action->uniqueId);
+
+        $leadAttributes = Yii::$app->request->post((new Lead())->formName());
+        if (empty($leadAttributes)) {
+            throw new BadRequestHttpException((new Lead())->formName() . ' is required', 1);
+        }
+
+        $lead = Lead::findOne([
+            'uid' => $leadAttributes['uid'],
+            'source_id' => $leadAttributes['market_info_id']
+        ]);
+        if (!$lead) {
+            throw new NotFoundHttpException('Not found Lead UID: ' . $leadAttributes['uid'], 2);
+        }
+
+        $response = [
+            'status' => 'Failed',
+            'errors' => []
+        ];
+
+        $transaction = Yii::$app->db->beginTransaction();
+        try {
+
+            $lead->attributes = $leadAttributes;
+            if (!$lead->save()) {
+                $response['errors'][] = $lead->getErrors();
+                $transaction->rollBack();
+            } else {
+
+                if (!empty($leadAttributes['additional_information']['pnr'])) {
+                    $aplliend = $lead->getAppliedAlternativeQuotes();
+                    if ($aplliend !== null) {
+                        $aplliend->record_locator = $leadAttributes['additional_information']['pnr'];
+                        $aplliend->save(false);
+                        if ($aplliend->hasErrors()) {
+                            $response['errors'][] = $aplliend->getErrors();
+                        }
+                    }
+                }
+
+                $response['status'] = 'Success';
+                $transaction->commit();
+            }
+
+        } catch (\Throwable $e) {
+
+            Yii::error($e->getTraceAsString(), 'API:Quote:create:try');
+            if (Yii::$app->request->get('debug')) $message = ($e->getTraceAsString());
+            else $message = $e->getMessage() . ' (code:' . $e->getCode() . ', line: ' . $e->getLine() . ')';
+
+            $response['error'] = $message;
+            $response['errors'] = $message;
+            $response['error_code'] = 30;
+
+            $transaction->rollBack();
+        }
+
+        $responseData = $response;
+        $responseData = $apiLog->endApiLog($responseData);
+
+        if (isset($response['error']) && $response['error']) {
+            $json = @json_encode($response['error']);
+            if (isset($response['error_code']) && $response['error_code']) $error_code = $response['error_code'];
+            else $error_code = 0;
+            throw new UnprocessableEntityHttpException($json, $error_code);
+        }
+
+
+        return $responseData;
+    }
 }

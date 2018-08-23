@@ -111,7 +111,8 @@ JS;
             <?php if (!$leadForm->getLead()->isNewRecord && count($leadForm->getLead()->getQuotes())) {
                 echo $this->render('partial/_quotes', [
                     'quotes' => array_reverse($leadForm->getLead()->getQuotes()),
-                    'lead' => $leadForm->getLead()
+                    'lead' => $leadForm->getLead(),
+                    'leadForm' => $leadForm
                 ]);
             } ?>
 
