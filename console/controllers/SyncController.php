@@ -384,7 +384,7 @@ class SyncController extends Controller
                     ])->execute();
 
                     echo 'Sync FINAL success Lead id: ' . $lead->id . PHP_EOL;
-                    sleep(1);
+                    //sleep(1);
                 } catch (\Throwable $throwable) {
                     var_dump($throwable->getMessage());
                     var_dump($throwable->getTraceAsString());
