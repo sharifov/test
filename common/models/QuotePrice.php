@@ -32,6 +32,13 @@ class QuotePrice extends \yii\db\ActiveRecord
         PASSENGER_CHILD = 'CHD',
         PASSENGER_INFANT = 'INF';
 
+
+    public CONST PASSENGER_TYPE_LIST = [
+        self::PASSENGER_ADULT => 'Adult',
+        self::PASSENGER_CHILD => 'Children',
+        self::PASSENGER_INFANT => 'Infant'
+    ];
+
     public $oldParams;
 
     /**
@@ -148,7 +155,7 @@ class QuotePrice extends \yii\db\ActiveRecord
         parent::afterFind();
     }
 
-    public function afterValidate()
+    /*public function afterValidate()
     {
         $this->updated = date('Y-m-d H:i:s');
 
@@ -157,7 +164,29 @@ class QuotePrice extends \yii\db\ActiveRecord
         }
 
         parent::afterValidate();
+    }*/
+
+
+    public function beforeSave($insert) : bool
+    {
+        if (parent::beforeSave($insert)) {
+
+            $this->updated = date('Y-m-d H:i:s');
+
+            if (empty($this->uid)) {
+                $this->uid = uniqid('seller.');
+            }
+
+            /*if ($insert) {
+
+
+            }*/
+
+            return true;
+        }
+        return false;
     }
+
 
     public function createQPrice($paxType)
     {
@@ -175,5 +204,10 @@ class QuotePrice extends \yii\db\ActiveRecord
                 $this->$attr = number_format($value, 2);
             }
         }
+    }
+
+    public function getPassengerTypeName() : string
+    {
+        return self::PASSENGER_TYPE_LIST[$this->passenger_type] ?? '-';
     }
 }

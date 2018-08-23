@@ -85,9 +85,15 @@ class NavItem
                     ],*/
                 ];
             }
-            $items[] = ['label' => '<i class="fa fa-search"></i> Search Order', 'url' => (!strpos(Yii::$app->request->baseUrl, 'admin'))
-                ? ['admin/leads/index']
-                : ['leads/index']];
+            $items[] = ['label' => '<i class="fa fa-search"></i> Search Lead', 'url' => (!strpos(Yii::$app->request->baseUrl, 'admin')) ? ['admin/leads/index'] : ['leads/index']];
+
+            $items[] = ['label' => '<i class="fa fa-plane"></i> Flight Segments', 'url' => (!strpos(Yii::$app->request->baseUrl, 'admin')) ? ['admin/lead-flight-segment/index'] : ['lead-flight-segment/index']];
+
+            $items[] = ['label' => '<i class="fa fa-quora"></i> Quote List', 'url' => (!strpos(Yii::$app->request->baseUrl, 'admin')) ? ['admin/quote/index'] : ['quote/index']];
+
+
+            $items[] = ['label' => '<i class="fa fa-dollar"></i> Quote Price List', 'url' => (!strpos(Yii::$app->request->baseUrl, 'admin')) ? ['admin/quote-price/index'] : ['quote-price/index']];
+
             $items[] = [
                 'label' => '<i class="fa fa-bar-chart"></i> Reports',
                 'linkOptions' => [

@@ -24,6 +24,18 @@ use Yii;
  */
 class LeadFlightSegment extends \yii\db\ActiveRecord
 {
+
+
+    public CONST FLEX_TYPE_MINUS        = '-';
+    public CONST FLEX_TYPE_PLUS         = '+';
+    public CONST FLEX_TYPE_PLUS_MINUS   = '+/-';
+
+    public CONST FLEX_TYPE_LIST = [
+        self::FLEX_TYPE_MINUS       => '-',
+        self::FLEX_TYPE_PLUS        => '+',
+        self::FLEX_TYPE_PLUS_MINUS  => '+/-',
+    ];
+
     /**
      * {@inheritdoc}
      */
@@ -38,29 +50,30 @@ class LeadFlightSegment extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['lead_id', 'flexibility'], 'integer'],
             [['origin', 'destination', 'departure'], 'required'],
+            [['origin', 'destination'], 'string', 'max' => 3],
+            [['lead_id', 'flexibility'], 'integer'],
+
+            [['flexibility_type'], 'default', 'value' => '+/-', 'on' => 'insert'],
+
             [['departure', 'created', 'updated', 'flexibility_type', 'flexibility', 'origin_label', 'destination_label'], 'safe'],
             [['origin_label', 'destination_label'], 'trim'],
-            [['origin', 'destination'], 'string', 'max' => 3],
             [['lead_id'], 'exist', 'skipOnError' => true, 'targetClass' => Lead::class, 'targetAttribute' => ['lead_id' => 'id']],
         ];
     }
 
-    public function init()
+
+    public function beforeSave($insert): bool
     {
-        if ($this->isNewRecord) {
-            $this->flexibility_type = '+/-';
-        }
+        if (parent::beforeSave($insert)) {
 
-        parent::init();
-    }
+            $this->updated = date('Y-m-d H:i:s');
 
-    public function beforeValidate()
-    {
-        $this->updated = date('Y-m-d H:i:s');
+            if($this->departure)  {
+                $this->departure = date('Y-m-d', strtotime($this->departure));
+            }
 
-        //if (!empty($this->origin_label)) {
+            //if (!empty($this->origin_label)) {
             $this->origin_label = trim($this->origin_label);
             if (!empty($this->origin_label)) {
                 $regex = '/(.*)[(]+[A-Z]{3}+[)]$/';
@@ -78,9 +91,9 @@ class LeadFlightSegment extends \yii\db\ActiveRecord
                     $this->getAttributeLabel('origin_label')
                 ));
             }
-        //}
+            //}
 
-        //if (!empty($this->destination_label)) {
+            //if (!empty($this->destination_label)) {
             $this->destination_label = trim($this->destination_label);
             if (!empty($this->destination_label)) {
                 $regex = '/(.*)[(]+[A-Z]{3}+[)]$/';
@@ -98,12 +111,16 @@ class LeadFlightSegment extends \yii\db\ActiveRecord
                     $this->getAttributeLabel('destination_label')
                 ));
             }
-        //}
+            //}
 
-        $this->flexibility = intval($this->flexibility);
+            $this->flexibility = (int) $this->flexibility;
 
-        return parent::beforeValidate();
+            return true;
+        }
+        return false;
     }
+
+
 
     public function afterSave($insert, $changedAttributes)
     {
@@ -128,11 +145,11 @@ class LeadFlightSegment extends \yii\db\ActiveRecord
     {
         return [
             'id' => 'ID',
-            'lead_id' => 'Lead ID',
+            'lead_id' => 'Lead',
             'origin' => 'Origin',
             'destination' => 'Destination',
-            'origin_label' => 'Origin',
-            'destination_label' => 'Destination',
+            'origin_label' => 'Origin Label',
+            'destination_label' => 'Destination Label',
             'departure' => 'Departure',
             'created' => 'Created',
             'updated' => 'Updated',
@@ -147,10 +164,4 @@ class LeadFlightSegment extends \yii\db\ActiveRecord
         return $this->hasOne(Lead::class, ['id' => 'lead_id']);
     }
 
-    public function afterValidate()
-    {
-        $this->departure = date('Y-m-d', strtotime($this->departure));
-
-        parent::afterValidate();
-    }
 }

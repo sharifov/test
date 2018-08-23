@@ -77,9 +77,9 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'status',
                 'value' => function(\common\models\Lead $model) {
-                    return '<h4><span class="label '.$model->getLabelClass().'">'.\common\models\Lead::getStatus($model->status).'</span></h4>';
+                    return $model->getStatusName(true);
                 },
-                'format' => 'raw',
+                'format' => 'html',
                 'filter' => \common\models\Lead::STATUS_LIST
             ],
             [
@@ -148,6 +148,36 @@ $this->params['breadcrumbs'][] = $this->title;
                 'contentOptions' => ['class' => 'text-center'],
             ],
 
+
+            [
+                'header' => 'Quotes',
+                'value' => function(\common\models\Lead $model) {
+                    return $model->quotesCount ? Html::a($model->quotesCount, ['quote/index', "QuoteSearch[lead_id]" => $model->id], ['target' => '_blank', 'data-pjax' => 0]) : '-' ;
+                },
+                'format' => 'raw',
+                'contentOptions' => ['class' => 'text-center'],
+            ],
+
+            [
+                'header' => 'Segments',
+                'value' => function(\common\models\Lead $model) {
+
+                    $segments = $model->leadFlightSegments;
+                    $segmentData = [];
+                    if($segments) {
+                        foreach ($segments as $sk => $segment) {
+                            $segmentData[] = ($sk + 1).'. <code>'.Html::a($segment->origin.'->'.$segment->destination, ['lead-flight-segment/view', 'id' => $segment->id], ['target' => '_blank', 'data-pjax' => 0]).'</code>';
+                        }
+                    }
+
+                    $segmentStr = implode('<br>', $segmentData);
+                    return ''.$segmentStr.'';
+                    //return $model->leadFlightSegmentsCount ? Html::a($model->leadFlightSegmentsCount, ['lead-flight-segment/index', "LeadFlightSegmentSearch[lead_id]" => $model->id], ['target' => '_blank', 'data-pjax' => 0]) : '-' ;
+                },
+                'format' => 'raw',
+                'contentOptions' => ['class' => 'text-center'],
+            ],
+
             //'children',
             //'infants',
             //'notes_for_experts:ntext',
@@ -177,11 +207,19 @@ $this->params['breadcrumbs'][] = $this->title;
             //'created',
             [
                 'attribute' => 'created',
-                'format' => 'raw',
                 'value' => function(\common\models\Lead $model) {
-                    return $model->created ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime($model->created) : '-';
+                    return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime($model->created, 'php:Y-m-d [H:i]');
                 },
+                'format' => 'html',
             ],
+
+            /*[
+                'attribute' => 'updated',
+                'value' => function(\common\models\Lead $model) {
+                    return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime($model->updated, 'php:Y-m-d [H:i]');
+                },
+                'format' => 'html',
+            ],*/
             //'bo_flight_id',
 
             ['class' => 'yii\grid\ActionColumn', 'template' => '{view}'],
