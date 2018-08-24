@@ -102,7 +102,7 @@ class ApiLead extends Model
             [['sub_sources_code'], 'string', 'max' => 20],
 
             [['sub_sources_code'], 'checkIsSourceCode'],
-            [['source_id'], 'checkIsSource'],
+            //[['source_id'], 'checkIsSource'],
 
             [['client_first_name', 'client_last_name', 'client_middle_name'], 'string', 'max' => 100],
             [['emails'], 'each', 'rule' => ['email']],
