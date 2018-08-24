@@ -1,4 +1,5 @@
 <?php
+
 namespace webapi\modules\v1\controllers;
 
 use common\models\Client;
@@ -102,105 +103,105 @@ class LeadController extends ApiBaseController
      *
      * @apiSuccessExample Success-Response:
      *     HTTP/1.1 200 OK
-    {
-        "status": 200,
-        "name": "Success",
-        "code": 0,
-        "message": "",
-        "data": {
-            "response": {
-                "lead": {
-                    "client_id": 11,
-                    "employee_id": null,
-                    "status": 1,
-                    "uid": "5b73b80eaf69b",
-                    "project_id": 6,
-                    "source_id": "38",
-                    "trip_type": "RT",
-                    "cabin": "E",
-                    "adults": "1",
-                    "children": 0,
-                    "infants": 0,
-                    "notes_for_experts": null,
-                    "created": "2018-08-15 05:20:14",
-                    "updated": "2018-08-15 05:20:14",
-                    "request_ip": "127.0.0.1",
-                    "request_ip_detail": "{\"ip\":\"127.0.0.1\",\"city\":\"North Pole\",\"postal\":\"99705\",\"state\":\"Alaska\",\"state_code\":\"AK\",\"country\":\"United States\",\"country_code\":\"US\",\"location\":\"64.7548317,-147.3431046\",\"timezone\":{\"id\":\"America\\/Anchorage\",\"location\":\"61.21805,-149.90028\",\"country_code\":\"US\",\"country_name\":\"United States of America\",\"iso3166_1_alpha_2\":\"US\",\"iso3166_1_alpha_3\":\"USA\",\"un_m49_code\":\"840\",\"itu\":\"USA\",\"marc\":\"xxu\",\"wmo\":\"US\",\"ds\":\"USA\",\"phone_prefix\":\"1\",\"fifa\":\"USA\",\"fips\":\"US\",\"gual\":\"259\",\"ioc\":\"USA\",\"currency_alpha_code\":\"USD\",\"currency_country_name\":\"UNITED STATES\",\"currency_minor_unit\":\"2\",\"currency_name\":\"US Dollar\",\"currency_code\":\"840\",\"independent\":\"Yes\",\"capital\":\"Washington\",\"continent\":\"NA\",\"tld\":\".us\",\"languages\":\"en-US,es-US,haw,fr\",\"geoname_id\":\"6252001\",\"edgar\":\"\"},\"datetime\":{\"date\":\"08\\/14\\/2018\",\"date_time\":\"08\\/14\\/2018 21:20:15\",\"date_time_txt\":\"Tuesday, August 14, 2018 21:20:15\",\"date_time_wti\":\"Tue, 14 Aug 2018 21:20:15 -0800\",\"date_time_ymd\":\"2018-08-14T21:20:15-08:00\",\"time\":\"21:20:15\",\"month\":\"8\",\"month_wilz\":\"08\",\"month_abbr\":\"Aug\",\"month_full\":\"August\",\"month_days\":\"31\",\"day\":\"14\",\"day_wilz\":\"14\",\"day_abbr\":\"Tue\",\"day_full\":\"Tuesday\",\"year\":\"2018\",\"year_abbr\":\"18\",\"hour_12_wolz\":\"9\",\"hour_12_wilz\":\"09\",\"hour_24_wolz\":\"21\",\"hour_24_wilz\":\"21\",\"hour_am_pm\":\"pm\",\"minutes\":\"20\",\"seconds\":\"15\",\"week\":\"33\",\"offset_seconds\":\"-28800\",\"offset_minutes\":\"-480\",\"offset_hours\":\"-8\",\"offset_gmt\":\"-08:00\",\"offset_tzid\":\"America\\/Anchorage\",\"offset_tzab\":\"AKDT\",\"offset_tzfull\":\"Alaska Daylight Time\",\"tz_string\":\"AKST+9AKDT,M3.2.0\\/2,M11.1.0\\/2\",\"dst\":\"true\",\"dst_observes\":\"true\",\"timeday_spe\":\"evening\",\"timeday_gen\":\"evening\"}}",
-                    "offset_gmt": "-08.00",
-                    "snooze_for": null,
-                    "rating": null,
-                    "id": 7
-                },
-                "flights": [
-                    {
-                        "origin": "BOS",
-                        "destination": "LGW",
-                        "departure": "2018-09-19"
-                    },
-                    {
-                        "origin": "LGW",
-                        "destination": "BOS",
-                        "departure": "2018-09-22"
-                    }
-                ],
-                "emails": [
-                    "chalpet@gmail.com",
-                    "chalpet2@gmail.com"
-                ],
-                "phones": [
-                    "+373-69-98-698",
-                    "+373-69-98-698"
-                ]
-            },
-            "request": {
-                "client_id": null,
-                "employee_id": null,
-                "status": null,
-                "uid": null,
-                "project_id": 6,
-                "source_id": "38",
-                "trip_type": null,
-                "cabin": null,
-                "adults": "1",
-                "children": null,
-                "infants": null,
-                "notes_for_experts": null,
-                "created": null,
-                "updated": null,
-                "request_ip": null,
-                "request_ip_detail": null,
-                "offset_gmt": null,
-                "snooze_for": null,
-                "rating": null,
-                "flights": [
-                    {
-                        "origin": "BOS",
-                        "destination": "LGW",
-                        "departure": "2018-09-19"
-                    },
-                    {
-                        "origin": "LGW",
-                        "destination": "BOS",
-                        "departure": "2018-09-22"
-                    }
-                ],
-                "emails": [
-                    "chalpet@gmail.com",
-                    "chalpet2@gmail.com"
-                ],
-                "phones": [
-                    "+373-69-98-698",
-                    "+373-69-98-698"
-                ],
-                "client_first_name": "Alexandr",
-                "client_last_name": "Freeman"
-            }
-        },
-        "action": "v1/lead/create",
-        "response_id": 42,
-        "request_dt": "2018-08-15 05:20:14",
-        "response_dt": "2018-08-15 05:20:15"
-    }
+     * {
+     * "status": 200,
+     * "name": "Success",
+     * "code": 0,
+     * "message": "",
+     * "data": {
+     * "response": {
+     * "lead": {
+     * "client_id": 11,
+     * "employee_id": null,
+     * "status": 1,
+     * "uid": "5b73b80eaf69b",
+     * "project_id": 6,
+     * "source_id": "38",
+     * "trip_type": "RT",
+     * "cabin": "E",
+     * "adults": "1",
+     * "children": 0,
+     * "infants": 0,
+     * "notes_for_experts": null,
+     * "created": "2018-08-15 05:20:14",
+     * "updated": "2018-08-15 05:20:14",
+     * "request_ip": "127.0.0.1",
+     * "request_ip_detail": "{\"ip\":\"127.0.0.1\",\"city\":\"North Pole\",\"postal\":\"99705\",\"state\":\"Alaska\",\"state_code\":\"AK\",\"country\":\"United States\",\"country_code\":\"US\",\"location\":\"64.7548317,-147.3431046\",\"timezone\":{\"id\":\"America\\/Anchorage\",\"location\":\"61.21805,-149.90028\",\"country_code\":\"US\",\"country_name\":\"United States of America\",\"iso3166_1_alpha_2\":\"US\",\"iso3166_1_alpha_3\":\"USA\",\"un_m49_code\":\"840\",\"itu\":\"USA\",\"marc\":\"xxu\",\"wmo\":\"US\",\"ds\":\"USA\",\"phone_prefix\":\"1\",\"fifa\":\"USA\",\"fips\":\"US\",\"gual\":\"259\",\"ioc\":\"USA\",\"currency_alpha_code\":\"USD\",\"currency_country_name\":\"UNITED STATES\",\"currency_minor_unit\":\"2\",\"currency_name\":\"US Dollar\",\"currency_code\":\"840\",\"independent\":\"Yes\",\"capital\":\"Washington\",\"continent\":\"NA\",\"tld\":\".us\",\"languages\":\"en-US,es-US,haw,fr\",\"geoname_id\":\"6252001\",\"edgar\":\"\"},\"datetime\":{\"date\":\"08\\/14\\/2018\",\"date_time\":\"08\\/14\\/2018 21:20:15\",\"date_time_txt\":\"Tuesday, August 14, 2018 21:20:15\",\"date_time_wti\":\"Tue, 14 Aug 2018 21:20:15 -0800\",\"date_time_ymd\":\"2018-08-14T21:20:15-08:00\",\"time\":\"21:20:15\",\"month\":\"8\",\"month_wilz\":\"08\",\"month_abbr\":\"Aug\",\"month_full\":\"August\",\"month_days\":\"31\",\"day\":\"14\",\"day_wilz\":\"14\",\"day_abbr\":\"Tue\",\"day_full\":\"Tuesday\",\"year\":\"2018\",\"year_abbr\":\"18\",\"hour_12_wolz\":\"9\",\"hour_12_wilz\":\"09\",\"hour_24_wolz\":\"21\",\"hour_24_wilz\":\"21\",\"hour_am_pm\":\"pm\",\"minutes\":\"20\",\"seconds\":\"15\",\"week\":\"33\",\"offset_seconds\":\"-28800\",\"offset_minutes\":\"-480\",\"offset_hours\":\"-8\",\"offset_gmt\":\"-08:00\",\"offset_tzid\":\"America\\/Anchorage\",\"offset_tzab\":\"AKDT\",\"offset_tzfull\":\"Alaska Daylight Time\",\"tz_string\":\"AKST+9AKDT,M3.2.0\\/2,M11.1.0\\/2\",\"dst\":\"true\",\"dst_observes\":\"true\",\"timeday_spe\":\"evening\",\"timeday_gen\":\"evening\"}}",
+     * "offset_gmt": "-08.00",
+     * "snooze_for": null,
+     * "rating": null,
+     * "id": 7
+     * },
+     * "flights": [
+     * {
+     * "origin": "BOS",
+     * "destination": "LGW",
+     * "departure": "2018-09-19"
+     * },
+     * {
+     * "origin": "LGW",
+     * "destination": "BOS",
+     * "departure": "2018-09-22"
+     * }
+     * ],
+     * "emails": [
+     * "chalpet@gmail.com",
+     * "chalpet2@gmail.com"
+     * ],
+     * "phones": [
+     * "+373-69-98-698",
+     * "+373-69-98-698"
+     * ]
+     * },
+     * "request": {
+     * "client_id": null,
+     * "employee_id": null,
+     * "status": null,
+     * "uid": null,
+     * "project_id": 6,
+     * "source_id": "38",
+     * "trip_type": null,
+     * "cabin": null,
+     * "adults": "1",
+     * "children": null,
+     * "infants": null,
+     * "notes_for_experts": null,
+     * "created": null,
+     * "updated": null,
+     * "request_ip": null,
+     * "request_ip_detail": null,
+     * "offset_gmt": null,
+     * "snooze_for": null,
+     * "rating": null,
+     * "flights": [
+     * {
+     * "origin": "BOS",
+     * "destination": "LGW",
+     * "departure": "2018-09-19"
+     * },
+     * {
+     * "origin": "LGW",
+     * "destination": "BOS",
+     * "departure": "2018-09-22"
+     * }
+     * ],
+     * "emails": [
+     * "chalpet@gmail.com",
+     * "chalpet2@gmail.com"
+     * ],
+     * "phones": [
+     * "+373-69-98-698",
+     * "+373-69-98-698"
+     * ],
+     * "client_first_name": "Alexandr",
+     * "client_last_name": "Freeman"
+     * }
+     * },
+     * "action": "v1/lead/create",
+     * "response_id": 42,
+     * "request_dt": "2018-08-15 05:20:14",
+     * "response_dt": "2018-08-15 05:20:15"
+     * }
      *
      * @apiError UserNotFound The id of the User was not found.
      *
@@ -230,13 +231,13 @@ class LeadController extends ApiBaseController
 
         $lead = Yii::$app->request->post('Lead');
 
-        if($lead) {
+        if ($lead) {
 
-            if(isset($lead['client_id'])) {
+            if (isset($lead['client_id'])) {
                 unset($lead['client_id']);
             }
 
-            if(isset($lead['source_id'])) {
+            if (isset($lead['source_id'])) {
                 unset($lead['source_id']);
             }
 
@@ -276,8 +277,6 @@ class LeadController extends ApiBaseController
         }
 
 
-
-
         $modelLead = new ApiLead();
         //$modelLead->scenario = ApiLead::SCENARIO_CREATE;
 
@@ -285,11 +284,11 @@ class LeadController extends ApiBaseController
 
         //print_r($post); exit;
 
-        if($this->apiProject) {
+        if ($this->apiProject) {
             $modelLead->project_id = $this->apiProject->id;
         }
 
-        if($modelLead->load($post)) {
+        if ($modelLead->load($post)) {
             if (!$modelLead->validate()) {
                 if ($errors = $modelLead->getErrors()) {
                     throw new UnprocessableEntityHttpException($this->errorToString($errors), 5);
@@ -304,13 +303,13 @@ class LeadController extends ApiBaseController
 
         $client = new Client();
 
-        if($modelLead->client_first_name) $client->first_name = $modelLead->client_first_name;
-            else $client->first_name = 'ClientName';
+        if ($modelLead->client_first_name) $client->first_name = $modelLead->client_first_name;
+        else $client->first_name = 'ClientName';
 
-        if($modelLead->client_last_name) $client->last_name = $modelLead->client_last_name;
-        if($modelLead->client_middle_name) $client->middle_name = $modelLead->client_middle_name;
+        if ($modelLead->client_last_name) $client->last_name = $modelLead->client_last_name;
+        if ($modelLead->client_middle_name) $client->middle_name = $modelLead->client_middle_name;
 
-        if(!$client->save()) {
+        if (!$client->save()) {
             throw new UnprocessableEntityHttpException($this->errorToString($client->errors));
         }
 
@@ -320,18 +319,18 @@ class LeadController extends ApiBaseController
         $lead->attributes = $modelLead->attributes;
 
         $lead->client_id = $client->id;
-        if(!$lead->status) $lead->status = Lead::STATUS_PENDING;
-        if(!$lead->uid) $lead->uid = uniqid();
+        if (!$lead->status) $lead->status = Lead::STATUS_PENDING;
+        if (!$lead->uid) $lead->uid = uniqid();
 
 
-        if(!$lead->trip_type) $lead->trip_type = Lead::TRIP_TYPE_ROUND_TRIP;
+        if (!$lead->trip_type) $lead->trip_type = Lead::TRIP_TYPE_ROUND_TRIP;
 
-        if($modelLead->flights) {
+        if ($modelLead->flights) {
             $flightCount = count($modelLead->flights);
 
-            if($flightCount === 1) {
+            if ($flightCount === 1) {
                 $lead->trip_type = Lead::TRIP_TYPE_ONE_WAY;
-            } elseif($flightCount === 2) {
+            } elseif ($flightCount === 2) {
                 $lead->trip_type = Lead::TRIP_TYPE_ROUND_TRIP;
             } else {
                 $lead->trip_type = Lead::TRIP_TYPE_MULTI_DESTINATION;
@@ -339,14 +338,14 @@ class LeadController extends ApiBaseController
         }
 
 
-        if(!$lead->cabin) $lead->cabin = Lead::CABIN_ECONOMY;
+        if (!$lead->cabin) $lead->cabin = Lead::CABIN_ECONOMY;
 
-        if(!$lead->children) $lead->children = 0;
-        if(!$lead->infants) $lead->infants = 0;
-        if(!$lead->request_ip) $lead->request_ip = Yii::$app->request->remoteIP;
+        if (!$lead->children) $lead->children = 0;
+        if (!$lead->infants) $lead->infants = 0;
+        if (!$lead->request_ip) $lead->request_ip = Yii::$app->request->remoteIP;
 
 
-        if($this->apiProject) $lead->project_id = $this->apiProject->id;
+        if ($this->apiProject) $lead->project_id = $this->apiProject->id;
 
         if (!$lead->validate()) {
             if ($errors = $lead->getErrors()) {
@@ -354,14 +353,14 @@ class LeadController extends ApiBaseController
             } else throw new UnprocessableEntityHttpException('Not validate Lead data', 7);
         }
 
-        if(!$lead->save()) {
+        if (!$lead->save()) {
             Yii::error(print_r($lead->errors, true), 'API:Lead:create:Lead:save');
             $transaction->rollBack();
             throw new UnprocessableEntityHttpException($this->errorToString($modelLead->errors));
         }
 
 
-        if($modelLead->flights) {
+        if ($modelLead->flights) {
             foreach ($modelLead->flights as $flight) {
                 $flightModel = new LeadFlightSegment();
 
@@ -378,7 +377,7 @@ class LeadController extends ApiBaseController
         }
 
 
-        if($modelLead->emails)
+        if ($modelLead->emails)
             foreach ($modelLead->emails as $email) {
                 $emailModel = new ClientEmail();
 
@@ -386,13 +385,13 @@ class LeadController extends ApiBaseController
                 $emailModel->email = $email;
                 $emailModel->created = date('Y-m-d H:i:s');
 
-                if(!$emailModel->save()) {
+                if (!$emailModel->save()) {
                     Yii::error(print_r($emailModel->errors, true), 'API:Lead:create:ClientEmail:save');
                     $transaction->rollBack();
                 }
             }
 
-        if($modelLead->phones)
+        if ($modelLead->phones)
             foreach ($modelLead->phones as $phone) {
                 $phoneModel = new ClientPhone();
 
@@ -400,7 +399,7 @@ class LeadController extends ApiBaseController
                 $phoneModel->phone = $phone;
                 $phoneModel->created = date('Y-m-d H:i:s');
 
-                if(!$phoneModel->save()) {
+                if (!$phoneModel->save()) {
                     Yii::error(print_r($phoneModel->errors, true), 'API:Lead:create:ClientPhone:save');
                     $transaction->rollBack();
                 }
@@ -408,7 +407,6 @@ class LeadController extends ApiBaseController
 
         $transaction->commit();
 
-        
 
         try {
             $response['lead'] = $lead;
@@ -420,8 +418,8 @@ class LeadController extends ApiBaseController
 
             $transaction->rollBack();
             Yii::error($e->getTraceAsString(), 'API:lead:create:try');
-            if(Yii::$app->request->get('debug')) $message = ($e->getTraceAsString());
-                else $message = $e->getMessage().' (code:'.$e->getCode().', line: '.$e->getLine().')';
+            if (Yii::$app->request->get('debug')) $message = ($e->getTraceAsString());
+            else $message = $e->getMessage() . ' (code:' . $e->getCode() . ', line: ' . $e->getLine() . ')';
 
             $response['error'] = $message;
             $response['error_code'] = 30;
@@ -429,7 +427,7 @@ class LeadController extends ApiBaseController
         }
 
 
-        if(isset($response['error']) && $response['error']) {
+        if (isset($response['error']) && $response['error']) {
 
         } else {
             /*$responseData['status']     = 200;
@@ -443,15 +441,15 @@ class LeadController extends ApiBaseController
             $responseData['client_id'] = $lead->client_id;
         }
 
-        $responseData['data']['response']               = $response;
+        $responseData['data']['response'] = $response;
         // $responseData['data']['request']                = $modelLead;
 
 
         $responseData = $apiLog->endApiLog($responseData);
 
-        if(isset($response['error']) && $response['error']) {
+        if (isset($response['error']) && $response['error']) {
             $json = @json_encode($response['error']);
-            if(isset($response['error_code']) && $response['error_code']) $error_code = $response['error_code'];
+            if (isset($response['error_code']) && $response['error_code']) $error_code = $response['error_code'];
             else $error_code = 0;
             throw new UnprocessableEntityHttpException($json, $error_code);
         }
@@ -544,7 +542,6 @@ class LeadController extends ApiBaseController
      *
      * @apiSuccessExample Success-Response:
      *     HTTP/1.1 200 OK
-
      *
      * @apiError UserNotFound The id of the User was not found.
      *
@@ -576,9 +573,9 @@ class LeadController extends ApiBaseController
 
         //print_r($this->apiProject); exit;
 
-        if($this->apiProject) $modelLead->project_id = $this->apiProject->id;
+        if ($this->apiProject) $modelLead->project_id = $this->apiProject->id;
 
-        if($modelLead->load(Yii::$app->request->post())) {
+        if ($modelLead->load(Yii::$app->request->post())) {
             if (!$modelLead->validate()) {
                 if ($errors = $modelLead->getErrors()) {
                     throw new UnprocessableEntityHttpException($this->errorToString($errors), 5);
@@ -589,27 +586,26 @@ class LeadController extends ApiBaseController
         }
 
         $lead = Lead::findOne($modelLead->lead_id);
-        if(!$lead) {
-            throw new NotFoundHttpException('Not found lead ID: '.$modelLead->lead_id, 9);
+        if (!$lead) {
+            throw new NotFoundHttpException('Not found lead ID: ' . $modelLead->lead_id, 9);
         }
 
         $response = [];
         $transaction = Yii::$app->db->beginTransaction();
 
 
-
         foreach ($modelLead->attributes as $attrKey => $attrValue) {
-            if($attrValue === null) continue;
-            if(isset($lead->$attrKey)) $lead->$attrKey = $attrValue;
+            if ($attrValue === null) continue;
+            if (isset($lead->$attrKey)) $lead->$attrKey = $attrValue;
         }
 
         $client = $lead->client;
 
-        if($modelLead->client_first_name || $modelLead->client_last_name || $modelLead->client_middle_name) {
-            if($client) {
-                if($modelLead->client_first_name) $client->first_name = $modelLead->client_first_name;
-                if($modelLead->client_last_name) $client->last_name = $modelLead->client_last_name;
-                if($modelLead->client_middle_name) $client->middle_name = $modelLead->client_middle_name;
+        if ($modelLead->client_first_name || $modelLead->client_last_name || $modelLead->client_middle_name) {
+            if ($client) {
+                if ($modelLead->client_first_name) $client->first_name = $modelLead->client_first_name;
+                if ($modelLead->client_last_name) $client->last_name = $modelLead->client_last_name;
+                if ($modelLead->client_middle_name) $client->middle_name = $modelLead->client_middle_name;
 
                 $client->save();
             }
@@ -622,14 +618,14 @@ class LeadController extends ApiBaseController
             } else throw new UnprocessableEntityHttpException('Not validate Lead data', 7);
         }
 
-        if(!$lead->save()) {
+        if (!$lead->save()) {
             Yii::error(print_r($lead->errors, true), 'API:Lead:update:Lead:save');
             $transaction->rollBack();
             throw new UnprocessableEntityHttpException($this->errorToString($modelLead->errors), 8);
         }
 
 
-        if($modelLead->flights) {
+        if ($modelLead->flights) {
 
             LeadFlightSegment::deleteAll(['lead_id' => $lead->id]);
 
@@ -649,7 +645,7 @@ class LeadController extends ApiBaseController
         }
 
 
-        if($modelLead->emails && $client) {
+        if ($modelLead->emails && $client) {
             ClientEmail::deleteAll(['client_id' => $client->id]);
             foreach ($modelLead->emails as $email) {
                 $emailModel = new ClientEmail();
@@ -665,7 +661,7 @@ class LeadController extends ApiBaseController
             }
         }
 
-        if($modelLead->phones && $client) {
+        if ($modelLead->phones && $client) {
             ClientPhone::deleteAll(['client_id' => $client->id]);
             foreach ($modelLead->phones as $phone) {
                 $phoneModel = new ClientPhone();
@@ -684,7 +680,6 @@ class LeadController extends ApiBaseController
         $transaction->commit();
 
 
-
         try {
             $response['lead'] = $lead;
             $response['flights'] = $lead->leadFlightSegments;
@@ -696,8 +691,8 @@ class LeadController extends ApiBaseController
 
             $transaction->rollBack();
             Yii::error($e->getTraceAsString(), 'API:lead:update:try');
-            if(Yii::$app->request->get('debug')) $message = ($e->getTraceAsString());
-            else $message = $e->getMessage().' (code:'.$e->getCode().', line: '.$e->getLine().')';
+            if (Yii::$app->request->get('debug')) $message = ($e->getTraceAsString());
+            else $message = $e->getMessage() . ' (code:' . $e->getCode() . ', line: ' . $e->getLine() . ')';
 
             $response['error'] = $message;
             $response['error_code'] = 30;
@@ -705,26 +700,25 @@ class LeadController extends ApiBaseController
         }
 
 
-        if(isset($response['error']) && $response['error']) {
+        if (isset($response['error']) && $response['error']) {
 
         } else {
-            $responseData['status']     = 200;
-            $responseData['name']       = 'Success';
-            $responseData['code']       = 0;
-            $responseData['message']    = '';
+            $responseData['status'] = 200;
+            $responseData['name'] = 'Success';
+            $responseData['code'] = 0;
+            $responseData['message'] = '';
         }
 
 
-        $responseData['data']['response']               = $response;
-        $responseData['data']['request']                = $modelLead;
-
+        $responseData['data']['response'] = $response;
+        $responseData['data']['request'] = $modelLead;
 
 
         $responseData = $apiLog->endApiLog($responseData);
 
-        if(isset($response['error']) && $response['error']) {
+        if (isset($response['error']) && $response['error']) {
             $json = @json_encode($response['error']);
-            if(isset($response['error_code']) && $response['error_code']) $error_code = $response['error_code'];
+            if (isset($response['error_code']) && $response['error_code']) $error_code = $response['error_code'];
             else $error_code = 0;
             throw new UnprocessableEntityHttpException($json, $error_code);
         }
@@ -770,7 +764,6 @@ class LeadController extends ApiBaseController
      *
      * @apiSuccessExample Success-Response:
      *     HTTP/1.1 200 OK
-
      *
      * @apiError UserNotFound The id of the User was not found.
      *
@@ -798,15 +791,14 @@ class LeadController extends ApiBaseController
         $apiLog = $this->startApiLog($this->action->uniqueId);
 
 
-
         $modelLead = new ApiLead();
         $modelLead->scenario = ApiLead::SCENARIO_GET;
 
         //print_r($this->apiProject); exit;
 
-        if($this->apiProject) $modelLead->project_id = $this->apiProject->id;
+        if ($this->apiProject) $modelLead->project_id = $this->apiProject->id;
 
-        if($modelLead->load(Yii::$app->request->post())) {
+        if ($modelLead->load(Yii::$app->request->post())) {
             if (!$modelLead->validate()) {
                 if ($errors = $modelLead->getErrors()) {
                     throw new UnprocessableEntityHttpException($this->errorToString($errors), 5);
@@ -817,8 +809,8 @@ class LeadController extends ApiBaseController
         }
 
         $lead = Lead::findOne($modelLead->lead_id);
-        if(!$lead) {
-            throw new NotFoundHttpException('Not found lead ID: '.$modelLead->lead_id, 9);
+        if (!$lead) {
+            throw new NotFoundHttpException('Not found lead ID: ' . $modelLead->lead_id, 9);
         }
 
         $response = [];
@@ -833,33 +825,33 @@ class LeadController extends ApiBaseController
         } catch (\Throwable $e) {
 
             Yii::error($e->getTraceAsString(), 'API:lead:get:try');
-            if(Yii::$app->request->get('debug')) $message = ($e->getTraceAsString());
-            else $message = $e->getMessage().' (code:'.$e->getCode().', line: '.$e->getLine().')';
+            if (Yii::$app->request->get('debug')) $message = ($e->getTraceAsString());
+            else $message = $e->getMessage() . ' (code:' . $e->getCode() . ', line: ' . $e->getLine() . ')';
 
             $response['error'] = $message;
             $response['error_code'] = 30;
         }
 
 
-        if(isset($response['error']) && $response['error']) {
+        if (isset($response['error']) && $response['error']) {
 
         } else {
-            $responseData['status']     = 200;
-            $responseData['name']       = 'Success';
-            $responseData['code']       = 0;
-            $responseData['message']    = '';
+            $responseData['status'] = 200;
+            $responseData['name'] = 'Success';
+            $responseData['code'] = 0;
+            $responseData['message'] = '';
         }
 
 
-        $responseData['data']['response']               = $response;
+        $responseData['data']['response'] = $response;
         //$responseData['data']['request']                = $modelLead;
 
 
         $responseData = $apiLog->endApiLog($responseData);
 
-        if(isset($response['error']) && $response['error']) {
+        if (isset($response['error']) && $response['error']) {
             $json = @json_encode($response['error']);
-            if(isset($response['error_code']) && $response['error_code']) $error_code = $response['error_code'];
+            if (isset($response['error_code']) && $response['error_code']) $error_code = $response['error_code'];
             else $error_code = 0;
             throw new UnprocessableEntityHttpException($json, $error_code);
         }
@@ -901,7 +893,9 @@ class LeadController extends ApiBaseController
                 $transaction->rollBack();
             } else {
 
-                if (!empty($leadAttributes['additional_information']['pnr'])) {
+                if (!empty($leadAttributes['additional_information']) &&
+                    !empty($leadAttributes['additional_information']['pnr'])
+                ) {
                     $aplliend = $lead->getAppliedAlternativeQuotes();
                     if ($aplliend !== null) {
                         $aplliend->record_locator = $leadAttributes['additional_information']['pnr'];
@@ -912,8 +906,18 @@ class LeadController extends ApiBaseController
                     }
                 }
 
-                $response['status'] = 'Success';
-                $transaction->commit();
+                if (!empty($leadAttributes['info_tickets'])) {
+                    $result = $lead->sendSoldEmail($leadAttributes['info_tickets']);
+                    if (!$result['status']) {
+                        $response['errors'][] = $result['errors'];
+                        $transaction->rollBack();
+                    }
+                }
+
+                if (empty($response['errors'])) {
+                    $response['status'] = 'Success';
+                    $transaction->commit();
+                }
             }
 
         } catch (\Throwable $e) {

@@ -35,7 +35,7 @@ class QuotePrice extends \yii\db\ActiveRecord
 
     public CONST PASSENGER_TYPE_LIST = [
         self::PASSENGER_ADULT => 'Adult',
-        self::PASSENGER_CHILD => 'Children',
+        self::PASSENGER_CHILD => 'Child',
         self::PASSENGER_INFANT => 'Infant'
     ];
 
@@ -206,8 +206,11 @@ class QuotePrice extends \yii\db\ActiveRecord
         }
     }
 
-    public function getPassengerTypeName() : string
+    public function getPassengerTypeName($type = null) : string
     {
+        if ($type !== null) {
+            return self::PASSENGER_TYPE_LIST[$type] ?? '-';
+        }
         return self::PASSENGER_TYPE_LIST[$this->passenger_type] ?? '-';
     }
 }

@@ -890,6 +890,7 @@ class Lead extends ActiveRecord
             $this->adults = (int)$this->adults;
             $this->children = (int)$this->children;
             $this->infants = (int)$this->infants;
+            $this->bo_flight_id = (int)$this->bo_flight_id;
 
             return true;
         }
@@ -960,6 +961,93 @@ class Lead extends ActiveRecord
         }
 
         return $types;
+    }
+
+    public function sendSoldEmail($data)
+    {
+        $result = [
+            'status' => false,
+            'errors' => []
+        ];
+
+        $key = sprintf('%s_lead_UID_%s', uniqid(), $this->uid);
+        $fileName = sprintf('_%s_%s.php', str_replace(' ', '_', strtolower($this->project->name)), $key);
+        $path = sprintf('%s/frontend/views/tmpEmail/quote/%s', dirname(Yii::getAlias('@app')), $fileName);
+
+        $template = ProjectEmailTemplate::findOne([
+            'type' => ProjectEmailTemplate::TYPE_EMAIL_TICKET,
+            'project_id' => $this->project_id
+        ]);
+
+        if ($template === null) {
+            $result['errors'][] = sprintf('Email Template [%s] for project [%s] not fond.',
+                ProjectEmailTemplate::getTypes(ProjectEmailTemplate::TYPE_EMAIL_TICKET),
+                $this->project->name
+            );
+            return $result;
+        }
+
+        $view = $template->template;
+        $fp = fopen($path, "w");
+        chmod($path, 0777);
+        fwrite($fp, $view);
+        fclose($fp);
+
+        $body = \Yii::$app->getView()->renderFile($path, [
+            'model' => $this,
+            'flightRequest' => $data,
+        ]);
+
+        $sellerContactInfo = EmployeeContactInfo::findOne([
+            'employee_id' => $this->employee->id,
+            'project_id' => $this->project_id
+        ]);
+        $credential = [
+            'email' => $sellerContactInfo->email_user,
+            'password' => $sellerContactInfo->email_pass,
+        ];
+
+        if (!empty($template->layout_path)) {
+            $body = \Yii::$app->getView()->renderFile($template->layout_path, [
+                'project' => $this->project,
+                'agentName' => ucfirst($this->employee->username),
+                'employee' => $this->employee,
+                'sellerContactInfo' => $sellerContactInfo,
+                'body' => $body
+            ]);
+        }
+
+        $subject = ProjectEmailTemplate::getMessageBody($template->subject, [
+            'pnr' => $data['pnr'],
+        ]);
+
+        $errors = [];
+        $isSend = EmailService::send($data['emails'], $this->project, $credential, $subject, $body, $errors);
+        $message = ($isSend)
+            ? sprintf('Sending email - \'Tickets\' succeeded! <br/>Emails: %s',
+                implode(', ', $data['emails'])
+            )
+            : sprintf('Sending email - \'Tickets\' failed! <br/>Emails: %s',
+                implode(', ', $data['emails'])
+            );
+
+        //Add logs after changed model attributes
+        $leadLog = new LeadLog((new LeadLogMessage()));
+        $leadLog->logMessage->message = empty($errors)
+            ? $message
+            : sprintf('%s <br/>Errors: %s', $message, print_r($errors, true));
+        $leadLog->logMessage->title = 'Send Tickets by Email';
+        $leadLog->logMessage->model = $this->formName();
+        $leadLog->addLog([
+            'lead_id' => $this->id,
+        ]);
+
+        $result['status'] = $isSend;
+        $result['errors'] = $errors;
+
+        unlink($path);
+
+        return $result;
     }
 
     public function sendEmail($quotes, $email)

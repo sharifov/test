@@ -4,6 +4,8 @@ namespace webapi\modules\v1\controllers;
 
 use common\models\EmployeeContactInfo;
 use common\models\Lead;
+use common\models\LeadLog;
+use common\models\local\LeadLogMessage;
 use common\models\Quote;
 use common\models\QuotePrice;
 use Yii;
@@ -283,6 +285,9 @@ class QuoteController extends ApiBaseController
         if (!$model) {
             throw new NotFoundHttpException('Not found Quote UID: ' . $quoteAttributes['uid'], 2);
         }
+        $changedAttributes = $model->attributes;
+        $changedAttributes['selling'] = $model->quotePrice()['selling'];
+        $selling = 0;
 
         $leadAttributes = Yii::$app->request->post((new Lead())->formName());
 
@@ -304,6 +309,7 @@ class QuoteController extends ApiBaseController
                     ]);
                     if ($quotePrice) {
                         $quotePrice->attributes = $quotePriceAttributes;
+                        $selling += $quotePrice->selling;
                         if (!$quotePrice->save()) {
                             $response['errors'][] = $quotePrice->getErrors();
                         }
@@ -321,6 +327,19 @@ class QuoteController extends ApiBaseController
                 }
                 $response['status'] = 'Success';
                 $transaction->commit();
+
+                //Add logs after changed model attributes
+                $leadLog = new LeadLog((new LeadLogMessage()));
+                $leadLog->logMessage->oldParams = $changedAttributes;
+                $newParams = array_intersect_key($model->attributes, $changedAttributes);
+                $newParams['selling'] = round($selling, 2);
+                $leadLog->logMessage->newParams = $newParams;
+                $leadLog->logMessage->title = 'Update';
+                $leadLog->logMessage->model = sprintf('%s (%s)', $model->formName(), $model->uid);
+                $leadLog->addLog([
+                    'lead_id' => $model->lead_id,
+                ]);
+
             } else {
                 $response['errors'][] = $model->getErrors();
                 $transaction->rollBack();
@@ -388,6 +407,11 @@ class QuoteController extends ApiBaseController
             $model = new Quote();
         }
 
+        $selling = 0;
+        $changedAttributes = $model->attributes;
+        $changedAttributes['selling'] = $selling;
+
+
         $response = [
             'status' => 'Failed',
             'errors' => []
@@ -406,6 +430,7 @@ class QuoteController extends ApiBaseController
                     if ($quotePrice) {
                         $quotePrice->attributes = $quotePriceAttributes;
                         $quotePrice->quote_id = $model->id;
+                        $selling += $quotePrice->selling;
                         if (!$quotePrice->save()) {
                             $response['errors'][] = $quotePrice->getErrors();
                         }
@@ -416,6 +441,19 @@ class QuoteController extends ApiBaseController
             if (!$model->hasErrors()) {
                 $response['status'] = 'Success';
                 $transaction->commit();
+
+                //Add logs after changed model attributes
+                $leadLog = new LeadLog((new LeadLogMessage()));
+                $leadLog->logMessage->oldParams = $changedAttributes;
+                $newParams = array_intersect_key($model->attributes, $changedAttributes);
+                $newParams['selling'] = round($selling, 2);
+                $leadLog->logMessage->newParams = $newParams;
+                $leadLog->logMessage->title = 'Create';
+                $leadLog->logMessage->model = sprintf('%s (%s)', $model->formName(), $model->uid);
+                $leadLog->addLog([
+                    'lead_id' => $model->lead_id,
+                ]);
+
             } else {
                 $response['errors'][] = $model->getErrors();
                 $transaction->rollBack();
