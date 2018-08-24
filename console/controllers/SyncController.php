@@ -13,6 +13,7 @@ use common\models\EmployeeAcl;
 use common\models\EmployeeContactInfo;
 use common\models\Lead;
 use common\models\LeadFlightSegment;
+use common\models\LeadFlow;
 use common\models\LeadPreferences;
 use common\models\Note;
 use common\models\Project;
@@ -365,6 +366,15 @@ class SyncController extends Controller
                             }
                         }
                         echo 'Sync success Quote id: ' . $quote->id . PHP_EOL;
+                    }
+
+                    if (!empty($objects['Flows'])) {
+                        foreach ($objects['Flows'] as $item) {
+                            $flow = new LeadFlow();
+                            $flow->attributes = $item;
+                            $flow->lead_id = $lead->id;
+                            $flow->save();
+                        }
                     }
 
                     if (!empty($objects['Reason'])) {

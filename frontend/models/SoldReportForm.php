@@ -161,7 +161,7 @@ class SoldReportForm extends Model
         return $data;
     }
 
-    public function getColumns()
+    public function getColumns($dataProvider)
     {
         return [
             [
@@ -183,32 +183,46 @@ class SoldReportForm extends Model
                         'data-url' => $url
                     ]);
                 },
-                'format' => 'raw'
+                'format' => 'raw',
+                'footer' => self::getTotal($dataProvider->models, 'totalSold'),
             ],
             [
                 'label' => 'Profit',
                 'value' => function ($model) {
                     return '$' . number_format($model['totalProfit'], 2);
-                }
+                },
+                'footer' => '$' . number_format(self::getTotal($dataProvider->models, 'totalProfit'), 2),
             ],
             [
                 'label' => 'Inbox -> Processing',
                 'value' => function ($model) {
                     return $model['fromInbox'];
-                }
+                },
+                'footer' => self::getTotal($dataProvider->models, 'fromInbox'),
             ],
             [
                 'label' => 'Follow Up -> Processing',
                 'value' => function ($model) {
                     return $model['fromFollowUp'];
-                }
+                },
+                'footer' => self::getTotal($dataProvider->models, 'fromFollowUp'),
             ],
             [
                 'label' => 'Created',
                 'value' => function ($model) {
                     return $model['personalCreated'];
-                }
+                },
+                'footer' => self::getTotal($dataProvider->models, 'personalCreated'),
             ],
         ];
+    }
+
+    private static function getTotal($provider, $columnName)
+    {
+        $total = 0;
+        foreach ($provider as $item) {
+            $total += $item[$columnName];
+        }
+        return $total;
     }
 }
