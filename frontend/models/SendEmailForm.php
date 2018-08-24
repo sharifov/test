@@ -154,7 +154,7 @@ class SendEmailForm extends Model
             'password' => $sellerContactInfo->email_pass,
         ];
         $errors = [];
-        $result = EmailService::send($this->emailTo, $this->project, $credential, $this->subject, $this->body,$errors);
+        $result = EmailService::sendByAWS($this->emailTo, $this->project, $credential, $this->subject, $this->body,$errors);
         $message = ($result)
             ? sprintf('Sending email - \'%s\' succeeded! <br/>Emails: %s', $this->subject, implode(', ', [$this->emailTo]))
             : sprintf('Sending email - \'%s\' failed! <br/>Emails: %s', $this->subject, implode(', ', [$this->emailTo]));

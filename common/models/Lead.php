@@ -890,7 +890,7 @@ class Lead extends ActiveRecord
             $this->adults = (int)$this->adults;
             $this->children = (int)$this->children;
             $this->infants = (int)$this->infants;
-            $this->bo_flight_id = (int)$this->bo_flight_id;
+            $this->bo_flight_id = sprintf('%d', $this->bo_flight_id);
 
             return true;
         }
@@ -1022,7 +1022,7 @@ class Lead extends ActiveRecord
         ]);
 
         $errors = [];
-        $isSend = EmailService::send($data['emails'], $this->project, $credential, $subject, $body, $errors);
+        $isSend = EmailService::sendByAWS($data['emails'], $this->project, $credential, $subject, $body, $errors);
         $message = ($isSend)
             ? sprintf('Sending email - \'Tickets\' succeeded! <br/>Emails: %s',
                 implode(', ', $data['emails'])
@@ -1145,7 +1145,7 @@ class Lead extends ActiveRecord
         ];
 
         $errors = [];
-        $isSend = EmailService::send($email, $this->project, $credential, $subject, $body, $errors);
+        $isSend = EmailService::sendByAWS($email, $this->project, $credential, $subject, $body, $errors);
         $message = ($isSend)
             ? sprintf('Sending email - \'Offer\' succeeded! <br/>Emails: %s <br/>Quotes: %s',
                 implode(', ', [$email]),
