@@ -269,6 +269,9 @@ class QuoteController extends DefaultController
                 $quote = empty($attr['Quote']['id'])
                     ? new Quote()
                     : Quote::findOne(['id' => $attr['Quote']['id']]);
+                if ($quote->isNewRecord) {
+                    $quote->uid = uniqid();
+                }
                 $changedAttributes = $quote->attributes;
                 $changedAttributes['selling'] = ($quote->isNewRecord)
                     ? 0 : $quote->quotePrice()['selling'];
