@@ -33,6 +33,20 @@ AppAsset::register($this);
     <?= $content ?>
 </main>
 
+<div class="modal modal-quote fade" id="get-request-flow-transition" style="display: none;">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                Lead - Flow Transition
+                <button type="button" class="close" data-dismiss="modal">
+                    <i class="fa fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body"></div>
+        </div>
+    </div>
+</div>
+
 <!-- MODAL ERROR WINDOWS -->
 <div class="modal modal-danger fade in" id="modal-error" style="display: none;">
     <div class="modal-dialog">

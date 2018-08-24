@@ -39,11 +39,12 @@ class QuotePriceController extends DefaultController
                         'allow' => true,
                         'roles' => ['supervision'],
                     ],
-                    [
-                        'actions' => ['index', 'view'],
+                    /*[
+                        'actions' => ['index'],
+
                         'allow' => true,
                         'roles' => ['agent'],
-                    ],
+                    ],*/
                 ],
             ],
         ];

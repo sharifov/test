@@ -19,7 +19,7 @@ class LeadFlightSegmentSearch extends LeadFlightSegment
     {
         return [
             [['id', 'lead_id', 'flexibility'], 'integer'],
-            [['origin', 'destination', 'departure', 'created', 'updated', 'flexibility_type', 'origin_label', 'destination_label'], 'safe'],
+            [['origin', 'destination', 'departure', 'created', 'updated', 'flexibility_type'], 'safe'],
         ];
     }
 
@@ -73,10 +73,10 @@ class LeadFlightSegmentSearch extends LeadFlightSegment
         ]);
 
         $query->andFilterWhere(['like', 'origin', $this->origin])
-            ->andFilterWhere(['like', 'destination', $this->destination])
+            ->andFilterWhere(['like', 'destination', $this->destination]);
             //->andFilterWhere(['like', 'flexibility_type', $this->flexibility_type])
-            ->andFilterWhere(['like', 'origin_label', $this->origin_label])
-            ->andFilterWhere(['like', 'destination_label', $this->destination_label]);
+            /*->andFilterWhere(['like', 'origin_label', $this->origin_label])
+            ->andFilterWhere(['like', 'destination_label', $this->destination_label]);*/
 
         return $dataProvider;
     }

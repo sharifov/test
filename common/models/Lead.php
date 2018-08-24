@@ -549,7 +549,6 @@ class Lead extends ActiveRecord
             case self::STATUS_PROCESSING:
                 $label = '<span class="label status-label bg-turquoise">' . self::getStatus($status) . '</span>';
                 break;
-            case self::STATUS_TRASH:
             case self::STATUS_ON_HOLD:
             case self::STATUS_FOLLOW_UP:
                 $label = '<span class="label status-label bg-blue">' . self::getStatus($status) . '</span>';
@@ -557,6 +556,10 @@ class Lead extends ActiveRecord
             case self::STATUS_SOLD:
             case self::STATUS_BOOKED:
                 $label = '<span class="label status-label bg-green">' . self::getStatus($status) . '</span>';
+                break;
+            case self::STATUS_TRASH:
+            case self::STATUS_REJECT:
+                $label = '<span class="label status-label bg-red">' . self::getStatus($status) . '</span>';
                 break;
         }
         return $label;

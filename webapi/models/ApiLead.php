@@ -178,6 +178,9 @@ class ApiLead extends Model
             } else {
                 $this->source_id = $source->id;
             }
+        } else {
+            $sources = Source::findAll(['project_id' => $this->project_id]);
+            $this->source_id = $sources[0]->id;
         }
     }
 

@@ -73,6 +73,7 @@ HTML;
         'class' => 'table table-striped table-hover table-bordered table-neutral',
     ],
     'layout' => $template,
-    'columns' => $model->getColumns()
+    'showFooter' => true,
+    'columns' => $model->getColumns($dataProvider)
 ])
 ?>

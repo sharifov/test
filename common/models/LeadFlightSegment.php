@@ -26,14 +26,14 @@ class LeadFlightSegment extends \yii\db\ActiveRecord
 {
 
 
-    public CONST FLEX_TYPE_MINUS        = '-';
-    public CONST FLEX_TYPE_PLUS         = '+';
-    public CONST FLEX_TYPE_PLUS_MINUS   = '+/-';
+    public CONST FLEX_TYPE_MINUS = '-';
+    public CONST FLEX_TYPE_PLUS = '+';
+    public CONST FLEX_TYPE_PLUS_MINUS = '+/-';
 
     public CONST FLEX_TYPE_LIST = [
-        self::FLEX_TYPE_MINUS       => '-',
-        self::FLEX_TYPE_PLUS        => '+',
-        self::FLEX_TYPE_PLUS_MINUS  => '+/-',
+        self::FLEX_TYPE_MINUS => '-',
+        self::FLEX_TYPE_PLUS => '+',
+        self::FLEX_TYPE_PLUS_MINUS => '+/-',
     ];
 
     /**
@@ -63,63 +63,73 @@ class LeadFlightSegment extends \yii\db\ActiveRecord
     }
 
 
+    public function beforeValidate()
+    {
+        $this->origin_label = trim($this->origin_label);
+        if (!empty($this->origin_label)) {
+            $regex = '/(.*)[(]+[A-Z]{3}+[)]$/';
+            $hits = preg_match_all($regex, $this->origin_label, $matches, PREG_PATTERN_ORDER);
+            if ($hits) {
+                $iata = str_replace('(', '', str_replace($matches[1][0], '', $matches[0][0]));
+                $this->origin = str_replace(')', '', $iata);
+            } else {
+                $this->addError('origin_label', sprintf('%s invalid format.',
+                    $this->getAttributeLabel('origin_label')
+                ));
+            }
+        } else {
+            $origin = Airport::findIdentity($this->origin);
+            if ($origin !== null) {
+                $this->origin_label = sprintf('%s (%s)', $origin->name, $origin->iata);
+            } else {
+                $this->addError('origin_label', sprintf('%s cannot be blank.',
+                    $this->getAttributeLabel('origin_label')
+                ));
+            }
+        }
+
+        $this->destination_label = trim($this->destination_label);
+        if (!empty($this->destination_label)) {
+            $regex = '/(.*)[(]+[A-Z]{3}+[)]$/';
+            $hits = preg_match_all($regex, $this->destination_label, $matches, PREG_PATTERN_ORDER);
+            if ($hits) {
+                $iata = str_replace('(', '', str_replace($matches[1][0], '', $matches[0][0]));
+                $this->destination = str_replace(')', '', $iata);
+            } else {
+                $this->addError('destination_label', sprintf('%s invalid format.',
+                    $this->getAttributeLabel('destination_label')
+                ));
+            }
+        } else {
+            $destination = Airport::findIdentity($this->destination);
+            if ($destination !== null) {
+                $this->destination_label = sprintf('%s (%s)', $destination->name, $destination->iata);
+            } else {
+                $this->addError('destination_label', sprintf('%s cannot be blank.',
+                    $this->getAttributeLabel('destination_label')
+                ));
+            }
+        }
+
+        return parent::beforeValidate();
+    }
+
     public function beforeSave($insert): bool
     {
         if (parent::beforeSave($insert)) {
 
             $this->updated = date('Y-m-d H:i:s');
 
-            if($this->departure)  {
+            if ($this->departure) {
                 $this->departure = date('Y-m-d', strtotime($this->departure));
             }
 
-            //if (!empty($this->origin_label)) {
-            $this->origin_label = trim($this->origin_label);
-            if (!empty($this->origin_label)) {
-                $regex = '/(.*)[(]+[A-Z]{3}+[)]$/';
-                $hits = preg_match_all($regex, $this->origin_label, $matches, PREG_PATTERN_ORDER);
-                if ($hits) {
-                    $iata = str_replace('(', '', str_replace($matches[1][0], '', $matches[0][0]));
-                    $this->origin = str_replace(')', '', $iata);
-                } else {
-                    $this->addError('origin_label', sprintf('%s invalid format.',
-                        $this->getAttributeLabel('origin_label')
-                    ));
-                }
-            } else {
-                $this->addError('origin_label', sprintf('%s cannot be blank.',
-                    $this->getAttributeLabel('origin_label')
-                ));
-            }
-            //}
-
-            //if (!empty($this->destination_label)) {
-            $this->destination_label = trim($this->destination_label);
-            if (!empty($this->destination_label)) {
-                $regex = '/(.*)[(]+[A-Z]{3}+[)]$/';
-                $hits = preg_match_all($regex, $this->destination_label, $matches, PREG_PATTERN_ORDER);
-                if ($hits) {
-                    $iata = str_replace('(', '', str_replace($matches[1][0], '', $matches[0][0]));
-                    $this->destination = str_replace(')', '', $iata);
-                } else {
-                    $this->addError('destination_label', sprintf('%s invalid format.',
-                        $this->getAttributeLabel('destination_label')
-                    ));
-                }
-            } else {
-                $this->addError('destination_label', sprintf('%s cannot be blank.',
-                    $this->getAttributeLabel('destination_label')
-                ));
-            }
-            //}
-
-            $this->flexibility = (int) $this->flexibility;
+            $this->flexibility = (int)$this->flexibility;
 
             return true;
         }
         return false;
     }
-
 
 
     public function afterSave($insert, $changedAttributes)
