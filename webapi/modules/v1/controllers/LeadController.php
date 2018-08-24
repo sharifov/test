@@ -294,6 +294,7 @@ class LeadController extends ApiBaseController
                     throw new UnprocessableEntityHttpException($this->errorToString($errors), 5);
                 } else throw new UnprocessableEntityHttpException('Not validate Api Lead data', 5);
             }
+            $modelLead->checkIsSourceCode();
         } else {
             throw new BadRequestHttpException('Not found Lead data on POST request', 6);
         }
@@ -346,6 +347,8 @@ class LeadController extends ApiBaseController
 
 
         if ($this->apiProject) $lead->project_id = $this->apiProject->id;
+
+
 
         if (!$lead->validate()) {
             if ($errors = $lead->getErrors()) {
