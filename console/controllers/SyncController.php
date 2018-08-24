@@ -368,6 +368,9 @@ class SyncController extends Controller
                         echo 'Sync success Quote id: ' . $quote->id . PHP_EOL;
                     }
 
+                    LeadFlow::deleteAll([
+                        'lead_id' => $lead->id
+                    ]);
                     if (!empty($objects['Flows'])) {
                         foreach ($objects['Flows'] as $item) {
                             $flow = new LeadFlow();

@@ -147,10 +147,10 @@ class SoldReportForm extends Model
         $transitions = $item->getFlowTransition();
         if (!empty($transitions)) {
             $mapping = ArrayHelper::map($transitions, 'id', 'status');
-            if (!in_array(Lead::STATUS_FOLLOW_UP, $mapping) && !in_array(Lead::STATUS_PENDING, $mapping)) {
-                $data['personalCreated'] = 1;
-            } else if (in_array(Lead::STATUS_FOLLOW_UP, $mapping)) {
+            if (in_array(Lead::STATUS_FOLLOW_UP, $mapping)) {
                 $data['fromFollowUp'] = 1;
+            } else if (!in_array(Lead::STATUS_FOLLOW_UP, $mapping) && !in_array(Lead::STATUS_PENDING, $mapping)) {
+                $data['personalCreated'] = 1;
             } else {
                 $data['fromInbox'] = 1;
             }
