@@ -141,7 +141,7 @@ class SoldReportForm extends Model
         $quote = $item->getAppliedAlternativeQuotes();
         if ($quote !== null) {
             $price = $quote->quotePrice();
-            $data['totalProfit'] = ($price['selling'] * Quote::SERVICE_FEE);
+            $data['totalProfit'] = $data['totalProfit'] - ($price['selling'] * Quote::SERVICE_FEE);
         }
 
         $transitions = $item->getFlowTransition();
