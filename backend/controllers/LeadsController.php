@@ -86,7 +86,7 @@ class LeadsController extends DefaultController
         $dataProvider = $searchModel->search($params);
 
 
-        $params = []; //Yii::$app->request->queryParams;
+        $params = Yii::$app->request->queryParams;
         $params['LeadFlightSegmentSearch']['lead_id'] = $model->id;
         $dataProviderSegments = $searchModelSegments->search($params);
 
@@ -105,10 +105,10 @@ class LeadsController extends DefaultController
         ];
 
         if (Yii::$app->request->isAjax) {
-            $viewParams['searchModel'] = null;
+            /*$viewParams['searchModel'] = null;
             $viewParams['dataProvider']->sort = false;
             $viewParams['searchModelSegments'] = null;
-            $viewParams['dataProviderSegments']->sort = false;
+            $viewParams['dataProviderSegments']->sort = false;*/
 
             return $this->renderAjax('view', $viewParams);
         }
