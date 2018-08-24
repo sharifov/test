@@ -7,6 +7,11 @@ use yii\bootstrap\Html;
 use frontend\models\LeadForm;
 
 if (!$leadForm->getLead()->isNewRecord) {
+    $flowTransitionUrl = \yii\helpers\Url::to([
+        'lead/flow-transition',
+        'leadId' => $leadForm->getLead()->id
+    ]);
+
     $checkUpdatesUrl = \yii\helpers\Url::to([
         'lead/check-updates',
         'leadId' => $leadForm->getLead()->id,
@@ -42,6 +47,16 @@ if (!$leadForm->getLead()->isNewRecord) {
     setTimeout(function() {
         checkRequestUpdates('$checkUpdatesUrl');
     }, 10000);
+
+    $('#view-flow-transition').click(function() {
+        $('#preloader').removeClass('hidden');
+        var editBlock = $('#get-request-flow-transition');
+        editBlock.find('.modal-body').html('');
+        editBlock.find('.modal-body').load('$flowTransitionUrl', function( response, status, xhr ) {
+            $('#preloader').addClass('hidden');
+            editBlock.modal('show');
+        });
+    });
 JS;
 
     $this->registerJs($js);
@@ -75,6 +90,15 @@ JS;
                     <div class="page-header__general-item">
                         <strong>Client Time:</strong>
                         <?= $leadForm->getLead()->getClientTime(); ?>
+                    </div>
+                    <div class="page-header__general-item">
+                        <strong>Lead ID:</strong>
+                        <span>
+                            <?= Html::a(sprintf('%08d', $leadForm->getLead()->id), '#', [
+                                'style' => 'color: #ffffff',
+                                'id' => 'view-flow-transition'
+                            ]) ?>
+                        </span>
                     </div>
                     <div class="page-header__general-item">
                         <strong>Lead Status:</strong>

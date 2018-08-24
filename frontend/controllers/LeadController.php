@@ -56,7 +56,7 @@ class LeadController extends DefaultController
                         'actions' => [
                             'create', 'add-comment', 'change-state', 'unassign', 'take',
                             'set-rating', 'add-note', 'unprocessed', 'call-expert', 'send-email',
-                            'check-updates'
+                            'check-updates', 'flow-transition'
                         ],
                         'allow' => true,
                         'roles' => ['agent'],
@@ -92,6 +92,17 @@ class LeadController extends DefaultController
     public function actionGetAirport($term)
     {
         return parent::actionGetAirport($term);
+    }
+
+    public function actionFlowTransition($leadId)
+    {
+        $lead = Lead::findOne(['id' => $leadId]);
+        if ($lead !== null) {
+            return $this->renderAjax('partial/_flowTransition', [
+                'flightRequestFlow' => $lead->getFlowTransition(),
+            ]);
+        }
+        return null;
     }
 
     public function actionCheckUpdates($leadId, $lastUpdate)
