@@ -58,6 +58,9 @@ class LeadFlightSegmentSearch extends LeadFlightSegment
         if (!$this->validate()) {
             // uncomment the following line if you do not want to return any records when validation fails
             // $query->where('0=1');
+            if ($this->hasErrors(['origin_label', 'destination_label'])) {
+                $this->clearErrors(['origin_label', 'destination_label']);
+            }
             return $dataProvider;
         }
 
