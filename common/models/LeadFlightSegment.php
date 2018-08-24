@@ -55,15 +55,72 @@ class LeadFlightSegment extends \yii\db\ActiveRecord
             [['lead_id', 'flexibility'], 'integer'],
 
             [['flexibility_type'], 'default', 'value' => '+/-', 'on' => 'insert'],
+            [['origin_label', 'destination_label'], 'trim'],
+
+            [['origin_label'], 'checkOriginLabel'],
+            [['destination_label'], 'checkDestinationLabel'],
 
             [['departure', 'created', 'updated', 'flexibility_type', 'flexibility', 'origin_label', 'destination_label'], 'safe'],
-            [['origin_label', 'destination_label'], 'trim'],
+
             [['lead_id'], 'exist', 'skipOnError' => true, 'targetClass' => Lead::class, 'targetAttribute' => ['lead_id' => 'id']],
         ];
     }
 
 
-    public function beforeValidate()
+    public function checkOriginLabel()
+    {
+        $this->origin_label = trim($this->origin_label);
+        if (!empty($this->origin_label)) {
+            $regex = '/(.*)[(]+[A-Z]{3}+[)]$/';
+            $hits = preg_match_all($regex, $this->origin_label, $matches, PREG_PATTERN_ORDER);
+            if ($hits) {
+                $iata = str_replace('(', '', str_replace($matches[1][0], '', $matches[0][0]));
+                $this->origin = str_replace(')', '', $iata);
+            } else {
+                $this->addError('origin_label', sprintf('%s invalid format.',
+                    $this->getAttributeLabel('origin_label')
+                ));
+            }
+        } else {
+            $origin = Airport::findIdentity($this->origin);
+            if ($origin !== null) {
+                $this->origin_label = sprintf('%s (%s)', $origin->name, $origin->iata);
+            } else {
+                $this->addError('origin_label', sprintf('%s cannot be blank.',
+                    $this->getAttributeLabel('origin_label')
+                ));
+            }
+        }
+    }
+
+    public function checkDestinationLabel()
+    {
+        $this->destination_label = trim($this->destination_label);
+        if (!empty($this->destination_label)) {
+            $regex = '/(.*)[(]+[A-Z]{3}+[)]$/';
+            $hits = preg_match_all($regex, $this->destination_label, $matches, PREG_PATTERN_ORDER);
+            if ($hits) {
+                $iata = str_replace('(', '', str_replace($matches[1][0], '', $matches[0][0]));
+                $this->destination = str_replace(')', '', $iata);
+            } else {
+                $this->addError('destination_label', sprintf('%s invalid format.',
+                    $this->getAttributeLabel('destination_label')
+                ));
+            }
+        } else {
+            $destination = Airport::findIdentity($this->destination);
+            if ($destination !== null) {
+                $this->destination_label = sprintf('%s (%s)', $destination->name, $destination->iata);
+            } else {
+                $this->addError('destination_label', sprintf('%s cannot be blank.',
+                    $this->getAttributeLabel('destination_label')
+                ));
+            }
+        }
+    }
+
+
+    /*public function beforeValidate()
     {
         $this->origin_label = trim($this->origin_label);
         if (!empty($this->origin_label)) {
@@ -112,7 +169,7 @@ class LeadFlightSegment extends \yii\db\ActiveRecord
         }
 
         return parent::beforeValidate();
-    }
+    }*/
 
     public function beforeSave($insert): bool
     {
