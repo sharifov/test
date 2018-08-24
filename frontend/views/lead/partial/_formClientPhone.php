@@ -158,7 +158,7 @@ use borales\extensions\phoneInput\PhoneInput;
 
             yii\bootstrap\Modal::begin([
                 'headerOptions' => ['id' => 'modal-header-' . $key],
-                'id' => 'modal-' . $key,
+                'id' => 'modal-phone-cnt-' . $key,
                 'size' => 'modal-lg',
                 'clientOptions' => ['backdrop' => 'static']//, 'keyboard' => FALSE]
             ]);
