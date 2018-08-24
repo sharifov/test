@@ -40,7 +40,10 @@ HTML;
             'filterModel' => $searchModel,
             'layout' => $template,
             'columns' => [
-                'id',
+                [
+                    'label' => 'ID',
+                    'value' => 'id'
+                ],
                 [
                     'attribute' => 'username',
                     'label' => 'Username',

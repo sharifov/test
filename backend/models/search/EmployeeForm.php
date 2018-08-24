@@ -15,7 +15,7 @@ class EmployeeForm extends Employee
     public function rules()
     {
         return [
-            [['username', 'status'], 'safe'],
+            [['status', 'id'], 'safe'],
         ];
     }
 
