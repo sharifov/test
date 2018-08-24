@@ -58,13 +58,16 @@ class LeadFlightSegment extends \yii\db\ActiveRecord
 
             [['departure', 'created', 'updated', 'flexibility_type', 'flexibility', 'origin_label', 'destination_label'], 'safe'],
             [['origin_label', 'destination_label'], 'trim'],
+
             [['lead_id'], 'exist', 'skipOnError' => true, 'targetClass' => Lead::class, 'targetAttribute' => ['lead_id' => 'id']],
         ];
     }
 
 
-    public function beforeValidate()
+    public function afterValidate()
     {
+        parent::afterValidate();
+
         $this->origin_label = trim($this->origin_label);
         if (!empty($this->origin_label)) {
             $regex = '/(.*)[(]+[A-Z]{3}+[)]$/';
@@ -110,8 +113,6 @@ class LeadFlightSegment extends \yii\db\ActiveRecord
                 ));
             }
         }
-
-        return parent::beforeValidate();
     }
 
     public function beforeSave($insert): bool
