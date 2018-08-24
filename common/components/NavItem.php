@@ -87,12 +87,17 @@ class NavItem
             }
             $items[] = ['label' => '<i class="fa fa-search"></i> Search Lead', 'url' => (!strpos(Yii::$app->request->baseUrl, 'admin')) ? ['admin/leads/index'] : ['leads/index']];
 
-            $items[] = ['label' => '<i class="fa fa-plane"></i> Flight Segments', 'url' => (!strpos(Yii::$app->request->baseUrl, 'admin')) ? ['admin/lead-flight-segment/index'] : ['lead-flight-segment/index']];
+            if (\in_array(Yii::$app->user->identity->role, ['admin', 'supervision'])) {
 
-            $items[] = ['label' => '<i class="fa fa-quora"></i> Quote List', 'url' => (!strpos(Yii::$app->request->baseUrl, 'admin')) ? ['admin/quote/index'] : ['quote/index']];
+                $items[] = ['label' => '<i class="fa fa-plane"></i> Flight Segments', 'url' => (!strpos(Yii::$app->request->baseUrl, 'admin')) ? ['admin/lead-flight-segment/index'] : ['lead-flight-segment/index']];
+
+                $items[] = ['label' => '<i class="fa fa-quora"></i> Quote List', 'url' => (!strpos(Yii::$app->request->baseUrl, 'admin')) ? ['admin/quote/index'] : ['quote/index']];
 
 
-            $items[] = ['label' => '<i class="fa fa-dollar"></i> Quote Price List', 'url' => (!strpos(Yii::$app->request->baseUrl, 'admin')) ? ['admin/quote-price/index'] : ['quote-price/index']];
+                $items[] = ['label' => '<i class="fa fa-dollar"></i> Quote Price List', 'url' => (!strpos(Yii::$app->request->baseUrl, 'admin')) ? ['admin/quote-price/index'] : ['quote-price/index']];
+
+                $items[] = ['label' => '<i class="fa fa-users"></i> Clients', 'url' => (!strpos(Yii::$app->request->baseUrl, 'admin')) ? ['admin/client/index'] : ['client/index']];
+            }
 
             $items[] = [
                 'label' => '<i class="fa fa-bar-chart"></i> Reports',
@@ -114,7 +119,7 @@ class NavItem
                 'items' => $items,
             ];
 
-            if (!in_array(Yii::$app->user->identity->role, ['agent', 'coach'])) {
+            if (!\in_array(Yii::$app->user->identity->role, ['agent', 'coach'])) {
                 $menuItems[] = [
                     'label' => '<i class="fa fa-cog"></i> Settings',
                     'items' => [
@@ -182,7 +187,7 @@ class NavItem
             }
 
 
-            if (in_array(Yii::$app->user->identity->role, ['admin', 'supervision'])) {
+            if (\in_array(Yii::$app->user->identity->role, ['admin', 'supervision'])) {
                 $menuItems[] = [
                     'label' => '<i class="fa fa-list"></i> Logs',
                     'items' => [

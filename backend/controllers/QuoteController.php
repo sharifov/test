@@ -42,7 +42,7 @@ class QuoteController extends DefaultController
                         'roles' => ['supervision'],
                     ],
                     [
-                        'actions' => ['index'],
+                        'actions' => ['index', 'view'],
                         'allow' => true,
                         'roles' => ['agent'],
                     ],

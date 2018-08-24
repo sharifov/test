@@ -50,9 +50,9 @@ $this->params['breadcrumbs'][] = $this->title;
                 'attribute' => 'quote.status',
                 //'header'    => 'Quote Status',
                 'value' => function(\common\models\QuotePrice $model) {
-                    return $model->quote ? $model->quote->getStatusName() : '-';
+                    return $model->quote ? $model->quote->getStatusName(true) : '-';
                 },
-                'contentOptions' => ['class' => 'text-center'],
+                'format' => 'html',
             ],
 
         ],
@@ -109,12 +109,12 @@ $this->params['breadcrumbs'][] = $this->title;
                     [
                         'attribute' => 'mark_up',
                         'options' => ['style' => 'width:110px'],
-                        'contentOptions' => ['class' => 'text-center'],
+
                     ],
                     [
                         'attribute' => 'extra_mark_up',
                         'options' => ['style' => 'width:110px'],
-                        'contentOptions' => ['class' => 'text-center'],
+
                     ],
 
 

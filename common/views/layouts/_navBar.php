@@ -39,7 +39,7 @@ if (!Yii::$app->user->isGuest) {
     ]);
     $menuItems = [];
     $menuItems[] = '<li class="dropdown">'
-        . Html::a('<i class="fa fa-user"></i> <span>' . Yii::$app->user->identity->username . '</span> <i class="fa fa-angle-down"></i>', '#', [
+        . Html::a('<i class="fa fa-user"></i> <span>' . Yii::$app->user->identity->username . ' ('.Yii::$app->user->identity->role.')</span> <i class="fa fa-angle-down"></i>', '#', [
             'class' => 'dropdown-toggle',
             'data-toggle' => 'dropdown'
         ])

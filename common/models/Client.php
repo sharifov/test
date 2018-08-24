@@ -80,9 +80,20 @@ class Client extends \yii\db\ActiveRecord
         return $this->hasMany(Lead::class, ['client_id' => 'id']);
     }
 
-    public function beforeValidate()
+    public function beforeSave($insert): bool
     {
-        $this->updated = date('Y-m-d H:i:s');
-        return parent::beforeValidate();
+        if (parent::beforeSave($insert)) {
+
+            if($insert) {
+                if(!$this->created) {
+                    $this->created = date('Y-m-d H:i:s');
+                }
+            }
+
+            $this->updated = date('Y-m-d H:i:s');
+            return true;
+        }
+        return false;
     }
+
 }

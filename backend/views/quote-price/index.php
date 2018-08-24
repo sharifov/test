@@ -47,8 +47,9 @@ $this->params['breadcrumbs'][] = $this->title;
                 'attribute' => 'quote.status',
                 'header'    => 'Quote Status',
                 'value' => function(\common\models\QuotePrice $model) {
-                    return $model->quote ? $model->quote->getStatusName() : '-';
+                    return $model->quote ? $model->quote->getStatusName(true) : '-';
                 },
+                'format' => 'html',
                 'options' => ['style' => 'width:120px'],
                 'contentOptions' => ['class' => 'text-center'],
             ],

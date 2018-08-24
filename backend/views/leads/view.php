@@ -401,8 +401,8 @@ $this->params['breadcrumbs'][] = $this->title;
 
 <?php
 yii\bootstrap\Modal::begin([
-    'headerOptions' => ['id' => 'modalHeader'],
-    'id' => 'modal',
+    'headerOptions' => ['id' => 'modal-ip-Header'],
+    'id' => 'modal-ip',
     'size' => 'modal-lg',
     'clientOptions' => ['backdrop' => 'static']//, 'keyboard' => FALSE]
 ]);
@@ -416,30 +416,15 @@ if($model->request_ip_detail){
         echo '</pre>';
     }
 }
-//echo "<div id='modalContent'>".\yii\helpers\VarDumper::dumpAsString($model)."</div>";
 yii\bootstrap\Modal::end();
 
 
-
 $jsCode = <<<JS
-
     $(document).on('click', '#btn_show_modal', function(){
-        
-        $('#modalHeader').html('<h3>' + $(this).attr('title') + ' ' + '<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button></h3>');
-        $('#modal').modal('show');
-        
-        //.find('#modalContent').html('<div style="text-align:center"><img width="200px" src="https://loading.io/spinners/gear-set/index.triple-gears-loading-icon.svg"></div>');
-        //$('#modal').modal('show');
-        
-        //alert($(this).attr('title'));
-        /*$('#modalHeader').html('<h3>' + $(this).attr('title') + ' ' + '<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button></h3>');
-        $.get($(this).attr('href'), function(data) {
-          $('#modal').find('#modalContent').html(data);
-        });*/
-       return false;
+        $('#modal-ip-Header').html('<h3>' + $(this).attr('title') + ' ' + '<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button></h3>');
+        $('#modal-ip').modal('show');
+        return false;
     });
-
-
 JS;
 
 $this->registerJs($jsCode, \yii\web\View::POS_READY);

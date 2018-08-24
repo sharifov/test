@@ -36,6 +36,126 @@ use frontend\models\LeadForm;
     </form>
 </div>
 ';
+
+
+        $searchModel = new \common\models\search\ClientSearch();
+        $params = Yii::$app->request->queryParams;
+        $params['ClientSearch']['client_email'] = $email->email;
+        $params['ClientSearch']['not_in_client_id'] = $email->client_id;
+        $dataProvider = $searchModel->search($params);
+
+        $emailCount = $dataProvider->count;
+
+        if($emailCount > 0) {
+
+
+            $emailContent = \yii\grid\GridView::widget([
+                'dataProvider' => $dataProvider,
+                'filterModel' => null,
+                'columns' => [
+                    //['class' => 'yii\grid\SerialColumn'],
+                    'id',
+                    'first_name',
+                    'middle_name',
+                    'last_name',
+                    [
+                        'header' => 'Phones',
+                        'attribute' => 'client_phone',
+                        'value' => function(\common\models\Client $model) {
+
+                            $phones = $model->clientPhones;
+                            $data = [];
+                            if($phones) {
+                                foreach ($phones as $k => $phone) {
+                                    $data[] = '<i class="fa fa-phone"></i> <code>'.Html::encode($phone->phone).'</code>';
+                                }
+                            }
+
+                            $str = implode('<br>', $data);
+                            return ''.$str.'';
+                        },
+                        'format' => 'raw',
+                        'contentOptions' => ['class' => 'text-left'],
+                    ],
+
+                    [
+                        'header' => 'Emails',
+                        'attribute' => 'client_email',
+                        'value' => function(\common\models\Client $model) {
+
+                            $emails = $model->clientEmails;
+                            $data = [];
+                            if($emails) {
+                                foreach ($emails as $k => $email) {
+                                    $data[] = '<i class="fa fa-envelope"></i> <code>'.Html::encode($email->email).'</code>';
+                                }
+                            }
+
+                            $str = implode('<br>', $data);
+                            return ''.$str.'';
+                        },
+                        'format' => 'raw',
+                        'contentOptions' => ['class' => 'text-left'],
+                    ],
+
+                    [
+                        'header' => 'Leads',
+                        'value' => function(\common\models\Client $model) {
+
+                            $leads = $model->leads;
+                            $data = [];
+                            if($leads) {
+                                foreach ($leads as $lead) {
+                                    $data[] = '<i class="fa fa-link"></i> '. Html::a('lead: '.$lead->id, ['/admin/leads/view', 'id' => $lead->id], ['target' => '_blank', 'data-pjax' => 0]).' (IP: '.$lead->request_ip.')';
+                                }
+                            }
+
+                            $str = '';
+                            if($data) {
+                                $str = ''.implode('<br>', $data).'';
+                            }
+
+                            return $str;
+                        },
+                        'format' => 'raw',
+                        //'options' => ['style' => 'width:100px']
+                    ],
+
+                    [
+                        'attribute' => 'created',
+                        'value' => function(\common\models\Client $model) {
+                            return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime($model->created, 'php:Y-m-d [H:i]');
+                        },
+                        'format' => 'html',
+                    ],
+
+                    ['class' => 'yii\grid\ActionColumn', 'template' => '{view}', 'controller' => 'admin/client'],
+                ],
+            ]);
+
+
+
+            yii\bootstrap\Modal::begin([
+                'headerOptions' => ['id' => 'modal-header-'.$key],
+                'id' => 'modal-'.$key,
+                'size' => 'modal-lg',
+                'clientOptions' => ['backdrop' => 'static']//, 'keyboard' => FALSE]
+            ]);
+            echo $emailContent; //"<div id='modalContent'></div>";
+            yii\bootstrap\Modal::end();
+
+
+            echo Html::a(($emailCount).' <i class="fa fa-user"></i>', 'javascript:void(0);', [
+                'id' => 'email-cnt-' . $key,
+                'data-modal_id' => $key,
+                'title' => $email->email,
+                'class' => 'btn sl-client-field-del js-cl-email-del showModalButton',
+            ]);
+
+
+        }
+
+
         echo Html::a('<i class="fa fa-comment"></i>', 'javascript:void(0);', [
             'id' => $popoverId,
             'data-toggle' => 'popover',

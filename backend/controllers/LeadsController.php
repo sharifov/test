@@ -94,14 +94,27 @@ class LeadsController extends DefaultController
 
         // VarDumper::dump($quotes, 10, true);
 
-        return $this->render('view', [
+
+        $viewParams = [
             'model' => $model,
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
 
             'searchModelSegments' => $searchModelSegments,
             'dataProviderSegments' => $dataProviderSegments,
-        ]);
+        ];
+
+        if (Yii::$app->request->isAjax) {
+            $viewParams['searchModel'] = null;
+            $viewParams['dataProvider']->sort = false;
+            $viewParams['searchModelSegments'] = null;
+            $viewParams['dataProviderSegments']->sort = false;
+
+            return $this->renderAjax('view', $viewParams);
+        }
+
+        return $this->render('view', $viewParams);
+
     }
 
     /**

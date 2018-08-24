@@ -1,0 +1,99 @@
+<?php
+
+namespace common\models\search;
+
+use common\models\ClientEmail;
+use common\models\ClientPhone;
+use Yii;
+use yii\base\Model;
+use yii\data\ActiveDataProvider;
+use common\models\Client;
+
+/**
+ * ClientSearch represents the model behind the search form of `common\models\Client`.
+ */
+class ClientSearch extends Client
+{
+
+    public $client_email;
+    public $client_phone;
+    public $not_in_client_id;
+
+    /**
+     * {@inheritdoc}
+     */
+    public function rules()
+    {
+        return [
+            [['id', 'not_in_client_id'], 'integer'],
+            [['client_email', 'client_phone'], 'string', 'max' => 20],
+            [['first_name', 'middle_name', 'last_name', 'created', 'updated'], 'safe'],
+        ];
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function scenarios()
+    {
+        // bypass scenarios() implementation in the parent class
+        return Model::scenarios();
+    }
+
+    /**
+     * Creates data provider instance with search query applied
+     *
+     * @param array $params
+     *
+     * @return ActiveDataProvider
+     */
+    public function search($params)
+    {
+        $query = Client::find();
+
+        // add conditions that should always apply here
+
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+            'sort'=> ['defaultOrder' => ['id' => SORT_DESC]],
+            'pagination' => [
+                'pageSize' => 30,
+            ],
+        ]);
+
+        $this->load($params);
+
+        if (!$this->validate()) {
+            // uncomment the following line if you do not want to return any records when validation fails
+            // $query->where('0=1');
+            return $dataProvider;
+        }
+
+        // grid filtering conditions
+        $query->andFilterWhere([
+            'id' => $this->id,
+            'DATE(created)' => $this->created,
+            'DATE(updated)' => $this->updated,
+        ]);
+
+        if($this->client_email) {
+            $subQuery = ClientEmail::find()->select(['DISTINCT(client_id)'])->where(['like', 'email', $this->client_email]);
+            $query->andWhere(['IN', 'id', $subQuery]);
+        }
+
+        if($this->client_phone) {
+            $subQuery = ClientPhone::find()->select(['DISTINCT(client_id)'])->where(['like', 'phone', $this->client_phone]);
+            $query->andWhere(['IN', 'id', $subQuery]);
+        }
+
+        if($this->not_in_client_id) {
+            $query->andWhere(['NOT IN', 'id', $this->not_in_client_id]);
+        }
+
+        $query->andFilterWhere(['like', 'first_name', $this->first_name])
+            ->andFilterWhere(['like', 'middle_name', $this->middle_name])
+            ->andFilterWhere(['like', 'last_name', $this->last_name]);
+
+        return $dataProvider;
+    }
+}

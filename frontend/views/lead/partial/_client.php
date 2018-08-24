@@ -189,3 +189,47 @@ $formId = sprintf('%s-form', $leadForm->getClient()->formName());
     </div>
 
 <?php ActiveForm::end(); ?>
+
+    <style type="text/css">
+        @media screen and (min-width: 768px) {
+            .modal-dialog {
+                width: 700px; /* New width for default modal */
+            }
+            .modal-sm {
+                width: 350px; /* New width for small modal */
+            }
+        }
+        @media screen and (min-width: 992px) {
+            .modal-lg {
+                width: 70%; /* New width for large modal */
+            }
+        }
+    </style>
+
+
+<?php
+$jsCode = <<<JS
+
+    $(document).on('click', '.showModalButton', function(){
+        var id = $(this).data('modal_id');
+        
+        //$('#' + id).modal('show').find('#modalContent').html('<div style="text-align:center"><img width="200px" src="https://loading.io/spinners/gear-set/index.triple-gears-loading-icon.svg"></div>');
+        $('#modal-header-' + id).html('<h4>' + $(this).attr('title') + ' ' + '<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button></h3>');
+        
+        //$('#modal').modal('show');
+        
+        //alert($(this).attr('title'));
+        //$('#modalHeader').html('<h3>' + $(this).attr('title') + ' ' + '<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button></h3>');
+        /*$.get($(this).attr('href'), function(data) {
+          $('#modal').find('#modalContent').html(data);
+        });*/
+        
+        $('#modal-' + id).modal('show');
+        //$('#modal').find('#modalContent').html(data);
+       return false;
+    });
+
+
+JS;
+
+$this->registerJs($jsCode, \yii\web\View::POS_READY);
