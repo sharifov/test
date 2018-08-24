@@ -69,7 +69,7 @@ use borales\extensions\phoneInput\PhoneInput;
 
         $phoneCount = $dataProvider->count;
 
-        if($phoneCount > 0) {
+        if ($phoneCount > 0) {
 
             $phoneContent = \yii\grid\GridView::widget([
                 'dataProvider' => $dataProvider,
@@ -83,18 +83,18 @@ use borales\extensions\phoneInput\PhoneInput;
                     [
                         'header' => 'Phones',
                         'attribute' => 'client_phone',
-                        'value' => function(\common\models\Client $model) {
+                        'value' => function (\common\models\Client $model) {
 
                             $phones = $model->clientPhones;
                             $data = [];
-                            if($phones) {
+                            if ($phones) {
                                 foreach ($phones as $k => $phone) {
-                                    $data[] = '<i class="fa fa-phone"></i> <code>'.Html::encode($phone->phone).'</code>';
+                                    $data[] = '<i class="fa fa-phone"></i> <code>' . Html::encode($phone->phone) . '</code>';
                                 }
                             }
 
                             $str = implode('<br>', $data);
-                            return ''.$str.'';
+                            return '' . $str . '';
                         },
                         'format' => 'raw',
                         'contentOptions' => ['class' => 'text-left'],
@@ -103,18 +103,18 @@ use borales\extensions\phoneInput\PhoneInput;
                     [
                         'header' => 'Emails',
                         'attribute' => 'client_email',
-                        'value' => function(\common\models\Client $model) {
+                        'value' => function (\common\models\Client $model) {
 
                             $emails = $model->clientEmails;
                             $data = [];
-                            if($emails) {
+                            if ($emails) {
                                 foreach ($emails as $k => $email) {
-                                    $data[] = '<i class="fa fa-envelope"></i> <code>'.Html::encode($email->email).'</code>';
+                                    $data[] = '<i class="fa fa-envelope"></i> <code>' . Html::encode($email->email) . '</code>';
                                 }
                             }
 
                             $str = implode('<br>', $data);
-                            return ''.$str.'';
+                            return '' . $str . '';
                         },
                         'format' => 'raw',
                         'contentOptions' => ['class' => 'text-left'],
@@ -122,19 +122,19 @@ use borales\extensions\phoneInput\PhoneInput;
 
                     [
                         'header' => 'Leads',
-                        'value' => function(\common\models\Client $model) {
+                        'value' => function (\common\models\Client $model) {
 
                             $leads = $model->leads;
                             $data = [];
-                            if($leads) {
+                            if ($leads) {
                                 foreach ($leads as $lead) {
-                                    $data[] = '<i class="fa fa-link"></i> '. Html::a('lead: '.$lead->id, ['/admin/leads/view', 'id' => $lead->id], ['target' => '_blank', 'data-pjax' => 0]).' (IP: '.$lead->request_ip.')';
+                                    $data[] = '<i class="fa fa-link"></i> ' . Html::a('lead: ' . $lead->id, ['/admin/leads/view', 'id' => $lead->id], ['target' => '_blank', 'data-pjax' => 0]) . ' (IP: ' . $lead->request_ip . ')';
                                 }
                             }
 
                             $str = '';
-                            if($data) {
-                                $str = ''.implode('<br>', $data).'';
+                            if ($data) {
+                                $str = '' . implode('<br>', $data) . '';
                             }
 
                             return $str;
@@ -145,8 +145,8 @@ use borales\extensions\phoneInput\PhoneInput;
 
                     [
                         'attribute' => 'created',
-                        'value' => function(\common\models\Client $model) {
-                            return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime($model->created, 'php:Y-m-d [H:i]');
+                        'value' => function (\common\models\Client $model) {
+                            return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime($model->created, 'php:Y-m-d [H:i]');
                         },
                         'format' => 'html',
                     ],
@@ -156,10 +156,9 @@ use borales\extensions\phoneInput\PhoneInput;
             ]);
 
 
-
             yii\bootstrap\Modal::begin([
-                'headerOptions' => ['id' => 'modal-header-'.$key],
-                'id' => 'modal-'.$key,
+                'headerOptions' => ['id' => 'modal-header-' . $key],
+                'id' => 'modal-' . $key,
                 'size' => 'modal-lg',
                 'clientOptions' => ['backdrop' => 'static']//, 'keyboard' => FALSE]
             ]);
@@ -167,10 +166,10 @@ use borales\extensions\phoneInput\PhoneInput;
             yii\bootstrap\Modal::end();
 
 
-            echo Html::a(($phoneCount).' <i class="fa fa-user"></i>', 'javascript:void(0);', [
+            echo Html::a(($phoneCount) . ' <i class="fa fa-user"></i>', 'javascript:void(0);', [
                 'id' => 'phone-cnt-' . $key,
                 'title' => $phone->phone,
-                'data-modal_id' => $key,
+                'data-modal_id' => 'phone-cnt-' . $key,
                 'class' => 'btn sl-client-field-del js-cl-email-del showModalButton',
             ]);
 
@@ -184,7 +183,6 @@ use borales\extensions\phoneInput\PhoneInput;
             'data-content' => $commentTemplate,
             'class' => 'btn sl-client-field-del js-cl-email-del client-comment-phone-button',
         ]);
-
 
 
     }
