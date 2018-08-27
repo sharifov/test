@@ -33,7 +33,9 @@ $queueType = Yii::$app->request->get('type');
         }
         if (in_array($model->status, [$model::STATUS_ON_HOLD, $model::STATUS_BOOKED, $model::STATUS_FOLLOW_UP])) {
             $now = new \DateTime();
-            $diff = $now->diff(new \DateTime($model->leadFlightSegments[0]->departure));
+            $diff = isset($model->leadFlightSegments[0])
+                ? $now->diff(new \DateTime($model->leadFlightSegments[0]->departure))
+                : $now->diff(new \DateTime($model->created));
             $diffInSec = $diff->s + ($diff->i * 60) + ($diff->h * 3600) + ($diff->d * 86400) + ($diff->m * 30 * 86400) + ($diff->y * 12 * 30 * 86400);
             //if departure <= 7 days
             if ($diffInSec <= (7 * 24 * 60 * 60)) {
