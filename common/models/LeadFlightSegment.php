@@ -64,10 +64,8 @@ class LeadFlightSegment extends \yii\db\ActiveRecord
     }
 
 
-    public function afterValidate()
+    public function beforeValidate()
     {
-        parent::afterValidate();
-
         $this->origin_label = trim($this->origin_label);
         if (!empty($this->origin_label)) {
             $regex = '/(.*)[(]+[A-Z]{3}+[)]$/';
@@ -113,6 +111,8 @@ class LeadFlightSegment extends \yii\db\ActiveRecord
                 ));
             }
         }
+
+        return parent::beforeValidate();
     }
 
     public function beforeSave($insert): bool
