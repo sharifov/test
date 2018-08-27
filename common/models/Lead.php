@@ -716,29 +716,14 @@ class Lead extends ActiveRecord
 
         if (!empty($offset)) {
             $content = '<span class="sale-client-time" id="' . $spanId . '" data-offset="' . $offset . '"></span>';
-            if (!empty($this->leads[0]->country_code)) {
-                $info = 'No info!';
-                $countryCode = 'N/A';
-                if (!empty($this->request_ip)) {
-                    if (!empty($this->request_ip_detail)) {
-                        $details = json_decode($this->request_ip_detail, true);
-                        $countryCode = isset($details['country_code'])
-                            ? $details['country_code']
-                            : $countryCode;
-                    }
-                    $info = sprintf('Country: <strong>%s</strong><br>IP: <strong>%s</strong>',
-                        strtoupper($countryCode),
-                        $this->request_ip);
+            if (!empty($this->request_ip_detail)) {
+                $ipData = @json_decode($this->request_ip_detail, true);
+                if (isset($ipData['country_code'])) {
+                    $content .= '&nbsp;' . Html::tag('i', '', [
+                            'class' => 'flag flag__' . strtolower($ipData['country_code']),
+                            'style' => 'vertical-align: bottom;'
+                        ]);
                 }
-                $content .= '&nbsp;' . Html::tag('i', '', [
-                        'class' => 'flag flag__' . strtolower($countryCode),
-                        'style' => 'vertical-align: bottom;',
-                        'title' => '',
-                        'data-toggle' => 'tooltip',
-                        'data-placement' => 'right',
-                        'data-original-title' => $info,
-                        'data-html' => 'true'
-                    ]);
             }
             return $content;
         }
