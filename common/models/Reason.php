@@ -32,13 +32,14 @@ class Reason extends \yii\db\ActiveRecord
 
     public static function getReason($queue = null)
     {
-        if ($queue == 'trash') {
+        if (in_array($queue, ['trash', 'reject'])) {
             return [
                 'Purchased elsewhere' => 'Purchased elsewhere',
                 'Flight date > 10 months' => 'Flight date > 10 months',
                 'Not interested' => 'Not interested',
                 'Duplicate' => 'Duplicate',
                 'Too late' => 'Too late',
+                'Test' => 'Test',
                 'Other' => 'Other'
             ];
         } elseif ($queue == 'follow-up') {

@@ -123,16 +123,3 @@ $formId = sprintf('%s-form', $leadForm->getLeadPreferences()->formName());
         ]) ?>
     </div>
 </div>
-<?php
-if (!$leadForm->getLead()->isNewRecord &&
-    (Yii::$app->user->identity->getId() == $leadForm->getLead()->employee_id) || $leadForm->viewPermission
-) : ?>
-    <div class="sidebar__section" id="call-actions-block">
-        <div class="btn-wrapper">
-            <?= Html::button('<span class="btn-icon"><i class="fa fa-list"></i></span> View call actions', [
-                'id' => 'view-call-actions-btn',
-                'class' => 'btn btn-primary btn-with-icon'
-            ]) ?>
-        </div>
-    </div>
-<?php endif; ?>
