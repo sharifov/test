@@ -790,7 +790,9 @@ class Lead extends ActiveRecord
         /**
          * @var $note Note
          */
-        $note = Note::find()->orderBy('id desc')->one();
+        $note = Note::find()
+            ->where(['lead_id' => $this->id])
+            ->orderBy('id desc')->one();
         $now = new \DateTime();
         $lastUpdate = new \DateTime($this->updated);
         if ($note !== null) {
