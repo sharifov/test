@@ -169,7 +169,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
             ->from('auth_item')->where(['type' => 1])
             ->all();
         foreach ($result as $item) {
-            if ($item['name'] == 'admin' && Yii::$app->user->identityClass->role != 'admin') {
+            if ($item['name'] == 'admin' && Yii::$app->user->identity->role != 'admin') {
                 continue;
             }
             $roles[$item['name']] = $item['description'];
