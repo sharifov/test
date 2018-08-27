@@ -34,7 +34,7 @@ class MonitorFlowController extends Controller
                 $quote->status = Quote::STATUS_DECLINED;
                 if ($quote->save()) {
                     if ($test) {
-                        echo sprintf('Decline quote: %s. FR: %d, Created: %s', $quote->uid, $quote->lead_id, $quote->updated) . PHP_EOL;
+                        echo sprintf('Decline quote: %s. FR: %d, Created: %s', $quote->uid, $quote->lead_id, $quote->created) . PHP_EOL;
                     }
                 }
             }
