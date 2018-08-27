@@ -776,6 +776,16 @@ class Lead extends ActiveRecord
     }
 
     /**
+     * @return array|null|\yii\db\ActiveRecord
+     */
+    public function lastLog()
+    {
+        return LeadLog::find()->where([
+            'lead_id' => $this->id,
+        ])->orderBy('id DESC')->one();
+    }
+
+    /**
      * @return Reason
      */
     public function lastReason()
