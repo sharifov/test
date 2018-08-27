@@ -327,8 +327,8 @@ class Lead extends ActiveRecord
             ];
         }
         $dataProvider->sort->attributes['last_activity'] = [
-            'asc' => ['notes_group.created' => SORT_DESC],
-            'desc' => ['notes_group.created' => SORT_ASC],
+            'asc' => ['notes.created' => SORT_DESC],
+            'desc' => ['notes.created' => SORT_ASC],
         ];
         $dataProvider->sort->attributes['pending'] = [
             'asc' => [Lead::tableName() . '.created' => SORT_ASC],
