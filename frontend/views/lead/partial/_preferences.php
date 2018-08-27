@@ -53,34 +53,36 @@ $formId = sprintf('%s-form', $leadForm->getLeadPreferences()->formName());
     </div>
 
     <?php if (!$leadForm->getLead()->isNewRecord) : ?>
-    <div class="row">
-        <div class="col-md-12">
-            <?php
+        <div class="row">
+            <div class="col-md-12">
+                <?php
 
-            $ipData = @json_decode($leadForm->getLead()->request_ip_detail, true);
+                $ipData = @json_decode($leadForm->getLead()->request_ip_detail, true);
 
-            $strData[] = isset($ipData['country']) ? 'Country: <b>'.$ipData['country'].'</b>' : '';
-            $strData[] = isset($ipData['state']) ? 'State: <b>'.$ipData['state'].'</b>' : '';
-            $strData[] = isset($ipData['city']) ? 'City: <b>'.$ipData['city'].'</b>' : '';
+                $strData[] = isset($ipData['country']) ? 'Country: <b>' . $ipData['country'] . '</b>' : '';
+                $strData[] = isset($ipData['state']) ? 'State: <b>' . $ipData['state'] . '</b>' : '';
+                $strData[] = isset($ipData['city']) ? 'City: <b>' . $ipData['city'] . '</b>' : '';
 
-            $str = implode('<br> ', $strData);
+                $str = implode('<br> ', $strData);
 
-            $popoverId = 'ip-popup';
-            $commentTemplate = '<small>'.$str.'</small>';
+                $popoverId = 'ip-popup';
+                $commentTemplate = '<small>' . $str . '</small>';
 
-            $ipCount = 10;
+                $ipCount = \common\models\Lead::find()->where([
+                    'request_ip' => $leadForm->getLead()->request_ip
+                ])->andWhere(['NOT IN', 'id', $leadForm->getLead()->id])->count();
 
-            echo '<br>'.Html::a('IP address: '.$leadForm->getLead()->request_ip . ($ipCount ? ' - '.$ipCount.' <i class="fa fa-clone"></i>' : ''), 'javascript:void(0);', [
-                'id' => $popoverId,
-                'data-toggle' => 'popover',
-                'data-placement' => 'bottom',
-                'data-content' => $commentTemplate,
-                'class' => 'btn sl-client-field-del client-comment-phone-button',
-            ]);
+                echo '<br>' . Html::a('IP address: ' . $leadForm->getLead()->request_ip . ($ipCount ? ' - ' . $ipCount . ' <i class="fa fa-clone"></i>' : ''), 'javascript:void(0);', [
+                        'id' => $popoverId,
+                        'data-toggle' => 'popover',
+                        'data-placement' => 'bottom',
+                        'data-content' => $commentTemplate,
+                        'class' => 'btn sl-client-field-del client-comment-phone-button',
+                    ]);
 
-            ?>
+                ?>
+            </div>
         </div>
-    </div>
     <?php endif; ?>
 
 </div>
