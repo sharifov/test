@@ -206,10 +206,10 @@ class SyncController extends Controller
                 try {
                     $leadId = intval($leadId);
                     //check if exist employee
-                    if (empty($objects['Lead']['employee_id']) && $status != 5) {
+                    if (empty($objects['Lead']['employee_id']) && !in_array($status,[5, 1])) {
                         continue;
                     }
-                    if ($status != 5) {
+                    if (!in_array($status,[5, 1])) {
                         $employee = Employee::findOne(['id' => $objects['Lead']['employee_id']]);
                         if ($employee === null) {
                             echo 'Need sync employee id: ' . $objects['Lead']['employee_id'] . PHP_EOL;
