@@ -797,8 +797,7 @@ class Quote extends \yii\db\ActiveRecord
             'status' => $this->status,
             'check_payment' => $this->check_payment,
             'fare_type' => $this->fare_type,
-            'employee_name' => ($this->created_by_seller)
-                ? $this->employee->username : $this->employee_name
+            'employee_name' => $this->employee_name
         ];
 
         $pQInformation = [];
