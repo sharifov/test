@@ -25,7 +25,7 @@ class EmployeeController extends DefaultController
      */
     public function behaviors()
     {
-        return [
+        $behaviors = [
             'access' => [
                 'class' => AccessControl::class,
                 'rules' => [
@@ -42,6 +42,8 @@ class EmployeeController extends DefaultController
                 ],
             ],
         ];
+
+        return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
 
     public function actionSellerContactInfo($employeeId)
