@@ -1061,12 +1061,14 @@ class Lead extends ActiveRecord
             'errors' => []
         ];
         $models = [];
+        $i = 1;
         foreach ($quotes as $quote) {
             $model = Quote::findOne([
                 'uid' => $quote
             ]);
             if ($model !== null) {
-                $models[] = $model;
+                $models[$i] = $model;
+                $i++;
             }
         }
 
