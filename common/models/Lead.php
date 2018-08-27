@@ -1244,7 +1244,9 @@ class Lead extends ActiveRecord
             'market_price' => !empty($this->leadPreferences)
                 ? $this->leadPreferences->market_price : '',
             'itinerary' => [],
-            'agent_name' => $this->employee->username
+            'agent_name' => ($this->employee !== null)
+                ? $this->employee->username
+                : 'N/A'
         ];
 
         $itinerary = [];
