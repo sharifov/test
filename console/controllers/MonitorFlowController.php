@@ -91,7 +91,6 @@ class MonitorFlowController extends Controller
 
             if ($diff <= time()) {
                 $object->status = $object::STATUS_FOLLOW_UP;
-                $object->employee_id = null;
                 $object->save();
                 $reason = new Reason();
 
