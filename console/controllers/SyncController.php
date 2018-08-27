@@ -197,24 +197,29 @@ class SyncController extends Controller
         $result = BackOffice::sendRequest('old/leads' . $query);
 
         var_dump($result['sql']);
+        if (isset($result['errors'])) {
+            var_dump($result['errors']);
+        }
 
         if (isset($result['data'])) {
             foreach ($result['data'] as $leadId => $objects) {
                 try {
                     $leadId = intval($leadId);
                     //check if exist employee
-                    if (empty($objects['Lead']['employee_id'])) {
+                    if (empty($objects['Lead']['employee_id']) && $status != 5) {
                         continue;
                     }
-                    $employee = Employee::findOne(['id' => $objects['Lead']['employee_id']]);
-                    if ($employee === null) {
-                        echo 'Need sync employee id: ' . $objects['Lead']['employee_id'] . PHP_EOL;
-                        $data = [
-                            'projects' => [6],
-                            'employeeID' => $objects['Lead']['employee_id']
-                        ];
-                        $result = BackOffice::sendRequest('old/sellers', 'POST', json_encode($data));
-                        $this->addSeller($result, $data);
+                    if ($status != 5) {
+                        $employee = Employee::findOne(['id' => $objects['Lead']['employee_id']]);
+                        if ($employee === null) {
+                            echo 'Need sync employee id: ' . $objects['Lead']['employee_id'] . PHP_EOL;
+                            $data = [
+                                'projects' => [6],
+                                'employeeID' => $objects['Lead']['employee_id']
+                            ];
+                            $result = BackOffice::sendRequest('old/sellers', 'POST', json_encode($data));
+                            $this->addSeller($result, $data);
+                        }
                     }
 
                     //add-edit client object
