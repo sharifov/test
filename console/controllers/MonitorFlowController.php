@@ -4,12 +4,43 @@ namespace console\controllers;
 
 use common\models\Lead;
 use common\models\LeadLog;
+use common\models\Quote;
 use common\models\Reason;
 use yii\console\Controller;
 use Yii;
 
 class MonitorFlowController extends Controller
 {
+    public function actionWatchDogDeclineQuote($test = false)
+    {
+        /**
+         * @var $quotes Quote[]
+         */
+        $quotes = Quote::find()
+            ->where(['status' => [
+                Quote::STATUS_CREATED, Quote::STATUS_SEND,
+                Quote::STATUS_OPENED
+            ]])->all();
+        if ($test) {
+            echo sprintf('Count: %s', count($quotes)) . PHP_EOL;
+        }
+        $now = time();
+        foreach ($quotes as $quote) {
+            if ($quote->lead->getAppliedAlternativeQuotes() !== null) {
+                continue;
+            }
+            $limitTime = strtotime($quote->created . '+1 day');
+            if ($limitTime <= $now) {
+                $quote->status = Quote::STATUS_DECLINED;
+                if ($quote->save()) {
+                    if ($test) {
+                        echo sprintf('Decline quote: %s. FR: %d, Created: %s', $quote->uid, $quote->flight_request_id, $quote->created_at) . PHP_EOL;
+                    }
+                }
+            }
+        }
+    }
+
     public function actionOnWake()
     {
         /**
