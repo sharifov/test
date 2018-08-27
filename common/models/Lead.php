@@ -82,6 +82,7 @@ class Lead extends ActiveRecord
     public CONST STATUS_LIST = [
         self::STATUS_PENDING => 'Pending',
         self::STATUS_PROCESSING => 'Processing',
+        self::STATUS_REJECT => 'Reject',
         self::STATUS_FOLLOW_UP => 'Follow Up',
         self::STATUS_ON_HOLD => 'Hold On',
         self::STATUS_SOLD => 'Sold',
