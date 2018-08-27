@@ -653,7 +653,7 @@ class LeadController extends DefaultController
             Yii::$app->response->format = Response::FORMAT_JSON;
             return $activity;
         }
-        return $this->renderAjax('_requestLog', [
+        return $this->renderAjax('partial/_requestLog', [
             'activity' => $activity,
             'discountId' => $quoteId,
             'lead' => $lead
