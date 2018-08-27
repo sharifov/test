@@ -359,6 +359,7 @@ class QuoteController extends DefaultController
                     $prices = $currentQuote->cloneQuote($quote, $lead);
                 }
             }
+            $quote->employee_name = Yii::$app->user->identity->username;
             return $this->renderAjax('_quote', [
                 'lead' => $lead,
                 'quote' => $quote,
