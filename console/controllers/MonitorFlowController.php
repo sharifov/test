@@ -67,7 +67,7 @@ class MonitorFlowController extends Controller
                 if ($test) {
                     echo $object->flight_request_id . ' - status: ' . $object->status . PHP_EOL;
                 }
-                $reason->reason = sprintf('No activity for more than eight hours');
+                $reason->reason = sprintf('No activity for more than 48 hours');
                 $reason->employee_id = null;
                 $reason->lead_id = $object->id;
                 $reason->save();
