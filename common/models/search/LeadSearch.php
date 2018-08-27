@@ -112,6 +112,7 @@ class LeadSearch extends Lead
             //'created' => $this->created,
             //'updated' => $this->updated,
             'snooze_for' => $this->snooze_for,
+            'bo_flight_id' => $this->bo_flight_id,
             'rating' => $this->rating,
             'called_expert' => $this->called_expert,
         ]);
@@ -167,8 +168,7 @@ class LeadSearch extends Lead
             ->andFilterWhere(['like', 'request_ip', $this->request_ip])
             ->andFilterWhere(['like', 'request_ip_detail', $this->request_ip_detail])
             ->andFilterWhere(['like', 'offset_gmt', $this->offset_gmt])
-            ->andFilterWhere(['like', 'discount_id', $this->discount_id])
-            ->andFilterWhere(['like', 'bo_flight_id', $this->bo_flight_id]);
+            ->andFilterWhere(['like', 'discount_id', $this->discount_id]);
 
         //$sqlRaw = $query->createCommand()->getRawSql();
         //VarDumper::dump($sqlRaw, 10, true); exit;

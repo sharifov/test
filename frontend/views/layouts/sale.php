@@ -47,6 +47,20 @@ AppAsset::register($this);
     </div>
 </div>
 
+<div class="modal modal-events fade" id="log-events" style="display: none;">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                Client Request Actions
+                <button type="button" class="close" data-dismiss="modal">
+                    <i class="fa fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body"></div>
+        </div>
+    </div>
+</div>
+
 <!-- MODAL ERROR WINDOWS -->
 <div class="modal modal-danger fade in" id="modal-error" style="display: none;">
     <div class="modal-dialog">

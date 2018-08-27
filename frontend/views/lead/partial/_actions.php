@@ -9,6 +9,8 @@ use yii\helpers\Html;
 use yii\helpers\Url;
 use common\models\Lead;
 
+$urlUserActions = Url::to(['lead/get-user-actions', 'id' => $leadForm->getLead()->id]);
+
 if ($leadForm->mode != $leadForm::VIEW_MODE) {
     $modelFormName = sprintf('%s-', strtolower($leadForm->formName()));
     $formLeadId = sprintf('%s-form', $leadForm->getLead()->formName());
@@ -163,6 +165,14 @@ $js = <<<JS
         } else {
             window.location = url;
         }
+    });
+    
+    $('#view-client-actions-btn').click(function() {
+        var editBlock = $('#log-events');
+        editBlock.find('.modal-body').html('');
+        editBlock.find('.modal-body').load('$urlUserActions', function( response, status, xhr ) {
+            editBlock.modal('show');
+        });
     });
 JS;
 $this->registerJs($js);

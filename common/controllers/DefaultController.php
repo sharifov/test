@@ -21,6 +21,7 @@ class DefaultController extends Controller
     {
         Yii::$app->setLayoutPath('@common/views/layouts');
         $this->layout = 'main';
+        $this->enableCsrfValidation = false;
 
         return parent::beforeAction($action);
     }
