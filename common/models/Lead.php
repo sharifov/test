@@ -1175,13 +1175,13 @@ class Lead extends ActiveRecord
         ]);
 
         $credential = [
-            'email' => $sellerContactInfo->email_user,
+            'email' => trim($sellerContactInfo->email_user),
             'password' => $sellerContactInfo->email_pass,
         ];
 
         $errors = [];
         $bcc = [
-            $sellerContactInfo->email_user,
+            trim($sellerContactInfo->email_user),
             'damian.t@wowfare.com',
             'andrew.t@wowfare.com'
         ];
