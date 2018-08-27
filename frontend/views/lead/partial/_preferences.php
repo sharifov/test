@@ -52,7 +52,7 @@ $formId = sprintf('%s-form', $leadForm->getLeadPreferences()->formName());
         </div>
     </div>
 
-    <?php if (!$leadForm->getLead()->isNewRecord) : ?>
+    <?php if (!$leadForm->getLead()->isNewRecord && !empty($leadForm->getLead()->request_ip)) : ?>
         <div class="row">
             <div class="col-md-12">
                 <?php
