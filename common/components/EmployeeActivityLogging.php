@@ -22,6 +22,9 @@ class EmployeeActivityLogging extends Behavior
     public function activityLogging()
     {
         if (!Yii::$app->user->isGuest) {
+            if (strpos(Yii::$app->request->getAbsoluteUrl(), 'util/check-updates') === true) {
+                return true;
+            }
             try {
                 $activity = new EmployeeActivity();
                 $activity->employee_id = Yii::$app->user->identity->getId();
