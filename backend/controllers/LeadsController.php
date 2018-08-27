@@ -36,12 +36,12 @@ class LeadsController extends DefaultController
                 'class' => AccessControl::class,
                 'rules' => [
                     [
-                        'actions' => ['index', 'update', 'view', 'delete', 'create'],
+                        'actions' => ['index', 'update', 'delete', 'create'],
                         'allow' => true,
                         'roles' => ['supervision'],
                     ],
                     [
-                        'actions' => ['index'],
+                        'actions' => ['view', 'index'],
                         'allow' => true,
                         'roles' => ['agent'],
                     ],
