@@ -22,7 +22,7 @@ class EmployeeActivityLogging extends Behavior
     public function activityLogging()
     {
         if (!Yii::$app->user->isGuest) {
-            if (strpos(Yii::$app->request->getAbsoluteUrl(), 'util/check-updates') === true) {
+            if (strpos(Yii::$app->request->getAbsoluteUrl(), 'lead/check-updates') === true) {
                 return true;
             }
             try {
