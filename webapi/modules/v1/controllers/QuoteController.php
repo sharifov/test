@@ -332,7 +332,9 @@ class QuoteController extends ApiBaseController
                 if (!$model->hasErrors()) {
                     if (!empty($leadAttributes)) {
                         $model->lead->attributes = $leadAttributes;
-                        $model->lead->save();
+                        if (!$model->lead->save()) {
+                            $response['errors'][] = $model->lead->getErrors();
+                        }
                     }
                     if ($model->status == Quote::STATUS_APPLIED) {
                         $model->lead->status = Lead::STATUS_BOOKED;
