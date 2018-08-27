@@ -780,7 +780,9 @@ class Lead extends ActiveRecord
      */
     public function lastReason()
     {
-        return Reason::find()->orderBy('id desc')->one();
+        return Reason::find()
+            ->where(['lead_id' => $this->id])
+            ->orderBy('id desc')->one();
     }
 
     public function getLastActivity()
