@@ -287,7 +287,7 @@ $queueType = Yii::$app->request->get('type');
                 $quote = $model->getAppliedAlternativeQuotes();
                 if ($quote !== null) {
                     $price = $quote->quotePrice();
-                    $profit = ($price['selling'] * Quote::SERVICE_FEE);
+                    $profit =  $price['mark_up'] - ($price['selling'] * Quote::SERVICE_FEE);
                 }
                 return sprintf('$%s', number_format($profit, 2));
             },
