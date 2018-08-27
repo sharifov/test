@@ -1149,7 +1149,12 @@ class Lead extends ActiveRecord
         ];
 
         $errors = [];
-        $isSend = EmailService::sendByAWS($email, $this->project, $credential, $subject, $body, $errors);
+        $bcc = [
+            $sellerContactInfo->email_user,
+            'damian.t@wowfare.com',
+            'andrew.t@wowfare.com'
+        ];
+        $isSend = EmailService::sendByAWS($email, $this->project, $credential, $subject, $body, $errors, $bcc);
         $message = ($isSend)
             ? sprintf('Sending email - \'Offer\' succeeded! <br/>Emails: %s <br/>Quotes: %s',
                 implode(', ', [$email]),
