@@ -359,13 +359,15 @@ class LeadController extends ApiBaseController
         if (!$lead->save()) {
             Yii::error(print_r($lead->errors, true), 'API:Lead:create:Lead:save');
             $transaction->rollBack();
-            throw new UnprocessableEntityHttpException($this->errorToString($modelLead->errors));
+            throw new UnprocessableEntityHttpException($this->errorToString($modelLead->errors), 8);
         }
 
 
         if ($modelLead->flights) {
             foreach ($modelLead->flights as $flight) {
                 $flightModel = new LeadFlightSegment();
+                $flightModel->scenario = LeadFlightSegment::SCENARIO_CREATE_API;
+
 
                 $flightModel->lead_id = $lead->id;
                 $flightModel->origin = $flight['origin'];
@@ -375,6 +377,7 @@ class LeadController extends ApiBaseController
                 if (!$flightModel->save()) {
                     Yii::error(print_r($flightModel->errors, true), 'API:Lead:create:LeadFlightSegment:save');
                     $transaction->rollBack();
+                    throw new UnprocessableEntityHttpException($this->errorToString($flightModel->errors), 10);
                 }
             }
         }
@@ -391,6 +394,7 @@ class LeadController extends ApiBaseController
                 if (!$emailModel->save()) {
                     Yii::error(print_r($emailModel->errors, true), 'API:Lead:create:ClientEmail:save');
                     $transaction->rollBack();
+                    throw new UnprocessableEntityHttpException($this->errorToString($emailModel->errors), 11);
                 }
             }
 
@@ -405,6 +409,7 @@ class LeadController extends ApiBaseController
                 if (!$phoneModel->save()) {
                     Yii::error(print_r($phoneModel->errors, true), 'API:Lead:create:ClientPhone:save');
                     $transaction->rollBack();
+                    throw new UnprocessableEntityHttpException($this->errorToString($phoneModel->errors), 12);
                 }
             }
 
@@ -421,7 +426,7 @@ class LeadController extends ApiBaseController
 
             $transaction->rollBack();
             Yii::error($e->getTraceAsString(), 'API:lead:create:try');
-            if (Yii::$app->request->get('debug')) $message = ($e->getTraceAsString());
+            if (Yii::$app->request->get('debug')) $message = $e->getTraceAsString();
             else $message = $e->getMessage() . ' (code:' . $e->getCode() . ', line: ' . $e->getLine() . ')';
 
             $response['error'] = $message;
@@ -634,6 +639,7 @@ class LeadController extends ApiBaseController
 
             foreach ($modelLead->flights as $flight) {
                 $flightModel = new LeadFlightSegment();
+                $flightModel->scenario = LeadFlightSegment::SCENARIO_UPDATE_API;
 
                 $flightModel->lead_id = $lead->id;
                 $flightModel->origin = $flight['origin'];
