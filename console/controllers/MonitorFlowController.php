@@ -82,6 +82,7 @@ class MonitorFlowController extends Controller
             }
 
             $emails = $object->client->clientEmails;
+            $now = date('Y-m-d H:i:s');
             if ($test) {
                 echo 'Lead date: '. $date . '. Now date: '.date('Y-m-d H:i:s') . PHP_EOL;
             }
@@ -98,7 +99,7 @@ class MonitorFlowController extends Controller
 
             $diff = strtotime(sprintf('%s + 48 hours', $date));
 
-            if ($diff <= time()) {
+            if ($diff <= strtotime($now)) {
                 $object->status = $object::STATUS_FOLLOW_UP;
                 $object->save(false);
                 if ($test) {
