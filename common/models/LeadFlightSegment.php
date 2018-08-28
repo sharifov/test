@@ -83,7 +83,7 @@ class LeadFlightSegment extends \yii\db\ActiveRecord
     /**
      * @return array
      */
-    public function scenarios() : array
+    public function scenarios()
     {
         $scenarios = parent::scenarios();
         //$scenarios[self::SCENARIO_CREATE_AGENT] = ['origin', 'destination', 'departure', 'origin_label', 'destination_label', 'lead_id', 'flexibility', 'flexibility_type'];

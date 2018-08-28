@@ -32,15 +32,11 @@ class NavItem
                 $items = [
                     [
                         'label' => 'Dashboard',
-                        'url' => (!strpos(Yii::$app->request->baseUrl, 'admin'))
-                            ? ['admin/site/index']
-                            : ['site/index']
+                        'url' => ['site/index']
                     ],
                     [
                         'label' => '<i class="fa fa-user"></i> Employees',
-                        'url' => (!strpos(Yii::$app->request->baseUrl, 'admin'))
-                            ? ['admin/employee/list']
-                            : ['employee/list']
+                        'url' => ['employee/list']
                     ],
                     /*[
                         'label' => 'Settings',
@@ -53,23 +49,23 @@ class NavItem
                         'items' => [
                             [
                                 'label' => 'ACL',
-                                'url' => sprintf('%s/admin/settings/acl', Yii::$app->urlManager->getHostInfo())
+                                'url' => sprintf('%s/settings/acl', Yii::$app->urlManager->getHostInfo())
                             ],
                             [
                                 'label' => 'Projects',
-                                'url' => sprintf('%s/admin/settings/projects', Yii::$app->urlManager->getHostInfo())
+                                'url' => sprintf('%s/settings/projects', Yii::$app->urlManager->getHostInfo())
                             ],
                             [
                                 'label' => 'Airlines',
-                                'url' => sprintf('%s/admin/settings/airlines', Yii::$app->urlManager->getHostInfo())
+                                'url' => sprintf('%s/settings/airlines', Yii::$app->urlManager->getHostInfo())
                             ],
                             [
                                 'label' => 'Airports',
-                                'url' => sprintf('%s/admin/settings/airports', Yii::$app->urlManager->getHostInfo())
+                                'url' => sprintf('%s/settings/airports', Yii::$app->urlManager->getHostInfo())
                             ],
                             [
                                 'label' => 'Logging',
-                                'url' => sprintf('%s/admin/settings/logging', Yii::$app->urlManager->getHostInfo())
+                                'url' => sprintf('%s/settings/logging', Yii::$app->urlManager->getHostInfo())
                             ],
 
                             [
@@ -85,14 +81,14 @@ class NavItem
                     ],*/
                 ];
 
-                $items[] = ['label' => '<i class="fa fa-plane"></i> Flight Segments', 'url' => (!strpos(Yii::$app->request->baseUrl, 'admin')) ? ['admin/lead-flight-segment/index'] : ['lead-flight-segment/index']];
+                $items[] = ['label' => '<i class="fa fa-plane"></i> Flight Segments', 'url' => (!strpos(Yii::$app->request->baseUrl, 'admin')) ? ['lead-flight-segment/index'] : ['lead-flight-segment/index']];
 
-                $items[] = ['label' => '<i class="fa fa-quora"></i> Quote List', 'url' => (!strpos(Yii::$app->request->baseUrl, 'admin')) ? ['admin/quote/index'] : ['quote/index']];
+                $items[] = ['label' => '<i class="fa fa-quora"></i> Quote List', 'url' => (!strpos(Yii::$app->request->baseUrl, 'admin')) ? ['quote/index'] : ['quote/index']];
 
-                $items[] = ['label' => '<i class="fa fa-dollar"></i> Quote Price List', 'url' => (!strpos(Yii::$app->request->baseUrl, 'admin')) ? ['admin/quote-price/index'] : ['quote-price/index']];
+                $items[] = ['label' => '<i class="fa fa-dollar"></i> Quote Price List', 'url' => (!strpos(Yii::$app->request->baseUrl, 'admin')) ? ['quote-price/index'] : ['quote-price/index']];
             }
 
-            $items[] = ['label' => '<i class="fa fa-search"></i> Search Lead', 'url' => (!strpos(Yii::$app->request->baseUrl, 'admin')) ? ['admin/leads/index'] : ['leads/index']];
+            $items[] = ['label' => '<i class="fa fa-search"></i> Search Lead', 'url' => (!strpos(Yii::$app->request->baseUrl, 'admin')) ? ['leads/index'] : ['leads/index']];
 
             $items[] = [
                 'label' => '<i class="fa fa-bar-chart"></i> Reports',
@@ -121,27 +117,27 @@ class NavItem
 
                         [
                             'label' => '<i class="fa fa-product-hunt"></i> Projects',
-                            'url' => sprintf('%s/admin/settings/projects', Yii::$app->urlManager->getHostInfo())
+                            'url' => sprintf('%s/settings/projects', Yii::$app->urlManager->getHostInfo())
                         ],
                         [
                             'label' => '<i class="fa fa-plane"></i> Airlines',
-                            'url' => sprintf('%s/admin/settings/airlines', Yii::$app->urlManager->getHostInfo())
+                            'url' => sprintf('%s/settings/airlines', Yii::$app->urlManager->getHostInfo())
                         ],
                         [
                             'label' => '<i class="fa fa-plane"></i> Airports',
-                            'url' => sprintf('%s/admin/settings/airports', Yii::$app->urlManager->getHostInfo())
+                            'url' => sprintf('%s/settings/airports', Yii::$app->urlManager->getHostInfo())
                         ],
                         /*[
                             'label' => 'Logging',
-                            'url' => sprintf('%s/admin/settings/logging', Yii::$app->urlManager->getHostInfo())
+                            'url' => sprintf('%s/settings/logging', Yii::$app->urlManager->getHostInfo())
                         ],*/
                         [
                             'label' => '<i class="fa fa-users"></i> API Users',
-                            'url' => sprintf('%s/admin/api-user/index', Yii::$app->urlManager->getHostInfo())
+                            'url' => sprintf('%s/api-user/index', Yii::$app->urlManager->getHostInfo())
                         ],
                         [
                             'label' => '<i class="fa fa-user-secret"></i> ACL',
-                            'url' => sprintf('%s/admin/settings/acl', Yii::$app->urlManager->getHostInfo())
+                            'url' => sprintf('%s/settings/acl', Yii::$app->urlManager->getHostInfo())
                         ],
 
                     ],
@@ -189,12 +185,12 @@ class NavItem
 
                         [
                             'label' => '<i class="fa fa-bars"></i> API Logs <span class="badge badge-warning">'. (\common\models\ApiLog::find()->where("DATE(al_request_dt) = DATE(NOW())")->count()) .'</span>',
-                            'url' => sprintf('%s/admin/api-log/index', Yii::$app->urlManager->getHostInfo())
+                            'url' => sprintf('%s/api-log/index', Yii::$app->urlManager->getHostInfo())
                         ],
 
                         [
                             'label' => '<i class="fa fa-bars"></i> System Logs <span class="badge badge-warning">'. (\backend\models\Log::find()->where("log_time BETWEEN ".strtotime(date('Y-m-d'))." AND ".strtotime(date('Y-m-d H:i:s')))->count()) .'</span>',
-                            'url' => sprintf('%s/admin/log/index', Yii::$app->urlManager->getHostInfo())
+                            'url' => sprintf('%s/log/index', Yii::$app->urlManager->getHostInfo())
                         ],
                     ],
                 ];
