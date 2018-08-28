@@ -485,6 +485,13 @@ class LeadController extends DefaultController
                     $dataProvider[$div] = Lead::search($type, null, $div);
                 }
             }
+        } else if (in_array($type, ['trash'])) {
+            $searchModel = new Lead();
+            $params = Yii::$app->request->queryParams;
+            if (isset($params[$searchModel->formName()])) {
+                $searchModel->employee_id = $params[$searchModel->formName()]['employee_id'];
+            }
+            $dataProvider = Lead::search($type, $searchModel);
         } else {
             $dataProvider = Lead::search($type);
         }
