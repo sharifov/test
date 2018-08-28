@@ -100,7 +100,7 @@ class MonitorFlowController extends Controller
 
             if ($diff <= time()) {
                 $object->status = $object::STATUS_FOLLOW_UP;
-                $object->save();
+                $object->save(false);
                 if ($test) {
                     var_dump($object->getErrors());
                 }
