@@ -191,10 +191,7 @@ $queueType = Yii::$app->request->get('type');
             'label' => 'Pending in Trash',
             'visible' => in_array($queueType, ['trash']),
             'value' => function ($model) {
-                /**
-                 * @var $model Lead
-                 */
-                return $model->getPendingInLastStatus($model['updated']);
+                return Lead::getPendingInLastStatus($model['updated']);
             },
             'format' => 'raw'
         ],

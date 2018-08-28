@@ -623,9 +623,6 @@ class Lead extends ActiveRecord
     public function getPendingInLastStatus($updated)
     {
         $now = new \DateTime();
-        if (empty($updated)) {
-            $updated = $this->updated;
-        }
         $updated = new \DateTime($updated);
         return self::diffFormat($now->diff($updated));
     }
