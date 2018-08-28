@@ -288,9 +288,14 @@ class LeadController extends DefaultController
 
     public function actionUnassign($id)
     {
-        $model = Lead::findOne([
+        /**
+         * @var $model Lead
+         */
+        $model = Lead::find()->where([
             'id' => $id
-        ]);
+        ])->andWhere([
+            'NOT IN', 'status', [Lead::STATUS_BOOKED, Lead::STATUS_SOLD]
+        ])->one();
         if ($model !== null) {
             $reason = new Reason();
             $attr = Yii::$app->request->post($reason->formName());
