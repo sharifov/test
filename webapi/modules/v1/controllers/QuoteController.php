@@ -338,7 +338,7 @@ class QuoteController extends ApiBaseController
                     }
                     if ($model->status == Quote::STATUS_APPLIED) {
                         $model->lead->status = Lead::STATUS_BOOKED;
-                        $model->lead->save();
+                        $model->lead->save(false, ['status']);
                         /*if (!empty($leadAttributes) && isset($leadAttributes['bo_flight_id'])) {
                             $model->lead->bo_flight_id = $leadAttributes['bo_flight_id'];
                         }
