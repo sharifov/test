@@ -124,16 +124,6 @@ JS;
         ]);
         ?>
 
-        <?php $leadNewForm = \yii\bootstrap\ActiveForm::begin([
-            //'enableClientValidation' => false,
-            'id' => 'asdasdasdasd'
-        ]); ?>
-            <?= $leadNewForm->errorSummary($leadForm); ?>
-
-        <? \yii\helpers\VarDumper::dump($leadForm->errors, 10, true); ?>
-
-        <?php \yii\bootstrap\ActiveForm::end(); ?>
-
         <div class="sl-request-content">
             <?= \common\widgets\Alert::widget() ?>
 
