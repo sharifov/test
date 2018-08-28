@@ -409,7 +409,6 @@ class LeadController extends DefaultController
             ->andWhere(['IN', 'status', [
                 Lead::STATUS_PENDING,
                 Lead::STATUS_FOLLOW_UP,
-                Lead::STATUS_ON_HOLD,
                 Lead::STATUS_SNOOZE
             ]])->one();
 
@@ -426,8 +425,14 @@ class LeadController extends DefaultController
                 }
                 return null;
             } else {
-                Yii::$app->getSession()->setFlash('warning', 'Lead is unavailable to access now!');
-                return $this->redirect(Yii::$app->request->referrer);
+                $model = Lead::findOne([
+                    'id' => $id,
+                    'employee_id' => Yii::$app->user->identity->getId()
+                ]);
+                if ($model === null) {
+                    Yii::$app->getSession()->setFlash('warning', 'Lead is unavailable to access now!');
+                    return $this->redirect(Yii::$app->request->referrer);
+                }
             }
         }
 
