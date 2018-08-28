@@ -54,20 +54,15 @@ use yii\helpers\Html;
  */
 class Lead extends ActiveRecord
 {
-    public $additionalInformationForm;
-
     public CONST
         TRIP_TYPE_ONE_WAY = 'OW',
         TRIP_TYPE_ROUND_TRIP = 'RT',
         TRIP_TYPE_MULTI_DESTINATION = 'MC';
-
-
     public CONST TRIP_TYPE_LIST = [
         self::TRIP_TYPE_ROUND_TRIP => 'Round Trip',
         self::TRIP_TYPE_ONE_WAY => 'One Way',
         self::TRIP_TYPE_MULTI_DESTINATION => 'Multidestination'
     ];
-
     public CONST
         STATUS_PENDING = 1,
         STATUS_PROCESSING = 2,
@@ -78,7 +73,6 @@ class Lead extends ActiveRecord
         STATUS_TRASH = 11,
         STATUS_BOOKED = 12,
         STATUS_SNOOZE = 13;
-
     public CONST STATUS_LIST = [
         self::STATUS_PENDING => 'Pending',
         self::STATUS_PROCESSING => 'Processing',
@@ -90,45 +84,34 @@ class Lead extends ActiveRecord
         self::STATUS_BOOKED => 'Booked',
         self::STATUS_SNOOZE => 'Snooze',
     ];
-
     public CONST STATUS_CLASS_LIST = [
-        self::STATUS_PENDING        => 'll-pending',
-        self::STATUS_PROCESSING     => 'll-processing',
-        self::STATUS_FOLLOW_UP      => 'll-follow_up',
-        self::STATUS_ON_HOLD        => 'll-on_hold',
-        self::STATUS_SOLD           => 'll-sold',
-        self::STATUS_TRASH          => 'll-trash',
-        self::STATUS_BOOKED         => 'll-booked',
-        self::STATUS_SNOOZE         => 'll-snooze',
+        self::STATUS_PENDING => 'll-pending',
+        self::STATUS_PROCESSING => 'll-processing',
+        self::STATUS_FOLLOW_UP => 'll-follow_up',
+        self::STATUS_ON_HOLD => 'll-on_hold',
+        self::STATUS_SOLD => 'll-sold',
+        self::STATUS_TRASH => 'll-trash',
+        self::STATUS_BOOKED => 'll-booked',
+        self::STATUS_SNOOZE => 'll-snooze',
     ];
-
     public CONST
         CABIN_ECONOMY = 'E',
         CABIN_BUSINESS = 'B',
         CABIN_FIRST = 'F',
         CABIN_PREMIUM = 'P';
-
     public CONST CABIN_LIST = [
         self::CABIN_ECONOMY => 'Economy',
         self::CABIN_PREMIUM => 'Premium eco',
         self::CABIN_BUSINESS => 'Business',
         self::CABIN_FIRST => 'First',
     ];
-
     public CONST
         DIV_GRID_WITH_OUT_EMAIL = 1,
         DIV_GRID_WITH_EMAIL = 2,
         DIV_GRID_SEND_QUOTES = 3,
         DIV_GRID_IN_SNOOZE = 4;
-
     public CONST SCENARIO_API = 'scenario_api';
-
-    public function init()
-    {
-        parent::init();
-
-        $this->additionalInformationForm = new LeadAdditionalInformation();
-    }
+    public $additionalInformationForm;
 
     public static function getDivs($div = null)
     {
@@ -251,26 +234,122 @@ class Lead extends ActiveRecord
                 break;
         }
 
+        $selected = [
+            Lead::tableName() . '.id', Lead::tableName() . '.bo_flight_id',
+            Lead::tableName() . '.adults', Lead::tableName() . '.children',
+            Lead::tableName() . '.infants', Lead::tableName() . '.cabin',
+            Lead::tableName() . '.status', Lead::tableName() . '.employee_id',
+            Lead::tableName() . '.rating', Lead::tableName() . '.source_id',
+            Lead::tableName() . '.additional_information', Source::tableName() . '.name',
+            LeadFlightSegment::tableName() . '.destination', Employee::tableName() . '.username',
+            LeadFlightSegment::tableName() . '.departure', Lead::tableName() . '.updated',
+            Lead::tableName() . '.created', Client::tableName() . '.first_name', Note::tableName() . '.created AS note_created',
+            Airport::tableName() . '.city', Reason::tableName() . '.reason', Lead::tableName() . '.snooze_for',
+            'g_ce.emails', 'g_cp.phones', 'all_q.send_q', 'all_q.not_send_q', 'g_detail_lfs.flight_detail'
+        ];
 
-        $query = self::find()
-            ->where(['IN', self::getTableSchema()->fullName . '.status', $status])
-            ->andWhere(['IN', self::getTableSchema()->fullName . '.project_id', $projectIds]);
+        $query = new Query();
+        $query->from(Lead::tableName())
+            ->innerJoin(Source::tableName(), Source::tableName() . '.id = ' . Lead::tableName() . '.source_id')
+            ->innerJoin(LeadFlightSegment::tableName(), LeadFlightSegment::tableName() . '.lead_id = ' . Lead::tableName() . '.id')
+            ->innerJoin('(' . (new Query)
+                    ->select(['lead_id', 'MIN(id) as first_fs'])
+                    ->from(LeadFlightSegment::tableName())
+                    ->groupBy('lead_id')
+                    ->createCommand()->rawSql . ') as g_lfs',
+                'g_lfs.lead_id = ' . LeadFlightSegment::tableName() . '.lead_id AND g_lfs.first_fs = ' . LeadFlightSegment::tableName() . '.id'
+            )
+            ->leftJoin(Airport::tableName(), Airport::tableName() . '.iata = ' . LeadFlightSegment::tableName() . '.destination')
+            ->leftJoin('(' . (new Query)
+                    ->select(['lead_id', 'MAX(id) as last_reason'])
+                    ->from(Reason::tableName())
+                    ->groupBy('lead_id')
+                    ->createCommand()->rawSql . ') as g_reason',
+                'g_reason.lead_id = ' . Lead::tableName() . '.id'
+            )
+            ->leftJoin(Reason::tableName(), Reason::tableName() . '.id = g_reason.last_reason')
+            ->leftJoin('(' . (new Query)
+                    ->select(['lead_id', 'MAX(id) as last_note'])
+                    ->from(Note::tableName())
+                    ->groupBy('lead_id')
+                    ->createCommand()->rawSql . ') as g_note',
+                'g_note.lead_id = ' . Lead::tableName() . '.id'
+            )
+            ->leftJoin(Note::tableName(), Note::tableName() . '.id = g_note.last_note')
+            ->innerJoin('(' . (new Query)
+                    ->select(['lead_id', 'GROUP_CONCAT(CONCAT(departure, \' \', origin, \'-\', destination) SEPARATOR \'<br>\') AS flight_detail'])
+                    ->from(LeadFlightSegment::tableName())
+                    ->groupBy('lead_id')
+                    ->createCommand()->rawSql . ') as g_detail_lfs',
+                'g_detail_lfs.lead_id = ' . Lead::tableName() . '.id'
+            )
+            ->innerJoin(Client::tableName(), Client::tableName() . '.id = ' . Lead::tableName() . '.client_id')
+            ->leftJoin('(' . (new Query)
+                    ->select(['GROUP_CONCAT(email SEPARATOR \'<br>\') AS emails', 'client_id'])
+                    ->from(ClientEmail::tableName())
+                    ->groupBy('client_id')
+                    ->createCommand()->rawSql . ') as g_ce',
+                'g_ce.client_id = ' . Client::tableName() . '.id'
+            )
+            ->leftJoin('(' . (new Query)
+                    ->select(['GROUP_CONCAT(phone SEPARATOR \'<br>\') AS phones', 'client_id'])
+                    ->from(ClientPhone::tableName())
+                    ->groupBy('client_id')
+                    ->createCommand()->rawSql . ') as g_cp',
+                'g_cp.client_id = ' . Client::tableName() . '.id'
+            )
+            ->leftJoin('(' . (new Query)
+                    ->select([
+                        'lead_id',
+                        'SUM(CASE WHEN status IN (2, 4, 5) THEN 1 ELSE 0 END) AS send_q',
+                        'SUM(CASE WHEN status NOT IN (2, 4, 5) THEN 1 ELSE 0 END) AS not_send_q',
+                    ])
+                    ->from(Quote::tableName())
+                    ->groupBy('lead_id')
+                    ->createCommand()->rawSql . ') as all_q',
+                'all_q.lead_id = ' . Lead::tableName() . '.id'
+            )
+            ->leftJoin(Employee::tableName(), Employee::tableName() . '.id = ' . Lead::tableName() . '.employee_id');
+
+        if (in_array($queue, ['sold', 'booked'])) {
+            $selected[] = Quote::tableName() . '.reservation_dump';
+            $selected[] = 'g_qp.selling';
+            $selected[] = 'g_qp.mark_up';
+
+            $query->leftJoin(Quote::tableName(), Quote::tableName() . '.lead_id = ' . Lead::tableName() . '.id AND ' . Quote::tableName() . '.status = :status', [
+                ':status' => Quote::STATUS_APPLIED
+            ]);
+            $query->leftJoin('(' . (new Query)
+                    ->select(['quote_id', 'SUM(selling) as selling', 'SUM(mark_up + extra_mark_up) as mark_up'])
+                    ->from(QuotePrice::tableName())
+                    ->groupBy('quote_id')
+                    ->createCommand()->rawSql . ') as g_qp',
+                'g_qp.quote_id = ' . Quote::tableName() . '.id'
+            );
+        }
+
+        $query->select($selected);
+
+        $query->where(['IN', Lead::tableName() . '.status', $status])
+            ->andWhere(['IN', Lead::tableName() . '.project_id', $projectIds]);
+
 
         if (Yii::$app->user->identity->role == 'agent' && in_array($queue, ['sold'])) {
             $query->andWhere([
-                'employee_id' => Yii::$app->user->identity->getId()
+                Lead::tableName() . '.employee_id' => Yii::$app->user->identity->getId()
             ]);
         }
 
         if ($searchModel !== null && in_array($queue, ['processing-all', 'trash'])) {
-            $query->andFilterWhere([self::getTableSchema()->fullName . '.employee_id' => $searchModel->employee_id]);
+            $query->andFilterWhere([
+                Lead::tableName() . '.employee_id' => $searchModel->employee_id
+            ]);
         }
 
         if ($divGridBy !== null) {
             switch ($divGridBy) {
                 case self::DIV_GRID_WITH_OUT_EMAIL:
-                    $query->join('LEFT JOIN', ClientEmail::tableName(), ClientEmail::tableName() . '.client_id = ' . Lead::tableName() . '.client_id');
-                    $query->andWhere(ClientEmail::tableName() . '.id IS NULL');
+                    $query->andWhere('g_ce.emails IS NULL');
                     break;
                 case self::DIV_GRID_WITH_EMAIL:
                     $subQuery = new Query();
@@ -279,8 +358,8 @@ class Lead extends ActiveRecord
                         Quote::STATUS_OPENED,
                         Quote::STATUS_APPLIED
                     ]]);
-                    $query->join('INNER JOIN', ClientEmail::tableName(), ClientEmail::tableName() . '.client_id = ' . Lead::tableName() . '.client_id');
-                    $query->andWhere(['NOT IN', self::getTableSchema()->fullName . '.id', ArrayHelper::map($subQuery->all(), 'lead_id', 'lead_id')]);
+                    $query->andWhere('g_ce.emails IS NOT NULL');
+                    $query->andWhere(['NOT IN', Lead::tableName() . '.id', ArrayHelper::map($subQuery->all(), 'lead_id', 'lead_id')]);
                     break;
                 case self::DIV_GRID_SEND_QUOTES:
                     $subQuery = new Query();
@@ -289,7 +368,7 @@ class Lead extends ActiveRecord
                         Quote::STATUS_OPENED,
                         Quote::STATUS_APPLIED
                     ]]);
-                    $query->andWhere(['IN', self::getTableSchema()->fullName . '.id', ArrayHelper::map($subQuery->all(), 'lead_id', 'lead_id')]);
+                    $query->andWhere(['IN', Lead::tableName() . '.id', ArrayHelper::map($subQuery->all(), 'lead_id', 'lead_id')]);
                     break;
             }
         }
@@ -297,19 +376,23 @@ class Lead extends ActiveRecord
         if (in_array($queue, ['follow-up'])) {
             $showAll = Yii::$app->request->cookies->getValue(self::getCookiesKey(), true);
             if (!$showAll) {
-                $query->andWhere(['NOT IN', self::getTableSchema()->fullName . '.id', self::unprocessedByAgentInFollowUp()]);
+                $query->andWhere([
+                    'NOT IN', Lead::tableName() . '.id', self::unprocessedByAgentInFollowUp()
+                ]);
             }
         }
 
         if (in_array($queue, ['processing'])) {
             $query->andWhere([
-                'employee_id' => Yii::$app->user->identity->getId()
+                Lead::tableName() . '.employee_id' => Yii::$app->user->identity->getId()
             ]);
         }
 
         $query->distinct = true;
-        /*var_dump($query->createCommand()->rawSql);
-        echo '<br><br><br>';*/
+
+        //var_dump($query->createCommand()->rawSql);
+        //var_dump($query->count());
+        //die;
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
             'pagination' => [
@@ -326,10 +409,6 @@ class Lead extends ActiveRecord
                 'desc' => [self::getTableSchema()->fullName . '.updated' => SORT_DESC],
             ];
         }
-        $dataProvider->sort->attributes['last_activity'] = [
-            'asc' => ['notes.created' => SORT_DESC],
-            'desc' => ['notes.created' => SORT_ASC],
-        ];
         $dataProvider->sort->attributes['pending'] = [
             'asc' => [Lead::tableName() . '.created' => SORT_ASC],
             'desc' => [Lead::tableName() . '.created' => SORT_DESC],
@@ -338,9 +417,9 @@ class Lead extends ActiveRecord
             'asc' => [Lead::tableName() . '.rating' => SORT_ASC],
             'desc' => [Lead::tableName() . '.rating' => SORT_DESC],
         ];
-        $dataProvider->sort->attributes['sub_source_id'] = [
-            'asc' => [Lead::tableName() . '.sub_source_id' => SORT_DESC],
-            'desc' => [Lead::tableName() . '.sub_source_id' => SORT_ASC],
+        $dataProvider->sort->attributes['source_id'] = [
+            'asc' => [Lead::tableName() . '.source_id' => SORT_DESC],
+            'desc' => [Lead::tableName() . '.source_id' => SORT_ASC],
         ];
 
         return $dataProvider;
@@ -372,6 +451,63 @@ class Lead extends ActiveRecord
         }
 
         return isset($mapping[$cabin]) ? $mapping[$cabin] : $cabin;
+    }
+
+    public static function getRating($id, $rating)
+    {
+        $checked1 = $checked2 = $checked3 = '';
+        if ($rating == 3) {
+            $checked3 = 'checked';
+        } elseif ($rating == 2) {
+            $checked2 = 'checked';
+        } elseif ($rating == 1) {
+            $checked1 = 'checked';
+        }
+
+        return '<fieldset class="rate-input-group">
+                    <input type="radio" name="rate-' . $id . '" id="rate-3-' . $id . '" value="3" ' . $checked3 . ' disabled>
+                    <label for="rate-3-' . $id . '"></label>
+                
+                    <input type="radio" name="rate-' . $id . '" id="rate-2-' . $id . '" value="2" ' . $checked2 . ' disabled>
+                    <label for="rate-2-' . $id . '"></label>
+                
+                    <input type="radio" name="rate-' . $id . '" id="rate-1-' . $id . '" value="1" ' . $checked1 . ' disabled>
+                    <label for="rate-1-' . $id . '"></label>
+                </fieldset>';
+    }
+
+    public static function getSnoozeCountdown($id, $snooze_for)
+    {
+        if (!empty($snooze_for)) {
+            return self::getCountdownTimer(new \DateTime($snooze_for), sprintf('snooze-countdown-%d', $id));
+        }
+        return '-';
+    }
+
+    private function getCountdownTimer(\DateTime $expired, $spanId)
+    {
+        return '<span id="' . $spanId . '" data-toggle="tooltip" data-placement="right" data-original-title="' . $expired->format('Y-m-d H:i') . '"></span>
+                <script type="text/javascript">
+                    var expired = moment.tz("' . $expired->format('Y-m-d H:i:s') . '", "UTC");
+                    $("#' . $spanId . '").countdown(expired.toDate(), function(event) {
+                        if (event.elapsed == false) {
+                            $(this).text(
+                                event.strftime(\'%Dd %Hh %Mm\')
+                            );
+                        } else {
+                            $(this).text(
+                                event.strftime(\'On Wake\')
+                            ).addClass(\'text-success\');
+                        }
+                    });
+                </script>';
+    }
+
+    public function init()
+    {
+        parent::init();
+
+        $this->additionalInformationForm = new LeadAdditionalInformation();
     }
 
     /**
@@ -454,61 +590,14 @@ class Lead extends ActiveRecord
         return LeadFlow::findAll(['lead_id' => $this->id]);
     }
 
-    public function getSnoozeCountdown()
-    {
-        if (!empty($this->snooze_for)) {
-            return $this->getCountdownTimer(new \DateTime($this->snooze_for), sprintf('snooze-countdown-%d', $this->id));
-        }
-        return '-';
-    }
-
-    private function getCountdownTimer(\DateTime $expired, $spanId)
-    {
-        return '<span id="' . $spanId . '" data-toggle="tooltip" data-placement="right" data-original-title="' . $expired->format('Y-m-d H:i') . '"></span>
-                <script type="text/javascript">
-                    var expired = moment.tz("' . $expired->format('Y-m-d H:i:s') . '", "UTC");
-                    $("#' . $spanId . '").countdown(expired.toDate(), function(event) {
-                        if (event.elapsed == false) {
-                            $(this).text(
-                                event.strftime(\'%Dd %Hh %Mm\')
-                            );
-                        } else {
-                            $(this).text(
-                                event.strftime(\'On Wake\')
-                            ).addClass(\'text-success\');
-                        }
-                    });
-                </script>';
-    }
-
-    public function getRating()
-    {
-        $checked1 = $checked2 = $checked3 = '';
-        if ($this->rating == 3) {
-            $checked3 = 'checked';
-        } elseif ($this->rating == 2) {
-            $checked2 = 'checked';
-        } elseif ($this->rating == 1) {
-            $checked1 = 'checked';
-        }
-
-        return '<fieldset class="rate-input-group">
-                    <input type="radio" name="rate-' . $this->id . '" id="rate-3-' . $this->id . '" value="3" ' . $checked3 . ' disabled>
-                    <label for="rate-3-' . $this->id . '"></label>
-                
-                    <input type="radio" name="rate-' . $this->id . '" id="rate-2-' . $this->id . '" value="2" ' . $checked2 . ' disabled>
-                    <label for="rate-2-' . $this->id . '"></label>
-                
-                    <input type="radio" name="rate-' . $this->id . '" id="rate-1-' . $this->id . '" value="1" ' . $checked1 . ' disabled>
-                    <label for="rate-1-' . $this->id . '"></label>
-                </fieldset>';
-    }
-
-    public function getPendingAfterCreate()
+    public function getPendingAfterCreate($created = null)
     {
         $now = new \DateTime();
-        $created = new \DateTime($this->created);
-        return $this->diffFormat($now->diff($created));
+        if (empty($created)) {
+            $created = $this->created;
+        }
+        $created = new \DateTime($created);
+        return self::diffFormat($now->diff($created));
     }
 
     protected function diffFormat(\DateInterval $interval)
@@ -531,11 +620,14 @@ class Lead extends ActiveRecord
         return implode(' ', $return);
     }
 
-    public function getPendingInLastStatus()
+    public function getPendingInLastStatus($updated)
     {
         $now = new \DateTime();
-        $updated = new \DateTime($this->updated);
-        return $this->diffFormat($now->diff($updated));
+        if (empty($updated)) {
+            $updated = $this->updated;
+        }
+        $updated = new \DateTime($updated);
+        return self::diffFormat($now->diff($updated));
     }
 
     public function getStatusLabel($status = null)
@@ -580,19 +672,25 @@ class Lead extends ActiveRecord
      * @param bool $label
      * @return string
      */
-    public function getStatusName(bool $label = false) : string
+    public function getStatusName(bool $label = false): string
     {
         $statusName = self::STATUS_LIST[$this->status] ?? '-';
 
-        if($label) {
+        if ($label) {
             $class = $this->getStatusLabelClass();
-            $statusName = '<span class="label '.$class.'" style="font-size: 13px">' . Html::encode($statusName) . '</span>';
+            $statusName = '<span class="label ' . $class . '" style="font-size: 13px">' . Html::encode($statusName) . '</span>';
         }
 
         return $statusName;
     }
 
-
+    /**
+     * @return string
+     */
+    public function getStatusLabelClass(): string
+    {
+        return self::STATUS_CLASS_LIST[$this->status] ?? 'label-default';
+    }
 
     public function afterSave($insert, $changedAttributes)
     {
@@ -700,14 +798,19 @@ class Lead extends ActiveRecord
             ->orderBy('id DESC')->all();
     }
 
-    public function getClientTime()
+    public function getClientTime($id = null)
     {
+        if (!empty($id)) {
+            $model = self::findOne(['id' => $id]);
+        } else {
+            $model = self::findOne(['id' => $this->id]);
+        }
         $offset = '';
-        $spanId = sprintf('sale-client-time-%d', $this->id);
-        if (!empty($this->offset_gmt)) {
-            $offset = $this->offset_gmt;
-        } elseif (count($this->leadFlightSegments)) {
-            $firstSegment = $this->leadFlightSegments[0];
+        $spanId = sprintf('sale-client-time-%d', $model->id);
+        if (!empty($model->offset_gmt)) {
+            $offset = $model->offset_gmt;
+        } elseif (count($model->leadFlightSegments)) {
+            $firstSegment = $model->leadFlightSegments[0];
             $airport = Airport::findIdentity($firstSegment->origin);
             if ($airport !== null && !empty($airport->dst)) {
                 $offset = $airport->dst;
@@ -716,8 +819,8 @@ class Lead extends ActiveRecord
 
         if (!empty($offset)) {
             $content = '<span class="sale-client-time" id="' . $spanId . '" data-offset="' . $offset . '"></span>';
-            if (!empty($this->request_ip_detail)) {
-                $ipData = @json_decode($this->request_ip_detail, true);
+            if (!empty($model->request_ip_detail)) {
+                $ipData = @json_decode($model->request_ip_detail, true);
                 if (isset($ipData['country_code'])) {
                     $content .= '&nbsp;' . Html::tag('i', '', [
                             'class' => 'flag flag__' . strtolower($ipData['country_code']),
@@ -780,23 +883,17 @@ class Lead extends ActiveRecord
             ->orderBy('id desc')->one();
     }
 
-    public function getLastActivity()
+    public static function getLastActivity($note_created, $updated)
     {
-        /**
-         * @var $note Note
-         */
-        $note = Note::find()
-            ->where(['lead_id' => $this->id])
-            ->orderBy('id desc')->one();
         $now = new \DateTime();
-        $lastUpdate = new \DateTime($this->updated);
-        if ($note !== null) {
-            $created = new \DateTime($note->created);
+        $lastUpdate = new \DateTime($updated);
+        if (!empty($note_created)) {
+            $created = new \DateTime($note_created);
             return ($lastUpdate->getTimestamp() > $created->getTimestamp())
-                ? $this->diffFormat($now->diff($lastUpdate))
-                : $this->diffFormat($now->diff($created));
+                ? self::diffFormat($now->diff($lastUpdate))
+                : self::diffFormat($now->diff($created));
         } else {
-            return $this->diffFormat($now->diff($lastUpdate));
+            return self::diffFormat($now->diff($lastUpdate));
         }
     }
 
@@ -809,14 +906,6 @@ class Lead extends ActiveRecord
             'lead_id' => $this->id,
             'status' => Quote::STATUS_APPLIED
         ]);
-    }
-
-    /**
-     * @return Quote[]
-     */
-    public function getQuotes()
-    {
-        return Quote::findAll(['lead_id' => $this->id]);
     }
 
     public function getQuotesCount(): int
@@ -1265,11 +1354,11 @@ class Lead extends ActiveRecord
     }
 
     /**
-     * @return string
+     * @return Quote[]
      */
-    public function getStatusLabelClass(): string
+    public function getQuotes()
     {
-        return self::STATUS_CLASS_LIST[$this->status] ?? 'label-default';
+        return Quote::findAll(['lead_id' => $this->id]);
     }
 
 }
