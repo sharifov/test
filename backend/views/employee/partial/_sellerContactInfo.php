@@ -104,14 +104,16 @@ $this->registerJs($js);
         </div>
     </div>
 <?php endforeach; ?>
-<div class="form-group">
-    <?= Html::button('Save', [
-        'class' => 'btn btn-primary',
-        'id' => 'seller-contact-info-btn',
-        'data-url' => sprintf('%s/admin/employee/seller-contact-info?employeeId=%d',
-            Yii::$app->urlManager->getHostInfo(),
-            $model->id
-        )
-    ]) ?>
-</div>
+<?php if (!empty($projectIds)) : ?>
+    <div class="form-group">
+        <?= Html::button('Save', [
+            'class' => 'btn btn-primary',
+            'id' => 'seller-contact-info-btn',
+            'data-url' => sprintf('%s/admin/employee/seller-contact-info?employeeId=%d',
+                Yii::$app->urlManager->getHostInfo(),
+                $model->id
+            )
+        ]) ?>
+    </div>
+<?php endif; ?>
 
