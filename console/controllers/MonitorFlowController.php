@@ -4,6 +4,7 @@ namespace console\controllers;
 
 use common\models\Lead;
 use common\models\LeadLog;
+use common\models\Note;
 use common\models\Quote;
 use common\models\Reason;
 use yii\console\Controller;
@@ -70,9 +71,10 @@ class MonitorFlowController extends Controller
 
         foreach ($objects as $object) {
             /**
-             * @var $lastLog LeadLog
+             * @var $lastLog Note
              */
-            $lastLog = $object->lastLog();
+            $lastLog = Note::find()->where(['lead_id' => $object->id])
+            ->orderBy('id DESC')->one();
             if ($lastLog === null) {
                 $date = $object->updated;
             } else {
@@ -80,11 +82,18 @@ class MonitorFlowController extends Controller
             }
 
             $emails = $object->client->clientEmails;
+            if ($test) {
+                echo 'Lead date: '. $date . '. Now date: '.date('Y-m-d H:i:s') . PHP_EOL;
+            }
             if (!empty($emails)) {
                 if ($test) {
                     echo $object->id . ' - status: ' . $object->status . ' Exist email' . PHP_EOL;
                 }
                 continue;
+            } else {
+                if ($test) {
+                    echo $object->id . ' - status: ' . $object->status . ' NO Exist email' . PHP_EOL;
+                }
             }
 
             $diff = strtotime(sprintf('%s + 48 hours', $date));
@@ -92,10 +101,13 @@ class MonitorFlowController extends Controller
             if ($diff <= time()) {
                 $object->status = $object::STATUS_FOLLOW_UP;
                 $object->save();
+                if ($test) {
+                    var_dump($object->getErrors());
+                }
                 $reason = new Reason();
 
                 if ($test) {
-                    echo $object->flight_request_id . ' - status: ' . $object->status . PHP_EOL;
+                    echo $object->id . ' - status: ' . $object->status . PHP_EOL;
                 }
                 $reason->reason = sprintf('No activity for more than 48 hours');
                 $reason->employee_id = null;
