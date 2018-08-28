@@ -33,7 +33,7 @@ class GTTGlobal
     {
         $returned = '';
         if ($lead->trip_type == Lead::TRIP_TYPE_ROUND_TRIP) {
-            $returned = date('m/d/Y', strtotime($lead->leadFlightSegments[0]->departure));
+            $returned = date('m/d/Y', strtotime($lead->leadFlightSegments[1]->departure));
         }
 
         $fields = http_build_query([

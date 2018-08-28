@@ -64,10 +64,8 @@ class LeadFlightSegment extends \yii\db\ActiveRecord
     }
 
 
-    public function afterValidate()
+    public function beforeValidate()
     {
-        parent::afterValidate();
-
         $this->origin_label = trim($this->origin_label);
         if (!empty($this->origin_label)) {
             $regex = '/(.*)[(]+[A-Z]{3}+[)]$/';
@@ -113,6 +111,8 @@ class LeadFlightSegment extends \yii\db\ActiveRecord
                 ));
             }
         }
+
+        return parent::beforeValidate();
     }
 
     public function beforeSave($insert): bool
@@ -136,6 +136,25 @@ class LeadFlightSegment extends \yii\db\ActiveRecord
     public function afterSave($insert, $changedAttributes)
     {
         parent::afterSave($insert, $changedAttributes);
+
+        if (!$insert) {
+            $resetCallExpert = false;
+            if (isset($changedAttributes['origin']) && $changedAttributes['origin'] != $this->origin) {
+                $resetCallExpert = true;
+            }
+            if (isset($changedAttributes['destination']) && $changedAttributes['destination'] != $this->destination) {
+                $resetCallExpert = true;
+            }
+            if (isset($changedAttributes['departure']) && $changedAttributes['departure'] != $this->departure) {
+                $resetCallExpert = true;
+            }
+            if ($resetCallExpert) {
+                Yii::$app->db->createCommand('UPDATE ' . Lead::tableName() . ' SET called_expert = :called_expert WHERE id = :id', [
+                    ':called_expert' => false,
+                    ':id' => $this->lead_id
+                ])->execute();
+            }
+        }
 
         //Add logs after changed model attributes
         $leadLog = new LeadLog((new LeadLogMessage()));

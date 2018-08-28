@@ -330,12 +330,19 @@ class QuoteController extends ApiBaseController
                 }
 
                 if (!$model->hasErrors()) {
+                    if (!empty($leadAttributes)) {
+                        $model->lead->attributes = $leadAttributes;
+                        if (!$model->lead->save()) {
+                            $response['errors'][] = $model->lead->getErrors();
+                        }
+                    }
                     if ($model->status == Quote::STATUS_APPLIED) {
                         $model->lead->status = Lead::STATUS_BOOKED;
-                        if (!empty($leadAttributes) && isset($leadAttributes['bo_flight_id'])) {
+                        $model->lead->save();
+                        /*if (!empty($leadAttributes) && isset($leadAttributes['bo_flight_id'])) {
                             $model->lead->bo_flight_id = $leadAttributes['bo_flight_id'];
                         }
-                        $model->lead->save();
+                        $model->lead->save();*/
                     }
                     $response['status'] = 'Success';
                     $transaction->commit();
