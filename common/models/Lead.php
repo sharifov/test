@@ -702,7 +702,7 @@ class Lead extends ActiveRecord
             try {
                 //echo Yii::$app->params['checkIpURL']; exit;
 
-                $jsonData = file_get_contents(Yii::$app->params['checkIpURL'] . $this->request_ip, false, $ctx);
+                $jsonData = [];//file_get_contents(Yii::$app->params['checkIpURL'] . $this->request_ip, false, $ctx);
 
 
             } catch (\Throwable $throwable) {
