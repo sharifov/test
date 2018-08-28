@@ -161,7 +161,7 @@ use yii\widgets\ActiveForm;
 
             <div class="row">
                 <div class="col-md-6">
-
+                    <?php  echo $form->field($model, 'bo_flight_id')->label('BO Sale ID') ?>
                 </div>
                 <div class="col-md-6">
                     <?php  echo $form->field($model, 'request_ip') ?>

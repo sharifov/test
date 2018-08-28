@@ -56,8 +56,6 @@ use frontend\models\LeadForm;
                     //['class' => 'yii\grid\SerialColumn'],
                     'id',
                     'first_name',
-                    'middle_name',
-                    'last_name',
                     [
                         'header' => 'Phones',
                         'attribute' => 'client_phone',

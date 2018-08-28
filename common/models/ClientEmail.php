@@ -66,6 +66,11 @@ class ClientEmail extends \yii\db\ActiveRecord
     public function beforeValidate()
     {
         $this->updated = date('Y-m-d H:i:s');
+
+        if (strpos($this->email, 'wowfare') !== false) {
+            $this->addError('email', 'Email is invalid!');
+        }
+
         return parent::beforeValidate();
     }
 }

@@ -82,6 +82,7 @@ class Lead extends ActiveRecord
     public CONST STATUS_LIST = [
         self::STATUS_PENDING => 'Pending',
         self::STATUS_PROCESSING => 'Processing',
+        self::STATUS_REJECT => 'Reject',
         self::STATUS_FOLLOW_UP => 'Follow Up',
         self::STATUS_ON_HOLD => 'Hold On',
         self::STATUS_SOLD => 'Sold',
@@ -326,8 +327,8 @@ class Lead extends ActiveRecord
             ];
         }
         $dataProvider->sort->attributes['last_activity'] = [
-            'asc' => ['notes_group.created' => SORT_DESC],
-            'desc' => ['notes_group.created' => SORT_ASC],
+            'asc' => ['notes.created' => SORT_DESC],
+            'desc' => ['notes.created' => SORT_ASC],
         ];
         $dataProvider->sort->attributes['pending'] = [
             'asc' => [Lead::tableName() . '.created' => SORT_ASC],
@@ -597,7 +598,7 @@ class Lead extends ActiveRecord
     {
         parent::afterSave($insert, $changedAttributes);
 
-        /*if (empty($this->offset_gmt) && !empty($this->request_ip)) {
+        if (empty($this->offset_gmt) && !empty($this->request_ip)) {
 
             $ctx = stream_context_create(['http' =>
                 ['timeout' => 5]  //Seconds
@@ -627,7 +628,7 @@ class Lead extends ActiveRecord
                     $this->update(false, ['offset_gmt', 'request_ip_detail']);
                 }
             }
-        }*/
+        }
 
         if ($insert) {
             LeadFlow::addStateFlow($this);
@@ -644,6 +645,7 @@ class Lead extends ActiveRecord
                 }
             }
             $flgUnActiveRequest = false;
+            $resetCallExpert = false;
             if (isset($changedAttributes['adults']) && $changedAttributes['adults'] != $this->adults) {
                 $flgUnActiveRequest = true;
             }
@@ -653,6 +655,20 @@ class Lead extends ActiveRecord
             if (isset($changedAttributes['infants']) && $changedAttributes['infants'] != $this->infants) {
                 $flgUnActiveRequest = true;
             }
+            if (isset($changedAttributes['cabin']) && $changedAttributes['cabin'] != $this->cabin) {
+                $resetCallExpert = true;
+            }
+            if (isset($changedAttributes['notes_for_experts']) && $changedAttributes['notes_for_experts'] != $this->notes_for_experts) {
+                $resetCallExpert = true;
+            }
+
+            if ($resetCallExpert || $flgUnActiveRequest) {
+                Yii::$app->db->createCommand('UPDATE ' . Lead::tableName() . ' SET called_expert = :called_expert WHERE id = :id', [
+                    ':called_expert' => false,
+                    ':id' => $this->id
+                ])->execute();
+            }
+
             if ($flgUnActiveRequest) {
                 foreach ($this->getAltQuotes() as $quote) {
                     if ($quote->status != $quote::STATUS_APPLIED) {
@@ -700,29 +716,14 @@ class Lead extends ActiveRecord
 
         if (!empty($offset)) {
             $content = '<span class="sale-client-time" id="' . $spanId . '" data-offset="' . $offset . '"></span>';
-            if (!empty($this->leads[0]->country_code)) {
-                $info = 'No info!';
-                $countryCode = 'N/A';
-                if (!empty($this->request_ip)) {
-                    if (!empty($this->request_ip_detail)) {
-                        $details = json_decode($this->request_ip_detail, true);
-                        $countryCode = isset($details['country_code'])
-                            ? $details['country_code']
-                            : $countryCode;
-                    }
-                    $info = sprintf('Country: <strong>%s</strong><br>IP: <strong>%s</strong>',
-                        strtoupper($countryCode),
-                        $this->request_ip);
+            if (!empty($this->request_ip_detail)) {
+                $ipData = @json_decode($this->request_ip_detail, true);
+                if (isset($ipData['country_code'])) {
+                    $content .= '&nbsp;' . Html::tag('i', '', [
+                            'class' => 'flag flag__' . strtolower($ipData['country_code']),
+                            'style' => 'vertical-align: bottom;'
+                        ]);
                 }
-                $content .= '&nbsp;' . Html::tag('i', '', [
-                        'class' => 'flag flag__' . strtolower($countryCode),
-                        'style' => 'vertical-align: bottom;',
-                        'title' => '',
-                        'data-toggle' => 'tooltip',
-                        'data-placement' => 'right',
-                        'data-original-title' => $info,
-                        'data-html' => 'true'
-                    ]);
             }
             return $content;
         }
@@ -760,11 +761,23 @@ class Lead extends ActiveRecord
     }
 
     /**
+     * @return array|null|\yii\db\ActiveRecord
+     */
+    public function lastLog()
+    {
+        return LeadLog::find()->where([
+            'lead_id' => $this->id,
+        ])->orderBy('id DESC')->one();
+    }
+
+    /**
      * @return Reason
      */
     public function lastReason()
     {
-        return Reason::find()->orderBy('id desc')->one();
+        return Reason::find()
+            ->where(['lead_id' => $this->id])
+            ->orderBy('id desc')->one();
     }
 
     public function getLastActivity()
@@ -772,7 +785,9 @@ class Lead extends ActiveRecord
         /**
          * @var $note Note
          */
-        $note = Note::find()->orderBy('id desc')->one();
+        $note = Note::find()
+            ->where(['lead_id' => $this->id])
+            ->orderBy('id desc')->one();
         $now = new \DateTime();
         $lastUpdate = new \DateTime($this->updated);
         if ($note !== null) {
@@ -1025,7 +1040,12 @@ class Lead extends ActiveRecord
         ]);
 
         $errors = [];
-        $isSend = EmailService::sendByAWS($data['emails'], $this->project, $credential, $subject, $body, $errors);
+        $bcc = [
+            trim($sellerContactInfo->email_user),
+            'damian.t@wowfare.com',
+            'andrew.t@wowfare.com'
+        ];
+        $isSend = EmailService::sendByAWS($data['emails'], $this->project, $credential, $subject, $body, $errors, $bcc);
         $message = ($isSend)
             ? sprintf('Sending email - \'Tickets\' succeeded! <br/>Emails: %s',
                 implode(', ', $data['emails'])
@@ -1060,12 +1080,14 @@ class Lead extends ActiveRecord
             'errors' => []
         ];
         $models = [];
+        $i = 1;
         foreach ($quotes as $quote) {
             $model = Quote::findOne([
                 'uid' => $quote
             ]);
             if ($model !== null) {
-                $models[] = $model;
+                $models[$i] = $model;
+                $i++;
             }
         }
 
@@ -1143,12 +1165,17 @@ class Lead extends ActiveRecord
         ]);
 
         $credential = [
-            'email' => $sellerContactInfo->email_user,
+            'email' => trim($sellerContactInfo->email_user),
             'password' => $sellerContactInfo->email_pass,
         ];
 
         $errors = [];
-        $isSend = EmailService::sendByAWS($email, $this->project, $credential, $subject, $body, $errors);
+        $bcc = [
+            trim($sellerContactInfo->email_user),
+            'damian.t@wowfare.com',
+            'andrew.t@wowfare.com'
+        ];
+        $isSend = EmailService::sendByAWS($email, $this->project, $credential, $subject, $body, $errors, $bcc);
         $message = ($isSend)
             ? sprintf('Sending email - \'Offer\' succeeded! <br/>Emails: %s <br/>Quotes: %s',
                 implode(', ', [$email]),
@@ -1207,7 +1234,9 @@ class Lead extends ActiveRecord
             'market_price' => !empty($this->leadPreferences)
                 ? $this->leadPreferences->market_price : '',
             'itinerary' => [],
-            'agent_name' => $this->employee->username
+            'agent_name' => ($this->employee !== null)
+                ? $this->employee->username
+                : 'N/A'
         ];
 
         $itinerary = [];

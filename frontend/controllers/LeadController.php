@@ -56,7 +56,7 @@ class LeadController extends DefaultController
                         'actions' => [
                             'create', 'add-comment', 'change-state', 'unassign', 'take',
                             'set-rating', 'add-note', 'unprocessed', 'call-expert', 'send-email',
-                            'check-updates', 'flow-transition'
+                            'check-updates', 'flow-transition', 'get-user-actions'
                         ],
                         'allow' => true,
                         'roles' => ['agent'],
@@ -354,6 +354,13 @@ class LeadController extends DefaultController
                         'type' => 'processing',
                         'id' => $model->id
                     ]);
+                } elseif ($reason->queue == 'reject') {
+                    $model->status = $model::STATUS_REJECT;
+                    $model->save();
+                    return $this->redirect([
+                        'queue',
+                        'type' => 'trash'
+                    ]);
                 } else {
                     $model->status = $model::STATUS_ON_HOLD;
                 }
@@ -608,6 +615,48 @@ class LeadController extends DefaultController
 
         return $this->render('lead', [
             'leadForm' => $leadForm
+        ]);
+    }
+
+    public function actionGetUserActions($id)
+    {
+        $lead = Lead::findOne([
+            'id' => $id
+        ]);
+
+        $activity = [];
+        $quoteId = '';
+
+        if ($lead === null) {
+            if (Yii::$app->request->isPost) {
+                $quoteId = Yii::$app->request->post('discountId', $lead->discount_id);
+            } else {
+                $quoteId = $lead->discount_id;
+            }
+        }
+
+        if (!empty($quoteId)) {
+            $url = $lead->project->link . '/api/user-action-list/' . intval($quoteId);
+            $ch = curl_init();
+            curl_setopt($ch, CURLOPT_VERBOSE, true);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_POST, true);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query(['apiKey' => $lead->project->api_key]));
+            curl_setopt($ch, CURLOPT_URL, $url);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/x-www-form-urlencoded']);
+            $result = curl_exec($ch);
+
+            $activity = json_decode($result);
+        }
+
+        if (Yii::$app->request->isPost) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            return $activity;
+        }
+        return $this->renderAjax('partial/_requestLog', [
+            'activity' => $activity,
+            'discountId' => $quoteId,
+            'lead' => $lead
         ]);
     }
 }

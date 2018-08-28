@@ -269,6 +269,9 @@ class QuoteController extends DefaultController
                 $quote = empty($attr['Quote']['id'])
                     ? new Quote()
                     : Quote::findOne(['id' => $attr['Quote']['id']]);
+                if ($quote->isNewRecord) {
+                    $quote->uid = uniqid();
+                }
                 $changedAttributes = $quote->attributes;
                 $changedAttributes['selling'] = ($quote->isNewRecord)
                     ? 0 : $quote->quotePrice()['selling'];
@@ -356,6 +359,7 @@ class QuoteController extends DefaultController
                     $prices = $currentQuote->cloneQuote($quote, $lead);
                 }
             }
+            $quote->employee_name = Yii::$app->user->identity->username;
             return $this->renderAjax('_quote', [
                 'lead' => $lead,
                 'quote' => $quote,

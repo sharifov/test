@@ -193,6 +193,7 @@ class LeadForm extends Model
             $leadModel->children = 0;
             $leadModel->infants = 0;
             $leadModel->uid = uniqid();
+            $leadModel->id = 0;
             $leadModel->status = Lead::STATUS_PENDING;
         }
         $this->_lead = $leadModel;

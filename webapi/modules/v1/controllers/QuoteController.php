@@ -2,6 +2,7 @@
 
 namespace webapi\modules\v1\controllers;
 
+use common\components\BackOffice;
 use common\models\EmployeeContactInfo;
 use common\models\Lead;
 use common\models\LeadLog;
@@ -285,76 +286,95 @@ class QuoteController extends ApiBaseController
         if (!$model) {
             throw new NotFoundHttpException('Not found Quote UID: ' . $quoteAttributes['uid'], 2);
         }
-        $changedAttributes = $model->attributes;
-        $changedAttributes['selling'] = $model->quotePrice()['selling'];
-        $selling = 0;
-
-        $leadAttributes = Yii::$app->request->post((new Lead())->formName());
 
         $response = [
             'status' => 'Failed',
             'errors' => []
         ];
 
-        $transaction = Yii::$app->db->beginTransaction();
-        try {
-            $model->attributes = $quoteAttributes;
-            $model->save();
+        if (isset($quoteAttributes['needSync']) && $quoteAttributes['needSync'] == true) {
+            $data = $model->lead->getLeadInformationForExpert();
+            $result = BackOffice::sendRequest('lead/update-lead', 'POST', json_encode($data));
+            if ($result['status'] == 'Success' && empty($result['errors'])) {
+                $response['status'] = 'Success';
+            } else {
+                $response['errors'] = $result['errors'];
+            }
+        } else {
 
-            $quotePricesAttributes = Yii::$app->request->post((new QuotePrice())->formName());
-            if (!empty($quotePricesAttributes)) {
-                foreach ($quotePricesAttributes as $quotePriceAttributes) {
-                    $quotePrice = QuotePrice::findOne([
-                        'uid' => $quotePriceAttributes['uid']
-                    ]);
-                    if ($quotePrice) {
-                        $quotePrice->attributes = $quotePriceAttributes;
-                        $selling += $quotePrice->selling;
-                        if (!$quotePrice->save()) {
-                            $response['errors'][] = $quotePrice->getErrors();
+            $changedAttributes = $model->attributes;
+            $changedAttributes['selling'] = $model->quotePrice()['selling'];
+            $selling = 0;
+
+            $leadAttributes = Yii::$app->request->post((new Lead())->formName());
+
+            $transaction = Yii::$app->db->beginTransaction();
+            try {
+                $model->attributes = $quoteAttributes;
+                $model->save();
+
+                $quotePricesAttributes = Yii::$app->request->post((new QuotePrice())->formName());
+                if (!empty($quotePricesAttributes)) {
+                    foreach ($quotePricesAttributes as $quotePriceAttributes) {
+                        $quotePrice = QuotePrice::findOne([
+                            'uid' => $quotePriceAttributes['uid']
+                        ]);
+                        if ($quotePrice) {
+                            $quotePrice->attributes = $quotePriceAttributes;
+                            $selling += $quotePrice->selling;
+                            if (!$quotePrice->save()) {
+                                $response['errors'][] = $quotePrice->getErrors();
+                            }
                         }
                     }
                 }
-            }
 
-            if (!$model->hasErrors()) {
-                if ($model->status == Quote::STATUS_APPLIED) {
-                    $model->lead->status = Lead::STATUS_BOOKED;
-                    if (!empty($leadAttributes) && isset($leadAttributes['bo_flight_id'])) {
-                        $model->lead->bo_flight_id = $leadAttributes['bo_flight_id'];
+                if (!$model->hasErrors()) {
+                    if (!empty($leadAttributes)) {
+                        $model->lead->attributes = $leadAttributes;
+                        if (!$model->lead->save()) {
+                            $response['errors'][] = $model->lead->getErrors();
+                        }
                     }
-                    $model->lead->save();
+                    if ($model->status == Quote::STATUS_APPLIED) {
+                        $model->lead->status = Lead::STATUS_BOOKED;
+                        $model->lead->save(false, ['status']);
+                        /*if (!empty($leadAttributes) && isset($leadAttributes['bo_flight_id'])) {
+                            $model->lead->bo_flight_id = $leadAttributes['bo_flight_id'];
+                        }
+                        $model->lead->save();*/
+                    }
+                    $response['status'] = 'Success';
+                    $transaction->commit();
+
+                    //Add logs after changed model attributes
+                    $leadLog = new LeadLog((new LeadLogMessage()));
+                    $leadLog->logMessage->oldParams = $changedAttributes;
+                    $newParams = array_intersect_key($model->attributes, $changedAttributes);
+                    $newParams['selling'] = round($selling, 2);
+                    $leadLog->logMessage->newParams = $newParams;
+                    $leadLog->logMessage->title = 'Update';
+                    $leadLog->logMessage->model = sprintf('%s (%s)', $model->formName(), $model->uid);
+                    $leadLog->addLog([
+                        'lead_id' => $model->lead_id,
+                    ]);
+
+                } else {
+                    $response['errors'][] = $model->getErrors();
+                    $transaction->rollBack();
                 }
-                $response['status'] = 'Success';
-                $transaction->commit();
+            } catch (\Throwable $e) {
 
-                //Add logs after changed model attributes
-                $leadLog = new LeadLog((new LeadLogMessage()));
-                $leadLog->logMessage->oldParams = $changedAttributes;
-                $newParams = array_intersect_key($model->attributes, $changedAttributes);
-                $newParams['selling'] = round($selling, 2);
-                $leadLog->logMessage->newParams = $newParams;
-                $leadLog->logMessage->title = 'Update';
-                $leadLog->logMessage->model = sprintf('%s (%s)', $model->formName(), $model->uid);
-                $leadLog->addLog([
-                    'lead_id' => $model->lead_id,
-                ]);
+                Yii::error($e->getTraceAsString(), 'API:Quote:update:try');
+                if (Yii::$app->request->get('debug')) $message = ($e->getTraceAsString());
+                else $message = $e->getMessage() . ' (code:' . $e->getCode() . ', line: ' . $e->getLine() . ')';
 
-            } else {
-                $response['errors'][] = $model->getErrors();
+                $response['error'] = $message;
+                $response['errors'] = $message;
+                $response['error_code'] = 30;
+
                 $transaction->rollBack();
             }
-        } catch (\Throwable $e) {
-
-            Yii::error($e->getTraceAsString(), 'API:Quote:update:try');
-            if (Yii::$app->request->get('debug')) $message = ($e->getTraceAsString());
-            else $message = $e->getMessage() . ' (code:' . $e->getCode() . ', line: ' . $e->getLine() . ')';
-
-            $response['error'] = $message;
-            $response['errors'] = $message;
-            $response['error_code'] = 30;
-
-            $transaction->rollBack();
         }
 
         $responseData = $response;

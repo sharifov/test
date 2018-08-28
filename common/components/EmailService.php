@@ -38,9 +38,6 @@ class EmailService
             if (!empty($bcc)) {
                 $mEmail->setBcc($bcc);
             }
-            if (!empty($bcc)) {
-                $mEmail->setBcc($bcc);
-            }
             $mEmail->setFrom(array($credential['email'] => strtoupper($source->name)));
             $mEmail->setContentType('text/plain; charset=UTF-8');
             $mEmail->setBody($subject, 'text/plain');
@@ -78,9 +75,6 @@ class EmailService
 
             $mEmail->setSubject($subject);
             $mEmail->setTo($to);
-            if (!empty($bcc)) {
-                $mEmail->setBcc($bcc);
-            }
             if (!empty($bcc)) {
                 $mEmail->setBcc($bcc);
             }
