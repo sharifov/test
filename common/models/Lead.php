@@ -503,6 +503,40 @@ class Lead extends ActiveRecord
                 </script>';
     }
 
+    public static function getLastActivity($note_created, $updated)
+    {
+        $now = new \DateTime();
+        $lastUpdate = new \DateTime($updated);
+        if (!empty($note_created)) {
+            $created = new \DateTime($note_created);
+            return ($lastUpdate->getTimestamp() > $created->getTimestamp())
+                ? self::diffFormat($now->diff($lastUpdate))
+                : self::diffFormat($now->diff($created));
+        } else {
+            return self::diffFormat($now->diff($lastUpdate));
+        }
+    }
+
+    protected function diffFormat(\DateInterval $interval)
+    {
+        $return = [];
+
+        if ($interval->format('%y') > 0) {
+            $return[] = $interval->format('%y') . 'y';
+        }
+        if ($interval->format('%m') > 0) {
+            $return[] = $interval->format('%m') . 'mh';
+        }
+        if ($interval->format('%d') > 0) {
+            $return[] = $interval->format('%d') . 'd';
+        }
+        if ($interval->format('%i') >= 0 && $interval->format('%h') >= 0) {
+            $return[] = $interval->format('%h') . 'h ' . $interval->format('%I') . 'm';
+        }
+
+        return implode(' ', $return);
+    }
+
     public function init()
     {
         parent::init();
@@ -600,26 +634,6 @@ class Lead extends ActiveRecord
         return self::diffFormat($now->diff($created));
     }
 
-    protected function diffFormat(\DateInterval $interval)
-    {
-        $return = [];
-
-        if ($interval->format('%y') > 0) {
-            $return[] = $interval->format('%y') . 'y';
-        }
-        if ($interval->format('%m') > 0) {
-            $return[] = $interval->format('%m') . 'mh';
-        }
-        if ($interval->format('%d') > 0) {
-            $return[] = $interval->format('%d') . 'd';
-        }
-        if ($interval->format('%i') >= 0 && $interval->format('%h') >= 0) {
-            $return[] = $interval->format('%h') . 'h ' . $interval->format('%I') . 'm';
-        }
-
-        return implode(' ', $return);
-    }
-
     public function getPendingInLastStatus($updated)
     {
         $now = new \DateTime();
@@ -663,7 +677,6 @@ class Lead extends ActiveRecord
     {
         return self::STATUS_LIST[$status_id] ?? '-';
     }
-
 
     /**
      * @param bool $label
@@ -878,20 +891,6 @@ class Lead extends ActiveRecord
         return Reason::find()
             ->where(['lead_id' => $this->id])
             ->orderBy('id desc')->one();
-    }
-
-    public static function getLastActivity($note_created, $updated)
-    {
-        $now = new \DateTime();
-        $lastUpdate = new \DateTime($updated);
-        if (!empty($note_created)) {
-            $created = new \DateTime($note_created);
-            return ($lastUpdate->getTimestamp() > $created->getTimestamp())
-                ? self::diffFormat($now->diff($lastUpdate))
-                : self::diffFormat($now->diff($created));
-        } else {
-            return self::diffFormat($now->diff($lastUpdate));
-        }
     }
 
     /**
@@ -1329,7 +1328,12 @@ class Lead extends ActiveRecord
         foreach ($this->leadFlightSegments as $leadFlightSegment) {
             $itinerary[] = [
                 'route' => sprintf('%s - %s', $leadFlightSegment->origin, $leadFlightSegment->destination),
-                'date' => $leadFlightSegment->departure
+                'date' => $leadFlightSegment->departure,
+                'flex' => empty($leadFlightSegment->flexibility)
+                    ? '' : sprintf('%s %d',
+                        $leadFlightSegment->flexibility_type,
+                        $leadFlightSegment->flexibility
+                    )
             ];
         }
         $information['itinerary'] = $itinerary;
