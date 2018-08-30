@@ -16,7 +16,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <h1><?= Html::encode($this->title) ?></h1>
     <?php Pjax::begin(); ?>
     <?php echo $this->render('_search', ['model' => $searchModel]); ?>
-    
+
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
@@ -25,7 +25,9 @@ $this->params['breadcrumbs'][] = $this->title;
                 'label' => 'Lead Id',
                 'attribute' => 'id',
                 'value' => function ($model) {
-                    return Html::a($model->id, ['leads/view', 'id' => $model->id]);
+                    return Html::a($model->id, ['leads/view', 'id' => $model->id], [
+                        'data-pjax' => 0
+                    ]);
                 },
                 'format' => 'raw',
                 'options' => ['style' => 'width:100px'],
