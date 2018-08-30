@@ -360,9 +360,9 @@ class Quote extends \yii\db\ActiveRecord
                     $this->uid = uniqid();
                 }
 
-                if(!$this->employee_id && Yii::$app->user->id) {
+/*                if(!$this->employee_id && Yii::$app->user->id) {
                     $this->employee_id = Yii::$app->user->id;
-                }
+                }*/
 
             }
 
