@@ -51,7 +51,9 @@ class EmployeeController extends DefaultController
         $roles = Yii::$app->user->identity->getRoles();
         if (empty($roles)) {
             return null;
-        } elseif (!in_array('admin', $roles) && Yii::$app->user->identity->getId() != $employeeId) {
+        } elseif (!in_array('admin', array_keys($roles)) &&
+            Yii::$app->user->identity->getId() != $employeeId
+        ) {
             return null;
         }
 
