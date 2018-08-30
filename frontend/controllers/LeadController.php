@@ -227,13 +227,16 @@ class LeadController extends DefaultController
             $data = $lead->getLeadInformationForExpert();
             $data['call_expert'] = true;
             $result = BackOffice::sendRequest('lead/update-lead', 'POST', json_encode($data));
+
+            $lead->notes_for_experts = Yii::$app->request->get('notes');
+
             if ($result['status'] == 'Success' && empty($result['errors'])) {
                 $lead->called_expert = true;
-                $lead->save();
                 Yii::$app->getSession()->setFlash('success', 'Call expert request succeeded');
             } else {
                 Yii::$app->getSession()->setFlash('warning', print_r($result['errors'], true));
             }
+            $lead->save();
         }
         return $this->redirect(Yii::$app->request->referrer);
     }
