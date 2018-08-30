@@ -403,7 +403,7 @@ class Lead extends ActiveRecord
         if ($queue != 'trash') {
             $dataProvider->sort->defaultOrder = !in_array($queue, ['sold', 'booked'])
             ? ['pending' => SORT_DESC]
-            : ['pending_last_status' => SORT_ASC];
+            : ['pending_last_status' => SORT_DESC];
         } else {
             $dataProvider->sort->defaultOrder = ['pending_in_trash' => SORT_DESC];
             $dataProvider->sort->attributes['pending_in_trash'] = [
