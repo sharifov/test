@@ -83,7 +83,7 @@ class NavItem
 
                 $items[] = ['label' => '<i class="fa fa-plane"></i> Flight Segments', 'url' => (!strpos(Yii::$app->request->baseUrl, 'admin')) ? ['lead-flight-segment/index'] : ['lead-flight-segment/index']];
 
-                $items[] = ['label' => '<i class="fa fa-quora"></i> Quote List', 'url' => (!strpos(Yii::$app->request->baseUrl, 'admin')) ? ['quote/index'] : ['quote/index']];
+                $items[] = ['label' => '<i class="fa fa-quora"></i> Quote List', 'url' => (!strpos(Yii::$app->request->baseUrl, 'admin')) ? ['quotes/index'] : ['quotes/index']];
 
                 $items[] = ['label' => '<i class="fa fa-dollar"></i> Quote Price List', 'url' => (!strpos(Yii::$app->request->baseUrl, 'admin')) ? ['quote-price/index'] : ['quote-price/index']];
             }

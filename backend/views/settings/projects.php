@@ -30,7 +30,7 @@ HTML;
 <div class="panel panel-default">
     <div class="panel-heading">Projects</div>
     <div class="panel-body">
-        <?php if (Yii::$app->user->identity->role == 'admin') : ?>
+        <?php if (\webvimark\modules\UserManagement\models\User::hasRole('admin')) : ?>
             <div class="mb-20">
                 <?= Html::a('Sync Project', '#', [
                     'class' => 'btn-success btn sync',

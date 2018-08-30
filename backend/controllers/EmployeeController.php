@@ -11,6 +11,7 @@ use common\models\ProjectEmployeeAccess;
 use Yii;
 use yii\bootstrap\Html;
 use yii\filters\AccessControl;
+use yii\filters\VerbFilter;
 use yii\helpers\ArrayHelper;
 use yii\web\BadRequestHttpException;
 use yii\web\Response;
@@ -18,32 +19,23 @@ use yii\web\Response;
 /**
  * Site controller
  */
-class EmployeeController extends DefaultController
+class EmployeeController extends BController
 {
     /**
-     * {@inheritdoc}
+     * @inheritdoc
      */
     public function behaviors()
     {
-        $behaviors = [
-            'access' => [
-                'class' => AccessControl::class,
-                'rules' => [
-                    [
-                        'actions' => ['list', 'update', 'acl-rule'],
-                        'allow' => true,
-                        'roles' => ['supervision'],
-                    ],
-                    [
-                        'actions' => ['seller-contact-info'],
-                        'allow' => true,
-                        'roles' => ['agent'],
-                    ],
-                ],
+        $behaviors = parent::behaviors();
+
+        $behaviors ['verbs'] = [
+            'class' => VerbFilter::class,
+            'actions' => [
+                'delete' => ['POST'],
             ],
         ];
 
-        return ArrayHelper::merge(parent::behaviors(), $behaviors);
+        return $behaviors;
     }
 
     public function actionSellerContactInfo($employeeId)

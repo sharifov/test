@@ -18,38 +18,23 @@ use yii\filters\VerbFilter;
 /**
  * LeadsController implements the CRUD actions for Lead model.
  */
-class LeadsController extends DefaultController
+class LeadsController extends BController
 {
     /**
-     * {@inheritdoc}
+     * @inheritdoc
      */
     public function behaviors()
     {
-        $behaviors = [
-            'verbs' => [
-                'class' => VerbFilter::class,
-                'actions' => [
-                    'delete' => ['POST'],
-                ],
-            ],
-            'access' => [
-                'class' => AccessControl::class,
-                'rules' => [
-                    [
-                        'actions' => ['index', 'update', 'delete', 'create'],
-                        'allow' => true,
-                        'roles' => ['supervision'],
-                    ],
-                    [
-                        'actions' => ['view', 'index'],
-                        'allow' => true,
-                        'roles' => ['agent'],
-                    ],
-                ],
+        $behaviors = parent::behaviors();
+
+        $behaviors ['verbs'] = [
+            'class' => VerbFilter::class,
+            'actions' => [
+                'delete' => ['POST'],
             ],
         ];
 
-        return ArrayHelper::merge(parent::behaviors(), $behaviors);
+        return $behaviors;
     }
 
     /**

@@ -17,10 +17,7 @@ $js = <<<JS
     google.charts.load('current', {packages: ['corechart', 'bar']});
 JS;
 $this->registerJs($js, \yii\web\View::POS_READY);
-Yii::$app->formatter->timeZone = 'Asia/Calcutta';
-
-
-
+//Yii::$app->formatter->timeZone = 'Asia/Calcutta';
 
 //$tzlist = DateTimeZone::listIdentifiers(DateTimeZone::ALL);
 

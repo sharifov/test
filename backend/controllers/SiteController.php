@@ -6,40 +6,43 @@ use common\models\ApiLog;
 use common\models\Lead;
 use yii\db\Expression;
 use yii\filters\AccessControl;
+use yii\filters\VerbFilter;
 use yii\helpers\ArrayHelper;
 
 /**
  * Site controller
  */
-class SiteController extends DefaultController
+class SiteController extends BController
 {
     /**
-     * {@inheritdoc}
+     * @inheritdoc
      */
     public function behaviors()
     {
-        $behaviors = [
-            'access' => [
-                'class' => AccessControl::class,
-                'rules' => [
-                    [
-                        'actions' => ['index'],
-                        'allow' => true,
-                        'roles' => ['supervision'],
-                    ],
-                ],
-            ]
+        $behaviors = parent::behaviors();
+
+        $behaviors ['verbs'] = [
+            'class' => VerbFilter::class,
+            'actions' => [
+                'delete' => ['POST'],
+            ],
         ];
 
-        return ArrayHelper::merge(parent::behaviors(), $behaviors);
+        return $behaviors;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function actions()
+
+        /**
+         * {@inheritdoc}
+         */
+        public function actions()
     {
-        return parent::actions();
+        return [
+            'error' => [
+                'class' => 'yii\web\ErrorAction',
+                'view' => '@yiister/gentelella/views/error',
+            ],
+        ];
     }
 
 

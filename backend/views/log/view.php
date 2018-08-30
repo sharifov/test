@@ -33,7 +33,7 @@ $this->params['breadcrumbs'][] = $this->title;
             //'message:ntext',
             [
                 'attribute' => 'message',
-                'format' => 'raw',
+                'format' => 'html',
                 'value' => function(\backend\models\Log $model) {
                     return $model->message ? '<pre>'.$model->message.'</pre>' : '-';
                 },
