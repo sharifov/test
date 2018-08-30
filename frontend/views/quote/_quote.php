@@ -225,7 +225,7 @@ $this->registerJs($js);
                             ],
                             'template' => '{input}'
                         ])->hiddenInput() .
-                        $form->field($price, '[' . $index . ']$extra_mark_up', [
+                        $form->field($price, '[' . $index . ']extra_mark_up', [
                             'options' => [
                                 'tag' => false,
                             ],
