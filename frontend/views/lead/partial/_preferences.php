@@ -111,7 +111,7 @@ $formId = sprintf('%s-form', $leadForm->getLeadPreferences()->formName());
     <?= $formPreferences->field($leadForm->getLead(), 'notes_for_experts')
         ->textarea([
             'rows' => 7,
-            'class' => 'form-control lead-form-input-element'
+            'class' => 'form-control'
         ]) ?>
 </div>
 <?php ActiveForm::end(); ?>
