@@ -48,14 +48,14 @@ class EmployeeController extends DefaultController
 
     public function actionSellerContactInfo($employeeId)
     {
-        $roles = Yii::$app->user->identity->getRoles();
+/*        $roles = Yii::$app->user->identity->getRoles();
         if (empty($roles)) {
             return null;
         } elseif (!in_array('admin', array_keys($roles)) &&
             Yii::$app->user->identity->getId() != $employeeId
         ) {
             return null;
-        }
+        }*/
 
         if (Yii::$app->request->isPost && Yii::$app->request->isAjax) {
             Yii::$app->response->format = Response::FORMAT_JSON;
