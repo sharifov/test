@@ -413,6 +413,10 @@ class Lead extends ActiveRecord
             'asc' => [Lead::tableName() . '.created' => SORT_ASC],
             'desc' => [Lead::tableName() . '.created' => SORT_DESC],
         ];
+        $dataProvider->sort->attributes['pending_last_status'] = [
+            'asc' => [Lead::tableName() . '.updated' => SORT_ASC],
+            'desc' => [Lead::tableName() . '.updated' => SORT_DESC],
+        ];
         $dataProvider->sort->attributes['rating'] = [
             'asc' => [Lead::tableName() . '.rating' => SORT_ASC],
             'desc' => [Lead::tableName() . '.rating' => SORT_DESC],

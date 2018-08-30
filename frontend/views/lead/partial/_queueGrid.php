@@ -51,6 +51,7 @@ $queueType = Yii::$app->request->get('type');
             'format' => 'raw'
         ],
         [
+            'attribute' => 'pending_last_status',
             'label' => 'Pending in Booked',
             'visible' => in_array($queueType, ['sold', 'booked']),
             'value' => function ($model) {
