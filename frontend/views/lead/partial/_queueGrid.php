@@ -52,7 +52,7 @@ $queueType = Yii::$app->request->get('type');
         ],
         [
             'label' => 'Pending in Booked',
-            'visible' => in_array($queueType, ['booked']),
+            'visible' => in_array($queueType, ['sold', 'booked']),
             'value' => function ($model) {
                 return Lead::getPendingInLastStatus($model['updated']);
             },
