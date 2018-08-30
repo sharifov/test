@@ -401,12 +401,14 @@ class Lead extends ActiveRecord
         ]);
 
         if ($queue != 'trash') {
-            $dataProvider->sort->defaultOrder = ['pending' => SORT_DESC];
+            $dataProvider->sort->defaultOrder = !in_array($queue, ['sold', 'booked'])
+            ? ['pending' => SORT_DESC]
+            : ['pending_last_status' => SORT_ASC];
         } else {
             $dataProvider->sort->defaultOrder = ['pending_in_trash' => SORT_DESC];
             $dataProvider->sort->attributes['pending_in_trash'] = [
-                'asc' => [self::getTableSchema()->fullName . '.updated' => SORT_ASC],
-                'desc' => [self::getTableSchema()->fullName . '.updated' => SORT_DESC],
+                'asc' => [Lead::tableName()  . '.updated' => SORT_ASC],
+                'desc' => [Lead::tableName() . '.updated' => SORT_DESC],
             ];
         }
         $dataProvider->sort->attributes['pending'] = [
