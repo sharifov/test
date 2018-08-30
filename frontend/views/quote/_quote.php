@@ -224,6 +224,12 @@ $this->registerJs($js);
                                 'tag' => false,
                             ],
                             'template' => '{input}'
+                        ])->hiddenInput() .
+                        $form->field($price, '[' . $index . ']$extra_mark_up', [
+                            'options' => [
+                                'tag' => false,
+                            ],
+                            'template' => '{input}'
                         ])->hiddenInput() ?>
                     </td>
                     <td class="td-input">
