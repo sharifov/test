@@ -228,7 +228,7 @@ class LeadController extends DefaultController
             $data['call_expert'] = true;
             $result = BackOffice::sendRequest('lead/update-lead', 'POST', json_encode($data));
 
-            $lead->notes_for_experts = Yii::$app->request->get('notes');
+            $lead->notes_for_experts = Yii::$app->request->post('notes');
 
             if ($result['status'] == 'Success' && empty($result['errors'])) {
                 $lead->called_expert = true;

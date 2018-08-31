@@ -111,7 +111,7 @@ if ($leadForm->mode != $leadForm::VIEW_MODE) {
         if ($('#lead-notes_for_experts').val().length >= 50) {
             $('#lead-notes_for_experts').parent().find('.help-block').html('')
             $('#lead-notes_for_experts').parent().removeClass('has-error');
-            $.get($(this).data('url') + '&notes=' + $('#lead-notes_for_experts').val());
+            $.post($(this).data('url'), {notes: $('#lead-notes_for_experts').val()});
         } else {
             $('#lead-notes_for_experts').parent().find('.help-block').html('Notes for Expert cannot be blank. Min 50 symbols!')
             $('#lead-notes_for_experts').parent().addClass('has-error');
