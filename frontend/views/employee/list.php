@@ -46,7 +46,7 @@ HTML;
                 ],
                 [
                     'attribute' => 'username',
-                    'label' => 'Username',
+                    //'label' => 'Username',
                     'filter' => Html::activeDropDownList($searchModel, 'id', $employees, [
                         'prompt' => '',
                         'class' => 'form-control'
@@ -59,10 +59,12 @@ HTML;
                     },
                     'format' => 'raw'
                 ],
-                [
-                    'label' => 'Email',
-                    'value' => 'email'
-                ],
+                /*[
+                        'attribute' => 'email'
+                    //'label' => 'Email',
+                    //'value' => 'email'
+                ],*/
+                'email:email',
                 [
                     'label' => 'Deleted',
                     'filter' => Html::activeDropDownList($searchModel, 'status', [
@@ -78,8 +80,22 @@ HTML;
                             : 'No';
                     }
                 ],
-                'created_at:datetime',
-                'updated_at:datetime',
+                //'created_at:datetime',
+                //'updated_at:datetime',
+                [
+                    'attribute' => 'created_at',
+                    'value' => function(\common\models\Employee $model) {
+                        return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime($model->created_at, 'php:Y-m-d [H:i]');
+                    },
+                    'format' => 'html',
+                ],
+                [
+                    'attribute' => 'updated_at',
+                    'value' => function(\common\models\Employee $model) {
+                        return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime($model->updated_at, 'php:Y-m-d [H:i]');
+                    },
+                    'format' => 'html',
+                ],
                 [
                     'class' => 'yii\grid\ActionColumn',
                     'template' => '{update}',

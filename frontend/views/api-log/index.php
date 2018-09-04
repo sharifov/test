@@ -49,7 +49,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'value' => function(\common\models\ApiLog $model) {
                     $data = \yii\helpers\VarDumper::dumpAsString(@json_decode($model->al_request_data, true));
                     //if($data) $data = end($data);
-                    return $data ? '<small>'.\yii\helpers\StringHelper::truncate($data, 200, '...', null, true).'</small>' : '-';
+                    return $data ? '<pre style="font-size: 10px">'.(\yii\helpers\StringHelper::truncate($data, 200, '...', null, true)).'</pre>' : '-';
                 },
             ],
 
@@ -61,7 +61,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'value' => function(\common\models\ApiLog $model) {
                     $data = \yii\helpers\VarDumper::dumpAsString(@json_decode($model->al_response_data, true));
                     //if($data) $data = end($data);
-                    return $data ? '<small>'.\yii\helpers\StringHelper::truncate($data, 500, '...', null, true).'</small>' : '-';
+                    return $data ? '<pre style="font-size: 10px">'.(\yii\helpers\StringHelper::truncate($data, 500, '...', null, true)).'</pre>' : '-';
                 },
             ],
             'al_response_dt',
