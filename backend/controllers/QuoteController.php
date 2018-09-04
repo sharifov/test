@@ -17,40 +17,23 @@ use yii\filters\VerbFilter;
 /**
  * QuoteController implements the CRUD actions for Quote model.
  */
-class QuoteController extends DefaultController
+class QuoteController extends BController
 {
     /**
-     * {@inheritdoc}
+     * @inheritdoc
      */
-
-
     public function behaviors()
     {
-        $behaviors = [
-            'verbs' => [
-                'class' => VerbFilter::class,
-                'actions' => [
-                    'delete' => ['POST'],
-                ],
-            ],
-            'access' => [
-                'class' => AccessControl::class,
-                'rules' => [
-                    [
-                        'actions' => ['index', 'update', 'view', 'delete', 'create'],
-                        'allow' => true,
-                        'roles' => ['supervision'],
-                    ],
-                    /*[
-                        'actions' => ['index'],
-                        'allow' => true,
-                        'roles' => ['agent'],
-                    ],*/
-                ],
+        $behaviors = parent::behaviors();
+
+        $behaviors ['verbs'] = [
+            'class' => VerbFilter::class,
+            'actions' => [
+                'delete' => ['POST'],
             ],
         ];
 
-        return ArrayHelper::merge(parent::behaviors(), $behaviors);
+        return $behaviors;
     }
 
     /**

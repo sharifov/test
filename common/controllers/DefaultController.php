@@ -84,7 +84,7 @@ class DefaultController extends Controller
         if (!Yii::$app->user->isGuest) {
             return $this->goHome();
         }
-        $isBackend = strpos(Yii::$app->request->baseUrl, 'admin');
+        $isBackend = false; //strpos(Yii::$app->request->baseUrl, 'admin');
 
         $model = new LoginForm();
 

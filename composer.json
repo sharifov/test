@@ -30,7 +30,11 @@
         "keltstr/yii2-simplehtmldom": "dev-master",
         "2amigos/yii2-date-time-picker-widget": "~1.0",
         "yiisoft/yii2-jui": "^2.0",
-        "ext-json": "*"
+        "ext-json": "*",
+        "ext-curl": "*",
+        "lajax/yii2-translate-manager": "^1.7",
+        "webvimark/module-user-management": "^1.0",
+        "yiister/yii2-gentelella": "~1.0"
     },
     "require-dev": {
         "yiisoft/yii2-debug": "~2.0.0",

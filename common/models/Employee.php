@@ -6,6 +6,7 @@ use Yii;
 use yii\base\NotSupportedException;
 use yii\db\Query;
 use yii\helpers\ArrayHelper;
+use yii\helpers\VarDumper;
 use yii\web\IdentityInterface;
 
 /**
@@ -61,7 +62,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
             $this->role = null;
         } else {
             $roles = $this->getRoles();
-            $this->role = array_keys($roles)[0];
+            $this->role = array_keys($roles)[0] ?? 'noname';
         }
 
         $this->deleted = !($this->status);
