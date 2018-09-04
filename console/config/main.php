@@ -58,6 +58,15 @@ return [
             ],
         ],
 
+        'authManager' => [
+            'class' => 'yii\rbac\DbManager',
+        ],
+        /*'user' => [
+            'class' => 'yii\web\User',
+            'identityClass' => 'common\models\Employee',
+            'enableSession' => false
+        ],*/
+
     ],
     'modules'=>[
         'translatemanager' => [
