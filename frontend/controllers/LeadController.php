@@ -227,13 +227,16 @@ class LeadController extends DefaultController
             $data = $lead->getLeadInformationForExpert();
             $data['call_expert'] = true;
             $result = BackOffice::sendRequest('lead/update-lead', 'POST', json_encode($data));
+
+            $lead->notes_for_experts = Yii::$app->request->post('notes');
+
             if ($result['status'] == 'Success' && empty($result['errors'])) {
                 $lead->called_expert = true;
-                $lead->save();
                 Yii::$app->getSession()->setFlash('success', 'Call expert request succeeded');
             } else {
                 Yii::$app->getSession()->setFlash('warning', print_r($result['errors'], true));
             }
+            $lead->save();
         }
         return $this->redirect(Yii::$app->request->referrer);
     }
@@ -288,9 +291,14 @@ class LeadController extends DefaultController
 
     public function actionUnassign($id)
     {
-        $model = Lead::findOne([
+        /**
+         * @var $model Lead
+         */
+        $model = Lead::find()->where([
             'id' => $id
-        ]);
+        ])->andWhere([
+            'NOT IN', 'status', [Lead::STATUS_BOOKED, Lead::STATUS_SOLD]
+        ])->one();
         if ($model !== null) {
             $reason = new Reason();
             $attr = Yii::$app->request->post($reason->formName());
@@ -409,7 +417,6 @@ class LeadController extends DefaultController
             ->andWhere(['IN', 'status', [
                 Lead::STATUS_PENDING,
                 Lead::STATUS_FOLLOW_UP,
-                Lead::STATUS_ON_HOLD,
                 Lead::STATUS_SNOOZE
             ]])->one();
 
@@ -426,8 +433,14 @@ class LeadController extends DefaultController
                 }
                 return null;
             } else {
-                Yii::$app->getSession()->setFlash('warning', 'Lead is unavailable to access now!');
-                return $this->redirect(Yii::$app->request->referrer);
+                $model = Lead::findOne([
+                    'id' => $id,
+                    'employee_id' => Yii::$app->user->identity->getId()
+                ]);
+                if ($model === null) {
+                    Yii::$app->getSession()->setFlash('warning', 'Lead is unavailable to access now!');
+                    return $this->redirect(Yii::$app->request->referrer);
+                }
             }
         }
 
@@ -480,6 +493,13 @@ class LeadController extends DefaultController
                     $dataProvider[$div] = Lead::search($type, null, $div);
                 }
             }
+        } else if (in_array($type, ['trash'])) {
+            $searchModel = new Lead();
+            $params = Yii::$app->request->queryParams;
+            if (isset($params[$searchModel->formName()])) {
+                $searchModel->employee_id = $params[$searchModel->formName()]['employee_id'];
+            }
+            $dataProvider = Lead::search($type, $searchModel);
         } else {
             $dataProvider = Lead::search($type);
         }

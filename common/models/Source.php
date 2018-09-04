@@ -64,9 +64,28 @@ class Source extends \yii\db\ActiveRecord
     /**
      * @return array
      */
-    public static function getList() : array
+    public static function getList(): array
     {
         $data = self::find()->orderBy(['name' => SORT_ASC])->asArray()->all();
-        return ArrayHelper::map($data,'id', 'name', 'project_id');
+        return ArrayHelper::map($data, 'id', 'name', 'project_id');
+    }
+
+    public static function getGroupList()
+    {
+        /**
+         * @var $projects Project[]
+         */
+        $map = [];
+        $projects = Project::findAll([
+            'id' => array_keys(ProjectEmployeeAccess::getProjectsByEmployee())
+        ]);
+        foreach ($projects as $project) {
+            $child_map = [];
+            foreach ($project->sources as $source) {
+                $child_map[$source->id] = sprintf('%s', $source->name);
+            }
+            $map[$project->name] = $child_map;
+        }
+        return $map;
     }
 }

@@ -8,7 +8,7 @@ return [
     ],
     'AWS_MAILER' => [
         'host' => 'email-smtp.us-east-1.amazonaws.com',
-        'port' => '25',
+        'port' => '587',
         'security' => 'tls',
         'username' => 'AKIAI5VDT2W5LGW7T3TQ',
         'password' => 'Avufe0iKvYJGNT+Dv8LyVBesiCbMX2ZaB5HC4kBc/2Zn'

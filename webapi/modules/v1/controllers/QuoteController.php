@@ -339,10 +339,6 @@ class QuoteController extends ApiBaseController
                     if ($model->status == Quote::STATUS_APPLIED) {
                         $model->lead->status = Lead::STATUS_BOOKED;
                         $model->lead->save(false, ['status']);
-                        /*if (!empty($leadAttributes) && isset($leadAttributes['bo_flight_id'])) {
-                            $model->lead->bo_flight_id = $leadAttributes['bo_flight_id'];
-                        }
-                        $model->lead->save();*/
                     }
                     $response['status'] = 'Success';
                     $transaction->commit();
@@ -441,6 +437,7 @@ class QuoteController extends ApiBaseController
         try {
             $model->attributes = $quoteAttributes;
             $model->lead_id = $lead->id;
+            $model->employee_id = null;
             $model->save();
 
             $quotePricesAttributes = Yii::$app->request->post((new QuotePrice())->formName());

@@ -48,12 +48,14 @@ class EmployeeController extends DefaultController
 
     public function actionSellerContactInfo($employeeId)
     {
-        $roles = Yii::$app->user->identity->getRoles();
+/*        $roles = Yii::$app->user->identity->getRoles();
         if (empty($roles)) {
             return null;
-        } elseif (!in_array('admin', $roles) && Yii::$app->user->identity->getId() != $employeeId) {
+        } elseif (!in_array('admin', array_keys($roles)) &&
+            Yii::$app->user->identity->getId() != $employeeId
+        ) {
             return null;
-        }
+        }*/
 
         if (Yii::$app->request->isPost && Yii::$app->request->isAjax) {
             Yii::$app->response->format = Response::FORMAT_JSON;
@@ -186,8 +188,8 @@ class EmployeeController extends DefaultController
                             $access->save();
                         }
                     }
-                    $model = Employee::findOne(['id' => $id]);
                     Yii::$app->getSession()->setFlash('success', ($isNew) ? 'Profile created!' : 'Profile updated!');
+                    return $this->redirect(['update', 'id' => $model->id]);
                 }
             }
 

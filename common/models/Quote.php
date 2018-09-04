@@ -360,9 +360,9 @@ class Quote extends \yii\db\ActiveRecord
                     $this->uid = uniqid();
                 }
 
-                if(!$this->employee_id && Yii::$app->user->id) {
+/*                if(!$this->employee_id && Yii::$app->user->id) {
                     $this->employee_id = Yii::$app->user->id;
-                }
+                }*/
 
             }
 
@@ -371,7 +371,7 @@ class Quote extends \yii\db\ActiveRecord
         return false;
     }
 
-    public static function parseDump($string, $validation = true, &$itinerary = [])
+    public static function parseDump($string, $validation = true, &$itinerary = [], $onView = false)
     {
 
         $depCity = $arrCity = null;
@@ -468,8 +468,11 @@ class Quote extends \yii\db\ActiveRecord
                         $arrDateTime->add(\DateInterval::createFromDateString('+1 year'));
                     }
 
-                    $depCity = Airport::findIdentity($depAirport);
-                    $arrCity = Airport::findIdentity($arrAirport);
+                    $depCity = $arrCity = null;
+                    if (!$onView) {
+                        $depCity = Airport::findIdentity($depAirport);
+                        $arrCity = Airport::findIdentity($arrAirport);
+                    }
                 }
 
                 $rowExpl = explode($depDate, $rowFl);
@@ -481,7 +484,10 @@ class Quote extends \yii\db\ActiveRecord
                     $flightDuration = ($arrDateTime->getTimestamp() - $depDateTime->getTimestamp()) / 60;
                 }
 
-                $airline = Airline::findIdentity($carrier);
+                $airline = null;
+                if (!$onView) {
+                    $airline = Airline::findIdentity($carrier);
+                }
 
                 $segment = [
                     'carrier' => $carrier,

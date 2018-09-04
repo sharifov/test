@@ -24,18 +24,15 @@ $queueType = Yii::$app->request->get('type');
     'layout' => $template,
     'filterModel' => $searchModel,
     'rowOptions' => function ($model) {
-        /**
-         * @var $model Lead
-         */
-        if ($model->status === $model::STATUS_PROCESSING &&
-            Yii::$app->user->identity->getId() == $model->employee_id) {
+        if ($model['status'] === Lead::STATUS_PROCESSING &&
+            Yii::$app->user->identity->getId() == $model['employee_id']) {
             return ['class' => 'highlighted'];
         }
-        if (in_array($model->status, [$model::STATUS_ON_HOLD, $model::STATUS_BOOKED, $model::STATUS_FOLLOW_UP])) {
+        if (in_array($model['status'], [Lead::STATUS_ON_HOLD, Lead::STATUS_BOOKED, Lead::STATUS_FOLLOW_UP])) {
             $now = new \DateTime();
-            $diff = isset($model->leadFlightSegments[0])
-                ? $now->diff(new \DateTime($model->leadFlightSegments[0]->departure))
-                : $now->diff(new \DateTime($model->created));
+            $diff = !empty($model['departure'])
+                ? $now->diff(new \DateTime($model['departure']))
+                : $now->diff(new \DateTime($model['created']));
             $diffInSec = $diff->s + ($diff->i * 60) + ($diff->h * 3600) + ($diff->d * 86400) + ($diff->m * 30 * 86400) + ($diff->y * 12 * 30 * 86400);
             //if departure <= 7 days
             if ($diffInSec <= (7 * 24 * 60 * 60)) {
@@ -49,21 +46,16 @@ $queueType = Yii::$app->request->get('type');
             'label' => 'Pending Time',
             'visible' => !in_array($queueType, ['sold', 'booked']),
             'value' => function ($model) {
-                /**
-                 * @var $model Lead
-                 */
-                return $model->getPendingAfterCreate();
+                return Lead::getPendingAfterCreate($model['created']);
             },
             'format' => 'raw'
         ],
         [
-            'label' => 'Pending in Booked',
-            'visible' => in_array($queueType, ['booked']),
+            'attribute' => 'pending_last_status',
+            'label' => 'Pending Time',
+            'visible' => in_array($queueType, ['sold', 'booked']),
             'value' => function ($model) {
-                /**
-                 * @var $model Lead
-                 */
-                return $model->getPendingInLastStatus();
+                return Lead::getPendingInLastStatus($model['updated']);
             },
             'format' => 'raw'
         ],
@@ -82,41 +74,37 @@ $queueType = Yii::$app->request->get('type');
                 !in_array($queueType, ['inbox'])
             ),
             'value' => function ($model) use ($queueType) {
-                /**
-                 * @var $model Lead
-                 */
                 if (in_array($queueType, ['booked', 'sold'])) {
-                    return sprintf('%d / %d', $model->id, $model->bo_flight_id);
+                    return sprintf('%d / %d', $model['id'], $model['bo_flight_id']);
                 }
 
-                return (!empty($model->id))
-                    ? $model->id : '-';
+                return (!empty($model['id']))
+                    ? $model['id'] : '-';
             }
         ],
         [
             'label' => 'PNR',
             'visible' => in_array($queueType, ['booked', 'sold']),
             'value' => function ($model) {
-                /**
-                 * @var $model Lead
-                 */
-                /*$quote = $model->getAppliedAlternativeQuotes();
-                return ($quote !== null && !empty($quote->record_locator))
-                    ? $quote->record_locator : '-';*/
-                return (!empty($model->additionalInformationForm->pnr))
-                    ? $model->additionalInformationForm->pnr : '-';
+                if (!empty($model['additional_information'])) {
+                    $additionally = new \common\models\local\LeadAdditionalInformation();
+                    $additionally->setAttributes(@json_decode($model['additional_information'], true));
+                    return (!empty($additionally->pnr))
+                        ? $additionally->pnr : '-';
+                }
+                return '-';
             }
         ],
         [
             'label' => 'Passengers',
             'visible' => in_array($queueType, ['booked', 'sold']),
             'value' => function ($model) {
-                /**
-                 * @var $model Lead
-                 */
                 $content = [];
-                if (!empty($model->additionalInformationForm->passengers)) {
-                    $content = $model->additionalInformationForm->passengers;
+                if (!empty($model['additional_information'])) {
+                    $additionally = new \common\models\local\LeadAdditionalInformation();
+                    $additionally->setAttributes(@json_decode($model['additional_information'], true));
+                    $content = (!empty($additionally->passengers))
+                        ? $additionally->passengers : $content;
                 }
                 return implode('<br/>', $content);
             },
@@ -126,27 +114,15 @@ $queueType = Yii::$app->request->get('type');
             'attribute' => 'Client',
             'visible' => !in_array($queueType, ['booked']),
             'value' => function ($model) {
-                /**
-                 * @var $model Lead
-                 */
-                return $model->client->first_name;
+                return $model['first_name'];
             }
         ],
         [
             'label' => 'Client Email',
             'visible' => in_array($queueType, ['sold']),
             'value' => function ($model) {
-                /**
-                 * @var $model Lead
-                 */
-                if (!empty($model->client->clientEmails)) {
-                    $emails = [];
-                    foreach ($model->client->clientEmails as $email) {
-                        $emails[] = $email->email;
-                    }
-                    return implode('<br/>', $emails);
-                }
-                return '---';
+                return !empty($model['emails'])
+                    ? $model['emails'] : '---';
             },
             'format' => 'raw'
         ],
@@ -157,14 +133,8 @@ $queueType = Yii::$app->request->get('type');
                 /**
                  * @var $model Lead
                  */
-                if (!empty($model->client->clientPhones)) {
-                    $phones = [];
-                    foreach ($model->client->clientPhones as $phone) {
-                        $phones[] = $phone->phone;
-                    }
-                    return implode('<br/>', $phones);
-                }
-                return '---';
+                return !empty($model['phones'])
+                    ? $model['phones'] : '---';
             },
             'format' => 'raw'
         ],
@@ -173,10 +143,7 @@ $queueType = Yii::$app->request->get('type');
             'label' => 'Client Time',
             'visible' => !in_array($queueType, ['booked', 'sold']),
             'value' => function ($model) {
-                /**
-                 * @var $model Lead
-                 */
-                return $model->getClientTime();
+                return Lead::getClientTime($model['id']);
             },
             'format' => 'raw'
         ],
@@ -184,17 +151,8 @@ $queueType = Yii::$app->request->get('type');
             'label' => 'Destination',
             'visible' => in_array($queueType, ['booked', 'sold']),
             'value' => function ($model) {
-                /**
-                 * @var $model Lead
-                 * @var $segments \common\models\local\FlightSegment[]
-                 */
-                $quote = $model->getAppliedAlternativeQuotes();
-                if ($quote !== null) {
-                    $trips = $quote->getTrips();
-                    $lastSegment = $trips[0]['segments'][count($trips[0]['segments']) - 1];
-                    return sprintf('%s (%s)', $lastSegment['arrivalCity'], $lastSegment['arrivalAirport']);
-                }
-                return null;
+                return empty($model['destination'])
+                    ? null : sprintf('%s (%s)', $model['city'], $model['destination']);
             },
             'format' => 'raw'
         ],
@@ -202,33 +160,16 @@ $queueType = Yii::$app->request->get('type');
             'attribute' => 'Request Details',
             'visible' => !in_array($queueType, ['booked', 'sold']),
             'content' => function ($model) {
-                /**
-                 * @var $model Lead
-                 */
-                $return = '';
-                $locations = [];
-                foreach ($model->leadFlightSegments as $key => $segment) {
-                    if ($model->trip_type != 'MC') {
-                        if ($return == '') $return .= ' ' . $segment->departure . ' ';
-                        if ($key == 0) $locations[] = $segment->origin;
-                        $locations[] = $segment->destination;
-                    } else {
-                        $locations[] = ' ' . $segment->departure . ' ' . $segment->origin . '-' . $segment->destination;
-                    }
-                }
+                $content = '';
                 if (
                     Yii::$app->user->identity->role != 'agent' ||
                     !in_array(Yii::$app->controller->action->id, ['inbox'])
                 ) {
-                    if ($model->trip_type != 'MC') {
-                        $return .= implode('-', $locations);
-                    } else {
-                        $return .= implode('<br/>', $locations);
-                    }
+                    $content .= $model['flight_detail'];
                 }
-                $return .= ' (<i class="fa fa-male"></i> x' . ($model->adults + $model->children + $model->infants) . ')';
-                $return .= sprintf('<br/><strong>Cabin:</strong> %s', $model->getCabin($model->cabin));
-                return $return;
+                $content .= ' (<i class="fa fa-male"></i> x' . ($model['adults'] + $model['children'] + $model['infants']) . ')';
+                $content .= sprintf('<br/><strong>Cabin:</strong> %s', Lead::getCabin($model['cabin']));
+                return $content;
             },
             'format' => 'raw'
         ],
@@ -240,8 +181,8 @@ $queueType = Yii::$app->request->get('type');
                  * @var $model Lead
                  */
                 return sprintf('Total: <strong>%d</strong> / Sent: <strong>%d</strong>',
-                    count($model->getAltQuotes()),
-                    $model->getSentCount()
+                    ($model['send_q'] + $model['not_send_q']),
+                    $model['send_q']
                 );
             },
             'format' => 'raw'
@@ -251,10 +192,7 @@ $queueType = Yii::$app->request->get('type');
             'label' => 'Pending in Trash',
             'visible' => in_array($queueType, ['trash']),
             'value' => function ($model) {
-                /**
-                 * @var $model Lead
-                 */
-                return $model->getPendingInLastStatus();
+                return Lead::getPendingInLastStatus($model['updated']);
             },
             'format' => 'raw'
         ],
@@ -269,25 +207,18 @@ $queueType = Yii::$app->request->get('type');
                 : null,
             'visible' => !in_array($queueType, ['inbox', 'follow-up']),
             'value' => function ($model) {
-                /**
-                 * @var $model Lead
-                 */
-                return ($model->employee !== null)
-                    ? $model->employee->username : '-';
+                return (!empty($model['username']))
+                    ? $model['username'] : '-';
             }
         ],
         [
             'label' => 'Profit',
             'visible' => in_array($queueType, ['booked', 'sold']),
             'value' => function ($model) {
-                /**
-                 * @var $model Lead
-                 */
                 $profit = 0;
-                $quote = $model->getAppliedAlternativeQuotes();
-                if ($quote !== null) {
-                    $price = $quote->quotePrice();
-                    $profit =  $price['mark_up'] - ($price['selling'] * Quote::SERVICE_FEE);
+                if (!empty($model['mark_up'])) {
+                    $profit = $model['mark_up'] - ($model['selling'] * Quote::SERVICE_FEE);
+                    $profit = ($profit < 0) ? 0 : $profit;
                 }
                 return sprintf('$%s', number_format($profit, 2));
             },
@@ -297,10 +228,7 @@ $queueType = Yii::$app->request->get('type');
             'label' => 'Date of Issue',
             'visible' => in_array($queueType, ['sold']),
             'value' => function ($model) {
-                /**
-                 * @var $model Lead
-                 */
-                return $model->updated;
+                return $model['updated'];
             },
             'format' => 'raw'
         ],
@@ -308,18 +236,12 @@ $queueType = Yii::$app->request->get('type');
             'label' => 'Date of Departure',
             'visible' => in_array($queueType, ['sold']),
             'value' => function ($model) {
-                /**
-                 * @var $model Lead
-                 * @var $segments \common\models\local\FlightSegment[]
-                 */
-                $quote = $model->getAppliedAlternativeQuotes();
-                if ($quote !== null) {
-                    $segments = [];
-                    Quote::parseDump($quote->reservation_dump, false, $segments);
-                    $lastSegment = $segments[0];
-                    return $lastSegment->departureTime;
+                if (isset($model['reservation_dump']) && !empty($model['reservation_dump'])) {
+                    $data = [];
+                    $segments = Quote::parseDump($model['reservation_dump'], false, $data, true);
+                    return $segments[0]['departureDateTime']->format('Y-m-d H:i');
                 }
-                return null;
+                return $model['departure'];
             },
             'format' => 'raw'
         ],
@@ -327,19 +249,20 @@ $queueType = Yii::$app->request->get('type');
             'label' => 'Processing Status',
             'visible' => in_array($queueType, ['booked']),
             'value' => function ($model) {
-                /**
-                 * @var $model Lead
-                 */
+                $additionally = new \common\models\local\LeadAdditionalInformation();
+                if (!empty($model['additional_information'])) {
+                    $additionally->setAttributes(@json_decode($model['additional_information'], true));
+                }
                 $labelVTF = '<span class="label label-danger"><i class="fa fa-times"></i></span>';
-                if (!empty($model->additionalInformationForm->vtf_processed)) {
+                if (!empty($additionally->vtf_processed)) {
                     $labelVTF = '<span class="label label-success"><i class="fa fa-check"></i></span>';
                 }
                 $labelTKT = '<span class="label label-danger"><i class="fa fa-times"></i></span>';
-                if (!empty($model->additionalInformationForm->tkt_processed)) {
+                if (!empty($additionally->tkt_processed)) {
                     $labelTKT = '<span class="label label-success"><i class="fa fa-check"></i></span>';
                 }
                 $labelEXP = '<span class="label label-danger"><i class="fa fa-times"></i></span>';
-                if (!empty($model->additionalInformationForm->exp_processed)) {
+                if (!empty($additionally->exp_processed)) {
                     $labelEXP = '<span class="label label-success"><i class="fa fa-check"></i></span>';
                 }
                 return 'VTF: ' . $labelVTF . ' TKT: ' . $labelTKT . ' EXP: ' . $labelEXP;
@@ -351,10 +274,7 @@ $queueType = Yii::$app->request->get('type');
             'label' => 'Last Activity',
             'visible' => !in_array($queueType, ['inbox', 'sold']),
             'value' => function ($model) {
-                /**
-                 * @var $model Lead
-                 */
-                return $model->getLastActivity();
+                return Lead::getLastActivity($model['note_created'], $model['updated']);
             },
             'format' => 'raw'
         ],
@@ -364,12 +284,8 @@ $queueType = Yii::$app->request->get('type');
             'visible' => !in_array($queueType, ['inbox', 'sold', 'booked']),
             'contentOptions' => ['style' => 'max-width: 250px;'],
             'value' => function ($model) {
-                /**
-                 * @var $model Lead
-                 */
-                $reason = $model->lastReason();
-                return ($reason !== null)
-                    ? $reason->reason : '-';
+                return (!empty($model['reason']))
+                    ? $model['reason'] : '-';
             }
         ],
         [
@@ -377,10 +293,7 @@ $queueType = Yii::$app->request->get('type');
             'visible' => ($div == Lead::DIV_GRID_IN_SNOOZE),
             'contentOptions' => ['style' => 'width: 115px;'],
             'value' => function ($model) {
-                /**
-                 * @var $model Lead
-                 */
-                return $model->getSnoozeCountdown();
+                return Lead::getSnoozeCountdown($model['id'], $model['snooze_for']);
             },
             'format' => 'raw'
         ],
@@ -389,10 +302,7 @@ $queueType = Yii::$app->request->get('type');
             'visible' => !in_array($queueType, ['inbox']),
             'contentOptions' => ['style' => 'width: 115px;'],
             'value' => function ($model) {
-                /**
-                 * @var $model Lead
-                 */
-                return $model->getRating();
+                return Lead::getRating($model['id'], $model['rating']);
             },
             'format' => 'raw'
         ],
@@ -404,10 +314,7 @@ $queueType = Yii::$app->request->get('type');
                 (Yii::$app->user->identity->role != 'agent')
             ),
             'value' => function ($model) {
-                /**
-                 * @var $model Lead
-                 */
-                return $model->source->name;
+                return $model['name'];
             },
             'format' => 'raw'
         ],
@@ -415,10 +322,7 @@ $queueType = Yii::$app->request->get('type');
             'label' => 'Status',
             'visible' => !in_array($queueType, ['sold']),
             'value' => function ($model) {
-                /**
-                 * @var $model Lead
-                 */
-                return $model->getStatusLabel();
+                return Lead::getStatusLabel($model['status']);
             },
             'format' => 'raw'
         ],
@@ -428,17 +332,14 @@ $queueType = Yii::$app->request->get('type');
             'template' => $actionButtonTemplate,
             'buttons' => [
                 'action' => function ($url, $model, $key) use ($queueType) {
-                    /**
-                     * @var $model Lead
-                     */
                     $buttons = '';
                     if (in_array($queueType, ['inbox', 'follow-up']) ||
                         ($queueType == 'processing' &&
-                            $model->status === $model::STATUS_ON_HOLD)
+                            $model['status'] === Lead::STATUS_ON_HOLD)
                     ) {
                         $buttons .= Html::a('Take', Url::to([
                             'lead/take',
-                            'id' => $model->id
+                            'id' => $model['id']
                         ]), [
                             'class' => 'btn btn-action btn-sm take-btn',
                             'data-pjax' => 0
@@ -446,29 +347,29 @@ $queueType = Yii::$app->request->get('type');
                     }
 
                     if ($queueType != 'inbox') {
-                        if (Yii::$app->user->identity->getId() == $model->employee_id &&
+                        if (Yii::$app->user->identity->getId() == $model['employee_id'] &&
                             $queueType = 'processing-all'
                         ) {
                             $queueType = 'processing';
                         }
-                        $buttons .= Html::a('Open', Url::to(['lead/quote', 'type' => $queueType, 'id' => $model->id]), [
+                        $buttons .= Html::a('Open', Url::to(['lead/quote', 'type' => $queueType, 'id' => $model['id']]), [
                             'class' => 'btn btn-action btn-sm',
                             'target' => '_blank',
                             'data-pjax' => 0
                         ]);
                     }
 
-                    if (Yii::$app->user->identity->getId() != $model->employee_id &&
-                        in_array($model->status, [$model::STATUS_ON_HOLD, $model::STATUS_PROCESSING])
+                    if (Yii::$app->user->identity->getId() != $model['employee_id'] &&
+                        in_array($model['status'], [Lead::STATUS_ON_HOLD, Lead::STATUS_PROCESSING])
                     ) {
                         $buttons .= Html::a('Take Over', Url::to([
                             'lead/take',
-                            'id' => $model->id,
+                            'id' => $model['id'],
                             'over' => true
                         ]), [
                             'class' => 'btn btn-action btn-sm take-processing-btn',
                             'data-pjax' => 0,
-                            'data-status' => $model->status
+                            'data-status' => $model['status']
                         ]);
                     }
 

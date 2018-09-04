@@ -61,7 +61,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         'attribute' => 'message',
                         'format' => 'raw',
                         'value' => function (\backend\models\Log $model) {
-                            $str = '<pre><small>'.\yii\helpers\StringHelper::truncate($model->message, 400, '...', null, true).'</small></pre> 
+                            $str = '<pre class="pre-wrap"><small>'.\yii\helpers\StringHelper::truncate($model->message, 400, '...', null, true).'</small></pre> 
                             <a href="'.\yii\helpers\Url::to(['log/view', 'id' => $model->id]).'" title="Log '.$model->id.'" class="btn btn-sm btn-success showModalButton" data-pjax="0">show log</a>';
                             return ($str);
                         },

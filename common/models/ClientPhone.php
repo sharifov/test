@@ -64,6 +64,8 @@ class ClientPhone extends \yii\db\ActiveRecord
 
     public function beforeValidate()
     {
+        $this->phone = str_replace('-', '', $this->phone);
+        $this->phone = str_replace(' ', '', $this->phone);
         $this->updated = date('Y-m-d H:i:s');
         return parent::beforeValidate();
     }
