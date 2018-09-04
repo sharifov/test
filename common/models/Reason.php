@@ -48,6 +48,15 @@ class Reason extends \yii\db\ActiveRecord
                 'Didn\'t get in touch' => 'Didn\'t get in touch',
                 'Other' => 'Other'
             ];
+        } elseif ($queue == 'processing') {
+            return [
+                'N/A' => 'N/A',
+                'No Available' => 'No Available',
+                'Voice Mail Send' => 'Voice Mail Send',
+                'Will call back' => 'Will call back',
+                'Waiting the option' => 'Waiting the option',
+                'Other' => 'Other'
+            ];
         }
         return [
             'Other' => 'Other'

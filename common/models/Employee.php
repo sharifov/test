@@ -194,6 +194,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
             [['auth_key'], 'string', 'max' => 32],
             [['username'], 'unique'],
             [['email'], 'unique'],
+            ['email', 'email'],
             [['password_reset_token'], 'unique'],
         ];
     }

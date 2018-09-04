@@ -69,10 +69,10 @@ class ApiLogSearch extends ApiLog
             'al_user_id' => $this->al_user_id,
         ]);
 
-        $query->andFilterWhere(['ilike', 'al_request_data', $this->al_request_data])
-            ->andFilterWhere(['ilike', 'al_response_data', $this->al_response_data])
-            ->andFilterWhere(['ilike', 'al_action', $this->al_action])
-            ->andFilterWhere(['ilike', 'al_ip_address', $this->al_ip_address]);
+        $query->andFilterWhere(['like', 'al_request_data', $this->al_request_data])
+            ->andFilterWhere(['like', 'al_response_data', $this->al_response_data])
+            ->andFilterWhere(['like', 'al_action', $this->al_action])
+            ->andFilterWhere(['like', 'al_ip_address', $this->al_ip_address]);
 
         return $dataProvider;
     }

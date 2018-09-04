@@ -72,6 +72,10 @@ if (!is_array($dataProvider)) {
         'searchModel' => $searchModel,
         'div' => ''
     ]);
+    /*echo \yii\grid\GridView::widget([
+        'dataProvider' => $dataProvider,
+        'layout' => $template,
+    ]);*/
 } else {
     foreach ($dataProvider as $div => $dataProv) :
         ?>

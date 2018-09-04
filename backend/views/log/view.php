@@ -35,7 +35,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'attribute' => 'message',
                 'format' => 'html',
                 'value' => function(\backend\models\Log $model) {
-                    return $model->message ? '<pre>'.$model->message.'</pre>' : '-';
+                    return $model->message ? '<pre class="pre-wrap">'.$model->message.'</pre>' : '-';
                 },
             ],
         ],
