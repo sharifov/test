@@ -2,6 +2,7 @@
 
 namespace webapi\models;
 
+use common\models\Airport;
 use common\models\Lead;
 use Yii;
 
@@ -16,7 +17,6 @@ use Yii;
  * @property string $origin_label
  * @property string $destination_label
  *
- * @property Lead $lead
  */
 class ApiLeadFlightSegment extends \yii\db\ActiveRecord
 {
@@ -45,10 +45,38 @@ class ApiLeadFlightSegment extends \yii\db\ActiveRecord
     {
         return [
             [['origin', 'destination', 'departure'], 'required'],
+            [['origin'], 'checkOriginIata'],
+            [['destination'], 'checkDestinationIata'],
             [['flexibility_type', 'flexibility', 'origin_label', 'destination_label'], 'safe'],
             [['origin_label', 'destination_label'], 'trim'],
             [['origin', 'destination'], 'string', 'max' => 3],
+            //[['lead_id'], 'exist', 'skipOnError' => true, 'targetClass' => Lead::class, 'targetAttribute' => ['lead_id' => 'id']],
         ];
+    }
+
+
+    public function checkOriginIata() : void
+    {
+        $origin = Airport::findIdentity($this->origin);
+        if ($origin) {
+            $this->origin_label = sprintf('%s (%s)', $origin->name, $origin->iata);
+        } else {
+            $this->addError('origin', sprintf('Not found %s IATA ("'.$this->origin.'") ',
+                $this->getAttributeLabel('origin')
+            ));
+        }
+    }
+
+    public function checkDestinationIata() : void
+    {
+        $destination = Airport::findIdentity($this->destination);
+        if ($destination) {
+            $this->destination_label = sprintf('%s (%s)', $destination->name, $destination->iata);
+        } else {
+            $this->addError('origin', sprintf('Not found %s IATA ("'.$this->destination.'") ',
+                $this->getAttributeLabel('destination')
+            ));
+        }
     }
 
 

@@ -36,6 +36,11 @@ class LeadFlightSegment extends \yii\db\ActiveRecord
         self::FLEX_TYPE_PLUS_MINUS => '+/-',
     ];
 
+
+    public CONST SCENARIO_CREATE_AGENT = 'create_agent';
+    public CONST SCENARIO_CREATE_API = 'create_api';
+    public CONST SCENARIO_UPDATE_API = 'update_api';
+
     /**
      * {@inheritdoc}
      */
@@ -50,7 +55,15 @@ class LeadFlightSegment extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['origin', 'destination', 'departure'], 'required'],
+            [['departure'], 'required'],
+
+            [['origin', 'destination'], 'required', 'on' => [self::SCENARIO_CREATE_API, self::SCENARIO_UPDATE_API]],
+
+            [['origin'], 'checkOriginIata', 'on' => [self::SCENARIO_CREATE_API, self::SCENARIO_UPDATE_API]],
+            [['destination'], 'checkDestinationIata', 'on' => [self::SCENARIO_CREATE_API, self::SCENARIO_UPDATE_API]],
+
+            [['origin_label', 'destination_label'], 'required', 'except' => [self::SCENARIO_CREATE_API, self::SCENARIO_UPDATE_API]],
+
             [['origin', 'destination'], 'string', 'max' => 3],
             [['lead_id', 'flexibility'], 'integer'],
 
@@ -67,7 +80,46 @@ class LeadFlightSegment extends \yii\db\ActiveRecord
     }
 
 
-    public function checkOriginLabel()
+    /**
+     * @return array
+     */
+    public function scenarios()
+    {
+        $scenarios = parent::scenarios();
+        //$scenarios[self::SCENARIO_CREATE_AGENT] = ['origin', 'destination', 'departure', 'origin_label', 'destination_label', 'lead_id', 'flexibility', 'flexibility_type'];
+        $scenarios[self::SCENARIO_CREATE_API] = ['origin', 'destination', 'departure', 'lead_id', 'flexibility', 'flexibility_type'];
+        $scenarios[self::SCENARIO_UPDATE_API] = ['origin', 'destination', 'departure', 'lead_id', 'flexibility', 'flexibility_type'];
+        return $scenarios;
+    }
+
+
+
+    public function checkOriginIata() : void
+    {
+        $origin = Airport::findIdentity($this->origin);
+        if ($origin) {
+            $this->origin_label = sprintf('%s (%s)', $origin->name, $origin->iata);
+        } else {
+            $this->addError('origin', sprintf('Not found %s IATA ("'.$this->origin.'") ',
+                $this->getAttributeLabel('origin')
+            ));
+        }
+    }
+
+    public function checkDestinationIata() : void
+    {
+        $destination = Airport::findIdentity($this->destination);
+        if ($destination) {
+            $this->destination_label = sprintf('%s (%s)', $destination->name, $destination->iata);
+        } else {
+            $this->addError('origin', sprintf('Not found %s IATA ("'.$this->destination.'") ',
+                $this->getAttributeLabel('destination')
+            ));
+        }
+    }
+
+
+    public function checkOriginLabel() : void
     {
         $this->origin_label = trim($this->origin_label);
         if (!empty($this->origin_label)) {
@@ -93,7 +145,7 @@ class LeadFlightSegment extends \yii\db\ActiveRecord
         }
     }
 
-    public function checkDestinationLabel()
+    public function checkDestinationLabel() : void
     {
         $this->destination_label = trim($this->destination_label);
         if (!empty($this->destination_label)) {
@@ -180,6 +232,22 @@ class LeadFlightSegment extends \yii\db\ActiveRecord
             if ($this->departure) {
                 $this->departure = date('Y-m-d', strtotime($this->departure));
             }
+
+
+            /*if(!$this->origin_label && $this->origin) {
+                $origin = Airport::findIdentity($this->origin);
+                if ($origin) {
+                    $this->origin_label = sprintf('%s (%s)', $origin->name, $origin->iata);
+                }
+            }
+
+            if(!$this->destination_label && $this->destination) {
+                $destination = Airport::findIdentity($this->destination);
+                if ($destination) {
+                    $this->destination_label = sprintf('%s (%s)', $destination->name, $destination->iata);
+                }
+            }*/
+
 
             $this->flexibility = (int)$this->flexibility;
 
