@@ -59,12 +59,19 @@ $queueType = Yii::$app->request->get('type');
             },
             'format' => 'raw'
         ],
+
         [
-            'label' => 'Created Date',
+            'attribute' => 'created',
+            //'label' => 'Created Date',
             'visible' => !in_array($queueType, ['booked', 'sold']),
-            'value' => 'created',
-            'format' => ['date', 'php:m/d/y h:i a'],
+            'value' => function($model) {
+                return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model['created']), 'php:Y-m-d [H:i]');
+            },
+            'format' => 'html',
+            'filter' => false
+
         ],
+
         [
             'attribute' => 'id',
             'label' => in_array($queueType, ['booked', 'sold'])
@@ -114,8 +121,9 @@ $queueType = Yii::$app->request->get('type');
             'attribute' => 'Client',
             'visible' => !in_array($queueType, ['booked']),
             'value' => function ($model) {
-                return $model['first_name'];
-            }
+                return '<i class="fa fa-user"></i> ' . $model['first_name']. ' ' .$model['last_name'];
+            },
+            'format' => 'html'
         ],
         [
             'label' => 'Client Email',

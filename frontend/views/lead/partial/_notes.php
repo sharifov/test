@@ -21,15 +21,15 @@
                     <thead>
                     <tr>
                         <th>Agent</th>
-                        <th>Timestamp</th>
+                        <th>Date Time</th>
                         <th>Note</th>
                     </tr>
                     </thead>
                     <tbody>
                     <?php foreach ($notes as $note) : ?>
                         <tr>
-                            <td><?= $note->employee->username ?></td>
-                            <td><?= date('d/m/Y H:i', strtotime($note->created)) ?></td>
+                            <td><i class="fa fa-user"></i> <?= $note->employee->username ?> (<?= $note->employee->id ?>)</td>
+                            <td><i class="fa fa-calendar"></i> <?= Yii::$app->formatter->asDatetime(strtotime($note->created), 'php: Y-m-d [H:i]') ?></td>
                             <td><?= $note->message ?></td>
                         </tr>
                     <?php endforeach; ?>
