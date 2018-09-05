@@ -93,7 +93,7 @@ function timezoneList()
 
     </div>
 
-    <?php if(Yii::$app->user->can('admin2') || Yii::$app->user->can('supervisor')) : ?>
+    <?php if(Yii::$app->user->can('admin') || Yii::$app->user->can('supervision')) : ?>
 
         <div class="">
             <div class="row top_tiles">

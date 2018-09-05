@@ -165,6 +165,9 @@ class NavItem
             }
 
 
+            $menuItems[] = Html::a('Create Lead', ['lead/create'], ['class' => 'btn btn-xs btn-primary', 'style' => 'margin-top: 8px']);
+
+
         }
     }
 
