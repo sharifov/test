@@ -61,210 +61,243 @@ function timezoneList()
 
 <div class="site-index">
 
-    <h4>Server date & time: <?=date('c')?>, Local format: <?=Yii::$app->formatter->asDatetime(time())?></h4>
-    <div class="">
-        <div class="row top_tiles">
 
-            <div class="animated flipInY col-lg-3 col-md-3 col-sm-6 col-xs-12">
-                <div class="tile-stats">
-                    <div class="icon"><i class="fa fa-users"></i></div>
-                    <div class="count"><?=\common\models\Lead::find()->where("DATE(created) = DATE(NOW())")->count()?></div>
-                    <h3>Leads</h3>
-                    <p>Today count of Leads</p>
-                </div>
-            </div>
-            <div class="animated flipInY col-lg-3 col-md-3 col-sm-6 col-xs-12">
-                <div class="tile-stats">
-                    <div class="icon"><i class="fa fa-cubes"></i></div>
-                    <div class="count"><?=\common\models\Quote::find()->where("DATE(created) = DATE(NOW())")->count()?></div>
-                    <h3>Quotes</h3>
-                    <p>Today count of Quotes</p>
-                </div>
-            </div>
-            <div class="animated flipInY col-lg-3 col-md-3 col-sm-6 col-xs-12">
-                <div class="tile-stats">
-                    <div class="icon"><i class="fa fa-sitemap"></i></div>
-                    <div class="count"><?=\common\models\ApiLog::find()->where("DATE(al_request_dt) = DATE(NOW())")->count()?></div>
-                    <h3>API Requests</h3>
-                    <p>Today count of API Requests</p>
-                </div>
-            </div>
-            <div class="animated flipInY col-lg-3 col-md-3 col-sm-6 col-xs-12">
-                <div class="tile-stats">
-                    <div class="icon"><i class="fa fa-list"></i></div>
-                    <div class="count"><?=\backend\models\Log::find()->where("log_time BETWEEN ".strtotime(date('Y-m-d'))." AND ".strtotime(date('Y-m-d H:i:s')))->count()?></div>
-                    <h3>System Logs</h3>
-                    <p>Today count of System Logs</p>
-                </div>
-            </div>
+    <div class="row">
+        <div class="col-md-6">
+            <table class="table table-bordered">
+                <tr>
+                    <th>Server Date Time</th>
+                    <td><?= date('Y-m-d H:i:s')?></td>
+                </tr>
+                <tr>
+                    <th>Local Date Time</th>
+                    <td><?= Yii::$app->formatter->asDatetime(time())?></td>
+                </tr>
+            </table>
+
+        </div>
+
+        <div class="col-md-6">
+            <table class="table table-bordered">
+                <tr>
+                    <th>Username:</th>
+                    <td><?= Yii::$app->user->identity->username?> (<?=Yii::$app->user->id?>)</td>
+                </tr>
+                <tr>
+                    <th>Role:</th>
+                    <td><?=implode(', ', Yii::$app->user->identity->roles)?></td>
+                </tr>
+            </table>
+
         </div>
 
     </div>
 
+    <?php if(Yii::$app->user->can('admin2') || Yii::$app->user->can('supervisor')) : ?>
+
+        <div class="">
+            <div class="row top_tiles">
+
+                <div class="animated flipInY col-lg-3 col-md-3 col-sm-6 col-xs-12">
+                    <div class="tile-stats">
+                        <div class="icon"><i class="fa fa-users"></i></div>
+                        <div class="count"><?=\common\models\Lead::find()->where("DATE(created) = DATE(NOW())")->count()?></div>
+                        <h3>Leads</h3>
+                        <p>Today count of Leads</p>
+                    </div>
+                </div>
+                <div class="animated flipInY col-lg-3 col-md-3 col-sm-6 col-xs-12">
+                    <div class="tile-stats">
+                        <div class="icon"><i class="fa fa-cubes"></i></div>
+                        <div class="count"><?=\common\models\Quote::find()->where("DATE(created) = DATE(NOW())")->count()?></div>
+                        <h3>Quotes</h3>
+                        <p>Today count of Quotes</p>
+                    </div>
+                </div>
+                <div class="animated flipInY col-lg-3 col-md-3 col-sm-6 col-xs-12">
+                    <div class="tile-stats">
+                        <div class="icon"><i class="fa fa-sitemap"></i></div>
+                        <div class="count"><?=\common\models\ApiLog::find()->where("DATE(al_request_dt) = DATE(NOW())")->count()?></div>
+                        <h3>API Requests</h3>
+                        <p>Today count of API Requests</p>
+                    </div>
+                </div>
+                <div class="animated flipInY col-lg-3 col-md-3 col-sm-6 col-xs-12">
+                    <div class="tile-stats">
+                        <div class="icon"><i class="fa fa-list"></i></div>
+                        <div class="count"><?=\backend\models\Log::find()->where("log_time BETWEEN ".strtotime(date('Y-m-d'))." AND ".strtotime(date('Y-m-d H:i:s')))->count()?></div>
+                        <h3>System Logs</h3>
+                        <p>Today count of System Logs</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <?php if ($dataStats): ?>
+            <div class="row">
+                <div class="col-md-12">
 
 
-    <? if ($dataStats): ?>
+                    <div id="chart_div"></div>
+
+
+                    <?
+                    $this->registerJs("google.charts.load('current', {'packages':['bar']}); google.charts.setOnLoadCallback(drawChart);", \yii\web\View::POS_READY);
+                    ?>
+
+                    <script>
+                        function drawChart() {
+                            var data = google.visualization.arrayToDataTable([
+                                ['Days', 'All', 'Pending', 'Booked', 'Sold', {role: 'annotation'}],
+                                <? foreach($dataStats as $k => $item):?>
+                                ['<?=date('d M', strtotime($item['created_date']))?>', <?=$item['done_count']?>, <?=$item['pending_count']?>, <?=$item['book_count']?>, <?=$item['sold_count']?>, '<?=($item['done_count'] )?>'],
+                                <? endforeach;?>
+
+                                <?//=$item['sum_price'].'$'?>
+                            ]);
+
+                            var options = {
+                                chart: {
+                                    title: 'Lead request',
+                                    subtitle: 'Lead request - Last 30 days',
+                                },
+                                title: 'Lead data',
+                                height: 400,
+                                vAxis: {
+                                    title: 'Requests'
+                                }
+                            };
+
+                            //var chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
+
+
+                            var chart = new google.charts.Bar(document.getElementById('chart_div'));
+
+                            chart.draw(data, options);
+                            //chart.draw(data, google.charts.Bar.convertOptions(options));
+
+                        }
+                    </script>
+                </div>
+            </div>
+        <? endif; ?>
+
+        <hr/>
+
         <div class="row">
             <div class="col-md-12">
+                <div class="col-md-4">
+                    <div id="chart_div_projects"></div>
+                    <? if ($dataSources): ?>
+
+                            <?
+                            $this->registerJs('google.charts.setOnLoadCallback(drawBasic1);', \yii\web\View::POS_READY);
+                            ?>
+
+                            <script>
+                                function drawBasic1() {
+                                    var data = google.visualization.arrayToDataTable([
+                                        ['Project', 'Count'],
+                                        <? foreach($dataSources as $k => $item):
+
+                                            $user = \common\models\ApiUser::findOne($item['al_user_id']);
+                                            if(!$user) continue;
+
+                                            $project = $user->auProject;
+                                            if(!$project) continue;
+
+                                        ?>
+                                        ['<? echo \yii\helpers\Html::encode($project->name).' (apiUser: '.$item['al_user_id'].')' ?>', <?=$item['cnt']?>],
+                                        <? endforeach;?>
+                                    ]);
+
+                                    var options = {
+                                        title: 'Project API Request stats - Last 30 days',
+                                        height: 400
+                                    };
+
+                                    var chart = new google.visualization.PieChart(document.getElementById('chart_div_projects'));
+                                    chart.draw(data, options);
+                                }
+                            </script>
+
+                    <? endif; ?>
+                </div>
 
 
-                <div id="chart_div"></div>
+                <div class="col-md-4">
+                    <div id="chart_div2"></div>
+                    <? if($dataEmployee): ?>
 
+                            <?
+                                $this->registerJs('google.charts.setOnLoadCallback(drawBasic2);', \yii\web\View::POS_READY);
+                            ?>
 
-                <?
-                $this->registerJs("google.charts.load('current', {'packages':['bar']}); google.charts.setOnLoadCallback(drawChart);", \yii\web\View::POS_READY);
-                ?>
+                            <script>
+                                function drawBasic2() {
+                                    var data = google.visualization.arrayToDataTable([
+                                        ['Employee', 'Count of leads'],
+                                        <? foreach($dataEmployee as $k => $item):
+                                            $employee = \common\models\Employee::find()->where(['id' => $item['employee_id']])->one();
+                                            if(!$employee) continue;
 
-                <script>
-                    function drawChart() {
-                        var data = google.visualization.arrayToDataTable([
-                            ['Days', 'All', 'Pending', 'Booked', 'Sold', {role: 'annotation'}],
-                            <? foreach($dataStats as $k => $item):?>
-                            ['<?=date('d M', strtotime($item['created_date']))?>', <?=$item['done_count']?>, <?=$item['pending_count']?>, <?=$item['book_count']?>, <?=$item['sold_count']?>, '<?=($item['done_count'] )?>'],
-                            <? endforeach;?>
+                                        ?>
+                                        ['<? echo \yii\helpers\Html::encode($employee->username) ?>', <?=$item['cnt']?>],
+                                        <? endforeach;?>
+                                    ]);
 
-                            <?//=$item['sum_price'].'$'?>
-                        ]);
+                                    var options = {
+                                        title: 'Employees & Leads - Last 30 days',
+                                        height: 400
+                                    };
 
-                        var options = {
-                            chart: {
-                                title: 'Lead request',
-                                subtitle: 'Lead request - Last 30 days',
-                            },
-                            title: 'Lead data',
-                            height: 400,
-                            vAxis: {
-                                title: 'Requests'
-                            }
-                        };
+                                    var chart = new google.visualization.PieChart(document.getElementById('chart_div2'));
+                                    chart.draw(data, options);
+                                }
+                            </script>
 
-                        //var chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
+                    <? endif; ?>
+                </div>
 
+                <div class="col-md-4">
+                    <div id="chart_div3"></div>
+                    <? if ($dataEmployeeSold): ?>
 
-                        var chart = new google.charts.Bar(document.getElementById('chart_div'));
+                            <?
+                                $this->registerJs('google.charts.setOnLoadCallback(drawBasic3);', \yii\web\View::POS_READY);
+                            ?>
 
-                        chart.draw(data, options);
-                        //chart.draw(data, google.charts.Bar.convertOptions(options));
-
-                    }
-                </script>
-            </div>
-        </div>
-    <? endif; ?>
-
-    <hr/>
-
-    <div class="row">
-        <div class="col-md-12">
-            <div class="col-md-4">
-                <div id="chart_div_projects"></div>
-                <? if ($dataSources): ?>
-
-                        <?
-                        $this->registerJs('google.charts.setOnLoadCallback(drawBasic1);', \yii\web\View::POS_READY);
-                        ?>
-
-                        <script>
-                            function drawBasic1() {
-                                var data = google.visualization.arrayToDataTable([
-                                    ['Project', 'Count'],
-                                    <? foreach($dataSources as $k => $item):
-
-                                        $user = \common\models\ApiUser::findOne($item['al_user_id']);
-                                        if(!$user) continue;
-
-                                        $project = $user->auProject;
-                                        if(!$project) continue;
-
-                                    ?>
-                                    ['<? echo \yii\helpers\Html::encode($project->name).' (apiUser: '.$item['al_user_id'].')' ?>', <?=$item['cnt']?>],
-                                    <? endforeach;?>
-                                ]);
-
-                                var options = {
-                                    title: 'Project API Request stats - Last 30 days',
-                                    height: 400
-                                };
-
-                                var chart = new google.visualization.PieChart(document.getElementById('chart_div_projects'));
-                                chart.draw(data, options);
-                            }
-                        </script>
-
-                <? endif; ?>
-            </div>
-
-
-            <div class="col-md-4">
-                <div id="chart_div2"></div>
-                <? if($dataEmployee): ?>
-
-                        <?
-                            $this->registerJs('google.charts.setOnLoadCallback(drawBasic2);', \yii\web\View::POS_READY);
-                        ?>
-
-                        <script>
-                            function drawBasic2() {
-                                var data = google.visualization.arrayToDataTable([
-                                    ['Employee', 'Count of leads'],
-                                    <? foreach($dataEmployee as $k => $item):
+                            <script>
+                                function drawBasic3() {
+                                    var data = google.visualization.arrayToDataTable([
+                                        ['Employee', 'Count of leads'],
+                                        <? foreach($dataEmployeeSold as $k => $item):
                                         $employee = \common\models\Employee::find()->where(['id' => $item['employee_id']])->one();
                                         if(!$employee) continue;
 
-                                    ?>
-                                    ['<? echo \yii\helpers\Html::encode($employee->username) ?>', <?=$item['cnt']?>],
-                                    <? endforeach;?>
-                                ]);
+                                        ?>
+                                        ['<? echo \yii\helpers\Html::encode($employee->username) ?>', <?=$item['cnt']?>],
+                                        <? endforeach;?>
+                                    ]);
 
-                                var options = {
-                                    title: 'Employees & Leads - Last 30 days',
-                                    height: 400
-                                };
+                                    var options = {
+                                        title: 'Employees & Leads, status Sold - Last 30 days',
+                                        height: 400
+                                    };
 
-                                var chart = new google.visualization.PieChart(document.getElementById('chart_div2'));
-                                chart.draw(data, options);
-                            }
-                        </script>
+                                    var chart = new google.visualization.PieChart(document.getElementById('chart_div3'));
+                                    chart.draw(data, options);
+                                }
+                            </script>
 
-                <? endif; ?>
+                    <? endif; ?>
+                </div>
+
+
             </div>
-
-            <div class="col-md-4">
-                <div id="chart_div3"></div>
-                <? if ($dataEmployeeSold): ?>
-
-                        <?
-                            $this->registerJs('google.charts.setOnLoadCallback(drawBasic3);', \yii\web\View::POS_READY);
-                        ?>
-
-                        <script>
-                            function drawBasic3() {
-                                var data = google.visualization.arrayToDataTable([
-                                    ['Employee', 'Count of leads'],
-                                    <? foreach($dataEmployeeSold as $k => $item):
-                                    $employee = \common\models\Employee::find()->where(['id' => $item['employee_id']])->one();
-                                    if(!$employee) continue;
-
-                                    ?>
-                                    ['<? echo \yii\helpers\Html::encode($employee->username) ?>', <?=$item['cnt']?>],
-                                    <? endforeach;?>
-                                ]);
-
-                                var options = {
-                                    title: 'Employees & Leads, status Sold - Last 30 days',
-                                    height: 400
-                                };
-
-                                var chart = new google.visualization.PieChart(document.getElementById('chart_div3'));
-                                chart.draw(data, options);
-                            }
-                        </script>
-
-                <? endif; ?>
-            </div>
-
-
         </div>
-    </div>
+
+    <?php endif; ?>
 
 </div>

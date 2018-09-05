@@ -38,106 +38,73 @@ class NavItem
                         'label' => '<i class="fa fa-user"></i> Employees',
                         'url' => ['employee/list']
                     ],
-                    /*[
-                        'label' => 'Settings',
-                        'linkOptions' => [
-                            'class' => 'dropdown-toggle',
-                            'data-toggle' => 'dropdown'
-                        ],
-                        'itemsOptions' => ['class' => 'dropdown-submenu'],
-                        'submenuOptions' => ['class' => 'dropdown-menu'],
-                        'items' => [
-                            [
-                                'label' => 'ACL',
-                                'url' => sprintf('%s/settings/acl', Yii::$app->urlManager->getHostInfo())
-                            ],
-                            [
-                                'label' => 'Projects',
-                                'url' => sprintf('%s/settings/projects', Yii::$app->urlManager->getHostInfo())
-                            ],
-                            [
-                                'label' => 'Airlines',
-                                'url' => sprintf('%s/settings/airlines', Yii::$app->urlManager->getHostInfo())
-                            ],
-                            [
-                                'label' => 'Airports',
-                                'url' => sprintf('%s/settings/airports', Yii::$app->urlManager->getHostInfo())
-                            ],
-                            [
-                                'label' => 'Logging',
-                                'url' => sprintf('%s/settings/logging', Yii::$app->urlManager->getHostInfo())
-                            ],
-
-                            [
-                                'label' => 'API Users',
-                                'url' => ['/api-user/index']
-                            ],
-
-                            [
-                                'label' => 'API Logs',
-                                'url' => ['/api-log/index']
-                            ],
-                        ]
-                    ],*/
                 ];
 
-                $items[] = ['label' => '<i class="fa fa-plane"></i> Flight Segments', 'url' => (!strpos(Yii::$app->request->baseUrl, 'admin')) ? ['lead-flight-segment/index'] : ['lead-flight-segment/index']];
+                $items[] = ['label' => '<i class="fa fa-plane"></i> Flight Segments', 'url' => ['lead-flight-segment/index']];
 
-                $items[] = ['label' => '<i class="fa fa-quora"></i> Quote List', 'url' => (!strpos(Yii::$app->request->baseUrl, 'admin')) ? ['quotes/index'] : ['quotes/index']];
+                $items[] = ['label' => '<i class="fa fa-quora"></i> Quote List', 'url' => ['quotes/index']];
 
-                $items[] = ['label' => '<i class="fa fa-dollar"></i> Quote Price List', 'url' => (!strpos(Yii::$app->request->baseUrl, 'admin')) ? ['quote-price/index'] : ['quote-price/index']];
+                $items[] = ['label' => '<i class="fa fa-dollar"></i> Quote Price List', 'url' => ['quote-price/index']];
             }
 
-            $items[] = ['label' => '<i class="fa fa-search"></i> Search Lead', 'url' => (!strpos(Yii::$app->request->baseUrl, 'admin')) ? ['leads/index'] : ['leads/index']];
+            $items[] = ['label' => '<i class="fa fa-search"></i> Search Lead', 'url' => ['leads/index']];
 
-            $items[] = [
+
+            $menuItems[] = [
+                'label' => ' <i class="fa fa-bars"></i> Menu',
+                'options' => ['class' => (in_array(Yii::$app->controller->action->uniqueId, ['site/index', 'employee/list', 'lead-flight-segment/index', 'quotes/index', 'quote-price/index', 'leads/index']) ? 'active' : '')],
+                'items' => $items,
+            ];
+
+
+            $menuItems[] = [
                 'label' => '<i class="fa fa-bar-chart"></i> Reports',
                 'linkOptions' => [
                     'class' => 'dropdown-toggle',
                     'data-toggle' => 'dropdown'
                 ],
+                'options' => ['class' => (Yii::$app->controller->action->uniqueId == 'report/sold' ? 'active' : '')],
                 'itemsOptions' => ['class' => 'dropdown-submenu'],
                 'submenuOptions' => ['class' => 'dropdown-menu'],
                 'items' => [
                     [
-                        'label' => 'Sold',
-                        'url' => sprintf('%s/report/sold', Yii::$app->urlManager->getHostInfo())
+                        'label' => '<i class="fa fa-bar-chart"></i> Sold',
+                        'url' => ['report/sold']
                     ],
                 ]
             ];
-            $menuItems[] = [
-                'label' => '<i class="fa fa-bars"></i> Menu',
-                'items' => $items,
-            ];
+
+
 
             if (!\in_array(Yii::$app->user->identity->role, ['agent', 'coach'])) {
                 $menuItems[] = [
                     'label' => '<i class="fa fa-cog"></i> Settings',
+                    'options' => ['class' => (in_array(Yii::$app->controller->action->uniqueId, ['settings/projects', 'settings/airlines', 'settings/airports', 'api-user/index', 'settings/acl']) ? 'active' : '')],
                     'items' => [
 
                         [
                             'label' => '<i class="fa fa-product-hunt"></i> Projects',
-                            'url' => sprintf('%s/settings/projects', Yii::$app->urlManager->getHostInfo())
+                            'url' => ['settings/projects']
                         ],
                         [
                             'label' => '<i class="fa fa-plane"></i> Airlines',
-                            'url' => sprintf('%s/settings/airlines', Yii::$app->urlManager->getHostInfo())
+                            'url' => ['settings/airlines']
                         ],
                         [
                             'label' => '<i class="fa fa-plane"></i> Airports',
-                            'url' => sprintf('%s/settings/airports', Yii::$app->urlManager->getHostInfo())
+                            'url' => ['settings/airports']
                         ],
                         /*[
                             'label' => 'Logging',
-                            'url' => sprintf('%s/settings/logging', Yii::$app->urlManager->getHostInfo())
+                            'url' => ['settings/logging']
                         ],*/
                         [
                             'label' => '<i class="fa fa-users"></i> API Users',
-                            'url' => sprintf('%s/api-user/index', Yii::$app->urlManager->getHostInfo())
+                            'url' => ['api-user/index']
                         ],
                         [
                             'label' => '<i class="fa fa-user-secret"></i> ACL',
-                            'url' => sprintf('%s/settings/acl', Yii::$app->urlManager->getHostInfo())
+                            'url' => ['settings/acl']
                         ],
 
                     ],
@@ -181,16 +148,17 @@ class NavItem
             if (\in_array(Yii::$app->user->identity->role, ['admin', 'supervision'])) {
                 $menuItems[] = [
                     'label' => '<i class="fa fa-list"></i> Logs',
+                    'options' => ['class' => (in_array(Yii::$app->controller->action->uniqueId, ['api-log/index', 'log/index']) ? 'active' : '')],
                     'items' => [
 
                         [
                             'label' => '<i class="fa fa-bars"></i> API Logs <span class="badge badge-warning">'. (\common\models\ApiLog::find()->where("DATE(al_request_dt) = DATE(NOW())")->count()) .'</span>',
-                            'url' => sprintf('%s/api-log/index', Yii::$app->urlManager->getHostInfo())
+                            'url' => ['api-log/index']
                         ],
 
                         [
                             'label' => '<i class="fa fa-bars"></i> System Logs <span class="badge badge-warning">'. (\backend\models\Log::find()->where("log_time BETWEEN ".strtotime(date('Y-m-d'))." AND ".strtotime(date('Y-m-d H:i:s')))->count()) .'</span>',
-                            'url' => sprintf('%s/log/index', Yii::$app->urlManager->getHostInfo())
+                            'url' => ['log/index']
                         ],
                     ],
                 ];
