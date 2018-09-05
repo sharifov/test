@@ -482,6 +482,36 @@ class Lead extends ActiveRecord
                 </fieldset>';
     }
 
+
+    public static function getRating2($value = 0) : string
+    {
+        $str = '';
+
+        if($value > 0) {
+            for ($i = 1; $i <= $value; $i++) {
+                $str .= '<i class="fa fa-star "></i> ';
+            }
+
+            $str .= ' ('.$value.')';
+
+            switch ($value) {
+                case 1: $class = 'text-danger';
+                    break;
+                case 2: $class = 'text-warning';
+                    break;
+                case 3: $class = 'text-success';
+                    break;
+                default: $class = '';
+            }
+
+            $str = '<div class="'.$class.'">'.$str.'</div>';
+        } else {
+            $str = '-';
+        }
+
+        return $str;
+    }
+
     public static function getSnoozeCountdown($id, $snooze_for)
     {
         if (!empty($snooze_for)) {
