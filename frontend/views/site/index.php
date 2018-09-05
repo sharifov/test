@@ -56,6 +56,8 @@ function timezoneList()
 
 //\yii\helpers\VarDumper::dump(timezoneList(), 10, true); exit;
 
+$userId = Yii::$app->user->id;
+
 
 ?>
 
@@ -93,7 +95,7 @@ function timezoneList()
 
     </div>
 
-    <?php if(Yii::$app->user->can('admin') || Yii::$app->user->can('supervision')) : ?>
+    <?php if(Yii::$app->authManager->getAssignment('admin', $userId) || Yii::$app->authManager->getAssignment('supervision', $userId)) : ?>
 
         <div class="">
             <div class="row top_tiles">
