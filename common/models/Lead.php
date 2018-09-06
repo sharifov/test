@@ -235,19 +235,25 @@ class Lead extends ActiveRecord
         }
 
 
-        $lastActivityQuery = new Query();
-        $lastActivityQuery->select([
+        $lastActivityNoteQuery = new Query();
+        $lastActivityNoteQuery->select([
             'MAX(' . Note::tableName() . '.created) AS last_activity',
             Note::tableName() . '.lead_id'
         ])->from(Note::tableName())
-            ->innerJoin(Lead::tableName(), Lead::tableName() . '.id = ' . Note::tableName() . '.lead_id')
-            ->where([Lead::tableName() . '.status' => $status])
-            ->union((new Query())->select([
-                Lead::tableName() . '.updated AS last_activity',
-                Lead::tableName() . '.id AS lead_id'
-            ])->from(Lead::tableName())
-                ->where([Lead::tableName() . '.status' => $status])
-            );
+            ->innerJoin(Lead::tableName(), Lead::tableName() . '.`id` = ' . Note::tableName() . '.`lead_id`')
+            ->where(Lead::tableName() . '.`status` IN (' . implode(',', $status) . ')');
+
+        $lastActivityLeadQuery = new Query();
+        $lastActivityLeadQuery->select([
+            Lead::tableName() . '.updated AS last_activity',
+            Lead::tableName() . '.id AS lead_id'
+        ])->from(Lead::tableName())
+            ->where(Lead::tableName() . '.`status` IN (' . implode(',', $status) . ')');
+
+        $lastActivityTable = sprintf('(SELECT MAX(last_activity) AS last_activity, lead_id FROM(%s UNION %s) AS lastActivityTable)  AS lastActivityTable',
+            $lastActivityNoteQuery->createCommand()->rawSql,
+            $lastActivityLeadQuery->createCommand()->rawSql
+        );
 
         $selected = [
             Lead::tableName() . '.id', Lead::tableName() . '.bo_flight_id',
@@ -275,7 +281,7 @@ class Lead extends ActiveRecord
                 'g_lfs.lead_id = ' . LeadFlightSegment::tableName() . '.lead_id AND g_lfs.first_fs = ' . LeadFlightSegment::tableName() . '.id'
             )
             ->leftJoin(Airport::tableName(), Airport::tableName() . '.iata = ' . LeadFlightSegment::tableName() . '.destination')
-            ->leftJoin('(' . (new Query)
+            ->leftJoin('(' . (new Query())
                     ->select(['lead_id', 'MAX(id) as last_reason'])
                     ->from(Reason::tableName())
                     ->groupBy('lead_id')
@@ -283,16 +289,8 @@ class Lead extends ActiveRecord
                 'g_reason.lead_id = ' . Lead::tableName() . '.id'
             )
             ->leftJoin(Reason::tableName(), Reason::tableName() . '.id = g_reason.last_reason')
-            ->leftJoin('(' . $lastActivityQuery->createCommand()->rawSql . ') AS lastActivityTable',
+            ->leftJoin($lastActivityTable,
                 'lastActivityTable.lead_id = ' . Lead::tableName() . '.id')
-            /*->leftJoin('(' . (new Query)
-                    ->select(['lead_id', 'MAX(id) as last_note'])
-                    ->from(Note::tableName())
-                    ->groupBy('lead_id')
-                    ->createCommand()->rawSql . ') as g_note',
-                'g_note.lead_id = ' . Lead::tableName() . '.id'
-            )
-            ->leftJoin(Note::tableName(), Note::tableName() . '.id = g_note.last_note')*/
             ->innerJoin('(' . (new Query)
                     ->select(['lead_id', 'GROUP_CONCAT(CONCAT(departure, \' \', origin, \'-\', destination) SEPARATOR \'<br>\') AS flight_detail'])
                     ->from(LeadFlightSegment::tableName())
