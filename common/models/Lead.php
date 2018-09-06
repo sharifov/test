@@ -241,7 +241,8 @@ class Lead extends ActiveRecord
             Note::tableName() . '.lead_id'
         ])->from(Note::tableName())
             ->innerJoin(Lead::tableName(), Lead::tableName() . '.`id` = ' . Note::tableName() . '.`lead_id`')
-            ->where(Lead::tableName() . '.`status` IN (' . implode(',', $status) . ')');
+            ->where(Lead::tableName() . '.`status` IN (' . implode(',', $status) . ')')
+            ->groupBy(' lead_id');
 
         $lastActivityLeadQuery = new Query();
         $lastActivityLeadQuery->select([
@@ -250,10 +251,12 @@ class Lead extends ActiveRecord
         ])->from(Lead::tableName())
             ->where(Lead::tableName() . '.`status` IN (' . implode(',', $status) . ')');
 
-        $lastActivityTable = sprintf('(SELECT MAX(last_activity) AS last_activity, lead_id FROM(%s UNION %s) AS lastActivityTable GROUP BY lead_id)  AS lastActivityTable',
+        $lastActivityTable = sprintf('(SELECT MIN(last_activity) AS last_activity, lead_id FROM(%s UNION %s) AS lastActivityUnion GROUP BY `lead_id`)  AS lastActivityTable',
             $lastActivityNoteQuery->createCommand()->rawSql,
             $lastActivityLeadQuery->createCommand()->rawSql
         );
+
+        //var_dump($lastActivityTable);
 
         $selected = [
             Lead::tableName() . '.id', Lead::tableName() . '.bo_flight_id',
@@ -263,7 +266,7 @@ class Lead extends ActiveRecord
             Lead::tableName() . '.rating', Lead::tableName() . '.source_id',
             Lead::tableName() . '.additional_information', Source::tableName() . '.name',
             LeadFlightSegment::tableName() . '.destination', Employee::tableName() . '.username',
-            LeadFlightSegment::tableName() . '.departure', Lead::tableName() . '.updated',
+            LeadFlightSegment::tableName() . '.departure', Lead::tableName() . '.updated AS last_activity',
             Lead::tableName() . '.created', Client::tableName() . '.first_name', 'lastActivityTable.last_activity AS last_activity',
             Airport::tableName() . '.city', Reason::tableName() . '.reason', Lead::tableName() . '.snooze_for',
             'g_ce.emails', 'g_cp.phones', 'all_q.send_q', 'all_q.not_send_q', 'g_detail_lfs.flight_detail'
