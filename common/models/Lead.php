@@ -264,7 +264,7 @@ class Lead extends ActiveRecord
             Lead::tableName() . '.additional_information', Source::tableName() . '.name',
             LeadFlightSegment::tableName() . '.destination', Employee::tableName() . '.username',
             LeadFlightSegment::tableName() . '.departure', Lead::tableName() . '.updated',
-            Lead::tableName() . '.created', Client::tableName() . '.first_name', 'lastActivityTable.last_activity',
+            Lead::tableName() . '.created', Client::tableName() . '.first_name', 'lastActivityTable.last_activity AS last_activity',
             Airport::tableName() . '.city', Reason::tableName() . '.reason', Lead::tableName() . '.snooze_for',
             'g_ce.emails', 'g_cp.phones', 'all_q.send_q', 'all_q.not_send_q', 'g_detail_lfs.flight_detail'
         ];
