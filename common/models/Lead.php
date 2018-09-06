@@ -403,7 +403,7 @@ class Lead extends ActiveRecord
             ]);
         }
 
-        $query->distinct = true;
+        //$query->distinct = true;
 
         //var_dump($query->createCommand()->rawSql);
         //var_dump($query->count());
