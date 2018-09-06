@@ -237,7 +237,7 @@ class Lead extends ActiveRecord
 
         $lastActivityNoteQuery = new Query();
         $lastActivityNoteQuery->select([
-            Note::tableName() . '.created AS last_activity',
+            'MAX(' . Note::tableName() . '.created) AS last_activity',
             Note::tableName() . '.lead_id'
         ])->from(Note::tableName())
             ->innerJoin(Lead::tableName(), Lead::tableName() . '.`id` = ' . Note::tableName() . '.`lead_id`')
