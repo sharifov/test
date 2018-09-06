@@ -234,6 +234,21 @@ class Lead extends ActiveRecord
                 break;
         }
 
+
+        $lastActivityQuery = new Query();
+        $lastActivityQuery->select([
+            'MAX(' . Note::tableName() . '.created) AS last_activity',
+            Note::tableName() . '.lead_id'
+        ])->from(Note::tableName())
+            ->innerJoin(Lead::tableName(), Lead::tableName() . '.id = ' . Note::tableName() . '.lead_id')
+            ->where([Lead::tableName() . '.status' => $status])
+            ->union((new Query())->select([
+                Lead::tableName() . '.updated AS last_activity',
+                Lead::tableName() . '.id AS lead_id'
+            ])->from(Lead::tableName())
+                ->where([Lead::tableName() . '.status' => $status])
+            );
+
         $selected = [
             Lead::tableName() . '.id', Lead::tableName() . '.bo_flight_id',
             Lead::tableName() . '.adults', Lead::tableName() . '.children',
@@ -243,7 +258,7 @@ class Lead extends ActiveRecord
             Lead::tableName() . '.additional_information', Source::tableName() . '.name',
             LeadFlightSegment::tableName() . '.destination', Employee::tableName() . '.username',
             LeadFlightSegment::tableName() . '.departure', Lead::tableName() . '.updated',
-            Lead::tableName() . '.created', Client::tableName() . '.first_name', Note::tableName() . '.created AS note_created',
+            Lead::tableName() . '.created', Client::tableName() . '.first_name', 'lastActivityTable.last_activity',
             Airport::tableName() . '.city', Reason::tableName() . '.reason', Lead::tableName() . '.snooze_for',
             'g_ce.emails', 'g_cp.phones', 'all_q.send_q', 'all_q.not_send_q', 'g_detail_lfs.flight_detail'
         ];
@@ -268,14 +283,16 @@ class Lead extends ActiveRecord
                 'g_reason.lead_id = ' . Lead::tableName() . '.id'
             )
             ->leftJoin(Reason::tableName(), Reason::tableName() . '.id = g_reason.last_reason')
-            ->leftJoin('(' . (new Query)
+            ->leftJoin('(' . $lastActivityQuery->createCommand()->rawSql . ') AS lastActivityTable',
+                'lastActivityTable.lead_id = ' . Lead::tableName() . '.id')
+            /*->leftJoin('(' . (new Query)
                     ->select(['lead_id', 'MAX(id) as last_note'])
                     ->from(Note::tableName())
                     ->groupBy('lead_id')
                     ->createCommand()->rawSql . ') as g_note',
                 'g_note.lead_id = ' . Lead::tableName() . '.id'
             )
-            ->leftJoin(Note::tableName(), Note::tableName() . '.id = g_note.last_note')
+            ->leftJoin(Note::tableName(), Note::tableName() . '.id = g_note.last_note')*/
             ->innerJoin('(' . (new Query)
                     ->select(['lead_id', 'GROUP_CONCAT(CONCAT(departure, \' \', origin, \'-\', destination) SEPARATOR \'<br>\') AS flight_detail'])
                     ->from(LeadFlightSegment::tableName())
@@ -402,15 +419,19 @@ class Lead extends ActiveRecord
 
         if ($queue != 'trash') {
             $dataProvider->sort->defaultOrder = !in_array($queue, ['sold', 'booked'])
-            ? ['pending' => SORT_DESC]
-            : ['pending_last_status' => SORT_DESC];
+                ? ['pending' => SORT_DESC]
+                : ['pending_last_status' => SORT_DESC];
         } else {
             $dataProvider->sort->defaultOrder = ['pending_in_trash' => SORT_DESC];
             $dataProvider->sort->attributes['pending_in_trash'] = [
-                'asc' => [Lead::tableName()  . '.updated' => SORT_ASC],
+                'asc' => [Lead::tableName() . '.updated' => SORT_ASC],
                 'desc' => [Lead::tableName() . '.updated' => SORT_DESC],
             ];
         }
+        $dataProvider->sort->attributes['last_activity'] = [
+            'asc' => ['lastActivityTable.last_activity' => SORT_ASC],
+            'desc' => ['lastActivityTable.last_activity' => SORT_DESC],
+        ];
         $dataProvider->sort->attributes['pending'] = [
             'asc' => [Lead::tableName() . '.created' => SORT_ASC],
             'desc' => [Lead::tableName() . '.created' => SORT_DESC],
@@ -509,18 +530,18 @@ class Lead extends ActiveRecord
                 </script>';
     }
 
-    public static function getLastActivity($note_created, $updated)
+    public static function getLastActivity($updated)
     {
         $now = new \DateTime();
         $lastUpdate = new \DateTime($updated);
-        if (!empty($note_created)) {
+        /*if (!empty($note_created)) {
             $created = new \DateTime($note_created);
             return ($lastUpdate->getTimestamp() > $created->getTimestamp())
                 ? self::diffFormat($now->diff($lastUpdate))
                 : self::diffFormat($now->diff($created));
-        } else {
-            return self::diffFormat($now->diff($lastUpdate));
-        }
+        } else {*/
+        return self::diffFormat($now->diff($lastUpdate));
+        //}
     }
 
     protected function diffFormat(\DateInterval $interval)

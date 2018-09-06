@@ -274,7 +274,10 @@ $queueType = Yii::$app->request->get('type');
             'label' => 'Last Activity',
             'visible' => !in_array($queueType, ['inbox', 'sold']),
             'value' => function ($model) {
-                return Lead::getLastActivity($model['note_created'], $model['updated']);
+                if (empty($model['last_activity'])) {
+                    return '-';
+                }
+                return Lead::getLastActivity($model['last_activity']);
             },
             'format' => 'raw'
         ],
