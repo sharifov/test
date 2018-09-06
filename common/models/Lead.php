@@ -237,7 +237,7 @@ class Lead extends ActiveRecord
 
         $lastActivityNoteQuery = new Query();
         $lastActivityNoteQuery->select([
-            'MAX(' . Note::tableName() . '.created) AS last_activity',
+            Note::tableName() . '.created AS last_activity',
             Note::tableName() . '.lead_id'
         ])->from(Note::tableName())
             ->innerJoin(Lead::tableName(), Lead::tableName() . '.`id` = ' . Note::tableName() . '.`lead_id`')
@@ -251,7 +251,7 @@ class Lead extends ActiveRecord
         ])->from(Lead::tableName())
             ->where(Lead::tableName() . '.`status` IN (' . implode(',', $status) . ')');
 
-        $lastActivityTable = sprintf('(SELECT MIN(last_activity) AS last_activity, lead_id FROM(%s UNION %s) AS lastActivityUnion GROUP BY `lead_id`)  AS lastActivityTable',
+        $lastActivityTable = sprintf('(SELECT MAX(last_activity) AS last_activity, lead_id FROM(%s UNION %s) AS lastActivityUnion GROUP BY `lead_id`)  AS lastActivityTable',
             $lastActivityNoteQuery->createCommand()->rawSql,
             $lastActivityLeadQuery->createCommand()->rawSql
         );
