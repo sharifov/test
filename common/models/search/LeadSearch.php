@@ -30,14 +30,14 @@ class LeadSearch extends Lead
     public function rules()
     {
         return [
-            [['id', 'client_id', 'employee_id', 'status', 'project_id', 'source_id', 'adults', 'children', 'infants', 'rating', 'called_expert'], 'integer'],
+            [['id', 'client_id', 'employee_id', 'status', 'project_id', 'adults', 'children', 'infants', 'rating', 'called_expert'], 'integer'],
             [['client_name', 'client_email', 'client_phone'], 'string'],
 
             //['created_date_from', 'default', 'value' => '2018-01-01'],
             //['created_date_to', 'default', 'value' => date('Y-m-d')],
 
             [['uid', 'trip_type', 'cabin', 'notes_for_experts', 'created', 'updated', 'request_ip', 'request_ip_detail', 'offset_gmt', 'snooze_for', 'discount_id', 'bo_flight_id',
-            'created_date_from', 'created_date_to', 'statuses'], 'safe'],
+            'created_date_from', 'created_date_to', 'source_id', 'statuses'], 'safe'],
         ];
     }
 
