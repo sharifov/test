@@ -76,8 +76,21 @@ return [
             ],
         ],
     ],
+    'modules' => [
+        'gridview' =>  [
+            'class' => '\kartik\grid\Module'
+        ]
+    ],
     'as beforeRequest' => [
         'class' => 'common\components\EmployeeActivityLogging',
+    ],
+    'container' => [
+        'definitions' => [
+            yii\grid\GridView::class => [
+                'options' => ['class' => 'table-responsive'],
+                'tableOptions' => ['class' => 'table table-bordered table-condensed table-hover'],
+            ],
+        ],
     ],
     'params' => $params,
 ];

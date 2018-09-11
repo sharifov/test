@@ -610,11 +610,11 @@ class Lead extends ActiveRecord
     public function attributeLabels(): array
     {
         return [
-            'id' => 'ID',
+            'id' => 'Lead Id',
             'client_id' => 'Client ID',
             'employee_id' => 'Employee ID',
             'status' => 'Status',
-            'uid' => 'Uid',
+            'uid' => 'UID',
             'project_id' => 'Project ID',
             'source_id' => 'Source ID',
             'trip_type' => 'Trip Type',
