@@ -267,7 +267,7 @@ class Lead extends ActiveRecord
             Lead::tableName() . '.additional_information', Source::tableName() . '.name',
             LeadFlightSegment::tableName() . '.destination', Employee::tableName() . '.username',
             LeadFlightSegment::tableName() . '.departure', Lead::tableName() . '.updated AS updated',
-            Lead::tableName() . '.created', Client::tableName() . '.first_name', 'lastActivityTable.last_activity AS last_activity',
+            Lead::tableName() . '.created', Client::tableName() . '.first_name', Client::tableName() . '.last_name', 'lastActivityTable.last_activity AS last_activity',
             Airport::tableName() . '.city', Reason::tableName() . '.reason', Lead::tableName() . '.snooze_for',
             'g_ce.emails', 'g_cp.phones', 'all_q.send_q', 'all_q.not_send_q', 'g_detail_lfs.flight_detail'
         ];
@@ -502,6 +502,39 @@ class Lead extends ActiveRecord
                     <input type="radio" name="rate-' . $id . '" id="rate-1-' . $id . '" value="1" ' . $checked1 . ' disabled>
                     <label for="rate-1-' . $id . '"></label>
                 </fieldset>';
+    }
+
+    /**
+     * @param int $value
+     * @return string
+     */
+    public static function getRating2($value = 0) : string
+    {
+        $str = '';
+
+        if($value > 0) {
+            for ($i = 1; $i <= $value; $i++) {
+                $str .= '<i class="fa fa-star "></i> ';
+            }
+
+            $str .= ' ('.$value.')';
+
+            switch ($value) {
+                case 1: $class = 'text-danger';
+                    break;
+                case 2: $class = 'text-warning';
+                    break;
+                case 3: $class = 'text-success';
+                    break;
+                default: $class = '';
+            }
+
+            $str = '<div class="'.$class.'">'.$str.'</div>';
+        } else {
+            $str = '-';
+        }
+
+        return $str;
     }
 
     public static function getSnoozeCountdown($id, $snooze_for)
