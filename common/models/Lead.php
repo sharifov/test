@@ -234,6 +234,30 @@ class Lead extends ActiveRecord
                 break;
         }
 
+
+        $lastActivityNoteQuery = new Query();
+        $lastActivityNoteQuery->select([
+            'MAX(' . Note::tableName() . '.created) AS last_activity',
+            Note::tableName() . '.lead_id'
+        ])->from(Note::tableName())
+            ->innerJoin(Lead::tableName(), Lead::tableName() . '.`id` = ' . Note::tableName() . '.`lead_id`')
+            ->where(Lead::tableName() . '.`status` IN (' . implode(',', $status) . ')')
+            ->groupBy(' lead_id');
+
+        $lastActivityLeadQuery = new Query();
+        $lastActivityLeadQuery->select([
+            Lead::tableName() . '.updated AS last_activity',
+            Lead::tableName() . '.id AS lead_id'
+        ])->from(Lead::tableName())
+            ->where(Lead::tableName() . '.`status` IN (' . implode(',', $status) . ')');
+
+        $lastActivityTable = sprintf('(SELECT MAX(last_activity) AS last_activity, lead_id FROM(%s UNION %s) AS lastActivityUnion GROUP BY `lead_id`)  AS lastActivityTable',
+            $lastActivityNoteQuery->createCommand()->rawSql,
+            $lastActivityLeadQuery->createCommand()->rawSql
+        );
+
+        //var_dump($lastActivityTable);
+
         $selected = [
             Lead::tableName() . '.id', Lead::tableName() . '.bo_flight_id',
             Lead::tableName() . '.adults', Lead::tableName() . '.children',
@@ -242,8 +266,8 @@ class Lead extends ActiveRecord
             Lead::tableName() . '.rating', Lead::tableName() . '.source_id',
             Lead::tableName() . '.additional_information', Source::tableName() . '.name',
             LeadFlightSegment::tableName() . '.destination', Employee::tableName() . '.username',
-            LeadFlightSegment::tableName() . '.departure', Lead::tableName() . '.updated',
-            Lead::tableName() . '.created', Client::tableName() . '.first_name', Client::tableName() . '.last_name', Note::tableName() . '.created AS note_created',
+            LeadFlightSegment::tableName() . '.departure', Lead::tableName() . '.updated AS updated',
+            Lead::tableName() . '.created', Client::tableName() . '.first_name', 'lastActivityTable.last_activity AS last_activity',
             Airport::tableName() . '.city', Reason::tableName() . '.reason', Lead::tableName() . '.snooze_for',
             'g_ce.emails', 'g_cp.phones', 'all_q.send_q', 'all_q.not_send_q', 'g_detail_lfs.flight_detail'
         ];
@@ -260,7 +284,7 @@ class Lead extends ActiveRecord
                 'g_lfs.lead_id = ' . LeadFlightSegment::tableName() . '.lead_id AND g_lfs.first_fs = ' . LeadFlightSegment::tableName() . '.id'
             )
             ->leftJoin(Airport::tableName(), Airport::tableName() . '.iata = ' . LeadFlightSegment::tableName() . '.destination')
-            ->leftJoin('(' . (new Query)
+            ->leftJoin('(' . (new Query())
                     ->select(['lead_id', 'MAX(id) as last_reason'])
                     ->from(Reason::tableName())
                     ->groupBy('lead_id')
@@ -268,14 +292,8 @@ class Lead extends ActiveRecord
                 'g_reason.lead_id = ' . Lead::tableName() . '.id'
             )
             ->leftJoin(Reason::tableName(), Reason::tableName() . '.id = g_reason.last_reason')
-            ->leftJoin('(' . (new Query)
-                    ->select(['lead_id', 'MAX(id) as last_note'])
-                    ->from(Note::tableName())
-                    ->groupBy('lead_id')
-                    ->createCommand()->rawSql . ') as g_note',
-                'g_note.lead_id = ' . Lead::tableName() . '.id'
-            )
-            ->leftJoin(Note::tableName(), Note::tableName() . '.id = g_note.last_note')
+            ->leftJoin($lastActivityTable,
+                'lastActivityTable.lead_id = ' . Lead::tableName() . '.id')
             ->innerJoin('(' . (new Query)
                     ->select(['lead_id', 'GROUP_CONCAT(CONCAT(departure, \' \', origin, \'-\', destination) SEPARATOR \'<br>\') AS flight_detail'])
                     ->from(LeadFlightSegment::tableName())
@@ -388,7 +406,7 @@ class Lead extends ActiveRecord
             ]);
         }
 
-        $query->distinct = true;
+        //$query->distinct = true;
 
         //var_dump($query->createCommand()->rawSql);
         //var_dump($query->count());
@@ -402,15 +420,19 @@ class Lead extends ActiveRecord
 
         if ($queue != 'trash') {
             $dataProvider->sort->defaultOrder = !in_array($queue, ['sold', 'booked'])
-            ? ['pending' => SORT_DESC]
-            : ['pending_last_status' => SORT_DESC];
+                ? ['pending' => SORT_DESC]
+                : ['pending_last_status' => SORT_DESC];
         } else {
             $dataProvider->sort->defaultOrder = ['pending_in_trash' => SORT_DESC];
             $dataProvider->sort->attributes['pending_in_trash'] = [
-                'asc' => [Lead::tableName()  . '.updated' => SORT_ASC],
+                'asc' => [Lead::tableName() . '.updated' => SORT_ASC],
                 'desc' => [Lead::tableName() . '.updated' => SORT_DESC],
             ];
         }
+        $dataProvider->sort->attributes['last_activity'] = [
+            'asc' => ['lastActivityTable.last_activity' => SORT_ASC],
+            'desc' => ['lastActivityTable.last_activity' => SORT_DESC],
+        ];
         $dataProvider->sort->attributes['pending'] = [
             'asc' => [Lead::tableName() . '.created' => SORT_ASC],
             'desc' => [Lead::tableName() . '.created' => SORT_DESC],
@@ -482,36 +504,6 @@ class Lead extends ActiveRecord
                 </fieldset>';
     }
 
-
-    public static function getRating2($value = 0) : string
-    {
-        $str = '';
-
-        if($value > 0) {
-            for ($i = 1; $i <= $value; $i++) {
-                $str .= '<i class="fa fa-star "></i> ';
-            }
-
-            $str .= ' ('.$value.')';
-
-            switch ($value) {
-                case 1: $class = 'text-danger';
-                    break;
-                case 2: $class = 'text-warning';
-                    break;
-                case 3: $class = 'text-success';
-                    break;
-                default: $class = '';
-            }
-
-            $str = '<div class="'.$class.'">'.$str.'</div>';
-        } else {
-            $str = '-';
-        }
-
-        return $str;
-    }
-
     public static function getSnoozeCountdown($id, $snooze_for)
     {
         if (!empty($snooze_for)) {
@@ -539,18 +531,18 @@ class Lead extends ActiveRecord
                 </script>';
     }
 
-    public static function getLastActivity($note_created, $updated)
+    public static function getLastActivity($updated)
     {
         $now = new \DateTime();
         $lastUpdate = new \DateTime($updated);
-        if (!empty($note_created)) {
+        /*if (!empty($note_created)) {
             $created = new \DateTime($note_created);
             return ($lastUpdate->getTimestamp() > $created->getTimestamp())
                 ? self::diffFormat($now->diff($lastUpdate))
                 : self::diffFormat($now->diff($created));
-        } else {
-            return self::diffFormat($now->diff($lastUpdate));
-        }
+        } else {*/
+        return self::diffFormat($now->diff($lastUpdate));
+        //}
     }
 
     protected function diffFormat(\DateInterval $interval)
@@ -610,11 +602,11 @@ class Lead extends ActiveRecord
     public function attributeLabels(): array
     {
         return [
-            'id' => 'Lead Id',
+            'id' => 'ID',
             'client_id' => 'Client ID',
             'employee_id' => 'Employee ID',
             'status' => 'Status',
-            'uid' => 'UID',
+            'uid' => 'Uid',
             'project_id' => 'Project ID',
             'source_id' => 'Source ID',
             'trip_type' => 'Trip Type',

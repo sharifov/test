@@ -65,12 +65,12 @@ use yii\widgets\ActiveForm;
             <?php if (Yii::$app->user->identity->role != 'agent') : ?>
                 <div class="row">
                     <div class="col-md-12">
-                        <?= $form->field($model, 'source')
+                        <?= $form->field($model, 'source_id')
                             ->widget(\kartik\select2\Select2::classname(), [
                                 'data' => \common\models\Source::getGroupList(),
                                 'options' => ['placeholder' => 'All'],
                                 'pluginOptions' => ['multiple' => true, 'allowClear' => true],
-                            ])
+                            ])->label('Market Info')
                         ?>
                     </div>
                 </div>

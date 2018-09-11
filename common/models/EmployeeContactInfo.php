@@ -41,6 +41,7 @@ class EmployeeContactInfo extends \yii\db\ActiveRecord
             [['email_user', 'email_pass', 'direct_line'], 'string', 'max' => 255],
             [['employee_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['employee_id' => 'id']],
             [['project_id'], 'exist', 'skipOnError' => true, 'targetClass' => Project::class, 'targetAttribute' => ['project_id' => 'id']],
+            [['employee_id', 'project_id'], 'unique', 'targetAttribute' => ['employee_id', 'project_id']]
         ];
     }
 

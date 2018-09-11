@@ -74,17 +74,19 @@ class MonitorFlowController extends Controller
              * @var $lastLog Note
              */
             $lastLog = Note::find()->where(['lead_id' => $object->id])
-            ->orderBy('id DESC')->one();
-            if ($lastLog === null) {
+                ->orderBy('id DESC')->one();
+            if ($lastLog == null) {
                 $date = $object->updated;
             } else {
-                $date = $lastLog->created;
+                $date = (strtotime($lastLog->created) < strtotime($object->updated))
+                    ? $object->updated
+                    : $lastLog->created;
             }
 
             $emails = $object->client->clientEmails;
             $now = date('Y-m-d H:i:s');
             if ($test) {
-                echo 'Lead date: '. $date . '. Now date: '.date('Y-m-d H:i:s') . PHP_EOL;
+                echo 'Lead date: ' . $date . '. Now date: ' . date('Y-m-d H:i:s') . PHP_EOL;
             }
             if (!empty($emails)) {
                 if ($test) {

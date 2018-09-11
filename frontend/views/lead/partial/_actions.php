@@ -108,12 +108,12 @@ if ($leadForm->mode != $leadForm::VIEW_MODE) {
     /*** Send call expert request ***/
     $('#btn-call-expert').click(function (e) {
         e.preventDefault();
-        if ($('#lead-notes_for_experts').val().length >= 50) {
+        if ($('#lead-notes_for_experts').val().length != 0) {
             $('#lead-notes_for_experts').parent().find('.help-block').html('')
             $('#lead-notes_for_experts').parent().removeClass('has-error');
             $.post($(this).data('url'), {notes: $('#lead-notes_for_experts').val()});
         } else {
-            $('#lead-notes_for_experts').parent().find('.help-block').html('Notes for Expert cannot be blank. Min 50 symbols!')
+            $('#lead-notes_for_experts').parent().find('.help-block').html('Notes for Expert cannot be blank.')
             $('#lead-notes_for_experts').parent().addClass('has-error');
         }
     });
