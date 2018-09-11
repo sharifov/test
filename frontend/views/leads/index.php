@@ -23,7 +23,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <h1><?= Html::encode($this->title) ?></h1>
 
-    <?//php Pjax::begin(); ?>
+    <?php Pjax::begin(); ?>
     <?php echo $this->render('_search', ['model' => $searchModel]); ?>
 
 
@@ -134,12 +134,19 @@ $this->params['breadcrumbs'][] = $this->title;
                 }
 
                 $city = '-';
-                if($originCode) {
+
+                $airport = \common\models\Airport::find()->where(['iata' => $originCode])->one();
+
+                if($airport && $airport->city) {
+                    $city = $airport->city;
+                }
+
+                /*if($originCode) {
                     $airport = \common\models\AirportList::find()->where(['ai_iata_code' => $originCode])->one();
                     if($airport && $airport->aiRegionIsoCode) {
                         $city = $airport->aiRegionIsoCode->r_name;
                     }
-                }
+                }*/
 
                 return $city;
             },
@@ -165,12 +172,14 @@ $this->params['breadcrumbs'][] = $this->title;
                 }
 
                 $city = '-';
-                if($destinationCode) {
-                    $airport = \common\models\AirportList::find()->where(['ai_iata_code' => $destinationCode])->one();
-                    if($airport && $airport->aiRegionIsoCode) {
-                        $city = $airport->aiRegionIsoCode->r_name;
-                    }
+
+                $airport = \common\models\Airport::find()->where(['iata' => $destinationCode])->one();
+
+                if($airport && $airport->city) {
+                    $city = $airport->city;
                 }
+
+
 
                 return $city;
             },
@@ -196,9 +205,11 @@ $this->params['breadcrumbs'][] = $this->title;
 
                 $country = '-';
                 if($originCode) {
-                    $airport = \common\models\AirportList::find()->where(['ai_iata_code' => $originCode])->one();
-                    if($airport && $airport->aiCountryIsoCode) {
-                        $country = $airport->aiCountryIsoCode->c_iso_code;
+                    //$airport = \common\models\AirportList::find()->where(['ai_iata_code' => $originCode])->one();
+                    $airport = \common\models\Airport::find()->where(['iata' => $originCode])->one();
+
+                    if($airport && $airport->countryId) {
+                        $country = $airport->countryId;
                     }
                 }
 
@@ -227,10 +238,17 @@ $this->params['breadcrumbs'][] = $this->title;
 
                 $country = '-';
                 if($destinationCode) {
-                    $airport = \common\models\AirportList::find()->where(['ai_iata_code' => $destinationCode])->one();
-                    if($airport && $airport->aiCountryIsoCode) {
-                        $country = $airport->aiCountryIsoCode->c_iso_code;
+                    //$airport = \common\models\AirportList::find()->where(['ai_iata_code' => $destinationCode])->one();
+
+                    $airport = \common\models\Airport::find()->where(['iata' => $destinationCode])->one();
+
+                    if($airport && $airport->countryId) {
+                        $country = $airport->countryId;
                     }
+
+                    /*if($airport && $airport->aiCountryIsoCode) {
+                        $country = $airport->aiCountryIsoCode->c_iso_code;
+                    }*/
                 }
 
                 return $country;
@@ -325,7 +343,7 @@ $this->params['breadcrumbs'][] = $this->title;
         [
             'header' => 'Created Date',
             'value' => function(\common\models\Lead $model) {
-                return Yii::$app->formatter->asDatetime($model->created, 'php:d-M-Y');
+                return Yii::$app->formatter->asDate($model->created);
             },
         ],
 
@@ -510,6 +528,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 },
                 'format' => 'raw',
                 'contentOptions' => ['class' => 'text-center'],
+                'options' => ['style' => 'width:140px'],
             ],
 
             //'children',
@@ -542,7 +561,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'created',
                 'value' => function(\common\models\Lead $model) {
-                    return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime($model->created, 'php:Y-m-d [H:i]');
+                    return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime($model->created);
                 },
                 'format' => 'html',
             ],
@@ -550,7 +569,7 @@ $this->params['breadcrumbs'][] = $this->title;
             /*[
                 'attribute' => 'updated',
                 'value' => function(\common\models\Lead $model) {
-                    return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime($model->updated, 'php:Y-m-d [H:i]');
+                    return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime($model->updated);
                 },
                 'format' => 'html',
             ],*/
@@ -558,8 +577,6 @@ $this->params['breadcrumbs'][] = $this->title;
 
             ['class' => 'yii\grid\ActionColumn', 'template' => '{view}'],
         ];
-
-    //$fullExportMenu =
 
         Yii::$app->state = Yii::$app::STATE_END;
 
@@ -575,13 +592,14 @@ $this->params['breadcrumbs'][] = $this->title;
             'target' => ExportMenu::TARGET_BLANK,
             'linkPath' => '/assets/',
             'folder' => '@webroot/assets', // this is default save folder on server
+            'dropdownOptions' => [
+                'label' => 'Full Export'
+            ],
+            'columnSelectorOptions' => [
+                'label' => 'Export Fields'
+            ]
         ]);
 
-
-
-
-
-    //echo Yii::getAlias('@webroot/assets'); exit;
 
 
     /*$fullExportMenu = ExportMenu::widget([
@@ -597,7 +615,6 @@ $this->params['breadcrumbs'][] = $this->title;
     ]);*/
 
 ?>
-<hr>
 
 <?php
 
@@ -606,7 +623,7 @@ $this->params['breadcrumbs'][] = $this->title;
         'filterModel' => $searchModel,
         //'containerOptions' => ['style'=>'overflow: auto'], // only set when $responsive = false
 
-        'export' => [
+        /*'export' => [
             'label' => 'Page',
             'fontAwesome' => true,
             'itemsAfter'=> [
@@ -614,7 +631,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 '<li class="dropdown-header">Export All Data</li>',
                 $fullExportMenu
             ]
-        ],
+        ],*/
 
 
         'columns' => $gridColumns,
@@ -645,5 +662,5 @@ $this->params['breadcrumbs'][] = $this->title;
 
     ]); ?>
 
-    <?//php Pjax::end(); ?>
+    <?php Pjax::end(); ?>
 </div>

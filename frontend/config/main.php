@@ -75,6 +75,14 @@ return [
                 ],
             ],
         ],
+
+        'formatter' => [
+            'dateFormat' => 'php:d-M-Y', //'dd.MM.yyyy',
+            'datetimeFormat' => 'php:d-M-Y [H:i]',
+            //'decimalSeparator' => ',',
+            //'thousandSeparator' => ' ',
+            //'currencyCode' => 'USD',
+        ],
     ],
     'modules' => [
         'gridview' =>  [

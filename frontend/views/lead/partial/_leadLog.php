@@ -17,7 +17,7 @@
             <tbody>
             <?php foreach ($logs as $saleLog) : ?>
                 <tr>
-                    <td><i class="fa fa-calendar"></i> <?= Yii::$app->formatter->asDatetime(strtotime($saleLog->created), 'php: Y-m-d [H:i]') ?></td>
+                    <td><i class="fa fa-calendar"></i> <?= Yii::$app->formatter->asDatetime(strtotime($saleLog->created)) ?></td>
                     <td><i class="fa fa-user"></i> <?= $saleLog->agent ?></td>
                     <td style="max-width: 1024px;">
                         <?php

@@ -154,7 +154,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     [
                         'attribute' => 'created',
                         'value' => function(\common\models\Lead $model) {
-                            return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime($model->created, 'php:Y-m-d [H:i]');
+                            return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime($model->created);
                         },
                         'format' => 'html',
                     ],
@@ -162,7 +162,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     [
                         'attribute' => 'updated',
                         'value' => function(\common\models\Lead $model) {
-                            return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime($model->updated, 'php:Y-m-d [H:i]');
+                            return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime($model->updated);
                         },
                         'format' => 'html',
                     ],
@@ -251,7 +251,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     [
                         'attribute' => 'created',
                         'value' => function(\common\models\LeadFlightSegment $model) {
-                            return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime($model->created, 'php:Y-m-d [H:i]');
+                            return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime($model->created);
                         },
                         'format' => 'html',
                     ],
@@ -259,7 +259,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     [
                         'attribute' => 'updated',
                         'value' => function(\common\models\LeadFlightSegment $model) {
-                            return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime($model->updated, 'php:Y-m-d [H:i]');
+                            return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime($model->updated);
                         },
                         'format' => 'html',
                     ],
@@ -372,7 +372,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 [
                     'attribute' => 'created',
                     'value' => function(\common\models\Quote $model) {
-                        return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime($model->created, 'php:Y-m-d [H:i]');
+                        return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime($model->created);
                     },
                     'format' => 'html',
                 ],
@@ -380,7 +380,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 [
                     'attribute' => 'updated',
                     'value' => function(\common\models\Quote $model) {
-                        return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime($model->updated, 'php:Y-m-d [H:i]');
+                        return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime($model->updated);
                     },
                     'format' => 'html',
                 ],

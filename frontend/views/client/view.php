@@ -85,14 +85,14 @@ $this->params['breadcrumbs'][] = $this->title;
                     [
                         'attribute' => 'created',
                         'value' => function(\common\models\Client $model) {
-                            return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime($model->created, 'php:Y-m-d [H:i]');
+                            return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime($model->created);
                         },
                         'format' => 'html',
                     ],
                     [
                         'attribute' => 'updated',
                         'value' => function(\common\models\Client $model) {
-                            return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime($model->updated, 'php:Y-m-d [H:i]');
+                            return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime($model->updated);
                         },
                         'format' => 'html',
                     ],

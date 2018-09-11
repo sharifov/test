@@ -65,7 +65,7 @@ $queueType = Yii::$app->request->get('type');
             //'label' => 'Created Date',
             'visible' => !in_array($queueType, ['booked', 'sold']),
             'value' => function($model) {
-                return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model['created']), 'php:Y-m-d [H:i]');
+                return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model['created']));
             },
             'format' => 'html',
             'filter' => false
