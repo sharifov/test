@@ -18,10 +18,10 @@ return [
         'formatter' => [
             'class' => 'yii\i18n\Formatter',
             'timeZone' => 'Europe/Chisinau',
-            'defaultTimeZone' => 'UTC',
-            'dateFormat' => 'php:Y-m-d',
-            'datetimeFormat' => 'php:Y-m-d H:i:s',
-            'timeFormat' => 'php:H:i:s',
+            'defaultTimeZone' => 'Europe/Chisinau',
+            'dateFormat' => 'php:d-M-Y',
+            'datetimeFormat' => 'php:d-M-Y H:i:s',
+            'timeFormat' => 'php:H:i',
 
             'thousandSeparator' => ',',
             'decimalSeparator' => '.',

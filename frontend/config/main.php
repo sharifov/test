@@ -79,9 +79,18 @@ return [
         'formatter' => [
             'dateFormat' => 'php:d-M-Y', //'dd.MM.yyyy',
             'datetimeFormat' => 'php:d-M-Y [H:i]',
+            'timeFormat' => 'php:H:i',
             //'decimalSeparator' => ',',
             //'thousandSeparator' => ' ',
             //'currencyCode' => 'USD',
+        ],
+
+        'i18n' => [
+            'translations' => [
+                '*' => [
+                    'class' => 'yii\i18n\PhpMessageSource'
+                ],
+            ],
         ],
     ],
     'modules' => [
