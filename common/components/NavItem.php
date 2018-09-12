@@ -47,7 +47,13 @@ class NavItem
                 $items[] = ['label' => '<i class="fa fa-dollar"></i> Quote Price List', 'url' => ['quote-price/index']];
             }
 
-            $items[] = ['label' => '<i class="fa fa-search"></i> Search Lead', 'url' => ['leads/index']];
+            $items[] = ['label' => '<i class="fa fa-search"></i> Search Leads', 'url' => ['leads/index']];
+
+
+            if (in_array(Yii::$app->user->identity->role, ['admin', 'supervision'])) {
+
+                $items[] = ['label' => '<i class="fa fa-sign-out"></i> Export Leads', 'url' => ['leads/export']];
+            }
 
 
             $menuItems[] = [

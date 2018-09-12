@@ -36,9 +36,9 @@ class LeadsController extends DefaultController
                 'class' => AccessControl::class,
                 'rules' => [
                     [
-                        'actions' => ['index', 'update', 'delete', 'create'],
+                        'actions' => ['index', 'update', 'delete', 'create', 'export'],
                         'allow' => true,
-                        'roles' => ['supervision'],
+                        'roles' => ['supervision', 'admin'],
                     ],
                     [
                         'actions' => ['view', 'index'],
@@ -62,6 +62,21 @@ class LeadsController extends DefaultController
         $dataProvider = $searchModel->search2(Yii::$app->request->queryParams);
 
         return $this->render('index', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+        ]);
+    }
+
+    /**
+     * Lists all Lead models.
+     * @return mixed
+     */
+    public function actionExport()
+    {
+        $searchModel = new LeadSearch();
+        $dataProvider = $searchModel->search2(Yii::$app->request->queryParams);
+
+        return $this->render('export', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
         ]);
