@@ -35,9 +35,8 @@
         "lajax/yii2-translate-manager": "^1.7",
         "webvimark/module-user-management": "^1.0",
         "yiister/yii2-gentelella": "~1.0",
-        "kartik-v/yii2-export": "@dev",
-        "kartik-v/yii2-grid": "@dev",
-        "kartik-v/yii2-krajee-base": "dev-master"
+        "kartik-v/yii2-export": "*",
+        "kartik-v/yii2-grid": "*"
     },
     "require-dev": {
         "yiisoft/yii2-debug": "~2.0.0",

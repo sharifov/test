@@ -1,9 +1,7 @@
 <?php
 
 use yii\helpers\Html;
-//use yii\grid\GridView;
 use yii\widgets\Pjax;
-use kartik\export\ExportMenu;
 use kartik\grid\GridView;
 
 /* @var $this yii\web\View */
@@ -582,14 +580,14 @@ $this->params['breadcrumbs'][] = $this->title;
 
 
 
-        $fullExportMenu = ExportMenu::widget([
+        $fullExportMenu = \kartik\export\ExportMenu::widget([
             'dataProvider' => $dataProvider,
             'columns' => $gridColumnsExport,
             'fontAwesome' => true,
             //'stream' => false, // this will automatically save file to a folder on web server
             //'deleteAfterSave' => false, // this will delete the saved web file after it is streamed to browser,
             //'batchSize' => 10,
-            'target' => ExportMenu::TARGET_BLANK,
+            'target' => \kartik\export\ExportMenu::TARGET_BLANK,
             'linkPath' => '/assets/',
             'folder' => '@webroot/assets', // this is default save folder on server
             'dropdownOptions' => [
