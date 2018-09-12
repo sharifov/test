@@ -409,15 +409,15 @@ $this->params['breadcrumbs'][] = $this->title;
         'filterModel' => $searchModel,
         //'containerOptions' => ['style'=>'overflow: auto'], // only set when $responsive = false
 
-        /*'export' => [
+        'export' => [
             'label' => 'Page',
             'fontAwesome' => true,
-            'itemsAfter'=> [
+            /*'itemsAfter'=> [
                 '<li role="presentation" class="divider"></li>',
                 '<li class="dropdown-header">Export All Data</li>',
                 $fullExportMenu
-            ]
-        ],*/
+            ]*/
+        ],
 
 
         'columns' => $gridColumnsExport,
@@ -428,7 +428,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 Html::a('<i class="glyphicon glyphicon-repeat"></i>', ['leads/index'], ['data-pjax'=>0, 'class' => 'btn btn-default', 'title'=>'Reset Grid'])
             ],
             '{export}',
-            //$fullExportMenu,
+            $fullExportMenu,
             '{toggleData}'
         ],
         'pjax' => true,
@@ -443,7 +443,7 @@ $this->params['breadcrumbs'][] = $this->title;
         /*'showPageSummary' => true,*/
         'panel' => [
             'type' => GridView::TYPE_PRIMARY,
-            'heading' => '<h3 class="panel-title"><i class="glyphicon glyphicon-list"></i> Leads</h3>',
+            'heading' => '<h3 class="panel-title"><i class="glyphicon glyphicon-list"></i> Export Leads</h3>',
         ],
 
     ]); ?>
