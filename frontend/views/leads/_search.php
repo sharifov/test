@@ -11,7 +11,7 @@ use yii\widgets\ActiveForm;
 <div class="lead-search">
 
     <?php $form = ActiveForm::begin([
-        'action' => ['index'],
+        //'action' => ['index'],
         'method' => 'get',
         'options' => [
             'data-pjax' => 1
