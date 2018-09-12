@@ -8,10 +8,12 @@ use common\models\Employee;
 use common\models\EmployeeAcl;
 use common\models\EmployeeContactInfo;
 use common\models\ProjectEmployeeAccess;
+use Symfony\Component\Finder\Exception\AccessDeniedException;
 use Yii;
 use yii\bootstrap\Html;
 use yii\filters\AccessControl;
 use yii\helpers\ArrayHelper;
+use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
 use yii\web\Response;
 
@@ -37,7 +39,7 @@ class EmployeeController extends DefaultController
                     [
                         'actions' => ['seller-contact-info'],
                         'allow' => true,
-                        'roles' => ['agent'],
+                        'roles' => ['agent', 'supervision'],
                     ],
                 ],
             ],
@@ -49,10 +51,17 @@ class EmployeeController extends DefaultController
     public function actionSellerContactInfo($employeeId)
     {
         $roles = Yii::$app->user->identity->getRoles();
+
+        if(is_array($roles)) {
+            $roles = array_keys($roles);
+        }
+
+        //print_r($roles); exit;
+
         if (empty($roles)) {
-            return null;
+            throw new AccessDeniedException('Not found roles');
         } elseif (!in_array('admin', $roles) && Yii::$app->user->identity->getId() != $employeeId) {
-            return null;
+            throw new AccessDeniedException('AccessDenied ('.$employeeId.')');
         }
 
         if (Yii::$app->request->isPost && Yii::$app->request->isAjax) {
@@ -63,16 +72,26 @@ class EmployeeController extends DefaultController
             ];
             $errors = [];
             $attrArr = Yii::$app->request->post('EmployeeContactInfo');
+
+
+
             foreach ($attrArr as $key => $attr) {
-                $model = empty($attr['id'])
-                    ? null
-                    : EmployeeContactInfo::findOne(['id' => $attr['id']]);
+                $model = empty($attr['id']) ? null : EmployeeContactInfo::findOne(['id' => $attr['id']]);
+
                 if ($model === null) {
                     $model = new EmployeeContactInfo();
                 }
                 $model->attributes = $attr;
+
+
+
                 if ($model->needSave()) {
+
+
                     if (!$model->save()) {
+
+                        //print_r($model->errors); exit;
+
                         if ($model->hasErrors('email_user')) {
                             $errors[Html::getInputId($model, '[' . $key . ']email_user')] = true;
                         }
@@ -82,10 +101,14 @@ class EmployeeController extends DefaultController
                         if ($model->hasErrors('direct_line')) {
                             $errors[Html::getInputId($model, '[' . $key . ']direct_line')] = true;
                         }
+
+                        $errors[$key] = VarDumper::dumpAsString($model->getFirstErrors());
+
                     }
                 }
             }
-            if (!empty($errors)) {
+
+            if ($errors) {
                 $result['success'] = false;
                 $result['errors'] = $errors;
             }
