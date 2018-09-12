@@ -108,7 +108,7 @@ $this->registerJs($js);
     <?= Html::button('Save', [
         'class' => 'btn btn-primary',
         'id' => 'seller-contact-info-btn',
-        'data-url' => sprintf('%s/admin/employee/seller-contact-info?employeeId=%d',
+        'data-url' => sprintf('%s/employee/seller-contact-info?employeeId=%d',
             Yii::$app->urlManager->getHostInfo(),
             $model->id
         )
