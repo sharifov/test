@@ -6,6 +6,7 @@ use common\controllers\DefaultController;
 use common\models\search\LeadFlightSegmentSearch;
 use common\models\search\LeadSearch;
 use common\models\search\QuoteSearch;
+use frontend\models\LeadMultipleForm;
 use Yii;
 use common\models\Lead;
 use yii\filters\AccessControl;
@@ -61,9 +62,51 @@ class LeadsController extends DefaultController
         $searchModel = new LeadSearch();
         $dataProvider = $searchModel->search2(Yii::$app->request->queryParams);
 
+        $multipleForm = new LeadMultipleForm();
+
+        if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id)) {
+            if ($multipleForm->load(Yii::$app->request->post()) && $multipleForm->lead_list) {
+                if ($multipleForm->validate()) {
+
+                    if (\is_array($multipleForm->lead_list)) {
+                        foreach ($multipleForm->lead_list as $lead_id) {
+                            $lead = Lead::findOne($lead_id);
+
+                            if ($lead) {
+                                $is_save = false;
+                                if ($multipleForm->employee_id) {
+                                    $lead->employee_id = $multipleForm->employee_id;
+                                    $is_save = true;
+                                }
+
+                                if ($multipleForm->status_id) {
+                                    $lead->status = $multipleForm->status_id;
+                                    $is_save = true;
+                                }
+
+                                if ($multipleForm->rating) {
+                                    $lead->rating = $multipleForm->rating;
+                                    $is_save = true;
+                                }
+
+                                if ($is_save) {
+                                    $lead->save();
+                                }
+                            }
+                        }
+                    }
+                    //VarDumper::dump(Yii::$app->request->post());
+                    //exit;
+                }
+                //return $this->redirect(['view', 'id' => $model->id]);
+            }
+        }
+
+
         return $this->render('index', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
+            'multipleForm' => $multipleForm
         ]);
     }
 

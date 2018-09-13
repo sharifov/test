@@ -323,3 +323,12 @@ a.desc:after {
 .lq-send {
     background-color: #0BB094;
 }
+
+/* -------- Yii2 styles --------------------------- */
+.error-summary {
+    color: #a94442;
+    background: #fdf7f7;
+    border-left: 3px solid #eed3d7;
+    padding: 10px 20px;
+    margin: 0 0 15px 0;
+}
