@@ -7,6 +7,7 @@ use kartik\grid\GridView;
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\LeadSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
+/* @var $multipleForm \frontend\models\LeadMultipleForm */
 
 $this->title = 'Search Leads';
 $this->params['breadcrumbs'][] = $this->title;
@@ -25,356 +26,57 @@ $this->params['breadcrumbs'][] = $this->title;
     <?php echo $this->render('_search', ['model' => $searchModel]); ?>
 
 
+    <?php if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id)) : ?>
+        <p>
+            <?//= Html::a('Create Lead', ['create'], ['class' => 'btn btn-success']) ?>
+            <?= Html::button('<i class="fa fa-edit"></i> Multiple update', ['class' => 'btn btn-info', 'data-toggle'=> "modal", 'data-target'=>"#modalUpdate" ])?>
+        </p>
+    <?php endif; ?>
 
-    <p>
-        <?//= Html::a('Create Lead', ['create'], ['class' => 'btn btn-success']) ?>
-    </p>
 
-
+    <?php $form = \yii\bootstrap\ActiveForm::begin(['options' => ['data-pjax' => true]]); // ['action' => ['leads/update-multiple'] ?>
 
     <?php
 
-    $gridColumnsExport = [
-        ['class' => 'yii\grid\SerialColumn'],
 
-        [
-            'attribute' => 'id',
-        ],
-
-        [
-            'attribute' => 'status',
-            'value' => function(\common\models\Lead $model) {
-                return $model->getStatusName(false);
-            },
-        ],
-
-        [
-            'header' => 'Segments',
-            'value' => function(\common\models\Lead $model) {
-
-                $segments = $model->leadFlightSegments;
-                $segmentData = [];
-                if($segments) {
-                    foreach ($segments as $sk => $segment) {
-                        $segmentData[] = ($sk + 1).'. '.($segment->origin.'->'.$segment->destination).'';
-                    }
-                }
-
-                $segmentStr = implode("\r\n", $segmentData);
-                return ''.$segmentStr.'';
-                //return $model->leadFlightSegmentsCount ? Html::a($model->leadFlightSegmentsCount, ['lead-flight-segment/index', "LeadFlightSegmentSearch[lead_id]" => $model->id], ['target' => '_blank', 'data-pjax' => 0]) : '-' ;
-            },
-
-        ],
-
-
-        [
-            'header' => 'Origin City Code',
-            'value' => function(\common\models\Lead $model) {
-
-                $segments = $model->leadFlightSegments;
-                $originCode = null;
-                $destinationCode = null;
-
-                if($segments) {
-                    foreach ($segments as $sk => $segment) {
-
-                        if(!$originCode) {
-                            $originCode = $segment->origin;
-                        }
-                        $destinationCode = $segment->destination;
-                    }
-                }
-
-                return $originCode;
-            },
-        ],
-
-
-        [
-            'header' => 'Destination City Code',
-            'value' => function(\common\models\Lead $model) {
-
-                $segments = $model->leadFlightSegments;
-                $originCode = null;
-                $destinationCode = null;
-
-                if($segments) {
-                    foreach ($segments as $sk => $segment) {
-
-                        if(!$originCode) {
-                            $originCode = $segment->origin;
-                        }
-                        $destinationCode = $segment->destination;
-                    }
-                }
-
-                return $destinationCode;
-            },
-        ],
-
-        [
-            'header' => 'Origin City, full name',
-            'value' => function(\common\models\Lead $model) {
-
-                $segments = $model->leadFlightSegments;
-                $originCode = null;
-                $destinationCode = null;
-
-                if($segments) {
-                    foreach ($segments as $sk => $segment) {
-
-                        if(!$originCode) {
-                            $originCode = $segment->origin;
-                        }
-                        $destinationCode = $segment->destination;
-                    }
-                }
-
-                $city = '-';
-
-                $airport = \common\models\Airport::find()->where(['iata' => $originCode])->one();
-
-                if($airport && $airport->city) {
-                    $city = $airport->city;
-                }
-
-                /*if($originCode) {
-                    $airport = \common\models\AirportList::find()->where(['ai_iata_code' => $originCode])->one();
-                    if($airport && $airport->aiRegionIsoCode) {
-                        $city = $airport->aiRegionIsoCode->r_name;
-                    }
-                }*/
-
-                return $city;
-            },
-        ],
-
-
-        [
-            'header' => 'Destination City, full name',
-            'value' => function(\common\models\Lead $model) {
-
-                $segments = $model->leadFlightSegments;
-                $originCode = null;
-                $destinationCode = null;
-
-                if($segments) {
-                    foreach ($segments as $sk => $segment) {
-
-                        if(!$originCode) {
-                            $originCode = $segment->origin;
-                        }
-                        $destinationCode = $segment->destination;
-                    }
-                }
-
-                $city = '-';
-
-                $airport = \common\models\Airport::find()->where(['iata' => $destinationCode])->one();
-
-                if($airport && $airport->city) {
-                    $city = $airport->city;
-                }
-
-
-
-                return $city;
-            },
-        ],
-
-        [
-            'header' => 'Origin Country',
-            'value' => function(\common\models\Lead $model) {
-
-                $segments = $model->leadFlightSegments;
-                $originCode = null;
-                $destinationCode = null;
-
-                if($segments) {
-                    foreach ($segments as $sk => $segment) {
-
-                        if(!$originCode) {
-                            $originCode = $segment->origin;
-                        }
-                        $destinationCode = $segment->destination;
-                    }
-                }
-
-                $country = '-';
-                if($originCode) {
-                    //$airport = \common\models\AirportList::find()->where(['ai_iata_code' => $originCode])->one();
-                    $airport = \common\models\Airport::find()->where(['iata' => $originCode])->one();
-
-                    if($airport && $airport->countryId) {
-                        $country = $airport->countryId;
-                    }
-                }
-
-                return $country;
-            },
-        ],
-
-
-        [
-            'header' => 'Destination Country',
-            'value' => function(\common\models\Lead $model) {
-
-                $segments = $model->leadFlightSegments;
-                $originCode = null;
-                $destinationCode = null;
-
-                if($segments) {
-                    foreach ($segments as $sk => $segment) {
-
-                        if(!$originCode) {
-                            $originCode = $segment->origin;
-                        }
-                        $destinationCode = $segment->destination;
-                    }
-                }
-
-                $country = '-';
-                if($destinationCode) {
-                    //$airport = \common\models\AirportList::find()->where(['ai_iata_code' => $destinationCode])->one();
-
-                    $airport = \common\models\Airport::find()->where(['iata' => $destinationCode])->one();
-
-                    if($airport && $airport->countryId) {
-                        $country = $airport->countryId;
-                    }
-
-                    /*if($airport && $airport->aiCountryIsoCode) {
-                        $country = $airport->aiCountryIsoCode->c_iso_code;
-                    }*/
-                }
-
-                return $country;
-            },
-        ],
-
-
-
-        [
-            'header' => 'Profit',
-            'value' => function(\common\models\Lead $model) {
-                $total = 0;
-                $quote = \common\models\Quote::find()->where(['lead_id' => $model->id, 'status' => \common\models\Quote::STATUS_APPLIED])->orderBy(['id' => SORT_DESC])->one();
-
-                if(!$quote) {
-                    $quote = \common\models\Quote::find()->where(['lead_id' => $model->id, 'status' => \common\models\Quote::STATUS_SEND])->orderBy(['id' => SORT_DESC])->one();
-                }
-
-                if($quote) {
-                    $prices = $quote->quotePrices;
-                    if($prices) {
-                        foreach ($prices as $price) {
-                            $total += (float) $price->selling - (float) $price->net;
-                        }
-                    }
-
-                }
-                return $total;
-            },
-        ],
-
-        [
-            'header' => 'Outbound Date',
-            'value' => function(\common\models\Lead $model) {
-                $segments = $model->leadFlightSegments;
-                $datetime = '';
-                if(isset($segments[0]) && $segments[0]->departure) {
-                    $datetime = date('d-M-Y', strtotime($segments[0]->departure));
-                }
-                return $datetime;
-            },
-        ],
-
-        [
-            'header' => 'Market info',
-            'value' => function(\common\models\Lead $model) {
-                return $model->source ? $model->source->name : '-';
-            },
-        ],
-
-
-        [
-            'attribute' => 'trip_type',
-            'value' => function(\common\models\Lead $model) {
-                return \common\models\Lead::getFlightType($model->trip_type) ?? '-';
-            },
-        ],
-
-        [
-            'attribute' => 'cabin',
-            'value' => function(\common\models\Lead $model) {
-                return \common\models\Lead::getCabin($model->cabin) ?? '-';
-            },
-        ],
-
-
-
-        [
-            'attribute' => 'adults',
-            'value' => function(\common\models\Lead $model) {
-                return $model->adults ?: 0;
-            },
-
-        ],
-
-        [
-            'attribute' => 'children',
-            'value' => function(\common\models\Lead $model) {
-                return $model->children ?: 0;
-            },
-
-        ],
-
-        [
-            'attribute' => 'infants',
-            'value' => function(\common\models\Lead $model) {
-                return $model->infants ?: 0;
-            },
-        ],
-
-
-        [
-            'header' => 'Created Date',
-            'value' => function(\common\models\Lead $model) {
-                return Yii::$app->formatter->asDate($model->created);
-            },
-        ],
-
-        [
-            'header' => 'Created Time',
-            'value' => function(\common\models\Lead $model) {
-                return Yii::$app->formatter->asDatetime($model->created, 'php:H:i');
-            },
-        ],
-
-
-
-    ];
-
-
-
-    /*$fullExportMenu = ExportMenu::widget([
-        'dataProvider' => $dataProvider,
-        'columns' => $gridColumnsExport,
-        'target' => ExportMenu::TARGET_BLANK,
-        'fontAwesome' => true,
-        'pjaxContainerId' => 'kv-pjax-container',
-        'dropdownOptions' => [
-            'label' => 'Full',
-            'class' => 'btn btn-default',
-            'itemsBefore' => [
-                '<li class="dropdown-header">Export All Data</li>',
-            ],
-        ],
-    ]);*/
 
         $gridColumns = [
             //['class' => 'yii\grid\SerialColumn'],
+
+
+            [
+                    'class' => 'yii\grid\CheckboxColumn',
+                    'name' => 'LeadMultipleForm[lead_list]'
+                    /*'checkboxOptions' => function(\common\models\Lead $model) {
+                        return ['value' => $model->id];
+                    },*/
+            ],
+
+            /*[
+
+                'header'=>Html::checkbox('selection_all', false, ['class'=>'select-on-check-all', 'value'=>1,
+                    'onclick'=>'
+                        $(".kv-row-checkbox").prop("checked", $(this).is(":checked"));
+                        if($(".kv-row-checkbox").prop("checked") === true) $(".delete_ready").attr("class","delete_ready warning");
+                        if($(".kv-row-checkbox").prop("checked") === false) $(".delete_ready").attr("class","delete_ready");
+
+
+                        ']),
+                'contentOptions'=>['class'=>'kv-row-select'],
+                'content'=>function($model, $key){
+
+
+                        return Html::checkbox('id[]', false, ['class'=>'kv-row-checkbox ',
+                            'value'=>$key, 'onclick'=>'$(this).closest("tr").toggleClass("warning");']);
+
+                    //return Html::checkbox('selection[]', false, ['class'=>'kv-row-checkbox', 'value'=>$key, 'onclick'=>'$(this).closest("tr").toggleClass("danger");', 'disabled'=> isset($model->stopDelete)&&!($model->stopDelete===1)]);
+                },
+                'hAlign'=>'center',
+                'vAlign'=>'middle',
+                'hiddenFromExport'=>true,
+                'mergeHeader'=>true,
+                'width'=>'50px'
+            ],*/
 
             [
                 'attribute' => 'id',
@@ -614,6 +316,8 @@ $this->params['breadcrumbs'][] = $this->title;
 
 ?>
 
+
+
 <?php
 
     echo GridView::widget([
@@ -638,6 +342,7 @@ $this->params['breadcrumbs'][] = $this->title;
             ['content'=>
                 //Html::button('<i class="glyphicon glyphicon-plus"></i>', ['type'=>'button', 'title'=>'Add Lead', 'class'=>'btn btn-success', 'onclick'=>'alert("This will launch the book creation form.\n\nDisabled for this demo!");']) . ' '.
                 Html::a('<i class="glyphicon glyphicon-repeat"></i>', ['leads/index'], ['data-pjax'=>0, 'class' => 'btn btn-default', 'title'=>'Reset Grid'])
+
             ],
             //'{export}',
             //$fullExportMenu,
@@ -660,5 +365,78 @@ $this->params['breadcrumbs'][] = $this->title;
 
     ]); ?>
 
+
+    <?php if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id)) : ?>
+
+        <p>
+                <?= Html::button('<i class="fa fa-edit"></i> Multiple update', ['class' => 'btn btn-info', 'data-toggle'=> "modal",
+                    'data-target'=>"#modalUpdate",
+                ]) ?>
+        </p>
+
+        <?= $form->errorSummary($multipleForm); ?>
+
+
+        <?php \yii\bootstrap\Modal::begin([
+                'header' => '<b>Multiple update selected Leads</b>',
+                //'toggleButton' => ['label' => 'click me'],
+                'id' => 'modalUpdate',
+                //'size' => 'modal-lg',
+             ]);
+        ?>
+
+
+        <div class="row">
+            <div class="col-md-12">
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <?= $form->field($multipleForm, 'status_id')->dropDownList(\common\models\Lead::STATUS_LIST, ['prompt' => '-']) ?>
+                        <?= $form->field($multipleForm, 'employee_id')->dropDownList(\common\models\Employee::getList(), ['prompt' => '-']) ?>
+                        <div class="form-group text-right">
+                            <?= Html::submitButton('<i class="fa fa-check-square"></i> Update selected Leads', ['class' => 'btn btn-info']) ?>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <?php \yii\bootstrap\Modal::end(); ?>
+    <?php endif; ?>
+
+    <?php \yii\bootstrap\ActiveForm::end(); ?>
+
+
     <?php Pjax::end(); ?>
+
+
+<?php
+$js = <<<JS
+    $(document).on('change', 'input[name="LeadMultipleForm[lead_list][]"]:checkbox', function() {
+        //alert(1);
+        //$('input:checkbox').each(function( index ) {
+            if($( this ).is(':checked')) {
+                $( this ).closest('tr').addClass('danger');
+            } else {
+                $( this ).closest('tr').removeClass('danger');
+            }
+        //});
+    });
+
+    $(document).on('change', '.select-on-check-all', function() {
+        $('input[name="LeadMultipleForm[lead_list][]"]:checkbox').trigger('change');
+    });
+
+    
+    $(document).on('pjax:start', function() {
+        $("#modalUpdate .close").click();
+    });
+
+
+
+
+JS;
+$this->registerJs($js, \yii\web\View::POS_READY);
+?>
+
+
 </div>
