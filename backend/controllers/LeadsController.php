@@ -18,38 +18,23 @@ use yii\filters\VerbFilter;
 /**
  * LeadsController implements the CRUD actions for Lead model.
  */
-class LeadsController extends DefaultController
+class LeadsController extends BController
 {
     /**
-     * {@inheritdoc}
+     * @inheritdoc
      */
     public function behaviors()
     {
-        $behaviors = [
-            'verbs' => [
-                'class' => VerbFilter::class,
-                'actions' => [
-                    'delete' => ['POST'],
-                ],
-            ],
-            'access' => [
-                'class' => AccessControl::class,
-                'rules' => [
-                    [
-                        'actions' => ['index', 'update', 'delete', 'create'],
-                        'allow' => true,
-                        'roles' => ['supervision'],
-                    ],
-                    [
-                        'actions' => ['view', 'index'],
-                        'allow' => true,
-                        'roles' => ['agent'],
-                    ],
-                ],
+        $behaviors = parent::behaviors();
+
+        $behaviors ['verbs'] = [
+            'class' => VerbFilter::class,
+            'actions' => [
+                'delete' => ['POST'],
             ],
         ];
 
-        return ArrayHelper::merge(parent::behaviors(), $behaviors);
+        return $behaviors;
     }
 
     /**
@@ -86,7 +71,7 @@ class LeadsController extends DefaultController
         $dataProvider = $searchModel->search($params);
 
 
-        $params = []; //Yii::$app->request->queryParams;
+        $params = Yii::$app->request->queryParams;
         $params['LeadFlightSegmentSearch']['lead_id'] = $model->id;
         $dataProviderSegments = $searchModelSegments->search($params);
 
@@ -105,10 +90,10 @@ class LeadsController extends DefaultController
         ];
 
         if (Yii::$app->request->isAjax) {
-            $viewParams['searchModel'] = null;
+            /*$viewParams['searchModel'] = null;
             $viewParams['dataProvider']->sort = false;
             $viewParams['searchModelSegments'] = null;
-            $viewParams['dataProviderSegments']->sort = false;
+            $viewParams['dataProviderSegments']->sort = false;*/
 
             return $this->renderAjax('view', $viewParams);
         }

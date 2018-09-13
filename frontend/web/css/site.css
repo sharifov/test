@@ -98,3 +98,228 @@
     -moz-border-radius: 6px 0 6px 6px;
     border-radius: 6px 0 6px 6px;
 }
+
+
+.tile-stats {
+    position: relative;
+    display: block;
+    margin-bottom: 12px;
+    border: 1px solid #E4E4E4;
+    -webkit-border-radius: 5px;
+    overflow: hidden;
+    padding-bottom: 5px;
+    -webkit-background-clip: padding-box;
+    -moz-border-radius: 5px;
+    -moz-background-clip: padding;
+    border-radius: 5px;
+    background-clip: padding-box;
+    background: #FFF;
+    transition: all 300ms ease-in-out
+}
+.tile-stats:hover .icon i {
+    animation-name: tansformAnimation;
+    animation-duration: .5s;
+    animation-iteration-count: 1;
+    color: rgba(58, 58, 58, 0.41);
+    animation-timing-function: ease;
+    animation-fill-mode: forwards;
+    -webkit-animation-name: tansformAnimation;
+    -webkit-animation-duration: .5s;
+    -webkit-animation-iteration-count: 1;
+    -webkit-animation-timing-function: ease;
+    -webkit-animation-fill-mode: forwards;
+    -moz-animation-name: tansformAnimation;
+    -moz-animation-duration: .5s;
+    -moz-animation-iteration-count: 1;
+    -moz-animation-timing-function: ease;
+    -moz-animation-fill-mode: forwards
+}
+.tile-stats .icon {
+    width: 20px;
+    height: 20px;
+    color: #BAB8B8;
+    position: absolute;
+    right: 53px;
+    top: 22px;
+    z-index: 1
+}
+.tile-stats .icon i {
+    margin: 0;
+    font-size: 60px;
+    line-height: 0;
+    vertical-align: bottom;
+    padding: 0
+}
+.tile-stats .count {
+    font-size: 38px;
+    font-weight: bold;
+    line-height: 1.65857
+}
+.tile-stats .count,
+.tile-stats h3,
+.tile-stats p {
+    position: relative;
+    margin: 0;
+    margin-left: 10px;
+    z-index: 5;
+    padding: 0
+}
+.tile-stats h3 {
+    color: #BAB8B8
+}
+.tile-stats p {
+    margin-top: 5px;
+    font-size: 12px
+}
+.tile-stats>.dash-box-footer {
+    position: relative;
+    text-align: center;
+    margin-top: 5px;
+    padding: 3px 0;
+    color: #fff;
+    color: rgba(255, 255, 255, 0.8);
+    display: block;
+    z-index: 10;
+    background: rgba(0, 0, 0, 0.1);
+    text-decoration: none
+}
+.tile-stats>.dash-box-footer:hover {
+    color: #fff;
+    background: rgba(0, 0, 0, 0.15)
+}
+.tile-stats>.dash-box-footer:hover {
+    color: #fff;
+    background: rgba(0, 0, 0, 0.15)
+}
+
+@media (min-width: 768px) {
+    #main-container {
+        width: 100%;
+        background-color: white;
+        padding-top: 10px;
+        padding-bottom: 10px;
+        margin-bottom: 10px;
+    }
+}
+
+.item-view-page .page-header {
+    margin-bottom: 10px;
+}
+
+/* add sorting icons to gridview sort links */
+a.asc:after, a.desc:after {
+    position: relative;
+    top: 1px;
+    display: inline-block;
+    font-family: 'Glyphicons Halflings';
+    font-style: normal;
+    font-weight: normal;
+    line-height: 1;
+    padding-left: 5px;
+}
+
+a.asc:after {
+    content: /*"\e113"*/ "\e151";
+}
+
+a.desc:after {
+    content: /*"\e114"*/ "\e152";
+}
+
+.sort-numerical a.asc:after {
+    content: "\e153";
+}
+
+.sort-numerical a.desc:after {
+    content: "\e154";
+}
+
+.sort-ordinal a.asc:after {
+    content: "\e155";
+}
+
+.sort-ordinal a.desc:after {
+    content: "\e156";
+}
+
+/*.grid-view td {
+    white-space: nowrap;
+}*/
+
+.grid-view .filters input,
+.grid-view .filters select {
+    min-width: 50px;
+}
+
+.breadcrumb {
+    background-color: #c7d7e1;
+    color: #fff;
+}
+
+.breadcrumb > li + li:before {
+    color: #eee;
+}
+
+.breadcrumb a {
+    color: #dbfbde;
+}
+
+.breadcrumb > .active {
+    color: #fff;
+}
+
+/* ----------------- LEAD STATUS CLASS -------------------------------- */
+
+.ll-pending {
+    background-color: #efc24a;
+}
+
+.ll-processing {
+    background-color: #659BE0;
+}
+
+.ll-follow_up {
+    background-color: #ce8911;
+}
+
+.ll-on_hold {
+    background-color: #d4846d;
+}
+
+.ll-sold {
+    background-color: #5ca968;
+}
+
+.ll-trash {
+    background-color: #8e99a5;
+}
+
+.ll-booked {
+    background-color: #0BB094;
+}
+
+.ll-snooze {
+    background-color: #714E9C;
+}
+
+/* ----------------- QUOTE STATUS CLASS -------------------------------- */
+
+.lq-created {
+    background-color: #efc24a;
+}
+
+.lq-applied {
+    background-color: #659BE0;
+}
+
+.lq-declined {
+    background-color: #d4846d;
+}
+
+.lq-opened {
+    background-color: #5ca968;
+}
+
+.lq-send {
+    background-color: #0BB094;
+}

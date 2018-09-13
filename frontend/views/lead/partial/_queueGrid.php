@@ -59,12 +59,19 @@ $queueType = Yii::$app->request->get('type');
             },
             'format' => 'raw'
         ],
+
         [
-            'label' => 'Created Date',
+            'attribute' => 'created',
+            //'label' => 'Created Date',
             'visible' => !in_array($queueType, ['booked', 'sold']),
-            'value' => 'created',
-            'format' => ['date', 'php:m/d/y h:i a'],
+            'value' => function($model) {
+                return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model['created']));
+            },
+            'format' => 'html',
+            'filter' => false
+
         ],
+
         [
             'attribute' => 'id',
             'label' => in_array($queueType, ['booked', 'sold'])
@@ -114,8 +121,9 @@ $queueType = Yii::$app->request->get('type');
             'attribute' => 'Client',
             'visible' => !in_array($queueType, ['booked']),
             'value' => function ($model) {
-                return $model['first_name'];
-            }
+                return '<i class="glyphicon glyphicon-user"></i> ' . $model['first_name']. ' ' .$model['last_name'];
+            },
+            'format' => 'html'
         ],
         [
             'label' => 'Client Email',
@@ -180,7 +188,7 @@ $queueType = Yii::$app->request->get('type');
                 /**
                  * @var $model Lead
                  */
-                return sprintf('Total: <strong>%d</strong> / Sent: <strong>%d</strong>',
+                return sprintf('Total: <strong>%d</strong> <br> Sent: <strong>%d</strong>',
                     ($model['send_q'] + $model['not_send_q']),
                     $model['send_q']
                 );
@@ -207,9 +215,9 @@ $queueType = Yii::$app->request->get('type');
                 : null,
             'visible' => !in_array($queueType, ['inbox', 'follow-up']),
             'value' => function ($model) {
-                return (!empty($model['username']))
-                    ? $model['username'] : '-';
-            }
+                return !empty($model['username']) ? '<i class="fa fa-user"></i> ' .Html::encode($model['username']) : '-';
+            },
+            'format' => 'html'
         ],
         [
             'label' => 'Profit',
@@ -287,9 +295,9 @@ $queueType = Yii::$app->request->get('type');
             'visible' => !in_array($queueType, ['inbox', 'sold', 'booked']),
             'contentOptions' => ['style' => 'max-width: 250px;'],
             'value' => function ($model) {
-                return (!empty($model['reason']))
-                    ? $model['reason'] : '-';
-            }
+                return !empty($model['reason']) ? $model['reason'] : '-';
+            },
+            //'format' => 'html'
         ],
         [
             'label' => 'Countdown',
@@ -303,9 +311,10 @@ $queueType = Yii::$app->request->get('type');
         [
             'label' => 'Rating',
             'visible' => !in_array($queueType, ['inbox']),
-            'contentOptions' => ['style' => 'width: 115px;'],
+            'contentOptions' => ['style' => 'width: 90px;', 'class' => 'text-center'],
+            'options' => ['class' => 'text-right'],
             'value' => function ($model) {
-                return Lead::getRating($model['id'], $model['rating']);
+                return Lead::getRating2($model['rating']);
             },
             'format' => 'raw'
         ],

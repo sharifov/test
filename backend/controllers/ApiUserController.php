@@ -14,9 +14,12 @@ use yii\filters\VerbFilter;
 /**
  * ApiUserController implements the CRUD actions for ApiUser model.
  */
-class ApiUserController extends DefaultController
+class ApiUserController extends BController
 {
-    /*public function behaviors()
+    /**
+     * @inheritdoc
+     */
+    public function behaviors()
     {
         $behaviors = parent::behaviors();
 
@@ -28,33 +31,6 @@ class ApiUserController extends DefaultController
         ];
 
         return $behaviors;
-    }*/
-
-    public function behaviors()
-    {
-        return [
-            'access' => [
-                'class' => AccessControl::class,
-                'rules' => [
-                    [
-                        'actions' => ['index', 'update', 'view', 'create', 'delete'],
-                        'allow' => true,
-                        'roles' => ['supervision'],
-                    ],
-                    [
-                        'actions' => ['index', 'view'],
-                        'allow' => true,
-                        'roles' => ['agent'],
-                    ],
-                ],
-            ],
-            'verbs' => [
-                'class' => VerbFilter::class,
-                'actions' => [
-                    'delete' => ['POST'],
-                ],
-            ],
-        ];
     }
 
 

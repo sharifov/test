@@ -11,14 +11,17 @@ use common\models\Lead;
 use common\models\local\LeadLogMessage;
 use common\models\Quote;
 use common\models\QuotePrice;
+use common\models\search\QuotePriceSearch;
+use common\models\search\QuoteSearch;
 use Yii;
 use yii\helpers\ArrayHelper;
 use yii\filters\AccessControl;
 use yii\helpers\Html;
+use yii\web\NotFoundHttpException;
 use yii\web\Response;
 
 /**
- * Site controller
+ * Quotes controller
  */
 class QuoteController extends DefaultController
 {
@@ -36,6 +39,7 @@ class QuoteController extends DefaultController
                             'create', 'save', 'decline', 'calc-price', 'extra-price',
                             'send-quotes', 'get-online-quotes'
                         ],
+
                         'allow' => true,
                         'roles' => ['agent'],
                     ],
@@ -53,6 +57,7 @@ class QuoteController extends DefaultController
     {
         return parent::actions();
     }
+
 
     public function actionGetOnlineQuotes($leadId)
     {

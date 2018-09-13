@@ -122,7 +122,7 @@ use frontend\models\LeadForm;
                     [
                         'attribute' => 'created',
                         'value' => function (\common\models\Client $model) {
-                            return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime($model->created, 'php:Y-m-d [H:i]');
+                            return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime($model->created);
                         },
                         'format' => 'html',
                     ],

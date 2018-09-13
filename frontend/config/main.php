@@ -8,6 +8,7 @@ $params = array_merge(
 
 return [
     'id' => 'app-frontend',
+    'name'  => 'Sales',
     'basePath' => dirname(__DIR__),
     'bootstrap' => ['log'],
     'controllerNamespace' => 'frontend\controllers',
@@ -74,9 +75,39 @@ return [
                 ],
             ],
         ],
+
+        'formatter' => [
+            'dateFormat' => 'php:d-M-Y', //'dd.MM.yyyy',
+            'datetimeFormat' => 'php:d-M-Y [H:i]',
+            'timeFormat' => 'php:H:i',
+            //'decimalSeparator' => ',',
+            //'thousandSeparator' => ' ',
+            //'currencyCode' => 'USD',
+        ],
+
+        'i18n' => [
+            'translations' => [
+                '*' => [
+                    'class' => 'yii\i18n\PhpMessageSource'
+                ],
+            ],
+        ],
+    ],
+    'modules' => [
+        'gridview' =>  [
+            'class' => '\kartik\grid\Module'
+        ]
     ],
     'as beforeRequest' => [
         'class' => 'common\components\EmployeeActivityLogging',
+    ],
+    'container' => [
+        'definitions' => [
+            yii\grid\GridView::class => [
+                'options' => ['class' => 'table-responsive'],
+                'tableOptions' => ['class' => 'table table-bordered table-condensed table-hover'],
+            ],
+        ],
     ],
     'params' => $params,
 ];

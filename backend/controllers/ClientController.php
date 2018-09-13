@@ -16,40 +16,23 @@ use yii\filters\VerbFilter;
 /**
  * ClientController implements the CRUD actions for Client model.
  */
-class ClientController extends DefaultController
+class ClientController extends BController
 {
     /**
-     * {@inheritdoc}
+     * @inheritdoc
      */
-
-
     public function behaviors()
     {
-        $behaviors = [
-            'verbs' => [
-                'class' => VerbFilter::class,
-                'actions' => [
-                    'delete' => ['POST'],
-                ],
-            ],
-            'access' => [
-                'class' => AccessControl::class,
-                'rules' => [
-                    [
-                        'actions' => ['index', 'update', 'view', 'delete', 'create', 'test'],
-                        'allow' => true,
-                        'roles' => ['supervision'],
-                    ],
-                    [
-                        'actions' => ['index', 'view'],
-                        'allow' => true,
-                        'roles' => ['agent'],
-                    ],
-                ],
+        $behaviors = parent::behaviors();
+
+        $behaviors ['verbs'] = [
+            'class' => VerbFilter::class,
+            'actions' => [
+                'delete' => ['POST'],
             ],
         ];
 
-        return ArrayHelper::merge(parent::behaviors(), $behaviors);
+        return $behaviors;
     }
 
     /**

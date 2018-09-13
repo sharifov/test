@@ -14,9 +14,12 @@ use yii\filters\AccessControl;
 /**
  * LogController implements the CRUD actions for Log model.
  */
-class LogController extends DefaultController
+class LogController extends BController
 {
-    /*public function behaviors()
+    /**
+     * @inheritdoc
+     */
+    public function behaviors()
     {
         $behaviors = parent::behaviors();
 
@@ -28,29 +31,6 @@ class LogController extends DefaultController
         ];
 
         return $behaviors;
-    }*/
-
-
-    public function behaviors()
-    {
-        return [
-            'access' => [
-                'class' => AccessControl::class,
-                'rules' => [
-                    [
-                        'actions' => ['index', 'clear', 'view', 'create', 'delete'],
-                        'allow' => true,
-                        'roles' => ['supervision'],
-                    ],
-                ],
-            ],
-            'verbs' => [
-                'class' => VerbFilter::class,
-                'actions' => [
-                    'delete' => ['POST'],
-                ],
-            ],
-        ];
     }
 
 

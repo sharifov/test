@@ -11,40 +11,38 @@ use common\models\GlobalAcl;
 use common\models\Log;
 use common\models\Project;
 use common\models\ProjectEmailTemplate;
+use webvimark\modules\UserManagement\models\User;
 use Yii;
 use yii\data\ActiveDataProvider;
 use yii\filters\AccessControl;
+use yii\filters\VerbFilter;
 use yii\helpers\ArrayHelper;
 use yii\web\BadRequestHttpException;
 use yii\web\ForbiddenHttpException;
 use yii\web\Response;
 
 /**
- * Site controller
+ * Settings controller
  */
-class SettingsController extends DefaultController
+class SettingsController extends BController
 {
     /**
-     * {@inheritdoc}
+     * @inheritdoc
      */
     public function behaviors()
     {
-        return [
-            'access' => [
-                'class' => AccessControl::class,
-                'rules' => [
-                    [
-                        'actions' => [
-                            'projects', 'airlines', 'airports', 'logging', 'acl', 'email-template',
-                            'sync', 'view-log', 'acl-rule'
-                        ],
-                        'allow' => true,
-                        'roles' => ['supervision'],
-                    ],
-                ],
+        $behaviors = parent::behaviors();
+
+        $behaviors ['verbs'] = [
+            'class' => VerbFilter::class,
+            'actions' => [
+                'delete' => ['POST'],
             ],
         ];
+
+        return $behaviors;
     }
+
 
     public function actionSync($type)
     {
@@ -167,10 +165,11 @@ class SettingsController extends DefaultController
      */
     public function actionProjects()
     {
+
         $this->view->title = sprintf('Projects - List');
 
         $availableProjects = [];
-        if (Yii::$app->user->identity->role == 'admin') {
+        if (User::hasRole('admin')) {
             $query = Project::find();
         } else {
             $availableProjects = ArrayHelper::map(Yii::$app->user->identity->projectEmployeeAccesses, 'project_id', 'project_id');
@@ -181,7 +180,7 @@ class SettingsController extends DefaultController
         if ($projectId !== null) {
             $project = Project::findOne(['id' => $projectId]);
             if ($project !== null) {
-                if (Yii::$app->user->identity->role != 'admin' && !in_array($project->id, $availableProjects)) {
+                if (!User::hasRole('admin') && !in_array($project->id, $availableProjects)) {
                     throw new ForbiddenHttpException();
                 }
                 return $this->render('item/project', [

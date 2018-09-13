@@ -66,8 +66,8 @@ class Source extends \yii\db\ActiveRecord
      */
     public static function getList(): array
     {
-        $data = self::find()->orderBy(['name' => SORT_ASC])->asArray()->all();
-        return ArrayHelper::map($data, 'id', 'name', 'project_id');
+        $data = self::find()->joinWith('project')->orderBy(['name' => SORT_ASC])->asArray()->all();
+        return ArrayHelper::map($data, 'id', 'name', 'project.name');
     }
 
     public static function getGroupList()
