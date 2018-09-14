@@ -377,6 +377,7 @@ class Quote extends \yii\db\ActiveRecord
         $depCity = $arrCity = null;
         $data = [];
         $segmentCount = 0;
+        $operatedCnt = 0;
         try {
             $rows = explode("\n", $string);
             foreach ($rows as $row) {
@@ -390,6 +391,17 @@ class Quote extends \yii\db\ActiveRecord
                             array_unshift($rowArr, $rowArrAst[$i]);
                         }
                     }
+                }
+
+                if (stripos($row, "OPERATED BY") !== false) {
+                    $operatedBy = trim(str_ireplace("OPERATED BY", "", $row));
+                    $idx = count($data);
+                    if($idx > 0){
+                        $idx--;
+                    }
+                    $operatedCnt++;
+                    $data[$idx]['operatedAirline'] = $operatedBy;
+                    $itinerary[$idx]->operationAirlineCode = $operatedBy;
                 }
 
                 if (!is_numeric(intval($rowArr[0]))) continue;
@@ -521,7 +533,7 @@ class Quote extends \yii\db\ActiveRecord
                 $itinerary[] = $fSegment;
             }
             if ($validation) {
-                if ($segmentCount !== count($data)) {
+                if ($segmentCount !== count($data)/*+$operatedCnt*/) {
                     $data = [];
                 }
             }

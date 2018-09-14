@@ -73,17 +73,27 @@ class Lead extends ActiveRecord
         STATUS_TRASH = 11,
         STATUS_BOOKED = 12,
         STATUS_SNOOZE = 13;
+
     public CONST STATUS_LIST = [
-        self::STATUS_PENDING => 'Pending',
-        self::STATUS_PROCESSING => 'Processing',
-        self::STATUS_REJECT => 'Reject',
-        self::STATUS_FOLLOW_UP => 'Follow Up',
-        self::STATUS_ON_HOLD => 'Hold On',
-        self::STATUS_SOLD => 'Sold',
-        self::STATUS_TRASH => 'Trash',
-        self::STATUS_BOOKED => 'Booked',
-        self::STATUS_SNOOZE => 'Snooze',
+        self::STATUS_PENDING        => 'Pending',
+        self::STATUS_PROCESSING     => 'Processing',
+        self::STATUS_REJECT         => 'Reject',
+        self::STATUS_FOLLOW_UP      => 'Follow Up',
+        self::STATUS_ON_HOLD        => 'Hold On',
+        self::STATUS_SOLD           => 'Sold',
+        self::STATUS_TRASH          => 'Trash',
+        self::STATUS_BOOKED         => 'Booked',
+        self::STATUS_SNOOZE         => 'Snooze',
     ];
+
+    public CONST STATUS_MULTIPLE_UPDATE_LIST = [
+        self::STATUS_FOLLOW_UP  => self::STATUS_LIST[self::STATUS_FOLLOW_UP],
+        self::STATUS_ON_HOLD    => self::STATUS_LIST[self::STATUS_ON_HOLD],
+        self::STATUS_TRASH      => self::STATUS_LIST[self::STATUS_TRASH],
+        self::STATUS_BOOKED     => self::STATUS_LIST[self::STATUS_BOOKED],
+        self::STATUS_SNOOZE     => self::STATUS_LIST[self::STATUS_SNOOZE],
+    ];
+
     public CONST STATUS_CLASS_LIST = [
         self::STATUS_PENDING => 'll-pending',
         self::STATUS_PROCESSING => 'll-processing',
@@ -110,7 +120,10 @@ class Lead extends ActiveRecord
         DIV_GRID_WITH_EMAIL = 2,
         DIV_GRID_SEND_QUOTES = 3,
         DIV_GRID_IN_SNOOZE = 4;
+
     public CONST SCENARIO_API = 'scenario_api';
+    public CONST SCENARIO_MULTIPLE_UPDATE = 'scenario_multiple_update';
+
     public $additionalInformationForm;
 
     public static function getDivs($div = null)
