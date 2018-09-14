@@ -80,24 +80,17 @@ class LeadsController extends DefaultController
                                 $is_save = false;
 
                                 if ($multipleForm->employee_id) {
-                                    if($multipleForm->employee_id == -1) $multipleForm->employee_id = null;
-                                    $lead->employee_id = $multipleForm->employee_id;
+                                    if($multipleForm->employee_id == -1) {
+                                        $lead->employee_id = null;
+                                    } else {
+                                        $lead->employee_id = $multipleForm->employee_id;
+                                    }
                                     $is_save = true;
                                 }
 
                                 if ($multipleForm->status_id) {
                                     $lead->status = $multipleForm->status_id;
                                     $is_save = true;
-
-                                    /*$log = new LeadFlow();
-                                    $log->employee_id = Yii::$app->user->id;
-                                    $log->lead_id = $lead->id;
-                                    $log->status = $multipleForm->status_id;
-                                    $log->created = date('Y-m-d H:i:s');
-
-                                    if(!$log->save()) {
-                                        Yii::error($log->errors, 'Leads/Index:LeadFlow:save');
-                                    }*/
                                 }
 
                                 if ($multipleForm->rating) {
@@ -138,10 +131,8 @@ class LeadsController extends DefaultController
                             }
                         }
                     }
-                    //VarDumper::dump(Yii::$app->request->post());
-                    //exit;
+
                 }
-                //return $this->redirect(['view', 'id' => $model->id]);
             }
         }
 
