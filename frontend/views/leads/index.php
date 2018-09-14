@@ -395,8 +395,23 @@ $this->params['breadcrumbs'][] = $this->title;
             <div class="col-md-12">
                 <div class="panel panel-default">
                     <div class="panel-body">
-                        <?= $form->field($multipleForm, 'status_id')->dropDownList(\common\models\Lead::STATUS_LIST, ['prompt' => '-']) ?>
-                        <?= $form->field($multipleForm, 'employee_id')->dropDownList(\common\models\Employee::getList(), ['prompt' => '-']) ?>
+                        <?= $form->field($multipleForm, 'status_id')->dropDownList(\common\models\Lead::STATUS_MULTIPLE_UPDATE_LIST, ['prompt' => '-', 'id' => 'status_id']) ?>
+
+                        <div id="reason_id_div" style="display: none">
+                            <?= $form->field($multipleForm, 'reason_id')->dropDownList(\common\models\Reason::getReasonListByStatus(\common\models\Lead::STATUS_PROCESSING), ['prompt' => '-', 'id' => 'reason_id']) // \common\models\Lead::STATUS_REASON_LIST ?>
+
+                            <div id="reason_description_div" style="display: none">
+                                <?= $form->field($multipleForm, 'reason_description')->textarea(['rows' => '3']) ?>
+                            </div>
+                        </div>
+
+                        <?php
+                            $emplData = \common\models\Employee::getList();
+                            $emplData[-1] = '--- REMOVE EMPLOYEE ---';
+
+                            //$emplData = array_merge(['-1' => '--- REMOVE EMPLOYEE ---'], $emplData);
+                        ?>
+                        <?= $form->field($multipleForm, 'employee_id')->dropDownList($emplData, ['prompt' => '-']) ?>
                         <div class="form-group text-right">
                             <?= Html::submitButton('<i class="fa fa-check-square"></i> Update selected Leads', ['class' => 'btn btn-info']) ?>
                         </div>
@@ -415,11 +430,35 @@ $this->params['breadcrumbs'][] = $this->title;
 
 
 <?php
+$ajaxUrl = \yii\helpers\Url::to(["leads/ajax-reason-list"]);
 $js = <<<JS
  
     $(document).on('pjax:start', function() {
         $("#modalUpdate .close").click();
     });
+
+    $(document).on('change', '#reason_id', function() {
+        if( $(this).val() == '0' ) {
+            $('#reason_description_div').show();
+        }  else {
+            $('#reason_description_div').hide();
+        }
+    });
+    
+     $(document).on('change', '#status_id', function() {
+         var status_id = $(this).val(); 
+        if( status_id > 0 ) {
+            $('#reason_id_div').show();
+            
+           $.post("$ajaxUrl",{status_id: status_id}, function( data ) {
+                $("#reason_id").html( data ).trigger('change');
+           })
+                        
+        }  else {
+            $('#reason_id_div').hide();
+        }
+    });
+
 
 JS;
 $this->registerJs($js, \yii\web\View::POS_READY);

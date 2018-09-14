@@ -22,6 +22,41 @@ class Reason extends \yii\db\ActiveRecord
     public $queue;
     public $other;
 
+
+    public const STATUS_REASON_LIST = [
+        Lead::STATUS_TRASH => [
+            1 => 'Purchased elsewhere',
+            2 => 'Flight date > 10 months',
+            3 => 'Not interested',
+            4 => 'Duplicate',
+            5 => 'Too late',
+            6 => 'Test',
+            0 => 'Other'
+        ],
+        Lead::STATUS_REJECT => [
+            1 => 'Purchased elsewhere',
+            2 => 'Flight date > 10 months',
+            3 => 'Not interested',
+            4 => 'Duplicate',
+            5 => 'Too late',
+            6 => 'Test',
+            0 => 'Other'
+        ],
+        Lead::STATUS_FOLLOW_UP => [
+            1 => 'Proper Follow Up Done',
+            2 => "Didn't get in touch",
+            0 => 'Other'
+        ],
+        Lead::STATUS_PROCESSING => [
+            1 => 'N/A',
+            2 => 'No Available',
+            3 => 'Voice Mail Send',
+            4 => 'Will call back',
+            5 => 'Waiting the option',
+            0 => 'Other'
+        ],
+    ];
+
     /**
      * {@inheritdoc}
      */
@@ -30,6 +65,29 @@ class Reason extends \yii\db\ActiveRecord
         return 'reasons';
     }
 
+    /**
+     * @param int $status_id
+     * @param int $reason_id
+     * @return string
+     */
+    public static function getReasonByStatus($status_id = 0, $reason_id = 0) : string
+    {
+        return self::STATUS_REASON_LIST[$status_id][$reason_id] ?? '-';
+    }
+
+    /**
+     * @param int $status_id
+     * @return array
+     */
+    public static function getReasonListByStatus($status_id = 0) : array
+    {
+        return self::STATUS_REASON_LIST[$status_id] ?? [];
+    }
+
+    /**
+     * @param null $queue
+     * @return array
+     */
     public static function getReason($queue = null)
     {
         if (in_array($queue, ['trash', 'reject'])) {
