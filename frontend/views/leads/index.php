@@ -45,12 +45,19 @@ $this->params['breadcrumbs'][] = $this->title;
 
 
             [
+                'class'       => '\kartik\grid\CheckboxColumn',
+                'name' => 'LeadMultipleForm[lead_list]',
+                'pageSummary' => true,
+                'rowSelectedClass' => GridView::TYPE_INFO,
+            ],
+
+            /*[
                     'class' => 'yii\grid\CheckboxColumn',
                     'name' => 'LeadMultipleForm[lead_list]'
-                    /*'checkboxOptions' => function(\common\models\Lead $model) {
+                    'checkboxOptions' => function(\common\models\Lead $model) {
                         return ['value' => $model->id];
-                    },*/
-            ],
+                    },
+            ],*/
 
             /*[
 
@@ -367,15 +374,13 @@ $this->params['breadcrumbs'][] = $this->title;
 
 
     <?php if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id)) : ?>
-
         <p>
-                <?= Html::button('<i class="fa fa-edit"></i> Multiple update', ['class' => 'btn btn-info', 'data-toggle'=> "modal",
-                    'data-target'=>"#modalUpdate",
-                ]) ?>
+            <?= Html::button('<i class="fa fa-edit"></i> Multiple update', ['class' => 'btn btn-info', 'data-toggle'=> "modal",
+                'data-target'=>"#modalUpdate",
+            ]) ?>
         </p>
 
         <?= $form->errorSummary($multipleForm); ?>
-
 
         <?php \yii\bootstrap\Modal::begin([
                 'header' => '<b>Multiple update selected Leads</b>',
@@ -411,28 +416,10 @@ $this->params['breadcrumbs'][] = $this->title;
 
 <?php
 $js = <<<JS
-    $(document).on('change', 'input[name="LeadMultipleForm[lead_list][]"]:checkbox', function() {
-        //alert(1);
-        //$('input:checkbox').each(function( index ) {
-            if($( this ).is(':checked')) {
-                $( this ).closest('tr').addClass('danger');
-            } else {
-                $( this ).closest('tr').removeClass('danger');
-            }
-        //});
-    });
-
-    $(document).on('change', '.select-on-check-all', function() {
-        $('input[name="LeadMultipleForm[lead_list][]"]:checkbox').trigger('change');
-    });
-
-    
+ 
     $(document).on('pjax:start', function() {
         $("#modalUpdate .close").click();
     });
-
-
-
 
 JS;
 $this->registerJs($js, \yii\web\View::POS_READY);
