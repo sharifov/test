@@ -392,6 +392,16 @@ class Quote extends \yii\db\ActiveRecord
                     }
                 }
 
+                if (stripos($row, "OPERATED BY") !== false) {
+                    $operatedBy = trim(str_ireplace("OPERATED BY", "", $row));
+                    $idx = count($itinerary);
+                    if($idx > 0){
+                        $idx--;
+                    }
+                    $data[$idx]['operatedAirline'] = $operatedBy;
+                    $itinerary[$idx]->operating_airline = $operatedBy;
+                }
+
                 if (!is_numeric(intval($rowArr[0]))) continue;
 
                 $segmentCount++;
