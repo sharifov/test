@@ -399,7 +399,6 @@ class Quote extends \yii\db\ActiveRecord
                         $idx--;
                     }
                     $data[$idx]['operatedAirline'] = $operatedBy;
-                    $itinerary[$idx]->operating_airline = $operatedBy;
                 }
 
                 if (!is_numeric(intval($rowArr[0]))) continue;
