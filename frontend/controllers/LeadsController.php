@@ -3,6 +3,8 @@
 namespace frontend\controllers;
 
 use common\controllers\DefaultController;
+use common\models\LeadFlow;
+use common\models\Reason;
 use common\models\search\LeadFlightSegmentSearch;
 use common\models\search\LeadSearch;
 use common\models\search\QuoteSearch;
@@ -42,7 +44,7 @@ class LeadsController extends DefaultController
                         'roles' => ['supervision', 'admin'],
                     ],
                     [
-                        'actions' => ['view', 'index'],
+                        'actions' => ['view', 'index', 'ajax-reason-list'],
                         'allow' => true,
                         'roles' => ['agent'],
                     ],
@@ -72,9 +74,13 @@ class LeadsController extends DefaultController
                         foreach ($multipleForm->lead_list as $lead_id) {
                             $lead = Lead::findOne($lead_id);
 
+
                             if ($lead) {
+                                //$lead->scenario = Lead::SCENARIO_MULTIPLE_UPDATE;
                                 $is_save = false;
+
                                 if ($multipleForm->employee_id) {
+                                    if($multipleForm->employee_id == -1) $multipleForm->employee_id = null;
                                     $lead->employee_id = $multipleForm->employee_id;
                                     $is_save = true;
                                 }
@@ -82,12 +88,49 @@ class LeadsController extends DefaultController
                                 if ($multipleForm->status_id) {
                                     $lead->status = $multipleForm->status_id;
                                     $is_save = true;
+
+                                    /*$log = new LeadFlow();
+                                    $log->employee_id = Yii::$app->user->id;
+                                    $log->lead_id = $lead->id;
+                                    $log->status = $multipleForm->status_id;
+                                    $log->created = date('Y-m-d H:i:s');
+
+                                    if(!$log->save()) {
+                                        Yii::error($log->errors, 'Leads/Index:LeadFlow:save');
+                                    }*/
                                 }
 
                                 if ($multipleForm->rating) {
                                     $lead->rating = $multipleForm->rating;
                                     $is_save = true;
                                 }
+
+
+                                $reasonValue = null;
+
+                                if ($multipleForm->status_id && is_numeric($multipleForm->reason_id)) {
+
+
+                                    if($multipleForm->reason_id > 0) {
+                                        $reasonValue = Reason::getReasonByStatus($multipleForm->status_id, $multipleForm->reason_id);
+                                    } else {
+                                        $reasonValue = $multipleForm->reason_description;
+                                    }
+
+                                    if($reasonValue) {
+                                        $reason = new Reason();
+                                        $reason->employee_id = Yii::$app->user->id;
+                                        $reason->lead_id = $lead->id;
+                                        $reason->reason = $reasonValue;
+                                        $reason->created = date('Y-m-d H:i:s');
+
+                                        if(!$reason->save()) {
+                                            Yii::error($reason->errors, 'Leads/Index:Reason:save');
+                                        }
+                                    }
+
+                                }
+
 
                                 if ($is_save) {
                                     $lead->save();
@@ -108,6 +151,25 @@ class LeadsController extends DefaultController
             'dataProvider' => $dataProvider,
             'multipleForm' => $multipleForm
         ]);
+    }
+
+
+    /**
+     * @return string
+     */
+    public function actionAjaxReasonList()
+    {
+        $status_id = Yii::$app->request->post('status_id');
+        $data = Reason::getReasonListByStatus($status_id);
+
+        $str = '<option value="">-</option>';
+        if($data) {
+            foreach ($data as $reasonId => $reasonName) {
+                $str .= '<option value="' . $reasonId . '">' . $reasonName . '</option>';
+            }
+        }
+
+        return $str;
     }
 
     /**
