@@ -88,6 +88,9 @@ class GTTGlobal
                 $fSegment->departureAirportCode = $segment['departureAirportCode'];
                 $fSegment->destinationAirportCode = $segment['arrivalAirportCode'];
                 $fSegment->destinationAirportCode = $segment['arrivalAirportCode'];
+                if(!empty($segment['codeShare'])){
+                    $fSegment->operationAirlineCode = $segment['codeShare'];
+                }
                 $segments[] = $fSegment;
             }
         }
