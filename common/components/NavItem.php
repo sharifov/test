@@ -152,18 +152,22 @@ class NavItem
 
 
             if (\in_array(Yii::$app->user->identity->role, ['admin', 'supervision'])) {
+
+                //$systemLogsCount = <span class="badge badge-warning">'. (\backend\models\Log::find()->where("log_time BETWEEN ".strtotime(date('Y-m-d'))." AND ".strtotime(date('Y-m-d H:i:s')))->count()) .'</span>;
+                // $apiLogsCount = <span class="badge badge-warning">'. (\common\models\ApiLog::find()->where("DATE(al_request_dt) = DATE(NOW())")->count()) .'</span>
+
                 $menuItems[] = [
                     'label' => '<i class="fa fa-list"></i> Logs',
                     'options' => ['class' => (in_array(Yii::$app->controller->action->uniqueId, ['api-log/index', 'log/index']) ? 'active' : '')],
                     'items' => [
 
                         [
-                            'label' => '<i class="fa fa-bars"></i> API Logs <span class="badge badge-warning">'. (\common\models\ApiLog::find()->where("DATE(al_request_dt) = DATE(NOW())")->count()) .'</span>',
+                            'label' => '<i class="fa fa-bars"></i> API Logs',
                             'url' => ['api-log/index']
                         ],
 
                         [
-                            'label' => '<i class="fa fa-bars"></i> System Logs <span class="badge badge-warning">'. (\backend\models\Log::find()->where("log_time BETWEEN ".strtotime(date('Y-m-d'))." AND ".strtotime(date('Y-m-d H:i:s')))->count()) .'</span>',
+                            'label' => '<i class="fa fa-bars"></i> System Logs',
                             'url' => ['log/index']
                         ],
                     ],

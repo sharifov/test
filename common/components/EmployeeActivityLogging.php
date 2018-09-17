@@ -21,7 +21,7 @@ class EmployeeActivityLogging extends Behavior
 
     public function activityLogging()
     {
-        if (!Yii::$app->user->isGuest) {
+        if (!Yii::$app->user->isGuest && !Yii::$app->request->isAjax) {
             if (strpos(Yii::$app->request->getAbsoluteUrl(), 'lead/check-updates') !== false) {
                 return true;
             }
@@ -49,7 +49,7 @@ class EmployeeActivityLogging extends Behavior
                 \Yii::error(sprintf('Employee ID: %s\\n\\n%s', Yii::$app->user->identity->getId(), print_r($ex->getTraceAsString(), true)), 'EmployeeActivityLogging->activityLogging()');
             }
 
-            $employee = Employee::findIdentity(Yii::$app->user->identity->getId());
+            $employee = Employee::findIdentity(Yii::$app->user->id);
             if ($employee->acl_rules_activated) {
                 $clientIP = $this->getClientIPAddress();
                 if ($clientIP == 'UNKNOWN' ||
