@@ -415,6 +415,7 @@ class Quote extends \yii\db\ActiveRecord
                 $depDateTime = '';
                 $arrDateTime = '';
                 $flightNumber = '';
+                $arrDateInRow = false;
 
                 $rowExpl = explode($carrier, $row);
                 $rowFl = $rowExpl[1];
@@ -433,6 +434,9 @@ class Quote extends \yii\db\ActiveRecord
                 if (!empty($matches)) {
                     if (empty($matches[0])) continue;
                     $depDate = $matches[0][0];
+                    if(isset($matches[0][1])){
+                        $arrDateInRow = true;
+                    }
                     $arrDate = (isset($matches[0][1])) ? $matches[0][1] : $depDate;
                 }
 
@@ -469,7 +473,7 @@ class Quote extends \yii\db\ActiveRecord
                     }
 
                     $arrDepDiff = $depDateTime->diff($arrDateTime);
-                    if($arrDepDiff->d == 0){
+                    if($arrDepDiff->d == 0 && !$arrDateInRow){
                         if($matches[3][1] == "+") {
                             $arrDateTime->add(\DateInterval::createFromDateString('+1 day'));
                         }elseif(strpos($matches[3][1], "+")){
