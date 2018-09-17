@@ -18,8 +18,8 @@ if ($leadForm->mode != $leadForm::VIEW_MODE) {
     $formPreferenceId = sprintf('%s-form', $leadForm->getLeadPreferences()->formName());
 
     $js = <<<JS
-    
-    $('#submit-lead-form-btn').click(function() {
+
+    $('#submit-lead-form-btn').click(function(event) {
         event.preventDefault();
         var formData = $('#$formLeadId, #$formClientId, #$formPreferenceId').serialize();
         $.post($('#$formLeadId').attr('action'), formData, function( data ) {
@@ -29,7 +29,7 @@ if ($leadForm->mode != $leadForm::VIEW_MODE) {
             });
             if (data.load && data.errors.length != 0) {
                 $.each(data.errors, function( index, model ) {
-                    var attrName = index.replace("$modelFormName", ""); 
+                    var attrName = index.replace("$modelFormName", "");
                     $.each(model[0], function( attr, errors) {
                         if (jQuery.type(errors) == 'object') {
                             var objectModel = errors;
@@ -62,14 +62,14 @@ if ($leadForm->mode != $leadForm::VIEW_MODE) {
             }
         });
     });
-    
+
     $('.lead-form-input-element').on("keyup", function(event) {
         event.preventDefault();
         if (event.keyCode === 13) {
             $('#submit-lead-form-btn').click();
         }
     });
-    
+
     /***  Add/Clone quote  ***/
     $('.add-clone-alt-quote').click(function (e) {
         e.preventDefault();
@@ -90,7 +90,7 @@ if ($leadForm->mode != $leadForm::VIEW_MODE) {
             });
         });
     });
-    
+
     /***  Quick search quotes ***/
     $('#quick-search-quotes').click(function (e) {
         e.preventDefault();
@@ -104,7 +104,7 @@ if ($leadForm->mode != $leadForm::VIEW_MODE) {
             });
         });
     });
-    
+
     /*** Send call expert request ***/
     $('#btn-call-expert').click(function (e) {
         e.preventDefault();
@@ -117,7 +117,7 @@ if ($leadForm->mode != $leadForm::VIEW_MODE) {
             $('#lead-notes_for_experts').parent().addClass('has-error');
         }
     });
-    
+
     /*** Send email ***/
     $('#send-email-action').click(function (e) {
         e.preventDefault();
@@ -140,11 +140,11 @@ $js = <<<JS
             return $("#popover-content-add-note").html();
         }
     });
-    
+
     $('[data-toggle="popover"]').on('click', function (e) {
         $('[data-toggle="popover"]').not(this).popover('hide');
     });
-    
+
     $('.client-comment-email-button, .client-comment-phone-button').popover({
         html: true
     });
@@ -159,7 +159,7 @@ $js = <<<JS
             editBlock.modal('show');
         });
     });
-    
+
     $('.take-processing-btn').click(function (e) {
         e.preventDefault();
         var url = $(this).attr('href');
@@ -173,7 +173,7 @@ $js = <<<JS
             window.location = url;
         }
     });
-    
+
     $('#view-client-actions-btn').click(function() {
         var editBlock = $('#log-events');
         editBlock.find('.modal-body').html('');
