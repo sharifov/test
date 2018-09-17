@@ -148,6 +148,9 @@ class Quote extends \yii\db\ActiveRecord
 
             $segment .= $daysName;
             $dump[] = $segment;
+            if($flightSegment->operationAirlineCode){
+                $dump[] = "OPERATED BY ".$flightSegment->operationAirlineCode;
+            }
         }
         return $dump;
     }
@@ -546,7 +549,7 @@ class Quote extends \yii\db\ActiveRecord
                 $itinerary[] = $fSegment;
             }
             if ($validation) {
-                if ($segmentCount !== count($data)/*+$operatedCnt*/) {
+                if ($segmentCount !== count($data)+$operatedCnt) {
                     $data = [];
                 }
             }
