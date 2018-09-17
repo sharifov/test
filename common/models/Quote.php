@@ -438,7 +438,7 @@ class Quote extends \yii\db\ActiveRecord
 
                 $rowExpl = explode($depAirport . $arrAirport, $row);
                 $rowTime = $rowExpl[1];
-                preg_match_all('/([0-9]{3,4})(N|A|P)?(\+([0-9]))?/', $rowTime, $matches);
+                preg_match_all('/([0-9]{3,4})(N|A|P)?(\+([0-9])?)?/', $rowTime, $matches);
                 if (!empty($matches)) {
                     $now = new \DateTime();
                     $matches[1][0] = substr_replace($matches[1][0], ':', -2, 0);
@@ -467,10 +467,19 @@ class Quote extends \yii\db\ActiveRecord
                     } else {
                         $arrDateTime = \DateTime::createFromFormat('jM H:i', $date);
                     }
+
+                    $arrDepDiff = $depDateTime->diff($arrDateTime);
+                    if($arrDepDiff->d == 0){
+                        if($matches[3][1] == "+") {
+                            $arrDateTime->add(\DateInterval::createFromDateString('+1 day'));
+                        }elseif(strpos($matches[3][1], "+")){
+                            $arrDateTime->add(\DateInterval::createFromDateString($matches[3][1].' day'));
+                        }
+                    }
+
                     if ($matches[4][1] != '') {
                         $arrDateTime->add(new \DateInterval('P' . $matches[4][1] . 'D'));
                     }
-
 
                     if ($now->format('m') > $arrDateTime->format('m')) {
                         $arrDateTime->add(\DateInterval::createFromDateString('+1 year'));
