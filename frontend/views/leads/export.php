@@ -260,20 +260,25 @@ $this->params['breadcrumbs'][] = $this->title;
             'header' => 'Profit',
             'value' => function(\common\models\Lead $model) {
                 $total = 0;
-                $quote = \common\models\Quote::find()->where(['lead_id' => $model->id, 'status' => \common\models\Quote::STATUS_APPLIED])->orderBy(['id' => SORT_DESC])->one();
 
-                if(!$quote) {
-                    $quote = \common\models\Quote::find()->where(['lead_id' => $model->id, 'status' => \common\models\Quote::STATUS_SEND])->orderBy(['id' => SORT_DESC])->one();
-                }
+                if($model->status == \common\models\Lead::STATUS_SOLD) {
+                    $quote = \common\models\Quote::find()->where(['lead_id' => $model->id, 'status' => \common\models\Quote::STATUS_APPLIED])->orderBy(['id' => SORT_DESC])->one();
 
-                if($quote) {
-                    $prices = $quote->quotePrices;
-                    if($prices) {
-                        foreach ($prices as $price) {
-                            $total += (float) $price->selling - (float) $price->net;
-                        }
+                    if (!$quote) {
+                        $quote = \common\models\Quote::find()->where(['lead_id' => $model->id, 'status' => \common\models\Quote::STATUS_SEND])->orderBy(['id' => SORT_DESC])->one();
                     }
 
+                    if ($quote) {
+                        $prices = $quote->quotePrices;
+                        if ($prices) {
+                            foreach ($prices as $price) {
+                                $total += (float)$price->selling - (float)$price->net;
+                            }
+                        }
+
+                    }
+                } else {
+                    $total = '';
                 }
                 return $total;
             },
