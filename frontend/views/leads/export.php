@@ -82,8 +82,9 @@ $this->params['breadcrumbs'][] = $this->title;
 
                         if(!$originCode) {
                             $originCode = $segment->origin;
+                            break;
                         }
-                        $destinationCode = $segment->destination;
+                        //$destinationCode = $segment->destination;
                     }
                 }
 
@@ -103,10 +104,13 @@ $this->params['breadcrumbs'][] = $this->title;
                 if($segments) {
                     foreach ($segments as $sk => $segment) {
 
-                        if(!$originCode) {
+                        /*if(!$originCode) {
                             $originCode = $segment->origin;
+                        }*/
+                        if(!$destinationCode) {
+                            $destinationCode = $segment->destination;
                         }
-                        $destinationCode = $segment->destination;
+
                     }
                 }
 
@@ -128,7 +132,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         if(!$originCode) {
                             $originCode = $segment->origin;
                         }
-                        $destinationCode = $segment->destination;
+                        //$destinationCode = $segment->destination;
                     }
                 }
 
@@ -163,10 +167,12 @@ $this->params['breadcrumbs'][] = $this->title;
                 if($segments) {
                     foreach ($segments as $sk => $segment) {
 
-                        if(!$originCode) {
+                        /*if(!$originCode) {
                             $originCode = $segment->origin;
+                        }*/
+                        if(!$destinationCode) {
+                            $destinationCode = $segment->destination;
                         }
-                        $destinationCode = $segment->destination;
                     }
                 }
 
@@ -198,7 +204,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         if(!$originCode) {
                             $originCode = $segment->origin;
                         }
-                        $destinationCode = $segment->destination;
+                        // $destinationCode = $segment->destination;
                     }
                 }
 
@@ -228,10 +234,13 @@ $this->params['breadcrumbs'][] = $this->title;
                 if($segments) {
                     foreach ($segments as $sk => $segment) {
 
-                        if(!$originCode) {
+                        /*if(!$originCode) {
                             $originCode = $segment->origin;
+                        }*/
+                        if(!$destinationCode) {
+                            $destinationCode = $segment->destination;
                         }
-                        $destinationCode = $segment->destination;
+                        //$destinationCode = $segment->destination;
                     }
                 }
 
