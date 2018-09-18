@@ -175,4 +175,116 @@ class LeadSearch extends Lead
 
         return $dataProvider;
     }
+
+
+    public function search3($params)
+    {
+        $query = Lead::find()->select('COUNT(*)', 'email');
+
+        // add conditions that should always apply here
+
+        //$query->groupBy
+
+            $query->joinWith(['client' => function ($q) {
+                if($this->client_name) {
+                    $q->where(['like', 'clients.last_name', $this->client_name])
+                        ->orWhere(['like', 'clients.first_name', $this->client_name]);
+                }
+            }]);
+
+
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+            'sort'=> ['defaultOrder' => ['id' => SORT_DESC]],
+            'pagination' => [
+                'pageSize' => 30,
+            ],
+        ]);
+
+        $this->load($params);
+
+        if (!$this->validate()) {
+            // uncomment the following line if you do not want to return any records when validation fails
+            // $query->where('0=1');
+            return $dataProvider;
+        }
+
+        // grid filtering conditions
+        $query->andFilterWhere([
+            'id' => $this->id,
+            'client_id' => $this->client_id,
+            'employee_id' => $this->employee_id,
+            'status' => $this->status,
+            'project_id' => $this->project_id,
+            'source_id' => $this->source_id,
+            'adults' => $this->adults,
+            'children' => $this->children,
+            'infants' => $this->infants,
+            //'created' => $this->created,
+            //'updated' => $this->updated,
+            'snooze_for' => $this->snooze_for,
+            'bo_flight_id' => $this->bo_flight_id,
+            'rating' => $this->rating,
+            'called_expert' => $this->called_expert,
+        ]);
+
+
+        if($this->statuses) {
+            $query->andWhere(['status' => $this->statuses]);
+        }
+
+
+        if($this->created_date_from || $this->created_date_to) {
+
+            if ($this->created_date_from) {
+                $query->andFilterWhere(['>=', 'DATE(leads.created)', date('Y-m-d', strtotime($this->created_date_from))]);
+            }
+            if ($this->created_date_to) {
+                $query->andFilterWhere(['<=', 'DATE(leads.created)', date('Y-m-d', strtotime($this->created_date_to))]);
+            }
+
+        } else {
+
+            if($this->created) {
+                $query->andFilterWhere(['DATE(created)'=> date('Y-m-d', strtotime($this->created))]);
+            }
+        }
+
+        if($this->client_name) {
+            $query->joinWith(['client' => function ($q) {
+                if($this->client_name) {
+                    $q->where(['like', 'clients.last_name', $this->client_name])
+                        ->orWhere(['like', 'clients.first_name', $this->client_name]);
+                }
+            }]);
+        }
+
+        if($this->client_email) {
+            $subQuery = ClientEmail::find()->select(['DISTINCT(client_id)'])->where(['like', 'email', $this->client_email]);
+            $query->andWhere(['IN', 'client_id', $subQuery]);
+        }
+
+        if($this->client_phone) {
+            $subQuery = ClientPhone::find()->select(['DISTINCT(client_id)'])->where(['like', 'phone', $this->client_phone]);
+            $query->andWhere(['IN', 'client_id', $subQuery]);
+        }
+
+        //echo $this->created_date_from;
+
+
+        $query->andFilterWhere(['like', 'uid', $this->uid])
+            ->andFilterWhere(['like', 'trip_type', $this->trip_type])
+            ->andFilterWhere(['like', 'cabin', $this->cabin])
+            ->andFilterWhere(['like', 'notes_for_experts', $this->notes_for_experts])
+            ->andFilterWhere(['like', 'request_ip', $this->request_ip])
+            ->andFilterWhere(['like', 'request_ip_detail', $this->request_ip_detail])
+            ->andFilterWhere(['like', 'offset_gmt', $this->offset_gmt])
+            ->andFilterWhere(['like', 'discount_id', $this->discount_id]);
+
+        //$sqlRaw = $query->createCommand()->getRawSql();
+        //VarDumper::dump($sqlRaw, 10, true); exit;
+
+        return $dataProvider;
+    }
+
 }

@@ -39,7 +39,7 @@ class LeadsController extends DefaultController
                 'class' => AccessControl::class,
                 'rules' => [
                     [
-                        'actions' => ['index', 'update', 'delete', 'create', 'export'],
+                        'actions' => ['index', 'update', 'delete', 'create', 'export', 'duplicate'],
                         'allow' => true,
                         'roles' => ['supervision', 'admin'],
                     ],
@@ -177,6 +177,24 @@ class LeadsController extends DefaultController
             'dataProvider' => $dataProvider,
         ]);
     }
+
+    /**
+     * Lists all Lead models.
+     * @return mixed
+     */
+    public function actionDuplicate()
+    {
+        $searchModel = new LeadSearch();
+        $dataProvider = $searchModel->search2(Yii::$app->request->queryParams);
+
+        return $this->render('duplicate', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+        ]);
+    }
+
+
+
 
     /**
      * Displays a single Lead model.

@@ -53,6 +53,7 @@ class NavItem
             if (in_array(Yii::$app->user->identity->role, ['admin', 'supervision'])) {
 
                 $items[] = ['label' => '<i class="glyphicon glyphicon-export"></i> Export Leads', 'url' => ['leads/export']];
+                $items[] = ['label' => '<i class="fa fa-copy"></i> Duplicate Leads', 'url' => ['leads/duplicate']];
             }
 
 
