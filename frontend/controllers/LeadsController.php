@@ -185,11 +185,18 @@ class LeadsController extends DefaultController
     public function actionDuplicate()
     {
         $searchModel = new LeadSearch();
-        $dataProvider = $searchModel->search2(Yii::$app->request->queryParams);
+        $dataProviderEmail = $searchModel->searchEmail(Yii::$app->request->queryParams);
+        $dataProviderPhone = $searchModel->searchPhone(Yii::$app->request->queryParams);
+        $dataProviderIp = $searchModel->searchIp(Yii::$app->request->queryParams);
+
+
+        //VarDumper::dump($dataProvider, 10, true); exit;
 
         return $this->render('duplicate', [
             'searchModel' => $searchModel,
-            'dataProvider' => $dataProvider,
+            'dataProviderEmail' => $dataProviderEmail,
+            'dataProviderPhone' => $dataProviderPhone,
+            'dataProviderIp' => $dataProviderIp,
         ]);
     }
 
