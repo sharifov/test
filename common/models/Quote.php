@@ -403,7 +403,7 @@ class Quote extends \yii\db\ActiveRecord
                         $idx--;
                     }
                     $operatedCnt++;
-                    $data[$idx]['operatedAirline'] = $operatedBy;
+                    $data[$idx]['operatingAirline'] = $operatedBy;
                     $itinerary[$idx]->operationAirlineCode = $operatedBy;
                 }
 
