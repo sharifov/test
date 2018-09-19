@@ -117,7 +117,7 @@ class ApiLead extends Model
             [['created', 'updated', 'snooze_for', 'flights', 'emails', 'phones'], 'safe'],
             [['uid', 'request_ip', 'offset_gmt'], 'string', 'max' => 255],
 
-            [['uid'], 'unique', 'targetClass' => Lead::class, 'message'=>'Lead UID already exists!'],
+            [['uid'], 'unique', 'targetClass' => Lead::class, 'targetAttribute' => ['uid', 'project_id'], 'message'=>'Lead UID ({value}) already exists!'],
 
             [['trip_type'], 'string', 'max' => 2],
             [['cabin'], 'string', 'max' => 1],
