@@ -68,13 +68,9 @@ class SiteController extends DefaultController
     public function actionIndex() : string
     {
 
-        $days = 30;
+        $days = 20;
         $dataStatsDone = Lead::find()->select("COUNT(*) AS done_count, DATE(created) AS created_date")
-            /*->where([
-                'status' => [
-                    Lead::STATUS_,
-                ],
-            ])*/
+            ->where(['<>', 'status', Lead::STATUS_TRASH])
             //->andWhere("DATE(created) >= DATE(NOW() - interval '".$days." days')")
             ->andWhere(['>=', 'DATE(created)', date('Y-m-d', strtotime("-".$days." days"))])
             ->groupBy('DATE(created)')
@@ -100,7 +96,35 @@ class SiteController extends DefaultController
         $dataStatsBooked = Lead::find()->select("COUNT(*) AS book_count, DATE(created) AS created_date")
             ->where([
                 'status' => [
-                    Lead::STATUS_BOOKED,
+                    Lead::STATUS_FOLLOW_UP,
+                ],
+            ])
+            ->andWhere(['>=', 'DATE(created)', date('Y-m-d', strtotime("-".$days." days"))])
+            ->groupBy(['DATE(created)'])
+            ->orderBy('DATE(created) DESC')
+            ->limit(30)->asArray()->all();
+
+
+
+
+
+        $dataStatsProcessing = Lead::find()->select("COUNT(*) AS proc_count, DATE(created) AS created_date")
+            ->where([
+                'status' => [
+                    Lead::STATUS_PROCESSING,
+                    Lead::STATUS_ON_HOLD
+                ],
+            ])
+            ->andWhere(['>=', 'DATE(created)', date('Y-m-d', strtotime("-".$days." days"))])
+            ->groupBy(['DATE(created)'])
+            ->orderBy('DATE(created) DESC')
+            ->limit(30)->asArray()->all();
+
+
+        $dataStatsTrash = Lead::find()->select("COUNT(*) AS trash_count, DATE(created) AS created_date")
+            ->where([
+                'status' => [
+                    Lead::STATUS_TRASH,
                 ],
             ])
             ->andWhere(['>=', 'DATE(created)', date('Y-m-d', strtotime("-".$days." days"))])
@@ -126,9 +150,12 @@ class SiteController extends DefaultController
         $dataStats = [];
 
         foreach ($dataStatsDone as $item) {
-            $item['pending_count'] = 0;
-            $item['book_count'] = 0;
-            $item['sold_count'] = 0;
+            $item['pending_count']  = 0;
+            $item['book_count']     = 0;
+            $item['sold_count']     = 0;
+            $item['proc_count']     = 0;
+            $item['trash_count']    = 0;
+            //$item['done_count']     = 0;
 
             $dataStats[$item['created_date']] =  $item;
         }
@@ -136,6 +163,9 @@ class SiteController extends DefaultController
         foreach ($dataStatsPending as $item) {
             $item['done_count'] = 0;
             $item['book_count'] = 0;
+            $item['sold_count'] = 0;
+            $item['proc_count'] = 0;
+            $item['trash_count'] = 0;
             if(isset($dataStats[$item['created_date']])) {
 
                 $dataStats[$item['created_date']]['pending_count'] = $item['pending_count'];
@@ -151,6 +181,8 @@ class SiteController extends DefaultController
             $item['done_count'] = 0;
             $item['pending_count'] = 0;
             $item['sold_count'] = 0;
+            $item['proc_count'] = 0;
+            $item['trash_count'] = 0;
 
             if(isset($dataStats[$item['created_date']])) {
 
@@ -162,10 +194,44 @@ class SiteController extends DefaultController
         }
 
 
+        foreach ($dataStatsTrash as $item) {
+            $item['done_count'] = 0;
+            $item['pending_count'] = 0;
+            $item['sold_count'] = 0;
+            $item['proc_count'] = 0;
+            $item['book_count'] = 0;
+
+            if(isset($dataStats[$item['created_date']])) {
+                $dataStats[$item['created_date']]['trash_count'] = $item['trash_count'];
+            } else {
+                $dataStats[$item['created_date']] = $item;
+            }
+        }
+
+
+        foreach ($dataStatsProcessing as $item) {
+            $item['done_count'] = 0;
+            $item['pending_count'] = 0;
+            $item['sold_count'] = 0;
+            $item['trash_count'] = 0;
+            $item['book_count'] = 0;
+
+            if(isset($dataStats[$item['created_date']])) {
+
+                $dataStats[$item['created_date']]['proc_count'] = $item['proc_count'];
+
+            } else {
+                $dataStats[$item['created_date']] = $item;
+            }
+        }
+
+
         foreach ($dataStatsSold as $item) {
             $item['done_count'] = 0;
             $item['pending_count'] = 0;
             $item['book_count'] = 0;
+            $item['proc_count'] = 0;
+            $item['trash_count'] = 0;
 
             if(isset($dataStats[$item['created_date']])) {
 
@@ -178,23 +244,28 @@ class SiteController extends DefaultController
 
         ksort($dataStats);
 
+
+
+        $days2 = 7;
+
         $dataSources = ApiLog::find()->select('COUNT(*) AS cnt, al_user_id')
-            ->andWhere(['>=', 'DATE(al_request_dt)', date('Y-m-d', strtotime("-".$days." days"))])
+            ->andWhere(['>=', 'DATE(al_request_dt)', date('Y-m-d', strtotime("-".$days2." days"))])
             ->groupBy(['al_user_id'])
             ->orderBy('cnt DESC')
             ->asArray()->all();
 
 
         $dataEmployee = Lead::find()->select("COUNT(*) AS cnt, employee_id") //, SUM(tr_total_price) AS sum_price
-        /*->where([
+        ->where([
             'status' => [
-                Lead::STATUS_BOOKED,
+                Lead::STATUS_PROCESSING,
+                Lead::STATUS_ON_HOLD,
             ],
-        ])*/
-        ->andWhere(['>=', 'DATE(created)', date('Y-m-d', strtotime("-".$days." days"))])
+        ])
+        ->andWhere(['>=', 'DATE(created)', date('Y-m-d', strtotime("-".$days2." days"))])
             ->groupBy(['employee_id'])
             ->orderBy('cnt DESC')
-            ->limit(30)->asArray()->all();
+            ->limit(20)->asArray()->all();
 
 
         $dataEmployeeSold = Lead::find()->select("COUNT(*) AS cnt, employee_id") //, SUM(tr_total_price) AS sum_price
@@ -203,13 +274,13 @@ class SiteController extends DefaultController
                 Lead::STATUS_SOLD,
             ],
         ])
-            ->andWhere(['>=', 'DATE(created)', date('Y-m-d', strtotime("-".$days." days"))])
+            ->andWhere(['>=', 'DATE(created)', date('Y-m-d', strtotime("-".$days2." days"))])
             ->groupBy(['employee_id'])
             ->orderBy('cnt DESC')
-            ->limit(30)->asArray()->all();
+            ->limit(20)->asArray()->all();
 
 
-        return $this->render('index', ['dataStats' => $dataStats, 'dataSources' => $dataSources, 'dataEmployee' => $dataEmployee, 'dataEmployeeSold' => $dataEmployeeSold]);
+        return $this->render('index', ['dataStats' => $dataStats, 'dataSources' => $dataSources, 'dataEmployee' => $dataEmployee, 'dataEmployeeSold' => $dataEmployeeSold, 'days2' => $days2]);
     }
 
     public function actionLogout()

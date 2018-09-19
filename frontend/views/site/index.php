@@ -144,17 +144,17 @@ $userId = Yii::$app->user->id;
                     <div id="chart_div"></div>
 
 
-                    <?
-                    $this->registerJs("google.charts.load('current', {'packages':['bar']}); google.charts.setOnLoadCallback(drawChart);", \yii\web\View::POS_READY);
+                    <?php
+                        $this->registerJs("google.charts.load('current', {'packages':['bar']}); google.charts.setOnLoadCallback(drawChart);", \yii\web\View::POS_READY);
                     ?>
 
                     <script>
                         function drawChart() {
                             var data = google.visualization.arrayToDataTable([
-                                ['Days', 'All', 'Pending', 'Booked', 'Sold', {role: 'annotation'}],
-                                <? foreach($dataStats as $k => $item):?>
-                                ['<?=date('d M', strtotime($item['created_date']))?>', <?=$item['done_count']?>, <?=$item['pending_count']?>, <?=$item['book_count']?>, <?=$item['sold_count']?>, '<?=($item['done_count'] )?>'],
-                                <? endforeach;?>
+                                ['Days', 'Not Trash', 'Trash', 'Pending', 'Processing + On Hold', 'Follow Up', 'Sold', {role: 'annotation'}],
+                                <?php foreach($dataStats as $k => $item):?>
+                                ['<?=date('d M', strtotime($item['created_date']))?>', <?=$item['done_count']?>, <?=$item['trash_count']?>, <?=$item['pending_count']?>, <?=$item['proc_count']?>, <?=$item['book_count']?>, <?=$item['sold_count']?>, '<?='--'?>'],
+                                <?php endforeach;?>
 
                                 <?//=$item['sum_price'].'$'?>
                             ]);
@@ -183,7 +183,7 @@ $userId = Yii::$app->user->id;
                     </script>
                 </div>
             </div>
-        <? endif; ?>
+        <?php endif; ?>
 
         <hr/>
 
@@ -191,17 +191,17 @@ $userId = Yii::$app->user->id;
             <div class="col-md-12">
                 <div class="col-md-4">
                     <div id="chart_div_projects"></div>
-                    <? if ($dataSources): ?>
+                    <?php if ($dataSources): ?>
 
-                            <?
-                            $this->registerJs('google.charts.setOnLoadCallback(drawBasic1);', \yii\web\View::POS_READY);
+                            <?php
+                                $this->registerJs('google.charts.setOnLoadCallback(drawBasic1);', \yii\web\View::POS_READY);
                             ?>
 
                             <script>
                                 function drawBasic1() {
                                     var data = google.visualization.arrayToDataTable([
                                         ['Project', 'Count'],
-                                        <? foreach($dataSources as $k => $item):
+                                        <?php foreach($dataSources as $k => $item):
 
                                             $user = \common\models\ApiUser::findOne($item['al_user_id']);
                                             if(!$user) continue;
@@ -210,12 +210,12 @@ $userId = Yii::$app->user->id;
                                             if(!$project) continue;
 
                                         ?>
-                                        ['<? echo \yii\helpers\Html::encode($project->name).' (apiUser: '.$item['al_user_id'].')' ?>', <?=$item['cnt']?>],
-                                        <? endforeach;?>
+                                        ['<?php echo \yii\helpers\Html::encode($project->name).' (apiUser: '.$item['al_user_id'].')' ?>', <?=$item['cnt']?>],
+                                        <?php endforeach;?>
                                     ]);
 
                                     var options = {
-                                        title: 'Project API Request stats - Last 30 days',
+                                        title: 'Project API Request stats - Last <?=$days2?> days',
                                         height: 400
                                     };
 
@@ -224,15 +224,15 @@ $userId = Yii::$app->user->id;
                                 }
                             </script>
 
-                    <? endif; ?>
+                    <?php endif; ?>
                 </div>
 
 
                 <div class="col-md-4">
                     <div id="chart_div2"></div>
-                    <? if($dataEmployee): ?>
+                    <?php if($dataEmployee): ?>
 
-                            <?
+                            <?php
                                 $this->registerJs('google.charts.setOnLoadCallback(drawBasic2);', \yii\web\View::POS_READY);
                             ?>
 
@@ -240,17 +240,17 @@ $userId = Yii::$app->user->id;
                                 function drawBasic2() {
                                     var data = google.visualization.arrayToDataTable([
                                         ['Employee', 'Count of leads'],
-                                        <? foreach($dataEmployee as $k => $item):
+                                        <?php foreach($dataEmployee as $k => $item):
                                             $employee = \common\models\Employee::find()->where(['id' => $item['employee_id']])->one();
                                             if(!$employee) continue;
 
                                         ?>
-                                        ['<? echo \yii\helpers\Html::encode($employee->username) ?>', <?=$item['cnt']?>],
-                                        <? endforeach;?>
+                                        ['<?php echo \yii\helpers\Html::encode($employee->username) ?>', <?=$item['cnt']?>],
+                                        <?php endforeach;?>
                                     ]);
 
                                     var options = {
-                                        title: 'Employees & Leads - Last 30 days',
+                                        title: 'Leads by Employees (Processing + On Hold) - Last <?=$days2?> days, limit 20 employees',
                                         height: 400
                                     };
 
@@ -259,12 +259,12 @@ $userId = Yii::$app->user->id;
                                 }
                             </script>
 
-                    <? endif; ?>
+                    <?php endif; ?>
                 </div>
 
                 <div class="col-md-4">
                     <div id="chart_div3"></div>
-                    <? if ($dataEmployeeSold): ?>
+                    <?php if ($dataEmployeeSold): ?>
 
                             <?
                                 $this->registerJs('google.charts.setOnLoadCallback(drawBasic3);', \yii\web\View::POS_READY);
@@ -274,17 +274,17 @@ $userId = Yii::$app->user->id;
                                 function drawBasic3() {
                                     var data = google.visualization.arrayToDataTable([
                                         ['Employee', 'Count of leads'],
-                                        <? foreach($dataEmployeeSold as $k => $item):
+                                        <?php foreach($dataEmployeeSold as $k => $item):
                                         $employee = \common\models\Employee::find()->where(['id' => $item['employee_id']])->one();
                                         if(!$employee) continue;
 
                                         ?>
-                                        ['<? echo \yii\helpers\Html::encode($employee->username) ?>', <?=$item['cnt']?>],
-                                        <? endforeach;?>
+                                        ['<?php echo \yii\helpers\Html::encode($employee->username) ?>', <?=$item['cnt']?>],
+                                        <?php endforeach;?>
                                     ]);
 
                                     var options = {
-                                        title: 'Employees & Leads, status Sold - Last 30 days',
+                                        title: 'Leads by Employees (Sold) - Last <?=$days2?> days, limit 20 employees',
                                         height: 400
                                     };
 
@@ -293,7 +293,7 @@ $userId = Yii::$app->user->id;
                                 }
                             </script>
 
-                    <? endif; ?>
+                    <?php endif; ?>
                 </div>
 
 
