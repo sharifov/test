@@ -7,6 +7,8 @@ use common\models\ClientEmail;
 use common\models\ClientPhone;
 use common\models\Lead;
 use common\models\LeadFlightSegment;
+use common\models\Project;
+use common\models\Source;
 use webapi\models\ApiLead;
 use Yii;
 use yii\web\BadRequestHttpException;
@@ -289,6 +291,24 @@ class LeadController extends ApiBaseController
         }
 
         if ($modelLead->load($post)) {
+
+
+            if($modelLead->project_id) {
+
+                $source = Source::findOne(['cid' => $modelLead->sub_sources_code, 'project_id' => $modelLead->project_id]);
+
+                if(!$source) {
+                    $old_sub_sources_code = $modelLead->sub_sources_code;
+                    $source = Source::find()->where(['project_id' => $modelLead->project_id])->orderBy(['id' => SORT_ASC])->one();
+                    if($source) {
+                        $modelLead->source_id = $source->id;
+                        $modelLead->sub_sources_code = $source->cid;
+                    }
+                    Yii::warning('Not found Source Code ('.$old_sub_sources_code.') Set Default Source ('.$modelLead->sub_sources_code.') Project Id: '.$modelLead->project_id, 'API:Lead:create:ApiLead:validate');
+                }
+
+            }
+
             if (!$modelLead->validate()) {
                 if ($errors = $modelLead->getErrors()) {
                     throw new UnprocessableEntityHttpException($this->errorToString($errors), 5);

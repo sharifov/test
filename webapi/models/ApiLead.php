@@ -4,6 +4,7 @@ namespace webapi\models;
 
 use common\models\Client;
 use common\models\Employee;
+use common\models\Lead;
 use common\models\Source;
 use Yii;
 use yii\base\Model;
@@ -115,6 +116,9 @@ class ApiLead extends Model
             [['notes_for_experts', 'request_ip_detail'], 'string'],
             [['created', 'updated', 'snooze_for', 'flights', 'emails', 'phones'], 'safe'],
             [['uid', 'request_ip', 'offset_gmt'], 'string', 'max' => 255],
+
+            [['uid'], 'unique', 'targetClass' => Lead::class, 'message'=>'Lead UID already exists!'],
+
             [['trip_type'], 'string', 'max' => 2],
             [['cabin'], 'string', 'max' => 1],
             [['client_id'], 'exist', 'skipOnError' => true, 'targetClass' => Client::class, 'targetAttribute' => ['client_id' => 'id']],
