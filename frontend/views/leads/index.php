@@ -407,7 +407,16 @@ $this->params['breadcrumbs'][] = $this->title;
             <div class="col-md-12">
                 <div class="panel panel-default">
                     <div class="panel-body">
-                        <?= $form->field($multipleForm, 'status_id')->dropDownList(\common\models\Lead::STATUS_MULTIPLE_UPDATE_LIST, ['prompt' => '-', 'id' => 'status_id']) ?>
+                        <?php
+                            $role = null;
+
+                            if(\Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id)) {
+                              $role = 'supervision';
+                            }  elseif(\Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
+                                $role = 'admin';
+                            }
+                        ?>
+                        <?= $form->field($multipleForm, 'status_id')->dropDownList(\common\models\Lead::getStatusList($role), ['prompt' => '-', 'id' => 'status_id']) ?>
 
                         <div id="reason_id_div" style="display: none">
                             <?= $form->field($multipleForm, 'reason_id')->dropDownList(\common\models\Reason::getReasonListByStatus(\common\models\Lead::STATUS_PROCESSING), ['prompt' => '-', 'id' => 'reason_id']) // \common\models\Lead::STATUS_REASON_LIST ?>

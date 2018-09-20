@@ -121,7 +121,19 @@ $queueType = Yii::$app->request->get('type');
             'attribute' => 'Client',
             'visible' => !in_array($queueType, ['booked']),
             'value' => function ($model) {
-                return '<i class="glyphicon glyphicon-user"></i> ' . $model['first_name'] . ' ' . $model['last_name'];
+
+                if(isset($model['first_name'])) {
+                    $clientName = $model['first_name'] . ' ' . $model['last_name'];
+                    if ($clientName === 'Client Name') {
+                        $clientName = '- - - ';
+                    } else {
+                        $clientName = '<i class="glyphicon glyphicon-user"></i> '. Html::encode($clientName);
+                    }
+                } else {
+                    $clientName = '-';
+                }
+                return $clientName;
+                //return '<i class="glyphicon glyphicon-user"></i> ' . $model['first_name']. ' ' .$model['last_name'];
             },
             'format' => 'html'
         ],
@@ -167,16 +179,17 @@ $queueType = Yii::$app->request->get('type');
         [
             'attribute' => 'Request Details',
             'visible' => !in_array($queueType, ['booked', 'sold']),
-            'content' => function ($model) {
+            'content' => function ($model) use ($queueType) {
                 $content = '';
-                if (
-                    Yii::$app->user->identity->role != 'agent' ||
-                    !in_array(Yii::$app->controller->action->id, ['inbox'])
-                ) {
+                if($queueType === 'inbox' && Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id)) {
+                    $content .= '';
+                } else {
                     $content .= $model['flight_detail'];
+                    $content .= ' (<i class="fa fa-male"></i> x' . ($model['adults'] + $model['children'] + $model['infants']) . ')<br/>';
                 }
-                $content .= ' (<i class="fa fa-male"></i> x' . ($model['adults'] + $model['children'] + $model['infants']) . ')';
-                $content .= sprintf('<br/><strong>Cabin:</strong> %s', Lead::getCabin($model['cabin']));
+
+                $content .= sprintf('<strong>Cabin:</strong> %s', Lead::getCabin($model['cabin']));
+
                 return $content;
             },
             'format' => 'raw'
