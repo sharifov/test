@@ -89,6 +89,7 @@ class QuoteController extends DefaultController
                             $model->lead_id = $lead->id;
                             $model->cabin = $lead->cabin;
                             $model->fare_type = $itinerary['privateFareType'];
+                            $model->employee_name = Yii::$app->user->identity->username;
                             foreach ($lead->getPaxTypes() as $type) {
                                 $newQPrice = new QuotePrice();
                                 $newQPrice->createQPrice($type);
@@ -284,6 +285,7 @@ class QuoteController extends DefaultController
                     ? 0 : $quote->quotePrice()['selling'];
                 if ($quote !== null) {
                     $quote->attributes = $attr['Quote'];
+                    $quote->employee_name = Yii::$app->user->identity->username;
                     $lead = Lead::findOne(['id' => $quote->lead_id]);
                     if (isset($attr['QuotePrice']) && $lead !== null) {
                         if ($save) {
