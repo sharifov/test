@@ -312,7 +312,7 @@ $queueType = Yii::$app->request->get('type');
             'value' => function ($model) {
                 return !empty($model['reason']) ? $model['reason'] : '-';
             },
-            //'format' => 'html'
+            'format' => 'raw'
         ],
         [
             'label' => 'Countdown',
@@ -395,7 +395,7 @@ $queueType = Yii::$app->request->get('type');
                             'over' => true
                         ]), [
                             'class' => 'btn btn-action btn-sm take-processing-btn',
-                            'data-pjax' => 0,
+                                'data-pjax' => 0,
                             'data-status' => $model['status']
                         ]);
                     }

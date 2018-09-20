@@ -2,9 +2,12 @@
 /**
  * @var $lead \common\models\Lead
  * @var $reason \common\models\Reason
+ * @var $activeLeadIds array
  */
 
 use yii\helpers\Html;
+
+$activeLeadIds = '[' . implode(',', $activeLeadIds) . ']';
 
 $js = <<<JS
 $('#salesale-snooze_for').attr('readonly', true);
@@ -13,6 +16,21 @@ $('#unassign-form').on('beforeSubmit', function () {
     if ($('#reason-reason').val() == 'Other' && $('#reason-other').val().length == 0) {
         $('#reason-other').parent().addClass('has-error');
         return false
+    }
+    $('#reason-duplicateleadid').val($.trim($('#reason-duplicateleadid').val()));
+    if ($('#reason-reason').val() == 'Duplicate') {
+        if ($('#reason-duplicateleadid').val().length == 0) {
+            $('#reason-duplicateleadid').parent().addClass('has-error');
+            return false
+        } else {
+            var activeLeadIds = $activeLeadIds;
+            if ($.inArray(parseInt($('#reason-duplicateleadid').val()), $activeLeadIds) != -1) {
+                $('#reason-duplicateleadid').parent().removeClass('has-error');
+                return true;
+            }
+            $('#reason-duplicateleadid').parent().addClass('has-error');
+            return false;
+        }
     }
     if ($('#salesale-snooze_for').length != 0 && $('#salesale-snooze_for').val().length == 0) {
          $('#salesale-snooze_for').parent().parent().addClass('has-error');
@@ -57,8 +75,13 @@ $reasonForm = \yii\widgets\ActiveForm::begin([
                 var val = $(this).val();
                 if (val == 'Other') {
                     $('#unassign-other-wrapper').addClass('in');
+                    $('#unassign-duplicate-wrapper').removeClass('in');
+                } else if (val == 'Duplicate') {
+                    $('#unassign-duplicate-wrapper').addClass('in');
+                    $('#unassign-other-wrapper').removeClass('in');
                 } else {
                     $('#unassign-other-wrapper').removeClass('in');
+                    $('#unassign-duplicate-wrapper').removeClass('in');
                 }
             "]) ?>
         </div>
@@ -106,9 +129,14 @@ $reasonForm = \yii\widgets\ActiveForm::begin([
     </div>
 <?php endif; ?>
 
-    <div class="form-group collapse" id="unassign-other-wrapper">
-        <?= $reasonForm->field($reason, 'other', ['options' => ['tag' => false,],])->textarea(['rows' => 5]) ?>
+    <div class="form-group collapse" id="unassign-duplicate-wrapper">
+        <?= $reasonForm->field($reason, 'duplicateLeadId', ['options' => ['tag' => false,]])->textInput() ?>
     </div>
+
+    <div class="form-group collapse" id="unassign-other-wrapper">
+        <?= $reasonForm->field($reason, 'other', ['options' => ['tag' => false,]])->textarea(['rows' => 5]) ?>
+    </div>
+
     <div class="actions-btn-wrapper">
         <?= \yii\bootstrap\Html::submitButton('Add', ['class' => 'btn btn-success popover-close-btn']) ?>
     </div>
