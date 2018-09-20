@@ -1436,4 +1436,22 @@ class Lead extends ActiveRecord
         return Quote::findAll(['lead_id' => $this->id]);
     }
 
+    /**
+     * @param null $role
+     * @return array
+     */
+    public static function getStatusList($role = null)
+    {
+
+        switch ($role) {
+            case 'admin' : $list = self::STATUS_LIST;
+                break;
+            case 'supervision' : $list = self::STATUS_MULTIPLE_UPDATE_LIST;
+                break;
+            default : $list = self::STATUS_LIST;
+        }
+
+        return $list;
+    }
+
 }
