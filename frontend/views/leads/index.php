@@ -165,10 +165,20 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'status',
                 'value' => function(\common\models\Lead $model) {
-                    return $model->getStatusName(true);
+                    $statusValue = $model->getStatusName(true);
+                    if($model->status === \common\models\Lead::STATUS_TRASH) {
+                        $reason = \common\models\Reason::find()->where(['lead_id' => $model->id])->orderBy(['id' => SORT_DESC])->one();
+                        if($reason) {
+                            $statusValue .= ' <span data-toggle="tooltip" data-placement="top" title="'.Html::encode($reason->reason).'"><i class="fa fa-warning"></i></span>';
+                        }
+
+                    }
+                    return $statusValue;
                 },
-                'format' => 'html',
-                'filter' => \common\models\Lead::STATUS_LIST
+                'format' => 'raw',
+                'filter' => \common\models\Lead::STATUS_LIST,
+                'options' => ['style' => 'width:100px'],
+
             ],
             [
                 'attribute' => 'project_id',
@@ -447,6 +457,9 @@ $this->params['breadcrumbs'][] = $this->title;
     <?php \yii\bootstrap\ActiveForm::end(); ?>
 
 
+
+
+
     <?php Pjax::end(); ?>
 
 
@@ -456,6 +469,10 @@ $js = <<<JS
  
     $(document).on('pjax:start', function() {
         $("#modalUpdate .close").click();
+    });
+
+    $(document).on('pjax:end', function() {
+         $('[data-toggle="tooltip"]').tooltip();
     });
 
     $(document).on('change', '#reason_id', function() {
@@ -481,6 +498,9 @@ $js = <<<JS
     });
 
 
+   $('[data-toggle="tooltip"]').tooltip();
+
+     
 JS;
 $this->registerJs($js, \yii\web\View::POS_READY);
 ?>
