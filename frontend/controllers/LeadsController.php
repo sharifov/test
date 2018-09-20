@@ -65,7 +65,13 @@ class LeadsController extends DefaultController
 
         $params = Yii::$app->request->queryParams;
 
-        if(!$params) {
+        if(Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id)) {
+            $isAgent = true;
+        } else {
+            $isAgent = false;
+        }
+
+        if(!$params && $isAgent) {
             $params['LeadSearch']['employee_id'] = Yii::$app->user->id;
         }
 
@@ -147,7 +153,8 @@ class LeadsController extends DefaultController
         return $this->render('index', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
-            'multipleForm' => $multipleForm
+            'multipleForm' => $multipleForm,
+            'isAgent' => $isAgent
         ]);
     }
 
