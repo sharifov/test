@@ -246,6 +246,7 @@ JS;
                     $quote->uid,
                     Lead::getCabin($quote->cabin)
                 ) ?>
+                | <span>Creator: <?= $quote->employee_name ?> (<?= ($quote->created_by_seller) ? 'Agent' : 'Expert'?>)</span>
                 <?= $quote->getStatusLabel() ?>
             </a>
             <?php if ($lead->getAppliedAlternativeQuotes() === null) {
