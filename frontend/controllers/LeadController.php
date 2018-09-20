@@ -647,7 +647,7 @@ class LeadController extends DefaultController
         $activity = [];
         $quoteId = '';
 
-        if ($lead === null) {
+        if ($lead !== null) {
             if (Yii::$app->request->isPost) {
                 $quoteId = Yii::$app->request->post('discountId', $lead->discount_id);
             } else {
