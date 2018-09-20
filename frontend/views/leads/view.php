@@ -15,6 +15,9 @@ use yii\widgets\DetailView;
 $this->title = 'Lead ID: ' . $model->id . ', UID: '.$model->uid;
 $this->params['breadcrumbs'][] = ['label' => 'Leads', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
+
+$isAgent = Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id);
+
 ?>
 <div class="lead-view">
 
@@ -51,7 +54,18 @@ $this->params['breadcrumbs'][] = $this->title;
                         'header' => 'Client name',
                         'format' => 'raw',
                         'value' => function(\common\models\Lead $model) {
-                            return $model->client ? '<i class="fa fa-user"></i> ' . Html::encode($model->client->first_name.' '.$model->client->last_name) : '-';
+                            if($model->client) {
+                                $clientName = $model->client->first_name . ' ' . $model->client->last_name;
+                                if ($clientName === 'Client Name') {
+                                    $clientName = '- - - ';
+                                } else {
+                                    $clientName = '<i class="fa fa-user"></i> '. Html::encode($clientName);
+                                }
+                            } else {
+                                $clientName = '-';
+                            }
+
+                            return $clientName;
                         },
                         'options' => ['style' => 'width:160px'],
                         //'filter' => \common\models\Employee::getList()
@@ -61,8 +75,17 @@ $this->params['breadcrumbs'][] = $this->title;
                         'attribute' => 'client.phone',
                         'header' => 'Client Phones',
                         'format' => 'raw',
-                        'value' => function(\common\models\Lead $model) {
-                            $str = $model->client && $model->client->clientPhones ? '<i class="fa fa-phone"></i> '.implode(' <br><i class="fa fa-phone"></i> ', \yii\helpers\ArrayHelper::map($model->client->clientPhones, 'phone', 'phone')).'' : '';
+                        'value' => function(\common\models\Lead $model) use ($isAgent) {
+                            if($model->client && $model->client->clientPhones) {
+                                if ($isAgent && Yii::$app->user->id !== $model->employee_id) {
+                                    $str = '- // - // - // -';
+                                } else {
+                                    $str = '<i class="fa fa-phone"></i> ' . implode(' <br><i class="fa fa-phone"></i> ', \yii\helpers\ArrayHelper::map($model->client->clientPhones, 'phone', 'phone'));
+                                }
+                            } else {
+                                $str = '-';
+                            }
+
                             return $str ?? '-';
                         },
                         'options' => ['style' => 'width:180px'],
@@ -73,8 +96,18 @@ $this->params['breadcrumbs'][] = $this->title;
                         'attribute' => 'client.email',
                         'header' => 'Client Emails',
                         'format' => 'raw',
-                        'value' => function(\common\models\Lead $model) {
-                            $str = $model->client && $model->client->clientEmails ? '<i class="fa fa-envelope"></i> '.implode(' <br><i class="fa fa-envelope"></i> ', \yii\helpers\ArrayHelper::map($model->client->clientEmails, 'email', 'email')).'' : '';
+                        'value' => function(\common\models\Lead $model) use ($isAgent) {
+
+                            if($model->client && $model->client->clientEmails) {
+                                if ($isAgent && Yii::$app->user->id !== $model->employee_id) {
+                                    $str = '- // - // - // -';
+                                } else {
+                                    $str = '<i class="fa fa-envelope"></i> '.implode(' <br><i class="fa fa-envelope"></i> ', \yii\helpers\ArrayHelper::map($model->client->clientEmails, 'email', 'email'));
+                                }
+                            } else {
+                                $str = '-';
+                            }
+
                             return $str ?? '-';
                         },
                         'options' => ['style' => 'width:180px'],
@@ -113,7 +146,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         'value' => function(\common\models\Lead $model) {
                             return $model->source ? $model->source->name : '-';
                         },
-
+                        'visible' => !$isAgent
                     ],
 
 

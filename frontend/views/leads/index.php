@@ -12,6 +12,8 @@ use kartik\grid\GridView;
 $this->title = 'Search Leads';
 $this->params['breadcrumbs'][] = $this->title;
 
+$isAgent = Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id);
+
 ?>
 <style>
 .dropdown-menu {
@@ -23,7 +25,15 @@ $this->params['breadcrumbs'][] = $this->title;
     <h1><?= Html::encode($this->title) ?></h1>
 
     <?php Pjax::begin(); ?>
-    <?php echo $this->render('_search', ['model' => $searchModel]); ?>
+    <?php
+
+        if($isAgent) {
+            $searchTpl = '_search_agent';
+        } else {
+            $searchTpl = '_search';
+        }
+
+    echo $this->render('_search_agent', ['model' => $searchModel]); ?>
 
 
     <?php if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id)) : ?>
@@ -49,6 +59,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'name' => 'LeadMultipleForm[lead_list]',
                 'pageSummary' => true,
                 'rowSelectedClass' => GridView::TYPE_INFO,
+                'visible' => !Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id)
             ],
 
             /*[
@@ -106,7 +117,19 @@ $this->params['breadcrumbs'][] = $this->title;
                 'header' => 'Client name',
                 'format' => 'raw',
                 'value' => function(\common\models\Lead $model) {
-                    return $model->client ? '<i class="fa fa-user"></i> ' . Html::encode($model->client->first_name.' '.$model->client->last_name) : '-';
+
+                    if($model->client) {
+                        $clientName = $model->client->first_name . ' ' . $model->client->last_name;
+                        if ($clientName === 'Client Name') {
+                            $clientName = '- - - ';
+                        } else {
+                            $clientName = '<i class="fa fa-user"></i> '. Html::encode($clientName);
+                        }
+                    } else {
+                        $clientName = '-';
+                    }
+
+                    return $clientName;
                 },
                 'options' => ['style' => 'width:160px'],
                 //'filter' => \common\models\Employee::getList()
@@ -116,8 +139,13 @@ $this->params['breadcrumbs'][] = $this->title;
                 'header' => 'Client Emails/Phones',
                 'format' => 'raw',
                 'value' => function(\common\models\Lead $model) {
-                    $str = $model->client && $model->client->clientEmails ? '<i class="fa fa-envelope"></i> '.implode(' <br><i class="fa fa-envelope"></i> ', \yii\helpers\ArrayHelper::map($model->client->clientEmails, 'email', 'email')).'' : '';
-                    $str .= $model->client && $model->client->clientPhones ? '<br><i class="fa fa-phone"></i> '.implode(' <br><i class="fa fa-phone"></i> ', \yii\helpers\ArrayHelper::map($model->client->clientPhones, 'phone', 'phone')).'' : '';
+
+                    if(Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id) && Yii::$app->user->id !== $model->employee_id) {
+                        $str = '- // - // - // -';
+                    } else {
+                        $str = $model->client && $model->client->clientEmails ? '<i class="fa fa-envelope"></i> ' . implode(' <br><i class="fa fa-envelope"></i> ', \yii\helpers\ArrayHelper::map($model->client->clientEmails, 'email', 'email')) . '' : '';
+                        $str .= $model->client && $model->client->clientPhones ? '<br><i class="fa fa-phone"></i> ' . implode(' <br><i class="fa fa-phone"></i> ', \yii\helpers\ArrayHelper::map($model->client->clientPhones, 'phone', 'phone')) . '' : '';
+                    }
 
                     return $str ?? '-';
                 },
@@ -157,7 +185,8 @@ $this->params['breadcrumbs'][] = $this->title;
                 'value' => function(\common\models\Lead $model) {
                     return $model->source ? $model->source->name : '-';
                 },
-                'filter' => \common\models\Source::getList()
+                'filter' => \common\models\Source::getList(),
+                'visible' => !$isAgent
             ],
 
             [
@@ -210,8 +239,8 @@ $this->params['breadcrumbs'][] = $this->title;
 
             [
                 'header' => 'Quotes',
-                'value' => function(\common\models\Lead $model) {
-                    return $model->quotesCount ? Html::a($model->quotesCount, ['quote/index', "QuoteSearch[lead_id]" => $model->id], ['target' => '_blank', 'data-pjax' => 0]) : '-' ;
+                'value' => function(\common\models\Lead $model) use ($isAgent) {
+                    return $model->quotesCount ? ($isAgent ? $model->quotesCount : Html::a($model->quotesCount, ['quote/index', "QuoteSearch[lead_id]" => $model->id], ['target' => '_blank', 'data-pjax' => 0])) : '-' ;
                 },
                 'format' => 'raw',
                 'contentOptions' => ['class' => 'text-center'],
@@ -285,41 +314,7 @@ $this->params['breadcrumbs'][] = $this->title;
             ['class' => 'yii\grid\ActionColumn', 'template' => '{view}'],
         ];
 
-        /*Yii::$app->state = Yii::$app::STATE_END;
 
-
-
-        $fullExportMenu = \kartik\export\ExportMenu::widget([
-            'dataProvider' => $dataProvider,
-            'columns' => $gridColumnsExport,
-            'fontAwesome' => true,
-            //'stream' => false, // this will automatically save file to a folder on web server
-            //'deleteAfterSave' => false, // this will delete the saved web file after it is streamed to browser,
-            //'batchSize' => 10,
-            'target' => \kartik\export\ExportMenu::TARGET_BLANK,
-            'linkPath' => '/assets/',
-            'folder' => '@webroot/assets', // this is default save folder on server
-            'dropdownOptions' => [
-                'label' => 'Full Export'
-            ],
-            'columnSelectorOptions' => [
-                'label' => 'Export Fields'
-            ]
-        ]);*/
-
-
-
-    /*$fullExportMenu = ExportMenu::widget([
-        'dataProvider' => $dataProvider,
-        'batchSize' => 10,
-        'columns' => $gridColumns,
-        'target' => ExportMenu::TARGET_BLANK,
-        'fontAwesome' => true,
-        'asDropdown' => false, // this is important for this case so we just need to get a HTML list
-        'dropdownOptions' => [
-            'label' => '<i class="glyphicon glyphicon-export"></i> Full'
-        ],
-    ]);*/
 
 ?>
 
@@ -327,50 +322,66 @@ $this->params['breadcrumbs'][] = $this->title;
 
 <?php
 
-    echo GridView::widget([
-        'dataProvider' => $dataProvider,
-        'filterModel' => $searchModel,
-        //'containerOptions' => ['style'=>'overflow: auto'], // only set when $responsive = false
-
-        /*'export' => [
-            'label' => 'Page',
-            'fontAwesome' => true,
-            'itemsAfter'=> [
-                '<li role="presentation" class="divider"></li>',
-                '<li class="dropdown-header">Export All Data</li>',
-                $fullExportMenu
-            ]
-        ],*/
+    /*if(Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id)) {
 
 
-        'columns' => $gridColumns,
+        echo \yii\grid\GridView::widget([
+            'dataProvider' => $dataProvider,
+            //'filterModel' => Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id) ? false : $searchModel,
+            'columns' => $gridColumns,
 
-        'toolbar' =>  [
-            ['content'=>
+        ]);
+    } else {*/
+
+
+        echo GridView::widget([
+            'dataProvider' => $dataProvider,
+            'filterModel' => $isAgent ? false : $searchModel,
+            //'containerOptions' => ['style'=>'overflow: auto'], // only set when $responsive = false
+
+            /*'export' => [
+                'label' => 'Page',
+                'fontAwesome' => true,
+                'itemsAfter'=> [
+                    '<li role="presentation" class="divider"></li>',
+                    '<li class="dropdown-header">Export All Data</li>',
+                    $fullExportMenu
+                ]
+            ],*/
+
+
+            'columns' => $gridColumns,
+
+            'toolbar' => [
+                ['content' =>
                 //Html::button('<i class="glyphicon glyphicon-plus"></i>', ['type'=>'button', 'title'=>'Add Lead', 'class'=>'btn btn-success', 'onclick'=>'alert("This will launch the book creation form.\n\nDisabled for this demo!");']) . ' '.
-                Html::a('<i class="glyphicon glyphicon-repeat"></i>', ['leads/index'], ['data-pjax'=>0, 'class' => 'btn btn-default', 'title'=>'Reset Grid'])
+                    Html::a('<i class="glyphicon glyphicon-repeat"></i>', ['leads/index'], ['data-pjax' => 0, 'class' => 'btn btn-default', 'title' => 'Reset Grid'])
 
+                ],
+                //'{export}',
+                //$fullExportMenu,
+                //'{toggleData}'
             ],
-            //'{export}',
-            //$fullExportMenu,
-            '{toggleData}'
-        ],
-        'pjax' => true,
-        'pjaxSettings' => ['options' => ['id' => 'kv-pjax-container']],
-        //'bordered' => true,
-        'striped' => false,
-        'condensed' => false,
-        'responsive' => true,
-        'hover' => true,
-        'floatHeader' => true,
-        'floatHeaderOptions' => ['scrollingTop' => 20],
-        /*'showPageSummary' => true,*/
-        'panel' => [
-            'type' => GridView::TYPE_PRIMARY,
-            'heading' => '<h3 class="panel-title"><i class="glyphicon glyphicon-list"></i> Leads</h3>',
-        ],
+            'pjax' => true,
+            'pjaxSettings' => ['options' => ['id' => 'kv-pjax-container']],
+            //'bordered' => true,
+            'striped' => false,
+            'condensed' => false,
+            'responsive' => true,
+            'hover' => true,
+            'floatHeader' => true,
+            'floatHeaderOptions' => ['scrollingTop' => 20],
+            /*'showPageSummary' => true,*/
+            'panel' => [
+                'type' => GridView::TYPE_PRIMARY,
+                'heading' => '<h3 class="panel-title"><i class="glyphicon glyphicon-list"></i> Leads</h3>',
+            ],
 
-    ]); ?>
+        ]);
+    //}
+
+
+    ?>
 
 
     <?php if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id)) : ?>

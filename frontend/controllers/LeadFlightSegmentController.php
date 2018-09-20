@@ -39,11 +39,11 @@ class LeadFlightSegmentController extends DefaultController
                         'allow' => true,
                         'roles' => ['supervision'],
                     ],
-                    /*[
-                        'actions' => ['index'],
+                    [
+                        'actions' => ['view'],
                         'allow' => true,
                         'roles' => ['agent'],
-                    ],*/
+                    ],
                 ],
             ],
         ];

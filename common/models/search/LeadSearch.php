@@ -160,6 +160,10 @@ class LeadSearch extends Lead
         }
 
         if($this->client_phone) {
+
+            $this->client_phone = preg_replace('~[^0-9\+]~', '', $this->client_phone);
+            $this->client_phone = ($this->client_phone[0] === "+" ? '+' : '') . str_replace("+", '', $this->client_phone);
+
             $subQuery = ClientPhone::find()->select(['DISTINCT(client_id)'])->where(['like', 'phone', $this->client_phone]);
             $query->andWhere(['IN', 'client_id', $subQuery]);
         }
