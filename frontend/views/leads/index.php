@@ -8,11 +8,12 @@ use kartik\grid\GridView;
 /* @var $searchModel common\models\search\LeadSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 /* @var $multipleForm \frontend\models\LeadMultipleForm */
+/* @var $isAgent bool */
+
 
 $this->title = 'Search Leads';
 $this->params['breadcrumbs'][] = $this->title;
 
-$isAgent = Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id);
 
 ?>
 <style>
@@ -33,7 +34,7 @@ $isAgent = Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id);
             $searchTpl = '_search';
         }
 
-    echo $this->render('_search_agent', ['model' => $searchModel]); ?>
+    echo $this->render($searchTpl, ['model' => $searchModel]); ?>
 
 
     <?php if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id)) : ?>
