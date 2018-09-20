@@ -541,6 +541,7 @@ class LeadController extends DefaultController
         $lead = Lead::findOne(['id' => $id]);
 
         if ($lead !== null) {
+            Yii::$app->cache->delete(sprintf('quick-search-%d-%d', $lead->id, Yii::$app->user->identity->getId()));
             if (!$lead->permissionsView()) {
                 throw new UnauthorizedHttpException('Not permissions view lead ID: ' . $id);
             }

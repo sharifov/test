@@ -88,6 +88,7 @@ class QuoteController extends DefaultController
                             $model->id = 0;
                             $model->lead_id = $lead->id;
                             $model->cabin = $lead->cabin;
+                            $model->fare_type = $itinerary['privateFareType'];
                             foreach ($lead->getPaxTypes() as $type) {
                                 $newQPrice = new QuotePrice();
                                 $newQPrice->createQPrice($type);
@@ -114,6 +115,7 @@ class QuoteController extends DefaultController
                                 'quote' => $model,
                                 'prices' => $prices
                             ]);
+                            Yii::$app->cache->delete(sprintf('quick-search-%d-%d', $lead->id, Yii::$app->user->identity->getId()));
                         }
                     }
                 } else {

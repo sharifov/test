@@ -344,6 +344,8 @@ class Lead extends ActiveRecord
 
         if (in_array($queue, ['sold', 'booked'])) {
             $selected[] = Quote::tableName() . '.reservation_dump';
+            $selected[] = Quote::tableName() . '.check_payment';
+            $selected[] = Quote::tableName() . '.fare_type';
             $selected[] = 'g_qp.selling';
             $selected[] = 'g_qp.mark_up';
 

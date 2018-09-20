@@ -8,6 +8,7 @@
 
 use yii\helpers\Html;
 use common\models\Lead;
+
 $formID = 'getOnlineQuotes';
 
 $js = <<<JS
@@ -168,7 +169,7 @@ $this->registerJs($js);
                     <div class="sl-quote__central">
                         <div class="sl-quote__attributes">
                             <strong>Validating Carrier: </strong><?= $alternativeQuote['mainAirlineName'] ?> <span
-                                class="badge badge-info"><?= $alternativeQuote['mainAirlineCode'] ?></span>
+                                    class="badge badge-info"><?= $alternativeQuote['mainAirlineCode'] ?></span>
                         </div>
                         <div class="sl-quote__dump">
                             <h5 class="sl-quote__subtitle">Reservation dump</h5>

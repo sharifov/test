@@ -64,7 +64,7 @@ $queueType = Yii::$app->request->get('type');
             'attribute' => 'created',
             //'label' => 'Created Date',
             'visible' => !in_array($queueType, ['booked', 'sold']),
-            'value' => function($model) {
+            'value' => function ($model) {
                 return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model['created']));
             },
             'format' => 'html',
@@ -121,7 +121,7 @@ $queueType = Yii::$app->request->get('type');
             'attribute' => 'Client',
             'visible' => !in_array($queueType, ['booked']),
             'value' => function ($model) {
-                return '<i class="glyphicon glyphicon-user"></i> ' . $model['first_name']. ' ' .$model['last_name'];
+                return '<i class="glyphicon glyphicon-user"></i> ' . $model['first_name'] . ' ' . $model['last_name'];
             },
             'format' => 'html'
         ],
@@ -215,7 +215,7 @@ $queueType = Yii::$app->request->get('type');
                 : null,
             'visible' => !in_array($queueType, ['inbox', 'follow-up']),
             'value' => function ($model) {
-                return !empty($model['username']) ? '<i class="fa fa-user"></i> ' .Html::encode($model['username']) : '-';
+                return !empty($model['username']) ? '<i class="fa fa-user"></i> ' . Html::encode($model['username']) : '-';
             },
             'format' => 'html'
         ],
@@ -223,12 +223,14 @@ $queueType = Yii::$app->request->get('type');
             'label' => 'Profit',
             'visible' => in_array($queueType, ['booked', 'sold']),
             'value' => function ($model) {
-                $profit = 0;
-                if (!empty($model['mark_up'])) {
+                $profit = Quote::getProfit($model['mark_up'], $model['selling'], $model['fare_type'], boolval($model['check_payment']));
+                return sprintf('<strong>$%s</strong>', number_format($profit, 2));
+                /*$profit = 0;
+                 if (!empty($model['mark_up'])) {
                     $profit = $model['mark_up'] - ($model['selling'] * Quote::SERVICE_FEE);
                     $profit = ($profit < 0) ? 0 : $profit;
                 }
-                return sprintf('$%s', number_format($profit, 2));
+                return sprintf('$%s', number_format($profit, 2));*/
             },
             'format' => 'raw'
         ],

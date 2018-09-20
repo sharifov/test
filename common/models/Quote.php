@@ -69,19 +69,19 @@ class Quote extends \yii\db\ActiveRecord
 
 
     public CONST STATUS_LIST = [
-        self::STATUS_CREATED    => 'Created',
-        self::STATUS_APPLIED    => 'Applied',
-        self::STATUS_DECLINED   => 'Declined',
-        self::STATUS_SEND       => 'Send',
-        self::STATUS_OPENED     => 'Opened'
+        self::STATUS_CREATED => 'Created',
+        self::STATUS_APPLIED => 'Applied',
+        self::STATUS_DECLINED => 'Declined',
+        self::STATUS_SEND => 'Send',
+        self::STATUS_OPENED => 'Opened'
     ];
 
     public CONST STATUS_CLASS_LIST = [
-        self::STATUS_CREATED    => 'lq-created',
-        self::STATUS_APPLIED    => 'lq-applied',
-        self::STATUS_DECLINED   => 'lq-declined',
-        self::STATUS_SEND       => 'lq-send',
-        self::STATUS_OPENED     => 'lq-opened'
+        self::STATUS_CREATED => 'lq-created',
+        self::STATUS_APPLIED => 'lq-applied',
+        self::STATUS_DECLINED => 'lq-declined',
+        self::STATUS_SEND => 'lq-send',
+        self::STATUS_OPENED => 'lq-opened'
     ];
 
     public $itinerary = [];
@@ -105,12 +105,66 @@ class Quote extends \yii\db\ActiveRecord
         return isset($mapping[$gds]) ? $mapping[$gds] : $gds;
     }
 
+    public static function getFareType($fareType = null)
+    {
+        $mapping = [
+            self::FARE_TYPE_PUB => 'Published - no commission',
+            self::FARE_TYPE_PUBC => 'Published - with commission',
+            self::FARE_TYPE_SR => 'Private - Limited markup',
+            self::FARE_TYPE_SRU => 'Private - Unlimited markup',
+            self::FARE_TYPE_COMM => 'SPLIT MCO'
+        ];
+
+        if ($fareType === null) {
+            return $mapping;
+        }
+
+        return isset($mapping[$fareType]) ? $mapping[$fareType] : $fareType;
+    }
+
     /**
      * @return string
      */
     public function getStatusLabelClass(): string
     {
         return self::STATUS_CLASS_LIST[$this->status] ?? 'label-default';
+    }
+
+    public static function getProfit($markUp, $sellingPrice, $fare_type, $check_payment = true)
+    {
+        $fare_type = empty($fare_type)
+            ? self::FARE_TYPE_PUB : $fare_type;
+        $profit = 0;
+        switch ($fare_type) {
+            case self::FARE_TYPE_SR:
+            case self::FARE_TYPE_SRU:
+            case self::FARE_TYPE_COMM:
+                switch ($check_payment) {
+                    case true:
+                        $profit = $markUp - ($sellingPrice * self::SERVICE_FEE);
+                        break;
+                    case false:
+                        $profit = $markUp;
+                        break;
+                }
+                break;
+            case self::FARE_TYPE_PUBC:
+            case self::FARE_TYPE_PUB:
+                switch ($check_payment) {
+                    case false:
+                        if ($markUp >= 0) {
+                            $profit = $markUp - ($markUp * self::SERVICE_FEE);
+                        } else {
+                            $profit = $markUp;
+                        }
+                        break;
+                    case true:
+                        $profit = $markUp - ($sellingPrice * self::SERVICE_FEE);
+                        break;
+                }
+                break;
+        }
+        return $profit;
     }
 
     public static function createDump($flightSegments)
@@ -148,8 +202,8 @@ class Quote extends \yii\db\ActiveRecord
 
             $segment .= $daysName;
             $dump[] = $segment;
-            if($flightSegment->operationAirlineCode){
-                $dump[] = "OPERATED BY ".$flightSegment->operationAirlineCode;
+            if ($flightSegment->operationAirlineCode) {
+                $dump[] = "OPERATED BY " . $flightSegment->operationAirlineCode;
             }
         }
         return $dump;
@@ -255,7 +309,7 @@ class Quote extends \yii\db\ActiveRecord
         ];
     }
 
-    public function behaviors() : array
+    public function behaviors(): array
     {
         return [
             'timestamp' => [
@@ -280,7 +334,7 @@ class Quote extends \yii\db\ActiveRecord
     /**
      * @return int
      */
-    public function getQuotePricesCount() : int
+    public function getQuotePricesCount(): int
     {
         return $this->hasMany(QuotePrice::class, ['quote_id' => 'id'])->count();
     }
@@ -341,8 +395,7 @@ class Quote extends \yii\db\ActiveRecord
     }*/
 
 
-
-    public function beforeSave($insert) : bool
+    public function beforeSave($insert): bool
     {
         if ($this->isNewRecord) {
             $this->uid = empty($this->uid) ? uniqid() : $this->uid;
@@ -355,17 +408,17 @@ class Quote extends \yii\db\ActiveRecord
 
 
             if ($insert) {
-                if(!$this->status) {
+                if (!$this->status) {
                     $this->status = self::STATUS_CREATED;
                 }
 
-                if(!$this->uid) {
+                if (!$this->uid) {
                     $this->uid = uniqid();
                 }
 
-/*                if(!$this->employee_id && Yii::$app->user->id) {
-                    $this->employee_id = Yii::$app->user->id;
-                }*/
+                /*                if(!$this->employee_id && Yii::$app->user->id) {
+                                    $this->employee_id = Yii::$app->user->id;
+                                }*/
 
             }
 
@@ -399,7 +452,7 @@ class Quote extends \yii\db\ActiveRecord
                 if (stripos($row, "OPERATED BY") !== false) {
                     $operatedBy = trim(str_ireplace("OPERATED BY", "", $row));
                     $idx = count($data);
-                    if($idx > 0){
+                    if ($idx > 0) {
                         $idx--;
                     }
                     $operatedCnt++;
@@ -437,7 +490,7 @@ class Quote extends \yii\db\ActiveRecord
                 if (!empty($matches)) {
                     if (empty($matches[0])) continue;
                     $depDate = $matches[0][0];
-                    if(isset($matches[0][1])){
+                    if (isset($matches[0][1])) {
                         $arrDateInRow = true;
                     }
                     $arrDate = (isset($matches[0][1])) ? $matches[0][1] : $depDate;
@@ -476,11 +529,11 @@ class Quote extends \yii\db\ActiveRecord
                     }
 
                     $arrDepDiff = $depDateTime->diff($arrDateTime);
-                    if($arrDepDiff->d == 0 && !$arrDateInRow){
-                        if($matches[3][1] == "+") {
+                    if ($arrDepDiff->d == 0 && !$arrDateInRow) {
+                        if ($matches[3][1] == "+") {
                             $arrDateTime->add(\DateInterval::createFromDateString('+1 day'));
-                        }elseif(strpos($matches[3][1], "+")){
-                            $arrDateTime->add(\DateInterval::createFromDateString($matches[3][1].' day'));
+                        } elseif (strpos($matches[3][1], "+")) {
+                            $arrDateTime->add(\DateInterval::createFromDateString($matches[3][1] . ' day'));
                         }
                     }
 
@@ -549,7 +602,7 @@ class Quote extends \yii\db\ActiveRecord
                 $itinerary[] = $fSegment;
             }
             if ($validation) {
-                if ($segmentCount !== count($data)+$operatedCnt) {
+                if ($segmentCount !== count($data) + $operatedCnt) {
                     $data = [];
                 }
             }
@@ -737,13 +790,13 @@ class Quote extends \yii\db\ActiveRecord
      * @param bool $label
      * @return string
      */
-    public function getStatusName(bool $label = false) : string
+    public function getStatusName(bool $label = false): string
     {
         $statusName = self::STATUS_LIST[$this->status] ?? '-';
 
-        if($label) {
+        if ($label) {
             $class = $this->getStatusLabelClass();
-            $statusName = '<span class="label '.$class.'" style="font-size: 13px">' . Html::encode($statusName) . '</span>';
+            $statusName = '<span class="label ' . $class . '" style="font-size: 13px">' . Html::encode($statusName) . '</span>';
         }
 
         return $statusName;
@@ -752,7 +805,7 @@ class Quote extends \yii\db\ActiveRecord
     /**
      * @return string
      */
-    public function getGdsName2() : string
+    public function getGdsName2(): string
     {
         $name = self::GDS_LIST[$this->gds] ?? '-';
         return $name;
@@ -815,6 +868,8 @@ class Quote extends \yii\db\ActiveRecord
         $result['fare'] = round($result['fare'], 2);
         $result['taxes'] = round($result['taxes'], 2);
         $result['isCC'] = boolval(!$this->check_payment);
+        $result['fare_type'] = empty($this->fare_type)
+            ? self::FARE_TYPE_PUB : $this->fare_type;
         return $result;
     }
 

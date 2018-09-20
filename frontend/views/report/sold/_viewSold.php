@@ -33,7 +33,7 @@ use common\models\Quote;
                     $appliedAlternativeQuotes = $lead->getAppliedAlternativeQuotes();
                     if ($appliedAlternativeQuotes !== null) {
                         $price = $appliedAlternativeQuotes->quotePrice();
-                        $profit = $price['mark_up'] - ($price['selling'] * Quote::SERVICE_FEE);
+                        $profit = Quote::getProfit($price['mark_up'], $price['selling'], $price['fare_type'], $price['isCC']);
                     }
 
                     echo sprintf('$%s', number_format($profit, 2));

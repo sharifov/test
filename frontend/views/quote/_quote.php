@@ -393,7 +393,17 @@ $this->registerJs($js);
                         ])->label(false); ?>
                         <label for="<?= Html::getInputId($quote, 'check_payment') ?>"></label>
                     </td>
-                    <th colspan="2" class="td-input"></th>
+                    <th class="td-input"><label for="fare-type">Fare Type</label></th>
+                    <td class="td-input">
+                        <div class="select-wrap-label">
+                            <?= $form->field($quote, 'fare_type', [
+                                'options' => [
+                                    'tag' => false,
+                                ],
+                                'template' => '{input}'
+                            ])->dropDownList(Quote::getFareType()) ?>
+                        </div>
+                    </td>
                 </tr>
                 </tbody>
             </table>
