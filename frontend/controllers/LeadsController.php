@@ -62,7 +62,14 @@ class LeadsController extends DefaultController
     public function actionIndex()
     {
         $searchModel = new LeadSearch();
-        $dataProvider = $searchModel->search2(Yii::$app->request->queryParams);
+
+        $params = Yii::$app->request->queryParams;
+
+        if(!$params) {
+            $params['LeadSearch']['employee_id'] = Yii::$app->user->id;
+        }
+
+        $dataProvider = $searchModel->search2($params);
 
         $multipleForm = new LeadMultipleForm();
 
