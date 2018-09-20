@@ -3,6 +3,7 @@
 namespace common\models;
 
 use Yii;
+use yii\helpers\Html;
 
 /**
  * This is the model class for table "reasons".
@@ -21,6 +22,7 @@ class Reason extends \yii\db\ActiveRecord
     public $returnToQueue;
     public $queue;
     public $other;
+    public $duplicateLeadId;
 
 
     public const STATUS_REASON_LIST = [
@@ -70,7 +72,7 @@ class Reason extends \yii\db\ActiveRecord
      * @param int $reason_id
      * @return string
      */
-    public static function getReasonByStatus($status_id = 0, $reason_id = 0) : string
+    public static function getReasonByStatus($status_id = 0, $reason_id = 0): string
     {
         return self::STATUS_REASON_LIST[$status_id][$reason_id] ?? '-';
     }
@@ -79,7 +81,7 @@ class Reason extends \yii\db\ActiveRecord
      * @param int $status_id
      * @return array
      */
-    public static function getReasonListByStatus($status_id = 0) : array
+    public static function getReasonListByStatus($status_id = 0): array
     {
         return self::STATUS_REASON_LIST[$status_id] ?? [];
     }
@@ -129,7 +131,7 @@ class Reason extends \yii\db\ActiveRecord
         return [
             ['reason', 'required'],
             [['employee_id', 'lead_id'], 'integer'],
-            [['created', 'queue', 'returnToQueue', 'other'], 'safe'],
+            [['created', 'queue', 'returnToQueue', 'other', 'duplicateLeadId'], 'safe'],
             [['reason'], 'string', 'max' => 255],
             [['employee_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['employee_id' => 'id']],
             [['lead_id'], 'exist', 'skipOnError' => true, 'targetClass' => Lead::class, 'targetAttribute' => ['lead_id' => 'id']],
@@ -170,6 +172,19 @@ class Reason extends \yii\db\ActiveRecord
     {
         if (!empty($this->other)) {
             $this->reason = sprintf('%s: %s', $this->reason, $this->other);
+        }
+        if (!empty($this->duplicateLeadId)) {
+            $aHref = Html::a($this->duplicateLeadId, [
+                'lead/quote',
+                'type' => 'processing',
+                'id' => $this->duplicateLeadId
+            ], [
+                'data-pjax' => 0,
+            ]);
+            $this->reason = sprintf('%s: %s',
+                $this->reason,
+                $aHref
+            );
         }
     }
 }

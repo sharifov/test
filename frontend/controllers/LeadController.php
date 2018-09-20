@@ -385,11 +385,19 @@ class LeadController extends DefaultController
     {
         $lead = Lead::findOne(['id' => $id]);
         if ($lead !== null) {
+            $activeLeads = Lead::find()
+                ->where([
+                    'status' => [
+                        Lead::STATUS_ON_HOLD, Lead::STATUS_PROCESSING,
+                        Lead::STATUS_SNOOZE, Lead::STATUS_FOLLOW_UP
+                    ]
+                ]);
             $reason = new Reason();
             $reason->queue = $queue;
             return $this->renderAjax('partial/_reason', [
                 'reason' => $reason,
-                'lead' => $lead
+                'lead' => $lead,
+                'activeLeadIds' => ArrayHelper::map($activeLeads->asArray()->all(), 'id', 'id')
             ]);
         }
         return null;
