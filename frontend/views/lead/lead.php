@@ -35,18 +35,18 @@ if (!$leadForm->getLead()->isNewRecord) {
                 } else {
                     setTimeout(function() {
                         checkRequestUpdates(data.checkUpdatesUrl);
-                    }, 10000);
+                    }, 120000);
                 }
             })
             .fail(function () {
                 setTimeout(function() {
                     checkRequestUpdates('$checkUpdatesUrl');
-                }, 10000);
+                }, 120000);
             });
     }
     setTimeout(function() {
         checkRequestUpdates('$checkUpdatesUrl');
-    }, 10000);
+    }, 120000);
 
     $('#view-flow-transition').click(function() {
         $('#preloader').removeClass('hidden');
