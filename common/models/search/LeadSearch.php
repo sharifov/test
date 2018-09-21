@@ -186,6 +186,123 @@ class LeadSearch extends Lead
         return $dataProvider;
     }
 
+    public function searchAgent($params)
+    {
+        $query = Lead::find();
+
+        // add conditions that should always apply here
+
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+            'sort'=> ['defaultOrder' => ['id' => SORT_DESC]],
+            'pagination' => [
+                'pageSize' => 30,
+            ],
+        ]);
+
+        $this->load($params);
+
+        if (!$this->validate()) {
+            // uncomment the following line if you do not want to return any records when validation fails
+            $query->where('0=1');
+            return $dataProvider;
+        }
+
+
+        /*'id' => ''
+        'uid' => ''
+        'client_id' => ''
+        'client_name' => ''
+        'client_email' => ''
+        'client_phone' => ''
+        'bo_flight_id' => ''
+        'employee_id' => ''*/
+
+
+        if($this->id || $this->uid || $this->client_id || $this->client_name || $this->client_email || $this->client_phone || $this->bo_flight_id || $this->employee_id) {
+
+        } else {
+            $this->employee_id = Yii::$app->user->id;
+        }
+
+        //VarDumper::dump($params, 10, true); exit;
+
+        // grid filtering conditions
+        $query->andFilterWhere([
+            'id' => $this->id,
+            'client_id' => $this->client_id,
+            'employee_id' => $this->employee_id,
+            'status' => $this->status,
+            'project_id' => $this->project_id,
+            'source_id' => $this->source_id,
+            'adults' => $this->adults,
+            'children' => $this->children,
+            'infants' => $this->infants,
+            //'created' => $this->created,
+            //'updated' => $this->updated,
+            'snooze_for' => $this->snooze_for,
+            'bo_flight_id' => $this->bo_flight_id,
+            'rating' => $this->rating,
+
+            'uid' => $this->uid,
+            'trip_type' => $this->trip_type,
+            'cabin' => $this->cabin,
+            'request_ip' => $this->request_ip,
+            'discount_id' => $this->discount_id,
+
+        ]);
+
+
+        if($this->statuses) {
+            $query->andWhere(['status' => $this->statuses]);
+        }
+
+
+        if($this->created_date_from || $this->created_date_to) {
+
+            if ($this->created_date_from) {
+                $query->andFilterWhere(['>=', 'DATE(leads.created)', date('Y-m-d', strtotime($this->created_date_from))]);
+            }
+            if ($this->created_date_to) {
+                $query->andFilterWhere(['<=', 'DATE(leads.created)', date('Y-m-d', strtotime($this->created_date_to))]);
+            }
+
+        } else {
+
+            if($this->created) {
+                $query->andFilterWhere(['DATE(created)'=> date('Y-m-d', strtotime($this->created))]);
+            }
+        }
+
+        if($this->client_name) {
+            $query->joinWith(['client' => function ($q) {
+                if($this->client_name) {
+                    $q->where(['=', 'clients.last_name', $this->client_name])
+                        ->orWhere(['=', 'clients.first_name', $this->client_name]);
+                }
+            }]);
+        }
+
+        if($this->client_email) {
+            $subQuery = ClientEmail::find()->select(['DISTINCT(client_id)'])->where(['=', 'email', $this->client_email]);
+            $query->andWhere(['IN', 'client_id', $subQuery]);
+        }
+
+        if($this->client_phone) {
+
+            $this->client_phone = preg_replace('~[^0-9\+]~', '', $this->client_phone);
+            $this->client_phone = ($this->client_phone[0] === "+" ? '+' : '') . str_replace("+", '', $this->client_phone);
+
+            $subQuery = ClientPhone::find()->select(['DISTINCT(client_id)'])->where(['=', 'phone', $this->client_phone]);
+            $query->andWhere(['IN', 'client_id', $subQuery]);
+        }
+
+
+
+
+        return $dataProvider;
+    }
+
 
     public function searchEmail($params)
     {

@@ -75,7 +75,14 @@ class LeadsController extends DefaultController
             $params['LeadSearch']['employee_id'] = Yii::$app->user->id;
         }
 
-        $dataProvider = $searchModel->search2($params);
+
+        if($isAgent) {
+            $dataProvider = $searchModel->searchAgent($params);
+        } else {
+            $dataProvider = $searchModel->search2($params);
+        }
+
+
 
         $multipleForm = new LeadMultipleForm();
 
