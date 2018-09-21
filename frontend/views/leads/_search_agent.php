@@ -163,13 +163,13 @@ $isAgent = Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id);
 
             <div class="row">
                 <div class="col-md-6">
-                    <?php  //echo $form->field($model, 'bo_flight_id')->label('BO Sale ID') ?>
+                    <?php  echo $form->field($model, 'bo_flight_id')->label('BO Sale ID') ?>
                 </div>
 
 
                 <?//php  echo $form->field($model, 'called_expert') ?>
                 <div class="col-md-6">
-                    <?php  echo $form->field($model, 'bo_flight_id')->label('BO Sale ID') ?>
+                    <?php  echo $form->field($model, 'request_ip') ?>
                     <?php // echo $form->field($model, 'employee_id')->dropDownList([Yii::$app->user->id => Yii::$app->user->identity->username], ['prompt' => '-']) ?>
                 </div>
             </div>

@@ -219,7 +219,7 @@ class LeadSearch extends Lead
         'employee_id' => ''*/
 
 
-        if($this->id || $this->uid || $this->client_id || $this->client_name || $this->client_email || $this->client_phone || $this->bo_flight_id || $this->employee_id) {
+        if($this->id || $this->uid || $this->client_id || $this->client_name || $this->client_email || $this->client_phone || $this->bo_flight_id || $this->employee_id || $this->request_ip) {
 
         } else {
             $this->employee_id = Yii::$app->user->id;
@@ -249,7 +249,6 @@ class LeadSearch extends Lead
             'cabin' => $this->cabin,
             'request_ip' => $this->request_ip,
             'discount_id' => $this->discount_id,
-
         ]);
 
 
