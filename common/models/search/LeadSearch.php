@@ -312,6 +312,7 @@ class LeadSearch extends Lead
         $query->select(['COUNT(*) AS cnt', 'ce.email AS client_email']);
         $query->from('leads AS l');
         $query->where(['IS NOT', 'ce.email', null]);
+        $query->andFilterWhere(['<>', 'l.status', Lead::STATUS_TRASH]);
 
         if($this->client_email) {
             $query->andFilterWhere(['like', 'ce.email', $this->client_email]);
@@ -363,6 +364,7 @@ class LeadSearch extends Lead
         $query->select(['COUNT(*) AS cnt', 'cp.phone AS client_phone']);
         $query->from('leads AS l');
         $query->where(['IS NOT', 'cp.phone', null]);
+        $query->andFilterWhere(['<>', 'l.status', Lead::STATUS_TRASH]);
 
         if($this->client_phone) {
             $query->andFilterWhere(['like', 'cp.phone', $this->client_phone]);
@@ -425,6 +427,7 @@ class LeadSearch extends Lead
         $query->select(['COUNT(*) AS cnt', 'l.request_ip']);
         $query->from('leads AS l');
         $query->where(['IS NOT', 'l.request_ip', null]);
+        $query->andFilterWhere(['<>', 'l.status', Lead::STATUS_TRASH]);
 
         if($this->request_ip) {
             $query->andFilterWhere(['like', 'l.request_ip', $this->request_ip]);
