@@ -104,7 +104,7 @@ use frontend\models\LeadForm;
                             $data = [];
                             if ($leads) {
                                 foreach ($leads as $lead) {
-                                    $data[] = '<i class="fa fa-link"></i> ' . Html::a('lead: ' . $lead->id, ['/admin/leads/view', 'id' => $lead->id], ['target' => '_blank', 'data-pjax' => 0]) . ' (IP: ' . $lead->request_ip . ')';
+                                    $data[] = '<i class="fa fa-link"></i> ' . Html::a('lead: ' . $lead->id, ['leads/view', 'id' => $lead->id], ['target' => '_blank', 'data-pjax' => 0]) . ' (IP: ' . $lead->request_ip . ')';
                                 }
                             }
 
@@ -127,7 +127,7 @@ use frontend\models\LeadForm;
                         'format' => 'html',
                     ],
 
-                    ['class' => 'yii\grid\ActionColumn', 'template' => '{view}', 'controller' => 'admin/client'],
+                    ['class' => 'yii\grid\ActionColumn', 'template' => '{view}', 'controller' => 'client'],
                 ],
             ]);
 
