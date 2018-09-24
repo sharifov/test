@@ -113,7 +113,7 @@ class SoldReportForm extends Model
         }
 
         $this->totalCount = count($result);
-        ArrayHelper::multisort($data, ['totalProfit'], [SORT_DESC]);
+        ArrayHelper::multisort($result, ['totalProfit'], [SORT_DESC]);
         return $result;
     }
 
