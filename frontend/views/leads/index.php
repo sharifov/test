@@ -99,6 +99,10 @@ $this->params['breadcrumbs'][] = $this->title;
 
             [
                 'attribute' => 'id',
+                'value' => function(\common\models\Lead $model) {
+                    return Html::a('<i class="fa fa-file-o"></i> '.$model->id, ['lead/processing/'.$model->id], ['data-pjax' => 0, 'target' => '_blank']);
+                },
+                'format' => 'raw',
                 'options' => ['style' => 'width:80px'],
                 'contentOptions' => ['class' => 'text-center'],
             ],
