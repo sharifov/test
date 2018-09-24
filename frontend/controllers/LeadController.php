@@ -10,6 +10,7 @@ use common\models\EmployeeContactInfo;
 use common\models\Lead;
 use common\models\LeadFlow;
 use common\models\LeadLog;
+use common\models\local\LeadAdditionalInformation;
 use common\models\Note;
 use common\models\ProjectEmailTemplate;
 use common\models\Reason;
@@ -19,6 +20,7 @@ use Yii;
 use yii\base\Model;
 use yii\helpers\ArrayHelper;
 use yii\filters\AccessControl;
+use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\web\BadRequestHttpException;
 use yii\web\Cookie;
@@ -56,7 +58,7 @@ class LeadController extends DefaultController
                         'actions' => [
                             'create', 'add-comment', 'change-state', 'unassign', 'take',
                             'set-rating', 'add-note', 'unprocessed', 'call-expert', 'send-email',
-                            'check-updates', 'flow-transition', 'get-user-actions'
+                            'check-updates', 'flow-transition', 'get-user-actions', 'add-pnr'
                         ],
                         'allow' => true,
                         'roles' => ['agent'],
@@ -92,6 +94,59 @@ class LeadController extends DefaultController
     public function actionGetAirport($term)
     {
         return parent::actionGetAirport($term);
+    }
+
+    public function actionAddPnr($leadId)
+    {
+        $lead = Lead::findOne(['id' => $leadId]);
+        if ($lead !== null) {
+            if (Yii::$app->request->isPost) {
+                $model = new LeadAdditionalInformation();
+                $attr = Yii::$app->request->post($model->formName());
+                if (empty($attr['pnr'])) {
+                    Yii::$app->response->format = Response::FORMAT_JSON;
+                    $errors[Html::getInputId($model, 'pnr')] = sprintf('Cannot be blank');
+                    return [
+                        'errors' => $errors
+                    ];
+                } else {
+                    $lead->additionalInformationForm->pnr = $attr['pnr'];
+                    $quote = $lead->getAppliedAlternativeQuotes();
+                    if ($quote !== null) {
+                        $quote->record_locator = $lead->additionalInformationForm->pnr;
+                        $quote->save();
+                    }
+                    $lead->save();
+                    $data = [
+                        'FlightRequest' => [
+                            'id' => $lead->bo_flight_id,
+                            'sub_sources_id' => $lead->source_id,
+                            'pnr' => $lead->additionalInformationForm->pnr
+                        ]
+                    ];
+                    $result = BackOffice::sendRequest('lead/add-pnr', 'POST', json_encode($data));
+                    if ($result['status'] != 'Success') {
+                        $quote->record_locator = null;
+                        $lead->additionalInformationForm->pnr = null;
+                        $quote->save();
+                        $lead->save();
+                        Yii::$app->getSession()->setFlash('warning', sprintf(
+                            'Add PNR failed! %s',
+                            print_r($result['errors'], true)
+                        ));
+                    }
+                    return $this->redirect([
+                        'quote',
+                        'type' => 'processing',
+                        'id' => $lead->id
+                    ]);
+                }
+            }
+            return $this->renderAjax('partial/_paxInfo', [
+                'lead' => $lead
+            ]);
+        }
+        return null;
     }
 
     public function actionFlowTransition($leadId)

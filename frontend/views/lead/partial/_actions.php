@@ -181,6 +181,18 @@ $js = <<<JS
             editBlock.modal('show');
         });
     });
+    
+    /***  Add PNR  ***/
+    $('#create-pnr').click(function (e) {
+        e.preventDefault();
+        var url = $(this).data('url');
+        var editBlock = $('#create-quote');
+        editBlock.find('.modal-title').html('PAX INFO');
+        editBlock.find('.modal-body').html('');
+        editBlock.find('.modal-body').load(url, function( response, status, xhr ) {
+            editBlock.modal('show');
+        });
+    });
 JS;
 $this->registerJs($js);
 
@@ -304,6 +316,22 @@ $this->registerJs($js);
             'data-placement' => 'bottom',
             'data-original-title' => 'Add note',
         ]) ?>
+
+        <?php if ($leadForm->getLead()->employee_id == Yii::$app->user->getId() &&
+            $leadForm->getLead()->status == Lead::STATUS_BOOKED &&
+            !empty($leadForm->getLead()->bo_flight_id)
+        ) {
+            $title = empty($leadForm->getLead()->additionalInformationForm->pnr)
+                ? 'Create PNR' : 'PNR Created';
+            $options = empty($leadForm->getLead()->additionalInformationForm->pnr) ? [
+                'class' => 'btn btn-success btn-with-icon add-pnr',
+                'id' => 'create-pnr',
+                'data-url' => Url::to(['lead/add-pnr', 'leadId' => $leadForm->getLead()->id])
+            ] : [
+                'class' => 'btn btn-default btn-with-icon',
+            ];
+            echo Html::button('<span class="btn-icon"><i class="fa fa-plus"></i></span> <span class="btn-text">' . $title . '</span>', $options);
+        } ?>
 
         <?php if ($leadForm->mode != $leadForm::VIEW_MODE) {
             $title = '<span class="btn-icon"><i class="fa fa-check"></i></span><span class="btn-text">Save</span>';
