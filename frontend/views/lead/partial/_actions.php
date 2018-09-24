@@ -21,6 +21,11 @@ if ($leadForm->mode != $leadForm::VIEW_MODE) {
 
     $('#submit-lead-form-btn').click(function(event) {
         event.preventDefault();
+        
+        var btn = $(this); 
+        btn.attr('disabled', true).prop('disabled', true);
+        btn.find('span i').attr('class', 'fa fa-spinner');
+        
         var formData = $('#$formLeadId, #$formClientId, #$formPreferenceId').serialize();
         $.post($('#$formLeadId').attr('action'), formData, function( data ) {
             $('.has-error').each(function() {
@@ -57,6 +62,8 @@ if ($leadForm->mode != $leadForm::VIEW_MODE) {
                     });
                 });
                 console.log(data.errors);
+                btn.attr('disabled', false).prop('disabled', false);
+                btn.find('span i').attr('class', 'fa fa-check');
             } else {
                 console.log(data);
             }
@@ -306,7 +313,7 @@ $this->registerJs($js);
         ]) ?>
 
         <?php if ($leadForm->mode != $leadForm::VIEW_MODE) {
-            $title = '<span class="btn-icon"><i class="fa fa-check"></i></span><span class="btn-text">Save</span>';
+            $title = '<span class="btn-icon"><i class="fa fa-check"></i></span><span class="btn-text">'.($leadForm->getLead()->isNewRecord ? 'Create' : 'Save').'</span>';
             echo Html::submitButton($title, [
                 'id' => 'submit-lead-form-btn',
                 'class' => 'btn btn-primary btn-with-icon'
