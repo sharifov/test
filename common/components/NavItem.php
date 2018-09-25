@@ -78,6 +78,10 @@ class NavItem
                         'label' => '<i class="fa fa-bar-chart"></i> Sold',
                         'url' => ['report/sold']
                     ],
+                    [
+                        'label' => '<i class="fa fa-users"></i> Agents & Leads',
+                        'url' => ['report/agents']
+                    ],
                 ]
             ];
 

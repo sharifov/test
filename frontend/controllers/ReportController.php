@@ -3,6 +3,7 @@
 namespace frontend\controllers;
 
 use common\controllers\DefaultController;
+use common\models\search\LeadSearch;
 use frontend\models\SoldReportForm;
 use common\models\Employee;
 use common\models\Lead;
@@ -27,6 +28,13 @@ class ReportController extends DefaultController
                         ],
                         'allow' => true,
                         'roles' => ['agent'],
+                    ],
+                    [
+                        'actions' => [
+                            'agents'
+                        ],
+                        'allow' => true,
+                        'roles' => ['admin', 'supervision'],
                     ],
                 ],
             ],
@@ -112,6 +120,20 @@ class ReportController extends DefaultController
             'dataProvider' => $dataProvider,
             'employees' => $employees,
             'isSupervision' => $isSupervision
+        ]);
+    }
+
+    public function actionAgents()
+    {
+        $searchModel = new LeadSearch();
+        $dataProvider = $searchModel->searchAgentLeads(Yii::$app->request->queryParams);
+
+
+        //VarDumper::dump($dataProvider, 10, true); exit;
+
+        return $this->render('agents', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
         ]);
     }
 }

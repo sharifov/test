@@ -470,4 +470,130 @@ class LeadSearch extends Lead
         return $dataProvider;
     }
 
+
+    public function searchAgentLeads($params)
+    {
+        $this->load($params);
+
+        $query = new Query();
+        $query->select(['e.id', 'e.username']);
+
+        $query->addSelect(['(SELECT COUNT(*) FROM leads WHERE DATE(created)=DATE(now()) AND employee_id=e.id AND status='.Lead::STATUS_SOLD.') AS st_sold ']);
+        $query->addSelect(['(SELECT COUNT(*) FROM leads WHERE DATE(created)=DATE(now()) AND employee_id=e.id AND status='.Lead::STATUS_ON_HOLD.') AS st_on_hold ']);
+        $query->addSelect(['(SELECT COUNT(*) FROM leads WHERE DATE(created)=DATE(now()) AND employee_id=e.id AND status='.Lead::STATUS_PROCESSING.') AS st_processing ']);
+        $query->addSelect(['(SELECT COUNT(*) FROM leads WHERE DATE(created)=DATE(now()) AND employee_id=e.id AND status='.Lead::STATUS_FOLLOW_UP.') AS st_follow_up ']);
+        $query->addSelect(['(SELECT COUNT(*) FROM leads WHERE DATE(created)=DATE(now()) AND employee_id=e.id AND status='.Lead::STATUS_TRASH.') AS st_trash ']);
+        $query->addSelect(['(SELECT COUNT(*) FROM leads WHERE DATE(created)=DATE(now()) AND employee_id=e.id AND status='.Lead::STATUS_REJECT.') AS st_reject ']);
+        $query->addSelect(['(SELECT COUNT(*) FROM leads WHERE DATE(created)=DATE(now()) AND employee_id=e.id AND status='.Lead::STATUS_BOOKED.') AS st_booked ']);
+        $query->addSelect(['(SELECT COUNT(*) FROM leads WHERE DATE(created)=DATE(now()) AND employee_id=e.id AND status='.Lead::STATUS_SNOOZE.') AS st_snooze ']);
+        $query->addSelect(['(SELECT COUNT(*) FROM leads WHERE DATE(created)=DATE(now()) AND employee_id=e.id AND status='.Lead::STATUS_PENDING.') AS st_pending ']);
+        $query->addSelect(['(SELECT COUNT(*) FROM leads WHERE DATE(created)=DATE(now()) AND employee_id=e.id) AS all_statuses']);
+
+
+        //$query->from('leads AS l');
+        $query->from('employees AS e');
+
+        //$query->where(['IS NOT', 'l.employee_id', null]);
+        //$query->where(['>', 'all_statuses', 0]);
+
+       // $query->leftJoin(['employee as e', 'l.employee_id=e.id']);
+
+        //$query->andFilterWhere(['l.status' => [Lead::STATUS_PROCESSING, Lead::STATUS_PENDING, Lead::STATUS_FOLLOW_UP, Lead::STATUS_ON_HOLD]]);
+
+        /*if($this->request_ip) {
+            $query->andFilterWhere(['like', 'l.request_ip', $this->request_ip]);
+        }*/
+
+        //$query->groupBy(['l.status', 'l.employee_id']);
+        $query->having(['>', 'all_statuses', 0]);
+
+        $totalCount = 20;
+
+        $command = $query->createCommand();
+        $sql = $command->rawSql;
+
+        $paramsData = [
+            'sql' => $sql,
+            //'params' => [':publish' => 1],
+            //'totalCount' => $totalCount,
+            'sort' => [
+                'defaultOrder' => ['st_sold' => SORT_DESC],
+                'attributes' => [
+                    'st_sold' => [
+                        'asc' => ['st_sold' => SORT_ASC],
+                        'desc' => ['st_sold' => SORT_DESC],
+                        'default' => SORT_DESC,
+                        'label' => 'Sold',
+                    ],
+                    'st_on_hold' => [
+                        'asc' => ['st_sst_on_holdold' => SORT_ASC],
+                        'desc' => ['st_on_hold' => SORT_DESC],
+                        'default' => SORT_DESC,
+                        'label' => 'Hold',
+                    ],
+                    'st_processing' => [
+                        'asc' => ['st_processing' => SORT_ASC],
+                        'desc' => ['st_processing' => SORT_DESC],
+                        'default' => SORT_DESC,
+                        'label' => 'Processing',
+                    ],
+                    'st_follow_up' => [
+                        'asc' => ['st_follow_up' => SORT_ASC],
+                        'desc' => ['st_follow_up' => SORT_DESC],
+                        'default' => SORT_DESC,
+                        'label' => 'Follow up',
+                    ],
+                    'st_trash' => [
+                        'asc' => ['st_trash' => SORT_ASC],
+                        'desc' => ['st_trash' => SORT_DESC],
+                        'default' => SORT_DESC,
+                        'label' => 'Trash',
+                    ],
+                    'st_reject' => [
+                        'asc' => ['st_reject' => SORT_ASC],
+                        'desc' => ['st_reject' => SORT_DESC],
+                        'default' => SORT_DESC,
+                        'label' => 'Reject',
+                    ],
+                    'st_booked' => [
+                        'asc' => ['st_booked' => SORT_ASC],
+                        'desc' => ['st_booked' => SORT_DESC],
+                        'default' => SORT_DESC,
+                        'label' => 'Booked',
+                    ],
+                    'st_snooze' => [
+                        'asc' => ['st_snooze' => SORT_ASC],
+                        'desc' => ['st_snooze' => SORT_DESC],
+                        'default' => SORT_DESC,
+                        'label' => 'Snooze',
+                    ],
+                    'st_pending' => [
+                        'asc' => ['st_pending' => SORT_ASC],
+                        'desc' => ['st_pending' => SORT_DESC],
+                        'default' => SORT_DESC,
+                        'label' => 'Pending',
+                    ],
+
+                    'id' => [
+                        'asc' => ['id' => SORT_ASC],
+                        'desc' => ['id' => SORT_DESC],
+                        'label' => 'Agent',
+                    ],
+                    'username' => [
+                        'asc' => ['username' => SORT_ASC],
+                        'desc' => ['username' => SORT_DESC],
+                        'label' => 'Agent',
+                    ],
+
+                ],
+            ],
+            'pagination' => [
+                'pageSize' => 20,
+            ],
+        ];
+
+        $dataProvider = new SqlDataProvider($paramsData);
+        return $dataProvider;
+    }
+
 }
