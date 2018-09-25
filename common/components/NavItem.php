@@ -54,6 +54,7 @@ class NavItem
 
                 $items[] = ['label' => '<i class="glyphicon glyphicon-export"></i> Export Leads', 'url' => ['leads/export']];
                 $items[] = ['label' => '<i class="fa fa-copy"></i> Duplicate Leads', 'url' => ['leads/duplicate']];
+                $items[] = ['label' => '<i class="fa fa-users"></i> Stats Agents & Leads', 'url' => ['report/agents']];
             }
 
 
@@ -77,10 +78,6 @@ class NavItem
                     [
                         'label' => '<i class="fa fa-bar-chart"></i> Sold',
                         'url' => ['report/sold']
-                    ],
-                    [
-                        'label' => '<i class="fa fa-users"></i> Agents & Leads',
-                        'url' => ['report/agents']
                     ],
                 ]
             ];
