@@ -778,9 +778,11 @@ class Lead extends ActiveRecord
         return self::STATUS_CLASS_LIST[$this->status] ?? 'label-default';
     }
 
-    public function afterSave($insert, $changedAttributes)
+    /**
+     * @return bool
+     */
+    public function updateIpInfo()
     {
-        parent::afterSave($insert, $changedAttributes);
 
         if (empty($this->offset_gmt) && !empty($this->request_ip)) {
 
@@ -789,18 +791,14 @@ class Lead extends ActiveRecord
             ]);
 
             try {
-                //echo Yii::$app->params['checkIpURL']; exit;
-
                 $jsonData = file_get_contents(Yii::$app->params['checkIpURL'] . $this->request_ip, false, $ctx);
-
-
             } catch (\Throwable $throwable) {
-                $jsonData = [];
+                return false;
             }
 
             if ($jsonData) {
 
-                $data = json_decode($jsonData, true);
+                $data = @json_decode($jsonData, true);
 
                 //print_r($data); exit;
 
@@ -809,10 +807,21 @@ class Lead extends ActiveRecord
                         $this->offset_gmt = str_replace(':', '.', $data['data']['datetime']['offset_gmt']);
                     }
                     $this->request_ip_detail = json_encode($data['data']);
-                    $this->update(false, ['offset_gmt', 'request_ip_detail']);
+                    //$this->update(false, ['offset_gmt', 'request_ip_detail']);
+
+                    Lead::updateAll(['offset_gmt' => $this->offset_gmt, 'request_ip_detail' => $this->request_ip_detail], ['id' => $this->id]);
+
+                    return true;
                 }
             }
         }
+        return false;
+    }
+
+
+    public function afterSave($insert, $changedAttributes)
+    {
+        parent::afterSave($insert, $changedAttributes);
 
         if ($insert) {
             LeadFlow::addStateFlow($this);
@@ -864,7 +873,7 @@ class Lead extends ActiveRecord
         }
 
         //Add logs after changed model attributes
-        $leadLog = new LeadLog((new LeadLogMessage()));
+        $leadLog = new LeadLog(new LeadLogMessage());
         $leadLog->logMessage->oldParams = $changedAttributes;
         $leadLog->logMessage->newParams = array_intersect_key($this->attributes, $changedAttributes);
         $leadLog->logMessage->title = ($insert)
