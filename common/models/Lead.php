@@ -13,6 +13,7 @@ use yii\db\ActiveRecord;
 use yii\db\Query;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
+use yii\helpers\Url;
 
 /**
  * This is the model class for table "leads".
@@ -819,16 +820,140 @@ class Lead extends ActiveRecord
     }
 
 
+    /**
+     * @param null $type
+     * @param null $employee_id
+     * @param null $employee2_id
+     * @return bool
+     */
+    public function sendNotification($type = null, $employee_id = null, $employee2_id = null)
+    {
+        $isSend = false;
+
+        $host = \Yii::$app->params['url_address'];
+
+        if($type && $employee_id && isset(Yii::$app->params['email_from']['sales'])) {
+            $user = Employee::findOne($employee_id);
+            $user2 = Employee::findOne($employee2_id);
+
+            if($user && $user->email) {
+
+                $swiftMailer = Yii::$app->mailer;
+
+                $userName = $user->username;
+
+                if($user2) {
+                    $userName2 = $user2->username;
+                } else {
+                    $userName2 = '-';
+                }
+
+                $body = 'Hi!';
+                $subject = '[Sales] Default subject';
+
+                if($type === 'reassigned-lead') {
+
+                    $body = Yii::t('email', "Dear {name},
+Attention! 
+Your Lead (ID: {lead_id}) has been reassigned to another agent ({name2}).
+
+You can view lead here: {url}
+
+Regards,
+Sales - Kivork",
+                        [
+                            'name' => $userName,
+                            'name2' => $userName2,
+                            'url' => $host.'/leads/view?id='.$this->id,
+                            'lead_id' => $this->id,
+                            'br' => "\r\n"
+                        ]);
+
+                    $subject = Yii::t('email', "⚠ [Sales] Your Lead-{id} has been reassigned to another agent ({username})", ['id' => $this->id, 'username' => $userName2]);
+
+                } elseif($type === 'lead-status-sold') {
+
+                    $body = Yii::t('email', "Dear {name},
+We have some great news for you! 
+Your Lead (ID: {lead_id}) has been changed status to SOLD!
+
+You can view lead here: {url}
+
+Regards,
+Sales - Kivork",
+                        [
+                            'name' => $userName,
+                            'url' => $host.'/leads/view?id='.$this->id,
+                            'lead_id' => $this->id,
+                            'br' => "\r\n"
+                        ]);
+
+                    $subject = Yii::t('email', "❀ [Sales] Your Lead-{id} has been changed status to SOLD", ['id' => $this->id]);
+                }
+
+                try {
+                    $isSend = $swiftMailer
+                        ->compose()//'sendDeliveryEmailForClient', ['order' => $this])
+                        ->setTo($user->email)
+                        ->setBcc(Yii::$app->params['email_to']['bcc_sales'])
+                        ->setFrom(Yii::$app->params['email_from']['sales'])
+                        ->setSubject($subject)
+                        ->setTextBody($body)
+                        ->send();
+
+                    if (!$isSend) {
+                        Yii::warning('Not send to Email:' . $user->email . ' - Sale Id: ' . $this->id, 'Lead:'.$type.':SendMail');
+                    }
+
+                } catch (\Throwable $e) {
+                    Yii::error($user->email.' '.$e->getMessage(), 'swiftMailer::send');
+                }
+
+            } else {
+                Yii::warning("Not found employee (".$employee_id.") or email: " . ($user ? $user->email : ''), 'Lead:'.$type.':SendMail');
+            }
+        } else {
+            Yii::warning("type = $type, employee_id = $employee_id, employee2_id = $employee2_id", 'Lead:'.$type.':SendMail');
+        }
+
+        return $isSend;
+    }
+
+
     public function afterSave($insert, $changedAttributes)
     {
+
         parent::afterSave($insert, $changedAttributes);
 
         if ($insert) {
             LeadFlow::addStateFlow($this);
         } else {
-            if (isset($changedAttributes['status']) && $changedAttributes['status'] != $this->status) {
+            if (isset($changedAttributes['status']) && $changedAttributes['status'] !== $this->status) {
                 LeadFlow::addStateFlow($this);
             }
+
+
+            if($this->status !== self::STATUS_TRASH && isset($changedAttributes['employee_id']) && $changedAttributes['employee_id'] !== $this->employee_id) {
+                //echo $changedAttributes['employee_id'].' - '. $this->employee_id;
+
+                if(isset($changedAttributes['status']) && $changedAttributes['status'] === self::STATUS_TRASH) {
+
+                } else {
+
+                    if (!$this->sendNotification('reassigned-lead', $changedAttributes['employee_id'], $this->employee_id)) {
+                        Yii::warning('Not send Email notification to employee_id: ' . $changedAttributes['employee_id'] . ', lead: ' . $this->id, 'Lead:afterSave:sendNotification');
+                    }
+                }
+            }
+
+            if (isset($changedAttributes['status']) && $changedAttributes['status'] !== $this->status) {
+                if($this->status === self::STATUS_SOLD) {
+                    if (!$this->sendNotification('lead-status-sold', $this->employee_id)) {
+                        Yii::warning('Not send Email notification to employee_id: ' . $this->employee_id . ', lead: ' . $this->id, 'Lead:afterSave:sendNotification');
+                    }
+                }
+            }
+
         }
 
         if (!$insert) {
