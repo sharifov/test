@@ -864,7 +864,7 @@ Sales - Kivork",
                         [
                             'name' => $userName,
                             'name2' => $userName2,
-                            'url' => $host.'/leads/view?id='.$this->id,
+                            'url' => $host.'/lead/booked/'.$this->id,
                             'lead_id' => $this->id,
                             'br' => "\r\n"
                         ]);
@@ -883,7 +883,7 @@ Regards,
 Sales - Kivork",
                         [
                             'name' => $userName,
-                            'url' => $host.'/leads/view?id='.$this->id,
+                            'url' => $host.'/lead/booked/'.$this->id,
                             'lead_id' => $this->id,
                             'br' => "\r\n"
                         ]);
@@ -933,7 +933,7 @@ Sales - Kivork",
             }
 
 
-            if($this->status != self::STATUS_TRASH && isset($changedAttributes['employee_id']) && $changedAttributes['employee_id'] != $this->employee_id) {
+            if($this->status != self::STATUS_TRASH && isset($changedAttributes['employee_id']) && $this->employee_id && $changedAttributes['employee_id'] != $this->employee_id) {
                 //echo $changedAttributes['employee_id'].' - '. $this->employee_id;
 
                 if(isset($changedAttributes['status']) && $changedAttributes['status'] === self::STATUS_TRASH) {
@@ -946,7 +946,7 @@ Sales - Kivork",
                 }
             }
 
-            if (isset($changedAttributes['status']) && $changedAttributes['status'] != $this->status) {
+            if (isset($changedAttributes['status']) && $this->employee_id && $changedAttributes['status'] != $this->status) {
 
                 if($this->status == self::STATUS_SOLD) {
                     //echo $changedAttributes['status'].' - '. $this->status; exit;
