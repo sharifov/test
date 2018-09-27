@@ -1,5 +1,4 @@
 <?php
-
 namespace console\controllers;
 
 use common\components\BackOffice;
@@ -28,9 +27,10 @@ use yii\helpers\Console;
 
 class DbController extends Controller
 {
+
     public function actionConvertCollate()
     {
-        printf("\n --- Start %s ---\n", $this->ansiFormat($this->className() . ' - ' . $this->action->id, Console::FG_YELLOW));
+        printf("\n --- Start %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
         $db = Yii::$app->getDb();
         // get the db name
         $schema = $db->createCommand('select database()')->queryScalar();
@@ -43,11 +43,52 @@ class DbController extends Controller
         foreach ($tables as $table) {
             $tableName = $table['table_name'];
             $db->createCommand("ALTER TABLE `$tableName` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci")->execute();
-            echo "tbl: ".$tableName. "\r\n";
+            echo "tbl: " . $tableName . "\r\n";
         }
         $db->createCommand('SET FOREIGN_KEY_CHECKS=1;')->execute();
-        printf("\n --- End %s ---\n", $this->ansiFormat($this->className() . ' - ' . $this->action->id, Console::FG_YELLOW));
+        printf("\n --- End %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
     }
 
+    /**
+     * Remove Client Emails and Phones Duplicates
+     */
+    public function actionRemoveClientDuplicates()
+    {
+        printf("\n --- Start %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
+        $db = Yii::$app->getDb();
+        // get the db name
+        $schema = $db->createCommand('select database()')->queryScalar();
 
+        $duplicatesEmail = $db->createCommand('SELECT ce.id, count(client_id) as cnt, email, client_id FROM client_email ce GROUP BY email, client_id HAVING cnt > 1')->queryAll();
+
+        if (count($duplicatesEmail) > 0) {
+            foreach ($duplicatesEmail as $entry) {
+                $db->createCommand('DELETE FROM client_email WHERE email = :email AND client_id = :client_id AND id != :id', [
+                    'id' => $entry['id'],
+                    'email' => $entry['email'],
+                    'client_id' => $entry['client_id']
+                ])->execute();
+            }
+            printf("\n--- Removed %s duplicates in client_email ---\n", count($duplicatesEmail));
+        } else {
+            printf("\n--- In client_email not found duplicates ---\n");
+        }
+
+        $duplicatesPhone = $db->createCommand('SELECT ce.id, count(client_id) as cnt, phone, client_id FROM client_phone ce GROUP BY phone, client_id HAVING cnt > 1')->queryAll();
+
+        if (count($duplicatesPhone) > 0) {
+            foreach ($duplicatesPhone as $entry) {
+                $db->createCommand('DELETE FROM client_phone WHERE phone = :phone AND client_id = :client_id AND id != :id', [
+                    'id' => $entry['id'],
+                    'phone' => $entry['phone'],
+                    'client_id' => $entry['client_id']
+                ])->execute();
+            }
+            printf("\n--- Removed %s duplicates in client_phone ---\n", count($duplicatesPhone));
+        } else {
+            printf("\n--- In client_phone not found duplicates ---\n");
+        }
+
+        printf("\n --- End %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
+    }
 }
