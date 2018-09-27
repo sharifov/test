@@ -824,9 +824,10 @@ class Lead extends ActiveRecord
      * @param null $type
      * @param null $employee_id
      * @param null $employee2_id
+     * @param  $lead
      * @return bool
      */
-    public function sendNotification($type = null, $employee_id = null, $employee2_id = null)
+    public function sendNotification($type = null, $employee_id = null, $employee2_id = null, $lead = null)
     {
         $isSend = false;
 
@@ -889,6 +890,29 @@ Sales - Kivork",
                         ]);
 
                     $subject = Yii::t('email', "❀ [Sales] Your Lead-{id} has been changed status to SOLD", ['id' => $this->id]);
+                } elseif($type === 'lead-status-booked') {
+
+
+                    $quote = Quote::find()->where(['lead_id' => $lead->id, 'status' => Quote::STATUS_APPLIED])->orderBy(['id' => SORT_DESC])->one();
+
+                    $body = Yii::t('email', "Dear {name},
+
+Your Lead (ID: {lead_id}) has been changed status to BOOKED!
+Booked quote UID: {quote_uid}
+
+You can view lead here: {url}
+
+Regards,
+Sales - Kivork",
+                        [
+                            'name' => $userName,
+                            'url' => $host.'/lead/booked/'.$this->id,
+                            'lead_id' => $this->id,
+                            'quote_uid' => $quote ? $quote->uid : '-',
+                            'br' => "\r\n"
+                        ]);
+
+                    $subject = Yii::t('email', "⚐ [Sales] Your Lead-{id} has been changed status to BOOKED", ['id' => $this->id]);
                 }
 
                 try {
@@ -951,6 +975,11 @@ Sales - Kivork",
                 if($this->status == self::STATUS_SOLD) {
                     //echo $changedAttributes['status'].' - '. $this->status; exit;
                     if (!$this->sendNotification('lead-status-sold', $this->employee_id)) {
+                        Yii::warning('Not send Email notification to employee_id: ' . $this->employee_id . ', lead: ' . $this->id, 'Lead:afterSave:sendNotification');
+                    }
+                } elseif($this->status == self::STATUS_BOOKED) {
+
+                    if (!$this->sendNotification('lead-status-booked', $this->employee_id, null, $this)) {
                         Yii::warning('Not send Email notification to employee_id: ' . $this->employee_id . ', lead: ' . $this->id, 'Lead:afterSave:sendNotification');
                     }
                 }
