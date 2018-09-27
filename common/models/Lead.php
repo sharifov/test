@@ -933,7 +933,7 @@ Sales - Kivork",
             }
 
 
-            if($this->status !== self::STATUS_TRASH && isset($changedAttributes['employee_id']) && $changedAttributes['employee_id'] !== $this->employee_id) {
+            if($this->status != self::STATUS_TRASH && isset($changedAttributes['employee_id']) && $changedAttributes['employee_id'] != $this->employee_id) {
                 //echo $changedAttributes['employee_id'].' - '. $this->employee_id;
 
                 if(isset($changedAttributes['status']) && $changedAttributes['status'] === self::STATUS_TRASH) {
@@ -946,8 +946,10 @@ Sales - Kivork",
                 }
             }
 
-            if (isset($changedAttributes['status']) && $changedAttributes['status'] !== $this->status) {
-                if($this->status === self::STATUS_SOLD) {
+            if (isset($changedAttributes['status']) && $changedAttributes['status'] != $this->status) {
+
+                if($this->status == self::STATUS_SOLD) {
+                    //echo $changedAttributes['status'].' - '. $this->status; exit;
                     if (!$this->sendNotification('lead-status-sold', $this->employee_id)) {
                         Yii::warning('Not send Email notification to employee_id: ' . $this->employee_id . ', lead: ' . $this->id, 'Lead:afterSave:sendNotification');
                     }
