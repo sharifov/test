@@ -838,7 +838,7 @@ class Lead extends ActiveRecord
 
             if($user && $user->email) {
 
-                $swiftMailer = Yii::$app->mailer;
+                $swiftMailer = Yii::$app->mailer2;
 
                 $userName = $user->username;
 
