@@ -29,5 +29,16 @@ return [
         'cache' => [
             'class' => 'yii\caching\FileCache',
         ],
+
+        'mailer' => [
+            'class' => 'yii\swiftmailer\Mailer',
+            'viewPath' => '@common/mail',
+            'useFileTransport' => true,
+        ],
+        'mailer2' => [
+            'class' => 'yii\swiftmailer\Mailer',
+            'viewPath' => '@common/mail',
+            'useFileTransport' => true,
+        ],
     ],
 ];
