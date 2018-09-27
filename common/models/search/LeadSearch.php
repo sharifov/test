@@ -309,7 +309,7 @@ class LeadSearch extends Lead
         $this->load($params);
 
         $query = new Query();
-        $query->select(['COUNT(*) AS cnt', 'ce.email AS client_email']);
+        $query->select(['COUNT(distinct l.id) AS cnt', 'ce.email AS client_email']);
         $query->from('leads AS l');
         $query->where(['IS NOT', 'ce.email', null]);
         $query->andFilterWhere(['l.status' => [Lead::STATUS_PROCESSING, Lead::STATUS_PENDING, Lead::STATUS_FOLLOW_UP, Lead::STATUS_ON_HOLD]]);
@@ -361,7 +361,7 @@ class LeadSearch extends Lead
         $this->load($params);
 
         $query = new Query();
-        $query->select(['COUNT(*) AS cnt', 'cp.phone AS client_phone']);
+        $query->select(['COUNT(distinct l.id) AS cnt', 'cp.phone AS client_phone']);
         $query->from('leads AS l');
         $query->where(['IS NOT', 'cp.phone', null]);
         $query->andFilterWhere(['l.status' => [Lead::STATUS_PROCESSING, Lead::STATUS_PENDING, Lead::STATUS_FOLLOW_UP, Lead::STATUS_ON_HOLD]]);
@@ -424,7 +424,7 @@ class LeadSearch extends Lead
         $this->load($params);
 
         $query = new Query();
-        $query->select(['COUNT(*) AS cnt', 'l.request_ip']);
+        $query->select(['COUNT(distinct l.id) AS cnt', 'l.request_ip']);
         $query->from('leads AS l');
         $query->where(['IS NOT', 'l.request_ip', null]);
         $query->andFilterWhere(['l.status' => [Lead::STATUS_PROCESSING, Lead::STATUS_PENDING, Lead::STATUS_FOLLOW_UP, Lead::STATUS_ON_HOLD]]);
