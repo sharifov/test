@@ -141,6 +141,11 @@ JS;
             } ?>
 
             <?php if (!$leadForm->getLead()->isNewRecord) : ?>
+
+                <?= $this->render('partial/_task_list', [
+                    'lead' => $leadForm->getLead()
+                ]); ?>
+
                 <?= $this->render('partial/_notes', [
                     'notes' => $leadForm->getLead()->getNotes()
                 ]); ?>

@@ -10,6 +10,7 @@ use common\models\EmployeeContactInfo;
 use common\models\Lead;
 use common\models\LeadFlow;
 use common\models\LeadLog;
+use common\models\LeadTask;
 use common\models\local\LeadAdditionalInformation;
 use common\models\Note;
 use common\models\ProjectEmailTemplate;
@@ -525,6 +526,11 @@ class LeadController extends DefaultController
         $model->employee_id = Yii::$app->user->identity->getId();
         $model->status = Lead::STATUS_PROCESSING;
         $model->save();
+
+
+        LeadTask::createTaskList($model->id, $model->employee_id, 1);
+        LeadTask::createTaskList($model->id, $model->employee_id, 2);
+        LeadTask::createTaskList($model->id, $model->employee_id, 3);
 
         return $this->redirect([
             'quote',
