@@ -629,7 +629,6 @@ class Quote extends \yii\db\ActiveRecord
                 'lead_id' => $this->lead_id,
             ]);
 
-
             if (isset($changedAttributes['status'])) {
                 if ($this->lead->called_expert &&
                     $changedAttributes['status'] != $this->status &&
@@ -639,7 +638,10 @@ class Quote extends \yii\db\ActiveRecord
                     $data = $quote->getQuoteInformationForExpert(true);
                     BackOffice::sendRequest('lead/update-quote', 'POST', json_encode($data));
                 }
+                QuoteStatusLog::createNewFromQuote($this);
             }
+        }else{
+            QuoteStatusLog::createNewFromQuote($this);
         }
     }
 
