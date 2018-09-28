@@ -669,6 +669,15 @@ class Quote extends \yii\db\ActiveRecord
         return $label;
     }
 
+    public function getLabelByStatus(int $status)
+    {
+        $class = self::STATUS_CLASS_LIST[$status];
+
+        $statusName = self::STATUS_LIST[$status] ?? '-';
+
+        return '<span class="label ' . $class . '" style="font-size: 13px">' . Html::encode($statusName) . '</span>';
+    }
+
     /**
      * @param $newQuote self
      * @param $lead Lead
@@ -930,4 +939,10 @@ class Quote extends \yii\db\ActiveRecord
             ];
         }
     }
+
+    public function getStatusLog()
+    {
+        return QuoteStatusLog::findAll(['quote_id' => $this->id]);
+    }
+
 }
