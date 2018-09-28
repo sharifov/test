@@ -100,14 +100,14 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'created',
                 'value' => function(\common\models\Client $model) {
-                    return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime($model->created);
+                return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->created));
                 },
                 'format' => 'html',
             ],
             [
                 'attribute' => 'updated',
                 'value' => function(\common\models\Client $model) {
-                    return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime($model->updated);
+                return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->updated));
                 },
                 'format' => 'html',
             ],
@@ -153,7 +153,7 @@ $jsCode = <<<JS
     $(document).on('click', '.show-modal', function(){
         //e.preventDefault();
         $('#modalClient').modal('show').find('#modalClientContent').html('<div style="text-align:center"><img width="200px" src="https://loading.io/spinners/gear-set/index.triple-gears-loading-icon.svg"></div>');
-                
+
         $('#modalClientHeader').html('<h4>' + $(this).attr('title') + ' ' + '<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button></h4>');
         $.get($(this).attr('href'), function(data) {
           $('#modalClient').find('#modalClientContent').html(data);

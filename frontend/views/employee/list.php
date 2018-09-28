@@ -85,14 +85,14 @@ HTML;
                 [
                     'attribute' => 'created_at',
                     'value' => function(\common\models\Employee $model) {
-                        return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime($model->created_at);
+                        return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->created_at));
                     },
                     'format' => 'html',
                 ],
                 [
                     'attribute' => 'updated_at',
                     'value' => function(\common\models\Employee $model) {
-                        return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime($model->updated_at);
+                        return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->updated_at));
                     },
                     'format' => 'html',
                 ],

@@ -369,7 +369,7 @@ $this->params['breadcrumbs'][] = $this->title;
         [
             'header' => 'Created Time',
             'value' => function(\common\models\Lead $model) {
-                return Yii::$app->formatter->asDatetime($model->created, 'php:H:i');
+                return Yii::$app->formatter->asDatetime(strtotime($model->created), 'php:H:i');
             },
         ],
 

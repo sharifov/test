@@ -187,7 +187,7 @@ $isAgent = Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id);
                     [
                         'attribute' => 'created',
                         'value' => function(\common\models\Lead $model) {
-                            return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime($model->created);
+                            return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->created));
                         },
                         'format' => 'html',
                     ],
@@ -195,7 +195,7 @@ $isAgent = Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id);
                     [
                         'attribute' => 'updated',
                         'value' => function(\common\models\Lead $model) {
-                            return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime($model->updated);
+                            return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->updated));
                         },
                         'format' => 'html',
                     ],
@@ -284,7 +284,7 @@ $isAgent = Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id);
                     [
                         'attribute' => 'created',
                         'value' => function(\common\models\LeadFlightSegment $model) {
-                            return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime($model->created);
+                            return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->created));
                         },
                         'format' => 'html',
                     ],
@@ -292,7 +292,7 @@ $isAgent = Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id);
                     [
                         'attribute' => 'updated',
                         'value' => function(\common\models\LeadFlightSegment $model) {
-                            return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime($model->updated);
+                            return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->updated));
                         },
                         'format' => 'html',
                     ],
@@ -405,7 +405,7 @@ $isAgent = Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id);
                 [
                     'attribute' => 'created',
                     'value' => function(\common\models\Quote $model) {
-                        return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime($model->created);
+                    return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->created));
                     },
                     'format' => 'html',
                 ],
@@ -413,7 +413,7 @@ $isAgent = Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id);
                 [
                     'attribute' => 'updated',
                     'value' => function(\common\models\Quote $model) {
-                        return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime($model->updated);
+                    return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->updated));
                     },
                     'format' => 'html',
                 ],
