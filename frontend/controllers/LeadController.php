@@ -599,7 +599,7 @@ class LeadController extends DefaultController
 
     public function actionQuote($type, $id)
     {
-        $this->view->title = sprintf('Processing Lead - %s Queue', ucfirst($type));
+        $this->view->title = sprintf('Processing Lead - %s', ucfirst($type));
 
         $lead = Lead::findOne(['id' => $id]);
 
@@ -613,6 +613,12 @@ class LeadController extends DefaultController
                 $leadForm->getLead()->employee_id != Yii::$app->user->identity->getId()
             ) {
                 $leadForm->mode = $leadForm::VIEW_MODE;
+            }
+
+            $flightSegments = $leadForm->getLeadFlightSegment();
+            foreach ($flightSegments as $segment){
+                $this->view->title = sprintf('%s & %s: ',$segment->destination, $id).$this->view->title;
+                break;
             }
 
             if (Yii::$app->request->isAjax) {
