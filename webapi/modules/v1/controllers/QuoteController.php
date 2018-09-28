@@ -155,6 +155,8 @@ class QuoteController extends ApiBaseController
      * },
      * "errors": [],
      * "uid": "5b7424e858e91",
+     * "lead_id": 123456,
+     * "lead_uid": "00jhk0017"
      * "agentName": "admin",
      * "agentEmail": "assistant@wowfare.com",
      * "agentDirectLine": "+1 888 946 3882",
@@ -221,6 +223,8 @@ class QuoteController extends ApiBaseController
             ]);
 
             $response['uid'] = $uid;
+            $response['lead_id'] = $model->lead->id;
+            $response['lead_uid'] = $model->lead->uid;
 
             $response['agentName'] = $model->lead->employee->username;
             $response['agentEmail'] = $sellerContactInfo ? $sellerContactInfo->email_user : $model->lead->project->contactInfo->email;
