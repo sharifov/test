@@ -960,7 +960,7 @@ Sales - Kivork",
             if($this->status != self::STATUS_TRASH && isset($changedAttributes['employee_id']) && $this->employee_id && $changedAttributes['employee_id'] != $this->employee_id) {
                 //echo $changedAttributes['employee_id'].' - '. $this->employee_id;
 
-                if(isset($changedAttributes['status']) && $changedAttributes['status'] === self::STATUS_TRASH) {
+                if(isset($changedAttributes['status']) && ( $changedAttributes['status'] == self::STATUS_TRASH || $changedAttributes['status'] == self::STATUS_FOLLOW_UP )) {
 
                 } else {
 

@@ -312,15 +312,16 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'created',
                 'value' => function(\common\models\Lead $model) {
-                    return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime($model->created);
+                    return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->created));
                 },
                 'format' => 'html',
             ],
+            //'created:date',
 
             /*[
                 'attribute' => 'updated',
                 'value' => function(\common\models\Lead $model) {
-                    return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime($model->updated);
+                    return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->updated));
                 },
                 'format' => 'html',
             ],*/
@@ -470,7 +471,7 @@ $this->params['breadcrumbs'][] = $this->title;
 <?php
 $ajaxUrl = \yii\helpers\Url::to(["leads/ajax-reason-list"]);
 $js = <<<JS
- 
+
     $(document).on('pjax:start', function() {
         $("#modalUpdate .close").click();
     });
@@ -486,16 +487,16 @@ $js = <<<JS
             $('#reason_description_div').hide();
         }
     });
-    
+
      $(document).on('change', '#status_id', function() {
-         var status_id = $(this).val(); 
+         var status_id = $(this).val();
         if( status_id > 0 ) {
             $('#reason_id_div').show();
-            
+
            $.post("$ajaxUrl",{status_id: status_id}, function( data ) {
                 $("#reason_id").html( data ).trigger('change');
            })
-                        
+
         }  else {
             $('#reason_id_div').hide();
         }
@@ -504,7 +505,7 @@ $js = <<<JS
 
    $('[data-toggle="tooltip"]').tooltip();
 
-     
+
 JS;
 $this->registerJs($js, \yii\web\View::POS_READY);
 ?>
