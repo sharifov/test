@@ -37,7 +37,7 @@ class QuoteController extends DefaultController
                     [
                         'actions' => [
                             'create', 'save', 'decline', 'calc-price', 'extra-price',
-                            'send-quotes', 'get-online-quotes'
+                            'send-quotes', 'get-online-quotes','status-log'
                         ],
 
                         'allow' => true,
@@ -373,6 +373,17 @@ class QuoteController extends DefaultController
                 'lead' => $lead,
                 'quote' => $quote,
                 'prices' => $prices
+            ]);
+        }
+        return null;
+    }
+
+    public function actionStatusLog($quoteId)
+    {
+        $quote = Quote::findOne(['id' => $quoteId]);
+        if ($quote !== null) {
+            return $this->renderAjax('partial/_statusLog', [
+                'data' => $quote->getStatusLog(),
             ]);
         }
         return null;

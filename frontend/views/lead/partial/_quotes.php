@@ -14,6 +14,7 @@ use frontend\models\LeadForm;
 
 $extraPriceUrl = \yii\helpers\Url::to(['quote/extra-price']);
 $declineUrl = \yii\helpers\Url::to(['quote/decline']);
+$statusLogUrl = \yii\helpers\Url::to(['quote/status-log']);
 $leadId = $lead->id;
 
 $appliedQuote = $lead->getAppliedAlternativeQuotes();
@@ -56,17 +57,17 @@ if ($leadForm->mode != $leadForm::VIEW_MODE) {
                     $('#sent-messages').find('div').html(quotes.length+' quotes was successfully Sent to client');
                     $('#sent-messages').show();
                     $('#sent-messages').fadeOut(10000);
-    
+
                     $.each(quotes, function(idx, quote){
                         $('#q-status-'+quote).text('Sent to client');
                         $('#q-status-'+quote).attr('class', 'sl-quote__status status-label label label-warning');
                     });
-                    
+
                     $('.quotes-uid:checked').each(function(idx, elm){
                         elm.checked = false;
                     });
                 }
-    
+
                 $('#preloader').addClass('hidden');
             },
             error: function (error) {
@@ -75,7 +76,7 @@ if ($leadForm->mode != $leadForm::VIEW_MODE) {
             }
         });
     });
-    
+
     $('#btn-send-quotes').popover({
         html: true,
         placement: 'top',
@@ -112,11 +113,11 @@ if ($leadForm->mode != $leadForm::VIEW_MODE) {
                     var sell = element.parent().parent().find('.sellingPrice-'+data.uid),
                             totalSell = $('#'+data.uid).find('.total-sellingPrice-'+data.uid),
                             totalMarkup = $('#'+data.uid).find('.total-markup-'+data.uid);
-        
+
                         sell.text(data.actual.sellingPrice);
                         totalSell.text(data.total.sellingPrice);
                         totalMarkup.text(data.total.markup);
-        
+
                         $('#isChangedMarkup-'+data.uid).removeClass('hidden');
                     }
             },
@@ -125,7 +126,19 @@ if ($leadForm->mode != $leadForm::VIEW_MODE) {
             }
         });
     });
-    
+
+    $('.view-status-log').click(function(e){
+        e.preventDefault();
+        $('#preloader').removeClass('hidden');
+        var editBlock = $('#get-quote-status-log');
+        editBlock.find('.modal-body').html('');
+        var id = $(this).attr('data-id');
+        editBlock.find('.modal-body').load('$statusLogUrl?quoteId='+id, function( response, status, xhr ) {
+            $('#preloader').addClass('hidden');
+            editBlock.modal('show');
+        });
+    });
+
     $('#btn-declined-quotes').click(function() {
         var quotes = Array();
         $('.quotes-uid:checked').each(function(idx, elm){
@@ -158,20 +171,20 @@ if ($leadForm->mode != $leadForm::VIEW_MODE) {
                     $('#sent-messages').find('div').html(quotes.length+' quotes was successfully Declined');
                     $('#sent-messages').show();
                     $('#sent-messages').fadeOut(10000);
-                    
+
                     $.each(quotes, function(idx, quote) {
                         $('#q-status-'+quote).text('Declined');
                         $('#q-status-'+quote).attr('class', 'sl-quote__status status-label label label-danger');
                     });
-                    
+
                     $.each($('.quotes-uid:checked'), function(idx, elm) {
                         elm.parentElement.classList.add('hidden');
                     });
                 }
             },
-            error: function (error) {	
+            error: function (error) {
                 $('#preloader').addClass('hidden');
-                console.log('Error: ' + error);			
+                console.log('Error: ' + error);
             }
         });
     });
@@ -249,6 +262,12 @@ JS;
                 | <span>Creator: <?= $quote->employee_name ?> (<?= ($quote->created_by_seller) ? 'Agent' : 'Expert'?>)</span>
                 <?= $quote->getStatusLabel() ?>
             </a>
+            <?= Html::a('<i class="fa fa-history"></i>', '#', [
+                'style' => 'color: #ffffff;',
+                'class' => 'view-status-log sl-quote__status-log btn btn-info btn-sm',
+                'data-id' => $quote->id,
+                'title' => 'View status log'
+            ]) ?>
             <?php if ($lead->getAppliedAlternativeQuotes() === null) {
                 echo Html::button('<i class="fa fa-copy"></i>', [
                     'class' => 'btn btn-primary btn-sm sl-quote__clone add-clone-alt-quote',
