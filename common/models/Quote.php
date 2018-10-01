@@ -463,7 +463,10 @@ class Quote extends \yii\db\ActiveRecord
                     }
                     if (isset($data[$idx]) && isset($itinerary[$idx])) {
                         $operatedCnt++;
-                        $data[$idx]['operatingAirline'] = $operatedBy;
+                        $position = stripos($row, "OPERATED BY");
+                        $operatedBy = trim(substr($row, $position));
+                        $operatedBy = trim(str_ireplace("OPERATED BY", "", $operatedBy));
+                        $data[$idx]['operationAirlineCode'] = $operatedBy;
                         $itinerary[$idx]->operationAirlineCode = $operatedBy;
                     }
                 }
