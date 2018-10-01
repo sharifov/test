@@ -14,7 +14,7 @@ use common\models\LeadFlightSegment;
 $formId = sprintf('%s-form', $leadForm->getLead()->formName());
 if ($leadForm->mode != $leadForm::VIEW_MODE) {
     $js = <<<JS
-    
+
     //----Switch Form Tabs
     function switchTabs(inputSel) {
         $(".js-mc-row:visible").first().find('.lead-remove-segment-button').addClass('hidden');
@@ -39,23 +39,23 @@ if ($leadForm->mode != $leadForm::VIEW_MODE) {
             }else if($(".js-mc-row:visible").length == 0){
                 $('#lead-new-segment-button').trigger('click');
                 $('#lead-new-segment-button').trigger('click');
-            }   
-            
+            }
+
             $(".js-mc-row:visible:eq(1) .origin").val($(".js-mc-row:eq(0) .destination").val()).trigger('change');
             $(".js-mc-row:visible:eq(1) .destination").val($(".js-mc-row:visible:eq(0) .origin").val()).trigger('change');
-    
+
             $(".js-mc-row:visible:eq(0) .destination").on("change",function(){
                 $(".js-mc-row:visible:eq(1) .origin").val($(this).val()).trigger('change');
             });
             $(".js-mc-row:visible:eq(0) .origin").on("change",function(){
                 $(".js-mc-row:visible:eq(1) .destination").val($(this).val()).trigger('change');
             });
-    
+
             $('#lead-new-segment-button').addClass('hidden');
             $('.js-tab').addClass('sl-itinerary-form__tab--rt').removeClass('sl-itinerary-form__tab--mc').removeClass('sl-itinerary-form__tab--ow');
         }
     }
-    
+
     $("#$formId input[type='radio']").change(function () {
         switchTabs(this.id);
     });
@@ -83,7 +83,7 @@ JS;
                         $location = $departing = [];
                         foreach ($leadForm->getLeadFlightSegment() as $key => $_segment) {
                             $location[] = sprintf('%s → %s', $_segment->origin, $_segment->destination);
-                            $departing[] = date('d.m.Y', strtotime($_segment->departure));
+                            $departing[] = Yii::$app->formatter->asDate(strtotime($_segment->departure));
                         }
                         ?>
                         <div class="sl-request-summary__locations">
@@ -206,7 +206,7 @@ JS;
                         $('#' + departureId).datepicker({
                             "autoclose": true,
                             "todayHighlight": true,
-                            "format": "yyyy-mm-dd",
+                            "format": "dd-M-yyyy",
                             "orientation": "top left",
                             "startDate": startDate
                         });
