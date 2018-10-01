@@ -87,7 +87,7 @@ JS;
                         $location = $departing = [];
                         foreach ($leadForm->getLeadFlightSegment() as $key => $_segment) {
                             $location[] = sprintf('%s → %s', $_segment->origin, $_segment->destination);
-                            $departing[] = date('d.m.Y', strtotime($_segment->departure));
+                            $departing[] = Yii::$app->formatter->asDate(strtotime($_segment->departure));
                         }
                         ?>
                         <div class="sl-request-summary__locations">
@@ -210,7 +210,7 @@ JS;
                         $('#' + departureId).datepicker({
                             "autoclose": true,
                             "todayHighlight": true,
-                            "format": "yyyy-mm-dd",
+                            "format": "dd-M-yyyy",
                             "orientation": "top left",
                             "startDate": startDate
                         });

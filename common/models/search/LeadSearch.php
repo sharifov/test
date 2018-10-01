@@ -12,6 +12,8 @@ use yii\data\SqlDataProvider;
 use yii\db\Query;
 use yii\debug\models\timeline\DataProvider;
 use yii\helpers\VarDumper;
+use common\models\Quote;
+use common\models\LeadFlightSegment;
 
 /**
  * LeadSearch represents the model behind the search form of `common\models\Lead`.
@@ -22,11 +24,14 @@ class LeadSearch extends Lead
     public $client_name;
     public $client_email;
     public $client_phone;
+    public $quote_pnr;
     public $cnt;
 
     public $statuses = [];
     public $created_date_from;
     public $created_date_to;
+    public $depart_date_from;
+    public $depart_date_to;
 
 
 
@@ -37,13 +42,13 @@ class LeadSearch extends Lead
     {
         return [
             [['id', 'client_id', 'employee_id', 'status', 'project_id', 'adults', 'children', 'infants', 'rating', 'called_expert', 'cnt'], 'integer'],
-            [['client_name', 'client_email', 'client_phone'], 'string'],
+            [['client_name', 'client_email', 'client_phone','quote_pnr'], 'string'],
 
             //['created_date_from', 'default', 'value' => '2018-01-01'],
             //['created_date_to', 'default', 'value' => date('Y-m-d')],
 
             [['uid', 'trip_type', 'cabin', 'notes_for_experts', 'created', 'updated', 'request_ip', 'request_ip_detail', 'offset_gmt', 'snooze_for', 'discount_id', 'bo_flight_id',
-            'created_date_from', 'created_date_to', 'source_id', 'statuses'], 'safe'],
+            'created_date_from', 'created_date_to', 'depart_date_from', 'depart_date_to', 'source_id', 'statuses'], 'safe'],
         ];
     }
 
@@ -145,6 +150,20 @@ class LeadSearch extends Lead
             }
         }
 
+        if($this->depart_date_from || $this->depart_date_to) {
+            $having = [];
+            if ($this->depart_date_from) {
+                $having[] = "MIN(departure) >= '".date('Y-m-d', strtotime($this->depart_date_from))."'";
+            }
+            if ($this->depart_date_to) {
+                $having[] = "MIN(departure) <= '".date('Y-m-d', strtotime($this->depart_date_to))."'";
+            }
+
+            $subQuery = LeadFlightSegment::find()->select(['DISTINCT(lead_id)'])->groupBy('lead_id')->having(implode(" AND ", $having));
+
+            $query->andWhere(['IN', 'leads.id', $subQuery]);
+        }
+
         if($this->client_name) {
             $query->joinWith(['client' => function ($q) {
                 if($this->client_name) {
@@ -169,7 +188,10 @@ class LeadSearch extends Lead
         }
 
         //echo $this->created_date_from;
-
+        if($this->quote_pnr) {
+            $subQuery = Quote::find()->select(['DISTINCT(lead_id)'])->where(['=', 'record_locator', mb_strtoupper($this->quote_pnr)]);
+            $query->andWhere(['IN', 'leads.id', $subQuery]);
+        }
 
         $query->andFilterWhere(['like', 'uid', $this->uid])
             ->andFilterWhere(['like', 'trip_type', $this->trip_type])
@@ -273,6 +295,20 @@ class LeadSearch extends Lead
             }
         }
 
+        if($this->depart_date_from || $this->depart_date_to) {
+            $having = [];
+            if ($this->depart_date_from) {
+                $having[] = "MIN(departure) >= '".date('Y-m-d', strtotime($this->depart_date_from))."'";
+            }
+            if ($this->depart_date_to) {
+                $having[] = "MIN(departure) <= '".date('Y-m-d', strtotime($this->depart_date_to))."'";
+            }
+
+            $subQuery = LeadFlightSegment::find()->select(['DISTINCT(lead_id)'])->groupBy('lead_id')->having(implode(" AND ", $having));
+
+            $query->andWhere(['IN', 'leads.id', $subQuery]);
+        }
+
         if($this->client_name) {
             $query->joinWith(['client' => function ($q) {
                 if($this->client_name) {
@@ -294,6 +330,11 @@ class LeadSearch extends Lead
 
             $subQuery = ClientPhone::find()->select(['DISTINCT(client_id)'])->where(['=', 'phone', $this->client_phone]);
             $query->andWhere(['IN', 'client_id', $subQuery]);
+        }
+
+        if($this->quote_pnr) {
+            $subQuery = Quote::find()->select(['DISTINCT(lead_id)'])->where(['=', 'record_locator', mb_strtoupper($this->quote_pnr)]);
+            $query->andWhere(['IN', 'leads.id', $subQuery]);
         }
 
 
