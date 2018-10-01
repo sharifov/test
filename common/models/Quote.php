@@ -456,7 +456,6 @@ class Quote extends \yii\db\ActiveRecord
                 }
 
                 if (stripos($row, "OPERATED BY") !== false) {
-                    $operatedBy = trim(str_ireplace("OPERATED BY", "", $row));
                     $idx = count($itinerary);
                     if($idx > 0){
                         $idx--;
@@ -485,12 +484,12 @@ class Quote extends \yii\db\ActiveRecord
                 $arrDateInRow = false;
                 $operationAirlineCode = '';
 
-                /*if (stripos($row, "OPERATED BY") !== false) {
+                if (stripos($row, "OPERATED BY") !== false) {
                     $position = stripos($row, "OPERATED BY");
                     $operatedBy = trim(substr($row, $position));
                     $operatedBy = trim(str_ireplace("OPERATED BY", "", $operatedBy));
                     $operationAirlineCode = $operatedBy;
-                }*/
+                }
 
                 $rowExpl = explode($carrier, $row);
                 $rowFl = $rowExpl[1];
@@ -606,6 +605,9 @@ class Quote extends \yii\db\ActiveRecord
                     'layoverDuration' => 0,
                     //'operationAirlineCode' => $operationAirlineCode
                 ];
+                if (!empty($operationAirlineCode)) {
+                    $segment['operationAirlineCode'] = $operationAirlineCode;
+                }
                 if (count($data) != 0 && isset($data[count($data) - 1])) {
                     $previewSegment = $data[count($data) - 1];
                     $segment['layoverDuration'] = ($segment['departureDateTime']->getTimestamp() - $previewSegment['arrivalDateTime']->getTimestamp()) / 60;
@@ -619,6 +621,9 @@ class Quote extends \yii\db\ActiveRecord
                 $fSegment->destinationAirportCode = $segment['arrivalAirport'];
                 $fSegment->departureTime = $segment['departureDateTime']->format('Y-m-d H:i:s');
                 $fSegment->arrivalTime = $segment['arrivalDateTime']->format('Y-m-d H:i:s');
+                if (!empty($operationAirlineCode)) {
+                    $fSegment->operationAirlineCode = $operationAirlineCode;
+                }
                 //$fSegment->operationAirlineCode = $segment['operationAirlineCode'];
                 $itinerary[] = $fSegment;
             }
