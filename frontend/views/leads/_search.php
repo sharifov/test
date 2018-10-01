@@ -98,10 +98,37 @@ use yii\widgets\ActiveForm;
 
         <div class="col-md-3">
 
+        	<div class="row">
+				<div class="col-md-6">
+				<?= $form->field($model, 'depart_date_from')->widget(
+                        \dosamigos\datepicker\DatePicker::class, [
+                        'inline' => false,
+                        //'template' => '<div class="well well-sm" style="background-color: #fff; width:250px">{input}</div>',
+                        'clientOptions' => [
+                            'autoclose' => true,
+                            'format' => 'dd-M-yyyy',
+                            'todayBtn' => true
+                        ]
+                    ]);?>
+				</div>
+				<div class="col-md-6">
+				 <?= $form->field($model, 'depart_date_to')->widget(
+                        \dosamigos\datepicker\DatePicker::class, [
+                        'inline' => false,
+                        //'template' => '<div class="well well-sm" style="background-color: #fff; width:250px">{input}</div>',
+                        'clientOptions' => [
+                            'autoclose' => true,
+                            'format' => 'dd-M-yyyy',
+                            'todayBtn' => true
+                        ]
+                    ]);?>
+				</div>
+			</div>
 
-            <?php  echo $form->field($model, 'project_id')->dropDownList(\common\models\Project::getList(), ['prompt' => '-']) ?>
-
-            <?php  echo $form->field($model, 'source_id')->dropDownList(\common\models\Source::getList(), ['prompt' => '-']) ?>
+			<div class="row">
+				<div class="col-md-6"><?php  echo $form->field($model, 'project_id')->dropDownList(\common\models\Project::getList(), ['prompt' => '-']) ?></div>
+				<div class="col-md-6"><?php  echo $form->field($model, 'source_id')->dropDownList(\common\models\Source::getList(), ['prompt' => '-']) ?></div>
+			</div>
 
 
             <div class="row">

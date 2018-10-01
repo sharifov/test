@@ -282,6 +282,24 @@ $this->params['breadcrumbs'][] = $this->title;
                 'options' => ['style' => 'width:140px'],
             ],
 
+            [
+                'header' => 'Depart',
+                'value' => function(\common\models\Lead $model) {
+
+                $segments = $model->leadFlightSegments;
+                $segmentData = [];
+                if($segments) {
+                    foreach ($segments as $sk => $segment) {
+                        return $segment->departure;
+                    }
+                }
+                return '';
+                //return $model->leadFlightSegmentsCount ? Html::a($model->leadFlightSegmentsCount, ['lead-flight-segment/index', "LeadFlightSegmentSearch[lead_id]" => $model->id], ['target' => '_blank', 'data-pjax' => 0]) : '-' ;
+                },
+                'format' => 'raw',
+                'contentOptions' => ['class' => 'text-center'],
+                'options' => ['style' => 'width:140px'],
+                ],
             //'children',
             //'infants',
             //'notes_for_experts:ntext',

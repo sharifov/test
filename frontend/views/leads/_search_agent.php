@@ -188,6 +188,33 @@ $isAgent = Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id);
                 </div>
             </div>
 
+            <div class="row">
+				<div class="col-md-6">
+				<?= $form->field($model, 'depart_date_from')->widget(
+                        \dosamigos\datepicker\DatePicker::class, [
+                        'inline' => false,
+                        //'template' => '<div class="well well-sm" style="background-color: #fff; width:250px">{input}</div>',
+                        'clientOptions' => [
+                            'autoclose' => true,
+                            'format' => 'dd-M-yyyy',
+                            'todayBtn' => true
+                        ]
+                    ]);?>
+				</div>
+				<div class="col-md-6">
+				 <?= $form->field($model, 'depart_date_to')->widget(
+                        \dosamigos\datepicker\DatePicker::class, [
+                        'inline' => false,
+                        //'template' => '<div class="well well-sm" style="background-color: #fff; width:250px">{input}</div>',
+                        'clientOptions' => [
+                            'autoclose' => true,
+                            'format' => 'dd-M-yyyy',
+                            'todayBtn' => true
+                        ]
+                    ]);?>
+				</div>
+			</div>
+
 
         <?php  //echo $form->field($model, 'notes_for_experts') ?>
 
