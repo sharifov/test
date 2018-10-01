@@ -32,7 +32,7 @@ use frontend\models\LeadForm;
 <div>
     <form action="/lead/add-comment?type=email&amp;id=' . $key . '" method="post">
         <textarea id="email-comment-' . $key . '" style="background-color: #fafafc; border: 1px solid #e4e8ef;" class="form-control mb-20" name="comment" rows="3">' . $email->comments . '</textarea>
-        <button type="button" class="btn btn-success popover-close-btn" onclick="addEmailComment($(this), \'' . $key . '\');">Add</button>    
+        <button type="button" class="btn btn-success popover-close-btn" onclick="addEmailComment($(this), \'' . $key . '\');">Add</button>
     </form>
 </div>
 ';
@@ -122,7 +122,7 @@ use frontend\models\LeadForm;
                     [
                         'attribute' => 'created',
                         'value' => function (\common\models\Client $model) {
-                            return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime($model->created);
+                            return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->created));
                         },
                         'format' => 'html',
                     ],

@@ -12,6 +12,7 @@ use yii\data\SqlDataProvider;
 use yii\db\Query;
 use yii\debug\models\timeline\DataProvider;
 use yii\helpers\VarDumper;
+use common\models\Quote;
 
 /**
  * LeadSearch represents the model behind the search form of `common\models\Lead`.
@@ -22,6 +23,7 @@ class LeadSearch extends Lead
     public $client_name;
     public $client_email;
     public $client_phone;
+    public $quote_pnr;
     public $cnt;
 
     public $statuses = [];
@@ -37,7 +39,7 @@ class LeadSearch extends Lead
     {
         return [
             [['id', 'client_id', 'employee_id', 'status', 'project_id', 'adults', 'children', 'infants', 'rating', 'called_expert', 'cnt'], 'integer'],
-            [['client_name', 'client_email', 'client_phone'], 'string'],
+            [['client_name', 'client_email', 'client_phone','quote_pnr'], 'string'],
 
             //['created_date_from', 'default', 'value' => '2018-01-01'],
             //['created_date_to', 'default', 'value' => date('Y-m-d')],
@@ -169,7 +171,10 @@ class LeadSearch extends Lead
         }
 
         //echo $this->created_date_from;
-
+        if($this->quote_pnr) {
+            $subQuery = Quote::find()->select(['DISTINCT(lead_id)'])->where(['=', 'record_locator', mb_strtoupper($this->quote_pnr)]);
+            $query->andWhere(['IN', 'id', $subQuery]);
+        }
 
         $query->andFilterWhere(['like', 'uid', $this->uid])
             ->andFilterWhere(['like', 'trip_type', $this->trip_type])
@@ -296,6 +301,11 @@ class LeadSearch extends Lead
             $query->andWhere(['IN', 'client_id', $subQuery]);
         }
 
+        if($this->quote_pnr) {
+            $subQuery = Quote::find()->select(['DISTINCT(lead_id)'])->where(['=', 'record_locator', mb_strtoupper($this->quote_pnr)]);
+            $query->andWhere(['IN', 'id', $subQuery]);
+        }
+
 
 
 
@@ -309,7 +319,7 @@ class LeadSearch extends Lead
         $this->load($params);
 
         $query = new Query();
-        $query->select(['COUNT(*) AS cnt', 'ce.email AS client_email']);
+        $query->select(['COUNT(distinct l.id) AS cnt', 'ce.email AS client_email']);
         $query->from('leads AS l');
         $query->where(['IS NOT', 'ce.email', null]);
         $query->andFilterWhere(['l.status' => [Lead::STATUS_PROCESSING, Lead::STATUS_PENDING, Lead::STATUS_FOLLOW_UP, Lead::STATUS_ON_HOLD]]);
@@ -361,7 +371,7 @@ class LeadSearch extends Lead
         $this->load($params);
 
         $query = new Query();
-        $query->select(['COUNT(*) AS cnt', 'cp.phone AS client_phone']);
+        $query->select(['COUNT(distinct l.id) AS cnt', 'cp.phone AS client_phone']);
         $query->from('leads AS l');
         $query->where(['IS NOT', 'cp.phone', null]);
         $query->andFilterWhere(['l.status' => [Lead::STATUS_PROCESSING, Lead::STATUS_PENDING, Lead::STATUS_FOLLOW_UP, Lead::STATUS_ON_HOLD]]);
@@ -424,7 +434,7 @@ class LeadSearch extends Lead
         $this->load($params);
 
         $query = new Query();
-        $query->select(['COUNT(*) AS cnt', 'l.request_ip']);
+        $query->select(['COUNT(distinct l.id) AS cnt', 'l.request_ip']);
         $query->from('leads AS l');
         $query->where(['IS NOT', 'l.request_ip', null]);
         $query->andFilterWhere(['l.status' => [Lead::STATUS_PROCESSING, Lead::STATUS_PENDING, Lead::STATUS_FOLLOW_UP, Lead::STATUS_ON_HOLD]]);

@@ -629,7 +629,6 @@ class Quote extends \yii\db\ActiveRecord
                 'lead_id' => $this->lead_id,
             ]);
 
-
             if (isset($changedAttributes['status'])) {
                 if ($this->lead->called_expert &&
                     $changedAttributes['status'] != $this->status &&
@@ -639,7 +638,10 @@ class Quote extends \yii\db\ActiveRecord
                     $data = $quote->getQuoteInformationForExpert(true);
                     BackOffice::sendRequest('lead/update-quote', 'POST', json_encode($data));
                 }
+                QuoteStatusLog::createNewFromQuote($this);
             }
+        }else{
+            QuoteStatusLog::createNewFromQuote($this);
         }
     }
 
@@ -665,6 +667,15 @@ class Quote extends \yii\db\ActiveRecord
                 break;
         }
         return $label;
+    }
+
+    public function getLabelByStatus(int $status)
+    {
+        $class = self::STATUS_CLASS_LIST[$status];
+
+        $statusName = self::STATUS_LIST[$status] ?? '-';
+
+        return '<span class="label ' . $class . '" style="font-size: 13px">' . Html::encode($statusName) . '</span>';
     }
 
     /**
@@ -928,4 +939,10 @@ class Quote extends \yii\db\ActiveRecord
             ];
         }
     }
+
+    public function getStatusLog()
+    {
+        return QuoteStatusLog::findAll(['quote_id' => $this->id]);
+    }
+
 }

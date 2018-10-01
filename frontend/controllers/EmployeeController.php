@@ -209,8 +209,12 @@ class EmployeeController extends DefaultController
                             $access->save();
                         }
                     }
-                    $model = Employee::findOne(['id' => $id]);
+                    //$model = Employee::findOne(['id' => $id]);
                     Yii::$app->getSession()->setFlash('success', ($isNew) ? 'Profile created!' : 'Profile updated!');
+
+                    if($isNew){
+                        return $this->redirect(['update','id' => $model->id]);
+                    }
                 }
             }
 

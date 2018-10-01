@@ -37,6 +37,7 @@ class ClientPhone extends \yii\db\ActiveRecord
             [['created', 'updated', 'comments'], 'safe'],
             [['phone'], 'string', 'max' => 100],
             [['client_id'], 'exist', 'skipOnError' => true, 'targetClass' => Client::class, 'targetAttribute' => ['client_id' => 'id']],
+            [['phone', 'client_id'], 'unique', 'targetAttribute' => ['phone', 'client_id']]
         ];
     }
 

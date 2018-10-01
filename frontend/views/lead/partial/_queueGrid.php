@@ -359,11 +359,13 @@ $queueType = Yii::$app->request->get('type');
             'template' => $actionButtonTemplate,
             'buttons' => [
                 'action' => function ($url, $model, $key) use ($queueType) {
+                    $buttonsCnt = 0;
                     $buttons = '';
                     if (in_array($queueType, ['inbox', 'follow-up']) ||
                         ($queueType == 'processing' &&
                             $model['status'] === Lead::STATUS_ON_HOLD)
                     ) {
+                        $buttonsCnt++;
                         $buttons .= Html::a('Take', Url::to([
                             'lead/take',
                             'id' => $model['id']
@@ -379,6 +381,7 @@ $queueType = Yii::$app->request->get('type');
                         ) {
                             $queueType = 'processing';
                         }
+                        $buttonsCnt++;
                         $buttons .= Html::a('Open', Url::to(['lead/quote', 'type' => $queueType, 'id' => $model['id']]), [
                             'class' => 'btn btn-action btn-sm',
                             'target' => '_blank',
@@ -389,6 +392,7 @@ $queueType = Yii::$app->request->get('type');
                     if (Yii::$app->user->identity->getId() != $model['employee_id'] &&
                         in_array($model['status'], [Lead::STATUS_ON_HOLD, Lead::STATUS_PROCESSING])
                     ) {
+                        $buttonsCnt++;
                         $buttons .= Html::a('Take Over', Url::to([
                             'lead/take',
                             'id' => $model['id'],
@@ -411,6 +415,7 @@ $queueType = Yii::$app->request->get('type');
                         ]);
                     }*/
 
+                    if($buttonsCnt > 1) {
                     $html = Html::tag('div', Html::button('Action', [
                             'class' => 'btn btn-sm btn-action dropdown-toggle',
                             'data-toggle' => 'dropdown',
@@ -422,8 +427,11 @@ $queueType = Yii::$app->request->get('type');
                         ]) . Html::tag('div', $buttons, [
                             'class' => 'dropdown-menu dropdown-btns'
                         ]), [
-                        'class' => 'btn-group'
-                    ]);
+                            'class' => 'btn-group'
+                        ]);
+                    }else{
+                        $html = $buttons;
+                    }
 
                     return $html;
                 }
