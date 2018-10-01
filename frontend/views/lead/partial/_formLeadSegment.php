@@ -83,6 +83,11 @@ use yii\helpers\Url;
             ]
         ]);
     }
+
+    if(!empty($segment->departure)){
+        $segment->departure = date('d-M-Y',strtotime($segment->departure));
+    }
+
     echo $form->field($segment, '[' . $key . ']departure', [
         'options' => [
             'class' => 'sl-itinerary-form__option'
@@ -97,7 +102,7 @@ use yii\helpers\Url;
         'clientOptions' => [
             'inline' => false,
             'autoclose' => true,
-            'format' => 'yyyy-mm-dd',
+            'format' => 'dd-M-yyyy',
             'todayHighlight' => true
         ]
     ]);
