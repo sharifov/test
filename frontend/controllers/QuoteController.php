@@ -288,8 +288,11 @@ class QuoteController extends DefaultController
                     $quote->employee_name = Yii::$app->user->identity->username;
                     $lead = Lead::findOne(['id' => $quote->lead_id]);
                     if (isset($attr['QuotePrice']) && $lead !== null) {
+                        $response['success'] = $quote->validate();
+                        $response['itinerary'] = $quote::createDump($quote->itinerary);
+                        $response['errors'] = $quote->getErrors();
                         if ($save) {
-                            $quote->validate();
+                            //$quote->validate();
                             $itinerary = $quote::createDump($quote->itinerary);
                             $quote->reservation_dump = str_replace('&nbsp;', ' ', implode("\n", $itinerary));
                             $quote->save();
@@ -334,9 +337,6 @@ class QuoteController extends DefaultController
                                 }
                             }
                         }
-                        $response['success'] = $quote->validate();
-                        $response['itinerary'] = $quote::createDump($quote->itinerary);
-                        $response['errors'] = $quote->getErrors();
                     }
                 }
             }

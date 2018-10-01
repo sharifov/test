@@ -432,6 +432,10 @@ class Quote extends \yii\db\ActiveRecord
     public static function parseDump($string, $validation = true, &$itinerary = [], $onView = false)
     {
 
+        if(!empty($itinerary) && $validation){
+            $itinerary = [];
+        }
+
         $depCity = $arrCity = null;
         $data = [];
         $segmentCount = 0;
@@ -449,6 +453,17 @@ class Quote extends \yii\db\ActiveRecord
                             array_unshift($rowArr, $rowArrAst[$i]);
                         }
                     }
+                }
+
+                if (stripos($row, "OPERATED BY") !== false) {
+                    $operatedBy = trim(str_ireplace("OPERATED BY", "", $row));
+                    $idx = count($itinerary);
+                    if($idx > 0){
+                        $idx--;
+                    }
+                    $operatedCnt++;
+                    $data[$idx]['operatingAirline'] = $operatedBy;
+                    $itinerary[$idx]->operationAirlineCode = $operatedBy;
                 }
 
                 if (!is_numeric(intval($rowArr[0]))) continue;
