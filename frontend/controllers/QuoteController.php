@@ -19,6 +19,8 @@ use yii\filters\AccessControl;
 use yii\helpers\Html;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
+use yii\web\BadRequestHttpException;
+use frontend\models\PreviewEmailQuotesForm;
 
 /**
  * Quotes controller
@@ -37,7 +39,7 @@ class QuoteController extends DefaultController
                     [
                         'actions' => [
                             'create', 'save', 'decline', 'calc-price', 'extra-price',
-                            'send-quotes', 'get-online-quotes','status-log'
+                            'send-quotes', 'get-online-quotes','status-log','preview-send-quotes'
                         ],
 
                         'allow' => true,
@@ -171,6 +173,70 @@ class QuoteController extends DefaultController
             }
         }
         return $result;
+    }
+
+    public function actionPreviewSendQuotes()
+    {
+        $result = [
+            'errors' => [],
+            'status' => false
+        ];
+
+        $previewEmailModel = new PreviewEmailQuotesForm();
+        if (Yii::$app->request->isAjax) {
+            $attr = Yii::$app->request->post();
+
+            if (isset($attr['quotes']) && isset($attr['leadId'])) {
+                $lead = Lead::findOne(['id' => $attr['leadId']]);
+                if ($lead !== null) {
+                    $result = $lead->previewEmail($attr['quotes'], $attr['email']);
+
+                    $previewEmailModel->leadId = $attr['leadId'];
+                    $previewEmailModel->quotes = implode(',',$attr['quotes']);
+                    $previewEmailModel->email = $attr['email'];
+                    if(!empty($result['email'])){
+                        $previewEmailModel->body = $result['email']['body'];
+                        $previewEmailModel->subject = $result['email']['subject'];
+                    }
+                    return $this->renderAjax('partial/_sendEmail', [
+                        'previewEmailModel' => $previewEmailModel,
+                        'errors' => $result['errors']
+                    ]);
+                }
+            }
+        }elseif (Yii::$app->request->isPost) {
+            $attr = Yii::$app->request->post($previewEmailModel->formName());
+            if (isset($attr['quotes']) && isset($attr['leadId'])) {
+                $lead = Lead::findOne(['id' => $attr['leadId']]);
+                if ($lead !== null) {
+                    $previewEmailModel->attributes = $attr;
+
+                    $result = $previewEmailModel->sendEmail($lead);
+                    if ($result['status']) {
+                        $quotes = explode(',', $attr['quotes']);
+
+                        foreach ($quotes as $quote){
+                            $model = Quote::findOne(['uid' => $quote]);
+
+                            if ($model !== null && $model->status != $model::STATUS_APPLIED) {
+                                $model->status = $model::STATUS_SEND;
+                                $model->save();
+                            }
+                        }
+                        Yii::$app->getSession()->setFlash('success', sprintf('Sent email \'%s\' succeed.', $previewEmailModel->subject));
+                    } else {
+                        Yii::$app->getSession()->setFlash('danger', sprintf('Sent email \'%s\' failed. Please verify your email or password from email!', $previewEmailModel->subject));
+                    }
+                    return $this->redirect([
+                        'lead/quote',
+                        'type' => 'processing',
+                        'id' => $lead->id
+                    ]);
+                }
+            }
+        }
+        throw new BadRequestHttpException();
+
     }
 
     public function actionDecline()

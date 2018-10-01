@@ -15,6 +15,7 @@ use frontend\models\LeadForm;
 $extraPriceUrl = \yii\helpers\Url::to(['quote/extra-price']);
 $declineUrl = \yii\helpers\Url::to(['quote/decline']);
 $statusLogUrl = \yii\helpers\Url::to(['quote/status-log']);
+$previewEmailUrl = \yii\helpers\Url::to(['quote/preview-send-quotes']);
 $leadId = $lead->id;
 
 $appliedQuote = $lead->getAppliedAlternativeQuotes();
@@ -41,32 +42,9 @@ if ($leadForm->mode != $leadForm::VIEW_MODE) {
             type: 'post',
             data: dataPost,
             success: function (data) {
-                if (data.errors.length != 0 || data.status != true) {
-                    $('#sent-messages').removeClass('hidden').addClass('alert-danger').removeClass('alert-success');
-                    $('#sent-messages').find('.fa-exclamation-triangle').addClass('hidden');
-                    $('#sent-messages').find('.fa-times-circle').removeClass('hidden');
-                    var errors = Array();
-                    $.each(data.errors, function(i, elm){errors.push(elm)});
-                    $('#sent-messages').find('div').html(errors.join('<br>'));
-                    $('#sent-messages').show();
-                    $('#sent-messages').fadeOut(10000);
-                }else {
-                    $('#sent-messages').removeClass('hidden').addClass('alert-success').removeClass('alert-danger');
-                    $('#sent-messages').find('.fa-exclamation-triangle').removeClass('hidden');
-                    $('#sent-messages').find('.fa-times-circle').addClass('hidden');
-                    $('#sent-messages').find('div').html(quotes.length+' quotes was successfully Sent to client');
-                    $('#sent-messages').show();
-                    $('#sent-messages').fadeOut(10000);
-
-                    $.each(quotes, function(idx, quote){
-                        $('#q-status-'+quote).text('Sent to client');
-                        $('#q-status-'+quote).attr('class', 'sl-quote__status status-label label label-warning');
-                    });
-
-                    $('.quotes-uid:checked').each(function(idx, elm){
-                        elm.checked = false;
-                    });
-                }
+                var editBlock = $('#preview-send-quotes');
+                editBlock.find('.modal-body').html(data);
+                editBlock.modal('show');
 
                 $('#preloader').addClass('hidden');
             },
@@ -224,7 +202,7 @@ JS;
                 <?= Html::button('Send', [
                     'class' => 'btn btn-success send-quotes-to-email',
                     'id' => 'btn-send-quotes-email',
-                    'data-url' => \yii\helpers\Url::to(['quote/send-quotes'])
+                    'data-url' => \yii\helpers\Url::to(['quote/preview-send-quotes'])
                 ]) ?>
             </div>
         </div>
@@ -445,3 +423,20 @@ JS;
         </div>
     </div>
 <?php endforeach; ?>
+
+
+
+<div class="modal modal-quote fade" id="preview-send-quotes" style="display: none;">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                Preview email
+                <button type="button" class="close" data-dismiss="modal">
+                    <i class="fa fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body" style="max-height: calc(100vh - 212px); overflow-y: auto;">
+            </div>
+        </div>
+    </div>
+</div>
