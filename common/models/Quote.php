@@ -482,12 +482,12 @@ class Quote extends \yii\db\ActiveRecord
                 $arrDateInRow = false;
                 $operationAirlineCode = '';
 
-                /*if (stripos($row, "OPERATED BY") !== false) {
+                if (stripos($row, "OPERATED BY") !== false) {
                     $position = stripos($row, "OPERATED BY");
                     $operatedBy = trim(substr($row, $position));
                     $operatedBy = trim(str_ireplace("OPERATED BY", "", $operatedBy));
                     $operationAirlineCode = $operatedBy;
-                }*/
+                }
 
                 $rowExpl = explode($carrier, $row);
                 $rowFl = $rowExpl[1];
@@ -619,11 +619,11 @@ class Quote extends \yii\db\ActiveRecord
                 $fSegment->operationAirlineCode = $segment['operationAirlineCode'];
                 $itinerary[] = $fSegment;
             }
-            if ($validation) {
+            /*if ($validation) {
                 if ($segmentCount !== count($data) + $operatedCnt) {
                     $data = [];
                 }
-            }
+            }*/
         } catch (ErrorException $ex) {
             $data = [];
         }
