@@ -461,9 +461,11 @@ class Quote extends \yii\db\ActiveRecord
                     if($idx > 0){
                         $idx--;
                     }
-                    $operatedCnt++;
-                    $data[$idx]['operatingAirline'] = $operatedBy;
-                    $itinerary[$idx]->operationAirlineCode = $operatedBy;
+                    if (isset($data[$idx]) && isset($itinerary[$idx])) {
+                        $operatedCnt++;
+                        $data[$idx]['operatingAirline'] = $operatedBy;
+                        $itinerary[$idx]->operationAirlineCode = $operatedBy;
+                    }
                 }
 
                 if (!is_numeric(intval($rowArr[0]))) continue;
@@ -480,12 +482,12 @@ class Quote extends \yii\db\ActiveRecord
                 $arrDateInRow = false;
                 $operationAirlineCode = '';
 
-                if (stripos($row, "OPERATED BY") !== false) {
+                /*if (stripos($row, "OPERATED BY") !== false) {
                     $position = stripos($row, "OPERATED BY");
                     $operatedBy = trim(substr($row, $position));
                     $operatedBy = trim(str_ireplace("OPERATED BY", "", $operatedBy));
                     $operationAirlineCode = $operatedBy;
-                }
+                }*/
 
                 $rowExpl = explode($carrier, $row);
                 $rowFl = $rowExpl[1];
