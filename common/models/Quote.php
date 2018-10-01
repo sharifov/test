@@ -432,6 +432,10 @@ class Quote extends \yii\db\ActiveRecord
     public static function parseDump($string, $validation = true, &$itinerary = [], $onView = false)
     {
 
+        if(!empty($itinerary) && $validation){
+            $itinerary = [];
+        }
+
         $depCity = $arrCity = null;
         $data = [];
         $segmentCount = 0;
@@ -451,6 +455,19 @@ class Quote extends \yii\db\ActiveRecord
                     }
                 }
 
+                if (stripos($row, "OPERATED BY") !== false) {
+                    $operatedBy = trim(str_ireplace("OPERATED BY", "", $row));
+                    $idx = count($itinerary);
+                    if($idx > 0){
+                        $idx--;
+                    }
+                    if (isset($data[$idx]) && isset($itinerary[$idx])) {
+                        $operatedCnt++;
+                        $data[$idx]['operatingAirline'] = $operatedBy;
+                        $itinerary[$idx]->operationAirlineCode = $operatedBy;
+                    }
+                }
+
                 if (!is_numeric(intval($rowArr[0]))) continue;
 
                 $segmentCount++;
@@ -465,12 +482,12 @@ class Quote extends \yii\db\ActiveRecord
                 $arrDateInRow = false;
                 $operationAirlineCode = '';
 
-                if (stripos($row, "OPERATED BY") !== false) {
+                /*if (stripos($row, "OPERATED BY") !== false) {
                     $position = stripos($row, "OPERATED BY");
                     $operatedBy = trim(substr($row, $position));
                     $operatedBy = trim(str_ireplace("OPERATED BY", "", $operatedBy));
                     $operationAirlineCode = $operatedBy;
-                }
+                }*/
 
                 $rowExpl = explode($carrier, $row);
                 $rowFl = $rowExpl[1];
