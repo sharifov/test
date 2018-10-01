@@ -168,8 +168,11 @@ use yii\widgets\ActiveForm;
                 </div>
             </div>
 
+			<div class="row">
+				<div class="col-md-6"><?php  echo $form->field($model, 'notes_for_experts') ?></div>
+				<div class="col-md-6"><?php  echo $form->field($model, 'quote_pnr')->label('PNR')  ?></div>
+			</div>
 
-        <?php  echo $form->field($model, 'notes_for_experts') ?>
 
         <?//php  echo $form->field($model, 'bo_flight_id') ?>
         </div>

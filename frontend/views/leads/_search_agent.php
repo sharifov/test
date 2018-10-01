@@ -33,6 +33,9 @@ $isAgent = Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id);
                 <div class="col-md-4">
                     <?= $form->field($model, 'uid') ?>
                 </div>
+                <div class="col-md-4">
+                    <?= $form->field($model, 'quote_pnr') ?>
+                </div>
 
             </div>
 

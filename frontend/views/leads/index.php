@@ -255,7 +255,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'header' => 'Quotes',
                 'value' => function(\common\models\Lead $model) use ($isAgent) {
-                    return $model->quotesCount ? ($isAgent ? $model->quotesCount : Html::a($model->quotesCount, ['quote/index', "QuoteSearch[lead_id]" => $model->id], ['target' => '_blank', 'data-pjax' => 0])) : '-' ;
+                    return $model->quotesCount ? ($isAgent ? $model->quotesCount : Html::a($model->quotesCount, ['quotes/index', "QuoteSearch[lead_id]" => $model->id], ['target' => '_blank', 'data-pjax' => 0])) : '-' ;
                 },
                 'format' => 'raw',
                 'contentOptions' => ['class' => 'text-center'],
