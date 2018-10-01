@@ -465,7 +465,7 @@ class Quote extends \yii\db\ActiveRecord
                         $position = stripos($row, "OPERATED BY");
                         $operatedBy = trim(substr($row, $position));
                         $operatedBy = trim(str_ireplace("OPERATED BY", "", $operatedBy));
-                        $data[$idx]['operationAirlineCode'] = $operatedBy;
+                        $data[$idx]['operatingAirline'] = $operatedBy;
                         $itinerary[$idx]->operationAirlineCode = $operatedBy;
                     }
                 }
@@ -606,7 +606,7 @@ class Quote extends \yii\db\ActiveRecord
                     //'operationAirlineCode' => $operationAirlineCode
                 ];
                 if (!empty($operationAirlineCode)) {
-                    $segment['operationAirlineCode'] = $operationAirlineCode;
+                    $segment['operatingAirline'] = $operationAirlineCode;
                 }
                 if (count($data) != 0 && isset($data[count($data) - 1])) {
                     $previewSegment = $data[count($data) - 1];
