@@ -75,4 +75,42 @@ class LeadTaskSearch extends LeadTask
 
         return $dataProvider;
     }
+
+
+    public function searchDashboard($params)
+    {
+        $query = LeadTask::find();
+
+        // add conditions that should always apply here
+
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+            'sort'=> ['defaultOrder' => ['lt_date' => SORT_DESC]],
+            'pagination' => [
+                'pageSize' => 20,
+            ],
+        ]);
+
+        $this->load($params);
+
+        if (!$this->validate()) {
+            // uncomment the following line if you do not want to return any records when validation fails
+            // $query->where('0=1');
+            return $dataProvider;
+        }
+
+        // grid filtering conditions
+        $query->andFilterWhere([
+            'lt_lead_id' => $this->lt_lead_id,
+            'lt_task_id' => $this->lt_task_id,
+            'lt_user_id' => $this->lt_user_id,
+            'lt_date' => $this->lt_date,
+            'lt_completed_dt' => $this->lt_completed_dt,
+            'lt_updated_dt' => $this->lt_updated_dt,
+        ]);
+
+        $query->andFilterWhere(['like', 'lt_notes', $this->lt_notes]);
+
+        return $dataProvider;
+    }
 }

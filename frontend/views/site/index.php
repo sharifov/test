@@ -1,11 +1,19 @@
 <?php
 
+use yii\helpers\Html;
+use yii\grid\GridView;
+use yii\widgets\Pjax;
+
 /* @var $this yii\web\View */
 /* @var $dataStats [] */
 /* @var $dataSources [] */
 /* @var $dataEmployee [] */
 /* @var $dataEmployeeSold [] */
 
+/* @var $searchModel common\models\search\LeadTaskSearch */
+/* @var $dp1 yii\data\ActiveDataProvider */
+/* @var $dp2 yii\data\ActiveDataProvider */
+/* @var $dp3 yii\data\ActiveDataProvider */
 
 
 $this->title = 'Dashboard';
@@ -94,6 +102,135 @@ $userId = Yii::$app->user->id;
         </div>
 
     </div>
+
+
+    <div class="row">
+        <div class="col-md-4">
+            <?php Pjax::begin(); ?>
+            <h4>TODO Task List yesterday (<?=date('Y-m-d', strtotime("-1 days"))?>):</h4>
+            <?= GridView::widget([
+                'dataProvider' => $dp1,
+                'filterModel' => $searchModel,
+                'columns' => [
+                    ['class' => 'yii\grid\SerialColumn'],
+
+                    [
+                        //'label' => 'Lead UID',
+                        'attribute' => 'lt_lead_id',
+                        'value' => function(\common\models\LeadTask $model) {
+                            return Html::a($model->lt_lead_id, ['lead/processing/' . $model->lt_lead_id], ['target' => '_blank', 'data-pjax' => 0]);
+                        },
+                        'format' => 'raw',
+                        //'filter' => false
+                    ],
+
+                    [
+                        'label' => 'Task',
+                        'attribute' => 'lt_task_id',
+                        'value' => function(\common\models\LeadTask $model) {
+                            return $model->ltTask ? $model->ltTask->t_name : '-';
+                        },
+                        'filter' => \common\models\Task::getList()
+                    ],
+
+                    'lt_notes',
+
+                    [
+                        'attribute' => 'lt_completed_dt',
+                        'value' => function(\common\models\LeadTask $model) {
+                            return $model->lt_completed_dt ? '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->lt_completed_dt)) : '-';
+                        },
+                        'format' => 'html',
+                    ],
+                ],
+            ]); ?>
+            <?php Pjax::end(); ?>
+        </div>
+        <div class="col-md-4">
+            <?php Pjax::begin(); ?>
+            <h4>TODO Task List today (<?=date('Y-m-d')?>):</h4>
+            <?= GridView::widget([
+                'dataProvider' => $dp2,
+                'filterModel' => $searchModel,
+                'columns' => [
+                    ['class' => 'yii\grid\SerialColumn'],
+
+                    [
+                        //'label' => 'Lead UID',
+                        'attribute' => 'lt_lead_id',
+                        'value' => function(\common\models\LeadTask $model) {
+                            return Html::a($model->lt_lead_id, ['lead/processing/' . $model->lt_lead_id], ['target' => '_blank', 'data-pjax' => 0]);
+                        },
+                        'format' => 'raw',
+                        //'filter' => false
+                    ],
+
+                    [
+                        'label' => 'Task',
+                        'attribute' => 'lt_task_id',
+                        'value' => function(\common\models\LeadTask $model) {
+                            return $model->ltTask ? $model->ltTask->t_name : '-';
+                        },
+                        'filter' => \common\models\Task::getList()
+                    ],
+
+                    'lt_notes',
+
+                    [
+                        'attribute' => 'lt_completed_dt',
+                        'value' => function(\common\models\LeadTask $model) {
+                            return $model->lt_completed_dt ? '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->lt_completed_dt)) : '-';
+                        },
+                        'format' => 'html',
+                    ],
+                ],
+            ]); ?>
+            <?php Pjax::end(); ?>
+        </div>
+        <div class="col-md-4">
+            <?php Pjax::begin(); ?>
+            <h4>TODO Task List tomorrow (<?=date('Y-m-d', strtotime("+1 days"))?>):</h4>
+            <?= GridView::widget([
+                'dataProvider' => $dp3,
+                'filterModel' => $searchModel,
+                'columns' => [
+                    ['class' => 'yii\grid\SerialColumn'],
+
+                    [
+                        //'label' => 'Lead UID',
+                        'attribute' => 'lt_lead_id',
+                        'value' => function(\common\models\LeadTask $model) {
+                            return Html::a($model->lt_lead_id, ['lead/processing/' . $model->lt_lead_id], ['target' => '_blank', 'data-pjax' => 0]);
+                        },
+                        'format' => 'raw',
+                        //'filter' => false
+                    ],
+
+                    [
+                        'label' => 'Task',
+                        'attribute' => 'lt_task_id',
+                        'value' => function(\common\models\LeadTask $model) {
+                            return $model->ltTask ? $model->ltTask->t_name : '-';
+                        },
+                        'filter' => \common\models\Task::getList()
+                    ],
+
+                    'lt_notes',
+
+                    [
+                        'attribute' => 'lt_completed_dt',
+                        'value' => function(\common\models\LeadTask $model) {
+                            return $model->lt_completed_dt ? '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->lt_completed_dt)) : '-';
+                        },
+                        'format' => 'html',
+                    ],
+                ],
+            ]); ?>
+            <?php Pjax::end(); ?>
+        </div>
+    </div>
+
+
 
     <?php if(Yii::$app->authManager->getAssignment('admin', $userId) || Yii::$app->authManager->getAssignment('supervision', $userId)) : ?>
 

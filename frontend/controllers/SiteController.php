@@ -4,9 +4,11 @@ namespace frontend\controllers;
 use common\controllers\DefaultController;
 use common\models\ApiLog;
 use common\models\Lead;
+use common\models\search\LeadTaskSearch;
 use Yii;
 use yii\base\InvalidParamException;
 use yii\helpers\ArrayHelper;
+use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
 use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
@@ -67,6 +69,9 @@ class SiteController extends DefaultController
      */
     public function actionIndex() : string
     {
+
+
+        $userId = Yii::$app->user->id;
 
         $days = 20;
         $dataStatsDone = Lead::find()->select("COUNT(*) AS done_count, DATE(created) AS created_date")
@@ -280,7 +285,51 @@ class SiteController extends DefaultController
             ->limit(20)->asArray()->all();
 
 
-        return $this->render('index', ['dataStats' => $dataStats, 'dataSources' => $dataSources, 'dataEmployee' => $dataEmployee, 'dataEmployeeSold' => $dataEmployeeSold, 'days2' => $days2]);
+
+
+        $params = Yii::$app->request->queryParams;
+
+        //$params['LeadTaskSearch']['lt_user_id'] = $userId;
+
+        //VarDumper::dump($params); exit;
+        $searchModel = new LeadTaskSearch();
+
+        $params['LeadTaskSearch']['lt_date'] = date('Y-m-d', strtotime("-1 days"));
+        $dp1 = $searchModel->searchDashboard($params);
+
+        $params['LeadTaskSearch']['lt_date'] = date('Y-m-d');
+        $dp2 = $searchModel->searchDashboard($params);
+
+        $params['LeadTaskSearch']['lt_date'] = date('Y-m-d', strtotime("+1 days"));
+        $dp3 = $searchModel->searchDashboard($params);
+
+
+        /*$taskList = \common\models\LeadTask::find()->where(['lt_user_id' => $userId])
+            ->andWhere(['>=', 'lt_date', date('Y-m-d', strtotime("-1 days"))])
+            ->andWhere(['<=', 'lt_date', date('Y-m-d', strtotime("+1 days"))])
+            ->orderBy(['lt_date' => SORT_ASC])->all();
+
+        $dateItem = [];
+        $myTaskByDate = [];
+
+        if($taskList) {
+            foreach ($taskList as $task) {
+                $dateItem[$task->lt_date] = $task->lt_date;
+                $myTaskByDate[$task->lt_date][$task->lt_user_id][] = $task;
+            }
+        }*/
+
+
+
+
+
+        return $this->render('index', ['dataStats' => $dataStats, 'dataSources' => $dataSources, 'dataEmployee' => $dataEmployee, 'dataEmployeeSold' => $dataEmployeeSold, 'days2' => $days2,
+            //'myTaskByDate' => $myTaskByDate,
+            'searchModel' => $searchModel,
+            'dp1' => $dp1,
+            'dp2' => $dp2,
+            'dp3' => $dp3,
+        ]);
     }
 
     public function actionLogout()
