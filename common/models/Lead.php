@@ -1352,6 +1352,7 @@ Sales - Kivork",
 
         $body = \Yii::$app->getView()->renderFile($path, [
             'model' => $this,
+            'uid' => $this->getAppliedAlternativeQuotes()->uid,
             'flightRequest' => $data,
         ]);
 
