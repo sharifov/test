@@ -235,13 +235,10 @@ class QuoteController extends ApiBaseController
             $response['itinerary']['trips'] = $model->getTrips();
             $response['itinerary']['price'] = $model->quotePrice();
 
-
-            // TODO: Quote::STATUS_SEND
-            /*if ($model->status == Quote::STATUS_SEND) {
+            if ($model->status == Quote::STATUS_SEND) {
                 $model->status = Quote::STATUS_OPENED;
-                $model->has_opened_date = date('Y-m-d h:m:i');
                 $model->save();
-            }*/
+            }
 
 
         } catch (\Throwable $e) {
