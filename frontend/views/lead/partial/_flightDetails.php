@@ -5,6 +5,13 @@ use yii\helpers\Html;
 use common\models\Lead;
 use common\models\LeadFlightSegment;
 
+
+$this->registerJsFile('/js/moment.min.js', [
+    'position' => \yii\web\View::POS_HEAD,
+    'depends' => [
+        \yii\web\JqueryAsset::class
+    ]
+]);
 /**
  * @var $this \yii\web\View
  * @var $formLeadModel ActiveForm
@@ -49,6 +56,15 @@ if ($leadForm->mode != $leadForm::VIEW_MODE) {
             });
             $(".js-mc-row:visible:eq(0) .origin").on("change",function(){
                 $(".js-mc-row:visible:eq(1) .destination").val($(this).val()).trigger('change');
+            });
+
+            $(".js-mc-row:visible:eq(0) .depart-date").on("change",function(){
+                var dtStr = $(this).val();
+                var newdate;
+                if(dtStr != '' && $(".js-mc-row:visible:eq(1) .depart-date").val() == '' ) {
+                    newdate = moment(dtStr, "DD-MMM-YYYY").add(7, 'days');
+                    $(".js-mc-row:visible:eq(1) .depart-date").val(newdate.format('DD-MMM-YYYY')).trigger('change');
+                }
             });
 
             $('#lead-new-segment-button').addClass('hidden');
