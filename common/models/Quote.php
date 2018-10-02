@@ -432,6 +432,10 @@ class Quote extends \yii\db\ActiveRecord
     public static function parseDump($string, $validation = true, &$itinerary = [], $onView = false)
     {
 
+        if (!empty($itinerary) && $validation) {
+            $itinerary = [];
+        }
+
         $depCity = $arrCity = null;
         $data = [];
         $segmentCount = 0;
@@ -448,6 +452,21 @@ class Quote extends \yii\db\ActiveRecord
                         for ($i = count($rowArrAst) - 1; $i >= 0; $i--) {
                             array_unshift($rowArr, $rowArrAst[$i]);
                         }
+                    }
+                }
+
+                if (stripos($rowArr[0], "OPERATED") !== false) {
+                    $idx = count($itinerary);
+                    if($idx > 0){
+                        $idx--;
+                    }
+                    if (isset($data[$idx]) && isset($itinerary[$idx])) {
+                        $operatedCnt++;
+                        $position = stripos($row, "OPERATED BY");
+                        $operatedBy = trim(substr($row, $position));
+                        $operatedBy = trim(str_ireplace("OPERATED BY", "", $operatedBy));
+                        $data[$idx]['operatingAirline'] = $operatedBy;
+                        $itinerary[$idx]->operationAirlineCode = $operatedBy;
                     }
                 }
 
@@ -583,9 +602,11 @@ class Quote extends \yii\db\ActiveRecord
                     'departureCity' => $depCity,
                     'arrivalCity' => $arrCity,
                     'flightDuration' => $flightDuration,
-                    'layoverDuration' => 0,
-                    'operationAirlineCode' => $operationAirlineCode
+                    'layoverDuration' => 0
                 ];
+                if (!empty($operationAirlineCode)) {
+                    $segment['operatingAirline'] = $operationAirlineCode;
+                }
                 if (count($data) != 0 && isset($data[count($data) - 1])) {
                     $previewSegment = $data[count($data) - 1];
                     $segment['layoverDuration'] = ($segment['departureDateTime']->getTimestamp() - $previewSegment['arrivalDateTime']->getTimestamp()) / 60;
@@ -599,10 +620,13 @@ class Quote extends \yii\db\ActiveRecord
                 $fSegment->destinationAirportCode = $segment['arrivalAirport'];
                 $fSegment->departureTime = $segment['departureDateTime']->format('Y-m-d H:i:s');
                 $fSegment->arrivalTime = $segment['arrivalDateTime']->format('Y-m-d H:i:s');
-                $fSegment->operationAirlineCode = $segment['operationAirlineCode'];
+                if (!empty($operationAirlineCode)) {
+                    $fSegment->operationAirlineCode = $operationAirlineCode;
+                }
                 $itinerary[] = $fSegment;
             }
             if ($validation) {
+                //echo sprintf('Check %d - %d - %d', $segmentCount, count($data), $operatedCnt);
                 if ($segmentCount !== count($data) + $operatedCnt) {
                     $data = [];
                 }
@@ -640,7 +664,7 @@ class Quote extends \yii\db\ActiveRecord
                 }
                 QuoteStatusLog::createNewFromQuote($this);
             }
-        }else{
+        } else {
             QuoteStatusLog::createNewFromQuote($this);
         }
     }
