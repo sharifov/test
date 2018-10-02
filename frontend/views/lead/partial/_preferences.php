@@ -238,7 +238,7 @@ $formId = sprintf('%s-form', $leadForm->getLeadPreferences()->formName());
                             [
                                 'attribute' => 'created',
                                 'value' => function (\common\models\Lead $model) {
-                                    return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime($model->created);
+                                    return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->created));
                                 },
                                 'format' => 'html',
                             ],

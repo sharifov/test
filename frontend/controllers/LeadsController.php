@@ -82,8 +82,6 @@ class LeadsController extends DefaultController
             $dataProvider = $searchModel->search2($params);
         }
 
-
-
         $multipleForm = new LeadMultipleForm();
 
         if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id)) {

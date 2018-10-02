@@ -513,10 +513,10 @@ class Lead extends ActiveRecord
         return '<fieldset class="rate-input-group">
                     <input type="radio" name="rate-' . $id . '" id="rate-3-' . $id . '" value="3" ' . $checked3 . ' disabled>
                     <label for="rate-3-' . $id . '"></label>
-                
+
                     <input type="radio" name="rate-' . $id . '" id="rate-2-' . $id . '" value="2" ' . $checked2 . ' disabled>
                     <label for="rate-2-' . $id . '"></label>
-                
+
                     <input type="radio" name="rate-' . $id . '" id="rate-1-' . $id . '" value="1" ' . $checked1 . ' disabled>
                     <label for="rate-1-' . $id . '"></label>
                 </fieldset>';
@@ -864,7 +864,7 @@ class Lead extends ActiveRecord
                 if($type === 'reassigned-lead') {
 
                     $body = Yii::t('email', "Dear {name},
-Attention! 
+Attention!
 Your Lead (ID: {lead_id}) has been reassigned to another agent ({name2}).
 
 You can view lead here: {url}
@@ -884,7 +884,7 @@ Sales - Kivork",
                 } elseif($type === 'lead-status-sold') {
 
                     $body = Yii::t('email', "Dear {name},
-We have some great news for you! 
+We have some great news for you!
 Your Lead (ID: {lead_id}) has been changed status to SOLD!
 
 You can view lead here: {url}
@@ -1408,6 +1408,103 @@ Sales - Kivork",
         return $result;
     }
 
+    public function previewEmail($quotes, $email)
+    {
+        $result = [
+            'status' => false,
+            'errors' => [],
+            'email' => [],
+        ];
+        $models = [];
+        $i = 1;
+        foreach ($quotes as $quote) {
+            $model = Quote::findOne([
+                'uid' => $quote
+            ]);
+            if ($model !== null) {
+                $models[$i] = $model;
+                $i++;
+            }
+        }
+
+        if (empty($models)) {
+            $result['errors'][] = sprintf('Quotes not found. UID: [%s]', implode(', ', $quotes));
+            return $result;
+        }
+
+        $key = sprintf('%s_%s', uniqid(), $email);
+        $fileName = sprintf('_%s_%s.php', str_replace(' ', '_', strtolower($this->project->name)), $key);
+        $path = sprintf('%s/tmpEmail/quote/%s', Yii::$app->getViewPath(), $fileName);
+
+        $template = ProjectEmailTemplate::findOne([
+            'type' => ProjectEmailTemplate::TYPE_EMAIL_OFFER,
+            'project_id' => $this->project_id
+        ]);
+
+        if ($template === null) {
+            $result['errors'][] = sprintf('Email Template [%s] for project [%s] not fond.',
+                ProjectEmailTemplate::getTypes(ProjectEmailTemplate::TYPE_EMAIL_OFFER),
+                $this->project->name
+                );
+            return $result;
+        }
+
+        $view = $template->template;
+        $fp = fopen($path, "w");
+        chmod($path, 0777);
+        fwrite($fp, $view);
+        fclose($fp);
+
+        $view = sprintf('/tmpEmail/quote/%s', $fileName);
+
+        $airport = Airport::findIdentity($this->leadFlightSegments[0]->origin);
+        $origin = ($airport !== null)
+        ? $airport->city :
+        $this->leadFlightSegments[0]->origin;
+
+        $airport = Airport::findIdentity($this->leadFlightSegments[0]->destination);
+        $destination = ($airport !== null)
+        ? $airport->city
+        : $this->leadFlightSegments[0]->destination;
+
+        $tripType = Lead::getFlightType($this->trip_type);
+
+        $sellerContactInfo = EmployeeContactInfo::findOne([
+            'employee_id' => $this->employee->id,
+            'project_id' => $this->project_id
+        ]);
+
+        $body = Yii::$app->getView()->render($view, [
+            'origin' => $origin,
+            'destination' => $destination,
+            'quotes' => $models,
+            'project' => $this->project,
+            'agentName' => ucfirst($this->employee->username),
+            'employee' => $this->employee,
+            'tripType' => $tripType,
+            'sellerContactInfo' => $sellerContactInfo
+        ]);
+
+        if (!empty($template->layout_path)) {
+            $result['email']['body'] = \Yii::$app->getView()->renderFile($template->layout_path, [
+                'project' => $this->project,
+                'agentName' => ucfirst($this->employee->username),
+                'employee' => $this->employee,
+                'sellerContactInfo' => $sellerContactInfo,
+                'body' => $body
+            ]);
+        }
+
+        $result['email']['subject'] = ProjectEmailTemplate::getMessageBody($template->subject, [
+            'origin' => $origin,
+            'destination' => $destination
+        ]);
+        unlink($path);
+
+
+        return $result;
+    }
+
     public function sendEmail($quotes, $email)
     {
         $result = [
@@ -1427,7 +1524,7 @@ Sales - Kivork",
         }
 
         if (empty($models)) {
-            $result['errors'][] = sprintf('Quotes not fond. UID: [%s]', implode(', ', $quotes));
+            $result['errors'][] = sprintf('Quotes not found. UID: [%s]', implode(', ', $quotes));
             return $result;
         }
 

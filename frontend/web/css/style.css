@@ -3324,7 +3324,7 @@ input[disabled] + .radio-tab__text {
 
 .sl-quote__status {
   position: absolute;
-  right: 104px;
+  right: 144px;
   text-transform: uppercase;
   min-width: 110px;
   top: 10px;
@@ -3471,3 +3471,11 @@ input[disabled] + .radio-tab__text {
 .tooltip {
   min-width: 170px;
 }
+
+.sl-quote__status-log{
+  position: absolute;
+  right: 96px;
+  text-transform: uppercase;
+  top: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  text-shadow: none;}

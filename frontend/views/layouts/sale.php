@@ -48,6 +48,20 @@ AppAsset::register($this);
     </div>
 </div>
 
+<div class="modal modal-quote fade" id="get-quote-status-log" style="display: none;">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                Quote - Status Log
+                <button type="button" class="close" data-dismiss="modal">
+                    <i class="fa fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body"></div>
+        </div>
+    </div>
+</div>
+
 <div class="modal modal-events fade" id="log-events" style="display: none;">
     <div class="modal-dialog">
         <div class="modal-content">

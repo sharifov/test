@@ -432,6 +432,10 @@ class Quote extends \yii\db\ActiveRecord
     public static function parseDump($string, $validation = true, &$itinerary = [], $onView = false)
     {
 
+        if (!empty($itinerary) && $validation) {
+            $itinerary = [];
+        }
+
         $depCity = $arrCity = null;
         $data = [];
         $segmentCount = 0;
@@ -448,6 +452,21 @@ class Quote extends \yii\db\ActiveRecord
                         for ($i = count($rowArrAst) - 1; $i >= 0; $i--) {
                             array_unshift($rowArr, $rowArrAst[$i]);
                         }
+                    }
+                }
+
+                if (stripos($rowArr[0], "OPERATED") !== false) {
+                    $idx = count($itinerary);
+                    if($idx > 0){
+                        $idx--;
+                    }
+                    if (isset($data[$idx]) && isset($itinerary[$idx])) {
+                        $operatedCnt++;
+                        $position = stripos($row, "OPERATED BY");
+                        $operatedBy = trim(substr($row, $position));
+                        $operatedBy = trim(str_ireplace("OPERATED BY", "", $operatedBy));
+                        $data[$idx]['operatingAirline'] = $operatedBy;
+                        $itinerary[$idx]->operationAirlineCode = $operatedBy;
                     }
                 }
 
@@ -583,9 +602,11 @@ class Quote extends \yii\db\ActiveRecord
                     'departureCity' => $depCity,
                     'arrivalCity' => $arrCity,
                     'flightDuration' => $flightDuration,
-                    'layoverDuration' => 0,
-                    'operationAirlineCode' => $operationAirlineCode
+                    'layoverDuration' => 0
                 ];
+                if (!empty($operationAirlineCode)) {
+                    $segment['operatingAirline'] = $operationAirlineCode;
+                }
                 if (count($data) != 0 && isset($data[count($data) - 1])) {
                     $previewSegment = $data[count($data) - 1];
                     $segment['layoverDuration'] = ($segment['departureDateTime']->getTimestamp() - $previewSegment['arrivalDateTime']->getTimestamp()) / 60;
@@ -599,10 +620,13 @@ class Quote extends \yii\db\ActiveRecord
                 $fSegment->destinationAirportCode = $segment['arrivalAirport'];
                 $fSegment->departureTime = $segment['departureDateTime']->format('Y-m-d H:i:s');
                 $fSegment->arrivalTime = $segment['arrivalDateTime']->format('Y-m-d H:i:s');
-                $fSegment->operationAirlineCode = $segment['operationAirlineCode'];
+                if (!empty($operationAirlineCode)) {
+                    $fSegment->operationAirlineCode = $operationAirlineCode;
+                }
                 $itinerary[] = $fSegment;
             }
             if ($validation) {
+                //echo sprintf('Check %d - %d - %d', $segmentCount, count($data), $operatedCnt);
                 if ($segmentCount !== count($data) + $operatedCnt) {
                     $data = [];
                 }
@@ -629,7 +653,6 @@ class Quote extends \yii\db\ActiveRecord
                 'lead_id' => $this->lead_id,
             ]);
 
-
             if (isset($changedAttributes['status'])) {
                 if ($this->lead->called_expert &&
                     $changedAttributes['status'] != $this->status &&
@@ -639,7 +662,10 @@ class Quote extends \yii\db\ActiveRecord
                     $data = $quote->getQuoteInformationForExpert(true);
                     BackOffice::sendRequest('lead/update-quote', 'POST', json_encode($data));
                 }
+                QuoteStatusLog::createNewFromQuote($this);
             }
+        } else {
+            QuoteStatusLog::createNewFromQuote($this);
         }
     }
 
@@ -665,6 +691,15 @@ class Quote extends \yii\db\ActiveRecord
                 break;
         }
         return $label;
+    }
+
+    public function getLabelByStatus(int $status)
+    {
+        $class = self::STATUS_CLASS_LIST[$status];
+
+        $statusName = self::STATUS_LIST[$status] ?? '-';
+
+        return '<span class="label ' . $class . '" style="font-size: 13px">' . Html::encode($statusName) . '</span>';
     }
 
     /**
@@ -928,4 +963,10 @@ class Quote extends \yii\db\ActiveRecord
             ];
         }
     }
+
+    public function getStatusLog()
+    {
+        return QuoteStatusLog::findAll(['quote_id' => $this->id]);
+    }
+
 }
