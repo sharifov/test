@@ -432,7 +432,7 @@ class Quote extends \yii\db\ActiveRecord
     public static function parseDump($string, $validation = true, &$itinerary = [], $onView = false)
     {
 
-        if(!empty($itinerary) && $validation){
+        if (!empty($itinerary) && $validation) {
             $itinerary = [];
         }
 
@@ -455,7 +455,7 @@ class Quote extends \yii\db\ActiveRecord
                     }
                 }
 
-                if (stripos($row, "OPERATED BY") !== false) {
+                if (stripos($rowArr[0], "OPERATED") !== false) {
                     $idx = count($itinerary);
                     if($idx > 0){
                         $idx--;
@@ -602,8 +602,7 @@ class Quote extends \yii\db\ActiveRecord
                     'departureCity' => $depCity,
                     'arrivalCity' => $arrCity,
                     'flightDuration' => $flightDuration,
-                    'layoverDuration' => 0,
-                    //'operationAirlineCode' => $operationAirlineCode
+                    'layoverDuration' => 0
                 ];
                 if (!empty($operationAirlineCode)) {
                     $segment['operatingAirline'] = $operationAirlineCode;
@@ -624,14 +623,14 @@ class Quote extends \yii\db\ActiveRecord
                 if (!empty($operationAirlineCode)) {
                     $fSegment->operationAirlineCode = $operationAirlineCode;
                 }
-                //$fSegment->operationAirlineCode = $segment['operationAirlineCode'];
                 $itinerary[] = $fSegment;
             }
-            /*if ($validation) {
+            if ($validation) {
+                //echo sprintf('Check %d - %d - %d', $segmentCount, count($data), $operatedCnt);
                 if ($segmentCount !== count($data) + $operatedCnt) {
                     $data = [];
                 }
-            }*/
+            }
         } catch (ErrorException $ex) {
             $data = [];
         }
@@ -665,7 +664,7 @@ class Quote extends \yii\db\ActiveRecord
                 }
                 QuoteStatusLog::createNewFromQuote($this);
             }
-        }else{
+        } else {
             QuoteStatusLog::createNewFromQuote($this);
         }
     }
