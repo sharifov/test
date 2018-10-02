@@ -76,23 +76,23 @@ class Lead extends ActiveRecord
         STATUS_SNOOZE = 13;
 
     public CONST STATUS_LIST = [
-        self::STATUS_PENDING        => 'Pending',
-        self::STATUS_PROCESSING     => 'Processing',
-        self::STATUS_REJECT         => 'Reject',
-        self::STATUS_FOLLOW_UP      => 'Follow Up',
-        self::STATUS_ON_HOLD        => 'Hold On',
-        self::STATUS_SOLD           => 'Sold',
-        self::STATUS_TRASH          => 'Trash',
-        self::STATUS_BOOKED         => 'Booked',
-        self::STATUS_SNOOZE         => 'Snooze',
+        self::STATUS_PENDING => 'Pending',
+        self::STATUS_PROCESSING => 'Processing',
+        self::STATUS_REJECT => 'Reject',
+        self::STATUS_FOLLOW_UP => 'Follow Up',
+        self::STATUS_ON_HOLD => 'Hold On',
+        self::STATUS_SOLD => 'Sold',
+        self::STATUS_TRASH => 'Trash',
+        self::STATUS_BOOKED => 'Booked',
+        self::STATUS_SNOOZE => 'Snooze',
     ];
 
     public CONST STATUS_MULTIPLE_UPDATE_LIST = [
-        self::STATUS_FOLLOW_UP  => self::STATUS_LIST[self::STATUS_FOLLOW_UP],
-        self::STATUS_ON_HOLD    => self::STATUS_LIST[self::STATUS_ON_HOLD],
-        self::STATUS_TRASH      => self::STATUS_LIST[self::STATUS_TRASH],
-        self::STATUS_BOOKED     => self::STATUS_LIST[self::STATUS_BOOKED],
-        self::STATUS_SNOOZE     => self::STATUS_LIST[self::STATUS_SNOOZE],
+        self::STATUS_FOLLOW_UP => self::STATUS_LIST[self::STATUS_FOLLOW_UP],
+        self::STATUS_ON_HOLD => self::STATUS_LIST[self::STATUS_ON_HOLD],
+        self::STATUS_TRASH => self::STATUS_LIST[self::STATUS_TRASH],
+        self::STATUS_BOOKED => self::STATUS_LIST[self::STATUS_BOOKED],
+        self::STATUS_SNOOZE => self::STATUS_LIST[self::STATUS_SNOOZE],
     ];
 
     public CONST STATUS_CLASS_LIST = [
@@ -524,28 +524,32 @@ class Lead extends ActiveRecord
      * @param int $value
      * @return string
      */
-    public static function getRating2($value = 0) : string
+    public static function getRating2($value = 0): string
     {
         $str = '';
 
-        if($value > 0) {
+        if ($value > 0) {
             for ($i = 1; $i <= $value; $i++) {
                 $str .= '<i class="fa fa-star "></i> ';
             }
 
-            $str .= ' ('.$value.')';
+            $str .= ' (' . $value . ')';
 
             switch ($value) {
-                case 1: $class = 'text-danger';
+                case 1:
+                    $class = 'text-danger';
                     break;
-                case 2: $class = 'text-warning';
+                case 2:
+                    $class = 'text-warning';
                     break;
-                case 3: $class = 'text-success';
+                case 3:
+                    $class = 'text-success';
                     break;
-                default: $class = '';
+                default:
+                    $class = '';
             }
 
-            $str = '<div class="'.$class.'">'.$str.'</div>';
+            $str = '<div class="' . $class . '">' . $str . '</div>';
         } else {
             $str = '-';
         }
@@ -833,17 +837,17 @@ class Lead extends ActiveRecord
 
         $host = \Yii::$app->params['url_address'];
 
-        if($type && $employee_id && isset(Yii::$app->params['email_from']['sales'])) {
+        if ($type && $employee_id && isset(Yii::$app->params['email_from']['sales'])) {
             $user = Employee::findOne($employee_id);
             $user2 = Employee::findOne($employee2_id);
 
-            if($user && $user->email) {
+            if ($user && $user->email) {
 
                 $swiftMailer = Yii::$app->mailer2;
 
                 $userName = $user->username;
 
-                if($user2) {
+                if ($user2) {
                     $userName2 = $user2->username;
                 } else {
                     $userName2 = '-';
@@ -852,7 +856,7 @@ class Lead extends ActiveRecord
                 $body = 'Hi!';
                 $subject = '[Sales] Default subject';
 
-                if($type === 'reassigned-lead') {
+                if ($type === 'reassigned-lead') {
 
                     $body = Yii::t('email', "Dear {name},
 Attention!
@@ -865,14 +869,14 @@ Sales - Kivork",
                         [
                             'name' => $userName,
                             'name2' => $userName2,
-                            'url' => $host.'/lead/booked/'.$this->id,
+                            'url' => $host . '/lead/booked/' . $this->id,
                             'lead_id' => $this->id,
                             'br' => "\r\n"
                         ]);
 
                     $subject = Yii::t('email', "⚠ [Sales] Your Lead-{id} has been reassigned to another agent ({username})", ['id' => $this->id, 'username' => $userName2]);
 
-                } elseif($type === 'lead-status-sold') {
+                } elseif ($type === 'lead-status-sold') {
 
                     $body = Yii::t('email', "Dear {name},
 We have some great news for you!
@@ -884,13 +888,13 @@ Regards,
 Sales - Kivork",
                         [
                             'name' => $userName,
-                            'url' => $host.'/lead/booked/'.$this->id,
+                            'url' => $host . '/lead/booked/' . $this->id,
                             'lead_id' => $this->id,
                             'br' => "\r\n"
                         ]);
 
                     $subject = Yii::t('email', "❀ [Sales] Your Lead-{id} has been changed status to SOLD", ['id' => $this->id]);
-                } elseif($type === 'lead-status-booked') {
+                } elseif ($type === 'lead-status-booked') {
 
 
                     $quote = Quote::find()->where(['lead_id' => $lead->id, 'status' => Quote::STATUS_APPLIED])->orderBy(['id' => SORT_DESC])->one();
@@ -906,7 +910,7 @@ Regards,
 Sales - Kivork",
                         [
                             'name' => $userName,
-                            'url' => $host.'/lead/booked/'.$this->id,
+                            'url' => $host . '/lead/booked/' . $this->id,
                             'lead_id' => $this->id,
                             'quote_uid' => $quote ? $quote->uid : '-',
                             'br' => "\r\n"
@@ -926,18 +930,18 @@ Sales - Kivork",
                         ->send();
 
                     if (!$isSend) {
-                        Yii::warning('Not send to Email:' . $user->email . ' - Sale Id: ' . $this->id, 'Lead:'.$type.':SendMail');
+                        Yii::warning('Not send to Email:' . $user->email . ' - Sale Id: ' . $this->id, 'Lead:' . $type . ':SendMail');
                     }
 
                 } catch (\Throwable $e) {
-                    Yii::error($user->email.' '.$e->getMessage(), 'swiftMailer::send');
+                    Yii::error($user->email . ' ' . $e->getMessage(), 'swiftMailer::send');
                 }
 
             } else {
-                Yii::warning("Not found employee (".$employee_id.") or email: " . ($user ? $user->email : ''), 'Lead:'.$type.':SendMail');
+                Yii::warning("Not found employee (" . $employee_id . ") or email: " . ($user ? $user->email : ''), 'Lead:' . $type . ':SendMail');
             }
         } else {
-            Yii::warning("type = $type, employee_id = $employee_id, employee2_id = $employee2_id", 'Lead:'.$type.':SendMail');
+            Yii::warning("type = $type, employee_id = $employee_id, employee2_id = $employee2_id", 'Lead:' . $type . ':SendMail');
         }
 
         return $isSend;
@@ -957,10 +961,10 @@ Sales - Kivork",
             }
 
 
-            if($this->status != self::STATUS_TRASH && isset($changedAttributes['employee_id']) && $this->employee_id && $changedAttributes['employee_id'] != $this->employee_id) {
+            if ($this->status != self::STATUS_TRASH && isset($changedAttributes['employee_id']) && $this->employee_id && $changedAttributes['employee_id'] != $this->employee_id) {
                 //echo $changedAttributes['employee_id'].' - '. $this->employee_id;
 
-                if(isset($changedAttributes['status']) && ( $changedAttributes['status'] == self::STATUS_TRASH || $changedAttributes['status'] == self::STATUS_FOLLOW_UP )) {
+                if (isset($changedAttributes['status']) && ($changedAttributes['status'] == self::STATUS_TRASH || $changedAttributes['status'] == self::STATUS_FOLLOW_UP)) {
 
                 } else {
 
@@ -972,12 +976,12 @@ Sales - Kivork",
 
             if (isset($changedAttributes['status']) && $this->employee_id && $changedAttributes['status'] != $this->status) {
 
-                if($this->status == self::STATUS_SOLD) {
+                if ($this->status == self::STATUS_SOLD) {
                     //echo $changedAttributes['status'].' - '. $this->status; exit;
                     if (!$this->sendNotification('lead-status-sold', $this->employee_id)) {
                         Yii::warning('Not send Email notification to employee_id: ' . $this->employee_id . ', lead: ' . $this->id, 'Lead:afterSave:sendNotification');
                     }
-                } elseif($this->status == self::STATUS_BOOKED) {
+                } elseif ($this->status == self::STATUS_BOOKED) {
 
                     if (!$this->sendNotification('lead-status-booked', $this->employee_id, null, $this)) {
                         Yii::warning('Not send Email notification to employee_id: ' . $this->employee_id . ', lead: ' . $this->id, 'Lead:afterSave:sendNotification');
@@ -1436,7 +1440,7 @@ Sales - Kivork",
             $result['errors'][] = sprintf('Email Template [%s] for project [%s] not fond.',
                 ProjectEmailTemplate::getTypes(ProjectEmailTemplate::TYPE_EMAIL_OFFER),
                 $this->project->name
-                );
+            );
             return $result;
         }
 
@@ -1450,13 +1454,13 @@ Sales - Kivork",
 
         $airport = Airport::findIdentity($this->leadFlightSegments[0]->origin);
         $origin = ($airport !== null)
-        ? $airport->city :
-        $this->leadFlightSegments[0]->origin;
+            ? $airport->city :
+            $this->leadFlightSegments[0]->origin;
 
         $airport = Airport::findIdentity($this->leadFlightSegments[0]->destination);
         $destination = ($airport !== null)
-        ? $airport->city
-        : $this->leadFlightSegments[0]->destination;
+            ? $airport->city
+            : $this->leadFlightSegments[0]->destination;
 
         $tripType = Lead::getFlightType($this->trip_type);
 
@@ -1469,6 +1473,8 @@ Sales - Kivork",
             'origin' => $origin,
             'destination' => $destination,
             'quotes' => $models,
+            'leadCabin' => self::getCabin($this->cabin),
+            'nrPax' => ($this->adults + $this->children + $this->infants),
             'project' => $this->project,
             'agentName' => ucfirst($this->employee->username),
             'employee' => $this->employee,
@@ -1565,6 +1571,8 @@ Sales - Kivork",
             'origin' => $origin,
             'destination' => $destination,
             'quotes' => $models,
+            'leadCabin' => self::getCabin($this->cabin),
+            'nrPax' => ($this->adults + $this->children + $this->infants),
             'project' => $this->project,
             'agentName' => ucfirst($this->employee->username),
             'employee' => $this->employee,
@@ -1708,11 +1716,14 @@ Sales - Kivork",
     {
 
         switch ($role) {
-            case 'admin' : $list = self::STATUS_LIST;
+            case 'admin' :
+                $list = self::STATUS_LIST;
                 break;
-            case 'supervision' : $list = self::STATUS_MULTIPLE_UPDATE_LIST;
+            case 'supervision' :
+                $list = self::STATUS_MULTIPLE_UPDATE_LIST;
                 break;
-            default : $list = self::STATUS_LIST;
+            default :
+                $list = self::STATUS_LIST;
         }
 
         return $list;
