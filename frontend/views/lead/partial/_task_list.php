@@ -26,6 +26,8 @@ if(Yii::$app->authManager->getAssignment('admin', $userId) || Yii::$app->authMan
     $is_manager = true;
 }
 
+$call2DelayTime = (2 * 60 * 60);
+
 ?>
 
 
@@ -148,14 +150,31 @@ if(Yii::$app->authManager->getAssignment('admin', $userId) || Yii::$app->authMan
                         <?php /** @var \common\models\LeadTask $taskItem */
 
 
+                            $call2TaskEnable = false;
 
                             foreach ($userTasks as $nr => $taskItem):
 
                                 $taskName = \yii\helpers\Html::encode($taskItem->ltTask->t_name);
 
-
+                                $taskIcon = '';
                                 $checked = $taskItem->lt_completed_dt ? true : false;
                                 $disabledTask = false;
+
+                                if($taskItem->ltTask->t_key == 'call1') {
+                                    if($checked) {
+                                        if((strtotime($taskItem->lt_completed_dt) + $call2DelayTime) <= time()) {
+                                            $call2TaskEnable = true;
+                                        } else {
+                                            $taskIcon = '<i class="fa fa-clock-o" title="Next call '.Yii::$app->formatter->asDatetime(strtotime($taskItem->lt_completed_dt) + $call2DelayTime).'"></i>';
+                                        }
+                                    }
+                                    //$taskIcon = '<i class="fa fa-clock-o"></i>';
+                                }
+
+
+                                if($taskItem->ltTask->t_key == 'call2') {
+                                    $disabledTask = !$call2TaskEnable;
+                                }
 
                                 if($checked && !$is_manager) {
                                     $disabledTask = true;
@@ -191,7 +210,7 @@ if(Yii::$app->authManager->getAssignment('admin', $userId) || Yii::$app->authMan
                             <tr class="<?=$taskItem->lt_completed_dt ? 'success' : '' ?>">
                                 <td><?=($nr + 1)?></td>
                                 <td><?=$taskCheckbox?></td>
-                                <td><b><?=$taskName?></b></td>
+                                <td><b><?=$taskIcon?> <?=$taskName?></b></td>
                                 <td><?=($taskItem->lt_completed_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($taskItem->lt_completed_dt)) : '' )?> </td>
                                 <td>
                                     <?php
