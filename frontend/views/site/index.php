@@ -1,4 +1,4 @@
-<?
+<?php
 
 /* @var $this yii\web\View */
 /* @var $dataStats [] */
@@ -12,7 +12,7 @@ $this->title = 'Dashboard';
 ?>
 <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 
-<?
+<?php
 $js = <<<JS
     google.charts.load('current', {packages: ['corechart', 'bar']});
 JS;
