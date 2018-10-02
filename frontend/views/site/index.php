@@ -111,6 +111,12 @@ $userId = Yii::$app->user->id;
             <?= GridView::widget([
                 'dataProvider' => $dp1,
                 'filterModel' => $searchModel,
+                //'tableOptions' => ['class' => 'table table-bordered table-condensed table-striped table-hover'],
+                'rowOptions' => function (\common\models\LeadTask $model, $index, $widget, $grid) {
+                    if ($model->lt_completed_dt) {
+                        return ['class' => 'success'];
+                    }
+                },
                 'columns' => [
                     ['class' => 'yii\grid\SerialColumn'],
 
@@ -152,6 +158,11 @@ $userId = Yii::$app->user->id;
             <?= GridView::widget([
                 'dataProvider' => $dp2,
                 'filterModel' => $searchModel,
+                'rowOptions' => function (\common\models\LeadTask $model, $index, $widget, $grid) {
+                    if ($model->lt_completed_dt) {
+                        return ['class' => 'success'];
+                    }
+                },
                 'columns' => [
                     ['class' => 'yii\grid\SerialColumn'],
 
@@ -193,6 +204,11 @@ $userId = Yii::$app->user->id;
             <?= GridView::widget([
                 'dataProvider' => $dp3,
                 'filterModel' => $searchModel,
+                'rowOptions' => function (\common\models\LeadTask $model, $index, $widget, $grid) {
+                    if ($model->lt_completed_dt) {
+                        return ['class' => 'success'];
+                    }
+                },
                 'columns' => [
                     ['class' => 'yii\grid\SerialColumn'],
 
