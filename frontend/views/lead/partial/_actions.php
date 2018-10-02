@@ -10,6 +10,7 @@ use yii\helpers\Url;
 use common\models\Lead;
 
 $urlUserActions = Url::to(['lead/get-user-actions', 'id' => $leadForm->getLead()->id]);
+$userId = Yii::$app->user->id;
 
 if ($leadForm->mode != $leadForm::VIEW_MODE) {
     $modelFormName = sprintf('%s-', strtolower($leadForm->formName()));
@@ -253,6 +254,17 @@ $this->registerJs($js);
                         <?php endif; ?>
 
                         <?php if ($processingConditions) : ?>
+
+                            <?php if(Yii::$app->authManager->getAssignment('admin', $userId) || Yii::$app->authManager->getAssignment('supervision', $userId)) : ?>
+                            <li>
+                                <?= Html::a('<i class="fa fa-commenting-o"></i> </span>'. ($leadForm->getLead()->l_answered ? 'Make UnAnswered' : 'Make Answered'), ['lead/update2', 'act' => 'answer', 'id' => $leadForm->getLead()->id], [
+                                    'class' => 'add-comment',
+                                    //'data-url' => Url::to(['lead/update2', 'act' => 'answer', 'id' => $leadForm->getLead()->id]),
+                                    'data-pjax' => 0
+                                ]) ?>
+                            </li>
+                            <? endif; ?>
+
                             <li>
                                 <?= Html::a('<i class="fa fa-share fa-rotate-180"></i></span> Hold On', '#', [
                                     'class' => 'add-reason',

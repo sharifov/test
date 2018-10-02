@@ -69,13 +69,14 @@ class LeadTaskController extends DefaultController
      * @param integer $lt_lead_id
      * @param integer $lt_task_id
      * @param integer $lt_user_id
+     * @param string $lt_date
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionView($lt_lead_id, $lt_task_id, $lt_user_id)
+    public function actionView($lt_lead_id, $lt_task_id, $lt_user_id, $lt_date)
     {
         return $this->render('view', [
-            'model' => $this->findModel($lt_lead_id, $lt_task_id, $lt_user_id),
+            'model' => $this->findModel($lt_lead_id, $lt_task_id, $lt_user_id, $lt_date),
         ]);
     }
 
@@ -89,7 +90,7 @@ class LeadTaskController extends DefaultController
         $model = new LeadTask();
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'lt_lead_id' => $model->lt_lead_id, 'lt_task_id' => $model->lt_task_id, 'lt_user_id' => $model->lt_user_id]);
+            return $this->redirect(['view', 'lt_lead_id' => $model->lt_lead_id, 'lt_task_id' => $model->lt_task_id, 'lt_user_id' => $model->lt_user_id, 'lt_date' => $model->lt_date]);
         }
 
         return $this->render('create', [
@@ -103,15 +104,16 @@ class LeadTaskController extends DefaultController
      * @param integer $lt_lead_id
      * @param integer $lt_task_id
      * @param integer $lt_user_id
+     * @param string $lt_date
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionUpdate($lt_lead_id, $lt_task_id, $lt_user_id)
+    public function actionUpdate($lt_lead_id, $lt_task_id, $lt_user_id, $lt_date)
     {
-        $model = $this->findModel($lt_lead_id, $lt_task_id, $lt_user_id);
+        $model = $this->findModel($lt_lead_id, $lt_task_id, $lt_user_id, $lt_date);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'lt_lead_id' => $model->lt_lead_id, 'lt_task_id' => $model->lt_task_id, 'lt_user_id' => $model->lt_user_id]);
+            return $this->redirect(['view', 'lt_lead_id' => $model->lt_lead_id, 'lt_task_id' => $model->lt_task_id, 'lt_user_id' => $model->lt_user_id, 'lt_date' => $model->lt_date]);
         }
 
         return $this->render('update', [
@@ -125,12 +127,13 @@ class LeadTaskController extends DefaultController
      * @param integer $lt_lead_id
      * @param integer $lt_task_id
      * @param integer $lt_user_id
+     * @param string $lt_date
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionDelete($lt_lead_id, $lt_task_id, $lt_user_id)
+    public function actionDelete($lt_lead_id, $lt_task_id, $lt_user_id, $lt_date)
     {
-        $this->findModel($lt_lead_id, $lt_task_id, $lt_user_id)->delete();
+        $this->findModel($lt_lead_id, $lt_task_id, $lt_user_id, $lt_date)->delete();
 
         return $this->redirect(['index']);
     }
@@ -141,12 +144,13 @@ class LeadTaskController extends DefaultController
      * @param integer $lt_lead_id
      * @param integer $lt_task_id
      * @param integer $lt_user_id
+     * @param string $lt_date
      * @return LeadTask the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
-    protected function findModel($lt_lead_id, $lt_task_id, $lt_user_id)
+    protected function findModel($lt_lead_id, $lt_task_id, $lt_user_id, $lt_date)
     {
-        if (($model = LeadTask::findOne(['lt_lead_id' => $lt_lead_id, 'lt_task_id' => $lt_task_id, 'lt_user_id' => $lt_user_id])) !== null) {
+        if (($model = LeadTask::findOne(['lt_lead_id' => $lt_lead_id, 'lt_task_id' => $lt_task_id, 'lt_user_id' => $lt_user_id, 'lt_date' => $lt_date])) !== null) {
             return $model;
         }
 

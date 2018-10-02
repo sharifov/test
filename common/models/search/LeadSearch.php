@@ -36,7 +36,7 @@ class LeadSearch extends Lead
     public function rules()
     {
         return [
-            [['id', 'client_id', 'employee_id', 'status', 'project_id', 'adults', 'children', 'infants', 'rating', 'called_expert', 'cnt'], 'integer'],
+            [['id', 'client_id', 'employee_id', 'status', 'project_id', 'adults', 'children', 'infants', 'rating', 'called_expert', 'cnt', 'l_grade'], 'integer'],
             [['client_name', 'client_email', 'client_phone'], 'string'],
 
             //['created_date_from', 'default', 'value' => '2018-01-01'],
@@ -121,6 +121,8 @@ class LeadSearch extends Lead
             'bo_flight_id' => $this->bo_flight_id,
             'rating' => $this->rating,
             'called_expert' => $this->called_expert,
+            'l_grade' => $this->l_grade,
+
         ]);
 
 
@@ -249,6 +251,7 @@ class LeadSearch extends Lead
             'cabin' => $this->cabin,
             'request_ip' => $this->request_ip,
             'discount_id' => $this->discount_id,
+            'l_grade' => $this->l_grade,
         ]);
 
 

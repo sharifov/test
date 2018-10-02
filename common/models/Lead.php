@@ -42,6 +42,8 @@ use yii\helpers\Url;
  * @property string $discount_id
  * @property string $bo_flight_id
  * @property string $additional_information
+ * @property int $l_answered
+ * @property int $l_grade
  *
  * @property LeadFlightSegment[] $leadFlightSegments
  * @property LeadPreferences $leadPreferences
@@ -282,7 +284,7 @@ class Lead extends ActiveRecord
             LeadFlightSegment::tableName() . '.destination', Employee::tableName() . '.username',
             LeadFlightSegment::tableName() . '.departure', Lead::tableName() . '.updated AS updated',
             Lead::tableName() . '.created', Client::tableName() . '.first_name', Client::tableName() . '.last_name', 'lastActivityTable.last_activity AS last_activity',
-            Airport::tableName() . '.city', Reason::tableName() . '.reason', Lead::tableName() . '.snooze_for',
+            Airport::tableName() . '.city', Reason::tableName() . '.reason', Lead::tableName() . '.snooze_for', Lead::tableName() . '.l_grade',
             'g_ce.emails', 'g_cp.phones', 'all_q.send_q', 'all_q.not_send_q', 'g_detail_lfs.flight_detail'
         ];
 
@@ -631,9 +633,12 @@ class Lead extends ActiveRecord
             [['trip_type', 'cabin'], 'required'],
             [['adults', 'children', 'infants', 'source_id'], 'required'], //'except' => self::SCENARIO_API],
 
-            [['client_id', 'employee_id', 'status', 'project_id', 'source_id', 'rating'], 'integer'],
+            [['client_id', 'employee_id', 'status', 'project_id', 'source_id', 'rating', 'l_grade'], 'integer'],
             [['adults', 'children', 'infants'], 'integer', 'max' => 9],
             [['adults'], 'integer', 'min' => 1],
+
+            [['l_answered'], 'boolean'],
+
             [['notes_for_experts'], 'string'],
             [['created', 'updated', 'offset_gmt', 'request_ip', 'request_ip_detail', 'snooze_for',
                 'called_expert', 'discount_id', 'bo_flight_id', 'additional_information'], 'safe'],
@@ -644,6 +649,8 @@ class Lead extends ActiveRecord
             [['employee_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['employee_id' => 'id']],
         ];
     }
+
+
 
     /**
      * {@inheritdoc}
@@ -666,6 +673,8 @@ class Lead extends ActiveRecord
             'notes_for_experts' => 'Notes for Expert',
             'created' => 'Created',
             'updated' => 'Updated',
+                'l_answered' => 'Answered',
+                'l_grade' => 'Grade',
         ];
     }
 
@@ -1619,6 +1628,48 @@ Sales - Kivork",
         }
 
         return $list;
+    }
+
+    /**
+     * @return string
+     */
+    public function getTaskInfo(): string
+    {
+
+        $taskListAll = \common\models\LeadTask::find()->select(['COUNT(*) AS field_cnt', 'lt_task_id'])->where(['lt_lead_id' => $this->id])->groupBy(['lt_task_id'])->all();
+        $taskListChecked = \common\models\LeadTask::find()->select(['COUNT(*) AS field_cnt', 'lt_task_id'])->where(['lt_lead_id' => $this->id])->andWhere(['IS NOT', 'lt_completed_dt', null])->groupBy(['lt_task_id'])->all();
+
+        $completed = [];
+        if($taskListChecked) {
+            foreach ($taskListChecked as $taskItem) {
+                $completed[$taskItem->lt_task_id] = $taskItem->field_cnt;
+            }
+        }
+
+        $item = [];
+
+        if($taskListAll) {
+            foreach ($taskListAll as $task) {
+                $item[] = $task->ltTask->t_name.' - ('.($completed[$task->lt_task_id] ?? 0).'/'. $task->field_cnt.')';
+            }
+        }
+
+        return implode('<br> ', $item);
+    }
+
+    /**
+     * @param int $lead_id
+     * @return string
+     */
+    static public function getTaskInfo2(int $lead_id): string
+    {
+        $lead = Lead::findOne($lead_id);
+        if($lead) {
+            $out = $lead->getTaskInfo();
+        } else {
+            $out = '';
+        }
+        return $out;
     }
 
 }

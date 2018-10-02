@@ -60,10 +60,26 @@ $this->params['breadcrumbs'][] = $this->title;
                 'filter' => \common\models\Employee::getList()
             ],
 
-            'lt_date',
+            'lt_date:date',
             'lt_notes',
-            'lt_completed_dt',
-            'lt_updated_dt',
+
+            [
+                'attribute' => 'lt_completed_dt',
+                'value' => function(\common\models\LeadTask $model) {
+                    return $model->lt_completed_dt ? '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->lt_completed_dt)) : '-';
+                },
+                'format' => 'html',
+            ],
+
+            [
+                'attribute' => 'lt_updated_dt',
+                'value' => function(\common\models\LeadTask $model) {
+                    return $model->lt_updated_dt ? '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->lt_updated_dt)) : '-';
+                },
+                'format' => 'html',
+            ],
+            //'lt_completed_dt',
+            //'lt_updated_dt',
 
             ['class' => 'yii\grid\ActionColumn'],
         ],

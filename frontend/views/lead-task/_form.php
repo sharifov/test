@@ -21,9 +21,9 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'lt_date')->input('date') ?>
 
-    <?= $form->field($model, 'lt_notes')->textarea(['maxlength' => true]) ?>
+    <?= $form->field($model, 'lt_notes')->textarea(['rows' => 5, 'maxlength' => true]) ?>
 
-    <?= $form->field($model, 'lt_completed_dt')->input('date') ?>
+    <?= $form->field($model, 'lt_completed_dt')->input('datetime') ?>
 
     <?//= $form->field($model, 'lt_updated_dt')->textInput() ?>
 

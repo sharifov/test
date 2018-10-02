@@ -21,6 +21,8 @@ use Yii;
  */
 class LeadTask extends \yii\db\ActiveRecord
 {
+    public $field_cnt;
+
     /**
      * {@inheritdoc}
      */

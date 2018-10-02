@@ -251,6 +251,27 @@ $this->params['breadcrumbs'][] = $this->title;
                 'contentOptions' => ['class' => 'text-center'],
             ],
 
+            [
+                //'header' => 'Grade',
+                'attribute' => 'l_grade',
+                'value' => function(\common\models\Lead $model) use ($isAgent) {
+                    return $model->l_grade;
+                },
+                'filter' => array_combine(range(0, 9), range(0, 9)),
+                'contentOptions' => ['class' => 'text-center'],
+                'visible' => !$isAgent
+            ],
+
+            [
+                'header' => 'Task Info',
+                'value' => function(\common\models\Lead $model) use ($isAgent) {
+                    return '<small style="font-size: 10px">'.$model->getTaskInfo().'</small>';
+                },
+                'format' => 'html',
+                'contentOptions' => ['class' => 'text-left'],
+                'visible' => !$isAgent,
+                'options' => ['style' => 'width:200px'],
+            ],
 
             [
                 'header' => 'Quotes',

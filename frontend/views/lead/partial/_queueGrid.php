@@ -17,6 +17,13 @@ use common\models\Employee;
 $actionButtonTemplate = '{action}';
 $queueType = Yii::$app->request->get('type');
 
+$userId = Yii::$app->user->id;
+
+$is_manager = false;
+if(Yii::$app->authManager->getAssignment('admin', $userId) || Yii::$app->authManager->getAssignment('supervision', $userId)) {
+    $is_manager = true;
+}
+
 ?>
 <?php \yii\widgets\Pjax::begin(['timeout' => 10000]); ?>
 <?= GridView::widget([
@@ -314,6 +321,28 @@ $queueType = Yii::$app->request->get('type');
             },
             'format' => 'raw'
         ],
+
+        [
+            'header' => 'Grade',
+            //'attribute' => 'l_grade',
+            'value' => function($model){
+                return $model['l_grade'];
+            },
+            'contentOptions' => ['class' => 'text-center'],
+            'visible' => $is_manager && in_array($queueType, ['follow-up', 'processing', 'processing-all'])
+        ],
+
+        [
+            'header' => 'Task Info',
+            'value' => function($model){
+                return '<small style="font-size: 10px">'.Lead::getTaskInfo2($model['id']).'</small>';
+            },
+            'format' => 'html',
+            'contentOptions' => ['class' => 'text-left'],
+            'visible' => $is_manager && in_array($queueType, ['follow-up', 'processing', 'processing-all']),
+            'options' => ['style' => 'width:140px'],
+        ],
+
         [
             'label' => 'Countdown',
             'visible' => ($div == Lead::DIV_GRID_IN_SNOOZE),
