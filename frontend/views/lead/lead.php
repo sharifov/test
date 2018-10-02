@@ -6,6 +6,14 @@
 use yii\bootstrap\Html;
 use frontend\models\LeadForm;
 
+
+$userId = Yii::$app->user->id;
+
+$is_manager = false;
+if(Yii::$app->authManager->getAssignment('admin', $userId) || Yii::$app->authManager->getAssignment('supervision', $userId)) {
+    $is_manager = true;
+}
+
 if (!$leadForm->getLead()->isNewRecord) {
     $flowTransitionUrl = \yii\helpers\Url::to([
         'lead/flow-transition',
@@ -132,6 +140,38 @@ JS;
             ]);
             ?>
 
+            <?//php \yii\widgets\Pjax::begin(); ?>
+
+            <div class="row">
+                <div class="col-md-12">
+                    <?php if(!$leadForm->getLead()->l_answered): ?>
+
+                        <?= Html::a(($leadForm->getLead()->l_answered ? '<i class="fa fa-commenting-o"></i>Make UnAnswered' : '<i class="fa fa-commenting"></i> Make Answered'), ['lead/update2', 'id' => $leadForm->getLead()->id, 'act' => 'answer'], [
+                        'class' => 'btn '.($leadForm->getLead()->l_answered ? 'btn-success' : 'btn-info'),
+                        'data-pjax' => false,
+                        'data' => [
+                            'confirm' => 'Are you sure?',
+                            'method' => 'post',
+                            'pjax' => 0
+                        ],
+                        ]) ?>
+                    <? else: ?>
+                        <span class="badge badge-success"><i class="fa fa-commenting-o"></i> ANSWERED: true</span>
+                    <? endif; ?>
+
+                    <?php if($is_manager): ?>
+                        <span class="badge badge-info" title="Grade"><i class="fa fa-retweet"></i> GRADE: <?=$leadForm->getLead()->l_grade?></span>
+                    <? endif; ?>
+                </div>
+
+            </div>
+            <br>
+
+
+            <?//php \yii\widgets\Pjax::end() ?>
+
+
+
             <?php if (!$leadForm->getLead()->isNewRecord && count($leadForm->getLead()->getQuotes())) {
                 echo $this->render('partial/_quotes', [
                     'quotes' => array_reverse($leadForm->getLead()->getQuotes()),
@@ -140,7 +180,13 @@ JS;
                 ]);
             } ?>
 
+
             <?php if (!$leadForm->getLead()->isNewRecord) : ?>
+
+                <?= $this->render('partial/_task_list', [
+                    'lead' => $leadForm->getLead()
+                ]); ?>
+
                 <?= $this->render('partial/_notes', [
                     'notes' => $leadForm->getLead()->getNotes()
                 ]); ?>

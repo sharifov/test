@@ -85,37 +85,47 @@ class NavItem
 
 
             if (!\in_array(Yii::$app->user->identity->role, ['agent', 'coach'])) {
+
+
+                $arrayItems = [
+                    [
+                    'label' => '<i class="fa fa-product-hunt"></i> Projects',
+                    'url' => ['settings/projects']
+                    ],
+                    [
+                        'label' => '<i class="fa fa-plane"></i> Airlines',
+                        'url' => ['settings/airlines']
+                    ],
+                    [
+                        'label' => '<i class="fa fa-plane"></i> Airports',
+                        'url' => ['settings/airports']
+                    ],
+                    /*[
+                        'label' => 'Logging',
+                        'url' => ['settings/logging']
+                    ],*/
+                    [
+                        'label' => '<i class="fa fa-users"></i> API Users',
+                        'url' => ['api-user/index']
+                    ],
+                    [
+                        'label' => '<i class="fa fa-user-secret"></i> ACL',
+                        'url' => ['settings/acl']
+                    ],
+                    [
+                        'label' => '<i class="fa fa-list"></i> Tasks',
+                        'url' => ['task/index']
+                    ],
+                    [
+                        'label' => '<i class="fa fa-list"></i> Lead Tasks',
+                        'url' => ['lead-task/index']
+                    ],
+                ];
+
                 $menuItems[] = [
                     'label' => '<i class="fa fa-cog"></i> Settings',
-                    'options' => ['class' => (in_array(Yii::$app->controller->action->uniqueId, ['settings/projects', 'settings/airlines', 'settings/airports', 'api-user/index', 'settings/acl']) ? 'active' : '')],
-                    'items' => [
-
-                        [
-                            'label' => '<i class="fa fa-product-hunt"></i> Projects',
-                            'url' => ['settings/projects']
-                        ],
-                        [
-                            'label' => '<i class="fa fa-plane"></i> Airlines',
-                            'url' => ['settings/airlines']
-                        ],
-                        [
-                            'label' => '<i class="fa fa-plane"></i> Airports',
-                            'url' => ['settings/airports']
-                        ],
-                        /*[
-                            'label' => 'Logging',
-                            'url' => ['settings/logging']
-                        ],*/
-                        [
-                            'label' => '<i class="fa fa-users"></i> API Users',
-                            'url' => ['api-user/index']
-                        ],
-                        [
-                            'label' => '<i class="fa fa-user-secret"></i> ACL',
-                            'url' => ['settings/acl']
-                        ],
-
-                    ],
+                    'options' => ['class' => (in_array(Yii::$app->controller->action->uniqueId, ['settings/projects', 'settings/airlines', 'settings/airports', 'api-user/index', 'settings/acl', 'task/index', 'lead-task/index']) ? 'active' : '')],
+                    'items' => $arrayItems
                 ];
             }
 
