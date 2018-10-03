@@ -77,7 +77,7 @@ if ($leadForm->mode != $leadForm::VIEW_MODE) {
     });
 
     $(function(){
-        switchTabs($("#$formId input[type='radio']").attr('id'));
+        switchTabs($("#$formId input[type='radio']:checked").attr('id'));
     });
 JS;
     $this->registerJs($js);
