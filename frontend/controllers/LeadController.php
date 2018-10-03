@@ -10,6 +10,7 @@ use common\models\EmployeeContactInfo;
 use common\models\Lead;
 use common\models\LeadFlow;
 use common\models\LeadLog;
+use common\models\LeadTask;
 use common\models\local\LeadAdditionalInformation;
 use common\models\Note;
 use common\models\ProjectEmailTemplate;
@@ -22,8 +23,10 @@ use yii\helpers\ArrayHelper;
 use yii\filters\AccessControl;
 use yii\helpers\Html;
 use yii\helpers\Url;
+use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
 use yii\web\Cookie;
+use yii\web\NotFoundHttpException;
 use yii\web\Response;
 use yii\web\UnauthorizedHttpException;
 use yii\widgets\ActiveForm;
@@ -58,7 +61,7 @@ class LeadController extends DefaultController
                         'actions' => [
                             'create', 'add-comment', 'change-state', 'unassign', 'take',
                             'set-rating', 'add-note', 'unprocessed', 'call-expert', 'send-email',
-                            'check-updates', 'flow-transition', 'get-user-actions', 'add-pnr'
+                            'check-updates', 'flow-transition', 'get-user-actions', 'add-pnr', 'update2'
                         ],
                         'allow' => true,
                         'roles' => ['agent'],
@@ -526,6 +529,11 @@ class LeadController extends DefaultController
         $model->status = Lead::STATUS_PROCESSING;
         $model->save();
 
+
+        LeadTask::createTaskList($model->id, $model->employee_id, 1);
+        LeadTask::createTaskList($model->id, $model->employee_id, 2);
+        LeadTask::createTaskList($model->id, $model->employee_id, 3);
+
         return $this->redirect([
             'quote',
             'type' => 'processing',
@@ -597,13 +605,118 @@ class LeadController extends DefaultController
         return null;
     }
 
+
+    public function actionUpdate2()
+    {
+
+        //echo 123; exit;
+
+        $lead_id = (int) Yii::$app->request->get('id');
+        $action = Yii::$app->request->get('act');
+        $lead = Lead::findOne(['id' => $lead_id]);
+        if(!$lead) {
+            throw new NotFoundHttpException('Not found lead ID: ' . $lead_id);
+        }
+
+        if($action === 'answer') {
+            $lead->l_answered = $lead->l_answered ? 0 : 1;
+            $lead->update();
+        }
+
+        $referrer = Yii::$app->request->referrer; //$_SERVER["HTTP_REFERER"];
+        return $this->redirect($referrer);
+    }
+
     public function actionQuote($type, $id)
     {
+
+
+
         $this->view->title = sprintf('Processing Lead - %s', ucfirst($type));
 
         $lead = Lead::findOne(['id' => $id]);
 
         if ($lead !== null) {
+
+
+            if (Yii::$app->request->post('hasEditable')) {
+
+                $value = '456';
+                $message = '';
+
+                // use Yii's response format to encode output as JSON
+                \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+
+                // read your posted model attributes
+                if (Yii::$app->request->isPost && $taskNotes = Yii::$app->request->post('task_notes')) {
+
+                    $taskId = $taskDate = $userId = $leadId = null;
+
+                    $leadId = $lead->id; //Yii::$app->request->get('lead_id');
+
+                    $taskKey = key($taskNotes);
+
+                    if($taskKey) {
+                        list($taskId, $taskDate, $userId) = explode('_', $taskKey);
+                    }
+
+                    $value = $taskNotes[$taskKey];
+
+
+                    if(!$taskId) {
+                        $message = 'Not found Task ID data';
+                    } elseif(!$taskDate) {
+                        $message = 'Not found Task Date data';
+                    } elseif(!$userId) {
+                        $message = 'Not found Task User ID data';
+                    } elseif(!$leadId) {
+                        $message = 'Not found Lead ID data';
+                    } else {
+
+                        if($taskDate && $taskId && $leadId && $userId) {
+                            $lt = LeadTask::find()->where(['lt_lead_id' => $leadId, 'lt_date' => $taskDate, 'lt_task_id' => $taskId, 'lt_user_id' => $userId])->one();
+                            if($lt) {
+                                $lt->lt_notes = $value;
+                                $lt->lt_updated_dt = date('Y-m-d H:i:s');
+                                $lt->update();
+                            }
+                        }
+
+                    }
+
+                } else {
+                    $message = 'Not found task notes data';
+                }
+
+
+                return ['output' => nl2br(Html::encode($value)), 'message' => $message];
+            }
+
+
+            if(Yii::$app->request->isPjax) {
+                $taskDate = Yii::$app->request->get('date');
+                $taskId = Yii::$app->request->get('task_id');
+                $leadId = $lead->id; //Yii::$app->request->get('lead_id');
+                $userId = Yii::$app->request->get('user_id'); // Yii::$app->user->id;
+
+                if($taskDate && $taskId && $leadId && $userId) {
+                    $lt = LeadTask::find()->where(['lt_lead_id' => $leadId, 'lt_date' => $taskDate, 'lt_task_id' => $taskId, 'lt_user_id' => $userId])->one();
+                    if($lt) {
+                        if($lt->lt_completed_dt) {
+                            $lt->lt_completed_dt = null;
+                        } else {
+                            $lt->lt_completed_dt = date('Y-m-d H:i:s');
+                        }
+                        $lt->lt_updated_dt = date('Y-m-d H:i:s');
+                        $lt->update();
+                    }
+                }
+
+            }
+
+
+
+
             Yii::$app->cache->delete(sprintf('quick-search-%d-%d', $lead->id, Yii::$app->user->identity->getId()));
             if (!$lead->permissionsView()) {
                 throw new UnauthorizedHttpException('Not permissions view lead ID: ' . $id);
@@ -615,13 +728,15 @@ class LeadController extends DefaultController
                 $leadForm->mode = $leadForm::VIEW_MODE;
             }
 
+
+
             $flightSegments = $leadForm->getLeadFlightSegment();
             foreach ($flightSegments as $segment){
                 $this->view->title = sprintf('%s & %s: ',$segment->destination, $id).$this->view->title;
                 break;
             }
 
-            if (Yii::$app->request->isAjax) {
+            if (Yii::$app->request->isAjax && !Yii::$app->request->isPjax) {
                 Yii::$app->response->format = Response::FORMAT_JSON;
                 $data = [
                     'load' => false,
