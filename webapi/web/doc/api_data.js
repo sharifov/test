@@ -872,6 +872,27 @@ define({ "api": [
             "optional": true,
             "field": "apiKey",
             "description": "<p>API Key for Project (if not use Basic-Authorization)</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": true,
+            "field": "clientIP",
+            "description": "<p>Client IP address</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "bool",
+            "optional": true,
+            "field": "clientUseProxy",
+            "description": "<p>Client Use Proxy</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": true,
+            "field": "clientUserAgent",
+            "description": "<p>Client User Agent</p>"
           }
         ]
       },

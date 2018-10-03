@@ -969,4 +969,22 @@ class Quote extends \yii\db\ActiveRecord
         return QuoteStatusLog::findAll(['quote_id' => $this->id]);
     }
 
+    /**
+     * @param string $ip
+     * @return bool
+     */
+    public function isExcludedIP($ip)
+    {
+        $ipInGlobal = GlobalAcl::findOne(['mask' => $ip]);
+        if($ipInGlobal !== null){
+            return true;
+        }
+
+        $ipInEmployee = EmployeeAcl::findOne(['mask' => $ip]);
+        if($ipInEmployee !== null){
+            return true;
+        }
+        return false;
+    }
+
 }

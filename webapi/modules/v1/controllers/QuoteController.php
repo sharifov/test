@@ -34,8 +34,11 @@ class QuoteController extends ApiBaseController
      *      "Accept-Encoding": "Accept-Encoding: gzip, deflate"
      *  }
      *
-     * @apiParam {string{13}}       uid      Quote UID
-     * @apiParam {string}           [apiKey]   API Key for Project (if not use Basic-Authorization)
+     * @apiParam {string{13}}       uid                 Quote UID
+     * @apiParam {string}           [apiKey]            API Key for Project (if not use Basic-Authorization)
+     * @apiParam {string}           [clientIP]          Client IP address
+     * @apiParam {bool}             [clientUseProxy]    Client Use Proxy
+     * @apiParam {string}           [clientUserAgent]   Client User Agent
      *
      *
      * @apiParamExample {json} Request-Example:
@@ -195,6 +198,7 @@ class QuoteController extends ApiBaseController
 
 
         $uid = Yii::$app->request->post('uid');
+        $clientIP = Yii::$app->request->post('clientIP');
 
         if (!$uid) {
             throw new BadRequestHttpException('Not found UID on POST request', 1);
@@ -236,8 +240,12 @@ class QuoteController extends ApiBaseController
             $response['itinerary']['price'] = $model->quotePrice();
 
             if ($model->status == Quote::STATUS_SEND) {
-                $model->status = Quote::STATUS_OPENED;
-                $model->save();
+                $excludeIP = Quote::isExcludedIP($clientIP);
+                if(!$excludeIP){
+                    $model->status = Quote::STATUS_OPENED;
+                    $model->save();
+                    exec(dirname(Yii::getAlias('@app')) . '/yii quote/send-opened-notification '.$uid.'  > /dev/null 2>&1 &');
+                }
             }
 
 
