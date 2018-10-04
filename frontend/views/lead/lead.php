@@ -146,6 +146,7 @@ JS;
                 <div class="col-md-12">
                     <?php if(!$leadForm->getLead()->l_answered): ?>
 
+                        <?php if($leadForm->getLead()->status == \common\models\Lead::STATUS_PROCESSING):?>
                         <?= Html::a(($leadForm->getLead()->l_answered ? '<i class="fa fa-commenting-o"></i>Make UnAnswered' : '<i class="fa fa-commenting"></i> Make Answered'), ['lead/update2', 'id' => $leadForm->getLead()->id, 'act' => 'answer'], [
                         'class' => 'btn '.($leadForm->getLead()->l_answered ? 'btn-success' : 'btn-info'),
                         'data-pjax' => false,
@@ -155,6 +156,10 @@ JS;
                             'pjax' => 0
                         ],
                         ]) ?>
+                        <? else: ?>
+                            <span class="badge badge-warning"><i class="fa fa-commenting-o"></i> ANSWERED: false</span>
+                        <? endif;?>
+
                     <? else: ?>
                         <span class="badge badge-success"><i class="fa fa-commenting-o"></i> ANSWERED: true</span>
                     <? endif; ?>
