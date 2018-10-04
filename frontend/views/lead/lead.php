@@ -120,10 +120,20 @@ JS;
 
 <div class="main-sidebars">
     <aside class="sidebar left-sidebar sl-client-sidebar">
-        <?= $this->render('partial/_client', [
-            'leadForm' => $leadForm
-        ]);
-        ?>
+
+        <?php if($leadForm->getLead()->status == \common\models\Lead::STATUS_FOLLOW_UP && $leadForm->getLead()->employee_id != Yii::$app->user->id && $is_manager):?>
+
+            <div class="alert alert-warning" role="alert">
+                <h4 class="alert-heading">Warning!</h4>
+                <p>Client information is not available for this status (FOLLOW UP)!</p>
+            </div>
+
+        <? else: ?>
+            <?= $this->render('partial/_client', [
+                'leadForm' => $leadForm
+            ]);
+            ?>
+        <? endif; ?>
     </aside>
 
     <div class="panel panel-main">
