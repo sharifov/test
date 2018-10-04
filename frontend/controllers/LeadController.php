@@ -526,6 +526,14 @@ class LeadController extends DefaultController
             }
         }
 
+
+        if ($model->status != Lead::STATUS_ON_HOLD) {
+            LeadTask::createTaskList($model->id, $model->employee_id, 1, '', Task::CAT_NOT_ANSWERED_PROCESS);
+            LeadTask::createTaskList($model->id, $model->employee_id, 2, '', Task::CAT_NOT_ANSWERED_PROCESS);
+            LeadTask::createTaskList($model->id, $model->employee_id, 3, '', Task::CAT_NOT_ANSWERED_PROCESS);
+        }
+
+
         $model->employee_id = Yii::$app->user->identity->getId();
         $model->status = Lead::STATUS_PROCESSING;
         $model->save();
@@ -533,9 +541,7 @@ class LeadController extends DefaultController
 
         //$taskList = ['call1', 'call2', 'voice-mail', 'email'];
 
-        LeadTask::createTaskList($model->id, $model->employee_id, 1, '', Task::CAT_NOT_ANSWERED_PROCESS);
-        LeadTask::createTaskList($model->id, $model->employee_id, 2, '', Task::CAT_NOT_ANSWERED_PROCESS);
-        LeadTask::createTaskList($model->id, $model->employee_id, 3, '', Task::CAT_ANSWERED_PROCESS);
+
 
         return $this->redirect([
             'quote',
