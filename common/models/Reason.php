@@ -57,6 +57,9 @@ class Reason extends \yii\db\ActiveRecord
             5 => 'Waiting the option',
             0 => 'Other'
         ],
+        Lead::STATUS_ON_HOLD => [
+            0 => 'Other'
+        ],
     ];
 
     /**
