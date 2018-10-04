@@ -527,6 +527,8 @@ class LeadController extends DefaultController
         }
 
 
+        $model->employee_id = Yii::$app->user->identity->getId();
+
         if ($model->status != Lead::STATUS_ON_HOLD) {
             LeadTask::createTaskList($model->id, $model->employee_id, 1, '', Task::CAT_NOT_ANSWERED_PROCESS);
             LeadTask::createTaskList($model->id, $model->employee_id, 2, '', Task::CAT_NOT_ANSWERED_PROCESS);
@@ -534,7 +536,7 @@ class LeadController extends DefaultController
         }
 
 
-        $model->employee_id = Yii::$app->user->identity->getId();
+
         $model->status = Lead::STATUS_PROCESSING;
         $model->save();
 
