@@ -135,6 +135,45 @@ JS;
         <div class="sl-request-content">
             <?= \common\widgets\Alert::widget() ?>
 
+            <?php if (!$leadForm->getLead()->isNewRecord) : ?>
+
+                <div class="row">
+                    <div class="col-md-12">
+                        <?php if(!$leadForm->getLead()->l_answered): ?>
+
+                            <?php if($leadForm->getLead()->status == \common\models\Lead::STATUS_PROCESSING):?>
+                                <?= Html::a(($leadForm->getLead()->l_answered ? '<i class="fa fa-commenting-o"></i>Make UnAnswered' : '<i class="fa fa-commenting"></i> Make Answered'), ['lead/update2', 'id' => $leadForm->getLead()->id, 'act' => 'answer'], [
+                                    'class' => 'btn '.($leadForm->getLead()->l_answered ? 'btn-success' : 'btn-info'),
+                                    'data-pjax' => false,
+                                    'data' => [
+                                        'confirm' => 'Are you sure?',
+                                        'method' => 'post',
+                                        'pjax' => 0
+                                    ],
+                                ]) ?>
+                            <? else: ?>
+                                <span class="badge badge-warning"><i class="fa fa-commenting-o"></i> ANSWERED: false</span>
+                            <? endif;?>
+
+                        <? else: ?>
+                            <span class="badge badge-success"><i class="fa fa-commenting-o"></i> ANSWERED: true</span>
+                        <? endif; ?>
+
+                        <?php if($is_manager): ?>
+                            <span class="badge badge-info" title="Grade"><i class="fa fa-retweet"></i> GRADE: <?=$leadForm->getLead()->l_grade?></span>
+                        <? endif; ?>
+                    </div>
+
+                </div>
+                <br>
+
+
+                <?= $this->render('partial/_task_list', [
+                    'lead' => $leadForm->getLead()
+                ]); ?>
+
+            <?php endif; ?>
+
             <?= $this->render('partial/_flightDetails', [
                 'leadForm' => $leadForm
             ]);
@@ -142,35 +181,7 @@ JS;
 
             <?//php \yii\widgets\Pjax::begin(); ?>
 
-            <div class="row">
-                <div class="col-md-12">
-                    <?php if(!$leadForm->getLead()->l_answered): ?>
 
-                        <?php if($leadForm->getLead()->status == \common\models\Lead::STATUS_PROCESSING):?>
-                        <?= Html::a(($leadForm->getLead()->l_answered ? '<i class="fa fa-commenting-o"></i>Make UnAnswered' : '<i class="fa fa-commenting"></i> Make Answered'), ['lead/update2', 'id' => $leadForm->getLead()->id, 'act' => 'answer'], [
-                        'class' => 'btn '.($leadForm->getLead()->l_answered ? 'btn-success' : 'btn-info'),
-                        'data-pjax' => false,
-                        'data' => [
-                            'confirm' => 'Are you sure?',
-                            'method' => 'post',
-                            'pjax' => 0
-                        ],
-                        ]) ?>
-                        <? else: ?>
-                            <span class="badge badge-warning"><i class="fa fa-commenting-o"></i> ANSWERED: false</span>
-                        <? endif;?>
-
-                    <? else: ?>
-                        <span class="badge badge-success"><i class="fa fa-commenting-o"></i> ANSWERED: true</span>
-                    <? endif; ?>
-
-                    <?php if($is_manager): ?>
-                        <span class="badge badge-info" title="Grade"><i class="fa fa-retweet"></i> GRADE: <?=$leadForm->getLead()->l_grade?></span>
-                    <? endif; ?>
-                </div>
-
-            </div>
-            <br>
 
 
             <?//php \yii\widgets\Pjax::end() ?>
@@ -188,9 +199,9 @@ JS;
 
             <?php if (!$leadForm->getLead()->isNewRecord) : ?>
 
-                <?= $this->render('partial/_task_list', [
+                <?/*= $this->render('partial/_task_list', [
                     'lead' => $leadForm->getLead()
-                ]); ?>
+                ]);*/ ?>
 
                 <?= $this->render('partial/_notes', [
                     'notes' => $leadForm->getLead()->getNotes()
