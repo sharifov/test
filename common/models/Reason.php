@@ -117,7 +117,18 @@ class Reason extends \yii\db\ActiveRecord
                 'Waiting the option' => 'Waiting the option',
                 'Other' => 'Other'
             ];
+        } elseif ($queue == 'processing-over') {
+            return [
+                'Client asked for assistance' => 'Client asked for assistance',
+                'Duplicate' => 'Duplicate',
+                'I am original agent' => 'I am original agent',
+                'Other' => 'Other'
+            ];
         }
+
+
+
+
         return [
             'Other' => 'Other'
         ];
