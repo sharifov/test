@@ -15,6 +15,7 @@ use common\models\local\LeadAdditionalInformation;
 use common\models\Note;
 use common\models\ProjectEmailTemplate;
 use common\models\Reason;
+use common\models\Task;
 use frontend\models\LeadForm;
 use frontend\models\SendEmailForm;
 use Yii;
@@ -530,9 +531,11 @@ class LeadController extends DefaultController
         $model->save();
 
 
-        LeadTask::createTaskList($model->id, $model->employee_id, 1);
-        LeadTask::createTaskList($model->id, $model->employee_id, 2);
-        LeadTask::createTaskList($model->id, $model->employee_id, 3);
+        //$taskList = ['call1', 'call2', 'voice-mail', 'email'];
+
+        LeadTask::createTaskList($model->id, $model->employee_id, 1, '', Task::CAT_NOT_ANSWERED_PROCESS);
+        LeadTask::createTaskList($model->id, $model->employee_id, 2, '', Task::CAT_NOT_ANSWERED_PROCESS);
+        LeadTask::createTaskList($model->id, $model->employee_id, 3, '', Task::CAT_ANSWERED_PROCESS);
 
         return $this->redirect([
             'quote',

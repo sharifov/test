@@ -18,7 +18,7 @@ class TaskSearch extends Task
     public function rules()
     {
         return [
-            [['t_id', 't_hidden'], 'integer'],
+            [['t_id', 't_hidden', 't_category_id', 't_sort_order'], 'integer'],
             [['t_key', 't_name', 't_description'], 'safe'],
         ];
     }
@@ -61,6 +61,8 @@ class TaskSearch extends Task
         $query->andFilterWhere([
             't_id' => $this->t_id,
             't_hidden' => $this->t_hidden,
+            't_category_id' => $this->t_category_id,
+            't_sort_order' => $this->t_sort_order,
         ]);
 
         $query->andFilterWhere(['like', 't_key', $this->t_key])

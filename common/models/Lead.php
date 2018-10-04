@@ -284,7 +284,7 @@ class Lead extends ActiveRecord
             LeadFlightSegment::tableName() . '.destination', Employee::tableName() . '.username',
             LeadFlightSegment::tableName() . '.departure', Lead::tableName() . '.updated AS updated',
             Lead::tableName() . '.created', Client::tableName() . '.first_name', Client::tableName() . '.last_name', 'lastActivityTable.last_activity AS last_activity',
-            Airport::tableName() . '.city', Reason::tableName() . '.reason', Lead::tableName() . '.snooze_for', Lead::tableName() . '.l_grade',
+            Airport::tableName() . '.city', Reason::tableName() . '.reason', Lead::tableName() . '.snooze_for', Lead::tableName() . '.l_grade', Lead::tableName() . '.l_answered',
             'g_ce.emails', 'g_cp.phones', 'all_q.send_q', 'all_q.not_send_q', 'g_detail_lfs.flight_detail'
         ];
 
@@ -995,6 +995,17 @@ Sales - Kivork",
                     if (!$this->sendNotification('lead-status-booked', $this->employee_id, null, $this)) {
                         Yii::warning('Not send Email notification to employee_id: ' . $this->employee_id . ', lead: ' . $this->id, 'Lead:afterSave:sendNotification');
                     }
+                } elseif ($this->status == self::STATUS_PROCESSING) {
+
+                    if(isset($changedAttributes['status']) && $changedAttributes['status'] == self::STATUS_FOLLOW_UP) {
+                        Yii::$app->db->createCommand('UPDATE ' . Lead::tableName() . ' SET l_grade = :grade WHERE id = :id', [
+                            ':grade' => ($this->l_grade + 1),
+                            ':id' => $this->id
+                        ])->execute();
+                    }
+                    /*if (!$this->sendNotification('lead-status-booked', $this->employee_id, null, $this)) {
+                        Yii::warning('Not send Email notification to employee_id: ' . $this->employee_id . ', lead: ' . $this->id, 'Lead:afterSave:sendNotification');
+                    }*/
                 }
             }
 

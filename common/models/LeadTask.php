@@ -97,14 +97,17 @@ class LeadTask extends \yii\db\ActiveRecord
         return new LeadTaskQuery(get_called_class());
     }
 
+
     /**
      * @param int $lead_id
      * @param int $user_id
      * @param int $day
      * @param string $date
+     * @param int $category_id
+     * @param array $task_list
      * @return bool
      */
-    public static function createTaskList(int $lead_id, int $user_id, int $day = 1, string $date = '')
+    public static function createTaskList(int $lead_id, int $user_id, int $day = 1, string $date = '', int $category_id = 0, array $task_list = [])
     {
 
         if($day < 1) {
@@ -116,7 +119,40 @@ class LeadTask extends \yii\db\ActiveRecord
         }
 
         if($lead_id && $user_id) {
-            switch ($day) {
+
+
+            if($category_id > 0) {
+                $taskList = Task::find()->where(['t_category_id' => $category_id])->orderBy(['t_sort_order' => SORT_ASC])->all();
+
+                if ($taskList) {
+                    foreach ($taskList as $task) {
+
+                        $lt_date = date('Y-m-d', strtotime($date . " +" . ($day - 1) . " days"));
+
+                        $lt = LeadTask::find()->where([
+                            'lt_lead_id' => $lead_id,
+                            'lt_task_id' => $task->t_id,
+                            'lt_user_id' => $user_id,
+                            'lt_date' => $lt_date,
+                        ])->exists();
+
+                        if (!$lt) {
+                            $lt = new LeadTask();
+                            $lt->lt_lead_id = $lead_id;
+                            $lt->lt_task_id = $task->t_id;
+                            $lt->lt_user_id = $user_id;
+                            $lt->lt_date = $lt_date;
+                            if (!$lt->save()) {
+                                Yii::error(print_r($lt->errors), 'LeadTask:createTaskList:Task:save');
+                            }
+                        }
+
+                    }
+                }
+            }
+
+
+            /*switch ($day) {
                 case 1:
                 case 2:
                 case 3:
@@ -124,21 +160,36 @@ class LeadTask extends \yii\db\ActiveRecord
                     break;
                 default:
                     $taskList = [];
-            }
+            }*/
 
-            foreach ($taskList as $taskKey) {
-                $task = Task::find()->select(['t_id'])->where(['t_key' => $taskKey])->one();
-                if($task) {
-                    $lt = new LeadTask();
-                    $lt->lt_lead_id = $lead_id;
-                    $lt->lt_task_id = $task->t_id;
-                    $lt->lt_user_id = $user_id;
-                    $lt->lt_date = date('Y-m-d', strtotime($date ." +".($day - 1)." days"));
-                    if(!$lt->save()) {
-                        Yii::error(print_r($lt->errors), 'LeadTask:createTaskList:Task:save');
+            if($task_list) {
+                foreach ($taskList as $taskKey) {
+                    $task = Task::find()->select(['t_id'])->where(['t_key' => $taskKey])->one();
+                    if ($task) {
+
+                        $lt_date = date('Y-m-d', strtotime($date . " +" . ($day - 1) . " days"));
+
+                        $lt = LeadTask::find()->where([
+                            'lt_lead_id' => $lead_id,
+                            'lt_task_id' => $task->t_id,
+                            'lt_user_id' => $user_id,
+                            'lt_date' => $lt_date,
+                        ])->exists();
+
+                        if (!$lt) {
+                            $lt = new LeadTask();
+                            $lt->lt_lead_id = $lead_id;
+                            $lt->lt_task_id = $task->t_id;
+                            $lt->lt_user_id = $user_id;
+                            $lt->lt_date = $lt_date;
+                            if (!$lt->save()) {
+                                Yii::error(print_r($lt->errors), 'LeadTask:createTaskList:Task:save');
+                            }
+                        }
                     }
                 }
             }
+
             return true;
         }
         return false;

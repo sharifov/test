@@ -300,6 +300,14 @@ if(Yii::$app->authManager->getAssignment('admin', $userId) || Yii::$app->authMan
             'format' => 'raw'
         ],
         [
+            'label' => 'Status',
+            'visible' => !in_array($queueType, ['sold']),
+            'value' => function ($model) {
+                return Lead::getStatusLabel($model['status']);
+            },
+            'format' => 'raw'
+        ],
+        [
             'attribute' => 'last_activity',
             'label' => 'Last Activity',
             'visible' => !in_array($queueType, ['inbox', 'sold']),
@@ -320,6 +328,17 @@ if(Yii::$app->authManager->getAssignment('admin', $userId) || Yii::$app->authMan
                 return !empty($model['reason']) ? $model['reason'] : '-';
             },
             'format' => 'raw'
+        ],
+
+        [
+            'header' => 'Answered',
+            //'attribute' => 'l_answered',
+            'value' => function($model) {
+                return $model['l_answered'] ? '<span class="label label-success">Yes</span>' : '<span class="label label-danger">No</span>';
+            },
+            'contentOptions' => ['class' => 'text-center'],
+            'format' => 'html',
+            'visible' => in_array($queueType, ['follow-up', 'processing', 'processing-all'])
         ],
 
         [
@@ -374,14 +393,7 @@ if(Yii::$app->authManager->getAssignment('admin', $userId) || Yii::$app->authMan
             },
             'format' => 'raw'
         ],
-        [
-            'label' => 'Status',
-            'visible' => !in_array($queueType, ['sold']),
-            'value' => function ($model) {
-                return Lead::getStatusLabel($model['status']);
-            },
-            'format' => 'raw'
-        ],
+
         [
             'class' => 'yii\grid\ActionColumn',
             'contentOptions' => ['style' => 'width: 145px;'],

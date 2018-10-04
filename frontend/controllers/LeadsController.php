@@ -64,6 +64,9 @@ class LeadsController extends DefaultController
         $searchModel = new LeadSearch();
 
         $params = Yii::$app->request->queryParams;
+        $params2 = Yii::$app->request->post();
+
+        $params = array_merge($params, $params2);
 
         if(Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id)) {
             $isAgent = true;

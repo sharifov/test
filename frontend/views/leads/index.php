@@ -25,7 +25,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <h1><?= Html::encode($this->title) ?></h1>
 
-    <?php Pjax::begin(); ?>
+    <?php Pjax::begin(); //['id' => 'lead-pjax-list', 'timeout' => 5000, 'enablePushState' => true, 'clientOptions' => ['method' => 'GET']]); ?>
     <?php
 
         if($isAgent) {
@@ -242,14 +242,14 @@ $this->params['breadcrumbs'][] = $this->title;
                 'contentOptions' => ['class' => 'text-center'],
             ],
 
-            [
+            /*[
                 'attribute' => 'infants',
                 'value' => function(\common\models\Lead $model) {
                     return $model->infants ?: '-';
                 },
                 'filter' => array_combine(range(0, 9), range(0, 9)),
                 'contentOptions' => ['class' => 'text-center'],
-            ],
+            ],*/
 
             [
                 //'header' => 'Grade',
@@ -260,6 +260,19 @@ $this->params['breadcrumbs'][] = $this->title;
                 'filter' => array_combine(range(0, 9), range(0, 9)),
                 'contentOptions' => ['class' => 'text-center'],
                 'visible' => !$isAgent
+            ],
+
+            [
+                //'header' => 'Grade',
+                'attribute' => 'l_answered',
+                'value' => function(\common\models\Lead $model) use ($isAgent) {
+                    return $model->l_answered ? '<span class="label label-success">Yes</span>' : '<span class="label label-danger">No</span>';
+                },
+                'filter' => [1 => 'Yes', 0 => 'No'],
+                'contentOptions' => ['class' => 'text-center'],
+                'format' => 'html'
+
+                //'visible' => !$isAgent
             ],
 
             [
@@ -417,8 +430,15 @@ $this->params['breadcrumbs'][] = $this->title;
                 //$fullExportMenu,
                 //'{toggleData}'
             ],
-            'pjax' => true,
-            'pjaxSettings' => ['options' => ['id' => 'kv-pjax-container']],
+            'pjax' => false,
+            /*'pjaxSettings' => [
+                'options' => [
+                    'id' => 'lead-pjax-list2',
+                    'enablePushState' => true,
+                    'clientOptions' => ['method' => 'get']
+                ],
+            ],*/
+
             //'bordered' => true,
             'striped' => false,
             'condensed' => false,
@@ -499,8 +519,6 @@ $this->params['breadcrumbs'][] = $this->title;
     <?php endif; ?>
 
     <?php \yii\bootstrap\ActiveForm::end(); ?>
-
-
 
 
 

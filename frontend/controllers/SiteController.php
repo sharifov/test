@@ -288,8 +288,7 @@ class SiteController extends DefaultController
 
 
         $params = Yii::$app->request->queryParams;
-
-        //$params['LeadTaskSearch']['lt_user_id'] = $userId;
+        $params['LeadTaskSearch']['lt_user_id'] = $userId;
 
         //VarDumper::dump($params); exit;
         $searchModel = new LeadTaskSearch();
@@ -318,8 +317,6 @@ class SiteController extends DefaultController
                 $myTaskByDate[$task->lt_date][$task->lt_user_id][] = $task;
             }
         }*/
-
-
 
 
 

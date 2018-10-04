@@ -6,7 +6,7 @@ use yii\widgets\DetailView;
 /* @var $this yii\web\View */
 /* @var $model common\models\Task */
 
-$this->title = $model->t_id;
+$this->title = $model->t_key;
 $this->params['breadcrumbs'][] = ['label' => 'Tasks', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
@@ -31,8 +31,15 @@ $this->params['breadcrumbs'][] = $this->title;
             't_id',
             't_key',
             't_name',
+            [
+                'attribute' => 't_category_id',
+                'value' => function(\common\models\Task $model) {
+                    return $model->getCategoryName();
+                },
+            ],
             't_description',
             't_hidden:boolean',
+            't_sort_order'
         ],
     ]) ?>
 

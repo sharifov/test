@@ -29,8 +29,17 @@ $this->params['breadcrumbs'][] = $this->title;
             't_id',
             't_key',
             't_name',
+            [
+                'attribute' => 't_category_id',
+                'value' => function(\common\models\Task $model) {
+                    return $model->getCategoryName();
+                },
+                'filter' => \common\models\Task::CAT_LIST
+            ],
+
             't_description',
             't_hidden:boolean',
+            't_sort_order',
 
             ['class' => 'yii\grid\ActionColumn'],
         ],
