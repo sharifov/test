@@ -221,9 +221,10 @@ $call2DelayTime = (2 * 60 * 60);
                                         echo Editable::widget([
                                             'name' => $name,
 
-                                            'asPopover' => true,
+                                            'asPopover' => false,
+                                            //'asPopover' => true,
                                             'displayValue' => nl2br(\yii\helpers\Html::encode($taskItem->lt_notes)),
-                                            'format' => Editable::FORMAT_BUTTON,
+                                            //'format' => Editable::FORMAT_BUTTON,
                                             'inputType' => Editable::INPUT_TEXTAREA,
                                             'value' => $taskItem->lt_notes,
                                             'header' => 'Notes',
@@ -232,7 +233,7 @@ $call2DelayTime = (2 * 60 * 60);
                                                 'action'=>\yii\helpers\Url::to(['member/usercp', 'id'=>$model->id]),
 
                                             ],*/
-                                            'size' => 'lg',
+                                            'size' => \kartik\popover\PopoverX::SIZE_LARGE,
                                             'options' => ['class' => 'form-control', 'rows' => 5, 'placeholder' => 'Enter notes...']
                                         ]);
                                     } else {
