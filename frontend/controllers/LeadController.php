@@ -358,6 +358,9 @@ class LeadController extends DefaultController
         ])->andWhere([
             'NOT IN', 'status', [Lead::STATUS_BOOKED, Lead::STATUS_SOLD]
         ])->one();
+
+        $type = 'inbox';
+
         if ($model !== null) {
             $reason = new Reason();
             $attr = Yii::$app->request->post($reason->formName());
@@ -387,8 +390,11 @@ class LeadController extends DefaultController
                 if ($reason->queue == 'follow-up') {
                     $model->status = $model::STATUS_FOLLOW_UP;
                     $model->employee_id = null;
+                    $type = 'follow-up';
+
                 } elseif ($reason->queue == 'trash') {
                     $model->status = $model::STATUS_TRASH;
+                    $type = 'trash';
                 } elseif ($reason->queue == 'snooze') {
                     $modelAttr = Yii::$app->request->post($model->formName());
                     $model->snooze_for = $modelAttr['snooze_for'];
@@ -431,12 +437,16 @@ class LeadController extends DefaultController
                 } else {
                     $model->status = $model::STATUS_ON_HOLD;
                 }
+
                 $model->save();
             }
         }
+
+
+
         return $this->redirect([
             'queue',
-            'type' => 'inbox'
+            'type' => $type
         ]);
     }
 

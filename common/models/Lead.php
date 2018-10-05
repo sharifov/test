@@ -965,6 +965,9 @@ Sales - Kivork",
         if ($insert) {
             LeadFlow::addStateFlow($this);
         } else {
+
+
+
             if (isset($changedAttributes['status']) && $changedAttributes['status'] !== $this->status) {
                 LeadFlow::addStateFlow($this);
             }
@@ -983,26 +986,27 @@ Sales - Kivork",
                 }
             }
 
-            if (isset($changedAttributes['status']) && $this->employee_id && $changedAttributes['status'] != $this->status) {
+            if (isset($changedAttributes['status']) && $changedAttributes['status'] != $this->status) {
+
 
                 if ($this->status == self::STATUS_SOLD) {
                     //echo $changedAttributes['status'].' - '. $this->status; exit;
-                    if (!$this->sendNotification('lead-status-sold', $this->employee_id)) {
+                    if ($this->employee_id && !$this->sendNotification('lead-status-sold', $this->employee_id)) {
                         Yii::warning('Not send Email notification to employee_id: ' . $this->employee_id . ', lead: ' . $this->id, 'Lead:afterSave:sendNotification');
                     }
                 } elseif ($this->status == self::STATUS_BOOKED) {
 
-                    if (!$this->sendNotification('lead-status-booked', $this->employee_id, null, $this)) {
+                    if ($this->employee_id && !$this->sendNotification('lead-status-booked', $this->employee_id, null, $this)) {
                         Yii::warning('Not send Email notification to employee_id: ' . $this->employee_id . ', lead: ' . $this->id, 'Lead:afterSave:sendNotification');
                     }
-                } elseif ($this->status == self::STATUS_PROCESSING) {
+                } elseif ($this->status == self::STATUS_FOLLOW_UP) {
 
-                    if(isset($changedAttributes['status']) && $changedAttributes['status'] == self::STATUS_FOLLOW_UP) {
+                        $this->l_grade = (int) $this->l_grade + 1;
                         Yii::$app->db->createCommand('UPDATE ' . Lead::tableName() . ' SET l_grade = :grade WHERE id = :id', [
-                            ':grade' => ($this->l_grade + 1),
+                            ':grade' => $this->l_grade,
                             ':id' => $this->id
                         ])->execute();
-                    }
+
                     /*if (!$this->sendNotification('lead-status-booked', $this->employee_id, null, $this)) {
                         Yii::warning('Not send Email notification to employee_id: ' . $this->employee_id . ', lead: ' . $this->id, 'Lead:afterSave:sendNotification');
                     }*/
