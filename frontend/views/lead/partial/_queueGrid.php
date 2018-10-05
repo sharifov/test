@@ -407,7 +407,7 @@ if(Yii::$app->authManager->getAssignment('admin', $userId) || Yii::$app->authMan
                             $model['status'] === Lead::STATUS_ON_HOLD)
                     ) {
                         $buttonsCnt++;
-                        $buttons .= Html::a('Take', Url::to([
+                        $buttons .= Html::a('Take & Open', Url::to([
                             'lead/take',
                             'id' => $model['id']
                         ]), [
@@ -416,14 +416,14 @@ if(Yii::$app->authManager->getAssignment('admin', $userId) || Yii::$app->authMan
                         ]);
                     }
 
-                    if ($queueType != 'inbox') {
+                    if ($queueType != 'inbox' && $queueType != 'follow-up') {
                         if (Yii::$app->user->identity->getId() == $model['employee_id'] &&
                             $queueType = 'processing-all'
                         ) {
                             $queueType = 'processing';
                         }
                         $buttonsCnt++;
-                        $buttons .= Html::a('Open', Url::to(['lead/quote', 'type' => $queueType, 'id' => $model['id']]), [
+                        $buttons .= Html::a('Open2', Url::to(['lead/quote', 'type' => $queueType, 'id' => $model['id']]), [
                             'class' => 'btn btn-action btn-sm',
                             'target' => '_blank',
                             'data-pjax' => 0
