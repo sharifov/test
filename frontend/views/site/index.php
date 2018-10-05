@@ -107,7 +107,7 @@ $userId = Yii::$app->user->id;
     <div class="row">
         <div class="col-md-4">
             <?php Pjax::begin(); ?>
-            <h4>TODO Task List yesterday (<?=date('Y-m-d', strtotime("-1 days"))?>):</h4>
+            <h4>To Do Task List <span class="label label-default">yesterday</span> (<?=date('Y-m-d', strtotime("-1 days"))?>):</h4>
             <?= GridView::widget([
                 'dataProvider' => $dp1,
                 'filterModel' => $searchModel,
@@ -139,22 +139,35 @@ $userId = Yii::$app->user->id;
                         'filter' => \common\models\Task::getList()
                     ],
 
-                    'lt_notes',
+                    [
+                        'attribute' => 'lt_notes',
+                        'value' => function(\common\models\LeadTask $model) {
+                            return $model->lt_notes ? $model->lt_notes : '-';
+                        },
+                    ],
 
                     [
+                        'attribute' => 'ltLead.status',
+                        'value' => function(\common\models\LeadTask $model) {
+                            return $model->ltLead ? $model->ltLead->getStatusLabel() : '-';
+                        },
+                        'format' => 'html'
+                    ],
+
+                    /*[
                         'attribute' => 'lt_completed_dt',
                         'value' => function(\common\models\LeadTask $model) {
                             return $model->lt_completed_dt ? '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->lt_completed_dt)) : '-';
                         },
                         'format' => 'html',
-                    ],
+                    ],*/
                 ],
             ]); ?>
             <?php Pjax::end(); ?>
         </div>
         <div class="col-md-4">
             <?php Pjax::begin(); ?>
-            <h4>TODO Task List today (<?=date('Y-m-d')?>):</h4>
+            <h4>To Do Task List <span class="label label-default">today</span> (<?=date('Y-m-d')?>):</h4>
             <?= GridView::widget([
                 'dataProvider' => $dp2,
                 'filterModel' => $searchModel,
@@ -185,22 +198,34 @@ $userId = Yii::$app->user->id;
                         'filter' => \common\models\Task::getList()
                     ],
 
-                    'lt_notes',
-
                     [
+                        'attribute' => 'lt_notes',
+                        'value' => function(\common\models\LeadTask $model) {
+                            return $model->lt_notes ? $model->lt_notes : '-';
+                        },
+                    ],
+                    [
+                        'attribute' => 'ltLead.status',
+                        'value' => function(\common\models\LeadTask $model) {
+                            return $model->ltLead ? $model->ltLead->getStatusLabel() : '-';
+                        },
+                        'format' => 'html'
+                    ],
+
+                    /*[
                         'attribute' => 'lt_completed_dt',
                         'value' => function(\common\models\LeadTask $model) {
                             return $model->lt_completed_dt ? '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->lt_completed_dt)) : '-';
                         },
                         'format' => 'html',
-                    ],
+                    ],*/
                 ],
             ]); ?>
             <?php Pjax::end(); ?>
         </div>
         <div class="col-md-4">
             <?php Pjax::begin(); ?>
-            <h4>TODO Task List tomorrow (<?=date('Y-m-d', strtotime("+1 days"))?>):</h4>
+            <h4>To Do Task List <span class="label label-default">tomorrow</span> (<?=date('Y-m-d', strtotime("+1 days"))?>):</h4>
             <?= GridView::widget([
                 'dataProvider' => $dp3,
                 'filterModel' => $searchModel,
@@ -231,15 +256,29 @@ $userId = Yii::$app->user->id;
                         'filter' => \common\models\Task::getList()
                     ],
 
-                    'lt_notes',
+                    [
+                        'attribute' => 'lt_notes',
+                        'value' => function(\common\models\LeadTask $model) {
+                            return $model->lt_notes ? $model->lt_notes : '-';
+                        },
+                    ],
 
                     [
+                        'attribute' => 'ltLead.status',
+                        'value' => function(\common\models\LeadTask $model) {
+                            return $model->ltLead ? $model->ltLead->getStatusLabel() : '-';
+                        },
+                        'format' => 'html'
+                    ],
+
+
+                    /*[
                         'attribute' => 'lt_completed_dt',
                         'value' => function(\common\models\LeadTask $model) {
                             return $model->lt_completed_dt ? '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->lt_completed_dt)) : '-';
                         },
                         'format' => 'html',
-                    ],
+                    ],*/
                 ],
             ]); ?>
             <?php Pjax::end(); ?>

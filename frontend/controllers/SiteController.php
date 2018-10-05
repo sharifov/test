@@ -289,6 +289,7 @@ class SiteController extends DefaultController
 
         $params = Yii::$app->request->queryParams;
         $params['LeadTaskSearch']['lt_user_id'] = $userId;
+        $params['LeadTaskSearch']['status_not_in'] = [Lead::STATUS_TRASH, Lead::STATUS_SNOOZE];
 
         //VarDumper::dump($params); exit;
         $searchModel = new LeadTaskSearch();

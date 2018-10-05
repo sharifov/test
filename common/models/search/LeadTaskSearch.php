@@ -12,6 +12,7 @@ use common\models\LeadTask;
  */
 class LeadTaskSearch extends LeadTask
 {
+    public $status_not_in;
     /**
      * {@inheritdoc}
      */
@@ -19,7 +20,7 @@ class LeadTaskSearch extends LeadTask
     {
         return [
             [['lt_lead_id', 'lt_task_id', 'lt_user_id'], 'integer'],
-            [['lt_date', 'lt_notes', 'lt_completed_dt', 'lt_updated_dt'], 'safe'],
+            [['lt_date', 'lt_notes', 'lt_completed_dt', 'lt_updated_dt', 'status_not_in'], 'safe'],
         ];
     }
 
@@ -98,6 +99,14 @@ class LeadTaskSearch extends LeadTask
             // $query->where('0=1');
             return $dataProvider;
         }
+
+        if($this->status_not_in) {
+            $query->joinWith(['ltLead' => function ($q) {
+                $q->where(['NOT IN', 'leads.status', $this->status_not_in]);
+            }]);
+        }
+
+        $query->andWhere(['IS', 'lt_completed_dt', null]);
 
         // grid filtering conditions
         $query->andFilterWhere([
