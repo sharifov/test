@@ -40,7 +40,7 @@ $call2DelayTime = (2 * 60 * 60);
     <div class="panel-heading collapsing-heading">
         <a data-toggle="collapse" href="#agents-notes" aria-expanded="true"
            class="collapsing-heading__collapse-link">
-            TODO Task List
+            To Do Task List
             <i class="collapsing-heading__arrow"></i>
         </a>
     </div>

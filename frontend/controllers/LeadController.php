@@ -631,7 +631,22 @@ class LeadController extends DefaultController
 
         if($action === 'answer') {
             $lead->l_answered = $lead->l_answered ? 0 : 1;
-            $lead->update();
+            if($lead->update()) {
+                if($lead->l_answered) {
+                    LeadTask::deleteAll('lt_lead_id = :lead_id AND lt_date >= :date AND lt_completed_dt IS NULL',
+                        [':lead_id' => $lead->id, ':date' => date('Y-m-d') ]);
+
+                    LeadTask::createTaskList($lead->id, $lead->employee_id, 1, '', Task::CAT_ANSWERED_PROCESS);
+                    LeadTask::createTaskList($lead->id, $lead->employee_id, 2, '', Task::CAT_ANSWERED_PROCESS);
+                    LeadTask::createTaskList($lead->id, $lead->employee_id, 3, '', Task::CAT_ANSWERED_PROCESS);
+
+                } else {
+                    LeadTask::deleteAll('lt_lead_id = :lead_id AND lt_date >= :date AND lt_completed_dt IS NULL',
+                        [':lead_id' => $lead->id, ':date' => date('Y-m-d') ]);
+
+                    LeadTask::createTaskList($lead->id, $lead->employee_id, 1, '', Task::CAT_NOT_ANSWERED_PROCESS);
+                }
+            }
         }
 
         $referrer = Yii::$app->request->referrer; //$_SERVER["HTTP_REFERER"];

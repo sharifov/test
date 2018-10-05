@@ -918,14 +918,14 @@ table thead, table th {
   right: 20px;
   border-style: solid;
   border-width: 7px 5px;
-  top: 13px;
+  top: 7px;
   border-color: transparent transparent #fff;
 }
 
 .panel .collapsing-heading__collapse-link {
   color: #fff;
   font-weight: bold;
-  padding: 14px 20px 13px;
+  padding: 10px 15px 5px;
   display: block;
   width: 100%;
   font-size: 14px;
@@ -933,7 +933,7 @@ table thead, table th {
 }
 
 .panel .collapsing-heading__collapse-link.collapsed .collapsing-heading__arrow {
-  top: 22px;
+  top: 14px;
   border-color: #fff transparent transparent;
 }
 
@@ -3226,7 +3226,7 @@ input[disabled] + .radio-tab__text {
 .sl-quotes-content {
   max-width: 1200px;
   width: 100%;
-  padding: 40px 20px 20px;
+  padding: 15px 20px 20px;
   margin: 0 auto;
 }
 
