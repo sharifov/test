@@ -1386,7 +1386,8 @@ Sales - Kivork",
                 'agentName' => ucfirst($this->employee->username),
                 'employee' => $this->employee,
                 'sellerContactInfo' => $sellerContactInfo,
-                'body' => $body
+                'body' => $body,
+                'templateType' => $template->type,
             ]);
         }
 
@@ -1504,7 +1505,7 @@ Sales - Kivork",
             'agentName' => ucfirst($this->employee->username),
             'employee' => $this->employee,
             'tripType' => $tripType,
-            'sellerContactInfo' => $sellerContactInfo
+            'sellerContactInfo' => $sellerContactInfo,
         ]);
 
         if (!empty($template->layout_path)) {
@@ -1513,7 +1514,8 @@ Sales - Kivork",
                 'agentName' => ucfirst($this->employee->username),
                 'employee' => $this->employee,
                 'sellerContactInfo' => $sellerContactInfo,
-                'body' => $body
+                'body' => $body,
+                'templateType' => $template->type,
             ]);
         }
 
@@ -1611,7 +1613,8 @@ Sales - Kivork",
                 'agentName' => ucfirst($this->employee->username),
                 'employee' => $this->employee,
                 'sellerContactInfo' => $sellerContactInfo,
-                'body' => $body
+                'body' => $body,
+                'templateType' => $template->type,
             ]);
         }
 

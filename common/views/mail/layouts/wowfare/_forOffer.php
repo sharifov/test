@@ -4,6 +4,7 @@
  * @var $agentName string
  * @var $employee \common\models\Employee
  * @var $body string
+ * @var $templateType string
  * @var $sellerContactInfo \common\models\EmployeeContactInfo
  */
 ?>
@@ -14,7 +15,7 @@
     <tbody>
     <tr style="padding: 0; text-align: left; vertical-align: top;">
         <td class="wrapper-inner" align="center" valign="top"
-            style="-moz-hyphens: auto; -webkit-hyphens: auto; border-collapse: collapse !important; color: #1C2F59; font-family: 'Roboto', Arial, Helvetica, sans-serif; font-weight: normal; hyphens: auto; line-height: 1.3; margin: 0; max-width: 808px !important; min-width: 808px !important; padding: 110px 20px !important; text-align: left; vertical-align: top; width: 808px !important; word-wrap: break-word;">
+            style="-moz-hyphens: auto; -webkit-hyphens: auto; border-collapse: collapse !important; color: #1C2F59; font-family: 'Roboto', Arial, Helvetica, sans-serif; font-weight: normal; hyphens: auto; line-height: 1.3; margin: 0; max-width: 808px !important; min-width: 808px !important; padding: 110px 20px 10px !important; text-align: left; vertical-align: top; width: 808px !important; word-wrap: break-word;">
             <table width="768" align="center" border="0" cellpadding="0" cellspacing="0"
                    class="container content-wrapper main-content"
                    style="background: #fefefe; background-color: #ffffff; border: 1px solid #DDDDDD; border-collapse: collapse; border-radius: 0; border-spacing: 0; margin: 0 auto; margin-bottom: 20px; max-width: 768px !important; min-width: 768px !important; padding: 0; text-align: inherit; vertical-align: top; width: 768px !important;">
@@ -113,19 +114,35 @@
                                                 General line: <?= $project->contactInfo->phone ?>
                                             </th>
                                         </tr>
+                                        <tr style="padding: 0; text-align: left; vertical-align: top;">
+                                            <th class="small-12 large-12 columns first last"
+                                                style="color: #1C2F59; font-family: 'Roboto', Arial, Helvetica, sans-serif; font-weight: normal; line-height: 1.3; margin: 0 auto; padding: 0; padding-top: 30px;padding-bottom: 16px; padding-left: 24px; padding-right: 24px; text-align: left; width: 100%;">
+                                                Share your expirience on: <br/>
+                                                <?php $trustPilotUrl = (isset($templateType) && $templateType == "_email_ticket")?"https://www.trustpilot.com/evaluate/wowfare.com":"https://www.trustpilot.com/review/wowfare.com"?>
+                                                <a href="<?= $trustPilotUrl?>" target="_blank"><img alt="trustpilot logo" src="<?= $project->link ?>/images/email/email-tp-widget.png" style="-ms-interpolation-mode: bicubic; clear: both; display: block; float: none; margin: 20px auto 0; max-width: 100%; outline: none; text-align: center; text-decoration: none; width: auto;"></a>
+                                            </th>
+                                        </tr>
                                     </table>
                                 </th>
                             </tr>
-                            <tr style="padding: 0; text-align: left; vertical-align: top;">
+
+                        </table>
+                    </td>
+                </tr>
+            </table>
+
+        </td>
+    </tr>
+    <tr style="padding: 0; text-align: left; vertical-align: top;">
                                 <th class="footer-bottom"
-                                    style="color: #1C2F59; font-family: 'Roboto', Arial, Helvetica, sans-serif; font-size: 12px; font-weight: normal; line-height: 1.3; margin: 0; padding: 32px 0 45px; text-align: center;">
+                                    style="color: #1C2F59; font-family: 'Roboto', Arial, Helvetica, sans-serif; font-size: 12px; font-weight: normal; line-height: 1.3; margin: 0; padding: 40px 0 15px; text-align: center;">
                                     <table class="row"
                                            style="border-collapse: collapse; border-spacing: 0; display: table; padding: 0; position: relative; text-align: left; vertical-align: top; width: 100%;">
                                         <tr style="padding: 0; text-align: left; vertical-align: top;">
                                             <th class="small-12 large-12 columns first last" align="center"
-                                                style="color: #1C2F59; font-family: 'Roboto', Arial, Helvetica, sans-serif; font-weight: normal; line-height: 1.3; margin: 0 auto; padding: 0; padding-bottom: 16px; padding-left: 24px; padding-right: 24px; text-align: left; width: 100%;">
-                                                <img src="<?= $project->link ?>/images/logo-colored.png" alt="Logo"
-                                                     width="139" height="24"
+                                                style="color: #1C2F59; font-family: 'Roboto', Arial, Helvetica, sans-serif; font-weight: normal; line-height: 1.3; margin: 0 auto; padding: 0; padding-left: 24px; padding-right: 24px; text-align: left; width: 100%;">
+                                                <img src="<?= $project->link ?>/images/email/email-logo-desaturated.png" alt="Logo"
+                                                     width="151" height="22"
                                                      class="footer-logo float-center"
                                                      style="-ms-interpolation-mode: bicubic; clear: both; display: block; float: none; margin: 0 auto; margin-bottom: 15px; max-width: 100%; outline: none; text-align: center; text-decoration: none; width: auto;">
                                             </th>
@@ -136,9 +153,7 @@
                                             <th class="small-12 large-12 columns first last footer-text text-center"
                                                 align="center"
                                                 style="color: #556383; font-family: 'Roboto', Arial, Helvetica, sans-serif; font-weight: normal; line-height: 1.4em; margin: 0 auto; padding: 0; padding-bottom: 16px; padding-left: 24px; padding-right: 24px; text-align: center; width: 100%;">
-                                                <?= ucfirst($project->name) ?> is a part of The
-                                                Travel Outlet of Virginia, LLC, major international consolidator for
-                                                travel and related services.
+
                                                 <div class="footer-copyright" style="color: #556383;">
                                                     © 2018 The Travel Outlet of Virginia, LLC. All rights reserved.
                                                 </div>
@@ -149,7 +164,7 @@
                                         <tr style="padding: 0; text-align: left; vertical-align: top;">
                                             <th class="small-12 large-12 columns first last" align="center"
                                                 style="color: #1C2F59; font-family: 'Roboto', Arial, Helvetica, sans-serif; font-weight: normal; line-height: 1.3; margin: 0 auto; padding: 0; padding-bottom: 16px; padding-left: 24px; padding-right: 24px; text-align: left; width: 100%;">
-                                                <img src="<?= $project->link ?>/images/partners.png" alt="Partners"
+                                                <img src="<?= $project->link ?>/images/email/email-partners.png" alt="Partners"
                                                      width="281" height="40"
                                                      class="footer-partners float-center"
                                                      style="-ms-interpolation-mode: bicubic; clear: both; display: block; float: none; margin: 20px auto 0; max-width: 100%; outline: none; text-align: center; text-decoration: none; width: auto;">
@@ -160,13 +175,6 @@
                                     </table>
                                 </th>
                             </tr>
-                        </table>
-                    </td>
-                </tr>
-            </table>
-
-        </td>
-    </tr>
     </tbody>
 </table>
 </body>
