@@ -423,7 +423,7 @@ if(Yii::$app->authManager->getAssignment('admin', $userId) || Yii::$app->authMan
                             $queueType = 'processing';
                         }
                         $buttonsCnt++;
-                        $buttons .= Html::a('Open2', Url::to(['lead/quote', 'type' => $queueType, 'id' => $model['id']]), [
+                        $buttons .= Html::a('Open', Url::to(['lead/quote', 'type' => $queueType, 'id' => $model['id']]), [
                             'class' => 'btn btn-action btn-sm',
                             'target' => '_blank',
                             'data-pjax' => 0
