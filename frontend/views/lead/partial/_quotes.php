@@ -250,7 +250,7 @@ JS;
                 echo Html::button('<i class="fa fa-copy"></i>', [
                     'class' => 'btn btn-primary btn-sm sl-quote__clone add-clone-alt-quote',
                     'data-uid' => $quote->uid,
-                    'data-url' => Url::to(['quote/create', 'leadId' => $lead->id, 'qId' => $quote->id])
+                    'data-url' => Url::to(['quote/clone', 'leadId' => $lead->id, 'qId' => $quote->id])
                 ]);
             } ?>
             <?php if ($leadForm->mode != $leadForm::VIEW_MODE && in_array($quote->status, [$quote::STATUS_CREATED, $quote::STATUS_SEND])) : ?>
