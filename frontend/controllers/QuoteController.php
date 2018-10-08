@@ -494,7 +494,7 @@ class QuoteController extends DefaultController
                 $newParams = array_intersect_key($quote->attributes, $changedAttributes);
                 $newParams['selling'] = round($selling, 2);
                 $leadLog->logMessage->newParams = $newParams;
-                $leadLog->logMessage->title = 'Create (Clone from '.$leadId.')';
+                $leadLog->logMessage->title = 'Create (Clone from '.$qId.')';
                 $leadLog->logMessage->model = sprintf('%s (%s)', $quote->formName(), $quote->uid);
                 $leadLog->addLog([
                     'lead_id' => $quote->lead_id,
