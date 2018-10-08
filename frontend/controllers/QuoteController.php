@@ -446,6 +446,7 @@ class QuoteController extends DefaultController
     public function actionClone($leadId, $qId)
     {
         $lead = Lead::findOne(['id' => $leadId]);
+        $errors = [];
 
         if ($lead !== null && !empty($qId)) {
             $currentQuote = Quote::findOne(['id' => $qId]);
@@ -454,24 +455,35 @@ class QuoteController extends DefaultController
                 return $this->renderAjax('_clone', [
                     'lead' => $lead,
                     'quote' => $currentQuote,
+                    'errors' => $errors,
                 ]);
+
             }elseif (Yii::$app->request->isPost) {
                 $quote = new Quote();
                 $quote->attributes = $currentQuote->attributes;
                 $quote->uid = uniqid();
                 $quote->status = Quote::STATUS_CREATED;
-                $quote->save();
+                $quote->save(false);
                 $selling = 0;
 
                 $quotePrices = QuotePrice::findAll(['quote_id' => $qId]);
                 foreach ($quotePrices as $price){
                     $newPrice = new QuotePrice();
                     $newPrice->attributes = $price->attributes;
-                    $newPrice->extra_mark_up = 0;
                     $newPrice->quote_id = $quote->id;
                     $newPrice->toFloat();
                     $selling += $newPrice->selling;
                     $newPrice->save();
+                    if (!$newPrice->save()) {
+                        $errors = array_merge($errors, $newPrice->getErrors());
+                    }
+                }
+                if(!empty($errors)){
+                    return $this->renderAjax('_clone', [
+                        'lead' => $lead,
+                        'quote' => $currentQuote,
+                        'errors' => $errors,
+                    ]);
                 }
 
                 $changedAttributes = $quote->attributes;
