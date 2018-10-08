@@ -38,7 +38,7 @@ class QuoteController extends DefaultController
                 'rules' => [
                     [
                         'actions' => [
-                            'create', 'save', 'decline', 'calc-price', 'extra-price',
+                            'create', 'save', 'decline', 'calc-price', 'extra-price', 'clone',
                             'send-quotes', 'get-online-quotes','status-log','preview-send-quotes'
                         ],
 
@@ -440,6 +440,91 @@ class QuoteController extends DefaultController
                 'prices' => $prices
             ]);
         }
+        return null;
+    }
+
+    public function actionClone($leadId, $qId)
+    {
+        $lead = Lead::findOne(['id' => $leadId]);
+        $errors = [];
+
+        if ($lead !== null && !empty($qId)) {
+            $currentQuote = Quote::findOne(['id' => $qId]);
+
+            if (Yii::$app->request->isAjax) {
+                return $this->renderAjax('_clone', [
+                    'lead' => $lead,
+                    'quote' => $currentQuote,
+                    'errors' => $errors,
+                ]);
+
+            }elseif (Yii::$app->request->isPost) {
+                $quote = new Quote();
+                $quote->attributes = $currentQuote->attributes;
+                $quote->uid = uniqid();
+                $quote->status = Quote::STATUS_CREATED;
+                $quote->save(false);
+
+                $quote->employee_id = $currentQuote->employee_id;
+                $quote->update();
+
+                $selling = 0;
+
+                $quotePrices = QuotePrice::findAll(['quote_id' => $qId]);
+                foreach ($quotePrices as $price){
+                    $newPrice = new QuotePrice();
+                    $newPrice->attributes = $price->attributes;
+                    $newPrice->quote_id = $quote->id;
+                    $newPrice->toFloat();
+                    $selling += $newPrice->selling;
+                    $newPrice->save();
+                    if (!$newPrice->save()) {
+                        $errors = array_merge($errors, $newPrice->getErrors());
+                    }
+                }
+                if(!empty($errors)){
+                    return $this->renderAjax('_clone', [
+                        'lead' => $lead,
+                        'quote' => $currentQuote,
+                        'errors' => $errors,
+                    ]);
+                }
+
+                $changedAttributes = $quote->attributes;
+                $changedAttributes['selling'] = 0;
+
+                $leadLog = new LeadLog((new LeadLogMessage()));
+                $leadLog->logMessage->oldParams = $changedAttributes;
+                $newParams = array_intersect_key($quote->attributes, $changedAttributes);
+                $newParams['selling'] = round($selling, 2);
+                $leadLog->logMessage->newParams = $newParams;
+                $leadLog->logMessage->title = 'Created '.$quote->id.' (Clone from '.$qId.')';
+                $leadLog->logMessage->model = sprintf('%s (%s)', $quote->formName(), $quote->uid);
+                $leadLog->addLog([
+                    'lead_id' => $quote->lead_id,
+                ]);
+
+                if ($lead->called_expert) {
+                    $data = $quote->getQuoteInformationForExpert(true);
+                    $result = BackOffice::sendRequest('lead/update-quote', 'POST', json_encode($data));
+                    if ($result['status'] != 'Success' || !empty($result['errors'])) {
+                        Yii::$app->getSession()->setFlash('warning', sprintf(
+                            'Update info quote [%s] for expert failed! %s',
+                            $quote->uid,
+                            print_r($result['errors'], true)
+                            ));
+                    }
+                }
+
+                return $this->redirect([
+                    'lead/quote',
+                    'type' => 'processing',
+                    'id' => $leadId
+                ]);
+            }
+        }
+
+
         return null;
     }
 
