@@ -353,4 +353,25 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         $data = self::find()->orderBy(['username' => SORT_ASC])->asArray()->all();
         return ArrayHelper::map($data,'id', 'username');
     }
+
+    /**
+     * @return array
+     */
+    public function getListByProject($projectId) : array
+    {
+        if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id))
+        {
+            $data = self::find()
+            ->orderBy(['username' => SORT_ASC])
+            ->asArray()->all();
+        }else{
+            $data = self::find()
+            ->joinWith('projectEmployeeAccesses')
+            ->where(['=','project_id',$projectId])
+            ->orderBy(['username' => SORT_ASC])
+            ->asArray()->all();
+        }
+
+        return ArrayHelper::map($data,'id', 'username');
+    }
 }

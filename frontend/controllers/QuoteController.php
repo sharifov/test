@@ -21,6 +21,7 @@ use yii\web\NotFoundHttpException;
 use yii\web\Response;
 use yii\web\BadRequestHttpException;
 use frontend\models\PreviewEmailQuotesForm;
+use common\models\Employee;
 
 /**
  * Quotes controller
@@ -73,7 +74,7 @@ class QuoteController extends DefaultController
             $attr = Yii::$app->request->post();
             if (isset($attr['gds']) && $lead !== null) {
                 if (isset($attr['itinerary-key']) && !empty($attr['itinerary-key'])) {
-                    $routings = Yii::$app->cache->get(sprintf('quick-search-%d-%d', $lead->id, Yii::$app->user->identity->getId()));
+                    $routings = Yii::$app->cache->get(sprintf('quick-search-%d-%d', $lead->id, Yii::$app->user->id));
                     $itinerary = null;
                     if ($routings !== false) {
                         foreach ($routings as $routing) {
@@ -91,7 +92,14 @@ class QuoteController extends DefaultController
                             $model->lead_id = $lead->id;
                             $model->cabin = $lead->cabin;
                             $model->fare_type = $itinerary['privateFareType'];
-                            $model->employee_name = Yii::$app->user->identity->username;
+                            if(empty($model->employee_id)){
+                                $model->employee_id = Yii::$app->user->id;
+                                $model->employee_name = Yii::$app->user->identity->username;
+                            }else{
+                                $employee = Employee::findIdentity($model->employee_id);
+                                $model->employee_name = (!empty($employee))?$employee->username:Yii::$app->user->identity->username;
+                            }
+
                             foreach ($lead->getPaxTypes() as $type) {
                                 $newQPrice = new QuotePrice();
                                 $newQPrice->createQPrice($type);
@@ -118,14 +126,14 @@ class QuoteController extends DefaultController
                                 'quote' => $model,
                                 'prices' => $prices
                             ]);
-                            Yii::$app->cache->delete(sprintf('quick-search-%d-%d', $lead->id, Yii::$app->user->identity->getId()));
+                            //Yii::$app->cache->delete(sprintf('quick-search-%d-%d', $lead->id, Yii::$app->user->identity->getId()));
                         }
                     }
                 } else {
                     $result = GTTGlobal::getOnlineQuotes($lead, $attr['gds']);
                     $response['success'] = isset($result['airTicketListResponse']);
                     if (isset($result['airTicketListResponse'])) {
-                        Yii::$app->cache->set(sprintf('quick-search-%d-%d', $lead->id, Yii::$app->user->identity->getId()), $result['airTicketListResponse']['routings'], 900);
+                        Yii::$app->cache->set(sprintf('quick-search-%d-%d', $lead->id, Yii::$app->user->id), $result['airTicketListResponse']['routings'], 300);
                         $response['body'] = $this->renderAjax('_onlineQuotesResult', [
                             'alternativeQuotes' => $result['airTicketListResponse']['routings'],
                             'lead' => $lead
@@ -351,7 +359,15 @@ class QuoteController extends DefaultController
                     ? 0 : $quote->quotePrice()['selling'];
                 if ($quote !== null) {
                     $quote->attributes = $attr['Quote'];
-                    $quote->employee_name = Yii::$app->user->identity->username;
+
+                    if(empty($quote->employee_id)){
+                        $quote->employee_id = Yii::$app->user->id;
+                        $quote->employee_name = Yii::$app->user->identity->username;
+                    }else{
+                        $employee = Employee::findIdentity($quote->employee_id);
+                        $quote->employee_name = (!empty($employee))?$employee->username:Yii::$app->user->identity->username;
+                    }
+
                     $lead = Lead::findOne(['id' => $quote->lead_id]);
                     if (isset($attr['QuotePrice']) && $lead !== null) {
                         $response['success'] = $quote->validate();
@@ -433,11 +449,18 @@ class QuoteController extends DefaultController
                     $prices = $currentQuote->cloneQuote($quote, $lead);
                 }
             }
-            $quote->employee_name = Yii::$app->user->identity->username;
+            if(empty($quote->employee_id)){
+                $quote->employee_id = Yii::$app->user->id;
+                $quote->employee_name = Yii::$app->user->identity->username;
+            }else{
+                $employee = Employee::findIdentity($quote->employee_id);
+                $quote->employee_name = (!empty($employee))?$employee->username:Yii::$app->user->identity->username;
+            }
             return $this->renderAjax('_quote', [
                 'lead' => $lead,
                 'quote' => $quote,
-                'prices' => $prices
+                'prices' => $prices,
+                'project_id' => $lead->project_id
             ]);
         }
         return null;

@@ -3,6 +3,7 @@
  * @var $lead Lead
  * @var $quote Quote
  * @var $prices QuotePrice[]
+ * @var $project_id int
  */
 
 use common\models\Lead;
@@ -13,6 +14,7 @@ use common\models\Quote;
 use common\models\QuotePrice;
 use kartik\select2\Select2;
 use common\models\Airline;
+use common\models\Employee;
 
 $quotePriceUrl = \yii\helpers\Url::to(['quote/calc-price', 'quoteId' => $quote->id]);
 $formID = sprintf('alt-quote-info-form-%d', $quote->id);
@@ -25,7 +27,7 @@ $paxCntTypes = [
 
 $js = <<<JS
     $('[data-toggle="tooltip"]').tooltip();
-    
+
     $('.alt-quote-price').keyup(function (event) {
         var key = event.keyCode ? event.keyCode : event.which;
         validatePriceField($(this), key);
@@ -44,8 +46,8 @@ $js = <<<JS
                     $('#'+index).val(value);
                 });
             },
-            error: function (error) {			
-                console.log('Error: ' + error);			
+            error: function (error) {
+                console.log('Error: ' + error);
             }
         });
     });
@@ -65,11 +67,11 @@ $js = <<<JS
         e.preventDefault();
         $('#modal-confirm-alt-itinerary').modal('hide');
     });
-    
+
     function addEditAltQuote(form, url)
     {
         $('.field-error').each(function() {
-            $(this).removeClass('field-error');  
+            $(this).removeClass('field-error');
         });
         $('#preloader').removeClass('hidden');
         $.ajax({
@@ -86,7 +88,7 @@ $js = <<<JS
                             itineraryErr = true;
                         }
                     });
-                    
+
                     if (data.itinerary.length != 0) {
                         if (Object.keys(data.errors).length == 1 && itineraryErr) {
                             $('#modal-confirm-alt-itinerary .diff-itinerary__content').html('');
@@ -110,8 +112,8 @@ $js = <<<JS
                     }
 	            }
             },
-            error: function (error) {			
-                console.log('Error: ' + error);			
+            error: function (error) {
+                console.log('Error: ' + error);
             }
         });
     }
@@ -128,7 +130,7 @@ $js = <<<JS
         var form = $('#$formID');
         addEditAltQuote(form, form.attr("action") + '?save=true');
     });
-    
+
     $('.clone-alt-price-by-type').click(function(e) {
         e.preventDefault();
         $(this).blur();
@@ -405,6 +407,24 @@ $this->registerJs($js);
                         </div>
                     </td>
                 </tr>
+                <?php if(!isset($project_id)){
+                    $project_id = $lead->project_id;
+                }?>
+                <?php if(isset($project_id)):?>
+                <tr>
+                	<th>Quote Creator</th>
+                	<td class="td-input" colspan="3">
+                        <div class="select-wrap-label">
+                            <?= $form->field($quote, 'employee_id', [
+                                'options' => [
+                                    'tag' => false,
+                                ],
+                                'template' => '{input}',
+                            ])->dropDownList(Employee::getListByProject($project_id)) ?>
+                        </div>
+                    </td>
+                </tr>
+                <?php endif;?>
                 </tbody>
             </table>
         </div>

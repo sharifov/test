@@ -401,7 +401,7 @@ class Quote extends \yii\db\ActiveRecord
     {
         if ($this->isNewRecord) {
             $this->uid = empty($this->uid) ? uniqid() : $this->uid;
-            if (!Yii::$app->user->isGuest && Yii::$app->user->identityClass != 'webapi\models\ApiUser') {
+            if (!Yii::$app->user->isGuest && Yii::$app->user->identityClass != 'webapi\models\ApiUser' && empty($this->employee_id)) {
                 $this->employee_id = Yii::$app->user->id;
             }
         }
