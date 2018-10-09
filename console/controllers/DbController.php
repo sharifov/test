@@ -94,6 +94,7 @@ class DbController extends Controller
 
     /**
      * Update Airline cabin classes from airapi
+     * 30   0  *  *  *     run-this-one php /var/www/sale/yii db/update-airline-cabin-classes
      */
     public function actionUpdateAirlineCabinClasses()
     {
