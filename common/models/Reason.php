@@ -28,10 +28,10 @@ class Reason extends \yii\db\ActiveRecord
     public const STATUS_REASON_LIST = [
         Lead::STATUS_TRASH => [
             1 => 'Purchased elsewhere',
-            2 => 'Flight date > 10 months',
-            3 => 'Not interested',
-            4 => 'Duplicate',
-            5 => 'Too late',
+            2 => 'Duplicate',
+            3 => 'Travel dates passed',
+            4 => 'Invalid phone number',
+            5 => 'Canceled trip',
             6 => 'Test',
             0 => 'Other'
         ],
@@ -104,13 +104,14 @@ class Reason extends \yii\db\ActiveRecord
         if (in_array($queue, ['trash', 'reject'])) {
             return [
                 'Purchased elsewhere' => 'Purchased elsewhere',
-                'Flight date > 10 months' => 'Flight date > 10 months',
-                'Not interested' => 'Not interested',
                 'Duplicate' => 'Duplicate',
-                'Too late' => 'Too late',
+                'Travel dates passed' => 'Travel dates passed',
+                'Invalid phone number' => 'Invalid phone number',
+                'Canceled trip' => 'Canceled trip',
                 'Test' => 'Test',
                 'Other' => 'Other'
             ];
+
         } elseif ($queue == 'follow-up') {
             return [
                 'Proper Follow Up Done' => 'Proper Follow Up Done',
@@ -196,17 +197,18 @@ class Reason extends \yii\db\ActiveRecord
 
     public function afterValidate()
     {
-        if (!empty($this->other)) {
+        if ($this->other) {
             $this->reason = sprintf('%s: %s', $this->reason, $this->other);
         }
-        if (!empty($this->duplicateLeadId)) {
+
+        if ($this->duplicateLeadId) {
+
             $aHref = Html::a($this->duplicateLeadId, [
                 'lead/quote',
                 'type' => 'processing',
                 'id' => $this->duplicateLeadId
-            ], [
-                'data-pjax' => 0,
-            ]);
+            ], ['data-pjax' => 0]);
+
             $this->reason = sprintf('%s: %s',
                 $this->reason,
                 $aHref

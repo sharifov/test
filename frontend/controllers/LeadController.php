@@ -460,13 +460,17 @@ class LeadController extends DefaultController
                         Lead::STATUS_ON_HOLD, Lead::STATUS_PROCESSING,
                         Lead::STATUS_SNOOZE, Lead::STATUS_FOLLOW_UP
                     ]
-                ]);
+                ])->andWhere(['<>', 'id', $id]);
+
+            $activeLeadIds = ArrayHelper::map($activeLeads->asArray()->all(), 'id', 'id');
+            $activeLeadIds = $activeLeadIds ?: [];
+
             $reason = new Reason();
             $reason->queue = $queue;
             return $this->renderAjax('partial/_reason', [
                 'reason' => $reason,
                 'lead' => $lead,
-                'activeLeadIds' => ArrayHelper::map($activeLeads->asArray()->all(), 'id', 'id')
+                'activeLeadIds' => $activeLeadIds
             ]);
         }
         return null;
