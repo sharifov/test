@@ -10,10 +10,12 @@ use yii\behaviors\TimestampBehavior;
 use yii\data\ActiveDataProvider;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
+use yii\db\Expression;
 use yii\db\Query;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\helpers\Url;
+use yii\helpers\VarDumper;
 
 /**
  * This is the model class for table "leads".
@@ -128,6 +130,91 @@ class Lead extends ActiveRecord
     public CONST SCENARIO_MULTIPLE_UPDATE = 'scenario_multiple_update';
 
     public $additionalInformationForm;
+    public $status_description;
+
+    /**
+     * {@inheritdoc}
+     */
+    public static function tableName()
+    {
+        return 'leads';
+    }
+
+    public function init()
+    {
+        parent::init();
+        $this->additionalInformationForm = new LeadAdditionalInformation();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function rules()
+    {
+        return [
+
+            [['trip_type', 'cabin'], 'required'],
+            [['adults', 'children', 'infants', 'source_id'], 'required'], //'except' => self::SCENARIO_API],
+
+            [['client_id', 'employee_id', 'status', 'project_id', 'source_id', 'rating', 'l_grade'], 'integer'],
+            [['adults', 'children', 'infants'], 'integer', 'max' => 9],
+            [['adults'], 'integer', 'min' => 1],
+
+            [['l_answered'], 'boolean'],
+
+            [['notes_for_experts'], 'string'],
+            [['created', 'updated', 'offset_gmt', 'request_ip', 'request_ip_detail', 'snooze_for',
+                'called_expert', 'discount_id', 'bo_flight_id', 'additional_information'], 'safe'],
+            [['uid'], 'string', 'max' => 255],
+            [['trip_type'], 'string', 'max' => 2],
+            [['cabin'], 'string', 'max' => 1],
+            [['status_description'], 'string'],
+            [['client_id'], 'exist', 'skipOnError' => true, 'targetClass' => Client::class, 'targetAttribute' => ['client_id' => 'id']],
+            [['employee_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['employee_id' => 'id']],
+        ];
+    }
+
+
+    /**
+     * {@inheritdoc}
+     */
+    public function attributeLabels(): array
+    {
+        return [
+            'id' => 'ID',
+            'client_id' => 'Client ID',
+            'employee_id' => 'Employee ID',
+            'status' => 'Status',
+            'uid' => 'Uid',
+            'project_id' => 'Project ID',
+            'source_id' => 'Source ID',
+            'trip_type' => 'Trip Type',
+            'cabin' => 'Cabin',
+            'adults' => 'Adults',
+            'children' => 'Children',
+            'infants' => 'Infants',
+            'notes_for_experts' => 'Notes for Expert',
+            'created' => 'Created',
+            'updated' => 'Updated',
+            'l_answered' => 'Answered',
+            'l_grade' => 'Grade',
+        ];
+    }
+
+    public function behaviors(): array
+    {
+        return [
+            'timestamp' => [
+                'class' => TimestampBehavior::class,
+                'attributes' => [
+                    ActiveRecord::EVENT_BEFORE_INSERT => ['created', 'updated'],
+                    ActiveRecord::EVENT_BEFORE_UPDATE => ['updated'],
+                ],
+                'value' => date('Y-m-d H:i:s') //new Expression('NOW()'),
+            ],
+        ];
+    }
+
 
     public static function getDivs($div = null)
     {
@@ -151,6 +238,8 @@ class Lead extends ActiveRecord
     {
         $badges = array_flip(self::getLeadQueueType());
         $projectIds = array_keys(ProjectEmployeeAccess::getProjectsByEmployee());
+
+        $userId = Yii::$app->user->id;
 
         foreach ($badges as $key => $value) {
             $status = [];
@@ -182,6 +271,13 @@ class Lead extends ActiveRecord
                 ->where(['IN', self::tableName() . '.status', $status])
                 ->andWhere(['IN', self::tableName() . '.project_id', $projectIds]);
 
+
+
+
+            if((Yii::$app->authManager->getAssignment('admin', $userId) || Yii::$app->authManager->getAssignment('supervision', $userId)) && in_array($key, ['trash', 'sold', 'follow-up', 'booked'])) {
+                $query->andWhere(['=', 'created', date('Y-m-d')]);
+            }
+
             if (Yii::$app->user->identity->role == 'agent' && in_array($key, ['trash'])) {
                 $badges[$key] = 0;
                 continue;
@@ -189,13 +285,13 @@ class Lead extends ActiveRecord
 
             if (Yii::$app->user->identity->role == 'agent' && in_array($key, ['sold'])) {
                 $query->andWhere([
-                    'employee_id' => Yii::$app->user->identity->getId()
+                    'employee_id' => $userId
                 ]);
             }
 
             if (in_array($key, ['processing'])) {
                 $query->andWhere([
-                    'employee_id' => Yii::$app->user->identity->getId()
+                    'employee_id' => $userId
                 ]);
             }
 
@@ -211,14 +307,6 @@ class Lead extends ActiveRecord
             'inbox', 'follow-up', 'processing',
             'processing-all', 'booked', 'sold', 'trash'
         ];
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public static function tableName()
-    {
-        return 'leads';
     }
 
     public static function search($queue, $searchModel = null, $divGridBy = null)
@@ -620,81 +708,7 @@ class Lead extends ActiveRecord
         return implode(' ', $return);
     }
 
-    public function init()
-    {
-        parent::init();
 
-        $this->additionalInformationForm = new LeadAdditionalInformation();
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function rules()
-    {
-        return [
-
-            [['trip_type', 'cabin'], 'required'],
-            [['adults', 'children', 'infants', 'source_id'], 'required'], //'except' => self::SCENARIO_API],
-
-            [['client_id', 'employee_id', 'status', 'project_id', 'source_id', 'rating', 'l_grade'], 'integer'],
-            [['adults', 'children', 'infants'], 'integer', 'max' => 9],
-            [['adults'], 'integer', 'min' => 1],
-
-            [['l_answered'], 'boolean'],
-
-            [['notes_for_experts'], 'string'],
-            [['created', 'updated', 'offset_gmt', 'request_ip', 'request_ip_detail', 'snooze_for',
-                'called_expert', 'discount_id', 'bo_flight_id', 'additional_information'], 'safe'],
-            [['uid'], 'string', 'max' => 255],
-            [['trip_type'], 'string', 'max' => 2],
-            [['cabin'], 'string', 'max' => 1],
-            [['client_id'], 'exist', 'skipOnError' => true, 'targetClass' => Client::class, 'targetAttribute' => ['client_id' => 'id']],
-            [['employee_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['employee_id' => 'id']],
-        ];
-    }
-
-
-
-    /**
-     * {@inheritdoc}
-     */
-    public function attributeLabels(): array
-    {
-        return [
-            'id' => 'ID',
-            'client_id' => 'Client ID',
-            'employee_id' => 'Employee ID',
-            'status' => 'Status',
-            'uid' => 'Uid',
-            'project_id' => 'Project ID',
-            'source_id' => 'Source ID',
-            'trip_type' => 'Trip Type',
-            'cabin' => 'Cabin',
-            'adults' => 'Adults',
-            'children' => 'Children',
-            'infants' => 'Infants',
-            'notes_for_experts' => 'Notes for Expert',
-            'created' => 'Created',
-            'updated' => 'Updated',
-                'l_answered' => 'Answered',
-                'l_grade' => 'Grade',
-        ];
-    }
-
-    public function behaviors(): array
-    {
-        return [
-            'timestamp' => [
-                'class' => TimestampBehavior::class,
-                'attributes' => [
-                    ActiveRecord::EVENT_BEFORE_INSERT => ['created', 'updated'],
-                    ActiveRecord::EVENT_BEFORE_UPDATE => ['updated'],
-                ],
-                'value' => date('Y-m-d H:i:s') //new Expression('NOW()'),
-            ],
-        ];
-    }
 
     public function permissionsView()
     {
@@ -906,6 +920,7 @@ Sales - Kivork",
                 } elseif ($type === 'lead-status-booked') {
 
 
+                    $subject = Yii::t('email', "⚐ [Sales] Your Lead-{id} has been changed status to BOOKED", ['id' => $this->id]);
                     $quote = Quote::find()->where(['lead_id' => $lead->id, 'status' => Quote::STATUS_APPLIED])->orderBy(['id' => SORT_DESC])->one();
 
                     $body = Yii::t('email', "Dear {name},
@@ -925,8 +940,53 @@ Sales - Kivork",
                             'br' => "\r\n"
                         ]);
 
-                    $subject = Yii::t('email', "⚐ [Sales] Your Lead-{id} has been changed status to BOOKED", ['id' => $this->id]);
+
+                } elseif ($type === 'lead-status-snooze') {
+
+                    $subject = Yii::t('email', "⏱ [Sales] Your Lead-{id} has been changed status to SNOOZE", ['id' => $this->id]);
+                    $body = Yii::t('email', "Dear {name},
+
+Your Lead (ID: {lead_id}) has been changed status to SNOOZE!
+Snooze for: {datetime}.
+Reason: {reason}
+
+You can view lead here: {url}
+
+Regards,
+Sales - Kivork",
+                        [
+                            'name' => $userName,
+                            'url' => $host . '/lead/booked/' . $this->id,
+                            'datetime' => Yii::$app->formatter->asDatetime(strtotime($this->snooze_for)),
+                            'reason' => $this->status_description ?: '-',
+                            'lead_id' => $this->id,
+                            'br' => "\r\n"
+                        ]);
+
+
+                } elseif ($type === 'lead-status-follow-up') {
+
+                    $subject = Yii::t('email', "⚠ [Sales] Your Lead-{id} has been changed status to FOLLOW-UP", ['id' => $this->id]);
+                    $body = Yii::t('email', "Dear {name},
+
+Your Lead (ID: {lead_id}) has been changed status to FOLLOW-UP!
+Reason: {reason}
+
+You can view lead here: {url}
+
+Regards,
+Sales - Kivork",
+                        [
+                            'name' => $userName,
+                            'url' => $host . '/lead/booked/' . $this->id,
+                            'reason' => $this->status_description ?: '-',
+                            'lead_id' => $this->id,
+                            'br' => "\r\n"
+                        ]);
+
                 }
+
+
 
                 try {
                     $isSend = $swiftMailer
@@ -1007,9 +1067,34 @@ Sales - Kivork",
                             ':id' => $this->id
                         ])->execute();
 
+                        if($this->status_description) {
+                            $reason = new Reason();
+                            $reason->lead_id = $this->id;
+                            $reason->employee_id = $this->employee_id;
+                            $reason->created = date('Y-m-d H:i:s');
+                            $reason->reason = $this->status_description;
+                            $reason->save();
+                        }
+
                     /*if (!$this->sendNotification('lead-status-booked', $this->employee_id, null, $this)) {
                         Yii::warning('Not send Email notification to employee_id: ' . $this->employee_id . ', lead: ' . $this->id, 'Lead:afterSave:sendNotification');
                     }*/
+                } elseif ($this->status == self::STATUS_SNOOZE) {
+
+                    if($this->status_description) {
+                        $reason = new Reason();
+                        $reason->lead_id = $this->id;
+                        $reason->employee_id = $this->employee_id;
+                        $reason->created = date('Y-m-d H:i:s');
+                        $reason->reason = $this->status_description;
+                        $reason->save();
+                    }
+
+
+                    if ($this->employee_id && !$this->sendNotification('lead-status-snooze', $this->employee_id, null, $this)) {
+                        Yii::warning('Not send Email notification to employee_id: ' . $this->employee_id . ', lead: ' . $this->id, 'Lead:afterSave:sendNotification');
+                    }
+
                 }
             }
 
@@ -1788,7 +1873,7 @@ Sales - Kivork",
      * @param int $lead_id
      * @return string
      */
-    static public function getTaskInfo2(int $lead_id): string
+    public static function getTaskInfo2(int $lead_id): string
     {
         $lead = Lead::findOne($lead_id);
         if($lead) {
@@ -1797,6 +1882,68 @@ Sales - Kivork",
             $out = '';
         }
         return $out;
+    }
+
+    /**
+     * @param int|null $category_id
+     * @return array
+     * @throws \yii\db\Exception
+     */
+    public static function getEndTaskLeads(int $category_id = null) : array
+    {
+
+        $query = new Query();
+        $query->select(['lt.lt_lead_id', 'lt.lt_user_id', 'l.status', 'l.l_answered', 't.t_category_id']);
+
+        $query->addSelect('(SELECT COUNT(*) FROM lead_task 
+INNER JOIN task ON (task.t_id = lead_task.lt_task_id)
+WHERE lt_lead_id = lt.lt_lead_id AND lt_user_id = lt.lt_user_id AND t_category_id = t.t_category_id AND lt_completed_dt IS NOT NULL) AS checked_cnt');
+
+        $query->addSelect('(SELECT COUNT(*) FROM lead_task 
+INNER JOIN task ON (task.t_id = lead_task.lt_task_id)
+WHERE lt_lead_id = lt.lt_lead_id AND lt_user_id = lt.lt_user_id AND t_category_id = t.t_category_id) AS all_cnt');
+
+        $query->addSelect('(SELECT lt_date FROM lead_task 
+INNER JOIN task ON (task.t_id = lead_task.lt_task_id)
+WHERE lt_lead_id = lt.lt_lead_id AND lt_user_id = lt.lt_user_id AND t_category_id = t.t_category_id
+ORDER BY lt_date DESC LIMIT 1) AS last_task_date');
+
+        $query->from('lead_task AS lt');
+        $query->innerJoin('task AS t', 't.t_id = lt.lt_task_id');
+        $query->innerJoin('leads AS l', 'l.id = lt.lt_lead_id');
+        $query->where(['l.status' => [Lead::STATUS_PROCESSING, Lead::STATUS_ON_HOLD]]);
+        $query->andWhere(['=', 'l.employee_id', new Expression('`lt`.`lt_user_id`')]);
+
+
+        $query->andWhere(['>', '(SELECT COUNT(*) FROM lead_task 
+INNER JOIN task ON (task.t_id = lead_task.lt_task_id)
+WHERE lt_lead_id = lt.lt_lead_id AND lt_user_id = lt.lt_user_id AND t_category_id = t.t_category_id)', '0']);
+
+        $query->andWhere([
+            '=',
+            new Expression('(SELECT COUNT(*) FROM lead_task 
+INNER JOIN task ON (task.t_id = lead_task.lt_task_id)
+WHERE lt_lead_id = lt.lt_lead_id AND lt_user_id = lt.lt_user_id AND t_category_id = t.t_category_id AND lt_completed_dt IS NOT NULL)'),
+            new Expression('(SELECT COUNT(*) FROM lead_task 
+INNER JOIN task ON (task.t_id = lead_task.lt_task_id)
+WHERE lt_lead_id = lt.lt_lead_id AND lt_user_id = lt.lt_user_id AND t_category_id = t.t_category_id)')
+        ]);
+
+        $query->andWhere(['<', new Expression('(SELECT lt_date FROM lead_task 
+INNER JOIN task ON (task.t_id = lead_task.lt_task_id)
+WHERE lt_lead_id = lt.lt_lead_id AND lt_user_id = lt.lt_user_id AND t_category_id = t.t_category_id
+ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
+
+        $query->andFilterWhere(['t.t_category_id' => $category_id]);
+        $query->groupBy(['lt.lt_lead_id', 'lt.lt_user_id', 't.t_category_id']);
+
+        $command = $query->createCommand();
+
+        //echo $command->getRawSql(); exit;
+
+        //VarDumper::dump($command->queryAll()); exit;
+
+        return $command->queryAll();
     }
 
 }
