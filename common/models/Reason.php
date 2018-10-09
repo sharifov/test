@@ -60,7 +60,13 @@ class Reason extends \yii\db\ActiveRecord
         Lead::STATUS_ON_HOLD => [
             0 => 'Other'
         ],
+        Lead::STATUS_SNOOZE => [
+            1 => 'Travelling dates > 12 months',
+            2 => 'Not ready to buy now',
+            0 => 'Other'
+        ],
     ];
+
 
     /**
      * {@inheritdoc}
@@ -125,6 +131,12 @@ class Reason extends \yii\db\ActiveRecord
                 'Client asked for assistance' => 'Client asked for assistance',
                 'Duplicate' => 'Duplicate',
                 'I am original agent' => 'I am original agent',
+                'Other' => 'Other'
+            ];
+        } elseif ($queue == 'snooze') {
+            return [
+                'Travelling dates > 12 months' => 'Travelling dates > 12 months',
+                'Not ready to buy now' => 'Not ready to buy now',
                 'Other' => 'Other'
             ];
         }
