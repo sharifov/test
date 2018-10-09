@@ -79,6 +79,25 @@ class Airline extends ActiveRecord
             : ArrayHelper::map(self::find()->asArray()->all(), 'iata', 'iata');
     }
 
+    public function getCabinByClass($class)
+    {
+        if(in_array($class, explode(',', $this->cl_economy))){
+            return 'E';
+        }elseif(in_array($class, explode(',', $this->cl_business))){
+            return 'B';
+        }elseif(in_array($class, explode(',', $this->cl_first))){
+            return 'F';
+        }elseif(in_array($class, explode(',', $this->cl_premium_economy))){
+            return 'P';
+        }elseif(in_array($class, explode(',', $this->cl_premium_business))){
+            return 'PB';
+        }elseif(in_array($class, explode(',', $this->cl_premium_first))){
+            return 'PF';
+        }
+
+        return null;
+    }
+
     public function syncCabinClasses()
     {
         $url = \Yii::$app->params['syncAirlineClasses'];

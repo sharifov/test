@@ -604,6 +604,9 @@ class Quote extends \yii\db\ActiveRecord
                     'flightDuration' => $flightDuration,
                     'layoverDuration' => 0
                 ];
+                if(!empty($airline)){
+                    $segment['cabin'] = $airline->getCabinByClass($cabin);
+                }
                 if (!empty($operationAirlineCode)) {
                     $segment['operatingAirline'] = $operationAirlineCode;
                 }
@@ -615,6 +618,9 @@ class Quote extends \yii\db\ActiveRecord
                 $fSegment = new FlightSegment();
                 $fSegment->airlineCode = $segment['carrier'];
                 $fSegment->bookingClass = $segment['bookingClass'];
+                if(isset($segment['cabin']) && !empty($segment['cabin'])){
+                    $fSegment->cabin = $segment['cabin'];
+                }
                 $fSegment->flightNumber = $segment['flightNumber'];
                 $fSegment->departureAirportCode = $segment['departureAirport'];
                 $fSegment->destinationAirportCode = $segment['arrivalAirport'];
@@ -746,7 +752,9 @@ class Quote extends \yii\db\ActiveRecord
         $tripIndex = 0;
         $segments = self::parseDump($this->reservation_dump, false);
         foreach ($segments as $key => $segment) {
-            $segment['cabin'] = $this->cabin;
+            if(!isset($segment['cabin']) || empty($segment['cabin'])){
+                $segment['cabin'] = $this->cabin;
+            }
             if ($this->trip_type != Lead::TRIP_TYPE_ONE_WAY) {
                 if ($key != 0) {
                     $lastSegment = isset($segments[$key - 1])
