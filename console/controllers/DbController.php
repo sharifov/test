@@ -91,4 +91,16 @@ class DbController extends Controller
 
         printf("\n --- End %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
     }
+
+    /**
+     * Update Airline cabin classes from airapi
+     */
+    public function actionUpdateAirlineCabinClasses()
+    {
+        printf("\n --- Start %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
+
+        Airline::syncCabinClasses();
+
+        printf("\n --- End %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
+    }
 }
