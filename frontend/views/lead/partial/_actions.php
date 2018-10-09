@@ -12,7 +12,7 @@ use common\models\Lead;
 $urlUserActions = Url::to(['lead/get-user-actions', 'id' => $leadForm->getLead()->id]);
 $userId = Yii::$app->user->id;
 
-if ($leadForm->mode != $leadForm::VIEW_MODE) {
+if ($leadForm->mode != $leadForm::VIEW_MODE || ($leadForm->mode == $leadForm::VIEW_MODE && (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id)))) {
     $modelFormName = sprintf('%s-', strtolower($leadForm->formName()));
     $formLeadId = sprintf('%s-form', $leadForm->getLead()->formName());
     $formClientId = sprintf('%s-form', $leadForm->getClient()->formName());
@@ -22,11 +22,11 @@ if ($leadForm->mode != $leadForm::VIEW_MODE) {
 
     $('#submit-lead-form-btn').click(function(event) {
         event.preventDefault();
-        
-        var btn = $(this); 
+
+        var btn = $(this);
         btn.attr('disabled', true).prop('disabled', true);
         btn.find('span i').attr('class', 'fa fa-spinner');
-        
+
         var formData = $('#$formLeadId, #$formClientId, #$formPreferenceId').serialize();
         $.post($('#$formLeadId').attr('action'), formData, function( data ) {
             $('.has-error').each(function() {
@@ -189,7 +189,7 @@ $js = <<<JS
             editBlock.modal('show');
         });
     });
-    
+
     /***  Add PNR  ***/
     $('#create-pnr').click(function (e) {
         e.preventDefault();
@@ -386,7 +386,21 @@ $this->registerJs($js);
                 ];
                 echo Html::a('<span class="btn-icon"><i class="fa fa-bell"></i></span> <span class="btn-text">' . $title . '</span>', null, $options);
             }
-        } ?>
+        }elseif($leadForm->mode == $leadForm::VIEW_MODE && (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id))){
+            if (!$leadForm->getLead()->isNewRecord) {
+                echo Html::button('<span class="btn-icon"><i class="fa fa-plus"></i></span><span class="btn-text">Add Quote</span>', [
+                    'class' => 'btn btn-success btn-with-icon add-clone-alt-quote',
+                    'data-uid' => 0,
+                    'data-url' => Url::to(['quote/create', 'leadId' => $leadForm->getLead()->id, 'qId' => 0]),
+                ]);
+
+                echo Html::button('<span class="btn-icon"><i class="fa fa-plus"></i></span><span class="btn-text">Quick Search Quote</span>', [
+                    'class' => 'btn btn-success btn-with-icon',
+                    'id' => 'quick-search-quotes',
+                    'data-url' => Url::to(['quote/get-online-quotes', 'leadId' => $leadForm->getLead()->id]),
+                ]);
+            }
+        }?>
     </div>
 </div>
 
