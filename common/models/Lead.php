@@ -239,6 +239,8 @@ class Lead extends ActiveRecord
         $badges = array_flip(self::getLeadQueueType());
         $projectIds = array_keys(ProjectEmployeeAccess::getProjectsByEmployee());
 
+        $userId = Yii::$app->user->id;
+
         foreach ($badges as $key => $value) {
             $status = [];
             switch ($key) {
@@ -269,6 +271,13 @@ class Lead extends ActiveRecord
                 ->where(['IN', self::tableName() . '.status', $status])
                 ->andWhere(['IN', self::tableName() . '.project_id', $projectIds]);
 
+
+
+
+            if((Yii::$app->authManager->getAssignment('admin', $userId) || Yii::$app->authManager->getAssignment('supervision', $userId)) && in_array($key, ['trash', 'sold', 'follow-up', 'booked'])) {
+                $query->andWhere(['=', 'created', date('Y-m-d')]);
+            }
+
             if (Yii::$app->user->identity->role == 'agent' && in_array($key, ['trash'])) {
                 $badges[$key] = 0;
                 continue;
@@ -276,13 +285,13 @@ class Lead extends ActiveRecord
 
             if (Yii::$app->user->identity->role == 'agent' && in_array($key, ['sold'])) {
                 $query->andWhere([
-                    'employee_id' => Yii::$app->user->identity->getId()
+                    'employee_id' => $userId
                 ]);
             }
 
             if (in_array($key, ['processing'])) {
                 $query->andWhere([
-                    'employee_id' => Yii::$app->user->identity->getId()
+                    'employee_id' => $userId
                 ]);
             }
 
