@@ -36,15 +36,15 @@ $call2DelayTime = (2 * 60 * 60);
 
 
 
-<div class="panel panel-success panel-wrapper agents-notes-block">
+<div class="panel panel-success panel-wrapper task-list-block">
     <div class="panel-heading collapsing-heading">
-        <a data-toggle="collapse" href="#agents-notes" aria-expanded="true"
+        <a data-toggle="collapse" href="#task-list" aria-expanded="true"
            class="collapsing-heading__collapse-link">
             To Do Task List
             <i class="collapsing-heading__arrow"></i>
         </a>
     </div>
-    <div class="collapse in" id="agents-notes" aria-expanded="true" style="">
+    <div class="collapse in" id="task-list" aria-expanded="true" style="">
         <div class="panel-body">
 
 
@@ -261,22 +261,22 @@ $call2DelayTime = (2 * 60 * 60);
 
 <?php
 $this->registerJs(
-    ' 
+    '
         $(document).on("change",".ch_task", function() {
             var pjaxId = $(this).data("pjax-id");
-            var containerId = "#pjax-tl-" + pjaxId; 
+            var containerId = "#pjax-tl-" + pjaxId;
             var taskId = $(this).val();
             var taskDate = pjaxId;
             var taskLeadId = $(this).data("lead-id");
             var taskUserId = $(this).data("user-id");
-            
+
             $.pjax.reload({container: containerId, push: false, replace: false, timeout: 5000, data: {date: taskDate, task_id: taskId, lead_id: taskLeadId, user_id: taskUserId}});
         });
-        
+
         $(document).on("pjax:start", function () {
             //$("#pjax-container").fadeOut("fast");
         });
-        
+
         $(document).on("pjax:end", function () {
             //$("#pjax-container").fadeIn("fast");
             //alert("end");

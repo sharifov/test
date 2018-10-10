@@ -500,7 +500,6 @@ class QuoteController extends DefaultController
                     $newPrice->quote_id = $quote->id;
                     $newPrice->toFloat();
                     $selling += $newPrice->selling;
-                    $newPrice->save();
                     if (!$newPrice->save()) {
                         $errors = array_merge($errors, $newPrice->getErrors());
                     }

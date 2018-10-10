@@ -201,6 +201,16 @@ $js = <<<JS
             editBlock.modal('show');
         });
     });
+
+    $('#clone-lead').click(function (e) {
+        e.preventDefault();
+        var url = $(this).data('url');
+        var editBlock = $('#modal-error');
+        editBlock.find('.modal-body').html('');
+        editBlock.find('.modal-body').load(url, function( response, status, xhr ) {
+            editBlock.modal('show');
+        });
+    });
 JS;
 $this->registerJs($js);
 
@@ -320,6 +330,12 @@ $this->registerJs($js);
                                 ]) ?>
                             </li>
                         <?php endif; ?>
+                            <li>
+                                <?= Html::a('<i class="fa fa-copy"></i> Clone lead', '#', [
+                                    'id' => 'clone-lead',
+                                    'data-url' => Url::to(['lead/clone', 'id' => $leadForm->getLead()->id])
+                                ]) ?>
+                            </li>
                     </ul>
                 </div>
                 <!--endregion-->

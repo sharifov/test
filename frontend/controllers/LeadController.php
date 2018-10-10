@@ -31,6 +31,7 @@ use yii\web\NotFoundHttpException;
 use yii\web\Response;
 use yii\web\UnauthorizedHttpException;
 use yii\widgets\ActiveForm;
+use common\models\LeadFlightSegment;
 
 /**
  * Site controller
@@ -62,7 +63,7 @@ class LeadController extends DefaultController
                         'actions' => [
                             'create', 'add-comment', 'change-state', 'unassign', 'take',
                             'set-rating', 'add-note', 'unprocessed', 'call-expert', 'send-email',
-                            'check-updates', 'flow-transition', 'get-user-actions', 'add-pnr', 'update2'
+                            'check-updates', 'flow-transition', 'get-user-actions', 'add-pnr', 'update2','clone',
                         ],
                         'allow' => true,
                         'roles' => ['agent'],
@@ -770,13 +771,13 @@ class LeadController extends DefaultController
                 $leadForm->mode = $leadForm::VIEW_MODE;
             }
 
-
-
             $flightSegments = $leadForm->getLeadFlightSegment();
             foreach ($flightSegments as $segment){
                 $this->view->title = sprintf('%s & %s: ',$segment->destination, $id).$this->view->title;
+
                 break;
             }
+
 
             if (Yii::$app->request->isAjax && !Yii::$app->request->isPjax) {
                 Yii::$app->response->format = Response::FORMAT_JSON;
@@ -905,5 +906,77 @@ class LeadController extends DefaultController
             'discountId' => $quoteId,
             'lead' => $lead
         ]);
+    }
+
+    public function actionClone($id)
+    {
+        $errors = [];
+        $lead = Lead::findOne(['id' => $id]);
+        if ($lead !== null) {
+            $newLead = new Lead();
+            $newLead->attributes = $lead->attributes;
+            if (Yii::$app->request->isAjax) {
+                return $this->renderAjax('partial/_clone', [
+                    'lead' => $newLead,
+                    'errors' => $errors,
+                ]);
+            }elseif (Yii::$app->request->isPost) {
+                $data = Yii::$app->request->post();
+
+                if($data['Lead']['description'] != 0){
+                    if(isset(Lead::CLONE_REASONS[$data['Lead']['description']])){
+                        $newLead->description = Lead::CLONE_REASONS[$data['Lead']['description']];
+                    }
+                }else{
+                    if(isset($data['other'])){
+                        $newLead->description = trim($data['other']);
+                    }
+                }
+                $newLead->status = Lead::STATUS_PROCESSING;
+                $newLead->clone_id = $id;
+                $newLead->employee_id = Yii::$app->user->id;
+                $newLead->notes_for_experts = null;
+                $newLead->rating = 0;
+                $newLead->additional_information = null;
+                $newLead->l_answered = 0;
+                $newLead->l_grade = 0;
+                $newLead->snooze_for = null;
+                $newLead->called_expert = false;
+                $newLead->created = null;
+                $newLead->updated = null;
+
+                if(!$newLead->save()){
+                    $errors = array_merge($errors, $newLead->getErrors());
+                }
+
+                if(empty($errors)){
+                    $flightSegments = LeadFlightSegment::findAll(['lead_id' => $id]);
+                    foreach ($flightSegments as $segment){
+                        $flightSegment = new LeadFlightSegment();
+                        $flightSegment->attributes = $segment->attributes;
+                        $flightSegment->lead_id = $newLead->id;
+                        if (!$flightSegment->save()) {
+                            $errors = array_merge($errors, $flightSegment->getErrors());
+                        }
+                    }
+                }
+
+                if(!empty($errors)){
+                    return $this->renderAjax('partial/_clone', [
+                        'lead' => $newLead,
+                        'errors' => $errors,
+                    ]);
+                }else{
+                    Lead::sendClonedEmail($newLead);
+                    return $this->redirect([
+                        'quote',
+                        'type' => 'processing',
+                        'id' => $newLead->id
+                    ]);
+                }
+            }
+
+        }
+        return null;
     }
 }
