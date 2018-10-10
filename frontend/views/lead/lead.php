@@ -27,7 +27,7 @@ if (!$leadForm->getLead()->isNewRecord) {
     ]);
 
     $js = <<<JS
-    function checkRequestUpdates(checkUrl) {  
+    function checkRequestUpdates(checkUrl) {
         $.get(checkUrl)
             .done(function (data) {
                 if (data.logs.length != 0) {
@@ -75,7 +75,21 @@ JS;
 <div class="page-header">
     <div class="container-fluid">
         <div class="page-header__wrapper">
-            <h2 class="page-header__title"><?= Html::encode($this->title) ?></h2>
+            <h2 class="page-header__title">
+            <?= Html::encode($this->title) ?>
+            <?php
+            $lead = $leadForm->getLead();
+            if(!empty($lead->clone_id)){
+                printf(" <a title=\"%s\" href=\"%s\">(Cloned from %s)</a> ",
+                    "Clone reason: ".$lead->description,
+                    \yii\helpers\Url::to([
+                    'lead/quote',
+                    'type' => 'processing',
+                    'id' => $lead->clone_id
+                ]),$lead->clone_id);
+            }
+            ?>
+            </h2>
             <div class="page-header__general">
                 <?php if ($leadForm->getLead()->isNewRecord) : ?>
                     <div class="page-header__general-item">

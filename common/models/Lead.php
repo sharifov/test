@@ -46,6 +46,8 @@ use yii\helpers\VarDumper;
  * @property string $additional_information
  * @property int $l_answered
  * @property int $l_grade
+ * @property int $clone_id
+ * @property string $description
  *
  * @property LeadFlightSegment[] $leadFlightSegments
  * @property LeadPreferences $leadPreferences
@@ -55,7 +57,8 @@ use yii\helpers\VarDumper;
  * @property Project $project
  * @property int $quotesCount
  * @property int $leadFlightSegmentsCount
- * @property LeadAdditionalInformation $additionalInformationForm
+ * @property LeadAdditionalInformation $additionalInformationForm *
+ * @property Lead $clone
  */
 class Lead extends ActiveRecord
 {
@@ -89,6 +92,14 @@ class Lead extends ActiveRecord
         self::STATUS_TRASH => 'Trash',
         self::STATUS_BOOKED => 'Booked',
         self::STATUS_SNOOZE => 'Snooze',
+    ];
+
+    public CONST CLONE_REASONS = [
+        1 => 'Group travel',
+        2 => 'Alternative credit card',
+        3 => 'Different flight',
+        4 => 'Flight adjustments',
+        0 => 'Other',
     ];
 
     public CONST STATUS_MULTIPLE_UPDATE_LIST = [
@@ -807,6 +818,14 @@ class Lead extends ActiveRecord
     }
 
     /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getClone()
+    {
+        return $this->hasOne(Lead::className(), ['id' => 'clone_id']);
+    }
+
+    /**
      * @return bool
      */
     public function updateIpInfo()
@@ -1011,6 +1030,58 @@ Sales - Kivork",
             }
         } else {
             Yii::warning("type = $type, employee_id = $employee_id, employee2_id = $employee2_id", 'Lead:' . $type . ':SendMail');
+        }
+
+        return $isSend;
+    }
+
+    public function sendClonedEmail(Lead $lead)
+    {
+        $isSend = false;
+
+        $host = \Yii::$app->params['url_address'];
+        if (isset(Yii::$app->params['email_from']['sales'])) {
+            $swiftMailer = Yii::$app->mailer2;
+            $user = Employee::findOne($lead->employee_id);
+
+            if(!empty($user)){
+                $agent = $user->username;
+                $subject = Yii::t('email', "⚑ [Sales] Cloned Lead-{id} by {agent}", ['id' => $lead->clone_id, 'agent' => $agent]);
+                $body =  Yii::t('email', "Agent {agent} cloned lead {clone_id} with reason [{reason}], url: {cloned_url}.
+New lead {lead_id} you can view here: {url}
+
+Regards,
+Sales - Kivork",
+                    [
+                        'agent' => $agent,
+                        'url' => $host . '/lead/processing/' . $lead->id,
+                        'cloned_url' => $host . '/lead/processing/' . $lead->clone_id,
+                        'reason' => $lead->description,
+                        'lead_id' => $lead->id,
+                        'clone_id' => $lead->clone_id,
+                        'br' => "\r\n"
+                    ]);
+
+                $emailTo = Yii::$app->params['email_to']['bcc_sales'];
+                try {
+                    $isSend = $swiftMailer
+                    ->compose()
+                    ->setTo($emailTo)
+                    ->setFrom(Yii::$app->params['email_from']['sales'])
+                    ->setSubject($subject)
+                    ->setTextBody($body)
+                    ->send();
+
+                    if (!$isSend) {
+                        Yii::warning('Not send to Email:' . Yii::$app->params['email_to']['bcc_sales'] . ' - Sale Id: ' . $lead->id, 'Lead:Cloned :SendMail');
+                    }
+
+                } catch (\Throwable $e) {
+                    Yii::error($user->email . ' ' . $e->getMessage(), 'swiftMailer::send');
+                }
+            }else{
+                Yii::warning("Not found employee (" . $lead->employee_id . "), Lead:Cloned :SendMail");
+            }
         }
 
         return $isSend;
@@ -1895,15 +1966,15 @@ Sales - Kivork",
         $query = new Query();
         $query->select(['lt.lt_lead_id', 'lt.lt_user_id', 'l.status', 'l.l_answered', 't.t_category_id']);
 
-        $query->addSelect('(SELECT COUNT(*) FROM lead_task 
+        $query->addSelect('(SELECT COUNT(*) FROM lead_task
 INNER JOIN task ON (task.t_id = lead_task.lt_task_id)
 WHERE lt_lead_id = lt.lt_lead_id AND lt_user_id = lt.lt_user_id AND t_category_id = t.t_category_id AND lt_completed_dt IS NOT NULL) AS checked_cnt');
 
-        $query->addSelect('(SELECT COUNT(*) FROM lead_task 
+        $query->addSelect('(SELECT COUNT(*) FROM lead_task
 INNER JOIN task ON (task.t_id = lead_task.lt_task_id)
 WHERE lt_lead_id = lt.lt_lead_id AND lt_user_id = lt.lt_user_id AND t_category_id = t.t_category_id) AS all_cnt');
 
-        $query->addSelect('(SELECT lt_date FROM lead_task 
+        $query->addSelect('(SELECT lt_date FROM lead_task
 INNER JOIN task ON (task.t_id = lead_task.lt_task_id)
 WHERE lt_lead_id = lt.lt_lead_id AND lt_user_id = lt.lt_user_id AND t_category_id = t.t_category_id
 ORDER BY lt_date DESC LIMIT 1) AS last_task_date');
@@ -1915,21 +1986,21 @@ ORDER BY lt_date DESC LIMIT 1) AS last_task_date');
         $query->andWhere(['=', 'l.employee_id', new Expression('`lt`.`lt_user_id`')]);
 
 
-        $query->andWhere(['>', '(SELECT COUNT(*) FROM lead_task 
+        $query->andWhere(['>', '(SELECT COUNT(*) FROM lead_task
 INNER JOIN task ON (task.t_id = lead_task.lt_task_id)
 WHERE lt_lead_id = lt.lt_lead_id AND lt_user_id = lt.lt_user_id AND t_category_id = t.t_category_id)', '0']);
 
         $query->andWhere([
             '=',
-            new Expression('(SELECT COUNT(*) FROM lead_task 
+            new Expression('(SELECT COUNT(*) FROM lead_task
 INNER JOIN task ON (task.t_id = lead_task.lt_task_id)
 WHERE lt_lead_id = lt.lt_lead_id AND lt_user_id = lt.lt_user_id AND t_category_id = t.t_category_id AND lt_completed_dt IS NOT NULL)'),
-            new Expression('(SELECT COUNT(*) FROM lead_task 
+            new Expression('(SELECT COUNT(*) FROM lead_task
 INNER JOIN task ON (task.t_id = lead_task.lt_task_id)
 WHERE lt_lead_id = lt.lt_lead_id AND lt_user_id = lt.lt_user_id AND t_category_id = t.t_category_id)')
         ]);
 
-        $query->andWhere(['<', new Expression('(SELECT lt_date FROM lead_task 
+        $query->andWhere(['<', new Expression('(SELECT lt_date FROM lead_task
 INNER JOIN task ON (task.t_id = lead_task.lt_task_id)
 WHERE lt_lead_id = lt.lt_lead_id AND lt_user_id = lt.lt_user_id AND t_category_id = t.t_category_id
 ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);

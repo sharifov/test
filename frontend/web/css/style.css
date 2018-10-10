@@ -3479,3 +3479,5 @@ input[disabled] + .radio-tab__text {
   top: 5px;
   border: 1px solid rgba(255, 255, 255, 0.5);
   text-shadow: none;}
+
+.page-header__title a{color:#fff;}
