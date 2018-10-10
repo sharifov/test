@@ -4,10 +4,13 @@ namespace common\models;
 
 use Yii;
 use yii\base\NotSupportedException;
+use yii\behaviors\TimestampBehavior;
+use yii\db\ActiveRecord;
 use yii\db\Query;
 use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
 use yii\web\IdentityInterface;
+use yii\web\NotFoundHttpException;
 
 /**
  * This is the model class for table "employees".
@@ -29,6 +32,8 @@ use yii\web\IdentityInterface;
  * @property Lead[] $leads
  * @property EmployeeAcl[] $employeeAcl
  * @property ProjectEmployeeAccess[] $projectEmployeeAccesses
+ * @property UserGroupAssign[] $userGroupAssigns
+ * @property UserGroup[] $ugsGroups
  */
 class Employee extends \yii\db\ActiveRecord implements IdentityInterface
 {
@@ -42,6 +47,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     public $role;
     public $employeeAccess;
     public $viewItemsEmployeeAccess;
+    public $user_groups;
 
     /**
      * {@inheritdoc}
@@ -49,6 +55,60 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     public static function tableName()
     {
         return 'employees';
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function rules()
+    {
+        return [
+            [['username', 'auth_key', 'password_hash', 'email', 'role'], 'required'],
+            [['password'], 'required', 'on' => self::SCENARIO_REGISTER],
+            [['email', 'password', 'username'], 'trim'],
+            [['password'], 'string', 'min' => 6],
+            [['status'], 'integer'],
+            [['username', 'password_hash', 'password_reset_token', 'email'], 'string', 'max' => 255],
+            [['auth_key'], 'string', 'max' => 32],
+            [['username'], 'unique'],
+            [['email'], 'unique'],
+            ['email', 'email'],
+            [['password_reset_token'], 'unique'],
+            [['created_at', 'updated_at', 'last_activity', 'acl_rules_activated', 'full_name', 'user_groups'], 'safe'],
+        ];
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function attributeLabels()
+    {
+        return [
+            'id' => 'ID',
+            'username' => 'Username',
+            'auth_key' => 'Auth Key',
+            'password_hash' => 'Password Hash',
+            'password_reset_token' => 'Password Reset Token',
+            'email' => 'Email',
+            'status' => 'Status',
+            'created_at' => 'Created At',
+            'updated_at' => 'Updated At',
+        ];
+    }
+
+
+    public function behaviors(): array
+    {
+        return [
+            'timestamp' => [
+                'class' => TimestampBehavior::class,
+                'attributes' => [
+                    ActiveRecord::EVENT_BEFORE_INSERT => ['created_at', 'updated_at'],
+                    ActiveRecord::EVENT_BEFORE_UPDATE => ['updated_at'],
+                ],
+                'value' => date('Y-m-d H:i:s') //new Expression('NOW()'),
+            ],
+        ];
     }
 
     public function afterFind()
@@ -74,12 +134,12 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         }
     }
 
-    public function afterValidate()
+    /*public function afterValidate()
     {
         parent::afterValidate();
 
         $this->updated_at = date('Y-m-d H:i:s');
-    }
+    }*/
 
     /**
      * @return \yii\db\ActiveQuery
@@ -180,44 +240,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         return $roles;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function rules()
-    {
-        return [
-            [['username', 'auth_key', 'password_hash', 'email', 'role'], 'required'],
-            [['password'], 'required', 'on' => self::SCENARIO_REGISTER],
-            [['email', 'password', 'username'], 'trim'],
-            [['password'], 'string', 'min' => 6],
-            [['status'], 'integer'],
-            [['created_at', 'updated_at', 'last_activity', 'acl_rules_activated', 'full_name'], 'safe'],
-            [['username', 'password_hash', 'password_reset_token', 'email'], 'string', 'max' => 255],
-            [['auth_key'], 'string', 'max' => 32],
-            [['username'], 'unique'],
-            [['email'], 'unique'],
-            ['email', 'email'],
-            [['password_reset_token'], 'unique'],
-        ];
-    }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function attributeLabels()
-    {
-        return [
-            'id' => 'ID',
-            'username' => 'Username',
-            'auth_key' => 'Auth Key',
-            'password_hash' => 'Password Hash',
-            'password_reset_token' => 'Password Reset Token',
-            'email' => 'Email',
-            'status' => 'Status',
-            'created_at' => 'Created At',
-            'updated_at' => 'Updated At',
-        ];
-    }
 
     /**
      * @return \yii\db\ActiveQuery
@@ -374,4 +397,62 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
 
         return ArrayHelper::map($data,'id', 'username');
     }
+
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getUserGroupAssigns()
+    {
+        return $this->hasMany(UserGroupAssign::class, ['ugs_user_id' => 'id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getUgsGroups()
+    {
+        return $this->hasMany(UserGroup::class, ['ug_id' => 'ugs_group_id'])->viaTable('user_group_assign', ['ugs_user_id' => 'id']);
+    }
+
+    /**
+     * @return array
+     */
+    public function getUserGroupList() : array
+    {
+        $groups = [];
+        if( $groupsModel =  $this->ugsGroups) {
+            $groups = \yii\helpers\ArrayHelper::map($groupsModel, 'ug_id', 'ug_name');
+        }
+
+        return $groups;
+    }
+
+    /**
+     * Deletes an existing Employee model.
+     * If deletion is successful, the browser will be redirected to the 'index' page.
+     * @param integer $id
+     * @return mixed
+     * @throws NotFoundHttpException if the model cannot be found
+     */
+    public function actionDelete($id)
+    {
+        $this->findModel($id)->delete();
+        return $this->redirect(['index']);
+    }
+    /**
+     * Finds the Employee model based on its primary key value.
+     * If the model is not found, a 404 HTTP exception will be thrown.
+     * @param integer $id
+     * @return Employee the loaded model
+     * @throws NotFoundHttpException if the model cannot be found
+     */
+    protected function findModel($id)
+    {
+        if (($model = Employee::findOne($id)) !== null) {
+            return $model;
+        }
+        throw new NotFoundHttpException('The requested page does not exist.');
+    }
+
 }

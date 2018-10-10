@@ -104,8 +104,8 @@ return [
     'container' => [
         'definitions' => [
             yii\grid\GridView::class => [
-                'options' => ['class' => 'table-responsive'],
-                'tableOptions' => ['class' => 'table table-bordered table-condensed table-hover'],
+                //'options' => ['class' => 'table-responsive'],
+                //'tableOptions' => ['class' => 'table table-bordered table-condensed table-hover'],
             ],
         ],
     ],

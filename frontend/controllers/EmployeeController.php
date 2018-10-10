@@ -8,6 +8,8 @@ use common\models\Employee;
 use common\models\EmployeeAcl;
 use common\models\EmployeeContactInfo;
 use common\models\ProjectEmployeeAccess;
+use common\models\search\EmployeeSearch;
+use common\models\UserGroupAssign;
 use Symfony\Component\Finder\Exception\AccessDeniedException;
 use Yii;
 use yii\bootstrap\Html;
@@ -15,6 +17,8 @@ use yii\filters\AccessControl;
 use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
+use yii\web\NotAcceptableHttpException;
+use yii\web\NotFoundHttpException;
 use yii\web\Response;
 
 /**
@@ -154,31 +158,66 @@ class EmployeeController extends DefaultController
      */
     public function actionList()
     {
-        $this->view->title = sprintf('Employees - List');
-        $searchModel = new EmployeeForm();
+        $searchModel = new EmployeeSearch();
+        $params = Yii::$app->request->queryParams;
 
-        $employees = ArrayHelper::map(Employee::find()->orderBy('username')->asArray()->all(), 'id', 'username');
+        if(Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id)) {
+            $params['EmployeeSearch']['supervision_id'] = Yii::$app->user->id;
+        }
+
+        $dataProvider = $searchModel->search($params);
 
         return $this->render('list', [
-            'dataProvider' => $searchModel->search(Yii::$app->request->queryParams),
+            'dataProvider' => $dataProvider,
             'searchModel' => $searchModel,
-            'employees' => $employees
         ]);
     }
 
 
     /**
-     * @return string
+     * @return string|Response
      * @throws BadRequestHttpException
+     * @throws NotAcceptableHttpException
+     * @throws NotFoundHttpException
      * @throws \yii\base\InvalidConfigException
      */
     public function actionUpdate()
     {
         $this->view->title = sprintf('Employees - Profile');
 
-        $id = Yii::$app->request->get('id', null);
+        $id = Yii::$app->request->get('id');
         if ($id !== null) {
             $model = Employee::findOne(['id' => $id]);
+
+            if (!$model) {
+                throw new NotFoundHttpException('The requested user does not exist.');
+            }
+
+            $roles = array_keys($model->getRoles());
+
+            if(!Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) && in_array('admin', $roles)) {
+                throw new NotAcceptableHttpException('Access denied for this user: '.$model->id);
+            }
+
+            if(Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id)) {
+                $access = false;
+
+                $userGroups = array_keys($model->getUserGroupList());
+
+                foreach (Yii::$app->user->identity->getUserGroupList() as $grId => $grName) {
+                    if(in_array($grId, $userGroups)) {
+                        $access = true;
+                        break;
+                    }
+                }
+
+                if(!$access) {
+                    throw new NotAcceptableHttpException('Access denied for this user (invalid user group)');
+                }
+            }
+
+
+
         } else {
             $model = new Employee(['scenario' => Employee::SCENARIO_REGISTER]);
         }
@@ -196,6 +235,21 @@ class EmployeeController extends DefaultController
                 $isNew = $model->prepareSave($attr);
                 if ($model->validate() && $model->save()) {
                     $model->addRole($isNew);
+
+
+                    if(isset($attr['user_groups'])) {
+                        UserGroupAssign::deleteAll(['ugs_user_id' => $model->id]);
+                        if($attr['user_groups']) {
+                            foreach ($attr['user_groups'] as $ugId) {
+                                $uga = new UserGroupAssign();
+                                $uga->ugs_user_id = $model->id;
+                                $uga->ugs_group_id = (int) $ugId;
+                                $uga->save();
+                            }
+                        }
+                    }
+                    //VarDumper::dump($attr['user_groups'], 10, true); exit;
+
                     foreach ($availableProjects as $availableProject) {
                         if (!in_array($availableProject, $newEmployeeAccess) && in_array($availableProject, $model->employeeAccess)) {
                             ProjectEmployeeAccess::deleteAll([
@@ -217,6 +271,10 @@ class EmployeeController extends DefaultController
                     }
                 }
             }
+
+            //VarDumper::dump($model->userGroupAssigns, 10 ,true); exit;
+
+            $model->user_groups = ArrayHelper::map($model->userGroupAssigns, 'ugs_group_id', 'ugs_group_id');
 
             return $this->render('_form', [
                 'model' => $model,

@@ -35,10 +35,17 @@ class NavItem
                         'url' => ['site/index']
                     ],
                     [
-                        'label' => '<i class="fa fa-user"></i> Employees',
+                        'label' => '<i class="fa fa-user"></i> Users',
                         'url' => ['employee/list']
                     ],
                 ];
+
+
+                if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
+                    $items[] = ['label' => '<i class="fa fa-users"></i> User Groups', 'url' => ['user-group/index']];
+                    $items[] = ['label' => '<i class="fa fa-users"></i> User Groups Assignments', 'url' => ['user-group-assign/index']];
+                }
+
 
                 $items[] = ['label' => '<i class="fa fa-plane"></i> Flight Segments', 'url' => ['lead-flight-segment/index']];
 
@@ -162,7 +169,7 @@ class NavItem
             }
 
 
-            if (\in_array(Yii::$app->user->identity->role, ['admin', 'supervision'])) {
+            if (\in_array(Yii::$app->user->identity->role, ['admin'])) {
 
                 //$systemLogsCount = <span class="badge badge-warning">'. (\backend\models\Log::find()->where("log_time BETWEEN ".strtotime(date('Y-m-d'))." AND ".strtotime(date('Y-m-d H:i:s')))->count()) .'</span>;
                 // $apiLogsCount = <span class="badge badge-warning">'. (\common\models\ApiLog::find()->where("DATE(al_request_dt) = DATE(NOW())")->count()) .'</span>

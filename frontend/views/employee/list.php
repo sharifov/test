@@ -1,14 +1,15 @@
 <?php
-/**
- * @var $this \yii\web\View
- * @var $dataProvider ActiveDataProvider
- * @var $searchModel \backend\models\search\EmployeeForm
- * @var $employees []
- */
+
+/* @var $this yii\web\View */
+/* @var $searchModel common\models\search\EmployeeSearch */
+/* @var $dataProvider yii\data\ActiveDataProvider */
+/* @var $employees [] */
 
 use yii\bootstrap\Html;
-use yii\data\ActiveDataProvider;
 use yii\grid\GridView;
+
+$this->title = 'User List';
+$this->params['breadcrumbs'][] = $this->title;
 
 $template = <<<HTML
 <div class="pagination-container row" style="margin-bottom: 10px;">
@@ -39,49 +40,66 @@ HTML;
             'dataProvider' => $dataProvider,
             'filterModel' => $searchModel,
             'layout' => $template,
+            'rowOptions' => function (\common\models\Employee $model, $index, $widget, $grid) {
+                if ($model->deleted) {
+                    return ['class' => 'danger'];
+                }
+            },
             'columns' => [
                 [
-                    'label' => 'ID',
-                    'value' => 'id'
+                    'attribute' => 'id'
                 ],
                 [
                     'attribute' => 'username',
-                    //'label' => 'Username',
-                    'filter' => Html::activeDropDownList($searchModel, 'id', $employees, [
-                        'prompt' => '',
-                        'class' => 'form-control'
-                    ]),
                     'value' => function (\common\models\Employee $model) {
-                        /**
-                         * @var $model \common\models\Employee
-                         */
-                        return $model->username;
+                        return Html::tag('i', '', ['class' => 'fa fa-user']).' '.Html::encode($model->username);
+                    },
+                    'format' => 'html'
+                ],
+
+                [
+                    //'attribute' => 'username',
+                    'label' => 'Role',
+                    'value' => function (\common\models\Employee $model) {
+                        $roles = $model->getRoles();
+                        return $roles ? implode(', ', $roles) : '-';
                     },
                     'format' => 'raw'
                 ],
-                /*[
-                        'attribute' => 'email'
-                    //'label' => 'Email',
-                    //'value' => 'email'
-                ],*/
+
                 'email:email',
                 [
-                    'label' => 'Deleted',
-                    'filter' => Html::activeDropDownList($searchModel, 'status', [
-                        $searchModel::STATUS_ACTIVE => 'No',
-                        $searchModel::STATUS_DELETED => 'Yes'
-                    ], [
-                        'prompt' => '',
-                        'class' => 'form-control'
-                    ]),
+                    'attribute' => 'status',
+                    'filter' => [$searchModel::STATUS_ACTIVE => 'Active', $searchModel::STATUS_DELETED => 'Deleted'],
                     'value' => function (\common\models\Employee $model) {
-                        return ($model->status === $model::STATUS_DELETED)
-                            ? 'Yes'
-                            : 'No';
-                    }
+                        return ($model->status === $model::STATUS_DELETED) ? '<span class="label label-danger">Deleted</span>' : '<span class="label label-success">Active</span>';
+                    },
+                    'format' => 'html'
                 ],
+
+                [
+                    'label' => 'User Groups',
+                    'attribute' => 'user_group_id',
+                    'value' => function (\common\models\Employee $model) {
+
+                        $groups = $model->getUserGroupList();
+                        $groupsValueArr = [];
+
+                        foreach ($groups as $group) {
+                            $groupsValueArr[] = Html::tag('span', Html::tag('i', '', ['class' => 'fa fa-users']) . ' ' . Html::encode($group), ['class' => 'label label-default']);
+                        }
+
+                        $groupsValue = implode(' ', $groupsValueArr);
+
+                        return $groupsValue;
+                    },
+                    'format' => 'html',
+                    'filter' => Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) ? \common\models\UserGroup::getList() : Yii::$app->user->identity->getUserGroupList()
+                ],
+
                 //'created_at:datetime',
                 //'updated_at:datetime',
+                'acl_rules_activated:boolean',
                 [
                     'attribute' => 'created_at',
                     'value' => function(\common\models\Employee $model) {
@@ -99,11 +117,17 @@ HTML;
                 [
                     'class' => 'yii\grid\ActionColumn',
                     'template' => '{update}',
-                    'buttons' => [
+                    'visibleButtons' => [
+                        /*'view' => function ($model, $key, $index) {
+                            return User::hasPermission('viewOrder');
+                        },*/
+                        'update' => function (\common\models\Employee $model, $key, $index) {
+                            return (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || !in_array('admin', array_keys($model->getRoles())));
+                        },
+                    ],
+                    /*'buttons' => [
                         'update' => function ($url, $model, $key) {
-                            /**
-                             * @var $model \common\models\Employee
-                             */
+
                             $url = \yii\helpers\Url::to([
                                 'employee/update',
                                 'id' => $model->id
@@ -113,7 +137,7 @@ HTML;
                             ]);
 
                         },
-                    ]
+                    ]*/
                 ],
             ]
         ])

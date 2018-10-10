@@ -13,43 +13,44 @@ use yii\widgets\MaskedInput;
 
 $formId = sprintf('%s-ID', $model->formName());
 
+if($model->isNewRecord) {
+    $this->title = 'Create new User';
+} else {
+    $this->title ='Update user: ' . $model->username.' (ID:  '.$model->id.')';
+}
+
+$this->params['breadcrumbs'][] = ['label' => 'User List', 'url' => ['list']];
+$this->params['breadcrumbs'][] = $this->title;
+
 ?>
 <?php $form = ActiveForm::begin([
     'successCssClass' => '',
     'id' => $formId
 ]) ?>
 <div class="col-sm-6">
-    <div class="panel panel-default">
-        <div class="panel-heading collapsing-heading">
-            <?php $text = sprintf('%s employee %s', empty($model->username) ? 'Create' : 'Edit', !empty($model->username) ? 'ID: ' . $model->id : ''); ?>
-            <?= Html::a($text . ' <i class="collapsing-heading__arrow"></i>', '#general-info', [
-                'data-toggle' => 'collapse',
-                'class' => 'collapsing-heading__collapse-link'
-            ]) ?>
-        </div>
-        <div class="panel-body panel-collapse collapse in" id="general-info">
+
 
             <div class="well">
                 <div class="row">
                     <div class="col-sm-6">
-                        <?= $form->field($model, 'username', ['template' => '{label}{input}'])->textInput() ?>
+                        <?= $form->field($model, 'username')->textInput() ?>
                     </div>
                     <div class="col-sm-6">
-                        <?= $form->field($model, 'password', ['template' => '{label}{input}'])->passwordInput() ?>
+                        <?= $form->field($model, 'password')->passwordInput() ?>
                     </div>
                 </div>
                 <div class="row">
                     <div class="col-sm-6">
-                        <?= $form->field($model, 'full_name', ['template' => '{label}{input}'])->textInput() ?>
+                        <?= $form->field($model, 'full_name')->textInput() ?>
                     </div>
                     <div class="col-sm-6">
-                        <?= $form->field($model, 'email', ['template' => '{label}{input}']) ?>
+                        <?= $form->field($model, 'email')->input('email') ?>
                     </div>
                 </div>
                 <?php if (!$isProfile) : ?>
                     <div class="row">
                         <div class="col-sm-6">
-                            <?= $form->field($model, 'role', ['template' => '{label}{input}'])->dropDownList(
+                            <?= $form->field($model, 'role')->dropDownList(
                                 $model::getAllRoles(), [
                                     'prompt' => '',
                                 ]
@@ -62,6 +63,51 @@ $formId = sprintf('%s-ID', $model->formName());
                         <?php endif; ?>
                     </div>
                 <?php endif; ?>
+                <div class="row">
+                    <div class="col-sm-12">
+                        <?php if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id)):
+
+                            if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
+                                $data = \common\models\UserGroup::getList();
+                            }
+
+                            if(Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id)) {
+                                $data = Yii::$app->user->identity->getUserGroupList();
+                            }
+
+
+                            ?>
+
+                            <?php
+                            echo $form->field($model, 'user_groups')->widget(\kartik\select2\Select2::class, [
+                                'data' => $data,
+                                'size' => \kartik\select2\Select2::SMALL,
+                                'options' => ['placeholder' => 'Select user groups', 'multiple' => true],
+                                'pluginOptions' => ['allowClear' => true],
+                            ]);
+                            ?>
+
+                        <? else: ?>
+
+                            <label class="control-label">User Groups</label>:
+                            <?php
+                                $groupsValue = '';
+                                if( $groupsModel =  $model->ugsGroups) {
+                                    $groups = \yii\helpers\ArrayHelper::map($groupsModel, 'ug_id', 'ug_name');
+
+                                    $groupsValueArr = [];
+                                    foreach ($groups as $group) {
+                                        $groupsValueArr[] = Html::tag('span', Html::encode($group), ['class' => 'label label-default']);
+                                    }
+                                    $groupsValue = implode(' ', $groupsValueArr);
+                                }
+                                echo $groupsValue;
+                            ?>
+
+                        <? endif; ?>
+                    </div>
+
+                </div>
             </div>
             <?php
             if (!$model->isNewRecord && !$isProfile) : ?>
@@ -152,10 +198,9 @@ JS;
                 </div>
             <?php endif; ?>
             <div class="form-group">
-                <?= Html::submitButton('Save', ['class' => 'btn btn-primary']) ?>
+                <?= Html::submitButton(($model->isNewRecord ? 'Create User' : 'Update User'), ['class' => 'btn btn-primary']) ?>
             </div>
-        </div>
-    </div>
+
 </div>
 
 <div class="col-sm-6">

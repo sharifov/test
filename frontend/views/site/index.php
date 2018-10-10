@@ -73,35 +73,62 @@ $userId = Yii::$app->user->id;
 
 
     <div class="row">
-        <div class="col-md-6">
+        <div class="col-md-4">
             <table class="table table-bordered">
                 <tr>
                     <th>Server Date Time</th>
                     <td><?= date('Y-m-d H:i:s')?></td>
                 </tr>
                 <tr>
-                    <th>Local Date Time</th>
+                    <th>Formatted Local Date Time</th>
                     <td><?= Yii::$app->formatter->asDatetime(time())?></td>
                 </tr>
             </table>
 
         </div>
 
-        <div class="col-md-6">
+        <div class="col-md-4">
             <table class="table table-bordered">
                 <tr>
-                    <th>Username:</th>
+                    <th>My Username:</th>
                     <td><?= Yii::$app->user->identity->username?> (<?=Yii::$app->user->id?>)</td>
                 </tr>
                 <tr>
-                    <th>Role:</th>
+                    <th>My Role:</th>
                     <td><?=implode(', ', Yii::$app->user->identity->roles)?></td>
                 </tr>
             </table>
 
         </div>
 
+        <div class="col-md-4">
+            <table class="table table-bordered">
+                <tr>
+                    <th>My User Groups:</th>
+                    <td>
+                        <?php
+                            $groupsValue = '';
+                            if( $groupsModel =  Yii::$app->user->identity->ugsGroups) {
+                                $groups = \yii\helpers\ArrayHelper::map($groupsModel, 'ug_id', 'ug_name');
+
+                                $groupsValueArr = [];
+                                foreach ($groups as $group) {
+                                    $groupsValueArr[] = Html::tag('span', Html::encode($group), ['class' => 'label label-default']);
+                                }
+                                $groupsValue = implode(' ', $groupsValueArr);
+                            }
+                            echo $groupsValue;
+                        ?>
+                    </td>
+                </tr>
+
+            </table>
+
+        </div>
+
     </div>
+
+    <br>
 
 
     <div class="row">
