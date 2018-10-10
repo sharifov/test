@@ -117,7 +117,7 @@
                                         <tr style="padding: 0; text-align: left; vertical-align: top;">
                                             <th class="small-12 large-12 columns first last"
                                                 style="color: #1C2F59; font-family: 'Roboto', Arial, Helvetica, sans-serif; font-weight: normal; line-height: 1.3; margin: 0 auto; padding: 0; padding-top: 30px;padding-bottom: 16px; padding-left: 24px; padding-right: 24px; text-align: left; width: 100%;">
-                                                Share your expirience on: <br/>
+                                                Share your experience on: <br/>
                                                 <?php $trustPilotUrl = (isset($templateType) && $templateType == "_email_ticket")?"https://www.trustpilot.com/evaluate/wowfare.com":"https://www.trustpilot.com/review/wowfare.com"?>
                                                 <a href="<?= $trustPilotUrl?>" target="_blank"><img alt="trustpilot logo" src="<?= $project->link ?>/images/email/email-tp-widget.png" style="-ms-interpolation-mode: bicubic; clear: both; display: block; float: none; margin: 20px auto 0; max-width: 100%; outline: none; text-align: center; text-decoration: none; width: auto;"></a>
                                             </th>
