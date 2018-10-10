@@ -7,8 +7,6 @@
 
 use yii\helpers\Html;
 
-$activeLeadIds = isset($activeLeadIds) ? $activeLeadIds : [];
-
 $activeLeadIds = '[' . implode(',', $activeLeadIds) . ']';
 
 $js = <<<JS

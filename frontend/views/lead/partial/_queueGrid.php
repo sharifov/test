@@ -407,7 +407,7 @@ if(Yii::$app->authManager->getAssignment('admin', $userId) || Yii::$app->authMan
                             $model['status'] === Lead::STATUS_ON_HOLD)
                     ) {
                         $buttonsCnt++;
-                        $buttons .= Html::a('Take & Open', Url::to([
+                        $buttons .= Html::a('Take', Url::to([
                             'lead/take',
                             'id' => $model['id']
                         ]), [
@@ -416,17 +416,18 @@ if(Yii::$app->authManager->getAssignment('admin', $userId) || Yii::$app->authMan
                         ]);
                     }
 
-                    if ($queueType != 'inbox' && $queueType != 'follow-up') {
+                    if ($queueType != 'inbox') { // && $queueType != 'follow-up'
                         if (Yii::$app->user->identity->getId() == $model['employee_id'] &&
                             $queueType = 'processing-all'
                         ) {
                             $queueType = 'processing';
                         }
                         $buttonsCnt++;
-                        $buttons .= Html::a('Open', Url::to(['lead/quote', 'type' => $queueType, 'id' => $model['id']]), [
-                            'class' => 'btn btn-action btn-sm',
+                        $buttons .= ' '.Html::a('<i class="fa fa-search"></i>', Url::to(['lead/quote', 'type' => $queueType, 'id' => $model['id']]), [
+                            'class' => 'btn btn-info btn-sm',
                             'target' => '_blank',
-                            'data-pjax' => 0
+                            'data-pjax' => 0,
+                                'title' => 'View lead'
                         ]);
                     }
 
@@ -434,7 +435,7 @@ if(Yii::$app->authManager->getAssignment('admin', $userId) || Yii::$app->authMan
                         in_array($model['status'], [Lead::STATUS_ON_HOLD, Lead::STATUS_PROCESSING])
                     ) {
                         $buttonsCnt++;
-                        $buttons .= Html::a('Take Over', Url::to([
+                        $buttons .= ' '.Html::a('Take Over', Url::to([
                             'lead/take',
                             'id' => $model['id'],
                             'over' => true
@@ -456,7 +457,7 @@ if(Yii::$app->authManager->getAssignment('admin', $userId) || Yii::$app->authMan
                         ]);
                     }*/
 
-                    if($buttonsCnt > 1) {
+                    if($buttonsCnt > 2) {
                     $html = Html::tag('div', Html::button('Action', [
                             'class' => 'btn btn-sm btn-action dropdown-toggle',
                             'data-toggle' => 'dropdown',
