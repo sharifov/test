@@ -936,10 +936,10 @@ class LeadController extends DefaultController
                 $newLead->clone_id = $id;
                 $newLead->employee_id = Yii::$app->user->id;
                 $newLead->notes_for_experts = null;
-                $newLead->rating = null;
+                $newLead->rating = 0;
                 $newLead->additional_information = null;
-                $newLead->l_answered = null;
-                $newLead->l_grade = null;
+                $newLead->l_answered = 0;
+                $newLead->l_grade = 0;
                 $newLead->snooze_for = null;
                 $newLead->called_expert = false;
                 $newLead->created = null;
