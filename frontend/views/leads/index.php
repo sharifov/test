@@ -15,6 +15,15 @@ $this->title = 'Search Leads';
 $this->params['breadcrumbs'][] = $this->title;
 
 
+
+if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
+    $userList = \common\models\Employee::getList();
+} else {
+    $userList = \common\models\Employee::getListByUserId(Yii::$app->user->id);
+}
+
+
+
 ?>
 <style>
 .dropdown-menu {
@@ -348,7 +357,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'value' => function(\common\models\Lead $model) {
                     return $model->employee ? '<i class="fa fa-user"></i> '.$model->employee->username : '-';
                 },
-                'filter' => \common\models\Employee::getList()
+                'filter' => $userList
             ],
 
             //'rating',

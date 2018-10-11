@@ -8,6 +8,7 @@ use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
 use yii\db\Query;
 use yii\helpers\ArrayHelper;
+use yii\helpers\Html;
 use yii\helpers\VarDumper;
 use yii\web\IdentityInterface;
 use yii\web\NotFoundHttpException;
@@ -377,6 +378,25 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         return ArrayHelper::map($data,'id', 'username');
     }
 
+
+    /**
+     * @param int|null $user_id
+     * @return array
+     */
+    public static function getListByUserId(int $user_id = null) : array
+    {
+        $subQuery1 = UserGroupAssign::find()->select(['ugs_group_id'])->where(['ugs_user_id' => $user_id]);
+        $subQuery = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->where(['IN', 'ugs_group_id', $subQuery1]);
+
+        $query = self::find()->orderBy(['username' => SORT_ASC])->asArray();
+        $query->andWhere(['IN', 'employees.id', $subQuery]);
+
+        $data = $query->all();
+        return ArrayHelper::map($data,'id', 'username');
+    }
+
+
+
     /**
      * @return array
      */
@@ -453,6 +473,85 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
             return $model;
         }
         throw new NotFoundHttpException('The requested page does not exist.');
+    }
+
+
+
+    public function getTaskStats(string $start_dt = null, string $end_dt = null): string
+    {
+
+        if($start_dt) {
+            $start_dt = date('Y-m-d', strtotime($start_dt));
+        } else {
+            $start_dt = null;
+        }
+
+        if($end_dt) {
+            $end_dt = date('Y-m-d', strtotime($end_dt));
+        } else {
+            $end_dt = null;
+        }
+
+
+        $taskListAllQuery = \common\models\LeadTask::find()->select(['COUNT(*) AS field_cnt', 'lt_task_id'])
+            ->where(['lt_user_id' => $this->id])
+            ->andFilterWhere(['>=', 'lt_date', $start_dt])
+            ->andFilterWhere(['<=', 'lt_date', $end_dt])
+            ->groupBy(['lt_task_id']);
+
+        $taskListCheckedQuery = \common\models\LeadTask::find()->select(['COUNT(*) AS field_cnt', 'lt_task_id'])
+            ->where(['lt_user_id' => $this->id])
+            ->andWhere(['IS NOT', 'lt_completed_dt', null])
+            ->andFilterWhere(['>=', 'lt_date', $start_dt])
+            ->andFilterWhere(['<=', 'lt_date', $end_dt])
+            ->groupBy(['lt_task_id']);
+
+
+
+        $taskListAllQuery->joinWith(['ltLead' => function ($q) {
+            $q->where(['NOT IN', 'leads.status', [Lead::STATUS_TRASH, Lead::STATUS_SNOOZE]]);
+        }]);
+
+        $taskListCheckedQuery->joinWith(['ltLead' => function ($q) {
+            $q->where(['NOT IN', 'leads.status', [Lead::STATUS_TRASH, Lead::STATUS_SNOOZE]]);
+        }]);
+
+
+        $taskListAll = $taskListAllQuery->all();
+        $taskListChecked = $taskListCheckedQuery->all();
+
+
+        //return $taskListChecked->createCommand()->getRawSql();
+
+        $completed = [];
+        if($taskListChecked) {
+            foreach ($taskListChecked as $taskItem) {
+                $completed[$taskItem->lt_task_id] = $taskItem->field_cnt;
+            }
+        }
+
+        //$itemHeader = [];
+        $item = [];
+
+        if($taskListAll) {
+            foreach ($taskListAll as $task) {
+                //$itemHeader[] = Html::encode($task->ltTask->t_name);
+                //$item[] = ''.($completed[$task->lt_task_id] ?? 0).'/'. $task->field_cnt.'';
+                $item[] = '<b>'.Html::encode($task->ltTask->t_name).'</b><br>'.($completed[$task->lt_task_id] ?? 0).' / '. Html::a($task->field_cnt,
+                        ['lead-task/index', 'LeadTaskSearch[lt_task_id]' => $task->lt_task_id, 'LeadTaskSearch[lt_user_id]' => $this->id],
+                        ['data-pjax' => 0, 'target' => '_blank']).'';
+            }
+        }
+
+
+        $str = '<table class="table table-bordered table-condensed">';
+        //$str .= '<tr><th class="text-center">'.implode('</th><th class="text-center">', $itemHeader).'</th></tr>';
+        $str .= '<tr>';
+        $str .= '<td class="text-center">'.implode('</td><td class="text-center">', $item).'</td>';
+        $str .= '</tr>';
+        $str .= '</table>';
+
+        return $str;
     }
 
 }

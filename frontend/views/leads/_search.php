@@ -135,7 +135,16 @@ use yii\widgets\ActiveForm;
 			</div>
 
 			<div class="row">
-				<div class="col-md-6"><?php  echo $form->field($model, 'project_id')->dropDownList(\common\models\Project::getList(), ['prompt' => '-']) ?></div>
+
+                <?php
+                    if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
+                        $projectList = \common\models\Project::getList();
+                    } else {
+                        $projectList = \common\models\Project::getList();
+                    }
+                ?>
+
+				<div class="col-md-6"><?php  echo $form->field($model, 'project_id')->dropDownList($projectList, ['prompt' => '-']) ?></div>
 				<div class="col-md-6"><?php  echo $form->field($model, 'source_id')->dropDownList(\common\models\Source::getList(), ['prompt' => '-']) ?></div>
 			</div>
 
@@ -191,7 +200,16 @@ use yii\widgets\ActiveForm;
 
                 <?//php  echo $form->field($model, 'called_expert') ?>
                 <div class="col-md-6">
-                    <?php  echo $form->field($model, 'employee_id')->dropDownList(\common\models\Employee::getList(), ['prompt' => '-']) ?>
+                    <?php
+                        if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
+                            $userList = \common\models\Employee::getList();
+                        } else {
+                            $userList = \common\models\Employee::getListByUserId(Yii::$app->user->id);
+                        }
+                    ?>
+
+
+                    <?php  echo $form->field($model, 'employee_id')->dropDownList($userList, ['prompt' => '-']) ?>
                 </div>
             </div>
 

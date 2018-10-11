@@ -74,6 +74,10 @@ class LeadsController extends DefaultController
             $isAgent = false;
         }
 
+        if(Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id)) {
+            $params['LeadSearch']['supervision_id'] = Yii::$app->user->id;
+        }
+
         if(!$params && $isAgent) {
             $params['LeadSearch']['employee_id'] = Yii::$app->user->id;
         }
@@ -192,7 +196,14 @@ class LeadsController extends DefaultController
     public function actionExport()
     {
         $searchModel = new LeadSearch();
-        $dataProvider = $searchModel->search2(Yii::$app->request->queryParams);
+
+        $params = Yii::$app->request->queryParams;
+
+        if(Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id)) {
+            $params['LeadSearch']['supervision_id'] = Yii::$app->user->id;
+        }
+
+        $dataProvider = $searchModel->search2($params);
 
         return $this->render('export', [
             'searchModel' => $searchModel,

@@ -4,6 +4,7 @@ namespace common\models\search;
 
 use common\models\ClientEmail;
 use common\models\ClientPhone;
+use common\models\UserGroupAssign;
 use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
@@ -33,6 +34,8 @@ class LeadSearch extends Lead
     public $depart_date_from;
     public $depart_date_to;
 
+    public $supervision_id;
+
 
 
     /**
@@ -41,7 +44,7 @@ class LeadSearch extends Lead
     public function rules()
     {
         return [
-            [['id', 'client_id', 'employee_id', 'status', 'project_id', 'adults', 'children', 'infants', 'rating', 'called_expert', 'cnt', 'l_grade', 'l_answered'], 'integer'],
+            [['id', 'client_id', 'employee_id', 'status', 'project_id', 'adults', 'children', 'infants', 'rating', 'called_expert', 'cnt', 'l_grade', 'l_answered', 'supervision_id'], 'integer'],
             [['client_name', 'client_email', 'client_phone','quote_pnr'], 'string'],
 
             //['created_date_from', 'default', 'value' => '2018-01-01'],
@@ -194,6 +197,12 @@ class LeadSearch extends Lead
         if($this->quote_pnr) {
             $subQuery = Quote::find()->select(['DISTINCT(lead_id)'])->where(['=', 'record_locator', mb_strtoupper($this->quote_pnr)]);
             $query->andWhere(['IN', 'leads.id', $subQuery]);
+        }
+
+        if($this->supervision_id > 0) {
+            $subQuery1 = UserGroupAssign::find()->select(['ugs_group_id'])->where(['ugs_user_id' => $this->supervision_id]);
+            $subQuery = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->where(['IN', 'ugs_group_id', $subQuery1]);
+            $query->andWhere(['IN', 'leads.employee_id', $subQuery]);
         }
 
         $query->andFilterWhere(['like', 'uid', $this->uid])
