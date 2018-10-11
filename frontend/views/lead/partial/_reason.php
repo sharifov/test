@@ -7,6 +7,7 @@
 
 use yii\helpers\Html;
 
+$activeLeadIds = isset($activeLeadIds) ? $activeLeadIds : [];
 $activeLeadIds = '[' . implode(',', $activeLeadIds) . ']';
 
 $js = <<<JS
@@ -36,9 +37,9 @@ $('#unassign-form').on('beforeSubmit', function () {
          $('#salesale-snooze_for').parent().parent().addClass('has-error');
         return false
     }
-    if ($('#reason-returntoqueue').val() == 'processing'  && 
-        $('#select-agent').length != 0  && 
-        $('#select-agent').val().length == 0) 
+    if ($('#reason-returntoqueue').val() == 'processing'  &&
+        $('#select-agent').length != 0  &&
+        $('#select-agent').val().length == 0)
     {
         $('#reason-other').parent().removeClass('has-error');
         $('#assign-agent-wrapper').addClass('has-error');
