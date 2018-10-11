@@ -321,7 +321,7 @@ class Lead extends ActiveRecord
         $sold = '';
 
         if((Yii::$app->authManager->getAssignment('admin', $userId) || Yii::$app->authManager->getAssignment('supervision', $userId))) {
-            $created = ' AND created = "' . date('Y-m-d') . '"';
+            //$created = ' AND created = "' . date('Y-m-d') . '"';
         }
 
         if (Yii::$app->user->identity->role == 'agent') {
