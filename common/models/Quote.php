@@ -10,6 +10,7 @@ use yii\base\ErrorException;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
 use yii\helpers\Html;
+use yii\db\Query;
 
 /**
  * This is the model class for table "quotes".
@@ -165,6 +166,29 @@ class Quote extends \yii\db\ActiveRecord
                 break;
         }
         return $profit;
+    }
+
+    public function getDataForProfit($quoteId)
+    {
+        $query = new Query();
+
+        $query
+        ->select(['selling' => 'SUM(qp.selling)',
+            'mark_up' => 'SUM(qp.mark_up + qp.extra_mark_up)',
+            'fare_type' => 'q.fare_type',
+            'check_payment' => 'q.check_payment'
+        ])
+        ->from(Quote::tableName().' q')
+        ->leftJoin(QuotePrice::tableName().' qp','q.id = qp.quote_id')
+        ->where(['q.id' => $quoteId]);
+
+        return $query->one();
+    }
+
+    public static function countProfit($id)
+    {
+        $data = self::getDataForProfit($id);
+        return self::getProfit($data['mark_up'], $data['selling'],$data['fare_type'],$data['check_payment']);
     }
 
     public static function createDump($flightSegments)
