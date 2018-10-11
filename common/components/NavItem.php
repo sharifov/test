@@ -129,9 +129,8 @@ class NavItem
                 ];
             }
 
-
             if (Yii::$app->user->identity->role != 'coach') {
-                $badges = Lead::getBadges();
+                $badges = Lead::getBadgesSingleQuery();
                 $menuItems[] = '<li class="' . self::isActive('inbox') . '">'
                     . Html::a('Inbox<span id="inbox-queue" class="badge badge-info">' . $badges['inbox'] . '</span > ', self::getQueueUri('inbox'))
                     . ' </li > ';

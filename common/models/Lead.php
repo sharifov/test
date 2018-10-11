@@ -282,9 +282,6 @@ class Lead extends ActiveRecord
                 ->where(['IN', self::tableName() . '.status', $status])
                 ->andWhere(['IN', self::tableName() . '.project_id', $projectIds]);
 
-
-
-
             if((Yii::$app->authManager->getAssignment('admin', $userId) || Yii::$app->authManager->getAssignment('supervision', $userId)) && in_array($key, ['trash', 'sold', 'follow-up', 'booked'])) {
                 $query->andWhere(['=', 'created', date('Y-m-d')]);
             }
@@ -306,10 +303,60 @@ class Lead extends ActiveRecord
                 ]);
             }
 
-            $badges[$key] = $query->count();
+            $query->select(['COUNT(id) as cntd'])->limit(1);
+
+            $badges[$key] = $query->scalar();
         }
 
         return $badges;
+    }
+
+    public static function getBadgesSingleQuery()
+    {
+        $projectIds = array_keys(ProjectEmployeeAccess::getProjectsByEmployee());
+
+        $userId = Yii::$app->user->id;
+        $created = '';
+        $employee = ' AND employee_id = '.$userId;
+        $sold = '';
+
+        if((Yii::$app->authManager->getAssignment('admin', $userId) || Yii::$app->authManager->getAssignment('supervision', $userId))) {
+            $created = ' AND created = "' . date('Y-m-d') . '"';
+        }
+
+        if (Yii::$app->user->identity->role == 'agent') {
+            $sold = $employee;
+        }
+        $default = implode(',', [
+            self::STATUS_PROCESSING,
+            self::STATUS_ON_HOLD,
+            self::STATUS_SNOOZE
+        ]);
+
+        $select = [
+            'inbox' => 'SUM(CASE WHEN status IN (:inbox) THEN 1 ELSE 0 END)',
+            'follow-up' => 'SUM(CASE WHEN status IN (:followup) ' . $created . ' THEN 1 ELSE 0 END)',
+            'booked' => 'SUM(CASE WHEN status IN (:booked) '.$created.' THEN 1 ELSE 0 END)',
+            'sold' => 'SUM(CASE WHEN status IN (:sold) '.$created.$sold.' THEN 1 ELSE 0 END)',
+            'processing' => 'SUM(CASE WHEN status IN ('.$default.') '.$employee.' THEN 1 ELSE 0 END)',
+            'processing-all' => 'SUM(CASE WHEN status IN ('.$default.') THEN 1 ELSE 0 END)'];
+
+        if(Yii::$app->user->identity->role != 'agent'){
+            $select['trash'] = 'SUM(CASE WHEN status IN ('.self::STATUS_TRASH.') '.$created.' THEN 1 ELSE 0 END)';
+        }
+
+        $query = self::find()
+        ->select($select)
+        ->andWhere(['IN', 'project_id', $projectIds])
+        ->addParams([':inbox' => self::STATUS_PENDING,
+                ':followup' => self::STATUS_FOLLOW_UP,
+                ':booked' => self::STATUS_BOOKED,
+                ':sold' => self::STATUS_SOLD,
+        ])
+        ->limit(1);
+        //echo $query->createCommand()->getRawSql();die;
+
+        return $query->createCommand()->queryOne();
     }
 
     public static function getLeadQueueType()

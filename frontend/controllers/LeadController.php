@@ -64,6 +64,7 @@ class LeadController extends DefaultController
                             'create', 'add-comment', 'change-state', 'unassign', 'take',
                             'set-rating', 'add-note', 'unprocessed', 'call-expert', 'send-email',
                             'check-updates', 'flow-transition', 'get-user-actions', 'add-pnr', 'update2','clone',
+                            'get-badges',
                         ],
                         'allow' => true,
                         'roles' => ['agent'],
@@ -205,6 +206,13 @@ class LeadController extends DefaultController
             $response['needRefresh'] = count($needRefresh);
         }
 
+        return $response;
+    }
+
+    public function actionGetBadges()
+    {
+        Yii::$app->response->format = Response::FORMAT_JSON;
+        $response = Lead::getBadgesSingleQuery();
         return $response;
     }
 
@@ -577,7 +585,6 @@ class LeadController extends DefaultController
     public function actionQueue($type)
     {
         $this->view->title = sprintf('Leads - %s Queue', ucfirst($type));
-
         $searchModel = null;
         if (in_array($type, ['processing-all', 'processing', 'follow-up'])) {
             $dataProvider = [];
