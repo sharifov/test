@@ -967,11 +967,23 @@ Sales - Kivork",
 
                 } elseif ($type === 'lead-status-sold') {
 
-                    $body = Yii::t('email', "Dear {name},
-We have some great news for you!
-Your Lead (ID: {lead_id}) has been changed status to SOLD!
+                    $quote = Quote::find()->where(['lead_id' => $this->id, 'status' => Quote::STATUS_APPLIED])->orderBy(['id' => SORT_DESC])->one();
+                    $flightSegment = LeadFlightSegment::find()->where(['lead_id' => $this->id])->orderBy(['id' => SORT_ASC])->one();
+                    $airlineName = '-';
+                    $profit = 0;
+                    if(!empty($quote)){
+                        $airline = Airline::findOne(['iata' => $quote->main_airline_code]);
+                        if(!empty($airline)){
+                            $airlineName = $airline->name;
+                        }
+                        $profit = number_format(Quote::countProfit($quote->id),2);
+                    }
 
-You can view lead here: {url}
+                    $body = Yii::t('email', "
+Booked quote with UID : {quote_uid},
+Source: {name},
+Sale ID: {lead_id} (Link to lead {url})
+{name} made \${profit} on {airline} to {destination}
 
 Regards,
 Sales - Kivork",
@@ -979,6 +991,10 @@ Sales - Kivork",
                             'name' => $userName,
                             'url' => $host . '/lead/booked/' . $this->id,
                             'lead_id' => $this->id,
+                            'quote_uid' => $quote ? $quote->uid : '-',
+                            'destination' => $flightSegment? $flightSegment->destination: '-',
+                            'airline' => $airlineName,
+                            'profit' => $profit,
                             'br' => "\r\n"
                         ]);
 
