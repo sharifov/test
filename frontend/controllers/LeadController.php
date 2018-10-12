@@ -32,6 +32,8 @@ use yii\web\Response;
 use yii\web\UnauthorizedHttpException;
 use yii\widgets\ActiveForm;
 use common\models\LeadFlightSegment;
+use common\models\Quote;
+use common\models\Employee;
 
 /**
  * Site controller
@@ -64,7 +66,7 @@ class LeadController extends DefaultController
                             'create', 'add-comment', 'change-state', 'unassign', 'take',
                             'set-rating', 'add-note', 'unprocessed', 'call-expert', 'send-email',
                             'check-updates', 'flow-transition', 'get-user-actions', 'add-pnr', 'update2','clone',
-                            'get-badges',
+                            'get-badges', 'test'
                         ],
                         'allow' => true,
                         'roles' => ['agent'],
@@ -614,9 +616,17 @@ class LeadController extends DefaultController
             $dataProvider = Lead::search($type);
         }
 
+        if (Yii::$app->user->identity->role == 'agent' && $type == 'sold')
+        {
+            $employee = Employee::findOne(['id' => Yii::$app->user->id]);
+            $today = date('Y-m-d');
+            $today = '2018-09-02';
+            $this->view->params['salary'] = $employee->calculateSalaryByMonth($today);
+        }
+
         return $this->render('queue', [
             'dataProvider' => $dataProvider,
-            'searchModel' => $searchModel
+            'searchModel' => $searchModel,
         ]);
     }
 
@@ -683,9 +693,6 @@ class LeadController extends DefaultController
 
     public function actionQuote($type, $id)
     {
-
-
-
         $this->view->title = sprintf('Processing Lead - %s', ucfirst($type));
 
         $lead = Lead::findOne(['id' => $id]);

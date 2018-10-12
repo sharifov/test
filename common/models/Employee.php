@@ -554,4 +554,49 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         return $str;
     }
 
+    public function calculateSalaryByMonth($date)
+    {
+        $start = new \DateTime($date);
+        $end = new \DateTime($date);
+        $start->modify('first day of this month');
+        $end->modify('last day of this month');
+        $base = 200;
+        $commission = 10;
+        $bonus = 0;
+
+        $query = new Query();
+        $query->select([
+            'q_id' => 'q.id',
+            'selling' => 'SUM(qp.selling)',
+            'mark_up' => 'SUM(qp.mark_up + qp.extra_mark_up)',
+            'fare_type' => 'q.fare_type',
+            'check_payment' => 'q.check_payment'
+        ])
+        ->from(Lead::tableName().' l')
+        ->leftJoin(Quote::tableName().' q','q.lead_id = l.id')
+        ->leftJoin(QuotePrice::tableName().' qp','q.id = qp.quote_id')
+        ->where(['l.status' => Lead::STATUS_SOLD , 'l.employee_id' => $this->id])
+        ->andWhere(['q.status' => Quote::STATUS_APPLIED])
+        ->andWhere(['BETWEEN','l.updated' , $start->format('Y-m-d').' 00:00:00', $end->format('Y-m-d').' 23:59:59'])
+        ->groupBy(['q.id'])
+        ;
+
+        $res = $query->all();
+
+        $profit = 0;
+        foreach ($res as $entry){
+            $profit += Quote::getProfit($entry['mark_up'], $entry['selling'], $entry['fare_type'], $entry['check_payment']);
+        }
+
+        switch ($profit){
+            case $profit > 11000: $bonus = 500; break;
+            case $profit > 8000: $bonus = 300; break;
+            case $profit > 5000: $bonus = 150; break;
+        }
+
+        $profit = $profit + $profit * $commission/100;
+
+        return $profit + $base + $bonus;
+    }
+
 }

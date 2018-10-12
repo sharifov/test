@@ -3,6 +3,7 @@
 /* @var $this \yii\web\View */
 
 /* @var $content string */
+/* @var $salary float */
 
 use frontend\assets\AppAsset;
 use common\widgets\Alert;
@@ -36,6 +37,9 @@ AppAsset::register($this);
         <div class="container-fluid">
             <div class="page-header__wrapper">
                 <h2 class="page-header__title"><?= Yii::$app->params['appName'] ?></h2>
+                <?php if(isset($this->params['salary'])):?>
+                <div class="salary_block">Salary this month: <?= number_format($this->params['salary'],2)?>$</div>
+                <?php endif;?>
                 <div class="page-header__general">
                     <?php
                     if (Yii::$app->controller->id == 'lead' && Yii::$app->controller->action->id = 'queue') {
