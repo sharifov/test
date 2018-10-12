@@ -62,7 +62,7 @@ return [
             'enableStrictParsing' => false,
             'rules' => [
                 [
-                    'pattern' => 'queue/<type:(inbox|follow-up|processing|processing-all|booked|sold|trash)>',
+                    'pattern' => 'queue/<type:(inbox|follow-up|processing|processing-all|booked|trash)>',
                     'route' => 'lead/queue',
                 ],
                 [
@@ -72,6 +72,14 @@ return [
                 [
                     'pattern' => 'take/<id>',
                     'route' => 'lead/take',
+                ],
+                [
+                    'pattern' => 'lead/get-salary/<dateparam>',
+                    'route' => 'lead/get-salary',
+                ],
+                [
+                    'pattern' => 'queue/sold',
+                    'route' => 'lead/sold',
                 ],
             ],
         ],

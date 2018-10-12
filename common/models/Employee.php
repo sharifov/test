@@ -564,14 +564,15 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         return $str;
     }
 
-    public function calculateSalaryByMonth($date)
+    /*
+     * @param startDate DateTime
+     * @param endDat DateTime
+     *
+     * */
+    public function calculateSalaryBetween($startDate, $endDate)
     {
-        $start = new \DateTime($date);
-        $end = new \DateTime($date);
-        $start->modify('first day of this month');
-        $end->modify('last day of this month');
-        $base = 200;
-        $commission = 10;
+        $base = ($this->userParams)?$this->userParams->up_base_amount:200;
+        $commission = ($this->userParams)?$this->userParams->up_commission_percent:10;
         $bonus = 0;
 
         $query = new Query();
@@ -587,10 +588,16 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         ->leftJoin(QuotePrice::tableName().' qp','q.id = qp.quote_id')
         ->where(['l.status' => Lead::STATUS_SOLD , 'l.employee_id' => $this->id])
         ->andWhere(['q.status' => Quote::STATUS_APPLIED])
-        ->andWhere(['BETWEEN','l.updated' , $start->format('Y-m-d').' 00:00:00', $end->format('Y-m-d').' 23:59:59'])
         ->groupBy(['q.id'])
         ;
 
+        if($startDate !== null && $endDate !== null){
+            $query->andWhere(['BETWEEN','l.updated' , $startDate->format('Y-m-d').' 00:00:00', $endDate->format('Y-m-d').' 23:59:59']);
+        }elseif($startDate !== null){
+            $query->andWhere(['>=','l.updated' , $startDate->format('Y-m-d').' 00:00:00']);
+        }elseif ($endDate !== null){
+            $query->andWhere(['<=','l.updated' , $endDate->format('Y-m-d').' 23:59:59']);
+        }
         $res = $query->all();
 
         $profit = 0;

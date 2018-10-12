@@ -2080,4 +2080,9 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
         return $command->queryAll();
     }
 
+    public function getBookedQuote()
+    {
+        return Quote::findOne(['lead_id' => $this->id, 'status' => Quote::STATUS_APPLIED]);
+    }
+
 }
