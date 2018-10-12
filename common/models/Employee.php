@@ -35,6 +35,7 @@ use yii\web\NotFoundHttpException;
  * @property ProjectEmployeeAccess[] $projectEmployeeAccesses
  * @property UserGroupAssign[] $userGroupAssigns
  * @property UserGroup[] $ugsGroups
+ * @property UserParams $userParams
  */
 class Employee extends \yii\db\ActiveRecord implements IdentityInterface
 {
@@ -201,6 +202,15 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
             'password_reset_token' => $token,
             'status' => self::STATUS_ACTIVE,
         ]);
+    }
+
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getUserParams()
+    {
+        return $this->hasOne(UserParams::className(), ['up_user_id' => 'id']);
     }
 
     /**

@@ -44,6 +44,7 @@ class NavItem
                 if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
                     $items[] = ['label' => '<i class="fa fa-users"></i> User Groups', 'url' => ['user-group/index']];
                     $items[] = ['label' => '<i class="fa fa-users"></i> User Groups Assignments', 'url' => ['user-group-assign/index']];
+                    $items[] = ['label' => '<i class="fa fa-users"></i> User Params', 'url' => ['user-params/index']];
                 }
 
 
