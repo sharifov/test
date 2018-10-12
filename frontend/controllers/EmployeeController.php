@@ -10,6 +10,7 @@ use common\models\EmployeeContactInfo;
 use common\models\ProjectEmployeeAccess;
 use common\models\search\EmployeeSearch;
 use common\models\UserGroupAssign;
+use common\models\UserParams;
 use Symfony\Component\Finder\Exception\AccessDeniedException;
 use Yii;
 use yii\bootstrap\Html;
@@ -185,12 +186,17 @@ class EmployeeController extends DefaultController
     {
         $this->view->title = sprintf('Employees - Profile');
 
-        $id = Yii::$app->request->get('id');
-        if ($id !== null) {
+        if ($id = Yii::$app->request->get('id')) {
+
             $model = Employee::findOne(['id' => $id]);
 
             if (!$model) {
                 throw new NotFoundHttpException('The requested user does not exist.');
+            }
+
+            $modelUserParams = UserParams::findOne($model->id);
+            if(!$modelUserParams) {
+                $modelUserParams = new UserParams();
             }
 
             $roles = array_keys($model->getRoles());
@@ -220,9 +226,12 @@ class EmployeeController extends DefaultController
 
         } else {
             $model = new Employee(['scenario' => Employee::SCENARIO_REGISTER]);
+            $modelUserParams = new UserParams();
         }
 
-        if ($model !== null) {
+
+
+
             if (Yii::$app->request->isPost) {
                 $attr = Yii::$app->request->post($model->formName());
 
@@ -234,6 +243,12 @@ class EmployeeController extends DefaultController
 
                 $isNew = $model->prepareSave($attr);
                 if ($model->validate() && $model->save()) {
+
+
+
+
+
+
                     $model->addRole($isNew);
 
 
@@ -276,12 +291,29 @@ class EmployeeController extends DefaultController
 
             $model->user_groups = ArrayHelper::map($model->userGroupAssigns, 'ugs_group_id', 'ugs_group_id');
 
+
+
+
+            if ($modelUserParams->load(Yii::$app->request->post())) {
+
+                //VarDumper::dump(Yii::$app->request->post()); exit;
+
+                $modelUserParams->up_user_id = $model->id;
+                $modelUserParams->up_updated_user_id = Yii::$app->user->id;
+
+                if($modelUserParams->save()) {
+                    return $this->refresh();
+                }
+            }
+
+
             return $this->render('_form', [
                 'model' => $model,
+                'modelUserParams' => $modelUserParams,
                 'isProfile' => false
             ]);
-        }
 
-        throw new BadRequestHttpException('"Employee ID ' . $id . '" not found.');
+
+        //throw new BadRequestHttpException('"Employee ID ' . $id . '" not found.');
     }
 }

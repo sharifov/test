@@ -100,6 +100,30 @@ HTML;
                 //'created_at:datetime',
                 //'updated_at:datetime',
                 'acl_rules_activated:boolean',
+
+                [
+                    'label' => 'Base Amount',
+                    //'attribute' => 'created_at',
+                    'value' => function(\common\models\Employee $model) {
+                        return $model->userParams ? '$'.number_format($model->userParams->up_base_amount , 2) : '-';
+                    },
+                    //'format' => '',
+                    'contentOptions' => ['class' => 'text-right'],
+                    'visible' => Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)
+                ],
+
+                [
+                    'label' => 'Commission',
+                    //'attribute' => 'created_at',
+                    'value' => function(\common\models\Employee $model) {
+                        return $model->userParams ? $model->userParams->up_commission_percent. '%' : '-';
+                    },
+                    //'format' => 'html',
+                    'contentOptions' => ['class' => 'text-right'],
+                    'visible' => Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)
+                ],
+
+
                 [
                     'attribute' => 'created_at',
                     'value' => function(\common\models\Employee $model) {
@@ -107,6 +131,8 @@ HTML;
                     },
                     'format' => 'html',
                 ],
+
+
                 [
                     'attribute' => 'updated_at',
                     'value' => function(\common\models\Employee $model) {

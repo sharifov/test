@@ -2,6 +2,7 @@
 /**
  * @var $this \yii\web\View
  * @var $model Employee
+ * @var $modelUserParams \common\models\UserParams
  * @var $isProfile boolean
  */
 
@@ -108,6 +109,24 @@ $this->params['breadcrumbs'][] = $this->title;
                     </div>
 
                 </div>
+
+                <?php if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)): ?>
+                <div class="row">
+                    <div class="col-md-12">
+                        <?php echo $form->errorSummary($modelUserParams) ?>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-3">
+                        <?= $form->field($modelUserParams, 'up_base_amount')->input('number', ['step' => 0.01, 'min' => 0, 'max' => '1000']) ?>
+                    </div>
+                    <div class="col-md-3">
+                        <?= $form->field($modelUserParams, 'up_commission_percent')->input('number', ['step' => 1, 'max' => 100, 'min' => 0]) ?>
+                    </div>
+                </div>
+                <?php endif; ?>
+
             </div>
             <?php
             if (!$model->isNewRecord && !$isProfile) : ?>
