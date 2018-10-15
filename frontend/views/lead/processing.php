@@ -68,6 +68,7 @@ $this->registerJsFile('/js/jquery.countdown-2.2.0/jquery.countdown.min.js', [
 <div class="lead-index">
 
     <?php Pjax::begin(); //['id' => 'lead-pjax-list', 'timeout' => 5000, 'enablePushState' => true, 'clientOptions' => ['method' => 'GET']]); ?>
+    <?= $this->render('_search_processing', ['model' => $searchModel]); ?>
 
     <?php $form = \yii\bootstrap\ActiveForm::begin(['options' => ['data-pjax' => true]]); // ['action' => ['leads/update-multiple'] ?>
 

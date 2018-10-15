@@ -37,6 +37,7 @@ class LeadSearch extends Lead
     public $depart_date_to;
     public $sold_date_from;
     public $sold_date_to;
+    public $processing_filter;
 
     public $supervision_id;
 
@@ -55,7 +56,7 @@ class LeadSearch extends Lead
             //['created_date_to', 'default', 'value' => date('Y-m-d')],
 
             [['uid', 'trip_type', 'cabin', 'notes_for_experts', 'created', 'updated', 'request_ip', 'request_ip_detail', 'offset_gmt', 'snooze_for', 'discount_id', 'bo_flight_id',
-                'created_date_from', 'created_date_to', 'depart_date_from', 'depart_date_to', 'source_id', 'statuses', 'sold_date_from', 'sold_date_to',], 'safe'],
+                'created_date_from', 'created_date_to', 'depart_date_from', 'depart_date_to', 'source_id', 'statuses', 'sold_date_from', 'sold_date_to', 'processing_filter'], 'safe'],
         ];
     }
 
@@ -514,6 +515,12 @@ class LeadSearch extends Lead
         ->andWhere(['IN','leads.status', [self::STATUS_SNOOZE, self::STATUS_PROCESSING, self::STATUS_ON_HOLD]])
         ->andWhere(['IN', $leadTable . '.project_id', $projectIds])
         ;
+
+        if($this->processing_filter){
+           switch ($this->processing_filter){
+               case 'snooze': $query->andWhere(['IN', $leadTable . '.project_id', $projectIds]); break;
+           }
+        }
 
         if($this->client_name) {
             $query->joinWith(['client' => function ($q) {

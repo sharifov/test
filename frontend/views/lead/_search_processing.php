@@ -19,7 +19,12 @@ $form = ActiveForm::begin([
         ]
     ]);
     ?>
-    <?=$form->field($model, 'filter')->dropDownList(['snooze' => 'Leads in snooze'], ['prompt' => '']);?>
+    <?=$form->field($model, 'processing_filter')->dropDownList([
+        'snooze' => 'Leads in snooze',
+        'without_email' => 'Leads without email',
+        'with_email' => 'Leads with email',
+        'with_send_quotes' => 'Leads with send quotes',
+    ], ['prompt' => '']);?>
 
 	<div class="form-group">
     	<?= Html::submitButton('<i class="fa fa-search"></i> Search leads', ['class' => 'btn btn-primary']) ?>
