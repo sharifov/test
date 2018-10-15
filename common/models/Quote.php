@@ -275,9 +275,9 @@ class Quote extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['uid', 'reservation_dump', 'pcc', 'gds', 'main_airline_code'], 'required'],
+            [['uid', 'reservation_dump', 'main_airline_code'], 'required'],
             [['lead_id', 'status', 'check_payment'], 'integer'],
-            [['created', 'updated', 'reservation_dump', 'created_by_seller', 'employee_name', 'employee_id'], 'safe'],
+            [['created', 'updated', 'reservation_dump', 'created_by_seller', 'employee_name', 'employee_id', 'pcc', 'gds'], 'safe'],
             [['uid', 'record_locator', 'pcc', 'cabin', 'gds', 'trip_type', 'main_airline_code', 'fare_type'], 'string', 'max' => 255],
 
             [['reservation_dump'], 'checkReservationDump'],
