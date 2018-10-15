@@ -564,4 +564,57 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         return $str;
     }
 
+    /*
+     * @param startDate DateTime
+     * @param endDat DateTime
+     *
+     * */
+    public function calculateSalaryBetween($startDate, $endDate)
+    {
+        $base = ($this->userParams)?$this->userParams->up_base_amount:200;
+        $commission = ($this->userParams)?$this->userParams->up_commission_percent:10;
+        $bonus = 0;
+
+        $query = new Query();
+        $query->select([
+            'q_id' => 'q.id',
+            'selling' => 'SUM(qp.selling)',
+            'mark_up' => 'SUM(qp.mark_up + qp.extra_mark_up)',
+            'fare_type' => 'q.fare_type',
+            'check_payment' => 'q.check_payment'
+        ])
+        ->from(Lead::tableName().' l')
+        ->leftJoin(Quote::tableName().' q','q.lead_id = l.id')
+        ->leftJoin(QuotePrice::tableName().' qp','q.id = qp.quote_id')
+        ->where(['l.status' => Lead::STATUS_SOLD , 'l.employee_id' => $this->id])
+        ->andWhere(['q.status' => Quote::STATUS_APPLIED])
+        ->groupBy(['q.id'])
+        ;
+
+        if($startDate !== null && $endDate !== null){
+            $query->andWhere(['BETWEEN','l.updated' , $startDate->format('Y-m-d').' 00:00:00', $endDate->format('Y-m-d').' 23:59:59']);
+        }elseif($startDate !== null){
+            $query->andWhere(['>=','l.updated' , $startDate->format('Y-m-d').' 00:00:00']);
+        }elseif ($endDate !== null){
+            $query->andWhere(['<=','l.updated' , $endDate->format('Y-m-d').' 23:59:59']);
+        }
+        $res = $query->all();
+
+        $profit = 0;
+        foreach ($res as $entry){
+            $profit += Quote::getProfit($entry['mark_up'], $entry['selling'], $entry['fare_type'], $entry['check_payment']);
+        }
+
+        switch (true){
+            case $profit > 11000: $bonus = 500; break;
+            case $profit > 8000: $bonus = 300; break;
+            case $profit > 5000: $bonus = 150; break;
+            default: $bonus = 0; break;
+        }
+
+        $profit = $profit + $profit * $commission/100;
+
+        return $profit + $base + $bonus;
+    }
+
 }

@@ -3,6 +3,7 @@
 /* @var $this \yii\web\View */
 
 /* @var $content string */
+/* @var $salary float */
 
 use frontend\assets\AppAsset;
 use common\widgets\Alert;

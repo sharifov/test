@@ -15,6 +15,8 @@ use yii\debug\models\timeline\DataProvider;
 use yii\helpers\VarDumper;
 use common\models\Quote;
 use common\models\LeadFlightSegment;
+use common\models\Client;
+use common\models\ProjectEmployeeAccess;
 
 /**
  * LeadSearch represents the model behind the search form of `common\models\Lead`.
@@ -33,6 +35,8 @@ class LeadSearch extends Lead
     public $created_date_to;
     public $depart_date_from;
     public $depart_date_to;
+    public $sold_date_from;
+    public $sold_date_to;
 
     public $supervision_id;
 
@@ -51,7 +55,7 @@ class LeadSearch extends Lead
             //['created_date_to', 'default', 'value' => date('Y-m-d')],
 
             [['uid', 'trip_type', 'cabin', 'notes_for_experts', 'created', 'updated', 'request_ip', 'request_ip_detail', 'offset_gmt', 'snooze_for', 'discount_id', 'bo_flight_id',
-            'created_date_from', 'created_date_to', 'depart_date_from', 'depart_date_to', 'source_id', 'statuses'], 'safe'],
+                'created_date_from', 'created_date_to', 'depart_date_from', 'depart_date_to', 'source_id', 'statuses', 'sold_date_from', 'sold_date_to',], 'safe'],
         ];
     }
 
@@ -357,6 +361,108 @@ class LeadSearch extends Lead
         return $dataProvider;
     }
 
+    /**
+     * Creates data provider instance with search query applied
+     *
+     * @param array $params
+     *
+     * @return ActiveDataProvider
+     */
+    public function searchSold($params)
+    {
+        $projectIds = array_keys(ProjectEmployeeAccess::getProjectsByEmployee());
+        $query = Lead::find();
+        $leadTable = Lead::tableName();
+
+        // add conditions that should always apply here
+
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+            'sort'=> ['defaultOrder' => ['updated' => SORT_DESC]],
+            'pagination' => [
+                'pageSize' => 30,
+            ],
+        ]);
+
+        $this->load($params);
+
+        if (!$this->validate()) {
+            // uncomment the following line if you do not want to return any records when validation fails
+            // $query->where('0=1');
+            return $dataProvider;
+        }
+
+        // grid filtering conditions
+        $query->andFilterWhere([
+            $leadTable.'.id' => $this->id,
+            $leadTable.'.client_id' => $this->client_id,
+            $leadTable.'.employee_id' => $this->employee_id,
+            $leadTable.'.project_id' => $this->project_id,
+            $leadTable.'.source_id' => $this->source_id,
+            $leadTable.'.bo_flight_id' => $this->bo_flight_id,
+            $leadTable.'.rating' => $this->rating,
+        ]);
+
+        $query
+        ->andWhere(['leads.status' => Lead::STATUS_SOLD])
+        ->andWhere(['IN', $leadTable . '.project_id', $projectIds])
+        ;
+
+
+        if(!empty($this->updated)){
+            $query->andFilterWhere(['=','DATE(leads.updated)', date('Y-m-d', strtotime($this->updated))]);
+        }
+
+
+        if($this->sold_date_from || $this->sold_date_to) {
+            if ($this->sold_date_from) {
+                $query->andFilterWhere(['>=', 'DATE(leads.updated)', date('Y-m-d', strtotime($this->sold_date_from))]);
+            }
+            if ($this->sold_date_to) {
+                $query->andFilterWhere(['<=', 'DATE(leads.updated)', date('Y-m-d', strtotime($this->sold_date_to))]);
+            }
+        }
+
+        if($this->client_name) {
+            $query->joinWith(['client' => function ($q) {
+                if($this->client_name) {
+                    $q->where(['like', 'clients.last_name', $this->client_name])
+                    ->orWhere(['like', 'clients.first_name', $this->client_name]);
+                }
+            }]);
+        }
+
+        if($this->client_email) {
+            $subQuery = ClientEmail::find()->select(['DISTINCT(client_id)'])->where(['like', 'email', $this->client_email]);
+            $query->andWhere(['IN', 'client_id', $subQuery]);
+        }
+
+        if($this->client_phone) {
+
+            $this->client_phone = preg_replace('~[^0-9\+]~', '', $this->client_phone);
+            $this->client_phone = ($this->client_phone[0] === "+" ? '+' : '') . str_replace("+", '', $this->client_phone);
+
+            $subQuery = ClientPhone::find()->select(['DISTINCT(client_id)'])->where(['like', 'phone', $this->client_phone]);
+            $query->andWhere(['IN', 'client_id', $subQuery]);
+        }
+
+        //echo $this->created_date_from;
+        if($this->quote_pnr) {
+            $subQuery = Quote::find()->select(['DISTINCT(lead_id)'])->where(['=', 'record_locator', mb_strtoupper($this->quote_pnr)]);
+            $query->andWhere(['IN', 'leads.id', $subQuery]);
+        }
+
+        if($this->supervision_id > 0) {
+            $subQuery1 = UserGroupAssign::find()->select(['ugs_group_id'])->where(['ugs_user_id' => $this->supervision_id]);
+            $subQuery = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->where(['IN', 'ugs_group_id', $subQuery1]);
+            $query->andWhere(['IN', 'leads.employee_id', $subQuery]);
+        }
+
+       /*  $sqlRaw = $query->createCommand()->getRawSql();
+        VarDumper::dump($sqlRaw, 10, true); exit; */
+
+        return $dataProvider;
+    }
 
     public function searchEmail($params)
     {
