@@ -6,6 +6,7 @@ use common\models\Lead;
 use common\models\Quote;
 use yii\helpers\Url;
 use common\models\Airport;
+use dosamigos\datepicker\DatePicker;
 
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\LeadSearch */
@@ -26,7 +27,7 @@ if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
 ?>
 <style>
 .dropdown-menu {
-	z-index: 1010!important;
+	z-index: 1010 !important;
 }
 </style>
 <div class="lead-index">
@@ -67,7 +68,7 @@ if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
                     return (! empty($additionally->pnr)) ? $additionally->pnr : '-';
                 }
                 return '-';
-            }
+            },
         ],
         [
             'label' => 'Passengers',
@@ -130,31 +131,31 @@ if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
                 if ($isAgent && Yii::$app->user->id !== $model->employee_id) {
                     $str = '- // - // - // -';
                 } else {
-                   $str = $model->client && $model->client->clientPhones ? '<br><i class="fa fa-phone"></i> ' . implode(' <br><i class="fa fa-phone"></i> ', \yii\helpers\ArrayHelper::map($model->client->clientPhones, 'phone', 'phone')) . '' : '';
+                    $str = $model->client && $model->client->clientPhones ? '<br><i class="fa fa-phone"></i> ' . implode(' <br><i class="fa fa-phone"></i> ', \yii\helpers\ArrayHelper::map($model->client->clientPhones, 'phone', 'phone')) . '' : '';
                 }
 
                 return $str ?? '-';
             },
             'options' => [
                 'style' => 'width:180px'
-            ],
+            ]
         ],
         [
             'label' => 'Destination',
-            'value' => function(\common\models\Lead $model) {
-                    $segments = $model->leadFlightSegments;
-                    $segmentData = [];
-                    if($segments) {
-                        foreach ($segments as $sk => $segment) {
-                            $airport = Airport::findIdentity($segment->destination);
-                            if($airport){
-                                return $airport->city." (".$segment->destination.")";
-                            }
-                            return $segment->destination;
+            'value' => function (\common\models\Lead $model) {
+                $segments = $model->leadFlightSegments;
+                $segmentData = [];
+                if ($segments) {
+                    foreach ($segments as $sk => $segment) {
+                        $airport = Airport::findIdentity($segment->destination);
+                        if ($airport) {
+                            return $airport->city . " (" . $segment->destination . ")";
                         }
+                        return $segment->destination;
                     }
-                    return '';
-                },
+                }
+                return '';
+            },
             'format' => 'raw'
         ],
 
@@ -165,13 +166,14 @@ if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
             'value' => function (\common\models\Lead $model) {
                 return $model->employee ? '<i class="fa fa-user"></i> ' . $model->employee->username : '-';
             },
-            'filter' => $userList
+            'filter' => $userList,
+            'visible' => !$isAgent,
         ],
         [
             'label' => 'Profit',
             'value' => function ($model) {
                 $quote = $model->getBookedQuote();
-                return "<strong>$".number_format(Quote::countProfit($quote->id), 2)."</strong>";
+                return "<strong>$" . number_format(Quote::countProfit($quote->id), 2) . "</strong>";
             },
             'format' => 'raw'
         ],
@@ -181,7 +183,16 @@ if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
             'value' => function ($model) {
                 return $model['updated'];
             },
-            'format' => 'raw'
+            'format' => 'datetime',
+            'filter' => DatePicker::widget([
+                'model' => $searchModel,
+                'attribute' => 'updated',
+                'clientOptions' => [
+                    'autoclose' => true,
+                    'format' => 'dd-M-yyyy'
+                ]
+            ]),
+            'contentOptions'=>['style'=>'width: 180px;text-align:center;']
         ],
         [
             'label' => 'Date of Departure',
@@ -210,7 +221,15 @@ if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
             },
             'format' => 'raw'
         ],
-
+        [
+            'attribute' => 'source_id',
+            'label' => 'Market Info',
+            'visible' => ! $isAgent,
+            'value' => function (\common\models\Lead $model) {
+                return $model->source ? $model->source->name : '-';
+            },
+            'filter' => \common\models\Source::getList(),
+        ],
         [
             'class' => 'yii\grid\ActionColumn',
             'template' => '{action}',
@@ -235,7 +254,7 @@ if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
 <?php
 echo GridView::widget([
     'dataProvider' => $dataProvider,
-    'filterModel' => $isAgent ? false : $searchModel,
+    'filterModel' => $searchModel,
     'columns' => $gridColumns,
     'toolbar' => false,
     'pjax' => false,

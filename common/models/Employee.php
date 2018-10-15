@@ -605,10 +605,11 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
             $profit += Quote::getProfit($entry['mark_up'], $entry['selling'], $entry['fare_type'], $entry['check_payment']);
         }
 
-        switch ($profit){
+        switch (true){
             case $profit > 11000: $bonus = 500; break;
             case $profit > 8000: $bonus = 300; break;
             case $profit > 5000: $bonus = 150; break;
+            default: $bonus = 0; break;
         }
 
         $profit = $profit + $profit * $commission/100;

@@ -203,8 +203,10 @@ class NavItem
     private static function isActive($type)
     {
         if ($type == Yii::$app->request->get('type') &&
-            Yii::$app->controller->action->id = 'queue'
+            Yii::$app->controller->action->id == 'queue'
         ) {
+            return 'active';
+        }elseif($type == 'sold' && Yii::$app->controller->action->id == 'sold'){
             return 'active';
         }
         return '';

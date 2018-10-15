@@ -398,6 +398,7 @@ class LeadSearch extends Lead
             $leadTable.'.client_id' => $this->client_id,
             $leadTable.'.employee_id' => $this->employee_id,
             $leadTable.'.project_id' => $this->project_id,
+            $leadTable.'.source_id' => $this->source_id,
             $leadTable.'.bo_flight_id' => $this->bo_flight_id,
             $leadTable.'.rating' => $this->rating,
         ]);
@@ -406,6 +407,12 @@ class LeadSearch extends Lead
         ->andWhere(['leads.status' => Lead::STATUS_SOLD])
         ->andWhere(['IN', $leadTable . '.project_id', $projectIds])
         ;
+
+
+        if(!empty($this->updated)){
+            $query->andFilterWhere(['=','DATE(leads.updated)', date('Y-m-d', strtotime($this->updated))]);
+        }
+
 
         if($this->sold_date_from || $this->sold_date_to) {
             if ($this->sold_date_from) {
