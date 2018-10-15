@@ -612,6 +612,8 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
             default: $bonus = 0; break;
         }
 
+        /* var_dump($profit, $base, $commission, $bonus);
+        die; */
         $profit = $profit + $profit * $commission/100;
 
         return $profit + $base + $bonus;

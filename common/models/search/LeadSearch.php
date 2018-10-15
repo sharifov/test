@@ -380,7 +380,7 @@ class LeadSearch extends Lead
             'query' => $query,
             'sort'=> ['defaultOrder' => ['updated' => SORT_DESC]],
             'pagination' => [
-                'pageSize' => 30,
+                'pageSize' => 100,
             ],
         ]);
 
@@ -407,12 +407,6 @@ class LeadSearch extends Lead
         ->andWhere(['leads.status' => Lead::STATUS_SOLD])
         ->andWhere(['IN', $leadTable . '.project_id', $projectIds])
         ;
-
-
-        if(!empty($this->updated)){
-            $query->andFilterWhere(['=','DATE(leads.updated)', date('Y-m-d', strtotime($this->updated))]);
-        }
-
 
         if($this->sold_date_from || $this->sold_date_to) {
             if ($this->sold_date_from) {
@@ -460,6 +454,98 @@ class LeadSearch extends Lead
 
        /*  $sqlRaw = $query->createCommand()->getRawSql();
         VarDumper::dump($sqlRaw, 10, true); exit; */
+
+        return $dataProvider;
+    }
+
+    /**
+     * Creates data provider instance with search query applied
+     *
+     * @param array $params
+     *
+     * @return ActiveDataProvider
+     */
+    public function searchProcessing($params)
+    {
+        $projectIds = array_keys(ProjectEmployeeAccess::getProjectsByEmployee());
+        $query = Lead::find();
+        $leadTable = Lead::tableName();
+
+        // add conditions that should always apply here
+
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+            'sort'=> ['defaultOrder' => ['created' => SORT_DESC]],
+            'pagination' => [
+                'pageSize' => 100,
+            ],
+        ]);
+        $dataProvider->setSort([
+            'attributes' => [
+                'id',
+                'created' => [
+                    'default' => SORT_DESC,
+                ],
+            ]
+        ]);
+
+        $this->load($params);
+
+        if (!$this->validate()) {
+            // uncomment the following line if you do not want to return any records when validation fails
+            // $query->where('0=1');
+            return $dataProvider;
+        }
+
+        // grid filtering conditions
+        $query->andFilterWhere([
+            $leadTable.'.id' => $this->id,
+            $leadTable.'.client_id' => $this->client_id,
+            $leadTable.'.employee_id' => $this->employee_id,
+            $leadTable.'.project_id' => $this->project_id,
+            $leadTable.'.source_id' => $this->source_id,
+            $leadTable.'.bo_flight_id' => $this->bo_flight_id,
+            $leadTable.'.rating' => $this->rating,
+            $leadTable.'.status' => $this->status,
+            $leadTable.'.l_answered' => $this->l_answered,
+        ]);
+
+        $query
+        ->andWhere(['IN','leads.status', [self::STATUS_SNOOZE, self::STATUS_PROCESSING, self::STATUS_ON_HOLD]])
+        ->andWhere(['IN', $leadTable . '.project_id', $projectIds])
+        ;
+
+        if($this->client_name) {
+            $query->joinWith(['client' => function ($q) {
+                if($this->client_name) {
+                    $q->where(['like', 'clients.last_name', $this->client_name])
+                    ->orWhere(['like', 'clients.first_name', $this->client_name]);
+                }
+            }]);
+        }
+
+        if($this->client_email) {
+            $subQuery = ClientEmail::find()->select(['DISTINCT(client_id)'])->where(['like', 'email', $this->client_email]);
+            $query->andWhere(['IN', 'client_id', $subQuery]);
+        }
+
+        if($this->client_phone) {
+
+            $this->client_phone = preg_replace('~[^0-9\+]~', '', $this->client_phone);
+            $this->client_phone = ($this->client_phone[0] === "+" ? '+' : '') . str_replace("+", '', $this->client_phone);
+
+            $subQuery = ClientPhone::find()->select(['DISTINCT(client_id)'])->where(['like', 'phone', $this->client_phone]);
+            $query->andWhere(['IN', 'client_id', $subQuery]);
+        }
+
+        if($this->supervision_id > 0) {
+            $subQuery1 = UserGroupAssign::find()->select(['ugs_group_id'])->where(['ugs_user_id' => $this->supervision_id]);
+            $subQuery = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->where(['IN', 'ugs_group_id', $subQuery1]);
+            $query->andWhere(['IN', 'leads.employee_id', $subQuery]);
+        }
+
+        /*  $sqlRaw = $query->createCommand()->getRawSql();
+         VarDumper::dump($sqlRaw, 10, true); exit; */
 
         return $dataProvider;
     }

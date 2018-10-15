@@ -1976,6 +1976,15 @@ Sales - Kivork",
         return $list;
     }
 
+    public static function getProcessingStatuses()
+    {
+        return [
+            self::STATUS_SNOOZE => self::STATUS_LIST[self::STATUS_SNOOZE],
+            self::STATUS_PROCESSING => self::STATUS_LIST[self::STATUS_PROCESSING],
+            self::STATUS_ON_HOLD => self::STATUS_LIST[self::STATUS_ON_HOLD],
+        ];
+    }
+
     /**
      * @return string
      */
@@ -2084,5 +2093,59 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
     {
         return Quote::findOne(['lead_id' => $this->id, 'status' => Quote::STATUS_APPLIED]);
     }
+
+    public function getFlightDetails()
+    {
+        $flightSegments = LeadFlightSegment::findAll(['lead_id' => $this->id]);
+        $segmentsStr = [];
+        foreach ($flightSegments as $entry){
+            $segmentsStr[] = $entry['departure'].' '.$entry['origin'].'-'.$entry['destination'];
+        }
+
+        return implode('<br/>', $segmentsStr);
+    }
+
+    public function getDeparture()
+    {
+        $flightSegment = LeadFlightSegment::find()->where(['lead_id' => $this->id])->orderBy(['departure' => SORT_ASC])->one();
+
+        return ($flightSegment)?$flightSegment['departure']:null;
+    }
+
+    public function getQuoteSendInfo()
+    {
+        $query = new Query();
+        $query->select(['SUM(CASE WHEN status IN (2, 4, 5) THEN 1 ELSE 0 END) AS send_q',
+                        'SUM(CASE WHEN status NOT IN (2, 4, 5) THEN 1 ELSE 0 END) AS not_send_q'])
+            ->from(Quote::tableName().' q')
+            ->where(['lead_id' => $this->id])
+            ->groupBy('lead_id');
+
+        return $query->createCommand()->queryOne();
+    }
+
+    public function getLastActivityByNote()
+    {
+        $lastNote = Note::find()->where(['lead_id' => $this->id])->orderBy(['created' => SORT_DESC])->one();
+
+        if(!empty($lastNote)){
+            return $lastNote['created'];
+        }
+
+        return $this->updated;
+    }
+
+    public function getLastReason()
+    {
+        $lastReason = Reason::find()->where(['lead_id' => $this->id])->orderBy(['created' => SORT_DESC])->one();
+
+        if(!empty($lastReason)){
+            return $lastReason['reason'];
+        }
+
+        return '-';
+    }
+
+
 
 }
