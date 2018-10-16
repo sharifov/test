@@ -4,6 +4,7 @@ namespace common\models\search;
 
 use common\models\ClientEmail;
 use common\models\ClientPhone;
+use common\models\LeadFlow;
 use common\models\UserGroupAssign;
 use Yii;
 use yii\base\Model;
@@ -121,7 +122,7 @@ class LeadSearch extends Lead
             'id' => $this->id,
             'client_id' => $this->client_id,
             'employee_id' => $this->employee_id,
-            'status' => $this->status,
+            'leads.status' => $this->status,
             'project_id' => $this->project_id,
             'source_id' => $this->source_id,
             'adults' => $this->adults,
@@ -140,7 +141,7 @@ class LeadSearch extends Lead
 
 
         if($this->statuses) {
-            $query->andWhere(['status' => $this->statuses]);
+            $query->andWhere(['leads.status' => $this->statuses]);
         }
 
 
@@ -156,7 +157,7 @@ class LeadSearch extends Lead
         } else {
 
             if($this->created) {
-                $query->andFilterWhere(['DATE(created)'=> date('Y-m-d', strtotime($this->created))]);
+                $query->andFilterWhere(['DATE(leads.created)'=> date('Y-m-d', strtotime($this->created))]);
             }
         }
 
@@ -173,6 +174,32 @@ class LeadSearch extends Lead
 
             $query->andWhere(['IN', 'leads.id', $subQuery]);
         }
+
+
+        if($this->sold_date_from || $this->sold_date_to) {
+
+            /*if ($this->sold_date_from) {
+                $query->andFilterWhere(['>=', 'DATE(leads.updated)', date('Y-m-d', strtotime($this->sold_date_from))]);
+            }
+            if ($this->sold_date_to) {
+                $query->andFilterWhere(['<=', 'DATE(leads.updated)', date('Y-m-d', strtotime($this->sold_date_to))]);
+            }*/
+
+
+            $subQuery = LeadFlow::find()->select(['DISTINCT(lead_flow.lead_id)'])->where('lead_flow.status = leads.status AND lead_flow.lead_id = leads.id');
+
+            if ($this->sold_date_from) {
+                $subQuery->andFilterWhere(['>=', 'DATE(lead_flow.created)', date('Y-m-d', strtotime($this->sold_date_from))]);
+            }
+            if ($this->sold_date_to) {
+                $subQuery->andFilterWhere(['<=', 'DATE(lead_flow.created)', date('Y-m-d', strtotime($this->sold_date_to))]);
+            }
+
+            $query->andWhere(['IN', 'leads.id', $subQuery]);
+        }
+
+
+
 
         if($this->client_name) {
             $query->joinWith(['client' => function ($q) {
@@ -415,12 +442,25 @@ class LeadSearch extends Lead
 
 
         if($this->sold_date_from || $this->sold_date_to) {
-            if ($this->sold_date_from) {
+
+            /*if ($this->sold_date_from) {
                 $query->andFilterWhere(['>=', 'DATE(leads.updated)', date('Y-m-d', strtotime($this->sold_date_from))]);
             }
             if ($this->sold_date_to) {
                 $query->andFilterWhere(['<=', 'DATE(leads.updated)', date('Y-m-d', strtotime($this->sold_date_to))]);
+            }*/
+
+
+            $subQuery = LeadFlow::find()->select(['DISTINCT(lead_flow.lead_id)'])->where('lead_flow.status = leads.status AND lead_flow.lead_id = leads.id');
+
+            if ($this->sold_date_from) {
+                $subQuery->andFilterWhere(['>=', 'DATE(lead_flow.created)', date('Y-m-d', strtotime($this->sold_date_from))]);
             }
+            if ($this->sold_date_to) {
+                $subQuery->andFilterWhere(['<=', 'DATE(lead_flow.created)', date('Y-m-d', strtotime($this->sold_date_to))]);
+            }
+
+            $query->andWhere(['IN', 'leads.id', $subQuery]);
         }
 
         if($this->client_name) {

@@ -50,6 +50,8 @@ use yii\helpers\VarDumper;
  * @property string $description
  *
  * @property LeadFlightSegment[] $leadFlightSegments
+ * @property LeadFlow[] $leadFlows
+ * @property LeadLog[] $leadLogs
  * @property LeadPreferences $leadPreferences
  * @property Client $client
  * @property Employee $employee
@@ -224,6 +226,23 @@ class Lead extends ActiveRecord
                 'value' => date('Y-m-d H:i:s') //new Expression('NOW()'),
             ],
         ];
+    }
+
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getLeadFlows()
+    {
+        return $this->hasMany(LeadFlow::class, ['lead_id' => 'id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getLeadLogs()
+    {
+        return $this->hasMany(LeadLog::class, ['lead_id' => 'id']);
     }
 
 
