@@ -15,7 +15,7 @@ use yii\filters\VerbFilter;
 /**
  * LeadTaskController implements the CRUD actions for LeadTask model.
  */
-class LeadTaskController extends DefaultController
+class LeadTaskController extends FController
 {
     /**
      * {@inheritdoc}

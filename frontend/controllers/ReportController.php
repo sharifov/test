@@ -14,7 +14,7 @@ use yii\helpers\ArrayHelper;
 use yii\web\Controller;
 use yii\web\Response;
 
-class ReportController extends DefaultController
+class ReportController extends FController
 {
     public function behaviors()
     {

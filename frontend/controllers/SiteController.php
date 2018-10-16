@@ -7,23 +7,18 @@ use common\models\Employee;
 use common\models\Lead;
 use common\models\search\EmployeeSearch;
 use common\models\search\LeadTaskSearch;
+use common\models\UserParams;
 use Yii;
-use yii\base\InvalidParamException;
 use yii\helpers\ArrayHelper;
-use yii\helpers\VarDumper;
-use yii\web\BadRequestHttpException;
 use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
 use common\models\LoginForm;
-use frontend\models\PasswordResetRequestForm;
-use frontend\models\ResetPasswordForm;
-use frontend\models\SignupForm;
-use frontend\models\ContactForm;
+use yii\web\ForbiddenHttpException;
 
 /**
  * Site controller
  */
-class SiteController extends DefaultController
+class SiteController extends FController
 {
     /**
      * {@inheritdoc}
@@ -35,23 +30,37 @@ class SiteController extends DefaultController
                 'class' => AccessControl::class,
                 'rules' => [
                     [
-                        'actions' => ['index'],
+                        'actions' => ['login', 'error'],
+                        'allow' => true,
+                    ],
+                    [
+                        'actions' => ['index', 'logout', 'profile', 'get-airport'],
                         'allow' => true,
                         'roles' => ['@'],
                     ],
                 ],
-            ]
+            ],
+            'verbs' => [
+                'class' => VerbFilter::class,
+                'actions' => [
+                    'logout' => ['post', 'GET'],
+                ],
+            ],
         ];
 
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
 
-    /**
-     * {@inheritdoc}
-     */
+
+
     public function actions()
     {
-        return parent::actions();
+        return [
+            'error' => [
+                'class' => 'yii\web\ErrorAction',
+                'view' => '@yiister/gentelella/views/error',
+            ],
+        ];
     }
 
     /**
@@ -372,16 +381,78 @@ class SiteController extends DefaultController
 
     public function actionLogout()
     {
-        return parent::actionLogout();
+        Yii::$app->user->logout();
+
+        return $this->goHome();
     }
 
+    /**
+     * Login action.
+     *
+     * @return string
+     */
     public function actionLogin()
     {
-        return parent::actionLogin();
+        $this->layout = '@frontend/themes/gentelella/views/layouts/login.php';
+
+        if (!Yii::$app->user->isGuest) {
+            return $this->goHome();
+        }
+        $isBackend = false; //strpos(Yii::$app->request->baseUrl, 'admin');
+
+        $model = new LoginForm();
+
+        if ($model->load(Yii::$app->request->post()) && $model->login($isBackend)) {
+            if (!$isBackend) {
+                return $this->goBack('/');
+            } else {
+                return $this->goBack();
+            }
+        } else {
+            $model->password = '';
+            return $this->render('login.php', [
+                'model' => $model,
+            ]);
+        }
     }
 
     public function actionProfile()
     {
-        return parent::actionProfile();
+        if (!Yii::$app->user->isGuest) {
+            $this->view->title = sprintf('Employee - Profile');
+            $model = Employee::findOne(['id' => Yii::$app->user->id]);
+            if ($model !== null) {
+                if (Yii::$app->request->isPost) {
+                    $attr = Yii::$app->request->post($model->formName());
+                    $model->prepareSave($attr);
+                    if ($model->validate() && $model->save()) {
+                        Yii::$app->getSession()->setFlash('success', 'Profile updated!');
+                    }
+                }
+
+                $modelUserParams = new UserParams();
+
+                return $this->render('@frontend/views/employee/_form.php', [
+                    'model' => $model,
+                    'modelUserParams' => $modelUserParams,
+                    'isProfile' => true
+                ]);
+            }
+        }
+
+        throw new ForbiddenHttpException();
+    }
+
+    public function actionGetAirport($term)
+    {
+        $response = file_get_contents(sprintf('%s?term=%s', Yii::$app->params['getAirportUrl'], $term));
+        $response = json_decode($response, true);
+        if (isset($response['success']) && $response['success']) {
+            return isset($response['data'])
+                ? json_encode($response['data'])
+                : json_encode([]);
+        }
+
+        return json_encode([]);
     }
 }

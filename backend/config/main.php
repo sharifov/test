@@ -77,7 +77,7 @@ return [
             'baseUrl' => '/bpanel',
         ],
         'user' => [
-            'identityClass' => 'common\models\User',
+            'identityClass' => 'common\models\User2',
             'enableAutoLogin' => true,
             'identityCookie' => ['name' => '_identity-backend', 'httpOnly' => true],
         ],
@@ -146,13 +146,13 @@ return [
             'defaultRoles' => ['guest'],
         ],
 
-        'user' => [
+        /*'user' => [
             'class' => 'webvimark\modules\UserManagement\components\UserConfig',
             'on afterLogin' => function($event) {
                 \webvimark\modules\UserManagement\models\UserVisitLog::newVisitor($event->identity->id);
             },
             'identityCookie' => ['name' => '_identity-backend', 'httpOnly' => false],
-        ],
+        ],*/
 
 
         'view' => [

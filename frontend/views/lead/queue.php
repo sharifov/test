@@ -9,6 +9,9 @@
 use yii\data\ActiveDataProvider;
 use common\models\Lead;
 
+
+
+
 $template = <<<HTML
 <div class="table-pagination">
     <div class="container">

@@ -25,7 +25,7 @@ use yii\web\Response;
 /**
  * Site controller
  */
-class EmployeeController extends DefaultController
+class EmployeeController extends FController
 {
     /**
      * {@inheritdoc}

@@ -14,21 +14,8 @@ use yii\filters\VerbFilter;
 /**
  * ApiLogController implements the CRUD actions for ApiLog model.
  */
-class ApiLogController extends DefaultController
+class ApiLogController extends FController
 {
-    /*public function behaviors()
-    {
-        $behaviors = parent::behaviors();
-
-        $behaviors ['verbs'] = [
-            'class' => VerbFilter::class,
-            'actions' => [
-                'delete' => ['POST'],
-            ],
-        ];
-
-        return $behaviors;
-    }*/
 
     public function behaviors()
     {

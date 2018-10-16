@@ -36,7 +36,7 @@ use common\models\LeadFlightSegment;
 /**
  * Site controller
  */
-class LeadController extends DefaultController
+class LeadController extends FController
 {
     /**
      * {@inheritdoc}
@@ -80,8 +80,9 @@ class LeadController extends DefaultController
     {
         if (parent::beforeAction($action)) {
             if (in_array($action->id, ['create', 'quote'])) {
-                Yii::$app->setLayoutPath('@app/views/layouts');
-                $this->layout = 'sale';
+                //Yii::$app->setLayoutPath('@frontend/views/layouts');
+                //$this->layout = 'sale';
+                //$this->layout = '@app/themes/gentelella/views/layouts/main_lead';
             }
             return true;
         }
@@ -683,7 +684,6 @@ class LeadController extends DefaultController
 
     public function actionQuote($type, $id)
     {
-
 
 
         $this->view->title = sprintf('Processing Lead - %s', ucfirst($type));
