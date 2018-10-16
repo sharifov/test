@@ -5,12 +5,12 @@ namespace common\models\search;
 use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
-use common\models\UserParams;
+use common\models\ProfitBonus;
 
 /**
- * UserParamsSearch represents the model behind the search form of `common\models\UserParams`.
+ * ProfitBonusSearch represents the model behind the search form of `common\models\ProfitBonus`.
  */
-class UserParamsSearch extends UserParams
+class ProfitBonusSearch extends ProfitBonus
 {
     /**
      * {@inheritdoc}
@@ -18,9 +18,8 @@ class UserParamsSearch extends UserParams
     public function rules()
     {
         return [
-            [['up_user_id', 'up_commission_percent', 'up_updated_user_id', 'up_bonus_active'], 'integer'],
-            [['up_base_amount'], 'number'],
-            [['up_updated_dt'], 'safe'],
+            [['pb_id', 'pb_user_id', 'pb_min_profit', 'pb_bonus', 'pb_updated_user_id'], 'integer'],
+            [['pb_updated_dt'], 'safe'],
         ];
     }
 
@@ -42,7 +41,7 @@ class UserParamsSearch extends UserParams
      */
     public function search($params)
     {
-        $query = UserParams::find();
+        $query = ProfitBonus::find();
 
         // add conditions that should always apply here
 
@@ -60,12 +59,12 @@ class UserParamsSearch extends UserParams
 
         // grid filtering conditions
         $query->andFilterWhere([
-            'up_user_id' => $this->up_user_id,
-            'up_commission_percent' => $this->up_commission_percent,
-            'up_base_amount' => $this->up_base_amount,
-            'up_updated_dt' => $this->up_updated_dt,
-            'up_bonus_active' => $this->up_bonus_active,
-            'up_updated_user_id' => $this->up_updated_user_id,
+            'pb_id' => $this->pb_id,
+            'pb_user_id' => $this->pb_user_id,
+            'pb_min_profit' => $this->pb_min_profit,
+            'pb_bonus' => $this->pb_bonus,
+            'pb_updated_dt' => $this->pb_updated_dt,
+            'pb_updated_user_id' => $this->pb_updated_user_id,
         ]);
 
         return $dataProvider;

@@ -44,6 +44,12 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     const STATUS_DELETED = 0;
     const STATUS_ACTIVE = 10;
 
+    const PROFIT_BONUSES = [
+        11000   =>  500,
+        8000    =>  300,
+        5000    =>  150
+    ];
+
     public $password;
     public $deleted;
     public $role;
@@ -573,6 +579,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     {
         $base = ($this->userParams)?$this->userParams->up_base_amount:200;
         $commission = ($this->userParams)?$this->userParams->up_commission_percent:10;
+        $bonusActive = ($this->userParams)?$this->userParams->up_bonus_active:1;
         $bonus = 0;
 
         $query = new Query();
@@ -605,16 +612,36 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
             $profit += Quote::getProfit($entry['mark_up'], $entry['selling'], $entry['fare_type'], $entry['check_payment']);
         }
 
-        switch (true){
-            case $profit > 11000: $bonus = 500; break;
-            case $profit > 8000: $bonus = 300; break;
-            case $profit > 5000: $bonus = 150; break;
-            default: $bonus = 0; break;
+        if($bonusActive){
+            $profitBonuses = $this->getProfitBonuses();
+            if(empty($profitBonuses)){
+                $profitBonuses = self::PROFIT_BONUSES;
+            }
+            foreach ($profitBonuses as $profKey => $bonusVal) {
+                if($profit >= $profKey){
+                    $bonus = $bonusVal;
+                    break;
+                }
+            }
         }
 
-        $profit = $profit + $profit * $commission/100;
+        $profit = $profit * $commission/100;
 
-        return $profit + $base + $bonus;
+        return [
+            'salary' => $profit + $base + $bonus,
+            'base' => $base,
+            'bonus' => $bonus,
+            'commission' => $commission,
+            ];
     }
 
+    public function getProfitBonuses()
+    {
+        $pb = ProfitBonus::find()->where(['pb_user_id' => $this->id])->orderBy(['pb_min_profit' => SORT_DESC])->all();
+        $data = [];
+        foreach ($pb as $entry){
+            $data[$entry['pb_min_profit']] = $entry['pb_bonus'];
+        }
+        return $data;
+    }
 }

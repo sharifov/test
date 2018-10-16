@@ -4,11 +4,11 @@ use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
-/* @var $model common\models\search\UserParamsSearch */
+/* @var $model common\models\search\ProfitBonusSearch */
 /* @var $form yii\widgets\ActiveForm */
 ?>
 
-<div class="user-params-search">
+<div class="profit-bonus-search">
 
     <?php $form = ActiveForm::begin([
         'action' => ['index'],
@@ -18,13 +18,17 @@ use yii\widgets\ActiveForm;
         ],
     ]); ?>
 
-    <?= $form->field($model, 'up_user_id') ?>
+    <?= $form->field($model, 'pb_id') ?>
 
-    <?= $form->field($model, 'up_commission_percent') ?>
+    <?= $form->field($model, 'pb_user_id') ?>
 
-    <?= $form->field($model, 'up_base_amount') ?>
+    <?= $form->field($model, 'pb_min_profit') ?>
 
-    <?= $form->field($model, 'up_bonus_active') ?>
+    <?= $form->field($model, 'pb_bonus') ?>
+
+    <?= $form->field($model, 'pb_updated_dt') ?>
+
+    <?php // echo $form->field($model, 'pb_updated_user_id') ?>
 
     <div class="form-group">
         <?= Html::submitButton('Search', ['class' => 'btn btn-primary']) ?>

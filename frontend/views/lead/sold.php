@@ -34,7 +34,8 @@ if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
 
     <?php Pjax::begin(); //['id' => 'lead-pjax-list', 'timeout' => 5000, 'enablePushState' => true, 'clientOptions' => ['method' => 'GET']]); ?>
     <?php if(isset($salary)):?>
-    <h1>Salary by <?= $salaryBy?>: $<?= number_format($salary,2)?></h1>
+    <h3>Salary by <?= $salaryBy?>: $<?= number_format($salary['salary'],2)?>
+    (Base: $<?= intval($salary['base'])?>, Commission: <?= $salary['commission']?>%, Bonus: $<?= $salary['bonus']?>)</h3>
     <?php endif;?>
     <?= $this->render('_search_sold', ['model' => $searchModel]); ?>
 

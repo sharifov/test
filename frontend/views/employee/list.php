@@ -123,6 +123,39 @@ HTML;
                     'visible' => Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)
                 ],
 
+                [
+                    'label' => 'Bonus Active',
+                    //'attribute' => 'created_at',
+                    'value' => function(\common\models\Employee $model) {
+                    return $model->userParams ? $model->userParams->up_bonus_active ? 'Yes':'No' : '-';
+                },
+                //'format' => 'html',
+                'contentOptions' => ['class' => 'text-right'],
+                'visible' => Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)
+                ],
+
+                [
+                    'label' => 'Bonus Profit',
+                    //'attribute' => 'created_at',
+                    'value' => function(\common\models\Employee $model) {
+                        $bonusProfit = $model->getProfitBonuses();
+                        if(empty($bonusProfit)){
+                            return Html::a('- ', ['profit-bonus/create/?user_id='.$model->id], ['data-pjax' => 0, 'target' => '_blank']);
+                        }
+                        $return = [];
+                        foreach ($bonusProfit as $profit => $bonus){
+                            $return[] = '>= '.$profit."&nbsp;->&nbsp;".$bonus;
+                        }
+                        return Html::a(implode('<br/>', $return), ['profit-bonus/index/?user_id='.$model->id], ['data-pjax' => 0, 'target' => '_blank']);
+                    },
+                    'format' => 'html',
+                    'contentOptions' => ['class' => 'text-left'],
+                    'options' => [
+                        'style' => 'width:120px'
+                    ],
+                    'visible' => Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)
+                ],
+
 
                 [
                     'attribute' => 'created_at',
