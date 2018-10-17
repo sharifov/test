@@ -144,6 +144,8 @@ class Lead extends ActiveRecord
 
     public $additionalInformationForm;
     public $status_description;
+    public $totalProfit;
+    public $splitProfitPercentSum = 0;
 
     /**
      * {@inheritdoc}
@@ -2095,4 +2097,19 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
         return $this->hasMany(ProfitSplit::className(), ['ps_lead_id' => 'id']);
     }
 
+    public function getAllProfitSplits()
+    {
+        return ProfitSplit::find()->where(['ps_lead_id' => $this->id])->all();
+    }
+
+    public function getSumPercentProfitSplit()
+    {
+        $query = new Query();
+        $query->from(ProfitSplit::tableName().' ps')
+            ->where(['ps.ps_lead_id' => $this->id])
+            ->select(['SUM(ps.ps_percent) as percent'])
+            ;
+
+        return $query->queryScalar();
+    }
 }

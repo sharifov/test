@@ -17,6 +17,8 @@ use common\models\Quote;
 use common\models\LeadFlightSegment;
 use common\models\Client;
 use common\models\ProjectEmployeeAccess;
+use common\models\LeadFlow;
+use common\models\ProfitSplit;
 
 /**
  * LeadSearch represents the model behind the search form of `common\models\Lead`.
@@ -396,7 +398,6 @@ class LeadSearch extends Lead
         $query->andFilterWhere([
             $leadTable.'.id' => $this->id,
             $leadTable.'.client_id' => $this->client_id,
-            $leadTable.'.employee_id' => $this->employee_id,
             $leadTable.'.project_id' => $this->project_id,
             $leadTable.'.source_id' => $this->source_id,
             $leadTable.'.bo_flight_id' => $this->bo_flight_id,
@@ -413,14 +414,26 @@ class LeadSearch extends Lead
             $query->andFilterWhere(['=','DATE(leads.updated)', date('Y-m-d', strtotime($this->updated))]);
         }
 
-
         if($this->sold_date_from || $this->sold_date_to) {
+
+            /*if ($this->sold_date_from) {
+             $query->andFilterWhere(['>=', 'DATE(leads.updated)', date('Y-m-d', strtotime($this->sold_date_from))]);
+             }
+             if ($this->sold_date_to) {
+             $query->andFilterWhere(['<=', 'DATE(leads.updated)', date('Y-m-d', strtotime($this->sold_date_to))]);
+             }*/
+
+
+            $subQuery = LeadFlow::find()->select(['DISTINCT(lead_flow.lead_id)'])->where('lead_flow.status = leads.status AND lead_flow.lead_id = leads.id');
+
             if ($this->sold_date_from) {
-                $query->andFilterWhere(['>=', 'DATE(leads.updated)', date('Y-m-d', strtotime($this->sold_date_from))]);
+                $subQuery->andFilterWhere(['>=', 'DATE(lead_flow.created)', date('Y-m-d', strtotime($this->sold_date_from))]);
             }
             if ($this->sold_date_to) {
-                $query->andFilterWhere(['<=', 'DATE(leads.updated)', date('Y-m-d', strtotime($this->sold_date_to))]);
+                $subQuery->andFilterWhere(['<=', 'DATE(lead_flow.created)', date('Y-m-d', strtotime($this->sold_date_to))]);
             }
+
+            $query->andWhere(['IN', 'leads.id', $subQuery]);
         }
 
         if($this->client_name) {
@@ -456,6 +469,13 @@ class LeadSearch extends Lead
             $subQuery1 = UserGroupAssign::find()->select(['ugs_group_id'])->where(['ugs_user_id' => $this->supervision_id]);
             $subQuery = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->where(['IN', 'ugs_group_id', $subQuery1]);
             $query->andWhere(['IN', 'leads.employee_id', $subQuery]);
+        }
+
+        if($this->employee_id){
+            $query
+            ->leftJoin(ProfitSplit::tableName().' ps','ps.ps_lead_id = leads.id')
+            ->andWhere($leadTable.'.employee_id = '. $this->employee_id.' OR ps.ps_user_id ='.$this->employee_id)
+            ->groupBy(['leads.id']);
         }
 
        /*  $sqlRaw = $query->createCommand()->getRawSql();

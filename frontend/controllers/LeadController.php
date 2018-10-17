@@ -687,7 +687,7 @@ class LeadController extends DefaultController
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
             'isAgent' => $isAgent,
-            'salary' => null,//$salary,
+            'salary' => $salary,
             'salaryBy' => $salaryBy,
         ]);
     }

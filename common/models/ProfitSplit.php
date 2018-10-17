@@ -122,4 +122,13 @@ class ProfitSplit extends \yii\db\ActiveRecord
     {
         return $this->hasOne(Employee::className(), ['id' => 'ps_user_id']);
     }
+
+    public function countProfit($total)
+    {
+        if(!empty($this->ps_percent)){
+            return $total * $this->ps_percent / 100;
+        }
+
+        return 0;
+    }
 }
