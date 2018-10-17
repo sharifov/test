@@ -184,6 +184,15 @@ $userId = Yii::$app->user->id;
             ],
 
             [
+                'label' => 'Lead status',
+                'attribute' => 'ltLead.status',
+                'value' => function(\common\models\LeadTask $model) {
+                    return $model->ltLead ? $model->ltLead->getStatusName() : '-';
+                },
+                'format' => 'html'
+            ],
+
+            [
                 //'attribute' => 'client_id',
                 'header' => 'Client name',
                 'format' => 'raw',
@@ -247,14 +256,7 @@ $userId = Yii::$app->user->id;
                 //'filter' => \common\models\Employee::getList()
             ],
 
-            [
-                'label' => 'Lead status',
-                'attribute' => 'ltLead.status',
-                'value' => function(\common\models\LeadTask $model) {
-                    return $model->ltLead ? $model->ltLead->getStatusName() : '-';
-                },
-                'format' => 'html'
-            ],
+
 
             [
                 'label' => 'Segments',
@@ -281,30 +283,35 @@ $userId = Yii::$app->user->id;
 
             [
                 'label' => 'Cabin',
-                'attribute' => 'cabin',
+                'attribute' => 'leads.cabin',
                 'value' => function(\common\models\LeadTask $model) {
                     return \common\models\Lead::getCabin($model->ltLead->cabin) ?? '-';
                 },
-                //'filter' => \common\models\Lead::CABIN_LIST
             ],
 
-
-
             [
-                'attribute' => 'adults',
+                'label' => 'Adults',
+                'attribute' => 'leads.adults',
                 'value' => function(\common\models\LeadTask $model) {
                     return $model->ltLead->adults ?: 0;
                 },
-                //'filter' => array_combine(range(0, 9), range(0, 9)),
                 'contentOptions' => ['class' => 'text-center'],
             ],
 
             [
-                'attribute' => 'children',
+                'label' => 'Children',
+                'attribute' => 'leads.children',
                 'value' => function(\common\models\LeadTask $model) {
                     return $model->ltLead->children ?: '-';
                 },
-                //'filter' => array_combine(range(0, 9), range(0, 9)),
+                'contentOptions' => ['class' => 'text-center'],
+            ],
+            [
+                'label' => 'Infants',
+                'attribute' => 'leads.infants',
+                'value' => function(\common\models\LeadTask $model) {
+                    return $model->ltLead->infants ?: '-';
+                },
                 'contentOptions' => ['class' => 'text-center'],
             ],
 
@@ -314,6 +321,16 @@ $userId = Yii::$app->user->id;
                 'attribute' => 'ltLead.created',
                 'value' => function(\common\models\LeadTask $model) {
                     return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->ltLead->created));
+                },
+                'format' => 'html',
+            ],
+
+            [
+                'label' => 'Lead pending time',
+                //'attribute' => 'ltLead.created',
+                'value' => function(\common\models\LeadTask $model) {
+                    $time = Yii::$app->formatter->asRelativeTime(strtotime($model->ltLead->created));
+                    return $time; //'<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->ltLead->created));
                 },
                 'format' => 'html',
             ],
