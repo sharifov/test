@@ -32,6 +32,9 @@ use yii\web\Response;
 use yii\web\UnauthorizedHttpException;
 use yii\widgets\ActiveForm;
 use common\models\LeadFlightSegment;
+use common\models\Quote;
+use common\models\Employee;
+use common\models\search\LeadSearch;
 
 /**
  * Site controller
@@ -64,7 +67,7 @@ class LeadController extends FController
                             'create', 'add-comment', 'change-state', 'unassign', 'take',
                             'set-rating', 'add-note', 'unprocessed', 'call-expert', 'send-email',
                             'check-updates', 'flow-transition', 'get-user-actions', 'add-pnr', 'update2','clone',
-                            'get-badges',
+                            'get-badges', 'sold'
                         ],
                         'allow' => true,
                         'roles' => ['agent'],
@@ -617,7 +620,75 @@ class LeadController extends FController
 
         return $this->render('queue', [
             'dataProvider' => $dataProvider,
-            'searchModel' => $searchModel
+            'searchModel' => $searchModel,
+        ]);
+    }
+
+    public function actionSold()
+    {
+        $searchModel = new LeadSearch();
+        $salary = null;
+        $salaryBy = '';
+
+        $params = Yii::$app->request->queryParams;
+        $params2 = Yii::$app->request->post();
+
+        $params = array_merge($params, $params2);
+
+        if(Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id)) {
+            $isAgent = true;
+        } else {
+            $isAgent = false;
+        }
+
+        if(Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id)) {
+            $params['LeadSearch']['supervision_id'] = Yii::$app->user->id;
+        }
+
+        if($isAgent) {
+            $params['LeadSearch']['employee_id'] = Yii::$app->user->id;
+            $employee = Employee::findOne(['id' => Yii::$app->user->id]);
+
+            if((!isset($params['LeadSearch']['sold_date_from']) && !isset($params['LeadSearch']['sold_date_to'])) ||
+                (empty($params['LeadSearch']['sold_date_from']) && empty($params['LeadSearch']['sold_date_to']))){
+                $start = new \DateTime();
+                $end = new \DateTime();
+                $start->modify('first day of this month');
+                $end->modify('last day of this month');
+                $salaryBy = $start->format('M Y');
+            }else{
+                if(!empty($params['LeadSearch']['sold_date_from'])){
+                    $start = \DateTime::createFromFormat('d-M-Y', $params['LeadSearch']['sold_date_from']);
+                }else{
+                    $start = null;
+                }
+                if(!empty($params['LeadSearch']['sold_date_to'])){
+                    $end = \DateTime::createFromFormat('d-M-Y', $params['LeadSearch']['sold_date_to']);
+                }else{
+                    $end = null;
+                }
+
+                $today = new \DateTime();
+                if($start !== null && $end !== null){
+                    $salaryBy = "(".$start->format('j M').' - '.$end->format('j M Y').')';
+                }elseif($start !== null){
+                    $salaryBy =  "(".$start->format('j M').' - '.$today->format('j M Y').')';
+                }elseif($end !== null){
+                    $salaryBy =  '(till '.$end->format('j M Y').')';
+                }
+            }
+
+            $salary = $employee->calculateSalaryBetween($start, $end);
+        }
+
+        $dataProvider = $searchModel->searchSold($params);
+
+        return $this->render('sold', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+            'isAgent' => $isAgent,
+            'salary' => null,//$salary,
+            'salaryBy' => $salaryBy,
         ]);
     }
 
@@ -684,8 +755,6 @@ class LeadController extends FController
 
     public function actionQuote($type, $id)
     {
-
-
         $this->view->title = sprintf('Processing Lead - %s', ucfirst($type));
 
         $lead = Lead::findOne(['id' => $id]);

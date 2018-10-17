@@ -306,13 +306,17 @@ class SiteController extends FController
 
         $params = Yii::$app->request->queryParams;
         $params['LeadTaskSearch']['lt_user_id'] = $userId;
-        $params['LeadTaskSearch']['status_not_in'] = [Lead::STATUS_TRASH, Lead::STATUS_SNOOZE];
+        $params['LeadTaskSearch']['status'] = [Lead::STATUS_PROCESSING, Lead::STATUS_ON_HOLD];
+
+        //['status_not_in'] = [Lead::STATUS_TRASH, Lead::STATUS_SNOOZE];
 
         //VarDumper::dump($params); exit;
         $searchModel = new LeadTaskSearch();
 
         $params['LeadTaskSearch']['lt_date'] = date('Y-m-d', strtotime("-1 days"));
         $dp1 = $searchModel->searchDashboard($params);
+
+        // $params['LeadTaskSearch']['status'] = [Lead::STATUS_PROCESSING, Lead::STATUS_ON_HOLD];
 
         $params['LeadTaskSearch']['lt_date'] = date('Y-m-d');
         $dp2 = $searchModel->searchDashboard($params);
