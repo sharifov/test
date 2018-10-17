@@ -57,8 +57,10 @@ use yii\helpers\VarDumper;
  * @property Project $project
  * @property int $quotesCount
  * @property int $leadFlightSegmentsCount
- * @property LeadAdditionalInformation $additionalInformationForm *
+ * @property LeadAdditionalInformation $additionalInformationForm
  * @property Lead $clone
+ * @property ProfitSplit[] $profitSplits
+ *
  */
 class Lead extends ActiveRecord
 {
@@ -2083,6 +2085,14 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
     public function getBookedQuote()
     {
         return Quote::findOne(['lead_id' => $this->id, 'status' => Quote::STATUS_APPLIED]);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getProfitSplits()
+    {
+        return $this->hasMany(ProfitSplit::className(), ['ps_lead_id' => 'id']);
     }
 
 }
