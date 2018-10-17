@@ -486,7 +486,11 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     }
 
 
-
+    /**
+     * @param string|null $start_dt
+     * @param string|null $end_dt
+     * @return string
+     */
     public function getTaskStats(string $start_dt = null, string $end_dt = null): string
     {
 
@@ -547,19 +551,43 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
             foreach ($taskListAll as $task) {
                 //$itemHeader[] = Html::encode($task->ltTask->t_name);
                 //$item[] = ''.($completed[$task->lt_task_id] ?? 0).'/'. $task->field_cnt.'';
-                $item[] = '<b>'.Html::encode($task->ltTask->t_name).'</b><br>'.($completed[$task->lt_task_id] ?? 0).' / '. Html::a($task->field_cnt,
+
+                $completedTasks = $completed[$task->lt_task_id] ?? 0;
+
+                $str = '<b>'.Html::encode($task->ltTask->t_name).'</b><br>'.$completedTasks.' / '. Html::a($task->field_cnt,
                         ['lead-task/index', 'LeadTaskSearch[lt_task_id]' => $task->lt_task_id, 'LeadTaskSearch[lt_user_id]' => $this->id],
                         ['data-pjax' => 0, 'target' => '_blank']).'';
+
+
+                if($task->field_cnt > 0) {
+                    $percent = (int) ($completedTasks * 100 / $task->field_cnt);
+                } else {
+                    $percent = 0;
+                }
+
+                $str .= '<br><div class="progress" title="'.$percent.'%">
+                          <div class="progress-bar" role="progressbar" aria-valuenow="'.$percent.'" aria-valuemin="0" aria-valuemax="100" style="width: '.$percent.'%;">
+                            '.$percent.'%
+                          </div>
+                        </div>';
+
+
+                $item[] = $str;
             }
         }
 
 
-        $str = '<table class="table table-bordered table-condensed">';
-        //$str .= '<tr><th class="text-center">'.implode('</th><th class="text-center">', $itemHeader).'</th></tr>';
-        $str .= '<tr>';
-        $str .= '<td class="text-center">'.implode('</td><td class="text-center">', $item).'</td>';
-        $str .= '</tr>';
-        $str .= '</table>';
+        if($item) {
+            $str = '<table class="table table-bordered table-condensed">';
+            //$str .= '<tr><th class="text-center">'.implode('</th><th class="text-center">', $itemHeader).'</th></tr>';
+
+            $str .= '<tr>';
+            $str .= '<td class="text-center">' . implode('</td><td class="text-center">', $item) . '</td>';
+            $str .= '</tr>';
+            $str .= '</table>';
+        } else {
+            $str = '-';
+        }
 
         return $str;
     }
@@ -615,6 +643,30 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         $profit = $profit + $profit * $commission/100;
 
         return $profit + $base + $bonus;
+    }
+
+
+    /**
+     * @param array $statusList
+     * @param string|null $startDate
+     * @param string|null $endDate
+     * @return int
+     */
+    public function getLeadCountByStatus(array $statusList = [], string $startDate = null, string $endDate = null) : int
+    {
+        if($startDate) {
+            $startDate = date('Y-m-d', strtotime($startDate));
+        }
+
+        if($endDate) {
+            $endDate = date('Y-m-d', strtotime($endDate));
+        }
+
+        $query = LeadFlow::find()->select('COUNT(DISTINCT(lead_id))')->where(['employee_id' => $this->id, 'status' => $statusList]);
+        $query->andFilterWhere(['>=', 'created', $startDate]);
+        $query->andFilterWhere(['<=', 'created', $endDate]);
+        $count = $query->asArray()->scalar();
+        return $count;
     }
 
 }
