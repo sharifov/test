@@ -44,20 +44,27 @@ if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
     <?php
 
     $gridColumns = [
-        [
+        /*[
             'attribute' => 'pending',
             'label' => 'Pending Time',
             'value' => function ($model) {
                 return Lead::getPendingAfterCreate($model->created);
             },
             'format' => 'raw'
-        ],
+        ],*/
 
         [
             'attribute' => 'id',
-            'label' => 'Lead ID / Sale ID (BO)',
+            'label' => 'Lead ID',
             'value' => function ($model) {
-                return sprintf('%d / %d', $model['id'], $model['bo_flight_id']);
+                return sprintf('%d', $model['id']);
+            }
+        ],
+        [
+            'attribute' => 'bo_flight_id',
+            'label' => 'Sale ID (BO)',
+            'value' => function ($model) {
+                return sprintf('%d', $model['bo_flight_id']);
             }
         ],
         [
@@ -82,7 +89,10 @@ if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
                 }
                 return implode('<br/>', $content);
             },
-            'format' => 'raw'
+            'format' => 'raw',
+            'contentOptions' => [
+                'style' => 'width: 200px;'
+            ]
         ],
         [
             // 'attribute' => 'client_id',
@@ -111,8 +121,8 @@ if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
 
                 return $clientName.'<br/>'.$emails.'<br/>'.$phones;
             },
-            'options' => [
-                'style' => 'width:260px'
+            'contentOptions' => [
+                'style' => 'width: 260px;'
             ]
             // 'filter' => \common\models\Employee::getList()
         ],
