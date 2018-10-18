@@ -99,6 +99,22 @@ if ($leadForm->mode != $leadForm::VIEW_MODE || ($leadForm->mode == $leadForm::VI
         });
     });
 
+    /***  Split profit  ***/
+    $('#split-profit').click(function (e) {
+        e.preventDefault();
+        var url = $(this).data('url');
+        var uid = $(this).data('uid');
+        var editBlock = $('#split-profit-modal');
+        editBlock.find('.modal-body').html('');
+        editBlock.find('.modal-body').load(url, function( response, status, xhr ) {
+            editBlock.modal({
+              backdrop: 'static',
+              show: true
+            });
+        });
+    });
+
+
     /***  Quick search quotes ***/
     $('#quick-search-quotes').click(function (e) {
         e.preventDefault();
@@ -417,6 +433,29 @@ $this->registerJs($js);
                 ]);
             }
         }?>
+
+        <?php if($leadForm->getLead()->status == Lead::STATUS_SOLD && (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id))):?>
+        	<?= Html::button('<span class="btn-icon"><i class="fa fa-money"></i></span><span class="btn-text">Split profit</span>', [
+                    'class' => 'btn btn-warning btn-with-icon',
+                    'id' => 'split-profit',
+                    'data-url' => Url::to(['lead/split-profit', 'id' => $leadForm->getLead()->id]),
+                ])?>
+
+
+        <div class="modal modal-quote fade" id="split-profit-modal" style="display: none;">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        Split profit
+                        <button type="button" class="close" data-dismiss="modal">
+                            <i class="fa fa-times"></i>
+                        </button>
+                    </div>
+                    <div class="modal-body"></div>
+                </div>
+            </div>
+        </div>
+        <?php endif;?>
     </div>
 </div>
 

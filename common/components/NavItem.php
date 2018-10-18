@@ -63,6 +63,7 @@ class NavItem
                 $items[] = ['label' => '<i class="glyphicon glyphicon-export"></i> Export Leads', 'url' => ['leads/export']];
                 $items[] = ['label' => '<i class="fa fa-copy"></i> Duplicate Leads', 'url' => ['leads/duplicate']];
                 $items[] = ['label' => '<i class="fa fa-users"></i> Stats Agents & Leads', 'url' => ['report/agents']];
+                $items[] = ['label' => '<i class="fa fa-list"></i> Lead Status History', 'url' => ['lead-flow/index']];
             }
 
 

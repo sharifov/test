@@ -181,6 +181,39 @@ use yii\widgets\ActiveForm;
                 </div>
             </div>
 
+
+            <div class="row">
+                <div class="col-md-6">
+                    <?//php  echo $form->field($model, 'created_date_from') ?>
+
+                    <?= $form->field($model, 'sold_date_from')->widget(
+                        \dosamigos\datepicker\DatePicker::class, [
+                        'inline' => false,
+                        //'template' => '<div class="well well-sm" style="background-color: #fff; width:250px">{input}</div>',
+                        'clientOptions' => [
+                            'autoclose' => true,
+                            'format' => 'dd-M-yyyy',
+                            'todayBtn' => true
+                        ]
+                    ])->label('Status Date from');?>
+
+                </div>
+
+                <div class="col-md-6">
+                    <?//php  echo $form->field($model, 'created_date_to') ?>
+                    <?= $form->field($model, 'sold_date_to')->widget(
+                        \dosamigos\datepicker\DatePicker::class, [
+                        'inline' => false,
+                        //'template' => '<div class="well well-sm" style="background-color: #fff; width:250px">{input}</div>',
+                        'clientOptions' => [
+                            'autoclose' => true,
+                            'format' => 'dd-M-yyyy',
+                            'todayBtn' => true
+                        ]
+                    ])->label('Status Date to');?>
+                </div>
+            </div>
+
             <?//= $form->field($model, 'employee_id') ?>
 
 

@@ -44,7 +44,7 @@ HTML;
         <?php endif; ?>
         <?= GridView::widget([
             'dataProvider' => $dataProvider,
-            'layout' => $template,
+            //'layout' => $template,
             'filterModel' => $searchModel,
             'columns' => [
                 'iata',

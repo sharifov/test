@@ -47,7 +47,7 @@ use common\models\Quote;
                         'id' => $lead->id
                     ]);
                     echo Html::a('Open', $url, [
-                        'class' => 'btn btn-action btn-sm',
+                        'class' => 'btn btn-primary btn-sm',
                         'target' => '_blank',
                         'data-pjax' => 0
                     ]);

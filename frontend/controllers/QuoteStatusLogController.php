@@ -13,7 +13,7 @@ use yii\helpers\ArrayHelper;
 /**
  * QuoteStatusLogController implements the CRUD actions for QuoteStatusLog model.
  */
-class QuoteStatusLogController extends DefaultController
+class QuoteStatusLogController extends FController
 {
 
     /**

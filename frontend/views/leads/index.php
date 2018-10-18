@@ -179,6 +179,7 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
                 'attribute' => 'status',
                 'value' => function(\common\models\Lead $model) {
                     $statusValue = $model->getStatusName(true);
+
                     if($model->status === \common\models\Lead::STATUS_TRASH) {
                         $reason = \common\models\Reason::find()->where(['lead_id' => $model->id])->orderBy(['id' => SORT_DESC])->one();
                         if($reason) {
@@ -186,11 +187,21 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
                         }
 
                     }
+
+                    $statusLog = \common\models\LeadFlow::find()->where(['lead_id' => $model->id, 'status' => $model->status])->orderBy(['id' => SORT_DESC])->one();
+
+                    if($statusLog) {
+                        $statusValue .= '<br><span class="label label-default">'.Yii::$app->formatter->asDatetime(strtotime($statusLog->created)).'</span>';
+                        $statusValue .= '<br><span class="label label-info">'.Yii::$app->formatter->asRelativeTime(strtotime($statusLog->created)).'</span>';
+
+                    }
+
                     return $statusValue;
                 },
                 'format' => 'raw',
                 'filter' => \common\models\Lead::STATUS_LIST,
                 'options' => ['style' => 'width:100px'],
+                'contentOptions' => ['class' => 'text-center'],
 
             ],
             [
@@ -312,7 +323,7 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
                     $segmentData = [];
                     if($segments) {
                         foreach ($segments as $sk => $segment) {
-                            $segmentData[] = ($sk + 1).'. <code>'.Html::a($segment->origin.'->'.$segment->destination, ['lead-flight-segment/view', 'id' => $segment->id], ['target' => '_blank', 'data-pjax' => 0]).'</code>';
+                            $segmentData[] = ($sk + 1).'. <code>'.Html::a($segment->origin.' <i class="fa fa-long-arrow-right"></i> '.$segment->destination, ['lead-flight-segment/view', 'id' => $segment->id], ['target' => '_blank', 'data-pjax' => 0]).'</code>';
                         }
                     }
 
@@ -321,7 +332,7 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
                     //return $model->leadFlightSegmentsCount ? Html::a($model->leadFlightSegmentsCount, ['lead-flight-segment/index', "LeadFlightSegmentSearch[lead_id]" => $model->id], ['target' => '_blank', 'data-pjax' => 0]) : '-' ;
                 },
                 'format' => 'raw',
-                'contentOptions' => ['class' => 'text-center'],
+                'contentOptions' => ['class' => 'text-left'],
                 'options' => ['style' => 'width:140px'],
             ],
 

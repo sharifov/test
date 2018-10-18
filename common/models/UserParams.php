@@ -35,7 +35,7 @@ class UserParams extends \yii\db\ActiveRecord
     {
         return [
             [['up_user_id'], 'required'],
-            [['up_user_id', 'up_commission_percent', 'up_updated_user_id'], 'integer'],
+            [['up_user_id', 'up_commission_percent', 'up_updated_user_id', 'up_bonus_active'], 'integer'],
             [['up_base_amount'], 'number'],
             [['up_updated_dt'], 'safe'],
             [['up_user_id'], 'unique'],
@@ -55,6 +55,7 @@ class UserParams extends \yii\db\ActiveRecord
             'up_base_amount' => 'Base Amount',
             'up_updated_dt' => 'Updated Dt',
             'up_updated_user_id' => 'Updated User ID',
+            'up_bonus_active' => 'Bonus Is Active',
         ];
     }
 

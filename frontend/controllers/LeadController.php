@@ -35,11 +35,12 @@ use common\models\LeadFlightSegment;
 use common\models\Quote;
 use common\models\Employee;
 use common\models\search\LeadSearch;
+use frontend\models\ProfitSplitForm;
 
 /**
  * Site controller
  */
-class LeadController extends DefaultController
+class LeadController extends FController
 {
     /**
      * {@inheritdoc}
@@ -67,7 +68,7 @@ class LeadController extends DefaultController
                             'create', 'add-comment', 'change-state', 'unassign', 'take',
                             'set-rating', 'add-note', 'unprocessed', 'call-expert', 'send-email',
                             'check-updates', 'flow-transition', 'get-user-actions', 'add-pnr', 'update2','clone',
-                            'get-badges', 'sold', 'processing'
+                            'get-badges', 'sold', 'split-profit', 'processing'
                         ],
                         'allow' => true,
                         'roles' => ['agent'],
@@ -83,8 +84,9 @@ class LeadController extends DefaultController
     {
         if (parent::beforeAction($action)) {
             if (in_array($action->id, ['create', 'quote'])) {
-                Yii::$app->setLayoutPath('@app/views/layouts');
-                $this->layout = 'sale';
+                //Yii::$app->setLayoutPath('@frontend/views/layouts');
+                //$this->layout = 'sale';
+                $this->layout = '@app/themes/gentelella/views/layouts/main_lead';
             }
             return true;
         }
@@ -587,7 +589,6 @@ class LeadController extends DefaultController
 
     public function actionQueue($type)
     {
-        $this->view->title = sprintf('Leads - %s Queue', ucfirst($type));
         $searchModel = null;
         if (in_array($type, ['processing-all', 'processing', 'follow-up'])) {
             $dataProvider = [];
@@ -620,6 +621,7 @@ class LeadController extends DefaultController
         return $this->render('queue', [
             'dataProvider' => $dataProvider,
             'searchModel' => $searchModel,
+            'type' => $type
         ]);
     }
 
@@ -1081,6 +1083,70 @@ class LeadController extends DefaultController
                         'id' => $newLead->id
                     ]);
                 }
+            }
+
+        }
+        return null;
+    }
+
+    public function actionSplitProfit($id)
+    {
+        $errors = [];
+        $lead = Lead::findOne(['id' => $id]);
+        if ($lead !== null) {
+            $totalProfit = $lead->getBookedQuote()->getTotalProfit();
+            $splitForm = new ProfitSplitForm($lead);
+
+            $mainAgentProfit = $totalProfit;
+
+           if (Yii::$app->request->isPost) {
+                $data = Yii::$app->request->post();
+
+                if(!isset($data['ProfitSplit'])){
+                    $data['ProfitSplit'] = [];
+                }
+
+                $load = $splitForm->loadModels($data);
+                if ($load) {
+                    $errors = ActiveForm::validate($splitForm);
+                }
+
+                if (empty($errors) && $splitForm->save($errors)) {
+                    return $this->redirect([
+                        'quote',
+                        'type' => 'sold',
+                        'id' => $lead->id
+                    ]);
+                }
+
+                $splitProfit = $splitForm->getProfitSplit();
+                if(!empty($splitProfit)){
+                    $percentSum = 0;
+                    foreach ($splitProfit as $entry){
+                        if(!empty($entry->ps_percent)){
+                            $percentSum += $entry->ps_percent;
+                        }
+                    }
+                    $mainAgentProfit -= $totalProfit*$percentSum/100;
+                }
+
+                if(!empty($errors)){
+                    return $this->renderAjax('_split_profit', [
+                        'lead' => $lead,
+                        'splitForm' => $splitForm,
+                        'totalProfit' => $totalProfit,
+                        'mainAgentProfit' => $mainAgentProfit,
+                        'errors' => $errors,
+                    ]);
+                }
+            }elseif (Yii::$app->request->isAjax){
+                return $this->renderAjax('_split_profit', [
+                    'lead' => $lead,
+                    'splitForm' => $splitForm,
+                    'totalProfit' => $totalProfit,
+                    'mainAgentProfit' => $mainAgentProfit,
+                    'errors' => $errors,
+                ]);
             }
 
         }

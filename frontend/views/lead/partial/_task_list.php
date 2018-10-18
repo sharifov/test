@@ -26,7 +26,7 @@ if(Yii::$app->authManager->getAssignment('admin', $userId) || Yii::$app->authMan
     $is_manager = true;
 }
 
-$call2DelayTime = (2 * 60 * 60);
+$call2DelayTime = Yii::$app->params['lead']['call2DelayTime']; //(2 * 60 * 60);
 
 ?>
 

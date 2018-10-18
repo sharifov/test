@@ -22,7 +22,7 @@ use yii\web\Response;
 /**
  * Site controller
  */
-class SettingsController extends DefaultController
+class SettingsController extends FController
 {
     /**
      * {@inheritdoc}

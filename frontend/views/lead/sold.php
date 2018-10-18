@@ -16,7 +16,7 @@ use dosamigos\datepicker\DatePicker;
 /* @var $salary float */
 /* @var $salaryBy string */
 
-$this->title = 'Sold';
+$this->title = 'Sold Queue';
 
 if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
     $userList = \common\models\Employee::getList();
@@ -24,7 +24,12 @@ if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
     $userList = \common\models\Employee::getListByUserId(Yii::$app->user->id);
 }
 
+$this->params['breadcrumbs'][] = $this->title;
+
 ?>
+
+<h1><?=\yii\helpers\Html::encode($this->title)?></h1>
+
 <style>
 .dropdown-menu {
 	z-index: 1010 !important;
@@ -34,7 +39,8 @@ if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
 
     <?php Pjax::begin(); //['id' => 'lead-pjax-list', 'timeout' => 5000, 'enablePushState' => true, 'clientOptions' => ['method' => 'GET']]); ?>
     <?php if(isset($salary)):?>
-    <h1>Salary by <?= $salaryBy?>: $<?= number_format($salary,2)?></h1>
+    <h3>Salary by <?= $salaryBy?>: $<?= number_format($salary['salary'],2)?>
+    (Base: $<?= intval($salary['base'])?>, Commission: <?= $salary['commission']?>%, Bonus: $<?= $salary['bonus']?>)</h3>
     <?php endif;?>
     <?= $this->render('_search_sold', ['model' => $searchModel]); ?>
 
@@ -43,20 +49,27 @@ if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
     <?php
 
     $gridColumns = [
-        [
+        /*[
             'attribute' => 'pending',
             'label' => 'Pending Time',
             'value' => function ($model) {
                 return Lead::getPendingAfterCreate($model->created);
             },
             'format' => 'raw'
-        ],
+        ],*/
 
         [
             'attribute' => 'id',
-            'label' => 'Lead ID / Sale ID (BO)',
+            'label' => 'Lead ID',
             'value' => function ($model) {
-                return sprintf('%d / %d', $model['id'], $model['bo_flight_id']);
+                return sprintf('%d', $model['id']);
+            }
+        ],
+        [
+            'attribute' => 'bo_flight_id',
+            'label' => 'Sale ID (BO)',
+            'value' => function ($model) {
+                return sprintf('%d', $model['bo_flight_id']);
             }
         ],
         [
@@ -68,7 +81,7 @@ if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
                     return (! empty($additionally->pnr)) ? $additionally->pnr : '-';
                 }
                 return '-';
-            },
+            }
         ],
         [
             'label' => 'Passengers',
@@ -81,13 +94,16 @@ if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
                 }
                 return implode('<br/>', $content);
             },
-            'format' => 'raw'
+            'format' => 'raw',
+            'contentOptions' => [
+                'style' => 'width: 200px;'
+            ]
         ],
         [
             // 'attribute' => 'client_id',
-            'header' => 'Client name',
+            'header' => 'Client',
             'format' => 'raw',
-            'value' => function (\common\models\Lead $model) {
+            'value' => function (\common\models\Lead $model) use ($isAgent) {
 
                 if ($model->client) {
                     $clientName = $model->client->first_name . ' ' . $model->client->last_name;
@@ -100,45 +116,20 @@ if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
                     $clientName = '-';
                 }
 
-                return $clientName;
+                if ($isAgent && Yii::$app->user->id !== $model->employee_id) {
+                    $emails = '- // - // - // -';
+                    $phones = '- // - // - // -';
+                } else {
+                    $emails = $model->client && $model->client->clientEmails ? '<i class="fa fa-envelope"></i> ' . implode(' <br><i class="fa fa-envelope"></i> ', \yii\helpers\ArrayHelper::map($model->client->clientEmails, 'email', 'email')) . '' : '';
+                    $phones = $model->client && $model->client->clientPhones ? '<br><i class="fa fa-phone"></i> ' . implode(' <br><i class="fa fa-phone"></i> ', \yii\helpers\ArrayHelper::map($model->client->clientPhones, 'phone', 'phone')) . '' : '';
+                }
+
+                return $clientName.'<br/>'.$emails.'<br/>'.$phones;
             },
-            'options' => [
-                'style' => 'width:160px'
+            'contentOptions' => [
+                'style' => 'width: 260px;'
             ]
             // 'filter' => \common\models\Employee::getList()
-        ],
-        [
-            'header' => 'Client Emails',
-            'format' => 'raw',
-            'value' => function (\common\models\Lead $model) use ($isAgent) {
-                if ($isAgent && Yii::$app->user->id !== $model->employee_id) {
-                    $str = '- // - // - // -';
-                } else {
-                    $str = $model->client && $model->client->clientEmails ? '<i class="fa fa-envelope"></i> ' . implode(' <br><i class="fa fa-envelope"></i> ', \yii\helpers\ArrayHelper::map($model->client->clientEmails, 'email', 'email')) . '' : '';
-                }
-
-                return $str ?? '-';
-            },
-            'options' => [
-                'style' => 'width:180px'
-            ]
-        ],
-
-        [
-            'label' => 'Client Phone',
-            'format' => 'raw',
-            'value' => function (\common\models\Lead $model) use ($isAgent) {
-                if ($isAgent && Yii::$app->user->id !== $model->employee_id) {
-                    $str = '- // - // - // -';
-                } else {
-                    $str = $model->client && $model->client->clientPhones ? '<br><i class="fa fa-phone"></i> ' . implode(' <br><i class="fa fa-phone"></i> ', \yii\helpers\ArrayHelper::map($model->client->clientPhones, 'phone', 'phone')) . '' : '';
-                }
-
-                return $str ?? '-';
-            },
-            'options' => [
-                'style' => 'width:180px'
-            ]
         ],
         [
             'label' => 'Destination',
@@ -167,13 +158,44 @@ if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
                 return $model->employee ? '<i class="fa fa-user"></i> ' . $model->employee->username : '-';
             },
             'filter' => $userList,
-            'visible' => !$isAgent,
+            'visible' => ! $isAgent
         ],
         [
-            'label' => 'Profit',
-            'value' => function ($model) {
+            'label' => 'Total Profit',
+            'value' => function ($model){
                 $quote = $model->getBookedQuote();
-                return "<strong>$" . number_format(Quote::countProfit($quote->id), 2) . "</strong>";
+                if(empty($quote)){
+                    return '';
+                }
+                $model->totalProfit = $quote->getTotalProfit();
+                return "<strong>$" . number_format($model->totalProfit, 2) . "</strong>";
+            },
+            'format' => 'raw'
+        ],
+        [
+            'label' => 'Split Profit',
+            'value' => function ($model) {
+                 $splitProfit = $model->getAllProfitSplits();
+                 $return = [];
+                 foreach ($splitProfit as $split){
+                     $model->splitProfitPercentSum += $split->ps_percent;
+                     $return[] = '<b>'.$split->psUser->username.'</b> ('.$split->ps_percent.'%) $'. number_format($split->countProfit($model->totalProfit),2);
+                 }
+                 if(empty($return)){
+                    return '-';
+                 }
+                 return implode('<br/>', $return);
+            },
+            'format' => 'raw'
+        ],
+        [
+            'label' => 'Main Agent Profit',
+            'value' => function ($model){
+                $mainAgentPercent = 100;
+                if($model->splitProfitPercentSum > 0){
+                    $mainAgentPercent -= $model->splitProfitPercentSum;
+                }
+                return "<strong>$" . number_format($model->totalProfit*$mainAgentPercent/100, 2) . "</strong>";
             },
             'format' => 'raw'
         ],
@@ -192,18 +214,24 @@ if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
                     'format' => 'dd-M-yyyy'
                 ]
             ]),
-            'contentOptions'=>['style'=>'width: 180px;text-align:center;']
+            'contentOptions' => [
+                'style' => 'width: 180px;text-align:center;'
+            ]
         ],
         [
             'label' => 'Date of Departure',
             'value' => function ($model) {
                 $quote = $model->getBookedQuote();
-                if (isset($quote['reservation_dump']) && ! empty($quote['reservation_dump'])) {
+                if (!empty($quote) && isset($quote['reservation_dump']) && ! empty($quote['reservation_dump'])) {
                     $data = [];
                     $segments = Quote::parseDump($quote['reservation_dump'], false, $data, true);
                     return $segments[0]['departureDateTime']->format('Y-m-d H:i');
                 }
-                return $model['departure'];
+                $firstSegment = $model->getFirstFlightSegment();
+                if(empty($firstSegment)){
+                    return '';
+                }
+                return $firstSegment['departure'];
             },
             'format' => 'raw'
         ],
@@ -228,7 +256,7 @@ if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
             'value' => function (\common\models\Lead $model) {
                 return $model->source ? $model->source->name : '-';
             },
-            'filter' => \common\models\Source::getList(),
+            'filter' => \common\models\Source::getList()
         ],
         [
             'class' => 'yii\grid\ActionColumn',
@@ -240,7 +268,7 @@ if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
                         'type' => 'sold',
                         'id' => $model['id']
                     ]), [
-                        'class' => 'btn btn-info btn-sm',
+                        'class' => 'btn btn-info btn-xs',
                         'target' => '_blank',
                         'data-pjax' => 0,
                         'title' => 'View lead'
@@ -258,7 +286,7 @@ echo GridView::widget([
     'columns' => $gridColumns,
     'toolbar' => false,
     'pjax' => false,
-    'striped' => false,
+    'striped' => true,
     'condensed' => false,
     'responsive' => true,
     'hover' => true,
@@ -266,10 +294,10 @@ echo GridView::widget([
     'floatHeaderOptions' => [
         'scrollingTop' => 20
     ],
-    'panel' => [
+    /*'panel' => [
         'type' => GridView::TYPE_PRIMARY,
         'heading' => '<h3 class="panel-title"><i class="glyphicon glyphicon-list"></i> Sold</h3>'
-    ]
+    ]*/
 
 ]);
 

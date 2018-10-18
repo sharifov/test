@@ -24,9 +24,7 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'up_base_amount') ?>
 
-    <?= $form->field($model, 'up_updated_dt') ?>
-
-    <?= $form->field($model, 'up_updated_user_id') ?>
+    <?= $form->field($model, 'up_bonus_active') ?>
 
     <div class="form-group">
         <?= Html::submitButton('Search', ['class' => 'btn btn-primary']) ?>

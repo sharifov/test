@@ -16,6 +16,7 @@ use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\helpers\VarDumper;
+use common\models\local\FlightSegment;
 
 /**
  * This is the model class for table "leads".
@@ -50,6 +51,8 @@ use yii\helpers\VarDumper;
  * @property string $description
  *
  * @property LeadFlightSegment[] $leadFlightSegments
+ * @property LeadFlow[] $leadFlows
+ * @property LeadLog[] $leadLogs
  * @property LeadPreferences $leadPreferences
  * @property Client $client
  * @property Employee $employee
@@ -57,8 +60,10 @@ use yii\helpers\VarDumper;
  * @property Project $project
  * @property int $quotesCount
  * @property int $leadFlightSegmentsCount
- * @property LeadAdditionalInformation $additionalInformationForm *
+ * @property LeadAdditionalInformation $additionalInformationForm
  * @property Lead $clone
+ * @property ProfitSplit[] $profitSplits
+ *
  */
 class Lead extends ActiveRecord
 {
@@ -142,6 +147,8 @@ class Lead extends ActiveRecord
 
     public $additionalInformationForm;
     public $status_description;
+    public $totalProfit;
+    public $splitProfitPercentSum = 0;
 
     /**
      * {@inheritdoc}
@@ -224,6 +231,23 @@ class Lead extends ActiveRecord
                 'value' => date('Y-m-d H:i:s') //new Expression('NOW()'),
             ],
         ];
+    }
+
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getLeadFlows()
+    {
+        return $this->hasMany(LeadFlow::class, ['lead_id' => 'id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getLeadLogs()
+    {
+        return $this->hasMany(LeadLog::class, ['lead_id' => 'id']);
     }
 
 
@@ -354,6 +378,12 @@ class Lead extends ActiveRecord
                 ':sold' => self::STATUS_SOLD,
         ])
         ->limit(1);
+
+        if(Yii::$app->authManager->getAssignment('supervision', $userId)){
+            $subQuery1 = UserGroupAssign::find()->select(['ugs_group_id'])->where(['ugs_user_id' => $userId]);
+            $subQuery = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->where(['IN', 'ugs_group_id', $subQuery1]);
+            $query->andWhere(['IN', 'leads.employee_id', $subQuery]);
+        }
         //echo $query->createCommand()->getRawSql();die;
 
         return $query->createCommand()->queryOne();
@@ -1322,7 +1352,7 @@ Sales - Kivork",
                 if (isset($ipData['country_code'])) {
                     $content .= '&nbsp;' . Html::tag('i', '', [
                             'class' => 'flag flag__' . strtolower($ipData['country_code']),
-                            'style' => 'vertical-align: bottom;'
+                            'style' => 'vertical-align: middle;'
                         ]);
                 }
             }
@@ -1411,6 +1441,12 @@ Sales - Kivork",
     public function getLeadFlightSegmentsCount(): int
     {
         return $this->hasMany(LeadFlightSegment::class, ['lead_id' => 'id'])->count();
+    }
+
+
+    public function getFirstFlightSegment()
+    {
+        return LeadFlightSegment::find()->where(['lead_id' => $this->id])->orderBy(['departure' => 'ASC'])->one();
     }
 
     /**
@@ -2110,6 +2146,30 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
         $flightSegment = LeadFlightSegment::find()->where(['lead_id' => $this->id])->orderBy(['departure' => SORT_ASC])->one();
 
         return ($flightSegment)?$flightSegment['departure']:null;
+    }
+
+     /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getProfitSplits()
+    {
+        return $this->hasMany(ProfitSplit::className(), ['ps_lead_id' => 'id']);
+    }
+
+    public function getAllProfitSplits()
+    {
+        return ProfitSplit::find()->where(['ps_lead_id' => $this->id])->all();
+    }
+
+    public function getSumPercentProfitSplit()
+    {
+        $query = new Query();
+        $query->from(ProfitSplit::tableName().' ps')
+            ->where(['ps.ps_lead_id' => $this->id])
+            ->select(['SUM(ps.ps_percent) as percent'])
+            ;
+
+        return $query->queryScalar();
     }
 
     public function getQuoteSendInfo()

@@ -206,7 +206,7 @@ JS;
                         $('#' + originId).autocomplete({
                             "autoFocus": true,
                             "source": function (request, response) {
-                                $.getJSON('/lead/get-airport', {
+                                $.getJSON('/site/get-airport', {
                                     term: request.term
                                 }, response);
                             },
@@ -216,7 +216,7 @@ JS;
                         $('#' + destinationId).autocomplete({
                             "autoFocus": true,
                             "source": function (request, response) {
-                                $.getJSON('/lead/get-airport', {
+                                $.getJSON('/site/get-airport', {
                                     term: request.term
                                 }, response);
                             },
