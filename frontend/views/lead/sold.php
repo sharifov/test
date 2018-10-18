@@ -173,7 +173,7 @@ if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
             'label' => 'Profit',
             'value' => function ($model) {
                 $quote = $model->getBookedQuote();
-                return "<strong>$" . number_format(Quote::countProfit($quote->id), 2) . "</strong>";
+                return $quote ? "<strong>$" . number_format(Quote::countProfit($quote->id), 2) . "</strong>" : '-';
             },
             'format' => 'raw'
         ],
@@ -203,7 +203,7 @@ if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
                     $segments = Quote::parseDump($quote['reservation_dump'], false, $data, true);
                     return $segments[0]['departureDateTime']->format('Y-m-d H:i');
                 }
-                return $model['departure'];
+                return '';
             },
             'format' => 'raw'
         ],
@@ -240,7 +240,7 @@ if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
                         'type' => 'sold',
                         'id' => $model['id']
                     ]), [
-                        'class' => 'btn btn-info btn-sm',
+                        'class' => 'btn btn-info btn-xs',
                         'target' => '_blank',
                         'data-pjax' => 0,
                         'title' => 'View lead'

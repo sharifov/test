@@ -39,7 +39,7 @@ HTML;
         <?= GridView::widget([
             'dataProvider' => $dataProvider,
             'filterModel' => $searchModel,
-            'layout' => $template,
+            //'layout' => $template,
             'rowOptions' => function (\common\models\Employee $model, $index, $widget, $grid) {
                 if ($model->deleted) {
                     return ['class' => 'danger'];

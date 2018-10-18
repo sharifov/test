@@ -15,7 +15,7 @@ use yii\filters\VerbFilter;
 /**
  * LeadFlowController implements the CRUD actions for LeadFlow model.
  */
-class LeadFlowController extends DefaultController
+class LeadFlowController extends FController
 {
     /**
      * {@inheritdoc}

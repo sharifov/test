@@ -39,7 +39,7 @@ AppAsset::register($this);
                 <div class="page-header__general">
                     <?php
                     if (Yii::$app->controller->id == 'lead' && Yii::$app->controller->action->id = 'queue') {
-                        echo Html::a('Create New Lead', Url::to(['lead/create']), ['class' => 'btn btn-action']);
+                        echo Html::a('Create New Lead', Url::to(['lead/create']), ['class' => 'btn btn-primary']);
                     }
                     if (Yii::$app->controller->action->id = 'queue' && Yii::$app->request->get('type') == 'follow-up') {
                         $showAll = Yii::$app->request->cookies->getValue(\common\models\Lead::getCookiesKey(), true);

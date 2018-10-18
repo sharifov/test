@@ -16,12 +16,14 @@ $isCoach = Yii::$app->authManager->getAssignment('coach', Yii::$app->user->id);
 <div id="sidebar-menu" class="main_menu_side hidden-print main_menu">
 
     <div class="menu_section">
-        <h3>Menu</h3>
+
 
         <br>
-        <div class="text-center">
+        <br>
+        <br>
+        <? /*<div class="text-center">
             <?= Html::a('<i class="fa fa-plus" style="font-size: 10px"></i> Create Lead &nbsp;&nbsp;&nbsp;&nbsp;', ['lead/create'], ['class' => 'btn btn-success btn-xs']) ?>
-        </div>
+        </div>*/ ?>
 
         <?php
 
@@ -46,12 +48,12 @@ $isCoach = Yii::$app->authManager->getAssignment('coach', Yii::$app->user->id);
 
 
         //$menuItems[] = ["label" => '<i class="fa fa-home"></i><span>'.Yii::t('menu', 'Home').'</span><small class="label-success label pull-right">new</small>', "url" => "/"];
+        $menuItems[] = ['label' => 'Create new Lead', 'url' => ['lead/create'], 'icon' => 'plus'];
         $menuItems[] = ["label" => "Dashboard", "url" => ["/"], "icon" => "area-chart"];
 
         if (Yii::$app->user->isGuest) {
             $menuItems[] = ['label' => 'Login', 'url' => ['/site/login']];
         } else {
-
 
             $menuItems[] = ['label' => 'Search Leads', 'url' => ['/leads/index'], 'icon' => 'search'];
 
@@ -64,7 +66,13 @@ $isCoach = Yii::$app->authManager->getAssignment('coach', Yii::$app->user->id);
                     'items' => [
                         ['label' => 'Flight Segments', 'url' => ['lead-flight-segment/index'], 'icon' => 'plane'],
                         ['label' => 'Quote List', 'url' => ['quotes/index'], 'icon' => 'quora'],
-                        ['label' => 'Quote Price List', 'url' => ['quote-price/index'], 'icon' => 'dollar']
+                        ['label' => 'Quote Price List', 'url' => ['quote-price/index'], 'icon' => 'dollar'],
+
+                        ['label' => 'Export Leads', 'url' => ['leads/export'], 'icon' => 'export'],
+                        ['label' => 'Duplicate Leads', 'url' => ['leads/duplicate'], 'icon' => 'copy'],
+                        ['label' => 'Stats Agents & Leads', 'url' => ['report/agents'], 'icon' => 'users'],
+                        ['label' => 'Lead Status History', 'url' => ['lead-flow/index'], 'icon' => 'list'],
+
                     ]
                     //'linkOptions' => ['data-method' => 'post']
                 ];

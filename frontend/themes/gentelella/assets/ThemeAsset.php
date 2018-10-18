@@ -14,6 +14,7 @@ class ThemeAsset extends AssetBundle
     public $sourcePath = '@bower/gentelella/build/';
     public $css = [
         'css/custom.css',
+        //'https://use.fontawesome.com/releases/v5.4.1/css/all.css',
     ];
     public $js = [
         //'js/custom.js',

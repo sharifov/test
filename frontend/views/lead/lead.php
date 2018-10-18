@@ -6,7 +6,7 @@
 use yii\bootstrap\Html;
 use frontend\models\LeadForm;
 
-$bundle = \frontend\themes\gentelella\assets\LeadAsset::register($this);
+//$bundle = \frontend\themes\gentelella\assets\LeadAsset::register($this);
 //$this->registerCssFile('/css/style-req.css');
 $userId = Yii::$app->user->id;
 
@@ -72,7 +72,6 @@ JS;
 }
 
 ?>
-
 <div class="page-header">
     <div class="container-fluid">
         <div class="page-header__wrapper">

@@ -62,30 +62,21 @@ $bundle = \frontend\themes\gentelella\assets\Asset::register($this);
                 <div class="col-md-3 left_col">
                     <div class="left_col scroll-view">
 
-                        <div class="navbar nav_title" style="border: 0;">
-                            <a href="/" class="site_title"><span title="<?=$host?>"><i class="fa fa-dollar"></i> Sales - KIVORK</span></a>
-                        </div>
-                        <div class="clearfix"></div>
+                        <?php
+                        $me = \common\models\Employee::findOne(Yii::$app->user->id);
+                        $default = "identicon";
 
-                        <div class="profile">
-                            <div class="profile_pic">
-                                <?
-                                $me = \common\models\Employee::findOne(Yii::$app->user->id);
-                                $default = "identicon";
+                        if(!$me || !$me->email) {
+                            $grav_url = '//www.gravatar.com/avatar/?d=identicon&s=60';
+                        }
+                        else {
+                            $grav_url = "//www.gravatar.com/avatar/" . md5(strtolower(trim($me->email))) . "?d=identicon&s=128";
+                        }
+                        ?>
 
-                                if(!$me || !$me->email) $grav_url = '//www.gravatar.com/avatar/?d=identicon&s=60';
-                                else $grav_url = "//www.gravatar.com/avatar/" . md5(strtolower(trim($me->email))) . "?d=identicon&s=128";
-                                ?>
-                                <?=Html::img($grav_url, ['alt' => 'avatar', 'class' => 'img-circle profile_img'])?>
-                            </div>
-                            <div class="profile_info">
-                                <span>Welcome,</span>
-                                <h2><?=Html::encode($me->username)?></h2>
-                            </div>
-                        </div>
-                        <!-- /menu prile quick info -->
-
-                        <br />
+                        <!-- navbar left -->
+                        <?= $this->render('_navbar_left', ['host' => $host, 'grav_url' => $grav_url]) ?>
+                        <!-- /navbar left -->
 
                         <!-- sidebar menu -->
                         <?= $this->render('_sidebar_menu') ?>

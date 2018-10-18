@@ -14,7 +14,9 @@ class Asset extends \yii\web\AssetBundle
     public $baseUrl = '@web';
 
     public $css = [
-        'css/custom2.css',
+        //'css/custom2.css',
+        'css/style-req.css?v=1.7',
+        //'https://use.fontawesome.com/releases/v5.4.1/css/all.css',
         //'css/font-awesome.css',
         //'css/style.css?v=2',
         //'css/site.css',
@@ -22,7 +24,7 @@ class Asset extends \yii\web\AssetBundle
 
     public $js = [
         'js/custom.js',
-        //'/js/util.js'
+        'js/util.js'
     ];
 
     /*public $depends = [
