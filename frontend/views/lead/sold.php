@@ -86,9 +86,9 @@ if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
         ],
         [
             // 'attribute' => 'client_id',
-            'header' => 'Client name',
+            'header' => 'Client',
             'format' => 'raw',
-            'value' => function (\common\models\Lead $model) {
+            'value' => function (\common\models\Lead $model) use ($isAgent) {
 
                 if ($model->client) {
                     $clientName = $model->client->first_name . ' ' . $model->client->last_name;
@@ -101,45 +101,20 @@ if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
                     $clientName = '-';
                 }
 
-                return $clientName;
+                if ($isAgent && Yii::$app->user->id !== $model->employee_id) {
+                    $emails = '- // - // - // -';
+                    $phones = '- // - // - // -';
+                } else {
+                    $emails = $model->client && $model->client->clientEmails ? '<i class="fa fa-envelope"></i> ' . implode(' <br><i class="fa fa-envelope"></i> ', \yii\helpers\ArrayHelper::map($model->client->clientEmails, 'email', 'email')) . '' : '';
+                    $phones = $model->client && $model->client->clientPhones ? '<br><i class="fa fa-phone"></i> ' . implode(' <br><i class="fa fa-phone"></i> ', \yii\helpers\ArrayHelper::map($model->client->clientPhones, 'phone', 'phone')) . '' : '';
+                }
+
+                return $clientName.'<br/>'.$emails.'<br/>'.$phones;
             },
             'options' => [
-                'style' => 'width:160px'
+                'style' => 'width:260px'
             ]
             // 'filter' => \common\models\Employee::getList()
-        ],
-        [
-            'header' => 'Client Emails',
-            'format' => 'raw',
-            'value' => function (\common\models\Lead $model) use ($isAgent) {
-                if ($isAgent && Yii::$app->user->id !== $model->employee_id) {
-                    $str = '- // - // - // -';
-                } else {
-                    $str = $model->client && $model->client->clientEmails ? '<i class="fa fa-envelope"></i> ' . implode(' <br><i class="fa fa-envelope"></i> ', \yii\helpers\ArrayHelper::map($model->client->clientEmails, 'email', 'email')) . '' : '';
-                }
-
-                return $str ?? '-';
-            },
-            'options' => [
-                'style' => 'width:180px'
-            ]
-        ],
-
-        [
-            'label' => 'Client Phone',
-            'format' => 'raw',
-            'value' => function (\common\models\Lead $model) use ($isAgent) {
-                if ($isAgent && Yii::$app->user->id !== $model->employee_id) {
-                    $str = '- // - // - // -';
-                } else {
-                    $str = $model->client && $model->client->clientPhones ? '<br><i class="fa fa-phone"></i> ' . implode(' <br><i class="fa fa-phone"></i> ', \yii\helpers\ArrayHelper::map($model->client->clientPhones, 'phone', 'phone')) . '' : '';
-                }
-
-                return $str ?? '-';
-            },
-            'options' => [
-                'style' => 'width:180px'
-            ]
         ],
         [
             'label' => 'Destination',

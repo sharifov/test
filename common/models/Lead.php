@@ -378,6 +378,12 @@ class Lead extends ActiveRecord
                 ':sold' => self::STATUS_SOLD,
         ])
         ->limit(1);
+
+        if(Yii::$app->authManager->getAssignment('supervision', $userId)){
+            $subQuery1 = UserGroupAssign::find()->select(['ugs_group_id'])->where(['ugs_user_id' => $userId]);
+            $subQuery = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->where(['IN', 'ugs_group_id', $subQuery1]);
+            $query->andWhere(['IN', 'leads.employee_id', $subQuery]);
+        }
         //echo $query->createCommand()->getRawSql();die;
 
         return $query->createCommand()->queryOne();
