@@ -44,6 +44,12 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     const STATUS_DELETED = 0;
     const STATUS_ACTIVE = 10;
 
+    const PROFIT_BONUSES = [
+        11000   =>  500,
+        8000    =>  300,
+        5000    =>  150
+    ];
+
     public $password;
     public $deleted;
     public $role;
@@ -601,48 +607,77 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     {
         $base = ($this->userParams)?$this->userParams->up_base_amount:200;
         $commission = ($this->userParams)?$this->userParams->up_commission_percent:10;
+        $bonusActive = ($this->userParams)?$this->userParams->up_bonus_active:1;
         $bonus = 0;
 
         $query = new Query();
         $query->select([
+            'lead_id' => 'l.id',
             'q_id' => 'q.id',
             'selling' => 'SUM(qp.selling)',
             'mark_up' => 'SUM(qp.mark_up + qp.extra_mark_up)',
             'fare_type' => 'q.fare_type',
-            'check_payment' => 'q.check_payment'
+            'check_payment' => 'q.check_payment',
+            'minus_percent' => 'SUM(ps.ps_percent)',
+            'agent_type' => "(CASE WHEN l.employee_id = $this->id THEN 'main' ELSE 'split' END)",
+            'split_percent' => "SUM(CASE WHEN ps.ps_user_id = $this->id THEN ps.ps_percent ELSE 0 END)"
         ])
         ->from(Lead::tableName().' l')
         ->leftJoin(Quote::tableName().' q','q.lead_id = l.id')
         ->leftJoin(QuotePrice::tableName().' qp','q.id = qp.quote_id')
-        ->where(['l.status' => Lead::STATUS_SOLD , 'l.employee_id' => $this->id])
-        ->andWhere(['q.status' => Quote::STATUS_APPLIED])
-        ->groupBy(['q.id'])
+        ->leftJoin(ProfitSplit::tableName().' ps','ps.ps_lead_id = l.id')
+        ->where(['l.status' => Lead::STATUS_SOLD, 'q.status' => Quote::STATUS_APPLIED])
+        ->andWhere('l.employee_id = '.$this->id.' OR ps.ps_user_id = '.$this->id)
+        ->groupBy(['q.id','l.id'])
         ;
 
-        if($startDate !== null && $endDate !== null){
-            $query->andWhere(['BETWEEN','l.updated' , $startDate->format('Y-m-d').' 00:00:00', $endDate->format('Y-m-d').' 23:59:59']);
-        }elseif($startDate !== null){
-            $query->andWhere(['>=','l.updated' , $startDate->format('Y-m-d').' 00:00:00']);
-        }elseif ($endDate !== null){
-            $query->andWhere(['<=','l.updated' , $endDate->format('Y-m-d').' 23:59:59']);
+        if($startDate !== null || $endDate !== null) {
+            $subQuery = LeadFlow::find()->select(['DISTINCT(lead_flow.lead_id)'])->where('lead_flow.status = l.status AND lead_flow.lead_id = l.id');
+            if ($startDate !== null) {
+                $subQuery->andFilterWhere(['>=', 'DATE(lead_flow.created)', $startDate->format('Y-m-d')]);
+            }
+            if ($endDate !== null) {
+                $subQuery->andFilterWhere(['<=', 'DATE(lead_flow.created)', $endDate->format('Y-m-d')]);
+            }
+            $query->andWhere(['IN', 'l.id', $subQuery]);
         }
+
+        //echo $query->createCommand()->getRawSql();die;
         $res = $query->all();
 
         $profit = 0;
         foreach ($res as $entry){
-            $profit += Quote::getProfit($entry['mark_up'], $entry['selling'], $entry['fare_type'], $entry['check_payment']);
+            $entry['minus_percent'] = intval($entry['minus_percent']);
+            $totalProfit = Quote::getProfit($entry['mark_up'], $entry['selling'], $entry['fare_type'], $entry['check_payment']);
+            if($entry['agent_type'] == 'main'){
+                $agentProfit = $totalProfit*(100-$entry['minus_percent'])/100;
+            }else{
+                $agentProfit = $totalProfit*$entry['split_percent']/100;
+            }
+            $profit += $agentProfit;
         }
 
-        switch (true){
-            case $profit > 11000: $bonus = 500; break;
-            case $profit > 8000: $bonus = 300; break;
-            case $profit > 5000: $bonus = 150; break;
-            default: $bonus = 0; break;
+        if($bonusActive){
+            $profitBonuses = $this->getProfitBonuses();
+            if(empty($profitBonuses)){
+                $profitBonuses = self::PROFIT_BONUSES;
+            }
+            foreach ($profitBonuses as $profKey => $bonusVal) {
+                if($profit >= $profKey){
+                    $bonus = $bonusVal;
+                    break;
+                }
+            }
         }
 
-        $profit = $profit + $profit * $commission/100;
+        $profit = $profit * $commission/100;
 
-        return $profit + $base + $bonus;
+        return [
+            'salary' => $profit + $base + $bonus,
+            'base' => $base,
+            'bonus' => $bonus,
+            'commission' => $commission,
+            ];
     }
 
 
@@ -669,4 +704,13 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         return $count;
     }
 
+    public function getProfitBonuses()
+    {
+        $pb = ProfitBonus::find()->where(['pb_user_id' => $this->id])->orderBy(['pb_min_profit' => SORT_DESC])->all();
+        $data = [];
+        foreach ($pb as $entry){
+            $data[$entry['pb_min_profit']] = $entry['pb_bonus'];
+        }
+        return $data;
+    }
 }

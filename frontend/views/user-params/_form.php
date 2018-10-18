@@ -18,6 +18,8 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'up_base_amount')->input('number') ?>
 
+    <?= $form->field($model, 'up_bonus_active')->checkbox() ?>
+
     <?//= $form->field($model, 'up_updated_dt')->textInput() ?>
 
     <?//= $form->field($model, 'up_updated_user_id')->textInput() ?>

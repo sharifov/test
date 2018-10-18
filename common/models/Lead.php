@@ -59,8 +59,10 @@ use yii\helpers\VarDumper;
  * @property Project $project
  * @property int $quotesCount
  * @property int $leadFlightSegmentsCount
- * @property LeadAdditionalInformation $additionalInformationForm *
+ * @property LeadAdditionalInformation $additionalInformationForm
  * @property Lead $clone
+ * @property ProfitSplit[] $profitSplits
+ *
  */
 class Lead extends ActiveRecord
 {
@@ -144,6 +146,8 @@ class Lead extends ActiveRecord
 
     public $additionalInformationForm;
     public $status_description;
+    public $totalProfit;
+    public $splitProfitPercentSum = 0;
 
     /**
      * {@inheritdoc}
@@ -2104,4 +2108,27 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
         return Quote::findOne(['lead_id' => $this->id, 'status' => Quote::STATUS_APPLIED]);
     }
 
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getProfitSplits()
+    {
+        return $this->hasMany(ProfitSplit::className(), ['ps_lead_id' => 'id']);
+    }
+
+    public function getAllProfitSplits()
+    {
+        return ProfitSplit::find()->where(['ps_lead_id' => $this->id])->all();
+    }
+
+    public function getSumPercentProfitSplit()
+    {
+        $query = new Query();
+        $query->from(ProfitSplit::tableName().' ps')
+            ->where(['ps.ps_lead_id' => $this->id])
+            ->select(['SUM(ps.ps_percent) as percent'])
+            ;
+
+        return $query->queryScalar();
+    }
 }

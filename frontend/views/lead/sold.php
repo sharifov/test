@@ -34,7 +34,8 @@ if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
 
     <?php Pjax::begin(); //['id' => 'lead-pjax-list', 'timeout' => 5000, 'enablePushState' => true, 'clientOptions' => ['method' => 'GET']]); ?>
     <?php if(isset($salary)):?>
-    <h1>Salary by <?= $salaryBy?>: $<?= number_format($salary,2)?></h1>
+    <h3>Salary by <?= $salaryBy?>: $<?= number_format($salary['salary'],2)?>
+    (Base: $<?= intval($salary['base'])?>, Commission: <?= $salary['commission']?>%, Bonus: $<?= $salary['bonus']?>)</h3>
     <?php endif;?>
     <?= $this->render('_search_sold', ['model' => $searchModel]); ?>
 
@@ -68,7 +69,7 @@ if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
                     return (! empty($additionally->pnr)) ? $additionally->pnr : '-';
                 }
                 return '-';
-            },
+            }
         ],
         [
             'label' => 'Passengers',
@@ -167,13 +168,41 @@ if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
                 return $model->employee ? '<i class="fa fa-user"></i> ' . $model->employee->username : '-';
             },
             'filter' => $userList,
-            'visible' => !$isAgent,
+            'visible' => ! $isAgent
         ],
         [
-            'label' => 'Profit',
-            'value' => function ($model) {
+            'label' => 'Total Profit',
+            'value' => function ($model){
                 $quote = $model->getBookedQuote();
-                return "<strong>$" . number_format(Quote::countProfit($quote->id), 2) . "</strong>";
+                $model->totalProfit = $quote->getTotalProfit();
+                return "<strong>$" . number_format($model->totalProfit, 2) . "</strong>";
+            },
+            'format' => 'raw'
+        ],
+        [
+            'label' => 'Split Profit',
+            'value' => function ($model) {
+                 $splitProfit = $model->getAllProfitSplits();
+                 $return = [];
+                 foreach ($splitProfit as $split){
+                     $model->splitProfitPercentSum += $split->ps_percent;
+                     $return[] = '<b>'.$split->psUser->username.'</b> ('.$split->ps_percent.'%) $'. number_format($split->countProfit($model->totalProfit),2);
+                 }
+                 if(empty($return)){
+                    return '-';
+                 }
+                 return implode('<br/>', $return);
+            },
+            'format' => 'raw'
+        ],
+        [
+            'label' => 'Main Agent Profit',
+            'value' => function ($model){
+                $mainAgentPercent = 100;
+                if($model->splitProfitPercentSum > 0){
+                    $mainAgentPercent -= $model->splitProfitPercentSum;
+                }
+                return "<strong>$" . number_format($model->totalProfit*$mainAgentPercent/100, 2) . "</strong>";
             },
             'format' => 'raw'
         ],
@@ -192,7 +221,9 @@ if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
                     'format' => 'dd-M-yyyy'
                 ]
             ]),
-            'contentOptions'=>['style'=>'width: 180px;text-align:center;']
+            'contentOptions' => [
+                'style' => 'width: 180px;text-align:center;'
+            ]
         ],
         [
             'label' => 'Date of Departure',
@@ -228,7 +259,7 @@ if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
             'value' => function (\common\models\Lead $model) {
                 return $model->source ? $model->source->name : '-';
             },
-            'filter' => \common\models\Source::getList(),
+            'filter' => \common\models\Source::getList()
         ],
         [
             'class' => 'yii\grid\ActionColumn',
