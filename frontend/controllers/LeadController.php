@@ -40,7 +40,7 @@ use frontend\models\ProfitSplitForm;
 /**
  * Site controller
  */
-class LeadController extends DefaultController
+class LeadController extends FController
 {
     /**
      * {@inheritdoc}
@@ -84,8 +84,9 @@ class LeadController extends DefaultController
     {
         if (parent::beforeAction($action)) {
             if (in_array($action->id, ['create', 'quote'])) {
-                Yii::$app->setLayoutPath('@app/views/layouts');
-                $this->layout = 'sale';
+                //Yii::$app->setLayoutPath('@frontend/views/layouts');
+                //$this->layout = 'sale';
+                $this->layout = '@app/themes/gentelella/views/layouts/main_lead';
             }
             return true;
         }
@@ -588,7 +589,6 @@ class LeadController extends DefaultController
 
     public function actionQueue($type)
     {
-        $this->view->title = sprintf('Leads - %s Queue', ucfirst($type));
         $searchModel = null;
         if (in_array($type, ['processing-all', 'processing', 'follow-up'])) {
             $dataProvider = [];
@@ -621,6 +621,7 @@ class LeadController extends DefaultController
         return $this->render('queue', [
             'dataProvider' => $dataProvider,
             'searchModel' => $searchModel,
+            'type' => $type
         ]);
     }
 

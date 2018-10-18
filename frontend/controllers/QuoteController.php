@@ -26,7 +26,7 @@ use common\models\Employee;
 /**
  * Quotes controller
  */
-class QuoteController extends DefaultController
+class QuoteController extends FController
 {
     /**
      * {@inheritdoc}

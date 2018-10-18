@@ -17,7 +17,7 @@ use yii\filters\VerbFilter;
 /**
  * QuoteController implements the CRUD actions for Quote model.
  */
-class QuotesController extends DefaultController
+class QuotesController extends FController
 {
     /**
      * {@inheritdoc}

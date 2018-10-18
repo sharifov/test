@@ -3,12 +3,21 @@
  * @var $this \yii\web\View
  * @var $dataProvider ActiveDataProvider[]
  * @var $searchModel Lead
+ * @var $type string
  */
 
 
 use yii\data\ActiveDataProvider;
 use common\models\Lead;
 
+$this->title = sprintf('%s Queue', ucfirst($type));
+$this->params['breadcrumbs'][] = $this->title;
+
+?>
+
+<h1><?=\yii\helpers\Html::encode($this->title)?></h1>
+
+<?php
 $template = <<<HTML
 <div class="table-pagination">
     <div class="container">

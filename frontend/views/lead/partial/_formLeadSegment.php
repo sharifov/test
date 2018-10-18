@@ -55,7 +55,7 @@ use yii\helpers\Url;
             'clientOptions' => [
                 'autoFocus' => true,
                 'source' => new JsExpression("function(request, response) {
-                $.getJSON('" . Url::to(['get-airport']) . "', {
+                $.getJSON('" . Url::to(['site/get-airport']) . "', {
                     term: request.term
                 }, response);
             }"),
@@ -75,7 +75,7 @@ use yii\helpers\Url;
             'clientOptions' => [
                 'autoFocus' => true,
                 'source' => new JsExpression("function(request, response) {
-                $.getJSON('" . Url::to(['get-airport']) . "', {
+                $.getJSON('" . Url::to(['site/get-airport']) . "', {
                     term: request.term
                 }, response);
             }"),

@@ -43,7 +43,7 @@ HTML;
         <?php endif; ?>
         <?= GridView::widget([
             'dataProvider' => $dataProvider,
-            'layout' => $template,
+            //'layout' => $template,
             'columns' => [
                 'id',
                 'name',

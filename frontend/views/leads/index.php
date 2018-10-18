@@ -323,7 +323,7 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
                     $segmentData = [];
                     if($segments) {
                         foreach ($segments as $sk => $segment) {
-                            $segmentData[] = ($sk + 1).'. <code>'.Html::a($segment->origin.'->'.$segment->destination, ['lead-flight-segment/view', 'id' => $segment->id], ['target' => '_blank', 'data-pjax' => 0]).'</code>';
+                            $segmentData[] = ($sk + 1).'. <code>'.Html::a($segment->origin.' <i class="fa fa-long-arrow-right"></i> '.$segment->destination, ['lead-flight-segment/view', 'id' => $segment->id], ['target' => '_blank', 'data-pjax' => 0]).'</code>';
                         }
                     }
 
@@ -332,7 +332,7 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
                     //return $model->leadFlightSegmentsCount ? Html::a($model->leadFlightSegmentsCount, ['lead-flight-segment/index', "LeadFlightSegmentSearch[lead_id]" => $model->id], ['target' => '_blank', 'data-pjax' => 0]) : '-' ;
                 },
                 'format' => 'raw',
-                'contentOptions' => ['class' => 'text-center'],
+                'contentOptions' => ['class' => 'text-left'],
                 'options' => ['style' => 'width:140px'],
             ],
 

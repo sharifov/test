@@ -28,7 +28,7 @@ if(Yii::$app->authManager->getAssignment('admin', $userId) || Yii::$app->authMan
 <?php \yii\widgets\Pjax::begin(['timeout' => 10000]); ?>
 <?= GridView::widget([
     'dataProvider' => $dataProvider,
-    'layout' => $template,
+    //'layout' => $template,
     'filterModel' => $searchModel,
     'rowOptions' => function ($model) {
         if ($model['status'] === Lead::STATUS_PROCESSING &&
@@ -403,7 +403,7 @@ if(Yii::$app->authManager->getAssignment('admin', $userId) || Yii::$app->authMan
                     $buttonsCnt = 0;
                     $buttons = '';
                     if (in_array($queueType, ['inbox', 'follow-up']) ||
-                        ($queueType == 'processing' &&
+                        ($queueType === 'processing' &&
                             $model['status'] === Lead::STATUS_ON_HOLD)
                     ) {
                         $buttonsCnt++;
@@ -411,7 +411,7 @@ if(Yii::$app->authManager->getAssignment('admin', $userId) || Yii::$app->authMan
                             'lead/take',
                             'id' => $model['id']
                         ]), [
-                            'class' => 'btn btn-action btn-sm take-btn',
+                            'class' => 'btn btn-primary btn-xs take-btn',
                             'data-pjax' => 0
                         ]);
                     }
@@ -424,7 +424,7 @@ if(Yii::$app->authManager->getAssignment('admin', $userId) || Yii::$app->authMan
                         }
                         $buttonsCnt++;
                         $buttons .= ' '.Html::a('<i class="fa fa-search"></i>', Url::to(['lead/quote', 'type' => $queueType, 'id' => $model['id']]), [
-                            'class' => 'btn btn-info btn-sm',
+                            'class' => 'btn btn-info btn-xs',
                             'target' => '_blank',
                             'data-pjax' => 0,
                                 'title' => 'View lead'
@@ -440,7 +440,7 @@ if(Yii::$app->authManager->getAssignment('admin', $userId) || Yii::$app->authMan
                             'id' => $model['id'],
                             'over' => true
                         ]), [
-                            'class' => 'btn btn-action btn-sm take-processing-btn',
+                            'class' => 'btn btn-xs take-processing-btn',
                                 'data-pjax' => 0,
                             'data-status' => $model['status']
                         ]);
@@ -451,7 +451,7 @@ if(Yii::$app->authManager->getAssignment('admin', $userId) || Yii::$app->authMan
                     if ($isSupervision && !empty($limitedAgents)) {
                         $url = Url::to(['sales/assign', 'id' => $model->leads[0]->id]);
                         $buttons .= Html::a('Assign', '#', [
-                            'class' => 'btn btn-action btn-sm assign-btn',
+                            'class' => 'btn btn-sm assign-btn',
                             'data-url' => $url,
                             'data-pjax' => 0
                         ]);
@@ -459,11 +459,11 @@ if(Yii::$app->authManager->getAssignment('admin', $userId) || Yii::$app->authMan
 
                     if($buttonsCnt > 2) {
                     $html = Html::tag('div', Html::button('Action', [
-                            'class' => 'btn btn-sm btn-action dropdown-toggle',
+                            'class' => 'btn btn-sm dropdown-toggle',
                             'data-toggle' => 'dropdown',
                             'aria-expanded' => 'false'
                         ]) . Html::button('<span class="caret"></span>', [
-                            'class' => 'btn btn-action btn-sm dropdown-toggle',
+                            'class' => 'btn btn-sm dropdown-toggle',
                             'data-toggle' => 'dropdown',
                             'aria-expanded' => 'false'
                         ]) . Html::tag('div', $buttons, [

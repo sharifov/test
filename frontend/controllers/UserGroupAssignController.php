@@ -14,7 +14,7 @@ use yii\filters\VerbFilter;
 /**
  * UserGroupAssignController implements the CRUD actions for UserGroupAssign model.
  */
-class UserGroupAssignController extends DefaultController
+class UserGroupAssignController extends FController
 {
     /**
      * {@inheritdoc}

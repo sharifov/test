@@ -1346,7 +1346,7 @@ Sales - Kivork",
                 if (isset($ipData['country_code'])) {
                     $content .= '&nbsp;' . Html::tag('i', '', [
                             'class' => 'flag flag__' . strtolower($ipData['country_code']),
-                            'style' => 'vertical-align: bottom;'
+                            'style' => 'vertical-align: middle;'
                         ]);
                 }
             }

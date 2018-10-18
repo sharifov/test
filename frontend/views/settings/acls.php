@@ -73,7 +73,7 @@ $this->registerJs($js);
         <?= GridView::widget([
             'dataProvider' => $dataProvider,
             'filterModel' => $searchModel,
-            'layout' => $template,
+            //'layout' => $template,
             'columns' => [
                 'id',
                 [

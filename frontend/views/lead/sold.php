@@ -278,7 +278,7 @@ if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
                         'type' => 'sold',
                         'id' => $model['id']
                     ]), [
-                        'class' => 'btn btn-info btn-sm',
+                        'class' => 'btn btn-info btn-xs',
                         'target' => '_blank',
                         'data-pjax' => 0,
                         'title' => 'View lead'

@@ -14,7 +14,7 @@ use yii\filters\VerbFilter;
 /**
  * ApiUserController implements the CRUD actions for ApiUser model.
  */
-class ApiUserController extends DefaultController
+class ApiUserController extends FController
 {
     /*public function behaviors()
     {
