@@ -16,6 +16,7 @@ use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\helpers\VarDumper;
+use common\models\local\FlightSegment;
 
 /**
  * This is the model class for table "leads".
@@ -1434,6 +1435,12 @@ Sales - Kivork",
     public function getLeadFlightSegmentsCount(): int
     {
         return $this->hasMany(LeadFlightSegment::class, ['lead_id' => 'id'])->count();
+    }
+
+
+    public function getFirstFlightSegment()
+    {
+        return LeadFlightSegment::find()->where(['lead_id' => $this->id])->orderBy(['departure' => 'ASC'])->one();
     }
 
     /**

@@ -174,6 +174,9 @@ if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
             'label' => 'Total Profit',
             'value' => function ($model){
                 $quote = $model->getBookedQuote();
+                if(empty($quote)){
+                    return '';
+                }
                 $model->totalProfit = $quote->getTotalProfit();
                 return "<strong>$" . number_format($model->totalProfit, 2) . "</strong>";
             },
@@ -229,12 +232,16 @@ if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
             'label' => 'Date of Departure',
             'value' => function ($model) {
                 $quote = $model->getBookedQuote();
-                if (isset($quote['reservation_dump']) && ! empty($quote['reservation_dump'])) {
+                if (!empty($quote) && isset($quote['reservation_dump']) && ! empty($quote['reservation_dump'])) {
                     $data = [];
                     $segments = Quote::parseDump($quote['reservation_dump'], false, $data, true);
                     return $segments[0]['departureDateTime']->format('Y-m-d H:i');
                 }
-                return $model['departure'];
+                $firstSegment = $model->getFirstFlightSegment();
+                if(empty($firstSegment)){
+                    return '';
+                }
+                return $firstSegment['departure'];
             },
             'format' => 'raw'
         ],
