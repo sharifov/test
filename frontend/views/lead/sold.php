@@ -16,7 +16,7 @@ use dosamigos\datepicker\DatePicker;
 /* @var $salary float */
 /* @var $salaryBy string */
 
-$this->title = 'Sold';
+$this->title = 'Sold Queue';
 
 if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
     $userList = \common\models\Employee::getList();
@@ -24,7 +24,12 @@ if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
     $userList = \common\models\Employee::getListByUserId(Yii::$app->user->id);
 }
 
+$this->params['breadcrumbs'][] = $this->title;
+
 ?>
+
+<h1><?=\yii\helpers\Html::encode($this->title)?></h1>
+
 <style>
 .dropdown-menu {
 	z-index: 1010 !important;
@@ -281,7 +286,7 @@ echo GridView::widget([
     'columns' => $gridColumns,
     'toolbar' => false,
     'pjax' => false,
-    'striped' => false,
+    'striped' => true,
     'condensed' => false,
     'responsive' => true,
     'hover' => true,
@@ -289,10 +294,10 @@ echo GridView::widget([
     'floatHeaderOptions' => [
         'scrollingTop' => 20
     ],
-    'panel' => [
+    /*'panel' => [
         'type' => GridView::TYPE_PRIMARY,
         'heading' => '<h3 class="panel-title"><i class="glyphicon glyphicon-list"></i> Sold</h3>'
-    ]
+    ]*/
 
 ]);
 

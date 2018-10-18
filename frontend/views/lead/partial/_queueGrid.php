@@ -49,11 +49,29 @@ if(Yii::$app->authManager->getAssignment('admin', $userId) || Yii::$app->authMan
     },
     'columns' => [
         [
+            'attribute' => 'id',
+            'label' => 'Lead Id',
+            'visible' => $is_manager,
+            'value' => function ($model) {
+                return $model['id'];
+            },
+        ],
+
+        [
+            'attribute' => 'bo_flight_id',
+            'label' => 'Sale ID (BO)',
+            'visible' => in_array($queueType, ['booked', 'sold']),
+            'value' => function ($model) {
+                return $model['bo_flight_id'];
+            },
+        ],
+
+        [
             'attribute' => 'pending',
             'label' => 'Pending Time',
             'visible' => !in_array($queueType, ['sold', 'booked']),
             'value' => function ($model) {
-                return Lead::getPendingAfterCreate($model['created']);
+                return Yii::$app->formatter->asRelativeTime(strtotime($model['created'])); //Lead::getPendingAfterCreate($model['created']);
             },
             'format' => 'raw'
         ],
@@ -79,7 +97,7 @@ if(Yii::$app->authManager->getAssignment('admin', $userId) || Yii::$app->authMan
 
         ],
 
-        [
+        /*[
             'attribute' => 'id',
             'label' => in_array($queueType, ['booked', 'sold'])
                 ? 'Lead ID / Sale ID (BO)' : 'Sale ID',
@@ -95,7 +113,7 @@ if(Yii::$app->authManager->getAssignment('admin', $userId) || Yii::$app->authMan
                 return (!empty($model['id']))
                     ? $model['id'] : '-';
             }
-        ],
+        ],*/
         [
             'label' => 'PNR',
             'visible' => in_array($queueType, ['booked', 'sold']),
