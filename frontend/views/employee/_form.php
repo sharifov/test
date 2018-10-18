@@ -124,6 +124,9 @@ $this->params['breadcrumbs'][] = $this->title;
                     <div class="col-md-3">
                         <?= $form->field($modelUserParams, 'up_commission_percent')->input('number', ['step' => 1, 'max' => 100, 'min' => 0]) ?>
                     </div>
+                    <div class="col-md-3">
+                        <?= $form->field($modelUserParams, 'up_bonus_active')->checkbox() ?>
+                    </div>
                 </div>
                 <?php endif; ?>
 
@@ -156,7 +159,7 @@ $this->params['breadcrumbs'][] = $this->title;
         $('#acl-rule-id').removeClass('hidden');
         $('#$idForm').addClass('hidden');
     });
-    
+
     $('#submit-btn').click(function() {
         $.post($(this).data('url'), $('#$idForm input').serialize(),function( data ) {
             if (data.success) {

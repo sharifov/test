@@ -56,6 +56,14 @@ $this->params['breadcrumbs'][] = $this->title;
                 'contentOptions' => ['class' => 'text-right'],
             ],
 
+            [
+                'attribute' => 'up_bonus_active',
+                'value' => function(\common\models\UserParams $model) {
+                    return $model->up_bonus_active ? 'Yes' : 'No';
+                },
+                'contentOptions' => ['class' => 'text-right'],
+            ],
+
             'up_updated_dt',
             'up_updated_user_id',
             [

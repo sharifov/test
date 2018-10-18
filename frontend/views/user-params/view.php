@@ -31,18 +31,26 @@ $this->params['breadcrumbs'][] = $this->title;
             'up_user_id',
             'upUser.username',
             [
-                'attribute' => 'up_commission_percent',
+                'attribute' => 'up_base_amount',
                 'value' => function(\common\models\UserParams $model) {
                     return $model->up_base_amount ? '$'.number_format($model->up_base_amount , 2) : '-';
                 },
-                
+
             ],
 
             [
-                'attribute' => 'up_base_amount',
+                'attribute' => 'up_commission_percent',
                 'value' => function(\common\models\UserParams $model) {
                     return $model->up_commission_percent ? $model->up_commission_percent. '%' : '-';
                 },
+
+            ],
+
+            [
+                'attribute' => 'up_bonus_active',
+                'value' => function(\common\models\UserParams $model) {
+                    return $model->up_bonus_active;
+            },
 
             ],
             'up_updated_dt',
