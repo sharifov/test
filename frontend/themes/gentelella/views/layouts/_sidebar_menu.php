@@ -101,9 +101,9 @@ $isCoach = Yii::$app->authManager->getAssignment('coach', Yii::$app->user->id);
                 $menuItems[] = ['label' => 'Follow Up <span id="follow-up-queue" class="label-success label pull-right">' . $badges['follow-up'] . '</span> ', 'url' => ['queue/follow-up'], 'icon' => 'recycle'];
                 $menuItems[] = ['label' => 'Processing <span id="processing-queue" class="label-warning label pull-right">' . $badges['processing'] . '</span> ', 'url' => ['queue/processing'], 'icon' => 'spinner'];
 
-                if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
+                /*if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
                     $menuItems[] = ['label' => 'Processing All <span id="processing-all-queue" class="label-warning label pull-right">' . $badges['processing-all'] . '</span> ', 'url' => ['queue/processing-all'], 'icon' => 'list'];
-                }
+                }*/
 
                 $menuItems[] = ['label' => 'Booked <span id="booked-queue" class="label-success label pull-right">' . $badges['booked'] . '</span> ', 'url' => ['queue/booked'], 'icon' => 'flag-o'];
                 $menuItems[] = ['label' => 'Sold <span id="sold-queue" class="label-success label pull-right">' . $badges['sold'] . '</span> ', 'url' => ['queue/sold'], 'icon' => 'flag'];
