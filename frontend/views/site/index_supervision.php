@@ -63,6 +63,26 @@ $userId = Yii::$app->user->id;
                         ?>
                     </td>
                 </tr>
+                <tr>
+                    <th>My Projects:</th>
+                    <td>
+                        <?php
+                        $projectsValue = '';
+
+                        if($projectList = \common\models\ProjectEmployeeAccess::getProjectsByEmployee()) {
+
+                            $groupsValueArr = [];
+                            foreach ($projectList as $project) {
+                                $groupsValueArr[] = Html::tag('span', Html::encode($project), ['class' => 'label label-default']);
+                            }
+                            $projectsValue = implode(' ', $groupsValueArr);
+                        }
+                        echo $projectsValue;
+                        ?>
+                    </td>
+                </tr>
+
+
 
             </table>
 

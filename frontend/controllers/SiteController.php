@@ -402,22 +402,17 @@ class SiteController extends FController
         if (!Yii::$app->user->isGuest) {
             return $this->goHome();
         }
-        $isBackend = false; //strpos(Yii::$app->request->baseUrl, 'admin');
 
         $model = new LoginForm();
-
-        if ($model->load(Yii::$app->request->post()) && $model->login($isBackend)) {
-            if (!$isBackend) {
-                return $this->goBack('/');
-            } else {
-                return $this->goBack();
-            }
-        } else {
-            $model->password = '';
-            return $this->render('login.php', [
-                'model' => $model,
-            ]);
+        if ($model->load(Yii::$app->request->post()) && $model->login()) {
+            return $this->goBack();
         }
+
+        $model->password = '';
+        return $this->render('login.php', [
+            'model' => $model,
+        ]);
+
     }
 
     public function actionProfile()

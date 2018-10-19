@@ -73,11 +73,11 @@ return [
             'enableStrictParsing' => false,
             'rules' => [
                 [
-                    'pattern' => 'queue/<type:(inbox|follow-up|processing|processing-all|booked|trash)>',
+                    'pattern' => 'queue/<type:(inbox|follow-up|processing1|processing-all|booked|trash)>',
                     'route' => 'lead/queue',
                 ],
                 [
-                    'pattern' => 'lead/<type:(inbox|follow-up|processing|processing-all|booked|sold|trash)>/<id>',
+                    'pattern' => 'lead/<type:(inbox|follow-up|processing1|processing-all|booked|sold|trash)>/<id>',
                     'route' => 'lead/quote',
                 ],
                 [
@@ -91,6 +91,10 @@ return [
                 [
                     'pattern' => 'queue/sold',
                     'route' => 'lead/sold',
+                ],
+                [
+                    'pattern' => 'queue/processing',
+                    'route' => 'lead/processing',
                 ],
             ],
         ],

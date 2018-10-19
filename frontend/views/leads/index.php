@@ -191,8 +191,9 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
                     $statusLog = \common\models\LeadFlow::find()->where(['lead_id' => $model->id, 'status' => $model->status])->orderBy(['id' => SORT_DESC])->one();
 
                     if($statusLog) {
-                        $statusValue .= '<br><span class="label label-default">'.Yii::$app->formatter->asDatetime(strtotime($statusLog->created)).'</span>';
-                        $statusValue .= '<br><span class="label label-info">'.Yii::$app->formatter->asRelativeTime(strtotime($statusLog->created)).'</span>';
+                        //$statusValue .= '<br><span class="label label-default">'.Yii::$app->formatter->asDatetime(strtotime($statusLog->created)).'</span>';
+                        $statusValue .= '<br><br><span class="label label-default">'.Yii::$app->formatter->asDatetime(strtotime($statusLog->created)).'</span>';
+                        $statusValue .= '<br>'.Yii::$app->formatter->asRelativeTime(strtotime($statusLog->created)).'';
 
                     }
 
@@ -290,7 +291,7 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
                 },
                 'filter' => [1 => 'Yes', 0 => 'No'],
                 'contentOptions' => ['class' => 'text-center'],
-                'format' => 'html'
+                'format' => 'raw'
 
                 //'visible' => !$isAgent
             ],
@@ -300,7 +301,7 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
                 'value' => function(\common\models\Lead $model) use ($isAgent) {
                     return '<small style="font-size: 10px">'.$model->getTaskInfo().'</small>';
                 },
-                'format' => 'html',
+                'format' => 'raw',
                 'contentOptions' => ['class' => 'text-left'],
                 'visible' => !$isAgent,
                 'options' => ['style' => 'width:200px'],
@@ -386,7 +387,7 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
                 'value' => function(\common\models\Lead $model) {
                     return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->created));
                 },
-                'format' => 'html',
+                'format' => 'raw',
             ],
             //'created:date',
 
@@ -395,7 +396,7 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
                 'value' => function(\common\models\Lead $model) {
                     return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->updated));
                 },
-                'format' => 'html',
+                'format' => 'raw',
             ],*/
             //'bo_flight_id',
 

@@ -68,7 +68,7 @@ class LeadController extends FController
                             'create', 'add-comment', 'change-state', 'unassign', 'take',
                             'set-rating', 'add-note', 'unprocessed', 'call-expert', 'send-email',
                             'check-updates', 'flow-transition', 'get-user-actions', 'add-pnr', 'update2','clone',
-                            'get-badges', 'sold', 'split-profit'
+                            'get-badges', 'sold', 'split-profit', 'processing'
                         ],
                         'allow' => true,
                         'roles' => ['agent'],
@@ -690,6 +690,36 @@ class LeadController extends FController
             'isAgent' => $isAgent,
             'salary' => $salary,
             'salaryBy' => $salaryBy,
+        ]);
+    }
+
+
+    public function actionProcessing()
+    {
+        $searchModel = new LeadSearch();
+
+        $params = Yii::$app->request->queryParams;
+        $params2 = Yii::$app->request->post();
+
+        $params = array_merge($params, $params2);
+
+        if(Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id)) {
+            $params['LeadSearch']['employee_id'] = Yii::$app->user->id;
+            $isAgent = true;
+        } else {
+            $isAgent = false;
+        }
+
+        if(Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id)) {
+            $params['LeadSearch']['supervision_id'] = Yii::$app->user->id;
+        }
+
+        $dataProvider = $searchModel->searchProcessing($params);
+
+        return $this->render('processing', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+            'isAgent' => $isAgent,
         ]);
     }
 

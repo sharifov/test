@@ -114,6 +114,10 @@ $isCoach = Yii::$app->authManager->getAssignment('coach', Yii::$app->user->id);
             }
 
 
+            if($isSupervision) {
+                $menuItems[] = ['label' => 'Users', 'url' => ['employee/list'], 'icon' => 'user'];
+            }
+
             if($isAdmin) {
                 $menuItems[] = [
                     'label' => 'Users',
@@ -128,7 +132,6 @@ $isCoach = Yii::$app->authManager->getAssignment('coach', Yii::$app->user->id);
                     //'linkOptions' => ['data-method' => 'post']
                 ];
                 $menuItems[] = ['label' => 'Clients', 'url' => ['/client/index'], 'icon' => 'users'];
-
 
                 $menuItems[] = [
                     'label' => 'Data Settings',

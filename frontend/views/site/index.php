@@ -71,7 +71,7 @@ $userId = Yii::$app->user->id;
 
 <div class="site-index">
 
-
+    <h1><?=$this->title?></h1>
     <div class="row">
         <div class="col-md-4">
             <table class="table table-bordered">
@@ -118,6 +118,24 @@ $userId = Yii::$app->user->id;
                                 $groupsValue = implode(' ', $groupsValueArr);
                             }
                             echo $groupsValue;
+                        ?>
+                    </td>
+                </tr>
+                <tr>
+                    <th>My Projects:</th>
+                    <td>
+                        <?php
+                        $projectsValue = '';
+
+                        if($projectList = \common\models\ProjectEmployeeAccess::getProjectsByEmployee()) {
+
+                            $groupsValueArr = [];
+                            foreach ($projectList as $project) {
+                                $groupsValueArr[] = Html::tag('span', Html::encode($project), ['class' => 'label label-default']);
+                            }
+                            $projectsValue = implode(' ', $groupsValueArr);
+                        }
+                        echo $projectsValue;
                         ?>
                     </td>
                 </tr>
