@@ -18,6 +18,9 @@ use common\models\LoginForm;
 
                 <?php $form = ActiveForm::begin(['id' => 'login-form']); ?>
                 <h1>Login Form</h1>
+                <?php /*<div>
+                    <?=$form->errorSummary($model); ?>
+                </div>*/ ?>
                 <div>
                     <?= $form->field($model, 'username', ['template' => '{input}{error}'])->textInput(['autofocus' => true, 'maxlength' => true, 'placeholder' => 'Username']) ?>
                     <?php /*<input type="text" class="form-control" placeholder="Username" required="" />*/ ?>
@@ -41,7 +44,7 @@ use common\models\LoginForm;
                 <div class="clearfix"></div>
 
                 <div class="separator">
-                     <? /*<p class="change_link">New to site?
+                     <?php /*<p class="change_link">New to site?
                         <a href="#signup" class="to_register"> Create Account </a>
                     </p>*/ ?>
 

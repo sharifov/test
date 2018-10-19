@@ -48,14 +48,13 @@ $bundle = \frontend\themes\gentelella\assets\Asset::register($this);
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
     <!--[if lt IE 9]>
 
-    <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
-    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/respond.js/1.4.2/respond.min.js"></script>
     <![endif]-->
 </head>
 <body class="nav-md">
 <?php $this->beginBody(); ?>
 <div class="container body">
-
     <div class="main_container">
         <?php if(!Yii::$app->user->isGuest):?>
 
@@ -218,18 +217,19 @@ $bundle = \frontend\themes\gentelella\assets\Asset::register($this);
         </footer>
         <!-- /footer content -->
     </div>
-
 </div>
-
-
-
-<? /*<div id="custom_notifications" class="custom-notifications dsp_none">
+<?php /*<div id="custom_notifications" class="custom-notifications dsp_none">
     <ul class="list-unstyled notifications clearfix" data-tabbed_notifications="notif-group">
     </ul>
     <div class="clearfix"></div>
     <div id="notif-group" class="tabbed_notifications"></div>
 </div>*/ ?>
 <!-- /footer content -->
+
+<!-- modals -->
+<?= $this->render('_modals') ?>
+<!-- /modals -->
+
 <?php $this->endBody(); ?>
 </body>
 </html>

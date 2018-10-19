@@ -3,24 +3,21 @@ use yii\helpers\Html;
 use yii\widgets\Pjax;
 use kartik\grid\GridView;
 use common\models\Lead;
-use common\models\Quote;
-use yii\helpers\Url;
 
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\LeadSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
-/* @var $multipleForm \frontend\models\LeadMultipleForm */
 /* @var $isAgent bool */
-/* @var $salary float */
-/* @var $salaryBy string */
+
 
 $this->title = 'Processing Queue';
-$queueType = 'processing';
 
 if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
     $userList = \common\models\Employee::getList();
+    $projectList = \common\models\Project::getList();
 } else {
     $userList = \common\models\Employee::getListByUserId(Yii::$app->user->id);
+    $projectList = \common\models\ProjectEmployeeAccess::getProjectsByEmployee();
 }
 
 $this->params['breadcrumbs'][] = $this->title;
@@ -58,7 +55,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'value' => function (\common\models\Lead $model) {
                 return Yii::$app->formatter->asRelativeTime(strtotime($model->created)); //Lead::getPendingAfterCreate($model->created);
             },
-            'format' => 'html'
+            'format' => 'raw'
         ],
 
         [
@@ -66,7 +63,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'value' => function (\common\models\Lead $model) {
                 return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->created));
             },
-            'format' => 'html',
+            'format' => 'raw',
             'filter' => false
 
         ],
@@ -185,11 +182,20 @@ $this->params['breadcrumbs'][] = $this->title;
             ]
 
         ],
-        [
+        /*[
             'attribute' => 'last_activity',
             'label' => 'Last Activity',
-            'value' => function ($model) {
+            'value' => function (\common\models\Lead $model) {
                 return Lead::getLastActivity($model->getLastActivityByNote());
+            },
+            'format' => 'raw'
+        ],*/
+
+        [
+            'attribute' => 'update',
+            'label' => 'Last Update',
+            'value' => function (\common\models\Lead $model) {
+                return '<span title="'.Yii::$app->formatter->asDatetime(strtotime($model->updated)).'">'.Yii::$app->formatter->asRelativeTime(strtotime($model->updated)).'</span>';
             },
             'format' => 'raw'
         ],
@@ -215,7 +221,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'class' => 'text-center'
             ],
             'filter' => [1 => 'Yes', 0 => 'No'],
-            'format' => 'html'
+            'format' => 'raw'
         ],
 
         [
@@ -256,6 +262,14 @@ $this->params['breadcrumbs'][] = $this->title;
             'format' => 'raw'
         ],
         [
+            'attribute' => 'project_id',
+            'value' => function(\common\models\Lead $model) {
+                return $model->project ? $model->project->name : '-';
+            },
+            'filter' => $projectList,
+            'visible' => ! $isAgent
+        ],
+        [
             'label' => 'Rating',
             'contentOptions' => [
                 'style' => 'width: 90px;',
@@ -273,56 +287,32 @@ $this->params['breadcrumbs'][] = $this->title;
             'class' => 'yii\grid\ActionColumn',
             'template' => '{action}',
             'buttons' => [
-                'action' => function ($url, \common\models\Lead $model, $key) use ($queueType) {
-                    $buttonsCnt = 0;
+                'action' => function ($url, \common\models\Lead $model, $key) {
+
                     $buttons = '';
 
-                    if ($model->status === Lead::STATUS_ON_HOLD) {
-                        $buttonsCnt ++;
-                        $buttons .= Html::a('Take', ['lead/take', 'id' => $model->id], ['class' => 'btn btn-primary btn-xs take-btn', 'data-pjax' => 0]);
-                    }
-
-
-
-                    $buttonsCnt ++;
-                    $buttons .= ' ' . Html::a('<i class="fa fa-search"></i>', ['lead/quote', 'type' => $queueType, 'id' => $model->id], [
+                    $buttons .= Html::a('<i class="fa fa-search"></i>', ['lead/quote', 'type' => 'processing', 'id' => $model->id], [
                         'class' => 'btn btn-info btn-xs',
                         'target' => '_blank',
                         'data-pjax' => 0,
                         'title' => 'View lead'
                     ]);
 
+                    if (Yii::$app->user->id === $model->employee_id && $model->status === Lead::STATUS_ON_HOLD) {
+
+                        $buttons .= Html::a('Take', ['lead/take', 'id' => $model->id], ['class' => 'btn btn-primary btn-xs take-btn', 'data-pjax' => 0]);
+                    }
 
                     if (Yii::$app->user->id != $model->employee_id && in_array($model->status, [Lead::STATUS_ON_HOLD, Lead::STATUS_PROCESSING])) {
-                        $buttonsCnt ++;
+
                         $buttons .= ' ' . Html::a('Take Over', ['lead/take', 'id' => $model->id, 'over' => true], [
                             'class' => 'btn btn-primary btn-xs take-processing-btn',
                             'data-pjax' => 0,
-                            'data-status' => $model['status']
+                            'data-status' => $model->status
                         ]);
                     }
 
-                    /*if ($buttonsCnt > 2) {
-                        $html = Html::tag('div', Html::button('Action', [
-                            'class' => 'btn btn-sm btn-primary dropdown-toggle',
-                            'data-toggle' => 'dropdown',
-                            'aria-expanded' => 'false'
-                        ]) . Html::button('<span class="caret"></span>', [
-                            'class' => 'btn btn-action btn-sm dropdown-toggle',
-                            'data-toggle' => 'dropdown',
-                            'aria-expanded' => 'false'
-                        ]) . Html::tag('div', $buttons, [
-                            'class' => 'dropdown-menu dropdown-btns'
-                        ]), [
-                            'class' => 'btn-group'
-                        ]);
-                    } else {
-
-                    }*/
-
-                    $html = $buttons;
-
-                    return $html;
+                    return $buttons;
                 }
             ]
         ]
@@ -349,13 +339,14 @@ echo GridView::widget([
         'heading' => '<h3 class="panel-title"><i class="glyphicon glyphicon-list"></i> Processing</h3>'
     ],*/
 
-    'rowOptions' => function ($model) {
-        if ($model['status'] === Lead::STATUS_PROCESSING && Yii::$app->user->identity->getId() == $model['employee_id']) {
+    'rowOptions' => function (Lead $model) {
+        if ($model->status === Lead::STATUS_PROCESSING && Yii::$app->user->id == $model->employee_id) {
             return [
                 'class' => 'highlighted'
             ];
         }
-        if (in_array($model['status'], [
+
+        /*if (in_array($model->status, [
             Lead::STATUS_ON_HOLD,
             Lead::STATUS_BOOKED,
             Lead::STATUS_FOLLOW_UP
@@ -371,7 +362,7 @@ echo GridView::widget([
                     'class' => 'success'
                 ];
             }
-        }
+        }*/
     }
 
 ]);

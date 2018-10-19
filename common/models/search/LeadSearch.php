@@ -492,10 +492,7 @@ class LeadSearch extends Lead
     }
 
     /**
-     * Creates data provider instance with search query applied
-     *
-     * @param array $params
-     *
+     * @param $params
      * @return ActiveDataProvider
      */
     public function searchProcessing($params)
@@ -508,19 +505,21 @@ class LeadSearch extends Lead
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> ['defaultOrder' => ['created' => SORT_DESC]],
+            'sort'=> ['defaultOrder' => ['updated' => SORT_DESC]],
             'pagination' => [
                 'pageSize' => 30,
             ],
         ]);
-        $dataProvider->setSort([
+
+        /*$dataProvider->setSort([
             'attributes' => [
                 'id',
-                'created' => [
+                'l_answered',
+                'updated' => [
                     'default' => SORT_DESC,
                 ],
             ]
-        ]);
+        ]);*/
 
         $this->load($params);
 
@@ -531,7 +530,7 @@ class LeadSearch extends Lead
         }
 
         // grid filtering conditions
-        $query->andFilterWhere([
+       $query->andFilterWhere([
             $leadTable.'.id' => $this->id,
             $leadTable.'.client_id' => $this->client_id,
             $leadTable.'.employee_id' => $this->employee_id,
@@ -540,8 +539,10 @@ class LeadSearch extends Lead
             $leadTable.'.bo_flight_id' => $this->bo_flight_id,
             $leadTable.'.rating' => $this->rating,
             $leadTable.'.status' => $this->status,
+            $leadTable.'.l_grade' => $this->l_grade,
             $leadTable.'.l_answered' => $this->l_answered,
         ]);
+
 
         $query
         ->andWhere(['IN','leads.status', [self::STATUS_SNOOZE, self::STATUS_PROCESSING, self::STATUS_ON_HOLD]])
