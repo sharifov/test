@@ -693,6 +693,7 @@ class LeadController extends FController
         ]);
     }
 
+
     public function actionProcessing()
     {
         $searchModel = new LeadSearch();
@@ -703,6 +704,7 @@ class LeadController extends FController
         $params = array_merge($params, $params2);
 
         if(Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id)) {
+            $params['LeadSearch']['employee_id'] = Yii::$app->user->id;
             $isAgent = true;
         } else {
             $isAgent = false;

@@ -2178,8 +2178,8 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
         $query->select(['SUM(CASE WHEN status IN (2, 4, 5) THEN 1 ELSE 0 END) AS send_q',
                         'SUM(CASE WHEN status NOT IN (2, 4, 5) THEN 1 ELSE 0 END) AS not_send_q'])
             ->from(Quote::tableName().' q')
-            ->where(['lead_id' => $this->id])
-            ->groupBy('lead_id');
+            ->where(['lead_id' => $this->id]);
+            //->groupBy('lead_id');
 
         return $query->createCommand()->queryOne();
     }

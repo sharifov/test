@@ -14,7 +14,7 @@ use yii\helpers\Url;
 /* @var $salary float */
 /* @var $salaryBy string */
 
-$this->title = 'Processing';
+$this->title = 'Processing Queue';
 $queueType = 'processing';
 
 if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
@@ -23,41 +23,7 @@ if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
     $userList = \common\models\Employee::getListByUserId(Yii::$app->user->id);
 }
 
-$js = <<<JS
-    $('.take-processing-btn').click(function (e) {
-        e.preventDefault();
-        var url = $(this).attr('href');
-        if ($.inArray($(this).data('status'), [2, 8]) != -1) {
-            var editBlock = $('#modal-error');
-            editBlock.find('.modal-body').html('');
-            editBlock.find('.modal-body').load(url, function( response, status, xhr ) {
-                editBlock.modal('show');
-            });
-        } else {
-            window.location = url;
-        }
-    });
-JS;
-$this->registerJs($js);
-
-$this->registerJsFile('/js/moment.min.js', [
-    'position' => \yii\web\View::POS_HEAD,
-    'depends' => [
-        \yii\web\JqueryAsset::class
-    ]
-]);
-$this->registerJsFile('/js/moment-timezone-with-data.min.js', [
-    'position' => \yii\web\View::POS_HEAD,
-    'depends' => [
-        \yii\web\JqueryAsset::class
-    ]
-]);
-$this->registerJsFile('/js/jquery.countdown-2.2.0/jquery.countdown.min.js', [
-    'position' => \yii\web\View::POS_HEAD,
-    'depends' => [
-        \yii\web\JqueryAsset::class
-    ]
-]);
+$this->params['breadcrumbs'][] = $this->title;
 ?>
 
 <style>
@@ -65,6 +31,7 @@ $this->registerJsFile('/js/jquery.countdown-2.2.0/jquery.countdown.min.js', [
 	z-index: 1010 !important;
 }
 </style>
+<h1><?=\yii\helpers\Html::encode($this->title)?></h1>
 <div class="lead-index">
 
     <?php Pjax::begin(); //['id' => 'lead-pjax-list', 'timeout' => 5000, 'enablePushState' => true, 'clientOptions' => ['method' => 'GET']]); ?>
@@ -76,34 +43,34 @@ $this->registerJsFile('/js/jquery.countdown-2.2.0/jquery.countdown.min.js', [
 
     $gridColumns = [
         [
+            'attribute' => 'id',
+            'label' => 'Lead ID',
+            'value' => function (\common\models\Lead $model) {
+                return $model->id;
+            },
+            'options' => [
+                'style' => 'width:80px'
+            ]
+        ],
+        [
             'attribute' => 'pending',
             'label' => 'Pending Time',
-            'value' => function ($model) {
-                return Lead::getPendingAfterCreate($model->created);
+            'value' => function (\common\models\Lead $model) {
+                return Yii::$app->formatter->asRelativeTime(strtotime($model->created)); //Lead::getPendingAfterCreate($model->created);
             },
-            'format' => 'raw'
+            'format' => 'html'
         ],
 
         [
             'attribute' => 'created',
-            'value' => function ($model) {
-                return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model['created']));
+            'value' => function (\common\models\Lead $model) {
+                return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->created));
             },
             'format' => 'html',
             'filter' => false
 
         ],
 
-        [
-            'attribute' => 'id',
-            'label' => 'Sale ID',
-            'value' => function ($model) {
-                return $model['id'];
-            },
-            'options' => [
-                'style' => 'width:80px'
-            ]
-        ],
         [
             // 'attribute' => 'client_id',
             'header' => 'Client',
@@ -117,6 +84,14 @@ $this->registerJsFile('/js/jquery.countdown-2.2.0/jquery.countdown.min.js', [
                     } else {
                         $clientName = '<i class="fa fa-user"></i> ' . Html::encode($clientName);
                     }
+
+
+                    $str = $model->client && $model->client->clientEmails ? '<i class="fa fa-envelope"></i> ' . implode(' <br><i class="fa fa-envelope"></i> ', \yii\helpers\ArrayHelper::map($model->client->clientEmails, 'email', 'email')) . '' : '';
+                    $str .= $model->client && $model->client->clientPhones ? '<br><i class="fa fa-phone"></i> ' . implode(' <br><i class="fa fa-phone"></i> ', \yii\helpers\ArrayHelper::map($model->client->clientPhones, 'phone', 'phone')) . '' : '';
+
+
+                    $clientName.= '<br>'. $str;
+
                 } else {
                     $clientName = '-';
                 }
@@ -127,20 +102,51 @@ $this->registerJsFile('/js/jquery.countdown-2.2.0/jquery.countdown.min.js', [
                 'style' => 'width:160px'
             ]
         ],
-        [
+        /*[
             'attribute' => 'clientTime',
             'label' => 'Client Time',
             'value' => function ($model) {
                 return Lead::getClientTime($model['id']);
             },
             'format' => 'raw'
+        ],*/
+
+        [
+            //'attribute' => 'client_id',
+            'header' => 'Client time',
+            'format' => 'raw',
+            'value' => function(\common\models\Lead $model) {
+                $clientTime = '-';
+                if($model->offset_gmt) {
+                    $offset2 = str_replace('.', ':', $model->offset_gmt);
+
+                    if(isset($offset2[0])) {
+                        if ($offset2[0] === '+') {
+                            $offset2 = str_replace('+', '-', $offset2);
+                        } else {
+                            $offset2 = str_replace('-', '+', $offset2);
+                        }
+                    }
+
+                    //$clientTime = date('H:i', time() + ($offset * 60 * 60));
+
+                    if($offset2) {
+                        $clientTime = date("H:i", strtotime("now $offset2 GMT"));
+                        $clientTime = '<i class="fa fa-clock-o"></i> <b>' . Html::encode($clientTime) . '</b> (GMT: ' .$model->offset_gmt . ')';
+                    }
+                }
+                return $clientTime;
+            },
+            'options' => ['style' => 'width:160px'],
+            //'filter' => \common\models\Employee::getList()
         ],
+
         [
             'attribute' => 'Request Details',
-            'content' => function ($model) {
+            'content' => function (\common\models\Lead $model) {
                 $content = '';
                 $content .= $model->getFlightDetails();
-                $content .= ' (<i class="fa fa-male"></i> x' . ($model['adults'] + $model['children'] + $model['infants']) . ')<br/>';
+                $content .= ' (<i class="fa fa-male"></i> x' . ($model->adults .'/'. $model->children .'/'. $model->infants) . ')<br/>';
 
                 $content .= sprintf('<strong>Cabin:</strong> %s', Lead::getCabin($model['cabin']));
 
@@ -170,18 +176,6 @@ $this->registerJsFile('/js/jquery.countdown-2.2.0/jquery.countdown.min.js', [
             'attribute' => 'status',
             'value' => function (\common\models\Lead $model) {
                 $statusValue = $model->getStatusName(true);
-                if ($model->status === \common\models\Lead::STATUS_TRASH) {
-                    $reason = \common\models\Reason::find()->where([
-                        'lead_id' => $model->id
-                    ])
-                        ->orderBy([
-                        'id' => SORT_DESC
-                    ])
-                        ->one();
-                    if ($reason) {
-                        $statusValue .= ' <span data-toggle="tooltip" data-placement="top" title="' . Html::encode($reason->reason) . '"><i class="fa fa-warning"></i></span>';
-                    }
-                }
                 return $statusValue;
             },
             'format' => 'raw',
@@ -214,24 +208,21 @@ $this->registerJsFile('/js/jquery.countdown-2.2.0/jquery.countdown.min.js', [
         [
             'header' => 'Answered',
             'attribute' => 'l_answered',
-            'value' => function ($model) {
-                return $model['l_answered'] ? '<span class="label label-success">Yes</span>' : '<span class="label label-danger">No</span>';
+            'value' => function (\common\models\Lead $model) {
+                return $model->l_answered ? '<span class="label label-success">Yes</span>' : '<span class="label label-danger">No</span>';
             },
             'contentOptions' => [
                 'class' => 'text-center'
             ],
-            'filter' => [
-                1 => 'Yes',
-                0 => 'No'
-            ],
+            'filter' => [1 => 'Yes', 0 => 'No'],
             'format' => 'html'
         ],
 
         [
             'header' => 'Grade',
-            // 'attribute' => 'l_grade',
-            'value' => function ($model) {
-                return $model['l_grade'];
+            'attribute' => 'l_grade',
+            'value' => function (\common\models\Lead $model) {
+                return $model->l_grade;
             },
             'contentOptions' => [
                 'class' => 'text-center'
@@ -241,8 +232,8 @@ $this->registerJsFile('/js/jquery.countdown-2.2.0/jquery.countdown.min.js', [
 
         [
             'header' => 'Task Info',
-            'value' => function ($model) {
-                return '<small style="font-size: 10px">' . Lead::getTaskInfo2($model['id']) . '</small>';
+            'value' => function (\common\models\Lead $model) {
+                return '<small style="font-size: 10px">' . Lead::getTaskInfo2($model->id) . '</small>';
             },
             'format' => 'html',
             'contentOptions' => [
@@ -259,8 +250,8 @@ $this->registerJsFile('/js/jquery.countdown-2.2.0/jquery.countdown.min.js', [
             'contentOptions' => [
                 'style' => 'width: 115px;'
             ],
-            'value' => function ($model) {
-                return Lead::getSnoozeCountdown($model['id'], $model['snooze_for']);
+            'value' => function (\common\models\Lead $model) {
+                return Lead::getSnoozeCountdown($model->id, $model->snooze_for);
             },
             'format' => 'raw'
         ],
@@ -273,8 +264,8 @@ $this->registerJsFile('/js/jquery.countdown-2.2.0/jquery.countdown.min.js', [
             'options' => [
                 'class' => 'text-right'
             ],
-            'value' => function ($model) {
-                return Lead::getRating2($model['rating']);
+            'value' => function (\common\models\Lead $model) {
+                return Lead::getRating2($model->rating);
             },
             'format' => 'raw'
         ],
@@ -282,56 +273,38 @@ $this->registerJsFile('/js/jquery.countdown-2.2.0/jquery.countdown.min.js', [
             'class' => 'yii\grid\ActionColumn',
             'template' => '{action}',
             'buttons' => [
-                'action' => function ($url, $model, $key) use ($queueType) {
+                'action' => function ($url, \common\models\Lead $model, $key) use ($queueType) {
                     $buttonsCnt = 0;
                     $buttons = '';
-                    if (($queueType == 'processing' && $model['status'] === Lead::STATUS_ON_HOLD)) {
+
+                    if ($model->status === Lead::STATUS_ON_HOLD) {
                         $buttonsCnt ++;
-                        $buttons .= Html::a('Take', Url::to([
-                            'lead/take',
-                            'id' => $model['id']
-                        ]), [
-                            'class' => 'btn btn-action btn-sm take-btn',
-                            'data-pjax' => 0
-                        ]);
+                        $buttons .= Html::a('Take', ['lead/take', 'id' => $model->id], ['class' => 'btn btn-primary btn-xs take-btn', 'data-pjax' => 0]);
                     }
 
-                    if ($queueType != 'inbox') { // && $queueType != 'follow-up'
-                        if (Yii::$app->user->identity->getId() == $model['employee_id'] && $queueType = 'processing-all') {
-                            $queueType = 'processing';
-                        }
-                        $buttonsCnt ++;
-                        $buttons .= ' ' . Html::a('<i class="fa fa-search"></i>', Url::to([
-                            'lead/quote',
-                            'type' => $queueType,
-                            'id' => $model['id']
-                        ]), [
-                            'class' => 'btn btn-info btn-sm',
-                            'target' => '_blank',
-                            'data-pjax' => 0,
-                            'title' => 'View lead'
-                        ]);
-                    }
 
-                    if (Yii::$app->user->identity->getId() != $model['employee_id'] && in_array($model['status'], [
-                        Lead::STATUS_ON_HOLD,
-                        Lead::STATUS_PROCESSING
-                    ])) {
+
+                    $buttonsCnt ++;
+                    $buttons .= ' ' . Html::a('<i class="fa fa-search"></i>', ['lead/quote', 'type' => $queueType, 'id' => $model->id], [
+                        'class' => 'btn btn-info btn-xs',
+                        'target' => '_blank',
+                        'data-pjax' => 0,
+                        'title' => 'View lead'
+                    ]);
+
+
+                    if (Yii::$app->user->id != $model->employee_id && in_array($model->status, [Lead::STATUS_ON_HOLD, Lead::STATUS_PROCESSING])) {
                         $buttonsCnt ++;
-                        $buttons .= ' ' . Html::a('Take Over', Url::to([
-                            'lead/take',
-                            'id' => $model['id'],
-                            'over' => true
-                        ]), [
-                            'class' => 'btn btn-action btn-sm take-processing-btn',
+                        $buttons .= ' ' . Html::a('Take Over', ['lead/take', 'id' => $model->id, 'over' => true], [
+                            'class' => 'btn btn-primary btn-xs take-processing-btn',
                             'data-pjax' => 0,
                             'data-status' => $model['status']
                         ]);
                     }
 
-                    if ($buttonsCnt > 2) {
+                    /*if ($buttonsCnt > 2) {
                         $html = Html::tag('div', Html::button('Action', [
-                            'class' => 'btn btn-sm btn-action dropdown-toggle',
+                            'class' => 'btn btn-sm btn-primary dropdown-toggle',
                             'data-toggle' => 'dropdown',
                             'aria-expanded' => 'false'
                         ]) . Html::button('<span class="caret"></span>', [
@@ -344,8 +317,10 @@ $this->registerJsFile('/js/jquery.countdown-2.2.0/jquery.countdown.min.js', [
                             'class' => 'btn-group'
                         ]);
                     } else {
-                        $html = $buttons;
-                    }
+
+                    }*/
+
+                    $html = $buttons;
 
                     return $html;
                 }
@@ -361,7 +336,7 @@ echo GridView::widget([
     'columns' => $gridColumns,
     'toolbar' => false,
     'pjax' => false,
-    'striped' => false,
+    'striped' => true,
     'condensed' => false,
     'responsive' => true,
     'hover' => true,
@@ -369,10 +344,10 @@ echo GridView::widget([
     'floatHeaderOptions' => [
         'scrollingTop' => 20
     ],
-    'panel' => [
+    /*'panel' => [
         'type' => GridView::TYPE_PRIMARY,
         'heading' => '<h3 class="panel-title"><i class="glyphicon glyphicon-list"></i> Processing</h3>'
-    ],
+    ],*/
 
     'rowOptions' => function ($model) {
         if ($model['status'] === Lead::STATUS_PROCESSING && Yii::$app->user->identity->getId() == $model['employee_id']) {
@@ -411,3 +386,41 @@ echo GridView::widget([
 
 
 </div>
+
+<?php
+$js = <<<JS
+    $('.take-processing-btn').click(function (e) {
+        e.preventDefault();
+        var url = $(this).attr('href');
+        if ($.inArray($(this).data('status'), [2, 8]) != -1) {
+            var editBlock = $('#modal-error');
+            editBlock.find('.modal-body').html('');
+            editBlock.find('.modal-body').load(url, function( response, status, xhr ) {
+                editBlock.modal('show');
+            });
+        } else {
+            window.location = url;
+        }
+    });
+JS;
+$this->registerJs($js);
+
+/*$this->registerJsFile('/js/moment.min.js', [
+    'position' => \yii\web\View::POS_HEAD,
+    'depends' => [
+        \yii\web\JqueryAsset::class
+    ]
+]);
+$this->registerJsFile('/js/moment-timezone-with-data.min.js', [
+    'position' => \yii\web\View::POS_HEAD,
+    'depends' => [
+        \yii\web\JqueryAsset::class
+    ]
+]);*/
+
+$this->registerJsFile('/js/jquery.countdown-2.2.0/jquery.countdown.min.js', [
+    'position' => \yii\web\View::POS_HEAD,
+    'depends' => [
+        \yii\web\JqueryAsset::class
+    ]
+]);

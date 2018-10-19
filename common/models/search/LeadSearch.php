@@ -10,6 +10,7 @@ use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use common\models\Lead;
 use yii\data\SqlDataProvider;
+use yii\db\Expression;
 use yii\db\Query;
 use yii\debug\models\timeline\DataProvider;
 use yii\helpers\VarDumper;
@@ -43,6 +44,9 @@ class LeadSearch extends Lead
 
     public $supervision_id;
 
+    /* processing search form */
+    public $email_status;
+    public $quote_status;
 
 
     /**
@@ -52,6 +56,8 @@ class LeadSearch extends Lead
     {
         return [
             [['id', 'client_id', 'employee_id', 'status', 'project_id', 'adults', 'children', 'infants', 'rating', 'called_expert', 'cnt', 'l_grade', 'l_answered', 'supervision_id'], 'integer'],
+            [['email_status', 'quote_status'], 'integer'],
+
             [['client_name', 'client_email', 'client_phone','quote_pnr'], 'string'],
 
             //['created_date_from', 'default', 'value' => '2018-01-01'],
@@ -504,7 +510,7 @@ class LeadSearch extends Lead
             'query' => $query,
             'sort'=> ['defaultOrder' => ['created' => SORT_DESC]],
             'pagination' => [
-                'pageSize' => 100,
+                'pageSize' => 30,
             ],
         ]);
         $dataProvider->setSort([
@@ -542,40 +548,48 @@ class LeadSearch extends Lead
         ->andWhere(['IN', $leadTable . '.project_id', $projectIds])
         ;
 
-        if($this->processing_filter){
+        /*if($this->processing_filter){
            switch ($this->processing_filter){
                case 'snooze': $query->andWhere(['IN', $leadTable . '.project_id', $projectIds]); break;
            }
-        }
+        }*/
 
-        if($this->client_name) {
+        /*if($this->client_name) {
             $query->joinWith(['client' => function ($q) {
                 if($this->client_name) {
                     $q->where(['like', 'clients.last_name', $this->client_name])
                     ->orWhere(['like', 'clients.first_name', $this->client_name]);
                 }
             }]);
+        }*/
+
+        if($this->email_status > 0) {
+            if($this->email_status == 2) {
+                $query->andWhere(new Expression('(SELECT COUNT(*) FROM client_email WHERE client_email.client_id = leads.client_id) > 1'));
+            } else {
+                $query->andWhere(new Expression('(SELECT COUNT(*) FROM client_email WHERE client_email.client_id = leads.client_id) = 0'));
+            }
         }
 
-        if($this->client_email) {
-            $subQuery = ClientEmail::find()->select(['DISTINCT(client_id)'])->where(['like', 'email', $this->client_email]);
-            $query->andWhere(['IN', 'client_id', $subQuery]);
+        if($this->quote_status > 0) {
+            $subQuery = Quote::find()->select(['COUNT(*)'])->where('quotes.lead_id = leads.id')->andWhere(['status' => [Quote::STATUS_APPLIED, Quote::STATUS_SEND, Quote::STATUS_OPENED] ]);
+            if($this->quote_status == 2) {
+                //echo $subQuery->createCommand()->getRawSql(); exit;
+                $query->andWhere(new Expression('('.$subQuery->createCommand()->getRawSql().') > 0'));
+            } else {
+                $query->andWhere(new Expression('('.$subQuery->createCommand()->getRawSql().') = 0'));
+            }
         }
 
-        if($this->client_phone) {
-
-            $this->client_phone = preg_replace('~[^0-9\+]~', '', $this->client_phone);
-            $this->client_phone = ($this->client_phone[0] === "+" ? '+' : '') . str_replace("+", '', $this->client_phone);
-
-            $subQuery = ClientPhone::find()->select(['DISTINCT(client_id)'])->where(['like', 'phone', $this->client_phone]);
-            $query->andWhere(['IN', 'client_id', $subQuery]);
-        }
 
         if($this->supervision_id > 0) {
             $subQuery1 = UserGroupAssign::find()->select(['ugs_group_id'])->where(['ugs_user_id' => $this->supervision_id]);
             $subQuery = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->where(['IN', 'ugs_group_id', $subQuery1]);
             $query->andWhere(['IN', 'leads.employee_id', $subQuery]);
         }
+
+        $query->with(['client', 'client.clientEmails', 'client.clientPhones', 'employee']);
+
 
         /*  $sqlRaw = $query->createCommand()->getRawSql();
          VarDumper::dump($sqlRaw, 10, true); exit; */
