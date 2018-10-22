@@ -33,7 +33,8 @@ class Note extends \yii\db\ActiveRecord
     {
         return [
             [['employee_id', 'lead_id'], 'integer'],
-            [['message'], 'string'],
+            [['message'],'string'],
+            [['message'],'required'],
             [['created'], 'safe'],
             [['employee_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['employee_id' => 'id']],
             [['lead_id'], 'exist', 'skipOnError' => true, 'targetClass' => Lead::class, 'targetAttribute' => ['lead_id' => 'id']],
