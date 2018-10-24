@@ -11,6 +11,40 @@ use yii\bootstrap\ActiveForm;
 use common\models\Employee;
 use common\models\EmployeeAcl;
 use yii\widgets\MaskedInput;
+use kartik\time\TimePicker;
+
+function timezoneList()
+{
+    $timezoneIdentifiers = DateTimeZone::listIdentifiers(DateTimeZone:: ALL);
+    $utcTime = new DateTime('now', new DateTimeZone('UTC'));
+
+    $tempTimezones = array();
+    foreach ($timezoneIdentifiers as $timezoneIdentifier) {
+        $currentTimezone = new DateTimeZone($timezoneIdentifier);
+
+        $tempTimezones[] = array(
+            'offset' => (int)$currentTimezone->getOffset($utcTime),
+            'identifier' => $timezoneIdentifier
+        );
+    }
+
+    // Sort the array by offset,identifier ascending
+    usort($tempTimezones, function($a, $b) {
+        return ($a['offset'] == $b['offset'])
+        ? strcmp($a['identifier'], $b['identifier'])
+        : $a['offset'] - $b['offset'];
+    });
+
+        $timezoneList = array();
+        foreach ($tempTimezones as $tz) {
+            $sign = ($tz['offset'] > 0) ? '+' : '-';
+            $offset = gmdate('H:i', abs($tz['offset']));
+            $timezoneList[$tz['identifier']] = '(UTC ' . $sign . $offset . ') ' .
+                $tz['identifier'];
+        }
+
+        return $timezoneList;
+}
 
 $formId = sprintf('%s-ID', $model->formName());
 
@@ -29,7 +63,6 @@ $this->params['breadcrumbs'][] = $this->title;
     'id' => $formId
 ]) ?>
 <div class="col-sm-6">
-
 
             <div class="well">
                 <div class="row">
@@ -126,6 +159,23 @@ $this->params['breadcrumbs'][] = $this->title;
                     </div>
                     <div class="col-md-3">
                         <?= $form->field($modelUserParams, 'up_bonus_active')->checkbox() ?>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-3">
+                        <?= $form->field($modelUserParams, 'up_work_start_tm')->widget(
+                            \kartik\time\TimePicker::class, [
+                                'pluginOptions' => [
+                                    'showSeconds' => false,
+                                    'showMeridian' => false,
+                            ]])?>
+                    </div>
+                    <div class="col-md-3">
+                        <?= $form->field($modelUserParams, 'up_work_minutes')->input('number', ['step' => 10, 'min' => 0])?>
+                    </div>
+                    <div class="col-md-6">
+                        <?= $form->field($modelUserParams, 'up_timezone')->dropDownList(timezoneList(),['value' => (empty($modelUserParams->up_timezone))?"Europe/Chisinau":$modelUserParams->up_timezone])?>
                     </div>
                 </div>
                 <?php endif; ?>
