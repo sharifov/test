@@ -3,7 +3,6 @@
  * @var $this \yii\web\View
  * @var $model Employee
  * @var $modelUserParams \common\models\UserParams
- * @var $isProfile boolean
  */
 /* @var $searchModel common\models\search\UserProjectParamsSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -59,26 +58,26 @@ if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
                         <?= $form->field($model, 'email')->input('email') ?>
                     </div>
                 </div>
-                <?php if (!$isProfile) : ?>
-                    <div class="row">
-                        <div class="col-sm-6">
-                            <?php if($model->isNewRecord || Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) ||
-                            (Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id) && $model->role == 'agent')): ?>
-                                <?= $form->field($model, 'role')->dropDownList($model::getAllRoles(), ['prompt' => '']) ?>
-                            <?php else: ?>
-                                <div>
-                                <label class="control-label">Role</label>:
-                                    <b><?=Html::encode($model->role);?></b>
-                                </div>
-                            <? endif; ?>
-                        </div>
-                        <?php if (!$model->isNewRecord) : ?>
-                            <div class="col-sm-6">
-                                <?= $form->field($model, 'deleted', ['template' => '{label}{input}'])->checkbox() ?>
+
+                <div class="row">
+                    <div class="col-sm-6">
+                        <?php if($model->isNewRecord || Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) ||
+                        (Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id) && $model->role == 'agent')): ?>
+                            <?= $form->field($model, 'role')->dropDownList($model::getAllRoles(), ['prompt' => '']) ?>
+                        <?php else: ?>
+                            <div>
+                            <label class="control-label">Role</label>:
+                                <b><?=Html::encode($model->role);?></b>
                             </div>
-                        <?php endif; ?>
+                        <? endif; ?>
                     </div>
-                <?php endif; ?>
+                    <?php if (!$model->isNewRecord) : ?>
+                        <div class="col-sm-6">
+                            <?= $form->field($model, 'deleted', ['template' => '{label}{input}'])->checkbox() ?>
+                        </div>
+                    <?php endif; ?>
+                </div>
+
                 <div class="row">
                     <div class="col-sm-12">
                         <?php if($model->isNewRecord || Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) ||
@@ -191,14 +190,22 @@ if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
                         <?= $form->field($modelUserParams, 'up_work_minutes')->input('number', ['step' => 10, 'min' => 0])?>
                     </div>
                     <div class="col-md-6">
-                        <?= $form->field($modelUserParams, 'up_timezone')->dropDownList(Employee::timezoneList(),['prompt' =>'-'])?>
+                        <?//= $form->field($modelUserParams, 'up_timezone')->dropDownList(Employee::timezoneList(),['prompt' =>'-'])?>
+                        <?php
+                        echo $form->field($modelUserParams, 'up_timezone')->widget(\kartik\select2\Select2::class, [
+                            'data' => Employee::timezoneList(),
+                            'size' => \kartik\select2\Select2::SMALL,
+                            'options' => ['placeholder' => 'Select TimeZone', 'multiple' => false],
+                            'pluginOptions' => ['allowClear' => true],
+                        ]);
+                        ?>
                     </div>
                 </div>
                 <?php endif; ?>
 
             </div>
             <?php
-            if (!$model->isNewRecord && !$isProfile) : ?>
+            if (!$model->isNewRecord) : ?>
                 <div class="well form-inline">
                     <div class="form-group">
                         <?= $form->field($model, 'acl_rules_activated', [
@@ -485,11 +492,7 @@ $js = <<<JS
 
     $(document).on('click', '.act-create-upp', function(e) {
         e.preventDefault();
-        $.get(
-            '/user-project-params/create-ajax',
-            {
-                user_id: $(this).data('user_id')
-            },
+        $.get('/user-project-params/create-ajax', {user_id: $(this).data('user_id')},
             function (data) {
                 $('#activity-modal .modal-content').html(data);
                 $('#activity-modal').modal();

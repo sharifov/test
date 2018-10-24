@@ -10,13 +10,13 @@ use yii\bootstrap\ActiveForm;
 use common\models\Employee;
 
 
-$this->title = 'Profile - ' . $model->username;
+$this->title = 'My profile - ' . $model->username;
 
-//$this->params['breadcrumbs'][] = ['label' => 'User List', 'url' => ['list']];
+$this->params['breadcrumbs'][] = ['label' => 'Dashboard', 'url' => ['/']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
-
-<div class="col-sm-5">
+<h1><?=Html::encode($this->title)?></h1>
+<div class="col-sm-6">
     <?php $form = ActiveForm::begin() ?>
             <div class="well">
                 <div class="row">
@@ -72,27 +72,72 @@ $this->params['breadcrumbs'][] = $this->title;
                         </div>
                     </div>
                 </div>
-
-
-
-                <div class="row">
-                    <div class="col-md-3">
-                        <?= $form->field($modelUserParams, 'up_base_amount')->input('number', ['step' => 0.01, 'min' => 0, 'max' => '1000']) ?>
-                    </div>
-                    <div class="col-md-3">
-                        <?= $form->field($modelUserParams, 'up_commission_percent')->input('number', ['step' => 1, 'max' => 100, 'min' => 0]) ?>
-                    </div>
-                    <div class="col-md-3">
-                        <?= $form->field($modelUserParams, 'up_bonus_active')->checkbox() ?>
-                    </div>
-                </div>
-
-
             </div>
 
+            <div class="row">
+                <?php /*<div class="col-md-3">
+                    <?= $form->field($modelUserParams, 'up_work_start_tm')->widget(
+                        \kartik\time\TimePicker::class, [
+                        'pluginOptions' => [
+                            'showSeconds' => false,
+                            'showMeridian' => false,
+                        ]])?>
+                </div>
+                <div class="col-md-3">
+                    <?= $form->field($modelUserParams, 'up_work_minutes')->input('number', ['step' => 10, 'min' => 0])?>
+                </div>*/ ?>
+                <div class="col-md-6">
+                    <?//= $form->field($modelUserParams, 'up_timezone')->dropDownList(Employee::timezoneList(),['prompt' =>'-'])?>
+
+                    <?php
+                    echo $form->field($modelUserParams, 'up_timezone')->widget(\kartik\select2\Select2::class, [
+                        'data' => Employee::timezoneList(),
+                        'size' => \kartik\select2\Select2::SMALL,
+                        'options' => ['placeholder' => 'Select TimeZone', 'multiple' => false],
+                        'pluginOptions' => ['allowClear' => true],
+                    ]);
+                    ?>
+
+                </div>
+            </div>
 
             <div class="form-group">
-                <?= Html::submitButton('Update Profile', ['class' => 'btn btn-primary']) ?>
+                <?= Html::submitButton('Save Profile', ['class' => 'btn btn-primary']) ?>
             </div>
     <?php ActiveForm::end() ?>
+</div>
+
+<div class="col-sm-6">
+
+    <?= \yii\widgets\DetailView::widget([
+        'model' => $modelUserParams,
+        'attributes' => [
+            [
+                'attribute' => 'up_base_amount',
+                'value' => function(\common\models\UserParams $model) {
+                    return $model->up_base_amount ? '$'.number_format($model->up_base_amount , 2) : '-';
+                },
+            ],
+            [
+                'attribute' => 'up_commission_percent',
+                'value' => function(\common\models\UserParams $model) {
+                    return $model->up_commission_percent ? $model->up_commission_percent. '%' : '-';
+                },
+
+            ],
+            'up_bonus_active:boolean',
+            'up_timezone',
+            'up_work_start_tm',
+            'up_work_minutes',
+            /*[
+                'attribute' => 'up_updated_dt',
+                'value' => function(\common\models\UserParams $model) {
+                    return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->up_updated_dt));
+                },
+                'format' => 'raw',
+            ],*/
+            //'upUpdatedUser.username'
+        ],
+    ]) ?>
+
 </div>

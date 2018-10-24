@@ -14,6 +14,7 @@ use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
 use common\models\LoginForm;
 use yii\web\ForbiddenHttpException;
+use yii\web\NotFoundHttpException;
 
 /**
  * Site controller
@@ -415,10 +416,11 @@ class SiteController extends FController
 
     }
 
+
     /**
      * @return string
      * @throws ForbiddenHttpException
-     * @throws \yii\base\InvalidConfigException
+     * @throws NotFoundHttpException
      */
     public function actionProfile() : string
     {
@@ -426,29 +428,50 @@ class SiteController extends FController
             throw new ForbiddenHttpException();
         }
 
-        $this->view->title = sprintf('Employee - Profile');
-        $model = Employee::findOne(['id' => Yii::$app->user->id]);
-        if ($model !== null) {
-            if (Yii::$app->request->isPost) {
-                $attr = Yii::$app->request->post($model->formName());
-                $model->prepareSave($attr);
-                if ($model->validate() && $model->save()) {
-                    Yii::$app->getSession()->setFlash('success', 'Profile updated!');
-                }
-            }
-
-            $modelUserParams = $model->userParams; //new UserParams();
-
-            if(!$modelUserParams) {
-                $modelUserParams = new UserParams();
-            }
-
-            return $this->render('/employee/update_profile', [
-                'model' => $model,
-                'modelUserParams' => $modelUserParams
-            ]);
+        $model = Employee::findOne(Yii::$app->user->id);
+        if(!$model) {
+            throw new NotFoundHttpException('The requested User does not exist.');
         }
 
+        $modelUserParams = $model->userParams;
+        if(!$modelUserParams) {
+            $modelUserParams = new UserParams();
+        }
+
+
+        //Yii::$app->request->isPost
+        if ($model->load(Yii::$app->request->post()) && $model->validate()) {
+            //$attr = Yii::$app->request->post($model->formName());
+
+            if (!empty($this->password)) {
+                $this->setPassword($this->password);
+            }
+
+
+            if ($modelUserParams->load(Yii::$app->request->post()) && $modelUserParams->validate()) {
+                $modelUserParams->save();
+            }
+                //$attr = Yii::$app->request->post($model->formName());
+
+            if (!empty($model->password)) {
+                $model->setPassword($model->password);
+            }
+            //$model->prepareSave($attr);
+            if ($model->save()) {
+                Yii::$app->session->setFlash('success', 'Profile successful updated!');
+                $model->refresh();
+            }
+
+        }
+
+         //new UserParams();
+
+
+
+        return $this->render('/employee/update_profile', [
+            'model' => $model,
+            'modelUserParams' => $modelUserParams
+        ]);
     }
 
     public function actionGetAirport($term)
