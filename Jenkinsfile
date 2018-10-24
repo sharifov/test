@@ -24,7 +24,7 @@ stage ('migrate DB') {
 	sh 'docker exec php ./yii migrate  --interactive=0'
 }
 
-stage ('UNIT TEST's') {
+stage ('UNIT TEST') {
 	sh 'echo “unit test comming soon”'
 	}
 
