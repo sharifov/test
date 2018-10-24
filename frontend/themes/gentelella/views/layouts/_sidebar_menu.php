@@ -127,7 +127,8 @@ $isCoach = Yii::$app->authManager->getAssignment('coach', Yii::$app->user->id);
                         ['label' => 'Users', 'url' => ['employee/list'], 'icon' => 'user'],
                         ['label' => 'User Groups', 'url' => ['user-group/index'], 'icon' => 'users'],
                         ['label' => 'User Groups Assignments', 'url' => ['user-group-assign/index'], 'icon' => 'users'],
-                        ['label' => 'User Params', 'url' => ['user-params/index'], 'icon' => 'users']
+                        ['label' => 'User Params', 'url' => ['user-params/index'], 'icon' => 'users'],
+                        ['label' => 'User Project Params', 'url' => ['user-project-params/index'], 'icon' => 'users']
                     ]
                     //'linkOptions' => ['data-method' => 'post']
                 ];

@@ -9,6 +9,7 @@ use common\models\LeadLog;
 use common\models\local\LeadLogMessage;
 use common\models\Quote;
 use common\models\QuotePrice;
+use common\models\UserProjectParams;
 use Yii;
 use yii\web\BadRequestHttpException;
 use yii\web\NotFoundHttpException;
@@ -221,9 +222,14 @@ class QuoteController extends ApiBaseController
 
             $response['status'] = ($model->status != $model::STATUS_DECLINED) ? 'Success' : 'Failed';
 
-            $sellerContactInfo = EmployeeContactInfo::findOne([
+            /*$sellerContactInfo = EmployeeContactInfo::findOne([
                 'employee_id' => $model->lead->employee_id,
                 'project_id' => $model->lead->project_id
+            ]);*/
+
+            $userProjectParams = UserProjectParams::findOne([
+                'upp_user_id' => $model->lead->employee_id,
+                'upp_project_id' => $model->lead->project_id
             ]);
 
             $response['uid'] = $uid;
@@ -231,11 +237,10 @@ class QuoteController extends ApiBaseController
             $response['lead_uid'] = $model->lead->uid;
 
             $response['agentName'] = $model->lead->employee->username;
-            $response['agentEmail'] = $sellerContactInfo ? $sellerContactInfo->email_user : $model->lead->project->contactInfo->email;
-
-            $response['agentDirectLine'] = ($sellerContactInfo !== null) ? $sellerContactInfo->direct_line : sprintf('+1 %s', $model->lead->project->contactInfo->phone);
+            $response['agentEmail'] = $userProjectParams ? $userProjectParams->upp_email : $model->lead->project->contactInfo->email;
+            $response['agentDirectLine'] = $userProjectParams ? $userProjectParams->upp_phone_number : sprintf('+1 %s', $model->lead->project->contactInfo->phone);
             $response['itinerary']['tripType'] = $model->trip_type;
-            $response['itinerary']['mainCarrier'] = ($model->getMainCarrier()) ? $model->getMainCarrier()->name : $model->main_airline_code;
+            $response['itinerary']['mainCarrier'] = $model->getMainCarrier() ? $model->getMainCarrier()->name : $model->main_airline_code;
             $response['itinerary']['trips'] = $model->getTrips();
             $response['itinerary']['price'] = $model->quotePrice();
 

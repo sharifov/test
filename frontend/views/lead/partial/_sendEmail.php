@@ -4,7 +4,6 @@
  * @var $sendEmailModel SendEmailForm
  * @var $lead Lead
  * @var $preview bool
- * @var $sellerContactInfo EmployeeContactInfo
  */
 
 use yii\bootstrap\Html;
@@ -17,16 +16,23 @@ use yii\helpers\ArrayHelper;
 use common\models\EmployeeContactInfo;
 
 
-$alert = false;
-$sellerContactInfo = EmployeeContactInfo::findOne([
+
+/*$sellerContactInfo = EmployeeContactInfo::findOne([
     'employee_id' => $lead->employee_id,
     'project_id' => $lead->project_id
+]);*/
+
+$userProjectParams = \common\models\UserProjectParams::findOne([
+    'upp_user_id' => $lead->employee_id,
+    'upp_project_id' => $lead->project_id
 ]);
-if ($sellerContactInfo === null ||
-    empty($sellerContactInfo->direct_line) ||
-    empty($sellerContactInfo->email_pass)
-) {
+
+
+
+if ($userProjectParams === null || empty($userProjectParams->upp_phone_number) || empty($userProjectParams->upp_email)) {
     $alert = true;
+} else {
+    $alert = false;
 }
 
 $emails = ArrayHelper::map($lead->client->clientEmails, 'email', 'email');

@@ -6,6 +6,7 @@
  * @var $body string
  * @var $templateType string
  * @var $sellerContactInfo \common\models\EmployeeContactInfo
+ * @var $userProjectParams \common\models\UserProjectParams
  */
 ?>
 
@@ -51,8 +52,8 @@
                                                 </div>
                                                 <div class="agent-phone"
                                                      style="color: #1C2F59; font-size: 24px; font-weight: bold; line-height: 1.2em; text-decoration: none;">
-                                                    <?php if ($sellerContactInfo !== null && !empty($sellerContactInfo->direct_line)) {
-                                                        echo $sellerContactInfo->direct_line;
+                                                    <?php if ($userProjectParams !== null && $userProjectParams->upp_phone_number) {
+                                                        echo $userProjectParams->upp_phone_number;
                                                     } else {
                                                         echo $project->contactInfo->phone;
                                                     } ?>
@@ -97,10 +98,10 @@
                                         <tr style="padding: 0; text-align: left; vertical-align: top;">
                                             <th class="small-12 large-12 columns first last"
                                                 style="color: #1C2F59; font-family: 'Roboto', Arial, Helvetica, sans-serif; font-weight: normal; line-height: 1.3; margin: 0 auto; padding: 0; padding-bottom: 16px; padding-left: 24px; padding-right: 24px; text-align: left; width: 100%;">
-                                                <?php if ($sellerContactInfo !== null) : ?>
-                                                    E-Mail: <a href="mailto:<?= $sellerContactInfo->email_user ?>"
+                                                <?php if ($userProjectParams !== null) : ?>
+                                                    E-Mail: <a href="mailto:<?= $userProjectParams->upp_email ?>"
                                                                class="footer-email"
-                                                               style="color: #4ECCC4; font-family: 'Roboto', Arial, Helvetica, sans-serif; font-weight: normal; line-height: 1.3; margin: 0; padding: 0; text-align: left; text-decoration: none;"><?= $sellerContactInfo->email_user ?></a>
+                                                               style="color: #4ECCC4; font-family: 'Roboto', Arial, Helvetica, sans-serif; font-weight: normal; line-height: 1.3; margin: 0; padding: 0; text-align: left; text-decoration: none;"><?= $userProjectParams->upp_email ?></a>
                                                     <br>
                                                 <?php else : ?>
                                                     E-Mail: <a href="mailto:<?= $employee->email ?>"
@@ -108,8 +109,8 @@
                                                                style="color: #4ECCC4; font-family: 'Roboto', Arial, Helvetica, sans-serif; font-weight: normal; line-height: 1.3; margin: 0; padding: 0; text-align: left; text-decoration: none;"><?= $employee->email ?></a>
                                                     <br>
                                                 <?php endif; ?>
-                                                <?php if ($sellerContactInfo !== null && !empty($sellerContactInfo->direct_line)) {
-                                                    echo sprintf('Direct Line: %s <br>', $sellerContactInfo->direct_line);
+                                                <?php if ($userProjectParams !== null && !empty($userProjectParams->upp_phone_number)) {
+                                                    echo sprintf('Direct Line: %s <br>', $userProjectParams->upp_phone_number);
                                                 } ?>
                                                 General line: <?= $project->contactInfo->phone ?>
                                             </th>

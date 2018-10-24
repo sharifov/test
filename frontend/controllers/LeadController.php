@@ -16,6 +16,7 @@ use common\models\Note;
 use common\models\ProjectEmailTemplate;
 use common\models\Reason;
 use common\models\Task;
+use common\models\UserProjectParams;
 use frontend\models\LeadForm;
 use frontend\models\SendEmailForm;
 use Yii;
@@ -233,17 +234,30 @@ class LeadController extends FController
             $sendEmailModel = new SendEmailForm();
             $sendEmailModel->employee = $lead->employee;
             $sendEmailModel->project = $lead->project;
-            $sellerContactInfo = EmployeeContactInfo::findOne([
+
+            /*$sellerContactInfo = EmployeeContactInfo::findOne([
                 'employee_id' => $sendEmailModel->employee->id,
                 'project_id' => $sendEmailModel->project->id
+            ]);*/
+
+
+            $userProjectParams = UserProjectParams::findOne([
+                'upp_user_id' => $sendEmailModel->employee->id,
+                'upp_project_id' => $sendEmailModel->project->id
             ]);
+
+
+            if(!$userProjectParams) {
+                throw new BadRequestHttpException('Not found UserProjectParams (user_id: '.$sendEmailModel->employee->id.', project_id: '.$sendEmailModel->project->id.' )');
+            }
+
             $templates = ProjectEmailTemplate::getTypesForSellers();
             if (Yii::$app->request->isAjax) {
                 $sendEmailModel->type = Yii::$app->request->get('type');
                 $template = $sendEmailModel->getTemplate();
                 if (Yii::$app->request->isGet) {
                     if ($template !== null) {
-                        $sendEmailModel->populate($template, $lead->client, $sellerContactInfo);
+                        $sendEmailModel->populate($template, $lead->client, $userProjectParams);
                     }
                 } else {
                     $attr = Yii::$app->request->post();
@@ -253,7 +267,7 @@ class LeadController extends FController
                         $preview = true;
                     }
                     if ($template !== null) {
-                        $sendEmailModel->populate($template, $lead->client, $sellerContactInfo);
+                        $sendEmailModel->populate($template, $lead->client, $userProjectParams);
                     }
                 }
                 return $this->renderAjax('partial/_sendEmail', [
@@ -268,7 +282,7 @@ class LeadController extends FController
                 $sendEmailModel->attributes = $attr;
                 $template = $sendEmailModel->getTemplate();
                 if ($template !== null) {
-                    $sendEmailModel->populate($template, $lead->client, $sellerContactInfo);
+                    $sendEmailModel->populate($template, $lead->client, $userProjectParams);
                 }
                 $isSent = $sendEmailModel->sentEmail($lead);
                 if ($isSent) {
