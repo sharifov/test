@@ -338,6 +338,11 @@ class EmployeeController extends FController
                 if($modelUserParams->save()) {
                     return $this->refresh();
                 }
+            }else{
+                if($model->isNewRecord) {
+                    $modelUserParams->up_timezone = $modelUserParams->up_timezone?:"Europe/Chisinau";
+                    $modelUserParams->up_work_minutes = $modelUserParams->up_work_minutes?:8*60; //8 hours;
+                }
             }
 
 

@@ -45,17 +45,18 @@ $this->params['breadcrumbs'][] = $this->title;
                 },
 
             ],
-
+            'up_bonus_active:boolean',
+            'up_timezone',
+            'up_work_start_tm',
+            'up_work_minutes',
             [
-                'attribute' => 'up_bonus_active',
+                'attribute' => 'up_updated_dt',
                 'value' => function(\common\models\UserParams $model) {
-                    return $model->up_bonus_active;
-            },
-
-            ],
-            'up_updated_dt',
-            'up_updated_user_id',
-            'upUpdatedUser.username'
+                 return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->up_updated_dt));
+                },
+                'format' => 'raw',
+             ],
+             'upUpdatedUser.username'
         ],
     ]) ?>
 
