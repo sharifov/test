@@ -33,9 +33,14 @@ use yii\web\NotFoundHttpException;
  * @property Lead[] $leads
  * @property EmployeeAcl[] $employeeAcl
  * @property ProjectEmployeeAccess[] $projectEmployeeAccesses
+ * @property Project[] $projects
+ *
  * @property UserGroupAssign[] $userGroupAssigns
  * @property UserGroup[] $ugsGroups
  * @property UserParams $userParams
+ *
+ * @property UserProjectParams[] $userProjectParams
+ * @property Project[] $uppProjects
  */
 class Employee extends \yii\db\ActiveRecord implements IdentityInterface
 {
@@ -55,7 +60,9 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     public $role;
     public $employeeAccess;
     public $viewItemsEmployeeAccess;
+
     public $user_groups;
+    public $user_projects;
 
     /**
      * {@inheritdoc}
@@ -82,7 +89,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
             [['email'], 'unique'],
             ['email', 'email'],
             [['password_reset_token'], 'unique'],
-            [['created_at', 'updated_at', 'last_activity', 'acl_rules_activated', 'full_name', 'user_groups'], 'safe'],
+            [['created_at', 'updated_at', 'last_activity', 'acl_rules_activated', 'full_name', 'user_groups', 'user_projects'], 'safe'],
         ];
     }
 
@@ -101,6 +108,8 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
             'status' => 'Status',
             'created_at' => 'Created At',
             'updated_at' => 'Updated At',
+            'user_groups' => 'User groups',
+            'user_projects' => 'Projects access'
         ];
     }
 
@@ -135,11 +144,11 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
             }
         }
 
-        $this->deleted = !($this->status);
+        $this->deleted = !$this->status;
 
-        if ($this->role != 'admin') {
+        /*if ($this->role != 'admin') {
             $this->employeeAccess = array_keys(ArrayHelper::map($this->projectEmployeeAccesses, 'project_id', 'project_id'));
-        }
+        }*/
     }
 
     /*public function afterValidate()
@@ -164,6 +173,33 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     {
         return $this->hasMany(ProjectEmployeeAccess::class, ['employee_id' => 'id']);
     }
+
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getUserProjectParams()
+    {
+        return $this->hasMany(UserProjectParams::class, ['upp_user_id' => 'id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getUppProjects()
+    {
+        return $this->hasMany(Project::class, ['id' => 'upp_project_id'])->viaTable('user_project_params', ['upp_user_id' => 'id']);
+    }
+
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getProjects()
+    {
+        return $this->hasMany(Project::class, ['id' => 'project_id'])->viaTable('project_employee_access', ['employee_id' => 'id']);
+    }
+
 
     /**
      * @inheritdoc
@@ -248,10 +284,14 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         $result = $query->select(['name', 'description'])
             ->from('auth_item')->where(['type' => 1])
             ->all();
+
         foreach ($result as $item) {
-            if ($item['name'] == 'admin' && Yii::$app->user->identity->role != 'admin') {
+            if (($item['name'] == 'admin' || $item['name'] == 'supervision')  && Yii::$app->user->identity->role != 'admin') {
                 continue;
             }
+
+
+
             $roles[$item['name']] = $item['description'];
         }
         return $roles;
@@ -712,5 +752,41 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
             $data[$entry['pb_min_profit']] = $entry['pb_bonus'];
         }
         return $data;
+    }
+
+    /**
+     * @return array
+     */
+    public static function timezoneList() : array
+    {
+        $timezoneIdentifiers = \DateTimeZone::listIdentifiers(\DateTimeZone:: ALL);
+        $utcTime = new \DateTime('now', new \DateTimeZone('UTC'));
+
+        $tempTimezones = array();
+        foreach ($timezoneIdentifiers as $timezoneIdentifier) {
+            $currentTimezone = new \DateTimeZone($timezoneIdentifier);
+
+            $tempTimezones[] = array(
+                'offset' => (int)$currentTimezone->getOffset($utcTime),
+                'identifier' => $timezoneIdentifier
+            );
+        }
+
+        // Sort the array by offset,identifier ascending
+        usort($tempTimezones, function($a, $b) {
+            return ($a['offset'] === $b['offset'])
+                ? strcmp($a['identifier'], $b['identifier'])
+                : $a['offset'] - $b['offset'];
+        });
+
+        $timezoneList = array();
+        foreach ($tempTimezones as $tz) {
+            $sign = ($tz['offset'] > 0) ? '+' : '-';
+            $offset = gmdate('H:i', abs($tz['offset']));
+            $timezoneList[$tz['identifier']] = '(UTC ' . $sign . $offset . ') ' .
+                $tz['identifier'];
+        }
+
+        return $timezoneList;
     }
 }

@@ -1,0 +1,38 @@
+version: '2'
+services:
+    nginx:
+        build: ./nginx
+        container_name: nginx
+        hostname: nginx
+        restart: unless-stopped
+        ports:
+            - "80:80"
+            - "443:443"
+        depends_on:
+            - "php"
+        volumes:
+            - ../../:/var/www/sale
+    php:
+        build: ./php
+        container_name: php
+        hostname: php
+        restart: unless-stopped
+        depends_on:
+            - "mysql"
+        volumes:
+            - ../../:/var/www/sale
+    mysql:
+        container_name: mysql
+        hostname: mysql
+        restart: unless-stopped
+        image: mysql:5.7
+        volumes:
+            - mysql_data:/var/lib/mysql
+        environment:
+            MYSQL_ROOT_PASSWORD: 'uls_server_/*-+x'
+            MYSQL_DATABASE: sale
+            MYSQL_USER: sale
+            MYSQL_PASSWORD: 'SalePasswd1!'
+volumes:
+    mysql_data:
+        driver: "local"

@@ -12,12 +12,12 @@ use common\models\Employee;
 use yii\helpers\ArrayHelper;
 
 $disabled = '';
-if ($isProfile || $model->id == Yii::$app->user->identity->getId()) {
+if ($isProfile || $model->id == Yii::$app->user->id) {
     $disabled = 'disabled';
 }
 ?>
 
-<?php if (in_array($model->role, ['agent', 'coach']) && $model->id == Yii::$app->user->identity->getId()) : ?>
+<?php if (in_array($model->role, ['agent', 'coach']) && $model->id == Yii::$app->user->id) : ?>
 <?php else : ?>
     <div class="panel panel-default">
         <div class="panel-heading collapsing-heading">

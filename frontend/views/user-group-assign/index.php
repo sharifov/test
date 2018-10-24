@@ -50,7 +50,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'value' => function(\common\models\UserGroupAssign $model) {
                     return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->ugs_updated_dt));
                 },
-                'format' => 'html',
+                'format' => 'raw',
             ],
 
             ['class' => 'yii\grid\ActionColumn'],

@@ -1,0 +1,66 @@
+<?php
+
+use yii\helpers\Html;
+use yii\widgets\DetailView;
+
+/* @var $this yii\web\View */
+/* @var $model common\models\UserProjectParams */
+
+$this->title = $model->uppUser->username . ' - '. $model->uppProject->name;
+$this->params['breadcrumbs'][] = ['label' => 'User Project Params', 'url' => ['index']];
+$this->params['breadcrumbs'][] = $this->title;
+?>
+<div class="user-project-params-view">
+
+    <h1><?= Html::encode($this->title) ?></h1>
+
+    <p>
+        <?= Html::a('Update', ['update', 'upp_user_id' => $model->upp_user_id, 'upp_project_id' => $model->upp_project_id], ['class' => 'btn btn-primary']) ?>
+        <?= Html::a('Delete', ['delete', 'upp_user_id' => $model->upp_user_id, 'upp_project_id' => $model->upp_project_id], [
+            'class' => 'btn btn-danger',
+            'data' => [
+                'confirm' => 'Are you sure you want to delete this item?',
+                'method' => 'post',
+            ],
+        ]) ?>
+    </p>
+
+    <div class="col-md-6">
+    <?= DetailView::widget([
+        'model' => $model,
+        'attributes' => [
+            [
+                'attribute' => 'upp_user_id',
+                'value' => function(\common\models\UserProjectParams $model) {
+                    return $model->uppUser ? '<i class="fa fa-user"></i> '.Html::encode($model->uppUser->username).'' : '-';
+                },
+                'format' => 'raw',
+            ],
+
+            [
+                'attribute' => 'upp_project_id',
+                'value' => function(\common\models\UserProjectParams $model) {
+                    return $model->uppProject ? ''.$model->uppProject->name.'' : '-';
+                },
+            ],
+
+            'upp_email:email',
+            'upp_phone_number',
+            'upp_tw_phone_number',
+            'upp_tw_sip_id',
+            [
+                'attribute' => 'upp_updated_dt',
+                'value' => function(\common\models\UserProjectParams $model) {
+                    return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->upp_updated_dt));
+                },
+                'format' => 'raw',
+            ],
+
+            [
+                'label' => 'Updated User',
+                'attribute' => 'uppUpdatedUser.username',
+            ],
+        ],
+    ]) ?>
+    </div>
+</div>

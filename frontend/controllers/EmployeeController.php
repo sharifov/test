@@ -9,6 +9,7 @@ use common\models\EmployeeAcl;
 use common\models\EmployeeContactInfo;
 use common\models\ProjectEmployeeAccess;
 use common\models\search\EmployeeSearch;
+use common\models\search\UserProjectParamsSearch;
 use common\models\UserGroupAssign;
 use common\models\UserParams;
 use Symfony\Component\Finder\Exception\AccessDeniedException;
@@ -263,21 +264,38 @@ class EmployeeController extends FController
                             }
                         }
                     }
+
+
+                    if(isset($attr['user_projects'])) {
+                        ProjectEmployeeAccess::deleteAll(['employee_id' => $model->id]);
+                        if($attr['user_projects']) {
+                            foreach ($attr['user_projects'] as $ugId) {
+                                $up = new ProjectEmployeeAccess();
+                                $up->employee_id = $model->id;
+                                $up->project_id = (int) $ugId;
+                                $up->created = date('Y-m-d H:i:s');
+                                $up->save();
+                            }
+                        }
+                    }
+
                     //VarDumper::dump($attr['user_groups'], 10, true); exit;
 
-                    foreach ($availableProjects as $availableProject) {
-                        if (!in_array($availableProject, $newEmployeeAccess) && in_array($availableProject, $model->employeeAccess)) {
+
+                    /*foreach ($availableProjects as $availableProject) {
+                        if (!in_array($availableProject, $newEmployeeAccess) && in_array($availableProject, $model->user_projects)) {
                             ProjectEmployeeAccess::deleteAll([
                                 'employee_id' => $model->id,
                                 'project_id' => $availableProject
                             ]);
-                        } else if (in_array($availableProject, $newEmployeeAccess) && !in_array($availableProject, $model->employeeAccess)) {
+                        } else if (in_array($availableProject, $newEmployeeAccess) && !in_array($availableProject, $model->user_projects)) {
                             $access = new ProjectEmployeeAccess();
                             $access->employee_id = $model->id;
                             $access->project_id = $availableProject;
                             $access->save();
                         }
-                    }
+                    }*/
+
                     //$model = Employee::findOne(['id' => $id]);
                     Yii::$app->getSession()->setFlash('success', ($isNew) ? 'Profile created!' : 'Profile updated!');
 
@@ -290,6 +308,22 @@ class EmployeeController extends FController
             //VarDumper::dump($model->userGroupAssigns, 10 ,true); exit;
 
             $model->user_groups = ArrayHelper::map($model->userGroupAssigns, 'ugs_group_id', 'ugs_group_id');
+            $model->user_projects = ArrayHelper::map($model->projects, 'id', 'id');
+
+            //VarDumper::dump($model->user_projects, 10, true); exit;
+
+
+
+        $searchModel = new UserProjectParamsSearch();
+        $params = Yii::$app->request->queryParams;
+
+        /*if(Yii::$app->authManager->getAssignment('supervision', $model->id)) {
+
+        }*/
+
+        $params['UserProjectParamsSearch']['upp_user_id'] = $model->id;
+
+        $dataProvider = $searchModel->search($params);
 
 
 
@@ -310,7 +344,9 @@ class EmployeeController extends FController
             return $this->render('_form', [
                 'model' => $model,
                 'modelUserParams' => $modelUserParams,
-                'isProfile' => false
+                'isProfile' => false,
+                'searchModel' => $searchModel,
+                'dataProvider' => $dataProvider,
             ]);
 
 
