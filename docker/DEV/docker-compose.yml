@@ -24,7 +24,7 @@ services:
         volumes:
             - ../../:/var/www/sale
     mysql:
-        container_name: sales-mysql:development
+        container_name: sales-mysql
         hostname: mysql
         restart: unless-stopped
         image: mysql:5.7
