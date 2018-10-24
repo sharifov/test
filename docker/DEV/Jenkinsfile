@@ -10,7 +10,9 @@ def DOCKER_HUB_USER="f1banac1"
 
 def HTTP_PORT="8090"
 
-stage ('')
+stage('Checkout') {
+        checkout scm
+    }
 
 stage ('Build Infrastructure images') {
 	sh 'cd docker/DEV && docker-compose up --build'
