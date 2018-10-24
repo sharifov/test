@@ -34,8 +34,6 @@ if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
     $userList = \common\models\Employee::getListByUserId(Yii::$app->user->id);
     $projectList = \common\models\ProjectEmployeeAccess::getProjectsByEmployee();
 }
-
-
 ?>
 
 
@@ -161,7 +159,7 @@ if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
 
                 </div>
 
-                <?php if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)): ?>
+                <?php if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id)): ?>
                 <div class="row">
                     <div class="col-md-12">
                         <?php echo $form->errorSummary($modelUserParams) ?>
@@ -193,7 +191,7 @@ if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
                         <?= $form->field($modelUserParams, 'up_work_minutes')->input('number', ['step' => 10, 'min' => 0])?>
                     </div>
                     <div class="col-md-6">
-                        <?= $form->field($modelUserParams, 'up_timezone')->dropDownList(Employee::timezoneList(),['value' => (empty($modelUserParams->up_timezone))?"Europe/Chisinau":$modelUserParams->up_timezone])?>
+                        <?= $form->field($modelUserParams, 'up_timezone')->dropDownList(Employee::timezoneList(),['prompt' =>'-'])?>
                     </div>
                 </div>
                 <?php endif; ?>
@@ -456,46 +454,46 @@ JS;
 
 <?php
 $js = <<<JS
-    
+
     $('#activity-modal').on('hidden.bs.modal', function () {
         // $('#modal-dialog').find('.modal-content').html('');
         $.pjax.reload({container:'#pjax-grid-upp'});
     });
 
-    
+
     /*$("#update-app-pjax").on("pjax:end", function() {
         $.pjax.reload({container:'#pjax-grid-upp'});
         $('#activity-modal').modal('hide');
     });*/
-    
-    
+
+
     $(document).on('click', '.act-update-upp', function(e) {
         e.preventDefault();
         //alert(123);
         $.get(
-            '/user-project-params/update-ajax',         
+            '/user-project-params/update-ajax',
             {
                 data: $(this).closest('tr').data('key')
             },
             function (data) {
                 $('#activity-modal .modal-content').html(data);
                 $('#activity-modal').modal();
-            }  
+            }
         );
     });
-    
-    
+
+
     $(document).on('click', '.act-create-upp', function(e) {
         e.preventDefault();
         $.get(
-            '/user-project-params/create-ajax',         
+            '/user-project-params/create-ajax',
             {
                 user_id: $(this).data('user_id')
             },
             function (data) {
                 $('#activity-modal .modal-content').html(data);
                 $('#activity-modal').modal();
-            }  
+            }
         );
     });
 
