@@ -14,6 +14,11 @@ use yii\db\ActiveRecord;
  * @property string $up_base_amount
  * @property string $up_updated_dt
  * @property int $up_updated_user_id
+ * @property string $up_timezone
+ * @property string $up_work_start_tm
+ * @property int $up_work_minutes
+ * @property bool $up_bonus_active
+ *
  *
  * @property Employee $upUpdatedUser
  * @property Employee $upUser
