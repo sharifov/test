@@ -32,7 +32,9 @@ stage("Image Prune"){
 
 stage ('Build Infrastructure images') {
 	sh 'echo “Run docker-cumpose”'
-	sh 'docker/DEV/docker-compose up --build'
+	sh 'ls -la'
+	cd 'docker/DEV'
+	sh 'docker-compose up --build'
 }
 
 stage ('Composer install'){
