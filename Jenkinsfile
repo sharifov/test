@@ -1,10 +1,5 @@
 node {
 
-stage ('Prepare environment') {
-	git branch: 'development', url: 'https://stash.travelinsides.com/scm/crm/sale.git'
-	sh 'git pull'
-}
-
 stage ('Build Infrastructure') {
 	sh 'echo “Run docker-cumpose”'
 	sh 'cd docker/DEV'
