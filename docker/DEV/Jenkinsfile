@@ -1,0 +1,61 @@
+node { 
+('sales-development-node')
+
+def CONTAINER_NAME1="sales-php"
+def CONTAINER_NAME2="sales-nginx"
+def CONTAINER_NAME3="sales-mysql"
+
+def CONTAINER_TAG="development"
+def DOCKER_HUB_USER="f1banac1"
+
+def HTTP_PORT="8090"
+
+stage ('')
+
+stage ('Build Infrastructure images') {
+	sh 'cd docker/DEV && docker-compose up --build'
+}
+
+stage ('Composer install'){
+	sh 'docker exec sales-php composer --no-progress --prefer-dist install'
+}
+
+stage ('intit project') {
+	sh 'echo “Tests will back”'
+	sh 'docker exec sales-php ./init --env=Development --overwrite=y'
+}
+
+stage ('migrate DB') {
+	sh 'docker exec sales-php ./yii migrate  --interactive=0'
+}
+
+stage ('UNIT TEST') {
+	sh 'echo “unit test comming soon”'
+	}
+
+stage('Push to Docker Registry'){
+        docker.withRegistry('https://docker-registry.travelinsides.com', 'DockerRegestryAccount') {
+            pushToImage(CONTAINER_NAME1, CONTAINER_NAME2, CONTAINER_NAME3, CONTAINER_TAG)
+            }
+    }
+
+stage ('Deploy'){
+	sh 'echo "Deployment"'
+    }
+}
+
+def pushToImage(containerName1, containerName2, containerName3, tag){
+    sh "docker tag $containerName1:$tag docker-registry.travelinsides.com/$containerName1:$tag"
+    sh "docker tag $containerName2:$tag docker-registry.travelinsides.com/$containerName2:$tag"
+    sh "docker tag $containerName3:$tag docker-registry.travelinsides.com/$containerName3:$tag"
+    sh "docker push docker-registry.travelinsides.com/$containerName1:$tag"
+    sh "docker push docker-registry.travelinsides.com/$containerName2:$tag"
+    sh "docker push docker-registry.travelinsides.com/$containerName3:$tag"
+    echo "Image push complete"
+}
+
+def runApp(containerName, tag, dockerHubUser, httpPort){
+    sh "docker pull docker-registry.travelinsides.com/$containerName"
+    sh "docker run -d --rm -p $httpPort:$httpPort --name $containerName docker-registry.travelinsides.com/$containerName:$tag"
+    echo "Application started on port: ${httpPort} (http)"
+}
