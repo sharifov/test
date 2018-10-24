@@ -37,7 +37,7 @@ if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
 
 ?>
 
-<div class="col-sm-6">
+<div class="col-sm-5">
     <?php $form = ActiveForm::begin([
         'successCssClass' => '',
         'id' => $formId
@@ -189,8 +189,8 @@ if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
                             'template' => '{input}'
                         ])->checkbox() ?>
                         <span>&nbsp;</span>
-                        <?= Html::a('Add Extra Rule', null, [
-                            'class' => 'btn btn-success',
+                        <?= Html::a('<i class="glyphicon glyphicon-plus"></i> Add Extra Rule', null, [
+                            'class' => 'btn btn-success btn-xs',
                             'id' => 'acl-rule-id',
                         ]) ?>
                         <?php
@@ -276,7 +276,7 @@ JS;
 </div>
 
 
-<div class="col-sm-6">
+<div class="col-sm-7">
     <?php if (!$model->isNewRecord) : ?>
 
         <div class="user-project-params-index">
@@ -288,10 +288,9 @@ JS;
             <p>
                 <?//= Html::a('Create User Project Params', ['user-project-params/create'], ['class' => 'btn btn-success']) ?>
 
-                <?php echo Html::a('<i class="glyphicon glyphicon-plus"></i> Create Project Params',
-                    ['user-project-params/create-ajax','user_id' => $model->id, 'redirect' => 'employee/update?id='.$model->id],
+                <?php echo Html::a('<i class="glyphicon glyphicon-plus"></i> Create Project Params',null,
                     [
-                        'class' => 'btn btn-success act-create-upp',
+                        'class' => 'btn btn-success btn-xs act-create-upp',
                         'title' => 'Create Project Params',
                         //'data-toggle'=>'modal',
                         //'data-target'=>'#activity-modal',
