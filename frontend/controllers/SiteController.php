@@ -397,7 +397,7 @@ class SiteController extends FController
      */
     public function actionLogin()
     {
-        $this->layout = '@frontend/themes/gentelella/views/layouts/login.php';
+        $this->layout = '@frontend/themes/gentelella/views/layouts/login';
 
         if (!Yii::$app->user->isGuest) {
             return $this->goHome();
@@ -415,31 +415,40 @@ class SiteController extends FController
 
     }
 
-    public function actionProfile()
+    /**
+     * @return string
+     * @throws ForbiddenHttpException
+     * @throws \yii\base\InvalidConfigException
+     */
+    public function actionProfile() : string
     {
-        if (!Yii::$app->user->isGuest) {
-            $this->view->title = sprintf('Employee - Profile');
-            $model = Employee::findOne(['id' => Yii::$app->user->id]);
-            if ($model !== null) {
-                if (Yii::$app->request->isPost) {
-                    $attr = Yii::$app->request->post($model->formName());
-                    $model->prepareSave($attr);
-                    if ($model->validate() && $model->save()) {
-                        Yii::$app->getSession()->setFlash('success', 'Profile updated!');
-                    }
-                }
-
-                $modelUserParams = new UserParams();
-
-                return $this->render('@frontend/views/employee/_form.php', [
-                    'model' => $model,
-                    'modelUserParams' => $modelUserParams,
-                    'isProfile' => true
-                ]);
-            }
+        if (Yii::$app->user->isGuest) {
+            throw new ForbiddenHttpException();
         }
 
-        throw new ForbiddenHttpException();
+        $this->view->title = sprintf('Employee - Profile');
+        $model = Employee::findOne(['id' => Yii::$app->user->id]);
+        if ($model !== null) {
+            if (Yii::$app->request->isPost) {
+                $attr = Yii::$app->request->post($model->formName());
+                $model->prepareSave($attr);
+                if ($model->validate() && $model->save()) {
+                    Yii::$app->getSession()->setFlash('success', 'Profile updated!');
+                }
+            }
+
+            $modelUserParams = $model->userParams; //new UserParams();
+
+            if(!$modelUserParams) {
+                $modelUserParams = new UserParams();
+            }
+
+            return $this->render('/employee/update_profile', [
+                'model' => $model,
+                'modelUserParams' => $modelUserParams
+            ]);
+        }
+
     }
 
     public function actionGetAirport($term)
