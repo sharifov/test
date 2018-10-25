@@ -28,7 +28,7 @@ if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
     <div class="panel-body">
         <div class="row mb-20">
             <div class="col-md-6">
-                <?= Html::a('Create', 'update', [
+                <?= Html::a('<i class="glyphicon glyphicon-plus"></i> Create new User', 'create', [
                     'class' => 'btn-success btn',
                 ]) ?>
             </div>
