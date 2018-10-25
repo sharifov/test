@@ -19,6 +19,7 @@ stage('Check machine') {
     sh 'whoami'
     sh 'docker ps -a'
     sh 'cd /var/www/sale/docker/DEV && docker-compose ps'
+    sh 'ls -la'
 }
 
 stage ('Build Infrastructure images') {
