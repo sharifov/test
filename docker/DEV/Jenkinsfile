@@ -20,6 +20,8 @@ stage('Check machine') {
     sh 'docker ps -a'
     sh 'cd /var/www/sale/docker/DEV && docker-compose ps'
     sh 'ls -la'
+    sh 'pwd'
+    sh 'git status'
 }
 
 stage ('Build Infrastructure images') {

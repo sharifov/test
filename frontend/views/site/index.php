@@ -41,7 +41,7 @@ $userId = Yii::$app->user->id;
                     <td><i class="fa fa-globe"></i> <?= Yii::$app->formatter->timeZone?></td>
                 </tr>
                 <tr>
-                    <th>Formatted Local Date Time</th>
+                    <th>Local Date Time</th>
                     <td><i class="fa fa-calendar"></i> <?= Yii::$app->formatter->asDatetime(time())?></td>
                 </tr>
             </table>
@@ -99,6 +99,42 @@ $userId = Yii::$app->user->id;
         </div>
 
         <div class="col-md-3">
+            <?php
+
+            $modelUserParams = Yii::$app->user->identity->userParams;
+            if($modelUserParams) {
+                echo \yii\widgets\DetailView::widget([
+                    'model' => $modelUserParams ?? null,
+                    'attributes' => [
+                        /*[
+                            'attribute' => 'up_base_amount',
+                            'value' => function(\common\models\UserParams $model) {
+                                return $model->up_base_amount ? '$'.number_format($model->up_base_amount , 2) : '-';
+                            },
+                        ],
+                        [
+                            'attribute' => 'up_commission_percent',
+                            'value' => function(\common\models\UserParams $model) {
+                                return $model->up_commission_percent ? $model->up_commission_percent. '%' : '-';
+                            },
+
+                        ],*/
+                        'up_bonus_active:boolean',
+                        'up_timezone',
+                        'up_work_start_tm',
+                        'up_work_minutes',
+                        /*[
+                            'attribute' => 'up_updated_dt',
+                            'value' => function(\common\models\UserParams $model) {
+                                return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->up_updated_dt));
+                            },
+                            'format' => 'raw',
+                        ],*/
+
+                    ],
+                ]);
+            }
+            ?>
 
 
         </div>
