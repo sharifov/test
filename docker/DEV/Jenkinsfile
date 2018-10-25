@@ -1,5 +1,4 @@
-node { 
-('sales-development-node')
+node ('sales-development-node') {
 
 def CONTAINER_NAME1="sales-php"
 def CONTAINER_NAME2="sales-nginx"
