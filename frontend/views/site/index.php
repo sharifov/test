@@ -362,17 +362,17 @@ $userId = Yii::$app->user->id;
             <ul class="nav nav-tabs">
                 <li>
                     <a data-toggle="tab" href="#tab-1">
-                        <i class="fa fa-calendar-times-o"></i>  <?=\yii\helpers\Html::encode(Yii::$app->formatter->asDate(strtotime("-1 days")))?> <span class="label label-default">yesterday</span>
+                        <i class="fa fa-calendar-times-o"></i>  <?=\yii\helpers\Html::encode(Yii::$app->formatter->asDate(strtotime("-1 days")))?> <span class="label label-default">previous</span>
                     </a>
                 </li>
                 <li class="active">
                     <a data-toggle="tab" href="#tab-2" style="background-color: #dff0d8">
-                        <i class="fa fa-calendar"></i>  <?=\yii\helpers\Html::encode(Yii::$app->formatter->asDate(time()))?> <span class="label label-success">today</span>
+                        <i class="fa fa-calendar"></i>  <?=\yii\helpers\Html::encode(Yii::$app->formatter->asDate(time()))?> <span class="label label-success">current</span>
                     </a>
                 </li>
                 <li>
                     <a data-toggle="tab" href="#tab-3" style="background-color:">
-                        <i class="fa fa-calendar-minus-o"></i>  <?=\yii\helpers\Html::encode(Yii::$app->formatter->asDate(strtotime("+1 days")))?> <span class="label label-warning">tomorrow</span>
+                        <i class="fa fa-calendar-minus-o"></i>  <?=\yii\helpers\Html::encode(Yii::$app->formatter->asDate(strtotime("+1 days")))?> <span class="label label-warning">next</span>
                     </a>
                 </li>
             </ul>
@@ -380,7 +380,7 @@ $userId = Yii::$app->user->id;
             <div class="tab-content">
                 <div id="tab-1" class="tab-pane fade in">
                     <?php Pjax::begin(); ?>
-                    <h4>To Do Task List <span class="label label-default">yesterday</span> (<?=Yii::$app->formatter->asDate(strtotime("-1 days"))?>):</h4>
+                    <h4>To Do Task List <span class="label label-default">previous</span> (<?=Yii::$app->formatter->asDate(strtotime("-1 days"))?>):</h4>
                     <?= GridView::widget([
                         'dataProvider' => $dp1,
                         'filterModel' => $searchModel,
@@ -397,7 +397,7 @@ $userId = Yii::$app->user->id;
 
                 <div id="tab-2" class="tab-pane fade in active">
                     <?php Pjax::begin(); ?>
-                    <h4>To Do Task List <span class="label label-success">today</span> (<?=Yii::$app->formatter->asDate(time())?>):</h4>
+                    <h4>To Do Task List <span class="label label-success">current</span> (<?=Yii::$app->formatter->asDate(time())?>):</h4>
                     <?= GridView::widget([
                         'dataProvider' => $dp2,
                         'filterModel' => $searchModel,
@@ -413,7 +413,7 @@ $userId = Yii::$app->user->id;
 
                 <div id="tab-3" class="tab-pane fade in">
                     <?php Pjax::begin(); ?>
-                    <h4>To Do Task List <span class="label label-warning">tomorrow</span> (<?=Yii::$app->formatter->asDate(strtotime("+1 days"))?>):</h4>
+                    <h4>To Do Task List <span class="label label-warning">next</span> (<?=Yii::$app->formatter->asDate(strtotime("+1 days"))?>):</h4>
                     <?= GridView::widget([
                         'dataProvider' => $dp3,
                         'filterModel' => $searchModel,

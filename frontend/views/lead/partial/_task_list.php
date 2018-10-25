@@ -4,7 +4,6 @@
  * @var $lead \common\models\Lead
  */
 
-
 use kartik\editable\Editable;
 use common\models\UserParams;
 
@@ -41,7 +40,10 @@ if($taskList) {
         $taskDateUTCShiftEnd = clone $taskDateUTC;
         $taskDateUTCShiftEnd->add(new DateInterval('PT'.($usersParams[$task->lt_user_id]['up_work_minutes']*60).'S'));
 
-        $dateItemShift[$task->lt_date] = ['start' => $taskDateUTC, 'end' => $taskDateUTCShiftEnd];
+        if(!isset($dateItemShift[$task->lt_date]) || $task->lt_user_id == $userId){
+            $dateItemShift[$task->lt_date] = ['start' => $taskDateUTC, 'end' => $taskDateUTCShiftEnd];
+        }
+
         $dateItem[$task->lt_date] = $task->lt_date;
         $taskByDate[$task->lt_date][$task->lt_user_id][] = $task;
     }
@@ -56,7 +58,7 @@ $call2DelayTime = Yii::$app->params['lead']['call2DelayTime']; //(2 * 60 * 60);
 
 ?>
 
-<?php //\yii\helpers\VarDumper::dump($dateItemShift); ?>
+<?php //\yii\helpers\VarDumper::dump($dateItemShift, 10, true); ?>
 
 
 <div class="panel panel-success panel-wrapper task-list-block">
@@ -72,16 +74,17 @@ $call2DelayTime = Yii::$app->params['lead']['call2DelayTime']; //(2 * 60 * 60);
 
 
             <?php
-                $currentTS = strtotime(date('Y-m-d H:i:s'));
+                $now = new DateTime();
+                $currentTS = $now->getTimestamp();
             ?>
 
 
             <ul class="nav nav-tabs">
-                <?php $activeShown = false;
+                <?php $activeShown = false;$active = false;
                     foreach ($dateItem as $date):
                     $dayTS = $dateItemShift[$date]['start']->getTimestamp();
                     $shiftEndTS = $dateItemShift[$date]['end']->getTimestamp();
-                    $active = (($dayTS < $currentTS && $shiftEndTS >= $currentTS) || ($dayTS > $currentTS && !$active && !$activeShown))?true:false;
+                    $active = (($dayTS < $currentTS && $shiftEndTS > $currentTS) || ($dayTS > $currentTS && !$active && !$activeShown))?true:false;
                     if(!$activeShown){
                         $activeShown = ($active)?true:false;
                     }
