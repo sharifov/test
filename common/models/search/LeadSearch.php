@@ -662,6 +662,53 @@ class LeadSearch extends Lead
         return $dataProvider;
     }
 
+    /**
+     * @param $params
+     * @return ActiveDataProvider
+     */
+    public function searchInbox($params)
+    {
+        $projectIds = array_keys(ProjectEmployeeAccess::getProjectsByEmployee());
+        $query = Lead::find();
+        $leadTable = Lead::tableName();
+
+        // add conditions that should always apply here
+
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+            'sort'=> ['defaultOrder' => ['created' => SORT_DESC]],
+            'pagination' => [
+                'pageSize' => 30,
+            ],
+        ]);
+
+        $this->load($params);
+
+        if (!$this->validate()) {
+            // uncomment the following line if you do not want to return any records when validation fails
+            // $query->where('0=1');
+            return $dataProvider;
+        }
+
+        // grid filtering conditions
+        $query->andFilterWhere([
+            $leadTable.'.id' => $this->id,
+            $leadTable.'.client_id' => $this->client_id,
+            $leadTable.'.project_id' => $this->project_id,
+            $leadTable.'.source_id' => $this->source_id,
+            $leadTable.'.status' => $this->status,
+        ]);
+
+        $query
+        ->andWhere(['IN','leads.status', [self::STATUS_PENDING]])
+        ->andWhere(['IN', $leadTable . '.project_id', $projectIds])
+        ;
+
+        $query->with(['client', 'client.clientEmails', 'client.clientPhones']);
+
+        return $dataProvider;
+    }
+
     public function searchEmail($params)
     {
 

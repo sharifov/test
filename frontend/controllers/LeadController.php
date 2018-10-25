@@ -69,7 +69,7 @@ class LeadController extends FController
                             'create', 'add-comment', 'change-state', 'unassign', 'take',
                             'set-rating', 'add-note', 'unprocessed', 'call-expert', 'send-email',
                             'check-updates', 'flow-transition', 'get-user-actions', 'add-pnr', 'update2','clone',
-                            'get-badges', 'sold', 'split-profit', 'processing', 'follow-up'
+                            'get-badges', 'sold', 'split-profit', 'processing', 'follow-up', 'inbox'
                         ],
                         'allow' => true,
                         'roles' => ['agent'],
@@ -471,11 +471,8 @@ class LeadController extends FController
             }
         }
 
-
-
         return $this->redirect([
-            'queue',
-            'type' => $type
+            'processing',
         ]);
     }
 
@@ -767,6 +764,34 @@ class LeadController extends FController
         ]);
     }
 
+
+    public function actionInbox()
+    {
+        $searchModel = new LeadSearch();
+
+        $params = Yii::$app->request->queryParams;
+        $params2 = Yii::$app->request->post();
+
+        $params = array_merge($params, $params2);
+
+        if(Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id)) {
+            $isAgent = true;
+        } else {
+            $isAgent = false;
+        }
+
+        if(Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id)) {
+            $params['LeadSearch']['supervision_id'] = Yii::$app->user->id;
+        }
+
+        $dataProvider = $searchModel->searchInbox($params);
+
+        return $this->render('inbox', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+            'isAgent' => $isAgent,
+        ]);
+    }
 
     public function actionAddComment($type, $id)
     {
