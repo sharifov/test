@@ -38,7 +38,7 @@ class EmployeeController extends FController
                 'class' => AccessControl::class,
                 'rules' => [
                     [
-                        'actions' => ['list', 'update', 'acl-rule'],
+                        'actions' => ['list', 'update', 'create', 'acl-rule'],
                         'allow' => true,
                         'roles' => ['supervision'],
                     ],
@@ -178,6 +178,95 @@ class EmployeeController extends FController
 
     /**
      * @return string|Response
+     * @throws \yii\base\InvalidConfigException
+     */
+    public function actionCreate()
+    {
+
+        $model = new Employee(['scenario' => Employee::SCENARIO_REGISTER]);
+        $modelUserParams = new UserParams();
+
+        if (Yii::$app->request->isPost) {
+            $attr = Yii::$app->request->post($model->formName());
+
+
+            $isNew = $model->prepareSave($attr);
+            if ($model->validate() && $model->save()) {
+
+                $model->addRole($isNew);
+
+                if(isset($attr['user_groups'])) {
+                    if($attr['user_groups']) {
+                        foreach ($attr['user_groups'] as $ugId) {
+                            $uga = new UserGroupAssign();
+                            $uga->ugs_user_id = $model->id;
+                            $uga->ugs_group_id = (int) $ugId;
+                            $uga->save();
+                        }
+                    }
+                }
+
+
+                if(isset($attr['user_projects'])) {
+                    if($attr['user_projects']) {
+                        foreach ($attr['user_projects'] as $ugId) {
+                            $up = new ProjectEmployeeAccess();
+                            $up->employee_id = $model->id;
+                            $up->project_id = (int) $ugId;
+                            $up->created = date('Y-m-d H:i:s');
+                            $up->save();
+                        }
+                    }
+                }
+
+
+                Yii::$app->getSession()->setFlash('success', 'User created');
+
+
+                if ($modelUserParams->load(Yii::$app->request->post())) {
+
+                    //VarDumper::dump(Yii::$app->request->post()); exit;
+
+                    $modelUserParams->up_user_id = $model->id;
+                    $modelUserParams->up_updated_user_id = Yii::$app->user->id;
+
+                    if($modelUserParams->save()) {
+                        //return $this->refresh();
+                    }
+                }
+
+                return $this->redirect(['update','id' => $model->id]);
+
+            }
+        } else {
+
+            $modelUserParams->up_timezone = "Europe/Chisinau";
+            $modelUserParams->up_work_minutes = 8 * 60;
+            $modelUserParams->up_base_amount = 0;
+            $modelUserParams->up_commission_percent = 0;
+
+        }
+
+        //VarDumper::dump($model->userGroupAssigns, 10 ,true); exit;
+
+        //$model->user_groups = ArrayHelper::map($model->userGroupAssigns, 'ugs_group_id', 'ugs_group_id');
+        //$model->user_projects = ArrayHelper::map($model->projects, 'id', 'id');
+
+        //VarDumper::dump($model->user_projects, 10, true); exit;
+
+
+        $dataProvider = null;
+
+        return $this->render('_form', [
+            'model' => $model,
+            'modelUserParams' => $modelUserParams,
+            'dataProvider' => $dataProvider,
+        ]);
+
+    }
+
+    /**
+     * @return string|Response
      * @throws BadRequestHttpException
      * @throws NotAcceptableHttpException
      * @throws NotFoundHttpException
@@ -185,7 +274,6 @@ class EmployeeController extends FController
      */
     public function actionUpdate()
     {
-        $this->view->title = sprintf('Employees - Profile');
 
         if ($id = Yii::$app->request->get('id')) {
 
@@ -223,31 +311,16 @@ class EmployeeController extends FController
                 }
             }
 
-
-
         } else {
-            $model = new Employee(['scenario' => Employee::SCENARIO_REGISTER]);
-            $modelUserParams = new UserParams();
+            throw new BadRequestHttpException('Invalid request');
         }
-
-
 
 
             if (Yii::$app->request->isPost) {
                 $attr = Yii::$app->request->post($model->formName());
 
-                $availableProjects = isset($attr['viewItemsEmployeeAccess'])
-                    ? array_keys(json_decode($attr['viewItemsEmployeeAccess'], true))
-                    : [];
-                $newEmployeeAccess = (isset($attr['employeeAccess']) && !empty($attr['employeeAccess']))
-                    ? $attr['employeeAccess'] : [];
-
                 $isNew = $model->prepareSave($attr);
                 if ($model->validate() && $model->save()) {
-
-
-
-
 
 
                     $model->addRole($isNew);
@@ -297,11 +370,9 @@ class EmployeeController extends FController
                     }*/
 
                     //$model = Employee::findOne(['id' => $id]);
-                    Yii::$app->getSession()->setFlash('success', ($isNew) ? 'Profile created!' : 'Profile updated!');
+                    Yii::$app->getSession()->setFlash('success', 'User updated');
 
-                    if($isNew){
-                        return $this->redirect(['update','id' => $model->id]);
-                    }
+
                 }
             }
 
@@ -314,18 +385,16 @@ class EmployeeController extends FController
 
 
 
-        $searchModel = new UserProjectParamsSearch();
-        $params = Yii::$app->request->queryParams;
+            $searchModel = new UserProjectParamsSearch();
+            $params = Yii::$app->request->queryParams;
 
-        /*if(Yii::$app->authManager->getAssignment('supervision', $model->id)) {
+            /*if(Yii::$app->authManager->getAssignment('supervision', $model->id)) {
 
-        }*/
+            }*/
 
-        $params['UserProjectParamsSearch']['upp_user_id'] = $model->id;
+            $params['UserProjectParamsSearch']['upp_user_id'] = $model->id;
 
-        $dataProvider = $searchModel->search($params);
-
-
+            $dataProvider = $searchModel->search($params);
 
 
             if ($modelUserParams->load(Yii::$app->request->post())) {
@@ -338,23 +407,15 @@ class EmployeeController extends FController
                 if($modelUserParams->save()) {
                     return $this->refresh();
                 }
-            }else{
-                if($model->isNewRecord) {
-                    $modelUserParams->up_timezone = $modelUserParams->up_timezone?:"Europe/Chisinau";
-                    $modelUserParams->up_work_minutes = $modelUserParams->up_work_minutes?:8*60; //8 hours;
-                }
             }
 
 
             return $this->render('_form', [
                 'model' => $model,
                 'modelUserParams' => $modelUserParams,
-                'isProfile' => false,
-                'searchModel' => $searchModel,
+                //'searchModel' => $searchModel,
                 'dataProvider' => $dataProvider,
             ]);
 
-
-        //throw new BadRequestHttpException('"Employee ID ' . $id . '" not found.');
     }
 }
