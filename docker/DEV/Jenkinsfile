@@ -41,7 +41,7 @@ stage('Push to Docker Registry'){
     }
 
 stage ('Deploy'){
-	sh 'echo "Deployment"'
+	sh 'echo "Deployment !"'
     }
 }
 
