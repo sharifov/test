@@ -16,8 +16,8 @@ stage('Checkout') {
 stage('Check machine') {
     sh 'ip add'
     sh 'hostname'
-    sh 'docker'
-    sh 'docker-compose'
+    sh 'docker ps -a'
+    sh 'cd /var/www/sale/docker/DEV && docker-compose ps'
 }
 
 stage ('Build Infrastructure images') {
