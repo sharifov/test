@@ -4,22 +4,50 @@
  * @var $lead \common\models\Lead
  */
 
-
 use kartik\editable\Editable;
+use common\models\UserParams;
 
 $taskList = \common\models\LeadTask::find()->where(['lt_lead_id' => $lead->id])->orderBy(['lt_date' => SORT_ASC])->all();
 
 $dateItem = [];
 $taskByDate = [];
+$dateItemShift = [];
+$userId = Yii::$app->user->id;
 
 if($taskList) {
+    $usersParams = [];
+    foreach ($taskList as $task){
+        if(!in_array($task->lt_user_id, array_keys($usersParams))){
+            $userParamsEntry = UserParams::find()->where(['up_user_id' => $task->lt_user_id])->one();
+            if($userParamsEntry){
+                $usersParams[$task->lt_user_id] = $userParamsEntry->toArray();
+            }else{
+                $usersParams[$task->lt_user_id] = [
+                    'up_work_start_tm' => '18:00',
+                    'up_work_minutes' => 480,
+                    'up_timezone' => 'Europe/Chisinau',
+                ];
+            }
+        }
+    }
     foreach ($taskList as $task) {
+        $taskDate = $task->lt_date;
+        $taskDate .= ' '.$usersParams[$task->lt_user_id]['up_work_start_tm'];
+
+        $taskDateUTC = new DateTime($taskDate, new DateTimeZone($usersParams[$task->lt_user_id]['up_timezone']));
+        $taskDateUTC->setTimezone(new DateTimeZone('UTC'));
+        $taskDateUTCstr = $taskDateUTC->format('Y-m-d H:i');
+        $taskDateUTCShiftEnd = clone $taskDateUTC;
+        $taskDateUTCShiftEnd->add(new DateInterval('PT'.($usersParams[$task->lt_user_id]['up_work_minutes']*60).'S'));
+
+        if(!isset($dateItemShift[$task->lt_date]) || $task->lt_user_id == $userId){
+            $dateItemShift[$task->lt_date] = ['start' => $taskDateUTC, 'end' => $taskDateUTCShiftEnd];
+        }
+
         $dateItem[$task->lt_date] = $task->lt_date;
         $taskByDate[$task->lt_date][$task->lt_user_id][] = $task;
     }
 }
-
-$userId = Yii::$app->user->id;
 
 $is_manager = false;
 if(Yii::$app->authManager->getAssignment('admin', $userId) || Yii::$app->authManager->getAssignment('supervision', $userId)) {
@@ -30,10 +58,7 @@ $call2DelayTime = Yii::$app->params['lead']['call2DelayTime']; //(2 * 60 * 60);
 
 ?>
 
-
-<?php //\yii\helpers\VarDumper::dump($dateItem); ?>
-
-
+<?php //\yii\helpers\VarDumper::dump($dateItemShift, 10, true); ?>
 
 
 <div class="panel panel-success panel-wrapper task-list-block">
@@ -49,18 +74,26 @@ $call2DelayTime = Yii::$app->params['lead']['call2DelayTime']; //(2 * 60 * 60);
 
 
             <?php
-                $currentTS = strtotime(date('Y-m-d'));
+                $now = new DateTime();
+                $currentTS = $now->getTimestamp();
             ?>
 
 
             <ul class="nav nav-tabs">
-                <?php foreach ($dateItem as $date):
-                    $dayTS = strtotime($date);
+                <?php $activeShown = false;$active = false;
+                    foreach ($dateItem as $date):
+                    $dayTS = $dateItemShift[$date]['start']->getTimestamp();
+                    $shiftEndTS = $dateItemShift[$date]['end']->getTimestamp();
+                    $active = (($dayTS < $currentTS && $shiftEndTS > $currentTS) || ($dayTS > $currentTS && !$active && !$activeShown))?true:false;
+                    if(!$activeShown){
+                        $activeShown = ($active)?true:false;
+                    }
 
-                    if($dayTS < $currentTS ) {
+
+                    if($shiftEndTS < $currentTS) {
                         $icon = 'fa-calendar-times-o';
                         $bg = 'lavenderblush';
-                    } elseif($dayTS > $currentTS ) {
+                    } elseif(!$active) {
                         $icon = 'fa-calendar-minus-o';
                         $bg = '';
                     } else {
@@ -70,9 +103,8 @@ $call2DelayTime = Yii::$app->params['lead']['call2DelayTime']; //(2 * 60 * 60);
 
                     ?>
 
-                    <li class="<?=($date == date('Y-m-d') ? 'active' : '')?>">
-
-                        <a data-toggle="tab" href="#tab-<?=\yii\helpers\Html::encode($date)?>" style="background-color: <?=$bg?>">
+                    <li class="<?=($active ? 'active' : '')?>">
+                        <a data-toggle="tab" href="#tab-<?=\yii\helpers\Html::encode(str_replace([' ',':'], '-', $date))?>" style="background-color: <?=$bg?>">
                             <i class="fa <?=$icon?>"></i> <?=\yii\helpers\Html::encode(Yii::$app->formatter->asDate(strtotime($date)))?>
                         </a>
                     </li>
@@ -83,12 +115,17 @@ $call2DelayTime = Yii::$app->params['lead']['call2DelayTime']; //(2 * 60 * 60);
 
 
             <div class="tab-content">
-                <?php foreach ($dateItem as $date):
-
-                    $dayTS = strtotime($date);
+                <?php $activeShown = false;
+                    foreach ($dateItem as $date):
+                    $dayTS = $dateItemShift[$date]['start']->getTimestamp();
+                    $shiftEndTS = $dateItemShift[$date]['end']->getTimestamp();
+                    $active = (($dayTS < $currentTS && $shiftEndTS >= $currentTS) || ($dayTS > $currentTS && !$active && !$activeShown))?true:false;
+                    if(!$activeShown){
+                        $activeShown = ($active)?true:false;
+                    }
 
                     ?>
-                <div id="tab-<?=\yii\helpers\Html::encode($date)?>" class="tab-pane fade in <?=($date == date('Y-m-d') ? 'active' : '')?>">
+                <div id="tab-<?=\yii\helpers\Html::encode(str_replace([' ',':'], '-', $date))?>" class="tab-pane fade in <?=($active ? 'active' : '')?>">
 
                     <?php \yii\widgets\Pjax::begin(['id' => 'pjax-tl-'.$date, 'enablePushState' => false, 'enableReplaceState' => false]); ?>
 
@@ -101,7 +138,7 @@ $call2DelayTime = Yii::$app->params['lead']['call2DelayTime']; //(2 * 60 * 60);
                     ?>
 
 
-                    <h4><i class="fa fa-calendar"></i> <?=\yii\helpers\Html::encode(Yii::$app->formatter->asDate(strtotime($date)))?> - Day #<?=$dDiff->days?> </h4>
+                    <h4><i class="fa fa-calendar"></i> <?=\yii\helpers\Html::encode(Yii::$app->formatter->asDate(strtotime($date)))?> - Day #<?=$dDiff->days+1?> </h4>
                     <?//=\yii\helpers\Html::a('Refresh', '/lead/processing/12001', ['class' => 'btn btn-warning']) ?>
                     <p>
                         <?php foreach ($taskByDate[$date] as $user_id => $userTasks):
@@ -180,7 +217,7 @@ $call2DelayTime = Yii::$app->params['lead']['call2DelayTime']; //(2 * 60 * 60);
                                     $disabledTask = true;
                                 }
 
-                                if(($dayTS < $currentTS || $dayTS > $currentTS) && !$is_manager) {
+                                if((!$active) && !$is_manager) {
                                     $disabledTask = true;
                                 }
 
@@ -194,7 +231,7 @@ $call2DelayTime = Yii::$app->params['lead']['call2DelayTime']; //(2 * 60 * 60);
                                     //$taskCheckbox = '<i class="fa fa-thumbs-o-up text-success"></i>';
                                 }
 
-                                if(!$checked && $dayTS < $currentTS && !$is_manager) {
+                                if(!$checked && $currentTS > $shiftEndTS && !$is_manager) {
                                     $taskCheckbox = '<i class="fa fa-times text-danger" ></i>';
                                 }
 
