@@ -55,7 +55,7 @@ stage ('Deploy'){
     }
 
   }
-}
+
 
 def pushToImage(containerName1, containerName2, containerName3, tag){
     sh "docker tag $containerName1:$tag docker-registry.travelinsides.com/$containerName1:$tag"
