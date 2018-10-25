@@ -18,7 +18,6 @@ stage('Check machine') {
     sh 'hostname'
     sh 'whoami'
     sh 'docker ps -a'
-    sh 'cd /var/www/sale/docker/DEV && docker-compose ps'
     sh 'ls -la'
     sh 'pwd'
     sh 'git status'
