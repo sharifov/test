@@ -13,6 +13,11 @@ stage('Checkout') {
         checkout scm
     }
 
+stage('Check machine') {
+    sh 'ip add'
+    sh 'hostname'
+}
+
 stage ('Build Infrastructure images') {
 	sh 'cd docker/DEV && docker-compose up --build'
 }
