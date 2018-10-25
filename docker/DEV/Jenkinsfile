@@ -2,7 +2,7 @@ node ('sales-development-node') {
 
 def CONTAINER_NAME1="sales-php"
 def CONTAINER_NAME2="sales-nginx"
-def CONTAINER_NAME3="sales-mysql"
+def CONTAINER_NAME3="mysql"
 
 def CONTAINER_TAG="development"
 def DOCKER_HUB_USER="f1banac1"
