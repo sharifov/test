@@ -1,3 +1,4 @@
+pipeline {
 /* import shared library */
 @Library('jenkins-shared-library')_
 
@@ -56,7 +57,7 @@ stage('Push to Docker Registry'){
 stage ('Deploy'){
 	sh 'echo "Deployment !"'
     }
-    
+
     post {
         always {
         /* Use slackNotifier.groovy from shared library and provide current build result as parameter */   
@@ -64,6 +65,7 @@ stage ('Deploy'){
             cleanWs()
         }
     }
+  }
 }
 
 def pushToImage(containerName1, containerName2, containerName3, tag){
