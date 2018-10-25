@@ -80,13 +80,19 @@ $userId = Yii::$app->user->id;
                     <th>My Project Access:</th>
                     <td><i class="fa fa-list"></i>
                         <?php
+
+                        //\yii\helpers\VarDumper::dump(Yii::$app->user->identity->projects, 10, true);
+
                         $projectsValue = '';
 
-                        if($projectList = \common\models\ProjectEmployeeAccess::getProjectsByEmployee()) {
+                        //$projectList = \common\models\ProjectEmployeeAccess::getProjectsByEmployee();
+                        $projectList = Yii::$app->user->identity->projects;
+
+                        if($projectList) {
 
                             $groupsValueArr = [];
                             foreach ($projectList as $project) {
-                                $groupsValueArr[] = Html::tag('span', Html::encode($project), ['class' => 'label label-default']);
+                                $groupsValueArr[] = Html::tag('span', Html::encode($project->name), ['class' => 'label label-default']);
                             }
                             $projectsValue = implode(' ', $groupsValueArr);
                         }
