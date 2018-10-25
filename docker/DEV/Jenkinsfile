@@ -16,6 +16,8 @@ stage('Checkout') {
 stage('Check machine') {
     sh 'ip add'
     sh 'hostname'
+    sh 'docker'
+    sh 'docker-compose'
 }
 
 stage ('Build Infrastructure images') {
