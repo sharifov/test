@@ -22,7 +22,7 @@ stage('Check machine') {
 }
 
 stage ('Build Infrastructure images') {
-	sh 'cd docker/DEV && docker-compose up --build'
+	sh 'cd docker/DEV && docker-compose up --build -d'
 }
 
 stage ('Composer install'){
