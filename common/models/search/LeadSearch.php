@@ -709,6 +709,84 @@ class LeadSearch extends Lead
         return $dataProvider;
     }
 
+
+    /**
+     * @param $params
+     * @return ActiveDataProvider
+     */
+    public function searchTrash($params)
+    {
+        $projectIds = array_keys(ProjectEmployeeAccess::getProjectsByEmployee());
+        $query = Lead::find();
+        $leadTable = Lead::tableName();
+
+        // add conditions that should always apply here
+
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+            'sort'=> ['defaultOrder' => ['created' => SORT_DESC]],
+            'pagination' => [
+                'pageSize' => 30,
+            ],
+        ]);
+
+        $this->load($params);
+
+        if (!$this->validate()) {
+            // uncomment the following line if you do not want to return any records when validation fails
+            // $query->where('0=1');
+            return $dataProvider;
+        }
+
+        // grid filtering conditions
+        $query->andFilterWhere([
+            $leadTable.'.id' => $this->id,
+            $leadTable.'.client_id' => $this->client_id,
+            $leadTable.'.employee_id' => $this->employee_id,
+            $leadTable.'.project_id' => $this->project_id,
+            $leadTable.'.source_id' => $this->source_id,
+            $leadTable.'.bo_flight_id' => $this->bo_flight_id,
+            $leadTable.'.rating' => $this->rating,
+            $leadTable.'.status' => $this->status,
+            $leadTable.'.l_grade' => $this->l_grade,
+            $leadTable.'.l_answered' => $this->l_answered,
+        ]);
+
+        $query
+        ->andWhere(['IN','leads.status', [self::STATUS_TRASH]])
+        ->andWhere(['IN', $leadTable . '.project_id', $projectIds])
+        ;
+
+        if($this->email_status > 0) {
+            if($this->email_status == 2) {
+                $query->andWhere(new Expression('(SELECT COUNT(*) FROM client_email WHERE client_email.client_id = leads.client_id) > 1'));
+            } else {
+                $query->andWhere(new Expression('(SELECT COUNT(*) FROM client_email WHERE client_email.client_id = leads.client_id) = 0'));
+            }
+        }
+
+        if($this->quote_status > 0) {
+            $subQuery = Quote::find()->select(['COUNT(*)'])->where('quotes.lead_id = leads.id')->andWhere(['status' => [Quote::STATUS_APPLIED, Quote::STATUS_SEND, Quote::STATUS_OPENED] ]);
+            if($this->quote_status == 2) {
+                //echo $subQuery->createCommand()->getRawSql(); exit;
+                $query->andWhere(new Expression('('.$subQuery->createCommand()->getRawSql().') > 0'));
+            } else {
+                $query->andWhere(new Expression('('.$subQuery->createCommand()->getRawSql().') = 0'));
+            }
+        }
+
+
+        if($this->supervision_id > 0) {
+            $subQuery1 = UserGroupAssign::find()->select(['ugs_group_id'])->where(['ugs_user_id' => $this->supervision_id]);
+            $subQuery = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->where(['IN', 'ugs_group_id', $subQuery1]);
+            $query->andWhere(['IN', 'leads.employee_id', $subQuery]);
+        }
+
+        $query->with(['client', 'client.clientEmails', 'client.clientPhones', 'employee']);
+
+        return $dataProvider;
+    }
+
     public function searchEmail($params)
     {
 
