@@ -92,7 +92,14 @@ class SiteController extends FController
             return $this->dashboardAdmin();
         }
 
+        return $this->dashboardAgent();
 
+    }
+
+
+    public function dashboardAgent() : string
+    {
+        $userId = Yii::$app->user->id;
 
         $params = Yii::$app->request->queryParams;
         $params['LeadTaskSearch']['lt_user_id'] = $userId;
@@ -101,18 +108,18 @@ class SiteController extends FController
         //['status_not_in'] = [Lead::STATUS_TRASH, Lead::STATUS_SNOOZE];
 
         //VarDumper::dump($params); exit;
-        $searchModel = new LeadTaskSearch();
+        $searchLeadTask = new LeadTaskSearch();
 
         $params['LeadTaskSearch']['lt_date'] = date('Y-m-d', strtotime("-1 days"));
-        $dp1 = $searchModel->searchDashboard($params);
+        $dp1 = $searchLeadTask->searchDashboard($params);
 
         // $params['LeadTaskSearch']['status'] = [Lead::STATUS_PROCESSING, Lead::STATUS_ON_HOLD];
 
         $params['LeadTaskSearch']['lt_date'] = date('Y-m-d');
-        $dp2 = $searchModel->searchDashboard($params);
+        $dp2 = $searchLeadTask->searchDashboard($params);
 
         $params['LeadTaskSearch']['lt_date'] = date('Y-m-d', strtotime("+1 days"));
-        $dp3 = $searchModel->searchDashboard($params);
+        $dp3 = $searchLeadTask->searchDashboard($params);
 
 
         /*$taskList = \common\models\LeadTask::find()->where(['lt_user_id' => $userId])
@@ -131,16 +138,33 @@ class SiteController extends FController
         }*/
 
 
+        $searchModel = new EmployeeSearch();
+        $params = Yii::$app->request->queryParams;
+
+        //if(Yii::$app->authManager->getAssignment('supervision', $userId)) {
+        //$params['EmployeeSearch']['supervision_id'] = $userId;
+        $params['EmployeeSearch']['id'] = $userId;
+        $params['EmployeeSearch']['status'] = Employee::STATUS_ACTIVE;
+        //}
+
+
+
+        $dataProvider = $searchModel->searchByUserGroups($params);
+
+        $searchModel->datetime_start = date('Y-m-d', strtotime('-0 day'));
+        $searchModel->datetime_end = date('Y-m-d');
+
+
 
         return $this->render('index', [
-            'searchModel' => $searchModel,
+            'searchLeadTask' => $searchLeadTask,
             'dp1' => $dp1,
             'dp2' => $dp2,
             'dp3' => $dp3,
+            'dataProvider' => $dataProvider,
+            'searchModel' => $searchModel,
         ]);
     }
-
-
 
     public function dashboardSupervision() : string
     {
