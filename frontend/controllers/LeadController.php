@@ -749,7 +749,6 @@ class LeadController extends FController
         $params = array_merge($params, $params2);
 
         if(Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id)) {
-            $params['LeadSearch']['employee_id'] = Yii::$app->user->id;
             $isAgent = true;
         } else {
             $isAgent = false;
@@ -1004,6 +1003,11 @@ class LeadController extends FController
             $leadForm->getLead()->employee_id = \Yii::$app->user->identity->getId();
             $leadForm->getLead()->status = Lead::STATUS_PROCESSING;
             if (empty($data['errors']) && $data['load'] && $leadForm->save($errors)) {
+                $model = $leadForm->getLead();
+                LeadTask::createTaskList($model->id, $model->employee_id, 1, '', Task::CAT_NOT_ANSWERED_PROCESS);
+                LeadTask::createTaskList($model->id, $model->employee_id, 2, '', Task::CAT_NOT_ANSWERED_PROCESS);
+                LeadTask::createTaskList($model->id, $model->employee_id, 3, '', Task::CAT_NOT_ANSWERED_PROCESS);
+
                 return $this->redirect([
                     'quote',
                     'type' => 'processing',
