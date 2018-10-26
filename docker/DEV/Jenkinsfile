@@ -1,7 +1,7 @@
 pipeline {
-    agent {
+    
         node ('sales-development-node') {
-    } 
+    
 def CONTAINER_NAME1="sales-php"
 def CONTAINER_NAME2="sales-nginx"
 def CONTAINER_NAME3="sales-mysql"
