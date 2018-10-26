@@ -17,6 +17,7 @@ def HTTP_PORT="80"
         }catch (Exception e) {
              slackSend (color: '#FF0000', channel: '#sales_dev_builds', message: "FAILED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})")
         }
+    }
 
     stage('Check machine') {
         sh 'ip add'
