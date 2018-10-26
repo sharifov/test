@@ -13,6 +13,7 @@ services:
             - "php"
         volumes:
             - ../../:/var/www/sale
+            - ./ssl-certs:/etc/ssl/ssl-certs
     php:
         build: ./php
         image: sales-php:development

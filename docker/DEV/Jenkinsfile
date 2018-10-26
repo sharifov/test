@@ -1,5 +1,4 @@
 node ('sales-development-node') {
-
 def CONTAINER_NAME1="sales-php"
 def CONTAINER_NAME2="sales-nginx"
 def CONTAINER_NAME3="sales-mysql"
@@ -8,57 +7,112 @@ def CONTAINER_TAG="development"
 def DOCKER_HUB_USER="f1banac1"
 
 def HTTP_PORT="80"
-
-stage('Checkout') {
-        // send build started notifications
+    stage ('Start') {
         slackSend (color: '#FFFF00',channel: '#sales_dev_builds', message: "STARTED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})")
+    }
+
+    stage('Checkout') {
+        try {
         checkout scm
+        }catch (Exception e) {
+             slackSend (color: '#FF0000', channel: '#sales_dev_builds', message: "FAILED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})")
+        }
     }
 
-stage('Check machine') {
-    sh 'ip add'
-    sh 'hostname'
-    sh 'whoami'
-    sh 'docker ps -a'
-    sh 'ls -la'
-    sh 'pwd'
-    sh 'git status'
-}
-
-stage ('Build Infrastructure images') {
-	sh 'cd docker/DEV && docker-compose up --build -d'
-}
-
-stage ('Composer install'){
-	sh 'docker exec sales-php composer --no-progress --prefer-dist install'
-}
-
-stage ('intit project') {
-	sh 'echo “Tests will back”'
-	sh 'docker exec sales-php ./init --env=Development --overwrite=y'
-}
-
-stage ('migrate DB') {
-	sh 'docker exec sales-php ./yii migrate  --interactive=0'
-}
-
-stage ('UNIT TEST') {
-	sh 'echo “unit test comming soon”'
-	}
-
-stage('Push to Docker Registry'){
-        docker.withRegistry('https://docker-registry.travelinsides.com', 'DockerRegestryAccount') {
-            pushToImage(CONTAINER_NAME1, CONTAINER_NAME2, CONTAINER_NAME3, CONTAINER_TAG)
-            }
+    stage('Check machine') {
+        try{
+        sh 'ip add'
+        sh 'hostname'
+        sh 'whoami'
+        sh 'docker ps -a'
+        sh 'ls -la'
+        sh 'pwd'
+        sh 'git status'}catch (Exception e) {
+             slackSend (color: '#FF0000', channel: '#sales_dev_builds', message: "FAILED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})")
+        }
     }
 
-stage ('Deploy'){
-	sh 'echo "Deployment !"'
-    slackSend (color: '#00ff00', channel: '#sales_dev_builds', message: "SUCCESS: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})")
+    stage ('Build Infrastructure images') {
+        try{
+    	sh 'cd docker/DEV && docker-compose up --build -d'}catch (Exception e) {
+             slackSend (color: '#FF0000', channel: '#sales_dev_builds', message: "FAILED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})")
+        } 
     }
 
-  }
+    stage ('Check container\'s status'){
+        // Nginx check
+        try{
+            sh 'docker inspect -f "{{.State.Running}}" sales-nginx'
+        }catch (Exception e) {
+             slackSend (color: '#FF0000', channel: '#sales_dev_builds', message: "FAILED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})")
+        } 
+        // php check
+        try{
+            sh 'docker inspect -f "{{.State.Running}}" sales-php'
+        }catch (Exception e) {
+             slackSend (color: '#FF0000', channel: '#sales_dev_builds', message: "FAILED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})")
+        }
+        // mysql check 
+        try{
+            sh 'docker inspect -f "{{.State.Running}}" sales-mysql'
+        }catch (Exception e) {
+             slackSend (color: '#FF0000', channel: '#sales_dev_builds', message: "FAILED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})")
+        }
+    }
 
+    // Work With Code
+    stage ('Composer install'){
+        try{
+    	sh 'docker exec sales-php composer --no-progress --prefer-dist install'}catch (Exception e) {
+             slackSend (color: '#FF0000', channel: '#sales_dev_builds', message: "FAILED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})")
+        } 
+    }
+
+    stage ('intit project') {
+        try{
+    	sh 'echo “Tests will back”'
+    	sh 'docker exec sales-php ./init --env=Development --overwrite=y'
+    }catch (Exception e) {
+             slackSend (color: '#FF0000', channel: '#sales_dev_builds', message: "FAILED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})")
+        } 
+    }
+
+    stage ('migrate DB') {
+        try {
+    	sh 'docker exec sales-php ./yii migrate  --interactive=0'
+    }catch (Exception e) {
+             slackSend (color: '#FF0000', channel: '#sales_dev_builds', message: "FAILED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})")
+        } 
+    }
+
+    stage ('UNIT TEST') {
+        try {
+    	sh 'echo “unit test comming soon”'
+    	}catch (Exception e) {
+             slackSend (color: '#FF0000', channel: '#sales_dev_builds', message: "FAILED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})")
+        } 
+    }
+
+    stage('Push to Docker Registry'){
+            try{
+            docker.withRegistry('https://docker-registry.travelinsides.com', 'DockerRegestryAccount') {
+                pushToImage(CONTAINER_NAME1, CONTAINER_NAME2, CONTAINER_NAME3, CONTAINER_TAG)
+                }}catch (Exception e) {
+             slackSend (color: '#FF0000', channel: '#sales_dev_builds', message: "FAILED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})")
+            } 
+        }
+
+    stage ('Deploy'){
+        try{
+    	sh 'echo "Deployment !"'
+         slackSend (color: '#00ff00', channel: '#sales_dev_builds', message: "SUCCESS: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})")
+        }catch (Exception e) {
+             slackSend (color: '#FF0000', channel: '#sales_dev_builds', message: "FAILED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})")
+        } 
+    }
+
+
+} 
 
 def pushToImage(containerName1, containerName2, containerName3, tag){
     sh "docker tag $containerName1:$tag docker-registry.travelinsides.com/$containerName1:$tag"

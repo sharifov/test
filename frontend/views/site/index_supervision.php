@@ -10,15 +10,14 @@ use yii\widgets\ActiveForm;
 /* @var $dataProvider yii\data\ActiveDataProvider */
 /* @var $form yii\widgets\ActiveForm */
 
-
+$bundle = \frontend\assets\TimelineAsset::register($this);
 $this->title = 'Dashboard - Supervision';
-?>
 
-<?php
-$js = <<<JS
+/*$js = <<<JS
     google.charts.load('current', {packages: ['corechart', 'bar']});
 JS;
-//$this->registerJs($js, \yii\web\View::POS_READY);
+//$this->registerJs($js, \yii\web\View::POS_READY);*/
+
 $userId = Yii::$app->user->id;
 ?>
 
@@ -78,11 +77,13 @@ $userId = Yii::$app->user->id;
                         <?php
                         $projectsValue = '';
 
-                        if($projectList = \common\models\ProjectEmployeeAccess::getProjectsByEmployee()) {
+                        $projectList = Yii::$app->user->identity->projects;
+
+                        if($projectList) {
 
                             $groupsValueArr = [];
                             foreach ($projectList as $project) {
-                                $groupsValueArr[] = Html::tag('span', Html::encode($project), ['class' => 'label label-default']);
+                                $groupsValueArr[] = Html::tag('span', Html::encode($project->name), ['class' => 'label label-default']);
                             }
                             $projectsValue = implode(' ', $groupsValueArr);
                         }
@@ -95,11 +96,94 @@ $userId = Yii::$app->user->id;
         </div>
 
         <div class="col-md-3">
+            <?php
+
+            /** @var \common\models\UserParams $modelUserParams */
+            $modelUserParams = Yii::$app->user->identity->userParams;
+            if($modelUserParams) {
+                echo \yii\widgets\DetailView::widget([
+                    'model' => $modelUserParams ?? null,
+                    'attributes' => [
+                        /*[
+                            'attribute' => 'up_base_amount',
+                            'value' => function(\common\models\UserParams $model) {
+                                return $model->up_base_amount ? '$'.number_format($model->up_base_amount , 2) : '-';
+                            },
+                        ],
+                        [
+                            'attribute' => 'up_commission_percent',
+                            'value' => function(\common\models\UserParams $model) {
+                                return $model->up_commission_percent ? $model->up_commission_percent. '%' : '-';
+                            },
+
+                        ],*/
+                        'up_bonus_active:boolean',
+                        'up_timezone',
+                        'up_work_start_tm',
+                        'up_work_minutes',
+                        /*[
+                            'attribute' => 'up_updated_dt',
+                            'value' => function(\common\models\UserParams $model) {
+                                return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->up_updated_dt));
+                            },
+                            'format' => 'raw',
+                        ],*/
+
+                    ],
+                ]);
+            }
+            ?>
 
 
         </div>
 
     </div>
+
+    <?php if($modelUserParams):
+
+        $js = <<<JS
+    //google.charts.load('current', {packages: ['corechart', 'bar']});
+    $("#myTimeline").timeline({
+        type            : "bar",
+        rows            : 1,
+        //rowHeight       : 80,
+        height          : "auto"
+  //      startDatetime   : "current"
+    });
+JS;
+        $this->registerJs($js, \yii\web\View::POS_READY);
+
+        ?>
+
+        <h3>My Shift Timeline</h3>
+        <!-- Timeline Block -->
+        <div id="myTimeline">
+            <ul class="timeline-events">
+                <?php
+                $currentDateTS = strtotime(Yii::$app->formatter->asDate(time()));
+                $startTime = date('Y-m-d '.$modelUserParams->up_work_start_tm);
+                echo $startTime;
+                $endTime = date('Y-m-d H:i', strtotime($startTime) + ($modelUserParams->up_work_minutes * 60));
+                ?>
+                <li data-timeline-node="{ start:'<?=$startTime?>',end:'<?=$endTime?>',content:'1 shift',bgColor:'rgb(137, 201, 151)',color:'#fff',row:1,extend:{'post_id':1,'permalink':'https://google.com/'} }"><?=date('d-M [H:i]', strtotime($startTime))?> ........ <?=date('d-M [H:i]', strtotime($endTime))?> ..... (<?=round($modelUserParams->up_work_minutes/60, 1)?> hours)</li>
+
+                <?php
+                $currentDateTS = strtotime(Yii::$app->formatter->asDate(strtotime("+1 day")));
+                $startTime = date('Y-m-d '.$modelUserParams->up_work_start_tm, $currentDateTS);
+                echo $startTime;
+                $endTime = date('Y-m-d H:i', strtotime($startTime) + ($modelUserParams->up_work_minutes * 60));
+                ?>
+                <li data-timeline-node="{ start:'<?=$startTime?>',end:'<?=$endTime?>',content:'2 shift',row:1 }"><?=date('d-M [H:i]', strtotime($startTime))?> ........ <?=date('d-M [H:i]', strtotime($endTime))?> ..... (<?=round($modelUserParams->up_work_minutes/60, 1)?> hours)</li>
+
+            </ul>
+        </div>
+
+        <!-- Timeline Event Detail View Area (optional) -->
+        <div class="timeline-event-view"></div>
+
+
+
+    <? endif; ?>
 
     <?php Pjax::begin(); ?>
     <div class="panel panel-default">
