@@ -1,5 +1,4 @@
 pipeline {
-    agent none
 def CONTAINER_NAME1="sales-php"
 def CONTAINER_NAME2="sales-nginx"
 def CONTAINER_NAME3="sales-mysql"
@@ -67,7 +66,7 @@ stages {
 
     
     } 
-    
+
 post {
     success {
          slackSend (color: '#00ff00', channel: '#sales_dev_builds', message: "SUCCESS: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})")
