@@ -16,9 +16,7 @@ stages {
         }
     }
     stage('Checkout') {
-            // send build started notifications
-            
-            checkout scm
+        checkout scm
         }
 
     stage('Check machine') {
@@ -66,8 +64,6 @@ stages {
     
     } // end stage section 
 
-  } // end node section
-
 post {
     success {
          slackSend (color: '#00ff00', channel: '#sales_dev_builds', message: "SUCCESS: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})")
@@ -80,6 +76,7 @@ post {
   
   }
 
+  } // end node section
 
 } // end pipline section
 
