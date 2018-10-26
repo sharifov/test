@@ -11,7 +11,7 @@ def HTTP_PORT="80"
 
 stage('Checkout') {
         // send build started notifications
-        slackSend (color: '#FFFF00', message: "STARTED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})")
+        slackSend (color: '#FFFF00',channel: '#sales_dev_builds', message: "STARTED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})")
         checkout scm
     }
 
@@ -54,7 +54,7 @@ stage('Push to Docker Registry'){
 
 stage ('Deploy'){
 	sh 'echo "Deployment !"'
-    slackSend (color: '#FFFF00', message: "Build Published: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})")
+    slackSend (color: '#00ff00', channel: '#sales_dev_builds', message: "SUCCESS: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})")
     }
 
   }
