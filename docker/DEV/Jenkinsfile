@@ -39,6 +39,28 @@ def HTTP_PORT="80"
         } 
     }
 
+    stage ('Check container\'s status'){
+        // Nginx check
+        try{
+            sh 'docker inspect -f '{{.State.Running}}' sales-nginx'
+        }catch (Exception e) {
+             slackSend (color: '#FF0000', channel: '#sales_dev_builds', message: "FAILED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})")
+        } 
+        // php check
+        try{
+            sh 'docker inspect -f '{{.State.Running}}' sales-php'
+        }catch (Exception e) {
+             slackSend (color: '#FF0000', channel: '#sales_dev_builds', message: "FAILED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})")
+        }
+        // mysql check 
+        try{
+            sh 'docker inspect -f '{{.State.Running}}' sales-mysql'
+        }catch (Exception e) {
+             slackSend (color: '#FF0000', channel: '#sales_dev_builds', message: "FAILED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})")
+        }
+    }
+
+    // Work With Code
     stage ('Composer install'){
         try{
     	sh 'docker exec sales-php composer --no-progress --prefer-dist install'}catch (Exception e) {
@@ -89,10 +111,6 @@ def HTTP_PORT="80"
         } 
     }
 
-    // failure {
-    //     slackSend (color: '#FF0000', channel: '#sales_dev_builds', message: "FAILED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})")
-    // }
-  
 
 } 
 
