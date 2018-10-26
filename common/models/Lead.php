@@ -341,7 +341,11 @@ class Lead extends ActiveRecord
 
         $userId = Yii::$app->user->id;
         $created = '';
-        $employee = ' AND employee_id = '.$userId;
+        $employee = '';
+        if(Yii::$app->authManager->getAssignment('agent', $userId)) {
+            $employee = ' AND employee_id = '.$userId;
+        }
+
         $sold = '';
 
         if(Yii::$app->authManager->getAssignment('supervision', $userId)){
