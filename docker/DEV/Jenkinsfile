@@ -10,6 +10,7 @@ def CONTAINER_TAG="development"
 def DOCKER_HUB_USER="f1banac1"
 
 def HTTP_PORT="80"
+stages {
 
 stage('Checkout') {
         // send build started notifications
@@ -62,7 +63,8 @@ stage ('Deploy'){
 failure {
         slackSend (color: '#FF0000', channel: '#sales_dev_builds', message: "FAILED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})")
     }
-
+    
+    } // end stage section 
   } // end node section
 
 } // end pipline section
