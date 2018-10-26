@@ -66,8 +66,8 @@ stages {
 
 
     
-    } // end stage section 
-
+    } 
+    
 post {
     success {
          slackSend (color: '#00ff00', channel: '#sales_dev_builds', message: "SUCCESS: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})")
@@ -78,12 +78,10 @@ post {
         slackSend (color: '#FF0000', channel: '#sales_dev_builds', message: "FAILED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})")
     }
   
-  }
-}
 
-  } // end node section
+  } 
 
-} // end pipline section
+} 
 
 def pushToImage(containerName1, containerName2, containerName3, tag){
     sh "docker tag $containerName1:$tag docker-registry.travelinsides.com/$containerName1:$tag"
