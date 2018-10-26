@@ -199,7 +199,7 @@ $bundle = \frontend\themes\gentelella\assets\Asset::register($this);
                     <?php echo yii\widgets\Breadcrumbs::widget([
                         'homeLink' => [
                             'label' => false,
-                            'template' => '<li><a href="'.Yii::$app->urlManager->createUrl('/').'">Admin</a></li>',
+                            'template' => '<li><a href="'.Yii::$app->urlManager->createUrl('/').'">Home</a></li>',
                         ],
                         'links' => isset($this->params['breadcrumbs']) ? $this->params['breadcrumbs'] : [],
                     ]);?>

@@ -814,7 +814,7 @@ class Lead extends ActiveRecord
     {
         if (Yii::$app->user->identity->role != 'admin') {
             $access = ProjectEmployeeAccess::findOne([
-                'employee_id' => Yii::$app->user->identity->getId(),
+                'employee_id' => Yii::$app->user->id,
                 'project_id' => $this->project_id
             ]);
             return ($access !== null);

@@ -1,12 +1,12 @@
 <?php
 
 use yii\helpers\Html;
-use yii\widgets\ActiveForm;
+use yii\bootstrap\ActiveForm;
 
 
 /* @var $this yii\web\View */
 /* @var $model common\models\UserProjectParams */
-/* @var $form yii\widgets\ActiveForm */
+/* @var $form yii\bootstrap\ActiveForm */
 
 $this->title = 'Update Project Params';
 //$this->params['breadcrumbs'][] = ['label' => 'User Project Params', 'url' => ['index']];
@@ -19,7 +19,6 @@ $this->title = 'Update Project Params';
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
         <h4 class="modal-title" id="myModalLabel"><?= Html::encode($this->title) ?></h4>
     </div>
-
 
 
     <div class="modal-body">
@@ -54,19 +53,27 @@ $this->title = 'Update Project Params';
                 ?>
 
                 <div class="form-group">
-                    <b>Username</b>: <?=Html::encode($model->uppUser->username)?>
+                    <label class="control-label">Username</label>
+                    <?=Html::input('text', 'username', $model->uppUser->username, ['class' => 'form-control', 'readonly' => true, 'disabled' => true]); ?>
                 </div>
-                <?//= $form->field($model, 'upp_project_id')->dropDownList($projectList, ['disabled' => true]) ?>
+
                 <div class="form-group">
-                    <b>Project</b>: <?=Html::encode($model->uppProject->name)?>
+                    <label class="control-label">Project</label>
+                    <?=Html::input('text', 'project', $model->uppProject->name, ['class' => 'form-control', 'readonly' => true, 'disabled' => true]); ?>
                 </div>
+
+                <?//= $form->field($model, 'upp_project_id')->dropDownList($projectList, ['disabled' => true]) ?>
 
                 <?= $form->field($model, 'upp_email')->input('email', ['maxlength' => true]) ?>
 
                 <?= $form->field($model, 'upp_phone_number')->widget(\borales\extensions\phoneInput\PhoneInput::class, [
+                        'class' => 'form-control',
                     'jsOptions' => [
                         'allowExtensions' => true,
                         'preferredCountries' => ['us'],
+                    ],
+                    'defaultOptions' => [
+                        'class' => 'form-control'
                     ]
                 ]) ?>
 

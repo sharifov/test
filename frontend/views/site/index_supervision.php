@@ -147,7 +147,10 @@ $userId = Yii::$app->user->id;
         type            : "bar",
         rows            : 1,
         //rowHeight       : 80,
-        height          : "auto"
+        height          : "auto",
+        langsDir        : "./js/jquery.timeline-master/dist/langs/",
+        httpLnaguage    : true
+
   //      startDatetime   : "current"
     });
 JS;

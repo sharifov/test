@@ -858,3 +858,12 @@ fieldset.fieldset legend {
     padding: 0 5px;
     border-bottom: none;
 }
+
+/* --------- PHONE NUMBER FIELDS ------------------ */
+.intl-tel-input,.intl-tel-input input {
+    width: 100%;
+}
+
+.intl-tel-input input {
+    padding: 6px 12px;
+}
