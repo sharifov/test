@@ -54,6 +54,7 @@ stage('Push to Docker Registry'){
 
 stage ('Deploy'){
 	sh 'echo "Deployment !"'
+    slackSend (color: '#FFFF00', message: "Build Published: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})")
     }
 
   }
