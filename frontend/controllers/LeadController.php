@@ -405,8 +405,7 @@ class LeadController extends FController
                     $model->status = $model::STATUS_REJECT;
                     $model->save();
                     return $this->redirect([
-                        'queue',
-                        'type' => 'trash'
+                        'trash',
                     ]);
                 }
             } else {
@@ -460,8 +459,7 @@ class LeadController extends FController
                     $model->status = $model::STATUS_REJECT;
                     $model->save();
                     return $this->redirect([
-                        'queue',
-                        'type' => 'trash'
+                        'trash',
                     ]);
                 } else {
                     $model->status = $model::STATUS_ON_HOLD;
