@@ -54,20 +54,15 @@ def HTTP_PORT="80"
 
     stage ('Deploy'){
     	sh 'echo "Deployment !"'
+        success {
+         slackSend (color: '#00ff00', channel: '#sales_dev_builds', message: "SUCCESS: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})")
+            }
         } 
 
-post {
-    success {
-         slackSend (color: '#00ff00', channel: '#sales_dev_builds', message: "SUCCESS: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})")
-
-    }
-
-    failure {
-        slackSend (color: '#FF0000', channel: '#sales_dev_builds', message: "FAILED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})")
-    }
+    // failure {
+    //     slackSend (color: '#FF0000', channel: '#sales_dev_builds', message: "FAILED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})")
+    // }
   
-
-  } 
 
 } 
 
