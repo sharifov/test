@@ -1,6 +1,5 @@
 pipeline {
-    node ('sales-development-node') {
-    
+    agent none
 def CONTAINER_NAME1="sales-php"
 def CONTAINER_NAME2="sales-nginx"
 def CONTAINER_NAME3="sales-mysql"
@@ -9,13 +8,19 @@ def CONTAINER_TAG="development"
 def DOCKER_HUB_USER="f1banac1"
 
 def HTTP_PORT="80"
+stages {
     stage ('Start') {
+        node ('sales-development-node') {
       steps {
         slackSend (color: '#FFFF00',channel: '#sales_dev_builds', message: "STARTED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})")
         }
     }
+}
+
     stage('Checkout') {
+        node ('sales-development-node') {
         checkout scm
+            }
         }
 
     stage('Check machine') {
@@ -58,6 +63,10 @@ def HTTP_PORT="80"
     stage ('Deploy'){
     	sh 'echo "Deployment !"'
         }
+
+
+    
+    } // end stage section 
 
 post {
     success {
