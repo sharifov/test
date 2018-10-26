@@ -53,6 +53,11 @@ $this->title = 'Create Project Params';
                     echo $form->field($model, 'upp_user_id')->hiddenInput()->label(false);
                 ?>
 
+                <div class="form-group">
+                    <label class="control-label">Username</label>
+                    <?=Html::input('text', 'username', $model->uppUser->username, ['class' => 'form-control', 'readonly' => true, 'disabled' => true]); ?>
+                </div>
+
                 <?= $form->field($model, 'upp_project_id')->dropDownList($projectList, ['prompt' => '-']) ?>
 
                 <?= $form->field($model, 'upp_email')->input('email', ['maxlength' => true]) ?>
