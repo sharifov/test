@@ -73,7 +73,7 @@ return [
             'enableStrictParsing' => false,
             'rules' => [
                 [
-                    'pattern' => 'queue/<type:(inbox1|follow-up1|processing1|processing-all|booked|trash1)>',
+                    'pattern' => 'queue/<type:(inbox1|follow-up1|processing1|processing-all|booked1|trash1)>',
                     'route' => 'lead/queue',
                 ],
                 [
@@ -107,6 +107,10 @@ return [
                 [
                     'pattern' => 'queue/trash',
                     'route' => 'lead/trash',
+                ],
+                [
+                    'pattern' => 'queue/booked',
+                    'route' => 'lead/booked',
                 ],
             ],
         ],

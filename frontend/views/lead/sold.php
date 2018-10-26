@@ -61,16 +61,10 @@ $this->params['breadcrumbs'][] = $this->title;
         [
             'attribute' => 'id',
             'label' => 'Lead ID',
-            'value' => function ($model) {
-                return sprintf('%d', $model['id']);
-            }
         ],
         [
             'attribute' => 'bo_flight_id',
             'label' => 'Sale ID (BO)',
-            'value' => function ($model) {
-                return sprintf('%d', $model['bo_flight_id']);
-            }
         ],
         [
             'label' => 'PNR',

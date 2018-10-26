@@ -344,8 +344,21 @@ class Lead extends ActiveRecord
         $employee = ' AND employee_id = '.$userId;
         $sold = '';
 
-        if((Yii::$app->authManager->getAssignment('admin', $userId) || Yii::$app->authManager->getAssignment('supervision', $userId))) {
-            //$created = ' AND created = "' . date('Y-m-d') . '"';
+        if(Yii::$app->authManager->getAssignment('supervision', $userId)){
+            $subQuery1 = UserGroupAssign::find()->select(['ugs_group_id'])->where(['ugs_user_id' => $userId]);
+            $subQuery = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->where(['IN', 'ugs_group_id', $subQuery1]);
+            $resEmp = $subQuery->createCommand()->queryAll();
+            $empArr = [];
+            if($resEmp){
+                foreach ($resEmp as $entry){
+                    $empArr[] = $entry['ugs_user_id'];
+                }
+            }
+
+            if(!empty($empArr)){
+                $employee = 'AND leads.employee_id IN ('.implode(',',$empArr).')';
+            }
+
         }
 
         if (Yii::$app->user->identity->role == 'agent') {
@@ -360,13 +373,12 @@ class Lead extends ActiveRecord
         $select = [
             'inbox' => 'SUM(CASE WHEN status IN (:inbox) THEN 1 ELSE 0 END)',
             'follow-up' => 'SUM(CASE WHEN status IN (:followup) ' . $created . ' THEN 1 ELSE 0 END)',
-            'booked' => 'SUM(CASE WHEN status IN (:booked) '.$created.' THEN 1 ELSE 0 END)',
-            'sold' => 'SUM(CASE WHEN status IN (:sold) '.$created.$sold.' THEN 1 ELSE 0 END)',
-            'processing' => 'SUM(CASE WHEN status IN ('.$default.') '.$employee.' THEN 1 ELSE 0 END)',
-            'processing-all' => 'SUM(CASE WHEN status IN ('.$default.') THEN 1 ELSE 0 END)'];
+            'booked' => 'SUM(CASE WHEN status IN (:booked) '.$created.$employee.' THEN 1 ELSE 0 END)',
+            'sold' => 'SUM(CASE WHEN status IN (:sold) '.$created.$sold.$employee.' THEN 1 ELSE 0 END)',
+            'processing' => 'SUM(CASE WHEN status IN ('.$default.') '.$employee.' THEN 1 ELSE 0 END)'];
 
         if(Yii::$app->user->identity->role != 'agent'){
-            $select['trash'] = 'SUM(CASE WHEN status IN ('.self::STATUS_TRASH.') '.$created.' THEN 1 ELSE 0 END)';
+            $select['trash'] = 'SUM(CASE WHEN status IN ('.self::STATUS_TRASH.') '.$created.$employee.' THEN 1 ELSE 0 END)';
         }
 
         $query = self::find()
@@ -379,11 +391,7 @@ class Lead extends ActiveRecord
         ])
         ->limit(1);
 
-        if(Yii::$app->authManager->getAssignment('supervision', $userId)){
-            $subQuery1 = UserGroupAssign::find()->select(['ugs_group_id'])->where(['ugs_user_id' => $userId]);
-            $subQuery = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->where(['IN', 'ugs_group_id', $subQuery1]);
-            $query->andWhere(['IN', 'leads.employee_id', $subQuery]);
-        }
+
         //echo $query->createCommand()->getRawSql();die;
 
         return $query->createCommand()->queryOne();
