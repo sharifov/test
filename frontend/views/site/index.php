@@ -233,7 +233,7 @@ JS;
                             if((strtotime($taskCall1->lt_completed_dt) + $call2DelayTime) <= time()) {
                                 $call2TaskEnable = true;
                             } else {
-                                $taskIcon = '<br><span class="label label-default">Call after '.Yii::$app->formatter->asDatetime(strtotime($taskCall1->lt_completed_dt) + $call2DelayTime).'</span>';
+                                $taskIcon = '<br><span class="label label-default">Call after <i class="fa fa-clock-o"></i> '.Yii::$app->formatter->asDatetime(strtotime($taskCall1->lt_completed_dt) + $call2DelayTime).'</span>';
                                 //'<i class="fa fa-clock-o" title="Next call '.Yii::$app->formatter->asDatetime(strtotime($taskCall1->lt_completed_dt) + $call2DelayTime).'"></i> ';
                             }
                         }
@@ -241,7 +241,7 @@ JS;
                     }
 
 
-                    return $model->ltTask ? '<h4><span title="'.Html::encode($model->ltTask->t_description).'" class="label label-info">'.Html::encode($model->ltTask->t_name).''.$taskIcon .'</span></h4>': '-';
+                    return $model->ltTask ? '<span style="font-size: 13px" title="'.Html::encode($model->ltTask->t_description).'" class="label label-info">'.Html::encode($model->ltTask->t_name).'</span>'.$taskIcon .'': '-';
                 },
                 'format' => 'html',
                 'filter' => \common\models\Task::getList()
