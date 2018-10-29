@@ -99,14 +99,14 @@ $this->params['breadcrumbs'][] = $this->title;
                 'style' => 'width:160px'
             ]
         ],
-        [
+        /*[
             'attribute' => 'clientTime',
             'label' => 'Client Time',
             'value' => function ($model) {
                 return Lead::getClientTime($model['id']);
             },
             'format' => 'raw'
-        ],
+        ],*/
 
         [
             //'attribute' => 'client_id',
