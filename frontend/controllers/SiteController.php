@@ -105,7 +105,7 @@ class SiteController extends FController
         $params['LeadTaskSearch']['lt_user_id'] = $userId;
         $params['LeadTaskSearch']['status'] = [Lead::STATUS_PROCESSING, Lead::STATUS_ON_HOLD];
 
-        //['status_not_in'] = [Lead::STATUS_TRASH, Lead::STATUS_SNOOZE];
+        $params['LeadTaskSearch']['status_not_in'] = [Lead::STATUS_TRASH/* , Lead::STATUS_SNOOZE */];
 
         //VarDumper::dump($params); exit;
         $searchLeadTask = new LeadTaskSearch();
