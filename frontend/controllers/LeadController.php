@@ -235,12 +235,6 @@ class LeadController extends FController
             $sendEmailModel->employee = $lead->employee;
             $sendEmailModel->project = $lead->project;
 
-            /*$sellerContactInfo = EmployeeContactInfo::findOne([
-                'employee_id' => $sendEmailModel->employee->id,
-                'project_id' => $sendEmailModel->project->id
-            ]);*/
-
-
             $userProjectParams = UserProjectParams::findOne([
                 'upp_user_id' => $sendEmailModel->employee->id,
                 'upp_project_id' => $sendEmailModel->project->id

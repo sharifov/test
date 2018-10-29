@@ -9,6 +9,7 @@ use common\models\LeadLog;
 use common\models\local\LeadLogMessage;
 use common\models\Project;
 use yii\base\Model;
+use common\models\UserProjectParams;
 
 class PreviewEmailQuotesForm extends Model
 {
@@ -69,19 +70,19 @@ class PreviewEmailQuotesForm extends Model
 
     public function sendEmail(Lead $lead)
     {
-        $sellerContactInfo = EmployeeContactInfo::findOne([
-            'employee_id' => $lead->employee->id,
-            'project_id' => $lead->project_id
+
+        $userProjectParams = UserProjectParams::findOne([
+            'upp_user_id' => $this->employee->id,
+            'upp_project_id' => $this->project_id
         ]);
 
         $credential = [
-            'email' => trim($sellerContactInfo->email_user),
-            'password' => $sellerContactInfo->email_pass
+            'email' => trim($userProjectParams->upp_email),
         ];
 
         $errors = [];
         $bcc = [
-            trim($sellerContactInfo->email_user),
+            trim($userProjectParams->upp_email),
             'damian.t@wowfare.com',
             'andrew.t@wowfare.com'
         ];
