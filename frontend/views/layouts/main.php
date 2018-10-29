@@ -10,7 +10,7 @@ use yii\helpers\Html;
 use yii\helpers\Url;
 
 AppAsset::register($this);
-
+exit;
 ?>
 <?php $this->beginPage() ?>
 <!DOCTYPE html>

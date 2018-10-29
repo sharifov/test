@@ -99,40 +99,21 @@ $this->params['breadcrumbs'][] = $this->title;
                 'style' => 'width:160px'
             ]
         ],
-        /*[
+        [
             'attribute' => 'clientTime',
             'label' => 'Client Time',
             'value' => function ($model) {
                 return Lead::getClientTime($model['id']);
             },
             'format' => 'raw'
-        ],*/
+        ],
 
         [
             //'attribute' => 'client_id',
             'header' => 'Client time',
             'format' => 'raw',
             'value' => function(\common\models\Lead $model) {
-                $clientTime = '-';
-                if($model->offset_gmt) {
-                    $offset2 = str_replace('.', ':', $model->offset_gmt);
-
-                    if(isset($offset2[0])) {
-                        if ($offset2[0] === '+') {
-                            $offset2 = str_replace('+', '-', $offset2);
-                        } else {
-                            $offset2 = str_replace('-', '+', $offset2);
-                        }
-                    }
-
-                    //$clientTime = date('H:i', time() + ($offset * 60 * 60));
-
-                    if($offset2) {
-                        $clientTime = date("H:i", strtotime("now $offset2 GMT"));
-                        $clientTime = '<i class="fa fa-clock-o"></i> <b>' . Html::encode($clientTime) . '</b><br/>(GMT: ' .$model->offset_gmt . ')';
-                    }
-                }
-                return $clientTime;
+                return $model->getClientTime2();
             },
             'options' => ['style' => 'width:160px'],
             //'filter' => \common\models\Employee::getList()

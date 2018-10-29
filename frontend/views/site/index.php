@@ -291,36 +291,11 @@ JS;
                 'header' => 'Client time',
                 'format' => 'raw',
                 'value' => function(\common\models\LeadTask $model) {
-
-                    $clientTime = '-';
-
                     if($model->ltLead) {
-                        $offset = $model->ltLead->offset_gmt;
-
-                        if($offset) {
-                            $offset2 = str_replace('.', ':', $offset);
-
-                            if(isset($offset2[0])) {
-                                if ($offset2[0] === '+') {
-                                    $offset2 = str_replace('+', '-', $offset2);
-                                } else {
-                                    $offset2 = str_replace('-', '+', $offset2);
-                                }
-                            }
-
-                            //$clientTime = date('H:i', time() + ($offset * 60 * 60));
-
-                            if($offset2) {
-                                $clientTime = date("H:i", strtotime("now $offset2 GMT"));
-
-                                $clientTime = '<i class="fa fa-clock-o"></i> <b>' . Html::encode($clientTime) . '</b> (GMT: ' . $offset . ')';
-                            }
-                        }
-
+                        $clientTime = $model->ltLead->getClientTime2();
                     } else {
                         $clientTime = '-';
                     }
-
                     return $clientTime;
                 },
                 'options' => ['style' => 'width:160px'],
