@@ -18,6 +18,14 @@ use yii\widgets\ActiveForm;
 $bundle = \frontend\assets\TimelineAsset::register($this);
 
 $this->title = 'Dashboard - Agent';
+
+$this->registerJsFile('https://cdnjs.cloudflare.com/ajax/libs/jquery.countdown/2.2.0/jquery.countdown.min.js', [
+    'position' => \yii\web\View::POS_HEAD,
+    'depends' => [
+        \yii\web\JqueryAsset::class
+    ]
+]);
+
 ?>
 <?/*<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>*/?>
 
@@ -243,8 +251,32 @@ JS;
 
                     return $model->ltTask ? '<span style="font-size: 13px" title="'.Html::encode($model->ltTask->t_description).'" class="label label-info">'.Html::encode($model->ltTask->t_name).'</span>'.$taskIcon .'': '-';
                 },
-                'format' => 'html',
+                'format' => 'raw',
                 'filter' => \common\models\Task::getList()
+            ],
+
+            [
+                'label' => 'Timer',
+                'value' => function(\common\models\LeadTask $model) {
+
+                    $cdTime = 0;
+                    if($model->ltTask && $model->ltTask->t_key === 'call2') {
+                        $call2DelayTime = Yii::$app->params['lead']['call2DelayTime'];
+
+                        $taskCall1 = \common\models\LeadTask::find()->where(['lt_user_id' => $model->lt_user_id, 'lt_lead_id' => $model->lt_lead_id, 'lt_date' => $model->lt_date, 'lt_task_id' => 1])->one();
+
+                        if($taskCall1 && (strtotime($taskCall1->lt_completed_dt) + $call2DelayTime) > time()) {
+                            $cdTime = strtotime($taskCall1->lt_completed_dt) + $call2DelayTime;
+                        }
+                    }
+
+                    $elapsedTime = $cdTime - time();
+
+                    return $elapsedTime > 0 ? '<div data-elapsed="'.$elapsedTime.'" data-countdown="'.date('Y-m-d H:i:s', $cdTime).'"></div>': '-';
+
+                },
+                'format' => 'raw',
+                'contentOptions' => ['class' => 'text-center', 'style' => 'width: 80px']
             ],
 
             [
@@ -260,7 +292,7 @@ JS;
                 'value' => function(\common\models\LeadTask $model) {
                     return $model->ltLead ? $model->ltLead->getStatusName() : '-';
                 },
-                'format' => 'html'
+                'format' => 'raw'
             ],
 
             [
@@ -368,7 +400,7 @@ JS;
                 'value' => function(\common\models\LeadTask $model) {
                     return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->ltLead->created));
                 },
-                'format' => 'html',
+                'format' => 'raw',
             ],
 
             [
@@ -378,7 +410,7 @@ JS;
                     $time = Yii::$app->formatter->asRelativeTime(strtotime($model->ltLead->created));
                     return $time; //'<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->ltLead->created));
                 },
-                'format' => 'html',
+                'format' => 'raw',
             ],
 
             /*[
@@ -719,6 +751,36 @@ JS;
         </div>
     </div>
     <?php Pjax::end(); ?>
-
-
 </div>
+
+<?php
+$js = '
+function initCountDown()
+{
+    $("[data-countdown]").each(function() {
+      var $this = $(this), finalDate = $(this).data("countdown");
+      var elapsedTime = $(this).data("elapsed");
+          
+        var seconds = new Date().getTime() + (elapsedTime * 1000);
+        $this.countdown(seconds, function(event) {
+            //var totalHours = event.offset.totalDays * 24 + event.offset.hours;
+            $(this).html(event.strftime(\'%H:%M:%S\'));
+        });
+      
+        /*$this.countdown(seconds, {elapse: false}).on(\'update.countdown\', function(event) {
+            var $this = $(this);
+            $this.html(event.strftime(\'To end: <span>%H:%M:%S</span>\'));
+        });*/
+      
+    });
+}
+
+$(document).on(\'pjax:end\', function() {
+    initCountDown();    
+});
+
+initCountDown();
+
+';
+
+$this->registerJs($js);
