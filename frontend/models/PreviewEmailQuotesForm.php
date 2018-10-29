@@ -72,8 +72,8 @@ class PreviewEmailQuotesForm extends Model
     {
 
         $userProjectParams = UserProjectParams::findOne([
-            'upp_user_id' => $this->employee->id,
-            'upp_project_id' => $this->project_id
+            'upp_user_id' => $lead->employee->id,
+            'upp_project_id' => $lead->project_id
         ]);
 
         $credential = [
