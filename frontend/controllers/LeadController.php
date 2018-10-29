@@ -783,8 +783,8 @@ class LeadController extends FController
         if($isAgent) {
             $user = Yii::$app->user->identity;
             /** @var Employee $user */
-            if(!$user->checkTimeShift()) {
-                throw new ForbiddenHttpException('Access denied! Invalid Agent time shift.');
+            if(!$user->checkShiftTime()) {
+                throw new ForbiddenHttpException('Access denied! Invalid Agent shift time');
             }
         }
 
@@ -796,8 +796,7 @@ class LeadController extends FController
 
         return $this->render('inbox', [
             'searchModel' => $searchModel,
-            'dataProvider' => $dataProvider,
-            'isAgent' => $isAgent,
+            'dataProvider' => $dataProvider
         ]);
     }
 

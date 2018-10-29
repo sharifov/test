@@ -791,32 +791,64 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         return $timezoneList;
     }
 
-    public function checkShiftTime() : bool
+
+    /**
+     * @return array
+     * @throws \Exception
+     */
+    public function getShiftTime() : array
     {
-        $task
+        $shiftData = [];
+
         if($this->userParams) {
             $startTime = $this->userParams->up_work_start_tm;
-            $workHours = $this->userParams->up_work_minutes;
+            $workHours = (int) $this->userParams->up_work_minutes * 60;
+            $timeZone = $this->userParams->up_timezone ?: 'UTC';
+
+            if($startTime && $workHours) {
+
+                $startShiftTimeUTC = new \DateTime(date('Y-m-d') . ' ' . $startTime, new \DateTimeZone($timeZone));
+                $startShiftTimeUTC->setTimezone(new \DateTimeZone('UTC'));
 
 
+                $endShiftTimeUTC = clone $startShiftTimeUTC;
+                $endShiftTimeUTC->add(new \DateInterval('PT' . $workHours . 'S'));
 
-            $taskDateUTC = new DateTime($taskDate, new DateTimeZone($usersParams[$task->lt_user_id]['up_timezone']));
-            $taskDateUTC->setTimezone(new DateTimeZone('UTC'));
-            $taskDateUTCstr = $taskDateUTC->format('Y-m-d H:i');
-            $taskDateUTCShiftEnd = clone $taskDateUTC;
-            $taskDateUTCShiftEnd->add(new DateInterval('PT'.($usersParams[$task->lt_user_id]['up_work_minutes']*60).'S'));
+                // $startShiftTimeDt = $startShiftTimeUTC->format('Y-m-d H:i:s');
+                // $endShiftTimeDt = $endShiftTimeUTC->format('Y-m-d H:i:s');
+                // echo $startShiftTimeUTC.' - '.$endShiftTimeUTC; exit;
 
+                $startTS = $startShiftTimeUTC->getTimestamp();
+                $endTS = $endShiftTimeUTC->getTimestamp();
 
-            if()
-
-                $dayTS = $dateItemShift[$date]['start']->getTimestamp();
-            $shiftEndTS = $dateItemShift[$date]['end']->getTimestamp();
-            $active = ($dayTS < $currentTS && $shiftEndTS > $currentTS) ? true : false;
-            if(!$activeShown){
-                $activeShown = ($active)?true:false;
+                $shiftData['start_utc_ts'] = $startTS;
+                $shiftData['end_utc_ts'] = $endTS;
+                $shiftData['start_utc_dt'] = $startShiftTimeUTC->format('Y-m-d H:i:s');
+                $shiftData['end_utc_dt'] = $endShiftTimeUTC->format('Y-m-d H:i:s');
             }
         }
 
+        return $shiftData;
+    }
 
+
+    /**
+     * @return bool
+     * @throws \Exception
+     */
+    public function checkShiftTime() : bool
+    {
+        $shiftData = $this->getShiftTime();
+        if($shiftData) {
+            $currentTS = time();
+            $startTS = $shiftData['start_utc_ts'] ?? 0;
+            $endTS = $shiftData['end_utc_ts'] ?? 0;
+
+            if ($startTS <= $currentTS && $endTS >= $currentTS) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
