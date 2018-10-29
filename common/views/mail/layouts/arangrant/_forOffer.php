@@ -4,7 +4,6 @@
  * @var $agentName string
  * @var $employee \common\models\Employee
  * @var $body string
- * @var $sellerContactInfo \common\models\EmployeeContactInfo
  * @var $userProjectParams \common\models\UserProjectParams
  */
 ?>

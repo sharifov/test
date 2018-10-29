@@ -1761,6 +1761,11 @@ Sales - Kivork",
             'employee_id' => $this->employee->id,
             'project_id' => $this->project_id
         ]);
+        $userProjectParams = UserProjectParams::findOne([
+            'upp_user_id' => $this->employee->id,
+            'upp_project_id' => $this->project_id
+        ]);
+
 
         $body = Yii::$app->getView()->render($view, [
             'origin' => $origin,
@@ -1780,7 +1785,7 @@ Sales - Kivork",
                 'project' => $this->project,
                 'agentName' => ucfirst($this->employee->username),
                 'employee' => $this->employee,
-                'sellerContactInfo' => $sellerContactInfo,
+                'userProjectParams' => $userProjectParams,
                 'body' => $body,
                 'templateType' => $template->type,
             ]);
