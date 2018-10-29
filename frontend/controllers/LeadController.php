@@ -28,6 +28,7 @@ use yii\helpers\Url;
 use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
 use yii\web\Cookie;
+use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
 use yii\web\UnauthorizedHttpException;
@@ -776,6 +777,15 @@ class LeadController extends FController
             $isAgent = true;
         } else {
             $isAgent = false;
+        }
+
+
+        if($isAgent) {
+            $user = Yii::$app->user->identity;
+            /** @var Employee $user */
+            if(!$user->checkTimeShift()) {
+                throw new ForbiddenHttpException('Access denied! Invalid Agent time shift.');
+            }
         }
 
         if(Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id)) {

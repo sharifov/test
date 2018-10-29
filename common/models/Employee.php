@@ -2,6 +2,7 @@
 
 namespace common\models;
 
+use borales\extensions\phoneInput\PhoneInput;
 use Yii;
 use yii\base\NotSupportedException;
 use yii\behaviors\TimestampBehavior;
@@ -788,5 +789,34 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         }
 
         return $timezoneList;
+    }
+
+    public function checkShiftTime() : bool
+    {
+        $task
+        if($this->userParams) {
+            $startTime = $this->userParams->up_work_start_tm;
+            $workHours = $this->userParams->up_work_minutes;
+
+
+
+            $taskDateUTC = new DateTime($taskDate, new DateTimeZone($usersParams[$task->lt_user_id]['up_timezone']));
+            $taskDateUTC->setTimezone(new DateTimeZone('UTC'));
+            $taskDateUTCstr = $taskDateUTC->format('Y-m-d H:i');
+            $taskDateUTCShiftEnd = clone $taskDateUTC;
+            $taskDateUTCShiftEnd->add(new DateInterval('PT'.($usersParams[$task->lt_user_id]['up_work_minutes']*60).'S'));
+
+
+            if()
+
+                $dayTS = $dateItemShift[$date]['start']->getTimestamp();
+            $shiftEndTS = $dateItemShift[$date]['end']->getTimestamp();
+            $active = ($dayTS < $currentTS && $shiftEndTS > $currentTS) ? true : false;
+            if(!$activeShown){
+                $activeShown = ($active)?true:false;
+            }
+        }
+
+
     }
 }
