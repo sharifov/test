@@ -1374,6 +1374,48 @@ Sales - Kivork",
         return '';
     }
 
+
+    public function getClientTime2()
+    {
+        $clientTime = '-';
+        $offset_gmt = $this->offset_gmt;
+        $offset = false;
+
+
+        if($offset_gmt) {
+            $offset = str_replace('.', ':', $offset_gmt);
+
+            if(isset($offset[0])) {
+                if (strpos($offset, '+') === 0) {
+                    $offset = str_replace('+', '-', $offset);
+                } else {
+                    $offset = str_replace('-', '+', $offset);
+                }
+            }
+
+
+        } else {
+
+            if($this->leadFlightSegments) {
+                $firstSegment = $this->leadFlightSegments[0];
+                $airport = Airport::findIdentity($firstSegment->origin);
+                if ($airport && $airport->dst) {
+                    $offset = $airport->dst;
+                    $offset_gmt = $airport->dst;
+                }
+            }
+
+        }
+
+        if($offset) {
+            $clientTime = date("H:i", strtotime("now $offset GMT"));
+            $clientTime = '<i class="fa fa-clock-o"></i> <b>' . Html::encode($clientTime) . '</b><br/>(GMT: ' .$offset_gmt . ')';
+        }
+
+        return $clientTime;
+    }
+
+
     /**
      * @return array|Note[]
      */

@@ -233,7 +233,7 @@ JS;
                             if((strtotime($taskCall1->lt_completed_dt) + $call2DelayTime) <= time()) {
                                 $call2TaskEnable = true;
                             } else {
-                                $taskIcon = '<br><span class="label label-default">Call after '.Yii::$app->formatter->asDatetime(strtotime($taskCall1->lt_completed_dt) + $call2DelayTime).'</span>';
+                                $taskIcon = '<br><span class="label label-default">Call after <i class="fa fa-clock-o"></i> '.Yii::$app->formatter->asDatetime(strtotime($taskCall1->lt_completed_dt) + $call2DelayTime).'</span>';
                                 //'<i class="fa fa-clock-o" title="Next call '.Yii::$app->formatter->asDatetime(strtotime($taskCall1->lt_completed_dt) + $call2DelayTime).'"></i> ';
                             }
                         }
@@ -241,7 +241,7 @@ JS;
                     }
 
 
-                    return $model->ltTask ? '<h4><span title="'.Html::encode($model->ltTask->t_description).'" class="label label-info">'.Html::encode($model->ltTask->t_name).''.$taskIcon .'</span></h4>': '-';
+                    return $model->ltTask ? '<span style="font-size: 13px" title="'.Html::encode($model->ltTask->t_description).'" class="label label-info">'.Html::encode($model->ltTask->t_name).'</span>'.$taskIcon .'': '-';
                 },
                 'format' => 'html',
                 'filter' => \common\models\Task::getList()
@@ -291,36 +291,11 @@ JS;
                 'header' => 'Client time',
                 'format' => 'raw',
                 'value' => function(\common\models\LeadTask $model) {
-
-                    $clientTime = '-';
-
                     if($model->ltLead) {
-                        $offset = $model->ltLead->offset_gmt;
-
-                        if($offset) {
-                            $offset2 = str_replace('.', ':', $offset);
-
-                            if(isset($offset2[0])) {
-                                if ($offset2[0] === '+') {
-                                    $offset2 = str_replace('+', '-', $offset2);
-                                } else {
-                                    $offset2 = str_replace('-', '+', $offset2);
-                                }
-                            }
-
-                            //$clientTime = date('H:i', time() + ($offset * 60 * 60));
-
-                            if($offset2) {
-                                $clientTime = date("H:i", strtotime("now $offset2 GMT"));
-
-                                $clientTime = '<i class="fa fa-clock-o"></i> <b>' . Html::encode($clientTime) . '</b> (GMT: ' . $offset . ')';
-                            }
-                        }
-
+                        $clientTime = $model->ltLead->getClientTime2();
                     } else {
                         $clientTime = '-';
                     }
-
                     return $clientTime;
                 },
                 'options' => ['style' => 'width:160px'],

@@ -126,26 +126,7 @@ echo Html::a($btnText, $btnUrl, [
             'header' => 'Client time',
             'format' => 'raw',
             'value' => function(\common\models\Lead $model) {
-                $clientTime = '-';
-                if($model->offset_gmt) {
-                    $offset2 = str_replace('.', ':', $model->offset_gmt);
-
-                    if(isset($offset2[0])) {
-                        if ($offset2[0] === '+') {
-                            $offset2 = str_replace('+', '-', $offset2);
-                        } else {
-                            $offset2 = str_replace('-', '+', $offset2);
-                        }
-                    }
-
-                    //$clientTime = date('H:i', time() + ($offset * 60 * 60));
-
-                    if($offset2) {
-                        $clientTime = date("H:i", strtotime("now $offset2 GMT"));
-                        $clientTime = '<i class="fa fa-clock-o"></i> <b>' . Html::encode($clientTime) . '</b> (GMT: ' .$model->offset_gmt . ')';
-                    }
-                }
-                return $clientTime;
+                return $model->getClientTime2();
             },
             'options' => ['style' => 'width:160px'],
             //'filter' => \common\models\Employee::getList()
