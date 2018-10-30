@@ -1680,13 +1680,12 @@ Sales - Kivork",
             'flightRequest' => $data,
         ]);
 
-        $sellerContactInfo = EmployeeContactInfo::findOne([
-            'employee_id' => $this->employee->id,
-            'project_id' => $this->project_id
+        $userProjectParams = UserProjectParams::findOne([
+            'upp_user_id' => $this->employee->id,
+            'upp_project_id' => $this->project_id
         ]);
         $credential = [
-            'email' => $sellerContactInfo->email_user,
-            'password' => $sellerContactInfo->email_pass,
+            'email' => $userProjectParams->upp_email,
         ];
 
         if (!empty($template->layout_path)) {
@@ -1694,7 +1693,7 @@ Sales - Kivork",
                 'project' => $this->project,
                 'agentName' => ucfirst($this->employee->username),
                 'employee' => $this->employee,
-                'sellerContactInfo' => $sellerContactInfo,
+                'userProjectParams' => $userProjectParams,
                 'body' => $body,
                 'templateType' => $template->type,
             ]);
@@ -1706,7 +1705,7 @@ Sales - Kivork",
 
         $errors = [];
         $bcc = [
-            trim($sellerContactInfo->email_user),
+            trim($userProjectParams->upp_email),
             'damian.t@wowfare.com',
             'andrew.t@wowfare.com'
         ];
@@ -1799,10 +1798,11 @@ Sales - Kivork",
 
         $tripType = Lead::getFlightType($this->trip_type);
 
-        $sellerContactInfo = EmployeeContactInfo::findOne([
-            'employee_id' => $this->employee->id,
-            'project_id' => $this->project_id
+        $userProjectParams = UserProjectParams::findOne([
+            'upp_user_id' => $this->employee->id,
+            'upp_project_id' => $this->project_id
         ]);
+
 
         $body = Yii::$app->getView()->render($view, [
             'origin' => $origin,
@@ -1814,7 +1814,7 @@ Sales - Kivork",
             'agentName' => ucfirst($this->employee->username),
             'employee' => $this->employee,
             'tripType' => $tripType,
-            'sellerContactInfo' => $sellerContactInfo,
+            'userProjectParams' => $userProjectParams,
         ]);
 
         if (!empty($template->layout_path)) {
@@ -1822,7 +1822,7 @@ Sales - Kivork",
                 'project' => $this->project,
                 'agentName' => ucfirst($this->employee->username),
                 'employee' => $this->employee,
-                'sellerContactInfo' => $sellerContactInfo,
+                'userProjectParams' => $userProjectParams,
                 'body' => $body,
                 'templateType' => $template->type,
             ]);
@@ -1898,9 +1898,9 @@ Sales - Kivork",
 
         $tripType = Lead::getFlightType($this->trip_type);
 
-        $sellerContactInfo = EmployeeContactInfo::findOne([
-            'employee_id' => $this->employee->id,
-            'project_id' => $this->project_id
+        $userProjectParams = UserProjectParams::findOne([
+            'upp_user_id' => $this->employee->id,
+            'upp_project_id' => $this->project_id
         ]);
 
         $body = Yii::$app->getView()->render($view, [
@@ -1913,7 +1913,7 @@ Sales - Kivork",
             'agentName' => ucfirst($this->employee->username),
             'employee' => $this->employee,
             'tripType' => $tripType,
-            'sellerContactInfo' => $sellerContactInfo
+            'userProjectParams' => $userProjectParams
         ]);
 
         if (!empty($template->layout_path)) {
@@ -1921,7 +1921,7 @@ Sales - Kivork",
                 'project' => $this->project,
                 'agentName' => ucfirst($this->employee->username),
                 'employee' => $this->employee,
-                'sellerContactInfo' => $sellerContactInfo,
+                'userProjectParams' => $userProjectParams,
                 'body' => $body,
                 'templateType' => $template->type,
             ]);
@@ -1933,13 +1933,12 @@ Sales - Kivork",
         ]);
 
         $credential = [
-            'email' => trim($sellerContactInfo->email_user),
-            'password' => $sellerContactInfo->email_pass,
+            'email' => trim($userProjectParams->upp_email),
         ];
 
         $errors = [];
         $bcc = [
-            trim($sellerContactInfo->email_user),
+            trim($userProjectParams->upp_email),
             'damian.t@wowfare.com',
             'andrew.t@wowfare.com'
         ];

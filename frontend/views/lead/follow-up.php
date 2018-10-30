@@ -63,7 +63,7 @@ echo Html::a($btnText, $btnUrl, [
             ]
         ],
         [
-            'attribute' => 'pending',
+            'attribute' => 'created',
             'label' => 'Pending Time',
             'value' => function (\common\models\Lead $model) {
                 return Yii::$app->formatter->asRelativeTime(strtotime($model->created)); //Lead::getPendingAfterCreate($model->created);
@@ -163,7 +163,7 @@ echo Html::a($btnText, $btnUrl, [
         ],*/
 
         [
-            'attribute' => 'update',
+            'attribute' => 'updated',
             'label' => 'Last Activity',
             'value' => function (\common\models\Lead $model) {
                 return '<span title="'.Yii::$app->formatter->asDatetime(strtotime($model->updated)).'">'.Yii::$app->formatter->asRelativeTime(strtotime($model->updated)).'</span>';

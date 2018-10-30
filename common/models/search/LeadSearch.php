@@ -234,14 +234,16 @@ class LeadSearch extends Lead
             ->andFilterWhere(['like', 'offset_gmt', $this->offset_gmt])
             ->andFilterWhere(['like', 'discount_id', $this->discount_id]);
 
-        //$sqlRaw = $query->createCommand()->getRawSql();
-        //VarDumper::dump($sqlRaw, 10, true); exit;
+/*         $sqlRaw = $query->createCommand()->getRawSql();
+
+        VarDumper::dump($sqlRaw, 10, true); exit; */
 
         return $dataProvider;
     }
 
     public function searchAgent($params)
     {
+        $projectIds = array_keys(ProjectEmployeeAccess::getProjectsByEmployee());
         $query = Lead::find();
 
         // add conditions that should always apply here
@@ -262,6 +264,9 @@ class LeadSearch extends Lead
             return $dataProvider;
         }
 
+        $query
+        ->andWhere(['IN', Lead::tableName() . '.project_id', $projectIds])
+        ;
 
         /*'id' => ''
         'uid' => ''
@@ -375,6 +380,9 @@ class LeadSearch extends Lead
 
 
 
+       /*  $sqlRaw = $query->createCommand()->getRawSql();
+
+        VarDumper::dump($sqlRaw, 10, true); exit; */
 
         return $dataProvider;
     }
@@ -634,7 +642,7 @@ class LeadSearch extends Lead
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> ['defaultOrder' => ['updated' => SORT_DESC]],
+            'sort'=> ['defaultOrder' => ['updated' => SORT_DESC],'attributes' => ['id','updated','created','status']],
             'pagination' => [
                 'pageSize' => 30,
             ],
@@ -716,7 +724,7 @@ class LeadSearch extends Lead
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> ['defaultOrder' => ['updated' => SORT_DESC]],
+            'sort'=> ['defaultOrder' => ['updated' => SORT_DESC],'attributes' => ['id','updated','created','status']],
             'pagination' => [
                 'pageSize' => 30,
             ],

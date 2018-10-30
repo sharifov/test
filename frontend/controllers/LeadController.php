@@ -236,12 +236,6 @@ class LeadController extends FController
             $sendEmailModel->employee = $lead->employee;
             $sendEmailModel->project = $lead->project;
 
-            /*$sellerContactInfo = EmployeeContactInfo::findOne([
-                'employee_id' => $sendEmailModel->employee->id,
-                'project_id' => $sendEmailModel->project->id
-            ]);*/
-
-
             $userProjectParams = UserProjectParams::findOne([
                 'upp_user_id' => $sendEmailModel->employee->id,
                 'upp_project_id' => $sendEmailModel->project->id
@@ -1143,15 +1137,22 @@ class LeadController extends FController
         }
 
         if (!empty($quoteId)) {
-            $url = $lead->project->link . '/api/user-action-list/' . intval($quoteId);
-            $ch = curl_init();
-            curl_setopt($ch, CURLOPT_VERBOSE, true);
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($ch, CURLOPT_POST, true);
-            curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query(['apiKey' => $lead->project->api_key]));
-            curl_setopt($ch, CURLOPT_URL, $url);
-            curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/x-www-form-urlencoded']);
-            $result = curl_exec($ch);
+
+            $result = null;
+            if($lead->project) {
+                $projectLink = $lead->project->link;
+                $projectLink = str_replace('www.', '', $projectLink);
+
+                $url = $projectLink . '/api/user-action-list/' . intval($quoteId);
+                $ch = curl_init();
+                curl_setopt($ch, CURLOPT_VERBOSE, true);
+                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                curl_setopt($ch, CURLOPT_POST, true);
+                curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query(['apiKey' => $lead->project->api_key]));
+                curl_setopt($ch, CURLOPT_URL, $url);
+                curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/x-www-form-urlencoded']);
+                $result = curl_exec($ch);
+            }
 
             $activity = json_decode($result);
         }

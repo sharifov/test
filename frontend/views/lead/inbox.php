@@ -53,6 +53,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'value' => function (\common\models\Lead $model) {
                 return $model->id;
             },
+            'visible' => ! $isAgent,
             'options' => [
                 'style' => 'width:80px'
             ]
@@ -61,7 +62,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'attribute' => 'pending',
             'label' => 'Pending Time',
             'value' => function (\common\models\Lead $model) {
-                return Yii::$app->formatter->asRelativeTime(strtotime($model->created)); //Lead::getPendingAfterCreate($model->created);
+                return Yii::$app->formatter->asRelativeTime(strtotime($model->created)); // Lead::getPendingAfterCreate($model->created);
             },
             'format' => 'raw'
         ],
@@ -90,19 +91,17 @@ $this->params['breadcrumbs'][] = $this->title;
                         $clientName = '<i class="fa fa-user"></i> ' . Html::encode($clientName);
                     }
 
-
                     $str = $model->client && $model->client->clientEmails ? '<i class="fa fa-envelope"></i> ' . implode(' <br><i class="fa fa-envelope"></i> ', \yii\helpers\ArrayHelper::map($model->client->clientEmails, 'email', 'email')) . '' : '';
                     $str .= $model->client && $model->client->clientPhones ? '<br><i class="fa fa-phone"></i> ' . implode(' <br><i class="fa fa-phone"></i> ', \yii\helpers\ArrayHelper::map($model->client->clientPhones, 'phone', 'phone')) . '' : '';
 
-
-                    $clientName.= '<br>'. $str;
-
+                    $clientName .= '<br>' . $str;
                 } else {
                     $clientName = '-';
                 }
 
                 return $clientName;
             },
+            'visible' => ! $isAgent,
             'options' => [
                 'style' => 'width:160px'
             ]
@@ -119,10 +118,12 @@ $this->params['breadcrumbs'][] = $this->title;
         [
             'header' => 'Client time',
             'format' => 'raw',
-            'value' => function(\common\models\Lead $model) {
+            'value' => function (\common\models\Lead $model) {
                 return $model->getClientTime2();
             },
-            'options' => ['style' => 'width:110px'],
+            'options' => [
+                'style' => 'width:110px'
+            ]
         ],
 
         [
@@ -130,7 +131,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'content' => function (\common\models\Lead $model) {
                 $content = '';
                 $content .= $model->getFlightDetails();
-                $content .= ' (<i class="fa fa-male"></i> x' . ($model->adults .'/'. $model->children .'/'. $model->infants) . ')<br/>';
+                $content .= ' (<i class="fa fa-male"></i> x' . ($model->adults . '/' . $model->children . '/' . $model->infants) . ')<br/>';
 
                 $content .= sprintf('<strong>Cabin:</strong> %s', Lead::getCabin($model['cabin']));
 
@@ -185,23 +186,25 @@ echo GridView::widget([
             ];
         }
 
-        /*if (in_array($model->status, [
-            Lead::STATUS_ON_HOLD,
-            Lead::STATUS_BOOKED,
-            Lead::STATUS_FOLLOW_UP
-        ])) {
-            $now = new \DateTime();
-            $departure = $model->getDeparture();
-
-            $diff = ! empty($departure) ? $now->diff(new \DateTime($departure)) : $now->diff(new \DateTime($departure));
-            $diffInSec = $diff->s + ($diff->i * 60) + ($diff->h * 3600) + ($diff->d * 86400) + ($diff->m * 30 * 86400) + ($diff->y * 12 * 30 * 86400);
-            // if departure <= 7 days
-            if ($diffInSec <= (7 * 24 * 60 * 60)) {
-                return [
-                    'class' => 'success'
-                ];
-            }
-        }*/
+        /*
+         * if (in_array($model->status, [
+         * Lead::STATUS_ON_HOLD,
+         * Lead::STATUS_BOOKED,
+         * Lead::STATUS_FOLLOW_UP
+         * ])) {
+         * $now = new \DateTime();
+         * $departure = $model->getDeparture();
+         *
+         * $diff = ! empty($departure) ? $now->diff(new \DateTime($departure)) : $now->diff(new \DateTime($departure));
+         * $diffInSec = $diff->s + ($diff->i * 60) + ($diff->h * 3600) + ($diff->d * 86400) + ($diff->m * 30 * 86400) + ($diff->y * 12 * 30 * 86400);
+         * // if departure <= 7 days
+         * if ($diffInSec <= (7 * 24 * 60 * 60)) {
+         * return [
+         * 'class' => 'success'
+         * ];
+         * }
+         * }
+         */
     }
 
 ]);
