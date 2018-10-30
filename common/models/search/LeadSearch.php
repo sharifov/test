@@ -212,10 +212,17 @@ class LeadSearch extends Lead
             $query->andWhere(['IN', 'leads.id', $subQuery]);
         }
 
+
+
         if($this->supervision_id > 0) {
-            $subQuery1 = UserGroupAssign::find()->select(['ugs_group_id'])->where(['ugs_user_id' => $this->supervision_id]);
-            $subQuery = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->where(['IN', 'ugs_group_id', $subQuery1]);
-            $query->andWhere(['IN', 'leads.employee_id', $subQuery]);
+
+            if($this->id || $this->uid || $this->client_id || $this->client_email || $this->client_phone) {
+
+            } else {
+                $subQuery1 = UserGroupAssign::find()->select(['ugs_group_id'])->where(['ugs_user_id' => $this->supervision_id]);
+                $subQuery = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->where(['IN', 'ugs_group_id', $subQuery1]);
+                $query->andWhere(['IN', 'leads.employee_id', $subQuery]);
+            }
         }
 
         $query->andFilterWhere(['like', 'uid', $this->uid])
