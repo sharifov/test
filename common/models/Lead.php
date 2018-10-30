@@ -16,6 +16,7 @@ use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\helpers\VarDumper;
+use common\models\local\FlightSegment;
 
 /**
  * This is the model class for table "leads".
@@ -50,6 +51,8 @@ use yii\helpers\VarDumper;
  * @property string $description
  *
  * @property LeadFlightSegment[] $leadFlightSegments
+ * @property LeadFlow[] $leadFlows
+ * @property LeadLog[] $leadLogs
  * @property LeadPreferences $leadPreferences
  * @property Client $client
  * @property Employee $employee
@@ -57,8 +60,10 @@ use yii\helpers\VarDumper;
  * @property Project $project
  * @property int $quotesCount
  * @property int $leadFlightSegmentsCount
- * @property LeadAdditionalInformation $additionalInformationForm *
+ * @property LeadAdditionalInformation $additionalInformationForm
  * @property Lead $clone
+ * @property ProfitSplit[] $profitSplits
+ *
  */
 class Lead extends ActiveRecord
 {
@@ -142,6 +147,8 @@ class Lead extends ActiveRecord
 
     public $additionalInformationForm;
     public $status_description;
+    public $totalProfit;
+    public $splitProfitPercentSum = 0;
 
     /**
      * {@inheritdoc}
@@ -224,6 +231,23 @@ class Lead extends ActiveRecord
                 'value' => date('Y-m-d H:i:s') //new Expression('NOW()'),
             ],
         ];
+    }
+
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getLeadFlows()
+    {
+        return $this->hasMany(LeadFlow::class, ['lead_id' => 'id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getLeadLogs()
+    {
+        return $this->hasMany(LeadLog::class, ['lead_id' => 'id']);
     }
 
 
@@ -317,11 +341,28 @@ class Lead extends ActiveRecord
 
         $userId = Yii::$app->user->id;
         $created = '';
-        $employee = ' AND employee_id = '.$userId;
+        $employee = '';
+        if(Yii::$app->authManager->getAssignment('agent', $userId)) {
+            $employee = ' AND employee_id = '.$userId;
+        }
+
         $sold = '';
 
-        if((Yii::$app->authManager->getAssignment('admin', $userId) || Yii::$app->authManager->getAssignment('supervision', $userId))) {
-            //$created = ' AND created = "' . date('Y-m-d') . '"';
+        if(Yii::$app->authManager->getAssignment('supervision', $userId)){
+            $subQuery1 = UserGroupAssign::find()->select(['ugs_group_id'])->where(['ugs_user_id' => $userId]);
+            $subQuery = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->where(['IN', 'ugs_group_id', $subQuery1]);
+            $resEmp = $subQuery->createCommand()->queryAll();
+            $empArr = [];
+            if($resEmp){
+                foreach ($resEmp as $entry){
+                    $empArr[] = $entry['ugs_user_id'];
+                }
+            }
+
+            if(!empty($empArr)){
+                $employee = 'AND leads.employee_id IN ('.implode(',',$empArr).')';
+            }
+
         }
 
         if (Yii::$app->user->identity->role == 'agent') {
@@ -336,13 +377,12 @@ class Lead extends ActiveRecord
         $select = [
             'inbox' => 'SUM(CASE WHEN status IN (:inbox) THEN 1 ELSE 0 END)',
             'follow-up' => 'SUM(CASE WHEN status IN (:followup) ' . $created . ' THEN 1 ELSE 0 END)',
-            'booked' => 'SUM(CASE WHEN status IN (:booked) '.$created.' THEN 1 ELSE 0 END)',
-            'sold' => 'SUM(CASE WHEN status IN (:sold) '.$created.$sold.' THEN 1 ELSE 0 END)',
-            'processing' => 'SUM(CASE WHEN status IN ('.$default.') '.$employee.' THEN 1 ELSE 0 END)',
-            'processing-all' => 'SUM(CASE WHEN status IN ('.$default.') THEN 1 ELSE 0 END)'];
+            'booked' => 'SUM(CASE WHEN status IN (:booked) '.$created.$employee.' THEN 1 ELSE 0 END)',
+            'sold' => 'SUM(CASE WHEN status IN (:sold) '.$created.$sold.$employee.' THEN 1 ELSE 0 END)',
+            'processing' => 'SUM(CASE WHEN status IN ('.$default.') '.$employee.' THEN 1 ELSE 0 END)'];
 
         if(Yii::$app->user->identity->role != 'agent'){
-            $select['trash'] = 'SUM(CASE WHEN status IN ('.self::STATUS_TRASH.') '.$created.' THEN 1 ELSE 0 END)';
+            $select['trash'] = 'SUM(CASE WHEN status IN ('.self::STATUS_TRASH.') '.$created.$employee.' THEN 1 ELSE 0 END)';
         }
 
         $query = self::find()
@@ -354,6 +394,8 @@ class Lead extends ActiveRecord
                 ':sold' => self::STATUS_SOLD,
         ])
         ->limit(1);
+
+
         //echo $query->createCommand()->getRawSql();die;
 
         return $query->createCommand()->queryOne();
@@ -772,7 +814,7 @@ class Lead extends ActiveRecord
     {
         if (Yii::$app->user->identity->role != 'admin') {
             $access = ProjectEmployeeAccess::findOne([
-                'employee_id' => Yii::$app->user->identity->getId(),
+                'employee_id' => Yii::$app->user->id,
                 'project_id' => $this->project_id
             ]);
             return ($access !== null);
@@ -1322,7 +1364,7 @@ Sales - Kivork",
                 if (isset($ipData['country_code'])) {
                     $content .= '&nbsp;' . Html::tag('i', '', [
                             'class' => 'flag flag__' . strtolower($ipData['country_code']),
-                            'style' => 'vertical-align: bottom;'
+                            'style' => 'vertical-align: middle;'
                         ]);
                 }
             }
@@ -1331,6 +1373,48 @@ Sales - Kivork",
 
         return '';
     }
+
+
+    public function getClientTime2()
+    {
+        $clientTime = '-';
+        $offset_gmt = $this->offset_gmt;
+        $offset = false;
+
+
+        if($offset_gmt) {
+            $offset = str_replace('.', ':', $offset_gmt);
+
+            if(isset($offset[0])) {
+                if (strpos($offset, '+') === 0) {
+                    $offset = str_replace('+', '-', $offset);
+                } else {
+                    $offset = str_replace('-', '+', $offset);
+                }
+            }
+
+
+        } else {
+
+            if($this->leadFlightSegments) {
+                $firstSegment = $this->leadFlightSegments[0];
+                $airport = Airport::findIdentity($firstSegment->origin);
+                if ($airport && $airport->dst) {
+                    $offset = $airport->dst;
+                    $offset_gmt = $airport->dst;
+                }
+            }
+
+        }
+
+        if($offset) {
+            $clientTime = date("H:i", strtotime("now $offset GMT"));
+            $clientTime = '<i class="fa fa-clock-o"></i> <b>' . Html::encode($clientTime) . '</b><br/>(GMT: ' .$offset_gmt . ')';
+        }
+
+        return $clientTime;
+    }
+
 
     /**
      * @return array|Note[]
@@ -1411,6 +1495,12 @@ Sales - Kivork",
     public function getLeadFlightSegmentsCount(): int
     {
         return $this->hasMany(LeadFlightSegment::class, ['lead_id' => 'id'])->count();
+    }
+
+
+    public function getFirstFlightSegment()
+    {
+        return LeadFlightSegment::find()->where(['lead_id' => $this->id])->orderBy(['departure' => 'ASC'])->one();
     }
 
     /**
@@ -1590,13 +1680,12 @@ Sales - Kivork",
             'flightRequest' => $data,
         ]);
 
-        $sellerContactInfo = EmployeeContactInfo::findOne([
-            'employee_id' => $this->employee->id,
-            'project_id' => $this->project_id
+        $userProjectParams = UserProjectParams::findOne([
+            'upp_user_id' => $this->employee->id,
+            'upp_project_id' => $this->project_id
         ]);
         $credential = [
-            'email' => $sellerContactInfo->email_user,
-            'password' => $sellerContactInfo->email_pass,
+            'email' => $userProjectParams->upp_email,
         ];
 
         if (!empty($template->layout_path)) {
@@ -1604,7 +1693,7 @@ Sales - Kivork",
                 'project' => $this->project,
                 'agentName' => ucfirst($this->employee->username),
                 'employee' => $this->employee,
-                'sellerContactInfo' => $sellerContactInfo,
+                'userProjectParams' => $userProjectParams,
                 'body' => $body,
                 'templateType' => $template->type,
             ]);
@@ -1616,7 +1705,7 @@ Sales - Kivork",
 
         $errors = [];
         $bcc = [
-            trim($sellerContactInfo->email_user),
+            trim($userProjectParams->upp_email),
             'damian.t@wowfare.com',
             'andrew.t@wowfare.com'
         ];
@@ -1709,10 +1798,11 @@ Sales - Kivork",
 
         $tripType = Lead::getFlightType($this->trip_type);
 
-        $sellerContactInfo = EmployeeContactInfo::findOne([
-            'employee_id' => $this->employee->id,
-            'project_id' => $this->project_id
+        $userProjectParams = UserProjectParams::findOne([
+            'upp_user_id' => $this->employee->id,
+            'upp_project_id' => $this->project_id
         ]);
+
 
         $body = Yii::$app->getView()->render($view, [
             'origin' => $origin,
@@ -1724,7 +1814,7 @@ Sales - Kivork",
             'agentName' => ucfirst($this->employee->username),
             'employee' => $this->employee,
             'tripType' => $tripType,
-            'sellerContactInfo' => $sellerContactInfo,
+            'userProjectParams' => $userProjectParams,
         ]);
 
         if (!empty($template->layout_path)) {
@@ -1732,7 +1822,7 @@ Sales - Kivork",
                 'project' => $this->project,
                 'agentName' => ucfirst($this->employee->username),
                 'employee' => $this->employee,
-                'sellerContactInfo' => $sellerContactInfo,
+                'userProjectParams' => $userProjectParams,
                 'body' => $body,
                 'templateType' => $template->type,
             ]);
@@ -1808,9 +1898,9 @@ Sales - Kivork",
 
         $tripType = Lead::getFlightType($this->trip_type);
 
-        $sellerContactInfo = EmployeeContactInfo::findOne([
-            'employee_id' => $this->employee->id,
-            'project_id' => $this->project_id
+        $userProjectParams = UserProjectParams::findOne([
+            'upp_user_id' => $this->employee->id,
+            'upp_project_id' => $this->project_id
         ]);
 
         $body = Yii::$app->getView()->render($view, [
@@ -1823,7 +1913,7 @@ Sales - Kivork",
             'agentName' => ucfirst($this->employee->username),
             'employee' => $this->employee,
             'tripType' => $tripType,
-            'sellerContactInfo' => $sellerContactInfo
+            'userProjectParams' => $userProjectParams
         ]);
 
         if (!empty($template->layout_path)) {
@@ -1831,7 +1921,7 @@ Sales - Kivork",
                 'project' => $this->project,
                 'agentName' => ucfirst($this->employee->username),
                 'employee' => $this->employee,
-                'sellerContactInfo' => $sellerContactInfo,
+                'userProjectParams' => $userProjectParams,
                 'body' => $body,
                 'templateType' => $template->type,
             ]);
@@ -1843,13 +1933,12 @@ Sales - Kivork",
         ]);
 
         $credential = [
-            'email' => trim($sellerContactInfo->email_user),
-            'password' => $sellerContactInfo->email_pass,
+            'email' => trim($userProjectParams->upp_email),
         ];
 
         $errors = [];
         $bcc = [
-            trim($sellerContactInfo->email_user),
+            trim($userProjectParams->upp_email),
             'damian.t@wowfare.com',
             'andrew.t@wowfare.com'
         ];
@@ -1976,6 +2065,15 @@ Sales - Kivork",
         return $list;
     }
 
+    public static function getProcessingStatuses()
+    {
+        return [
+            self::STATUS_SNOOZE => self::STATUS_LIST[self::STATUS_SNOOZE],
+            self::STATUS_PROCESSING => self::STATUS_LIST[self::STATUS_PROCESSING],
+            self::STATUS_ON_HOLD => self::STATUS_LIST[self::STATUS_ON_HOLD],
+        ];
+    }
+
     /**
      * @return string
      */
@@ -2084,5 +2182,83 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
     {
         return Quote::findOne(['lead_id' => $this->id, 'status' => Quote::STATUS_APPLIED]);
     }
+
+    public function getFlightDetails()
+    {
+        $flightSegments = LeadFlightSegment::findAll(['lead_id' => $this->id]);
+        $segmentsStr = [];
+        foreach ($flightSegments as $entry){
+            $segmentsStr[] = $entry['departure'].' '.$entry['origin'].'-'.$entry['destination'];
+        }
+
+        return implode('<br/>', $segmentsStr);
+    }
+
+    public function getDeparture()
+    {
+        $flightSegment = LeadFlightSegment::find()->where(['lead_id' => $this->id])->orderBy(['departure' => SORT_ASC])->one();
+
+        return ($flightSegment)?$flightSegment['departure']:null;
+    }
+
+     /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getProfitSplits()
+    {
+        return $this->hasMany(ProfitSplit::className(), ['ps_lead_id' => 'id']);
+    }
+
+    public function getAllProfitSplits()
+    {
+        return ProfitSplit::find()->where(['ps_lead_id' => $this->id])->all();
+    }
+
+    public function getSumPercentProfitSplit()
+    {
+        $query = new Query();
+        $query->from(ProfitSplit::tableName().' ps')
+            ->where(['ps.ps_lead_id' => $this->id])
+            ->select(['SUM(ps.ps_percent) as percent'])
+            ;
+
+        return $query->queryScalar();
+    }
+
+    public function getQuoteSendInfo()
+    {
+        $query = new Query();
+        $query->select(['SUM(CASE WHEN status IN (2, 4, 5) THEN 1 ELSE 0 END) AS send_q',
+                        'SUM(CASE WHEN status NOT IN (2, 4, 5) THEN 1 ELSE 0 END) AS not_send_q'])
+            ->from(Quote::tableName().' q')
+            ->where(['lead_id' => $this->id]);
+            //->groupBy('lead_id');
+
+        return $query->createCommand()->queryOne();
+    }
+
+    public function getLastActivityByNote()
+    {
+        $lastNote = Note::find()->where(['lead_id' => $this->id])->orderBy(['created' => SORT_DESC])->one();
+
+        if(!empty($lastNote)){
+            return $lastNote['created'];
+        }
+
+        return $this->updated;
+    }
+
+    public function getLastReason()
+    {
+        $lastReason = Reason::find()->where(['lead_id' => $this->id])->orderBy(['created' => SORT_DESC])->one();
+
+        if(!empty($lastReason)){
+            return $lastReason['reason'];
+        }
+
+        return '-';
+    }
+
+
 
 }

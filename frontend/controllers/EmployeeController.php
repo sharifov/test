@@ -9,6 +9,7 @@ use common\models\EmployeeAcl;
 use common\models\EmployeeContactInfo;
 use common\models\ProjectEmployeeAccess;
 use common\models\search\EmployeeSearch;
+use common\models\search\UserProjectParamsSearch;
 use common\models\UserGroupAssign;
 use common\models\UserParams;
 use Symfony\Component\Finder\Exception\AccessDeniedException;
@@ -25,7 +26,7 @@ use yii\web\Response;
 /**
  * Site controller
  */
-class EmployeeController extends DefaultController
+class EmployeeController extends FController
 {
     /**
      * {@inheritdoc}
@@ -37,7 +38,7 @@ class EmployeeController extends DefaultController
                 'class' => AccessControl::class,
                 'rules' => [
                     [
-                        'actions' => ['list', 'update', 'acl-rule'],
+                        'actions' => ['list', 'update', 'create', 'acl-rule'],
                         'allow' => true,
                         'roles' => ['supervision'],
                     ],
@@ -177,6 +178,95 @@ class EmployeeController extends DefaultController
 
     /**
      * @return string|Response
+     * @throws \yii\base\InvalidConfigException
+     */
+    public function actionCreate()
+    {
+
+        $model = new Employee(['scenario' => Employee::SCENARIO_REGISTER]);
+        $modelUserParams = new UserParams();
+
+        if (Yii::$app->request->isPost) {
+            $attr = Yii::$app->request->post($model->formName());
+
+
+            $isNew = $model->prepareSave($attr);
+            if ($model->validate() && $model->save()) {
+
+                $model->addRole($isNew);
+
+                if(isset($attr['user_groups'])) {
+                    if($attr['user_groups']) {
+                        foreach ($attr['user_groups'] as $ugId) {
+                            $uga = new UserGroupAssign();
+                            $uga->ugs_user_id = $model->id;
+                            $uga->ugs_group_id = (int) $ugId;
+                            $uga->save();
+                        }
+                    }
+                }
+
+
+                if(isset($attr['user_projects'])) {
+                    if($attr['user_projects']) {
+                        foreach ($attr['user_projects'] as $ugId) {
+                            $up = new ProjectEmployeeAccess();
+                            $up->employee_id = $model->id;
+                            $up->project_id = (int) $ugId;
+                            $up->created = date('Y-m-d H:i:s');
+                            $up->save();
+                        }
+                    }
+                }
+
+
+                Yii::$app->getSession()->setFlash('success', 'User created');
+
+
+                if ($modelUserParams->load(Yii::$app->request->post())) {
+
+                    //VarDumper::dump(Yii::$app->request->post()); exit;
+
+                    $modelUserParams->up_user_id = $model->id;
+                    $modelUserParams->up_updated_user_id = Yii::$app->user->id;
+
+                    if($modelUserParams->save()) {
+                        //return $this->refresh();
+                    }
+                }
+
+                return $this->redirect(['update','id' => $model->id]);
+
+            }
+        } else {
+
+            $modelUserParams->up_timezone = "Europe/Chisinau";
+            $modelUserParams->up_work_minutes = 8 * 60;
+            $modelUserParams->up_base_amount = 0;
+            $modelUserParams->up_commission_percent = 0;
+
+        }
+
+        //VarDumper::dump($model->userGroupAssigns, 10 ,true); exit;
+
+        //$model->user_groups = ArrayHelper::map($model->userGroupAssigns, 'ugs_group_id', 'ugs_group_id');
+        //$model->user_projects = ArrayHelper::map($model->projects, 'id', 'id');
+
+        //VarDumper::dump($model->user_projects, 10, true); exit;
+
+
+        $dataProvider = null;
+
+        return $this->render('_form', [
+            'model' => $model,
+            'modelUserParams' => $modelUserParams,
+            'dataProvider' => $dataProvider,
+        ]);
+
+    }
+
+    /**
+     * @return string|Response
      * @throws BadRequestHttpException
      * @throws NotAcceptableHttpException
      * @throws NotFoundHttpException
@@ -184,7 +274,6 @@ class EmployeeController extends DefaultController
      */
     public function actionUpdate()
     {
-        $this->view->title = sprintf('Employees - Profile');
 
         if ($id = Yii::$app->request->get('id')) {
 
@@ -222,31 +311,16 @@ class EmployeeController extends DefaultController
                 }
             }
 
-
-
         } else {
-            $model = new Employee(['scenario' => Employee::SCENARIO_REGISTER]);
-            $modelUserParams = new UserParams();
+            throw new BadRequestHttpException('Invalid request');
         }
-
-
 
 
             if (Yii::$app->request->isPost) {
                 $attr = Yii::$app->request->post($model->formName());
 
-                $availableProjects = isset($attr['viewItemsEmployeeAccess'])
-                    ? array_keys(json_decode($attr['viewItemsEmployeeAccess'], true))
-                    : [];
-                $newEmployeeAccess = (isset($attr['employeeAccess']) && !empty($attr['employeeAccess']))
-                    ? $attr['employeeAccess'] : [];
-
                 $isNew = $model->prepareSave($attr);
                 if ($model->validate() && $model->save()) {
-
-
-
-
 
 
                     $model->addRole($isNew);
@@ -263,35 +337,64 @@ class EmployeeController extends DefaultController
                             }
                         }
                     }
+
+
+                    if(isset($attr['user_projects'])) {
+                        ProjectEmployeeAccess::deleteAll(['employee_id' => $model->id]);
+                        if($attr['user_projects']) {
+                            foreach ($attr['user_projects'] as $ugId) {
+                                $up = new ProjectEmployeeAccess();
+                                $up->employee_id = $model->id;
+                                $up->project_id = (int) $ugId;
+                                $up->created = date('Y-m-d H:i:s');
+                                $up->save();
+                            }
+                        }
+                    }
+
                     //VarDumper::dump($attr['user_groups'], 10, true); exit;
 
-                    foreach ($availableProjects as $availableProject) {
-                        if (!in_array($availableProject, $newEmployeeAccess) && in_array($availableProject, $model->employeeAccess)) {
+
+                    /*foreach ($availableProjects as $availableProject) {
+                        if (!in_array($availableProject, $newEmployeeAccess) && in_array($availableProject, $model->user_projects)) {
                             ProjectEmployeeAccess::deleteAll([
                                 'employee_id' => $model->id,
                                 'project_id' => $availableProject
                             ]);
-                        } else if (in_array($availableProject, $newEmployeeAccess) && !in_array($availableProject, $model->employeeAccess)) {
+                        } else if (in_array($availableProject, $newEmployeeAccess) && !in_array($availableProject, $model->user_projects)) {
                             $access = new ProjectEmployeeAccess();
                             $access->employee_id = $model->id;
                             $access->project_id = $availableProject;
                             $access->save();
                         }
-                    }
-                    //$model = Employee::findOne(['id' => $id]);
-                    Yii::$app->getSession()->setFlash('success', ($isNew) ? 'Profile created!' : 'Profile updated!');
+                    }*/
 
-                    if($isNew){
-                        return $this->redirect(['update','id' => $model->id]);
-                    }
+                    //$model = Employee::findOne(['id' => $id]);
+                    Yii::$app->getSession()->setFlash('success', 'User updated');
+
+
                 }
             }
 
             //VarDumper::dump($model->userGroupAssigns, 10 ,true); exit;
 
             $model->user_groups = ArrayHelper::map($model->userGroupAssigns, 'ugs_group_id', 'ugs_group_id');
+            $model->user_projects = ArrayHelper::map($model->projects, 'id', 'id');
+
+            //VarDumper::dump($model->user_projects, 10, true); exit;
 
 
+
+            $searchModel = new UserProjectParamsSearch();
+            $params = Yii::$app->request->queryParams;
+
+            /*if(Yii::$app->authManager->getAssignment('supervision', $model->id)) {
+
+            }*/
+
+            $params['UserProjectParamsSearch']['upp_user_id'] = $model->id;
+
+            $dataProvider = $searchModel->search($params);
 
 
             if ($modelUserParams->load(Yii::$app->request->post())) {
@@ -310,10 +413,9 @@ class EmployeeController extends DefaultController
             return $this->render('_form', [
                 'model' => $model,
                 'modelUserParams' => $modelUserParams,
-                'isProfile' => false
+                //'searchModel' => $searchModel,
+                'dataProvider' => $dataProvider,
             ]);
 
-
-        //throw new BadRequestHttpException('"Employee ID ' . $id . '" not found.');
     }
 }

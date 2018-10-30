@@ -75,10 +75,12 @@ class EmployeeAcl extends \yii\db\ActiveRecord
 
     public static function isActiveIPRule($ip)
     {
+        $id = Yii::$app->user->id ? Yii::$app->user->id : 0;
+
         return self::findOne([
             'active' => true,
             'mask' => trim($ip),
-            'employee_id' => Yii::$app->user->identity->getId()
+            'employee_id' => $id
         ]);
     }
 }

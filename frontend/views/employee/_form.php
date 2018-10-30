@@ -3,14 +3,16 @@
  * @var $this \yii\web\View
  * @var $model Employee
  * @var $modelUserParams \common\models\UserParams
- * @var $isProfile boolean
  */
+/* @var $searchModel common\models\search\UserProjectParamsSearch */
+/* @var $dataProvider yii\data\ActiveDataProvider */
 
 use yii\bootstrap\Html;
 use yii\bootstrap\ActiveForm;
 use common\models\Employee;
 use common\models\EmployeeAcl;
 use yii\widgets\MaskedInput;
+use kartik\time\TimePicker;
 
 $formId = sprintf('%s-ID', $model->formName());
 
@@ -23,21 +25,29 @@ if($model->isNewRecord) {
 $this->params['breadcrumbs'][] = ['label' => 'User List', 'url' => ['list']];
 $this->params['breadcrumbs'][] = $this->title;
 
+
+if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
+    $userList = \common\models\Employee::getList();
+    $projectList = \common\models\Project::getList();
+} else {
+    $userList = \common\models\Employee::getListByUserId(Yii::$app->user->id);
+    $projectList = \common\models\ProjectEmployeeAccess::getProjectsByEmployee();
+}
 ?>
-<?php $form = ActiveForm::begin([
-    'successCssClass' => '',
-    'id' => $formId
-]) ?>
-<div class="col-sm-6">
 
 
+<div class="col-sm-5">
+    <?php $form = ActiveForm::begin([
+        'successCssClass' => '',
+        'id' => $formId
+    ]) ?>
             <div class="well">
                 <div class="row">
                     <div class="col-sm-6">
-                        <?= $form->field($model, 'username')->textInput() ?>
+                        <?= $form->field($model, 'username')->textInput(['autocomplete' => "new-user"]) ?>
                     </div>
                     <div class="col-sm-6">
-                        <?= $form->field($model, 'password')->passwordInput() ?>
+                        <?= $form->field($model, 'password')->passwordInput(['autocomplete' => "new-password"]) ?>
                     </div>
                 </div>
                 <div class="row">
@@ -48,33 +58,43 @@ $this->params['breadcrumbs'][] = $this->title;
                         <?= $form->field($model, 'email')->input('email') ?>
                     </div>
                 </div>
-                <?php if (!$isProfile) : ?>
-                    <div class="row">
-                        <div class="col-sm-6">
-                            <?= $form->field($model, 'role')->dropDownList(
-                                $model::getAllRoles(), [
-                                    'prompt' => '',
-                                ]
-                            ) ?>
-                        </div>
-                        <?php if (!$model->isNewRecord) : ?>
-                            <div class="col-sm-6">
-                                <?= $form->field($model, 'deleted', ['template' => '{label}{input}'])->checkbox() ?>
+
+                <div class="row">
+                    <div class="col-sm-6">
+                        <?php if($model->isNewRecord || Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) ||
+                        (Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id) && $model->role == 'agent')): ?>
+                            <?= $form->field($model, 'role')->dropDownList($model::getAllRoles(), ['prompt' => '']) ?>
+                        <?php else: ?>
+                            <div>
+                            <label class="control-label">Role</label>:
+                                <b><?=Html::encode($model->role);?></b>
                             </div>
-                        <?php endif; ?>
+                        <? endif; ?>
                     </div>
-                <?php endif; ?>
+                    <?php if (!$model->isNewRecord) : ?>
+                        <div class="col-sm-6">
+                            <?= $form->field($model, 'deleted', ['template' => '{label}{input}'])->checkbox() ?>
+                        </div>
+                    <?php endif; ?>
+                </div>
+
                 <div class="row">
                     <div class="col-sm-12">
-                        <?php if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id)):
+                        <?php if($model->isNewRecord || Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) ||
+                            (Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id) && $model->role == 'agent')):
 
                             if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
                                 $data = \common\models\UserGroup::getList();
+                                $dataProjects = \common\models\Project::getList();
                             }
 
                             if(Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id)) {
                                 $data = Yii::$app->user->identity->getUserGroupList();
+                                $dataProjects = \yii\helpers\ArrayHelper::map(Yii::$app->user->identity->projects, 'id', 'name');
+                                //\yii\helpers\VarDumper::dump($dataProjects, 10, true);                             //exit;
                             }
+
+
 
 
                             ?>
@@ -88,29 +108,57 @@ $this->params['breadcrumbs'][] = $this->title;
                             ]);
                             ?>
 
+
+                            <?php
+                            echo $form->field($model, 'user_projects')->widget(\kartik\select2\Select2::class, [
+                                'data' => $dataProjects,
+                                'size' => \kartik\select2\Select2::SMALL,
+                                'options' => ['placeholder' => 'Select user projects', 'multiple' => true],
+                                'pluginOptions' => ['allowClear' => true],
+                            ]);
+                            ?>
+
                         <? else: ?>
 
-                            <label class="control-label">User Groups</label>:
-                            <?php
-                                $groupsValue = '';
-                                if( $groupsModel =  $model->ugsGroups) {
-                                    $groups = \yii\helpers\ArrayHelper::map($groupsModel, 'ug_id', 'ug_name');
+                            <div class="col-md-12">
+                                <label class="control-label">User Groups</label>:
+                                <?php
+                                    $groupsValue = '';
+                                    if( $groupsModel =  $model->ugsGroups) {
+                                        $groups = \yii\helpers\ArrayHelper::map($groupsModel, 'ug_id', 'ug_name');
 
-                                    $groupsValueArr = [];
-                                    foreach ($groups as $group) {
-                                        $groupsValueArr[] = Html::tag('span', Html::encode($group), ['class' => 'label label-default']);
+                                        $groupsValueArr = [];
+                                        foreach ($groups as $group) {
+                                            $groupsValueArr[] = Html::tag('span', Html::encode($group), ['class' => 'label label-default']);
+                                        }
+                                        $groupsValue = implode(' ', $groupsValueArr);
                                     }
-                                    $groupsValue = implode(' ', $groupsValueArr);
-                                }
-                                echo $groupsValue;
-                            ?>
+                                    echo $groupsValue;
+                                ?>
+                            </div>
+
+                            <div class="col-md-12">
+                                <label class="control-label">Projects access</label>:
+                                <?php
+                                    $projectsValueArr = [];
+
+                                    if($projects = $model->projects) {
+                                        foreach ($projects as $project) {
+                                            $projectsValueArr[] = Html::tag('span', Html::tag('i', '', ['class' => 'fa fa-list']) . ' ' . Html::encode($project->name), ['class' => 'label label-info']);
+                                        }
+                                    }
+
+                                    $projectsValue = implode(' ', $projectsValueArr);
+                                    echo $projectsValue;
+                                ?>
+                            </div>
 
                         <? endif; ?>
                     </div>
 
                 </div>
 
-                <?php if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)): ?>
+                <?php if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id)): ?>
                 <div class="row">
                     <div class="col-md-12">
                         <?php echo $form->errorSummary($modelUserParams) ?>
@@ -124,20 +172,48 @@ $this->params['breadcrumbs'][] = $this->title;
                     <div class="col-md-3">
                         <?= $form->field($modelUserParams, 'up_commission_percent')->input('number', ['step' => 1, 'max' => 100, 'min' => 0]) ?>
                     </div>
+                    <div class="col-md-3">
+                        <?= $form->field($modelUserParams, 'up_bonus_active')->checkbox() ?>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-3">
+                        <?= $form->field($modelUserParams, 'up_work_start_tm')->widget(
+                            \kartik\time\TimePicker::class, [
+                                'pluginOptions' => [
+                                    'showSeconds' => false,
+                                    'showMeridian' => false,
+                            ]])?>
+                    </div>
+                    <div class="col-md-3">
+                        <?= $form->field($modelUserParams, 'up_work_minutes')->input('number', ['step' => 10, 'min' => 0])?>
+                    </div>
+                    <div class="col-md-6">
+                        <?//= $form->field($modelUserParams, 'up_timezone')->dropDownList(Employee::timezoneList(),['prompt' =>'-'])?>
+                        <?php
+                        echo $form->field($modelUserParams, 'up_timezone')->widget(\kartik\select2\Select2::class, [
+                            'data' => Employee::timezoneList(),
+                            'size' => \kartik\select2\Select2::SMALL,
+                            'options' => ['placeholder' => 'Select TimeZone', 'multiple' => false],
+                            'pluginOptions' => ['allowClear' => true],
+                        ]);
+                        ?>
+                    </div>
                 </div>
                 <?php endif; ?>
 
             </div>
             <?php
-            if (!$model->isNewRecord && !$isProfile) : ?>
+            if (!$model->isNewRecord) : ?>
                 <div class="well form-inline">
                     <div class="form-group">
                         <?= $form->field($model, 'acl_rules_activated', [
                             'template' => '{input}'
                         ])->checkbox() ?>
                         <span>&nbsp;</span>
-                        <?= Html::a('Add Extra Rule', null, [
-                            'class' => 'btn btn-success',
+                        <?= Html::a('<i class="glyphicon glyphicon-plus"></i> Add Extra Rule', null, [
+                            'class' => 'btn btn-success btn-xs',
                             'id' => 'acl-rule-id',
                         ]) ?>
                         <?php
@@ -156,7 +232,7 @@ $this->params['breadcrumbs'][] = $this->title;
         $('#acl-rule-id').removeClass('hidden');
         $('#$idForm').addClass('hidden');
     });
-    
+
     $('#submit-btn').click(function() {
         $.post($(this).data('url'), $('#$idForm input').serialize(),function( data ) {
             if (data.success) {
@@ -219,11 +295,130 @@ JS;
             <div class="form-group">
                 <?= Html::submitButton(($model->isNewRecord ? 'Create User' : 'Update User'), ['class' => 'btn btn-primary']) ?>
             </div>
-
+    <?php ActiveForm::end() ?>
 </div>
 
-<div class="col-sm-6">
+
+<div class="col-sm-7">
     <?php if (!$model->isNewRecord) : ?>
+
+        <div class="user-project-params-index">
+
+            <h4>Project Params</h4>
+
+            <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
+            <?php \yii\widgets\Pjax::begin(['id' => 'pjax-grid-upp']); ?>
+            <p>
+                <?//= Html::a('Create User Project Params', ['user-project-params/create'], ['class' => 'btn btn-success']) ?>
+
+                <?php echo Html::a('<i class="glyphicon glyphicon-plus"></i> Create Project Params',null,
+                    [
+                        'class' => 'btn btn-success btn-xs act-create-upp',
+                        'title' => 'Create Project Params',
+                        //'data-toggle'=>'modal',
+                        //'data-target'=>'#activity-modal',
+                        'data-user_id' => $model->id,
+                        'data-pjax' => '0',
+                    ]
+                );
+                ?>
+
+
+
+                <?php /*<div class="modal fade" id="modal-dialog" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content loader-lg">
+
+                        </div>
+                    </div>
+                </div>*/ ?>
+
+
+            </p>
+
+
+            <?= \yii\grid\GridView::widget([
+                'dataProvider' => $dataProvider,
+                //'filterModel' => $searchModel,
+                'columns' => [
+                    ['class' => 'yii\grid\SerialColumn'],
+
+
+                    [
+                        'attribute' => 'upp_project_id',
+                        'value' => function(\common\models\UserProjectParams $model) {
+                            return $model->uppProject ? ''.$model->uppProject->name.'' : '-';
+                        },
+                        'filter' => $projectList
+                        //'format' => 'raw'
+                        //'contentOptions' => ['class' => 'text-right']
+                    ],
+
+                    //'upp_user_id',
+                    //'upp_project_id',
+                    'upp_email:email',
+                    'upp_phone_number',
+                    'upp_tw_phone_number',
+                    'upp_tw_sip_id',
+
+                    /*[
+                        'label' => 'Action',
+                        'value' => function(\common\models\UserProjectParams $model) {
+                            return Html::a('<i class="glyphicon glyphicon-edit"></i> Update',
+                                 ['user-project-params/update','upp_user_id' => $model->upp_user_id, 'upp_project_id' => $model->upp_project_id, 'redirect' => 'employee/update?id='.$model->upp_user_id],
+                                [
+                                    'class' => 'btn btn-xs btn-warning',
+                                    'title' => 'Update Params',
+                                    'data-toggle'=>'modal',
+                                    'data-target'=>'#modal-dialog',
+                                    'data-id' => $model->upp_user_id . '_' . $model->upp_project_id,
+                                    //'data-pjax' => '0',
+                                ]
+                            );
+
+                        },
+                        'format' => 'raw'
+                    ],*/
+
+                    //'upp_created_dt',
+                    //'upp_updated_dt',
+                    /*[
+                        'attribute' => 'upp_updated_dt',
+                        'value' => function(\common\models\UserProjectParams $model) {
+                            return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->upp_updated_dt));
+                        },
+                        'format' => 'raw',
+                    ],*/
+
+
+
+                    [
+                        'class' => 'yii\grid\ActionColumn',
+                        'template' => '{update} {delete}',
+                        'controller' => 'user-project-params',
+                        //'headerOptions' => ['width' => '20%', 'class' => '',],
+                        'buttons' => [
+                            'update' => function ($url, $model, $key) {
+                                return Html::a('<span class="glyphicon glyphicon-edit"></span>','#', [
+                                    'class' => 'act-update-upp',
+                                    'title' => 'Update Project params',
+                                    //'data-toggle' => 'modal',
+                                    //'data-target' => '#activity-modal',
+                                    'data-id' => $key,
+                                    'data-pjax' => '0',
+                                ]);
+                            },
+                        ],
+
+                    ],
+                ],
+            ]); ?>
+            <?php \yii\widgets\Pjax::end(); ?>
+        </div>
+
+
+
+        <?php /*
         <div class="panel panel-default">
             <div class="panel-heading collapsing-heading">
                 <?= Html::a('Seller Contact Info <i class="collapsing-heading__arrow"></i>', '#seller-contact-info', [
@@ -237,18 +432,73 @@ JS;
                 ]) ?>
             </div>
         </div>
+        */ ?>
+
+
     <?php endif; ?>
-    <?= $this->render('partial/_activities', [
+    <?/*= $this->render('partial/_activities', [
         'model' => $model
-    ]) ?>
-    <?php
+    ])*/ ?>
+
+    <?php /*
     if (!$model->isNewRecord && $model->role != 'admin') {
         echo $this->render('partial/_permissions', [
             'model' => $model,
             'isProfile' => $isProfile
         ]);
-    }
+    }*/
     ?>
 </div>
 
-<?php ActiveForm::end() ?>
+<?php \yii\bootstrap\Modal::begin([
+    'id' => 'activity-modal',
+    //'header' => '<h4 class="modal-title">View Image</h4>',
+    //'footer' => '<a href="#" class="btn btn-primary" data-dismiss="modal">Close</a>',
+
+]); ?>
+<?php \yii\bootstrap\Modal::end(); ?>
+
+
+<?php
+$js = <<<JS
+
+    $('#activity-modal').on('hidden.bs.modal', function () {
+        // $('#modal-dialog').find('.modal-content').html('');
+        $.pjax.reload({container:'#pjax-grid-upp'});
+    });
+
+
+    /*$("#update-app-pjax").on("pjax:end", function() {
+        $.pjax.reload({container:'#pjax-grid-upp'});
+        $('#activity-modal').modal('hide');
+    });*/
+
+
+    $(document).on('click', '.act-update-upp', function(e) {
+        e.preventDefault();
+        //alert(123);
+        $.get(
+            '/user-project-params/update-ajax',
+            {
+                data: $(this).closest('tr').data('key')
+            },
+            function (data) {
+                $('#activity-modal .modal-content').html(data);
+                $('#activity-modal').modal();
+            }
+        );
+    });
+
+
+    $(document).on('click', '.act-create-upp', function(e) {
+        e.preventDefault();
+        $.get('/user-project-params/create-ajax', {user_id: $(this).data('user_id')},
+            function (data) {
+                $('#activity-modal .modal-content').html(data);
+                $('#activity-modal').modal();
+            }
+        );
+    });
+
+JS;
+$this->registerJs($js);

@@ -15,7 +15,7 @@ use yii\filters\VerbFilter;
 /**
  * LeadFlightSegmentController implements the CRUD actions for LeadFlightSegment model.
  */
-class LeadFlightSegmentController extends DefaultController
+class LeadFlightSegmentController extends FController
 {
     /**
      * {@inheritdoc}

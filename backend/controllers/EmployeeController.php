@@ -148,13 +148,13 @@ class EmployeeController extends BController
         $this->view->title = sprintf('Employees - Profile');
 
         $id = Yii::$app->request->get('id', null);
-        if ($id !== null) {
+        if ($id) {
             $model = Employee::findOne(['id' => $id]);
         } else {
             $model = new Employee(['scenario' => Employee::SCENARIO_REGISTER]);
         }
 
-        if ($model !== null) {
+        if ($model) {
             if (Yii::$app->request->isPost) {
                 $attr = Yii::$app->request->post($model->formName());
 
@@ -168,12 +168,12 @@ class EmployeeController extends BController
                 if ($model->validate() && $model->save()) {
                     $model->addRole($isNew);
                     foreach ($availableProjects as $availableProject) {
-                        if (!in_array($availableProject, $newEmployeeAccess) && in_array($availableProject, $model->employeeAccess)) {
+                        if (!in_array($availableProject, $newEmployeeAccess) && in_array($availableProject, $model->user_projects)) {
                             ProjectEmployeeAccess::deleteAll([
                                 'employee_id' => $model->id,
                                 'project_id' => $availableProject
                             ]);
-                        } else if (in_array($availableProject, $newEmployeeAccess) && !in_array($availableProject, $model->employeeAccess)) {
+                        } else if (in_array($availableProject, $newEmployeeAccess) && !in_array($availableProject, $model->user_projects)) {
                             $access = new ProjectEmployeeAccess();
                             $access->employee_id = $model->id;
                             $access->project_id = $availableProject;

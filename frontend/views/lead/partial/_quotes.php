@@ -228,7 +228,7 @@ JS;
         $tagACollapseClass = 'collapsed';
     }
     ?>
-    <div class="panel panel-info panel-wrapper sl-quote" id="<?= $quote->uid ?>">
+    <div class="panel panel-primary panel-wrapper sl-quote" id="<?= $quote->uid ?>">
         <div class="panel-heading collapsing-heading">
             <a data-toggle="collapse" href="#quote-<?= $quote->uid ?>"
                class="collapsing-heading__collapse-link <?= $tagACollapseClass ?>">

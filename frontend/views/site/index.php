@@ -3,522 +3,784 @@
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
+use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
-/* @var $dataStats [] */
-/* @var $dataSources [] */
-/* @var $dataEmployee [] */
-/* @var $dataEmployeeSold [] */
-
-/* @var $searchModel common\models\search\LeadTaskSearch */
+/* @var $searchLeadTask common\models\search\LeadTaskSearch */
 /* @var $dp1 yii\data\ActiveDataProvider */
 /* @var $dp2 yii\data\ActiveDataProvider */
 /* @var $dp3 yii\data\ActiveDataProvider */
 
+/* @var $searchModel common\models\search\EmployeeSearch */
+/* @var $dataProvider yii\data\ActiveDataProvider */
+/* @var $form yii\widgets\ActiveForm */
 
-$this->title = 'Dashboard';
+$bundle = \frontend\assets\TimelineAsset::register($this);
+
+$this->title = 'Dashboard - Agent';
+
+$this->registerJsFile('https://cdnjs.cloudflare.com/ajax/libs/jquery.countdown/2.2.0/jquery.countdown.min.js', [
+    'position' => \yii\web\View::POS_HEAD,
+    'depends' => [
+        \yii\web\JqueryAsset::class
+    ]
+]);
+
 ?>
-<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+<?/*<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>*/?>
 
 <?php
-$js = <<<JS
-    google.charts.load('current', {packages: ['corechart', 'bar']});
-JS;
-$this->registerJs($js, \yii\web\View::POS_READY);
-//Yii::$app->formatter->timeZone = 'Asia/Calcutta';
 
-//$tzlist = DateTimeZone::listIdentifiers(DateTimeZone::ALL);
-
-function timezoneList()
-{
-    $timezoneIdentifiers = DateTimeZone::listIdentifiers(DateTimeZone:: ALL);
-    $utcTime = new DateTime('now', new DateTimeZone('UTC'));
-
-    $tempTimezones = array();
-    foreach ($timezoneIdentifiers as $timezoneIdentifier) {
-        $currentTimezone = new DateTimeZone($timezoneIdentifier);
-
-        $tempTimezones[] = array(
-            'offset' => (int)$currentTimezone->getOffset($utcTime),
-            'identifier' => $timezoneIdentifier
-        );
-    }
-
-    // Sort the array by offset,identifier ascending
-    usort($tempTimezones, function($a, $b) {
-        return ($a['offset'] == $b['offset'])
-            ? strcmp($a['identifier'], $b['identifier'])
-            : $a['offset'] - $b['offset'];
-    });
-
-    $timezoneList = array();
-    foreach ($tempTimezones as $tz) {
-        $sign = ($tz['offset'] > 0) ? '+' : '-';
-        $offset = gmdate('H:i', abs($tz['offset']));
-        $timezoneList[$tz['identifier']] = '(UTC ' . $sign . $offset . ') ' .
-            $tz['identifier'];
-    }
-
-    return $timezoneList;
-}
-
-//\yii\helpers\VarDumper::dump(timezoneList(), 10, true); exit;
+//$date = date('Y-m-d H:i', strtotime("+1 days"));
 
 $userId = Yii::$app->user->id;
-
-
 ?>
 
 <div class="site-index">
 
+    <h1><?=$this->title?></h1>
 
     <div class="row">
-        <div class="col-md-4">
+        <div class="col-md-3">
             <table class="table table-bordered">
                 <tr>
-                    <th>Server Date Time</th>
-                    <td><?= date('Y-m-d H:i:s')?></td>
+                    <th>Server Date Time (UTC)</th>
+                    <td><i class="fa fa-calendar"></i> <?= date('Y-M-d [H:i]')?></td>
                 </tr>
                 <tr>
-                    <th>Formatted Local Date Time</th>
-                    <td><?= Yii::$app->formatter->asDatetime(time())?></td>
+                    <th>Current Time Zone</th>
+                    <td><i class="fa fa-globe"></i> <?= Yii::$app->formatter->timeZone?></td>
+                </tr>
+                <tr>
+                    <th>Local Date Time</th>
+                    <td><i class="fa fa-calendar"></i> <?= Yii::$app->formatter->asDatetime(time())?></td>
                 </tr>
             </table>
 
         </div>
 
-        <div class="col-md-4">
+        <div class="col-md-3">
             <table class="table table-bordered">
                 <tr>
                     <th>My Username:</th>
-                    <td><?= Yii::$app->user->identity->username?> (<?=Yii::$app->user->id?>)</td>
+                    <td><i class="fa fa-user"></i> <?= Yii::$app->user->identity->username?> (<?=Yii::$app->user->id?>)</td>
                 </tr>
                 <tr>
                     <th>My Role:</th>
                     <td><?=implode(', ', Yii::$app->user->identity->roles)?></td>
                 </tr>
-            </table>
-
-        </div>
-
-        <div class="col-md-4">
-            <table class="table table-bordered">
                 <tr>
                     <th>My User Groups:</th>
-                    <td>
+                    <td><i class="fa fa-users"></i>
                         <?php
-                            $groupsValue = '';
-                            if( $groupsModel =  Yii::$app->user->identity->ugsGroups) {
-                                $groups = \yii\helpers\ArrayHelper::map($groupsModel, 'ug_id', 'ug_name');
+                        $groupsValue = '';
+                        if( $groupsModel =  Yii::$app->user->identity->ugsGroups) {
+                            $groups = \yii\helpers\ArrayHelper::map($groupsModel, 'ug_id', 'ug_name');
 
-                                $groupsValueArr = [];
-                                foreach ($groups as $group) {
-                                    $groupsValueArr[] = Html::tag('span', Html::encode($group), ['class' => 'label label-default']);
-                                }
-                                $groupsValue = implode(' ', $groupsValueArr);
+                            $groupsValueArr = [];
+                            foreach ($groups as $group) {
+                                $groupsValueArr[] = Html::tag('span', Html::encode($group), ['class' => 'label label-default']);
                             }
-                            echo $groupsValue;
+                            $groupsValue = implode(' ', $groupsValueArr);
+                        }
+                        echo $groupsValue;
                         ?>
                     </td>
                 </tr>
+                <tr>
+                    <th>My Project Access:</th>
+                    <td><i class="fa fa-list"></i>
+                        <?php
 
+                        //\yii\helpers\VarDumper::dump(Yii::$app->user->identity->projects, 10, true);
+
+                        $projectsValue = '';
+
+                        //$projectList = \common\models\ProjectEmployeeAccess::getProjectsByEmployee();
+                        $projectList = Yii::$app->user->identity->projects;
+
+                        if($projectList) {
+
+                            $groupsValueArr = [];
+                            foreach ($projectList as $project) {
+                                $groupsValueArr[] = Html::tag('span', Html::encode($project->name), ['class' => 'label label-default']);
+                            }
+                            $projectsValue = implode(' ', $groupsValueArr);
+                        }
+                        echo $projectsValue;
+                        ?>
+                    </td>
+                </tr>
             </table>
 
         </div>
 
+        <div class="col-md-3">
+            <?php
+
+            /** @var \common\models\UserParams $modelUserParams */
+            $modelUserParams = Yii::$app->user->identity->userParams;
+            if($modelUserParams) {
+                echo \yii\widgets\DetailView::widget([
+                    'model' => $modelUserParams ?? null,
+                    'attributes' => [
+                        /*[
+                            'attribute' => 'up_base_amount',
+                            'value' => function(\common\models\UserParams $model) {
+                                return $model->up_base_amount ? '$'.number_format($model->up_base_amount , 2) : '-';
+                            },
+                        ],
+                        [
+                            'attribute' => 'up_commission_percent',
+                            'value' => function(\common\models\UserParams $model) {
+                                return $model->up_commission_percent ? $model->up_commission_percent. '%' : '-';
+                            },
+
+                        ],*/
+                        'up_bonus_active:boolean',
+                        'up_timezone',
+                        'up_work_start_tm',
+                        'up_work_minutes',
+                        /*[
+                            'attribute' => 'up_updated_dt',
+                            'value' => function(\common\models\UserParams $model) {
+                                return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->up_updated_dt));
+                            },
+                            'format' => 'raw',
+                        ],*/
+
+                    ],
+                ]);
+            }
+            ?>
+
+
+        </div>
+
     </div>
+
+    <?php if($modelUserParams):
+
+        $js = <<<JS
+    //google.charts.load('current', {packages: ['corechart', 'bar']});
+    $("#myTimeline").timeline({
+        type            : "bar",
+        rows            : 1,
+        //rowHeight       : 80,
+        height          : "auto"
+  //      startDatetime   : "current"
+    });
+JS;
+        $this->registerJs($js, \yii\web\View::POS_READY);
+
+        ?>
+
+        <h3>My Shift Timeline</h3>
+        <!-- Timeline Block -->
+        <div id="myTimeline">
+            <ul class="timeline-events">
+                <?php
+                    $currentDateTS = strtotime(Yii::$app->formatter->asDate(time()));
+                    $startTime = date('Y-m-d '.$modelUserParams->up_work_start_tm);
+                    echo $startTime;
+                    $endTime = date('Y-m-d H:i', strtotime($startTime) + ($modelUserParams->up_work_minutes * 60));
+                ?>
+                <li data-timeline-node="{ start:'<?=$startTime?>',end:'<?=$endTime?>',content:'1 shift',bgColor:'rgb(137, 201, 151)',color:'#fff',row:1,extend:{'post_id':1,'permalink':'https://google.com/'} }"><?=date('d-M [H:i]', strtotime($startTime))?> ........ <?=date('d-M [H:i]', strtotime($endTime))?> ..... (<?=round($modelUserParams->up_work_minutes/60, 1)?> hours)</li>
+
+                <?php
+                    $currentDateTS = strtotime(Yii::$app->formatter->asDate(strtotime("+1 day")));
+                    $startTime = date('Y-m-d '.$modelUserParams->up_work_start_tm, $currentDateTS);
+                    echo $startTime;
+                    $endTime = date('Y-m-d H:i', strtotime($startTime) + ($modelUserParams->up_work_minutes * 60));
+                ?>
+                <li data-timeline-node="{ start:'<?=$startTime?>',end:'<?=$endTime?>',content:'2 shift',row:1 }"><?=date('d-M [H:i]', strtotime($startTime))?> ........ <?=date('d-M [H:i]', strtotime($endTime))?> ..... (<?=round($modelUserParams->up_work_minutes/60, 1)?> hours)</li>
+
+            </ul>
+        </div>
+
+        <!-- Timeline Event Detail View Area (optional) -->
+        <div class="timeline-event-view"></div>
+
+
+
+    <? endif; ?>
+
+
+
 
     <br>
 
+    <?php
+        $columns = [
+            ['class' => 'yii\grid\SerialColumn'],
+
+            [
+                //'label' => 'Lead UID',
+                'attribute' => 'lt_lead_id',
+                'value' => function(\common\models\LeadTask $model) {
+                    return Html::a($model->lt_lead_id, ['lead/processing/' . $model->lt_lead_id], ['target' => '_blank', 'data-pjax' => 0]);
+                },
+                'format' => 'raw',
+                'options' => ['style' => 'width:80px'],
+                //'filter' => false
+            ],
+
+            [
+                'label' => 'Task',
+                'attribute' => 'lt_task_id',
+                'value' => function(\common\models\LeadTask $model) {
+
+                    $taskIcon = '';
+                    if($model->ltTask && $model->ltTask->t_key === 'call2') {
+
+                        $call2DelayTime = Yii::$app->params['lead']['call2DelayTime']; //(2 * 60 * 60);
+
+                        $taskCall1 = \common\models\LeadTask::find()->where(['lt_user_id' => $model->lt_user_id, 'lt_lead_id' => $model->lt_lead_id, 'lt_date' => $model->lt_date, 'lt_task_id' => 1])->one();
+
+                        if($taskCall1) {
+                            if((strtotime($taskCall1->lt_completed_dt) + $call2DelayTime) <= time()) {
+                                $call2TaskEnable = true;
+                            } else {
+                                $taskIcon = '<br><span class="label label-default">Call after <i class="fa fa-clock-o"></i> '.Yii::$app->formatter->asDatetime(strtotime($taskCall1->lt_completed_dt) + $call2DelayTime).'</span>';
+                                //'<i class="fa fa-clock-o" title="Next call '.Yii::$app->formatter->asDatetime(strtotime($taskCall1->lt_completed_dt) + $call2DelayTime).'"></i> ';
+                            }
+                        }
+                        //$taskIcon = '<i class="fa fa-clock-o"></i>';
+                    }
+
+
+                    return $model->ltTask ? '<span style="font-size: 13px" title="'.Html::encode($model->ltTask->t_description).'" class="label label-info">'.Html::encode($model->ltTask->t_name).'</span>'.$taskIcon .'': '-';
+                },
+                'format' => 'raw',
+                'filter' => \common\models\Task::getList()
+            ],
+
+            [
+                'label' => 'Timer',
+                'value' => function(\common\models\LeadTask $model) {
+
+                    $cdTime = 0;
+                    if($model->ltTask && $model->ltTask->t_key === 'call2') {
+                        $call2DelayTime = Yii::$app->params['lead']['call2DelayTime'];
+
+                        $taskCall1 = \common\models\LeadTask::find()->where(['lt_user_id' => $model->lt_user_id, 'lt_lead_id' => $model->lt_lead_id, 'lt_date' => $model->lt_date, 'lt_task_id' => 1])->one();
+
+                        if($taskCall1 && (strtotime($taskCall1->lt_completed_dt) + $call2DelayTime) > time()) {
+                            $cdTime = strtotime($taskCall1->lt_completed_dt) + $call2DelayTime;
+                        }
+                    }
+
+                    $elapsedTime = $cdTime - time();
+
+                    return $elapsedTime > 0 ? '<div data-elapsed="'.$elapsedTime.'" data-countdown="'.date('Y-m-d H:i:s', $cdTime).'"></div>': '-';
+
+                },
+                'format' => 'raw',
+                'contentOptions' => ['class' => 'text-center', 'style' => 'width: 80px']
+            ],
+
+            [
+                'attribute' => 'lt_notes',
+                'value' => function(\common\models\LeadTask $model) {
+                    return $model->lt_notes ? $model->lt_notes : '-';
+                },
+            ],
+
+            [
+                'label' => 'Lead status',
+                'attribute' => 'ltLead.status',
+                'value' => function(\common\models\LeadTask $model) {
+                    return $model->ltLead ? $model->ltLead->getStatusName() : '-';
+                },
+                'format' => 'raw'
+            ],
+
+            [
+                //'attribute' => 'client_id',
+                'header' => 'Client name',
+                'format' => 'raw',
+                'value' => function(\common\models\LeadTask $model) {
+
+                    if($model->ltLead->client) {
+                        $clientName = $model->ltLead->client->first_name . ' ' . $model->ltLead->client->last_name;
+                        if ($clientName === 'Client Name') {
+                            $clientName = '-';
+                        } else {
+                            $clientName = '<i class="fa fa-user"></i> '. Html::encode($clientName);
+                        }
+                    } else {
+                        $clientName = '-';
+                    }
+
+                    return $clientName;
+                },
+                'options' => ['style' => 'width:160px'],
+                //'filter' => \common\models\Employee::getList()
+            ],
+
+            [
+                //'attribute' => 'client_id',
+                'header' => 'Client time',
+                'format' => 'raw',
+                'value' => function(\common\models\LeadTask $model) {
+                    if($model->ltLead) {
+                        $clientTime = $model->ltLead->getClientTime2();
+                    } else {
+                        $clientTime = '-';
+                    }
+                    return $clientTime;
+                },
+                'options' => ['style' => 'width:160px'],
+                //'filter' => \common\models\Employee::getList()
+            ],
+
+
+
+            [
+                'label' => 'Segments',
+                'value' => function(\common\models\LeadTask $model) {
+
+                    $segments = $model->ltLead->leadFlightSegments;
+                    $segmentData = [];
+                    if($segments) {
+                        foreach ($segments as $sk => $segment) {
+                            //$segmentData[] = ($sk + 1).'. <code>'.Html::a($segment->origin.'->'.$segment->destination, ['lead-flight-segment/view', 'id' => $segment->id], ['target' => '_blank', 'data-pjax' => 0]).'</code>';
+                            $segmentData[] = ($sk + 1).'. <code>'.$segment->origin.'->'.$segment->destination.'</code>';
+                        }
+                    }
+
+                    $segmentStr = implode('<br>', $segmentData);
+                    return ''.$segmentStr.'';
+
+                },
+                'format' => 'raw',
+                'contentOptions' => ['class' => 'text-center'],
+                'options' => ['style' => 'width:140px'],
+            ],
+
+
+            [
+                'label' => 'Cabin',
+                'attribute' => 'leads.cabin',
+                'value' => function(\common\models\LeadTask $model) {
+                    return \common\models\Lead::getCabin($model->ltLead->cabin) ?? '-';
+                },
+            ],
+
+            [
+                'label' => 'Adults',
+                'attribute' => 'leads.adults',
+                'value' => function(\common\models\LeadTask $model) {
+                    return $model->ltLead->adults ?: 0;
+                },
+                'contentOptions' => ['class' => 'text-center'],
+            ],
+
+            [
+                'label' => 'Children',
+                'attribute' => 'leads.children',
+                'value' => function(\common\models\LeadTask $model) {
+                    return $model->ltLead->children ?: '-';
+                },
+                'contentOptions' => ['class' => 'text-center'],
+            ],
+            [
+                'label' => 'Infants',
+                'attribute' => 'leads.infants',
+                'value' => function(\common\models\LeadTask $model) {
+                    return $model->ltLead->infants ?: '-';
+                },
+                'contentOptions' => ['class' => 'text-center'],
+            ],
+
+
+            [
+                'label' => 'Lead created',
+                'attribute' => 'ltLead.created',
+                'value' => function(\common\models\LeadTask $model) {
+                    return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->ltLead->created));
+                },
+                'format' => 'raw',
+            ],
+
+            [
+                'label' => 'Lead pending time',
+                //'attribute' => 'ltLead.created',
+                'value' => function(\common\models\LeadTask $model) {
+                    $time = Yii::$app->formatter->asRelativeTime(strtotime($model->ltLead->created));
+                    return $time; //'<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->ltLead->created));
+                },
+                'format' => 'raw',
+            ],
+
+            /*[
+                'attribute' => 'lt_completed_dt',
+                'value' => function(\common\models\LeadTask $model) {
+                    return $model->lt_completed_dt ? '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->lt_completed_dt)) : '-';
+                },
+                'format' => 'html',
+            ],*/
+        ];
+    ?>
 
     <div class="row">
-        <div class="col-md-4">
-            <?php Pjax::begin(); ?>
-            <h4>To Do Task List <span class="label label-default">yesterday</span> (<?=date('Y-m-d', strtotime("-1 days"))?>):</h4>
-            <?= GridView::widget([
-                'dataProvider' => $dp1,
-                'filterModel' => $searchModel,
-                //'tableOptions' => ['class' => 'table table-bordered table-condensed table-striped table-hover'],
-                'rowOptions' => function (\common\models\LeadTask $model, $index, $widget, $grid) {
-                    if ($model->lt_completed_dt) {
-                        return ['class' => 'success'];
-                    }
-                },
-                'columns' => [
-                    ['class' => 'yii\grid\SerialColumn'],
+        <div class="col-md-12">
+            <ul class="nav nav-tabs">
+                <li>
+                    <a data-toggle="tab" href="#tab-1">
+                        <i class="fa fa-calendar-times-o"></i>  <?=\yii\helpers\Html::encode(Yii::$app->formatter->asDate(strtotime("-1 days")))?> <span class="label label-default">previous</span>
+                    </a>
+                </li>
+                <li class="active">
+                    <a data-toggle="tab" href="#tab-2" style="background-color: #dff0d8">
+                        <i class="fa fa-calendar"></i>  <?=\yii\helpers\Html::encode(Yii::$app->formatter->asDate(time()))?> <span class="label label-success">current</span>
+                    </a>
+                </li>
+                <li>
+                    <a data-toggle="tab" href="#tab-3" style="background-color:">
+                        <i class="fa fa-calendar-minus-o"></i>  <?=\yii\helpers\Html::encode(Yii::$app->formatter->asDate(strtotime("+1 days")))?> <span class="label label-warning">next</span>
+                    </a>
+                </li>
+            </ul>
 
-                    [
-                        //'label' => 'Lead UID',
-                        'attribute' => 'lt_lead_id',
-                        'value' => function(\common\models\LeadTask $model) {
-                            return Html::a($model->lt_lead_id, ['lead/processing/' . $model->lt_lead_id], ['target' => '_blank', 'data-pjax' => 0]);
+            <div class="tab-content">
+                <div id="tab-1" class="tab-pane fade in">
+                    <?php Pjax::begin(); ?>
+                    <h4>To Do Task List <span class="label label-default">previous</span> (<?=Yii::$app->formatter->asDate(strtotime("-1 days"))?>):</h4>
+                    <?= GridView::widget([
+                        'dataProvider' => $dp1,
+                        'filterModel' => $searchLeadTask,
+                        //'tableOptions' => ['class' => 'table table-bordered table-condensed table-striped table-hover'],
+                        'rowOptions' => function (\common\models\LeadTask $model, $index, $widget, $grid) {
+                            if ($model->lt_completed_dt) {
+                                return ['class' => 'success'];
+                            }
                         },
-                        'format' => 'raw',
-                        //'filter' => false
-                    ],
+                        'columns' => $columns,
+                    ]); ?>
+                    <?php Pjax::end(); ?>
+                </div>
 
-                    [
-                        'label' => 'Task',
-                        'attribute' => 'lt_task_id',
-                        'value' => function(\common\models\LeadTask $model) {
-                            return $model->ltTask ? $model->ltTask->t_name : '-';
+                <div id="tab-2" class="tab-pane fade in active">
+                    <?php Pjax::begin(); ?>
+                    <h4>To Do Task List <span class="label label-success">current</span> (<?=Yii::$app->formatter->asDate(time())?>):</h4>
+                    <?= GridView::widget([
+                        'dataProvider' => $dp2,
+                        'filterModel' => $searchLeadTask,
+                        'rowOptions' => function (\common\models\LeadTask $model, $index, $widget, $grid) {
+                            if ($model->lt_completed_dt) {
+                                return ['class' => 'success'];
+                            }
                         },
-                        'filter' => \common\models\Task::getList()
-                    ],
+                        'columns' => $columns,
+                    ]); ?>
+                    <?php Pjax::end(); ?>
+                </div>
 
-                    [
-                        'attribute' => 'lt_notes',
-                        'value' => function(\common\models\LeadTask $model) {
-                            return $model->lt_notes ? $model->lt_notes : '-';
+                <div id="tab-3" class="tab-pane fade in">
+                    <?php Pjax::begin(); ?>
+                    <h4>To Do Task List <span class="label label-warning">next</span> (<?=Yii::$app->formatter->asDate(strtotime("+1 days"))?>):</h4>
+                    <?= GridView::widget([
+                        'dataProvider' => $dp3,
+                        'filterModel' => $searchLeadTask,
+                        'rowOptions' => function (\common\models\LeadTask $model, $index, $widget, $grid) {
+                            if ($model->lt_completed_dt) {
+                                return ['class' => 'success'];
+                            }
                         },
-                    ],
+                        'columns' => $columns,
+                    ]); ?>
+                    <?php Pjax::end(); ?>
+                </div>
+            </div>
 
-                    [
-                        'attribute' => 'ltLead.status',
-                        'value' => function(\common\models\LeadTask $model) {
-                            return $model->ltLead ? $model->ltLead->getStatusLabel() : '-';
-                        },
-                        'format' => 'html'
-                    ],
-
-                    /*[
-                        'attribute' => 'lt_completed_dt',
-                        'value' => function(\common\models\LeadTask $model) {
-                            return $model->lt_completed_dt ? '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->lt_completed_dt)) : '-';
-                        },
-                        'format' => 'html',
-                    ],*/
-                ],
-            ]); ?>
-            <?php Pjax::end(); ?>
         </div>
-        <div class="col-md-4">
-            <?php Pjax::begin(); ?>
-            <h4>To Do Task List <span class="label label-default">today</span> (<?=date('Y-m-d')?>):</h4>
-            <?= GridView::widget([
-                'dataProvider' => $dp2,
-                'filterModel' => $searchModel,
-                'rowOptions' => function (\common\models\LeadTask $model, $index, $widget, $grid) {
-                    if ($model->lt_completed_dt) {
-                        return ['class' => 'success'];
-                    }
-                },
-                'columns' => [
-                    ['class' => 'yii\grid\SerialColumn'],
 
-                    [
-                        //'label' => 'Lead UID',
-                        'attribute' => 'lt_lead_id',
-                        'value' => function(\common\models\LeadTask $model) {
-                            return Html::a($model->lt_lead_id, ['lead/processing/' . $model->lt_lead_id], ['target' => '_blank', 'data-pjax' => 0]);
-                        },
-                        'format' => 'raw',
-                        //'filter' => false
-                    ],
-
-                    [
-                        'label' => 'Task',
-                        'attribute' => 'lt_task_id',
-                        'value' => function(\common\models\LeadTask $model) {
-                            return $model->ltTask ? $model->ltTask->t_name : '-';
-                        },
-                        'filter' => \common\models\Task::getList()
-                    ],
-
-                    [
-                        'attribute' => 'lt_notes',
-                        'value' => function(\common\models\LeadTask $model) {
-                            return $model->lt_notes ? $model->lt_notes : '-';
-                        },
-                    ],
-                    [
-                        'attribute' => 'ltLead.status',
-                        'value' => function(\common\models\LeadTask $model) {
-                            return $model->ltLead ? $model->ltLead->getStatusLabel() : '-';
-                        },
-                        'format' => 'html'
-                    ],
-
-                    /*[
-                        'attribute' => 'lt_completed_dt',
-                        'value' => function(\common\models\LeadTask $model) {
-                            return $model->lt_completed_dt ? '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->lt_completed_dt)) : '-';
-                        },
-                        'format' => 'html',
-                    ],*/
-                ],
-            ]); ?>
-            <?php Pjax::end(); ?>
-        </div>
-        <div class="col-md-4">
-            <?php Pjax::begin(); ?>
-            <h4>To Do Task List <span class="label label-default">tomorrow</span> (<?=date('Y-m-d', strtotime("+1 days"))?>):</h4>
-            <?= GridView::widget([
-                'dataProvider' => $dp3,
-                'filterModel' => $searchModel,
-                'rowOptions' => function (\common\models\LeadTask $model, $index, $widget, $grid) {
-                    if ($model->lt_completed_dt) {
-                        return ['class' => 'success'];
-                    }
-                },
-                'columns' => [
-                    ['class' => 'yii\grid\SerialColumn'],
-
-                    [
-                        //'label' => 'Lead UID',
-                        'attribute' => 'lt_lead_id',
-                        'value' => function(\common\models\LeadTask $model) {
-                            return Html::a($model->lt_lead_id, ['lead/processing/' . $model->lt_lead_id], ['target' => '_blank', 'data-pjax' => 0]);
-                        },
-                        'format' => 'raw',
-                        //'filter' => false
-                    ],
-
-                    [
-                        'label' => 'Task',
-                        'attribute' => 'lt_task_id',
-                        'value' => function(\common\models\LeadTask $model) {
-                            return $model->ltTask ? $model->ltTask->t_name : '-';
-                        },
-                        'filter' => \common\models\Task::getList()
-                    ],
-
-                    [
-                        'attribute' => 'lt_notes',
-                        'value' => function(\common\models\LeadTask $model) {
-                            return $model->lt_notes ? $model->lt_notes : '-';
-                        },
-                    ],
-
-                    [
-                        'attribute' => 'ltLead.status',
-                        'value' => function(\common\models\LeadTask $model) {
-                            return $model->ltLead ? $model->ltLead->getStatusLabel() : '-';
-                        },
-                        'format' => 'html'
-                    ],
-
-
-                    /*[
-                        'attribute' => 'lt_completed_dt',
-                        'value' => function(\common\models\LeadTask $model) {
-                            return $model->lt_completed_dt ? '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->lt_completed_dt)) : '-';
-                        },
-                        'format' => 'html',
-                    ],*/
-                ],
-            ]); ?>
-            <?php Pjax::end(); ?>
-        </div>
     </div>
 
 
+    <?php Pjax::begin(); ?>
+    <div class="panel panel-default">
+        <div class="panel-heading">My Stats <?=$searchModel->date_range ? '(' . $searchModel->date_range . ')' : ''?></div>
+        <div class="panel-body">
 
-    <?php if(Yii::$app->authManager->getAssignment('admin', $userId) || Yii::$app->authManager->getAssignment('supervision', $userId)) : ?>
-
-        <div class="">
-            <div class="row top_tiles">
-
-                <div class="animated flipInY col-lg-3 col-md-3 col-sm-6 col-xs-12">
-                    <div class="tile-stats">
-                        <div class="icon"><i class="fa fa-users"></i></div>
-                        <div class="count"><?=\common\models\Lead::find()->where("DATE(created) = DATE(NOW())")->count()?></div>
-                        <h3>Leads</h3>
-                        <p>Today count of Leads</p>
-                    </div>
-                </div>
-                <div class="animated flipInY col-lg-3 col-md-3 col-sm-6 col-xs-12">
-                    <div class="tile-stats">
-                        <div class="icon"><i class="fa fa-cubes"></i></div>
-                        <div class="count"><?=\common\models\Quote::find()->where("DATE(created) = DATE(NOW())")->count()?></div>
-                        <h3>Quotes</h3>
-                        <p>Today count of Quotes</p>
-                    </div>
-                </div>
-                <div class="animated flipInY col-lg-3 col-md-3 col-sm-6 col-xs-12">
-                    <div class="tile-stats">
-                        <div class="icon"><i class="fa fa-sitemap"></i></div>
-                        <div class="count"><?=\common\models\ApiLog::find()->where("DATE(al_request_dt) = DATE(NOW())")->count()?></div>
-                        <h3>API Requests</h3>
-                        <p>Today count of API Requests</p>
-                    </div>
-                </div>
-                <div class="animated flipInY col-lg-3 col-md-3 col-sm-6 col-xs-12">
-                    <div class="tile-stats">
-                        <div class="icon"><i class="fa fa-list"></i></div>
-                        <div class="count"><?=\backend\models\Log::find()->where("log_time BETWEEN ".strtotime(date('Y-m-d'))." AND ".strtotime(date('Y-m-d H:i:s')))->count()?></div>
-                        <h3>System Logs</h3>
-                        <p>Today count of System Logs</p>
-                    </div>
-                </div>
-            </div>
-
-        </div>
-
-        <?php if ($dataStats): ?>
             <div class="row">
-                <div class="col-md-12">
 
+                <?php $form = ActiveForm::begin([
+                    'action' => ['index'],
+                    'method' => 'get',
+                    'options' => [
+                        'data-pjax' => 1
+                    ],
+                ]); ?>
 
-                    <div id="chart_div"></div>
-
-
+                <div class="col-md-3">
                     <?php
-                        $this->registerJs("google.charts.load('current', {'packages':['bar']}); google.charts.setOnLoadCallback(drawChart);", \yii\web\View::POS_READY);
+                    echo  \kartik\daterange\DateRangePicker::widget([
+                        'model'=> $searchModel,
+                        'attribute' => 'date_range',
+                        //'name'=>'date_range',
+                        'useWithAddon'=>true,
+                        //'value'=>'2015-10-19 12:00 AM - 2015-11-03 01:00 PM',
+                        'presetDropdown'=>true,
+                        'hideInput'=>true,
+                        'convertFormat'=>true,
+                        'startAttribute' => 'datetime_start',
+                        'endAttribute' => 'datetime_end',
+                        //'startInputOptions' => ['value' => date('Y-m-d', strtotime('-5 days'))],
+                        //'endInputOptions' => ['value' => '2017-07-20'],
+                        'pluginOptions'=>[
+                            'timePicker'=> false,
+                            'timePickerIncrement'=>15,
+                            'locale'=>['format'=>'Y-m-d']
+                        ]
+                    ]);
                     ?>
-
-                    <script>
-                        function drawChart() {
-                            var data = google.visualization.arrayToDataTable([
-                                ['Days', 'Not Trash', 'Trash', 'Pending', 'Processing + On Hold', 'Follow Up', 'Sold', {role: 'annotation'}],
-                                <?php foreach($dataStats as $k => $item):?>
-                                ['<?=date('d M', strtotime($item['created_date']))?>', <?=$item['done_count']?>, <?=$item['trash_count']?>, <?=$item['pending_count']?>, <?=$item['proc_count']?>, <?=$item['book_count']?>, <?=$item['sold_count']?>, '<?='--'?>'],
-                                <?php endforeach;?>
-
-                                <?//=$item['sum_price'].'$'?>
-                            ]);
-
-                            var options = {
-                                chart: {
-                                    title: 'Lead request',
-                                    subtitle: 'Lead request - Last 30 days',
-                                },
-                                title: 'Lead data',
-                                height: 400,
-                                vAxis: {
-                                    title: 'Requests'
-                                }
-                            };
-
-                            //var chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
-
-
-                            var chart = new google.charts.Bar(document.getElementById('chart_div'));
-
-                            chart.draw(data, options);
-                            //chart.draw(data, google.charts.Bar.convertOptions(options));
-
-                        }
-                    </script>
                 </div>
+
+                <div class="form-group">
+                    <?= Html::submitButton('<i class="fa fa-search"></i> Show result', ['class' => 'btn btn-primary']) ?>
+                    <?//= Html::resetButton('Reset', ['class' => 'btn btn-default']) ?>
+                </div>
+
+                <?php ActiveForm::end(); ?>
             </div>
-        <?php endif; ?>
-
-        <hr/>
-
-        <div class="row">
-            <div class="col-md-12">
-                <div class="col-md-4">
-                    <div id="chart_div_projects"></div>
-                    <?php if ($dataSources): ?>
-
-                            <?php
-                                $this->registerJs('google.charts.setOnLoadCallback(drawBasic1);', \yii\web\View::POS_READY);
-                            ?>
-
-                            <script>
-                                function drawBasic1() {
-                                    var data = google.visualization.arrayToDataTable([
-                                        ['Project', 'Count'],
-                                        <?php foreach($dataSources as $k => $item):
-
-                                            $user = \common\models\ApiUser::findOne($item['al_user_id']);
-                                            if(!$user) continue;
-
-                                            $project = $user->auProject;
-                                            if(!$project) continue;
-
-                                        ?>
-                                        ['<?php echo \yii\helpers\Html::encode($project->name).' (apiUser: '.$item['al_user_id'].')' ?>', <?=$item['cnt']?>],
-                                        <?php endforeach;?>
-                                    ]);
-
-                                    var options = {
-                                        title: 'Project API Request stats - Last <?=$days2?> days',
-                                        height: 400
-                                    };
-
-                                    var chart = new google.visualization.PieChart(document.getElementById('chart_div_projects'));
-                                    chart.draw(data, options);
-                                }
-                            </script>
-
-                    <?php endif; ?>
-                </div>
 
 
-                <div class="col-md-4">
-                    <div id="chart_div2"></div>
-                    <?php if($dataEmployee): ?>
+            <?= GridView::widget([
+                'dataProvider' => $dataProvider,
+                //'filterModel' => $searchModel,
+                'rowOptions' => function (\common\models\Employee $model, $index, $widget, $grid) {
+                    if ($model->deleted) {
+                        return ['class' => 'danger'];
+                    }
+                },
+                'columns' => [
+                    /*[
+                        'attribute' => 'id',
+                        'contentOptions' => ['class' => 'text-center'],
+                        'options' => ['style' => 'width:60px'],
+                    ],*/
+                    [
+                        'attribute' => 'username',
+                        'value' => function (\common\models\Employee $model) {
+                            return Html::tag('i', '', ['class' => 'fa fa-user']).' '.Html::encode($model->username);
+                        },
+                        'format' => 'raw',
+                        //'contentOptions' => ['title' => 'text-center'],
+                        'options' => ['style' => 'width:180px'],
+                    ],
 
-                            <?php
-                                $this->registerJs('google.charts.setOnLoadCallback(drawBasic2);', \yii\web\View::POS_READY);
-                            ?>
+                    /*[
+                        //'attribute' => 'username',
+                        'label' => 'Role',
+                        'value' => function (\common\models\Employee $model) {
+                            $roles = $model->getRoles();
+                            return $roles ? implode(', ', $roles) : '-';
+                        },
+                        'options' => ['style' => 'width:150px'],
+                        //'format' => 'raw'
+                    ],*/
 
-                            <script>
-                                function drawBasic2() {
-                                    var data = google.visualization.arrayToDataTable([
-                                        ['Employee', 'Count of leads'],
-                                        <?php foreach($dataEmployee as $k => $item):
-                                            $employee = \common\models\Employee::find()->where(['id' => $item['employee_id']])->one();
-                                            if(!$employee) continue;
+                    /*'email:email',
+                    [
+                        'attribute' => 'status',
+                        'filter' => [$searchModel::STATUS_ACTIVE => 'Active', $searchModel::STATUS_DELETED => 'Deleted'],
+                        'value' => function (\common\models\Employee $model) {
+                            return ($model->status === $model::STATUS_DELETED) ? '<span class="label label-danger">Deleted</span>' : '<span class="label label-success">Active</span>';
+                        },
+                        'format' => 'html'
+                    ],*/
 
-                                        ?>
-                                        ['<?php echo \yii\helpers\Html::encode($employee->username) ?>', <?=$item['cnt']?>],
-                                        <?php endforeach;?>
-                                    ]);
+                    /*[
+                        'label' => 'User Groups',
+                        'attribute' => 'user_group_id',
+                        'value' => function (\common\models\Employee $model) {
 
-                                    var options = {
-                                        title: 'Leads by Employees (Processing + On Hold) - Last <?=$days2?> days, limit 20 employees',
-                                        height: 400
-                                    };
+                            $groups = $model->getUserGroupList();
+                            $groupsValueArr = [];
 
-                                    var chart = new google.visualization.PieChart(document.getElementById('chart_div2'));
-                                    chart.draw(data, options);
-                                }
-                            </script>
+                            foreach ($groups as $group) {
+                                $groupsValueArr[] = Html::tag('span', Html::tag('i', '', ['class' => 'fa fa-users']) . ' ' . Html::encode($group), ['class' => 'label label-default']);
+                            }
 
-                    <?php endif; ?>
-                </div>
+                            $groupsValue = implode(' ', $groupsValueArr);
 
-                <div class="col-md-4">
-                    <div id="chart_div3"></div>
-                    <?php if ($dataEmployeeSold): ?>
+                            return $groupsValue;
+                        },
+                        'format' => 'raw',
+                        'filter' => Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) ? \common\models\UserGroup::getList() : Yii::$app->user->identity->getUserGroupList()
+                    ],*/
 
-                            <?
-                                $this->registerJs('google.charts.setOnLoadCallback(drawBasic3);', \yii\web\View::POS_READY);
-                            ?>
+                    [
+                        'label' => 'Tasks Result for Period',
+                        'value' => function(\common\models\Employee $model) use ($searchModel) {
+                            return $model->getTaskStats($searchModel->datetime_start, $searchModel->datetime_end);
+                        },
+                        'format' => 'raw',
+                        'contentOptions' => ['class' => 'text-left'],
+                        /*'filter' => \kartik\daterange\DateRangePicker::widget([
+                            'model'=> $searchModel,
+                            'attribute' => 'date_range',
+                            //'name'=>'date_range',
+                            'useWithAddon'=>true,
+                            //'value'=>'2015-10-19 12:00 AM - 2015-11-03 01:00 PM',
+                            'presetDropdown'=>true,
+                            'hideInput'=>true,
+                            'convertFormat'=>true,
+                            'startAttribute' => 'datetime_start',
+                            'endAttribute' => 'datetime_end',
+                            //'startInputOptions' => ['value' => date('Y-m-d', strtotime('-5 days'))],
+                            //'endInputOptions' => ['value' => '2017-07-20'],
+                            'pluginOptions'=>[
+                                'timePicker'=> false,
+                                'timePickerIncrement'=>15,
+                                'locale'=>['format'=>'Y-m-d']
+                            ]
+                        ])*/
+                        //'options' => ['style' => 'width:200px'],
 
-                            <script>
-                                function drawBasic3() {
-                                    var data = google.visualization.arrayToDataTable([
-                                        ['Employee', 'Count of leads'],
-                                        <?php foreach($dataEmployeeSold as $k => $item):
-                                        $employee = \common\models\Employee::find()->where(['id' => $item['employee_id']])->one();
-                                        if(!$employee) continue;
+                    ],
+                    [
+                        'label' => 'Processing',
+                        'value' => function (\common\models\Employee $model) use ($searchModel) {
+                            $cnt = $model->getLeadCountByStatus([\common\models\Lead::STATUS_PROCESSING], $searchModel->datetime_start, $searchModel->datetime_end);
+                            /*return $cnt ? Html::a($cnt, ['lead-flow/index',
+                                'LeadFlowSearch[employee_id]' => $model->id,
+                                'LeadFlowSearch[status]' => \common\models\Lead::STATUS_PROCESSING,
+                                'LeadFlowSearch[created_date_from]' => $searchModel->datetime_start,
+                                'LeadFlowSearch[created_date_to]' => $searchModel->datetime_end
+                            ], ['data-pjax' => 0, 'target' => '_blank']) : '-';*/
+                            return $cnt ?: '-';
+                        },
+                        'format' => 'raw',
+                        'contentOptions' => ['class' => 'text-center', 'style' => 'width: 100px']
+                    ],
+                    [
+                        'label' => 'Hold On',
+                        'value' => function (\common\models\Employee $model) use ($searchModel) {
+                            $cnt = $model->getLeadCountByStatus([\common\models\Lead::STATUS_ON_HOLD], $searchModel->datetime_start, $searchModel->datetime_end);
+                            /*return $cnt ? Html::a($cnt, ['lead-flow/index',
+                                'LeadFlowSearch[employee_id]' => $model->id,
+                                'LeadFlowSearch[status]' => \common\models\Lead::STATUS_ON_HOLD,
+                                'LeadFlowSearch[created_date_from]' => $searchModel->datetime_start,
+                                'LeadFlowSearch[created_date_to]' => $searchModel->datetime_end
+                            ], ['data-pjax' => 0, 'target' => '_blank']) : '-';*/
+                            return $cnt ?: '-';
+                        },
+                        'format' => 'raw',
+                        'contentOptions' => ['class' => 'text-center', 'style' => 'width: 100px']
+                    ],
+                    [
+                        'label' => 'Booked',
+                        'value' => function (\common\models\Employee $model) use ($searchModel) {
+                            $cnt = $model->getLeadCountByStatus([\common\models\Lead::STATUS_BOOKED], $searchModel->datetime_start, $searchModel->datetime_end);
+                            /*return $cnt ? Html::a($cnt, ['lead-flow/index',
+                                'LeadFlowSearch[employee_id]' => $model->id,
+                                'LeadFlowSearch[status]' => \common\models\Lead::STATUS_BOOKED,
+                                'LeadFlowSearch[created_date_from]' => $searchModel->datetime_start,
+                                'LeadFlowSearch[created_date_to]' => $searchModel->datetime_end
+                            ], ['data-pjax' => 0, 'target' => '_blank']) : '-';*/
+                            return $cnt ?: '-';
+                        },
+                        'format' => 'raw',
+                        'contentOptions' => ['class' => 'text-center', 'style' => 'width: 100px']
+                    ],
+                    [
+                        'label' => 'Sold',
+                        'value' => function (\common\models\Employee $model) use ($searchModel) {
+                            $cnt = $model->getLeadCountByStatus([\common\models\Lead::STATUS_SOLD], $searchModel->datetime_start, $searchModel->datetime_end);
+                            /*return $cnt ? Html::a($cnt, ['lead-flow/index',
+                                'LeadFlowSearch[employee_id]' => $model->id,
+                                'LeadFlowSearch[status]' => \common\models\Lead::STATUS_SOLD,
+                                'LeadFlowSearch[created_date_from]' => $searchModel->datetime_start,
+                                'LeadFlowSearch[created_date_to]' => $searchModel->datetime_end
+                            ], ['data-pjax' => 0, 'target' => '_blank']) : '-';*/
+                            return $cnt ?: '-';
+                        },
+                        'format' => 'raw',
+                        'contentOptions' => ['class' => 'text-center', 'style' => 'width: 100px']
+                    ],
+                    [
+                        'label' => 'Follow Up',
+                        'value' => function (\common\models\Employee $model) use ($searchModel) {
+                            $cnt = $model->getLeadCountByStatus([\common\models\Lead::STATUS_FOLLOW_UP], $searchModel->datetime_start, $searchModel->datetime_end);
+                            /*return $cnt ? Html::a($cnt, ['lead-flow/index',
+                                'LeadFlowSearch[employee_id]' => $model->id,
+                                'LeadFlowSearch[status]' => \common\models\Lead::STATUS_FOLLOW_UP,
+                                'LeadFlowSearch[created_date_from]' => $searchModel->datetime_start,
+                                'LeadFlowSearch[created_date_to]' => $searchModel->datetime_end
+                            ], ['data-pjax' => 0, 'target' => '_blank']) : '-';*/
+                            return $cnt ?: '-';
+                        },
+                        'format' => 'raw',
+                        'contentOptions' => ['class' => 'text-center', 'style' => 'width: 100px']
+                    ],
+                    [
+                        'label' => 'Trash',
+                        'value' => function (\common\models\Employee $model) use ($searchModel) {
+                            $cnt = $model->getLeadCountByStatus([\common\models\Lead::STATUS_TRASH], $searchModel->datetime_start, $searchModel->datetime_end);
+                            /*return $cnt ? Html::a($cnt, ['lead-flow/index',
+                                'LeadFlowSearch[employee_id]' => $model->id,
+                                'LeadFlowSearch[status]' => \common\models\Lead::STATUS_TRASH,
+                                'LeadFlowSearch[created_date_from]' => $searchModel->datetime_start,
+                                'LeadFlowSearch[created_date_to]' => $searchModel->datetime_end
+                            ], ['data-pjax' => 0, 'target' => '_blank']) : '-';*/
+                            return $cnt ?: '-';
+                        },
+                        'format' => 'raw',
+                        'contentOptions' => ['class' => 'text-center', 'style' => 'width: 100px']
+                    ]
 
-                                        ?>
-                                        ['<?php echo \yii\helpers\Html::encode($employee->username) ?>', <?=$item['cnt']?>],
-                                        <?php endforeach;?>
-                                    ]);
 
-                                    var options = {
-                                        title: 'Leads by Employees (Sold) - Last <?=$days2?> days, limit 20 employees',
-                                        height: 400
-                                    };
+                    /*[
+                        'class' => 'yii\grid\ActionColumn',
+                        'template' => '{update}',
+                        'visibleButtons' => [
+                            'update' => function (\common\models\Employee $model, $key, $index) {
+                                return (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || !in_array('admin', array_keys($model->getRoles())));
+                            },
+                        ],
 
-                                    var chart = new google.visualization.PieChart(document.getElementById('chart_div3'));
-                                    chart.draw(data, options);
-                                }
-                            </script>
-
-                    <?php endif; ?>
-                </div>
+                    ],*/
+                ]
+            ])
+            ?>
 
 
-            </div>
         </div>
-
-    <?php endif; ?>
-
+    </div>
+    <?php Pjax::end(); ?>
 </div>
+
+<?php
+$js = '
+function initCountDown()
+{
+    $("[data-countdown]").each(function() {
+      var $this = $(this), finalDate = $(this).data("countdown");
+      var elapsedTime = $(this).data("elapsed");
+          
+        var seconds = new Date().getTime() + (elapsedTime * 1000);
+        $this.countdown(seconds, function(event) {
+            //var totalHours = event.offset.totalDays * 24 + event.offset.hours;
+            $(this).html(event.strftime(\'%H:%M:%S\'));
+        });
+      
+        /*$this.countdown(seconds, {elapse: false}).on(\'update.countdown\', function(event) {
+            var $this = $(this);
+            $this.html(event.strftime(\'To end: <span>%H:%M:%S</span>\'));
+        });*/
+      
+    });
+}
+
+$(document).on(\'pjax:end\', function() {
+    initCountDown();    
+});
+
+initCountDown();
+
+';
+
+$this->registerJs($js);

@@ -14,7 +14,7 @@ use frontend\models\LeadForm;
 
 ?>
 
-<div class="form-group sl-client-field">
+<div class="sl-client-field">
     <?php
     echo $form->field($email, '[' . $key . ']email', [
         'template' => '{input}{error}'
@@ -24,7 +24,7 @@ use frontend\models\LeadForm;
 
     if (($key == '__id__' || strpos($key, 'new') !== false) && $nr != 0) {
         echo Html::a('<i class="fa fa-trash"></i>', 'javascript:void(0);', [
-            'class' => 'btn sl-client-field-del js-cl-email-del client-remove-email-button',
+            'class' => 'btn btn-danger client-remove-email-button',
         ]);
     } else if (!$email->isNewRecord) {
         $popoverId = 'addEmailComment-' . $key;
@@ -146,7 +146,7 @@ use frontend\models\LeadForm;
                 'id' => 'email-cnt-' . $key,
                 'data-modal_id' => 'email-cnt-' . $key,
                 'title' => $email->email,
-                'class' => 'btn sl-client-field-del js-cl-email-del showModalButton',
+                'class' => 'btn btn-primary showModalButton',
             ]);
 
 
@@ -158,7 +158,7 @@ use frontend\models\LeadForm;
             'data-toggle' => 'popover',
             'data-placement' => 'right',
             'data-content' => $commentTemplate,
-            'class' => 'btn sl-client-field-del js-cl-email-del client-comment-email-button',
+            'class' => 'btn btn-primary client-comment-email-button',
         ]);
     }
     ?>

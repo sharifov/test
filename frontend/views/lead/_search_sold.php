@@ -9,7 +9,6 @@ use yii\widgets\ActiveForm;
 ?>
 
 <div class="lead-search">
-
     <?php $form = ActiveForm::begin([
         //'action' => ['index'],
         'method' => 'get',
@@ -18,7 +17,7 @@ use yii\widgets\ActiveForm;
             'class' => 'form-inline',
         ],
     ]); ?>
-    <?= $form->field($model, 'sold_date_from')->widget(
+    <?= $form->field($model, 'sold_date_from',['template'=>'{label}{input}'])->widget(
             \dosamigos\datepicker\DatePicker::class, [
             'inline' => false,
             'clientOptions' => [
@@ -27,7 +26,7 @@ use yii\widgets\ActiveForm;
                 'todayBtn' => true
             ]
         ]);?>
-    <?= $form->field($model, 'sold_date_to')->widget(
+    <?= $form->field($model, 'sold_date_to',['template'=>'{label}{input}'])->widget(
             \dosamigos\datepicker\DatePicker::class, [
             'inline' => false,
             'clientOptions' => [
@@ -37,7 +36,7 @@ use yii\widgets\ActiveForm;
             ]
         ]);?>
 
-	<div class="form-group">
+	<div class="form-group" style="margin-bottom: 16px;">
     	<?= Html::submitButton('<i class="fa fa-search"></i> Search leads', ['class' => 'btn btn-primary']) ?>
     	<?= Html::resetButton('<i class="fa fa-close"></i> Reset form', ['class' => 'btn btn-warning']) ?>
 	</div>

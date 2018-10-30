@@ -191,6 +191,11 @@ class Quote extends \yii\db\ActiveRecord
         return self::getProfit($data['mark_up'], $data['selling'],$data['fare_type'],$data['check_payment']);
     }
 
+    public function getTotalProfit()
+    {
+        return self::countProfit($this->id);
+    }
+
     public static function createDump($flightSegments)
     {
         /**

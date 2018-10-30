@@ -7,23 +7,19 @@ use common\models\Employee;
 use common\models\Lead;
 use common\models\search\EmployeeSearch;
 use common\models\search\LeadTaskSearch;
+use common\models\UserParams;
 use Yii;
-use yii\base\InvalidParamException;
 use yii\helpers\ArrayHelper;
-use yii\helpers\VarDumper;
-use yii\web\BadRequestHttpException;
 use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
 use common\models\LoginForm;
-use frontend\models\PasswordResetRequestForm;
-use frontend\models\ResetPasswordForm;
-use frontend\models\SignupForm;
-use frontend\models\ContactForm;
+use yii\web\ForbiddenHttpException;
+use yii\web\NotFoundHttpException;
 
 /**
  * Site controller
  */
-class SiteController extends DefaultController
+class SiteController extends FController
 {
     /**
      * {@inheritdoc}
@@ -35,23 +31,37 @@ class SiteController extends DefaultController
                 'class' => AccessControl::class,
                 'rules' => [
                     [
-                        'actions' => ['index'],
+                        'actions' => ['login', 'error'],
+                        'allow' => true,
+                    ],
+                    [
+                        'actions' => ['index', 'logout', 'profile', 'get-airport'],
                         'allow' => true,
                         'roles' => ['@'],
                     ],
                 ],
-            ]
+            ],
+            'verbs' => [
+                'class' => VerbFilter::class,
+                'actions' => [
+                    'logout' => ['post', 'GET'],
+                ],
+            ],
         ];
 
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
 
-    /**
-     * {@inheritdoc}
-     */
+
+
     public function actions()
     {
-        return parent::actions();
+        return [
+            'error' => [
+                'class' => 'yii\web\ErrorAction',
+                'view' => '@yiister/gentelella/views/error',
+            ],
+        ];
     }
 
     /**
@@ -78,8 +88,119 @@ class SiteController extends DefaultController
             return $this->dashboardSupervision();
         }
 
+        if(Yii::$app->authManager->getAssignment('admin', $userId)) {
+            return $this->dashboardAdmin();
+        }
+
+        return $this->dashboardAgent();
+
+    }
 
 
+    public function dashboardAgent() : string
+    {
+        $userId = Yii::$app->user->id;
+
+        $params = Yii::$app->request->queryParams;
+        $params['LeadTaskSearch']['lt_user_id'] = $userId;
+        $params['LeadTaskSearch']['status'] = [Lead::STATUS_PROCESSING, Lead::STATUS_ON_HOLD];
+
+        $params['LeadTaskSearch']['status_not_in'] = [Lead::STATUS_TRASH/* , Lead::STATUS_SNOOZE */];
+
+        //VarDumper::dump($params); exit;
+        $searchLeadTask = new LeadTaskSearch();
+
+        $params['LeadTaskSearch']['lt_date'] = date('Y-m-d', strtotime("-1 days"));
+        $dp1 = $searchLeadTask->searchDashboard($params);
+
+        // $params['LeadTaskSearch']['status'] = [Lead::STATUS_PROCESSING, Lead::STATUS_ON_HOLD];
+
+        $params['LeadTaskSearch']['lt_date'] = date('Y-m-d');
+        $dp2 = $searchLeadTask->searchDashboard($params);
+
+        $params['LeadTaskSearch']['lt_date'] = date('Y-m-d', strtotime("+1 days"));
+        $dp3 = $searchLeadTask->searchDashboard($params);
+
+
+        /*$taskList = \common\models\LeadTask::find()->where(['lt_user_id' => $userId])
+            ->andWhere(['>=', 'lt_date', date('Y-m-d', strtotime("-1 days"))])
+            ->andWhere(['<=', 'lt_date', date('Y-m-d', strtotime("+1 days"))])
+            ->orderBy(['lt_date' => SORT_ASC])->all();
+
+        $dateItem = [];
+        $myTaskByDate = [];
+
+        if($taskList) {
+            foreach ($taskList as $task) {
+                $dateItem[$task->lt_date] = $task->lt_date;
+                $myTaskByDate[$task->lt_date][$task->lt_user_id][] = $task;
+            }
+        }*/
+
+
+        $searchModel = new EmployeeSearch();
+        $params = Yii::$app->request->queryParams;
+
+        //if(Yii::$app->authManager->getAssignment('supervision', $userId)) {
+        //$params['EmployeeSearch']['supervision_id'] = $userId;
+        $params['EmployeeSearch']['id'] = $userId;
+        $params['EmployeeSearch']['status'] = Employee::STATUS_ACTIVE;
+        //}
+
+
+
+        $dataProvider = $searchModel->searchByUserGroups($params);
+
+        $searchModel->datetime_start = date('Y-m-d', strtotime('-0 day'));
+        $searchModel->datetime_end = date('Y-m-d');
+
+
+
+        return $this->render('index', [
+            'searchLeadTask' => $searchLeadTask,
+            'dp1' => $dp1,
+            'dp2' => $dp2,
+            'dp3' => $dp3,
+            'dataProvider' => $dataProvider,
+            'searchModel' => $searchModel,
+        ]);
+    }
+
+    public function dashboardSupervision() : string
+    {
+
+        $userId = Yii::$app->user->id;
+
+        $searchModel = new EmployeeSearch();
+        $params = Yii::$app->request->queryParams;
+
+        //if(Yii::$app->authManager->getAssignment('supervision', $userId)) {
+            $params['EmployeeSearch']['supervision_id'] = $userId;
+            $params['EmployeeSearch']['status'] = Employee::STATUS_ACTIVE;
+        //}
+
+
+
+        $dataProvider = $searchModel->searchByUserGroups($params);
+
+        $searchModel->datetime_start = date('Y-m-d', strtotime('-0 day'));
+        $searchModel->datetime_end = date('Y-m-d');
+
+        //$searchModel->date_range = $searchModel->datetime_start.' - '. $searchModel->datetime_end;
+
+
+        return $this->render('index_supervision', [
+            'dataProvider' => $dataProvider,
+            'searchModel' => $searchModel,
+        ]);
+
+    }
+
+
+    public function dashboardAdmin() : string
+    {
+
+        //$userId = Yii::$app->user->id;
 
         $days = 20;
         $dataStatsDone = Lead::find()->select("COUNT(*) AS done_count, DATE(created) AS created_date")
@@ -275,7 +396,7 @@ class SiteController extends DefaultController
                 Lead::STATUS_ON_HOLD,
             ],
         ])
-        ->andWhere(['>=', 'DATE(created)', date('Y-m-d', strtotime("-".$days2." days"))])
+            ->andWhere(['>=', 'DATE(created)', date('Y-m-d', strtotime("-".$days2." days"))])
             ->groupBy(['employee_id'])
             ->orderBy('cnt DESC')
             ->limit(20)->asArray()->all();
@@ -294,63 +415,13 @@ class SiteController extends DefaultController
 
 
 
-
-        $params = Yii::$app->request->queryParams;
-        $params['LeadTaskSearch']['lt_user_id'] = $userId;
-        $params['LeadTaskSearch']['status_not_in'] = [Lead::STATUS_TRASH, Lead::STATUS_SNOOZE];
-
-        //VarDumper::dump($params); exit;
-        $searchModel = new LeadTaskSearch();
-
-        $params['LeadTaskSearch']['lt_date'] = date('Y-m-d', strtotime("-1 days"));
-        $dp1 = $searchModel->searchDashboard($params);
-
-        $params['LeadTaskSearch']['lt_date'] = date('Y-m-d');
-        $dp2 = $searchModel->searchDashboard($params);
-
-        $params['LeadTaskSearch']['lt_date'] = date('Y-m-d', strtotime("+1 days"));
-        $dp3 = $searchModel->searchDashboard($params);
-
-
-        /*$taskList = \common\models\LeadTask::find()->where(['lt_user_id' => $userId])
-            ->andWhere(['>=', 'lt_date', date('Y-m-d', strtotime("-1 days"))])
-            ->andWhere(['<=', 'lt_date', date('Y-m-d', strtotime("+1 days"))])
-            ->orderBy(['lt_date' => SORT_ASC])->all();
-
-        $dateItem = [];
-        $myTaskByDate = [];
-
-        if($taskList) {
-            foreach ($taskList as $task) {
-                $dateItem[$task->lt_date] = $task->lt_date;
-                $myTaskByDate[$task->lt_date][$task->lt_user_id][] = $task;
-            }
-        }*/
-
-
-
-        return $this->render('index', ['dataStats' => $dataStats, 'dataSources' => $dataSources, 'dataEmployee' => $dataEmployee, 'dataEmployeeSold' => $dataEmployeeSold, 'days2' => $days2,
-            //'myTaskByDate' => $myTaskByDate,
-            'searchModel' => $searchModel,
-            'dp1' => $dp1,
-            'dp2' => $dp2,
-            'dp3' => $dp3,
-        ]);
-    }
-
-
-
-    public function dashboardSupervision() : string
-    {
-
-        $userId = Yii::$app->user->id;
-
         $searchModel = new EmployeeSearch();
         $params = Yii::$app->request->queryParams;
 
         //if(Yii::$app->authManager->getAssignment('supervision', $userId)) {
-            $params['EmployeeSearch']['supervision_id'] = $userId;
-            $params['EmployeeSearch']['status'] = Employee::STATUS_ACTIVE;
+        //$params['EmployeeSearch']['supervision_id'] = $userId;
+
+        $params['EmployeeSearch']['status'] = Employee::STATUS_ACTIVE;
         //}
 
 
@@ -363,25 +434,118 @@ class SiteController extends DefaultController
         //$searchModel->date_range = $searchModel->datetime_start.' - '. $searchModel->datetime_end;
 
 
-        return $this->render('index_supervision', [
+        return $this->render('index_admin', [
             'dataProvider' => $dataProvider,
             'searchModel' => $searchModel,
+            'dataStats' => $dataStats,
+            'dataSources' => $dataSources,
+            'dataEmployee' => $dataEmployee,
+            'dataEmployeeSold' => $dataEmployeeSold,
+            'days2' => $days2,
         ]);
 
     }
 
     public function actionLogout()
     {
-        return parent::actionLogout();
+        Yii::$app->user->logout();
+
+        return $this->goHome();
     }
 
+    /**
+     * Login action.
+     *
+     * @return string
+     */
     public function actionLogin()
     {
-        return parent::actionLogin();
+        $this->layout = '@frontend/themes/gentelella/views/layouts/login';
+
+        if (!Yii::$app->user->isGuest) {
+            return $this->goHome();
+        }
+
+        $model = new LoginForm();
+        if ($model->load(Yii::$app->request->post()) && $model->login()) {
+            return $this->goBack();
+        }
+
+        $model->password = '';
+        return $this->render('login.php', [
+            'model' => $model,
+        ]);
+
     }
 
-    public function actionProfile()
+
+    /**
+     * @return string
+     * @throws ForbiddenHttpException
+     * @throws NotFoundHttpException
+     */
+    public function actionProfile() : string
     {
-        return parent::actionProfile();
+        if (Yii::$app->user->isGuest) {
+            throw new ForbiddenHttpException();
+        }
+
+        $model = Employee::findOne(Yii::$app->user->id);
+        if(!$model) {
+            throw new NotFoundHttpException('The requested User does not exist.');
+        }
+
+        $modelUserParams = $model->userParams;
+        if(!$modelUserParams) {
+            $modelUserParams = new UserParams();
+        }
+
+
+        //Yii::$app->request->isPost
+        if ($model->load(Yii::$app->request->post()) && $model->validate()) {
+            //$attr = Yii::$app->request->post($model->formName());
+
+            if (!empty($this->password)) {
+                $this->setPassword($this->password);
+            }
+
+
+            if ($modelUserParams->load(Yii::$app->request->post()) && $modelUserParams->validate()) {
+                $modelUserParams->save();
+            }
+                //$attr = Yii::$app->request->post($model->formName());
+
+            if (!empty($model->password)) {
+                $model->setPassword($model->password);
+            }
+            //$model->prepareSave($attr);
+            if ($model->save()) {
+                Yii::$app->session->setFlash('success', 'Profile successful updated!');
+                $model->refresh();
+            }
+
+        }
+
+         //new UserParams();
+
+
+
+        return $this->render('/employee/update_profile', [
+            'model' => $model,
+            'modelUserParams' => $modelUserParams
+        ]);
+    }
+
+    public function actionGetAirport($term)
+    {
+        $response = file_get_contents(sprintf('%s?term=%s', Yii::$app->params['getAirportUrl'], $term));
+        $response = json_decode($response, true);
+        if (isset($response['success']) && $response['success']) {
+            return isset($response['data'])
+                ? json_encode($response['data'])
+                : json_encode([]);
+        }
+
+        return json_encode([]);
     }
 }

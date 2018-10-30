@@ -56,7 +56,23 @@ $this->params['breadcrumbs'][] = $this->title;
                 'contentOptions' => ['class' => 'text-right'],
             ],
 
-            'up_updated_dt',
+            [
+                'attribute' => 'up_bonus_active',
+                'value' => function(\common\models\UserParams $model) {
+                    return $model->up_bonus_active ? 'Yes' : 'No';
+                },
+                'contentOptions' => ['class' => 'text-right'],
+            ],
+            'up_timezone',
+            'up_work_start_tm',
+            'up_work_minutes',
+            [
+                'attribute' => 'up_updated_dt',
+                'value' => function(\common\models\UserParams $model) {
+                return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->up_updated_dt));
+                },
+                'format' => 'raw',
+            ],
             'up_updated_user_id',
             [
                     'label' => 'Updated User',

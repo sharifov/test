@@ -93,7 +93,6 @@ $isAgent = Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id);
             <?php  //echo $form->field($model, 'source_id')->dropDownList(\common\models\Source::getList(), ['prompt' => '-']) ?>
 
 
-            <?php /*
             <div class="row">
                 <div class="col-md-12">
 
@@ -108,7 +107,6 @@ $isAgent = Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id);
 
                 </div>
             </div>
-            */ ?>
 
             <?php /*
             <div class="row">

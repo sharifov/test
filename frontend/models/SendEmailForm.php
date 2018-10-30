@@ -10,6 +10,7 @@ use common\models\LeadLog;
 use common\models\local\LeadLogMessage;
 use common\models\Project;
 use common\models\ProjectEmailTemplate;
+use common\models\UserProjectParams;
 use yii\base\Model;
 
 class SendEmailForm extends Model
@@ -65,12 +66,13 @@ class SendEmailForm extends Model
         return null;
     }
 
+
     /**
      * @param ProjectEmailTemplate $template
      * @param Client $client
-     * @param EmployeeContactInfo $sellerContactInfo
+     * @param UserProjectParams $userProjectParams
      */
-    public function populate(ProjectEmailTemplate $template, Client $client, EmployeeContactInfo $sellerContactInfo)
+    public function populate(ProjectEmailTemplate $template, Client $client, UserProjectParams $userProjectParams) : void
     {
         $additionalParams = [];
         if ($template->type == ProjectEmailTemplate::TYPE_SALES_FREE_FORM) {
@@ -79,12 +81,20 @@ class SendEmailForm extends Model
         } elseif ($template->type == ProjectEmailTemplate::TYPE_SALES_TESTIMONIALS) {
             $additionalParams['airlineName'] = 'airline';
         }
-        $info = self::viewTemplate($template, $client, $this->project, $sellerContactInfo, $additionalParams);
+        $info = self::viewTemplate($template, $client, $this->project, $userProjectParams, $additionalParams);
         $this->subject = $info['subject'];
         $this->body = $info['body'];
     }
 
-    public static function viewTemplate(ProjectEmailTemplate $template, Client $client, Project $source, EmployeeContactInfo $sellerContactInfo, $additionalParams = [])
+    /**
+     * @param ProjectEmailTemplate $template
+     * @param Client $client
+     * @param Project $source
+     * @param UserProjectParams $userProjectParams
+     * @param array $additionalParams
+     * @return array
+     */
+    public static function viewTemplate(ProjectEmailTemplate $template, Client $client, Project $source, UserProjectParams $userProjectParams, $additionalParams = []) : array
     {
         $bodyParams = $subjectParams = [];
 
@@ -94,8 +104,8 @@ class SendEmailForm extends Model
                     'clientFirstName' => ($client->first_name == 'Client Name')
                         ? 'Customer'
                         : ucfirst($client->first_name),
-                    'agentName' => ucfirst($sellerContactInfo->employee->username),
-                    'agentPhone' => $sellerContactInfo->direct_line,
+                    'agentName' => ucfirst($userProjectParams->uppUser->username),
+                    'agentPhone' => $userProjectParams->upp_phone_number,
                     'projectPhone' => $source->contactInfo->phone,
                     'projectLink' => $source->link,
                     'body' => empty($additionalParams['body'])
@@ -112,8 +122,8 @@ class SendEmailForm extends Model
                     'clientFirstName' => ($client->first_name == 'Client Name')
                         ? 'Customer'
                         : ucfirst($client->first_name),
-                    'agentName' => ucfirst($sellerContactInfo->employee->username),
-                    'agentPhone' => $sellerContactInfo->direct_line,
+                    'agentName' => ucfirst($userProjectParams->uppUser->username),
+                    'agentPhone' => $userProjectParams->upp_phone_number,
                     'projectPhone' => $source->contactInfo->phone,
                     'projectLink' => $source->link
                 ];
@@ -123,8 +133,8 @@ class SendEmailForm extends Model
                     'clientFirstName' => ($client->first_name == 'Client Name')
                         ? 'Customer'
                         : ucfirst($client->first_name),
-                    'agentName' => ucfirst($sellerContactInfo->employee->username),
-                    'agentPhone' => $sellerContactInfo->direct_line,
+                    'agentName' => ucfirst($userProjectParams->uppUser->username),
+                    'agentPhone' => $userProjectParams->upp_phone_number,
                     'projectPhone' => $source->contactInfo->phone,
                     'projectLink' => $source->link,
                     'airlineName' => $additionalParams['airlineName']
@@ -145,13 +155,13 @@ class SendEmailForm extends Model
      */
     public function sentEmail(Lead $lead)
     {
-        $sellerContactInfo = EmployeeContactInfo::findOne([
-            'employee_id' => $this->employee->id,
-            'project_id' => $this->project->id
+        $userProjectParams = UserProjectParams::findOne([
+            'upp_user_id' => $this->employee->id,
+            'upp_project_id' => $this->project_id
         ]);
+
         $credential = [
-            'email' => $sellerContactInfo->email_user,
-            'password' => $sellerContactInfo->email_pass,
+            'email' => $userProjectParams->upp_email,
         ];
         $errors = [];
         $result = EmailService::sendByAWS($this->emailTo, $this->project, $credential, $this->subject, $this->body,$errors);

@@ -14,6 +14,11 @@ use yii\db\ActiveRecord;
  * @property string $up_base_amount
  * @property string $up_updated_dt
  * @property int $up_updated_user_id
+ * @property string $up_timezone
+ * @property string $up_work_start_tm
+ * @property int $up_work_minutes
+ * @property bool $up_bonus_active
+ *
  *
  * @property Employee $upUpdatedUser
  * @property Employee $upUser
@@ -35,9 +40,10 @@ class UserParams extends \yii\db\ActiveRecord
     {
         return [
             [['up_user_id'], 'required'],
-            [['up_user_id', 'up_commission_percent', 'up_updated_user_id'], 'integer'],
+            [['up_user_id', 'up_commission_percent', 'up_updated_user_id', 'up_bonus_active', 'up_work_minutes'], 'integer'],
             [['up_base_amount'], 'number'],
-            [['up_updated_dt'], 'safe'],
+            [['up_updated_dt', 'up_work_start_tm'], 'safe'],
+            [['up_timezone'], 'string', 'max' => 40],
             [['up_user_id'], 'unique'],
             [['up_updated_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['up_updated_user_id' => 'id']],
             [['up_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['up_user_id' => 'id']],
@@ -55,6 +61,10 @@ class UserParams extends \yii\db\ActiveRecord
             'up_base_amount' => 'Base Amount',
             'up_updated_dt' => 'Updated Dt',
             'up_updated_user_id' => 'Updated User ID',
+            'up_bonus_active' => 'Bonus Is Active',
+            'up_work_start_tm' => 'Work Start Time',
+            'up_work_minutes' => 'Work Minutes',
+            'up_timezone' => 'Timezone',
         ];
     }
 

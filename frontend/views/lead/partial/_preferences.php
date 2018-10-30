@@ -266,7 +266,7 @@ $formId = sprintf('%s-form', $leadForm->getLeadPreferences()->formName());
                         'id' => 'op-cnt-ip',
                         'data-modal_id' => 'ip-cnt-ip',
                         'title' => $leadForm->getLead()->request_ip,
-                        'class' => 'btn sl-client-field-del js-cl-ip-del showModalButton',
+                        'class' => 'btn btn-primary btn-xs showModalButton',
                     ]);
 
 
@@ -278,7 +278,8 @@ $formId = sprintf('%s-form', $leadForm->getLeadPreferences()->formName());
                             'data-toggle' => 'popover',
                             'data-placement' => 'bottom',
                             'data-content' => $commentTemplate,
-                            'class' => 'btn sl-client-field-del client-comment-phone-button',
+                            'class' => 'btn btn-info btn-xs client-comment-phone-button',
+                            //'class' => 'btn btn-info btn-xs',
                         ]);
                 }
 

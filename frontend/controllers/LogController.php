@@ -14,7 +14,7 @@ use yii\filters\AccessControl;
 /**
  * LogController implements the CRUD actions for Log model.
  */
-class LogController extends DefaultController
+class LogController extends FController
 {
     /*public function behaviors()
     {

@@ -21,7 +21,7 @@ use yii\filters\VerbFilter;
 /**
  * LeadsController implements the CRUD actions for Lead model.
  */
-class LeadsController extends DefaultController
+class LeadsController extends FController
 {
     /**
      * {@inheritdoc}

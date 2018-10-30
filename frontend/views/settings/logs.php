@@ -31,7 +31,7 @@ HTML;
         <?= GridView::widget([
             'dataProvider' => $dataProvider,
             'filterModel' => $searchModel,
-            'layout' => $template,
+            //'layout' => $template,
             'columns' => [
                 [
                     'attribute' => 'category',

@@ -16,6 +16,7 @@ use common\models\Note;
 use common\models\ProjectEmailTemplate;
 use common\models\Reason;
 use common\models\Task;
+use common\models\UserProjectParams;
 use frontend\models\LeadForm;
 use frontend\models\SendEmailForm;
 use Yii;
@@ -35,11 +36,12 @@ use common\models\LeadFlightSegment;
 use common\models\Quote;
 use common\models\Employee;
 use common\models\search\LeadSearch;
+use frontend\models\ProfitSplitForm;
 
 /**
  * Site controller
  */
-class LeadController extends DefaultController
+class LeadController extends FController
 {
     /**
      * {@inheritdoc}
@@ -67,7 +69,7 @@ class LeadController extends DefaultController
                             'create', 'add-comment', 'change-state', 'unassign', 'take',
                             'set-rating', 'add-note', 'unprocessed', 'call-expert', 'send-email',
                             'check-updates', 'flow-transition', 'get-user-actions', 'add-pnr', 'update2','clone',
-                            'get-badges', 'sold'
+                            'get-badges', 'sold', 'split-profit', 'processing', 'follow-up', 'inbox', 'trash', 'booked'
                         ],
                         'allow' => true,
                         'roles' => ['agent'],
@@ -83,8 +85,9 @@ class LeadController extends DefaultController
     {
         if (parent::beforeAction($action)) {
             if (in_array($action->id, ['create', 'quote'])) {
-                Yii::$app->setLayoutPath('@app/views/layouts');
-                $this->layout = 'sale';
+                //Yii::$app->setLayoutPath('@frontend/views/layouts');
+                //$this->layout = 'sale';
+                $this->layout = '@app/themes/gentelella/views/layouts/main_lead';
             }
             return true;
         }
@@ -231,17 +234,24 @@ class LeadController extends DefaultController
             $sendEmailModel = new SendEmailForm();
             $sendEmailModel->employee = $lead->employee;
             $sendEmailModel->project = $lead->project;
-            $sellerContactInfo = EmployeeContactInfo::findOne([
-                'employee_id' => $sendEmailModel->employee->id,
-                'project_id' => $sendEmailModel->project->id
+
+            $userProjectParams = UserProjectParams::findOne([
+                'upp_user_id' => $sendEmailModel->employee->id,
+                'upp_project_id' => $sendEmailModel->project->id
             ]);
+
+
+            if(!$userProjectParams) {
+                throw new BadRequestHttpException('Not found UserProjectParams (user_id: '.$sendEmailModel->employee->id.', project_id: '.$sendEmailModel->project->id.' )');
+            }
+
             $templates = ProjectEmailTemplate::getTypesForSellers();
             if (Yii::$app->request->isAjax) {
                 $sendEmailModel->type = Yii::$app->request->get('type');
                 $template = $sendEmailModel->getTemplate();
                 if (Yii::$app->request->isGet) {
                     if ($template !== null) {
-                        $sendEmailModel->populate($template, $lead->client, $sellerContactInfo);
+                        $sendEmailModel->populate($template, $lead->client, $userProjectParams);
                     }
                 } else {
                     $attr = Yii::$app->request->post();
@@ -251,7 +261,7 @@ class LeadController extends DefaultController
                         $preview = true;
                     }
                     if ($template !== null) {
-                        $sendEmailModel->populate($template, $lead->client, $sellerContactInfo);
+                        $sendEmailModel->populate($template, $lead->client, $userProjectParams);
                     }
                 }
                 return $this->renderAjax('partial/_sendEmail', [
@@ -266,7 +276,7 @@ class LeadController extends DefaultController
                 $sendEmailModel->attributes = $attr;
                 $template = $sendEmailModel->getTemplate();
                 if ($template !== null) {
-                    $sendEmailModel->populate($template, $lead->client, $sellerContactInfo);
+                    $sendEmailModel->populate($template, $lead->client, $userProjectParams);
                 }
                 $isSent = $sendEmailModel->sentEmail($lead);
                 if ($isSent) {
@@ -324,8 +334,7 @@ class LeadController extends DefaultController
             ]));
         }
         return $this->redirect([
-            'queue',
-            'type' => 'follow-up'
+            'follow-up',
         ]);
     }
 
@@ -390,8 +399,7 @@ class LeadController extends DefaultController
                     $model->status = $model::STATUS_REJECT;
                     $model->save();
                     return $this->redirect([
-                        'queue',
-                        'type' => 'trash'
+                        'trash',
                     ]);
                 }
             } else {
@@ -402,8 +410,10 @@ class LeadController extends DefaultController
                 if ($reason->queue == 'follow-up') {
                     $model->status = $model::STATUS_FOLLOW_UP;
                     $model->employee_id = null;
-                    $type = 'follow-up';
-
+                    $model->save();
+                    return $this->redirect([
+                        'follow-up',
+                    ]);
                 } elseif ($reason->queue == 'trash') {
                     $model->status = $model::STATUS_TRASH;
                     $type = 'trash';
@@ -443,8 +453,7 @@ class LeadController extends DefaultController
                     $model->status = $model::STATUS_REJECT;
                     $model->save();
                     return $this->redirect([
-                        'queue',
-                        'type' => 'trash'
+                        'trash',
                     ]);
                 } else {
                     $model->status = $model::STATUS_ON_HOLD;
@@ -454,11 +463,8 @@ class LeadController extends DefaultController
             }
         }
 
-
-
         return $this->redirect([
-            'queue',
-            'type' => $type
+            'processing',
         ]);
     }
 
@@ -587,7 +593,6 @@ class LeadController extends DefaultController
 
     public function actionQueue($type)
     {
-        $this->view->title = sprintf('Leads - %s Queue', ucfirst($type));
         $searchModel = null;
         if (in_array($type, ['processing-all', 'processing', 'follow-up'])) {
             $dataProvider = [];
@@ -620,6 +625,7 @@ class LeadController extends DefaultController
         return $this->render('queue', [
             'dataProvider' => $dataProvider,
             'searchModel' => $searchModel,
+            'type' => $type
         ]);
     }
 
@@ -686,8 +692,156 @@ class LeadController extends DefaultController
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
             'isAgent' => $isAgent,
-            'salary' => null,//$salary,
+            'salary' => $salary,
             'salaryBy' => $salaryBy,
+        ]);
+    }
+
+
+    public function actionProcessing()
+    {
+        $searchModel = new LeadSearch();
+
+        $params = Yii::$app->request->queryParams;
+        $params2 = Yii::$app->request->post();
+
+        $params = array_merge($params, $params2);
+
+        if(Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id)) {
+            $params['LeadSearch']['employee_id'] = Yii::$app->user->id;
+            $isAgent = true;
+        } else {
+            $isAgent = false;
+        }
+
+        if(Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id)) {
+            $params['LeadSearch']['supervision_id'] = Yii::$app->user->id;
+        }
+
+        $dataProvider = $searchModel->searchProcessing($params);
+
+        return $this->render('processing', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+            'isAgent' => $isAgent,
+        ]);
+    }
+
+
+    public function actionFollowUp()
+    {
+        $searchModel = new LeadSearch();
+
+        $params = Yii::$app->request->queryParams;
+        $params2 = Yii::$app->request->post();
+
+        $params = array_merge($params, $params2);
+
+        if(Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id)) {
+            $isAgent = true;
+        } else {
+            $isAgent = false;
+        }
+
+        if(Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id)) {
+            $params['LeadSearch']['supervision_id'] = Yii::$app->user->id;
+        }
+
+        $dataProvider = $searchModel->searchFollowUp($params);
+
+        return $this->render('follow-up', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+            'isAgent' => $isAgent,
+        ]);
+    }
+
+
+    public function actionInbox()
+    {
+        $searchModel = new LeadSearch();
+
+        $params = Yii::$app->request->queryParams;
+        $params2 = Yii::$app->request->post();
+
+        $params = array_merge($params, $params2);
+
+        if(Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id)) {
+            $isAgent = true;
+        } else {
+            $isAgent = false;
+        }
+
+        if(Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id)) {
+            $params['LeadSearch']['supervision_id'] = Yii::$app->user->id;
+        }
+
+        $dataProvider = $searchModel->searchInbox($params);
+
+        return $this->render('inbox', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+            'isAgent' => $isAgent,
+        ]);
+    }
+
+
+    public function actionTrash()
+    {
+        $searchModel = new LeadSearch();
+
+        $params = Yii::$app->request->queryParams;
+        $params2 = Yii::$app->request->post();
+
+        $params = array_merge($params, $params2);
+
+        if(Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id)) {
+            $params['LeadSearch']['employee_id'] = Yii::$app->user->id;
+            $isAgent = true;
+        } else {
+            $isAgent = false;
+        }
+
+        if(Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id)) {
+            $params['LeadSearch']['supervision_id'] = Yii::$app->user->id;
+        }
+
+        $dataProvider = $searchModel->searchTrash($params);
+
+        return $this->render('trash', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+            'isAgent' => $isAgent,
+        ]);
+    }
+
+
+    public function actionBooked()
+    {
+        $searchModel = new LeadSearch();
+
+        $params = Yii::$app->request->queryParams;
+        $params2 = Yii::$app->request->post();
+
+        $params = array_merge($params, $params2);
+
+        if(Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id)) {
+            $params['LeadSearch']['employee_id'] = Yii::$app->user->id;
+            $isAgent = true;
+        } else {
+            $isAgent = false;
+        }
+
+        if(Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id)) {
+            $params['LeadSearch']['supervision_id'] = Yii::$app->user->id;
+        }
+
+        $dataProvider = $searchModel->searchBooked($params);
+
+        return $this->render('booked', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+            'isAgent' => $isAgent,
         ]);
     }
 
@@ -926,6 +1080,11 @@ class LeadController extends DefaultController
             $leadForm->getLead()->employee_id = \Yii::$app->user->identity->getId();
             $leadForm->getLead()->status = Lead::STATUS_PROCESSING;
             if (empty($data['errors']) && $data['load'] && $leadForm->save($errors)) {
+                $model = $leadForm->getLead();
+                LeadTask::createTaskList($model->id, $model->employee_id, 1, '', Task::CAT_NOT_ANSWERED_PROCESS);
+                LeadTask::createTaskList($model->id, $model->employee_id, 2, '', Task::CAT_NOT_ANSWERED_PROCESS);
+                LeadTask::createTaskList($model->id, $model->employee_id, 3, '', Task::CAT_NOT_ANSWERED_PROCESS);
+
                 return $this->redirect([
                     'quote',
                     'type' => 'processing',
@@ -963,15 +1122,22 @@ class LeadController extends DefaultController
         }
 
         if (!empty($quoteId)) {
-            $url = $lead->project->link . '/api/user-action-list/' . intval($quoteId);
-            $ch = curl_init();
-            curl_setopt($ch, CURLOPT_VERBOSE, true);
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($ch, CURLOPT_POST, true);
-            curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query(['apiKey' => $lead->project->api_key]));
-            curl_setopt($ch, CURLOPT_URL, $url);
-            curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/x-www-form-urlencoded']);
-            $result = curl_exec($ch);
+
+            $result = null;
+            if($lead->project) {
+                $projectLink = $lead->project->link;
+                $projectLink = str_replace('www.', '', $projectLink);
+
+                $url = $projectLink . '/api/user-action-list/' . intval($quoteId);
+                $ch = curl_init();
+                curl_setopt($ch, CURLOPT_VERBOSE, true);
+                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                curl_setopt($ch, CURLOPT_POST, true);
+                curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query(['apiKey' => $lead->project->api_key]));
+                curl_setopt($ch, CURLOPT_URL, $url);
+                curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/x-www-form-urlencoded']);
+                $result = curl_exec($ch);
+            }
 
             $activity = json_decode($result);
         }
@@ -1053,6 +1219,70 @@ class LeadController extends DefaultController
                         'id' => $newLead->id
                     ]);
                 }
+            }
+
+        }
+        return null;
+    }
+
+    public function actionSplitProfit($id)
+    {
+        $errors = [];
+        $lead = Lead::findOne(['id' => $id]);
+        if ($lead !== null) {
+            $totalProfit = $lead->getBookedQuote()->getTotalProfit();
+            $splitForm = new ProfitSplitForm($lead);
+
+            $mainAgentProfit = $totalProfit;
+
+           if (Yii::$app->request->isPost) {
+                $data = Yii::$app->request->post();
+
+                if(!isset($data['ProfitSplit'])){
+                    $data['ProfitSplit'] = [];
+                }
+
+                $load = $splitForm->loadModels($data);
+                if ($load) {
+                    $errors = ActiveForm::validate($splitForm);
+                }
+
+                if (empty($errors) && $splitForm->save($errors)) {
+                    return $this->redirect([
+                        'quote',
+                        'type' => 'sold',
+                        'id' => $lead->id
+                    ]);
+                }
+
+                $splitProfit = $splitForm->getProfitSplit();
+                if(!empty($splitProfit)){
+                    $percentSum = 0;
+                    foreach ($splitProfit as $entry){
+                        if(!empty($entry->ps_percent)){
+                            $percentSum += $entry->ps_percent;
+                        }
+                    }
+                    $mainAgentProfit -= $totalProfit*$percentSum/100;
+                }
+
+                if(!empty($errors)){
+                    return $this->renderAjax('_split_profit', [
+                        'lead' => $lead,
+                        'splitForm' => $splitForm,
+                        'totalProfit' => $totalProfit,
+                        'mainAgentProfit' => $mainAgentProfit,
+                        'errors' => $errors,
+                    ]);
+                }
+            }elseif (Yii::$app->request->isAjax){
+                return $this->renderAjax('_split_profit', [
+                    'lead' => $lead,
+                    'splitForm' => $splitForm,
+                    'totalProfit' => $totalProfit,
+                    'mainAgentProfit' => $mainAgentProfit,
+                    'errors' => $errors,
+                ]);
             }
 
         }

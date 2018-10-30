@@ -10,9 +10,8 @@ use yii\bootstrap\Html;
 use yii\data\ActiveDataProvider;
 use yii\grid\GridView;
 
-$template = <<<HTML
-<div class="pagination-container row" style="margin-bottom: 10px;">
-    <div class="col-sm-4" style="/*padding-top: 20px;*/">
+/*$template = '<div class="pagination-container row" style="margin-bottom: 10px;">
+    <div class="col-sm-4">
         {summary}
     </div>
     <div class="col-sm-8" style="text-align: right;">
@@ -21,8 +20,8 @@ $template = <<<HTML
 </div>
 <div class="table-responsive">
     {items}
-</div>
-HTML;
+</div>';
+*/
 
 ?>
 <div class="panel panel-default">
@@ -38,7 +37,7 @@ HTML;
         <?= GridView::widget([
             'dataProvider' => $dataProvider,
             'filterModel' => $searchModel,
-            'layout' => $template,
+            //'layout' => $template,
             'columns' => [
                 [
                     'label' => 'ID',

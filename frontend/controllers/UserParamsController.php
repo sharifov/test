@@ -14,7 +14,7 @@ use yii\filters\VerbFilter;
 /**
  * UserParamsController implements the CRUD actions for UserParams model.
  */
-class UserParamsController extends DefaultController
+class UserParamsController extends FController
 {
     /**
      * {@inheritdoc}

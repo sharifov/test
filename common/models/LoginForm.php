@@ -53,18 +53,54 @@ class LoginForm extends Model
      *
      * @return bool whether the user is logged in successfully
      */
-    public function login(&$isBackend)
+    public function login()
     {
         if ($this->validate()) {
             $user = $this->getUser();
-            if (!in_array($user->role, ['admin', 'supervision']) && $isBackend) {
-                $isBackend = false;
-                return false;
+
+
+            if($user) {
+
+                if($user->acl_rules_activated) {
+                    $clientIP = $this->getClientIPAddress();
+
+                    if ($clientIP == 'UNKNOWN' ||  (GlobalAcl::isActiveIPRule($clientIP) === null && EmployeeAcl::isActiveIPRule($clientIP) === null)) {
+
+                        $this->addError('username', sprintf('Remote Address %s Denied! Please, contact your Supervision or Administrator.', $clientIP));
+                        //Yii::$app->user->logout();
+                        //Yii::$app->getSession()->setFlash('danger', sprintf('Remote Address %s Denied! Please, contact your Supervision or Administrator.', $clientIP));
+                        return false;
+                    }
+                }
+
+                return Yii::$app->user->login($user, $this->rememberMe ? 3600 * 24 * 30 : 0);
             }
-            return Yii::$app->user->login($user, $this->rememberMe ? 3600 * 24 * 30 : 0);
         }
-        
         return false;
+    }
+
+
+    /**
+     * @return string
+     */
+    private function getClientIPAddress()
+    {
+        if (isset($_SERVER['HTTP_CLIENT_IP']))
+            $ipAddress = $_SERVER['HTTP_CLIENT_IP'];
+        else if (isset($_SERVER['HTTP_X_FORWARDED_FOR']))
+            $ipAddress = $_SERVER['HTTP_X_FORWARDED_FOR'];
+        else if (isset($_SERVER['HTTP_X_FORWARDED']))
+            $ipAddress = $_SERVER['HTTP_X_FORWARDED'];
+        else if (isset($_SERVER['HTTP_FORWARDED_FOR']))
+            $ipAddress = $_SERVER['HTTP_FORWARDED_FOR'];
+        else if (isset($_SERVER['HTTP_FORWARDED']))
+            $ipAddress = $_SERVER['HTTP_FORWARDED'];
+        else if (isset($_SERVER['REMOTE_ADDR']))
+            $ipAddress = $_SERVER['REMOTE_ADDR'];
+        else
+            $ipAddress = 'UNKNOWN';
+
+        return $ipAddress;
     }
 
     /**

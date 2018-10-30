@@ -27,7 +27,7 @@ AppAsset::register($this);
 <?php $this->beginBody() ?>
 
 <header>
-    <?= $this->render('@common/views/layouts/_navBar.php') ?>
+    <?//= $this->render('@common/views/layouts/_navBar.php') ?>
 </header>
 
 <main class="main-content">

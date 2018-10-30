@@ -15,7 +15,7 @@ use yii\filters\VerbFilter;
 /**
  * TaskController implements the CRUD actions for Task model.
  */
-class TaskController extends DefaultController
+class TaskController extends FController
 {
     /**
      * {@inheritdoc}

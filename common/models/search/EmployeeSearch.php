@@ -2,7 +2,9 @@
 
 namespace common\models\search;
 
+use common\models\ProjectEmployeeAccess;
 use common\models\UserGroupAssign;
+use common\models\UserProjectParams;
 use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
@@ -16,6 +18,9 @@ class EmployeeSearch extends Employee
 {
     public $supervision_id;
     public $user_group_id;
+    public $user_project_id;
+    public $user_params_project_id;
+
 
     public $datetime_start;
     public $datetime_end;
@@ -29,7 +34,7 @@ class EmployeeSearch extends Employee
     public function rules()
     {
         return [
-            [['id', 'status', 'acl_rules_activated', 'supervision_id', 'user_group_id'], 'integer'],
+            [['id', 'status', 'acl_rules_activated', 'supervision_id', 'user_group_id', 'user_project_id', 'user_params_project_id'], 'integer'],
             [['username', 'full_name', 'auth_key', 'password_hash', 'password_reset_token', 'email', 'last_activity', 'created_at', 'updated_at'], 'safe'],
             [['datetime_start', 'datetime_end'], 'safe'],
             [['date_range'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
@@ -86,6 +91,16 @@ class EmployeeSearch extends Employee
 
         if($this->user_group_id > 0) {
             $subQuery = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->where(['=', 'ugs_group_id', $this->user_group_id]);
+            $query->andWhere(['IN', 'employees.id', $subQuery]);
+        }
+
+        if($this->user_params_project_id > 0) {
+            $subQuery = UserProjectParams::find()->select(['DISTINCT(upp_user_id)'])->where(['=', 'upp_project_id', $this->user_params_project_id]);
+            $query->andWhere(['IN', 'employees.id', $subQuery]);
+        }
+
+        if($this->user_project_id > 0) {
+            $subQuery = ProjectEmployeeAccess::find()->select(['DISTINCT(employee_id)'])->where(['=', 'project_id', $this->user_project_id]);
             $query->andWhere(['IN', 'employees.id', $subQuery]);
         }
 

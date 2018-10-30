@@ -43,7 +43,7 @@ HTML;
         <?php endif; ?>
         <?= GridView::widget([
             'dataProvider' => $dataProvider,
-            'layout' => $template,
+            //'layout' => $template,
             'columns' => [
                 'id',
                 'name',
@@ -80,5 +80,19 @@ HTML;
             ]
         ])
         ?>
+    </div>
+</div>
+<div class="modal fade" id="modal-email-templates" style="display: none;">
+    <div class="modal-dialog" role="document" style="width: 1024px;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <?= Html::button('<span>×</span>', [
+                    'class' => 'close',
+                    'data-dismiss' => 'modal'
+                ]) ?>
+                <h4 class="modal-title"></h4>
+            </div>
+            <div class="modal-body"></div>
+        </div>
     </div>
 </div>

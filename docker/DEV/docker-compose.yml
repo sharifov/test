@@ -13,6 +13,7 @@ services:
             - "php"
         volumes:
             - ../../:/var/www/sale
+            - ./ssl-certs:/etc/ssl/ssl-certs
     php:
         build: ./php
         image: sales-php:development
@@ -24,6 +25,8 @@ services:
         volumes:
             - ../../:/var/www/sale
     mysql:
+        build: ./db
+        image: sales-mysql:development
         container_name: sales-mysql
         hostname: mysql
         restart: unless-stopped

@@ -31,23 +31,32 @@ $this->params['breadcrumbs'][] = $this->title;
             'up_user_id',
             'upUser.username',
             [
-                'attribute' => 'up_commission_percent',
+                'attribute' => 'up_base_amount',
                 'value' => function(\common\models\UserParams $model) {
                     return $model->up_base_amount ? '$'.number_format($model->up_base_amount , 2) : '-';
                 },
-                
+
             ],
 
             [
-                'attribute' => 'up_base_amount',
+                'attribute' => 'up_commission_percent',
                 'value' => function(\common\models\UserParams $model) {
                     return $model->up_commission_percent ? $model->up_commission_percent. '%' : '-';
                 },
 
             ],
-            'up_updated_dt',
-            'up_updated_user_id',
-            'upUpdatedUser.username'
+            'up_bonus_active:boolean',
+            'up_timezone',
+            'up_work_start_tm',
+            'up_work_minutes',
+            [
+                'attribute' => 'up_updated_dt',
+                'value' => function(\common\models\UserParams $model) {
+                 return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->up_updated_dt));
+                },
+                'format' => 'raw',
+             ],
+             'upUpdatedUser.username'
         ],
     ]) ?>
 

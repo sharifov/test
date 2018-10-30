@@ -15,7 +15,7 @@ use yii\filters\VerbFilter;
 /**
  * QuotePriceController implements the CRUD actions for QuotePrice model.
  */
-class QuotePriceController extends DefaultController
+class QuotePriceController extends FController
 {
     /**
      * {@inheritdoc}

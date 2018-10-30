@@ -46,7 +46,7 @@ use borales\extensions\phoneInput\PhoneInput;
 
     if (($key == '__id__' || strpos($key, 'new') !== false) && $nr != 0) {
         echo Html::a('<i class="fa fa-trash"></i>', 'javascript:void(0);', [
-            'class' => 'btn sl-client-field-del js-cl-email-del client-remove-phone-button',
+            'class' => 'btn btn-danger client-remove-phone-button',
         ]);
     } else if (!$phone->isNewRecord) {
         $popoverId = 'addPhoneComment-' . $key;
@@ -168,7 +168,7 @@ use borales\extensions\phoneInput\PhoneInput;
                 'id' => 'phone-cnt-' . $key,
                 'title' => $phone->phone,
                 'data-modal_id' => 'phone-cnt-' . $key,
-                'class' => 'btn sl-client-field-del js-cl-email-del showModalButton',
+                'class' => 'btn btn-primary showModalButton',
             ]);
 
 
@@ -179,7 +179,7 @@ use borales\extensions\phoneInput\PhoneInput;
             'data-toggle' => 'popover',
             'data-placement' => 'right',
             'data-content' => $commentTemplate,
-            'class' => 'btn sl-client-field-del js-cl-email-del client-comment-phone-button',
+            'class' => 'btn btn-primary client-comment-phone-button',
         ]);
 
 
