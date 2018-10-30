@@ -36,8 +36,12 @@ $this->params['breadcrumbs'][] = $this->title;
     <?php if(!$checkShiftTime): ?>
         <div class="alert alert-warning alert-dismissible" role="alert">
             <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-            <strong>Warning!</strong> Invalid Your shift time.
+            <strong>Warning!</strong> New leads are only available on your shift. (Current You time: <?=Yii::$app->formatter->asTime(time())?>)
         </div>
+
+        <?/*php \yii\helpers\VarDumper::dump(Yii::$app->user->identity->getShiftTime(), 10, true)?>
+        <?php echo date('Y-m-d H:i:s')*/?>
+
     <?php endif; ?>
 
     <?php

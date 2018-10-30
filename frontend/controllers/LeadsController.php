@@ -88,7 +88,6 @@ class LeadsController extends FController
             $dataProvider = $searchModel->search2($params);
         }
 
-
         /*if($isAgent) {
             $user = Yii::$app->user->identity;
             $checkShiftTime = $user->checkShiftTime();
