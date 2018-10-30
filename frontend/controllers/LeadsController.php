@@ -82,12 +82,18 @@ class LeadsController extends FController
             $params['LeadSearch']['employee_id'] = Yii::$app->user->id;
         }
 
-
         if($isAgent) {
             $dataProvider = $searchModel->searchAgent($params);
         } else {
             $dataProvider = $searchModel->search2($params);
         }
+
+
+        /*if($isAgent) {
+            $user = Yii::$app->user->identity;
+            $checkShiftTime = $user->checkShiftTime();
+
+        }*/
 
         $multipleForm = new LeadMultipleForm();
 

@@ -15,11 +15,16 @@ $this->title = 'Search Leads';
 $this->params['breadcrumbs'][] = $this->title;
 
 
+$statusList = \common\models\Lead::STATUS_LIST;
 
 if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
     $userList = \common\models\Employee::getList();
 } else {
     $userList = \common\models\Employee::getListByUserId(Yii::$app->user->id);
+    if($isAgent) {
+        $statusList = \common\models\Lead::STATUS_LIST;
+        unset($statusList[\common\models\Lead::STATUS_PENDING]);
+    }
 }
 
 
@@ -200,7 +205,7 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
                     return $statusValue;
                 },
                 'format' => 'raw',
-                'filter' => \common\models\Lead::STATUS_LIST,
+                'filter' => $statusList,
                 'options' => ['style' => 'width:100px'],
                 'contentOptions' => ['class' => 'text-center'],
 

@@ -780,13 +780,18 @@ class LeadController extends FController
         }
 
 
+        $checkShiftTime = true;
+
         if($isAgent) {
             $user = Yii::$app->user->identity;
             /** @var Employee $user */
-            if(!$user->checkShiftTime()) {
+            $checkShiftTime = $user->checkShiftTime();
+            /*if($checkShiftTime = !$user->checkShiftTime()) {
                 throw new ForbiddenHttpException('Access denied! Invalid Agent shift time');
-            }
+            }*/
         }
+
+
 
         if(Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id)) {
             $params['LeadSearch']['supervision_id'] = Yii::$app->user->id;
@@ -796,7 +801,8 @@ class LeadController extends FController
 
         return $this->render('inbox', [
             'searchModel' => $searchModel,
-            'dataProvider' => $dataProvider
+            'dataProvider' => $dataProvider,
+            'checkShiftTime' => $checkShiftTime
         ]);
     }
 

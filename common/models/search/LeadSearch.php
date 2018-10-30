@@ -305,6 +305,8 @@ class LeadSearch extends Lead
             $query->andWhere(['status' => $this->statuses]);
         }
 
+        $query->andWhere(['<>', 'status', Lead::STATUS_PENDING]);
+
 
         if($this->created_date_from || $this->created_date_to) {
 
