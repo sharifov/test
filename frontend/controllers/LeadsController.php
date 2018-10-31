@@ -4,10 +4,12 @@ namespace frontend\controllers;
 
 use common\controllers\DefaultController;
 use common\models\LeadFlow;
+use common\models\LeadTask;
 use common\models\Reason;
 use common\models\search\LeadFlightSegmentSearch;
 use common\models\search\LeadSearch;
 use common\models\search\QuoteSearch;
+use common\models\Task;
 use frontend\models\LeadMultipleForm;
 use Yii;
 use common\models\Lead;
@@ -152,6 +154,19 @@ class LeadsController extends FController
                                         }
                                     }
 
+                                }
+
+                                if($multipleForm->status_id == Lead::STATUS_PROCESSING && $multipleForm->employee_id > 0 ) {
+
+                                    if($lead->l_answered) {
+                                        $taskType = Task::CAT_ANSWERED_PROCESS;
+                                    } else {
+                                        $taskType = Task::CAT_NOT_ANSWERED_PROCESS;
+                                    }
+
+                                    LeadTask::createTaskList($lead->id, $multipleForm->employee_id, 1, '', $taskType);
+                                    LeadTask::createTaskList($lead->id, $multipleForm->employee_id, 2, '', $taskType);
+                                    LeadTask::createTaskList($lead->id, $multipleForm->employee_id, 3, '', $taskType);
                                 }
 
 
