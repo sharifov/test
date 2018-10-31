@@ -3,6 +3,7 @@
 namespace common\models;
 
 use borales\extensions\phoneInput\PhoneInput;
+use common\components\BackOffice;
 use Yii;
 use yii\base\NotSupportedException;
 use yii\behaviors\TimestampBehavior;
@@ -457,7 +458,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     /**
      * @return array
      */
-    public function getListByProject($projectId) : array
+    public static function getListByProject($projectId, $withExperts = false) : array
     {
         if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id))
         {
@@ -470,6 +471,35 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
             ->where(['=','project_id',$projectId])
             ->orderBy(['username' => SORT_ASC])
             ->asArray()->all();
+        }
+
+        if ($withExperts) {
+            $experts = Yii::$app->cache->get(sprintf('list-of-experts-from-BO'));
+            if ($experts === false) {
+                $result = BackOffice::sendRequest('default/experts');
+                if (!empty($result)) {
+                    $experts = $result;
+                    Yii::$app->cache->set(sprintf('list-of-experts-from-BO'), $experts, 21600);
+                }
+            }
+            if (is_array($experts)) {
+                $employeesGroup = [
+                    'Sales' => ArrayHelper::map($data,'id', 'username'),
+                    'Experts' => $experts
+                ];
+                $options = [];
+                foreach ($employeesGroup as $type => $group) {
+                    $child_options = [];
+                    foreach ($group as $id => $employee) {
+                        $employeeId = ($type != 'Experts')
+                            ? $id
+                            : $employee;
+                        $child_options[$employeeId] = $employee;
+                    }
+                    $options[$type] = $child_options;
+                }
+                return $options;
+            }
         }
 
         return ArrayHelper::map($data,'id', 'username');
