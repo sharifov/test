@@ -47,7 +47,6 @@ echo Html::a($btnText, $btnUrl, [
     <?php Pjax::begin(); //['id' => 'lead-pjax-list', 'timeout' => 5000, 'enablePushState' => true, 'clientOptions' => ['method' => 'GET']]); ?>
     <?= $this->render('_search_follow_up', ['model' => $searchModel]); ?>
 
-    <?php $form = \yii\bootstrap\ActiveForm::begin(['options' => ['data-pjax' => true]]); // ['action' => ['leads/update-multiple'] ?>
 
     <?php
 
@@ -315,12 +314,7 @@ echo GridView::widget([
 
 ?>
 
-
-    <?php \yii\bootstrap\ActiveForm::end(); ?>
-
-
-    <?php Pjax::end(); ?>
-
+<?php Pjax::end(); ?>
 
 </div>
 
