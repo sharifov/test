@@ -503,9 +503,14 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
         [
             'attribute' => 'updated',
             'value' => function(\common\models\Lead $model) {
-                return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->updated));
+                $str = '<b>'.Yii::$app->formatter->asRelativeTime(strtotime($model->updated)).'</b>';
+                $str .= '<br><i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->updated));
+                return $str;
             },
             'format' => 'raw',
+            'contentOptions' => [
+                'class' => 'text-center'
+            ],
         ],
         // 'bo_flight_id',
 
