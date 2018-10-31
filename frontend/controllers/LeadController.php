@@ -796,7 +796,8 @@ class LeadController extends FController
         return $this->render('inbox', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
-            'checkShiftTime' => $checkShiftTime
+            'checkShiftTime' => $checkShiftTime,
+            'isAgent' => $isAgent
         ]);
     }
 

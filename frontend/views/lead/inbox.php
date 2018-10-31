@@ -9,6 +9,7 @@ use yii\helpers\Url;
 /* @var $searchModel common\models\search\LeadSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 /* @var $checkShiftTime bool */
+/* @var $isAgent bool */
 
 $this->title = 'Inbox Queue';
 
