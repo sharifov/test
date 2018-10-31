@@ -145,7 +145,7 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
                 'class' => 'text-center'
             ]
         ],
-        [
+        /*[
             // 'attribute' => 'client_id',
             'header' => 'Client name',
             'format' => 'raw',
@@ -168,17 +168,30 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
                 'style' => 'width:160px'
             ]
             // 'filter' => \common\models\Employee::getList()
-        ],
+        ],*/
 
         [
-            'header' => 'Client Emails/Phones',
+            'header' => 'Client / Emails / Phones',
             'format' => 'raw',
             'value' => function (\common\models\Lead $model) {
 
-                if (Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id) && Yii::$app->user->id !== $model->employee_id) {
-                    $str = '- // - // - // -';
+                if ($model->client) {
+                    $clientName = $model->client->first_name . ' ' . $model->client->last_name;
+                    if ($clientName === 'Client Name') {
+                        $clientName = '- - - ';
+                    } else {
+                        $clientName = '<i class="fa fa-user"></i> ' . Html::encode($clientName);
+                    }
                 } else {
-                    $str = $model->client && $model->client->clientEmails ? '<i class="fa fa-envelope"></i> ' . implode(' <br><i class="fa fa-envelope"></i> ', \yii\helpers\ArrayHelper::map($model->client->clientEmails, 'email', 'email')) . '' : '';
+                    $clientName = '-';
+                }
+
+                $str = $clientName.'<br>';
+
+                if (Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id) && Yii::$app->user->id !== $model->employee_id) {
+                    $str .= '- // - // - // -';
+                } else {
+                    $str .= $model->client && $model->client->clientEmails ? '<i class="fa fa-envelope"></i> ' . implode(' <br><i class="fa fa-envelope"></i> ', \yii\helpers\ArrayHelper::map($model->client->clientEmails, 'email', 'email')) . '' : '';
                     $str .= $model->client && $model->client->clientPhones ? '<br><i class="fa fa-phone"></i> ' . implode(' <br><i class="fa fa-phone"></i> ', \yii\helpers\ArrayHelper::map($model->client->clientPhones, 'phone', 'phone')) . '' : '';
                 }
 
@@ -262,7 +275,7 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
 
         // 'project_id',
         // 'source_id',
-        [
+        /*[
             'attribute' => 'source_id',
             'value' => function (\common\models\Lead $model) {
                 return $model->source ? $model->source->name : '-';
@@ -277,7 +290,7 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
                 return \common\models\Lead::getFlightType($model->trip_type) ?? '-';
             },
             'filter' => \common\models\Lead::TRIP_TYPE_LIST
-        ],
+        ],*/
 
         [
             'attribute' => 'cabin',
@@ -292,6 +305,17 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
         // 'adults',
 
         [
+            'label' => 'Passeng',
+            'value' => function (\common\models\Lead $model) {
+                return '<i class="fa fa-users"></i> <span title="adult">'. $model->adults .'</span> / <span title="child">' . $model->children . '</span> / <span title="infant">' . $model->infants.'</span>';
+            },
+            'format' => 'raw',
+            'contentOptions' => [
+                'class' => 'text-center'
+            ]
+        ],
+
+        /*[
             'attribute' => 'adults',
             'value' => function (\common\models\Lead $model) {
                 return $model->adults ?: 0;
@@ -311,7 +335,7 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
             'contentOptions' => [
                 'class' => 'text-center'
             ]
-        ],
+        ],*/
 
             /*[
                 'attribute' => 'infants',
@@ -421,21 +445,21 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
             'value' => function (\common\models\Lead $model) {
 
                 $segments = $model->leadFlightSegments;
-                $segmentData = [];
+
                 if ($segments) {
                     foreach ($segments as $sk => $segment) {
-                        return $segment->departure;
+                        return date('d-M-Y', strtotime($segment->departure));
                     }
                 }
-                return '';
-                // return $model->leadFlightSegmentsCount ? Html::a($model->leadFlightSegmentsCount, ['lead-flight-segment/index', "LeadFlightSegmentSearch[lead_id]" => $model->id], ['target' => '_blank', 'data-pjax' => 0]) : '-' ;
+                return '-';
+
             },
             'format' => 'raw',
             'contentOptions' => [
                 'class' => 'text-center'
             ],
             'options' => [
-                'style' => 'width:140px'
+                'style' => 'width:100px'
             ]
         ],
         // 'children',
@@ -476,15 +500,13 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
         ],
         // 'created:date',
 
-        /*
-         * [
-         * 'attribute' => 'updated',
-         * 'value' => function(\common\models\Lead $model) {
-         * return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->updated));
-         * },
-         * 'format' => 'raw',
-         * ],
-         */
+        [
+            'attribute' => 'updated',
+            'value' => function(\common\models\Lead $model) {
+                return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->updated));
+            },
+            'format' => 'raw',
+        ],
         // 'bo_flight_id',
 
         [
