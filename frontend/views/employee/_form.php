@@ -167,7 +167,7 @@ if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
 
                 <div class="row">
                     <div class="col-md-3">
-                        <?= $form->field($modelUserParams, 'up_base_amount')->input('number', ['step' => 0.01, 'min' => 0, 'max' => '1000']) ?>
+                        <?= $form->field($modelUserParams, 'up_base_amount')->input('number', ['step' => 0.01, 'min' => 0, 'max' => 1000]) ?>
                     </div>
                     <div class="col-md-3">
                         <?= $form->field($modelUserParams, 'up_commission_percent')->input('number', ['step' => 1, 'max' => 100, 'min' => 0]) ?>
@@ -176,6 +176,19 @@ if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
                         <?= $form->field($modelUserParams, 'up_bonus_active')->checkbox() ?>
                     </div>
                 </div>
+
+                <div class="row">
+                    <div class="col-md-3">
+                        <?= $form->field($modelUserParams, 'up_inbox_show_limit_leads')->input('number', ['step' => 1, 'min' => 0, 'max' => 500]) ?>
+                    </div>
+                    <div class="col-md-3">
+                        <?= $form->field($modelUserParams, 'up_default_take_limit_leads')->input('number', ['step' => 1, 'max' => 100, 'min' => 0]) ?>
+                    </div>
+                    <div class="col-md-3">
+                        <?= $form->field($modelUserParams, 'up_min_percent_for_take_leads')->input('number', ['step' => 1, 'max' => 100, 'min' => 0]) ?>
+                    </div>
+                </div>
+
 
                 <div class="row">
                     <div class="col-md-3">

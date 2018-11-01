@@ -30,6 +30,10 @@ use common\models\Employee;
 
 		<?= $form->field($model, 'up_work_minutes')->input('number', ['step' => 10, 'min' => 0])?>
 
+        <?= $form->field($model, 'up_inbox_show_limit_leads')->input('number', ['step' => 1, 'min' => 0, 'max' => 500])?>
+        <?= $form->field($model, 'up_default_take_limit_leads')->input('number', ['step' => 1, 'min' => 0, 'max' => 100])?>
+        <?= $form->field($model, 'up_min_percent_for_take_leads')->input('number', ['step' => 1, 'min' => 0, 'max' => 100])?>
+
 		<?= $form->field($model, 'up_timezone')->dropDownList(Employee::timezoneList(),['prompt' =>'-'])?>
 
         <div class="form-group">
