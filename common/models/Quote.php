@@ -1023,5 +1023,4 @@ class Quote extends \yii\db\ActiveRecord
         }
         return false;
     }
-
 }

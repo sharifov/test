@@ -5,6 +5,7 @@
 
 use yii\bootstrap\Html;
 use frontend\models\LeadForm;
+use yii\bootstrap\Modal;
 
 //$bundle = \frontend\themes\gentelella\assets\LeadAsset::register($this);
 //$this->registerCssFile('/css/style-req.css');
@@ -89,42 +90,37 @@ JS;
                 ]),$lead->clone_id);
             }
             ?>
+            <?php if ($leadForm->getLead()->isNewRecord) : ?>
+            	<span class="label status-label label-info">New</span>
+            <?php else:?>
+            	<?= $leadForm->getLead()->getStatusLabel() ?>
+            <?php endif;?>
             </h2>
             <div class="page-header__general">
-                <?php if ($leadForm->getLead()->isNewRecord) : ?>
-                    <div class="page-header__general-item">
-                        <strong>Lead Status:</strong>
-                        <span id="status-label"><span class="label status-label label-info">New</span></span>
-                    </div>
-                <?php else : ?>
+                <?php if (!$leadForm->getLead()->isNewRecord) : ?>
                     <?php if (!empty($leadForm->getLead()->employee_id)) : ?>
                         <div class="page-header__general-item">
-                            <strong>Assigned to Agent: </strong>
-                            <?= $leadForm->getLead()->employee->username ?>
+                            <strong>Assigned to:</strong>
+                            <i class="fa fa-user"></i> <?= $leadForm->getLead()->employee->username ?>
                         </div>
                     <?php endif; ?>
                     <div class="page-header__general-item">
-                        <strong>Rating:</strong>
-                        <?= $this->render('partial/_rating', [
-                            'lead' => $leadForm->getLead()
-                        ]) ?>
-                    </div>
-                    <div class="page-header__general-item">
-                        <strong>Client Time:</strong>
+                        <strong>Client <i class="fa fa-clock-o"></i>:</strong>
                         <?= $leadForm->getLead()->getClientTime(); ?>
                     </div>
                     <div class="page-header__general-item">
-                        <strong>Lead ID:</strong>
-                        <span>
-                            <?= Html::a(sprintf('%08d', $leadForm->getLead()->id), '#', [
-                                'style' => 'color: #ffffff',
-                                'id' => 'view-flow-transition'
-                            ]) ?>
-                        </span>
+                        <strong>UID:</strong>
+                        <span><?= Html::a(sprintf('%08d', $leadForm->getLead()->uid), '#', ['id' => 'view-flow-transition']) ?></span>
+                    </div>
+
+                    <div class="page-header__general-item">
+                        <strong>Market:</strong>
+                        <span><?= $leadForm->getLead()->project->name.' - '.$leadForm->getLead()->source->name?></span>
                     </div>
                     <div class="page-header__general-item">
-                        <strong>Lead Status:</strong>
-                        <?= $leadForm->getLead()->getStatusLabel() ?>
+                        <?= $this->render('partial/_rating', [
+                            'lead' => $leadForm->getLead()
+                        ]) ?>
                     </div>
                 <?php endif; ?>
             </div>
@@ -133,23 +129,6 @@ JS;
 </div>
 
 <div class="main-sidebars">
-    <aside class="sidebar left-sidebar sl-client-sidebar">
-
-        <?php if($leadForm->getLead()->status == \common\models\Lead::STATUS_FOLLOW_UP && $leadForm->getLead()->employee_id != Yii::$app->user->id && $is_manager):?>
-
-            <div class="alert alert-warning" role="alert">
-                <h4 class="alert-heading">Warning!</h4>
-                <p>Client information is not available for this status (FOLLOW UP)!</p>
-            </div>
-
-        <? else: ?>
-            <?= $this->render('partial/_client', [
-                'leadForm' => $leadForm
-            ]);
-            ?>
-        <? endif; ?>
-    </aside>
-
     <div class="panel panel-main">
         <?= $this->render('partial/_actions', [
             'leadForm' => $leadForm
@@ -210,7 +189,15 @@ JS;
 
             <?//php \yii\widgets\Pjax::end() ?>
 
-
+			<div id="search-result">
+				<div id="search-preloader" class="hidden">
+                    <div class="preloader">
+                        <span class="fa fa-spinner fa-pulse fa-3x fa-fw"></span>
+                        <div class="preloader__text">Search Loading...</div>
+                    </div>
+                </div>
+                <div class="content"></div>
+			</div>
 
             <?php if (!$leadForm->getLead()->isNewRecord && count($leadForm->getLead()->getQuotes())) {
                 echo $this->render('partial/_quotes', [
@@ -250,6 +237,19 @@ JS;
     </div>
 
     <aside class="sidebar right-sidebar sl-right-sidebar">
+    	 <?php if($leadForm->getLead()->status == \common\models\Lead::STATUS_FOLLOW_UP && $leadForm->getLead()->employee_id != Yii::$app->user->id && $is_manager):?>
+
+            <div class="alert alert-warning" role="alert">
+                <h4 class="alert-heading">Warning!</h4>
+                <p>Client information is not available for this status (FOLLOW UP)!</p>
+            </div>
+
+        <? else: ?>
+            <?= $this->render('partial/_client', [
+                'leadForm' => $leadForm
+            ]);
+            ?>
+        <? endif; ?>
         <?= $this->render('partial/_preferences', [
             'leadForm' => $leadForm
         ]);

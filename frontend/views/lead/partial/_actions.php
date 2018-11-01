@@ -42,9 +42,9 @@ if ($leadForm->mode != $leadForm::VIEW_MODE || ($leadForm->mode == $leadForm::VI
                             var keyModel = attr;
                             $.each(objectModel, function( attr, errors) {
                                 var inputId = '#' + attrName + '-' + keyModel + '-' + attr;
-                                if ($(inputId).hasClass('depart-date') || $(inputId).attr('type') == 'tel') {
-                                    $(inputId).parent().parent().addClass('has-error');
-                                    $(inputId).parent().parent().find('.help-block').html(errors[0]);
+                                if ($(inputId).hasClass('depart-date') || $(inputId).attr('type') == 'tel' || $(inputId).attr('type') == 'email') {
+                                    $(inputId).parent().parent().parent().addClass('has-error');
+                                    $(inputId).parent().parent().parent().find('.help-block').html(errors[0]);
                                 } else {
                                     $(inputId).parent().addClass('has-error');
                                     $(inputId).parent().find('.help-block').html(errors[0]);
@@ -62,11 +62,11 @@ if ($leadForm->mode != $leadForm::VIEW_MODE || ($leadForm->mode == $leadForm::VI
                         }
                     });
                 });
-                console.log(data.errors);
+                //console.log(data.errors);
                 btn.attr('disabled', false).prop('disabled', false);
                 btn.find('span i').attr('class', 'fa fa-check');
             } else {
-                console.log(data);
+                //console.log(data);
             }
         });
     });
@@ -116,16 +116,26 @@ if ($leadForm->mode != $leadForm::VIEW_MODE || ($leadForm->mode == $leadForm::VI
 
 
     /***  Quick search quotes ***/
-    $('#quick-search-quotes').click(function (e) {
+    $(document).on('click','#quick-search-quotes', function (e) {
+        $('#popover-quick-search').popover('hide');
         e.preventDefault();
-        var url = $(this).data('url');
-        var editBlock = $('#quick-search');
-        editBlock.find('.modal-body').html('');
-        editBlock.find('.modal-body').load(url, function( response, status, xhr ) {
-            editBlock.modal({
-              backdrop: 'static',
-              show: true
-            });
+        $('#search-preloader').removeClass('hidden');
+        $('html, body').animate({
+                scrollTop: $("#search-result").offset().top
+            }, 2000);
+        var url = $('#quick-search-quotes').data('url');
+        $.ajax({
+            type: 'post',
+            data: {'gds': $('#gds-selector').val()},
+            url: url,
+            success: function (data) {
+                $('#search-preloader').addClass('hidden');
+                $('#search-result .content').html(data);
+            },
+            error: function (error) {
+                $('#search-preloader').removeClass('hidden');
+                console.log('Error: ' + error);
+            }
         });
     });
 
@@ -164,6 +174,8 @@ $js = <<<JS
             return $("#popover-content-add-note").html();
         }
     });
+
+    $('.popover-class[data-toggle="popover"]').popover();
 
     $('[data-toggle="popover"]').on('click', function (e) {
         $('[data-toggle="popover"]').not(this).popover('hide');
@@ -383,8 +395,7 @@ $this->registerJs($js);
             ];
             echo Html::button('<span class="btn-icon"><i class="fa fa-plus"></i></span> <span class="btn-text">' . $title . '</span>', $options);
         } ?>
-
-        <?php if ($leadForm->mode != $leadForm::VIEW_MODE) {
+		<?php if ($leadForm->mode != $leadForm::VIEW_MODE) {
             $title = '<span class="btn-icon"><i class="fa fa-check"></i></span><span class="btn-text">'.($leadForm->getLead()->isNewRecord ? 'Create' : 'Save').'</span>';
             echo Html::submitButton($title, [
                 'id' => 'submit-lead-form-btn',
@@ -399,9 +410,18 @@ $this->registerJs($js);
                 ]);
 
                 echo Html::button('<span class="btn-icon"><i class="fa fa-plus"></i></span><span class="btn-text">Quick Search Quote</span>', [
-                    'class' => 'btn btn-success btn-with-icon',
-                    'id' => 'quick-search-quotes',
-                    'data-url' => Url::to(['quote/get-online-quotes', 'leadId' => $leadForm->getLead()->id]),
+                    'class' => 'btn btn-success btn-with-icon popover-class',
+                    'data-toggle' => 'popover',
+                    'id' => 'popover-quick-search',
+                    'data-html' => 'true',
+                    'data-title' => 'Choose GDS',
+                    'data-trigger' => 'click',
+                    'data-content' => '<div style="width:250px;">'.Html::dropDownList('gds', null, ['S' => 'Sabre'], ['class' => 'form-control','id' => 'gds-selector']).Html::button('Search', [
+                        'class' => 'btn btn-success',
+                        'style' => 'margin-top:10px;',
+                        'id' => 'quick-search-quotes',
+                        'data-url' => Url::to(['quote/get-online-quotes', 'leadId' => $leadForm->getLead()->id]),
+                    ]).'</div>',
                 ]);
             }
 

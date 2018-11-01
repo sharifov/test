@@ -14,51 +14,17 @@ use frontend\models\LeadForm;
 use borales\extensions\phoneInput\PhoneInput;
 
 ?>
-
-<div class="form-group sl-client-field">
+<div class="sl-client-field">
     <?php
-    if ($key == '__id__') {
-        echo $form->field($phone, '[' . $key . ']phone', [
-            'options' => [
-                'class' => '',
-            ],
-            'template' => '{input}{error}'
-        ])->textInput([
-            'class' => 'form-control lead-form-input-element',
-            'type' => 'tel'
-        ])->label(false);
-    } else {
-        echo $form->field($phone, '[' . $key . ']phone', [
-            'options' => [
-                'class' => '',
-            ],
-            'template' => '{input}{error}'
-        ])->widget(PhoneInput::class, [
-            'options' => [
-                'class' => 'form-control lead-form-input-element'
-            ],
-            'jsOptions' => [
-                'nationalMode' => false,
-                'preferredCountries' => ['us'],
-            ]
-        ])->label(false);
-    }
-
+    $template = '<div class="input-group">{input}';
     if (($key == '__id__' || strpos($key, 'new') !== false) && $nr != 0) {
-        echo Html::a('<i class="fa fa-trash"></i>', 'javascript:void(0);', [
-            'class' => 'btn btn-danger client-remove-phone-button',
-        ]);
-    } else if (!$phone->isNewRecord) {
-        $popoverId = 'addPhoneComment-' . $key;
-        $commentTemplate = '
-<div>
-    <form action="/lead/add-comment?type=phone&amp;id=' . $key . '" method="post">
-        <textarea id="email-comment-' . $key . '" style="background-color: #fafafc; border: 1px solid #e4e8ef;" class="form-control mb-20" name="comment" rows="3">' . $phone->comments . '</textarea>
-        <button type="button" class="btn btn-success popover-close-btn" onclick="addPhoneComment($(this), \'' . $key . '\');">Add</button>
-    </form>
-</div>
-';
-
+        $template .= '<span class="input-group-btn">'.
+            Html::button('<i class="fa fa-trash"></i>',[
+                'class' => 'btn btn-danger client-remove-phone-button'
+            ]).
+            '</span>';
+    }
+    if (!$phone->isNewRecord) {
         //$phoneCount = rand(0, 1);
 
         $searchModel = new \common\models\search\ClientSearch();
@@ -83,19 +49,19 @@ use borales\extensions\phoneInput\PhoneInput;
                         'attribute' => 'client_phone',
                         'value' => function (\common\models\Client $model) {
 
-                            $phones = $model->clientPhones;
-                            $data = [];
-                            if ($phones) {
-                                foreach ($phones as $k => $phone) {
-                                    $data[] = '<i class="fa fa-phone"></i> <code>' . Html::encode($phone->phone) . '</code>';
-                                }
+                        $phones = $model->clientPhones;
+                        $data = [];
+                        if ($phones) {
+                            foreach ($phones as $k => $phone) {
+                                $data[] = '<i class="fa fa-phone"></i> <code>' . Html::encode($phone->phone) . '</code>';
                             }
+                        }
 
-                            $str = implode('<br>', $data);
-                            return '' . $str . '';
-                        },
-                        'format' => 'raw',
-                        'contentOptions' => ['class' => 'text-left'],
+                        $str = implode('<br>', $data);
+                        return '' . $str . '';
+                    },
+                    'format' => 'raw',
+                    'contentOptions' => ['class' => 'text-left'],
                     ],
 
                     [
@@ -103,55 +69,55 @@ use borales\extensions\phoneInput\PhoneInput;
                         'attribute' => 'client_email',
                         'value' => function (\common\models\Client $model) {
 
-                            $emails = $model->clientEmails;
-                            $data = [];
-                            if ($emails) {
-                                foreach ($emails as $k => $email) {
-                                    $data[] = '<i class="fa fa-envelope"></i> <code>' . Html::encode($email->email) . '</code>';
-                                }
+                        $emails = $model->clientEmails;
+                        $data = [];
+                        if ($emails) {
+                            foreach ($emails as $k => $email) {
+                                $data[] = '<i class="fa fa-envelope"></i> <code>' . Html::encode($email->email) . '</code>';
                             }
+                        }
 
-                            $str = implode('<br>', $data);
-                            return '' . $str . '';
-                        },
-                        'format' => 'raw',
-                        'contentOptions' => ['class' => 'text-left'],
+                        $str = implode('<br>', $data);
+                        return '' . $str . '';
+                    },
+                    'format' => 'raw',
+                    'contentOptions' => ['class' => 'text-left'],
                     ],
 
                     [
                         'header' => 'Leads',
                         'value' => function (\common\models\Client $model) {
 
-                            $leads = $model->leads;
-                            $data = [];
-                            if ($leads) {
-                                foreach ($leads as $lead) {
-                                    $data[] = '<i class="fa fa-link"></i> ' . Html::a('lead: ' . $lead->id, ['leads/view', 'id' => $lead->id], ['target' => '_blank', 'data-pjax' => 0]) . ' (IP: ' . $lead->request_ip . ')';
-                                }
+                        $leads = $model->leads;
+                        $data = [];
+                        if ($leads) {
+                            foreach ($leads as $lead) {
+                                $data[] = '<i class="fa fa-link"></i> ' . Html::a('lead: ' . $lead->id, ['leads/view', 'id' => $lead->id], ['target' => '_blank', 'data-pjax' => 0]) . ' (IP: ' . $lead->request_ip . ')';
                             }
+                        }
 
-                            $str = '';
-                            if ($data) {
-                                $str = '' . implode('<br>', $data) . '';
-                            }
+                        $str = '';
+                        if ($data) {
+                            $str = '' . implode('<br>', $data) . '';
+                        }
 
-                            return $str;
-                        },
-                        'format' => 'raw',
-                        //'options' => ['style' => 'width:100px']
+                        return $str;
+                    },
+                    'format' => 'raw',
+                    //'options' => ['style' => 'width:100px']
                     ],
 
                     [
                         'attribute' => 'created',
                         'value' => function (\common\models\Client $model) {
-                            return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->created));
-                        },
-                        'format' => 'html',
+                        return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->created));
+                    },
+                    'format' => 'html',
                     ],
 
                     ['class' => 'yii\grid\ActionColumn', 'template' => '{view}', 'controller' => 'client'],
-                ],
-            ]);
+                    ],
+                    ]);
 
 
             yii\bootstrap\Modal::begin([
@@ -164,25 +130,42 @@ use borales\extensions\phoneInput\PhoneInput;
             yii\bootstrap\Modal::end();
 
 
-            echo Html::a(($phoneCount) . ' <i class="fa fa-user"></i>', 'javascript:void(0);', [
+            $template .= '<span class="input-group-btn">'.Html::button('<i class="fa fa-user"></i> '.$phoneCount, [
                 'id' => 'phone-cnt-' . $key,
                 'title' => $phone->phone,
                 'data-modal_id' => 'phone-cnt-' . $key,
                 'class' => 'btn btn-primary showModalButton',
-            ]);
-
-
+            ]).'</span>';
         }
 
-        echo Html::a('<i class="fa fa-comment"></i>', 'javascript:void(0);', [
-            'id' => $popoverId,
-            'data-toggle' => 'popover',
-            'data-placement' => 'right',
-            'data-content' => $commentTemplate,
-            'class' => 'btn btn-primary client-comment-phone-button',
-        ]);
+    }
+    $template .= '</div>{error}';
 
-
+    if ($key == '__id__') {
+        echo $form->field($phone, '[' . $key . ']phone', [
+            'options' => [
+                'class' => 'form-group',
+            ],
+            'template' => $template
+        ])->textInput([
+            'class' => 'form-control lead-form-input-element',
+            'type' => 'tel'
+        ])->label(false);
+    } else {
+        echo $form->field($phone, '[' . $key . ']phone', [
+            'options' => [
+                'class' => 'form-group',
+            ],
+            'template' => $template
+        ])->widget(PhoneInput::class, [
+            'options' => [
+                'class' => 'form-control lead-form-input-element'
+            ],
+            'jsOptions' => [
+                'nationalMode' => false,
+                'preferredCountries' => ['us'],
+            ]
+        ])->label(false);
     }
     ?>
 </div>

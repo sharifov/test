@@ -22,6 +22,7 @@ use yii\web\Response;
 use yii\web\BadRequestHttpException;
 use frontend\models\PreviewEmailQuotesForm;
 use common\models\Employee;
+use common\components\SearchService;
 
 /**
  * Quotes controller
@@ -61,8 +62,31 @@ class QuoteController extends FController
         return parent::actions();
     }
 
-
     public function actionGetOnlineQuotes($leadId)
+    {
+        $lead = Lead::findOne(['id' => $leadId]);
+        if (Yii::$app->request->isPost) {
+            $response = [
+                'success' => false,
+                'body' => ''
+            ];
+            $attr = Yii::$app->request->post();
+            $result = Yii::$app->cache->get(sprintf('quick-search-%d-%d', $lead->id, Yii::$app->user->id));
+            if(!$result){
+                $result = SearchService::getOnlineQuotes($lead, $attr['gds']);
+                Yii::$app->cache->set(sprintf('quick-search-%d-%d', $lead->id, Yii::$app->user->id), $result, 30000);
+            }
+
+            $viewData = SearchService::getAirlineLocationInfo($result);
+            $viewData['result'] = $result;
+
+            return $this->renderAjax('_search_results', $viewData);
+        }
+
+        return '';
+    }
+
+    public function actionGetOnlineQuotesOld($leadId)
     {
         $lead = Lead::findOne(['id' => $leadId]);
         if (Yii::$app->request->isPost) {

@@ -52,4 +52,15 @@ class Airport extends ActiveRecord
         ];
     }
 
+    public static function getAirportListByIata($iata = [])
+    {
+        $data = [];
+        $airports = self::find()->where(['iata' => $iata])->all();
+        foreach ($airports as $airport){
+            $data[$airport['iata']] = ['name' => $airport['name'], 'city' => $airport['city'], 'country' => $airport['country']];
+        }
+
+        return $data;
+    }
+
 }

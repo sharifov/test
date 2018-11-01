@@ -914,8 +914,6 @@ class LeadController extends FController
 
     public function actionQuote($type, $id)
     {
-        $this->view->title = sprintf('Processing Lead - %s', ucfirst($type));
-
         $lead = Lead::findOne(['id' => $id]);
 
         if ($lead !== null) {
@@ -1012,8 +1010,7 @@ class LeadController extends FController
 
             $flightSegments = $leadForm->getLeadFlightSegment();
             foreach ($flightSegments as $segment){
-                $this->view->title = sprintf('%s & %s: ',$segment->destination, $id).$this->view->title;
-
+                $this->view->title = 'Lead #'.$id.' ✈ '.$segment->destination;
                 break;
             }
 

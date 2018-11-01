@@ -16,17 +16,27 @@ use frontend\models\LeadForm;
 
 <div class="sl-client-field">
     <?php
+
+    $template = '<div class="input-group"><span class="input-group-addon">@</span>{input}';
+    if (($key == '__id__' || strpos($key, 'new') !== false) && $nr != 0) {
+        $template .= '<span class="input-group-btn">'.
+            Html::button('<i class="fa fa-trash"></i>',[
+                'class' => 'btn btn-danger client-remove-email-button'
+            ]).
+            '</span>';
+    }
+    $template .= '</div>{error}';
     echo $form->field($email, '[' . $key . ']email', [
-        'template' => '{input}{error}'
+        'template' => $template,
+        'options' => [
+            'class' => 'form-group'
+        ]
     ])->textInput([
-        'class' => 'form-control email lead-form-input-element'
+        'class' => 'form-control email lead-form-input-element',
+        'type' => 'email'
     ])->label(false);
 
-    if (($key == '__id__' || strpos($key, 'new') !== false) && $nr != 0) {
-        echo Html::a('<i class="fa fa-trash"></i>', 'javascript:void(0);', [
-            'class' => 'btn btn-danger client-remove-email-button',
-        ]);
-    } else if (!$email->isNewRecord) {
+    if (!$email->isNewRecord) {
         $popoverId = 'addEmailComment-' . $key;
         $commentTemplate = '
 <div>
@@ -141,8 +151,7 @@ use frontend\models\LeadForm;
             echo $emailContent; //"<div id='modalContent'></div>";
             yii\bootstrap\Modal::end();
 
-
-            echo Html::a(($emailCount) . ' <i class="fa fa-user"></i>', 'javascript:void(0);', [
+            echo Html::button('<i class="fa fa-user"></i> '.$emailCount, [
                 'id' => 'email-cnt-' . $key,
                 'data-modal_id' => 'email-cnt-' . $key,
                 'title' => $email->email,
@@ -153,13 +162,13 @@ use frontend\models\LeadForm;
         }
 
 
-        echo Html::a('<i class="fa fa-comment"></i>', 'javascript:void(0);', [
+       /*  echo Html::a('<i class="fa fa-comment"></i>', 'javascript:void(0);', [
             'id' => $popoverId,
             'data-toggle' => 'popover',
             'data-placement' => 'right',
             'data-content' => $commentTemplate,
             'class' => 'btn btn-primary client-comment-email-button',
-        ]);
+        ]); */
     }
     ?>
 </div>
