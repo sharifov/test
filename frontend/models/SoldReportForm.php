@@ -202,11 +202,19 @@ class SoldReportForm extends Model
                 'footer' => '<i class="fa fa-male"></i> ' . self::getTotal($dataProvider->models, 'pax'),
             ],
             [
+                'label' => 'Avg per PAX',
+                'value' => function ($model) {
+                    return '<i class="fa fa-dollar"></i> ' . number_format(($model['totalProfit'] / $model['pax']), 2);
+                },
+                'format' => 'raw',
+            ],
+            [
                 'label' => 'Profit',
                 'value' => function ($model) {
-                    return '$' . number_format($model['totalProfit'], 2);
+                    return '<i class="fa fa-dollar"></i> ' . number_format($model['totalProfit'], 2);
                 },
-                'footer' => '$' . number_format(self::getTotal($dataProvider->models, 'totalProfit'), 2),
+                'format' => 'raw',
+                'footer' => '<i class="fa fa-dollar"></i> ' . number_format(self::getTotal($dataProvider->models, 'totalProfit'), 2),
             ],
             [
                 'label' => 'Inbox -> Processing',
