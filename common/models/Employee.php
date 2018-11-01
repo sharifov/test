@@ -563,6 +563,58 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     }
 
 
+
+    public function getCurrentShiftTaskInfoSummary()
+    {
+        $shiftTime = $this->getShiftTime();
+
+        $stats = [];
+        if(isset($shiftTime['start_utc_dt']) && $shiftTime['start_utc_dt']) {
+            $startShiftDate = date('Y-m-d', strtotime($shiftTime['start_utc_dt']));
+        } else {
+            $startShiftDate = date('Y-m-d');
+        }
+
+        //VarDumper::dump($startShiftDate, 10, true); exit;
+
+        $taskListAllQuery = \common\models\LeadTask::find()
+            ->where(['lt_user_id' => $this->id])
+            ->andWhere(['=', 'lt_date', $startShiftDate]);
+
+        $taskListCheckedQuery = \common\models\LeadTask::find()
+            ->where(['lt_user_id' => $this->id])
+            ->andWhere(['IS NOT', 'lt_completed_dt', null])
+            ->andWhere(['=', 'lt_date', $startShiftDate]);
+
+
+        $taskListAllQuery->joinWith(['ltLead' => function ($q) {
+            $q->where(['NOT IN', 'leads.status', [Lead::STATUS_TRASH, Lead::STATUS_SNOOZE]]);
+        }]);
+
+        $taskListCheckedQuery->joinWith(['ltLead' => function ($q) {
+            $q->where(['NOT IN', 'leads.status', [Lead::STATUS_TRASH, Lead::STATUS_SNOOZE]]);
+        }]);
+
+
+        $completedTasksCount = (int) $taskListCheckedQuery->count();
+        $allTasksCount = (int) $taskListAllQuery->count();
+
+
+        $stats['completedTasksCount'] = $completedTasksCount;
+        $stats['allTasksCount'] = $allTasksCount;
+
+
+        if($allTasksCount > 0) {
+            $completedTasksPercent = round($completedTasksCount * 100 / $allTasksCount);
+        } else {
+            $completedTasksPercent = 0;
+        }
+
+        $stats['completedTasksPercent'] = $completedTasksPercent;
+        return $stats;
+    }
+
+
     /**
      * @param string|null $start_dt
      * @param string|null $end_dt
