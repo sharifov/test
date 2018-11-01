@@ -27,9 +27,9 @@ $js = <<<JS
             if (dateTo >= dateFrom) {
                 var timeDiff = Math.abs(dateTo.getTime() - dateFrom.getTime());
                 var diffDays = Math.ceil(timeDiff / (1000 * 3600 * 24));
-                if (diffDays < 31) {
+                /*if (diffDays <= 90) {
                     return true;
-                }
+                }*/
             }
         }
         return false;
