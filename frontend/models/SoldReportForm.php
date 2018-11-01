@@ -94,6 +94,7 @@ class SoldReportForm extends Model
             $data = [
                 'agent' => $key,
                 'totalSold' => 0,
+                'pax' => 0,
                 'totalProfit' => 0,
                 'fromInbox' => 0,
                 'fromFollowUp' => 0,
@@ -106,6 +107,7 @@ class SoldReportForm extends Model
                 $data['fromInbox'] = $data['fromInbox'] + $item['fromInbox'];
                 $data['fromFollowUp'] = $data['fromFollowUp'] + $item['fromFollowUp'];
                 $data['personalCreated'] = $data['personalCreated'] + $item['personalCreated'];
+                $data['pax'] = $data['pax'] + $item['pax'];
                 $data['ids'][] = $item['id'];
             }
 
@@ -132,6 +134,7 @@ class SoldReportForm extends Model
         $data = [
             'agent' => $item->employee->username,
             'totalSold' => 1,
+            'pax' => 0,
             'totalProfit' => 0,
             'fromInbox' => 0,
             'fromFollowUp' => 0,
@@ -144,6 +147,8 @@ class SoldReportForm extends Model
             $price = $quote->quotePrice();
             $data['totalProfit'] = $profit = Quote::getProfit($price['mark_up'], $price['selling'], $price['fare_type'], $price['isCC']);
         }
+
+        $data['pax'] = ($item->adults + $item->children + $item->infants);
 
         $transitions = $item->getFlowTransition();
         if (!empty($transitions)) {
@@ -187,6 +192,14 @@ class SoldReportForm extends Model
                 },
                 'format' => 'raw',
                 'footer' => self::getTotal($dataProvider->models, 'totalSold'),
+            ],
+            [
+                'label' => 'PAX',
+                'value' => function ($model) {
+                    return '<i class="fa fa-male"></i> ' . $model['pax'];
+                },
+                'format' => 'raw',
+                'footer' => '<i class="fa fa-male"></i> ' . self::getTotal($dataProvider->models, 'pax'),
             ],
             [
                 'label' => 'Profit',
