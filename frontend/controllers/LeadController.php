@@ -780,6 +780,15 @@ class LeadController extends FController
             $user = Yii::$app->user->identity;
             /** @var Employee $user */
             $checkShiftTime = $user->checkShiftTime();
+            $userParams = $user->userParams;
+
+            if($userParams) {
+                if($userParams->up_inbox_show_limit_leads > 0) {
+                    $params['LeadSearch']['limit'] = $userParams->up_inbox_show_limit_leads;
+                }
+            }
+
+
             /*if($checkShiftTime = !$user->checkShiftTime()) {
                 throw new ForbiddenHttpException('Access denied! Invalid Agent shift time');
             }*/

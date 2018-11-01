@@ -141,6 +141,11 @@ $userId = Yii::$app->user->id;
                         'up_timezone',
                         'up_work_start_tm',
                         'up_work_minutes',
+
+                        'up_inbox_show_limit_leads',
+                        'up_default_take_limit_leads',
+                        'up_min_percent_for_take_leads',
+
                         /*[
                             'attribute' => 'up_updated_dt',
                             'value' => function(\common\models\UserParams $model) {

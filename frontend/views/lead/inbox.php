@@ -28,7 +28,7 @@ $this->params['breadcrumbs'][] = $this->title;
 }
 </style>
 <h1>
-	<?=\yii\helpers\Html::encode($this->title)?>
+    <i class="fa fa-briefcase"></i> <?=\yii\helpers\Html::encode($this->title)?>
 </h1>
 <div class="lead-index">
 
@@ -48,6 +48,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <?php
 
     $gridColumns = [
+        ['class' => 'yii\grid\SerialColumn'],
         [
             'attribute' => 'id',
             'label' => 'Lead ID',
@@ -60,11 +61,14 @@ $this->params['breadcrumbs'][] = $this->title;
             ]
         ],
         [
-            'attribute' => 'pending',
+            //'attribute' => 'pending',
             'label' => 'Pending Time',
             'value' => function (\common\models\Lead $model) {
                 return Yii::$app->formatter->asRelativeTime(strtotime($model->created)); // Lead::getPendingAfterCreate($model->created);
             },
+            'options' => [
+                'style' => 'width:180px'
+            ],
             'format' => 'raw'
         ],
 
@@ -73,7 +77,11 @@ $this->params['breadcrumbs'][] = $this->title;
             'value' => function (\common\models\Lead $model) {
                 return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->created));
             },
+
             'format' => 'raw',
+            'options' => [
+                'style' => 'width:180px'
+            ],
             'filter' => false
 
         ],
@@ -116,18 +124,9 @@ $this->params['breadcrumbs'][] = $this->title;
             'format' => 'raw'
         ], */
 
-        [
-            'header' => 'Client time',
-            'format' => 'raw',
-            'value' => function (\common\models\Lead $model) {
-                return $model->getClientTime2();
-            },
-            'options' => [
-                'style' => 'width:110px'
-            ]
-        ],
 
-        [
+
+        /*[
             'attribute' => 'Request Details',
             'content' => function (\common\models\Lead $model) {
                 $content = '';
@@ -139,7 +138,89 @@ $this->params['breadcrumbs'][] = $this->title;
                 return $content;
             },
             'format' => 'raw'
+        ],*/
+
+        [
+            'header' => 'Segments',
+            'value' => function (\common\models\Lead $model) {
+
+                $segments = $model->leadFlightSegments;
+                $segmentData = [];
+                if ($segments) {
+                    foreach ($segments as $sk => $segment) {
+                        $segmentData[] = ($sk + 1) . '. <small>' . $segment->origin . ' <i class="fa fa-long-arrow-right"></i> ' . $segment->destination . '</small>';
+                    }
+                }
+
+                $segmentStr = implode('<br>', $segmentData);
+                return '' . $segmentStr . '';
+                // return $model->leadFlightSegmentsCount ? Html::a($model->leadFlightSegmentsCount, ['lead-flight-segment/index', "LeadFlightSegmentSearch[lead_id]" => $model->id], ['target' => '_blank', 'data-pjax' => 0]) : '-' ;
+            },
+            'format' => 'raw',
+            'contentOptions' => [
+                'class' => 'text-left'
+            ],
+            'options' => [
+                'style' => 'width:140px'
+            ]
         ],
+
+        [
+            'header' => 'Depart',
+            'value' => function (\common\models\Lead $model) {
+
+                $segments = $model->leadFlightSegments;
+
+                if ($segments) {
+                    foreach ($segments as $sk => $segment) {
+                        return date('d-M-Y', strtotime($segment->departure));
+                    }
+                }
+                return '-';
+
+            },
+            'format' => 'raw',
+            'contentOptions' => [
+                'class' => 'text-center'
+            ],
+            'options' => [
+                'style' => 'width:100px'
+            ]
+        ],
+
+        [
+            'attribute' => 'cabin',
+            'value' => function (\common\models\Lead $model) {
+                return \common\models\Lead::getCabin($model->cabin) ?? '-';
+            },
+            'filter' => false //\common\models\Lead::CABIN_LIST
+        ],
+
+        [
+            'label' => 'Pax',
+            'value' => function (\common\models\Lead $model) {
+                return '<span title="adult"><i class="fa fa-male"></i> '. $model->adults .'</span> / <span title="child"><i class="fa fa-child"></i> ' . $model->children . '</span> / <span title="infant"><i class="fa fa-info"></i> ' . $model->infants.'</span>';
+            },
+            'format' => 'raw',
+            'contentOptions' => [
+                'class' => 'text-center'
+            ],
+            'options' => [
+                'style' => 'width:100px'
+            ]
+        ],
+
+        [
+            'header' => 'Client time',
+            'format' => 'raw',
+            'value' => function (\common\models\Lead $model) {
+                return $model->getClientTime2();
+            },
+            'options' => [
+                'style' => 'width:110px'
+            ]
+        ],
+
         [
             'class' => 'yii\grid\ActionColumn',
             'template' => '{action}',
