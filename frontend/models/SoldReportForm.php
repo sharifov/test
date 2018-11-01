@@ -165,6 +165,7 @@ class SoldReportForm extends Model
     public function getColumns($dataProvider)
     {
         return [
+            ['class' => 'yii\grid\SerialColumn'],
             [
                 'label' => 'Agent',
                 'value' => function ($model) {
