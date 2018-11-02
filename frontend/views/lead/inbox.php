@@ -8,6 +8,7 @@ use yii\helpers\Url;
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\LeadSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
+/* @var $checkShiftTime bool */
 /* @var $isAgent bool */
 
 $this->title = 'Inbox Queue';
@@ -32,6 +33,18 @@ $this->params['breadcrumbs'][] = $this->title;
 <div class="lead-index">
 
     <?php Pjax::begin(); //['id' => 'lead-pjax-list', 'timeout' => 5000, 'enablePushState' => true, 'clientOptions' => ['method' => 'GET']]); ?>
+
+    <?php if(!$checkShiftTime): ?>
+        <div class="alert alert-warning alert-dismissible" role="alert">
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <strong>Warning!</strong> New leads are only available on your shift. (Current You time: <?=Yii::$app->formatter->asTime(time())?>)
+        </div>
+
+        <?/*php \yii\helpers\VarDumper::dump(Yii::$app->user->identity->getShiftTime(), 10, true)?>
+        <?php echo date('Y-m-d H:i:s')*/?>
+
+    <?php endif; ?>
+
     <?php
 
     $gridColumns = [
@@ -131,17 +144,14 @@ $this->params['breadcrumbs'][] = $this->title;
             'class' => 'yii\grid\ActionColumn',
             'template' => '{action}',
             'buttons' => [
-                'action' => function ($url, \common\models\Lead $model, $key) {
-
+                'action' => function ($url, \common\models\Lead $model, $key) use ($checkShiftTime) {
                     $buttons = '';
-
-                    $buttons .= Html::a('Take', Url::to([
-                        'lead/take',
-                        'id' => $model['id']
-                    ]), [
-                        'class' => 'btn btn-primary btn-xs take-btn',
-                        'data-pjax' => 0
-                    ]);
+                    if($checkShiftTime) {
+                        $buttons .= Html::a('Take', ['lead/take', 'id' => $model->id], [
+                            'class' => 'btn btn-primary btn-xs take-btn',
+                            'data-pjax' => 0
+                        ]);
+                    }
 
                     return $buttons;
                 }

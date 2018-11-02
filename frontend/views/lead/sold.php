@@ -44,8 +44,6 @@ $this->params['breadcrumbs'][] = $this->title;
     <?php endif;?>
     <?= $this->render('_search_sold', ['model' => $searchModel]); ?>
 
-    <?php $form = \yii\bootstrap\ActiveForm::begin(['options' => ['data-pjax' => true]]); // ['action' => ['leads/update-multiple'] ?>
-
     <?php
 
     $gridColumns = [
@@ -296,10 +294,6 @@ echo GridView::widget([
 ]);
 
 ?>
-
-
-    <?php \yii\bootstrap\ActiveForm::end(); ?>
-
 
     <?php Pjax::end(); ?>
 

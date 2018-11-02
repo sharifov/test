@@ -157,7 +157,7 @@ class SendEmailForm extends Model
     {
         $userProjectParams = UserProjectParams::findOne([
             'upp_user_id' => $this->employee->id,
-            'upp_project_id' => $this->project_id
+            'upp_project_id' => $this->project->id
         ]);
 
         $credential = [

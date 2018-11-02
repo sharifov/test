@@ -430,9 +430,9 @@ class Quote extends \yii\db\ActiveRecord
     {
         if ($this->isNewRecord) {
             $this->uid = empty($this->uid) ? uniqid() : $this->uid;
-            if (!Yii::$app->user->isGuest && Yii::$app->user->identityClass != 'webapi\models\ApiUser' && empty($this->employee_id)) {
+            /*if (!Yii::$app->user->isGuest && Yii::$app->user->identityClass != 'webapi\models\ApiUser' && empty($this->employee_id)) {
                 $this->employee_id = Yii::$app->user->id;
-            }
+            }*/
         }
 
         if (parent::beforeSave($insert)) {
@@ -912,18 +912,18 @@ class Quote extends \yii\db\ActiveRecord
             if (!isset($result['detail'][$price->passenger_type]['selling'])) {
                 $result['detail'][$price->passenger_type]['selling'] = $price->selling;
                 $result['detail'][$price->passenger_type]['fare'] = $price->fare;
-                $result['detail'][$price->passenger_type]['taxes'] = $price->taxes + $price->mark_up + $price->extra_mark_up;
+                $result['detail'][$price->passenger_type]['taxes'] = $price->taxes + $price->mark_up + $price->extra_mark_up + $price->service_fee;
                 $result['detail'][$price->passenger_type]['tickets'] = 1;
             } else {
                 $result['detail'][$price->passenger_type]['selling'] += $price->selling;
                 $result['detail'][$price->passenger_type]['fare'] += $price->fare;
-                $result['detail'][$price->passenger_type]['taxes'] += $price->taxes + $price->mark_up + $price->extra_mark_up;
+                $result['detail'][$price->passenger_type]['taxes'] += $price->taxes + $price->mark_up + $price->extra_mark_up + $price->service_fee;
                 $result['detail'][$price->passenger_type]['tickets'] += 1;
             }
 
             $result['selling'] += $price->selling;
             $result['fare'] += $price->fare;
-            $result['mark_up'] += $price->mark_up + $price->extra_mark_up;
+            $result['mark_up'] += $price->mark_up + $price->extra_mark_up + $price->service_fee;
             $result['taxes'] += $price->taxes;
         }
 
@@ -973,7 +973,8 @@ class Quote extends \yii\db\ActiveRecord
                     'fare' => $quotePrice->fare,
                     'taxes' => $quotePrice->taxes,
                     'mark_up' => $quotePrice->mark_up,
-                    'extra_mark_up' => $quotePrice->extra_mark_up
+                    'extra_mark_up' => $quotePrice->extra_mark_up,
+                    'service_fee' => $quotePrice->service_fee
                 ]
             ];
         }

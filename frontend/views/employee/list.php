@@ -47,6 +47,25 @@ if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
                     'attribute' => 'id',
                     'contentOptions' => ['class' => 'text-left', 'style' => 'width: 60px'],
                 ],
+
+
+                [
+                    'label' => 'Grav',
+                    'value' => function (\common\models\Employee $model) {
+
+                        if($model->email) {
+                            $grav_url = "//www.gravatar.com/avatar/" . md5(mb_strtolower(trim($model->email))) . "?d=identicon&s=25";
+                        } else {
+                            $grav_url = '//www.gravatar.com/avatar/?d=identicon&s=25';
+                        }
+
+                        $icon = \yii\helpers\Html::img($grav_url, ['class' => 'img-circle img-thumbnail']);
+
+                        return $icon;
+                    },
+                    'format' => 'raw'
+                ],
+
                 [
                     'attribute' => 'username',
                     'value' => function (\common\models\Employee $model) {

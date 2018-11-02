@@ -2,6 +2,8 @@
 
 namespace common\models;
 
+use borales\extensions\phoneInput\PhoneInput;
+use common\components\BackOffice;
 use Yii;
 use yii\base\NotSupportedException;
 use yii\behaviors\TimestampBehavior;
@@ -456,7 +458,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     /**
      * @return array
      */
-    public function getListByProject($projectId) : array
+    public static function getListByProject($projectId, $withExperts = false) : array
     {
         if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id))
         {
@@ -469,6 +471,35 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
             ->where(['=','project_id',$projectId])
             ->orderBy(['username' => SORT_ASC])
             ->asArray()->all();
+        }
+
+        if ($withExperts) {
+            $experts = Yii::$app->cache->get(sprintf('list-of-experts-from-BO'));
+            if ($experts === false) {
+                $result = BackOffice::sendRequest('default/experts');
+                if (!empty($result)) {
+                    $experts = $result;
+                    Yii::$app->cache->set(sprintf('list-of-experts-from-BO'), $experts, 21600);
+                }
+            }
+            if (is_array($experts)) {
+                $employeesGroup = [
+                    'Sales' => ArrayHelper::map($data,'id', 'username'),
+                    'Experts' => $experts
+                ];
+                $options = [];
+                foreach ($employeesGroup as $type => $group) {
+                    $child_options = [];
+                    foreach ($group as $id => $employee) {
+                        $employeeId = ($type != 'Experts')
+                            ? $id
+                            : $employee;
+                        $child_options[$employeeId] = $employee;
+                    }
+                    $options[$type] = $child_options;
+                }
+                return $options;
+            }
         }
 
         return ArrayHelper::map($data,'id', 'username');
@@ -788,5 +819,66 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         }
 
         return $timezoneList;
+    }
+
+
+    /**
+     * @return array
+     * @throws \Exception
+     */
+    public function getShiftTime() : array
+    {
+        $shiftData = [];
+
+        if($this->userParams) {
+            $startTime = $this->userParams->up_work_start_tm;
+            $workHours = (int) $this->userParams->up_work_minutes * 60;
+            $timeZone = $this->userParams->up_timezone ?: 'UTC';
+
+            if($startTime && $workHours) {
+
+                $startShiftTimeUTC = new \DateTime(date('Y-m-d') . ' ' . $startTime, new \DateTimeZone($timeZone));
+                $startShiftTimeUTC->setTimezone(new \DateTimeZone('UTC'));
+
+
+                $endShiftTimeUTC = clone $startShiftTimeUTC;
+                $endShiftTimeUTC->add(new \DateInterval('PT' . $workHours . 'S'));
+
+                // $startShiftTimeDt = $startShiftTimeUTC->format('Y-m-d H:i:s');
+                // $endShiftTimeDt = $endShiftTimeUTC->format('Y-m-d H:i:s');
+                // echo $startShiftTimeUTC.' - '.$endShiftTimeUTC; exit;
+
+                $startTS = $startShiftTimeUTC->getTimestamp();
+                $endTS = $endShiftTimeUTC->getTimestamp();
+
+                $shiftData['start_utc_ts'] = $startTS;
+                $shiftData['end_utc_ts'] = $endTS;
+                $shiftData['start_utc_dt'] = $startShiftTimeUTC->format('Y-m-d H:i:s');
+                $shiftData['end_utc_dt'] = $endShiftTimeUTC->format('Y-m-d H:i:s');
+            }
+        }
+
+        return $shiftData;
+    }
+
+
+    /**
+     * @return bool
+     * @throws \Exception
+     */
+    public function checkShiftTime() : bool
+    {
+        $shiftData = $this->getShiftTime();
+        if($shiftData) {
+            $currentTS = time();
+            $startTS = $shiftData['start_utc_ts'] ?? 0;
+            $endTS = $shiftData['end_utc_ts'] ?? 0;
+
+            if ($startTS <= $currentTS && $endTS >= $currentTS) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

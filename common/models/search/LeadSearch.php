@@ -212,10 +212,23 @@ class LeadSearch extends Lead
             $query->andWhere(['IN', 'leads.id', $subQuery]);
         }
 
+
+
         if($this->supervision_id > 0) {
-            $subQuery1 = UserGroupAssign::find()->select(['ugs_group_id'])->where(['ugs_user_id' => $this->supervision_id]);
-            $subQuery = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->where(['IN', 'ugs_group_id', $subQuery1]);
-            $query->andWhere(['IN', 'leads.employee_id', $subQuery]);
+
+            if($this->id || $this->uid || $this->client_id || $this->client_email || $this->client_phone || $this->status == Lead::STATUS_FOLLOW_UP) {
+
+            } else {
+
+                if($this->statuses && in_array(Lead::STATUS_FOLLOW_UP, $this->statuses) && count($this->statuses) == 1) {
+
+                } else {
+
+                    $subQuery1 = UserGroupAssign::find()->select(['ugs_group_id'])->where(['ugs_user_id' => $this->supervision_id]);
+                    $subQuery = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->where(['IN', 'ugs_group_id', $subQuery1]);
+                    $query->andWhere(['IN', 'leads.employee_id', $subQuery]);
+                }
+            }
         }
 
         $query->andFilterWhere(['like', 'uid', $this->uid])
@@ -309,6 +322,8 @@ class LeadSearch extends Lead
         if($this->statuses) {
             $query->andWhere(['status' => $this->statuses]);
         }
+
+        $query->andWhere(['<>', 'status', Lead::STATUS_PENDING]);
 
 
         if($this->created_date_from || $this->created_date_to) {

@@ -28,6 +28,7 @@ use yii\helpers\Url;
 use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
 use yii\web\Cookie;
+use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
 use yii\web\UnauthorizedHttpException;
@@ -772,6 +773,20 @@ class LeadController extends FController
             $isAgent = false;
         }
 
+
+        $checkShiftTime = true;
+
+        if($isAgent) {
+            $user = Yii::$app->user->identity;
+            /** @var Employee $user */
+            $checkShiftTime = $user->checkShiftTime();
+            /*if($checkShiftTime = !$user->checkShiftTime()) {
+                throw new ForbiddenHttpException('Access denied! Invalid Agent shift time');
+            }*/
+        }
+
+
+
         if(Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id)) {
             $params['LeadSearch']['supervision_id'] = Yii::$app->user->id;
         }
@@ -781,7 +796,8 @@ class LeadController extends FController
         return $this->render('inbox', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
-            'isAgent' => $isAgent,
+            'checkShiftTime' => $checkShiftTime,
+            'isAgent' => $isAgent
         ]);
     }
 
