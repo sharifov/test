@@ -218,12 +218,18 @@ class LeadSearch extends Lead
 
         if($this->supervision_id > 0) {
 
-            if($this->id || $this->uid || $this->client_id || $this->client_email || $this->client_phone) {
+            if($this->id || $this->uid || $this->client_id || $this->client_email || $this->client_phone || $this->status == Lead::STATUS_FOLLOW_UP) {
 
             } else {
-                $subQuery1 = UserGroupAssign::find()->select(['ugs_group_id'])->where(['ugs_user_id' => $this->supervision_id]);
-                $subQuery = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->where(['IN', 'ugs_group_id', $subQuery1]);
-                $query->andWhere(['IN', 'leads.employee_id', $subQuery]);
+
+                if($this->statuses && in_array(Lead::STATUS_FOLLOW_UP, $this->statuses) && count($this->statuses) == 1) {
+
+                } else {
+
+                    $subQuery1 = UserGroupAssign::find()->select(['ugs_group_id'])->where(['ugs_user_id' => $this->supervision_id]);
+                    $subQuery = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->where(['IN', 'ugs_group_id', $subQuery1]);
+                    $query->andWhere(['IN', 'leads.employee_id', $subQuery]);
+                }
             }
         }
 
