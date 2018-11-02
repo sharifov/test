@@ -71,18 +71,30 @@ class ChangeMarkup extends Model
                 if ($quotePrice->passenger_type == $quotePrice::PASSENGER_ADULT && $this->pax_type == self::PAX_ADT) {
                     $quotePrice->extra_mark_up = $this->value;
                     $quotePrice->selling = $quotePrice->net + $quotePrice->mark_up + $quotePrice->extra_mark_up;
+                    if ($this->quote->check_payment) {
+                        $quotePrice->service_fee = round($quotePrice->selling * Quote::SERVICE_FEE, 2);
+                        $quotePrice->selling += $quotePrice->service_fee;
+                    }
                     $result['actual']['sellingPrice'] += $quotePrice->selling;
                     $result['actual']['markup'] += $quotePrice->extra_mark_up;
                     $cnt++;
                 } else if ($quotePrice->passenger_type == $quotePrice::PASSENGER_CHILD && $this->pax_type == self::PAX_CNN) {
                     $quotePrice->extra_mark_up = $this->value;
                     $quotePrice->selling = $quotePrice->net + $quotePrice->mark_up + $quotePrice->extra_mark_up;
+                    if ($this->quote->check_payment) {
+                        $quotePrice->service_fee = round($quotePrice->selling * Quote::SERVICE_FEE, 2);
+                        $quotePrice->selling += $quotePrice->service_fee;
+                    }
                     $result['actual']['sellingPrice'] += $quotePrice->selling;
                     $result['actual']['markup'] += $quotePrice->extra_mark_up;
                     $cnt++;
                 } else if ($quotePrice->passenger_type == $quotePrice::PASSENGER_INFANT && $this->pax_type == self::PAX_INF) {
                     $quotePrice->extra_mark_up = $this->value;
                     $quotePrice->selling = $quotePrice->net + $quotePrice->mark_up + $quotePrice->extra_mark_up;
+                    if ($this->quote->check_payment) {
+                        $quotePrice->service_fee = round($quotePrice->selling * Quote::SERVICE_FEE, 2);
+                        $quotePrice->selling += $quotePrice->service_fee;
+                    }
                     $result['actual']['sellingPrice'] += $quotePrice->selling;
                     $result['actual']['markup'] += $quotePrice->extra_mark_up;
                     $cnt++;
