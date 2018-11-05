@@ -820,7 +820,7 @@ class LeadController extends FController
             }*/
         }
 
-        $checkShiftTime = true;
+        //$checkShiftTime = true;
 
 
 
@@ -840,7 +840,8 @@ class LeadController extends FController
             'checkShiftTime' => $checkShiftTime,
             'isAgent' => $isAgent,
             'isAccessNewLead' => $isAccessNewLead,
-            'user' => $user
+            'user' => $user,
+            'newLeadsCount' => $user->getCountNewLeadCurrentShift()
         ]);
     }
 

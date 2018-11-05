@@ -12,6 +12,7 @@ use yii\helpers\Url;
 /* @var $isAgent bool */
 /* @var $isAccessNewLead bool */
 /* @var $user \common\models\Employee */
+/* @var $newLeadsCount integer */
 
 $this->title = 'Inbox Queue';
 
@@ -91,7 +92,14 @@ $this->params['breadcrumbs'][] = $this->title;
         </div>
 
         <div class="col-md-1" title="Taked leads">
-            <input type="text" value="<?=$user->getCountNewLeadCurrentShift()?>" data-max="<?=$user->userParams->up_default_take_limit_leads?>" data-width="120" data-height="120" data-fgColor="#337ab7" class="dial" readonly="readonly" title="Taked leads">
+            <?php
+                if($user->userParams->up_default_take_limit_leads && $newLeadsCount > $user->userParams->up_default_take_limit_leads) {
+                    $maxVal = $isAccessNewLead ? $newLeadsCount + 1 : $newLeadsCount;
+                }  else {
+                    $maxVal = $user->userParams->up_default_take_limit_leads;
+                }
+            ?>
+            <input type="text" value="<?=$newLeadsCount?>" data-max="<?=$maxVal?>" data-width="120" data-height="120" data-fgColor="#337ab7" class="dial" readonly="readonly" title="Taked leads">
         </div>
 
         <div class="col-md-3">
@@ -127,7 +135,7 @@ $this->params['breadcrumbs'][] = $this->title;
             <div class="tile-stats">
                 <div class="icon"><i class="fa fa-newspaper-o"></i>
                 </div>
-                <div class="count"><?=$user->getCountNewLeadCurrentShift()?></div>
+                <div class="count"><?=$newLeadsCount?></div>
 
                 <h3>Taked New Leads</h3>
                 <p>Current shift</p>
