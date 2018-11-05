@@ -26,6 +26,7 @@ $this->registerJsFile('https://cdnjs.cloudflare.com/ajax/libs/jquery.countdown/2
     ]
 ]);
 
+
 ?>
 <?/*<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>*/?>
 
@@ -190,6 +191,10 @@ $userId = Yii::$app->user->id;
             </table>
 
         </div>
+
+
+
+
 
     </div>
 

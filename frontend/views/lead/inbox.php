@@ -10,6 +10,8 @@ use yii\helpers\Url;
 /* @var $dataProvider yii\data\ActiveDataProvider */
 /* @var $checkShiftTime bool */
 /* @var $isAgent bool */
+/* @var $isAccessNewLead bool */
+/* @var $user \common\models\Employee */
 
 $this->title = 'Inbox Queue';
 
@@ -19,31 +21,151 @@ if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
     $userList = \common\models\Employee::getListByUserId(Yii::$app->user->id);
 }
 
+
+$this->registerJsFile('https://cdnjs.cloudflare.com/ajax/libs/jQuery-Knob/1.2.13/jquery.knob.min.js', [
+    //'position' => \yii\web\View::POS_HEAD,
+    'depends' => [
+        \yii\web\JqueryAsset::class
+    ]
+]);
+
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 
-<style>
-.dropdown-menu {
-	z-index: 1010 !important;
-}
-</style>
 <h1>
     <i class="fa fa-briefcase"></i> <?=\yii\helpers\Html::encode($this->title)?>
 </h1>
+
 <div class="lead-index">
+
+    <div class="col-md-12">
+        <?php
+        $taskSummary = $user->getCurrentShiftTaskInfoSummary();
+        //\yii\helpers\VarDumper::dump($taskSummary, 10, true);
+        ?>
+
+        <div class="animated flipInY col-lg-2 col-md-2 col-sm-6 col-xs-12">
+            <div class="tile-stats">
+                <div class="icon"><i class="fa fa-check-square-o"></i>
+                </div>
+                <div class="count"><?=$taskSummary['completedTasksCount']?></div>
+
+                <h3>Completed tasks</h3>
+                <p>Current shift</p>
+            </div>
+        </div>
+
+        <div class="animated flipInY col-lg-2 col-md-2 col-sm-6 col-xs-12">
+            <div class="tile-stats">
+                <div class="icon"><i class="fa fa-list"></i>
+                </div>
+                <div class="count"><?=$taskSummary['allTasksCount']?></div>
+
+                <h3>All tasks</h3>
+                <p>Current shift</p>
+            </div>
+        </div>
+
+        <?/*
+        <div class="col-md-3">
+            <table class="table table-bordered">
+                <tr>
+                    <th>Completed tasks / All tasks</th>
+                    <td><?=$taskSummary['completedTasksCount']?> / <?=$taskSummary['allTasksCount']?></td>
+                </tr>
+                <tr>
+                    <th>Current Shift task progress</th>
+                    <td style="width: 50%">
+                        <div class="progress" title="<?=$taskSummary['completedTasksPercent']?>%">
+                            <div class="progress-bar" role="progressbar" aria-valuenow="'.$percent.'" aria-valuemin="0" aria-valuemax="100" style="width: <?=$taskSummary['completedTasksPercent']?>%;">
+                                <?=$taskSummary['completedTasksPercent']?>%
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </div>*/ ?>
+
+        <div class="col-md-1" title="Сompleted Tasks Percent">
+            <input type="text" value="<?=$taskSummary['completedTasksPercent']?>" data-width="120" data-height="120" data-fgColor="<?=($taskSummary['completedTasksPercent']>=$user->userParams->up_min_percent_for_take_leads?'#66CC66':'#f3a72d')?>" class="dial" readonly="readonly" title="Сompleted Tasks Percent">
+        </div>
+
+        <div class="col-md-1" title="Taked leads">
+            <input type="text" value="<?=$user->getCountNewLeadCurrentShift()?>" data-max="<?=$user->userParams->up_default_take_limit_leads?>" data-width="120" data-height="120" data-fgColor="#337ab7" class="dial" readonly="readonly" title="Taked leads">
+        </div>
+
+        <div class="col-md-3">
+            <table class="table table-bordered">
+                <?php /*<tr>
+                    <th>Taked New Leads current shift</th>
+                    <td><?=$user->getCountNewLeadCurrentShift()?></td>
+                </tr>*/ ?>
+                <tr>
+                    <th>Minimal percent for take new lead</th>
+                    <td><?=$user->userParams->up_min_percent_for_take_leads?>%</td>
+                </tr>
+                <tr>
+                    <th>Default limit for take new lead</th>
+                    <td><?=$user->userParams->up_default_take_limit_leads?></td>
+                </tr>
+                <tr>
+                    <th>Current Shift task progress</th>
+                    <td style="width: 50%">
+                        <div class="progress" title="<?=$taskSummary['completedTasksPercent']?>%">
+                            <div class="progress-bar" role="progressbar" aria-valuenow="'.$percent.'" aria-valuemin="0" aria-valuemax="100" style="width: <?=$taskSummary['completedTasksPercent']?>%;">
+                                <?=$taskSummary['completedTasksPercent']?>%
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+
+            </table>
+        </div>
+
+
+        <div class="animated flipInY col-lg-3 col-md-3 col-sm-6 col-xs-12">
+            <div class="tile-stats">
+                <div class="icon"><i class="fa fa-newspaper-o"></i>
+                </div>
+                <div class="count"><?=$user->getCountNewLeadCurrentShift()?></div>
+
+                <h3>Taked New Leads</h3>
+                <p>Current shift</p>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="clearfix"></div>
 
     <?php Pjax::begin(); //['id' => 'lead-pjax-list', 'timeout' => 5000, 'enablePushState' => true, 'clientOptions' => ['method' => 'GET']]); ?>
 
+
+
     <?php if(!$checkShiftTime): ?>
-        <div class="alert alert-warning alert-dismissible" role="alert">
-            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-            <strong>Warning!</strong> New leads are only available on your shift. (Current You time: <?=Yii::$app->formatter->asTime(time())?>)
+        <div class="row col-md-4">
+                <div class="alert alert-warning alert-dismissible" role="alert">
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <strong>Warning!</strong> New leads are only available on your shift. (Current You time: <?=Yii::$app->formatter->asTime(time())?>)
+                </div>
+
+                <?/*php \yii\helpers\VarDumper::dump(Yii::$app->user->identity->getShiftTime(), 10, true)?>
+                <?php echo date('Y-m-d H:i:s')*/?>
         </div>
-
-        <?/*php \yii\helpers\VarDumper::dump(Yii::$app->user->identity->getShiftTime(), 10, true)?>
-        <?php echo date('Y-m-d H:i:s')*/?>
-
     <?php endif; ?>
+
+    <div class="clearfix"></div>
+
+    <?php if(!$isAccessNewLead): ?>
+        <div class="row col-md-4">
+            <div class="alert alert-warning alert-dismissible" role="alert">
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <strong>Warning!</strong> Access is denied - action "take new lead"
+            </div>
+        </div>
+    <?php endif; ?>
+
+    <div class="clearfix"></div>
 
     <?php
 
@@ -141,6 +263,29 @@ $this->params['breadcrumbs'][] = $this->title;
         ],*/
 
         [
+            'header' => 'Depart',
+            'value' => function (\common\models\Lead $model) {
+
+                $segments = $model->leadFlightSegments;
+
+                if ($segments) {
+                    foreach ($segments as $sk => $segment) {
+                        return date('d-M-Y', strtotime($segment->departure));
+                    }
+                }
+                return '-';
+
+            },
+            'format' => 'raw',
+            'contentOptions' => [
+                'class' => 'text-center'
+            ],
+            'options' => [
+                'style' => 'width:100px'
+            ]
+        ],
+
+        [
             'header' => 'Segments',
             'value' => function (\common\models\Lead $model) {
 
@@ -166,37 +311,6 @@ $this->params['breadcrumbs'][] = $this->title;
         ],
 
         [
-            'header' => 'Depart',
-            'value' => function (\common\models\Lead $model) {
-
-                $segments = $model->leadFlightSegments;
-
-                if ($segments) {
-                    foreach ($segments as $sk => $segment) {
-                        return date('d-M-Y', strtotime($segment->departure));
-                    }
-                }
-                return '-';
-
-            },
-            'format' => 'raw',
-            'contentOptions' => [
-                'class' => 'text-center'
-            ],
-            'options' => [
-                'style' => 'width:100px'
-            ]
-        ],
-
-        [
-            'attribute' => 'cabin',
-            'value' => function (\common\models\Lead $model) {
-                return \common\models\Lead::getCabin($model->cabin) ?? '-';
-            },
-            'filter' => false //\common\models\Lead::CABIN_LIST
-        ],
-
-        [
             'label' => 'Pax',
             'value' => function (\common\models\Lead $model) {
                 return '<span title="adult"><i class="fa fa-male"></i> '. $model->adults .'</span> / <span title="child"><i class="fa fa-child"></i> ' . $model->children . '</span> / <span title="infant"><i class="fa fa-info"></i> ' . $model->infants.'</span>';
@@ -209,6 +323,17 @@ $this->params['breadcrumbs'][] = $this->title;
                 'style' => 'width:100px'
             ]
         ],
+
+
+        [
+            'attribute' => 'cabin',
+            'value' => function (\common\models\Lead $model) {
+                return \common\models\Lead::getCabin($model->cabin) ?? '-';
+            },
+            'filter' => false //\common\models\Lead::CABIN_LIST
+        ],
+
+
 
         [
             'header' => 'Client time',
@@ -225,9 +350,21 @@ $this->params['breadcrumbs'][] = $this->title;
             'class' => 'yii\grid\ActionColumn',
             'template' => '{action}',
             'buttons' => [
-                'action' => function ($url, \common\models\Lead $model, $key) use ($checkShiftTime) {
+                'action' => function ($url, \common\models\Lead $model, $key) use ($checkShiftTime, $isAccessNewLead, $isAgent) {
                     $buttons = '';
-                    if($checkShiftTime) {
+
+                    if($isAgent) {
+                        if (!$isAccessNewLead) {
+                            $buttons .= '<i class="fa fa-warning warning"></i> Access is denied (limit) - "Take lead"<br/>';
+                        }
+
+                        if (!$checkShiftTime) {
+                            $buttons .= '<i class="fa fa-warning warning"></i> Time shift limit access<br>';
+                        }
+                    }
+
+
+                    if(!$buttons) {
                         $buttons .= Html::a('Take', ['lead/take', 'id' => $model->id], [
                             'class' => 'btn btn-primary btn-xs take-btn',
                             'data-pjax' => 0
@@ -293,3 +430,7 @@ echo GridView::widget([
 ?>
 <?php Pjax::end(); ?>
 </div>
+
+<?php //if($isAccessNewLead):?>
+    <?php $this->registerJs('$(".dial").knob();', \yii\web\View::POS_READY); ?>
+<?php //endif; ?>

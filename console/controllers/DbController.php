@@ -28,6 +28,9 @@ use yii\helpers\Console;
 class DbController extends Controller
 {
 
+    /**
+     * @throws \yii\db\Exception
+     */
     public function actionConvertCollate()
     {
         printf("\n --- Start %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
@@ -103,5 +106,37 @@ class DbController extends Controller
         Airline::syncCabinClasses();
 
         printf("\n --- End %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
+    }
+
+
+    /**
+     * @throws \yii\db\Exception
+     */
+    public function actionUpdateLeadFlow()
+    {
+
+        printf("\n --- Start %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
+        $db = Yii::$app->getDb();
+
+
+        $sql = 'SELECT id, 
+(SELECT lf1.status FROM lead_flow AS lf1 WHERE lf1.lead_id = lf.lead_id AND lf1.id < lf.id ORDER BY lf1.id DESC LIMIT 1) AS from_status_id,
+(SELECT lf2.created FROM lead_flow AS lf2 WHERE lf2.lead_id = lf.lead_id AND lf2.id > lf.id ORDER BY lf2.id ASC LIMIT 1) AS end_dt,
+(UNIX_TIMESTAMP((SELECT lf2.created FROM lead_flow AS lf2 WHERE lf2.lead_id = lf.lead_id AND lf2.id > lf.id ORDER BY lf2.id ASC LIMIT 1)) - UNIX_TIMESTAMP(lf.created)) AS time_duration
+FROM lead_flow AS lf
+ORDER BY lf.lead_id, id';
+
+        $logs = $db->createCommand($sql)->queryAll();
+
+        if($logs) {
+            foreach ($logs as $nr => $log) {
+                LeadFlow::updateAll(['lf_from_status_id' => $log['from_status_id'], 'lf_end_dt' => $log['end_dt'], 'lf_time_duration' => $log['time_duration']], ['id' => $log['id']]);
+                echo $nr.' - id: '.$log['id']."\n";
+            }
+        }
+
+        printf("\n --- End %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
+
+
     }
 }

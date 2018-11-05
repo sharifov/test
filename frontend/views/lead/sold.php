@@ -28,7 +28,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
 ?>
 
-<h1><?=\yii\helpers\Html::encode($this->title)?></h1>
+<h1><i class="fa fa-flag"></i> <?=\yii\helpers\Html::encode($this->title)?></h1>
 
 <style>
 .dropdown-menu {

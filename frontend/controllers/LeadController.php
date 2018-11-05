@@ -29,6 +29,7 @@ use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
 use yii\web\Cookie;
 use yii\web\ForbiddenHttpException;
+use yii\web\NotAcceptableHttpException;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
 use yii\web\UnauthorizedHttpException;
@@ -501,9 +502,25 @@ class LeadController extends FController
          * @var $inProcessing Lead
          * @var $model Lead
          */
+
+        $user = Yii::$app->user->identity;
+
+
+
+        if(Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id)) {
+            $isAgent = true;
+        } else {
+            $isAgent = false;
+        }
+
+        /*if(Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id)) {
+            $params['LeadSearch']['supervision_id'] = Yii::$app->user->id;
+        }*/
+
+
         $inProcessing = Lead::find()
             ->where([
-                'employee_id' => Yii::$app->user->identity->getId(),
+                'employee_id' => $user->getId(),
                 'status' => Lead::STATUS_PROCESSING
             ])->one();
         if ($inProcessing !== null) {
@@ -521,6 +538,7 @@ class LeadController extends FController
             ]])->one();
 
         if ($model === null) {
+
             if (Yii::$app->request->get('over', 0)) {
                 $lead = Lead::findOne(['id' => $id]);
                 if ($lead !== null) {
@@ -535,7 +553,7 @@ class LeadController extends FController
             } else {
                 $model = Lead::findOne([
                     'id' => $id,
-                    'employee_id' => Yii::$app->user->identity->getId()
+                    'employee_id' => $user->getId()
                 ]);
                 if ($model === null) {
                     Yii::$app->getSession()->setFlash('warning', 'Lead is unavailable to access now!');
@@ -548,11 +566,19 @@ class LeadController extends FController
             throw new UnauthorizedHttpException('Not permissions view lead ID: ' . $id);
         }
 
+
+        if($model->status == Lead::STATUS_PENDING && $isAgent) {
+            $isAccessNewLead = $user->accessTakeNewLead();
+            if(!$isAccessNewLead) {
+                throw new NotAcceptableHttpException('Access is denied (limit) - "Take lead"');
+            }
+        }
+
         if ($model->status == Lead::STATUS_FOLLOW_UP) {
             $checkProccessingByAgent = LeadFlow::findOne([
                 'lead_id' => $model->id,
                 'status' => $model::STATUS_PROCESSING,
-                'employee_id' => Yii::$app->user->identity->getId()
+                'employee_id' => $user->getId()
             ]);
             if ($checkProccessingByAgent === null) {
                 $model->called_expert = false;
@@ -560,7 +586,7 @@ class LeadController extends FController
         }
 
 
-        $model->employee_id = Yii::$app->user->identity->getId();
+        $model->employee_id = $user->getId();
 
         if ($model->status != Lead::STATUS_ON_HOLD && $model->status != Lead::STATUS_SNOOZE && !$model->l_answered) {
             LeadTask::createTaskList($model->id, $model->employee_id, 1, '', Task::CAT_NOT_ANSWERED_PROCESS);
@@ -794,6 +820,8 @@ class LeadController extends FController
             }*/
         }
 
+        $checkShiftTime = true;
+
 
 
         if(Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id)) {
@@ -802,11 +830,17 @@ class LeadController extends FController
 
         $dataProvider = $searchModel->searchInbox($params);
 
+        $user = Yii::$app->user->identity;
+
+        $isAccessNewLead = $user->accessTakeNewLead();
+
         return $this->render('inbox', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
             'checkShiftTime' => $checkShiftTime,
-            'isAgent' => $isAgent
+            'isAgent' => $isAgent,
+            'isAccessNewLead' => $isAccessNewLead,
+            'user' => $user
         ]);
     }
 
