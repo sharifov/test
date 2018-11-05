@@ -46,7 +46,7 @@ class LeadsController extends FController
                         'roles' => ['supervision', 'admin'],
                     ],
                     [
-                        'actions' => ['view', 'index', 'ajax-reason-list'],
+                        'actions' => ['index', 'ajax-reason-list'],
                         'allow' => true,
                         'roles' => ['agent'],
                     ],

@@ -1409,7 +1409,7 @@ Sales - Kivork",
 
         if($offset) {
             $clientTime = date("H:i", strtotime("now $offset GMT"));
-            $clientTime = '<i class="fa fa-clock-o"></i> <b>' . Html::encode($clientTime) . '</b><br/>(GMT: ' .$offset_gmt . ')';
+            $clientTime = '<i class="fa fa-clock-o"></i> <b>' . Html::encode($clientTime) . '</b>'; //<br/>(GMT: ' .$offset_gmt . ')';
         }
 
         return $clientTime;

@@ -30,6 +30,7 @@ $this->params['breadcrumbs'][] = $this->title;
 }
 </style>
 <h1>
+    <i class="fa fa-flag-o"></i>
 	<?=\yii\helpers\Html::encode($this->title)?>
 </h1>
 <div class="lead-index">

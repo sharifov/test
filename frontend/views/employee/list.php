@@ -231,6 +231,29 @@ if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
                     'visible' => Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)
                 ],
 
+                [
+                    'label' => 'Other params',
+                    //'attribute' => 'created_at',
+                    'value' => function(\common\models\Employee $model) {
+                        if($params = $model->userParams) {
+                            $str = '<table class="table table-bordered" style="font-size:10px">';
+                            $str .= '<tr><td>'.$params->getAttributeLabel('up_inbox_show_limit_leads').'</td><td>'.$params->up_inbox_show_limit_leads.'</td></tr>';
+                            $str .= '<tr><td>'.$params->getAttributeLabel('up_default_take_limit_leads').'</td><td>'.$params->up_default_take_limit_leads.'</td></tr>';
+                            $str .= '<tr><td>'.$params->getAttributeLabel('up_min_percent_for_take_leads').'</td><td>'.$params->up_min_percent_for_take_leads.'%</td></tr>';
+                            $str .= '</table>';
+                        } else {
+                            $str = '-';
+                        }
+                        return $str;
+                    },
+                    'format' => 'raw',
+                    'contentOptions' => ['class' => 'text-left'],
+                    'options' => [
+                        'style' => 'width:240px;'
+                    ],
+                    'visible' => Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)
+                ],
+
 
                 /*[
                     'attribute' => 'created_at',
