@@ -18,7 +18,7 @@ class UserParamsSearch extends UserParams
     public function rules()
     {
         return [
-            [['up_user_id', 'up_commission_percent', 'up_updated_user_id', 'up_bonus_active'], 'integer'],
+            [['up_user_id', 'up_commission_percent', 'up_updated_user_id', 'up_bonus_active', 'up_inbox_show_limit_leads', 'up_default_take_limit_leads', 'up_min_percent_for_take_leads'], 'integer'],
             [['up_base_amount'], 'number'],
             [['up_updated_dt'], 'safe'],
         ];
@@ -66,6 +66,9 @@ class UserParamsSearch extends UserParams
             'up_updated_dt' => $this->up_updated_dt,
             'up_bonus_active' => $this->up_bonus_active,
             'up_updated_user_id' => $this->up_updated_user_id,
+            'up_inbox_show_limit_leads' => $this->up_inbox_show_limit_leads,
+            'up_default_take_limit_leads' => $this->up_default_take_limit_leads,
+            'up_min_percent_for_take_leads' => $this->up_min_percent_for_take_leads,
         ]);
 
         return $dataProvider;

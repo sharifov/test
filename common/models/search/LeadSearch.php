@@ -48,6 +48,8 @@ class LeadSearch extends Lead
     public $email_status;
     public $quote_status;
 
+    public $limit;
+
 
     /**
      * {@inheritdoc}
@@ -55,7 +57,7 @@ class LeadSearch extends Lead
     public function rules()
     {
         return [
-            [['id', 'client_id', 'employee_id', 'status', 'project_id', 'adults', 'children', 'infants', 'rating', 'called_expert', 'cnt', 'l_grade', 'l_answered', 'supervision_id'], 'integer'],
+            [['id', 'client_id', 'employee_id', 'status', 'project_id', 'adults', 'children', 'infants', 'rating', 'called_expert', 'cnt', 'l_grade', 'l_answered', 'supervision_id', 'limit'], 'integer'],
             [['email_status', 'quote_status'], 'integer'],
 
             [['client_name', 'client_email', 'client_phone','quote_pnr'], 'string'],
@@ -815,17 +817,16 @@ class LeadSearch extends Lead
         $query = Lead::find();
         $leadTable = Lead::tableName();
 
+
         // add conditions that should always apply here
+        $this->load($params);
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
             'sort'=> ['defaultOrder' => ['created' => SORT_DESC]],
-            'pagination' => [
-                'pageSize' => 30,
-            ],
+            'pagination' => $this->limit > 0 ? false : ['pageSize' => 20],
         ]);
 
-        $this->load($params);
 
         if (!$this->validate()) {
             // uncomment the following line if you do not want to return any records when validation fails
@@ -847,7 +848,17 @@ class LeadSearch extends Lead
         ->andWhere(['IN', $leadTable . '.project_id', $projectIds])
         ;
 
+
+        if($this->limit > 0) {
+            $query->limit($this->limit);
+            //$dataProvider->setTotalCount($this->limit);
+        }
+
         $query->with(['client', 'client.clientEmails', 'client.clientPhones']);
+
+
+
+
 
         return $dataProvider;
     }

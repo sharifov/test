@@ -66,6 +66,9 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     public $user_groups;
     public $user_projects;
 
+    public $shiftData = [];
+    public $currentShiftTaskInfoSummary = [];
+
     /**
      * {@inheritdoc}
      */
@@ -564,6 +567,67 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
 
 
     /**
+     * @return array|mixed
+     * @throws \Exception
+     */
+    public function getCurrentShiftTaskInfoSummary()
+    {
+
+        if($this->currentShiftTaskInfoSummary) {
+            return $this->currentShiftTaskInfoSummary;
+        }
+
+        $shiftTime = $this->getShiftTime();
+
+        $stats = [];
+        if(isset($shiftTime['start_utc_dt']) && $shiftTime['start_utc_dt']) {
+            $startShiftDate = date('Y-m-d', strtotime($shiftTime['start_utc_dt']));
+        } else {
+            $startShiftDate = date('Y-m-d');
+        }
+
+        //VarDumper::dump($startShiftDate, 10, true); exit;
+
+        $taskListAllQuery = \common\models\LeadTask::find()
+            ->where(['lt_user_id' => $this->id])
+            ->andWhere(['=', 'lt_date', $startShiftDate]);
+
+        $taskListCheckedQuery = \common\models\LeadTask::find()
+            ->where(['lt_user_id' => $this->id])
+            ->andWhere(['IS NOT', 'lt_completed_dt', null])
+            ->andWhere(['=', 'lt_date', $startShiftDate]);
+
+
+        $taskListAllQuery->joinWith(['ltLead' => function ($q) {
+            $q->where(['NOT IN', 'leads.status', [Lead::STATUS_TRASH, Lead::STATUS_SNOOZE]]);
+        }]);
+
+        $taskListCheckedQuery->joinWith(['ltLead' => function ($q) {
+            $q->where(['NOT IN', 'leads.status', [Lead::STATUS_TRASH, Lead::STATUS_SNOOZE]]);
+        }]);
+
+
+        $completedTasksCount = (int) $taskListCheckedQuery->count();
+        $allTasksCount = (int) $taskListAllQuery->count();
+
+
+        $stats['completedTasksCount'] = $completedTasksCount;
+        $stats['allTasksCount'] = $allTasksCount;
+
+
+        if($allTasksCount > 0) {
+            $completedTasksPercent = round($completedTasksCount * 100 / $allTasksCount);
+        } else {
+            $completedTasksPercent = 0;
+        }
+
+        $stats['completedTasksPercent'] = $completedTasksPercent;
+        $this->currentShiftTaskInfoSummary = $stats;
+        return $stats;
+    }
+
+
+    /**
      * @param string|null $start_dt
      * @param string|null $end_dt
      * @return string
@@ -830,6 +894,10 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     {
         $shiftData = [];
 
+        if($this->shiftData) {
+            return $this->shiftData;
+        }
+
         if($this->userParams) {
             $startTime = $this->userParams->up_work_start_tm;
             $workHours = (int) $this->userParams->up_work_minutes * 60;
@@ -853,9 +921,15 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
 
                 $shiftData['start_utc_ts'] = $startTS;
                 $shiftData['end_utc_ts'] = $endTS;
+
+                $shiftData['start_period_utc_ts'] = $endTS - (24 * 60 * 60);
+
                 $shiftData['start_utc_dt'] = $startShiftTimeUTC->format('Y-m-d H:i:s');
                 $shiftData['end_utc_dt'] = $endShiftTimeUTC->format('Y-m-d H:i:s');
+
+                $shiftData['start_period_utc_dt'] = date('Y-m-d H:i:s', $shiftData['start_period_utc_ts']);
             }
+            $this->shiftData = $shiftData;
         }
 
         return $shiftData;
@@ -880,5 +954,62 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         }
 
         return false;
+    }
+
+    /**
+     * @return int|string
+     * @throws \Exception
+     */
+    public function getCountNewLeadCurrentShift()
+    {
+        $shift = $this->getShiftTime();
+        // VarDumper::dump($shift, 10, true);
+        $endDT = $shift['end_utc_dt'];
+        $startDT = $shift['start_period_utc_dt'];
+        $query = LeadFlow::find()->where(['>=', 'created', $startDT])->andWhere(['<=', 'created', $endDT])
+            ->andWhere(['employee_id' => $this->id, 'lf_from_status_id' => Lead::STATUS_PENDING, 'status' => Lead::STATUS_PROCESSING]);
+
+        // echo $query->createCommand()->getRawSql();
+
+        $count = $query->count();
+        return $count;
+    }
+
+    /**
+     * @return bool
+     * @throws \Exception
+     */
+    public function accessTakeNewLead() : bool
+    {
+        $access = false;
+        //$shift = $this->getShiftTime();
+
+
+        if($params = $this->userParams) {
+
+
+
+            if(!$params->up_min_percent_for_take_leads) {
+                $access = true;
+            } else {
+
+                $currentShiftTaskInfoSummary = $this->getCurrentShiftTaskInfoSummary();
+                if($currentShiftTaskInfoSummary['completedTasksPercent'] >= $params->up_min_percent_for_take_leads) {
+                    $access = true;
+                } else {
+                    $countNewLeads = $this->getCountNewLeadCurrentShift();
+
+                    if(!$params->up_default_take_limit_leads) {
+                        $access = true;
+                    } elseif($countNewLeads < $params->up_default_take_limit_leads) {
+                        $access = true;
+                    }
+                }
+
+            }
+
+        }
+
+        return $access;
     }
 }

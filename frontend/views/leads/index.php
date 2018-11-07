@@ -305,9 +305,9 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
         // 'adults',
 
         [
-            'label' => 'Passeng',
+            'label' => 'Pax',
             'value' => function (\common\models\Lead $model) {
-                return '<i class="fa fa-users"></i> <span title="adult">'. $model->adults .'</span> / <span title="child">' . $model->children . '</span> / <span title="infant">' . $model->infants.'</span>';
+                return '<i class="fa fa-male"></i> <span title="adult">'. $model->adults .'</span> / <span title="child">' . $model->children . '</span> / <span title="infant">' . $model->infants.'</span>';
             },
             'format' => 'raw',
             'contentOptions' => [

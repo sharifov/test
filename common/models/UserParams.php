@@ -18,7 +18,9 @@ use yii\db\ActiveRecord;
  * @property string $up_work_start_tm
  * @property int $up_work_minutes
  * @property bool $up_bonus_active
- *
+ * @property int $up_inbox_show_limit_leads
+ * @property int $up_default_take_limit_leads
+ * @property int $up_min_percent_for_take_leads
  *
  * @property Employee $upUpdatedUser
  * @property Employee $upUser
@@ -40,7 +42,7 @@ class UserParams extends \yii\db\ActiveRecord
     {
         return [
             [['up_user_id'], 'required'],
-            [['up_user_id', 'up_commission_percent', 'up_updated_user_id', 'up_bonus_active', 'up_work_minutes'], 'integer'],
+            [['up_user_id', 'up_commission_percent', 'up_updated_user_id', 'up_bonus_active', 'up_work_minutes', 'up_inbox_show_limit_leads', 'up_default_take_limit_leads', 'up_min_percent_for_take_leads'], 'integer'],
             [['up_base_amount'], 'number'],
             [['up_updated_dt', 'up_work_start_tm'], 'safe'],
             [['up_timezone'], 'string', 'max' => 40],
@@ -65,6 +67,9 @@ class UserParams extends \yii\db\ActiveRecord
             'up_work_start_tm' => 'Work Start Time',
             'up_work_minutes' => 'Work Minutes',
             'up_timezone' => 'Timezone',
+            'up_inbox_show_limit_leads' => 'Inbox show limit leads',
+            'up_default_take_limit_leads' => 'Default take limit leads',
+            'up_min_percent_for_take_leads' => 'Min percent for take leads',
         ];
     }
 

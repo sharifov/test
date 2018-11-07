@@ -26,6 +26,7 @@ $this->registerJsFile('https://cdnjs.cloudflare.com/ajax/libs/jquery.countdown/2
     ]
 ]);
 
+
 ?>
 <?/*<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>*/?>
 
@@ -141,6 +142,11 @@ $userId = Yii::$app->user->id;
                         'up_timezone',
                         'up_work_start_tm',
                         'up_work_minutes',
+
+                        'up_inbox_show_limit_leads',
+                        'up_default_take_limit_leads',
+                        'up_min_percent_for_take_leads',
+
                         /*[
                             'attribute' => 'up_updated_dt',
                             'value' => function(\common\models\UserParams $model) {
@@ -156,6 +162,39 @@ $userId = Yii::$app->user->id;
 
 
         </div>
+
+        <div class="col-md-3">
+            <?php
+                $taskSummary = Yii::$app->user->identity->getCurrentShiftTaskInfoSummary();
+                //\yii\helpers\VarDumper::dump($taskSummary, 10, true);
+            ?>
+
+            <table class="table table-bordered">
+                <tr>
+                    <th>Current Shift All tasks</th>
+                    <td><?=$taskSummary['allTasksCount']?></td>
+                </tr>
+                <tr>
+                    <th>Current Shift Completed tasks</th>
+                    <td><?=$taskSummary['completedTasksCount']?></td>
+                </tr>
+                <tr>
+                    <th>Current Shift task progress</th>
+                    <td style="width: 50%">
+                        <div class="progress" title="<?=$taskSummary['completedTasksPercent']?>%">
+                            <div class="progress-bar" role="progressbar" aria-valuenow="'.$percent.'" aria-valuemin="0" aria-valuemax="100" style="width: <?=$taskSummary['completedTasksPercent']?>%;">
+                                <?=$taskSummary['completedTasksPercent']?>%
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+
+        </div>
+
+
+
+
 
     </div>
 

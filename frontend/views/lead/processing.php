@@ -28,7 +28,7 @@ $this->params['breadcrumbs'][] = $this->title;
 	z-index: 1010 !important;
 }
 </style>
-<h1><?=\yii\helpers\Html::encode($this->title)?></h1>
+<h1><i class="fa fa-spinner"></i> <?=\yii\helpers\Html::encode($this->title)?></h1>
 <div class="lead-index">
 
     <?php Pjax::begin(); //['id' => 'lead-pjax-list', 'timeout' => 5000, 'enablePushState' => true, 'clientOptions' => ['method' => 'GET']]); ?>
