@@ -29,6 +29,8 @@ def HTTP_PORT="80"
         sh 'git status'}catch (Exception e) {
              slackSend (color: '#FF0000', channel: '#sales_dev_builds', message: "FAILED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})")
         }
+      }
+      stage("SonarQube"){
         // SonarQube
           script {
             //Requires SonarQube Scanner
