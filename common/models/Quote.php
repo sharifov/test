@@ -33,11 +33,13 @@ use yii\db\Query;
  * @property string $updated
  * @property boolean $created_by_seller
  * @property string $employee_name
+ * @property string $last_ticket_date
  *
  * @property QuotePrice[] $quotePrices
  * @property int $quotePricesCount
  * @property Employee $employee
  * @property Lead $lead
+ * @property QuoteTrip[] $quoteTrips
  */
 class Quote extends \yii\db\ActiveRecord
 {
@@ -70,10 +72,10 @@ class Quote extends \yii\db\ActiveRecord
 
 
     public CONST STATUS_LIST = [
-        self::STATUS_CREATED => 'Created',
+        self::STATUS_CREATED => 'New',
         self::STATUS_APPLIED => 'Applied',
         self::STATUS_DECLINED => 'Declined',
-        self::STATUS_SEND => 'Send',
+        self::STATUS_SEND => 'Sent',
         self::STATUS_OPENED => 'Opened'
     ];
 
@@ -83,6 +85,14 @@ class Quote extends \yii\db\ActiveRecord
         self::STATUS_DECLINED => 'lq-declined',
         self::STATUS_SEND => 'lq-send',
         self::STATUS_OPENED => 'lq-opened'
+    ];
+
+    public CONST STATUS_CLASS_SPAN = [
+        self::STATUS_CREATED => 'status-new',
+        self::STATUS_APPLIED => 'status-applied',
+        self::STATUS_DECLINED => 'status-declined',
+        self::STATUS_SEND => 'status-send',
+        self::STATUS_OPENED => 'status-opened'
     ];
 
     public $itinerary = [];
@@ -166,6 +176,14 @@ class Quote extends \yii\db\ActiveRecord
                 break;
         }
         return $profit;
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getQuoteTrips()
+    {
+        return $this->hasMany(QuoteTrip::className(), ['qt_quote_id' => 'id']);
     }
 
     public function getDataForProfit($quoteId)
@@ -282,7 +300,7 @@ class Quote extends \yii\db\ActiveRecord
         return [
             [['uid', 'reservation_dump', 'main_airline_code'], 'required'],
             [['lead_id', 'status', 'check_payment'], 'integer'],
-            [['created', 'updated', 'reservation_dump', 'created_by_seller', 'employee_name', 'employee_id', 'pcc', 'gds'], 'safe'],
+            [['created', 'updated', 'reservation_dump', 'created_by_seller', 'employee_name', 'employee_id', 'pcc', 'gds', 'last_ticket_date'], 'safe'],
             [['uid', 'record_locator', 'pcc', 'cabin', 'gds', 'trip_type', 'main_airline_code', 'fare_type'], 'string', 'max' => 255],
 
             [['reservation_dump'], 'checkReservationDump'],
@@ -337,6 +355,7 @@ class Quote extends \yii\db\ActiveRecord
             'fare_type' => 'Fare Type',
             'created' => 'Created',
             'updated' => 'Updated',
+            'last_ticket_date' => 'Last Ticket Date',
         ];
     }
 
@@ -727,6 +746,15 @@ class Quote extends \yii\db\ActiveRecord
         }
         return $label;
     }
+
+    public function getStatusSpan()
+    {
+        $class = self::STATUS_CLASS_SPAN[$this->status] ??  '';
+        $label = self::STATUS_LIST[$this->status] ?? '-';
+
+        return '<span id="q-status-' . $this->uid . '" class="quote__status '.$class.'" title="At ' . $this->updated . '" data-toggle="tooltip"><i class="fa fa-circle"></i> <span>'.$label.'</span></span>';
+    }
+
 
     public function getLabelByStatus(int $status)
     {

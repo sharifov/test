@@ -23,6 +23,11 @@ use yii\web\BadRequestHttpException;
 use frontend\models\PreviewEmailQuotesForm;
 use common\models\Employee;
 use common\components\SearchService;
+use common\models\QuoteTrip;
+use yii\helpers\VarDumper;
+use common\models\QuoteSegment;
+use common\models\QuoteSegmentStop;
+use common\models\QuoteSegmentBaggage;
 
 /**
  * Quotes controller
@@ -41,7 +46,7 @@ class QuoteController extends FController
                     [
                         'actions' => [
                             'create', 'save', 'decline', 'calc-price', 'extra-price', 'clone',
-                            'send-quotes', 'get-online-quotes','status-log','preview-send-quotes'
+                            'send-quotes', 'get-online-quotes','get-online-quotes-old','status-log','preview-send-quotes','create-quote-from-search'
                         ],
 
                         'allow' => true,
@@ -71,19 +76,227 @@ class QuoteController extends FController
                 'body' => ''
             ];
             $attr = Yii::$app->request->post();
-            $result = Yii::$app->cache->get(sprintf('quick-search-%d-%d', $lead->id, Yii::$app->user->id));
-            if(!$result){
-                $result = SearchService::getOnlineQuotes($lead, $attr['gds']);
-                Yii::$app->cache->set(sprintf('quick-search-%d-%d', $lead->id, Yii::$app->user->id), $result, 30000);
+            if(isset($attr['gds']) && $lead !== null){
+                $keyCache = sprintf('quick-search-new-%d-%d-%s', $lead->id, Yii::$app->user->id, $attr['gds']);
+                $result = Yii::$app->cache->get($keyCache);
+
+                if(!$result){
+                    $result = SearchService::getOnlineQuotes($lead, $attr['gds']);
+                    if($result) {
+                        Yii::$app->cache->set($keyCache, $result, 30000);
+                    }
+                }
+
+                $viewData = SearchService::getAirlineLocationInfo($result);
+                $viewData['result'] = $result;
+                $viewData['leadId'] = $leadId;
+                $viewData['gds'] = $attr['gds'];
+
+                return $this->renderAjax('_search_results', $viewData);
             }
 
-            $viewData = SearchService::getAirlineLocationInfo($result);
-            $viewData['result'] = $result;
-
-            return $this->renderAjax('_search_results', $viewData);
         }
 
         return '';
+    }
+
+    public function actionCreateQuoteFromSearch($leadId)
+    {
+        Yii::$app->response->format = Response::FORMAT_JSON;
+        $result = [
+            'errors' => [],
+            'status' => false
+        ];
+
+        $lead = Lead::findOne(['id' => $leadId]);
+        if (Yii::$app->request->isPost) {
+            $attr = Yii::$app->request->post();
+
+            if(isset($attr['gds']) && isset($attr['key']) && $lead !== null){
+                $keyCache = sprintf('quick-search-new-%d-%d-%s', $lead->id, Yii::$app->user->id, $attr['gds']);
+                $resultSearch = Yii::$app->cache->get($keyCache);
+
+                if($resultSearch !== false){
+                    foreach ($resultSearch['results'] as $entry){
+                        if($entry['key'] == $attr['key']){
+                            $transaction = Quote::getDb()->beginTransaction();
+
+                            $quote = new Quote();
+                            $quote->uid = uniqid();
+                            $quote->lead_id = $leadId;
+                            $quote->cabin = $lead->cabin;
+                            $quote->trip_type = $lead->trip_type;
+                            $quote->check_payment = true;
+                            $quote->fare_type = $entry['fareType'];
+                            $quote->gds = $entry['gds'];
+                            $quote->pcc = $entry['pcc'];
+                            $quote->main_airline_code = $entry['validatingCarrier'];
+                            $quote->last_ticket_date = $entry['prices']['lastTicketDate'];
+                            $quote->reservation_dump = str_replace('&nbsp;', ' ', SearchService::getItineraryDump($entry));
+                            $quote->employee_id = Yii::$app->user->id;
+                            $quote->employee_name = Yii::$app->user->identity->username;
+
+                            if (!$quote->save()) {
+                                Yii::error(VarDumper::dump($quote->getErrors()), 'QuoteController:create-quote-from-search:quote:save');
+                                $transaction->rollBack();
+                                return $result;
+                            }else{
+                                if(isset($entry['trips']) && is_array($entry['trips'])) {
+                                    foreach ($entry['trips'] as $tripEntry){
+                                        $trip = new QuoteTrip();
+                                        $trip->qt_duration = $tripEntry['duration'];
+
+                                        if(!$trip->validate()){
+                                            Yii::error(VarDumper::dumpAsString($entry)."\n".VarDumper::dumpAsString($trip->getErrors()), 'QuoteController:create-quote-from-search:trip:save');
+                                            $transaction->rollBack();
+                                            return $result;
+                                        }
+                                        $quote->link('quoteTrips', $trip);
+                                        $keys = [];
+
+                                        if(isset($tripEntry['segments']) && is_array($tripEntry['segments'])) {
+                                            foreach ($tripEntry['segments'] as $segmentEntry){
+                                                $segment = new QuoteSegment();
+                                                $segment->qs_departure_airport_code = $segmentEntry['departureAirportCode'];
+                                                if(isset($segmentEntry['departureAirportTerminal'])){
+                                                    $segment->qs_departure_airport_terminal = $segmentEntry['departureAirportTerminal'];
+                                                }
+                                                $segment->qs_arrival_airport_code = $segmentEntry['arrivalAirportCode'];
+                                                if(isset($segmentEntry['arrivalAirportTerminal'])){
+                                                    $segment->qs_arrival_airport_terminal = $segmentEntry['arrivalAirportTerminal'];
+                                                }
+                                                $segment->qs_arrival_time = $segmentEntry['arrivalTime'];
+                                                $segment->qs_departure_time = $segmentEntry['departureTime'];
+                                                $segment->qs_air_equip_type = $segmentEntry['airEquipType'];
+                                                $segment->qs_booking_class = $segmentEntry['bookingClass'];
+                                                $segment->qs_flight_number = $segmentEntry['flightNumber'];
+                                                $segment->qs_fare_code = $segmentEntry['fareCode'];
+                                                $segment->qs_duration = $segmentEntry['duration'];
+                                                $segment->qs_operating_airline = $segmentEntry['operatingAirline'];
+                                                $segment->qs_marketing_airline = $segmentEntry['marketingAirline'];
+                                                $segment->qs_cabin = $segmentEntry['cabin'];
+                                                $segment->qs_mileage = $segmentEntry['mileage'];
+                                                if(isset($segmentEntry['marriageGroup'])){
+                                                    $segment->qs_marriage_group = $segmentEntry['marriageGroup'];
+                                                }
+                                                if(isset($segmentEntry['meal'])){
+                                                    $segment->qs_meal = $segmentEntry['meal'];
+                                                }
+                                                $segment->qs_stop = $segmentEntry['stop'];
+                                                $segment->qs_air_equip_type = $segmentEntry['airEquipType'];
+                                                $segment->qs_key = '#'.$segmentEntry['flightNumber'].
+                                                    ($segmentEntry['stop']>0?'('.$segmentEntry['stop'].')':'').
+                                                    $segmentEntry['departureAirportCode'].'-'.$segmentEntry['arrivalAirportCode'].' '.$segmentEntry['departureTime'];
+                                                $keys[] = $segment->qs_key;
+
+                                                if(!$segment->validate()){
+                                                    Yii::error(VarDumper::dumpAsString($entry)."\n".VarDumper::dumpAsString($segment->getErrors()), 'QuoteController:create-quote-from-search:segment:save');
+                                                    $transaction->rollBack();
+                                                    return $result;
+                                                }
+                                                $trip->link('quoteSegments', $segment);
+
+                                                if(isset($segmentEntry['stops']) && !empty($segmentEntry['stops'])){
+                                                    foreach ($segmentEntry['stops'] as $stopEntry){
+                                                        $stop = new QuoteSegmentStop();
+                                                        $stop->qss_location_code = $stopEntry['locationCode'];
+                                                        $stop->qss_departure_dt = $stopEntry['departureDateTime'];
+                                                        $stop->qss_arrival_dt = $stopEntry['arrivalDateTime'];
+                                                        if(isset($stopEntry['duration'])){
+                                                            $stop->qss_duration = $stopEntry['duration'];
+                                                        }
+                                                        if(isset($stopEntry['elapsedTime'])){
+                                                            $stop->qss_elapsed_time = $stopEntry['elapsedTime'];
+                                                        }
+                                                        if(isset($stopEntry['equipment'])){
+                                                            $stop->qss_equipment = $stopEntry['equipment'];
+                                                        }
+                                                        if(!$stop->validate()){
+                                                            Yii::error(VarDumper::dumpAsString($entry)."\n".VarDumper::dumpAsString($stop->getErrors()), 'QuoteController:create-quote-from-search:stop:save');
+                                                            $transaction->rollBack();
+                                                            return $result;
+                                                        }
+                                                        $segment->link('quoteSegmentStops', $stop);
+                                                    }
+                                                }
+
+                                                if(isset($segmentEntry['baggage'])){
+                                                    foreach ($segmentEntry['baggage'] as $paxCode => $baggageEntry){
+                                                        $baggage = new QuoteSegmentBaggage();
+                                                        $baggage->qsb_pax_code = $paxCode;
+                                                        if(isset($baggageEntry['airlineCode'])){
+                                                            $baggage->qsb_airline_code = $baggageEntry['airlineCode'];
+                                                        }
+                                                        if(isset($baggageEntry['allowPieces'])){
+                                                            $baggage->qsb_allow_pieces = $baggageEntry['allowPieces'];
+                                                        }
+                                                        if(isset($baggageEntry['allowWeight'])){
+                                                            $baggage->qsb_allow_weight = $baggageEntry['allowWeight'];
+                                                        }
+                                                        if(isset($baggageEntry['allowUnit'])){
+                                                            $baggage->qsb_allow_unit = $baggageEntry['allowUnit'];
+                                                        }
+                                                        if(isset($baggageEntry['allowMaxWeight'])){
+                                                            $baggage->qsb_allow_max_weight = $baggageEntry['allowMaxWeight'];
+                                                        }
+                                                        if(isset($baggageEntry['allowMaxSize'])){
+                                                            $baggage->qsb_allow_max_size = $baggageEntry['allowMaxSize'];
+                                                        }
+                                                        if(!$baggage->validate()){
+                                                            Yii::error(VarDumper::dumpAsString($entry)."\n".VarDumper::dumpAsString($baggage->getErrors()), 'QuoteController:create-quote-from-search:baggage:save');
+                                                            $transaction->rollBack();
+                                                            return $result;
+                                                        }
+                                                        $segment->link('quoteSegmentBaggages', $baggage);
+                                                    }
+                                                }
+                                            }
+                                        }
+
+                                        $trip->qt_key = implode('|', $keys);
+                                        if(!$trip->save()){
+                                            Yii::error(VarDumper::dumpAsString($entry)."\n".VarDumper::dumpAsString($stop->getErrors()), 'QuoteController:create-quote-from-search:trip:savekey');
+                                            $transaction->rollBack();
+                                            return $result;
+                                        }
+                                    }
+                                }
+
+                                foreach ($entry['passengers'] as $paxCode => $paxEntry){
+                                    for($i = 0; $i < $paxEntry['cnt']; $i++){
+                                        $price = new QuotePrice();
+                                        $price->passenger_type = $paxCode;
+                                        $price->fare = $paxEntry['baseFare'];
+                                        $price->taxes = $paxEntry['baseTax'];
+                                        $price->net = $price->fare + $price->taxes;
+                                        $price->mark_up = $paxEntry['markup'];
+                                        $price->selling = $paxEntry['price'];
+
+                                        if(!$price->validate()){
+                                            Yii::error(VarDumper::dumpAsString($entry)."\n".VarDumper::dumpAsString($baggage->getErrors()), 'QuoteController:create-quote-from-search:baggage:save');
+                                            $transaction->rollBack();
+                                            return $result;
+                                        }
+
+                                        $quote->link('quotePrices', $price);
+                                    }
+                                }
+                            }
+
+                            $transaction->commit();
+                            $result['status'] = true;
+
+                            return $result;
+                        }
+                    }
+
+
+                }
+            }
+
+        }
+
+        return $result;
     }
 
     public function actionGetOnlineQuotesOld($leadId)

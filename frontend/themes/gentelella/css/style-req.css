@@ -1961,7 +1961,7 @@ input[disabled] + .radio-tab__text {
 }
 
 .modal-open .modal {
-  overflow: visible;
+  overflow: auto;
 }
 
 /*End Fix*/
@@ -3000,6 +3000,10 @@ input[disabled] + .radio-tab__text {
 #client-phones .intl-tel-input.separate-dial-code .selected-flag {
   height: 28px;
   z-index: 4;
+}
+
+.modal-backdrop {
+  background-color: #46494c !important;
 }
 
 .noUi-connect {
@@ -4994,6 +4998,8 @@ input[disabled] + .radio-tab__text {
 .search-filters__airports-departure {
   margin-bottom: 24px;
 }
+
+.modal-scrollable .modal{z-index:inherit;}
 .modal-open .modal {
    overflow: auto;
 }

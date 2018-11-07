@@ -52,7 +52,7 @@ $bundle = \frontend\themes\gentelella\assets\Asset::register($this);
     <script src="https://cdnjs.cloudflare.com/ajax/libs/respond.js/1.4.2/respond.min.js"></script>
     <![endif]-->
 </head>
-<body class="nav-md">
+<body class="nav-<?= !empty($_COOKIE['menuIsCollapsed']) && $_COOKIE['menuIsCollapsed'] == 'true' ? 'sm' : 'md' ?>">
 <?php $this->beginBody(); ?>
 <div class="container body">
     <div class="main_container">

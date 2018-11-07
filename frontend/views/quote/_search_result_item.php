@@ -1,5 +1,6 @@
 <?php
 use common\components\SearchService;
+use yii\bootstrap\Html;
 
 /**
  * @var $resultKey int
@@ -71,6 +72,9 @@ use common\components\SearchService;
                                     	</span>
                                 	<?php endif;?>
                                 	<?php if(isset($segment['meal'])):?><span class="badge badge-light" title="<?= $segment['meal']?>"><i class="fa fa-cutlery"></i></span><?php endif;?>
+                                	<?php if(isset($segment['stop']) && $segment['stop'] > 0):?>
+                                		<div class="text-danger"><i class="fa fa-warning"></i> <?= \Yii::t('search', '{n, plural, =0{no technical stops} one{# technical stop} other{# technical stops}}', ['n' => $segment['stop']]);?></div>
+                                	<?php endif;?>
                                 </div>
                             </div>
                             <?php endforeach;?>
@@ -109,6 +113,7 @@ use common\components\SearchService;
 			<?php foreach ($result['trips'] as $trip):?>
 			<?php
 			$segmentsCnt = count($trip['segments']);
+			$stopCnt = $segmentsCnt - 1;
 			$firstSegment = $trip['segments'][0];
 			$lastSegment = $trip['segments'][$segmentsCnt-1];
 			$tripsInfo[] = ((!isset($locations[$firstSegment['departureAirportCode']]))?:$locations[$firstSegment['departureAirportCode']]['city']).' → '.((!isset($locations[$lastSegment['arrivalAirportCode']]))?:$locations[$lastSegment['arrivalAirportCode']]['city']);
@@ -116,6 +121,9 @@ use common\components\SearchService;
             foreach ($trip['segments'] as $segment){
                 if(!in_array(SearchService::getCabin($segment['cabin']), $cabins)){
                     $cabins[] = SearchService::getCabin($segment['cabin']);
+                }
+                if(isset($segment['stop']) && $segment['stop'] > 0){
+                    $stopCnt += $segment['stop'];
                 }
             }
 			?>
@@ -155,7 +163,7 @@ use common\components\SearchService;
 				</div>
 				<div class="quote__additional-info">
 					<div class="quote__stops">
-						<span class="quote__stop-quantity"><?= \Yii::t('search', '{n, plural, =0{Nonstop} one{# stop} other{# stops}}', ['n' => ($segmentsCnt-1)]);?></span>
+						<span class="quote__stop-quantity"><?= \Yii::t('search', '{n, plural, =0{Nonstop} one{# stop} other{# stops}}', ['n' => $stopCnt]);?></span>
 					</div>
 					<div class="quote__cabin"><?= implode(', ',$cabins)?></div>
 				</div>
@@ -215,13 +223,16 @@ use common\components\SearchService;
 	<div class="quote__footer">
 		<div class="quote__footer-left"></div>
 		<div class="quote__footer-right">
-			<button class="btn btn-primary search_details__btn" data-target="#result_<?= $resultKey?>" data-title="<?= implode(', ',$tripsInfo)?>">
-				<i class="fa fa-eye"></i>&nbsp; <span>Details</span>
-			</button>
-			&nbsp;
-			<button class="btn btn-success">
-				<i class="fa fa-check"></i>&nbsp; <span>Select</span>
-			</button>
+			 <?= Html::button('<i class="fa fa-eye"></i>&nbsp; <span>Details</span>', [
+                 'class' => 'btn btn-primary search_details__btn',
+			     'data-title' => implode(', ',$tripsInfo),
+			     'data-target' => '#result_'.$resultKey,
+                ]) ?>
+            <?= Html::button('<i class="fa fa-check"></i>&nbsp; <span>Select</span>', [
+                 'class' => 'btn btn-success create_quote__btn',
+		         'data-title' => implode(', ',$tripsInfo),
+                'data-key' => $result['key'],
+            ]) ?>
 		</div>
 	</div>
 </div>

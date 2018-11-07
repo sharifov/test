@@ -37,6 +37,7 @@ use common\models\Quote;
 use common\models\Employee;
 use common\models\search\LeadSearch;
 use frontend\models\ProfitSplitForm;
+use common\components\SearchService;
 
 /**
  * Site controller
@@ -69,7 +70,8 @@ class LeadController extends FController
                             'create', 'add-comment', 'change-state', 'unassign', 'take',
                             'set-rating', 'add-note', 'unprocessed', 'call-expert', 'send-email',
                             'check-updates', 'flow-transition', 'get-user-actions', 'add-pnr', 'update2','clone',
-                            'get-badges', 'sold', 'split-profit', 'processing', 'follow-up', 'inbox', 'trash', 'booked'
+                            'get-badges', 'sold', 'split-profit', 'processing', 'follow-up', 'inbox', 'trash', 'booked',
+                            'test'
                         ],
                         'allow' => true,
                         'roles' => ['agent'],
@@ -917,8 +919,6 @@ class LeadController extends FController
         $lead = Lead::findOne(['id' => $id]);
 
         if ($lead !== null) {
-
-
             if (Yii::$app->request->post('hasEditable')) {
 
                 $value = '456';
@@ -1055,8 +1055,11 @@ class LeadController extends FController
                 return $data;
             }
 
+            $quotesProvider = $lead->getQuotesProvider([]);
+
             return $this->render('lead', [
-                'leadForm' => $leadForm
+                'leadForm' => $leadForm,
+                'quotesProvider' => $quotesProvider,
             ]);
         }
         throw new UnauthorizedHttpException('Not found lead by ID: ' . $id);

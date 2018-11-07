@@ -131,6 +131,61 @@ class SearchService
         return ['airlines' => $airlines, 'locations' => $locations];
     }
 
+    public static function getAirlineLocationItem($resItem)
+    {
+        $airlinesIata = [];
+        $locationsIata = [];
+
+
+        if(!in_array($resItem['validatingCarrier'], $airlinesIata)){
+            $airlinesIata[] = $resItem['validatingCarrier'];
+        }
+        foreach ($resItem['trips'] as $trip){
+            foreach ($trip['segments'] as $segment){
+                if(!in_array($segment['operatingAirline'], $airlinesIata)){
+                    $airlinesIata[] = $segment['operatingAirline'];
+                }
+                if(!in_array($segment['marketingAirline'], $airlinesIata)){
+                    $airlinesIata[] = $segment['marketingAirline'];
+                }
+                if(!in_array($segment['departureAirportCode'], $locationsIata)){
+                    $locationsIata[] = $segment['departureAirportCode'];
+                }
+                if(!in_array($segment['arrivalAirportCode'], $locationsIata)){
+                    $locationsIata[] = $segment['arrivalAirportCode'];
+                }
+            }
+        }
+
+        $airlines = Airline::getAirlinesListByIata($airlinesIata);
+        $locations = Airport::getAirportListByIata($locationsIata);
+
+        return ['airlines' => $airlines, 'locations' => $locations];
+    }
+
+    public static function getItineraryDump($result)
+    {
+        $segments = [];
+
+        foreach ($result['trips'] as $trip){
+            foreach ($trip['segments'] as $segment) {
+                $fSegment = new FlightSegment();
+                $fSegment->departureTime = $segment['departureTime'];
+                $fSegment->arrivalTime = $segment['arrivalTime'];
+                $fSegment->airlineCode = $segment['marketingAirline'];
+                $fSegment->flightNumber = $segment['flightNumber'];
+                $fSegment->bookingClass = $segment['bookingClass'];
+                $fSegment->departureAirportCode = $segment['departureAirportCode'];
+                $fSegment->destinationAirportCode = $segment['arrivalAirportCode'];
+                if($segment['operatingAirline'] != $segment['marketingAirline']){
+                    $fSegment->operationAirlineCode = $segment['operatingAirline'];
+                }
+                $segments[] = $fSegment;
+            }
+        }
+        return implode("\n", Quote::createDump($segments));
+    }
+
     public static function getLayoverDuration($from, $to)
     {
         $fromDateTime = new \DateTime($from);
@@ -148,28 +203,5 @@ class SearchService
             Lead::TRIP_TYPE_MULTI_DESTINATION => 'openjaw'
         ];
         return $mapping[$type];
-    }
-
-    public static function getItineraryDump($trips)
-    {
-        $segments = [];
-        foreach ($trips as $trip) {
-            foreach ($trip['segments'] as $segment) {
-                $fSegment = new FlightSegment();
-                $fSegment->departureTime = $segment['departureTime'];
-                $fSegment->arrivalTime = $segment['arrivalTime'];
-                $fSegment->airlineCode = $segment['airlineCode'];
-                $fSegment->flightNumber = $segment['flightNumber'];
-                $fSegment->bookingClass = $segment['BookingClass'];
-                $fSegment->departureAirportCode = $segment['departureAirportCode'];
-                $fSegment->destinationAirportCode = $segment['arrivalAirportCode'];
-                $fSegment->destinationAirportCode = $segment['arrivalAirportCode'];
-                if (! empty($segment['codeShare'])) {
-                    $fSegment->operationAirlineCode = $segment['codeShare'];
-                }
-                $segments[] = $fSegment;
-            }
-        }
-        return implode("\n", Quote::createDump($segments));
     }
 }

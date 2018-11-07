@@ -1,11 +1,14 @@
 <?php
 /**
  * @var $leadForm LeadForm
+ * @var $quotesProvider ActiveProvider
  */
 
 use yii\bootstrap\Html;
 use frontend\models\LeadForm;
 use yii\bootstrap\Modal;
+use yii\widgets\ListView;
+use common\models\Quote;
 
 //$bundle = \frontend\themes\gentelella\assets\LeadAsset::register($this);
 //$this->registerCssFile('/css/style-req.css');
@@ -71,7 +74,175 @@ JS;
 
     $this->registerJs($js);
 }
+?>
+<?php  $js = <<<JS
+$(document).on('click','.quote_details__btn', function (e) {
+    e.preventDefault();
+    var modal = $('#flight-details__modal');
+    modal.find('.modal-header h2').html($(this).data('title'));
+    var target = $($(this).data('target')).html();
+    modal.find('.modal-body').html(target);
+    modal.modal('show');
+});
+JS;
 
+$this->registerJs($js);
+?>
+<?php $extraPriceUrl = \yii\helpers\Url::to(['quote/extra-price']);
+$declineUrl = \yii\helpers\Url::to(['quote/decline']);
+$statusLogUrl = \yii\helpers\Url::to(['quote/status-log']);
+$previewEmailUrl = \yii\helpers\Url::to(['quote/preview-send-quotes']);
+$leadId = $leadForm->getLead()->id;
+
+if ($leadForm->mode != $leadForm::VIEW_MODE) {
+    $js = <<<JS
+
+    $('[data-toggle="tooltip"]').tooltip();
+    $(document).on('click', '.send-quotes-to-email', function () {
+        var urlModel = $(this).data('url');
+        var email = $('#send-to-email').val();
+        var quotes = Array();
+        $('.quotes-uid:checked').each(function(idx, elm){
+            quotes.push($(elm).val());
+        });
+        if (quotes.length == 0) {
+            return null;
+        }
+        $('#btn-send-quotes').popover('hide');
+        $('#preloader').removeClass('hidden');
+        var dataPost = {leadId: $leadId, email:email, quotes: quotes };
+        $.ajax({
+            url: urlModel,
+            type: 'post',
+            data: dataPost,
+            success: function (data) {
+                var editBlock = $('#preview-send-quotes');
+                editBlock.find('.modal-body').html(data);
+                editBlock.modal('show');
+
+                $('#preloader').addClass('hidden');
+            },
+            error: function (error) {
+                $('#preloader').addClass('hidden');
+                console.log('Error: ' + error);
+            }
+        });
+    });
+
+    $('#btn-send-quotes').popover({
+        html: true,
+        placement: 'top',
+        content: function () {
+            $('#send-to-email').html('');
+            $('.email').each(function(idx, elm){
+                var val = $(elm).val();
+                if(val != ''){
+                    $('#send-to-email').append('<option value="'+val+'">'+val+'</option>');
+                }
+            });
+            return $(".js-pop-emails-content").html();
+        }
+    });
+    $('#lg-btn-send-quotes').click(function() {
+        $('#btn-send-quotes').trigger('click');
+    });
+
+    $('.ext-mark-up').keyup(function (event) {
+        var key = event.keyCode ? event.keyCode : event.which;
+        validatePriceField($(this), key);
+    });
+    $('.ext-mark-up').change(function (event) {
+        if ($(this).val().length == 0) {
+            $(this).val(0);
+        }
+        var element = $(this);
+        $.ajax({
+            type: 'post',
+            url: '$extraPriceUrl',
+            data: {'quote_uid': $(this).data('quote-uid'), 'value': $(this).val(), 'pax_type': $(this).data('pax-type')},
+            success: function (data) {
+                if (!jQuery.isEmptyObject(data)) {
+                    var sell = element.parent().parent().find('.sellingPrice-'+data.uid),
+                            totalSell = $('#'+data.uid).find('.total-sellingPrice-'+data.uid),
+                            totalMarkup = $('#'+data.uid).find('.total-markup-'+data.uid);
+
+                        sell.text(data.actual.sellingPrice);
+                        totalSell.text(data.total.sellingPrice);
+                        totalMarkup.text(data.total.markup);
+
+                        $('#isChangedMarkup-'+data.uid).removeClass('hidden');
+                    }
+            },
+            error: function (error) {
+            console.log('Error: ' + error);
+            }
+        });
+    });
+
+    $('.view-status-log').click(function(e){
+        e.preventDefault();
+        $('#preloader').removeClass('hidden');
+        var editBlock = $('#get-quote-status-log');
+        editBlock.find('.modal-body').html('');
+        var id = $(this).attr('data-id');
+        editBlock.find('.modal-body').load('$statusLogUrl?quoteId='+id, function( response, status, xhr ) {
+            $('#preloader').addClass('hidden');
+            editBlock.modal('show');
+        });
+    });
+
+    $('#btn-declined-quotes').click(function() {
+        var quotes = Array();
+        $('.quotes-uid:checked').each(function(idx, elm){
+            quotes.push($(elm).val());
+        });
+        if (quotes.length == 0) {
+            return null;
+        }
+        var dataPost = {quotes: quotes};
+        $('#preloader').removeClass('hidden');
+        $.ajax({
+            type: 'post',
+            url: '$declineUrl',
+            data: dataPost,
+            success: function (data) {
+                $('#preloader').addClass('hidden');
+                if (data.errors.length != 0) {
+                    $('#sent-messages').removeClass('hidden').addClass('alert-danger').removeClass('alert-success');
+                    $('#sent-messages').find('.fa-exclamation-triangle').addClass('hidden');
+                    $('#sent-messages').find('.fa-times-circle').removeClass('hidden');
+                    var errors = Array();
+                    $.each(data.errors, function(i, elm){errors.push(elm)});
+                    $('#sent-messages').find('div').html(errors.join('<br>'));
+                    $('#sent-messages').show();
+                    $('#sent-messages').fadeOut(10000);
+                } else {
+                    $('#sent-messages').removeClass('hidden').addClass('alert-success').removeClass('alert-danger');
+                    $('#sent-messages').find('.fa-exclamation-triangle').removeClass('hidden');
+                    $('#sent-messages').find('.fa-times-circle').addClass('hidden');
+                    $('#sent-messages').find('div').html(quotes.length+' quotes was successfully Declined');
+                    $('#sent-messages').show();
+                    $('#sent-messages').fadeOut(10000);
+
+                    $.each(quotes, function(idx, quote) {
+                        $('#q-status-'+quote).text('Declined');
+                        $('#q-status-'+quote).attr('class', 'sl-quote__status status-label label label-danger');
+                    });
+
+                    $.each($('.quotes-uid:checked'), function(idx, elm) {
+                        elm.parentElement.classList.add('hidden');
+                    });
+                }
+            },
+            error: function (error) {
+                $('#preloader').addClass('hidden');
+                console.log('Error: ' + error);
+            }
+        });
+    });
+JS;
+    $this->registerJs($js);
+}
 ?>
 <div class="page-header">
     <div class="container-fluid">
@@ -182,24 +353,20 @@ JS;
             ]);
             ?>
 
-            <?//php \yii\widgets\Pjax::begin(); ?>
-
-
-
-
-            <?//php \yii\widgets\Pjax::end() ?>
-
-			<div id="search-result">
-				<div id="search-preloader" class="hidden">
-                    <div class="preloader">
-                        <span class="fa fa-spinner fa-pulse fa-3x fa-fw"></span>
-                        <div class="preloader__text">Search Loading...</div>
-                    </div>
-                </div>
-                <div class="content"></div>
-			</div>
+            <?php \yii\widgets\Pjax::begin(); ?>
+			<?= ListView::widget([
+			    'dataProvider' => $quotesProvider,
+			    'itemView' => 'partial/_quote_item',
+                'viewParams' => [
+                    'appliedQuote' => $lead->getAppliedAlternativeQuotes(),
+                    'leadId' => $lead->id,
+                    'leadForm' => $leadForm
+                ],
+			]);?>
+            <?php \yii\widgets\Pjax::end() ?>
 
             <?php if (!$leadForm->getLead()->isNewRecord && count($leadForm->getLead()->getQuotes())) {
+
                 echo $this->render('partial/_quotes', [
                     'quotes' => array_reverse($leadForm->getLead()->getQuotes()),
                     'lead' => $leadForm->getLead(),

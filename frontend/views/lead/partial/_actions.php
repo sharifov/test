@@ -8,6 +8,7 @@ use frontend\models\LeadForm;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use common\models\Lead;
+use yii\bootstrap\Modal;
 
 $urlUserActions = Url::to(['lead/get-user-actions', 'id' => $leadForm->getLead()->id]);
 $userId = Yii::$app->user->id;
@@ -114,26 +115,39 @@ if ($leadForm->mode != $leadForm::VIEW_MODE || ($leadForm->mode == $leadForm::VI
         });
     });
 
+    /***  Quick search quotes ***/
+    $('#quick-search-quotes').click(function (e) {
+        e.preventDefault();
+        var url = $(this).data('url');
+        var editBlock = $('#quick-search');
+        editBlock.find('.modal-body').html('');
+        editBlock.find('.modal-body').load(url, function( response, status, xhr ) {
+            editBlock.modal({
+              backdrop: 'static',
+              show: true
+            });
+        });
+    });
 
     /***  Quick search quotes ***/
-    $(document).on('click','#quick-search-quotes', function (e) {
+    $(document).on('click','#quick-search-quotes-btn', function (e) {
         $('#popover-quick-search').popover('hide');
         e.preventDefault();
-        $('#search-preloader').removeClass('hidden');
-        $('html, body').animate({
-                scrollTop: $("#search-result").offset().top
-            }, 2000);
-        var url = $('#quick-search-quotes').data('url');
-        $.ajax({
+        var url = $('#quick-search-quotes-btn').data('url');
+        $('#preloader').removeClass('hidden');
+        var modal = $('#search-results__modal');
+
+         $.ajax({
             type: 'post',
             data: {'gds': $('#gds-selector').val()},
             url: url,
             success: function (data) {
-                $('#search-preloader').addClass('hidden');
-                $('#search-result .content').html(data);
+                $('#preloader').addClass('hidden');
+                modal.find('.modal-body').html(data);
+                modal.modal('show');
             },
             error: function (error) {
-                $('#search-preloader').removeClass('hidden');
+                $('#preloader').removeClass('hidden');
                 console.log('Error: ' + error);
             }
         });
@@ -410,6 +424,12 @@ $this->registerJs($js);
                 ]);
 
                 echo Html::button('<span class="btn-icon"><i class="fa fa-plus"></i></span><span class="btn-text">Quick Search Quote</span>', [
+                    'class' => 'btn btn-warning btn-with-icon',
+                    'id' => 'quick-search-quotes',
+                    'data-url' => Url::to(['quote/get-online-quotes-old', 'leadId' => $leadForm->getLead()->id]),
+                ]);
+
+                echo Html::button('<span class="btn-icon"><i class="fa fa-plus"></i></span><span class="btn-text">Quick Search Quote (2)</span>', [
                     'class' => 'btn btn-success btn-with-icon popover-class',
                     'data-toggle' => 'popover',
                     'id' => 'popover-quick-search',
@@ -419,7 +439,7 @@ $this->registerJs($js);
                     'data-content' => '<div style="width:250px;">'.Html::dropDownList('gds', null, ['S' => 'Sabre'], ['class' => 'form-control','id' => 'gds-selector']).Html::button('Search', [
                         'class' => 'btn btn-success',
                         'style' => 'margin-top:10px;',
-                        'id' => 'quick-search-quotes',
+                        'id' => 'quick-search-quotes-btn',
                         'data-url' => Url::to(['quote/get-online-quotes', 'leadId' => $leadForm->getLead()->id]),
                     ]).'</div>',
                 ]);
@@ -500,3 +520,23 @@ $this->registerJs($js);
     <?php \yii\widgets\ActiveForm::end() ?>
 </div>
 <!--endregion-->
+
+<?php Modal::begin(['id' => 'search-results__modal',
+    'header' => '<h2>Search results</h2>',
+    'size' => Modal::SIZE_LARGE
+])?>
+<?php Modal::end()?>
+
+<?php Modal::begin(['id' => 'flight-details__modal',
+    'header' => '<h2></h2>',
+    'size' => Modal::SIZE_LARGE,
+])?>
+<?php Modal::end()?>
+
+<?php Modal::begin(['id' => 'search-result-quote__modal',
+    'header' => '<h2>Add quote</h2>',
+    'size' => Modal::SIZE_LARGE,
+])?>
+<?php Modal::end()?>
+<?php $this->registerJsFile('//cdnjs.cloudflare.com/ajax/libs/bootstrap-modal/2.2.6/js/bootstrap-modal.min.js', ['depends' => [yii\web\JqueryAsset::className()]])?>
+<?php $this->registerJsFile('//cdnjs.cloudflare.com/ajax/libs/bootstrap-modal/2.2.6/js/bootstrap-modalmanager.min.js', ['depends' => [yii\web\JqueryAsset::className()]])?>

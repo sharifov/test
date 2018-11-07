@@ -2,7 +2,6 @@
 
 namespace common\models;
 
-use common\models\local\LeadLogMessage;
 use Yii;
 
 /**
