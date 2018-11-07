@@ -34,8 +34,6 @@ $this->params['breadcrumbs'][] = $this->title;
     <?php Pjax::begin(); //['id' => 'lead-pjax-list', 'timeout' => 5000, 'enablePushState' => true, 'clientOptions' => ['method' => 'GET']]); ?>
     <?= $this->render('_search_processing', ['model' => $searchModel]); ?>
 
-    <?php $form = \yii\bootstrap\ActiveForm::begin(['options' => ['data-pjax' => true]]); // ['action' => ['leads/update-multiple'] ?>
-
     <?php
 
     $gridColumns = [
@@ -50,7 +48,7 @@ $this->params['breadcrumbs'][] = $this->title;
             ]
         ],
         [
-            'attribute' => 'pending',
+            'attribute' => 'created',
             'label' => 'Pending Time',
             'value' => function (\common\models\Lead $model) {
                 return Yii::$app->formatter->asRelativeTime(strtotime($model->created)); //Lead::getPendingAfterCreate($model->created);
@@ -113,26 +111,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'header' => 'Client time',
             'format' => 'raw',
             'value' => function(\common\models\Lead $model) {
-                $clientTime = '-';
-                if($model->offset_gmt) {
-                    $offset2 = str_replace('.', ':', $model->offset_gmt);
-
-                    if(isset($offset2[0])) {
-                        if ($offset2[0] === '+') {
-                            $offset2 = str_replace('+', '-', $offset2);
-                        } else {
-                            $offset2 = str_replace('-', '+', $offset2);
-                        }
-                    }
-
-                    //$clientTime = date('H:i', time() + ($offset * 60 * 60));
-
-                    if($offset2) {
-                        $clientTime = date("H:i", strtotime("now $offset2 GMT"));
-                        $clientTime = '<i class="fa fa-clock-o"></i> <b>' . Html::encode($clientTime) . '</b><br/>(GMT: ' .$model->offset_gmt . ')';
-                    }
-                }
-                return $clientTime;
+                return $model->getClientTime2();
             },
             'options' => ['style' => 'width:160px'],
             //'filter' => \common\models\Employee::getList()
@@ -192,7 +171,7 @@ $this->params['breadcrumbs'][] = $this->title;
         ],*/
 
         [
-            'attribute' => 'update',
+            'attribute' => 'updated',
             'label' => 'Last Update',
             'value' => function (\common\models\Lead $model) {
                 return '<span title="'.Yii::$app->formatter->asDatetime(strtotime($model->updated)).'">'.Yii::$app->formatter->asRelativeTime(strtotime($model->updated)).'</span>';
@@ -320,7 +299,8 @@ $this->params['breadcrumbs'][] = $this->title;
 
     ?>
 <?php
-echo GridView::widget([
+
+/*echo GridView::widget([
     'dataProvider' => $dataProvider,
     'filterModel' => $searchModel,
     'columns' => $gridColumns,
@@ -334,10 +314,10 @@ echo GridView::widget([
     'floatHeaderOptions' => [
         'scrollingTop' => 20
     ],
-    /*'panel' => [
-        'type' => GridView::TYPE_PRIMARY,
-        'heading' => '<h3 class="panel-title"><i class="glyphicon glyphicon-list"></i> Processing</h3>'
-    ],*/
+    //'panel' => [
+    //    'type' => GridView::TYPE_PRIMARY,
+    //    'heading' => '<h3 class="panel-title"><i class="glyphicon glyphicon-list"></i> Processing</h3>'
+    //],
 
     'rowOptions' => function (Lead $model) {
         if ($model->status === Lead::STATUS_PROCESSING && Yii::$app->user->id == $model->employee_id) {
@@ -345,32 +325,29 @@ echo GridView::widget([
                 'class' => 'highlighted'
             ];
         }
-
-        /*if (in_array($model->status, [
-            Lead::STATUS_ON_HOLD,
-            Lead::STATUS_BOOKED,
-            Lead::STATUS_FOLLOW_UP
-        ])) {
-            $now = new \DateTime();
-            $departure = $model->getDeparture();
-
-            $diff = ! empty($departure) ? $now->diff(new \DateTime($departure)) : $now->diff(new \DateTime($departure));
-            $diffInSec = $diff->s + ($diff->i * 60) + ($diff->h * 3600) + ($diff->d * 86400) + ($diff->m * 30 * 86400) + ($diff->y * 12 * 30 * 86400);
-            // if departure <= 7 days
-            if ($diffInSec <= (7 * 24 * 60 * 60)) {
-                return [
-                    'class' => 'success'
-                ];
-            }
-        }*/
     }
 
-]);
+]);*/
+
+
+    echo \yii\grid\GridView::widget([
+        'dataProvider' => $dataProvider,
+        'filterModel' => $searchModel,
+        'columns' => $gridColumns,
+
+
+        'rowOptions' => function (Lead $model) {
+            if ($model->status === Lead::STATUS_PROCESSING && Yii::$app->user->id == $model->employee_id) {
+                return [
+                    'class' => 'highlighted'
+                ];
+            }
+        }
+    ]);
 
 ?>
 
 
-    <?php \yii\bootstrap\ActiveForm::end(); ?>
 
 
     <?php Pjax::end(); ?>

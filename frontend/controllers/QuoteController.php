@@ -558,7 +558,7 @@ class QuoteController extends FController
             }
             $price->attributes = $item;
 
-            $price::calculation($price);
+            $price::calculation($price, $quote->check_payment);
             $price->toMoney();
             $result[Html::getInputId($price, '[' . $key . ']mark_up')] = $price->mark_up;
             $result[Html::getInputId($price, '[' . $key . ']selling')] = $price->selling;
@@ -566,6 +566,7 @@ class QuoteController extends FController
             $result[Html::getInputId($price, '[' . $key . ']extra_mark_up')] = $price->extra_mark_up;
             $result[Html::getInputId($price, '[' . $key . ']fare')] = $price->fare;
             $result[Html::getInputId($price, '[' . $key . ']taxes')] = $price->taxes;
+            $result[Html::getInputId($price, '[' . $key . ']service_fee')] = $price->service_fee;
             $result[Html::getInputId($price, '[' . $key . ']oldParams')] = $price->oldParams;
         }
 
@@ -601,8 +602,14 @@ class QuoteController extends FController
                         $quote->employee_id = Yii::$app->user->id;
                         $quote->employee_name = Yii::$app->user->identity->username;
                     }else{
-                        $employee = Employee::findIdentity($quote->employee_id);
-                        $quote->employee_name = (!empty($employee))?$employee->username:Yii::$app->user->identity->username;
+                        if (empty((int)$quote->employee_id)) {
+                            $quote->employee_name = $quote->employee_id;
+                            $quote->employee_id = null;
+                            $quote->created_by_seller = false;
+                        } else {
+                            $employee = Employee::findIdentity($quote->employee_id);
+                            $quote->employee_name = (!empty($employee))?$employee->username:Yii::$app->user->identity->username;
+                        }
                     }
 
                     $lead = Lead::findOne(['id' => $quote->lead_id]);

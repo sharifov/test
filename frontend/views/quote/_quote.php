@@ -221,6 +221,12 @@ $this->registerJs($js);
                             ],
                             'template' => '{input}'
                         ])->hiddenInput() .
+                        $form->field($price, '[' . $index . ']service_fee', [
+                            'options' => [
+                                'tag' => false,
+                            ],
+                            'template' => '{input}'
+                        ])->hiddenInput() .
                         $form->field($price, '[' . $index . ']oldParams', [
                             'options' => [
                                 'tag' => false,
@@ -391,6 +397,7 @@ $this->registerJs($js);
                                 'tag' => false,
                             ],
                         ])->checkbox([
+                            'class' => 'alt-quote-price',
                             'template' => '{input}'
                         ])->label(false); ?>
                         <label for="<?= Html::getInputId($quote, 'check_payment') ?>"></label>
@@ -407,24 +414,24 @@ $this->registerJs($js);
                         </div>
                     </td>
                 </tr>
-                <?php if(!isset($project_id)){
+                <?php if (!isset($project_id)) {
                     $project_id = $lead->project_id;
-                }?>
-                <?php if(isset($project_id)):?>
-                <tr>
-                	<th>Quote Creator</th>
-                	<td class="td-input" colspan="3">
-                        <div class="select-wrap-label">
-                            <?= $form->field($quote, 'employee_id', [
-                                'options' => [
-                                    'tag' => false,
-                                ],
-                                'template' => '{input}',
-                            ])->dropDownList(Employee::getListByProject($project_id)) ?>
-                        </div>
-                    </td>
-                </tr>
-                <?php endif;?>
+                } ?>
+                <?php if (isset($project_id)): ?>
+                    <tr>
+                        <th>Quote Creator</th>
+                        <td class="td-input" colspan="3">
+                            <div class="select-wrap-label">
+                                <?= $form->field($quote, 'employee_id', [
+                                    'options' => [
+                                        'tag' => false,
+                                    ],
+                                    'template' => '{input}',
+                                ])->dropDownList(Employee::getListByProject($project_id, true)) ?>
+                            </div>
+                        </td>
+                    </tr>
+                <?php endif; ?>
                 </tbody>
             </table>
         </div>

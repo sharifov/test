@@ -16,12 +16,6 @@ use yii\helpers\ArrayHelper;
 use common\models\EmployeeContactInfo;
 
 
-
-/*$sellerContactInfo = EmployeeContactInfo::findOne([
-    'employee_id' => $lead->employee_id,
-    'project_id' => $lead->project_id
-]);*/
-
 $userProjectParams = \common\models\UserProjectParams::findOne([
     'upp_user_id' => $lead->employee_id,
     'upp_project_id' => $lead->project_id
@@ -51,13 +45,13 @@ $js = <<<JS
         editBlock.parent().html('');
         $('#create-quote').modal('hide');
     });
-    
+
     $('#sendemailform-type').change(function(e) {
         var url = '$url&type='+$(this).val();
         var editBlock = $('#create-quote');
         editBlock.find('.modal-body').load(url, function( response, status, xhr ) { });
     });
-    
+
     $('#preview-email').click(function () {
         $('#$formId').yiiActiveForm('validateAttribute', 'sendemailform-subject');
         if ($('#sendemailform-type').val() == '_email_sales_free_form') {
@@ -71,7 +65,7 @@ $js = <<<JS
             var url = '$url&type='+$('#sendemailform-type').val();
             var editBlock = $('#create-quote');
             editBlock.find('.modal-body').load(url, {
-                subject: $('#sendemailform-subject').val(), 
+                subject: $('#sendemailform-subject').val(),
                 extra_body: $('#sendemailform-extrabody').val()
             }, function( response, status, xhr ) { });
             return true;
@@ -79,7 +73,7 @@ $js = <<<JS
             return false;
         }
     });
-    
+
     $('#$formId').on('beforeSubmit', function () {
         $('#preloader').removeClass('hidden');
         setTimeout(function() {

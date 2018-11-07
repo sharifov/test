@@ -212,10 +212,23 @@ class LeadSearch extends Lead
             $query->andWhere(['IN', 'leads.id', $subQuery]);
         }
 
+
+
         if($this->supervision_id > 0) {
-            $subQuery1 = UserGroupAssign::find()->select(['ugs_group_id'])->where(['ugs_user_id' => $this->supervision_id]);
-            $subQuery = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->where(['IN', 'ugs_group_id', $subQuery1]);
-            $query->andWhere(['IN', 'leads.employee_id', $subQuery]);
+
+            if($this->id || $this->uid || $this->client_id || $this->client_email || $this->client_phone || $this->status == Lead::STATUS_FOLLOW_UP) {
+
+            } else {
+
+                if($this->statuses && in_array(Lead::STATUS_FOLLOW_UP, $this->statuses) && count($this->statuses) == 1) {
+
+                } else {
+
+                    $subQuery1 = UserGroupAssign::find()->select(['ugs_group_id'])->where(['ugs_user_id' => $this->supervision_id]);
+                    $subQuery = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->where(['IN', 'ugs_group_id', $subQuery1]);
+                    $query->andWhere(['IN', 'leads.employee_id', $subQuery]);
+                }
+            }
         }
 
         $query->andFilterWhere(['like', 'uid', $this->uid])
@@ -227,14 +240,16 @@ class LeadSearch extends Lead
             ->andFilterWhere(['like', 'offset_gmt', $this->offset_gmt])
             ->andFilterWhere(['like', 'discount_id', $this->discount_id]);
 
-        //$sqlRaw = $query->createCommand()->getRawSql();
-        //VarDumper::dump($sqlRaw, 10, true); exit;
+/*         $sqlRaw = $query->createCommand()->getRawSql();
+
+        VarDumper::dump($sqlRaw, 10, true); exit; */
 
         return $dataProvider;
     }
 
     public function searchAgent($params)
     {
+        $projectIds = array_keys(ProjectEmployeeAccess::getProjectsByEmployee());
         $query = Lead::find();
 
         // add conditions that should always apply here
@@ -255,6 +270,9 @@ class LeadSearch extends Lead
             return $dataProvider;
         }
 
+        $query
+        ->andWhere(['IN', Lead::tableName() . '.project_id', $projectIds])
+        ;
 
         /*'id' => ''
         'uid' => ''
@@ -304,6 +322,8 @@ class LeadSearch extends Lead
         if($this->statuses) {
             $query->andWhere(['status' => $this->statuses]);
         }
+
+        $query->andWhere(['<>', 'status', Lead::STATUS_PENDING]);
 
 
         if($this->created_date_from || $this->created_date_to) {
@@ -366,6 +386,9 @@ class LeadSearch extends Lead
 
 
 
+       /*  $sqlRaw = $query->createCommand()->getRawSql();
+
+        VarDumper::dump($sqlRaw, 10, true); exit; */
 
         return $dataProvider;
     }
@@ -625,7 +648,7 @@ class LeadSearch extends Lead
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> ['defaultOrder' => ['updated' => SORT_DESC]],
+            'sort'=> ['defaultOrder' => ['updated' => SORT_DESC],'attributes' => ['id','updated','created','status']],
             'pagination' => [
                 'pageSize' => 30,
             ],
@@ -707,7 +730,7 @@ class LeadSearch extends Lead
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> ['defaultOrder' => ['updated' => SORT_DESC]],
+            'sort'=> ['defaultOrder' => ['updated' => SORT_DESC],'attributes' => ['id','updated','created','status']],
             'pagination' => [
                 'pageSize' => 30,
             ],

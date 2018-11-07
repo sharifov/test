@@ -8,8 +8,8 @@ use yii\helpers\Url;
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\LeadSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
+/* @var $checkShiftTime bool */
 /* @var $isAgent bool */
-
 
 $this->title = 'Inbox Queue';
 
@@ -33,6 +33,18 @@ $this->params['breadcrumbs'][] = $this->title;
 <div class="lead-index">
 
     <?php Pjax::begin(); //['id' => 'lead-pjax-list', 'timeout' => 5000, 'enablePushState' => true, 'clientOptions' => ['method' => 'GET']]); ?>
+
+    <?php if(!$checkShiftTime): ?>
+        <div class="alert alert-warning alert-dismissible" role="alert">
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <strong>Warning!</strong> New leads are only available on your shift. (Current You time: <?=Yii::$app->formatter->asTime(time())?>)
+        </div>
+
+        <?/*php \yii\helpers\VarDumper::dump(Yii::$app->user->identity->getShiftTime(), 10, true)?>
+        <?php echo date('Y-m-d H:i:s')*/?>
+
+    <?php endif; ?>
+
     <?php
 
     $gridColumns = [
@@ -42,6 +54,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'value' => function (\common\models\Lead $model) {
                 return $model->id;
             },
+            'visible' => ! $isAgent,
             'options' => [
                 'style' => 'width:80px'
             ]
@@ -50,7 +63,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'attribute' => 'pending',
             'label' => 'Pending Time',
             'value' => function (\common\models\Lead $model) {
-                return Yii::$app->formatter->asRelativeTime(strtotime($model->created)); //Lead::getPendingAfterCreate($model->created);
+                return Yii::$app->formatter->asRelativeTime(strtotime($model->created)); // Lead::getPendingAfterCreate($model->created);
             },
             'format' => 'raw'
         ],
@@ -79,19 +92,17 @@ $this->params['breadcrumbs'][] = $this->title;
                         $clientName = '<i class="fa fa-user"></i> ' . Html::encode($clientName);
                     }
 
-
                     $str = $model->client && $model->client->clientEmails ? '<i class="fa fa-envelope"></i> ' . implode(' <br><i class="fa fa-envelope"></i> ', \yii\helpers\ArrayHelper::map($model->client->clientEmails, 'email', 'email')) . '' : '';
                     $str .= $model->client && $model->client->clientPhones ? '<br><i class="fa fa-phone"></i> ' . implode(' <br><i class="fa fa-phone"></i> ', \yii\helpers\ArrayHelper::map($model->client->clientPhones, 'phone', 'phone')) . '' : '';
 
-
-                    $clientName.= '<br>'. $str;
-
+                    $clientName .= '<br>' . $str;
                 } else {
                     $clientName = '-';
                 }
 
                 return $clientName;
             },
+            'visible' => ! $isAgent,
             'options' => [
                 'style' => 'width:160px'
             ]
@@ -108,29 +119,12 @@ $this->params['breadcrumbs'][] = $this->title;
         [
             'header' => 'Client time',
             'format' => 'raw',
-            'value' => function(\common\models\Lead $model) {
-                $clientTime = '-';
-                if($model->offset_gmt) {
-                    $offset2 = str_replace('.', ':', $model->offset_gmt);
-
-                    if(isset($offset2[0])) {
-                        if ($offset2[0] === '+') {
-                            $offset2 = str_replace('+', '-', $offset2);
-                        } else {
-                            $offset2 = str_replace('-', '+', $offset2);
-                        }
-                    }
-
-                    //$clientTime = date('H:i', time() + ($offset * 60 * 60));
-
-                    if($offset2) {
-                        $clientTime = date("H:i", strtotime("now $offset2 GMT"));
-                        $clientTime = '<i class="fa fa-clock-o"></i> <b>' . Html::encode($clientTime) . '</b><br/>(GMT: ' .$model->offset_gmt . ')';
-                    }
-                }
-                return $clientTime;
+            'value' => function (\common\models\Lead $model) {
+                return $model->getClientTime2();
             },
-            'options' => ['style' => 'width:110px'],
+            'options' => [
+                'style' => 'width:110px'
+            ]
         ],
 
         [
@@ -138,7 +132,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'content' => function (\common\models\Lead $model) {
                 $content = '';
                 $content .= $model->getFlightDetails();
-                $content .= ' (<i class="fa fa-male"></i> x' . ($model->adults .'/'. $model->children .'/'. $model->infants) . ')<br/>';
+                $content .= ' (<i class="fa fa-male"></i> x' . ($model->adults . '/' . $model->children . '/' . $model->infants) . ')<br/>';
 
                 $content .= sprintf('<strong>Cabin:</strong> %s', Lead::getCabin($model['cabin']));
 
@@ -150,17 +144,14 @@ $this->params['breadcrumbs'][] = $this->title;
             'class' => 'yii\grid\ActionColumn',
             'template' => '{action}',
             'buttons' => [
-                'action' => function ($url, \common\models\Lead $model, $key) {
-
+                'action' => function ($url, \common\models\Lead $model, $key) use ($checkShiftTime) {
                     $buttons = '';
-
-                    $buttons .= Html::a('Take', Url::to([
-                        'lead/take',
-                        'id' => $model['id']
-                    ]), [
-                        'class' => 'btn btn-primary btn-xs take-btn',
-                        'data-pjax' => 0
-                    ]);
+                    if($checkShiftTime) {
+                        $buttons .= Html::a('Take', ['lead/take', 'id' => $model->id], [
+                            'class' => 'btn btn-primary btn-xs take-btn',
+                            'data-pjax' => 0
+                        ]);
+                    }
 
                     return $buttons;
                 }
@@ -196,23 +187,25 @@ echo GridView::widget([
             ];
         }
 
-        /*if (in_array($model->status, [
-            Lead::STATUS_ON_HOLD,
-            Lead::STATUS_BOOKED,
-            Lead::STATUS_FOLLOW_UP
-        ])) {
-            $now = new \DateTime();
-            $departure = $model->getDeparture();
-
-            $diff = ! empty($departure) ? $now->diff(new \DateTime($departure)) : $now->diff(new \DateTime($departure));
-            $diffInSec = $diff->s + ($diff->i * 60) + ($diff->h * 3600) + ($diff->d * 86400) + ($diff->m * 30 * 86400) + ($diff->y * 12 * 30 * 86400);
-            // if departure <= 7 days
-            if ($diffInSec <= (7 * 24 * 60 * 60)) {
-                return [
-                    'class' => 'success'
-                ];
-            }
-        }*/
+        /*
+         * if (in_array($model->status, [
+         * Lead::STATUS_ON_HOLD,
+         * Lead::STATUS_BOOKED,
+         * Lead::STATUS_FOLLOW_UP
+         * ])) {
+         * $now = new \DateTime();
+         * $departure = $model->getDeparture();
+         *
+         * $diff = ! empty($departure) ? $now->diff(new \DateTime($departure)) : $now->diff(new \DateTime($departure));
+         * $diffInSec = $diff->s + ($diff->i * 60) + ($diff->h * 3600) + ($diff->d * 86400) + ($diff->m * 30 * 86400) + ($diff->y * 12 * 30 * 86400);
+         * // if departure <= 7 days
+         * if ($diffInSec <= (7 * 24 * 60 * 60)) {
+         * return [
+         * 'class' => 'success'
+         * ];
+         * }
+         * }
+         */
     }
 
 ]);

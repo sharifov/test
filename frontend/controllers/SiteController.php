@@ -1,4 +1,5 @@
 <?php
+
 namespace frontend\controllers;
 
 use common\controllers\DefaultController;
@@ -53,7 +54,6 @@ class SiteController extends FController
     }
 
 
-
     public function actions()
     {
         return [
@@ -79,16 +79,16 @@ class SiteController extends FController
      *
      * @return string
      */
-    public function actionIndex() : string
+    public function actionIndex(): string
     {
 
         $userId = Yii::$app->user->id;
 
-        if(Yii::$app->authManager->getAssignment('supervision', $userId)) {
+        if (Yii::$app->authManager->getAssignment('supervision', $userId)) {
             return $this->dashboardSupervision();
         }
 
-        if(Yii::$app->authManager->getAssignment('admin', $userId)) {
+        if (Yii::$app->authManager->getAssignment('admin', $userId)) {
             return $this->dashboardAdmin();
         }
 
@@ -96,8 +96,276 @@ class SiteController extends FController
 
     }
 
+    public function dashboardSupervision(): string
+    {
 
-    public function dashboardAgent() : string
+        $userId = Yii::$app->user->id;
+
+        $searchModel = new EmployeeSearch();
+        $params = Yii::$app->request->queryParams;
+
+        //if(Yii::$app->authManager->getAssignment('supervision', $userId)) {
+        $params['EmployeeSearch']['supervision_id'] = $userId;
+        $params['EmployeeSearch']['status'] = Employee::STATUS_ACTIVE;
+        //}
+
+
+        $dataProvider = $searchModel->searchByUserGroups($params);
+
+        $searchModel->datetime_start = date('Y-m-d', strtotime('-0 day'));
+        $searchModel->datetime_end = date('Y-m-d');
+
+        //$searchModel->date_range = $searchModel->datetime_start.' - '. $searchModel->datetime_end;
+
+
+        return $this->render('index_supervision', [
+            'dataProvider' => $dataProvider,
+            'searchModel' => $searchModel,
+        ]);
+
+    }
+
+    public function dashboardAdmin(): string
+    {
+
+        //$userId = Yii::$app->user->id;
+
+        $days = 20;
+        $dataStatsDone = Lead::find()->select("COUNT(*) AS done_count, DATE(created) AS created_date")
+            ->where(['<>', 'status', Lead::STATUS_TRASH])
+            //->andWhere("DATE(created) >= DATE(NOW() - interval '".$days." days')")
+            ->andWhere(['>=', 'DATE(created)', date('Y-m-d', strtotime("-" . $days . " days"))])
+            ->groupBy('DATE(created)')
+            ->orderBy('DATE(created) DESC')
+            ->limit(30)->asArray()->all();
+
+
+        $dataStatsPending = Lead::find()->select("COUNT(*) AS pending_count, DATE(created) AS created_date")
+            ->where([
+                'status' => [
+                    Lead::STATUS_PENDING,
+                ],
+            ])
+            //->andWhere("DATE(created) >= DATE(NOW() - interval '".$days." days')")
+            ->andWhere(['>=', 'DATE(created)', date('Y-m-d', strtotime("-" . $days . " days"))])
+            ->groupBy(['DATE(created)'])
+            ->orderBy('DATE(created) DESC')
+            ->limit(30)->asArray()->all();
+
+
+        $dataStatsBooked = Lead::find()->select("COUNT(*) AS book_count, DATE(created) AS created_date")
+            ->where([
+                'status' => [
+                    Lead::STATUS_FOLLOW_UP,
+                ],
+            ])
+            ->andWhere(['>=', 'DATE(created)', date('Y-m-d', strtotime("-" . $days . " days"))])
+            ->groupBy(['DATE(created)'])
+            ->orderBy('DATE(created) DESC')
+            ->limit(30)->asArray()->all();
+
+
+        $dataStatsProcessing = Lead::find()->select("COUNT(*) AS proc_count, DATE(created) AS created_date")
+            ->where([
+                'status' => [
+                    Lead::STATUS_PROCESSING,
+                    Lead::STATUS_ON_HOLD
+                ],
+            ])
+            ->andWhere(['>=', 'DATE(created)', date('Y-m-d', strtotime("-" . $days . " days"))])
+            ->groupBy(['DATE(created)'])
+            ->orderBy('DATE(created) DESC')
+            ->limit(30)->asArray()->all();
+
+
+        $dataStatsTrash = Lead::find()->select("COUNT(*) AS trash_count, DATE(created) AS created_date")
+            ->where([
+                'status' => [
+                    Lead::STATUS_TRASH,
+                ],
+            ])
+            ->andWhere(['>=', 'DATE(created)', date('Y-m-d', strtotime("-" . $days . " days"))])
+            ->groupBy(['DATE(created)'])
+            ->orderBy('DATE(created) DESC')
+            ->limit(30)->asArray()->all();
+
+
+        $dataStatsSold = Lead::find()->select("COUNT(*) AS sold_count, DATE(created) AS created_date")
+            ->where([
+                'status' => [
+                    Lead::STATUS_SOLD,
+                ],
+            ])
+            ->andWhere(['>=', 'DATE(created)', date('Y-m-d', strtotime("-" . $days . " days"))])
+            ->groupBy(['DATE(created)'])
+            ->orderBy('DATE(created) DESC')
+            ->limit(30)->asArray()->all();
+
+
+        //print_r($dataStatsPending);
+
+        $dataStats = [];
+
+        foreach ($dataStatsDone as $item) {
+            $item['pending_count'] = 0;
+            $item['book_count'] = 0;
+            $item['sold_count'] = 0;
+            $item['proc_count'] = 0;
+            $item['trash_count'] = 0;
+            //$item['done_count']     = 0;
+
+            $dataStats[$item['created_date']] = $item;
+        }
+
+        foreach ($dataStatsPending as $item) {
+            $item['done_count'] = 0;
+            $item['book_count'] = 0;
+            $item['sold_count'] = 0;
+            $item['proc_count'] = 0;
+            $item['trash_count'] = 0;
+            if (isset($dataStats[$item['created_date']])) {
+
+                $dataStats[$item['created_date']]['pending_count'] = $item['pending_count'];
+
+            } else {
+                $dataStats[$item['created_date']] = $item;
+            }
+        }
+
+
+        foreach ($dataStatsBooked as $item) {
+            $item['done_count'] = 0;
+            $item['pending_count'] = 0;
+            $item['sold_count'] = 0;
+            $item['proc_count'] = 0;
+            $item['trash_count'] = 0;
+
+            if (isset($dataStats[$item['created_date']])) {
+
+                $dataStats[$item['created_date']]['book_count'] = $item['book_count'];
+
+            } else {
+                $dataStats[$item['created_date']] = $item;
+            }
+        }
+
+
+        foreach ($dataStatsTrash as $item) {
+            $item['done_count'] = 0;
+            $item['pending_count'] = 0;
+            $item['sold_count'] = 0;
+            $item['proc_count'] = 0;
+            $item['book_count'] = 0;
+
+            if (isset($dataStats[$item['created_date']])) {
+                $dataStats[$item['created_date']]['trash_count'] = $item['trash_count'];
+            } else {
+                $dataStats[$item['created_date']] = $item;
+            }
+        }
+
+
+        foreach ($dataStatsProcessing as $item) {
+            $item['done_count'] = 0;
+            $item['pending_count'] = 0;
+            $item['sold_count'] = 0;
+            $item['trash_count'] = 0;
+            $item['book_count'] = 0;
+
+            if (isset($dataStats[$item['created_date']])) {
+
+                $dataStats[$item['created_date']]['proc_count'] = $item['proc_count'];
+
+            } else {
+                $dataStats[$item['created_date']] = $item;
+            }
+        }
+
+
+        foreach ($dataStatsSold as $item) {
+            $item['done_count'] = 0;
+            $item['pending_count'] = 0;
+            $item['book_count'] = 0;
+            $item['proc_count'] = 0;
+            $item['trash_count'] = 0;
+
+            if (isset($dataStats[$item['created_date']])) {
+
+                $dataStats[$item['created_date']]['sold_count'] = $item['sold_count'];
+
+            } else {
+                $dataStats[$item['created_date']] = $item;
+            }
+        }
+
+        ksort($dataStats);
+
+
+        $days2 = 7;
+
+        $dataSources = ApiLog::find()->select('COUNT(*) AS cnt, al_user_id')
+            ->andWhere(['>=', 'DATE(al_request_dt)', date('Y-m-d', strtotime("-" . $days2 . " days"))])
+            ->groupBy(['al_user_id'])
+            ->orderBy('cnt DESC')
+            ->asArray()->all();
+
+
+        $dataEmployee = Lead::find()->select("COUNT(*) AS cnt, employee_id")//, SUM(tr_total_price) AS sum_price
+        ->where([
+            'status' => [
+                Lead::STATUS_PROCESSING,
+                Lead::STATUS_ON_HOLD,
+            ],
+        ])
+            ->andWhere(['>=', 'DATE(created)', date('Y-m-d', strtotime("-" . $days2 . " days"))])
+            ->groupBy(['employee_id'])
+            ->orderBy('cnt DESC')
+            ->limit(20)->asArray()->all();
+
+
+        $dataEmployeeSold = Lead::find()->select("COUNT(*) AS cnt, employee_id")//, SUM(tr_total_price) AS sum_price
+        ->where([
+            'status' => [
+                Lead::STATUS_SOLD,
+            ],
+        ])
+            ->andWhere(['>=', 'DATE(created)', date('Y-m-d', strtotime("-" . $days2 . " days"))])
+            ->groupBy(['employee_id'])
+            ->orderBy('cnt DESC')
+            ->limit(20)->asArray()->all();
+
+
+        $searchModel = new EmployeeSearch();
+        $params = Yii::$app->request->queryParams;
+
+        //if(Yii::$app->authManager->getAssignment('supervision', $userId)) {
+        //$params['EmployeeSearch']['supervision_id'] = $userId;
+
+        $params['EmployeeSearch']['status'] = Employee::STATUS_ACTIVE;
+        //}
+
+
+        $dataProvider = $searchModel->searchByUserGroups($params);
+
+        $searchModel->datetime_start = date('Y-m-d', strtotime('-0 day'));
+        $searchModel->datetime_end = date('Y-m-d');
+
+        //$searchModel->date_range = $searchModel->datetime_start.' - '. $searchModel->datetime_end;
+
+
+        return $this->render('index_admin', [
+            'dataProvider' => $dataProvider,
+            'searchModel' => $searchModel,
+            'dataStats' => $dataStats,
+            'dataSources' => $dataSources,
+            'dataEmployee' => $dataEmployee,
+            'dataEmployeeSold' => $dataEmployeeSold,
+            'days2' => $days2,
+        ]);
+
+    }
+
+    public function dashboardAgent(): string
     {
         $userId = Yii::$app->user->id;
 
@@ -105,7 +373,7 @@ class SiteController extends FController
         $params['LeadTaskSearch']['lt_user_id'] = $userId;
         $params['LeadTaskSearch']['status'] = [Lead::STATUS_PROCESSING, Lead::STATUS_ON_HOLD];
 
-        //['status_not_in'] = [Lead::STATUS_TRASH, Lead::STATUS_SNOOZE];
+        $params['LeadTaskSearch']['status_not_in'] = [Lead::STATUS_TRASH/* , Lead::STATUS_SNOOZE */];
 
         //VarDumper::dump($params); exit;
         $searchLeadTask = new LeadTaskSearch();
@@ -148,12 +416,10 @@ class SiteController extends FController
         //}
 
 
-
         $dataProvider = $searchModel->searchByUserGroups($params);
 
         $searchModel->datetime_start = date('Y-m-d', strtotime('-0 day'));
         $searchModel->datetime_end = date('Y-m-d');
-
 
 
         return $this->render('index', [
@@ -164,286 +430,6 @@ class SiteController extends FController
             'dataProvider' => $dataProvider,
             'searchModel' => $searchModel,
         ]);
-    }
-
-    public function dashboardSupervision() : string
-    {
-
-        $userId = Yii::$app->user->id;
-
-        $searchModel = new EmployeeSearch();
-        $params = Yii::$app->request->queryParams;
-
-        //if(Yii::$app->authManager->getAssignment('supervision', $userId)) {
-            $params['EmployeeSearch']['supervision_id'] = $userId;
-            $params['EmployeeSearch']['status'] = Employee::STATUS_ACTIVE;
-        //}
-
-
-
-        $dataProvider = $searchModel->searchByUserGroups($params);
-
-        $searchModel->datetime_start = date('Y-m-d', strtotime('-0 day'));
-        $searchModel->datetime_end = date('Y-m-d');
-
-        //$searchModel->date_range = $searchModel->datetime_start.' - '. $searchModel->datetime_end;
-
-
-        return $this->render('index_supervision', [
-            'dataProvider' => $dataProvider,
-            'searchModel' => $searchModel,
-        ]);
-
-    }
-
-
-    public function dashboardAdmin() : string
-    {
-
-        //$userId = Yii::$app->user->id;
-
-        $days = 20;
-        $dataStatsDone = Lead::find()->select("COUNT(*) AS done_count, DATE(created) AS created_date")
-            ->where(['<>', 'status', Lead::STATUS_TRASH])
-            //->andWhere("DATE(created) >= DATE(NOW() - interval '".$days." days')")
-            ->andWhere(['>=', 'DATE(created)', date('Y-m-d', strtotime("-".$days." days"))])
-            ->groupBy('DATE(created)')
-            ->orderBy('DATE(created) DESC')
-            ->limit(30)->asArray()->all();
-
-
-
-        $dataStatsPending = Lead::find()->select("COUNT(*) AS pending_count, DATE(created) AS created_date")
-            ->where([
-                'status' => [
-                    Lead::STATUS_PENDING,
-                ],
-            ])
-            //->andWhere("DATE(created) >= DATE(NOW() - interval '".$days." days')")
-            ->andWhere(['>=', 'DATE(created)', date('Y-m-d', strtotime("-".$days." days"))])
-            ->groupBy(['DATE(created)'])
-            ->orderBy('DATE(created) DESC')
-            ->limit(30)->asArray()->all();
-
-
-
-        $dataStatsBooked = Lead::find()->select("COUNT(*) AS book_count, DATE(created) AS created_date")
-            ->where([
-                'status' => [
-                    Lead::STATUS_FOLLOW_UP,
-                ],
-            ])
-            ->andWhere(['>=', 'DATE(created)', date('Y-m-d', strtotime("-".$days." days"))])
-            ->groupBy(['DATE(created)'])
-            ->orderBy('DATE(created) DESC')
-            ->limit(30)->asArray()->all();
-
-
-
-
-
-        $dataStatsProcessing = Lead::find()->select("COUNT(*) AS proc_count, DATE(created) AS created_date")
-            ->where([
-                'status' => [
-                    Lead::STATUS_PROCESSING,
-                    Lead::STATUS_ON_HOLD
-                ],
-            ])
-            ->andWhere(['>=', 'DATE(created)', date('Y-m-d', strtotime("-".$days." days"))])
-            ->groupBy(['DATE(created)'])
-            ->orderBy('DATE(created) DESC')
-            ->limit(30)->asArray()->all();
-
-
-        $dataStatsTrash = Lead::find()->select("COUNT(*) AS trash_count, DATE(created) AS created_date")
-            ->where([
-                'status' => [
-                    Lead::STATUS_TRASH,
-                ],
-            ])
-            ->andWhere(['>=', 'DATE(created)', date('Y-m-d', strtotime("-".$days." days"))])
-            ->groupBy(['DATE(created)'])
-            ->orderBy('DATE(created) DESC')
-            ->limit(30)->asArray()->all();
-
-
-        $dataStatsSold = Lead::find()->select("COUNT(*) AS sold_count, DATE(created) AS created_date")
-            ->where([
-                'status' => [
-                    Lead::STATUS_SOLD,
-                ],
-            ])
-            ->andWhere(['>=', 'DATE(created)', date('Y-m-d', strtotime("-".$days." days"))])
-            ->groupBy(['DATE(created)'])
-            ->orderBy('DATE(created) DESC')
-            ->limit(30)->asArray()->all();
-
-
-        //print_r($dataStatsPending);
-
-        $dataStats = [];
-
-        foreach ($dataStatsDone as $item) {
-            $item['pending_count']  = 0;
-            $item['book_count']     = 0;
-            $item['sold_count']     = 0;
-            $item['proc_count']     = 0;
-            $item['trash_count']    = 0;
-            //$item['done_count']     = 0;
-
-            $dataStats[$item['created_date']] =  $item;
-        }
-
-        foreach ($dataStatsPending as $item) {
-            $item['done_count'] = 0;
-            $item['book_count'] = 0;
-            $item['sold_count'] = 0;
-            $item['proc_count'] = 0;
-            $item['trash_count'] = 0;
-            if(isset($dataStats[$item['created_date']])) {
-
-                $dataStats[$item['created_date']]['pending_count'] = $item['pending_count'];
-
-            } else {
-                $dataStats[$item['created_date']] = $item;
-            }
-        }
-
-
-
-        foreach ($dataStatsBooked as $item) {
-            $item['done_count'] = 0;
-            $item['pending_count'] = 0;
-            $item['sold_count'] = 0;
-            $item['proc_count'] = 0;
-            $item['trash_count'] = 0;
-
-            if(isset($dataStats[$item['created_date']])) {
-
-                $dataStats[$item['created_date']]['book_count'] = $item['book_count'];
-
-            } else {
-                $dataStats[$item['created_date']] = $item;
-            }
-        }
-
-
-        foreach ($dataStatsTrash as $item) {
-            $item['done_count'] = 0;
-            $item['pending_count'] = 0;
-            $item['sold_count'] = 0;
-            $item['proc_count'] = 0;
-            $item['book_count'] = 0;
-
-            if(isset($dataStats[$item['created_date']])) {
-                $dataStats[$item['created_date']]['trash_count'] = $item['trash_count'];
-            } else {
-                $dataStats[$item['created_date']] = $item;
-            }
-        }
-
-
-        foreach ($dataStatsProcessing as $item) {
-            $item['done_count'] = 0;
-            $item['pending_count'] = 0;
-            $item['sold_count'] = 0;
-            $item['trash_count'] = 0;
-            $item['book_count'] = 0;
-
-            if(isset($dataStats[$item['created_date']])) {
-
-                $dataStats[$item['created_date']]['proc_count'] = $item['proc_count'];
-
-            } else {
-                $dataStats[$item['created_date']] = $item;
-            }
-        }
-
-
-        foreach ($dataStatsSold as $item) {
-            $item['done_count'] = 0;
-            $item['pending_count'] = 0;
-            $item['book_count'] = 0;
-            $item['proc_count'] = 0;
-            $item['trash_count'] = 0;
-
-            if(isset($dataStats[$item['created_date']])) {
-
-                $dataStats[$item['created_date']]['sold_count'] = $item['sold_count'];
-
-            } else {
-                $dataStats[$item['created_date']] = $item;
-            }
-        }
-
-        ksort($dataStats);
-
-
-
-        $days2 = 7;
-
-        $dataSources = ApiLog::find()->select('COUNT(*) AS cnt, al_user_id')
-            ->andWhere(['>=', 'DATE(al_request_dt)', date('Y-m-d', strtotime("-".$days2." days"))])
-            ->groupBy(['al_user_id'])
-            ->orderBy('cnt DESC')
-            ->asArray()->all();
-
-
-        $dataEmployee = Lead::find()->select("COUNT(*) AS cnt, employee_id") //, SUM(tr_total_price) AS sum_price
-        ->where([
-            'status' => [
-                Lead::STATUS_PROCESSING,
-                Lead::STATUS_ON_HOLD,
-            ],
-        ])
-            ->andWhere(['>=', 'DATE(created)', date('Y-m-d', strtotime("-".$days2." days"))])
-            ->groupBy(['employee_id'])
-            ->orderBy('cnt DESC')
-            ->limit(20)->asArray()->all();
-
-
-        $dataEmployeeSold = Lead::find()->select("COUNT(*) AS cnt, employee_id") //, SUM(tr_total_price) AS sum_price
-        ->where([
-            'status' => [
-                Lead::STATUS_SOLD,
-            ],
-        ])
-            ->andWhere(['>=', 'DATE(created)', date('Y-m-d', strtotime("-".$days2." days"))])
-            ->groupBy(['employee_id'])
-            ->orderBy('cnt DESC')
-            ->limit(20)->asArray()->all();
-
-
-
-        $searchModel = new EmployeeSearch();
-        $params = Yii::$app->request->queryParams;
-
-        //if(Yii::$app->authManager->getAssignment('supervision', $userId)) {
-        //$params['EmployeeSearch']['supervision_id'] = $userId;
-
-        $params['EmployeeSearch']['status'] = Employee::STATUS_ACTIVE;
-        //}
-
-
-
-        $dataProvider = $searchModel->searchByUserGroups($params);
-
-        $searchModel->datetime_start = date('Y-m-d', strtotime('-0 day'));
-        $searchModel->datetime_end = date('Y-m-d');
-
-        //$searchModel->date_range = $searchModel->datetime_start.' - '. $searchModel->datetime_end;
-
-
-        return $this->render('index_admin', [
-            'dataProvider' => $dataProvider,
-            'searchModel' => $searchModel,
-            'dataStats' => $dataStats,
-            'dataSources' => $dataSources,
-            'dataEmployee' => $dataEmployee,
-            'dataEmployeeSold' => $dataEmployeeSold,
-            'days2' => $days2,
-        ]);
-
     }
 
     public function actionLogout()
@@ -484,19 +470,19 @@ class SiteController extends FController
      * @throws ForbiddenHttpException
      * @throws NotFoundHttpException
      */
-    public function actionProfile() : string
+    public function actionProfile(): string
     {
         if (Yii::$app->user->isGuest) {
             throw new ForbiddenHttpException();
         }
 
         $model = Employee::findOne(Yii::$app->user->id);
-        if(!$model) {
+        if (!$model) {
             throw new NotFoundHttpException('The requested User does not exist.');
         }
 
         $modelUserParams = $model->userParams;
-        if(!$modelUserParams) {
+        if (!$modelUserParams) {
             $modelUserParams = new UserParams();
         }
 
@@ -513,7 +499,7 @@ class SiteController extends FController
             if ($modelUserParams->load(Yii::$app->request->post()) && $modelUserParams->validate()) {
                 $modelUserParams->save();
             }
-                //$attr = Yii::$app->request->post($model->formName());
+            //$attr = Yii::$app->request->post($model->formName());
 
             if (!empty($model->password)) {
                 $model->setPassword($model->password);
@@ -526,8 +512,7 @@ class SiteController extends FController
 
         }
 
-         //new UserParams();
-
+        //new UserParams();
 
 
         return $this->render('/employee/update_profile', [
@@ -541,9 +526,12 @@ class SiteController extends FController
         $response = file_get_contents(sprintf('%s?term=%s', Yii::$app->params['getAirportUrl'], $term));
         $response = json_decode($response, true);
         if (isset($response['success']) && $response['success']) {
-            return isset($response['data'])
-                ? json_encode($response['data'])
-                : json_encode([]);
+            if (isset($response['data'])) {
+                foreach ($response['data'] as $key => $item) {
+                    $response['data'][$key]['value'] = sprintf('%s (%s)', $item['city'], $item['iata']);
+                }
+                return json_encode($response['data']);
+            }
         }
 
         return json_encode([]);

@@ -98,7 +98,7 @@ class LeadFlightSegment extends \yii\db\ActiveRecord
     {
         $origin = Airport::findIdentity($this->origin);
         if ($origin) {
-            $this->origin_label = sprintf('%s (%s)', $origin->name, $origin->iata);
+            $this->origin_label = sprintf('%s (%s)', $origin->city, $origin->iata);
         } else {
             $this->addError('origin', sprintf('Not found %s IATA ("'.$this->origin.'") ',
                 $this->getAttributeLabel('origin')
@@ -110,7 +110,7 @@ class LeadFlightSegment extends \yii\db\ActiveRecord
     {
         $destination = Airport::findIdentity($this->destination);
         if ($destination) {
-            $this->destination_label = sprintf('%s (%s)', $destination->name, $destination->iata);
+            $this->destination_label = sprintf('%s (%s)', $destination->city, $destination->iata);
         } else {
             $this->addError('origin', sprintf('Not found %s IATA ("'.$this->destination.'") ',
                 $this->getAttributeLabel('destination')
@@ -136,7 +136,7 @@ class LeadFlightSegment extends \yii\db\ActiveRecord
         } else {
             $origin = Airport::findIdentity($this->origin);
             if ($origin !== null) {
-                $this->origin_label = sprintf('%s (%s)', $origin->name, $origin->iata);
+                $this->origin_label = sprintf('%s (%s)', $origin->city, $origin->iata);
             } else {
                 $this->addError('origin_label', sprintf('%s cannot be blank.',
                     $this->getAttributeLabel('origin_label')
@@ -162,7 +162,7 @@ class LeadFlightSegment extends \yii\db\ActiveRecord
         } else {
             $destination = Airport::findIdentity($this->destination);
             if ($destination !== null) {
-                $this->destination_label = sprintf('%s (%s)', $destination->name, $destination->iata);
+                $this->destination_label = sprintf('%s (%s)', $destination->city, $destination->iata);
             } else {
                 $this->addError('destination_label', sprintf('%s cannot be blank.',
                     $this->getAttributeLabel('destination_label')

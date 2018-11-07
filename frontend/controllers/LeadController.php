@@ -28,6 +28,7 @@ use yii\helpers\Url;
 use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
 use yii\web\Cookie;
+use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
 use yii\web\UnauthorizedHttpException;
@@ -236,12 +237,6 @@ class LeadController extends FController
             $sendEmailModel = new SendEmailForm();
             $sendEmailModel->employee = $lead->employee;
             $sendEmailModel->project = $lead->project;
-
-            /*$sellerContactInfo = EmployeeContactInfo::findOne([
-                'employee_id' => $sendEmailModel->employee->id,
-                'project_id' => $sendEmailModel->project->id
-            ]);*/
-
 
             $userProjectParams = UserProjectParams::findOne([
                 'upp_user_id' => $sendEmailModel->employee->id,
@@ -780,6 +775,20 @@ class LeadController extends FController
             $isAgent = false;
         }
 
+
+        $checkShiftTime = true;
+
+        if($isAgent) {
+            $user = Yii::$app->user->identity;
+            /** @var Employee $user */
+            $checkShiftTime = $user->checkShiftTime();
+            /*if($checkShiftTime = !$user->checkShiftTime()) {
+                throw new ForbiddenHttpException('Access denied! Invalid Agent shift time');
+            }*/
+        }
+
+
+
         if(Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id)) {
             $params['LeadSearch']['supervision_id'] = Yii::$app->user->id;
         }
@@ -789,7 +798,8 @@ class LeadController extends FController
         return $this->render('inbox', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
-            'isAgent' => $isAgent,
+            'checkShiftTime' => $checkShiftTime,
+            'isAgent' => $isAgent
         ]);
     }
 
@@ -1128,15 +1138,22 @@ class LeadController extends FController
         }
 
         if (!empty($quoteId)) {
-            $url = $lead->project->link . '/api/user-action-list/' . intval($quoteId);
-            $ch = curl_init();
-            curl_setopt($ch, CURLOPT_VERBOSE, true);
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($ch, CURLOPT_POST, true);
-            curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query(['apiKey' => $lead->project->api_key]));
-            curl_setopt($ch, CURLOPT_URL, $url);
-            curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/x-www-form-urlencoded']);
-            $result = curl_exec($ch);
+
+            $result = null;
+            if($lead->project) {
+                $projectLink = $lead->project->link;
+                $projectLink = str_replace('www.', '', $projectLink);
+
+                $url = $projectLink . '/api/user-action-list/' . intval($quoteId);
+                $ch = curl_init();
+                curl_setopt($ch, CURLOPT_VERBOSE, true);
+                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                curl_setopt($ch, CURLOPT_POST, true);
+                curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query(['apiKey' => $lead->project->api_key]));
+                curl_setopt($ch, CURLOPT_URL, $url);
+                curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/x-www-form-urlencoded']);
+                $result = curl_exec($ch);
+            }
 
             $activity = json_decode($result);
         }

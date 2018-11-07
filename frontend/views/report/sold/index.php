@@ -27,12 +27,12 @@ $js = <<<JS
             if (dateTo >= dateFrom) {
                 var timeDiff = Math.abs(dateTo.getTime() - dateFrom.getTime());
                 var diffDays = Math.ceil(timeDiff / (1000 * 3600 * 24));
-                if (diffDays < 31) {
+                if (diffDays <= 90) {
                     return true;
                 }
             }
         }
-        return false;
+        return true;
     }
 
     $('.btn-primary').click(function() {
@@ -183,6 +183,21 @@ $this->registerJs($js);
                 'dataProvider' => $dataProvider,
                 'model' => $model
             ]) ?>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal modal-events fade" id="modal-report-info" style="display: none;">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                Sold Leads
+                <button type="button" class="close" data-dismiss="modal">
+                    <i class="fa fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body"></div>
         </div>
     </div>
 </div>

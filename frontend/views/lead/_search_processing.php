@@ -8,15 +8,13 @@ use yii\widgets\ActiveForm;
 
 <div class="lead-search-processing">
 
-    <?php
 
-    $form = ActiveForm::begin([
-        // 'action' => ['index'],
+    <?php $form = ActiveForm::begin([
+        //'action' => ['queue/processing'],
         'method' => 'get',
         'options' => [
-            'data-pjax' => 1,
-            //'class' => 'form-inline'
-        ]
+            'data-pjax' => 1
+        ],
     ]);
 
     $statusList = \common\models\Lead::getProcessingStatuses();

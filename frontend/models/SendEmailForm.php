@@ -155,13 +155,13 @@ class SendEmailForm extends Model
      */
     public function sentEmail(Lead $lead)
     {
-        $sellerContactInfo = EmployeeContactInfo::findOne([
-            'employee_id' => $this->employee->id,
-            'project_id' => $this->project->id
+        $userProjectParams = UserProjectParams::findOne([
+            'upp_user_id' => $this->employee->id,
+            'upp_project_id' => $this->project->id
         ]);
+
         $credential = [
-            'email' => $sellerContactInfo->email_user,
-            'password' => $sellerContactInfo->email_pass,
+            'email' => $userProjectParams->upp_email,
         ];
         $errors = [];
         $result = EmailService::sendByAWS($this->emailTo, $this->project, $credential, $this->subject, $this->body,$errors);

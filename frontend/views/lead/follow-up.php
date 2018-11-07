@@ -47,7 +47,6 @@ echo Html::a($btnText, $btnUrl, [
     <?php Pjax::begin(); //['id' => 'lead-pjax-list', 'timeout' => 5000, 'enablePushState' => true, 'clientOptions' => ['method' => 'GET']]); ?>
     <?= $this->render('_search_follow_up', ['model' => $searchModel]); ?>
 
-    <?php $form = \yii\bootstrap\ActiveForm::begin(['options' => ['data-pjax' => true]]); // ['action' => ['leads/update-multiple'] ?>
 
     <?php
 
@@ -63,7 +62,7 @@ echo Html::a($btnText, $btnUrl, [
             ]
         ],
         [
-            'attribute' => 'pending',
+            'attribute' => 'created',
             'label' => 'Pending Time',
             'value' => function (\common\models\Lead $model) {
                 return Yii::$app->formatter->asRelativeTime(strtotime($model->created)); //Lead::getPendingAfterCreate($model->created);
@@ -126,26 +125,7 @@ echo Html::a($btnText, $btnUrl, [
             'header' => 'Client time',
             'format' => 'raw',
             'value' => function(\common\models\Lead $model) {
-                $clientTime = '-';
-                if($model->offset_gmt) {
-                    $offset2 = str_replace('.', ':', $model->offset_gmt);
-
-                    if(isset($offset2[0])) {
-                        if ($offset2[0] === '+') {
-                            $offset2 = str_replace('+', '-', $offset2);
-                        } else {
-                            $offset2 = str_replace('-', '+', $offset2);
-                        }
-                    }
-
-                    //$clientTime = date('H:i', time() + ($offset * 60 * 60));
-
-                    if($offset2) {
-                        $clientTime = date("H:i", strtotime("now $offset2 GMT"));
-                        $clientTime = '<i class="fa fa-clock-o"></i> <b>' . Html::encode($clientTime) . '</b> (GMT: ' .$model->offset_gmt . ')';
-                    }
-                }
-                return $clientTime;
+                return $model->getClientTime2();
             },
             'options' => ['style' => 'width:160px'],
             //'filter' => \common\models\Employee::getList()
@@ -182,7 +162,7 @@ echo Html::a($btnText, $btnUrl, [
         ],*/
 
         [
-            'attribute' => 'update',
+            'attribute' => 'updated',
             'label' => 'Last Activity',
             'value' => function (\common\models\Lead $model) {
                 return '<span title="'.Yii::$app->formatter->asDatetime(strtotime($model->updated)).'">'.Yii::$app->formatter->asRelativeTime(strtotime($model->updated)).'</span>';
@@ -334,12 +314,7 @@ echo GridView::widget([
 
 ?>
 
-
-    <?php \yii\bootstrap\ActiveForm::end(); ?>
-
-
-    <?php Pjax::end(); ?>
-
+<?php Pjax::end(); ?>
 
 </div>
 
