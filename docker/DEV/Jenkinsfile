@@ -30,7 +30,6 @@ def HTTP_PORT="80"
              slackSend (color: '#FF0000', channel: '#sales_dev_builds', message: "FAILED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})")
         }
         // SonarQube
-        steps{
           script {
             //Requires SonarQube Scanner
             scannerHome = tool 'SonarQube Scanner'
@@ -38,7 +37,6 @@ def HTTP_PORT="80"
           withSonarQubeEnv('SonarQube') {
             sh "${scannerHome}/bin/sonar-scanner"
           }
-        }
         // SonarQube END
     }
 
