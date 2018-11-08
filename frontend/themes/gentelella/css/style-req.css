@@ -5003,3 +5003,4 @@ input[disabled] + .radio-tab__text {
 .modal-open .modal {
    overflow: auto;
 }
+.list-view .quote{margin:10px 0 20px;}

@@ -158,11 +158,11 @@ class QuoteController extends FController
                                             foreach ($tripEntry['segments'] as $segmentEntry){
                                                 $segment = new QuoteSegment();
                                                 $segment->qs_departure_airport_code = $segmentEntry['departureAirportCode'];
-                                                if(isset($segmentEntry['departureAirportTerminal'])){
+                                                if(isset($segmentEntry['departureAirportTerminal']) && !empty($segmentEntry['departureAirportTerminal'])){
                                                     $segment->qs_departure_airport_terminal = $segmentEntry['departureAirportTerminal'];
                                                 }
                                                 $segment->qs_arrival_airport_code = $segmentEntry['arrivalAirportCode'];
-                                                if(isset($segmentEntry['arrivalAirportTerminal'])){
+                                                if(isset($segmentEntry['arrivalAirportTerminal']) && !empty($segmentEntry['arrivalAirportTerminal'])){
                                                     $segment->qs_arrival_airport_terminal = $segmentEntry['arrivalAirportTerminal'];
                                                 }
                                                 $segment->qs_arrival_time = $segmentEntry['arrivalTime'];
@@ -737,7 +737,7 @@ class QuoteController extends FController
 
                 $selling = 0;
 
-                $quotePrices = QuotePrice::findAll(['quote_id' => $qId]);
+                $quotePrices = $currentQuote->getQuotePrices()->all();
                 foreach ($quotePrices as $price){
                     $newPrice = new QuotePrice();
                     $newPrice->attributes = $price->attributes;
@@ -748,6 +748,46 @@ class QuoteController extends FController
                         $errors = array_merge($errors, $newPrice->getErrors());
                     }
                 }
+                $quoteTrips = $currentQuote->getQuoteTrips()->all();
+                if(!empty($quoteTrips)){
+                    foreach ($quoteTrips as $trip){
+                        $newTrip = new QuoteTrip();
+                        $newTrip->attributes = $trip->attributes;
+                        $newTrip->qt_quote_id = $quote->id;
+                        $newTrip->save(false);
+
+                        $segments = $trip->getQuoteSegments()->all();
+                        if(!empty($segments)){
+                            foreach ($segments as $segment){
+                                $newSegment = new QuoteSegment();
+                                $newSegment->attributes = $segment->attributes;
+                                $newSegment->qs_trip_id = $newTrip->qt_id;
+                                $newSegment->save(false);
+
+                                $stops = $segment->getQuoteSegmentStops()->all();
+                                if(!empty($stops)){
+                                    foreach ($stops as $stop){
+                                        $newStop = new QuoteSegmentStop();
+                                        $newStop->attributes = $stop->attributes;
+                                        $newStop->qss_segment_id = $segment->qs_id;
+                                        $newStop->save(false);
+                                    }
+                                }
+
+                                $baggages = $segment->getQuoteSegmentBaggages()->all();
+                                if(!empty($baggages)){
+                                    foreach ($baggages as $baggage){
+                                        $newBaggage = new QuoteSegmentBaggage();
+                                        $newBaggage->attributes = $baggage->attributes;
+                                        $newBaggage->qsb_segment_id = $segment->qs_id;
+                                        $newBaggage->save(false);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
                 if(!empty($errors)){
                     return $this->renderAjax('_clone', [
                         'lead' => $lead,

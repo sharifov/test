@@ -24,6 +24,7 @@ use common\models\Source;
 use yii\console\Controller;
 use Yii;
 use yii\helpers\Console;
+use yii\helpers\VarDumper;
 
 class DbController extends Controller
 {
@@ -119,7 +120,7 @@ class DbController extends Controller
         $db = Yii::$app->getDb();
 
 
-        $sql = 'SELECT id, 
+        $sql = 'SELECT id,
 (SELECT lf1.status FROM lead_flow AS lf1 WHERE lf1.lead_id = lf.lead_id AND lf1.id < lf.id ORDER BY lf1.id DESC LIMIT 1) AS from_status_id,
 (SELECT lf2.created FROM lead_flow AS lf2 WHERE lf2.lead_id = lf.lead_id AND lf2.id > lf.id ORDER BY lf2.id ASC LIMIT 1) AS end_dt,
 (UNIX_TIMESTAMP((SELECT lf2.created FROM lead_flow AS lf2 WHERE lf2.lead_id = lf.lead_id AND lf2.id > lf.id ORDER BY lf2.id ASC LIMIT 1)) - UNIX_TIMESTAMP(lf.created)) AS time_duration
@@ -136,7 +137,42 @@ ORDER BY lf.lead_id, id';
         }
 
         printf("\n --- End %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
+    }
 
+    /**
+     * Update quotes from dump to trip + segments
+     */
+    public function actionUpdateQuotesFromDump()
+    {
+        printf("\n --- Start %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
+
+        /* $db = Yii::$app->getDb();
+        $sql = 'SELECT q.id, q.uid, q.reservation_dump FROM quotes q LEFT JOIN quote_trip qt ON qt.qt_quote_id = q.id WHERE qt.qt_id IS NULL';
+        $quotes = $db->createCommand($sql)->queryAll();
+        printf("\n Quotes to update: %d \n", count($quotes));
+
+        if(count($quotes)){
+            foreach ($quotes as $quote){
+                $data = Quote::parseDump($quote['reservation_dump']);
+                printf("\n %s\n", VarDumper::dumpAsString($data));
+                break;
+            }
+        } */
+
+        $quotes = Quote::find()->leftJoin('quote_trip','quote_trip.qt_quote_id = quotes.id')->where(['quote_trip.qt_id' => null])->all();
+        printf("\n Quotes to update: %d \n", count($quotes));
+        if(count($quotes)){
+            $cntUpdated = 0;
+            foreach ($quotes as $quote){
+                if($quote->updateQuoteTrips()){
+                    $cntUpdated++;
+                }
+            }
+
+            printf("\n Quotes updated: %d \n", $cntUpdated);
+        }
+
+        printf("\n --- End %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
 
     }
 }

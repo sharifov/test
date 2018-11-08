@@ -235,6 +235,9 @@ use yii\helpers\Url;
 			</span>
 		</div>
 		<div class="quote__actions">
+			<div class="hidden" id="isChangedMarkup-<?= $model->uid ?>">
+                <span class="text-danger">The price has changed</span>
+            </div>
 			<?php
                     $now = new \DateTime();
                     $adultsPrices = $childrenPrices = $infantsPrices = [

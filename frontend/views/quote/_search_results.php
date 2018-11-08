@@ -35,6 +35,7 @@ $js = <<<JS
                 if(data.status == true){
                     $('#search-results__modal').modal('hide');
                     $('#flight-details__modal').modal('hide');
+                    $.pjax.reload({container: '#quotes_list', async: false});
                 }else{
                     alert('Some errors was happened during create quote. Please try again later.');
                 }

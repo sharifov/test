@@ -41,6 +41,41 @@ use Yii;
  */
 class QuoteSegment extends \yii\db\ActiveRecord
 {
+    const CABIN_ECONOMY = 'Y', CABIN_PREMIUM_ECONOMY = 'S', CABIN_BUSINESS = 'C',
+    CABIN_PREMIUM_BUSINESS = 'J', CABIN_FIRST = 'F', CABIN_PREMIUM_FIRST = 'P';
+
+    public static function getCabin($cabin = null)
+    {
+        $mapping = [
+            self::CABIN_ECONOMY => 'Economy',
+            self::CABIN_PREMIUM_ECONOMY => 'Premium Economy',
+            self::CABIN_BUSINESS => 'Business',
+            self::CABIN_PREMIUM_BUSINESS => 'Premium Business',
+            self::CABIN_FIRST => 'First',
+            self::CABIN_PREMIUM_FIRST => 'Premium First',
+        ];
+
+        if ($cabin === null) {
+            return $mapping;
+        }
+
+        return isset($mapping[$cabin]) ? $mapping[$cabin] : $cabin;
+    }
+
+    public static function getCabinReal($cabin)
+    {
+        $mapping = [
+            'E' =>  self::CABIN_ECONOMY,
+            'P' => self::CABIN_PREMIUM_ECONOMY ,
+            'B'  =>  self::CABIN_BUSINESS,
+            'PB'  =>  self::CABIN_PREMIUM_BUSINESS,
+            'F'  =>  self::CABIN_FIRST,
+            'PF'  =>  self::CABIN_PREMIUM_FIRST,
+        ];
+
+        return isset($mapping[$cabin]) ? $mapping[$cabin] : $cabin;
+    }
+
     /**
      * {@inheritdoc}
      */

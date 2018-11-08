@@ -538,5 +538,11 @@ $this->registerJs($js);
     'size' => Modal::SIZE_LARGE,
 ])?>
 <?php Modal::end()?>
+<?php Modal::begin(['id' => 'preview-send-quotes',
+    'header' => '<h2>Preview email</h2>',
+    'size' => Modal::SIZE_LARGE,
+])?>
+<?php Modal::end()?>
+
 <?php $this->registerJsFile('//cdnjs.cloudflare.com/ajax/libs/bootstrap-modal/2.2.6/js/bootstrap-modal.min.js', ['depends' => [yii\web\JqueryAsset::className()]])?>
 <?php $this->registerJsFile('//cdnjs.cloudflare.com/ajax/libs/bootstrap-modal/2.2.6/js/bootstrap-modalmanager.min.js', ['depends' => [yii\web\JqueryAsset::className()]])?>
