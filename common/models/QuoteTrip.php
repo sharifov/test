@@ -17,6 +17,30 @@ use Yii;
  */
 class QuoteTrip extends \yii\db\ActiveRecord
 {
+    public $stops = 0;
+
+
+    public function getStops()
+    {
+
+        if(!empty($this->quoteSegments) && count($this->quoteSegments) > 1){
+            $this->stops = count($this->quoteSegments) - 1;
+            foreach ($this->quoteSegments as $segment){
+                if(isset($segment->qs_stop) && !empty($segment->qs_stop)){
+                    $this->stops += $segment->qs_stop;
+                }
+            }
+        }
+        return $this->stops;
+    }
+
+    public function afterFind()
+    {
+        parent::afterFind();
+
+        $this->getStops();
+    }
+
     /**
      * {@inheritdoc}
      */

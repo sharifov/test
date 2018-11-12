@@ -35,6 +35,7 @@ use yii\helpers\VarDumper;
  * @property boolean $created_by_seller
  * @property string $employee_name
  * @property string $last_ticket_date
+ * @property double $service_fee_percent
  *
  * @property QuotePrice[] $quotePrices
  * @property int $quotePricesCount
@@ -97,6 +98,10 @@ class Quote extends \yii\db\ActiveRecord
     ];
 
     public $itinerary = [];
+    public $hasFreeBaggage = false;
+    public $freeBaggageInfo;
+    public $hasAirportChange = false;
+    public $hasOvernight = false;
 
     /**
      * {@inheritdoc}
@@ -301,7 +306,7 @@ class Quote extends \yii\db\ActiveRecord
         return [
             [['uid', 'reservation_dump', 'main_airline_code'], 'required'],
             [['lead_id', 'status', 'check_payment'], 'integer'],
-            [['created', 'updated', 'reservation_dump', 'created_by_seller', 'employee_name', 'employee_id', 'pcc', 'gds', 'last_ticket_date'], 'safe'],
+            [['created', 'updated', 'reservation_dump', 'created_by_seller', 'employee_name', 'employee_id', 'pcc', 'gds', 'last_ticket_date', 'service_fee_percent'], 'safe'],
             [['uid', 'record_locator', 'pcc', 'cabin', 'gds', 'trip_type', 'main_airline_code', 'fare_type'], 'string', 'max' => 255],
 
             [['reservation_dump'], 'checkReservationDump'],
@@ -357,6 +362,7 @@ class Quote extends \yii\db\ActiveRecord
             'created' => 'Created',
             'updated' => 'Updated',
             'last_ticket_date' => 'Last Ticket Date',
+            'service_fee_percent' => 'Service Fee Percent',
         ];
     }
 
@@ -724,6 +730,10 @@ class Quote extends \yii\db\ActiveRecord
                     $position = stripos($row, "OPERATED BY");
                     $operatedBy = trim(substr($row, $position));
                     $operatedBy = trim(str_ireplace("OPERATED BY", "", $operatedBy));
+                    preg_match('/\((.*?)\)/', $operatedBy, $matches);
+                    if (!empty($matches)) {
+                        $operatedBy = trim($matches[1]);
+                    }
                     $segments[$idx]['operatingAirline'] = $operatedBy;
                 }
             }
@@ -746,6 +756,10 @@ class Quote extends \yii\db\ActiveRecord
                 $position = stripos($row, "OPERATED BY");
                 $operatedBy = trim(substr($row, $position));
                 $operatedBy = trim(str_ireplace("OPERATED BY", "", $operatedBy));
+                preg_match('/\((.*?)\)/', $operatedBy, $matches);
+                if (!empty($matches)) {
+                    $operatedBy = trim($matches[1]);
+                }
                 $operationAirlineCode = $operatedBy;
             }
 
@@ -856,6 +870,9 @@ class Quote extends \yii\db\ActiveRecord
             if(!empty($airline)){
                 $segment['qs_cabin'] = QuoteSegment::getCabinReal($airline->getCabinByClass($cabin));
             }
+            if(!$segment['qs_cabin']){
+                $segment['qs_cabin'] = $this->cabin;
+            }
             $segments[] = $segment;
         }
 
@@ -902,7 +919,7 @@ class Quote extends \yii\db\ActiveRecord
         return $trips;
     }
 
-    public function updateQuoteTrips()
+    public function createQuoteTrips()
     {
         if($this->getQuoteTrips()->count() == 0){
             $data = $this->getTripsSegmentsData();
@@ -926,7 +943,7 @@ class Quote extends \yii\db\ActiveRecord
                             $segment = new QuoteSegment();
                             $segment->attributes = $segmentEntry;
                             if(!$segment->validate()){
-                                Yii::error(VarDumper::dumpAsString($segment->getErrors()), 'QuoteModel:updateQuoteTrips:segment:save');
+                                Yii::error(VarDumper::dumpAsString($segmentEntry).VarDumper::dumpAsString($segment->getErrors()), 'QuoteModel:updateQuoteTrips:segment:save');
                                 $transaction->rollBack();
                                 return false;
                             }
@@ -940,6 +957,78 @@ class Quote extends \yii\db\ActiveRecord
         }
 
         return false;
+    }
+
+    public function afterFind()
+    {
+        parent::afterFind();
+
+        $this->getBaggageInfo();
+        $this->getHasAirportChange();
+        //$this->getHasOvernight();
+    }
+
+    public function getHasOvernight()
+    {
+        if(!empty($this->quoteTrips)){
+            foreach ($this->quoteTrips as $trip){
+                if(!empty($trip->quoteSegments) && count($trip->quoteSegments) > 1){
+                    foreach ($trip->quoteSegments as $segment){
+                        if($segment->getIsOVernight()){
+                            $this->hasOvernight = true;
+                        }
+                    }
+                }
+            }
+        }
+        return $this->hasOvernight;
+    }
+
+    public function getHasAirportChange()
+    {
+        if(!empty($this->quoteTrips)){
+            foreach ($this->quoteTrips as $trip){
+                if(!empty($trip->quoteSegments) && count($trip->quoteSegments) > 1){
+                    $previousSegment = null;
+                    foreach ($trip->quoteSegments as $segment){
+                        if($previousSegment !== null && $segment->qs_departure_airport_code != $previousSegment->qs_arrival_airport_code){
+                            $this->hasAirportChange = true;
+                            break;
+                        }
+                        $previousSegment = $segment;
+                    }
+                }
+            }
+        }
+        return $this->hasAirportChange;
+    }
+
+    public function getBaggageInfo()
+    {
+        //if one segment has baggage -> quote has baggage
+        if(!empty($this->quoteTrips)){
+            foreach ($this->quoteTrips as $trip){
+                if(!empty($trip->quoteSegments)){
+                    foreach ($trip->quoteSegments as $segment){
+                        if(!empty($segment->quoteSegmentBaggages)){
+                            foreach ($segment->quoteSegmentBaggages as $baggage){
+                                if(($baggage->qsb_allow_pieces && $baggage->qsb_allow_pieces > 0)){
+                                    $this->freeBaggageInfo = $baggage->qsb_allow_pieces.' pcs';
+                                }elseif ($baggage->qsb_allow_weight){
+                                    $this->freeBaggageInfo = $baggage->qsb_allow_weight.$baggage->qsb_allow_unit;
+                                }
+
+                                if($this->freeBaggageInfo){
+                                    $this->hasFreeBaggage = true;
+                                    return ['hasFreeBaggage' => $this->hasFreeBaggage, 'freeBaggageInfo' => $this->freeBaggageInfo];
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return ['hasFreeBaggage' => $this->hasFreeBaggage, 'freeBaggageInfo' => $this->freeBaggageInfo];
     }
 
     public function afterSave($insert, $changedAttributes)
@@ -1054,6 +1143,57 @@ class Quote extends \yii\db\ActiveRecord
     }
 
     public function getTrips(&$title = null)
+    {
+        $trips = [];
+
+        if(empty($this->quoteTrips)){
+            return $this->getTripsFromDump($title);
+        }
+
+        foreach ($this->quoteTrips as $trip){
+            $segments = [];
+            $routing = [];
+            foreach ($trip->quoteSegments as $keySegm => $segment) {
+                if($keySegm == 0){
+                    $routing[] = $segment->qs_departure_airport_code;
+                }
+                $routing[] = $segment->qs_arrival_airport_code;
+                $airline = Airline::findIdentity($segment->qs_marketing_airline);
+                $departureDateTime = new \DateTime($segment->qs_departure_time);
+                $arrivalDateTime = new \DateTime($segment->qs_arrival_time);
+                $segments[] = [
+                    'cabin' => $segment->qs_cabin,
+                    'carrier' => $segment->qs_marketing_airline,
+                    'airlineName' => ($airline)?$airline->name:'',
+                    'departureAirport' => $segment->qs_departure_airport_code,
+                    'departureCity' => ($segment->departureAirport)?$segment->departureAirport->city:'',
+                    'departureCountry' => ($segment->departureAirport)?$segment->departureAirport->country:'',
+                    'arrivalAirport' => $segment->qs_arrival_airport_code,
+                    'arrivalCity' => ($segment->arrivalAirport)?$segment->arrivalAirport->city:'',
+                    'arrivalCountry' => ($segment->arrivalAirport)?$segment->arrivalAirport->country:'',
+                    'departureDateTime' => $departureDateTime,
+                    'arrivalDateTime' => $arrivalDateTime,
+                    'flightNumber' => $segment->qs_flight_number,
+                    'bookingClass' => $segment->qs_booking_class,
+                    'flightDuration' => $segment->qs_duration,
+                    'operatingAirline' => ($segment->qs_operating_airline != $segment->qs_marketing_airline)?$segment->qs_operating_airline:null,
+                    'layoverDuration' => ($keySegm > 0)?(($departureDateTime->getTimestamp() - $segments[$keySegm-1]['arrivalDateTime']->getTimestamp())/60):0,
+                    'stop' => $segment->qs_stop,
+                ];
+            }
+            $trips[] = [
+                'segments' => $segments,
+                'stops' => $trip->stops,
+                'totalDuration' => $trip->qt_duration,
+                'routing' => implode('-', $routing),
+                'title' => $segments[0]['departureCity'].' - '.$segments[count($segments)-1]['arrivalCity'],
+                ];
+        }
+
+        return $trips;
+    }
+
+    public function getTripsFromDump(&$title = null)
     {
         $trips = [];
         $tripIndex = 0;
@@ -1184,7 +1324,6 @@ class Quote extends \yii\db\ActiveRecord
             'currency' => 'USD'
         ];
         foreach ($this->quotePrices as $price) {
-            $price->toFloat();
             $price->roundValue();
 
             if (!isset($result['detail'][$price->passenger_type]['selling'])) {

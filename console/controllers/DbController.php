@@ -164,7 +164,7 @@ ORDER BY lf.lead_id, id';
         if(count($quotes)){
             $cntUpdated = 0;
             foreach ($quotes as $quote){
-                if($quote->updateQuoteTrips()){
+                if($quote->createQuoteTrips()){
                     $cntUpdated++;
                 }
             }

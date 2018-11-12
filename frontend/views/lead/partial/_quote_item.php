@@ -12,6 +12,8 @@ use common\models\Airline;
 use common\components\SearchService;
 use yii\bootstrap\Html;
 use yii\helpers\Url;
+use yii\helpers\VarDumper;
+use common\models\QuotePrice;
 ?>
 <div class="quote">
 	<div class="quote__details" id="quote_detail_<?= $model->uid?>" style="display:none;">
@@ -22,7 +24,7 @@ use yii\helpers\Url;
                 <div class="trip__leg">
                     <h4 class="trip__subtitle">
                         <span class="trip__leg-type"><?php if(count($model->quoteTrips) < 3 && $tripKey == 0):?>Depart<?php elseif(count($model->quoteTrips) < 3 && $tripKey > 0):?>Return<?php else:?><?= ($tripKey+1);?> Trip<?php endif?></span>
-                        <span class="trip__leg-date"><?= Yii::$app->formatter->asDatetime(strtotime($segments[0]->qs_departure_time),'EEE d MMM')?></span>
+                        <span class="trip__leg-date"><?= Yii::$app->formatter_search->asDatetime(strtotime($segments[0]->qs_departure_time),'EEE d MMM')?></span>
                     </h4>
                     <div class="trip__card">
                         <div class="trip__details trip-detailed" id="flight-leg-1">
@@ -48,15 +50,15 @@ use yii\helpers\Url;
                                     </div>
 
                                     <div class="segment__location segment__location--from">
-                                        <span class="segment__time"><?= Yii::$app->formatter->asDatetime(strtotime($segment->qs_departure_time),'h:mm a')?></span>
+                                        <span class="segment__time"><?= Yii::$app->formatter_search->asDatetime(strtotime($segment->qs_departure_time),'h:mm a')?></span>
                                         <span class="segment__airport"><?= (!$segment->departureAirport)?:$segment->departureAirport->name;?> (<?= $segment->qs_departure_airport_code?>)</span>
-                                        <span class="segment__date"><?= Yii::$app->formatter->asDatetime(strtotime($segment->qs_departure_time),'EEEE, MMM d')?></span>
+                                        <span class="segment__date"><?= Yii::$app->formatter_search->asDatetime(strtotime($segment->qs_departure_time),'EEEE, MMM d')?></span>
                                     </div>
 
                                     <div class="segment__location segment__location--to">
-                                        <span class="segment__time"><?= Yii::$app->formatter->asDatetime(strtotime($segment->qs_arrival_time),'h:mm a')?></span>
+                                        <span class="segment__time"><?= Yii::$app->formatter_search->asDatetime(strtotime($segment->qs_arrival_time),'h:mm a')?></span>
                                         <span class="segment__airport"><?= (!$segment->arrivalAirport)?:$segment->arrivalAirport->name;?> (<?= $segment->qs_arrival_airport_code?>)</span>
-                                        <span class="segment__date"><?= Yii::$app->formatter->asDatetime(strtotime($segment->qs_arrival_time),'EEEE, MMM d')?></span>
+                                        <span class="segment__date"><?= Yii::$app->formatter_search->asDatetime(strtotime($segment->qs_arrival_time),'EEEE, MMM d')?></span>
                                     </div>
 
                                     <div class="segment__duration-wrapper">
@@ -65,10 +67,10 @@ use yii\helpers\Url;
                                     </div>
                                 </div>
                                 <div class="segment__note">
-                                	<?php if($segment->qs_operating_airline != $segment->qs_marketing_airline):?>Operated by <?= $airline = Airline::findIdentity($segment->qs_operating_airline);if($airline) echo $airline->name; else $segment->qs_operating_airline?>.<?php endif;?>
-                                	<?php if(!empty($segment->baggages)):?>
+                                	<?php if($segment->qs_operating_airline != $segment->qs_marketing_airline):?>Operated by <?php $airline = Airline::findIdentity($segment->qs_operating_airline);if($airline) echo $airline->name; else $segment->qs_operating_airline?>.<?php endif;?>
+                                	<?php if(!empty($segment->quoteSegmentBaggages)):?>
                                     	<span class="badge badge-light"><i class="fa fa-suitcase"></i>&nbsp;
-                                    	<?php foreach ($segment->baggages as $baggage):?>
+                                    	<?php foreach ($segment->quoteSegmentBaggages as $baggage):?>
                                         	<?php if(isset($baggage->qsb_allow_pieces)):?>
                                         		<?= \Yii::t('search', '{n, plural, =0{no baggage} one{# piece} other{# pieces}}', ['n' => $baggage->qsb_allow_pieces]);?>
                                         	<?php elseif(isset($baggage->qsb_allow_weight)):?>
@@ -155,34 +157,57 @@ use yii\helpers\Url;
 		<div class="quote__trip">
 			<?php foreach ($model->quoteTrips as $trip):?>
 			<?php
+			$firstSegment = null;
+			$lastSegment = null;
+
 			$segments = $trip->quoteSegments;
-			$segmentsCnt = count($segments);
-			$stopCnt = $segmentsCnt - 1;
-			$firstSegment = $segments[0];
-			$lastSegment = $segments[$segmentsCnt-1];
-			$cabins = [];
-			foreach ($segments as $segment){
-			    if(!in_array(SearchService::getCabin($segment->qs_cabin), $cabins)){
-			        $cabins[] = SearchService::getCabin($segment->qs_cabin);
-			    }
-			    if(isset($segment->qs_stop) && $segment->qs_stop > 0){
-			        $stopCnt += $segment->qs_stop;
-			    }
+			if( $segments ) {
+    			$segmentsCnt = count($segments);
+    			$stopCnt = $segmentsCnt - 1;
+    			$firstSegment = $segments[0];
+    			$lastSegment = end($segments);
+    			$cabins = [];
+    			$marketingAirlines = [];
+    			$airlineNames = [];
+    			foreach ($segments as $segment){
+    			    if(!in_array(SearchService::getCabin($segment->qs_cabin), $cabins)){
+    			        $cabins[] = SearchService::getCabin($segment->qs_cabin);
+    			    }
+    			    if(isset($segment->qs_stop) && $segment->qs_stop > 0){
+    			        $stopCnt += $segment->qs_stop;
+    			    }
+    			    if(!in_array($segment->qs_marketing_airline, $marketingAirlines)){
+    			        $marketingAirlines[] = $segment->qs_marketing_airline;
+    			        $airline = Airline::findIdentity($segment->qs_marketing_airline);
+    			        if($airline){
+    			            $airlineNames[] =  $airline->name;
+    			        }else{
+    			            $airlineNames[] = $segment->qs_marketing_airline;
+    			        }
+
+    			    }
+    			}
+			} else {
+			    continue;
 			}
 			?>
 			<div class="quote__segment">
 				<div class="quote__info">
-					<img src="//www.gstatic.com/flights/airline_logos/70px/<?= $firstSegment->qs_marketing_airline?>.png" alt="<?= $firstSegment->qs_marketing_airline?>" class="quote__airline-logo">
+					<?php if(count($marketingAirlines) == 1):?>
+					<img src="//www.gstatic.com/flights/airline_logos/70px/<?= $marketingAirlines[0]?>.png" alt="<?= $marketingAirlines[0]?>" class="quote__airline-logo">
+					<?php else:?>
+					<img src="/img/multiple_airlines.png" alt="<?= implode(', ',$marketingAirlines)?>" class="quote__airline-logo">
+					<?php endif;?>
 					<div class="quote__info-options">
 						<div class="quote__duration"><?= SearchService::durationInMinutes($trip->qt_duration)?></div>
-						<div class="quote__airline-name"><?php $airline = Airline::findIdentity($firstSegment->qs_marketing_airline);if($airline) echo $airline->name?></div>
+						<div class="quote__airline-name"><?= implode(', ',$airlineNames);?></div>
 					</div>
 				</div>
 				<div class="quote__itinerary">
 					<div class="quote__itinerary-col quote__itinerary-col--from">
 						<div class="quote__datetime">
-							<span class="quote__time"><?= Yii::$app->formatter->asDatetime(strtotime($firstSegment->qs_departure_time),'h:mm a')?></span>
-							<span class="quote__date"><?= Yii::$app->formatter->asDatetime(strtotime($firstSegment->qs_departure_time),'MMM d')?></span>
+							<span class="quote__time"><?= Yii::$app->formatter_search->asDatetime(strtotime($firstSegment->qs_departure_time),'h:mm a')?></span>
+							<span class="quote__date"><?= Yii::$app->formatter_search->asDatetime(strtotime($firstSegment->qs_departure_time),'MMM d')?></span>
 						</div>
 						<div class="quote__location">
 							<div class="quote__airport">
@@ -193,8 +218,8 @@ use yii\helpers\Url;
 					</div>
 					<div class="quote__itinerary-col quote__itinerary-col--to">
 						<div class="quote__datetime">
-							<span class="quote__time"><?= Yii::$app->formatter->asDatetime(strtotime($lastSegment->qs_arrival_time),'h:mm a')?></span>
-							<span class="quote__date"><?= Yii::$app->formatter->asDatetime(strtotime($lastSegment->qs_arrival_time),'MMM d')?></span>
+							<span class="quote__time"><?= Yii::$app->formatter_search->asDatetime(strtotime($lastSegment->qs_arrival_time),'h:mm a')?></span>
+							<span class="quote__date"><?= Yii::$app->formatter_search->asDatetime(strtotime($lastSegment->qs_arrival_time),'MMM d')?></span>
 						</div>
 						<div class="quote__location">
 							<div class="quote__airport">
@@ -215,23 +240,15 @@ use yii\helpers\Url;
 
 		</div>
 		<div class="quote__badges">
-			<span class="quote__badge quote__badge--amenities quote__badge--disabled" data-toggle="tooltip" title="" data-original-title="">
+			<span class="quote__badge quote__badge--amenities <?php if(!$model->hasFreeBaggage):?>quote__badge--disabled<?php endif;?>" data-toggle="tooltip"
+			 title="<?= ($model->freeBaggageInfo)?'Free baggage - '.$model->freeBaggageInfo:'No free baggage'?>"
+			data-original-title="<?= ($model->freeBaggageInfo)?'Free baggage - '.$model->freeBaggageInfo:'No free baggage'?>">
 				<i class="fa fa-suitcase"></i><span class="quote__badge-num"></span>
 			</span>
-			<span class="quote__badge quote__badge--amenities quote__badge--disabled" data-toggle="tooltip" title="" data-original-title="">
-				<i class="fa fa-wifi"></i>
-			</span>
-				<span class="quote__badge quote__badge--warning" data-toggle="tooltip" title="" data-original-title="Overnight Layover"> <i class="fa fa-moon-o"></i>
-			</span> <span class="quote__badge quote__badge--warning"
-				data-toggle="tooltip" title="" data-original-title="Airports Change">
+			<span class="quote__badge <?php if($model->hasAirportChange):?>quote__badge--warning<?php else:?>quote__badge--disabled<?php endif;?>" data-toggle="tooltip"
+			 title="<?= ($model->hasAirportChange)?'Airports Change':'No Airports Change'?>"
+			  data-original-title="<?= ($model->hasAirportChange)?'Airports Change':'No Airports Change'?>">
 				<i class="fa fa-exchange"></i>
-			</span> <span class="quote__badge quote__badge--advantage"
-				data-toggle="tooltip" title="" data-original-title="The quickest"> <i
-				class="fa fa-clock-o"></i>
-			</span> <span
-				class="quote__badge quote__badge--advantage quote__badge--disabled"
-				data-toggle="tooltip" title="" data-original-title="The cheapest"> <i
-				class="fa fa-dollar"></i>
 			</span>
 		</div>
 		<div class="quote__actions">
@@ -247,7 +264,6 @@ use yii\helpers\Url;
                     $prices = $model->quotePrices;
                     $netPrice = $sellingPrice = $markup = $extraMarkup = 0;
                     foreach ($prices as $idx => $price) {
-                        $price->toFloat();
                         $netPrice += $price->net;
                         $markup += $price->mark_up;
                         $sellingPrice += $price->selling;
@@ -301,7 +317,7 @@ use yii\helpers\Url;
                                         'data-pax-type' => 'adt-markup'
                                     ]) ?>
                                 </td>
-                                <td><span class="sellingPrice-<?= $model->uid ?>"><?= $adultsPrices['sell'] / $adultsPrices['cnt'] ?></span></td>
+                                <td class="sellingPrice-<?= $model->uid ?>"><?= $adultsPrices['sell'] / $adultsPrices['cnt'] ?></td>
                             </tr>
                         <?php endif; ?>
                         <?php if ($childrenPrices['cnt'] > 0): ?>
@@ -316,7 +332,7 @@ use yii\helpers\Url;
                                         'data-pax-type' => 'cnn-markup'
                                     ]) ?>
                                 </td>
-                                <td><span class="sellingPrice-<?= $model->uid ?>"><?= $childrenPrices['sell'] / $childrenPrices['cnt'] ?></span></td>
+                                <td class="sellingPrice-<?= $model->uid ?>"><?= $childrenPrices['sell'] / $childrenPrices['cnt'] ?></td>
                             </tr>
                         <?php endif; ?>
                         <?php if ($infantsPrices['cnt'] > 0): ?>
@@ -331,18 +347,26 @@ use yii\helpers\Url;
                                         'data-pax-type' => 'inf-markup'
                                     ]) ?>
                                 </td>
-                                <td><span class="sellingPrice-<?= $model->uid ?>"><?= $infantsPrices['sell'] / $infantsPrices['cnt'] ?></span></td>
+                                <td class="sellingPrice-<?= $model->uid ?>"><?= $infantsPrices['sell'] / $infantsPrices['cnt'] ?></td>
                             </tr>
                         <?php endif; ?>
 				</tbody>
 				<tfoot>
+					<?php $service_fee_total = 0?>
+                    <?php if($model->check_payment):?>
+                    <tr class="danger">
+                        <th colspan="4">+ Service fee</th>
+                        <td><?= Quote::SERVICE_FEE*100?>%</td>
+                        <td><?php /*$service_fee_total = round($sellingPrice * $model->service_fee_percent/100, 2); echo $service_fee_total;*/ ?></td>
+                    </tr>
+                    <?php endif;?>
 					<tr>
                         <th>Total</th>
                         <td><?= count($model->quotePrices) ?></td>
                         <td><?= $netPrice ?></td>
                         <td><?= $markup ?></td>
-                        <td><span class="total-markup-<?= $model->uid ?>"><?= $extraMarkup ?></span></td>
-                        <td><span class="total-sellingPrice-<?= $model->uid ?>"><?= $sellingPrice ?></span></td>
+                        <td class="total-markup-<?= $model->uid ?>"><?= $extraMarkup ?></td>
+                        <td class="total-sellingPrice-<?= $model->uid ?>"><?= $sellingPrice ?></td>
                     </tr>
 				</tfoot>
 			</table>

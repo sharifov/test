@@ -137,7 +137,7 @@ class QuoteController extends FController
                             $quote->employee_name = Yii::$app->user->identity->username;
 
                             if (!$quote->save()) {
-                                Yii::error(VarDumper::dump($quote->getErrors()), 'QuoteController:create-quote-from-search:quote:save');
+                                Yii::error(VarDumper::dumpAsString($quote->getErrors()), 'QuoteController:create-quote-from-search:quote:save');
                                 $transaction->rollBack();
                                 return $result;
                             }else{
@@ -255,7 +255,7 @@ class QuoteController extends FController
 
                                         $trip->qt_key = implode('|', $keys);
                                         if(!$trip->save()){
-                                            Yii::error(VarDumper::dumpAsString($entry)."\n".VarDumper::dumpAsString($stop->getErrors()), 'QuoteController:create-quote-from-search:trip:savekey');
+                                            Yii::error(VarDumper::dumpAsString($entry)."\n".VarDumper::dumpAsString($trip->getErrors()), 'QuoteController:create-quote-from-search:trip:savekey');
                                             $transaction->rollBack();
                                             return $result;
                                         }
@@ -270,10 +270,12 @@ class QuoteController extends FController
                                         $price->taxes = $paxEntry['baseTax'];
                                         $price->net = $price->fare + $price->taxes;
                                         $price->mark_up = $paxEntry['markup'];
-                                        $price->selling = $paxEntry['price'];
+                                        $price->selling = $price->net + $price->mark_up + $price->extra_mark_up;
+                                        $price->service_fee = ($quote->check_payment)?round($price->selling * Quote::SERVICE_FEE, 2):0;
+                                        $price->selling += $price->service_fee;
 
                                         if(!$price->validate()){
-                                            Yii::error(VarDumper::dumpAsString($entry)."\n".VarDumper::dumpAsString($baggage->getErrors()), 'QuoteController:create-quote-from-search:baggage:save');
+                                            Yii::error(VarDumper::dumpAsString($entry)."\n".VarDumper::dumpAsString($price->getErrors()), 'QuoteController:create-quote-from-search:baggage:save');
                                             $transaction->rollBack();
                                             return $result;
                                         }
@@ -349,7 +351,7 @@ class QuoteController extends FController
                                 }
                                 $newQPrice->id = 0;
                                 $newQPrice::calculation($newQPrice);
-                                $newQPrice->toMoney();
+                                //$newQPrice->toMoney();
                                 $prices[] = $newQPrice;
                             }
                             $model->main_airline_code = $itinerary['mainAirlineCode'];
@@ -559,7 +561,7 @@ class QuoteController extends FController
             $price->attributes = $item;
 
             $price::calculation($price, $quote->check_payment);
-            $price->toMoney();
+            //$price->toMoney();
             $result[Html::getInputId($price, '[' . $key . ']mark_up')] = $price->mark_up;
             $result[Html::getInputId($price, '[' . $key . ']selling')] = $price->selling;
             $result[Html::getInputId($price, '[' . $key . ']net')] = $price->net;
@@ -646,6 +648,8 @@ class QuoteController extends FController
                             $leadLog->addLog([
                                 'lead_id' => $quote->lead_id,
                             ]);
+
+                            $quote->createQuoteTrips();
 
                             if ($lead->called_expert) {
                                 $quote = Quote::findOne(['id' => $quote->id]);

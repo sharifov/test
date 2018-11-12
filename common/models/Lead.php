@@ -2264,11 +2264,7 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
      */
     public function getQuotesProvider($params)
     {
-        $projectIds = array_keys(ProjectEmployeeAccess::getProjectsByEmployee());
         $query = Quote::find()->where(['lead_id' => $this->id]);
-
-        // add conditions that should always apply here
-
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
             'sort'=> ['defaultOrder' => ['created' => SORT_DESC]],
@@ -2280,12 +2276,8 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
         $this->load($params);
 
         if (!$this->validate()) {
-            // uncomment the following line if you do not want to return any records when validation fails
-            // $query->where('0=1');
             return $dataProvider;
         }
-
-        //$query->with(['client', 'client.clientEmails', 'client.clientPhones', 'employee']);
 
         return $dataProvider;
     }

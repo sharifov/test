@@ -497,7 +497,10 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
                         $employeeId = ($type != 'Experts')
                             ? $id
                             : $employee;
-                        $child_options[$employeeId] = $employee;
+                            if(is_int($employeeId)){
+                                $child_options[$employeeId] = $employee;
+                            }
+
                     }
                     $options[$type] = $child_options;
                 }

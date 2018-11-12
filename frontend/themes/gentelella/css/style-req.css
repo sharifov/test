@@ -3938,9 +3938,9 @@ input[disabled] + .radio-tab__text {
 }
 
 .quote__badges {
-  -webkit-flex: 0 1 90px;
-      -ms-flex: 0 1 90px;
-          flex: 0 1 90px;
+  -webkit-flex: 0 1 45px;
+      -ms-flex: 0 1 45px;
+          flex: 0 1 45px;
   padding: 10px 8px;
   background-color: #f5f5f7;
   display: -webkit-flex;
@@ -5004,3 +5004,9 @@ input[disabled] + .radio-tab__text {
    overflow: auto;
 }
 .list-view .quote{margin:10px 0 20px;}
+
+.form-control.field-error {
+  border: 1px solid #e15258;
+  background-color: #fee;
+}
+.select2-dropdown{z-index:9999!important;}

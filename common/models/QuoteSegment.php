@@ -44,6 +44,27 @@ class QuoteSegment extends \yii\db\ActiveRecord
     const CABIN_ECONOMY = 'Y', CABIN_PREMIUM_ECONOMY = 'S', CABIN_BUSINESS = 'C',
     CABIN_PREMIUM_BUSINESS = 'J', CABIN_FIRST = 'F', CABIN_PREMIUM_FIRST = 'P';
 
+    public $isOvernight = false;
+
+    public function getIsOVernight()
+    {
+        $departureTime = new \DateTime($this->qs_departure_time);
+        $arrivalTime = new \DateTime($this->qs_arrival_time);
+
+        if(($departureTime->format('H') <= 1 || $departureTime->format('H') >= 22)  && $arrivalTime->format('H') <= 7){
+            $this->isOvernight = true;
+        }
+
+        return $this->isOvernight;
+    }
+
+    public function afterFind()
+    {
+        parent::afterFind();
+
+        $this->getIsOVernight();
+    }
+
     public static function getCabin($cabin = null)
     {
         $mapping = [
