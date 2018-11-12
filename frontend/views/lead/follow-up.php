@@ -30,17 +30,9 @@ $this->params['breadcrumbs'][] = $this->title;
 }
 </style>
 <h1>
+    <i class="fa fa-recycle"></i>
 	<?=\yii\helpers\Html::encode($this->title)?>
-<?php $showAll = Yii::$app->request->cookies->getValue(\common\models\Lead::getCookiesKey(), true);
-$btnClass = (!$showAll)
-? 'btn-warning' : 'btn-success';
-$btnText = (!$showAll)
-? 'Show All' : 'Show Unprocessed';
-$btnUrl = Url::to(['lead/unprocessed', 'show' => !$showAll]);
-echo Html::a($btnText, $btnUrl, [
-    'class' => 'btn ' . $btnClass,
-    'style' => 'margin-left: 10px;'
-                        ]);?>
+
 </h1>
 <div class="lead-index">
 

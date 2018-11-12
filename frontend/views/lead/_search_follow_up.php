@@ -37,6 +37,15 @@ use yii\widgets\ActiveForm;
         <div class="col-md-12">
             <br>
             <div class="form-group text-center">
+                <?php $showAll = Yii::$app->request->cookies->getValue(\common\models\Lead::getCookiesKey(), true);
+                $btnClass = $showAll ? 'btn-success' : 'btn-warning';
+                $btnText = $showAll ? 'Show Unprocessed' : 'Show All';
+
+                echo Html::a('<i class="fa fa-list"></i> ' . $btnText, ['lead/unprocessed', 'show' => !$showAll], [
+                    'class' => 'btn ' . $btnClass,
+                    'style' => 'margin-left: 10px;'
+                ]);?>
+
                 <?= Html::submitButton('<i class="fa fa-search"></i> Search leads', ['class' => 'btn btn-primary']) ?>
                 <?= Html::resetButton('<i class="fa fa-close"></i> Reset form', ['class' => 'btn btn-warning']) ?>
             </div>

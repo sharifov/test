@@ -110,6 +110,7 @@ class Lead extends ActiveRecord
     public CONST STATUS_MULTIPLE_UPDATE_LIST = [
         self::STATUS_FOLLOW_UP => self::STATUS_LIST[self::STATUS_FOLLOW_UP],
         self::STATUS_ON_HOLD => self::STATUS_LIST[self::STATUS_ON_HOLD],
+        self::STATUS_PROCESSING => self::STATUS_LIST[self::STATUS_PROCESSING],
         self::STATUS_TRASH => self::STATUS_LIST[self::STATUS_TRASH],
         self::STATUS_BOOKED => self::STATUS_LIST[self::STATUS_BOOKED],
         self::STATUS_SNOOZE => self::STATUS_LIST[self::STATUS_SNOOZE],
@@ -1409,7 +1410,7 @@ Sales - Kivork",
 
         if($offset) {
             $clientTime = date("H:i", strtotime("now $offset GMT"));
-            $clientTime = '<i class="fa fa-clock-o"></i> <b>' . Html::encode($clientTime) . '</b><br/>(GMT: ' .$offset_gmt . ')';
+            $clientTime = '<i class="fa fa-clock-o"></i> <b>' . Html::encode($clientTime) . '</b>'; //<br/>(GMT: ' .$offset_gmt . ')';
         }
 
         return $clientTime;
