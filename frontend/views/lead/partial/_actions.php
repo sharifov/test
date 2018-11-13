@@ -80,7 +80,7 @@ if ($leadForm->mode != $leadForm::VIEW_MODE || ($leadForm->mode == $leadForm::VI
     });
 
     /***  Add/Clone quote  ***/
-    $('.add-clone-alt-quote').click(function (e) {
+    $(document).on('click','.add-clone-alt-quote', function (e) {
         e.preventDefault();
         var url = $(this).data('url');
         var uid = $(this).data('uid');

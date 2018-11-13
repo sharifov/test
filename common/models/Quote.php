@@ -870,8 +870,8 @@ class Quote extends \yii\db\ActiveRecord
             if(!empty($airline)){
                 $segment['qs_cabin'] = QuoteSegment::getCabinReal($airline->getCabinByClass($cabin));
             }
-            if(!$segment['qs_cabin']){
-                $segment['qs_cabin'] = $this->cabin;
+            if(!isset($segment['qs_cabin'])){
+                $segment['qs_cabin'] = QuoteSegment::getCabinReal($this->cabin);
             }
             $segments[] = $segment;
         }

@@ -146,19 +146,6 @@ ORDER BY lf.lead_id, id';
     {
         printf("\n --- Start %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
 
-        /* $db = Yii::$app->getDb();
-        $sql = 'SELECT q.id, q.uid, q.reservation_dump FROM quotes q LEFT JOIN quote_trip qt ON qt.qt_quote_id = q.id WHERE qt.qt_id IS NULL';
-        $quotes = $db->createCommand($sql)->queryAll();
-        printf("\n Quotes to update: %d \n", count($quotes));
-
-        if(count($quotes)){
-            foreach ($quotes as $quote){
-                $data = Quote::parseDump($quote['reservation_dump']);
-                printf("\n %s\n", VarDumper::dumpAsString($data));
-                break;
-            }
-        } */
-
         $quotes = Quote::find()->leftJoin('quote_trip','quote_trip.qt_quote_id = quotes.id')->where(['quote_trip.qt_id' => null])->all();
         printf("\n Quotes to update: %d \n", count($quotes));
         if(count($quotes)){

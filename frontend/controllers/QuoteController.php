@@ -773,7 +773,7 @@ class QuoteController extends FController
                                     foreach ($stops as $stop){
                                         $newStop = new QuoteSegmentStop();
                                         $newStop->attributes = $stop->attributes;
-                                        $newStop->qss_segment_id = $segment->qs_id;
+                                        $newStop->qss_segment_id = $newSegment->qs_id;
                                         $newStop->save(false);
                                     }
                                 }
@@ -783,7 +783,7 @@ class QuoteController extends FController
                                     foreach ($baggages as $baggage){
                                         $newBaggage = new QuoteSegmentBaggage();
                                         $newBaggage->attributes = $baggage->attributes;
-                                        $newBaggage->qsb_segment_id = $segment->qs_id;
+                                        $newBaggage->qsb_segment_id = $newSegment->qs_id;
                                         $newBaggage->save(false);
                                     }
                                 }

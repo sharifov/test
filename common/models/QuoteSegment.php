@@ -87,10 +87,14 @@ class QuoteSegment extends \yii\db\ActiveRecord
     {
         $mapping = [
             'E' =>  self::CABIN_ECONOMY,
+            'Economy' =>  self::CABIN_ECONOMY,
             'P' => self::CABIN_PREMIUM_ECONOMY ,
+            'Premium eco' => self::CABIN_PREMIUM_ECONOMY ,
             'B'  =>  self::CABIN_BUSINESS,
+            'Business'  =>  self::CABIN_BUSINESS,
             'PB'  =>  self::CABIN_PREMIUM_BUSINESS,
             'F'  =>  self::CABIN_FIRST,
+            'First'  =>  self::CABIN_FIRST,
             'PF'  =>  self::CABIN_PREMIUM_FIRST,
         ];
 

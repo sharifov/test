@@ -453,6 +453,7 @@ class QuoteController extends ApiBaseController
             $model->lead_id = $lead->id;
             $model->employee_id = null;
             $model->save();
+            $model->createQuoteTrips();
 
             $quotePricesAttributes = Yii::$app->request->post((new QuotePrice())->formName());
             if (!empty($quotePricesAttributes)) {
