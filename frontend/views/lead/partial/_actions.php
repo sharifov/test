@@ -8,6 +8,7 @@ use frontend\models\LeadForm;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use common\models\Lead;
+use yii\bootstrap\Modal;
 
 $urlUserActions = Url::to(['lead/get-user-actions', 'id' => $leadForm->getLead()->id]);
 $userId = Yii::$app->user->id;
@@ -42,9 +43,9 @@ if ($leadForm->mode != $leadForm::VIEW_MODE || ($leadForm->mode == $leadForm::VI
                             var keyModel = attr;
                             $.each(objectModel, function( attr, errors) {
                                 var inputId = '#' + attrName + '-' + keyModel + '-' + attr;
-                                if ($(inputId).hasClass('depart-date') || $(inputId).attr('type') == 'tel') {
-                                    $(inputId).parent().parent().addClass('has-error');
-                                    $(inputId).parent().parent().find('.help-block').html(errors[0]);
+                                if ($(inputId).hasClass('depart-date') || $(inputId).attr('type') == 'tel' || $(inputId).attr('type') == 'email') {
+                                    $(inputId).parent().parent().parent().addClass('has-error');
+                                    $(inputId).parent().parent().parent().find('.help-block').html(errors[0]);
                                 } else {
                                     $(inputId).parent().addClass('has-error');
                                     $(inputId).parent().find('.help-block').html(errors[0]);
@@ -62,11 +63,11 @@ if ($leadForm->mode != $leadForm::VIEW_MODE || ($leadForm->mode == $leadForm::VI
                         }
                     });
                 });
-                console.log(data.errors);
+                //console.log(data.errors);
                 btn.attr('disabled', false).prop('disabled', false);
                 btn.find('span i').attr('class', 'fa fa-check');
             } else {
-                console.log(data);
+                //console.log(data);
             }
         });
     });
@@ -79,7 +80,7 @@ if ($leadForm->mode != $leadForm::VIEW_MODE || ($leadForm->mode == $leadForm::VI
     });
 
     /***  Add/Clone quote  ***/
-    $('.add-clone-alt-quote').click(function (e) {
+    $(document).on('click','.add-clone-alt-quote', function (e) {
         e.preventDefault();
         var url = $(this).data('url');
         var uid = $(this).data('uid');
@@ -114,7 +115,6 @@ if ($leadForm->mode != $leadForm::VIEW_MODE || ($leadForm->mode == $leadForm::VI
         });
     });
 
-
     /***  Quick search quotes ***/
     $('#quick-search-quotes').click(function (e) {
         e.preventDefault();
@@ -126,6 +126,30 @@ if ($leadForm->mode != $leadForm::VIEW_MODE || ($leadForm->mode == $leadForm::VI
               backdrop: 'static',
               show: true
             });
+        });
+    });
+
+    /***  Quick search quotes ***/
+    $(document).on('click','#quick-search-quotes-btn', function (e) {
+        $('#popover-quick-search').popover('hide');
+        e.preventDefault();
+        var url = $('#quick-search-quotes-btn').data('url');
+        $('#preloader').removeClass('hidden');
+        var modal = $('#search-results__modal');
+
+         $.ajax({
+            type: 'post',
+            data: {'gds': $('#gds-selector').val()},
+            url: url,
+            success: function (data) {
+                $('#preloader').addClass('hidden');
+                modal.find('.modal-body').html(data);
+                modal.modal('show');
+            },
+            error: function (error) {
+                $('#preloader').removeClass('hidden');
+                console.log('Error: ' + error);
+            }
         });
     });
 
@@ -164,6 +188,8 @@ $js = <<<JS
             return $("#popover-content-add-note").html();
         }
     });
+
+    $('.popover-class[data-toggle="popover"]').popover();
 
     $('[data-toggle="popover"]').on('click', function (e) {
         $('[data-toggle="popover"]').not(this).popover('hide');
@@ -383,8 +409,7 @@ $this->registerJs($js);
             ];
             echo Html::button('<span class="btn-icon"><i class="fa fa-plus"></i></span> <span class="btn-text">' . $title . '</span>', $options);
         } ?>
-
-        <?php if ($leadForm->mode != $leadForm::VIEW_MODE) {
+		<?php if ($leadForm->mode != $leadForm::VIEW_MODE) {
             $title = '<span class="btn-icon"><i class="fa fa-check"></i></span><span class="btn-text">'.($leadForm->getLead()->isNewRecord ? 'Create' : 'Save').'</span>';
             echo Html::submitButton($title, [
                 'id' => 'submit-lead-form-btn',
@@ -399,9 +424,24 @@ $this->registerJs($js);
                 ]);
 
                 echo Html::button('<span class="btn-icon"><i class="fa fa-plus"></i></span><span class="btn-text">Quick Search Quote</span>', [
-                    'class' => 'btn btn-success btn-with-icon',
+                    'class' => 'btn btn-warning btn-with-icon',
                     'id' => 'quick-search-quotes',
-                    'data-url' => Url::to(['quote/get-online-quotes', 'leadId' => $leadForm->getLead()->id]),
+                    'data-url' => Url::to(['quote/get-online-quotes-old', 'leadId' => $leadForm->getLead()->id]),
+                ]);
+
+                echo Html::button('<span class="btn-icon"><i class="fa fa-plus"></i></span><span class="btn-text">Quick Search Quote (2)</span>', [
+                    'class' => 'btn btn-success btn-with-icon popover-class',
+                    'data-toggle' => 'popover',
+                    'id' => 'popover-quick-search',
+                    'data-html' => 'true',
+                    'data-title' => 'Choose GDS',
+                    'data-trigger' => 'click',
+                    'data-content' => '<div style="width:250px;">'.Html::dropDownList('gds', null, ['S' => 'Sabre'], ['class' => 'form-control','id' => 'gds-selector']).Html::button('Search', [
+                        'class' => 'btn btn-success',
+                        'style' => 'margin-top:10px;',
+                        'id' => 'quick-search-quotes-btn',
+                        'data-url' => Url::to(['quote/get-online-quotes', 'leadId' => $leadForm->getLead()->id]),
+                    ]).'</div>',
                 ]);
             }
 
@@ -480,3 +520,33 @@ $this->registerJs($js);
     <?php \yii\widgets\ActiveForm::end() ?>
 </div>
 <!--endregion-->
+
+<?php Modal::begin(['id' => 'search-results__modal',
+    'header' => '<h2>Search results</h2>',
+    'size' => Modal::SIZE_LARGE
+])?>
+<?php Modal::end()?>
+
+<?php Modal::begin(['id' => 'flight-details__modal',
+    'header' => '<h2></h2>',
+    'size' => Modal::SIZE_LARGE,
+])?>
+<?php Modal::end()?>
+
+<?php Modal::begin(['id' => 'search-result-quote__modal',
+    'header' => '<h2>Add quote</h2>',
+    'size' => Modal::SIZE_LARGE,
+])?>
+<?php Modal::end()?>
+<?php Modal::begin(['id' => 'preview-send-quotes',
+    'header' => '<h2>Preview email</h2>',
+    'size' => Modal::SIZE_LARGE,
+])?>
+<?php Modal::end()?>
+<?php $this->registerCssFile('//cdnjs.cloudflare.com/ajax/libs/noUiSlider/11.1.0/nouislider.min.css',[
+    'depends' => [\yii\bootstrap\BootstrapAsset::className()],
+]);?>
+<?php $this->registerJsFile('//cdnjs.cloudflare.com/ajax/libs/bootstrap-modal/2.2.6/js/bootstrap-modal.min.js', ['depends' => [yii\web\JqueryAsset::className()]])?>
+<?php $this->registerJsFile('//cdnjs.cloudflare.com/ajax/libs/bootstrap-modal/2.2.6/js/bootstrap-modalmanager.min.js', ['depends' => [yii\web\JqueryAsset::className()]])?>
+<?php $this->registerJsFile('//cdnjs.cloudflare.com/ajax/libs/noUiSlider/11.1.0/nouislider.min.js', ['depends' => [yii\web\JqueryAsset::className()]])?>
+<?php $this->registerJsFile('/js/search-result.js', ['depends' => [yii\web\JqueryAsset::className()]])?>

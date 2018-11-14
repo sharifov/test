@@ -62,7 +62,7 @@ class SyncController extends Controller
         $result = BackOffice::sendRequest('default/airports');
         if (isset($result['data'])) {
             foreach ($result['data'] as $airportId => $airportAttr) {
-                $airport = Airport::findOne(['id' => $airportId]);
+                $airport = Airport::findOne($airportAttr['iata']);
                 if ($airport === null) {
                     $airport = new Airport();
                 }
@@ -195,6 +195,7 @@ class SyncController extends Controller
         echo $query . PHP_EOL;
 
         $result = BackOffice::sendRequest('old/leads' . $query);
+        var_dump($result);
 
         var_dump($result['sql']);
         if (isset($result['errors'])) {
@@ -342,6 +343,8 @@ class SyncController extends Controller
                         $quote->attributes = $item;
                         $quote->lead_id = $lead->id;
                         $quote->save();
+                        $quote->createQuoteTrips();
+
                         if (!$quote->save(false)) {
                             echo 'LEAD: ' . $quote->lead_id . PHP_EOL;
                             var_dump($quote->getErrors());

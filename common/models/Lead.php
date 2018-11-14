@@ -2259,7 +2259,28 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
 
         return '-';
     }
+    /**
+     * @param $params
+     * @return ActiveDataProvider
+     */
+    public function getQuotesProvider($params)
+    {
+        $query = Quote::find()->where(['lead_id' => $this->id]);
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+            'sort'=> ['defaultOrder' => ['created' => SORT_DESC]],
+            'pagination' => [
+                'pageSize' => 30,
+            ],
+        ]);
 
+        $this->load($params);
 
+        if (!$this->validate()) {
+            return $dataProvider;
+        }
+
+        return $dataProvider;
+    }
 
 }
