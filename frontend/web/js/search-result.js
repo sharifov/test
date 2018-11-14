@@ -170,8 +170,14 @@ SearchResult = function(props) {
 		                break;
                     case 'duration':
                     	$(selector).each(function(idx){
-                    		var durations = $(this).data('duration');
                     		var obj = $(this);
+                    		var duration = $(this).data('totalduration');
+                    		if(duration <= filterList[filter]){
+	    			 			$(obj).removeClass('hide');
+		    			 		$(obj).addClass('filtered');
+		    			 		filterApplied = true;
+	    			 		}
+                    		/*var durations = $(this).data('duration');
 
 		    			 	durations.forEach(function(duration){
 		    			 		if(duration <= filterList[filter]){
@@ -180,7 +186,8 @@ SearchResult = function(props) {
 			    			 		filterApplied = true;
 			    			 		return;
 		    			 		}
-		    			 	});
+		    			 	});*/
+
 		    		 	});
                         break;
 	    		}

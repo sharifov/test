@@ -10,10 +10,11 @@ use yii\bootstrap\Html;
  */
 
 ?>
-<?php $totalDuration = []; $stops = [];
+<?php $totalDuration = []; $stops = []; $totalDurationSum = 0;
 foreach ($result['trips'] as $trip){
     if(isset($trip['duration'])){
         $totalDuration[] = $trip['duration'];
+        $totalDurationSum += $trip['duration'];
     }
     $stopCnt = count($trip['segments']) - 1;
     foreach ($trip['segments'] as $segment){
@@ -25,7 +26,7 @@ foreach ($result['trips'] as $trip){
 }
 ?>
 <div class="quote search-result__quote" data-price="<?= $result['prices']['totalPrice']?>"
-data-durationmax="<?= max($totalDuration)?>" data-duration="<?= json_encode($totalDuration)?>"
+data-durationmax="<?= max($totalDuration)?>" data-duration="<?= json_encode($totalDuration)?>" data-totalduration="<?= $totalDurationSum?>"
 data-stop="<?= json_encode($stops)?>"
 data-airline="<?= $result['validatingCarrier']?>">
 	<div class="quote__heading">
