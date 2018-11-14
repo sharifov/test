@@ -84,7 +84,7 @@ class QuoteController extends FController
                 if(!$result){
                     $result = SearchService::getOnlineQuotes($lead, $attr['gds']);
                     if($result) {
-                        Yii::$app->cache->set($keyCache, $result, 30000);
+                        Yii::$app->cache->set($keyCache, $result, 300);
                     }
                 }
 

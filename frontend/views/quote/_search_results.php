@@ -65,7 +65,7 @@ $js = <<<JS
 JS;
 $this->registerJs($js);
 ?>
-<?php if($result || (isset($result['count']) && $result['count'] > 0)):?>
+<?php if($result && (isset($result['count']) && $result['count'] > 0)):?>
 <?php
 $minPrice = $result['results'][0]['prices']['totalPrice'];
 $maxPrice = end($result['results'])['prices']['totalPrice'];
