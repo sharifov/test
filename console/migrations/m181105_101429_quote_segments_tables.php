@@ -20,7 +20,7 @@ class m181105_101429_quote_segments_tables extends Migration
         $this->alterColumn('{{%quotes}}', 'trip_type', $this->string(2));
         $this->alterColumn('{{%quotes}}', 'main_airline_code', $this->string(2));
         $this->alterColumn('{{%quotes}}', 'fare_type', $this->string(20));
-        $this->alterColumn('{{%quotes}}', 'pcc', $this->string(20));
+        $this->alterColumn('{{%quotes}}', 'pcc', $this->string(30));
 
         $this->createTable('{{%quote_trip}}', [
             'qt_id' => $this->primaryKey(),
