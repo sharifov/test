@@ -14,6 +14,10 @@ use Yii;
 use yii\web\BadRequestHttpException;
 use yii\web\NotFoundHttpException;
 use yii\web\UnprocessableEntityHttpException;
+use common\models\QuoteSegment;
+use common\models\QuoteTrip;
+use common\models\QuoteSegmentBaggage;
+use common\models\QuoteSegmentBaggageCharge;
 
 
 class QuoteController extends ApiBaseController
@@ -306,6 +310,49 @@ class QuoteController extends ApiBaseController
             'errors' => []
         ];
 
+        if(isset($quoteAttributes['baggage']) && !empty($quoteAttributes['baggage'])){
+            foreach ($quoteAttributes['baggage'] as $baggageAttr){
+                $segmentKey = $baggageAttr['segment'];
+                $origin = substr($segmentKey, 0, 3);
+                $destination = substr($segmentKey, 2, 3);
+                $segments = QuoteSegment::find()->innerJoin(QuoteTrip::tableName(),'qs_trip_id = qt_id')
+                ->andWhere(['qt_quote_id' =>  $model->id])
+                ->andWhere(['or',
+                    ['qs_departure_airport_code'=>$origin],
+                    ['qs_arrival_airport_code'=>$destination]
+                ])
+                ->all();
+                if(!empty($segments)){
+                    if(isset($baggageAttr['free_baggage']) && isset($baggageAttr['free_baggage']['piece'])){
+                        foreach ($segments as $segment){
+                            $baggage = new QuoteSegmentBaggage();
+                            $baggage->qsb_allow_pieces = $baggageAttr['free_baggage']['piece'];
+                            $baggage->qsb_segment_id = $segment->qs_id;
+                            if(isset($baggageAttr['free_baggage']['weight'])){
+                                $baggage->qsb_allow_max_weight = $baggageAttr['free_baggage']['weight'];
+                            }
+                            $baggage->save(false);
+                        }
+                    }
+                    if(isset($baggageAttr['paid_baggage']) && !empty($baggageAttr['paid_baggage'])){
+                        foreach ($baggageAttr['paid_baggage'] as $paidBaggageAttr){
+                            $baggage = new QuoteSegmentBaggageCharge();
+                            $baggage->qsbc_segment_id = $segment->qs_id;
+                            $baggage->qsbc_price = str_replace('USD', '', $paidBaggageAttr['price']);
+                            if(isset($paidBaggageAttr['piece'])){
+                                $baggage->qsbc_first_piece = $paidBaggageAttr['piece'];
+                                $baggage->qsbc_last_piece = $paidBaggageAttr['piece'];
+                            }
+                            if(isset($paidBaggageAttr['weight'])){
+                                $baggage->qsbc_max_weight = $paidBaggageAttr['weight'];
+                            }
+                            $baggage->save(false);
+                        }
+                    }
+                }
+            }
+        }
+
         if (isset($quoteAttributes['needSync']) && $quoteAttributes['needSync'] == true) {
             $data = $model->lead->getLeadInformationForExpert();
             $result = BackOffice::sendRequest('lead/update-lead', 'POST', json_encode($data));
@@ -454,6 +501,49 @@ class QuoteController extends ApiBaseController
             $model->employee_id = null;
             $model->save();
             $model->createQuoteTrips();
+
+            if(isset($quoteAttributes['baggage']) && !empty($quoteAttributes['baggage'])){
+                foreach ($quoteAttributes['baggage'] as $baggageAttr){
+                    $segmentKey = $baggageAttr['segment'];
+                    $origin = substr($segmentKey, 0, 3);
+                    $destination = substr($segmentKey, 2, 3);
+                    $segments = QuoteSegment::find()->innerJoin(QuoteTrip::tableName(),'qs_trip_id = qt_id')
+                                ->andWhere(['qt_quote_id' =>  $model->id])
+                                ->andWhere(['or',
+                                    ['qs_departure_airport_code'=>$origin],
+                                    ['qs_arrival_airport_code'=>$destination]
+                                ])
+                                ->all();
+                    if(!empty($segments)){
+                        if(isset($baggageAttr['free_baggage']) && isset($baggageAttr['free_baggage']['piece'])){
+                            foreach ($segments as $segment){
+                                $baggage = new QuoteSegmentBaggage();
+                                $baggage->qsb_allow_pieces = $baggageAttr['free_baggage']['piece'];
+                                $baggage->qsb_segment_id = $segment->qs_id;
+                                if(isset($baggageAttr['free_baggage']['weight'])){
+                                    $baggage->qsb_allow_max_weight = $baggageAttr['free_baggage']['weight'];
+                                }
+                                $baggage->save(false);
+                            }
+                        }
+                        if(isset($baggageAttr['paid_baggage']) && !empty($baggageAttr['paid_baggage'])){
+                            foreach ($baggageAttr['paid_baggage'] as $paidBaggageAttr){
+                                $baggage = new QuoteSegmentBaggageCharge();
+                                $baggage->qsbc_segment_id = $segment->qs_id;
+                                $baggage->qsbc_price = str_replace('USD', '', $paidBaggageAttr['price']);
+                                if(isset($paidBaggageAttr['piece'])){
+                                    $baggage->qsbc_first_piece = $paidBaggageAttr['piece'];
+                                    $baggage->qsbc_last_piece = $paidBaggageAttr['piece'];
+                                }
+                                if(isset($paidBaggageAttr['weight'])){
+                                    $baggage->qsbc_max_weight = $paidBaggageAttr['weight'];
+                                }
+                                $baggage->save(false);
+                            }
+                        }
+                    }
+                }
+            }
 
             $quotePricesAttributes = Yii::$app->request->post((new QuotePrice())->formName());
             if (!empty($quotePricesAttributes)) {

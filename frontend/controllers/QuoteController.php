@@ -28,6 +28,7 @@ use yii\helpers\VarDumper;
 use common\models\QuoteSegment;
 use common\models\QuoteSegmentStop;
 use common\models\QuoteSegmentBaggage;
+use common\models\QuoteSegmentBaggageCharge;
 
 /**
  * Quotes controller
@@ -248,6 +249,37 @@ class QuoteController extends FController
                                                             return $result;
                                                         }
                                                         $segment->link('quoteSegmentBaggages', $baggage);
+
+                                                        if(isset($baggageEntry['charge']) && !empty($baggageEntry['charge'])){
+                                                            foreach ($baggageEntry['charge'] as $baggageEntryCharge){
+                                                                $baggageCharge = new QuoteSegmentBaggageCharge();
+                                                                $baggageCharge->qsbc_pax_code = $paxCode;
+                                                                if(isset($baggageEntryCharge['price'])){
+                                                                    $baggageCharge->qsbc_price = $baggageEntryCharge['price'];
+                                                                }
+                                                                if(isset($baggageEntryCharge['currency'])){
+                                                                    $baggageCharge->qsbc_currency = $baggageEntryCharge['currency'];
+                                                                }
+                                                                if(isset($baggageEntryCharge['firstPiece'])){
+                                                                    $baggageCharge->qsbc_first_piece = $baggageEntryCharge['firstPiece'];
+                                                                }
+                                                                if(isset($baggageEntryCharge['lastPiece'])){
+                                                                    $baggageCharge->qsbc_last_piece = $baggageEntryCharge['lastPiece'];
+                                                                }
+                                                                if(isset($baggageEntryCharge['maxWeight'])){
+                                                                    $baggageCharge->qsbc_max_weight = $baggageEntryCharge['maxWeight'];
+                                                                }
+                                                                if(isset($baggageEntryCharge['maxSize'])){
+                                                                    $baggageCharge->qsbc_max_size = $baggageEntryCharge['maxSize'];
+                                                                }
+                                                                if(!$baggageCharge->validate()){
+                                                                    Yii::error(VarDumper::dumpAsString($entry)."\n".VarDumper::dumpAsString($baggageCharge->getErrors()), 'QuoteController:create-quote-from-search:baggage_charge:save');
+                                                                    $transaction->rollBack();
+                                                                    return $result;
+                                                                }
+                                                                $segment->link('quoteSegmentBaggageCharges', $baggageCharge);
+                                                            }
+                                                        }
                                                     }
                                                 }
                                             }
@@ -741,7 +773,7 @@ class QuoteController extends FController
 
                 $selling = 0;
 
-                $quotePrices = $currentQuote->getQuotePrices()->all();
+                $quotePrices = $currentQuote->quotePrices;
                 foreach ($quotePrices as $price){
                     $newPrice = new QuotePrice();
                     $newPrice->attributes = $price->attributes;
@@ -752,7 +784,7 @@ class QuoteController extends FController
                         $errors = array_merge($errors, $newPrice->getErrors());
                     }
                 }
-                $quoteTrips = $currentQuote->getQuoteTrips()->all();
+                $quoteTrips = $currentQuote->quoteTrips;
                 if(!empty($quoteTrips)){
                     foreach ($quoteTrips as $trip){
                         $newTrip = new QuoteTrip();
@@ -760,7 +792,7 @@ class QuoteController extends FController
                         $newTrip->qt_quote_id = $quote->id;
                         $newTrip->save(false);
 
-                        $segments = $trip->getQuoteSegments()->all();
+                        $segments = $trip->quoteSegments;
                         if(!empty($segments)){
                             foreach ($segments as $segment){
                                 $newSegment = new QuoteSegment();
@@ -768,7 +800,7 @@ class QuoteController extends FController
                                 $newSegment->qs_trip_id = $newTrip->qt_id;
                                 $newSegment->save(false);
 
-                                $stops = $segment->getQuoteSegmentStops()->all();
+                                $stops = $segment->quoteSegmentStops;
                                 if(!empty($stops)){
                                     foreach ($stops as $stop){
                                         $newStop = new QuoteSegmentStop();
@@ -778,12 +810,22 @@ class QuoteController extends FController
                                     }
                                 }
 
-                                $baggages = $segment->getQuoteSegmentBaggages()->all();
+                                $baggages = $segment->quoteSegmentBaggages;
                                 if(!empty($baggages)){
                                     foreach ($baggages as $baggage){
                                         $newBaggage = new QuoteSegmentBaggage();
                                         $newBaggage->attributes = $baggage->attributes;
                                         $newBaggage->qsb_segment_id = $newSegment->qs_id;
+                                        $newBaggage->save(false);
+                                    }
+                                }
+
+                                $baggageCharges = $segment->quoteSegmentBaggageCharges;
+                                if(!empty($baggageCharges)){
+                                    foreach ($baggageCharges as $baggage){
+                                        $newBaggage = new QuoteSegmentBaggageCharge();
+                                        $newBaggage->attributes = $baggage->attributes;
+                                        $newBaggage->qsbc_segment_id = $newSegment->qs_id;
                                         $newBaggage->save(false);
                                     }
                                 }

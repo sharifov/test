@@ -35,6 +35,7 @@ use Yii;
  * @property QuoteTrip $trip
  * @property Employee $updatedUser
  * @property QuoteSegmentBaggage[] $quoteSegmentBaggages
+ * @property QuoteSegmentBaggageCharge[] $quoteSegmentBaggageCharges
  * @property QuoteSegmentStop[] $quoteSegmentStops
  * @property Airport $arrivalAirport
  * @property Airport $departureAirport
@@ -201,6 +202,14 @@ class QuoteSegment extends \yii\db\ActiveRecord
     public function getQuoteSegmentBaggages()
     {
         return $this->hasMany(QuoteSegmentBaggage::className(), ['qsb_segment_id' => 'qs_id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getQuoteSegmentBaggageCharges()
+    {
+        return $this->hasMany(QuoteSegmentBaggageCharge::className(), ['qsbc_segment_id' => 'qs_id']);
     }
 
     /**

@@ -241,15 +241,20 @@ data-airline="<?= $result['validatingCarrier']?>">
                                 <div class="segment__note">
                                 	<?php if($segment['operatingAirline'] != $segment['marketingAirline']):?>Operated by <?= (!isset($airlines[$segment['operatingAirline']]))?:$airlines[$segment['operatingAirline']];?>.<?php endif;?>
                                 	<?php if(isset($segment['baggage'])):?>
-                                    	<span class="badge badge-light"><i class="fa fa-suitcase"></i>&nbsp;
                                     	<?php foreach ($segment['baggage'] as $baggage):?>
+                                        	<span class="badge badge-primary"><i class="fa fa-suitcase"></i>&nbsp;
                                         	<?php if(isset($baggage['allowPieces'])):?>
                                         		<?= \Yii::t('search', '{n, plural, =0{no baggage} one{# piece} other{# pieces}}', ['n' => $baggage['allowPieces']]);?>
                                         	<?php elseif(isset($baggage['allowWeight'])):?>
                                         		<?= $baggage['allowWeight'].$baggage['allowUnit']?>
                                         	<?php endif;?>
+                                    		</span>
+                                    		<?php if(isset($baggage['charge'])):?>
+                                    		<?php foreach ($baggage['charge'] as $charge):?>
+											<span title="<?= (isset($charge['maxSize'])?$charge['maxSize']:'').' '.(isset($charge['maxWeight'])?$charge['maxWeight']:'')?>" class="badge badge-light"><i class="fa fa-plus"></i>&nbsp;<i class="fa fa-suitcase"></i>&nbsp;<?= $charge['price']?>$</span>
+                                    		<?php endforeach;?>
+                                    		<?php endif;?>
                                     	<?php break; endforeach;?>
-                                    	</span>
                                 	<?php endif;?>
                                 	<?php if(isset($segment['meal'])):?><span class="badge badge-light" title="<?= $segment['meal']?>"><i class="fa fa-cutlery"></i></span><?php endif;?>
                                 	<?php if(isset($segment['stop']) && $segment['stop'] > 0):?>

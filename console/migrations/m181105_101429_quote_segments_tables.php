@@ -14,23 +14,23 @@ class m181105_101429_quote_segments_tables extends Migration
      */
     public function safeUp()
     {
-        $this->addColumn('quotes', 'last_ticket_date', $this->dateTime());
-        $this->alterColumn('quotes', 'gds', $this->string(1));
-        $this->alterColumn('quotes', 'cabin', $this->string(20));
-        $this->alterColumn('quotes', 'trip_type', $this->string(2));
-        $this->alterColumn('quotes', 'main_airline_code', $this->string(2));
-        $this->alterColumn('quotes', 'fare_type', $this->string(20));
-        $this->alterColumn('quotes', 'pcc', $this->string(20));
+        $this->addColumn('{{%quotes}}', 'last_ticket_date', $this->dateTime());
+        $this->alterColumn('{{%quotes}}', 'gds', $this->string(1));
+        $this->alterColumn('{{%quotes}}', 'cabin', $this->string(20));
+        $this->alterColumn('{{%quotes}}', 'trip_type', $this->string(2));
+        $this->alterColumn('{{%quotes}}', 'main_airline_code', $this->string(2));
+        $this->alterColumn('{{%quotes}}', 'fare_type', $this->string(20));
+        $this->alterColumn('{{%quotes}}', 'pcc', $this->string(20));
 
-        $this->createTable('quote_trip', [
+        $this->createTable('{{%quote_trip}}', [
             'qt_id' => $this->primaryKey(),
             'qt_duration' => $this->integer(),
             'qt_key' => $this->string(255),
             'qt_quote_id' => $this->integer()
         ]);
-        $this->addForeignKey('fk_quote_trip_quotes', 'quote_trip', 'qt_quote_id', 'quotes', 'id', 'CASCADE', 'CASCADE');
+        $this->addForeignKey('fk_quote_trip_quotes', '{{%quote_trip}}', 'qt_quote_id', 'quotes', 'id', 'CASCADE', 'CASCADE');
 
-        $this->createTable('quote_segment', [
+        $this->createTable('{{%quote_segment}}', [
             'qs_id' => $this->primaryKey(),
             'qs_departure_time' => $this->dateTime(),
             'qs_arrival_time' => $this->dateTime(),
@@ -58,10 +58,10 @@ class m181105_101429_quote_segments_tables extends Migration
             'qs_updated_dt' => $this->dateTime(),
             'qs_updated_user_id' => $this->integer()
         ]);
-        $this->addForeignKey('fk_quote_segment_trip', 'quote_segment', 'qs_trip_id', 'quote_trip', 'qt_id', 'CASCADE', 'CASCADE');
-        $this->addForeignKey('fk_updated_user', 'quote_segment', 'qs_updated_user_id', '{{%employees}}', 'id', 'CASCADE', 'CASCADE');
+        $this->addForeignKey('fk_quote_segment_trip', '{{%quote_segment}}', 'qs_trip_id', 'quote_trip', 'qt_id', 'CASCADE', 'CASCADE');
+        $this->addForeignKey('fk_updated_user', '{{%quote_segment}}', 'qs_updated_user_id', '{{%employees}}', 'id', 'CASCADE', 'CASCADE');
 
-        $this->createTable('quote_segment_baggage', [
+        $this->createTable('{{%quote_segment_baggage}}', [
             'qsb_id' => $this->primaryKey(),
             'qsb_pax_code' => $this->string(3),
             'qsb_segment_id' => $this->integer(),
@@ -77,10 +77,10 @@ class m181105_101429_quote_segments_tables extends Migration
             'qsb_updated_user_id' => $this->integer()
         ]);
 
-        $this->addForeignKey('fk_segment_baggage_updated_user', 'quote_segment_baggage', 'qsb_updated_user_id', '{{%employees}}', 'id', 'CASCADE', 'CASCADE');
-        $this->addForeignKey('fk_quote_segment_baggage', 'quote_segment_baggage', 'qsb_segment_id', 'quote_segment', 'qs_id', 'CASCADE', 'CASCADE');
+        $this->addForeignKey('fk_segment_baggage_updated_user', '{{%quote_segment_baggage}}', 'qsb_updated_user_id', '{{%employees}}', 'id', 'CASCADE', 'CASCADE');
+        $this->addForeignKey('fk_quote_segment_baggage', '{{%quote_segment_baggage}}', 'qsb_segment_id', 'quote_segment', 'qs_id', 'CASCADE', 'CASCADE');
 
-        $this->createTable('quote_segment_stop', [
+        $this->createTable('{{%quote_segment_stop}}', [
             'qss_id' => $this->primaryKey(),
             'qss_location_code' => $this->string(3),
             'qss_departure_dt' => $this->dateTime(),
@@ -91,7 +91,7 @@ class m181105_101429_quote_segments_tables extends Migration
             'qss_segment_id' => $this->integer()
         ]);
 
-        $this->addForeignKey('fk_quote_segment_stops', 'quote_segment_stop', 'qss_segment_id', 'quote_segment', 'qs_id', 'CASCADE', 'CASCADE');
+        $this->addForeignKey('fk_quote_segment_stops', '{{%quote_segment_stop}}', 'qss_segment_id', 'quote_segment', 'qs_id', 'CASCADE', 'CASCADE');
     }
 
     /**
@@ -101,20 +101,20 @@ class m181105_101429_quote_segments_tables extends Migration
      */
     public function safeDown()
     {
-        $this->dropForeignKey('fk_quote_segment_stops', 'quote_segment_stop');
-        $this->dropTable('quote_segment_stop');
+        $this->dropForeignKey('fk_quote_segment_stops', '{{%quote_segment_stop}}');
+        $this->dropTable('{{%quote_segment_stop}}');
 
-        $this->dropForeignKey('fk_quote_segment_baggage', 'quote_segment_baggage');
-        $this->dropForeignKey('fk_segment_baggage_updated_user', 'quote_segment_baggage');
-        $this->dropTable('quote_segment_baggage');
+        $this->dropForeignKey('fk_quote_segment_baggage', '{{%quote_segment_baggage}}');
+        $this->dropForeignKey('fk_segment_baggage_updated_user', '{{%quote_segment_baggage}}');
+        $this->dropTable('{{%quote_segment_baggage}}');
 
-        $this->dropForeignKey('fk_updated_user', 'quote_segment');
-        $this->dropForeignKey('fk_quote_segment_trip', 'quote_segment');
-        $this->dropTable('quote_segment');
+        $this->dropForeignKey('fk_updated_user', '{{%quote_segment}}');
+        $this->dropForeignKey('fk_quote_segment_trip', '{{%quote_segment}}');
+        $this->dropTable('{{%quote_segment}}');
 
-        $this->dropForeignKey('fk_quote_trip_quotes', 'quote_trip');
-        $this->dropTable('quote_trip');
+        $this->dropForeignKey('fk_quote_trip_quotes', '{{%quote_trip}}');
+        $this->dropTable('{{%quote_trip}}');
 
-        $this->dropColumn('quotes', 'last_ticket_date');
+        $this->dropColumn('{{%quotes}}', 'last_ticket_date');
     }
 }
