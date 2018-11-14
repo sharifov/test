@@ -546,7 +546,7 @@ $this->registerJs($js);
 <?php $this->registerCssFile('//cdnjs.cloudflare.com/ajax/libs/noUiSlider/11.1.0/nouislider.min.css',[
     'depends' => [\yii\bootstrap\BootstrapAsset::className()],
 ]);?>
-<?php $this->registerJsFile('//cdnjs.cloudflare.com/ajax/libs/bootstrap-modal/2.2.6/js/bootstrap-modal.min.js', ['depends' => [yii\web\JqueryAsset::className()]])?>
-<?php $this->registerJsFile('//cdnjs.cloudflare.com/ajax/libs/bootstrap-modal/2.2.6/js/bootstrap-modalmanager.min.js', ['depends' => [yii\web\JqueryAsset::className()]])?>
+<?php $this->registerJsFile('/js/bootstrap-modal.min.js', ['depends' => [yii\web\JqueryAsset::className()]])?>
+<?php $this->registerJsFile('/js/bootstrap-modalmanager.min.js', ['depends' => [yii\web\JqueryAsset::className()]])?>
 <?php $this->registerJsFile('//cdnjs.cloudflare.com/ajax/libs/noUiSlider/11.1.0/nouislider.min.js', ['depends' => [yii\web\JqueryAsset::className()]])?>
 <?php $this->registerJsFile('/js/search-result.js', ['depends' => [yii\web\JqueryAsset::className()]])?>
