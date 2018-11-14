@@ -203,7 +203,9 @@ $maxPrice = end($result['results'])['prices']['totalPrice'];
 <?php foreach ($result['results'] as $key => $resultItem):?>
 	<?= $this->render('_search_result_item', ['resultKey' => $key,'result' => $resultItem,'locations' => $locations,'airlines' => $airlines]);?>
 <?php endforeach;?>
-<?php else:?>
-	<p>No search results</p>
-<?php endif;?>
 </div>
+<?php else:?>
+<div class="search-results__wrapper">
+	<p>No search results</p>
+</div>
+<?php endif;?>

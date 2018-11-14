@@ -331,6 +331,9 @@ class QuoteController extends ApiBaseController
                             if(isset($baggageAttr['free_baggage']['weight'])){
                                 $baggage->qsb_allow_max_weight = $baggageAttr['free_baggage']['weight'];
                             }
+                            if(isset($baggageAttr['free_baggage']['height'])){
+                                $baggage->qsbc_max_size = $baggageAttr['free_baggage']['height'];
+                            }
                             $baggage->save(false);
                         }
                     }
@@ -345,6 +348,9 @@ class QuoteController extends ApiBaseController
                             }
                             if(isset($paidBaggageAttr['weight'])){
                                 $baggage->qsbc_max_weight = $paidBaggageAttr['weight'];
+                            }
+                            if(isset($paidBaggageAttr['height'])){
+                                $baggage->qsbc_max_size = $paidBaggageAttr['height'];
                             }
                             $baggage->save(false);
                         }
@@ -523,6 +529,9 @@ class QuoteController extends ApiBaseController
                                 if(isset($baggageAttr['free_baggage']['weight'])){
                                     $baggage->qsb_allow_max_weight = $baggageAttr['free_baggage']['weight'];
                                 }
+                                if(isset($baggageAttr['free_baggage']['height'])){
+                                    $baggage->qsbc_max_size = $baggageAttr['free_baggage']['height'];
+                                }
                                 $baggage->save(false);
                             }
                         }
@@ -537,6 +546,9 @@ class QuoteController extends ApiBaseController
                                 }
                                 if(isset($paidBaggageAttr['weight'])){
                                     $baggage->qsbc_max_weight = $paidBaggageAttr['weight'];
+                                }
+                                if(isset($paidBaggageAttr['height'])){
+                                    $baggage->qsbc_max_size = $paidBaggageAttr['height'];
                                 }
                                 $baggage->save(false);
                             }

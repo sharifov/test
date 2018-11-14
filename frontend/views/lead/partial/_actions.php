@@ -467,9 +467,24 @@ $this->registerJs($js);
                 ]);
 
                 echo Html::button('<span class="btn-icon"><i class="fa fa-plus"></i></span><span class="btn-text">Quick Search Quote</span>', [
-                    'class' => 'btn btn-success btn-with-icon',
+                    'class' => 'btn btn-warning btn-with-icon',
                     'id' => 'quick-search-quotes',
                     'data-url' => Url::to(['quote/get-online-quotes', 'leadId' => $leadForm->getLead()->id]),
+                ]);
+
+                echo Html::button('<span class="btn-icon"><i class="fa fa-plus"></i></span><span class="btn-text">Quick Search Quote (2)</span>', [
+                    'class' => 'btn btn-success btn-with-icon popover-class',
+                    'data-toggle' => 'popover',
+                    'id' => 'popover-quick-search',
+                    'data-html' => 'true',
+                    'data-title' => 'Choose GDS',
+                    'data-trigger' => 'click',
+                    'data-content' => '<div style="width:250px;">'.Html::dropDownList('gds', null, ['S' => 'Sabre'], ['class' => 'form-control','id' => 'gds-selector']).Html::button('Search', [
+                        'class' => 'btn btn-success',
+                        'style' => 'margin-top:10px;',
+                        'id' => 'quick-search-quotes-btn',
+                        'data-url' => Url::to(['quote/get-online-quotes', 'leadId' => $leadForm->getLead()->id]),
+                    ]).'</div>',
                 ]);
             }
         }?>
