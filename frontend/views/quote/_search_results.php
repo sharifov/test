@@ -9,7 +9,7 @@ use yii\helpers\Url;
  * @var $leadId int
  * @var $gds string
  */
-
+if($result && (isset($result['count']) && $result['count'] > 0)):
 $url = Url::to(['quote/create-quote-from-search', 'leadId' => $leadId]);
 $js = <<<JS
     $(document).on('click','.search_details__btn', function (e) {
@@ -65,7 +65,6 @@ $js = <<<JS
 JS;
 $this->registerJs($js);
 ?>
-<?php if($result && (isset($result['count']) && $result['count'] > 0)):?>
 <?php
 $minPrice = $result['results'][0]['prices']['totalPrice'];
 $maxPrice = end($result['results'])['prices']['totalPrice'];
