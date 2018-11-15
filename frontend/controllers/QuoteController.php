@@ -78,7 +78,7 @@ class QuoteController extends FController
             ];
             $attr = Yii::$app->request->post();
             if(isset($attr['gds']) && $lead !== null){
-                $keyCache = sprintf('quick-search-new-%d-%d-%s', $lead->id, Yii::$app->user->id, $attr['gds']);
+                $keyCache = sprintf('quick-search-new-%d-%d-%s-%s', $lead->id, Yii::$app->user->id, $attr['gds'], $lead->adults . $lead->children . $lead->infants);
                 $result = Yii::$app->cache->get($keyCache);
 
                 if(!$result){
@@ -114,7 +114,7 @@ class QuoteController extends FController
             $attr = Yii::$app->request->post();
 
             if(isset($attr['gds']) && isset($attr['key']) && $lead !== null){
-                $keyCache = sprintf('quick-search-new-%d-%d-%s', $lead->id, Yii::$app->user->id, $attr['gds']);
+                $keyCache = sprintf('quick-search-new-%d-%d-%s-%s', $lead->id, Yii::$app->user->id, $attr['gds'], $lead->adults . $lead->children . $lead->infants);
                 $resultSearch = Yii::$app->cache->get($keyCache);
 
                 if($resultSearch !== false){
@@ -325,6 +325,8 @@ class QuoteController extends FController
                     }
 
 
+                }else{
+                    $result['errors'][] = 'Search result not found';
                 }
             }
 

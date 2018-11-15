@@ -71,7 +71,8 @@ class SearchService
             'gds' => $gdsCode,
             'cid' => 'SAL101',
             'adt' => $lead->adults,
-            'chd' => $lead->children
+            'chd' => $lead->children,
+            'inf' => $lead->infants,
         ];
 
         foreach ($lead->leadFlightSegments as $flightSegment) {
