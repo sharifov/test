@@ -332,7 +332,7 @@ class QuoteController extends ApiBaseController
                                 $baggage->qsb_allow_max_weight = substr($baggageAttr['free_baggage']['weight'],0,100);
                             }
                             if(isset($baggageAttr['free_baggage']['height'])){
-                                $baggage->qsbc_max_size = substr($baggageAttr['free_baggage']['height'],0,100);
+                                $baggage->qsb_max_size = substr($baggageAttr['free_baggage']['height'],0,100);
                             }
                             $baggage->save(false);
                         }
@@ -532,7 +532,7 @@ class QuoteController extends ApiBaseController
                                     $baggage->qsb_allow_max_weight = substr($baggageAttr['free_baggage']['weight'], 0, 100);
                                 }
                                 if(isset($baggageAttr['free_baggage']['height'])){
-                                    $baggage->qsbc_max_size = substr($baggageAttr['free_baggage']['height'], 0, 100);
+                                    $baggage->qsb_max_size = substr($baggageAttr['free_baggage']['height'], 0, 100);
                                 }
                                 $baggage->save(false);
                             }
