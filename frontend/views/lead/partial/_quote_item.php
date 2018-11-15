@@ -12,7 +12,6 @@ use common\models\Airline;
 use common\components\SearchService;
 use yii\bootstrap\Html;
 use yii\helpers\Url;
-use yii\helpers\VarDumper;
 use common\models\QuotePrice;
 ?>
 <div class="quote">
@@ -67,7 +66,7 @@ use common\models\QuotePrice;
                                     </div>
                                 </div>
                                 <div class="segment__note">
-                                	<?php if($segment->qs_operating_airline != $segment->qs_marketing_airline):?>Operated by <?php $airline = Airline::findIdentity($segment->qs_operating_airline);if($airline) echo $airline->name; else $segment->qs_operating_airline?>.<?php endif;?>
+                                	<?php if($segment->qs_operating_airline != $segment->qs_marketing_airline):?>Operated by <?php $airline = Airline::findIdentity($segment->qs_operating_airline);if($airline) echo $airline->name; else echo $segment->qs_operating_airline?>.<?php endif;?>
                                 	<?php if(!empty($segment->quoteSegmentBaggages)):?>
                                     	<span class="badge badge-primary"><i class="fa fa-suitcase"></i>&nbsp;
                                     	<?php foreach ($segment->quoteSegmentBaggages as $baggage):?>

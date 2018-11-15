@@ -740,7 +740,7 @@ class Quote extends \yii\db\ActiveRecord
                             $operatedBy = $airline->iata;
                         }
                     }
-                    $segments[$idx]['operatingAirline'] = $operatedBy;
+                    $segments[$idx]['operatingAirline'] = str_replace('/', '', $operatedBy);
                 }
             }
 
@@ -772,7 +772,7 @@ class Quote extends \yii\db\ActiveRecord
                         $operatedBy = $airline->iata;
                     }
                 }
-                $operationAirlineCode = $operatedBy;
+                $operationAirlineCode = str_replace('/', '', $operatedBy);
             }
 
             $rowExpl = explode($carrier, $row);
