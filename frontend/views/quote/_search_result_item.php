@@ -190,7 +190,8 @@ data-airline="<?= $result['validatingCarrier']?>">
        	<?= Html::button('<i class="fa fa-check"></i>&nbsp; <span>Select</span>', [
                  'class' => 'btn btn-success create_quote__btn',
 		         'data-title' => implode(', ',$tripsInfo),
-                'data-key' => $result['key'],
+           	    'data-key' => $result['key'],
+           	    'data-gds' => $result['gds'],
             ]) ?>
         </div>
 		<div class="trip">
@@ -284,6 +285,7 @@ data-airline="<?= $result['validatingCarrier']?>">
                  'class' => 'btn btn-success create_quote__btn',
 		         'data-title' => implode(', ',$tripsInfo),
                 'data-key' => $result['key'],
+                'data-gds' => $result['gds'],
             ]) ?>
 		</div>
 	</div>

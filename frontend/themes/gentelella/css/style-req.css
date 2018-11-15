@@ -1,4 +1,4 @@
-/*V 1.8*/
+/*V 1.9*/
 /*==== Colors ====*/
 /*Colors in layout*/
 /*==== Fonts ====*/
@@ -5010,3 +5010,8 @@ input[disabled] + .radio-tab__text {
   background-color: #fee;
 }
 .select2-dropdown{z-index:9999!important;}
+
+ .search-filters .filter .dropdown-menu{
+   width: 320px;
+   left: auto;
+}

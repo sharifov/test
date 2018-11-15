@@ -97,7 +97,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     $clientName = '-';
                 }
 
-                return $clientName;
+                return $clientName.'<br/>'.$model->getClientTime2();
             },
             'options' => [
                 'style' => 'width:160px'
@@ -112,23 +112,25 @@ $this->params['breadcrumbs'][] = $this->title;
             'format' => 'raw'
         ],*/
 
-        [
+       /*  [
             //'attribute' => 'client_id',
             'header' => 'Client time',
             'format' => 'raw',
             'value' => function(\common\models\Lead $model) {
-                return $model->getClientTime2();
+                return ;
             },
-            'options' => ['style' => 'width:160px'],
+            'options' => ['style' => 'width:100px'],
             //'filter' => \common\models\Employee::getList()
-        ],
+        ], */
 
         [
             'attribute' => 'Request Details',
             'content' => function (\common\models\Lead $model) {
                 $content = '';
                 $content .= $model->getFlightDetails();
-                $content .= ' (<i class="fa fa-male"></i> x' . ($model->adults .'/'. $model->children .'/'. $model->infants) . ')<br/>';
+                $pax = '<span title="adult"><i class="fa fa-male"></i> '. $model->adults .'</span> / <span title="child"><i class="fa fa-child"></i> ' . $model->children . '</span> / <span title="infant"><i class="fa fa-info"></i> ' . $model->infants.'</span>';
+
+                $content .= '<br/>'.$pax.'<br/>';
 
                 $content .= sprintf('<strong>Cabin:</strong> %s', Lead::getCabin($model['cabin']));
 
@@ -165,16 +167,16 @@ $this->params['breadcrumbs'][] = $this->title;
             'attribute' => 'reason',
             'label' => 'Reason',
             'contentOptions' => [
-                'style' => 'max-width: 250px;'
+                'style' => 'text-align:center;'
             ],
             'value' => function (\common\models\Lead $model) {
-                return $model->getLastReason();
+                return '<span style="cursor:help;" class="label label-warning" title="'.Html::encode($model->getLastReason()).'">&nbsp;<i class="fa fa-info-circle"></i>&nbsp;</span>';
             },
             'format' => 'raw'
         ],
 
         [
-            'header' => 'Answered',
+            'header' => 'Answ.',
             'attribute' => 'l_answered',
             'value' => function (\common\models\Lead $model) {
                 return $model->l_answered ? '<span class="label label-success">Yes</span>' : '<span class="label label-danger">No</span>';
@@ -193,7 +195,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 return $model->l_grade;
             },
             'contentOptions' => [
-                'class' => 'text-center'
+                'class' => 'text-center',
             ],
             'visible' => ! $isAgent
         ],

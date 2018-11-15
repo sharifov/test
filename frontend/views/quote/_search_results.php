@@ -10,7 +10,6 @@ use yii\helpers\Url;
  * @var $gds string
  */
 if($result && (isset($result['count']) && $result['count'] > 0)):
-$url = Url::to(['quote/create-quote-from-search', 'leadId' => $leadId]);
 $js = <<<JS
     $(document).on('click','.search_details__btn', function (e) {
         e.preventDefault();
@@ -19,30 +18,6 @@ $js = <<<JS
         var target = $($(this).data('target')).html();
         modal.find('.modal-body').html(target);
         modal.modal('show');
-    });
-
-    $(document).on('click','.create_quote__btn', function (e) {
-        e.preventDefault();
-        var key = $(this).data('key');
-        $('#preloader').removeClass('hidden');
-        $.ajax({
-            url: '$url',
-            type: 'post',
-            data: {'key': key, 'gds': '$gds'},
-            success: function (data) {
-                $('#preloader').addClass('hidden');
-                if(data.status == true){
-                    $('#search-results__modal').modal('hide');
-                    $('#flight-details__modal').modal('hide');
-                    $.pjax.reload({container: '#quotes_list', async: false});
-                }else{
-                    alert('Some errors was happened during create quote. Please try again later.');
-                }
-            },
-            error: function (error) {
-                console.log('Error: ' + error);
-            }
-        });
     });
 
     $(document).on('change', '#sort_search', function(e) {

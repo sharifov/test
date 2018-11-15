@@ -180,7 +180,36 @@ JS;
     $this->registerJs($js);
 }
 
+
+$urlCreateQuoteFromSearch = Url::to(['quote/create-quote-from-search', 'leadId' => $leadForm->getLead()->id]);
+
 $js = <<<JS
+    $(document).on('click','.create_quote__btn', function (e) {
+        e.preventDefault();
+        var key = $(this).data('key');
+        var gds = $(this).data('gds');
+        $('#preloader').removeClass('hidden');
+        $.ajax({
+        url: '$urlCreateQuoteFromSearch',
+            type: 'post',
+            data: {'key': key, 'gds': gds},
+            success: function (data) {
+                $('#preloader').addClass('hidden');
+                if(data.status == true){
+                    $('#search-results__modal').modal('hide');
+                    $('#flight-details__modal').modal('hide');
+                    $(this).closest('.search-result__quote')
+                    $.pjax.reload({container: '#quotes_list', async: false});
+                }else{
+                    alert('Some errors was happened during create quote. Please try again later.');
+                }
+            },
+            error: function (error) {
+                console.log('Error: ' + error);
+            }
+        });
+    });
+
     /** -------- Popovers -------- **/
     $('#popover-link-add-note').popover({
         html: true,
