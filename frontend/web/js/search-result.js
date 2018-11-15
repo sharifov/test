@@ -149,15 +149,19 @@ SearchResult = function(props) {
                         $(selector).each(function(idx){
 	                        var stopsData = $(this).data('stop');
 	                		var obj = $(this);
+	                		var cnt = 0;
 
 	                		stopsData.forEach(function(stop){
 		    			 		if(stop <= stops){
-		    			 			$(obj).removeClass('hide');
-			    			 		$(obj).addClass('filtered');
-			    			 		filterApplied = true;
-			    			 		return;
+			    			 		cnt++;
 		    			 		}
 		    			 	});
+
+	                		if(stopsData.length == cnt){
+	                			$(obj).removeClass('hide');
+		    			 		$(obj).addClass('filtered');
+		    			 		filterApplied = true;
+	                		}
 		    		 	});
                         break;
 		    		case 'airline':
@@ -171,22 +175,28 @@ SearchResult = function(props) {
                     case 'duration':
                     	$(selector).each(function(idx){
                     		var obj = $(this);
-                    		var duration = $(this).data('totalduration');
+                    		/*var duration = $(this).data('totalduration');
                     		if(duration <= filterList[filter]){
 	    			 			$(obj).removeClass('hide');
 		    			 		$(obj).addClass('filtered');
 		    			 		filterApplied = true;
-	    			 		}
-                    		/*var durations = $(this).data('duration');
+	    			 		}*/
+                    		var durations = $(this).data('duration');
+	                		var cnt = 0;
 
 		    			 	durations.forEach(function(duration){
 		    			 		if(duration <= filterList[filter]){
-		    			 			$(obj).removeClass('hide');
-			    			 		$(obj).addClass('filtered');
-			    			 		filterApplied = true;
-			    			 		return;
+		    			 			cnt++;
+
 		    			 		}
-		    			 	});*/
+		    			 	});
+
+		    			 	if(durations.length == cnt){
+		    			 		$(obj).removeClass('hide');
+		    			 		$(obj).addClass('filtered');
+		    			 		filterApplied = true;
+		    			 		return;
+	                		}
 
 		    		 	});
                         break;
