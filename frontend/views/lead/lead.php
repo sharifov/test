@@ -135,7 +135,7 @@ $this->registerJs($js);
                     </div>
                     <div class="page-header__general-item">
                         <strong>UID:</strong>
-                        <span><?= Html::a(sprintf('%08d', $leadForm->getLead()->uid), '#', ['id' => 'view-flow-transition']) ?></span>
+                        <span><?= Html::a($leadForm->getLead()->uid, '#', ['id' => 'view-flow-transition']) ?></span>
                     </div>
 
                     <div class="page-header__general-item">
