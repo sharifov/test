@@ -231,7 +231,8 @@ $isCoach = Yii::$app->authManager->getAssignment('coach', Yii::$app->user->id);
                     'items' => [
                         ['label' => 'API Logs', 'url' => ['/api-log/index'], 'icon' => 'sitemap'],
                         ['label' => 'System Logs', 'url' => ['/log/index'], 'icon' => 'bars'],
-                        ['label' => 'Clear cache', 'url' => ['/tools/clear-cache'], 'icon' => 'remove'],
+                        //['label' => 'Clear cache', 'url' => ['/tools/clear-cache'], 'icon' => 'remove'],
+                        ['label' => 'Clean cache & assets', 'url' => ['/clean/index'], 'icon' => 'remove'],
                     ]
                     //'linkOptions' => ['data-method' => 'post']
                 ];
