@@ -454,13 +454,13 @@ $this->registerJs($js);
                     'data-url' => Url::to(['quote/create', 'leadId' => $leadForm->getLead()->id, 'qId' => 0]),
                 ]);
 
-                echo Html::button('<span class="btn-icon"><i class="fa fa-plus"></i></span><span class="btn-text">Quick Search Quote</span>', [
+                /* echo Html::button('<span class="btn-icon"><i class="fa fa-plus"></i></span><span class="btn-text">Quick Search Quote</span>', [
                     'class' => 'btn btn-warning btn-with-icon',
                     'id' => 'quick-search-quotes',
                     'data-url' => Url::to(['quote/get-online-quotes-old', 'leadId' => $leadForm->getLead()->id]),
-                ]);
+                ]); */
 
-                echo Html::button('<span class="btn-icon"><i class="fa fa-plus"></i></span><span class="btn-text">Quick Search Quote (2)</span>', [
+                echo Html::button('<span class="btn-icon"><i class="fa fa-plus"></i></span><span class="btn-text">Quick Search Quote</span>', [
                     'class' => 'btn btn-success btn-with-icon popover-class',
                     'data-toggle' => 'popover',
                     'id' => 'popover-quick-search',
@@ -497,13 +497,13 @@ $this->registerJs($js);
                     'data-url' => Url::to(['quote/create', 'leadId' => $leadForm->getLead()->id, 'qId' => 0]),
                 ]);
 
-                echo Html::button('<span class="btn-icon"><i class="fa fa-plus"></i></span><span class="btn-text">Quick Search Quote</span>', [
+                /* echo Html::button('<span class="btn-icon"><i class="fa fa-plus"></i></span><span class="btn-text">Quick Search Quote</span>', [
                     'class' => 'btn btn-warning btn-with-icon',
                     'id' => 'quick-search-quotes',
                     'data-url' => Url::to(['quote/get-online-quotes', 'leadId' => $leadForm->getLead()->id]),
-                ]);
+                ]); */
 
-                echo Html::button('<span class="btn-icon"><i class="fa fa-plus"></i></span><span class="btn-text">Quick Search Quote (2)</span>', [
+                echo Html::button('<span class="btn-icon"><i class="fa fa-plus"></i></span><span class="btn-text">Quick Search Quote</span>', [
                     'class' => 'btn btn-success btn-with-icon popover-class',
                     'data-toggle' => 'popover',
                     'id' => 'popover-quick-search',

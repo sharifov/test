@@ -154,8 +154,7 @@ $maxPrice = end($result['results'])['prices']['totalPrice'];
 
         <!--Duration-->
         <div class="filter filter--duration dropdown js-filter">
-            <a href="#" data-toggle="dropdown">Duration
-                <i class="icn-clear-filter js-clear-filter"></i></a>
+            <a href="#" data-toggle="dropdown">Trip Duration <i class="icn-clear-filter js-clear-filter"></i></a>
 
             <!--Dropdown-->
             <div class="dropdown-menu dropdown-menu-right">

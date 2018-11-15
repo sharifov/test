@@ -84,6 +84,14 @@ $(document).on('click','.quote_details__btn', function (e) {
     modal.find('.modal-body').html(target);
     modal.modal('show');
 });
+
+$(document).on('change', '.quote__heading input:checkbox', function () {
+    if ($(this).is(":checked")) {
+        $(this).parents('.quote').addClass("quote--selected");
+    } else {
+        $(this).parents('.quote').removeClass("quote--selected");
+    }
+});
 JS;
 
 $this->registerJs($js);
