@@ -734,6 +734,13 @@ class Quote extends \yii\db\ActiveRecord
                     if (!empty($matches)) {
                         $operatedBy = trim($matches[1]);
                     }
+                    if(mb_strlen($operatedBy) > 2){
+                        $airline = Airline::find()->andWhere(['like' ,'name', $operatedBy ])->one();
+                        var_dump($airline, $operatedBy);
+                        if(!empty($airline)){
+                            $operatedBy = $airline->iata;
+                        }
+                    }
                     $segments[$idx]['operatingAirline'] = $operatedBy;
                 }
             }
@@ -759,6 +766,13 @@ class Quote extends \yii\db\ActiveRecord
                 preg_match('/\((.*?)\)/', $operatedBy, $matches);
                 if (!empty($matches)) {
                     $operatedBy = trim($matches[1]);
+                }
+                if(mb_strlen($operatedBy) > 2){
+                    $airline = Airline::find()->andWhere(['like' ,'name', $operatedBy ])->one();
+                    var_dump($airline, $operatedBy);
+                    if(!empty($airline)){
+                        $operatedBy = $airline->iata;
+                    }
                 }
                 $operationAirlineCode = $operatedBy;
             }
@@ -932,7 +946,7 @@ class Quote extends \yii\db\ActiveRecord
                     $trip->qt_key = $tripEntry['qt_key'];
 
                     if(!$trip->validate()){
-                        Yii::error(VarDumper::dumpAsString($trip->getErrors()), 'QuoteModel:updateQuoteTrips:trip:save');
+                        Yii::error(VarDumper::dumpAsString($trip->getErrors()).'<br/>dump: '.$this->reservation_dump, 'QuoteModel:updateQuoteTrips:trip:save');
                         $transaction->rollBack();
                         return false;
                     }
@@ -943,7 +957,7 @@ class Quote extends \yii\db\ActiveRecord
                             $segment = new QuoteSegment();
                             $segment->attributes = $segmentEntry;
                             if(!$segment->validate()){
-                                Yii::error(VarDumper::dumpAsString($segmentEntry).VarDumper::dumpAsString($segment->getErrors()), 'QuoteModel:updateQuoteTrips:segment:save');
+                                Yii::error(VarDumper::dumpAsString($segmentEntry).VarDumper::dumpAsString($segment->getErrors()).'<br/>dump: '.$this->reservation_dump, 'QuoteModel:updateQuoteTrips:segment:save');
                                 $transaction->rollBack();
                                 return false;
                             }

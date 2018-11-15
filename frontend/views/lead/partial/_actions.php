@@ -575,7 +575,7 @@ $this->registerJs($js);
 
 <?php Modal::begin(['id' => 'flight-details__modal',
     'header' => '<h2></h2>',
-    'size' => Modal::SIZE_LARGE,
+    'size' => Modal::SIZE_DEFAULT,
 ])?>
 <?php Modal::end()?>
 
