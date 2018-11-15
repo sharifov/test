@@ -872,7 +872,7 @@ class Quote extends \yii\db\ActiveRecord
                 'qs_departure_time' => $depDateTime,
                 'qs_arrival_time' => $arrDateTime,
                 'qs_flight_number' => $flightNumber,
-                'qs_booking_class' => $cabin,
+                'qs_booking_class' => trim($cabin),
                 'qs_duration' => $flightDuration,
                 'qs_marketing_airline' => $carrier,
                 'qs_operating_airline' => (!empty($operationAirlineCode))?$operationAirlineCode:$carrier,

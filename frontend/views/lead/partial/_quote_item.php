@@ -162,6 +162,17 @@ use common\models\QuotePrice;
                     'data-target' => '#quote_detail_'.$model->uid,
                     'title' => 'Details'
                 ]) ?>
+                <?= Html::button('<i title="" class="fa fa-terminal"></i>', [
+                    'class' => 'btn btn-primary popover-class',
+                    'title' => 'Reservation Dump',
+                    'data-toggle' => 'popover',
+                    'data-html' => 'true',
+                    'data-title' => 'Reservation Dump',
+                    'data-trigger' => 'click',
+                    'data-placement' => 'left',
+                    'data-container' => 'body',
+                    'data-content' => '<div style="width:450px;">'.str_replace("\n", '<br/>', $model->reservation_dump).'</div>',
+                ]);?>
 			</div>
 		</div>
 	</div>

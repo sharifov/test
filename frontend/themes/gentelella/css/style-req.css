@@ -5015,3 +5015,5 @@ input[disabled] + .radio-tab__text {
    width: 320px;
    left: auto;
 }
+
+.popover {max-width:800px;}
