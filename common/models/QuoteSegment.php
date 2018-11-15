@@ -122,7 +122,7 @@ class QuoteSegment extends \yii\db\ActiveRecord
             [['qs_booking_class', 'qs_cabin'], 'string', 'max' => 1],
             [['qs_departure_airport_code', 'qs_arrival_airport_code', 'qs_air_equip_type', 'qs_meal'], 'string', 'max' => 3],
             [['qs_marketing_airline', 'qs_marriage_group'], 'string', 'max' => 2],
-            [['qs_operating_airline'], 'string', 'max' => 25],
+            [['qs_operating_airline'], 'string', 'max' => 45],
             [['qs_fare_code'], 'string', 'max' => 15],
             [['qs_key'], 'string', 'max' => 255],
             [['qs_arrival_airport_code'], 'exist', 'skipOnError' => true, 'targetClass' => Airport::className(), 'targetAttribute' => ['qs_arrival_airport_code' => 'iata']],
