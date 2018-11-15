@@ -736,7 +736,6 @@ class Quote extends \yii\db\ActiveRecord
                     }
                     if(mb_strlen($operatedBy) > 2){
                         $airline = Airline::find()->andWhere(['like' ,'name', $operatedBy ])->one();
-                        var_dump($airline, $operatedBy);
                         if(!empty($airline)){
                             $operatedBy = $airline->iata;
                         }
@@ -769,7 +768,6 @@ class Quote extends \yii\db\ActiveRecord
                 }
                 if(mb_strlen($operatedBy) > 2){
                     $airline = Airline::find()->andWhere(['like' ,'name', $operatedBy ])->one();
-                    var_dump($airline, $operatedBy);
                     if(!empty($airline)){
                         $operatedBy = $airline->iata;
                     }
