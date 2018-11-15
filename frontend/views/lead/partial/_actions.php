@@ -188,6 +188,7 @@ $js = <<<JS
         e.preventDefault();
         var key = $(this).data('key');
         var gds = $(this).data('gds');
+        var searchResId = $(this).data('result');
         $('#preloader').removeClass('hidden');
         $.ajax({
         url: '$urlCreateQuoteFromSearch',
@@ -196,9 +197,10 @@ $js = <<<JS
             success: function (data) {
                 $('#preloader').addClass('hidden');
                 if(data.status == true){
-                    $('#search-results__modal').modal('hide');
+                    //$('#search-results__modal').modal('hide');
                     $('#flight-details__modal').modal('hide');
-                    $(this).closest('.search-result__quote')
+                    $('#'+searchResId).addClass('quote--selected');
+
                     $.pjax.reload({container: '#quotes_list', async: false});
                 }else{
                     alert('Some errors was happened during create quote. Please try again later.');

@@ -28,9 +28,10 @@ foreach ($result['trips'] as $trip){
 <div class="quote search-result__quote" data-price="<?= $result['prices']['totalPrice']?>"
 data-durationmax="<?= max($totalDuration)?>" data-duration="<?= json_encode($totalDuration)?>" data-totalduration="<?= $totalDurationSum?>"
 data-stop="<?= json_encode($stops)?>"
-data-airline="<?= $result['validatingCarrier']?>">
+data-airline="<?= $result['validatingCarrier']?>" id="search-result__quote-<?= $resultKey?>">
 	<div class="quote__heading">
 		<div class="quote__heading-left">
+			<span class="quote__id"><strong># <?= $resultKey+1 ?></strong></span>
 			<span class="quote__vc">
 				<span class="quote__vc-logo">
 					<img src="//www.gstatic.com/flights/airline_logos/70px/<?= $result['validatingCarrier']?>.png" alt="<?= $result['validatingCarrier']?>" class="quote__vc-img">
@@ -192,6 +193,7 @@ data-airline="<?= $result['validatingCarrier']?>">
 		         'data-title' => implode(', ',$tripsInfo),
            	    'data-key' => $result['key'],
            	    'data-gds' => $result['gds'],
+       	        'data-result' => 'search-result__quote-'.$resultKey,
             ]) ?>
         </div>
 		<div class="trip">
@@ -286,6 +288,7 @@ data-airline="<?= $result['validatingCarrier']?>">
 		         'data-title' => implode(', ',$tripsInfo),
                 'data-key' => $result['key'],
                 'data-gds' => $result['gds'],
+                'data-result' => 'search-result__quote-'.$resultKey,
             ]) ?>
 		</div>
 	</div>
