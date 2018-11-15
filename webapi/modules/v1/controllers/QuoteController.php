@@ -338,21 +338,23 @@ class QuoteController extends ApiBaseController
                         }
                     }
                     if(isset($baggageAttr['paid_baggage']) && !empty($baggageAttr['paid_baggage'])){
-                        foreach ($baggageAttr['paid_baggage'] as $paidBaggageAttr){
-                            $baggage = new QuoteSegmentBaggageCharge();
-                            $baggage->qsbc_segment_id = $segment->qs_id;
-                            $baggage->qsbc_price = str_replace('USD', '', $paidBaggageAttr['price']);
-                            if(isset($paidBaggageAttr['piece'])){
-                                $baggage->qsbc_first_piece = $paidBaggageAttr['piece'];
-                                $baggage->qsbc_last_piece = $paidBaggageAttr['piece'];
+                        foreach ($segments as $segment){
+                            foreach ($baggageAttr['paid_baggage'] as $paidBaggageAttr){
+                                $baggage = new QuoteSegmentBaggageCharge();
+                                $baggage->qsbc_segment_id = $segment->qs_id;
+                                $baggage->qsbc_price = str_replace('USD', '', $paidBaggageAttr['price']);
+                                if(isset($paidBaggageAttr['piece'])){
+                                    $baggage->qsbc_first_piece = $paidBaggageAttr['piece'];
+                                    $baggage->qsbc_last_piece = $paidBaggageAttr['piece'];
+                                }
+                                if(isset($paidBaggageAttr['weight'])){
+                                    $baggage->qsbc_max_weight = substr($paidBaggageAttr['weight'], 0 , 100);
+                                }
+                                if(isset($paidBaggageAttr['height'])){
+                                    $baggage->qsbc_max_size = substr($paidBaggageAttr['height'],0, 100);
+                                }
+                                $baggage->save(false);
                             }
-                            if(isset($paidBaggageAttr['weight'])){
-                                $baggage->qsbc_max_weight = substr($paidBaggageAttr['weight'],0,100);
-                            }
-                            if(isset($paidBaggageAttr['height'])){
-                                $baggage->qsbc_max_size = substr($paidBaggageAttr['height'],0,100);
-                            }
-                            $baggage->save(false);
                         }
                     }
                 }
@@ -536,21 +538,23 @@ class QuoteController extends ApiBaseController
                             }
                         }
                         if(isset($baggageAttr['paid_baggage']) && !empty($baggageAttr['paid_baggage'])){
-                            foreach ($baggageAttr['paid_baggage'] as $paidBaggageAttr){
-                                $baggage = new QuoteSegmentBaggageCharge();
-                                $baggage->qsbc_segment_id = $segment->qs_id;
-                                $baggage->qsbc_price = str_replace('USD', '', $paidBaggageAttr['price']);
-                                if(isset($paidBaggageAttr['piece'])){
-                                    $baggage->qsbc_first_piece = $paidBaggageAttr['piece'];
-                                    $baggage->qsbc_last_piece = $paidBaggageAttr['piece'];
+                            foreach ($segments as $segment){
+                                foreach ($baggageAttr['paid_baggage'] as $paidBaggageAttr){
+                                    $baggage = new QuoteSegmentBaggageCharge();
+                                    $baggage->qsbc_segment_id = $segment->qs_id;
+                                    $baggage->qsbc_price = str_replace('USD', '', $paidBaggageAttr['price']);
+                                    if(isset($paidBaggageAttr['piece'])){
+                                        $baggage->qsbc_first_piece = $paidBaggageAttr['piece'];
+                                        $baggage->qsbc_last_piece = $paidBaggageAttr['piece'];
+                                    }
+                                    if(isset($paidBaggageAttr['weight'])){
+                                        $baggage->qsbc_max_weight = substr($paidBaggageAttr['weight'], 0 , 100);
+                                    }
+                                    if(isset($paidBaggageAttr['height'])){
+                                        $baggage->qsbc_max_size = substr($paidBaggageAttr['height'],0, 100);
+                                    }
+                                    $baggage->save(false);
                                 }
-                                if(isset($paidBaggageAttr['weight'])){
-                                    $baggage->qsbc_max_weight = substr($paidBaggageAttr['weight'], 0 , 100);
-                                }
-                                if(isset($paidBaggageAttr['height'])){
-                                    $baggage->qsbc_max_size = substr($paidBaggageAttr['height'],0, 100);
-                                }
-                                $baggage->save(false);
                             }
                         }
                     }
