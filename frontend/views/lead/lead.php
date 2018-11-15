@@ -10,7 +10,6 @@ use yii\bootstrap\Modal;
 use yii\widgets\ListView;
 use common\models\Quote;
 
-
 //$bundle = \frontend\themes\gentelella\assets\LeadAsset::register($this);
 //$this->registerCssFile('/css/style-req.css');
 $userId = Yii::$app->user->id;

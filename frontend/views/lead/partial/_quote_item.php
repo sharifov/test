@@ -171,7 +171,10 @@ use common\models\QuotePrice;
                     'data-trigger' => 'click',
                     'data-placement' => 'left',
                     'data-container' => 'body',
-                    'data-content' => '<div style="width:450px;">'.str_replace("\n", '<br/>', $model->reservation_dump).'</div>',
+                    'data-content' => '<div class="popover-dump">
+                                    <button class="btn btn-primary btn-clipboard popover-dump-copy" data-clipboard-text="'.$model->reservation_dump.'"><i class="fa fa-copy"></i></button>
+                                    '.str_replace("\n", '<br/>', $model->reservation_dump).'
+                                    </div>',
                 ]);?>
 			</div>
 		</div>
