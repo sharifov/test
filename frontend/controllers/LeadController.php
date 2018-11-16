@@ -520,6 +520,17 @@ class LeadController extends FController
         }*/
 
 
+        $allowLead = Lead::find()->where([
+            'id' => $id
+        ])->andWhere([
+            'IN', 'status', [Lead::STATUS_BOOKED, Lead::STATUS_SOLD]
+        ])->one();
+        if ($allowLead !== null) {
+            Yii::$app->getSession()->setFlash('warning', 'Lead is unavailable to "Take" now!');
+            return $this->redirect(Yii::$app->request->referrer);
+        }
+
+
         $inProcessing = Lead::find()
             ->where([
                 'employee_id' => $user->getId(),
