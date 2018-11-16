@@ -1625,21 +1625,6 @@ Sales - Kivork",
         parent::afterFind();
 
         if (!empty($this->additional_information)) {
-            //$separateInfoArr = json_decode($this->additional_information);
-            /*if (is_array($separateInfoArr)) {
-                foreach ($separateInfoArr as $key => $separateInfo) {
-                    if ($key != 0) {
-                        $additionalInfo = new LeadAdditionalInformation();
-                        $this->additionalInformationForm[] = $additionalInfo->setAttributes($separateInfo);
-                    } else {
-                        $this->additionalInformationForm[$key]->setAttributes($separateInfo);
-                    }
-                }
-            } else {
-                $separateInfo = json_decode($this->additional_information, true);
-                $this->additionalInformationForm[0]->setAttributes($separateInfo);
-            }*/
-
             $this->additionalInformationForm = self::getLeadAdditionalInfo($this->additional_information);
         }
     }
@@ -1651,7 +1636,6 @@ Sales - Kivork",
     public static function getLeadAdditionalInfo($additionalInfoStr)
     {
         $additionalInformationFormArr = [];
-        $additionalInfoStr = sprintf('['.$additionalInfoStr.','.$additionalInfoStr.']');
         $separateInfoArr = json_decode($additionalInfoStr);
         if (is_array($separateInfoArr)) {
             $separateInfoArr = json_decode($additionalInfoStr, true);
@@ -1662,7 +1646,8 @@ Sales - Kivork",
             }
         } else {
             $additionalInfo = new LeadAdditionalInformation();
-            $additionalInformationFormArr[] = $additionalInfo->setAttributes(json_decode($additionalInfoStr, true));
+            $additionalInfo->setAttributes(json_decode($additionalInfoStr, true));
+            $additionalInformationFormArr[] = $additionalInfo;
         }
 
         return $additionalInformationFormArr;

@@ -55,7 +55,7 @@ $this->registerJs($js);
             ])->hiddenInput() ?>
             <div class="row" style="margin: 0 0 20px;">
                 <div class="col-md-6 form-inline">
-                    <?= $form->field($lead->additionalInformationForm, 'pnr')->textInput()->label('Add PNR:&nbsp;') ?>
+                    <?= $form->field($lead->additionalInformationForm[0], 'pnr')->textInput()->label('Add PNR:&nbsp;') ?>
                     <div class="form-group" style="margin: 0 0 10px 10px;">
                         <label class="control-label">GDS:&nbsp;</label>
                         <?= Quote::getGDSName($quote->gds) ?>
@@ -86,7 +86,7 @@ $this->registerJs($js);
                 </thead>
                 <tbody>
                 <?php
-                foreach ($lead->additionalInformationForm->paxInfo as $index => $passenger) : ?>
+                foreach ($lead->additionalInformationForm[0]->paxInfo as $index => $passenger) : ?>
                     <tr>
                         <td class="td-input">
                             <?= $passenger['pax'] ?>

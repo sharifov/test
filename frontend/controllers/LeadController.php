@@ -126,10 +126,10 @@ class LeadController extends FController
                         'errors' => $errors
                     ];
                 } else {
-                    $lead->additionalInformationForm->pnr = $attr['pnr'];
+                    $lead->additionalInformationForm[0]->pnr = $attr['pnr'];
                     $quote = $lead->getAppliedAlternativeQuotes();
                     if ($quote !== null) {
-                        $quote->record_locator = $lead->additionalInformationForm->pnr;
+                        $quote->record_locator = $lead->additionalInformationForm[0]->pnr;
                         $quote->save();
                     }
                     $lead->save();
@@ -137,13 +137,13 @@ class LeadController extends FController
                         'FlightRequest' => [
                             'id' => $lead->bo_flight_id,
                             'sub_sources_id' => $lead->source_id,
-                            'pnr' => $lead->additionalInformationForm->pnr
+                            'pnr' => $lead->additionalInformationForm[0]->pnr
                         ]
                     ];
                     $result = BackOffice::sendRequest('lead/add-pnr', 'POST', json_encode($data));
                     if ($result['status'] != 'Success') {
                         $quote->record_locator = null;
-                        $lead->additionalInformationForm->pnr = null;
+                        $lead->additionalInformationForm[0]->pnr = null;
                         $quote->save();
                         $lead->save();
                         Yii::$app->getSession()->setFlash('warning', sprintf(

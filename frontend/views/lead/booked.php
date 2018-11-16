@@ -54,7 +54,33 @@ $this->params['breadcrumbs'][] = $this->title;
         [
             'attribute' => 'bo_flight_id',
             'label' => 'Sale ID (BO)',
-            'options' => [
+            'value' => function (\common\models\Lead $model) {
+                if (!empty($model['additional_information'])) {
+                    $additionallyInfo = Lead::getLeadAdditionalInfo($model['additional_information']);
+                    $ids = [];
+                    $maxPaxCnt = 0;
+                    foreach ($additionallyInfo as $additionally) {
+                        $ids[] = (!empty($additionally->bo_sale_id))
+                            ? $additionally->bo_sale_id : 0;
+
+                        if ($maxPaxCnt <= count($additionally->passengers)) {
+                            $maxPaxCnt = count($additionally->passengers);
+                        }
+                    }
+
+                    $divTag = Html::tag('div', '', [
+                        'style' => 'border: 1px solid #a3b3bd; margin: 0px 0 5px;'
+                    ]);
+                    $newRows = '';
+                    for ($i = 0; $i < $maxPaxCnt; $i++) {
+                        $newRows .= '<br/>';
+                    }
+                    return implode($newRows . $divTag, $ids);
+                }
+                return 0;
+            },
+            'format' => 'raw',
+            'contentOptions' => [
                 'style' => 'width:80px'
             ]
         ],
@@ -72,14 +98,24 @@ $this->params['breadcrumbs'][] = $this->title;
                 if (!empty($model['additional_information'])) {
                     $additionallyInfo = Lead::getLeadAdditionalInfo($model['additional_information']);
                     $pnrs = [];
+                    $maxPaxCnt = 0;
                     foreach ($additionallyInfo as $additionally) {
                         $pnrs[] = (!empty($additionally->pnr))
                             ? $additionally->pnr : '-';
+
+                        if ($maxPaxCnt <= count($additionally->passengers)) {
+                            $maxPaxCnt = count($additionally->passengers);
+                        }
                     }
-                    return implode('<div></div>', $pnrs);
-                    /*$additionally = new \common\models\local\LeadAdditionalInformation();
-                    $additionally->setAttributes(@json_decode($model['additional_information'], true));
-                    return (! empty($additionally->pnr)) ? $additionally->pnr : '-';*/
+
+                    $divTag = Html::tag('div', '', [
+                        'style' => 'border: 1px solid #a3b3bd; margin: px 0 5px;'
+                    ]);
+                    $newRows = '';
+                    for ($i = 0; $i < $maxPaxCnt; $i++) {
+                        $newRows .= '<br/>';
+                    }
+                    return implode($newRows . $divTag, $pnrs);
                 }
                 return '-';
             },
@@ -100,12 +136,9 @@ $this->params['breadcrumbs'][] = $this->title;
                             $content[] = implode('<br/>', $pax);
                         }
                     }
-                    /*$additionally = new \common\models\local\LeadAdditionalInformation();
-                    $additionally->setAttributes(@json_decode($model['additional_information'], true));
-                    $content[] = (! empty($additionally->passengers)) ? $additionally->passengers : '';*/
                 }
                 $divTag = Html::tag('div', '', [
-                    'style' => 'border: 1px solid #a3b3bd; margin: 10px 0 5px;'
+                    'style' => 'border: 1px solid #a3b3bd; margin: 0px 0 5px;'
                 ]);
                 return implode($divTag, $content);
             },
@@ -118,7 +151,6 @@ $this->params['breadcrumbs'][] = $this->title;
             'label' => 'Destination',
             'value' => function (\common\models\Lead $model) {
                 $segments = $model->leadFlightSegments;
-                $segmentData = [];
                 if ($segments) {
                     foreach ($segments as $sk => $segment) {
                         $airport = Airport::findIdentity($segment->destination);
@@ -193,29 +225,64 @@ $this->params['breadcrumbs'][] = $this->title;
         [
             'label' => 'VTF',
             'value' => function (\common\models\Lead $model) {
-                $additionally = new \common\models\local\LeadAdditionalInformation();
-                if (!empty($model['additional_information'])) {
-                    $additionally->setAttributes(@json_decode($model['additional_information'], true));
-                }
                 $labelVTF = '<span class="label label-danger"><i class="fa fa-times"></i></span>';
-                if (!empty($additionally->vtf_processed)) {
-                    $labelVTF = '<span class="label label-success"><i class="fa fa-check"></i></span>';
+                if (!empty($model['additional_information'])) {
+                    $additionallyInfo = Lead::getLeadAdditionalInfo($model['additional_information']);
+                    $labels = [];
+                    $maxPaxCnt = 0;
+                    foreach ($additionallyInfo as $additionally) {
+                        $labels[] = (!empty($additionally->vtf_processed))
+                            ? '<span class="label label-success"><i class="fa fa-check"></i></span>'
+                            : $labelVTF;
+
+                        if ($maxPaxCnt <= count($additionally->passengers)) {
+                            $maxPaxCnt = count($additionally->passengers);
+                        }
+                    }
+
+                    $divTag = Html::tag('div', '', [
+                        'style' => 'border: 1px solid #a3b3bd; margin: 0px 0 5px;'
+                    ]);
+                    $newRows = '';
+                    for ($i = 0; $i < $maxPaxCnt; $i++) {
+                        $newRows .= '<br/>';
+                    }
+                    return implode($newRows . $divTag, $labels);
                 }
+
                 return $labelVTF;
+
             },
             'format' => 'raw'
         ],
         [
             'label' => 'TKT',
             'value' => function (\common\models\Lead $model) {
-                $additionally = new \common\models\local\LeadAdditionalInformation();
-                if (!empty($model['additional_information'])) {
-                    $additionally->setAttributes(@json_decode($model['additional_information'], true));
-                }
                 $labelTKT = '<span class="label label-danger"><i class="fa fa-times"></i></span>';
-                if (!empty($additionally->tkt_processed)) {
-                    $labelTKT = '<span class="label label-success"><i class="fa fa-check"></i></span>';
+                if (!empty($model['additional_information'])) {
+                    $additionallyInfo = Lead::getLeadAdditionalInfo($model['additional_information']);
+                    $labels = [];
+                    $maxPaxCnt = 0;
+                    foreach ($additionallyInfo as $additionally) {
+                        $labels[] = (!empty($additionally->tkt_processed))
+                            ? '<span class="label label-success"><i class="fa fa-check"></i></span>'
+                            : $labelTKT;
+
+                        if ($maxPaxCnt <= count($additionally->passengers)) {
+                            $maxPaxCnt = count($additionally->passengers);
+                        }
+                    }
+
+                    $divTag = Html::tag('div', '', [
+                        'style' => 'border: 1px solid #a3b3bd; margin: 0px 0 5px;'
+                    ]);
+                    $newRows = '';
+                    for ($i = 0; $i < $maxPaxCnt; $i++) {
+                        $newRows .= '<br/>';
+                    }
+                    return implode($newRows . $divTag, $labels);
                 }
+
                 return $labelTKT;
             },
             'format' => 'raw'
@@ -223,14 +290,31 @@ $this->params['breadcrumbs'][] = $this->title;
         [
             'label' => 'EXP',
             'value' => function (\common\models\Lead $model) {
-                $additionally = new \common\models\local\LeadAdditionalInformation();
-                if (!empty($model['additional_information'])) {
-                    $additionally->setAttributes(@json_decode($model['additional_information'], true));
-                }
                 $labelEXP = '<span class="label label-danger"><i class="fa fa-times"></i></span>';
-                if (!empty($additionally->exp_processed)) {
-                    $labelEXP = '<span class="label label-success"><i class="fa fa-check"></i></span>';
+                if (!empty($model['additional_information'])) {
+                    $additionallyInfo = Lead::getLeadAdditionalInfo($model['additional_information']);
+                    $labels = [];
+                    $maxPaxCnt = 0;
+                    foreach ($additionallyInfo as $additionally) {
+                        $labels[] = (!empty($additionally->exp_processed))
+                            ? '<span class="label label-success"><i class="fa fa-check"></i></span>'
+                            : $labelEXP;
+
+                        if ($maxPaxCnt <= count($additionally->passengers)) {
+                            $maxPaxCnt = count($additionally->passengers);
+                        }
+                    }
+
+                    $divTag = Html::tag('div', '', [
+                        'style' => 'border: 1px solid #a3b3bd; margin: 0px 0 5px;'
+                    ]);
+                    $newRows = '';
+                    for ($i = 0; $i < $maxPaxCnt; $i++) {
+                        $newRows .= '<br/>';
+                    }
+                    return implode($newRows . $divTag, $labels);
                 }
+
                 return $labelEXP;
             },
             'format' => 'raw'
