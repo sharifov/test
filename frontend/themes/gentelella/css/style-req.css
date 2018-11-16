@@ -1,4 +1,4 @@
-/*V 1.9*/
+/*V 2.0*/
 /*==== Colors ====*/
 /*Colors in layout*/
 /*==== Fonts ====*/
@@ -3864,6 +3864,15 @@ input[disabled] + .radio-tab__text {
 
 .quote + .quote {
   margin-top: 20px;
+}
+
+
+.quote--highlight {
+ border-color: #82b9e2;
+}
+
+.quote--highlight .quote__heading {
+ background-color: #e5f4ff;
 }
 
 .quote--selected {

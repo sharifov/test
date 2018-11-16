@@ -57,6 +57,18 @@ class SearchService
         return isset($mapping[$cabin]) ? $mapping[$cabin] : $cabin;
     }
 
+    public static function getCabinRealCode($cabin)
+    {
+        $mapping = [
+            Lead::CABIN_ECONOMY => self::CABIN_ECONOMY,
+            Lead::CABIN_PREMIUM => self::CABIN_PREMIUM_ECONOMY,
+            Lead::CABIN_BUSINESS => self::CABIN_BUSINESS ,
+            Lead::CABIN_FIRST => self::CABIN_FIRST,
+        ];
+
+        return isset($mapping[$cabin]) ? $mapping[$cabin] : $cabin;
+    }
+
     public static function getOnlineQuotes(Lead $lead, $gdsCode)
     {
         $returned = '';
@@ -67,7 +79,7 @@ class SearchService
         $fl = [];
 
         $params = [
-            'cabin' => $lead->cabin,
+            'cabin' => self::getCabinRealCode($lead->cabin),
             'gds' => $gdsCode,
             'cid' => 'SAL101',
             'adt' => $lead->adults,

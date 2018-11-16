@@ -14,7 +14,7 @@ use yii\bootstrap\Html;
 use yii\helpers\Url;
 use common\models\QuotePrice;
 ?>
-<div class="quote">
+<div class="quote quote--highlight">
 	<div class="quote__details" id="quote_detail_<?= $model->uid?>" style="display:none;">
 		<div class="trip">
             <div class="trip__item">

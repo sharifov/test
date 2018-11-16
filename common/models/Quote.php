@@ -1173,6 +1173,7 @@ class Quote extends \yii\db\ActiveRecord
                 $airline = Airline::findIdentity($segment->qs_marketing_airline);
                 $departureDateTime = new \DateTime($segment->qs_departure_time);
                 $arrivalDateTime = new \DateTime($segment->qs_arrival_time);
+                $operatingAirline = Airline::findIdentity($segment->qs_operating_airline);
                 $segments[] = [
                     'cabin' => $segment->qs_cabin,
                     'carrier' => $segment->qs_marketing_airline,
@@ -1188,7 +1189,7 @@ class Quote extends \yii\db\ActiveRecord
                     'flightNumber' => $segment->qs_flight_number,
                     'bookingClass' => $segment->qs_booking_class,
                     'flightDuration' => $segment->qs_duration,
-                    'operatingAirline' => ($segment->qs_operating_airline != $segment->qs_marketing_airline)?$segment->qs_operating_airline:null,
+                    'operatingAirline' => ($segment->qs_operating_airline != $segment->qs_marketing_airline)?(($operatingAirline)?$operatingAirline->name:$segment->qs_operating_airline):null,
                     'layoverDuration' => ($keySegm > 0)?(($departureDateTime->getTimestamp() - $segments[$keySegm-1]['arrivalDateTime']->getTimestamp())/60):0,
                     'stop' => $segment->qs_stop,
                 ];
