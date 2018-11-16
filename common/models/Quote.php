@@ -63,6 +63,7 @@ class Quote extends \yii\db\ActiveRecord
         FARE_TYPE_SR = 'SR',
         FARE_TYPE_SRU = 'SRU',
         FARE_TYPE_COMM = 'COMM',
+        FARE_TYPE_TOUR= 'TOUR',
         FARE_TYPE_PUBC = 'PUBC';
 
     public const
@@ -167,6 +168,7 @@ class Quote extends \yii\db\ActiveRecord
                 break;
             case self::FARE_TYPE_PUBC:
             case self::FARE_TYPE_PUB:
+            case self::FARE_TYPE_TOUR:
                 switch ($check_payment) {
                     case false:
                         if ($markUp >= 0) {
