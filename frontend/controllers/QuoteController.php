@@ -92,6 +92,7 @@ class QuoteController extends FController
                 $viewData['result'] = $result;
                 $viewData['leadId'] = $leadId;
                 $viewData['gds'] = $attr['gds'];
+                $viewData['lead'] = $lead;
 
                 return $this->renderAjax('_search_results', $viewData);
             }

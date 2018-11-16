@@ -172,6 +172,37 @@ SearchResult = function(props) {
 		    				filterApplied = true;
 		    			});
 		                break;
+		    		case 'travelTime':
+		    			$(selector).each(function(idx){
+                    		var obj = $(this);
+                    		var time = $(this).data('time');
+	                		var cnt = 0;
+	                		var cntTrue = 0;
+
+	                		for(var i in filterList[filter]){
+	                			if(!filterList[filter].hasOwnProperty(i)) continue;
+	                			cnt++;
+
+	                			if (filterList[filter][i].depart && filterList[filter][i].arrival) {
+                                    if(scope.helper.dateBetweenToTimes(filterList[filter][i].depart, time[i].departure) &&
+                                        scope.helper.dateBetweenToTimes(filterList[filter][i].arrival, time[i].arrival)){
+                                    	cntTrue++;
+                                    }
+                                }else{
+                                	if(filterList[filter][i].depart && scope.helper.dateBetweenToTimes(filterList[filter][i].depart, time[i].departure) ||
+                                            filterList[filter][i].arrival && scope.helper.dateBetweenToTimes(filterList[filter][i].arrival, time[i].arrival)){
+                                    	cntTrue++;
+                                    }
+                                }
+	                		}
+	                		if(cnt == cntTrue){
+	                			$(obj).removeClass('hide');
+		    			 		$(obj).addClass('filtered');
+		    			 		filterApplied = true;
+		    			 		return;
+	                		}
+		    		 	});
+		    			break;
                     case 'duration':
                     	$(selector).each(function(idx){
                     		var obj = $(this);
@@ -406,6 +437,108 @@ SearchResult = function(props) {
         });
     };
 
+    this.filterTravelTimeSelectedTitleText = function() {
+        var headerText = 'Time';
+        if (Object.keys(filterList.travelTime).length < 3) {
+            var count = 0,
+                headerTextData = [];
+
+            for (var timeIndex in filterList.travelTime) {
+                if (!filterList.travelTime.hasOwnProperty(timeIndex)) continue;
+                var item = filterList.travelTime[timeIndex];
+                if (item.depart) {
+                    count++;
+                    headerTextData.push({direction: "departure", data: item.depart});
+                }
+                if (item.arrival) {
+                    count ++;
+                    headerTextData.push({direction: "arrival", data: item.arrival});
+                }
+            }
+            if (count < 3) {
+                headerText = '<span class="filter__summary js-filter-summary">';
+                for (var h=0; h<count; h++) {
+                    headerText += '   <span class="filter__summary-time">' +
+                        '       <i class="icn-take-' + (headerTextData[h].direction === "departure" ? 'off' : 'on') + '-white"></i>' +
+                        scope.helper.toHHMM(headerTextData[h].data[0] * 60) + ' - ' + scope.helper.toHHMM(headerTextData[h].data[1] * 60) +
+                        '   </span>';
+                }
+                headerText += '</span>';
+            }
+        }
+        return headerText;
+    };
+
+    this.filterTravelTime = function() {
+
+    	var sliderFlightTime = [],
+        filterTime = ".filter--travel-time",
+        jsFilterReset = ".filter--travel-time .js-filter-reset",
+        jsClearFilter = ".filter--travel-time i.js-clear-filter";
+
+	    if ($('[data-id="landing-slider-time"]').length) {
+	        var el = $('[data-id="landing-slider-time"]');
+	        for (var i=0, l=el.length; i<l; i++) {
+
+	            sliderFlightTime.push(el[i]);
+	            noUiSlider.create(el[i], {
+	                start: [0, 1440],
+	                connect: [false, true, false],
+	                tooltips: [
+	                    {to: function(value) {return scope.helper.toHHMM(value * 60);}},
+	                    {to: function(value) {return scope.helper.toHHMM(value * 60);}}
+	                ],
+	                step: 60,
+	                range: {
+	                    'min': 0,
+	                    'max': 1440
+	                }
+	            });
+
+	            el[i].noUiSlider.on('update', function (values, handle) {
+	                var selectedDate = scope.helper.toHHMM(values[0] * 60) + ' - ' + scope.helper.toHHMM(values[1] * 60);
+	                $(this.target).parents('[data-id="landing-time"]').find('[data-id="landing-value-time"] span').html(selectedDate);
+	            });
+
+	            el[i].noUiSlider.on('change', function(values, handle, unencoded, tap, positions) {
+	                if (tap) {
+	                    $(jsFilterReset).removeClass('hidden');
+	                    scope.addFilterParams({
+	                        name: 'travelTime',
+	                        value: values,
+	                        index: $(this.target).parents('.tab-pane').attr('data-index'),
+	                        direction: $(this.target).attr('data-direction')
+	                    });
+
+	                    $(filterTime).addClass('selected').find('a[data-toggle="dropdown"] span').html(scope.filterTravelTimeSelectedTitleText());
+	                }
+	            });
+
+	            el[i].noUiSlider.on('end', function(values) {
+	                $(jsFilterReset).removeClass('hidden');
+	                scope.addFilterParams({
+	                    name: 'travelTime',
+	                    value: values,
+	                    index: $(this.target).parents('.tab-pane').attr('data-index'),
+	                    direction: $(this.target).attr('data-direction')
+	                });
+	                $(filterTime).addClass('selected').find('a[data-toggle="dropdown"] span').html(scope.filterTravelTimeSelectedTitleText());
+	            });
+
+	            $(jsClearFilter + ", " + jsFilterReset).on("click", function(e) {
+	                e.preventDefault();
+	                e.stopImmediatePropagation();
+	                $(jsFilterReset).addClass('hidden');
+	                $(filterTime).removeClass('selected').find('a[data-toggle="dropdown"] span').html(locale.time);
+	                sliderFlightTime.forEach(function(item) {
+	                    item.noUiSlider.reset();
+	                });
+	                scope.unsetFilterParams("travelTime");
+	            });
+	        }
+	    }
+    }
+
     this.filterInit = function() {
         //= airline filter
         scope.filterAirline();
@@ -418,9 +551,20 @@ SearchResult = function(props) {
         //=# duration filter
 
         //= stops filter
-        $('.filter--connections').show();
         scope.filterStops();
         //=# stops filter
+
+        //= time filter
+        if ($('.filter--travel-time .nav-tabs').length) {
+            $('.filter--travel-time .nav-tabs').tab();
+            $('.filter--travel-time .nav-tabs li a').on('click', function (e) {
+                e.preventDefault();
+                $(this).tab('show')
+            });
+            $('.filter--travel-time .nav-tabs li:first a').click();
+        }
+        scope.filterTravelTime();
+        //=# time filter
     };
 
     this.helper = {
