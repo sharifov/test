@@ -2283,4 +2283,15 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
         return $dataProvider;
     }
 
+
+    public function generateLeadKey()
+    {
+        $leadFlights = $this->leadFlightSegments;
+        $key = $this->cabin;
+        foreach ($leadFlights as $flEntry){
+            $key .= $flEntry->origin.$flEntry->destination.strtotime($flEntry->departure).$flEntry->flexibility_type.$flEntry->flexibility;
+        }
+        $key .= '_'.$this->adults.'_'.$this->children.'_'.$this->infants;
+        return $key;
+    }
 }
