@@ -60,7 +60,7 @@ use common\models\local\FlightSegment;
  * @property Project $project
  * @property int $quotesCount
  * @property int $leadFlightSegmentsCount
- * @property LeadAdditionalInformation $additionalInformationForm
+ * @property LeadAdditionalInformation[] $additionalInformationForm
  * @property Lead $clone
  * @property ProfitSplit[] $profitSplits
  *
@@ -162,7 +162,7 @@ class Lead extends ActiveRecord
     public function init()
     {
         parent::init();
-        $this->additionalInformationForm = new LeadAdditionalInformation();
+        $this->additionalInformationForm = [new LeadAdditionalInformation()];
     }
 
     /**
@@ -307,7 +307,7 @@ class Lead extends ActiveRecord
                 ->where(['IN', self::tableName() . '.status', $status])
                 ->andWhere(['IN', self::tableName() . '.project_id', $projectIds]);
 
-            if((Yii::$app->authManager->getAssignment('admin', $userId) || Yii::$app->authManager->getAssignment('supervision', $userId)) && in_array($key, ['trash', 'sold', 'follow-up', 'booked'])) {
+            if ((Yii::$app->authManager->getAssignment('admin', $userId) || Yii::$app->authManager->getAssignment('supervision', $userId)) && in_array($key, ['trash', 'sold', 'follow-up', 'booked'])) {
                 $query->andWhere(['=', 'created', date('Y-m-d')]);
             }
 
@@ -343,25 +343,25 @@ class Lead extends ActiveRecord
         $userId = Yii::$app->user->id;
         $created = '';
         $employee = '';
-        if(Yii::$app->authManager->getAssignment('agent', $userId)) {
-            $employee = ' AND employee_id = '.$userId;
+        if (Yii::$app->authManager->getAssignment('agent', $userId)) {
+            $employee = ' AND employee_id = ' . $userId;
         }
 
         $sold = '';
 
-        if(Yii::$app->authManager->getAssignment('supervision', $userId)){
+        if (Yii::$app->authManager->getAssignment('supervision', $userId)) {
             $subQuery1 = UserGroupAssign::find()->select(['ugs_group_id'])->where(['ugs_user_id' => $userId]);
             $subQuery = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->where(['IN', 'ugs_group_id', $subQuery1]);
             $resEmp = $subQuery->createCommand()->queryAll();
             $empArr = [];
-            if($resEmp){
-                foreach ($resEmp as $entry){
+            if ($resEmp) {
+                foreach ($resEmp as $entry) {
                     $empArr[] = $entry['ugs_user_id'];
                 }
             }
 
-            if(!empty($empArr)){
-                $employee = 'AND leads.employee_id IN ('.implode(',',$empArr).')';
+            if (!empty($empArr)) {
+                $employee = 'AND leads.employee_id IN (' . implode(',', $empArr) . ')';
             }
 
         }
@@ -378,23 +378,23 @@ class Lead extends ActiveRecord
         $select = [
             'inbox' => 'SUM(CASE WHEN status IN (:inbox) THEN 1 ELSE 0 END)',
             'follow-up' => 'SUM(CASE WHEN status IN (:followup) ' . $created . ' THEN 1 ELSE 0 END)',
-            'booked' => 'SUM(CASE WHEN status IN (:booked) '.$created.$employee.' THEN 1 ELSE 0 END)',
-            'sold' => 'SUM(CASE WHEN status IN (:sold) '.$created.$sold.$employee.' THEN 1 ELSE 0 END)',
-            'processing' => 'SUM(CASE WHEN status IN ('.$default.') '.$employee.' THEN 1 ELSE 0 END)'];
+            'booked' => 'SUM(CASE WHEN status IN (:booked) ' . $created . $employee . ' THEN 1 ELSE 0 END)',
+            'sold' => 'SUM(CASE WHEN status IN (:sold) ' . $created . $sold . $employee . ' THEN 1 ELSE 0 END)',
+            'processing' => 'SUM(CASE WHEN status IN (' . $default . ') ' . $employee . ' THEN 1 ELSE 0 END)'];
 
-        if(Yii::$app->user->identity->role != 'agent'){
-            $select['trash'] = 'SUM(CASE WHEN status IN ('.self::STATUS_TRASH.') '.$created.$employee.' THEN 1 ELSE 0 END)';
+        if (Yii::$app->user->identity->role != 'agent') {
+            $select['trash'] = 'SUM(CASE WHEN status IN (' . self::STATUS_TRASH . ') ' . $created . $employee . ' THEN 1 ELSE 0 END)';
         }
 
         $query = self::find()
-        ->select($select)
-        ->andWhere(['IN', 'project_id', $projectIds])
-        ->addParams([':inbox' => self::STATUS_PENDING,
+            ->select($select)
+            ->andWhere(['IN', 'project_id', $projectIds])
+            ->addParams([':inbox' => self::STATUS_PENDING,
                 ':followup' => self::STATUS_FOLLOW_UP,
                 ':booked' => self::STATUS_BOOKED,
                 ':sold' => self::STATUS_SOLD,
-        ])
-        ->limit(1);
+            ])
+            ->limit(1);
 
 
         //echo $query->createCommand()->getRawSql();die;
@@ -810,7 +810,6 @@ class Lead extends ActiveRecord
     }
 
 
-
     public function permissionsView()
     {
         if (Yii::$app->user->identity->role != 'admin') {
@@ -1014,12 +1013,12 @@ Sales - Kivork",
                     $flightSegment = LeadFlightSegment::find()->where(['lead_id' => $this->id])->orderBy(['id' => SORT_ASC])->one();
                     $airlineName = '-';
                     $profit = 0;
-                    if(!empty($quote)){
+                    if (!empty($quote)) {
                         $airline = Airline::findOne(['iata' => $quote->main_airline_code]);
-                        if(!empty($airline)){
+                        if (!empty($airline)) {
                             $airlineName = $airline->name;
                         }
-                        $profit = number_format(Quote::countProfit($quote->id),2);
+                        $profit = number_format(Quote::countProfit($quote->id), 2);
                     }
 
                     $body = Yii::t('email', "
@@ -1035,7 +1034,7 @@ Sales - Kivork",
                             'url' => $host . '/lead/booked/' . $this->id,
                             'lead_id' => $this->id,
                             'quote_uid' => $quote ? $quote->uid : '-',
-                            'destination' => $flightSegment? $flightSegment->destination: '-',
+                            'destination' => $flightSegment ? $flightSegment->destination : '-',
                             'airline' => $airlineName,
                             'profit' => $profit,
                             'br' => "\r\n"
@@ -1112,7 +1111,6 @@ Sales - Kivork",
                 }
 
 
-
                 try {
                     $isSend = $swiftMailer
                         ->compose()//'sendDeliveryEmailForClient', ['order' => $this])
@@ -1150,10 +1148,10 @@ Sales - Kivork",
             $swiftMailer = Yii::$app->mailer2;
             $user = Employee::findOne($lead->employee_id);
 
-            if(!empty($user)){
+            if (!empty($user)) {
                 $agent = $user->username;
                 $subject = Yii::t('email', "⚑ [Sales] Cloned Lead-{id} by {agent}", ['id' => $lead->clone_id, 'agent' => $agent]);
-                $body =  Yii::t('email', "Agent {agent} cloned lead {clone_id} with reason [{reason}], url: {cloned_url}.
+                $body = Yii::t('email', "Agent {agent} cloned lead {clone_id} with reason [{reason}], url: {cloned_url}.
 New lead {lead_id} you can view here: {url}
 
 Regards,
@@ -1171,12 +1169,12 @@ Sales - Kivork",
                 $emailTo = Yii::$app->params['email_to']['bcc_sales'];
                 try {
                     $isSend = $swiftMailer
-                    ->compose()
-                    ->setTo($emailTo)
-                    ->setFrom(Yii::$app->params['email_from']['sales'])
-                    ->setSubject($subject)
-                    ->setTextBody($body)
-                    ->send();
+                        ->compose()
+                        ->setTo($emailTo)
+                        ->setFrom(Yii::$app->params['email_from']['sales'])
+                        ->setSubject($subject)
+                        ->setTextBody($body)
+                        ->send();
 
                     if (!$isSend) {
                         Yii::warning('Not send to Email:' . Yii::$app->params['email_to']['bcc_sales'] . ' - Sale Id: ' . $lead->id, 'Lead:Cloned :SendMail');
@@ -1185,7 +1183,7 @@ Sales - Kivork",
                 } catch (\Throwable $e) {
                     Yii::error($user->email . ' ' . $e->getMessage(), 'swiftMailer::send');
                 }
-            }else{
+            } else {
                 Yii::warning("Not found employee (" . $lead->employee_id . "), Lead:Cloned :SendMail");
             }
         }
@@ -1202,7 +1200,6 @@ Sales - Kivork",
         if ($insert) {
             LeadFlow::addStateFlow($this);
         } else {
-
 
 
             if (isset($changedAttributes['status']) && $changedAttributes['status'] !== $this->status) {
@@ -1238,27 +1235,27 @@ Sales - Kivork",
                     }
                 } elseif ($this->status == self::STATUS_FOLLOW_UP) {
 
-                        $this->l_grade = (int) $this->l_grade + 1;
-                        Yii::$app->db->createCommand('UPDATE ' . Lead::tableName() . ' SET l_grade = :grade WHERE id = :id', [
-                            ':grade' => $this->l_grade,
-                            ':id' => $this->id
-                        ])->execute();
+                    $this->l_grade = (int)$this->l_grade + 1;
+                    Yii::$app->db->createCommand('UPDATE ' . Lead::tableName() . ' SET l_grade = :grade WHERE id = :id', [
+                        ':grade' => $this->l_grade,
+                        ':id' => $this->id
+                    ])->execute();
 
-                        if($this->status_description) {
-                            $reason = new Reason();
-                            $reason->lead_id = $this->id;
-                            $reason->employee_id = $this->employee_id;
-                            $reason->created = date('Y-m-d H:i:s');
-                            $reason->reason = $this->status_description;
-                            $reason->save();
-                        }
+                    if ($this->status_description) {
+                        $reason = new Reason();
+                        $reason->lead_id = $this->id;
+                        $reason->employee_id = $this->employee_id;
+                        $reason->created = date('Y-m-d H:i:s');
+                        $reason->reason = $this->status_description;
+                        $reason->save();
+                    }
 
                     /*if (!$this->sendNotification('lead-status-booked', $this->employee_id, null, $this)) {
                         Yii::warning('Not send Email notification to employee_id: ' . $this->employee_id . ', lead: ' . $this->id, 'Lead:afterSave:sendNotification');
                     }*/
                 } elseif ($this->status == self::STATUS_SNOOZE) {
 
-                    if($this->status_description) {
+                    if ($this->status_description) {
                         $reason = new Reason();
                         $reason->lead_id = $this->id;
                         $reason->employee_id = $this->employee_id;
@@ -1383,10 +1380,10 @@ Sales - Kivork",
         $offset = false;
 
 
-        if($offset_gmt) {
+        if ($offset_gmt) {
             $offset = str_replace('.', ':', $offset_gmt);
 
-            if(isset($offset[0])) {
+            if (isset($offset[0])) {
                 if (strpos($offset, '+') === 0) {
                     $offset = str_replace('+', '-', $offset);
                 } else {
@@ -1397,7 +1394,7 @@ Sales - Kivork",
 
         } else {
 
-            if($this->leadFlightSegments) {
+            if ($this->leadFlightSegments) {
                 $firstSegment = $this->leadFlightSegments[0];
                 $airport = Airport::findIdentity($firstSegment->origin);
                 if ($airport && $airport->dst) {
@@ -1408,7 +1405,7 @@ Sales - Kivork",
 
         }
 
-        if($offset) {
+        if ($offset) {
             $clientTime = date("H:i", strtotime("now $offset GMT"));
             $clientTime = '<i class="fa fa-clock-o"></i> <b>' . Html::encode($clientTime) . '</b>'; //<br/>(GMT: ' .$offset_gmt . ')';
         }
@@ -1613,7 +1610,11 @@ Sales - Kivork",
         if (is_array($this->additional_information)) {
             $this->additional_information = json_encode($this->additional_information);
         } else {
-            $this->additional_information = json_encode($this->additionalInformationForm->attributes);
+            $separateInfo = [];
+            foreach ($this->additionalInformationForm as $additionalInformation) {
+                $separateInfo[] = $additionalInformation->attributes;
+            }
+            $this->additional_information = json_encode($separateInfo);
         }
 
         parent::afterValidate();
@@ -1624,9 +1625,47 @@ Sales - Kivork",
         parent::afterFind();
 
         if (!empty($this->additional_information)) {
-            $additionalInformationFormAttr = json_decode($this->additional_information, true);
-            $this->additionalInformationForm->setAttributes($additionalInformationFormAttr);
+            //$separateInfoArr = json_decode($this->additional_information);
+            /*if (is_array($separateInfoArr)) {
+                foreach ($separateInfoArr as $key => $separateInfo) {
+                    if ($key != 0) {
+                        $additionalInfo = new LeadAdditionalInformation();
+                        $this->additionalInformationForm[] = $additionalInfo->setAttributes($separateInfo);
+                    } else {
+                        $this->additionalInformationForm[$key]->setAttributes($separateInfo);
+                    }
+                }
+            } else {
+                $separateInfo = json_decode($this->additional_information, true);
+                $this->additionalInformationForm[0]->setAttributes($separateInfo);
+            }*/
+
+            $this->additionalInformationForm = self::getLeadAdditionalInfo($this->additional_information);
         }
+    }
+
+    /**
+     * @param $additionalInfoStr
+     * @return LeadAdditionalInformation[]
+     */
+    public static function getLeadAdditionalInfo($additionalInfoStr)
+    {
+        $additionalInformationFormArr = [];
+        $additionalInfoStr = sprintf('['.$additionalInfoStr.','.$additionalInfoStr.']');
+        $separateInfoArr = json_decode($additionalInfoStr);
+        if (is_array($separateInfoArr)) {
+            $separateInfoArr = json_decode($additionalInfoStr, true);
+            foreach ($separateInfoArr as $key => $separateInfo) {
+                $additionalInfo = new LeadAdditionalInformation();
+                $additionalInfo->setAttributes($separateInfo);
+                $additionalInformationFormArr[] = $additionalInfo;
+            }
+        } else {
+            $additionalInfo = new LeadAdditionalInformation();
+            $additionalInformationFormArr[] = $additionalInfo->setAttributes(json_decode($additionalInfoStr, true));
+        }
+
+        return $additionalInformationFormArr;
     }
 
     public function getPaxTypes()
@@ -2085,7 +2124,7 @@ Sales - Kivork",
         $taskListChecked = \common\models\LeadTask::find()->select(['COUNT(*) AS field_cnt', 'lt_task_id'])->where(['lt_lead_id' => $this->id])->andWhere(['IS NOT', 'lt_completed_dt', null])->groupBy(['lt_task_id'])->all();
 
         $completed = [];
-        if($taskListChecked) {
+        if ($taskListChecked) {
             foreach ($taskListChecked as $taskItem) {
                 $completed[$taskItem->lt_task_id] = $taskItem->field_cnt;
             }
@@ -2093,9 +2132,9 @@ Sales - Kivork",
 
         $item = [];
 
-        if($taskListAll) {
+        if ($taskListAll) {
             foreach ($taskListAll as $task) {
-                $item[] = $task->ltTask->t_name.' - ('.($completed[$task->lt_task_id] ?? 0).'/'. $task->field_cnt.')';
+                $item[] = $task->ltTask->t_name . ' - (' . ($completed[$task->lt_task_id] ?? 0) . '/' . $task->field_cnt . ')';
             }
         }
 
@@ -2109,7 +2148,7 @@ Sales - Kivork",
     public static function getTaskInfo2(int $lead_id): string
     {
         $lead = Lead::findOne($lead_id);
-        if($lead) {
+        if ($lead) {
             $out = $lead->getTaskInfo();
         } else {
             $out = '';
@@ -2122,7 +2161,7 @@ Sales - Kivork",
      * @return array
      * @throws \yii\db\Exception
      */
-    public static function getEndTaskLeads(int $category_id = null) : array
+    public static function getEndTaskLeads(int $category_id = null): array
     {
 
         $query = new Query();
@@ -2188,8 +2227,8 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
     {
         $flightSegments = LeadFlightSegment::findAll(['lead_id' => $this->id]);
         $segmentsStr = [];
-        foreach ($flightSegments as $entry){
-            $segmentsStr[] = $entry['departure'].' '.$entry['origin'].'-'.$entry['destination'];
+        foreach ($flightSegments as $entry) {
+            $segmentsStr[] = $entry['departure'] . ' ' . $entry['origin'] . '-' . $entry['destination'];
         }
 
         return implode('<br/>', $segmentsStr);
@@ -2199,10 +2238,10 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
     {
         $flightSegment = LeadFlightSegment::find()->where(['lead_id' => $this->id])->orderBy(['departure' => SORT_ASC])->one();
 
-        return ($flightSegment)?$flightSegment['departure']:null;
+        return ($flightSegment) ? $flightSegment['departure'] : null;
     }
 
-     /**
+    /**
      * @return \yii\db\ActiveQuery
      */
     public function getProfitSplits()
@@ -2218,10 +2257,9 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
     public function getSumPercentProfitSplit()
     {
         $query = new Query();
-        $query->from(ProfitSplit::tableName().' ps')
+        $query->from(ProfitSplit::tableName() . ' ps')
             ->where(['ps.ps_lead_id' => $this->id])
-            ->select(['SUM(ps.ps_percent) as percent'])
-            ;
+            ->select(['SUM(ps.ps_percent) as percent']);
 
         return $query->queryScalar();
     }
@@ -2230,10 +2268,10 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
     {
         $query = new Query();
         $query->select(['SUM(CASE WHEN status IN (2, 4, 5) THEN 1 ELSE 0 END) AS send_q',
-                        'SUM(CASE WHEN status NOT IN (2, 4, 5) THEN 1 ELSE 0 END) AS not_send_q'])
-            ->from(Quote::tableName().' q')
+            'SUM(CASE WHEN status NOT IN (2, 4, 5) THEN 1 ELSE 0 END) AS not_send_q'])
+            ->from(Quote::tableName() . ' q')
             ->where(['lead_id' => $this->id]);
-            //->groupBy('lead_id');
+        //->groupBy('lead_id');
 
         return $query->createCommand()->queryOne();
     }
@@ -2242,7 +2280,7 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
     {
         $lastNote = Note::find()->where(['lead_id' => $this->id])->orderBy(['created' => SORT_DESC])->one();
 
-        if(!empty($lastNote)){
+        if (!empty($lastNote)) {
             return $lastNote['created'];
         }
 
@@ -2253,12 +2291,13 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
     {
         $lastReason = Reason::find()->where(['lead_id' => $this->id])->orderBy(['created' => SORT_DESC])->one();
 
-        if(!empty($lastReason)){
+        if (!empty($lastReason)) {
             return $lastReason['reason'];
         }
 
         return '-';
     }
+
     /**
      * @param $params
      * @return ActiveDataProvider
@@ -2268,7 +2307,7 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
         $query = Quote::find()->where(['lead_id' => $this->id]);
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> ['defaultOrder' => ['created' => SORT_DESC]],
+            'sort' => ['defaultOrder' => ['created' => SORT_DESC]],
             'pagination' => [
                 'pageSize' => 30,
             ],

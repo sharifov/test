@@ -1,4 +1,5 @@
 <?php
+
 namespace common\models\local;
 
 
@@ -14,7 +15,6 @@ use yii\base\Model;
  * @property array $paxInfo
  * @property string $pnr
  */
-
 class LeadAdditionalInformation extends Model
 {
     public $pnr;

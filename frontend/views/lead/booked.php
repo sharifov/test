@@ -1,4 +1,5 @@
 <?php
+
 use yii\helpers\Html;
 use yii\widgets\Pjax;
 use kartik\grid\GridView;
@@ -25,13 +26,13 @@ $this->params['breadcrumbs'][] = $this->title;
 ?>
 
 <style>
-.dropdown-menu {
-	z-index: 1010 !important;
-}
+    .dropdown-menu {
+        z-index: 1010 !important;
+    }
 </style>
 <h1>
     <i class="fa fa-flag-o"></i>
-	<?=\yii\helpers\Html::encode($this->title)?>
+    <?= \yii\helpers\Html::encode($this->title) ?>
 </h1>
 <div class="lead-index">
 
@@ -68,24 +69,45 @@ $this->params['breadcrumbs'][] = $this->title;
         [
             'label' => 'PNR',
             'value' => function ($model) {
-                if (! empty($model['additional_information'])) {
-                    $additionally = new \common\models\local\LeadAdditionalInformation();
+                if (!empty($model['additional_information'])) {
+                    $additionallyInfo = Lead::getLeadAdditionalInfo($model['additional_information']);
+                    $pnrs = [];
+                    foreach ($additionallyInfo as $additionally) {
+                        $pnrs[] = (!empty($additionally->pnr))
+                            ? $additionally->pnr : '-';
+                    }
+                    return implode('<div></div>', $pnrs);
+                    /*$additionally = new \common\models\local\LeadAdditionalInformation();
                     $additionally->setAttributes(@json_decode($model['additional_information'], true));
-                    return (! empty($additionally->pnr)) ? $additionally->pnr : '-';
+                    return (! empty($additionally->pnr)) ? $additionally->pnr : '-';*/
                 }
                 return '-';
-            }
+            },
+            'format' => 'raw',
         ],
         [
             'label' => 'Passengers',
             'value' => function ($model) {
                 $content = [];
-                if (! empty($model['additional_information'])) {
-                    $additionally = new \common\models\local\LeadAdditionalInformation();
+                if (!empty($model['additional_information'])) {
+                    $additionallyInfo = Lead::getLeadAdditionalInfo($model['additional_information']);
+                    foreach ($additionallyInfo as $additionally) {
+                        if (!empty($additionally->passengers)) {
+                            $pax = [];
+                            foreach ($additionally->passengers as $passenger) {
+                                $pax[] = strtoupper($passenger);
+                            }
+                            $content[] = implode('<br/>', $pax);
+                        }
+                    }
+                    /*$additionally = new \common\models\local\LeadAdditionalInformation();
                     $additionally->setAttributes(@json_decode($model['additional_information'], true));
-                    $content = (! empty($additionally->passengers)) ? $additionally->passengers : $content;
+                    $content[] = (! empty($additionally->passengers)) ? $additionally->passengers : '';*/
                 }
-                return implode('<br/>', $content);
+                $divTag = Html::tag('div', '', [
+                    'style' => 'border: 1px solid #a3b3bd; margin: 10px 0 5px;'
+                ]);
+                return implode($divTag, $content);
             },
             'format' => 'raw',
             'contentOptions' => [
@@ -119,7 +141,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 return $model->employee ? '<i class="fa fa-user"></i> ' . $model->employee->username : '-';
             },
             'filter' => $userList,
-            'visible' => ! $isAgent
+            'visible' => !$isAgent
         ],
         [
             'label' => 'Total Profit',
@@ -172,11 +194,11 @@ $this->params['breadcrumbs'][] = $this->title;
             'label' => 'VTF',
             'value' => function (\common\models\Lead $model) {
                 $additionally = new \common\models\local\LeadAdditionalInformation();
-                if (! empty($model['additional_information'])) {
+                if (!empty($model['additional_information'])) {
                     $additionally->setAttributes(@json_decode($model['additional_information'], true));
                 }
                 $labelVTF = '<span class="label label-danger"><i class="fa fa-times"></i></span>';
-                if (! empty($additionally->vtf_processed)) {
+                if (!empty($additionally->vtf_processed)) {
                     $labelVTF = '<span class="label label-success"><i class="fa fa-check"></i></span>';
                 }
                 return $labelVTF;
@@ -187,11 +209,11 @@ $this->params['breadcrumbs'][] = $this->title;
             'label' => 'TKT',
             'value' => function (\common\models\Lead $model) {
                 $additionally = new \common\models\local\LeadAdditionalInformation();
-                if (! empty($model['additional_information'])) {
+                if (!empty($model['additional_information'])) {
                     $additionally->setAttributes(@json_decode($model['additional_information'], true));
                 }
                 $labelTKT = '<span class="label label-danger"><i class="fa fa-times"></i></span>';
-                if (! empty($additionally->tkt_processed)) {
+                if (!empty($additionally->tkt_processed)) {
                     $labelTKT = '<span class="label label-success"><i class="fa fa-check"></i></span>';
                 }
                 return $labelTKT;
@@ -202,11 +224,11 @@ $this->params['breadcrumbs'][] = $this->title;
             'label' => 'EXP',
             'value' => function (\common\models\Lead $model) {
                 $additionally = new \common\models\local\LeadAdditionalInformation();
-                if (! empty($model['additional_information'])) {
+                if (!empty($model['additional_information'])) {
                     $additionally->setAttributes(@json_decode($model['additional_information'], true));
                 }
                 $labelEXP = '<span class="label label-danger"><i class="fa fa-times"></i></span>';
-                if (! empty($additionally->exp_processed)) {
+                if (!empty($additionally->exp_processed)) {
                     $labelEXP = '<span class="label label-success"><i class="fa fa-check"></i></span>';
                 }
                 return $labelEXP;
@@ -233,7 +255,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 return $model->project ? $model->project->name : '-';
             },
             'filter' => $projectList,
-            'visible' => ! $isAgent
+            'visible' => !$isAgent
         ],
         [
             'class' => 'yii\grid\ActionColumn',
@@ -261,20 +283,20 @@ $this->params['breadcrumbs'][] = $this->title;
     ];
 
     ?>
-<?php
+    <?php
 
-echo \yii\grid\GridView::widget([
-    'dataProvider' => $dataProvider,
-    'filterModel' => $searchModel,
-    'columns' => $gridColumns,
-    'rowOptions' => function (Lead $model) {
-        if ($model->status === Lead::STATUS_PROCESSING && Yii::$app->user->id == $model->employee_id) {
-            return [
-                'class' => 'highlighted'
-            ];
+    echo \yii\grid\GridView::widget([
+        'dataProvider' => $dataProvider,
+        'filterModel' => $searchModel,
+        'columns' => $gridColumns,
+        'rowOptions' => function (Lead $model) {
+            if ($model->status === Lead::STATUS_PROCESSING && Yii::$app->user->id == $model->employee_id) {
+                return [
+                    'class' => 'highlighted'
+                ];
+            }
         }
-    }
-]);
-?>
-<?php Pjax::end(); ?>
+    ]);
+    ?>
+    <?php Pjax::end(); ?>
 </div>
