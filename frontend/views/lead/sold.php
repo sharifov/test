@@ -74,8 +74,8 @@ $this->params['breadcrumbs'][] = $this->title;
                         $ids[] = (!empty($additionally->bo_sale_id))
                             ? $additionally->bo_sale_id : 0;
 
-                        if ($maxPaxCnt <= count($additionally->passengers)) {
-                            $maxPaxCnt = count($additionally->passengers);
+                        if ($maxPaxCnt <= \count($additionally->passengers)) {
+                            $maxPaxCnt = \count($additionally->passengers);
                         }
                     }
 

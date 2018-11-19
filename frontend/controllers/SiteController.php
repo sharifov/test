@@ -14,6 +14,7 @@ use yii\helpers\ArrayHelper;
 use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
 use common\models\LoginForm;
+use yii\helpers\VarDumper;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 
@@ -81,6 +82,12 @@ class SiteController extends FController
      */
     public function actionIndex(): string
     {
+
+        $str = '[{"pnr":"JN3LG4","bo_sale_id":202,"vtf_processed":false,"tkt_processed":true,"exp_processed":true,"passengers":["DAS \/ SUBHADEEP (ADT)"],"paxInfo":[{"pax":"DAS \/ SUBHADEEP (ADT)","dob":"1987-03-04","sex":"M"}]},{"pnr":"TEST","bo_sale_id":203,"vtf_processed":false,"tkt_processed":true,"exp_processed":true,"passengers":["Balon \/ John M (ADT)"],"paxInfo":[{"pax":"Balon \/ John M (ADT)","dob":"1991-08-08","sex":"F"}]}]';
+        $additionallyInfo = Lead::getLeadAdditionalInfo($str);
+        foreach ($additionallyInfo as $item) {
+            VarDumper::dump(count($item->passengers), 10, true);
+        }
 
         $userId = Yii::$app->user->id;
 
