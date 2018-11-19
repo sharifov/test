@@ -80,6 +80,11 @@ Prod Hosts:
   - [http://sales.dev.travelinsides.com/admin](http://sales.dev.travelinsides.com/admin) - Backend
   - [http://api-sales.dev.travelinsides.com](http://api-sales.dev.travelinsides.com) - API
   - [http://api-sales.dev.travelinsides.com/doc/index.html](http://api-sales.dev.travelinsides.com/doc/index.html) - API Documentation
+  
+ New Dev Hosts:
+ -------------------
+ - [https://sales-dev.travelinsides.com](https://sales-dev.travelinsides.com) - Frontend
+ - [https://sales-dev.travelinsides.com/admin](https://sales-dev.travelinsides.com/admin) - Backend
  
  Generate API Documentation (apiDoc):
  ```
