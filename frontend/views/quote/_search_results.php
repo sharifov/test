@@ -1,6 +1,7 @@
 <?php
 use yii\bootstrap\Modal;
 use yii\helpers\Url;
+use common\models\Lead;
 
 /**
  * @var $result []
@@ -8,6 +9,7 @@ use yii\helpers\Url;
  * @var $locations []
  * @var $leadId int
  * @var $gds string
+ * @var $lead Lead
  */
 if($result && (isset($result['count']) && $result['count'] > 0)):
 $js = <<<JS
@@ -160,13 +162,77 @@ $maxPrice = end($result['results'])['prices']['totalPrice'];
             <div class="dropdown-menu dropdown-menu-right">
                 <div class="search-filters__stops">
                     <h3 class="search-filters__header">
-                        Duration
+                        Trip Duration
                         <i class="search-filters__close-btn js-dropdown-close"></i>
                     </h3>
                     <div class="search-filters__body">
                         <span class="search-filters__slider-label search-filters__default" id="duration-slider-label">Any</span>
                         <a href="#" class="search-filters__clear-link js-filter-reset">Clear</a>
                         <div class="search-filters__slider" id="duration-slider"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+         <div class="filter filter--travel-time dropdown js-filter">
+            <a href="#" data-toggle="dropdown">
+                <span class="filter__summary js-filter-summary">Time</span>
+                <i class="icn-clear-filter js-clear-filter"></i>
+            </a>
+
+            <!--Dropdown-->
+            <div class="dropdown-menu dropdown-menu-right">
+                <div class="search-filters__time">
+                    <h3 class="search-filters__header">
+                        Time
+                        <i class="search-filters__close-btn js-dropdown-close"></i>
+                    </h3>
+                    <div class="search-filters__body">
+                        <!--Flight Depart-->
+                        <div class="search-filters__flight">
+                        	<?php $tabTtl = ['Depart','Return'];?>
+                        	<?php $cntTrips = count($lead->leadFlightSegments);?>
+							<?php if($cntTrips > 1):?>
+                            <ul class="nav nav-tabs search-filters__tabs">
+                            	<?php foreach ($lead->leadFlightSegments as $idx => $flSegment):?>
+								<li<?php if($idx == 0):?> class="active"<?php endif;?>>
+									<a href="#filter-time-<?= $idx?>" data-toggle="tab">
+									<?php if($cntTrips > 2):?>Trip <?= $idx+1?><?php else:?><?= $tabTtl[$idx]?><?php endif;?>
+									</a>
+								</li>
+                            	<?php endforeach;?>
+                            </ul>
+                            <?php endif;?>
+
+                            <div class="tab-content search-filters__tab-content">
+                            	<?php foreach ($lead->leadFlightSegments as $idx => $flSegment):?>
+                                <div class="tab-pane<?php if($idx == 0):?> active<?php endif;?>" id="filter-time-<?= $idx?>" data-index="<?= $idx?>">
+                                    <div class="search-filters__time-section">
+                                        <h4 class="search-filters__flight-title"><?= $flSegment->origin?> &#8594; <?= $flSegment->destination?></h4>
+                                        <div class="search-filters__time-item takeoff" data-id="landing-time">
+                                            <h4 class="search-filters__section-subtitle">
+                                                <i class="icn-take-off"></i>
+                                                Takeoff:
+                                                <span class="search-filters__time-value search-filters__default" data-id="landing-value-time"><span> Any Time</span></span>
+                                            </h4>
+                                            <div class="search-filters__slider" data-id="landing-slider-time" data-direction="depart"></div>
+                                        </div>
+                                        <div id="search-time-departure">
+                                            <div class="search-filters__time-item landing" data-id="landing-time">
+                                                <h4 class="search-filters__section-subtitle">
+                                                    <i class="icn-take-on"></i>
+                                                    Landing:
+                                                    <span class="search-filters__time-value" data-id="landing-value-time"><span> Any Time</span></span>
+                                                </h4>
+                                                <div class="search-filters__slider" data-id="landing-slider-time" data-direction="arrival"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <?php endforeach;?>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
             </div>

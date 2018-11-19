@@ -78,7 +78,7 @@ class QuoteController extends FController
             ];
             $attr = Yii::$app->request->post();
             if(isset($attr['gds']) && $lead !== null){
-                $keyCache = sprintf('quick-search-new-%d-%d-%s-%s', $lead->id, Yii::$app->user->id, $attr['gds'], $lead->adults . $lead->children . $lead->infants);
+                $keyCache = sprintf('quick-search-new-%d-%d-%s-%s', $lead->id, Yii::$app->user->id, $attr['gds'], $lead->generateLeadKey());
                 $result = Yii::$app->cache->get($keyCache);
 
                 if(!$result){
@@ -92,6 +92,7 @@ class QuoteController extends FController
                 $viewData['result'] = $result;
                 $viewData['leadId'] = $leadId;
                 $viewData['gds'] = $attr['gds'];
+                $viewData['lead'] = $lead;
 
                 return $this->renderAjax('_search_results', $viewData);
             }
@@ -114,7 +115,7 @@ class QuoteController extends FController
             $attr = Yii::$app->request->post();
 
             if(isset($attr['gds']) && isset($attr['key']) && $lead !== null){
-                $keyCache = sprintf('quick-search-new-%d-%d-%s-%s', $lead->id, Yii::$app->user->id, $attr['gds'], $lead->adults . $lead->children . $lead->infants);
+                $keyCache = sprintf('quick-search-new-%d-%d-%s-%s', $lead->id, Yii::$app->user->id, $attr['gds'], $lead->generateLeadKey());
                 $resultSearch = Yii::$app->cache->get($keyCache);
 
                 if($resultSearch !== false){
