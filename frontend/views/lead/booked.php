@@ -63,7 +63,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         $ids[] = (!empty($additionally->bo_sale_id))
                             ? $additionally->bo_sale_id : 0;
 
-                        if ($maxPaxCnt <= count($additionally->passengers)) {
+                        if (!empty($additionally->passengers) && $maxPaxCnt <= count($additionally->passengers)) {
                             $maxPaxCnt = count($additionally->passengers);
                         }
                     }
@@ -103,7 +103,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         $pnrs[] = (!empty($additionally->pnr))
                             ? $additionally->pnr : '-';
 
-                        if ($maxPaxCnt <= count($additionally->passengers)) {
+                        if (!empty($additionally->passengers) && $maxPaxCnt <= count($additionally->passengers)) {
                             $maxPaxCnt = count($additionally->passengers);
                         }
                     }
@@ -235,7 +235,7 @@ $this->params['breadcrumbs'][] = $this->title;
                             ? '<span class="label label-success"><i class="fa fa-check"></i></span>'
                             : $labelVTF;
 
-                        if ($maxPaxCnt <= count($additionally->passengers)) {
+                        if (!empty($additionally->passengers) && $maxPaxCnt <= count($additionally->passengers)) {
                             $maxPaxCnt = count($additionally->passengers);
                         }
                     }
@@ -268,7 +268,7 @@ $this->params['breadcrumbs'][] = $this->title;
                             ? '<span class="label label-success"><i class="fa fa-check"></i></span>'
                             : $labelTKT;
 
-                        if ($maxPaxCnt <= count($additionally->passengers)) {
+                        if (!empty($additionally->passengers) && $maxPaxCnt <= count($additionally->passengers)) {
                             $maxPaxCnt = count($additionally->passengers);
                         }
                     }
@@ -300,7 +300,7 @@ $this->params['breadcrumbs'][] = $this->title;
                             ? '<span class="label label-success"><i class="fa fa-check"></i></span>'
                             : $labelEXP;
 
-                        if ($maxPaxCnt <= count($additionally->passengers)) {
+                        if (!empty($additionally->passengers) && $maxPaxCnt <= count($additionally->passengers)) {
                             $maxPaxCnt = count($additionally->passengers);
                         }
                     }
