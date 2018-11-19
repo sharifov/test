@@ -10,7 +10,15 @@ use yii\bootstrap\Html;
  */
 
 ?>
-<?php $totalDuration = []; $stops = []; $totalDurationSum = 0; $time = [];
+<?php $totalDuration = []; $stops = []; $totalDurationSum = 0; $time = []; $price = $result['prices']['totalPrice'];
+if(isset($result['passengers']['ADT'])){
+    $price = $result['passengers']['ADT']['price'];
+}elseif (isset($result['passengers']['CHD'])){
+    $price = $result['passengers']['CHD']['price'];
+}elseif (isset($result['passengers']['INF'])){
+    $price = $result['passengers']['INF']['price'];
+}
+
 foreach ($result['trips'] as $trip){
     if(isset($trip['duration'])){
         $totalDuration[] = $trip['duration'];
@@ -28,7 +36,7 @@ foreach ($result['trips'] as $trip){
     $stops[] = $stopCnt;
 }
 ?>
-<div class="quote search-result__quote" data-price="<?= $result['prices']['totalPrice']?>"
+<div class="quote search-result__quote" data-price="<?= $price?>"
 data-durationmax="<?= max($totalDuration)?>" data-duration="<?= json_encode($totalDuration)?>" data-totalduration="<?= $totalDurationSum?>"
 data-stop="<?= json_encode($stops)?>" data-time='<?= json_encode($time)?>'
 data-airline="<?= $result['validatingCarrier']?>" id="search-result__quote-<?= $resultKey?>">
@@ -52,7 +60,7 @@ data-airline="<?= $result['validatingCarrier']?>" id="search-result__quote-<?= $
 			</div>
 		</div>
 		<div class="quote__heading-right text-success">
-			<strong class="quote__quote-price">$<?= $result['prices']['totalPrice']?></strong>
+			<strong class="quote__quote-price">$<?= $price?></strong>
 		</div>
 	</div>
 	<div class="quote__wrapper">

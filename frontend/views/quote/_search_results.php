@@ -44,7 +44,22 @@ $this->registerJs($js);
 ?>
 <?php
 $minPrice = $result['results'][0]['prices']['totalPrice'];
-$maxPrice = end($result['results'])['prices']['totalPrice'];
+if(isset($result['results'][0]['passengers']['ADT'])){
+    $minPrice = $result['results'][0]['passengers']['ADT']['price'];
+}elseif (isset($result['results'][0]['passengers']['CHD'])){
+    $minPrice = $result['results'][0]['passengers']['CHD']['price'];
+}elseif (isset($result['results'][0]['passengers']['INF'])){
+    $minPrice = $result['results'][0]['passengers']['INF']['price'];
+}
+$lastResult = end($result['results']);
+$maxPrice = $lastResult['prices']['totalPrice'];
+if(isset($lastResult['passengers']['ADT'])){
+    $maxPrice = $lastResult['passengers']['ADT']['price'];
+}elseif (isset($lastResult['passengers']['CHD'])){
+    $maxPrice = $lastResult['passengers']['CHD']['price'];
+}elseif (isset($lastResult['passengers']['INF'])){
+    $maxPrice = $lastResult['passengers']['INF']['price'];
+}
 ?>
 <div class="filters-panel">
     <div class="filters-aux">
