@@ -66,7 +66,6 @@ class ChangeMarkup extends Model
             $changedAttributes['selling'] = $this->quote->quotePrice()['selling'];
             foreach ($this->quote->quotePrices as $quotePrice) {
                 $oldMarkup += $quotePrice->extra_mark_up;
-                $quotePrice->toFloat();
                 $quotePrice->roundValue();
                 if ($quotePrice->passenger_type == $quotePrice::PASSENGER_ADULT && $this->pax_type == self::PAX_ADT) {
                     $quotePrice->extra_mark_up = $this->value;

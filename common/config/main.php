@@ -26,6 +26,15 @@ return [
             'thousandSeparator' => ',',
             'decimalSeparator' => '.',
         ],
+        'formatter_search' => [
+            'class' => 'yii\i18n\Formatter',
+            'dateFormat' => 'php:d-M-Y',
+            'datetimeFormat' => 'php:d-M-Y H:i:s',
+            'timeFormat' => 'php:H:i',
+
+            'thousandSeparator' => ',',
+            'decimalSeparator' => '.',
+        ],
         'cache' => [
             'class' => 'yii\caching\FileCache',
         ],

@@ -22,7 +22,6 @@ $appliedQuote = $lead->getAppliedAlternativeQuotes();
 
 if ($leadForm->mode != $leadForm::VIEW_MODE) {
     $js = <<<JS
-
     $('[data-toggle="tooltip"]').tooltip();
     $(document).on('click', '.send-quotes-to-email', function () {
         var urlModel = $(this).data('url');

@@ -867,3 +867,5 @@ fieldset.fieldset legend {
 .intl-tel-input input {
     padding: 6px 12px;
 }
+
+#search-preloader .preloader{position:relative;color:#468cab;}

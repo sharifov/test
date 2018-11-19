@@ -2,7 +2,6 @@
 
 namespace common\models;
 
-use common\models\local\LeadLogMessage;
 use Yii;
 
 /**
@@ -76,6 +75,48 @@ class QuotePrice extends \yii\db\ActiveRecord
         }
         $model->selling = ($model->selling < 0)
             ? 0 : $model->selling;
+
+        if (!$check_payment) {
+            $model->service_fee = 0;
+        } else {
+            $model->service_fee = round($model->selling * Quote::SERVICE_FEE, 2);
+        }
+
+        $model->selling += $model->service_fee;
+
+        $model->roundValue();
+
+        $model->oldParams = serialize($model->attributes);
+    }
+
+
+    public function calculation2($check_payment = true)
+    {
+        $model = $this;
+        $model->oldAttributes = unserialize($model->oldParams);
+        $model->oldParams = '';
+        $model->toFloat();
+
+        if ($model->oldAttributes['selling'] != $model->selling) {
+            $model->mark_up = $model->mark_up + ($model->selling - $model->oldAttributes['selling']);
+        } elseif ($model->oldAttributes['net'] != $model->net) {
+            $model->fare = $model->fare + ($model->net - $model->oldAttributes['net']);
+            $model->mark_up = $model->selling - $model->net;
+            if ($model->fare < 0) {
+                $model->taxes = $model->taxes + $model->fare;
+                $model->fare = 0;
+            }
+            $model->selling = $model->net + $model->mark_up;
+        } else {
+            if ($model->fare >= $model->net) {
+                $model->net = $model->fare + $model->taxes;
+            } else {
+                $model->taxes = $model->net - $model->fare;
+            }
+            $model->selling = $model->net + $model->mark_up + $model->extra_mark_up;
+        }
+        $model->selling = ($model->selling < 0)
+        ? 0 : $model->selling;
 
         if (!$check_payment) {
             $model->service_fee = 0;

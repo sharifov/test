@@ -603,10 +603,7 @@ class LeadSearch extends Lead
         }
 
         if($this->client_phone) {
-
-            $this->client_phone = preg_replace('~[^0-9\+]~', '', $this->client_phone);
-            $this->client_phone = ($this->client_phone[0] === "+" ? '+' : '') . str_replace("+", '', $this->client_phone);
-
+            $this->client_phone = ClientPhone::clearNumber($this->client_phone);
             $subQuery = ClientPhone::find()->select(['DISTINCT(client_id)'])->where(['like', 'phone', $this->client_phone]);
             $query->andWhere(['IN', 'client_id', $subQuery]);
         }
@@ -617,7 +614,7 @@ class LeadSearch extends Lead
             $query->andWhere(['IN', 'leads.id', $subQuery]);
         }
 
-        if($this->supervision_id > 0) {
+        /*if($this->supervision_id > 0) {
             $subQuery1 = UserGroupAssign::find()->select(['ugs_group_id'])->where(['ugs_user_id' => $this->supervision_id]);
             $subQuery = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->where(['IN', 'ugs_group_id', $subQuery1]);
             $query->andWhere(['IN', 'leads.employee_id', $subQuery]);
@@ -628,7 +625,7 @@ class LeadSearch extends Lead
             ->leftJoin(ProfitSplit::tableName().' ps','ps.ps_lead_id = leads.id')
             ->andWhere($leadTable.'.employee_id = '. $this->employee_id.' OR ps.ps_user_id ='.$this->employee_id)
             ->groupBy(['leads.id']);
-        }
+        }*/
 
         /*  $sqlRaw = $query->createCommand()->getRawSql();
          VarDumper::dump($sqlRaw, 10, true); exit; */

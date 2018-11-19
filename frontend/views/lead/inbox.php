@@ -194,7 +194,12 @@ $this->params['breadcrumbs'][] = $this->title;
             //'attribute' => 'pending',
             'label' => 'Pending Time',
             'value' => function (\common\models\Lead $model) {
-                return Yii::$app->formatter->asRelativeTime(strtotime($model->created)); // Lead::getPendingAfterCreate($model->created);
+                $createdTS = strtotime($model->created);
+
+                $diffTime = time() - $createdTS;
+                $diffHours = (int) ($diffTime / (60 * 24));
+
+                return ($diffHours > 3 && $diffHours < 73 ) ? $diffHours.' hours' : Yii::$app->formatter->asRelativeTime($createdTS);
             },
             'options' => [
                 'style' => 'width:180px'
@@ -310,6 +315,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 // return $model->leadFlightSegmentsCount ? Html::a($model->leadFlightSegmentsCount, ['lead-flight-segment/index', "LeadFlightSegmentSearch[lead_id]" => $model->id], ['target' => '_blank', 'data-pjax' => 0]) : '-' ;
             },
             'format' => 'raw',
+            'visible' => ! $isAgent,
             'contentOptions' => [
                 'class' => 'text-left'
             ],
@@ -324,6 +330,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 return '<span title="adult"><i class="fa fa-male"></i> '. $model->adults .'</span> / <span title="child"><i class="fa fa-child"></i> ' . $model->children . '</span> / <span title="infant"><i class="fa fa-info"></i> ' . $model->infants.'</span>';
             },
             'format' => 'raw',
+            'visible' => ! $isAgent,
             'contentOptions' => [
                 'class' => 'text-center'
             ],

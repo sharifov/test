@@ -70,4 +70,17 @@ class ClientPhone extends \yii\db\ActiveRecord
         $this->updated = date('Y-m-d H:i:s');
         return parent::beforeValidate();
     }
+
+    /**
+     * @param string $phoneNumber
+     * @return null|string|string[]
+     */
+    public static function clearNumber(string $phoneNumber = '')
+    {
+        $phoneNumber = preg_replace('~[^0-9\+]~', '', $phoneNumber);
+        if(isset($phoneNumber[0])) {
+            $phoneNumber = ($phoneNumber[0] === '+' ? '+' : '') . str_replace('+', '', $phoneNumber);
+        }
+        return $phoneNumber;
+    }
 }

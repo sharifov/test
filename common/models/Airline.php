@@ -147,4 +147,15 @@ class Airline extends ActiveRecord
             }
         }
     }
+
+    public static function getAirlinesListByIata($iata = [])
+    {
+        $data = [];
+        $airlines = self::find()->where(['iata' => $iata])->all();
+        foreach ($airlines as $airline){
+            $data[$airline['iata']] = $airline['name'];
+        }
+
+        return $data;
+    }
 }
