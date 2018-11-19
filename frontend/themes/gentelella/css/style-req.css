@@ -1,4 +1,4 @@
-/*V 1.9*/
+/*V 2.0*/
 /*==== Colors ====*/
 /*Colors in layout*/
 /*==== Fonts ====*/
@@ -3866,6 +3866,15 @@ input[disabled] + .radio-tab__text {
   margin-top: 20px;
 }
 
+
+.quote--highlight {
+ border-color: #82b9e2;
+}
+
+.quote--highlight .quote__heading {
+ background-color: #e5f4ff;
+}
+
 .quote--selected {
   border-color: #399e65;
 }
@@ -5017,3 +5026,5 @@ input[disabled] + .radio-tab__text {
 }
 
 .popover {max-width:800px;}
+.popover-dump{width:450px;}
+.popover-dump-copy{position:absolute;top:0;right:0;}

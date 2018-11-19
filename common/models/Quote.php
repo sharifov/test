@@ -63,6 +63,7 @@ class Quote extends \yii\db\ActiveRecord
         FARE_TYPE_SR = 'SR',
         FARE_TYPE_SRU = 'SRU',
         FARE_TYPE_COMM = 'COMM',
+        FARE_TYPE_TOUR= 'TOUR',
         FARE_TYPE_PUBC = 'PUBC';
 
     public const
@@ -167,6 +168,7 @@ class Quote extends \yii\db\ActiveRecord
                 break;
             case self::FARE_TYPE_PUBC:
             case self::FARE_TYPE_PUB:
+            case self::FARE_TYPE_TOUR:
                 switch ($check_payment) {
                     case false:
                         if ($markUp >= 0) {
@@ -1173,6 +1175,7 @@ class Quote extends \yii\db\ActiveRecord
                 $airline = Airline::findIdentity($segment->qs_marketing_airline);
                 $departureDateTime = new \DateTime($segment->qs_departure_time);
                 $arrivalDateTime = new \DateTime($segment->qs_arrival_time);
+                $operatingAirline = Airline::findIdentity($segment->qs_operating_airline);
                 $segments[] = [
                     'cabin' => $segment->qs_cabin,
                     'carrier' => $segment->qs_marketing_airline,
@@ -1188,7 +1191,7 @@ class Quote extends \yii\db\ActiveRecord
                     'flightNumber' => $segment->qs_flight_number,
                     'bookingClass' => $segment->qs_booking_class,
                     'flightDuration' => $segment->qs_duration,
-                    'operatingAirline' => ($segment->qs_operating_airline != $segment->qs_marketing_airline)?$segment->qs_operating_airline:null,
+                    'operatingAirline' => ($segment->qs_operating_airline != $segment->qs_marketing_airline)?(($operatingAirline)?$operatingAirline->name:$segment->qs_operating_airline):null,
                     'layoverDuration' => ($keySegm > 0)?(($departureDateTime->getTimestamp() - $segments[$keySegm-1]['arrivalDateTime']->getTimestamp())/60):0,
                     'stop' => $segment->qs_stop,
                 ];

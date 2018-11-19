@@ -202,6 +202,7 @@ $js = <<<JS
                     $('#'+searchResId).addClass('quote--selected');
 
                     $.pjax.reload({container: '#quotes_list', async: false});
+                    $('.popover-class[data-toggle="popover"]').popover();
                 }else{
                     alert('Some errors was happened during create quote. Please try again later.');
                 }
@@ -284,6 +285,15 @@ $js = <<<JS
             editBlock.modal('show');
         });
     });
+
+$(document).ready(function() {
+    var clipboard = new ClipboardJS('.btn-clipboard');
+
+    clipboard.on('success', function(e) {
+        alert('Reservation dump copied successfully to clipboard');
+        e.clearSelection();
+    });
+});
 JS;
 $this->registerJs($js);
 
@@ -598,4 +608,5 @@ $this->registerJs($js);
 <?php $this->registerJsFile('//cdnjs.cloudflare.com/ajax/libs/bootstrap-modal/2.2.6/js/bootstrap-modal.min.js', ['depends' => [yii\web\JqueryAsset::className()]])?>
 <?php $this->registerJsFile('//cdnjs.cloudflare.com/ajax/libs/bootstrap-modal/2.2.6/js/bootstrap-modalmanager.min.js', ['depends' => [yii\web\JqueryAsset::className()]])?>
 <?php $this->registerJsFile('//cdnjs.cloudflare.com/ajax/libs/noUiSlider/11.1.0/nouislider.min.js', ['depends' => [yii\web\JqueryAsset::className()]])?>
+<?php $this->registerJsFile('//cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.0/clipboard.min.js', ['depends' => [yii\web\JqueryAsset::className()]])?>
 <?php $this->registerJsFile('/js/search-result.js', ['depends' => [yii\web\JqueryAsset::className()]])?>
