@@ -70,6 +70,9 @@ $this->params['breadcrumbs'][] = $this->title;
                     $additionallyInfo = Lead::getLeadAdditionalInfo($model['additional_information']);
                     $ids = [];
                     foreach ($additionallyInfo as $additionally) {
+                        if (!$additionally->tkt_processed) {
+                            continue;
+                        }
                         $newRows = '';
                         if (!empty($additionally->passengers)) {
                             for ($i = 0; $i < count($additionally->passengers); $i++) {
@@ -100,6 +103,9 @@ $this->params['breadcrumbs'][] = $this->title;
                     $additionallyInfo = Lead::getLeadAdditionalInfo($model['additional_information']);
                     $pnrs = [];
                     foreach ($additionallyInfo as $additionally) {
+                        if (!$additionally->tkt_processed) {
+                            continue;
+                        }
                         $newRows = '';
                         if (!empty($additionally->passengers)) {
                             for ($i = 0; $i < count($additionally->passengers); $i++) {
@@ -127,6 +133,9 @@ $this->params['breadcrumbs'][] = $this->title;
                 if (!empty($model['additional_information'])) {
                     $additionallyInfo = Lead::getLeadAdditionalInfo($model['additional_information']);
                     foreach ($additionallyInfo as $additionally) {
+                        if (!$additionally->tkt_processed) {
+                            continue;
+                        }
                         if (!empty($additionally->passengers)) {
                             $pax = [];
                             foreach ($additionally->passengers as $passenger) {
