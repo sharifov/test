@@ -173,7 +173,10 @@ $this->params['breadcrumbs'][] = $this->title;
         ],
         [
             'label' => 'Total Profit',
-            'value' => function ($model) {
+            'value' => function (common\models\Lead $model) {
+                if (!empty($model->final_profit)) {
+                    return "<strong>$" . number_format($model->final_profit, 2) . "</strong>";
+                }
                 $quote = $model->getBookedQuote();
                 if (empty($quote)) {
                     return '';

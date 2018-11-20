@@ -29,11 +29,13 @@ use common\models\Quote;
                 <td><?= $lead->updated ?></td>
                 <td>
                     <?php
-                    $profit = 0;
-                    $appliedAlternativeQuotes = $lead->getAppliedAlternativeQuotes();
-                    if ($appliedAlternativeQuotes !== null) {
-                        $price = $appliedAlternativeQuotes->quotePrice();
-                        $profit = Quote::getProfit($price['mark_up'], $price['selling'], $price['fare_type'], $price['isCC']);
+                    $profit = $lead->final_profit;
+                    if (empty($profit)) {
+                        $appliedAlternativeQuotes = $lead->getAppliedAlternativeQuotes();
+                        if ($appliedAlternativeQuotes !== null) {
+                            $price = $appliedAlternativeQuotes->quotePrice();
+                            $profit = Quote::getProfit($price['mark_up'], $price['selling'], $price['fare_type'], $price['isCC']);
+                        }
                     }
 
                     echo sprintf('$%s', number_format($profit, 2));

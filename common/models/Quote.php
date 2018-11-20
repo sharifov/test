@@ -219,6 +219,9 @@ class Quote extends \yii\db\ActiveRecord
 
     public function getTotalProfit()
     {
+        if (!empty($this->lead->final_profit)) {
+            return $this->lead->final_profit;
+        }
         return self::countProfit($this->id);
     }
 
