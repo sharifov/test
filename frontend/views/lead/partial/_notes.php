@@ -6,7 +6,7 @@
 
 ?>
 
-<div class="panel panel-neutral panel-wrapper agents-notes-block">
+<div class="panel panel-success panel-wrapper agents-notes-block">
     <div class="panel-heading collapsing-heading">
         <a data-toggle="collapse" href="#agents-notes" aria-expanded="true"
            class="collapsing-heading__collapse-link">
