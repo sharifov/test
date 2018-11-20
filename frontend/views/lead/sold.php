@@ -69,24 +69,22 @@ $this->params['breadcrumbs'][] = $this->title;
                 if (!empty($model['additional_information'])) {
                     $additionallyInfo = Lead::getLeadAdditionalInfo($model['additional_information']);
                     $ids = [];
-                    $maxPaxCnt = 0;
                     foreach ($additionallyInfo as $additionally) {
-                        $ids[] = (!empty($additionally->bo_sale_id))
-                            ? $additionally->bo_sale_id : 0;
-
-                        if (!empty($additionally->passengers) && $maxPaxCnt <= count($additionally->passengers)) {
-                            $maxPaxCnt = count($additionally->passengers);
+                        $newRows = '';
+                        if (!empty($additionally->passengers)) {
+                            for ($i = 0; $i < count($additionally->passengers); $i++) {
+                                $newRows .= '<br/>';
+                            }
                         }
+                        $bo_sale_id = (!empty($additionally->bo_sale_id))
+                            ? $additionally->bo_sale_id : 0;
+                        $ids[] = $bo_sale_id . $newRows;
                     }
 
                     $divTag = Html::tag('div', '', [
                         'style' => 'border: 1px solid #a3b3bd; margin: 0px 0 5px;'
                     ]);
-                    $newRows = '';
-                    for ($i = 0; $i < $maxPaxCnt; $i++) {
-                        $newRows .= '<br/>';
-                    }
-                    return implode($newRows . $divTag, $ids);
+                    return implode($divTag, $ids);
                 }
                 return 0;
             },
@@ -101,24 +99,22 @@ $this->params['breadcrumbs'][] = $this->title;
                 if (!empty($model['additional_information'])) {
                     $additionallyInfo = Lead::getLeadAdditionalInfo($model['additional_information']);
                     $pnrs = [];
-                    $maxPaxCnt = 0;
                     foreach ($additionallyInfo as $additionally) {
-                        $pnrs[] = (!empty($additionally->pnr))
-                            ? $additionally->pnr : '-';
-
-                        if (!empty($additionally->passengers) && $maxPaxCnt <= count($additionally->passengers)) {
-                            $maxPaxCnt = count($additionally->passengers);
+                        $newRows = '';
+                        if (!empty($additionally->passengers)) {
+                            for ($i = 0; $i < count($additionally->passengers); $i++) {
+                                $newRows .= '<br/>';
+                            }
                         }
+                        $pnr = (!empty($additionally->pnr))
+                            ? $additionally->pnr : '-';
+                        $pnrs[] = $pnr . $newRows;
                     }
 
                     $divTag = Html::tag('div', '', [
                         'style' => 'border: 1px solid #a3b3bd; margin: 0px 0 5px;'
                     ]);
-                    $newRows = '';
-                    for ($i = 0; $i < $maxPaxCnt; $i++) {
-                        $newRows .= '<br/>';
-                    }
-                    return implode($newRows . $divTag, $pnrs);
+                    return implode($divTag, $pnrs);
                 }
                 return '-';
             },
