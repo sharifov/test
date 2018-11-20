@@ -77,7 +77,7 @@ $this->params['breadcrumbs'][] = $this->title;
                             }
                         }
                         $bo_sale_id = (!empty($additionally->bo_sale_id))
-                            ? $additionally->bo_sale_id : 0;
+                            ? $additionally->bo_sale_id : $model->bo_flight_id;
                         $ids[] = $bo_sale_id . $newRows;
                     }
 
