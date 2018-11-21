@@ -219,7 +219,7 @@ $this->params['breadcrumbs'][] = $this->title;
         [
             'label' => 'Total Profit',
             'value' => function (\common\models\Lead $model) {
-                if (!empty($model->final_profit)) {
+                if ($model->final_profit !== null) {
                     return "<strong>$" . number_format($model->final_profit, 2) . "</strong>";
                 }
                 $quote = $model->getBookedQuote();

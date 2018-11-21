@@ -142,7 +142,7 @@ class SoldReportForm extends Model
             'id' => $item->id
         ];
 
-        if (empty($item->final_profit)) {
+        if ($item->final_profit === null) {
             $quote = $item->getAppliedAlternativeQuotes();
             if ($quote !== null) {
                 $price = $quote->quotePrice();

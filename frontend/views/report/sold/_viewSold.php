@@ -30,7 +30,7 @@ use common\models\Quote;
                 <td>
                     <?php
                     $profit = $lead->final_profit;
-                    if (empty($profit)) {
+                    if ($lead->final_profit === null) {
                         $appliedAlternativeQuotes = $lead->getAppliedAlternativeQuotes();
                         if ($appliedAlternativeQuotes !== null) {
                             $price = $appliedAlternativeQuotes->quotePrice();

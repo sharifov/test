@@ -129,7 +129,7 @@ class Quote extends \yii\db\ActiveRecord
             self::FARE_TYPE_PUB => 'Published - no commission',
             self::FARE_TYPE_PUBC => 'Published - with commission',
             self::FARE_TYPE_SR => 'Private - Limited markup',
-            self::FARE_TYPE_SRU => 'Private - Unlimited markup',
+            self::FARE_TYPE_TOUR => 'Tour Fare'
             self::FARE_TYPE_COMM => 'SPLIT MCO'
         ];
 
@@ -219,7 +219,7 @@ class Quote extends \yii\db\ActiveRecord
 
     public function getTotalProfit()
     {
-        if (!empty($this->lead->final_profit)) {
+        if ($this->lead->final_profit !== null) {
             return $this->lead->final_profit;
         }
         return self::countProfit($this->id);
