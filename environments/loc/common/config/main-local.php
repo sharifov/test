@@ -16,5 +16,11 @@ return [
             // for the mailer to send real emails.
             'useFileTransport' => true,
         ],
+        'communication' => [
+            'class' => \common\components\CommunicationService::class,
+            'url' => 'http://api.communication.office.test/v1/',
+            'username' => 'sales',
+            'password' => 'Sales2018!',
+        ],
     ],
 ];

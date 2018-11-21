@@ -95,6 +95,9 @@ $isCoach = Yii::$app->authManager->getAssignment('coach', Yii::$app->user->id);
 
 
             if (!$isCoach) {
+
+                $menuItems[] = ['label' => 'Mails <span id="inbox-queue" class="label-info label pull-right"></span> ', 'url' => ['/email/index'], 'icon' => 'envelope'];
+
                 $badges = \common\models\Lead::getBadgesSingleQuery();
 
                 $menuItems[] = ['label' => 'Inbox <span id="inbox-queue" class="label-info label pull-right">' . $badges['inbox'] . '</span> ', 'url' => ['queue/inbox'], 'icon' => 'briefcase'];
@@ -146,6 +149,7 @@ $isCoach = Yii::$app->authManager->getAssignment('coach', Yii::$app->user->id);
                         ['label' => 'API Users', 'url' => ['/api-user/index'], 'icon' => 'users'],
                         ['label' => 'Tasks', 'url' => ['task/index'], 'icon' => 'list'],
                         ['label' => 'Lead Tasks', 'url' => ['lead-task/index'], 'icon' => 'list'],
+                        ['label' => 'Email template types', 'url' => ['/email-template-type/index'], 'icon' => 'envelope-o'],
                     ]
                 ];
 
