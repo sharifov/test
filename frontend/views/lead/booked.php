@@ -66,7 +66,7 @@ $this->params['breadcrumbs'][] = $this->title;
                             }
                         }
                         $bo_sale_id = (!empty($additionally->bo_sale_id))
-                            ? $additionally->bo_sale_id : 0;
+                            ? $additionally->bo_sale_id : $model->bo_flight_id;
                         $ids[] = $bo_sale_id . $newRows;
                     }
 
@@ -173,7 +173,10 @@ $this->params['breadcrumbs'][] = $this->title;
         ],
         [
             'label' => 'Total Profit',
-            'value' => function ($model) {
+            'value' => function (common\models\Lead $model) {
+                if (!empty($model->final_profit)) {
+                    return "<strong>$" . number_format($model->final_profit, 2) . "</strong>";
+                }
                 $quote = $model->getBookedQuote();
                 if (empty($quote)) {
                     return '';

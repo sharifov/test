@@ -70,6 +70,9 @@ $this->params['breadcrumbs'][] = $this->title;
                     $additionallyInfo = Lead::getLeadAdditionalInfo($model['additional_information']);
                     $ids = [];
                     foreach ($additionallyInfo as $additionally) {
+                        /*if (!$additionally->tkt_processed) {
+                            continue;
+                        }*/
                         $newRows = '';
                         if (!empty($additionally->passengers)) {
                             for ($i = 0; $i < count($additionally->passengers); $i++) {
@@ -77,7 +80,7 @@ $this->params['breadcrumbs'][] = $this->title;
                             }
                         }
                         $bo_sale_id = (!empty($additionally->bo_sale_id))
-                            ? $additionally->bo_sale_id : 0;
+                            ? $additionally->bo_sale_id : $model->bo_flight_id;
                         $ids[] = $bo_sale_id . $newRows;
                     }
 
@@ -100,6 +103,9 @@ $this->params['breadcrumbs'][] = $this->title;
                     $additionallyInfo = Lead::getLeadAdditionalInfo($model['additional_information']);
                     $pnrs = [];
                     foreach ($additionallyInfo as $additionally) {
+                        /*if (!$additionally->tkt_processed) {
+                            continue;
+                        }*/
                         $newRows = '';
                         if (!empty($additionally->passengers)) {
                             for ($i = 0; $i < count($additionally->passengers); $i++) {
@@ -127,6 +133,9 @@ $this->params['breadcrumbs'][] = $this->title;
                 if (!empty($model['additional_information'])) {
                     $additionallyInfo = Lead::getLeadAdditionalInfo($model['additional_information']);
                     foreach ($additionallyInfo as $additionally) {
+                        /*if (!$additionally->tkt_processed) {
+                            continue;
+                        }*/
                         if (!empty($additionally->passengers)) {
                             $pax = [];
                             foreach ($additionally->passengers as $passenger) {
@@ -209,7 +218,10 @@ $this->params['breadcrumbs'][] = $this->title;
         ],
         [
             'label' => 'Total Profit',
-            'value' => function ($model) {
+            'value' => function (\common\models\Lead $model) {
+                if ($model->final_profit !== null) {
+                    return "<strong>$" . number_format($model->final_profit, 2) . "</strong>";
+                }
                 $quote = $model->getBookedQuote();
                 if (empty($quote)) {
                     return '';
