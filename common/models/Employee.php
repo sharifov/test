@@ -751,6 +751,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         $query = new Query();
         $query->select([
             'lead_id' => 'l.id',
+            'final_profit' => 'l.final_profit',
             'q_id' => 'q.id',
             'selling' => 'SUM(qp.selling)',
             'mark_up' => 'SUM(qp.mark_up + qp.extra_mark_up)',
@@ -786,7 +787,9 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         $profit = 0;
         foreach ($res as $entry){
             $entry['minus_percent'] = intval($entry['minus_percent']);
-            $totalProfit = Quote::getProfit($entry['mark_up'], $entry['selling'], $entry['fare_type'], $entry['check_payment']);
+            $totalProfit = !empty($entry['final_profit'])
+                ? (float)$entry['final_profit']
+                : Quote::getProfit($entry['mark_up'], $entry['selling'], $entry['fare_type'], $entry['check_payment']);
             if($entry['agent_type'] == 'main'){
                 $agentProfit = $totalProfit*(100-$entry['minus_percent'])/100;
             }else{

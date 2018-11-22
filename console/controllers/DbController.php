@@ -23,6 +23,7 @@ use common\models\Reason;
 use common\models\Source;
 use yii\console\Controller;
 use Yii;
+use yii\helpers\ArrayHelper;
 use yii\helpers\Console;
 use yii\helpers\VarDumper;
 
@@ -161,5 +162,31 @@ ORDER BY lf.lead_id, id';
 
         printf("\n --- End %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
 
+    }
+
+    public function actionUpdateSoldSales()
+    {
+        /**
+         * @var $leadsFlow LeadFlow[]
+         */
+        printf("\n --- Start %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
+        $db = Yii::$app->getDb();
+
+        $leadIds = ArrayHelper::map(Lead::find()->where(['status' => Lead::STATUS_SOLD])->all(), 'id', 'id');
+
+        $leadsFlow = LeadFlow::findAll([
+            'lead_id' => $leadIds,
+            'status' => Lead::STATUS_SOLD
+        ]);
+
+        foreach ($leadsFlow as $leadFlow) {
+            $sql = sprintf('UPDATE leads SET updated = \'%s\' WHERE id = %d', $leadFlow->created, $leadFlow->lead_id);
+            $db->createCommand($sql)->execute();
+
+            printf("\n SQL - %s\n", $sql);
+            printf("\n Lead ID: %d  - updated: '%s'\n", $leadFlow->lead_id, $leadFlow->created);
+        }
+
+        printf("\n --- End %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
     }
 }
