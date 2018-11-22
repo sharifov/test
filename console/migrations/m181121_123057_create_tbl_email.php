@@ -21,7 +21,9 @@ class m181121_123057_create_tbl_email extends Migration
         $this->createTable('{{%email_template_type}}',	[
             'etp_id'                     => $this->primaryKey(),
             'etp_key'                    => $this->string(50)->unique()->notNull(),
+            'etp_origin_name'            => $this->string(100)->notNull(),
             'etp_name'                   => $this->string(100)->notNull(),
+            'etp_hidden'                 => $this->boolean()->defaultValue(false),
             'etp_created_user_id'        => $this->integer(),
             'etp_updated_user_id'        => $this->integer(),
             'etp_created_dt'             => $this->dateTime(),
@@ -80,7 +82,7 @@ class m181121_123057_create_tbl_email extends Migration
     public function safeDown()
     {
         $this->dropTable('{{%email}}');
-        $this->dropTable('{{%email_type}}');
+        $this->dropTable('{{%email_template_type}}');
     }
 
 

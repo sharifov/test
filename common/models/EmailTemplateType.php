@@ -4,6 +4,9 @@ namespace common\models;
 
 use common\components\CommunicationService;
 use Yii;
+use yii\behaviors\BlameableBehavior;
+use yii\behaviors\TimestampBehavior;
+use yii\db\ActiveRecord;
 use yii\helpers\VarDumper;
 
 /**
@@ -12,6 +15,8 @@ use yii\helpers\VarDumper;
  * @property int $etp_id
  * @property string $etp_key
  * @property string $etp_name
+ * @property string $etp_origin_name
+ * @property boolean $etp_hidden
  * @property int $etp_created_user_id
  * @property int $etp_updated_user_id
  * @property string $etp_created_dt
@@ -37,12 +42,13 @@ class EmailTemplateType extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['etp_key', 'etp_name'], 'required'],
+            [['etp_key', 'etp_name', 'etp_origin_name'], 'required'],
             [['etp_created_user_id', 'etp_updated_user_id'], 'integer'],
             [['etp_created_dt', 'etp_updated_dt'], 'safe'],
             [['etp_key'], 'string', 'max' => 50],
-            [['etp_name'], 'string', 'max' => 100],
+            [['etp_name', 'etp_origin_name'], 'string', 'max' => 100],
             [['etp_key'], 'unique'],
+            [['etp_hidden'], 'boolean'],
             [['etp_created_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['etp_created_user_id' => 'id']],
             [['etp_updated_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['etp_updated_user_id' => 'id']],
         ];
@@ -57,10 +63,34 @@ class EmailTemplateType extends \yii\db\ActiveRecord
             'etp_id' => 'ID',
             'etp_key' => 'Key',
             'etp_name' => 'Name',
+            'etp_origin_name' => 'Original Name',
+            'etp_hidden'    => 'Hidden',
             'etp_created_user_id' => 'Created User ID',
             'etp_updated_user_id' => 'Updated User ID',
             'etp_created_dt' => 'Created Dt',
             'etp_updated_dt' => 'Updated Dt',
+        ];
+    }
+
+    /**
+     * @return array
+     */
+    public function behaviors(): array
+    {
+        return [
+            'timestamp' => [
+                'class' => TimestampBehavior::class,
+                'attributes' => [
+                    ActiveRecord::EVENT_BEFORE_INSERT => ['etp_created_dt'],
+                    ActiveRecord::EVENT_BEFORE_UPDATE => ['etp_updated_dt'],
+                ],
+                'value' => date('Y-m-d H:i:s') //new Expression('NOW()'),
+            ],
+            'user' => [
+                'class' => BlameableBehavior::class,
+                'createdByAttribute' => 'etp_created_user_id',
+                'updatedByAttribute' => 'etp_updated_user_id',
+            ],
         ];
     }
 
@@ -112,8 +142,7 @@ class EmailTemplateType extends \yii\db\ActiveRecord
 
         /** @var CommunicationService $communication */
         $communication = Yii::$app->communication;
-        $mailTypes = $communication->mailTypes(7);
-        //VarDumper::dump($mailTypes, 10, true);  //exit;
+        $mailTypes = $communication->mailTypes();
 
         if($mailTypes && isset($mailTypes['data']['types'])) {
 
@@ -123,6 +152,7 @@ class EmailTemplateType extends \yii\db\ActiveRecord
                         $t = new self();
                         $t->etp_id = $type['etp_id'];
                         $t->etp_created_dt = date('Y-m-d H:i:s');
+                        $t->etp_name = $type['etp_name'];
 
                         if(isset(Yii::$app->user) && Yii::$app->user->id) {
                             $t->etp_created_user_id = Yii::$app->user->id;
@@ -134,7 +164,7 @@ class EmailTemplateType extends \yii\db\ActiveRecord
                     }
 
                     $t->etp_key = $type['etp_key'];
-                    $t->etp_name = $type['etp_name'];
+                    $t->etp_origin_name = $type['etp_name'];
                     $t->etp_updated_dt = date('Y-m-d H:i:s');
 
                     if(isset(Yii::$app->user) && Yii::$app->user->id) {

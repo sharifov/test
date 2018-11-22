@@ -32,7 +32,9 @@ $this->params['breadcrumbs'][] = $this->title;
 
             'etp_id',
             'etp_key',
+            'etp_origin_name',
             'etp_name',
+            'etp_hidden:boolean',
             [
                 'attribute' => 'etp_updated_user_id',
                 'value' => function (\common\models\EmailTemplateType $model) {
@@ -62,6 +64,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 },
                 'format' => 'raw'
             ],
+
             /*'etp_created_user_id',
             'etp_updated_user_id',
             'etp_created_dt',

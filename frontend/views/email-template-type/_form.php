@@ -14,15 +14,12 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'etp_key')->textInput(['maxlength' => true]) ?>
 
+    <?= $form->field($model, 'etp_origin_name')->textInput(['maxlength' => true, 'disabled' => true]) ?>
+
     <?= $form->field($model, 'etp_name')->textInput(['maxlength' => true]) ?>
 
-    <?= $form->field($model, 'etp_created_user_id')->textInput() ?>
+    <?= $form->field($model, 'etp_hidden')->checkbox() ?>
 
-    <?= $form->field($model, 'etp_updated_user_id')->textInput() ?>
-
-    <?= $form->field($model, 'etp_created_dt')->textInput() ?>
-
-    <?= $form->field($model, 'etp_updated_dt')->textInput() ?>
 
     <div class="form-group">
         <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>

@@ -19,7 +19,7 @@ class EmailTemplateTypeSearch extends EmailTemplateType
     {
         return [
             [['etp_id', 'etp_created_user_id', 'etp_updated_user_id'], 'integer'],
-            [['etp_key', 'etp_name', 'etp_created_dt', 'etp_updated_dt'], 'safe'],
+            [['etp_key', 'etp_name', 'etp_origin_name', 'etp_hidden', 'etp_created_dt', 'etp_updated_dt'], 'safe'],
         ];
     }
 
@@ -60,6 +60,7 @@ class EmailTemplateTypeSearch extends EmailTemplateType
         // grid filtering conditions
         $query->andFilterWhere([
             'etp_id' => $this->etp_id,
+            'etp_hidden' => $this->etp_hidden,
             'etp_created_user_id' => $this->etp_created_user_id,
             'etp_updated_user_id' => $this->etp_updated_user_id,
             'etp_created_dt' => $this->etp_created_dt,
@@ -67,7 +68,8 @@ class EmailTemplateTypeSearch extends EmailTemplateType
         ]);
 
         $query->andFilterWhere(['like', 'etp_key', $this->etp_key])
-            ->andFilterWhere(['like', 'etp_name', $this->etp_name]);
+            ->andFilterWhere(['like', 'etp_name', $this->etp_name])
+            ->andFilterWhere(['like', 'etp_origin_name', $this->etp_origin_name]);
 
         return $dataProvider;
     }

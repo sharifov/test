@@ -200,15 +200,14 @@ class CommunicationService extends Component
 
 
     /**
-     * @param int $project_id
      * @return array
      * @throws \yii\httpclient\Exception
      */
-    public function mailTypes(int $project_id) : array
+    public function mailTypes() : array
     {
         $out = ['error' => false, 'data' => []];
 
-        $data['project_id'] = $project_id;
+        $data = [];
         $response = $this->sendRequest('email/template-types', $data);
 
         if ($response->isOk) {
