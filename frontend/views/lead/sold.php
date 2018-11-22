@@ -133,9 +133,9 @@ $this->params['breadcrumbs'][] = $this->title;
                 if (!empty($model['additional_information'])) {
                     $additionallyInfo = Lead::getLeadAdditionalInfo($model['additional_information']);
                     foreach ($additionallyInfo as $additionally) {
-                        if (!$additionally->tkt_processed) {
+                        /*if (!$additionally->tkt_processed) {
                             continue;
-                        }
+                        }*/
                         if (!empty($additionally->passengers)) {
                             $pax = [];
                             foreach ($additionally->passengers as $passenger) {
