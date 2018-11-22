@@ -1,4 +1,5 @@
 <?php
+
 use yii\helpers\Html;
 use yii\widgets\Pjax;
 use kartik\grid\GridView;
@@ -28,20 +29,21 @@ $this->params['breadcrumbs'][] = $this->title;
 
 ?>
 
-<h1><i class="fa fa-flag"></i> <?=\yii\helpers\Html::encode($this->title)?></h1>
+<h1><i class="fa fa-flag"></i> <?= \yii\helpers\Html::encode($this->title) ?></h1>
 
 <style>
-.dropdown-menu {
-	z-index: 1010 !important;
-}
+    .dropdown-menu {
+        z-index: 1010 !important;
+    }
 </style>
 <div class="lead-index">
 
     <?php Pjax::begin(); //['id' => 'lead-pjax-list', 'timeout' => 5000, 'enablePushState' => true, 'clientOptions' => ['method' => 'GET']]); ?>
-    <?php if(isset($salary)):?>
-    <h3>Salary by <?= $salaryBy?>: $<?= number_format($salary['salary'],2)?>
-    (Base: $<?= round($salary['base'])?>, Commission: <?= $salary['commission']?>%, Bonus: $<?= $salary['bonus']?>)</h3>
-    <?php endif;?>
+    <?php if (isset($salary)): ?>
+        <h3>Salary by <?= $salaryBy ?>: $<?= number_format($salary['salary'], 2) ?>
+            (Base: $<?= round($salary['base']) ?>, Commission: <?= $salary['commission'] ?>%, Bonus:
+            $<?= $salary['bonus'] ?>)</h3>
+    <?php endif; ?>
     <?= $this->render('_search_sold', ['model' => $searchModel]); ?>
 
     <?php
@@ -63,28 +65,90 @@ $this->params['breadcrumbs'][] = $this->title;
         [
             'attribute' => 'bo_flight_id',
             'label' => 'Sale ID (BO)',
+            'value' => function (\common\models\Lead $model) {
+                if (!empty($model['additional_information'])) {
+                    $additionallyInfo = Lead::getLeadAdditionalInfo($model['additional_information']);
+                    $ids = [];
+                    foreach ($additionallyInfo as $additionally) {
+                        /*if (!$additionally->tkt_processed) {
+                            continue;
+                        }*/
+                        $newRows = '';
+                        if (!empty($additionally->passengers)) {
+                            for ($i = 0; $i < count($additionally->passengers); $i++) {
+                                $newRows .= '<br/>';
+                            }
+                        }
+                        $bo_sale_id = (!empty($additionally->bo_sale_id))
+                            ? $additionally->bo_sale_id : $model->bo_flight_id;
+                        $ids[] = $bo_sale_id . $newRows;
+                    }
+
+                    $divTag = Html::tag('div', '', [
+                        'style' => 'border: 1px solid #a3b3bd; margin: 0px 0 5px;'
+                    ]);
+                    return implode($divTag, $ids);
+                }
+                return 0;
+            },
+            'format' => 'raw',
+            'contentOptions' => [
+                'style' => 'width:80px'
+            ]
         ],
         [
             'label' => 'PNR',
             'value' => function ($model) {
-                if (! empty($model['additional_information'])) {
-                    $additionally = new \common\models\local\LeadAdditionalInformation();
-                    $additionally->setAttributes(@json_decode($model['additional_information'], true));
-                    return (! empty($additionally->pnr)) ? $additionally->pnr : '-';
+                if (!empty($model['additional_information'])) {
+                    $additionallyInfo = Lead::getLeadAdditionalInfo($model['additional_information']);
+                    $pnrs = [];
+                    foreach ($additionallyInfo as $additionally) {
+                        /*if (!$additionally->tkt_processed) {
+                            continue;
+                        }*/
+                        $newRows = '';
+                        if (!empty($additionally->passengers)) {
+                            for ($i = 0; $i < count($additionally->passengers); $i++) {
+                                $newRows .= '<br/>';
+                            }
+                        }
+                        $pnr = (!empty($additionally->pnr))
+                            ? $additionally->pnr : '-';
+                        $pnrs[] = $pnr . $newRows;
+                    }
+
+                    $divTag = Html::tag('div', '', [
+                        'style' => 'border: 1px solid #a3b3bd; margin: 0px 0 5px;'
+                    ]);
+                    return implode($divTag, $pnrs);
                 }
                 return '-';
-            }
+            },
+            'format' => 'raw',
         ],
         [
             'label' => 'Passengers',
             'value' => function ($model) {
                 $content = [];
-                if (! empty($model['additional_information'])) {
-                    $additionally = new \common\models\local\LeadAdditionalInformation();
-                    $additionally->setAttributes(@json_decode($model['additional_information'], true));
-                    $content = (! empty($additionally->passengers)) ? $additionally->passengers : $content;
+                if (!empty($model['additional_information'])) {
+                    $additionallyInfo = Lead::getLeadAdditionalInfo($model['additional_information']);
+                    foreach ($additionallyInfo as $additionally) {
+                        /*if (!$additionally->tkt_processed) {
+                            continue;
+                        }*/
+                        if (!empty($additionally->passengers)) {
+                            $pax = [];
+                            foreach ($additionally->passengers as $passenger) {
+                                $pax[] = strtoupper($passenger);
+                            }
+                            $content[] = implode('<br/>', $pax);
+                        }
+                    }
                 }
-                return implode('<br/>', $content);
+                $divTag = Html::tag('div', '', [
+                    'style' => 'border: 1px solid #a3b3bd; margin: 0px 0 5px;'
+                ]);
+                return implode($divTag, $content);
             },
             'format' => 'raw',
             'contentOptions' => [
@@ -116,7 +180,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     $phones = $model->client && $model->client->clientPhones ? '<br><i class="fa fa-phone"></i> ' . implode(' <br><i class="fa fa-phone"></i> ', \yii\helpers\ArrayHelper::map($model->client->clientPhones, 'phone', 'phone')) . '' : '';
                 }
 
-                return $clientName.'<br/>'.$emails.'<br/>'.$phones;
+                return $clientName . '<br/>' . $emails . '<br/>' . $phones;
             },
             'contentOptions' => [
                 'style' => 'width: 260px;'
@@ -150,13 +214,16 @@ $this->params['breadcrumbs'][] = $this->title;
                 return $model->employee ? '<i class="fa fa-user"></i> ' . $model->employee->username : '-';
             },
             'filter' => $userList,
-            'visible' => ! $isAgent
+            'visible' => !$isAgent
         ],
         [
             'label' => 'Total Profit',
-            'value' => function ($model){
+            'value' => function (\common\models\Lead $model) {
+                if ($model->final_profit !== null) {
+                    return "<strong>$" . number_format($model->final_profit, 2) . "</strong>";
+                }
                 $quote = $model->getBookedQuote();
-                if(empty($quote)){
+                if (empty($quote)) {
                     return '';
                 }
                 $model->totalProfit = $quote->getTotalProfit();
@@ -167,27 +234,27 @@ $this->params['breadcrumbs'][] = $this->title;
         [
             'label' => 'Split Profit',
             'value' => function ($model) {
-                 $splitProfit = $model->getAllProfitSplits();
-                 $return = [];
-                 foreach ($splitProfit as $split){
-                     $model->splitProfitPercentSum += $split->ps_percent;
-                     $return[] = '<b>'.$split->psUser->username.'</b> ('.$split->ps_percent.'%) $'. number_format($split->countProfit($model->totalProfit),2);
-                 }
-                 if(empty($return)){
+                $splitProfit = $model->getAllProfitSplits();
+                $return = [];
+                foreach ($splitProfit as $split) {
+                    $model->splitProfitPercentSum += $split->ps_percent;
+                    $return[] = '<b>' . $split->psUser->username . '</b> (' . $split->ps_percent . '%) $' . number_format($split->countProfit($model->totalProfit), 2);
+                }
+                if (empty($return)) {
                     return '-';
-                 }
-                 return implode('<br/>', $return);
+                }
+                return implode('<br/>', $return);
             },
             'format' => 'raw'
         ],
         [
             'label' => 'Main Agent Profit',
-            'value' => function ($model){
+            'value' => function ($model) {
                 $mainAgentPercent = 100;
-                if($model->splitProfitPercentSum > 0){
+                if ($model->splitProfitPercentSum > 0) {
                     $mainAgentPercent -= $model->splitProfitPercentSum;
                 }
-                return "<strong>$" . number_format($model->totalProfit*$mainAgentPercent/100, 2) . "</strong>";
+                return "<strong>$" . number_format($model->totalProfit * $mainAgentPercent / 100, 2) . "</strong>";
             },
             'format' => 'raw'
         ],
@@ -214,13 +281,13 @@ $this->params['breadcrumbs'][] = $this->title;
             'label' => 'Date of Departure',
             'value' => function ($model) {
                 $quote = $model->getBookedQuote();
-                if (!empty($quote) && isset($quote['reservation_dump']) && ! empty($quote['reservation_dump'])) {
+                if (!empty($quote) && isset($quote['reservation_dump']) && !empty($quote['reservation_dump'])) {
                     $data = [];
                     $segments = Quote::parseDump($quote['reservation_dump'], false, $data, true);
                     return $segments[0]['departureDateTime']->format('Y-m-d H:i');
                 }
                 $firstSegment = $model->getFirstFlightSegment();
-                if(empty($firstSegment)){
+                if (empty($firstSegment)) {
                     return '';
                 }
                 return $firstSegment['departure'];
@@ -244,7 +311,7 @@ $this->params['breadcrumbs'][] = $this->title;
         [
             'attribute' => 'source_id',
             'label' => 'Market Info',
-            'visible' => ! $isAgent,
+            'visible' => !$isAgent,
             'value' => function (\common\models\Lead $model) {
                 return $model->source ? $model->source->name : '-';
             },
@@ -271,29 +338,29 @@ $this->params['breadcrumbs'][] = $this->title;
     ];
 
     ?>
-<?php
-echo GridView::widget([
-    'dataProvider' => $dataProvider,
-    'filterModel' => $searchModel,
-    'columns' => $gridColumns,
-    'toolbar' => false,
-    'pjax' => false,
-    'striped' => true,
-    'condensed' => false,
-    'responsive' => true,
-    'hover' => true,
-    'floatHeader' => true,
-    'floatHeaderOptions' => [
-        'scrollingTop' => 20
-    ],
-    /*'panel' => [
-        'type' => GridView::TYPE_PRIMARY,
-        'heading' => '<h3 class="panel-title"><i class="glyphicon glyphicon-list"></i> Sold</h3>'
-    ]*/
+    <?php
+    echo GridView::widget([
+        'dataProvider' => $dataProvider,
+        'filterModel' => $searchModel,
+        'columns' => $gridColumns,
+        'toolbar' => false,
+        'pjax' => false,
+        'striped' => true,
+        'condensed' => false,
+        'responsive' => true,
+        'hover' => true,
+        'floatHeader' => true,
+        'floatHeaderOptions' => [
+            'scrollingTop' => 20
+        ],
+        /*'panel' => [
+            'type' => GridView::TYPE_PRIMARY,
+            'heading' => '<h3 class="panel-title"><i class="glyphicon glyphicon-list"></i> Sold</h3>'
+        ]*/
 
-]);
+    ]);
 
-?>
+    ?>
 
     <?php Pjax::end(); ?>
 

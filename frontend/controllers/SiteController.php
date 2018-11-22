@@ -14,6 +14,7 @@ use yii\helpers\ArrayHelper;
 use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
 use common\models\LoginForm;
+use yii\helpers\VarDumper;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 
@@ -81,7 +82,6 @@ class SiteController extends FController
      */
     public function actionIndex(): string
     {
-
         $userId = Yii::$app->user->id;
 
         if (Yii::$app->authManager->getAssignment('supervision', $userId)) {

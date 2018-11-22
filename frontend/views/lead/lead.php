@@ -404,7 +404,7 @@ JS;
                 <?= $this->render('partial/_notes', [
                     'notes' => $leadForm->getLead()->getNotes()
                 ]); ?>
-                <div class="panel panel-neutral panel-wrapper history-block">
+                <div class="panel panel-success panel-wrapper history-block">
                     <div class="panel-heading collapsing-heading">
                         <a data-toggle="collapse" href="#agents-activity-logs" aria-expanded="false"
                            class="collapsing-heading__collapse-link collapsed">

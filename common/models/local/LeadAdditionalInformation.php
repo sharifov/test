@@ -1,4 +1,5 @@
 <?php
+
 namespace common\models\local;
 
 
@@ -13,11 +14,12 @@ use yii\base\Model;
  * @property array $passengers
  * @property array $paxInfo
  * @property string $pnr
+ * @property int $bo_sale_id
  */
-
 class LeadAdditionalInformation extends Model
 {
     public $pnr;
+    public $bo_sale_id;
     public $vtf_processed;
     public $tkt_processed;
     public $exp_processed;
@@ -27,7 +29,8 @@ class LeadAdditionalInformation extends Model
     public function rules()
     {
         return [
-            [['vtf_processed', 'tkt_processed', 'exp_processed', 'passengers', 'pnr', 'paxInfo'], 'safe'],
+            [['vtf_processed', 'tkt_processed', 'exp_processed', 'passengers', 'pnr', 'paxInfo',
+                'bo_sale_id'], 'safe'],
         ];
     }
 }

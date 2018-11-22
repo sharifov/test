@@ -1,4 +1,5 @@
 <?php
+
 use yii\helpers\Html;
 use yii\widgets\Pjax;
 use kartik\grid\GridView;
@@ -25,13 +26,13 @@ $this->params['breadcrumbs'][] = $this->title;
 ?>
 
 <style>
-.dropdown-menu {
-	z-index: 1010 !important;
-}
+    .dropdown-menu {
+        z-index: 1010 !important;
+    }
 </style>
 <h1>
     <i class="fa fa-flag-o"></i>
-	<?=\yii\helpers\Html::encode($this->title)?>
+    <?= \yii\helpers\Html::encode($this->title) ?>
 </h1>
 <div class="lead-index">
 
@@ -53,7 +54,31 @@ $this->params['breadcrumbs'][] = $this->title;
         [
             'attribute' => 'bo_flight_id',
             'label' => 'Sale ID (BO)',
-            'options' => [
+            'value' => function (\common\models\Lead $model) {
+                if (!empty($model['additional_information'])) {
+                    $additionallyInfo = Lead::getLeadAdditionalInfo($model['additional_information']);
+                    $ids = [];
+                    foreach ($additionallyInfo as $additionally) {
+                        $newRows = '';
+                        if (!empty($additionally->passengers)) {
+                            for ($i = 0; $i < count($additionally->passengers); $i++) {
+                                $newRows .= '<br/>';
+                            }
+                        }
+                        $bo_sale_id = (!empty($additionally->bo_sale_id))
+                            ? $additionally->bo_sale_id : $model->bo_flight_id;
+                        $ids[] = $bo_sale_id . $newRows;
+                    }
+
+                    $divTag = Html::tag('div', '', [
+                        'style' => 'border: 1px solid #a3b3bd; margin: 0px 0 5px;'
+                    ]);
+                    return implode($divTag, $ids);
+                }
+                return 0;
+            },
+            'format' => 'raw',
+            'contentOptions' => [
                 'style' => 'width:80px'
             ]
         ],
@@ -68,24 +93,50 @@ $this->params['breadcrumbs'][] = $this->title;
         [
             'label' => 'PNR',
             'value' => function ($model) {
-                if (! empty($model['additional_information'])) {
-                    $additionally = new \common\models\local\LeadAdditionalInformation();
-                    $additionally->setAttributes(@json_decode($model['additional_information'], true));
-                    return (! empty($additionally->pnr)) ? $additionally->pnr : '-';
+                if (!empty($model['additional_information'])) {
+                    $additionallyInfo = Lead::getLeadAdditionalInfo($model['additional_information']);
+                    $pnrs = [];
+                    foreach ($additionallyInfo as $additionally) {
+                        $newRows = '';
+                        if (!empty($additionally->passengers)) {
+                            for ($i = 0; $i < count($additionally->passengers); $i++) {
+                                $newRows .= '<br/>';
+                            }
+                        }
+                        $pnr = (!empty($additionally->pnr))
+                            ? $additionally->pnr : '-';
+                        $pnrs[] = $pnr . $newRows;
+                    }
+
+                    $divTag = Html::tag('div', '', [
+                        'style' => 'border: 1px solid #a3b3bd; margin: 0px 0 5px;'
+                    ]);
+                    return implode($divTag, $pnrs);
                 }
                 return '-';
-            }
+            },
+            'format' => 'raw',
         ],
         [
             'label' => 'Passengers',
             'value' => function ($model) {
                 $content = [];
-                if (! empty($model['additional_information'])) {
-                    $additionally = new \common\models\local\LeadAdditionalInformation();
-                    $additionally->setAttributes(@json_decode($model['additional_information'], true));
-                    $content = (! empty($additionally->passengers)) ? $additionally->passengers : $content;
+                if (!empty($model['additional_information'])) {
+                    $additionallyInfo = Lead::getLeadAdditionalInfo($model['additional_information']);
+                    foreach ($additionallyInfo as $additionally) {
+                        if (!empty($additionally->passengers)) {
+                            $pax = [];
+                            foreach ($additionally->passengers as $passenger) {
+                                $pax[] = strtoupper($passenger);
+                            }
+                            $content[] = implode('<br/>', $pax);
+                        }
+                    }
                 }
-                return implode('<br/>', $content);
+                $divTag = Html::tag('div', '', [
+                    'style' => 'border: 1px solid #a3b3bd; margin: 0px 0 5px;'
+                ]);
+                return implode($divTag, $content);
             },
             'format' => 'raw',
             'contentOptions' => [
@@ -96,7 +147,6 @@ $this->params['breadcrumbs'][] = $this->title;
             'label' => 'Destination',
             'value' => function (\common\models\Lead $model) {
                 $segments = $model->leadFlightSegments;
-                $segmentData = [];
                 if ($segments) {
                     foreach ($segments as $sk => $segment) {
                         $airport = Airport::findIdentity($segment->destination);
@@ -119,11 +169,14 @@ $this->params['breadcrumbs'][] = $this->title;
                 return $model->employee ? '<i class="fa fa-user"></i> ' . $model->employee->username : '-';
             },
             'filter' => $userList,
-            'visible' => ! $isAgent
+            'visible' => !$isAgent
         ],
         [
             'label' => 'Total Profit',
-            'value' => function ($model) {
+            'value' => function (common\models\Lead $model) {
+                if (!empty($model->final_profit)) {
+                    return "<strong>$" . number_format($model->final_profit, 2) . "</strong>";
+                }
                 $quote = $model->getBookedQuote();
                 if (empty($quote)) {
                     return '';
@@ -171,29 +224,64 @@ $this->params['breadcrumbs'][] = $this->title;
         [
             'label' => 'VTF',
             'value' => function (\common\models\Lead $model) {
-                $additionally = new \common\models\local\LeadAdditionalInformation();
-                if (! empty($model['additional_information'])) {
-                    $additionally->setAttributes(@json_decode($model['additional_information'], true));
-                }
                 $labelVTF = '<span class="label label-danger"><i class="fa fa-times"></i></span>';
-                if (! empty($additionally->vtf_processed)) {
-                    $labelVTF = '<span class="label label-success"><i class="fa fa-check"></i></span>';
+                if (!empty($model['additional_information'])) {
+                    $additionallyInfo = Lead::getLeadAdditionalInfo($model['additional_information']);
+                    $labels = [];
+                    foreach ($additionallyInfo as $additionally) {
+                        $newRows = '';
+                        if (!empty($additionally->passengers)) {
+                            for ($i = 0; $i < count($additionally->passengers); $i++) {
+                                $newRows .= '<br/>';
+                            }
+                        }
+                        $label = (!empty($additionally->vtf_processed))
+                            ? '<span class="label label-success"><i class="fa fa-check"></i></span>'
+                            : $labelVTF;
+
+                        $labels[] = $label . $newRows;
+                    }
+
+                    $divTag = Html::tag('div', '', [
+                        'style' => 'border: 1px solid #a3b3bd; margin: 0px 0 5px;'
+                    ]);
+
+                    return implode($divTag, $labels);
                 }
+
                 return $labelVTF;
+
             },
             'format' => 'raw'
         ],
         [
             'label' => 'TKT',
             'value' => function (\common\models\Lead $model) {
-                $additionally = new \common\models\local\LeadAdditionalInformation();
-                if (! empty($model['additional_information'])) {
-                    $additionally->setAttributes(@json_decode($model['additional_information'], true));
-                }
                 $labelTKT = '<span class="label label-danger"><i class="fa fa-times"></i></span>';
-                if (! empty($additionally->tkt_processed)) {
-                    $labelTKT = '<span class="label label-success"><i class="fa fa-check"></i></span>';
+                if (!empty($model['additional_information'])) {
+                    $additionallyInfo = Lead::getLeadAdditionalInfo($model['additional_information']);
+                    $labels = [];
+                    foreach ($additionallyInfo as $additionally) {
+                        $newRows = '';
+                        if (!empty($additionally->passengers)) {
+                            for ($i = 0; $i < count($additionally->passengers); $i++) {
+                                $newRows .= '<br/>';
+                            }
+                        }
+                        $label = (!empty($additionally->tkt_processed))
+                            ? '<span class="label label-success"><i class="fa fa-check"></i></span>'
+                            : $labelTKT;
+
+                        $labels[] = $label . $newRows;
+                    }
+
+                    $divTag = Html::tag('div', '', [
+                        'style' => 'border: 1px solid #a3b3bd; margin: 0px 0 5px;'
+                    ]);
+
+                    return implode($divTag, $labels);
                 }
+
                 return $labelTKT;
             },
             'format' => 'raw'
@@ -201,14 +289,31 @@ $this->params['breadcrumbs'][] = $this->title;
         [
             'label' => 'EXP',
             'value' => function (\common\models\Lead $model) {
-                $additionally = new \common\models\local\LeadAdditionalInformation();
-                if (! empty($model['additional_information'])) {
-                    $additionally->setAttributes(@json_decode($model['additional_information'], true));
-                }
                 $labelEXP = '<span class="label label-danger"><i class="fa fa-times"></i></span>';
-                if (! empty($additionally->exp_processed)) {
-                    $labelEXP = '<span class="label label-success"><i class="fa fa-check"></i></span>';
+                if (!empty($model['additional_information'])) {
+                    $additionallyInfo = Lead::getLeadAdditionalInfo($model['additional_information']);
+                    $labels = [];
+                    foreach ($additionallyInfo as $additionally) {
+                        $newRows = '';
+                        if (!empty($additionally->passengers)) {
+                            for ($i = 0; $i < count($additionally->passengers); $i++) {
+                                $newRows .= '<br/>';
+                            }
+                        }
+                        $label = (!empty($additionally->exp_processed))
+                            ? '<span class="label label-success"><i class="fa fa-check"></i></span>'
+                            : $labelEXP;
+
+                        $labels[] = $label . $newRows;
+                    }
+
+                    $divTag = Html::tag('div', '', [
+                        'style' => 'border: 1px solid #a3b3bd; margin: 0px 0 5px;'
+                    ]);
+
+                    return implode($divTag, $labels);
                 }
+
                 return $labelEXP;
             },
             'format' => 'raw'
@@ -233,7 +338,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 return $model->project ? $model->project->name : '-';
             },
             'filter' => $projectList,
-            'visible' => ! $isAgent
+            'visible' => !$isAgent
         ],
         [
             'class' => 'yii\grid\ActionColumn',
@@ -261,20 +366,20 @@ $this->params['breadcrumbs'][] = $this->title;
     ];
 
     ?>
-<?php
+    <?php
 
-echo \yii\grid\GridView::widget([
-    'dataProvider' => $dataProvider,
-    'filterModel' => $searchModel,
-    'columns' => $gridColumns,
-    'rowOptions' => function (Lead $model) {
-        if ($model->status === Lead::STATUS_PROCESSING && Yii::$app->user->id == $model->employee_id) {
-            return [
-                'class' => 'highlighted'
-            ];
+    echo \yii\grid\GridView::widget([
+        'dataProvider' => $dataProvider,
+        'filterModel' => $searchModel,
+        'columns' => $gridColumns,
+        'rowOptions' => function (Lead $model) {
+            if ($model->status === Lead::STATUS_PROCESSING && Yii::$app->user->id == $model->employee_id) {
+                return [
+                    'class' => 'highlighted'
+                ];
+            }
         }
-    }
-]);
-?>
-<?php Pjax::end(); ?>
+    ]);
+    ?>
+    <?php Pjax::end(); ?>
 </div>
