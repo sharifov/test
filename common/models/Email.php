@@ -3,6 +3,9 @@
 namespace common\models;
 
 use Yii;
+use yii\behaviors\TimestampBehavior;
+use yii\behaviors\BlameableBehavior;
+use yii\db\ActiveRecord;
 
 /**
  * This is the model class for table "email".
@@ -46,6 +49,10 @@ use Yii;
  */
 class Email extends \yii\db\ActiveRecord
 {
+    public CONST TYPE_DRAFT = 0, TYPE_OUTBOX = 1, TYPE_INBOX = 2;
+
+    public $quotes = [];
+
     /**
      * {@inheritdoc}
      */
@@ -73,6 +80,7 @@ class Email extends \yii\db\ActiveRecord
             [['e_project_id'], 'exist', 'skipOnError' => true, 'targetClass' => Project::class, 'targetAttribute' => ['e_project_id' => 'id']],
             [['e_template_type_id'], 'exist', 'skipOnError' => true, 'targetClass' => EmailTemplateType::class, 'targetAttribute' => ['e_template_type_id' => 'etp_id']],
             [['e_updated_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['e_updated_user_id' => 'id']],
+            [['quotes'],'safe']
         ];
     }
 
@@ -82,35 +90,59 @@ class Email extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'e_id' => 'E ID',
-            'e_reply_id' => 'E Reply ID',
-            'e_lead_id' => 'E Lead ID',
-            'e_project_id' => 'E Project ID',
-            'e_email_from' => 'E Email From',
-            'e_email_to' => 'E Email To',
-            'e_email_cc' => 'E Email Cc',
-            'e_email_bc' => 'E Email Bc',
-            'e_email_subject' => 'E Email Subject',
-            'e_email_body_html' => 'E Email Body Html',
-            'e_email_body_text' => 'E Email Body Text',
-            'e_attach' => 'E Attach',
-            'e_email_data' => 'E Email Data',
-            'e_type_id' => 'E Type ID',
-            'e_template_type_id' => 'E Template Type ID',
-            'e_language_id' => 'E Language ID',
-            'e_communication_id' => 'E Communication ID',
-            'e_is_deleted' => 'E Is Deleted',
-            'e_is_new' => 'E Is New',
-            'e_delay' => 'E Delay',
-            'e_priority' => 'E Priority',
-            'e_status_id' => 'E Status ID',
-            'e_status_done_dt' => 'E Status Done Dt',
-            'e_read_dt' => 'E Read Dt',
-            'e_error_message' => 'E Error Message',
-            'e_created_user_id' => 'E Created User ID',
-            'e_updated_user_id' => 'E Updated User ID',
-            'e_created_dt' => 'E Created Dt',
-            'e_updated_dt' => 'E Updated Dt',
+            'e_id' => 'ID',
+            'e_reply_id' => 'Reply ID',
+            'e_lead_id' => 'Lead ID',
+            'e_project_id' => 'Project ID',
+            'e_email_from' => 'Email From',
+            'e_email_to' => 'To',
+            'e_email_cc' => 'Cc',
+            'e_email_bc' => 'Bc',
+            'e_email_subject' => 'Subject',
+            'e_email_body_html' => 'Body Html',
+            'e_email_body_text' => 'Body Text',
+            'e_attach' => 'Attach',
+            'e_email_data' => 'Email Data',
+            'e_type_id' => 'Type ID',
+            'e_template_type_id' => 'Template Type ID',
+            'e_language_id' => 'Language ID',
+            'e_communication_id' => 'Communication ID',
+            'e_is_deleted' => 'Is Deleted',
+            'e_is_new' => 'Is New',
+            'e_delay' => 'Delay',
+            'e_priority' => 'Priority',
+            'e_status_id' => 'Status ID',
+            'e_status_done_dt' => 'Status Done Dt',
+            'e_read_dt' => 'Read Dt',
+            'e_error_message' => 'Error Message',
+            'e_created_user_id' => 'Created User ID',
+            'e_updated_user_id' => 'Updated User ID',
+            'e_created_dt' => 'Created Dt',
+            'e_updated_dt' => 'Updated Dt',
+        ];
+    }
+
+
+
+    /**
+     * @return array
+     */
+    public function behaviors(): array
+    {
+        return [
+            'timestamp' => [
+                'class' => TimestampBehavior::class,
+                'attributes' => [
+                    ActiveRecord::EVENT_BEFORE_INSERT => ['e_created_dt'],
+                    ActiveRecord::EVENT_BEFORE_UPDATE => ['e_updated_dt'],
+                ],
+                'value' => date('Y-m-d H:i:s') //new Expression('NOW()'),
+            ],
+            'user' => [
+                'class' => BlameableBehavior::class,
+                'createdByAttribute' => 'e_created_user_id',
+                'updatedByAttribute' => 'e_updated_dt',
+            ],
         ];
     }
 
@@ -169,5 +201,25 @@ class Email extends \yii\db\ActiveRecord
     public static function find()
     {
         return new EmailQuery(get_called_class());
+    }
+
+    public function setEmailData($emailData)
+    {
+        $this->e_email_data = json_encode($emailData);
+    }
+
+    public function getEmailData()
+    {
+        return json_decode($this->e_email_data, true);
+    }
+
+    public function setQuotes($quotes)
+    {
+        $this->quotes = implode(',', $quotes);
+    }
+
+    public function getQuotes()
+    {
+        return explode(',',$this->quotes);
     }
 }

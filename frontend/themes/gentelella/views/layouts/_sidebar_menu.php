@@ -227,6 +227,31 @@ $isCoach = Yii::$app->authManager->getAssignment('coach', Yii::$app->user->id);
 
             if($isAdmin) {
 
+                $menuItems[] = [
+                    'label' => Yii::t('menu', 'Languages'),
+                    'url' => 'javascript:',
+                    'icon' => 'language',
+                    'items' =>  [
+
+                        ['label' => Yii::t('language', 'Language'), 'url' => 'javascript:',
+                            'items' => [
+                                ['label' => Yii::t('language', 'List of languages'), 'url' => ['/translatemanager/language/list']],
+                                ['label' => Yii::t('language', 'Create'), 'url' => ['/translatemanager/language/create']],
+                            ]
+                        ],
+
+
+                        ['label' => Yii::t('language', 'Scan'), 'url' => ['/translatemanager/language/scan']],
+                        ['label' => Yii::t('language', 'Optimize'), 'url' => ['/translatemanager/language/optimizer']],
+                        ['label' => Yii::t('language', 'Im-/Export'), 'url' => 'javascript:',
+                            'items' => [
+                                ['label' => Yii::t('language', 'Import'), 'url' => ['/translatemanager/language/import']],
+                                ['label' => Yii::t('language', 'Export'), 'url' => ['/translatemanager/language/export']],
+                            ]
+                        ],
+                    ]
+                ];
+
 
                 $menuItems[] = [
                     'label' => 'Logs & Tools',
