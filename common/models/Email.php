@@ -53,6 +53,32 @@ class Email extends \yii\db\ActiveRecord
 
     public $quotes = [];
 
+    public const STATUS_NEW     = 1;
+    public const STATUS_PENDING = 2;
+    public const STATUS_PROCESS = 3;
+    public const STATUS_CANCEL  = 4;
+    public const STATUS_DONE    = 5;
+    public const STATUS_ERROR   = 6;
+
+    public const STATUS_LIST = [
+        self::STATUS_NEW        => 'New',
+        self::STATUS_PENDING    => 'Pending',
+        self::STATUS_PROCESS    => 'Process',
+        self::STATUS_CANCEL     => 'Cancel',
+        self::STATUS_DONE       => 'Done',
+        self::STATUS_ERROR      => 'Error',
+    ];
+
+    public const PRIORITY_LOW       = 1;
+    public const PRIORITY_NORMAL    = 2;
+    public const PRIORITY_HIGH      = 3;
+
+    public const PRIORITY_LIST = [
+        self::PRIORITY_LOW      => 'Low',
+        self::PRIORITY_NORMAL   => 'Normal',
+        self::PRIORITY_HIGH     => 'High',
+    ];
+
     /**
      * {@inheritdoc}
      */
@@ -144,6 +170,22 @@ class Email extends \yii\db\ActiveRecord
                 'updatedByAttribute' => 'e_updated_dt',
             ],
         ];
+    }
+
+    /**
+     * @return mixed|string
+     */
+    public function getStatusName()
+    {
+        return self::STATUS_LIST[$this->e_status_id] ?? '-';
+    }
+
+    /**
+     * @return mixed|string
+     */
+    public function getPriorityName()
+    {
+        return self::PRIORITY_LIST[$this->e_project_id] ?? '-';
     }
 
     /**

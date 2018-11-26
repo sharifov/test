@@ -23,6 +23,7 @@ return [
 
     'lead' => [
         'call2DelayTime' => 2 * 60 * 60,     // 2 hours
-    ]
+    ],
+    'processing_fee' => 25,
 
 ];
