@@ -204,7 +204,8 @@ $this->params['breadcrumbs'][] = $this->title;
             'options' => [
                 'style' => 'width:180px'
             ],
-            'format' => 'raw'
+            'format' => 'raw',
+            'visible' => ! $isAgent,
         ],
 
         [
@@ -217,8 +218,8 @@ $this->params['breadcrumbs'][] = $this->title;
             'options' => [
                 'style' => 'width:180px'
             ],
-            'filter' => false
-
+            'filter' => false,
+            'enableSorting' => ! $isAgent
         ],
 
         [
