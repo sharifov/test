@@ -545,7 +545,7 @@ class QuoteController extends FController
                 $lead = Lead::findOne(['id' => $attr['leadId']]);
                 if ($lead !== null) {
                     $email->setQuotes($attr['quotes']);
-                    $result = $lead->previewEmail($attr['quotes'], $attr['email']);
+                    //$result = $lead->previewEmail($attr['quotes'], $attr['email']);
 
                     $userProjectParams = UserProjectParams::findOne([
                         'upp_user_id' => $lead->employee->id,
@@ -599,8 +599,10 @@ class QuoteController extends FController
                     ];
                     $comData = $communication->mailSend($email->e_project_id, $templateKey, $email->e_email_from, $email->e_email_to, $content_data, $email->getEmailData(), $email->e_language_id);
 
-                    if ($comData['error'] ===  false) {
-                        //$email->e_communication_id = $comData['eq_id'];
+                    //VarDumper::dump($comData, 10, true); exit;
+
+                    if ($comData && $comData['error'] ===  false) {
+                        $email->e_communication_id = $comData['data']['eq_id'] ?? null;
                         if(!$email->save()){
                             Yii::error(VarDumper::dumpAsString($email->getErrors()), 'QuoteController:preview-send-quotes-new:email:save');
                         }

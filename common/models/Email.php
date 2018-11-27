@@ -164,12 +164,13 @@ class Email extends \yii\db\ActiveRecord
                 ],
                 'value' => date('Y-m-d H:i:s') //new Expression('NOW()'),
             ],
-            'user' => [
+            /*'user' => [
                 'class' => BlameableBehavior::class,
                 'createdByAttribute' => 'e_created_user_id',
-                'updatedByAttribute' => 'e_updated_dt',
-            ],
+                'updatedByAttribute' => 'e_updated_user_id',
+            ],*/
         ];
+
     }
 
     /**
