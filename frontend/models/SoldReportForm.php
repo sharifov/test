@@ -142,10 +142,14 @@ class SoldReportForm extends Model
             'id' => $item->id
         ];
 
-        $quote = $item->getAppliedAlternativeQuotes();
-        if ($quote !== null) {
-            $price = $quote->quotePrice();
-            $data['totalProfit'] = $profit = Quote::getProfit($price['mark_up'], $price['selling'], $price['fare_type'], $price['isCC']);
+        if ($item->final_profit === null) {
+            $quote = $item->getAppliedAlternativeQuotes();
+            if ($quote !== null) {
+                $price = $quote->quotePrice();
+                $data['totalProfit'] = Quote::getProfit($price['mark_up'], $price['selling'], $price['fare_type'], $price['isCC']);
+            }
+        } else {
+            $data['totalProfit'] = (float)$item->final_profit;
         }
 
         $data['pax'] = ($item->adults + $item->children + $item->infants);

@@ -52,9 +52,9 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     const STATUS_ACTIVE = 10;
 
     const PROFIT_BONUSES = [
-        11000   =>  500,
-        8000    =>  300,
-        5000    =>  150
+        11000 => 500,
+        8000 => 300,
+        5000 => 150
     ];
 
     public $password;
@@ -140,8 +140,8 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         //var_dump(\webapi\models\ApiUser::class); die;
 
 
-        if(isset(Yii::$app->user)) {
-            if(Yii::$app->user && Yii::$app->user->identityClass === \webapi\models\ApiUser::class) {
+        if (isset(Yii::$app->user)) {
+            if (Yii::$app->user && Yii::$app->user->identityClass === \webapi\models\ApiUser::class) {
                 $this->role = null;
             } else {
                 $roles = $this->getRoles();
@@ -291,17 +291,15 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
             ->all();
 
         foreach ($result as $item) {
-            if (($item['name'] == 'admin' || $item['name'] == 'supervision')  && Yii::$app->user->identity->role != 'admin') {
+            if (($item['name'] == 'admin' || $item['name'] == 'supervision') && Yii::$app->user->identity->role != 'admin') {
                 continue;
             }
-
 
 
             $roles[$item['name']] = $item['description'];
         }
         return $roles;
     }
-
 
 
     /**
@@ -433,10 +431,10 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     /**
      * @return array
      */
-    public static function getList() : array
+    public static function getList(): array
     {
         $data = self::find()->orderBy(['username' => SORT_ASC])->asArray()->all();
-        return ArrayHelper::map($data,'id', 'username');
+        return ArrayHelper::map($data, 'id', 'username');
     }
 
 
@@ -444,7 +442,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
      * @param int|null $user_id
      * @return array
      */
-    public static function getListByUserId(int $user_id = null) : array
+    public static function getListByUserId(int $user_id = null): array
     {
         $subQuery1 = UserGroupAssign::find()->select(['ugs_group_id'])->where(['ugs_user_id' => $user_id]);
         $subQuery = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->where(['IN', 'ugs_group_id', $subQuery1]);
@@ -453,27 +451,25 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         $query->andWhere(['IN', 'employees.id', $subQuery]);
 
         $data = $query->all();
-        return ArrayHelper::map($data,'id', 'username');
+        return ArrayHelper::map($data, 'id', 'username');
     }
-
 
 
     /**
      * @return array
      */
-    public static function getListByProject($projectId, $withExperts = false) : array
+    public static function getListByProject($projectId, $withExperts = false): array
     {
-        if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id))
-        {
+        if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id)) {
             $data = self::find()
-            ->orderBy(['username' => SORT_ASC])
-            ->asArray()->all();
-        }else{
+                ->orderBy(['username' => SORT_ASC])
+                ->asArray()->all();
+        } else {
             $data = self::find()
-            ->joinWith('projectEmployeeAccesses')
-            ->where(['=','project_id',$projectId])
-            ->orderBy(['username' => SORT_ASC])
-            ->asArray()->all();
+                ->joinWith('projectEmployeeAccesses')
+                ->where(['=', 'project_id', $projectId])
+                ->orderBy(['username' => SORT_ASC])
+                ->asArray()->all();
         }
 
         if ($withExperts) {
@@ -487,7 +483,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
             }
             if (is_array($experts)) {
                 $employeesGroup = [
-                    'Sales' => ArrayHelper::map($data,'id', 'username'),
+                    'Sales' => ArrayHelper::map($data, 'id', 'username'),
                     'Experts' => $experts
                 ];
                 $options = [];
@@ -497,9 +493,10 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
                         $employeeId = ($type != 'Experts')
                             ? $id
                             : $employee;
-                            if(is_int($employeeId)){
-                                $child_options[$employeeId] = $employee;
-                            }
+
+                        //if(is_int($employeeId)){
+                        $child_options[$employeeId] = $employee;
+                        //}
 
                     }
                     $options[$type] = $child_options;
@@ -508,7 +505,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
             }
         }
 
-        return ArrayHelper::map($data,'id', 'username');
+        return ArrayHelper::map($data, 'id', 'username');
     }
 
 
@@ -531,10 +528,10 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     /**
      * @return array
      */
-    public function getUserGroupList() : array
+    public function getUserGroupList(): array
     {
         $groups = [];
-        if( $groupsModel =  $this->ugsGroups) {
+        if ($groupsModel = $this->ugsGroups) {
             $groups = \yii\helpers\ArrayHelper::map($groupsModel, 'ug_id', 'ug_name');
         }
 
@@ -553,6 +550,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         $this->findModel($id)->delete();
         return $this->redirect(['index']);
     }
+
     /**
      * Finds the Employee model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
@@ -576,14 +574,14 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     public function getCurrentShiftTaskInfoSummary()
     {
 
-        if($this->currentShiftTaskInfoSummary) {
+        if ($this->currentShiftTaskInfoSummary) {
             return $this->currentShiftTaskInfoSummary;
         }
 
         $shiftTime = $this->getShiftTime();
 
         $stats = [];
-        if(isset($shiftTime['start_utc_dt']) && $shiftTime['start_utc_dt']) {
+        if (isset($shiftTime['start_utc_dt']) && $shiftTime['start_utc_dt']) {
             $startShiftDate = date('Y-m-d', strtotime($shiftTime['start_utc_dt']));
         } else {
             $startShiftDate = date('Y-m-d');
@@ -610,15 +608,15 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         }]);
 
 
-        $completedTasksCount = (int) $taskListCheckedQuery->count();
-        $allTasksCount = (int) $taskListAllQuery->count();
+        $completedTasksCount = (int)$taskListCheckedQuery->count();
+        $allTasksCount = (int)$taskListAllQuery->count();
 
 
         $stats['completedTasksCount'] = $completedTasksCount;
         $stats['allTasksCount'] = $allTasksCount;
 
 
-        if($allTasksCount > 0) {
+        if ($allTasksCount > 0) {
             $completedTasksPercent = round($completedTasksCount * 100 / $allTasksCount);
         } else {
             $completedTasksPercent = 0;
@@ -638,13 +636,13 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     public function getTaskStats(string $start_dt = null, string $end_dt = null): string
     {
 
-        if($start_dt) {
+        if ($start_dt) {
             $start_dt = date('Y-m-d', strtotime($start_dt));
         } else {
             $start_dt = null;
         }
 
-        if($end_dt) {
+        if ($end_dt) {
             $end_dt = date('Y-m-d', strtotime($end_dt));
         } else {
             $end_dt = null;
@@ -665,7 +663,6 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
             ->groupBy(['lt_task_id']);
 
 
-
         $taskListAllQuery->joinWith(['ltLead' => function ($q) {
             $q->where(['NOT IN', 'leads.status', [Lead::STATUS_TRASH, Lead::STATUS_SNOOZE]]);
         }]);
@@ -682,7 +679,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         //return $taskListChecked->createCommand()->getRawSql();
 
         $completed = [];
-        if($taskListChecked) {
+        if ($taskListChecked) {
             foreach ($taskListChecked as $taskItem) {
                 $completed[$taskItem->lt_task_id] = $taskItem->field_cnt;
             }
@@ -691,27 +688,27 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         //$itemHeader = [];
         $item = [];
 
-        if($taskListAll) {
+        if ($taskListAll) {
             foreach ($taskListAll as $task) {
                 //$itemHeader[] = Html::encode($task->ltTask->t_name);
                 //$item[] = ''.($completed[$task->lt_task_id] ?? 0).'/'. $task->field_cnt.'';
 
                 $completedTasks = $completed[$task->lt_task_id] ?? 0;
 
-                $str = '<b>'.Html::encode($task->ltTask->t_name).'</b><br>'.$completedTasks.' / '. Html::a($task->field_cnt,
+                $str = '<b>' . Html::encode($task->ltTask->t_name) . '</b><br>' . $completedTasks . ' / ' . Html::a($task->field_cnt,
                         ['lead-task/index', 'LeadTaskSearch[lt_task_id]' => $task->lt_task_id, 'LeadTaskSearch[lt_user_id]' => $this->id],
-                        ['data-pjax' => 0, 'target' => '_blank']).'';
+                        ['data-pjax' => 0, 'target' => '_blank']) . '';
 
 
-                if($task->field_cnt > 0) {
-                    $percent = (int) ($completedTasks * 100 / $task->field_cnt);
+                if ($task->field_cnt > 0) {
+                    $percent = (int)($completedTasks * 100 / $task->field_cnt);
                 } else {
                     $percent = 0;
                 }
 
-                $str .= '<br><div class="progress" title="'.$percent.'%">
-                          <div class="progress-bar" role="progressbar" aria-valuenow="'.$percent.'" aria-valuemin="0" aria-valuemax="100" style="width: '.$percent.'%;">
-                            '.$percent.'%
+                $str .= '<br><div class="progress" title="' . $percent . '%">
+                          <div class="progress-bar" role="progressbar" aria-valuenow="' . $percent . '" aria-valuemin="0" aria-valuemax="100" style="width: ' . $percent . '%;">
+                            ' . $percent . '%
                           </div>
                         </div>';
 
@@ -721,7 +718,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         }
 
 
-        if($item) {
+        if ($item) {
             $str = '<table class="table table-bordered table-condensed">';
             //$str .= '<tr><th class="text-center">'.implode('</th><th class="text-center">', $itemHeader).'</th></tr>';
 
@@ -743,14 +740,15 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
      * */
     public function calculateSalaryBetween($startDate, $endDate)
     {
-        $base = ($this->userParams)?$this->userParams->up_base_amount:200;
-        $commission = ($this->userParams)?$this->userParams->up_commission_percent:10;
-        $bonusActive = ($this->userParams)?$this->userParams->up_bonus_active:1;
+        $base = ($this->userParams) ? $this->userParams->up_base_amount : 200;
+        $commission = ($this->userParams) ? $this->userParams->up_commission_percent : 10;
+        $bonusActive = ($this->userParams) ? $this->userParams->up_bonus_active : 1;
         $bonus = 0;
 
         $query = new Query();
         $query->select([
             'lead_id' => 'l.id',
+            'final_profit' => 'l.final_profit',
             'q_id' => 'q.id',
             'selling' => 'SUM(qp.selling)',
             'mark_up' => 'SUM(qp.mark_up + qp.extra_mark_up)',
@@ -760,16 +758,15 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
             'agent_type' => "(CASE WHEN l.employee_id = $this->id THEN 'main' ELSE 'split' END)",
             'split_percent' => "SUM(CASE WHEN ps.ps_user_id = $this->id THEN ps.ps_percent ELSE 0 END)"
         ])
-        ->from(Lead::tableName().' l')
-        ->leftJoin(Quote::tableName().' q','q.lead_id = l.id')
-        ->leftJoin(QuotePrice::tableName().' qp','q.id = qp.quote_id')
-        ->leftJoin(ProfitSplit::tableName().' ps','ps.ps_lead_id = l.id')
-        ->where(['l.status' => Lead::STATUS_SOLD, 'q.status' => Quote::STATUS_APPLIED])
-        ->andWhere('l.employee_id = '.$this->id.' OR ps.ps_user_id = '.$this->id)
-        ->groupBy(['q.id','l.id'])
-        ;
+            ->from(Lead::tableName() . ' l')
+            ->leftJoin(Quote::tableName() . ' q', 'q.lead_id = l.id')
+            ->leftJoin(QuotePrice::tableName() . ' qp', 'q.id = qp.quote_id')
+            ->leftJoin(ProfitSplit::tableName() . ' ps', 'ps.ps_lead_id = l.id')
+            ->where(['l.status' => Lead::STATUS_SOLD, 'q.status' => Quote::STATUS_APPLIED])
+            ->andWhere('l.employee_id = ' . $this->id . ' OR ps.ps_user_id = ' . $this->id)
+            ->groupBy(['q.id', 'l.id']);
 
-        if($startDate !== null || $endDate !== null) {
+        if ($startDate !== null || $endDate !== null) {
             $subQuery = LeadFlow::find()->select(['DISTINCT(lead_flow.lead_id)'])->where('lead_flow.status = l.status AND lead_flow.lead_id = l.id');
             if ($startDate !== null) {
                 $subQuery->andFilterWhere(['>=', 'DATE(lead_flow.created)', $startDate->format('Y-m-d')]);
@@ -784,38 +781,40 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         $res = $query->all();
 
         $profit = 0;
-        foreach ($res as $entry){
+        foreach ($res as $entry) {
             $entry['minus_percent'] = intval($entry['minus_percent']);
-            $totalProfit = Quote::getProfit($entry['mark_up'], $entry['selling'], $entry['fare_type'], $entry['check_payment']);
-            if($entry['agent_type'] == 'main'){
-                $agentProfit = $totalProfit*(100-$entry['minus_percent'])/100;
-            }else{
-                $agentProfit = $totalProfit*$entry['split_percent']/100;
+            $totalProfit = !empty($entry['final_profit'])
+                ? (float)$entry['final_profit']
+                : Quote::getProfit($entry['mark_up'], $entry['selling'], $entry['fare_type'], $entry['check_payment']);
+            if ($entry['agent_type'] == 'main') {
+                $agentProfit = $totalProfit * (100 - $entry['minus_percent']) / 100;
+            } else {
+                $agentProfit = $totalProfit * $entry['split_percent'] / 100;
             }
             $profit += $agentProfit;
         }
 
-        if($bonusActive){
+        if ($bonusActive) {
             $profitBonuses = $this->getProfitBonuses();
-            if(empty($profitBonuses)){
+            if (empty($profitBonuses)) {
                 $profitBonuses = self::PROFIT_BONUSES;
             }
             foreach ($profitBonuses as $profKey => $bonusVal) {
-                if($profit >= $profKey){
+                if ($profit >= $profKey) {
                     $bonus = $bonusVal;
                     break;
                 }
             }
         }
 
-        $profit = $profit * $commission/100;
+        $profit = $profit * $commission / 100;
 
         return [
             'salary' => $profit + $base + $bonus,
             'base' => $base,
             'bonus' => $bonus,
             'commission' => $commission,
-            ];
+        ];
     }
 
 
@@ -825,13 +824,13 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
      * @param string|null $endDate
      * @return int
      */
-    public function getLeadCountByStatus(array $statusList = [], string $startDate = null, string $endDate = null) : int
+    public function getLeadCountByStatus(array $statusList = [], string $startDate = null, string $endDate = null): int
     {
-        if($startDate) {
+        if ($startDate) {
             $startDate = date('Y-m-d', strtotime($startDate));
         }
 
-        if($endDate) {
+        if ($endDate) {
             $endDate = date('Y-m-d', strtotime($endDate));
         }
 
@@ -846,7 +845,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     {
         $pb = ProfitBonus::find()->where(['pb_user_id' => $this->id])->orderBy(['pb_min_profit' => SORT_DESC])->all();
         $data = [];
-        foreach ($pb as $entry){
+        foreach ($pb as $entry) {
             $data[$entry['pb_min_profit']] = $entry['pb_bonus'];
         }
         return $data;
@@ -855,7 +854,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     /**
      * @return array
      */
-    public static function timezoneList() : array
+    public static function timezoneList(): array
     {
         $timezoneIdentifiers = \DateTimeZone::listIdentifiers(\DateTimeZone:: ALL);
         $utcTime = new \DateTime('now', new \DateTimeZone('UTC'));
@@ -871,7 +870,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         }
 
         // Sort the array by offset,identifier ascending
-        usort($tempTimezones, function($a, $b) {
+        usort($tempTimezones, function ($a, $b) {
             return ($a['offset'] === $b['offset'])
                 ? strcmp($a['identifier'], $b['identifier'])
                 : $a['offset'] - $b['offset'];
@@ -893,20 +892,20 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
      * @return array
      * @throws \Exception
      */
-    public function getShiftTime() : array
+    public function getShiftTime(): array
     {
         $shiftData = [];
 
-        if($this->shiftData) {
+        if ($this->shiftData) {
             return $this->shiftData;
         }
 
-        if($this->userParams) {
+        if ($this->userParams) {
             $startTime = $this->userParams->up_work_start_tm;
-            $workHours = (int) $this->userParams->up_work_minutes * 60;
+            $workHours = (int)$this->userParams->up_work_minutes * 60;
             $timeZone = $this->userParams->up_timezone ?: 'UTC';
 
-            if($startTime && $workHours) {
+            if ($startTime && $workHours) {
 
                 $startShiftTimeUTC = new \DateTime(date('Y-m-d') . ' ' . $startTime, new \DateTimeZone($timeZone));
                 $startShiftTimeUTC->setTimezone(new \DateTimeZone('UTC'));
@@ -943,10 +942,10 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
      * @return bool
      * @throws \Exception
      */
-    public function checkShiftTime() : bool
+    public function checkShiftTime(): bool
     {
         $shiftData = $this->getShiftTime();
-        if($shiftData) {
+        if ($shiftData) {
             $currentTS = time();
             $startTS = $shiftData['start_utc_ts'] ?? 0;
             $endTS = $shiftData['end_utc_ts'] ?? 0;
@@ -982,29 +981,28 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
      * @return bool
      * @throws \Exception
      */
-    public function accessTakeNewLead() : bool
+    public function accessTakeNewLead(): bool
     {
         $access = false;
         //$shift = $this->getShiftTime();
 
 
-        if($params = $this->userParams) {
+        if ($params = $this->userParams) {
 
 
-
-            if(!$params->up_min_percent_for_take_leads) {
+            if (!$params->up_min_percent_for_take_leads) {
                 $access = true;
             } else {
 
                 $currentShiftTaskInfoSummary = $this->getCurrentShiftTaskInfoSummary();
-                if($currentShiftTaskInfoSummary['completedTasksPercent'] >= $params->up_min_percent_for_take_leads) {
+                if ($currentShiftTaskInfoSummary['completedTasksPercent'] >= $params->up_min_percent_for_take_leads) {
                     $access = true;
                 } else {
                     $countNewLeads = $this->getCountNewLeadCurrentShift();
 
-                    if(!$params->up_default_take_limit_leads) {
+                    if (!$params->up_default_take_limit_leads) {
                         $access = true;
-                    } elseif($countNewLeads < $params->up_default_take_limit_leads) {
+                    } elseif ($countNewLeads < $params->up_default_take_limit_leads) {
                         $access = true;
                     }
                 }

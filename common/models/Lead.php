@@ -49,6 +49,8 @@ use common\models\local\FlightSegment;
  * @property int $l_grade
  * @property int $clone_id
  * @property string $description
+ * @property double $final_profit
+ * @property string $tips
  *
  * @property LeadFlightSegment[] $leadFlightSegments
  * @property LeadFlow[] $leadFlows
@@ -183,7 +185,7 @@ class Lead extends ActiveRecord
 
             [['notes_for_experts'], 'string'],
             [['created', 'updated', 'offset_gmt', 'request_ip', 'request_ip_detail', 'snooze_for',
-                'called_expert', 'discount_id', 'bo_flight_id', 'additional_information'], 'safe'],
+                'called_expert', 'discount_id', 'bo_flight_id', 'additional_information', 'final_profit', 'tips'], 'safe'],
             [['uid'], 'string', 'max' => 255],
             [['trip_type'], 'string', 'max' => 2],
             [['cabin'], 'string', 'max' => 1],
