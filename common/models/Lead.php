@@ -2010,8 +2010,6 @@ Sales - Kivork",
         $airport = Airport::findIdentity($this->leadFlightSegments[0]->destination);
         $destination = ($airport !== null) ? $airport->city : $this->leadFlightSegments[0]->destination;
 
-        $tripType = Lead::getFlightType($this->trip_type);
-
         $userProjectParams = UserProjectParams::findOne([
             'upp_user_id' => $this->employee->id,
             'upp_project_id' => $this->project_id
@@ -2089,7 +2087,7 @@ Sales - Kivork",
                 'originCity' => $origin,
                 'destinationCity' => $destination,
                 'cabinType' => self::getCabin($this->cabin),
-                'tripType' => $tripType,
+                'tripType' => strtolower($this->trip_type),
                 'pax' => ($this->adults + $this->children + $this->infants)
             ],
             'quotes' => $quotesData,
