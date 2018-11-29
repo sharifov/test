@@ -906,13 +906,22 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
             $timeZone = $this->userParams->up_timezone ?: 'UTC';
 
             if ($startTime && $workHours) {
+                $currentTimeUTC = new \DateTime();
+                $currentTimeUTC->setTimezone(new \DateTimeZone('UTC'));
 
                 $startShiftTimeUTC = new \DateTime(date('Y-m-d') . ' ' . $startTime, new \DateTimeZone($timeZone));
                 $startShiftTimeUTC->setTimezone(new \DateTimeZone('UTC'));
 
-
                 $endShiftTimeUTC = clone $startShiftTimeUTC;
                 $endShiftTimeUTC->add(new \DateInterval('PT' . $workHours . 'S'));
+
+                $endShiftMinutes = $endShiftTimeUTC->format('H')*60 + $endShiftTimeUTC->format('i');
+                $currentMinutes = $currentTimeUTC->format('H')*60 + $currentTimeUTC->format('i');
+
+                if($currentMinutes >= 0 && $endShiftMinutes >= $currentMinutes){
+                    $startShiftTimeUTC->modify('-1 day');
+                    $endShiftTimeUTC->modify('-1 day');
+                }
 
                 // $startShiftTimeDt = $startShiftTimeUTC->format('Y-m-d H:i:s');
                 // $endShiftTimeDt = $endShiftTimeUTC->format('Y-m-d H:i:s');
