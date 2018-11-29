@@ -267,7 +267,7 @@ data-airline="<?= $result['validatingCarrier']?>" id="search-result__quote-<?= $
                                     		<?php if(isset($baggage['charge'])):?>
                                     		<?php foreach ($baggage['charge'] as $charge):?>
 											<span title="<?= (isset($charge['maxSize'])?$charge['maxSize']:'').' '.(isset($charge['maxWeight'])?$charge['maxWeight']:'')?>" class="badge badge-light"><i class="fa fa-plus"></i>&nbsp;
-											<i class="fa fa-suitcase"></i>&nbsp;<?= ($charge['price'])?$charge['price']:''?>$</span>
+											<i class="fa fa-suitcase"></i>&nbsp;<?= (isset($charge['price']))?$charge['price']:''?>$</span>
                                     		<?php endforeach;?>
                                     		<?php endif;?>
                                     	<?php break; endforeach;?>
