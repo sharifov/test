@@ -12,6 +12,7 @@ use yii\db\ActiveRecord;
 use yii\helpers\Html;
 use yii\db\Query;
 use yii\helpers\VarDumper;
+use common\components\SearchService;
 
 /**
  * This is the model class for table "quotes".
@@ -1209,6 +1210,56 @@ class Quote extends \yii\db\ActiveRecord
         }
 
         return $trips;
+    }
+
+    public function getInfoForEmail()
+    {
+        $trips = [];
+
+        foreach ($this->quoteTrips as $trip){
+            $firstSegment = null;
+            $lastSegment = null;
+
+            $segments = $trip->quoteSegments;
+            if( $segments ) {
+                $segmentsCnt = count($segments);
+                $stopCnt = $segmentsCnt - 1;
+                $firstSegment = $segments[0];
+                $lastSegment = end($segments);
+                $marketingAirlines = [];
+                foreach ($segments as $segment){
+                    if(isset($segment->qs_stop) && $segment->qs_stop > 0){
+                        $stopCnt += $segment->qs_stop;
+                    }
+                    if(!in_array($segment->qs_marketing_airline, $marketingAirlines)){
+                        $marketingAirlines[] = $segment->qs_marketing_airline;
+                    }
+                }
+            } else {
+                continue;
+            }
+            $datediff = strtotime($lastSegment->qs_arrival_time) - strtotime($firstSegment->qs_departure_time);
+
+            $trips[] = [
+                'airline' => (count($marketingAirlines) == 1)?$marketingAirlines[0]:'',
+                'departureDate' => Yii::$app->formatter_search->asDatetime(strtotime($firstSegment->qs_departure_time),'MMM d'),
+                'departureTime' => Yii::$app->formatter_search->asDatetime(strtotime($firstSegment->qs_departure_time),'h:mm a'),
+                'departureAirport' => $firstSegment->qs_departure_airport_code,
+                'departureCity' => ($firstSegment->departureAirport)?$firstSegment->departureAirport->city:$firstSegment->qs_departure_airport_code,
+                'arrivalTime' => Yii::$app->formatter_search->asDatetime(strtotime($lastSegment->qs_arrival_time),'h:mm a'),
+                'arrivalDatePlus' => round($datediff / (60 * 60 * 24)),
+                'arrivalAirport' => $lastSegment->qs_arrival_airport_code,
+                'arrivalCity' => ($lastSegment->arrivalAirport)?$lastSegment->arrivalAirport->city:$lastSegment->qs_arrival_airport_code,
+                'duration' => SearchService::durationInMinutes($trip->qt_duration),
+                'stops' => Yii::t('search', '{n, plural, =0{Nonstop} one{# stop} other{# stops}}', ['n' => $stopCnt]),
+            ];
+        }
+
+        return [
+            'price' => $this->quotePrice()['amountPerPax'],
+            'trips' => $trips,
+            'baggage' => $this->freeBaggageInfo,
+        ];
     }
 
     public function getTripsFromDump(&$title = null)
