@@ -918,11 +918,14 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
                 $endShiftMinutes = $endShiftTimeUTC->format('H')*60 + $endShiftTimeUTC->format('i');
                 $currentMinutes = $currentTimeUTC->format('H')*60 + $currentTimeUTC->format('i');
 
-                if($currentMinutes >= 0 && $endShiftMinutes >= $currentMinutes){
-                    $startShiftTimeUTC->modify('-1 day');
-                    $endShiftTimeUTC->modify('-1 day');
-                }
+                if($startShiftTimeUTC->format('d') != $endShiftTimeUTC->format('d')){
+                    //var_dump($currentMinutes, $endShiftMinutes, ($currentMinutes >= 0 && $endShiftMinutes >= $currentMinutes));
+                    if($currentMinutes >= 0 && $endShiftMinutes >= $currentMinutes){
+                        $startShiftTimeUTC->modify('-1 day');
+                        $endShiftTimeUTC->modify('-1 day');
+                    }
 
+                }
                 // $startShiftTimeDt = $startShiftTimeUTC->format('Y-m-d H:i:s');
                 // $endShiftTimeDt = $endShiftTimeUTC->format('Y-m-d H:i:s');
                 // echo $startShiftTimeUTC.' - '.$endShiftTimeUTC; exit;
@@ -954,10 +957,15 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     public function checkShiftTime(): bool
     {
         $shiftData = $this->getShiftTime();
+
         if ($shiftData) {
             $currentTS = time();
             $startTS = $shiftData['start_utc_ts'] ?? 0;
             $endTS = $shiftData['end_utc_ts'] ?? 0;
+
+            /* VarDumper::dump($shiftData, 10, true);
+            echo $currentTS.' '.date('Y-m-d H:i:s',$currentTS);
+            die; */
 
             if ($startTS <= $currentTS && $endTS >= $currentTS) {
                 return true;
