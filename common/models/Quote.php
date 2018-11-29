@@ -226,6 +226,12 @@ class Quote extends \yii\db\ActiveRecord
         return self::countProfit($this->id);
     }
 
+    public function getProcessingFee()
+    {
+        $groups = $this->employee->ugsGroups;
+        return ($groups)?$groups[0]->ug_processing_fee:0;
+    }
+
     public static function createDump($flightSegments)
     {
         /**

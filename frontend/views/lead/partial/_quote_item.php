@@ -12,7 +12,6 @@ use common\models\Airline;
 use common\components\SearchService;
 use yii\bootstrap\Html;
 use yii\helpers\Url;
-use common\models\QuotePrice;
 ?>
 <div class="quote quote--highlight">
 	<div class="quote__details" id="quote_detail_<?= $model->uid?>" style="display:none;">
@@ -390,10 +389,20 @@ use common\models\QuotePrice;
                     <?php if($model->check_payment):?>
                     <tr class="danger">
                         <th colspan="4">Merchant fee</th>
-                        <td><?= Quote::SERVICE_FEE*100?>%</td>
-                        <td><?php /*$service_fee_total = round($sellingPrice * $model->service_fee_percent/100, 2); echo $service_fee_total;*/ ?></td>
+                        <th><?= Quote::SERVICE_FEE*100?>%</th>
+                        <th><?php $serviceFeePercent = (!$model->service_fee_percent)?Quote::SERVICE_FEE*100:$model->service_fee_percent;
+                        $service_fee_total = $sellingPrice - round($sellingPrice * (100 - $serviceFeePercent)/100, 2);
+                        echo "-".$service_fee_total; ?></th>
                     </tr>
                     <?php endif;?>
+                    <tr class="danger">
+                        <th colspan="5">Processing fee</th>
+                        <th><?php $processingFee = $model->getProcessingFee(); if($processingFee > 0) echo "-".$processingFee; else echo 0;?></th>
+                    </tr>
+                    <tr class="info">
+                        <th colspan="5">Profit</th>
+                        <th><?= $model->getTotalProfit()?></th>
+                    </tr>
 				</tfoot>
 			</table>
 		</div>

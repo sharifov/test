@@ -16,6 +16,7 @@ use yii\helpers\ArrayHelper;
  * @property string $ug_description
  * @property int $ug_disable
  * @property string $ug_updated_dt
+ * @property int $ug_processing_fee
  *
  * @property UserGroupAssign[] $userGroupAssigns
  * @property Employee[] $ugsUsers
@@ -37,7 +38,7 @@ class UserGroup extends \yii\db\ActiveRecord
     {
         return [
             [['ug_key', 'ug_name'], 'required'],
-            [['ug_disable'], 'integer'],
+            [['ug_disable', 'ug_processing_fee'], 'integer'],
             [['ug_updated_dt'], 'safe'],
             [['ug_key', 'ug_name'], 'string', 'max' => 100],
             [['ug_description'], 'string', 'max' => 255],
@@ -57,6 +58,7 @@ class UserGroup extends \yii\db\ActiveRecord
             'ug_description' => 'Description',
             'ug_disable' => 'Disable',
             'ug_updated_dt' => 'Updated Dt',
+            'ug_processing_fee' => 'Processing Fee',
         ];
     }
 
