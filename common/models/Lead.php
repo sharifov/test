@@ -17,6 +17,7 @@ use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\helpers\VarDumper;
 use common\models\local\FlightSegment;
+use common\components\SearchService;
 
 /**
  * This is the model class for table "leads".
@@ -1865,6 +1866,7 @@ Sales - Kivork",
         return $result;
     }
 
+
     public function sendEmail($quotes, $email)
     {
         $result = [
@@ -1997,6 +1999,106 @@ Sales - Kivork",
         unlink($path);
 
         return $result;
+    }
+
+
+    public function getEmailData($quotesUids)
+    {
+
+        $airport = Airport::findIdentity($this->leadFlightSegments[0]->origin);
+        $origin = ($airport !== null) ? $airport->city : $this->leadFlightSegments[0]->origin;
+
+        $airport = Airport::findIdentity($this->leadFlightSegments[0]->destination);
+        $destination = ($airport !== null) ? $airport->city : $this->leadFlightSegments[0]->destination;
+
+        $userProjectParams = UserProjectParams::findOne([
+            'upp_user_id' => $this->employee->id,
+            'upp_project_id' => $this->project_id
+        ]);
+
+        $quotesData = [];
+        foreach ($quotesUids as $uid){
+            $quote = Quote::findOne(['uid' => $uid]);
+            if($quote !== null){
+                $segmentsData = [];
+                $trips = $quote->quoteTrips;
+                foreach ($trips as $trip){
+                    $segments = $trip->quoteSegments;
+                    if( $segments ) {
+                        $segmentsCnt = count($segments);
+                        $stopCnt = $segmentsCnt - 1;
+                        $firstSegment = $segments[0];
+                        $lastSegment = end($segments);
+                        $cabins = [];
+                        $marketingAirlines = [];
+                        $airlineNames = [];
+                        foreach ($segments as $segment){
+                            if(!in_array(SearchService::getCabin($segment->qs_cabin), $cabins)){
+                                $cabins[] = SearchService::getCabin($segment->qs_cabin);
+                            }
+                            if(isset($segment->qs_stop) && $segment->qs_stop > 0){
+                                $stopCnt += $segment->qs_stop;
+                            }
+                            if(!in_array($segment->qs_marketing_airline, $marketingAirlines)){
+                                $marketingAirlines[] = $segment->qs_marketing_airline;
+                                $airline = Airline::findIdentity($segment->qs_marketing_airline);
+                                if($airline){
+                                    $airlineNames[] =  $airline->name;
+                                }else{
+                                    $airlineNames[] = $segment->qs_marketing_airline;
+                                }
+
+                            }
+                        }
+                    } else {
+                        continue;
+                    }
+
+                    $segmentsData[] = [
+                        'airlineIata' => (count($marketingAirlines) == 1)?$marketingAirlines[0]:'multiple_airlines',
+                        'airlineLogoUrl' => (count($marketingAirlines) == 1)?'//www.gstatic.com/flights/airline_logos/70px/'.$marketingAirlines[0].'.png':'/img/multiple_airlines.png',
+                        'departDate' => Yii::$app->formatter_search->asDatetime(strtotime($firstSegment->qs_departure_time),'MMM d'),
+                        'departTime' => Yii::$app->formatter_search->asDatetime(strtotime($firstSegment->qs_departure_time),'h:mm a'),
+                        'originIata' => $firstSegment->qs_departure_airport_code,
+                        'originCity' => ($firstSegment->departureAirport)?$firstSegment->departureAirport->city:$firstSegment->qs_departure_airport_code,
+                        'flightDuration' => SearchService::durationInMinutes($trip->qt_duration),
+                        'stopsQuantity' => \Yii::t('search', '{n, plural, =0{Nonstop} one{# stop} other{# stops}}', ['n' => $stopCnt]),
+                        'destinationIata' => $lastSegment->qs_arrival_airport_code,
+                        'destinationCity' => ($lastSegment->arrivalAirport)?$lastSegment->arrivalAirport->city:$lastSegment->qs_arrival_airport_code,
+                        'arriveTime' => Yii::$app->formatter_search->asDatetime(strtotime($lastSegment->qs_arrival_time),'h:mm a'),
+                        'arriveDate' => Yii::$app->formatter_search->asDatetime(strtotime($lastSegment->qs_arrival_time),'MMM d')
+                    ];
+                }
+                $quotesData[] = [
+                    'currency' => 'USD',
+                    'price' => $quote->quotePrice()['amountPerPax'],
+                    'url' => $this->project->link.'/checkout/'.$quote->uid,
+                    'segments' => $segmentsData
+                ];
+            }
+        }
+
+        $emailData = [
+            'project_url' => $this->project->link,
+            'agent' => [
+                'name' => ucfirst($this->employee->username),
+                'email' => trim($userProjectParams->upp_email)
+            ],
+            'request' => [
+                'originCity' => $origin,
+                'destinationCity' => $destination,
+                'cabinType' => self::getCabin($this->cabin),
+                'tripType' => strtolower($this->trip_type),
+                'pax' => ($this->adults + $this->children + $this->infants)
+            ],
+            'quotes' => $quotesData,
+            'contacts' => [
+                'phone' => $this->project->contactInfo->phone,
+                'email' => $this->project->contactInfo->email,
+            ],
+        ];
+
+        return $emailData;
     }
 
     public static function getFlightType($flightType = null)

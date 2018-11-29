@@ -29,6 +29,11 @@ use common\models\QuoteSegment;
 use common\models\QuoteSegmentStop;
 use common\models\QuoteSegmentBaggage;
 use common\models\QuoteSegmentBaggageCharge;
+use common\components\CommunicationService;
+use common\models\UserProjectParams;
+use frontend\models\PreviewEmailCommunicationForm;
+use common\models\Email;
+use common\models\EmailTemplateType;
 
 /**
  * Quotes controller
@@ -47,7 +52,8 @@ class QuoteController extends FController
                     [
                         'actions' => [
                             'create', 'save', 'decline', 'calc-price', 'extra-price', 'clone',
-                            'send-quotes', 'get-online-quotes','get-online-quotes-old','status-log','preview-send-quotes','create-quote-from-search'
+                            'send-quotes', 'get-online-quotes','get-online-quotes-old','status-log','preview-send-quotes',
+                            'create-quote-from-search','preview-send-quotes-new',
                         ],
 
                         'allow' => true,
@@ -508,6 +514,111 @@ class QuoteController extends FController
                         Yii::$app->getSession()->setFlash('success', sprintf('Sent email \'%s\' succeed.', $previewEmailModel->subject));
                     } else {
                         Yii::$app->getSession()->setFlash('danger', sprintf('Sent email \'%s\' failed. Please verify your email or password from email!', $previewEmailModel->subject));
+                    }
+                    return $this->redirect([
+                        'lead/quote',
+                        'type' => 'processing',
+                        'id' => $lead->id
+                    ]);
+                }
+            }
+        }
+        throw new BadRequestHttpException();
+
+    }
+
+    public function actionPreviewSendQuotesNew()
+    {
+        $result = [
+            'errors' => [],
+            'status' => false
+        ];
+        $templateKey = 'cl_offer';
+
+
+        $email = new Email();
+        $communication = Yii::$app->communication;
+        if (Yii::$app->request->isAjax) {
+            $attr = Yii::$app->request->post();
+
+            if (isset($attr['quotes']) && isset($attr['leadId'])) {
+                $lead = Lead::findOne(['id' => $attr['leadId']]);
+                if ($lead !== null) {
+                    $email->setQuotes($attr['quotes']);
+                    //$result = $lead->previewEmail($attr['quotes'], $attr['email']);
+
+                    $userProjectParams = UserProjectParams::findOne([
+                        'upp_user_id' => $lead->employee->id,
+                        'upp_project_id' => $lead->project_id
+                    ]);
+
+                    $emailFrom = trim($userProjectParams->upp_email);
+                    $previewEmail = [];
+                    $templateType = EmailTemplateType::findOne(['etp_key' => $templateKey]);
+                    $emailData = $lead->getEmailData($attr['quotes']);
+
+                    $comData = $communication->mailPreview($lead->project_id, $templateKey, $emailFrom, $attr['email'], $emailData, $attr['lang']);
+
+                    if(isset($comData['error']) && $comData['error'] !== false){
+                        $result['errors'] = $comData['error'];
+                    }else{
+                        if(isset($comData['data'])){
+                            $responseData = $comData['data'];
+                            $email->attributes = [
+                                'e_email_subject' => $responseData['email_subject'],
+                                'e_email_body_html' => $responseData['email_body_html'],
+                                'e_email_body_text' => $responseData['email_body_text'],
+                                'e_email_from' => $responseData['email_from'],
+                                'e_email_to' => $responseData['email_to'],
+                                'e_language_id' => $attr['lang'],
+                                'e_project_id' => $lead->project_id,
+                                'e_lead_id' => $lead->id,
+                                'e_template_type_id' => ($templateType)?$templateType->etp_id:null,
+                            ];
+                            $email->setEmailData($responseData['email_data']);
+                        }
+                    }
+
+                    return $this->renderAjax('partial/_sendEmailPreview', [
+                        'email' => $email,
+                        'errors' => $result['errors']
+                    ]);
+                }
+            }
+        }elseif (Yii::$app->request->isPost) {
+            $attr = Yii::$app->request->post($email->formName());
+            if (isset($attr['quotes']) && isset($attr['e_lead_id'])) {
+                $lead = Lead::findOne(['id' => $attr['e_lead_id']]);
+                if ($lead !== null) {
+                    $email->attributes = $attr;
+
+                    $content_data = [
+                        'email_body_html' => $email->e_email_body_html,
+                        'email_body_text' => $email->e_email_body_text,
+                        'email_subject' => $email->e_email_subject,
+                    ];
+                    $comData = $communication->mailSend($email->e_project_id, $templateKey, $email->e_email_from, $email->e_email_to, $content_data, $email->getEmailData(), $email->e_language_id);
+
+                    //VarDumper::dump($comData, 10, true); exit;
+
+                    if ($comData && $comData['error'] ===  false) {
+                        $email->e_communication_id = $comData['data']['eq_id'] ?? null;
+                        if(!$email->save()){
+                            Yii::error(VarDumper::dumpAsString($email->getErrors()), 'QuoteController:preview-send-quotes-new:email:save');
+                        }
+                        $quotes = $email->getQuotes();
+
+                        foreach ($quotes as $quote){
+                            $model = Quote::findOne(['uid' => $quote]);
+
+                            if ($model !== null && $model->status != $model::STATUS_APPLIED) {
+                                $model->status = $model::STATUS_SEND;
+                                $model->save();
+                            }
+                        }
+                        Yii::$app->getSession()->setFlash('success', sprintf('Sent email \'%s\' succeed.', $email->e_email_subject));
+                    } else {
+                        Yii::$app->getSession()->setFlash('danger', sprintf('Sent email \'%s\' failed. Please verify your email or password from email!', $email->e_email_subject));
                     }
                     return $this->redirect([
                         'lead/quote',

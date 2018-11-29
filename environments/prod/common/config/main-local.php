@@ -12,5 +12,11 @@ return [
             'class' => 'yii\swiftmailer\Mailer',
             'viewPath' => '@common/mail',
         ],
+        'communication' => [
+            'class' => \common\components\CommunicationService::class,
+            'url' => 'https://communication.api.travelinsides.com/v1/',
+            'username' => 'sales',
+            'password' => 'Sales2018!',
+        ],
     ],
 ];

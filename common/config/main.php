@@ -49,5 +49,11 @@ return [
             'viewPath' => '@common/mail',
             'useFileTransport' => true,
         ],
+        'communication' => [
+            'class' => \common\components\CommunicationService::class,
+            'url' => 'https://communication.api.travelinsides.com/v1/',
+            'username' => 'sales',
+            'password' => '',
+        ],
     ],
 ];

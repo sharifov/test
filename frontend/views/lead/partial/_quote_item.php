@@ -378,14 +378,6 @@ use common\models\QuotePrice;
                         <?php endif; ?>
 				</tbody>
 				<tfoot>
-					<?php $service_fee_total = 0?>
-                    <?php if($model->check_payment):?>
-                    <tr class="danger">
-                        <th colspan="4">+ Service fee</th>
-                        <td><?= Quote::SERVICE_FEE*100?>%</td>
-                        <td><?php /*$service_fee_total = round($sellingPrice * $model->service_fee_percent/100, 2); echo $service_fee_total;*/ ?></td>
-                    </tr>
-                    <?php endif;?>
 					<tr>
                         <th>Total</th>
                         <td><?= count($model->quotePrices) ?></td>
@@ -394,6 +386,14 @@ use common\models\QuotePrice;
                         <td class="total-markup-<?= $model->uid ?>"><?= $extraMarkup ?></td>
                         <td class="total-sellingPrice-<?= $model->uid ?>"><?= $sellingPrice ?></td>
                     </tr>
+					<?php $service_fee_total = 0?>
+                    <?php if($model->check_payment):?>
+                    <tr class="danger">
+                        <th colspan="4">Merchant fee</th>
+                        <td><?= Quote::SERVICE_FEE*100?>%</td>
+                        <td><?php /*$service_fee_total = round($sellingPrice * $model->service_fee_percent/100, 2); echo $service_fee_total;*/ ?></td>
+                    </tr>
+                    <?php endif;?>
 				</tfoot>
 			</table>
 		</div>
