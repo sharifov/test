@@ -20,6 +20,7 @@ return [
     ]
     ,
     'syncAirlineClasses' => 'http://airsearch.api.travelinsides.com/airline/get-cabin-classes',
+    'searchApiUrl' => 'http://airsearch.api.travelinsides.com/v1/search',
 
     'lead' => [
         'call2DelayTime' => 2 * 60 * 60,     // 2 hours

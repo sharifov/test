@@ -7,6 +7,9 @@ use common\models\Quote;
 use Yii;
 use common\models\Airline;
 use common\models\Airport;
+use yii\httpclient\Client;
+use yii\httpclient\CurlTransport;
+use yii\helpers\VarDumper;
 
 class SearchService
 {
@@ -71,6 +74,7 @@ class SearchService
 
     public static function getOnlineQuotes(Lead $lead, $gdsCode)
     {
+        $result = null;
         $returned = '';
         if ($lead->trip_type == Lead::TRIP_TYPE_ROUND_TRIP) {
             $returned = date('m/d/Y', strtotime($lead->leadFlightSegments[1]->departure));
@@ -98,14 +102,30 @@ class SearchService
         $params['fl'] = $fl;
 
         $fields = http_build_query($params);
+        $url = \Yii::$app->params['searchApiUrl'].'?' . $fields;
 
-        $ch = curl_init();
+        ///
+        $client = new Client();
+        $client->setTransport(CurlTransport::class);
+        $request = $client->createRequest();
+        $request->setMethod('GET')->setUrl($url)->setOptions([CURLOPT_ENCODING => 'gzip']);
+        $response = $request->send();
+
+        if ($response->isOk) {
+            return $response->data;
+        } else {
+            \Yii::error(VarDumper::dumpAsString($response->content, 10), 'SearchService::getOnlineQuotes');
+        }
+
+        ///
+
+        /* $ch = curl_init();
         curl_setopt($ch, CURLOPT_VERBOSE, true);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_URL, 'http://airsearch.api.travelinsides.com/v1/search?' . $fields);
-        $result = curl_exec($ch);
+        curl_setopt($ch, CURLOPT_URL, $url);
+        $result = curl_exec($ch); */
 
-        Yii::warning(sprintf("Request:\n%s\n\nDump:\n%s", print_r($fields, true), print_r(curl_getinfo($ch), true)), 'SearchService::getOnlineQuotes()');
+        //Yii::warning(sprintf("Request:\n%s\n\nDump:\n%s", print_r($fields, true), print_r(curl_getinfo($ch), true)), 'SearchService::getOnlineQuotes()');
 
         return json_decode($result, true);
     }
