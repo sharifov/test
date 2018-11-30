@@ -150,12 +150,6 @@ class NavItem
                     . Html::a('Processing(Me)<span class="badge badge-warning">' . $badges['processing'] . '</span > ', self::getQueueUri('processing'))
                     . ' </li > ';
 
-                if (Yii::$app->user->identity->role != 'agent') {
-                    $menuItems[] = '<li class="' . self::isActive('processing-all') . '">'
-                        . Html::a('Processing(All)<span class="badge badge-mint">' . $badges['processing-all'] . '</span > ', self::getQueueUri('processing-all'))
-                        . ' </li > ';
-                }
-
                 $menuItems[] = '<li class="' . self::isActive('booked') . '">'
                     . Html::a('Booked<span class="badge badge-success">' . $badges['booked'] . '</span > ', self::getQueueUri('booked'))
                     . ' </li > ';

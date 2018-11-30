@@ -2,7 +2,6 @@
 
 namespace frontend\controllers;
 
-use common\controllers\DefaultController;
 use common\models\LeadFlightSegment;
 use common\models\search\QuotePriceSearch;
 use Yii;

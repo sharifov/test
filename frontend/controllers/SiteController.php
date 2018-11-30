@@ -2,7 +2,6 @@
 
 namespace frontend\controllers;
 
-use common\controllers\DefaultController;
 use common\models\ApiLog;
 use common\models\Employee;
 use common\models\Lead;

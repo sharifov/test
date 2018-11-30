@@ -3,7 +3,6 @@
 namespace frontend\controllers;
 
 use common\components\BackOffice;
-use common\controllers\DefaultController;
 use common\models\ClientEmail;
 use common\models\ClientPhone;
 use common\models\EmployeeContactInfo;
@@ -40,6 +39,7 @@ use common\models\Employee;
 use common\models\search\LeadSearch;
 use frontend\models\ProfitSplitForm;
 use common\components\SearchService;
+use common\models\QuotePrice;
 
 /**
  * Site controller
@@ -993,7 +993,26 @@ class LeadController extends FController
                 \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
 
                 // read your posted model attributes
-                if (Yii::$app->request->isPost && $taskNotes = Yii::$app->request->post('task_notes')) {
+                if(Yii::$app->request->isPost && $extraMarkup = Yii::$app->request->post('extra_markup')){
+                    $paxCode = key($extraMarkup);
+                    if($paxCode){
+                        $quoteId = key($extraMarkup[$paxCode]);
+                        if($quoteId){
+                            $qPrices = QuotePrice::find()->where(['quote_id' => $quoteId, 'passenger_type' => $paxCode])->all();
+                            if (count($qPrices)){
+                                foreach ($qPrices as $qPrice){
+                                    $qPrice->extra_mark_up = $extraMarkup[$paxCode][$quoteId];
+                                    $qPrice->update();
+                                }
+                                return ['output' => $extraMarkup[$paxCode][$quoteId]];
+                            }
+                            return [];
+                        }
+                        return [];
+                    }
+
+                    return [];
+                }elseif (Yii::$app->request->isPost && $taskNotes = Yii::$app->request->post('task_notes')) {
 
                     $taskId = $taskDate = $userId = $leadId = null;
 

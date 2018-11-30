@@ -2,7 +2,6 @@
 
 namespace frontend\controllers;
 
-use common\controllers\DefaultController;
 use Yii;
 use common\models\QuotePrice;
 use common\models\search\QuotePriceSearch;

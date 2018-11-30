@@ -5028,3 +5028,7 @@ input[disabled] + .radio-tab__text {
 .popover {max-width:800px;}
 .popover-dump{width:450px;}
 .popover-dump-copy{position:absolute;top:0;right:0;}
+
+.table-prices .kv-editable-parent.form-group{margin:0;}
+.table-prices .kv-editable{position:relative;}
+.table-prices .kv-editable-close{position:absolute;top:0;right:0;}

@@ -2,7 +2,6 @@
 
 namespace frontend\controllers;
 
-use common\controllers\DefaultController;
 use common\models\LeadFlow;
 use common\models\LeadTask;
 use common\models\Reason;

@@ -226,10 +226,23 @@ class Quote extends \yii\db\ActiveRecord
         return self::countProfit($this->id);
     }
 
+    /**
+     * @return int
+     */
     public function getProcessingFee()
     {
+        if(!$this->employee)
+            return 0;
         $groups = $this->employee->ugsGroups;
         return ($groups)?$groups[0]->ug_processing_fee:0;
+    }
+
+    public function isEditable()
+    {
+        if($this->status == self::STATUS_CREATED)
+            return true;
+
+        return false;
     }
 
     public static function createDump($flightSegments)
@@ -1436,6 +1449,61 @@ class Quote extends \yii\db\ActiveRecord
         $result['fare_type'] = empty($this->fare_type)
             ? self::FARE_TYPE_PUB : $this->fare_type;
         return $result;
+    }
+
+    public function getPricesData()
+    {
+        $prices = [];
+        $service_fee_percent = ($this->check_payment)?($this->service_fee_percent?$this->service_fee_percent:self::SERVICE_FEE*100):0;
+        $defData = [
+            'fare' => 0,
+            'taxes' => 0,
+            'net' => 0, // fare + taxes
+            'cnt' => 0,
+            'mark_up' => 0,
+            'extra_mark_up' => 0,
+            'service_fee' => 0,
+            'selling' => 0, //net + mark_up + extra_mark_up + service_fee
+        ];
+        $total = $defData;
+
+        $paxCode = null;
+        foreach ($this->quotePrices as $price){
+            if($paxCode !== $price->passenger_type){
+                $prices[$price->passenger_type] = $defData;
+                $paxCode = $price->passenger_type;
+            }
+            $prices[$price->passenger_type]['fare'] += $price->fare;
+            $prices[$price->passenger_type]['taxes'] += $price->taxes;
+            $prices[$price->passenger_type]['net'] = $prices[$price->passenger_type]['fare'] + $prices[$price->passenger_type]['taxes'];
+            $prices[$price->passenger_type]['cnt'] += 1;
+            $prices[$price->passenger_type]['mark_up'] += $price->mark_up;
+            $prices[$price->passenger_type]['extra_mark_up'] += $price->extra_mark_up;
+            $prices[$price->passenger_type]['selling'] = ($prices[$price->passenger_type]['net'] + $prices[$price->passenger_type]['mark_up'] + $prices[$price->passenger_type]['extra_mark_up']);
+            if($service_fee_percent > 0){
+                $prices[$price->passenger_type]['service_fee'] = $prices[$price->passenger_type]['selling'] * $service_fee_percent / 100;
+                $prices[$price->passenger_type]['selling'] += $prices[$price->passenger_type]['service_fee'];
+            }
+            $prices[$price->passenger_type]['selling'] = round($prices[$price->passenger_type]['selling'], 2);
+        }
+
+        foreach ($prices as $key => $price){
+            $total['cnt'] += $price['cnt'];
+            $total['net'] += $price['net'];
+            $total['mark_up'] += $price['mark_up'];
+            $total['extra_mark_up'] += $price['extra_mark_up'];
+            $total['selling'] += $price['selling'];
+
+            $prices[$key]['selling'] = round($price['selling'], 2);
+            $prices[$key]['net'] = round($price['net'], 2);
+        }
+
+        return [
+                'prices' => $prices,
+                'total' => $total,
+                'service_fee_percent' => $service_fee_percent,
+                'processing_fee' => $this->getProcessingFee()
+                ];
     }
 
     public function getQuoteInformationForExpert($single = false)
