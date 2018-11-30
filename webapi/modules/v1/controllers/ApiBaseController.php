@@ -20,12 +20,18 @@ use yii\web\Response;
 /**
  * Class ApiBaseController
  * @package webapi\controllers
+ *
+ * @property bool $debug
+ * @property Project $apiProject
+ * @property ApiUser $apiUser
+ *
  */
 class ApiBaseController extends Controller
 {
 
     public $apiUser;
     public $apiProject;
+    public $debug = false;
 
     /**
      *
@@ -34,6 +40,9 @@ class ApiBaseController extends Controller
     {
         parent::init();
         Yii::$app->user->enableSession = false;
+        if(Yii::$app->request->get('debug')) {
+            $this->debug = true;
+        }
     }
 
 
