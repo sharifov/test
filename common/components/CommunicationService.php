@@ -85,6 +85,8 @@ class CommunicationService extends Component
             $this->request->addHeaders($headers);
         }
 
+        $this->request->setOptions([CURLOPT_ENCODING => 'gzip']);
+
         if($options) {
             $this->request->setOptions($options);
         }
@@ -223,5 +225,53 @@ class CommunicationService extends Component
 
         return $out;
     }
+
+
+    /**
+     * @param array $filter
+     * @return array
+     * @throws \yii\httpclient\Exception
+     */
+    public function mailGetMessages(array $filter = []) : array
+    {
+        $out = ['error' => false, 'data' => []];
+
+        $data = [];
+        $data['project'] = 123;
+
+        if(isset($filter['last_dt'])) {
+            $data['last_dt'] = date('Y-m-d H:i:s', strtotime($filter['last_dt']));
+        }
+
+        if(isset($filter['last_id'])) {
+            $data['last_id'] = (int) $filter['last_id'];
+        }
+
+
+        /*$email_to = Yii::$app->request->post('email_to');
+        $email_from = Yii::$app->request->post('email_from');
+        $limit = Yii::$app->request->post('limit');
+        $offset = Yii::$app->request->post('offset');
+        $new = Yii::$app->request->post('new');
+        $last_id = Yii::$app->request->post('last_id');
+        $last_dt = Yii::$app->request->post('last_dt');*/
+
+        $response = $this->sendRequest('email/inbox', $data);
+
+        if ($response->isOk) {
+            if(isset($response->data['data']['response'])) {
+                $out['data'] = $response->data['data']['response'];
+            } else {
+                $out['error'] = 'Not found in response array data key [data][response]';
+            }
+        } else {
+            $out['error'] = $response->content;
+            \Yii::error('filter: '. VarDumper::dumpAsString($filter)."\r\n". VarDumper::dumpAsString($out['error'], 10), 'CommunicationService::mailGetMessages');
+        }
+
+        return $out;
+    }
+
+
 
 }

@@ -39,6 +39,10 @@ use yii\db\ActiveRecord;
  * @property int $e_updated_user_id
  * @property string $e_created_dt
  * @property string $e_updated_dt
+ * @property string $e_message_id
+ * @property string $e_ref_message_id
+ * @property string $e_inbox_created_dt
+ * @property int $e_inbox_email_id
  *
  * @property Employee $eCreatedUser
  * @property Language $eLanguage
@@ -93,11 +97,11 @@ class Email extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['e_reply_id', 'e_lead_id', 'e_project_id', 'e_type_id', 'e_template_type_id', 'e_communication_id', 'e_is_deleted', 'e_is_new', 'e_delay', 'e_priority', 'e_status_id', 'e_created_user_id', 'e_updated_user_id'], 'integer'],
+            [['e_reply_id', 'e_lead_id', 'e_project_id', 'e_type_id', 'e_template_type_id', 'e_communication_id', 'e_is_deleted', 'e_is_new', 'e_delay', 'e_priority', 'e_status_id', 'e_created_user_id', 'e_updated_user_id', 'e_inbox_email_id'], 'integer'],
             [['e_email_from', 'e_email_to'], 'required'],
-            [['e_email_body_html', 'e_email_body_text', 'e_email_data'], 'string'],
-            [['e_status_done_dt', 'e_read_dt', 'e_created_dt', 'e_updated_dt'], 'safe'],
-            [['e_email_from', 'e_email_to', 'e_email_cc', 'e_email_bc', 'e_email_subject', 'e_attach'], 'string', 'max' => 255],
+            [['e_email_body_html', 'e_email_body_text', 'e_email_data', 'e_ref_message_id'], 'string'],
+            [['e_status_done_dt', 'e_read_dt', 'e_created_dt', 'e_updated_dt', 'e_inbox_created_dt'], 'safe'],
+            [['e_email_from', 'e_email_to', 'e_email_cc', 'e_email_bc', 'e_email_subject', 'e_attach', 'e_message_id'], 'string', 'max' => 255],
             [['e_language_id'], 'string', 'max' => 5],
             [['e_error_message'], 'string', 'max' => 500],
             [['e_created_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['e_created_user_id' => 'id']],
@@ -145,6 +149,10 @@ class Email extends \yii\db\ActiveRecord
             'e_updated_user_id' => 'Updated User ID',
             'e_created_dt' => 'Created Dt',
             'e_updated_dt' => 'Updated Dt',
+            'e_message_id' => 'Message ID',
+            'e_ref_message_id' => 'Reference Message ID',
+            'e_inbox_created_dt' => 'Inbox Created Dt',
+            'e_inbox_email_id' => 'Inbox Email ID',
         ];
     }
 

@@ -74,8 +74,16 @@ class EmailController extends FController
      */
     public function actionView($id)
     {
+
+        $model =$this->findModel($id);
+
+        if(Yii::$app->request->get('preview')) {
+           return $model->e_email_body_html;
+        }
+
+
         return $this->render('view', [
-            'model' => $this->findModel($id),
+            'model' => $model,
         ]);
     }
 
