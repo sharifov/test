@@ -34,16 +34,15 @@ class EmailController extends FController
                 'class' => AccessControl::class,
                 'rules' => [
                     [
-                        'actions' => ['index', 'update', 'view', 'delete', 'create'],
+                        'actions' => ['index', 'update', 'view', 'delete', 'create', 'inbox'],
                         'allow' => true,
                         'roles' => ['supervision'],
                     ],
-                    /*[
-                        'actions' => ['index'],
-
+                    [
+                        'actions' => ['inbox', 'view'],
                         'allow' => true,
                         'roles' => ['agent'],
-                    ],*/
+                    ],
                 ],
             ],
         ];
@@ -63,6 +62,30 @@ class EmailController extends FController
         return $this->render('index', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
+        ]);
+    }
+
+
+    /**
+     * Lists all Email models.
+     * @return mixed
+     */
+    public function actionInbox()
+    {
+        $searchModel = new EmailSearch();
+
+        $params = Yii::$app->request->queryParams;
+        $dataProvider = $searchModel->searchEmails($params);
+
+        $modelEmailView = null;
+        if($e_id = Yii::$app->request->get('id')) {
+            $modelEmailView = Email::findOne($e_id);
+        }
+
+        return $this->render('inbox', [
+            //'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+            'modelEmailView' => $modelEmailView
         ]);
     }
 
