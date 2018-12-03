@@ -12,17 +12,52 @@ use yii\widgets\ActiveForm;
     <div class="mail_heading row">
         <div class="col-md-8">
             <div class="btn-group">
-                <button class="btn btn-sm btn-primary" type="button"><i class="fa fa-reply"></i> Reply</button>
+
+                <?php if($model->e_type_id == \common\models\Email::TYPE_DRAFT || $model->e_type_id == \common\models\Email::TYPE_OUTBOX): ?>
+                    <?= Html::a('<i class="fa fa-edit"></i> Edit', \yii\helpers\Url::current(['reply_id' => null, 'id' => null, 'edit_id' => $model->e_id]), [
+                        'class' => 'btn btn-sm btn-warning',
+                        'data-placement' => 'top',
+                        'data-toggle' => 'tooltip',
+                        'data-original-title' => 'Edit',
+                        /*'data' => [
+                            'confirm' => 'Are you sure you want to delete this message?',
+                            'method' => 'post',
+                        ],*/
+                    ]) ?>
+                <? endif; ?>
+                <?php if($model->e_type_id == \common\models\Email::TYPE_INBOX): ?>
+                    <?= Html::a('<i class="fa fa-reply"></i> Reply', \yii\helpers\Url::current(['id' => null, 'reply_id' => $model->e_id, 'edit_id' => null]), [
+                        'class' => 'btn btn-sm btn-primary',
+                        'data-placement' => 'top',
+                        'data-toggle' => 'tooltip',
+                        'data-original-title' => 'Reply',
+                        /*'data' => [
+                            'confirm' => 'Are you sure you want to delete this message?',
+                            'method' => 'post',
+                        ],*/
+                    ]) ?>
+                <? endif; ?>
+
                 <?php /*<button class="btn btn-sm btn-default" type="button" data-placement="top" data-toggle="tooltip" data-original-title="Forward"><i class="fa fa-share"></i></button>
                 <button class="btn btn-sm btn-default" type="button" data-placement="top" data-toggle="tooltip" data-original-title="Print"><i class="fa fa-print"></i></button>*/ ?>
-                <button class="btn btn-sm btn-default" type="button" data-placement="top" data-toggle="tooltip" data-original-title="Trash"><i class="fa fa-trash-o"></i></button>
+                <?php /*<button class="btn btn-sm btn-default" type="button" data-placement="top" data-toggle="tooltip" data-original-title="Trash"><i class="fa fa-trash-o"></i></button>*/ ?>
+                <?= Html::a('<i class="fa fa-trash-o"></i>' . ($model->e_is_deleted ? ' UnTrash' : '' ), ['soft-delete', 'id' => $model->e_id], [
+                    'class' => 'btn btn-sm btn-default',
+                    'data-placement' => 'top',
+                    'data-toggle' => 'tooltip',
+                    'data-original-title' => 'Trash',
+                    'data' => [
+                        'confirm' => 'Are you sure you want to delete this message?',
+                        'method' => 'post',
+                    ],
+                ]) ?>
             </div>
         </div>
         <div class="col-md-4 text-right">
             <p class="date"><i class="fa fa-calendar"></i> <?=Yii::$app->formatter->asDatetime(strtotime($model->e_created_dt))?></p>
         </div>
         <div class="col-md-12">
-            <h4> <?=Html::encode($model->e_email_subject)?></h4>
+            <h4> <span class="badge badge-info"><?=$model->getTypeName()?></span> <?=Html::encode($model->e_email_subject)?></h4>
         </div>
     </div>
     <div class="sender-info">
@@ -32,6 +67,12 @@ use yii\widgets\ActiveForm;
                 <span><?=Html::encode($model->e_email_from)?></span> To:
                 <i class="fa fa-user"></i> <strong><?=Html::encode($model->e_email_to)?></strong>
                 <a class="sender-dropdown"><i class="fa fa-chevron-down"></i></a>
+                <?php if($model->eProject):?>
+                    <span class="label label-info"><?=Html::encode($model->eProject->name)?></span>
+                <?php endif;?>
+                <?php if($model->e_status_id):?>
+                    <span class="badge badge-warning"><?=Html::encode($model->getStatusName())?></span>
+                <?php endif;?>
             </div>
         </div>
     </div>

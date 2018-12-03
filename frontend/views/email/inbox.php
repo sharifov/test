@@ -8,10 +8,12 @@ use yii\widgets\ListView;
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\EmailSearch */
 /* @var $modelEmailView common\models\Email */
+/* @var $modelNewEmail common\models\Email */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
 $this->title = 'Emails';
 $this->params['breadcrumbs'][] = $this->title;
+
 ?>
 
 <div class="">
@@ -36,6 +38,15 @@ $this->params['breadcrumbs'][] = $this->title;
     <div class="clearfix"></div>*/ ?>
 
     <div class="row">
+
+
+        <div id="preloader" class="overlay" style="display: none">
+            <div class="preloader">
+                <span class="fa fa-spinner fa-pulse fa-3x fa-fw"></span>
+                <div class="preloader__text">Loading...</div>
+            </div>
+        </div>
+
         <div class="col-md-12">
             <div class="x_panel">
                 <div class="x_title">
@@ -59,11 +70,30 @@ $this->params['breadcrumbs'][] = $this->title;
                 </div>
                 <div class="x_content">
 
-                    <?php Pjax::begin(); ?>
+                    <?php Pjax::begin(['id' => 'pjax-email']); ?>
+
+
+
+                    <?/*php $form = Form::begin([
+                        'action' => ['index'],
+                        'method' => 'get',
+                        'options' => [
+                            'data-pjax' => 1
+                        ],
+                    ]);*/ ?>
+
                     <div class="row">
                         <div class="col-sm-3 mail_list_column">
-                            <button id="compose" class="btn btn-sm btn-success btn-block" type="button">COMPOSE</button>
 
+                            <?= Html::beginForm(\yii\helpers\Url::current(['email_type_id' => null, 'action' => null]), 'GET', ['data-pjax' => 1]) ?>
+                                <div class="col-md-4">
+                                    <?=Html::a('<i class="fa fa-plus"></i> Create NEW', \yii\helpers\Url::current(['id' => null, 'reply_id' => null, 'edit_id' => null, 'action' => 'new']), ['class' => 'btn btn-sm btn-success'])?>
+                                </div>
+                                <div class="col-md-8">
+                                    <?=Html::dropDownList('email_type_id', Yii::$app->request->get('email_type_id'), \common\models\Email::FILTER_TYPE_LIST, ['class' => 'form-control', 'onchange' => '$("#btn-submit-email").click();'])?>
+                                    <?= Html::submitButton('Ok', ['id' => 'btn-submit-email', 'class' => 'btn btn-primary hidden']) ?>
+                                </div>
+                            <?= Html::endForm() ?>
 
                             <?= ListView::widget([
                                 'dataProvider' => $dataProvider,
@@ -76,9 +106,6 @@ $this->params['breadcrumbs'][] = $this->title;
                                 'layout' => "{summary}\n{pager}\n{items}\n{summary}",
                                 'itemView' => function ($model, $key, $index, $widget) use ($modelEmailView, $dataProvider) {
                                     return $this->render('_list_item',['model' => $model, 'modelEmailView' => $modelEmailView, 'dataProvider' => $dataProvider]);
-
-                                    // or just do some echo
-                                    // return $model->title . ' posted by ' . $model->author;
                                 },
 
                                 'itemOptions' => [
@@ -94,9 +121,6 @@ $this->params['breadcrumbs'][] = $this->title;
                                     'maxButtonCount' => 3,
                                 ],*/
 
-                                /*'itemView' => function ($model, $key, $index, $widget) {
-                                    return Html::a(Html::encode($model->e_id), ['view', 'id' => $model->e_id]);
-                                },*/
                             ]) ?>
 
 
@@ -109,9 +133,18 @@ $this->params['breadcrumbs'][] = $this->title;
                             <?php if($modelEmailView): ?>
                                 <?=$this->render('_view_mail', ['model' => $modelEmailView])?>
                             <? endif; ?>
+
+
+
+                            <?php if(Yii::$app->request->get('action') === 'new' || Yii::$app->request->get('edit_id') || Yii::$app->request->get('reply_id')): ?>
+                                <?=$this->render('_new_mail', ['model' => $modelNewEmail])?>
+                            <? endif; ?>
+
                         </div>
                         <!-- /CONTENT MAIL -->
                     </div>
+
+
                     <?php Pjax::end(); ?>
                 </div>
             </div>
@@ -124,18 +157,14 @@ $this->params['breadcrumbs'][] = $this->title;
 <?php Pjax::end();*/ ?>
 
 
-
 <?php
-/*$js = <<<JS
-$(document).on('click', '.view_email', function() {
-  var emailId = $(this).data('email-id');
-  //alert(emailId);
-  //$.pjax.reload({container: '#pjax-view-mail', async:false});
+$js = <<<JS
+$("#pjax-email").on("pjax:start", function() {
+    $('#preloader').show(); //fadeOut('slow');
 });
-
-//$.pjax({url: 'demo2.html', container: '.container'})
+$("#pjax-email").on("pjax:end", function() {
+    $('#preloader').hide(); //fadeIn('slow');
+});
 JS;
 
-$this->registerJs($js, \yii\web\View::POS_READY);*/
-
-
+//$this->registerJs($js, \yii\web\View::POS_READY);

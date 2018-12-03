@@ -12,13 +12,16 @@ use common\models\Email;
  */
 class EmailSearch extends Email
 {
+
+    public $email_type_id;
+
     /**
      * {@inheritdoc}
      */
     public function rules()
     {
         return [
-            [['e_id', 'e_reply_id', 'e_lead_id', 'e_project_id', 'e_type_id', 'e_template_type_id', 'e_communication_id', 'e_is_deleted', 'e_is_new', 'e_delay', 'e_priority', 'e_status_id', 'e_created_user_id', 'e_updated_user_id', 'e_inbox_email_id'], 'integer'],
+            [['e_id', 'e_reply_id', 'e_lead_id', 'e_project_id', 'e_type_id', 'e_template_type_id', 'e_communication_id', 'e_is_deleted', 'e_is_new', 'e_delay', 'e_priority', 'e_status_id', 'e_created_user_id', 'e_updated_user_id', 'e_inbox_email_id', 'email_type_id'], 'integer'],
             [['e_email_from', 'e_email_to', 'e_email_cc', 'e_email_bc', 'e_email_subject', 'e_email_body_html', 'e_email_body_text', 'e_attach', 'e_email_data', 'e_language_id', 'e_status_done_dt', 'e_read_dt', 'e_error_message', 'e_created_dt', 'e_updated_dt', 'e_message_id', 'e_ref_message_id', 'e_inbox_created_dt'], 'safe'],
         ];
     }
@@ -104,6 +107,7 @@ class EmailSearch extends Email
 
         // add conditions that should always apply here
 
+
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
             'sort'=> ['defaultOrder' => ['e_created_dt' => SORT_DESC]],
@@ -114,11 +118,37 @@ class EmailSearch extends Email
 
         $this->load($params);
 
+        if(isset($params['email_type_id']) && $params['email_type_id'] > 0) {
+
+            //echo $this->email_type_id; exit;
+
+            $this->email_type_id = (int) $params['email_type_id'];
+
+            if($this->email_type_id == Email::FILTER_TYPE_ALL) {
+                $query->where(['e_is_deleted' => false]);
+            }
+            elseif($this->email_type_id == Email::FILTER_TYPE_INBOX) {
+               $query->where(['e_type_id' => Email::TYPE_INBOX, 'e_is_deleted' => false]);
+            }
+            elseif($this->email_type_id == Email::FILTER_TYPE_OUTBOX) {
+                $query->where(['e_type_id' => Email::TYPE_OUTBOX, 'e_is_deleted' => false]);
+            }
+            elseif($this->email_type_id == Email::FILTER_TYPE_DRAFT) {
+                $query->where(['e_type_id' => Email::TYPE_DRAFT, 'e_is_deleted' => false]);
+            }
+            elseif($this->email_type_id == Email::FILTER_TYPE_TRASH) {
+                $query->where(['e_is_deleted' => true]);
+            }
+        }
+
         if (!$this->validate()) {
             // uncomment the following line if you do not want to return any records when validation fails
             // $query->where('0=1');
             return $dataProvider;
         }
+
+
+
 
         // grid filtering conditions
         $query->andFilterWhere([

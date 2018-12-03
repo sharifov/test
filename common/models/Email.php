@@ -2,10 +2,12 @@
 
 namespace common\models;
 
+use common\components\CommunicationService;
 use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\behaviors\BlameableBehavior;
 use yii\db\ActiveRecord;
+use yii\helpers\VarDumper;
 
 /**
  * This is the model class for table "email".
@@ -53,7 +55,16 @@ use yii\db\ActiveRecord;
  */
 class Email extends \yii\db\ActiveRecord
 {
-    public CONST TYPE_DRAFT = 0, TYPE_OUTBOX = 1, TYPE_INBOX = 2;
+    public const TYPE_DRAFT     = 0;
+    public const TYPE_OUTBOX    = 1;
+    public const TYPE_INBOX     = 2;
+
+    public const TYPE_LIST = [
+        self::TYPE_DRAFT    => 'Draft',
+        self::TYPE_OUTBOX   => 'Outbox',
+        self::TYPE_INBOX    => 'Inbox',
+    ];
+
 
     public $quotes = [];
 
@@ -81,6 +92,22 @@ class Email extends \yii\db\ActiveRecord
         self::PRIORITY_LOW      => 'Low',
         self::PRIORITY_NORMAL   => 'Normal',
         self::PRIORITY_HIGH     => 'High',
+    ];
+
+
+    public const FILTER_TYPE_ALL        = 1;
+    public const FILTER_TYPE_INBOX      = 2;
+    public const FILTER_TYPE_OUTBOX     = 3;
+    public const FILTER_TYPE_DRAFT      = 4;
+    public const FILTER_TYPE_TRASH      = 5;
+
+
+    public const FILTER_TYPE_LIST = [
+        self::FILTER_TYPE_ALL       => 'ALL',
+        self::FILTER_TYPE_INBOX     => 'INBOX',
+        self::FILTER_TYPE_OUTBOX    => 'OUTBOX',
+        self::FILTER_TYPE_DRAFT     => 'DRAFT',
+        self::FILTER_TYPE_TRASH     => 'TRASH',
     ];
 
     /**
@@ -198,6 +225,14 @@ class Email extends \yii\db\ActiveRecord
     }
 
     /**
+     * @return mixed|string
+     */
+    public function getTypeName()
+    {
+        return self::TYPE_LIST[$this->e_type_id] ?? '-';
+    }
+
+    /**
      * @return \yii\db\ActiveQuery
      */
     public function getECreatedUser()
@@ -312,5 +347,44 @@ class Email extends \yii\db\ActiveRecord
         $text = preg_replace('!\s+!', ' ', $text);
 
         return $text;
+    }
+
+    /**
+     * @return bool
+     * @throws \yii\httpclient\Exception
+     */
+    public function sendMail(): bool
+    {
+        /** @var CommunicationService $communication */
+        $communication = Yii::$app->communication;
+        $data = [];
+        $data['project_id'] = $this->e_project_id;
+
+        $content_data['email_body_html'] = $this->e_email_body_html;
+        $content_data['email_body_text'] = $this->e_email_body_text;
+        $content_data['email_subject'] = $this->e_email_subject;
+        $content_data['email_reply_to'] = $this->e_email_from;
+        $content_data['email_cc'] = $this->e_email_cc;
+        $content_data['email_bcc'] = $this->e_email_bc;
+
+        $request = $communication->mailSend($this->e_project_id, 'cl_offer', $this->e_email_from, $this->e_email_to, $content_data, $data, ($this->e_language_id ?: 'en-US'), 0);
+
+        if($request && $request['data']) {
+            $this->e_status_id = $request['data']['eq_status_id'];
+            $this->save();
+            return true;
+        }
+        // VarDumper::dump($request, 10, true); exit;
+
+        return false;
+    }
+
+    /**
+     * @return string
+     */
+    public function generateMessageId(): string
+    {
+        $message = uniqid().'.'.$this->e_email_from;
+        return $message;
     }
 }
