@@ -355,12 +355,23 @@ $this->params['breadcrumbs'][] = $this->title;
             'header' => 'Client time',
             'format' => 'raw',
             'value' => function (\common\models\Lead $model) {
-                return $model->getClientTime2();
+                return $model->getClientTime();
             },
             'options' => [
                 'style' => 'width:110px'
             ]
         ],
+
+        /*[
+            'header' => 'Client time2',
+            'format' => 'raw',
+            'value' => function (\common\models\Lead $model) {
+                return $model->getClientTime2();
+            },
+            'options' => [
+                'style' => 'width:110px'
+            ]
+        ],*/
 
         [
             'class' => 'yii\grid\ActionColumn',
@@ -381,10 +392,17 @@ $this->params['breadcrumbs'][] = $this->title;
 
 
                     if(!$buttons) {
-                        $buttons .= Html::a('Take', ['lead/take', 'id' => $model->id], [
+                        $buttons .= Html::a('<i class="fa fa-download"></i> Take', ['lead/take', 'id' => $model->id], [
                             'class' => 'btn btn-primary btn-xs take-btn',
                             'data-pjax' => 0
                         ]);
+
+                        if(!$isAgent) {
+                            $buttons .= Html::a('<i class="fa fa-search"></i> View', '/lead/processing/' . $model->id, [
+                                'class' => 'btn btn-info btn-xs',
+                                'data-pjax' => 0
+                            ]);
+                        }
                     }
 
                     return $buttons;
