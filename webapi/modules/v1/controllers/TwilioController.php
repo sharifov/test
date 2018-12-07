@@ -13,6 +13,14 @@ class TwilioController extends Controller
 {
 
 
+
+    public function init()
+    {
+        parent::init();
+        Yii::$app->user->enableSession = false;
+        $this->enableCsrfValidation = false;
+    }
+
     /**
      * Displays homepage.
      *
