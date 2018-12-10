@@ -1451,10 +1451,20 @@ class Quote extends \yii\db\ActiveRecord
         return $result;
     }
 
+    public function getServiceFeePercent()
+    {
+        return ($this->check_payment)?($this->service_fee_percent?$this->service_fee_percent:self::SERVICE_FEE*100):0;
+    }
+
+    public function getPricePerPax()
+    {
+
+    }
+
     public function getPricesData()
     {
         $prices = [];
-        $service_fee_percent = ($this->check_payment)?($this->service_fee_percent?$this->service_fee_percent:self::SERVICE_FEE*100):0;
+        $service_fee_percent = $this->getServiceFeePercent();
         $defData = [
             'fare' => 0,
             'taxes' => 0,

@@ -239,6 +239,28 @@ class QuotePrice extends \yii\db\ActiveRecord
     }
 
 
+    public function getData()
+    {
+        $data = [
+            'fare' => $this->fare,
+            'taxes' => $this->taxes,
+            'mark_up' => $this->mark_up,
+            'extra_mark_up' => $this->extra_mark_up,
+            'service_fee' => 0,
+            'selling' => 0,
+            'net' => $this->fare + $this->taxes,
+            'cnt' => 1
+        ];
+
+        $data['selling'] = $data['net'] + $data['mark_up'] + $data['extra_mark_up'];
+        $service_fee_percent = $this->quote->getServiceFeePercent();
+        $service_fee = ($service_fee_percent > 0)?$data['selling'] * $service_fee_percent / 100:0;
+        $data['selling'] += $service_fee;
+        $data['selling'] = round($data['selling']);
+
+        return $data;
+    }
+
     public function createQPrice($paxType)
     {
         $this->passenger_type = $paxType;
