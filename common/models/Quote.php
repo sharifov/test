@@ -1180,6 +1180,20 @@ class Quote extends \yii\db\ActiveRecord
                 $departureDateTime = new \DateTime($segment->qs_departure_time);
                 $arrivalDateTime = new \DateTime($segment->qs_arrival_time);
                 $operatingAirline = Airline::findIdentity($segment->qs_operating_airline);
+                $baggages = $segment->quoteSegmentBaggages;
+                $baggageCharge = $segment->quoteSegmentBaggageCharges;
+
+                $baggageInfo = [];
+                if(count($baggages)){
+                    foreach ($baggages as $baggageEntry){
+                        $baggageInfo[$baggageEntry->qsb_pax_code] = $baggageEntry->getInfo();
+                    }
+                }
+                if(count($baggageCharge)){
+                    foreach ($baggageCharge as $baggageChEntry){
+                        $baggageInfo[$baggageChEntry->qsbc_pax_code]['charge'] = $baggageChEntry->getInfo();
+                    }
+                }
                 $segments[] = [
                     'cabin' => $segment->qs_cabin,
                     'carrier' => $segment->qs_marketing_airline,
@@ -1198,6 +1212,7 @@ class Quote extends \yii\db\ActiveRecord
                     'operatingAirline' => ($segment->qs_operating_airline != $segment->qs_marketing_airline)?(($operatingAirline)?$operatingAirline->name:$segment->qs_operating_airline):null,
                     'layoverDuration' => ($keySegm > 0)?(($departureDateTime->getTimestamp() - $segments[$keySegm-1]['arrivalDateTime']->getTimestamp())/60):0,
                     'stop' => $segment->qs_stop,
+                    'baggage' => $baggageInfo,
                 ];
             }
             $trips[] = [

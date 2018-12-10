@@ -71,6 +71,32 @@ class QuoteSegmentBaggageCharge extends \yii\db\ActiveRecord
         ];
     }
 
+    public function getInfo()
+    {
+        $data = [];
+
+        if(!empty($this->qsbc_price)){
+            $data['price'] = $this->qsbc_price;
+        }
+        if(!empty($this->qsbc_currency)){
+            $data['currency'] = $this->qsbc_currency;
+        }
+        if(!empty($this->qsbc_max_weight)){
+            $data['maxWeight'] = $this->qsbc_max_weight;
+        }
+        if(!empty($this->qsbc_max_size)){
+            $data['maxSize'] = $this->qsbc_max_size;
+        }
+        if(!empty($this->qsbc_first_piece)){
+            $data['firstPiece'] = $this->qsbc_first_piece;
+        }
+        if(!empty($this->qsbc_last_piece)){
+            $data['lastPiece'] = $this->qsbc_last_piece;
+        }
+
+        return $data;
+    }
+
     /**
      * @return \yii\db\ActiveQuery
      */
