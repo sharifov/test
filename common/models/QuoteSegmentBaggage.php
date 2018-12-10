@@ -85,4 +85,30 @@ class QuoteSegmentBaggage extends \yii\db\ActiveRecord
     {
         return $this->hasOne(Employee::className(), ['id' => 'qsb_updated_user_id']);
     }
+
+    public function getInfo()
+    {
+        $data = [];
+
+        if(!empty($this->qsb_airline_code)){
+            $data['airlineCode'] = $this->qsb_airline_code;
+        }
+        if(!empty($this->qsb_allow_pieces)){
+            $data['allowPieces'] = $this->qsb_allow_pieces;
+        }
+        if(!empty($this->qsb_allow_unit)){
+            $data['allowUnit'] = $this->qsb_allow_unit;
+        }
+        if(!empty($this->qsb_allow_weight)){
+            $data['allowWeight'] = $this->qsb_allow_weight;
+        }
+        if(!empty($this->qsb_allow_max_size)){
+            $data['allowMaxSize'] = $this->qsb_allow_max_size;
+        }
+        if(!empty($this->qsb_allow_max_weight)){
+            $data['allowMaxWeight'] = $this->qsb_allow_max_weight;
+        }
+
+        return $data;
+    }
 }
