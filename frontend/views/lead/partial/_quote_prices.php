@@ -23,41 +23,41 @@ use yii\helpers\VarDumper;
 		<?php foreach ($priceData['prices'] as $paxCode => $price):?>
 		<tr>
 			<th><?= $paxCode?></th>
-            <td>x <?= $price['cnt']?></td>
-            <td><?= $price['net'] / $price['cnt'] ?></td>
-            <td><?= $price['mark_up'] / $price['cnt'] ?></td>
+            <td>x <?= $price['tickets']?></td>
+            <td><?= number_format($price['net'] / $price['tickets'], 2) ?></td>
+            <td><?= number_format($price['mark_up'] / $price['tickets'], 2) ?></td>
             <td><?php if($quote->isEditable()):?>
                 <?= Editable::widget([
                         'name'=>'extra_markup['.strtolower($paxCode).']['.$quote->id.']',
                         'asPopover' => false,
                         'pjaxContainerId' => 'pjax-quote_prices-'.$quote->id,
-                        'value' => $price['extra_mark_up'] / $price['cnt'],
+                        'value' => number_format($price['extra_mark_up'] / $price['tickets'], 2),
                         'header' => 'Extra markup',
                         'size'=>'sm',
                         'inputType' => Editable::INPUT_TEXT,
                         'buttonsTemplate' => '{submit}',
-                        'pluginEvents' => ["editableSuccess" => "function(event, val, form, data) { $.pjax.reload({container: '#pjax-quote_prices-{$quote->id}', async: false}); }",],
+                        'pluginEvents' => ["editableSuccess" => "function(event, val, form, data) { $.pjax.reload({container: '#pjax-quote_prices-{$quote->id}', async: false}); $('#quote_profit_{$quote->id}').popover('hide').popover('destroy');$.pjax.reload({container: '#pjax-quote_estimation_profit-{$quote->id}', async: false});$('#quote_profit_{$quote->id}').popover();}",],
                         'inlineSettings' => [
                             'templateBefore' => '<div class="editable-pannel">{loading}',
                             'templateAfter' => '{buttons}{close}</div>'],
                         'options' => ['class'=>'form-control','style'=>'width:50px;', 'placeholder'=>'Enter extra markup','resetButton' => '<i class="fas fa-ban"></i>']
                     ]);?>
                 <?php else:?>
-                	<?= $price['extra_mark_up'] / $price['cnt']?>
+                	<?= number_format($price['extra_mark_up'] / $price['tickets'], 2)?>
                 <?php endif;?>
             </td>
-            <td><?= $price['selling'] / $price['cnt'] ?></td>
+            <td><?= number_format($price['selling'] / $price['tickets'], 2) ?></td>
 		</tr>
 		<?php endforeach;?>
     </tbody>
 	<tfoot>
     	<tr>
             <th>Total</th>
-            <td><?= $priceData['total']['cnt']?></td>
-            <td><?= $priceData['total']['net']?></td>
-            <td><?= $priceData['total']['mark_up']?></td>
-            <td class="total-markup-<?= $quote->uid ?>"><?= $priceData['total']['extra_mark_up']?></td>
-            <td class="total-sellingPrice-<?= $quote->uid ?>"><?= $priceData['total']['selling']?></td>
+            <td><?= $priceData['total']['tickets']?></td>
+            <td><?= number_format($priceData['total']['net'], 2)?></td>
+            <td><?= number_format($priceData['total']['mark_up'], 2)?></td>
+            <td class="total-markup-<?= $quote->uid ?>"><?= number_format($priceData['total']['extra_mark_up'], 2)?></td>
+            <td class="total-sellingPrice-<?= $quote->uid ?>"><?= number_format($priceData['total']['selling'], 2)?></td>
         </tr>
 	</tfoot>
 </table>

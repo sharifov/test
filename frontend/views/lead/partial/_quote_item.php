@@ -137,6 +137,15 @@ use yii\helpers\Url;
 				PCC: <strong><?= $model->pcc?></strong>
 			</div>
 			<span class="quote__creator" data-toggle="tooltip" title="" data-original-title="<?= ($model->created_by_seller) ? 'Agent' : 'Expert'?> <?= $model->employee_name?>"><i class="fa fa-user"></i>&nbsp;<strong><?= $model->employee_name?></strong></span>
+			<?php \yii\widgets\Pjax::begin(['id' => 'pjax-quote_estimation_profit-'.$model->id, 'enablePushState' => false, 'enableReplaceState' => false]); ?>
+			<?php $priceData = $model->getPricesData();	?>
+			<button id="quote_profit_<?= $model->id?>" data-toggle="popover" data-html="true" data-trigger="click" data-placement="top" data-container="body" title="Estimation Profit" class="popover-class quote__profit btn btn-info"
+			 data-content='<?= $model->getEstimationProfitText();?>'>
+			<?php if(isset($priceData['total'])):?>
+				<?= '$'.round($priceData['total']['selling'] - $priceData['total']['net'] - $priceData['processing_fee'] - $priceData['service_fee'],2);?>
+			<?php endif;?>
+			</button>
+            <?php \yii\widgets\Pjax::end(); ?>
 		</div>
 		<div class="quote__heading-right">
 			<?= $model->getStatusSpan()?>

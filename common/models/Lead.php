@@ -2071,7 +2071,7 @@ Sales - Kivork",
                 }
                 $quotesData[] = [
                     'currency' => 'USD',
-                    'price' => $quote->quotePrice()['amountPerPax'],
+                    'price' => $quote->getPricePerPax(),
                     'url' => $this->project->link.'/checkout/'.$quote->uid,
                     'segments' => $segmentsData
                 ];

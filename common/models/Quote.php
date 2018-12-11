@@ -1275,7 +1275,7 @@ class Quote extends \yii\db\ActiveRecord
         }
 
         return [
-            'price' => $this->quotePrice()['amountPerPax'],
+            'price' => $this->getPricePerPax(),
             'trips' => $trips,
             'baggage' => $this->freeBaggageInfo,
         ];
@@ -1451,14 +1451,62 @@ class Quote extends \yii\db\ActiveRecord
         return $result;
     }
 
+    public function getQuotePriceData()
+    {
+        $priceData = $this->getPricesData();
+        $details = [];
+        foreach ($priceData['prices'] as $paxCode => $price){
+            $details[$paxCode]['selling'] = round($price['selling']/$price['tickets'], 2);
+            $details[$paxCode]['fare'] = round($price['fare']/$price['tickets'], 2);
+            $details[$paxCode]['taxes'] = round(($price['taxes'] + $price['mark_up'] + $price['extra_mark_up'] + $price['service_fee']) / $price['tickets'], 2);
+            $details[$paxCode]['tickets'] = $price['tickets'];
+        }
+        $result = [
+            'detail' => $details,
+            'tickets' => count($this->quotePrices),
+            'selling' => $priceData['total']['selling'],
+            'amountPerPax' => $this->getPricePerPax(),
+            'fare' => $priceData['total']['fare'],
+            'mark_up' => $priceData['total']['mark_up'],
+            'taxes' => $priceData['total']['taxes'],
+            'currency' => 'USD',
+            'isCC' => boolval(!$this->check_payment),
+            'fare_type' => empty($this->fare_type) ? self::FARE_TYPE_PUB : $this->fare_type,
+        ];
+        return $result;
+    }
+
     public function getServiceFeePercent()
     {
         return ($this->check_payment)?($this->service_fee_percent?$this->service_fee_percent:self::SERVICE_FEE*100):0;
     }
 
+    public function getEstimationProfitText()
+    {
+        $priceData = $this->getPricesData();
+        $data = [];
+        if(isset($priceData['service_fee']) && $priceData['service_fee'] > 0){
+            $data[] = '<span class="text-danger">Merchant fee: -'.round($priceData['service_fee'],2).'$</span>';
+        }
+        if(isset($priceData['processing_fee']) && $priceData['processing_fee'] > 0){
+            $data[] = '<span class="text-danger">Processing fee: -'.round($priceData['processing_fee'],2).'$</span>';
+        }
+
+        return implode('<br/>', $data);
+    }
+
     public function getPricePerPax()
     {
+        $priceData = $this->getPricesData();
+        if(isset($priceData['prices'])){
+            foreach ($priceData['prices'] as $paxCode => $priceEntry) {
+                if($paxCode == QuotePrice::PASSENGER_ADULT){
+                    return round($priceEntry['selling'] / $priceEntry['tickets'],2);
+                }
+            }
+        }
 
+        return 0;
     }
 
     public function getPricesData()
@@ -1469,7 +1517,7 @@ class Quote extends \yii\db\ActiveRecord
             'fare' => 0,
             'taxes' => 0,
             'net' => 0, // fare + taxes
-            'cnt' => 0,
+            'tickets' => 0,
             'mark_up' => 0,
             'extra_mark_up' => 0,
             'service_fee' => 0,
@@ -1486,7 +1534,7 @@ class Quote extends \yii\db\ActiveRecord
             $prices[$price->passenger_type]['fare'] += $price->fare;
             $prices[$price->passenger_type]['taxes'] += $price->taxes;
             $prices[$price->passenger_type]['net'] = $prices[$price->passenger_type]['fare'] + $prices[$price->passenger_type]['taxes'];
-            $prices[$price->passenger_type]['cnt'] += 1;
+            $prices[$price->passenger_type]['tickets'] += 1;
             $prices[$price->passenger_type]['mark_up'] += $price->mark_up;
             $prices[$price->passenger_type]['extra_mark_up'] += $price->extra_mark_up;
             $prices[$price->passenger_type]['selling'] = ($prices[$price->passenger_type]['net'] + $prices[$price->passenger_type]['mark_up'] + $prices[$price->passenger_type]['extra_mark_up']);
@@ -1498,7 +1546,7 @@ class Quote extends \yii\db\ActiveRecord
         }
 
         foreach ($prices as $key => $price){
-            $total['cnt'] += $price['cnt'];
+            $total['tickets'] += $price['tickets'];
             $total['net'] += $price['net'];
             $total['mark_up'] += $price['mark_up'];
             $total['extra_mark_up'] += $price['extra_mark_up'];
@@ -1512,6 +1560,7 @@ class Quote extends \yii\db\ActiveRecord
                 'prices' => $prices,
                 'total' => $total,
                 'service_fee_percent' => $service_fee_percent,
+                'service_fee' => ($service_fee_percent > 0)?$total['selling'] * $service_fee_percent / 100:0,
                 'processing_fee' => $this->getProcessingFee()
                 ];
     }

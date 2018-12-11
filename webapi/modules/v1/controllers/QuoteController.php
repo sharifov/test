@@ -246,7 +246,7 @@ class QuoteController extends ApiBaseController
             $response['itinerary']['tripType'] = $model->trip_type;
             $response['itinerary']['mainCarrier'] = $model->getMainCarrier() ? $model->getMainCarrier()->name : $model->main_airline_code;
             $response['itinerary']['trips'] = $model->getTrips();
-            $response['itinerary']['price'] = $model->quotePrice();
+            $response['itinerary']['price'] = $model->getQuotePriceData(); //$model->quotePrice();
 
             if ($model->status == Quote::STATUS_SEND) {
                 $excludeIP = Quote::isExcludedIP($clientIP);
@@ -372,8 +372,8 @@ class QuoteController extends ApiBaseController
         } else {
 
             $changedAttributes = $model->attributes;
-            $changedAttributes['selling'] = $model->quotePrice()['selling'];
-            $selling = 0;
+            $changedAttributes['selling'] = $model->getPricesData()['total']['selling'];
+            //$selling = 0;
 
             $leadAttributes = Yii::$app->request->post((new Lead())->formName());
 
@@ -390,7 +390,7 @@ class QuoteController extends ApiBaseController
                         ]);
                         if ($quotePrice) {
                             $quotePrice->attributes = $quotePriceAttributes;
-                            $selling += $quotePrice->selling;
+                            //$selling += $quotePrice->selling;
                             if (!$quotePrice->save()) {
                                 $response['errors'][] = $quotePrice->getErrors();
                             }
@@ -416,7 +416,7 @@ class QuoteController extends ApiBaseController
                     $leadLog = new LeadLog((new LeadLogMessage()));
                     $leadLog->logMessage->oldParams = $changedAttributes;
                     $newParams = array_intersect_key($model->attributes, $changedAttributes);
-                    $newParams['selling'] = round($selling, 2);
+                    $newParams['selling'] = round($model->getPricesData()['total']['selling'], 2);
                     $leadLog->logMessage->newParams = $newParams;
                     $leadLog->logMessage->title = 'Update';
                     $leadLog->logMessage->model = sprintf('%s (%s)', $model->formName(), $model->uid);
@@ -568,7 +568,7 @@ class QuoteController extends ApiBaseController
                     if ($quotePrice) {
                         $quotePrice->attributes = $quotePriceAttributes;
                         $quotePrice->quote_id = $model->id;
-                        $selling += $quotePrice->selling;
+                        //$selling += $quotePrice->selling;
                         if (!$quotePrice->save()) {
                             $response['errors'][] = $quotePrice->getErrors();
                         }
@@ -584,7 +584,7 @@ class QuoteController extends ApiBaseController
                 $leadLog = new LeadLog((new LeadLogMessage()));
                 $leadLog->logMessage->oldParams = $changedAttributes;
                 $newParams = array_intersect_key($model->attributes, $changedAttributes);
-                $newParams['selling'] = round($selling, 2);
+                $newParams['selling'] = round($model->getPricesData()['total']['selling'], 2);
                 $leadLog->logMessage->newParams = $newParams;
                 $leadLog->logMessage->title = 'Create';
                 $leadLog->logMessage->model = sprintf('%s (%s)', $model->formName(), $model->uid);
