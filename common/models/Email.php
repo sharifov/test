@@ -221,7 +221,7 @@ class Email extends \yii\db\ActiveRecord
      */
     public function getPriorityName()
     {
-        return self::PRIORITY_LIST[$this->e_project_id] ?? '-';
+        return self::PRIORITY_LIST[$this->e_priority] ?? '-';
     }
 
     /**

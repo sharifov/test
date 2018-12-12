@@ -3,25 +3,19 @@
 namespace frontend\controllers;
 
 use Yii;
-use common\models\EmailTemplateType;
-use common\models\search\EmailTemplateTypeSearch;
+use common\models\Sms;
+use common\models\search\SmsSearch;
+use frontend\controllers\FController;
 use yii\filters\AccessControl;
 use yii\helpers\ArrayHelper;
-use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
-use yii\web\Response;
 
 /**
- * EmailTemplateTypeController implements the CRUD actions for EmailTemplateType model.
+ * SmsController implements the CRUD actions for Sms model.
  */
-class EmailTemplateTypeController extends FController
+class SmsController extends FController
 {
-    /**
-     * {@inheritdoc}
-     */
-
-
     public function behaviors()
     {
         $behaviors = [
@@ -35,15 +29,15 @@ class EmailTemplateTypeController extends FController
                 'class' => AccessControl::class,
                 'rules' => [
                     [
-                        'actions' => ['index', 'update', 'view', 'delete', 'create', 'synchronization'],
+                        'actions' => ['index', 'update', 'view', 'delete', 'create', 'inbox', 'soft-delete'],
                         'allow' => true,
-                        'roles' => ['admin'],
+                        'roles' => ['supervision'],
                     ],
-                    /*[
-                        'actions' => ['index'],
+                    [
+                        'actions' => ['inbox', 'view', 'soft-delete'],
                         'allow' => true,
                         'roles' => ['agent'],
-                    ],*/
+                    ],
                 ],
             ],
         ];
@@ -51,13 +45,14 @@ class EmailTemplateTypeController extends FController
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
 
+
     /**
-     * Lists all EmailTemplateType models.
+     * Lists all Sms models.
      * @return mixed
      */
     public function actionIndex()
     {
-        $searchModel = new EmailTemplateTypeSearch();
+        $searchModel = new SmsSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
         return $this->render('index', [
@@ -67,7 +62,7 @@ class EmailTemplateTypeController extends FController
     }
 
     /**
-     * Displays a single EmailTemplateType model.
+     * Displays a single Sms model.
      * @param integer $id
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
@@ -80,16 +75,16 @@ class EmailTemplateTypeController extends FController
     }
 
     /**
-     * Creates a new EmailTemplateType model.
+     * Creates a new Sms model.
      * If creation is successful, the browser will be redirected to the 'view' page.
      * @return mixed
      */
     public function actionCreate()
     {
-        $model = new EmailTemplateType();
+        $model = new Sms();
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->etp_id]);
+            return $this->redirect(['view', 'id' => $model->s_id]);
         }
 
         return $this->render('create', [
@@ -98,7 +93,7 @@ class EmailTemplateTypeController extends FController
     }
 
     /**
-     * Updates an existing EmailTemplateType model.
+     * Updates an existing Sms model.
      * If update is successful, the browser will be redirected to the 'view' page.
      * @param integer $id
      * @return mixed
@@ -109,7 +104,7 @@ class EmailTemplateTypeController extends FController
         $model = $this->findModel($id);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->etp_id]);
+            return $this->redirect(['view', 'id' => $model->s_id]);
         }
 
         return $this->render('update', [
@@ -117,15 +112,14 @@ class EmailTemplateTypeController extends FController
         ]);
     }
 
-
     /**
-     * @param $id
-     * @return Response
-     * @throws NotFoundHttpException
-     * @throws \Throwable
-     * @throws \yii\db\StaleObjectException
+     * Deletes an existing Sms model.
+     * If deletion is successful, the browser will be redirected to the 'index' page.
+     * @param integer $id
+     * @return mixed
+     * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionDelete($id): Response
+    public function actionDelete($id)
     {
         $this->findModel($id)->delete();
 
@@ -133,45 +127,18 @@ class EmailTemplateTypeController extends FController
     }
 
     /**
-     * Finds the EmailTemplateType model based on its primary key value.
+     * Finds the Sms model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
      * @param integer $id
-     * @return EmailTemplateType the loaded model
+     * @return Sms the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
     protected function findModel($id)
     {
-        if (($model = EmailTemplateType::findOne($id)) !== null) {
+        if (($model = Sms::findOne($id)) !== null) {
             return $model;
         }
 
         throw new NotFoundHttpException('The requested page does not exist.');
-    }
-
-
-    /**
-     * @return Response
-     * @throws \yii\httpclient\Exception
-     */
-    public function actionSynchronization() : Response
-    {
-        $result = EmailTemplateType::synchronizationTypes();
-
-        if($result) {
-            if($result['error']) {
-                Yii::$app->getSession()->setFlash('error', $result['error']);
-            } else {
-                $message = 'Synchronization successful<br>';
-                if($result['created']) {
-                    $message .= 'Created type: "'.implode(', ', $result['created']).'"<br>';
-                }
-                if($result['updated']) {
-                    $message .= 'Updated type: "'.implode(', ', $result['updated']).'"<br>';
-                }
-                Yii::$app->getSession()->setFlash('success', $message);
-            }
-        }
-
-        return $this->redirect(['index']);
     }
 }

@@ -273,5 +273,164 @@ class CommunicationService extends Component
     }
 
 
+    /**
+     * @param int $project_id
+     * @param string $template_type
+     * @param string $phone_from
+     * @param string $phone_to
+     * @param array $sms_data
+     * @param string $language
+     * @return array
+     * @throws \yii\httpclient\Exception
+     */
+    public function smsPreview(int $project_id, string $template_type, string $phone_from, string $phone_to, array $sms_data = [], string $language = 'en-US') : array
+    {
+        $out = ['error' => false, 'data' => []];
+
+        $data['project_id'] = $project_id;
+        $data['sms']['phone_from'] = $phone_from;
+        $data['sms']['phone_to'] = $phone_to;
+        $data['sms']['type_key'] = $template_type;
+        $data['sms']['language_id'] = $language;
+        $data['sms']['sms_data'] = $sms_data;
+
+        $response = $this->sendRequest('sms/preview', $data);
+
+        if ($response->isOk) {
+            if(isset($response->data['data']['response'])) {
+                $out['data'] = $response->data['data']['response'];
+            } else {
+                $out['error'] = 'Not found in response array data key [data][response]';
+            }
+        } else {
+            $out['error'] = $response->content;
+            \Yii::error(VarDumper::dumpAsString($out['error'], 10), 'CommunicationService::smsPreview');
+        }
+
+        return $out;
+    }
+
+
+    /**
+     * @param int $project_id
+     * @param string $template_type
+     * @param string $phone_from
+     * @param string $phone_to
+     * @param array $content_data
+     * @param array $sms_data
+     * @param string $language
+     * @param int $delay
+     * @return array
+     * @throws \yii\httpclient\Exception
+     */
+    public function smsSend(int $project_id, string $template_type, string $phone_from, string $phone_to, array $content_data = [], array $sms_data = [], string $language = 'en-US', int $delay = 0) : array
+    {
+        $out = ['error' => false, 'data' => []];
+
+        $data['project_id'] = $project_id;
+        $data['sms']['sq_phone_from'] = $phone_from;
+        $data['sms']['sq_phone_to'] = $phone_to;
+        $data['sms']['sq_type_key'] = $template_type;
+        $data['sms']['sq_language_id'] = $language;
+        $data['sms']['sq_sms_data'] = $sms_data;
+
+        if(isset($content_data['sms_text'])) {
+            $data['sms']['sq_sms_text'] = $content_data['sms_text'];
+        }
+
+        if($delay > 0) {
+            $data['sms']['sq_delay'] = $delay;
+        }
+
+
+        $response = $this->sendRequest('sms/send', $data);
+
+        if ($response->isOk) {
+            if(isset($response->data['data']['response'])) {
+                $out['data'] = $response->data['data']['response'];
+            } else {
+                $out['error'] = 'Not found in response array data key [data][response]';
+            }
+        } else {
+            $out['error'] = $response->content;
+            \Yii::error(VarDumper::dumpAsString($out['error'], 10), 'CommunicationService::smsSend');
+        }
+
+        return $out;
+    }
+
+
+    /**
+     * @return array
+     * @throws \yii\httpclient\Exception
+     */
+    public function smsTypes() : array
+    {
+        $out = ['error' => false, 'data' => []];
+
+        $data = [];
+        $response = $this->sendRequest('sms/template-types', $data);
+
+        if ($response->isOk) {
+            if(isset($response->data['data']['response'])) {
+                $out['data'] = $response->data['data']['response'];
+            } else {
+                $out['error'] = 'Not found in response array data key [data][response]';
+            }
+        } else {
+            $out['error'] = $response->content;
+            \Yii::error(VarDumper::dumpAsString($out['error'], 10), 'CommunicationService::smsTypes');
+        }
+
+        return $out;
+    }
+
+
+    /**
+     * @param array $filter
+     * @return array
+     * @throws \yii\httpclient\Exception
+     */
+    public function smsGetMessages(array $filter = []) : array
+    {
+        $out = ['error' => false, 'data' => []];
+
+        $data = [];
+        $data['project'] = 123;
+
+        if(isset($filter['last_dt'])) {
+            $data['last_dt'] = date('Y-m-d H:i:s', strtotime($filter['last_dt']));
+        }
+
+        if(isset($filter['last_id'])) {
+            $data['last_id'] = (int) $filter['last_id'];
+        }
+
+
+        /*$email_to = Yii::$app->request->post('email_to');
+        $email_from = Yii::$app->request->post('email_from');
+        $limit = Yii::$app->request->post('limit');
+        $offset = Yii::$app->request->post('offset');
+        $new = Yii::$app->request->post('new');
+        $last_id = Yii::$app->request->post('last_id');
+        $last_dt = Yii::$app->request->post('last_dt');*/
+
+        $response = $this->sendRequest('sms/inbox', $data);
+
+        if ($response->isOk) {
+            if(isset($response->data['data']['response'])) {
+                $out['data'] = $response->data['data']['response'];
+            } else {
+                $out['error'] = 'Not found in response array data key [data][response]';
+            }
+        } else {
+            $out['error'] = $response->content;
+            \Yii::error('filter: '. VarDumper::dumpAsString($filter)."\r\n". VarDumper::dumpAsString($out['error'], 10), 'CommunicationService::smsGetMessages');
+        }
+
+        return $out;
+    }
+
+
 
 }
