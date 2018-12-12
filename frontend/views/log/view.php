@@ -4,7 +4,7 @@ use yii\helpers\Html;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
-/* @var $model backend\models\Log */
+/* @var $model frontend\models\Log */
 
 $this->title = $model->id;
 $this->params['breadcrumbs'][] = ['label' => 'Logs', 'url' => ['index']];
@@ -34,7 +34,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'message',
                 'format' => 'raw',
-                'value' => function(\backend\models\Log $model) {
+                'value' => function(\frontend\models\Log $model) {
                     return $model->message ? '<pre>'.$model->message.'</pre>' : '-';
                 },
             ],

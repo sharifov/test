@@ -69,6 +69,10 @@ $this->params['breadcrumbs'][] = $this->title;
                 'e_updated_user_id',
                 'e_created_dt',
                 'e_updated_dt',
+                'e_message_id',
+                'e_ref_message_id:ntext',
+                'e_inbox_created_dt',
+                'e_inbox_email_id:email',
             ],
         ]) ?>
     </div>

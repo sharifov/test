@@ -96,7 +96,7 @@ $isCoach = Yii::$app->authManager->getAssignment('coach', Yii::$app->user->id);
 
             if (!$isCoach) {
 
-                $menuItems[] = ['label' => 'Mails <span id="inbox-queue" class="label-info label pull-right"></span> ', 'url' => ['/email/index'], 'icon' => 'envelope'];
+                $menuItems[] = ['label' => 'Mail inbox <span id="inbox-queue" class="label-info label pull-right"></span> ', 'url' => ['/email/inbox'], 'icon' => 'envelope'];
 
                 $badges = \common\models\Lead::getBadgesSingleQuery();
 
@@ -122,6 +122,9 @@ $isCoach = Yii::$app->authManager->getAssignment('coach', Yii::$app->user->id);
             }
 
             if($isAdmin) {
+
+                $menuItems[] = ['label' => 'Mails <span id="inbox-queue" class="label-info label pull-right"></span> ', 'url' => ['/email/index'], 'icon' => 'envelope'];
+
                 $menuItems[] = [
                     'label' => 'Users',
                     'url' => 'javascript:',
