@@ -51,7 +51,7 @@ use common\components\SearchService;
  * @property int $clone_id
  * @property string $description
  * @property double $final_profit
- * @property string $tips
+ * @property double $tips
  *
  * @property LeadFlightSegment[] $leadFlightSegments
  * @property LeadFlow[] $leadFlows
@@ -66,6 +66,7 @@ use common\components\SearchService;
  * @property LeadAdditionalInformation[] $additionalInformationForm
  * @property Lead $clone
  * @property ProfitSplit[] $profitSplits
+ * @property TipsSplit[] $tipsSplits
  *
  */
 class Lead extends ActiveRecord
@@ -153,6 +154,8 @@ class Lead extends ActiveRecord
     public $status_description;
     public $totalProfit;
     public $splitProfitPercentSum = 0;
+    public $totalTips;
+    public $splitTipsPercentSum = 0;
 
     /**
      * {@inheritdoc}
@@ -2349,6 +2352,30 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
         $query->from(ProfitSplit::tableName() . ' ps')
             ->where(['ps.ps_lead_id' => $this->id])
             ->select(['SUM(ps.ps_percent) as percent']);
+
+        return $query->queryScalar();
+    }
+
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getTipsSplits()
+    {
+        return $this->hasMany(TipsSplit::className(), ['ts_lead_id' => 'id']);
+    }
+
+    public function getAllTipsSplits()
+    {
+        return TipsSplit::find()->where(['ts_lead_id' => $this->id])->all();
+    }
+
+    public function getSumPercentTipsSplit()
+    {
+        $query = new Query();
+        $query->from(TipsSplit::tableName() . ' ts')
+        ->where(['ts.ts_lead_id' => $this->id])
+        ->select(['SUM(ts.ts_percent) as percent']);
 
         return $query->queryScalar();
     }

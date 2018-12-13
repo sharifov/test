@@ -149,7 +149,7 @@ class Quote extends \yii\db\ActiveRecord
         return self::STATUS_CLASS_LIST[$this->status] ?? 'label-default';
     }
 
-    public static function getProfit($markUp, $sellingPrice, $fare_type, $check_payment = true)
+    public static function getProfit($markUp, $sellingPrice, $fare_type, $check_payment = true, $processing_fee = 0)
     {
         $fare_type = empty($fare_type)
             ? self::FARE_TYPE_PUB : $fare_type;
@@ -184,7 +184,60 @@ class Quote extends \yii\db\ActiveRecord
                 }
                 break;
         }
+        $profit -= $processing_fee;
         return $profit;
+    }
+
+    /**
+     * @return float
+     */
+    public function getEstimationProfit()
+    {
+        $priceData = $this->getPricesData();
+        $profit = 0;
+        $markUp = $priceData['total']['mark_up'] + $priceData['total']['extra_mark_up'];
+        $sellingPrice = $priceData['total']['selling'];
+        $fareType = empty($this->fare_type)? self::FARE_TYPE_PUB :$this->fare_type;
+        $checkPayment = $this->check_payment;
+        $processingFee = $priceData['processing_fee'];
+        $serviceFee = $this->getServiceFeePercent();
+        if($serviceFee > 0){
+            $serviceFee = $serviceFee/100;
+        }
+
+        switch ($fareType) {
+            case self::FARE_TYPE_SR:
+            case self::FARE_TYPE_SRU:
+            case self::FARE_TYPE_COMM:
+                switch ($checkPayment) {
+                    case true:
+                        $profit = $markUp - ($sellingPrice * $serviceFee);
+                        break;
+                    case false:
+                        $profit = $markUp;
+                        break;
+                }
+                break;
+            case self::FARE_TYPE_PUBC:
+            case self::FARE_TYPE_PUB:
+            case self::FARE_TYPE_TOUR:
+                switch ($checkPayment) {
+                    case false:
+                        if ($markUp >= 0) {
+                            $profit = $markUp - ($markUp * $serviceFee);
+                        } else {
+                            $profit = $markUp;
+                        }
+                        break;
+                    case true:
+                        $profit = $markUp - ($sellingPrice * $serviceFee);
+                        break;
+                }
+                break;
+        }
+        $profit -= $processingFee;
+
+        return round($profit,2);
     }
 
     /**
@@ -223,7 +276,10 @@ class Quote extends \yii\db\ActiveRecord
         if ($this->lead->final_profit !== null) {
             return $this->lead->final_profit;
         }
-        return self::countProfit($this->id);
+
+        $priceData = $this->getPricesData();
+        return self::getProfit($priceData['total']['mark_up'] + $priceData['total']['extra_mark_up'], $priceData['total']['selling'],$this->fare_type,$this->check_payment);
+        //return self::countProfit($this->id);
     }
 
     /**

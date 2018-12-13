@@ -40,6 +40,7 @@ use common\models\search\LeadSearch;
 use frontend\models\ProfitSplitForm;
 use common\components\SearchService;
 use common\models\QuotePrice;
+use frontend\models\TipsSplitForm;
 
 /**
  * Site controller
@@ -72,7 +73,7 @@ class LeadController extends FController
                             'create', 'add-comment', 'change-state', 'unassign', 'take',
                             'set-rating', 'add-note', 'unprocessed', 'call-expert', 'send-email',
                             'check-updates', 'flow-transition', 'get-user-actions', 'add-pnr', 'update2','clone',
-                            'get-badges', 'sold', 'split-profit', 'processing', 'follow-up', 'inbox', 'trash', 'booked',
+                            'get-badges', 'sold', 'split-profit', 'split-tips','processing', 'follow-up', 'inbox', 'trash', 'booked',
                             'test'
                         ],
                         'allow' => true,
@@ -723,7 +724,8 @@ class LeadController extends FController
                 }
             }
 
-            $salary = $employee->calculateSalaryBetween($start, $end);
+           // $salary = $employee->calculateSalaryBetween($start, $end);
+            $salary = $employee->calculateSalaryBetweenNew($start, $end);
         }
 
         $dataProvider = $searchModel->searchSold($params);
@@ -1320,7 +1322,7 @@ class LeadController extends FController
         $errors = [];
         $lead = Lead::findOne(['id' => $id]);
         if ($lead !== null) {
-            $totalProfit = $lead->getBookedQuote()->getTotalProfit();
+            $totalProfit = $lead->getBookedQuote()->getEstimationProfit();
             $splitForm = new ProfitSplitForm($lead);
 
             $mainAgentProfit = $totalProfit;
@@ -1371,6 +1373,70 @@ class LeadController extends FController
                     'splitForm' => $splitForm,
                     'totalProfit' => $totalProfit,
                     'mainAgentProfit' => $mainAgentProfit,
+                    'errors' => $errors,
+                ]);
+            }
+
+        }
+        return null;
+    }
+
+    public function actionSplitTips($id)
+    {
+        $errors = [];
+        $lead = Lead::findOne(['id' => $id]);
+        if ($lead !== null) {
+            $totalTips = $lead->tips;
+            $splitForm = new TipsSplitForm($lead);
+
+            $mainAgentTips = $totalTips;
+
+            if (Yii::$app->request->isPost) {
+                $data = Yii::$app->request->post();
+
+                if(!isset($data['TipsSplit'])){
+                    $data['TipsSplit'] = [];
+                }
+
+                $load = $splitForm->loadModels($data);
+                if ($load) {
+                    $errors = ActiveForm::validate($splitForm);
+                }
+
+                if (empty($errors) && $splitForm->save($errors)) {
+                    return $this->redirect([
+                        'quote',
+                        'type' => 'sold',
+                        'id' => $lead->id
+                    ]);
+                }
+
+                $splitTips = $splitForm->getTipsSplit();
+                if(!empty($splitTips)){
+                    $percentSum = 0;
+                    foreach ($splitTips as $entry){
+                        if(!empty($entry->ts_percent)){
+                            $percentSum += $entry->ts_percent;
+                        }
+                    }
+                    $mainAgentTips -= $totalTips*$percentSum/100;
+                }
+
+                if(!empty($errors)){
+                    return $this->renderAjax('_split_tips', [
+                        'lead' => $lead,
+                        'splitForm' => $splitForm,
+                        'totalTips' => $totalTips,
+                        'mainAgentTips' => $mainAgentTips,
+                        'errors' => $errors,
+                    ]);
+                }
+            }elseif (Yii::$app->request->isAjax){
+                return $this->renderAjax('_split_tips', [
+                    'lead' => $lead,
+                    'splitForm' => $splitForm,
+                    'totalTips' => $totalTips,
+                    'mainAgentTips' => $mainAgentTips,
                     'errors' => $errors,
                 ]);
             }
