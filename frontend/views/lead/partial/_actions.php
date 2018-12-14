@@ -115,6 +115,21 @@ if ($leadForm->mode != $leadForm::VIEW_MODE || ($leadForm->mode == $leadForm::VI
         });
     });
 
+    /***  Split tips  ***/
+    $('#split-tips').click(function (e) {
+        e.preventDefault();
+        var url = $(this).data('url');
+        var uid = $(this).data('uid');
+        var editBlock = $('#split-tips-modal');
+        editBlock.find('.modal-body').html('');
+        editBlock.find('.modal-body').load(url, function( response, status, xhr ) {
+            editBlock.modal({
+              backdrop: 'static',
+              show: true
+            });
+        });
+    });
+
     /***  Quick search quotes ***/
     $('#quick-search-quotes').click(function (e) {
         e.preventDefault();
@@ -537,20 +552,25 @@ $this->registerJs($js);
                     'data-url' => Url::to(['lead/split-profit', 'id' => $leadForm->getLead()->id]),
                 ])?>
 
+            <?php Modal::begin(['id' => 'split-profit-modal',
+                'header' => '<h2>Split profit</h2>',
+                'size' => Modal::SIZE_LARGE
+            ])?>
+            <?php Modal::end()?>
 
-        <div class="modal modal-quote fade" id="split-profit-modal" style="display: none;">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        Split profit
-                        <button type="button" class="close" data-dismiss="modal">
-                            <i class="fa fa-times"></i>
-                        </button>
-                    </div>
-                    <div class="modal-body"></div>
-                </div>
-            </div>
-        </div>
+            <?php if($leadForm->getLead()->tips > 0):?>
+                <?= Html::button('<span class="btn-icon"><i class="fa fa-money"></i></span><span class="btn-text">Split tips</span>', [
+                        'class' => 'btn btn-info btn-with-icon',
+                        'id' => 'split-tips',
+                        'data-url' => Url::to(['lead/split-tips', 'id' => $leadForm->getLead()->id]),
+                    ])?>
+
+                <?php Modal::begin(['id' => 'split-tips-modal',
+                    'header' => '<h2>Split tips</h2>',
+                    'size' => Modal::SIZE_LARGE
+                ])?>
+                <?php Modal::end()?>
+            <?php endif;?>
         <?php endif;?>
     </div>
 </div>

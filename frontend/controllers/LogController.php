@@ -2,7 +2,6 @@
 
 namespace frontend\controllers;
 
-use common\controllers\DefaultController;
 use Yii;
 use backend\models\Log;
 use backend\models\search\LogSearch;

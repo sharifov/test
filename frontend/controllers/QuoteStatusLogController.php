@@ -2,7 +2,6 @@
 namespace frontend\controllers;
 
 use Yii;
-use common\controllers\DefaultController;
 use common\models\QuoteStatusLog;
 use common\models\search\QuoteStatusLogSearch;
 use yii\web\NotFoundHttpException;

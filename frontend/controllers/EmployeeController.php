@@ -3,7 +3,6 @@
 namespace frontend\controllers;
 
 use backend\models\search\EmployeeForm;
-use common\controllers\DefaultController;
 use common\models\Employee;
 use common\models\EmployeeAcl;
 use common\models\EmployeeContactInfo;

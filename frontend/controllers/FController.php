@@ -3,7 +3,6 @@ namespace frontend\controllers;
 
 //use webvimark\modules\UserManagement\models\rbacDB\Role;
 //use webvimark\modules\UserManagement\models\User;
-use common\controllers\DefaultController;
 use yii\web\Controller;
 
 /**

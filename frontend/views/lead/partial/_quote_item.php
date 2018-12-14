@@ -12,7 +12,6 @@ use common\models\Airline;
 use common\components\SearchService;
 use yii\bootstrap\Html;
 use yii\helpers\Url;
-use common\models\QuotePrice;
 ?>
 <div class="quote quote--highlight">
 	<div class="quote__details" id="quote_detail_<?= $model->uid?>" style="display:none;">
@@ -138,6 +137,15 @@ use common\models\QuotePrice;
 				PCC: <strong><?= $model->pcc?></strong>
 			</div>
 			<span class="quote__creator" data-toggle="tooltip" title="" data-original-title="<?= ($model->created_by_seller) ? 'Agent' : 'Expert'?> <?= $model->employee_name?>"><i class="fa fa-user"></i>&nbsp;<strong><?= $model->employee_name?></strong></span>
+			<?php \yii\widgets\Pjax::begin(['id' => 'pjax-quote_estimation_profit-'.$model->id, 'enablePushState' => false, 'enableReplaceState' => false]); ?>
+			<?php $priceData = $model->getPricesData();	?>
+			<button id="quote_profit_<?= $model->id?>" data-toggle="popover" data-html="true" data-trigger="click" data-placement="top" data-container="body" title="Estimation Profit" class="popover-class quote__profit btn btn-info"
+			 data-content='<?= $model->getEstimationProfitText();?>'>
+			<?php if(isset($priceData['total'])):?>
+				<?= '$'.$model->getEstimationProfit();?>
+			<?php endif;?>
+			</button>
+            <?php \yii\widgets\Pjax::end(); ?>
 		</div>
 		<div class="quote__heading-right">
 			<?= $model->getStatusSpan()?>
@@ -278,124 +286,11 @@ use common\models\QuotePrice;
 			</span>
 		</div>
 		<div class="quote__actions">
-			<div class="hidden" id="isChangedMarkup-<?= $model->uid ?>">
-                <span class="text-danger">The price has changed</span>
-            </div>
-			<?php
-                    $now = new \DateTime();
-                    $adultsPrices = $childrenPrices = $infantsPrices = [
-                        'cnt' => 0, 'net' => 0,
-                        'sell' => 0, 'markup' => 0, 'saleMarkUp' => 0
-                    ];
-                    $prices = $model->quotePrices;
-                    $netPrice = $sellingPrice = $markup = $extraMarkup = 0;
-                    foreach ($prices as $idx => $price) {
-                        $netPrice += $price->net;
-                        $markup += $price->mark_up;
-                        $sellingPrice += $price->selling;
-                        $extraMarkup += $price->extra_mark_up;
-                        switch ($price->passenger_type) {
-                            case $price::PASSENGER_CHILD:
-                                $childrenPrices['cnt']++;
-                                $childrenPrices['net'] += $price->net;
-                                $childrenPrices['sell'] += $price->selling;
-                                $childrenPrices['markup'] += $price->mark_up;
-                                $childrenPrices['saleMarkUp'] += $price->extra_mark_up;
-                                break;
-                            case $price::PASSENGER_INFANT:
-                                $infantsPrices['cnt']++;
-                                $infantsPrices['net'] += $price->net;
-                                $infantsPrices['sell'] += $price->selling;
-                                $infantsPrices['markup'] += $price->mark_up;
-                                $infantsPrices['saleMarkUp'] += $price->extra_mark_up;
-                                break;
-                            default:
-                                $adultsPrices['cnt']++;
-                                $adultsPrices['net'] += $price->net;
-                                $adultsPrices['sell'] += $price->selling;
-                                $adultsPrices['markup'] += $price->mark_up;
-                                $adultsPrices['saleMarkUp'] += $price->extra_mark_up;
-                                break;
-                        }
-                    }
-                    ?>
-			<table class="table table-striped table-prices">
-				<thead>
-					<tr>
-						<th>Pax</th>
-						<th>Q</th>
-						<th>NP, $</th>
-						<th>Mkp, $</th>
-						<th>Ex Mkp, $</th>
-						<th>SP, $</th>
-					</tr>
-				</thead>
-				<tbody>
-					<?php if ($adultsPrices['cnt'] > 0): ?>
-                            <tr>
-                                <th>ADT</th>
-                                <td>x <?= $adultsPrices['cnt'] ?></td>
-                                <td><?= $adultsPrices['net'] / $adultsPrices['cnt'] ?></td>
-                                <td><?= $adultsPrices['markup'] / $adultsPrices['cnt'] ?></td>
-                                <td><?= Html::textInput('adt-markup-' . $model->uid, $adultsPrices['saleMarkUp'] / $adultsPrices['cnt'], [
-                                        'class' => 'form-control ext-mark-up',
-                                        'data-quote-uid' => $model->uid,
-                                        'data-pax-type' => 'adt-markup'
-                                    ]) ?>
-                                </td>
-                                <td class="sellingPrice-<?= $model->uid ?>"><?= $adultsPrices['sell'] / $adultsPrices['cnt'] ?></td>
-                            </tr>
-                        <?php endif; ?>
-                        <?php if ($childrenPrices['cnt'] > 0): ?>
-                            <tr>
-                                <th>CHD</th>
-                                <td>x <?= $childrenPrices['cnt'] ?></td>
-                                <td><?= $childrenPrices['net'] / $childrenPrices['cnt'] ?></td>
-                                <td><?= $childrenPrices['markup'] / $childrenPrices['cnt'] ?></td>
-                                <td><?= Html::textInput('cnn-markup-' . $model->uid, $childrenPrices['saleMarkUp'] / $childrenPrices['cnt'], [
-                                        'class' => 'form-control ext-mark-up',
-                                        'data-quote-uid' => $model->uid,
-                                        'data-pax-type' => 'cnn-markup'
-                                    ]) ?>
-                                </td>
-                                <td class="sellingPrice-<?= $model->uid ?>"><?= $childrenPrices['sell'] / $childrenPrices['cnt'] ?></td>
-                            </tr>
-                        <?php endif; ?>
-                        <?php if ($infantsPrices['cnt'] > 0): ?>
-                            <tr>
-                                <th>INF</th>
-                                <td>x <?= $infantsPrices['cnt'] ?></td>
-                                <td><?= $infantsPrices['net'] / $infantsPrices['cnt'] ?></td>
-                                <td><?= $infantsPrices['markup'] / $infantsPrices['cnt'] ?></td>
-                                <td><?= Html::textInput('inf-markup-' . $model->uid, $infantsPrices['saleMarkUp'] / $infantsPrices['cnt'], [
-                                        'class' => 'form-control ext-mark-up',
-                                        'data-quote-uid' => $model->uid,
-                                        'data-pax-type' => 'inf-markup'
-                                    ]) ?>
-                                </td>
-                                <td class="sellingPrice-<?= $model->uid ?>"><?= $infantsPrices['sell'] / $infantsPrices['cnt'] ?></td>
-                            </tr>
-                        <?php endif; ?>
-				</tbody>
-				<tfoot>
-					<tr>
-                        <th>Total</th>
-                        <td><?= count($model->quotePrices) ?></td>
-                        <td><?= $netPrice ?></td>
-                        <td><?= $markup ?></td>
-                        <td class="total-markup-<?= $model->uid ?>"><?= $extraMarkup ?></td>
-                        <td class="total-sellingPrice-<?= $model->uid ?>"><?= $sellingPrice ?></td>
-                    </tr>
-					<?php $service_fee_total = 0?>
-                    <?php if($model->check_payment):?>
-                    <tr class="danger">
-                        <th colspan="4">Merchant fee</th>
-                        <td><?= Quote::SERVICE_FEE*100?>%</td>
-                        <td><?php /*$service_fee_total = round($sellingPrice * $model->service_fee_percent/100, 2); echo $service_fee_total;*/ ?></td>
-                    </tr>
-                    <?php endif;?>
-				</tfoot>
-			</table>
+			<?php \yii\widgets\Pjax::begin(['id' => 'pjax-quote_prices-'.$model->id, 'enablePushState' => false, 'enableReplaceState' => false]); ?>
+			<?= $this->render('_quote_prices', [
+                    'quote' => $model
+                ]); ?>
+            <?php \yii\widgets\Pjax::end(); ?>
 		</div>
 	</div>
 </div>
