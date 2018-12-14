@@ -287,8 +287,14 @@ class Quote extends \yii\db\ActiveRecord
      */
     public function getProcessingFee()
     {
-        if(!$this->employee)
-            return 0;
+        if(!$this->employee){
+            $employee = $this->lead->employee;
+            if(!$employee) return 0;
+
+            $groups = $employee->ugsGroups;
+            return ($groups)?$groups[0]->ug_processing_fee:0;
+        }
+
         $groups = $this->employee->ugsGroups;
         return ($groups)?$groups[0]->ug_processing_fee:0;
     }
