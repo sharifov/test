@@ -3,25 +3,19 @@
 namespace frontend\controllers;
 
 use Yii;
-use common\models\EmailTemplateType;
-use common\models\search\EmailTemplateTypeSearch;
+use common\models\SmsTemplateType;
+use common\models\search\SmsTemplateTypeSearch;
 use yii\filters\AccessControl;
 use yii\helpers\ArrayHelper;
-use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\web\Response;
 
 /**
- * EmailTemplateTypeController implements the CRUD actions for EmailTemplateType model.
+ * SmsTemplateTypeController implements the CRUD actions for SmsTemplateType model.
  */
-class EmailTemplateTypeController extends FController
+class SmsTemplateTypeController extends FController
 {
-    /**
-     * {@inheritdoc}
-     */
-
-
     public function behaviors()
     {
         $behaviors = [
@@ -52,12 +46,12 @@ class EmailTemplateTypeController extends FController
     }
 
     /**
-     * Lists all EmailTemplateType models.
+     * Lists all SmsTemplateType models.
      * @return mixed
      */
     public function actionIndex()
     {
-        $searchModel = new EmailTemplateTypeSearch();
+        $searchModel = new SmsTemplateTypeSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
         return $this->render('index', [
@@ -67,7 +61,7 @@ class EmailTemplateTypeController extends FController
     }
 
     /**
-     * Displays a single EmailTemplateType model.
+     * Displays a single SmsTemplateType model.
      * @param integer $id
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
@@ -80,16 +74,16 @@ class EmailTemplateTypeController extends FController
     }
 
     /**
-     * Creates a new EmailTemplateType model.
+     * Creates a new SmsTemplateType model.
      * If creation is successful, the browser will be redirected to the 'view' page.
      * @return mixed
      */
     public function actionCreate()
     {
-        $model = new EmailTemplateType();
+        $model = new SmsTemplateType();
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->etp_id]);
+            return $this->redirect(['view', 'id' => $model->stp_id]);
         }
 
         return $this->render('create', [
@@ -98,7 +92,7 @@ class EmailTemplateTypeController extends FController
     }
 
     /**
-     * Updates an existing EmailTemplateType model.
+     * Updates an existing SmsTemplateType model.
      * If update is successful, the browser will be redirected to the 'view' page.
      * @param integer $id
      * @return mixed
@@ -109,7 +103,7 @@ class EmailTemplateTypeController extends FController
         $model = $this->findModel($id);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->etp_id]);
+            return $this->redirect(['view', 'id' => $model->stp_id]);
         }
 
         return $this->render('update', [
@@ -133,21 +127,20 @@ class EmailTemplateTypeController extends FController
     }
 
     /**
-     * Finds the EmailTemplateType model based on its primary key value.
+     * Finds the SmsTemplateType model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
      * @param integer $id
-     * @return EmailTemplateType the loaded model
+     * @return SmsTemplateType the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
     protected function findModel($id)
     {
-        if (($model = EmailTemplateType::findOne($id)) !== null) {
+        if (($model = SmsTemplateType::findOne($id)) !== null) {
             return $model;
         }
 
         throw new NotFoundHttpException('The requested page does not exist.');
     }
-
 
     /**
      * @return Response
@@ -155,7 +148,7 @@ class EmailTemplateTypeController extends FController
      */
     public function actionSynchronization() : Response
     {
-        $result = EmailTemplateType::synchronizationTypes();
+        $result = SmsTemplateType::synchronizationTypes();
 
         if($result) {
             if($result['error']) {

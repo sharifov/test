@@ -76,6 +76,14 @@ use yii\widgets\ActiveForm;
 
     <?php // echo $form->field($model, 'e_updated_dt') ?>
 
+    <?php // echo $form->field($model, 'e_message_id') ?>
+
+    <?php // echo $form->field($model, 'e_ref_message_id') ?>
+
+    <?php // echo $form->field($model, 'e_inbox_created_dt') ?>
+
+    <?php // echo $form->field($model, 'e_inbox_email_id') ?>
+
     <div class="form-group">
         <?= Html::submitButton('Search', ['class' => 'btn btn-primary']) ?>
         <?= Html::resetButton('Reset', ['class' => 'btn btn-default']) ?>

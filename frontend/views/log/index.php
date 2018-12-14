@@ -5,7 +5,7 @@ use yii\grid\GridView;
 use dosamigos\datepicker\DatePicker;
 
 /* @var $this yii\web\View */
-/* @var $searchModel backend\models\search\LogSearch */
+/* @var $searchModel frontend\models\search\LogSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
 $this->title = 'Logs';
@@ -54,13 +54,13 @@ $this->params['breadcrumbs'][] = $this->title;
                     //'category',
                     [
                         'attribute' => 'category',
-                        'filter' => \backend\models\Log::getCategoryFilter(),
+                        'filter' => \frontend\models\Log::getCategoryFilter(),
                         'contentOptions'=>['style'=>'width: 200px;text-align:center;']
                     ],
                     [
                         'attribute' => 'message',
                         'format' => 'raw',
-                        'value' => function (\backend\models\Log $model) {
+                        'value' => function (\frontend\models\Log $model) {
                             $str = '<pre><small>'.(\yii\helpers\StringHelper::truncate($model->message, 400, '...', null, true)).'</small></pre> 
                             <a href="'.\yii\helpers\Url::to(['log/view', 'id' => $model->id]).'" title="Log '.$model->id.'" class="btn btn-sm btn-success showModalButton" data-pjax="0">show log</a>';
                             return ($str);

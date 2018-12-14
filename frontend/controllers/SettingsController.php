@@ -2,10 +2,11 @@
 
 namespace frontend\controllers;
 
-use backend\models\search\AirlineForm;
-use backend\models\search\AirportForm;
-use backend\models\search\GlobalAclForm;
-use backend\models\search\LogForm;
+use frontend\models\search\AirlineForm;
+use frontend\models\search\AirportForm;
+use frontend\models\search\GlobalAclForm;
+use frontend\models\search\LogForm;
+use common\controllers\DefaultController;
 use common\models\GlobalAcl;
 use common\models\Log;
 use common\models\Project;

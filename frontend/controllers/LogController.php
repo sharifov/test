@@ -3,9 +3,8 @@
 namespace frontend\controllers;
 
 use Yii;
-use backend\models\Log;
-use backend\models\search\LogSearch;
-use yii\web\Controller;
+use frontend\models\Log;
+use frontend\models\search\LogSearch;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
