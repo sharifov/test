@@ -41,6 +41,7 @@ use frontend\models\ProfitSplitForm;
 use common\components\SearchService;
 use common\models\QuotePrice;
 use frontend\models\TipsSplitForm;
+use common\models\local\LeadLogMessage;
 
 /**
  * Site controller
@@ -1002,10 +1003,38 @@ class LeadController extends FController
                         if($quoteId){
                             $qPrices = QuotePrice::find()->where(['quote_id' => $quoteId, 'passenger_type' => $paxCode])->all();
                             if (count($qPrices)){
+                                $quote = Quote::findOne(['id' => $quoteId]);
+                                $priceData = $quote->getPricesData();
+                                $sellingOld = $priceData['total']['selling'];
                                 foreach ($qPrices as $qPrice){
                                     $qPrice->extra_mark_up = $extraMarkup[$paxCode][$quoteId];
                                     $qPrice->update();
                                 }
+
+                                $quote = Quote::findOne(['id' => $quoteId]);
+                                $priceData = $quote->getPricesData();
+                                //log messages
+                                $leadLog = new LeadLog((new LeadLogMessage()));
+                                $leadLog->logMessage->oldParams = ['selling' => $sellingOld];
+                                $leadLog->logMessage->newParams = ['selling' => $priceData['total']['selling']];
+                                $leadLog->logMessage->title = 'Update';
+                                $leadLog->logMessage->model = sprintf('%s (%s)', $quote->formName(), $quote->uid);
+                                $leadLog->addLog([
+                                    'lead_id' => $id,
+                                ]);
+
+                                if ($lead->called_expert) {
+                                    $data = $quote->getQuoteInformationForExpert(true);
+                                    $response = BackOffice::sendRequest('lead/update-quote', 'POST', json_encode($data));
+                                    if ($response['status'] != 'Success' || !empty($response['errors'])) {
+                                        \Yii::$app->getSession()->setFlash('warning', sprintf(
+                                            'Update info quote [%s] for expert failed! %s',
+                                            $quote->uid,
+                                            print_r($response['errors'], true)
+                                            ));
+                                    }
+                                }
+
                                 return ['output' => $extraMarkup[$paxCode][$quoteId]];
                             }
                             return [];
