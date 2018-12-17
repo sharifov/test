@@ -11,6 +11,7 @@ use yii\helpers\Url;
 /* @var $checkShiftTime bool */
 /* @var $isAgent bool */
 /* @var $isAccessNewLead bool */
+/* @var $accessLeadByFrequency array */
 /* @var $user \common\models\Employee */
 /* @var $newLeadsCount integer */
 
@@ -25,6 +26,18 @@ if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
 
 $this->registerJsFile('https://cdnjs.cloudflare.com/ajax/libs/jQuery-Knob/1.2.13/jquery.knob.min.js', [
     //'position' => \yii\web\View::POS_HEAD,
+    'depends' => [
+        \yii\web\JqueryAsset::class
+    ]
+]);
+$this->registerJsFile('/js/moment.min.js', [
+    'position' => \yii\web\View::POS_HEAD,
+    'depends' => [
+        \yii\web\JqueryAsset::class
+    ]
+]);
+$this->registerJsFile('/js/jquery.countdown-2.2.0/jquery.countdown.min.js', [
+    'position' => \yii\web\View::POS_HEAD,
     'depends' => [
         \yii\web\JqueryAsset::class
     ]
@@ -149,9 +162,9 @@ $this->params['breadcrumbs'][] = $this->title;
     <?php Pjax::begin(); //['id' => 'lead-pjax-list', 'timeout' => 5000, 'enablePushState' => true, 'clientOptions' => ['method' => 'GET']]); ?>
 
 
-
+	<div class="row">
     <?php if(!$checkShiftTime): ?>
-        <div class="row col-md-4">
+        <div class="col-md-4">
                 <div class="alert alert-warning alert-dismissible" role="alert">
                     <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                     <strong>Warning!</strong> New leads are only available on your shift. (Current You time: <?=Yii::$app->formatter->asTime(time())?>)
@@ -162,10 +175,8 @@ $this->params['breadcrumbs'][] = $this->title;
         </div>
     <?php endif; ?>
 
-    <div class="clearfix"></div>
-
     <?php if(!$isAccessNewLead): ?>
-        <div class="row col-md-4">
+        <div class="col-md-4">
             <div class="alert alert-warning alert-dismissible" role="alert">
                 <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                 <strong>Warning!</strong> Access is denied - action "take new lead"
@@ -173,7 +184,16 @@ $this->params['breadcrumbs'][] = $this->title;
         </div>
     <?php endif; ?>
 
-    <div class="clearfix"></div>
+
+    <?php if(!empty($accessLeadByFrequency) && $accessLeadByFrequency['access'] == false): ?>
+        <div class="col-md-4">
+            <div class="alert alert-warning alert-dismissible" role="alert">
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <strong>Warning!</strong> New leads will be available in <span id="left-time-countdown" data-elapsed="<?= $accessLeadByFrequency['takeDtUTC']->format('U') - time()?>" data-countdown="<?= $accessLeadByFrequency['takeDtUTC']->format('Y-m-d H:i')?>"><?=Yii::$app->formatter->asTime($accessLeadByFrequency['takeDt'])?></span>
+                 </div>
+        </div>
+    <?php endif; ?>
+	</div>
 
     <?php
 
@@ -468,3 +488,29 @@ echo GridView::widget([
 <?php //if($isAccessNewLead):?>
     <?php $this->registerJs('$(".dial").knob();', \yii\web\View::POS_READY); ?>
 <?php //endif; ?>
+
+
+<?php
+$js = '
+function initCountDown()
+{
+    $("[data-countdown]").each(function() {
+      var $this = $(this), finalDate = $(this).data("countdown");
+      var elapsedTime = $(this).data("elapsed");
+
+        var seconds = new Date().getTime() + (elapsedTime * 1000);
+        $this.countdown(seconds, function(event) {
+            $(this).html(event.strftime(\'%H:%M:%S\'));
+        });
+    });
+}
+
+$(document).on(\'pjax:end\', function() {
+    initCountDown();
+});
+
+initCountDown();
+
+';
+
+$this->registerJs($js);

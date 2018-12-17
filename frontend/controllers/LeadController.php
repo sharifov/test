@@ -849,6 +849,14 @@ class LeadController extends FController
         $user = Yii::$app->user->identity;
 
         $isAccessNewLead = $user->accessTakeNewLead();
+        $accessLeadByFrequency = [];
+
+        if($isAccessNewLead){
+            $accessLeadByFrequency = $user->accessTakeLeadByFrequencyMinutes();
+            if(!$accessLeadByFrequency['access']){
+                $isAccessNewLead = $accessLeadByFrequency['access'];
+            }
+        }
 
         return $this->render('inbox', [
             'searchModel' => $searchModel,
@@ -856,6 +864,7 @@ class LeadController extends FController
             'checkShiftTime' => $checkShiftTime,
             'isAgent' => $isAgent,
             'isAccessNewLead' => $isAccessNewLead,
+            'accessLeadByFrequency' => $accessLeadByFrequency,
             'user' => $user,
             'newLeadsCount' => $user->getCountNewLeadCurrentShift()
         ]);

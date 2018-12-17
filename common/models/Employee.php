@@ -627,6 +627,20 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         return $stats;
     }
 
+    /**
+     * @return string
+     */
+    public function getLastTakenLeadDt():string
+    {
+        $leadFlow = LeadFlow::find()
+                        ->where(['employee_id' => $this->id])
+                        ->andWhere(['status' => 2, 'lf_from_status_id' => 1])
+                        ->orderBy(['created' => SORT_DESC])
+                        ->one();
+
+       return ($leadFlow)?$leadFlow->created:'';
+    }
+
 
     /**
      * @param string|null $start_dt
@@ -1120,5 +1134,45 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         }
 
         return $access;
+    }
+
+    /**
+     * @return array
+     */
+    public function accessTakeLeadByFrequencyMinutes(): array
+    {
+        $access = true;
+        $takeDt = new \DateTime();
+        $timeZone = $this->userParams->up_timezone ?: 'UTC';
+
+        $params = $this->userParams;
+        if($params){
+            if($params->up_frequency_minutes){
+                $lastTakenDt = $this->getLastTakenLeadDt();
+
+                if(!empty($lastTakenDt)){
+                    $lastTakenUTC = new \DateTime($lastTakenDt);
+                    $lastTakenUTC->setTimezone(new \DateTimeZone('UTC'));
+
+                    $nowUTC = new \DateTime();
+                    $nowUTC->setTimezone(new \DateTimeZone('UTC'));
+
+                    $frequencyMinutes = $params->up_frequency_minutes;
+
+                    $nextTakeUTC = $lastTakenUTC->add(new \DateInterval('PT' . $frequencyMinutes . 'M'));
+
+                    if($nextTakeUTC > $nowUTC){
+                        $access = false;
+                        $takeDt = $nextTakeUTC;
+                    }
+
+                }
+            }
+        }
+
+        $takeDt->setTimezone(new \DateTimeZone($timeZone));
+        $takeDtUTC = $takeDt->setTimezone(new \DateTimeZone('UTC'));
+
+        return ['access' => $access, 'takeDt' => $takeDt, 'takeDtUTC' => $takeDtUTC];
     }
 }

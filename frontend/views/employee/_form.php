@@ -217,6 +217,9 @@ if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
                         <div class="col-md-3">
                             <?= $form->field($modelUserParams, 'up_min_percent_for_take_leads')->input('number', ['step' => 1, 'max' => 100, 'min' => 0]) ?>
                         </div>
+                        <div class="col-md-3">
+                            <?= $form->field($modelUserParams, 'up_frequency_minutes')->input('number', ['step' => 1, 'max' => 1000, 'min' => 0]) ?>
+                        </div>
                     </div>
 
                 <?php endif; ?>
