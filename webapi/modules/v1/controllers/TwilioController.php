@@ -84,7 +84,22 @@ class TwilioController extends Controller
 
         Yii::warning(VarDumper::dumpAsString($out), 'Twilio Request');
 
+        header("Content-type: text/xml");
+
+        $xml = '<?xml version="1.0" encoding="UTF-8"?>
+<Response><Dial callerId="sip:alex.connor@kivork.sip.us1.twilio.com" record="true">
+            <Number>'. Yii::$app->request->get('phone') .'</Number>
+        </Dial>
+</Response>';
+
+        /*      $xml = '<Response><Dial timeout="10" record="true">
+                    <Sip>'. $tosip .'</Sip>
+                </Dial>
+        </Response>';*/
+        echo  $xml; exit;
+
     }
+
 
     public function actionFallback()
     {
