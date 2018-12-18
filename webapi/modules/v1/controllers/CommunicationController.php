@@ -57,6 +57,9 @@ class CommunicationController extends ApiBaseController
 
     public function actionEmail(): array
     {
+
+
+
         $this->checkPost();
         $apiLog = $this->startApiLog($this->action->uniqueId);
 
@@ -66,6 +69,8 @@ class CommunicationController extends ApiBaseController
         /*if(!$action) {
             throw new NotFoundHttpException('Not found action', 1);
         }*/
+
+
 
         if(!$type) {
             throw new NotFoundHttpException('Not found Email type', 1);
