@@ -68,7 +68,7 @@ class CommunicationController extends ApiBaseController
         }*/
 
         if(!$type) {
-            throw new NotFoundHttpException('Not found type', 1);
+            throw new NotFoundHttpException('Not found Email type', 1);
         }
 
 
@@ -77,7 +77,7 @@ class CommunicationController extends ApiBaseController
                 break;
             case self::TYPE_NEW_EMAIL_MESSAGES_RECEIVED : $response = $this->newEmailMessagesReceived();
                 break;
-            default: throw new BadRequestHttpException('Invalid type', 2);
+            default: throw new BadRequestHttpException('Invalid Email type', 2);
         }
 
         $responseData = [];
@@ -313,6 +313,112 @@ class CommunicationController extends ApiBaseController
             $filter = [];
             $dateTime = null;
 
+            //$filter['last_dt'] = '';
+
+            $lastEmail = Email::find()->orderBy(['e_id'=> SORT_DESC])->one();
+            if($lastEmail) {
+                //$filter['last_dt'] = $lastEmail->e_inbox_created_dt;
+                $filter['last_id'] = $lastEmail->e_inbox_email_id;
+            }
+
+            /*$email_to = Yii::$app->request->post('email_to');
+            $email_from = Yii::$app->request->post('email_from');
+            $limit = Yii::$app->request->post('limit');
+            $offset = Yii::$app->request->post('offset');
+            $new = Yii::$app->request->post('new');
+            $last_id = Yii::$app->request->post('last_id');
+            $last_dt = Yii::$app->request->post('last_dt');*/
+
+            $res = $communication->mailGetMessages($filter);
+
+            if(isset($res['error']) && $res['error']) {
+                $response['error'] = 'Error mailGetMessages';
+                $response['error_code'] = 13;
+
+                Yii::error(VarDumper::dumpAsString($res['error']), 'API:Communication:newEmailMessagesReceived:mailGetMessages');
+
+            } elseif(isset($res['data']['emails']) && $res['data']['emails'] && \is_array($res['data']['emails'])) {
+
+
+                /*
+                * @property int $ei_id
+                * @property string $ei_email_to
+                * @property string $ei_email_from
+                * @property string $ei_email_subject
+                * @property string $ei_email_text
+                * @property string $ei_email_category
+                * @property int $ei_project_id
+                * @property bool $ei_new
+                * @property bool $ei_deleted
+                * @property string $ei_created_dt
+                * @property string $ei_updated_dt
+                * @property string $ei_ref_mess_ids
+                * @property string $ei_message_id
+                    */
+
+
+                foreach ($res['data']['emails'] as $mail) {
+
+                    $email = new Email();
+
+                    $email->e_type_id = Email::TYPE_INBOX;
+                    $email->e_status_id = Email::STATUS_DONE;
+                    $email->e_is_new = true;
+
+                    $email->e_email_to = $mail['ei_email_to'];
+                    $email->e_email_from = $mail['ei_email_from'];
+                    $email->e_email_subject = $mail['ei_email_subject'];
+                    $email->e_project_id = $mail['ei_project_id'];
+                    $email->e_email_body_html = $mail['ei_email_text'];
+                    $email->e_created_dt = $mail['ei_created_dt'];
+
+                    $email->e_inbox_email_id = $mail['ei_id'];
+                    $email->e_inbox_created_dt = $mail['ei_created_dt'];
+                    $email->e_ref_message_id = $mail['ei_ref_mess_ids'];
+                    $email->e_message_id = $mail['ei_message_id'];
+
+                    if(!$email->save()) {
+                        Yii::error(VarDumper::dumpAsString($email->errors), 'API:Communication:newEmailMessagesReceived:Email:save');
+                    }
+                }
+
+                /*if($eq_status_id > 0) {
+                    $email->e_status_id = $eq_status_id;
+                    if($eq_status_id === Email::STATUS_DONE) {
+                        $email->e_status_done_dt = date('Y-m-d H:i:s');
+                    }
+
+
+                }*/
+            }
+
+
+        } catch (\Throwable $e) {
+            Yii::error($e->getTraceAsString(), 'API:Communication:newEmailMessagesReceived:Email:try');
+            $message = $this->debug ? $e->getTraceAsString() : $e->getMessage() . ' (code:' . $e->getCode() . ', line: ' . $e->getLine() . ')';
+            $response['error'] = $message;
+            $response['error_code'] = 15;
+        }
+
+        return $response;
+    }
+
+
+    /**
+     * @return array
+     */
+    private function newSmsMessagesReceived(): array
+    {
+        $response = [];
+
+        try {
+
+            /** @var CommunicationService $communication */
+            $communication = Yii::$app->communication;
+
+            $filter = [];
+            $dateTime = null;
+
             $filter['last_dt'] = '';
 
             /*$email_to = Yii::$app->request->post('email_to');
@@ -323,11 +429,13 @@ class CommunicationController extends ApiBaseController
             $last_id = Yii::$app->request->post('last_id');
             $last_dt = Yii::$app->request->post('last_dt');*/
 
-            $res = $communication->smsGetMessages($filter);
+            $res = $communication->mailGetMessages($filter);
 
             if(isset($res['error']) && $res['error']) {
                 $response['error'] = 'Error mailGetMessages';
                 $response['error_code'] = 13;
+
+                Yii::error(VarDumper::dumpAsString($res['error']), 'API:Communication:newEmailMessagesReceived:mailGetMessages');
 
             } elseif(isset($res['data']) && $res['data'] && \is_array($res['data'])) {
 
@@ -382,7 +490,7 @@ class CommunicationController extends ApiBaseController
                     $sms->s_tw_from_zip = $smsItem['si_from_zip'] ?? null;
 
                     if(!$sms->save()) {
-                        Yii::error(VarDumper::dumpAsString($sms->errors), 'API:Communication:newSmsMessagesReceived:Sms:save');
+                        Yii::error(VarDumper::dumpAsString($sms->errors), 'API:Communication:newEmailMessagesReceived:Sms:save');
                     }
                 }
 
@@ -390,7 +498,7 @@ class CommunicationController extends ApiBaseController
 
 
         } catch (\Throwable $e) {
-            Yii::error($e->getTraceAsString(), 'API:Communication:newMessagesReceived:Email:try');
+            Yii::error($e->getTraceAsString(), 'API:Communication:newEmailMessagesReceived:Email:try');
             $message = $this->debug ? $e->getTraceAsString() : $e->getMessage() . ' (code:' . $e->getCode() . ', line: ' . $e->getLine() . ')';
             $response['error'] = $message;
             $response['error_code'] = 15;
@@ -398,5 +506,9 @@ class CommunicationController extends ApiBaseController
 
         return $response;
     }
+
+
+
+
 
 }
