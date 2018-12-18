@@ -22,7 +22,9 @@ class CommunicationController extends ApiBaseController
 
     public const TYPE_UPDATE_EMAIL_STATUS = 'update_email_status';
     public const TYPE_UPDATE_SMS_STATUS = 'update_sms_status';
-    public const TYPE_NEW_MESSAGES_RECEIVED = 'new_messages_received';
+
+    public const TYPE_NEW_EMAIL_MESSAGES_RECEIVED = 'new_email_messages_received';
+    public const TYPE_NEW_SMS_MESSAGES_RECEIVED = 'new_sms_messages_received';
 
     /**
      * @api {post} /v1/communication/email Communication Email
@@ -73,7 +75,7 @@ class CommunicationController extends ApiBaseController
         switch ($type) {
             case self::TYPE_UPDATE_EMAIL_STATUS : $response = $this->updateEmailStatus();
                 break;
-            case self::TYPE_NEW_MESSAGES_RECEIVED : $response = $this->newEmailMessagesReceived();
+            case self::TYPE_NEW_EMAIL_MESSAGES_RECEIVED : $response = $this->newEmailMessagesReceived();
                 break;
             default: throw new BadRequestHttpException('Invalid type', 2);
         }
@@ -158,7 +160,7 @@ class CommunicationController extends ApiBaseController
         switch ($type) {
             case self::TYPE_UPDATE_SMS_STATUS : $response = $this->updateSmsStatus();
                 break;
-            case self::TYPE_NEW_MESSAGES_RECEIVED : $response = $this->newSmsMessagesReceived();
+            case self::TYPE_NEW_SMS_MESSAGES_RECEIVED : $response = $this->newSmsMessagesReceived();
                 break;
             default: throw new BadRequestHttpException('Invalid type', 2);
         }
