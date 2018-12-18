@@ -15,6 +15,7 @@ use common\models\Quote;
 $userId = Yii::$app->user->id;
 
 $is_manager = false;
+$is_admin = (Yii::$app->authManager->getAssignment('admin', $userId));
 if(Yii::$app->authManager->getAssignment('admin', $userId) || Yii::$app->authManager->getAssignment('supervision', $userId)) {
     $is_manager = true;
 }
@@ -413,6 +414,7 @@ JS;
                             ]) ?>
                         </div>
                     </div>
+                    <?php if($is_admin):?>
                     <!-- New button send -->
                     <?= Html::button('<i class="fa fa-send"></i>&nbsp;Send Quotes', [
                         'class' => 'btn btn-primary popover-class',
@@ -444,6 +446,7 @@ JS;
                                                     'data-url' => \yii\helpers\Url::to(['quote/preview-send-quotes-new'])
                                                 ]).'</div>',
                     ]);?>
+                    <?php endif;?>
                 </div>
                 <div id="sent-messages" class="alert hidden">
                     <i class="fa fa-exclamation-triangle hidden"></i>
