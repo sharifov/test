@@ -41,7 +41,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <?php Pjax::begin(); //['id' => 'lead-pjax-list', 'timeout' => 5000, 'enablePushState' => true, 'clientOptions' => ['method' => 'GET']]); ?>
     <?php if (isset($salary)): ?>
         <h3>Salary by <?= $salaryBy ?>: $<?= number_format($salary['salary'], 2) ?>
-            (Estimate Profit:$<?= round($salary['startProfit']) ?> , Base: $<?= round($salary['base']) ?>, Commission: <?= $salary['commission'] ?>%, Bonus:
+            (Base: $<?= round($salary['base']) ?>, Commission: <?= $salary['commission'] ?>%, Bonus:
             $<?= $salary['bonus'] ?>)</h3>
     <?php endif; ?>
     <?= $this->render('_search_sold', ['model' => $searchModel]); ?>
