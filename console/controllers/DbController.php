@@ -44,11 +44,22 @@ class DbController extends Controller
             ':schema' => $schema
         ])->queryAll();
         $db->createCommand('SET FOREIGN_KEY_CHECKS=0;')->execute();
+
+        //VarDumper::dump($tables); exit;
+
         // Alter the encoding of each table
-        foreach ($tables as $table) {
-            $tableName = $table['table_name'];
-            $db->createCommand("ALTER TABLE `$tableName` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci")->execute();
-            echo "tbl: " . $tableName . "\r\n";
+        foreach ($tables as $id => $table) {
+            if(isset($table['table_name'])) {
+                $tableName = $table['table_name'];
+                $db->createCommand("ALTER TABLE `$tableName` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci")->execute();
+                echo $id." - tbl: " . $tableName . "\r\n";
+            }
+
+            if(isset($table['TABLE_NAME'])) {
+                $tableName = $table['TABLE_NAME'];
+                $db->createCommand("ALTER TABLE `$tableName` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci")->execute();
+                echo $id." - tbl: " . $tableName . "\r\n";
+            }
         }
         $db->createCommand('SET FOREIGN_KEY_CHECKS=1;')->execute();
         printf("\n --- End %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
