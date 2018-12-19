@@ -3,6 +3,7 @@ namespace webapi\modules\v1\controllers;
 
 use common\components\CommunicationService;
 use common\models\Email;
+use common\models\Project;
 use common\models\Sms;
 use Yii;
 use yii\helpers\VarDumper;
@@ -373,7 +374,12 @@ class CommunicationController extends ApiBaseController
                     $email->e_email_to = $mail['ei_email_to'];
                     $email->e_email_from = $mail['ei_email_from'];
                     $email->e_email_subject = $mail['ei_email_subject'];
-                    $email->e_project_id = $mail['ei_project_id'];
+                    if($mail['ei_project_id'] > 0) {
+                        $project = Project::findOne($mail['ei_project_id']);
+                        if($project) {
+                            $email->e_project_id = $project->id;
+                        }
+                    }
                     $email->e_email_body_html = $mail['ei_email_text'];
                     $email->e_created_dt = $mail['ei_created_dt'];
 
