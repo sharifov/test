@@ -73,6 +73,11 @@ use yii\widgets\ActiveForm;
                 <?php if($model->e_status_id):?>
                     <span class="badge badge-warning"><?=Html::encode($model->getStatusName())?></span>
                 <?php endif;?>
+
+                <?php if($model->e_is_deleted):?>
+                    <span class="badge badge-danger">Deleted</span>
+                <?php endif;?>
+
             </div>
         </div>
     </div>

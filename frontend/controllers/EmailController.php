@@ -113,7 +113,8 @@ class EmailController extends FController
         }
 
         $params = Yii::$app->request->queryParams;
-        $params['email_type_id'] = Yii::$app->request->get('email_type_id');
+        $params['email_type_id'] = Yii::$app->request->get('email_type_id', Email::FILTER_TYPE_ALL);
+        $params['EmailSearch']['e_project_id'] = Yii::$app->request->get('email_project_id');
 
         $dataProvider = $searchModel->searchEmails($params);
 

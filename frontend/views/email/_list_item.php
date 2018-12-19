@@ -20,13 +20,41 @@ use yii\widgets\ActiveForm;
 
     <div class="mail_list">
         <div class="left">
+            <?php if($model->e_type_id == \common\models\Email::TYPE_DRAFT):?>
+                <i class="fa fa-edit"></i><br>
+            <?php endif; ?>
+            <?php if($model->e_type_id == \common\models\Email::TYPE_OUTBOX):?>
+                <i class="fa fa-level-up"></i><br>
+            <?php endif; ?>
+            <?php if($model->e_type_id == \common\models\Email::TYPE_INBOX):?>
+                <i class="fa fa-level-down"></i><br>
+            <?php endif; ?>
+
+            <?php if($model->e_is_deleted):?>
+                <i class="fa fa-trash"></i><br>
+            <?php endif; ?>
+
             <?php if($model->e_is_new):?>
-                <i class="fa fa-circle"></i>
-            <? endif; ?><?/*<i class="fa fa-edit"></i>*/?>
+                <i class="fa fa-circle"></i><br>
+            <?php endif; ?><?/*<i class="fa fa-edit"></i>*/?>
         </div>
         <div class="right">
             <h3>
-                <?=Html::encode($model->e_email_from)?> - <?=Html::encode($model->e_email_to)?> <small><?=Yii::$app->formatter->asDatetime(strtotime($model->e_created_dt))?></small></h3>
+                <?=Html::encode($model->e_email_from)?> - <?=Html::encode($model->e_email_to)?>
+                <small>
+                    <?php if($model->e_type_id == \common\models\Email::TYPE_INBOX):?>
+                        <?=$model->e_inbox_email_id ? 'cid: '.$model->e_inbox_email_id : ''?><br/>
+                        <?=$model->e_inbox_created_dt ? Yii::$app->formatter->asDatetime(strtotime($model->e_inbox_created_dt)) : '-'?>
+                    <?php endif; ?>
+                    <?php if($model->e_type_id == \common\models\Email::TYPE_OUTBOX):?>
+                        <?=Yii::$app->formatter->asDatetime(strtotime($model->e_created_dt))?>
+                    <?php endif; ?>
+                    <?php if($model->e_type_id == \common\models\Email::TYPE_DRAFT):?>
+                        <i><?=Yii::$app->formatter->asDatetime(strtotime($model->e_created_dt))?></i>
+                    <?php endif; ?>
+
+                </small>
+            </h3>
             <p><?php if($model->eProject):?>
                 <span class="label label-info"><?=Html::encode($model->eProject->name)?></span>
                 <?php endif;?><?=Html::encode($model->e_email_subject)?></p>
