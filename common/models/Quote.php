@@ -1222,6 +1222,7 @@ class Quote extends \yii\db\ActiveRecord
             }
             $newQPrice->id = 0;
             $newQPrice->passenger_type = $type;
+            $newQPrice->uid = null;
             $newQPrice->toMoney();
             $prices[] = $newQPrice;
         }
