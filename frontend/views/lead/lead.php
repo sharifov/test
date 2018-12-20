@@ -496,9 +496,14 @@ JS;
         </div>
     </div>
 
-	<?php if($leadForm->mode == $leadForm::VIEW_MODE && (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id))):?>
-    <aside class="sidebar right-sidebar sl-right-sidebar">
-    	 <?php if($leadForm->getLead()->status == \common\models\Lead::STATUS_FOLLOW_UP && $leadForm->getLead()->employee_id != Yii::$app->user->id && $is_manager):?>
+	<aside class="sidebar right-sidebar sl-right-sidebar">
+    	 <?php if($leadForm->mode == $leadForm::VIEW_MODE && (!Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) && !Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id))):?>
+			<div class="alert alert-warning" role="alert">
+                <h4 class="alert-heading">Warning!</h4>
+                <p>Client information is not available in VIEW MODE, please take lead!</p>
+            </div>
+
+    	 <?php elseif($leadForm->getLead()->status == \common\models\Lead::STATUS_FOLLOW_UP && $leadForm->getLead()->employee_id != Yii::$app->user->id && $is_manager):?>
 
             <div class="alert alert-warning" role="alert">
                 <h4 class="alert-heading">Warning!</h4>
@@ -516,5 +521,4 @@ JS;
         ]);
         ?>
     </aside>
-    <?php endif;?>
 </div>
