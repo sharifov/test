@@ -496,6 +496,7 @@ JS;
         </div>
     </div>
 
+	<?php if($leadForm->mode == $leadForm::VIEW_MODE && (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id))):?>
     <aside class="sidebar right-sidebar sl-right-sidebar">
     	 <?php if($leadForm->getLead()->status == \common\models\Lead::STATUS_FOLLOW_UP && $leadForm->getLead()->employee_id != Yii::$app->user->id && $is_manager):?>
 
@@ -515,4 +516,5 @@ JS;
         ]);
         ?>
     </aside>
+    <?php endif;?>
 </div>
