@@ -323,19 +323,19 @@ $buttonAddNote = Html::a('<span class="btn-icon"><i class="fa fa-file-text-o"></
     'data-placement' => 'bottom',
     'data-original-title' => 'Add note']);
 
-$buttonTakeOver = Html::a('<i class="fa fa-share fa-rotate-0"></i> Take Over', Url::to([
+$buttonTakeOver = Html::a('<i class="fa fa-share fa-rotate-0"></i> Take Over', [
     'lead/take',
     'id' => $leadForm->getLead()->id,
     'over' => true
-]), [
-    'class' => 'take-processing-btn',
+], [
+    'class' => 'take-processing-btn btn btn-sm btn-info',
     'data-status' => $leadForm->getLead()->status
 ]);
 
-$buttonTake = Html::a('<i class="fa fa-share fa-rotate-0"></i> Take', Url::to([
+$buttonTake = Html::a('<i class="fa fa-share fa-rotate-0"></i> Take', [
     'lead/take',
     'id' => $leadForm->getLead()->id
-]));
+]);
 
 $buttonClone = Html::a('<i class="fa fa-copy"></i> Clone lead', '#', [
     'id' => 'clone-lead',
@@ -411,6 +411,7 @@ $buttonAnswer = Html::a('<i class="fa fa-commenting-o"></i> </span>'. ($leadForm
 
 $viwModeSuperAdminCondition = ($leadForm->mode == $leadForm::VIEW_MODE && (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id)));
 $buttonsSubAction = [];
+$takeConditions = false;
 if (!$leadForm->getLead()->isNewRecord) {
     $takeConditions = ($leadForm->viewPermission &&
         in_array($leadForm->getLead()->status, [Lead::STATUS_ON_HOLD, Lead::STATUS_FOLLOW_UP, Lead::STATUS_PENDING, Lead::STATUS_PROCESSING]) &&
@@ -425,15 +426,6 @@ if (!$leadForm->getLead()->isNewRecord) {
         );
     $unTrashConditions = ($leadForm->getLead()->status == Lead::STATUS_TRASH);
 
-    if ($takeConditions){
-        if (in_array($leadForm->getLead()->status, [Lead::STATUS_PROCESSING, Lead::STATUS_ON_HOLD]) && $leadForm->getLead()->employee_id != Yii::$app->user->identity->getId()) {
-            $buttonsSubAction[] = $buttonTakeOver;
-        } else if (($leadForm->getLead()->status == Lead::STATUS_ON_HOLD && $leadForm->getLead()->employee_id == Yii::$app->user->identity->getId()) ||
-        in_array($leadForm->getLead()->status, [Lead::STATUS_PENDING, Lead::STATUS_FOLLOW_UP])
-        ) {
-            $buttonsSubAction[] = $buttonTake;
-        }
-    }
     if($processingConditions){
         if(Yii::$app->authManager->getAssignment('admin', $userId) || Yii::$app->authManager->getAssignment('supervision', $userId)) {
             $buttonsSubAction[] = $buttonAnswer;
@@ -459,6 +451,15 @@ if (!$leadForm->getLead()->isNewRecord) {
 ?>
 <div class="panel-main__header" id="actions-header">
     <div class="panel-main__actions">
+    	<?php if ($takeConditions){
+            if (in_array($leadForm->getLead()->status, [Lead::STATUS_PROCESSING, Lead::STATUS_ON_HOLD]) && $leadForm->getLead()->employee_id != Yii::$app->user->identity->getId()) {
+               echo $buttonTakeOver;
+            } else if (($leadForm->getLead()->status == Lead::STATUS_ON_HOLD && $leadForm->getLead()->employee_id == Yii::$app->user->identity->getId()) ||
+            in_array($leadForm->getLead()->status, [Lead::STATUS_PENDING, Lead::STATUS_FOLLOW_UP])
+            ) {
+                echo $buttonTake;
+            }
+        }?>
     	<?php if(count($buttonsSubAction) > 1):?>
     	<div class="dropdown inline-block">
             <?= Html::a('<span class="btn-icon"><i class="fa fa-ellipsis-v"></i></span><span class="btn-text">Action</span>', null, [
@@ -472,7 +473,7 @@ if (!$leadForm->getLead()->isNewRecord) {
             </ul>
         </div>
         <?php elseif (count($buttonsSubAction) == 1):?>
-        	<?= $buttonsSubAction[0]?>
+        	<span class="btn btn-info btn-sm btn-out-a"><?= $buttonsSubAction[0];?></span>
     	<?php endif;?>
 
         <?php if ($leadForm->getLead()->employee_id == Yii::$app->user->getId() &&

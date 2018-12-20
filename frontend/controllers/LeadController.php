@@ -1319,6 +1319,7 @@ class LeadController extends FController
                 $newLead->called_expert = false;
                 $newLead->created = null;
                 $newLead->updated = null;
+                $newLead->tips = 0;
 
                 if(!$newLead->save()){
                     $errors = array_merge($errors, $newLead->getErrors());
