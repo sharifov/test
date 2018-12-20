@@ -30,6 +30,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'ug_key',
             'ug_name',
             'ug_description',
+            'ug_processing_fee',
             'ug_disable:boolean',
             //'ug_updated_dt',
             [

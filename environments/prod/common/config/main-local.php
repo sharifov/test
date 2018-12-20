@@ -6,11 +6,17 @@ return [
             'dsn' => 'mysql:host=localhost;dbname=sale',
             'username' => 'sale',
             'password' => ')*YB6N)(c0ejip3',
-            'charset' => 'utf8',
+            'charset' => 'utf8mb4',
         ],
         'mailer' => [
             'class' => 'yii\swiftmailer\Mailer',
             'viewPath' => '@common/mail',
+        ],
+        'communication' => [
+            'class' => \common\components\CommunicationService::class,
+            'url' => 'https://communication.api.travelinsides.com/v1/',
+            'username' => 'sales',
+            'password' => 'Sales2018!',
         ],
     ],
 ];

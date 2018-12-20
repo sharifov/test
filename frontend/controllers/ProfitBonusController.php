@@ -5,7 +5,7 @@ namespace frontend\controllers;
 use Yii;
 use common\models\ProfitBonus;
 use common\models\search\ProfitBonusSearch;
-use common\controllers\DefaultController;
+use frontend\controllers\FController;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
@@ -14,7 +14,7 @@ use common\models\Employee;
 /**
  * ProfitBonusController implements the CRUD actions for ProfitBonus model.
  */
-class ProfitBonusController extends DefaultController
+class ProfitBonusController extends FController
 {
     /**
      * {@inheritdoc}

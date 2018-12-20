@@ -9,7 +9,7 @@ use yii\bootstrap\Html;
 use yii\data\ActiveDataProvider;
 use yii\grid\GridView;
 use yii\helpers\Url;
-use backend\models\search\AirportForm;
+use frontend\models\search\AirportForm;
 use common\models\Airport;
 
 $template = <<<HTML

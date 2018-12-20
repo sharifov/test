@@ -19,6 +19,8 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'ug_description')->textInput(['maxlength' => true]) ?>
 
+        <?= $form->field($model, 'ug_processing_fee')->textInput(['type' => 'number','maxlength' => true]) ?>
+
         <?= $form->field($model, 'ug_disable')->checkbox() ?>
 
         <?//= $form->field($model, 'ug_updated_dt')->textInput() ?>

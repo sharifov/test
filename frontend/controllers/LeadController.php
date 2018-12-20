@@ -3,7 +3,6 @@
 namespace frontend\controllers;
 
 use common\components\BackOffice;
-use common\controllers\DefaultController;
 use common\models\ClientEmail;
 use common\models\ClientPhone;
 use common\models\EmployeeContactInfo;
@@ -40,6 +39,9 @@ use common\models\Employee;
 use common\models\search\LeadSearch;
 use frontend\models\ProfitSplitForm;
 use common\components\SearchService;
+use common\models\QuotePrice;
+use frontend\models\TipsSplitForm;
+use common\models\local\LeadLogMessage;
 
 /**
  * Site controller
@@ -72,7 +74,7 @@ class LeadController extends FController
                             'create', 'add-comment', 'change-state', 'unassign', 'take',
                             'set-rating', 'add-note', 'unprocessed', 'call-expert', 'send-email',
                             'check-updates', 'flow-transition', 'get-user-actions', 'add-pnr', 'update2','clone',
-                            'get-badges', 'sold', 'split-profit', 'processing', 'follow-up', 'inbox', 'trash', 'booked',
+                            'get-badges', 'sold', 'split-profit', 'split-tips','processing', 'follow-up', 'inbox', 'trash', 'booked',
                             'test'
                         ],
                         'allow' => true,
@@ -723,7 +725,8 @@ class LeadController extends FController
                 }
             }
 
-            $salary = $employee->calculateSalaryBetween($start, $end);
+           // $salary = $employee->calculateSalaryBetween($start, $end);
+            $salary = $employee->calculateSalaryBetweenNew($start, $end);
         }
 
         $dataProvider = $searchModel->searchSold($params);
@@ -846,6 +849,14 @@ class LeadController extends FController
         $user = Yii::$app->user->identity;
 
         $isAccessNewLead = $user->accessTakeNewLead();
+        $accessLeadByFrequency = [];
+
+        if($isAccessNewLead){
+            $accessLeadByFrequency = $user->accessTakeLeadByFrequencyMinutes();
+            if(!$accessLeadByFrequency['access']){
+                $isAccessNewLead = $accessLeadByFrequency['access'];
+            }
+        }
 
         return $this->render('inbox', [
             'searchModel' => $searchModel,
@@ -853,6 +864,7 @@ class LeadController extends FController
             'checkShiftTime' => $checkShiftTime,
             'isAgent' => $isAgent,
             'isAccessNewLead' => $isAccessNewLead,
+            'accessLeadByFrequency' => $accessLeadByFrequency,
             'user' => $user,
             'newLeadsCount' => $user->getCountNewLeadCurrentShift()
         ]);
@@ -993,7 +1005,54 @@ class LeadController extends FController
                 \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
 
                 // read your posted model attributes
-                if (Yii::$app->request->isPost && $taskNotes = Yii::$app->request->post('task_notes')) {
+                if(Yii::$app->request->isPost && $extraMarkup = Yii::$app->request->post('extra_markup')){
+                    $paxCode = key($extraMarkup);
+                    if($paxCode){
+                        $quoteId = key($extraMarkup[$paxCode]);
+                        if($quoteId){
+                            $qPrices = QuotePrice::find()->where(['quote_id' => $quoteId, 'passenger_type' => $paxCode])->all();
+                            if (count($qPrices)){
+                                $quote = Quote::findOne(['id' => $quoteId]);
+                                $priceData = $quote->getPricesData();
+                                $sellingOld = $priceData['total']['selling'];
+                                foreach ($qPrices as $qPrice){
+                                    $qPrice->extra_mark_up = $extraMarkup[$paxCode][$quoteId];
+                                    $qPrice->update();
+                                }
+
+                                $quote = Quote::findOne(['id' => $quoteId]);
+                                $priceData = $quote->getPricesData();
+                                //log messages
+                                $leadLog = new LeadLog((new LeadLogMessage()));
+                                $leadLog->logMessage->oldParams = ['selling' => $sellingOld];
+                                $leadLog->logMessage->newParams = ['selling' => $priceData['total']['selling']];
+                                $leadLog->logMessage->title = 'Update';
+                                $leadLog->logMessage->model = sprintf('%s (%s)', $quote->formName(), $quote->uid);
+                                $leadLog->addLog([
+                                    'lead_id' => $id,
+                                ]);
+
+                                if ($lead->called_expert) {
+                                    $data = $quote->getQuoteInformationForExpert(true);
+                                    $response = BackOffice::sendRequest('lead/update-quote', 'POST', json_encode($data));
+                                    if ($response['status'] != 'Success' || !empty($response['errors'])) {
+                                        \Yii::$app->getSession()->setFlash('warning', sprintf(
+                                            'Update info quote [%s] for expert failed! %s',
+                                            $quote->uid,
+                                            print_r($response['errors'], true)
+                                            ));
+                                    }
+                                }
+
+                                return ['output' => $extraMarkup[$paxCode][$quoteId]];
+                            }
+                            return [];
+                        }
+                        return [];
+                    }
+
+                    return [];
+                }elseif (Yii::$app->request->isPost && $taskNotes = Yii::$app->request->post('task_notes')) {
 
                     $taskId = $taskDate = $userId = $leadId = null;
 
@@ -1301,7 +1360,7 @@ class LeadController extends FController
         $errors = [];
         $lead = Lead::findOne(['id' => $id]);
         if ($lead !== null) {
-            $totalProfit = $lead->getBookedQuote()->getTotalProfit();
+            $totalProfit = $lead->getBookedQuote()->getEstimationProfit();
             $splitForm = new ProfitSplitForm($lead);
 
             $mainAgentProfit = $totalProfit;
@@ -1352,6 +1411,70 @@ class LeadController extends FController
                     'splitForm' => $splitForm,
                     'totalProfit' => $totalProfit,
                     'mainAgentProfit' => $mainAgentProfit,
+                    'errors' => $errors,
+                ]);
+            }
+
+        }
+        return null;
+    }
+
+    public function actionSplitTips($id)
+    {
+        $errors = [];
+        $lead = Lead::findOne(['id' => $id]);
+        if ($lead !== null) {
+            $totalTips = $lead->tips;
+            $splitForm = new TipsSplitForm($lead);
+
+            $mainAgentTips = $totalTips;
+
+            if (Yii::$app->request->isPost) {
+                $data = Yii::$app->request->post();
+
+                if(!isset($data['TipsSplit'])){
+                    $data['TipsSplit'] = [];
+                }
+
+                $load = $splitForm->loadModels($data);
+                if ($load) {
+                    $errors = ActiveForm::validate($splitForm);
+                }
+
+                if (empty($errors) && $splitForm->save($errors)) {
+                    return $this->redirect([
+                        'quote',
+                        'type' => 'sold',
+                        'id' => $lead->id
+                    ]);
+                }
+
+                $splitTips = $splitForm->getTipsSplit();
+                if(!empty($splitTips)){
+                    $percentSum = 0;
+                    foreach ($splitTips as $entry){
+                        if(!empty($entry->ts_percent)){
+                            $percentSum += $entry->ts_percent;
+                        }
+                    }
+                    $mainAgentTips -= $totalTips*$percentSum/100;
+                }
+
+                if(!empty($errors)){
+                    return $this->renderAjax('_split_tips', [
+                        'lead' => $lead,
+                        'splitForm' => $splitForm,
+                        'totalTips' => $totalTips,
+                        'mainAgentTips' => $mainAgentTips,
+                        'errors' => $errors,
+                    ]);
+                }
+            }elseif (Yii::$app->request->isAjax){
+                return $this->renderAjax('_split_tips', [
+                    'lead' => $lead,
+                    'splitForm' => $splitForm,
+                    'totalTips' => $totalTips,
+                    'mainAgentTips' => $mainAgentTips,
                     'errors' => $errors,
                 ]);
             }

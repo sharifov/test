@@ -627,6 +627,20 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         return $stats;
     }
 
+    /**
+     * @return string
+     */
+    public function getLastTakenLeadDt():string
+    {
+        $leadFlow = LeadFlow::find()
+                        ->where(['employee_id' => $this->id])
+                        ->andWhere(['status' => 2, 'lf_from_status_id' => 1])
+                        ->orderBy(['created' => SORT_DESC])
+                        ->one();
+
+       return ($leadFlow)?$leadFlow->created:'';
+    }
+
 
     /**
      * @param string|null $start_dt
@@ -731,6 +745,97 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         }
 
         return $str;
+    }
+
+    /*
+     * @param startDate DateTime
+     * @param endDat DateTime
+     *
+     * */
+    public function calculateSalaryBetweenNew($startDate, $endDate)
+    {
+        $projectIds = array_keys(ProjectEmployeeAccess::getProjectsByEmployee());
+        $base = ($this->userParams) ? $this->userParams->up_base_amount : 200;
+        $commission = ($this->userParams) ? $this->userParams->up_commission_percent : 10;
+        $bonusActive = ($this->userParams) ? $this->userParams->up_bonus_active : 1;
+        $bonus = 0;
+
+        $query = new Query();
+        $query->select([
+            'lead_id' => 'l.id',
+            'q_id' => 'q.id',
+            'fare_type' => 'q.fare_type',
+            'check_payment' => 'q.check_payment',
+            'tips' => 'l.tips',
+            'agent_type' => "(CASE WHEN l.employee_id = $this->id THEN 'main' ELSE 'split' END)",
+            'minus_percent_profit' => 'SUM(ps.ps_percent)',
+            'split_percent_profit' => "SUM(CASE WHEN ps.ps_user_id = $this->id THEN ps.ps_percent ELSE 0 END)",
+            'minus_percent_tips' => 'SUM(ts.ts_percent)',
+            'split_percent_tips' => "SUM(CASE WHEN ts.ts_user_id = $this->id THEN ts.ts_percent ELSE 0 END)"
+        ])
+        ->from(Lead::tableName() . ' l')
+        ->leftJoin(Quote::tableName() . ' q', 'q.lead_id = l.id')
+        ->leftJoin(ProfitSplit::tableName() . ' ps', 'ps.ps_lead_id = l.id')
+        ->leftJoin(TipsSplit::tableName() . ' ts', 'ts.ts_lead_id = l.id')
+        ->where(['l.status' => Lead::STATUS_SOLD, 'q.status' => Quote::STATUS_APPLIED])
+        ->andWhere(['IN', 'l.project_id', $projectIds])
+        ->andWhere('l.employee_id = ' . $this->id . ' OR ps.ps_user_id = ' . $this->id. ' OR ts.ts_user_id = ' . $this->id)
+        ->groupBy(['q.id', 'l.id']);
+
+        if ($startDate !== null || $endDate !== null) {
+            $subQuery = LeadFlow::find()->select(['DISTINCT(lead_flow.lead_id)'])->where('lead_flow.status = l.status AND lead_flow.lead_id = l.id');
+            if ($startDate !== null) {
+                $subQuery->andFilterWhere(['>=', 'DATE(lead_flow.created)', $startDate->format('Y-m-d')]);
+            }
+            if ($endDate !== null) {
+                $subQuery->andFilterWhere(['<=', 'DATE(lead_flow.created)', $endDate->format('Y-m-d')]);
+            }
+            $query->andWhere(['IN', 'l.id', $subQuery]);
+        }
+
+        //echo $query->createCommand()->getRawSql();die;
+        $res = $query->all();
+
+        $profit = 0;
+        foreach ($res as $entry) {
+            $entry['minus_percent_profit'] = intval($entry['minus_percent_profit']);
+            $entry['minus_percent_tips'] = intval($entry['minus_percent_tips']);
+            $quote = Quote::findOne(['id' => $entry['q_id']]);
+            $totalProfit = $quote->getEstimationProfit();
+            $totalTips = $entry['tips'];
+            if ($entry['agent_type'] == 'main') {
+                $agentProfit = $totalProfit * (100 - $entry['minus_percent_profit']) / 100;
+                $agentTips = ($totalTips > 0)?($totalTips * (100 - $entry['minus_percent_tips']) / 100):0;
+            } else {
+                $agentProfit = $totalProfit * $entry['split_percent_profit'] / 100;
+                $agentTips = ($totalTips > 0)?($totalTips * $entry['split_percent_tips'] / 100):0;
+            }
+            $profit += $agentProfit + $agentTips;
+        }
+
+        if ($bonusActive) {
+            $profitBonuses = $this->getProfitBonuses();
+            if (empty($profitBonuses)) {
+                $profitBonuses = self::PROFIT_BONUSES;
+            }
+            foreach ($profitBonuses as $profKey => $bonusVal) {
+                if ($profit >= $profKey) {
+                    $bonus = $bonusVal;
+                    break;
+                }
+            }
+        }
+
+        $startProfit = $profit;
+        $profit = $profit * $commission / 100;
+
+        return [
+            'salary' => $profit + $base + $bonus,
+            'base' => $base,
+            'bonus' => $bonus,
+            'startProfit' => $startProfit,
+            'commission' => $commission,
+        ];
     }
 
     /*
@@ -1029,5 +1134,45 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         }
 
         return $access;
+    }
+
+    /**
+     * @return array
+     */
+    public function accessTakeLeadByFrequencyMinutes(): array
+    {
+        $access = true;
+        $takeDt = new \DateTime();
+        $timeZone = $this->userParams->up_timezone ?: 'UTC';
+
+        $params = $this->userParams;
+        if($params){
+            if($params->up_frequency_minutes){
+                $lastTakenDt = $this->getLastTakenLeadDt();
+
+                if(!empty($lastTakenDt)){
+                    $lastTakenUTC = new \DateTime($lastTakenDt);
+                    $lastTakenUTC->setTimezone(new \DateTimeZone('UTC'));
+
+                    $nowUTC = new \DateTime();
+                    $nowUTC->setTimezone(new \DateTimeZone('UTC'));
+
+                    $frequencyMinutes = $params->up_frequency_minutes;
+
+                    $nextTakeUTC = $lastTakenUTC->add(new \DateInterval('PT' . $frequencyMinutes . 'M'));
+
+                    if($nextTakeUTC > $nowUTC){
+                        $access = false;
+                        $takeDt = $nextTakeUTC;
+                    }
+
+                }
+            }
+        }
+
+        $takeDt->setTimezone(new \DateTimeZone($timeZone));
+        $takeDtUTC = $takeDt->setTimezone(new \DateTimeZone('UTC'));
+
+        return ['access' => $access, 'takeDt' => $takeDt, 'takeDtUTC' => $takeDtUTC];
     }
 }

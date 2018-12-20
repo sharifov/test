@@ -2,7 +2,6 @@
 
 namespace frontend\controllers;
 
-use common\controllers\DefaultController;
 use common\models\Lead;
 use Yii;
 use common\models\Client;

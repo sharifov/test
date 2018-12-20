@@ -20,6 +20,7 @@ use common\models\Client;
 use common\models\ProjectEmployeeAccess;
 use common\models\LeadFlow;
 use common\models\ProfitSplit;
+use common\models\TipsSplit;
 
 /**
  * LeadSearch represents the model behind the search form of `common\models\Lead`.
@@ -506,7 +507,8 @@ class LeadSearch extends Lead
         if($this->employee_id){
             $query
             ->leftJoin(ProfitSplit::tableName().' ps','ps.ps_lead_id = leads.id')
-            ->andWhere($leadTable.'.employee_id = '. $this->employee_id.' OR ps.ps_user_id ='.$this->employee_id)
+            ->leftJoin(TipsSplit::tableName().' ts','ts.ts_lead_id = leads.id')
+            ->andWhere($leadTable.'.employee_id = '. $this->employee_id.' OR ps.ps_user_id ='.$this->employee_id.' OR ts.ts_user_id ='.$this->employee_id)
             ->groupBy(['leads.id']);
         }
 

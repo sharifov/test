@@ -2,7 +2,6 @@
 
 namespace frontend\controllers;
 
-use common\controllers\DefaultController;
 use Yii;
 use common\models\LeadFlow;
 use common\models\search\LeadFlowSearch;

@@ -20,12 +20,18 @@ use yii\web\Response;
 /**
  * Class ApiBaseController
  * @package webapi\controllers
+ *
+ * @property bool $debug
+ * @property Project $apiProject
+ * @property ApiUser $apiUser
+ *
  */
 class ApiBaseController extends Controller
 {
 
     public $apiUser;
     public $apiProject;
+    public $debug = false;
 
     /**
      *
@@ -33,7 +39,11 @@ class ApiBaseController extends Controller
     public function init()
     {
         parent::init();
+
         Yii::$app->user->enableSession = false;
+        if(Yii::$app->request->get('debug')) {
+            $this->debug = true;
+        }
     }
 
 
@@ -97,8 +107,14 @@ class ApiBaseController extends Controller
                     'au_api_username' => $username
                 ]);
 
-                if (!$apiUser) return NULL;
-                if (!$apiUser->validatePassword($password)) return NULL;
+                if (!$apiUser) {
+                    Yii::warning('API not found username: '.$username, 'API:HttpBasicAuth:ApiUser');
+                    return NULL;
+                }
+                if (!$apiUser->validatePassword($password)) {
+                    Yii::warning('API invalid password: '.$password.', username: '.$username.' ', 'API:HttpBasicAuth:ApiUser');
+                    return NULL;
+                }
                 if (!$apiUser->au_enabled) {
                     throw new NotAcceptableHttpException('ApiUser is disabled', 10);
                 }

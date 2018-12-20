@@ -2,7 +2,6 @@
 
 namespace frontend\controllers;
 
-use common\controllers\DefaultController;
 use common\models\search\LeadSearch;
 use frontend\models\SoldReportForm;
 use common\models\Employee;

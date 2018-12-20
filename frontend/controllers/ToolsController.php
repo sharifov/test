@@ -2,7 +2,6 @@
 
 namespace frontend\controllers;
 
-use common\controllers\DefaultController;
 use Yii;
 use common\models\ApiLog;
 use common\models\search\ApiLogSearch;

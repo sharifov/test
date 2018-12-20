@@ -6,7 +6,7 @@ return [
             'dsn' => 'mysql:host=mysql;dbname=sale',
             'username' => 'sale',
             'password' => 'SalePasswd1!',
-            'charset' => 'utf8',
+            'charset' => 'utf8mb4',
         ],
         'mailer' => [
             'class' => 'yii\swiftmailer\Mailer',
@@ -15,6 +15,12 @@ return [
             // 'useFileTransport' to false and configure a transport
             // for the mailer to send real emails.
             'useFileTransport' => true,
+        ],
+        'communication' => [
+            'class' => \common\components\CommunicationService::class,
+            'url' => 'https://communication-dev.api.travelinsides.com/v1/',
+            'username' => 'sales',
+            'password' => 'Sales2018!',
         ],
     ],
 ];

@@ -6,7 +6,7 @@ use dosamigos\datepicker\DatePicker;
 use yii\helpers\Url;
 
 /* @var $this yii\web\View */
-/* @var $searchModel backend\models\search\LogForm */
+/* @var $searchModel frontend\models\search\LogForm */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
 $this->title = 'Logging';

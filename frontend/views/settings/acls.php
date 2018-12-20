@@ -7,7 +7,7 @@ use common\models\GlobalAcl;
 
 /**
  * @var $this yii\web\View
- * @var $searchModel backend\models\search\GlobalAclForm
+ * @var $searchModel frontend\models\search\GlobalAclForm
  * @var $dataProvider yii\data\ActiveDataProvider
  * @var $model GlobalAcl
  */

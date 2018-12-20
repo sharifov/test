@@ -15,6 +15,7 @@ use common\models\Quote;
 $userId = Yii::$app->user->id;
 
 $is_manager = false;
+$is_admin = (Yii::$app->authManager->getAssignment('admin', $userId));
 if(Yii::$app->authManager->getAssignment('admin', $userId) || Yii::$app->authManager->getAssignment('supervision', $userId)) {
     $is_manager = true;
 }
@@ -249,6 +250,37 @@ if ($leadForm->mode != $leadForm::VIEW_MODE) {
         });
     });
 
+    $(document).on('click', '.send-quotes-to-email-new', function () {
+        var urlModel = $(this).data('url');
+        var email = $('#send-to-email-new').val();
+        var lang = $('#send-to-email-lng').val();
+        var quotes = Array();
+        $('.quotes-uid:checked').each(function(idx, elm){
+            quotes.push($(elm).val());
+        });
+        if (quotes.length == 0) {
+            return null;
+        }
+        $('#preloader').removeClass('hidden');
+        var dataPost = {leadId: $leadId, email:email, lang: lang,  quotes: quotes };
+        $.ajax({
+            url: urlModel,
+            type: 'post',
+            data: dataPost,
+            success: function (data) {
+                var editBlock = $('#preview-send-quotes');
+                editBlock.find('.modal-body').html(data);
+                editBlock.modal('show');
+
+                $('#preloader').addClass('hidden');
+            },
+            error: function (error) {
+                $('#preloader').addClass('hidden');
+                console.log('Error: ' + error);
+            }
+        });
+    });
+
     $('#btn-send-quotes').popover({
         html: true,
         placement: 'top',
@@ -262,6 +294,14 @@ if ($leadForm->mode != $leadForm::VIEW_MODE) {
             });
             return $(".js-pop-emails-content").html();
         }
+    });
+    $('#send-quotes-btn-popover').click(function(){
+        $('.email').each(function(idx, elm){
+            var val = $(elm).val();
+            if(val != ''){
+                $('#send-to-email-new').append('<option value="'+val+'">'+val+'</option>');
+            }
+        });
     });
     $('#lg-btn-send-quotes').click(function() {
         $('#btn-send-quotes').trigger('click');
@@ -374,6 +414,39 @@ JS;
                             ]) ?>
                         </div>
                     </div>
+                    <?php if($is_admin):?>
+                    <!-- New button send -->
+                    <?= Html::button('<i class="fa fa-send"></i>&nbsp;Send Quotes', [
+                        'class' => 'btn btn-primary popover-class',
+                        'title' => 'Select Emails',
+                        'data-toggle' => 'popover',
+                        'data-html' => 'true',
+                        'data-title' => 'Select Emails',
+                        'data-trigger' => 'click',
+                        'id' => 'send-quotes-btn-popover',
+                        'data-placement' => 'top',
+                        'data-container' => 'body',
+                        'data-content' => '<label for="send-to-email-new" class="select-wrap-label mb-20">'.
+                                                Html::dropDownList('send_to_email', null, [], [
+                                                    'class' => 'form-control',
+                                                    'id' => 'send-to-email-new'
+                                                ]).'
+                                            </label>
+                                            <label for="send-to-email-lng" class="select-wrap-label mb-20">'.
+                                                Html::dropDownList('send_to_email_lng', null,
+                                                    \lajax\translatemanager\models\Language::getLanguageNames(true), [
+                                                    'class' => 'form-control',
+                                                    'id' => 'send-to-email-lng'
+                                                ]).'
+                                            </label>
+                                            <div>'.
+                                                Html::button('Send', [
+                                                    'class' => 'btn btn-success send-quotes-to-email-new',
+                                                    'id' => 'btn-send-quotes-email-new',
+                                                    'data-url' => \yii\helpers\Url::to(['quote/preview-send-quotes-new'])
+                                                ]).'</div>',
+                    ]);?>
+                    <?php endif;?>
                 </div>
                 <div id="sent-messages" class="alert hidden">
                     <i class="fa fa-exclamation-triangle hidden"></i>

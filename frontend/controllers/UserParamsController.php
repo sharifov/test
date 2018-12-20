@@ -2,7 +2,6 @@
 
 namespace frontend\controllers;
 
-use common\controllers\DefaultController;
 use Yii;
 use common\models\UserParams;
 use common\models\search\UserParamsSearch;
