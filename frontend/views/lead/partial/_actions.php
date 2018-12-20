@@ -335,6 +335,8 @@ $buttonTakeOver = Html::a('<i class="fa fa-share fa-rotate-0"></i> Take Over', [
 $buttonTake = Html::a('<i class="fa fa-share fa-rotate-0"></i> Take', [
     'lead/take',
     'id' => $leadForm->getLead()->id
+],[
+    'class' => 'btn btn-sm btn-info',
 ]);
 
 $buttonClone = Html::a('<i class="fa fa-copy"></i> Clone lead', '#', [
