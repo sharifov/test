@@ -5034,3 +5034,4 @@ input[disabled] + .radio-tab__text {
 .table-prices .kv-editable-close{position:absolute;top:0;right:0;}
 .quote .table-prices tbody td, .quote .table-prices tbody th,.quote .table-prices tfoot td, .quote .table-prices tfoot th{text-align:right;}
 .table hr{margin:2px 0;}
+.btn-out-a a{color:#fff!important;}
