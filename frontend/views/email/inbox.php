@@ -85,13 +85,16 @@ $this->params['breadcrumbs'][] = $this->title;
                     <div class="row">
                         <div class="col-sm-3 mail_list_column">
 
-                            <?= Html::beginForm(\yii\helpers\Url::current(['email_type_id' => null, 'action' => null]), 'GET', ['data-pjax' => 1]) ?>
-                                <div class="col-md-4">
-                                    <?=Html::a('<i class="fa fa-plus"></i> Create NEW', \yii\helpers\Url::current(['id' => null, 'reply_id' => null, 'edit_id' => null, 'action' => 'new']), ['class' => 'btn btn-sm btn-success'])?>
+                            <?= Html::beginForm(\yii\helpers\Url::current(['email_type_id' => null, 'email_project_id' => null, 'action' => null]), 'GET', ['data-pjax' => 1]) ?>
+                                <div class="col-md-3">
+                                    <?=Html::a('<i class="fa fa-envelope"></i> Create NEW', \yii\helpers\Url::current(['id' => null, 'reply_id' => null, 'edit_id' => null, 'action' => 'new']), ['class' => 'btn btn-sm btn-success'])?>
                                 </div>
-                                <div class="col-md-8">
+                                <div class="col-md-4">
                                     <?=Html::dropDownList('email_type_id', Yii::$app->request->get('email_type_id'), \common\models\Email::FILTER_TYPE_LIST, ['class' => 'form-control', 'onchange' => '$("#btn-submit-email").click();'])?>
                                     <?= Html::submitButton('Ok', ['id' => 'btn-submit-email', 'class' => 'btn btn-primary hidden']) ?>
+                                </div>
+                                <div class="col-md-5">
+                                    <?=Html::dropDownList('email_project_id', Yii::$app->request->get('email_project_id'), \common\models\Project::getList(), ['prompt' => 'ALL', 'class' => 'form-control', 'onchange' => '$("#btn-submit-email").click();'])?>
                                 </div>
                             <?= Html::endForm() ?>
 

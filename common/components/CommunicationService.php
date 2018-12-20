@@ -266,7 +266,7 @@ class CommunicationService extends Component
             }
         } else {
             $out['error'] = $response->content;
-            \Yii::error('filter: '. VarDumper::dumpAsString($filter)."\r\n". VarDumper::dumpAsString($out['error'], 10), 'CommunicationService::mailGetMessages');
+            \Yii::error('filter: '. VarDumper::dumpAsString($filter)."\r\n". VarDumper::dumpAsString($out['error'], 10), 'Component:CommunicationService::mailGetMessages');
         }
 
         return $out;

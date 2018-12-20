@@ -14,6 +14,7 @@ class EmailSearch extends Email
 {
 
     public $email_type_id;
+    //public $email_project_id;
 
     /**
      * {@inheritdoc}
@@ -140,6 +141,10 @@ class EmailSearch extends Email
                 $query->where(['e_is_deleted' => true]);
             }
         }
+
+
+
+
 
         if (!$this->validate()) {
             // uncomment the following line if you do not want to return any records when validation fails

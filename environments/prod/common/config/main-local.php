@@ -6,7 +6,7 @@ return [
             'dsn' => 'mysql:host=localhost;dbname=sale',
             'username' => 'sale',
             'password' => ')*YB6N)(c0ejip3',
-            'charset' => 'utf8',
+            'charset' => 'utf8mb4',
         ],
         'mailer' => [
             'class' => 'yii\swiftmailer\Mailer',
