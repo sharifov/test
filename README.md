@@ -235,3 +235,14 @@ webapi
 vendor/                  contains dependent 3rd-party packages
 environments/            contains environment-based overrides
 ```
+
+Start WebSocket Server:
+```
+php console/socket-server.php start
+```
+
+
+Check process by PORT
+```
+sudo netstat -tulpn| grep :8080
+```
