@@ -8,173 +8,248 @@
  * @var $userProjectParams \common\models\UserProjectParams
  */
 ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional //EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:v="urn:schemas-microsoft-com:vml" style="background: #f3f3f3; min-height: 100%;">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Offers</title>
+    <!--Styles-->
+    <style>
+        @media (max-width: 479px) {
+            td.col {
+                display: inline-block;
+                width: 100%;
+            }
+            td.col.col-md-6 {
+                width: 100%;
+            }
+        }
+        @media (max-width: 479px) {
+            .header {
+                padding-top: 30px !important;
+            }
+            .wrapper-inner table {
+                width: 100% !important;
+                min-width: 100% !important;
+                max-width: 100% !important;
+            }
+            .wrapper-inner {
+                padding: 0 10px !important;
+                width: 0 !important;
+                min-width: 0 !important;
+                max-width: 0 !important;
+            }
+            .block {
+                padding: 15px !important;
+                border-radius: 0 !important;
+            }
+            td.sales-contacts td.col:first-child {
+                margin-bottom: 24px !important;
+            }
+            .footer {
+                padding: 10px 16px 24px 16px !important;
+            }
+            .intro-text .h1 {
+                font-size: 20px !important;
+            }
+        }
+    </style>
 
-<body style="-ms-text-size-adjust: 100%; -webkit-text-size-adjust: none; background-color: #EBEFF8; box-sizing: border-box; color: #333; font-family: 'Roboto', Arial, Helvetica, sans-serif; font-size: 15px; font-weight: normal; line-height: 1.3; margin: 0; min-width: 100%; padding: 0; text-align: left; width: 100% !important;">
-<table width="100%" border="0" cellpadding="0" cellspacing="0" class="body"
-       style="background: #EBEFF8; border-collapse: collapse; border-spacing: 0; color: #1C2F59; font-family: 'Roboto', Arial, Helvetica, sans-serif; font-weight: normal; height: 100%; line-height: 1.3; margin: 0; padding: 0; text-align: left; vertical-align: top; width: 100%;">
-    <tbody>
+    <style>
+        @media (max-width: 479px) {
+            .request-options {
+                letter-spacing: 1px;
+            }
+            .request-title .h1 {
+                font-size: 20px;
+                line-height: 24px;
+                padding-top: 5px;
+            }
+            .airline-logo {
+                width: 55px !important;
+                display: block !important;
+            }
+            .airline-logo-img {
+                width: 20px !important;
+                height: 20px !important;
+                margin: 0 auto 1px !important;
+            }
+            .baggage-text span {
+                display: none !important;
+            }
+            .city {
+                display: none !important;
+            }
+            .time,
+            .iata {
+                display: block !important;
+                font-size: 14px !important;
+            }
+            .iata {
+                margin-right: 0 !important;
+            }
+            .duration-stops {
+                padding: 0 15px !important;
+            }
+            .duration, .stops {
+                color: #bbc2c5 !important;
+            }
+            .trip {
+                padding: 8px !important;
+            }
+            .from, .top {
+                width: auto !important;
+            }
+            .depart-date {
+                display: block !important;
+                font-size: 12px !important;
+                padding: 0 !important;
+                text-align: center !important;
+            }
+            .trip > table {
+                position: relative !important;
+            }
+            .offer-price-note {
+                letter-spacing: 0.5px !important;
+                font-size: 11px !important;
+            }
+            .offer-price-value {
+                font-size: 20px !important;
+            }
+            .block {
+                border-bottom-width: 10px !important;
+            }
+            td.offer-footer {
+                padding: 6px 8px !important;
+            }
+            .offer-price, .offer-details {
+                padding-top: 30px !important;
+            }
+        }
+    </style>
+</head>
+<body style="-ms-text-size-adjust: 100%; -webkit-text-size-adjust: none; background-color: #F2F6F7; box-sizing: border-box; color: #4C5259; font-family: 'Roboto', Arial, Helvetica, sans-serif; font-size: 14px; font-weight: normal; line-height: 1.3; margin: 0; min-width: 100%; padding: 0; text-align: left; width: 100% !important;">
+<table width="100%" border="0" cellpadding="0" cellspacing="0" class="body" style="background: #F2F6F7; border-collapse: collapse; border-spacing: 0; font-family: 'Roboto', Arial, Helvetica, sans-serif; font-weight: normal; height: 100%; line-height: 1.3; margin: 0; padding: 0; text-align: left; vertical-align: top; width: 100%;">
     <tr style="padding: 0; text-align: left; vertical-align: top;">
-        <td class="wrapper-inner" align="center" valign="top"
-            style="-moz-hyphens: auto; -webkit-hyphens: auto; border-collapse: collapse !important; color: #1C2F59; font-family: 'Roboto', Arial, Helvetica, sans-serif; font-weight: normal; hyphens: auto; line-height: 1.3; margin: 0; max-width: 808px !important; min-width: 808px !important; padding: 110px 20px 10px !important; text-align: left; vertical-align: top; width: 808px !important; word-wrap: break-word;">
-            <table width="768" align="center" border="0" cellpadding="0" cellspacing="0"
-                   class="container content-wrapper main-content"
-                   style="background: #fefefe; background-color: #ffffff; border: 1px solid #DDDDDD; border-collapse: collapse; border-radius: 0; border-spacing: 0; margin: 0 auto; margin-bottom: 20px; max-width: 768px !important; min-width: 768px !important; padding: 0; text-align: inherit; vertical-align: top; width: 768px !important;">
-                <tbody>
+        <td class="wrapper-inner" align="center" valign="top" style="-moz-hyphens: auto; -webkit-hyphens: auto; background: #F2F6F7; border-collapse: collapse !important; font-family: 'Roboto', Arial, Helvetica, sans-serif; font-weight: normal; hyphens: auto; line-height: 1.3; margin: 0; max-width: 600px; min-width: 600px; padding: 0 20px; text-align: left; vertical-align: top; width: 600px; word-wrap: break-word;">
+            <table width="600" align="center" border="0" cellpadding="0" cellspacing="0" class="container content-wrapper main-content" style="background: #fefefe; background-color: transparent; border-collapse: collapse; border-spacing: 0; margin: 0 auto; max-width: 600px; min-width: 600px; padding: 0; text-align: inherit; vertical-align: top; width: 600px;">
                 <tr style="padding: 0; text-align: left; vertical-align: top;">
-                    <td class="full-width"
-                        style="-moz-hyphens: auto; -webkit-hyphens: auto; border-collapse: collapse !important; color: #1C2F59; font-family: 'Roboto', Arial, Helvetica, sans-serif; font-weight: normal; hyphens: auto; line-height: 1.3; margin: 0; padding: 0; text-align: left; vertical-align: top; width: 100% !important; word-wrap: break-word;">
-                        <table class="full-width"
-                               style="border-collapse: collapse; border-spacing: 0; padding: 0; text-align: left; vertical-align: top; width: 100% !important;">
+                    <td class="full-wd" style="-moz-hyphens: auto; -webkit-hyphens: auto; border-collapse: collapse !important; font-family: 'Roboto', Arial, Helvetica, sans-serif; font-weight: normal; hyphens: auto; line-height: 1.3; margin: 0; padding: 0; text-align: left; vertical-align: top; width: 100% !important; word-wrap: break-word;">
+                        <table class="full-wd" style="border-collapse: collapse; border-spacing: 0; padding: 0; text-align: left; vertical-align: top; width: 100% !important;">
 
-                            <!--Header-->
-                            <tbody>
+                            <!------------------------
+                            -----------Header---------
+                            ------------------------->
+
                             <tr style="padding: 0; text-align: left; vertical-align: top;">
-                                <td class="header"
-                                    style="-moz-hyphens: auto; -webkit-hyphens: auto; border-bottom: 1px solid #F5F7FC; border-collapse: collapse !important; color: #1C2F59; font-family: 'Roboto', Arial, Helvetica, sans-serif; font-weight: normal; hyphens: auto; line-height: 1.3; margin: 0; padding: 0; text-align: left; vertical-align: top; word-wrap: break-word;">
-                                    <table class="row"
-                                           style="border-collapse: collapse; border-spacing: 0; display: table; padding: 0; position: relative; text-align: left; vertical-align: top; width: 100%;">
+                                <td class="header align-center full-wd" style="-moz-hyphens: auto; -webkit-hyphens: auto; background: transparent; border-collapse: collapse !important; font-family: 'Roboto', Arial, Helvetica, sans-serif; font-weight: normal; hyphens: auto; line-height: 1.3; margin: 0; padding: 20px 20px 15px; text-align: center; vertical-align: top; width: 100% !important; word-wrap: break-word;">
+                                    <table class="full-wd" style="border-collapse: collapse; border-spacing: 0; padding: 0; text-align: center; vertical-align: top; width: 100% !important;">
                                         <tr style="padding: 0; text-align: left; vertical-align: top;">
-                                            <th class="small-6 large-6 columns header-logo" valign="middle"
-                                                align="center"
-                                                style="color: #1C2F59; font-family: 'Roboto', Arial, Helvetica, sans-serif; font-weight: normal; height: 120px; line-height: 1.3; margin: 0 auto; min-height: 120px; padding: 0 40px !important; padding-bottom: 16px; padding-left: 24px; padding-right: 8px; text-align: left; vertical-align: middle !important; width: 50%;">
-                                                <img src="<?= $project->link ?>/images/logo-colored.png"
-                                                     alt="<?= $project->name ?>"
-                                                     width="179"
-                                                     height="30" class="logo float-center" align="center"
-                                                     style="-ms-interpolation-mode: bicubic; clear: both; display: block; float: none; height: 30px; margin: 0 auto; max-width: 100%; outline: none; text-align: center; text-decoration: none; width: 179px;">
-                                            </th>
-                                            <th class="small-6 large-6 columns header-agent" valign="middle"
-                                                style="background-color: #F5F7FC; color: #1C2F59; font-family: 'Roboto', Arial, Helvetica, sans-serif; font-weight: normal; height: 120px; line-height: 1.3; margin: 0 auto; min-height: 120px; padding: 0 40px !important; padding-bottom: 16px; padding-left: 24px; padding-right: 8px; text-align: left; vertical-align: middle !important; width: 50%;">
-                                                <div class="agent-name"
-                                                     style="color: #556383; font-size: 14px; height: 16px; line-height: 20px; padding-top: 8px;">
-                                                    <?= $agentName ?>
-                                                </div>
-                                                <div class="agent-phone"
-                                                     style="color: #1C2F59; font-size: 24px; font-weight: bold; line-height: 1.2em; text-decoration: none;">
-                                                    <?php if ($userProjectParams !== null && $userProjectParams->upp_phone_number) {
-                                                        echo $userProjectParams->upp_phone_number;
-                                                    } else {
-                                                        echo $project->contactInfo->phone;
-                                                    } ?>
-                                                </div>
-                                            </th>
-                                            <th class="expander"
-                                                style="color: #1C2F59; font-family: 'Roboto', Arial, Helvetica, sans-serif; font-weight: normal; line-height: 1.3; margin: 0; padding: 0; text-align: left;"></th>
+                                            <td class="full-wd logo-wrapper" valign="middle" style="-moz-hyphens: auto; -webkit-hyphens: auto; border-collapse: collapse !important; font-family: 'Roboto', Arial, Helvetica, sans-serif; font-weight: normal; hyphens: auto; line-height: 1.3; margin: 0; padding: 0; padding-bottom: 10px; text-align: center; vertical-align: top; width: 100% !important; word-wrap: break-word;">
+                                                <img src="<?= $project->link ?>/images/email/logo.png" alt="<?= $project->name ?>" width="160" height="50" class="logo" style="-ms-interpolation-mode: bicubic; clear: both; display: block; height: 50px; margin: 0 auto; max-width: 100%; outline: none; text-decoration: none; width: 160px;">
+                                            </td>
+                                        </tr>
+                                        <tr style="padding: 0; text-align: left; vertical-align: top;">
+                                            <td class="header-menu" style="-moz-hyphens: auto; -webkit-hyphens: auto; border-collapse: collapse !important; color: #8E9399; font-family: 'Roboto', Arial, Helvetica, sans-serif; font-size: 12px; font-weight: normal; hyphens: auto; line-height: 18px; margin: 0; padding: 0; text-align: center; vertical-align: top; word-wrap: break-word;">Book flights online the right way</td>
                                         </tr>
                                     </table>
                                 </td>
                             </tr>
 
-                            <!-- Body  -->
-                            <?= $body ?>
+							<?= $body ?>
 
-                            </tbody>
+
                         </table>
                     </td>
                 </tr>
-                </tbody>
-            </table>
 
-            <table width="768" align="center" border="0" cellpadding="0" cellspacing="0"
-                   class="container content-wrapper footer"
-                   style="background: #fefefe; background-color: #ffffff; border: 1px solid #DDDDDD; border-collapse: collapse; border-radius: 0; border-spacing: 0; margin: 0 auto; max-width: 768px !important; min-width: 768px !important; padding: 0; text-align: inherit; vertical-align: top; width: 768px !important;">
+                <!------------------------
+                ----   Sales Footer   ----
+                ------------------------->
+
                 <tr style="padding: 0; text-align: left; vertical-align: top;">
-                    <td class="full-width"
-                        style="-moz-hyphens: auto; -webkit-hyphens: auto; border-collapse: collapse !important; color: #1C2F59; font-family: 'Roboto', Arial, Helvetica, sans-serif; font-weight: normal; hyphens: auto; line-height: 1.3; margin: 0; padding: 0 20px; text-align: left; vertical-align: top; width: 100% !important; word-wrap: break-word;">
-                        <table class="full-width"
-                               style="border-collapse: collapse; border-spacing: 0; padding: 0; text-align: left; vertical-align: top; width: 100% !important;">
+                    <td class="block full-wd sales-footer" style="-moz-hyphens: auto; -webkit-hyphens: auto; background-color: #fff; border-bottom: 16px solid #F2F6F7; border-collapse: collapse !important; border-radius: 4px; font-family: 'Roboto', Arial, Helvetica, sans-serif; font-weight: normal; hyphens: auto; line-height: 1.3; margin: 0; padding: 32px; text-align: left; vertical-align: top; width: 100% !important; word-wrap: break-word;">
+                        <table class="full-wd" style="border-collapse: collapse; border-spacing: 0; padding: 0; text-align: left; vertical-align: top; width: 100% !important;">
                             <tr style="padding: 0; text-align: left; vertical-align: top;">
-                                <th class="footer-top"
-                                    style="border-bottom: 1px solid #F5F7FC; color: #1C2F59; font-family: 'Roboto', Arial, Helvetica, sans-serif; font-size: 16px; font-weight: normal; line-height: 1.3; margin: 0; padding: 30px 0; text-align: left;">
-                                    <table class="row"
-                                           style="border-collapse: collapse; border-spacing: 0; display: table; padding: 0; position: relative; text-align: left; vertical-align: top; width: 100%;">
+                                <td class="full-wd sales-intro" style="-moz-hyphens: auto; -webkit-hyphens: auto; border-collapse: collapse !important; font-family: 'Roboto', Arial, Helvetica, sans-serif; font-weight: normal; hyphens: auto; line-height: 1.3; margin: 0; padding: 0; padding-bottom: 30px; text-align: left; vertical-align: top; width: 100% !important; word-wrap: break-word;">
+                                    <h3 class="h3" style="color: #212121; font-family: 'Roboto', Arial, Helvetica, sans-serif; font-size: 20px; font-weight: bolder; line-height: 28px; margin: 0; margin-bottom: 16px; padding: 0; text-align: left;">Sincerely, your agent <?= $agentName ?></h3>
+                                    <div class="text" style="font-size: 14px; line-height: 24px;">If you have additional questions or requests, you can contact me by phone, or simply replying to this email.</div>
+                                </td>
+                            </tr>
+                            <tr style="padding: 0; text-align: left; vertical-align: top;">
+                                <td class="full-wd sales-contacts" style="-moz-hyphens: auto; -webkit-hyphens: auto; border-collapse: collapse !important; font-family: 'Roboto', Arial, Helvetica, sans-serif; font-weight: normal; hyphens: auto; line-height: 1.3; margin: 0; padding: 0; text-align: left; vertical-align: top; width: 100% !important; word-wrap: break-word;">
+                                    <table class="full-wd" style="border-collapse: collapse; border-spacing: 0; padding: 0; text-align: left; vertical-align: top; width: 100% !important;">
                                         <tr style="padding: 0; text-align: left; vertical-align: top;">
-                                            <th class="small-12 large-12 columns first last"
-                                                style="color: #1C2F59; font-family: 'Roboto', Arial, Helvetica, sans-serif; font-weight: normal; line-height: 1.3; margin: 0 auto; padding: 0; padding-bottom: 16px; padding-left: 24px; padding-right: 24px; text-align: left; width: 100%;">
-                                                Sincerely,<br><?= $agentName ?>
-                                            </th>
-                                        </tr>
-                                        <tr style="padding: 0; text-align: left; vertical-align: top;">
-                                            <th class="small-12 large-12 columns first last"
-                                                style="color: #1C2F59; font-family: 'Roboto', Arial, Helvetica, sans-serif; font-weight: normal; line-height: 1.3; margin: 0 auto; padding: 0; padding-bottom: 16px; padding-left: 24px; padding-right: 24px; text-align: left; width: 100%;">
-                                                <?php if ($userProjectParams !== null) : ?>
-                                                    E-Mail: <a href="mailto:<?= $userProjectParams->upp_email ?>"
-                                                               class="footer-email"
-                                                               style="color: #4ECCC4; font-family: 'Roboto', Arial, Helvetica, sans-serif; font-weight: normal; line-height: 1.3; margin: 0; padding: 0; text-align: left; text-decoration: none;"><?= $userProjectParams->upp_email ?></a>
-                                                    <br>
-                                                <?php else : ?>
-                                                    E-Mail: <a href="mailto:<?= $employee->email ?>"
-                                                               class="footer-email"
-                                                               style="color: #4ECCC4; font-family: 'Roboto', Arial, Helvetica, sans-serif; font-weight: normal; line-height: 1.3; margin: 0; padding: 0; text-align: left; text-decoration: none;"><?= $employee->email ?></a>
-                                                    <br>
-                                                <?php endif; ?>
-                                                <?php if ($userProjectParams !== null && !empty($userProjectParams->upp_phone_number)) {
-                                                    echo sprintf('Direct Line: %s <br>', $userProjectParams->upp_phone_number);
-                                                } ?>
-                                                General line: <?= $project->contactInfo->phone ?>
-                                            </th>
-                                        </tr>
-                                        <tr style="padding: 0; text-align: left; vertical-align: top;">
-                                            <th class="small-12 large-12 columns first last"
-                                                style="color: #1C2F59; font-family: 'Roboto', Arial, Helvetica, sans-serif; font-weight: normal; line-height: 1.3; margin: 0 auto; padding: 0; padding-top: 30px;padding-bottom: 16px; padding-left: 24px; padding-right: 24px; text-align: left; width: 100%;">
-                                                Share your experience on: <br/>
-                                                <?php $trustPilotUrl = (isset($templateType) && $templateType == "_email_ticket")?"https://www.trustpilot.com/evaluate/wowfare.com":"https://www.trustpilot.com/review/wowfare.com"?>
-                                                <a href="<?= $trustPilotUrl?>" target="_blank"><img alt="trustpilot logo" src="<?= $project->link ?>/images/email/email-tp-widget.png" style="-ms-interpolation-mode: bicubic; clear: both; display: block; float: none; margin: 20px auto 0; max-width: 100%; outline: none; text-align: center; text-decoration: none; width: auto;"></a>
-                                            </th>
+                                            <td class="col col-md-6" style="-moz-hyphens: auto; -webkit-hyphens: auto; border-collapse: collapse !important; font-family: 'Roboto', Arial, Helvetica, sans-serif; font-weight: normal; hyphens: auto; line-height: 1.3; margin: 0; padding: 0; padding-right: 16px; text-align: left; vertical-align: top; width: 50%; word-wrap: break-word;">
+                                                <h4 class="h4" style="color: #212121; font-family: 'Roboto', Arial, Helvetica, sans-serif; font-size: 16px; font-weight: bolder; line-height: 19px; margin: 0; margin-bottom: 12px; padding: 0; text-align: left;"><?= $agentName ?></h4>
+                                                <div class="text" style="font-size: 14px; line-height: 24px;">
+                                                    <a href="tel:<?php if ($userProjectParams !== null && !empty($userProjectParams->upp_phone_number)) {
+                                                        echo $userProjectParams->upp_phone_number;
+                                                    } else {
+                                                        echo $project->contactInfo->phone;
+                                                    } ?>" style="color: #4C5259; font-family: 'Roboto', Arial, Helvetica, sans-serif; font-weight: normal; line-height: 1.3; margin: 0; padding: 0; text-align: left; text-decoration: none;"><?php if ($userProjectParams !== null && !empty($userProjectParams->upp_phone_number)) {
+                                                        echo $userProjectParams->upp_phone_number;
+                                                    } else {
+                                                        echo $project->contactInfo->phone;
+                                                    } ?></a><br>
+                                                    <a href="mailto:<?= $userProjectParams->upp_email ?>" style="color: #4C5259; font-family: 'Roboto', Arial, Helvetica, sans-serif; font-weight: normal; line-height: 1.3; margin: 0; padding: 0; text-align: left; text-decoration: none;"><?= $userProjectParams->upp_email ?></a>
+                                                </div>
+                                            </td>
+                                            <td class="col col-md-6" style="-moz-hyphens: auto; -webkit-hyphens: auto; border-collapse: collapse !important; font-family: 'Roboto', Arial, Helvetica, sans-serif; font-weight: normal; hyphens: auto; line-height: 1.3; margin: 0; padding: 0; padding-right: 16px; text-align: left; vertical-align: top; width: 50%; word-wrap: break-word;">
+                                                <h4 class="h4" style="color: #212121; font-family: 'Roboto', Arial, Helvetica, sans-serif; font-size: 16px; font-weight: bolder; line-height: 19px; margin: 0; margin-bottom: 12px; padding: 0; text-align: left;">General Line</h4>
+                                                <div class="text" style="font-size: 14px; line-height: 24px;">
+                                                    <a href="tel:<?= $project->contactInfo->phone ?>" style="color: #4C5259; font-family: 'Roboto', Arial, Helvetica, sans-serif; font-weight: normal; line-height: 1.3; margin: 0; padding: 0; text-align: left; text-decoration: none;"><?= $project->contactInfo->phone ?></a><br>
+                                                    <a href="mailto:<?= $project->contactInfo->email ?>" style="color: #4C5259; font-family: 'Roboto', Arial, Helvetica, sans-serif; font-weight: normal; line-height: 1.3; margin: 0; padding: 0; text-align: left; text-decoration: none;"><?= $project->contactInfo->email ?></a>
+                                                </div>
+                                            </td>
                                         </tr>
                                     </table>
-                                </th>
+                                </td>
                             </tr>
-
                         </table>
                     </td>
                 </tr>
-            </table>
 
+
+            </table>     <!--End of main-->
+        </td>   <!--...-->
+    </tr>   <!--...-->
+
+    <!------------------------
+    -------   Footer   -------
+    ------------------------->
+
+    <tr style="padding: 0; text-align: left; vertical-align: top;">
+        <td class="full-wd footer align-center" align="center" style="-moz-hyphens: auto; -webkit-hyphens: auto; border-collapse: collapse !important; font-family: 'Roboto', Arial, Helvetica, sans-serif; font-weight: normal; hyphens: auto; line-height: 1.3; margin: 0; padding: 30px 16px 60px 16px; text-align: center; vertical-align: top; width: 100% !important; word-wrap: break-word;">
+            <table class="full-wd" style="border-collapse: collapse; border-spacing: 0; padding: 0; text-align: center; vertical-align: top; width: 100% !important;">
+                <tr style="padding: 0; text-align: left; vertical-align: top;">
+                    <td class="full-wd trustpilot" style="-moz-hyphens: auto; -webkit-hyphens: auto; border-collapse: collapse !important; font-family: 'Roboto', Arial, Helvetica, sans-serif; font-weight: normal; hyphens: auto; line-height: 1.3; margin: 0; padding: 0; text-align: center; vertical-align: top; width: 100% !important; word-wrap: break-word;">
+                        <a href="https://www.trustpilot.com/review/wowfare.com" class="trustpilot-link" style="color: #806bff; display: inline-block; font-family: 'Roboto', Arial, Helvetica, sans-serif; font-weight: normal; line-height: 1.3; margin: 0; margin-bottom: 20px; padding: 0; text-align: left; text-decoration: none;">
+                            <img src="<?= $project->link ?>/images/email/trustpilot.png" alt="" class="trustpilot-logo" width="126" height="61" style="-ms-interpolation-mode: bicubic; border: none; clear: both; display: block; height: 61px; margin: 0 auto; max-width: 100%; outline: none; text-decoration: none; width: 126px;">
+                        </a>
+                    </td>
+                </tr>
+                <tr style="padding: 0; text-align: left; vertical-align: top;">
+                    <td class="footer-info full-wd" style="-moz-hyphens: auto; -webkit-hyphens: auto; border-collapse: collapse !important; color: #87929D; font-family: 'Roboto', Arial, Helvetica, sans-serif; font-size: 14px; font-weight: normal; hyphens: auto; line-height: 24px; margin: 0; padding: 0; text-align: center; vertical-align: top; width: 100% !important; word-wrap: break-word;">
+                        Sent by <a href="<?= $project->link ?>" style="color: #4C5259; font-family: 'Roboto', Arial, Helvetica, sans-serif; font-weight: normal; line-height: 24px; margin: 0; padding: 0; text-align: left; text-decoration: underline;"><?= $project->name ?></a>
+                    </td>
+                </tr>
+                <tr style="padding: 0; text-align: left; vertical-align: top;">
+                    <td class="footer-menu full-wd" style="-moz-hyphens: auto; -webkit-hyphens: auto; border-collapse: collapse !important; font-family: 'Roboto', Arial, Helvetica, sans-serif; font-weight: normal; hyphens: auto; line-height: 1.3; margin: 0; padding: 0; text-align: center; vertical-align: top; width: 100% !important; word-wrap: break-word;">
+                        <a href="<?= $project->link ?>/unsubscribe" class="footer-menu-link" style="color: #4C5259; font-family: 'Roboto', Arial, Helvetica, sans-serif; font-weight: normal; line-height: 24px; margin: 0; margin-left: 1px; margin-right: 5px; padding: 0; text-align: left; text-decoration: underline;">Unsubscribe</a>&#183;
+                        <a href="<?= $project->link ?>/care" class="footer-menu-link" style="color: #4C5259; font-family: 'Roboto', Arial, Helvetica, sans-serif; font-weight: normal; line-height: 24px; margin: 0; margin-left: 1px; margin-right: 5px; padding: 0; text-align: left; text-decoration: underline;">Help</a>&#183;
+                        <a href="<?= $project->link ?>/policy" class="footer-menu-link" style="color: #4C5259; font-family: 'Roboto', Arial, Helvetica, sans-serif; font-weight: normal; line-height: 24px; margin: 0; margin-left: 1px; margin-right: 5px; padding: 0; text-align: left; text-decoration: underline;">Privacy policy</a>
+                    </td>
+                </tr>
+            </table>
         </td>
     </tr>
-    <tr style="padding: 0; text-align: left; vertical-align: top;">
-                                <th class="footer-bottom"
-                                    style="color: #1C2F59; font-family: 'Roboto', Arial, Helvetica, sans-serif; font-size: 12px; font-weight: normal; line-height: 1.3; margin: 0; padding: 40px 0 15px; text-align: center;">
-                                    <table class="row"
-                                           style="border-collapse: collapse; border-spacing: 0; display: table; padding: 0; position: relative; text-align: left; vertical-align: top; width: 100%;">
-                                        <tr style="padding: 0; text-align: left; vertical-align: top;">
-                                            <th class="small-12 large-12 columns first last" align="center"
-                                                style="color: #1C2F59; font-family: 'Roboto', Arial, Helvetica, sans-serif; font-weight: normal; line-height: 1.3; margin: 0 auto; padding: 0; padding-left: 24px; padding-right: 24px; text-align: left; width: 100%;">
-                                                <img src="<?= $project->link ?>/images/email/email-logo-desaturated.png" alt="Logo"
-                                                     width="151" height="22"
-                                                     class="footer-logo float-center"
-                                                     style="-ms-interpolation-mode: bicubic; clear: both; display: block; float: none; margin: 0 auto; margin-bottom: 15px; max-width: 100%; outline: none; text-align: center; text-decoration: none; width: auto;">
-                                            </th>
-                                            <th class="expander"
-                                                style="color: #1C2F59; font-family: 'Roboto', Arial, Helvetica, sans-serif; font-weight: normal; line-height: 1.3; margin: 0; padding: 0; text-align: left;"></th>
-                                        </tr>
-                                        <tr style="padding: 0; text-align: left; vertical-align: top;">
-                                            <th class="small-12 large-12 columns first last footer-text text-center"
-                                                align="center"
-                                                style="color: #556383; font-family: 'Roboto', Arial, Helvetica, sans-serif; font-weight: normal; line-height: 1.4em; margin: 0 auto; padding: 0; padding-bottom: 16px; padding-left: 24px; padding-right: 24px; text-align: center; width: 100%;">
-
-                                                <div class="footer-copyright" style="color: #556383;">
-                                                    © 2018 The Travel Outlet of Virginia, LLC. All rights reserved.
-                                                </div>
-                                            </th>
-                                            <th class="expander"
-                                                style="color: #1C2F59; font-family: 'Roboto', Arial, Helvetica, sans-serif; font-weight: normal; line-height: 1.3; margin: 0; padding: 0; text-align: left;"></th>
-                                        </tr>
-                                        <tr style="padding: 0; text-align: left; vertical-align: top;">
-                                            <th class="small-12 large-12 columns first last" align="center"
-                                                style="color: #1C2F59; font-family: 'Roboto', Arial, Helvetica, sans-serif; font-weight: normal; line-height: 1.3; margin: 0 auto; padding: 0; padding-bottom: 16px; padding-left: 24px; padding-right: 24px; text-align: left; width: 100%;">
-                                                <img src="<?= $project->link ?>/images/email/email-partners.png" alt="Partners"
-                                                     width="281" height="40"
-                                                     class="footer-partners float-center"
-                                                     style="-ms-interpolation-mode: bicubic; clear: both; display: block; float: none; margin: 20px auto 0; max-width: 100%; outline: none; text-align: center; text-decoration: none; width: auto;">
-                                            </th>
-                                            <th class="expander"
-                                                style="color: #1C2F59; font-family: 'Roboto', Arial, Helvetica, sans-serif; font-weight: normal; line-height: 1.3; margin: 0; padding: 0; text-align: left;"></th>
-                                        </tr>
-                                    </table>
-                                </th>
-                            </tr>
-    </tbody>
 </table>
+
+
+
 </body>
+</html>
