@@ -350,8 +350,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'buttons' => [
                 'action' => function ($url, $model, $key) {
                     return Html::a('<i class="fa fa-search"></i>', Url::to([
-                        'lead/quote',
-                        'type' => 'sold',
+                        'lead/view',
                         'id' => $model['id']
                     ]), [
                         'class' => 'btn btn-info btn-xs',

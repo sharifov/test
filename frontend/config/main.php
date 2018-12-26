@@ -72,13 +72,13 @@ return [
             'showScriptName' => false,
             'enableStrictParsing' => false,
             'rules' => [
-                [
+                /*[
                     'pattern' => 'queue/<type:(inbox1|follow-up1|processing1|processing-all|booked1|trash1)>',
                     'route' => 'lead/queue',
-                ],
+                ],*/
                 [
-                    'pattern' => 'lead/<type:(inbox|follow-up|processing|processing-all|booked|sold|trash)>/<id>',
-                    'route' => 'lead/quote',
+                    'pattern' => 'lead/view/<id>',
+                    'route' => 'lead/view',
                 ],
                 [
                     'pattern' => 'take/<id>',

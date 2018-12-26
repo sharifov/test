@@ -16,10 +16,14 @@ use common\models\ProjectEmailTemplate;
 use common\models\Reason;
 use common\models\Task;
 use common\models\UserProjectParams;
+use frontend\models\CommunicationForm;
 use frontend\models\LeadForm;
 use frontend\models\SendEmailForm;
+use Symfony\Component\Finder\Exception\AccessDeniedException;
 use Yii;
 use yii\base\Model;
+use yii\data\ActiveDataProvider;
+use yii\db\Expression;
 use yii\helpers\ArrayHelper;
 use yii\filters\AccessControl;
 use yii\helpers\Html;
@@ -58,27 +62,15 @@ class LeadController extends FController
                 'class' => AccessControl::class,
                 'rules' => [
                     [
-                        'actions' => ['queue', 'quote'],
-                        'allow' => true,
-                        'roles' => ['agent'],
-                        'matchCallback' => function ($rule, $action) {
-                            $type = Yii::$app->request->get('type');
-                            if ($type == 'trash' && Yii::$app->user->identity->role == 'agent') {
-                                return false;
-                            }
-                            return in_array($type, Lead::getLeadQueueType());
-                        },
-                    ],
-                    [
                         'actions' => [
                             'create', 'add-comment', 'change-state', 'unassign', 'take',
                             'set-rating', 'add-note', 'unprocessed', 'call-expert', 'send-email',
                             'check-updates', 'flow-transition', 'get-user-actions', 'add-pnr', 'update2','clone',
                             'get-badges', 'sold', 'split-profit', 'split-tips','processing', 'follow-up', 'inbox', 'trash', 'booked',
-                            'test'
+                            'test', 'view'
                         ],
                         'allow' => true,
-                        'roles' => ['agent'],
+                        'roles' => ['agent', 'admin', 'supervisor'],
                     ],
                 ],
             ]
@@ -90,7 +82,7 @@ class LeadController extends FController
     public function beforeAction($action)
     {
         if (parent::beforeAction($action)) {
-            if (in_array($action->id, ['create', 'quote'])) {
+            if (in_array($action->id, ['create', 'view'])) {
                 //Yii::$app->setLayoutPath('@frontend/views/layouts');
                 //$this->layout = 'sale';
                 $this->layout = '@app/themes/gentelella/views/layouts/main_lead';
@@ -107,6 +99,268 @@ class LeadController extends FController
     public function actions()
     {
         return parent::actions();
+    }
+
+    public function actionView($id)
+    {
+        $lead = Lead::findOne(['id' => $id]);
+        if(!$lead) {
+            throw new UnauthorizedHttpException('Not found lead by ID: ' . $id);
+        }
+
+        if($lead->status == Lead::STATUS_TRASH && Yii::$app->user->identity->role == 'agent') {
+            throw new AccessDeniedException('Access Denied for Agent');
+        }
+
+
+            if (Yii::$app->request->post('hasEditable')) {
+
+                $value = '456';
+                $message = '';
+
+                // use Yii's response format to encode output as JSON
+                \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+
+                // read your posted model attributes
+                if(Yii::$app->request->isPost && $extraMarkup = Yii::$app->request->post('extra_markup')){
+                    $paxCode = key($extraMarkup);
+                    if($paxCode){
+                        $quoteId = key($extraMarkup[$paxCode]);
+                        if($quoteId){
+                            $qPrices = QuotePrice::find()->where(['quote_id' => $quoteId, 'passenger_type' => $paxCode])->all();
+                            if (count($qPrices)){
+                                $quote = Quote::findOne(['id' => $quoteId]);
+                                $priceData = $quote->getPricesData();
+                                $sellingOld = $priceData['total']['selling'];
+                                foreach ($qPrices as $qPrice){
+                                    $qPrice->extra_mark_up = $extraMarkup[$paxCode][$quoteId];
+                                    $qPrice->update();
+                                }
+
+                                $quote = Quote::findOne(['id' => $quoteId]);
+                                $priceData = $quote->getPricesData();
+                                //log messages
+                                $leadLog = new LeadLog((new LeadLogMessage()));
+                                $leadLog->logMessage->oldParams = ['selling' => $sellingOld];
+                                $leadLog->logMessage->newParams = ['selling' => $priceData['total']['selling']];
+                                $leadLog->logMessage->title = 'Update';
+                                $leadLog->logMessage->model = sprintf('%s (%s)', $quote->formName(), $quote->uid);
+                                $leadLog->addLog([
+                                    'lead_id' => $id,
+                                ]);
+
+                                if ($lead->called_expert) {
+                                    $data = $quote->getQuoteInformationForExpert(true);
+                                    $response = BackOffice::sendRequest('lead/update-quote', 'POST', json_encode($data));
+                                    if ($response['status'] != 'Success' || !empty($response['errors'])) {
+                                        \Yii::$app->getSession()->setFlash('warning', sprintf(
+                                            'Update info quote [%s] for expert failed! %s',
+                                            $quote->uid,
+                                            print_r($response['errors'], true)
+                                        ));
+                                    }
+                                }
+
+                                return ['output' => $extraMarkup[$paxCode][$quoteId]];
+                            }
+                            return [];
+                        }
+                        return [];
+                    }
+
+                    return [];
+                }elseif (Yii::$app->request->isPost && $taskNotes = Yii::$app->request->post('task_notes')) {
+
+                    $taskId = $taskDate = $userId = $leadId = null;
+
+                    $leadId = $lead->id; //Yii::$app->request->get('lead_id');
+
+                    $taskKey = key($taskNotes);
+
+                    if($taskKey) {
+                        list($taskId, $taskDate, $userId) = explode('_', $taskKey);
+                    }
+
+                    $value = $taskNotes[$taskKey];
+
+
+                    if(!$taskId) {
+                        $message = 'Not found Task ID data';
+                    } elseif(!$taskDate) {
+                        $message = 'Not found Task Date data';
+                    } elseif(!$userId) {
+                        $message = 'Not found Task User ID data';
+                    } elseif(!$leadId) {
+                        $message = 'Not found Lead ID data';
+                    } else {
+
+                        if($taskDate && $taskId && $leadId && $userId) {
+                            $lt = LeadTask::find()->where(['lt_lead_id' => $leadId, 'lt_date' => $taskDate, 'lt_task_id' => $taskId, 'lt_user_id' => $userId])->one();
+                            if($lt) {
+                                $lt->lt_notes = $value;
+                                $lt->lt_updated_dt = date('Y-m-d H:i:s');
+                                $lt->update();
+                            }
+                        }
+
+                    }
+
+                } else {
+                    $message = 'Not found task notes data';
+                }
+
+
+                return ['output' => nl2br(Html::encode($value)), 'message' => $message];
+            }
+
+
+            if(Yii::$app->request->isPjax) {
+                $taskDate = Yii::$app->request->get('date');
+                $taskId = Yii::$app->request->get('task_id');
+                $leadId = $lead->id; //Yii::$app->request->get('lead_id');
+                $userId = Yii::$app->request->get('user_id'); // Yii::$app->user->id;
+
+                if($taskDate && $taskId && $leadId && $userId) {
+                    $lt = LeadTask::find()->where(['lt_lead_id' => $leadId, 'lt_date' => $taskDate, 'lt_task_id' => $taskId, 'lt_user_id' => $userId])->one();
+                    if($lt) {
+                        if($lt->lt_completed_dt) {
+                            $lt->lt_completed_dt = null;
+                        } else {
+                            $lt->lt_completed_dt = date('Y-m-d H:i:s');
+                        }
+                        $lt->lt_updated_dt = date('Y-m-d H:i:s');
+                        $lt->update();
+                    }
+                }
+
+            }
+
+
+
+
+            Yii::$app->cache->delete(sprintf('quick-search-%d-%d', $lead->id, Yii::$app->user->identity->getId()));
+            if (!$lead->permissionsView()) {
+                throw new UnauthorizedHttpException('Not permissions view lead ID: ' . $id);
+            }
+            $leadForm = new LeadForm($lead);
+            if ($leadForm->getLead()->status != Lead::STATUS_PROCESSING ||
+                $leadForm->getLead()->employee_id != Yii::$app->user->identity->getId()
+            ) {
+                $leadForm->mode = $leadForm::VIEW_MODE;
+            }
+
+            $flightSegments = $leadForm->getLeadFlightSegment();
+            foreach ($flightSegments as $segment){
+                $this->view->title = 'Lead #'.$id.' ✈ '.$segment->destination;
+                break;
+            }
+
+
+            if (Yii::$app->request->isAjax && !Yii::$app->request->isPjax) {
+                Yii::$app->response->format = Response::FORMAT_JSON;
+                $data = [
+                    'load' => false,
+                    'errors' => []
+                ];
+                if ($leadForm->loadModels(Yii::$app->request->post())) {
+                    $data['load'] = true;
+                    $data['errors'] = ActiveForm::validate($leadForm);
+                }
+
+                $errors = [];
+                if (empty($data['errors']) && $data['load'] && $leadForm->save($errors)) {
+
+                    if ($lead->called_expert) {
+                        $lead = Lead::findOne(['id' => $id]);
+                        $data = $lead->getLeadInformationForExpert();
+                        $result = BackOffice::sendRequest('lead/update-lead', 'POST', json_encode($data));
+                        if ($result['status'] != 'Success' || !empty($result['errors'])) {
+                            Yii::$app->getSession()->setFlash('warning', sprintf(
+                                'Update info lead for expert failed! %s',
+                                print_r($result['errors'], true)
+                            ));
+                        }
+                    }
+
+                    return $this->redirect([
+                        'quote',
+                        'type' => 'processing',
+                        'id' => $leadForm->getLead()->id
+                    ]);
+                }
+
+                if (!empty($errors)) {
+                    $data['errors'] = $errors;
+                }
+
+                return $data;
+            }
+
+            $quotesProvider = $lead->getQuotesProvider([]);
+
+
+
+            $query1 = (new \yii\db\Query())
+                ->select(['e_id AS id', new Expression('"email" AS type'), 'e_lead_id AS lead_id', 'e_created_dt AS created_dt'])
+                ->from('email')
+                ->where(['e_lead_id' => $lead->id]);
+
+            $query2 = (new \yii\db\Query())
+                ->select(['s_id AS id', new Expression('"sms" AS type'), 's_lead_id AS lead_id', 's_created_dt AS created_dt'])
+                ->from('sms')
+                ->where(['s_lead_id' => $lead->id]);
+
+
+//            $query1 = (new \yii\db\Query())
+//                ->select('e_id AS id, 1 AS type, e_lead_id AS lead_id, e_created_dt AS created_dt')
+//                ->from('email');
+//            //->where(['!=', 'number', '']);
+//
+//            $query2 = (new \yii\db\Query())
+//                ->select('s_id AS id, 2 AS type, s_lead_id AS lead_id, s_created_dt AS created_dt')
+//                ->from('sms');
+//            //->where(['!=', 'firstname', '']);
+
+
+
+            $unionQuery = (new \yii\db\Query())
+                ->from(['union_table' => $query1->union($query2)])
+                ->orderBy(['created_dt' => SORT_ASC]);
+
+            //echo $query1->count(); exit;
+
+            $dataProviderCommunication = new ActiveDataProvider([
+                'query' => $unionQuery,
+                'pagination' => [
+                    'pageSize' => 20,
+                ],
+            ]);
+
+
+            $comForm = new CommunicationForm();
+
+            if ($comForm->load(Yii::$app->request->post())) {
+
+                $comForm->c_lead_id = $lead->id;
+
+                if($comForm->validate()) {
+
+                }
+                //return $this->redirect(['view', 'id' => $model->al_id]);
+            } else {
+                $comForm->c_type_id = 1;
+            }
+
+            //$dataProviderCommunication = $lead->getQuotesProvider([]);
+
+            return $this->render('view', [
+                'leadForm' => $leadForm,
+                'comForm' => $comForm,
+                'quotesProvider' => $quotesProvider,
+                'dataProviderCommunication' => $dataProviderCommunication,
+            ]);
+
+
     }
 
     public function actionGetAirport($term)
@@ -633,43 +887,7 @@ class LeadController extends FController
 
     }
 
-    public function actionQueue($type)
-    {
-        $searchModel = null;
-        if (in_array($type, ['processing-all', 'processing', 'follow-up'])) {
-            $dataProvider = [];
-            foreach (array_keys(Lead::getDivs()) as $div) {
-                if ($div == Lead::DIV_GRID_IN_SNOOZE && $type == 'follow-up') {
-                    continue;
-                }
-                if ($type == 'processing-all') {
-                    $searchModel = new Lead();
-                    $params = Yii::$app->request->queryParams;
-                    if (isset($params[$searchModel->formName()])) {
-                        $searchModel->employee_id = $params[$searchModel->formName()]['employee_id'];
-                    }
-                    $dataProvider[$div] = Lead::search($type, $searchModel, $div);
-                } else {
-                    $dataProvider[$div] = Lead::search($type, null, $div);
-                }
-            }
-        } else if (in_array($type, ['trash'])) {
-            $searchModel = new Lead();
-            $params = Yii::$app->request->queryParams;
-            if (isset($params[$searchModel->formName()])) {
-                $searchModel->employee_id = $params[$searchModel->formName()]['employee_id'];
-            }
-            $dataProvider = Lead::search($type, $searchModel);
-        } else {
-            $dataProvider = Lead::search($type);
-        }
 
-        return $this->render('queue', [
-            'dataProvider' => $dataProvider,
-            'searchModel' => $searchModel,
-            'type' => $type
-        ]);
-    }
 
     public function actionSold()
     {
@@ -991,203 +1209,6 @@ class LeadController extends FController
         return $this->redirect($referrer);
     }
 
-    public function actionQuote($type, $id)
-    {
-        $lead = Lead::findOne(['id' => $id]);
-
-        if ($lead !== null) {
-            if (Yii::$app->request->post('hasEditable')) {
-
-                $value = '456';
-                $message = '';
-
-                // use Yii's response format to encode output as JSON
-                \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
-
-                // read your posted model attributes
-                if(Yii::$app->request->isPost && $extraMarkup = Yii::$app->request->post('extra_markup')){
-                    $paxCode = key($extraMarkup);
-                    if($paxCode){
-                        $quoteId = key($extraMarkup[$paxCode]);
-                        if($quoteId){
-                            $qPrices = QuotePrice::find()->where(['quote_id' => $quoteId, 'passenger_type' => $paxCode])->all();
-                            if (count($qPrices)){
-                                $quote = Quote::findOne(['id' => $quoteId]);
-                                $priceData = $quote->getPricesData();
-                                $sellingOld = $priceData['total']['selling'];
-                                foreach ($qPrices as $qPrice){
-                                    $qPrice->extra_mark_up = $extraMarkup[$paxCode][$quoteId];
-                                    $qPrice->update();
-                                }
-
-                                $quote = Quote::findOne(['id' => $quoteId]);
-                                $priceData = $quote->getPricesData();
-                                //log messages
-                                $leadLog = new LeadLog((new LeadLogMessage()));
-                                $leadLog->logMessage->oldParams = ['selling' => $sellingOld];
-                                $leadLog->logMessage->newParams = ['selling' => $priceData['total']['selling']];
-                                $leadLog->logMessage->title = 'Update';
-                                $leadLog->logMessage->model = sprintf('%s (%s)', $quote->formName(), $quote->uid);
-                                $leadLog->addLog([
-                                    'lead_id' => $id,
-                                ]);
-
-                                if ($lead->called_expert) {
-                                    $data = $quote->getQuoteInformationForExpert(true);
-                                    $response = BackOffice::sendRequest('lead/update-quote', 'POST', json_encode($data));
-                                    if ($response['status'] != 'Success' || !empty($response['errors'])) {
-                                        \Yii::$app->getSession()->setFlash('warning', sprintf(
-                                            'Update info quote [%s] for expert failed! %s',
-                                            $quote->uid,
-                                            print_r($response['errors'], true)
-                                            ));
-                                    }
-                                }
-
-                                return ['output' => $extraMarkup[$paxCode][$quoteId]];
-                            }
-                            return [];
-                        }
-                        return [];
-                    }
-
-                    return [];
-                }elseif (Yii::$app->request->isPost && $taskNotes = Yii::$app->request->post('task_notes')) {
-
-                    $taskId = $taskDate = $userId = $leadId = null;
-
-                    $leadId = $lead->id; //Yii::$app->request->get('lead_id');
-
-                    $taskKey = key($taskNotes);
-
-                    if($taskKey) {
-                        list($taskId, $taskDate, $userId) = explode('_', $taskKey);
-                    }
-
-                    $value = $taskNotes[$taskKey];
-
-
-                    if(!$taskId) {
-                        $message = 'Not found Task ID data';
-                    } elseif(!$taskDate) {
-                        $message = 'Not found Task Date data';
-                    } elseif(!$userId) {
-                        $message = 'Not found Task User ID data';
-                    } elseif(!$leadId) {
-                        $message = 'Not found Lead ID data';
-                    } else {
-
-                        if($taskDate && $taskId && $leadId && $userId) {
-                            $lt = LeadTask::find()->where(['lt_lead_id' => $leadId, 'lt_date' => $taskDate, 'lt_task_id' => $taskId, 'lt_user_id' => $userId])->one();
-                            if($lt) {
-                                $lt->lt_notes = $value;
-                                $lt->lt_updated_dt = date('Y-m-d H:i:s');
-                                $lt->update();
-                            }
-                        }
-
-                    }
-
-                } else {
-                    $message = 'Not found task notes data';
-                }
-
-
-                return ['output' => nl2br(Html::encode($value)), 'message' => $message];
-            }
-
-
-            if(Yii::$app->request->isPjax) {
-                $taskDate = Yii::$app->request->get('date');
-                $taskId = Yii::$app->request->get('task_id');
-                $leadId = $lead->id; //Yii::$app->request->get('lead_id');
-                $userId = Yii::$app->request->get('user_id'); // Yii::$app->user->id;
-
-                if($taskDate && $taskId && $leadId && $userId) {
-                    $lt = LeadTask::find()->where(['lt_lead_id' => $leadId, 'lt_date' => $taskDate, 'lt_task_id' => $taskId, 'lt_user_id' => $userId])->one();
-                    if($lt) {
-                        if($lt->lt_completed_dt) {
-                            $lt->lt_completed_dt = null;
-                        } else {
-                            $lt->lt_completed_dt = date('Y-m-d H:i:s');
-                        }
-                        $lt->lt_updated_dt = date('Y-m-d H:i:s');
-                        $lt->update();
-                    }
-                }
-
-            }
-
-
-
-
-            Yii::$app->cache->delete(sprintf('quick-search-%d-%d', $lead->id, Yii::$app->user->identity->getId()));
-            if (!$lead->permissionsView()) {
-                throw new UnauthorizedHttpException('Not permissions view lead ID: ' . $id);
-            }
-            $leadForm = new LeadForm($lead);
-            if ($leadForm->getLead()->status != Lead::STATUS_PROCESSING ||
-                $leadForm->getLead()->employee_id != Yii::$app->user->identity->getId()
-            ) {
-                $leadForm->mode = $leadForm::VIEW_MODE;
-            }
-
-            $flightSegments = $leadForm->getLeadFlightSegment();
-            foreach ($flightSegments as $segment){
-                $this->view->title = 'Lead #'.$id.' ✈ '.$segment->destination;
-                break;
-            }
-
-
-            if (Yii::$app->request->isAjax && !Yii::$app->request->isPjax) {
-                Yii::$app->response->format = Response::FORMAT_JSON;
-                $data = [
-                    'load' => false,
-                    'errors' => []
-                ];
-                if ($leadForm->loadModels(Yii::$app->request->post())) {
-                    $data['load'] = true;
-                    $data['errors'] = ActiveForm::validate($leadForm);
-                }
-
-                $errors = [];
-                if (empty($data['errors']) && $data['load'] && $leadForm->save($errors)) {
-
-                    if ($lead->called_expert) {
-                        $lead = Lead::findOne(['id' => $id]);
-                        $data = $lead->getLeadInformationForExpert();
-                        $result = BackOffice::sendRequest('lead/update-lead', 'POST', json_encode($data));
-                        if ($result['status'] != 'Success' || !empty($result['errors'])) {
-                            Yii::$app->getSession()->setFlash('warning', sprintf(
-                                'Update info lead for expert failed! %s',
-                                print_r($result['errors'], true)
-                            ));
-                        }
-                    }
-
-                    return $this->redirect([
-                        'quote',
-                        'type' => 'processing',
-                        'id' => $leadForm->getLead()->id
-                    ]);
-                }
-
-                if (!empty($errors)) {
-                    $data['errors'] = $errors;
-                }
-
-                return $data;
-            }
-
-            $quotesProvider = $lead->getQuotesProvider([]);
-
-            return $this->render('lead', [
-                'leadForm' => $leadForm,
-                'quotesProvider' => $quotesProvider,
-            ]);
-        }
-        throw new UnauthorizedHttpException('Not found lead by ID: ' . $id);
-    }
 
     public function actionCreate()
     {
@@ -1229,7 +1250,7 @@ class LeadController extends FController
             return $data;
         }
 
-        return $this->render('lead', [
+        return $this->render('view', [
             'leadForm' => $leadForm
         ]);
     }

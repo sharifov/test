@@ -7,6 +7,7 @@ use Yii;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
+use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
 
 /**
@@ -178,5 +179,19 @@ class SmsTemplateType extends \yii\db\ActiveRecord
         }
 
         return $data;
+    }
+
+    /**
+     * @param bool $withHidden
+     * @return array
+     */
+    public static function getList($withHidden = true) : array
+    {
+        $query = self::find()->orderBy(['stp_name' => SORT_ASC]);
+        if(!$withHidden) {
+            $query->andWhere(['stp_hidden' => false]);
+        }
+        $data = $query->asArray()->all();
+        return ArrayHelper::map($data, 'stp_id', 'stp_name');
     }
 }

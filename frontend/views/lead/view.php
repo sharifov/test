@@ -1,7 +1,9 @@
 <?php
 /**
  * @var $leadForm LeadForm
- * @var $quotesProvider ActiveProvider
+ * @var $comForm \frontend\models\CommunicationForm
+ * @var $quotesProvider \yii\data\ActiveDataProvider
+ * @var $dataProviderCommunication \yii\data\ActiveDataProvider
  */
 
 use yii\bootstrap\Html;
@@ -9,6 +11,9 @@ use frontend\models\LeadForm;
 use yii\bootstrap\Modal;
 use yii\widgets\ListView;
 use common\models\Quote;
+
+
+$bundle = \frontend\themes\gentelella\assets\AssetLeadCommunication::register($this);
 
 //$bundle = \frontend\themes\gentelella\assets\LeadAsset::register($this);
 //$this->registerCssFile('/css/style-req.css');
@@ -109,8 +114,7 @@ $this->registerJs($js);
                 printf(" <a title=\"%s\" href=\"%s\">(Cloned from %s)</a> ",
                     "Clone reason: ".$lead->description,
                     \yii\helpers\Url::to([
-                    'lead/quote',
-                    'type' => 'processing',
+                    'lead/view',
                     'id' => $lead->clone_id
                 ]),$lead->clone_id);
             }
@@ -381,19 +385,19 @@ JS;
 ?>
                 <?php if ($leadForm->mode != $leadForm::VIEW_MODE) : ?>
                 <div class="btn-wrapper pt-20 mb-20">
-                    <?= Html::button('<i class="fa fa-eye-slash"></i>&nbsp;Declined Quotes', [
-                        'class' => 'btn btn-primary btn-lg',
+                    <?= Html::button('<i class="fa fa-eye-slash"></i> Declined Quotes', [
+                        'class' => 'btn btn-primary btn-sm',
                         'id' => 'btn-declined-quotes',
                     ]) ?>
                     <!--Button Send-->
                     <span class="btn-group">
-                        <?= Html::button('<i class="fa fa-send"></i>&nbsp;Send Quotes', [
-                            'class' => 'btn btn-lg btn-success',
+                        <?= Html::button('<i class="fa fa-send"></i> Send Email Quotes', [
+                            'class' => 'btn btn-sm btn-success',
                             'id' => 'lg-btn-send-quotes',
                         ]) ?>
                         <?= Html::button('<span class="caret"></span>', [
                             'id' => 'btn-send-quotes',
-                            'class' => 'btn btn-lg btn-success dropdown-toggle sl-popover-btn',
+                            'class' => 'btn btn-sm btn-success dropdown-toggle sl-popover-btn',
                             'data-toggle' => 'popover',
                             'title' => '',
                             'data-original-title' => 'Select Emails',
@@ -408,15 +412,16 @@ JS;
                         </label>
                         <div>
                             <?= Html::button('Send', [
-                                'class' => 'btn btn-success send-quotes-to-email',
+                                'class' => 'btn btn-sm btn-success send-quotes-to-email',
                                 'id' => 'btn-send-quotes-email',
                                 'data-url' => \yii\helpers\Url::to(['quote/preview-send-quotes'])
                             ]) ?>
                         </div>
                     </div>
+
                     <?php if($is_admin):?>
                     <!-- New button send -->
-                    <?= Html::button('<i class="fa fa-send"></i>&nbsp;Send Quotes', [
+                    <?= Html::button('<i class="fa fa-envelope"></i> Send Email Quotes 2', [
                         'class' => 'btn btn-primary popover-class',
                         'title' => 'Select Emails',
                         'data-toggle' => 'popover',
@@ -467,6 +472,18 @@ JS;
 			]);?>
             <?php \yii\widgets\Pjax::end() ?>
             <?php endif;?>
+
+
+            <?php if (!$leadForm->getLead()->isNewRecord) : ?>
+                <?= $this->render('communication/lead_communication', [
+                        'leadForm'      => $leadForm,
+                        'comForm'       => $comForm,
+                        'leadId'        => $lead->id,
+                        'dataProvider'  => $dataProviderCommunication
+                    ]);
+                ?>
+            <?php endif;?>
+
 
             <?php if (!$leadForm->getLead()->isNewRecord) : ?>
 
@@ -522,3 +539,27 @@ JS;
         ?>
     </aside>
 </div>
+
+
+<style>
+    #scrollUp{bottom:20px;right:20px;background:#555;color:#fff;font-size:12px;font-family:sans-serif;text-decoration:none;opacity:.9;padding:10px 20px;-webkit-border-radius:16px;-moz-border-radius:16px;border-radius:16px;-webkit-transition:background 200ms linear;-moz-transition:background 200ms linear;transition:background 200ms linear}#scrollUp:hover{background:#000}
+</style>
+
+<?php
+
+$js = <<<JS
+$(function () {
+  $.scrollUp({
+    scrollName: 'scrollUp', // Element ID
+    topDistance: '300', // Distance from top before showing element (px)
+    topSpeed: 300, // Speed back to top (ms)
+    animation: 'fade', // Fade, slide, none
+    animationInSpeed: 200, // Animation in speed (ms)
+    animationOutSpeed: 200, // Animation out speed (ms)
+    scrollText: 'Scroll to top', // Text for element
+    activeOverlay: true, // Set CSS color to display scrollUp active point, e.g '#00FFFF'
+  });
+});
+JS;
+
+$this->registerJs($js);
