@@ -747,6 +747,17 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         return $str;
     }
 
+    public function paramsForSalary()
+    {
+        $data = [];
+
+        $data['base_amount'] = ($this->userParams) ? $this->userParams->up_base_amount : 200;
+        $data['commission_percent'] = ($this->userParams) ? $this->userParams->up_commission_percent : 10;
+        $data['bonus_active'] = ($this->userParams) ? $this->userParams->up_bonus_active : 1;
+
+        return $data;
+    }
+
     /*
      * @param startDate DateTime
      * @param endDat DateTime
