@@ -17,7 +17,7 @@ use yii\db\ActiveRecord;
  * @property string $kh_agent_approved_dt
  * @property string $kh_super_approved_dt
  * @property int $kh_super_id
- * @property string $kh_bonus_amount
+ * @property string $kh_base_amount
  * @property int $kh_bonus_active
  * @property int $kh_commission_percent
  * @property string $kh_profit_bonus
@@ -47,7 +47,7 @@ class KpiHistory extends \yii\db\ActiveRecord
             [['kh_user_id'], 'required'],
             [['kh_user_id', 'kh_super_id', 'kh_bonus_active', 'kh_commission_percent'], 'integer'],
             [['kh_date_dt', 'kh_created_dt', 'kh_updated_dt', 'kh_agent_approved_dt', 'kh_super_approved_dt'], 'safe'],
-            [['kh_bonus_amount', 'kh_profit_bonus', 'kh_manual_bonus', 'kh_estimation_profit'], 'number'],
+            [['kh_base_amount', 'kh_profit_bonus', 'kh_manual_bonus', 'kh_estimation_profit'], 'number'],
             [['kh_description'], 'string'],
             [['kh_super_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::className(), 'targetAttribute' => ['kh_super_id' => 'id']],
             [['kh_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::className(), 'targetAttribute' => ['kh_user_id' => 'id']],
@@ -63,14 +63,14 @@ class KpiHistory extends \yii\db\ActiveRecord
             'kh_id' => 'ID',
             'kh_user_id' => 'User ID',
             'kh_date_dt' => 'Date',
-            'kh_created_dt' => 'Created Dt',
-            'kh_updated_dt' => 'Updated Dt',
-            'kh_agent_approved_dt' => 'Agent Approved Dt',
-            'kh_super_approved_dt' => 'Super Approved Dt',
+            'kh_created_dt' => 'Created',
+            'kh_updated_dt' => 'Updated',
+            'kh_agent_approved_dt' => 'Agent Approved',
+            'kh_super_approved_dt' => 'Super Approved',
             'kh_super_id' => 'Super ID',
-            'kh_bonus_amount' => 'Bonus Amount',
+            'kh_base_amount' => 'Base $',
             'kh_bonus_active' => 'Bonus Active',
-            'kh_commission_percent' => 'Commission Percent',
+            'kh_commission_percent' => 'Commission %',
             'kh_profit_bonus' => 'Profit Bonus',
             'kh_manual_bonus' => 'Manual Bonus',
             'kh_estimation_profit' => 'Estimation Profit',

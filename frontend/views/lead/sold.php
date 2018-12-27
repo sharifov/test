@@ -261,7 +261,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 if($model->tips == 0) {
                     return '-';
                 }
-                $totalTipsTxt = "<strong>$" . number_format($model->tips, 2) . "</strong>";
+                $totalTipsTxt = "<strong>$" . number_format($model->totalTips, 2) . "</strong>";
 
                 $splitTipsTxt = '';
                 $splitTips = $model->getAllTipsSplits();
@@ -278,7 +278,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 if ($model->splitTipsPercentSum > 0) {
                     $mainAgentPercent -= $model->splitTipsPercentSum;
                 }
-                $mainAgentTipsTxt = "<strong>$" . number_format($model->tips * $mainAgentPercent / 100, 2) . "</strong>";
+                $mainAgentTipsTxt = "<strong>$" . number_format($model->totalTips * $mainAgentPercent / 100, 2) . "</strong>";
 
                 return 'Tips: '.$totalTipsTxt.(($splitTipsTxt)?'<hr/>Split tips:<br/>'.$splitTipsTxt:'').'<hr/> '.
                     (($model->employee)?$model->employee->username:'Main agent').' tips: '.$mainAgentTipsTxt;

@@ -725,8 +725,7 @@ class LeadController extends FController
                 }
             }
 
-           // $salary = $employee->calculateSalaryBetween($start, $end);
-            $salary = $employee->calculateSalaryBetweenNew($start, $end);
+            $salary = $employee->calculateSalaryBetween($start, $end);
         }
 
         $dataProvider = $searchModel->searchSold($params);
@@ -1425,7 +1424,7 @@ class LeadController extends FController
         $errors = [];
         $lead = Lead::findOne(['id' => $id]);
         if ($lead !== null) {
-            $totalTips = $lead->tips;
+            $totalTips = $lead->totalTips;
             $splitForm = new TipsSplitForm($lead);
 
             $mainAgentTips = $totalTips;
