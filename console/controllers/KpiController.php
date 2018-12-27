@@ -33,32 +33,12 @@ class KpiController extends Controller
         $agents = Employee::getAllEmployeesByRole('agent');
 
         foreach ($agents as $agent){
-            $salary = $agent->calculateSalaryBetween($start, $end);
-            $salaryParams = $agent->paramsForSalary();
-
-            $khDate = $end->format('Y-m-d');
-            $khUserId = $agent->id;
-
-            $kpiHistory = KpiHistory::find()->where(['kh_date_dt' => $khDate, 'kh_user_id' => $khUserId])->one();
-            if(!$kpiHistory){
-                $kpiHistory = new KpiHistory();
-                $kpiHistory->kh_date_dt = $khDate;
-                $kpiHistory->kh_user_id = $khUserId;
-            }
-
-            if(empty($kpiHistory->kh_agent_approved_dt) && empty($kpiHistory->kh_super_approved_dt)){
-                $kpiHistory->kh_base_amount = $salaryParams['base_amount'];
-                $kpiHistory->kh_commission_percent = $salaryParams['commission_percent'];
-                $kpiHistory->kh_bonus_active = $salaryParams['bonus_active'];
-                $kpiHistory->kh_profit_bonus = $salary['bonus'];
-                $kpiHistory->kh_estimation_profit = $salary['startProfit'];
-            }
-
+            $kpiHistory = KpiHistory::recalculateSalary($agent, $start, $end);
             if(!$kpiHistory->save()){
                 printf("\nSalary for agent ".$agent->username.' not saved');
                 print_r($kpiHistory->errors);
             }else{
-                print("\nSalary for ".$agent->username.': $'.$salary['salary']);
+                print("\nSalary for ".$agent->username.': $'.$kpiHistory->getSalary());
             }
         }
 

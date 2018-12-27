@@ -562,7 +562,7 @@ class LeadSearch extends Lead
 
         $query
         ->andWhere(['leads.status' => Lead::STATUS_SOLD])
-        ->andWhere(['IN', $leadTable . '.project_id', $projectIds])
+        //->andWhere(['IN', $leadTable . '.project_id', $projectIds])
         ;
 
 

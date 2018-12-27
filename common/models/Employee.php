@@ -437,6 +437,15 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         return ArrayHelper::map($data, 'id', 'username');
     }
 
+    /**
+     * @return array
+     */
+    public static function getListByRole($role = 'agent'): array
+    {
+        $data = self::find()->leftJoin('auth_assignment','auth_assignment.user_id = id')->andWhere(['auth_assignment.item_name' => $role])->orderBy(['username' => SORT_ASC])->asArray()->all();
+        return ArrayHelper::map($data, 'id', 'username');
+    }
+
 
     /**
      * @param int|null $user_id

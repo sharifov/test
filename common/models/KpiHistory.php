@@ -108,4 +108,42 @@ class KpiHistory extends \yii\db\ActiveRecord
     {
         return $this->hasOne(Employee::className(), ['id' => 'kh_user_id']);
     }
+
+    public function getSalary()
+    {
+        $salary = 0;
+        $profit = $this->kh_estimation_profit * $this->kh_commission_percent / 100;
+        $salary = $profit + $this->kh_base_amount + $this->kh_profit_bonus + $this->kh_manual_bonus;
+
+        return number_format($salary, 2);
+    }
+
+
+    /**
+     * @return KpiHistory
+     */
+    public static function recalculateSalary(Employee $agent, \DateTime $start, \DateTime $end)
+    {
+        $salary = $agent->calculateSalaryBetween($start, $end);
+        $salaryParams = $agent->paramsForSalary();
+
+        $khDate = $end->format('Y-m-d');
+        $khUserId = $agent->id;
+
+        $kpiHistory = KpiHistory::find()->where(['kh_date_dt' => $khDate, 'kh_user_id' => $khUserId])->one();
+        if(!$kpiHistory){
+            $kpiHistory = new KpiHistory();
+            $kpiHistory->kh_date_dt = $khDate;
+            $kpiHistory->kh_user_id = $khUserId;
+        }
+        if(empty($kpiHistory->kh_agent_approved_dt) && empty($kpiHistory->kh_super_approved_dt)){
+            $kpiHistory->kh_base_amount = $salaryParams['base_amount'];
+            $kpiHistory->kh_commission_percent = $salaryParams['commission_percent'];
+            $kpiHistory->kh_bonus_active = $salaryParams['bonus_active'];
+            $kpiHistory->kh_profit_bonus = $salary['bonus'];
+            $kpiHistory->kh_estimation_profit = $salary['startProfit'];
+        }
+
+        return $kpiHistory;
+    }
 }
