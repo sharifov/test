@@ -2,6 +2,8 @@
 /**
  * @var $leadForm LeadForm
  * @var $comForm \frontend\models\CommunicationForm
+ * @var $previewEmailForm \frontend\models\LeadPreviewEmailForm
+ * @var $previewSmsForm \frontend\models\LeadPreviewSmsForm
  * @var $quotesProvider \yii\data\ActiveDataProvider
  * @var $dataProviderCommunication \yii\data\ActiveDataProvider
  */
@@ -477,6 +479,8 @@ JS;
             <?php if (!$leadForm->getLead()->isNewRecord) : ?>
                 <?= $this->render('communication/lead_communication', [
                         'leadForm'      => $leadForm,
+                        'previewEmailForm' => $previewEmailForm,
+                        'previewSmsForm' => $previewSmsForm,
                         'comForm'       => $comForm,
                         'leadId'        => $lead->id,
                         'dataProvider'  => $dataProviderCommunication

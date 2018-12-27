@@ -3,8 +3,11 @@
 namespace frontend\controllers;
 
 use common\components\BackOffice;
+use common\components\CommunicationService;
 use common\models\ClientEmail;
 use common\models\ClientPhone;
+use common\models\Email;
+use common\models\EmailTemplateType;
 use common\models\EmployeeContactInfo;
 use common\models\Lead;
 use common\models\LeadFlow;
@@ -14,10 +17,14 @@ use common\models\local\LeadAdditionalInformation;
 use common\models\Note;
 use common\models\ProjectEmailTemplate;
 use common\models\Reason;
+use common\models\Sms;
+use common\models\SmsTemplateType;
 use common\models\Task;
 use common\models\UserProjectParams;
 use frontend\models\CommunicationForm;
 use frontend\models\LeadForm;
+use frontend\models\LeadPreviewEmailForm;
+use frontend\models\LeadPreviewSmsForm;
 use frontend\models\SendEmailForm;
 use Symfony\Component\Finder\Exception\AccessDeniedException;
 use Yii;
@@ -296,48 +303,101 @@ class LeadController extends FController
                 return $data;
             }
 
-            $quotesProvider = $lead->getQuotesProvider([]);
 
 
 
-            $query1 = (new \yii\db\Query())
-                ->select(['e_id AS id', new Expression('"email" AS type'), 'e_lead_id AS lead_id', 'e_created_dt AS created_dt'])
-                ->from('email')
-                ->where(['e_lead_id' => $lead->id]);
+        $previewEmailForm = new LeadPreviewEmailForm();
+        $previewEmailForm->is_send = false;
 
-            $query2 = (new \yii\db\Query())
-                ->select(['s_id AS id', new Expression('"sms" AS type'), 's_lead_id AS lead_id', 's_created_dt AS created_dt'])
-                ->from('sms')
-                ->where(['s_lead_id' => $lead->id]);
+        $previewSmsForm = new LeadPreviewSmsForm();
+        $previewSmsForm->is_send = false;
 
 
-//            $query1 = (new \yii\db\Query())
-//                ->select('e_id AS id, 1 AS type, e_lead_id AS lead_id, e_created_dt AS created_dt')
-//                ->from('email');
-//            //->where(['!=', 'number', '']);
-//
-//            $query2 = (new \yii\db\Query())
-//                ->select('s_id AS id, 2 AS type, s_lead_id AS lead_id, s_created_dt AS created_dt')
-//                ->from('sms');
-//            //->where(['!=', 'firstname', '']);
+        if ($previewEmailForm->load(Yii::$app->request->post())) {
+            $previewEmailForm->e_lead_id = $lead->id;
+            if($previewEmailForm->validate()) {
+
+                $mail = new Email();
+                $mail->e_project_id = $lead->project_id;
+                $mail->e_lead_id = $lead->id;
+                if($previewEmailForm->e_email_tpl_id) {
+                    $mail->e_template_type_id = $previewEmailForm->e_email_tpl_id;
+                }
+                $mail->e_type_id = Email::TYPE_OUTBOX;
+                $mail->e_status_id = Email::STATUS_PENDING;
+                $mail->e_email_subject = $previewEmailForm->e_email_subject;
+                $mail->e_email_body_html = $previewEmailForm->e_email_message;
+                $mail->e_email_from = $previewEmailForm->e_email_from;
+
+                if($previewEmailForm->e_language_id) {
+                    $mail->e_language_id = $previewEmailForm->e_language_id;
+                }
+
+                $mail->e_email_to = $previewEmailForm->e_email_to;
+                //$mail->e_email_data = [];
+                $mail->e_message_id = $mail->generateMessageId();
+                $mail->e_created_dt = date('Y-m-d H:i:s');
+                $mail->e_created_user_id = Yii::$app->user->id;
+
+                if($mail->save()) {
+                    Yii::$app->session->setFlash('mail-send-success', '<strong>Email Message</strong> has been successfully sent to <strong>'.$mail->e_email_to.'</strong>');
+                    $previewEmailForm->is_send = true;
+                    $this->refresh();
+
+                } else {
+                    $previewEmailForm->addError('e_email_subject', VarDumper::dumpAsString($mail->errors));
+                    Yii::error(VarDumper::dumpAsString($mail->errors), 'LeadController:view:Email:save');
+                }
+                //VarDumper::dump($previewEmailForm->attributes, 10, true);              exit;
+            }
+        }
 
 
+        if ($previewSmsForm->load(Yii::$app->request->post())) {
+            $previewSmsForm->s_lead_id = $lead->id;
+            if($previewSmsForm->validate()) {
 
-            $unionQuery = (new \yii\db\Query())
-                ->from(['union_table' => $query1->union($query2)])
-                ->orderBy(['created_dt' => SORT_ASC]);
+                $sms = new Sms();
+                $sms->s_project_id = $lead->project_id;
+                $sms->s_lead_id = $lead->id;
+                if($previewSmsForm->s_sms_tpl_id) {
+                    $sms->s_template_type_id = $previewSmsForm->s_sms_tpl_id;
+                }
+                $sms->s_type_id = Sms::TYPE_OUTBOX;
+                $sms->s_status_id = Sms::STATUS_PENDING;
 
-            //echo $query1->count(); exit;
+                $sms->s_sms_text = $previewSmsForm->s_sms_message;
+                $sms->s_phone_from = $previewSmsForm->s_phone_from;
+                $sms->s_phone_to = $previewSmsForm->s_phone_to;
 
-            $dataProviderCommunication = new ActiveDataProvider([
-                'query' => $unionQuery,
-                'pagination' => [
-                    'pageSize' => 20,
-                ],
-            ]);
+                if($previewSmsForm->s_language_id) {
+                    $sms->s_language_id = $previewSmsForm->s_language_id;
+                }
+
+                //$sms->s_email_data = [];
+
+                $sms->s_created_dt = date('Y-m-d H:i:s');
+                $sms->s_created_user_id = Yii::$app->user->id;
+
+                if($sms->save()) {
+                    Yii::$app->session->setFlash('sms-send-success', '<strong>SMS Message</strong> has been successfully sent to <strong>'.$sms->s_phone_to.'</strong>');
+                    $previewSmsForm->is_send = true;
+                    $this->refresh();
+
+                } else {
+                    $previewSmsForm->addError('s_sms_text', VarDumper::dumpAsString($sms->errors));
+                    Yii::error(VarDumper::dumpAsString($sms->errors), 'LeadController:view:Sms:save');
+                }
+                //VarDumper::dump($previewEmailForm->attributes, 10, true);              exit;
+            }
+        }
+
 
 
             $comForm = new CommunicationForm();
+            $comForm->c_preview_email = 0;
+            $comForm->c_preview_sms = 0;
+
 
             if ($comForm->load(Yii::$app->request->post())) {
 
@@ -345,20 +405,219 @@ class LeadController extends FController
 
                 if($comForm->validate()) {
 
+                    if($comForm->c_type_id == CommunicationForm::TYPE_EMAIL) {
+
+                            $comForm->c_preview_email = 1;
+
+                            $mailFrom = Yii::$app->user->identity->email;
+
+                            /** @var CommunicationService $communication */
+                            $communication = Yii::$app->communication;
+                            $data['origin'] = '';
+
+
+                            //$mailPreview = $communication->mailPreview(7, 'cl_offer', 'chalpet@gmail.com', 'chalpet2@gmail.com', $data, 'ru-RU');
+                            //$mailTypes = $communication->mailTypes(7);
+
+                            $content_data['email_body_html'] = $comForm->c_email_message;
+                            //$content_data['email_body_text'] = '2';
+                            $content_data['email_subject'] = $comForm->c_email_subject;
+
+                            $content_data['email_reply_to'] = $mailFrom;
+                            //$content_data['email_cc'] = 'chalpet-cc@gmail.com';
+                            //$content_data['email_bcc'] = 'chalpet-bcc@gmail.com';
+
+
+                            if ($lead->project_id) {
+                                $upp = UserProjectParams::find()->where(['upp_project_id' => $lead->project_id, 'upp_user_id' => Yii::$app->user->id])->one();
+                                if ($upp) {
+                                    $mailFrom = $upp->upp_email;
+                                }
+                            }
+
+                            $language = $comForm->c_language_id ?: 'en-US';
+
+                            $previewEmailForm->e_lead_id = $lead->id;
+                            $previewEmailForm->e_email_tpl_id = $comForm->c_email_tpl_id;
+                            $previewEmailForm->e_language_id = $comForm->c_language_id;
+
+                            if ($comForm->c_email_tpl_id > 0) {
+                                $tpl = EmailTemplateType::findOne($comForm->c_email_tpl_id);
+                                //$mailSend = $communication->mailSend(7, 'cl_offer', 'chalpet@gmail.com', 'chalpet2@gmail.com', $content_data, $data, 'ru-RU', 10);
+
+                                $mailPreview = $communication->mailPreview($lead->project_id, ($tpl ? $tpl->etp_key : ''), $mailFrom, $comForm->c_email_to, $content_data, $language);
+
+
+                                if ($mailPreview && isset($mailPreview['data'])) {
+                                    if (isset($mailPreview['error']) && $mailPreview['error']) {
+
+                                        $errorJson = @json_decode($mailPreview['error'], true);
+                                        $comForm->addError('c_email_preview', 'Communication Server response: ' . ($errorJson['message'] ?? $mailPreview['error']));
+                                        Yii::error($mailPreview['error'], 'LeadController:view:mailPreview');
+                                        $comForm->c_preview_email = 0;
+                                    } else {
+
+                                        $previewEmailForm->e_email_message = $mailPreview['data']['email_body_html'];
+                                        $previewEmailForm->e_email_subject = $mailPreview['data']['email_subject'];
+                                        $previewEmailForm->e_email_from = $mailFrom; //$mailPreview['data']['email_from'];
+                                        $previewEmailForm->e_email_to = $comForm->c_email_to; //$mailPreview['data']['email_to'];
+
+                                    }
+                                }
+
+                                //VarDumper::dump($mailPreview, 10, true);// exit;
+                            } else {
+                                $previewEmailForm->e_email_message = $comForm->c_email_message;
+                                $previewEmailForm->e_email_subject = $comForm->c_email_subject;
+                                $previewEmailForm->e_email_from = $mailFrom;
+                                $previewEmailForm->e_email_to = $comForm->c_email_to;
+                            }
+
+
+                    }
+
+
+                    if($comForm->c_type_id == CommunicationForm::TYPE_SMS) {
+
+                        $comForm->c_preview_sms = 1;
+
+                        /** @var CommunicationService $communication */
+                        $communication = Yii::$app->communication;
+
+                        //$data['origin'] = 'ORIGIN';
+                        //$data['destination'] = 'DESTINATION';
+
+
+                        $content_data['message'] = $comForm->c_sms_message;
+                        $content_data['project_id'] = $lead->project_id;
+                        $phoneFrom = '';
+
+                        if($lead->project_id) {
+                            $upp = UserProjectParams::find()->where(['upp_project_id' => $lead->project_id, 'upp_user_id' => Yii::$app->user->id])->one();
+                            if($upp) {
+                                $phoneFrom = $upp->upp_tw_phone_number;
+                            }
+                        }
+
+                        if(!$phoneFrom) {
+                            $comForm->c_preview_sms = 0;
+                            $comForm->addError('c_sms_preview', 'Config Error: Not found phone number for Project Id: '.$lead->project_id.', agent: "'.Yii::$app->user->identity->username.'"');
+
+                        } else {
+
+
+
+                            $previewSmsForm->s_phone_to = $comForm->c_phone_number;
+                            $previewSmsForm->s_phone_from = $phoneFrom;
+
+                            if($comForm->c_language_id) {
+                                $previewSmsForm->s_language_id =  $comForm->c_language_id; //$language;
+                            }
+
+
+                            if ($comForm->c_sms_tpl_id > 0) {
+
+                                $language = $comForm->c_language_id ?: 'en-US';
+
+                                $tpl = SmsTemplateType::findOne($comForm->c_sms_tpl_id);
+                                //$mailSend = $communication->mailSend(7, 'cl_offer', 'chalpet@gmail.com', 'chalpet2@gmail.com', $content_data, $data, 'ru-RU', 10);
+
+                                $smsPreview = $communication->smsPreview($lead->project_id, ($tpl ? $tpl->stp_key : ''), $phoneFrom, $comForm->c_phone_number, $content_data, $language);
+
+
+
+                                if ($smsPreview && isset($smsPreview['data'])) {
+                                    if (isset($smsPreview['error']) && $smsPreview['error']) {
+
+                                        $errorJson = @json_decode($smsPreview['error'], true);
+                                        $comForm->addError('c_email_preview', 'Communication Server response: ' . ($errorJson['message'] ?? $smsPreview['error']));
+                                        Yii::error($communication->url ."\r\n ".$smsPreview['error'], 'LeadController:view:smsPreview');
+                                        $comForm->c_preview_sms = 0;
+                                    } else {
+                                        //$previewSmsForm->s_phone_from = $smsPreview['data']['phone_from'];
+                                        $previewSmsForm->s_sms_message = $smsPreview['data']['sms_text'];
+                                    }
+                                }
+
+
+                                //VarDumper::dump($mailPreview, 10, true);// exit;
+                            } else {
+                                $previewSmsForm->s_sms_message = $comForm->c_sms_message;
+                            }
+                        }
+
+                    }
+
                 }
                 //return $this->redirect(['view', 'id' => $model->al_id]);
             } else {
                 $comForm->c_type_id = 1;
             }
 
-            //$dataProviderCommunication = $lead->getQuotesProvider([]);
+            if($previewEmailForm->is_send || $previewSmsForm->is_send) {
+                $comForm->c_preview_email = 0;
+                $comForm->c_preview_sms = 0;
+            }
 
-            return $this->render('view', [
-                'leadForm' => $leadForm,
-                'comForm' => $comForm,
-                'quotesProvider' => $quotesProvider,
-                'dataProviderCommunication' => $dataProviderCommunication,
-            ]);
+
+        $quotesProvider = $lead->getQuotesProvider([]);
+
+
+
+        $query1 = (new \yii\db\Query())
+            ->select(['e_id AS id', new Expression('"email" AS type'), 'e_lead_id AS lead_id', 'e_created_dt AS created_dt'])
+            ->from('email')
+            ->where(['e_lead_id' => $lead->id]);
+
+        $query2 = (new \yii\db\Query())
+            ->select(['s_id AS id', new Expression('"sms" AS type'), 's_lead_id AS lead_id', 's_created_dt AS created_dt'])
+            ->from('sms')
+            ->where(['s_lead_id' => $lead->id]);
+
+
+
+        $unionQuery = (new \yii\db\Query())
+            ->from(['union_table' => $query1->union($query2)])
+            ->orderBy(['created_dt' => SORT_ASC]);
+
+        //echo $query1->count(); exit;
+
+        $dataProviderCommunication = new ActiveDataProvider([
+            'query' => $unionQuery,
+            'pagination' => [
+                'pageSize' => 10,
+                //'page' => 0
+            ],
+        ]);
+
+
+
+
+        //$pageCount = ;//        $pageCount = $dataProviderCommunication->pagination->pageCount;
+
+        //echo $pageCount; exit;*/
+
+        /*$pager = $dataProviderCommunication->pagination;
+        $pager->pageCount = $dataProviderCommunication->totalCount;*/
+        if(!Yii::$app->request->isAjax) {
+            $pageCount = ceil($dataProviderCommunication->totalCount / $dataProviderCommunication->pagination->pageSize) - 1;
+            if($pageCount < 0) {
+                $pageCount = 0;
+            }
+            $dataProviderCommunication->pagination->page = $pageCount;
+        }
+
+
+        //$dataProviderCommunication = $lead->getQuotesProvider([]);
+
+        return $this->render('view', [
+            'leadForm' => $leadForm,
+            'previewEmailForm' => $previewEmailForm,
+            'previewSmsForm' => $previewSmsForm,
+            'comForm' => $comForm,
+            'quotesProvider' => $quotesProvider,
+            'dataProviderCommunication' => $dataProviderCommunication,
+        ]);
 
 
     }

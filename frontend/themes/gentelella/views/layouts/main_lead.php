@@ -39,7 +39,7 @@ $bundle = \frontend\themes\gentelella\assets\Asset::register($this);
 
         //$this->head();
 
-        $host = 'BookAir';
+        $host = 'Sales';
         echo Html::tag('title', ucfirst($host).' - '.Html::encode($this->title));
         ?>
         <?php /*<link rel="stylesheet" href="<?= Yii::$app->getAssetManager()->publish(Yii::getAlias('@frontend').'/web/css/style_theme.css')[1];?>"/>*/ ?>
