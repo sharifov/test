@@ -145,11 +145,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'template' => '{action}',
             'buttons' => [
                 'action' => function ($url, $model, $key) {
-                return Html::a('<i class="fa fa-search"></i>', Url::to([
-                    'lead/quote',
-                    'type' => 'sold',
-                    'id' => $model['id']
-                ]), [
+                return Html::a('<i class="fa fa-search"></i>', ['lead/view', 'id' => $model->id], [
                     'class' => 'btn btn-info btn-xs',
                     'target' => '_blank',
                     'data-pjax' => 0,
