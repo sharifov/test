@@ -1633,6 +1633,7 @@ Sales - Kivork",
         if (!empty($this->additional_information)) {
             $this->additionalInformationForm = self::getLeadAdditionalInfo($this->additional_information);
         }
+        $this->totalTips = ($this->tips)?$this->tips/2:0;
     }
 
     /**

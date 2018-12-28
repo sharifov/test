@@ -802,7 +802,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
             $entry['minus_percent_tips'] = intval($entry['minus_percent_tips']);
             $quote = Quote::findOne(['id' => $entry['q_id']]);
             $totalProfit = $quote->getEstimationProfit();
-            $totalTips = $entry['tips'];
+            $totalTips = $entry['tips']/2;
             if ($entry['agent_type'] == 'main') {
                 $agentProfit = $totalProfit * (100 - $entry['minus_percent_profit']) / 100;
                 $agentTips = ($totalTips > 0)?($totalTips * (100 - $entry['minus_percent_tips']) / 100):0;
