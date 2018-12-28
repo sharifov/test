@@ -144,6 +144,11 @@ class KpiHistory extends \yii\db\ActiveRecord
             $kpiHistory->kh_estimation_profit = $salary['startProfit'];
         }
 
+        if(empty($kpiHistory->kh_agent_approved_dt)|| empty($kpiHistory->kh_super_approved_dt)){
+            $kpiHistory->kh_agent_approved_dt = null;
+            $kpiHistory->kh_super_approved_dt = null;
+        }
+
         return $kpiHistory;
     }
 }

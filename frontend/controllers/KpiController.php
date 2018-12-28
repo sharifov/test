@@ -62,7 +62,7 @@ class KpiController extends FController
             $result = KpiService::calculateSalary($date->format('Y-m-d'));
 
             return $this->redirect([
-                'kpi/view',
+                'kpi/index',
                 'KpiHistorySearch[kh_date_dt]' => $params2['DynamicModel']['date_dt'],
             ]);
         }
