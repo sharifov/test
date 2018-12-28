@@ -7,24 +7,19 @@
 
 namespace frontend\themes\gentelella\assets;
 
-class Asset extends \yii\web\AssetBundle
+class AssetLeadCommunication extends \yii\web\AssetBundle
 {
-    public $sourcePath = '@frontend/themes/gentelella/';
-    //public $basePath = '@webroot';
+    //public $sourcePath = '@frontend/themes/gentelella/';
+    public $basePath = '@webroot';
     public $baseUrl = '@web';
 
     public $css = [
-        //'css/custom2.css',
-        'css/style-req.css',
-        //'https://use.fontawesome.com/releases/v5.4.1/css/all.css',
-        //'css/font-awesome.css',
-        //'css/style.css?v=2',
-        //'css/site.css',
+        'css/style-lead-communication.css',
     ];
 
     public $js = [
-        'js/custom.js',
-        'js/util.js'
+        'https://cdnjs.cloudflare.com/ajax/libs/scrollup/2.4.1/jquery.scrollUp.min.js'
+        //'js/js-lead-communication.js',
     ];
 
     /*public $depends = [

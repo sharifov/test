@@ -43,12 +43,10 @@ use common\models\Quote;
                 </td>
                 <td>
                     <?php
-                    $url = Url::to([
-                        'lead/quote',
-                        'type' => 'sold',
+                    echo Html::a('Open', [
+                        'lead/view',
                         'id' => $lead->id
-                    ]);
-                    echo Html::a('Open', $url, [
+                    ], [
                         'class' => 'btn btn-primary btn-sm',
                         'target' => '_blank',
                         'data-pjax' => 0

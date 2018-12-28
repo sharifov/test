@@ -349,12 +349,15 @@ class Email extends \yii\db\ActiveRecord
         return $text;
     }
 
+
     /**
-     * @return bool
-     * @throws \yii\httpclient\Exception
+     * @return array
      */
-    public function sendMail(): bool
+    public function sendMail(): array
     {
+
+        $out = ['error' => false];
+
         /** @var CommunicationService $communication */
         $communication = Yii::$app->communication;
         $data = [];
@@ -366,17 +369,46 @@ class Email extends \yii\db\ActiveRecord
         $content_data['email_reply_to'] = $this->e_email_from;
         $content_data['email_cc'] = $this->e_email_cc;
         $content_data['email_bcc'] = $this->e_email_bc;
+        $content_data['email_message_id'] = $this->e_message_id;
 
-        $request = $communication->mailSend($this->e_project_id, 'cl_offer', $this->e_email_from, $this->e_email_to, $content_data, $data, ($this->e_language_id ?: 'en-US'), 0);
+        $tplType = $this->eTemplateType ? $this->eTemplateType->etp_key : null;
 
-        if($request && $request['data']) {
-            $this->e_status_id = $request['data']['eq_status_id'];
+        try {
+            $request = $communication->mailSend($this->e_project_id, $tplType, $this->e_email_from, $this->e_email_to, $content_data, $data, ($this->e_language_id ?: 'en-US'), 0);
+
+
+            if($request && isset($request['data']['eq_status_id'])) {
+                $this->e_status_id = $request['data']['eq_status_id'];
+                $this->e_communication_id = $request['data']['eq_id'];
+                $this->save();
+            }
+
+            //VarDumper::dump($request, 10, true); exit;
+
+            if($request && isset($request['error']) && $request['error']) {
+                $this->e_status_id = self::STATUS_ERROR;
+                $errorData = @json_decode($request['error'], true);
+                $this->e_error_message = 'Communication error: ' . ($errorData['message'] ?: $request['error']);
+                $this->save();
+                $out['error'] = $this->e_error_message;
+            }
+
+        } catch (\Throwable $exception) {
+            $error = VarDumper::dumpAsString($exception->getMessage());
+            $out['error'] = $error;
+            Yii::error($error, 'Email:sendMail:mailSend:exception');
+            $this->e_error_message = 'Communication error: ' . $error;
             $this->save();
-            return true;
         }
+
+        //VarDumper::dump($request, 10, true); exit;
+
+
+
+
         // VarDumper::dump($request, 10, true); exit;
 
-        return false;
+        return $out;
     }
 
     /**
@@ -384,7 +416,12 @@ class Email extends \yii\db\ActiveRecord
      */
     public function generateMessageId(): string
     {
-        $message = uniqid().'.'.$this->e_email_from;
+        $arr[] = $this->e_id;
+        $arr[] = $this->e_lead_id;
+        $arr[] = $this->e_email_from;
+
+        $message = implode('.', $arr);
         return $message;
     }
+
 }

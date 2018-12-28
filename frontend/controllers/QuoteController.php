@@ -515,8 +515,7 @@ class QuoteController extends FController
                         Yii::$app->getSession()->setFlash('danger', sprintf('Sent email \'%s\' failed. Please verify your email or password from email!', $previewEmailModel->subject));
                     }
                     return $this->redirect([
-                        'lead/quote',
-                        'type' => 'processing',
+                        'lead/view',
                         'id' => $lead->id
                     ]);
                 }
@@ -620,8 +619,7 @@ class QuoteController extends FController
                         Yii::$app->getSession()->setFlash('danger', sprintf('Sent email \'%s\' failed. Please verify your email or password from email!', $email->e_email_subject));
                     }
                     return $this->redirect([
-                        'lead/quote',
-                        'type' => 'processing',
+                        'lead/view',
                         'id' => $lead->id
                     ]);
                 }
@@ -982,8 +980,7 @@ class QuoteController extends FController
                 }
 
                 return $this->redirect([
-                    'lead/quote',
-                    'type' => 'processing',
+                    'lead/view',
                     'id' => $leadId
                 ]);
             }

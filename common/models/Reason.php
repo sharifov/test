@@ -204,8 +204,7 @@ class Reason extends \yii\db\ActiveRecord
         if ($this->duplicateLeadId) {
 
             $aHref = Html::a($this->duplicateLeadId, [
-                'lead/quote',
-                'type' => 'processing',
+                'lead/view',
                 'id' => $this->duplicateLeadId
             ], ['data-pjax' => 0]);
 

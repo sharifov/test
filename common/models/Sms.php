@@ -6,6 +6,7 @@ use common\components\CommunicationService;
 use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
+use yii\helpers\VarDumper;
 
 /**
  * This is the model class for table "sms".
@@ -299,27 +300,56 @@ class Sms extends \yii\db\ActiveRecord
         return new SmsQuery(get_called_class());
     }
 
-    /**
-     * @return bool
-     * @throws \yii\httpclient\Exception
-     */
-    public function sendMail(): bool
+
+    public function sendSms()
     {
+        $out = ['error' => false];
+
         /** @var CommunicationService $communication */
         $communication = Yii::$app->communication;
         $data = [];
         $data['project_id'] = $this->s_project_id;
 
         $content_data['sms_text'] = $this->s_sms_text;
-        $request = $communication->smsSend($this->s_project_id, 'cl_offer', $this->s_phone_from, $this->s_phone_to, $content_data, $data, ($this->s_language_id ?: 'en-US'), 0);
 
-        if($request && $request['data']) {
-            $this->s_status_id = $request['data']['sq_status_id'];
+        $tplType = $this->sTemplateType ? $this->sTemplateType->stp_key : null;
+
+
+        try {
+
+            $str = 'ProjectId: ' . $this->s_project_id. ' TemplateKey:'. $tplType . ' From:' . $this->s_phone_from . ' To:'. $this->s_phone_to;
+            //VarDumper::dump($str); exit;
+
+            $request = $communication->smsSend($this->s_project_id, $tplType, $this->s_phone_from, $this->s_phone_to, $content_data, $data, ($this->s_language_id ?: 'en-US'), 0);
+
+            if($request && isset($request['data']['sq_status_id'])) {
+                $this->s_status_id = $request['data']['sq_status_id'];
+                $this->s_communication_id = $request['data']['sq_id'];
+                $this->save();
+            }
+
+            //VarDumper::dump($request, 10, true); exit;
+
+            if($request && isset($request['error']) && $request['error']) {
+                $this->s_status_id = self::STATUS_ERROR;
+                $errorData = @json_decode($request['error'], true);
+                $this->s_error_message = 'Communication error: ' . ($errorData['message'] ?: $request['error']);
+                $this->save();
+                $out['error'] = $this->s_error_message;
+                Yii::error($str. "\r\n". $out['error'], 'Sms:sendSms:smsSend:CommunicationError');
+            }
+
+        } catch (\Throwable $exception) {
+            $error = VarDumper::dumpAsString($exception->getMessage());
+            $out['error'] = $error;
+            Yii::error($str. "\r\n". $error, 'Sms:sendSms:smsSend:exception');
+            $this->s_error_message = 'Communication error: ' . $error;
             $this->save();
-            return true;
         }
-        // VarDumper::dump($request, 10, true); exit;
 
-        return false;
+       // VarDumper::dump($request, 10, true); exit;
+
+        return $out;
     }
+
 }

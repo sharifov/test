@@ -257,7 +257,7 @@ JS;
                 //'label' => 'Lead UID',
                 'attribute' => 'lt_lead_id',
                 'value' => function(\common\models\LeadTask $model) {
-                    return Html::a($model->lt_lead_id, ['lead/processing/' . $model->lt_lead_id], ['target' => '_blank', 'data-pjax' => 0]);
+                    return Html::a($model->lt_lead_id, ['lead/view/' . $model->lt_lead_id], ['target' => '_blank', 'data-pjax' => 0]);
                 },
                 'format' => 'raw',
                 'options' => ['style' => 'width:80px'],

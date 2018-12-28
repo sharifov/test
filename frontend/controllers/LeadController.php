@@ -3,8 +3,11 @@
 namespace frontend\controllers;
 
 use common\components\BackOffice;
+use common\components\CommunicationService;
 use common\models\ClientEmail;
 use common\models\ClientPhone;
+use common\models\Email;
+use common\models\EmailTemplateType;
 use common\models\EmployeeContactInfo;
 use common\models\Lead;
 use common\models\LeadFlow;
@@ -14,12 +17,20 @@ use common\models\local\LeadAdditionalInformation;
 use common\models\Note;
 use common\models\ProjectEmailTemplate;
 use common\models\Reason;
+use common\models\Sms;
+use common\models\SmsTemplateType;
 use common\models\Task;
 use common\models\UserProjectParams;
+use frontend\models\CommunicationForm;
 use frontend\models\LeadForm;
+use frontend\models\LeadPreviewEmailForm;
+use frontend\models\LeadPreviewSmsForm;
 use frontend\models\SendEmailForm;
+use Symfony\Component\Finder\Exception\AccessDeniedException;
 use Yii;
 use yii\base\Model;
+use yii\data\ActiveDataProvider;
+use yii\db\Expression;
 use yii\helpers\ArrayHelper;
 use yii\filters\AccessControl;
 use yii\helpers\Html;
@@ -58,27 +69,15 @@ class LeadController extends FController
                 'class' => AccessControl::class,
                 'rules' => [
                     [
-                        'actions' => ['queue', 'quote'],
-                        'allow' => true,
-                        'roles' => ['agent'],
-                        'matchCallback' => function ($rule, $action) {
-                            $type = Yii::$app->request->get('type');
-                            if ($type == 'trash' && Yii::$app->user->identity->role == 'agent') {
-                                return false;
-                            }
-                            return in_array($type, Lead::getLeadQueueType());
-                        },
-                    ],
-                    [
                         'actions' => [
                             'create', 'add-comment', 'change-state', 'unassign', 'take',
                             'set-rating', 'add-note', 'unprocessed', 'call-expert', 'send-email',
                             'check-updates', 'flow-transition', 'get-user-actions', 'add-pnr', 'update2','clone',
                             'get-badges', 'sold', 'split-profit', 'split-tips','processing', 'follow-up', 'inbox', 'trash', 'booked',
-                            'test'
+                            'test', 'view'
                         ],
                         'allow' => true,
-                        'roles' => ['agent'],
+                        'roles' => ['agent', 'admin', 'supervisor'],
                     ],
                 ],
             ]
@@ -90,7 +89,7 @@ class LeadController extends FController
     public function beforeAction($action)
     {
         if (parent::beforeAction($action)) {
-            if (in_array($action->id, ['create', 'quote'])) {
+            if (in_array($action->id, ['create', 'view'])) {
                 //Yii::$app->setLayoutPath('@frontend/views/layouts');
                 //$this->layout = 'sale';
                 $this->layout = '@app/themes/gentelella/views/layouts/main_lead';
@@ -107,6 +106,547 @@ class LeadController extends FController
     public function actions()
     {
         return parent::actions();
+    }
+
+    public function actionView($id)
+    {
+        $lead = Lead::findOne(['id' => $id]);
+        if(!$lead) {
+            throw new UnauthorizedHttpException('Not found lead by ID: ' . $id);
+        }
+
+        if($lead->status == Lead::STATUS_TRASH && Yii::$app->user->identity->role == 'agent') {
+            throw new AccessDeniedException('Access Denied for Agent');
+        }
+
+
+            if (Yii::$app->request->post('hasEditable')) {
+
+                $value = '456';
+                $message = '';
+
+                // use Yii's response format to encode output as JSON
+                \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+
+                // read your posted model attributes
+                if(Yii::$app->request->isPost && $extraMarkup = Yii::$app->request->post('extra_markup')){
+                    $paxCode = key($extraMarkup);
+                    if($paxCode){
+                        $quoteId = key($extraMarkup[$paxCode]);
+                        if($quoteId){
+                            $qPrices = QuotePrice::find()->where(['quote_id' => $quoteId, 'passenger_type' => $paxCode])->all();
+                            if (count($qPrices)){
+                                $quote = Quote::findOne(['id' => $quoteId]);
+                                $priceData = $quote->getPricesData();
+                                $sellingOld = $priceData['total']['selling'];
+                                foreach ($qPrices as $qPrice){
+                                    $qPrice->extra_mark_up = $extraMarkup[$paxCode][$quoteId];
+                                    $qPrice->update();
+                                }
+
+                                $quote = Quote::findOne(['id' => $quoteId]);
+                                $priceData = $quote->getPricesData();
+                                //log messages
+                                $leadLog = new LeadLog((new LeadLogMessage()));
+                                $leadLog->logMessage->oldParams = ['selling' => $sellingOld];
+                                $leadLog->logMessage->newParams = ['selling' => $priceData['total']['selling']];
+                                $leadLog->logMessage->title = 'Update';
+                                $leadLog->logMessage->model = sprintf('%s (%s)', $quote->formName(), $quote->uid);
+                                $leadLog->addLog([
+                                    'lead_id' => $id,
+                                ]);
+
+                                if ($lead->called_expert) {
+                                    $data = $quote->getQuoteInformationForExpert(true);
+                                    $response = BackOffice::sendRequest('lead/update-quote', 'POST', json_encode($data));
+                                    if ($response['status'] != 'Success' || !empty($response['errors'])) {
+                                        \Yii::$app->getSession()->setFlash('warning', sprintf(
+                                            'Update info quote [%s] for expert failed! %s',
+                                            $quote->uid,
+                                            print_r($response['errors'], true)
+                                        ));
+                                    }
+                                }
+
+                                return ['output' => $extraMarkup[$paxCode][$quoteId]];
+                            }
+                            return [];
+                        }
+                        return [];
+                    }
+
+                    return [];
+                }elseif (Yii::$app->request->isPost && $taskNotes = Yii::$app->request->post('task_notes')) {
+
+                    $taskId = $taskDate = $userId = $leadId = null;
+
+                    $leadId = $lead->id; //Yii::$app->request->get('lead_id');
+
+                    $taskKey = key($taskNotes);
+
+                    if($taskKey) {
+                        list($taskId, $taskDate, $userId) = explode('_', $taskKey);
+                    }
+
+                    $value = $taskNotes[$taskKey];
+
+
+                    if(!$taskId) {
+                        $message = 'Not found Task ID data';
+                    } elseif(!$taskDate) {
+                        $message = 'Not found Task Date data';
+                    } elseif(!$userId) {
+                        $message = 'Not found Task User ID data';
+                    } elseif(!$leadId) {
+                        $message = 'Not found Lead ID data';
+                    } else {
+
+                        if($taskDate && $taskId && $leadId && $userId) {
+                            $lt = LeadTask::find()->where(['lt_lead_id' => $leadId, 'lt_date' => $taskDate, 'lt_task_id' => $taskId, 'lt_user_id' => $userId])->one();
+                            if($lt) {
+                                $lt->lt_notes = $value;
+                                $lt->lt_updated_dt = date('Y-m-d H:i:s');
+                                $lt->update();
+                            }
+                        }
+
+                    }
+
+                } else {
+                    $message = 'Not found task notes data';
+                }
+
+
+                return ['output' => nl2br(Html::encode($value)), 'message' => $message];
+            }
+
+
+            if(Yii::$app->request->isPjax) {
+                $taskDate = Yii::$app->request->get('date');
+                $taskId = Yii::$app->request->get('task_id');
+                $leadId = $lead->id; //Yii::$app->request->get('lead_id');
+                $userId = Yii::$app->request->get('user_id'); // Yii::$app->user->id;
+
+                if($taskDate && $taskId && $leadId && $userId) {
+                    $lt = LeadTask::find()->where(['lt_lead_id' => $leadId, 'lt_date' => $taskDate, 'lt_task_id' => $taskId, 'lt_user_id' => $userId])->one();
+                    if($lt) {
+                        if($lt->lt_completed_dt) {
+                            $lt->lt_completed_dt = null;
+                        } else {
+                            $lt->lt_completed_dt = date('Y-m-d H:i:s');
+                        }
+                        $lt->lt_updated_dt = date('Y-m-d H:i:s');
+                        $lt->update();
+                    }
+                }
+
+            }
+
+
+
+
+            Yii::$app->cache->delete(sprintf('quick-search-%d-%d', $lead->id, Yii::$app->user->identity->getId()));
+            if (!$lead->permissionsView()) {
+                throw new UnauthorizedHttpException('Not permissions view lead ID: ' . $id);
+            }
+            $leadForm = new LeadForm($lead);
+            if ($leadForm->getLead()->status != Lead::STATUS_PROCESSING ||
+                $leadForm->getLead()->employee_id != Yii::$app->user->identity->getId()
+            ) {
+                $leadForm->mode = $leadForm::VIEW_MODE;
+            }
+
+            $flightSegments = $leadForm->getLeadFlightSegment();
+            foreach ($flightSegments as $segment){
+                $this->view->title = 'Lead #'.$id.' ✈ '.$segment->destination;
+                break;
+            }
+
+
+            if (Yii::$app->request->isAjax && !Yii::$app->request->isPjax) {
+                Yii::$app->response->format = Response::FORMAT_JSON;
+                $data = [
+                    'load' => false,
+                    'errors' => []
+                ];
+                if ($leadForm->loadModels(Yii::$app->request->post())) {
+                    $data['load'] = true;
+                    $data['errors'] = ActiveForm::validate($leadForm);
+                }
+
+                $errors = [];
+                if (empty($data['errors']) && $data['load'] && $leadForm->save($errors)) {
+
+                    if ($lead->called_expert) {
+                        $lead = Lead::findOne(['id' => $id]);
+                        $data = $lead->getLeadInformationForExpert();
+                        $result = BackOffice::sendRequest('lead/update-lead', 'POST', json_encode($data));
+                        if ($result['status'] != 'Success' || !empty($result['errors'])) {
+                            Yii::$app->getSession()->setFlash('warning', sprintf(
+                                'Update info lead for expert failed! %s',
+                                print_r($result['errors'], true)
+                            ));
+                        }
+                    }
+
+                    return $this->redirect([
+                        'quote',
+                        'type' => 'processing',
+                        'id' => $leadForm->getLead()->id
+                    ]);
+                }
+
+                if (!empty($errors)) {
+                    $data['errors'] = $errors;
+                }
+
+                return $data;
+            }
+
+
+
+
+        $previewEmailForm = new LeadPreviewEmailForm();
+        $previewEmailForm->is_send = false;
+
+
+        if ($previewEmailForm->load(Yii::$app->request->post())) {
+            $previewEmailForm->e_lead_id = $lead->id;
+            if($previewEmailForm->validate()) {
+
+                $mail = new Email();
+                $mail->e_project_id = $lead->project_id;
+                $mail->e_lead_id = $lead->id;
+                if($previewEmailForm->e_email_tpl_id) {
+                    $mail->e_template_type_id = $previewEmailForm->e_email_tpl_id;
+                }
+                $mail->e_type_id = Email::TYPE_OUTBOX;
+                $mail->e_status_id = Email::STATUS_PENDING;
+                $mail->e_email_subject = $previewEmailForm->e_email_subject;
+                $mail->e_email_body_html = $previewEmailForm->e_email_message;
+                $mail->e_email_from = $previewEmailForm->e_email_from;
+
+                if($previewEmailForm->e_language_id) {
+                    $mail->e_language_id = $previewEmailForm->e_language_id;
+                }
+
+                $mail->e_email_to = $previewEmailForm->e_email_to;
+                //$mail->e_email_data = [];
+                $mail->e_message_id = $mail->generateMessageId();
+                $mail->e_created_dt = date('Y-m-d H:i:s');
+                $mail->e_created_user_id = Yii::$app->user->id;
+
+                if($mail->save()) {
+
+                    $previewEmailForm->is_send = true;
+
+                    $mailResponse = $mail->sendMail();
+
+                    if(isset($mailResponse['error']) && $mailResponse['error']) {
+                        //echo $mailResponse['error']; exit; //'Error: <strong>Email Message</strong> has not been sent to <strong>'.$mail->e_email_to.'</strong>'; exit;
+                        Yii::$app->session->setFlash('send-error', 'Error: <strong>Email Message</strong> has not been sent to <strong>'.$mail->e_email_to.'</strong>');
+                        Yii::error('Error: Email Message has not been sent to '.$mail->e_email_to."\r\n ".$mailResponse['error'], 'LeadController:view:Email:sendMail');
+                    } else {
+                        //echo '<strong>Email Message</strong> has been successfully sent to <strong>'.$mail->e_email_to.'</strong>'; exit;
+                        Yii::$app->session->setFlash('send-success', '<strong>Email Message</strong> has been successfully sent to <strong>'.$mail->e_email_to.'</strong>');
+                    }
+
+                    $this->refresh();
+
+                } else {
+                    $previewEmailForm->addError('e_email_subject', VarDumper::dumpAsString($mail->errors));
+                    Yii::error(VarDumper::dumpAsString($mail->errors), 'LeadController:view:Email:save');
+                }
+                //VarDumper::dump($previewEmailForm->attributes, 10, true);              exit;
+            }
+        }
+
+
+        $previewSmsForm = new LeadPreviewSmsForm();
+        $previewSmsForm->is_send = false;
+
+        if ($previewSmsForm->load(Yii::$app->request->post())) {
+            $previewSmsForm->s_lead_id = $lead->id;
+            if($previewSmsForm->validate()) {
+
+                $sms = new Sms();
+                $sms->s_project_id = $lead->project_id;
+                $sms->s_lead_id = $lead->id;
+                if($previewSmsForm->s_sms_tpl_id) {
+                    $sms->s_template_type_id = $previewSmsForm->s_sms_tpl_id;
+                }
+                $sms->s_type_id = Sms::TYPE_OUTBOX;
+                $sms->s_status_id = Sms::STATUS_PENDING;
+
+                $sms->s_sms_text = $previewSmsForm->s_sms_message;
+                $sms->s_phone_from = $previewSmsForm->s_phone_from;
+                $sms->s_phone_to = $previewSmsForm->s_phone_to;
+
+                if($previewSmsForm->s_language_id) {
+                    $sms->s_language_id = $previewSmsForm->s_language_id;
+                }
+
+                //$sms->s_email_data = [];
+
+                $sms->s_created_dt = date('Y-m-d H:i:s');
+                $sms->s_created_user_id = Yii::$app->user->id;
+
+                if($sms->save()) {
+
+                    $previewSmsForm->is_send = true;
+
+
+                    $smsResponse = $sms->sendSms();
+
+                    if(isset($smsResponse['error']) && $smsResponse['error']) {
+                        Yii::$app->session->setFlash('send-error', 'Error: <strong>SMS Message</strong> has not been sent to <strong>'.$sms->s_phone_to.'</strong>');
+                        Yii::error('Error: SMS Message has not been sent to '.$sms->s_phone_to."\r\n ".$smsResponse['error'], 'LeadController:view:Sms:sendSms');
+                    } else {
+                        Yii::$app->session->setFlash('send-success', '<strong>SMS Message</strong> has been successfully sent to <strong>'.$sms->s_phone_to.'</strong>');
+                    }
+
+                    $this->refresh();
+
+                } else {
+                    $previewSmsForm->addError('s_sms_text', VarDumper::dumpAsString($sms->errors));
+                    Yii::error(VarDumper::dumpAsString($sms->errors), 'LeadController:view:Sms:save');
+                }
+                //VarDumper::dump($previewEmailForm->attributes, 10, true);              exit;
+            }
+        }
+
+
+
+            $comForm = new CommunicationForm();
+            $comForm->c_preview_email = 0;
+            $comForm->c_preview_sms = 0;
+
+
+            if ($comForm->load(Yii::$app->request->post())) {
+
+                $comForm->c_lead_id = $lead->id;
+
+                if($comForm->validate()) {
+
+                    if($comForm->c_type_id == CommunicationForm::TYPE_EMAIL) {
+
+                            $comForm->c_preview_email = 1;
+
+                            $mailFrom = Yii::$app->user->identity->email;
+
+                            /** @var CommunicationService $communication */
+                            $communication = Yii::$app->communication;
+                            $data['origin'] = '';
+
+
+                            //$mailPreview = $communication->mailPreview(7, 'cl_offer', 'chalpet@gmail.com', 'chalpet2@gmail.com', $data, 'ru-RU');
+                            //$mailTypes = $communication->mailTypes(7);
+
+                            $content_data['email_body_html'] = $comForm->c_email_message;
+                            //$content_data['email_body_text'] = '2';
+                            $content_data['email_subject'] = $comForm->c_email_subject;
+
+                            $content_data['email_reply_to'] = $mailFrom;
+                            //$content_data['email_cc'] = 'chalpet-cc@gmail.com';
+                            //$content_data['email_bcc'] = 'chalpet-bcc@gmail.com';
+
+
+                            if ($lead->project_id) {
+                                $upp = UserProjectParams::find()->where(['upp_project_id' => $lead->project_id, 'upp_user_id' => Yii::$app->user->id])->one();
+                                if ($upp) {
+                                    $mailFrom = $upp->upp_email;
+                                }
+                            }
+
+                            $language = $comForm->c_language_id ?: 'en-US';
+
+                            $previewEmailForm->e_lead_id = $lead->id;
+                            $previewEmailForm->e_email_tpl_id = $comForm->c_email_tpl_id;
+                            $previewEmailForm->e_language_id = $comForm->c_language_id;
+
+                            if ($comForm->c_email_tpl_id > 0) {
+                                $tpl = EmailTemplateType::findOne($comForm->c_email_tpl_id);
+                                //$mailSend = $communication->mailSend(7, 'cl_offer', 'chalpet@gmail.com', 'chalpet2@gmail.com', $content_data, $data, 'ru-RU', 10);
+
+                                $mailPreview = $communication->mailPreview($lead->project_id, ($tpl ? $tpl->etp_key : ''), $mailFrom, $comForm->c_email_to, $content_data, $language);
+
+
+                                if ($mailPreview && isset($mailPreview['data'])) {
+                                    if (isset($mailPreview['error']) && $mailPreview['error']) {
+
+                                        $errorJson = @json_decode($mailPreview['error'], true);
+                                        $comForm->addError('c_email_preview', 'Communication Server response: ' . ($errorJson['message'] ?? $mailPreview['error']));
+                                        Yii::error($mailPreview['error'], 'LeadController:view:mailPreview');
+                                        $comForm->c_preview_email = 0;
+                                    } else {
+
+                                        $previewEmailForm->e_email_message = $mailPreview['data']['email_body_html'];
+                                        $previewEmailForm->e_email_subject = $mailPreview['data']['email_subject'];
+                                        $previewEmailForm->e_email_from = $mailFrom; //$mailPreview['data']['email_from'];
+                                        $previewEmailForm->e_email_to = $comForm->c_email_to; //$mailPreview['data']['email_to'];
+
+                                    }
+                                }
+
+                                //VarDumper::dump($mailPreview, 10, true);// exit;
+                            } else {
+                                $previewEmailForm->e_email_message = $comForm->c_email_message;
+                                $previewEmailForm->e_email_subject = $comForm->c_email_subject;
+                                $previewEmailForm->e_email_from = $mailFrom;
+                                $previewEmailForm->e_email_to = $comForm->c_email_to;
+                            }
+
+
+                    }
+
+
+                    if($comForm->c_type_id == CommunicationForm::TYPE_SMS) {
+
+                        $comForm->c_preview_sms = 1;
+
+                        /** @var CommunicationService $communication */
+                        $communication = Yii::$app->communication;
+
+                        //$data['origin'] = 'ORIGIN';
+                        //$data['destination'] = 'DESTINATION';
+
+
+                        $content_data['message'] = $comForm->c_sms_message;
+                        $content_data['project_id'] = $lead->project_id;
+                        $phoneFrom = '';
+
+                        if($lead->project_id) {
+                            $upp = UserProjectParams::find()->where(['upp_project_id' => $lead->project_id, 'upp_user_id' => Yii::$app->user->id])->one();
+                            if($upp) {
+                                $phoneFrom = $upp->upp_tw_phone_number;
+                            }
+                        }
+
+                        if(!$phoneFrom) {
+                            $comForm->c_preview_sms = 0;
+                            $comForm->addError('c_sms_preview', 'Config Error: Not found phone number for Project Id: '.$lead->project_id.', agent: "'.Yii::$app->user->identity->username.'"');
+
+                        } else {
+
+
+
+                            $previewSmsForm->s_phone_to = $comForm->c_phone_number;
+                            $previewSmsForm->s_phone_from = $phoneFrom;
+
+                            if($comForm->c_language_id) {
+                                $previewSmsForm->s_language_id =  $comForm->c_language_id; //$language;
+                            }
+
+
+                            if ($comForm->c_sms_tpl_id > 0) {
+
+                                $previewSmsForm->s_sms_tpl_id = $comForm->c_sms_tpl_id;
+
+                                $language = $comForm->c_language_id ?: 'en-US';
+
+
+                                $tpl = SmsTemplateType::findOne($comForm->c_sms_tpl_id);
+                                //$mailSend = $communication->mailSend(7, 'cl_offer', 'chalpet@gmail.com', 'chalpet2@gmail.com', $content_data, $data, 'ru-RU', 10);
+
+                                $smsPreview = $communication->smsPreview($lead->project_id, ($tpl ? $tpl->stp_key : ''), $phoneFrom, $comForm->c_phone_number, $content_data, $language);
+
+
+
+                                if ($smsPreview && isset($smsPreview['data'])) {
+                                    if (isset($smsPreview['error']) && $smsPreview['error']) {
+
+                                        $errorJson = @json_decode($smsPreview['error'], true);
+                                        $comForm->addError('c_email_preview', 'Communication Server response: ' . ($errorJson['message'] ?? $smsPreview['error']));
+                                        Yii::error($communication->url ."\r\n ".$smsPreview['error'], 'LeadController:view:smsPreview');
+                                        $comForm->c_preview_sms = 0;
+                                    } else {
+                                        //$previewSmsForm->s_phone_from = $smsPreview['data']['phone_from'];
+                                        $previewSmsForm->s_sms_message = $smsPreview['data']['sms_text'];
+                                    }
+                                }
+
+
+                                //VarDumper::dump($mailPreview, 10, true);// exit;
+                            } else {
+                                $previewSmsForm->s_sms_message = $comForm->c_sms_message;
+
+                            }
+                        }
+
+                    }
+
+                }
+                //return $this->redirect(['view', 'id' => $model->al_id]);
+            } else {
+                $comForm->c_type_id = 1;
+            }
+
+            if($previewEmailForm->is_send || $previewSmsForm->is_send) {
+                $comForm->c_preview_email = 0;
+                $comForm->c_preview_sms = 0;
+            }
+
+
+        $quotesProvider = $lead->getQuotesProvider([]);
+
+
+
+        $query1 = (new \yii\db\Query())
+            ->select(['e_id AS id', new Expression('"email" AS type'), 'e_lead_id AS lead_id', 'e_created_dt AS created_dt'])
+            ->from('email')
+            ->where(['e_lead_id' => $lead->id]);
+
+        $query2 = (new \yii\db\Query())
+            ->select(['s_id AS id', new Expression('"sms" AS type'), 's_lead_id AS lead_id', 's_created_dt AS created_dt'])
+            ->from('sms')
+            ->where(['s_lead_id' => $lead->id]);
+
+
+
+        $unionQuery = (new \yii\db\Query())
+            ->from(['union_table' => $query1->union($query2)])
+            ->orderBy(['created_dt' => SORT_ASC]);
+
+        //echo $query1->count(); exit;
+
+        $dataProviderCommunication = new ActiveDataProvider([
+            'query' => $unionQuery,
+            'pagination' => [
+                'pageSize' => 10,
+                //'page' => 0
+            ],
+        ]);
+
+
+
+
+        //$pageCount = ;//        $pageCount = $dataProviderCommunication->pagination->pageCount;
+
+        //echo $pageCount; exit;*/
+
+        /*$pager = $dataProviderCommunication->pagination;
+        $pager->pageCount = $dataProviderCommunication->totalCount;*/
+        if(!Yii::$app->request->isAjax) {
+            $pageCount = ceil($dataProviderCommunication->totalCount / $dataProviderCommunication->pagination->pageSize) - 1;
+            if($pageCount < 0) {
+                $pageCount = 0;
+            }
+            $dataProviderCommunication->pagination->page = $pageCount;
+        }
+
+
+        //$dataProviderCommunication = $lead->getQuotesProvider([]);
+
+        return $this->render('view', [
+            'leadForm' => $leadForm,
+            'previewEmailForm' => $previewEmailForm,
+            'previewSmsForm' => $previewSmsForm,
+            'comForm' => $comForm,
+            'quotesProvider' => $quotesProvider,
+            'dataProviderCommunication' => $dataProviderCommunication,
+        ]);
+
+
     }
 
     public function actionGetAirport($term)
@@ -633,43 +1173,7 @@ class LeadController extends FController
 
     }
 
-    public function actionQueue($type)
-    {
-        $searchModel = null;
-        if (in_array($type, ['processing-all', 'processing', 'follow-up'])) {
-            $dataProvider = [];
-            foreach (array_keys(Lead::getDivs()) as $div) {
-                if ($div == Lead::DIV_GRID_IN_SNOOZE && $type == 'follow-up') {
-                    continue;
-                }
-                if ($type == 'processing-all') {
-                    $searchModel = new Lead();
-                    $params = Yii::$app->request->queryParams;
-                    if (isset($params[$searchModel->formName()])) {
-                        $searchModel->employee_id = $params[$searchModel->formName()]['employee_id'];
-                    }
-                    $dataProvider[$div] = Lead::search($type, $searchModel, $div);
-                } else {
-                    $dataProvider[$div] = Lead::search($type, null, $div);
-                }
-            }
-        } else if (in_array($type, ['trash'])) {
-            $searchModel = new Lead();
-            $params = Yii::$app->request->queryParams;
-            if (isset($params[$searchModel->formName()])) {
-                $searchModel->employee_id = $params[$searchModel->formName()]['employee_id'];
-            }
-            $dataProvider = Lead::search($type, $searchModel);
-        } else {
-            $dataProvider = Lead::search($type);
-        }
 
-        return $this->render('queue', [
-            'dataProvider' => $dataProvider,
-            'searchModel' => $searchModel,
-            'type' => $type
-        ]);
-    }
 
     public function actionSold()
     {
@@ -956,203 +1460,6 @@ class LeadController extends FController
         return $this->redirect($referrer);
     }
 
-    public function actionQuote($type, $id)
-    {
-        $lead = Lead::findOne(['id' => $id]);
-
-        if ($lead !== null) {
-            if (Yii::$app->request->post('hasEditable')) {
-
-                $value = '456';
-                $message = '';
-
-                // use Yii's response format to encode output as JSON
-                \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
-
-                // read your posted model attributes
-                if(Yii::$app->request->isPost && $extraMarkup = Yii::$app->request->post('extra_markup')){
-                    $paxCode = key($extraMarkup);
-                    if($paxCode){
-                        $quoteId = key($extraMarkup[$paxCode]);
-                        if($quoteId){
-                            $qPrices = QuotePrice::find()->where(['quote_id' => $quoteId, 'passenger_type' => $paxCode])->all();
-                            if (count($qPrices)){
-                                $quote = Quote::findOne(['id' => $quoteId]);
-                                $priceData = $quote->getPricesData();
-                                $sellingOld = $priceData['total']['selling'];
-                                foreach ($qPrices as $qPrice){
-                                    $qPrice->extra_mark_up = $extraMarkup[$paxCode][$quoteId];
-                                    $qPrice->update();
-                                }
-
-                                $quote = Quote::findOne(['id' => $quoteId]);
-                                $priceData = $quote->getPricesData();
-                                //log messages
-                                $leadLog = new LeadLog((new LeadLogMessage()));
-                                $leadLog->logMessage->oldParams = ['selling' => $sellingOld];
-                                $leadLog->logMessage->newParams = ['selling' => $priceData['total']['selling']];
-                                $leadLog->logMessage->title = 'Update';
-                                $leadLog->logMessage->model = sprintf('%s (%s)', $quote->formName(), $quote->uid);
-                                $leadLog->addLog([
-                                    'lead_id' => $id,
-                                ]);
-
-                                if ($lead->called_expert) {
-                                    $data = $quote->getQuoteInformationForExpert(true);
-                                    $response = BackOffice::sendRequest('lead/update-quote', 'POST', json_encode($data));
-                                    if ($response['status'] != 'Success' || !empty($response['errors'])) {
-                                        \Yii::$app->getSession()->setFlash('warning', sprintf(
-                                            'Update info quote [%s] for expert failed! %s',
-                                            $quote->uid,
-                                            print_r($response['errors'], true)
-                                            ));
-                                    }
-                                }
-
-                                return ['output' => $extraMarkup[$paxCode][$quoteId]];
-                            }
-                            return [];
-                        }
-                        return [];
-                    }
-
-                    return [];
-                }elseif (Yii::$app->request->isPost && $taskNotes = Yii::$app->request->post('task_notes')) {
-
-                    $taskId = $taskDate = $userId = $leadId = null;
-
-                    $leadId = $lead->id; //Yii::$app->request->get('lead_id');
-
-                    $taskKey = key($taskNotes);
-
-                    if($taskKey) {
-                        list($taskId, $taskDate, $userId) = explode('_', $taskKey);
-                    }
-
-                    $value = $taskNotes[$taskKey];
-
-
-                    if(!$taskId) {
-                        $message = 'Not found Task ID data';
-                    } elseif(!$taskDate) {
-                        $message = 'Not found Task Date data';
-                    } elseif(!$userId) {
-                        $message = 'Not found Task User ID data';
-                    } elseif(!$leadId) {
-                        $message = 'Not found Lead ID data';
-                    } else {
-
-                        if($taskDate && $taskId && $leadId && $userId) {
-                            $lt = LeadTask::find()->where(['lt_lead_id' => $leadId, 'lt_date' => $taskDate, 'lt_task_id' => $taskId, 'lt_user_id' => $userId])->one();
-                            if($lt) {
-                                $lt->lt_notes = $value;
-                                $lt->lt_updated_dt = date('Y-m-d H:i:s');
-                                $lt->update();
-                            }
-                        }
-
-                    }
-
-                } else {
-                    $message = 'Not found task notes data';
-                }
-
-
-                return ['output' => nl2br(Html::encode($value)), 'message' => $message];
-            }
-
-
-            if(Yii::$app->request->isPjax) {
-                $taskDate = Yii::$app->request->get('date');
-                $taskId = Yii::$app->request->get('task_id');
-                $leadId = $lead->id; //Yii::$app->request->get('lead_id');
-                $userId = Yii::$app->request->get('user_id'); // Yii::$app->user->id;
-
-                if($taskDate && $taskId && $leadId && $userId) {
-                    $lt = LeadTask::find()->where(['lt_lead_id' => $leadId, 'lt_date' => $taskDate, 'lt_task_id' => $taskId, 'lt_user_id' => $userId])->one();
-                    if($lt) {
-                        if($lt->lt_completed_dt) {
-                            $lt->lt_completed_dt = null;
-                        } else {
-                            $lt->lt_completed_dt = date('Y-m-d H:i:s');
-                        }
-                        $lt->lt_updated_dt = date('Y-m-d H:i:s');
-                        $lt->update();
-                    }
-                }
-
-            }
-
-
-
-
-            Yii::$app->cache->delete(sprintf('quick-search-%d-%d', $lead->id, Yii::$app->user->identity->getId()));
-            if (!$lead->permissionsView()) {
-                throw new UnauthorizedHttpException('Not permissions view lead ID: ' . $id);
-            }
-            $leadForm = new LeadForm($lead);
-            if ($leadForm->getLead()->status != Lead::STATUS_PROCESSING ||
-                $leadForm->getLead()->employee_id != Yii::$app->user->identity->getId()
-            ) {
-                $leadForm->mode = $leadForm::VIEW_MODE;
-            }
-
-            $flightSegments = $leadForm->getLeadFlightSegment();
-            foreach ($flightSegments as $segment){
-                $this->view->title = 'Lead #'.$id.' ✈ '.$segment->destination;
-                break;
-            }
-
-
-            if (Yii::$app->request->isAjax && !Yii::$app->request->isPjax) {
-                Yii::$app->response->format = Response::FORMAT_JSON;
-                $data = [
-                    'load' => false,
-                    'errors' => []
-                ];
-                if ($leadForm->loadModels(Yii::$app->request->post())) {
-                    $data['load'] = true;
-                    $data['errors'] = ActiveForm::validate($leadForm);
-                }
-
-                $errors = [];
-                if (empty($data['errors']) && $data['load'] && $leadForm->save($errors)) {
-
-                    if ($lead->called_expert) {
-                        $lead = Lead::findOne(['id' => $id]);
-                        $data = $lead->getLeadInformationForExpert();
-                        $result = BackOffice::sendRequest('lead/update-lead', 'POST', json_encode($data));
-                        if ($result['status'] != 'Success' || !empty($result['errors'])) {
-                            Yii::$app->getSession()->setFlash('warning', sprintf(
-                                'Update info lead for expert failed! %s',
-                                print_r($result['errors'], true)
-                            ));
-                        }
-                    }
-
-                    return $this->redirect([
-                        'quote',
-                        'type' => 'processing',
-                        'id' => $leadForm->getLead()->id
-                    ]);
-                }
-
-                if (!empty($errors)) {
-                    $data['errors'] = $errors;
-                }
-
-                return $data;
-            }
-
-            $quotesProvider = $lead->getQuotesProvider([]);
-
-            return $this->render('lead', [
-                'leadForm' => $leadForm,
-                'quotesProvider' => $quotesProvider,
-            ]);
-        }
-        throw new UnauthorizedHttpException('Not found lead by ID: ' . $id);
-    }
 
     public function actionCreate()
     {
@@ -1194,7 +1501,7 @@ class LeadController extends FController
             return $data;
         }
 
-        return $this->render('lead', [
+        return $this->render('view', [
             'leadForm' => $leadForm
         ]);
     }
