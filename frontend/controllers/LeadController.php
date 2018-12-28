@@ -1425,7 +1425,7 @@ class LeadController extends FController
         $errors = [];
         $lead = Lead::findOne(['id' => $id]);
         if ($lead !== null) {
-            $totalTips = $lead->tips;
+            $totalTips = $lead->totalTips;
             $splitForm = new TipsSplitForm($lead);
 
             $mainAgentTips = $totalTips;

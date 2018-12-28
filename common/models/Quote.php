@@ -153,37 +153,7 @@ class Quote extends \yii\db\ActiveRecord
     {
         $fare_type = empty($fare_type)
             ? self::FARE_TYPE_PUB : $fare_type;
-        $profit = 0;
-        switch ($fare_type) {
-            case self::FARE_TYPE_SR:
-            case self::FARE_TYPE_SRU:
-            case self::FARE_TYPE_COMM:
-                switch ($check_payment) {
-                    case true:
-                        $profit = $markUp - ($sellingPrice * self::SERVICE_FEE);
-                        break;
-                    case false:
-                        $profit = $markUp;
-                        break;
-                }
-                break;
-            case self::FARE_TYPE_PUBC:
-            case self::FARE_TYPE_PUB:
-            case self::FARE_TYPE_TOUR:
-                switch ($check_payment) {
-                    case false:
-                        if ($markUp >= 0) {
-                            $profit = $markUp - ($markUp * self::SERVICE_FEE);
-                        } else {
-                            $profit = $markUp;
-                        }
-                        break;
-                    case true:
-                        $profit = $markUp - ($sellingPrice * self::SERVICE_FEE);
-                        break;
-                }
-                break;
-        }
+        $profit = $markUp;
         $profit -= $processing_fee;
         return $profit;
     }
@@ -205,36 +175,7 @@ class Quote extends \yii\db\ActiveRecord
             $serviceFee = $serviceFee/100;
         }
 
-        switch ($fareType) {
-            case self::FARE_TYPE_SR:
-            case self::FARE_TYPE_SRU:
-            case self::FARE_TYPE_COMM:
-                switch ($checkPayment) {
-                    case true:
-                        $profit = $markUp - ($sellingPrice * $serviceFee);
-                        break;
-                    case false:
-                        $profit = $markUp;
-                        break;
-                }
-                break;
-            case self::FARE_TYPE_PUBC:
-            case self::FARE_TYPE_PUB:
-            case self::FARE_TYPE_TOUR:
-                switch ($checkPayment) {
-                    case false:
-                        if ($markUp >= 0) {
-                            $profit = $markUp - ($markUp * $serviceFee);
-                        } else {
-                            $profit = $markUp;
-                        }
-                        break;
-                    case true:
-                        $profit = $markUp - ($sellingPrice * $serviceFee);
-                        break;
-                }
-                break;
-        }
+        $profit += $markUp;
         $profit -= $processingFee;
 
         return round($profit,2);
@@ -1563,14 +1504,14 @@ class Quote extends \yii\db\ActiveRecord
     {
         $priceData = $this->getPricesData();
         $data = [];
-        if(isset($priceData['service_fee']) && $priceData['service_fee'] > 0){
+        /* if(isset($priceData['service_fee']) && $priceData['service_fee'] > 0){
             $data[] = '<span class="text-danger">Merchant fee: -'.round($priceData['service_fee'],2).'$</span>';
-        }
+        } */
         if(isset($priceData['processing_fee']) && $priceData['processing_fee'] > 0){
             $data[] = '<span class="text-danger">Processing fee: -'.round($priceData['processing_fee'],2).'$</span>';
         }
 
-        return implode('<br/>', $data);
+        return (empty($data))?'-':implode('<br/>', $data);
     }
 
     public function getPricePerPax()
