@@ -465,6 +465,9 @@ class LeadController extends FController
                             $previewEmailForm->e_language_id = $comForm->c_language_id;
 
                             if ($comForm->c_email_tpl_id > 0) {
+
+                                $previewEmailForm->e_email_tpl_id = $comForm->c_email_tpl_id;
+
                                 $tpl = EmailTemplateType::findOne($comForm->c_email_tpl_id);
                                 //$mailSend = $communication->mailSend(7, 'cl_offer', 'chalpet@gmail.com', 'chalpet2@gmail.com', $content_data, $data, 'ru-RU', 10);
 
