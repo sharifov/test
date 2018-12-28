@@ -3881,6 +3881,8 @@ input[disabled] + .radio-tab__text {
 
 .quote--highlight {
   border-color: #82b9e2;
+  margin-top: 20px;
+  margin-bottom: 10px;
 }
 
 .quote--highlight .quote__heading {

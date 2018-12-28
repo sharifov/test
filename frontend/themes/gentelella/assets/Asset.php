@@ -15,7 +15,7 @@ class Asset extends \yii\web\AssetBundle
 
     public $css = [
         //'css/custom2.css',
-        'css/style-req.css?v=2.2',
+        'css/style-req.css',
         //'https://use.fontawesome.com/releases/v5.4.1/css/all.css',
         //'css/font-awesome.css',
         //'css/style.css?v=2',

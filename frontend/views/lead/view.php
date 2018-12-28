@@ -476,7 +476,7 @@ JS;
             <?php endif;?>
 
 
-            <?php if (!$leadForm->getLead()->isNewRecord) : ?>
+            <?php if (!$leadForm->getLead()->isNewRecord && $is_admin) : ?>
                 <?= $this->render('communication/lead_communication', [
                         'leadForm'      => $leadForm,
                         'previewEmailForm' => $previewEmailForm,

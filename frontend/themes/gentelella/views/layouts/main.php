@@ -23,7 +23,7 @@ $bundle = \frontend\themes\gentelella\assets\Asset::register($this);
 <!DOCTYPE html>
 <html lang="<?= Yii::$app->language ?>">
 <head>
-    <meta name="description" content="Book Air">
+    <meta name="description" content="Sales">
     <?php
     $this->registerMetaTag(['http-equiv' => 'Content-Type', 'content' => 'text/html; charset=UTF-8']);
     $this->registerMetaTag(['http-equiv' => 'X-UA-Compatible', 'content' => 'IE=edge']);
