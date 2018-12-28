@@ -80,19 +80,7 @@ $isCoach = Yii::$app->authManager->getAssignment('coach', Yii::$app->user->id);
 
 
 
-            $menuItems[] = [
-                'label' => 'Reports',
-                'url' => 'javascript:',
-                'icon' => 'bar-chart',
-                'items' => [
-                    ['label' => 'Sold', 'url' => ['report/sold']],
-                ]
-                //'linkOptions' => ['data-method' => 'post']
-            ];
-
-
-
-
+            $menuItems[] = ['label' => 'KPI <span id="kpi" class="label-info label pull-right"></span> ', 'url' => ['/kpi'], 'icon' => 'money'];
 
             if (!$isCoach) {
 

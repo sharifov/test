@@ -3,171 +3,159 @@
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
+use yii\helpers\Url;
 use dosamigos\datepicker\DatePicker;
-use common\models\Quote;
+use yii\widgets\ActiveForm;
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\ApiLogSearch */
-/* @var $dataProvider yii\data\ActiveDataProvider
- * @var $historyParams [] */
+/* @var $dataProvider yii\data\ActiveDataProvider */
+/* @var $isAgent bool */
 
-$this->title = 'KPI';
+if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
+    $userList = \common\models\Employee::getListByRole('agent');
+} else {
+    $userList = \common\models\Employee::getListByUserId(Yii::$app->user->id);
+}
+
+$this->title = 'KPI History';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
-<div class="kpi-index">
+<div class="kpi-view">
 
     <h1><?= Html::encode($this->title) ?></h1>
     <?php Pjax::begin(); ?>
-
-    <div class="row">
-    	<div class="col-md-9">
-    		<?= $this->render('_search', ['model' => $searchModel]);?>
-    	</div>
-    	<div class="col-md-3">
-    	<?php if(!empty($historyParams)):?>
-    		<table class="table table-bordered">
-				<tbody>
-					<tr>
-						<th>Base amount</th>
-						<td>$<?= $historyParams['base_amount']?></td>
-					</tr>
-					<tr>
-						<th>Bonus active (status)</th>
-						<td><?= ($historyParams['bonus_active'])?"Yes":"No"?></td>
-					</tr>
-					<tr>
-						<th>Profit bonuses</th>
-						<td>
-							<?php foreach ($historyParams['profit_bonuses'] as $pbKey => $pbVal):?>
-							>= <?= $pbKey.' -> '.$pbVal?><br/>
-							<?php endforeach;?>
-						</td>
-					</tr>
-					<tr>
-						<th>Commission</th>
-						<td><?= $historyParams['commision_percent']?><b>%</b></td>
-					</tr>
-				</tbody>
-			</table>
-    	<?php endif;?>
-    	</div>
-    </div>
-
-    <?php $gridColumns = [
-        [
-            'attribute' => 'id',
-            'label' => 'Lead ID',
-        ],
-        [
-            'label' => 'Profit',
-            'value' => function (\common\models\Lead $model) {
-                $totalProfitTxt = '';
-                if ($model->final_profit !== null) {
-                    $totalProfitTxt = "<strong>$" . number_format($model->final_profit, 2) . "</strong>";
-                }else{
-                    $quote = $model->getBookedQuote();
-                    if (empty($quote)) {
-                        $totalProfitTxt = "<strong>$" . number_format(0, 2) . "</strong>";
-                    }else{
-                        $model->totalProfit = $quote->getEstimationProfit();
-                        $totalProfitTxt = "<strong>$" . number_format($model->totalProfit, 2) . "</strong>";
-                    }
-                }
-
-                $splitProfitTxt = '';
-                $splitProfit = $model->getAllProfitSplits();
-                $return = [];
-                foreach ($splitProfit as $split) {
-                    $model->splitProfitPercentSum += $split->ps_percent;
-                    $return[] = '<b>' . $split->psUser->username . '</b> (' . $split->ps_percent . '%) $' . number_format($split->countProfit($model->totalProfit), 2);
-                }
-                if (!empty($return)) {
-                    $splitProfitTxt = implode('<br/>', $return);
-                }
-
-                $mainAgentPercent = 100;
-                if ($model->splitProfitPercentSum > 0) {
-                    $mainAgentPercent -= $model->splitProfitPercentSum;
-                }
-                $mainAgentProfitTxt = "<strong>$" . number_format($model->totalProfit * $mainAgentPercent / 100, 2) . "</strong>";
-
-                return 'Total profit: '.$totalProfitTxt.(($splitProfitTxt)?'<hr/>Split profit:<br/>'.$splitProfitTxt:'').
-                '<hr/> '.(($model->employee)?$model->employee->username:'Main agent').' profit: '.$mainAgentProfitTxt;
-
-            },
-            'format' => 'raw'
-        ],
-        [
-            'label' => 'Tips',
-            'value' => function (\common\models\Lead $model) {
-                if($model->tips == 0) {
-                    return '-';
-                }
-                $totalTipsTxt = "<strong>$" . number_format($model->tips, 2) . "</strong>";
-
-                $splitTipsTxt = '';
-                $splitTips = $model->getAllTipsSplits();
-                $return = [];
-                foreach ($splitTips as $split) {
-                    $model->splitTipsPercentSum += $split->ts_percent;
-                    $return[] = '<b>' . $split->tsUser->username . '</b> (' . $split->ts_percent . '%) $' . number_format($split->countTips($model->tips), 2);
-                }
-                if (!empty($return)) {
-                    $splitTipsTxt = implode('<br/>', $return);
-                }
-
-                $mainAgentPercent = 100;
-                if ($model->splitTipsPercentSum > 0) {
-                    $mainAgentPercent -= $model->splitTipsPercentSum;
-                }
-                $mainAgentTipsTxt = "<strong>$" . number_format($model->tips * $mainAgentPercent / 100, 2) . "</strong>";
-
-                return 'Tips: '.$totalTipsTxt.(($splitTipsTxt)?'<hr/>Split tips:<br/>'.$splitTipsTxt:'').'<hr/> '.
-                    (($model->employee)?$model->employee->username:'Main agent').' tips: '.$mainAgentTipsTxt;
-            },
-            'format' => 'raw'
-        ],
-        [
-            'label' => 'Date of Issue',
-            'attribute' => 'updated',
-            'value' => function ($model) {
-                return $model['updated'];
-            },
-            'format' => 'datetime',
-            'filter' => DatePicker::widget([
-                'model' => $searchModel,
-                'attribute' => 'updated',
-                'clientOptions' => [
-                    'autoclose' => true,
-                    'format' => 'dd-M-yyyy'
-                ]
-            ]),
-            'contentOptions' => [
-                'style' => 'width: 180px;text-align:center;'
-            ]
-        ],
-        [
-            'label' => 'Date of Departure',
-            'value' => function ($model) {
-                $quote = $model->getBookedQuote();
-                if (!empty($quote) && isset($quote['reservation_dump']) && !empty($quote['reservation_dump'])) {
-                    $data = [];
-                    $segments = Quote::parseDump($quote['reservation_dump'], false, $data, true);
-                    return $segments[0]['departureDateTime']->format('Y-m-d H:i');
-                }
-                $firstSegment = $model->getFirstFlightSegment();
-                if (empty($firstSegment)) {
-                    return '';
-                }
-                return $firstSegment['departure'];
-            },
-            'format' => 'raw'
-        ],
-    ];?>
+    <?php if(!$isAgent):?>
+    	<div class="form-inline">
+            <?php
+            $form = ActiveForm::begin([
+                'method' => 'post',
+            ]);
+            ?>
+            	<?= $form->field($model, 'date_dt', ['template' => "{label}{input}"])
+            	->widget(\dosamigos\datepicker\DatePicker::class,
+            	    ['inline' => false,'clientOptions' => ['autoclose' => true,'format' => 'M-yyyy','todayBtn' => true]])
+            	->label('Date');?>
+            	<div class="form-group">
+            		<?= Html::submitButton('<i class="fa fa-search"></i> Calculate salary by month', ['class' => 'btn btn-info','style'=>'margin-bottom:10px;']) ?>
+            	</div>
+            <?php ActiveForm::end(); ?>
+        </div>
+    <?php endif;?>
 
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
-        //'filterModel' => $searchModel,
-        'columns' => $gridColumns,
+        'filterModel' => $searchModel,
+        'columns' => [
+            [
+                'attribute' => 'kh_user_id',
+                'label' => 'Employee',
+                'value' => function (\common\models\KpiHistory $model) {
+                    return Html::tag('i', '', ['class' => 'fa fa-user']).' '.Html::encode($model->khUser->username);
+                    },
+                'format' => 'raw',
+                'filter' => $userList,
+                'visible' => !$isAgent
+            ],
+            [
+                'attribute' => 'kh_date_dt',
+                'label' => 'Month-Year',
+                'value' => function (\common\models\KpiHistory $model) {
+                    return (new DateTime($model->kh_date_dt))->format('M-Y');
+                },
+                'format' => 'raw',
+                'filter' => DatePicker::widget([
+                    'model' => $searchModel,
+                    'attribute' => 'kh_date_dt',
+                    'clientOptions' => [
+                        'autoclose' => true,
+                        'format' => 'M-yyyy'
+                    ]
+                ]),
+                'contentOptions' => [
+                    'style' => 'width: 180px;text-align:center;'
+                ]
+            ],
+            'kh_base_amount',
+            'kh_commission_percent',
+            [
+                'attribute' => 'kh_bonus_active',
+                'label' => 'Bonus active',
+                'value' => function (\common\models\KpiHistory $model) {
+                    return ($model->kh_bonus_active)?"Yes":"No";
+                },
+                'format' => 'raw',
+                //'contentOptions' => ['class' => 'text-center'],
+                'filter' => [0 => 'No', 1 => 'Yes']
+            ],
+            'kh_profit_bonus',
+            'kh_manual_bonus',
+            [
+                'attribute' => 'kh_estimation_profit',
+                'visible' => !$isAgent,
+                ],
+            [
+                'label' => 'Salary',
+                'value' => function (\common\models\KpiHistory $model) {
+                    return $model->getSalary();
+                },
+                'format' => 'raw',
+            ],
+            [
+                'label' => 'Agent approved',
+                'attribute' => 'kh_agent_approved_dt',
+                'value' => function ($model) {
+                    return $model['kh_agent_approved_dt'];
+                },
+                'format' => 'datetime',
+                'filter' => DatePicker::widget([
+                    'model' => $searchModel,
+                    'attribute' => 'kh_agent_approved_dt',
+                    'clientOptions' => [
+                        'autoclose' => true,
+                        'format' => 'yyyy-mm-dd'
+                    ]
+                ]),
+                'contentOptions' => [
+                    'style' => 'width: 180px;text-align:center;'
+                ]
+            ],
+            [
+                'label' => 'Super approved',
+                'attribute' => 'kh_super_approved_dt',
+                'value' => function ($model) {
+                    return $model['kh_super_approved_dt'];
+                    },
+                'format' => 'datetime',
+                'filter' => DatePicker::widget([
+                    'model' => $searchModel,
+                    'attribute' => 'kh_super_approved_dt',
+                    'clientOptions' => [
+                        'autoclose' => true,
+                        'format' => 'yyyy-mm-dd'
+                    ]
+                ]),
+                'contentOptions' => [
+                    'style' => 'width: 180px;text-align:center;'
+                ]
+            ],
+            [
+                'class' => 'yii\grid\ActionColumn',
+                'template' => '{action}',
+                'buttons' => [
+                    'action' => function ($url, $model, $key) {
+                            return Html::a('Details', Url::to([
+                                'kpi/details',
+                                'id' => $model['kh_id']
+                            ]), [
+                                'class' => 'btn btn-info btn-xs',
+                                'target' => '_blank',
+                                'data-pjax' => 0,
+                                'title' => 'View details'
+                            ]);
+                    }
+                ]
+            ]
+        ],
     ]); ?>
     <?php Pjax::end(); ?>
 </div>

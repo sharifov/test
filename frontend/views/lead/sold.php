@@ -39,11 +39,7 @@ $this->params['breadcrumbs'][] = $this->title;
 <div class="lead-index">
 
     <?php Pjax::begin(); //['id' => 'lead-pjax-list', 'timeout' => 5000, 'enablePushState' => true, 'clientOptions' => ['method' => 'GET']]); ?>
-    <?php if (isset($salary)): ?>
-        <h3>Salary by <?= $salaryBy ?>: $<?= number_format($salary['salary'], 2) ?>
-            (Base: $<?= round($salary['base']) ?>, Commission: <?= $salary['commission'] ?>%, Bonus:
-            $<?= $salary['bonus'] ?>)</h3>
-    <?php endif; ?>
+
     <?= $this->render('_search_sold', ['model' => $searchModel]); ?>
 
     <?php
@@ -215,75 +211,6 @@ $this->params['breadcrumbs'][] = $this->title;
             },
             'filter' => $userList,
             'visible' => !$isAgent
-        ],
-        [
-            'label' => 'Profit',
-            'value' => function (\common\models\Lead $model) {
-                $totalProfitTxt = '';
-                if ($model->final_profit !== null) {
-                    $totalProfitTxt = "<strong>$" . number_format($model->final_profit, 2) . "</strong>";
-                }else{
-                    $quote = $model->getBookedQuote();
-                    if (empty($quote)) {
-                        $totalProfitTxt = "<strong>$" . number_format(0, 2) . "</strong>";
-                    }else{
-                        $model->totalProfit = $quote->getEstimationProfit();
-                        $totalProfitTxt = "<strong>$" . number_format($model->totalProfit, 2) . "</strong>";
-                    }
-                }
-
-                $splitProfitTxt = '';
-                $splitProfit = $model->getAllProfitSplits();
-                $return = [];
-                foreach ($splitProfit as $split) {
-                    $model->splitProfitPercentSum += $split->ps_percent;
-                    $return[] = '<b>' . $split->psUser->username . '</b> (' . $split->ps_percent . '%) $' . number_format($split->countProfit($model->totalProfit), 2);
-                }
-                if (!empty($return)) {
-                    $splitProfitTxt = implode('<br/>', $return);
-                }
-
-                $mainAgentPercent = 100;
-                if ($model->splitProfitPercentSum > 0) {
-                    $mainAgentPercent -= $model->splitProfitPercentSum;
-                }
-                $mainAgentProfitTxt = "<strong>$" . number_format($model->totalProfit * $mainAgentPercent / 100, 2) . "</strong>";
-
-                return 'Total profit: '.$totalProfitTxt.(($splitProfitTxt)?'<hr/>Split profit:<br/>'.$splitProfitTxt:'').
-                '<hr/> '.(($model->employee)?$model->employee->username:'Main agent').' profit: '.$mainAgentProfitTxt;
-
-            },
-            'format' => 'raw'
-        ],
-        [
-            'label' => 'Tips',
-            'value' => function (\common\models\Lead $model) {
-                if($model->tips == 0) {
-                    return '-';
-                }
-                $totalTipsTxt = "<strong>$" . number_format($model->totalTips, 2) . "</strong>";
-
-                $splitTipsTxt = '';
-                $splitTips = $model->getAllTipsSplits();
-                $return = [];
-                foreach ($splitTips as $split) {
-                    $model->splitTipsPercentSum += $split->ts_percent;
-                    $return[] = '<b>' . $split->tsUser->username . '</b> (' . $split->ts_percent . '%) $' . number_format($split->countTips($model->tips), 2);
-                }
-                if (!empty($return)) {
-                    $splitTipsTxt = implode('<br/>', $return);
-                }
-
-                $mainAgentPercent = 100;
-                if ($model->splitTipsPercentSum > 0) {
-                    $mainAgentPercent -= $model->splitTipsPercentSum;
-                }
-                $mainAgentTipsTxt = "<strong>$" . number_format($model->totalTips * $mainAgentPercent / 100, 2) . "</strong>";
-
-                return 'Tips: '.$totalTipsTxt.(($splitTipsTxt)?'<hr/>Split tips:<br/>'.$splitTipsTxt:'').'<hr/> '.
-                    (($model->employee)?$model->employee->username:'Main agent').' tips: '.$mainAgentTipsTxt;
-            },
-            'format' => 'raw'
         ],
         [
             'label' => 'Date of Issue',

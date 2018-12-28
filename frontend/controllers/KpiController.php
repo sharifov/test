@@ -4,12 +4,12 @@ namespace frontend\controllers;
 
 use Yii;
 use yii\filters\AccessControl;
-use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use common\models\search\LeadSearch;
-use common\models\Employee;
 use common\models\KpiHistory;
 use common\models\search\KpiHistorySearch;
+use yii\base\DynamicModel;
+use common\components\KpiService;
 
 /**
  * KpiController.
@@ -24,12 +24,12 @@ class KpiController extends FController
                 'class' => AccessControl::class,
                 'rules' => [
                     [
-                        'actions' => ['index', 'view','details'],
+                        'actions' => ['index', 'details'],
                         'allow' => true,
                         'roles' => ['supervision'],
                     ],
                     [
-                        'actions' => ['view','details'],
+                        'actions' => ['index','details'],
                         'allow' => true,
                         'roles' => ['agent'],
                     ],
@@ -44,93 +44,28 @@ class KpiController extends FController
         ];
     }
 
-
     /**
      * @return mixed
      */
     public function actionIndex()
     {
-        $employee = null;
-        $historyParams = [];
-        $salary = null;
-        $salaryBy = '';
-        $searchModel = new LeadSearch();
-        $kpiHistory = new KpiHistory();
-
-        $params = Yii::$app->request->queryParams;
-        $params2 = Yii::$app->request->post();
-
-        $params = array_merge($params, $params2);
-
-        $dataProvider = $searchModel->searchSoldKpi($params);
-        $emplyee_id = null;
-
-        if(isset($params['LeadSearch']['employee_id'])){
-            $emplyee_id = $params['LeadSearch']['employee_id'];
-            $employee = Employee::findOne(['id' => $emplyee_id]);
-        }
-
-        if($employee){
-            $historyParams = $employee->paramsForSalary();
-
-            if((!isset($params['LeadSearch']['sold_date_from']) && !isset($params['LeadSearch']['sold_date_to'])) ||
-                (empty($params['LeadSearch']['sold_date_from']) && empty($params['LeadSearch']['sold_date_to']))){
-                    $start = new \DateTime();
-                    $end = new \DateTime();
-                    $start->modify('first day of this month');
-                    $end->modify('last day of this month');
-                    $salaryBy = $start->format('M Y');
-            }else{
-                if(!empty($params['LeadSearch']['sold_date_from'])){
-                    $start = \DateTime::createFromFormat('d-M-Y', $params['LeadSearch']['sold_date_from']);
-                }else{
-                    $start = null;
-                }
-                if(!empty($params['LeadSearch']['sold_date_to'])){
-                    $end = \DateTime::createFromFormat('d-M-Y', $params['LeadSearch']['sold_date_to']);
-                }else{
-                    $end = null;
-                }
-
-                $today = new \DateTime();
-                if($start !== null && $end !== null){
-                    $salaryBy = "(".$start->format('j M').' - '.$end->format('j M Y').')';
-                }elseif($start !== null){
-                    $salaryBy =  "(".$start->format('j M').' - '.$today->format('j M Y').')';
-                }elseif($end !== null){
-                    $salaryBy =  '(till '.$end->format('j M Y').')';
-                }
-            }
-
-            $salary = $employee->calculateSalaryBetween($start, $end);
-
-            $kpiHistory->kh_base_amount = $salary['base'];
-            $kpiHistory->kh_bonus_active = $historyParams['bonus_active'];
-            $kpiHistory->kh_commission_percent = $historyParams['commission_percent'];
-            $kpiHistory->kh_user_id = $emplyee_id;
-            $kpiHistory->kh_profit_bonus = $salary['bonus'];
-            $kpiHistory->kh_estimation_profit = $salary['startProfit'];
-        }
-
-        return $this->render('index', [
-            'searchModel' => $searchModel,
-            'dataProvider' => $dataProvider,
-            'historyParams' => $historyParams,
-            'salary' => $salary,
-            'salaryBy' => $salaryBy,
-            'kpiHistory' => $kpiHistory,
-        ]);
-    }
-
-    /**
-     * @return mixed
-     */
-    public function actionView()
-    {
         $isAgent = (Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id));
         $searchModel = new KpiHistorySearch();
         $params = Yii::$app->request->queryParams;
         $params2 = Yii::$app->request->post();
+
+        $model = new DynamicModel(['date_dt']);
+        $model->addRule(['date_dt'], 'required');
+
+        if($model->load($params2)){
+            $date = \DateTime::createFromFormat('M-Y', $params2['DynamicModel']['date_dt']);
+            $result = KpiService::calculateSalary($date->format('Y-m-d'));
+
+            return $this->redirect([
+                'kpi/view',
+                'KpiHistorySearch[kh_date_dt]' => $params2['DynamicModel']['date_dt'],
+            ]);
+        }
 
         $params = array_merge($params, $params2);
         if($isAgent) {
@@ -138,10 +73,11 @@ class KpiController extends FController
         }
         $dataProvider = $searchModel->search($params);
 
-        return $this->render('view', [
+        return $this->render('index', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
             'isAgent' => $isAgent,
+            'model' => $model,
         ]);
     }
 
@@ -155,7 +91,7 @@ class KpiController extends FController
         $kpiHistory = KpiHistory::find()->where(['kh_id' => $id])->one();
         if(!$kpiHistory || ($isAgent && Yii::$app->user->id != $kpiHistory->kh_user_id) ){
             return $this->redirect([
-                'kpi/view',
+                'kpi/index',
             ]);
         }
 
