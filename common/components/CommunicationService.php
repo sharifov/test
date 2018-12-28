@@ -134,17 +134,17 @@ class CommunicationService extends Component
 
     /**
      * @param int $project_id
-     * @param string $template_type
+     * @param string|null $template_type
      * @param string $email_from
      * @param string $email_to
      * @param array $content_data
      * @param array $email_data
-     * @param string $language
+     * @param string|null $language
      * @param int $delay
      * @return array
      * @throws \yii\httpclient\Exception
      */
-    public function mailSend(int $project_id, string $template_type, string $email_from, string $email_to, array $content_data = [], array $email_data = [], string $language = 'en-US', int $delay = 0) : array
+    public function mailSend(int $project_id, ?string $template_type, string $email_from, string $email_to, array $content_data = [], array $email_data = [], ?string $language = 'en-US', int $delay = 0) : array
     {
         $out = ['error' => false, 'data' => []];
 

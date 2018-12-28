@@ -39,16 +39,19 @@ use \common\models\Sms;
 
         if($mail->e_status_id == Email::STATUS_DONE) {
             $statusClass = 'success';
+            $statusTitle = 'DONE - ' . Yii::$app->formatter->asDatetime(strtotime($mail->e_status_done_dt));
         } elseif($mail->e_status_id == Email::STATUS_ERROR || $mail->e_status_id == Email::STATUS_CANCEL) {
             $statusClass = 'error';
+            $statusTitle = 'ERROR - '. $mail->e_error_message;
         } else {
             $statusClass = 'sent';
+            $statusTitle = 'SENT - ComID: '. $mail->e_communication_id;
         }
     ?>
 
         <div class="chat__message chat__message--<?=($mail->e_type_id == Email::TYPE_INBOX ? 'client' : 'system')?> chat__message--email">
             <div class="chat__icn"><i class="fa fa-envelope-open"></i></div>
-            <i class="chat__status chat__status--<?=$statusClass?> fa fa-circle" data-toggle="tooltip" title="" data-placement="right" data-original-title="SENT"></i>
+            <i class="chat__status chat__status--<?=$statusClass?> fa fa-circle" data-toggle="tooltip" title="<?=Html::encode($statusTitle)?>" data-placement="right" data-original-title="<?=Html::encode($statusTitle)?>"></i>
             <div class="chat__message-heading">
                 <?php if($mail->e_type_id == Email::TYPE_INBOX):?>
                     <div class="chat__sender">Email from <strong><?=($mail->eCreatedUser ? Html::encode($mail->eCreatedUser->username) : '-') ?>, (<?=Html::encode($mail->e_email_from)?>)</strong> to  (<strong><?=Html::encode($mail->e_email_to)?></strong>)</div>
@@ -76,15 +79,19 @@ use \common\models\Sms;
 
             if($sms->s_status_id == Sms::STATUS_DONE) {
                 $statusClass = 'success';
+                $statusTitle = 'DELIVERED - ' . Yii::$app->formatter->asDatetime(strtotime($sms->s_status_done_dt));
             } elseif($sms->s_status_id == Sms::STATUS_ERROR || $sms->s_status_id == Sms::STATUS_CANCEL) {
                 $statusClass = 'error';
+                $statusTitle = 'ERROR - '. $sms->s_error_message;
             } else {
                 $statusClass = 'sent';
+                $statusTitle = 'SENT - ComID: '. $sms->s_communication_id;
             }
     ?>
         <div class="chat__message chat__message--<?=($sms->s_type_id == Sms::TYPE_INBOX ? 'client' : 'system')?> chat__message--sms">
         <div class="chat__icn"><i class="fa fa-comments-o"></i></div>
-        <i class="chat__status chat__status--<?=$statusClass?> fa fa-circle" data-toggle="tooltip" title="" data-placement="left" data-original-title="DELIVERED"></i>
+
+        <i class="chat__status chat__status--<?=$statusClass?> fa fa-circle" data-toggle="tooltip" title="<?=Html::encode($statusTitle)?>" data-placement="left" data-original-title="<?=Html::encode($statusTitle)?>"></i>
         <div class="chat__message-heading">
             <?php if($sms->s_type_id == Sms::TYPE_INBOX):?>
                 <div class="chat__sender">SMS from <strong><?=Html::encode($sms->s_phone_from)?></strong> to <strong><?=Html::encode($sms->s_phone_to)?></strong></div>

@@ -340,12 +340,15 @@ class LeadController extends FController
 
                     $previewEmailForm->is_send = true;
 
-                    if($mail->sendMail()) {
-                        Yii::$app->session->setFlash('mail-send-success', '<strong>Email Message</strong> has been successfully sent to <strong>'.$mail->e_email_to.'</strong>');
+                    $mailResponse = $mail->sendMail();
 
-                    } else {
+                    if(isset($mailResponse['error']) && $mailResponse['error']) {
+                        //echo $mailResponse['error']; exit; //'Error: <strong>Email Message</strong> has not been sent to <strong>'.$mail->e_email_to.'</strong>'; exit;
                         Yii::$app->session->setFlash('send-error', 'Error: <strong>Email Message</strong> has not been sent to <strong>'.$mail->e_email_to.'</strong>');
-                        Yii::error('Error: Email Message has not been sent to '.$mail->e_email_to.'', 'LeadController:view:Email:sendMail');
+                        Yii::error('Error: Email Message has not been sent to '.$mail->e_email_to."\r\n ".$mailResponse['error'], 'LeadController:view:Email:sendMail');
+                    } else {
+                        //echo '<strong>Email Message</strong> has been successfully sent to <strong>'.$mail->e_email_to.'</strong>'; exit;
+                        Yii::$app->session->setFlash('send-success', '<strong>Email Message</strong> has been successfully sent to <strong>'.$mail->e_email_to.'</strong>');
                     }
 
                     $this->refresh();
@@ -392,12 +395,14 @@ class LeadController extends FController
 
                     $previewSmsForm->is_send = true;
 
-                    if($sms->sendSms()) {
-                        Yii::$app->session->setFlash('sms-send-success', '<strong>SMS Message</strong> has been successfully sent to <strong>'.$sms->s_phone_to.'</strong>');
 
-                    } else {
+                    $smsResponse = $sms->sendSms();
+
+                    if(isset($smsResponse['error']) && $smsResponse['error']) {
                         Yii::$app->session->setFlash('send-error', 'Error: <strong>SMS Message</strong> has not been sent to <strong>'.$sms->s_phone_to.'</strong>');
-                        Yii::error('Error: SMS Message has not been sent to '.$sms->s_phone_to.'', 'LeadController:view:Sms:sendSms');
+                        Yii::error('Error: SMS Message has not been sent to '.$sms->s_phone_to."\r\n ".$smsResponse['error'], 'LeadController:view:Sms:sendSms');
+                    } else {
+                        Yii::$app->session->setFlash('send-success', '<strong>SMS Message</strong> has been successfully sent to <strong>'.$sms->s_phone_to.'</strong>');
                     }
 
                     $this->refresh();
@@ -535,7 +540,10 @@ class LeadController extends FController
 
                             if ($comForm->c_sms_tpl_id > 0) {
 
+                                $previewSmsForm->s_sms_tpl_id = $comForm->c_sms_tpl_id;
+
                                 $language = $comForm->c_language_id ?: 'en-US';
+
 
                                 $tpl = SmsTemplateType::findOne($comForm->c_sms_tpl_id);
                                 //$mailSend = $communication->mailSend(7, 'cl_offer', 'chalpet@gmail.com', 'chalpet2@gmail.com', $content_data, $data, 'ru-RU', 10);
@@ -561,6 +569,7 @@ class LeadController extends FController
                                 //VarDumper::dump($mailPreview, 10, true);// exit;
                             } else {
                                 $previewSmsForm->s_sms_message = $comForm->c_sms_message;
+
                             }
                         }
 

@@ -349,12 +349,15 @@ class Email extends \yii\db\ActiveRecord
         return $text;
     }
 
+
     /**
-     * @return bool
-     * @throws \yii\httpclient\Exception
+     * @return array
      */
-    public function sendMail(): bool
+    public function sendMail(): array
     {
+
+        $out = ['error' => false];
+
         /** @var CommunicationService $communication */
         $communication = Yii::$app->communication;
         $data = [];
@@ -370,16 +373,42 @@ class Email extends \yii\db\ActiveRecord
 
         $tplType = $this->eTemplateType ? $this->eTemplateType->etp_key : null;
 
-        $request = $communication->mailSend($this->e_project_id, $tplType, $this->e_email_from, $this->e_email_to, $content_data, $data, ($this->e_language_id ?: 'en-US'), 0);
+        try {
+            $request = $communication->mailSend($this->e_project_id, $tplType, $this->e_email_from, $this->e_email_to, $content_data, $data, ($this->e_language_id ?: 'en-US'), 0);
 
-        if($request && isset($request['data']['eq_status_id'])) {
-            $this->e_status_id = $request['data']['eq_status_id'];
+
+            if($request && isset($request['data']['eq_status_id'])) {
+                $this->e_status_id = $request['data']['eq_status_id'];
+                $this->e_communication_id = $request['data']['eq_id'];
+                $this->save();
+            }
+
+            //VarDumper::dump($request, 10, true); exit;
+
+            if($request && isset($request['error']) && $request['error']) {
+                $this->e_status_id = self::STATUS_ERROR;
+                $errorData = @json_decode($request['error'], true);
+                $this->e_error_message = 'Communication error: ' . ($errorData['message'] ?: $request['error']);
+                $this->save();
+                $out['error'] = $this->e_error_message;
+            }
+
+        } catch (\Throwable $exception) {
+            $error = VarDumper::dumpAsString($exception->getMessage());
+            $out['error'] = $error;
+            Yii::error($error, 'Email:sendMail:mailSend:exception');
+            $this->e_error_message = 'Communication error: ' . $error;
             $this->save();
-            return true;
         }
+
+        //VarDumper::dump($request, 10, true); exit;
+
+
+
+
         // VarDumper::dump($request, 10, true); exit;
 
-        return false;
+        return $out;
     }
 
     /**
