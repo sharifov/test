@@ -16,7 +16,7 @@ $isAgent = Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id);
     <p class="text-warning"><i class="fa fa-info-circle"></i> For searching the exact matches of the fields are used</p>
 
     <?php $form = ActiveForm::begin([
-        //'action' => ['index'],
+        'action' => ['index'],
         'method' => 'get',
         'options' => [
             'data-pjax' => 1
