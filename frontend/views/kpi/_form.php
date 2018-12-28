@@ -38,7 +38,10 @@ use common\models\Employee;
 		<?php endif;?>
 		<br/>
 		<?php if(!$isAgent && (empty($model->kh_agent_approved_dt) || empty($model->kh_super_approved_dt))):?>
-        <?= Html::submitButton('Recalculate Kpi', ['name' => 'recalculate_kpi','class' => 'btn btn-info']) ?>
+        <?= Html::submitButton('Recalculate Kpi', ['name' => 'recalculate_kpi','class' => 'btn btn-info',
+            'data' => [
+                'confirm' => 'Are you sure you want to recalculate salary for month?',
+            ],]) ?>
 		<?php endif;?>
     <?php ActiveForm::end(); ?>
 

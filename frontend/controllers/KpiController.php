@@ -61,6 +61,8 @@ class KpiController extends FController
             $date = \DateTime::createFromFormat('M-Y', $params2['DynamicModel']['date_dt']);
             $result = KpiService::calculateSalary($date->format('Y-m-d'));
 
+            Yii::info('Month: '.$date->format('M-Y').' User: '.Yii::$app->user->id.' Agents: All ', 'info\KpiService::calculateSalary');
+
             return $this->redirect([
                 'kpi/index',
                 'KpiHistorySearch[kh_date_dt]' => $params2['DynamicModel']['date_dt'],
@@ -104,6 +106,8 @@ class KpiController extends FController
             $postParams = Yii::$app->request->post();
             if(isset($postParams['recalculate_kpi'])){
                 $kpiHistory = KpiHistory::recalculateSalary($agent, $start, $end);
+                Yii::info('Month: '.$end->format('M-Y').' User: '.Yii::$app->user->id.' Agent: '.$agent->id, 'info\KpiHistory::recalculateSalary');
+
                 $kpiHistory->kh_agent_approved_dt = null;
                 $kpiHistory->kh_super_approved_dt = null;
             }elseif(isset($postParams['approved_by_super'])){

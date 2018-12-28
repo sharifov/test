@@ -44,6 +44,13 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
+        'rowOptions' => function (\common\models\KpiHistory $model) {
+            if (!empty($model->kh_super_approved_dt) && !empty($model->kh_agent_approved_dt)) {
+                return ['class' => 'info'];
+            }elseif(!empty($model->kh_super_approved_dt) || !empty($model->kh_agent_approved_dt)){
+                return ['class' => 'warning'];
+            }
+        },
         'filterModel' => $searchModel,
         'columns' => [
             [

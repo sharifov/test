@@ -16,6 +16,8 @@ use yii\helpers\Url;
  * */
 
 $this->title = 'Salary by '.$month.' for '.$agent.': $'.$kpiHistory->getSalary();
+
+$this->params['breadcrumbs'][] = ['label' => 'KPI', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="kpi-index">
