@@ -28,7 +28,7 @@ $bundle = yiister\gentelella\assets\Asset::register($this);
     $host = str_replace(['http://','https://'], '', $_SERVER['HTTP_HOST']);
     echo Html::tag('title', ucfirst($host). ' - AUTHORIZATION');
     ?>
-    <link rel="stylesheet" href="<?= Yii::$app->getAssetManager()->publish(Yii::getAlias('@frontend').'/web/css/style_theme.css')[1];?>"/>
+    <?php /*<link rel="stylesheet" href="<?= Yii::$app->getAssetManager()->publish(Yii::getAlias('@frontend').'/web/css/style_theme.css')[1];?>"/> ?>
     <?//php $this->head() ?>
     <? /*<link rel="shortcut icon" href="<?php echo Yii::$app->request->baseUrl; ?>/favicon.ico" type="image/x-icon" />*/ ?>
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
