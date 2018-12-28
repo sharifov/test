@@ -236,6 +236,12 @@ $c_type_id = $comForm->c_type_id;
                         echo '</div>';
                     }
 
+                    if(Yii::$app->session->hasFlash('send-error')) {
+                        echo '<div class="alert alert-danger alert-dismissible" role="alert"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>';
+                        echo Yii::$app->session->getFlash('send-error');
+                        echo '</div>';
+                    }
+
                     echo $form->errorSummary($comForm);
 
                 ?>

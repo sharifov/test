@@ -309,9 +309,6 @@ class LeadController extends FController
         $previewEmailForm = new LeadPreviewEmailForm();
         $previewEmailForm->is_send = false;
 
-        $previewSmsForm = new LeadPreviewSmsForm();
-        $previewSmsForm->is_send = false;
-
 
         if ($previewEmailForm->load(Yii::$app->request->post())) {
             $previewEmailForm->e_lead_id = $lead->id;
@@ -340,8 +337,17 @@ class LeadController extends FController
                 $mail->e_created_user_id = Yii::$app->user->id;
 
                 if($mail->save()) {
-                    Yii::$app->session->setFlash('mail-send-success', '<strong>Email Message</strong> has been successfully sent to <strong>'.$mail->e_email_to.'</strong>');
+
                     $previewEmailForm->is_send = true;
+
+                    if($mail->sendMail()) {
+                        Yii::$app->session->setFlash('mail-send-success', '<strong>Email Message</strong> has been successfully sent to <strong>'.$mail->e_email_to.'</strong>');
+
+                    } else {
+                        Yii::$app->session->setFlash('send-error', 'Error: <strong>Email Message</strong> has not been sent to <strong>'.$mail->e_email_to.'</strong>');
+                        Yii::error('Error: Email Message has not been sent to '.$mail->e_email_to.'', 'LeadController:view:Email:sendMail');
+                    }
+
                     $this->refresh();
 
                 } else {
@@ -352,6 +358,9 @@ class LeadController extends FController
             }
         }
 
+
+        $previewSmsForm = new LeadPreviewSmsForm();
+        $previewSmsForm->is_send = false;
 
         if ($previewSmsForm->load(Yii::$app->request->post())) {
             $previewSmsForm->s_lead_id = $lead->id;
@@ -380,8 +389,17 @@ class LeadController extends FController
                 $sms->s_created_user_id = Yii::$app->user->id;
 
                 if($sms->save()) {
-                    Yii::$app->session->setFlash('sms-send-success', '<strong>SMS Message</strong> has been successfully sent to <strong>'.$sms->s_phone_to.'</strong>');
+
                     $previewSmsForm->is_send = true;
+
+                    if($sms->sendSms()) {
+                        Yii::$app->session->setFlash('sms-send-success', '<strong>SMS Message</strong> has been successfully sent to <strong>'.$sms->s_phone_to.'</strong>');
+
+                    } else {
+                        Yii::$app->session->setFlash('send-error', 'Error: <strong>SMS Message</strong> has not been sent to <strong>'.$sms->s_phone_to.'</strong>');
+                        Yii::error('Error: SMS Message has not been sent to '.$sms->s_phone_to.'', 'LeadController:view:Sms:sendSms');
+                    }
+
                     $this->refresh();
 
                 } else {

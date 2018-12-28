@@ -303,7 +303,7 @@ class Sms extends \yii\db\ActiveRecord
      * @return bool
      * @throws \yii\httpclient\Exception
      */
-    public function sendMail(): bool
+    public function sendSms(): bool
     {
         /** @var CommunicationService $communication */
         $communication = Yii::$app->communication;
@@ -311,9 +311,12 @@ class Sms extends \yii\db\ActiveRecord
         $data['project_id'] = $this->s_project_id;
 
         $content_data['sms_text'] = $this->s_sms_text;
-        $request = $communication->smsSend($this->s_project_id, 'cl_offer', $this->s_phone_from, $this->s_phone_to, $content_data, $data, ($this->s_language_id ?: 'en-US'), 0);
 
-        if($request && $request['data']) {
+        $tplType = $this->sTemplateType ? $this->sTemplateType->stp_key : null;
+
+        $request = $communication->smsSend($this->s_project_id, $tplType, $this->s_phone_from, $this->s_phone_to, $content_data, $data, ($this->s_language_id ?: 'en-US'), 0);
+
+        if($request && isset($request['data']['sq_status_id'])) {
             $this->s_status_id = $request['data']['sq_status_id'];
             $this->save();
             return true;
@@ -322,4 +325,5 @@ class Sms extends \yii\db\ActiveRecord
 
         return false;
     }
+
 }

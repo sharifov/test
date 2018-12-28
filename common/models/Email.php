@@ -366,10 +366,13 @@ class Email extends \yii\db\ActiveRecord
         $content_data['email_reply_to'] = $this->e_email_from;
         $content_data['email_cc'] = $this->e_email_cc;
         $content_data['email_bcc'] = $this->e_email_bc;
+        $content_data['email_message_id'] = $this->e_message_id;
 
-        $request = $communication->mailSend($this->e_project_id, 'cl_offer', $this->e_email_from, $this->e_email_to, $content_data, $data, ($this->e_language_id ?: 'en-US'), 0);
+        $tplType = $this->eTemplateType ? $this->eTemplateType->etp_key : null;
 
-        if($request && $request['data']) {
+        $request = $communication->mailSend($this->e_project_id, $tplType, $this->e_email_from, $this->e_email_to, $content_data, $data, ($this->e_language_id ?: 'en-US'), 0);
+
+        if($request && isset($request['data']['eq_status_id'])) {
             $this->e_status_id = $request['data']['eq_status_id'];
             $this->save();
             return true;
@@ -384,7 +387,12 @@ class Email extends \yii\db\ActiveRecord
      */
     public function generateMessageId(): string
     {
-        $message = uniqid().'.'.$this->e_email_from;
+        $arr[] = $this->e_id;
+        $arr[] = $this->e_lead_id;
+        $arr[] = $this->e_email_from;
+
+        $message = implode('.', $arr);
         return $message;
     }
+
 }
