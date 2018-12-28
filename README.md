@@ -73,24 +73,24 @@ Prod Hosts:
  - [https://sales.travelinsides.com/admin](https://sales.travelinsides.com/admin) - Backend
  - [https://sales.api.travelinsides.com](https://sales.api.travelinsides.com) - API
  - [https://sales.api.travelinsides.com/doc/index.html](https://sales.api.travelinsides.com/doc/index.html) - API Documentation
- 
+
  Dev Hosts:
  -------------------
   - [http://sales.dev.travelinsides.com](http://sales.dev.travelinsides.com) - Frontend
   - [http://sales.dev.travelinsides.com/admin](http://sales.dev.travelinsides.com/admin) - Backend
   - [http://api-sales.dev.travelinsides.com](http://api-sales.dev.travelinsides.com) - API
   - [http://api-sales.dev.travelinsides.com/doc/index.html](http://api-sales.dev.travelinsides.com/doc/index.html) - API Documentation
-  
+
  New Dev Hosts:
  -------------------
  - [https://sales-dev.travelinsides.com](https://sales-dev.travelinsides.com) - Frontend
  - [https://sales-dev.travelinsides.com/admin](https://sales-dev.travelinsides.com/admin) - Backend
- 
+
  Generate API Documentation (apiDoc):
  ```
  sudo apidoc -i "./webapi/modules" -o "./webapi/web/doc" -f ".*\\.php$"
  ```
- 
+
  Api Example:
  -------------------
 
@@ -181,7 +181,7 @@ common/config/test-local.php
 
 [https://codeception.com/docs/02-GettingStarted](https://codeception.com/docs/02-GettingStarted#Generators)
 
-* generate acceptance >> ```../vendor/bin/codecept generate:cest acceptance Index``` 
+* generate acceptance >> ```../vendor/bin/codecept generate:cest acceptance Index```
 * build test >> ```vendor/bin/codecept build```
 * run custom test >> ```../vendor/bin/codecept run tests/acceptance/IndexCest.php```
 * run test >> ```vendor/bin/codecept run```
@@ -200,7 +200,7 @@ common
     config/              contains shared configurations
     mail/                contains view files for e-mails
     models/              contains model classes used in both backend and frontend
-    tests/               contains tests for common classes    
+    tests/               contains tests for common classes
 console
     config/              contains console configurations
     controllers/         contains console controllers (commands)
@@ -213,7 +213,7 @@ backend
     controllers/         contains Web controller classes
     models/              contains backend-specific model classes
     runtime/             contains files generated during runtime
-    tests/               contains tests for backend application    
+    tests/               contains tests for backend application
     views/               contains view files for the Web application
     web/                 contains the entry script and Web resources
 frontend
@@ -245,4 +245,15 @@ php console/socket-server.php start
 Check process by PORT
 ```
 sudo netstat -tulpn| grep :8080
+```
+
+CRONs
+```
+*/15  *  *  *  *     run-this-one php /var/www/sale/yii monitor-flow/follow-up
+*/15  *  *  *  *     run-this-one php /var/www/sale/yii monitor-flow/on-wake
+*/30  *  *  *  *     run-this-one php /var/www/sale/yii monitor-flow/watch-dog-decline-quote
+*/3   *  *  *  *     run-this-one php /var/www/sale/yii lead/update-ip-info
+10   0  *  *  *     run-this-one php /var/www/sale/yii lead/update-by-tasks
+30   0  *  *  *     run-this-one php /var/www/sale/yii db/update-airline-cabin-classes
+0   30  1  *  *     php /var/www/sale/yii kpi/calculate-salary
 ```
