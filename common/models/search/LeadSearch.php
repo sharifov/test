@@ -211,8 +211,10 @@ class LeadSearch extends Lead
 
         //echo $this->created_date_from;
         if($this->quote_pnr) {
-            $subQuery = Quote::find()->select(['DISTINCT(lead_id)'])->where(['=', 'record_locator', mb_strtoupper($this->quote_pnr)]);
-            $query->andWhere(['IN', 'leads.id', $subQuery]);
+            //$subQuery = Quote::find()->select(['DISTINCT(lead_id)'])->where(['=', 'record_locator', mb_strtoupper($this->quote_pnr)]);
+            //$query->andWhere(['IN', 'leads.id', $subQuery]);
+
+            $query->andWhere(['LIKE','leads.additional_information', new Expression('\'%"pnr":%"'.$this->quote_pnr.'"%\'')]);
         }
 
 
@@ -243,7 +245,7 @@ class LeadSearch extends Lead
             ->andFilterWhere(['like', 'offset_gmt', $this->offset_gmt])
             ->andFilterWhere(['like', 'discount_id', $this->discount_id]);
 
-/*         $sqlRaw = $query->createCommand()->getRawSql();
+        /*  $sqlRaw = $query->createCommand()->getRawSql();
 
         VarDumper::dump($sqlRaw, 10, true); exit; */
 
@@ -383,8 +385,10 @@ class LeadSearch extends Lead
         }
 
         if($this->quote_pnr) {
-            $subQuery = Quote::find()->select(['DISTINCT(lead_id)'])->where(['=', 'record_locator', mb_strtoupper($this->quote_pnr)]);
-            $query->andWhere(['IN', 'leads.id', $subQuery]);
+            /* $subQuery = Quote::find()->select(['DISTINCT(lead_id)'])->where(['=', 'record_locator', mb_strtoupper($this->quote_pnr)]);
+            $query->andWhere(['IN', 'leads.id', $subQuery]); */
+
+            $query->andWhere(['LIKE','leads.additional_information', new Expression('\'%"pnr":%"'.$this->quote_pnr.'"%\'')]);
         }
 
 
