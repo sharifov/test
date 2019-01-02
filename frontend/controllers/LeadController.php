@@ -290,8 +290,7 @@ class LeadController extends FController
                     }
 
                     return $this->redirect([
-                        'quote',
-                        'type' => 'processing',
+                        'view',
                         'id' => $leadForm->getLead()->id
                     ]);
                 }
@@ -697,8 +696,7 @@ class LeadController extends FController
                         ));
                     }
                     return $this->redirect([
-                        'quote',
-                        'type' => 'processing',
+                        'view',
                         'id' => $lead->id
                     ]);
                 }
@@ -834,8 +832,7 @@ class LeadController extends FController
                     Yii::$app->getSession()->setFlash('danger', sprintf('Sent email \'%s\' failed. Please verify your email or password from email!', $sendEmailModel->subject));
                 }
                 return $this->redirect([
-                    'quote',
-                    'type' => 'processing',
+                    'view',
                     'id' => $lead->id
                 ]);
             } else {
@@ -940,8 +937,7 @@ class LeadController extends FController
                     $model->snooze_for = '';
                     $model->save();
                     return $this->redirect([
-                        'quote',
-                        'type' => 'processing',
+                        'view',
                         'id' => $model->id
                     ]);
                 } elseif ($attr['queue'] == 'reject') {
@@ -994,8 +990,7 @@ class LeadController extends FController
                     $note->save();
 
                     return $this->redirect([
-                        'quote',
-                        'type' => 'processing',
+                        'view',
                         'id' => $model->id
                     ]);
                 } elseif ($reason->queue == 'reject') {
@@ -1169,8 +1164,7 @@ class LeadController extends FController
 
 
         return $this->redirect([
-            'quote',
-            'type' => 'processing',
+            'view',
             'id' => $model->id
         ]);
 
@@ -1491,8 +1485,7 @@ class LeadController extends FController
                 LeadTask::createTaskList($model->id, $model->employee_id, 3, '', Task::CAT_NOT_ANSWERED_PROCESS);
 
                 return $this->redirect([
-                    'quote',
-                    'type' => 'processing',
+                    'view',
                     'id' => $leadForm->getLead()->id
                 ]);
             }
@@ -1620,8 +1613,7 @@ class LeadController extends FController
                 }else{
                     Lead::sendClonedEmail($newLead);
                     return $this->redirect([
-                        'quote',
-                        'type' => 'processing',
+                        'view',
                         'id' => $newLead->id
                     ]);
                 }
@@ -1655,8 +1647,7 @@ class LeadController extends FController
 
                 if (empty($errors) && $splitForm->save($errors)) {
                     return $this->redirect([
-                        'quote',
-                        'type' => 'sold',
+                        'view',
                         'id' => $lead->id
                     ]);
                 }
@@ -1719,8 +1710,7 @@ class LeadController extends FController
 
                 if (empty($errors) && $splitForm->save($errors)) {
                     return $this->redirect([
-                        'quote',
-                        'type' => 'sold',
+                        'view',
                         'id' => $lead->id
                     ]);
                 }
