@@ -149,7 +149,7 @@
                                     <table class="full-wd" style="border-collapse: collapse; border-spacing: 0; padding: 0; text-align: center; vertical-align: top; width: 100% !important;">
                                         <tr style="padding: 0; text-align: left; vertical-align: top;">
                                             <td class="full-wd logo-wrapper" valign="middle" style="-moz-hyphens: auto; -webkit-hyphens: auto; border-collapse: collapse !important; font-family: 'Roboto', Arial, Helvetica, sans-serif; font-weight: normal; hyphens: auto; line-height: 1.3; margin: 0; padding: 0; padding-bottom: 10px; text-align: center; vertical-align: top; width: 100% !important; word-wrap: break-word;">
-                                                <img src="<?= $project->link ?>/images/email/logo.png" alt="<?= $project->name ?>" width="160" height="50" class="logo" style="-ms-interpolation-mode: bicubic; clear: both; display: block; height: 50px; margin: 0 auto; max-width: 100%; outline: none; text-decoration: none; width: 160px;">
+                                                <img src="<?= $project->link ?>/theme/ovago/images/email/logo.png" alt="<?= $project->name ?>" width="160" height="50" class="logo" style="-ms-interpolation-mode: bicubic; clear: both; display: block; height: 50px; margin: 0 auto; max-width: 100%; outline: none; text-decoration: none; width: 160px;">
                                             </td>
                                         </tr>
                                         <tr style="padding: 0; text-align: left; vertical-align: top;">
