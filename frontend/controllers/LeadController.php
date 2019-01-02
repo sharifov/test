@@ -580,7 +580,7 @@ class LeadController extends FController
                 }
                 //return $this->redirect(['view', 'id' => $model->al_id]);
             } else {
-                $comForm->c_type_id = 1;
+                $comForm->c_type_id = '';
             }
 
             if($previewEmailForm->is_send || $previewSmsForm->is_send) {

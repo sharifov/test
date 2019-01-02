@@ -62,6 +62,7 @@ $c_type_id = $comForm->c_type_id;
                     'class' => 'list-wrapper',
                     'id' => 'list-wrapper',
                 ],
+                'emptyText' => '<div class="text-center">Not found communication messages</div><br>',
                 'layout' => "{summary}\n<div class=\"text-center\">{pager}</div>\n{items}<div class=\"text-center\">{pager}</div>\n",
                 'itemView' => function ($model, $key, $index, $widget) use ($dataProvider) {
                     return $this->render('_list_item',['model' => $model, 'dataProvider' => $dataProvider]);
@@ -249,7 +250,42 @@ $c_type_id = $comForm->c_type_id;
 
                     <div class="row">
                         <div class="col-sm-3 form-group">
-                            <?= $form->field($comForm, 'c_type_id')->dropDownList(\frontend\models\CommunicationForm::TYPE_LIST, ['class' => 'form-control', 'id' => 'c_type_id']) ?>
+                            <?php
+                                $typeList = [];
+                                $agentParams = \common\models\UserProjectParams::find()->where(['upp_project_id' => $leadForm->getLead()->project_id, 'upp_user_id' => Yii::$app->user->id])->limit(1)->one();
+
+                                //\yii\helpers\VarDumper::dump($leadForm->getLead()->id, 10, true); exit;
+
+                                if($agentParams) {
+                                    foreach (\frontend\models\CommunicationForm::TYPE_LIST as $tk => $itemName) {
+
+                                        if ($tk == \frontend\models\CommunicationForm::TYPE_EMAIL) {
+
+                                            if ($agentParams->upp_email) {
+                                                $typeList[$tk] = $itemName . ' (' . $agentParams->upp_email . ')';
+                                            }
+                                        }
+
+                                        if ($tk == \frontend\models\CommunicationForm::TYPE_SMS) {
+
+                                            if ($agentParams->upp_tw_phone_number) {
+                                                $typeList[$tk] = $itemName . ' (' . $agentParams->upp_tw_phone_number . ')';
+                                            }
+                                        }
+
+                                        if ($tk == \frontend\models\CommunicationForm::TYPE_VOICE) {
+
+                                            if ($agentParams->upp_tw_sip_id) {
+                                                $typeList[$tk] = $itemName . ' (' . $agentParams->upp_tw_sip_id . ')';
+                                            }
+                                        }
+                                    }
+                                }
+
+                            ?>
+
+
+                            <?= $form->field($comForm, 'c_type_id')->dropDownList($typeList, ['prompt' => '---', 'class' => 'form-control', 'id' => 'c_type_id']) ?>
                             <?//=$form->field($comForm, 'c_lead_id')->hiddenInput()->label(false); ?>
                         </div>
 
@@ -377,6 +413,10 @@ $js = <<<JS
             $('.message-field-sms').hide();
             $('.message-field-phone').hide();
             $('.message-field-email').show();
+        } else {
+            $('.message-field-sms').hide();
+            $('.message-field-phone').hide();
+            $('.message-field-email').hide();
         }
     }
     
