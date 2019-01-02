@@ -27,6 +27,12 @@ $this->params['breadcrumbs'][] = $this->title;
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
+        'rowOptions' => function (\common\models\SmsTemplateType $model) {
+            if ($model->stp_hidden) {
+                return ['class' => 'danger'];
+            }
+            return [];
+        },
         'columns' => [
             //['class' => 'yii\grid\SerialColumn'],
 
