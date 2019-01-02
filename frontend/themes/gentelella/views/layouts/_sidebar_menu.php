@@ -8,6 +8,7 @@ use yii\bootstrap\Nav;
 
 $isAdmin = Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id);
 $isSupervision = Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id);
+$isAgent = Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id);
 $isCoach = Yii::$app->authManager->getAssignment('coach', Yii::$app->user->id);
 
 
@@ -80,7 +81,11 @@ $isCoach = Yii::$app->authManager->getAssignment('coach', Yii::$app->user->id);
 
 
 
-            $menuItems[] = ['label' => 'KPI <span id="kpi" class="label-info label pull-right"></span> ', 'url' => ['/kpi'], 'icon' => 'money'];
+            if($isAdmin || $isAgent)
+            {
+                $menuItems[] = ['label' => 'KPI <span id="kpi" class="label-info label pull-right"></span> ', 'url' => ['/kpi'], 'icon' => 'money'];
+            }
+
 
             if (!$isCoach) {
 
