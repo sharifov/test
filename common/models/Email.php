@@ -45,6 +45,8 @@ use yii\helpers\VarDumper;
  * @property string $e_ref_message_id
  * @property string $e_inbox_created_dt
  * @property int $e_inbox_email_id
+ * @property string $e_email_from_name
+ * @property int $e_email_to_name
  *
  * @property Employee $eCreatedUser
  * @property Language $eLanguage
@@ -128,7 +130,7 @@ class Email extends \yii\db\ActiveRecord
             [['e_email_from', 'e_email_to'], 'required'],
             [['e_email_body_html', 'e_email_body_text', 'e_email_data', 'e_ref_message_id'], 'string'],
             [['e_status_done_dt', 'e_read_dt', 'e_created_dt', 'e_updated_dt', 'e_inbox_created_dt'], 'safe'],
-            [['e_email_from', 'e_email_to', 'e_email_cc', 'e_email_bc', 'e_email_subject', 'e_attach', 'e_message_id'], 'string', 'max' => 255],
+            [['e_email_from', 'e_email_to', 'e_email_cc', 'e_email_bc', 'e_email_subject', 'e_attach', 'e_message_id', 'e_email_from_name', 'e_email_to_name'], 'string', 'max' => 255],
             [['e_language_id'], 'string', 'max' => 5],
             [['e_error_message'], 'string', 'max' => 500],
             [['e_created_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['e_created_user_id' => 'id']],
@@ -152,7 +154,9 @@ class Email extends \yii\db\ActiveRecord
             'e_lead_id' => 'Lead ID',
             'e_project_id' => 'Project ID',
             'e_email_from' => 'Email From',
+            'e_email_from_name' => 'Email From Name',
             'e_email_to' => 'To',
+            'e_email_to_name' => 'Email To Name',
             'e_email_cc' => 'Cc',
             'e_email_bc' => 'Bc',
             'e_email_subject' => 'Subject',
