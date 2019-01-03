@@ -373,7 +373,7 @@ class Lead extends ActiveRecord
         }
 
         if (Yii::$app->user->identity->role == 'agent') {
-            $sold = $employee;
+            $sold = ' AND (employee_id = ' . $userId.' OR ps.ps_user_id ='.$userId.' OR ts.ts_user_id ='.$userId.')';
         }
         $default = implode(',', [
             self::STATUS_PROCESSING,
@@ -382,18 +382,20 @@ class Lead extends ActiveRecord
         ]);
 
         $select = [
-            'inbox' => 'SUM(CASE WHEN status IN (:inbox) THEN 1 ELSE 0 END)',
-            'follow-up' => 'SUM(CASE WHEN status IN (:followup) ' . $created . ' THEN 1 ELSE 0 END)',
-            'booked' => 'SUM(CASE WHEN status IN (:booked) ' . $created . $employee . ' THEN 1 ELSE 0 END)',
-            'sold' => 'SUM(CASE WHEN status IN (:sold) ' . $created . $sold . $employee . ' THEN 1 ELSE 0 END)',
-            'processing' => 'SUM(CASE WHEN status IN (' . $default . ') ' . $employee . ' THEN 1 ELSE 0 END)'];
+            'inbox' => 'COUNT(DISTINCT CASE WHEN status IN (:inbox) THEN leads.id ELSE NULL END)',
+            'follow-up' => 'COUNT(DISTINCT CASE WHEN status IN (:followup) ' . $created . '  THEN leads.id ELSE NULL END)',
+            'booked' => 'COUNT(DISTINCT CASE WHEN status IN (:booked) ' . $created .$sold . ' THEN leads.id ELSE NULL END)',
+            'sold' => 'COUNT(DISTINCT CASE WHEN status IN (:sold) ' . $created . $sold . ' THEN leads.id ELSE NULL END)',
+            'processing' => 'COUNT(DISTINCT CASE WHEN status IN (' . $default . ') ' . $employee . ' THEN leads.id ELSE NULL END)'];
 
         if (Yii::$app->user->identity->role != 'agent') {
-            $select['trash'] = 'SUM(CASE WHEN status IN (' . self::STATUS_TRASH . ') ' . $created . $employee . ' THEN 1 ELSE 0 END)';
+            $select['trash'] = 'COUNT(DISTINCT CASE WHEN status IN (' . self::STATUS_TRASH . ') ' . $created . $employee . ' THEN leads.id ELSE NULL END)';
         }
 
         $query = self::find()
             ->select($select)
+            ->leftJoin(ProfitSplit::tableName().' ps','ps.ps_lead_id = leads.id')
+            ->leftJoin(TipsSplit::tableName().' ts','ts.ts_lead_id = leads.id')
             ->andWhere(['IN', 'project_id', $projectIds])
             ->addParams([':inbox' => self::STATUS_PENDING,
                 ':followup' => self::STATUS_FOLLOW_UP,
@@ -2315,6 +2317,8 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
     {
         return Quote::findOne(['lead_id' => $this->id, 'status' => Quote::STATUS_APPLIED]);
     }
+
+
 
     public function getFlightDetails()
     {

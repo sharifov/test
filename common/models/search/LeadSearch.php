@@ -419,7 +419,7 @@ class LeadSearch extends Lead
             'query' => $query,
             'sort'=> ['defaultOrder' => ['updated' => SORT_DESC]],
             'pagination' => [
-                'pageSize' => 100,
+                'pageSize' => 30,
             ],
         ]);
 
@@ -516,7 +516,7 @@ class LeadSearch extends Lead
             ->groupBy(['leads.id']);
         }
 
-       /*  $sqlRaw = $query->createCommand()->getRawSql();
+        /* $sqlRaw = $query->createCommand()->getRawSql();
         VarDumper::dump($sqlRaw, 10, true); exit; */
 
         return $dataProvider;
@@ -710,7 +710,7 @@ class LeadSearch extends Lead
             $query->andWhere(['IN', 'leads.id', $subQuery]);
         }
 
-        /*if($this->supervision_id > 0) {
+        if($this->supervision_id > 0) {
             $subQuery1 = UserGroupAssign::find()->select(['ugs_group_id'])->where(['ugs_user_id' => $this->supervision_id]);
             $subQuery = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->where(['IN', 'ugs_group_id', $subQuery1]);
             $query->andWhere(['IN', 'leads.employee_id', $subQuery]);
@@ -721,7 +721,7 @@ class LeadSearch extends Lead
             ->leftJoin(ProfitSplit::tableName().' ps','ps.ps_lead_id = leads.id')
             ->andWhere($leadTable.'.employee_id = '. $this->employee_id.' OR ps.ps_user_id ='.$this->employee_id)
             ->groupBy(['leads.id']);
-        }*/
+        }
 
         /*  $sqlRaw = $query->createCommand()->getRawSql();
          VarDumper::dump($sqlRaw, 10, true); exit; */
