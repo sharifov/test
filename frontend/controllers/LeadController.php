@@ -4,6 +4,7 @@ namespace frontend\controllers;
 
 use common\components\BackOffice;
 use common\components\CommunicationService;
+use common\models\Airport;
 use common\models\ClientEmail;
 use common\models\ClientPhone;
 use common\models\Email;
@@ -453,12 +454,22 @@ class LeadController extends FController
                             //$content_data['email_bcc'] = 'chalpet-bcc@gmail.com';
 
 
+                            $upp = null;
                             if ($lead->project_id) {
                                 $upp = UserProjectParams::find()->where(['upp_project_id' => $lead->project_id, 'upp_user_id' => Yii::$app->user->id])->one();
                                 if ($upp) {
                                     $mailFrom = $upp->upp_email;
                                 }
                             }
+
+
+                            $projectContactInfo = [];
+                            $project = $lead->project;
+                            if($project && $project->contact_info) {
+                                $projectContactInfo = @json_decode($project->contact_info, true);
+                            }
+
+
 
                             $language = $comForm->c_language_id ?: 'en-US';
 
@@ -479,21 +490,88 @@ class LeadController extends FController
                                         $quoteModel = Quote::findOne($qid);
                                         if($quoteModel) {
 
+                                            //$quoteItem = $quoteModel->getInfoForEmail2();
                                             $quoteItem = [
-                                                'qid' => $quoteModel->id,
-                                                'record_locator' => $quoteModel->record_locator,
-                                                'pcc' => $quoteModel->pcc,
-                                                'cabin' => $quoteModel->cabin,
-                                                'trip_type' => $quoteModel->trip_type,
-                                                'main_airline_code' => $quoteModel->main_airline_code,
+                                                'id' => $quoteModel->id,
+                                                'uid' => $quoteModel->uid,
+                                                'cabinClass' => $quoteModel->cabin,
+                                                'tripType' => $quoteModel->trip_type,
+
+                                                //'airlineCode' => $quoteModel->main_airline_code,
+                                                //'offerData' =>  $quoteModel->getInfoForEmail2()
                                                 //'shortUrl' => $quoteModel->quotePrice(),
                                             ];
+
+                                            $quoteItem = array_merge($quoteItem, $quoteModel->getInfoForEmail2());
 
                                             $content_data['quotes'][] = $quoteItem;
                                         }
                                     }
                                 }
 
+
+                                $content_data['project'] = [
+                                    'name'      => $project ? $project->name : '',
+                                    'url'       => $project ? $project->link : 'https://',
+                                    'address'   => $projectContactInfo['address'] ?? '',
+                                    'phone'     => $projectContactInfo['phone'] ?? '',
+                                    'email'     => $projectContactInfo['email'] ?? '',
+                                ];
+
+                                $content_data['agent'] = [
+                                    'name'  => Yii::$app->user->identity->full_name,
+                                    'phone' => $upp && $upp->upp_phone_number ? $upp->upp_phone_number : '',
+                                    'email' => $upp && $upp->upp_email ? $upp->upp_email : '',
+                                ];
+
+
+                                $arriveCity = '';
+                                $departCity = '';
+
+                                $arriveIATA = '';
+                                $departIATA = '';
+
+                                if($leadSegments = $lead->leadFlightSegments) {
+                                    $firstSegment = $leadSegments[0];
+                                    $lastSegment = end($leadSegments);
+
+                                    $departIATA = $firstSegment->origin;
+                                    $arriveIATA = $lastSegment->destination;
+
+                                    $departAirport = Airport::find()->where(['iata' => $firstSegment->origin])->one();
+                                    if($departAirport) {
+                                        $departCity = $departAirport->city;
+                                    } else {
+                                        $departCity = $firstSegment->origin;
+                                    }
+
+
+                                    $arriveAirport = Airport::find()->where(['iata' => $lastSegment->destination])->one();
+                                    if($arriveAirport) {
+                                        $arriveCity = $arriveAirport->city;
+                                    } else {
+                                        $arriveCity = $lastSegment->destination;
+                                    }
+
+                                }
+
+                                $content_data['request'] = [
+                                    'arriveCity'    => $arriveCity,
+                                    'departCity'    => $departCity,
+                                    'arriveIATA'    => $arriveIATA,
+                                    'departIATA'    => $departIATA,
+                                    'tripType'      => $lead->trip_type,
+                                    'cabinClass'    => $lead->cabin,
+                                    'paxAdt'        => (int) $lead->adults,
+                                    'paxChd'        => (int) $lead->children,
+                                    'paxInf'        => (int) $lead->infants,
+                                    'paxTotal'      => (int) $lead->adults + (int) $lead->children + (int) $lead->infants
+                                ];
+
+
+                                //echo json_encode($content_data); exit;
+
+                                //echo (Html::encode(json_encode($content_data))); exit;
 
                                 $mailPreview = $communication->mailPreview($lead->project_id, ($tpl ? $tpl->etp_key : ''), $mailFrom, $comForm->c_email_to, $content_data, $language);
 
