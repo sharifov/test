@@ -424,31 +424,12 @@ class CommunicationController extends ApiBaseController
 
         try {
 
-            /** @var CommunicationService $communication */
-            $communication = Yii::$app->communication;
+            $smsItem = Yii::$app->request->post();
 
-            $filter = [];
-            $dateTime = null;
+            if(!isset($smsItem['si_id']) || !\is_array($smsItem) || !count($smsItem)) {
+                throw new \Exception('Error POST data');
+            }
 
-            $filter['last_dt'] = '';
-
-            /*$email_to = Yii::$app->request->post('email_to');
-            $email_from = Yii::$app->request->post('email_from');
-            $limit = Yii::$app->request->post('limit');
-            $offset = Yii::$app->request->post('offset');
-            $new = Yii::$app->request->post('new');
-            $last_id = Yii::$app->request->post('last_id');
-            $last_dt = Yii::$app->request->post('last_dt');*/
-
-            $res = $communication->mailGetMessages($filter);
-
-            if(isset($res['error']) && $res['error']) {
-                $response['error'] = 'Error mailGetMessages';
-                $response['error_code'] = 13;
-
-                Yii::error(VarDumper::dumpAsString($res['error']), 'API:Communication:newEmailMessagesReceived:mailGetMessages');
-
-            } elseif(isset($res['data']) && $res['data'] && \is_array($res['data'])) {
 
                 /*
                  *  * @property int $si_id
@@ -472,8 +453,6 @@ class CommunicationController extends ApiBaseController
                  * @property string $si_from_zip
                  */
 
-
-                foreach ($res['data'] as $smsItem) {
                     $sms = new Sms();
                     $sms->s_type_id = Sms::TYPE_INBOX;
                     $sms->s_status_id = Sms::STATUS_DONE;
@@ -501,15 +480,14 @@ class CommunicationController extends ApiBaseController
                     $sms->s_tw_from_zip = $smsItem['si_from_zip'] ?? null;
 
                     if(!$sms->save()) {
-                        Yii::error(VarDumper::dumpAsString($sms->errors), 'API:Communication:newEmailMessagesReceived:Sms:save');
+                        Yii::error(VarDumper::dumpAsString($sms->errors), 'API:Communication:newSmsMessagesReceived:Sms:save');
+                        throw new \Exception('Error save sms data');
                     }
-                }
 
-            }
-
+                    $response = $sms->attributes;
 
         } catch (\Throwable $e) {
-            Yii::error($e->getTraceAsString(), 'API:Communication:newEmailMessagesReceived:Email:try');
+            Yii::error($e->getTraceAsString(), 'API:Communication:newSmsMessagesReceived:Sms:try');
             $message = $this->debug ? $e->getTraceAsString() : $e->getMessage() . ' (code:' . $e->getCode() . ', line: ' . $e->getLine() . ')';
             $response['error'] = $message;
             $response['error_code'] = 15;
