@@ -237,6 +237,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         return 'Tips: '.$totalTipsTxt.(($splitTipsTxt)?'<hr/>Split tips:<br/>'.$splitTipsTxt:'').'<hr/> '.
                             (($model->employee)?$model->employee->username:'Main agent').' tips: '.$mainAgentTipsTxt;
                     },
+                    'format' => 'raw'
        ],
         [
             'attribute' => 'update',
