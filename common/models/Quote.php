@@ -102,6 +102,7 @@ class Quote extends \yii\db\ActiveRecord
     public $itinerary = [];
     public $hasFreeBaggage = false;
     public $freeBaggageInfo;
+    public $freeBaggageInfo2;
     public $hasAirportChange = false;
     public $hasOvernight = false;
 
@@ -1058,7 +1059,7 @@ class Quote extends \yii\db\ActiveRecord
                                     $this->freeBaggageInfo = $baggage->qsb_allow_weight.$baggage->qsb_allow_unit;
                                 }
 
-                                if($this->freeBaggageInfo){
+                                if($this->freeBaggageInfo) {
                                     $this->hasFreeBaggage = true;
                                     return ['hasFreeBaggage' => $this->hasFreeBaggage, 'freeBaggageInfo' => $this->freeBaggageInfo];
                                 }
@@ -1069,6 +1070,44 @@ class Quote extends \yii\db\ActiveRecord
             }
         }
         return ['hasFreeBaggage' => $this->hasFreeBaggage, 'freeBaggageInfo' => $this->freeBaggageInfo];
+    }
+
+
+    /**
+     * @return array
+     * @throws \Exception
+     */
+    public function getBaggageInfo2() : array
+    {
+
+        $caryOn = 1;
+        $checked = random_int(0, 1);
+
+        //if one segment has baggage -> quote has baggage
+        /*if(!empty($this->quoteTrips)){
+            foreach ($this->quoteTrips as $trip){
+                if(!empty($trip->quoteSegments)){
+                    foreach ($trip->quoteSegments as $segment){
+                        if(!empty($segment->quoteSegmentBaggages)){
+                            foreach ($segment->quoteSegmentBaggages as $baggage){
+                                if($baggage->qsb_allow_pieces && $baggage->qsb_allow_pieces > 0){
+                                    $this->freeBaggageInfo2 = $baggage->qsb_allow_pieces;
+                                } elseif ($baggage->qsb_allow_weight) {
+                                    $this->freeBaggageInfo2 = $baggage->qsb_allow_weight.$baggage->qsb_allow_unit;
+                                }
+
+                                if($this->freeBaggageInfo2){
+                                    $this->hasFreeBaggage = true;
+                                    //return ['hasFreeBaggage' => $this->hasFreeBaggage, 'freeBaggageInfo' => $this->freeBaggageInfo2];
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }*/
+
+        return ['carryOn' => $caryOn, 'checked' => $checked];
     }
 
     public function afterSave($insert, $changedAttributes)
@@ -1299,6 +1338,71 @@ class Quote extends \yii\db\ActiveRecord
             'baggage' => $this->freeBaggageInfo,
         ];
     }
+
+
+    /**
+     * @return array
+     */
+    public function getInfoForEmail2() : array
+    {
+        $trips = [];
+
+        foreach ($this->quoteTrips as $trip){
+            $firstSegment = null;
+            $lastSegment = null;
+
+            $segments = $trip->quoteSegments;
+            if( $segments ) {
+                $segmentsCnt = count($segments);
+                $stopCnt = $segmentsCnt - 1;
+                $firstSegment = $segments[0];
+                $lastSegment = end($segments);
+                $marketingAirlines = [];
+                foreach ($segments as $segment) {
+                    if(isset($segment->qs_stop) && $segment->qs_stop > 0){
+                        $stopCnt += $segment->qs_stop;
+                    }
+                    if(!in_array($segment->qs_marketing_airline, $marketingAirlines)){
+                        $marketingAirlines[] = $segment->qs_marketing_airline;
+                    }
+                }
+
+                $dateDiff = strtotime($lastSegment->qs_arrival_time) - strtotime($firstSegment->qs_departure_time);
+
+                $trips[] = [
+                    'airlineCode' => 1 === count($marketingAirlines) ? $marketingAirlines[0] : '',
+                    //'departureDate' => Yii::$app->formatter_search->asDatetime(strtotime($firstSegment->qs_departure_time),'MMM d'),
+                    //'departureTime' => Yii::$app->formatter_search->asDatetime(strtotime($firstSegment->qs_departure_time),'h:mm a'),
+                    'departDateTime' => date('Y-m-d H:i:s', strtotime($firstSegment->qs_departure_time)),
+                    'departAirportIATA' => $firstSegment->qs_departure_airport_code,
+                    //'departAirportName' => $firstSegment->qs_departure_airport_,
+                    'departCity' => $firstSegment->departureAirport ? $firstSegment->departureAirport->city : $firstSegment->qs_departure_airport_code,
+                    'arriveDateTime' => date('Y-m-d H:i:s', strtotime($lastSegment->qs_arrival_time)), //Yii::$app->formatter_search->asDatetime(strtotime($lastSegment->qs_arrival_time),'h:mm a'),
+                    'arriveDatePlus' => round($dateDiff / (60 * 60 * 24)),
+                    'arriveAirportIATA' => $lastSegment->qs_arrival_airport_code,
+                    'arriveCity' => $lastSegment->arrivalAirport ? $lastSegment->arrivalAirport->city : $lastSegment->qs_arrival_airport_code,
+                    'flightDuration' => SearchService::durationInMinutes($trip->qt_duration),
+                    'flightDurationMinutes' => $trip->qt_duration,
+                    'stopsQuantity' => $stopCnt,
+                ];
+
+            }
+
+
+        }
+
+
+
+        return [
+            'pricePerPax' => $this->getPricePerPax(),
+            'priceTotal' => 0,
+            'currencySymbol' => '$',
+            'currencyCode' => 'USD',
+            'trips' => $trips,
+            'baggage' => $this->getBaggageInfo2(),
+        ];
+    }
+
 
     public function getTripsFromDump(&$title = null)
     {
