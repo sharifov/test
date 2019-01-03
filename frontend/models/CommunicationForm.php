@@ -24,6 +24,9 @@ use yii\base\Model;
  * @property integer $c_email_tpl_id
  * @property integer $c_user_id
  * @property string $c_language_id
+ * @property string $c_quotes
+ *
+ * @property array $quoteList;
  *
  * @property integer $c_preview_email
  * @property integer $c_preview_sms
@@ -43,6 +46,9 @@ class CommunicationForm extends Model
         self::TYPE_VOICE    => 'Phone',
     ];
 
+    public const TPL_TYPE_EMAIL_OFFER = 1;
+    public const TPL_TYPE_SMS_OFFER = 2;
+
     public $c_type_id;
     public $c_lead_id;
 
@@ -61,6 +67,9 @@ class CommunicationForm extends Model
 
     public $c_preview_email;
     public $c_preview_sms;
+    public $c_quotes;
+
+    public $quoteList;
 
 
 
@@ -96,6 +105,21 @@ class CommunicationForm extends Model
                 }"
             ],
 
+
+
+            [['c_quotes'], 'required', 'when' => function (CommunicationForm $model) {
+                    return ($model->c_email_tpl_id == self::TPL_TYPE_EMAIL_OFFER && $model->c_type_id == self::TYPE_EMAIL) || ($model->c_sms_tpl_id == self::TPL_TYPE_SMS_OFFER && $model->c_type_id == self::TYPE_SMS);
+                },
+                'whenClient' => "function (attribute, value) { return ($('#c_type_id').val() == " . self::TYPE_EMAIL . " && $('#c_email_tpl_id').val() == " . self::TPL_TYPE_EMAIL_OFFER . '); }'
+            ],
+
+            [['c_quotes'], 'required', 'when' => function (CommunicationForm $model) {
+                    return $model->c_sms_tpl_id == self::TPL_TYPE_SMS_OFFER && $model->c_type_id == self::TYPE_SMS;
+                },
+                'whenClient' => "function (attribute, value) { return $('#c_type_id').val() == " . self::TYPE_SMS . " && $('#c_sms_tpl_id').val() == " . self::TPL_TYPE_SMS_OFFER . '; }'
+            ],
+
+
             [['c_email_subject', 'c_email_message', 'c_sms_message'], 'trim'],
 
             [['c_phone_number'], 'string', 'max' => 30],
@@ -112,6 +136,9 @@ class CommunicationForm extends Model
 
             [['c_language_id'], 'string', 'max' => 5],
 
+            [['c_quotes'], 'string'], //'each', 'rule' => ['integer']],
+            [['c_quotes'], 'validateQuotes'],
+
             [['c_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['c_user_id' => 'id']],
             [['c_language_id'], 'exist', 'skipOnError' => true, 'targetClass' => Language::class, 'targetAttribute' => ['c_language_id' => 'language_id']],
             [['c_lead_id'], 'exist', 'skipOnError' => true, 'targetClass' => Lead::class, 'targetAttribute' => ['c_lead_id' => 'id']],
@@ -121,12 +148,15 @@ class CommunicationForm extends Model
         ];
     }
 
-    /*public function validateType($attribute, $params, $validator)
+    public function validateQuotes($attribute, $params, $validator)
     {
-        if ($this->$attribute == self::TYPE_SMS) {
-            //if()   $this->addError($attribute, 'The country must be either "USA" or "Indonesia".');
-        }
-    }*/
+       if (!empty($this->c_quotes)) {
+           $this->quoteList = @json_decode($this->c_quotes, true);
+           if(!is_array($this->quoteList)) {
+               $this->quoteList = [];
+           }
+       }
+    }
 
 
     /**
@@ -135,7 +165,7 @@ class CommunicationForm extends Model
     public function attributeLabels() : array
     {
         return [
-            'c_type_id'            => 'Message Type',
+            'c_type_id'         => 'Message Type',
             'c_lead_id'         => 'Lead Id',
             'c_sms_tpl_id'      => 'SMS Template',
             'c_sms_message'     => 'SMS Message',
@@ -146,6 +176,7 @@ class CommunicationForm extends Model
             'c_phone_number'    => 'Phone number',
             'c_language_id'     => 'Language',
             'c_user_id'         => 'Agent ID',
+            'c_quotes'          => 'Checked Quotes'
         ];
     }
 
