@@ -286,15 +286,15 @@ $c_type_id = $comForm->c_type_id;
 
 
                             <?= $form->field($comForm, 'c_type_id')->dropDownList($typeList, ['prompt' => '---', 'class' => 'form-control', 'id' => 'c_type_id']) ?>
-                            <?//=$form->field($comForm, 'c_lead_id')->hiddenInput()->label(false); ?>
+                            <?= $form->field($comForm, 'c_quotes')->hiddenInput(['id' => 'c_quotes'])->label(false); ?>
                         </div>
 
                         <div class="col-sm-3 form-group message-field-sms" id="sms-template-group">
-                            <?= $form->field($comForm, 'c_sms_tpl_id')->dropDownList(\common\models\SmsTemplateType::getList(false), ['prompt' => '---', 'class' => 'form-control', 'id' => 'sms-template']) ?>
+                            <?= $form->field($comForm, 'c_sms_tpl_id')->dropDownList(\common\models\SmsTemplateType::getList(false), ['prompt' => '---', 'class' => 'form-control', 'id' => 'c_sms_tpl_id']) ?>
                         </div>
 
                         <div class="col-sm-3 form-group message-field-email" id="email-template-group" style="display: none;">
-                            <?= $form->field($comForm, 'c_email_tpl_id')->dropDownList(\common\models\EmailTemplateType::getList(false), ['prompt' => '---', 'class' => 'form-control', 'id' => 'email-template']) ?>
+                            <?= $form->field($comForm, 'c_email_tpl_id')->dropDownList(\common\models\EmailTemplateType::getList(false), ['prompt' => '---', 'class' => 'form-control', 'id' => 'c_email_tpl_id']) ?>
                         </div>
 
                         <div class="col-sm-3 form-group message-field-sms message-field-email" id="language-group" style="display: block;">
@@ -482,6 +482,31 @@ $js = <<<JS
         
         return false;
     });
+    
+    
+    
+    $('body').on('change', '.quotes-uid', function() {
+        
+        var quoteList = [];
+        var jsonQuotes = '';
+        
+        $('input[type=checkbox].quotes-uid:checked').each(function() {
+            quoteList.push($(this).data('id'));
+        });
+        
+        if (quoteList.length === 0) {
+            jsonQuotes = '';
+            
+        } else {
+            jsonQuotes = JSON.stringify(quoteList);
+        }
+        $('#c_quotes').val(jsonQuotes);
+        
+        // console.log(quoteList);
+        // console.log(jsonQuotes);
+        
+    });
+    
     
     
     

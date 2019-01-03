@@ -429,6 +429,9 @@ class LeadController extends FController
 
                     if($comForm->c_type_id == CommunicationForm::TYPE_EMAIL) {
 
+
+                            //VarDumper::dump($comForm->quoteList, 10, true); exit;
+
                             $comForm->c_preview_email = 1;
 
                             $mailFrom = Yii::$app->user->identity->email;
@@ -469,6 +472,28 @@ class LeadController extends FController
 
                                 $tpl = EmailTemplateType::findOne($comForm->c_email_tpl_id);
                                 //$mailSend = $communication->mailSend(7, 'cl_offer', 'chalpet@gmail.com', 'chalpet2@gmail.com', $content_data, $data, 'ru-RU', 10);
+
+
+                                if($comForm->quoteList) {
+                                    foreach ($comForm->quoteList as $qid) {
+                                        $quoteModel = Quote::findOne($qid);
+                                        if($quoteModel) {
+
+                                            $quoteItem = [
+                                                'qid' => $quoteModel->id,
+                                                'record_locator' => $quoteModel->record_locator,
+                                                'pcc' => $quoteModel->pcc,
+                                                'cabin' => $quoteModel->cabin,
+                                                'trip_type' => $quoteModel->trip_type,
+                                                'main_airline_code' => $quoteModel->main_airline_code,
+                                                //'shortUrl' => $quoteModel->quotePrice(),
+                                            ];
+
+                                            $content_data['quotes'][] = $quoteItem;
+                                        }
+                                    }
+                                }
+
 
                                 $mailPreview = $communication->mailPreview($lead->project_id, ($tpl ? $tpl->etp_key : ''), $mailFrom, $comForm->c_email_to, $content_data, $language);
 
