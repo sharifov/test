@@ -372,7 +372,9 @@ class CommunicationController extends ApiBaseController
                     $email->e_is_new = true;
 
                     $email->e_email_to = $mail['ei_email_to'];
+                    $email->e_email_to_name = $mail['ei_email_to_name'] ?? null;
                     $email->e_email_from = $mail['ei_email_from'];
+                    $email->e_email_from_name = $mail['ei_email_from_name'] ?? null;
                     $email->e_email_subject = $mail['ei_email_subject'];
                     if($mail['ei_project_id'] > 0) {
                         $project = Project::findOne($mail['ei_project_id']);
