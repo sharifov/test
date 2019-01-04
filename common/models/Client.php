@@ -24,7 +24,7 @@ use Yii;
 class Client extends \yii\db\ActiveRecord
 {
 
-    public $name;
+    public $full_name;
 
     /**
      * {@inheritdoc}

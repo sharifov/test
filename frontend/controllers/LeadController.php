@@ -428,6 +428,8 @@ class LeadController extends FController
 
                 if($comForm->validate()) {
 
+                    $project = $lead->project;
+
                     if($comForm->c_type_id == CommunicationForm::TYPE_EMAIL) {
 
 
@@ -464,7 +466,7 @@ class LeadController extends FController
 
 
                             $projectContactInfo = [];
-                            $project = $lead->project;
+
                             if($project && $project->contact_info) {
                                 $projectContactInfo = @json_decode($project->contact_info, true);
                             }
@@ -652,6 +654,98 @@ class LeadController extends FController
                             if ($comForm->c_sms_tpl_id > 0) {
 
                                 $previewSmsForm->s_sms_tpl_id = $comForm->c_sms_tpl_id;
+
+
+                                if($comForm->quoteList) {
+                                    foreach ($comForm->quoteList as $qid) {
+                                        $quoteModel = Quote::findOne($qid);
+                                        if($quoteModel) {
+
+                                            //$quoteItem = $quoteModel->getInfoForEmail2();
+                                            $quoteItem = [
+                                                'id' => $quoteModel->id,
+                                                'uid' => $quoteModel->uid,
+                                                'cabinClass' => $quoteModel->cabin,
+                                                'tripType' => $quoteModel->trip_type,
+
+                                                //'airlineCode' => $quoteModel->main_airline_code,
+                                                //'offerData' =>  $quoteModel->getInfoForEmail2()
+                                                //'shortUrl' => $quoteModel->quotePrice(),
+                                            ];
+
+                                            $quoteItem = array_merge($quoteItem, $quoteModel->getInfoForEmail2());
+
+                                            $content_data['quotes'][] = $quoteItem;
+                                        }
+                                    }
+                                }
+
+
+                                $content_data['project'] = [
+                                    'name'      => $project ? $project->name : '',
+                                    'url'       => $project ? $project->link : 'https://',
+                                    'address'   => $projectContactInfo['address'] ?? '',
+                                    'phone'     => $projectContactInfo['phone'] ?? '',
+                                    'email'     => $projectContactInfo['email'] ?? '',
+                                ];
+
+                                $content_data['agent'] = [
+                                    'name'  => Yii::$app->user->identity->full_name,
+                                    'phone' => $upp && $upp->upp_phone_number ? $upp->upp_phone_number : '',
+                                    'email' => $upp && $upp->upp_email ? $upp->upp_email : '',
+                                ];
+
+                                $content_data['client'] = [
+                                    'fullName'     => $lead->client ? $lead->client->full_name : '',
+                                    'firstName'    => $lead->client ? $lead->client->first_name : '',
+                                    'lastName'     => $lead->client ? $lead->client->last_name : '',
+                                ];
+
+
+                                $arriveCity = '';
+                                $departCity = '';
+
+                                $arriveIATA = '';
+                                $departIATA = '';
+
+                                if($leadSegments = $lead->leadFlightSegments) {
+                                    $firstSegment = $leadSegments[0];
+                                    $lastSegment = end($leadSegments);
+
+                                    $departIATA = $firstSegment->origin;
+                                    $arriveIATA = $lastSegment->destination;
+
+                                    $departAirport = Airport::find()->where(['iata' => $firstSegment->origin])->one();
+                                    if($departAirport) {
+                                        $departCity = $departAirport->city;
+                                    } else {
+                                        $departCity = $firstSegment->origin;
+                                    }
+
+
+                                    $arriveAirport = Airport::find()->where(['iata' => $lastSegment->destination])->one();
+                                    if($arriveAirport) {
+                                        $arriveCity = $arriveAirport->city;
+                                    } else {
+                                        $arriveCity = $lastSegment->destination;
+                                    }
+
+                                }
+
+                                $content_data['request'] = [
+                                    'arriveCity'    => $arriveCity,
+                                    'departCity'    => $departCity,
+                                    'arriveIATA'    => $arriveIATA,
+                                    'departIATA'    => $departIATA,
+                                    'tripType'      => $lead->trip_type,
+                                    'cabinClass'    => $lead->cabin,
+                                    'paxAdt'        => (int) $lead->adults,
+                                    'paxChd'        => (int) $lead->children,
+                                    'paxInf'        => (int) $lead->infants,
+                                    'paxTotal'      => (int) $lead->adults + (int) $lead->children + (int) $lead->infants
+                                ];
+
+
 
                                 $language = $comForm->c_language_id ?: 'en-US';
 
