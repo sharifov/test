@@ -44,6 +44,31 @@ class TestController extends FController
 
 
 
+    public function actionEmail()
+    {
+        $swiftMailer = \Yii::$app->mailer;
+
+        $mail = $swiftMailer
+            ->compose()
+            ->setTo(['chalpet@gmail.com' => 'Alex'])
+            ->setFrom(['chalpet@gmail.com' => 'Dima'])
+            ->setSubject('Test message');
+
+
+        /*$headers = $mail->getSwiftMessage()->getHeaders();
+        $headers->addTextHeader('Content-Transfer-Encoding','base64');*/
+
+        $mail->setHeader('Message-ID', '123456.chalpet@gmail.com');
+        $mail->setHtmlBody('HTML message');
+
+        if($mail->send()) {
+            echo 'Send';
+        } else {
+            echo 'Not send';
+        }
+    }
+
+
     public function actionComPreview()
     {
         /** @var CommunicationService $communication */

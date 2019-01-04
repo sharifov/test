@@ -54,9 +54,11 @@ use \common\models\Sms;
             <i class="chat__status chat__status--<?=$statusClass?> fa fa-circle" data-toggle="tooltip" title="<?=Html::encode($statusTitle)?>" data-placement="right" data-original-title="<?=Html::encode($statusTitle)?>"></i>
             <div class="chat__message-heading">
                 <?php if($mail->e_type_id == Email::TYPE_INBOX):?>
-                    <div class="chat__sender">Email from <strong><?=($mail->eCreatedUser ? Html::encode($mail->eCreatedUser->username) : '-') ?>, (<?=Html::encode($mail->e_email_from)?>)</strong> to  (<strong><?=Html::encode($mail->e_email_to)?></strong>)</div>
+                    <div class="chat__sender">Email from (<?=Html::encode($mail->e_email_from_name)?> <<strong><?=Html::encode($mail->e_email_from)?>> )</strong>
+                            to (<?=Html::encode($mail->e_email_to_name)?> <<strong><?=Html::encode($mail->e_email_to)?></strong>>)</div>
                 <? else: ?>
-                    <div class="chat__sender">Email from (<strong><?=Html::encode($mail->e_email_from)?></strong>) to (<strong><?=Html::encode($mail->e_email_to)?></strong>)</div>
+                    <div class="chat__sender">Email from <?=($mail->eCreatedUser ? Html::encode($mail->eCreatedUser->username) : '-') ?>, (<?=Html::encode($mail->e_email_from_name)?> <<strong><?=Html::encode($mail->e_email_from)?></strong>>) to
+                        (<?=Html::encode($mail->e_email_to_name)?> <<strong><?=Html::encode($mail->e_email_to)?></strong>>)</div>
                 <?php endif;?>
                 <div class="chat__date"><?=Yii::$app->formatter->asDatetime(strtotime($mail->e_created_dt))?> <?=$mail->e_language_id ? '('.$mail->e_language_id.')' : ''?></div> <?php //11:01AM | June 9?>
             </div>

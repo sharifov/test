@@ -46,7 +46,7 @@ use yii\helpers\VarDumper;
  * @property string $e_inbox_created_dt
  * @property int $e_inbox_email_id
  * @property string $e_email_from_name
- * @property int $e_email_to_name
+ * @property string $e_email_to_name
  *
  * @property Employee $eCreatedUser
  * @property Language $eLanguage
@@ -373,7 +373,18 @@ class Email extends \yii\db\ActiveRecord
         $content_data['email_reply_to'] = $this->e_email_from;
         $content_data['email_cc'] = $this->e_email_cc;
         $content_data['email_bcc'] = $this->e_email_bc;
-        $content_data['email_message_id'] = $this->e_message_id;
+
+        if($this->e_email_from_name) {
+            $content_data['email_from_name'] = $this->e_email_from_name;
+        }
+
+        if($this->e_email_to_name) {
+            $content_data['email_to_name'] = $this->e_email_to_name;
+        }
+
+        if($this->e_message_id) {
+            $content_data['email_message_id'] = $this->e_message_id;
+        }
 
         $tplType = $this->eTemplateType ? $this->eTemplateType->etp_key : null;
 
@@ -421,10 +432,11 @@ class Email extends \yii\db\ActiveRecord
     public function generateMessageId(): string
     {
         $arr[] = $this->e_id;
+        $arr[] = $this->e_project_id;
         $arr[] = $this->e_lead_id;
         $arr[] = $this->e_email_from;
 
-        $message = implode('.', $arr);
+        $message = '<' . implode('.', $arr) . '>';
         return $message;
     }
 
