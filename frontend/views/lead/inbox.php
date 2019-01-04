@@ -382,6 +382,15 @@ $this->params['breadcrumbs'][] = $this->title;
             ]
         ],
 
+        [
+            'header' => 'Project',
+            'attribute' => 'project_id',
+            'filter' => false,
+            'value' => function (\common\models\Lead $model) {
+                return $model->project ? $model->project->name : '-';
+            },
+         ],
+
         /*[
             'header' => 'Client time2',
             'format' => 'raw',
