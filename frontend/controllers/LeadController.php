@@ -524,6 +524,12 @@ class LeadController extends FController
                                     'email' => $upp && $upp->upp_email ? $upp->upp_email : '',
                                 ];
 
+                                $content_data['client'] = [
+                                    'fullName'     => $lead->client ? $lead->client->full_name : '',
+                                    'firstName'    => $lead->client ? $lead->client->first_name : '',
+                                    'lastName'     => $lead->client ? $lead->client->last_name : '',
+                                ];
+
 
                                 $arriveCity = '';
                                 $departCity = '';
