@@ -13,7 +13,6 @@ use yii\data\SqlDataProvider;
 use yii\db\Expression;
 use yii\db\Query;
 use yii\debug\models\timeline\DataProvider;
-use yii\helpers\VarDumper;
 use common\models\Quote;
 use common\models\LeadFlightSegment;
 use common\models\Client;
@@ -227,8 +226,9 @@ class LeadSearch extends Lead
 
                 if($this->statuses && in_array(Lead::STATUS_FOLLOW_UP, $this->statuses) && count($this->statuses) == 1) {
 
-                } else {
+                } elseif($this->statuses && in_array(Lead::STATUS_PENDING, $this->statuses) && count($this->statuses) == 1){
 
+                } else {
                     $subQuery1 = UserGroupAssign::find()->select(['ugs_group_id'])->where(['ugs_user_id' => $this->supervision_id]);
                     $subQuery = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->where(['IN', 'ugs_group_id', $subQuery1]);
                     $query->andWhere(['IN', 'leads.employee_id', $subQuery]);
