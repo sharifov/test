@@ -384,7 +384,7 @@ class Lead extends ActiveRecord
         $select = [
             'inbox' => 'COUNT(DISTINCT CASE WHEN status IN (:inbox) THEN leads.id ELSE NULL END)',
             'follow-up' => 'COUNT(DISTINCT CASE WHEN status IN (:followup) ' . $created . '  THEN leads.id ELSE NULL END)',
-            'booked' => 'COUNT(DISTINCT CASE WHEN status IN (:booked) ' . $created .$sold . ' THEN leads.id ELSE NULL END)',
+            'booked' => 'COUNT(DISTINCT CASE WHEN status IN (:booked) ' . $created . ' THEN leads.id ELSE NULL END)',
             'sold' => 'COUNT(DISTINCT CASE WHEN status IN (:sold) ' . $created . $sold . ' THEN leads.id ELSE NULL END)',
             'processing' => 'COUNT(DISTINCT CASE WHEN status IN (' . $default . ') ' . $employee . ' THEN leads.id ELSE NULL END)'];
 
