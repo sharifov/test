@@ -15,12 +15,17 @@ use Yii;
  * @property string $created
  * @property string $updated
  *
+ * @property string $full_name
+ *
  * @property ClientEmail[] $clientEmails
  * @property ClientPhone[] $clientPhones
  * @property Lead[] $leads
  */
 class Client extends \yii\db\ActiveRecord
 {
+
+    public $full_name;
+
     /**
      * {@inheritdoc}
      */
@@ -53,7 +58,15 @@ class Client extends \yii\db\ActiveRecord
             'last_name' => 'Last Name',
             'created' => 'Created',
             'updated' => 'Updated',
+            'full_name' => 'Full Name',
         ];
+    }
+
+
+    public function afterFind()
+    {
+        parent::afterFind();
+        $this->full_name = trim($this->first_name . ' ' . $this->last_name);
     }
 
     /**
