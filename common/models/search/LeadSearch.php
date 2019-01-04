@@ -779,7 +779,7 @@ class LeadSearch extends Lead
 
         if($this->email_status > 0) {
             if($this->email_status == 2) {
-                $query->andWhere(new Expression('(SELECT COUNT(*) FROM client_email WHERE client_email.client_id = leads.client_id) > 1'));
+                $query->andWhere(new Expression('(SELECT COUNT(*) FROM client_email WHERE client_email.client_id = leads.client_id) > 0'));
             } else {
                 $query->andWhere(new Expression('(SELECT COUNT(*) FROM client_email WHERE client_email.client_id = leads.client_id) = 0'));
             }
@@ -868,7 +868,7 @@ class LeadSearch extends Lead
 
         if($this->email_status > 0) {
             if($this->email_status == 2) {
-                $query->andWhere(new Expression('(SELECT COUNT(*) FROM client_email WHERE client_email.client_id = leads.client_id) > 1'));
+                $query->andWhere(new Expression('(SELECT COUNT(*) FROM client_email WHERE client_email.client_id = leads.client_id) > 0'));
             } else {
                 $query->andWhere(new Expression('(SELECT COUNT(*) FROM client_email WHERE client_email.client_id = leads.client_id) = 0'));
             }
@@ -1006,7 +1006,7 @@ class LeadSearch extends Lead
 
         if($this->email_status > 0) {
             if($this->email_status == 2) {
-                $query->andWhere(new Expression('(SELECT COUNT(*) FROM client_email WHERE client_email.client_id = leads.client_id) > 1'));
+                $query->andWhere(new Expression('(SELECT COUNT(*) FROM client_email WHERE client_email.client_id = leads.client_id) > 0'));
             } else {
                 $query->andWhere(new Expression('(SELECT COUNT(*) FROM client_email WHERE client_email.client_id = leads.client_id) = 0'));
             }
