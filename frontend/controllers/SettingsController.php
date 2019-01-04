@@ -36,7 +36,7 @@ class SettingsController extends FController
                     [
                         'actions' => [
                             'projects', 'airlines', 'airports', 'logging', 'acl', 'email-template',
-                            'sync', 'view-log', 'acl-rule'
+                            'sync', 'view-log', 'acl-rule', 'project-data'
                         ],
                         'allow' => true,
                         'roles' => ['supervision'],
@@ -200,6 +200,32 @@ class SettingsController extends FController
             'dataProvider' => $dataProvider,
         ]);
     }
+
+    public function actionProjectData($id)
+    {
+        $errors = [];
+        $project = Project::findOne(['id' => $id]);
+        if ($project !== null) {
+
+            if (Yii::$app->request->isPost || Yii::$app->request->isAjax) {
+                if ($project->load(Yii::$app->request->post())) {
+                    if($project->save()){
+                        return $this->redirect(['settings/projects']);
+                    }
+                }else{
+                    if(empty($project->custom_data)){
+                        $project->custom_data = @json_encode(['background-color' => '#f4f7fa', 'color' => '#000000']);
+                    }
+                }
+
+                return $this->renderAjax('_project_custom_data', [
+                    'model' => $project
+                ]);
+            }
+        }
+        return null;
+    }
+
 
     /**
      * @return string
