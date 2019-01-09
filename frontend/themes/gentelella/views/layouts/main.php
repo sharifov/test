@@ -14,6 +14,8 @@ use \webvimark\modules\UserManagement\UserManagementModule;
 
 //\backend\assets\AppAsset::register($this);
 $bundle = \frontend\themes\gentelella\assets\Asset::register($this);
+\frontend\assets\NotifyAsset::register($this);
+
 
 //$this->registerCssFile('@backend/themes/gentelella/css/custom.css');
 //Yii::$app->view->registerCssFile('@backend/themes/gentelella/css/custom.css', ['depends'=>'yiister\gentelella\assets\Asset']);
