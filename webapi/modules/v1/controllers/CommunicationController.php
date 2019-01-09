@@ -390,6 +390,11 @@ class CommunicationController extends ApiBaseController
                     $email->e_ref_message_id = $mail['ei_ref_mess_ids'];
                     $email->e_message_id = $mail['ei_message_id'];
 
+                    $lead_id = $email->detectLeadId();
+                    if($lead_id) {
+                        Yii::info('Email Detected LeadId '.$lead_id.' from '.$email->e_email_from, 'info\API:Communication:newEmailMessagesReceived:Email');
+                    }
+
                     if(!$email->save()) {
                         Yii::error(VarDumper::dumpAsString($email->errors), 'API:Communication:newEmailMessagesReceived:Email:save');
                     }
@@ -424,14 +429,23 @@ class CommunicationController extends ApiBaseController
     {
         $response = [];
 
+        $smsItem = Yii::$app->request->post();
+
+        if(!\is_array($smsItem)) {
+            $response['error'] = 'Sales: Invalid POST request (array)';
+            $response['error_code'] = 16;
+        }
+
+        if(!isset($smsItem['si_id'])) {
+            $response['error'] = 'Sales: Invalid POST request - not found (si_id)';
+            $response['error_code'] = 17;
+        }
+
+        if(isset($response['error']) && $response['error']) {
+            return $response;
+        }
+
         try {
-
-            $smsItem = Yii::$app->request->post();
-
-            if(!isset($smsItem['si_id']) || !\is_array($smsItem) || !count($smsItem)) {
-                throw new \Exception('Error POST data');
-            }
-
 
                 /*
                  *  * @property int $si_id
@@ -462,6 +476,8 @@ class CommunicationController extends ApiBaseController
 
                     $sms->s_status_done_dt = isset($smsItem['si_sent_dt']) ? date('Y-m-d H:i:s', strtotime($smsItem['si_sent_dt'])) : null;
 
+                    $sms->s_communication_id = $smsItem['si_id'] ?? null;
+
                     $sms->s_phone_to = $smsItem['si_phone_to'];
                     $sms->s_phone_from = $smsItem['si_phone_from'];
                     $sms->s_project_id = $smsItem['si_project_id'] ?? null;
@@ -480,6 +496,12 @@ class CommunicationController extends ApiBaseController
                     $sms->s_tw_from_city = $smsItem['si_from_city'] ?? null;
                     $sms->s_tw_from_state = $smsItem['si_from_state'] ?? null;
                     $sms->s_tw_from_zip = $smsItem['si_from_zip'] ?? null;
+
+                    $lead_id = $sms->detectLeadId();
+                    if($lead_id) {
+                        Yii::info('SMS Detected LeadId '.$lead_id.' from '.$sms->s_phone_from, 'info\API:Communication:newSmsMessagesReceived:Sms');
+                    }
+
 
                     if(!$sms->save()) {
                         Yii::error(VarDumper::dumpAsString($sms->errors), 'API:Communication:newSmsMessagesReceived:Sms:save');

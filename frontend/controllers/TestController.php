@@ -159,4 +159,34 @@ class TestController extends FController
         return base64_encode($key);
     }
 
+    public function actionDetectLead()
+    {
+        $subject = 'RE Hello [lid:78456123]';
+        $subject = 'RE Hello [uid:7asd845qwe6123]';
+        $message_id = '<kiv.1.6.345.alex.connor@gmail.com> <qwewqeqweqwe.qweqwe@mail.com> <aasdfkjal.sfasldfkl@gmail.com> <kiv.12.63.348.alex.connor@gmail.com>';
+
+        $matches = [];
+
+        //preg_match('~\[lid:(\d+)\]~si', $subject, $matches);
+        //preg_match('~\[uid:(\w+)\]~si', $subject, $matches);
+
+        preg_match_all('~<kiv\.(.+)>~iU', $message_id, $matches);
+        if(isset($matches[1]) && $matches[1]) {
+            foreach ($matches[1] as $messageId) {
+                $messageArr = explode('.', $messageId);
+                if(isset($messageArr[2]) && $messageArr[2]) {
+                    $lead_id = (int) $messageArr[2];
+
+                    echo $lead_id . '<br>';
+                }
+            }
+        }
+
+
+
+
+        //VarDumper::dump($matches, 10, true);
+
+    }
+
 }

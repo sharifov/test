@@ -462,12 +462,28 @@ $this->registerJs($js);
 
 
 <?php
+$currentUrl = \yii\helpers\Url::current();
+?>
+
+<script>
+    // var currentUrl = '<?=$currentUrl?>';
+    function updateCommunication() {
+        $.pjax.reload({container: '#pjax-lead-communication', push: false, replace: false, timeout: 6000});
+        //url: currentUrl,
+    }
+</script>
+
+<?php
+
 $js = <<<JS
+   
    
 
     //$('input[type="tel"]').intlTelInput();
 
     //    Chat fields
+    
+    
 
 
     $('body').on("change", '#c_type_id', function () {
@@ -512,6 +528,8 @@ $js = <<<JS
         // console.log(jsonQuotes);
         
     });
+    
+    
     
     
     
