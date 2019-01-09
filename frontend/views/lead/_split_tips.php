@@ -13,7 +13,7 @@ use common\models\TipsSplit;
 if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
     $userList = \common\models\Employee::getList();
 } else {
-    $userList = \common\models\Employee::getListByUserId(Yii::$app->user->id);
+    $userList = \common\models\Employee::getListByRole('agent');
 }
 
 $js = <<<JS
