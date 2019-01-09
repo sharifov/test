@@ -5360,3 +5360,7 @@ input[disabled] + .radio-tab__text {
     opacity: 0;
   }
 }
+
+.project-logo{float:right;max-height:70px;max-width:200px;}
+.project-logo img{max-height:70px;}
+.btn-out-a a{color:#fff!important;}

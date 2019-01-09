@@ -450,8 +450,26 @@ if (!$leadForm->getLead()->isNewRecord) {
         $buttonsSubAction[] = $buttonClone;
     }
 }
+$project = $leadForm->getLead()->project;
+$projectCustomData = $project->custom_data;
+$projectStyles = '';
+if(!empty($projectCustomData)){
+    $projectCustomDataArr = json_decode($projectCustomData, true);
+    if(!empty($projectCustomDataArr)){
+        $stylesArr = [];
+        foreach ($projectCustomDataArr as $styleKey => $styleEntry){
+            if(!empty($styleEntry)){
+                $stylesArr[] = $styleKey.':'.$styleEntry;
+            }
+        }
+        $stylesArr[] = 'background-image:url(https://communication.travelinsides.com/imgs/'. strtolower($project->name).'/logo_white.png);background-repeat: no-repeat;background-position: center right;background-size: 101px;background-origin: content-box;';
+        if(!empty($stylesArr)){
+            $projectStyles = ' style="'.implode(';',$stylesArr).'"';
+        }
+    }
+}
 ?>
-<div class="panel-main__header" id="actions-header">
+<div class="panel-main__header" id="actions-header"<?= $projectStyles?>>
     <div class="panel-main__actions">
     	<?php if ($takeConditions){
             if (in_array($leadForm->getLead()->status, [Lead::STATUS_PROCESSING, Lead::STATUS_ON_HOLD]) && $leadForm->getLead()->employee_id != Yii::$app->user->identity->getId()) {
