@@ -42,7 +42,7 @@ class UserParams extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['up_user_id','up_work_minutes', 'up_work_start_tm'], 'required'],
+            [['up_user_id','up_work_minutes', 'up_work_start_tm','up_timezone'], 'required'],
             [['up_user_id', 'up_commission_percent', 'up_updated_user_id', 'up_bonus_active', 'up_work_minutes', 'up_inbox_show_limit_leads', 'up_default_take_limit_leads', 'up_min_percent_for_take_leads', 'up_frequency_minutes'], 'integer'],
             [['up_base_amount'], 'number'],
             [['up_updated_dt'], 'safe'],
