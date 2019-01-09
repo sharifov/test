@@ -431,6 +431,7 @@ class Email extends \yii\db\ActiveRecord
      */
     public function generateMessageId(): string
     {
+        $arr[] = 'kiv';
         $arr[] = $this->e_id;
         $arr[] = $this->e_project_id;
         $arr[] = $this->e_lead_id;
