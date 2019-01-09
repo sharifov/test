@@ -146,7 +146,8 @@ $this->registerJs($js);
 
                     <div class="page-header__general-item">
                         <strong>Market:</strong>
-                        <span><?= $leadForm->getLead()->project->name.' - '.$leadForm->getLead()->source->name?></span>
+                        <span><?= (($leadForm->getLead()->project)?$leadForm->getLead()->project->name:'').
+                        (($leadForm->getLead()->source)?' - '.$leadForm->getLead()->source->name:'')?></span>
                     </div>
                     <div class="page-header__general-item">
                         <?= $this->render('partial/_rating', [
