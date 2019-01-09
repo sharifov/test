@@ -34,8 +34,7 @@ if($taskList) {
         $taskDate = $task->lt_date;
         $taskDate .= ' '.$usersParams[$task->lt_user_id]['up_work_start_tm'];
 
-
-        $usersParams[$task->lt_user_id]['up_timezone'] = $usersParams[$task->lt_user_id]['up_timezone'] ?? 'UTC';
+        $usersParams[$task->lt_user_id]['up_timezone'] = $usersParams[$task->lt_user_id]['up_timezone'] ?: 'UTC';
 
         $taskDateUTC = new DateTime($taskDate, new DateTimeZone($usersParams[$task->lt_user_id]['up_timezone']));
         $taskDateUTC->setTimezone(new DateTimeZone('UTC'));
