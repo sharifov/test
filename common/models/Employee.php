@@ -1006,6 +1006,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         }
 
         if ($this->userParams) {
+            $this->userParams->up_work_minutes = ($this->userParams->up_work_minutes)?:480;
             $startTime = $this->userParams->up_work_start_tm;
             $workHours = (int)$this->userParams->up_work_minutes * 60;
             $timeZone = $this->userParams->up_timezone ?: 'UTC';
