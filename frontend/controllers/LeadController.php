@@ -326,17 +326,22 @@ class LeadController extends FController
                 $mail->e_email_body_html = $previewEmailForm->e_email_message;
                 $mail->e_email_from = $previewEmailForm->e_email_from;
 
+                $mail->e_email_from_name = $previewEmailForm->e_email_from_name;
+                $mail->e_email_to_name = $previewEmailForm->e_email_to_name;
+
                 if($previewEmailForm->e_language_id) {
                     $mail->e_language_id = $previewEmailForm->e_language_id;
                 }
 
                 $mail->e_email_to = $previewEmailForm->e_email_to;
                 //$mail->e_email_data = [];
-                $mail->e_message_id = $mail->generateMessageId();
                 $mail->e_created_dt = date('Y-m-d H:i:s');
                 $mail->e_created_user_id = Yii::$app->user->id;
 
                 if($mail->save()) {
+
+                    $mail->e_message_id = $mail->generateMessageId();
+                    $mail->update();
 
                     $previewEmailForm->is_send = true;
 
@@ -351,7 +356,7 @@ class LeadController extends FController
                         Yii::$app->session->setFlash('send-success', '<strong>Email Message</strong> has been successfully sent to <strong>'.$mail->e_email_to.'</strong>');
                     }
 
-                    $this->refresh();
+                    $this->refresh('#communication-form');
 
                 } else {
                     $previewEmailForm->addError('e_email_subject', VarDumper::dumpAsString($mail->errors));
@@ -405,7 +410,7 @@ class LeadController extends FController
                         Yii::$app->session->setFlash('send-success', '<strong>SMS Message</strong> has been successfully sent to <strong>'.$sms->s_phone_to.'</strong>');
                     }
 
-                    $this->refresh();
+                    $this->refresh('#communication-form');
 
                 } else {
                     $previewSmsForm->addError('s_sms_text', VarDumper::dumpAsString($sms->errors));
@@ -427,6 +432,8 @@ class LeadController extends FController
                 $comForm->c_lead_id = $lead->id;
 
                 if($comForm->validate()) {
+
+                    $project = $lead->project;
 
                     if($comForm->c_type_id == CommunicationForm::TYPE_EMAIL) {
 
@@ -464,7 +471,7 @@ class LeadController extends FController
 
 
                             $projectContactInfo = [];
-                            $project = $lead->project;
+
                             if($project && $project->contact_info) {
                                 $projectContactInfo = @json_decode($project->contact_info, true);
                             }
@@ -485,89 +492,7 @@ class LeadController extends FController
                                 //$mailSend = $communication->mailSend(7, 'cl_offer', 'chalpet@gmail.com', 'chalpet2@gmail.com', $content_data, $data, 'ru-RU', 10);
 
 
-                                if($comForm->quoteList) {
-                                    foreach ($comForm->quoteList as $qid) {
-                                        $quoteModel = Quote::findOne($qid);
-                                        if($quoteModel) {
-
-                                            //$quoteItem = $quoteModel->getInfoForEmail2();
-                                            $quoteItem = [
-                                                'id' => $quoteModel->id,
-                                                'uid' => $quoteModel->uid,
-                                                'cabinClass' => $quoteModel->cabin,
-                                                'tripType' => $quoteModel->trip_type,
-
-                                                //'airlineCode' => $quoteModel->main_airline_code,
-                                                //'offerData' =>  $quoteModel->getInfoForEmail2()
-                                                //'shortUrl' => $quoteModel->quotePrice(),
-                                            ];
-
-                                            $quoteItem = array_merge($quoteItem, $quoteModel->getInfoForEmail2());
-
-                                            $content_data['quotes'][] = $quoteItem;
-                                        }
-                                    }
-                                }
-
-
-                                $content_data['project'] = [
-                                    'name'      => $project ? $project->name : '',
-                                    'url'       => $project ? $project->link : 'https://',
-                                    'address'   => $projectContactInfo['address'] ?? '',
-                                    'phone'     => $projectContactInfo['phone'] ?? '',
-                                    'email'     => $projectContactInfo['email'] ?? '',
-                                ];
-
-                                $content_data['agent'] = [
-                                    'name'  => Yii::$app->user->identity->full_name,
-                                    'phone' => $upp && $upp->upp_phone_number ? $upp->upp_phone_number : '',
-                                    'email' => $upp && $upp->upp_email ? $upp->upp_email : '',
-                                ];
-
-
-                                $arriveCity = '';
-                                $departCity = '';
-
-                                $arriveIATA = '';
-                                $departIATA = '';
-
-                                if($leadSegments = $lead->leadFlightSegments) {
-                                    $firstSegment = $leadSegments[0];
-                                    $lastSegment = end($leadSegments);
-
-                                    $departIATA = $firstSegment->origin;
-                                    $arriveIATA = $lastSegment->destination;
-
-                                    $departAirport = Airport::find()->where(['iata' => $firstSegment->origin])->one();
-                                    if($departAirport) {
-                                        $departCity = $departAirport->city;
-                                    } else {
-                                        $departCity = $firstSegment->origin;
-                                    }
-
-
-                                    $arriveAirport = Airport::find()->where(['iata' => $lastSegment->destination])->one();
-                                    if($arriveAirport) {
-                                        $arriveCity = $arriveAirport->city;
-                                    } else {
-                                        $arriveCity = $lastSegment->destination;
-                                    }
-
-                                }
-
-                                $content_data['request'] = [
-                                    'arriveCity'    => $arriveCity,
-                                    'departCity'    => $departCity,
-                                    'arriveIATA'    => $arriveIATA,
-                                    'departIATA'    => $departIATA,
-                                    'tripType'      => $lead->trip_type,
-                                    'cabinClass'    => $lead->cabin,
-                                    'paxAdt'        => (int) $lead->adults,
-                                    'paxChd'        => (int) $lead->children,
-                                    'paxInf'        => (int) $lead->infants,
-                                    'paxTotal'      => (int) $lead->adults + (int) $lead->children + (int) $lead->infants
-                                ];
-
+                                $content_data = $lead->getEmailData2($comForm->quoteList);
 
                                 //echo json_encode($content_data); exit;
 
@@ -589,7 +514,8 @@ class LeadController extends FController
                                         $previewEmailForm->e_email_subject = $mailPreview['data']['email_subject'];
                                         $previewEmailForm->e_email_from = $mailFrom; //$mailPreview['data']['email_from'];
                                         $previewEmailForm->e_email_to = $comForm->c_email_to; //$mailPreview['data']['email_to'];
-
+                                        $previewEmailForm->e_email_from_name = Yii::$app->user->identity->full_name;
+                                        $previewEmailForm->e_email_to_name = $lead->client ? $lead->client->full_name : '';
                                     }
                                 }
 
@@ -599,6 +525,8 @@ class LeadController extends FController
                                 $previewEmailForm->e_email_subject = $comForm->c_email_subject;
                                 $previewEmailForm->e_email_from = $mailFrom;
                                 $previewEmailForm->e_email_to = $comForm->c_email_to;
+                                $previewEmailForm->e_email_from_name = Yii::$app->user->identity->full_name;
+                                $previewEmailForm->e_email_to_name = $lead->client ? $lead->client->full_name : '';
                             }
 
 
@@ -647,14 +575,14 @@ class LeadController extends FController
 
                                 $previewSmsForm->s_sms_tpl_id = $comForm->c_sms_tpl_id;
 
-                                $language = $comForm->c_language_id ?: 'en-US';
+                                $content_data = $lead->getEmailData2($comForm->quoteList);
 
+                                $language = $comForm->c_language_id ?: 'en-US';
 
                                 $tpl = SmsTemplateType::findOne($comForm->c_sms_tpl_id);
                                 //$mailSend = $communication->mailSend(7, 'cl_offer', 'chalpet@gmail.com', 'chalpet2@gmail.com', $content_data, $data, 'ru-RU', 10);
 
                                 $smsPreview = $communication->smsPreview($lead->project_id, ($tpl ? $tpl->stp_key : ''), $phoneFrom, $comForm->c_phone_number, $content_data, $language);
-
 
 
                                 if ($smsPreview && isset($smsPreview['data'])) {
@@ -1480,14 +1408,14 @@ class LeadController extends FController
         $params = array_merge($params, $params2);
 
         if(Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id)) {
-            //$params['LeadSearch']['employee_id'] = Yii::$app->user->id;
+            $params['LeadSearch']['employee_id'] = Yii::$app->user->id;
             $isAgent = true;
         } else {
             $isAgent = false;
         }
 
         if(Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id)) {
-            //$params['LeadSearch']['supervision_id'] = Yii::$app->user->id;
+            $params['LeadSearch']['supervision_id'] = Yii::$app->user->id;
         }
 
         $dataProvider = $searchModel->searchBooked($params);

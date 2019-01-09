@@ -119,13 +119,18 @@ $c_type_id = $comForm->c_type_id;
 
                 <div class="row">
                     <div class="col-sm-4 form-group">
-                        <?= $form2->field($previewEmailForm, 'e_email_from')->textInput(['class' => 'form-control', 'maxlength' => true]) ?>
+                        <?= $form2->field($previewEmailForm, 'e_email_from')->textInput(['class' => 'form-control', 'maxlength' => true, 'readonly' => true]) ?>
+                        <?= $form2->field($previewEmailForm, 'e_email_from_name')->textInput(['class' => 'form-control', 'maxlength' => true, 'readonly' => true]) ?>
+
+
+
                         <?= $form2->field($previewEmailForm, 'e_lead_id')->hiddenInput()->label(false); ?>
                         <?= $form2->field($previewEmailForm, 'e_language_id')->hiddenInput()->label(false); ?>
                         <?= $form2->field($previewEmailForm, 'e_email_tpl_id')->hiddenInput()->label(false); ?>
                     </div>
                     <div class="col-sm-4 form-group">
-                        <?= $form2->field($previewEmailForm, 'e_email_to')->textInput(['class' => 'form-control', 'maxlength' => true]) ?>
+                        <?= $form2->field($previewEmailForm, 'e_email_to')->textInput(['class' => 'form-control', 'maxlength' => true, 'readonly' => true]) ?>
+                        <?= $form2->field($previewEmailForm, 'e_email_to_name')->textInput(['class' => 'form-control', 'maxlength' => true, 'readonly' => true]) ?>
                     </div>
                 </div>
                 <div class="row">
@@ -185,13 +190,13 @@ $c_type_id = $comForm->c_type_id;
 
                     <div class="row">
                         <div class="col-sm-6 form-group">
-                            <?= $form3->field($previewSmsForm, 's_phone_from')->textInput(['class' => 'form-control', 'maxlength' => true]) ?>
+                            <?= $form3->field($previewSmsForm, 's_phone_from')->textInput(['class' => 'form-control', 'maxlength' => true, 'readonly' => true]) ?>
                             <?//= $form3->field($previewSmsForm, 's_lead_id')->hiddenInput()->label(false); ?>
                             <?= $form3->field($previewSmsForm, 's_language_id')->hiddenInput()->label(false); ?>
                             <?= $form3->field($previewSmsForm, 's_sms_tpl_id')->hiddenInput()->label(false); ?>
                         </div>
                         <div class="col-sm-6 form-group">
-                            <?= $form3->field($previewSmsForm, 's_phone_to')->textInput(['class' => 'form-control', 'maxlength' => true]) ?>
+                            <?= $form3->field($previewSmsForm, 's_phone_to')->textInput(['class' => 'form-control', 'maxlength' => true, 'readonly' => true]) ?>
                         </div>
                     </div>
 
@@ -212,6 +217,7 @@ $c_type_id = $comForm->c_type_id;
 
                 <?php $form = \yii\bootstrap\ActiveForm::begin([
                     //'action' => ['index'],
+                    'id' => 'communication-form',
                     'method' => 'post',
                     'options' => [
                         'data-pjax' => 1,

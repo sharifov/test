@@ -116,6 +116,14 @@ class CommunicationService extends Component
         $data['mail']['language_id'] = $language;
         $data['mail']['email_data'] = $email_data;
 
+        if(isset($email_data['email_from_name']) && $email_data['email_from_name']) {
+            $data['mail']['email_from_name'] = $email_data['email_from_name'];
+        }
+
+        if(isset($email_data['email_to_name']) && $email_data['email_to_name']) {
+            $data['mail']['email_to_name'] = $email_data['email_to_name'];
+        }
+
         $response = $this->sendRequest('email/preview', $data);
 
         if ($response->isOk) {
@@ -126,7 +134,7 @@ class CommunicationService extends Component
             }
         } else {
             $out['error'] = $response->content;
-            \Yii::error(VarDumper::dumpAsString($out['error'], 10), 'CommunicationService::mailPreview');
+            \Yii::error(VarDumper::dumpAsString($out['error'], 10), 'Component:CommunicationService::mailPreview');
         }
 
         return $out;
@@ -154,6 +162,19 @@ class CommunicationService extends Component
         $data['mail']['eq_type_key'] = $template_type;
         $data['mail']['eq_language_id'] = $language;
         $data['mail']['eq_email_data'] = $email_data;
+
+
+        if(isset($content_data['email_from_name']) && $content_data['email_from_name']) {
+            $data['mail']['eq_email_from_name'] = $content_data['email_from_name'];
+        }
+
+        if(isset($content_data['email_to_name']) && $content_data['email_to_name']) {
+            $data['mail']['eq_email_to_name'] = $content_data['email_to_name'];
+        }
+
+        if(isset($content_data['email_message_id']) && $content_data['email_message_id']) {
+            $data['mail']['eq_email_message_id'] = $content_data['email_message_id'];
+        }
 
         if(isset($content_data['email_body_html'])) {
             $data['mail']['eq_email_body_html'] = $content_data['email_body_html'];
@@ -194,7 +215,7 @@ class CommunicationService extends Component
             }
         } else {
             $out['error'] = $response->content;
-            \Yii::error(VarDumper::dumpAsString($out['error'], 10), 'CommunicationService::mailSend');
+            \Yii::error(VarDumper::dumpAsString($out['error'], 10), 'Component:CommunicationService::mailSend');
         }
 
         return $out;
@@ -220,7 +241,7 @@ class CommunicationService extends Component
             }
         } else {
             $out['error'] = $response->content;
-            \Yii::error(VarDumper::dumpAsString($out['error'], 10), 'CommunicationService::mailTypes');
+            \Yii::error(VarDumper::dumpAsString($out['error'], 10), 'Component:CommunicationService::mailTypes');
         }
 
         return $out;
@@ -304,7 +325,7 @@ class CommunicationService extends Component
             }
         } else {
             $out['error'] = $response->content;
-            \Yii::error(VarDumper::dumpAsString($out['error'], 10), 'CommunicationService::smsPreview');
+            \Yii::error(VarDumper::dumpAsString($out['error'], 10), 'Component:CommunicationService::smsPreview');
         }
 
         return $out;
@@ -353,7 +374,7 @@ class CommunicationService extends Component
             }
         } else {
             $out['error'] = $response->content;
-            \Yii::error(VarDumper::dumpAsString($out['error'], 10), 'CommunicationService::smsSend');
+            \Yii::error(VarDumper::dumpAsString($out['error'], 10), 'Component:CommunicationService::smsSend');
         }
 
         return $out;
@@ -379,7 +400,7 @@ class CommunicationService extends Component
             }
         } else {
             $out['error'] = $response->content;
-            \Yii::error(VarDumper::dumpAsString($out['error'], 10), 'CommunicationService::smsTypes');
+            \Yii::error(VarDumper::dumpAsString($out['error'], 10), 'Component:CommunicationService::smsTypes');
         }
 
         return $out;
@@ -425,7 +446,7 @@ class CommunicationService extends Component
             }
         } else {
             $out['error'] = $response->content;
-            \Yii::error('filter: '. VarDumper::dumpAsString($filter)."\r\n". VarDumper::dumpAsString($out['error'], 10), 'CommunicationService::smsGetMessages');
+            \Yii::error('filter: '. VarDumper::dumpAsString($filter)."\r\n". VarDumper::dumpAsString($out['error'], 10), 'Component:CommunicationService::smsGetMessages');
         }
 
         return $out;
