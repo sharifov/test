@@ -2427,7 +2427,13 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
         return Quote::findOne(['lead_id' => $this->id, 'status' => Quote::STATUS_APPLIED]);
     }
 
+    public function getBookedQuoteUid()
+    {
+        $query = new Query();
+        $query->select(['uid'])->from('quotes')->where(['lead_id' => $this->id, 'status' => Quote::STATUS_APPLIED])->limit(1);
 
+        return $query->createCommand()->queryScalar();
+    }
 
     public function getFlightDetails()
     {
