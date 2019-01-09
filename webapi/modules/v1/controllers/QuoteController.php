@@ -164,9 +164,7 @@ class QuoteController extends ApiBaseController
      * "errors": [],
      * "uid": "5b7424e858e91",
      * "lead_id": 123456,
-     * "lead_uid": "00jhk0017",
-     * "lead_status": "sold",
-     * "booked_quote_uid": "5b8ddfc56a15c",
+     * "lead_uid": "00jhk0017"
      * "agentName": "admin",
      * "agentEmail": "assistant@wowfare.com",
      * "agentDirectLine": "+1 888 946 3882",
@@ -241,13 +239,6 @@ class QuoteController extends ApiBaseController
             $response['uid'] = $uid;
             $response['lead_id'] = $model->lead->id;
             $response['lead_uid'] = $model->lead->uid;
-            $response['lead_status'] = null;
-            $response['booked_quote_uid'] = null;
-
-            if(in_array($model->lead->status,[10,12])){
-                $response['lead_status'] = ($model->lead->status == 10)?'sold':'booked';
-                $response['booked_quote_uid'] = $model->lead->getBookedQuoteUid();
-            }
 
             $response['agentName'] = $model->lead->employee->username;
             $response['agentEmail'] = $userProjectParams ? $userProjectParams->upp_email : $model->lead->project->contactInfo->email;

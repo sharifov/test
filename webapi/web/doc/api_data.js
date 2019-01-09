@@ -45,94 +45,6 @@ define({ "api": [
   },
   {
     "type": "post",
-    "url": "/v1/communication/email",
-    "title": "Communication Email",
-    "version": "0.1.0",
-    "name": "CommunicationEmail",
-    "group": "Communication",
-    "permission": [
-      {
-        "name": "Authorized User"
-      }
-    ],
-    "header": {
-      "fields": {
-        "Header": [
-          {
-            "group": "Header",
-            "type": "string",
-            "optional": false,
-            "field": "Authorization",
-            "description": "<p>Credentials <code>base64_encode(Username:Password)</code></p>"
-          }
-        ]
-      },
-      "examples": [
-        {
-          "title": "Header-Example:",
-          "content": "{\n    \"Authorization\": \"Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==\",\n    \"Accept-Encoding\": \"Accept-Encoding: gzip, deflate\"\n}",
-          "type": "json"
-        }
-      ]
-    },
-    "success": {
-      "examples": [
-        {
-          "title": "Success-Response:",
-          "content": "HTTP/1.1 200 OK\n{\n    \"type\": \"update_email_status\",\n    \"eq_id\": 127,\n    \"eq_status_id\": 5,\n}",
-          "type": "json"
-        }
-      ]
-    },
-    "filename": "webapi/modules/v1/controllers/CommunicationController.php",
-    "groupTitle": "Communication"
-  },
-  {
-    "type": "post",
-    "url": "/v1/communication/sms",
-    "title": "Communication SMS",
-    "version": "0.1.0",
-    "name": "CommunicationSms",
-    "group": "Communication",
-    "permission": [
-      {
-        "name": "Authorized User"
-      }
-    ],
-    "header": {
-      "fields": {
-        "Header": [
-          {
-            "group": "Header",
-            "type": "string",
-            "optional": false,
-            "field": "Authorization",
-            "description": "<p>Credentials <code>base64_encode(Username:Password)</code></p>"
-          }
-        ]
-      },
-      "examples": [
-        {
-          "title": "Header-Example:",
-          "content": "{\n    \"Authorization\": \"Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==\",\n    \"Accept-Encoding\": \"Accept-Encoding: gzip, deflate\"\n}",
-          "type": "json"
-        }
-      ]
-    },
-    "success": {
-      "examples": [
-        {
-          "title": "Success-Response:",
-          "content": "HTTP/1.1 200 OK\n{\n    \"type\": \"update_sms_status\",\n    \"sq_id\": 127,\n    \"sq_status_id\": 5,\n}",
-          "type": "json"
-        }
-      ]
-    },
-    "filename": "webapi/modules/v1/controllers/CommunicationController.php",
-    "groupTitle": "Communication"
-  },
-  {
-    "type": "post",
     "url": "/v1/lead/create",
     "title": "Create Lead",
     "version": "0.1.0",
@@ -1077,7 +989,7 @@ define({ "api": [
       "examples": [
         {
           "title": "Success-Response:",
-          "content": "    HTTP/1.1 200 OK\n\n\n{\n\"status\": \"Success\",\n\"itinerary\": {\n\"tripType\": \"OW\",\n\"mainCarrier\": \"WOW air\",\n\"trips\": [\n{\n\"segments\": [\n{\n\"carrier\": \"WW\",\n\"airlineName\": \"WOW air\",\n\"departureAirport\": \"BOS\",\n\"arrivalAirport\": \"KEF\",\n\"departureDateTime\": {\n\"date\": \"2018-09-19 19:00:00.000000\",\n\"timezone_type\": 3,\n\"timezone\": \"UTC\"\n},\n\"arrivalDateTime\": {\n\"date\": \"2018-09-20 04:30:00.000000\",\n\"timezone_type\": 3,\n\"timezone\": \"UTC\"\n},\n\"flightNumber\": \"126\",\n\"bookingClass\": \"O\",\n\"departureCity\": \"Boston\",\n\"arrivalCity\": \"Reykjavik\",\n\"flightDuration\": 330,\n\"layoverDuration\": 0,\n\"cabin\": \"E\",\n\"departureCountry\": \"United States\",\n\"arrivalCountry\": \"Iceland\"\n},\n{\n\"carrier\": \"WW\",\n\"airlineName\": \"WOW air\",\n\"departureAirport\": \"KEF\",\n\"arrivalAirport\": \"LGW\",\n\"departureDateTime\": {\n\"date\": \"2018-09-20 15:30:00.000000\",\n\"timezone_type\": 3,\n\"timezone\": \"UTC\"\n},\n\"arrivalDateTime\": {\n\"date\": \"2018-09-20 19:50:00.000000\",\n\"timezone_type\": 3,\n\"timezone\": \"UTC\"\n},\n\"flightNumber\": \"814\",\n\"bookingClass\": \"N\",\n\"departureCity\": \"Reykjavik\",\n\"arrivalCity\": \"London\",\n\"flightDuration\": 200,\n\"layoverDuration\": 660,\n\"cabin\": \"E\",\n\"departureCountry\": \"Iceland\",\n\"arrivalCountry\": \"United Kingdom\"\n}\n],\n\"totalDuration\": 1190,\n\"routing\": \"BOS-KEF-LGW\",\n\"title\": \"Boston - London\"\n}\n],\n\"price\": {\n\"detail\": {\n\"ADT\": {\n\"selling\": 350.2,\n\"fare\": 237,\n\"taxes\": 113.2,\n\"tickets\": 1\n}\n},\n\"tickets\": 1,\n\"selling\": 350.2,\n\"amountPerPax\": 350.2,\n\"fare\": 237,\n\"mark_up\": 0,\n\"taxes\": 113.2,\n\"currency\": \"USD\",\n\"isCC\": false\n}\n},\n\"errors\": [],\n\"uid\": \"5b7424e858e91\",\n\"lead_id\": 123456,\n\"lead_uid\": \"00jhk0017\",\n\"lead_status\": \"sold\",\n\"booked_quote_uid\": \"5b8ddfc56a15c\",\n\"agentName\": \"admin\",\n\"agentEmail\": \"assistant@wowfare.com\",\n\"agentDirectLine\": \"+1 888 946 3882\",\n\"action\": \"v1/quote/get-info\",\n\"response_id\": 173,\n\"request_dt\": \"2018-08-16 06:42:03\",\n\"response_dt\": \"2018-08-16 06:42:03\"\n}",
+          "content": "    HTTP/1.1 200 OK\n\n\n{\n\"status\": \"Success\",\n\"itinerary\": {\n\"tripType\": \"OW\",\n\"mainCarrier\": \"WOW air\",\n\"trips\": [\n{\n\"segments\": [\n{\n\"carrier\": \"WW\",\n\"airlineName\": \"WOW air\",\n\"departureAirport\": \"BOS\",\n\"arrivalAirport\": \"KEF\",\n\"departureDateTime\": {\n\"date\": \"2018-09-19 19:00:00.000000\",\n\"timezone_type\": 3,\n\"timezone\": \"UTC\"\n},\n\"arrivalDateTime\": {\n\"date\": \"2018-09-20 04:30:00.000000\",\n\"timezone_type\": 3,\n\"timezone\": \"UTC\"\n},\n\"flightNumber\": \"126\",\n\"bookingClass\": \"O\",\n\"departureCity\": \"Boston\",\n\"arrivalCity\": \"Reykjavik\",\n\"flightDuration\": 330,\n\"layoverDuration\": 0,\n\"cabin\": \"E\",\n\"departureCountry\": \"United States\",\n\"arrivalCountry\": \"Iceland\"\n},\n{\n\"carrier\": \"WW\",\n\"airlineName\": \"WOW air\",\n\"departureAirport\": \"KEF\",\n\"arrivalAirport\": \"LGW\",\n\"departureDateTime\": {\n\"date\": \"2018-09-20 15:30:00.000000\",\n\"timezone_type\": 3,\n\"timezone\": \"UTC\"\n},\n\"arrivalDateTime\": {\n\"date\": \"2018-09-20 19:50:00.000000\",\n\"timezone_type\": 3,\n\"timezone\": \"UTC\"\n},\n\"flightNumber\": \"814\",\n\"bookingClass\": \"N\",\n\"departureCity\": \"Reykjavik\",\n\"arrivalCity\": \"London\",\n\"flightDuration\": 200,\n\"layoverDuration\": 660,\n\"cabin\": \"E\",\n\"departureCountry\": \"Iceland\",\n\"arrivalCountry\": \"United Kingdom\"\n}\n],\n\"totalDuration\": 1190,\n\"routing\": \"BOS-KEF-LGW\",\n\"title\": \"Boston - London\"\n}\n],\n\"price\": {\n\"detail\": {\n\"ADT\": {\n\"selling\": 350.2,\n\"fare\": 237,\n\"taxes\": 113.2,\n\"tickets\": 1\n}\n},\n\"tickets\": 1,\n\"selling\": 350.2,\n\"amountPerPax\": 350.2,\n\"fare\": 237,\n\"mark_up\": 0,\n\"taxes\": 113.2,\n\"currency\": \"USD\",\n\"isCC\": false\n}\n},\n\"errors\": [],\n\"uid\": \"5b7424e858e91\",\n\"lead_id\": 123456,\n\"lead_uid\": \"00jhk0017\"\n\"agentName\": \"admin\",\n\"agentEmail\": \"assistant@wowfare.com\",\n\"agentDirectLine\": \"+1 888 946 3882\",\n\"action\": \"v1/quote/get-info\",\n\"response_id\": 173,\n\"request_dt\": \"2018-08-16 06:42:03\",\n\"response_dt\": \"2018-08-16 06:42:03\"\n}",
           "type": "json"
         }
       ]
