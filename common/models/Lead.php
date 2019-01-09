@@ -2050,6 +2050,11 @@ Sales - Kivork",
         }
 
 
+        $content_data['lead'] = [
+            'id'  => $this->id,
+            'uid' => $this->uid
+        ];
+
         $content_data['project'] = [
             'name'      => $project ? $project->name : '',
             'url'       => $project ? $project->link : 'https://',
