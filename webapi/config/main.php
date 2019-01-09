@@ -87,6 +87,20 @@ return [
                         return "[webapi][$ip][$userID]";
                     },
                 ],
+                [
+                    'class' => \yii\log\DbTarget::class,
+                    'levels' => ['info'],
+                    'except' => [
+                        'yii\web\HttpException:404',
+                    ],
+                    'logVars' => [],
+                    'categories' => ['info\*'],
+                    'prefix' => function () {
+                        $userID = Yii::$app->user->isGuest ? '-' : Yii::$app->user->id;
+                        $ip = $_SERVER['REMOTE_ADDR'];
+                        return "[webapi][$ip][$userID]";
+                    },
+                ],
                 /*[
                     'class'         => \primipilus\log\TelegramTarget::class,
                     'levels'        => ['error'],

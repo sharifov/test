@@ -352,4 +352,25 @@ class Sms extends \yii\db\ActiveRecord
         return $out;
     }
 
+
+    /**
+     * @return int|mixed
+     */
+    public function detectLeadId()
+    {
+
+        $clientPhone = ClientPhone::find()->where(['phone' => $this->s_phone_from])->orderBy(['id' => SORT_DESC])->limit(1)->one();
+        if($clientPhone && $clientPhone->client_id) {
+            $lead = Lead::find()->where(['client_id' => $clientPhone->client_id, 'status' => [Lead::STATUS_PROCESSING, Lead::STATUS_SNOOZE, Lead::STATUS_ON_HOLD, Lead::STATUS_FOLLOW_UP]])->orderBy(['id' => SORT_DESC])->limit(1)->one();
+            if(!$lead) {
+                $lead = Lead::find()->where(['client_id' => $clientPhone->client_id])->orderBy(['id' => SORT_DESC])->limit(1)->one();
+            }
+            if($lead) {
+                $this->s_lead_id = $lead->id;
+            }
+        }
+
+        return $this->s_lead_id;
+    }
+
 }
