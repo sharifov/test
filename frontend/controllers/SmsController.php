@@ -189,9 +189,9 @@ class SmsController extends FController
 
             if (isset($data['data'], $data['data']['sms']) && count($data['data']['sms'])) {
                 foreach ($data['data']['sms'] AS $key => $smsItem) {
-                    $total++;
                     $find = Sms::findOne(['s_tw_message_sid' => $smsItem['si_message_sid']]);
                     if (NULL === $find) {
+                        $total++;
                         $sms = new Sms();
                         $sms->s_type_id = Sms::TYPE_INBOX;
                         $sms->s_status_id = Sms::STATUS_DONE;
