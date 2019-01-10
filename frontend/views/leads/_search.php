@@ -6,12 +6,13 @@ use yii\widgets\ActiveForm;
 /* @var $this yii\web\View */
 /* @var $model common\models\search\LeadSearch */
 /* @var $form yii\widgets\ActiveForm */
+/* @var $action string */
 ?>
 
 <div class="lead-search">
 
     <?php $form = ActiveForm::begin([
-        'action' => ['index'],
+        'action' => [$action],
         'method' => 'get',
         'options' => [
             'data-pjax' => 1

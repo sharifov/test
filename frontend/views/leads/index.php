@@ -45,7 +45,8 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
     }
 
     echo $this->render($searchTpl, [
-        'model' => $searchModel
+        'model' => $searchModel,
+        'action' => 'index'
     ]);
     ?>
 
