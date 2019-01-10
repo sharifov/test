@@ -163,7 +163,7 @@ $bundle = \frontend\themes\gentelella\assets\Asset::register($this);
                                         </li>
                                     </ul>
                                 </li>
-                                <?//= backend\widgets\Notifications::widget(); ?>
+                                <?= frontend\widgets\Notifications::widget(); ?>
 
                                 <?//= backend\widgets\ChatNotifications::widget(); ?>
 

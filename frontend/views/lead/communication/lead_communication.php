@@ -463,21 +463,69 @@ $this->registerJs($js);
 
 <?php
 $currentUrl = \yii\helpers\Url::current();
+$jsPath = Yii::$app->request->baseUrl.'/js/sounds/';
 ?>
 
 <script>
+    // var context = new AudioContext();
     // var currentUrl = '<?=$currentUrl?>';
     function updateCommunication() {
         $.pjax.reload({container: '#pjax-lead-communication', push: false, replace: false, timeout: 6000});
         //url: currentUrl,
     }
+
+
+    /*function notifyLead() {
+
+        new PNotify({
+            title: "Hello",
+            type: "success",
+            text: "message",
+            desktop: {
+                desktop: true
+            },
+            nonblock: {
+                nonblock: true
+            },
+            delay: 30000,
+            hide: false
+        }).get().click(function(e) {
+
+        });
+
+        new PNotify({
+            title: "Hello2",
+            type: "info",
+            text: "Messafe text",
+            hide: true
+        });
+
+    }*/
 </script>
+
 
 <?php
 
+
+
 $js = <<<JS
-   
-   
+
+    /*PNotify.prototype.options.styling = "bootstrap3";
+    PNotify.desktop.permission();
+
+    
+    
+    ion.sound({
+        sounds: [
+            {name: "bell_ring"},
+            {name: "door_bell"},
+            {name: "button_tiny"}
+        ],
+        path: "$jsPath",
+        preload: true,
+        multiplay: true,
+        volume: 0.8
+    });*/
 
     //$('input[type="tel"]').intlTelInput();
 

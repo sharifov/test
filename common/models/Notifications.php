@@ -1,0 +1,222 @@
+<?php
+
+namespace common\models;
+
+use Yii;
+use yii\behaviors\TimestampBehavior;
+use yii\db\ActiveRecord;
+
+/**
+ * This is the model class for table "notifications".
+ *
+ * @property integer $n_id
+ * @property integer $n_user_id
+ * @property integer $n_type_id
+ * @property string $n_title
+ * @property string $n_message
+ * @property boolean $n_new
+ * @property boolean $n_deleted
+ * @property boolean $n_popup
+ * @property boolean $n_popup_show
+ * @property string $n_read_dt
+ * @property string $n_created_dt
+ * @property string $n_unique_id
+ *
+ * @property Employee $nUser
+ */
+class Notifications extends ActiveRecord
+{
+
+    CONST TYPE_SUCCESS = 1;
+    CONST TYPE_INFO = 2;
+    CONST TYPE_WARNING = 3;
+    CONST TYPE_DANGER = 4;
+
+    /**
+     * @inheritdoc
+     */
+    public static function tableName()
+    {
+        return 'notifications';
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function rules()
+    {
+        return [
+            [['n_user_id', 'n_type_id'], 'required'],
+            [['n_user_id', 'n_type_id'], 'integer'],
+            [['n_message'], 'string'],
+            [['n_new', 'n_deleted', 'n_popup', 'n_popup_show'], 'boolean'],
+            [['n_read_dt', 'n_created_dt'], 'safe'],
+            [['n_title'], 'string', 'max' => 100],
+            [['n_unique_id'], 'string', 'max' => 40],
+            [['n_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['n_user_id' => 'id']],
+        ];
+    }
+
+    public function behaviors()
+    {
+        return [
+            'timestamp' => [
+                'class' => TimestampBehavior::class,
+                'attributes' => [
+                    ActiveRecord::EVENT_BEFORE_INSERT => ['n_created_dt'],
+                    //ActiveRecord::EVENT_BEFORE_UPDATE => ['n_created_dt'],
+                ],
+                'value' => date('Y-m-d H:i:s') //new Expression('NOW()'),
+            ],
+        ];
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function attributeLabels()
+    {
+        return [
+            'n_id' => 'ID',
+            'n_user_id' => 'User',
+            'n_type_id' => 'Type ID',
+            'n_title' => 'Title',
+            'n_message' => 'Message',
+            'n_new' => 'New',
+            'n_deleted' => 'Deleted',
+            'n_popup' => 'Popup',
+            'n_popup_show' => 'Popup Show',
+            'n_read_dt' => 'Read Date',
+            'n_created_dt' => 'Created Date',
+            'n_unique_id' => 'Unique ID',
+        ];
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getNUser()
+    {
+        return $this->hasOne(Employee::class, ['id' => 'n_user_id']);
+    }
+
+    /**
+     * @inheritdoc
+     * @return NotificationsQuery the active query used by this AR class.
+     */
+    public static function find()
+    {
+        return new NotificationsQuery(get_called_class());
+    }
+
+    /**
+     * @return mixed
+     */
+    public static function getTypeList()
+    {
+        $list[self::TYPE_SUCCESS]   = 'Success';
+        $list[self::TYPE_INFO]      = 'Info';
+        $list[self::TYPE_WARNING]   = 'Warning';
+        $list[self::TYPE_DANGER]    = 'Danger';
+
+        return $list;
+    }
+
+    /**
+     * @param integer $type_id
+     * @return string
+     */
+    public function getType($type_id = null)
+    {
+        if(!$type_id) $type_id = $this->n_type_id;
+
+        $list = self::getTypeList();
+        if(isset($list[$type_id])) return $list[$type_id];
+            else return '???';
+    }
+
+    /**
+     * @param int $user_id
+     * @return mixed
+     */
+    public static function findNewCount($user_id = 0)
+    {
+        $cnt = self::find()->where(['n_user_id' => $user_id, 'n_new' => true, 'n_deleted' => false])->count();
+        return $cnt;
+    }
+
+    /**
+     * @param int $user_id
+     * @return array|Notifications[]
+     */
+    public static function findNew($user_id = 0)
+    {
+        $list = self::find()->where(['n_user_id' => $user_id, 'n_new' => true, 'n_deleted' => false])->all();
+        return $list;
+    }
+
+    /**
+     * @return string
+     */
+    public function getNotifyType()
+    {
+        switch ($this->n_type_id) {
+            case self::TYPE_SUCCESS: $str = 'success';
+                break;
+            case self::TYPE_INFO: $str = 'info';
+                break;
+            case self::TYPE_WARNING: $str = '';
+                break;
+            case self::TYPE_DANGER: $str = 'error';
+                break;
+            default: $str = 'info';
+        }
+        return $str;
+    }
+
+
+    /**
+     * @param int $user_id
+     * @param string $title
+     * @param string $message
+     * @param int $type
+     * @param bool $popup
+     * @param bool $unique
+     * @return bool
+     */
+    public static function create($user_id = 0, $title = '', $message = '', $type = 1, $popup = true, $unique = false)
+    {
+
+        $md5Hash = md5($message.$user_id);
+        if($unique) {
+            $exists = Notifications::find()->where(['n_unique_id' => $md5Hash])->exists();
+            if($exists) return false;
+        }
+
+        $model = new self();
+        $model->n_user_id = $user_id;
+        $model->n_title = $title;
+        $model->n_message = $message;
+        $model->n_type_id = $type;
+        $model->n_popup = $popup;
+        $model->n_unique_id = $md5Hash;
+
+        $model->n_new = true;
+        if($model->save()){
+            $userEmail = User::find()->where(['id' => $user_id])->one();
+            if($userEmail->email) {
+
+                /*Yii::$app->mailer_photolamus
+                    ->compose()
+                    ->setTo($userEmail->email)
+                    ->setFrom(Yii::$app->params['email_from']['photolamus'])
+                    ->setSubject($title)
+                    ->setTextBody($message)
+                    ->send();*/
+            }
+        }
+        return $model->save();
+
+    }
+
+}

@@ -189,4 +189,29 @@ class TestController extends FController
 
     }
 
+    public function actionLangPlural()
+    {
+        $n = random_int(0, 10);
+
+
+        //echo Yii::t('app', 'You are the - {n,selectordinal,one{# один} two{# два} few{# мало} many{# несколько} other{# нет}} ', ['n' => $n]);
+
+        Yii::$app->language = 'en-US';
+
+
+        for($i = 0; $i<=20; $i++) {
+
+            echo \Yii::t('app', '{n, selectordinal,
+     =0{У вас нет новых сообщений}
+    
+     one{У вас # непрочитанное сообщение}
+     few{У вас # непрочитанных сообщения}
+     many{У вас # непрочитанных сообщений...}
+     other{У вас # прочитанных сообщений!}}',
+                ['n' => $i]
+            ).'<br>';
+        }
+
+    }
+
 }

@@ -81,34 +81,45 @@ class CommunicationForm extends Model
         return [
             [['c_type_id', 'c_lead_id'], 'required'],
 
-            [['c_email_to', 'c_email_message', 'c_email_subject', 'c_language_id'], 'required', 'when' => function (CommunicationForm $model) {
+            [['c_email_to', 'c_language_id'], 'required', 'when' => function (CommunicationForm $model) {
                         return $model->c_type_id == self::TYPE_EMAIL;
                     },
-                'whenClient' => "function (attribute, value) {
-                    return $('#c_type_id').val() == 1;
-                }"
+                'whenClient' => "function (attribute, value) { return $('#c_type_id').val() == " . self::TYPE_EMAIL . '; }'
             ],
 
-            [['c_phone_number', 'c_sms_message'], 'required', 'when' => function (CommunicationForm $model) {
+
+            [['c_email_message', 'c_email_subject'], 'required', 'when' => function (CommunicationForm $model) {
+                return $model->c_email_tpl_id != self::TPL_TYPE_EMAIL_OFFER && $model->c_type_id == self::TYPE_EMAIL;
+            },
+                'whenClient' => "function (attribute, value) { return ($('#c_type_id').val() == " . self::TYPE_EMAIL . " && $('#c_email_tpl_id').val() != " . self::TPL_TYPE_EMAIL_OFFER . '); }'
+            ],
+
+
+            [['c_phone_number'], 'required', 'when' => function (CommunicationForm $model) {
                 return $model->c_type_id == self::TYPE_SMS;
             },
-                'whenClient' => "function (attribute, value) {
-                    return $('#c_type_id').val() == 2;
-                }"
+                'whenClient' => "function (attribute, value) { return $('#c_type_id').val() == " . self::TYPE_SMS . '; }'
             ],
+
+
+            [['c_sms_message'], 'required', 'when' => function (CommunicationForm $model) {
+                return $model->c_sms_tpl_id != self::TPL_TYPE_SMS_OFFER && $model->c_type_id == self::TYPE_SMS;
+            },
+                'whenClient' => "function (attribute, value) { return $('#c_type_id').val() == " . self::TYPE_SMS . " && $('#c_sms_tpl_id').val() != " . self::TPL_TYPE_SMS_OFFER . '; }'
+            ],
+
 
             [['c_phone_number'], 'required', 'when' => function (CommunicationForm $model) {
                 return $model->c_type_id == self::TYPE_VOICE;
             },
                 'whenClient' => "function (attribute, value) {
-                    return $('#c_type_id').val() == 3;
-                }"
+                    return $('#c_type_id').val() == " . self::TYPE_VOICE . '; }'
             ],
 
 
 
             [['c_quotes'], 'required', 'when' => function (CommunicationForm $model) {
-                    return ($model->c_email_tpl_id == self::TPL_TYPE_EMAIL_OFFER && $model->c_type_id == self::TYPE_EMAIL) || ($model->c_sms_tpl_id == self::TPL_TYPE_SMS_OFFER && $model->c_type_id == self::TYPE_SMS);
+                    return $model->c_email_tpl_id == self::TPL_TYPE_EMAIL_OFFER && $model->c_type_id == self::TYPE_EMAIL;
                 },
                 'whenClient' => "function (attribute, value) { return ($('#c_type_id').val() == " . self::TYPE_EMAIL . " && $('#c_email_tpl_id').val() == " . self::TPL_TYPE_EMAIL_OFFER . '); }'
             ],

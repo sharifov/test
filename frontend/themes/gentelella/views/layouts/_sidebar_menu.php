@@ -59,6 +59,16 @@ $isCoach = Yii::$app->authManager->getAssignment('coach', Yii::$app->user->id);
             $menuItems[] = ['label' => 'Search Leads', 'url' => ['/leads/index'], 'icon' => 'search'];
 
 
+            $cntNotifications = \common\models\Notifications::findNewCount(Yii::$app->user->id);
+
+            $menuItems[] = [
+                'label' => 'My Notifications'.
+                    '<span id="div-cnt-notification">'.($cntNotifications ? '<span class="label-success label pull-right">'.$cntNotifications.'</span>':'').'</span>',
+                'url' => ['/notifications/list'],
+                'icon' => 'envelope',
+            ];
+
+
             if($isAdmin || $isSupervision) {
                 $menuItems[] = [
                     'label' => 'Additional',
@@ -149,6 +159,7 @@ $isCoach = Yii::$app->authManager->getAssignment('coach', Yii::$app->user->id);
                         ['label' => 'Lead Tasks', 'url' => ['lead-task/index'], 'icon' => 'list'],
                         ['label' => 'Email template types', 'url' => ['/email-template-type/index'], 'icon' => 'envelope-o'],
                         ['label' => 'SMS template types', 'url' => ['/sms-template-type/index'], 'icon' => 'comments-o'],
+                        ['label' => 'All Notifications', 'url' => ['/notifications/index'], 'icon' => 'comment-o'],
                     ]
                 ];
 
