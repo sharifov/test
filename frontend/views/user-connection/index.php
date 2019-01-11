@@ -53,6 +53,14 @@ $this->params['breadcrumbs'][] = $this->title;
                 'format' => 'raw'
             ],
 
+            [
+                'label' => 'Duration',
+                'value' => function (\common\models\UserConnection $model) {
+                    return Yii::$app->formatter->asRelativeTime(strtotime($model->uc_created_dt));
+                },
+                'format' => 'raw'
+            ],
+
             //'uc_created_dt',
 
             ['class' => 'yii\grid\ActionColumn'],

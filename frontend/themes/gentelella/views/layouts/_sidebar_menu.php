@@ -65,7 +65,7 @@ $isCoach = Yii::$app->authManager->getAssignment('coach', Yii::$app->user->id);
                 'label' => 'My Notifications'.
                     '<span id="div-cnt-notification">'.($cntNotifications ? '<span class="label-success label pull-right">'.$cntNotifications.'</span>':'').'</span>',
                 'url' => ['/notifications/list'],
-                'icon' => 'envelope',
+                'icon' => 'comment',
             ];
 
 

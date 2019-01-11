@@ -8,7 +8,7 @@
         'role' => 'presentation',
 ]])?>
     <a href="javascript:;" class="dropdown-toggle info-number" data-toggle="dropdown" aria-expanded="false">
-        <i class="fa fa-envelope-o"></i>
+        <i class="fa fa-comment-o"></i>
         <?php if($newCount): ?>
             <span class="badge bg-green"><?=$newCount?></span>
         <? endif;?>
@@ -27,10 +27,12 @@
                 </span>
                 <span>
                     <span><?=\yii\helpers\Html::encode($item->n_title)?></span>
-                    <span class="time"><?=Yii::$app->formatter->asRelativeTime($item->n_created_dt)?></span>
+                    <span class="time"><?=Yii::$app->formatter->asRelativeTime(strtotime($item->n_created_dt))?></span>
                 </span>
                 <span class="message">
-                    <?=mb_substr(\yii\helpers\Html::encode($item->n_message), 0, 80)?>...
+                    <?=\yii\helpers\StringHelper::truncate(\common\models\Email::strip_html_tags($item->n_message), 80, '...');?><br>
+                    <?/*=$item->n_created_dt?><br>
+                    <?= Yii::$app->formatter->asRelativeTime(strtotime($item->n_created_dt))*/?>
                 </span>
             </a>
             <?php
@@ -83,7 +85,7 @@
         <? endforeach; ?>
         <li>
             <div class="text-center">
-                <?=\yii\helpers\Html::a('<strong>See all Notifications</strong>', ['notifications/list'], ['data-pjax' => 0])?>
+                <?=\yii\helpers\Html::a('<i class="fa fa-search"></i> <strong>See all Notifications</strong>', ['notifications/list'], ['data-pjax' => 0])?>
             </div>
 
             <?php
@@ -125,9 +127,9 @@ if(Yii::$app->controller->action->uniqueId === 'lead/view') {
 $js = <<<JS
     function updatePjaxNotify() {
         //alert('ajax 1');
-        $.pjax({container : '#notify-pjax', push: false, timeout: '6000', scrollTo: false});  
+        $.pjax({container : '#notify-pjax', push: false, timeout: '8000', scrollTo: false});  
     }
-    //var timerId2 = setInterval(updatePjaxNotify, 20000);
+    var timerId2 = setInterval(updatePjaxNotify, 3 * 60000);
 
     var socket   = null;
 
@@ -162,55 +164,31 @@ $js = <<<JS
             console.log('Socket Status: ' + socket.readyState + ' (Open)');
             //console.log(e);
         };
+        
         socket.onmessage = function (e) {
-            //alert(e.data);
-            //var customWindow = window.open('', '_self', ''); customWindow.close();
-            //location.href = '/';
-            //alert(e.data);
-            
+ 
             //console.log(e.data);
             //alert(e.data);
             //alert(345);
-                      
             
-            
-                try {
-                    
-                    var obj = JSON.parse(e.data); // $.parseJSON( e.data );
-                    
-                    //alert(typeof obj);
+            try {
+                var obj = JSON.parse(e.data); // $.parseJSON( e.data );
                 
-                    //if (typeof obj.error !== 'undefined' || obj.error != '') {
-                        
-                        if (typeof obj.command !== 'undefined') {
-                            
-                            if(obj.command === 'getNewNotification') {
-                                //alert(obj.command);
-                                updatePjaxNotify();
-                            }
-                            
-                            if(obj.command === 'updateCommunication') {
-                                updatePjaxNotify();
-                                updateCommunication();
-                            }
-                            
-                            
-                        }
-                        
-                    /*} else {
-                        alert(e.data);
-                    }*/
-       
-                } catch (error) {
-                    console.log('Invalid JSON data');
-                    alert(e.data);
+                if (typeof obj.command !== 'undefined') {
+                    
+                    if(obj.command === 'getNewNotification') {
+                        //alert(obj.command);
+                        updatePjaxNotify();
+                    }
+                    
+                    if(obj.command === 'updateCommunication') {
+                        updatePjaxNotify();
+                        updateCommunication();
+                    }
                 }
-            //} else {
-                //console.log(e);
-            //}
-            
-            
-            
+            } catch (error) {
+                console.error('Invalid JSON data');
+            }
             
         };
 
@@ -225,8 +203,8 @@ $js = <<<JS
         };
 
 
-    } catch (e) {
-        console.error(e);
+    } catch (error) {
+        console.error(error);
     }
 
 JS;

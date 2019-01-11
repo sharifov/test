@@ -25,23 +25,48 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
         ]) ?>
     </p>
+    <div class="row">
+        <div class="col-md-6">
 
-    <?= DetailView::widget([
-        'model' => $model,
-        'attributes' => [
-            'n_id',
-            [
-              'attribute' => 'n_type_id',
-                'value' => function(\common\models\Notifications $model) {
-                    return $model->getType();
-                }
-            ],
-            'n_title',
-            'n_message:ntext',
-            //'n_new:boolean',
-            'n_read_dt',
-            'n_created_dt',
-        ],
-    ]) ?>
+            <?= DetailView::widget([
+                'model' => $model,
+                'attributes' => [
+                    'n_id',
+                    [
+                      'attribute' => 'n_type_id',
+                        'value' => function(\common\models\Notifications $model) {
+                            return $model->getType();
+                        }
+                    ],
+                    'n_title',
+                    //'n_message:ntext',
+                    //'n_new:boolean',
+                    [
+                        'attribute' => 'n_read_dt',
+                        'value' => function (\common\models\Notifications $model) {
+                            return $model->n_read_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->n_read_dt)) : '-';
+                        },
+                        'format' => 'raw'
+                    ],
+
+                    [
+                        'attribute' => 'n_created_dt',
+                        'value' => function (\common\models\Notifications $model) {
+                            return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->n_created_dt));
+                        },
+                        'format' => 'raw'
+                    ],
+                ],
+            ]) ?>
+        </div>
+        <div class="col-md-6">
+            <h4>Message text:</h4>
+            <pre>
+                <?php
+                    echo $model->n_message;
+                ?>
+            </pre>
+        </div>
+    </div>
 
 </div>
