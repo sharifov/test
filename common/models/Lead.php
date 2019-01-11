@@ -2065,6 +2065,7 @@ Sales - Kivork",
 
         $content_data['agent'] = [
             'name'  => Yii::$app->user->identity->full_name,
+            'username'  => Yii::$app->user->identity->username,
             'phone' => $upp && $upp->upp_phone_number ? $upp->upp_phone_number : '',
             'email' => $upp && $upp->upp_email ? $upp->upp_email : '',
         ];

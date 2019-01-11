@@ -509,4 +509,30 @@ class Email extends \yii\db\ActiveRecord
         return $this->e_lead_id;
     }
 
+
+    /**
+     * @return array
+     */
+    public function getUsersIdByEmail(): array
+    {
+        $users = [];
+        $params = UserProjectParams::find()->where(['upp_email' => $this->e_email_to])->all();
+
+        if($params) {
+            foreach ($params as $param) {
+                $users[$param->upp_user_id] = $param->upp_user_id;
+            }
+        }
+
+        $employees = Employee::find()->where(['email' => $this->e_email_to])->all();
+
+        if($employees) {
+            foreach ($employees as $employe) {
+                $users[$employe->id] = $employe->id;
+            }
+        }
+
+        return $users;
+    }
+
 }

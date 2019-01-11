@@ -373,4 +373,21 @@ class Sms extends \yii\db\ActiveRecord
         return $this->s_lead_id;
     }
 
+    /**
+     * @return array
+     */
+    public function getUsersIdByPhone(): array
+    {
+        $users = [];
+        $params = UserProjectParams::find()->where(['upp_tw_phone_number' => $this->s_phone_to])->orWhere(['upp_phone_number' => $this->s_phone_to])->all();
+
+        if($params) {
+            foreach ($params as $param) {
+                $users[$param->upp_user_id] = $param->upp_user_id;
+            }
+        }
+
+        return $users;
+    }
+
 }

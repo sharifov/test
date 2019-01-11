@@ -3,6 +3,7 @@ namespace webapi\modules\v1\controllers;
 
 use common\components\CommunicationService;
 use common\models\Email;
+use common\models\Notifications;
 use common\models\Project;
 use common\models\Sms;
 use Yii;
@@ -363,6 +364,9 @@ class CommunicationController extends ApiBaseController
                     */
 
 
+                $leadArray = [];
+                $userArray = [];
+
                 foreach ($res['data']['emails'] as $mail) {
 
                     $email = new Email();
@@ -391,12 +395,38 @@ class CommunicationController extends ApiBaseController
                     $email->e_message_id = $mail['ei_message_id'];
 
                     $lead_id = $email->detectLeadId();
+                    $users = $email->getUsersIdByEmail();
+
+                    if($users) {
+                        foreach ($users as $user_id) {
+                            $userArray[$user_id] = $user_id;
+                        }
+                    }
+
                     if($lead_id) {
                         Yii::info('Email Detected LeadId '.$lead_id.' from '.$email->e_email_from, 'info\API:Communication:newEmailMessagesReceived:Email');
+                        $leadArray[$lead_id] = $lead_id;
                     }
 
                     if(!$email->save()) {
                         Yii::error(VarDumper::dumpAsString($email->errors), 'API:Communication:newEmailMessagesReceived:Email:save');
+                    }
+                }
+
+
+
+
+                if($userArray) {
+                    foreach ($userArray as $user_id) {
+                        Notifications::create($user_id, 'New Emails received', 'New Emails received. Check your inbox.', Notifications::TYPE_INFO, true);
+                        Notifications::socket($user_id, null, 'getNewNotification', [], true);
+                    }
+                }
+
+
+                if($leadArray) {
+                    foreach ($leadArray as $lead_id) {
+                        Notifications::socket(null, $lead_id, 'updateCommunication', [], true);
                     }
                 }
 
@@ -498,6 +528,8 @@ class CommunicationController extends ApiBaseController
                     $sms->s_tw_from_zip = $smsItem['si_from_zip'] ?? null;
 
                     $lead_id = $sms->detectLeadId();
+
+
                     if($lead_id) {
                         Yii::info('SMS Detected LeadId '.$lead_id.' from '.$sms->s_phone_from, 'info\API:Communication:newSmsMessagesReceived:Sms');
                     }
@@ -507,6 +539,24 @@ class CommunicationController extends ApiBaseController
                         Yii::error(VarDumper::dumpAsString($sms->errors), 'API:Communication:newSmsMessagesReceived:Sms:save');
                         throw new \Exception('Error save sms data');
                     }
+
+
+                    //Notifications::create(Yii::$app->user->id, 'Test '.date('H:i:s'), 'Test message <h2>asdasdasd</h2>', Notifications::TYPE_SUCCESS, true);
+
+
+                    $users = $sms->getUsersIdByPhone();
+
+                    if($users) {
+                        foreach ($users as $user_id) {
+                            Notifications::create($user_id, 'New SMS '.$sms->s_phone_from, 'New SMS from ' . $sms->s_phone_from .' <br> '.nl2br($sms->s_sms_text), Notifications::TYPE_INFO, true);
+                            Notifications::socket($user_id, null, 'getNewNotification', ['sms_id' => $sms->s_id], true);
+                        }
+                    }
+
+                    if($lead_id) {
+                        Notifications::socket(null, $lead_id, 'updateCommunication', ['sms_id' => $sms->s_id], true);
+                    }
+
 
                     $response = $sms->attributes;
 

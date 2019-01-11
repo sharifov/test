@@ -4,6 +4,7 @@ namespace frontend\controllers;
 
 use common\components\CommunicationService;
 use common\components\CountEvent;
+use common\models\Notifications;
 use Yii;
 use yii\helpers\ArrayHelper;
 use yii\filters\VerbFilter;
@@ -104,17 +105,21 @@ class TestController extends FController
     public function actionSocket()
     {
 
+
+        Notifications::create(Yii::$app->user->id, 'Test '.date('H:i:s'), 'Test message <h2>asdasdasd</h2>', Notifications::TYPE_SUCCESS, true);
+
         $socket = 'tcp://127.0.0.1:1234';
         $user_id = Yii::$app->user->id; //'tester01';
         $lead_id = 12345;
         $data['message'] = 'test '.date('H:i:s');
+        $data['command'] = 'getNewNotification';
 
 
         try {
             // соединяемся с локальным tcp-сервером
             $instance = stream_socket_client($socket);
             // отправляем сообщение
-            if (fwrite($instance, json_encode(['lead_id' => $lead_id, 'multiple' => false, 'data' => $data]) . "\n")) {
+            if (fwrite($instance, json_encode(['user_id' => $user_id, /*'lead_id' => $lead_id,*/ 'multiple' => false, 'data' => $data]) . "\n")) {
                 echo 'OK';
             } else {
                 echo 'NO';

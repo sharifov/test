@@ -50,7 +50,7 @@ $c_type_id = $comForm->c_type_id;
 
 
 <?php yii\widgets\Pjax::begin(['id' => 'pjax-lead-communication' ,'enablePushState' => false]) ?>
-
+    <?/*<h1><?=random_int(1, 100)?></h1>*/ ?>
     <div class="panel chat">
         <div class="chat__list">
 

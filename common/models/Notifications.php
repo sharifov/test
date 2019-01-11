@@ -5,6 +5,7 @@ namespace common\models;
 use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
+use yii\helpers\VarDumper;
 
 /**
  * This is the model class for table "notifications".
@@ -184,13 +185,15 @@ class Notifications extends ActiveRecord
      * @param bool $unique
      * @return bool
      */
-    public static function create($user_id = 0, $title = '', $message = '', $type = 1, $popup = true, $unique = false)
+    public static function create($user_id = 0, $title = '', $message = '', $type = 1, $popup = true, $unique = false) : bool
     {
 
         $md5Hash = md5($message.$user_id);
         if($unique) {
             $exists = Notifications::find()->where(['n_unique_id' => $md5Hash])->exists();
-            if($exists) return false;
+            if($exists) {
+                return false;
+            }
         }
 
         $model = new self();
@@ -203,8 +206,8 @@ class Notifications extends ActiveRecord
 
         $model->n_new = true;
         if($model->save()){
-            $userEmail = User::find()->where(['id' => $user_id])->one();
-            if($userEmail->email) {
+            //$userEmail = User::find()->where(['id' => $user_id])->one();
+            //if($userEmail->email) {
 
                 /*Yii::$app->mailer_photolamus
                     ->compose()
@@ -213,10 +216,52 @@ class Notifications extends ActiveRecord
                     ->setSubject($title)
                     ->setTextBody($message)
                     ->send();*/
-            }
+            //}
+            return true;
         }
-        return $model->save();
 
+        return false;
+    }
+
+
+    /**
+     * @param int|null $user_id
+     * @param int|null $lead_id
+     * @param string|null $command
+     * @param array $data
+     * @param bool $multiple
+     * @return bool
+     */
+    public static function socket(int $user_id = null, int $lead_id = null, string $command = null, array $data = [], bool $multiple = true) : bool
+    {
+        $socket = 'tcp://127.0.0.1:1234';
+        if($command) {
+            $data['command'] = $command;
+        }
+        $jsonData = [];
+
+        if($user_id) {
+            $jsonData['user_id'] = $user_id;
+        }
+
+        if($lead_id) {
+            $jsonData['lead_id'] = $lead_id;
+        }
+
+        $jsonData['multiple'] = $multiple;
+        $jsonData['data'] = $data;
+
+        try {
+            // connect tcp-server
+            $instance = stream_socket_client($socket);
+            // send message
+            if (fwrite($instance, json_encode($jsonData) . "\n")) {
+                return true;
+            }
+        } catch (\Throwable $exception) {
+            Yii::error(VarDumper::dumpAsString($exception->getMessage(), 10), 'Notifications:socket:stream_socket_client');
+        }
+        return false;
     }
 
 }

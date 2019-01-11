@@ -135,6 +135,7 @@ $isCoach = Yii::$app->authManager->getAssignment('coach', Yii::$app->user->id);
                     'url' => 'javascript:',
                     'icon' => 'user',
                     'items' => [
+                        ['label' => 'User Connections', 'url' => ['/user-connection/index'], 'icon' => 'plug'],
                         ['label' => 'Users', 'url' => ['employee/list'], 'icon' => 'user'],
                         ['label' => 'User Groups', 'url' => ['user-group/index'], 'icon' => 'users'],
                         ['label' => 'User Groups Assignments', 'url' => ['user-group-assign/index'], 'icon' => 'users'],

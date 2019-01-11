@@ -13,7 +13,7 @@ use yii\web\AssetBundle;
  * @author Alexandr
  * @since 1.0
  */
-class NotifyAsset extends AssetBundle
+class WebSocketAsset extends AssetBundle
 {
     public $basePath = '@webroot';
     public $baseUrl = '@web';
@@ -27,18 +27,12 @@ class NotifyAsset extends AssetBundle
 
     public $js = [
         'js/pnotify/pnotify.custom.min.js',
-        'https://cdnjs.cloudflare.com/ajax/libs/ion-sound/3.0.7/js/ion.sound.min.js',
-        'https://cdnjs.cloudflare.com/ajax/libs/favico.js/0.3.10/favico.min.js',
-
-
-
+        'https://cdnjs.cloudflare.com/ajax/libs/ion-sound/3.0.7/js/ion.sound.min.js'
         /*'https://cdnjs.cloudflare.com/ajax/libs/pnotify/3.2.1/pnotify.js',
         'https://cdnjs.cloudflare.com/ajax/libs/pnotify/3.2.1/pnotify.desktop.js',
         'https://cdnjs.cloudflare.com/ajax/libs/pnotify/3.2.1/pnotify.animate.js',
         'https://cdnjs.cloudflare.com/ajax/libs/pnotify/3.2.1/pnotify.nonblock.js',
-        'https://cdnjs.cloudflare.com/ajax/libs/pnotify/3.2.1/pnotify.mobile.js',*/
-
-        'js/init-objects.js',
+        'https://cdnjs.cloudflare.com/ajax/libs/pnotify/3.2.1/pnotify.mobile.js'*/
     ];
 
     public $depends = [
