@@ -133,7 +133,7 @@ $controllerId = Yii::$app->controller->id;
 $actionId = Yii::$app->controller->action->id;
 $pageUrl = urlencode(\yii\helpers\Url::current());
 $leadId = null;
-$webSocketHost = (Yii::$app->request->isSecureConnection ? 'wss': 'ws') . '://'.Yii::$app->request->serverName . ':8888';
+$webSocketHost = (Yii::$app->request->isSecureConnection ? 'wss': 'ws') . '://'.Yii::$app->request->serverName . '/ws';// . ':8888';
 
 if(Yii::$app->controller->action->uniqueId === 'lead/view') {
     $leadId = Yii::$app->request->get('id');
@@ -168,10 +168,93 @@ $js = <<<JS
     var pageUrl = '$pageUrl';
     var leadId = '$leadId';
     var webSocketHost = '$webSocketHost';
+    
+    /**
+     * inits a websocket by a given url, returned promise resolves with initialized websocket, rejects after failure/timeout.
+     *
+     * @param url the websocket url to init
+     * @param existingWebsocket if passed and this passed websocket is already open, this existingWebsocket is resolved, no additional websocket is opened
+     * @param timeoutMs the timeout in milliseconds for opening the websocket
+     * @param numberOfRetries the number of times initializing the socket should be retried, if not specified or 0, no retries are made
+     *        and a failure/timeout causes rejection of the returned promise
+     * @return {Promise}
+     */
+    function initWebsocket(url, existingWebsocket, timeoutMs, numberOfRetries) {
+        timeoutMs = timeoutMs ? timeoutMs : 1500;
+        numberOfRetries = numberOfRetries ? numberOfRetries : 0;
+        var hasReturned = false;
+        var promise = new Promise((resolve, reject) => {
+            setTimeout(function () {
+                if(!hasReturned) {
+                    console.info('opening websocket timed out: ' + url);
+                    rejectInternal();
+                }
+            }, timeoutMs);
+            if (!existingWebsocket || existingWebsocket.readyState != existingWebsocket.OPEN) {
+                if (existingWebsocket) {
+                    existingWebsocket.close();
+                }
+                var websocket = new WebSocket(url);
+                websocket.onopen = function () {
+                    if(hasReturned) {
+                        websocket.close();
+                    } else {
+                        console.info('websocket to opened! url: ' + url);
+                        resolve(websocket);
+                    }
+                };
+                websocket.onclose = function () {
+                    console.info('websocket closed! url: ' + url);
+                    rejectInternal();
+                };
+                websocket.onerror = function () {
+                    console.info('websocket error! url: ' + url);
+                    rejectInternal();
+                };
+            } else {
+                resolve(existingWebsocket);
+            }
+    
+            function rejectInternal() {
+                if(numberOfRetries <= 0) {
+                    reject();
+                } else if(!hasReturned) {
+                    hasReturned = true;
+                    console.info('retrying connection to websocket! url: ' + url + ', remaining retries: ' + (numberOfRetries-1));
+                    initWebsocket(url, null, timeoutMs, numberOfRetries-1).then(resolve, reject);
+                }
+            }
+        });
+        promise.then(function () {hasReturned = true;}, function () {hasReturned = true;});
+        return promise;
+    };
+    
 
     try {
+        
+        
+        
+        
 
-        socket = new WebSocket(webSocketHost + '/?user_id=' + userId + '&controller_id=' + controllerId + '&action_id=' + actionId + '&page_url=' + pageUrl + '&lead_id=' + leadId);
+        const socket = new WebSocket(webSocketHost + '/?user_id=' + userId + '&controller_id=' + controllerId + '&action_id=' + actionId + '&page_url=' + pageUrl + '&lead_id=' + leadId);
+        
+        /*initWebsocket('ws:\\localhost:8090', null, 5000, 10).then(function(socket){
+                console.log('socket initialized!');
+                //do something with socket...
+            
+                //if you want to use the socket later again and assure that it is still open:
+                initWebsocket('ws:\\localhost:8090', socket, 5000, 10).then(function(socket){
+                    //if socket is still open, you are using the same "socket" object here
+                    //if socket was closed, you are using a new opened "socket" object
+                }
+            
+            }, function(){
+                console.log('init of socket failed!');
+        });*/
+        
+        //const socket = new WebSocket('wss:\\sales.dev.travelinsides.com:8888/?user_id=1&controller_id=test&action_id=test&page_url=test&lead_id=15636');
+        
+        //const socket = new WebSocket('wss:\\sales.dev.travelinsides.com:8888/?user_id=1&controller_id=test&action_id=test&page_url=test&lead_id=15636');
         
         socket.onopen = function (e) {
             //socket.send('{"user2_id":' + user_id + '}');
@@ -207,15 +290,28 @@ $js = <<<JS
             
         };
 
-        socket.onclose = function (e) {
-            console.log('Socket Status: ' + socket.readyState + ' (Closed)');
+        socket.onclose = function (event) {
+            
+            if (event.wasClean) {
+                console.log('Connection closed success (Close)');
+            } else {
+                console.error('Обрыв соединения'); // например, "убит" процесс сервера
+            }
+            console.log('Code: ' + event.code + ', причина: ' + event.reason);
+            
+            //console.log('Socket Status: ' + socket.readyState + ' (Closed)');
         };
 
-        socket.onerror = function(evt) {
+        socket.onerror = function(event) {
             //if (socket.readyState == 1) {
-                console.log('Socket error: ' + evt.type);
+                console.log('Socket error: ' + event.message);
             //}
         };
+        
+        /*socket.setTimeout(function () {
+        console.log('2 seconds passed, closing the socket');
+      socket.close();
+    }, 2000);*/
 
 
     } catch (error) {
