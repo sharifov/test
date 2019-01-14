@@ -154,7 +154,7 @@ $ws_worker->onConnect = function(\Workerman\Connection\TcpConnection $connection
             'uc_controller_id'          => $_GET['controller_id'] ?? null,
             'uc_action_id'              => $_GET['action_id'] ?? null,
             'uc_page_url'               => $_GET['page_url'] ?? null,
-            'uc_ip'                     => $connection->getRemoteIp(),
+            'uc_ip'                     => $_GET['ip'] ?? null, //$connection->getRemoteIp(),
             'uc_created_dt'             => date('Y-m-d H:i:s'),
         ];
 
