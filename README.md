@@ -90,6 +90,10 @@ Prod Hosts:
  ```
  sudo apidoc -i "./webapi/modules" -o "./webapi/web/doc" -f ".*\\.php$"
  ```
+WebSocket Server:
+```
+sudo php console/socket-server.php start
+```
 
  Api Example:
  -------------------
