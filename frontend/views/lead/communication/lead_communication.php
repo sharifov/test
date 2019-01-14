@@ -468,10 +468,10 @@ $jsPath = Yii::$app->request->baseUrl.'/js/sounds/';
 
 <script>
     // var context = new AudioContext();
-    // var currentUrl = '<?=$currentUrl?>';
+    var currentUrl = '<?=$currentUrl?>';
+
     function updateCommunication() {
-        $.pjax.reload({container: '#pjax-lead-communication', push: false, replace: false, timeout: 6000});
-        //url: currentUrl,
+        $.pjax.reload({url: currentUrl, container: '#pjax-lead-communication', push: false, replace: false, timeout: 6000});
     }
 
 
