@@ -112,13 +112,28 @@
 <?php yii\widgets\Pjax::end() ?>
 
 <?php
+
+
+
+
+/*echo  \yii\helpers\Url::home().'<br>';
+echo  \yii\helpers\Url::base().'<br>';
+
+echo  \yii\helpers\Url::home(true).'<br>';
+echo  \yii\helpers\Url::base(true).'<br>';
+
+exit;*/
+
+//\yii\helpers\VarDumper::dump($_SERVER, 10, true); exit;
+
 //$jsPath = Yii::$app->request->baseUrl.'/js/sounds/';
 
 $userId = Yii::$app->user->id;
 $controllerId = Yii::$app->controller->id;
 $actionId = Yii::$app->controller->action->id;
-$pageUrl = \yii\helpers\Url::current();
+$pageUrl = urlencode(\yii\helpers\Url::current());
 $leadId = null;
+$webSocketHost = (Yii::$app->request->isSecureConnection ? 'wss': 'ws') . '://'.Yii::$app->request->serverName . ':8080';
 
 if(Yii::$app->controller->action->uniqueId === 'lead/view') {
     $leadId = Yii::$app->request->get('id');
@@ -152,12 +167,12 @@ $js = <<<JS
     var actionId = '$actionId';
     var pageUrl = '$pageUrl';
     var leadId = '$leadId';
+    var webSocketHost = '$webSocketHost';
 
     try {
 
-        socket = new WebSocket('ws://localhost:8080/?user_id=' + userId + '&controller_id=' + controllerId + '&action_id=' + actionId + '&page_url=' + pageUrl + '&lead_id=' + leadId);
-        //socket = new WebSocket('ws://localhost:8080/?lead_id=12345');
-
+        socket = new WebSocket(webSocketHost + '/?user_id=' + userId + '&controller_id=' + controllerId + '&action_id=' + actionId + '&page_url=' + pageUrl + '&lead_id=' + leadId);
+        
         socket.onopen = function (e) {
             //socket.send('{"user2_id":' + user_id + '}');
             //alert(1234);

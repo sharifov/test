@@ -58,7 +58,7 @@ $ws_worker->name = 'WebsocketWorker';
 $ws_worker->onWorkerStart = function() use (&$user, &$userConnections, &$leadConnections)
 {
 
-    $inner_tcp_worker = new Worker('tcp://127.0.0.1:1234');
+    $inner_tcp_worker = new Worker('tcp://0.0.0.0:1234');
     $inner_tcp_worker->name = 'TcpWorker';
     //$inner_tcp_worker->user = 'www-data';
 
