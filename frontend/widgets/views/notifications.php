@@ -133,7 +133,7 @@ $controllerId = Yii::$app->controller->id;
 $actionId = Yii::$app->controller->action->id;
 $pageUrl = urlencode(\yii\helpers\Url::current());
 $leadId = null;
-$webSocketHost = (Yii::$app->request->isSecureConnection ? 'wss': 'ws') . '://'.Yii::$app->request->serverName . ':8080';
+$webSocketHost = (Yii::$app->request->isSecureConnection ? 'wss': 'ws') . '://'.Yii::$app->request->serverName . ':8888';
 
 if(Yii::$app->controller->action->uniqueId === 'lead/view') {
     $leadId = Yii::$app->request->get('id');

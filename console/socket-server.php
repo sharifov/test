@@ -50,7 +50,7 @@ $leadConnections = [];
 $connectionsUser = [];
 $connectionsLead = [];
 
-$ws_worker = new Worker('websocket://0.0.0.0:8080');
+$ws_worker = new Worker('websocket://0.0.0.0:8888');
 $ws_worker->name = 'WebsocketWorker';
 //$ws_worker->user = 'www-data';
 
