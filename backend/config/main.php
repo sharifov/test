@@ -9,7 +9,7 @@ $params = array_merge(
 return [
     'id' => 'app-backend',
     'basePath' => dirname(__DIR__),
-    'name' => 'Sales Admin - KIVORK',
+    'name' => 'Sales Admin',
     'controllerNamespace' => 'backend\controllers',
     'language' => 'en-US',
     'homeUrl'   =>  '/bpanel',
