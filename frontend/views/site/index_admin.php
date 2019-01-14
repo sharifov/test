@@ -10,6 +10,8 @@ use yii\widgets\ActiveForm;
 /* @var $dataSources [] */
 /* @var $dataEmployee [] */
 /* @var $dataEmployeeSold [] */
+/* @var $crontabJobList [] */
+/* @var $processList [] */
 
 /* @var $searchModel common\models\search\EmployeeSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -103,8 +105,41 @@ $userId = Yii::$app->user->id;
         </div>
 
         <div class="col-md-3">
+            <h4>System processes and cron jobs running:</h4>
+            <table class="table table-bordered table-condensed">
+                <tr>
+                    <th>PID</th>
+                    <th>Started</th>
+                    <th>Time</th>
+                    <th>Command</th>
+                </tr>
+                <?php if($processList): ?>
+                    <?php foreach($processList AS $proc): ?>
+                        <tr>
+                            <td><?php echo $proc['pid']; ?></td>
+                            <td><?php echo $proc['stime']; ?></td>
+                            <td><?php echo $proc['time']; ?></td>
+                            <td><?php echo $proc['command']; ?></td>
+                        </tr>
+                    <?php endforeach;?>
+                <?php endif;?>
+            </table>
+        </div>
 
-
+        <div class="col-md-3">
+            <?php if($crontabJobList): ?>
+                <h4>Cron jobs (/etc/crontab)</h4>
+                <table class="table table-bordered table-condensed">
+                    <tr>
+                        <th>Cron jobs</th>
+                    </tr>
+                    <?php foreach($crontabJobList AS $cronJob): ?>
+                        <tr>
+                            <td><?php echo $cronJob; ?></td>
+                        </tr>
+                    <?php endforeach;?>
+                </table>
+            <?php endif;?>
         </div>
 
     </div>
