@@ -88,7 +88,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 $return = [];
                 foreach ($splitTips as $split) {
                     $model->splitTipsPercentSum += $split->ts_percent;
-                    $return[] = '<b>' . $split->tsUser->username . '</b> (' . $split->ts_percent . '%) $' . number_format($split->countTips($model->tips), 2);
+                    $return[] = '<b>' . $split->tsUser->username . '</b> (' . $split->ts_percent . '%) $' . number_format($split->countTips($model->totalTips), 2);
                 }
                 if (!empty($return)) {
                     $splitTipsTxt = implode('<br/>', $return);
