@@ -159,6 +159,16 @@ return [
         'gridview' =>  [
             'class' => '\kartik\grid\Module'
         ],
+
+        /*'supervisor' => [
+            'class'    => 'supervisormanager\Module',
+            'authData' => [
+                'user'     => 'supervisor',
+                'password' => 'Supervisor2019!',
+                'url'      => 'http://127.0.0.1:9001/RPC2' // Set by default
+            ]
+        ],*/
+
         'translatemanager' => [
             'class'                     => \lajax\translatemanager\Module::class,
             'root'                      => '@common/templates',               // The root directory of the project scan.
