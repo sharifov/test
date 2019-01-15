@@ -7,6 +7,11 @@ class m190110_090500_create_tbl_notifications extends Migration
     public function safeUp()
     {
 
+        $tableOptions = null;
+        if ($this->db->driverName === 'mysql') {
+            $tableOptions = 'CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ENGINE=InnoDB';
+        }
+
         $this->createTable('{{%notifications}}', [
             'n_id'         => $this->primaryKey(),
             'n_unique_id'   => $this->string(40),
@@ -20,7 +25,7 @@ class m190110_090500_create_tbl_notifications extends Migration
             'n_popup_show' => $this->boolean()->defaultValue(false),
             'n_read_dt'    => $this->dateTime(),
             'n_created_dt' => $this->dateTime(),
-        ]);
+        ], $tableOptions);
 
         $this->addForeignKey('FK-notifications_n_user_id', '{{%notifications}}', ['n_user_id'], '{{%employees}}', ['id'], 'CASCADE', 'CASCADE');
     }
