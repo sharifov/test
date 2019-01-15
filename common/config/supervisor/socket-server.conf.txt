@@ -3,7 +3,7 @@ command=/usr/bin/php /var/www/sales.zeit.test/www/console/socket-server.php star
 stdout_logfile=/var/www/sales.zeit.test/www/console/runtime/socket-server.log
 autostart=true
 autorestart=true
-user=www-data
+user=root
 stopsignal=KILL
 numprocs=1
 
