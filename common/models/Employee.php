@@ -787,6 +787,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         $query = new Query();
         $query->select([
             'lead_id' => 'l.id',
+            'final_profit' => 'l.final_profit',
             'q_id' => 'q.id',
             'fare_type' => 'q.fare_type',
             'check_payment' => 'q.check_payment',
@@ -824,7 +825,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
             $entry['minus_percent_profit'] = intval($entry['minus_percent_profit']);
             $entry['minus_percent_tips'] = intval($entry['minus_percent_tips']);
             $quote = Quote::findOne(['id' => $entry['q_id']]);
-            $totalProfit = $quote->getEstimationProfit();
+            $totalProfit = ($entry['final_profit'])?$entry['final_profit']:$quote->getEstimationProfit();
             $totalTips = $entry['tips']/2;
             if ($entry['agent_type'] == 'main') {
                 $agentProfit = $totalProfit * (100 - $entry['minus_percent_profit']) / 100;

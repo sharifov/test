@@ -168,7 +168,6 @@ class Quote extends \yii\db\ActiveRecord
         $profit = 0;
         $markUp = $priceData['total']['mark_up'] + $priceData['total']['extra_mark_up'];
         $sellingPrice = $priceData['total']['selling'];
-        $fareType = empty($this->fare_type)? self::FARE_TYPE_PUB :$this->fare_type;
         $checkPayment = $this->check_payment;
         $processingFee = $priceData['processing_fee'];
         $serviceFee = $this->getServiceFeePercent();
