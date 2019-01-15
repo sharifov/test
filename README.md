@@ -36,6 +36,8 @@ OR:
 #sudo apt-get install php7.2 php-pear php7.2-zip php7.2-curl php7.2-gd php7.2-mysql php7.2-mcrypt php7.2-xml php7.2-mbstring php7.2-pgsql php7.2-imagick php7.2-xmlrpc php7.2-sqlite3 php7.2-soap php7.2-tidy php7.2-recode php7.2-pspell php7.2-imap
 sudo apt-get install php7.3 php7.3-fpm php-pear php-imagick php7.3-intl php7.3-zip php7.3-curl php7.3-gd php7.3-mysql php7.3-xml php7.3-mbstring php7.3-pgsql php7.3-xmlrpc php7.3-sqlite3 php7.3-soap php7.3-tidy php7.3-recode php7.3-pspell php7.3-imap
 sudo update-alternatives --config php
+
+
 ```
 
 2). Composer INSTALL:
@@ -64,8 +66,7 @@ Migration (RBAC + LOG):
 ./yii migrate
 ```
 
-Yii 2 Advanced Project Template is a skeleton [Yii 2](http://www.yiiframework.com/) application best for
-developing complex Web applications with multiple tiers.
+
 
 Prod Hosts:
 -------------------
@@ -90,10 +91,40 @@ Prod Hosts:
  ```
  sudo apidoc -i "./webapi/modules" -o "./webapi/web/doc" -f ".*\\.php$"
  ```
-WebSocket Server:
+WebSocket Server (https://github.com/walkor/Workerman):
 ```
 sudo php console/socket-server.php start
+sudo php console/socket-server.php stop
+sudo php console/socket-server.php restart
+sudo php console/socket-server.php reload
+
 ```
+
+
+Install Supervisor
+ -------------------
+ ```
+ sudo apt-get install supervisor
+ sudo nano /etc/supervisor/supervisord.conf
+ ```
+ Update global config file (code):
+ ```
+ [include]
+ files = /var/www/.../www/common/config/supervisor/*.conf
+ ```
+ 
+ Create supervisor config file (rename to socket-server.conf):
+ ```
+ /var/www/.../common/config/supervisor/socket-server.conf.txt
+ ```
+ 
+ Start supervisor service:
+ ```
+ 
+ sudo service supervisor start (OR sudo /etc/init.d/supervisor restart)
+ #sudo apt-get install php-xmlrpc -y (optional)
+ ``` 
+
 
  Api Example:
  -------------------
