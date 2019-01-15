@@ -14,11 +14,17 @@ use \webvimark\modules\UserManagement\UserManagementModule;
 
 //\backend\assets\AppAsset::register($this);
 $bundle = \frontend\themes\gentelella\assets\Asset::register($this);
-\frontend\assets\NotifyAsset::register($this);
+
 
 
 //$this->registerCssFile('@backend/themes/gentelella/css/custom.css');
 //Yii::$app->view->registerCssFile('@backend/themes/gentelella/css/custom.css', ['depends'=>'yiister\gentelella\assets\Asset']);
+
+$isAdmin = Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id);
+
+if($isAdmin) {
+    \frontend\assets\NotifyAsset::register($this);
+}
 
 ?>
 <?php $this->beginPage(); ?>
@@ -120,18 +126,19 @@ $bundle = \frontend\themes\gentelella\assets\Asset::register($this);
                     <ul class="nav navbar-nav navbar-right">
                         <li class="">
                             <a href="javascript:;" class="user-profile dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
-                                <? /*<img src="http://placehold.it/128x128" alt="">*/ ?>
+                                <?/*<img src="http://placehold.it/128x128" alt="">*/ ?>
 
                                 <?=Html::img($grav_url, ['alt' => 'avatar'])?>
 
-                                <?
+                                <?php
                                     $myRolesModel = \webvimark\modules\UserManagement\models\rbacDB\Role::getUserRoles(Yii::$app->user->id);
                                     $myRoles = [];
-                                    if($myRolesModel)
+                                    if($myRolesModel) {
                                         foreach ($myRolesModel as $role) {
-                                            if($role->name == 'guest') continue;
+                                            if ($role->name == 'guest') continue;
                                             $myRoles[] = $role->name;
                                         }
+                                    }
 
                                 ?>
                                 <b><?=implode(', ', $myRoles) ; ?></b>:
@@ -163,7 +170,9 @@ $bundle = \frontend\themes\gentelella\assets\Asset::register($this);
                                 </li>
                             </ul>
                         </li>
-                        <?= frontend\widgets\Notifications::widget(); ?>
+                        <?php if($isAdmin): ?>
+                            <?= frontend\widgets\Notifications::widget(); ?>
+                        <?php endif;?>
 
                         <?//= backend\widgets\ChatNotifications::widget(); ?>
 

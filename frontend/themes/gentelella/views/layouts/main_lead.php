@@ -14,7 +14,12 @@ use \webvimark\modules\UserManagement\UserManagementModule;
 
 //\backend\assets\AppAsset::register($this);
 $bundle = \frontend\themes\gentelella\assets\Asset::register($this);
-\frontend\assets\NotifyAsset::register($this);
+
+$isAdmin = Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id);
+
+if($isAdmin) {
+    \frontend\assets\NotifyAsset::register($this);
+}
 
 //$this->registerCssFile('@backend/themes/gentelella/css/custom.css');
 //Yii::$app->view->registerCssFile('@backend/themes/gentelella/css/custom.css', ['depends'=>'yiister\gentelella\assets\Asset']);
@@ -163,7 +168,9 @@ $bundle = \frontend\themes\gentelella\assets\Asset::register($this);
                                         </li>
                                     </ul>
                                 </li>
-                                <?= frontend\widgets\Notifications::widget(); ?>
+                                <?php if($isAdmin): ?>
+                                    <?= frontend\widgets\Notifications::widget(); ?>
+                                <?php endif;?>
 
                                 <?//= backend\widgets\ChatNotifications::widget(); ?>
 
