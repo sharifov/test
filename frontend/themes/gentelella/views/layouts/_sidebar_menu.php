@@ -68,6 +68,8 @@ $isCoach = Yii::$app->authManager->getAssignment('coach', Yii::$app->user->id);
                     'url' => ['/notifications/list'],
                     'icon' => 'comment',
                 ];
+
+                $menuItems[] = ['label' => 'My Mails <span id="email-inbox-queue" class="label-info label pull-right"></span> ', 'url' => ['/email/inbox'], 'icon' => 'envelope'];
             }
 
 
@@ -102,8 +104,7 @@ $isCoach = Yii::$app->authManager->getAssignment('coach', Yii::$app->user->id);
             if (!$isCoach) {
 
                 if($isAdmin) {
-                $menuItems[] = ['label' => 'Mail inbox <span id="email-inbox-queue" class="label-info label pull-right"></span> ', 'url' => ['/email/inbox'], 'icon' => 'envelope'];
-                $menuItems[] = ['label' => 'SMS inbox <span id="sms-inbox-queue" class="label-info label pull-right"></span> ', 'url' => ['/sms/index'], 'icon' => 'comments-o'];
+                    $menuItems[] = ['label' => 'SMS inbox <span id="sms-inbox-queue" class="label-info label pull-right"></span> ', 'url' => ['/sms/index'], 'icon' => 'comments-o'];
                 }
                 $badges = \common\models\Lead::getBadgesSingleQuery();
 

@@ -135,6 +135,7 @@ $pageUrl = urlencode(\yii\helpers\Url::current());
 $leadId = null;
 $ipAddress = Yii::$app->request->remoteIP;
 $webSocketHost = (Yii::$app->request->isSecureConnection ? 'wss': 'ws') . '://'.Yii::$app->request->serverName . '/ws';// . ':8888';
+//$userAgent = urlencode(Yii::$app->request->userAgent);
 
 if(Yii::$app->controller->action->uniqueId === 'lead/view') {
     $leadId = Yii::$app->request->get('id');
@@ -233,9 +234,9 @@ $js = <<<JS
             if (event.wasClean) {
                 console.log('Connection closed success (Close)');
             } else {
-                console.error('Обрыв соединения'); // например, "убит" процесс сервера
+                console.error('Disconnect (Error)'); // Example kill process of server
             }
-            console.log('Code: ' + event.code + ', причина: ' + event.reason);
+            console.log('Code: ' + event.code);
             
             //console.log('Socket Status: ' + socket.readyState + ' (Closed)');
         };
