@@ -28,6 +28,8 @@ class CommunicationController extends ApiBaseController
     public const TYPE_NEW_EMAIL_MESSAGES_RECEIVED = 'new_email_messages_received';
     public const TYPE_NEW_SMS_MESSAGES_RECEIVED = 'new_sms_messages_received';
 
+    protected $accessEmailRequest = true;
+
     /**
      * @api {post} /v1/communication/email Communication Email
      * @apiVersion 0.1.0
@@ -59,20 +61,15 @@ class CommunicationController extends ApiBaseController
 
     public function actionEmail(): array
     {
-
-
-
         $this->checkPost();
         $apiLog = $this->startApiLog($this->action->uniqueId);
 
         //$action = Yii::$app->request->post('action');
         $type = Yii::$app->request->post('type');
-
+        $last_id = Yii::$app->request->post('last_email_id', NULL);
         /*if(!$action) {
             throw new NotFoundHttpException('Not found action', 1);
         }*/
-
-
 
         if(!$type) {
             throw new NotFoundHttpException('Not found Email type', 1);
@@ -82,7 +79,7 @@ class CommunicationController extends ApiBaseController
         switch ($type) {
             case self::TYPE_UPDATE_EMAIL_STATUS : $response = $this->updateEmailStatus();
                 break;
-            case self::TYPE_NEW_EMAIL_MESSAGES_RECEIVED : $response = $this->newEmailMessagesReceived();
+            case self::TYPE_NEW_EMAIL_MESSAGES_RECEIVED : $response = $this->newEmailMessagesReceived($last_id);
                 break;
             default: throw new BadRequestHttpException('Invalid Email type', 2);
         }
@@ -306,11 +303,13 @@ class CommunicationController extends ApiBaseController
 
 
     /**
+     * @param null $last_id
      * @return array
      */
-    private function newEmailMessagesReceived(): array
+    private function newEmailMessagesReceived($last_id = NULl): array
     {
         $response = [];
+        set_time_limit(10);
 
         try {
 
@@ -320,13 +319,27 @@ class CommunicationController extends ApiBaseController
             $filter = [];
             $dateTime = null;
 
+            $this->accessEmailRequest = true;
+            $cicleCount = 0;
+            $countTotal = 0;
+
             //$filter['last_dt'] = '';
 
-            $lastEmail = Email::find()->orderBy(['e_id'=> SORT_DESC])->one();
-            if($lastEmail) {
-                //$filter['last_dt'] = $lastEmail->e_inbox_created_dt;
-                $filter['last_id'] = $lastEmail->e_inbox_email_id;
+            if(NULL === $last_id) {
+
+                $lastEmail = Email::find()->where('e_inbox_email_id > 0')->orderBy(['e_inbox_email_id' => SORT_DESC])->one();
+
+                if ($lastEmail) {
+                    //$filter['last_dt'] = $lastEmail->e_inbox_created_dt;
+                    $filter['last_id'] = $lastEmail->e_inbox_email_id;
+                } else {
+                    $filter['last_id'] = 18100;
+                }
+            } else {
+                $filter['last_id'] = (int)$last_id;
             }
+            $filter['limit'] = 20;
+
 
             /*$email_to = Yii::$app->request->post('email_to');
             $email_from = Yii::$app->request->post('email_from');
@@ -336,110 +349,130 @@ class CommunicationController extends ApiBaseController
             $last_id = Yii::$app->request->post('last_id');
             $last_dt = Yii::$app->request->post('last_dt');*/
 
-            $res = $communication->mailGetMessages($filter);
+            while ($this->accessEmailRequest  &&  $cicleCount < 10) {
 
-            if(isset($res['error']) && $res['error']) {
-                $response['error'] = 'Error mailGetMessages';
-                $response['error_code'] = 13;
+                $res = $communication->mailGetMessages($filter);
+                if (isset($res['error']) && $res['error']) {
+                    $response['error'] = 'Error mailGetMessages';
+                    $response['error_code'] = 13;
 
-                Yii::error(VarDumper::dumpAsString($res['error']), 'API:Communication:newEmailMessagesReceived:mailGetMessages');
+                    Yii::error(VarDumper::dumpAsString($res['error']), 'API:Communication:newEmailMessagesReceived:mailGetMessages');
 
-            } elseif(isset($res['data']['emails']) && $res['data']['emails'] && \is_array($res['data']['emails'])) {
+                } elseif (isset($res['data']['emails']) && $res['data']['emails'] && \is_array($res['data']['emails'])) {
+
+                    if (count($res['data']['emails']) < 1) {
+                        $this->accessEmailRequest = false;
+                        $response['total'] = $countTotal;
+                        $response['cicle_num'] = $cicleCount;
+                        return $response;
+                    }
+
+                    /*
+                    * @property int $ei_id
+                    * @property string $ei_email_to
+                    * @property string $ei_email_from
+                    * @property string $ei_email_subject
+                    * @property string $ei_email_text
+                    * @property string $ei_email_category
+                    * @property int $ei_project_id
+                    * @property bool $ei_new
+                    * @property bool $ei_deleted
+                    * @property string $ei_created_dt
+                    * @property string $ei_updated_dt
+                    * @property string $ei_ref_mess_ids
+                    * @property string $ei_message_id
+                        */
 
 
-                /*
-                * @property int $ei_id
-                * @property string $ei_email_to
-                * @property string $ei_email_from
-                * @property string $ei_email_subject
-                * @property string $ei_email_text
-                * @property string $ei_email_category
-                * @property int $ei_project_id
-                * @property bool $ei_new
-                * @property bool $ei_deleted
-                * @property string $ei_created_dt
-                * @property string $ei_updated_dt
-                * @property string $ei_ref_mess_ids
-                * @property string $ei_message_id
-                    */
+                    $leadArray = [];
+                    $userArray = [];
 
+                    foreach ($res['data']['emails'] as $mail) {
+                        $filter['last_id'] = $mail['ei_id'];
 
-                $leadArray = [];
-                $userArray = [];
+                        $find = Email::find()->where([
+                            "e_message_id" => $mail['ei_message_id'],
+                            "e_email_to" => $mail['ei_email_to']]
+                        )->one();
 
-                foreach ($res['data']['emails'] as $mail) {
+                        if($find) {
+                            $find->e_inbox_email_id = $mail['ei_id'];
+                            $find->save();
+                            continue;
+                        }
 
-                    $email = new Email();
+                        $email = new Email();
 
-                    $email->e_type_id = Email::TYPE_INBOX;
-                    $email->e_status_id = Email::STATUS_DONE;
-                    $email->e_is_new = true;
+                        $email->e_type_id = Email::TYPE_INBOX;
+                        $email->e_status_id = Email::STATUS_DONE;
+                        $email->e_is_new = true;
 
-                    $email->e_email_to = $mail['ei_email_to'];
-                    $email->e_email_to_name = $mail['ei_email_to_name'] ?? null;
-                    $email->e_email_from = $mail['ei_email_from'];
-                    $email->e_email_from_name = $mail['ei_email_from_name'] ?? null;
-                    $email->e_email_subject = $mail['ei_email_subject'];
-                    if($mail['ei_project_id'] > 0) {
-                        $project = Project::findOne($mail['ei_project_id']);
-                        if($project) {
-                            $email->e_project_id = $project->id;
+                        $email->e_email_to = $mail['ei_email_to'];
+                        $email->e_email_to_name = $mail['ei_email_to_name'] ?? null;
+                        $email->e_email_from = $mail['ei_email_from'];
+                        $email->e_email_from_name = $mail['ei_email_from_name'] ?? null;
+                        $email->e_email_subject = $mail['ei_email_subject'];
+                        if ($mail['ei_project_id'] > 0) {
+                            $project = Project::findOne($mail['ei_project_id']);
+                            if ($project) {
+                                $email->e_project_id = $project->id;
+                            }
+                        }
+                        $email->e_email_body_html = $mail['ei_email_text'];
+                        $email->e_created_dt = $mail['ei_created_dt'];
+
+                        $email->e_inbox_email_id = $mail['ei_id'];
+                        $email->e_inbox_created_dt = $mail['ei_created_dt'];
+                        $email->e_ref_message_id = $mail['ei_ref_mess_ids'];
+                        $email->e_message_id = $mail['ei_message_id'];
+
+                        $lead_id = $email->detectLeadId();
+                        $users = $email->getUsersIdByEmail();
+
+                        if ($users) {
+                            foreach ($users as $user_id) {
+                                $userArray[$user_id] = $user_id;
+                            }
+                        }
+
+                        if ($lead_id) {
+                            Yii::info('Email Detected LeadId ' . $lead_id . ' from ' . $email->e_email_from, 'info\API:Communication:newEmailMessagesReceived:Email');
+                            $leadArray[$lead_id] = $lead_id;
+                        }
+
+                        if (!$email->save()) {
+                            Yii::error(VarDumper::dumpAsString($email->errors), 'API:Communication:newEmailMessagesReceived:Email:save');
+                        }
+
+                        $countTotal ++;
+                    }
+
+                    if ($userArray) {
+                        foreach ($userArray as $user_id) {
+                            Notifications::create($user_id, 'New Emails received', 'New Emails received. Check your inbox.', Notifications::TYPE_INFO, true);
+                            Notifications::socket($user_id, null, 'getNewNotification', [], true);
                         }
                     }
-                    $email->e_email_body_html = $mail['ei_email_text'];
-                    $email->e_created_dt = $mail['ei_created_dt'];
 
-                    $email->e_inbox_email_id = $mail['ei_id'];
-                    $email->e_inbox_created_dt = $mail['ei_created_dt'];
-                    $email->e_ref_message_id = $mail['ei_ref_mess_ids'];
-                    $email->e_message_id = $mail['ei_message_id'];
-
-                    $lead_id = $email->detectLeadId();
-                    $users = $email->getUsersIdByEmail();
-
-                    if($users) {
-                        foreach ($users as $user_id) {
-                            $userArray[$user_id] = $user_id;
+                    if ($leadArray) {
+                        foreach ($leadArray as $lead_id) {
+                            Notifications::socket(null, $lead_id, 'updateCommunication', [], true);
                         }
                     }
 
-                    if($lead_id) {
-                        Yii::info('Email Detected LeadId '.$lead_id.' from '.$email->e_email_from, 'info\API:Communication:newEmailMessagesReceived:Email');
-                        $leadArray[$lead_id] = $lead_id;
-                    }
+                    /*if($eq_status_id > 0) {
+                        $email->e_status_id = $eq_status_id;
+                        if($eq_status_id === Email::STATUS_DONE) {
+                            $email->e_status_done_dt = date('Y-m-d H:i:s');
+                        }
 
-                    if(!$email->save()) {
-                        Yii::error(VarDumper::dumpAsString($email->errors), 'API:Communication:newEmailMessagesReceived:Email:save');
-                    }
+
+                    }*/
+                } else {
+                    return $response;
                 }
-
-
-
-
-                if($userArray) {
-                    foreach ($userArray as $user_id) {
-                        Notifications::create($user_id, 'New Emails received', 'New Emails received. Check your inbox.', Notifications::TYPE_INFO, true);
-                        Notifications::socket($user_id, null, 'getNewNotification', [], true);
-                    }
-                }
-
-
-                if($leadArray) {
-                    foreach ($leadArray as $lead_id) {
-                        Notifications::socket(null, $lead_id, 'updateCommunication', [], true);
-                    }
-                }
-
-                /*if($eq_status_id > 0) {
-                    $email->e_status_id = $eq_status_id;
-                    if($eq_status_id === Email::STATUS_DONE) {
-                        $email->e_status_done_dt = date('Y-m-d H:i:s');
-                    }
-
-
-                }*/
+                $cicleCount ++;
             }
-
 
         } catch (\Throwable $e) {
             Yii::error($e->getTraceAsString(), 'API:Communication:newEmailMessagesReceived:Email:try');

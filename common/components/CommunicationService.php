@@ -268,14 +268,9 @@ class CommunicationService extends Component
             $data['last_id'] = (int) $filter['last_id'];
         }
 
-
-        /*$email_to = Yii::$app->request->post('email_to');
-        $email_from = Yii::$app->request->post('email_from');
-        $limit = Yii::$app->request->post('limit');
-        $offset = Yii::$app->request->post('offset');
-        $new = Yii::$app->request->post('new');
-        $last_id = Yii::$app->request->post('last_id');
-        $last_dt = Yii::$app->request->post('last_dt');*/
+        if(isset($filter['limit'])) {
+            $data['limit'] = (int) $filter['limit'];
+        }
 
         $response = $this->sendRequest('email/inbox', $data);
 
