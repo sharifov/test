@@ -13,7 +13,6 @@ use yii\data\SqlDataProvider;
 use yii\db\Expression;
 use yii\db\Query;
 use yii\debug\models\timeline\DataProvider;
-use yii\helpers\VarDumper;
 use common\models\Quote;
 use common\models\LeadFlightSegment;
 use common\models\Client;
@@ -249,8 +248,9 @@ class LeadSearch extends Lead
 
                 if($this->statuses && in_array(Lead::STATUS_FOLLOW_UP, $this->statuses) && count($this->statuses) == 1) {
 
-                } else {
+                } elseif($this->statuses && in_array(Lead::STATUS_PENDING, $this->statuses) && count($this->statuses) == 1){
 
+                } else {
                     $subQuery1 = UserGroupAssign::find()->select(['ugs_group_id'])->where(['ugs_user_id' => $this->supervision_id]);
                     $subQuery = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->where(['IN', 'ugs_group_id', $subQuery1]);
                     $query->andWhere(['IN', 'leads.employee_id', $subQuery]);
@@ -441,7 +441,7 @@ class LeadSearch extends Lead
             'query' => $query,
             'sort'=> ['defaultOrder' => ['updated' => SORT_DESC]],
             'pagination' => [
-                'pageSize' => 100,
+                'pageSize' => 30,
             ],
         ]);
 
@@ -538,8 +538,98 @@ class LeadSearch extends Lead
             ->groupBy(['leads.id']);
         }
 
-       /*  $sqlRaw = $query->createCommand()->getRawSql();
+        /* $sqlRaw = $query->createCommand()->getRawSql();
         VarDumper::dump($sqlRaw, 10, true); exit; */
+
+        return $dataProvider;
+    }
+
+
+    /**
+     * Creates data provider instance with search query applied
+     *
+     * @param array $params
+     *
+     * @return ActiveDataProvider
+     */
+    public function searchSoldKpi($params)
+    {
+        $projectIds = array_keys(ProjectEmployeeAccess::getProjectsByEmployee());
+        $query = Lead::find();
+        $leadTable = Lead::tableName();
+
+        // add conditions that should always apply here
+
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+            'sort'=> ['defaultOrder' => ['updated' => SORT_DESC]],
+            'pagination' => [
+                'pageSize' => 100,
+            ],
+        ]);
+
+        $this->load($params);
+
+        if (!$this->validate()) {
+            // uncomment the following line if you do not want to return any records when validation fails
+            // $query->where('0=1');
+            return $dataProvider;
+        }
+
+        // grid filtering conditions
+        $query->andFilterWhere([
+            $leadTable.'.id' => $this->id,
+            $leadTable.'.client_id' => $this->client_id,
+            $leadTable.'.project_id' => $this->project_id,
+            $leadTable.'.source_id' => $this->source_id,
+            $leadTable.'.bo_flight_id' => $this->bo_flight_id,
+            $leadTable.'.rating' => $this->rating,
+        ]);
+
+        $query
+        ->andWhere(['leads.status' => Lead::STATUS_SOLD])
+        //->andWhere(['IN', $leadTable . '.project_id', $projectIds])
+        ;
+
+
+        if(!empty($this->updated)){
+            $query->andFilterWhere(['=','DATE(leads.updated)', date('Y-m-d', strtotime($this->updated))]);
+        }
+
+        if($this->sold_date_from || $this->sold_date_to) {
+            $subQuery = LeadFlow::find()->select(['DISTINCT(lead_flow.lead_id)'])->where('lead_flow.status = leads.status AND lead_flow.lead_id = leads.id');
+
+            if ($this->sold_date_from) {
+                $subQuery->andFilterWhere(['>=', 'DATE(lead_flow.created)', date('Y-m-d', strtotime($this->sold_date_from))]);
+            }
+            if ($this->sold_date_to) {
+                $subQuery->andFilterWhere(['<=', 'DATE(lead_flow.created)', date('Y-m-d', strtotime($this->sold_date_to))]);
+            }
+
+            $query->andWhere(['IN', 'leads.id', $subQuery]);
+        }
+
+        //echo $this->created_date_from;
+        if($this->quote_pnr) {
+            $subQuery = Quote::find()->select(['DISTINCT(lead_id)'])->where(['=', 'record_locator', mb_strtoupper($this->quote_pnr)]);
+            $query->andWhere(['IN', 'leads.id', $subQuery]);
+        }
+
+        if($this->supervision_id > 0) {
+            $subQuery1 = UserGroupAssign::find()->select(['ugs_group_id'])->where(['ugs_user_id' => $this->supervision_id]);
+            $subQuery = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->where(['IN', 'ugs_group_id', $subQuery1]);
+            $query->andWhere(['IN', 'leads.employee_id', $subQuery]);
+        }
+
+        if($this->employee_id){
+            $query
+            ->leftJoin(ProfitSplit::tableName().' ps','ps.ps_lead_id = leads.id')
+            ->leftJoin(TipsSplit::tableName().' ts','ts.ts_lead_id = leads.id')
+            ->andWhere($leadTable.'.employee_id = '. $this->employee_id.' OR ps.ps_user_id ='.$this->employee_id.' OR ts.ts_user_id ='.$this->employee_id)
+            ->groupBy(['leads.id']);
+        }else{
+            $query->andWhere('1=2');
+        }
 
         return $dataProvider;
     }
@@ -642,7 +732,7 @@ class LeadSearch extends Lead
             $query->andWhere(['IN', 'leads.id', $subQuery]);
         }
 
-        /*if($this->supervision_id > 0) {
+        if($this->supervision_id > 0) {
             $subQuery1 = UserGroupAssign::find()->select(['ugs_group_id'])->where(['ugs_user_id' => $this->supervision_id]);
             $subQuery = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->where(['IN', 'ugs_group_id', $subQuery1]);
             $query->andWhere(['IN', 'leads.employee_id', $subQuery]);
@@ -653,7 +743,7 @@ class LeadSearch extends Lead
             ->leftJoin(ProfitSplit::tableName().' ps','ps.ps_lead_id = leads.id')
             ->andWhere($leadTable.'.employee_id = '. $this->employee_id.' OR ps.ps_user_id ='.$this->employee_id)
             ->groupBy(['leads.id']);
-        }*/
+        }
 
         /*  $sqlRaw = $query->createCommand()->getRawSql();
          VarDumper::dump($sqlRaw, 10, true); exit; */
@@ -711,7 +801,7 @@ class LeadSearch extends Lead
 
         if($this->email_status > 0) {
             if($this->email_status == 2) {
-                $query->andWhere(new Expression('(SELECT COUNT(*) FROM client_email WHERE client_email.client_id = leads.client_id) > 1'));
+                $query->andWhere(new Expression('(SELECT COUNT(*) FROM client_email WHERE client_email.client_id = leads.client_id) > 0'));
             } else {
                 $query->andWhere(new Expression('(SELECT COUNT(*) FROM client_email WHERE client_email.client_id = leads.client_id) = 0'));
             }
@@ -800,7 +890,7 @@ class LeadSearch extends Lead
 
         if($this->email_status > 0) {
             if($this->email_status == 2) {
-                $query->andWhere(new Expression('(SELECT COUNT(*) FROM client_email WHERE client_email.client_id = leads.client_id) > 1'));
+                $query->andWhere(new Expression('(SELECT COUNT(*) FROM client_email WHERE client_email.client_id = leads.client_id) > 0'));
             } else {
                 $query->andWhere(new Expression('(SELECT COUNT(*) FROM client_email WHERE client_email.client_id = leads.client_id) = 0'));
             }
@@ -938,7 +1028,7 @@ class LeadSearch extends Lead
 
         if($this->email_status > 0) {
             if($this->email_status == 2) {
-                $query->andWhere(new Expression('(SELECT COUNT(*) FROM client_email WHERE client_email.client_id = leads.client_id) > 1'));
+                $query->andWhere(new Expression('(SELECT COUNT(*) FROM client_email WHERE client_email.client_id = leads.client_id) > 0'));
             } else {
                 $query->andWhere(new Expression('(SELECT COUNT(*) FROM client_email WHERE client_email.client_id = leads.client_id) = 0'));
             }

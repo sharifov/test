@@ -39,11 +39,7 @@ $this->params['breadcrumbs'][] = $this->title;
 <div class="lead-index">
 
     <?php Pjax::begin(); //['id' => 'lead-pjax-list', 'timeout' => 5000, 'enablePushState' => true, 'clientOptions' => ['method' => 'GET']]); ?>
-    <?php if (isset($salary)): ?>
-        <h3>Salary by <?= $salaryBy ?>: $<?= number_format($salary['salary'], 2) ?>
-            (Base: $<?= round($salary['base']) ?>, Commission: <?= $salary['commission'] ?>%, Bonus:
-            $<?= $salary['bonus'] ?>)</h3>
-    <?php endif; ?>
+
     <?= $this->render('_search_sold', ['model' => $searchModel]); ?>
 
     <?php
@@ -61,6 +57,9 @@ $this->params['breadcrumbs'][] = $this->title;
         [
             'attribute' => 'id',
             'label' => 'Lead ID',
+            'contentOptions' => [
+                'style' => 'width:60px'
+            ]
         ],
         [
             'attribute' => 'bo_flight_id',
@@ -70,24 +69,15 @@ $this->params['breadcrumbs'][] = $this->title;
                     $additionallyInfo = Lead::getLeadAdditionalInfo($model['additional_information']);
                     $ids = [];
                     foreach ($additionallyInfo as $additionally) {
-                        /*if (!$additionally->tkt_processed) {
-                            continue;
-                        }*/
-                        $newRows = '';
-                        if (!empty($additionally->passengers)) {
-                            for ($i = 0; $i < count($additionally->passengers); $i++) {
-                                $newRows .= '<br/>';
-                            }
-                        }
                         $bo_sale_id = (!empty($additionally->bo_sale_id))
                             ? $additionally->bo_sale_id : $model->bo_flight_id;
-                        $ids[] = $bo_sale_id . $newRows;
+                        $ids[] = $bo_sale_id ;
                     }
 
-                    $divTag = Html::tag('div', '', [
-                        'style' => 'border: 1px solid #a3b3bd; margin: 0px 0 5px;'
+                    $hrTag = Html::tag('hr', '', [
+                        'style' => 'background-color: #a3b3bd;'
                     ]);
-                    return implode($divTag, $ids);
+                    return implode($hrTag, $ids);
                 }
                 return 0;
             },
@@ -103,28 +93,25 @@ $this->params['breadcrumbs'][] = $this->title;
                     $additionallyInfo = Lead::getLeadAdditionalInfo($model['additional_information']);
                     $pnrs = [];
                     foreach ($additionallyInfo as $additionally) {
-                        /*if (!$additionally->tkt_processed) {
-                            continue;
-                        }*/
-                        $newRows = '';
-                        if (!empty($additionally->passengers)) {
-                            for ($i = 0; $i < count($additionally->passengers); $i++) {
-                                $newRows .= '<br/>';
-                            }
-                        }
                         $pnr = (!empty($additionally->pnr))
                             ? $additionally->pnr : '-';
-                        $pnrs[] = $pnr . $newRows;
+                        $pnrs[] = $pnr;
                     }
 
-                    $divTag = Html::tag('div', '', [
-                        'style' => 'border: 1px solid #a3b3bd; margin: 0px 0 5px;'
+                    $hrTag = Html::tag('hr', '', [
+                        'style' => 'background-color: #a3b3bd;'
                     ]);
-                    return implode($divTag, $pnrs);
+                    return implode($hrTag, $pnrs);
                 }
                 return '-';
             },
             'format' => 'raw',
+            'contentOptions' => [
+                'style' => 'width:80px'
+            ],
+            'options' => [
+                'class' => 'width:80px'
+            ],
         ],
         [
             'label' => 'Passengers',
@@ -133,9 +120,6 @@ $this->params['breadcrumbs'][] = $this->title;
                 if (!empty($model['additional_information'])) {
                     $additionallyInfo = Lead::getLeadAdditionalInfo($model['additional_information']);
                     foreach ($additionallyInfo as $additionally) {
-                        /*if (!$additionally->tkt_processed) {
-                            continue;
-                        }*/
                         if (!empty($additionally->passengers)) {
                             $pax = [];
                             foreach ($additionally->passengers as $passenger) {
@@ -145,14 +129,14 @@ $this->params['breadcrumbs'][] = $this->title;
                         }
                     }
                 }
-                $divTag = Html::tag('div', '', [
-                    'style' => 'border: 1px solid #a3b3bd; margin: 0px 0 5px;'
+                $hrTag = Html::tag('hr', '', [
+                    'style' => 'background-color: #a3b3bd;'
                 ]);
-                return implode($divTag, $content);
+                return implode($hrTag, $content);
             },
             'format' => 'raw',
             'contentOptions' => [
-                'style' => 'width: 200px;'
+                'style' => 'width: 250px;white-space: normal;',
             ]
         ],
         [
@@ -183,7 +167,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 return $clientName . '<br/>' . $emails . '<br/>' . $phones;
             },
             'contentOptions' => [
-                'style' => 'width: 260px;'
+                'style' => 'width: 200px;'
             ]
             // 'filter' => \common\models\Employee::getList()
         ],
@@ -215,12 +199,13 @@ $this->params['breadcrumbs'][] = $this->title;
             },
             'filter' => $userList,
             'visible' => !$isAgent
-        ],
-        [
-            'label' => 'Profit',
-            'value' => function (\common\models\Lead $model) {
+            ],
+            [
+                'label' => 'Profit',
+                'value' => function (\common\models\Lead $model) {
                 $totalProfitTxt = '';
                 if ($model->final_profit !== null) {
+                    $model->totalProfit = $model->final_profit;
                     $totalProfitTxt = "<strong>$" . number_format($model->final_profit, 2) . "</strong>";
                 }else{
                     $quote = $model->getBookedQuote();
@@ -254,37 +239,37 @@ $this->params['breadcrumbs'][] = $this->title;
 
             },
             'format' => 'raw'
-        ],
-        [
-            'label' => 'Tips',
-            'value' => function (\common\models\Lead $model) {
-                if($model->totalTips == 0) {
-                    return '-';
-                }
-                $totalTipsTxt = "<strong>$" . number_format($model->totalTips, 2) . "</strong>";
+                    ],
+                    [
+                        'label' => 'Tips',
+                        'value' => function (\common\models\Lead $model) {
+                        if($model->totalTips == 0) {
+                            return '-';
+                        }
+                        $totalTipsTxt = "<strong>$" . number_format($model->totalTips, 2) . "</strong>";
 
-                $splitTipsTxt = '';
-                $splitTips = $model->getAllTipsSplits();
-                $return = [];
-                foreach ($splitTips as $split) {
-                    $model->splitTipsPercentSum += $split->ts_percent;
-                    $return[] = '<b>' . $split->tsUser->username . '</b> (' . $split->ts_percent . '%) $' . number_format($split->countTips($model->totalTips), 2);
-                }
-                if (!empty($return)) {
-                    $splitTipsTxt = implode('<br/>', $return);
-                }
+                        $splitTipsTxt = '';
+                        $splitTips = $model->getAllTipsSplits();
+                        $return = [];
+                        foreach ($splitTips as $split) {
+                            $model->splitTipsPercentSum += $split->ts_percent;
+                            $return[] = '<b>' . $split->tsUser->username . '</b> (' . $split->ts_percent . '%) $' . number_format($split->countTips($model->totalTips), 2);
+                        }
+                        if (!empty($return)) {
+                            $splitTipsTxt = implode('<br/>', $return);
+                        }
 
-                $mainAgentPercent = 100;
-                if ($model->splitTipsPercentSum > 0) {
-                    $mainAgentPercent -= $model->splitTipsPercentSum;
-                }
-                $mainAgentTipsTxt = "<strong>$" . number_format($model->totalTips * $mainAgentPercent / 100, 2) . "</strong>";
+                        $mainAgentPercent = 100;
+                        if ($model->splitTipsPercentSum > 0) {
+                            $mainAgentPercent -= $model->splitTipsPercentSum;
+                        }
+                        $mainAgentTipsTxt = "<strong>$" . number_format($model->totalTips * $mainAgentPercent / 100, 2) . "</strong>";
 
-                return 'Tips: '.$totalTipsTxt.(($splitTipsTxt)?'<hr/>Split tips:<br/>'.$splitTipsTxt:'').'<hr/> '.
-                    (($model->employee)?$model->employee->username:'Main agent').' tips: '.$mainAgentTipsTxt;
-            },
-            'format' => 'raw'
-        ],
+                        return 'Tips: '.$totalTipsTxt.(($splitTipsTxt)?'<hr/>Split tips:<br/>'.$splitTipsTxt:'').'<hr/> '.
+                            (($model->employee)?$model->employee->username:'Main agent').' tips: '.$mainAgentTipsTxt;
+                    },
+                    'format' => 'raw'
+                    ],
         [
             'label' => 'Date of Issue',
             'attribute' => 'updated',
@@ -301,25 +286,18 @@ $this->params['breadcrumbs'][] = $this->title;
                 ]
             ]),
             'contentOptions' => [
-                'style' => 'width: 180px;text-align:center;'
+                'style' => 'width: 100px;text-align:center;'
             ]
         ],
         [
             'label' => 'Date of Departure',
             'value' => function ($model) {
-                $quote = $model->getBookedQuote();
-                if (!empty($quote) && isset($quote['reservation_dump']) && !empty($quote['reservation_dump'])) {
-                    $data = [];
-                    $segments = Quote::parseDump($quote['reservation_dump'], false, $data, true);
-                    return $segments[0]['departureDateTime']->format('Y-m-d H:i');
-                }
-                $firstSegment = $model->getFirstFlightSegment();
-                if (empty($firstSegment)) {
-                    return '';
-                }
-                return $firstSegment['departure'];
+                return $model->getDeparture();
             },
-            'format' => 'raw'
+            'format' => 'raw',
+            'contentOptions' => [
+                'style' => 'width:100px'
+            ]
         ],
         [
             'label' => 'Rating',
@@ -350,8 +328,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'buttons' => [
                 'action' => function ($url, $model, $key) {
                     return Html::a('<i class="fa fa-search"></i>', Url::to([
-                        'lead/quote',
-                        'type' => 'sold',
+                        'lead/view',
                         'id' => $model['id']
                     ]), [
                         'class' => 'btn btn-info btn-xs',

@@ -45,6 +45,8 @@ use yii\helpers\VarDumper;
  * @property string $e_ref_message_id
  * @property string $e_inbox_created_dt
  * @property int $e_inbox_email_id
+ * @property string $e_email_from_name
+ * @property string $e_email_to_name
  *
  * @property Employee $eCreatedUser
  * @property Language $eLanguage
@@ -128,7 +130,7 @@ class Email extends \yii\db\ActiveRecord
             [['e_email_from', 'e_email_to'], 'required'],
             [['e_email_body_html', 'e_email_body_text', 'e_email_data', 'e_ref_message_id'], 'string'],
             [['e_status_done_dt', 'e_read_dt', 'e_created_dt', 'e_updated_dt', 'e_inbox_created_dt'], 'safe'],
-            [['e_email_from', 'e_email_to', 'e_email_cc', 'e_email_bc', 'e_email_subject', 'e_attach', 'e_message_id'], 'string', 'max' => 255],
+            [['e_email_from', 'e_email_to', 'e_email_cc', 'e_email_bc', 'e_email_subject', 'e_attach', 'e_message_id', 'e_email_from_name', 'e_email_to_name'], 'string', 'max' => 255],
             [['e_language_id'], 'string', 'max' => 5],
             [['e_error_message'], 'string', 'max' => 500],
             [['e_created_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['e_created_user_id' => 'id']],
@@ -152,7 +154,9 @@ class Email extends \yii\db\ActiveRecord
             'e_lead_id' => 'Lead ID',
             'e_project_id' => 'Project ID',
             'e_email_from' => 'Email From',
+            'e_email_from_name' => 'Email From Name',
             'e_email_to' => 'To',
+            'e_email_to_name' => 'Email To Name',
             'e_email_cc' => 'Cc',
             'e_email_bc' => 'Bc',
             'e_email_subject' => 'Subject',
@@ -349,12 +353,15 @@ class Email extends \yii\db\ActiveRecord
         return $text;
     }
 
+
     /**
-     * @return bool
-     * @throws \yii\httpclient\Exception
+     * @return array
      */
-    public function sendMail(): bool
+    public function sendMail(): array
     {
+
+        $out = ['error' => false];
+
         /** @var CommunicationService $communication */
         $communication = Yii::$app->communication;
         $data = [];
@@ -367,16 +374,56 @@ class Email extends \yii\db\ActiveRecord
         $content_data['email_cc'] = $this->e_email_cc;
         $content_data['email_bcc'] = $this->e_email_bc;
 
-        $request = $communication->mailSend($this->e_project_id, 'cl_offer', $this->e_email_from, $this->e_email_to, $content_data, $data, ($this->e_language_id ?: 'en-US'), 0);
-
-        if($request && $request['data']) {
-            $this->e_status_id = $request['data']['eq_status_id'];
-            $this->save();
-            return true;
+        if($this->e_email_from_name) {
+            $content_data['email_from_name'] = $this->e_email_from_name;
         }
+
+        if($this->e_email_to_name) {
+            $content_data['email_to_name'] = $this->e_email_to_name;
+        }
+
+        if($this->e_message_id) {
+            $content_data['email_message_id'] = $this->e_message_id;
+        }
+
+        $tplType = $this->eTemplateType ? $this->eTemplateType->etp_key : null;
+
+        try {
+            $request = $communication->mailSend($this->e_project_id, $tplType, $this->e_email_from, $this->e_email_to, $content_data, $data, ($this->e_language_id ?: 'en-US'), 0);
+
+
+            if($request && isset($request['data']['eq_status_id'])) {
+                $this->e_status_id = $request['data']['eq_status_id'];
+                $this->e_communication_id = $request['data']['eq_id'];
+                $this->save();
+            }
+
+            //VarDumper::dump($request, 10, true); exit;
+
+            if($request && isset($request['error']) && $request['error']) {
+                $this->e_status_id = self::STATUS_ERROR;
+                $errorData = @json_decode($request['error'], true);
+                $this->e_error_message = 'Communication error: ' . ($errorData['message'] ?: $request['error']);
+                $this->save();
+                $out['error'] = $this->e_error_message;
+            }
+
+        } catch (\Throwable $exception) {
+            $error = VarDumper::dumpAsString($exception->getMessage());
+            $out['error'] = $error;
+            Yii::error($error, 'Email:sendMail:mailSend:exception');
+            $this->e_error_message = 'Communication error: ' . $error;
+            $this->save();
+        }
+
+        //VarDumper::dump($request, 10, true); exit;
+
+
+
+
         // VarDumper::dump($request, 10, true); exit;
 
-        return false;
+        return $out;
     }
 
     /**
@@ -384,7 +431,108 @@ class Email extends \yii\db\ActiveRecord
      */
     public function generateMessageId(): string
     {
-        $message = uniqid().'.'.$this->e_email_from;
+        $arr[] = 'kiv';
+        $arr[] = $this->e_id;
+        $arr[] = $this->e_project_id;
+        $arr[] = $this->e_lead_id;
+        $arr[] = $this->e_email_from;
+
+        $message = '<' . implode('.', $arr) . '>';
         return $message;
     }
+
+    /**
+     * @return int|mixed
+     */
+    public function detectLeadId()
+    {
+
+        // $subject = 'RE Hello [lid:78456123]';
+        // $subject = 'RE Hello [uid:lkasdjlkjkl234]';
+        // $ref_message_id = '<kiv.1.6.345.alex.connor@gmail.com> <qwewqeqweqwe.qweqwe@mail.com> <aasdfkjal.sfasldfkl@gmail.com>';
+
+        $subject = $this->e_email_subject;
+
+        $matches = [];
+        $lead = null;
+
+        preg_match('~\[lid:(\d+)\]~si', $subject, $matches);
+
+        if(isset($matches[1]) && $matches[1]) {
+            $lead_id = (int) $matches[1];
+            $lead = Lead::find()->where(['id' => $lead_id])->one();
+        }
+
+        if(!$lead) {
+            $matches = [];
+            preg_match('~\[uid:(\w+)\]~si', $subject, $matches);
+            if(isset($matches[1]) && $matches[1]) {
+                $lead = Lead::find()->where(['uid' => $matches[1]])->one();
+            }
+        }
+
+        //preg_match('~\[uid:(\w+)\]~si', $subject, $matches);
+
+        if(!$lead) {
+            $matches = [];
+            preg_match_all('~<kiv\.(.+)>~iU', $this->e_ref_message_id, $matches);
+            if (isset($matches[1]) && $matches[1]) {
+                foreach ($matches[1] as $messageId) {
+                    $messageArr = explode('.', $messageId);
+                    if (isset($messageArr[2]) && $messageArr[2]) {
+                        $lead_id = (int) $messageArr[2];
+
+                        $lead = Lead::find()->where(['id' => $lead_id])->one();
+                        if($lead) {
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        if($lead) {
+            $this->e_lead_id = $lead->id;
+        } else {
+            $clientEmail = ClientEmail::find()->where(['email' => $this->e_email_from])->orderBy(['id' => SORT_DESC])->limit(1)->one();
+            if($clientEmail && $clientEmail->client_id) {
+                $lead = Lead::find()->where(['client_id' => $clientEmail->client_id, 'status' => [Lead::STATUS_PROCESSING, Lead::STATUS_SNOOZE, Lead::STATUS_ON_HOLD, Lead::STATUS_FOLLOW_UP]])->orderBy(['id' => SORT_DESC])->limit(1)->one();
+                if(!$lead) {
+                    $lead = Lead::find()->where(['client_id' => $clientEmail->client_id])->orderBy(['id' => SORT_DESC])->limit(1)->one();
+                }
+                if($lead) {
+                    $this->e_lead_id = $lead->id;
+                }
+            }
+        }
+
+        return $this->e_lead_id;
+    }
+
+
+    /**
+     * @return array
+     */
+    public function getUsersIdByEmail(): array
+    {
+        $users = [];
+        $params = UserProjectParams::find()->where(['upp_email' => $this->e_email_to])->all();
+
+        if($params) {
+            foreach ($params as $param) {
+                $users[$param->upp_user_id] = $param->upp_user_id;
+            }
+        }
+
+        $employees = Employee::find()->where(['email' => $this->e_email_to])->all();
+
+        if($employees) {
+            foreach ($employees as $employe) {
+                $users[$employe->id] = $employe->id;
+            }
+        }
+
+        return $users;
+    }
+
 }

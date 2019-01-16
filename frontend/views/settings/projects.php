@@ -10,6 +10,7 @@ use yii\data\ActiveDataProvider;
 use yii\grid\GridView;
 use common\models\Project;
 use yii\helpers\Url;
+use yii\bootstrap\Modal;
 
 $template = <<<HTML
 <div class="pagination-container row" style="margin-bottom: 10px;">
@@ -25,6 +26,22 @@ $template = <<<HTML
 </div>
 HTML;
 
+$js = <<<JS
+$('.project-data-btn').click(function (e) {
+        e.preventDefault();
+        var url = $(this).attr('href');
+        var editBlock = $('#project-data-modal');
+        editBlock.find('.modal-body').html('');
+        editBlock.find('.modal-body').load(url, function( response, status, xhr ) {
+            editBlock.modal({
+              backdrop: 'static',
+              show: true
+            });
+        });
+    });
+
+JS;
+$this->registerJs($js);
 ?>
 
 <div class="panel panel-default">
@@ -73,6 +90,11 @@ HTML;
                             ]);
                             return Html::a('<span class="glyphicon glyphicon-edit"></span>', $url, [
                                 'title' => 'Edit'
+                            ]).'&nbsp;'.
+                            Html::a('<span class="glyphicon glyphicon-cog"></span>',
+                                Url::to(['settings/project-data', 'id' => $model->id]), [
+                                'title' => 'Custom params',
+                                'class' => 'project-data-btn',
                             ]);
                         }
                     ]
@@ -96,3 +118,9 @@ HTML;
         </div>
     </div>
 </div>
+
+<?php Modal::begin(['id' => 'project-data-modal',
+    'header' => '<h2>Project Custom Params</h2>',
+    'size' => Modal::SIZE_LARGE,
+])?>
+<?php Modal::end()?>

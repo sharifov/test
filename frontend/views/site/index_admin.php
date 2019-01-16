@@ -10,6 +10,8 @@ use yii\widgets\ActiveForm;
 /* @var $dataSources [] */
 /* @var $dataEmployee [] */
 /* @var $dataEmployeeSold [] */
+/* @var $crontabJobList [] */
+/* @var $processList [] */
 
 /* @var $searchModel common\models\search\EmployeeSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -103,8 +105,41 @@ $userId = Yii::$app->user->id;
         </div>
 
         <div class="col-md-3">
+            <h4>System processes and cron jobs running:</h4>
+            <table class="table table-bordered table-condensed">
+                <tr>
+                    <th>PID</th>
+                    <th>Started</th>
+                    <th>Time</th>
+                    <th>Command</th>
+                </tr>
+                <?php if($processList): ?>
+                    <?php foreach($processList AS $proc): ?>
+                        <tr>
+                            <td><?php echo $proc['pid']; ?></td>
+                            <td><?php echo $proc['stime']; ?></td>
+                            <td><?php echo $proc['time']; ?></td>
+                            <td><?php echo $proc['command']; ?></td>
+                        </tr>
+                    <?php endforeach;?>
+                <?php endif;?>
+            </table>
+        </div>
 
-
+        <div class="col-md-3">
+            <?php if($crontabJobList): ?>
+                <h4>Cron jobs (/etc/crontab)</h4>
+                <table class="table table-bordered table-condensed">
+                    <tr>
+                        <th>Cron jobs</th>
+                    </tr>
+                    <?php foreach($crontabJobList AS $cronJob): ?>
+                        <tr>
+                            <td><?php echo $cronJob; ?></td>
+                        </tr>
+                    <?php endforeach;?>
+                </table>
+            <?php endif;?>
         </div>
 
     </div>
@@ -114,15 +149,28 @@ $userId = Yii::$app->user->id;
     <div class="">
         <div class="row top_tiles">
 
-            <div class="animated flipInY col-lg-3 col-md-3 col-sm-6 col-xs-12">
+            <div class="animated flipInY col-lg-2 col-md-2 col-sm-6 col-xs-12">
                 <div class="tile-stats">
                     <div class="icon"><i class="fa fa-users"></i></div>
+                    <div class="count">
+                        <?=\common\models\UserConnection::find()->select('uc_user_id')->groupBy(['uc_user_id'])->count()?> /
+                        <?=\common\models\UserConnection::find()->count()?>
+                    </div>
+                    <h3><?=Html::a('Online Employees', ['user-connection/index'])?></h3>
+                    <p>Current state Online Employees / Connections</p>
+                </div>
+            </div>
+
+            <div class="animated flipInY col-lg-2 col-md-2 col-sm-6 col-xs-12">
+                <div class="tile-stats">
+                    <div class="icon"><i class="fa fa-list"></i></div>
                     <div class="count"><?=\common\models\Lead::find()->where("DATE(created) = DATE(NOW())")->count()?></div>
                     <h3>Leads</h3>
                     <p>Today count of Leads</p>
                 </div>
             </div>
-            <div class="animated flipInY col-lg-3 col-md-3 col-sm-6 col-xs-12">
+
+            <div class="animated flipInY col-lg-2 col-md-2 col-sm-6 col-xs-12">
                 <div class="tile-stats">
                     <div class="icon"><i class="fa fa-cubes"></i></div>
                     <div class="count"><?=\common\models\Quote::find()->where("DATE(created) = DATE(NOW())")->count()?></div>
@@ -130,7 +178,7 @@ $userId = Yii::$app->user->id;
                     <p>Today count of Quotes</p>
                 </div>
             </div>
-            <div class="animated flipInY col-lg-3 col-md-3 col-sm-6 col-xs-12">
+            <div class="animated flipInY col-lg-2 col-md-2 col-sm-2 col-xs-12">
                 <div class="tile-stats">
                     <div class="icon"><i class="fa fa-sitemap"></i></div>
                     <div class="count"><?=\common\models\ApiLog::find()->where("DATE(al_request_dt) = DATE(NOW())")->count()?></div>
@@ -138,7 +186,28 @@ $userId = Yii::$app->user->id;
                     <p>Today count of API Requests</p>
                 </div>
             </div>
-            <div class="animated flipInY col-lg-3 col-md-3 col-sm-6 col-xs-12">
+
+            <div class="animated flipInY col-lg-2 col-md-2 col-sm-6 col-xs-12">
+                <div class="tile-stats">
+                    <div class="icon"><i class="fa fa-envelope"></i></div>
+                    <div class="count"><?=\common\models\Email::find()->where('DATE(e_created_dt) = DATE(NOW())')->count()?></div>
+                    <h3><?=Html::a('Emails', ['email/index'])?></h3>
+                    <p>Today count of Emails</p>
+                </div>
+            </div>
+
+
+            <div class="animated flipInY col-lg-2 col-md-2 col-sm-6 col-xs-12">
+                <div class="tile-stats">
+                    <div class="icon"><i class="fa fa-comment"></i></div>
+                    <div class="count"><?=\common\models\Sms::find()->where('DATE(s_created_dt) = DATE(NOW())')->count()?></div>
+                    <h3><?=Html::a('SMS', ['sms/index'])?></h3>
+                    <p>Today count of SMS</p>
+                </div>
+            </div>
+
+            <?php /*
+            <div class="animated flipInY col-lg-2 col-md-2 col-sm-6 col-xs-12">
                 <div class="tile-stats">
                     <div class="icon"><i class="fa fa-list"></i></div>
                     <div class="count"><?=\frontend\models\Log::find()->where("log_time BETWEEN ".strtotime(date('Y-m-d'))." AND ".strtotime(date('Y-m-d H:i:s')))->count()?></div>
@@ -146,6 +215,7 @@ $userId = Yii::$app->user->id;
                     <p>Today count of System Logs</p>
                 </div>
             </div>
+            */ ?>
         </div>
 
     </div>

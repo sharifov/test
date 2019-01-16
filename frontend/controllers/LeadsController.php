@@ -62,12 +62,25 @@ class LeadsController extends FController
      */
     public function actionIndex()
     {
+        $session = Yii::$app->session;
+
         $searchModel = new LeadSearch();
 
         $params = Yii::$app->request->queryParams;
         $params2 = Yii::$app->request->post();
 
         $params = array_merge($params, $params2);
+
+        if(isset($params['reset'])){
+            $params = [];
+            $session->remove('LeadSearch');
+        }
+
+        if ($session->has('LeadSearch') && empty($params)){
+            $params = $session->get('LeadSearch');
+        }elseif (!empty($params)){
+            $session->set('LeadSearch', $params);
+        }
 
         if(Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id)) {
             $isAgent = true;

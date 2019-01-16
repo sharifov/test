@@ -21,21 +21,21 @@ use yii\widgets\ActiveForm;
     <div class="mail_list">
         <div class="left">
             <?php if($model->e_type_id == \common\models\Email::TYPE_DRAFT):?>
-                <i class="fa fa-edit"></i><br>
+                <i class="fa fa-edit" title="Draft"></i><br>
             <?php endif; ?>
             <?php if($model->e_type_id == \common\models\Email::TYPE_OUTBOX):?>
-                <i class="fa fa-level-up"></i><br>
+                <i class="fa fa-arrow-circle-up" title="Outbox"></i><br>
             <?php endif; ?>
             <?php if($model->e_type_id == \common\models\Email::TYPE_INBOX):?>
-                <i class="fa fa-level-down"></i><br>
+                <i class="fa fa-arrow-circle-down" title="Inbox"></i><br>
             <?php endif; ?>
 
             <?php if($model->e_is_deleted):?>
-                <i class="fa fa-trash"></i><br>
+                <i class="fa fa-trash" title="Trash"></i><br>
             <?php endif; ?>
 
             <?php if($model->e_is_new):?>
-                <i class="fa fa-circle"></i><br>
+                <i class="fa fa-circle" title="New message"></i><br>
             <?php endif; ?><?/*<i class="fa fa-edit"></i>*/?>
         </div>
         <div class="right">

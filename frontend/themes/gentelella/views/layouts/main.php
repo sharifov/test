@@ -15,15 +15,23 @@ use \webvimark\modules\UserManagement\UserManagementModule;
 //\backend\assets\AppAsset::register($this);
 $bundle = \frontend\themes\gentelella\assets\Asset::register($this);
 
+
+
 //$this->registerCssFile('@backend/themes/gentelella/css/custom.css');
 //Yii::$app->view->registerCssFile('@backend/themes/gentelella/css/custom.css', ['depends'=>'yiister\gentelella\assets\Asset']);
+
+$isAdmin = Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id);
+
+//if($isAdmin) {
+    \frontend\assets\NotifyAsset::register($this);
+//}
 
 ?>
 <?php $this->beginPage(); ?>
 <!DOCTYPE html>
 <html lang="<?= Yii::$app->language ?>">
 <head>
-    <meta name="description" content="Book Air">
+    <meta name="description" content="Sales">
     <?php
     $this->registerMetaTag(['http-equiv' => 'Content-Type', 'content' => 'text/html; charset=UTF-8']);
     $this->registerMetaTag(['http-equiv' => 'X-UA-Compatible', 'content' => 'IE=edge']);
@@ -39,12 +47,12 @@ $bundle = \frontend\themes\gentelella\assets\Asset::register($this);
 
     //$this->head();
 
-    $host = 'BookAir';
+    $host = 'Sales';
     echo Html::tag('title', ucfirst($host).' - '.Html::encode($this->title));
     ?>
-    <link rel="stylesheet" href="<?= Yii::$app->getAssetManager()->publish(Yii::getAlias('@frontend').'/web/css/style_theme.css')[1];?>"/>
-    <?//php $this->head() ?>
-    <? /*<link rel="shortcut icon" href="<?php echo Yii::$app->request->baseUrl; ?>/favicon.ico" type="image/x-icon" />*/ ?>
+    <?php /*<link rel="stylesheet" href="<?= Yii::$app->getAssetManager()->publish(Yii::getAlias('@frontend').'/web/css/style_theme.css')[1];?>"/>*/ ?>
+    <?php //php $this->head() ?>
+    <?php /*<link rel="shortcut icon" href="<?php echo Yii::$app->request->baseUrl; ?>/favicon.ico" type="image/x-icon" />*/ ?>
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
     <!--[if lt IE 9]>
 
@@ -118,18 +126,19 @@ $bundle = \frontend\themes\gentelella\assets\Asset::register($this);
                     <ul class="nav navbar-nav navbar-right">
                         <li class="">
                             <a href="javascript:;" class="user-profile dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
-                                <? /*<img src="http://placehold.it/128x128" alt="">*/ ?>
+                                <?/*<img src="http://placehold.it/128x128" alt="">*/ ?>
 
                                 <?=Html::img($grav_url, ['alt' => 'avatar'])?>
 
-                                <?
+                                <?php
                                     $myRolesModel = \webvimark\modules\UserManagement\models\rbacDB\Role::getUserRoles(Yii::$app->user->id);
                                     $myRoles = [];
-                                    if($myRolesModel)
+                                    if($myRolesModel) {
                                         foreach ($myRolesModel as $role) {
-                                            if($role->name == 'guest') continue;
+                                            if ($role->name == 'guest') continue;
                                             $myRoles[] = $role->name;
                                         }
+                                    }
 
                                 ?>
                                 <b><?=implode(', ', $myRoles) ; ?></b>:
@@ -161,7 +170,9 @@ $bundle = \frontend\themes\gentelella\assets\Asset::register($this);
                                 </li>
                             </ul>
                         </li>
-                        <?//= backend\widgets\Notifications::widget(); ?>
+                        <?/*php if($isAdmin):*/ ?>
+                            <?= frontend\widgets\Notifications::widget(); ?>
+                        <?/*php endif;*/?>
 
                         <?//= backend\widgets\ChatNotifications::widget(); ?>
 

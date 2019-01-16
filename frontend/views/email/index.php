@@ -112,5 +112,84 @@ $this->params['breadcrumbs'][] = $this->title;
             ['class' => 'yii\grid\ActionColumn'],
         ],
     ]); ?>
-    <?php Pjax::end(); ?>
+    <?php Pjax::end();
+
+
+
+    ?>
+
+
+    <script>
+
+
+        var socket   = null;
+
+
+        /**
+         * Send a message to the WebSocket server
+         */
+        function onSendClick() {
+            if (socket.readyState != socket.OPEN) {
+                console.error("Socket is not open: " + socket.readyState);
+                return;
+            }
+            var msg = document.getElementById("message").value;
+            socket.send(msg);
+        }
+
+
+        var user_id = '<?=Yii::$app->user->id?>';
+
+        /*try {
+
+            socket = new WebSocket('ws://localhost:8080/?user_id=' + user_id);
+            //socket = new WebSocket('ws://localhost:8080/?lead_id=12345');
+
+            socket.onopen = function (e) {
+                //socket.send('{"user2_id":' + user_id + '}');
+                //alert(1234);
+                console.log('Socket Status: ' + socket.readyState + ' (Open)');
+                //console.log(e);
+            };
+            socket.onmessage = function (e) {
+                //alert(e.data);
+                //var customWindow = window.open('', '_self', ''); customWindow.close();
+                //location.href = '/';
+                alert(e.data);
+                console.log(e.data);
+            };
+
+            socket.onclose = function (e) {
+                console.log('Socket Status: ' + socket.readyState + ' (Closed)');
+            };
+
+            socket.onerror = function(evt) {
+                //if (socket.readyState == 1) {
+                    console.log('Socket error: ' + evt.type);
+                //}
+            };
+
+
+        } catch (e) {
+            console.error(e);
+        }*/
+
+
+
+
+
+        //open(location, '_self').close();
+
+        //window.top.close();
+
+       /* function closeWin() {
+            window.top.close();
+        }
+        setTimeout(function(){
+            closeWin()
+        }, 3000);*/
+
+    </script>
+
+
 </div>

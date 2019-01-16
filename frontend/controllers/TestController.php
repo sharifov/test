@@ -3,6 +3,8 @@
 namespace frontend\controllers;
 
 use common\components\CommunicationService;
+use common\components\CountEvent;
+use common\models\Notifications;
 use Yii;
 use yii\helpers\ArrayHelper;
 use yii\filters\VerbFilter;
@@ -43,6 +45,31 @@ class TestController extends FController
 
 
 
+    public function actionEmail()
+    {
+        $swiftMailer = \Yii::$app->mailer;
+
+        $mail = $swiftMailer
+            ->compose()
+            ->setTo(['chalpet@gmail.com' => 'Alex'])
+            ->setFrom(['chalpet@gmail.com' => 'Dima'])
+            ->setSubject('Test message');
+
+
+        /*$headers = $mail->getSwiftMessage()->getHeaders();
+        $headers->addTextHeader('Content-Transfer-Encoding','base64');*/
+
+        $mail->setHeader('Message-ID', '123456.chalpet@gmail.com');
+        $mail->setHtmlBody('HTML message');
+
+        if($mail->send()) {
+            echo 'Send';
+        } else {
+            echo 'Not send';
+        }
+    }
+
+
     public function actionComPreview()
     {
         /** @var CommunicationService $communication */
@@ -75,5 +102,121 @@ class TestController extends FController
 
     }
 
+    public function actionSocket()
+    {
+
+
+        Notifications::create(Yii::$app->user->id, 'Test '.date('H:i:s'), 'Test message <h2>asdasdasd</h2>', Notifications::TYPE_SUCCESS, true);
+
+        $socket = 'tcp://127.0.0.1:1234';
+        $user_id = Yii::$app->user->id; //'tester01';
+        $lead_id = 12345;
+        $data['message'] = 'test '.date('H:i:s');
+        $data['command'] = 'getNewNotification';
+
+
+        try {
+            // соединяемся с локальным tcp-сервером
+            $instance = stream_socket_client($socket);
+            // отправляем сообщение
+            if (fwrite($instance, json_encode(['user_id' => $user_id, /*'lead_id' => $lead_id,*/ 'multiple' => false, 'data' => $data]) . "\n")) {
+                echo 'OK';
+            } else {
+                echo 'NO';
+            }
+        } catch (\Exception $exception) {
+            echo $exception->getMessage();
+        }
+
+        /*$host    = "localhost";
+        $port    = 8080;
+
+        $context = stream_context_create();
+
+        $socket = stream_socket_client(
+            $host . ':' . $port,
+            $errno,
+            $errstr,
+            30,
+            STREAM_CLIENT_CONNECT,
+            $context
+        );
+
+        $key = $this->generateWebsocketKey();
+        $headers = "HTTP/1.1 101 Switching Protocols\r\n";
+        $headers .= "Upgrade: websocket\r\n";
+        $headers .= "Connection: Upgrade\r\n";
+        $headers .= "Sec-WebSocket-Version: 13\r\n";
+        $headers .= "Sec-WebSocket-Key: $key\r\n\r\n";
+        stream_socket_sendto($socket, $headers);
+        stream_socket_sendto($socket, 'this is my socket test to websocket');*/
+
+        // echo 123;
+        ///\yiicod\socketio\Broadcast::emit(CountEvent::name(), ['count' => 10]);
+    }
+
+
+    private function generateWebsocketKey() {
+        $chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!"$&/()=[]{}0123456789';
+        $key = '';
+        $chars_length = strlen($chars);
+        for ($i = 0; $i < 16; $i++) $key .= $chars[mt_rand(0, $chars_length-1)];
+        return base64_encode($key);
+    }
+
+    public function actionDetectLead()
+    {
+        $subject = 'RE Hello [lid:78456123]';
+        $subject = 'RE Hello [uid:7asd845qwe6123]';
+        $message_id = '<kiv.1.6.345.alex.connor@gmail.com> <qwewqeqweqwe.qweqwe@mail.com> <aasdfkjal.sfasldfkl@gmail.com> <kiv.12.63.348.alex.connor@gmail.com>';
+
+        $matches = [];
+
+        //preg_match('~\[lid:(\d+)\]~si', $subject, $matches);
+        //preg_match('~\[uid:(\w+)\]~si', $subject, $matches);
+
+        preg_match_all('~<kiv\.(.+)>~iU', $message_id, $matches);
+        if(isset($matches[1]) && $matches[1]) {
+            foreach ($matches[1] as $messageId) {
+                $messageArr = explode('.', $messageId);
+                if(isset($messageArr[2]) && $messageArr[2]) {
+                    $lead_id = (int) $messageArr[2];
+
+                    echo $lead_id . '<br>';
+                }
+            }
+        }
+
+
+
+
+        //VarDumper::dump($matches, 10, true);
+
+    }
+
+    public function actionLangPlural()
+    {
+        $n = random_int(0, 10);
+
+
+        //echo Yii::t('app', 'You are the - {n,selectordinal,one{# один} two{# два} few{# мало} many{# несколько} other{# нет}} ', ['n' => $n]);
+
+        Yii::$app->language = 'en-US';
+
+
+        for($i = 0; $i<=20; $i++) {
+
+            echo \Yii::t('app', '{n, selectordinal,
+     =0{У вас нет новых сообщений}
+    
+     one{У вас # непрочитанное сообщение}
+     few{У вас # непрочитанных сообщения}
+     many{У вас # непрочитанных сообщений...}
+     other{У вас # прочитанных сообщений!}}',
+                ['n' => $i]
+            ).'<br>';
+        }
+
+    }
 
 }

@@ -112,7 +112,7 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
             'attribute' => 'id',
             'value' => function (\common\models\Lead $model) {
                 return Html::a('<i class="fa fa-file-o"></i> ' . $model->id, [
-                    'lead/processing/' . $model->id
+                    'lead/view/' . $model->id
                 ], [
                     'data-pjax' => 0,
                     'target' => '_blank'

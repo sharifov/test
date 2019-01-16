@@ -116,6 +116,14 @@ class CommunicationService extends Component
         $data['mail']['language_id'] = $language;
         $data['mail']['email_data'] = $email_data;
 
+        if(isset($email_data['email_from_name']) && $email_data['email_from_name']) {
+            $data['mail']['email_from_name'] = $email_data['email_from_name'];
+        }
+
+        if(isset($email_data['email_to_name']) && $email_data['email_to_name']) {
+            $data['mail']['email_to_name'] = $email_data['email_to_name'];
+        }
+
         $response = $this->sendRequest('email/preview', $data);
 
         if ($response->isOk) {
@@ -126,7 +134,7 @@ class CommunicationService extends Component
             }
         } else {
             $out['error'] = $response->content;
-            \Yii::error(VarDumper::dumpAsString($out['error'], 10), 'CommunicationService::mailPreview');
+            \Yii::error(VarDumper::dumpAsString($out['error'], 10), 'Component:CommunicationService::mailPreview');
         }
 
         return $out;
@@ -134,17 +142,17 @@ class CommunicationService extends Component
 
     /**
      * @param int $project_id
-     * @param string $template_type
+     * @param string|null $template_type
      * @param string $email_from
      * @param string $email_to
      * @param array $content_data
      * @param array $email_data
-     * @param string $language
+     * @param string|null $language
      * @param int $delay
      * @return array
      * @throws \yii\httpclient\Exception
      */
-    public function mailSend(int $project_id, string $template_type, string $email_from, string $email_to, array $content_data = [], array $email_data = [], string $language = 'en-US', int $delay = 0) : array
+    public function mailSend(int $project_id, ?string $template_type, string $email_from, string $email_to, array $content_data = [], array $email_data = [], ?string $language = 'en-US', int $delay = 0) : array
     {
         $out = ['error' => false, 'data' => []];
 
@@ -154,6 +162,19 @@ class CommunicationService extends Component
         $data['mail']['eq_type_key'] = $template_type;
         $data['mail']['eq_language_id'] = $language;
         $data['mail']['eq_email_data'] = $email_data;
+
+
+        if(isset($content_data['email_from_name']) && $content_data['email_from_name']) {
+            $data['mail']['eq_email_from_name'] = $content_data['email_from_name'];
+        }
+
+        if(isset($content_data['email_to_name']) && $content_data['email_to_name']) {
+            $data['mail']['eq_email_to_name'] = $content_data['email_to_name'];
+        }
+
+        if(isset($content_data['email_message_id']) && $content_data['email_message_id']) {
+            $data['mail']['eq_email_message_id'] = $content_data['email_message_id'];
+        }
 
         if(isset($content_data['email_body_html'])) {
             $data['mail']['eq_email_body_html'] = $content_data['email_body_html'];
@@ -194,7 +215,7 @@ class CommunicationService extends Component
             }
         } else {
             $out['error'] = $response->content;
-            \Yii::error(VarDumper::dumpAsString($out['error'], 10), 'CommunicationService::mailSend');
+            \Yii::error(VarDumper::dumpAsString($out['error'], 10), 'Component:CommunicationService::mailSend');
         }
 
         return $out;
@@ -220,7 +241,7 @@ class CommunicationService extends Component
             }
         } else {
             $out['error'] = $response->content;
-            \Yii::error(VarDumper::dumpAsString($out['error'], 10), 'CommunicationService::mailTypes');
+            \Yii::error(VarDumper::dumpAsString($out['error'], 10), 'Component:CommunicationService::mailTypes');
         }
 
         return $out;
@@ -275,15 +296,15 @@ class CommunicationService extends Component
 
     /**
      * @param int $project_id
-     * @param string $template_type
+     * @param string|null $template_type
      * @param string $phone_from
      * @param string $phone_to
      * @param array $sms_data
-     * @param string $language
+     * @param string|null $language
      * @return array
      * @throws \yii\httpclient\Exception
      */
-    public function smsPreview(int $project_id, string $template_type, string $phone_from, string $phone_to, array $sms_data = [], string $language = 'en-US') : array
+    public function smsPreview(int $project_id, ?string $template_type, string $phone_from, string $phone_to, array $sms_data = [], ?string $language = 'en-US') : array
     {
         $out = ['error' => false, 'data' => []];
 
@@ -304,7 +325,7 @@ class CommunicationService extends Component
             }
         } else {
             $out['error'] = $response->content;
-            \Yii::error(VarDumper::dumpAsString($out['error'], 10), 'CommunicationService::smsPreview');
+            \Yii::error(VarDumper::dumpAsString($out['error'], 10), 'Component:CommunicationService::smsPreview');
         }
 
         return $out;
@@ -318,12 +339,12 @@ class CommunicationService extends Component
      * @param string $phone_to
      * @param array $content_data
      * @param array $sms_data
-     * @param string $language
-     * @param int $delay
+     * @param string|null $language
+     * @param int|null $delay
      * @return array
      * @throws \yii\httpclient\Exception
      */
-    public function smsSend(int $project_id, string $template_type, string $phone_from, string $phone_to, array $content_data = [], array $sms_data = [], string $language = 'en-US', int $delay = 0) : array
+    public function smsSend(int $project_id, ?string $template_type, string $phone_from, string $phone_to, array $content_data = [], array $sms_data = [], ?string $language = 'en-US', ?int $delay = 0) : array
     {
         $out = ['error' => false, 'data' => []];
 
@@ -353,7 +374,7 @@ class CommunicationService extends Component
             }
         } else {
             $out['error'] = $response->content;
-            \Yii::error(VarDumper::dumpAsString($out['error'], 10), 'CommunicationService::smsSend');
+            \Yii::error(VarDumper::dumpAsString($out['error'], 10), 'Component:CommunicationService::smsSend');
         }
 
         return $out;
@@ -379,7 +400,7 @@ class CommunicationService extends Component
             }
         } else {
             $out['error'] = $response->content;
-            \Yii::error(VarDumper::dumpAsString($out['error'], 10), 'CommunicationService::smsTypes');
+            \Yii::error(VarDumper::dumpAsString($out['error'], 10), 'Component:CommunicationService::smsTypes');
         }
 
         return $out;
@@ -406,14 +427,13 @@ class CommunicationService extends Component
             $data['last_id'] = (int) $filter['last_id'];
         }
 
+        if(isset($filter['last_n'])) {
+            $data['last_n'] = (int) $filter['last_n'];
+        }
 
-        /*$email_to = Yii::$app->request->post('email_to');
-        $email_from = Yii::$app->request->post('email_from');
-        $limit = Yii::$app->request->post('limit');
-        $offset = Yii::$app->request->post('offset');
-        $new = Yii::$app->request->post('new');
-        $last_id = Yii::$app->request->post('last_id');
-        $last_dt = Yii::$app->request->post('last_dt');*/
+        if(isset($filter['limit'])) {
+            $data['limit'] = (int) $filter['limit'];
+        }
 
         $response = $this->sendRequest('sms/inbox', $data);
 
@@ -425,7 +445,7 @@ class CommunicationService extends Component
             }
         } else {
             $out['error'] = $response->content;
-            \Yii::error('filter: '. VarDumper::dumpAsString($filter)."\r\n". VarDumper::dumpAsString($out['error'], 10), 'CommunicationService::smsGetMessages');
+            \Yii::error('filter: '. VarDumper::dumpAsString($filter)."\r\n". VarDumper::dumpAsString($out['error'], 10), 'Component:CommunicationService::smsGetMessages');
         }
 
         return $out;

@@ -382,6 +382,15 @@ $this->params['breadcrumbs'][] = $this->title;
             ]
         ],
 
+        [
+            'header' => 'Project',
+            'attribute' => 'project_id',
+            'filter' => false,
+            'value' => function (\common\models\Lead $model) {
+                return $model->project ? $model->project->name : '-';
+            },
+         ],
+
         /*[
             'header' => 'Client time2',
             'format' => 'raw',
@@ -418,7 +427,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         ]);
 
                         if(!$isAgent) {
-                            $buttons .= Html::a('<i class="fa fa-search"></i> View', '/lead/processing/' . $model->id, [
+                            $buttons .= Html::a('<i class="fa fa-search"></i> View', '/lead/view/' . $model->id, [
                                 'class' => 'btn btn-info btn-xs',
                                 'data-pjax' => 0
                             ]);
