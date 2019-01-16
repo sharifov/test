@@ -17,9 +17,9 @@ $bundle = \frontend\themes\gentelella\assets\Asset::register($this);
 
 $isAdmin = Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id);
 
-if($isAdmin) {
+//if($isAdmin) {
     \frontend\assets\NotifyAsset::register($this);
-}
+//}
 
 //$this->registerCssFile('@backend/themes/gentelella/css/custom.css');
 //Yii::$app->view->registerCssFile('@backend/themes/gentelella/css/custom.css', ['depends'=>'yiister\gentelella\assets\Asset']);
@@ -168,9 +168,9 @@ if($isAdmin) {
                                         </li>
                                     </ul>
                                 </li>
-                                <?php if($isAdmin): ?>
+                                <?/*php if($isAdmin):*/ ?>
                                     <?= frontend\widgets\Notifications::widget(); ?>
-                                <?php endif;?>
+                                <?/*php endif;*/ ?>
 
                                 <?//= backend\widgets\ChatNotifications::widget(); ?>
 

@@ -10,9 +10,13 @@ use yii\widgets\ListView;
 /* @var $modelEmailView common\models\Email */
 /* @var $modelNewEmail common\models\Email */
 /* @var $dataProvider yii\data\ActiveDataProvider */
+/* @var $mailList [] */
+/* @var $projectList [] */
 
 $this->title = 'Emails';
 $this->params['breadcrumbs'][] = $this->title;
+
+$is_admin = Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id);
 
 ?>
 
@@ -83,18 +87,40 @@ $this->params['breadcrumbs'][] = $this->title;
                     ]);*/ ?>
 
                     <div class="row">
-                        <div class="col-sm-3 mail_list_column">
+                        <div class="col-md-3 mail_list_column">
 
-                            <?= Html::beginForm(\yii\helpers\Url::current(['email_type_id' => null, 'email_project_id' => null, 'action' => null]), 'GET', ['data-pjax' => 1]) ?>
+                            <?= Html::beginForm(\yii\helpers\Url::current(['email_type_id' => null, 'email_project_id' => null, 'email_email' => null ,'action' => null]), 'GET', ['data-pjax' => 1]) ?>
                                 <div class="col-md-3">
-                                    <?=Html::a('<i class="fa fa-envelope"></i> Create NEW', \yii\helpers\Url::current(['id' => null, 'reply_id' => null, 'edit_id' => null, 'action' => 'new']), ['class' => 'btn btn-sm btn-success'])?>
+
+                                    <!-- Split button -->
+                                    <div class="btn-group">
+                                        <?//=Html::a('<i class="fa fa-envelope"></i> Create', \yii\helpers\Url::current(['id' => null, 'reply_id' => null, 'edit_id' => null, 'action' => 'new']), ['class' => 'btn btn-sm btn-success'])?>
+                                        <button type="button" class="btn btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                            <i class="fa fa-envelope"></i> Create NEW <span class="caret"></span>
+
+                                        </button>
+                                        <ul class="dropdown-menu">
+                                            <?php foreach ($mailList as $mailName): ?>
+                                                <li>
+                                                    <?=Html::a('<i class="fa fa-envelope"></i> '. $mailName, \yii\helpers\Url::current(['email_email' => $mailName, 'id' => null, 'reply_id' => null, 'edit_id' => null, 'action' => 'new']))?>
+                                                </li>
+                                            <?php endforeach; ?>
+                                        </ul>
+                                    </div>
+
+
+
                                 </div>
                                 <div class="col-md-4">
                                     <?=Html::dropDownList('email_type_id', Yii::$app->request->get('email_type_id'), \common\models\Email::FILTER_TYPE_LIST, ['class' => 'form-control', 'onchange' => '$("#btn-submit-email").click();'])?>
                                     <?= Html::submitButton('Ok', ['id' => 'btn-submit-email', 'class' => 'btn btn-primary hidden']) ?>
                                 </div>
                                 <div class="col-md-5">
-                                    <?=Html::dropDownList('email_project_id', Yii::$app->request->get('email_project_id'), \common\models\Project::getList(), ['prompt' => 'ALL', 'class' => 'form-control', 'onchange' => '$("#btn-submit-email").click();'])?>
+                                    <?php if($is_admin):?>
+                                        <?=Html::dropDownList('email_project_id', Yii::$app->request->get('email_project_id'), $projectList, ['prompt' => 'All projects', 'class' => 'form-control', 'onchange' => '$("#btn-submit-email").click();'])?>
+                                    <? endif; ?>
+
+                                    <?=Html::dropDownList('email_email', Yii::$app->request->get('email_email'), $mailList, ['prompt' => 'All emails', 'class' => 'form-control', 'onchange' => '$("#btn-submit-email").click();'])?>
                                 </div>
                             <?= Html::endForm() ?>
 
@@ -135,12 +161,23 @@ $this->params['breadcrumbs'][] = $this->title;
                         <div class="col-sm-9 mail_view">
                             <?php if($modelEmailView): ?>
                                 <?=$this->render('_view_mail', ['model' => $modelEmailView])?>
-                            <? endif; ?>
+                            <? elseif(Yii::$app->request->get('action') === 'new' || Yii::$app->request->get('edit_id') || Yii::$app->request->get('reply_id')): ?>
 
+                                <?php
+                                    if(Yii::$app->request->get('action') === 'new') {
+                                        $action = 'create';
+                                    } elseif(Yii::$app->request->get('edit_id')) {
+                                        $action = 'update';
+                                    } elseif(Yii::$app->request->get('reply_id')) {
+                                        $action = 'reply';
+                                    } else {
+                                        $action = '';
+                                    }
+                                ?>
 
-
-                            <?php if(Yii::$app->request->get('action') === 'new' || Yii::$app->request->get('edit_id') || Yii::$app->request->get('reply_id')): ?>
-                                <?=$this->render('_new_mail', ['model' => $modelNewEmail])?>
+                                <?=$this->render('_new_mail', ['model' => $modelNewEmail, 'mailList' => $mailList, 'action' => $action])?>
+                            <? else: ?>
+                                <?=$this->render('_stats', ['model' => $modelNewEmail, 'mailList' => $mailList])?>
                             <? endif; ?>
 
                         </div>
