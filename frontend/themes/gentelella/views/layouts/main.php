@@ -22,9 +22,9 @@ $bundle = \frontend\themes\gentelella\assets\Asset::register($this);
 
 $isAdmin = Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id);
 
-if($isAdmin) {
+//if($isAdmin) {
     \frontend\assets\NotifyAsset::register($this);
-}
+//}
 
 ?>
 <?php $this->beginPage(); ?>
@@ -170,9 +170,9 @@ if($isAdmin) {
                                 </li>
                             </ul>
                         </li>
-                        <?php if($isAdmin): ?>
+                        <?/*php if($isAdmin):*/ ?>
                             <?= frontend\widgets\Notifications::widget(); ?>
-                        <?php endif;?>
+                        <?/*php endif;*/?>
 
                         <?//= backend\widgets\ChatNotifications::widget(); ?>
 

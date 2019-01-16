@@ -97,4 +97,15 @@ class Project extends \yii\db\ActiveRecord
         return ArrayHelper::map($data,'id', 'name');
     }
 
+
+    /**
+     * @param int $user_id
+     * @return array
+     */
+    public static function getListByUser(int $user_id = 0) : array
+    {
+        $data = ProjectEmployeeAccess::find()->select(['project_id'])->with('project')->where(['employee_id' => $user_id])->all();
+        return ArrayHelper::map($data,'project_id', 'project.name');
+    }
+
 }

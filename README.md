@@ -91,15 +91,6 @@ Prod Hosts:
  ```
  sudo apidoc -i "./webapi/modules" -o "./webapi/web/doc" -f ".*\\.php$"
  ```
-WebSocket Server (https://github.com/walkor/Workerman):
-```
-sudo php console/socket-server.php start
-sudo php console/socket-server.php stop
-sudo php console/socket-server.php restart
-sudo php console/socket-server.php reload
-
-```
-
 
 Install Supervisor
  -------------------
@@ -110,7 +101,7 @@ Install Supervisor
  Update global config file (code):
  ```
  [include]
- files = /var/www/.../www/common/config/supervisor/*.conf
+ files = /var/www/.../common/config/supervisor/*.conf
  ```
  
  Create supervisor config file (rename to socket-server.conf):
@@ -155,42 +146,6 @@ curl -X POST \
   -F 'lead[client_last_name]=Freeman'
 ```
 
-PHP Example:
-```
-<?php
-
-$curl = curl_init();
-
-curl_setopt_array($curl, array(
-  CURLOPT_URL => "http://sales.api.travelinsides.com/v1/lead/create?debug=1",
-  CURLOPT_RETURNTRANSFER => true,
-  CURLOPT_ENCODING => "",
-  CURLOPT_MAXREDIRS => 10,
-  CURLOPT_TIMEOUT => 30,
-  CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-  CURLOPT_CUSTOMREQUEST => "POST",
-  CURLOPT_POSTFIELDS => "------WebKitFormBoundary7MA4YWxkTrZu0gW\r\nContent-Disposition: form-data; name=\"lead[emails][0]\"\r\n\r\nchalpet@gmail.com\r\n------WebKitFormBoundary7MA4YWxkTrZu0gW\r\nContent-Disposition: form-data; name=\"lead[emails][1]\"\r\n\r\nchalpet2@gmail.com\r\n------WebKitFormBoundary7MA4YWxkTrZu0gW\r\nContent-Disposition: form-data; name=\"lead[phones][0]\"\r\n\r\n+373-69-98-698\r\n------WebKitFormBoundary7MA4YWxkTrZu0gW\r\nContent-Disposition: form-data; name=\"lead[phones][1]\"\r\n\r\n+373-69-98-698\r\n------WebKitFormBoundary7MA4YWxkTrZu0gW\r\nContent-Disposition: form-data; name=\"lead[flights][0][origin]\"\r\n\r\nBOS\r\n------WebKitFormBoundary7MA4YWxkTrZu0gW\r\nContent-Disposition: form-data; name=\"lead[flights][0][destination]\"\r\n\r\nLGW\r\n------WebKitFormBoundary7MA4YWxkTrZu0gW\r\nContent-Disposition: form-data; name=\"lead[flights][0][departure]\"\r\n\r\n2018-09-19\r\n------WebKitFormBoundary7MA4YWxkTrZu0gW\r\nContent-Disposition: form-data; name=\"lead[flights][1][origin]\"\r\n\r\nLGW\r\n------WebKitFormBoundary7MA4YWxkTrZu0gW\r\nContent-Disposition: form-data; name=\"lead[flights][1][destination]\"\r\n\r\nBOS\r\n------WebKitFormBoundary7MA4YWxkTrZu0gW\r\nContent-Disposition: form-data; name=\"lead[flights][1][departure]\"\r\n\r\n2018-09-22\r\n------WebKitFormBoundary7MA4YWxkTrZu0gW\r\nContent-Disposition: form-data; name=\"lead[source_id]\"\r\n\r\n38\r\n------WebKitFormBoundary7MA4YWxkTrZu0gW\r\nContent-Disposition: form-data; name=\"lead[adults]\"\r\n\r\n1\r\n------WebKitFormBoundary7MA4YWxkTrZu0gW\r\nContent-Disposition: form-data; name=\"lead[client_first_name]\"\r\n\r\nAlexandr\r\n------WebKitFormBoundary7MA4YWxkTrZu0gW\r\nContent-Disposition: form-data; name=\"lead[client_last_name]\"\r\n\r\nFreeman\r\n------WebKitFormBoundary7MA4YWxkTrZu0gW--",
-  CURLOPT_HTTPHEADER => array(
-    "authorization: Basic YmFja29mZmljZTpiZl90ZXN0MjAxOA==",
-    "cache-control: no-cache",
-    "content-type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW",
-    "postman-token: 162d0ed6-e56f-8f2d-1840-bd956db7e929"
-  ),
-));
-
-$response = curl_exec($curl);
-$err = curl_error($curl);
-
-curl_close($curl);
-
-if ($err) {
-  echo "cURL Error #:" . $err;
-} else {
-  echo $response;
-}
-
-```
-
 Documentation is at [docs/guide/README.md](docs/guide/README.md).
 
 Test Code - Migration:
@@ -216,16 +171,44 @@ common/config/test-local.php
 
 [https://codeception.com/docs/02-GettingStarted](https://codeception.com/docs/02-GettingStarted#Generators)
 
-* generate acceptance >> ```../vendor/bin/codecept generate:cest acceptance Index```
-* build test >> ```vendor/bin/codecept build```
-* run custom test >> ```../vendor/bin/codecept run tests/acceptance/IndexCest.php```
-* run test >> ```vendor/bin/codecept run```
+* generate acceptance ```../vendor/bin/codecept generate:cest acceptance Index```
+* build test ```vendor/bin/codecept build```
+* run custom test  ```../vendor/bin/codecept run tests/acceptance/IndexCest.php```
+* run test ```vendor/bin/codecept run```
 
 
 PhantomJS
 -------------------
 * Download & install - [http://phantomjs.org/download.html](http://phantomjs.org/download.html)
-* Run >> ```phantomjs --webdriver=4444```
+* Run  ```phantomjs --webdriver=4444```
+
+
+WebSocket Server (https://github.com/walkor/Workerman):
+```
+sudo php console/socket-server.php start
+sudo php console/socket-server.php stop
+sudo php console/socket-server.php restart
+sudo php console/socket-server.php reload
+
+```
+
+
+Check process by PORT
+```
+sudo netstat -tulpn| grep :8080
+```
+
+CRONs
+-------------------
+```
+*/15  *  *  *  *     run-this-one php /var/www/sale/yii monitor-flow/follow-up
+*/15  *  *  *  *     run-this-one php /var/www/sale/yii monitor-flow/on-wake
+*/30  *  *  *  *     run-this-one php /var/www/sale/yii monitor-flow/watch-dog-decline-quote
+*/3   *  *  *  *     run-this-one php /var/www/sale/yii lead/update-ip-info
+10   0  *  *  *     run-this-one php /var/www/sale/yii lead/update-by-tasks
+30   0  *  *  *     run-this-one php /var/www/sale/yii db/update-airline-cabin-classes
+40   0  1  *  *     php /var/www/sale/yii kpi/calculate-salary
+```
 
 DIRECTORY STRUCTURE
 -------------------
@@ -269,26 +252,4 @@ webapi
     web/                 contains the entry script and Web resources
 vendor/                  contains dependent 3rd-party packages
 environments/            contains environment-based overrides
-```
-
-Start WebSocket Server:
-```
-php console/socket-server.php start
-```
-
-
-Check process by PORT
-```
-sudo netstat -tulpn| grep :8080
-```
-
-CRONs
-```
-*/15  *  *  *  *     run-this-one php /var/www/sale/yii monitor-flow/follow-up
-*/15  *  *  *  *     run-this-one php /var/www/sale/yii monitor-flow/on-wake
-*/30  *  *  *  *     run-this-one php /var/www/sale/yii monitor-flow/watch-dog-decline-quote
-*/3   *  *  *  *     run-this-one php /var/www/sale/yii lead/update-ip-info
-10   0  *  *  *     run-this-one php /var/www/sale/yii lead/update-by-tasks
-30   0  *  *  *     run-this-one php /var/www/sale/yii db/update-airline-cabin-classes
-0   30  1  *  *     php /var/www/sale/yii kpi/calculate-salary
 ```

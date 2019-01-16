@@ -1,6 +1,6 @@
 [program:SoketServer]
-command=/usr/bin/php /var/www/sales.zeit.test/www/console/socket-server.php start
-stdout_logfile=/var/www/sales.zeit.test/www/console/runtime/socket-server.log
+command=/usr/bin/php /var/www/sale/console/socket-server.php start
+stdout_logfile=/var/www/sale/console/runtime/socket-server.log
 autostart=true
 autorestart=true
 user=root

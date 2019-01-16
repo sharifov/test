@@ -141,9 +141,10 @@ $ws_worker->onConnect = function(\Workerman\Connection\TcpConnection $connection
 
 
         $ip = $_GET['ip'] ?? null;
+        $ua = $_GET['ua'] ?? $_SERVER['HTTP_USER_AGENT'];
 
         echo 'ip: '.$ip.', ';
-        echo 'useragent: '.$_SERVER['HTTP_USER_AGENT'].', ';
+        echo 'useragent: '.$ua.', ';
         echo 'dt: ' . date('Y-m-d H:i:s');
 
 
@@ -151,7 +152,7 @@ $ws_worker->onConnect = function(\Workerman\Connection\TcpConnection $connection
             'uc_connection_id'          => $connection->id,
             'uc_user_id'                => $user_id,
             'uc_lead_id'                => $lead_id,
-            'uc_user_agent'             => $_SERVER['HTTP_USER_AGENT'] ?? null,
+            'uc_user_agent'             => $ua,
             'uc_controller_id'          => $_GET['controller_id'] ?? null,
             'uc_action_id'              => $_GET['action_id'] ?? null,
             'uc_page_url'               => $_GET['page_url'] ?? null,
