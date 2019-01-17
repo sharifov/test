@@ -355,7 +355,7 @@ class SiteController extends FController
         $crontabJobList = [];
         $processList = [];
 
-        @exec('crontab -l', $outCron);
+        @exec('cat /var/spool/cron/crontabs/root', $outCron);
         if(isset($outCron) && count($outCron)) {
             foreach ($outCron AS $lineCron) {
                 if(!preg_match('/(#|SHELL|PATH)/', $lineCron) && strlen($lineCron) > 2) {
