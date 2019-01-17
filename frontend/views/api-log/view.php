@@ -29,9 +29,9 @@ $this->params['breadcrumbs'][] = $this->title;
         'model' => $model,
         'attributes' => [
             'al_id',
-            'al_request_data:ntext',
+            //'al_request_data:ntext',
             'al_request_dt',
-            'al_response_data:ntext',
+            //'al_response_data:ntext',
             'al_response_dt',
             'al_ip_address',
         ],
@@ -40,21 +40,13 @@ $this->params['breadcrumbs'][] = $this->title;
     <div class="row">
     <div class="col-md-6">
     <h2>Request (<?=$model->al_request_dt?>):</h2>
-        <pre><small>
-            <? \yii\helpers\VarDumper::dump(@json_decode($model->al_request_data, true), 10, true); ?>
-            <? //if($model->al_request_data) echo json_decode($model->al_request_data), true); ?>
-            </small>
-        </pre>
+        <pre><small><?php \yii\helpers\VarDumper::dump(@json_decode($model->al_request_data, true), 10, true); ?></small></pre>
     </div>
 
 
     <div class="col-md-6">
     <h2>Response (<?=$model->al_response_dt?>):</h2>
-        <pre><small>
-            <? \yii\helpers\VarDumper::dump(@json_decode($model->al_response_data, true), 10, true); ?>
-            <? //if($model->al_request_data) echo json_decode($model->al_request_data), true); ?>
-                </small>
-        </pre>
+        <pre><small><?php \yii\helpers\VarDumper::dump(@json_decode($model->al_response_data, true), 10, true); ?></small></pre>
     </div>
     </div>
 

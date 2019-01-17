@@ -52,7 +52,7 @@ use common\models\LoginForm;
                     <br />
 
                     <div>
-                        <h1><i class="fa fa-dollar"></i>ales - KIVORK</h1>
+                        <h1><i class="fa fa-dollar"></i>ales</h1>
                         <p>©2017-<?=date('Y')?> All Rights Reserved.</p>
                     </div>
                 </div>

@@ -120,7 +120,7 @@ use yii\helpers\Url;
 		<div class="quote__heading-left">
 			<?php if ($leadForm->mode != $leadForm::VIEW_MODE && in_array($model->status, [$model::STATUS_CREATED, $model::STATUS_SEND])) : ?>
 			<div class="custom-checkbox">
-				<input class="quotes-uid" id="q<?= $model->uid ?>" value="<?= $model->uid ?>" type="checkbox" name="quote[<?= $model->uid ?>]">
+				<input class="quotes-uid" id="q<?= $model->uid ?>" value="<?= $model->uid ?>" data-id="<?=$model->id?>" type="checkbox" name="quote[<?= $model->uid ?>]">
                 <label for="q<?= $model->uid ?>"></label>
 			</div>
             <?php endif; ?>

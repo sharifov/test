@@ -7,6 +7,7 @@ use common\models\ApiLog;
 use common\models\search\ApiLogSearch;
 use yii\filters\AccessControl;
 use yii\helpers\FileHelper;
+use yii\helpers\VarDumper;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -24,9 +25,9 @@ class ToolsController extends FController
                 'class' => AccessControl::class,
                 'rules' => [
                     [
-                        'actions' => ['clear-cache'],
+                        'actions' => ['clear-cache', 'supervisor'],
                         'allow' => true,
-                        'roles' => ['supervision'],
+                        'roles' => ['supervision', 'admin'],
                     ]
                 ],
             ],
@@ -89,5 +90,22 @@ class ToolsController extends FController
         }
 
         return $this->redirect(Yii::$app->request->referrer);
+    }
+
+    public function actionSupervisor(): string
+    {
+
+        //$supervisor = new \Supervisor\Api('127.0.0.1', 9001, 'supervisor', 'Supervisor2019!');
+
+        //$processes = $supervisor->getAllProcessInfo();
+        /*foreach ($processes as $processInfo) {
+            print_r($processInfo);
+        }*/
+
+        // Call Supervisor API
+        //VarDumper::dump($supervisor->getAllProcessInfo(), 10, true);
+         //exit;
+
+        return $this->render('supervisor');
     }
 }

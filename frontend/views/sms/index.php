@@ -3,6 +3,7 @@
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
+
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\SmsSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -13,12 +14,26 @@ $this->params['breadcrumbs'][] = $this->title;
 <div class="sms-index">
 
     <h1><?= Html::encode($this->title) ?></h1>
-    <?php Pjax::begin(); ?>
-    <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
 
-    <p>
-        <?= Html::a('Create Sms', ['create'], ['class' => 'btn btn-success']) ?>
-    </p>
+    <?php if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) : ?>
+    <div class="lead-search">
+        <div class="row">
+            <div class="col-md-3">
+                <p>
+                    <?= Html::a('Create Sms', ['create'], ['class' => 'btn btn-success']) ?>
+                </p>
+            </div>
+            <div class="col-md-9">
+                <?php
+                echo $this->render('_inboxform', [
+                    'model' => $inboxModel
+                ]);
+                ?>
+            </div>
+        </div>
+    </div>
+    <?php endif; ?>
+    <?php Pjax::begin(); ?>
 
     <?= GridView::widget([
         'dataProvider' => $dataProvider,

@@ -6,7 +6,7 @@ return [
 
 
 
-    'appName' => 'KIVORK - Sales',
+    'appName' => 'Sales',
     'checkIpURL' => 'http://timezoneapi.io/api/ip/?',
 
     'url_address'      => 'https://sales.travelinsides.com',

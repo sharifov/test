@@ -13,13 +13,13 @@ use common\models\TipsSplit;
 if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
     $userList = \common\models\Employee::getList();
 } else {
-    $userList = \common\models\Employee::getListByUserId(Yii::$app->user->id);
+    $userList = \common\models\Employee::getListByRole('agent');
 }
 
 $js = <<<JS
 $(function(){
     $(document).on('beforeValidate','#split-form', function (e) {
-        $('#new-split-block').remove();
+        $('#new-split-tips-block').remove();
         return true;
     });
 
@@ -60,7 +60,7 @@ $this->registerJs($js);?>
 	<div class="col-md-4">Tips for main agent (<b><?= $lead->employee->username?></b>): $<span id="main-agent-tips"><?= $mainAgentTips?></span></div>
 	<div class="col-md-4">
 	<?= Html::button('<span class="btn-icon"><i class="fa fa-plus"></i></span><span>Add Agent</span>', [
-            'id' => 'new-split-button',
+            'id' => 'new-split-tips-button',
             'class' => 'btn btn-success btn-with-icon pull-right' ,
         ]); ?>
 	</div>
@@ -86,7 +86,7 @@ $this->registerJs($js);?>
         }
     }
     ?>
-    <div id="new-split-block" style="display: none;">
+    <div id="new-split-tips-block" style="display: none;">
         <?php $newSplit = new TipsSplit(); ?>
         <?= $this->render('partial/_formSplitTips', [
             'key' => '__id__',
@@ -101,9 +101,9 @@ $this->registerJs($js);?>
 <script>
     // add split button
     var split_k = <?php echo isset($key) ? str_replace('new', '', $key) : 0; ?>;
-    $('#new-split-button').on('click', function () {
+    $('#new-split-tips-button').on('click', function () {
         split_k += 1;
-        $('#tips-splits').append($('#new-split-block').html().replace(/__id__/g, 'new' + split_k));
+        $('#tips-splits').append($('#new-split-tips-block').html().replace(/__id__/g, 'new' + split_k));
     });
 
     // remove split button

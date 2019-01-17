@@ -352,6 +352,39 @@ class SiteController extends FController
         //$searchModel->date_range = $searchModel->datetime_start.' - '. $searchModel->datetime_end;
 
 
+        $crontabJobList = [];
+        $processList = [];
+
+        @exec('cat /etc/crontab', $outCron);
+        if(isset($outCron) && count($outCron)) {
+            foreach ($outCron AS $lineCron) {
+                if(!preg_match('/(#|SHELL|PATH)/', $lineCron) && strlen($lineCron) > 2) {
+                    $crontabJobList[] = $lineCron;
+                }
+            }
+        }
+
+        @exec('ps aux | grep WorkerMan | grep -v grep', $out);
+
+        if(isset($out) && count($out)) {
+            foreach ($out AS $line) {
+                //if(!preg_match("/(grep|workqueue)/", $line)) {
+                    $tpmArr =  preg_split("#\s+#", $line);
+                    $com = '';
+                    for ($i=10; $i < count($tpmArr); $i++) {
+                        $com .= $tpmArr[$i] . ' ';
+                    }
+                    $processList[] = [
+                        'pid' => $tpmArr[1],
+                        'stime' => $tpmArr[8],
+                        'time' => $tpmArr[9],
+                        'command' => $com,
+                    ];
+                //}
+            }
+        }
+
+
         return $this->render('index_admin', [
             'dataProvider' => $dataProvider,
             'searchModel' => $searchModel,
@@ -360,6 +393,8 @@ class SiteController extends FController
             'dataEmployee' => $dataEmployee,
             'dataEmployeeSold' => $dataEmployeeSold,
             'days2' => $days2,
+            'crontabJobList' => $crontabJobList,
+            'processList' => $processList,
         ]);
 
     }

@@ -8,7 +8,7 @@ use yii\helpers\Html;
 ?>
 
 <div class="navbar nav_title" style="border: 0;">
-    <a href="/" class="site_title"><span title="<?=$host?>"><i class="fa fa-dollar"></i> Sales - KIVORK</span></a>
+    <a href="/" class="site_title"><span title="<?=$host?>"><i class="fa fa-dollar"></i> Sales</span></a>
 </div>
 <div class="clearfix"></div>
 

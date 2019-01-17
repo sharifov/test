@@ -2,9 +2,12 @@
 
 namespace frontend\controllers;
 
+use common\components\CommunicationService;
+use common\models\EmailTemplateType;
 use common\models\ProjectEmployeeAccess;
 use common\models\UserProjectParams;
 use http\Url;
+use Symfony\Component\Finder\Exception\AccessDeniedException;
 use Yii;
 use common\models\Email;
 use common\models\search\EmailSearch;
@@ -72,8 +75,8 @@ class EmailController extends FController
 
 
     /**
-     * Lists all Email models.
-     * @return mixed
+     * @return string
+     * @throws \yii\httpclient\Exception
      */
     public function actionInbox()
     {
@@ -104,17 +107,125 @@ class EmailController extends FController
 
             if(!$modelNewEmail->hasErrors() && $modelNewEmail->save()) {
 
+                $error = '';
+
                 if(Yii::$app->request->post('e_send')) {
-                    $modelNewEmail->sendMail();
+                    $out = $modelNewEmail->sendMail();
+
+                    if(isset($out['error']) && $out['error']) {
+                        $error = $out['error'];
+                    }
                 }
+
                 //$modelNewEmail->send
-                return $this->redirect(['email/inbox', 'id' => $modelNewEmail->e_id]);
+
+                if($error) {
+                    $modelNewEmail->addError('c_email_preview', 'Communication Server response: ' . $error);
+                    Yii::error($error, 'EmailController:inbox:sendMail');
+                } else {
+                    return $this->redirect(['email/inbox', 'id' => $modelNewEmail->e_id]);
+                }
             }
+        } else {
+
+            if(Yii::$app->request->get('email_email')) {
+                $modelNewEmail->e_email_from = Yii::$app->request->get('email_email');
+            }
+
+            if(Yii::$app->request->get('action') === 'new') {
+                $upp = UserProjectParams::find()->where(['LOWER(upp_email)' => strtolower($modelNewEmail->e_email_from)])->one();
+                if($upp && $upp->upp_project_id) {
+                    $modelNewEmail->e_project_id = $upp->upp_project_id;
+                }
+
+                if($modelNewEmail->e_project_id) {
+
+
+
+                    /** @var CommunicationService $communication */
+                    $communication = Yii::$app->communication;
+                    $data['origin'] = '';
+
+
+                    $content_data['email_body_html'] = '';
+                    $content_data['email_subject'] = '';
+                    $content_data['content'] = '<br>';
+
+                    //$content_data['email_reply_to'] = ;
+                    //$content_data['email_cc'] = 'chalpet-cc@gmail.com';
+                    //$content_data['email_bcc'] = 'chalpet-bcc@gmail.com';
+
+
+
+                    $projectContactInfo = [];
+
+                    $project = null;
+
+                    if($upp && $project = $upp->uppProject) {
+                        $projectContactInfo = @json_decode($project->contact_info, true);
+                        //VarDumper::dump($projectContactInfo); exit;
+                    }
+                    $language = 'en-US';
+
+
+
+                    $tpl = 'cl_agent_blank'; // 'cl_agent_blank'//EmailTemplateType::findOne($comForm->c_email_tpl_id);
+                    //$mailSend = $communication->mailSend(7, 'cl_offer', 'chalpet@gmail.com', 'chalpet2@gmail.com', $content_data, $data, 'ru-RU', 10);
+
+
+                    //$content_data = []; //$lead->getEmailData2($comForm->quoteList);
+
+                    $content_data['project'] = [
+                        'name'      => $project ? $project->name : '',
+                        'url'       => $project ? $project->link : 'https://',
+                        'address'   => $projectContactInfo['address'] ?? '',
+                        'phone'     => $projectContactInfo['phone'] ?? '',
+                        'email'     => $projectContactInfo['email'] ?? '',
+                    ];
+
+                    $content_data['contacts'] = $content_data['project'];
+
+                    $content_data['agent'] = [
+                        'name'  => Yii::$app->user->identity->full_name,
+                        'username'  => Yii::$app->user->identity->username,
+                        'phone' => $upp && $upp->upp_phone_number ? $upp->upp_phone_number : '',
+                        'email' => $upp && $upp->upp_email ? $upp->upp_email : '',
+                    ];
+
+
+                    $mailPreview = $communication->mailPreview($modelNewEmail->e_project_id, $tpl, $modelNewEmail->e_email_from, '', $content_data, $language);
+
+                    if ($mailPreview && isset($mailPreview['data'])) {
+
+                        if (isset($mailPreview['error']) && $mailPreview['error']) {
+
+                            $errorJson = @json_decode($mailPreview['error'], true);
+                            $modelNewEmail->addError('c_email_preview', 'Communication Server response: ' . ($errorJson['message'] ?? $mailPreview['error']));
+                            Yii::error($mailPreview['error'], 'EmailController:inbox:mailPreview');
+
+                            //$modelNewEmail->e_email_body_html = ($errorJson['message'] ?? $mailPreview['error']);
+
+                        } else {
+                            $modelNewEmail->e_email_body_html = $mailPreview['data']['email_body_html'];
+                        }
+                    }
+
+                    $modelNewEmail->e_email_subject = '✈️ ' . ($project ? $project->name : ''). ' - ' . Yii::$app->user->identity->username; //$mailPreview['data']['email_subject'];
+
+                }
+
+            }
+
+
         }
 
         $params = Yii::$app->request->queryParams;
         $params['email_type_id'] = Yii::$app->request->get('email_type_id', Email::FILTER_TYPE_ALL);
+
         $params['EmailSearch']['e_project_id'] = Yii::$app->request->get('email_project_id');
+        $params['EmailSearch']['user_id'] = Yii::$app->user->id;
+        $params['EmailSearch']['email'] = Yii::$app->request->get('email_email');
+
 
         $dataProvider = $searchModel->searchEmails($params);
 
@@ -144,12 +255,21 @@ class EmailController extends FController
             $mail = Email::findOne($e_id);
 
             if($mail) {
+
+                /*if(!$mail->e_project_id) {
+                    $upp = UserProjectParams::find()->where(['LOWER(upp_email)' => strtolower($modelNewEmail->e_email_from)])->one();
+                    if($upp && $upp->upp_project_id) {
+                        $modelNewEmail->e_project_id = $upp->upp_project_id;
+                    }
+                }*/
+
                 $modelNewEmail = new Email();
                 $modelNewEmail->e_project_id = $mail->e_project_id;
-                $modelNewEmail->e_email_from = $mail->e_email_to;
-                $modelNewEmail->e_email_to = $mail->e_email_from;
+                $modelNewEmail->e_email_from = $modelNewEmail->e_type_id == Email::TYPE_INBOX ? $mail->e_email_to : $mail->e_email_from;
+                $modelNewEmail->e_email_to = $modelNewEmail->e_type_id == Email::TYPE_INBOX ? $mail->e_email_from : $mail->e_email_to;
                 $modelNewEmail->e_email_subject = 'Re: ' . $mail->e_email_subject;
-                $modelNewEmail->e_message_id = $modelNewEmail->generateMessageId();
+
+                //$modelNewEmail->e_message_id = $modelNewEmail->generateMessageId();
                 // $modelNewEmail->e_email_body_html = '<p>Hi '.Html::encode($modelNewEmail->e_email_to).'!</p><blockquote>'.nl2br(Email::strip_html_tags($mail->e_email_body_html)).'</blockquote><p>The best regards, <br>'.Html::encode(Yii::$app->user->identity->username).'</p>';
 
                 $modelNewEmail->e_email_body_html = '<!DOCTYPE html><html><head><title>Redactor</title><meta charset="UTF-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" /></head><body><p>Hi '.Html::encode($modelNewEmail->e_email_to).'!</p><blockquote>'.nl2br(Email::strip_html_tags($mail->e_email_body_html)).'</blockquote><p>The best regards, <br>'.Html::encode(Yii::$app->user->identity->username).'</p></body></html>';
@@ -165,11 +285,23 @@ class EmailController extends FController
         }
 
 
+        $mailList = [];
+
+        $mails = UserProjectParams::find()->select(['upp_email'])->where(['upp_user_id' => Yii::$app->user->id])->andWhere(['!=', 'upp_email', ''])->asArray()->all();
+        if($mails) {
+            $mailList = ArrayHelper::map($mails, 'upp_email', 'upp_email');
+        }
+
+        $projectList = \common\models\Project::getListByUser(Yii::$app->user->id);
+
+
         return $this->render('inbox', [
             //'searchModel'     => $searchModel,
             'dataProvider'      => $dataProvider,
             'modelEmailView'    => $modelEmailView,
-            'modelNewEmail'     => $modelNewEmail
+            'modelNewEmail'     => $modelNewEmail,
+            'mailList'          => $mailList,
+            'projectList'       => $projectList,
         ]);
     }
 
@@ -184,10 +316,18 @@ class EmailController extends FController
 
         $model =$this->findModel($id);
 
+        $is_admin = Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id);
+
+        if(!$is_admin) {
+            $userAccess = UserProjectParams::find()->where(['or', ['upp_email' => $model->e_email_from], ['upp_email' => $model->e_email_to]])->andWhere(['upp_user_id' => Yii::$app->user->id])->exists();
+            if(!$userAccess) {
+                throw new AccessDeniedException('Access Denied. Email ID:'.$model->e_id);
+            }
+        }
+
         if(Yii::$app->request->get('preview')) {
            return $model->e_email_body_html;
         }
-
 
         return $this->render('view', [
             'model' => $model,

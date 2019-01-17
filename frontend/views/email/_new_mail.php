@@ -6,6 +6,8 @@ use yii\widgets\ActiveForm;
 /* @var $this yii\web\View */
 /* @var $model common\models\Email */
 /* @var $form yii\widgets\ActiveForm */
+/* @var $mailList [] */
+/* @var $action string */
 
 
 ?>
@@ -28,19 +30,34 @@ use yii\widgets\ActiveForm;
                     ],
                 ])*/ ?>
 
+
             </div>
         </div>
         <div class="col-md-4 text-right">
             <p class="date"><i class="fa fa-calendar"></i> <?=Yii::$app->formatter->asDatetime(time())?></p>
         </div>
         <div class="col-md-12">
-            <h4></h4>
+            <?php if($action === 'create'):?>
+                <h4>Create new mail</h4>
+            <?php endif; ?>
+
+            <?php if($action === 'update'):?>
+                <h4>Edit mail message</h4>
+            <?php endif; ?>
+
+            <?php if($action === 'reply'):?>
+                <h4>Reply message</h4>
+            <?php endif; ?>
+
         </div>
     </div>
 
     <div class="view-mail">
 
         <?php $form = ActiveForm::begin(); ?>
+
+
+        <?php echo $form->errorSummary($model)?>
 
         <?//= $form->field($model, 'e_reply_id')->textInput() ?>
         <?//= $form->field($model, 'e_lead_id')->textInput() ?>
@@ -56,7 +73,14 @@ use yii\widgets\ActiveForm;
 
         <div class="row">
             <div class="col-md-4">
-                <?= $form->field($model, 'e_email_from')->textInput(['maxlength' => true]) ?>
+                <?php if($action === 'create' || $action === 'update' || $action === 'reply'):?>
+                    <?= $form->field($model, 'e_email_from')->textInput(['maxlength' => true, 'readonly' => true]) ?>
+                <?php else: ?>
+                    <?= $form->field($model, 'e_email_from')->dropDownList($mailList, ['prompt' => '--- select email ---']) ?>
+                <?php endif; ?>
+
+                <?//= $form->field($model, 'e_email_from')->textInput(['maxlength' => true]) ?>
+
             </div>
             <div class="col-md-4">
                 <?= $form->field($model, 'e_email_to')->textInput(['maxlength' => true]) ?>
@@ -70,9 +94,10 @@ use yii\widgets\ActiveForm;
             <div class="col-md-8">
                 <?= $form->field($model, 'e_email_subject')->textInput(['maxlength' => true]) ?>
             </div>
+            <?/*
             <div class="col-md-4">
                 <?= $form->field($model, 'e_message_id')->textInput(['readonly' => true]) ?>
-            </div>
+            </div>*/?>
         </div>
         <div class="clearfix"></div>
 
@@ -150,8 +175,8 @@ use yii\widgets\ActiveForm;
         <?//= $form->field($model, 'e_error_message')->textInput(['maxlength' => true]) ?>
 
 
-        <div class="form-group">
-            <?= Html::submitButton('<i class="fa fa-edit"></i> Save', ['class' => 'btn btn-warning']) ?>
+        <div class="form-group text-center">
+            <?/*= Html::submitButton('<i class="fa fa-edit"></i> Save', ['class' => 'btn btn-warning'])*/ ?>
             <?= Html::submitButton('<i class="fa fa-send"></i> Send Message', ['class' => 'btn btn-success', 'onclick' => '$("#e_send").val(1)']) ?>
         </div>
 

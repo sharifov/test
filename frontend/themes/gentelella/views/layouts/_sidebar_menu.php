@@ -8,6 +8,7 @@ use yii\bootstrap\Nav;
 
 $isAdmin = Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id);
 $isSupervision = Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id);
+$isAgent = Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id);
 $isCoach = Yii::$app->authManager->getAssignment('coach', Yii::$app->user->id);
 
 
@@ -58,6 +59,20 @@ $isCoach = Yii::$app->authManager->getAssignment('coach', Yii::$app->user->id);
             $menuItems[] = ['label' => 'Search Leads', 'url' => ['/leads/index'], 'icon' => 'search'];
 
 
+            if($isAdmin) {
+                $cntNotifications = \common\models\Notifications::findNewCount(Yii::$app->user->id);
+
+                $menuItems[] = [
+                    'label' => 'My Notifications' .
+                        '<span id="div-cnt-notification">' . ($cntNotifications ? '<span class="label-success label pull-right">' . $cntNotifications . '</span>' : '') . '</span>',
+                    'url' => ['/notifications/list'],
+                    'icon' => 'comment',
+                ];
+
+                $menuItems[] = ['label' => 'My Mails <span id="email-inbox-queue" class="label-info label pull-right"></span> ', 'url' => ['/email/inbox'], 'icon' => 'envelope'];
+            }
+
+
             if($isAdmin || $isSupervision) {
                 $menuItems[] = [
                     'label' => 'Additional',
@@ -80,25 +95,16 @@ $isCoach = Yii::$app->authManager->getAssignment('coach', Yii::$app->user->id);
 
 
 
-            $menuItems[] = [
-                'label' => 'Reports',
-                'url' => 'javascript:',
-                'icon' => 'bar-chart',
-                'items' => [
-                    ['label' => 'Sold', 'url' => ['report/sold']],
-                ]
-                //'linkOptions' => ['data-method' => 'post']
-            ];
-
-
-
+            if($isAdmin || $isAgent)
+            {
+                $menuItems[] = ['label' => 'KPI <span id="kpi" class="label-info label pull-right"></span> ', 'url' => ['/kpi'], 'icon' => 'money'];
+            }
 
 
             if (!$isCoach) {
 
                 if($isAdmin) {
-                $menuItems[] = ['label' => 'Mail inbox <span id="email-inbox-queue" class="label-info label pull-right"></span> ', 'url' => ['/email/inbox'], 'icon' => 'envelope'];
-                $menuItems[] = ['label' => 'SMS inbox <span id="sms-inbox-queue" class="label-info label pull-right"></span> ', 'url' => ['/sms/index'], 'icon' => 'comments-o'];
+                    $menuItems[] = ['label' => 'SMS inbox <span id="sms-inbox-queue" class="label-info label pull-right"></span> ', 'url' => ['/sms/index'], 'icon' => 'comments-o'];
                 }
                 $badges = \common\models\Lead::getBadgesSingleQuery();
 
@@ -132,6 +138,7 @@ $isCoach = Yii::$app->authManager->getAssignment('coach', Yii::$app->user->id);
                     'url' => 'javascript:',
                     'icon' => 'user',
                     'items' => [
+                        ['label' => 'User Connections', 'url' => ['/user-connection/index'], 'icon' => 'plug'],
                         ['label' => 'Users', 'url' => ['employee/list'], 'icon' => 'user'],
                         ['label' => 'User Groups', 'url' => ['user-group/index'], 'icon' => 'users'],
                         ['label' => 'User Groups Assignments', 'url' => ['user-group-assign/index'], 'icon' => 'users'],
@@ -156,6 +163,7 @@ $isCoach = Yii::$app->authManager->getAssignment('coach', Yii::$app->user->id);
                         ['label' => 'Lead Tasks', 'url' => ['lead-task/index'], 'icon' => 'list'],
                         ['label' => 'Email template types', 'url' => ['/email-template-type/index'], 'icon' => 'envelope-o'],
                         ['label' => 'SMS template types', 'url' => ['/sms-template-type/index'], 'icon' => 'comments-o'],
+                        ['label' => 'All Notifications', 'url' => ['/notifications/index'], 'icon' => 'comment-o'],
                     ]
                 ];
 
@@ -268,6 +276,7 @@ $isCoach = Yii::$app->authManager->getAssignment('coach', Yii::$app->user->id);
                         ['label' => 'System Logs', 'url' => ['/log/index'], 'icon' => 'bars'],
                         //['label' => 'Clear cache', 'url' => ['/tools/clear-cache'], 'icon' => 'remove'],
                         ['label' => 'Clean cache & assets', 'url' => ['/clean/index'], 'icon' => 'remove'],
+                        //['label' => 'Supervisor Service', 'url' => ['/tools/supervisor'], 'icon' => 'user'],
                     ]
                     //'linkOptions' => ['data-method' => 'post']
                 ];

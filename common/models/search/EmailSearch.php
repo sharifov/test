@@ -2,6 +2,7 @@
 
 namespace common\models\search;
 
+use common\models\UserProjectParams;
 use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
@@ -117,6 +118,8 @@ class EmailSearch extends Email
             ],
         ]);
 
+        //var_dump($params);        exit;
+
         $this->load($params);
 
         if(isset($params['email_type_id']) && $params['email_type_id'] > 0) {
@@ -140,6 +143,20 @@ class EmailSearch extends Email
             elseif($this->email_type_id == Email::FILTER_TYPE_TRASH) {
                 $query->where(['e_is_deleted' => true]);
             }
+        }
+
+
+
+        if(isset($params['EmailSearch']['user_id']) && $params['EmailSearch']['user_id'] > 0) {
+            $subQuery = UserProjectParams::find()->select(['upp_email'])->where(['upp_user_id' => $params['EmailSearch']['user_id']])->andWhere(['!=', 'upp_email', '']);
+            $query->andWhere(['or', ['IN', 'e_email_from', $subQuery], ['IN', 'e_email_to', $subQuery]]);
+        }
+
+
+
+        if(isset($params['EmailSearch']['email']) && $params['EmailSearch']['email']) {
+            $params['EmailSearch']['email'] = strtolower(trim($params['EmailSearch']['email']));
+            $query->andWhere(['or', ['e_email_from' => $params['EmailSearch']['email']], ['e_email_to' => $params['EmailSearch']['email']]]);
         }
 
 

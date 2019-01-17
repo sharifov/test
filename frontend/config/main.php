@@ -61,6 +61,20 @@ return [
                         return "[frontend][$ip][$userID]";
                     },
                 ],
+                [
+                    'class' => 'yii\log\DbTarget',
+                    'levels' => ['info'],
+                    'except' => [
+                        'yii\web\HttpException:404',
+                    ],
+                    'logVars' => [],
+                    'categories' => ['info\*'],
+                    'prefix' => function () {
+                        $userID = Yii::$app->user->isGuest ? '-' : Yii::$app->user->id;
+                        $ip = $_SERVER['REMOTE_ADDR'];
+                        return "[frontend][$ip][$userID]";
+                    },
+                 ],
             ],
         ],
         'errorHandler' => [
@@ -72,13 +86,13 @@ return [
             'showScriptName' => false,
             'enableStrictParsing' => false,
             'rules' => [
-                [
+                /*[
                     'pattern' => 'queue/<type:(inbox1|follow-up1|processing1|processing-all|booked1|trash1)>',
                     'route' => 'lead/queue',
-                ],
+                ],*/
                 [
-                    'pattern' => 'lead/<type:(inbox|follow-up|processing|processing-all|booked|sold|trash)>/<id>',
-                    'route' => 'lead/quote',
+                    'pattern' => 'lead/view/<id>',
+                    'route' => 'lead/view',
                 ],
                 [
                     'pattern' => 'take/<id>',
@@ -145,6 +159,16 @@ return [
         'gridview' =>  [
             'class' => '\kartik\grid\Module'
         ],
+
+        /*'supervisor' => [
+            'class'    => 'supervisormanager\Module',
+            'authData' => [
+                'user'     => 'supervisor',
+                'password' => 'Supervisor2019!',
+                'url'      => 'http://127.0.0.1:9001/RPC2' // Set by default
+            ]
+        ],*/
+
         'translatemanager' => [
             'class'                     => \lajax\translatemanager\Module::class,
             'root'                      => '@common/templates',               // The root directory of the project scan.

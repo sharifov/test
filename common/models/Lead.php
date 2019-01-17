@@ -373,7 +373,7 @@ class Lead extends ActiveRecord
         }
 
         if (Yii::$app->user->identity->role == 'agent') {
-            $sold = $employee;
+            $sold = ' AND (employee_id = ' . $userId.' OR ps.ps_user_id ='.$userId.' OR ts.ts_user_id ='.$userId.')';
         }
         $default = implode(',', [
             self::STATUS_PROCESSING,
@@ -382,18 +382,20 @@ class Lead extends ActiveRecord
         ]);
 
         $select = [
-            'inbox' => 'SUM(CASE WHEN status IN (:inbox) THEN 1 ELSE 0 END)',
-            'follow-up' => 'SUM(CASE WHEN status IN (:followup) ' . $created . ' THEN 1 ELSE 0 END)',
-            'booked' => 'SUM(CASE WHEN status IN (:booked) ' . $created . $employee . ' THEN 1 ELSE 0 END)',
-            'sold' => 'SUM(CASE WHEN status IN (:sold) ' . $created . $sold . $employee . ' THEN 1 ELSE 0 END)',
-            'processing' => 'SUM(CASE WHEN status IN (' . $default . ') ' . $employee . ' THEN 1 ELSE 0 END)'];
+            'inbox' => 'COUNT(DISTINCT CASE WHEN status IN (:inbox) THEN leads.id ELSE NULL END)',
+            'follow-up' => 'COUNT(DISTINCT CASE WHEN status IN (:followup) ' . $created . '  THEN leads.id ELSE NULL END)',
+            'booked' => 'COUNT(DISTINCT CASE WHEN status IN (:booked) ' . $created . ' THEN leads.id ELSE NULL END)',
+            'sold' => 'COUNT(DISTINCT CASE WHEN status IN (:sold) ' . $created . $sold .$employee . ' THEN leads.id ELSE NULL END)',
+            'processing' => 'COUNT(DISTINCT CASE WHEN status IN (' . $default . ') ' . $employee . ' THEN leads.id ELSE NULL END)'];
 
         if (Yii::$app->user->identity->role != 'agent') {
-            $select['trash'] = 'SUM(CASE WHEN status IN (' . self::STATUS_TRASH . ') ' . $created . $employee . ' THEN 1 ELSE 0 END)';
+            $select['trash'] = 'COUNT(DISTINCT CASE WHEN status IN (' . self::STATUS_TRASH . ') ' . $created . $employee . ' THEN leads.id ELSE NULL END)';
         }
 
         $query = self::find()
             ->select($select)
+            ->leftJoin(ProfitSplit::tableName().' ps','ps.ps_lead_id = leads.id')
+            ->leftJoin(TipsSplit::tableName().' ts','ts.ts_lead_id = leads.id')
             ->andWhere(['IN', 'project_id', $projectIds])
             ->addParams([':inbox' => self::STATUS_PENDING,
                 ':followup' => self::STATUS_FOLLOW_UP,
@@ -2005,6 +2007,121 @@ Sales - Kivork",
         return $result;
     }
 
+
+    /**
+     * @param array $quoteIds
+     * @return array
+     */
+    public function getEmailData2($quoteIds = []) : array
+    {
+        $project = $this->project;
+
+        $upp = null;
+        if ($project) {
+            $upp = UserProjectParams::find()->where(['upp_project_id' => $project->id, 'upp_user_id' => Yii::$app->user->id])->one();
+            /*if ($upp) {
+                $mailFrom = $upp->upp_email;
+            }*/
+        }
+
+
+        if($quoteIds && is_array($quoteIds)) {
+            foreach ($quoteIds as $qid) {
+                $quoteModel = Quote::findOne($qid);
+                if($quoteModel) {
+
+                    //$quoteItem = $quoteModel->getInfoForEmail2();
+                    $quoteItem = [
+                        'id' => $quoteModel->id,
+                        'uid' => $quoteModel->uid,
+                        'cabinClass' => $quoteModel->cabin,
+                        'tripType' => $quoteModel->trip_type,
+
+                        //'airlineCode' => $quoteModel->main_airline_code,
+                        //'offerData' =>  $quoteModel->getInfoForEmail2()
+                        //'shortUrl' => $quoteModel->quotePrice(),
+                    ];
+
+                    $quoteItem = array_merge($quoteItem, $quoteModel->getInfoForEmail2());
+
+                    $content_data['quotes'][] = $quoteItem;
+                }
+            }
+        }
+
+
+        $content_data['lead'] = [
+            'id'  => $this->id,
+            'uid' => $this->uid
+        ];
+
+        $content_data['project'] = [
+            'name'      => $project ? $project->name : '',
+            'url'       => $project ? $project->link : 'https://',
+            'address'   => $projectContactInfo['address'] ?? '',
+            'phone'     => $projectContactInfo['phone'] ?? '',
+            'email'     => $projectContactInfo['email'] ?? '',
+        ];
+
+        $content_data['agent'] = [
+            'name'  => Yii::$app->user->identity->full_name,
+            'username'  => Yii::$app->user->identity->username,
+            'phone' => $upp && $upp->upp_phone_number ? $upp->upp_phone_number : '',
+            'email' => $upp && $upp->upp_email ? $upp->upp_email : '',
+        ];
+
+        $content_data['client'] = [
+            'fullName'     => $this->client ? $this->client->full_name : '',
+            'firstName'    => $this->client ? $this->client->first_name : '',
+            'lastName'     => $this->client ? $this->client->last_name : '',
+        ];
+
+
+        $arriveCity = '';
+        $departCity = '';
+
+        $arriveIATA = '';
+        $departIATA = '';
+
+        if($leadSegments = $this->leadFlightSegments) {
+            $firstSegment = $leadSegments[0];
+            $lastSegment = end($leadSegments);
+
+            $departIATA = $firstSegment->origin;
+            $arriveIATA = $lastSegment->destination;
+
+            $departAirport = Airport::find()->where(['iata' => $firstSegment->origin])->one();
+            if($departAirport) {
+                $departCity = $departAirport->city;
+            } else {
+                $departCity = $firstSegment->origin;
+            }
+
+
+            $arriveAirport = Airport::find()->where(['iata' => $lastSegment->destination])->one();
+            if($arriveAirport) {
+                $arriveCity = $arriveAirport->city;
+            } else {
+                $arriveCity = $lastSegment->destination;
+            }
+
+        }
+
+        $content_data['request'] = [
+            'arriveCity'    => $arriveCity,
+            'departCity'    => $departCity,
+            'arriveIATA'    => $arriveIATA,
+            'departIATA'    => $departIATA,
+            'tripType'      => $this->trip_type,
+            'cabinClass'    => $this->cabin,
+            'paxAdt'        => (int) $this->adults,
+            'paxChd'        => (int) $this->children,
+            'paxInf'        => (int) $this->infants,
+            'paxTotal'      => (int) $this->adults + (int) $this->children + (int) $this->infants
+        ];
+
+        return $content_data;
+    }
 
     public function getEmailData($quotesUids)
     {

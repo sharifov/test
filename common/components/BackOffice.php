@@ -23,16 +23,16 @@ class BackOffice
         ]);
         $result = curl_exec($ch);
 
-        Yii::warning(sprintf("Request:\n%s\n\nDump:\n%s\n\nResponse:\n%s",
+        /*Yii::warning(sprintf("Request:\n%s\n\nDump:\n%s\n\nResponse:\n%s",
             print_r($fields, true),
             print_r(curl_getinfo($ch), true),
             print_r($result, true)
-        ), 'BackOffice component');
+        ), 'BackOffice component');*/
 
         return json_decode($result, true);
     }
 
-    private function getSignature()
+    private function getSignature(): string
     {
         $expired = time() + 3600;
         $md5 = md5(sprintf('%s:%s:%s', Yii::$app->params['sync']['apiKey'], Yii::$app->params['sync']['ver'], $expired));

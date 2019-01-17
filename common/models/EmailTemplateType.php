@@ -7,6 +7,7 @@ use Yii;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
+use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
 
 /**
@@ -180,5 +181,20 @@ class EmailTemplateType extends \yii\db\ActiveRecord
         }
 
         return $data;
+    }
+
+
+    /**
+     * @param bool $withHidden
+     * @return array
+     */
+    public static function getList($withHidden = true) : array
+    {
+        $query = self::find()->orderBy(['etp_name' => SORT_ASC]);
+        if(!$withHidden) {
+            $query->andWhere(['etp_hidden' => false]);
+        }
+        $data = $query->asArray()->all();
+        return ArrayHelper::map($data, 'etp_id', 'etp_name');
     }
 }

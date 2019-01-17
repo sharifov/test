@@ -20,7 +20,11 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'e_email_from')->textInput(['maxlength' => true]) ?>
 
+    <?= $form->field($model, 'e_email_from_name')->textInput(['maxlength' => true]) ?>
+
     <?= $form->field($model, 'e_email_to')->textInput(['maxlength' => true]) ?>
+
+    <?= $form->field($model, 'e_email_to_name')->textInput(['maxlength' => true]) ?>
 
     <?= $form->field($model, 'e_email_cc')->textInput(['maxlength' => true]) ?>
 

@@ -16,6 +16,7 @@ use yii\helpers\ArrayHelper;
  * @property string $contact_info
  * @property int $closed
  * @property string $last_update
+ * @property string $custom_data
  *
  * @property Source[] $sources
  * @property ContactInfo $contactInfo
@@ -38,7 +39,7 @@ class Project extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['contact_info'], 'string'],
+            [['contact_info','custom_data'], 'string'],
             [['closed'], 'integer'],
             [['last_update'], 'safe'],
             [['name', 'link', 'api_key'], 'string', 'max' => 255],
@@ -58,6 +59,7 @@ class Project extends \yii\db\ActiveRecord
             'contact_info' => 'Contact Info',
             'closed' => 'Closed',
             'last_update' => 'Last Update',
+            'custom_data' => 'Custom Data',
         ];
     }
 
@@ -94,4 +96,16 @@ class Project extends \yii\db\ActiveRecord
         $data = self::find()->orderBy(['name' => SORT_ASC])->asArray()->all();
         return ArrayHelper::map($data,'id', 'name');
     }
+
+
+    /**
+     * @param int $user_id
+     * @return array
+     */
+    public static function getListByUser(int $user_id = 0) : array
+    {
+        $data = ProjectEmployeeAccess::find()->select(['project_id'])->with('project')->where(['employee_id' => $user_id])->all();
+        return ArrayHelper::map($data,'project_id', 'project.name');
+    }
+
 }
