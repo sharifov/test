@@ -11,6 +11,8 @@ use yii\helpers\ArrayHelper;
 use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
 use yii\helpers\VarDumper;
+use common\components\ReceiveEmailsJob;
+use yii\queue\Queue;
 
 
 /**
@@ -220,13 +222,26 @@ class TestController extends FController
 
     }
 
-    public function actionTest2()
+    public function actionEmailJob()
     {
-        $mails = UserProjectParams::find()->select(['DISTINCT(upp_email)'])->andWhere(['!=', 'upp_email', ''])->asArray()->all();
-        if($mails) {
-            $mailList = ArrayHelper::getColumn($mails,'upp_email');
-        }
-        VarDumper::dump($mailList, 10, true);
+
+        $job = new ReceiveEmailsJob();
+
+        $job->last_email_id = 18964;
+
+        $data = [
+            'last_email_id' => 18964,
+            'run_all' => 'ok',
+        ];
+
+        $job->request_data = $data;
+
+        /** @var Queue $queue */
+        $queue = \Yii::$app->queue_email_job;
+
+        $queue->push($job);
+
+        return 'ok';
     }
 
 }

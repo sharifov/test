@@ -13,6 +13,10 @@ use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
 use yii\web\NotFoundHttpException;
 use yii\web\UnprocessableEntityHttpException;
+use common\models\UserProjectParams;
+use yii\helpers\ArrayHelper;
+use common\components\ReceiveEmailsJob;
+use yii\queue\Queue;
 
 class CommunicationController extends ApiBaseController
 {
@@ -349,16 +353,6 @@ class CommunicationController extends ApiBaseController
             }
             $filter['limit'] = 20;
 
-
-
-            /*$email_to = Yii::$app->request->post('email_to');
-            $email_from = Yii::$app->request->post('email_from');
-            $limit = Yii::$app->request->post('limit');
-            $offset = Yii::$app->request->post('offset');
-            $new = Yii::$app->request->post('new');
-            $last_id = Yii::$app->request->post('last_id');
-            $last_dt = Yii::$app->request->post('last_dt');*/
-
             $mailList = [];
 
             $mails = UserProjectParams::find()->select(['DISTINCT(upp_email)'])->andWhere(['!=', 'upp_email', ''])->asArray()->all();
@@ -368,140 +362,18 @@ class CommunicationController extends ApiBaseController
 
             $filter['mail_list'] = $mailList;
 
-
-            while ($this->accessEmailRequest  &&  $cicleCount < 100) {
-
-                $res = $communication->mailGetMessages($filter);
-                //VarDumper::dump($res); exit;
-                if (isset($res['error']) && $res['error']) {
-                    $response['error'] = 'Error mailGetMessages';
-                    $response['error_code'] = 13;
-
-                    Yii::error(VarDumper::dumpAsString($res['error']), 'API:Communication:newEmailMessagesReceived:mailGetMessages');
-
-                    $res['data']['emails'] = [];
-
-                } elseif (isset($res['data']['emails']) && $res['data']['emails'] && \is_array($res['data']['emails'])) {
-
-                    /*if (count($res['data']['emails']) < 1) {
-                        $this->accessEmailRequest = false;
-                        $response[] = [
-                            'total' => $countTotal,
-                            'cicle_num' => $cicleCount,
-                        ];
-                        return $response;
-                    }*/
-
-                    /*
-                    * @property int $ei_id
-                    * @property string $ei_email_to
-                    * @property string $ei_email_from
-                    * @property string $ei_email_subject
-                    * @property string $ei_email_text
-                    * @property string $ei_email_category
-                    * @property int $ei_project_id
-                    * @property bool $ei_new
-                    * @property bool $ei_deleted
-                    * @property string $ei_created_dt
-                    * @property string $ei_updated_dt
-                    * @property string $ei_ref_mess_ids
-                    * @property string $ei_message_id
-                        */
-
-
-                    $leadArray = [];
-                    $userArray = [];
-
-                    foreach ($res['data']['emails'] as $mail) {
-                        $filter['last_id'] = $mail['ei_id'] + 1;
-
-                        $find = Email::find()->where([
-                            "e_message_id" => $mail['ei_message_id'],
-                            "e_email_to" => $mail['ei_email_to']]
-                        )->one();
-
-                        if($find) {
-                            $find->e_inbox_email_id = $mail['ei_id'];
-                            $find->save();
-                            continue;
-                        }
-
-                        $email = new Email();
-
-                        $email->e_type_id = Email::TYPE_INBOX;
-                        $email->e_status_id = Email::STATUS_DONE;
-                        $email->e_is_new = true;
-
-                        $email->e_email_to = $mail['ei_email_to'];
-                        $email->e_email_to_name = $mail['ei_email_to_name'] ?? null;
-                        $email->e_email_from = $mail['ei_email_from'];
-                        $email->e_email_from_name = $mail['ei_email_from_name'] ?? null;
-                        $email->e_email_subject = $mail['ei_email_subject'];
-                        if ($mail['ei_project_id'] > 0) {
-                            $project = Project::findOne($mail['ei_project_id']);
-                            if ($project) {
-                                $email->e_project_id = $project->id;
-                            }
-                        }
-                        $email->e_email_body_html = $mail['ei_email_text'];
-                        $email->e_created_dt = $mail['ei_created_dt'];
-
-                        $email->e_inbox_email_id = $mail['ei_id'];
-                        $email->e_inbox_created_dt = $mail['ei_created_dt'];
-                        $email->e_ref_message_id = $mail['ei_ref_mess_ids'];
-                        $email->e_message_id = $mail['ei_message_id'];
-
-                        $lead_id = $email->detectLeadId();
-                        $users = $email->getUsersIdByEmail();
-
-                        if ($users) {
-                            foreach ($users as $user_id) {
-                                $userArray[$user_id] = $user_id;
-                            }
-                        }
-
-                        if ($lead_id) {
-                            Yii::info('Email Detected LeadId ' . $lead_id . ' from ' . $email->e_email_from, 'info\API:Communication:newEmailMessagesReceived:Email');
-                            $leadArray[$lead_id] = $lead_id;
-                        }
-
-                        if (!$email->save()) {
-                            Yii::error(VarDumper::dumpAsString($email->errors), 'API:Communication:newEmailMessagesReceived:Email:save');
-                        }
-
-                        $countTotal ++;
-                    }
-
-                    if ($userArray) {
-                        foreach ($userArray as $user_id) {
-                            Notifications::create($user_id, 'New Emails received', 'New Emails received. Check your inbox.', Notifications::TYPE_INFO, true);
-                            Notifications::socket($user_id, null, 'getNewNotification', [], true);
-                        }
-                    }
-
-                    if ($leadArray) {
-                        foreach ($leadArray as $lead_id) {
-                            Notifications::socket(null, $lead_id, 'updateCommunication', [], true);
-                        }
-                    }
-
-                    /*if($eq_status_id > 0) {
-                        $email->e_status_id = $eq_status_id;
-                        if($eq_status_id === Email::STATUS_DONE) {
-                            $email->e_status_done_dt = date('Y-m-d H:i:s');
-                        }
-
-
-                    }*/
-                } else {
-                    $response[] = [
-                        'total' => $countTotal,
-                        'cicle_num' => $cicleCount,
-                    ];
-                    return $response;
-                }
-                $cicleCount ++;
-            }
+            // push job
+            $job = new ReceiveEmailsJob();
+            $job->last_email_id = $filter['last_id'];
+            $data = [
+                'last_email_id' => $filter['last_id'],
+                'mail_list' => $filter['mail_list'],
+                'limit' => $filter['limit'],
+            ];
+            $job->request_data = $data;
+            /** @var Queue $queue */
+            $queue = \Yii::$app->queue_email_job;
+            $queue->push($job);
 
         } catch (\Throwable $e) {
             Yii::error($e->getTraceAsString(), 'API:Communication:newEmailMessagesReceived:Email:try');
@@ -509,10 +381,6 @@ class CommunicationController extends ApiBaseController
             $response['error'] = $message;
             $response['error_code'] = 15;
         }
-        $response[] = [
-            'total' => $countTotal,
-            'cicle_num' => $cicleCount,
-        ];
 
         return $response;
     }
