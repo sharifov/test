@@ -13,8 +13,6 @@ use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
 use yii\web\NotFoundHttpException;
 use yii\web\UnprocessableEntityHttpException;
-use common\models\UserProjectParams;
-use yii\helpers\ArrayHelper;
 use common\components\ReceiveEmailsJob;
 use yii\queue\Queue;
 
@@ -315,21 +313,12 @@ class CommunicationController extends ApiBaseController
     private function newEmailMessagesReceived($last_id = NULl): array
     {
         $response = [];
-        set_time_limit(10);
-
         try {
-
-            /** @var CommunicationService $communication */
-            $communication = Yii::$app->communication;
 
             $filter = [];
             $dateTime = null;
 
             $this->accessEmailRequest = true;
-            $cicleCount = 0;
-            $countTotal = 0;
-
-            //$filter['last_dt'] = '';
 
             if(NULL === $last_id) {
 
