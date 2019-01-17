@@ -90,7 +90,12 @@ $this->params['breadcrumbs'][] = $this->title;
                 if(!$date)
                     $date = $model->updated;
 
-                return Yii::$app->formatter->asRelativeTime(strtotime($date)); // Lead::getPendingAfterCreate($model->created);
+                $dateTS = strtotime($date);
+
+                $diffTime = time() - $dateTS;
+                $diffHours = (int) ($diffTime / (60 * 24));
+
+                return ($diffHours > 3 && $diffHours < 73 ) ? $diffHours.' hours' : Yii::$app->formatter->asRelativeTime($dateTS);
 
             },
             'format' => 'raw'
