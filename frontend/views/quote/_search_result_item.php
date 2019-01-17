@@ -65,7 +65,7 @@ data-airline="<?= $result['validatingCarrier']?>" id="search-result__quote-<?= $
 	</div>
 	<div class="quote__wrapper">
 		<div class="quote__trip">
-			<?php $tripsInfo = []?>
+			<?php $tripsInfo = []; $hasAirportChange = false;?>
 			<?php foreach ($result['trips'] as $trip):?>
 			<?php
 			$segmentsCnt = count($trip['segments']);
@@ -75,7 +75,6 @@ data-airline="<?= $result['validatingCarrier']?>" id="search-result__quote-<?= $
 			$tripsInfo[] = ((!isset($locations[$firstSegment['departureAirportCode']]))?:$locations[$firstSegment['departureAirportCode']]['city']).' → '.((!isset($locations[$lastSegment['arrivalAirportCode']]))?:$locations[$lastSegment['arrivalAirportCode']]['city']);
 			$cabins = [];
 			$hasFreeBaggage = false;
-			$hasAirportChange = false;
 			$freeBaggageInfo = '';
 			$previousSegment = null;
 			$marketingAirlines = [];
