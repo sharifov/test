@@ -33,7 +33,16 @@ $this->params['breadcrumbs'][] = $this->title;
         'columns' => [
             //['class' => 'yii\grid\SerialColumn'],
 
-            'al_id',
+            //'al_id',
+
+            [
+                'attribute' => 'al_id',
+                'value' => function(\common\models\ApiLog $model) {
+                    return $model->al_id;
+                },
+                'options' => ['style' => 'width:100px']
+            ],
+
             [
                 'attribute' => 'al_action',
                 'value' => function(\common\models\ApiLog $model) {
@@ -41,6 +50,15 @@ $this->params['breadcrumbs'][] = $this->title;
                 },
                 'filter' => \common\models\ApiLog::getActionFilter()
             ],
+
+            [
+                'label' => 'Relative Time',
+                'value' => function (\common\models\ApiLog $model) {
+                    return $model->al_request_dt ? '' . Yii::$app->formatter->asRelativeTime(strtotime($model->al_request_dt)) : '-';
+                },
+                //'format' => 'raw'
+            ],
+
             //'al_request_data:ntext',
 
             [
@@ -53,7 +71,16 @@ $this->params['breadcrumbs'][] = $this->title;
                 },
             ],
 
-            'al_request_dt',
+            //'al_request_dt',
+
+            [
+                'attribute' => 'al_request_dt',
+                'value' => function (\common\models\ApiLog $model) {
+                    return $model->al_request_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->al_request_dt)) : '-';
+                },
+                'format' => 'raw'
+            ],
+
             //'al_response_data:ntext',
             [
                 'attribute' => 'al_response_data',
@@ -64,8 +91,26 @@ $this->params['breadcrumbs'][] = $this->title;
                     return $data ? '<pre style="font-size: 10px">'.(\yii\helpers\StringHelper::truncate($data, 500, '...', null, true)).'</pre>' : '-';
                 },
             ],
-            'al_response_dt',
-            'al_user_id',
+            //'al_response_dt',
+            [
+                'attribute' => 'al_response_dt',
+                'value' => function (\common\models\ApiLog $model) {
+                    return $model->al_response_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->al_response_dt)) : '-';
+                },
+                'format' => 'raw'
+            ],
+            //'al_user_id',
+
+            [
+                'attribute' => 'al_user_id',
+                //'format' => 'html',
+                'value' => function(\common\models\ApiLog $model) {
+                    $apiUser = \common\models\ApiUser::findOne($model->al_user_id);
+                    return $apiUser ? $apiUser->au_name . ' ('.$model->al_user_id.')' : $model->al_user_id;
+                },
+                'filter' => \common\models\ApiUser::getList()
+            ],
+
             'al_ip_address',
 
             ['class' => 'yii\grid\ActionColumn'],
