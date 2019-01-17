@@ -32,8 +32,6 @@ class CommunicationController extends ApiBaseController
     public const TYPE_NEW_EMAIL_MESSAGES_RECEIVED = 'new_email_messages_received';
     public const TYPE_NEW_SMS_MESSAGES_RECEIVED = 'new_sms_messages_received';
 
-    protected $accessEmailRequest = true;
-
     /**
      * @api {post} /v1/communication/email Communication Email
      * @apiVersion 0.1.0
@@ -317,9 +315,6 @@ class CommunicationController extends ApiBaseController
 
             $filter = [];
             $dateTime = null;
-
-            $this->accessEmailRequest = true;
-
             if(NULL === $last_id) {
 
                 $lastEmail = Email::find()->where('e_inbox_email_id > 0')->orderBy(['e_inbox_email_id' => SORT_DESC])->one();
@@ -340,15 +335,14 @@ class CommunicationController extends ApiBaseController
                 }
 
             }
+
             $filter['limit'] = 20;
 
             $mailList = [];
-
             $mails = UserProjectParams::find()->select(['DISTINCT(upp_email)'])->andWhere(['!=', 'upp_email', ''])->asArray()->all();
             if($mails) {
                 $mailList = ArrayHelper::getColumn($mails,'upp_email');
             }
-
             $filter['mail_list'] = $mailList;
 
             // push job
@@ -479,7 +473,6 @@ class CommunicationController extends ApiBaseController
                     if($lead_id) {
                         Notifications::socket(null, $lead_id, 'updateCommunication', ['sms_id' => $sms->s_id], true);
                     }
-
 
                     $response = $sms->attributes;
 
