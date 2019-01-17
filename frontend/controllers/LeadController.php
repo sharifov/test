@@ -111,9 +111,10 @@ class LeadController extends FController
 
     public function actionView($id)
     {
-        $lead = Lead::findOne(['id' => $id]);
+        $id = (int) $id;
+        $lead = Lead::findOne($id);
         if(!$lead) {
-            throw new UnauthorizedHttpException('Not found lead by ID: ' . $id);
+            throw new NotFoundHttpException('Not found lead ID: ' . $id);
         }
 
         if($lead->status == Lead::STATUS_TRASH && Yii::$app->user->identity->role == 'agent') {
