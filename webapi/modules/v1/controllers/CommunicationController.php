@@ -331,14 +331,22 @@ class CommunicationController extends ApiBaseController
 
                 if ($lastEmail) {
                     //$filter['last_dt'] = $lastEmail->e_inbox_created_dt;
-                    $filter['last_id'] = $lastEmail->e_inbox_email_id;
+                    $filter['last_id'] = $lastEmail->e_inbox_email_id + 1;
                 } else {
                     $filter['last_id'] = 18100;
                 }
             } else {
                 $filter['last_id'] = (int)$last_id;
+
+                $checkLastEmail = Email::find()->where('e_inbox_email_id = ' . $filter['last_id'] )->one();
+                if($checkLastEmail) {
+                    $response[] = 'Last ID ' . $filter['last_id'] . ' Exists';
+                    return $response;
+                }
+
             }
             $filter['limit'] = 20;
+
 
 
             /*$email_to = Yii::$app->request->post('email_to');
@@ -349,9 +357,10 @@ class CommunicationController extends ApiBaseController
             $last_id = Yii::$app->request->post('last_id');
             $last_dt = Yii::$app->request->post('last_dt');*/
 
-            while ($this->accessEmailRequest  &&  $cicleCount < 10) {
+            while ($this->accessEmailRequest  &&  $cicleCount < 100) {
 
                 $res = $communication->mailGetMessages($filter);
+                //VarDumper::dump($res); exit;
                 if (isset($res['error']) && $res['error']) {
                     $response['error'] = 'Error mailGetMessages';
                     $response['error_code'] = 13;
@@ -362,8 +371,10 @@ class CommunicationController extends ApiBaseController
 
                     if (count($res['data']['emails']) < 1) {
                         $this->accessEmailRequest = false;
-                        $response['total'] = $countTotal;
-                        $response['cicle_num'] = $cicleCount;
+                        $response[] = [
+                            'total' => $countTotal,
+                            'cicle_num' => $cicleCount,
+                        ];
                         return $response;
                     }
 
@@ -388,7 +399,7 @@ class CommunicationController extends ApiBaseController
                     $userArray = [];
 
                     foreach ($res['data']['emails'] as $mail) {
-                        $filter['last_id'] = $mail['ei_id'];
+                        $filter['last_id'] = $mail['ei_id'] + 1;
 
                         $find = Email::find()->where([
                             "e_message_id" => $mail['ei_message_id'],
@@ -469,6 +480,10 @@ class CommunicationController extends ApiBaseController
 
                     }*/
                 } else {
+                    $response[] = [
+                        'total' => $countTotal,
+                        'cicle_num' => $cicleCount,
+                    ];
                     return $response;
                 }
                 $cicleCount ++;
@@ -480,6 +495,10 @@ class CommunicationController extends ApiBaseController
             $response['error'] = $message;
             $response['error_code'] = 15;
         }
+        $response[] = [
+            'total' => $countTotal,
+            'cicle_num' => $cicleCount,
+        ];
 
         return $response;
     }
