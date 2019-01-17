@@ -109,12 +109,51 @@ Install Supervisor
  /var/www/.../common/config/supervisor/socket-server.conf.txt
  ```
  
+  Create supervisor config file (rename to queue-email-job.conf):
+  ```
+  /var/www/.../common/config/supervisor/queue-email-job.conf.txt
+  ```
+
+ 
+ 
  Start supervisor service:
  ```
  
  sudo service supervisor start (OR sudo /etc/init.d/supervisor restart)
  #sudo apt-get install php-xmlrpc -y (optional)
  ``` 
+  
+
+Beanstalk:
+-------------------
+Driver for queue
+
+(https://github.com/yiisoft/yii2-queue/blob/master/docs/guide-ru/driver-beanstalk.md)
+```
+        // example in yii components
+        'queue_email_job' => [
+            'class' => \yii\queue\beanstalk\Queue::class,
+            'host' => 'localhost',
+            'port' => 11300,
+            'tube' => 'queue_email_job',
+        ],
+```
+
+*Install on Ubuntu:*
+```
+apt-get install beanstalkd
+```
+*Install on Centos:*
+```
+yum install beanstalkd
+```
+
+*Run service:*
+```
+service beanstalkd start
+```
+
+----------
 
 
  Api Example:

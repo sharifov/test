@@ -1,2 +1,3 @@
 socket-server.conf
+queue-email-job.conf
 !.gitignore
