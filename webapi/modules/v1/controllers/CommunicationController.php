@@ -485,9 +485,4 @@ class CommunicationController extends ApiBaseController
 
         return $response;
     }
-
-
-
-
-
 }
