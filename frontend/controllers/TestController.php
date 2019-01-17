@@ -5,6 +5,7 @@ namespace frontend\controllers;
 use common\components\CommunicationService;
 use common\components\CountEvent;
 use common\models\Notifications;
+use common\models\UserProjectParams;
 use Yii;
 use yii\helpers\ArrayHelper;
 use yii\filters\VerbFilter;
@@ -217,6 +218,15 @@ class TestController extends FController
             ).'<br>';
         }
 
+    }
+
+    public function actionTest2()
+    {
+        $mails = UserProjectParams::find()->select(['DISTINCT(upp_email)'])->andWhere(['!=', 'upp_email', ''])->asArray()->all();
+        if($mails) {
+            $mailList = ArrayHelper::getColumn($mails,'upp_email');
+        }
+        VarDumper::dump($mailList, 10, true);
     }
 
 }

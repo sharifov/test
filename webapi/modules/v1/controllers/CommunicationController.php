@@ -6,7 +6,9 @@ use common\models\Email;
 use common\models\Notifications;
 use common\models\Project;
 use common\models\Sms;
+use common\models\UserProjectParams;
 use Yii;
+use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
 use yii\web\NotFoundHttpException;
@@ -357,6 +359,16 @@ class CommunicationController extends ApiBaseController
             $last_id = Yii::$app->request->post('last_id');
             $last_dt = Yii::$app->request->post('last_dt');*/
 
+            $mailList = [];
+
+            $mails = UserProjectParams::find()->select(['DISTINCT(upp_email)'])->andWhere(['!=', 'upp_email', ''])->asArray()->all();
+            if($mails) {
+                $mailList = ArrayHelper::getColumn($mails,'upp_email');
+            }
+
+            $filter['mail_list'] = $mailList;
+
+
             while ($this->accessEmailRequest  &&  $cicleCount < 100) {
 
                 $res = $communication->mailGetMessages($filter);
@@ -367,16 +379,18 @@ class CommunicationController extends ApiBaseController
 
                     Yii::error(VarDumper::dumpAsString($res['error']), 'API:Communication:newEmailMessagesReceived:mailGetMessages');
 
+                    $res['data']['emails'] = [];
+
                 } elseif (isset($res['data']['emails']) && $res['data']['emails'] && \is_array($res['data']['emails'])) {
 
-                    if (count($res['data']['emails']) < 1) {
+                    /*if (count($res['data']['emails']) < 1) {
                         $this->accessEmailRequest = false;
                         $response[] = [
                             'total' => $countTotal,
                             'cicle_num' => $cicleCount,
                         ];
                         return $response;
-                    }
+                    }*/
 
                     /*
                     * @property int $ei_id

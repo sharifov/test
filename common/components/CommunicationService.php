@@ -258,7 +258,7 @@ class CommunicationService extends Component
         $out = ['error' => false, 'data' => []];
 
         $data = [];
-        $data['project'] = 123;
+        //$data['project'] = 123;
 
         if(isset($filter['last_dt'])) {
             $data['last_dt'] = date('Y-m-d H:i:s', strtotime($filter['last_dt']));
@@ -271,6 +271,15 @@ class CommunicationService extends Component
         if(isset($filter['limit'])) {
             $data['limit'] = (int) $filter['limit'];
         }
+
+        if(isset($filter['mail_list'])) {
+            $data['mail_list'] = $filter['mail_list'];
+        }
+
+        if(isset($filter['project_list'])) {
+            $data['project_list'] = $filter['project_list'];
+        }
+
 
         $response = $this->sendRequest('email/inbox', $data);
 
@@ -428,6 +437,14 @@ class CommunicationService extends Component
 
         if(isset($filter['limit'])) {
             $data['limit'] = (int) $filter['limit'];
+        }
+
+        if(isset($filter['phone_list'])) {
+            $data['phone_list'] = $filter['phone_list'];
+        }
+
+        if(isset($filter['project_list'])) {
+            $data['project_list'] = $filter['project_list'];
         }
 
         $response = $this->sendRequest('sms/inbox', $data);
