@@ -364,7 +364,7 @@ class SiteController extends FController
             }
         }
 
-        @exec('ps aux | grep WorkerMan | grep -v grep', $out);
+        @exec('ps aux | grep -E "(queue|WorkerMan)" | grep -v grep', $out);
 
         if(isset($out) && count($out)) {
             foreach ($out AS $line) {
