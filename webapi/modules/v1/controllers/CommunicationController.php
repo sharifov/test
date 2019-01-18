@@ -356,7 +356,11 @@ class CommunicationController extends ApiBaseController
             $job->request_data = $data;
             /** @var Queue $queue */
             $queue = \Yii::$app->queue_email_job;
-            $queue->push($job);
+            $jobId = $queue->push($job);
+            $response[] = [
+                'job_id' => $jobId,
+                'last_id' => $filter['last_id'],
+            ];
 
         } catch (\Throwable $e) {
             Yii::error($e->getTraceAsString(), 'API:Communication:newEmailMessagesReceived:Email:try');
