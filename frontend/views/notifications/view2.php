@@ -6,18 +6,18 @@ use yii\widgets\DetailView;
 /* @var $this yii\web\View */
 /* @var $model common\models\Notifications */
 
-$this->title = $model->n_title;
+$this->title = 'Notification - '. $model->n_title;
 $this->params['breadcrumbs'][] = ['label' => Yii::t('notifications', 'My Notifications'), 'url' => ['list']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="notifications-view">
 
-    <h1><?= Html::encode($this->title) ?></h1>
+    <h1><i class="fa fa-comment-o"></i> <?= Html::encode($this->title) ?></h1>
 
     <p>
-        <?= Html::a(Yii::t('notifications', 'My Notifications'), ['list'], ['class' => 'btn btn-success']) ?>
+        <?= Html::a('<i class="fa fa-list"></i> My Notifications', ['list'], ['class' => 'btn btn-success']) ?>
 
-        <?= Html::a(Yii::t('notifications', 'Delete'), ['soft-delete', 'id' => $model->n_id], [
+        <?= Html::a('<i class="fa fa-trash"></i>  Delete', ['soft-delete', 'id' => $model->n_id], [
             'class' => 'btn btn-danger',
             'data' => [
                 'confirm' => Yii::t('notifications', 'Are you sure you want to delete this item?'),
@@ -26,11 +26,16 @@ $this->params['breadcrumbs'][] = $this->title;
         ]) ?>
     </p>
     <div class="row">
-        <div class="col-md-6">
+        <div class="col-md-5">
+            <pre><?php  echo $model->n_title; ?></pre>
+            <pre><?php  echo $model->n_message; ?></pre>
+        </div>
+        <div class="col-md-7">
 
             <?= DetailView::widget([
                 'model' => $model,
                 'attributes' => [
+                    //'n_title',
                     'n_id',
                     [
                       'attribute' => 'n_type_id',
@@ -38,7 +43,7 @@ $this->params['breadcrumbs'][] = $this->title;
                             return $model->getType();
                         }
                     ],
-                    'n_title',
+
                     //'n_message:ntext',
                     //'n_new:boolean',
                     [
@@ -59,14 +64,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 ],
             ]) ?>
         </div>
-        <div class="col-md-6">
-            <h4>Message text:</h4>
-            <pre>
-                <?php
-                    echo $model->n_message;
-                ?>
-            </pre>
-        </div>
+
     </div>
 
 </div>

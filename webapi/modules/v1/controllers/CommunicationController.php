@@ -2,13 +2,16 @@
 namespace webapi\modules\v1\controllers;
 
 use common\components\CommunicationService;
+use common\models\ClientPhone;
 use common\models\Email;
+use common\models\Employee;
 use common\models\Notifications;
 use common\models\Project;
 use common\models\Sms;
 use common\models\UserProjectParams;
 use Yii;
 use yii\helpers\ArrayHelper;
+use yii\helpers\Html;
 use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
 use yii\web\NotFoundHttpException;
@@ -467,9 +470,18 @@ class CommunicationController extends ApiBaseController
 
                     $users = $sms->getUsersIdByPhone();
 
+                    $clientPhone = ClientPhone::find()->where(['phone' => $sms->s_phone_from])->orderBy(['id' => SORT_DESC])->limit(1)->one();
+                    if($clientPhone) {
+                        $clientName = $clientPhone->client ? $clientPhone->client->full_name : '-';
+                    } else {
+                        $clientName = '-';
+                    }
+
                     if($users) {
                         foreach ($users as $user_id) {
-                            Notifications::create($user_id, 'New SMS '.$sms->s_phone_from, 'New SMS from ' . $sms->s_phone_from .' <br> '.nl2br($sms->s_sms_text), Notifications::TYPE_INFO, true);
+
+                            Notifications::create($user_id, 'New SMS '.$sms->s_phone_from, 'SMS from ' . $sms->s_phone_from .' ('.$clientName.') to '.$sms->s_phone_to.' <br> '.nl2br(Html::encode($sms->s_sms_text))
+                            . ($lead_id ? '<br>Lead ID: '.$lead_id : ''), Notifications::TYPE_INFO, true);
                             Notifications::socket($user_id, null, 'getNewNotification', ['sms_id' => $sms->s_id], true);
                         }
                     }

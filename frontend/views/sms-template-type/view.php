@@ -32,7 +32,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'stp_key',
             'stp_origin_name',
             'stp_name',
-            'stp_hidden',
+            'stp_hidden:boolean',
             [
                 'attribute' => 'stp_updated_user_id',
                 'value' => function (\common\models\SmsTemplateType $model) {

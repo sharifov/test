@@ -18,7 +18,7 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'stp_name')->textInput(['maxlength' => true]) ?>
 
-    <?= $form->field($model, 'stp_hidden')->textInput() ?>
+    <?= $form->field($model, 'stp_hidden')->checkbox() ?>
 
     <?/*= $form->field($model, 'stp_created_user_id')->textInput() ?>
 
