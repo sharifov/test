@@ -357,7 +357,7 @@ class CommunicationController extends ApiBaseController
             /** @var Queue $queue */
             $queue = \Yii::$app->queue_email_job;
             $jobId = $queue->push($job);
-            $response[] = [
+            $response = [
                 'job_id' => $jobId,
                 'last_id' => $filter['last_id'],
             ];
