@@ -162,10 +162,11 @@ class SmsController extends FController
                 $smsResponse = $model->sendSms();
 
                 if(isset($smsResponse['error']) && $smsResponse['error']) {
-                    Yii::$app->session->setFlash('send-error', 'Error: <strong>SMS Message</strong> has not been sent to <strong>'.$model->s_phone_to.'</strong>');
+                    Yii::$app->session->setFlash('danger', 'Error: <strong>SMS Message</strong> has not been sent to <strong>'.$model->s_phone_to.'</strong>');
                     Yii::error('Error: SMS Message has not been sent to '.$model->s_phone_to."\r\n ".$smsResponse['error'], 'SmsController:create:Sms:sendSms');
+                    $model->addError('s_sms_text', 'Error: SMS Message has not been sent to '.$model->s_phone_to.".\r\n ".$smsResponse['error']);
                 } else {
-                    Yii::$app->session->setFlash('send-success', '<strong>SMS Message</strong> has been successfully sent to <strong>'.$model->s_phone_to.'</strong>');
+                    Yii::$app->session->setFlash('success', '<strong>SMS Message</strong> has been successfully sent to <strong>'.$model->s_phone_to.'</strong>');
                     return $this->redirect(['view2', 'id' => $model->s_id]);
                 }
 
