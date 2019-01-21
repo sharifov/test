@@ -3,8 +3,7 @@ namespace frontend\controllers;
 
 use common\models\UserConnection;
 use yii\web\Controller;
-use yii\web\HttpException;
-use yii\web\NotAcceptableHttpException;
+use yii\web\ForbiddenHttpException;
 
 /**
  * FrontendEnd parent controller
@@ -38,7 +37,7 @@ class FController extends Controller
            if(isset(\Yii::$app->params['limitUserConnections']) && \Yii::$app->params['limitUserConnections'] > 0) {
                $countConnections = UserConnection::find()->where(['uc_user_id' => \Yii::$app->user->id])->count();
                if ($countConnections > \Yii::$app->params['limitUserConnections'] && 'site/error' != \Yii::$app->controller->action->uniqueId) {
-                   throw new NotAcceptableHttpException('Denied Access: You have too many connections (' . $countConnections . '). Close the old browser tabs and try again!');
+                   throw new ForbiddenHttpException('Denied Access: You have too many connections (' . $countConnections . '). Close the old browser tabs and try again!');
                }
            }
        }

@@ -4,12 +4,10 @@ namespace frontend\controllers;
 
 use common\components\BackOffice;
 use common\components\CommunicationService;
-use common\models\Airport;
 use common\models\ClientEmail;
 use common\models\ClientPhone;
 use common\models\Email;
 use common\models\EmailTemplateType;
-use common\models\EmployeeContactInfo;
 use common\models\Lead;
 use common\models\LeadFlow;
 use common\models\LeadLog;
@@ -27,9 +25,7 @@ use frontend\models\LeadForm;
 use frontend\models\LeadPreviewEmailForm;
 use frontend\models\LeadPreviewSmsForm;
 use frontend\models\SendEmailForm;
-use Symfony\Component\Finder\Exception\AccessDeniedException;
 use Yii;
-use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use yii\db\Expression;
 use yii\helpers\ArrayHelper;
@@ -40,7 +36,6 @@ use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
 use yii\web\Cookie;
 use yii\web\ForbiddenHttpException;
-use yii\web\NotAcceptableHttpException;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
 use yii\web\UnauthorizedHttpException;
@@ -50,7 +45,6 @@ use common\models\Quote;
 use common\models\Employee;
 use common\models\search\LeadSearch;
 use frontend\models\ProfitSplitForm;
-use common\components\SearchService;
 use common\models\QuotePrice;
 use frontend\models\TipsSplitForm;
 use common\models\local\LeadLogMessage;
@@ -109,6 +103,17 @@ class LeadController extends FController
         return parent::actions();
     }
 
+    /**
+     * @param $id
+     * @return string
+     * @throws ForbiddenHttpException
+     * @throws NotFoundHttpException
+     * @throws UnauthorizedHttpException
+     * @throws \Throwable
+     * @throws \yii\base\InvalidConfigException
+     * @throws \yii\db\StaleObjectException
+     * @throws \yii\httpclient\Exception
+     */
     public function actionView($id)
     {
         $id = (int) $id;
@@ -118,7 +123,7 @@ class LeadController extends FController
         }
 
         if($lead->status == Lead::STATUS_TRASH && Yii::$app->user->identity->role == 'agent') {
-            throw new AccessDeniedException('Access Denied for Agent');
+            throw new ForbiddenHttpException('Access Denied for Agent');
         }
 
 
@@ -1150,7 +1155,7 @@ class LeadController extends FController
         if($model->status == Lead::STATUS_PENDING && $isAgent) {
             $isAccessNewLead = $user->accessTakeNewLead();
             if(!$isAccessNewLead) {
-                throw new NotAcceptableHttpException('Access is denied (limit) - "Take lead"');
+                throw new ForbiddenHttpException('Access is denied (limit) - "Take lead"');
             }
         }
 

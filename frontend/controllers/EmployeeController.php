@@ -2,7 +2,6 @@
 
 namespace frontend\controllers;
 
-use frontend\models\search\EmployeeForm;
 use common\models\Employee;
 use common\models\EmployeeAcl;
 use common\models\EmployeeContactInfo;
@@ -11,14 +10,13 @@ use common\models\search\EmployeeSearch;
 use common\models\search\UserProjectParamsSearch;
 use common\models\UserGroupAssign;
 use common\models\UserParams;
-use Symfony\Component\Finder\Exception\AccessDeniedException;
 use Yii;
 use yii\bootstrap\Html;
 use yii\filters\AccessControl;
 use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
-use yii\web\NotAcceptableHttpException;
+use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
 
@@ -64,9 +62,9 @@ class EmployeeController extends FController
         //print_r($roles); exit;
 
         if (empty($roles)) {
-            throw new AccessDeniedException('Not found roles');
+            throw new ForbiddenHttpException('Not found roles');
         } elseif (!in_array('admin', $roles) && Yii::$app->user->identity->getId() != $employeeId) {
-            throw new AccessDeniedException('AccessDenied ('.$employeeId.')');
+            throw new ForbiddenHttpException('AccessDenied ('.$employeeId.')');
         }
 
         if (Yii::$app->request->isPost && Yii::$app->request->isAjax) {
@@ -264,10 +262,11 @@ class EmployeeController extends FController
 
     }
 
+
     /**
      * @return string|Response
      * @throws BadRequestHttpException
-     * @throws NotAcceptableHttpException
+     * @throws ForbiddenHttpException
      * @throws NotFoundHttpException
      * @throws \yii\base\InvalidConfigException
      */
@@ -290,7 +289,7 @@ class EmployeeController extends FController
             $roles = array_keys($model->getRoles());
 
             if(!Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) && in_array('admin', $roles)) {
-                throw new NotAcceptableHttpException('Access denied for this user: '.$model->id);
+                throw new ForbiddenHttpException('Access denied for this user: '.$model->id);
             }
 
             if(Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id)) {
@@ -306,7 +305,7 @@ class EmployeeController extends FController
                 }
 
                 if(!$access) {
-                    throw new NotAcceptableHttpException('Access denied for this user (invalid user group)');
+                    throw new ForbiddenHttpException('Access denied for this user (invalid user group)');
                 }
             }
 

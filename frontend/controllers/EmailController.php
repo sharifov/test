@@ -3,19 +3,15 @@
 namespace frontend\controllers;
 
 use common\components\CommunicationService;
-use common\models\EmailTemplateType;
-use common\models\ProjectEmployeeAccess;
 use common\models\UserProjectParams;
 use http\Url;
-use Symfony\Component\Finder\Exception\AccessDeniedException;
 use Yii;
 use common\models\Email;
 use common\models\search\EmailSearch;
 use yii\filters\AccessControl;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
-use yii\helpers\VarDumper;
-use yii\web\Controller;
+use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 
@@ -305,11 +301,12 @@ class EmailController extends FController
         ]);
     }
 
+
     /**
-     * Displays a single Email model.
-     * @param integer $id
-     * @return mixed
-     * @throws NotFoundHttpException if the model cannot be found
+     * @param $id
+     * @return string
+     * @throws ForbiddenHttpException
+     * @throws NotFoundHttpException
      */
     public function actionView($id)
     {
@@ -321,7 +318,7 @@ class EmailController extends FController
         if(!$is_admin) {
             $userAccess = UserProjectParams::find()->where(['or', ['upp_email' => $model->e_email_from], ['upp_email' => $model->e_email_to]])->andWhere(['upp_user_id' => Yii::$app->user->id])->exists();
             if(!$userAccess) {
-                throw new AccessDeniedException('Access Denied. Email ID:'.$model->e_id);
+                throw new ForbiddenHttpException('Access Denied. Email ID:'.$model->e_id);
             }
         }
 
