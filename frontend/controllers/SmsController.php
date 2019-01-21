@@ -80,8 +80,8 @@ class SmsController extends FController
         $searchModel = new SmsSearch();
 
         $params = Yii::$app->request->queryParams;
-        //$params['SmsSearch']['user_id'] = Yii::$app->user->id;
-        $params['SmsSearch']['phone'] = Yii::$app->request->get('sms_phone');
+        $params['SmsSearch']['user_id'] = Yii::$app->user->id;
+        //$params['SmsSearch']['phone'] = Yii::$app->request->get('sms_phone');
         $params['SmsSearch']['s_is_deleted'] = 0;
 
         $dataProvider = $searchModel->searchSms($params);
@@ -159,8 +159,16 @@ class SmsController extends FController
             $model->s_type_id = Sms::TYPE_OUTBOX;
 
             if($model->save()) {
-                //$model->sendSms();
-                return $this->redirect(['view2', 'id' => $model->s_id]);
+                $smsResponse = $model->sendSms();
+
+                if(isset($smsResponse['error']) && $smsResponse['error']) {
+                    Yii::$app->session->setFlash('send-error', 'Error: <strong>SMS Message</strong> has not been sent to <strong>'.$model->s_phone_to.'</strong>');
+                    Yii::error('Error: SMS Message has not been sent to '.$model->s_phone_to."\r\n ".$smsResponse['error'], 'SmsController:create:Sms:sendSms');
+                } else {
+                    Yii::$app->session->setFlash('send-success', '<strong>SMS Message</strong> has been successfully sent to <strong>'.$model->s_phone_to.'</strong>');
+                    return $this->redirect(['view2', 'id' => $model->s_id]);
+                }
+
             }
         }
 
