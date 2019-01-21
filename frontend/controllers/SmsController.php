@@ -255,7 +255,11 @@ class SmsController extends FController
     public function actionAllDelete()
     {
         $phoneList = Employee::getPhoneList(Yii::$app->user->id);
-        Sms::updateAll(['s_is_deleted' => true], ['and', ['s_is_deleted' => false, ['or', ['s_phone_from' => $phoneList], ['s_phone_to' => $phoneList]]]]);
+
+        //VarDumper::dump($phoneList, 10, true); exit;
+
+        Sms::updateAll(['s_is_deleted' => true], ['s_is_deleted' => false, 's_phone_from' => $phoneList]);
+        Sms::updateAll(['s_is_deleted' => true], ['s_is_deleted' => false, 's_phone_to' => $phoneList]);
         return $this->redirect(['list']);
     }
 
@@ -265,7 +269,8 @@ class SmsController extends FController
     public function actionAllRead()
     {
         $phoneList = Employee::getPhoneList(Yii::$app->user->id);
-        Sms::updateAll(['s_is_new' => false, 's_read_dt' => date('Y-m-d H:i:s')], ['and', ['s_read_dt' => null, ['or', ['s_phone_from' => $phoneList], ['s_phone_to' => $phoneList]]]]);
+        Sms::updateAll(['s_is_new' => false, 's_read_dt' => date('Y-m-d H:i:s')], ['s_read_dt' => null, 's_phone_from' => $phoneList]);
+        Sms::updateAll(['s_is_new' => false, 's_read_dt' => date('Y-m-d H:i:s')], ['s_read_dt' => null, 's_phone_to' => $phoneList]);
         return $this->redirect(['list']);
     }
 
