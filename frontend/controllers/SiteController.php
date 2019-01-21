@@ -15,6 +15,7 @@ use yii\filters\AccessControl;
 use common\models\LoginForm;
 use yii\helpers\VarDumper;
 use yii\web\ForbiddenHttpException;
+use yii\web\NotAcceptableHttpException;
 use yii\web\NotFoundHttpException;
 
 /**
@@ -36,7 +37,7 @@ class SiteController extends FController
                         'allow' => true,
                     ],
                     [
-                        'actions' => ['index', 'logout', 'profile', 'get-airport'],
+                        'actions' => ['index', 'logout', 'profile', 'get-airport', 'blank'],
                         'allow' => true,
                         'roles' => ['@'],
                     ],
@@ -59,7 +60,8 @@ class SiteController extends FController
         return [
             'error' => [
                 'class' => 'yii\web\ErrorAction',
-                'view' => '@yiister/gentelella/views/error',
+                'view' => '@frontend/themes/gentelella/views/site/error',
+                'layout' => '@frontend/themes/gentelella/views/layouts/error'
             ],
         ];
     }
@@ -570,4 +572,5 @@ class SiteController extends FController
 
         return json_encode([]);
     }
+
 }
