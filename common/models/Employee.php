@@ -1118,4 +1118,35 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     {
         return self::find()->leftJoin('auth_assignment','auth_assignment.user_id = id')->andWhere(['auth_assignment.item_name' => $role])->all();
     }
+
+    /**
+     * @param int $user_id
+     * @return array
+     */
+    public static function getPhoneList(int $user_id) : array
+    {
+        $phoneList = [];
+        $phoneList2 = [];
+
+        $phones = UserProjectParams::find()->select(['DISTINCT(upp_phone_number)'])->where(['upp_user_id' => $user_id])
+            ->andWhere(['and', ['<>', 'upp_phone_number', ''], ['IS NOT', 'upp_phone_number', null]])
+            ->asArray()->all();
+
+        if($phones) {
+            $phoneList = ArrayHelper::map($phones, 'upp_phone_number', 'upp_phone_number');
+        }
+
+        $phones2 = UserProjectParams::find()->select(['DISTINCT(upp_tw_phone_number)'])->where(['upp_user_id' => $user_id])
+            ->andWhere(['and', ['<>', 'upp_tw_phone_number', ''], ['IS NOT', 'upp_tw_phone_number', null]])
+            ->asArray()->all();
+
+        //VarDumper::dump($phones2); //->createCommand()->rawSql);  exit();
+
+        if($phones2) {
+            $phoneList2 = ArrayHelper::map($phones2, 'upp_tw_phone_number', 'upp_tw_phone_number');
+        }
+        $phoneList = array_merge($phoneList, $phoneList2);
+
+        return $phoneList;
+    }
 }

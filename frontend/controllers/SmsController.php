@@ -2,7 +2,10 @@
 
 namespace frontend\controllers;
 
+use common\models\Employee;
+use common\models\UserProjectParams;
 use frontend\models\SmsInboxForm;
+use phpDocumentor\Reflection\Types\This;
 use Yii;
 use common\models\Sms;
 use common\models\search\SmsSearch;
@@ -10,6 +13,7 @@ use frontend\controllers\FController;
 use yii\filters\AccessControl;
 use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
+use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use common\components\CommunicationService;
@@ -37,7 +41,7 @@ class SmsController extends FController
                         'roles' => ['supervision'],
                     ],
                     [
-                        'actions' => ['inbox', 'view', 'soft-delete'],
+                        'actions' => ['view', 'view2', 'soft-delete', 'all-delete', 'all-read', 'list'],
                         'allow' => true,
                         'roles' => ['agent'],
                     ],
@@ -68,6 +72,34 @@ class SmsController extends FController
     }
 
     /**
+     * Lists all Sms models.
+     * @return mixed
+     */
+    public function actionList()
+    {
+        $searchModel = new SmsSearch();
+
+        $params = Yii::$app->request->queryParams;
+        //$params['SmsSearch']['user_id'] = Yii::$app->user->id;
+        $params['SmsSearch']['phone'] = Yii::$app->request->get('sms_phone');
+        $params['SmsSearch']['s_is_deleted'] = 0;
+
+        $dataProvider = $searchModel->searchSms($params);
+        $phoneList = Employee::getPhoneList(Yii::$app->user->id);
+
+        //VarDumper::dump($phoneList, 10, true);
+
+        $projectList = \common\models\Project::getListByUser(Yii::$app->user->id);
+
+        return $this->render('list', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+            'phoneList'          => $phoneList,
+            'projectList'       => $projectList,
+        ]);
+    }
+
+    /**
      * Displays a single Sms model.
      * @param integer $id
      * @return mixed
@@ -80,6 +112,29 @@ class SmsController extends FController
         ]);
     }
 
+
+    /**
+     * @param $id
+     * @return string
+     * @throws ForbiddenHttpException
+     * @throws NotFoundHttpException
+     */
+    public function actionView2($id)
+    {
+        $model = $this->findModel($id);
+        $this->checkAccess($model);
+
+        if($model->s_is_new) {
+            $model->s_read_dt = date('Y-m-d H:i:s');
+            $model->s_is_new = false;
+            $model->save();
+        }
+
+        return $this->render('view2', [
+            'model' => $model,
+        ]);
+    }
+
     /**
      * Creates a new Sms model.
      * If creation is successful, the browser will be redirected to the 'view' page.
@@ -89,12 +144,32 @@ class SmsController extends FController
     {
         $model = new Sms();
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->s_id]);
+        if ($model->load(Yii::$app->request->post())) {
+
+            $upp = UserProjectParams::find()->where(['upp_phone_number' => $model->s_phone_from])->orWhere(['upp_tw_phone_number' => $model->s_phone_from])->limit(1)->one();
+            if($upp && $upp->upp_project_id) {
+                $model->s_project_id = $upp->upp_project_id;
+            } else {
+                $model->s_project_id = null;
+            }
+
+            $model->s_created_user_id = Yii::$app->user->id;
+            $model->s_created_dt = date('Y-m-d H:i:s');
+            $model->s_status_id = Sms::STATUS_PROCESS;
+            $model->s_type_id = Sms::TYPE_OUTBOX;
+
+            if($model->save()) {
+                //$model->sendSms();
+                return $this->redirect(['view2', 'id' => $model->s_id]);
+            }
         }
+
+
+        $phoneList = Employee::getPhoneList(Yii::$app->user->id);
 
         return $this->render('create', [
             'model' => $model,
+            'phoneList' => $phoneList,
         ]);
     }
 
@@ -109,28 +184,83 @@ class SmsController extends FController
     {
         $model = $this->findModel($id);
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->s_id]);
+        if ($model->load(Yii::$app->request->post())) {
+
+            $upp = UserProjectParams::find()->where(['upp_phone_number' => $model->s_phone_from])->orWhere(['upp_tw_phone_number' => $model->s_phone_from])->limit(1)->one();
+            if($upp && $upp->upp_project_id) {
+                $model->s_project_id = $upp->upp_project_id;
+            } else {
+                $model->s_project_id = null;
+            }
+
+            $model->s_updated_user_id = Yii::$app->user->id;
+            $model->s_updated_dt = date('Y-m-d H:i:s');
+
+            if($model->save()) {
+                return $this->redirect(['view', 'id' => $model->s_id]);
+            }
         }
+
+        $phoneList = Employee::getPhoneList(Yii::$app->user->id);
 
         return $this->render('update', [
             'model' => $model,
+            'phoneList' => $phoneList,
         ]);
     }
 
+
     /**
-     * Deletes an existing Sms model.
-     * If deletion is successful, the browser will be redirected to the 'index' page.
-     * @param integer $id
-     * @return mixed
-     * @throws NotFoundHttpException if the model cannot be found
+     * @param $id
+     * @return \yii\web\Response
+     * @throws NotFoundHttpException
+     * @throws \Throwable
+     * @throws \yii\db\StaleObjectException
      */
     public function actionDelete($id)
     {
         $this->findModel($id)->delete();
-
         return $this->redirect(['index']);
     }
+
+
+    /**
+     * @param $id
+     * @return \yii\web\Response
+     * @throws ForbiddenHttpException
+     * @throws NotFoundHttpException
+     */
+    public function actionSoftDelete($id)
+    {
+        $model = $this->findModel($id);
+        $this->checkAccess($model);
+        $model->s_is_deleted = true;
+        $model->save();
+
+        return $this->redirect(['list']);
+    }
+
+
+    /**
+     * @return \yii\web\Response
+     */
+    public function actionAllDelete()
+    {
+        $phoneList = Employee::getPhoneList(Yii::$app->user->id);
+        Sms::updateAll(['s_is_deleted' => true], ['and', ['s_is_deleted' => false, ['or', ['s_phone_from' => $phoneList], ['s_phone_to' => $phoneList]]]]);
+        return $this->redirect(['list']);
+    }
+
+    /**
+     * @return \yii\web\Response
+     */
+    public function actionAllRead()
+    {
+        $phoneList = Employee::getPhoneList(Yii::$app->user->id);
+        Sms::updateAll(['s_is_new' => false, 's_read_dt' => date('Y-m-d H:i:s')], ['and', ['s_read_dt' => null, ['or', ['s_phone_from' => $phoneList], ['s_phone_to' => $phoneList]]]]);
+        return $this->redirect(['list']);
+    }
+
 
     /**
      * Finds the Sms model based on its primary key value.
@@ -148,10 +278,32 @@ class SmsController extends FController
         throw new NotFoundHttpException('The requested page does not exist.');
     }
 
+    /**
+     * @param Sms $model
+     * @throws ForbiddenHttpException
+     */
+    protected function checkAccess(Sms $model) : void
+    {
+        $phoneList = [];
+
+        $phoneList[$model->s_phone_to] = $model->s_phone_to;
+        $phoneList[$model->s_phone_from] = $model->s_phone_from;
+
+        $access = UserProjectParams::find()->where(['upp_user_id' => Yii::$app->user->id])
+            ->andWhere(['or', ['upp_tw_phone_number' => $phoneList], ['upp_phone_number' => $phoneList]])->exists();
+
+        if(!$access) {
+            //throw new ForbiddenHttpException('Access denied for this SMS. Check User Project Params phones');
+        }
+    }
+
+
     public function actionInbox()
     {
         $errors = 0;
-        $com = Yii::$app->get('communication');
+
+        /** @var CommunicationService $com */
+        $com = Yii::$app->communication; //get('communication');
         $model = new SmsInboxForm();
         $total = 0;
 
@@ -230,8 +382,10 @@ class SmsController extends FController
         }
         if ($errors > 0) {
             Yii::$app->session->setFlash('error', $errors . '  Errors');
+        } else {
+            Yii::$app->session->setFlash('success', $total . ' Sms items received');
         }
-        Yii::$app->session->setFlash('success', $total . ' Sms items received');
-        $this->redirect('/sms/index')->send();
+
+        return $this->redirect(['index']);
     }
 }
