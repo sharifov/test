@@ -86,7 +86,17 @@ $this->params['breadcrumbs'][] = $this->title;
             'attribute' => 'pending',
             'label' => 'Pending Time',
             'value' => function (\common\models\Lead $model) {
-                return Yii::$app->formatter->asRelativeTime(strtotime($model->created)); // Lead::getPendingAfterCreate($model->created);
+                $date = $model->getStatusDate(Lead::STATUS_BOOKED);
+                if(!$date)
+                    $date = $model->updated;
+
+                $dateTS = strtotime($date);
+
+                $diffTime = time() - $dateTS;
+                $diffHours = (int) ($diffTime / (60 * 24));
+
+                return ($diffHours > 3 && $diffHours < 73 ) ? $diffHours.' hours' : Yii::$app->formatter->asRelativeTime($dateTS);
+
             },
             'format' => 'raw'
         ],

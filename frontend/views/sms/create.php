@@ -5,6 +5,7 @@ use yii\helpers\Html;
 
 /* @var $this yii\web\View */
 /* @var $model common\models\Sms */
+/* @var $phoneList [] */
 
 $this->title = 'Create Sms';
 $this->params['breadcrumbs'][] = ['label' => 'Sms', 'url' => ['index']];
@@ -16,6 +17,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <?= $this->render('_form', [
         'model' => $model,
+        'phoneList' => $phoneList,
     ]) ?>
 
 </div>

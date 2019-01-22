@@ -103,6 +103,11 @@ class EmailSearch extends Email
         return $dataProvider;
     }
 
+
+    /**
+     * @param $params
+     * @return ActiveDataProvider
+     */
     public function searchEmails($params)
     {
         $query = Email::find();
@@ -149,14 +154,13 @@ class EmailSearch extends Email
 
         if(isset($params['EmailSearch']['user_id']) && $params['EmailSearch']['user_id'] > 0) {
             $subQuery = UserProjectParams::find()->select(['upp_email'])->where(['upp_user_id' => $params['EmailSearch']['user_id']])->andWhere(['!=', 'upp_email', '']);
-            $query->andWhere(['or', ['IN', 'e_email_from', $subQuery], ['IN', 'e_email_to', $subQuery]]);
+            $query->andWhere(['or', ['IN', 'e_email_from', $subQuery], ['and', ['IN', 'e_email_to', $subQuery], ['e_type_id' => Email::TYPE_INBOX]]]);
         }
-
 
 
         if(isset($params['EmailSearch']['email']) && $params['EmailSearch']['email']) {
             $params['EmailSearch']['email'] = strtolower(trim($params['EmailSearch']['email']));
-            $query->andWhere(['or', ['e_email_from' => $params['EmailSearch']['email']], ['e_email_to' => $params['EmailSearch']['email']]]);
+            $query->andWhere(['or', ['e_email_from' => $params['EmailSearch']['email']], ['and', ['e_email_to' => $params['EmailSearch']['email']], ['e_type_id' => Email::TYPE_INBOX]]]);
         }
 
 

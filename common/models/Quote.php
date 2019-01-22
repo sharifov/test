@@ -972,7 +972,7 @@ class Quote extends \yii\db\ActiveRecord
                     $trip->qt_key = $tripEntry['qt_key'];
 
                     if(!$trip->validate()){
-                        Yii::error('QuoteUid: '.$this->uid.'<br/>'.VarDumper::dumpAsString($trip->getErrors()).'<br/>dump: '.$this->reservation_dump, 'QuoteModel:updateQuoteTrips:trip:save');
+                        Yii::error('QuoteUid: '.$this->uid.'<br/>'.VarDumper::dumpAsString($trip->getErrors()).'<br/>dump: '.$this->reservation_dump, 'QuoteModel:createQuoteTrips:QuoteTrip:save');
                         $transaction->rollBack();
                         return false;
                     }
@@ -983,7 +983,7 @@ class Quote extends \yii\db\ActiveRecord
                             $segment = new QuoteSegment();
                             $segment->attributes = $segmentEntry;
                             if(!$segment->validate()){
-                                Yii::error('QuoteUid: '.$this->uid.'<br/>'.VarDumper::dumpAsString($segmentEntry).VarDumper::dumpAsString($segment->getErrors()).'<br/>dump: '.$this->reservation_dump, 'QuoteModel:updateQuoteTrips:segment:save');
+                                Yii::error('QuoteUid: '.$this->uid.'<br/>'.VarDumper::dumpAsString($segmentEntry).VarDumper::dumpAsString($segment->getErrors()).'<br/>dump: '.$this->reservation_dump, 'QuoteModel:createQuoteTrips:QuoteSegment:save');
                                 $transaction->rollBack();
                                 return false;
                             }

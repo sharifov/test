@@ -462,45 +462,16 @@ $this->registerJs($js);
 
 
 <?php
-$currentUrl = \yii\helpers\Url::current();
-$jsPath = Yii::$app->request->baseUrl.'/js/sounds/';
+    $currentUrl = \yii\helpers\Url::current();
+    $jsPath = Yii::$app->request->baseUrl.'/js/sounds/';
 ?>
 
 <script>
-    // var context = new AudioContext();
     var currentUrl = '<?=$currentUrl?>';
 
     function updateCommunication() {
         $.pjax.reload({url: currentUrl, container: '#pjax-lead-communication', push: false, replace: false, timeout: 6000});
     }
-
-
-    /*function notifyLead() {
-
-        new PNotify({
-            title: "Hello",
-            type: "success",
-            text: "message",
-            desktop: {
-                desktop: true
-            },
-            nonblock: {
-                nonblock: true
-            },
-            delay: 30000,
-            hide: false
-        }).get().click(function(e) {
-
-        });
-
-        new PNotify({
-            title: "Hello2",
-            type: "info",
-            text: "Messafe text",
-            hide: true
-        });
-
-    }*/
 </script>
 
 
@@ -509,31 +480,6 @@ $jsPath = Yii::$app->request->baseUrl.'/js/sounds/';
 
 
 $js = <<<JS
-
-    /*PNotify.prototype.options.styling = "bootstrap3";
-    PNotify.desktop.permission();
-
-    
-    
-    ion.sound({
-        sounds: [
-            {name: "bell_ring"},
-            {name: "door_bell"},
-            {name: "button_tiny"}
-        ],
-        path: "$jsPath",
-        preload: true,
-        multiplay: true,
-        volume: 0.8
-    });*/
-
-    //$('input[type="tel"]').intlTelInput();
-
-    //    Chat fields
-    
-    
-
-
     $('body').on("change", '#c_type_id', function () {
         initializeMessageType($(this).val());
     });
@@ -549,7 +495,6 @@ $js = <<<JS
         var popup = $('#modal-email-view');
         //previewPopup.find('.modal-body').html(data);
         popup.modal('show');
-        
         return false;
     });
     
@@ -571,16 +516,7 @@ $js = <<<JS
             jsonQuotes = JSON.stringify(quoteList);
         }
         $('#c_quotes').val(jsonQuotes);
-        
-        // console.log(quoteList);
-        // console.log(jsonQuotes);
-        
     });
-    
-    
-    
-    
-    
     
     /*$('[data-toggle="tooltip"]').tooltip();
 

@@ -5,11 +5,14 @@ namespace frontend\controllers;
 use common\components\CommunicationService;
 use common\components\CountEvent;
 use common\models\Notifications;
+use common\models\UserProjectParams;
 use Yii;
 use yii\helpers\ArrayHelper;
 use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
 use yii\helpers\VarDumper;
+use common\components\ReceiveEmailsJob;
+use yii\queue\Queue;
 
 
 /**
@@ -217,6 +220,28 @@ class TestController extends FController
             ).'<br>';
         }
 
+    }
+
+    public function actionEmailJob()
+    {
+
+        $job = new ReceiveEmailsJob();
+
+        $job->last_email_id = 18964;
+
+        $data = [
+            'last_email_id' => 18964,
+            'run_all' => 'ok',
+        ];
+
+        $job->request_data = $data;
+
+        /** @var Queue $queue */
+        $queue = \Yii::$app->queue_email_job;
+
+        $queue->push($job);
+
+        return 'ok';
     }
 
 }

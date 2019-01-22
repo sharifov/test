@@ -1,2 +1,2 @@
-socket-server.conf
+*.conf
 !.gitignore

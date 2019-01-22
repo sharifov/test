@@ -685,6 +685,16 @@ class Lead extends ActiveRecord
         return ArrayHelper::map($subQuery->all(), 'lead_id', 'lead_id');
     }
 
+    public function getStatusDate($status)
+    {
+        $flow = LeadFlow::find()->where(['lead_id' => $this->id ,'status' => $status])->one();
+        if($flow){
+            return $flow['created'];
+        }
+
+        return null;
+    }
+
     public static function getCabin($cabin = null)
     {
         $mapping = self::CABIN_LIST;

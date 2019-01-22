@@ -55,5 +55,14 @@ return [
             'username' => 'sales',
             'password' => '',
         ],
+        'queue_email_job' => [
+            'class' => \yii\queue\beanstalk\Queue::class,
+            'host' => 'localhost',
+            'port' => 11300,
+            'tube' => 'queue_email_job',
+        ],
+    ],
+    'bootstrap' => [
+        'queue_email_job',
     ],
 ];

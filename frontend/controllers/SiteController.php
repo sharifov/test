@@ -13,7 +13,6 @@ use yii\helpers\ArrayHelper;
 use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
 use common\models\LoginForm;
-use yii\helpers\VarDumper;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 
@@ -36,7 +35,7 @@ class SiteController extends FController
                         'allow' => true,
                     ],
                     [
-                        'actions' => ['index', 'logout', 'profile', 'get-airport'],
+                        'actions' => ['index', 'logout', 'profile', 'get-airport', 'blank'],
                         'allow' => true,
                         'roles' => ['@'],
                     ],
@@ -59,7 +58,8 @@ class SiteController extends FController
         return [
             'error' => [
                 'class' => 'yii\web\ErrorAction',
-                'view' => '@yiister/gentelella/views/error',
+                'view' => '@frontend/themes/gentelella/views/site/error',
+                'layout' => '@frontend/themes/gentelella/views/layouts/error'
             ],
         ];
     }
@@ -355,7 +355,7 @@ class SiteController extends FController
         $crontabJobList = [];
         $processList = [];
 
-        @exec('cat /etc/crontab', $outCron);
+        @exec('cat /var/spool/cron/crontabs/root', $outCron);
         if(isset($outCron) && count($outCron)) {
             foreach ($outCron AS $lineCron) {
                 if(!preg_match('/(#|SHELL|PATH)/', $lineCron) && strlen($lineCron) > 2) {
@@ -364,7 +364,7 @@ class SiteController extends FController
             }
         }
 
-        @exec('ps aux | grep WorkerMan | grep -v grep', $out);
+        @exec('ps aux | grep -E "(queue|WorkerMan)" | grep -v grep', $out);
 
         if(isset($out) && count($out)) {
             foreach ($out AS $line) {
@@ -570,4 +570,5 @@ class SiteController extends FController
 
         return json_encode([]);
     }
+
 }

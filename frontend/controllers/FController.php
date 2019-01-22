@@ -1,9 +1,9 @@
 <?php
 namespace frontend\controllers;
 
-//use webvimark\modules\UserManagement\models\rbacDB\Role;
-//use webvimark\modules\UserManagement\models\User;
+use common\models\UserConnection;
 use yii\web\Controller;
+use yii\web\ForbiddenHttpException;
 
 /**
  * FrontendEnd parent controller
@@ -28,9 +28,17 @@ class FController extends Controller
 
        if(!\Yii::$app->user->isGuest){
            $user = \Yii::$app->user->identity;
-           $timezone = ($user->userParams)?$user->userParams->up_timezone:null;
+           $timezone = $user->userParams ? $user->userParams->up_timezone : null;
            if($timezone){
                \Yii::$app->formatter->timeZone = $timezone;
+           }
+
+
+           if(isset(\Yii::$app->params['limitUserConnections']) && \Yii::$app->params['limitUserConnections'] > 0) {
+               $countConnections = UserConnection::find()->where(['uc_user_id' => \Yii::$app->user->id])->count();
+               if ($countConnections > \Yii::$app->params['limitUserConnections'] && 'site/error' != \Yii::$app->controller->action->uniqueId) {
+                   throw new ForbiddenHttpException('Denied Access: You have too many connections (' . $countConnections . '). Close the old browser tabs and try again!');
+               }
            }
        }
 
