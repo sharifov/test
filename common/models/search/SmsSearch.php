@@ -173,9 +173,13 @@ class SmsSearch extends Sms
         }
 
 
-        if(isset($params['SmsSearch']['phone']) && $params['SmsSearch']['phone']) {
-            $params['SmsSearch']['phone'] = strtolower(trim($params['SmsSearch']['phone']));
-            $query->andWhere(['or', ['s_phone_from' => $params['SmsSearch']['phone']], ['and', ['s_phone_to' => $params['SmsSearch']['phone']], ['s_type_id' => Sms::TYPE_INBOX]]]);
+        if(isset($params['SmsSearch']['phone_list']) && $params['SmsSearch']['phone_list']) {
+            //$params['SmsSearch']['phone_list'] = strtolower(trim($params['SmsSearch']['phone']));
+            $query->andWhere(['or', ['s_phone_from' => $params['SmsSearch']['phone_list']], ['and', ['s_phone_to' => $params['SmsSearch']['phone_list']], ['s_type_id' => Sms::TYPE_INBOX]]]);
+        }
+
+        if(is_numeric($this->s_is_deleted)) {
+            $query->andWhere(['s_is_deleted' => $this->s_is_deleted]);
         }
 
         $query->andFilterWhere(['like', 's_phone_from', $this->s_phone_from])

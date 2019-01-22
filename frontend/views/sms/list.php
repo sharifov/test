@@ -39,6 +39,9 @@ $this->params['breadcrumbs'][] = $this->title;
     <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
 
     <p>
+
+        <?= Html::a('<i class="fa fa-plus"></i> Create Sms', ['create'], ['class' => 'btn btn-success']) ?>
+
         <?= Html::a('<i class="fa fa-check"></i> Make Read All', ['all-read'], [
             'class' => 'btn btn-info',
             'data' => [

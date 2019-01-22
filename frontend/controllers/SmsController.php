@@ -80,8 +80,8 @@ class SmsController extends FController
         $searchModel = new SmsSearch();
 
         $params = Yii::$app->request->queryParams;
-        //$params['SmsSearch']['user_id'] = Yii::$app->user->id;
-        $params['SmsSearch']['phone'] = Yii::$app->request->get('sms_phone');
+        $params['SmsSearch']['user_id'] = Yii::$app->user->id;
+        //$params['SmsSearch']['phone'] = Yii::$app->request->get('sms_phone');
         $params['SmsSearch']['s_is_deleted'] = 0;
 
         $dataProvider = $searchModel->searchSms($params);
@@ -159,8 +159,17 @@ class SmsController extends FController
             $model->s_type_id = Sms::TYPE_OUTBOX;
 
             if($model->save()) {
-                //$model->sendSms();
-                return $this->redirect(['view2', 'id' => $model->s_id]);
+                $smsResponse = $model->sendSms();
+
+                if(isset($smsResponse['error']) && $smsResponse['error']) {
+                    Yii::$app->session->setFlash('danger', 'Error: <strong>SMS Message</strong> has not been sent to <strong>'.$model->s_phone_to.'</strong>');
+                    Yii::error('Error: SMS Message has not been sent to '.$model->s_phone_to."\r\n ".$smsResponse['error'], 'SmsController:create:Sms:sendSms');
+                    $model->addError('s_sms_text', 'Error: SMS Message has not been sent to '.$model->s_phone_to.".\r\n ".$smsResponse['error']);
+                } else {
+                    Yii::$app->session->setFlash('success', '<strong>SMS Message</strong> has been successfully sent to <strong>'.$model->s_phone_to.'</strong>');
+                    return $this->redirect(['view2', 'id' => $model->s_id]);
+                }
+
             }
         }
 
@@ -247,7 +256,11 @@ class SmsController extends FController
     public function actionAllDelete()
     {
         $phoneList = Employee::getPhoneList(Yii::$app->user->id);
-        Sms::updateAll(['s_is_deleted' => true], ['and', ['s_is_deleted' => false, ['or', ['s_phone_from' => $phoneList], ['s_phone_to' => $phoneList]]]]);
+
+        //VarDumper::dump($phoneList, 10, true); exit;
+
+        Sms::updateAll(['s_is_deleted' => true], ['s_is_deleted' => false, 's_phone_from' => $phoneList]);
+        Sms::updateAll(['s_is_deleted' => true], ['s_is_deleted' => false, 's_phone_to' => $phoneList]);
         return $this->redirect(['list']);
     }
 
@@ -257,7 +270,8 @@ class SmsController extends FController
     public function actionAllRead()
     {
         $phoneList = Employee::getPhoneList(Yii::$app->user->id);
-        Sms::updateAll(['s_is_new' => false, 's_read_dt' => date('Y-m-d H:i:s')], ['and', ['s_read_dt' => null, ['or', ['s_phone_from' => $phoneList], ['s_phone_to' => $phoneList]]]]);
+        Sms::updateAll(['s_is_new' => false, 's_read_dt' => date('Y-m-d H:i:s')], ['s_read_dt' => null, 's_phone_from' => $phoneList]);
+        Sms::updateAll(['s_is_new' => false, 's_read_dt' => date('Y-m-d H:i:s')], ['s_read_dt' => null, 's_phone_to' => $phoneList]);
         return $this->redirect(['list']);
     }
 
