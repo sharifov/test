@@ -636,9 +636,9 @@ class LeadController extends FController
 
                             $response = $communication->callToPhone($lead->project_id, 'sip:'.$upp->upp_tw_sip_id, $upp->upp_tw_phone_number, $comForm->c_phone_number);
 
-                            if($response && isset($response['data']['response']['call'])) {
+                            if($response && isset($response['data']['call'])) {
 
-                                $comForm->c_voice_sid = $response['data']['response']['call']['sid'];
+                                $comForm->c_voice_sid = $response['data']['call']['sid'];
 
 //                                "response": {
 //                                    "url": "https://communication.api.travelinsides.com/v1/twilio/voice-request?callerId=sip%3Aalex.connor%40kivork.sip.us1.twilio.com&number=%2B37369594567",
@@ -666,7 +666,14 @@ class LeadController extends FController
 //                                },
                             } else {
                                 $comForm->c_voice_status = 5; // Error
-                                $comForm->addError('c_sms_preview', 'Error call: '. VarDumper::dumpAsString($response, 10));
+
+                                if(isset($response['error']) && $response['error']) {
+                                    $error = $response['error'];
+                                } else {
+                                    $error = VarDumper::dumpAsString($response, 10);
+                                }
+
+                                $comForm->addError('c_sms_preview', 'Error call: '. $error);
                             }
 
                             //$comForm->c_voice_status = 1;
@@ -723,7 +730,7 @@ class LeadController extends FController
             }
             //return $this->redirect(['view', 'id' => $model->al_id]);
         } else {
-            $comForm->c_type_id = CommunicationForm::TYPE_VOICE;
+            $comForm->c_type_id = ''; //CommunicationForm::TYPE_VOICE;
         }
 
         if($previewEmailForm->is_send || $previewSmsForm->is_send) {
