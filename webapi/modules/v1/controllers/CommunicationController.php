@@ -206,6 +206,78 @@ class CommunicationController extends ApiBaseController
 
 
     /**
+     * @api {post} /v1/communication/voice Communication Voice
+     * @apiVersion 0.1.0
+     * @apiName CommunicationVoice
+     * @apiGroup Communication
+     * @apiPermission Authorized User
+     *
+     * @apiHeader {string} Authorization    Credentials <code>base64_encode(Username:Password)</code>
+     * @apiHeaderExample {json} Header-Example:
+     *  {
+     *      "Authorization": "Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==",
+     *      "Accept-Encoding": "Accept-Encoding: gzip, deflate"
+     *  }
+     *
+     * @apiSuccessExample Success-Response:
+     *  HTTP/1.1 200 OK
+     *  {
+     *      "type": "update_sms_status"
+     *  }
+     *
+     *
+     * @return array
+     * @throws NotFoundHttpException
+     * @throws UnprocessableEntityHttpException
+     * @throws \yii\web\BadRequestHttpException
+     */
+
+    public function actionVoice(): array
+    {
+        $this->checkPost();
+        $apiLog = $this->startApiLog($this->action->uniqueId);
+
+        //$action = Yii::$app->request->post('action');
+        //$type = Yii::$app->request->post('type');
+
+        /*if(!$action) {
+            throw new NotFoundHttpException('Not found action', 1);
+        }*/
+
+        $response = Yii::$app->request->post();
+
+        $responseData = [];
+
+        if (isset($response['error']) && $response['error']) {
+
+        } else {
+            $responseData = [
+                'status'    => 200,
+                'name'      => 'Success',
+                'code'      => 0,
+                'message'   => ''
+            ];
+        }
+
+        $responseData['data']['response'] = $response;
+        // $responseData['data']['request']                = $modelLead;
+        $responseData = $apiLog->endApiLog($responseData);
+
+        if (isset($response['error']) && $response['error']) {
+            $json = @json_encode($response['error']);
+            if (isset($response['error_code']) && $response['error_code']) {
+                $error_code = $response['error_code'];
+            } else {
+                $error_code = 0;
+            }
+            throw new UnprocessableEntityHttpException($json, $error_code);
+        }
+
+        return $responseData;
+    }
+
+
+    /**
      * @return mixed
      */
     private function updateEmailStatus()
