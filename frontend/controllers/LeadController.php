@@ -4,6 +4,7 @@ namespace frontend\controllers;
 
 use common\components\BackOffice;
 use common\components\CommunicationService;
+use common\models\Call;
 use common\models\ClientEmail;
 use common\models\ClientPhone;
 use common\models\Email;
@@ -638,9 +639,58 @@ class LeadController extends FController
 
                                 $response = $communication->callToPhone($lead->project_id, 'sip:' . $upp->upp_tw_sip_id, $upp->upp_tw_phone_number, $comForm->c_phone_number, Yii::$app->user->identity->username);
 
+                                Yii::info('ProjectId: '.$lead->project_id.', sip:' . $upp->upp_tw_sip_id.', phoneFrom:'.$upp->upp_tw_phone_number.', phoneTo:'.$comForm->c_phone_number." Logs: \r\n".VarDumper::dumpAsString($response, 10), 'info/LeadController:callToPhone');
+
+
                                 if ($response && isset($response['data']['call'])) {
 
-                                    $comForm->c_voice_sid = $response['data']['call']['sid'];
+
+                                    $dataCall = $response['data']['call'];
+
+
+                                    $call = new Call();
+                                    $call->c_call_type_id = 1;
+                                    $call->c_call_sid = $dataCall['sid'];
+                                    $call->c_account_sid = $dataCall['account_sid'];
+
+                                    $call->c_to = $comForm->c_phone_number; //$dataCall['to'];
+                                    $call->c_from = $upp->upp_tw_phone_number; //$dataCall['from'];
+                                    $call->c_sip = $upp->upp_tw_sip_id;
+                                    $call->c_caller_name = $dataCall['from'];
+                                    $call->c_call_status = $dataCall['status'];
+                                    $call->c_api_version = $dataCall['api_version'];
+                                    $call->c_direction = $dataCall['direction'];
+                                    $call->c_uri = $dataCall['uri'];
+                                    $call->c_lead_id = $lead->id;
+
+                                    $call->c_created_dt = date('Y-m-d H:i:s');
+                                    $call->c_created_user_id = Yii::$app->user->id;
+
+                                    if(!$call->save()) {
+                                        Yii::error(VarDumper::dumpAsString($call->errors, 10), '');
+                                        $comForm->addError('c_sms_preview', 'Error call: ' . VarDumper::dumpAsString($call->errors, 10));
+                                        $comForm->c_voice_sid = $dataCall['sid'];
+                                    } else {
+                                        $comForm->c_voice_sid = $call->c_id.' - '. $dataCall['sid'];
+                                    }
+
+//
+//                                    $response['call']['sid'] = $call->sid;
+//                                    $response['call']['to'] = $call->to;
+//                                    $response['call']['from'] = $call->from;
+//                                    $response['call']['status'] = $call->status;
+//                                    $response['call']['price'] = $call->price;
+//                                    $response['call']['account_sid'] = $call->accountSid;
+//                                    $response['call']['api_version'] = $call->apiVersion;
+//                                    $response['call']['annotation'] = $call->annotation;
+//                                    $response['call']['uri'] = $call->uri;
+//                                    $response['call']['direction'] = $call->direction;
+//                                    $response['call']['phone_number_sid'] = $call->phoneNumberSid;
+//                                    $response['call']['caller_name'] = $call->callerName;
+//                                    $response['call']['start_time'] = $call->startTime;
+//                                    $response['call']['date_created'] = $call->dateCreated;
+//                                    $response['call']['date_updated'] = $call->dateUpdated;
+
 
 //                                "response": {
 //                                    "url": "https://communication.api.travelinsides.com/v1/twilio/voice-request?callerId=sip%3Aalex.connor%40kivork.sip.us1.twilio.com&number=%2B37369594567",
