@@ -1157,6 +1157,11 @@ class LeadController extends FController
             if(!$isAccessNewLead) {
                 throw new ForbiddenHttpException('Access is denied (limit) - "Take lead"');
             }
+
+            $isAccessNewLeadByFrequency = $user->accessTakeLeadByFrequencyMinutes();
+            if(!$isAccessNewLeadByFrequency['access']){
+                throw new ForbiddenHttpException('Access is denied (frequency) - "Take lead"');
+            }
         }
 
         if ($model->status == Lead::STATUS_FOLLOW_UP) {
