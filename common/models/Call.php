@@ -60,8 +60,8 @@ class Call extends \yii\db\ActiveRecord
             [['c_api_version', 'c_sip_response_code'], 'string', 'max' => 10],
             [['c_caller_name'], 'string', 'max' => 50],
             [['c_call_duration', 'c_recording_duration'], 'string', 'max' => 20],
-            [['c_recording_url'], 'string', 'max' => 120],
-            [['c_timestamp', 'c_uri', 'c_sequence_number'], 'string', 'max' => 40],
+            [['c_recording_url', 'c_uri'], 'string', 'max' => 120],
+            [['c_timestamp', 'c_sequence_number'], 'string', 'max' => 40],
             [['c_created_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['c_created_user_id' => 'id']],
             [['c_lead_id'], 'exist', 'skipOnError' => true, 'targetClass' => Lead::class, 'targetAttribute' => ['c_lead_id' => 'id']],
         ];

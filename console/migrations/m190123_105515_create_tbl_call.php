@@ -39,7 +39,7 @@ class m190123_105515_create_tbl_call extends Migration
             'c_recording_sid'      => $this->string(34),
             'c_recording_duration' => $this->string(20),
             'c_timestamp'          => $this->string(40),
-            'c_uri'                => $this->string(40),
+            'c_uri'                => $this->string(120),
             'c_sequence_number'    => $this->string(40),
             'c_lead_id'            => $this->integer(),
             'c_created_user_id'    => $this->integer(),
