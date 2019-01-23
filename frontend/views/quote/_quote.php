@@ -98,6 +98,14 @@ $js = <<<JS
                         }
                     });
 
+                    $.each(data.errorsPrices, function( index, value ) {
+                        $.each(value, function (idx, val){
+                            $('#quoteprice-'+index+'-'+idx).addClass('field-error');
+                            $('#quoteprice-'+index+'-'+idx).parent().addClass('has-error parent-error');
+                        });
+
+                    });
+
                     if (data.itinerary.length != 0) {
                         if (Object.keys(data.errors).length == 1 && itineraryErr) {
                             $('#modal-confirm-alt-itinerary .diff-itinerary__content').html('');

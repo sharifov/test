@@ -800,24 +800,34 @@ class QuoteController extends FController
                     if (isset($attr['QuotePrice']) && $lead !== null) {
                         $response['success'] = $quote->validate();
                         if ($save) {
+                            $selling = 0;
                             $itinerary = $quote::createDump($quote->itinerary);
                             $quote->reservation_dump = str_replace('&nbsp;', ' ', implode("\n", $itinerary));
                             $quote->save(false);
-                            $selling = 0;
+
                             foreach ($attr['QuotePrice'] as $key => $quotePrice) {
                                 $price = empty($quotePrice['id'])
-                                    ? new QuotePrice()
-                                    : QuotePrice::findOne(['id' => $quotePrice['id']]);
+                                ? new QuotePrice()
+                                : QuotePrice::findOne(['id' => $quotePrice['id']]);
                                 if ($price !== null) {
                                     $price->attributes = $quotePrice;
                                     $price->quote_id = $quote->id;
                                     $price->toFloat();
                                     $selling += $price->selling;
                                     if (!$price->save()) {
-                                        var_dump($price->getErrors());
+                                        //var_dump($price->getErrors());
+
+                                        $response['itinerary'] = $quote::createDump($quote->itinerary);
+                                        $response['errorsPrices'][$key] = $price->getErrors();
                                     }
                                 }
                             }
+
+                            if(isset($response['errorsPrices'])){
+                                $response['success'] = false;
+                                return $response;
+                            }
+
 
                             //Add logs after changed model attributes
                             $leadLog = new LeadLog((new LeadLogMessage()));
