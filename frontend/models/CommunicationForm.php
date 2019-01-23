@@ -30,6 +30,8 @@ use yii\base\Model;
  *
  * @property integer $c_preview_email
  * @property integer $c_preview_sms
+ * @property integer $c_voice_status
+ * @property string $c_voice_sid
  *
  */
 
@@ -67,6 +69,9 @@ class CommunicationForm extends Model
 
     public $c_preview_email;
     public $c_preview_sms;
+    public $c_voice_status;
+    public $c_voice_sid;
+
     public $c_quotes;
 
     public $quoteList;
@@ -139,7 +144,7 @@ class CommunicationForm extends Model
             //[['c_type_id'], 'validateType'],
 
             [['c_email_to'], 'email'],
-            [['c_sms_tpl_id', 'c_email_tpl_id', 'c_user_id', 'c_type_id', 'c_lead_id'], 'integer'],
+            [['c_sms_tpl_id', 'c_email_tpl_id', 'c_user_id', 'c_type_id', 'c_lead_id', 'c_voice_status'], 'integer'],
 
             [['c_email_message', 'c_sms_message'], 'string'],
             [['c_sms_message'], 'string', 'max' => 500, 'min' => 10],

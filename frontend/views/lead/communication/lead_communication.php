@@ -355,22 +355,54 @@ $c_type_id = $comForm->c_type_id;
                         </div>
                     </div>
                     <div class="chat__call call-box message-field-phone" id="call-box" style="display: none;">
+
                         <div class="call-box__interlocutor">
                             <div class="call-box__interlocutor-name"><?php echo Html::encode($leadForm->getClient()->first_name.' ' . $leadForm->getClient()->last_name); ?></div>
-                            <div class="call-box__interlocutor-number" id="div-call-phone-number">-</div>
+                            <div class="call-box__interlocutor-number" id="div-call-phone-number"><?=$comForm->c_phone_number?></div>
                         </div>
-                        <div class="call-box__img call-box__img--waiting">
+                        <div class="call-box__img <?=$comForm->c_voice_status == 1 ? 'call-box__img--waiting':''?>" id="div-call-img">
                             <?=Html::img('/img/user.png', ['class' => 'img-circle img-responsive', 'alt' => 'client'])?>
                         </div>
-                        <div class="call-box__status call-box__status--waiting hidden">Connection ...</div>
-                        <div class="call-box__status call-box__status--call"><i class="fa fa-clock-o"></i>&nbsp;<strong>2:05</strong></div>
+
+                            <div class="call-box__status call-box__status--waiting" style="display: block" id="div-call-message">
+                                <?php if($comForm->c_voice_status == 0):?>
+                                    Waiting
+                                <?php endif;?>
+                                <?php if($comForm->c_voice_status == 1):?>
+                                    Connection ... <?=$comForm->c_voice_sid?>
+                                <?php endif;?>
+                                <?php if($comForm->c_voice_status == 2):?>
+                                    Canceled Call
+                                <?php endif;?>
+                                <?php if($comForm->c_voice_status == 5):?>
+                                    Error Call
+                                <?php endif;?>
+                            </div>
+                        <?php if($comForm->c_voice_status == 1):?>
+                            <div class="call-box__status call-box__status--call" style="display: block" id="div-call-time"><i class="fa fa-clock-o"></i>&nbsp;<strong id="div-call-timer">00:00</strong></div>
+                        <?php endif;?>
                         <div class="call-box__btns">
                             <?//= Html::button('<i class="fa fa-microphone-slash"></i>', ['class' => 'btn call-box__btn call-box__btn--mute']) ?>
-                            <?= Html::submitButton('<i class="fa fa-phone"></i>', ['class' => 'btn call-box__btn call-box__btn--call']) ?>
-                            <?= Html::button('<i class="fa fa-pause"></i>', ['class' => 'btn call-box__btn call-box__btn--pause', 'disabled' => true]) ?>
+                            <?= Html::submitButton('<i class="fa fa-phone"></i>', ['class' => 'btn call-box__btn call-box__btn--call', 'id' => 'btn-start-call', 'disabled' => ($comForm->c_voice_status == 1 ? true : false), 'onclick' => '$("#c_voice_status").val(1)']) ?>
+                            <?/*= Html::button('<i class="fa fa-pause"></i>', ['class' => 'btn call-box__btn call-box__btn--pause', 'disabled' => true, 'id' => 'btn-pause'])*/ ?>
+                            <?= Html::submitButton('<i class="fa fa-stop"></i>', ['class' => 'btn call-box__btn call-box__btn--stop', 'disabled' => $comForm->c_voice_status == 1 ? false : true, 'id' => 'btn-stop-call', 'onclick' => '$("#c_voice_status").val(2)']) ?>
                         </div>
                     </div>
 
+                    <?= $form2->field($comForm, 'c_voice_status')->hiddenInput(['id' => 'c_voice_status'])->label(false); ?>
+
+
+                <?/*php if($comForm->c_voice_status === 1):?>
+                    <?php
+                    $js = "
+                        var previewPopup = $('#modal-email-preview');
+                        //previewPopup.find('.modal-body').html(data);
+                        previewPopup.modal('show');";
+
+                    $this->registerJs($js);
+
+                    ?>
+                <?php endif; */?>
 
 
                 <?php if($comForm->c_preview_email):?>
@@ -517,6 +549,28 @@ $js = <<<JS
         }
         $('#c_quotes').val(jsonQuotes);
     });
+    
+    
+    /*$('body').on('click', '#btn-start-call', function() {
+        $('#div-call-img').addClass('call-box__img--waiting');
+        $('#div-call-message').show();
+        $('#div-call-time').show();
+        $(this).attr('disabled', true);
+        $('#btn-stop-call').attr('disabled', false);
+        
+    });
+    
+    $('body').on('click', '#btn-stop-call', function() {
+        $('#div-call-img').removeClass('call-box__img--waiting');
+        
+        $('#div-call-message').hide();
+        $('#div-call-time').hide();
+        $(this).attr('disabled', true);
+        $('#btn-start-call').attr('disabled', false);
+    });*/
+    
+    
+    
     
     /*$('[data-toggle="tooltip"]').tooltip();
 

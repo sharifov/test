@@ -4,6 +4,7 @@ namespace frontend\controllers;
 
 use common\components\BackOffice;
 use common\components\CommunicationService;
+use common\models\Call;
 use common\models\ClientEmail;
 use common\models\ClientPhone;
 use common\models\Email;
@@ -427,10 +428,10 @@ class LeadController extends FController
         }
 
 
-
         $comForm = new CommunicationForm();
         $comForm->c_preview_email = 0;
         $comForm->c_preview_sms = 0;
+        $comForm->c_voice_status = 0;
 
 
         if ($comForm->load(Yii::$app->request->post())) {
@@ -614,10 +615,176 @@ class LeadController extends FController
 
                 }
 
+                if($comForm->c_type_id == CommunicationForm::TYPE_VOICE) {
+
+                    //$comForm->c_voice_status = 0;
+                    /** @var CommunicationService $communication */
+                    $communication = Yii::$app->communication;
+
+                    $upp = null;
+                    if($lead->project_id) {
+                        $upp = UserProjectParams::find()->where(['upp_project_id' => $lead->project_id, 'upp_user_id' => Yii::$app->user->id])->one();
+                    }
+
+                    if($upp) {
+
+                        if (!$upp->upp_tw_phone_number) {
+                            $comForm->addError('c_sms_preview', 'Config Error: Not found TW phone number for Project Id: ' . $lead->project_id . ', agent: "' . Yii::$app->user->identity->username . '"');
+                        } elseif (!$upp->upp_tw_sip_id) {
+                            $comForm->addError('c_sms_preview', 'Config Error: Not found TW SIP account for Project Id: ' . $lead->project_id . ', agent: "' . Yii::$app->user->identity->username . '"');
+                        } else {
+
+
+                            if($comForm->c_voice_status == 1) {
+
+                                $response = $communication->callToPhone($lead->project_id, 'sip:' . $upp->upp_tw_sip_id, $upp->upp_tw_phone_number, $comForm->c_phone_number, Yii::$app->user->identity->username);
+
+                                Yii::info('ProjectId: '.$lead->project_id.', sip:' . $upp->upp_tw_sip_id.', phoneFrom:'.$upp->upp_tw_phone_number.', phoneTo:'.$comForm->c_phone_number." Logs: \r\n".VarDumper::dumpAsString($response, 10), 'info/LeadController:callToPhone');
+
+
+                                if ($response && isset($response['data']['call'])) {
+
+
+                                    $dataCall = $response['data']['call'];
+
+
+                                    $call = new Call();
+                                    $call->c_call_type_id = 1;
+                                    $call->c_call_sid = $dataCall['sid'];
+                                    $call->c_account_sid = $dataCall['account_sid'];
+
+                                    $call->c_to = $comForm->c_phone_number; //$dataCall['to'];
+                                    $call->c_from = $upp->upp_tw_phone_number; //$dataCall['from'];
+                                    $call->c_sip = $upp->upp_tw_sip_id;
+                                    $call->c_caller_name = $dataCall['from'];
+                                    $call->c_call_status = $dataCall['status'];
+                                    $call->c_api_version = $dataCall['api_version'];
+                                    $call->c_direction = $dataCall['direction'];
+                                    $call->c_uri = $dataCall['uri'];
+                                    $call->c_lead_id = $lead->id;
+
+                                    $call->c_created_dt = date('Y-m-d H:i:s');
+                                    $call->c_created_user_id = Yii::$app->user->id;
+
+                                    if(!$call->save()) {
+                                        Yii::error(VarDumper::dumpAsString($call->errors, 10), '');
+                                        $comForm->addError('c_sms_preview', 'Error call: ' . VarDumper::dumpAsString($call->errors, 10));
+                                        $comForm->c_voice_sid = $dataCall['sid'];
+                                    } else {
+                                        $comForm->c_voice_sid = $call->c_id.' - '. $dataCall['sid'];
+                                    }
+
+//
+//                                    $response['call']['sid'] = $call->sid;
+//                                    $response['call']['to'] = $call->to;
+//                                    $response['call']['from'] = $call->from;
+//                                    $response['call']['status'] = $call->status;
+//                                    $response['call']['price'] = $call->price;
+//                                    $response['call']['account_sid'] = $call->accountSid;
+//                                    $response['call']['api_version'] = $call->apiVersion;
+//                                    $response['call']['annotation'] = $call->annotation;
+//                                    $response['call']['uri'] = $call->uri;
+//                                    $response['call']['direction'] = $call->direction;
+//                                    $response['call']['phone_number_sid'] = $call->phoneNumberSid;
+//                                    $response['call']['caller_name'] = $call->callerName;
+//                                    $response['call']['start_time'] = $call->startTime;
+//                                    $response['call']['date_created'] = $call->dateCreated;
+//                                    $response['call']['date_updated'] = $call->dateUpdated;
+
+
+//                                "response": {
+//                                    "url": "https://communication.api.travelinsides.com/v1/twilio/voice-request?callerId=sip%3Aalex.connor%40kivork.sip.us1.twilio.com&number=%2B37369594567",
+//                                    "statusCallback": "https://communication.api.travelinsides.com/v1/twilio/voice-status-callback",
+//                                    "statusCallbackMethod": "POST",
+//                                    "statusCallbackEvent": [
+//                                                                "initiated",
+//                                                                "ringing",
+//                                                                "answered",
+//                                                                "completed"
+//                                                            ],
+//                                    "call": {
+//                                        "sid": "CAc447aee392051e4733fa59ade185db67",
+//                                        "to": "sip:alex.connor@kivork.sip.us1.twilio.com",
+//                                        "from": "BotDialer",
+//                                        "status": "queued",
+//                                        "price": null,
+//                                        "account_sid": "AC10f3c74efba7b492cbd7dca86077736c",
+//                                        "api_version": "2010-04-01",
+//                                        "annotation": null,
+//                                        "uri": "/2010-04-01/Accounts/AC10f3c74efba7b492cbd7dca86077736c/Calls/CAc447aee392051e4733fa59ade185db67.json",
+//                                        "direction": "outbound-api",
+//                                        "phone_number_sid": null
+//                                    }
+//                                },
+                                } else {
+                                    $comForm->c_voice_status = 5; // Error
+
+                                    if (isset($response['error']) && $response['error']) {
+                                        $error = $response['error'];
+                                    } else {
+                                        $error = VarDumper::dumpAsString($response, 10);
+                                    }
+
+                                    $comForm->addError('c_sms_preview', 'Error call: ' . $error);
+                                }
+
+                            }
+
+                            //$comForm->c_voice_status = 1;
+                            //$comForm->addError('c_sms_preview', 'Ok: Not found TW SIP account for Project Id: ' . $lead->project_id . ', agent: "' . Yii::$app->user->identity->username . '"');
+
+                            /*$previewSmsForm->s_phone_to = $comForm->c_phone_number;
+                            $previewSmsForm->s_phone_from = $phoneFrom;
+
+                            if($comForm->c_language_id) {
+                                $previewSmsForm->s_language_id =  $comForm->c_language_id; //$language;
+                            }
+
+
+                            if ($comForm->c_sms_tpl_id > 0) {
+
+                                $previewSmsForm->s_sms_tpl_id = $comForm->c_sms_tpl_id;
+
+                                $content_data = $lead->getEmailData2($comForm->quoteList);
+
+                                $language = $comForm->c_language_id ?: 'en-US';
+
+                                $tpl = SmsTemplateType::findOne($comForm->c_sms_tpl_id);
+                                //$mailSend = $communication->mailSend(7, 'cl_offer', 'chalpet@gmail.com', 'chalpet2@gmail.com', $content_data, $data, 'ru-RU', 10);
+
+                                $smsPreview = $communication->smsPreview($lead->project_id, ($tpl ? $tpl->stp_key : ''), $phoneFrom, $comForm->c_phone_number, $content_data, $language);
+
+
+                                if ($smsPreview && isset($smsPreview['data'])) {
+                                    if (isset($smsPreview['error']) && $smsPreview['error']) {
+
+                                        $errorJson = @json_decode($smsPreview['error'], true);
+                                        $comForm->addError('c_email_preview', 'Communication Server response: ' . ($errorJson['message'] ?? $smsPreview['error']));
+                                        Yii::error($communication->url ."\r\n ".$smsPreview['error'], 'LeadController:view:smsPreview');
+                                        $comForm->c_preview_sms = 0;
+                                    } else {
+                                        //$previewSmsForm->s_phone_from = $smsPreview['data']['phone_from'];
+                                        $previewSmsForm->s_sms_message = $smsPreview['data']['sms_text'];
+                                    }
+                                }
+
+
+                                //VarDumper::dump($mailPreview, 10, true);// exit;
+                            } else {
+                                $previewSmsForm->s_sms_message = $comForm->c_sms_message;
+
+                            }*/
+                        }
+                    } else {
+                        $comForm->addError('c_sms_preview', 'Config Error: Not found User Params for Project Id: ' . $lead->project_id . ', agent: "' . Yii::$app->user->identity->username . '"');
+                    }
+
+                }
+
             }
             //return $this->redirect(['view', 'id' => $model->al_id]);
         } else {
-            $comForm->c_type_id = '';
+            $comForm->c_type_id = ''; //CommunicationForm::TYPE_VOICE;
         }
 
         if($previewEmailForm->is_send || $previewSmsForm->is_send) {
