@@ -2,6 +2,7 @@
 namespace webapi\modules\v1\controllers;
 
 use common\components\CommunicationService;
+use common\models\Call;
 use common\models\ClientPhone;
 use common\models\Email;
 use common\models\Employee;
@@ -244,7 +245,63 @@ class CommunicationController extends ApiBaseController
             throw new NotFoundHttpException('Not found action', 1);
         }*/
 
-        $response = Yii::$app->request->post();
+
+//        [
+//            'c_id' => '5'
+//            'c_call_status' => 'completed'
+//            'c_project_id' => '2'
+//            'callData' => [
+//                'ApiVersion' => '2010-04-01'
+//                'Called' => 'sip:alex.connor@kivork.sip.us1.twilio.com'
+//                'CallStatus' => 'completed'
+//                'Duration' => '1'
+//                'From' => 'admin'
+//                'CallerCountry' => 'CF'
+//                'Direction' => 'outbound-api'
+//                'Timestamp' => 'Wed, 23 Jan 2019 16:36:00 +0000'
+//                'CallDuration' => '18'
+//                'CallbackSource' => 'call-progress-events'
+//                'AccountSid' => 'AC10f3c74efba7b492cbd7dca86077736c'
+//                'SipCallId' => 'd39486fe63a4c8de6c946994f3c9f17f@0.0.0.0'
+//                'CallerCity' => ''
+//                'SipResponseCode' => '200'
+//                'CallerState' => ''
+//                'Caller' => 'admin'
+//                'FromCountry' => 'CF'
+//                'FromCity' => ''
+//                'SequenceNumber' => '3'
+//                'CallSid' => 'CA35e3633dd15dc2d2c50f8d62d9f94187'
+//                'To' => 'sip:alex.connor@kivork.sip.us1.twilio.com'
+//                'FromZip' => ''
+//                'CallerZip' => ''
+//                'FromState' => ''
+//            ]
+//            'action' => 'update'
+//            'type' => 'voip'
+//        ]
+
+        $post = Yii::$app->request->post();
+
+        if(isset($post['callData']['CallSid']) && $post['callData']['CallSid']) {
+            $call = Call::find()->where(['c_call_sid' => $post['callData']['CallSid']])->one();
+            if($call) {
+                $call->c_call_status = $post['callData']['CallStatus'];
+                $call->c_call_duration = $post['callData']['Duration'];
+                $call->c_sequence_number = $post['callData']['SequenceNumber'];
+
+                $call->save();
+                if($call->c_lead_id) {
+                    /*Notifications::create($user_id, 'New SMS '.$sms->s_phone_from, 'SMS from ' . $sms->s_phone_from .' ('.$clientName.') to '.$sms->s_phone_to.' <br> '.nl2br(Html::encode($sms->s_sms_text))
+                        . ($lead_id ? '<br>Lead ID: '.$lead_id : ''), Notifications::TYPE_INFO, true);*/
+                    Notifications::socket(null, $call->c_lead_id, 'callUpdate', ['status' => $call->c_call_status, 'duration' => $call->c_call_duration, 'snr' => $call->c_sequence_number], true);
+                }
+            }
+        }
+
+        $response = $post;
+
+
+
 
         $responseData = [];
 

@@ -504,6 +504,12 @@ $this->registerJs($js);
     function updateCommunication() {
         $.pjax.reload({url: currentUrl, container: '#pjax-lead-communication', push: false, replace: false, timeout: 6000});
     }
+
+    function callUpdate(obj) {
+        console.log(obj);
+        $('#div-call-message').html('');
+    }
+
 </script>
 
 

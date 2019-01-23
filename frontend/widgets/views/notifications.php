@@ -222,6 +222,12 @@ $js = <<<JS
                         updatePjaxNotify();
                         updateCommunication();
                     }
+                    
+                    if(obj.command === 'callUpdate') {
+                        callUpdate(obj);
+                    }
+                    
+                    
                 }
             } catch (error) {
                 console.error('Invalid JSON data');
