@@ -634,11 +634,13 @@ class LeadController extends FController
                         } else {
 
 
-                            $response = $communication->callToPhone($lead->project_id, 'sip:'.$upp->upp_tw_sip_id, $upp->upp_tw_phone_number, $comForm->c_phone_number);
+                            if($comForm->c_voice_status == 1) {
 
-                            if($response && isset($response['data']['call'])) {
+                                $response = $communication->callToPhone($lead->project_id, 'sip:' . $upp->upp_tw_sip_id, $upp->upp_tw_phone_number, $comForm->c_phone_number, Yii::$app->user->identity->username);
 
-                                $comForm->c_voice_sid = $response['data']['call']['sid'];
+                                if ($response && isset($response['data']['call'])) {
+
+                                    $comForm->c_voice_sid = $response['data']['call']['sid'];
 
 //                                "response": {
 //                                    "url": "https://communication.api.travelinsides.com/v1/twilio/voice-request?callerId=sip%3Aalex.connor%40kivork.sip.us1.twilio.com&number=%2B37369594567",
@@ -664,16 +666,18 @@ class LeadController extends FController
 //                                        "phone_number_sid": null
 //                                    }
 //                                },
-                            } else {
-                                $comForm->c_voice_status = 5; // Error
-
-                                if(isset($response['error']) && $response['error']) {
-                                    $error = $response['error'];
                                 } else {
-                                    $error = VarDumper::dumpAsString($response, 10);
+                                    $comForm->c_voice_status = 5; // Error
+
+                                    if (isset($response['error']) && $response['error']) {
+                                        $error = $response['error'];
+                                    } else {
+                                        $error = VarDumper::dumpAsString($response, 10);
+                                    }
+
+                                    $comForm->addError('c_sms_preview', 'Error call: ' . $error);
                                 }
 
-                                $comForm->addError('c_sms_preview', 'Error call: '. $error);
                             }
 
                             //$comForm->c_voice_status = 1;

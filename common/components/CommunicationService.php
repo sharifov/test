@@ -469,11 +469,12 @@ class CommunicationService extends Component
      * @param string $phone_from
      * @param string $from_number
      * @param string $phone_to
+     * @param string $from_name
      * @param array $options
      * @return array
      * @throws \yii\httpclient\Exception
      */
-    public function callToPhone(int $project_id, string $phone_from, string $from_number, string $phone_to, array $options = []) : array
+    public function callToPhone(int $project_id, string $phone_from, string $from_number, string $phone_to, string $from_name = '', array $options = []) : array
     {
         $out = ['error' => false, 'data' => []];
 
@@ -481,6 +482,7 @@ class CommunicationService extends Component
         $data['voice']['from'] = $phone_from;
         $data['voice']['to'] = $phone_to;
         $data['voice']['from_number'] = $from_number;
+        $data['voice']['from_name'] = $from_name;
 
         $data['voice']['options'] = $options; //['url'] = 'http://api-sales.dev.travelinsides.com/v1/twilio/request/?phone=+37369594567*/';
 
