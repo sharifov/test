@@ -743,6 +743,45 @@ class QuoteController extends FController
                 if ($quote !== null) {
                     $quote->attributes = $attr['Quote'];
 
+                    if(!empty($quote->pricing_info)){
+                        $pricing = $quote->parsePriceDump($quote->pricing_info);
+
+                        if(!empty($pricing)){
+                            if (!empty($pricing['validating_carrier'])) {
+                                $quote->main_airline_code = $pricing['validating_carrier'];
+                                $response[Html::getInputId($quote, 'main_airline_code')] = $quote->main_airline_code;
+                            }
+                            $response['pricing'] = $pricing;
+                            $response[Html::getInputId($quote, 'gds')] = 'S';
+
+                            foreach ($attr['QuotePrice'] as $key => $quotePrice) {
+                                $price = empty($quotePrice['id'])
+                                ? new QuotePrice()
+                                : QuotePrice::findOne(['id' => $quotePrice['id']]);
+                                if ($price !== null) {
+                                    $price->attributes = $quotePrice;
+                                    $price->quote_id = $quote->id;
+
+                                    if(isset($pricing['prices'][$price->passenger_type])){
+                                        $price->fare = $pricing['prices'][$price->passenger_type]['fare'];
+                                        $price->taxes = $pricing['prices'][$price->passenger_type]['taxes'];
+                                        $price->net = $price->fare + $price->taxes;
+                                        $price->selling = $price->net + $price->mark_up;
+                                    }
+
+                                    $price->oldParams = '';
+                                    $price->oldParams = serialize($price->attributes);
+
+                                    $price->toFloat();
+                                    $response[Html::getInputId($price, '[' . $key . ']fare')] = $price->fare;
+                                    $response[Html::getInputId($price, '[' . $key . ']taxes')] = $price->taxes;
+                                    $response[Html::getInputId($price, '[' . $key . ']net')] = $price->net;
+                                    $response[Html::getInputId($price, '[' . $key . ']selling')] = $price->selling;
+                                }
+                            }
+                        }
+                    }
+
                     if(empty($quote->employee_id)){
                         $quote->employee_id = Yii::$app->user->id;
                         $quote->employee_name = Yii::$app->user->identity->username;
@@ -793,6 +832,63 @@ class QuoteController extends FController
                             ]);
 
                             $quote->createQuoteTrips();
+
+                            if(!empty($quote->pricing_info)){
+                                $quoteAttributes = $quote->parsePriceDump($quote->pricing_info);
+                                //var_dump($quoteAttributes['baggage']);die;
+
+                                if(isset($quoteAttributes['baggage']) && !empty($quoteAttributes['baggage'])){
+                                    foreach ($quoteAttributes['baggage'] as $baggageAttr){
+                                        $segmentKey = $baggageAttr['segment'];
+                                        $origin = substr($segmentKey, 0, 3);
+                                        $destination = substr($segmentKey, 2, 3);
+                                        $segments = QuoteSegment::find()->innerJoin(QuoteTrip::tableName(),'qs_trip_id = qt_id')
+                                        ->andWhere(['qt_quote_id' =>  $quote->id])
+                                        ->andWhere(['or',
+                                            ['qs_departure_airport_code'=>$origin],
+                                            ['qs_arrival_airport_code'=>$destination]
+                                        ])
+                                        ->all();
+                                        if(!empty($segments)){
+                                            if(isset($baggageAttr['free_baggage']) && isset($baggageAttr['free_baggage']['piece'])){
+                                                foreach ($segments as $segment){
+                                                    $baggage = new QuoteSegmentBaggage();
+                                                    $baggage->qsb_allow_pieces = $baggageAttr['free_baggage']['piece'];
+                                                    $baggage->qsb_segment_id = $segment->qs_id;
+                                                    if(isset($baggageAttr['free_baggage']['weight'])){
+                                                        $baggage->qsb_allow_max_weight = substr($baggageAttr['free_baggage']['weight'], 0, 100);
+                                                    }
+                                                    if(isset($baggageAttr['free_baggage']['height'])){
+                                                        $baggage->qsb_allow_max_size = substr($baggageAttr['free_baggage']['height'], 0, 100);
+                                                    }
+                                                    $baggage->save(false);
+                                                }
+                                            }
+                                            if(isset($baggageAttr['paid_baggage']) && !empty($baggageAttr['paid_baggage'])){
+                                                foreach ($segments as $segment){
+                                                    foreach ($baggageAttr['paid_baggage'] as $paidBaggageAttr){
+                                                        $baggage = new QuoteSegmentBaggageCharge();
+                                                        $baggage->qsbc_segment_id = $segment->qs_id;
+                                                        $baggage->qsbc_price = str_replace('USD', '', $paidBaggageAttr['price']);
+                                                        if(isset($paidBaggageAttr['piece'])){
+                                                            $baggage->qsbc_first_piece = $paidBaggageAttr['piece'];
+                                                            $baggage->qsbc_last_piece = $paidBaggageAttr['piece'];
+                                                        }
+                                                        if(isset($paidBaggageAttr['weight'])){
+                                                            $baggage->qsbc_max_weight = substr($paidBaggageAttr['weight'], 0 , 100);
+                                                        }
+                                                        if(isset($paidBaggageAttr['height'])){
+                                                            $baggage->qsbc_max_size = substr($paidBaggageAttr['height'],0, 100);
+                                                        }
+                                                        $baggage->save(false);
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+
+                            }
 
                             if ($lead->called_expert) {
                                 $quote = Quote::findOne(['id' => $quote->id]);
