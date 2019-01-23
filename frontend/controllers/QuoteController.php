@@ -815,8 +815,6 @@ class QuoteController extends FController
                                     $price->toFloat();
                                     $selling += $price->selling;
                                     if (!$price->save()) {
-                                        //var_dump($price->getErrors());
-
                                         $response['itinerary'] = $quote::createDump($quote->itinerary);
                                         $response['errorsPrices'][$key] = $price->getErrors();
                                     }
@@ -825,6 +823,7 @@ class QuoteController extends FController
 
                             if(isset($response['errorsPrices'])){
                                 $response['success'] = false;
+                                $quote->delete();
                                 return $response;
                             }
 
