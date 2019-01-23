@@ -505,9 +505,23 @@ $this->registerJs($js);
         $.pjax.reload({url: currentUrl, container: '#pjax-lead-communication', push: false, replace: false, timeout: 6000});
     }
 
+    function stopCall() {
+        $('#div-call-img').removeClass('call-box__img--waiting');
+        $('#div-call-message').hide();
+        $('#div-call-time').hide();
+        $(this).attr('disabled', true);
+        $('#btn-start-call').attr('disabled', false);
+    }
+
     function callUpdate(obj) {
         console.log(obj);
-        $('#div-call-message').html('');
+        //status: "completed", duration: "1", snr: "3"
+        $('#div-call-message').html(obj.snr + ' - ' + obj.status);
+
+        if(obj.status == 'completed') {
+            stopCall(); //updateCommunication();
+        }
+
     }
 
 </script>

@@ -285,10 +285,14 @@ class CommunicationController extends ApiBaseController
         if(isset($post['callData']['CallSid']) && $post['callData']['CallSid']) {
             $call = Call::find()->where(['c_call_sid' => $post['callData']['CallSid']])->one();
             if($call) {
-                $call->c_call_status = $post['callData']['CallStatus'];
-                $call->c_call_duration = $post['callData']['Duration'];
-                $call->c_sequence_number = $post['callData']['SequenceNumber'];
 
+                $call->c_call_status = $post['callData']['CallStatus'] ?? '';
+                $call->c_sequence_number = $post['callData']['SequenceNumber'] ?? 0;
+
+                if(isset($post['callData']['Duration'])) {
+                    $call->c_call_duration = (int) $post['callData']['Duration'];
+                }
+                
                 $call->save();
                 if($call->c_lead_id) {
                     /*Notifications::create($user_id, 'New SMS '.$sms->s_phone_from, 'SMS from ' . $sms->s_phone_from .' ('.$clientName.') to '.$sms->s_phone_to.' <br> '.nl2br(Html::encode($sms->s_sms_text))
