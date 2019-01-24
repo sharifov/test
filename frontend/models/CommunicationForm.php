@@ -2,6 +2,7 @@
 namespace frontend\models;
 
 use borales\extensions\phoneInput\PhoneInputValidator;
+use common\models\Call;
 use common\models\EmailTemplateType;
 use common\models\Employee;
 use common\models\Language;
@@ -25,6 +26,7 @@ use yii\base\Model;
  * @property integer $c_user_id
  * @property string $c_language_id
  * @property string $c_quotes
+ * @property integer $c_call_id
  *
  * @property array $quoteList;
  *
@@ -41,6 +43,9 @@ class CommunicationForm extends Model
     public const TYPE_EMAIL = 1;
     public const TYPE_SMS   = 2;
     public const TYPE_VOICE = 3;
+
+
+
 
     public const TYPE_LIST = [
         self::TYPE_EMAIL    => 'Email',
@@ -71,6 +76,7 @@ class CommunicationForm extends Model
     public $c_preview_sms;
     public $c_voice_status;
     public $c_voice_sid;
+    public $c_call_id;
 
     public $c_quotes;
 
@@ -141,10 +147,13 @@ class CommunicationForm extends Model
             [['c_phone_number'], 'string', 'max' => 30],
             [['c_phone_number'], PhoneInputValidator::class],
 
+            [['c_voice_sid'], 'string', 'max' => 40],
+
+
             //[['c_type_id'], 'validateType'],
 
             [['c_email_to'], 'email'],
-            [['c_sms_tpl_id', 'c_email_tpl_id', 'c_user_id', 'c_type_id', 'c_lead_id', 'c_voice_status'], 'integer'],
+            [['c_sms_tpl_id', 'c_email_tpl_id', 'c_user_id', 'c_type_id', 'c_lead_id', 'c_voice_status', 'c_call_id'], 'integer'],
 
             [['c_email_message', 'c_sms_message'], 'string'],
             [['c_sms_message'], 'string', 'max' => 500, 'min' => 10],
@@ -161,6 +170,8 @@ class CommunicationForm extends Model
 
             [['c_email_tpl_id'], 'exist', 'skipOnError' => true, 'targetClass' => EmailTemplateType::class, 'targetAttribute' => ['c_email_tpl_id' => 'etp_id']],
             [['c_sms_tpl_id'], 'exist', 'skipOnError' => true, 'targetClass' => SmsTemplateType::class, 'targetAttribute' => ['c_sms_tpl_id' => 'stp_id']],
+            [['c_call_id'], 'exist', 'skipOnError' => true, 'targetClass' => Call::class, 'targetAttribute' => ['c_call_id' => 'c_id']],
+
         ];
     }
 

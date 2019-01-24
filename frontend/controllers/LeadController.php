@@ -636,6 +636,10 @@ class LeadController extends FController
 
 
                             if($comForm->c_voice_status == 1) {
+                                $comForm->c_voice_sid = 'test';
+                            }
+
+                            if($comForm->c_voice_status == 51) {
 
                                 $response = $communication->callToPhone($lead->project_id, 'sip:' . $upp->upp_tw_sip_id, $upp->upp_tw_phone_number, $comForm->c_phone_number, Yii::$app->user->identity->username);
 
@@ -669,9 +673,12 @@ class LeadController extends FController
                                     if(!$call->save()) {
                                         Yii::error(VarDumper::dumpAsString($call->errors, 10), '');
                                         $comForm->addError('c_sms_preview', 'Error call: ' . VarDumper::dumpAsString($call->errors, 10));
-                                        $comForm->c_voice_sid = $dataCall['sid'];
                                     } else {
-                                        $comForm->c_voice_sid = $call->c_id.' - '. $dataCall['sid'];
+                                        $comForm->c_call_id = $call->c_id;
+                                    }
+
+                                    if(isset($dataCall['sid'])) {
+                                        $comForm->c_voice_sid = $dataCall['sid'];
                                     }
 
 //

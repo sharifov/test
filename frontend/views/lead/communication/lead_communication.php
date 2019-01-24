@@ -378,7 +378,7 @@ $c_type_id = $comForm->c_type_id;
                                     Error Call
                                 <?php endif;?>
                             </div>
-                        <?php if($comForm->c_voice_status == 1):?>
+                        <?php if(1===1 || $comForm->c_voice_status == 1):?>
                             <div class="call-box__status call-box__status--call" style="display: block" id="div-call-time"><i class="fa fa-clock-o"></i>&nbsp;<strong id="div-call-timer">00:00</strong></div>
                         <?php endif;?>
                         <div class="call-box__btns">
@@ -390,6 +390,9 @@ $c_type_id = $comForm->c_type_id;
                     </div>
 
                     <?= $form2->field($comForm, 'c_voice_status')->hiddenInput(['id' => 'c_voice_status'])->label(false); ?>
+                    <?= $form2->field($comForm, 'c_voice_sid')->hiddenInput(['id' => 'c_voice_sid'])->label(false); ?>
+                    <?= $form2->field($comForm, 'c_call_id')->hiddenInput(['id' => 'c_call_id'])->label(false); ?>
+
 
 
                 <?/*php if($comForm->c_voice_status === 1):?>
@@ -499,19 +502,33 @@ $this->registerJs($js);
 ?>
 
 <script>
-    var currentUrl = '<?=$currentUrl?>';
+    const currentUrl = '<?=$currentUrl?>';
 
     function updateCommunication() {
         $.pjax.reload({url: currentUrl, container: '#pjax-lead-communication', push: false, replace: false, timeout: 6000});
     }
 
-    function stopCall() {
+    function stopCall(duration) {
         $('#div-call-img').removeClass('call-box__img--waiting');
-        $('#div-call-message').hide();
-        $('#div-call-time').hide();
-        $(this).attr('disabled', true);
+        //$('#div-call-message').hide();
+        //$('#div-call-time').hide();
         $('#btn-start-call').attr('disabled', false);
+        $('#btn-stop-call').attr('disabled', true);
+        stopCallTimer(duration);
     }
+
+
+    function startCall() {
+
+        $('#div-call-img').addClass('call-box__img--waiting');
+        $('#div-call-message').show();
+        $('#div-call-time').show();
+        $('#btn-start-call').attr('disabled', true);
+        $('#btn-stop-call').attr('disabled', false);
+
+        //startCallTimer();
+    }
+
 
     function callUpdate(obj) {
         console.log(obj);
@@ -519,13 +536,29 @@ $this->registerJs($js);
         $('#div-call-message').html(obj.snr + ' - ' + obj.status);
 
         if(obj.status == 'completed') {
-            stopCall(); //updateCommunication();
+            stopCall(obj.duration); //updateCommunication();
+        } else if(obj.status == 'in-progress') {
+            startCallTimer();
+            //$('#div-call-timer').timer('resume');
+        } else if(obj.status == 'initiated') {
+            startCall();
         }
-
     }
+
+    function startCallTimer() {
+        $('#div-call-timer').timer('remove');
+        $('#div-call-timer').timer({format: '%M:%S', seconds: 0}).timer('start');
+    }
+
+    function stopCallTimer(sec) {
+        $('#div-call-timer').timer('remove');
+        $('#div-call-timer').timer({format: '%M:%S', seconds: sec}).timer('pause');
+    }
+
 
 </script>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/timer.jquery/0.9.0/timer.jquery.min.js"></script>
 
 <?php
 
@@ -570,6 +603,8 @@ $js = <<<JS
         $('#c_quotes').val(jsonQuotes);
     });
     
+       
+    //startCallTimer();
     
     /*$('body').on('click', '#btn-start-call', function() {
         $('#div-call-img').addClass('call-box__img--waiting');

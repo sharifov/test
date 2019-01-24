@@ -37,6 +37,38 @@ use Yii;
  */
 class Call extends \yii\db\ActiveRecord
 {
+
+    public const CALL_STATUS_QUEUE          = 'queued';
+    public const CALL_STATUS_RINGING        = 'ringing';
+    public const CALL_STATUS_IN_PROGRESS    = 'in-progress';
+    public const CALL_STATUS_COMPLETED      = 'completed';
+    public const CALL_STATUS_BUSY           = 'busy';
+    public const CALL_STATUS_FAILED         = 'failed';
+    public const CALL_STATUS_NO_ANSWER      = 'no-answer';
+    public const CALL_STATUS_CANCELED       = 'canceled';
+
+    public const CALL_STATUS_LIST = [
+        self::CALL_STATUS_QUEUE         => 'Queued',
+        self::CALL_STATUS_RINGING       => 'Ringing',
+        self::CALL_STATUS_IN_PROGRESS   => 'In progress',
+        self::CALL_STATUS_COMPLETED     => 'Completed',
+        self::CALL_STATUS_BUSY          => 'Busy',
+        self::CALL_STATUS_FAILED        => 'Failed',
+        self::CALL_STATUS_NO_ANSWER     => 'No answer',
+        self::CALL_STATUS_CANCELED      => 'Canceled',
+    ];
+
+    public const CALL_STATUS_DESCRIPTION_LIST = [
+        self::CALL_STATUS_QUEUE         => 'The call is ready and waiting in line before going out.',
+        self::CALL_STATUS_RINGING       => 'The call is currently ringing.',
+        self::CALL_STATUS_IN_PROGRESS   => 'The call was answered and is actively in progress.',
+        self::CALL_STATUS_COMPLETED     => 'The call was answered and has ended normally.',
+        self::CALL_STATUS_BUSY          => 'The caller received a busy signal.',
+        self::CALL_STATUS_FAILED        => 'The call could not be completed as dialed, most likely because the phone number was non-existent.',
+        self::CALL_STATUS_NO_ANSWER     => 'The call ended without being answered.',
+        self::CALL_STATUS_CANCELED      => 'The call was canceled via the REST API while queued or ringing.',
+    ];
+
     /**
      * {@inheritdoc}
      */

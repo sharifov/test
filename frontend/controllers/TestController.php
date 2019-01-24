@@ -244,4 +244,29 @@ class TestController extends FController
         return 'ok';
     }
 
+    public function actionCallTimer()
+    {
+
+        /*if ($vl->vl_call_status == 'initiated') {
+
+        } elseif($vl->vl_call_status == 'ringing') {
+
+        } elseif($vl->vl_call_status == 'in-progress') {
+
+        } elseif($vl->vl_call_status == 'busy') {
+
+        } elseif($vl->vl_call_status == 'completed') {
+            $call->c_call_duration = $vl->vl_call_duration;
+        }*/
+
+        $statuses = ['initiated', 'ringing', 'in-progress', 'completed'];
+        $lead_id = 54719;
+        $n = 0;
+        foreach ($statuses as $status) {
+            sleep(random_int(5, 7));
+            $n++;
+            Notifications::socket(null, $lead_id, 'callUpdate', ['status' => $status, 'duration' =>  ($status == 'completed' ? random_int(51, 180) : 0), 'snr' => $n], true);
+        }
+    }
+
 }
