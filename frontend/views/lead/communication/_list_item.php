@@ -24,7 +24,7 @@ use \common\models\Call;
 
         if($call->c_call_status == Call::CALL_STATUS_COMPLETED) {
             $statusClass = 'success';
-            $statusTitle = 'COMPLETED - ' . Yii::$app->formatter->asDatetime(strtotime($sms->s_status_done_dt));
+            $statusTitle = 'COMPLETED - ' . Yii::$app->formatter->asDatetime(strtotime($call->c_created_dt) + (int) $call->c_call_duration);
         } elseif($call->c_call_status == Call::CALL_STATUS_CANCELED) {
             $statusClass = 'error';
             $statusTitle = 'CANCELED';
@@ -56,7 +56,7 @@ use \common\models\Call;
         <div class="panel-body">
             <?php if($call->c_recording_url):?>
             <audio controls="controls" class="chat__audio">
-                <source src="audio.mp3" type="audio/mpeg">
+                <source src="<?=$call->c_recording_url?>" type="audio/mpeg">
                 Your browser does not support the audio element.
             </audio>
             <? else: ?>
