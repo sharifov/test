@@ -544,7 +544,10 @@ $this->registerJs($js);
             startCall();
         } else if(obj.status == 'busy') {
             stopCall(0);
+        } else if(obj.status == 'no-answer') {
+            stopCall(0);
         }
+
     }
 
     function startCallTimer() {

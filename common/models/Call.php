@@ -69,6 +69,14 @@ class Call extends \yii\db\ActiveRecord
         self::CALL_STATUS_CANCELED      => 'The call was canceled via the REST API while queued or ringing.',
     ];
 
+    public const CALL_TYPE_OUT  = 1;
+    public const CALL_TYPE_IN   = 2;
+
+    public const CALL_TYPE_LIST = [
+        self::CALL_TYPE_OUT => 'Outgoing',
+        self::CALL_TYPE_IN  => 'Incoming',
+    ];
+
     /**
      * {@inheritdoc}
      */
