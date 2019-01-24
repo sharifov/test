@@ -635,11 +635,42 @@ class LeadController extends FController
                         } else {
 
 
-                            if($comForm->c_voice_status == 1) {
+                            /*if($comForm->c_voice_status == 1) {
                                 $comForm->c_voice_sid = 'test';
+                            }*/
+
+                            if($comForm->c_voice_status == 2) {
+
+                                if($comForm->c_voice_sid) {
+                                    Yii::info('sid: ' . $comForm->c_voice_sid . " Logs: \r\n" . VarDumper::dumpAsString($response, 10), 'info/LeadController:updateCall');
+
+                                    $response = $communication->updateCall($comForm->c_voice_sid, ['status' => 'completed']);
+
+
+                                    if ($response && isset($response['data']['call'])) {
+                                        $dataCall = $response['data']['call'];
+
+                                        /*if(isset($dataCall['sid'])) {
+                                            $comForm->c_voice_sid = $dataCall['sid'];
+                                        }*/
+
+                                    } else {
+                                        $comForm->c_voice_status = 5; // Error
+
+                                        if (isset($response['error']) && $response['error']) {
+                                            $error = $response['error'];
+                                        } else {
+                                            $error = VarDumper::dumpAsString($response, 10);
+                                        }
+
+                                        $comForm->addError('c_sms_preview', 'Error call: ' . $error);
+                                    }
+                                } else {
+                                    $comForm->addError('c_sms_preview', 'Error: Not found Call SID');
+                                }
                             }
 
-                            if($comForm->c_voice_status == 51) {
+                            if($comForm->c_voice_status == 1) {
 
                                 $response = $communication->callToPhone($lead->project_id, 'sip:' . $upp->upp_tw_sip_id, $upp->upp_tw_phone_number, $comForm->c_phone_number, Yii::$app->user->identity->username);
 

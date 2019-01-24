@@ -504,6 +504,36 @@ class CommunicationService extends Component
     }
 
 
+    /**
+     * @param string $sid
+     * @param array $updateData
+     * @return array
+     * @throws \yii\httpclient\Exception
+     */
+    public function updateCall(string $sid, array $updateData = []) : array
+    {
+        $out = ['error' => false, 'data' => []];
+
+        $data['sid'] = $sid;
+        $data['data'] = $updateData;
+
+        $response = $this->sendRequest('voice/update-call', $data);
+
+        if ($response->isOk) {
+            if(isset($response->data['data']['response'])) {
+                $out['data'] = $response->data['data']['response'];
+            } else {
+                $out['error'] = 'Not found in response array data key [data][response]';
+            }
+        } else {
+            $out['error'] = $response->content;
+            \Yii::error(VarDumper::dumpAsString($out['error'], 10), 'Component:CommunicationService::updateCall');
+        }
+
+        return $out;
+    }
+
+
 
 
 
