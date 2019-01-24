@@ -30,6 +30,9 @@ class CommunicationController extends ApiBaseController
     public const ACTION_CREATE  = 'create';
     public const ACTION_DELETE  = 'delete';
 
+    public const TYPE_VOIP_RECORD       = 'voip_record';
+    public const TYPE_VOIP              = 'voip';
+
     public const TYPE_UPDATE_EMAIL_STATUS = 'update_email_status';
     public const TYPE_UPDATE_SMS_STATUS = 'update_sms_status';
 
@@ -239,7 +242,7 @@ class CommunicationController extends ApiBaseController
         $apiLog = $this->startApiLog($this->action->uniqueId);
 
         //$action = Yii::$app->request->post('action');
-        //$type = Yii::$app->request->post('type');
+        $type = Yii::$app->request->post('type');
 
         /*if(!$action) {
             throw new NotFoundHttpException('Not found action', 1);
@@ -282,30 +285,49 @@ class CommunicationController extends ApiBaseController
 
         $post = Yii::$app->request->post();
 
-        if(isset($post['callData']['CallSid']) && $post['callData']['CallSid']) {
-            $call = Call::find()->where(['c_call_sid' => $post['callData']['CallSid']])->one();
-            if($call) {
+        if($type == self::TYPE_VOIP_RECORD) {
 
-                $call->c_call_status = $post['callData']['CallStatus'] ?? '';
-                $call->c_sequence_number = $post['callData']['SequenceNumber'] ?? 0;
+            if (isset($post['callData']['CallSid']) && $post['callData']['CallSid']) {
+                $call = Call::find()->where(['c_call_sid' => $post['callData']['CallSid']])->one();
+                if ($call) {
 
-                if(isset($post['callData']['Duration'])) {
-                    $call->c_call_duration = (int) $post['callData']['Duration'];
+                    $call->c_recording_url = $post['callData']['CallStatus'] ?? '';
+                    $call->c_recording_duration = $post['callData']['RecordingDuration'];
+                    $call->c_recording_sid = $post['callData']['RecordingSid'];
+                    
+
+                    $call->save();
+                    if ($call->c_lead_id) {
+                        /*Notifications::create($user_id, 'New SMS '.$sms->s_phone_from, 'SMS from ' . $sms->s_phone_from .' ('.$clientName.') to '.$sms->s_phone_to.' <br> '.nl2br(Html::encode($sms->s_sms_text))
+                            . ($lead_id ? '<br>Lead ID: '.$lead_id : ''), Notifications::TYPE_INFO, true);*/
+                        Notifications::socket(null, $call->c_lead_id, 'recordUpdate', ['url' => $call->c_recording_url], true);
+                    }
                 }
+            }
 
-                $call->save();
-                if($call->c_lead_id) {
-                    /*Notifications::create($user_id, 'New SMS '.$sms->s_phone_from, 'SMS from ' . $sms->s_phone_from .' ('.$clientName.') to '.$sms->s_phone_to.' <br> '.nl2br(Html::encode($sms->s_sms_text))
-                        . ($lead_id ? '<br>Lead ID: '.$lead_id : ''), Notifications::TYPE_INFO, true);*/
-                    Notifications::socket(null, $call->c_lead_id, 'callUpdate', ['status' => $call->c_call_status, 'duration' => $call->c_call_duration, 'snr' => $call->c_sequence_number], true);
+        } else {
+            if (isset($post['callData']['CallSid']) && $post['callData']['CallSid']) {
+                $call = Call::find()->where(['c_call_sid' => $post['callData']['CallSid']])->one();
+                if ($call) {
+
+                    $call->c_call_status = $post['callData']['CallStatus'] ?? '';
+                    $call->c_sequence_number = $post['callData']['SequenceNumber'] ?? 0;
+
+                    if (isset($post['callData']['Duration'])) {
+                        $call->c_call_duration = (int)$post['callData']['Duration'];
+                    }
+
+                    $call->save();
+                    if ($call->c_lead_id) {
+                        /*Notifications::create($user_id, 'New SMS '.$sms->s_phone_from, 'SMS from ' . $sms->s_phone_from .' ('.$clientName.') to '.$sms->s_phone_to.' <br> '.nl2br(Html::encode($sms->s_sms_text))
+                            . ($lead_id ? '<br>Lead ID: '.$lead_id : ''), Notifications::TYPE_INFO, true);*/
+                        Notifications::socket(null, $call->c_lead_id, 'callUpdate', ['status' => $call->c_call_status, 'duration' => $call->c_call_duration, 'snr' => $call->c_sequence_number], true);
+                    }
                 }
             }
         }
 
         $response = $post;
-
-
-
 
         $responseData = [];
 
