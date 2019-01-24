@@ -542,6 +542,8 @@ $this->registerJs($js);
             //$('#div-call-timer').timer('resume');
         } else if(obj.status == 'initiated') {
             startCall();
+        } else if(obj.status == 'busy') {
+            stopCall(0);
         }
     }
 

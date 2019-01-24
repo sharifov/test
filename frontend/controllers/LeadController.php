@@ -642,9 +642,10 @@ class LeadController extends FController
                             if($comForm->c_voice_status == 2) {
 
                                 if($comForm->c_voice_sid) {
-                                    Yii::info('sid: ' . $comForm->c_voice_sid . " Logs: \r\n" . VarDumper::dumpAsString($response, 10), 'info/LeadController:updateCall');
 
                                     $response = $communication->updateCall($comForm->c_voice_sid, ['status' => 'completed']);
+
+                                    Yii::info('sid: ' . $comForm->c_voice_sid . " Logs: \r\n" . VarDumper::dumpAsString($response, 10), 'info/LeadController:updateCall');
 
 
                                     if ($response && isset($response['data']['call'])) {
