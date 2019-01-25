@@ -537,6 +537,7 @@ $this->registerJs($js);
 
         if(obj.status == 'completed') {
             stopCall(obj.duration); //updateCommunication();
+            updateCommunication();
         } else if(obj.status == 'in-progress') {
             startCallTimer();
             //$('#div-call-timer').timer('resume');
@@ -544,8 +545,10 @@ $this->registerJs($js);
             startCall();
         } else if(obj.status == 'busy') {
             stopCall(0);
+            updateCommunication();
         } else if(obj.status == 'no-answer') {
             stopCall(0);
+            updateCommunication();
         }
 
     }

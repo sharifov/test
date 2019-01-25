@@ -31,9 +31,16 @@ use Yii;
  * @property int $c_lead_id
  * @property int $c_created_user_id
  * @property string $c_created_dt
+ * @property int $c_com_call_id
+ * @property string $c_updated_dt
+ * @property int $c_project_id
+ * @property string $c_error_message
+ * @property int $c_is_new
+ * @property int $c_is_deleted
  *
  * @property Employee $cCreatedUser
  * @property Lead $cLead
+ * @property Project $cProject
  */
 class Call extends \yii\db\ActiveRecord
 {
@@ -92,18 +99,20 @@ class Call extends \yii\db\ActiveRecord
     {
         return [
             [['c_call_sid', 'c_account_sid'], 'required'],
-            [['c_call_type_id', 'c_lead_id', 'c_created_user_id'], 'integer'],
-            [['c_created_dt'], 'safe'],
+            [['c_call_type_id', 'c_lead_id', 'c_created_user_id', 'c_com_call_id', 'c_project_id', 'c_is_new', 'c_is_deleted'], 'integer'],
+            [['c_created_dt', 'c_updated_dt'], 'safe'],
             [['c_call_sid', 'c_account_sid', 'c_parent_call_sid', 'c_recording_sid'], 'string', 'max' => 34],
             [['c_from', 'c_to', 'c_sip', 'c_forwarded_from'], 'string', 'max' => 100],
             [['c_call_status', 'c_direction'], 'string', 'max' => 15],
             [['c_api_version', 'c_sip_response_code'], 'string', 'max' => 10],
             [['c_caller_name'], 'string', 'max' => 50],
             [['c_call_duration', 'c_recording_duration'], 'string', 'max' => 20],
-            [['c_recording_url', 'c_uri'], 'string', 'max' => 120],
+            [['c_recording_url', 'c_uri'], 'string', 'max' => 200],
             [['c_timestamp', 'c_sequence_number'], 'string', 'max' => 40],
+            [['c_error_message'], 'string', 'max' => 500],
             [['c_created_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['c_created_user_id' => 'id']],
             [['c_lead_id'], 'exist', 'skipOnError' => true, 'targetClass' => Lead::class, 'targetAttribute' => ['c_lead_id' => 'id']],
+            [['c_project_id'], 'exist', 'skipOnError' => true, 'targetClass' => Project::class, 'targetAttribute' => ['c_project_id' => 'id']],
         ];
     }
 
@@ -137,6 +146,12 @@ class Call extends \yii\db\ActiveRecord
             'c_lead_id' => 'Lead ID',
             'c_created_user_id' => 'Created User ID',
             'c_created_dt' => 'Created Dt',
+            'c_com_call_id' => 'Com Call ID',
+            'c_updated_dt' => 'Updated Dt',
+            'c_project_id' => 'Project ID',
+            'c_error_message' => 'Error Message',
+            'c_is_new' => 'Is New',
+            'c_is_deleted' => 'Is Deleted',
         ];
     }
 
@@ -146,6 +161,14 @@ class Call extends \yii\db\ActiveRecord
     public function getCCreatedUser()
     {
         return $this->hasOne(Employee::class, ['id' => 'c_created_user_id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getCProject()
+    {
+        return $this->hasOne(Project::class, ['id' => 'c_project_id']);
     }
 
     /**
@@ -163,5 +186,13 @@ class Call extends \yii\db\ActiveRecord
     public static function find()
     {
         return new CallQuery(get_called_class());
+    }
+
+    /**
+     * @return mixed|string
+     */
+    public function getCallTypeName()
+    {
+        return self::CALL_TYPE_LIST[$this->c_call_type_id] ?? '-';
     }
 }

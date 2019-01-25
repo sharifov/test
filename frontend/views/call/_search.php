@@ -66,6 +66,18 @@ use yii\widgets\ActiveForm;
 
     <?php // echo $form->field($model, 'c_created_dt') ?>
 
+    <?php // echo $form->field($model, 'c_com_call_id') ?>
+
+    <?php // echo $form->field($model, 'c_updated_dt') ?>
+
+    <?php // echo $form->field($model, 'c_project_id') ?>
+
+    <?php // echo $form->field($model, 'c_error_message') ?>
+
+    <?php // echo $form->field($model, 'c_is_new') ?>
+
+    <?php // echo $form->field($model, 'c_is_deleted') ?>
+
     <div class="form-group">
         <?= Html::submitButton('Search', ['class' => 'btn btn-primary']) ?>
         <?= Html::resetButton('Reset', ['class' => 'btn btn-default']) ?>

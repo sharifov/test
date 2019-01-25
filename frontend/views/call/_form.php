@@ -58,6 +58,18 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'c_created_dt')->textInput() ?>
 
+    <?= $form->field($model, 'c_com_call_id')->textInput() ?>
+
+    <?= $form->field($model, 'c_updated_dt')->textInput() ?>
+
+    <?= $form->field($model, 'c_project_id')->textInput() ?>
+
+    <?= $form->field($model, 'c_error_message')->textInput(['maxlength' => true]) ?>
+
+    <?= $form->field($model, 'c_is_new')->textInput() ?>
+
+    <?= $form->field($model, 'c_is_deleted')->textInput() ?>
+
     <div class="form-group">
         <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
     </div>

@@ -295,13 +295,16 @@ class CommunicationController extends ApiBaseController
                         $call->c_recording_url = $post['callData']['RecordingUrl'];
                         $call->c_recording_duration = $post['callData']['RecordingDuration'];
                         $call->c_recording_sid = $post['callData']['RecordingSid'];
+                        $call->c_updated_dt = date('Y-m-d H:i:s');
 
 
-                        $call->save();
+                        if(!$call->save()) {
+                            Yii::error(VarDumper::dumpAsString($call->errors), 'API:CommunicationController:actionVoice:Call:save');
+                        }
                         if ($call->c_lead_id) {
                             /*Notifications::create($user_id, 'New SMS '.$sms->s_phone_from, 'SMS from ' . $sms->s_phone_from .' ('.$clientName.') to '.$sms->s_phone_to.' <br> '.nl2br(Html::encode($sms->s_sms_text))
                                 . ($lead_id ? '<br>Lead ID: '.$lead_id : ''), Notifications::TYPE_INFO, true);*/
-                            Notifications::socket(null, $call->c_lead_id, 'recordUpdate', ['url' => $call->c_recording_url], true);
+                            Notifications::socket(null, $call->c_lead_id, 'recordingUpdate', ['url' => $call->c_recording_url], true);
                         }
                     }
                 }
@@ -316,10 +319,13 @@ class CommunicationController extends ApiBaseController
                     $call->c_sequence_number = $post['callData']['SequenceNumber'] ?? 0;
 
                     if (isset($post['callData']['Duration'])) {
-                        $call->c_call_duration = (int)$post['callData']['Duration'];
+                        $call->c_call_duration = (int) $post['callData']['Duration'];
                     }
 
-                    $call->save();
+                    $call->c_updated_dt = date('Y-m-d H:i:s');
+                    if(!$call->save()) {
+                        Yii::error(VarDumper::dumpAsString($call->errors), 'API:CommunicationController:actionVoice:Call:save');
+                    }
                     if ($call->c_lead_id) {
                         /*Notifications::create($user_id, 'New SMS '.$sms->s_phone_from, 'SMS from ' . $sms->s_phone_from .' ('.$clientName.') to '.$sms->s_phone_to.' <br> '.nl2br(Html::encode($sms->s_sms_text))
                             . ($lead_id ? '<br>Lead ID: '.$lead_id : ''), Notifications::TYPE_INFO, true);*/

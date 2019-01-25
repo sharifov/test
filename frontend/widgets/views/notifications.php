@@ -227,6 +227,10 @@ $js = <<<JS
                         callUpdate(obj);
                     }
                     
+                    if(obj.command === 'recordingUpdate') {
+                        updatePjaxNotify();
+                        updateCommunication();
+                    }
                     
                 }
             } catch (error) {

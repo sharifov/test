@@ -53,6 +53,12 @@ $this->params['breadcrumbs'][] = $this->title;
             'c_lead_id',
             'c_created_user_id',
             'c_created_dt',
+            'c_com_call_id',
+            'c_updated_dt',
+            'c_project_id',
+            'c_error_message',
+            'c_is_new',
+            'c_is_deleted',
         ],
     ]) ?>
 

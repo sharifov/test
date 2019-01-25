@@ -685,6 +685,9 @@ class LeadController extends FController
 
 
                                     $call = new Call();
+
+                                    $call->c_com_call_id = isset($response['data']['com_call_id']) ? (int) $response['data']['com_call_id'] : null ;
+
                                     $call->c_call_type_id = 1;
                                     $call->c_call_sid = $dataCall['sid'];
                                     $call->c_account_sid = $dataCall['account_sid'];
@@ -698,6 +701,7 @@ class LeadController extends FController
                                     $call->c_direction = $dataCall['direction'];
                                     $call->c_uri = $dataCall['uri'];
                                     $call->c_lead_id = $lead->id;
+                                    $call->c_project_id = $lead->project_id;
 
                                     $call->c_created_dt = date('Y-m-d H:i:s');
                                     $call->c_created_user_id = Yii::$app->user->id;
