@@ -20,7 +20,7 @@ use Yii;
  * @property string $c_forwarded_from
  * @property string $c_caller_name
  * @property string $c_parent_call_sid
- * @property string $c_call_duration
+ * @property int $c_call_duration
  * @property string $c_sip_response_code
  * @property string $c_recording_url
  * @property string $c_recording_sid
@@ -99,14 +99,14 @@ class Call extends \yii\db\ActiveRecord
     {
         return [
             [['c_call_sid', 'c_account_sid'], 'required'],
-            [['c_call_type_id', 'c_lead_id', 'c_created_user_id', 'c_com_call_id', 'c_project_id', 'c_is_new', 'c_is_deleted'], 'integer'],
+            [['c_call_type_id', 'c_lead_id', 'c_created_user_id', 'c_com_call_id', 'c_project_id', 'c_is_new', 'c_is_deleted', 'c_call_duration'], 'integer'],
             [['c_created_dt', 'c_updated_dt'], 'safe'],
             [['c_call_sid', 'c_account_sid', 'c_parent_call_sid', 'c_recording_sid'], 'string', 'max' => 34],
             [['c_from', 'c_to', 'c_sip', 'c_forwarded_from'], 'string', 'max' => 100],
             [['c_call_status', 'c_direction'], 'string', 'max' => 15],
             [['c_api_version', 'c_sip_response_code'], 'string', 'max' => 10],
             [['c_caller_name'], 'string', 'max' => 50],
-            [['c_call_duration', 'c_recording_duration'], 'string', 'max' => 20],
+            [['c_recording_duration'], 'string', 'max' => 20],
             [['c_recording_url', 'c_uri'], 'string', 'max' => 200],
             [['c_timestamp', 'c_sequence_number'], 'string', 'max' => 40],
             [['c_error_message'], 'string', 'max' => 500],

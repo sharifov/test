@@ -15,6 +15,9 @@ class m190125_075012_update_column_url_tbl_call extends Migration
         $this->alterColumn('{{%call}}', 'c_uri', $this->string(200));
         $this->alterColumn('{{%call}}', 'c_recording_url', $this->string(200));
 
+        $this->alterColumn('{{%call}}', 'c_call_duration', $this->integer());
+
+
         $this->addColumn('{{%call}}', 'c_com_call_id', $this->integer());
         $this->addColumn('{{%call}}', 'c_updated_dt', $this->timestamp());
 
@@ -31,6 +34,9 @@ class m190125_075012_update_column_url_tbl_call extends Migration
      */
     public function safeDown()
     {
+
+        $this->dropForeignKey('FK-call_c_project_id', '{{%call}}');
+
         $this->dropColumn('{{%call}}', 'c_com_call_id');
         $this->dropColumn('{{%call}}', 'c_updated_dt');
 
