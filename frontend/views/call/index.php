@@ -25,8 +25,8 @@ $this->params['breadcrumbs'][] = $this->title;
         'filterModel' => $searchModel,
         'columns' => [
             //['class' => 'yii\grid\SerialColumn'],
-
             'c_id',
+            ['class' => 'yii\grid\ActionColumn'],
             'c_com_call_id',
             'c_call_sid',
             //'c_account_sid',
@@ -111,7 +111,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'c_is_new:boolean',
             //'c_is_deleted:boolean',
 
-            ['class' => 'yii\grid\ActionColumn'],
+
         ],
     ]); ?>
     <?php Pjax::end(); ?>

@@ -320,9 +320,10 @@ class CommunicationController extends ApiBaseController
                     $call->c_call_status = $post['callData']['CallStatus'] ?? '';
                     $call->c_sequence_number = $post['callData']['SequenceNumber'] ?? 0;
 
-                    if (isset($post['callData']['Duration'])) {
-                        $call->c_call_duration = (int) $post['callData']['Duration'];
+                    if (isset($post['callData']['CallDuration'])) {
+                        $call->c_call_duration = (int) $post['callData']['CallDuration'];
                     }
+
 
                     $call->c_updated_dt = date('Y-m-d H:i:s');
                     if(!$call->save()) {

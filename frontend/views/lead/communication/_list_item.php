@@ -30,7 +30,11 @@ use \common\models\Call;
             $statusTitle = 'CANCELED';
         } else {
             $statusClass = 'sent';
-            $statusTitle = 'init: ';
+            $statusTitle = $call->c_call_status; //'INIT';
+        }
+
+        if($call->c_id) {
+            $statusTitle .= ' - Call ID: '. $call->c_id;
         }
 
         if($call->c_call_type_id == Call::CALL_TYPE_IN) {
@@ -44,11 +48,10 @@ use \common\models\Call;
         <i class="chat__status chat__status--<?=$statusClass?> fa fa-circle" data-toggle="tooltip" title="<?=Html::encode($statusTitle)?>" data-placement="right" data-original-title="<?=Html::encode($statusTitle)?>"></i>
         <div class="chat__message-heading">
 
-
             <?php if($call->c_call_type_id == Call::CALL_TYPE_IN):?>
                 <div class="chat__sender">Call from (<strong><?=Html::encode($call->c_from)?>) </strong> to (<strong><?=Html::encode($call->c_to)?></strong>)</div>
             <? else: ?>
-                <div class="chat__sender">Call from (<strong><?=Html::encode($call->c_from)?>) </strong> to (<strong><?=Html::encode($call->c_to)?></strong>)</div>
+                <div class="chat__sender">Call from <b><?=($call->cCreatedUser ? Html::encode($call->cCreatedUser->username) : '-') ?></b>, (<strong><?=Html::encode($call->c_from)?>) </strong> to (<strong><?=Html::encode($call->c_to)?></strong>)</div>
             <?php endif;?>
 
             <div class="chat__date"><?=Yii::$app->formatter->asDatetime(strtotime($call->c_created_dt))?></div> <?php //11:01AM | June 9?>
@@ -60,7 +63,7 @@ use \common\models\Call;
                 Your browser does not support the audio element.
             </audio>
             <? else: ?>
-                <div>Not found Call record ...</div>
+                <div><i class="fa fa-volume-off"></i> ... <?=$call->c_call_duration > 0 ? Yii::$app->formatter->asDuration($call->c_call_duration) : ''?></div>
             <?php endif;?>
         </div>
     </div>
