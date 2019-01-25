@@ -211,6 +211,8 @@ $js = <<<JS
             try {
                 var obj = JSON.parse(e.data); // $.parseJSON( e.data );
                 
+                console.log(obj);
+                
                 if (typeof obj.command !== 'undefined') {
                     
                     if(obj.command === 'getNewNotification') {

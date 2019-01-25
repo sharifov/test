@@ -57,13 +57,20 @@ $this->params['breadcrumbs'][] = $this->title;
             'c_call_status',
             //'c_api_version',
             //'c_direction',
-            'c_forwarded_from',
+            //'c_forwarded_from',
             'c_caller_name',
             //'c_parent_call_sid',
             'c_call_duration',
             //'c_sip_response_code',
-            'c_recording_url:url',
-            'c_recording_sid',
+            //'c_recording_url:url',
+            [
+                'attribute' => 'c_recording_url',
+                'value' => function (\common\models\Call $model) {
+                    return  $model->c_recording_url ? '<audio controls="controls" class="chat__audio"><source src="'.$model->c_recording_url.'" type="audio/mpeg"> </audio><br>' . Html::a('Link', $model->c_recording_url, ['target' => '_blank']) : '-';
+                },
+                'format' => 'raw'
+            ],
+            //'c_recording_sid',
             'c_recording_duration',
             'c_timestamp',
             //'c_uri',
