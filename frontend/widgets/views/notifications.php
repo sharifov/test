@@ -234,6 +234,10 @@ $js = <<<JS
                         updateCommunication();
                     }
                     
+                    if(obj.command === 'incomingCall') {
+                        incomingCall(obj);
+                    }
+                    
                 }
             } catch (error) {
                 console.error('Invalid JSON data');

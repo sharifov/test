@@ -269,4 +269,43 @@ class TestController extends FController
         }
     }
 
+
+    public function actionIncomingCall()
+    {
+
+
+        /*if ($vl->vl_call_status == 'initiated') {
+
+        } elseif($vl->vl_call_status == 'ringing') {
+
+        } elseif($vl->vl_call_status == 'in-progress') {
+
+        } elseif($vl->vl_call_status == 'busy') {
+
+        } elseif($vl->vl_call_status == 'completed') {
+            $call->c_call_duration = $vl->vl_call_duration;
+        }*/
+
+        $statuses = ['initiated', 'ringing', 'in-progress', 'completed'];
+        $user_id = Yii::$app->user->id;
+        $n = 0;
+
+
+        $data = [];
+        $data['client_name'] = 'Alexandr Test';
+        $data['client_id'] = 345;
+        $data['client_phone'] = '+3738956478';
+        $data['last_lead_id'] = 34567;
+
+        foreach ($statuses as $status) {
+            sleep(random_int(3, 5));
+            $data['status'] = $status;
+            $n++;
+            Notifications::socket($user_id, $lead_id = null, 'incomingCall', $data, true);
+            echo '<br>'.$status;
+        }
+
+    }
+
+
 }

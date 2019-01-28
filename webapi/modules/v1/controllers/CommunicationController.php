@@ -31,6 +31,7 @@ class CommunicationController extends ApiBaseController
     public const ACTION_DELETE  = 'delete';
 
     public const TYPE_VOIP_RECORD       = 'voip_record';
+    public const TYPE_VOIP_INCOMING     = 'voip_incoming';
     public const TYPE_VOIP              = 'voip';
 
     public const TYPE_UPDATE_EMAIL_STATUS = 'update_email_status';
@@ -285,7 +286,77 @@ class CommunicationController extends ApiBaseController
 
         $post = Yii::$app->request->post();
 
-        if($type == self::TYPE_VOIP_RECORD) {
+        $response = $post;
+
+        if($type == self::TYPE_VOIP_INCOMING) {
+
+            Yii::info(VarDumper::dumpAsString($post), 'info\API:CommunicationController:actionVoice:TYPE_VOIP_INCOMING');
+
+            /*if (isset($post['callData']['CallSid']) && $post['callData']['CallSid']) {
+                $call = Call::find()->where(['c_call_sid' => $post['callData']['CallSid']])->one();
+                if ($call) {
+
+                    if($post['callData']['RecordingUrl']) {
+                        $call->c_recording_url = $post['callData']['RecordingUrl'];
+                        $call->c_recording_duration = $post['callData']['RecordingDuration'];
+                        $call->c_recording_sid = $post['callData']['RecordingSid'];
+                        $call->c_updated_dt = date('Y-m-d H:i:s');
+
+
+                        if(!$call->save()) {
+                            Yii::error(VarDumper::dumpAsString($call->errors), 'API:CommunicationController:actionVoice:Call1:save');
+                        }
+                        if ($call->c_lead_id) {
+
+                            if($call->c_created_user_id) {
+                                Notifications::create($call->c_created_user_id, 'Call Recording Completed  from ' . $call->c_from . ' to ' . $call->c_to . ' <br>Lead ID: ' . $call->c_lead_id , Notifications::TYPE_INFO, true);
+                            }
+                            Notifications::socket(null, $call->c_lead_id, 'recordingUpdate', ['url' => $call->c_recording_url], true);
+                        }
+                    }
+                }
+            }*/
+
+            $agent_phone_number = '+16692216352';
+            $client_phone_number = '+37369594567';
+
+            $upp = UserProjectParams::find()->where(['upp_phone_number' => $agent_phone_number])->orWhere(['upp_tw_phone_number' => $agent_phone_number])->one();
+
+            if($upp) {
+                if($upp->upp_tw_sip_id) {
+                    $response['agent_sip'] = $upp->upp_tw_sip_id;
+                    $response['agent_phone_number'] = $agent_phone_number;
+                    $response['client_phone_number'] = $client_phone_number;
+                } else {
+                    $response['error'] = 'Phone number';
+                }
+            } else {
+                $response['error'] = 'Not found phone number';
+            }
+
+
+
+            /*$statuses = ['initiated', 'ringing', 'in-progress', 'completed'];
+            $user_id = Yii::$app->user->id;
+            $n = 0;
+
+
+            $data = [];
+            $data['client_name'] = 'Alexandr Test';
+            $data['client_id'] = 345;
+            $data['client_phone'] = '+3738956478';
+            $data['last_lead_id'] = 34567;
+
+            foreach ($statuses as $status) {
+                sleep(random_int(3, 5));
+                $data['status'] = $status;
+                $n++;
+                Notifications::socket($user_id, $lead_id = null, 'incomingCall', $data, true);
+                echo '<br>'.$status;
+            }*/
+
+
+        } elseif($type == self::TYPE_VOIP_RECORD) {
 
             if (isset($post['callData']['CallSid']) && $post['callData']['CallSid']) {
                 $call = Call::find()->where(['c_call_sid' => $post['callData']['CallSid']])->one();
@@ -338,7 +409,7 @@ class CommunicationController extends ApiBaseController
             }
         }
 
-        $response = $post;
+
 
         $responseData = [];
 

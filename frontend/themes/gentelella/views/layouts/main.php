@@ -241,6 +241,8 @@ $isAdmin = Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id);
 <?= $this->render('_modals') ?>
 <!-- /modals -->
 
+<?= frontend\widgets\CallBox::widget(); ?>
+
 <?php $this->endBody(); ?>
 </body>
 </html>
