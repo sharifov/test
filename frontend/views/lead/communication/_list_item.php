@@ -58,13 +58,14 @@ use \common\models\Call;
         </div>
         <div class="panel-body">
             <?php if($call->c_recording_url):?>
-            <audio controls="controls" class="chat__audio">
-                <source src="<?=$call->c_recording_url?>" type="audio/mpeg">
-                Your browser does not support the audio element.
-            </audio>
+                <audio controls="controls" class="chat__audio">
+                    <source src="<?=$call->c_recording_url?>" type="audio/mpeg">
+                    Your browser does not support the audio element
+                </audio>
             <? else: ?>
-                <div><i class="fa fa-volume-off"></i> ... <?=$call->c_call_duration > 0 ? Yii::$app->formatter->asDuration($call->c_call_duration) : ''?></div>
+                <div><i class="fa fa-volume-off"></i> ... <?=$call->c_call_status?></div>
             <?php endif;?>
+            <div><?=$call->c_call_duration > 0 ? 'Duration: ' . Yii::$app->formatter->asDuration($call->c_call_duration) : ''?></div>
         </div>
     </div>
     <?php endif;?>
