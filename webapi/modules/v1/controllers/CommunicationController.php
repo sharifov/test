@@ -6,6 +6,7 @@ use common\models\Call;
 use common\models\ClientPhone;
 use common\models\Email;
 use common\models\Employee;
+use common\models\Lead;
 use common\models\Notifications;
 use common\models\Project;
 use common\models\Sms;
@@ -290,6 +291,39 @@ class CommunicationController extends ApiBaseController
 
         if($type == self::TYPE_VOIP_INCOMING) {
 
+
+                    //['type'] =
+                        //['call_id']
+                /*[call][
+                    'Called' => '+15596489977'
+                   'ToState' => 'CA'
+                   'CallerCountry' => 'US'
+                   'Direction' => 'inbound'
+                   'CallerState' => 'CA'
+                   'ToZip' => '93618'
+                   'CallSid' => 'CAda14121e342c1eb9835b3131537283d1'
+                   'To' => '+15596489977'
+                   'CallerZip' => '94949'
+                   'ToCountry' => 'US'
+                   'ApiVersion' => '2010-04-01'
+                   'CalledZip' => '93618'
+                   'CalledCity' => 'DINUBA'
+                   'CallStatus' => 'ringing'
+                   'From' => '+14154834499'
+                   'AccountSid' => 'AC10f3c74efba7b492cbd7dca86077736c'
+                   'CalledCountry' => 'US'
+                   'CallerCity' => 'IGNACIO'
+                   'ApplicationSid' => 'APd65ba6826de6314e0780220d89fc6cde'
+                   'Caller' => '+14154834499'
+                   'FromCountry' => 'US'
+                   'ToCity' => 'DINUBA'
+                   'FromCity' => 'IGNACIO'
+                   'CalledState' => 'CA'
+                   'FromZip' => '94949'
+                   'FromState' => 'CA'
+                ]*/
+
+
             Yii::info(VarDumper::dumpAsString($post), 'info\API:CommunicationController:actionVoice:TYPE_VOIP_INCOMING');
 
             /*if (isset($post['callData']['CallSid']) && $post['callData']['CallSid']) {
@@ -317,21 +351,122 @@ class CommunicationController extends ApiBaseController
                 }
             }*/
 
-            $agent_phone_number = '+16692216352';
-            $client_phone_number = '+37369594567';
 
-            $upp = UserProjectParams::find()->where(['upp_phone_number' => $agent_phone_number])->orWhere(['upp_tw_phone_number' => $agent_phone_number])->one();
+            if(isset($post['call']) && $post['call']) {
 
-            if($upp) {
-                if($upp->upp_tw_sip_id) {
-                    $response['agent_sip'] = $upp->upp_tw_sip_id;
-                    $response['agent_phone_number'] = $agent_phone_number;
-                    $response['client_phone_number'] = $client_phone_number;
+                $client_phone_number = null;
+                $agent_phone_number = null;
+
+                if (isset($post['call']['From']) && $post['call']['From']) {
+                    $client_phone_number = $post['call']['From'];
+                }
+
+                if (isset($post['call']['Called']) && $post['call']['Called']) {
+                    $agent_phone_number = $post['call']['Called'];
+                }
+
+                if (!$client_phone_number) {
+                    $response['error'] = 'Not found Call From (Client phone number)';
+                    $response['error_code'] = 10;
+                }
+
+                if (!$agent_phone_number) {
+                    $response['error'] = 'Not found Call Called (Agent phone number)';
+                    $response['error_code'] = 11;
+                }
+
+
+                $upp = UserProjectParams::find()->where(['upp_phone_number' => $agent_phone_number])->orWhere(['upp_tw_phone_number' => $agent_phone_number])->one();
+
+
+                if ($upp) {
+
+                    $call = new Call();
+                    $call->c_sip = $upp->upp_tw_sip_id;
+                    $call->c_call_sid = $post['call']['CallSid'] ?? null;
+                    $call->c_account_sid = $post['call']['AccountSid'] ?? null;
+                    $call->c_call_type_id = Call::CALL_TYPE_IN;
+                    $call->c_call_status = $post['call']['CallStatus'] ?? 'ringing';
+                    $call->c_com_call_id = $post['call_id'] ?? null;
+                    $call->c_direction = $post['call']['Direction'] ?? null;
+                    $call->c_project_id = $upp->upp_project_id;
+                    $call->c_is_new = 1;
+                    $call->c_api_version = $post['call']['ApiVersion'] ?? null;
+                    $call->c_from = $client_phone_number;
+                    $call->c_to = $agent_phone_number;
+                    $call->c_created_dt = date('Y-m-d H:i:s');
+                    $call->c_created_user_id = $upp->upp_user_id;
+
+                    if(!$call->save()) {
+                        Yii::error(VarDumper::dumpAsString($call->errors), 'API:CommunicationController:actionVoice:Call:save');
+                    } else {
+
+                        $data = [];
+                        $data['client_name'] = 'Noname';
+                        $data['client_id'] = null;
+                        $data['last_lead_id'] = null;
+                        $data['client_emails'] = [];
+                        $data['client_phones'] = [];
+
+                        $clientPhone = ClientPhone::find()->where(['phone' => $client_phone_number])->one();
+
+                        if($clientPhone && $client = $clientPhone->client) {
+                            $data['client_name'] = $client->full_name;
+                            $data['client_id'] = $clientPhone->client_id;
+
+                            $lead = Lead::find()->select(['id'])->where(['client_id' => $clientPhone->client_id])->orderBy(['id' => SORT_DESC])->limit(1)->one();
+                            if($lead) {
+                                $data['last_lead_id'] = $lead->id;
+                            }
+
+                            if($client->clientEmails) {
+                               foreach ($client->clientEmails as $email) {
+                                   $data['client_emails'][] = $email->email;
+                               }
+                            }
+
+                            if($client->clientPhones) {
+                                foreach ($client->clientPhones as $phone) {
+                                    $data['client_phones'][] = $phone->phone;
+                                }
+                            }
+                        }
+
+                        $data['client_phone'] = $client_phone_number;
+                        $data['agent_phone'] = $agent_phone_number;
+
+                        $data['post'] = $post;
+
+                        $data['status'] = $call->c_call_status;
+
+                        Notifications::create($call->c_created_user_id, 'New Call from '.$call->c_from. ' ('.$data['client_name'].')', 'Call from ' . $call->c_from .' ('.$data['client_name'].') to '.$call->c_to, Notifications::TYPE_INFO, true);
+                        Notifications::socket($call->c_created_user_id, $lead_id = null, 'incomingCall', $data, true);
+
+                        //Notifications::socket(null, $call->c_lead_id, 'callUpdate', ['status' => $call->c_call_status, 'duration' => $call->c_call_duration, 'snr' => $call->c_sequence_number], true);
+                    }
+
+                    /*if ($call->c_lead_id) {
+                        Notifications::create($user_id, 'New SMS '.$sms->s_phone_from, 'SMS from ' . $sms->s_phone_from .' ('.$clientName.') to '.$sms->s_phone_to.' <br> '.nl2br(Html::encode($sms->s_sms_text))
+                            . ($lead_id ? '<br>Lead ID: '.$lead_id : ''), Notifications::TYPE_INFO, true);
+                        //Notifications::socket(null, $call->c_lead_id, 'callUpdate', ['status' => $call->c_call_status, 'duration' => $call->c_call_duration, 'snr' => $call->c_sequence_number], true);
+                    }*/
+
+
+                    if ($upp->upp_tw_sip_id) {
+                        $response['agent_sip'] = $upp->upp_tw_sip_id;
+                        $response['agent_phone_number'] = $agent_phone_number;
+                        $response['client_phone_number'] = $client_phone_number;
+                    } else {
+                        $response['error'] = 'Agent SIP account is empty';
+                        $response['error_code'] = 14;
+                    }
                 } else {
-                    $response['error'] = 'Phone number';
+                    $response['error'] = 'Not found agent phone number';
+                    $response['error_code'] = 13;
                 }
             } else {
-                $response['error'] = 'Not found phone number';
+                $response['error'] = 'Not found "call" array';
+                $response['error_code'] = 12;
             }
 
 

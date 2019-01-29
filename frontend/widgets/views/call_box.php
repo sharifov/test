@@ -95,7 +95,7 @@
         console.log(obj);
 
 
-        if(obj.status == 'initiated') {
+        if(obj.status == 'initiated' || obj.status == 'ringing') {
             hideCallBox(0);
             if (!$('.fab').hasClass('is-visible')) {
                 toggleFab();
