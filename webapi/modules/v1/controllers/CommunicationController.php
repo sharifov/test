@@ -428,8 +428,7 @@ class CommunicationController extends ApiBaseController
                         $data['client_phone'] = $client_phone_number;
                         $data['agent_phone'] = $agent_phone_number;
 
-
-                        $data['post'] = $post;
+                        //$data['post'] = $post;
 
                         $data['status'] = $call->c_call_status;
 

@@ -19,7 +19,7 @@
   height: 56px;
   border-radius: 50%;
   text-align: center;
-  color: #f0f0f0;
+  color: #f0f0f0 !important;
   margin: 25px auto 0;
   box-shadow: 0 0 4px rgba(0, 0, 0, .14), 0 4px 8px rgba(0, 0, 0, .28);
   cursor: pointer;
@@ -30,7 +30,9 @@
   overflow: hidden;
   background: #42a5f5;
 }
-
+.fab:hover {
+  background: #53adfa;
+}
 .fab > i {
   font-size: 2em;
   line-height: 55px;
@@ -212,10 +214,12 @@
 #call_box_body{
   height: 450px;
 }
-.call_box_login p,.call_box_body li, p, a{
+
+.call_box_login p,.call_box_body li,.fabs p,.fabs a{
   -webkit-animation: zoomIn .5s cubic-bezier(.42, 0, .58, 1);
   animation: zoomIn .5s cubic-bezier(.42, 0, .58, 1);
 }
+
 .call_box_body p {
   padding: 20px;
   color: #888
@@ -577,7 +581,7 @@ strong.call_box_time {
 }
 /*Animation*/
 
-/*@-webkit-keyframes zoomIn {
+@-webkit-keyframes zoomIn {
   0% {
     -webkit-transform: scale(0);
     transform: scale(0);
@@ -637,7 +641,7 @@ strong.call_box_time {
     transform: scale(1);
     opacity: 0;
   }
-}*/
+}
 /* SMARTPHONES PORTRAIT */
 
 @media only screen and (min-width: 300px) {
