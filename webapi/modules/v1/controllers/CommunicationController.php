@@ -404,6 +404,8 @@ class CommunicationController extends ApiBaseController
                             if($lead) {
                                 $data['last_lead_id'] = $lead->id;
                                 $data['client_last_activity'] = Yii::$app->formatter->asDate(strtotime($client->created));
+                                $call->c_lead_id = $lead->id;
+                                $call->save();
                             }
 
                             $data['client_count_calls'] = Call::find()->where(['c_from' => $client_phone_number])->orWhere(['c_to' => $client_phone_number])->count();
