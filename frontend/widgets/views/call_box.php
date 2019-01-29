@@ -105,7 +105,7 @@
             $('#call_box_client_phone').text(obj.client_phone);
         }
 
-        if(obj.status == 'completed') {
+        if(obj.status == 'completed' || obj.status == 'busy') {
             hideCallBox(0);
             if ($('.fab').hasClass('is-visible')) {
                 toggleFab();
