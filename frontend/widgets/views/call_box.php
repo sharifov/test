@@ -31,27 +31,23 @@
                 <table class="table table-bordered">
                     <tr>
                         <th>Last Lead</th>
-                        <td id="">-</td>
-                    </tr>
-                    <tr>
-                        <th>Email</th>
-                        <td>-</td>
+                        <td id="call_last_lead_id">-</td>
                     </tr>
                     <tr>
                         <th>Count of Calls</th>
-                        <td>-</td>
+                        <td id="call_count_calls">-</td>
                     </tr>
                     <tr>
                         <th>Count of SMS</th>
-                        <td>-</td>
+                        <td id="call_count_sms">-</td>
                     </tr>
                     <tr>
                         <th>Created Date</th>
-                        <td>-</td>
+                        <td id="call_created_date">-</td>
                     </tr>
                     <tr>
                         <th>Last Activity</th>
-                        <td>-</td>
+                        <td id="call_last_activity">-</td>
                     </tr>
                 </table>
             </div>
@@ -103,6 +99,15 @@
 
             $('#call_box_client_name').text(obj.client_name);
             $('#call_box_client_phone').text(obj.client_phone);
+
+            if(obj.last_lead_id > 0) {
+                $('#call_last_lead_id').html('<a href="/lead/view/' + obj.last_lead_id + '" target="_blank">' + obj.last_lead_id + '</a>');
+            }
+
+            $('#call_count_calls').text(obj.client_count_calls);
+            $('#call_count_sms').text(obj.client_count_sms);
+            $('#call_created_date').text(obj.client_created_date);
+            $('#call_last_activity').text(obj.client_last_activity);
         }
 
         if(obj.status == 'completed' || obj.status == 'busy') {

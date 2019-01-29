@@ -326,30 +326,6 @@ class CommunicationController extends ApiBaseController
 
             Yii::info(VarDumper::dumpAsString($post), 'info\API:CommunicationController:actionVoice:TYPE_VOIP_INCOMING');
 
-            /*if (isset($post['callData']['CallSid']) && $post['callData']['CallSid']) {
-                $call = Call::find()->where(['c_call_sid' => $post['callData']['CallSid']])->one();
-                if ($call) {
-
-                    if($post['callData']['RecordingUrl']) {
-                        $call->c_recording_url = $post['callData']['RecordingUrl'];
-                        $call->c_recording_duration = $post['callData']['RecordingDuration'];
-                        $call->c_recording_sid = $post['callData']['RecordingSid'];
-                        $call->c_updated_dt = date('Y-m-d H:i:s');
-
-
-                        if(!$call->save()) {
-                            Yii::error(VarDumper::dumpAsString($call->errors), 'API:CommunicationController:actionVoice:Call1:save');
-                        }
-                        if ($call->c_lead_id) {
-
-                            if($call->c_created_user_id) {
-                                Notifications::create($call->c_created_user_id, 'Call Recording Completed  from ' . $call->c_from . ' to ' . $call->c_to . ' <br>Lead ID: ' . $call->c_lead_id , Notifications::TYPE_INFO, true);
-                            }
-                            Notifications::socket(null, $call->c_lead_id, 'recordingUpdate', ['url' => $call->c_recording_url], true);
-                        }
-                    }
-                }
-            }*/
 
 
             if(isset($post['call']) && $post['call']) {
@@ -377,6 +353,9 @@ class CommunicationController extends ApiBaseController
 
 
                 $upp = UserProjectParams::find()->where(['upp_phone_number' => $agent_phone_number])->orWhere(['upp_tw_phone_number' => $agent_phone_number])->one();
+
+
+
 
 
                 if ($upp) {
@@ -408,16 +387,28 @@ class CommunicationController extends ApiBaseController
                         $data['client_emails'] = [];
                         $data['client_phones'] = [];
 
+
+                        $data['call_count_calls'] = 0;
+                        $data['call_count_sms'] = 0;
+                        $data['call_created_date'] = '';
+                        $data['call_last_activity'] = '';
+
                         $clientPhone = ClientPhone::find()->where(['phone' => $client_phone_number])->one();
 
                         if($clientPhone && $client = $clientPhone->client) {
                             $data['client_name'] = $client->full_name;
                             $data['client_id'] = $clientPhone->client_id;
+                            $data['call_created_date'] = Yii::$app->formatter->asDate(strtotime($client->created));
 
                             $lead = Lead::find()->select(['id'])->where(['client_id' => $clientPhone->client_id])->orderBy(['id' => SORT_DESC])->limit(1)->one();
                             if($lead) {
                                 $data['last_lead_id'] = $lead->id;
+                                $data['call_last_activity'] = Yii::$app->formatter->asDate(strtotime($client->created));
                             }
+
+                            $data['call_count_calls'] = Call::find()->where(['c_from' => $client_phone_number])->orWhere(['c_to' => $client_phone_number])->count();
+                            $data['call_count_sms'] = Sms::find()->where(['s_phone_from' => $client_phone_number])->orWhere(['s_phone_to' => $client_phone_number])->count();
+
 
                             if($client->clientEmails) {
                                foreach ($client->clientEmails as $email) {
@@ -434,6 +425,7 @@ class CommunicationController extends ApiBaseController
 
                         $data['client_phone'] = $client_phone_number;
                         $data['agent_phone'] = $agent_phone_number;
+
 
                         $data['post'] = $post;
 
@@ -540,6 +532,11 @@ class CommunicationController extends ApiBaseController
                             . ($lead_id ? '<br>Lead ID: '.$lead_id : ''), Notifications::TYPE_INFO, true);*/
                         Notifications::socket(null, $call->c_lead_id, 'callUpdate', ['status' => $call->c_call_status, 'duration' => $call->c_call_duration, 'snr' => $call->c_sequence_number], true);
                     }
+
+                    if($call->c_created_user_id) {
+                        Notifications::socket($call->c_created_user_id, $lead_id = null, 'incomingCall', ['status' => $call->c_call_status, 'duration' => $call->c_call_duration, 'snr' => $call->c_sequence_number], true);
+                    }
+
                 }
             }
         }
