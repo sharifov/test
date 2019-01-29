@@ -388,26 +388,26 @@ class CommunicationController extends ApiBaseController
                         $data['client_phones'] = [];
 
 
-                        $data['call_count_calls'] = 0;
-                        $data['call_count_sms'] = 0;
-                        $data['call_created_date'] = '';
-                        $data['call_last_activity'] = '';
+                        $data['client_count_calls'] = 0;
+                        $data['client_count_sms'] = 0;
+                        $data['client_created_date'] = '';
+                        $data['client_last_activity'] = '';
 
                         $clientPhone = ClientPhone::find()->where(['phone' => $client_phone_number])->one();
 
                         if($clientPhone && $client = $clientPhone->client) {
                             $data['client_name'] = $client->full_name;
                             $data['client_id'] = $clientPhone->client_id;
-                            $data['call_created_date'] = Yii::$app->formatter->asDate(strtotime($client->created));
+                            $data['client_created_date'] = Yii::$app->formatter->asDate(strtotime($client->created));
 
                             $lead = Lead::find()->select(['id'])->where(['client_id' => $clientPhone->client_id])->orderBy(['id' => SORT_DESC])->limit(1)->one();
                             if($lead) {
                                 $data['last_lead_id'] = $lead->id;
-                                $data['call_last_activity'] = Yii::$app->formatter->asDate(strtotime($client->created));
+                                $data['client_last_activity'] = Yii::$app->formatter->asDate(strtotime($client->created));
                             }
 
-                            $data['call_count_calls'] = Call::find()->where(['c_from' => $client_phone_number])->orWhere(['c_to' => $client_phone_number])->count();
-                            $data['call_count_sms'] = Sms::find()->where(['s_phone_from' => $client_phone_number])->orWhere(['s_phone_to' => $client_phone_number])->count();
+                            $data['client_count_calls'] = Call::find()->where(['c_from' => $client_phone_number])->orWhere(['c_to' => $client_phone_number])->count();
+                            $data['client_count_sms'] = Sms::find()->where(['s_phone_from' => $client_phone_number])->orWhere(['s_phone_to' => $client_phone_number])->count();
 
 
                             if($client->clientEmails) {

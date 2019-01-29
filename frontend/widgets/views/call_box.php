@@ -5,11 +5,11 @@
 \frontend\assets\CallBoxAsset::register($this);
 
 ?>
-<?php yii\widgets\Pjax::begin(['id' => 'call-box-pjax', 'timeout' => 10000, 'enablePushState' => false, 'options' => [
+<?php /*yii\widgets\Pjax::begin(['id' => 'call-box-pjax', 'timeout' => 10000, 'enablePushState' => false, 'options' => [
         //'tag' => 'li',
         //'class' => 'dropdown',
         //'role' => 'presentation',
-]])?>
+]])*/?>
 <div class="fabs">
     <div class="call_box">
         <div class="call_box_header">
@@ -79,7 +79,7 @@
     <a id="prime" class="fab"><i class="prime fa fa-phone"></i></a>
 </div>
 
-<?php yii\widgets\Pjax::end() ?>
+<?php //yii\widgets\Pjax::end() ?>
 
 
 <script>
@@ -101,7 +101,7 @@
             $('#call_box_client_phone').text(obj.client_phone);
 
             if(obj.last_lead_id > 0) {
-                $('#call_last_lead_id').html('<a href="/lead/view/' + obj.last_lead_id + '" target="_blank">' + obj.last_lead_id + '</a>');
+                $('#call_last_lead_id').html('<a href="/lead/view/' + obj.last_lead_id + '" target="_blank" data-pjax="0">' + obj.last_lead_id + '</a>');
             }
 
             $('#call_count_calls').text(obj.client_count_calls);
