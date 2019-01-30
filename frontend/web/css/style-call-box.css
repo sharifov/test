@@ -31,8 +31,28 @@
   background: #42a5f5;
 }
 .fab:hover {
-  background: #53adfa;
+  background: #5cc7f5;
 }
+
+
+.call-status-ready {
+  background: #84e4a6;
+}
+
+.call-status-ready:hover {
+  background: #96e4a7;
+}
+
+
+.call-status-occupied {
+  background: #e4beb2;
+}
+
+.call-status-occupied:hover {
+  background: #e4cec0;
+}
+
+
 .fab > i {
   font-size: 2em;
   line-height: 55px;
@@ -752,4 +772,9 @@ strong.call_box_time {
 }
 :-moz-placeholder { /* Firefox 4 - 18 */
   color: #bbb;
+}
+
+#client-details-modal .modal-dialog {
+    width: 80%;
+    max-width: 1200px;
 }

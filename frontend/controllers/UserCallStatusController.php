@@ -2,27 +2,22 @@
 
 namespace frontend\controllers;
 
-use common\models\Lead;
-use common\models\search\LeadSearch;
+use common\models\Notifications;
 use Yii;
-use common\models\Client;
-use common\models\search\ClientSearch;
+use common\models\UserCallStatus;
+use common\models\search\UserCallStatusSearch;
 use yii\filters\AccessControl;
 use yii\helpers\ArrayHelper;
+use yii\helpers\VarDumper;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 
 /**
- * ClientController implements the CRUD actions for Client model.
+ * UserCallStatusController implements the CRUD actions for UserCallStatus model.
  */
-class ClientController extends FController
+class UserCallStatusController extends FController
 {
-    /**
-     * {@inheritdoc}
-     */
-
-
     public function behaviors()
     {
         $behaviors = [
@@ -36,14 +31,14 @@ class ClientController extends FController
                 'class' => AccessControl::class,
                 'rules' => [
                     [
-                        'actions' => ['index', 'update', 'view', 'delete', 'create', 'test', 'ajax-get-info'],
+                        'actions' => ['index', 'update', 'view', 'delete', 'create', 'update-status'],
                         'allow' => true,
-                        'roles' => ['supervision'],
+                        'roles' => ['admin'],
                     ],
                     [
-                        'actions' => ['index', 'view', 'ajax-get-info'],
+                        'actions' => ['index', 'update-status'],
                         'allow' => true,
-                        'roles' => ['agent'],
+                        'roles' => ['agent', 'supervisor'],
                     ],
                 ],
             ],
@@ -53,12 +48,12 @@ class ClientController extends FController
     }
 
     /**
-     * Lists all Client models.
+     * Lists all UserCallStatus models.
      * @return mixed
      */
     public function actionIndex()
     {
-        $searchModel = new ClientSearch();
+        $searchModel = new UserCallStatusSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
         return $this->render('index', [
@@ -68,7 +63,7 @@ class ClientController extends FController
     }
 
     /**
-     * Displays a single Client model.
+     * Displays a single UserCallStatus model.
      * @param integer $id
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
@@ -81,16 +76,16 @@ class ClientController extends FController
     }
 
     /**
-     * Creates a new Client model.
+     * Creates a new UserCallStatus model.
      * If creation is successful, the browser will be redirected to the 'view' page.
      * @return mixed
      */
     public function actionCreate()
     {
-        $model = new Client();
+        $model = new UserCallStatus();
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->id]);
+            return $this->redirect(['view', 'id' => $model->us_id]);
         }
 
         return $this->render('create', [
@@ -99,7 +94,7 @@ class ClientController extends FController
     }
 
     /**
-     * Updates an existing Client model.
+     * Updates an existing UserCallStatus model.
      * If update is successful, the browser will be redirected to the 'view' page.
      * @param integer $id
      * @return mixed
@@ -110,7 +105,7 @@ class ClientController extends FController
         $model = $this->findModel($id);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->id]);
+            return $this->redirect(['view', 'id' => $model->us_id]);
         }
 
         return $this->render('update', [
@@ -119,7 +114,7 @@ class ClientController extends FController
     }
 
     /**
-     * Deletes an existing Client model.
+     * Deletes an existing UserCallStatus model.
      * If deletion is successful, the browser will be redirected to the 'index' page.
      * @param integer $id
      * @return mixed
@@ -133,53 +128,40 @@ class ClientController extends FController
     }
 
     /**
-     * Finds the Client model based on its primary key value.
+     * Finds the UserCallStatus model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
      * @param integer $id
-     * @return Client the loaded model
+     * @return UserCallStatus the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
     protected function findModel($id)
     {
-        if (($model = Client::findOne($id)) !== null) {
+        if (($model = UserCallStatus::findOne($id)) !== null) {
             return $model;
         }
 
         throw new NotFoundHttpException('The requested page does not exist.');
     }
 
-    public function actionAjaxGetInfo()
+    /**
+     * @return array
+     */
+    public function actionUpdateStatus(): array
     {
-        $client_id = (int) Yii::$app->request->post('client_id');
-
-        $model = $this->findModel($client_id);
-
-        if(Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id)) {
-            $isAgent = true;
-        } else {
-            $isAgent = false;
+        $type_id = (int) Yii::$app->request->post('type_id');
+        if($type_id > 0) {
+            $ucs = new UserCallStatus();
+            $ucs->us_type_id = $type_id;
+            $ucs->us_user_id = Yii::$app->user->id;
+            $ucs->us_created_dt = date('Y-m-d H:i:s');
+            if(!$ucs->save()) {
+                Yii::error(VarDumper::dumpAsString($ucs->errors), 'UserCallStatusController:actionUpdateStatus:save');
+            } else {
+                Notifications::socket($ucs->us_user_id, null, 'updateUserCallStatus', ['type_id' => $type_id]);
+            }
         }
 
-        $searchModel = new LeadSearch();
-
-        $params = Yii::$app->request->queryParams;
-
-        $params['LeadSearch']['client_id'] = $model->id;
-
-        if($isAgent) {
-            $dataProvider = $searchModel->searchAgent($params);
-        } else {
-            $dataProvider = $searchModel->search2($params);
-        }
-
-        $dataProvider->sort = false;
-
-        return $this->renderPartial('ajax_info', [
-            'model' => $model,
-            'searchModel' => $searchModel,
-            'dataProvider' => $dataProvider,
-            'isAgent' => $isAgent
-        ]);
+        Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+        return ['type_id' => $type_id];
     }
-
 }

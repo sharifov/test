@@ -85,6 +85,7 @@ $isCoach = Yii::$app->authManager->getAssignment('coach', Yii::$app->user->id);
                         ['label' => 'Call List', 'url' => ['/call/index'], 'icon' => 'phone'],
                         ['label' => 'SMS List', 'url' => ['/sms/index'], 'icon' => 'comments-o'],
                         ['label' => 'Mail List', 'url' => ['/email/index'], 'icon' => 'envelope'],
+                        ['label' => 'User Call Statuses', 'url' => ['/user-call-status/index'], 'icon' => 'list'],
                     ];
                 }
 

@@ -238,6 +238,10 @@ $js = <<<JS
                         incomingCall(obj);
                     }
                     
+                    if(obj.command === 'updateUserCallStatus') {
+                        updateUserCallStatus(obj);
+                    }
+                    
                 }
             } catch (error) {
                 console.error('Invalid JSON data');
