@@ -48,7 +48,11 @@ if($clientPhone && $client = $clientPhone->client) {
                     <?=\yii\helpers\Html::img('/img/user.png')?>
                 </div>
                 <span id="call_box_client_name"><?=\yii\helpers\Html::encode($client_name)?></span> <br>  <span class="agent" id="call_box_client_phone"><?=\yii\helpers\Html::encode($client_phone)?></span>
-                <span class="online" id="call_box_call_status"><?=$lastCall->c_lead_id ? \yii\helpers\Html::a('LeadId: '.$lastCall->c_lead_id, ['lead/view', 'id' => $lastCall->c_lead_id], ['target' => '_blank', 'data-pjax' => 0]) : ''?></span>
+                <span class="online" id="call_box_call_status">
+                    <?php if($lastCall):?>
+                        <?=$lastCall->c_lead_id ? \yii\helpers\Html::a('LeadId: '.$lastCall->c_lead_id, ['lead/view', 'id' => $lastCall->c_lead_id], ['target' => '_blank', 'data-pjax' => 0]) : ''?>
+                    <?php endif; ?>
+                </span>
                 <?/* <i class="fa fa-phone"></i>*/?>
                 <span id="call_box_fullscreen_loader" class="call_box_fullscreen_loader"><i class="fullscreen fa fa-window-maximize"></i></span>
 
@@ -56,7 +60,11 @@ if($clientPhone && $client = $clientPhone->client) {
 
         </div>
         <div class="call_box_body call_box_login">
-            <h5 id="call_box_call_status"><?=ucfirst($lastCall->c_call_status)?> ... (<?=Yii::$app->formatter->asRelativeTime(strtotime($lastCall->c_created_dt))?>)</h5>
+            <h5 id="call_box_call_status">
+                <?php if($lastCall):?>
+                    <?=ucfirst($lastCall->c_call_status)?> ... (<?=Yii::$app->formatter->asRelativeTime(strtotime($lastCall->c_created_dt))?>)
+                <?php endif; ?>
+            </h5>
 
             <?/*<a id="call_box_first_screen2" class="fab"><i class="fa fa-arrow-right"></i></a>*/ ?>
             <div style="padding: 10px">
