@@ -14,11 +14,14 @@ if($client) {
 } else {
     $client_name = '';
 }*/
+$client_phone = '';
 
-if($lastCall->c_call_type_id == \common\models\Call::CALL_TYPE_IN) {
-    $client_phone = $lastCall->c_from;
-} else {
-    $client_phone = $lastCall->c_to;
+if($lastCall) {
+    if ($lastCall->c_call_type_id == \common\models\Call::CALL_TYPE_IN) {
+        $client_phone = $lastCall->c_from;
+    } else {
+        $client_phone = $lastCall->c_to;
+    }
 }
 
 
