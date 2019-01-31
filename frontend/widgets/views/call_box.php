@@ -60,15 +60,33 @@ if($clientPhone && $client = $clientPhone->client) {
 
         </div>
         <div class="call_box_body call_box_login">
-            <h5 id="call_box_call_status">
+            <h4 id="call_box_call_status">
                 <?php if($lastCall):?>
                     <?=ucfirst($lastCall->c_call_status)?> ... (<?=Yii::$app->formatter->asRelativeTime(strtotime($lastCall->c_created_dt))?>)
                 <?php endif; ?>
-            </h5>
+            </h4>
 
             <?/*<a id="call_box_first_screen2" class="fab"><i class="fa fa-arrow-right"></i></a>*/ ?>
             <div style="padding: 10px">
+
+                <div class="row">
+                    <div class="col-md-6">
+                        My Call Status:
+                    </div>
+                    <div class="col-md-6">
+                        <?php
+                        echo \yii\helpers\Html::dropDownList('user-call-status', $userCallStatus ? $userCallStatus->us_type_id : \common\models\UserCallStatus::STATUS_TYPE_READY, \common\models\UserCallStatus::STATUS_TYPE_LIST,
+                            ['class' => 'form-control', 'id' => 'user-call-status-select']);
+                        ?>
+
+                        <?/*=\yii\helpers\Html::button('<i class="fa fa-search"></i> Show Details', ['class' => 'btn btn-sm btn-info', 'id' => 'call_box_first_screen'])*/?>
+                    </div>
+                    <br><br>
+                </div>
+
+
                 <?php if($lastCalls): $n = 1; ?>
+                    <h5>Last Calls:</h5>
                 <table class="table table-bordered">
                     <?php foreach ($lastCalls as $call):?>
                     <tr>
@@ -122,7 +140,7 @@ if($clientPhone && $client = $clientPhone->client) {
                 <button type="button" class="btn btn-danger">Occupied</button>
             </div>*/?>
 
-
+            <?/*
             <div class="dropup">
                 <button class="btn btn-default btn-xs dropdown-toggle" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                     <span id="span-update-call-status"><?=($userCallStatus ? $userCallStatus->getStatusTypeName() : 'Update my Call Status')?></span>
@@ -132,9 +150,10 @@ if($clientPhone && $client = $clientPhone->client) {
                     <li><?=\yii\helpers\Html::a('Is Ready', '#', ['class' => 'user-call-status', 'data-type-id' => \common\models\UserCallStatus::STATUS_TYPE_READY])?></li>
                     <li><?=\yii\helpers\Html::a('Is Occupied', '#', ['class' => 'user-call-status','data-type-id' => \common\models\UserCallStatus::STATUS_TYPE_OCCUPIED])?></li>
                 </ul>
-            </div>
+            </div>*/ ?>
 
-            <?/*=\yii\helpers\Html::button('<i class="fa fa-search"></i> Show Details', ['class' => 'btn btn-sm btn-info', 'id' => 'call_box_first_screen'])*/?>
+
+
 
         </div>
 
@@ -222,10 +241,12 @@ if($clientPhone && $client = $clientPhone->client) {
             $('#prime').addClass('call-status-ready');
             $('#prime').removeClass('call-status-occupied');
             $('#span-update-call-status').text('Is Ready');
+            $('#user-call-status-select').val(obj.type_id);
         } else if(obj.type_id == 2) {
             $('#prime').removeClass('call-status-ready');
             $('#prime').addClass('call-status-occupied');
             $('#span-update-call-status').text('Is Occupied');
+            $('#user-call-status-select').val(obj.type_id);
             if ($('.fab').hasClass('is-visible')) {
                 toggleFab();
             }
@@ -270,11 +291,12 @@ $js = <<<JS
             }
         );
     });
-
-
-    $(document).on('click', '.user-call-status', function(e) {
+    
+    //$('#user-call-status-select')
+    
+    $(document).on('click', '#user-call-status-select', function(e) {
         e.preventDefault();
-        var type_id = $(this).data('type-id');
+        var type_id = $(this).val();
         
         $.ajax({
             type: 'post',
@@ -292,6 +314,25 @@ $js = <<<JS
         });
 
     });
+
+
+   /* $(document).on('click', '.user-call-status', function(e) {
+        e.preventDefault();
+        var type_id = $(this).data('type-id');
+        
+        $.ajax({
+            type: 'post',
+            data: {'type_id': type_id},
+            url: callStatusUrl,
+            success: function (data) {
+                console.log(data);
+            },
+            error: function (error) {
+                console.error('Error: ' + error);
+            }
+        });
+
+    });*/
 
 
 JS;
