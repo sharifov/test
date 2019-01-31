@@ -2,12 +2,15 @@
 
 namespace frontend\controllers;
 
+use common\models\Employee;
+use common\models\UserProjectParams;
 use Yii;
 use common\models\Call;
 use common\models\search\CallSearch;
 use yii\filters\AccessControl;
 use yii\helpers\ArrayHelper;
 use yii\web\Controller;
+use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 
@@ -29,7 +32,7 @@ class CallController extends FController
                 'class' => AccessControl::class,
                 'rules' => [
                     [
-                        'actions' => ['index', 'update', 'view', 'delete', 'create', 'inbox', 'soft-delete'],
+                        'actions' => ['index', 'update', 'view', 'delete', 'create', 'inbox', 'soft-delete', 'list'],
                         'allow' => true,
                         'roles' => ['supervision', 'admin'],
                     ],
@@ -61,6 +64,32 @@ class CallController extends FController
     }
 
     /**
+     * Lists all Call models.
+     * @return mixed
+     */
+    public function actionList()
+    {
+        $searchModel = new CallSearch();
+
+        $params = Yii::$app->request->queryParams;
+        $params['CallSearch']['c_created_user_id'] = Yii::$app->user->id;
+
+        $dataProvider = $searchModel->searchAgent($params);
+
+        $phoneList = Employee::getPhoneList(Yii::$app->user->id);
+        $projectList = \common\models\Project::getListByUser(Yii::$app->user->id);
+
+
+        return $this->render('list', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+            'phoneList'          => $phoneList,
+            'projectList'       => $projectList,
+        ]);
+    }
+
+
+    /**
      * Displays a single Call model.
      * @param integer $id
      * @return mixed
@@ -68,8 +97,39 @@ class CallController extends FController
      */
     public function actionView($id)
     {
+        $model = $this->findModel($id);
+
+        if($model->c_is_new) {
+            //$model->c_read_dt = date('Y-m-d H:i:s');
+            $model->c_is_new = false;
+            $model->save();
+        }
+
         return $this->render('view', [
-            'model' => $this->findModel($id),
+            'model' => $model,
+        ]);
+    }
+
+    /**
+     * Displays a single Call model.
+     * @param integer $id
+     * @return mixed
+     * @throws NotFoundHttpException if the model cannot be found
+     */
+    public function actionView2($id)
+    {
+
+        $model = $this->findModel($id);
+        $this->checkAccess($model);
+
+        if($model->c_is_new) {
+            //$model->c_read_dt = date('Y-m-d H:i:s');
+            $model->c_is_new = false;
+            $model->save();
+        }
+
+        return $this->render('view2', [
+            'model' => $model,
         ]);
     }
 
@@ -139,5 +199,39 @@ class CallController extends FController
         }
 
         throw new NotFoundHttpException('The requested page does not exist.');
+    }
+
+
+    /**
+     * @param Call $model
+     * @throws ForbiddenHttpException
+     */
+    protected function checkAccess(Call $model) : void
+    {
+        /*$phoneList = [];
+
+        $phoneList[$model->c_to] = $model->c_to;
+        $phoneList[$model->c_from] = $model->c_from;
+
+        $access = UserProjectParams::find()->where(['upp_user_id' => Yii::$app->user->id])
+            ->andWhere(['or', ['upp_tw_phone_number' => $phoneList], ['upp_phone_number' => $phoneList]])->exists();*/
+
+
+        $access = $model->c_created_user_id == Yii::$app->user->id ? true : false;
+
+
+        if(!$access) {
+            throw new ForbiddenHttpException('Access denied for this Call. '); // Check User Project Params phones
+        }
+    }
+
+
+    /**
+     * @return \yii\web\Response
+     */
+    public function actionAllRead()
+    {
+        Call::updateAll(['c_is_new' => false], ['c_is_new' => null, 'c_created_user_id' => Yii::$app->user->id]);
+        return $this->redirect(['list']);
     }
 }

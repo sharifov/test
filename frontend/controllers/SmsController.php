@@ -307,7 +307,7 @@ class SmsController extends FController
             ->andWhere(['or', ['upp_tw_phone_number' => $phoneList], ['upp_phone_number' => $phoneList]])->exists();
 
         if(!$access) {
-            //throw new ForbiddenHttpException('Access denied for this SMS. Check User Project Params phones');
+            throw new ForbiddenHttpException('Access denied for this SMS. Check User Project Params phones');
         }
     }
 

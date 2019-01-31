@@ -15,7 +15,7 @@
     </a>
 
     <ul id="menu1" class="dropdown-menu list-unstyled msg_list" role="menu">
-        <?
+        <?php
 
         $soundPlay = false;
 
@@ -62,7 +62,7 @@
                         nonblock: true
                     },*/
                     delay: 30000,
-                    hide: false
+                    hide: true
                 }).get().click(function(e) {
         
                 });

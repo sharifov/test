@@ -23,10 +23,21 @@ $this->params['breadcrumbs'][] = $this->title;
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
+        'tableOptions' => ['class' => 'table table-bordered table-condensed table-hover'],
+        'rowOptions' => function (\common\models\Call $model, $index, $widget, $grid) {
+            if ($model->c_call_status === \common\models\Call::CALL_STATUS_BUSY) {
+                return ['class' => 'danger'];
+            } elseif ($model->c_call_status === \common\models\Call::CALL_STATUS_RINGING || $model->c_call_status === \common\models\Call::CALL_STATUS_QUEUE) {
+                return ['class' => 'warning'];
+            } elseif ($model->c_call_status === \common\models\Call::CALL_STATUS_COMPLETED) {
+                return ['class' => 'success'];
+            }
+        },
         'columns' => [
             //['class' => 'yii\grid\SerialColumn'],
             'c_id',
             ['class' => 'yii\grid\ActionColumn'],
+            'c_is_new:boolean',
             'c_com_call_id',
             'c_call_sid',
             //'c_account_sid',
@@ -50,11 +61,34 @@ $this->params['breadcrumbs'][] = $this->title;
                 'filter' => \common\models\Project::getList()
             ],
 
-            'c_lead_id',
+            //'c_lead_id',
+            [
+                'attribute' => 'c_lead_id',
+                'value' => function (\common\models\Call $model) {
+                    return  $model->c_lead_id ? Html::a($model->c_lead_id, ['lead/view', 'id' => $model->c_lead_id, ['target' => '_blank', 'data-pjax' => 0]]) : '-';
+                },
+                'format' => 'raw'
+            ],
             'c_from',
             'c_to',
             'c_sip',
-            'c_call_status',
+            //'c_call_status',
+            [
+                'attribute' => 'c_call_status',
+                'value' => function (\common\models\Call $model) {
+                    return $model->c_call_status;
+                },
+                'filter' => \common\models\Call::CALL_STATUS_LIST
+            ],
+
+            [
+                'attribute' => 'c_call_type_id',
+                'value' => function (\common\models\Call $model) {
+                    return $model->getCallTypeName();
+                },
+                'filter' => \common\models\Call::CALL_TYPE_LIST
+            ],
+
             //'c_api_version',
             //'c_direction',
             //'c_forwarded_from',
@@ -66,13 +100,21 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'c_recording_url',
                 'value' => function (\common\models\Call $model) {
-                    return  $model->c_recording_url ? '<audio controls="controls" class="chat__audio"><source src="'.$model->c_recording_url.'" type="audio/mpeg"> </audio><br>' . Html::a('Link', $model->c_recording_url, ['target' => '_blank']) : '-';
+                    return  $model->c_recording_url ? '<audio controls="controls" style="width: 350px; height: 25px"><source src="'.$model->c_recording_url.'" type="audio/mpeg"> </audio>' : '-';
+                },
+                'format' => 'raw'
+            ],
+
+            [
+                'label' => 'Record Link',
+                'value' => function (\common\models\Call $model) {
+                    return  $model->c_recording_url ? Html::a('Link', $model->c_recording_url, ['target' => '_blank']) : '-';
                 },
                 'format' => 'raw'
             ],
             //'c_recording_sid',
             'c_recording_duration',
-            'c_timestamp',
+            //'c_timestamp',
             //'c_uri',
             'c_sequence_number',
 
@@ -108,7 +150,7 @@ $this->params['breadcrumbs'][] = $this->title;
             //'c_updated_dt',
 
             //'c_error_message',
-            'c_is_new:boolean',
+
             //'c_is_deleted:boolean',
 
 

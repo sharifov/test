@@ -847,6 +847,8 @@ class CommunicationController extends ApiBaseController
                         $clientName = '-';
                     }
 
+                    $user_id = 0;
+
                     if($users) {
                         foreach ($users as $user_id) {
 
@@ -854,6 +856,11 @@ class CommunicationController extends ApiBaseController
                             . ($lead_id ? '<br>Lead ID: '.$lead_id : ''), Notifications::TYPE_INFO, true);
                             Notifications::socket($user_id, null, 'getNewNotification', ['sms_id' => $sms->s_id], true);
                         }
+                    }
+
+                    if($user_id > 0) {
+                        $sms->s_created_user_id = $user_id;
+                        $sms->save();
                     }
 
                     if($lead_id) {

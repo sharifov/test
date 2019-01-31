@@ -97,4 +97,72 @@ class CallSearch extends Call
 
         return $dataProvider;
     }
+
+
+    /**
+     * Creates data provider instance with search query applied
+     *
+     * @param array $params
+     *
+     * @return ActiveDataProvider
+     */
+    public function searchAgent($params)
+    {
+        $query = Call::find();
+
+        // add conditions that should always apply here
+
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+            'sort'=> ['defaultOrder' => ['c_id' => SORT_DESC]],
+            'pagination' => [
+                'pageSize' => 30,
+            ],
+        ]);
+
+        $this->load($params);
+
+        if (!$this->validate()) {
+            // uncomment the following line if you do not want to return any records when validation fails
+            // $query->where('0=1');
+            return $dataProvider;
+        }
+
+        // grid filtering conditions
+        $query->andFilterWhere([
+            'c_id' => $this->c_id,
+            'c_call_type_id' => $this->c_call_type_id,
+            'c_lead_id' => $this->c_lead_id,
+            'c_created_user_id' => $this->c_created_user_id,
+            'c_created_dt' => $this->c_created_dt,
+            'c_com_call_id' => $this->c_com_call_id,
+            'c_updated_dt' => $this->c_updated_dt,
+            'c_project_id' => $this->c_project_id,
+            'c_is_new' => $this->c_is_new,
+            'c_is_deleted' => $this->c_is_deleted,
+        ]);
+
+        $query->andFilterWhere(['like', 'c_call_sid', $this->c_call_sid])
+            ->andFilterWhere(['like', 'c_account_sid', $this->c_account_sid])
+            ->andFilterWhere(['like', 'c_from', $this->c_from])
+            ->andFilterWhere(['like', 'c_to', $this->c_to])
+            ->andFilterWhere(['like', 'c_sip', $this->c_sip])
+            ->andFilterWhere(['like', 'c_call_status', $this->c_call_status])
+            ->andFilterWhere(['like', 'c_api_version', $this->c_api_version])
+            ->andFilterWhere(['like', 'c_direction', $this->c_direction])
+            ->andFilterWhere(['like', 'c_forwarded_from', $this->c_forwarded_from])
+            ->andFilterWhere(['like', 'c_caller_name', $this->c_caller_name])
+            ->andFilterWhere(['like', 'c_parent_call_sid', $this->c_parent_call_sid])
+            ->andFilterWhere(['like', 'c_call_duration', $this->c_call_duration])
+            ->andFilterWhere(['like', 'c_sip_response_code', $this->c_sip_response_code])
+            ->andFilterWhere(['like', 'c_recording_url', $this->c_recording_url])
+            ->andFilterWhere(['like', 'c_recording_sid', $this->c_recording_sid])
+            ->andFilterWhere(['like', 'c_recording_duration', $this->c_recording_duration])
+            ->andFilterWhere(['like', 'c_timestamp', $this->c_timestamp])
+            ->andFilterWhere(['like', 'c_uri', $this->c_uri])
+            ->andFilterWhere(['like', 'c_sequence_number', $this->c_sequence_number])
+            ->andFilterWhere(['like', 'c_error_message', $this->c_error_message]);
+
+        return $dataProvider;
+    }
 }
