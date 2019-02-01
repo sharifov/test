@@ -994,6 +994,7 @@ class QuoteController extends FController
                     $newPrice = new QuotePrice();
                     $newPrice->attributes = $price->attributes;
                     $newPrice->quote_id = $quote->id;
+                    $newPrice->uid = uniqid(explode('.', $price->uid)[0] . '.');
                     $newPrice->toFloat();
                     $selling += $newPrice->selling;
                     if (!$newPrice->save()) {
