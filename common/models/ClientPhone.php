@@ -107,8 +107,8 @@ class ClientPhone extends \yii\db\ActiveRecord
                 /** @var Queue $queue */
                 $queue = \Yii::$app->queue_phone_check;
                 $job = new CheckPhoneNumberJob();
-                $job->client_id = 1;
-                $job->client_phone_id = 1;
+                $job->client_id = $this->client_id;
+                $job->client_phone_id = $this->id;
                 $queue->push($job);
             }
         }
