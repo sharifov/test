@@ -400,10 +400,14 @@ class CommunicationController extends ApiBaseController
                         foreach ($usersForCall as $userForCall) {
                             $upp = UserProjectParams::find()->where(['upp_user_id' => $userForCall['tbl_user_id'], 'upp_project_id' => $call_project_id])->one();
 
-                            $call_user_id = (int) $upp->upp_user_id;
-                            $call_sip_id = $upp->upp_tw_sip_id;
-
                             if($upp) {
+
+                                $call_user_id = (int) $upp->upp_user_id;
+                                $call_sip_id = $upp->upp_tw_sip_id;
+                                if($upp->upp_tw_phone_number) {
+                                    $agent_phone_number = $upp->upp_tw_phone_number;
+                                }
+
                                 break;
                             }
                         }
@@ -433,11 +437,15 @@ class CommunicationController extends ApiBaseController
                     }
                 }
 
+                /*if($isRedirectCall) {
+
+                }*/
+
 
                 if ($call_project_id && $call_user_id) {
 
                     $call = new Call();
-                    $call->c_sip = $call_sip_id;
+
                     $call->c_call_sid = $post['call']['CallSid'] ?? null;
                     $call->c_account_sid = $post['call']['AccountSid'] ?? null;
                     $call->c_call_type_id = Call::CALL_TYPE_IN;
@@ -447,9 +455,11 @@ class CommunicationController extends ApiBaseController
                     $call->c_project_id = $call_project_id;
                     $call->c_is_new = 1;
                     $call->c_api_version = $post['call']['ApiVersion'] ?? null;
-                    $call->c_from = $client_phone_number;
-                    $call->c_to = $agent_phone_number;
                     $call->c_created_dt = date('Y-m-d H:i:s');
+
+                    $call->c_from = $client_phone_number;
+                    $call->c_sip = $call_sip_id;
+                    $call->c_to = $call_sip_id ? $agent_phone_number : $generalLineProject;
                     $call->c_created_user_id = $call_user_id;
 
                     if(!$call->save()) {
