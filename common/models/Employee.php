@@ -1149,4 +1149,46 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
 
         return $phoneList;
     }
+
+
+    /**
+     * @return bool
+     */
+    public function isOnline() : bool
+    {
+        $online = UserConnection::find()->where(['uc_user_id' => $this->id])->exists();
+        return $online;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isCallStatusReady() : bool
+    {
+        $isReady = true;
+        $ucs = UserCallStatus::find()->where(['us_user_id' => $this->id])->orderBy(['us_id' => SORT_DESC])->limit(1)->one();
+        if($ucs) {
+            if((int) $ucs->us_type_id !== UserCallStatus::STATUS_TYPE_OCCUPIED) {
+                $isReady = false;
+            }
+        }
+        return $isReady;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isCallFree() : bool
+    {
+        $isFree = true;
+        $call = Call::find()->where(['c_created_user_id' => $this->id])->orderBy(['c_id' => SORT_DESC])->limit(1)->one();
+        if($call) {
+            if(in_array($call->c_call_type_id, [Call::CALL_STATUS_QUEUE, Call::CALL_STATUS_RINGING, Call::CALL_STATUS_IN_PROGRESS])) {
+                $isFree = false;
+            }
+        }
+        return $isFree;
+    }
+
+
 }

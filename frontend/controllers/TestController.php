@@ -4,9 +4,15 @@ namespace frontend\controllers;
 
 use common\components\CommunicationService;
 use common\components\CountEvent;
+use common\models\Call;
 use common\models\Notifications;
+use common\models\UserCallStatus;
+use common\models\UserConnection;
+use common\models\UserGroupAssign;
 use common\models\UserProjectParams;
 use Yii;
+use yii\db\Expression;
+use yii\db\Query;
 use yii\helpers\ArrayHelper;
 use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
@@ -305,6 +311,50 @@ class TestController extends FController
             echo '<br>'.$status;
         }
 
+    }
+
+    public function actionQueryUser()
+    {
+        $query = UserConnection::find();
+
+        $project_id = 8;
+        $date_time = '2019-01-01 10:00:00';
+
+        $subQuery2 = UserCallStatus::find()->select(['us_type_id'])->where('us_user_id = user_connection.uc_user_id')->orderBy(['us_id' => SORT_DESC])->limit(1);
+        $subQuery3 = Call::find()->select(['c_call_status'])->where('c_created_user_id = user_connection.uc_user_id')->orderBy(['c_id' => SORT_DESC])->limit(1);
+        $subQuery4 = UserProjectParams::find()->select(['upp_tw_sip_id'])->where('upp_user_id = user_connection.uc_user_id')->andWhere(['upp_project_id' => $project_id]);
+        $subQuery5 = Call::find()->select(['COUNT(*)'])->where('c_created_user_id = user_connection.uc_user_id')->andWhere(['c_call_type_id' => Call::CALL_TYPE_IN])->andWhere(['>=', 'c_created_dt', $date_time]);
+
+        $query->select(['user_connection.uc_user_id', 'call_status_id' => $subQuery2, 'last_call_status' => $subQuery3, 'upp_tw_sip_id' => $subQuery4, 'calls_count' => $subQuery5]);
+        //$query->addSelect(new Expression($subQuery2 . ' AS aaa'));
+
+        $subQuery1 = UserGroupAssign::find()->select(['ugs_group_id'])->where(['ugs_user_id' => Yii::$app->user->id]);
+        $subQuery = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->where(['IN', 'ugs_group_id', $subQuery1]);
+        $query->andWhere(['IN', 'user_connection.uc_user_id', $subQuery]);
+        $query->groupBy(['user_connection.uc_user_id']);
+
+        $query->orderBy(['calls_count' => SORT_ASC]);
+
+
+
+        //$query->andWhere($subQuery2 .' >');*/
+
+
+
+
+
+
+
+
+
+        $sqlRaw = $query->createCommand()->getRawSql();
+
+        echo $sqlRaw;
+
+        //VarDumper::dump($sqlRaw, 10, true);
+        exit;
+
+        //$users = $query->all();
     }
 
 

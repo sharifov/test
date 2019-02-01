@@ -10,6 +10,9 @@ use common\models\Lead;
 use common\models\Notifications;
 use common\models\Project;
 use common\models\Sms;
+use common\models\UserCallStatus;
+use common\models\UserConnection;
+use common\models\UserGroupAssign;
 use common\models\UserProjectParams;
 use Yii;
 use yii\helpers\ArrayHelper;
@@ -354,8 +357,54 @@ class CommunicationController extends ApiBaseController
 
                 $upp = UserProjectParams::find()->where(['upp_phone_number' => $agent_phone_number])->orWhere(['upp_tw_phone_number' => $agent_phone_number])->one();
 
+                $userCallEnable = false;
+                $user = null;
+
+                if($upp && $user = $upp->uppUser) {
+
+                    $project_id = $upp->upp_project_id;
+
+                    if($user->isOnline()) {
+                        if($user->isCallStatusReady()) {
+                            if($user->isCallFree()) {
+                                $userCallEnable = true;
+                            } else {
+                                Yii::info('Call Occupied - User ('.$user->username.') Id: '.$user->id.', phone: ' . $agent_phone_number, 'info\API:CommunicationController:actionVoice:isCallFree');
+                            }
+                        } else {
+                            Yii::info('Call Status not Ready - User ('.$user->username.') Id: '.$user->id.', phone: ' . $agent_phone_number, 'info\API:CommunicationController:actionVoice:isCallStatusReady');
+                        }
+                    } else {
+                        Yii::info('Offline - User ('.$user->username.') Id: '.$user->id.', phone: ' . $agent_phone_number, 'info\API:CommunicationController:actionVoice:isOnline');
+                    }
+                }
 
 
+                if(!$userCallEnable && $user) {
+
+                    $query = UserConnection::find();
+
+
+                    $subQuery1 = UserGroupAssign::find()->select(['ugs_group_id'])->where(['ugs_user_id' => $user->id]);
+                    $subQuery = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->where(['IN', 'ugs_group_id', $subQuery1]);
+                    $query->andWhere(['IN', 'user_connection.uc_user_id', $subQuery]);
+
+                    $query->groupBy(['uc_user_id']);
+
+
+
+                    $subQuery2 = UserCallStatus::find()->where(['us_user_id' => $this->id])->orderBy(['us_id' => SORT_DESC])->limit(1);
+
+                    $query->andWhere(['IN', 'leads.id', $subQuery]);
+
+                    /*$sqlRaw = $query->createCommand()->getRawSql();
+
+                    VarDumper::dump($sqlRaw, 10, true); exit;*/
+
+                    $users = $query->all();
+
+                    $upp = UserProjectParams::find()->where(['upp_phone_number' => $agent_phone_number])->orWhere(['upp_tw_phone_number' => $agent_phone_number])->one();
+                }
 
 
                 if ($upp) {
