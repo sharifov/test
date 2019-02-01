@@ -89,13 +89,16 @@ if($clientPhone && $client = $clientPhone->client) {
                     <h5>Last Calls:</h5>
                 <table class="table table-bordered">
                     <?php foreach ($lastCalls as $call):?>
+
                     <tr>
-                        <th><?=$n++?>. <?=((int) $call->c_call_type_id === \common\models\Call::CALL_TYPE_IN ? \yii\helpers\Html::img('/img/incoming-call.png', ['title' => 'Incoming', 'style' => 'width:14px']) :
+                        <td><small><?=$n++?></small></td>
+                        <th><small><?=((int) $call->c_call_type_id === \common\models\Call::CALL_TYPE_IN ? \yii\helpers\Html::img('/img/incoming-call.png', ['title' => 'Incoming', 'style' => 'width:14px']) :
                                 \yii\helpers\Html::img('/img/outgoing-call2.png', ['title' => 'Outgoing', 'style' => 'width:14px']))?>
 
                             <?=((int) $call->c_call_type_id === \common\models\Call::CALL_TYPE_IN ? $call->c_from : $call->c_to)?>
+                                </small>
                         </th>
-                        <td><small><?=$call->c_call_duration > 0 ? Yii::$app->formatter->asDuration($call->c_call_duration) : 0?></small></td>
+                        <td><small title="<?=$call->c_call_duration ? Yii::$app->formatter->asDuration($call->c_call_duration) : ''?>"><?=$call->c_call_duration > 0 ? $call->c_call_duration : 0?> s<br><?=\yii\helpers\Html::encode($call->c_call_status)?></small></td>
                         <td><small><?=Yii::$app->formatter->asDatetime(strtotime($call->c_created_dt), 'dd-MMM [HH:mm]')?></small></td>
                     </tr>
                    <?php endforeach; ?>
