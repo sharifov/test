@@ -42,17 +42,20 @@ class CheckPhoneNumberJob extends BaseObject implements \yii\queue\JobInterface
         ];
         try {
 
+            if($debug) { echo 'client_id: ' . $this->client_id . ' client_phone_id: ' . $this->client_phone_id . PHP_EOL;  }
+
             if($this->client_id < 1 || $this->client_phone_id < 1) {
                 throw new \Exception('Error CheckPhoneNumberJob data');
             }
-
             $clientPhone = ClientPhone::findOne(['client_id' => $this->client_id, 'id' => $this->client_phone_id ]);
             if(!$clientPhone || strlen($clientPhone->phone) < 11 ) {
                 throw new \Exception('ClientPhone is empty or not found');
             }
 
+            if($debug) { echo 'clientPhone->validate_dt: ' . $clientPhone->validate_dt . PHP_EOL;  }
+
             if($clientPhone->validate_dt !== null) {
-                return true;
+                 return true;
             }
 
             $data = [];
@@ -118,6 +121,8 @@ class CheckPhoneNumberJob extends BaseObject implements \yii\queue\JobInterface
             $out['status'] = 'error';
             $out['message'] = $e->getMessage() . ': ' . $e->getFile() . ' : ' . $e->getLine();
             \Yii::error(VarDumper::dumpAsString($out), 'CheckPhoneNumberJob:execute');
+            echo "Error: ";
+            print_r($out);
         }
 
         if ($debug) {
