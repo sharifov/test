@@ -355,75 +355,102 @@ class CommunicationController extends ApiBaseController
                 }
 
 
+                $isRedirectCall = true;
+
+                $call_user_id = null;
+                $call_sip_id = null;
+                $call_project_id = null;
+
                 $upp = UserProjectParams::find()->where(['upp_phone_number' => $agent_phone_number])->orWhere(['upp_tw_phone_number' => $agent_phone_number])->one();
 
-                $userCallEnable = false;
+
                 $user = null;
+
 
                 if($upp && $user = $upp->uppUser) {
 
-                    $project_id = $upp->upp_project_id;
+                    $call_user_id = (int) $upp->upp_user_id;
+                    $call_sip_id = $upp->upp_tw_sip_id;
+                    $call_project_id = (int) $upp->upp_project_id;
 
                     if($user->isOnline()) {
                         if($user->isCallStatusReady()) {
                             if($user->isCallFree()) {
-                                $userCallEnable = true;
+                                $isRedirectCall = false;
+
                             } else {
                                 Yii::info('Call Occupied - User ('.$user->username.') Id: '.$user->id.', phone: ' . $agent_phone_number, 'info\API:CommunicationController:actionVoice:isCallFree');
+                                Notifications::create($user->id, 'Missing Call from '.$client_phone_number.' [Occupied]', 'Missing Call from ' . $client_phone_number .' to '.$agent_phone_number . "\r\n Reason: Agent Occupied", Notifications::TYPE_WARNING, true);
                             }
                         } else {
                             Yii::info('Call Status not Ready - User ('.$user->username.') Id: '.$user->id.', phone: ' . $agent_phone_number, 'info\API:CommunicationController:actionVoice:isCallStatusReady');
+                            Notifications::create($user->id, 'Missing Call from '.$client_phone_number.' [not Ready]', 'Missing Call from ' . $client_phone_number .' to '.$agent_phone_number . "\r\n Reason: Call Status not Ready", Notifications::TYPE_WARNING, true);
                         }
                     } else {
                         Yii::info('Offline - User ('.$user->username.') Id: '.$user->id.', phone: ' . $agent_phone_number, 'info\API:CommunicationController:actionVoice:isOnline');
+                        Notifications::create($user->id, 'Missing Call from '.$client_phone_number.' [Offline]', 'Missing Call from ' . $client_phone_number .' to '.$agent_phone_number . "\r\n Reason: Agent offline", Notifications::TYPE_WARNING, true);
                     }
                 }
 
 
-                if(!$userCallEnable && $user) {
+                if($isRedirectCall && $call_user_id && $call_project_id) {
 
-                    $query = UserConnection::find();
+                    $usersForCall = Employee::getAgentsForCall($call_user_id, $call_project_id);
+                    if($usersForCall) {
+                        foreach ($usersForCall as $userForCall) {
+                            $upp = UserProjectParams::find()->where(['upp_user_id' => $userForCall['tbl_user_id'], 'upp_project_id' => $call_project_id])->one();
 
+                            $call_user_id = (int) $upp->upp_user_id;
+                            $call_sip_id = $upp->upp_tw_sip_id;
 
-                    $subQuery1 = UserGroupAssign::find()->select(['ugs_group_id'])->where(['ugs_user_id' => $user->id]);
-                    $subQuery = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->where(['IN', 'ugs_group_id', $subQuery1]);
-                    $query->andWhere(['IN', 'user_connection.uc_user_id', $subQuery]);
+                            if($upp) {
+                                break;
+                            }
+                        }
+                    }
+                    /*
+                     *    0 => [
+                                'tbl_user_id' => '167'
+                                'tbl_call_status_id' => '2'
+                                'tbl_last_call_status' => null
+                                'tbl_sip_id' => null
+                                'tbl_calls_count' => '0'
+                            ]
+                     */
+                }
 
-                    $query->groupBy(['uc_user_id']);
+                $generalLineProject = '';
 
+                if($call_project_id && !$call_sip_id) {
 
-
-                    $subQuery2 = UserCallStatus::find()->where(['us_user_id' => $this->id])->orderBy(['us_id' => SORT_DESC])->limit(1);
-
-                    $query->andWhere(['IN', 'leads.id', $subQuery]);
-
-                    /*$sqlRaw = $query->createCommand()->getRawSql();
-
-                    VarDumper::dump($sqlRaw, 10, true); exit;*/
-
-                    $users = $query->all();
-
-                    $upp = UserProjectParams::find()->where(['upp_phone_number' => $agent_phone_number])->orWhere(['upp_tw_phone_number' => $agent_phone_number])->one();
+                    $project = Project::findOne($call_project_id);
+                    if($project && $project->contactInfo && $project->contactInfo->phone) {
+                        $generalLineProject = str_replace(' ', $project->contactInfo->phone);
+                        $generalLineProject = str_replace('-', $generalLineProject);
+                        if(isset($generalLineProject[0]) && $generalLineProject[0] !== '+') {
+                            $generalLineProject .= '+' . $generalLineProject[0];
+                        }
+                    }
                 }
 
 
-                if ($upp) {
+                if ($call_project_id && $call_user_id) {
 
                     $call = new Call();
-                    $call->c_sip = $upp->upp_tw_sip_id;
+                    $call->c_sip = $call_sip_id;
                     $call->c_call_sid = $post['call']['CallSid'] ?? null;
                     $call->c_account_sid = $post['call']['AccountSid'] ?? null;
                     $call->c_call_type_id = Call::CALL_TYPE_IN;
-                    $call->c_call_status = $post['call']['CallStatus'] ?? 'ringing';
+                    $call->c_call_status = $post['call']['CallStatus'] ?? Call::CALL_STATUS_RINGING;
                     $call->c_com_call_id = $post['call_id'] ?? null;
                     $call->c_direction = $post['call']['Direction'] ?? null;
-                    $call->c_project_id = $upp->upp_project_id;
+                    $call->c_project_id = $call_project_id;
                     $call->c_is_new = 1;
                     $call->c_api_version = $post['call']['ApiVersion'] ?? null;
                     $call->c_from = $client_phone_number;
                     $call->c_to = $agent_phone_number;
                     $call->c_created_dt = date('Y-m-d H:i:s');
-                    $call->c_created_user_id = $upp->upp_user_id;
+                    $call->c_created_user_id = $call_user_id;
 
                     if(!$call->save()) {
                         Yii::error(VarDumper::dumpAsString($call->errors), 'API:CommunicationController:actionVoice:Call:save');
@@ -457,7 +484,7 @@ class CommunicationController extends ApiBaseController
                                 $call->save();
                             }
 
-                            $data['client_count_calls'] = Call::find()->where(['c_from' => $client_phone_number])->orWhere(['c_to' => $client_phone_number])->count();
+                            /*$data['client_count_calls'] = Call::find()->where(['c_from' => $client_phone_number])->orWhere(['c_to' => $client_phone_number])->count();
                             $data['client_count_sms'] = Sms::find()->where(['s_phone_from' => $client_phone_number])->orWhere(['s_phone_to' => $client_phone_number])->count();
 
 
@@ -471,7 +498,7 @@ class CommunicationController extends ApiBaseController
                                 foreach ($client->clientPhones as $phone) {
                                     $data['client_phones'][] = $phone->phone;
                                 }
-                            }
+                            }*/
                         }
 
                         $data['client_phone'] = $client_phone_number;
@@ -494,16 +521,19 @@ class CommunicationController extends ApiBaseController
                     }*/
 
 
-                    if ($upp->upp_tw_sip_id) {
-                        $response['agent_sip'] = $upp->upp_tw_sip_id;
+                    //if ($call_sip_id) {
+
+                        $response['agent_sip'] = $call_sip_id;
                         $response['agent_phone_number'] = $agent_phone_number;
                         $response['client_phone_number'] = $client_phone_number;
-                    } else {
+                        $response['general_phone_number'] = $generalLineProject;
+
+                    /*} else {
                         $response['error'] = 'Agent SIP account is empty';
                         $response['error_code'] = 14;
-                    }
+                    }*/
                 } else {
-                    $response['error'] = 'Not found agent phone number';
+                    $response['error'] = 'Not found call_project_id or call_user_id';
                     $response['error_code'] = 13;
                 }
             } else {

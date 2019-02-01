@@ -45,6 +45,7 @@ class UserProjectParams extends \yii\db\ActiveRecord
             [['upp_user_id', 'upp_project_id', 'upp_updated_user_id'], 'integer'],
             [['upp_created_dt', 'upp_updated_dt'], 'safe'],
             [['upp_email', 'upp_tw_sip_id'], 'string', 'max' => 100],
+            [['upp_email', 'upp_tw_sip_id'], 'trim'],
             [['upp_email'], 'email'],
             [['upp_phone_number', 'upp_tw_phone_number'], 'string', 'max' => 30],
             [['upp_user_id', 'upp_project_id'], 'unique', 'targetAttribute' => ['upp_user_id', 'upp_project_id']],
