@@ -117,7 +117,7 @@ class CheckPhoneNumberJob extends BaseObject implements \yii\queue\JobInterface
         } catch (\Throwable $e) {
             $out['status'] = 'error';
             $out['message'] = $e->getMessage() . ': ' . $e->getFile() . ' : ' . $e->getLine();
-            \Yii::error($e->getTraceAsString(), 'CheckPhoneNumberJob:execute');
+            \Yii::error($out, 'CheckPhoneNumberJob:execute');
         }
 
         if ($debug) {
