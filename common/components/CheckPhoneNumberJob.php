@@ -30,7 +30,7 @@ class CheckPhoneNumberJob extends BaseObject implements \yii\queue\JobInterface
      */
     public function execute($queue): bool
     {
-        $debug = false;
+        $debug = true;
 
         if($debug) {
             echo 'Start debug' . PHP_EOL;
@@ -75,11 +75,11 @@ class CheckPhoneNumberJob extends BaseObject implements \yii\queue\JobInterface
             //print_r($response->data); exit;
 
             if($debug) {
-
                 echo "isOk: ". $response->isOk . PHP_EOL;
             }
 
             if ($response->isOk) {
+                \Yii::info(VarDumper::dumpAsString(['client_phone' => $clientPhone->phone, 'response_data' => $response->data]), 'info\CheckPhoneNumberJob:execute:84');
                 if(!isset($response->data['data']['response'])) {
                     throw new \Exception('Not found in response array data key [data][response]');
                 }
@@ -117,7 +117,7 @@ class CheckPhoneNumberJob extends BaseObject implements \yii\queue\JobInterface
         } catch (\Throwable $e) {
             $out['status'] = 'error';
             $out['message'] = $e->getMessage() . ': ' . $e->getFile() . ' : ' . $e->getLine();
-            \Yii::error($out, 'CheckPhoneNumberJob:execute');
+            \Yii::error(VarDumper::dumpAsString($out), 'CheckPhoneNumberJob:execute');
         }
 
         if ($debug) {
