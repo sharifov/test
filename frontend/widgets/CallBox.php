@@ -32,7 +32,7 @@ class CallBox extends \yii\bootstrap\Widget
         //$model = \common\models\Notifications::findNew($user_id);
 
         $lastCall = Call::find()->where(['c_created_user_id' => \Yii::$app->user->id])->orderBy(['c_id' => SORT_DESC])->limit(1)->one();
-        $lastCalls = Call::find()->where(['c_created_user_id' => \Yii::$app->user->id])->orderBy(['c_id' => SORT_DESC])->limit(10)->all();
+        $lastCalls = Call::find()->where(['c_created_user_id' => \Yii::$app->user->id])->orderBy(['c_id' => SORT_DESC])->limit(5)->all();
 
         $userCallStatus = UserCallStatus::find()->where(['us_user_id' => \Yii::$app->user->id])->orderBy(['us_id' => SORT_DESC])->limit(1)->one();
 
