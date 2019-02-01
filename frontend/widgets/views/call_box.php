@@ -48,11 +48,11 @@ if($clientPhone && $client = $clientPhone->client) {
                     <?=\yii\helpers\Html::img('/img/user.png')?>
                 </div>
                 <span id="call_box_client_name"><?=\yii\helpers\Html::encode($client_name)?></span> <br>  <span class="agent" id="call_box_client_phone"><?=\yii\helpers\Html::encode($client_phone)?></span>
-                <span class="online" id="call_box_call_status">
+                <?/*<span class="online">
                     <?php if($lastCall):?>
                         <?=$lastCall->c_lead_id ? \yii\helpers\Html::a('LeadId: '.$lastCall->c_lead_id, ['lead/view', 'id' => $lastCall->c_lead_id], ['target' => '_blank', 'data-pjax' => 0]) : ''?>
                     <?php endif; ?>
-                </span>
+                </span>*/?>
                 <?/* <i class="fa fa-phone"></i>*/?>
                 <span id="call_box_fullscreen_loader" class="call_box_fullscreen_loader"><i class="fullscreen fa fa-window-maximize"></i></span>
 
