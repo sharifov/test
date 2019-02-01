@@ -21,6 +21,7 @@ use yii\filters\AccessControl;
 use yii\helpers\VarDumper;
 use common\components\ReceiveEmailsJob;
 use yii\queue\Queue;
+use common\components\CheckPhoneNumberJob;
 
 
 /**

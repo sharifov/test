@@ -61,8 +61,15 @@ return [
             'port' => 11300,
             'tube' => 'queue_email_job',
         ],
+        'queue_phone_check' => [
+            'class' => \yii\queue\beanstalk\Queue::class,
+            'host' => 'localhost',
+            'port' => 11300,
+            'tube' => 'queue_phone_check',
+        ],
     ],
     'bootstrap' => [
         'queue_email_job',
+        'queue_phone_check',
     ],
 ];
