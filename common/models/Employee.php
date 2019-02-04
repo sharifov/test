@@ -1168,7 +1168,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         $isReady = true;
         $ucs = UserCallStatus::find()->where(['us_user_id' => $this->id])->orderBy(['us_id' => SORT_DESC])->limit(1)->one();
         if($ucs) {
-            if((int) $ucs->us_type_id !== UserCallStatus::STATUS_TYPE_OCCUPIED) {
+            if((int) $ucs->us_type_id === UserCallStatus::STATUS_TYPE_OCCUPIED) {
                 $isReady = false;
             }
         }
