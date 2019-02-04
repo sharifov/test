@@ -25,7 +25,7 @@ if($lastCall) {
 }
 
 
-$clientPhone = \common\models\ClientPhone::find()->where(['phone' => $client_phone])->limit(1)->one();
+$clientPhone = \common\models\ClientPhone::find()->where(['phone' => $client_phone])->limit(1)->orderBy(['client_id' => SORT_DESC])->one();
 $client = null;
 if($clientPhone && $client = $clientPhone->client) {
     $client_name = $client->full_name;
