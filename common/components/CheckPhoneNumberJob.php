@@ -130,6 +130,6 @@ class CheckPhoneNumberJob extends BaseObject implements \yii\queue\JobInterface
         if ($debug) {
             echo "response: " . print_r($out, true) . PHP_EOL;
         }
-        return false;
+        return true;
     }
 }
