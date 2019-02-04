@@ -173,7 +173,19 @@ $isCoach = Yii::$app->authManager->getAssignment('coach', Yii::$app->user->id);
                     ]
                     //'linkOptions' => ['data-method' => 'post']
                 ];
-                $menuItems[] = ['label' => 'Clients', 'url' => ['/client/index'], 'icon' => 'users'];
+
+                //$menuItems[] = ['label' => 'Clients', 'url' => ['/client/index'], 'icon' => 'users'];
+                $menuItems[] = [
+                    'label' => 'Clients',
+                    'url' => 'javascript:',
+                    'icon' => 'users',
+                    'items' =>  [
+
+                        ['label' => 'Clients', 'url' => ['/client/index'], 'icon' => 'users'],
+                        ['label' => 'Clients phones', 'url' => ['/client-phone'], 'icon' => 'phone'],
+                    ]
+                ];
+
 
                 $menuItems[] = [
                     'label' => 'Data Settings',
