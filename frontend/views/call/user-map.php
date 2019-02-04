@@ -17,7 +17,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <?php if($usersByProject):?>
         <?php foreach ($usersByProject as $projectUser): ?>
-            <div class="col-md-4">
+            <div class="col-md-6">
                 <h3><?=$projectUser['project_name']?></h3>
                 <?php if($projectUser['users']):?>
 
@@ -28,6 +28,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         <th>Is Ready</th>
                         <th>Last Call Status</th>
                         <th style="width: 280px">SIP</th>
+                        <th style="width: 280px">Phone</th>
                         <th>Calls Count</th>
                     </tr>
                 <?php foreach ($projectUser['users'] as $userMap):
@@ -45,6 +46,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         <td><?=($userMap['tbl_call_status_id'] == \common\models\UserCallStatus::STATUS_TYPE_READY ? 'Ready' : 'Occupied')?></td>
                         <td><?=$userMap['tbl_last_call_status']?></td>
                         <td><?=$userMap['tbl_sip_id']?></td>
+                        <td><?=$userMap['tbl_phone']?></td>
                         <td><?=$userMap['tbl_calls_count']?></td>
                     </tr>
                 <?php endforeach; ?>

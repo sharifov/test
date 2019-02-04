@@ -1205,6 +1205,10 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         $subQuery2 = UserCallStatus::find()->select(['us_type_id'])->where('us_user_id = user_connection.uc_user_id')->orderBy(['us_id' => SORT_DESC])->limit(1);
         $subQuery3 = Call::find()->select(['c_call_status'])->where('c_created_user_id = user_connection.uc_user_id')->orderBy(['c_id' => SORT_DESC])->limit(1);
         $subQuery4 = UserProjectParams::find()->select(['upp_tw_sip_id'])->where('upp_user_id = user_connection.uc_user_id')->andWhere(['upp_project_id' => $project_id]);
+        $subQuery6 = UserProjectParams::find()->select(['upp_tw_phone_number'])->where('upp_user_id = user_connection.uc_user_id')->andWhere(['upp_project_id' => $project_id]);
+
+
+
         $subQuery5 = Call::find()->select(['COUNT(*)'])->where('c_created_user_id = user_connection.uc_user_id')->andWhere(['c_call_type_id' => Call::CALL_TYPE_IN])->andWhere(['>=', 'c_created_dt', $date_time]);
 
         $query->select([
@@ -1212,7 +1216,9 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
                 'tbl_call_status_id' => $subQuery2,
                 'tbl_last_call_status' => $subQuery3,
                 'tbl_sip_id' => $subQuery4,
-                'tbl_calls_count' => $subQuery5]
+                'tbl_phone' => $subQuery6,
+                'tbl_calls_count' => $subQuery5
+            ]
         );
 
         $subQuery1 = UserGroupAssign::find()->select(['ugs_group_id'])->where(['ugs_user_id' => $user_id]);
