@@ -103,7 +103,7 @@ class ClientPhone extends \yii\db\ActiveRecord
     {
         if($this->id > 0 && $this->client_id > 0 ) {
             $isRenewPhoneNumber = ( $this->old_phone != '' && $this->old_phone !== $this->phone );
-            Yii::info(VarDumper::dumpAsString([
+            \Yii::info(VarDumper::dumpAsString([
                 'client_id' => $this->client_id,
                 'id' => $this->id,
                 'validate_dt' => $this->validate_dt,
