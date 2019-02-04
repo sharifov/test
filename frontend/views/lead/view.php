@@ -477,14 +477,15 @@ JS;
             <?php endif;?>
 
 
-            <?php if (!$leadForm->getLead()->isNewRecord && $is_admin) : ?>
+            <?php if (!$leadForm->getLead()->isNewRecord) : ?>
                 <?= $this->render('communication/lead_communication', [
                         'leadForm'      => $leadForm,
                         'previewEmailForm' => $previewEmailForm,
                         'previewSmsForm' => $previewSmsForm,
                         'comForm'       => $comForm,
                         'leadId'        => $lead->id,
-                        'dataProvider'  => $dataProviderCommunication
+                        'dataProvider'  => $dataProviderCommunication,
+                        'isAdmin'       => $is_admin
                     ]);
                 ?>
             <?php endif;?>

@@ -10,6 +10,7 @@ namespace frontend\widgets;
 use common\models\Call;
 use common\models\Email;
 use common\models\Sms;
+use yii\helpers\VarDumper;
 
 /**
  * Alert widget renders a message from
@@ -26,6 +27,10 @@ class Notifications extends \yii\bootstrap\Widget
     public function run()
     {
         $user_id = \Yii::$app->user->id;
+
+
+
+
         $newCount = \common\models\Notifications::findNewCount($user_id);
         $model = \common\models\Notifications::findNew($user_id);
 

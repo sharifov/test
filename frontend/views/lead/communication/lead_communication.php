@@ -6,6 +6,7 @@
  * @var $leadForm \frontend\models\LeadForm
  * @var $previewEmailForm \frontend\models\LeadPreviewEmailForm
  * @var $previewSmsForm \frontend\models\LeadPreviewSmsForm
+ * @var $isAdmin bool
  *
  */
 
@@ -267,7 +268,7 @@ $c_type_id = $comForm->c_type_id;
 
                                         if ($tk == \frontend\models\CommunicationForm::TYPE_EMAIL) {
 
-                                            if ($agentParams->upp_email) {
+                                            if ($isAdmin && $agentParams->upp_email) {
                                                 $typeList[$tk] = $itemName . ' (' . $agentParams->upp_email . ')';
                                             }
                                         }
@@ -281,8 +282,9 @@ $c_type_id = $comForm->c_type_id;
 
                                         if ($tk == \frontend\models\CommunicationForm::TYPE_VOICE) {
 
+
                                             if ($agentParams->upp_tw_sip_id) {
-                                                $typeList[$tk] = $itemName . ' (' . $agentParams->upp_tw_sip_id . ')';
+                                                $typeList[$tk] = $itemName . ($isAdmin ? ' (' . $agentParams->upp_tw_sip_id . ')' : '');
                                             }
                                         }
                                     }
