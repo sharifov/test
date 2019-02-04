@@ -333,6 +333,8 @@ class CommunicationController extends ApiBaseController
 
             if(isset($post['call']) && $post['call']) {
 
+                Yii::info('Detect - Call', 'info\API:CommunicationController:actionVoice:DetectCall - 0');
+
                 $client_phone_number = null;
                 $agent_phone_number = null;
 
@@ -340,7 +342,7 @@ class CommunicationController extends ApiBaseController
                     $client_phone_number = $post['call']['From'];
                 }
 
-                if (isset($post['call']['Called']) && $post['call']['Called']) {
+                if (isset($post['call']['To']) && $post['call']['To']) {
                     $agent_phone_number = $post['call']['Called'];
                 }
 
@@ -361,7 +363,8 @@ class CommunicationController extends ApiBaseController
                 $call_sip_id = null;
                 $call_project_id = null;
 
-                $upp = UserProjectParams::find()->where(['upp_phone_number' => $agent_phone_number])->orWhere(['upp_tw_phone_number' => $agent_phone_number])->one();
+                //$upp = UserProjectParams::find()->where(['upp_phone_number' => $agent_phone_number])->orWhere(['upp_tw_phone_number' => $agent_phone_number])->one();
+                $upp = UserProjectParams::find()->where(['upp_tw_phone_number' => $agent_phone_number])->one();
 
 
                 $user = null;
@@ -373,10 +376,13 @@ class CommunicationController extends ApiBaseController
                     $call_sip_id = $upp->upp_tw_sip_id;
                     $call_project_id = (int) $upp->upp_project_id;
 
+                    Yii::info('Detect - User ('.$user->username.') Id: '.$user->id.', phone: ' . $agent_phone_number, 'info\API:CommunicationController:actionVoice:UserProjectParams - 1');
+
                     if($user->isOnline()) {
                         if($user->isCallStatusReady()) {
                             if($user->isCallFree()) {
                                 $isRedirectCall = false;
+                                Yii::info('DIRECT - User ('.$user->username.') Id: '.$user->id.', phone: ' . $agent_phone_number, 'info\API:CommunicationController:actionVoice:Direct - 2');
 
                             } else {
                                 Yii::info('Call Occupied - User ('.$user->username.') Id: '.$user->id.', phone: ' . $agent_phone_number, 'info\API:CommunicationController:actionVoice:isCallFree');
