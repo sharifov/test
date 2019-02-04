@@ -404,6 +404,8 @@ class CommunicationController extends ApiBaseController
 
                 if($isRedirectCall && $call_user_id && $call_project_id) {
 
+                    $call_sip_id = null;
+
                     Yii::info('isRedirectCall - call_user_id ('.$call_user_id.'), call_project_id: '. $call_project_id, 'info\API:CommunicationController:actionVoice:Redirect - 3');
                     $usersForCall = Employee::getAgentsForCall($call_user_id, $call_project_id);
 
@@ -436,8 +438,6 @@ class CommunicationController extends ApiBaseController
                                 'tbl_calls_count' => '0'
                             ]
                      */
-                } else {
-                    $call_sip_id = null;
                 }
 
                 $generalLineProject = '';
