@@ -30,7 +30,7 @@ class CheckPhoneNumberJob extends BaseObject implements \yii\queue\JobInterface
      */
     public function execute($queue): bool
     {
-        $debug = true;
+        $debug = false;
 
         if($debug) {
             echo 'Start debug' . PHP_EOL;
@@ -48,15 +48,15 @@ class CheckPhoneNumberJob extends BaseObject implements \yii\queue\JobInterface
                 throw new \Exception('Error CheckPhoneNumberJob data');
             }
             $clientPhone = ClientPhone::findOne(['client_id' => $this->client_id, 'id' => $this->client_phone_id ]);
-            if(!$clientPhone || strlen($clientPhone->phone) < 11 ) {
+            if(!$clientPhone || strlen($clientPhone->phone) < 9 ) {
                 throw new \Exception('ClientPhone is empty or not found');
             }
 
             if($debug) { echo 'clientPhone->validate_dt: ' . $clientPhone->validate_dt . PHP_EOL;  }
 
-            if($clientPhone->validate_dt !== null) {
+            /*if($clientPhone->validate_dt !== null) {
                  return true;
-            }
+            }*/
 
             $data = [];
             $url = Yii::$app->communication->url .'phone/index/?phone=' . $clientPhone->phone;
@@ -121,8 +121,10 @@ class CheckPhoneNumberJob extends BaseObject implements \yii\queue\JobInterface
             $out['status'] = 'error';
             $out['message'] = $e->getMessage() . ': ' . $e->getFile() . ' : ' . $e->getLine();
             \Yii::error(VarDumper::dumpAsString($out), 'CheckPhoneNumberJob:execute');
-            echo "Error: ";
-            print_r($out);
+            if ($debug) {
+                echo "Error: ";
+                print_r($out);
+            }
         }
 
         if ($debug) {
