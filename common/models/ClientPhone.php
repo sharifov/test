@@ -111,7 +111,7 @@ class ClientPhone extends \yii\db\ActiveRecord
                 'old_phone' => $this->old_phone,
                 'phone' => $this->phone,
                 'isRenewPhoneNumber' => $isRenewPhoneNumber,
-            ]), 'model:ClientPhone:afterSave');
+            ]), 'info\model:ClientPhone:afterSave');
             // check if phone rewrite
             if(NULL === $this->validate_dt || $isRenewPhoneNumber) {
                 /** @var Queue $queue */
