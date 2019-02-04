@@ -3,6 +3,7 @@
 namespace common\models;
 
 use Yii;
+use yii\helpers\VarDumper;
 use yii\queue\Queue;
 use common\components\CheckPhoneNumberJob;
 
@@ -76,11 +77,11 @@ class ClientPhone extends \yii\db\ActiveRecord
 
     public function beforeValidate()
     {
+        $this->phone = str_replace('-', '', $this->phone);
+        $this->phone = str_replace(' ', '', $this->phone);
         if(!$this->isNewRecord) {
             $this->old_phone = $this->oldAttributes['phone'];
         }
-        $this->phone = str_replace('-', '', $this->phone);
-        $this->phone = str_replace(' ', '', $this->phone);
         $this->updated = date('Y-m-d H:i:s');
         return parent::beforeValidate();
     }
@@ -101,8 +102,17 @@ class ClientPhone extends \yii\db\ActiveRecord
     public function afterSave($insert, $changedAttributes)
     {
         if($this->id > 0 && $this->client_id > 0 ) {
+            $isRenewPhoneNumber = ( $this->old_phone != '' && $this->old_phone !== $this->phone );
+            Yii::info(VarDumper::dumpAsString([
+                'client_id' => $this->client_id,
+                'id' => $this->id,
+                'validate_dt' => $this->validate_dt,
+                'is_sms' => $this->is_sms,
+                'old_phone' => $this->old_phone,
+                'phone' => $this->phone,
+                'isRenewPhoneNumber' => $isRenewPhoneNumber,
+            ]), 'model:ClientPhone:afterSave');
             // check if phone rewrite
-            $isRenewPhoneNumber = ( $this->old_phone != '' && $this->old_phone != $this->phone );
             if(NULL === $this->validate_dt || $isRenewPhoneNumber) {
                 /** @var Queue $queue */
                 $queue = \Yii::$app->queue_phone_check;
