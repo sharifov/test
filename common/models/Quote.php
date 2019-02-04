@@ -339,7 +339,8 @@ class Quote extends \yii\db\ActiveRecord
     {
         return [
             [['uid', 'reservation_dump', 'main_airline_code'], 'required'],
-            [['lead_id', 'status', 'check_payment'], 'integer'],
+            [['lead_id', 'status' ], 'integer'],
+            [[ 'check_payment'], 'boolean'],
             [['created', 'updated', 'reservation_dump', 'created_by_seller', 'employee_name', 'employee_id', 'pcc', 'gds', 'last_ticket_date', 'service_fee_percent'], 'safe'],
             [['uid', 'record_locator', 'pcc', 'cabin', 'gds', 'trip_type', 'main_airline_code', 'fare_type'], 'string', 'max' => 255],
 
