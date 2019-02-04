@@ -917,13 +917,18 @@ class CommunicationController extends ApiBaseController
 
 
                     if($lead_id) {
+                        $lead = Lead::findOne($lead_id);
+                        if($lead) {
+                            $sms->s_project_id = $lead->project_id;
+                        }
                         Yii::info('SMS Detected LeadId '.$lead_id.' from '.$sms->s_phone_from, 'info\API:Communication:newSmsMessagesReceived:Sms');
                     }
 
 
                     if(!$sms->save()) {
                         Yii::error(VarDumper::dumpAsString($sms->errors), 'API:Communication:newSmsMessagesReceived:Sms:save');
-                        throw new \Exception('Error save sms data');
+                        $response['error_code'] = 12;
+                        throw new \Exception('Error save SMS data ' . VarDumper::dumpAsString($sms->errors));
                     }
 
 
@@ -965,7 +970,9 @@ class CommunicationController extends ApiBaseController
             Yii::error($e->getTraceAsString(), 'API:Communication:newSmsMessagesReceived:Sms:try');
             $message = $this->debug ? $e->getTraceAsString() : $e->getMessage() . ' (code:' . $e->getCode() . ', line: ' . $e->getLine() . ')';
             $response['error'] = $message;
-            $response['error_code'] = 15;
+            if(!isset($response['error_code']) || !$response['error_code']) {
+                $response['error_code'] = 15;
+            }
         }
 
         return $response;
