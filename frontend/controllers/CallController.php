@@ -32,7 +32,7 @@ class CallController extends FController
                 'class' => AccessControl::class,
                 'rules' => [
                     [
-                        'actions' => ['index', 'update', 'view', 'delete', 'create', 'inbox', 'soft-delete', 'list'],
+                        'actions' => ['index', 'update', 'view', 'delete', 'create', 'inbox', 'soft-delete', 'list', 'user-map'],
                         'allow' => true,
                         'roles' => ['supervision', 'admin'],
                     ],
@@ -233,5 +233,16 @@ class CallController extends FController
     {
         Call::updateAll(['c_is_new' => false], ['c_is_new' => null, 'c_created_user_id' => Yii::$app->user->id]);
         return $this->redirect(['list']);
+    }
+
+
+    public function actionUserMap()
+    {
+        $query = Employee::getQueryAgentOnlineStatus(Yii::$app->user->id, 8);
+        $users = $query->asArray()->all();
+
+        return $this->render('user-map', [
+            'users' => $users,
+        ]);
     }
 }

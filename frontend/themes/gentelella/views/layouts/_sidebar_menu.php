@@ -86,6 +86,7 @@ $isCoach = Yii::$app->authManager->getAssignment('coach', Yii::$app->user->id);
                         ['label' => 'SMS List', 'url' => ['/sms/index'], 'icon' => 'comments-o'],
                         ['label' => 'Mail List', 'url' => ['/email/index'], 'icon' => 'envelope'],
                         ['label' => 'User Call Statuses', 'url' => ['/user-call-status/index'], 'icon' => 'list'],
+
                     ];
                 }
 
@@ -151,6 +152,7 @@ $isCoach = Yii::$app->authManager->getAssignment('coach', Yii::$app->user->id);
                     'icon' => 'user',
                     'items' => [
                         ['label' => 'User Connections', 'url' => ['/user-connection/index'], 'icon' => 'plug'],
+                        ['label' => 'Call User Map', 'url' => ['/call/user-map'], 'icon' => 'list'],
                         ['label' => 'Users', 'url' => ['employee/list'], 'icon' => 'user'],
                         ['label' => 'User Groups', 'url' => ['user-group/index'], 'icon' => 'users'],
                         ['label' => 'User Groups Assignments', 'url' => ['user-group-assign/index'], 'icon' => 'users'],
