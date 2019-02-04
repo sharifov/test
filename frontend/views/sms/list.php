@@ -40,7 +40,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <p>
 
-        <?= Html::a('<i class="fa fa-plus"></i> Create Sms', ['create'], ['class' => 'btn btn-success']) ?>
+        <?//= Html::a('<i class="fa fa-plus"></i> Create Sms', ['create'], ['class' => 'btn btn-success']) ?>
 
         <?= Html::a('<i class="fa fa-check"></i> Make Read All', ['all-read'], [
             'class' => 'btn btn-info',

@@ -27,14 +27,23 @@ class CallBox extends \yii\bootstrap\Widget
 
     public function run()
     {
-        //$user_id = \Yii::$app->user->id;
+        $user_id = \Yii::$app->user->id;
         $newCount = 0; //\common\models\Notifications::findNewCount($user_id);
         //$model = \common\models\Notifications::findNew($user_id);
 
-        $lastCall = Call::find()->where(['c_created_user_id' => \Yii::$app->user->id])->orderBy(['c_id' => SORT_DESC])->limit(1)->one();
-        $lastCalls = Call::find()->where(['c_created_user_id' => \Yii::$app->user->id])->orderBy(['c_id' => SORT_DESC])->limit(5)->all();
+        $sipExist = \common\models\UserProjectParams::find()->where(['upp_user_id' => $user_id])->andWhere(['AND', ['IS NOT', 'upp_tw_sip_id', null], ['!=', 'upp_tw_sip_id', '']])->one();
 
-        $userCallStatus = UserCallStatus::find()->where(['us_user_id' => \Yii::$app->user->id])->orderBy(['us_id' => SORT_DESC])->limit(1)->one();
+        //VarDumper::dump($sipExist->attributes, 10, true);
+
+        if(!$sipExist) {
+            return '';
+        }
+
+
+        $lastCall = Call::find()->where(['c_created_user_id' => $user_id])->orderBy(['c_id' => SORT_DESC])->limit(1)->one();
+        $lastCalls = Call::find()->where(['c_created_user_id' => $user_id])->orderBy(['c_id' => SORT_DESC])->limit(5)->all();
+
+        $userCallStatus = UserCallStatus::find()->where(['us_user_id' => $user_id])->orderBy(['us_id' => SORT_DESC])->limit(1)->one();
 
         return $this->render('call_box', ['lastCall' => $lastCall, 'lastCalls' => $lastCalls, 'userCallStatus' => $userCallStatus]);
     }
