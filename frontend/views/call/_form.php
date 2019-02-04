@@ -12,11 +12,13 @@ use yii\widgets\ActiveForm;
 
     <?php $form = ActiveForm::begin(); ?>
 
+    <div class="col-md-6">
+
     <?= $form->field($model, 'c_call_sid')->textInput(['maxlength' => true]) ?>
 
     <?= $form->field($model, 'c_account_sid')->textInput(['maxlength' => true]) ?>
 
-    <?= $form->field($model, 'c_call_type_id')->textInput() ?>
+    <?= $form->field($model, 'c_call_type_id')->dropDownList(\common\models\Call::CALL_TYPE_LIST) ?>
 
     <?= $form->field($model, 'c_from')->textInput(['maxlength' => true]) ?>
 
@@ -24,7 +26,7 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'c_sip')->textInput(['maxlength' => true]) ?>
 
-    <?= $form->field($model, 'c_call_status')->textInput(['maxlength' => true]) ?>
+    <?= $form->field($model, 'c_call_status')->dropDownList(\common\models\Call::CALL_STATUS_LIST) ?>
 
     <?= $form->field($model, 'c_api_version')->textInput(['maxlength' => true]) ?>
 
@@ -37,6 +39,8 @@ use yii\widgets\ActiveForm;
     <?= $form->field($model, 'c_parent_call_sid')->textInput(['maxlength' => true]) ?>
 
     <?= $form->field($model, 'c_call_duration')->textInput(['maxlength' => true]) ?>
+    </div>
+    <div class="col-md-6">
 
     <?= $form->field($model, 'c_sip_response_code')->textInput(['maxlength' => true]) ?>
 
@@ -54,21 +58,22 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'c_lead_id')->textInput() ?>
 
-    <?= $form->field($model, 'c_created_user_id')->textInput() ?>
+    <?//= $form->field($model, 'c_created_user_id')->textInput() ?>
 
-    <?= $form->field($model, 'c_created_dt')->textInput() ?>
+    <?//= $form->field($model, 'c_created_dt')->textInput() ?>
 
     <?= $form->field($model, 'c_com_call_id')->textInput() ?>
 
-    <?= $form->field($model, 'c_updated_dt')->textInput() ?>
+    <?//= $form->field($model, 'c_updated_dt')->textInput() ?>
 
-    <?= $form->field($model, 'c_project_id')->textInput() ?>
+    <?= $form->field($model, 'c_project_id')->dropDownList(\common\models\Project::getList()) ?>
 
     <?= $form->field($model, 'c_error_message')->textInput(['maxlength' => true]) ?>
 
-    <?= $form->field($model, 'c_is_new')->textInput() ?>
+    <?= $form->field($model, 'c_is_new')->checkbox() ?>
 
-    <?= $form->field($model, 'c_is_deleted')->textInput() ?>
+    <?= $form->field($model, 'c_is_deleted')->checkbox() ?>
+</div>
 
     <div class="form-group">
         <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>

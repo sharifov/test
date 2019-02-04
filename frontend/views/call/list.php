@@ -24,10 +24,10 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <p>
         <?//= Html::a('Create Call', ['create'], ['class' => 'btn btn-success']) ?>
-        <?= Html::a('<i class="fa fa-check"></i> Make Read All', ['all-read'], [
+        <?= Html::a('<i class="fa fa-check"></i> Make View All', ['all-read'], [
             'class' => 'btn btn-info',
             'data' => [
-                'confirm' => 'Are you sure you want to mark read all SMS?',
+                'confirm' => 'Are you sure you want to mark view all Calls?',
                 'method' => 'post',
             ],
         ]) ?>

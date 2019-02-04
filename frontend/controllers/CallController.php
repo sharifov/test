@@ -32,7 +32,7 @@ class CallController extends FController
                 'class' => AccessControl::class,
                 'rules' => [
                     [
-                        'actions' => ['index', 'update', 'view', 'delete', 'create', 'inbox', 'soft-delete', 'list', 'user-map'],
+                        'actions' => ['index', 'update', 'view', 'delete', 'create', 'inbox', 'soft-delete', 'list', 'user-map', 'all-read'],
                         'allow' => true,
                         'roles' => ['supervision', 'admin'],
                     ],
@@ -99,11 +99,6 @@ class CallController extends FController
     {
         $model = $this->findModel($id);
 
-        if($model->c_is_new) {
-            //$model->c_read_dt = date('Y-m-d H:i:s');
-            $model->c_is_new = false;
-            $model->save();
-        }
 
         return $this->render('view', [
             'model' => $model,
@@ -231,7 +226,7 @@ class CallController extends FController
      */
     public function actionAllRead()
     {
-        Call::updateAll(['c_is_new' => false], ['c_is_new' => null, 'c_created_user_id' => Yii::$app->user->id]);
+        Call::updateAll(['c_is_new' => false], ['c_is_new' => true, 'c_created_user_id' => Yii::$app->user->id]);
         return $this->redirect(['list']);
     }
 

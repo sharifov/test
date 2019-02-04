@@ -296,19 +296,17 @@ $js = <<<JS
             }
         );
     });
-    
-    //$('#user-call-status-select')
-    
-    $(document).on('click', '#user-call-status-select', function(e) {
+   
+    $(document).on('change', '#user-call-status-select', function(e) {
         e.preventDefault();
         var type_id = $(this).val();
-        
+                
         $.ajax({
             type: 'post',
             data: {'type_id': type_id},
             url: callStatusUrl,
             success: function (data) {
-                console.log(data);
+                //console.log(data);
                 /*$('#preloader').addClass('hidden');
                 modal.find('.modal-body').html(data);
                 modal.modal('show');*/
@@ -319,25 +317,6 @@ $js = <<<JS
         });
 
     });
-
-
-   /* $(document).on('click', '.user-call-status', function(e) {
-        e.preventDefault();
-        var type_id = $(this).data('type-id');
-        
-        $.ajax({
-            type: 'post',
-            data: {'type_id': type_id},
-            url: callStatusUrl,
-            success: function (data) {
-                console.log(data);
-            },
-            error: function (error) {
-                console.error('Error: ' + error);
-            }
-        });
-
-    });*/
 
 
 JS;
