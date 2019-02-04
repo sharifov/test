@@ -23,8 +23,8 @@ use yii\helpers\VarDumper;
  * @property int $s_template_type_id
  * @property string $s_language_id
  * @property int $s_communication_id
- * @property int $s_is_deleted
- * @property int $s_is_new
+ * @property bool $s_is_deleted
+ * @property bool $s_is_new
  * @property int $s_delay
  * @property int $s_priority
  * @property int $s_status_id
@@ -128,7 +128,8 @@ class Sms extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['s_reply_id', 's_lead_id', 's_project_id', 's_type_id', 's_template_type_id', 's_communication_id', 's_is_deleted', 's_is_new', 's_delay', 's_priority', 's_status_id', 's_tw_num_segments', 's_created_user_id', 's_updated_user_id'], 'integer'],
+            [['s_reply_id', 's_lead_id', 's_project_id', 's_type_id', 's_template_type_id', 's_communication_id', 's_delay', 's_priority', 's_status_id', 's_tw_num_segments', 's_created_user_id', 's_updated_user_id'], 'integer'],
+            [['s_is_new', 's_is_deleted'], 'boolean'],
             [['s_phone_from', 's_phone_to'], 'required'],
             [['s_sms_text', 's_sms_data'], 'string'],
             [['s_status_done_dt', 's_read_dt', 's_tw_sent_dt', 's_created_dt', 's_updated_dt'], 'safe'],
