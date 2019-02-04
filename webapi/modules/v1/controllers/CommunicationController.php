@@ -446,8 +446,8 @@ class CommunicationController extends ApiBaseController
 
                     $project = Project::findOne($call_project_id);
                     if($project && $project->contactInfo && $project->contactInfo->phone) {
-                        $generalLineProject = str_replace(' ', $project->contactInfo->phone);
-                        $generalLineProject = str_replace('-', $generalLineProject);
+                        $generalLineProject = str_replace(' ', '', $project->contactInfo->phone);
+                        $generalLineProject = str_replace('-', '', $generalLineProject);
                         if(isset($generalLineProject[0]) && $generalLineProject[0] !== '+') {
                             $generalLineProject .= '+' . $generalLineProject[0];
                         }
