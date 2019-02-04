@@ -31,7 +31,7 @@ class CheckPhoneNumberJob extends BaseObject implements \yii\queue\JobInterface
     public function execute($queue): bool
     {
         $debug = false;
-
+        \Yii::info(VarDumper::dumpAsString(['client_id' =>  $this->client_id , 'client_phone_id' => $this->client_phone_id]), 'info\CheckPhoneNumberJob:execute:34');
         if($debug) {
             echo 'Start debug' . PHP_EOL;
         }
