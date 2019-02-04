@@ -3,12 +3,14 @@
 namespace frontend\controllers;
 
 use common\models\Employee;
+use common\models\Project;
 use common\models\UserProjectParams;
 use Yii;
 use common\models\Call;
 use common\models\search\CallSearch;
 use yii\filters\AccessControl;
 use yii\helpers\ArrayHelper;
+use yii\helpers\VarDumper;
 use yii\web\Controller;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
@@ -233,11 +235,23 @@ class CallController extends FController
 
     public function actionUserMap()
     {
-        $query = Employee::getQueryAgentOnlineStatus(Yii::$app->user->id, 8);
-        $users = $query->asArray()->all();
+        $projects = Project::getList();
+        $usersByProject = [];
+
+        if($projects) {
+            foreach ($projects as $projectId => $projectName) {
+
+                $query = Employee::getQueryAgentOnlineStatus(Yii::$app->user->id, $projectId);
+                $usersByProject[$projectId]['project_name'] = $projectName;
+                $usersByProject[$projectId]['project_id'] = $projectId;
+                $usersByProject[$projectId]['users'] = $query->asArray()->all();
+            }
+        }
+
+        //VarDumper::dump($usersByProject, 10, true);
 
         return $this->render('user-map', [
-            'users' => $users,
+            'usersByProject' => $usersByProject,
         ]);
     }
 }
