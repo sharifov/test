@@ -376,7 +376,7 @@ class CommunicationController extends ApiBaseController
                     $call_sip_id = $upp->upp_tw_sip_id;
                     $call_project_id = (int) $upp->upp_project_id;
 
-                    Yii::info('Detect - User ('.$user->username.') Id: '.$user->id.', phone: ' . $agent_phone_number, 'info\API:CommunicationController:actionVoice:UserProjectParams - 1');
+                    //Yii::info('Detect - User ('.$user->username.') Id: '.$user->id.', phone: ' . $agent_phone_number, 'info\API:CommunicationController:actionVoice:UserProjectParams - 1');
 
                     if($user->isOnline()) {
                         if($user->isCallStatusReady()) {
@@ -404,7 +404,11 @@ class CommunicationController extends ApiBaseController
 
                 if($isRedirectCall && $call_user_id && $call_project_id) {
 
+                    Yii::info('isRedirectCall - call_user_id ('.$call_user_id.'), call_project_id: '. $call_project_id, 'info\API:CommunicationController:actionVoice:Redirect - 3');
                     $usersForCall = Employee::getAgentsForCall($call_user_id, $call_project_id);
+
+                    Yii::info(VarDumper::dumpAsString($usersForCall), 'info\API:CommunicationController:actionVoice:getAgentsForCall - 4');
+
                     if($usersForCall) {
                         foreach ($usersForCall as $userForCall) {
                             $upp = UserProjectParams::find()->where(['upp_user_id' => $userForCall['tbl_user_id'], 'upp_project_id' => $call_project_id])->one();
@@ -416,6 +420,8 @@ class CommunicationController extends ApiBaseController
                                 if($upp->upp_tw_phone_number) {
                                     $agent_phone_number = $upp->upp_tw_phone_number;
                                 }
+
+                                Yii::info('call_user_id: '.$call_user_id.', call_sip_id: '.$call_sip_id.', agent_phone_number: '.$agent_phone_number, 'info\API:CommunicationController:actionVoice:UserProjectParams - 5');
 
                                 break;
                             }
@@ -430,6 +436,8 @@ class CommunicationController extends ApiBaseController
                                 'tbl_calls_count' => '0'
                             ]
                      */
+                } else {
+                    $call_sip_id = null;
                 }
 
                 $generalLineProject = '';
