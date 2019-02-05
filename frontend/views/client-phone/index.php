@@ -24,7 +24,7 @@ $this->params['breadcrumbs'][] = $this->title;
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'columns' => [
-            ['class' => 'yii\grid\SerialColumn'],
+            //['class' => 'yii\grid\SerialColumn'],
 
             'id',
             [
@@ -42,10 +42,16 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             //'client_id',
             'phone',
-            'created',
+            [
+                'attribute' => 'created',
+                'value' => function (\common\models\ClientPhone $model) {
+                    return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->created));
+                },
+                'format' => 'raw'
+            ],
             //'updated',
             //'comments:ntext',
-            'is_sms',
+            'is_sms:boolean',
             'validate_dt',
 
             ['class' => 'yii\grid\ActionColumn'],
