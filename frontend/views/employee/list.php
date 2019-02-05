@@ -274,7 +274,7 @@ if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
                 ],
                 [
                     'class' => 'yii\grid\ActionColumn',
-                    'template' => '{update} {projects} {groups}',
+                    'template' => '{update} {projects} {groups} {switch}',
                     'visibleButtons' => [
                         /*'view' => function ($model, $key, $index) {
                             return User::hasPermission('viewOrder');
@@ -288,6 +288,9 @@ if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
                         'groups' => function (\common\models\Employee $model, $key, $index) {
                             return (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || !in_array('admin', array_keys($model->getRoles())));
                         },
+                        'switch' => function (\common\models\Employee $model, $key, $index) {
+                            return (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || !in_array('admin', array_keys($model->getRoles())));
+                        },
                     ],
                     'buttons' => [
                         'projects' => function ($url, \common\models\Employee $model, $key) {
@@ -295,6 +298,12 @@ if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
                         },
                         'groups' => function ($url, \common\models\Employee $model, $key) {
                             return Html::a('<span class="fa fa-users"></span>', ['user-group-assign/index', 'UserGroupAssignSearch[ugs_user_id]' => $model->id], ['title' => 'User Groups', 'target' => '_blank']);
+                        },
+                        'switch' => function ($url, \common\models\Employee $model, $key) {
+                            return Html::a('<span class="fa fa-sign-in"></span>', ['employee/switch', 'id' => $model->id], ['title' => 'switch User', 'data' => [
+                                'confirm' => 'Are you sure you want to switch user?',
+                                //'method' => 'get',
+                            ],]);
                         },
                     ]
                 ],

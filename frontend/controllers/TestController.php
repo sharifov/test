@@ -40,7 +40,7 @@ class TestController extends FController
                 'rules' => [
                     [
                         'allow' => true,
-                        'roles' => ['@'],
+                        //'roles' => ['@'],
                     ],
                 ],
             ],
@@ -342,5 +342,37 @@ class TestController extends FController
         //VarDumper::dump($users, 10, true);
     }
 
+    /*
+    public function actionLogin()
+    {
+        echo Yii::$app->user->id; exit;
+
+        $user_id = Yii::$app->request->get('id');
+        $user = Employee::findIdentity($user_id);
+        if($user) {
+            VarDumper::dump($user->attributes, 10, true);
+            //exit;
+            //Yii::$app->user->switchIdentity($user);
+
+            Yii::$app->user->logout();
+            if(!Yii::$app->user->login($user, 3600 * 24 * 30)) {
+                echo 'Not logined'; exit;
+            }
+
+
+
+            //$this->redirect(['site/index']);
+        }
+
+        //Yii::$app->user->login($user, $this->rememberMe ? 3600 * 24 * 30 : 0);
+
+        echo '--'.Yii::$app->user->id;
+
+        echo Yii::$app->user->id;
+
+        exit;
+
+        //$this->redirect(['site/index']);
+    }*/
 
 }

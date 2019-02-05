@@ -2,6 +2,7 @@
 
 namespace frontend\controllers;
 
+use common\models\search\EmployeeSearch;
 use Yii;
 use common\models\UserConnection;
 use common\models\search\UserConnectionSearch;
@@ -29,7 +30,7 @@ class UserConnectionController extends FController
                 'class' => AccessControl::class,
                 'rules' => [
                     [
-                        'actions' => ['index', 'update', 'view', 'delete'],
+                        'actions' => ['index', 'update', 'view', 'delete', 'stats'],
                         'allow' => true,
                         'roles' => ['supervision', 'admin'],
                     ],
@@ -52,6 +53,27 @@ class UserConnectionController extends FController
         return $this->render('index', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
+        ]);
+    }
+
+    public function actionStats()
+    {
+        $searchModel = new EmployeeSearch();
+        $params = Yii::$app->request->queryParams;
+
+        if(!isset($params['EmployeeSearch']['status']) || !$params['EmployeeSearch']['status']) {
+            $params['EmployeeSearch']['status'] = 10;
+        }
+
+        if(Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id)) {
+            $params['EmployeeSearch']['supervision_id'] = Yii::$app->user->id;
+        }
+
+        $dataProvider = $searchModel->search($params);
+
+        return $this->render('stats', [
+            'dataProvider' => $dataProvider,
+            'searchModel' => $searchModel,
         ]);
     }
 
