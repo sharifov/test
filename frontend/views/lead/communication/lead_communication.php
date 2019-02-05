@@ -323,7 +323,7 @@ $c_type_id = $comForm->c_type_id;
                         </div>
                     </div>
                     <div id="sms-input-box" class="message-field-sms">
-                        <div class="form-group">
+                        <div class="form-group" id="sms-textarea-div">
                             <?= $form->field($comForm, 'c_sms_message')->textarea(['rows' => 4, 'class' => 'form-control', 'id' => 'sms-message']) ?>
                         </div>
                         <div class="btn-wrapper">
@@ -461,10 +461,10 @@ $js = <<<JS
             $('.message-field-phone').hide();
             $('.message-field-email').hide();
         }
+        
+        $('#c_sms_tpl_id').trigger('change');
     }
-    
-          
-    
+        
 
     initializeMessageType($c_type_id);
     
@@ -581,6 +581,14 @@ $js = <<<JS
 
     $('body').on("change", '#c_phone_number', function () {
         $('#div-call-phone-number').text($(this).val());
+    });
+    
+    $('body').on("change", '#c_sms_tpl_id', function () {
+        if($(this).val() == 2) {
+            $('#sms-textarea-div').hide();
+        } else {
+            $('#sms-textarea-div').show();
+        }
     });
 
 
