@@ -333,7 +333,7 @@ class CommunicationController extends ApiBaseController
 
             if(isset($post['call']) && $post['call']) {
 
-                Yii::info('Detect - Call', 'info\API:CommunicationController:actionVoice:DetectCall - 0');
+                //Yii::info('Detect - Call', 'info\API:CommunicationController:actionVoice:DetectCall - 0');
 
                 $client_phone_number = null;
                 $agent_phone_number = null;
@@ -409,7 +409,7 @@ class CommunicationController extends ApiBaseController
                     Yii::info('isRedirectCall - call_user_id ('.$call_user_id.'), call_project_id: '. $call_project_id, 'info\API:CommunicationController:actionVoice:Redirect - 3');
                     $usersForCall = Employee::getAgentsForCall($call_user_id, $call_project_id);
 
-                    Yii::info(VarDumper::dumpAsString($usersForCall), 'info\API:CommunicationController:actionVoice:getAgentsForCall - 4');
+                    Yii::info('Redirect usersForCall: ' . VarDumper::dumpAsString($usersForCall), 'info\API:CommunicationController:actionVoice:getAgentsForCall - 4');
 
                     if($usersForCall) {
                         foreach ($usersForCall as $userForCall) {
@@ -423,7 +423,7 @@ class CommunicationController extends ApiBaseController
                                     $agent_phone_number = $upp->upp_tw_phone_number;
                                 }
 
-                                Yii::info('call_user_id: '.$call_user_id.', call_sip_id: '.$call_sip_id.', agent_phone_number: '.$agent_phone_number, 'info\API:CommunicationController:actionVoice:UserProjectParams - 5');
+                                Yii::info('Redirected Call: call_user_id: '.$call_user_id.', call_sip_id: '.$call_sip_id.', agent_phone_number: '.$agent_phone_number, 'info\API:CommunicationController:actionVoice:UserProjectParams - 5');
 
                                 break;
                             }
@@ -449,8 +449,10 @@ class CommunicationController extends ApiBaseController
                         $generalLineProject = str_replace(' ', '', $project->contactInfo->phone);
                         $generalLineProject = str_replace('-', '', $generalLineProject);
                         if(isset($generalLineProject[0]) && $generalLineProject[0] !== '+') {
-                            $generalLineProject .= '+' . $generalLineProject[0];
+                            $generalLineProject = '+' . $generalLineProject;
                         }
+
+                        Yii::info('Redirected to General Line : call_project_id: '.$call_project_id.', generalLine: '.$generalLineProject, 'info\API:CommunicationController:actionVoice:GeneralLine - 6');
                     }
                 }
 
@@ -478,7 +480,7 @@ class CommunicationController extends ApiBaseController
                     $call->c_sip = $call_sip_id;
                     $call->c_to = $call_sip_id ? $agent_phone_number : $generalLineProject;
 
-                    if($call->c_account_sid) {
+                    if($call_sip_id) {
                         $call->c_created_user_id = $call_user_id;
                     }
 
@@ -539,7 +541,9 @@ class CommunicationController extends ApiBaseController
                         $data['status'] = $call->c_call_status;
 
                         //Notifications::create($call->c_created_user_id, 'New Call from '.$call->c_from. ' ('.$data['client_name'].')', 'Call from ' . $call->c_from .' ('.$data['client_name'].') to '.$call->c_to, Notifications::TYPE_INFO, true);
-                        Notifications::socket($call->c_created_user_id, $lead_id = null, 'incomingCall', $data, true);
+                        if($call->c_created_user_id) {
+                            Notifications::socket($call->c_created_user_id, $lead_id = null, 'incomingCall', $data, true);
+                        }
 
                         //Notifications::socket(null, $call->c_lead_id, 'callUpdate', ['status' => $call->c_call_status, 'duration' => $call->c_call_duration, 'snr' => $call->c_sequence_number], true);
                     }
