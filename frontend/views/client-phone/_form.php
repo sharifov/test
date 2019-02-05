@@ -7,7 +7,7 @@ use yii\widgets\ActiveForm;
 /* @var $model common\models\ClientPhone */
 /* @var $form yii\widgets\ActiveForm */
 
-$dataClients = \common\models\Client::getList();
+
 ?>
 
 <div class="client-phone-form">
@@ -18,15 +18,14 @@ $dataClients = \common\models\Client::getList();
 
     <? //= $form->field($model, 'client_id')->textInput() ?>
 
-    <?php
-    echo $form->field($model, 'client_id')->dropDownList($dataClients, ['prompt' => '---']);
-    ?>
+    <div class="col-md-6">
+    <?= $form->field($model, 'client_id')->input('number', ['min' => 1]) ?>
 
     <?= $form->field($model, 'phone')->textInput(['maxlength' => true]) ?>
 
-    <?= $form->field($model, 'created')->textInput() ?>
+    <?//= $form->field($model, 'created')->textInput() ?>
 
-    <?= $form->field($model, 'updated')->textInput() ?>
+    <?//= $form->field($model, 'updated')->textInput() ?>
 
     <?= $form->field($model, 'comments')->textarea(['rows' => 6]) ?>
 
@@ -36,6 +35,7 @@ $dataClients = \common\models\Client::getList();
 
     <div class="form-group">
         <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
+    </div>
     </div>
 
     <?php ActiveForm::end(); ?>

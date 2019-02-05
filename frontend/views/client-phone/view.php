@@ -6,7 +6,7 @@ use yii\widgets\DetailView;
 /* @var $this yii\web\View */
 /* @var $model common\models\ClientPhone */
 
-$this->title = $model->id;
+$this->title = $model->phone;
 $this->params['breadcrumbs'][] = ['label' => 'Client Phones', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 \yii\web\YiiAsset::register($this);
@@ -39,11 +39,30 @@ $this->params['breadcrumbs'][] = $this->title;
                 'format' => 'raw'
             ],
             'phone',
-            'created',
-            'updated',
+            [
+                'attribute' => 'created',
+                'value' => function (\common\models\ClientPhone $model) {
+                    return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->created));
+                },
+                'format' => 'raw'
+            ],
+            [
+                'attribute' => 'updated',
+                'value' => function (\common\models\ClientPhone $model) {
+                    return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->updated));
+                },
+                'format' => 'raw'
+            ],
             'comments:ntext',
-            'is_sms',
-            'validate_dt',
+            'is_sms:boolean',
+            [
+                'attribute' => 'validate_dt',
+                'value' => function (\common\models\ClientPhone $model) {
+                    return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->validate_dt));
+                },
+                'format' => 'raw'
+            ],
+
         ],
     ]) ?>
 
