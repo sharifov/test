@@ -119,4 +119,19 @@ class Client extends \yii\db\ActiveRecord
         return ArrayHelper::map($data,'id', 'first_name');
     }
 
+    /**
+     * @return array
+     */
+    public function getPhoneNumbersSms(): array
+    {
+        $phoneList = [];
+        $phones = $this->clientPhones;
+        if($phones) {
+            foreach ($phones as $phone) {
+                $phoneList[$phone->phone] = $phone->phone . ($phone->is_sms ? ' (sms)' : '');
+            }
+        }
+        return $phoneList;
+    }
+
 }

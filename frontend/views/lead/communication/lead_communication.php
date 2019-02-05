@@ -230,7 +230,7 @@ $c_type_id = $comForm->c_type_id;
                     $clientEmails = \yii\helpers\ArrayHelper::map($leadForm->getClientEmail(), 'email', 'email');
                     $clientEmails[Yii::$app->user->identity->email] = Yii::$app->user->identity->email;
 
-                    $clientPhones = \yii\helpers\ArrayHelper::map($leadForm->getClientPhone(), 'phone', 'phone');
+                    $clientPhones = $leadForm->getClient()->getPhoneNumbersSms(); //\yii\helpers\ArrayHelper::map($leadForm->getClientPhone(), 'phone', 'phone');
 
                     if(Yii::$app->session->hasFlash('send-success')) {
                         echo '<div class="alert alert-success alert-dismissible" role="alert"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>';
