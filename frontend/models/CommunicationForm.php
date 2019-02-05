@@ -113,11 +113,11 @@ class CommunicationForm extends Model
             ],
 
 
-            [['c_sms_message'], 'required', 'when' => function (CommunicationForm $model) {
+            /*[['c_sms_message'], 'required', 'when' => function (CommunicationForm $model) {
                 return $model->c_sms_tpl_id != self::TPL_TYPE_SMS_OFFER && $model->c_type_id == self::TYPE_SMS;
             },
                 'whenClient' => "function (attribute, value) { return $('#c_type_id').val() == " . self::TYPE_SMS . " && $('#c_sms_tpl_id').val() != " . self::TPL_TYPE_SMS_OFFER . '; }'
-            ],
+            ],*/
 
 
             [['c_phone_number'], 'required', 'when' => function (CommunicationForm $model) {
@@ -156,7 +156,7 @@ class CommunicationForm extends Model
             [['c_sms_tpl_id', 'c_email_tpl_id', 'c_user_id', 'c_type_id', 'c_lead_id', 'c_voice_status', 'c_call_id'], 'integer'],
 
             [['c_email_message', 'c_sms_message'], 'string'],
-            [['c_sms_message'], 'string', 'max' => 500, 'min' => 10],
+            [['c_sms_message'], 'string', 'max' => 500],
             [['c_email_subject'], 'string', 'max' => 80, 'min' => 5],
 
             [['c_language_id'], 'string', 'max' => 5],

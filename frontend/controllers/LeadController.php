@@ -584,6 +584,10 @@ class LeadController extends FController
 
                             $content_data = $lead->getEmailData2($comForm->quoteList);
 
+                            $content_data['content'] = $comForm->c_sms_message;
+
+                            //VarDumper::dump($content_data, 10, true); exit;
+
                             $language = $comForm->c_language_id ?: 'en-US';
 
                             $tpl = SmsTemplateType::findOne($comForm->c_sms_tpl_id);

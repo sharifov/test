@@ -48,6 +48,10 @@ class ClentPhoneSearch extends ClientPhone
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+            'sort'=> ['defaultOrder' => ['id' => SORT_DESC]],
+            'pagination' => [
+                'pageSize' => 30,
+            ],
         ]);
         //VarDumper::dump($dataProvider, 10, true); exit;
         $this->load($params);
