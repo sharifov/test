@@ -48,6 +48,41 @@ if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
                     'contentOptions' => ['class' => 'text-left', 'style' => 'width: 60px'],
                 ],
 
+                [
+                    'class' => 'yii\grid\ActionColumn',
+                    'template' => '{update} {projects} {groups} {switch}',
+                    'visibleButtons' => [
+                        /*'view' => function ($model, $key, $index) {
+                            return User::hasPermission('viewOrder');
+                        },*/
+                        'update' => function (\common\models\Employee $model, $key, $index) {
+                            return (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || !in_array('admin', array_keys($model->getRoles())));
+                        },
+                        'projects' => function (\common\models\Employee $model, $key, $index) {
+                            return (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || !in_array('admin', array_keys($model->getRoles())));
+                        },
+                        'groups' => function (\common\models\Employee $model, $key, $index) {
+                            return (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || !in_array('admin', array_keys($model->getRoles())));
+                        },
+                        'switch' => function (\common\models\Employee $model, $key, $index) {
+                            return (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || !in_array('admin', array_keys($model->getRoles())));
+                        },
+                    ],
+                    'buttons' => [
+                        'projects' => function ($url, \common\models\Employee $model, $key) {
+                            return Html::a('<span class="fa fa-list"></span>', ['user-project-params/index', 'UserProjectParamsSearch[upp_user_id]' => $model->id], ['title' => 'Projects', 'target' => '_blank']);
+                        },
+                        'groups' => function ($url, \common\models\Employee $model, $key) {
+                            return Html::a('<span class="fa fa-users"></span>', ['user-group-assign/index', 'UserGroupAssignSearch[ugs_user_id]' => $model->id], ['title' => 'User Groups', 'target' => '_blank']);
+                        },
+                        'switch' => function ($url, \common\models\Employee $model, $key) {
+                            return Html::a('<span class="fa fa-sign-in"></span>', ['employee/switch', 'id' => $model->id], ['title' => 'switch User', 'data' => [
+                                'confirm' => 'Are you sure you want to switch user?',
+                                //'method' => 'get',
+                            ],]);
+                        },
+                    ]
+                ],
 
                 [
                     'label' => 'Grav',
@@ -95,6 +130,40 @@ if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
                 ],
 
                 [
+                    //'label' => 'Online',
+                    'attribute' => 'online',
+                    //'filter' => false,
+                    'filter' => [1 => 'Online', 2 => 'Offline'],
+                    'value' => function (\common\models\Employee $model) {
+                        return $model->isOnline() ? '<span class="label label-success">Online</span>' : '<span class="label label-danger">Offline</span>';
+                    },
+                    'format' => 'raw'
+                ],
+
+                [
+                    'label' => 'Call Ready',
+                    'filter' => false,
+                    //'filter' => [1 => 'Online', $searchModel::STATUS_DELETED => 'Deleted'],
+                    'value' => function (\common\models\Employee $model) {
+                        return $model->isCallStatusReady() ? '<span class="label label-success">Ready</span>' : '<span class="label label-warning">Occupied</span>';
+                    },
+                    'format' => 'raw'
+                ],
+
+                [
+                    'label' => 'Last Call Status',
+                    'filter' => false,
+                    //'filter' => [1 => 'Online', $searchModel::STATUS_DELETED => 'Deleted'],
+                    'value' => function (\common\models\Employee $model) {
+
+                        $call = \common\models\Call::find()->where(['c_created_user_id' => $model->id])->orderBy(['c_id' => SORT_DESC])->limit(1)->one();
+
+                        return $call ? $call->c_call_status : '-';
+                    },
+                    'format' => 'raw'
+                ],
+
+                [
                     'label' => 'User Groups',
                     'attribute' => 'user_group_id',
                     'value' => function (\common\models\Employee $model) {
@@ -116,7 +185,7 @@ if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
 
 
 
-                [
+                /*[
                     'label' => 'Projects access',
                     'attribute' => 'user_project_id',
                     'value' => function (\common\models\Employee $model) {
@@ -136,9 +205,9 @@ if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
                     },
                     'format' => 'raw',
                     'filter' => $projectList
-                ],
+                ],*/
 
-                [
+                /*[
                     'label' => 'Projects Params',
                     'attribute' => 'user_params_project_id',
                     'value' => function (\common\models\Employee $model) {
@@ -158,6 +227,39 @@ if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
                     },
                     'format' => 'raw',
                     'filter' => $projectList
+                ],*/
+
+                [
+                    'label' => 'Projects Params',
+                    'attribute' => 'user_params_project_id',
+                    'value' => function (\common\models\Employee $model) {
+
+                        $str = '<small><table class="table table-bordered">';
+
+                        //$projects = $model->uppProjects;
+                        $projectParams = $model->userProjectParams;
+                        //$projectsValueArr = [];
+
+                        if($projectParams) {
+                            foreach ($projectParams as $projectParam) {
+                                $str.='<tr>';
+                                $str.='<td>'.Html::encode($projectParam->upp_project_id).'</td>';
+                                $str.='<td>'.Html::encode($projectParam->uppProject->name).'</td>';
+                                $str.='<td>'.Html::encode($projectParam->upp_tw_phone_number).'</td>';
+                                $str.='<td>'.Html::encode($projectParam->upp_tw_sip_id).'</td>';
+                                //$projectsValueArr[] = Html::tag('span', Html::tag('i', '', ['class' => 'fa fa-list']) . ' ' . Html::encode($project->name), ['class' => 'label label-default']);
+                                $str.='</tr>';
+                            }
+                        }
+
+                        $str .= '</table></small>';
+
+                        //$projectsValue = implode(' ', $projectsValueArr);
+
+                        return $str; //$projectsValue;
+                    },
+                    'format' => 'raw',
+                    'filter' => $projectList
                 ],
 
                 //'created_at:datetime',
@@ -165,7 +267,7 @@ if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
                 // 'acl_rules_activated:boolean',
 
                 [
-                    //'label' => 'Base Amount',
+                    'label' => 'IP filter',
                     'attribute' => 'acl_rules_activated',
                     'value' => function(\common\models\Employee $model) {
                         return $model->acl_rules_activated ? '<span class="label label-success">Yes</span>' : '<span class="label label-danger">No</span>';
@@ -176,7 +278,7 @@ if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
                     //'visible' => Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)
                 ],
 
-                [
+                /*[
                     'label' => 'Base Amount',
                     //'attribute' => 'created_at',
                     'value' => function(\common\models\Employee $model) {
@@ -185,9 +287,9 @@ if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
                     //'format' => '',
                     'contentOptions' => ['class' => 'text-right'],
                     'visible' => Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)
-                ],
+                ],*/
 
-                [
+                /*[
                     'label' => 'Commission',
                     //'attribute' => 'created_at',
                     'value' => function(\common\models\Employee $model) {
@@ -196,9 +298,9 @@ if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
                     //'format' => 'html',
                     'contentOptions' => ['class' => 'text-right'],
                     'visible' => Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)
-                ],
+                ],*/
 
-                [
+                /*[
                     'label' => 'Bonus Active',
                     //'attribute' => 'created_at',
                     'value' => function(\common\models\Employee $model) {
@@ -207,7 +309,7 @@ if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
                 //'format' => 'html',
                 'contentOptions' => ['class' => 'text-right'],
                 'visible' => Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)
-                ],
+                ],*/
 
                 [
                     'label' => 'Bonus Profit',
@@ -227,6 +329,29 @@ if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
                     'contentOptions' => ['class' => 'text-left'],
                     'options' => [
                         'style' => 'width:120px'
+                    ],
+                    'visible' => Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)
+                ],
+
+
+                [
+                    'label' => 'Bonuses',
+                    'value' => function(\common\models\Employee $model) {
+                        if($params = $model->userParams) {
+                            $str = '<table class="table table-bordered" style="font-size:10px">';
+                            $str .= '<tr><td>Bonus Active</td><td>'. ($params->up_bonus_active ? 'Yes':'No') . '</td></tr>';
+                            $str .= '<tr><td>Commission</td><td>'. ($params->up_commission_percent ? $params->up_commission_percent . '%':'-') . '</td></tr>';
+                            $str .= '<tr><td>Base Amount</td><td>' . ($params->up_base_amount ? number_format($params->up_base_amount, 2) : '-').'</td></tr>';
+                            $str .= '</table>';
+                        } else {
+                            $str = '-';
+                        }
+                        return $str;
+                    },
+                    'format' => 'raw',
+                    'contentOptions' => ['class' => 'text-left'],
+                    'options' => [
+                        'style' => 'width:240px;'
                     ],
                     'visible' => Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)
                 ],
@@ -272,41 +397,7 @@ if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
                     },
                     'format' => 'raw',
                 ],
-                [
-                    'class' => 'yii\grid\ActionColumn',
-                    'template' => '{update} {projects} {groups} {switch}',
-                    'visibleButtons' => [
-                        /*'view' => function ($model, $key, $index) {
-                            return User::hasPermission('viewOrder');
-                        },*/
-                        'update' => function (\common\models\Employee $model, $key, $index) {
-                            return (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || !in_array('admin', array_keys($model->getRoles())));
-                        },
-                        'projects' => function (\common\models\Employee $model, $key, $index) {
-                            return (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || !in_array('admin', array_keys($model->getRoles())));
-                        },
-                        'groups' => function (\common\models\Employee $model, $key, $index) {
-                            return (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || !in_array('admin', array_keys($model->getRoles())));
-                        },
-                        'switch' => function (\common\models\Employee $model, $key, $index) {
-                            return (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || !in_array('admin', array_keys($model->getRoles())));
-                        },
-                    ],
-                    'buttons' => [
-                        'projects' => function ($url, \common\models\Employee $model, $key) {
-                            return Html::a('<span class="fa fa-list"></span>', ['user-project-params/index', 'UserProjectParamsSearch[upp_user_id]' => $model->id], ['title' => 'Projects', 'target' => '_blank']);
-                        },
-                        'groups' => function ($url, \common\models\Employee $model, $key) {
-                            return Html::a('<span class="fa fa-users"></span>', ['user-group-assign/index', 'UserGroupAssignSearch[ugs_user_id]' => $model->id], ['title' => 'User Groups', 'target' => '_blank']);
-                        },
-                        'switch' => function ($url, \common\models\Employee $model, $key) {
-                            return Html::a('<span class="fa fa-sign-in"></span>', ['employee/switch', 'id' => $model->id], ['title' => 'switch User', 'data' => [
-                                'confirm' => 'Are you sure you want to switch user?',
-                                //'method' => 'get',
-                            ],]);
-                        },
-                    ]
-                ],
+
             ]
         ])
         ?>

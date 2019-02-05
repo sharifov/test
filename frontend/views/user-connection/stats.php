@@ -161,18 +161,29 @@ if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
                     'attribute' => 'user_params_project_id',
                     'value' => function (\common\models\Employee $model) {
 
-                        $projects = $model->uppProjects;
-                        $projectsValueArr = [];
+                        $str = '<small><table class="table table-bordered">';
 
-                        if($projects) {
-                            foreach ($projects as $project) {
-                                $projectsValueArr[] = Html::tag('span', Html::tag('i', '', ['class' => 'fa fa-list']) . ' ' . Html::encode($project->name), ['class' => 'label label-default']);
+                        //$projects = $model->uppProjects;
+                        $projectParams = $model->userProjectParams;
+                        //$projectsValueArr = [];
+
+                        if($projectParams) {
+                            foreach ($projectParams as $projectParam) {
+                                $str.='<tr>';
+                                $str.='<td>'.Html::encode($projectParam->upp_project_id).'</td>';
+                                $str.='<td>'.Html::encode($projectParam->uppProject->name).'</td>';
+                                $str.='<td>'.Html::encode($projectParam->upp_tw_phone_number).'</td>';
+                                $str.='<td>'.Html::encode($projectParam->upp_tw_sip_id).'</td>';
+                                //$projectsValueArr[] = Html::tag('span', Html::tag('i', '', ['class' => 'fa fa-list']) . ' ' . Html::encode($project->name), ['class' => 'label label-default']);
+                                $str.='</tr>';
                             }
                         }
 
-                        $projectsValue = implode(' ', $projectsValueArr);
+                        $str .= '</table></small>';
 
-                        return $projectsValue;
+                        //$projectsValue = implode(' ', $projectsValueArr);
+
+                        return $str; //$projectsValue;
                     },
                     'format' => 'raw',
                     'filter' => $projectList
