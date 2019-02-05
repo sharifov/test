@@ -470,14 +470,17 @@ class CommunicationController extends ApiBaseController
                     $call->c_com_call_id = $post['call_id'] ?? null;
                     $call->c_direction = $post['call']['Direction'] ?? null;
                     $call->c_project_id = $call_project_id;
-                    $call->c_is_new = 1;
+                    $call->c_is_new = true;
                     $call->c_api_version = $post['call']['ApiVersion'] ?? null;
                     $call->c_created_dt = date('Y-m-d H:i:s');
 
                     $call->c_from = $client_phone_number;
                     $call->c_sip = $call_sip_id;
                     $call->c_to = $call_sip_id ? $agent_phone_number : $generalLineProject;
-                    $call->c_created_user_id = $call_user_id;
+
+                    if($call->c_account_sid) {
+                        $call->c_created_user_id = $call_user_id;
+                    }
 
                     if(!$call->save()) {
                         Yii::error(VarDumper::dumpAsString($call->errors), 'API:CommunicationController:actionVoice:Call:save');
