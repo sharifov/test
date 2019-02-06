@@ -190,6 +190,11 @@ $c_type_id = $comForm->c_type_id;
 
 
                     <div class="row">
+                        <div class="alert alert-info alert-dismissible" role="alert">
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                            <strong>Attention!</strong> Check the length of messages and try to use the minimum number of characters.
+                        </div>
+
                         <div class="col-sm-6 form-group">
                             <?= $form3->field($previewSmsForm, 's_phone_from')->textInput(['class' => 'form-control', 'maxlength' => true, 'readonly' => true]) ?>
                             <?//= $form3->field($previewSmsForm, 's_lead_id')->hiddenInput()->label(false); ?>
@@ -202,10 +207,19 @@ $c_type_id = $comForm->c_type_id;
                     </div>
 
                     <div class="form-group">
-                        <?= $form3->field($previewSmsForm, 's_sms_message')->textarea(['rows' => 4, 'class' => 'form-control', 'id' => 'email-message']) ?>
+                        <?= $form3->field($previewSmsForm, 's_sms_message')->textarea(['rows' => 4, 'class' => 'form-control', 'id' => 'preview-sms-message']) ?>
+                        <table class="table table-condensed table-responsive table-bordered" id="preview-sms-counter">
+                            <tr>
+                                <td>Length: <span class="length"></span></td>
+                                <td>Messages: <span class="messages"></span></td>
+                                <td>Per Message: <span class="per_message"></span></td>
+                                <td>Remaining: <span class="remaining"></span></td>
+                                <td>Encoding: <span class="encoding"></span></td>
+                            </tr>
+                        </table>
                     </div>
-                    <div class="btn-wrapper">
-                        <?= Html::submitButton('<i class="fa fa-envelope-o"></i> Send SMS', ['class' => 'btn btn-lg btn-primary']) ?>
+                    <div class="btn-wrapper text-center">
+                        <?= Html::submitButton('Send SMS <i class="fa fa-paper-plane"></i>', ['class' => 'btn btn-lg btn-primary']) ?>
                     </div>
 
                     <?php \yii\bootstrap\ActiveForm::end(); ?>
@@ -325,6 +339,17 @@ $c_type_id = $comForm->c_type_id;
                     <div id="sms-input-box" class="message-field-sms">
                         <div class="form-group" id="sms-textarea-div">
                             <?= $form->field($comForm, 'c_sms_message')->textarea(['rows' => 4, 'class' => 'form-control', 'id' => 'sms-message']) ?>
+
+                            <table class="table table-condensed table-responsive table-bordered" id="sms-counter">
+                                <tr>
+                                    <td>Length: <span class="length"></span></td>
+                                    <td>Messages: <span class="messages"></span></td>
+                                    <td>Per Message: <span class="per_message"></span></td>
+                                    <td>Remaining: <span class="remaining"></span></td>
+                                    <td>Encoding: <span class="encoding"></span></td>
+                                </tr>
+                            </table>
+
                         </div>
                         <div class="btn-wrapper">
                             <?= Html::submitButton('<i class="fa fa-envelope-o"></i> Send SMS', ['class' => 'btn btn-lg btn-primary']) ?>
@@ -463,6 +488,9 @@ $js = <<<JS
         }
         
         $('#c_sms_tpl_id').trigger('change');
+        $('#sms-message').countSms('#sms-counter');
+        $('#preview-sms-message').countSms('#preview-sms-counter');
+        
     }
         
 

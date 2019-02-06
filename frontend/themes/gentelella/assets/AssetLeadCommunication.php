@@ -18,8 +18,8 @@ class AssetLeadCommunication extends \yii\web\AssetBundle
     ];
 
     public $js = [
-        'https://cdnjs.cloudflare.com/ajax/libs/scrollup/2.4.1/jquery.scrollUp.min.js'
-        //'js/js-lead-communication.js',
+        'https://cdnjs.cloudflare.com/ajax/libs/scrollup/2.4.1/jquery.scrollUp.min.js',
+        '/js/sms_counter.min.js',
     ];
 
     /*public $depends = [
