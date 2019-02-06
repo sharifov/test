@@ -746,6 +746,11 @@ class CommunicationController extends ApiBaseController
     {
         $sq_id = (int) Yii::$app->request->post('sq_id');
         $sq_status_id = (int) Yii::$app->request->post('sq_status_id');
+
+        //$sq_price = Yii::$app->request->post('sq_price');
+
+        $smsParams = Yii::$app->request->post('sms');
+
         // $sq_project_id = Yii::$app->request->post('sq_project_id');
 
         try {
@@ -765,6 +770,17 @@ class CommunicationController extends ApiBaseController
                     $sms->s_status_id = $sq_status_id;
                     if($sq_status_id === Sms::STATUS_DONE) {
                         $sms->s_status_done_dt = date('Y-m-d H:i:s');
+                    }
+
+
+                    if($smsParams) {
+                        if(isset($smsParams['sq_tw_price']) && $smsParams['sq_tw_price']) {
+                            $sms->s_tw_price = (float) $smsParams['sq_tw_price'];
+                        }
+
+                        if(isset($smsParams['sq_tw_num_segments']) && $smsParams['sq_tw_num_segments']) {
+                            $sms->s_tw_num_segments = (int) $smsParams['sq_tw_num_segments'];
+                        }
                     }
 
                     if(!$sms->save()) {
