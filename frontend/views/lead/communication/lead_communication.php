@@ -207,7 +207,7 @@ $c_type_id = $comForm->c_type_id;
                     </div>
 
                     <div class="form-group">
-                        <?= $form3->field($previewSmsForm, 's_sms_message')->textarea(['rows' => 4, 'class' => 'form-control', 'id' => 'preview-sms-message']) ?>
+                        <?= $form3->field($previewSmsForm, 's_sms_message')->textarea(['rows' => 6, 'class' => 'form-control', 'id' => 'preview-sms-message']) ?>
                         <table class="table table-condensed table-responsive table-bordered" id="preview-sms-counter">
                             <tr>
                                 <td>Length: <span class="length"></span></td>
