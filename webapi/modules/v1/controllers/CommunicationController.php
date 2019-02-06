@@ -775,7 +775,7 @@ class CommunicationController extends ApiBaseController
 
                     if($smsParams) {
                         if(isset($smsParams['sq_tw_price']) && $smsParams['sq_tw_price']) {
-                            $sms->s_tw_price = (float) $smsParams['sq_tw_price'];
+                            $sms->s_tw_price = abs((float) $smsParams['sq_tw_price']);
                         }
 
                         if(isset($smsParams['sq_tw_num_segments']) && $smsParams['sq_tw_num_segments']) {

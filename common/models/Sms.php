@@ -31,7 +31,7 @@ use yii\helpers\VarDumper;
  * @property string $s_status_done_dt
  * @property string $s_read_dt
  * @property string $s_error_message
- * @property string $s_tw_price
+ * @property float $s_tw_price
  * @property string $s_tw_sent_dt
  * @property string $s_tw_account_sid
  * @property string $s_tw_message_sid
