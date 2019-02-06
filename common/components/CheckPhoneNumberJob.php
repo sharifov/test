@@ -31,7 +31,7 @@ class CheckPhoneNumberJob extends BaseObject implements \yii\queue\JobInterface
     public function execute($queue): bool
     {
         $debug = false;
-        \Yii::info(VarDumper::dumpAsString(['client_id' =>  $this->client_id , 'client_phone_id' => $this->client_phone_id]), 'info\CheckPhoneNumberJob:execute:34');
+        //\Yii::info(VarDumper::dumpAsString(['client_id' =>  $this->client_id , 'client_phone_id' => $this->client_phone_id]), 'info\CheckPhoneNumberJob:execute:34');
         if($debug) {
             echo 'Start debug' . PHP_EOL;
         }
@@ -48,8 +48,12 @@ class CheckPhoneNumberJob extends BaseObject implements \yii\queue\JobInterface
                 throw new \Exception('Error CheckPhoneNumberJob data');
             }
             $clientPhone = ClientPhone::findOne(['client_id' => $this->client_id, 'id' => $this->client_phone_id ]);
-            if(!$clientPhone || strlen($clientPhone->phone) < 8 ) {
-                throw new \Exception('ClientPhone is empty or not found');
+            if(!$clientPhone ) {
+                throw new \Exception('ClientPhone not found in db');
+            }
+
+            if(strlen($clientPhone->phone) < 8 ) {
+                throw new \Exception('ClientPhone is < 8');
             }
 
             if($debug) { echo 'clientPhone->validate_dt: ' . $clientPhone->validate_dt . PHP_EOL;  }
@@ -82,12 +86,12 @@ class CheckPhoneNumberJob extends BaseObject implements \yii\queue\JobInterface
             }
 
             if ($response->isOk) {
-                \Yii::info(VarDumper::dumpAsString(['client_phone' => $clientPhone->phone, 'response_data' => $response->data]), 'info\CheckPhoneNumberJob:execute:84');
+                //\Yii::info(VarDumper::dumpAsString(['client_phone' => $clientPhone->phone, 'response_data' => $response->data]), 'info\CheckPhoneNumberJob:execute:84');
                 if(!isset($response->data['data']['response'])) {
-                    throw new \Exception('Not found in response array data key [data][response]');
+                    throw new \Exception('Not found in response array data key [data][response] :: ' . VarDumper::dumpAsString(['client_phone' => $clientPhone->phone, 'response_data' => $response->data]));
                 }
             } else {
-                throw new \Exception('ClientPhone error response from communication');
+                throw new \Exception('ClientPhone error response from communication: '. $response->content);
             }
 
             $is_error = false;
@@ -110,8 +114,8 @@ class CheckPhoneNumberJob extends BaseObject implements \yii\queue\JobInterface
                 }
             } else {
                 $is_error = true;
-                throw new \Exception('Not found in response array data key [data][response]');
-            }
+                throw new \Exception('Not found in response array data key [data][response][numbers] :: ' . VarDumper::dumpAsString(['client_phone' => $clientPhone->phone, 'response_data' => $response->data]));
+             }
 
             if(!$is_error) return true;
 
