@@ -48,7 +48,7 @@ class CheckPhoneNumberJob extends BaseObject implements \yii\queue\JobInterface
                 throw new \Exception('Error CheckPhoneNumberJob data');
             }
             $clientPhone = ClientPhone::findOne(['client_id' => $this->client_id, 'id' => $this->client_phone_id ]);
-            if(!$clientPhone || strlen($clientPhone->phone) < 9 ) {
+            if(!$clientPhone || strlen($clientPhone->phone) < 8 ) {
                 throw new \Exception('ClientPhone is empty or not found');
             }
 
@@ -69,7 +69,7 @@ class CheckPhoneNumberJob extends BaseObject implements \yii\queue\JobInterface
             $request->setUrl($url)
                 ->setMethod('GET')
                 ->setOptions([
-                    CURLOPT_CONNECTTIMEOUT => 5,
+                    CURLOPT_CONNECTTIMEOUT => 30,
                     CURLOPT_TIMEOUT => 30,
                 ]);
                 //->setData($data);
