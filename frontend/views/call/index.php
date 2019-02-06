@@ -95,6 +95,13 @@ $this->params['breadcrumbs'][] = $this->title;
             'c_caller_name',
             //'c_parent_call_sid',
             'c_call_duration',
+            //'c_price:currency',
+            [
+                'attribute' => 'c_price',
+                'value' => function (\common\models\Call $model) {
+                    return $model->c_price ? Yii::$app->formatter->asCurrency($model->c_price) : '-';
+                },
+            ],
             //'c_sip_response_code',
             //'c_recording_url:url',
             [

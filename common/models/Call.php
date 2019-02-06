@@ -37,6 +37,7 @@ use Yii;
  * @property string $c_error_message
  * @property bool $c_is_new
  * @property bool $c_is_deleted
+ * @property float $c_price
  *
  * @property Employee $cCreatedUser
  * @property Lead $cLead
@@ -100,6 +101,7 @@ class Call extends \yii\db\ActiveRecord
         return [
             [['c_call_sid', 'c_account_sid'], 'required'],
             [['c_call_type_id', 'c_lead_id', 'c_created_user_id', 'c_com_call_id', 'c_project_id', 'c_call_duration'], 'integer'],
+            [['c_price'], 'number'],
             [['c_is_new', 'c_is_deleted'], 'boolean'],
             [['c_created_dt', 'c_updated_dt'], 'safe'],
             [['c_call_sid', 'c_account_sid', 'c_parent_call_sid', 'c_recording_sid'], 'string', 'max' => 34],
@@ -153,6 +155,7 @@ class Call extends \yii\db\ActiveRecord
             'c_error_message' => 'Error Message',
             'c_is_new' => 'Is New',
             'c_is_deleted' => 'Is Deleted',
+            'c_price' => 'Price'
         ];
     }
 

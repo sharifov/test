@@ -636,6 +636,9 @@ class CommunicationController extends ApiBaseController
                         $call->c_call_duration = (int) $post['callData']['CallDuration'];
                     }
 
+                    if (isset($post['call']['c_tw_price']) && $post['call']['c_tw_price']) {
+                        $call->c_price = abs((float) $post['call']['c_tw_price']);
+                    }
 
                     $call->c_updated_dt = date('Y-m-d H:i:s');
                     if(!$call->save()) {
