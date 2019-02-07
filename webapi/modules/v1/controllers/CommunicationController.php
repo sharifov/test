@@ -950,6 +950,19 @@ class CommunicationController extends ApiBaseController
                     $sms->s_tw_num_segments = (int) $smsData['num_segments'];
                 }
 
+                if(isset($smsData['sid']) && $smsData['sid']) {
+                    if(!$sms->s_tw_message_sid) {
+                        $sms->s_tw_message_sid = $smsData['sid'];
+                    }
+                }
+
+                if(isset($smsData['account_sid']) && $smsData['account_sid']) {
+                    if(!$sms->s_tw_account_sid) {
+                        $sms->s_tw_account_sid = $smsData['account_sid'];
+                    }
+                }
+
+
                 if(isset($smsData['status'])) {
 
                     $sms->s_error_message = 'status: ' . $smsData['status'];
