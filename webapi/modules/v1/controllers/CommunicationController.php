@@ -684,7 +684,14 @@ class CommunicationController extends ApiBaseController
                         $call->c_call_status =$post['callData']['status'];
                     }
 
-                    $call->save();
+                    if(isset($post['callData']['duration'])) {
+                        $call->c_call_duration = (int) $post['callData']['duration'];
+                    }
+
+
+                    if(!$call->save()) {
+                        Yii::error(VarDumper::dumpAsString($call->errors), 'API:CommunicationController:actionVoice:TYPE_VOIP_FINISH:Call:save');
+                    }
 
                     /*if($post['callData']['RecordingUrl']) {
                         $call->c_recording_url = $post['callData']['RecordingUrl'];
