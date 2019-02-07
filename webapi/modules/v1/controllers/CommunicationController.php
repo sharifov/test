@@ -38,11 +38,15 @@ class CommunicationController extends ApiBaseController
     public const TYPE_VOIP_INCOMING     = 'voip_incoming';
     public const TYPE_VOIP              = 'voip';
 
+
     public const TYPE_UPDATE_EMAIL_STATUS = 'update_email_status';
     public const TYPE_UPDATE_SMS_STATUS = 'update_sms_status';
 
     public const TYPE_NEW_EMAIL_MESSAGES_RECEIVED = 'new_email_messages_received';
     public const TYPE_NEW_SMS_MESSAGES_RECEIVED = 'new_sms_messages_received';
+
+    public const TYPE_VOIP_FINISH       = 'voip_finish';
+    public const TYPE_SMS_FINISH        = 'sms_finish';
 
     /**
      * @api {post} /v1/communication/email Communication Email
@@ -180,6 +184,8 @@ class CommunicationController extends ApiBaseController
                 break;
             case self::TYPE_NEW_SMS_MESSAGES_RECEIVED : $response = $this->newSmsMessagesReceived();
                 break;
+            case self::TYPE_SMS_FINISH : $response = $this->smsFinish();
+                break;
             default: throw new BadRequestHttpException('Invalid type', 2);
         }
 
@@ -197,7 +203,6 @@ class CommunicationController extends ApiBaseController
         }
 
         $responseData['data']['response'] = $response;
-        // $responseData['data']['request']                = $modelLead;
         $responseData = $apiLog->endApiLog($responseData);
 
         if (isset($response['error']) && $response['error']) {
@@ -624,6 +629,78 @@ class CommunicationController extends ApiBaseController
                 }
             }
 
+        } elseif($type === self::TYPE_VOIP_FINISH) {
+
+            Yii::info(VarDumper::dumpAsString($post), 'info\API:CommunicationController:actionVoice:TYPE_VOIP_FINISH');
+
+            //{"sid": "SMb40bfd6908184ec0a51e20789979e304", "date_created": "Wed, 06 Feb 2019 21:30:12 +0000", "date_updated": "Wed, 06 Feb 2019 21:30:12 +0000", "date_sent": "Wed, 06 Feb 2019 21:30:12 +0000", "account_sid": "AC10f3c74efba7b492cbd7dca86077736c", "to": "+15122036074", "from": "+16692011645", "messaging_service_sid": null, "body": "WOWFARE best price (per adult) to Kathmandu:\r\n$\u00a01905.05 (s short layovers), https://wowfare.com/q/5c5b5180c6d29\r\nRegards, Nancy", "status": "delivered", "num_segments": "2", "num_media": "0", "direction": "outbound-api", "api_version": "2010-04-01", "price": "-0.01500", "price_unit": "USD", "error_code": null, "error_message": null, "uri": "/2010-04-01/Accounts/AC10f3c74efba7b492cbd7dca86077736c/Messages/SMb40bfd6908184ec0a51e20789979e304.json", "subresource_uris": {"media": "/2010-04-01/Accounts/AC10f3c74efba7b492cbd7dca86077736c/Messages/SMb40bfd6908184ec0a51e20789979e304/Media.json"}}
+
+            if (isset($post['callData']['sid']) && $post['callData']['sid']) {
+                $call = Call::find()->where(['c_call_sid' => $post['callData']['sid']])->one();
+
+
+
+                /*
+                 *
+                 *
+                 *
+                 *  account_sid: "AC10f3c74efba7b492cbd7dca86077736c"
+                    annotation: null
+                    answered_by: null
+                    api_version: "2010-04-01"
+                    caller_name: ""
+                    date_created: "Wed, 06 Feb 2019 15:27:34 +0000"
+                    date_updated: "Wed, 06 Feb 2019 15:27:53 +0000"
+                    direction: "outbound-api"
+                    duration: "15"
+                    end_time: "Wed, 06 Feb 2019 15:27:53 +0000"
+                    forwarded_from: null
+                    from: "onorine.miller"
+                    from_formatted: "onorine.miller"
+                    group_sid: null
+                    parent_call_sid: null
+                    phone_number_sid: null
+                    price: "-0.00400"
+                    price_unit: "USD"
+                    sid: "CA6359554e2ac4a920427165c4b69288b7"
+                    start_time: "Wed, 06 Feb 2019 15:27:38 +0000"
+                    status: "completed"
+                    subresource_uris: {,…}
+                    notifications: "/2010-04-01/Accounts/AC10f3c74efba7b492cbd7dca86077736c/Calls/CA6359554e2ac4a920427165c4b69288b7/Notifications.json"
+                    recordings: "/2010-04-01/Accounts/AC10f3c74efba7b492cbd7dca86077736c/Calls/CA6359554e2ac4a920427165c4b69288b7/Recordings.json"
+                    to: "sip:onorine.miller@kivork.sip.us1.twilio.com"
+                    to_formatted: "sip:onorine.miller@kivork.sip.us1.twilio.com"
+                    uri: "/2010-04-01/Accounts/AC10f3c74efba7b492cbd7dca86077736c/Calls/CA6359554e2ac4a920427165c4b69288b7.json"
+                 *
+                 */
+
+                if ($call) {
+
+                    if(isset($post['callData']['price'])) {
+                        $call->c_price = abs((float) $post['callData']['price']);
+                    }
+
+                    if(isset($post['callData']['status'])) {
+                        $call->c_call_status =$post['callData']['status'];
+                    }
+
+                    $call->save();
+
+                    /*if($post['callData']['RecordingUrl']) {
+                        $call->c_recording_url = $post['callData']['RecordingUrl'];
+                        $call->c_recording_duration = $post['callData']['RecordingDuration'];
+                        $call->c_recording_sid = $post['callData']['RecordingSid'];
+                        $call->c_updated_dt = date('Y-m-d H:i:s');
+
+
+                        if(!$call->save()) {
+                            Yii::error(VarDumper::dumpAsString($call->errors), 'API:CommunicationController:actionVoice:TYPE_VOIP_FINISH:Call:save');
+                        }
+
+                    }*/
+                }
+            }
+
         } else {
             if (isset($post['callData']['CallSid']) && $post['callData']['CallSid']) {
                 $call = Call::find()->where(['c_call_sid' => $post['callData']['CallSid']])->one();
@@ -799,10 +876,97 @@ class CommunicationController extends ApiBaseController
 
 
         } catch (\Throwable $e) {
-            Yii::error($e->getTraceAsString(), 'API:Communication:updateEmailStatus:Email:try');
+            Yii::error($e->getTraceAsString(), 'API:Communication:updateSmsStatus:try');
             $message = $this->debug ? $e->getTraceAsString() : $e->getMessage() . ' (code:' . $e->getCode() . ', line: ' . $e->getLine() . ')';
             $response['error'] = $message;
             $response['error_code'] = 15;
+        }
+
+        return $response;
+    }
+
+
+
+    private function smsFinish(): array
+    {
+
+        /*
+         * account_sid: "AC10f3c74efba7b492cbd7dca86077736c"
+            api_version: "2010-04-01"
+            body: "WOWFARE best price (per adult) to Kathmandu:
+            ↵$ 1905.05 (s short layovers), https://wowfare.com/q/5c5b5180c6d29
+            ↵Regards, Nancy"
+            date_created: "Wed, 06 Feb 2019 21:30:12 +0000"
+            date_sent: "Wed, 06 Feb 2019 21:30:12 +0000"
+            date_updated: "Wed, 06 Feb 2019 21:30:12 +0000"
+            direction: "outbound-api"
+            error_code: null
+            error_message: null
+            from: "+16692011645"
+            messaging_service_sid: null
+            num_media: "0"
+            num_segments: "2"
+            price: "-0.01500"
+            price_unit: "USD"
+            sid: "SMb40bfd6908184ec0a51e20789979e304"
+            status: "delivered"
+            subresource_uris: {,…}
+            media: "/2010-04-01/Accounts/AC10f3c74efba7b492cbd7dca86077736c/Messages/SMb40bfd6908184ec0a51e20789979e304/Media.json"
+            to: "+15122036074"
+            uri: "/2010-04-01/Accounts/AC10f3c74efba7b492cbd7dca86077736c/Messages/SMb40bfd6908184ec0a51e20789979e304.json"
+         */
+
+        $response = [];
+
+        try {
+
+            $smsData = Yii::$app->request->post('smsData');
+
+            if(!$smsData) {
+                throw new NotFoundHttpException('Not found smsData', 11);
+            }
+
+            if(!$smsData['sid']) {
+                throw new NotFoundHttpException('Not found smsData[sid]', 12);
+            }
+
+
+            $sms = Sms::findOne(['s_tw_message_sid' => $smsData['sid']]);
+            if($sms) {
+
+                if(isset($smsData['price'])) {
+                    $sms->s_tw_price = abs((float) $smsData['price']);
+                }
+
+                if(isset($smsData['num_segments']) && $smsData['num_segments']) {
+                    $sms->s_tw_num_segments = (int) $smsData['num_segments'];
+                }
+
+                if(isset($smsData['status'])) {
+
+                    $sms->s_error_message = 'status: ' . $smsData['status'];
+
+                    if($smsData['status'] === 'delivered') {
+                        $sms->s_status_id = SMS::STATUS_DONE;
+                    }
+                }
+
+                if(!$sms->save()) {
+                    Yii::error(VarDumper::dumpAsString($sms->errors), 'API:Communication:smsFinish:Sms:save');
+                }
+                $response['sms'] = $sms->attributes;
+
+            } else {
+                $response['error'] = 'Not found SMS message_sid ('.$smsData['sid'].')';
+                $response['error_code'] = 13;
+            }
+
+
+        } catch (\Throwable $e) {
+            Yii::error($e->getTraceAsString(), 'API:Communication:smsFinish:try');
+            $message = $this->debug ? $e->getTraceAsString() : $e->getMessage() . ' (code:' . $e->getCode() . ', line: ' . $e->getLine() . ')';
+            $response['error'] = $message;
+            $response['error_code'] = $e->getCode();
         }
 
         return $response;
