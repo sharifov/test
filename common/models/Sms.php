@@ -324,8 +324,40 @@ class Sms extends \yii\db\ActiveRecord
             $request = $communication->smsSend($this->s_project_id, $tplType, $this->s_phone_from, $this->s_phone_to, $content_data, $data, ($this->s_language_id ?: 'en-US'), 0);
 
             if($request && isset($request['data']['sq_status_id'])) {
-                $this->s_status_id = $request['data']['sq_status_id'];
-                $this->s_communication_id = $request['data']['sq_id'];
+
+                $this->s_status_id          = $request['data']['sq_status_id'];
+                $this->s_communication_id   = $request['data']['sq_id'];
+
+                $this->s_tw_message_sid     = $request['data']['sq_tw_message_id'] ?? null;
+                $this->s_tw_num_segments    = $request['data']['sq_tw_num_segments'] ?? null;
+                $this->s_tw_account_sid     = $request['data']['sq_tw_account_sid'] ?? null;
+                $this->s_tw_price           = $request['data']['sq_tw_price'] ?? null;
+                $this->s_sms_data           = $request['data']['sq_sms_data'] ?? null;
+                $this->s_is_new             = false;
+
+                /**
+                 * @property int $sq_id
+                * @property int $sq_project_id
+                * @property string $sq_phone_from
+                * @property string $sq_phone_to
+                * @property string $sq_sms_text
+                * @property string $sq_sms_data
+                * @property int $sq_type_id
+                * @property string $sq_language_id
+                * @property int $sq_priority
+                * @property int $sq_status_id
+                * @property int $sq_delay
+                * @property string $sq_tw_message_id
+                * @property float $sq_tw_price
+                * @property int $sq_tw_num_segments
+                * @property string $sq_tw_sent_dt
+                * @property string $sq_tw_status
+                * @property string $sq_tw_uri
+                * @property string $sq_tw_account_sid
+                * @property int $sq_created_api_user_id
+                * @property string $sq_created_dt
+                 */
+
                 $this->save();
             }
 
