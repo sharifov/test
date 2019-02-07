@@ -60,7 +60,7 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
 
             //'s_is_new:boolean',
-
+            's_tw_message_sid',
 
             [
                 'attribute' => 's_type_id',
@@ -120,13 +120,13 @@ $this->params['breadcrumbs'][] = $this->title;
             //'s_type_id',
             //'s_template_type_id',
             //'s_language_id',
-            [
+            /*[
                 'attribute' => 's_language_id',
                 'value' => function (\common\models\Sms $model) {
                     return $model->s_language_id;
                 },
                 'filter' => \lajax\translatemanager\models\Language::getLanguageNames()
-            ],
+            ],*/
             //'s_communication_id',
             [
                     'label' => 'Comm Id',
