@@ -69,7 +69,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'value' => function (\common\models\Sms $model) {
                     return $model->getTypeName();
                 },
-                'filter' => \common\models\Sms::FILTER_TYPE_LIST
+                'filter' => \common\models\Sms::TYPE_LIST
             ],
 
             [
