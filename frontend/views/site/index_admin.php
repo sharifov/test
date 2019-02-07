@@ -178,6 +178,7 @@ $userId = Yii::$app->user->id;
                     <p>Today count of Quotes</p>
                 </div>
             </div>
+            <?php /*
             <div class="animated flipInY col-lg-2 col-md-2 col-sm-2 col-xs-12">
                 <div class="tile-stats">
                     <div class="icon"><i class="fa fa-sitemap"></i></div>
@@ -185,7 +186,35 @@ $userId = Yii::$app->user->id;
                     <h3>API Requests</h3>
                     <p>Today count of API Requests</p>
                 </div>
+            </div>*/
+            ?>
+
+            <div class="animated flipInY col-lg-2 col-md-2 col-sm-2 col-xs-12">
+                <div class="tile-stats">
+                    <div class="icon"><i class="fa fa-phone"></i></div>
+                    <div class="count">
+                        <?=\common\models\Call::find()->where('DATE(c_created_dt) = DATE(NOW())')->andWhere(['c_call_type_id' => \common\models\Call::CALL_TYPE_OUT])->count()?>
+                        /
+                        <?=\common\models\Call::find()->where('DATE(c_created_dt) = DATE(NOW())')->andWhere(['c_call_type_id' => \common\models\Call::CALL_TYPE_IN])->count()?>
+                    </div>
+                    <h3>Calls Out (<?=number_format(\common\models\Call::find()->where('DATE(c_created_dt) = DATE(NOW())')->andWhere(['c_call_type_id' => \common\models\Call::CALL_TYPE_OUT])->sum('c_price'), 3)?> $) / In</h3>
+                    <p>Today count of Calls Outgoing / Incoming</p>
+                </div>
             </div>
+
+            <div class="animated flipInY col-lg-2 col-md-2 col-sm-6 col-xs-12">
+                <div class="tile-stats">
+                    <div class="icon"><i class="fa fa-comment"></i></div>
+                    <div class="count">
+                        <?=\common\models\Sms::find()->where('DATE(s_created_dt) = DATE(NOW())')->andWhere(['s_type_id' => \common\models\SMS::TYPE_OUTBOX])->count()?>
+                        /
+                        <?=\common\models\Sms::find()->where('DATE(s_created_dt) = DATE(NOW())')->andWhere(['s_type_id' => \common\models\SMS::TYPE_INBOX])->count()?>
+                    </div>
+                    <h3><?=Html::a('SMS', ['sms/index'])?> Out (<?=number_format(\common\models\Sms::find()->where('DATE(s_created_dt) = DATE(NOW())')->andWhere(['s_type_id' => \common\models\SMS::TYPE_OUTBOX])->sum('s_tw_price'), 3)?> $) / In</h3>
+                    <p>Today count of SMS Outgoing / Incoming</p>
+                </div>
+            </div>
+
 
             <div class="animated flipInY col-lg-2 col-md-2 col-sm-6 col-xs-12">
                 <div class="tile-stats">
@@ -197,14 +226,7 @@ $userId = Yii::$app->user->id;
             </div>
 
 
-            <div class="animated flipInY col-lg-2 col-md-2 col-sm-6 col-xs-12">
-                <div class="tile-stats">
-                    <div class="icon"><i class="fa fa-comment"></i></div>
-                    <div class="count"><?=\common\models\Sms::find()->where('DATE(s_created_dt) = DATE(NOW())')->count()?></div>
-                    <h3><?=Html::a('SMS', ['sms/index'])?></h3>
-                    <p>Today count of SMS</p>
-                </div>
-            </div>
+
 
             <?php /*
             <div class="animated flipInY col-lg-2 col-md-2 col-sm-6 col-xs-12">
