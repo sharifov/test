@@ -921,6 +921,7 @@ class CommunicationController extends ApiBaseController
         try {
 
             $smsData = Yii::$app->request->post('smsData');
+            $comId = Yii::$app->request->post('sq_id');
 
             if(!$smsData) {
                 throw new NotFoundHttpException('Not found smsData', 11);
@@ -931,7 +932,14 @@ class CommunicationController extends ApiBaseController
             }
 
 
+
             $sms = Sms::findOne(['s_tw_message_sid' => $smsData['sid']]);
+
+            if(!$sms) {
+                $sms = Sms::findOne(['s_communication_id' => $comId]);
+            }
+
+
             if($sms) {
 
                 if(isset($smsData['price'])) {
@@ -957,7 +965,7 @@ class CommunicationController extends ApiBaseController
                 $response['sms'] = $sms->attributes;
 
             } else {
-                $response['error'] = 'Not found SMS message_sid ('.$smsData['sid'].')';
+                $response['error'] = 'Not found SMS message_sid ('.$smsData['sid'].') and not found CommId ('.$comId.')';
                 $response['error_code'] = 13;
             }
 
