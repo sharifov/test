@@ -40,12 +40,14 @@ $this->params['breadcrumbs'][] = $this->title;
         'filterModel' => $searchModel,
         'tableOptions' => ['class' => 'table table-bordered table-condensed table-hover'],
         'rowOptions' => function (\common\models\Sms $model, $index, $widget, $grid) {
-            if ($model->s_status_id == \common\models\Sms::STATUS_ERROR) {
-                return ['class' => 'danger'];
-            } elseif ($model->s_status_id == \common\models\Sms::STATUS_PROCESS) {
-                return ['class' => 'warning'];
-            } elseif ($model->s_status_id == \common\models\Sms::STATUS_DONE) {
-                return ['class' => 'success'];
+            if($model->s_type_id == \common\models\Sms::TYPE_OUTBOX) {
+                if ($model->s_status_id == \common\models\Sms::STATUS_ERROR) {
+                    return ['class' => 'danger'];
+                } elseif ($model->s_status_id == \common\models\Sms::STATUS_PROCESS) {
+                    return ['class' => 'warning'];
+                } elseif ($model->s_status_id == \common\models\Sms::STATUS_DONE) {
+                    return ['class' => 'success'];
+                }
             }
         },
         'columns' => [
