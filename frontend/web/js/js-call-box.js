@@ -75,5 +75,32 @@ function hideCallBox(hide) {
     }
 }
 
+var tProgress = 0;
+
+function inProgressStart() {
+    tProgress = 1;
+    inProgressGo();
+}
+
+function inProgressGo() {
+    var i, n, s = '';
+    for (i = 0; i < 10; i++) {
+        n = Math.floor(Math.sin((Date.now()/200) + (i/2)) * 4) + 4;
+        s += String.fromCharCode(0x2581 + n);
+    }
+
+    if(tProgress > 0) {
+        window.location.hash = s;
+        setTimeout(inProgressGo, 50);
+    } else {
+        window.location.hash = '';
+    }
+}
+
+function inProgressStop() {
+    tProgress = 0;
+    window.location.hash = '';
+}
+
 //toggleFab();
 hideCallBox(0);
