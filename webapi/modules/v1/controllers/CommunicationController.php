@@ -835,6 +835,41 @@ class CommunicationController extends ApiBaseController
      */
     private function updateSmsStatus()
     {
+
+        /*
+         * [
+                'sq_id' => '257'
+                'sq_status_id' => '5'
+                'sq_project_id' => '6'
+                'sq_num_segments' => '2'
+                'sms' => [
+                    'sq_id' => '257'
+                    'sq_project_id' => '6'
+                    'sq_phone_from' => '+15596489977'
+                    'sq_phone_to' => '+37360368365'
+                    'sq_sms_text' => 'WOWFARE best price (per adult) to London:'
+                    'sq_sms_data' => '{\"project_id\":\"6\"}'
+                    'sq_type_id' => '2'
+                    'sq_language_id' => 'en-US'
+                    'sq_job_id' => '9058'
+                    'sq_priority' => '2'
+                    'sq_status_id' => '5'
+                    'sq_delay' => '0'
+                    'sq_status_done_dt' => '2019-02-08 09:25:16'
+                    'sq_tw_message_id' => 'SM591824e067f7459e9da3134dd8fe5b77'
+                    'sq_tw_num_segments' => '2'
+                    'sq_tw_status' => 'queued'
+                    'sq_tw_uri' => '/2010-04-01/Accounts/AC10f3c74efba7b492cbd7dca86077736c/Messages/SM591824e067f7459e9da3134dd8fe5b77.json'
+                    'sq_created_api_user_id' => '8'
+                    'sq_created_dt' => '2019-02-08 09:25:15'
+                    'sq_updated_dt' => '2019-02-08 09:25:16'
+                ]
+                'action' => 'update'
+                'type' => 'update_sms_status'
+            ]
+         */
+
+
         $sq_id = (int) Yii::$app->request->post('sq_id');
         $sq_status_id = (int) Yii::$app->request->post('sq_status_id');
 
@@ -856,7 +891,19 @@ class CommunicationController extends ApiBaseController
                 throw new NotFoundHttpException('Not found sq_status_id', 12);
             }
 
-            $sms = Sms::findOne(['s_communication_id' => $sq_id]);
+            $sid =  $smsParams['sq_tw_message_id'] ?? null;
+
+            $sms = null;
+
+            if($sid) {
+                $sms = Sms::findOne(['sq_tw_message_id' => $sid]);
+            }
+
+            if(!$sms) {
+                $sms = Sms::findOne(['s_communication_id' => $sq_id]);
+            }
+
+
             if($sms) {
 
                 if($sq_status_id > 0) {
@@ -864,7 +911,6 @@ class CommunicationController extends ApiBaseController
                     if($sq_status_id === Sms::STATUS_DONE) {
                         $sms->s_status_done_dt = date('Y-m-d H:i:s');
                     }
-
 
                     if($smsParams) {
                         if(isset($smsParams['sq_tw_price']) && $smsParams['sq_tw_price']) {
@@ -874,6 +920,15 @@ class CommunicationController extends ApiBaseController
                         if(isset($smsParams['sq_tw_num_segments']) && $smsParams['sq_tw_num_segments']) {
                             $sms->s_tw_num_segments = (int) $smsParams['sq_tw_num_segments'];
                         }
+
+                        if(isset($smsParams['sq_tw_status']) && $smsParams['sq_tw_status']) {
+                            $sms->s_error_message = 'status: ' .  $smsParams['sq_tw_status'];
+                        }
+
+                        if(!$sms->s_tw_message_sid && isset($smsParams['sq_tw_message_id']) && $smsParams['sq_tw_message_id']) {
+                            $sms->s_tw_message_sid = $smsParams['sq_tw_message_id'];
+                        }
+
                     }
 
                     if(!$sms->save()) {
@@ -883,7 +938,7 @@ class CommunicationController extends ApiBaseController
 
                 $response['sms'] = $sms->s_id;
             } else {
-                $response['error'] = 'Not found Communication ID ('.$sq_id.')';
+                $response['error'] = 'Not found SMS ID ('.$sq_id.')';
                 $response['error_code'] = 13;
             }
 
