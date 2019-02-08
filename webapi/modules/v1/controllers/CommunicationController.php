@@ -1185,7 +1185,7 @@ class CommunicationController extends ApiBaseController
 
                     $sms->s_status_done_dt = isset($smsItem['si_sent_dt']) ? date('Y-m-d H:i:s', strtotime($smsItem['si_sent_dt'])) : null;
 
-                    $sms->s_communication_id = $smsItem['si_id'] ?? null;
+                    //$sms->s_communication_id = $smsItem['si_id'] ?? null;
 
                     $sms->s_phone_to = $smsItem['si_phone_to'];
                     $sms->s_phone_from = $smsItem['si_phone_from'];
@@ -1205,6 +1205,7 @@ class CommunicationController extends ApiBaseController
                     $sms->s_tw_from_city = $smsItem['si_from_city'] ?? null;
                     $sms->s_tw_from_state = $smsItem['si_from_state'] ?? null;
                     $sms->s_tw_from_zip = $smsItem['si_from_zip'] ?? null;
+
 
                     $lead_id = $sms->detectLeadId();
 
