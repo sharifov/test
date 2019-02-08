@@ -329,6 +329,11 @@ class Sms extends \yii\db\ActiveRecord
                 $this->s_communication_id   = $request['data']['sq_id'];
 
                 $this->s_tw_message_sid     = $request['data']['sq_tw_message_id'] ?? null;
+
+                if(!$this->s_tw_message_sid) {
+                    Yii::warning('Not init s_tw_message_sid, comId: '. $this->s_communication_id, 'sendSms:s_tw_message_sid' );
+                }
+
                 $this->s_tw_num_segments    = $request['data']['sq_tw_num_segments'] ?? null;
                 $this->s_tw_account_sid     = $request['data']['sq_tw_account_sid'] ?? null;
                 $this->s_tw_price           = $request['data']['sq_tw_price'] ?? null;

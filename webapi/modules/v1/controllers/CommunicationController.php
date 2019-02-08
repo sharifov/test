@@ -846,6 +846,8 @@ class CommunicationController extends ApiBaseController
 
         try {
 
+            Yii::info(VarDumper::dumpAsString(Yii::$app->request->post()), 'info\updateSmsStatus');
+
             if(!$sq_id) {
                 throw new NotFoundHttpException('Not found sq_id', 11);
             }
