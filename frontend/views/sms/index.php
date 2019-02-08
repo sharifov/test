@@ -23,13 +23,13 @@ $this->params['breadcrumbs'][] = $this->title;
                     <?= Html::a('Create Sms', ['create'], ['class' => 'btn btn-success']) ?>
                 </p>
             </div>
-            <div class="col-md-9">
+            <?php /*<div class="col-md-9">
                 <?php
                 echo $this->render('_inboxform', [
                     'model' => $inboxModel
                 ]);
                 ?>
-            </div>
+            </div>*/ ?>
         </div>
     </div>
     <?php endif; ?>

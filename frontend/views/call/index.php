@@ -25,23 +25,30 @@ $this->params['breadcrumbs'][] = $this->title;
         'filterModel' => $searchModel,
         'tableOptions' => ['class' => 'table table-bordered table-condensed table-hover'],
         'rowOptions' => function (\common\models\Call $model, $index, $widget, $grid) {
-            if ($model->c_call_status === \common\models\Call::CALL_STATUS_BUSY) {
-                return ['class' => 'danger'];
-            } elseif ($model->c_call_status === \common\models\Call::CALL_STATUS_RINGING || $model->c_call_status === \common\models\Call::CALL_STATUS_QUEUE) {
-                return ['class' => 'warning'];
-            } elseif ($model->c_call_status === \common\models\Call::CALL_STATUS_COMPLETED) {
-                return ['class' => 'success'];
+            if($model->c_call_type_id == \common\models\Call::CALL_TYPE_OUT) {
+                if ($model->c_call_status === \common\models\Call::CALL_STATUS_BUSY) {
+                    return ['class' => 'danger'];
+                } elseif ($model->c_call_status === \common\models\Call::CALL_STATUS_RINGING || $model->c_call_status === \common\models\Call::CALL_STATUS_QUEUE) {
+                    return ['class' => 'warning'];
+                } elseif ($model->c_call_status === \common\models\Call::CALL_STATUS_COMPLETED) {
+                    return ['class' => 'success'];
+                }
             }
         },
         'columns' => [
             //['class' => 'yii\grid\SerialColumn'],
-            'c_id',
+            [
+                'attribute' => 'c_id',
+                'value' => function (\common\models\Call $model) {
+                    return $model->c_id;
+                },
+                'options' => ['style' => 'width: 80px']
+            ],
             ['class' => 'yii\grid\ActionColumn'],
             'c_is_new:boolean',
             'c_com_call_id',
             'c_call_sid',
             //'c_account_sid',
-            //'c_call_type_id',
 
             [
                 'attribute' => 'c_call_type_id',
@@ -81,13 +88,6 @@ $this->params['breadcrumbs'][] = $this->title;
                 'filter' => \common\models\Call::CALL_STATUS_LIST
             ],
 
-            [
-                'attribute' => 'c_call_type_id',
-                'value' => function (\common\models\Call $model) {
-                    return $model->getCallTypeName();
-                },
-                'filter' => \common\models\Call::CALL_TYPE_LIST
-            ],
 
             //'c_api_version',
             //'c_direction',
@@ -123,7 +123,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'c_recording_duration',
             //'c_timestamp',
             //'c_uri',
-            'c_sequence_number',
+            //'c_sequence_number',
 
             //'c_created_user_id',
 
