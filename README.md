@@ -66,6 +66,13 @@ Migration (RBAC + LOG):
 ./yii migrate
 ```
 
+Create MySQL Dump:
+```
+mysqldump -v -u sale -p sale | gzip > `date +/var/www/backups/sql.%Y%m%d.gz`
+
+gunzip < /path/to/outputfile.sql.gz | mysql -v -u USER -pPASSWORD DATABASE
+```
+
 
 
 Prod Hosts:

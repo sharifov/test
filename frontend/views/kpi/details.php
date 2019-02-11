@@ -34,23 +34,24 @@ $this->params['breadcrumbs'][] = $this->title;
         [
             'attribute' => 'id',
             'label' => 'Lead ID',
-        ],
-        [
-            'label' => 'Profit',
             'value' => function (\common\models\Lead $model) {
-                $totalProfitTxt = '';
+                return Html::a($model->id, ['lead/view', 'id' => $model->id, ['data-pjax' => 0, 'target' => '_blank']]);
+            },
+            'format' => 'raw'
+        ],
+
+        [
+            'label' => 'Final Profit',
+            'value' => function (\common\models\Lead $model) {
+
                 if ($model->final_profit !== null) {
                     $model->totalProfit = $model->final_profit;
-                    $totalProfitTxt = "<strong>$" . number_format($model->final_profit, 2) . "</strong>";
-                }else{
-                    $quote = $model->getBookedQuote();
-                    if (empty($quote)) {
-                        $totalProfitTxt = "<strong>$" . number_format(0, 2) . "</strong>";
-                    }else{
-                        $model->totalProfit = $quote->getEstimationProfit();
-                        $totalProfitTxt = "<strong>$" . number_format($model->totalProfit, 2) . "</strong>";
-                    }
+                    $totalProfitTxt = $model->final_profit;
+                } else {
+                    $totalProfitTxt = 0;
                 }
+
+                $totalProfitTxt = '<strong>$' .number_format($totalProfitTxt, 2) . '</strong>';
 
                 $splitProfitTxt = '';
                 $splitProfit = $model->getAllProfitSplits();
@@ -67,14 +68,61 @@ $this->params['breadcrumbs'][] = $this->title;
                 if ($model->splitProfitPercentSum > 0) {
                     $mainAgentPercent -= $model->splitProfitPercentSum;
                 }
-                $mainAgentProfitTxt = "<strong>$" . number_format($model->totalProfit * $mainAgentPercent / 100, 2) . "</strong>";
+                $mainAgentProfitTxt = $model->totalProfit * $mainAgentPercent / 100;
 
-                return 'Total profit: '.$totalProfitTxt.(($splitProfitTxt)?'<hr/>Split profit:<br/>'.$splitProfitTxt:'').
-                '<hr/> '.(($model->employee)?$model->employee->username:'Main agent').' profit: '.$mainAgentProfitTxt;
+                return 'Total profit: '.$totalProfitTxt .
+                    (($splitProfitTxt)?'<hr/>Split profit:<br/>'.$splitProfitTxt:'')
+                    .'<br/> '
+                    .(($model->employee)?$model->employee->username : 'Main agent')
+                    .' profit - <strong>$' . number_format($mainAgentProfitTxt, 2) . '</strong>';
 
             },
             'format' => 'raw'
         ],
+
+        [
+            'label' => 'Dynamic Profit',
+            'value' => function (\common\models\Lead $model) {
+
+
+                $quote = $model->getBookedQuote();
+                if (empty($quote)) {
+                    $totalProfitTxt = 0;
+                }else{
+                    $model->totalProfit = $quote->getEstimationProfit();
+                    $totalProfitTxt = $model->totalProfit;
+                }
+
+
+                $totalProfitTxt = '<strong>$' .number_format($totalProfitTxt, 2) . '</strong>';
+
+                $splitProfitTxt = '';
+                $splitProfit = $model->getAllProfitSplits();
+                $return = [];
+                foreach ($splitProfit as $split) {
+                    $model->splitProfitPercentSum += $split->ps_percent;
+                    $return[] = '<b>' . $split->psUser->username . '</b> (' . $split->ps_percent . '%) $' . number_format($split->countProfit($model->totalProfit), 2);
+                }
+                if (!empty($return)) {
+                    $splitProfitTxt = implode('<br/>', $return);
+                }
+
+                $mainAgentPercent = 100;
+                if ($model->splitProfitPercentSum > 0) {
+                    $mainAgentPercent -= $model->splitProfitPercentSum;
+                }
+                $mainAgentProfitTxt = $model->totalProfit * $mainAgentPercent / 100;
+
+                return 'Total profit: '.$totalProfitTxt .
+                    ($splitProfitTxt ? '<hr/>Split profit:<br/>'.$splitProfitTxt : '')
+                    .'<br/> '
+                    .($model->employee ? $model->employee->username : 'Main agent')
+                    .' profit - <strong>$' . number_format($mainAgentProfitTxt, 2) . '</strong>';
+
+            },
+            'format' => 'raw'
+        ],
+
         [
             'label' => 'Tips',
             'value' => function (\common\models\Lead $model) {
@@ -100,8 +148,8 @@ $this->params['breadcrumbs'][] = $this->title;
                 }
                 $mainAgentTipsTxt = "<strong>$" . number_format($model->totalTips * $mainAgentPercent / 100, 2) . "</strong>";
 
-                return 'Tips: '.$totalTipsTxt.(($splitTipsTxt)?'<hr/>Split tips:<br/>'.$splitTipsTxt:'').'<hr/> '.
-                    (($model->employee)?$model->employee->username:'Main agent').' tips: '.$mainAgentTipsTxt;
+                return 'Tips: '.$totalTipsTxt . ($splitTipsTxt ? '<hr/>Split tips:<br/>'.$splitTipsTxt:'').'<hr/> '.
+                    ($model->employee ? $model->employee->username : 'Main agent').' tips: '.$mainAgentTipsTxt;
             },
             'format' => 'raw'
         ],
@@ -146,7 +194,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'template' => '{action}',
             'buttons' => [
                 'action' => function ($url, $model, $key) {
-                return Html::a('<i class="fa fa-search"></i>', ['lead/view', 'id' => $model->id], [
+                return Html::a('<i class="fa fa-search"></i> View Lead', ['lead/view', 'id' => $model->id], [
                     'class' => 'btn btn-info btn-xs',
                     'target' => '_blank',
                     'data-pjax' => 0,
