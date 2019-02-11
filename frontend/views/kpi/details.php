@@ -41,14 +41,23 @@ $this->params['breadcrumbs'][] = $this->title;
         ],
 
         [
-            'label' => 'Final Profit',
+            'label' => 'Profit',
             'value' => function (\common\models\Lead $model) {
 
                 if ($model->final_profit !== null) {
-                    $model->totalProfit = $model->final_profit;
-                    $totalProfitTxt = $model->final_profit;
+                    $model->totalProfit = $model->final_profit - 25;
+                    $totalProfitTxt = $model->final_profit - 25;
                 } else {
-                    $totalProfitTxt = 0;
+                    //$totalProfitTxt = 0;
+
+                    $quote = $model->getBookedQuote();
+                    if (empty($quote)) {
+                        $totalProfitTxt = 0;
+                    } else{
+                        $model->totalProfit = $quote->getEstimationProfit();
+                        $totalProfitTxt = $model->totalProfit;
+                    }
+
                 }
 
                 $totalProfitTxt = '<strong>$' .number_format($totalProfitTxt, 2) . '</strong>';
@@ -71,16 +80,16 @@ $this->params['breadcrumbs'][] = $this->title;
                 $mainAgentProfitTxt = $model->totalProfit * $mainAgentPercent / 100;
 
                 return 'Total profit: '.$totalProfitTxt .
-                    (($splitProfitTxt)?'<hr/>Split profit:<br/>'.$splitProfitTxt:'')
-                    .'<br/> '
-                    .(($model->employee)?$model->employee->username : 'Main agent')
-                    .' profit - <strong>$' . number_format($mainAgentProfitTxt, 2) . '</strong>';
+                    ($splitProfitTxt ? '<hr/>Split profit:<br/>'.$splitProfitTxt : '')
+                    .'<hr/> '
+                    .($model->employee ? $model->employee->username : 'Main agent')
+                    .' profit: <strong>$' . number_format($mainAgentProfitTxt, 2) . '</strong>';
 
             },
             'format' => 'raw'
         ],
 
-        [
+        /*[
             'label' => 'Dynamic Profit',
             'value' => function (\common\models\Lead $model) {
 
@@ -121,7 +130,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
             },
             'format' => 'raw'
-        ],
+        ],*/
 
         [
             'label' => 'Tips',
