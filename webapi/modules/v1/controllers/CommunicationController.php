@@ -896,7 +896,7 @@ class CommunicationController extends ApiBaseController
             $sms = null;
 
             if($sid) {
-                $sms = Sms::findOne(['sq_tw_message_id' => $sid]);
+                $sms = Sms::findOne(['s_tw_message_sid' => $sid]);
             }
 
             if(!$sms) {
