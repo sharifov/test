@@ -222,6 +222,8 @@ if($clientPhone && $client = $clientPhone->client) {
                 $('#btn-client-details').data('client-id', obj.client_id).show();
             }
 
+            inProgressStart();
+
             /*
             $('#call_count_calls').text(obj.client_count_calls);
             $('#call_count_sms').text(obj.client_count_sms);
@@ -234,6 +236,8 @@ if($clientPhone && $client = $clientPhone->client) {
             if ($('.fab').hasClass('is-visible')) {
                 toggleFab();
             }
+
+            inProgressStop();
         }
 
         $('#call_box_call_status').text(obj.status + ' ...');

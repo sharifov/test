@@ -121,7 +121,7 @@ class ClientPhone extends \yii\db\ActiveRecord
     {
         if($this->id > 0 && $this->client_id > 0 ) {
             $isRenewPhoneNumber = ( $this->old_phone != '' && $this->old_phone !== $this->phone );
-            \Yii::info(VarDumper::dumpAsString([
+            /*\Yii::info(VarDumper::dumpAsString([
                 'client_id' => $this->client_id,
                 'id' => $this->id,
                 'validate_dt' => $this->validate_dt,
@@ -129,7 +129,8 @@ class ClientPhone extends \yii\db\ActiveRecord
                 'old_phone' => $this->old_phone,
                 'phone' => $this->phone,
                 'isRenewPhoneNumber' => $isRenewPhoneNumber,
-            ]), 'info\model:ClientPhone:afterSave');
+            ]), 'info\model:ClientPhone:afterSave');*/
+
             // check if phone rewrite
             if(NULL === $this->validate_dt || $isRenewPhoneNumber) {
                 /** @var Queue $queue */

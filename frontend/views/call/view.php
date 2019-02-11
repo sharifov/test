@@ -120,7 +120,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'c_price',
                 'value' => function (\common\models\Call $model) {
-                    return $model->c_price ? Yii::$app->formatter->asCurrency($model->c_price) : '-';
+                    return $model->c_price ? '$'.number_format($model->c_price, 5) : '-';
                 },
             ],
         ],

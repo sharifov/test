@@ -23,13 +23,13 @@ $this->params['breadcrumbs'][] = $this->title;
                     <?= Html::a('Create Sms', ['create'], ['class' => 'btn btn-success']) ?>
                 </p>
             </div>
-            <div class="col-md-9">
+            <?php /*<div class="col-md-9">
                 <?php
                 echo $this->render('_inboxform', [
                     'model' => $inboxModel
                 ]);
                 ?>
-            </div>
+            </div>*/ ?>
         </div>
     </div>
     <?php endif; ?>
@@ -40,12 +40,14 @@ $this->params['breadcrumbs'][] = $this->title;
         'filterModel' => $searchModel,
         'tableOptions' => ['class' => 'table table-bordered table-condensed table-hover'],
         'rowOptions' => function (\common\models\Sms $model, $index, $widget, $grid) {
-            if ($model->s_status_id == \common\models\Sms::STATUS_ERROR) {
-                return ['class' => 'danger'];
-            } elseif ($model->s_status_id == \common\models\Sms::STATUS_PROCESS) {
-                return ['class' => 'warning'];
-            } elseif ($model->s_status_id == \common\models\Sms::STATUS_DONE) {
-                return ['class' => 'success'];
+            if($model->s_type_id == \common\models\Sms::TYPE_OUTBOX) {
+                if ($model->s_status_id == \common\models\Sms::STATUS_ERROR) {
+                    return ['class' => 'danger'];
+                } elseif ($model->s_status_id == \common\models\Sms::STATUS_PROCESS) {
+                    return ['class' => 'warning'];
+                } elseif ($model->s_status_id == \common\models\Sms::STATUS_DONE) {
+                    return ['class' => 'success'];
+                }
             }
         },
         'columns' => [
@@ -60,14 +62,14 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
 
             //'s_is_new:boolean',
-
+            's_tw_message_sid',
 
             [
                 'attribute' => 's_type_id',
                 'value' => function (\common\models\Sms $model) {
                     return $model->getTypeName();
                 },
-                'filter' => \common\models\Sms::FILTER_TYPE_LIST
+                'filter' => \common\models\Sms::TYPE_LIST
             ],
 
             [
@@ -120,13 +122,13 @@ $this->params['breadcrumbs'][] = $this->title;
             //'s_type_id',
             //'s_template_type_id',
             //'s_language_id',
-            [
+            /*[
                 'attribute' => 's_language_id',
                 'value' => function (\common\models\Sms $model) {
                     return $model->s_language_id;
                 },
                 'filter' => \lajax\translatemanager\models\Language::getLanguageNames()
-            ],
+            ],*/
             //'s_communication_id',
             [
                     'label' => 'Comm Id',
