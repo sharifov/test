@@ -93,7 +93,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 $dateTS = strtotime($date);
 
                 $diffTime = time() - $dateTS;
-                $diffHours = (int) ($diffTime / (60 * 24));
+                $diffHours = (int) ($diffTime / (60 * 60));
 
                 return ($diffHours > 3 && $diffHours < 73 ) ? $diffHours.' hours' : Yii::$app->formatter->asRelativeTime($dateTS);
 
