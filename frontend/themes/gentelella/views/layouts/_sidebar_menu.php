@@ -70,26 +70,54 @@ $isCoach = Yii::$app->authManager->getAssignment('coach', Yii::$app->user->id);
                 ];
 
                 $menuItems[] = ['label' => 'My Mails <span id="email-inbox-queue" class="label-info label pull-right"></span> ', 'url' => ['/email/inbox'], 'icon' => 'envelope'];
+
+            }
+
+
+
+            $sipExist = \common\models\UserProjectParams::find()->where(['upp_user_id' => Yii::$app->user->id])->andWhere(['AND', ['IS NOT', 'upp_tw_sip_id', null], ['<>', 'upp_tw_sip_id', '']])->exists();
+            $smsExist = \common\models\UserProjectParams::find()->where(['upp_user_id' => Yii::$app->user->id])->andWhere(['AND', ['IS NOT', 'upp_tw_phone_number', null], ['<>', 'upp_tw_phone_number', '']])->exists();
+
+            if($smsExist) {
                 $menuItems[] = ['label' => 'My SMS <span id="sms-inbox-queue" class="label-info label pull-right"></span> ', 'url' => ['/sms/list'], 'icon' => 'comments'];
+            }
+
+            if($sipExist) {
+                $menuItems[] = ['label' => 'My Calls <span id="call-inbox-queue" class="label-info label pull-right"></span> ', 'url' => ['/call/list'], 'icon' => 'phone'];
             }
 
 
             if($isAdmin || $isSupervision) {
+
+                $items = [];
+                if($isAdmin) {
+                    $items =  [
+
+                        ['label' => 'All Notifications', 'url' => ['/notifications/index'], 'icon' => 'comment-o'],
+                        ['label' => 'Call List', 'url' => ['/call/index'], 'icon' => 'phone'],
+                        ['label' => 'SMS List', 'url' => ['/sms/index'], 'icon' => 'comments-o'],
+                        ['label' => 'Mail List', 'url' => ['/email/index'], 'icon' => 'envelope'],
+                        ['label' => 'User Call Statuses', 'url' => ['/user-call-status/index'], 'icon' => 'list'],
+
+                    ];
+                }
+
+                $items = array_merge($items, [
+                    ['label' => 'Flight Segments', 'url' => ['lead-flight-segment/index'], 'icon' => 'plane'],
+                    ['label' => 'Quote List', 'url' => ['quotes/index'], 'icon' => 'quora'],
+                    ['label' => 'Quote Price List', 'url' => ['quote-price/index'], 'icon' => 'dollar'],
+
+                    ['label' => 'Export Leads', 'url' => ['leads/export'], 'icon' => 'export'],
+                    ['label' => 'Duplicate Leads', 'url' => ['leads/duplicate'], 'icon' => 'copy'],
+                    ['label' => 'Stats Agents & Leads', 'url' => ['report/agents'], 'icon' => 'users'],
+                    ['label' => 'Lead Status History', 'url' => ['lead-flow/index'], 'icon' => 'list'],
+                ]);
+                
                 $menuItems[] = [
                     'label' => 'Additional',
                     'url' => 'javascript:',
                     'icon' => 'list',
-                    'items' => [
-                        ['label' => 'Flight Segments', 'url' => ['lead-flight-segment/index'], 'icon' => 'plane'],
-                        ['label' => 'Quote List', 'url' => ['quotes/index'], 'icon' => 'quora'],
-                        ['label' => 'Quote Price List', 'url' => ['quote-price/index'], 'icon' => 'dollar'],
-
-                        ['label' => 'Export Leads', 'url' => ['leads/export'], 'icon' => 'export'],
-                        ['label' => 'Duplicate Leads', 'url' => ['leads/duplicate'], 'icon' => 'copy'],
-                        ['label' => 'Stats Agents & Leads', 'url' => ['report/agents'], 'icon' => 'users'],
-                        ['label' => 'Lead Status History', 'url' => ['lead-flow/index'], 'icon' => 'list'],
-
-                    ]
+                    'items' => $items
                     //'linkOptions' => ['data-method' => 'post']
                 ];
             }
@@ -104,9 +132,6 @@ $isCoach = Yii::$app->authManager->getAssignment('coach', Yii::$app->user->id);
 
             if (!$isCoach) {
 
-                if($isAdmin) {
-                    $menuItems[] = ['label' => 'SMS inbox <span id="sms-inbox-queue" class="label-info label pull-right"></span> ', 'url' => ['/sms/index'], 'icon' => 'comments-o'];
-                }
                 $badges = \common\models\Lead::getBadgesSingleQuery();
 
                 $menuItems[] = ['label' => 'Inbox <span id="inbox-queue" class="label-info label pull-right">' . $badges['inbox'] . '</span> ', 'url' => ['queue/inbox'], 'icon' => 'briefcase'];
@@ -132,7 +157,6 @@ $isCoach = Yii::$app->authManager->getAssignment('coach', Yii::$app->user->id);
 
             if($isAdmin) {
 
-                $menuItems[] = ['label' => 'Mails <span id="inbox-queue" class="label-info label pull-right"></span> ', 'url' => ['/email/index'], 'icon' => 'envelope'];
 
                 $menuItems[] = [
                     'label' => 'Users',
@@ -140,6 +164,8 @@ $isCoach = Yii::$app->authManager->getAssignment('coach', Yii::$app->user->id);
                     'icon' => 'user',
                     'items' => [
                         ['label' => 'User Connections', 'url' => ['/user-connection/index'], 'icon' => 'plug'],
+                        ['label' => 'User Stats', 'url' => ['/user-connection/stats'], 'icon' => 'area-chart'],
+                        ['label' => 'Call User Map', 'url' => ['/call/user-map'], 'icon' => 'list'],
                         ['label' => 'Users', 'url' => ['employee/list'], 'icon' => 'user'],
                         ['label' => 'User Groups', 'url' => ['user-group/index'], 'icon' => 'users'],
                         ['label' => 'User Groups Assignments', 'url' => ['user-group-assign/index'], 'icon' => 'users'],
@@ -148,13 +174,26 @@ $isCoach = Yii::$app->authManager->getAssignment('coach', Yii::$app->user->id);
                     ]
                     //'linkOptions' => ['data-method' => 'post']
                 ];
-                $menuItems[] = ['label' => 'Clients', 'url' => ['/client/index'], 'icon' => 'users'];
+
+                //$menuItems[] = ['label' => 'Clients', 'url' => ['/client/index'], 'icon' => 'users'];
+                $menuItems[] = [
+                    'label' => 'Clients',
+                    'url' => 'javascript:',
+                    'icon' => 'users',
+                    'items' =>  [
+
+                        ['label' => 'Clients', 'url' => ['/client/index'], 'icon' => 'users'],
+                        ['label' => 'Clients phones', 'url' => ['/client-phone'], 'icon' => 'phone'],
+                    ]
+                ];
+
 
                 $menuItems[] = [
                     'label' => 'Data Settings',
                     'url' => 'javascript:',
                     'icon' => 'list',
                     'items' =>  [
+
                         ['label' => 'Projects', 'url' => ['/settings/projects'], 'icon' => 'product-hunt'],
                         ['label' => 'Airlines', 'url' => ['/settings/airlines'], 'icon' => 'plane'],
                         ['label' => 'Airports', 'url' => ['/settings/airports'], 'icon' => 'plane'],
@@ -164,7 +203,7 @@ $isCoach = Yii::$app->authManager->getAssignment('coach', Yii::$app->user->id);
                         ['label' => 'Lead Tasks', 'url' => ['lead-task/index'], 'icon' => 'list'],
                         ['label' => 'Email template types', 'url' => ['/email-template-type/index'], 'icon' => 'envelope-o'],
                         ['label' => 'SMS template types', 'url' => ['/sms-template-type/index'], 'icon' => 'comments-o'],
-                        ['label' => 'All Notifications', 'url' => ['/notifications/index'], 'icon' => 'comment-o'],
+
                     ]
                 ];
 

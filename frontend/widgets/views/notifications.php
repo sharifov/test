@@ -15,7 +15,7 @@
     </a>
 
     <ul id="menu1" class="dropdown-menu list-unstyled msg_list" role="menu">
-        <?
+        <?php
 
         $soundPlay = false;
 
@@ -62,7 +62,7 @@
                         nonblock: true
                     },*/
                     delay: 30000,
-                    hide: false
+                    hide: true
                 }).get().click(function(e) {
         
                 });
@@ -211,6 +211,8 @@ $js = <<<JS
             try {
                 var obj = JSON.parse(e.data); // $.parseJSON( e.data );
                 
+                console.log(obj);
+                
                 if (typeof obj.command !== 'undefined') {
                     
                     if(obj.command === 'getNewNotification') {
@@ -222,6 +224,24 @@ $js = <<<JS
                         updatePjaxNotify();
                         updateCommunication();
                     }
+                    
+                    if(obj.command === 'callUpdate') {
+                        callUpdate(obj);
+                    }
+                    
+                    if(obj.command === 'recordingUpdate') {
+                        updatePjaxNotify();
+                        updateCommunication();
+                    }
+                    
+                    if(obj.command === 'incomingCall') {
+                        incomingCall(obj);
+                    }
+                    
+                    if(obj.command === 'updateUserCallStatus') {
+                        updateUserCallStatus(obj);
+                    }
+                    
                 }
             } catch (error) {
                 console.error('Invalid JSON data');

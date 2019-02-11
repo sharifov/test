@@ -28,6 +28,7 @@ use common\components\SearchService;
  * @property string $trip_type
  * @property string $main_airline_code
  * @property string $reservation_dump
+ * @property string $pricing_info
  * @property int $status
  * @property boolean $check_payment
  * @property string $fare_type
@@ -98,6 +99,11 @@ class Quote extends \yii\db\ActiveRecord
         self::STATUS_SEND => 'status-send',
         self::STATUS_OPENED => 'status-opened'
     ];
+
+    public CONST
+        PASSENGER_ADULT = 'ADT',
+        PASSENGER_CHILD = 'CHD',
+        PASSENGER_INFANT = 'INF';
 
     public $itinerary = [];
     public $hasFreeBaggage = false;
@@ -333,11 +339,13 @@ class Quote extends \yii\db\ActiveRecord
     {
         return [
             [['uid', 'reservation_dump', 'main_airline_code'], 'required'],
-            [['lead_id', 'status', 'check_payment'], 'integer'],
+            [['lead_id', 'status' ], 'integer'],
+            [[ 'check_payment'], 'boolean'],
             [['created', 'updated', 'reservation_dump', 'created_by_seller', 'employee_name', 'employee_id', 'pcc', 'gds', 'last_ticket_date', 'service_fee_percent'], 'safe'],
             [['uid', 'record_locator', 'pcc', 'cabin', 'gds', 'trip_type', 'main_airline_code', 'fare_type'], 'string', 'max' => 255],
 
             [['reservation_dump'], 'checkReservationDump'],
+            [['pricing_info'], 'string'],
             [['status'], 'checkStatus'],
 
             [['employee_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['employee_id' => 'id']],
@@ -391,6 +399,8 @@ class Quote extends \yii\db\ActiveRecord
             'updated' => 'Updated',
             'last_ticket_date' => 'Last Ticket Date',
             'service_fee_percent' => 'Service Fee Percent',
+            'reservation_dump' => 'Reservation Dump',
+            'pricing_info' => 'Pricing info',
         ];
     }
 
@@ -1764,5 +1774,190 @@ class Quote extends \yii\db\ActiveRecord
             return true;
         }
         return false;
+    }
+
+    public function parsePriceDump($priceDump)
+    {
+        $explodeDump = explode("\n", $priceDump);
+        $priceRows = [];
+        $bagRows = [];
+        $validatingCarrierRow = '';
+        foreach ($explodeDump as $key => $row) {
+            $row = trim($row);
+            if (stripos($row, "«") !== false) {
+                continue;
+            }
+
+            if ((stripos($row, "JCB") !== false ||
+                stripos($row, "ADT") !== false ||
+                stripos($row, "PFA") !== false ||
+                stripos($row, "JNN") !== false ||
+                stripos($row, "CNN") !== false ||
+                stripos($row, "CBC") !== false ||
+                stripos($row, "JNF") !== false ||
+                stripos($row, "INF") !== false ||
+                stripos($row, "CBI") !== false) &&
+                stripos($row, "XT") !== false
+                ) {
+                    $priceRows[] = $row;
+                }
+
+                if (stripos($row, "VALIDATING CARRIER") !== false && empty($validatingCarrierRow)) {
+                    $row = str_replace("VALIDATING CARRIER - ", "", $row);
+                    $validating = explode(' ', $row);
+                    $validatingCarrierRow = $validating[0];
+                }
+
+                if (stripos($row, "BAG ALLOWANCE") !== false) {
+                    $bagRows[] = $this->getBagString($explodeDump, $key);
+                }
+        }
+
+        $prices = [];
+        foreach ($priceRows as $row) {
+            if (stripos($row, "JCB") !== false ||
+                stripos($row, "ADT") !== false ||
+                stripos($row, "PFA") !== false
+                ) {
+                    if (empty($prices[self::PASSENGER_ADULT])) {
+                        $prices[self::PASSENGER_ADULT] = $this->getPrice($row);
+                    }
+                } elseif (stripos($row, "JNN") !== false ||
+                    stripos($row, "CNN") !== false ||
+                    stripos($row, "CBC") !== false
+                    ) {
+                        if (empty($prices[self::PASSENGER_CHILD])) {
+                            $prices[self::PASSENGER_CHILD] = $this->getPrice($row);
+                        }
+                } elseif (stripos($row, "JNF") !== false ||
+                    stripos($row, "INF") !== false ||
+                    stripos($row, "CBI") !== false
+                    ) {
+                        if (empty($prices[self::PASSENGER_INFANT])) {
+                            $prices[self::PASSENGER_INFANT] = $this->getPrice($row);
+                        }
+                }
+        }
+
+
+        return [
+            'validating_carrier' => $validatingCarrierRow,
+            'prices' => $prices,
+            'baggage' => $bagRows
+        ];
+    }
+
+    private function getBagString($array, $index)
+    {
+        $bags = [];
+        foreach ($array as $key => $val) {
+            $val = trim($val);
+            if ($key < $index) {
+                continue;
+            }
+            $bags[] = $val;
+            if (stripos($val, "**") !== false) {
+                if (!isset($array[($key + 1)]) || stripos($array[($key + 1)], "2NDCHECKED") === false) {
+                    break;
+                }
+            }
+        }
+
+        $bagsString = explode('2NDCHECKED', trim(implode(' ', $bags)));
+        $bags = [
+            'segment' => '',
+            'free_baggage' => [],
+            'paid_baggage' => []
+        ];
+        foreach ($bagsString as $key => $val) {
+            $val = str_replace('*', '', $val);
+            $detail = explode('-', $val);
+            if (stripos($val, "BAG ALLOWANCE") !== false) {
+                $bags['segment'] = $detail[1];
+                if (stripos($val, "NIL/") !== false ||
+                    stripos($val, "*/") !== false
+                    ) {
+                        if (stripos($val, "1STCHECKED") !== false) {
+                            $bagsString = explode('1STCHECKED', $val);
+                            $detailBag = explode('/', $bagsString[1]);
+                            if (stripos($detailBag[0], "USD") !== false) {
+                                $bagItem = [
+                                    'ordinal' => '1st',
+                                    'piece' => 1,
+                                    'weight' => 'N/A',
+                                    'height' => 'N/A',
+                                    'price' => explode('-', $detailBag[0])[2],
+                                ];
+                                $detailVolume = explode('UP TO', $bagsString[1]);
+                                if (isset($detailVolume[1])) {
+                                    $bagItem['weight'] = trim(sprintf('UP TO%s', str_replace('AND', '', $detailVolume[1])));
+                                }
+                                if (isset($detailVolume[2])) {
+                                    $bagItem['height'] = trim(sprintf('UP TO%s', str_replace('AND', '', $detailVolume[2])));
+                                }
+                                $bags['paid_baggage'][] = $bagItem;
+                            }
+                        }
+                    } else {
+
+                        $detailBag = explode('/', $detail[2]);
+                        $bags['free_baggage'] = [
+                            'piece' => (int)str_replace('P', '', $detailBag[0]),
+                            'weight' => 'N/A',
+                            'height' => 'N/A',
+                            'price' => 'USD0'
+                        ];
+                        $detailVolume = explode('UP TO', $detail[2]);
+                        if (isset($detailVolume[1])) {
+                            $bags['free_baggage']['weight'] = trim(sprintf('UP TO%s', str_replace('AND', '', $detailVolume[1])));
+                        }
+                        if (isset($detailVolume[2])) {
+                            $bags['free_baggage']['height'] = trim(sprintf('UP TO%s', str_replace('AND', '', $detailVolume[2])));
+                        }
+                    }
+            } else {
+                $detailBag = explode('/', $detail[2]);
+                if (stripos($detailBag[0], "USD") !== false) {
+                    $bagItem = [
+                        'ordinal' => '2nd',
+                        'piece' => 1,
+                        'weight' => 'N/A',
+                        'height' => 'N/A',
+                        'price' => $detailBag[0],
+                    ];
+
+                    $detailVolume = explode('UP TO', $detail[2]);
+                    if (isset($detailVolume[1])) {
+                        $bagItem['weight'] = trim(sprintf('UP TO%s', str_replace('AND', '', $detailVolume[1])));
+                    }
+                    if (isset($detailVolume[2])) {
+                        $bagItem['height'] = trim(sprintf('UP TO%s', str_replace('AND', '', $detailVolume[2])));
+                    }
+                    $bags['paid_baggage'][] = $bagItem;
+                }
+
+            }
+        }
+        return $bags;
+    }
+
+    private function getPrice($string)
+    {
+        $arr = [
+            'fare' => 0,
+            'taxes' => 0,
+        ];
+        $rows = explode(' ', $string);
+        foreach ($rows as $row) {
+            if (stripos($row, "XT") !== false) {
+                $arr['taxes'] = (float)str_replace('XT', '', $row);
+            }
+        }
+        $lastRow = end($rows);
+        if (stripos($lastRow, "USD") !== false) {
+            $lastRow = str_replace('USD', '', $lastRow);
+            $arr['fare'] = (float)substr($lastRow, 0, -2) - $arr['taxes'];
+        }
+        return $arr;
     }
 }

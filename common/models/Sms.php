@@ -23,15 +23,15 @@ use yii\helpers\VarDumper;
  * @property int $s_template_type_id
  * @property string $s_language_id
  * @property int $s_communication_id
- * @property int $s_is_deleted
- * @property int $s_is_new
+ * @property bool $s_is_deleted
+ * @property bool $s_is_new
  * @property int $s_delay
  * @property int $s_priority
  * @property int $s_status_id
  * @property string $s_status_done_dt
  * @property string $s_read_dt
  * @property string $s_error_message
- * @property string $s_tw_price
+ * @property float $s_tw_price
  * @property string $s_tw_sent_dt
  * @property string $s_tw_account_sid
  * @property string $s_tw_message_sid
@@ -128,7 +128,8 @@ class Sms extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['s_reply_id', 's_lead_id', 's_project_id', 's_type_id', 's_template_type_id', 's_communication_id', 's_is_deleted', 's_is_new', 's_delay', 's_priority', 's_status_id', 's_tw_num_segments', 's_created_user_id', 's_updated_user_id'], 'integer'],
+            [['s_reply_id', 's_lead_id', 's_project_id', 's_type_id', 's_template_type_id', 's_communication_id', 's_delay', 's_priority', 's_status_id', 's_tw_num_segments', 's_created_user_id', 's_updated_user_id'], 'integer'],
+            [['s_is_new', 's_is_deleted'], 'boolean'],
             [['s_phone_from', 's_phone_to'], 'required'],
             [['s_sms_text', 's_sms_data'], 'string'],
             [['s_status_done_dt', 's_read_dt', 's_tw_sent_dt', 's_created_dt', 's_updated_dt'], 'safe'],
@@ -323,8 +324,45 @@ class Sms extends \yii\db\ActiveRecord
             $request = $communication->smsSend($this->s_project_id, $tplType, $this->s_phone_from, $this->s_phone_to, $content_data, $data, ($this->s_language_id ?: 'en-US'), 0);
 
             if($request && isset($request['data']['sq_status_id'])) {
-                $this->s_status_id = $request['data']['sq_status_id'];
-                $this->s_communication_id = $request['data']['sq_id'];
+
+                $this->s_status_id          = $request['data']['sq_status_id'];
+                $this->s_communication_id   = $request['data']['sq_id'];
+
+                $this->s_tw_message_sid     = $request['data']['sq_tw_message_id'] ?? null;
+
+                /*if(!$this->s_tw_message_sid) {
+                    Yii::warning('Not init s_tw_message_sid, comId: '. $this->s_communication_id, 'sendSms:s_tw_message_sid' );
+                }*/
+
+                $this->s_tw_num_segments    = $request['data']['sq_tw_num_segments'] ?? null;
+                $this->s_tw_account_sid     = $request['data']['sq_tw_account_sid'] ?? null;
+                $this->s_tw_price           = $request['data']['sq_tw_price'] ?? null;
+                $this->s_sms_data           = $request['data']['sq_sms_data'] ?? null;
+                $this->s_is_new             = false;
+
+                /**
+                 * @property int $sq_id
+                * @property int $sq_project_id
+                * @property string $sq_phone_from
+                * @property string $sq_phone_to
+                * @property string $sq_sms_text
+                * @property string $sq_sms_data
+                * @property int $sq_type_id
+                * @property string $sq_language_id
+                * @property int $sq_priority
+                * @property int $sq_status_id
+                * @property int $sq_delay
+                * @property string $sq_tw_message_id
+                * @property float $sq_tw_price
+                * @property int $sq_tw_num_segments
+                * @property string $sq_tw_sent_dt
+                * @property string $sq_tw_status
+                * @property string $sq_tw_uri
+                * @property string $sq_tw_account_sid
+                * @property int $sq_created_api_user_id
+                * @property string $sq_created_dt
+                 */
+
                 $this->save();
             }
 

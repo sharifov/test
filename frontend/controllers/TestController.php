@@ -4,15 +4,24 @@ namespace frontend\controllers;
 
 use common\components\CommunicationService;
 use common\components\CountEvent;
+use common\models\Call;
+use common\models\Employee;
 use common\models\Notifications;
+use common\models\Project;
+use common\models\UserCallStatus;
+use common\models\UserConnection;
+use common\models\UserGroupAssign;
 use common\models\UserProjectParams;
 use Yii;
+use yii\db\Expression;
+use yii\db\Query;
 use yii\helpers\ArrayHelper;
 use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
 use yii\helpers\VarDumper;
 use common\components\ReceiveEmailsJob;
 use yii\queue\Queue;
+use common\components\CheckPhoneNumberJob;
 
 
 /**
@@ -31,7 +40,7 @@ class TestController extends FController
                 'rules' => [
                     [
                         'allow' => true,
-                        'roles' => ['@'],
+                        //'roles' => ['@'],
                     ],
                 ],
             ],
@@ -243,5 +252,127 @@ class TestController extends FController
 
         return 'ok';
     }
+
+    public function actionCallTimer()
+    {
+
+        /*if ($vl->vl_call_status == 'initiated') {
+
+        } elseif($vl->vl_call_status == 'ringing') {
+
+        } elseif($vl->vl_call_status == 'in-progress') {
+
+        } elseif($vl->vl_call_status == 'busy') {
+
+        } elseif($vl->vl_call_status == 'completed') {
+            $call->c_call_duration = $vl->vl_call_duration;
+        }*/
+
+        $statuses = ['initiated', 'ringing', 'in-progress', 'completed'];
+        $lead_id = 54719;
+        $n = 0;
+        foreach ($statuses as $status) {
+            sleep(random_int(5, 7));
+            $n++;
+            Notifications::socket(null, $lead_id, 'callUpdate', ['status' => $status, 'duration' =>  ($status == 'completed' ? random_int(51, 180) : 0), 'snr' => $n], true);
+        }
+    }
+
+
+    public function actionIncomingCall()
+    {
+
+
+        /*if ($vl->vl_call_status == 'initiated') {
+
+        } elseif($vl->vl_call_status == 'ringing') {
+
+        } elseif($vl->vl_call_status == 'in-progress') {
+
+        } elseif($vl->vl_call_status == 'busy') {
+
+        } elseif($vl->vl_call_status == 'completed') {
+            $call->c_call_duration = $vl->vl_call_duration;
+        }*/
+
+        $statuses = ['initiated', 'ringing', 'in-progress', 'completed'];
+        $user_id = Yii::$app->user->id;
+        $n = 0;
+
+
+        $data = [];
+        $data['client_name'] = 'Alexandr Test';
+        $data['client_id'] = 345;
+        $data['client_phone'] = '+3738956478';
+        $data['last_lead_id'] = 34567;
+
+        foreach ($statuses as $status) {
+            sleep(random_int(3, 5));
+            $data['status'] = $status;
+            $n++;
+            Notifications::socket($user_id, $lead_id = null, 'incomingCall', $data, true);
+            echo '<br>'.$status;
+        }
+
+    }
+
+
+    public function actionQueryUser()
+    {
+        $user_id = Yii::$app->user->id;
+
+
+        //$sqlRaw = $query->createCommand()->getRawSql();
+        //$sqlRaw = $generalQuery->createCommand()->getRawSql();
+
+
+        //echo $sqlRaw;
+
+        //VarDumper::dump($sqlRaw, 10, true);
+        //exit;
+
+        //$users = Employee::getAgentsForCall($user_id, 8);
+
+        $projects = Project::find()->all();
+        foreach ($projects as $project) {
+            VarDumper::dump($project->contactInfo->phone, 10, true);
+        }
+
+
+        //VarDumper::dump($users, 10, true);
+    }
+
+    /*
+    public function actionLogin()
+    {
+        echo Yii::$app->user->id; exit;
+
+        $user_id = Yii::$app->request->get('id');
+        $user = Employee::findIdentity($user_id);
+        if($user) {
+            VarDumper::dump($user->attributes, 10, true);
+            //exit;
+            //Yii::$app->user->switchIdentity($user);
+
+            Yii::$app->user->logout();
+            if(!Yii::$app->user->login($user, 3600 * 24 * 30)) {
+                echo 'Not logined'; exit;
+            }
+
+
+
+            //$this->redirect(['site/index']);
+        }
+
+        //Yii::$app->user->login($user, $this->rememberMe ? 3600 * 24 * 30 : 0);
+
+        echo '--'.Yii::$app->user->id;
+
+        echo Yii::$app->user->id;
+
+        exit;
+
+        //$this->redirect(['site/index']);
+    }*/
 
 }

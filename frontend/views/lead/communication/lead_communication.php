@@ -6,6 +6,7 @@
  * @var $leadForm \frontend\models\LeadForm
  * @var $previewEmailForm \frontend\models\LeadPreviewEmailForm
  * @var $previewSmsForm \frontend\models\LeadPreviewSmsForm
+ * @var $isAdmin bool
  *
  */
 
@@ -189,6 +190,11 @@ $c_type_id = $comForm->c_type_id;
 
 
                     <div class="row">
+                        <div class="alert alert-info alert-dismissible" role="alert">
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                            <strong>Attention!</strong> Check the length of messages and try to use the minimum number of characters.
+                        </div>
+
                         <div class="col-sm-6 form-group">
                             <?= $form3->field($previewSmsForm, 's_phone_from')->textInput(['class' => 'form-control', 'maxlength' => true, 'readonly' => true]) ?>
                             <?//= $form3->field($previewSmsForm, 's_lead_id')->hiddenInput()->label(false); ?>
@@ -201,10 +207,19 @@ $c_type_id = $comForm->c_type_id;
                     </div>
 
                     <div class="form-group">
-                        <?= $form3->field($previewSmsForm, 's_sms_message')->textarea(['rows' => 4, 'class' => 'form-control', 'id' => 'email-message']) ?>
+                        <?= $form3->field($previewSmsForm, 's_sms_message')->textarea(['rows' => 6, 'class' => 'form-control', 'id' => 'preview-sms-message']) ?>
+                        <table class="table table-condensed table-responsive table-bordered" id="preview-sms-counter">
+                            <tr>
+                                <td>Length: <span class="length"></span></td>
+                                <td>Messages: <span class="messages"></span></td>
+                                <td>Per Message: <span class="per_message"></span></td>
+                                <td>Remaining: <span class="remaining"></span></td>
+                                <td>Encoding: <span class="encoding"></span></td>
+                            </tr>
+                        </table>
                     </div>
-                    <div class="btn-wrapper">
-                        <?= Html::submitButton('<i class="fa fa-envelope-o"></i> Send SMS', ['class' => 'btn btn-lg btn-primary']) ?>
+                    <div class="btn-wrapper text-center">
+                        <?= Html::submitButton('Send SMS <i class="fa fa-paper-plane"></i>', ['class' => 'btn btn-lg btn-primary']) ?>
                     </div>
 
                     <?php \yii\bootstrap\ActiveForm::end(); ?>
@@ -229,7 +244,7 @@ $c_type_id = $comForm->c_type_id;
                     $clientEmails = \yii\helpers\ArrayHelper::map($leadForm->getClientEmail(), 'email', 'email');
                     $clientEmails[Yii::$app->user->identity->email] = Yii::$app->user->identity->email;
 
-                    $clientPhones = \yii\helpers\ArrayHelper::map($leadForm->getClientPhone(), 'phone', 'phone');
+                    $clientPhones = $leadForm->getClient()->getPhoneNumbersSms(); //\yii\helpers\ArrayHelper::map($leadForm->getClientPhone(), 'phone', 'phone');
 
                     if(Yii::$app->session->hasFlash('send-success')) {
                         echo '<div class="alert alert-success alert-dismissible" role="alert"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>';
@@ -267,7 +282,7 @@ $c_type_id = $comForm->c_type_id;
 
                                         if ($tk == \frontend\models\CommunicationForm::TYPE_EMAIL) {
 
-                                            if ($agentParams->upp_email) {
+                                            if ($isAdmin && $agentParams->upp_email) {
                                                 $typeList[$tk] = $itemName . ' (' . $agentParams->upp_email . ')';
                                             }
                                         }
@@ -281,8 +296,9 @@ $c_type_id = $comForm->c_type_id;
 
                                         if ($tk == \frontend\models\CommunicationForm::TYPE_VOICE) {
 
+
                                             if ($agentParams->upp_tw_sip_id) {
-                                                $typeList[$tk] = $itemName . ' (' . $agentParams->upp_tw_sip_id . ')';
+                                                $typeList[$tk] = $itemName . ($isAdmin ? ' (' . $agentParams->upp_tw_sip_id . ')' : '');
                                             }
                                         }
                                     }
@@ -321,8 +337,19 @@ $c_type_id = $comForm->c_type_id;
                         </div>
                     </div>
                     <div id="sms-input-box" class="message-field-sms">
-                        <div class="form-group">
+                        <div class="form-group" id="sms-textarea-div">
                             <?= $form->field($comForm, 'c_sms_message')->textarea(['rows' => 4, 'class' => 'form-control', 'id' => 'sms-message']) ?>
+
+                            <table class="table table-condensed table-responsive table-bordered" id="sms-counter">
+                                <tr>
+                                    <td>Length: <span class="length"></span></td>
+                                    <td>Messages: <span class="messages"></span></td>
+                                    <td>Per Message: <span class="per_message"></span></td>
+                                    <td>Remaining: <span class="remaining"></span></td>
+                                    <td>Encoding: <span class="encoding"></span></td>
+                                </tr>
+                            </table>
+
                         </div>
                         <div class="btn-wrapper">
                             <?= Html::submitButton('<i class="fa fa-envelope-o"></i> Send SMS', ['class' => 'btn btn-lg btn-primary']) ?>
@@ -355,22 +382,57 @@ $c_type_id = $comForm->c_type_id;
                         </div>
                     </div>
                     <div class="chat__call call-box message-field-phone" id="call-box" style="display: none;">
+
                         <div class="call-box__interlocutor">
                             <div class="call-box__interlocutor-name"><?php echo Html::encode($leadForm->getClient()->first_name.' ' . $leadForm->getClient()->last_name); ?></div>
-                            <div class="call-box__interlocutor-number" id="div-call-phone-number">-</div>
+                            <div class="call-box__interlocutor-number" id="div-call-phone-number"><?=$comForm->c_phone_number?></div>
                         </div>
-                        <div class="call-box__img call-box__img--waiting">
+                        <div class="call-box__img <?=$comForm->c_voice_status == 1 ? 'call-box__img--waiting':''?>" id="div-call-img">
                             <?=Html::img('/img/user.png', ['class' => 'img-circle img-responsive', 'alt' => 'client'])?>
                         </div>
-                        <div class="call-box__status call-box__status--waiting hidden">Connection ...</div>
-                        <div class="call-box__status call-box__status--call"><i class="fa fa-clock-o"></i>&nbsp;<strong>2:05</strong></div>
+
+                            <div class="call-box__status call-box__status--waiting" style="display: block" id="div-call-message">
+                                <?php if($comForm->c_voice_status == 0):?>
+                                    Waiting
+                                <?php endif;?>
+                                <?php if($comForm->c_voice_status == 1):?>
+                                    Connection ... <?=$comForm->c_voice_sid?>
+                                <?php endif;?>
+                                <?php if($comForm->c_voice_status == 2):?>
+                                    Canceled Call
+                                <?php endif;?>
+                                <?php if($comForm->c_voice_status == 5):?>
+                                    Error Call
+                                <?php endif;?>
+                            </div>
+                        <?php if(1===1 || $comForm->c_voice_status == 1):?>
+                            <div class="call-box__status call-box__status--call" style="display: block" id="div-call-time"><i class="fa fa-clock-o"></i>&nbsp;<strong id="div-call-timer">00:00</strong></div>
+                        <?php endif;?>
                         <div class="call-box__btns">
                             <?//= Html::button('<i class="fa fa-microphone-slash"></i>', ['class' => 'btn call-box__btn call-box__btn--mute']) ?>
-                            <?= Html::submitButton('<i class="fa fa-phone"></i>', ['class' => 'btn call-box__btn call-box__btn--call']) ?>
-                            <?= Html::button('<i class="fa fa-pause"></i>', ['class' => 'btn call-box__btn call-box__btn--pause', 'disabled' => true]) ?>
+                            <?= Html::submitButton('<i class="fa fa-phone"></i>', ['class' => 'btn call-box__btn call-box__btn--call', 'id' => 'btn-start-call', 'disabled' => ($comForm->c_voice_status == 1 ? true : false), 'onclick' => '$("#c_voice_status").val(1)']) ?>
+                            <?/*= Html::button('<i class="fa fa-pause"></i>', ['class' => 'btn call-box__btn call-box__btn--pause', 'disabled' => true, 'id' => 'btn-pause'])*/ ?>
+                            <?= Html::submitButton('<i class="fa fa-stop"></i>', ['class' => 'btn call-box__btn call-box__btn--stop', 'disabled' => $comForm->c_voice_status == 1 ? false : true, 'id' => 'btn-stop-call', 'onclick' => '$("#c_voice_status").val(2)']) ?>
                         </div>
                     </div>
 
+                    <?= $form2->field($comForm, 'c_voice_status')->hiddenInput(['id' => 'c_voice_status'])->label(false); ?>
+                    <?= $form2->field($comForm, 'c_voice_sid')->hiddenInput(['id' => 'c_voice_sid'])->label(false); ?>
+                    <?= $form2->field($comForm, 'c_call_id')->hiddenInput(['id' => 'c_call_id'])->label(false); ?>
+
+
+
+                <?/*php if($comForm->c_voice_status === 1):?>
+                    <?php
+                    $js = "
+                        var previewPopup = $('#modal-email-preview');
+                        //previewPopup.find('.modal-body').html(data);
+                        previewPopup.modal('show');";
+
+                    $this->registerJs($js);
+
+                    ?>
+                <?php endif; */?>
 
 
                 <?php if($comForm->c_preview_email):?>
@@ -424,10 +486,13 @@ $js = <<<JS
             $('.message-field-phone').hide();
             $('.message-field-email').hide();
         }
+        
+        $('#c_sms_tpl_id').trigger('change');
+        $('#sms-message').countSms('#sms-counter');
+        $('#preview-sms-message').countSms('#preview-sms-counter');
+        
     }
-    
-          
-    
+        
 
     initializeMessageType($c_type_id);
     
@@ -467,13 +532,71 @@ $this->registerJs($js);
 ?>
 
 <script>
-    var currentUrl = '<?=$currentUrl?>';
+    const currentUrl = '<?=$currentUrl?>';
 
     function updateCommunication() {
         $.pjax.reload({url: currentUrl, container: '#pjax-lead-communication', push: false, replace: false, timeout: 6000});
     }
+
+    function stopCall(duration) {
+        $('#div-call-img').removeClass('call-box__img--waiting');
+        //$('#div-call-message').hide();
+        //$('#div-call-time').hide();
+        $('#btn-start-call').attr('disabled', false);
+        $('#btn-stop-call').attr('disabled', true);
+        stopCallTimer(duration);
+    }
+
+
+    function startCall() {
+
+        $('#div-call-img').addClass('call-box__img--waiting');
+        $('#div-call-message').show();
+        $('#div-call-time').show();
+        $('#btn-start-call').attr('disabled', true);
+        $('#btn-stop-call').attr('disabled', false);
+
+        //startCallTimer();
+    }
+
+
+    function callUpdate(obj) {
+        console.log(obj);
+        //status: "completed", duration: "1", snr: "3"
+        $('#div-call-message').html(obj.snr + ' - ' + obj.status);
+
+        if(obj.status == 'completed') {
+            stopCall(obj.duration); //updateCommunication();
+            updateCommunication();
+        } else if(obj.status == 'in-progress') {
+            startCallTimer();
+            //$('#div-call-timer').timer('resume');
+        } else if(obj.status == 'initiated') {
+            startCall();
+        } else if(obj.status == 'busy') {
+            stopCall(0);
+            updateCommunication();
+        } else if(obj.status == 'no-answer') {
+            stopCall(0);
+            updateCommunication();
+        }
+
+    }
+
+    function startCallTimer() {
+        $('#div-call-timer').timer('remove');
+        $('#div-call-timer').timer({format: '%M:%S', seconds: 0}).timer('start');
+    }
+
+    function stopCallTimer(sec) {
+        $('#div-call-timer').timer('remove');
+        $('#div-call-timer').timer({format: '%M:%S', seconds: sec}).timer('pause');
+    }
+
+
 </script>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/timer.jquery/0.9.0/timer.jquery.min.js"></script>
 
 <?php
 
@@ -486,6 +609,14 @@ $js = <<<JS
 
     $('body').on("change", '#c_phone_number', function () {
         $('#div-call-phone-number').text($(this).val());
+    });
+    
+    $('body').on("change", '#c_sms_tpl_id', function () {
+        if($(this).val() == 2) {
+            $('#sms-textarea-div').hide();
+        } else {
+            $('#sms-textarea-div').show();
+        }
     });
 
 
@@ -517,6 +648,30 @@ $js = <<<JS
         }
         $('#c_quotes').val(jsonQuotes);
     });
+    
+       
+    //startCallTimer();
+    
+    /*$('body').on('click', '#btn-start-call', function() {
+        $('#div-call-img').addClass('call-box__img--waiting');
+        $('#div-call-message').show();
+        $('#div-call-time').show();
+        $(this).attr('disabled', true);
+        $('#btn-stop-call').attr('disabled', false);
+        
+    });
+    
+    $('body').on('click', '#btn-stop-call', function() {
+        $('#div-call-img').removeClass('call-box__img--waiting');
+        
+        $('#div-call-message').hide();
+        $('#div-call-time').hide();
+        $(this).attr('disabled', true);
+        $('#btn-start-call').attr('disabled', false);
+    });*/
+    
+    
+    
     
     /*$('[data-toggle="tooltip"]').tooltip();
 

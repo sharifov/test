@@ -123,10 +123,15 @@ class ReceiveEmailsJob extends BaseObject implements \yii\queue\JobInterface
                         $lead_id = $email->detectLeadId();
                         $users = $email->getUsersIdByEmail();
 
+                        $user_id = 0;
                         if ($users) {
                             foreach ($users as $user_id) {
                                 $userArray[$user_id] = $user_id;
                             }
+                        }
+
+                        if($user_id > 0) {
+                            $email->e_created_user_id = $user_id;
                         }
 
                         if ($lead_id) {
@@ -150,7 +155,7 @@ class ReceiveEmailsJob extends BaseObject implements \yii\queue\JobInterface
                     $cicleCount--;
                     $accessEmailRequest = false;
                     if ($debug) {
-                        echo "Cicle finish" . PHP_EOL;
+                        echo 'Cicle finish' . PHP_EOL;
                     }
                 }
                 $cicleCount++;

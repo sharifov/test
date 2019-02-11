@@ -3,6 +3,7 @@
 namespace common\models\search;
 
 use common\models\ProjectEmployeeAccess;
+use common\models\UserConnection;
 use common\models\UserGroupAssign;
 use common\models\UserProjectParams;
 use Yii;
@@ -26,6 +27,8 @@ class EmployeeSearch extends Employee
     public $datetime_end;
     public $date_range;
 
+    public $online;
+
 
 
     /**
@@ -34,7 +37,7 @@ class EmployeeSearch extends Employee
     public function rules()
     {
         return [
-            [['id', 'status', 'acl_rules_activated', 'supervision_id', 'user_group_id', 'user_project_id', 'user_params_project_id'], 'integer'],
+            [['id', 'status', 'acl_rules_activated', 'supervision_id', 'user_group_id', 'user_project_id', 'user_params_project_id', 'online'], 'integer'],
             [['username', 'full_name', 'auth_key', 'password_hash', 'password_reset_token', 'email', 'last_activity', 'created_at', 'updated_at'], 'safe'],
             [['datetime_start', 'datetime_end'], 'safe'],
             [['date_range'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
@@ -67,7 +70,7 @@ class EmployeeSearch extends Employee
             'query' => $query,
             'sort'=> ['defaultOrder' => ['id' => SORT_DESC]],
             'pagination' => [
-                'pageSize' => 30,
+                'pageSize' => 40,
             ],
         ]);
 
@@ -108,6 +111,18 @@ class EmployeeSearch extends Employee
             $subQuery1 = UserGroupAssign::find()->select(['ugs_group_id'])->where(['ugs_user_id' => $this->supervision_id]);
             $subQuery = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->where(['IN', 'ugs_group_id', $subQuery1]);
             $query->andWhere(['IN', 'employees.id', $subQuery]);
+        }
+
+
+
+        if($this->online > 0) {
+            if($this->online == 1) {
+                $subQuery = UserConnection::find()->select(['DISTINCT(uc_user_id)']);
+                $query->andWhere(['IN', 'employees.id', $subQuery]);
+            } elseif($this->online == 2) {
+                $subQuery = UserConnection::find()->select(['DISTINCT(uc_user_id)']);
+                $query->andWhere(['NOT IN', 'employees.id', $subQuery]);
+            }
         }
 
         $query->andFilterWhere(['like', 'username', $this->username])

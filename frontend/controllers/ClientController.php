@@ -3,6 +3,7 @@
 namespace frontend\controllers;
 
 use common\models\Lead;
+use common\models\search\LeadSearch;
 use Yii;
 use common\models\Client;
 use common\models\search\ClientSearch;
@@ -35,12 +36,12 @@ class ClientController extends FController
                 'class' => AccessControl::class,
                 'rules' => [
                     [
-                        'actions' => ['index', 'update', 'view', 'delete', 'create', 'test'],
+                        'actions' => ['index', 'update', 'view', 'delete', 'create', 'test', 'ajax-get-info'],
                         'allow' => true,
                         'roles' => ['supervision'],
                     ],
                     [
-                        'actions' => ['index', 'view'],
+                        'actions' => ['index', 'view', 'ajax-get-info'],
                         'allow' => true,
                         'roles' => ['agent'],
                     ],
@@ -145,6 +146,40 @@ class ClientController extends FController
         }
 
         throw new NotFoundHttpException('The requested page does not exist.');
+    }
+
+    public function actionAjaxGetInfo()
+    {
+        $client_id = (int) Yii::$app->request->post('client_id');
+
+        $model = $this->findModel($client_id);
+
+        if(Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id)) {
+            $isAgent = true;
+        } else {
+            $isAgent = false;
+        }
+
+        $searchModel = new LeadSearch();
+
+        $params = Yii::$app->request->queryParams;
+
+        $params['LeadSearch']['client_id'] = $model->id;
+
+        if($isAgent) {
+            $dataProvider = $searchModel->searchAgent($params);
+        } else {
+            $dataProvider = $searchModel->search2($params);
+        }
+
+        $dataProvider->sort = false;
+
+        return $this->renderPartial('ajax_info', [
+            'model' => $model,
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+            'isAgent' => $isAgent
+        ]);
     }
 
 }

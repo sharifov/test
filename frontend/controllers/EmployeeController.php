@@ -35,6 +35,11 @@ class EmployeeController extends FController
                 'class' => AccessControl::class,
                 'rules' => [
                     [
+                        'actions' => ['switch'],
+                        'allow' => true,
+                        'roles' => ['admin'],
+                    ],
+                    [
                         'actions' => ['list', 'update', 'create', 'acl-rule'],
                         'allow' => true,
                         'roles' => ['supervision'],
@@ -416,4 +421,21 @@ class EmployeeController extends FController
             ]);
 
     }
+
+    public function actionSwitch()
+    {
+        $user_id = Yii::$app->request->get('id');
+        $user = Employee::findOne($user_id);
+        if($user) {
+            //VarDumper::dump($user->attributes, 10, true);
+            //exit;
+
+            if(!Yii::$app->user->login($user)) {
+                echo 'Not logined'; exit;
+            }
+            //$this->redirect(['site/index']);
+        }
+        $this->redirect(['site/index']);
+    }
+
 }

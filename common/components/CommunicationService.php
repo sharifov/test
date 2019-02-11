@@ -464,5 +464,77 @@ class CommunicationService extends Component
     }
 
 
+    /**
+     * @param int $project_id
+     * @param string $phone_from
+     * @param string $from_number
+     * @param string $phone_to
+     * @param string $from_name
+     * @param array $options
+     * @return array
+     * @throws \yii\httpclient\Exception
+     */
+    public function callToPhone(int $project_id, string $phone_from, string $from_number, string $phone_to, string $from_name = '', array $options = []) : array
+    {
+        $out = ['error' => false, 'data' => []];
+
+        $data['project_id'] = $project_id;
+        $data['voice']['from'] = $phone_from;
+        $data['voice']['to'] = $phone_to;
+        $data['voice']['from_number'] = $from_number;
+        $data['voice']['from_name'] = $from_name;
+
+        $data['voice']['options'] = $options; //['url'] = 'http://api-sales.dev.travelinsides.com/v1/twilio/request/?phone=+37369594567*/';
+
+
+        $response = $this->sendRequest('voice/call-to-phone', $data);
+
+        if ($response->isOk) {
+            if(isset($response->data['data']['response'])) {
+                $out['data'] = $response->data['data']['response'];
+            } else {
+                $out['error'] = 'Not found in response array data key [data][response]';
+            }
+        } else {
+            $out['error'] = $response->content;
+            \Yii::error(VarDumper::dumpAsString($out['error'], 10), 'Component:CommunicationService::callToPhone');
+        }
+
+        return $out;
+    }
+
+
+    /**
+     * @param string $sid
+     * @param array $updateData
+     * @return array
+     * @throws \yii\httpclient\Exception
+     */
+    public function updateCall(string $sid, array $updateData = []) : array
+    {
+        $out = ['error' => false, 'data' => []];
+
+        $data['sid'] = $sid;
+        $data['data'] = $updateData;
+
+        $response = $this->sendRequest('voice/update-call', $data);
+
+        if ($response->isOk) {
+            if(isset($response->data['data']['response'])) {
+                $out['data'] = $response->data['data']['response'];
+            } else {
+                $out['error'] = 'Not found in response array data key [data][response]';
+            }
+        } else {
+            $out['error'] = $response->content;
+            \Yii::error(VarDumper::dumpAsString($out['error'], 10), 'Component:CommunicationService::updateCall');
+        }
+
+        return $out;
+    }
+
+
+
+
 
 }

@@ -73,6 +73,7 @@ $js = <<<JS
         $('.field-error').each(function() {
             $(this).removeClass('field-error');
         });
+        $('.parent-error').removeClass('has-error');
         $('#preloader').removeClass('hidden');
         $.ajax({
             url: url,
@@ -81,12 +82,28 @@ $js = <<<JS
             success: function (data) {
                 var itineraryErr = false;
                 $('#preloader').addClass('hidden');
+
+                $.each(data, function( index, value ) {
+                    $('#'+index).val(value);
+                    if(index == 'quote-main_airline_code'){
+                        $('#'+index).trigger('change');
+                    }
+                });
                 if (data.success == false) {
                     $.each(data.errors, function( index, value ) {
                         $('#quote-'+index).addClass('field-error');
+                        $('#quote-'+index).parent().addClass('has-error parent-error');
                         if (index == 'reservation_dump') {
                             itineraryErr = true;
                         }
+                    });
+
+                    $.each(data.errorsPrices, function( index, value ) {
+                        $.each(value, function (idx, val){
+                            $('#quoteprice-'+index+'-'+idx).addClass('field-error');
+                            $('#quoteprice-'+index+'-'+idx).parent().addClass('has-error parent-error');
+                        });
+
                     });
 
                     if (data.itinerary.length != 0) {
@@ -440,10 +457,23 @@ $this->registerJs($js);
                 <li class="active">
                     <?= Html::a('Reservation Dump', sprintf('#r-dump-%d', $quote->id), ['data-toggle' => 'tab']) ?>
                 </li>
+                <li>
+                	<?= Html::a('Pricing', sprintf('#r-dump-pane-%d', $quote->id), ['data-toggle' => 'tab']) ?>
+                </li>
             </ul>
             <div class="tab-content">
                 <div id="<?= sprintf('r-dump-%d', $quote->id) ?>" class="tab-pane fade in active">
                     <?= $form->field($quote, 'reservation_dump', [
+                        'options' => [
+                            'tag' => false,
+                        ],
+                        'template' => '{input}'
+                    ])->textarea([
+                        'rows' => 5
+                    ]) ?>
+                </div>
+                <div id="<?= sprintf('r-dump-pane-%d', $quote->id) ?>" class="tab-pane fade in">
+                    <?= $form->field($quote, 'pricing_info', [
                         'options' => [
                             'tag' => false,
                         ],

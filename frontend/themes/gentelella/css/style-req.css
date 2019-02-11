@@ -505,7 +505,7 @@ pre {
   color: #d83c49;
 }
 
-.has-error .form-control {
+.has-error .form-control, .field-error {
   border-color: #ff968c;
 }
 

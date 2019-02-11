@@ -29,8 +29,8 @@ use yii\helpers\VarDumper;
  * @property int $e_template_type_id
  * @property string $e_language_id
  * @property int $e_communication_id
- * @property int $e_is_deleted
- * @property int $e_is_new
+ * @property bool $e_is_deleted
+ * @property bool $e_is_new
  * @property int $e_delay
  * @property int $e_priority
  * @property int $e_status_id
@@ -126,7 +126,8 @@ class Email extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['e_reply_id', 'e_lead_id', 'e_project_id', 'e_type_id', 'e_template_type_id', 'e_communication_id', 'e_is_deleted', 'e_is_new', 'e_delay', 'e_priority', 'e_status_id', 'e_created_user_id', 'e_updated_user_id', 'e_inbox_email_id'], 'integer'],
+            [['e_reply_id', 'e_lead_id', 'e_project_id', 'e_type_id', 'e_template_type_id', 'e_communication_id', 'e_is_deleted', 'e_priority', 'e_status_id', 'e_created_user_id', 'e_updated_user_id', 'e_inbox_email_id'], 'integer'],
+            [['e_is_new', 'e_is_deleted'], 'boolean'],
             [['e_email_from', 'e_email_to'], 'required'],
             [['e_email_body_html', 'e_email_body_text', 'e_email_data', 'e_ref_message_id'], 'string'],
             [['e_status_done_dt', 'e_read_dt', 'e_created_dt', 'e_updated_dt', 'e_inbox_created_dt'], 'safe'],

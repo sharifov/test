@@ -36,22 +36,7 @@ if ($leadForm->mode != $leadForm::VIEW_MODE) {
         $('#btn-send-quotes').popover('hide');
         $('#preloader').removeClass('hidden');
         var dataPost = {leadId: $leadId, email:email, quotes: quotes };
-        $.ajax({
-            url: urlModel,
-            type: 'post',
-            data: dataPost,
-            success: function (data) {
-                var editBlock = $('#preview-send-quotes');
-                editBlock.find('.modal-body').html(data);
-                editBlock.modal('show');
-
-                $('#preloader').addClass('hidden');
-            },
-            error: function (error) {
-                $('#preloader').addClass('hidden');
-                console.log('Error: ' + error);
-            }
-        });
+        
     });
 
     $('#btn-send-quotes').popover({

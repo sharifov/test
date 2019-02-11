@@ -4,6 +4,7 @@ use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 use \common\models\Email;
 use \common\models\Sms;
+use \common\models\Call;
 
 /* @var $this yii\web\View */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -16,21 +17,58 @@ use \common\models\Sms;
 
 <?//php \yii\helpers\VarDumper::dump($model, 10, true) ?>
 
-<?php if($model['type'] === 'voice'): ?>
+<?php if($model['type'] === 'voice'):
+
+    $call = Call::findOne($model['id']);
+    if($call):
+
+        if($call->c_call_status == Call::CALL_STATUS_COMPLETED) {
+            $statusClass = 'success';
+            $statusTitle = 'COMPLETED - ' . Yii::$app->formatter->asDatetime(strtotime($call->c_created_dt) + (int) $call->c_call_duration);
+        } elseif($call->c_call_status == Call::CALL_STATUS_CANCELED) {
+            $statusClass = 'error';
+            $statusTitle = 'CANCELED';
+        } else {
+            $statusClass = 'sent';
+            $statusTitle = $call->c_call_status; //'INIT';
+        }
+
+        if($call->c_id) {
+            $statusTitle .= ' - Call ID: '. $call->c_id;
+        }
+
+        if($call->c_call_type_id == Call::CALL_TYPE_IN) {
+            $fromType = 'client';
+        } else {
+            $fromType = 'system';
+        }
+    ?>
     <div class="chat__message chat__message--<?=$fromType?> chat__message--phone">
-    <div class="chat__icn"><i class="fa fa-phone"></i></div>
-    <i class="chat__status chat__status--sent fa fa-circle" data-toggle="tooltip" title="" data-placement="left" data-original-title="SENT"></i>
-    <div class="chat__message-heading">
-        <div class="chat__sender">Call from <strong>Agent Mary</strong> to <strong>+37366889955</strong></div>
-        <div class="chat__date">11:01AM | June 9</div>
+        <div class="chat__icn"><i class="fa fa-phone"></i></div>
+        <i class="chat__status chat__status--<?=$statusClass?> fa fa-circle" data-toggle="tooltip" title="<?=Html::encode($statusTitle)?>" data-placement="right" data-original-title="<?=Html::encode($statusTitle)?>"></i>
+        <div class="chat__message-heading">
+
+            <?php if($call->c_call_type_id == Call::CALL_TYPE_IN):?>
+                <div class="chat__sender">Call from (<strong><?=Html::encode($call->c_from)?>) </strong> to (<strong><?=Html::encode($call->c_to)?></strong>)</div>
+            <? else: ?>
+                <div class="chat__sender">Call from <b><?=($call->cCreatedUser ? Html::encode($call->cCreatedUser->username) : '-') ?></b>, (<strong><?=Html::encode($call->c_from)?>) </strong> to (<strong><?=Html::encode($call->c_to)?></strong>)</div>
+            <?php endif;?>
+
+            <div class="chat__date"><?=Yii::$app->formatter->asDatetime(strtotime($call->c_created_dt))?></div> <?php //11:01AM | June 9?>
+        </div>
+        <div class="panel-body">
+            <?php if($call->c_recording_url):?>
+                <audio controls="controls" class="chat__audio">
+                    <source src="<?=$call->c_recording_url?>" type="audio/mpeg">
+                    Your browser does not support the audio element
+                </audio>
+            <? else: ?>
+                <div><i class="fa fa-volume-off"></i> ... <?=$call->c_call_status?></div>
+            <?php endif;?>
+            <div><?=$call->c_call_duration > 0 ? 'Duration: ' . Yii::$app->formatter->asDuration($call->c_call_duration) : ''?></div>
+        </div>
     </div>
-    <div class="panel-body">
-        <audio controls="controls" class="chat__audio">
-            <source src="audio.mp3" type="audio/mpeg">
-            Your browser does not support the audio element.
-        </audio>
-    </div>
-</div>
+    <?php endif;?>
 <?php endif;?>
 
 <?php if($model['type'] === 'email'):

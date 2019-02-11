@@ -1,0 +1,8 @@
+[program:QueuePhoneCheckJob]
+command=/usr/bin/php /var/www/sales.zeit.test/www/yii queue-phone-check/listen
+stdout_logfile=/var/www/sales.zeit.test/www/console/runtime/queue-phone-check.log
+autostart=true
+autorestart=true
+user=root
+stopsignal=KILL
+numprocs=1
