@@ -44,9 +44,9 @@ $this->params['breadcrumbs'][] = $this->title;
             'label' => 'Profit',
             'value' => function (\common\models\Lead $model) {
 
-                if ($model->final_profit !== null) {
-                    $model->totalProfit = $model->final_profit - 25;
-                    $totalProfitTxt = $model->final_profit - 25;
+                if ($model->finalProfit) {
+                    $model->totalProfit = $model->finalProfit;
+                    $totalProfitTxt = $model->finalProfit;
                 } else {
                     //$totalProfitTxt = 0;
 

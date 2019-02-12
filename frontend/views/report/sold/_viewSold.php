@@ -29,7 +29,7 @@ use common\models\Quote;
                 <td><?= $lead->updated ?></td>
                 <td>
                     <?php
-                    $profit = $lead->final_profit;
+                    $profit = $lead->finalProfit;
                     if ($lead->final_profit === null) {
                         $appliedAlternativeQuotes = $lead->getAppliedAlternativeQuotes();
                         if ($appliedAlternativeQuotes !== null) {

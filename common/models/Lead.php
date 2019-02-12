@@ -53,6 +53,8 @@ use common\components\SearchService;
  * @property double $final_profit
  * @property double $tips
  *
+ * @property double $finalProfit
+ *
  * @property LeadFlightSegment[] $leadFlightSegments
  * @property LeadFlow[] $leadFlows
  * @property LeadLog[] $leadLogs
@@ -71,6 +73,9 @@ use common\components\SearchService;
  */
 class Lead extends ActiveRecord
 {
+
+    public const AGENT_PROCESSING_FEE = 25.0;
+
     public CONST
         TRIP_TYPE_ONE_WAY = 'OW',
         TRIP_TYPE_ROUND_TRIP = 'RT',
@@ -156,6 +161,8 @@ class Lead extends ActiveRecord
     public $splitProfitPercentSum = 0;
     public $totalTips;
     public $splitTipsPercentSum = 0;
+
+    public $finalProfit = 0;
 
     /**
      * {@inheritdoc}
@@ -1646,6 +1653,13 @@ Sales - Kivork",
             $this->additionalInformationForm = self::getLeadAdditionalInfo($this->additional_information);
         }
         $this->totalTips = ($this->tips)?$this->tips/2:0;
+
+
+        if($this->final_profit) {
+            $this->finalProfit = (float) $this->final_profit - self::AGENT_PROCESSING_FEE;
+        } else {
+            $this->finalProfit = $this->final_profit;
+        }
     }
 
     /**

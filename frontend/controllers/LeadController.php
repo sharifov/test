@@ -1885,7 +1885,7 @@ class LeadController extends FController
         $errors = [];
         $lead = Lead::findOne(['id' => $id]);
         if ($lead !== null) {
-            $totalProfit = ($lead->final_profit !== null)?$lead->final_profit:$lead->getBookedQuote()->getEstimationProfit();
+            $totalProfit = $lead->finalProfit ?: $lead->getBookedQuote()->getEstimationProfit();
             $splitForm = new ProfitSplitForm($lead);
 
             $mainAgentProfit = $totalProfit;
