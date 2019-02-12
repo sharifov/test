@@ -2054,6 +2054,7 @@ Sales - Kivork",
                 $quoteModel = Quote::findOne($qid);
                 if($quoteModel) {
 
+                    $cabinClasses = [];
                     //$quoteItem = $quoteModel->getInfoForEmail2();
                     $quoteItem = [
                         'id' => $quoteModel->id,

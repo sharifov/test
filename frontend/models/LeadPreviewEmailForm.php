@@ -21,6 +21,7 @@ use yii\base\Model;
  * @property integer $e_email_tpl_id
  * @property integer $e_user_id
  * @property string $e_language_id
+ * @property array $e_content_data
  *
  * @property boolean $is_send
  *
@@ -38,6 +39,7 @@ class LeadPreviewEmailForm extends Model
     public $e_email_tpl_id;
     public $e_user_id;
     public $e_language_id;
+    public $e_content_data = [];
 
     public $is_send;
 

@@ -1349,37 +1349,67 @@ class Quote extends \yii\db\ActiveRecord
     }
 
 
-    /**
-     * @return array
-     */
+
     public function getInfoForEmail2() : array
     {
         $trips = [];
+        $quoteCabinClasses = [];
+        $quoteMarketingAirlines = [];
 
         foreach ($this->quoteTrips as $trip){
+
+            $tripCabinClasses = [];
+            $tripMarketingAirlines = [];
+
             $firstSegment = null;
             $lastSegment = null;
-
             $segments = $trip->quoteSegments;
+
             if( $segments ) {
+
                 $segmentsCnt = count($segments);
                 $stopCnt = $segmentsCnt - 1;
                 $firstSegment = $segments[0];
                 $lastSegment = end($segments);
-                $marketingAirlines = [];
+
                 foreach ($segments as $segment) {
-                    if(isset($segment->qs_stop) && $segment->qs_stop > 0){
+
+                    $cabinClass = SearchService::getCabin($segment->qs_cabin);
+
+                    $quoteCabinClasses[$segment->qs_cabin] = $cabinClass;
+                    $tripCabinClasses[$segment->qs_cabin] = $cabinClass;
+
+                    $airlineCode = $airlineName = $segment->qs_marketing_airline;
+
+                    if($segment->qs_marketing_airline) {
+                        $airline = Airline::findIdentity($segment->qs_marketing_airline);
+                        if($airline) {
+                            $airlineName = $airline->name;
+                        }
+                    }
+
+                    $tripMarketingAirlines[$airlineCode] = $airlineName; /*[
+                        'airlineName' => $airlineName,
+                        'airlineCode' => $airlineCode,
+                    ];*/
+
+                    $quoteMarketingAirlines[$airlineCode] = $airlineName;
+
+                    if($segment->qs_stop > 0){
                         $stopCnt += $segment->qs_stop;
                     }
-                    if(!in_array($segment->qs_marketing_airline, $marketingAirlines)){
-                        $marketingAirlines[] = $segment->qs_marketing_airline;
-                    }
+
                 }
 
                 $dateDiff = strtotime($lastSegment->qs_arrival_time) - strtotime($firstSegment->qs_departure_time);
 
                 $trips[] = [
-                    'airlineCode' => 1 === count($marketingAirlines) ? $marketingAirlines[0] : '',
+                    'cabinClasses' => $tripCabinClasses,
+                    'marketingAirlines' => $tripMarketingAirlines,
+
+                    //'airlineCode' => isset($marketingAirlines[0]) ? $marketingAirlines[0]['airlineName'] : '',
+                    //'airlineName' => isset($marketingAirlines[0]) ? $marketingAirlines[0]['airlineCode'] : '',
+
                     //'departureDate' => Yii::$app->formatter_search->asDatetime(strtotime($firstSegment->qs_departure_time),'MMM d'),
                     //'departureTime' => Yii::$app->formatter_search->asDatetime(strtotime($firstSegment->qs_departure_time),'h:mm a'),
                     'departDateTime' => date('Y-m-d H:i:s', strtotime($firstSegment->qs_departure_time)),
@@ -1403,6 +1433,8 @@ class Quote extends \yii\db\ActiveRecord
 
 
         return [
+            'cabinClasses' => $quoteCabinClasses,
+            'marketingAirlines' => $quoteMarketingAirlines,
             'pricePerPax' => $this->getPricePerPax(),
             'priceTotal' => 0,
             'currencySymbol' => '$',
