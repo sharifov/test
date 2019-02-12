@@ -157,8 +157,21 @@ $c_type_id = $comForm->c_type_id;
                         ]
                     ]) ?>
                 </div>
+                <?php if($isAdmin):?>
+                <div class="row" style="display: none" id="email-data-content-div">
+                    <pre><?php
+                        //\yii\helpers\VarDumper::dump($previewEmailForm->e_content_data, 10, true);
+                        echo json_encode($previewEmailForm->e_content_data);
+                    ?>
+                    </pre>
+                </div>
+                <?php endif; ?>
+
                 <div class="btn-wrapper">
                     <?= Html::submitButton('<i class="fa fa-envelope-o"></i> Send Email', ['class' => 'btn btn-lg btn-primary']) ?>
+                    <?php if($isAdmin):?>
+                        <?= Html::button('<i class="fa fa-list"></i> Show Email data (for Admins)', ['class' => 'btn btn-lg btn-warning', 'onclick' => '$("#email-data-content-div").toggle()']) ?>
+                    <?php endif; ?>
                 </div>
                 <?php \yii\bootstrap\ActiveForm::end(); ?>
 

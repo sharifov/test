@@ -500,12 +500,16 @@ class LeadController extends FController
 
 
                             $content_data = $lead->getEmailData2($comForm->quoteList);
+                            $previewEmailForm->e_content_data = $content_data;
 
                             //echo json_encode($content_data); exit;
 
-                            //echo (Html::encode(json_encode($content_data))); exit;
+                            //echo (Html::encode(json_encode($content_data)));
+                            //VarDumper::dump($content_data, 10 , true); exit;
 
                             $mailPreview = $communication->mailPreview($lead->project_id, ($tpl ? $tpl->etp_key : ''), $mailFrom, $comForm->c_email_to, $content_data, $language);
+
+
 
 
                             if ($mailPreview && isset($mailPreview['data'])) {
