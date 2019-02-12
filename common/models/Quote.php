@@ -1355,11 +1355,13 @@ class Quote extends \yii\db\ActiveRecord
         $trips = [];
         $quoteCabinClasses = [];
         $quoteMarketingAirlines = [];
+        $quoteOperatedAirlines = [];
 
         foreach ($this->quoteTrips as $trip){
 
             $tripCabinClasses = [];
             $tripMarketingAirlines = [];
+            $tripOperatedAirlines = [];
 
             $firstSegment = null;
             $lastSegment = null;
@@ -1379,21 +1381,36 @@ class Quote extends \yii\db\ActiveRecord
                     $quoteCabinClasses[$segment->qs_cabin] = $cabinClass;
                     $tripCabinClasses[$segment->qs_cabin] = $cabinClass;
 
-                    $airlineCode = $airlineName = $segment->qs_marketing_airline;
+                    $airlineCodeM = $airlineNameM = $segment->qs_marketing_airline;
 
                     if($segment->qs_marketing_airline) {
                         $airline = Airline::findIdentity($segment->qs_marketing_airline);
                         if($airline) {
-                            $airlineName = $airline->name;
+                            $airlineNameM = $airline->name;
                         }
                     }
 
-                    $tripMarketingAirlines[$airlineCode] = $airlineName; /*[
+                    $tripMarketingAirlines[$airlineCodeM] = $airlineNameM; /*[
                         'airlineName' => $airlineName,
                         'airlineCode' => $airlineCode,
                     ];*/
 
-                    $quoteMarketingAirlines[$airlineCode] = $airlineName;
+                    $quoteMarketingAirlines[$airlineCodeM] = $airlineNameM;
+
+
+                    $airlineCodeO = $airlineNameO = $segment->qs_operating_airline;
+
+                    if($segment->qs_operating_airline) {
+                        $airline = Airline::findIdentity($segment->qs_operating_airline);
+                        if($airline) {
+                            $airlineNameO = $airline->name;
+                        }
+                    }
+
+                    $tripOperatedAirlines[$airlineCodeO] = $airlineNameO;
+                    $quoteOperatedAirlines[$airlineCodeO] = $airlineNameO;
+
+
 
                     if($segment->qs_stop > 0){
                         $stopCnt += $segment->qs_stop;
@@ -1406,6 +1423,8 @@ class Quote extends \yii\db\ActiveRecord
                 $trips[] = [
                     'cabinClasses' => $tripCabinClasses,
                     'marketingAirlines' => $tripMarketingAirlines,
+                    'operatedAirlines' => $tripOperatedAirlines,
+
 
                     //'airlineCode' => isset($marketingAirlines[0]) ? $marketingAirlines[0]['airlineName'] : '',
                     //'airlineName' => isset($marketingAirlines[0]) ? $marketingAirlines[0]['airlineCode'] : '',
@@ -1435,6 +1454,7 @@ class Quote extends \yii\db\ActiveRecord
         return [
             'cabinClasses' => $quoteCabinClasses,
             'marketingAirlines' => $quoteMarketingAirlines,
+            'operatedAirlines' => $quoteOperatedAirlines,
             'pricePerPax' => $this->getPricePerPax(),
             'priceTotal' => 0,
             'currencySymbol' => '$',
