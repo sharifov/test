@@ -49,7 +49,7 @@ class KpiController extends FController
      */
     public function actionIndex()
     {
-        $isAgent = (Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id));
+        $isAgent = Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id);
         $searchModel = new KpiHistorySearch();
         $params = Yii::$app->request->queryParams;
         $params2 = Yii::$app->request->post();
@@ -59,9 +59,14 @@ class KpiController extends FController
 
         if($model->load($params2)){
             $date = \DateTime::createFromFormat('M-Y', $params2['DynamicModel']['date_dt']);
+
+
+            //echo $date; exit;
+
             $result = KpiService::calculateSalary($date->format('Y-m-d'));
 
             Yii::info('Month: '.$date->format('M-Y').' User: '.Yii::$app->user->id.' Agents: All ', 'info\KpiService::calculateSalary');
+            Yii::$app->session->setFlash('success', 'Calculate Salary Month: '.$date->format('M-Y'));
 
             return $this->redirect([
                 'kpi/index',

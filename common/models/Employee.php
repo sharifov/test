@@ -756,13 +756,22 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         return $str;
     }
 
-    public function paramsForSalary()
+    /**
+     * @return array
+     */
+    public function paramsForSalary() : array
     {
         $data = [];
+        if($this->userParams) {
+            $data['base_amount'] = is_numeric($this->userParams->up_base_amount) ? (float) $this->userParams->up_base_amount : 0;
+            $data['commission_percent'] = is_numeric($this->userParams->up_commission_percent) ? (float) $this->userParams->up_commission_percent : 0;
+            $data['bonus_active'] = is_numeric($this->userParams->up_bonus_active) ? $this->userParams->up_bonus_active : 0;
+        } else {
+            $data['base_amount'] = 200;
+            $data['commission_percent'] = 10;
+            $data['bonus_active'] = 1;
+        }
 
-        $data['base_amount'] = (!empty($this->userParams)) ? ($this->userParams->up_base_amount)?:200 : 200;
-        $data['commission_percent'] = ($this->userParams) ? ($this->userParams->up_commission_percent)?:10 : 10;
-        $data['bonus_active'] = ($this->userParams) ? ($this->userParams->up_bonus_active)?:1 : 1;
         $data['profit_bonuses'] = $this->getProfitBonuses();
         if(empty($data['profit_bonuses'])){
             $data['profit_bonuses'] = self::PROFIT_BONUSES;
