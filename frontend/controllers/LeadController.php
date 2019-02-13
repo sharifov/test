@@ -992,7 +992,7 @@ class LeadController extends FController
             $logs = $query->all();
             if (count($logs)) {
                 $response['logs'] = $this->renderAjax('partial/_leadLog', [
-                    'logs' => $model->getLogs()
+                    'logs' => $model->leadLogs
                 ]);
                 $response['checkUpdatesUrl'] = Url::to([
                     'lead/check-updates',

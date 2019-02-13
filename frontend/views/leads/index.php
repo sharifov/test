@@ -196,6 +196,15 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
                     $str .= $model->client && $model->client->clientPhones ? '<br><i class="fa fa-phone"></i> ' . implode(' <br><i class="fa fa-phone"></i> ', \yii\helpers\ArrayHelper::map($model->client->clientPhones, 'phone', 'phone')) . '' : '';
                 }
 
+                /*$str .= '<br>';
+                $str .= '<span title="Calls Out / In"><i class="fa fa-phone"></i> '. $model->getCountCalls(\common\models\Call::CALL_TYPE_OUT) .'/'.  $model->getCountCalls(\common\models\Call::CALL_TYPE_IN) .'</span> | ';
+                $str .= '<span title="SMS Out / In"><i class="fa fa-comments"></i> '. $model->getCountSms(\common\models\Sms::TYPE_OUTBOX) .'/'.  $model->getCountCalls(\common\models\Sms::TYPE_INBOX) .'</span> | ';
+                $str .= '<span title="Email Out / In"><i class="fa fa-envelope"></i> '. $model->getCountEmails(\common\models\Email::TYPE_OUTBOX) .'/'.  $model->getCountEmails(\common\models\Email::TYPE_INBOX) .'</span>';*/
+
+                //$strArr[] = $str;
+
+                //$str = implode('<br>', $strArr);
+
                 return $str ?? '-';
             },
             'options' => [
@@ -305,10 +314,26 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
         // 'cabin',
         // 'adults',
 
-        [
+        /*[
             'label' => 'Pax',
             'value' => function (\common\models\Lead $model) {
                 return '<i class="fa fa-male"></i> <span title="adult">'. $model->adults .'</span> / <span title="child">' . $model->children . '</span> / <span title="infant">' . $model->infants.'</span>';
+            },
+            'format' => 'raw',
+            'contentOptions' => [
+                'class' => 'text-center'
+            ]
+        ],*/
+
+        [
+            'label' => 'Pax / Communication',
+            'value' => function (\common\models\Lead $model) {
+                //$str = '';
+                $str = '<i class="fa fa-male"></i> <span title="adult">'. $model->adults .'</span> / <span title="child">' . $model->children . '</span> / <span title="infant">' . $model->infants.'</span><br>';
+                $str .= '<span title="Calls Out / In"><i class="fa fa-phone success"></i> '. $model->getCountCalls(\common\models\Call::CALL_TYPE_OUT) .'/'.  $model->getCountCalls(\common\models\Call::CALL_TYPE_IN) .'</span> | ';
+                $str .= '<span title="SMS Out / In"><i class="fa fa-comments info"></i> '. $model->getCountSms(\common\models\Sms::TYPE_OUTBOX) .'/'.  $model->getCountCalls(\common\models\Sms::TYPE_INBOX) .'</span> | ';
+                $str .= '<span title="Email Out / In"><i class="fa fa-envelope danger"></i> '. $model->getCountEmails(\common\models\Email::TYPE_OUTBOX) .'/'.  $model->getCountEmails(\common\models\Email::TYPE_INBOX) .'</span>';
+                return $str;
             },
             'format' => 'raw',
             'contentOptions' => [

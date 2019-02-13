@@ -54,7 +54,21 @@ use common\components\SearchService;
  * @property double $tips
  *
  * @property double $finalProfit
+ * @property int $quotesCount
+ * @property int $leadFlightSegmentsCount
  *
+ *
+ * @property Call[] $calls
+ * @property Email[] $emails
+ * @property Sms[] $sms
+ * @property LeadTask[] $leadTasks
+ * @property Lead[] $leads
+ * @property Note[] $notes
+ * @property Employee[] $psUsers
+ * @property Quote[] $quotes
+ * @property Reason[] $reasons
+ * @property Employee[] $tsUsers
+ * @property UserConnection[] $userConnections
  * @property LeadFlightSegment[] $leadFlightSegments
  * @property LeadFlow[] $leadFlows
  * @property LeadLog[] $leadLogs
@@ -63,8 +77,6 @@ use common\components\SearchService;
  * @property Employee $employee
  * @property Source $source
  * @property Project $project
- * @property int $quotesCount
- * @property int $leadFlightSegmentsCount
  * @property LeadAdditionalInformation[] $additionalInformationForm
  * @property Lead $clone
  * @property ProfitSplit[] $profitSplits
@@ -187,20 +199,21 @@ class Lead extends ActiveRecord
 
             [['trip_type', 'cabin'], 'required'],
             [['adults', 'children', 'infants', 'source_id'], 'required'], //'except' => self::SCENARIO_API],
-
-            [['client_id', 'employee_id', 'status', 'project_id', 'source_id', 'rating', 'l_grade'], 'integer'],
+            [['client_id', 'employee_id', 'status', 'project_id', 'source_id', 'rating', 'l_grade', 'clone_id'], 'integer'],
             [['adults', 'children', 'infants'], 'integer', 'max' => 9],
             [['adults'], 'integer', 'min' => 1],
-
             [['l_answered'], 'boolean'],
+            [['notes_for_experts', 'request_ip_detail', 'additional_information'], 'string'],
+            [['final_profit', 'tips'], 'number'],
+            [['uid', 'request_ip', 'offset_gmt', 'discount_id', 'bo_flight_id', 'description'], 'string', 'max' => 255],
 
-            [['notes_for_experts'], 'string'],
-            [['created', 'updated', 'offset_gmt', 'request_ip', 'request_ip_detail', 'snooze_for',
-                'called_expert', 'discount_id', 'bo_flight_id', 'additional_information', 'final_profit', 'tips'], 'safe'],
+            [['created', 'updated', 'snooze_for', 'called_expert'], 'safe'],
+
             [['uid'], 'string', 'max' => 255],
             [['trip_type'], 'string', 'max' => 2],
             [['cabin'], 'string', 'max' => 1],
             [['status_description'], 'string'],
+            [['clone_id'], 'exist', 'skipOnError' => true, 'targetClass' => self::class, 'targetAttribute' => ['clone_id' => 'id']],
             [['client_id'], 'exist', 'skipOnError' => true, 'targetClass' => Client::class, 'targetAttribute' => ['client_id' => 'id']],
             [['employee_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['employee_id' => 'id']],
         ];
@@ -247,11 +260,34 @@ class Lead extends ActiveRecord
         ];
     }
 
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getCalls(): ActiveQuery
+    {
+        return $this->hasMany(Call::class, ['c_lead_id' => 'id']);
+    }
 
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getLeadFlows()
+    public function getEmails(): ActiveQuery
+    {
+        return $this->hasMany(Email::class, ['e_lead_id' => 'id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getLeadFlightSegments(): ActiveQuery
+    {
+        return $this->hasMany(LeadFlightSegment::class, ['lead_id' => 'id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getLeadFlows(): ActiveQuery
     {
         return $this->hasMany(LeadFlow::class, ['lead_id' => 'id']);
     }
@@ -259,10 +295,154 @@ class Lead extends ActiveRecord
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getLeadLogs()
+    public function getLeadLogs(): ActiveQuery
     {
         return $this->hasMany(LeadLog::class, ['lead_id' => 'id']);
     }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getLeadPreferences(): ActiveQuery
+    {
+        return $this->hasMany(LeadPreferences::class, ['lead_id' => 'id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getLeadTasks(): ActiveQuery
+    {
+        return $this->hasMany(LeadTask::class, ['lt_lead_id' => 'id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getClient(): ActiveQuery
+    {
+        return $this->hasOne(Client::class, ['id' => 'client_id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getClone(): ActiveQuery
+    {
+        return $this->hasOne(self::class, ['id' => 'clone_id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getLeads(): ActiveQuery
+    {
+        return $this->hasMany(self::class, ['clone_id' => 'id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getEmployee(): ActiveQuery
+    {
+        return $this->hasOne(Employee::class, ['id' => 'employee_id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    /*public function getNotes(): ActiveQuery
+    {
+        return $this->hasMany(Note::class, ['lead_id' => 'id']);
+    }*/
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getProfitSplits(): ActiveQuery
+    {
+        return $this->hasMany(ProfitSplit::class, ['ps_lead_id' => 'id']);
+    }
+
+    /**
+     * @return ActiveQuery
+     * @throws \yii\base\InvalidConfigException
+     */
+    public function getPsUsers(): ActiveQuery
+    {
+        return $this->hasMany(Employee::class, ['id' => 'ps_user_id'])->viaTable('profit_split', ['ps_lead_id' => 'id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getQuotes(): ActiveQuery
+    {
+        return $this->hasMany(Quote::class, ['lead_id' => 'id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getReasons(): ActiveQuery
+    {
+        return $this->hasMany(Reason::class, ['lead_id' => 'id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getSms(): ActiveQuery
+    {
+        return $this->hasMany(Sms::class, ['s_lead_id' => 'id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getTipsSplits(): ActiveQuery
+    {
+        return $this->hasMany(TipsSplit::class, ['ts_lead_id' => 'id']);
+    }
+
+
+    /**
+     * @return ActiveQuery
+     * @throws \yii\base\InvalidConfigException
+     */
+    public function getTsUsers(): ActiveQuery
+    {
+        return $this->hasMany(Employee::class, ['id' => 'ts_user_id'])->viaTable('tips_split', ['ts_lead_id' => 'id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getUserConnections(): ActiveQuery
+    {
+        return $this->hasMany(UserConnection::class, ['uc_lead_id' => 'id']);
+    }
+
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getSource(): ActiveQuery
+    {
+        return $this->hasOne(Source::class, ['id' => 'source_id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getProject(): ActiveQuery
+    {
+        return $this->hasOne(Project::class, ['id' => 'project_id']);
+    }
+
+
+
+    // ----------------------------------------------------------------------------------------------------------------------------------------
 
 
     public static function getDivs($div = null)
@@ -931,13 +1111,6 @@ class Lead extends ActiveRecord
         return self::STATUS_CLASS_LIST[$this->status] ?? 'label-default';
     }
 
-    /**
-     * @return \yii\db\ActiveQuery
-     */
-    public function getClone()
-    {
-        return $this->hasOne(Lead::className(), ['id' => 'clone_id']);
-    }
 
     /**
      * @return bool
@@ -1442,20 +1615,20 @@ Sales - Kivork",
     /**
      * @return array|Note[]
      */
-    public function getNotes()
+    /*public function getAllNotes()
     {
         return Note::find()->where(['lead_id' => $this->id])
             ->orderBy('id DESC')->all();
-    }
+    }*/
 
     /**
      * @return array|Note[]
      */
-    public function getLogs()
+    /*public function getLogs()
     {
         return LeadLog::find()->where(['lead_id' => $this->id])
             ->orderBy('id DESC')->all();
-    }
+    }*/
 
     public function getSentCount()
     {
@@ -1499,18 +1672,14 @@ Sales - Kivork",
         ]);
     }
 
+    /**
+     * @return int
+     */
     public function getQuotesCount(): int
     {
         return $this->hasMany(Quote::class, ['lead_id' => 'id'])->count();
     }
 
-    /**
-     * @return \yii\db\ActiveQuery
-     */
-    public function getLeadFlightSegments(): ActiveQuery
-    {
-        return $this->hasMany(LeadFlightSegment::class, ['lead_id' => 'id']);
-    }
 
     /**
      * @return int
@@ -1526,45 +1695,8 @@ Sales - Kivork",
         return LeadFlightSegment::find()->where(['lead_id' => $this->id])->orderBy(['departure' => 'ASC'])->one();
     }
 
-    /**
-     * @return \yii\db\ActiveQuery
-     */
-    public function getLeadPreferences(): ActiveQuery
-    {
-        return $this->hasOne(LeadPreferences::class, ['lead_id' => 'id']);
-    }
 
-    /**
-     * @return \yii\db\ActiveQuery
-     */
-    public function getClient(): ActiveQuery
-    {
-        return $this->hasOne(Client::class, ['id' => 'client_id']);
-    }
 
-    /**
-     * @return \yii\db\ActiveQuery
-     */
-    public function getEmployee(): ActiveQuery
-    {
-        return $this->hasOne(Employee::class, ['id' => 'employee_id']);
-    }
-
-    /**
-     * @return \yii\db\ActiveQuery
-     */
-    public function getSource(): ActiveQuery
-    {
-        return $this->hasOne(Source::class, ['id' => 'source_id']);
-    }
-
-    /**
-     * @return \yii\db\ActiveQuery
-     */
-    public function getProject(): ActiveQuery
-    {
-        return $this->hasOne(Project::class, ['id' => 'project_id']);
-    }
 
 
     public function beforeSave($insert): bool
@@ -2296,7 +2428,7 @@ Sales - Kivork",
         $information['itinerary'] = $itinerary;
 
         $quoteArr = [];
-        foreach ($this->getQuotes() as $quote) {
+        foreach ($this->quotes as $quote) {
             $quoteArr[] = $quote->getQuoteInformationForExpert();
         }
 
@@ -2314,10 +2446,10 @@ Sales - Kivork",
     /**
      * @return Quote[]
      */
-    public function getQuotes()
+    /*public function getQuotes()
     {
         return Quote::findAll(['lead_id' => $this->id]);
-    }
+    }*/
 
     /**
      * @param null $role
@@ -2484,13 +2616,7 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
         return ($flightSegment) ? $flightSegment['departure'] : null;
     }
 
-    /**
-     * @return \yii\db\ActiveQuery
-     */
-    public function getProfitSplits()
-    {
-        return $this->hasMany(ProfitSplit::className(), ['ps_lead_id' => 'id']);
-    }
+
 
     public function getAllProfitSplits()
     {
@@ -2508,13 +2634,6 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
     }
 
 
-    /**
-     * @return \yii\db\ActiveQuery
-     */
-    public function getTipsSplits()
-    {
-        return $this->hasMany(TipsSplit::className(), ['ts_lead_id' => 'id']);
-    }
 
     public function getAllTipsSplits()
     {
@@ -2599,5 +2718,50 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
         }
         $key .= '_'.$this->adults.'_'.$this->children.'_'.$this->infants;
         return $key;
+    }
+
+
+    /**
+     * @param int $type_id
+     * @return int|string
+     */
+    public function getCountCalls(int $type_id = 0)
+    {
+        if($type_id === 0) {
+            $count = Call::find()->where(['c_lead_id' => $this->id, 'c_is_deleted' => false])->count();
+        } else {
+            $count = Call::find()->where(['c_lead_id' => $this->id, 'c_is_deleted' => false, 'c_call_type_id' => $type_id])->count();
+        }
+        return $count;
+    }
+
+
+    /**
+     * @param int $type_id
+     * @return int|string
+     */
+    public function getCountSms(int $type_id = 0)
+    {
+        if($type_id === 0) {
+            $count = Sms::find()->where(['s_lead_id' => $this->id, 's_is_deleted' => false])->count();
+        } else {
+            $count = Sms::find()->where(['s_lead_id' => $this->id, 's_type_id' => $type_id, 's_is_deleted' => false])->count();
+        }
+        return $count;
+    }
+
+
+    /**
+     * @param int $type_id
+     * @return int|string
+     */
+    public function getCountEmails(int $type_id = 0)
+    {
+        if($type_id === 0) {
+            $count = Email::find()->where(['e_lead_id' => $this->id, 'e_is_deleted' => false])->count();
+        } else {
+            $count = Email::find()->where(['e_lead_id' => $this->id, 'e_type_id' => $type_id, 'e_is_deleted' => false])->count();
+        }
+        return $count;
     }
 }
