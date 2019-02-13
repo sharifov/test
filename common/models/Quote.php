@@ -1355,13 +1355,13 @@ class Quote extends \yii\db\ActiveRecord
         $trips = [];
         $quoteCabinClasses = [];
         $quoteMarketingAirlines = [];
-        $quoteOperatedAirlines = [];
+        $quoteOperatingAirlines = [];
 
         foreach ($this->quoteTrips as $trip){
 
             $tripCabinClasses = [];
             $tripMarketingAirlines = [];
-            $tripOperatedAirlines = [];
+            $tripOperatingAirlines = [];
 
             $firstSegment = null;
             $lastSegment = null;
@@ -1407,8 +1407,8 @@ class Quote extends \yii\db\ActiveRecord
                         }
                     }
 
-                    $tripOperatedAirlines[$airlineCodeO] = $airlineNameO;
-                    $quoteOperatedAirlines[$airlineCodeO] = $airlineNameO;
+                    $tripOperatingAirlines[$airlineCodeO] = $airlineNameO;
+                    $quoteOperatingAirlines[$airlineCodeO] = $airlineNameO;
 
 
 
@@ -1423,7 +1423,7 @@ class Quote extends \yii\db\ActiveRecord
                 $trips[] = [
                     'cabinClasses' => $tripCabinClasses,
                     'marketingAirlines' => $tripMarketingAirlines,
-                    'operatedAirlines' => $tripOperatedAirlines,
+                    'operatingAirlines' => $tripOperatingAirlines,
 
 
                     //'airlineCode' => isset($marketingAirlines[0]) ? $marketingAirlines[0]['airlineName'] : '',
@@ -1454,7 +1454,7 @@ class Quote extends \yii\db\ActiveRecord
         return [
             'cabinClasses' => $quoteCabinClasses,
             'marketingAirlines' => $quoteMarketingAirlines,
-            'operatedAirlines' => $quoteOperatedAirlines,
+            'operatingAirlines' => $quoteOperatingAirlines,
             'pricePerPax' => $this->getPricePerPax(),
             'priceTotal' => 0,
             'currencySymbol' => '$',

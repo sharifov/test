@@ -17,6 +17,10 @@ if ($leadForm->mode != $leadForm::VIEW_MODE || ($leadForm->mode == $leadForm::VI
     $modelFormName = sprintf('%s-', strtolower($leadForm->formName()));
     $formLeadId = sprintf('%s-form', $leadForm->getLead()->formName());
     $formClientId = sprintf('%s-form', $leadForm->getClient()->formName());
+
+
+    //\yii\helpers\VarDumper::dump($leadForm->getLeadPreferences(), true); exit;
+
     $formPreferenceId = sprintf('%s-form', $leadForm->getLeadPreferences()->formName());
 
     $js = <<<JS
