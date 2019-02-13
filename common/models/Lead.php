@@ -1913,7 +1913,7 @@ Sales - Kivork",
         }
 
 
-        $content_data['request'] = [
+        $content_data[' request'] = [
             'arriveCity'    => $arriveCity,
             'departCity'    => $departCity,
             'arriveIATA'    => $arriveIATA,

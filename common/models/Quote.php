@@ -1089,11 +1089,11 @@ class Quote extends \yii\db\ActiveRecord
     public function getBaggageInfo2() : array
     {
 
-        $caryOn = 1;
-        $checked = random_int(0, 1);
+        //$caryOn = 1;
+        //$checked = random_int(0, 1);
 
         //if one segment has baggage -> quote has baggage
-        /*if(!empty($this->quoteTrips)){
+        if($this->quoteTrips){
             foreach ($this->quoteTrips as $trip){
                 if(!empty($trip->quoteSegments)){
                     foreach ($trip->quoteSegments as $segment){
@@ -1114,10 +1114,41 @@ class Quote extends \yii\db\ActiveRecord
                     }
                 }
             }
-        }*/
+        }
 
         return ['carryOn' => $caryOn, 'checked' => $checked];
     }
+
+
+    /**
+     * @param QuoteTrip $trip
+     * @return array
+     */
+    public function getBaggageInfoByTrip(QuoteTrip $trip) : array
+    {
+
+        $caryOn = 1;
+        $checked = 0;
+
+        if($trip->quoteSegments){
+            foreach ($trip->quoteSegments as $segment){
+                if(!empty($segment->quoteSegmentBaggages)){
+                    foreach ($segment->quoteSegmentBaggages as $baggage){
+                        if($baggage->qsb_allow_pieces > 0) {
+                            $checked = $baggage->qsb_allow_pieces;
+                        }
+                        /*elseif ($baggage->qsb_allow_weight) {
+                            $this->freeBaggageInfo2 = $baggage->qsb_allow_weight.$baggage->qsb_allow_unit;
+                        }*/
+                    }
+                }
+            }
+        }
+
+
+        return ['carryOn' => $caryOn, 'checked' => $checked];
+    }
+
 
     public function afterSave($insert, $changedAttributes)
     {
@@ -1444,6 +1475,7 @@ class Quote extends \yii\db\ActiveRecord
                     'flightDuration' => SearchService::durationInMinutes($trip->qt_duration),
                     'flightDurationMinutes' => $trip->qt_duration,
                     'stopsQuantity' => $stopCnt,
+                    'baggage' => $this->getBaggageInfoByTrip($trip),
                 ];
 
             }
@@ -1462,7 +1494,7 @@ class Quote extends \yii\db\ActiveRecord
             'currencySymbol' => '$',
             'currencyCode' => 'USD',
             'trips' => $trips,
-            'baggage' => $this->getBaggageInfo2(),
+            //'baggage' => $this->getBaggageInfo2(),
         ];
     }
 
