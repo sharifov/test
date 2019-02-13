@@ -2,6 +2,7 @@
 use yii\helpers\Html;
 use yii\widgets\Pjax;
 use kartik\grid\GridView;
+//use yii\grid\GridView;
 use common\models\Lead;
 use yii\helpers\Url;
 
@@ -443,6 +444,7 @@ $this->params['breadcrumbs'][] = $this->title;
     ?>
 <?php
 echo GridView::widget([
+
     'dataProvider' => $dataProvider,
     'filterModel' => $searchModel,
     'columns' => $gridColumns,
@@ -516,6 +518,7 @@ function initCountDown()
 
 $(document).on(\'pjax:end\', function() {
     initCountDown();
+    setClienTime();
 });
 
 initCountDown();

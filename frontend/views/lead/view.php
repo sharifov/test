@@ -498,7 +498,7 @@ JS;
                 ]);*/ ?>
 
                 <?= $this->render('partial/_notes', [
-                    'notes' => $leadForm->getLead()->getNotes()
+                    'notes' => $leadForm->getLead()->notes
                 ]); ?>
                 <div class="panel panel-success panel-wrapper history-block">
                     <div class="panel-heading collapsing-heading">
@@ -510,7 +510,7 @@ JS;
                     </div>
                     <div class="collapse" id="agents-activity-logs" aria-expanded="false" style="">
                         <?= $this->render('partial/_leadLog', [
-                            'logs' => $leadForm->getLead()->getLogs()
+                            'logs' => $leadForm->getLead()->leadLogs
                         ]); ?>
                     </div>
                 </div>
