@@ -1860,6 +1860,8 @@ Sales - Kivork",
         $arriveIATA = '';
         $departIATA = '';
 
+        $requestSegments = [];
+
         if($leadSegments = $this->leadFlightSegments) {
             $firstSegment = $leadSegments[0];
             $lastSegment = end($leadSegments);
@@ -1875,20 +1877,44 @@ Sales - Kivork",
             }
 
 
-            $arriveAirport = Airport::find()->where(['iata' => $lastSegment->destination])->one();
+            $arriveAirport = Airport::find()->where(['iata' => $firstSegment->destination])->one();
             if($arriveAirport) {
                 $arriveCity = $arriveAirport->city;
             } else {
-                $arriveCity = $lastSegment->destination;
+                $arriveCity = $firstSegment->destination;
+            }
+
+
+            /** @property string $origin
+            * @property string $destination
+            * @property string $departure
+            * @property int $flexibility
+            * @property string $flexibility_type
+            * @property string $created
+            * @property string $updated
+            * @property string $origin_label
+            * @property string $destination_label*/
+
+
+            foreach($leadSegments as $segmentModel) {
+                $requestSegments[] = [
+                    'departureDate' => $segmentModel->departure,
+                    'originIATA' => $segmentModel->origin,
+                    'destinationIATA' => $segmentModel->destination,
+                    'originLabel' => $segmentModel->origin,
+                    'destinationLabel' => $segmentModel->destination,
+                ];
             }
 
         }
+
 
         $content_data['request'] = [
             'arriveCity'    => $arriveCity,
             'departCity'    => $departCity,
             'arriveIATA'    => $arriveIATA,
             'departIATA'    => $departIATA,
+            'segments'      => $requestSegments,
             'tripType'      => $this->trip_type,
             'cabinClass'    => $this->cabin,
             'paxAdt'        => (int) $this->adults,
@@ -2387,341 +2413,4 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
     }
 
 
-
-    public static function getDivs($div = null)
-    {
-        $mapping = [
-            self::DIV_GRID_IN_SNOOZE => 'Leads in snooze',
-            self::DIV_GRID_WITH_OUT_EMAIL => 'Leads with out email',
-            self::DIV_GRID_WITH_EMAIL => 'Leads with email',
-            self::DIV_GRID_SEND_QUOTES => 'Leads with send quotes'
-        ];
-        if ($div === null) {
-            return $mapping;
-        } else {
-            return $mapping[$div];
-        }
-    }
-
-    /**
-     * @return array|null
-     */
-    public static function getBadges()
-    {
-        $badges = array_flip(self::getLeadQueueType());
-        $projectIds = array_keys(ProjectEmployeeAccess::getProjectsByEmployee());
-
-        $userId = Yii::$app->user->id;
-
-        foreach ($badges as $key => $value) {
-            $status = [];
-            switch ($key) {
-                case 'inbox':
-                    $status[] = self::STATUS_PENDING;
-                    break;
-                case 'follow-up':
-                    $status[] = self::STATUS_FOLLOW_UP;
-                    break;
-                case 'booked':
-                    $status[] = self::STATUS_BOOKED;
-                    break;
-                case 'sold':
-                    $status[] = self::STATUS_SOLD;
-                    break;
-                case 'trash':
-                    $status[] = self::STATUS_TRASH;
-                    break;
-                default:
-                    $status = [
-                        self::STATUS_PROCESSING, self::STATUS_ON_HOLD,
-                        self::STATUS_SNOOZE
-                    ];
-                    break;
-            }
-
-            $query = self::find()
-                ->where(['IN', self::tableName() . '.status', $status])
-                ->andWhere(['IN', self::tableName() . '.project_id', $projectIds]);
-
-            if ((Yii::$app->authManager->getAssignment('admin', $userId) || Yii::$app->authManager->getAssignment('supervision', $userId)) && in_array($key, ['trash', 'sold', 'follow-up', 'booked'])) {
-                $query->andWhere(['=', 'created', date('Y-m-d')]);
-            }
-
-            if (Yii::$app->user->identity->role == 'agent' && in_array($key, ['trash'])) {
-                $badges[$key] = 0;
-                continue;
-            }
-
-            if (Yii::$app->user->identity->role == 'agent' && in_array($key, ['sold'])) {
-                $query->andWhere([
-                    'employee_id' => $userId
-                ]);
-            }
-
-            if (in_array($key, ['processing'])) {
-                $query->andWhere([
-                    'employee_id' => $userId
-                ]);
-            }
-
-            $query->select(['COUNT(id) as cntd'])->limit(1);
-
-            $badges[$key] = $query->scalar();
-        }
-
-        return $badges;
-    }
-
-
-
-    /*
-    public static function search($queue, $searchModel = null, $divGridBy = null)
-    {
-        $projectIds = array_keys(ProjectEmployeeAccess::getProjectsByEmployee());
-        $status = [];
-        switch ($queue) {
-            case 'inbox':
-                $status[] = self::STATUS_PENDING;
-                break;
-            case 'follow-up':
-                $status[] = self::STATUS_FOLLOW_UP;
-                break;
-            case 'booked':
-                $status[] = self::STATUS_BOOKED;
-                break;
-            case 'sold':
-                $status[] = self::STATUS_SOLD;
-                break;
-            case 'trash':
-                $status[] = self::STATUS_TRASH;
-                break;
-            default:
-                if ($divGridBy === self::DIV_GRID_IN_SNOOZE) {
-                    $status[] = self::STATUS_SNOOZE;
-                } else {
-                    $status = [self::STATUS_PROCESSING, self::STATUS_ON_HOLD];
-                }
-                break;
-        }
-
-
-        $lastActivityNoteQuery = new Query();
-        $lastActivityNoteQuery->select([
-            'MAX(' . Note::tableName() . '.created) AS last_activity',
-            Note::tableName() . '.lead_id'
-        ])->from(Note::tableName())
-            ->innerJoin(Lead::tableName(), Lead::tableName() . '.`id` = ' . Note::tableName() . '.`lead_id`')
-            ->where(Lead::tableName() . '.`status` IN (' . implode(',', $status) . ')')
-            ->groupBy(' lead_id');
-
-        $lastActivityLeadQuery = new Query();
-        $lastActivityLeadQuery->select([
-            Lead::tableName() . '.updated AS last_activity',
-            Lead::tableName() . '.id AS lead_id'
-        ])->from(Lead::tableName())
-            ->where(Lead::tableName() . '.`status` IN (' . implode(',', $status) . ')');
-
-        $lastActivityTable = sprintf('(SELECT MAX(last_activity) AS last_activity, lead_id FROM(%s UNION %s) AS lastActivityUnion GROUP BY `lead_id`)  AS lastActivityTable',
-            $lastActivityNoteQuery->createCommand()->rawSql,
-            $lastActivityLeadQuery->createCommand()->rawSql
-        );
-
-        //var_dump($lastActivityTable);
-
-        $selected = [
-            Lead::tableName() . '.id', Lead::tableName() . '.bo_flight_id',
-            Lead::tableName() . '.adults', Lead::tableName() . '.children',
-            Lead::tableName() . '.infants', Lead::tableName() . '.cabin',
-            Lead::tableName() . '.status', Lead::tableName() . '.employee_id',
-            Lead::tableName() . '.rating', Lead::tableName() . '.source_id',
-            Lead::tableName() . '.additional_information', Source::tableName() . '.name',
-            LeadFlightSegment::tableName() . '.destination', Employee::tableName() . '.username',
-            LeadFlightSegment::tableName() . '.departure', Lead::tableName() . '.updated AS updated',
-            Lead::tableName() . '.created', Client::tableName() . '.first_name', Client::tableName() . '.last_name', 'lastActivityTable.last_activity AS last_activity',
-            Airport::tableName() . '.city', Reason::tableName() . '.reason', Lead::tableName() . '.snooze_for', Lead::tableName() . '.l_grade', Lead::tableName() . '.l_answered',
-            'g_ce.emails', 'g_cp.phones', 'all_q.send_q', 'all_q.not_send_q', 'g_detail_lfs.flight_detail'
-        ];
-
-        $query = new Query();
-        $query->from(Lead::tableName())
-            ->innerJoin(Source::tableName(), Source::tableName() . '.id = ' . Lead::tableName() . '.source_id')
-            ->innerJoin(LeadFlightSegment::tableName(), LeadFlightSegment::tableName() . '.lead_id = ' . Lead::tableName() . '.id')
-            ->innerJoin('(' . (new Query)
-                    ->select(['lead_id', 'MIN(id) as first_fs'])
-                    ->from(LeadFlightSegment::tableName())
-                    ->groupBy('lead_id')
-                    ->createCommand()->rawSql . ') as g_lfs',
-                'g_lfs.lead_id = ' . LeadFlightSegment::tableName() . '.lead_id AND g_lfs.first_fs = ' . LeadFlightSegment::tableName() . '.id'
-            )
-            ->leftJoin(Airport::tableName(), Airport::tableName() . '.iata = ' . LeadFlightSegment::tableName() . '.destination')
-            ->leftJoin('(' . (new Query())
-                    ->select(['lead_id', 'MAX(id) as last_reason'])
-                    ->from(Reason::tableName())
-                    ->groupBy('lead_id')
-                    ->createCommand()->rawSql . ') as g_reason',
-                'g_reason.lead_id = ' . Lead::tableName() . '.id'
-            )
-            ->leftJoin(Reason::tableName(), Reason::tableName() . '.id = g_reason.last_reason')
-            ->leftJoin($lastActivityTable,
-                'lastActivityTable.lead_id = ' . Lead::tableName() . '.id')
-            ->innerJoin('(' . (new Query)
-                    ->select(['lead_id', 'GROUP_CONCAT(CONCAT(departure, \' \', origin, \'-\', destination) SEPARATOR \'<br>\') AS flight_detail'])
-                    ->from(LeadFlightSegment::tableName())
-                    ->groupBy('lead_id')
-                    ->createCommand()->rawSql . ') as g_detail_lfs',
-                'g_detail_lfs.lead_id = ' . Lead::tableName() . '.id'
-            )
-            ->innerJoin(Client::tableName(), Client::tableName() . '.id = ' . Lead::tableName() . '.client_id')
-            ->leftJoin('(' . (new Query)
-                    ->select(['GROUP_CONCAT(email SEPARATOR \'<br>\') AS emails', 'client_id'])
-                    ->from(ClientEmail::tableName())
-                    ->groupBy('client_id')
-                    ->createCommand()->rawSql . ') as g_ce',
-                'g_ce.client_id = ' . Client::tableName() . '.id'
-            )
-            ->leftJoin('(' . (new Query)
-                    ->select(['GROUP_CONCAT(phone SEPARATOR \'<br>\') AS phones', 'client_id'])
-                    ->from(ClientPhone::tableName())
-                    ->groupBy('client_id')
-                    ->createCommand()->rawSql . ') as g_cp',
-                'g_cp.client_id = ' . Client::tableName() . '.id'
-            )
-            ->leftJoin('(' . (new Query)
-                    ->select([
-                        'lead_id',
-                        'SUM(CASE WHEN status IN (2, 4, 5) THEN 1 ELSE 0 END) AS send_q',
-                        'SUM(CASE WHEN status NOT IN (2, 4, 5) THEN 1 ELSE 0 END) AS not_send_q',
-                    ])
-                    ->from(Quote::tableName())
-                    ->groupBy('lead_id')
-                    ->createCommand()->rawSql . ') as all_q',
-                'all_q.lead_id = ' . Lead::tableName() . '.id'
-            )
-            ->leftJoin(Employee::tableName(), Employee::tableName() . '.id = ' . Lead::tableName() . '.employee_id');
-
-        if (in_array($queue, ['sold', 'booked'])) {
-            $selected[] = Quote::tableName() . '.reservation_dump';
-            $selected[] = Quote::tableName() . '.check_payment';
-            $selected[] = Quote::tableName() . '.fare_type';
-            $selected[] = 'g_qp.selling';
-            $selected[] = 'g_qp.mark_up';
-
-            $query->leftJoin(Quote::tableName(), Quote::tableName() . '.lead_id = ' . Lead::tableName() . '.id AND ' . Quote::tableName() . '.status = :status', [
-                ':status' => Quote::STATUS_APPLIED
-            ]);
-            $query->leftJoin('(' . (new Query)
-                    ->select(['quote_id', 'SUM(selling) as selling', 'SUM(mark_up + extra_mark_up) as mark_up'])
-                    ->from(QuotePrice::tableName())
-                    ->groupBy('quote_id')
-                    ->createCommand()->rawSql . ') as g_qp',
-                'g_qp.quote_id = ' . Quote::tableName() . '.id'
-            );
-        }
-
-        $query->select($selected);
-
-        $query->where(['IN', Lead::tableName() . '.status', $status])
-            ->andWhere(['IN', Lead::tableName() . '.project_id', $projectIds]);
-
-
-        if (Yii::$app->user->identity->role == 'agent' && in_array($queue, ['sold'])) {
-            $query->andWhere([
-                Lead::tableName() . '.employee_id' => Yii::$app->user->identity->getId()
-            ]);
-        }
-
-        if ($searchModel !== null && in_array($queue, ['processing-all', 'trash'])) {
-            $query->andFilterWhere([
-                Lead::tableName() . '.employee_id' => $searchModel->employee_id
-            ]);
-        }
-
-        if ($divGridBy !== null) {
-            switch ($divGridBy) {
-                case self::DIV_GRID_WITH_OUT_EMAIL:
-                    $query->andWhere('g_ce.emails IS NULL');
-                    break;
-                case self::DIV_GRID_WITH_EMAIL:
-                    $subQuery = new Query();
-                    $subQuery->select(['lead_id'])->from(Quote::tableName())->where(['IN', 'status', [
-                        Quote::STATUS_SEND,
-                        Quote::STATUS_OPENED,
-                        Quote::STATUS_APPLIED
-                    ]]);
-                    $query->andWhere('g_ce.emails IS NOT NULL');
-                    $query->andWhere(['NOT IN', Lead::tableName() . '.id', ArrayHelper::map($subQuery->all(), 'lead_id', 'lead_id')]);
-                    break;
-                case self::DIV_GRID_SEND_QUOTES:
-                    $subQuery = new Query();
-                    $subQuery->select(['lead_id'])->from(Quote::tableName())->where(['IN', 'status', [
-                        Quote::STATUS_SEND,
-                        Quote::STATUS_OPENED,
-                        Quote::STATUS_APPLIED
-                    ]]);
-                    $query->andWhere(['IN', Lead::tableName() . '.id', ArrayHelper::map($subQuery->all(), 'lead_id', 'lead_id')]);
-                    break;
-            }
-        }
-
-        if (in_array($queue, ['follow-up'])) {
-            $showAll = Yii::$app->request->cookies->getValue(self::getCookiesKey(), true);
-            if (!$showAll) {
-                $query->andWhere([
-                    'NOT IN', Lead::tableName() . '.id', self::unprocessedByAgentInFollowUp()
-                ]);
-            }
-        }
-
-        if (in_array($queue, ['processing'])) {
-            $query->andWhere([
-                Lead::tableName() . '.employee_id' => Yii::$app->user->identity->getId()
-            ]);
-        }
-
-        //$query->distinct = true;
-
-        //var_dump($query->createCommand()->rawSql);
-        //var_dump($query->count());
-        //die;
-        $dataProvider = new ActiveDataProvider([
-            'query' => $query,
-            'pagination' => [
-                'pageSize' => 100,
-            ]
-        ]);
-
-        if ($queue != 'trash') {
-            $dataProvider->sort->defaultOrder = !in_array($queue, ['sold', 'booked'])
-                ? ['pending' => SORT_DESC]
-                : ['pending_last_status' => SORT_DESC];
-        } else {
-            $dataProvider->sort->defaultOrder = ['pending_in_trash' => SORT_DESC];
-            $dataProvider->sort->attributes['pending_in_trash'] = [
-                'asc' => [Lead::tableName() . '.updated' => SORT_ASC],
-                'desc' => [Lead::tableName() . '.updated' => SORT_DESC],
-            ];
-        }
-        $dataProvider->sort->attributes['last_activity'] = [
-            'asc' => ['lastActivityTable.last_activity' => SORT_ASC],
-            'desc' => ['lastActivityTable.last_activity' => SORT_DESC],
-        ];
-        $dataProvider->sort->attributes['pending'] = [
-            'asc' => [Lead::tableName() . '.created' => SORT_ASC],
-            'desc' => [Lead::tableName() . '.created' => SORT_DESC],
-        ];
-        $dataProvider->sort->attributes['pending_last_status'] = [
-            'asc' => [Lead::tableName() . '.updated' => SORT_ASC],
-            'desc' => [Lead::tableName() . '.updated' => SORT_DESC],
-        ];
-        $dataProvider->sort->attributes['rating'] = [
-            'asc' => [Lead::tableName() . '.rating' => SORT_ASC],
-            'desc' => [Lead::tableName() . '.rating' => SORT_DESC],
-        ];
-        $dataProvider->sort->attributes['source_id'] = [
-            'asc' => [Lead::tableName() . '.source_id' => SORT_DESC],
-            'desc' => [Lead::tableName() . '.source_id' => SORT_ASC],
-        ];
-
-        return $dataProvider;
-    }*/
 }

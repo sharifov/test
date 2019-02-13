@@ -1350,6 +1350,8 @@ class Quote extends \yii\db\ActiveRecord
 
 
 
+
+
     public function getInfoForEmail2() : array
     {
         $trips = [];

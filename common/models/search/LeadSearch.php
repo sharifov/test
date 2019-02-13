@@ -106,7 +106,7 @@ class LeadSearch extends Lead
      *
      * @return ActiveDataProvider
      */
-    public function search2($params)
+    public function search($params)
     {
         $query = Lead::find();
 

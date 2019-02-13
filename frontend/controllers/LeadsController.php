@@ -99,7 +99,7 @@ class LeadsController extends FController
         if($isAgent) {
             $dataProvider = $searchModel->searchAgent($params);
         } else {
-            $dataProvider = $searchModel->search2($params);
+            $dataProvider = $searchModel->search($params);
         }
 
         /*if($isAgent) {
@@ -235,7 +235,7 @@ class LeadsController extends FController
             $params['LeadSearch']['supervision_id'] = Yii::$app->user->id;
         }
 
-        $dataProvider = $searchModel->search2($params);
+        $dataProvider = $searchModel->search($params);
 
         return $this->render('export', [
             'searchModel' => $searchModel,
