@@ -44,7 +44,7 @@ use common\components\SearchService;
  * @property string $snooze_for
  * @property boolean $called_expert
  * @property string $discount_id
- * @property string $bo_flight_id
+ * @property int $bo_flight_id
  * @property string $additional_information
  * @property int $l_answered
  * @property int $l_grade
@@ -192,15 +192,15 @@ class Lead extends ActiveRecord
 
             [['trip_type', 'cabin'], 'required'],
             [['adults', 'children', 'infants', 'source_id'], 'required'], //'except' => self::SCENARIO_API],
-            [['client_id', 'employee_id', 'status', 'project_id', 'source_id', 'rating', 'l_grade', 'clone_id'], 'integer'],
+            [['client_id', 'employee_id', 'status', 'project_id', 'source_id', 'rating', 'l_grade', 'clone_id', 'bo_flight_id'], 'integer'],
             [['adults', 'children', 'infants'], 'integer', 'max' => 9],
             [['adults'], 'integer', 'min' => 1],
             [['l_answered'], 'boolean'],
-            [['notes_for_experts', 'request_ip_detail', 'additional_information'], 'string'],
+            [['notes_for_experts', 'request_ip_detail'], 'string'],
             [['final_profit', 'tips'], 'number'],
-            [['uid', 'request_ip', 'offset_gmt', 'discount_id', 'bo_flight_id', 'description'], 'string', 'max' => 255],
+            [['uid', 'request_ip', 'offset_gmt', 'discount_id', 'description'], 'string', 'max' => 255],
 
-            [['created', 'updated', 'snooze_for', 'called_expert'], 'safe'],
+            [['created', 'updated', 'snooze_for', 'called_expert', 'additional_information'], 'safe'],
 
             [['uid'], 'string', 'max' => 255],
             [['trip_type'], 'string', 'max' => 2],
@@ -236,6 +236,7 @@ class Lead extends ActiveRecord
             'updated' => 'Updated',
             'l_answered' => 'Answered',
             'l_grade' => 'Grade',
+            'bo_flight_id' => '(BO) Flight ID',
         ];
     }
 
@@ -1342,10 +1343,10 @@ Sales - Kivork",
                 //$this->updated = date('Y-m-d H:i:s');
             }
 
-            $this->adults = (int)$this->adults;
-            $this->children = (int)$this->children;
-            $this->infants = (int)$this->infants;
-            $this->bo_flight_id = sprintf('%d', $this->bo_flight_id);
+            $this->adults = (int) $this->adults;
+            $this->children = (int) $this->children;
+            $this->infants = (int) $this->infants;
+            $this->bo_flight_id = (int) $this->bo_flight_id;
 
             return true;
         }

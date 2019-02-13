@@ -20,6 +20,7 @@ use common\models\ProjectEmployeeAccess;
 use common\models\LeadFlow;
 use common\models\ProfitSplit;
 use common\models\TipsSplit;
+use yii\helpers\VarDumper;
 
 /**
  * LeadSearch represents the model behind the search form of `common\models\Lead`.
@@ -57,7 +58,7 @@ class LeadSearch extends Lead
     public function rules()
     {
         return [
-            [['id', 'client_id', 'employee_id', 'status', 'project_id', 'adults', 'children', 'infants', 'rating', 'called_expert', 'cnt', 'l_grade', 'l_answered', 'supervision_id', 'limit'], 'integer'],
+            [['id', 'client_id', 'employee_id', 'status', 'project_id', 'adults', 'children', 'infants', 'rating', 'called_expert', 'cnt', 'l_grade', 'l_answered', 'supervision_id', 'limit', 'bo_flight_id'], 'integer'],
             [['email_status', 'quote_status'], 'integer'],
 
             [['client_name', 'client_email', 'client_phone','quote_pnr'], 'string'],
@@ -65,7 +66,7 @@ class LeadSearch extends Lead
             //['created_date_from', 'default', 'value' => '2018-01-01'],
             //['created_date_to', 'default', 'value' => date('Y-m-d')],
 
-            [['uid', 'trip_type', 'cabin', 'notes_for_experts', 'created', 'updated', 'request_ip', 'request_ip_detail', 'offset_gmt', 'snooze_for', 'discount_id', 'bo_flight_id',
+            [['uid', 'trip_type', 'cabin', 'notes_for_experts', 'created', 'updated', 'request_ip', 'request_ip_detail', 'offset_gmt', 'snooze_for', 'discount_id',
                 'created_date_from', 'created_date_to', 'depart_date_from', 'depart_date_to', 'source_id', 'statuses', 'sold_date_from', 'sold_date_to', 'processing_filter'], 'safe'],
         ];
     }

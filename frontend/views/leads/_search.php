@@ -23,13 +23,16 @@ use yii\widgets\ActiveForm;
         <div class="col-md-3">
 
             <div class="row">
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <?= $form->field($model, 'id')->input('number', ['min' => 1]) ?>
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <?= $form->field($model, 'uid') ?>
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-3">
+                    <?= $form->field($model, 'bo_flight_id')->input('number', ['min' => 0]) ?>
+                </div>
+                <div class="col-md-3">
                     <?= $form->field($model, 'discount_id')->input('number', ['min' => 1]) ?>
                 </div>
             </div>
@@ -249,7 +252,6 @@ use yii\widgets\ActiveForm;
 
             <div class="row">
                 <div class="col-md-6">
-                    <?php  echo $form->field($model, 'bo_flight_id')->label('BO Sale ID') ?>
                 </div>
                 <div class="col-md-6">
                     <?php  echo $form->field($model, 'request_ip') ?>
