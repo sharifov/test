@@ -1897,12 +1897,16 @@ Sales - Kivork",
 
 
             foreach($leadSegments as $segmentModel) {
+
+                $destAirport = Airport::find()->where(['iata' => $segmentModel->destination])->one();
+                $origAirport = Airport::find()->where(['iata' => $segmentModel->origin])->one();
+
                 $requestSegments[] = [
                     'departureDate' => $segmentModel->departure,
                     'originIATA' => $segmentModel->origin,
                     'destinationIATA' => $segmentModel->destination,
-                    'originLabel' => $segmentModel->origin,
-                    'destinationLabel' => $segmentModel->destination,
+                    'originCity' => $origAirport ? $origAirport->city : $segmentModel->origin,
+                    'destinationCity' => $destAirport ? $destAirport->city : $segmentModel->destination,
                 ];
             }
 
