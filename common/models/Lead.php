@@ -1224,15 +1224,17 @@ Sales - Kivork",
     }
 
 
-    public function getClientTime2()
+    /**
+     * @return string
+     * @throws \Exception
+     */
+    public function getClientTime2(): string
     {
         $clientTime = '-';
-        $offset_gmt = $this->offset_gmt;
         $offset = false;
 
-
-        if ($offset_gmt) {
-            $offset = str_replace('.', ':', $offset_gmt);
+        if ($this->offset_gmt) {
+            $offset = str_replace('.', ':', $this->offset_gmt);
 
             if (isset($offset[0])) {
                 if (strpos($offset, '+') === 0) {
@@ -1242,23 +1244,31 @@ Sales - Kivork",
                 }
             }
 
+        } elseif ($this->leadFlightSegments) {
 
-        } else {
-
-            if ($this->leadFlightSegments) {
-                $firstSegment = $this->leadFlightSegments[0];
-                $airport = Airport::findIdentity($firstSegment->origin);
-                if ($airport && $airport->dst) {
-                    $offset = $airport->dst;
-                    $offset_gmt = $airport->dst;
-                }
+            $firstSegment = $this->leadFlightSegments[0];
+            $airport = Airport::findIdentity($firstSegment->origin);
+            if ($airport && $airport->dst) {
+                $offset = $airport->dst;
+                //$offset_gmt = $airport->dst;
             }
-
         }
 
+
         if ($offset) {
-            $clientTime = date("H:i", strtotime("now $offset GMT"));
-            $clientTime = '<i class="fa fa-clock-o"></i> <b>' . Html::encode($clientTime) . '</b>'; //<br/>(GMT: ' .$offset_gmt . ')';
+            /*$offset = -$offset;
+
+            if($offset > 0) {
+                $offset = '+' . $offset;
+            }
+
+            $clientTime = date('H:i', strtotime("now $offset GMT"));*/
+
+
+            $tz = new \DateTimeZone($offset);
+            $dt = new \DateTime(strtotime(time()), $tz);
+            $clientTime = $dt->format('H:i');
+            $clientTime = '<b title="TZ ('.$offset.') '.($this->offset_gmt ? 'by IP': 'by IATA').'"><i class="fa fa-clock-o '.($this->offset_gmt ? 'success': '').'"></i> ' . Html::encode($clientTime) . '</b>'; //<br/>(GMT: ' .$offset_gmt . ')';
         }
 
         return $clientTime;
