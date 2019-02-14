@@ -79,7 +79,7 @@ use common\components\SearchService;
 class Lead extends ActiveRecord
 {
 
-    public const AGENT_PROCESSING_FEE = 25.0;
+    public const AGENT_PROCESSING_FEE_PER_PAX = 25.0;
 
     public CONST
         TRIP_TYPE_ONE_WAY = 'OW',
@@ -1427,7 +1427,7 @@ Sales - Kivork",
 
 
         if($this->final_profit) {
-            $this->finalProfit = (float) $this->final_profit - self::AGENT_PROCESSING_FEE;
+            $this->finalProfit = (float) $this->final_profit - (self::AGENT_PROCESSING_FEE_PER_PAX * (int) ($this->adults + $this->children));
         } else {
             $this->finalProfit = $this->final_profit;
         }
