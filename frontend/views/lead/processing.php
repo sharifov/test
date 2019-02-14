@@ -114,13 +114,13 @@ $this->params['breadcrumbs'][] = $this->title;
         ],*/
 
         [
-            //'attribute' => 'client_id',
+            //'attribute' => 'clientTime',
             'header' => 'Client time',
             'format' => 'raw',
             'value' => function(\common\models\Lead $model) {
                 return $model->getClientTime2();
             },
-            'options' => ['style' => 'width:160px'],
+            //'options' => ['style' => 'width:80px'],
             //'filter' => \common\models\Employee::getList()
         ],
 
@@ -377,6 +377,11 @@ $js = <<<JS
             window.location = url;
         }
     });
+
+/*$(document).on('pjax:end', function() {
+    setClienTime();
+});*/
+
 JS;
 $this->registerJs($js);
 
