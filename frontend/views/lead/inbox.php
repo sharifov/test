@@ -372,16 +372,28 @@ $this->params['breadcrumbs'][] = $this->title;
 
 
 
-        [
+        /*[
             'header' => 'Client time',
             'format' => 'raw',
             'value' => function (\common\models\Lead $model) {
                 return $model->getClientTime();
             },
-            'options' => [
-                'style' => 'width:110px'
-            ]
+            'visible' => ! $isAgent,
+            //'options' => ['style' => 'width:110px'],
+
+        ],*/
+
+
+        [
+            'header' => 'Client time',
+            'format' => 'raw',
+            'value' => function(\common\models\Lead $model) {
+                return $model->getClientTime2();
+            },
+            //'options' => ['style' => 'width:80px'],
+            //'filter' => \common\models\Employee::getList()
         ],
+
 
         [
             'header' => 'Project',

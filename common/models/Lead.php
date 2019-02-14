@@ -1264,8 +1264,17 @@ Sales - Kivork",
 
             $clientTime = date('H:i', strtotime("now $offset GMT"));*/
 
+            if($offset > 0) {
+                $offset = '+'.$offset;
+            }
 
-            $tz = new \DateTimeZone($offset);
+            try {
+                $tz = new \DateTimeZone($offset);
+            } catch (\Exception $exception) {
+                //echo $offset; exit;
+                //$offset = 0;
+                $tz = new \DateTimeZone('00:00');
+            }
             $dt = new \DateTime(strtotime(time()), $tz);
             $clientTime = $dt->format('H:i');
             $clientTime = '<b title="TZ ('.$offset.') '.($this->offset_gmt ? 'by IP': 'by IATA').'"><i class="fa fa-clock-o '.($this->offset_gmt ? 'success': '').'"></i> ' . Html::encode($clientTime) . '</b>'; //<br/>(GMT: ' .$offset_gmt . ')';
