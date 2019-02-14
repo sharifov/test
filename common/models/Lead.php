@@ -606,18 +606,15 @@ class Lead extends ActiveRecord
      */
     public static function getCountdownTimer(\DateTime $expired, $spanId): string
     {
+        //var expired = moment.tz("' . $expired->format('Y-m-d H:i:s') . '", "UTC");
+
         return '<span id="' . $spanId . '" data-toggle="tooltip" data-placement="right" data-original-title="' . $expired->format('Y-m-d H:i') . '"></span>
                 <script type="text/javascript">
-                    var expired = moment.tz("' . $expired->format('Y-m-d H:i:s') . '", "UTC");
-                    $("#' . $spanId . '").countdown(expired.toDate(), function(event) {
+                    $("#' . $spanId . '").countdown("' . $expired->format('Y/m/d H:i:s') . '", function(event) {
                         if (event.elapsed == false) {
-                            $(this).text(
-                                event.strftime(\'%Dd %Hh %Mm\')
-                            );
+                            $(this).text(event.strftime(\'%Dd %Hh %Mm\'));
                         } else {
-                            $(this).text(
-                                event.strftime(\'On Wake\')
-                            ).addClass(\'text-success\');
+                            $(this).text(event.strftime(\'On Wake\')).addClass(\'text-success\');
                         }
                     });
                 </script>';
