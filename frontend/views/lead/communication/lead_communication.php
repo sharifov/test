@@ -648,16 +648,17 @@ $js = <<<JS
     });
     
     $('body').on("change", '#c_email_tpl_id', function () {
-        
-        
+                
         var type_id = $('#c_type_id').val();
         
-        if($(this).val() == 1 && type_id != 1) {
-            $('#email-textarea-div').hide();
-            $('#email-subtitle-group').hide();
-        } else {
-            $('#email-textarea-div').show();
-            $('#email-subtitle-group').show();
+        if(type_id == 1) {
+            if($(this).val() == 1) {
+                $('#email-textarea-div').hide();
+                $('#email-subtitle-group').hide();
+            } else {
+                $('#email-textarea-div').show();
+                $('#email-subtitle-group').show();
+            }
         }
     });
 
