@@ -367,6 +367,7 @@ class CommunicationController extends ApiBaseController
                 $call_user_id = null;
                 $call_sip_id = null;
                 $call_project_id = null;
+                $call_agent_username = null;
 
                 //$upp = UserProjectParams::find()->where(['upp_phone_number' => $agent_phone_number])->orWhere(['upp_tw_phone_number' => $agent_phone_number])->one();
                 $upp = UserProjectParams::find()->where(['upp_tw_phone_number' => $agent_phone_number])->one();
@@ -376,7 +377,7 @@ class CommunicationController extends ApiBaseController
 
 
                 if($upp && $user = $upp->uppUser) {
-
+                    $call_agent_username = $user->username;
                     $call_user_id = (int) $upp->upp_user_id;
                     $call_sip_id = $upp->upp_tw_sip_id;
                     $call_project_id = (int) $upp->upp_project_id;
@@ -541,6 +542,7 @@ class CommunicationController extends ApiBaseController
                         $data['client_phone'] = $client_phone_number;
                         $data['agent_phone'] = $agent_phone_number;
 
+
                         //$data['post'] = $post;
 
                         $data['status'] = $call->c_call_status;
@@ -566,6 +568,7 @@ class CommunicationController extends ApiBaseController
                         $response['agent_phone_number'] = $agent_phone_number;
                         $response['client_phone_number'] = $client_phone_number;
                         $response['general_phone_number'] = $generalLineProject;
+                        $response['agent_username'] = $call_agent_username;
 
                     /*} else {
                         $response['error'] = 'Agent SIP account is empty';
