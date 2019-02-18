@@ -1290,7 +1290,42 @@ Sales - Kivork",
                 $clientTime = "now $offset GMT";
             }*/
 
-            $clientTime = $offset;
+            //$offset = '-2';
+
+            $timezoneName = timezone_name_from_abbr('',intval($offset) * 60 * 60,0);
+
+            /*$date = new \DateTime(time(), new \DateTimeZone($timezoneName));
+           // $clientTime = Yii::$app->formatter->asTime() $date->format('H:i');
+            $clientTime = $date->format('H:i');
+
+
+
+            $utcTime  = new \DateTime('now', new \DateTimeZone('UTC'));
+
+
+            $gmtTimezone = new \DateTimeZone($timezoneName);
+            $myDateTime = new \DateTime('2019-02-18 13:28', $gmtTimezone);
+
+
+
+
+
+            $clientTime = $utcTime->format('H:i');*/
+
+
+
+            //-----------------------------------------------------------
+
+
+            $dt = new \DateTime();
+            if($timezoneName) {
+                $timezone = new \DateTimeZone($timezoneName);
+                $dt->setTimezone($timezone);
+            }
+            $clientTime =  $dt->format('H:i');
+
+
+            //$clientTime = $clientTime; . ' '.$timezone->getName();  //$offset
 
             $clientTime = '<b title="TZ ('.$offset.') '.($this->offset_gmt ? 'by IP': 'by IATA').'"><i class="fa fa-clock-o '.($this->offset_gmt ? 'success': '').'"></i> ' . Html::encode($clientTime) . '</b>'; //<br/>(GMT: ' .$offset_gmt . ')';
 
