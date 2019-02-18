@@ -648,7 +648,11 @@ $js = <<<JS
     });
     
     $('body').on("change", '#c_email_tpl_id', function () {
-        if($(this).val() == 1) {
+        
+        
+        var type_id = $('#c_type_id').val();
+        
+        if($(this).val() == 1 && type_id != 1) {
             $('#email-textarea-div').hide();
             $('#email-subtitle-group').hide();
         } else {
