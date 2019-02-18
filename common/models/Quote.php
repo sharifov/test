@@ -1120,10 +1120,7 @@ class Quote extends \yii\db\ActiveRecord
     }
 
 
-    /**
-     * @param QuoteTrip $trip
-     * @return array
-     */
+
     public function getBaggageInfoByTrip(QuoteTrip $trip) : array
     {
 
