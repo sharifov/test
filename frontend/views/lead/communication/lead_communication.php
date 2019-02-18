@@ -167,7 +167,13 @@ $c_type_id = $comForm->c_type_id;
                 </div>
                 <?php endif; ?>
 
-                <div class="btn-wrapper">
+                <div class="row">
+                    <div class="col-md-12">
+                        <b>Content size: <?=Yii::$app->formatter->asShortSize(mb_strlen($previewEmailForm->e_email_message), 1) ?></b><hr>
+                    </div>
+                </div>
+
+                <div class="btn-wrapper text-right">
                     <?= Html::submitButton('<i class="fa fa-envelope-o"></i> Send Email', ['class' => 'btn btn-lg btn-primary']) ?>
                     <?php if($isAdmin):?>
                         <?= Html::button('<i class="fa fa-list"></i> Show Email data (for Admins)', ['class' => 'btn btn-lg btn-warning', 'onclick' => '$("#email-data-content-div").toggle()']) ?>
@@ -368,8 +374,9 @@ $c_type_id = $comForm->c_type_id;
                             <?= Html::submitButton('<i class="fa fa-envelope-o"></i> Send SMS', ['class' => 'btn btn-lg btn-primary']) ?>
                         </div>
                     </div>
+
                     <div id="email-input-box" class="message-field-email" style="display: none;">
-                        <div class="form-group">
+                        <div class="form-group" id="email-textarea-div">
                             <?//= $form->field($comForm, 'c_email_message')->textarea(['rows' => 4, 'class' => 'form-control', 'id' => 'email-message']) ?>
 
                             <?= $form->field($comForm, 'c_email_message')->widget(\dosamigos\ckeditor\CKEditor::class, [
@@ -418,7 +425,7 @@ $c_type_id = $comForm->c_type_id;
                                     Error Call
                                 <?php endif;?>
                             </div>
-                        <?php if(1===1 || $comForm->c_voice_status == 1):?>
+                        <?php if($comForm->c_voice_status == 1):?>
                             <div class="call-box__status call-box__status--call" style="display: block" id="div-call-time"><i class="fa fa-clock-o"></i>&nbsp;<strong id="div-call-timer">00:00</strong></div>
                         <?php endif;?>
                         <div class="call-box__btns">
@@ -501,6 +508,8 @@ $js = <<<JS
         }
         
         $('#c_sms_tpl_id').trigger('change');
+        $('#c_email_tpl_id').trigger('change');
+                
         $('#sms-message').countSms('#sms-counter');
         $('#preview-sms-message').countSms('#preview-sms-counter');
         
@@ -629,6 +638,16 @@ $js = <<<JS
             $('#sms-textarea-div').hide();
         } else {
             $('#sms-textarea-div').show();
+        }
+    });
+    
+    $('body').on("change", '#c_email_tpl_id', function () {
+        if($(this).val() == 1) {
+            $('#email-textarea-div').hide();
+            $('#email-subtitle-group').hide();
+        } else {
+            $('#email-textarea-div').show();
+            $('#email-subtitle-group').show();
         }
     });
 
