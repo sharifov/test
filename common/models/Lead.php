@@ -1265,16 +1265,37 @@ Sales - Kivork",
                 $offset = '+'.$offset;
             }
 
-            try {
+            /*try {
                 $tz = new \DateTimeZone($offset);
+                $dt = new \DateTime(strtotime(time()), $tz);
+                $clientTime = $dt->format('H:i');
+                //$clientTime = '<b title="TZ ('.$offset.') '.($this->offset_gmt ? 'by IP': 'by IATA').'"><i class="fa fa-clock-o '.($this->offset_gmt ? 'success': '').'"></i> ' . Html::encode($clientTime) . '</b>'; //<br/>(GMT: ' .$offset_gmt . ')';
+                //$clientTime = $offset;
             } catch (\Exception $exception) {
                 //echo $offset; exit;
                 //$offset = 0;
-                $tz = new \DateTimeZone('00:00');
-            }
-            $dt = new \DateTime(strtotime(time()), $tz);
-            $clientTime = $dt->format('H:i');
+                //$tz = new \DateTimeZone('00:00');
+                //$clientTime = '-';
+
+                //$offset = -$offset;
+                if (isset($offset[0])) {
+                    if (strpos($offset, '+') === 0) {
+                        //$offset = str_replace('+', '-', $offset);
+                    } else {
+                        //$offset = str_replace('-', '+', $offset);
+                    }
+                }
+
+                $clientTime = date('H:i', strtotime("now $offset GMT"));
+                $clientTime = "now $offset GMT";
+            }*/
+
+            $clientTime = $offset;
+
             $clientTime = '<b title="TZ ('.$offset.') '.($this->offset_gmt ? 'by IP': 'by IATA').'"><i class="fa fa-clock-o '.($this->offset_gmt ? 'success': '').'"></i> ' . Html::encode($clientTime) . '</b>'; //<br/>(GMT: ' .$offset_gmt . ')';
+
+            //$clientTime = $offset;
+
         }
 
         return $clientTime;
