@@ -10,6 +10,7 @@ use common\models\search\EmployeeSearch;
 use common\models\search\UserProjectParamsSearch;
 use common\models\UserGroupAssign;
 use common\models\UserParams;
+use common\models\UserProfile;
 use Yii;
 use yii\bootstrap\Html;
 use yii\filters\AccessControl;
@@ -187,13 +188,27 @@ class EmployeeController extends FController
 
         $model = new Employee(['scenario' => Employee::SCENARIO_REGISTER]);
         $modelUserParams = new UserParams();
+        $modelProfile = new UserProfile();
 
         if (Yii::$app->request->isPost) {
             $attr = Yii::$app->request->post($model->formName());
 
 
+
             $isNew = $model->prepareSave($attr);
             if ($model->validate() && $model->save()) {
+
+                $modelProfile->up_user_id = $model->id;
+
+                if ($modelProfile->load(Yii::$app->request->post())) {
+
+                    $modelProfile->up_updated_dt = date('Y-m-d H:i:s');
+
+                    if(!$modelProfile->save()) {
+                        Yii::error(VarDumper::dumpAsString($modelProfile->errors, 10), 'EmployeeController:actionCreate:modelProfile:save');
+                    }
+                }
+
 
                 $model->addRole($isNew);
 
@@ -263,6 +278,7 @@ class EmployeeController extends FController
             'model' => $model,
             'modelUserParams' => $modelUserParams,
             'dataProvider' => $dataProvider,
+            'modelProfile' => $modelProfile
         ]);
 
     }
@@ -314,6 +330,14 @@ class EmployeeController extends FController
                 }
             }
 
+            $modelProfile = $model->userProfile;
+            //VarDumper::dump($modelProfile->attributes, 10, true); exit;
+            if(!$modelProfile) {
+                $modelProfile = new UserProfile();
+                $modelProfile->up_user_id = $id;
+            }
+
+
         } else {
             throw new BadRequestHttpException('Invalid request');
         }
@@ -325,6 +349,19 @@ class EmployeeController extends FController
                 $isNew = $model->prepareSave($attr);
                 if ($model->validate() && $model->save()) {
 
+
+                    //VarDumper::dump(Yii::$app->request->post(), 10, true); exit;
+
+                    if ($modelProfile->load(Yii::$app->request->post())) {
+
+                        $modelProfile->up_updated_dt = date('Y-m-d H:i:s');
+
+                        //VarDumper::dump(Yii::$app->request->post(), 10, true); exit;
+                        if(!$modelProfile->save()) {
+                            //VarDumper::dump($modelProfile->errors,10, true); exit;
+                            Yii::error(VarDumper::dumpAsString($modelProfile->errors, 10), 'EmployeeController:actionUpdate:modelProfile:save');
+                        }
+                    }
 
                     $model->addRole($isNew);
 
@@ -418,6 +455,7 @@ class EmployeeController extends FController
                 'modelUserParams' => $modelUserParams,
                 //'searchModel' => $searchModel,
                 'dataProvider' => $dataProvider,
+                'modelProfile' => $modelProfile
             ]);
 
     }
