@@ -133,6 +133,50 @@
   },
   {
     "type": "post",
+    "url": "/v1/communication/voice",
+    "title": "Communication Voice",
+    "version": "0.1.0",
+    "name": "CommunicationVoice",
+    "group": "Communication",
+    "permission": [
+      {
+        "name": "Authorized User"
+      }
+    ],
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "string",
+            "optional": false,
+            "field": "Authorization",
+            "description": "<p>Credentials <code>base64_encode(Username:Password)</code></p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Header-Example:",
+          "content": "{\n    \"Authorization\": \"Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==\",\n    \"Accept-Encoding\": \"Accept-Encoding: gzip, deflate\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "HTTP/1.1 200 OK\n{\n    \"type\": \"update_sms_status\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "webapi/modules/v1/controllers/CommunicationController.php",
+    "groupTitle": "Communication"
+  },
+  {
+    "type": "post",
     "url": "/v1/lead/create",
     "title": "Create Lead",
     "version": "0.1.0",
