@@ -1387,6 +1387,8 @@ class Quote extends \yii\db\ActiveRecord
         $quoteMarketingAirlines = [];
         $quoteOperatingAirlines = [];
 
+        $maxStopsQuantity = 0;
+
         foreach ($this->quoteTrips as $trip){
 
             $tripCabinClasses = [];
@@ -1440,12 +1442,13 @@ class Quote extends \yii\db\ActiveRecord
                     $tripOperatingAirlines[$airlineCodeO] = $airlineNameO;
                     $quoteOperatingAirlines[$airlineCodeO] = $airlineNameO;
 
-
-
                     if($segment->qs_stop > 0){
                         $stopCnt += $segment->qs_stop;
                     }
+                }
 
+                if($stopCnt > $maxStopsQuantity) {
+                    $maxStopsQuantity = $stopCnt;
                 }
 
                 $dateDiff = strtotime($lastSegment->qs_arrival_time) - strtotime($firstSegment->qs_departure_time);
@@ -1491,6 +1494,7 @@ class Quote extends \yii\db\ActiveRecord
             'currencySymbol' => '$',
             'currencyCode' => 'USD',
             'trips' => $trips,
+            'maxStopsQuantity' => $maxStopsQuantity
             //'baggage' => $this->getBaggageInfo2(),
         ];
     }
