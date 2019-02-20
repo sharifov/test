@@ -434,7 +434,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
 
                     if(!$buttons) {
-                        $buttons .= Html::a('<i class="fa fa-download"></i> Take', ['lead/take', 'id' => $model->id], [
+                        $buttons .= Html::a('<i class="fa fa-download"></i> Take', ['lead/take', 'gid' => $model->gid], [
                             'class' => 'btn btn-primary btn-xs take-btn',
                             'data-pjax' => 0
                         ]);

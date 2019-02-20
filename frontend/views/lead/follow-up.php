@@ -257,10 +257,10 @@ $this->params['breadcrumbs'][] = $this->title;
 
                     $buttons = '';
 
-                    $buttons .= Html::a('Take', Url::to([
+                    $buttons .= Html::a('Take', [
                         'lead/take',
-                        'id' => $model['id']
-                    ]), [
+                        'gid' => $model->gid
+                    ], [
                         'class' => 'btn btn-primary btn-xs take-btn',
                         'data-pjax' => 0
                     ]);

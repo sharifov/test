@@ -117,6 +117,7 @@ class LeadController extends ApiBaseController
      * "employee_id": null,
      * "status": 1,
      * "uid": "5b73b80eaf69b",
+     * "gid": "65df1546edccce15518e929e5af1a4",
      * "project_id": 6,
      * "source_id": "38",
      * "trip_type": "RT",

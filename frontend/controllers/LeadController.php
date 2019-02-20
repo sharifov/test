@@ -1282,11 +1282,16 @@ class LeadController extends FController
         return null;
     }
 
-    public function actionTake($id)
+    /**
+     * @param string $gid
+     * @return Response
+     * @throws ForbiddenHttpException
+     * @throws UnauthorizedHttpException
+     */
+    public function actionTake(string $gid)
     {
         /**
          * @var $inProcessing Lead
-         * @var $model Lead
          */
 
         $user = Yii::$app->user->identity;
@@ -1305,7 +1310,7 @@ class LeadController extends FController
 
 
         $allowLead = Lead::find()->where([
-            'id' => $id
+            'gid' => $gid
         ])->andWhere([
             'IN', 'status', [Lead::STATUS_BOOKED, Lead::STATUS_SOLD]
         ])->one();
@@ -1327,7 +1332,7 @@ class LeadController extends FController
         }
 
         $model = Lead::find()
-            ->where(['id' => $id])
+            ->where(['gid' => $gid])
             ->andWhere(['IN', 'status', [
                 Lead::STATUS_PENDING,
                 Lead::STATUS_FOLLOW_UP,
@@ -1337,7 +1342,7 @@ class LeadController extends FController
         if ($model === null) {
 
             if (Yii::$app->request->get('over', 0)) {
-                $lead = Lead::findOne(['id' => $id]);
+                $lead = Lead::findOne(['gid' => $gid]);
                 if ($lead !== null) {
                     $reason = new Reason();
                     $reason->queue = 'processing-over';
@@ -1349,7 +1354,7 @@ class LeadController extends FController
                 return null;
             } else {
                 $model = Lead::findOne([
-                    'id' => $id,
+                    'gid' => $gid,
                     'employee_id' => $user->getId()
                 ]);
                 if ($model === null) {
@@ -1360,7 +1365,7 @@ class LeadController extends FController
         }
 
         if (!$model->permissionsView()) {
-            throw new UnauthorizedHttpException('Not permissions view lead ID: ' . $id);
+            throw new UnauthorizedHttpException('Not permissions view lead GID: ' . $gid);
         }
 
 

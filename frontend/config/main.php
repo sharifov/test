@@ -99,7 +99,7 @@ return [
                     'route' => 'lead/view',
                 ],
                 [
-                    'pattern' => 'take/<id>',
+                    'pattern' => 'take/<gid>',
                     'route' => 'lead/take',
                 ],
                 [

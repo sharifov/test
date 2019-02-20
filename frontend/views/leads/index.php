@@ -540,10 +540,10 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
         ],
         // 'bo_flight_id',
 
-        [
+        /*[
             'class' => 'yii\grid\ActionColumn',
             'template' => '{view}'
-        ]
+        ]*/
     ];
 
     ?>

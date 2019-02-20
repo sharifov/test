@@ -33,8 +33,11 @@ use yii\widgets\ActiveForm;
                     <?= $form->field($model, 'bo_flight_id')->input('number', ['min' => 0]) ?>
                 </div>
                 <div class="col-md-3">
-                    <?= $form->field($model, 'discount_id')->input('number', ['min' => 1]) ?>
+                    <?= $form->field($model, 'gid')->textInput(['maxlength' => true]) ?>
                 </div>
+                <?/*<div class="col-md-3">
+                    <?= $form->field($model, 'discount_id')->input('number', ['min' => 1]) ?>
+                </div>*/?>
             </div>
 
             <div class="row">
@@ -252,6 +255,7 @@ use yii\widgets\ActiveForm;
 
             <div class="row">
                 <div class="col-md-6">
+                    <?= $form->field($model, 'discount_id')->input('number', ['min' => 1]) ?>
                 </div>
                 <div class="col-md-6">
                     <?php  echo $form->field($model, 'request_ip') ?>

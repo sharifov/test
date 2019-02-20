@@ -286,12 +286,12 @@ $this->params['breadcrumbs'][] = $this->title;
 
                     if (Yii::$app->user->id === $model->employee_id && $model->status === Lead::STATUS_ON_HOLD) {
 
-                        $buttons .= Html::a('Take', ['lead/take', 'id' => $model->id], ['class' => 'btn btn-primary btn-xs take-btn', 'data-pjax' => 0]);
+                        $buttons .= Html::a('Take', ['lead/take', 'gid' => $model->gid], ['class' => 'btn btn-primary btn-xs take-btn', 'data-pjax' => 0]);
                     }
 
                     if (Yii::$app->user->id != $model->employee_id && in_array($model->status, [Lead::STATUS_ON_HOLD, Lead::STATUS_PROCESSING])) {
 
-                        $buttons .= ' ' . Html::a('Take Over', ['lead/take', 'id' => $model->id, 'over' => true], [
+                        $buttons .= ' ' . Html::a('Take Over', ['lead/take', 'gid' => $model->gid, 'over' => true], [
                             'class' => 'btn btn-primary btn-xs take-processing-btn',
                             'data-pjax' => 0,
                             'data-status' => $model->status
