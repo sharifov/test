@@ -10,6 +10,7 @@ use common\models\Lead;
 use common\models\Notifications;
 use common\models\Project;
 use common\models\Sms;
+use common\models\User;
 use common\models\UserCallStatus;
 use common\models\UserConnection;
 use common\models\UserGroupAssign;
@@ -367,7 +368,7 @@ class CommunicationController extends ApiBaseController
                 $call_user_id = null;
                 $call_sip_id = null;
                 $call_project_id = null;
-                $call_agent_username = null;
+                $call_agent_username = [];
 
                 //$upp = UserProjectParams::find()->where(['upp_phone_number' => $agent_phone_number])->orWhere(['upp_tw_phone_number' => $agent_phone_number])->one();
                 $upp = UserProjectParams::find()->where(['upp_tw_phone_number' => $agent_phone_number])->one();
@@ -377,7 +378,9 @@ class CommunicationController extends ApiBaseController
 
 
                 if($upp && $user = $upp->uppUser) {
-                    $call_agent_username = $user->username;
+                    if($user->userProfile && $user->userProfile->up_call_type_id == 2) {
+                        $call_agent_username[] = $user->username;
+                    }
                     $call_user_id = (int) $upp->upp_user_id;
                     $call_sip_id = $upp->upp_tw_sip_id;
                     $call_project_id = (int) $upp->upp_project_id;
@@ -420,7 +423,10 @@ class CommunicationController extends ApiBaseController
                     if($usersForCall) {
                         foreach ($usersForCall as $userForCall) {
                             $upp = UserProjectParams::find()->where(['upp_user_id' => $userForCall['tbl_user_id'], 'upp_project_id' => $call_project_id])->one();
-
+                            $employeeModel = Employee::findOne(['id' => $userForCall['tbl_user_id']]);
+                            if($employeeModel && $employeeModel->userProfile && $employeeModel->userProfile->up_call_type_id == 2) {
+                                $call_agent_username[] = $employeeModel->username;
+                            }
                             if($upp) {
 
                                 $call_user_id = (int) $upp->upp_user_id;
