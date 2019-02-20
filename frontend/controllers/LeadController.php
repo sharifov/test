@@ -1833,6 +1833,7 @@ class LeadController extends FController
                 $newLead->created = null;
                 $newLead->updated = null;
                 $newLead->tips = 0;
+                $newLead->gid = null;
 
                 if(!$newLead->save()){
                     $errors = array_merge($errors, $newLead->getErrors());
@@ -1850,12 +1851,12 @@ class LeadController extends FController
                     }
                 }
 
-                if(!empty($errors)){
+                if(!empty($errors)) {
                     return $this->renderAjax('partial/_clone', [
                         'lead' => $newLead,
                         'errors' => $errors,
                     ]);
-                }else{
+                } else {
                     Lead::sendClonedEmail($newLead);
                     return $this->redirect(['lead/view', 'gid' => $newLead->gid]);
                 }
