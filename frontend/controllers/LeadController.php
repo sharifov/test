@@ -104,8 +104,9 @@ class LeadController extends FController
         return parent::actions();
     }
 
+
     /**
-     * @param $id
+     * @param string $gid
      * @return string
      * @throws ForbiddenHttpException
      * @throws NotFoundHttpException
@@ -115,12 +116,18 @@ class LeadController extends FController
      * @throws \yii\db\StaleObjectException
      * @throws \yii\httpclient\Exception
      */
-    public function actionView($id)
+    public function actionView(string $gid): string
     {
-        $id = (int) $id;
-        $lead = Lead::findOne($id);
+
+        $gid = mb_substr($gid, 0, 32);
+
+        //$id = (int) $id;
+        //$lead = Lead::findOne($id);
+
+        $lead = Lead::find()->where(['gid' => $gid])->limit(1)->one();
+
         if(!$lead) {
-            throw new NotFoundHttpException('Not found lead ID: ' . $id);
+            throw new NotFoundHttpException('Not found lead ID: ' . $gid);
         }
 
         if($lead->status == Lead::STATUS_TRASH && Yii::$app->user->identity->role == 'agent') {
@@ -161,7 +168,7 @@ class LeadController extends FController
                                 $leadLog->logMessage->title = 'Update';
                                 $leadLog->logMessage->model = sprintf('%s (%s)', $quote->formName(), $quote->uid);
                                 $leadLog->addLog([
-                                    'lead_id' => $id,
+                                    'lead_id' => $lead->id,
                                 ]);
 
                                 if ($lead->called_expert) {
@@ -255,7 +262,7 @@ class LeadController extends FController
 
             Yii::$app->cache->delete(sprintf('quick-search-%d-%d', $lead->id, Yii::$app->user->identity->getId()));
             if (!$lead->permissionsView()) {
-                throw new UnauthorizedHttpException('Not permissions view lead ID: ' . $id);
+                throw new UnauthorizedHttpException('Not permissions view lead ID: ' . $lead->id);
             }
             $leadForm = new LeadForm($lead);
             if ($leadForm->getLead()->status != Lead::STATUS_PROCESSING ||
@@ -266,7 +273,7 @@ class LeadController extends FController
 
             $flightSegments = $leadForm->getLeadFlightSegment();
             foreach ($flightSegments as $segment){
-                $this->view->title = 'Lead #'.$id.' ✈ '.$segment->destination;
+                $this->view->title = 'Lead #'.$lead->id.' ✈ '.$segment->destination;
                 break;
             }
 
@@ -286,7 +293,7 @@ class LeadController extends FController
                 if (empty($data['errors']) && $data['load'] && $leadForm->save($errors)) {
 
                     if ($lead->called_expert) {
-                        $lead = Lead::findOne(['id' => $id]);
+                        $lead = Lead::findOne(['id' => $lead->id]);
                         $data = $lead->getLeadInformationForExpert();
                         $result = BackOffice::sendRequest('lead/update-lead', 'POST', json_encode($data));
                         if ($result['status'] != 'Success' || !empty($result['errors'])) {

@@ -138,7 +138,17 @@ $webSocketHost = (Yii::$app->request->isSecureConnection ? 'wss': 'ws') . '://'.
 //$userAgent = urlencode(Yii::$app->request->userAgent);
 
 if(Yii::$app->controller->action->uniqueId === 'lead/view') {
+
     $leadId = Yii::$app->request->get('id');
+
+    if(!$leadId) {
+        $gid = Yii::$app->request->get('gid');
+        $lead = \common\models\Lead::find()->where(['gid' => $gid])->one();
+        if($lead) {
+            $leadId = $lead->id;
+            unset($lead);
+        }
+    }
 }
 
 $js = <<<JS

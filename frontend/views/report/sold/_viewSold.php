@@ -45,7 +45,7 @@ use common\models\Quote;
                     <?php
                     echo Html::a('Open', [
                         'lead/view',
-                        'id' => $lead->id
+                        'gid' => $lead->gid
                     ], [
                         'class' => 'btn btn-primary btn-sm',
                         'target' => '_blank',

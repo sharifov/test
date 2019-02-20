@@ -326,11 +326,11 @@ $this->params['breadcrumbs'][] = $this->title;
             'class' => 'yii\grid\ActionColumn',
             'template' => '{action}',
             'buttons' => [
-                'action' => function ($url, $model, $key) {
-                    return Html::a('<i class="fa fa-search"></i>', Url::to([
+                'action' => function ($url, Lead $model, $key) {
+                    return Html::a('<i class="fa fa-search"></i>', [
                         'lead/view',
-                        'id' => $model['id']
-                    ]), [
+                        'gid' => $model->gid
+                    ], [
                         'class' => 'btn btn-info btn-xs',
                         'target' => '_blank',
                         'data-pjax' => 0,
