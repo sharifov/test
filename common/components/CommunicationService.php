@@ -580,18 +580,18 @@ class CommunicationService extends Component
         if($deleteCache) {
             \Yii::$app->cache->delete($cacheKey);
         }
-        $token = \Yii::$app->cache->get($cacheKey);
+        $out = \Yii::$app->cache->get($cacheKey);
 
-        if ($token === false) {
+        if ($out === false) {
             $out = $this->getJwtToken($username);
 
             if($out && isset($out['data']['token']) && $out['data']['token']) {
                 $expired = isset($out['data']['expire']) ? strtotime($out['data']['expire']) - time() : 60 * 30;
-                \Yii::$app->cache->set($cacheKey, $out['data']['token'], $expired);
+                \Yii::$app->cache->set($cacheKey, $out, $expired);
             }
         }
 
-        return $token;
+        return $out;
     }
 
 
