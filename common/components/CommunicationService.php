@@ -75,7 +75,7 @@ class CommunicationService extends Component
         $url = $this->url . $action;
 
         //$options = ['RETURNTRANSFER' => 1];
-
+        \Yii::error(VarDumper::dumpAsString($url, 10), 'CommunicationService::sendRequest:url');
 
         $this->request->setMethod($method)
             ->setUrl($url)
