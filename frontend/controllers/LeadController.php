@@ -304,10 +304,7 @@ class LeadController extends FController
                         }
                     }
 
-                    return $this->redirect([
-                        'view',
-                        'id' => $leadForm->getLead()->id
-                    ]);
+                    return $this->redirect(['lead/view', 'gid' => $leadForm->getLead()->gid]);
                 }
 
                 if (!empty($errors)) {
@@ -958,10 +955,7 @@ class LeadController extends FController
                             print_r($result['errors'], true)
                         ));
                     }
-                    return $this->redirect([
-                        'view',
-                        'id' => $lead->id
-                    ]);
+                    return $this->redirect(['lead/view', 'gid' => $lead->gid]);
                 }
             }
             return $this->renderAjax('partial/_paxInfo', [
@@ -1094,10 +1088,9 @@ class LeadController extends FController
                 } else {
                     Yii::$app->getSession()->setFlash('danger', sprintf('Sent email \'%s\' failed. Please verify your email or password from email!', $sendEmailModel->subject));
                 }
-                return $this->redirect([
-                    'view',
-                    'id' => $lead->id
-                ]);
+
+                return $this->redirect(['lead/view', 'gid' => $lead->gid]);
+
             } else {
                 return $this->renderAjax('partial/_sendEmail', [
                     'templates' => $templates,
@@ -1142,9 +1135,7 @@ class LeadController extends FController
                 'expire' => strtotime('+1 day')
             ]));
         }
-        return $this->redirect([
-            'follow-up',
-        ]);
+        return $this->redirect(['follow-up']);
     }
 
     public function actionAddNote()
@@ -1199,16 +1190,13 @@ class LeadController extends FController
                     $model->status = $model::STATUS_PROCESSING;
                     $model->snooze_for = '';
                     $model->save();
-                    return $this->redirect([
-                        'view',
-                        'id' => $model->id
-                    ]);
+
+                    return $this->redirect(['lead/view', 'gid' => $model->gid]);
+
                 } elseif ($attr['queue'] == 'reject') {
                     $model->status = $model::STATUS_REJECT;
                     $model->save();
-                    return $this->redirect([
-                        'trash',
-                    ]);
+                    return $this->redirect(['trash']);
                 }
             } else {
                 $reason->attributes = $attr;
@@ -1219,9 +1207,8 @@ class LeadController extends FController
                     $model->status = $model::STATUS_FOLLOW_UP;
                     $model->employee_id = null;
                     $model->save();
-                    return $this->redirect([
-                        'follow-up',
-                    ]);
+                    return $this->redirect(['follow-up']);
+
                 } elseif ($reason->queue == 'trash') {
                     $model->status = $model::STATUS_TRASH;
                     $type = 'trash';
@@ -1252,16 +1239,12 @@ class LeadController extends FController
                     );
                     $note->save();
 
-                    return $this->redirect([
-                        'view',
-                        'id' => $model->id
-                    ]);
+                    return $this->redirect(['lead/view', 'gid' => $model->gid]);
+
                 } elseif ($reason->queue == 'reject') {
                     $model->status = $model::STATUS_REJECT;
                     $model->save();
-                    return $this->redirect([
-                        'trash',
-                    ]);
+                    return $this->redirect(['trash']);
                 } else {
                     $model->status = $model::STATUS_ON_HOLD;
                 }
@@ -1270,9 +1253,7 @@ class LeadController extends FController
             }
         }
 
-        return $this->redirect([
-            'processing',
-        ]);
+        return $this->redirect(['processing']);
     }
 
     public function actionChangeState($id, $queue)
@@ -1429,13 +1410,7 @@ class LeadController extends FController
 
         //$taskList = ['call1', 'call2', 'voice-mail', 'email'];
 
-
-
-        return $this->redirect([
-            'view',
-            'id' => $model->id
-        ]);
-
+        return $this->redirect(['lead/view', 'gid' => $model->gid]);
     }
 
 
@@ -1752,10 +1727,7 @@ class LeadController extends FController
                 LeadTask::createTaskList($model->id, $model->employee_id, 2, '', Task::CAT_NOT_ANSWERED_PROCESS);
                 LeadTask::createTaskList($model->id, $model->employee_id, 3, '', Task::CAT_NOT_ANSWERED_PROCESS);
 
-                return $this->redirect([
-                    'view',
-                    'id' => $leadForm->getLead()->id
-                ]);
+                return $this->redirect(['lead/view', 'gid' => $leadForm->getLead()->gid]);
             }
 
             if (!empty($errors)) {
@@ -1880,10 +1852,7 @@ class LeadController extends FController
                     ]);
                 }else{
                     Lead::sendClonedEmail($newLead);
-                    return $this->redirect([
-                        'view',
-                        'id' => $newLead->id
-                    ]);
+                    return $this->redirect(['lead/view', 'gid' => $newLead->gid]);
                 }
             }
 
@@ -1914,10 +1883,7 @@ class LeadController extends FController
                 }
 
                 if (empty($errors) && $splitForm->save($errors)) {
-                    return $this->redirect([
-                        'view',
-                        'id' => $lead->id
-                    ]);
+                    return $this->redirect(['lead/view', 'gid' => $lead->gid]);
                 }
 
                 $splitProfit = $splitForm->getProfitSplit();
@@ -1977,10 +1943,7 @@ class LeadController extends FController
                 }
 
                 if (empty($errors) && $splitForm->save($errors)) {
-                    return $this->redirect([
-                        'view',
-                        'id' => $lead->id
-                    ]);
+                    return $this->redirect(['lead/view', 'gid' => $lead->gid]);
                 }
 
                 $splitTips = $splitForm->getTipsSplit();
