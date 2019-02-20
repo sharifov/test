@@ -14,6 +14,13 @@ class m190220_095158_add_column_gid_tbl_lead extends Migration
     {
         $this->addColumn('{{%leads}}', 'gid', $this->string(32)->unique());
         $this->createIndex('IND-leads_gii','{{%leads}}', 'gid', true);
+
+        if (Yii::$app->cache) {
+            Yii::$app->cache->flush();
+        }
+
+        Yii::$app->db->getSchema()->refreshTableSchema('{{%leads}}');
+
         $this->execute('UPDATE leads SET gid = MD5(id) WHERE gid IS NULL');
     }
 
@@ -24,6 +31,10 @@ class m190220_095158_add_column_gid_tbl_lead extends Migration
     {
         $this->dropIndex('IND-leads_gii', '{{%leads}}');
         $this->dropColumn('{{%leads}}', 'gid');
+
+        if (Yii::$app->cache) {
+            Yii::$app->cache->flush();
+        }
     }
 
 

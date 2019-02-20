@@ -116,7 +116,7 @@ class LeadController extends FController
      * @throws \yii\db\StaleObjectException
      * @throws \yii\httpclient\Exception
      */
-    public function actionView(string $gid): string
+    public function actionView(string $gid)
     {
 
         $gid = mb_substr($gid, 0, 32);
