@@ -113,11 +113,14 @@ $this->registerJs($js);
             <?php
             $lead = $leadForm->getLead();
             if(!empty($lead->clone_id)){
+
+                $cloneLead = \common\models\Lead::findOne($lead->clone_id);
+
                 printf(" <a title=\"%s\" href=\"%s\">(Cloned from %s)</a> ",
                     "Clone reason: ".$lead->description,
                     \yii\helpers\Url::to([
                     'lead/view',
-                    'id' => $lead->clone_id
+                    'uid' => $cloneLead->uid
                 ]),$lead->clone_id);
             }
             ?>

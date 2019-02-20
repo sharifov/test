@@ -197,7 +197,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
                     $buttons .= Html::a('<i class="fa fa-search"></i>', [
                         'lead/view',
-                        'id' => $model->id
+                        'gid' => $model->gid
                     ], [
                         'class' => 'btn btn-info btn-xs',
                         'target' => '_blank',

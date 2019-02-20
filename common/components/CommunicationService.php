@@ -576,7 +576,7 @@ class CommunicationService extends Component
     public function getJwtTokenCache($username = '', $deleteCache = false)
     {
         $cacheKey = 'jwt_token_'.$username;
-                
+
         if($deleteCache) {
             \Yii::$app->cache->delete($cacheKey);
         }

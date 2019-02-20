@@ -265,7 +265,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         'data-pjax' => 0
                     ]);
 
-                    $buttons .= Html::a('<i class="fa fa-search"></i>', ['lead/view', 'id' => $model->id], [
+                    $buttons .= Html::a('<i class="fa fa-search"></i>', ['lead/view', 'gid' => $model->gid], [
                         'class' => 'btn btn-info btn-xs',
                         'target' => '_blank',
                         'data-pjax' => 0,

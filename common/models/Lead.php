@@ -23,6 +23,7 @@ use common\components\SearchService;
  * This is the model class for table "leads".
  *
  * @property int $id
+ * @property string $gid
  * @property int $client_id
  * @property int $employee_id
  * @property int $status
@@ -56,6 +57,7 @@ use common\components\SearchService;
  * @property double $finalProfit
  * @property int $quotesCount
  * @property int $leadFlightSegmentsCount
+ * @property double $agentProcessingFee
  *
  * @property Call[] $calls
  * @property Email[] $emails
@@ -168,6 +170,7 @@ class Lead extends ActiveRecord
     public $splitTipsPercentSum = 0;
 
     public $finalProfit = 0;
+    public $agentProcessingFee = 0.00;
 
     /**
      * {@inheritdoc}
@@ -199,9 +202,9 @@ class Lead extends ActiveRecord
             [['notes_for_experts', 'request_ip_detail'], 'string'],
             [['final_profit', 'tips'], 'number'],
             [['uid', 'request_ip', 'offset_gmt', 'discount_id', 'description'], 'string', 'max' => 255],
-
+            [['gid'], 'string', 'max' => 32],
+            [['gid'], 'unique'],
             [['created', 'updated', 'snooze_for', 'called_expert', 'additional_information'], 'safe'],
-
             [['uid'], 'string', 'max' => 255],
             [['trip_type'], 'string', 'max' => 2],
             [['cabin'], 'string', 'max' => 1],
@@ -220,10 +223,11 @@ class Lead extends ActiveRecord
     {
         return [
             'id' => 'ID',
+            'uid' => 'UID',
+            'gid' => 'GID',
             'client_id' => 'Client ID',
             'employee_id' => 'Employee ID',
             'status' => 'Status',
-            'uid' => 'Uid',
             'project_id' => 'Project ID',
             'source_id' => 'Source ID',
             'trip_type' => 'Trip Type',
@@ -1411,8 +1415,17 @@ Sales - Kivork",
                 if ($leadExistByUID !== null) {
                     $this->uid = uniqid();
                 }
+
+                /*if(!$this->gid) {
+                    $this->gid = md5(uniqid('', true));
+                }*/
+
             } else {
                 //$this->updated = date('Y-m-d H:i:s');
+            }
+
+            if(!$this->gid) {
+                $this->gid = md5(uniqid('', true));
             }
 
             $this->adults = (int) $this->adults;
@@ -1476,14 +1489,31 @@ Sales - Kivork",
         if (!empty($this->additional_information)) {
             $this->additionalInformationForm = self::getLeadAdditionalInfo($this->additional_information);
         }
-        $this->totalTips = ($this->tips)?$this->tips/2:0;
 
+        $this->totalTips = $this->tips ? $this->tips/2 : 0;
+
+        $processing_fee_per_pax = self::AGENT_PROCESSING_FEE_PER_PAX;
+
+        if($this->employee_id && $this->employee) {
+            $groups = $this->employee->ugsGroups;
+            if($groups) {
+                foreach ($groups as $group) {
+                    if($group->ug_processing_fee) {
+                        $processing_fee_per_pax = $group->ug_processing_fee;
+                        break;
+                    }
+                }
+                unset($groups);
+            }
+        }
 
         if($this->final_profit) {
-            $this->finalProfit = (float) $this->final_profit - (self::AGENT_PROCESSING_FEE_PER_PAX * (int) ($this->adults + $this->children));
+            $this->finalProfit = (float) $this->final_profit - ($processing_fee_per_pax * (int) ($this->adults + $this->children));
         } else {
             $this->finalProfit = $this->final_profit;
         }
+
+        $this->agentProcessingFee = $processing_fee_per_pax * (int) ($this->adults + $this->children);
     }
 
     /**

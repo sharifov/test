@@ -35,7 +35,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'attribute' => 'id',
             'label' => 'Lead ID',
             'value' => function (\common\models\Lead $model) {
-                return Html::a($model->id, ['lead/view', 'id' => $model->id, ['data-pjax' => 0, 'target' => '_blank']]);
+                return Html::a($model->id, ['lead/view', 'gid' => $model->gid, ['data-pjax' => 0, 'target' => '_blank']]);
             },
             'format' => 'raw'
         ],
@@ -202,8 +202,8 @@ $this->params['breadcrumbs'][] = $this->title;
             'class' => 'yii\grid\ActionColumn',
             'template' => '{action}',
             'buttons' => [
-                'action' => function ($url, $model, $key) {
-                return Html::a('<i class="fa fa-search"></i> View Lead', ['lead/view', 'id' => $model->id], [
+                'action' => function ($url, \common\models\Lead $model, $key) {
+                return Html::a('<i class="fa fa-search"></i> View Lead', ['lead/view', 'gid' => $model->gid], [
                     'class' => 'btn btn-info btn-xs',
                     'target' => '_blank',
                     'data-pjax' => 0,
