@@ -529,11 +529,11 @@ JS;
                 <p>Client information is not available in VIEW MODE, please take lead!</p>
             </div>
 
-    	 <?php elseif($leadForm->getLead()->status == \common\models\Lead::STATUS_FOLLOW_UP && $leadForm->getLead()->employee_id != Yii::$app->user->id && $is_manager):?>
+    	 <?php elseif(!$is_manager && ( $leadForm->getLead()->status == \common\models\Lead::STATUS_FOLLOW_UP || $leadForm->getLead()->status == \common\models\Lead::STATUS_PENDING ) && $leadForm->getLead()->employee_id != Yii::$app->user->id):?>
 
             <div class="alert alert-warning" role="alert">
                 <h4 class="alert-heading">Warning!</h4>
-                <p>Client information is not available for this status (FOLLOW UP)!</p>
+                <p>Client information is not available for this status (<?=strtoupper($leadForm->getLead()->getStatusName())?>)!</p>
             </div>
 
         <? else: ?>
