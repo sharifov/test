@@ -34,7 +34,7 @@ class PhoneController extends FController
         $this->layout = false;
 
         $user = \Yii::$app->user->identity;
-        $params = UserProjectParams::find(['upp_user_id' => $user->id])->all();
+        /*$params = UserProjectParams::find(['upp_user_id' => $user->id])->all();
         $tw_number = '';
         if(count($params)) {
             foreach ($params AS $param) {
@@ -43,7 +43,9 @@ class PhoneController extends FController
                     break;
                 }
             }
-        }
+        }*/
+
+        $tw_number = '+15596489977';
 
         return $this->render('index', [
             'client' => $user->username,
