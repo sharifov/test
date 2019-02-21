@@ -46,9 +46,9 @@ class PhoneController extends FController
         }*/
 
         $tw_number = '+15596489977';
-
+        $client = 'seller'.$user->id;
         return $this->render('index', [
-            'client' => $this->filterClientUsername($user->username),
+            'client' => $client,
             'fromAgentPhone' => $tw_number,
         ]);
     }
@@ -56,15 +56,9 @@ class PhoneController extends FController
     public function actionGetToken()
     {
         \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
-        $username = $this->filterClientUsername(\Yii::$app->user->identity->username);
+        $username = 'seller'. \Yii::$app->user->identity->id;
         //VarDumper::dump($username, 10, true); exit;
         $data = Yii::$app->communication->getJwtTokenCache($username, true);
         return $data;
     }
-
-    protected function filterClientUsername($string)
-    {
-        return preg_replace('/[^a-zA-Z0-9]/', '', $string);
-    }
-
 }
