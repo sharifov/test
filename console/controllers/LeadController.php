@@ -20,7 +20,7 @@ class LeadController extends Controller
             ->andWhere(['status' => [Lead::STATUS_PENDING, Lead::STATUS_PROCESSING]])
             ->andWhere(['IS NOT', 'request_ip', null])
             ->orderBy(['id' => SORT_DESC])
-            ->limit(3)->all();
+            ->limit(20)->all();
 
             //print_r($leads->createCommand()->getRawSql());
 
@@ -35,10 +35,14 @@ class LeadController extends Controller
                     echo "\r\n";
 
                 } else {
-                    echo $lead->id." OK\r\n";
-                    VarDumper::dump($out);
+                    echo $lead->id.' OK - ';
+                    if(isset($out['data']['timeZone'])) {
+                        VarDumper::dump($out['data']['timeZone']);
+                    }
                     echo "\r\n";
                 }
+
+                sleep(1);
             }
 
         }

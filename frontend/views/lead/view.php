@@ -139,8 +139,8 @@ $this->registerJs($js);
                         </div>
                     <?php endif; ?>
                     <div class="page-header__general-item">
-                        <strong>Client <i class="fa fa-clock-o"></i>:</strong>
-                        <?= $leadForm->getLead()->getClientTime(); ?>
+                        <strong>Client:</strong>
+                        <?= $leadForm->getLead()->getClientTime2(); ?>
                     </div>
                     <div class="page-header__general-item">
                         <strong>UID:</strong>
