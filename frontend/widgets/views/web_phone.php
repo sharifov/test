@@ -34,54 +34,60 @@
 
     <?php if($token): ?>
 
-        <i class="fa fa-phone" style="height: 100%"></i>
+            <table class="table table-bordered">
+                <tr>
+                    <td><i title="<?=$token?>">Token</i></td>
+                    <td><i class="fa fa-user"></i> clientId: <?=$clientId?></td>
+                    <td><i class="fa fa-phone"></i> AgentPhone: <?=$fromAgentPhone?></td>
+                </tr>
+            </table>
 
-    <i title="<?=$token?>">Token</i><br>
-    clientId: <?=$clientId?><br>
-    AgentPhone: <?=$fromAgentPhone?><br>
 
-    <div class="container body">
-
-        <div class="main_container">
             <div id="controls">
-                <div id="info">
-                    <p class="instructions">Twilio Client</p>
-                    <div id="client-name"></div>
-                    <div id="output-selection">
-                        <label>Ringtone Devices</label>
-                        <select id="ringtone-devices" multiple></select>
-                        <label>Speaker Devices</label>
-                        <select id="speaker-devices" multiple></select><br/>
-                        <a id="get-devices">Seeing unknown devices?</a>
-                    </div>
-                </div>
-                <div id="call-controls">
-                    <p class="instructions">Make a Call:</p>
-                    <input id="phone-number" type="text" placeholder="Enter a phone # or client name" />
-                    <button id="button-call">Call</button>
-                    <button id="button-hangup">Hangup</button>
-                    <div id="volume-indicators">
-                        <br />
-                        <label>Mic Volume</label>
 
+                <table class="table table-bordered">
+                    <tr>
+                        <td>
+                            <div id="info">
+                                <div id="client-name"></div>
+                                <div id="output-selection">
+                                    <label>Ringtone Devices</label>
+                                    <select id="ringtone-devices" multiple></select>
+                                    <label>Speaker Devices</label>
+                                    <select id="speaker-devices" multiple></select><br/>
+                                    <?/*<a id="get-devices">Seeing unknown devices?</a>*/?>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div id="call-controls">
+                                <p>Make a Call:</p>
+                                <input id="phone-number" type="text" placeholder="Enter a phone/client" />
+                                <br>
+                                <?=\yii\helpers\Html::button('Call', ['class' => 'btn btn-xs btn-success', 'id' => 'button-call'])?>
+                                <?=\yii\helpers\Html::button('Hangup', ['class' => 'btn btn-xs btn-danger','id' => 'button-hangup'])?>
 
-                        <div id="input-volume" style=" border: dashed 1px #fff; width: 200px; height: 10px;"></div>
+                                <div id="volume-indicators">
+                                    <label>Mic Volume</label>
+                                    <div id="input-volume" style=" border: dashed 1px #fff; width: 200px; height: 10px;"></div>
+                                    <br/>
+                                    <label>Speaker Volume</label>
+                                    <div id="output-volume" style=" border: dashed 1px #fff; width: 200px; height: 10px;"></div>
+                                </div>
+                            </div>
 
-                        <br/><br/>
-                        <label>Speaker Volume</label>
-                        <div id="output-volume" style=" border: dashed 1px #fff; width: 200px; height: 10px;"></div>
-                    </div>
-                </div>
-
-                <div id="call-controls2">
-                    <button id="button-answer">Answer</button>
-                    <button id="button-reject">Reject</button>
-                </div>
-                <div id="log"></div>
+                            <div id="call-controls2">
+                                <?=\yii\helpers\Html::button('Answer', ['class' => 'btn btn-xs btn-success', 'id' => 'button-answer'])?>
+                                <?=\yii\helpers\Html::button('Reject', ['class' => 'btn btn-xs btn-danger','id' => 'button-reject'])?>
+                            </div>
+                        </td>
+                        <td>
+                            <i>Logs:</i>
+                            <div id="log"></div>
+                        </td>
+                    </tr>
+                </table>
             </div>
-        </div>
-    </div>
-
     <?php else: ?>
         <div class="alert alert-danger alert-dismissible" role="alert">
             <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
