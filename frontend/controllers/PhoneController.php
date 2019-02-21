@@ -3,6 +3,8 @@
 namespace frontend\controllers;
 
 use common\models\UserProjectParams;
+use yii\filters\AccessControl;
+use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
 use \yii\web\Controller;
 use yii\web\NotFoundHttpException;
@@ -14,19 +16,33 @@ use yii\web\View;
 class PhoneController extends FController
 {
 
-    /**
-     * {@inheritdoc}
-     */
     public function behaviors()
     {
-        return [
+        $behaviors = [
             'verbs' => [
                 'class' => VerbFilter::class,
                 'actions' => [
                     'delete' => ['POST'],
                 ],
             ],
+            'access' => [
+                'class' => AccessControl::class,
+                'rules' => [
+                    [
+                        'actions' => ['index', 'get-token', 'test'],
+                        'allow' => true,
+                        'roles' => ['supervision'],
+                    ],
+                    [
+                        'actions' => ['index', 'get-token', 'test'],
+                        'allow' => true,
+                        'roles' => ['agent'],
+                    ],
+                ],
+            ],
         ];
+
+        return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
 
     public function actionIndex()
@@ -52,6 +68,15 @@ class PhoneController extends FController
             'fromAgentPhone' => $tw_number,
         ]);
     }
+
+
+    public function actionTest()
+    {
+        //$this->layout = false;
+        return $this->render('test', [
+        ]);
+    }
+
 
     public function actionGetToken()
     {
