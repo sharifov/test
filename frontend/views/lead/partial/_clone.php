@@ -20,9 +20,13 @@ $('#cancel-btn').click(function (e) {
 });
 JS;
 $this->registerJs($js);?>
-<?php if(!empty($errors)):?>
+<?php if($errors):?>
 <div class="alert alert-danger">Some errors happened! <br/>
-<?php foreach ($errors as $error):?> <?= $error;?> <?php endforeach;?>
+    <?php if(is_array($errors)):?>
+        <?php foreach ($errors as $error):?> <?= \yii\helpers\VarDumper::dumpAsString($error);?> <?php endforeach;?>
+    <?php else:?>
+        <?php \yii\helpers\VarDumper::dump($errors); ?>
+    <?php endif;?>
 </div>
 <?php endif;?>
 <?php
