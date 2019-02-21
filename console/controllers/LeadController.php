@@ -7,6 +7,7 @@ use common\models\Task;
 use yii\console\Controller;
 use yii\helpers\Console;
 use yii\helpers\Url;
+use yii\helpers\VarDumper;
 
 class LeadController extends Controller
 {
@@ -19,17 +20,29 @@ class LeadController extends Controller
             ->andWhere(['status' => [Lead::STATUS_PENDING, Lead::STATUS_PROCESSING]])
             ->andWhere(['IS NOT', 'request_ip', null])
             ->orderBy(['id' => SORT_DESC])
-            ->limit(3)->all();
+            ->limit(20)->all();
 
             //print_r($leads->createCommand()->getRawSql());
 
         if($leads) {
             foreach ($leads as $lead) {
-                if($lead->updateIpInfo()) {
-                    echo $lead->id." OK\r\n";
+
+                $out = $lead->updateIpInfo2();
+
+                if(isset($out['error']) && $out['error']) {
+                    echo $lead->id."\r\n";
+                    VarDumper::dump($out);
+                    echo "\r\n";
+
                 } else {
-                    echo $lead->id." Error\r\n";
+                    echo $lead->id.' OK - ';
+                    if(isset($out['data']['timeZone'])) {
+                        VarDumper::dump($out['data']['timeZone']);
+                    }
+                    echo "\r\n";
                 }
+
+                sleep(1);
             }
 
         }

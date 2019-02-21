@@ -27,20 +27,19 @@ $isAgent = Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id);
         <div class="col-md-3">
 
             <div class="row">
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <?= $form->field($model, 'id')->input('number', ['min' => 1]) ?>
                 </div>
-                <div class="col-md-4">
-                    <?= $form->field($model, 'uid') ?>
+                <div class="col-md-3">
+                    <?= $form->field($model, 'uid')->textInput(['maxlength' => true]) ?>
                 </div>
-                <div class="col-md-4">
-                    <?= $form->field($model, 'quote_pnr') ?>
+                <div class="col-md-3">
+                    <?= $form->field($model, 'quote_pnr')->textInput(['maxlength' => true]) ?>
                 </div>
-
+                <div class="col-md-3">
+                    <?= $form->field($model, 'gid')->textInput(['maxlength' => true]) ?>
+                </div>
             </div>
-
-
-
 
         </div>
 

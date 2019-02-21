@@ -104,8 +104,9 @@ class LeadController extends FController
         return parent::actions();
     }
 
+
     /**
-     * @param $id
+     * @param string $gid
      * @return string
      * @throws ForbiddenHttpException
      * @throws NotFoundHttpException
@@ -115,12 +116,18 @@ class LeadController extends FController
      * @throws \yii\db\StaleObjectException
      * @throws \yii\httpclient\Exception
      */
-    public function actionView($id)
+    public function actionView(string $gid)
     {
-        $id = (int) $id;
-        $lead = Lead::findOne($id);
+
+        $gid = mb_substr($gid, 0, 32);
+
+        //$id = (int) $id;
+        //$lead = Lead::findOne($id);
+
+        $lead = Lead::find()->where(['gid' => $gid])->limit(1)->one();
+
         if(!$lead) {
-            throw new NotFoundHttpException('Not found lead ID: ' . $id);
+            throw new NotFoundHttpException('Not found lead ID: ' . $gid);
         }
 
         if($lead->status == Lead::STATUS_TRASH && Yii::$app->user->identity->role == 'agent') {
@@ -161,7 +168,7 @@ class LeadController extends FController
                                 $leadLog->logMessage->title = 'Update';
                                 $leadLog->logMessage->model = sprintf('%s (%s)', $quote->formName(), $quote->uid);
                                 $leadLog->addLog([
-                                    'lead_id' => $id,
+                                    'lead_id' => $lead->id,
                                 ]);
 
                                 if ($lead->called_expert) {
@@ -255,7 +262,7 @@ class LeadController extends FController
 
             Yii::$app->cache->delete(sprintf('quick-search-%d-%d', $lead->id, Yii::$app->user->identity->getId()));
             if (!$lead->permissionsView()) {
-                throw new UnauthorizedHttpException('Not permissions view lead ID: ' . $id);
+                throw new UnauthorizedHttpException('Not permissions view lead ID: ' . $lead->id);
             }
             $leadForm = new LeadForm($lead);
             if ($leadForm->getLead()->status != Lead::STATUS_PROCESSING ||
@@ -266,7 +273,7 @@ class LeadController extends FController
 
             $flightSegments = $leadForm->getLeadFlightSegment();
             foreach ($flightSegments as $segment){
-                $this->view->title = 'Lead #'.$id.' ✈ '.$segment->destination;
+                $this->view->title = 'Lead #'.$lead->id.' ✈ '.$segment->destination;
                 break;
             }
 
@@ -286,7 +293,7 @@ class LeadController extends FController
                 if (empty($data['errors']) && $data['load'] && $leadForm->save($errors)) {
 
                     if ($lead->called_expert) {
-                        $lead = Lead::findOne(['id' => $id]);
+                        $lead = Lead::findOne(['id' => $lead->id]);
                         $data = $lead->getLeadInformationForExpert();
                         $result = BackOffice::sendRequest('lead/update-lead', 'POST', json_encode($data));
                         if ($result['status'] != 'Success' || !empty($result['errors'])) {
@@ -297,10 +304,7 @@ class LeadController extends FController
                         }
                     }
 
-                    return $this->redirect([
-                        'view',
-                        'id' => $leadForm->getLead()->id
-                    ]);
+                    return $this->redirect(['lead/view', 'gid' => $leadForm->getLead()->gid]);
                 }
 
                 if (!empty($errors)) {
@@ -500,12 +504,16 @@ class LeadController extends FController
 
 
                             $content_data = $lead->getEmailData2($comForm->quoteList);
+                            $previewEmailForm->e_content_data = $content_data;
 
                             //echo json_encode($content_data); exit;
 
-                            //echo (Html::encode(json_encode($content_data))); exit;
+                            //echo (Html::encode(json_encode($content_data)));
+                            //VarDumper::dump($content_data, 10 , true); exit;
 
                             $mailPreview = $communication->mailPreview($lead->project_id, ($tpl ? $tpl->etp_key : ''), $mailFrom, $comForm->c_email_to, $content_data, $language);
+
+
 
 
                             if ($mailPreview && isset($mailPreview['data'])) {
@@ -947,10 +955,7 @@ class LeadController extends FController
                             print_r($result['errors'], true)
                         ));
                     }
-                    return $this->redirect([
-                        'view',
-                        'id' => $lead->id
-                    ]);
+                    return $this->redirect(['lead/view', 'gid' => $lead->gid]);
                 }
             }
             return $this->renderAjax('partial/_paxInfo', [
@@ -988,7 +993,7 @@ class LeadController extends FController
             $logs = $query->all();
             if (count($logs)) {
                 $response['logs'] = $this->renderAjax('partial/_leadLog', [
-                    'logs' => $model->getLogs()
+                    'logs' => $model->leadLogs
                 ]);
                 $response['checkUpdatesUrl'] = Url::to([
                     'lead/check-updates',
@@ -1083,10 +1088,9 @@ class LeadController extends FController
                 } else {
                     Yii::$app->getSession()->setFlash('danger', sprintf('Sent email \'%s\' failed. Please verify your email or password from email!', $sendEmailModel->subject));
                 }
-                return $this->redirect([
-                    'view',
-                    'id' => $lead->id
-                ]);
+
+                return $this->redirect(['lead/view', 'gid' => $lead->gid]);
+
             } else {
                 return $this->renderAjax('partial/_sendEmail', [
                     'templates' => $templates,
@@ -1131,9 +1135,7 @@ class LeadController extends FController
                 'expire' => strtotime('+1 day')
             ]));
         }
-        return $this->redirect([
-            'follow-up',
-        ]);
+        return $this->redirect(['follow-up']);
     }
 
     public function actionAddNote()
@@ -1188,16 +1190,13 @@ class LeadController extends FController
                     $model->status = $model::STATUS_PROCESSING;
                     $model->snooze_for = '';
                     $model->save();
-                    return $this->redirect([
-                        'view',
-                        'id' => $model->id
-                    ]);
+
+                    return $this->redirect(['lead/view', 'gid' => $model->gid]);
+
                 } elseif ($attr['queue'] == 'reject') {
                     $model->status = $model::STATUS_REJECT;
                     $model->save();
-                    return $this->redirect([
-                        'trash',
-                    ]);
+                    return $this->redirect(['trash']);
                 }
             } else {
                 $reason->attributes = $attr;
@@ -1208,9 +1207,8 @@ class LeadController extends FController
                     $model->status = $model::STATUS_FOLLOW_UP;
                     $model->employee_id = null;
                     $model->save();
-                    return $this->redirect([
-                        'follow-up',
-                    ]);
+                    return $this->redirect(['follow-up']);
+
                 } elseif ($reason->queue == 'trash') {
                     $model->status = $model::STATUS_TRASH;
                     $type = 'trash';
@@ -1241,16 +1239,12 @@ class LeadController extends FController
                     );
                     $note->save();
 
-                    return $this->redirect([
-                        'view',
-                        'id' => $model->id
-                    ]);
+                    return $this->redirect(['lead/view', 'gid' => $model->gid]);
+
                 } elseif ($reason->queue == 'reject') {
                     $model->status = $model::STATUS_REJECT;
                     $model->save();
-                    return $this->redirect([
-                        'trash',
-                    ]);
+                    return $this->redirect(['trash']);
                 } else {
                     $model->status = $model::STATUS_ON_HOLD;
                 }
@@ -1259,9 +1253,7 @@ class LeadController extends FController
             }
         }
 
-        return $this->redirect([
-            'processing',
-        ]);
+        return $this->redirect(['processing']);
     }
 
     public function actionChangeState($id, $queue)
@@ -1290,11 +1282,16 @@ class LeadController extends FController
         return null;
     }
 
-    public function actionTake($id)
+    /**
+     * @param string $gid
+     * @return Response
+     * @throws ForbiddenHttpException
+     * @throws UnauthorizedHttpException
+     */
+    public function actionTake(string $gid)
     {
         /**
          * @var $inProcessing Lead
-         * @var $model Lead
          */
 
         $user = Yii::$app->user->identity;
@@ -1313,7 +1310,7 @@ class LeadController extends FController
 
 
         $allowLead = Lead::find()->where([
-            'id' => $id
+            'gid' => $gid
         ])->andWhere([
             'IN', 'status', [Lead::STATUS_BOOKED, Lead::STATUS_SOLD]
         ])->one();
@@ -1335,7 +1332,7 @@ class LeadController extends FController
         }
 
         $model = Lead::find()
-            ->where(['id' => $id])
+            ->where(['gid' => $gid])
             ->andWhere(['IN', 'status', [
                 Lead::STATUS_PENDING,
                 Lead::STATUS_FOLLOW_UP,
@@ -1345,7 +1342,7 @@ class LeadController extends FController
         if ($model === null) {
 
             if (Yii::$app->request->get('over', 0)) {
-                $lead = Lead::findOne(['id' => $id]);
+                $lead = Lead::findOne(['gid' => $gid]);
                 if ($lead !== null) {
                     $reason = new Reason();
                     $reason->queue = 'processing-over';
@@ -1357,7 +1354,7 @@ class LeadController extends FController
                 return null;
             } else {
                 $model = Lead::findOne([
-                    'id' => $id,
+                    'gid' => $gid,
                     'employee_id' => $user->getId()
                 ]);
                 if ($model === null) {
@@ -1368,7 +1365,7 @@ class LeadController extends FController
         }
 
         if (!$model->permissionsView()) {
-            throw new UnauthorizedHttpException('Not permissions view lead ID: ' . $id);
+            throw new UnauthorizedHttpException('Not permissions view lead GID: ' . $gid);
         }
 
 
@@ -1418,13 +1415,7 @@ class LeadController extends FController
 
         //$taskList = ['call1', 'call2', 'voice-mail', 'email'];
 
-
-
-        return $this->redirect([
-            'view',
-            'id' => $model->id
-        ]);
-
+        return $this->redirect(['lead/view', 'gid' => $model->gid]);
     }
 
 
@@ -1741,10 +1732,7 @@ class LeadController extends FController
                 LeadTask::createTaskList($model->id, $model->employee_id, 2, '', Task::CAT_NOT_ANSWERED_PROCESS);
                 LeadTask::createTaskList($model->id, $model->employee_id, 3, '', Task::CAT_NOT_ANSWERED_PROCESS);
 
-                return $this->redirect([
-                    'view',
-                    'id' => $leadForm->getLead()->id
-                ]);
+                return $this->redirect(['lead/view', 'gid' => $leadForm->getLead()->gid]);
             }
 
             if (!empty($errors)) {
@@ -1845,6 +1833,7 @@ class LeadController extends FController
                 $newLead->created = null;
                 $newLead->updated = null;
                 $newLead->tips = 0;
+                $newLead->gid = null;
 
                 if(!$newLead->save()){
                     $errors = array_merge($errors, $newLead->getErrors());
@@ -1862,17 +1851,14 @@ class LeadController extends FController
                     }
                 }
 
-                if(!empty($errors)){
+                if(!empty($errors)) {
                     return $this->renderAjax('partial/_clone', [
                         'lead' => $newLead,
                         'errors' => $errors,
                     ]);
-                }else{
+                } else {
                     Lead::sendClonedEmail($newLead);
-                    return $this->redirect([
-                        'view',
-                        'id' => $newLead->id
-                    ]);
+                    return $this->redirect(['lead/view', 'gid' => $newLead->gid]);
                 }
             }
 
@@ -1903,10 +1889,7 @@ class LeadController extends FController
                 }
 
                 if (empty($errors) && $splitForm->save($errors)) {
-                    return $this->redirect([
-                        'view',
-                        'id' => $lead->id
-                    ]);
+                    return $this->redirect(['lead/view', 'gid' => $lead->gid]);
                 }
 
                 $splitProfit = $splitForm->getProfitSplit();
@@ -1966,10 +1949,7 @@ class LeadController extends FController
                 }
 
                 if (empty($errors) && $splitForm->save($errors)) {
-                    return $this->redirect([
-                        'view',
-                        'id' => $lead->id
-                    ]);
+                    return $this->redirect(['lead/view', 'gid' => $lead->gid]);
                 }
 
                 $splitTips = $splitForm->getTipsSplit();

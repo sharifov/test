@@ -17,6 +17,10 @@ if ($leadForm->mode != $leadForm::VIEW_MODE || ($leadForm->mode == $leadForm::VI
     $modelFormName = sprintf('%s-', strtolower($leadForm->formName()));
     $formLeadId = sprintf('%s-form', $leadForm->getLead()->formName());
     $formClientId = sprintf('%s-form', $leadForm->getClient()->formName());
+
+
+    //\yii\helpers\VarDumper::dump($leadForm->getLeadPreferences(), true); exit;
+
     $formPreferenceId = sprintf('%s-form', $leadForm->getLeadPreferences()->formName());
 
     $js = <<<JS
@@ -325,7 +329,7 @@ $buttonAddNote = Html::a('<span class="btn-icon"><i class="fa fa-file-text-o"></
 
 $buttonTakeOver = Html::a('<i class="fa fa-share fa-rotate-0"></i> Take Over', [
     'lead/take',
-    'id' => $leadForm->getLead()->id,
+    'gid' => $leadForm->getLead()->gid,
     'over' => true
 ], [
     'class' => 'take-processing-btn btn btn-sm btn-info',
@@ -334,7 +338,7 @@ $buttonTakeOver = Html::a('<i class="fa fa-share fa-rotate-0"></i> Take Over', [
 
 $buttonTake = Html::a('<i class="fa fa-share fa-rotate-0"></i> Take', [
     'lead/take',
-    'id' => $leadForm->getLead()->id
+    'gid' => $leadForm->getLead()->gid
 ],[
     'class' => 'btn btn-sm btn-info',
 ]);
@@ -371,7 +375,7 @@ $buttonSendEmail = Html::a('<i class="fa fa-envelope"></i> Send email', '#', [
 
 $buttonOnWake = Html::a('<i class="fa fa-street-view"></i> On Wake', Url::to([
     'lead/take',
-    'id' => $leadForm->getLead()->id
+    'gid' => $leadForm->getLead()->gid
 ]));
 
 $buttonReturnLead = Html::a('<i class="fa fa-share fa-rotate-180"></i> Return Lead', '#', [

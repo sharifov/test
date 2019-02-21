@@ -113,11 +113,14 @@ $this->registerJs($js);
             <?php
             $lead = $leadForm->getLead();
             if(!empty($lead->clone_id)){
+
+                $cloneLead = \common\models\Lead::findOne($lead->clone_id);
+
                 printf(" <a title=\"%s\" href=\"%s\">(Cloned from %s)</a> ",
                     "Clone reason: ".$lead->description,
                     \yii\helpers\Url::to([
                     'lead/view',
-                    'id' => $lead->clone_id
+                    'uid' => $cloneLead->uid
                 ]),$lead->clone_id);
             }
             ?>
@@ -136,8 +139,8 @@ $this->registerJs($js);
                         </div>
                     <?php endif; ?>
                     <div class="page-header__general-item">
-                        <strong>Client <i class="fa fa-clock-o"></i>:</strong>
-                        <?= $leadForm->getLead()->getClientTime(); ?>
+                        <strong>Client:</strong>
+                        <?= $leadForm->getLead()->getClientTime2(); ?>
                     </div>
                     <div class="page-header__general-item">
                         <strong>UID:</strong>
@@ -498,7 +501,7 @@ JS;
                 ]);*/ ?>
 
                 <?= $this->render('partial/_notes', [
-                    'notes' => $leadForm->getLead()->getNotes()
+                    'notes' => $leadForm->getLead()->notes
                 ]); ?>
                 <div class="panel panel-success panel-wrapper history-block">
                     <div class="panel-heading collapsing-heading">
@@ -510,7 +513,7 @@ JS;
                     </div>
                     <div class="collapse" id="agents-activity-logs" aria-expanded="false" style="">
                         <?= $this->render('partial/_leadLog', [
-                            'logs' => $leadForm->getLead()->getLogs()
+                            'logs' => $leadForm->getLead()->leadLogs
                         ]); ?>
                     </div>
                 </div>
@@ -526,11 +529,11 @@ JS;
                 <p>Client information is not available in VIEW MODE, please take lead!</p>
             </div>
 
-    	 <?php elseif($leadForm->getLead()->status == \common\models\Lead::STATUS_FOLLOW_UP && $leadForm->getLead()->employee_id != Yii::$app->user->id && $is_manager):?>
+    	 <?php elseif(!$is_manager && ( $leadForm->getLead()->status == \common\models\Lead::STATUS_FOLLOW_UP || $leadForm->getLead()->status == \common\models\Lead::STATUS_PENDING ) && $leadForm->getLead()->employee_id != Yii::$app->user->id):?>
 
             <div class="alert alert-warning" role="alert">
                 <h4 class="alert-heading">Warning!</h4>
-                <p>Client information is not available for this status (FOLLOW UP)!</p>
+                <p>Client information is not available for this status (<?=strtoupper($leadForm->getLead()->getStatusName())?>)!</p>
             </div>
 
         <? else: ?>

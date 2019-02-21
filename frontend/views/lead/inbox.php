@@ -2,6 +2,7 @@
 use yii\helpers\Html;
 use yii\widgets\Pjax;
 use kartik\grid\GridView;
+//use yii\grid\GridView;
 use common\models\Lead;
 use yii\helpers\Url;
 
@@ -371,16 +372,28 @@ $this->params['breadcrumbs'][] = $this->title;
 
 
 
-        [
+        /*[
             'header' => 'Client time',
             'format' => 'raw',
             'value' => function (\common\models\Lead $model) {
                 return $model->getClientTime();
             },
-            'options' => [
-                'style' => 'width:110px'
-            ]
+            'visible' => ! $isAgent,
+            //'options' => ['style' => 'width:110px'],
+
+        ],*/
+
+
+        [
+            'header' => 'Client time',
+            'format' => 'raw',
+            'value' => function(\common\models\Lead $model) {
+                return $model->getClientTime2();
+            },
+            //'options' => ['style' => 'width:80px'],
+            //'filter' => \common\models\Employee::getList()
         ],
+
 
         [
             'header' => 'Project',
@@ -421,13 +434,13 @@ $this->params['breadcrumbs'][] = $this->title;
 
 
                     if(!$buttons) {
-                        $buttons .= Html::a('<i class="fa fa-download"></i> Take', ['lead/take', 'id' => $model->id], [
+                        $buttons .= Html::a('<i class="fa fa-download"></i> Take', ['lead/take', 'gid' => $model->gid], [
                             'class' => 'btn btn-primary btn-xs take-btn',
                             'data-pjax' => 0
                         ]);
 
                         if(!$isAgent) {
-                            $buttons .= Html::a('<i class="fa fa-search"></i> View', '/lead/view/' . $model->id, [
+                            $buttons .= Html::a('<i class="fa fa-search"></i> View', ['lead/view', 'gid' => $model->gid], [
                                 'class' => 'btn btn-info btn-xs',
                                 'data-pjax' => 0
                             ]);
@@ -443,6 +456,7 @@ $this->params['breadcrumbs'][] = $this->title;
     ?>
 <?php
 echo GridView::widget([
+
     'dataProvider' => $dataProvider,
     'filterModel' => $searchModel,
     'columns' => $gridColumns,
@@ -516,6 +530,7 @@ function initCountDown()
 
 $(document).on(\'pjax:end\', function() {
     initCountDown();
+    setClienTime();
 });
 
 initCountDown();

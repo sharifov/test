@@ -1089,11 +1089,11 @@ class Quote extends \yii\db\ActiveRecord
     public function getBaggageInfo2() : array
     {
 
-        $caryOn = 1;
-        $checked = random_int(0, 1);
+        //$caryOn = 1;
+        //$checked = random_int(0, 1);
 
         //if one segment has baggage -> quote has baggage
-        /*if(!empty($this->quoteTrips)){
+        if($this->quoteTrips){
             foreach ($this->quoteTrips as $trip){
                 if(!empty($trip->quoteSegments)){
                     foreach ($trip->quoteSegments as $segment){
@@ -1114,10 +1114,38 @@ class Quote extends \yii\db\ActiveRecord
                     }
                 }
             }
-        }*/
+        }
 
         return ['carryOn' => $caryOn, 'checked' => $checked];
     }
+
+
+
+    public function getBaggageInfoByTrip(QuoteTrip $trip) : array
+    {
+
+        $caryOn = 1;
+        $checked = 0;
+
+        if($trip->quoteSegments){
+            foreach ($trip->quoteSegments as $segment){
+                if(!empty($segment->quoteSegmentBaggages)){
+                    foreach ($segment->quoteSegmentBaggages as $baggage){
+                        if($baggage->qsb_allow_pieces > 0) {
+                            $checked = $baggage->qsb_allow_pieces;
+                        }
+                        /*elseif ($baggage->qsb_allow_weight) {
+                            $this->freeBaggageInfo2 = $baggage->qsb_allow_weight.$baggage->qsb_allow_unit;
+                        }*/
+                    }
+                }
+            }
+        }
+
+
+        return ['carryOn' => $caryOn, 'checked' => $checked];
+    }
+
 
     public function afterSave($insert, $changedAttributes)
     {
@@ -1349,37 +1377,91 @@ class Quote extends \yii\db\ActiveRecord
     }
 
 
-    /**
-     * @return array
-     */
+
+
+
     public function getInfoForEmail2() : array
     {
         $trips = [];
+        $quoteCabinClasses = [];
+        $quoteMarketingAirlines = [];
+        $quoteOperatingAirlines = [];
+
+        $maxStopsQuantity = 0;
 
         foreach ($this->quoteTrips as $trip){
+
+            $tripCabinClasses = [];
+            $tripMarketingAirlines = [];
+            $tripOperatingAirlines = [];
+
             $firstSegment = null;
             $lastSegment = null;
-
             $segments = $trip->quoteSegments;
+
             if( $segments ) {
+
                 $segmentsCnt = count($segments);
                 $stopCnt = $segmentsCnt - 1;
                 $firstSegment = $segments[0];
                 $lastSegment = end($segments);
-                $marketingAirlines = [];
+
                 foreach ($segments as $segment) {
-                    if(isset($segment->qs_stop) && $segment->qs_stop > 0){
+
+                    $cabinClass = SearchService::getCabin($segment->qs_cabin);
+
+                    $quoteCabinClasses[$segment->qs_cabin] = $cabinClass;
+                    $tripCabinClasses[$segment->qs_cabin] = $cabinClass;
+
+                    $airlineCodeM = $airlineNameM = $segment->qs_marketing_airline;
+
+                    if($segment->qs_marketing_airline) {
+                        $airline = Airline::findIdentity($segment->qs_marketing_airline);
+                        if($airline) {
+                            $airlineNameM = $airline->name;
+                        }
+                    }
+
+                    $tripMarketingAirlines[$airlineCodeM] = $airlineNameM; /*[
+                        'airlineName' => $airlineName,
+                        'airlineCode' => $airlineCode,
+                    ];*/
+
+                    $quoteMarketingAirlines[$airlineCodeM] = $airlineNameM;
+
+
+                    $airlineCodeO = $airlineNameO = $segment->qs_operating_airline;
+
+                    if($segment->qs_operating_airline) {
+                        $airline = Airline::findIdentity($segment->qs_operating_airline);
+                        if($airline) {
+                            $airlineNameO = $airline->name;
+                        }
+                    }
+
+                    $tripOperatingAirlines[$airlineCodeO] = $airlineNameO;
+                    $quoteOperatingAirlines[$airlineCodeO] = $airlineNameO;
+
+                    if($segment->qs_stop > 0){
                         $stopCnt += $segment->qs_stop;
                     }
-                    if(!in_array($segment->qs_marketing_airline, $marketingAirlines)){
-                        $marketingAirlines[] = $segment->qs_marketing_airline;
-                    }
+                }
+
+                if($stopCnt > $maxStopsQuantity) {
+                    $maxStopsQuantity = $stopCnt;
                 }
 
                 $dateDiff = strtotime($lastSegment->qs_arrival_time) - strtotime($firstSegment->qs_departure_time);
 
                 $trips[] = [
-                    'airlineCode' => 1 === count($marketingAirlines) ? $marketingAirlines[0] : '',
+                    'cabinClasses' => $tripCabinClasses,
+                    'marketingAirlines' => $tripMarketingAirlines,
+                    'operatingAirlines' => $tripOperatingAirlines,
+
+
+                    //'airlineCode' => isset($marketingAirlines[0]) ? $marketingAirlines[0]['airlineName'] : '',
+                    //'airlineName' => isset($marketingAirlines[0]) ? $marketingAirlines[0]['airlineCode'] : '',
+
                     //'departureDate' => Yii::$app->formatter_search->asDatetime(strtotime($firstSegment->qs_departure_time),'MMM d'),
                     //'departureTime' => Yii::$app->formatter_search->asDatetime(strtotime($firstSegment->qs_departure_time),'h:mm a'),
                     'departDateTime' => date('Y-m-d H:i:s', strtotime($firstSegment->qs_departure_time)),
@@ -1393,6 +1475,7 @@ class Quote extends \yii\db\ActiveRecord
                     'flightDuration' => SearchService::durationInMinutes($trip->qt_duration),
                     'flightDurationMinutes' => $trip->qt_duration,
                     'stopsQuantity' => $stopCnt,
+                    'baggage' => $this->getBaggageInfoByTrip($trip),
                 ];
 
             }
@@ -1403,12 +1486,16 @@ class Quote extends \yii\db\ActiveRecord
 
 
         return [
+            'cabinClasses' => $quoteCabinClasses,
+            'marketingAirlines' => $quoteMarketingAirlines,
+            'operatingAirlines' => $quoteOperatingAirlines,
             'pricePerPax' => $this->getPricePerPax(),
             'priceTotal' => 0,
             'currencySymbol' => '$',
             'currencyCode' => 'USD',
             'trips' => $trips,
-            'baggage' => $this->getBaggageInfo2(),
+            'maxStopsQuantity' => $maxStopsQuantity
+            //'baggage' => $this->getBaggageInfo2(),
         ];
     }
 

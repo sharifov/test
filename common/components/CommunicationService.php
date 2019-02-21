@@ -76,7 +76,6 @@ class CommunicationService extends Component
 
         //$options = ['RETURNTRANSFER' => 1];
 
-
         $this->request->setMethod($method)
             ->setUrl($url)
             ->setData($data);
@@ -497,7 +496,7 @@ class CommunicationService extends Component
             }
         } else {
             $out['error'] = $response->content;
-            \Yii::error(VarDumper::dumpAsString($out['error'], 10), 'Component:CommunicationService::callToPhone');
+            \Yii::error(VarDumper::dumpAsString($out['error']), 'Component:CommunicationService::callToPhone');
         }
 
         return $out;
@@ -527,14 +526,73 @@ class CommunicationService extends Component
             }
         } else {
             $out['error'] = $response->content;
-            \Yii::error(VarDumper::dumpAsString($out['error'], 10), 'Component:CommunicationService::updateCall');
+            \Yii::error(VarDumper::dumpAsString($out['error']), 'Component:CommunicationService::updateCall');
         }
 
         return $out;
     }
 
 
+    /**
+     * @param string $username
+     * @return array
+     * @throws \yii\httpclient\Exception
+     */
+    public function getJwtToken($username = '') : array
+    {
 
+        /*'identity' => $token->jt_agent,
+        'client'    => $token->jt_agent,
+        'token'     => $token->jt_token,
+        'expire'    => $token->jt_expire_dt,*/
+
+        $out = ['error' => false, 'data' => []];
+
+        $data['agent'] = $username;
+
+        $response = $this->sendRequest('twilio-jwt/get-token', $data);
+
+        if ($response->isOk) {
+            if(isset($response->data['data'])) {
+                $out['data'] = $response->data['data'];
+            } else {
+                $out['error'] = 'Not found in response array data key [data]';
+            }
+        } else {
+            $out['error'] = $response->content;
+            \Yii::error(VarDumper::dumpAsString($out['error']), 'Component:CommunicationService::getToken');
+        }
+
+        return $out;
+    }
+
+
+    /**
+     * @param string $username
+     * @param bool $deleteCache
+     * @return mixed
+     * @throws \yii\httpclient\Exception
+     */
+    public function getJwtTokenCache($username = '', $deleteCache = false)
+    {
+        $cacheKey = 'jwt_token_'.$username;
+
+        if($deleteCache) {
+            \Yii::$app->cache->delete($cacheKey);
+        }
+        $out = \Yii::$app->cache->get($cacheKey);
+
+        if ($out === false) {
+            $out = $this->getJwtToken($username);
+
+            if($out && isset($out['data']['token']) && $out['data']['token']) {
+                $expired = isset($out['data']['expire']) ? strtotime($out['data']['expire']) - time() : 60 * 30;
+                \Yii::$app->cache->set($cacheKey, $out, $expired);
+            }
+        }
+
+        return $out;
+    }
 
 
 }

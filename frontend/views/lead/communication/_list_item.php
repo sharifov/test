@@ -119,7 +119,7 @@ use \common\models\Call;
 
             if($sms->s_status_id == Sms::STATUS_DONE) {
                 $statusClass = 'success';
-                $statusTitle = 'DELIVERED - ' . Yii::$app->formatter->asDatetime(strtotime($sms->s_status_done_dt));
+                $statusTitle = 'DELIVERED - ' . ($sms->s_status_done_dt ? Yii::$app->formatter->asDatetime(strtotime($sms->s_status_done_dt)) : Yii::$app->formatter->asDatetime(strtotime($sms->s_updated_dt)));
             } elseif($sms->s_status_id == Sms::STATUS_ERROR || $sms->s_status_id == Sms::STATUS_CANCEL) {
                 $statusClass = 'error';
                 $statusTitle = 'ERROR - '. $sms->s_error_message;

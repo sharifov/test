@@ -516,7 +516,7 @@ class QuoteController extends FController
                     }
                     return $this->redirect([
                         'lead/view',
-                        'id' => $lead->id
+                        'gid' => $lead->gid
                     ]);
                 }
             }
@@ -620,7 +620,7 @@ class QuoteController extends FController
                     }
                     return $this->redirect([
                         'lead/view',
-                        'id' => $lead->id
+                        'gid' => $lead->gid
                     ]);
                 }
             }
@@ -1087,7 +1087,7 @@ class QuoteController extends FController
 
                 return $this->redirect([
                     'lead/view',
-                    'id' => $leadId
+                    'gid' => $lead->gid
                 ]);
             }
         }

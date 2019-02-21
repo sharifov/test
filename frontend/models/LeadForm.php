@@ -83,7 +83,7 @@ class LeadForm extends Model
             $this->setLeadFlightSegment($lead->leadFlightSegments);
 
             if ($lead->leadPreferences === null) {
-                $this->setLeadPreferences((new LeadPreferences()));
+                $this->setLeadPreferences(new LeadPreferences());
             } else {
                 $this->setLeadPreferences($lead->leadPreferences);
             }

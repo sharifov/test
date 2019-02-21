@@ -20,6 +20,7 @@ use common\models\ProjectEmployeeAccess;
 use common\models\LeadFlow;
 use common\models\ProfitSplit;
 use common\models\TipsSplit;
+use yii\helpers\VarDumper;
 
 /**
  * LeadSearch represents the model behind the search form of `common\models\Lead`.
@@ -57,15 +58,15 @@ class LeadSearch extends Lead
     public function rules()
     {
         return [
-            [['id', 'client_id', 'employee_id', 'status', 'project_id', 'adults', 'children', 'infants', 'rating', 'called_expert', 'cnt', 'l_grade', 'l_answered', 'supervision_id', 'limit'], 'integer'],
+            [['id', 'client_id', 'employee_id', 'status', 'project_id', 'adults', 'children', 'infants', 'rating', 'called_expert', 'cnt', 'l_grade', 'l_answered', 'supervision_id', 'limit', 'bo_flight_id'], 'integer'],
             [['email_status', 'quote_status'], 'integer'],
 
-            [['client_name', 'client_email', 'client_phone','quote_pnr'], 'string'],
+            [['client_name', 'client_email', 'client_phone','quote_pnr', 'gid'], 'string'],
 
             //['created_date_from', 'default', 'value' => '2018-01-01'],
             //['created_date_to', 'default', 'value' => date('Y-m-d')],
 
-            [['uid', 'trip_type', 'cabin', 'notes_for_experts', 'created', 'updated', 'request_ip', 'request_ip_detail', 'offset_gmt', 'snooze_for', 'discount_id', 'bo_flight_id',
+            [['uid', 'trip_type', 'cabin', 'notes_for_experts', 'created', 'updated', 'request_ip', 'request_ip_detail', 'offset_gmt', 'snooze_for', 'discount_id',
                 'created_date_from', 'created_date_to', 'depart_date_from', 'depart_date_to', 'source_id', 'statuses', 'sold_date_from', 'sold_date_to', 'processing_filter'], 'safe'],
         ];
     }
@@ -105,7 +106,7 @@ class LeadSearch extends Lead
      *
      * @return ActiveDataProvider
      */
-    public function search2($params)
+    public function search($params)
     {
         $query = Lead::find();
 
@@ -130,6 +131,7 @@ class LeadSearch extends Lead
         // grid filtering conditions
         $query->andFilterWhere([
             'id' => $this->id,
+            'gid'   => $this->gid,
             'client_id' => $this->client_id,
             'employee_id' => $this->employee_id,
             'status' => $this->status,
@@ -193,7 +195,6 @@ class LeadSearch extends Lead
              if ($this->sold_date_to) {
              $query->andFilterWhere(['<=', 'DATE(leads.updated)', date('Y-m-d', strtotime($this->sold_date_to))]);
              }*/
-
 
             $subQuery = LeadFlow::find()->select(['DISTINCT(lead_flow.lead_id)'])->where('lead_flow.status = leads.status AND lead_flow.lead_id = leads.id');
 
@@ -311,7 +312,7 @@ class LeadSearch extends Lead
         'employee_id' => ''*/
 
 
-        if($this->id || $this->uid || $this->client_id || $this->client_name || $this->client_email || $this->client_phone || $this->bo_flight_id || $this->employee_id || $this->request_ip) {
+        if($this->id || $this->uid || $this->gid || $this->client_id || $this->client_name || $this->client_email || $this->client_phone || $this->bo_flight_id || $this->employee_id || $this->request_ip) {
 
         } else {
             $this->employee_id = Yii::$app->user->id;
@@ -322,6 +323,7 @@ class LeadSearch extends Lead
         // grid filtering conditions
         $query->andFilterWhere([
             'id' => $this->id,
+            'gid' => $this->gid,
             'client_id' => $this->client_id,
             'employee_id' => $this->employee_id,
             'status' => $this->status,

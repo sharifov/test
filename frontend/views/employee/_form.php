@@ -1,20 +1,19 @@
 <?php
 /**
  * @var $this \yii\web\View
- * @var $model Employee
  * @var $modelUserParams \common\models\UserParams
+ * @var $modelProfile \common\models\UserProfile
  */
 /* @var $searchModel common\models\search\UserProjectParamsSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
+/* @var $model common\models\Employee */
 
 use yii\bootstrap\Html;
 use yii\bootstrap\ActiveForm;
 use common\models\Employee;
 use common\models\EmployeeAcl;
 use yii\widgets\MaskedInput;
-use kartik\time\TimePicker;
 
-$formId = sprintf('%s-ID', $model->formName());
 
 if($model->isNewRecord) {
     $this->title = 'Create new User';
@@ -39,7 +38,7 @@ if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
 <div class="col-sm-5">
     <?php $form = ActiveForm::begin([
         'successCssClass' => '',
-        'id' => $formId
+        'id' => sprintf('%s-ID', $model->formName())
     ]) ?>
             <div class="well">
                 <div class="row">
@@ -313,14 +312,34 @@ JS;
                     </div>
                 </div>
             <?php endif; ?>
-            <div class="form-group">
-                <?= Html::submitButton(($model->isNewRecord ? 'Create User' : 'Update User'), ['class' => 'btn btn-primary']) ?>
+
+            <h4>Profile Settings</h4>
+
+            <div class="row">
+                <div class="col-md-3">
+                    <?= $form->field($modelProfile, 'up_call_type_id')->dropDownList(\common\models\UserProfile::CALL_TYPE_LIST) ?>
+                </div>
+                <div class="col-md-3">
+                    <?= $form->field($modelProfile, 'up_sip')->textInput(['maxlength' => true]) ?>
+                </div>
+                <div class="col-md-3">
+                    <?= $form->field($modelProfile, 'up_telegram')->textInput(['maxlength' => true]) ?>
+                    <?= $form->field($modelProfile, 'up_telegram_enable')->checkbox() ?>
+                </div>
+                <div class="col-md-3">
+
+                </div>
+            </div>
+
+            <div class="form-group text-center">
+                <?= Html::submitButton(($model->isNewRecord ? '<i class="fa fa-plus"></i> Create User' : '<i class="fa fa-save"></i> Update & Save User data'), ['class' => $model->isNewRecord ? 'btn btn-success' : 'btn btn-warning']) ?>
             </div>
     <?php ActiveForm::end() ?>
 </div>
 
 
 <div class="col-sm-7">
+
     <?php if (!$model->isNewRecord) : ?>
 
         <div class="user-project-params-index">

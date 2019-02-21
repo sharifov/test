@@ -31,7 +31,6 @@ use yii\web\NotFoundHttpException;
  * @property string $last_activity
  * @property boolean $acl_rules_activated
  *
- * @property EmployeeProfile[] $employeeProfiles
  * @property Lead[] $leads
  * @property EmployeeAcl[] $employeeAcl
  * @property ProjectEmployeeAccess[] $projectEmployeeAccesses
@@ -43,15 +42,16 @@ use yii\web\NotFoundHttpException;
  *
  * @property UserProjectParams[] $userProjectParams
  * @property Project[] $uppProjects
+ * @property UserProfile $userProfile
  */
 class Employee extends \yii\db\ActiveRecord implements IdentityInterface
 {
-    const SCENARIO_REGISTER = 'register';
+    public const SCENARIO_REGISTER = 'register';
 
-    const STATUS_DELETED = 0;
-    const STATUS_ACTIVE = 10;
+    public const STATUS_DELETED = 0;
+    public const STATUS_ACTIVE = 10;
 
-    const PROFIT_BONUSES = [
+    public const PROFIT_BONUSES = [
         11000 => 500,
         8000 => 300,
         5000 => 150
@@ -162,6 +162,14 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
 
         $this->updated_at = date('Y-m-d H:i:s');
     }*/
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getUserProfile()
+    {
+        return $this->hasOne(UserProfile::class, ['up_user_id' => 'id']);
+    }
 
     /**
      * @return \yii\db\ActiveQuery
@@ -301,14 +309,6 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         return $roles;
     }
 
-
-    /**
-     * @return \yii\db\ActiveQuery
-     */
-    public function getEmployeeProfiles()
-    {
-        return $this->hasMany(EmployeeProfile::class, ['employee_id' => 'id']);
-    }
 
     /**
      * @return \yii\db\ActiveQuery
@@ -756,13 +756,22 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         return $str;
     }
 
-    public function paramsForSalary()
+    /**
+     * @return array
+     */
+    public function paramsForSalary() : array
     {
         $data = [];
+        if($this->userParams) {
+            $data['base_amount'] = is_numeric($this->userParams->up_base_amount) ? (float) $this->userParams->up_base_amount : 0;
+            $data['commission_percent'] = is_numeric($this->userParams->up_commission_percent) ? (float) $this->userParams->up_commission_percent : 0;
+            $data['bonus_active'] = is_numeric($this->userParams->up_bonus_active) ? $this->userParams->up_bonus_active : 0;
+        } else {
+            $data['base_amount'] = 200;
+            $data['commission_percent'] = 10;
+            $data['bonus_active'] = 1;
+        }
 
-        $data['base_amount'] = (!empty($this->userParams)) ? ($this->userParams->up_base_amount)?:200 : 200;
-        $data['commission_percent'] = ($this->userParams) ? ($this->userParams->up_commission_percent)?:10 : 10;
-        $data['bonus_active'] = ($this->userParams) ? ($this->userParams->up_bonus_active)?:1 : 1;
         $data['profit_bonuses'] = $this->getProfitBonuses();
         if(empty($data['profit_bonuses'])){
             $data['profit_bonuses'] = self::PROFIT_BONUSES;

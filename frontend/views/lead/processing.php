@@ -91,7 +91,14 @@ $this->params['breadcrumbs'][] = $this->title;
                     $clientName = '-';
                 }
 
-                return $clientName;
+
+                $str = '<br><br>';
+                $str .= '<span title="Calls Out / In"><i class="fa fa-phone success"></i> '. $model->getCountCalls(\common\models\Call::CALL_TYPE_OUT) .'/'.  $model->getCountCalls(\common\models\Call::CALL_TYPE_IN) .'</span> | ';
+                $str .= '<span title="SMS Out / In"><i class="fa fa-comments info"></i> '. $model->getCountSms(\common\models\Sms::TYPE_OUTBOX) .'/'.  $model->getCountCalls(\common\models\Sms::TYPE_INBOX) .'</span> | ';
+                $str .= '<span title="Email Out / In"><i class="fa fa-envelope danger"></i> '. $model->getCountEmails(\common\models\Email::TYPE_OUTBOX) .'/'.  $model->getCountEmails(\common\models\Email::TYPE_INBOX) .'</span>';
+
+
+                return $clientName . $str;
             },
             'options' => [
                 'style' => 'width:160px'
@@ -107,13 +114,13 @@ $this->params['breadcrumbs'][] = $this->title;
         ],*/
 
         [
-            //'attribute' => 'client_id',
+            //'attribute' => 'clientTime',
             'header' => 'Client time',
             'format' => 'raw',
             'value' => function(\common\models\Lead $model) {
                 return $model->getClientTime2();
             },
-            'options' => ['style' => 'width:160px'],
+            //'options' => ['style' => 'width:80px'],
             //'filter' => \common\models\Employee::getList()
         ],
 
@@ -270,7 +277,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
                     $buttons = '';
 
-                    $buttons .= Html::a('<i class="fa fa-search"></i>', ['lead/view', 'id' => $model->id], [
+                    $buttons .= Html::a('<i class="fa fa-search"></i>', ['lead/view', 'gid' => $model->gid], [
                         'class' => 'btn btn-info btn-xs',
                         'target' => '_blank',
                         'data-pjax' => 0,
@@ -279,12 +286,12 @@ $this->params['breadcrumbs'][] = $this->title;
 
                     if (Yii::$app->user->id === $model->employee_id && $model->status === Lead::STATUS_ON_HOLD) {
 
-                        $buttons .= Html::a('Take', ['lead/take', 'id' => $model->id], ['class' => 'btn btn-primary btn-xs take-btn', 'data-pjax' => 0]);
+                        $buttons .= Html::a('Take', ['lead/take', 'gid' => $model->gid], ['class' => 'btn btn-primary btn-xs take-btn', 'data-pjax' => 0]);
                     }
 
                     if (Yii::$app->user->id != $model->employee_id && in_array($model->status, [Lead::STATUS_ON_HOLD, Lead::STATUS_PROCESSING])) {
 
-                        $buttons .= ' ' . Html::a('Take Over', ['lead/take', 'id' => $model->id, 'over' => true], [
+                        $buttons .= ' ' . Html::a('Take Over', ['lead/take', 'gid' => $model->gid, 'over' => true], [
                             'class' => 'btn btn-primary btn-xs take-processing-btn',
                             'data-pjax' => 0,
                             'data-status' => $model->status
@@ -370,6 +377,11 @@ $js = <<<JS
             window.location = url;
         }
     });
+
+/*$(document).on('pjax:end', function() {
+    setClienTime();
+});*/
+
 JS;
 $this->registerJs($js);
 

@@ -50,7 +50,7 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
                 //'label' => 'Lead UID',
                 'attribute' => 'lead_id',
                 'value' => function(\common\models\LeadFlow $model) {
-                    return 'Lead: '. Html::a('' . $model->lead_id, ['lead/view/' . $model->lead_id], ['target' => '_blank', 'data-pjax' => 0]);
+                    return 'Lead: '. Html::a('' . $model->lead_id, ['lead/view', 'gid' => $model->lead->gid], ['target' => '_blank', 'data-pjax' => 0]);
                 },
                 'format' => 'raw',
                 'options' => ['style' => 'width:140px'],

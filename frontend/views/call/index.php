@@ -72,7 +72,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'c_lead_id',
                 'value' => function (\common\models\Call $model) {
-                    return  $model->c_lead_id ? Html::a($model->c_lead_id, ['lead/view', 'id' => $model->c_lead_id, ['target' => '_blank', 'data-pjax' => 0]]) : '-';
+                    return  $model->c_lead_id ? Html::a($model->c_lead_id, ['lead/view', 'gid' => $model->cLead->gid, ['target' => '_blank', 'data-pjax' => 0]]) : '-';
                 },
                 'format' => 'raw'
             ],

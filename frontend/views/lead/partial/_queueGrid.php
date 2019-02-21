@@ -425,10 +425,10 @@ if(Yii::$app->authManager->getAssignment('admin', $userId) || Yii::$app->authMan
                             $model['status'] === Lead::STATUS_ON_HOLD)
                     ) {
                         $buttonsCnt++;
-                        $buttons .= Html::a('Take', Url::to([
+                        $buttons .= Html::a('Take', [
                             'lead/take',
-                            'id' => $model['id']
-                        ]), [
+                            'gid' => $model->gid
+                        ], [
                             'class' => 'btn btn-primary btn-xs take-btn',
                             'data-pjax' => 0
                         ]);
@@ -441,7 +441,7 @@ if(Yii::$app->authManager->getAssignment('admin', $userId) || Yii::$app->authMan
                             $queueType = 'processing';
                         }
                         $buttonsCnt++;
-                        $buttons .= ' '.Html::a('<i class="fa fa-search"></i>', ['lead/view', 'id' => $model['id']], [
+                        $buttons .= ' '.Html::a('<i class="fa fa-search"></i>', ['lead/view', 'gid' => $model->gid], [
                             'class' => 'btn btn-info btn-xs',
                             'target' => '_blank',
                             'data-pjax' => 0,
@@ -453,11 +453,11 @@ if(Yii::$app->authManager->getAssignment('admin', $userId) || Yii::$app->authMan
                         in_array($model['status'], [Lead::STATUS_ON_HOLD, Lead::STATUS_PROCESSING])
                     ) {
                         $buttonsCnt++;
-                        $buttons .= ' '.Html::a('Take Over', Url::to([
+                        $buttons .= ' '.Html::a('Take Over', [
                             'lead/take',
-                            'id' => $model['id'],
+                            'gid' => $model->gid,
                             'over' => true
-                        ]), [
+                        ], [
                             'class' => 'btn btn-xs take-processing-btn',
                                 'data-pjax' => 0,
                             'data-status' => $model['status']

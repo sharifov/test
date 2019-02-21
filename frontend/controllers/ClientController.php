@@ -169,7 +169,7 @@ class ClientController extends FController
         if($isAgent) {
             $dataProvider = $searchModel->searchAgent($params);
         } else {
-            $dataProvider = $searchModel->search2($params);
+            $dataProvider = $searchModel->search($params);
         }
 
         $dataProvider->sort = false;

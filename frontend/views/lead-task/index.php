@@ -31,7 +31,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'label' => 'Lead UID',
                 'attribute' => 'lt_lead_id',
                 'value' => function(\common\models\LeadTask $model) {
-                    return Html::a($model->ltLead->uid, ['lead/view/' . $model->lt_lead_id], ['target' => '_blank', 'data-pjax' => 0]);
+                    return Html::a($model->ltLead->uid, ['lead/view', 'gid' => $model->ltLead->gid], ['target' => '_blank', 'data-pjax' => 0]);
                 },
                 'format' => 'raw',
                 'filter' => false

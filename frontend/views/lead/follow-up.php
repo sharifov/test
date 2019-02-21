@@ -97,12 +97,33 @@ $this->params['breadcrumbs'][] = $this->title;
                     $clientName = '-';
                 }
 
-                return $clientName.'<br/>'.$model->getClientTime2();
+                $str = '';
+                /*$str .= '<span title="Calls Out / In"><i class="fa fa-phone success"></i> '. $model->getCountCalls(\common\models\Call::CALL_TYPE_OUT) .'/'.  $model->getCountCalls(\common\models\Call::CALL_TYPE_IN) .'</span> | ';
+                $str .= '<span title="SMS Out / In"><i class="fa fa-comments info"></i> '. $model->getCountSms(\common\models\Sms::TYPE_OUTBOX) .'/'.  $model->getCountCalls(\common\models\Sms::TYPE_INBOX) .'</span> | ';
+                $str .= '<span title="Email Out / In"><i class="fa fa-envelope danger"></i> '. $model->getCountEmails(\common\models\Email::TYPE_OUTBOX) .'/'.  $model->getCountEmails(\common\models\Email::TYPE_INBOX) .'</span>';*/
+
+                return $clientName.'<br/>'.$model->getClientTime2().$str;
             },
             'options' => [
                 'style' => 'width:160px'
             ]
         ],
+
+        [
+            'label' => 'Communication',
+            'value' => function (\common\models\Lead $model) {
+                $str = '';
+                $str .= '<span title="Calls Out / In"><i class="fa fa-phone success"></i> '. $model->getCountCalls(\common\models\Call::CALL_TYPE_OUT) .'/'.  $model->getCountCalls(\common\models\Call::CALL_TYPE_IN) .'</span> | ';
+                $str .= '<span title="SMS Out / In"><i class="fa fa-comments info"></i> '. $model->getCountSms(\common\models\Sms::TYPE_OUTBOX) .'/'.  $model->getCountCalls(\common\models\Sms::TYPE_INBOX) .'</span> | ';
+                $str .= '<span title="Email Out / In"><i class="fa fa-envelope danger"></i> '. $model->getCountEmails(\common\models\Email::TYPE_OUTBOX) .'/'.  $model->getCountEmails(\common\models\Email::TYPE_INBOX) .'</span>';
+                return $str;
+            },
+            'format' => 'raw',
+            'contentOptions' => [
+                'class' => 'text-center'
+            ]
+        ],
+
         /*[
             'attribute' => 'clientTime',
             'label' => 'Client Time',
@@ -236,15 +257,15 @@ $this->params['breadcrumbs'][] = $this->title;
 
                     $buttons = '';
 
-                    $buttons .= Html::a('Take', Url::to([
+                    $buttons .= Html::a('Take', [
                         'lead/take',
-                        'id' => $model['id']
-                    ]), [
+                        'gid' => $model->gid
+                    ], [
                         'class' => 'btn btn-primary btn-xs take-btn',
                         'data-pjax' => 0
                     ]);
 
-                    $buttons .= Html::a('<i class="fa fa-search"></i>', ['lead/view', 'id' => $model->id], [
+                    $buttons .= Html::a('<i class="fa fa-search"></i>', ['lead/view', 'gid' => $model->gid], [
                         'class' => 'btn btn-info btn-xs',
                         'target' => '_blank',
                         'data-pjax' => 0,
