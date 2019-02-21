@@ -192,12 +192,26 @@ $formId = sprintf('%s-form', $leadForm->getClient()->formName());
             <?php if (!empty($leadForm->getLead()->request_ip)) : ?>
             	<?php
                 $ipData = @json_decode($leadForm->getLead()->request_ip_detail, true);
+                $strData = [];
 
-                $strData[] = isset($ipData['country']) ? 'Country: <b>' . $ipData['country'] . '</b>' : 'Country: -';
-                $strData[] = isset($ipData['state']) ? 'State: <b>' . $ipData['state'] . '</b>' : 'State: -';
-                $strData[] = isset($ipData['city']) ? 'City: <b>' . $ipData['city'] . '</b>' : 'City: -';
+                $str = '';
 
-                $str = implode('<br> ', $strData);
+                if($ipData) {
+
+                    $str .= '<table class="table table-bordered">';
+                    foreach ($ipData as $key => $val) {
+                        $strData[] = $key.': '.$val;
+                        $str .= '<tr><th>'.$key.'</th><td>'.$val.'</td></tr>';
+                    }
+
+                    $str .= '</table>';
+
+                    /*$strData[] = isset($ipData['country']) ? 'Country: <b>' . $ipData['country'] . '</b>' : 'Country: -';
+                    $strData[] = isset($ipData['state']) ? 'State: <b>' . $ipData['state'] . '</b>' : 'State: -';
+                    $strData[] = isset($ipData['city']) ? 'City: <b>' . $ipData['city'] . '</b>' : 'City: -';*/
+                }
+
+                //$str = implode('<br> ', $strData);
 
                 $popoverId = 'ip-popup';
                 $commentTemplate = $str;

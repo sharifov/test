@@ -1295,11 +1295,11 @@ Sales - Kivork",
             $offset = str_replace('.', ':', $this->offset_gmt);
 
             if (isset($offset[0])) {
-                if (strpos($offset, '+') === 0) {
+                /*if (strpos($offset, '+') === 0) {
                     $offset = str_replace('+', '-', $offset);
                 } else {
                     $offset = str_replace('-', '+', $offset);
-                }
+                }*/
             }
 
         } elseif ($this->leadFlightSegments) {
@@ -1322,8 +1322,8 @@ Sales - Kivork",
 
             $clientTime = date('H:i', strtotime("now $offset GMT"));*/
 
-            if($offset > 0) {
-                $offset = '+'.$offset;
+            if(is_numeric($offset) && $offset > 0) {
+                $offset = '+' . $offset;
             }
 
             /*try {
