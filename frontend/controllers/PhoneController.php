@@ -56,7 +56,7 @@ class PhoneController extends FController
         \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
         $username = \Yii::$app->user->identity->username;
         //VarDumper::dump($username, 10, true); exit;
-        $data = Yii::$app->communication->getJwtTokenCache($username, false);
+        $data = Yii::$app->communication->getJwtTokenCache($username, true);
         return $data;
     }
 }
