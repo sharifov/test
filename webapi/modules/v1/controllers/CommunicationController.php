@@ -379,7 +379,7 @@ class CommunicationController extends ApiBaseController
 
                 if($upp && $user = $upp->uppUser) {
                     if($user->userProfile && $user->userProfile->up_call_type_id == 2) {
-                        $call_agent_username[] = $user->username;
+                        $call_agent_username[] = 'seller'.$user->id;
                     }
                     $call_user_id = (int) $upp->upp_user_id;
                     $call_sip_id = $upp->upp_tw_sip_id;
@@ -425,7 +425,7 @@ class CommunicationController extends ApiBaseController
                             $upp = UserProjectParams::find()->where(['upp_user_id' => $userForCall['tbl_user_id'], 'upp_project_id' => $call_project_id])->one();
                             $employeeModel = Employee::findOne(['id' => $userForCall['tbl_user_id']]);
                             if($employeeModel && $employeeModel->userProfile && $employeeModel->userProfile->up_call_type_id == 2) {
-                                $call_agent_username[] = $employeeModel->username;
+                                $call_agent_username[] = 'seller'.$employeeModel->id; //$employeeModel->username;
                             }
                             if($upp) {
 
