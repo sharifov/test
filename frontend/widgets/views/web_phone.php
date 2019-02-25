@@ -146,10 +146,10 @@
         }
     };
 
-    document.getElementById('get-devices').onclick = function () {
+    /*document.getElementById('get-devices').onclick = function () {
         navigator.mediaDevices.getUserMedia({audio: true})
             .then(updateAllDevices.bind(device));
-    }
+    }*/
 
     speakerDevices.addEventListener('change', function () {
         var selectedDevices = [].slice.call(speakerDevices.children)
