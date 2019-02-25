@@ -264,6 +264,7 @@
     }
 
     document.getElementById('button-answer').onclick = function () {
+        console.log("button-answer: " + connection);
         if (connection) {
             connection.accept();
             document.getElementById('call-controls').style.display = 'block';
@@ -272,6 +273,7 @@
     };
 
     document.getElementById('button-reject').onclick = function () {
+        console.log("button-reject: " + connection);
         if (connection) {
             connection.reject();
             document.getElementById('call-controls').style.display = 'block';
