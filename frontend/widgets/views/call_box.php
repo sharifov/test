@@ -183,7 +183,7 @@ if($clientPhone && $client = $clientPhone->client) {
         <textarea id="call_boxSend" name="call_box_message" placeholder="Send a message" class="call_box_field call_box_message"></textarea>*/?>
         </div>
     </div>
-    <a id="prime" class="fab <?=($userCallStatus && $userCallStatus->us_type_id == \common\models\UserCallStatus::STATUS_TYPE_OCCUPIED ? 'call-status-occupied' : 'call-status-ready')?>"><i class="prime fa fa-phone"></i></a>
+    <a id="prime" class="fab <?=($userCallStatus && $userCallStatus->us_type_id == \common\models\UserCallStatus::STATUS_TYPE_OCCUPIED ? 'call-status-occupied' : 'call-status-ready')?>"><i class="prime fa fa-list"></i></a>
 </div>
 
 <?php //yii\widgets\Pjax::end() ?>

@@ -30,20 +30,49 @@
     }
 </style>
 
+<div class="fabs2" style="display: none">
+    <a id="prime2" class="fab2"><i class="fa fa-phone"></i></a>
+</div>
+
 <div id="web-phone-widget">
 
     <?php if($token): ?>
 
+
+        <div id="web-phone-token" style="display: none"><?=$token?></div>
             <table class="table table-bordered">
                 <tr>
-                    <td><i title="<?=$token?>">Token</i></td>
-                    <td><i class="fa fa-user"></i> clientId: <?=$clientId?></td>
-                    <td><i class="fa fa-phone"></i> AgentPhone: <?=$fromAgentPhone?></td>
+                    <?/*<td style="display: none"><i title="<?=$token?>">Token</i></td>*/?>
+                    <td width="100px"><i class="fa fa-user"></i> <?=$clientId?></td>
+                    <td>From: <i class="fa fa-phone"></i> <span id="web-call-from-number"></span></td>
+
+                    <td>To: <i class="fa fa-phone"></i> <span id="web-call-to-number"></span></td>
+                    <?/*<td>
+                        <table class="table table-bordered">
+                            <tr>
+                                <td>From:</td><td> <i class="fa fa-phone"></i> <span id="web-call-from-number"></span></td>
+                            </tr>
+                            <tr>
+                                <td>To:</td><td> <i class="fa fa-phone"></i> <span id="web-call-to-number"></span></td>
+                            </tr>
+                        </table>
+                    </td>*/?>
+                    <td>
+                        <?/*=\yii\helpers\Html::button('<i class="fa fa-phone"></i> Call', ['class' => 'btn btn-xs btn-success', 'id' => 'button-call'])*/?>
+                        <?=\yii\helpers\Html::button('<i class="fa fa-close"></i> Hangup', ['class' => 'btn btn-xs btn-danger','id' => 'button-hangup', 'style' => 'display:none'])?>
+                    </td>
+                    <td width="120px">
+                        <div class="text-right">
+                            <?=\yii\helpers\Html::button('<i class="fa fa-tumblr"></i>', ['class' => 'btn btn-xs btn-primary', 'id' => 'btn-webphone-token', 'onclick' => 'alert($("#web-phone-token").text())'])?>
+                            <?=\yii\helpers\Html::button('<i class="fa fa-angle-double-up"></i>', ['class' => 'btn btn-xs btn-primary', 'id' => 'btn-nin-max-webphone'])?>
+                            <?=\yii\helpers\Html::button('<i class="fa fa-close"></i>', ['class' => 'btn btn-xs btn-primary', 'id' => 'btn-webphone-close'])?>
+                        </div>
+                    </td>
                 </tr>
             </table>
 
 
-            <div id="controls">
+            <div class="webphone-controls" id="controls" style="display: none">
 
                 <table class="table table-bordered">
                     <tr>
@@ -61,11 +90,9 @@
                         </td>
                         <td>
                             <div id="call-controls">
-                                <p>Make a Call:</p>
+                                <?/*<p>Make a Call:</p>
                                 <input id="phone-number" type="text" placeholder="Enter a phone/client" />
-                                <br>
-                                <?=\yii\helpers\Html::button('Call', ['class' => 'btn btn-xs btn-success', 'id' => 'button-call'])?>
-                                <?=\yii\helpers\Html::button('Hangup', ['class' => 'btn btn-xs btn-danger','id' => 'button-hangup'])?>
+                                <br>*/?>
 
                                 <div id="volume-indicators">
                                     <label>Mic Volume</label>
@@ -77,8 +104,8 @@
                             </div>
 
                             <div id="call-controls2">
-                                <?=\yii\helpers\Html::button('Answer', ['class' => 'btn btn-xs btn-success', 'id' => 'button-answer'])?>
-                                <?=\yii\helpers\Html::button('Reject', ['class' => 'btn btn-xs btn-danger','id' => 'button-reject'])?>
+                                <?=\yii\helpers\Html::button('<i class="fa fa-phone"></i> Answer', ['class' => 'btn btn-xs btn-success', 'id' => 'button-answer'])?>
+                                <?=\yii\helpers\Html::button('<i class="fa fa-close"></i> Reject', ['class' => 'btn btn-xs btn-danger','id' => 'button-reject'])?>
                             </div>
                         </td>
                         <td>
@@ -105,7 +132,7 @@
 <?php \yii\bootstrap\Modal::end(); ?>
 
 <script type="text/javascript">
-    var tw_configs = {"client":"<?= $clientId;?>","FromAgentPhone":"<?= $fromAgentPhone;?>"};
+    var tw_configs = {"client":"<?= $clientId;?>"};
 
     "use strict";
 
@@ -125,7 +152,7 @@
     }
 
     // Bind button to make call
-    document.getElementById('button-call').onclick = function () {
+    /*document.getElementById('button-call').onclick = function () {
         // get the phone number to connect the call to
         var params = {
             To: document.getElementById('phone-number').value,
@@ -136,7 +163,7 @@
         if (device) {
             device.connect(params);
         }
-    };
+    };*/
 
     // Bind button to hangup call
     document.getElementById('button-hangup').onclick = function () {
@@ -306,7 +333,7 @@
 
                 device.on('connect', function (conn) {
                     log('Successfully established call!');
-                    document.getElementById('button-call').style.display = 'none';
+                    //document.getElementById('button-call').style.display = 'none';
                     document.getElementById('button-hangup').style.display = 'inline';
                     volumeIndicators.style.display = 'block';
                     bindVolumeIndicators(conn);
@@ -314,9 +341,12 @@
 
                 device.on('disconnect', function (conn) {
                     log('Call ended.');
-                    document.getElementById('button-call').style.display = 'inline';
+                    //document.getElementById('button-call').style.display = 'inline';
                     document.getElementById('button-hangup').style.display = 'none';
                     volumeIndicators.style.display = 'none';
+
+                    cleanPhones();
+
                 });
 
                 device.on('incoming', function (conn) {
@@ -369,18 +399,38 @@
     //});
 
 
+    function webCall(phone_from, phone_to) {
+        var params = {To: phone_to, FromAgentPhone: phone_from};
+
+        if (device) {
+
+            $('#web-call-from-number').text(params.FromAgentPhone);
+            $('#web-call-to-number').text(params.To);
+
+            console.log('Calling ' + params.To + '...');
+            device.connect(params);
+        }
+    }
+
+    function cleanPhones()
+    {
+        $('#web-call-from-number').text('');
+        $('#web-call-to-number').text('');
+    }
+
+
 </script>
 
 <?php
 
 //$callStatusUrl = \yii\helpers\Url::to(['user-call-status/update-status']);
-//$clientInfoUrl = \yii\helpers\Url::to(['client/ajax-get-info']);
+$ajaxPhoneDialUrl = \yii\helpers\Url::to(['phone/ajax-phone-dial']);
 
 $userId = Yii::$app->user->id;
 
 $js = <<<JS
 
-    
+    const ajaxPhoneDialUrl = '$ajaxPhoneDialUrl';
 
     /*$(document).on('click', '#btn-client-details', function(e) {
         e.preventDefault();
@@ -415,11 +465,73 @@ $js = <<<JS
 
     });*/
     
+    
+    $('#btn-nin-max-webphone').on('click', function() {
+        var iTag = $(this).find('i');
+        if(iTag.hasClass('fa-angle-double-down')) {
+            iTag.removeClass('fa-angle-double-down').addClass('fa-angle-double-up');    
+            
+            $('.webphone-controls').slideUp();
+        } else {
+            iTag.removeClass('fa-angle-double-up').addClass('fa-angle-double-down');
+            $('.webphone-controls').slideDown();
+        }
+        
+        //$(this).find('i').addClass('fa-angle-double-up');
+    });
+    
+    $('#btn-webphone-close').on('click', function() {
+        
+        $('#web-phone-widget').slideUp();
+        $('.fabs2').show();
+        //$(this).find('i').addClass('fa-angle-double-up');
+    });
+    
+    
+    $('#prime2').on('click', function() {
+        $('#web-phone-widget').slideDown();
+        $('.fabs2').hide();
+    });
+    
+    $('.call-phone').on('click', function(e) {
+        var phone_number = $(this).data('phone');
+        var project_id = $(this).data('project-id');
+        //alert(phoneNumber);
+        
+        e.preventDefault();
+        
+        $('#web-phone-dial-modal .modal-body').html('<div style="text-align:center"><img width="200px" src="https://loading.io/spinners/gear-set/index.triple-gears-loading-icon.svg"></div>');
+        $('#web-phone-dial-modal').modal();
+        
+        $.post(ajaxPhoneDialUrl, {'phone_number': phone_number, 'project_id': project_id},
+            function (data) {
+                $('#web-phone-dial-modal .modal-body').html(data);
+            }
+        );
+    });
+    
+    $(document).on('click', '#btn-make-call', function(e) {
+        e.preventDefault();
+        var phone_to = $('#call-to-number').val();
+        var phone_from = $('#call-from-number').val();
+        $('#web-phone-dial-modal').modal('hide');
+        //alert(phone_from + ' - ' + phone_to);
+        
+        
+        $('#web-phone-widget').slideDown();
+        $('.fabs2').hide();
+        
+        webCall(phone_from, phone_to);
+    });
+    
+    
+    
+    
     $('#web-phone-widget').css({left:'50%', 'margin-left':'-'+($('#web-phone-widget').width() / 2)+'px'}).slideDown();
     
-    console.log(tw_configs);
-        initDevice();
-        setInterval('renewTwDevice();', 50000);
+    //console.log(tw_configs);
+    initDevice();
+    setInterval('renewTwDevice();', 50000);
 
 
 JS;
