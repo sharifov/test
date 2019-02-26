@@ -5,7 +5,7 @@ $('#prime').on('click', function () {
 
 //Toggle call_box and links
 function toggleFab() {
-    $('.prime').toggleClass('fa-phone');
+    $('.prime').toggleClass('fa-list');
     $('.prime').toggleClass('fa-close');
     $('.prime').toggleClass('is-active');
     $('.prime').toggleClass('is-visible');
