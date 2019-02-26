@@ -86,7 +86,7 @@ class ApiLead extends Model
 
     public function formName()
     {
-        return (new Lead())->formName();
+        return 'lead';
     }
 
     /**
