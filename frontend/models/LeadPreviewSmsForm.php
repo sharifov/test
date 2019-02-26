@@ -21,6 +21,7 @@ use yii\base\Model;
  * @property integer $s_user_id
  * @property string $s_language_id
  *
+ * @property string $s_quote_list
  * @property boolean $is_send
  *
  */
@@ -35,6 +36,7 @@ class LeadPreviewSmsForm extends Model
     public $s_sms_tpl_id;
     public $s_user_id;
     public $s_language_id;
+    public $s_quote_list;
 
     public $is_send;
 
@@ -51,6 +53,8 @@ class LeadPreviewSmsForm extends Model
 
             [['s_sms_tpl_id', 's_lead_id', 's_user_id'], 'integer'],
             [['s_sms_message'], 'string', 'min' => 10],
+
+            [['s_quote_list'], 'string'],
 
             [['s_phone_to', 's_phone_from'], 'string', 'max' => 30],
             [['s_phone_to', 's_phone_from'], PhoneInputValidator::class],
