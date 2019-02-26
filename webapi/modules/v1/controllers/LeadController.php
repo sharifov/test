@@ -824,8 +824,6 @@ class LeadController extends ApiBaseController
         $modelLead = new ApiLead();
         $modelLead->scenario = ApiLead::SCENARIO_GET;
 
-        //print_r($this->apiProject); exit;
-
         if ($this->apiProject) $modelLead->project_id = $this->apiProject->id;
 
         if ($modelLead->load(Yii::$app->request->post())) {
@@ -838,7 +836,10 @@ class LeadController extends ApiBaseController
             throw new BadRequestHttpException('Not found Lead data on POST request', 6);
         }
 
-        $lead = Lead::findOne($modelLead->lead_id);
+        $lead = Lead::find()->where([
+            'uid' => $modelLead->uid,
+            'source_id' => $modelLead->source_id
+        ])->one();
         if (!$lead) {
             throw new NotFoundHttpException('Not found lead ID: ' . $modelLead->lead_id, 9);
         }

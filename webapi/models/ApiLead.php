@@ -86,7 +86,7 @@ class ApiLead extends Model
 
     public function formName()
     {
-        return 'lead';
+        return (new Lead())->formName();
     }
 
     /**
@@ -117,7 +117,7 @@ class ApiLead extends Model
             [['created', 'updated', 'snooze_for', 'flights', 'emails', 'phones'], 'safe'],
             [['uid', 'request_ip', 'offset_gmt'], 'string', 'max' => 255],
 
-            [['uid'], 'unique', 'targetClass' => Lead::class, 'targetAttribute' => ['uid', 'project_id'], 'message'=>'Lead UID ({value}) already exists!'],
+            [['uid'], 'unique', 'targetClass' => Lead::class, 'targetAttribute' => ['uid', 'project_id'], 'message'=>'Lead UID ({value}) already exists!', 'except' => [self::SCENARIO_GET]],
 
             [['trip_type'], 'string', 'max' => 2],
             [['cabin'], 'string', 'max' => 1],
@@ -132,7 +132,7 @@ class ApiLead extends Model
         $scenarios = parent::scenarios();
         $scenarios[self::SCENARIO_UPDATE] = ['lead_id', 'status', 'uid', 'trip_type', 'cabin', 'adults', 'children', 'infants', 'notes_for_experts', 'request_ip', 'request_ip_detail', 'offset_gmt', 'snooze_for', 'rating', 'flights', 'emails', 'phones',
             'client_first_name', 'client_last_name', 'client_middle_name', 'discount_id', 'sub_sources_code'];
-        $scenarios[self::SCENARIO_GET] = ['lead_id'];
+        $scenarios[self::SCENARIO_GET] = ['lead_id', 'uid', 'source_id'];
         return $scenarios;
     }
 
