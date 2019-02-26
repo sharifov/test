@@ -1828,6 +1828,7 @@ class Quote extends \yii\db\ActiveRecord
             return [
                 'LeadRequest' => [
                     'uid' => $this->lead->uid,
+                    'gid' => $this->lead->gid,
                     'market_info_id' => $this->lead->source->id
                 ],
                 'LeadQuote' => [

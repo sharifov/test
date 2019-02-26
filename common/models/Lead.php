@@ -2249,6 +2249,7 @@ Sales - Kivork",
             'call_expert' => false,
             'LeadRequest' => [
                 'uid' => $this->uid,
+                'gid' => $this->gid,
                 'market_info_id' => $this->source_id,
                 'information' => $information
             ],
