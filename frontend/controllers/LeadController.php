@@ -364,6 +364,23 @@ class LeadController extends FController
                         Yii::error('Error: Email Message has not been sent to '.$mail->e_email_to."\r\n ".$mailResponse['error'], 'LeadController:view:Email:sendMail');
                     } else {
                         //echo '<strong>Email Message</strong> has been successfully sent to <strong>'.$mail->e_email_to.'</strong>'; exit;
+
+
+                        if($quoteList = @json_decode($previewEmailForm->e_quote_list)) {
+                            if(is_array($quoteList)) {
+                                foreach ($quoteList as $quoteId) {
+                                    $quoteId = (int)$quoteId;
+                                    $quote = Quote::findOne($quoteId);
+                                    if ($quote) {
+                                        $quote->status = Quote::STATUS_SEND;
+                                        if (!$quote->save()) {
+                                            Yii::error($quote->errors, 'LeadController:view:Email:Quote:save');
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
                         Yii::$app->session->setFlash('send-success', '<strong>Email Message</strong> has been successfully sent to <strong>'.$mail->e_email_to.'</strong>');
                     }
 
@@ -418,6 +435,22 @@ class LeadController extends FController
                         Yii::$app->session->setFlash('send-error', 'Error: <strong>SMS Message</strong> has not been sent to <strong>'.$sms->s_phone_to.'</strong>');
                         Yii::error('Error: SMS Message has not been sent to '.$sms->s_phone_to."\r\n ".$smsResponse['error'], 'LeadController:view:Sms:sendSms');
                     } else {
+
+                        if($quoteList = @json_decode($previewSmsForm->s_quote_list)) {
+                           if(is_array($quoteList)) {
+                               foreach ($quoteList as $quoteId) {
+                                   $quoteId = (int)$quoteId;
+                                   $quote = Quote::findOne($quoteId);
+                                   if ($quote) {
+                                       $quote->status = Quote::STATUS_SEND;
+                                       if (!$quote->save()) {
+                                           Yii::error($quote->errors, 'LeadController:view:Sms:Quote:save');
+                                       }
+                                   }
+                               }
+                           }
+                        }
+
                         Yii::$app->session->setFlash('send-success', '<strong>SMS Message</strong> has been successfully sent to <strong>'.$sms->s_phone_to.'</strong>');
                     }
 
@@ -487,6 +520,8 @@ class LeadController extends FController
                             $projectContactInfo = @json_decode($project->contact_info, true);
                         }
 
+                        $previewEmailForm->e_quote_list = @json_encode([]);
+
 
 
                         $language = $comForm->c_language_id ?: 'en-US';
@@ -531,6 +566,7 @@ class LeadController extends FController
                                     $previewEmailForm->e_email_to = $comForm->c_email_to; //$mailPreview['data']['email_to'];
                                     $previewEmailForm->e_email_from_name = Yii::$app->user->identity->full_name;
                                     $previewEmailForm->e_email_to_name = $lead->client ? $lead->client->full_name : '';
+                                    $previewEmailForm->e_quote_list = @json_encode($comForm->quoteList);
                                 }
                             }
 
@@ -543,7 +579,6 @@ class LeadController extends FController
                             $previewEmailForm->e_email_from_name = Yii::$app->user->identity->full_name;
                             $previewEmailForm->e_email_to_name = $lead->client ? $lead->client->full_name : '';
                         }
-
 
                 }
 
@@ -569,6 +604,8 @@ class LeadController extends FController
                             $phoneFrom = $upp->upp_tw_phone_number;
                         }
                     }
+
+                    $previewSmsForm->s_quote_list = @json_encode([]);
 
                     if(!$phoneFrom) {
                         $comForm->c_preview_sms = 0;
@@ -614,6 +651,7 @@ class LeadController extends FController
                                 } else {
                                     //$previewSmsForm->s_phone_from = $smsPreview['data']['phone_from'];
                                     $previewSmsForm->s_sms_message = $smsPreview['data']['sms_text'];
+                                    $previewSmsForm->s_quote_list = @json_encode($comForm->quoteList);
                                 }
                             }
 
