@@ -321,12 +321,13 @@ if (typeof NProgress != 'undefined') {
         };
 
         $('body').popover({
-          selector: '[data-popover]',
-          trigger: 'click hover',
-          delay: {
-            show: 50,
-            hide: 400
-          }
+			sanitize: false,
+          	selector: '[data-popover]',
+          	trigger: 'click hover',
+          	delay: {
+            	show: 50,
+            	hide: 400
+          	}
         });
 
 
@@ -1970,12 +1971,13 @@ if (typeof NProgress != 'undefined') {
 				};
 
 				$('body').popover({
-				  selector: '[data-popover]',
-				  trigger: 'click hover',
-				  delay: {
-					show: 50,
-					hide: 400
-				  }
+					sanitize: false,
+				  	selector: '[data-popover]',
+				  	trigger: 'click hover',
+				  	delay: {
+						show: 50,
+						hide: 400
+				  	}
 				});
 
 			};
