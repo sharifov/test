@@ -22,7 +22,7 @@ $isCoach = Yii::$app->authManager->getAssignment('coach', Yii::$app->user->id);
         <br>
         <br>
         <br>
-        <? /*<div class="text-center">
+        <?php /*<div class="text-center">
             <?= Html::a('<i class="fa fa-plus" style="font-size: 10px"></i> Create Lead &nbsp;&nbsp;&nbsp;&nbsp;', ['lead/create'], ['class' => 'btn btn-success btn-xs']) ?>
         </div>*/ ?>
 
@@ -50,7 +50,7 @@ $isCoach = Yii::$app->authManager->getAssignment('coach', Yii::$app->user->id);
 
         //$menuItems[] = ["label" => '<i class="fa fa-home"></i><span>'.Yii::t('menu', 'Home').'</span><small class="label-success label pull-right">new</small>', "url" => "/"];
         $menuItems[] = ['label' => 'Create new Lead', 'url' => ['lead/create'], 'icon' => 'plus'];
-        $menuItems[] = ["label" => "Dashboard", "url" => ["/"], "icon" => "area-chart"];
+        $menuItems[] = ['label' => 'Dashboard', 'url' => ['/'], 'icon' => 'area-chart'];
 
         if (Yii::$app->user->isGuest) {
             $menuItems[] = ['label' => 'Login', 'url' => ['/site/login']];
@@ -59,7 +59,7 @@ $isCoach = Yii::$app->authManager->getAssignment('coach', Yii::$app->user->id);
             $menuItems[] = ['label' => 'Search Leads', 'url' => ['/leads/index'], 'icon' => 'search'];
 
 
-            if($isAdmin) {
+            //if($isAdmin) {
                 $cntNotifications = \common\models\Notifications::findNewCount(Yii::$app->user->id);
 
                 $menuItems[] = [
@@ -71,7 +71,7 @@ $isCoach = Yii::$app->authManager->getAssignment('coach', Yii::$app->user->id);
 
                 $menuItems[] = ['label' => 'My Mails <span id="email-inbox-queue" class="label-info label pull-right"></span> ', 'url' => ['/email/inbox'], 'icon' => 'envelope'];
 
-            }
+            //}
 
 
 
