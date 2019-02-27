@@ -228,7 +228,6 @@ $this->registerJs($js);
 if ($leadForm->mode != $leadForm::VIEW_MODE) {
     $js = <<<JS
 
-    $('[data-toggle="tooltip"]').tooltip();
     $(document).on('click', '.send-quotes-to-email', function () {
         var urlModel = $(this).data('url');
         var email = $('#send-to-email').val();
@@ -292,6 +291,7 @@ if ($leadForm->mode != $leadForm::VIEW_MODE) {
     });
 
     $('#btn-send-quotes').popover({
+        sanitize: false,
         html: true,
         placement: 'top',
         content: function () {
@@ -437,6 +437,7 @@ JS;
                         'id' => 'send-quotes-btn-popover',
                         'data-placement' => 'top',
                         'data-container' => 'body',
+                            'data-sanitize' => 'false',
                         'data-content' => '<label for="send-to-email-new" class="select-wrap-label mb-20">'.
                                                 Html::dropDownList('send_to_email', null, [], [
                                                     'class' => 'form-control',
@@ -558,16 +559,20 @@ JS;
 
 $js = <<<JS
 $(function () {
-  $.scrollUp({
-    scrollName: 'scrollUp', // Element ID
-    topDistance: '300', // Distance from top before showing element (px)
-    topSpeed: 300, // Speed back to top (ms)
-    animation: 'fade', // Fade, slide, none
-    animationInSpeed: 200, // Animation in speed (ms)
-    animationOutSpeed: 200, // Animation out speed (ms)
-    scrollText: 'Scroll to top', // Text for element
-    activeOverlay: true, // Set CSS color to display scrollUp active point, e.g '#00FFFF'
-  });
+    $.scrollUp({
+        scrollName: 'scrollUp', // Element ID
+        topDistance: '300', // Distance from top before showing element (px)
+        topSpeed: 300, // Speed back to top (ms)
+        animation: 'fade', // Fade, slide, none
+        animationInSpeed: 200, // Animation in speed (ms)
+        animationOutSpeed: 200, // Animation out speed (ms)
+        scrollText: 'Scroll to top', // Text for element
+        activeOverlay: true, // Set CSS color to display scrollUp active point, e.g '#00FFFF'
+    });
+  
+    //$("[data-toggle='tooltip']").tooltip(); 
+    //$("[data-toggle='popover']").popover({sanitize: false}); 
+  
 });
 JS;
 

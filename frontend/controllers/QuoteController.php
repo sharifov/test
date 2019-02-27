@@ -73,21 +73,32 @@ class QuoteController extends FController
         return parent::actions();
     }
 
+    /**
+     * @param $leadId
+     * @return string
+     */
     public function actionGetOnlineQuotes($leadId)
     {
         $lead = Lead::findOne(['id' => $leadId]);
         if (Yii::$app->request->isPost) {
-            $response = [
+            /*$response = [
                 'success' => false,
                 'body' => ''
-            ];
-            $attr = Yii::$app->request->post();
-            if(isset($attr['gds']) && $lead !== null){
-                $keyCache = sprintf('quick-search-new-%d-%d-%s-%s', $lead->id, Yii::$app->user->id, $attr['gds'], $lead->generateLeadKey());
+            ];*/
+
+            $gds = Yii::$app->request->post('gds', '');
+
+            if($lead !== null){
+                $keyCache = sprintf('quick-search-new-%d-%s', $lead->id, $gds);
+
+                Yii::$app->cache->delete($keyCache);
+
                 $result = Yii::$app->cache->get($keyCache);
 
-                if(!$result){
-                    $result = SearchService::getOnlineQuotes($lead, $attr['gds']);
+
+
+                if($result === false){
+                    $result = SearchService::getOnlineQuotes($lead);
                     if($result) {
                         Yii::$app->cache->set($keyCache, $result, 300);
                     }
@@ -96,10 +107,12 @@ class QuoteController extends FController
                 $viewData = SearchService::getAirlineLocationInfo($result);
                 $viewData['result'] = $result;
                 $viewData['leadId'] = $leadId;
-                $viewData['gds'] = $attr['gds'];
+                $viewData['gds'] = $gds;
                 $viewData['lead'] = $lead;
 
                 return $this->renderAjax('_search_results', $viewData);
+            } else {
+                return 'Not found lead';
             }
 
         }

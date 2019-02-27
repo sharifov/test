@@ -40,6 +40,7 @@ if ($leadForm->mode != $leadForm::VIEW_MODE) {
     });
 
     $('#btn-send-quotes').popover({
+        sanitize: false,
         html: true,
         placement: 'top',
         content: function () {

@@ -72,7 +72,7 @@ class SearchService
         return isset($mapping[$cabin]) ? $mapping[$cabin] : $cabin;
     }
 
-    public static function getOnlineQuotes(Lead $lead, $gdsCode)
+    public static function getOnlineQuotes(Lead $lead, $gdsCode = null)
     {
         $result = null;
         $returned = '';
@@ -84,12 +84,15 @@ class SearchService
 
         $params = [
             'cabin' => self::getCabinRealCode($lead->cabin),
-            'gds' => $gdsCode,
             'cid' => 'SAL101',
             'adt' => $lead->adults,
             'chd' => $lead->children,
             'inf' => $lead->infants,
         ];
+
+        if($gdsCode) {
+            $params['gds'] = $gdsCode;
+        }
 
         foreach ($lead->leadFlightSegments as $flightSegment) {
             $fl[] = [
