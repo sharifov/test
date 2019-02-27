@@ -150,7 +150,7 @@ if ($leadForm->mode != $leadForm::VIEW_MODE || ($leadForm->mode == $leadForm::VI
 
     /***  Quick search quotes ***/
     $(document).on('click','#quick-search-quotes-btn', function (e) {
-        $('#popover-quick-search').popover('hide');
+        //$('#popover-quick-search').popover('hide');
         e.preventDefault();
         var url = $('#quick-search-quotes-btn').data('url');
         $('#preloader').removeClass('hidden');
@@ -221,7 +221,7 @@ $js = <<<JS
                     $('#'+searchResId).addClass('quote--selected');
 
                     $.pjax.reload({container: '#quotes_list', async: false});
-                    $('.popover-class[data-toggle="popover"]').popover();
+                    $('.popover-class[data-toggle="popover"]').popover({ sanitize: false });
                 }else{
                     alert('Some errors was happened during create quote. Please try again later.');
                 }
@@ -234,19 +234,21 @@ $js = <<<JS
 
     /** -------- Popovers -------- **/
     $('#popover-link-add-note').popover({
+        sanitize: false,
         html: true,
         content: function () {
             return $("#popover-content-add-note").html();
         }
     });
 
-    $('.popover-class[data-toggle="popover"]').popover();
+    $('.popover-class[data-toggle="popover"]').popover({sanitize: false});
 
     $('[data-toggle="popover"]').on('click', function (e) {
         $('[data-toggle="popover"]').not(this).popover('hide');
     });
 
     $('.client-comment-email-button, .client-comment-phone-button').popover({
+        sanitize: false,
         html: true
     });
 
@@ -394,19 +396,10 @@ $buttonAddQuote = Html::button('<span class="btn-icon"><i class="fa fa-plus"></i
     'data-url' => Url::to(['quote/create', 'leadId' => $leadForm->getLead()->id, 'qId' => 0]),
 ]);
 
-$buttonQuickSearchQuote = Html::button('<span class="btn-icon"><i class="fa fa-plus"></i></span><span class="btn-text">Quick Search Quote</span>', [
-    'class' => 'btn btn-success btn-with-icon popover-class',
-    'data-toggle' => 'popover',
-    'id' => 'popover-quick-search',
-    'data-html' => 'true',
-    'data-title' => 'Choose GDS',
-    'data-trigger' => 'click',
-    'data-content' => '<div style="width:250px;">'.Html::dropDownList('gds', null, ['S' => 'Sabre'], ['class' => 'form-control','id' => 'gds-selector']).Html::button('Search', [
-        'class' => 'btn btn-success',
-        'style' => 'margin-top:10px;',
-        'id' => 'quick-search-quotes-btn',
-        'data-url' => Url::to(['quote/get-online-quotes', 'leadId' => $leadForm->getLead()->id]),
-    ]).'</div>',
+$buttonQuickSearchQuote = Html::button('<i class="fa fa-search"></i> Quick Search Quote', [
+    'class' => 'btn btn-warning',
+    'id' => 'quick-search-quotes-btn',
+    'data-url' => Url::to(['quote/get-online-quotes', 'leadId' => $leadForm->getLead()->id]),
 ]);
 
 $buttonAnswer = Html::a('<i class="fa fa-commenting-o"></i> </span>'. ($leadForm->getLead()->l_answered ? 'Make UnAnswered' : 'Make Answered'), ['lead/update2', 'act' => 'answer', 'id' => $leadForm->getLead()->id], [
@@ -617,6 +610,11 @@ if($project){
     <?php \yii\widgets\ActiveForm::end() ?>
 </div>
 <!--endregion-->
+<style>
+    #search-results__modal .modal-dialog {
+        width: 1150px;
+    }
+</style>
 
 <?php Modal::begin(['id' => 'search-results__modal',
     'header' => '<h2>Search results</h2>',

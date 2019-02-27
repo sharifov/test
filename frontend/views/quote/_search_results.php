@@ -255,8 +255,15 @@ if(isset($lastResult['passengers']['ADT'])){
     </div>
 </div>
 <div class="search-results__wrapper">
+    <?php $n = 0; ?>
 <?php foreach ($result['results'] as $key => $resultItem):?>
 	<?= $this->render('_search_result_item', ['resultKey' => $key,'result' => $resultItem,'locations' => $locations,'airlines' => $airlines]);?>
+    <?php
+        $n++;
+        if($n > 50) {
+            //break;
+        }
+    ?>
 <?php endforeach;?>
 </div>
 <?php else:?>
