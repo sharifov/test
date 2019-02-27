@@ -4,6 +4,7 @@ use frontend\models\LeadForm;
 use common\models\ClientEmail;
 use common\models\ClientPhone;
 use yii\helpers\Html;
+use yii\helpers\VarDumper;
 
 /**
  * @var $this \yii\web\View
@@ -197,9 +198,11 @@ $formId = sprintf('%s-form', $leadForm->getClient()->formName());
                 $str = '';
 
                 if($ipData) {
-
                     $str .= '<table class="table table-bordered">';
                     foreach ($ipData as $key => $val) {
+                        if(is_array($val)){
+                            continue;
+                        }
                         $strData[] = $key.': '.$val;
                         $str .= '<tr><th>'.$key.'</th><td>'.$val.'</td></tr>';
                     }
