@@ -58,6 +58,7 @@ use common\components\SearchService;
  * @property int $quotesCount
  * @property int $leadFlightSegmentsCount
  * @property double $agentProcessingFee
+ * @property double $agents_processing_fee
  *
  * @property Call[] $calls
  * @property Email[] $emails
@@ -200,7 +201,7 @@ class Lead extends ActiveRecord
             [['adults'], 'integer', 'min' => 1],
             [['l_answered'], 'boolean'],
             [['notes_for_experts', 'request_ip_detail'], 'string'],
-            [['final_profit', 'tips'], 'number'],
+            [['final_profit', 'tips', 'agents_processing_fee'], 'number'],
             [['uid', 'request_ip', 'offset_gmt', 'discount_id', 'description'], 'string', 'max' => 255],
             [['gid'], 'string', 'max' => 32],
             [['gid'], 'unique'],
@@ -241,6 +242,7 @@ class Lead extends ActiveRecord
             'l_answered' => 'Answered',
             'l_grade' => 'Grade',
             'bo_flight_id' => '(BO) Flight ID',
+            'agents_processing_fee' => 'Agents Processing Fee',
         ];
     }
 
@@ -1054,7 +1056,6 @@ Sales - Kivork",
         return $isSend;
     }
 
-
     public function afterSave($insert, $changedAttributes)
     {
 
@@ -1443,6 +1444,7 @@ Sales - Kivork",
             $this->children = (int) $this->children;
             $this->infants = (int) $this->infants;
             $this->bo_flight_id = (int) $this->bo_flight_id;
+            $this->agents_processing_fee = ($this->adults + $this->children) * self::AGENT_PROCESSING_FEE_PER_PAX;
 
             return true;
         }
@@ -1525,6 +1527,7 @@ Sales - Kivork",
         }
 
         $this->agentProcessingFee = $processing_fee_per_pax * (int) ($this->adults + $this->children);
+        $this->agents_processing_fee = ($this->agents_processing_fee)?$this->agents_processing_fee:$processing_fee_per_pax * (int) ($this->adults + $this->children);
     }
 
     /**

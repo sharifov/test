@@ -797,7 +797,9 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         $query->select([
             'lead_id' => 'l.id',
             'final_profit' => 'l.final_profit',
+            'agents_processing_fee' => 'l.agents_processing_fee',
             'q_id' => 'q.id',
+            'pax_cnt' => '(l.adults + l.children)',
             'fare_type' => 'q.fare_type',
             'check_payment' => 'q.check_payment',
             'tips' => 'l.tips',
@@ -834,7 +836,13 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
             $entry['minus_percent_profit'] = intval($entry['minus_percent_profit']);
             $entry['minus_percent_tips'] = intval($entry['minus_percent_tips']);
             $quote = Quote::findOne(['id' => $entry['q_id']]);
-            $totalProfit = ($entry['final_profit'])?$entry['final_profit']:$quote->getEstimationProfit();
+            if($entry['final_profit']){
+                $totalProfit = $entry['final_profit'];
+                $agentsProcessingFee = ($entry['agents_processing_fee'])?$entry['agents_processing_fee']:$entry['pax_cnt']*Lead::AGENT_PROCESSING_FEE_PER_PAX;
+                $totalProfit -= $agentsProcessingFee;
+            }else{
+                $totalProfit = $quote->getEstimationProfit();
+            }
             $totalTips = $entry['tips']/2;
             if ($entry['agent_type'] == 'main') {
                 $agentProfit = $totalProfit * (100 - $entry['minus_percent_profit']) / 100;

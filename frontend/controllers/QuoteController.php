@@ -73,21 +73,32 @@ class QuoteController extends FController
         return parent::actions();
     }
 
+    /**
+     * @param $leadId
+     * @return string
+     */
     public function actionGetOnlineQuotes($leadId)
     {
         $lead = Lead::findOne(['id' => $leadId]);
         if (Yii::$app->request->isPost) {
-            $response = [
+            /*$response = [
                 'success' => false,
                 'body' => ''
-            ];
-            $attr = Yii::$app->request->post();
-            if(isset($attr['gds']) && $lead !== null){
-                $keyCache = sprintf('quick-search-new-%d-%d-%s-%s', $lead->id, Yii::$app->user->id, $attr['gds'], $lead->generateLeadKey());
+            ];*/
+
+            $gds = Yii::$app->request->post('gds', '');
+
+            if($lead !== null){
+                $keyCache = sprintf('quick-search-new-%d-%s-%s', $lead->id, $gds, $lead->generateLeadKey());
+
+                Yii::$app->cache->delete($keyCache);
+
                 $result = Yii::$app->cache->get($keyCache);
 
-                if(!$result){
-                    $result = SearchService::getOnlineQuotes($lead, $attr['gds']);
+
+
+                if($result === false){
+                    $result = SearchService::getOnlineQuotes($lead);
                     if($result) {
                         Yii::$app->cache->set($keyCache, $result, 300);
                     }
@@ -96,10 +107,12 @@ class QuoteController extends FController
                 $viewData = SearchService::getAirlineLocationInfo($result);
                 $viewData['result'] = $result;
                 $viewData['leadId'] = $leadId;
-                $viewData['gds'] = $attr['gds'];
+                $viewData['gds'] = $gds;
                 $viewData['lead'] = $lead;
 
                 return $this->renderAjax('_search_results', $viewData);
+            } else {
+                return 'Not found lead';
             }
 
         }
@@ -117,15 +130,17 @@ class QuoteController extends FController
 
         $lead = Lead::findOne(['id' => $leadId]);
         if (Yii::$app->request->isPost) {
-            $attr = Yii::$app->request->post();
+            //$gds = Yii::$app->request->post('gds');
+            $gds = '';
+            $key = Yii::$app->request->post('key');
 
-            if(isset($attr['gds']) && isset($attr['key']) && $lead !== null){
-                $keyCache = sprintf('quick-search-new-%d-%d-%s-%s', $lead->id, Yii::$app->user->id, $attr['gds'], $lead->generateLeadKey());
+            if($key && $lead !== null){
+                $keyCache = sprintf('quick-search-new-%d-%s-%s', $lead->id, $gds, $lead->generateLeadKey());
                 $resultSearch = Yii::$app->cache->get($keyCache);
 
                 if($resultSearch !== false){
                     foreach ($resultSearch['results'] as $entry){
-                        if($entry['key'] == $attr['key']){
+                        if($entry['key'] == $key){
                             $transaction = Quote::getDb()->beginTransaction();
 
                             $quote = new Quote();
