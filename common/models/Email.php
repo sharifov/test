@@ -536,4 +536,26 @@ class Email extends \yii\db\ActiveRecord
         return $users;
     }
 
+    /**
+     * @param string $str
+     * @return string
+     */
+    public static function reSubject($str = '') : string
+    {
+        $str = trim($str);
+        if(strpos($str, 'Re:', 0) === false && strpos($str, 'Re[', 0) === false) {
+            return 'Re:'. $str;
+        } else {
+            if(mb_substr($str, 0,3, 'utf-8') === 'Re:') {
+                return preg_replace("/(Re:)/i", 'Re[1]:', $str, 1);
+            } elseif(preg_match('/Re\[([\d]+)\]:/i', $str, $matches)) {
+                if(isset($matches[0], $matches[1])) {
+                    $newVal = $matches[1] + 1;
+                    return preg_replace('/Re\[([\d]+)\]:/i', 'Re['.$newVal.']:', $str, 1);
+                }
+            }
+        }
+        return $str;
+    }
+
 }
