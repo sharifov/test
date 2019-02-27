@@ -764,56 +764,10 @@ class Lead extends ActiveRecord
         return self::STATUS_CLASS_LIST[$this->status] ?? 'label-default';
     }
 
-
-
-    /**
-     * @return bool
-     */
-    public function updateIpInfo()
-    {
-
-        $out = [];
-
-        if (empty($this->offset_gmt) && !empty($this->request_ip)) {
-
-            $ctx = stream_context_create(['http' =>
-                ['timeout' => 5]  //Seconds
-            ]);
-
-            try {
-                $jsonData = file_get_contents(Yii::$app->params['checkIpURL'] . $this->request_ip, false, $ctx);
-            } catch (\Throwable $throwable) {
-                $out['error'] =  $throwable->getMessage();
-                $jsonData = null;
-            }
-
-            if ($jsonData) {
-
-                $data = @json_decode($jsonData, true);
-
-                //print_r($data); exit;
-
-                if (isset($data['meta']['code']) && $data['meta']['code'] == '200') {
-                    if (isset($data['data']['datetime'])) {
-                        $this->offset_gmt = str_replace(':', '.', $data['data']['datetime']['offset_gmt']);
-                    }
-                    $this->request_ip_detail = json_encode($data['data']);
-                    //$this->update(false, ['offset_gmt', 'request_ip_detail']);
-
-                    Lead::updateAll(['offset_gmt' => $this->offset_gmt, 'request_ip_detail' => $this->request_ip_detail], ['id' => $this->id]);
-
-                    //return true;
-                }
-            }
-        }
-        return $out;
-    }
-
-
     /**
      * @return array
      */
-    public function updateIpInfo2(): array
+    public function updateIpInfo(): array
     {
 
         $out = ['error' => false, 'data' => []];

@@ -4,10 +4,11 @@ return [
     'supportEmail' => 'support@example.com',
     'user.passwordResetTokenExpire' => 3600,*/
 
+    'serviceName' => 'communication',
+    'serviceVersion' => '1.0.0',
 
 
     'appName' => 'Sales',
-    'checkIpURL' => 'http://timezoneapi.io/api/ip/?',
 
     'url_address'      => 'https://sales.travelinsides.com',
 

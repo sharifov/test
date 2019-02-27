@@ -27,7 +27,7 @@ class LeadController extends Controller
         if($leads) {
             foreach ($leads as $lead) {
 
-                $out = $lead->updateIpInfo2();
+                $out = $lead->updateIpInfo();
 
                 if(isset($out['error']) && $out['error']) {
                     echo $lead->id."\r\n";
