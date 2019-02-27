@@ -187,6 +187,17 @@ class Quote extends \yii\db\ActiveRecord
         return round($profit,2);
     }
 
+    public function getFinalProfit()
+    {
+        $final = $this->lead->final_profit;
+        if($this->lead->agents_processing_fee){
+            $final -= $this->lead->agents_processing_fee;
+        }else{
+            $final -= ($this->lead->adults + $this->lead->children)*Lead::AGENT_PROCESSING_FEE_PER_PAX;
+        }
+        return $final;
+    }
+
     /**
      * @return \yii\db\ActiveQuery
      */
