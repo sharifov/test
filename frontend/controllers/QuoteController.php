@@ -197,7 +197,9 @@ class QuoteController extends FController
                                                 $segment->qs_operating_airline = $segmentEntry['operatingAirline'];
                                                 $segment->qs_marketing_airline = $segmentEntry['marketingAirline'];
                                                 $segment->qs_cabin = $segmentEntry['cabin'];
-                                                $segment->qs_mileage = $segmentEntry['mileage'];
+                                                if(isset($segmentEntry['mileage'])){
+                                                    $segment->qs_mileage = $segmentEntry['mileage'];
+                                                }
                                                 if(isset($segmentEntry['marriageGroup'])){
                                                     $segment->qs_marriage_group = $segmentEntry['marriageGroup'];
                                                 }
