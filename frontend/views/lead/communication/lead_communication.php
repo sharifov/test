@@ -392,7 +392,7 @@ $c_type_id = $comForm->c_type_id;
                                 'preset' => 'custom',
                                 'clientOptions' => [
                                     'height' => 500,
-                                    'fullPage' => true,
+                                    'fullPage' => false,
 
                                     'allowedContent' => true,
                                     'resize_enabled' => false,

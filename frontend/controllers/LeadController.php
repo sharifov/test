@@ -538,7 +538,12 @@ class LeadController extends FController
                             //$mailSend = $communication->mailSend(7, 'cl_offer', 'chalpet@gmail.com', 'chalpet2@gmail.com', $content_data, $data, 'ru-RU', 10);
 
 
-                            $content_data = $lead->getEmailData2($comForm->quoteList);
+                            //VarDumper::dump($content_data, 10 , true); exit;
+                            $content_data = $lead->getEmailData2($comForm->quoteList, $projectContactInfo);
+                            $content_data['content'] = $comForm->c_email_message;
+                            $content_data['subject'] = $comForm->c_email_subject;
+
+                            $previewEmailForm->e_email_subject = $comForm->c_email_subject;
                             $previewEmailForm->e_content_data = $content_data;
 
                             //echo json_encode($content_data); exit;
@@ -561,7 +566,9 @@ class LeadController extends FController
                                 } else {
 
                                     $previewEmailForm->e_email_message = $mailPreview['data']['email_body_html'];
-                                    $previewEmailForm->e_email_subject = $mailPreview['data']['email_subject'];
+                                    if(isset($mailPreview['data']['email_subject']) && $mailPreview['data']['email_subject']) {
+                                        $previewEmailForm->e_email_subject = $mailPreview['data']['email_subject'];
+                                    }
                                     $previewEmailForm->e_email_from = $mailFrom; //$mailPreview['data']['email_from'];
                                     $previewEmailForm->e_email_to = $comForm->c_email_to; //$mailPreview['data']['email_to'];
                                     $previewEmailForm->e_email_from_name = Yii::$app->user->identity->full_name;
@@ -605,6 +612,12 @@ class LeadController extends FController
                         }
                     }
 
+                    $projectContactInfo = [];
+
+                    if($project && $project->contact_info) {
+                        $projectContactInfo = @json_decode($project->contact_info, true);
+                    }
+
                     $previewSmsForm->s_quote_list = @json_encode([]);
 
                     if(!$phoneFrom) {
@@ -627,8 +640,7 @@ class LeadController extends FController
 
                             $previewSmsForm->s_sms_tpl_id = $comForm->c_sms_tpl_id;
 
-                            $content_data = $lead->getEmailData2($comForm->quoteList);
-
+                            $content_data = $lead->getEmailData2($comForm->quoteList, $projectContactInfo);
                             $content_data['content'] = $comForm->c_sms_message;
 
                             //VarDumper::dump($content_data, 10, true); exit;

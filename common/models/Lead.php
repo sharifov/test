@@ -1902,9 +1902,10 @@ Sales - Kivork",
 
     /**
      * @param array $quoteIds
+     * @param $projectContactInfo
      * @return array
      */
-    public function getEmailData2($quoteIds = []) : array
+    public function getEmailData2($quoteIds = [], $projectContactInfo) : array
     {
         $project = $this->project;
 
