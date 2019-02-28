@@ -77,7 +77,7 @@ use \common\models\Call;
 
         if($mail->e_status_id == Email::STATUS_DONE) {
             $statusClass = 'success';
-            $statusTitle = 'DONE - ' . Yii::$app->formatter->asDatetime(strtotime($mail->e_status_done_dt));
+            $statusTitle = 'DONE - ' . ($mail->e_status_done_dt ? Yii::$app->formatter->asDatetime(strtotime($mail->e_status_done_dt)) : Yii::$app->formatter->asDatetime(strtotime($mail->e_updated_dt)));
         } elseif($mail->e_status_id == Email::STATUS_ERROR || $mail->e_status_id == Email::STATUS_CANCEL) {
             $statusClass = 'error';
             $statusTitle = 'ERROR - '. $mail->e_error_message;
