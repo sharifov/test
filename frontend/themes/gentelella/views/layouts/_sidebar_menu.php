@@ -69,9 +69,9 @@ $isCoach = Yii::$app->authManager->getAssignment('coach', Yii::$app->user->id);
                     'icon' => 'comment',
                 ];
 
-                if($isAdmin || $isSupervision) {
+                //if($isAdmin || $isSupervision) {
                     $menuItems[] = ['label' => 'My Mails <span id="email-inbox-queue" class="label-info label pull-right"></span> ', 'url' => ['/email/inbox'], 'icon' => 'envelope'];
-                }
+                //}
 
             //}
 
