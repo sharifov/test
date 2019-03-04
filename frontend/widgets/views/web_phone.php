@@ -8,28 +8,6 @@
 \frontend\assets\WebPhoneAsset::register($this);
 ?>
 
-<style>
-    #web-phone-widget {
-        position: fixed;
-        width: 100%;
-        max-width: 800px;
-
-        padding: 2px;
-        bottom: 10px;
-        border: 1px solid #8AC007;
-        /*margin-left: 50%;*/
-        box-shadow: 2px 2px 4px #333;
-        z-index: 999;
-        display: none;
-        /*height: 600px;*/
-        background-color: rgba(255, 255, 255, 0.8);
-        /*margin-left: -50px;*/
-
-        /*margin-left: calc(100% - calc(width / 2));*/
-
-    }
-</style>
-
 <div class="fabs2" style="display: none">
     <a id="prime2" class="fab2"><i class="fa fa-phone"></i></a>
 </div>
@@ -506,7 +484,7 @@ $js = <<<JS
     
     $('#btn-webphone-close').on('click', function() {
         
-        $('#web-phone-widget').slideUp();
+        $('#web-phone-widget').slideUp('fast');
         $('.fabs2').show();
         //$(this).find('i').addClass('fa-angle-double-up');
     });

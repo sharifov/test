@@ -9,6 +9,25 @@
   outline: 0;
 }*/
 
+#web-phone-widget {
+  position: fixed;
+  width: 100%;
+  max-width: 800px;
+
+  padding: 2px;
+  bottom: 10px;
+  border: 3px solid #78c286;
+  /*margin-left: 50%;*/
+  box-shadow: 3px 3px 3px #333;
+  z-index: 999;
+  display: none;
+  /*height: 600px;*/
+  background-color: rgba(255, 255, 255, 0.8);
+  border-radius: 8px;
+  /*margin-left: -50px;*/
+  /*margin-left: calc(100% - calc(width / 2));*/
+}
+
 
 div#call-controls {
   display: none;
