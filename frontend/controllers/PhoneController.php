@@ -183,7 +183,7 @@ class PhoneController extends FController
             Notifications::create(Yii::$app->user->id, 'Outgoing Call from '.$call_from, 'Outgoing Call from ' . $call_from .' to '.$call_to, Notifications::TYPE_WARNING, true);
             Notifications::socket(Yii::$app->user->id, null, 'getNewNotification', [], true);
             Notifications::socket(Yii::$app->user->id, null, 'callUpdate', ['status' => Call::CALL_STATUS_RINGING, 'duration' => 0, 'snr' => 0], true);
-            
+
         }
 
         return $out;

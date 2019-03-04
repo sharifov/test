@@ -117,8 +117,7 @@
 
 <script type="text/javascript">
 
-    const ajaxSaveCallUrl = '$ajaxSaveCallUrl';
-
+    const ajaxSaveCallUrl = '<?=$ajaxSaveCallUrl?>';
 
     function createNitify(title, message, type) {
         new PNotify({
