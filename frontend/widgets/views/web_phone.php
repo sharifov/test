@@ -302,6 +302,11 @@
     };
 
 
+    function saveDbCall(sid, from, to) {
+        console.info('sid: ' + sid + ' : ' + from + ' : ' + to);
+    }
+
+
     function initDevice() {
 
         clearLog();
@@ -327,9 +332,11 @@
                 device.on('connect', function (conn) {
                     log('Successfully established call!');
                     console.info(conn);
-                    console.info(conn.parameters);
-                    console.log(conn.parameters.CallSid);
-                    
+                    //console.info(conn.parameters);
+                    //console.log(conn.parameters.CallSid);
+
+                    saveDbCall(conn.parameters.CallSid, conn.message.FromAgentPhone, conn.message.To);
+
                     //document.getElementById('button-call').style.display = 'none';
                     document.getElementById('button-hangup').style.display = 'inline';
                     volumeIndicators.style.display = 'block';
