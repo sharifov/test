@@ -109,7 +109,15 @@
 ]); ?>
 <?php \yii\bootstrap\Modal::end(); ?>
 
+
+<?php
+    $ajaxSaveCallUrl = \yii\helpers\Url::to(['phone/ajax-save-call']);
+?>
+
+
 <script type="text/javascript">
+
+    const ajaxSaveCallUrl = '$ajaxSaveCallUrl';
 
 
     function createNitify(title, message, type) {
@@ -304,6 +312,21 @@
 
     function saveDbCall(sid, from, to) {
         console.info('sid: ' + sid + ' : ' + from + ' : ' + to);
+
+        $.ajax({
+            type: 'post',
+            data: {'call_sid': sid, 'call_from': from, 'call_to': to},
+            url: ajaxSaveCallUrl,
+            success: function (data) {
+                console.log(data);
+                //$('#preloader').addClass('hidden');
+                //modal.find('.modal-body').html(data);
+                //modal.modal('show');
+            },
+            error: function (error) {
+                console.error(error);
+            }
+        });
     }
 
 

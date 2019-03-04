@@ -2,6 +2,7 @@
 
 namespace frontend\controllers;
 
+use common\models\Call;
 use common\models\ClientPhone;
 use common\models\Project;
 use common\models\search\LeadSearch;
@@ -32,12 +33,12 @@ class PhoneController extends FController
                 'class' => AccessControl::class,
                 'rules' => [
                     [
-                        'actions' => ['index', 'get-token', 'test', 'ajax-phone-dial'],
+                        'actions' => ['index', 'get-token', 'test', 'ajax-phone-dial', 'ajax-save-call'],
                         'allow' => true,
                         'roles' => ['supervision'],
                     ],
                     [
-                        'actions' => ['index', 'get-token', 'test', 'ajax-phone-dial'],
+                        'actions' => ['index', 'get-token', 'test', 'ajax-phone-dial', 'ajax-save-call'],
                         'allow' => true,
                         'roles' => ['agent'],
                     ],
@@ -146,4 +147,45 @@ class PhoneController extends FController
         $data = Yii::$app->communication->getJwtTokenCache($username, true);
         return $data;
     }
+
+    /**
+     * @return array
+     */
+    public function actionAjaxSaveCall(): array
+    {
+        $call_sid = Yii::$app->request->post('call_sid');
+        $call_from = Yii::$app->request->post('call_from');
+        $call_to = Yii::$app->request->post('call_to');
+
+        $out = ['error' => '', 'data' => []];
+
+        \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+
+        if($call_sid && $call_from && $call_to) {
+            $call = Call::find()->where(['c_call_sid' => $call_sid])->limit(1)->one();
+            if(!$call) {
+                $call = new Call();
+                $call->c_call_sid = $call_sid;
+                $call->c_from = $call_from;
+                $call->c_to = $call_to;
+                $call->c_call_status = Call::CALL_STATUS_RINGING;
+                $call->c_created_dt = date('Y-m-d H:i:s');
+                $call->c_created_user_id = Yii::$app->user->id;
+                $call->c_call_type_id = Call::CALL_TYPE_OUT;
+            }
+
+            $call->c_updated_dt = date('Y-m-d H:i:s');
+
+            if(!$call->save()) {
+                $out['error'] = VarDumper::dumpAsString($call->errors);
+                Yii::error($out['error'], 'PhoneController:actionAjaxSaveCall:Call:save');
+            } else {
+                $out['data'] = $call->attributes;
+            }
+        }
+
+        return $out;
+    }
+
+
 }
