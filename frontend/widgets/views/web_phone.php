@@ -18,7 +18,7 @@
 
 
         <div id="web-phone-token" style="display: none"><?=$token?></div>
-            <table class="table table-bordered" style="margin: 0">
+            <table class="table" style="margin: 0">
                 <tr>
                     <?/*<td style="display: none"><i title="<?=$token?>">Token</i></td>*/?>
                     <td width="100"><i class="fa fa-user"></i> <span><?=$clientId?></span></td>
