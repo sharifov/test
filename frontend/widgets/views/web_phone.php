@@ -40,10 +40,10 @@
 
 
         <div id="web-phone-token" style="display: none"><?=$token?></div>
-            <table class="table table-bordered">
+            <table class="table table-bordered" style="margin: 0">
                 <tr>
                     <?/*<td style="display: none"><i title="<?=$token?>">Token</i></td>*/?>
-                    <td width="100px"><i class="fa fa-user"></i> <?=$clientId?></td>
+                    <td width="100"><i class="fa fa-user"></i> <span><?=$clientId?></span></td>
                     <td>From: <i class="fa fa-phone"></i> <span id="web-call-from-number"></span></td>
 
                     <td>To: <i class="fa fa-phone"></i> <span id="web-call-to-number"></span></td>
@@ -57,15 +57,35 @@
                             </tr>
                         </table>
                     </td>*/?>
-                    <td>
-                        <?/*=\yii\helpers\Html::button('<i class="fa fa-phone"></i> Call', ['class' => 'btn btn-xs btn-success', 'id' => 'button-call'])*/?>
-                        <?=\yii\helpers\Html::button('<i class="fa fa-close"></i> Hangup', ['class' => 'btn btn-xs btn-danger','id' => 'button-hangup', 'style' => 'display:none'])?>
-                    </td>
                     <td width="120px">
                         <div class="text-right">
-                            <?=\yii\helpers\Html::button('<i class="fa fa-tumblr"></i>', ['class' => 'btn btn-xs btn-primary', 'id' => 'btn-webphone-token', 'onclick' => 'alert($("#web-phone-token").text())'])?>
+                            <?//=\yii\helpers\Html::button('<i class="fa fa-tumblr"></i>', ['class' => 'btn btn-xs btn-primary', 'id' => 'btn-webphone-token', 'onclick' => 'alert($("#web-phone-token").text())'])?>
                             <?=\yii\helpers\Html::button('<i class="fa fa-angle-double-up"></i>', ['class' => 'btn btn-xs btn-primary', 'id' => 'btn-nin-max-webphone'])?>
                             <?=\yii\helpers\Html::button('<i class="fa fa-close"></i>', ['class' => 'btn btn-xs btn-primary', 'id' => 'btn-webphone-close'])?>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+            <table class="table" style="margin: 0">
+                <tr>
+                    <td width="250">
+                        <table id="volume-indicators" style="display: none">
+                            <tr title="Mic Volume">
+                                <td><i class="fa fa-microphone"></i> </td>
+                                <td><div id="input-volume" style="width: 200px; height: 7px;"></div></td>
+                            </tr>
+                            <tr title="Speaker Volume">
+                                <td><i class="fa fa-volume-down"></i> </td>
+                                <td><div id="output-volume" style="width: 200px; height: 7px;"></div></td>
+                            </tr>
+                        </table>
+                    </td>
+                    <td>
+                        <?=\yii\helpers\Html::button('<i class="fa fa-close"></i> Hangup', ['class' => 'btn btn-xs btn-danger','id' => 'button-hangup', 'style' => 'display:none'])?>
+                        <?/*=\yii\helpers\Html::button('<i class="fa fa-phone"></i> Call', ['class' => 'btn btn-xs btn-success', 'id' => 'button-call'])*/?>
+                        <div id="call-controls2" style="display: none">
+                            <?=\yii\helpers\Html::button('<i class="fa fa-phone"></i> Answer', ['class' => 'btn btn-sm btn-success', 'id' => 'button-answer'])?>
+                            <?=\yii\helpers\Html::button('<i class="fa fa-close"></i> Reject', ['class' => 'btn btn-sm btn-danger','id' => 'button-reject'])?>
                         </div>
                     </td>
                 </tr>
@@ -74,11 +94,11 @@
 
             <div class="webphone-controls" id="controls" style="display: none">
 
-                <table class="table table-bordered">
+                <table class="table">
                     <tr>
-                        <td>
+                        <td width="250">
                             <div id="info">
-                                <div id="client-name"></div>
+                                <?/*<div id="client-name"></div>*/ ?>
                                 <div id="output-selection">
                                     <label>Ringtone Devices</label>
                                     <select id="ringtone-devices" multiple></select>
@@ -89,28 +109,8 @@
                             </div>
                         </td>
                         <td>
-                            <div id="call-controls">
-                                <?/*<p>Make a Call:</p>
-                                <input id="phone-number" type="text" placeholder="Enter a phone/client" />
-                                <br>*/?>
-
-                                <div id="volume-indicators">
-                                    <label>Mic Volume</label>
-                                    <div id="input-volume" style=" border: dashed 1px #fff; width: 200px; height: 10px;"></div>
-                                    <br/>
-                                    <label>Speaker Volume</label>
-                                    <div id="output-volume" style=" border: dashed 1px #fff; width: 200px; height: 10px;"></div>
-                                </div>
-                            </div>
-
-                            <div id="call-controls2">
-                                <?=\yii\helpers\Html::button('<i class="fa fa-phone"></i> Answer', ['class' => 'btn btn-xs btn-success', 'id' => 'button-answer'])?>
-                                <?=\yii\helpers\Html::button('<i class="fa fa-close"></i> Reject', ['class' => 'btn btn-xs btn-danger','id' => 'button-reject'])?>
-                            </div>
-                        </td>
-                        <td>
                             <i>Logs:</i>
-                            <div id="log"></div>
+                            <div id="call-log"></div>
                         </td>
                     </tr>
                 </table>
@@ -132,9 +132,20 @@
 <?php \yii\bootstrap\Modal::end(); ?>
 
 <script type="text/javascript">
+
+
+    function createNitify(title, message, type) {
+        new PNotify({
+            title: title,
+            type: type,
+            text: message,
+            hide: true
+        });
+    }
+
     var tw_configs = {"client":"<?= $clientId;?>"};
 
-    "use strict";
+   // "use strict";
 
     var device;
     var connection;
@@ -202,27 +213,33 @@
         device.audio.ringtoneDevices.set(selectedDevices);
     });
 
+
+    function volumeIndicatorsChange(inputVolume, outputVolume) {
+        var inputColor = 'red';
+        if (inputVolume < .50) {
+            inputColor = 'green';
+        } else if (inputVolume < .75) {
+            inputColor = 'yellow';
+        }
+
+        inputVolumeBar.style.width = Math.floor(inputVolume * 300) + 'px';
+        inputVolumeBar.style.background = inputColor;
+
+        var outputColor = 'red';
+        if (outputVolume < .50) {
+            outputColor = 'green';
+        } else if (outputVolume < .75) {
+            outputColor = 'yellow';
+        }
+
+        outputVolumeBar.style.width = Math.floor(outputVolume * 300) + 'px';
+        outputVolumeBar.style.background = outputColor;
+    }
+
+
     function bindVolumeIndicators(connection) {
         connection.on('volume', function (inputVolume, outputVolume) {
-            var inputColor = 'red';
-            if (inputVolume < .50) {
-                inputColor = 'green';
-            } else if (inputVolume < .75) {
-                inputColor = 'yellow';
-            }
-
-            inputVolumeBar.style.width = Math.floor(inputVolume * 300) + 'px';
-            inputVolumeBar.style.background = inputColor;
-
-            var outputColor = 'red';
-            if (outputVolume < .50) {
-                outputColor = 'green';
-            } else if (outputVolume < .75) {
-                outputColor = 'yellow';
-            }
-
-            outputVolumeBar.style.width = Math.floor(outputVolume * 300) + 'px';
-            outputVolumeBar.style.background = outputColor;
+            volumeIndicatorsChange(inputVolume, outputVolume);
         });
     }
 
@@ -258,24 +275,24 @@
 
     // Activity log
     function log(message) {
-        var logDiv = document.getElementById('log');
+        var logDiv = document.getElementById('call-log');
         logDiv.innerHTML += '<p>&gt;&nbsp;' + message + '</p>';
         logDiv.scrollTop = logDiv.scrollHeight;
     }
 
 
     function clearLog() {
-        var logDiv = document.getElementById('log');
+        var logDiv = document.getElementById('call-log');
         logDiv.innerHTML = '';
         logDiv.scrollTop = logDiv.scrollHeight;
     }
 
     // Set the client name in the UI
-    function setClientNameUI(clientName) {
+    /*function setClientNameUI(clientName) {
         var div = document.getElementById('client-name');
         div.innerHTML = 'Your client name: <strong>' + clientName +
             '</strong>';
-    }
+    }*/
 
     function renewTwDevice() {
         console.log(device.status());
@@ -294,7 +311,6 @@
         console.log("button-answer: " + connection);
         if (connection) {
             connection.accept();
-            document.getElementById('call-controls').style.display = 'block';
             document.getElementById('call-controls2').style.display = 'none';
         }
     };
@@ -303,7 +319,6 @@
         console.log("button-reject: " + connection);
         if (connection) {
             connection.reject();
-            document.getElementById('call-controls').style.display = 'block';
             document.getElementById('call-controls2').style.display = 'none';
         }
     };
@@ -324,7 +339,7 @@
                 //console.log([data, device]);
                 device.on('ready', function (device) {
                     log('Twilio.Device Ready!');
-                    document.getElementById('call-controls').style.display = 'block';
+                    //document.getElementById('call-controls').style.display = 'block';
                 });
 
                 device.on('error', function (error) {
@@ -341,6 +356,9 @@
 
                 device.on('disconnect', function (conn) {
                     log('Call ended.');
+                    createNitify('Call ended', 'Call ended', 'warning');
+                    console.log(conn);
+
                     //document.getElementById('button-call').style.display = 'inline';
                     document.getElementById('button-hangup').style.display = 'none';
                     volumeIndicators.style.display = 'none';
@@ -352,8 +370,10 @@
                 device.on('incoming', function (conn) {
                     connection = conn;
                     log('Incoming connection from ' + conn.parameters.From);
+                    createNitify('Incoming connection', 'Incoming connection from ' + conn.parameters.From, 'success');
+
                     var archEnemyPhoneNumber = tw_configs.client;
-                    document.getElementById('call-controls').style.display = 'none';
+                    //document.getElementById('call-controls').style.display = 'none';
                     document.getElementById('call-controls2').style.display = 'block';
                     /*
                     if (conn.parameters.From === archEnemyPhoneNumber || conn.parameters.From === 'client:' + archEnemyPhoneNumber) {
@@ -372,14 +392,16 @@
 
                 device.on('cancel', function (conn) {
                     connection = conn;
-                    log('Cancel call.');
-                    document.getElementById('call-controls').style.display = 'block';
+                    log('Cancel call');
+                    createNitify('Cancel call', 'Cancel call', 'warning');
+                    //document.getElementById('call-controls').style.display = 'block';
                     document.getElementById('call-controls2').style.display = 'none';
                 });
 
 
 
-                setClientNameUI(data.client);
+                //setClientNameUI(data.client);
+
                 device.audio.on('deviceChange', updateAllDevices.bind(device));
                 // Show audio selection UI if it is supported by the browser.
                 if (device.audio.isOutputSelectionSupported) {
@@ -389,6 +411,7 @@
             .catch(function (err) {
                 console.log(err);
                 log('Could not get a token from server!');
+                createNitify('Call Token error!', 'Could not get a token from server!', 'error');
             });
     }
 
@@ -408,6 +431,7 @@
             $('#web-call-to-number').text(params.To);
 
             console.log('Calling ' + params.To + '...');
+            createNitify('Calling', 'Calling ' + params.To + '...', 'success');
             device.connect(params);
         }
     }

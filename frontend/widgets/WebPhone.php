@@ -43,9 +43,9 @@ class WebPhone extends \yii\bootstrap\Widget
         }
 
 
-        if (\Yii::$app->controller->uniqueId != 'phone') {
+        /*if (\Yii::$app->controller->uniqueId != 'phone') {
             return '';
-        }
+        }*/
 
         //VarDumper::dump($userProfile, 10, true);        exit;
 
@@ -59,9 +59,6 @@ class WebPhone extends \yii\bootstrap\Widget
             $token = false;
         }
 
-
-        $fromAgentPhone = '+15596489977';
-
-        return $this->render('web_phone', ['clientId' => $clientId, 'token' => $token, 'fromAgentPhone' => $fromAgentPhone]);
+        return $this->render('web_phone', ['clientId' => $clientId, 'token' => $token]);
     }
 }
