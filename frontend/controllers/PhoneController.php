@@ -4,18 +4,15 @@ namespace frontend\controllers;
 
 use common\models\Call;
 use common\models\ClientPhone;
+use common\models\Notifications;
 use common\models\Project;
-use common\models\search\LeadSearch;
 use common\models\UserProjectParams;
 use yii\filters\AccessControl;
 use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
-use \yii\web\Controller;
-use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use Yii;
-use common\CommunicationService;
-use yii\web\View;
+
 
 class PhoneController extends FController
 {
@@ -182,6 +179,11 @@ class PhoneController extends FController
             } else {
                 $out['data'] = $call->attributes;
             }
+
+            Notifications::create(Yii::$app->user->id, 'Outgoing Call from '.$call_from, 'Outgoing Call from ' . $call_from .' to '.$call_to, Notifications::TYPE_WARNING, true);
+            Notifications::socket(Yii::$app->user->id, null, 'getNewNotification', [], true);
+            Notifications::socket(Yii::$app->user->id, null, 'callUpdate', ['status' => Call::CALL_STATUS_RINGING, 'duration' => 0, 'snr' => 0], true);
+            
         }
 
         return $out;
