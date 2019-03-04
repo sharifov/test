@@ -372,7 +372,7 @@ class CommunicationController extends ApiBaseController
 
                 //$upp = UserProjectParams::find()->where(['upp_phone_number' => $agent_phone_number])->orWhere(['upp_tw_phone_number' => $agent_phone_number])->one();
                 $upp = UserProjectParams::find()->where(['upp_tw_phone_number' => $agent_phone_number])->one();
-                                
+
                 $user = null;
 
 
