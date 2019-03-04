@@ -296,7 +296,7 @@ class CommunicationController extends ApiBaseController
 
         $post = Yii::$app->request->post();
 
-        $response = $post;
+        $response = []; //$post;
 
         if($type == self::TYPE_VOIP_INCOMING) {
 
@@ -372,8 +372,7 @@ class CommunicationController extends ApiBaseController
 
                 //$upp = UserProjectParams::find()->where(['upp_phone_number' => $agent_phone_number])->orWhere(['upp_tw_phone_number' => $agent_phone_number])->one();
                 $upp = UserProjectParams::find()->where(['upp_tw_phone_number' => $agent_phone_number])->one();
-
-
+                                
                 $user = null;
 
 
@@ -553,6 +552,8 @@ class CommunicationController extends ApiBaseController
 
                         $data['status'] = $call->c_call_status;
 
+                        $response['call'] = $call->attributes;
+
                         //Notifications::create($call->c_created_user_id, 'New Call from '.$call->c_from. ' ('.$data['client_name'].')', 'Call from ' . $call->c_from .' ('.$data['client_name'].') to '.$call->c_to, Notifications::TYPE_INFO, true);
                         if($call->c_created_user_id) {
                             Notifications::socket($call->c_created_user_id, $lead_id = null, 'incomingCall', $data, true);
@@ -685,22 +686,29 @@ class CommunicationController extends ApiBaseController
 
                     $upp = null;
 
-                    if($call->c_from) {
+                    if($call->c_project_id && $call->c_from) {
                         $agentId = (int) str_replace('client:seller', '', $call->c_from);
                         if($agentId) {
                             $upp = UserProjectParams::find()->where(['upp_user_id' => $agentId, 'upp_project_id' => $call->c_project_id])->one();
                         }
                     }
 
-                    //$upp = UserProjectParams::find()->where(['upp_phone_number' => $agent_phone_number])->orWhere(['upp_tw_phone_number' => $agent_phone_number])->one();
+                    if(!$upp) {
+                        $upp = UserProjectParams::find()->where(['upp_phone_number' => $call->c_from])->orWhere(['upp_tw_phone_number' => $call->c_from])->one();
+                    }
+
+                    if(!$upp) {
+                        $upp = UserProjectParams::find()->where(['upp_phone_number' => $call->c_to])->orWhere(['upp_tw_phone_number' => $call->c_to])->one();
+                    }
 
                     $user = null;
-                    if($upp && $user = $upp->uppUser) {
+                    if($upp && $upp->uppUser) {
 
-                        $call->c_created_user_id = $user->id;
+                        $call->c_created_user_id = $upp->uppUser->id;
+                        $call->c_project_id = $upp->upp_project_id;
 
-                        Notifications::create($user->id, 'Call completed', 'Call from ' . $call->c_from .' to '.$call->c_to, Notifications::TYPE_WARNING, true);
-                        Notifications::socket($user->id, null, 'getNewNotification', [], true);
+                        Notifications::create($upp->uppUser->id, 'Call completed', 'Call from ' . $call->c_from .' to '.$call->c_to, Notifications::TYPE_WARNING, true);
+                        Notifications::socket($upp->uppUser->id, null, 'getNewNotification', [], true);
                     }
 
                 }
