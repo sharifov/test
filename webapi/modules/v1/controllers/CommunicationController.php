@@ -647,6 +647,64 @@ class CommunicationController extends ApiBaseController
             if (isset($post['callData']['sid']) && $post['callData']['sid']) {
                 $call = Call::find()->where(['c_call_sid' => $post['callData']['sid']])->limit(1)->one();
 
+                $callData = $post['call'];
+
+                if(!$call) {
+                    $call = new Call();
+                    $call->c_call_sid = $callData['c_call_sid'];
+                    $call->c_account_sid = $callData['c_account_sid'];
+                    $call->c_call_type_id = $callData['c_call_type_id'];
+                    $call->c_uri = $callData['c_uri'];
+
+                    $call->c_from = $callData['c_from'];
+                    $call->c_to = $callData['c_to'];
+
+                    $call->c_timestamp = $callData['c_timestamp'];
+                    $call->c_created_dt = $callData['c_created_dt'];
+                    $call->c_updated_dt = date('Y-m-d H:i:s');
+
+                    $call->c_recording_url = $callData['c_recording_url'];
+                    $call->c_recording_sid = $callData['c_recording_sid'];
+                    $call->c_recording_duration = $callData['c_recording_duration'];
+
+                    $call->c_caller_name = $callData['c_caller_name'];
+                    $call->c_direction = $callData['c_direction'];
+                    $call->c_api_version = $callData['c_api_version'];
+
+
+                    //$call->c_call_status = $post['callData']['CallStatus'] ?? '';
+                    //$call->c_sequence_number = $post['callData']['SequenceNumber'] ?? 0;
+
+                    $call->c_sip = $callData['c_sip'];
+
+                    if($callData['c_project_id']) {
+                        $call->c_project_id = $callData['c_project_id'];
+                    }
+
+
+
+                    $upp = null;
+
+                    if($call->c_from) {
+                        $agentId = (int) str_replace('client:seller', '', $call->c_from);
+                        if($agentId) {
+                            $upp = UserProjectParams::find()->where(['upp_user_id' => $agentId, 'upp_project_id' => $call->c_project_id])->one();
+                        }
+                    }
+
+                    //$upp = UserProjectParams::find()->where(['upp_phone_number' => $agent_phone_number])->orWhere(['upp_tw_phone_number' => $agent_phone_number])->one();
+
+                    $user = null;
+                    if($upp && $user = $upp->uppUser) {
+
+                        $call->c_created_user_id = $user->id;
+
+                        Notifications::create($user->id, 'Call completed', 'Call from ' . $call->c_from .' to '.$call->c_to, Notifications::TYPE_WARNING, true);
+                        Notifications::socket($user->id, null, 'getNewNotification', [], true);
+                    }
+
+                }
+
 
 
                 /*
