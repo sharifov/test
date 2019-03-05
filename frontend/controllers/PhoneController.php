@@ -153,6 +153,8 @@ class PhoneController extends FController
     public function actionAjaxSaveCall(): array
     {
         $call_sid = Yii::$app->request->post('call_sid');
+        $call_acc_sid = Yii::$app->request->post('call_acc_sid');
+
         $call_from = Yii::$app->request->post('call_from');
         $call_to = Yii::$app->request->post('call_to');
         $call_status = Yii::$app->request->post('call_status', Call::CALL_STATUS_RINGING);
@@ -174,7 +176,10 @@ class PhoneController extends FController
                 $call->c_created_dt = date('Y-m-d H:i:s');
                 $call->c_created_user_id = Yii::$app->user->id;
                 $call->c_call_type_id = Call::CALL_TYPE_OUT;
-                //$call->c_account_sid =
+
+                if($call_acc_sid) {
+                    $call->c_account_sid = $call_acc_sid;
+                }
             }
 
             if(!$call->c_lead_id && $lead_id) {

@@ -131,6 +131,7 @@
 
     var tw_configs = {"client":"<?= $clientId;?>"};
     var webPhoneParams = {};
+    var call_acc_sid = '';
 
    // "use strict";
 
@@ -315,15 +316,17 @@
 
         var project_id = webPhoneParams.project_id;
         var lead_id = webPhoneParams.lead_id;
+        //var call_acc_sid =
 
         console.info('sid: ' + call_sid + ' : ' + call_from + ' : ' + call_to + ' : ' + call_status + ' : ' + project_id + ' : ' + lead_id);
 
         //console.warn(webPhoneParams); return false;
 
-        if(sid) {
+        if(call_sid) {
             $.ajax({
                 type: 'post',
                 data: {
+                    'call_acc_sid': call_acc_sid,
                     'call_sid': call_sid,
                     'call_from': call_from,
                     'call_to': call_to,
@@ -356,6 +359,9 @@
                 log('Got a token.');
                 console.log('app_sid: ' + data.app_sid);
                 console.log('account_sid: ' + data.account_sid);
+
+                call_acc_sid = data.account_sid;
+
                 //console.log('Token: ' + data.token);
                 // Setup Twilio.Device
                 device = new Twilio.Device(data.token, {debug: true});
