@@ -792,8 +792,8 @@ class CommunicationController extends ApiBaseController
         elseif($type === self::TYPE_VOIP_CLIENT) {
 
 
-            if (isset($post['callData']['sid']) && $post['callData']['sid']) {
-                $call = Call::find()->where(['c_call_sid' => $post['callData']['sid']])->limit(1)->one();
+            if (isset($post['callData']['CallSid']) && $post['callData']['CallSid']) {
+                $call = Call::find()->where(['c_call_sid' => $post['callData']['CallSid']])->limit(1)->one();
 
                 $callData = $post['call'];
 
