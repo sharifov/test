@@ -3,6 +3,7 @@
 namespace frontend\controllers;
 
 use common\components\CommunicationService;
+use common\models\Employee;
 use common\models\UserProjectParams;
 use http\Url;
 use Yii;
@@ -288,6 +289,11 @@ class EmailController extends FController
             $mailList = ArrayHelper::map($mails, 'upp_email', 'upp_email');
         }
 
+        $user = Employee::findOne(Yii::$app->user->id);
+        if($user && $user->email) {
+            $mailList[$user->email] = $user->email;
+        }
+        
         $projectList = \common\models\Project::getListByUser(Yii::$app->user->id);
 
 
