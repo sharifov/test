@@ -43,6 +43,18 @@ return [
                     },
                 ],
                 [
+                    'class' => \yii\log\DbTarget::class,
+                    'levels' => ['info'],
+                    'except' => [
+                        'yii\web\HttpException:404',
+                    ],
+                    'logVars' => [],
+                    'categories' => ['info\*'],
+                    'prefix' => function () {
+                        return "[console]";
+                    },
+                ],
+                [
                     'class' => \common\components\logger\AirFileTarget::class,
                     'levels' => ['error', 'warning'],
                     'except' => [

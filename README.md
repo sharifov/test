@@ -292,6 +292,7 @@ CRONs
 10   0  *  *  *     run-this-one php /var/www/sale/yii lead/update-by-tasks
 30   0  *  *  *     run-this-one php /var/www/sale/yii db/update-airline-cabin-classes
 40   0  1  *  *     php /var/www/sale/yii kpi/calculate-salary
+*/10   *  *  *  *   php /var/www/sale/yii call/update-status
 ```
 
 DIRECTORY STRUCTURE
