@@ -75,6 +75,16 @@ return [
                         return "[frontend][$ip][$userID]";
                     },
                  ],
+                [
+                    'class' => \common\components\logger\AirFileTarget::class,
+                    'levels' => ['error', 'warning'],
+                    'except' => [
+                        'yii\web\HttpException:404',
+                    ],
+                    //'logVars' => YII_DEBUG ? ['_GET', '_POST', '_FILES', '_COOKIE', '_SESSION', '_SERVER'] : [],
+                    'logVars' => [],
+                    'logFile' => '@runtime/logs/stash.log'
+                ],
             ],
         ],
         'errorHandler' => [

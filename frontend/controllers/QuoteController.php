@@ -89,7 +89,7 @@ class QuoteController extends FController
             $gds = Yii::$app->request->post('gds', '');
 
             if($lead !== null){
-                $keyCache = sprintf('quick-search-new-%d-%s', $lead->id, $gds);
+                $keyCache = sprintf('quick-search-new-%d-%s-%s', $lead->id, $gds, $lead->generateLeadKey());
 
                 Yii::$app->cache->delete($keyCache);
 
@@ -130,15 +130,17 @@ class QuoteController extends FController
 
         $lead = Lead::findOne(['id' => $leadId]);
         if (Yii::$app->request->isPost) {
-            $attr = Yii::$app->request->post();
+            //$gds = Yii::$app->request->post('gds');
+            $gds = '';
+            $key = Yii::$app->request->post('key');
 
-            if(isset($attr['gds']) && isset($attr['key']) && $lead !== null){
-                $keyCache = sprintf('quick-search-new-%d-%d-%s-%s', $lead->id, Yii::$app->user->id, $attr['gds'], $lead->generateLeadKey());
+            if($key && $lead !== null){
+                $keyCache = sprintf('quick-search-new-%d-%s-%s', $lead->id, $gds, $lead->generateLeadKey());
                 $resultSearch = Yii::$app->cache->get($keyCache);
 
                 if($resultSearch !== false){
                     foreach ($resultSearch['results'] as $entry){
-                        if($entry['key'] == $attr['key']){
+                        if($entry['key'] == $key){
                             $transaction = Quote::getDb()->beginTransaction();
 
                             $quote = new Quote();
@@ -195,7 +197,9 @@ class QuoteController extends FController
                                                 $segment->qs_operating_airline = $segmentEntry['operatingAirline'];
                                                 $segment->qs_marketing_airline = $segmentEntry['marketingAirline'];
                                                 $segment->qs_cabin = $segmentEntry['cabin'];
-                                                $segment->qs_mileage = $segmentEntry['mileage'];
+                                                if(isset($segmentEntry['mileage'])){
+                                                    $segment->qs_mileage = $segmentEntry['mileage'];
+                                                }
                                                 if(isset($segmentEntry['marriageGroup'])){
                                                     $segment->qs_marriage_group = $segmentEntry['marriageGroup'];
                                                 }

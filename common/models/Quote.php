@@ -176,15 +176,26 @@ class Quote extends \yii\db\ActiveRecord
         $sellingPrice = $priceData['total']['selling'];
         $checkPayment = $this->check_payment;
         $processingFee = $priceData['processing_fee'];
-        $serviceFee = $this->getServiceFeePercent();
+        /* $serviceFee = $this->getServiceFeePercent();
         if($serviceFee > 0){
             $serviceFee = $serviceFee/100;
-        }
+        } */
 
         $profit += $markUp;
         $profit -= $processingFee;
 
         return round($profit,2);
+    }
+
+    public function getFinalProfit()
+    {
+        $final = $this->lead->final_profit;
+        if($this->lead->agents_processing_fee){
+            $final -= $this->lead->agents_processing_fee;
+        }else{
+            $final -= ($this->lead->adults + $this->lead->children)*Lead::AGENT_PROCESSING_FEE_PER_PAX;
+        }
+        return $final;
     }
 
     /**
@@ -234,6 +245,9 @@ class Quote extends \yii\db\ActiveRecord
      */
     public function getProcessingFee()
     {
+        if($this->lead->agents_processing_fee)
+            return $this->lead->agents_processing_fee;
+
         if(!$this->employee){
             $employee = $this->lead->employee;
             if(!$employee) return 0;

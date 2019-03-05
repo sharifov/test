@@ -306,7 +306,7 @@ $c_type_id = $comForm->c_type_id;
 
                                         if ($tk == \frontend\models\CommunicationForm::TYPE_EMAIL) {
 
-                                            if ($isAdmin && $agentParams->upp_email) {
+                                            if ($agentParams->upp_email) {
                                                 $typeList[$tk] = $itemName . ' (' . $agentParams->upp_email . ')';
                                             }
                                         }
@@ -392,7 +392,7 @@ $c_type_id = $comForm->c_type_id;
                                 'preset' => 'custom',
                                 'clientOptions' => [
                                     'height' => 500,
-                                    'fullPage' => true,
+                                    'fullPage' => false,
 
                                     'allowedContent' => true,
                                     'resize_enabled' => false,

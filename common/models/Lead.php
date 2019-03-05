@@ -58,6 +58,7 @@ use common\components\SearchService;
  * @property int $quotesCount
  * @property int $leadFlightSegmentsCount
  * @property double $agentProcessingFee
+ * @property double $agents_processing_fee
  *
  * @property Call[] $calls
  * @property Email[] $emails
@@ -200,7 +201,7 @@ class Lead extends ActiveRecord
             [['adults'], 'integer', 'min' => 1],
             [['l_answered'], 'boolean'],
             [['notes_for_experts', 'request_ip_detail'], 'string'],
-            [['final_profit', 'tips'], 'number'],
+            [['final_profit', 'tips', 'agents_processing_fee'], 'number'],
             [['uid', 'request_ip', 'offset_gmt', 'discount_id', 'description'], 'string', 'max' => 255],
             [['gid'], 'string', 'max' => 32],
             [['gid'], 'unique'],
@@ -241,6 +242,7 @@ class Lead extends ActiveRecord
             'l_answered' => 'Answered',
             'l_grade' => 'Grade',
             'bo_flight_id' => '(BO) Flight ID',
+            'agents_processing_fee' => 'Agents Processing Fee',
         ];
     }
 
@@ -764,56 +766,10 @@ class Lead extends ActiveRecord
         return self::STATUS_CLASS_LIST[$this->status] ?? 'label-default';
     }
 
-
-
-    /**
-     * @return bool
-     */
-    public function updateIpInfo()
-    {
-
-        $out = [];
-
-        if (empty($this->offset_gmt) && !empty($this->request_ip)) {
-
-            $ctx = stream_context_create(['http' =>
-                ['timeout' => 5]  //Seconds
-            ]);
-
-            try {
-                $jsonData = file_get_contents(Yii::$app->params['checkIpURL'] . $this->request_ip, false, $ctx);
-            } catch (\Throwable $throwable) {
-                $out['error'] =  $throwable->getMessage();
-                $jsonData = null;
-            }
-
-            if ($jsonData) {
-
-                $data = @json_decode($jsonData, true);
-
-                //print_r($data); exit;
-
-                if (isset($data['meta']['code']) && $data['meta']['code'] == '200') {
-                    if (isset($data['data']['datetime'])) {
-                        $this->offset_gmt = str_replace(':', '.', $data['data']['datetime']['offset_gmt']);
-                    }
-                    $this->request_ip_detail = json_encode($data['data']);
-                    //$this->update(false, ['offset_gmt', 'request_ip_detail']);
-
-                    Lead::updateAll(['offset_gmt' => $this->offset_gmt, 'request_ip_detail' => $this->request_ip_detail], ['id' => $this->id]);
-
-                    //return true;
-                }
-            }
-        }
-        return $out;
-    }
-
-
     /**
      * @return array
      */
-    public function updateIpInfo2(): array
+    public function updateIpInfo(): array
     {
 
         $out = ['error' => false, 'data' => []];
@@ -1099,7 +1055,6 @@ Sales - Kivork",
 
         return $isSend;
     }
-
 
     public function afterSave($insert, $changedAttributes)
     {
@@ -1489,6 +1444,7 @@ Sales - Kivork",
             $this->children = (int) $this->children;
             $this->infants = (int) $this->infants;
             $this->bo_flight_id = (int) $this->bo_flight_id;
+            $this->agents_processing_fee = ($this->adults + $this->children) * self::AGENT_PROCESSING_FEE_PER_PAX;
 
             return true;
         }
@@ -1571,6 +1527,7 @@ Sales - Kivork",
         }
 
         $this->agentProcessingFee = $processing_fee_per_pax * (int) ($this->adults + $this->children);
+        $this->agents_processing_fee = ($this->agents_processing_fee)?$this->agents_processing_fee:$processing_fee_per_pax * (int) ($this->adults + $this->children);
     }
 
     /**
@@ -1945,9 +1902,10 @@ Sales - Kivork",
 
     /**
      * @param array $quoteIds
+     * @param $projectContactInfo
      * @return array
      */
-    public function getEmailData2($quoteIds = []) : array
+    public function getEmailData2($quoteIds = [], $projectContactInfo) : array
     {
         $project = $this->project;
 

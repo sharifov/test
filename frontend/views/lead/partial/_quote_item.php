@@ -139,12 +139,19 @@ use yii\helpers\Url;
 			<span class="quote__creator" data-toggle="tooltip" title="" data-original-title="<?= ($model->created_by_seller) ? 'Agent' : 'Expert'?> <?= $model->employee_name?>"><i class="fa fa-user"></i>&nbsp;<strong><?= $model->employee_name?></strong></span>
 			<?php \yii\widgets\Pjax::begin(['id' => 'pjax-quote_estimation_profit-'.$model->id, 'enablePushState' => false, 'enableReplaceState' => false]); ?>
 			<?php $priceData = $model->getPricesData();	?>
+			<?php if($model->status == $model::STATUS_APPLIED && $model->lead->final_profit !== null):?>
+			<button id="quote_profit_<?= $model->id?>" data-toggle="popover" data-html="true" data-trigger="click" data-placement="top" data-container="body" title="Final Profit" class="popover-class quote__profit btn btn-info"
+			 data-content='<?= $model->getEstimationProfitText();?>'>
+				<?= '$'.$model->getFinalProfit();?>
+			</button>
+			<?php else:?>
 			<button id="quote_profit_<?= $model->id?>" data-toggle="popover" data-html="true" data-trigger="click" data-placement="top" data-container="body" title="Estimation Profit" class="popover-class quote__profit btn btn-info"
 			 data-content='<?= $model->getEstimationProfitText();?>'>
 			<?php if(isset($priceData['total'])):?>
 				<?= '$'.$model->getEstimationProfit();?>
 			<?php endif;?>
 			</button>
+			<?php endif;?>
             <?php \yii\widgets\Pjax::end(); ?>
 		</div>
 		<div class="quote__heading-right">

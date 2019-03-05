@@ -237,12 +237,50 @@ sudo php console/socket-server.php restart
 sudo php console/socket-server.php reload
 
 ```
-
-
 Check process by PORT
 ```
 sudo netstat -tulpn| grep :8080
 ```
+
+Filebeat for ELK
+-------------------
+
+Filebeat on Ubuntu:
+```
+wget -qO - https://artifacts.elastic.co/GPG-KEY-elasticsearch | sudo apt-key add -
+sudo apt-get install apt-transport-https
+echo "deb https://artifacts.elastic.co/packages/6.x/apt stable main" | sudo tee -a /etc/apt/sources.list.d/elastic-6.x.list
+sudo apt-get update && sudo apt-get install filebeat
+sudo update-rc.d filebeat defaults 95 10
+
+```
+Filebeat on CentOS:
+```
+sudo rpm --import https://packages.elastic.co/GPG-KEY-elasticsearch
+sudo nano /etc/yum.repos.d/elastic.repo
+
+        [elastic-6.x]
+        name=Elastic repository for 6.x packages
+        baseurl=https://artifacts.elastic.co/packages/6.x/yum
+        gpgcheck=1
+        gpgkey=https://artifacts.elastic.co/GPG-KEY-elasticsearch
+        enabled=1
+        autorefresh=1
+        type=rpm-md
+
+sudo yum install filebeat
+sudo chkconfig --add filebeat
+
+```
+Copy config file ```./filebeat.yml``` to ```/etc/filebeat/filebeat.yml```
+Check Filebeat
+```
+sudo service filebeat restart
+sudo service filebeat status
+sudo tail -f /var/log/filebeat/filebeat
+``` 
+
+
 
 CRONs
 -------------------

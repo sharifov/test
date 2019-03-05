@@ -262,9 +262,9 @@ class EmailController extends FController
 
                 $modelNewEmail = new Email();
                 $modelNewEmail->e_project_id = $mail->e_project_id;
-                $modelNewEmail->e_email_from = $modelNewEmail->e_type_id == Email::TYPE_INBOX ? $mail->e_email_to : $mail->e_email_from;
-                $modelNewEmail->e_email_to = $modelNewEmail->e_type_id == Email::TYPE_INBOX ? $mail->e_email_from : $mail->e_email_to;
-                $modelNewEmail->e_email_subject = 'Re: ' . $mail->e_email_subject;
+                $modelNewEmail->e_email_from = $mail->e_type_id == Email::TYPE_INBOX ? $mail->e_email_to : $mail->e_email_from;
+                $modelNewEmail->e_email_to = $mail->e_type_id == Email::TYPE_INBOX ? $mail->e_email_from : $mail->e_email_to;
+                $modelNewEmail->e_email_subject = Email::reSubject($mail->e_email_subject);
 
                 //$modelNewEmail->e_message_id = $modelNewEmail->generateMessageId();
                 // $modelNewEmail->e_email_body_html = '<p>Hi '.Html::encode($modelNewEmail->e_email_to).'!</p><blockquote>'.nl2br(Email::strip_html_tags($mail->e_email_body_html)).'</blockquote><p>The best regards, <br>'.Html::encode(Yii::$app->user->identity->username).'</p>';
