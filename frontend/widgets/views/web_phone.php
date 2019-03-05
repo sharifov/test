@@ -337,6 +337,7 @@
             .then(function (data_res) {
                 var data = data_res.data;
                 log('Got a token.');
+                console.log('Token: ' + data);
                 console.log('Token: ' + data.token);
                 // Setup Twilio.Device
                 device = new Twilio.Device(data.token, {debug: true});
