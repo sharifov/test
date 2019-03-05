@@ -83,6 +83,7 @@ class PhoneController extends FController
     {
         $phone_number = Yii::$app->request->post('phone_number');
         $project_id = Yii::$app->request->post('project_id');
+        $lead_id = Yii::$app->request->post('lead_id');
 
         $project = Project::findOne($project_id);
 
@@ -130,6 +131,7 @@ class PhoneController extends FController
             'phone_number' => $phone_number,
             'project' => $project,
             'model' => $model,
+            'lead_id' => $lead_id,
             //'dataProvider' => $dataProvider,
             'isAgent' => $isAgent,
             'fromPhoneNumbers' => $fromPhoneNumbers
@@ -153,6 +155,10 @@ class PhoneController extends FController
         $call_sid = Yii::$app->request->post('call_sid');
         $call_from = Yii::$app->request->post('call_from');
         $call_to = Yii::$app->request->post('call_to');
+        $call_status = Yii::$app->request->post('call_status', Call::CALL_STATUS_RINGING);
+
+        $lead_id = Yii::$app->request->post('lead_id');
+        $project_id = Yii::$app->request->post('project_id');
 
         $out = ['error' => '', 'data' => []];
 
@@ -165,13 +171,21 @@ class PhoneController extends FController
                 $call->c_call_sid = $call_sid;
                 $call->c_from = $call_from;
                 $call->c_to = $call_to;
-                $call->c_call_status = Call::CALL_STATUS_RINGING;
                 $call->c_created_dt = date('Y-m-d H:i:s');
                 $call->c_created_user_id = Yii::$app->user->id;
                 $call->c_call_type_id = Call::CALL_TYPE_OUT;
                 //$call->c_account_sid =
             }
 
+            if(!$call->c_lead_id && $lead_id) {
+                $call->c_lead_id = (int) $lead_id;
+            }
+
+            if(!$call->c_project_id && $project_id) {
+                $call->c_project_id = (int) $project_id;
+            }
+
+            $call->c_call_status = $call_status;
             $call->c_updated_dt = date('Y-m-d H:i:s');
 
             if(!$call->save()) {

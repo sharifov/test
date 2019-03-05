@@ -119,7 +119,8 @@
 
     const ajaxSaveCallUrl = '<?=$ajaxSaveCallUrl?>';
 
-    function createNitify(title, message, type) {
+
+    function createNotify(title, message, type) {
         new PNotify({
             title: title,
             type: type,
@@ -129,6 +130,7 @@
     }
 
     var tw_configs = {"client":"<?= $clientId;?>"};
+    var webPhoneParams = {};
 
    // "use strict";
 
@@ -309,23 +311,38 @@
     };
 
 
-    function saveDbCall(sid, from, to) {
-        console.info('sid: ' + sid + ' : ' + from + ' : ' + to);
+    function saveDbCall(call_sid, call_from, call_to, call_status) {
 
-        $.ajax({
-            type: 'post',
-            data: {'call_sid': sid, 'call_from': from, 'call_to': to},
-            url: ajaxSaveCallUrl,
-            success: function (data) {
-                console.log(data);
-                //$('#preloader').addClass('hidden');
-                //modal.find('.modal-body').html(data);
-                //modal.modal('show');
-            },
-            error: function (error) {
-                console.error(error);
-            }
-        });
+        var project_id = webPhoneParams.project_id;
+        var lead_id = webPhoneParams.lead_id;
+
+        console.info('sid: ' + call_sid + ' : ' + call_from + ' : ' + call_to + ' : ' + call_status + ' : ' + project_id + ' : ' + lead_id);
+
+        //console.warn(webPhoneParams); return false;
+
+        if(sid) {
+            $.ajax({
+                type: 'post',
+                data: {
+                    'call_sid': call_sid,
+                    'call_from': call_from,
+                    'call_to': call_to,
+                    'call_status': call_status,
+                    'lead_id': lead_id,
+                    'project_id': project_id
+                },
+                url: ajaxSaveCallUrl,
+                success: function (data) {
+                    console.log(data);
+                    //$('#preloader').addClass('hidden');
+                    //modal.find('.modal-body').html(data);
+                    //modal.modal('show');
+                },
+                error: function (error) {
+                    console.error(error);
+                }
+            });
+        }
     }
 
 
@@ -338,7 +355,8 @@
                 var data = data_res.data;
                 log('Got a token.');
                 console.log('app_sid: ' + data.app_sid);
-                console.log('Token: ' + data.token);
+                console.log('account_sid: ' + data.account_sid);
+                //console.log('Token: ' + data.token);
                 // Setup Twilio.Device
                 device = new Twilio.Device(data.token, {debug: true});
 
@@ -354,11 +372,11 @@
 
                 device.on('connect', function (conn) {
                     log('Successfully established call!');
-                    console.info(conn);
+                    console.warn(conn);
                     //console.info(conn.parameters);
                     //console.log(conn.parameters.CallSid);
 
-                    saveDbCall(conn.parameters.CallSid, conn.message.FromAgentPhone, conn.message.To);
+                    saveDbCall(conn.parameters.CallSid, conn.message.FromAgentPhone, conn.message.To, 'queued');
 
                     //document.getElementById('button-call').style.display = 'none';
                     document.getElementById('button-hangup').style.display = 'inline';
@@ -367,9 +385,11 @@
                 });
 
                 device.on('disconnect', function (conn) {
-                    log('Call ended.');
-                    createNitify('Call ended', 'Call ended', 'warning');
-                    console.log(conn);
+                    log('Call ended');
+                    createNotify('Call ended', 'Call ended', 'warning');
+                    console.warn(conn);
+
+                    saveDbCall(conn.parameters.CallSid, conn.message.FromAgentPhone, conn.message.To, 'completed');
 
                     //document.getElementById('button-call').style.display = 'inline';
                     document.getElementById('button-hangup').style.display = 'none';
@@ -382,7 +402,7 @@
                 device.on('incoming', function (conn) {
                     connection = conn;
                     log('Incoming connection from ' + conn.parameters.From);
-                    createNitify('Incoming connection', 'Incoming connection from ' + conn.parameters.From, 'success');
+                    createNotify('Incoming connection', 'Incoming connection from ' + conn.parameters.From, 'success');
 
                     var archEnemyPhoneNumber = tw_configs.client;
                     //document.getElementById('call-controls').style.display = 'none';
@@ -405,7 +425,9 @@
                 device.on('cancel', function (conn) {
                     connection = conn;
                     log('Cancel call');
-                    createNitify('Cancel call', 'Cancel call', 'warning');
+                    createNotify('Cancel call', 'Cancel call', 'warning');
+                    saveDbCall(conn.parameters.CallSid, conn.message.FromAgentPhone, conn.message.To, 'canceled');
+
                     //document.getElementById('call-controls').style.display = 'block';
                     document.getElementById('call-controls2').style.display = 'none';
                 });
@@ -423,7 +445,7 @@
             .catch(function (err) {
                 console.log(err);
                 log('Could not get a token from server!');
-                createNitify('Call Token error!', 'Could not get a token from server!', 'error');
+                createNotify('Call Token error!', 'Could not get a token from server!', 'error');
             });
     }
 
@@ -434,8 +456,11 @@
     //});
 
 
-    function webCall(phone_from, phone_to) {
-        var params = {To: phone_to, FromAgentPhone: phone_from};
+    function webCall(phone_from, phone_to, project_id, lead_id) {
+        var params = {'To': phone_to, 'FromAgentPhone': phone_from, 'project_id': project_id, 'lead_id': lead_id};
+        webPhoneParams = params;
+
+        //console.log(params); return false;
 
         if (device) {
 
@@ -443,7 +468,7 @@
             $('#web-call-to-number').text(params.To);
 
             console.log('Calling ' + params.To + '...');
-            createNitify('Calling', 'Calling ' + params.To + '...', 'success');
+            createNotify('Calling', 'Calling ' + params.To + '...', 'success');
             device.connect(params);
         }
     }
@@ -532,6 +557,8 @@ $js = <<<JS
     $('.call-phone').on('click', function(e) {
         var phone_number = $(this).data('phone');
         var project_id = $(this).data('project-id');
+        var lead_id = $(this).data('lead-id');
+        
         //alert(phoneNumber);
         
         e.preventDefault();
@@ -539,7 +566,7 @@ $js = <<<JS
         $('#web-phone-dial-modal .modal-body').html('<div style="text-align:center"><img width="200px" src="https://loading.io/spinners/gear-set/index.triple-gears-loading-icon.svg"></div>');
         $('#web-phone-dial-modal').modal();
         
-        $.post(ajaxPhoneDialUrl, {'phone_number': phone_number, 'project_id': project_id},
+        $.post(ajaxPhoneDialUrl, {'phone_number': phone_number, 'project_id': project_id, 'lead_id': lead_id},
             function (data) {
                 $('#web-phone-dial-modal .modal-body').html(data);
             }
@@ -550,6 +577,11 @@ $js = <<<JS
         e.preventDefault();
         var phone_to = $('#call-to-number').val();
         var phone_from = $('#call-from-number').val();
+        
+        var project_id = $('#call-project-id').val();
+        var lead_id = $('#call-lead-id').val();
+        
+        
         $('#web-phone-dial-modal').modal('hide');
         //alert(phone_from + ' - ' + phone_to);
         
@@ -557,7 +589,7 @@ $js = <<<JS
         $('#web-phone-widget').slideDown();
         $('.fabs2').hide();
         
-        webCall(phone_from, phone_to);
+        webCall(phone_from, phone_to, project_id, lead_id);
     });
     
     
