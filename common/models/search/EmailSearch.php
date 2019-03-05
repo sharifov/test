@@ -158,7 +158,7 @@ class EmailSearch extends Email
 
         if(isset($params['EmailSearch']['user_id']) && $params['EmailSearch']['user_id'] > 0) {
             $subQuery = UserProjectParams::find()->select(['upp_email'])->where(['upp_user_id' => $params['EmailSearch']['user_id']])->andWhere(['!=', 'upp_email', '']);
-            $query->andWhere(['or', ['IN', 'e_email_from', $subQuery], ['and', ['IN', 'e_email_to', $subQuery], ['e_type_id' => Email::TYPE_INBOX]]]);
+            $query->andWhere(['or', ['=', 'e_created_user_id', $params['EmailSearch']['user_id']], ['IN', 'e_email_from', $subQuery], ['and', ['IN', 'e_email_to', $subQuery], ['e_type_id' => Email::TYPE_INBOX]]]);
         }
 
 
