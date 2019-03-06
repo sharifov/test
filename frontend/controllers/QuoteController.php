@@ -124,7 +124,7 @@ class QuoteController extends FController
     {
         Yii::$app->response->format = Response::FORMAT_JSON;
         $result = [
-            'errors' => [],
+            'error' => '',
             'status' => false
         ];
 
@@ -134,7 +134,7 @@ class QuoteController extends FController
             $gds = '';
             $key = Yii::$app->request->post('key');
 
-            if($key && $lead !== null){
+            if($key && $lead){
                 $keyCache = sprintf('quick-search-new-%d-%s-%s', $lead->id, $gds, $lead->generateLeadKey());
                 $resultSearch = Yii::$app->cache->get($keyCache);
 
@@ -159,6 +159,7 @@ class QuoteController extends FController
                             $quote->employee_name = Yii::$app->user->identity->username;
 
                             if (!$quote->save()) {
+                                $result['error'] = VarDumper::dumpAsString($quote->errors);
                                 Yii::error(VarDumper::dumpAsString($quote->getErrors()), 'QuoteController:create-quote-from-search:quote:save');
                                 $transaction->rollBack();
                                 return $result;
@@ -169,6 +170,7 @@ class QuoteController extends FController
                                         $trip->qt_duration = $tripEntry['duration'];
 
                                         if(!$trip->validate()){
+                                            $result['error'] = VarDumper::dumpAsString($trip->errors);
                                             Yii::error(VarDumper::dumpAsString($entry)."\n".VarDumper::dumpAsString($trip->getErrors()), 'QuoteController:create-quote-from-search:trip:save');
                                             $transaction->rollBack();
                                             return $result;
@@ -214,6 +216,7 @@ class QuoteController extends FController
                                                 $keys[] = $segment->qs_key;
 
                                                 if(!$segment->validate()){
+                                                    $result['error'] = VarDumper::dumpAsString($segment->errors);
                                                     Yii::error(VarDumper::dumpAsString($entry)."\n".VarDumper::dumpAsString($segment->getErrors()), 'QuoteController:create-quote-from-search:segment:save');
                                                     $transaction->rollBack();
                                                     return $result;
@@ -236,6 +239,7 @@ class QuoteController extends FController
                                                             $stop->qss_equipment = $stopEntry['equipment'];
                                                         }
                                                         if(!$stop->validate()){
+                                                            $result['error'] = VarDumper::dumpAsString($stop->errors);
                                                             Yii::error(VarDumper::dumpAsString($entry)."\n".VarDumper::dumpAsString($stop->getErrors()), 'QuoteController:create-quote-from-search:stop:save');
                                                             $transaction->rollBack();
                                                             return $result;
@@ -267,7 +271,9 @@ class QuoteController extends FController
                                                             $baggage->qsb_allow_max_size = $baggageEntry['allowMaxSize'];
                                                         }
                                                         if(!$baggage->validate()){
+                                                            $result['error'] = VarDumper::dumpAsString($baggage->errors);
                                                             Yii::error(VarDumper::dumpAsString($entry)."\n".VarDumper::dumpAsString($baggage->getErrors()), 'QuoteController:create-quote-from-search:baggage:save');
+
                                                             $transaction->rollBack();
                                                             return $result;
                                                         }
@@ -296,6 +302,7 @@ class QuoteController extends FController
                                                                     $baggageCharge->qsbc_max_size = $baggageEntryCharge['maxSize'];
                                                                 }
                                                                 if(!$baggageCharge->validate()){
+                                                                    $result['error'] = VarDumper::dumpAsString($baggageCharge->errors);
                                                                     Yii::error(VarDumper::dumpAsString($entry)."\n".VarDumper::dumpAsString($baggageCharge->getErrors()), 'QuoteController:create-quote-from-search:baggage_charge:save');
                                                                     $transaction->rollBack();
                                                                     return $result;
@@ -310,6 +317,7 @@ class QuoteController extends FController
 
                                         $trip->qt_key = implode('|', $keys);
                                         if(!$trip->save()){
+                                            $result['error'] = VarDumper::dumpAsString($trip->errors);
                                             Yii::error(VarDumper::dumpAsString($entry)."\n".VarDumper::dumpAsString($trip->getErrors()), 'QuoteController:create-quote-from-search:trip:savekey');
                                             $transaction->rollBack();
                                             return $result;
@@ -330,7 +338,8 @@ class QuoteController extends FController
                                         $price->selling += $price->service_fee;
 
                                         if(!$price->validate()){
-                                            Yii::error(VarDumper::dumpAsString($entry)."\n".VarDumper::dumpAsString($price->getErrors()), 'QuoteController:create-quote-from-search:baggage:save');
+                                            $result['error'] = VarDumper::dumpAsString($price->errors);
+                                            Yii::error(VarDumper::dumpAsString($entry)."\n".VarDumper::dumpAsString($price->getErrors()), 'QuoteController:create-quote-from-search:price:save');
                                             $transaction->rollBack();
                                             return $result;
                                         }
@@ -348,9 +357,11 @@ class QuoteController extends FController
                     }
 
 
-                }else{
-                    $result['errors'][] = 'Search result not found';
+                } else{
+                    $result['error'] = 'Not found Quote from Search result from Cache. Please update search request!';
                 }
+            } else {
+                $result['error'] = 'Key or Lead is empty!';
             }
 
         }
