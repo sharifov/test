@@ -30,8 +30,8 @@ class CallBox extends \yii\bootstrap\Widget
         $user_id = \Yii::$app->user->id;
         $newCount = 0; //\common\models\Notifications::findNewCount($user_id);
         //$model = \common\models\Notifications::findNew($user_id);
-
-        $sipExist = \common\models\UserProjectParams::find()->where(['upp_user_id' => $user_id])->andWhere(['AND', ['IS NOT', 'upp_tw_sip_id', null], ['!=', 'upp_tw_sip_id', '']])->one();
+        $userModel = \common\models\Employee::findOne($user_id);
+        $sipExist = $sipExist = ($userModel->userProfile->up_sip && strlen($userModel->userProfile->up_sip) > 2); // \common\models\UserProjectParams::find()->where(['upp_user_id' => $user_id])->andWhere(['AND', ['IS NOT', 'upp_tw_sip_id', null], ['!=', 'upp_tw_sip_id', '']])->one();
 
         //VarDumper::dump($sipExist->attributes, 10, true);
 

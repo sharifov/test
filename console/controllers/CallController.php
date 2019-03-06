@@ -3,6 +3,8 @@
 namespace console\controllers;
 
 use common\models\Call;
+use common\models\Employee;
+use common\models\UserProfile;
 use yii\console\Controller;
 use Yii;
 use yii\helpers\Console;
@@ -50,4 +52,38 @@ class CallController extends Controller
         echo $this->ansiFormat(PHP_EOL . 'Finish update' . PHP_EOL, Console::FG_GREEN);
         return 0;
     }
+
+
+    public function actionUsers()
+    {
+        $users = Employee::find()->orderBy(['id' => SORT_ASC])->all();
+        //VarDumper::dump(count($users)); exit;
+        $items = [];
+        $dtNow = new \DateTime('now');
+        $dateFormatNow = $dtNow->format("Y-m-d H:i:s");
+        if(count($users)) {
+            foreach ($users AS $user) {
+                $upps = $user->userProjectParams;
+                if(count($upps)) {
+                    foreach ($upps AS $upp) {
+                        if(!isset($items[$user->id]) && $upp->upp_tw_sip_id && (strlen($upp->upp_tw_sip_id) > 2)) {
+                            $items[$user->id] = $upp->upp_tw_sip_id;
+                            if(!$user->userProfile) {
+                                $userProfile = new UserProfile();
+                                $userProfile->up_call_type_id = 2;
+                                $userProfile->up_user_id = $user->id;
+                                $userProfile->save();
+                                $user = Employee::findOne($user->id);
+                            }
+                            $user->userProfile->up_sip = $upp->upp_tw_sip_id;
+                            $user->userProfile->up_updated_dt = $dateFormatNow;
+                            $user->userProfile->save();
+                        }
+                    }
+                }
+            }
+        }
+        VarDumper::dump($items); exit;
+    }
+
 }

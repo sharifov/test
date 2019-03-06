@@ -687,12 +687,12 @@ class LeadController extends FController
                     if($lead->project_id) {
                         $upp = UserProjectParams::find()->where(['upp_project_id' => $lead->project_id, 'upp_user_id' => Yii::$app->user->id])->one();
                     }
-
-                    if($upp) {
+                    $userModel = Employee::findOne(Yii::$app->user->id);
+                    if($upp && $userModel) {
 
                         if (!$upp->upp_tw_phone_number) {
                             $comForm->addError('c_sms_preview', 'Config Error: Not found TW phone number for Project Id: ' . $lead->project_id . ', agent: "' . Yii::$app->user->identity->username . '"');
-                        } elseif (!$upp->upp_tw_sip_id) {
+                        } elseif (!$userModel->userProfile->up_sip) {
                             $comForm->addError('c_sms_preview', 'Config Error: Not found TW SIP account for Project Id: ' . $lead->project_id . ', agent: "' . Yii::$app->user->identity->username . '"');
                         } else {
 
@@ -735,9 +735,9 @@ class LeadController extends FController
 
                             if($comForm->c_voice_status == 1) {
 
-                                $response = $communication->callToPhone($lead->project_id, 'sip:' . $upp->upp_tw_sip_id, $upp->upp_tw_phone_number, $comForm->c_phone_number, Yii::$app->user->identity->username);
+                                $response = $communication->callToPhone($lead->project_id, 'sip:' . $userModel->userProfile->up_sip, $upp->upp_tw_phone_number, $comForm->c_phone_number, Yii::$app->user->identity->username);
 
-                                Yii::info('ProjectId: '.$lead->project_id.', sip:' . $upp->upp_tw_sip_id.', phoneFrom:'.$upp->upp_tw_phone_number.', phoneTo:'.$comForm->c_phone_number." Logs: \r\n".VarDumper::dumpAsString($response, 10), 'info/LeadController:callToPhone');
+                                Yii::info('ProjectId: '.$lead->project_id.', sip:' . $userModel->userProfile->up_sip.', phoneFrom:'.$upp->upp_tw_phone_number.', phoneTo:'.$comForm->c_phone_number." Logs: \r\n".VarDumper::dumpAsString($response, 10), 'info/LeadController:callToPhone');
 
 
                                 if ($response && isset($response['data']['call'])) {
@@ -756,7 +756,7 @@ class LeadController extends FController
 
                                     $call->c_to = $comForm->c_phone_number; //$dataCall['to'];
                                     $call->c_from = $upp->upp_tw_phone_number; //$dataCall['from'];
-                                    $call->c_sip = $upp->upp_tw_sip_id;
+                                    $call->c_sip = $userModel->userProfile->up_sip;
                                     $call->c_caller_name = $dataCall['from'];
                                     $call->c_call_status = $dataCall['status'];
                                     $call->c_api_version = $dataCall['api_version'];

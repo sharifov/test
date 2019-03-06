@@ -51,7 +51,7 @@ if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
 
         <?//= $form->field($model, 'upp_tw_phone_number')->textInput(['maxlength' => true]) ?>
 
-        <?= $form->field($model, 'upp_tw_sip_id')->textInput(['maxlength' => true]) ?>
+        <?// = $form->field($model, 'upp_tw_sip_id')->textInput(['maxlength' => true]) ?>
 
 
         <div class="form-group">

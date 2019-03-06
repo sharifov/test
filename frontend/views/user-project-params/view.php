@@ -47,7 +47,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'upp_email:email',
             'upp_phone_number',
             'upp_tw_phone_number',
-            'upp_tw_sip_id',
+            //'upp_tw_sip_id',
             [
                 'attribute' => 'upp_updated_dt',
                 'value' => function(\common\models\UserProjectParams $model) {

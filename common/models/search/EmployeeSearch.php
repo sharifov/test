@@ -5,6 +5,7 @@ namespace common\models\search;
 use common\models\ProjectEmployeeAccess;
 use common\models\UserConnection;
 use common\models\UserGroupAssign;
+use common\models\UserProfile;
 use common\models\UserProjectParams;
 use Yii;
 use yii\base\Model;
@@ -22,6 +23,8 @@ class EmployeeSearch extends Employee
     public $user_project_id;
     public $user_params_project_id;
 
+    public $user_call_type_id;
+    public $user_sip;
 
     public $datetime_start;
     public $datetime_end;
@@ -30,15 +33,14 @@ class EmployeeSearch extends Employee
     public $online;
 
 
-
     /**
      * {@inheritdoc}
      */
     public function rules()
     {
         return [
-            [['id', 'status', 'acl_rules_activated', 'supervision_id', 'user_group_id', 'user_project_id', 'user_params_project_id', 'online'], 'integer'],
-            [['username', 'full_name', 'auth_key', 'password_hash', 'password_reset_token', 'email', 'last_activity', 'created_at', 'updated_at'], 'safe'],
+            [['id', 'status', 'acl_rules_activated', 'supervision_id', 'user_group_id', 'user_project_id', 'user_params_project_id', 'online', 'user_call_type_id'], 'integer'],
+            [['username', 'full_name', 'auth_key', 'password_hash', 'password_reset_token', 'email', 'last_activity', 'created_at', 'updated_at', 'user_sip'], 'safe'],
             [['datetime_start', 'datetime_end'], 'safe'],
             [['date_range'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
         ];
@@ -68,7 +70,7 @@ class EmployeeSearch extends Employee
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> ['defaultOrder' => ['id' => SORT_DESC]],
+            'sort' => ['defaultOrder' => ['id' => SORT_DESC]],
             'pagination' => [
                 'pageSize' => 40,
             ],
@@ -92,34 +94,44 @@ class EmployeeSearch extends Employee
             'updated_at' => $this->updated_at
         ]);
 
-        if($this->user_group_id > 0) {
+        if ($this->user_group_id > 0) {
             $subQuery = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->where(['=', 'ugs_group_id', $this->user_group_id]);
             $query->andWhere(['IN', 'employees.id', $subQuery]);
         }
 
-        if($this->user_params_project_id > 0) {
+        if ($this->user_params_project_id > 0) {
             $subQuery = UserProjectParams::find()->select(['DISTINCT(upp_user_id)'])->where(['=', 'upp_project_id', $this->user_params_project_id]);
             $query->andWhere(['IN', 'employees.id', $subQuery]);
         }
 
-        if($this->user_project_id > 0) {
+
+        if ($this->user_call_type_id > 0) {
+            $subQuery = UserProfile::find()->select(['DISTINCT(up_user_id)'])->where(['=', 'up_call_type_id', $this->user_call_type_id]);
+            $query->andWhere(['IN', 'employees.id', $subQuery]);
+        }
+
+        if (strlen($this->user_sip) > 0) {
+            $subQuery = UserProfile::find()->select(['DISTINCT(up_user_id)'])->where(['like', 'up_sip', $this->user_sip]);
+            $query->andWhere(['IN', 'employees.id', $subQuery]);
+        }
+
+        if ($this->user_project_id > 0) {
             $subQuery = ProjectEmployeeAccess::find()->select(['DISTINCT(employee_id)'])->where(['=', 'project_id', $this->user_project_id]);
             $query->andWhere(['IN', 'employees.id', $subQuery]);
         }
 
-        if($this->supervision_id > 0) {
+        if ($this->supervision_id > 0) {
             $subQuery1 = UserGroupAssign::find()->select(['ugs_group_id'])->where(['ugs_user_id' => $this->supervision_id]);
             $subQuery = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->where(['IN', 'ugs_group_id', $subQuery1]);
             $query->andWhere(['IN', 'employees.id', $subQuery]);
         }
 
 
-
-        if($this->online > 0) {
-            if($this->online == 1) {
+        if ($this->online > 0) {
+            if ($this->online == 1) {
                 $subQuery = UserConnection::find()->select(['DISTINCT(uc_user_id)']);
                 $query->andWhere(['IN', 'employees.id', $subQuery]);
-            } elseif($this->online == 2) {
+            } elseif ($this->online == 2) {
                 $subQuery = UserConnection::find()->select(['DISTINCT(uc_user_id)']);
                 $query->andWhere(['NOT IN', 'employees.id', $subQuery]);
             }
@@ -151,7 +163,7 @@ class EmployeeSearch extends Employee
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> ['defaultOrder' => ['id' => SORT_DESC]],
+            'sort' => ['defaultOrder' => ['id' => SORT_DESC]],
             'pagination' => [
                 'pageSize' => 30,
             ],
@@ -175,12 +187,12 @@ class EmployeeSearch extends Employee
             'updated_at' => $this->updated_at
         ]);
 
-        if($this->user_group_id > 0) {
+        if ($this->user_group_id > 0) {
             $subQuery = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->where(['=', 'ugs_group_id', $this->user_group_id]);
             $query->andWhere(['IN', 'employees.id', $subQuery]);
         }
 
-        if($this->supervision_id > 0) {
+        if ($this->supervision_id > 0) {
             $subQuery1 = UserGroupAssign::find()->select(['ugs_group_id'])->where(['ugs_user_id' => $this->supervision_id]);
             $subQuery = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->where(['IN', 'ugs_group_id', $subQuery1]);
             $query->andWhere(['IN', 'employees.id', $subQuery]);
@@ -201,7 +213,6 @@ class EmployeeSearch extends Employee
     }
 
 
-
     public function searchAgentLeads($params)
     {
         $this->load($params);
@@ -209,15 +220,15 @@ class EmployeeSearch extends Employee
         $query = new Query();
         $query->select(['e.id', 'e.username']);
 
-        $query->addSelect(['(SELECT COUNT(*) FROM leads WHERE DATE(created)=DATE(now()) AND employee_id=e.id AND status='.Lead::STATUS_SOLD.') AS st_sold ']);
-        $query->addSelect(['(SELECT COUNT(*) FROM leads WHERE DATE(created)=DATE(now()) AND employee_id=e.id AND status='.Lead::STATUS_ON_HOLD.') AS st_on_hold ']);
-        $query->addSelect(['(SELECT COUNT(*) FROM leads WHERE DATE(created)=DATE(now()) AND employee_id=e.id AND status='.Lead::STATUS_PROCESSING.') AS st_processing ']);
-        $query->addSelect(['(SELECT COUNT(*) FROM leads WHERE DATE(created)=DATE(now()) AND employee_id=e.id AND status='.Lead::STATUS_FOLLOW_UP.') AS st_follow_up ']);
-        $query->addSelect(['(SELECT COUNT(*) FROM leads WHERE DATE(created)=DATE(now()) AND employee_id=e.id AND status='.Lead::STATUS_TRASH.') AS st_trash ']);
-        $query->addSelect(['(SELECT COUNT(*) FROM leads WHERE DATE(created)=DATE(now()) AND employee_id=e.id AND status='.Lead::STATUS_REJECT.') AS st_reject ']);
-        $query->addSelect(['(SELECT COUNT(*) FROM leads WHERE DATE(created)=DATE(now()) AND employee_id=e.id AND status='.Lead::STATUS_BOOKED.') AS st_booked ']);
-        $query->addSelect(['(SELECT COUNT(*) FROM leads WHERE DATE(created)=DATE(now()) AND employee_id=e.id AND status='.Lead::STATUS_SNOOZE.') AS st_snooze ']);
-        $query->addSelect(['(SELECT COUNT(*) FROM leads WHERE DATE(created)=DATE(now()) AND employee_id=e.id AND status='.Lead::STATUS_PENDING.') AS st_pending ']);
+        $query->addSelect(['(SELECT COUNT(*) FROM leads WHERE DATE(created)=DATE(now()) AND employee_id=e.id AND status=' . Lead::STATUS_SOLD . ') AS st_sold ']);
+        $query->addSelect(['(SELECT COUNT(*) FROM leads WHERE DATE(created)=DATE(now()) AND employee_id=e.id AND status=' . Lead::STATUS_ON_HOLD . ') AS st_on_hold ']);
+        $query->addSelect(['(SELECT COUNT(*) FROM leads WHERE DATE(created)=DATE(now()) AND employee_id=e.id AND status=' . Lead::STATUS_PROCESSING . ') AS st_processing ']);
+        $query->addSelect(['(SELECT COUNT(*) FROM leads WHERE DATE(created)=DATE(now()) AND employee_id=e.id AND status=' . Lead::STATUS_FOLLOW_UP . ') AS st_follow_up ']);
+        $query->addSelect(['(SELECT COUNT(*) FROM leads WHERE DATE(created)=DATE(now()) AND employee_id=e.id AND status=' . Lead::STATUS_TRASH . ') AS st_trash ']);
+        $query->addSelect(['(SELECT COUNT(*) FROM leads WHERE DATE(created)=DATE(now()) AND employee_id=e.id AND status=' . Lead::STATUS_REJECT . ') AS st_reject ']);
+        $query->addSelect(['(SELECT COUNT(*) FROM leads WHERE DATE(created)=DATE(now()) AND employee_id=e.id AND status=' . Lead::STATUS_BOOKED . ') AS st_booked ']);
+        $query->addSelect(['(SELECT COUNT(*) FROM leads WHERE DATE(created)=DATE(now()) AND employee_id=e.id AND status=' . Lead::STATUS_SNOOZE . ') AS st_snooze ']);
+        $query->addSelect(['(SELECT COUNT(*) FROM leads WHERE DATE(created)=DATE(now()) AND employee_id=e.id AND status=' . Lead::STATUS_PENDING . ') AS st_pending ']);
         $query->addSelect(['(SELECT COUNT(*) FROM leads WHERE DATE(created)=DATE(now()) AND employee_id=e.id) AS all_statuses']);
 
 

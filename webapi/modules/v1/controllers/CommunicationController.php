@@ -385,9 +385,9 @@ class CommunicationController extends ApiBaseController
                         }
                     }
 
-                    if(!$call_sip_id) {
+                    /*if(!$call_sip_id) {
                         $call_sip_id = $upp->upp_tw_sip_id;
-                    }
+                    }*/
 
                     if($user->userProfile && $user->userProfile->up_call_type_id == 2) {
                         $call_agent_username[] = 'seller'.$user->id;
@@ -441,7 +441,7 @@ class CommunicationController extends ApiBaseController
                             if($upp) {
 
                                 $call_user_id = (int) $upp->upp_user_id;
-                                $call_sip_id = $upp->upp_tw_sip_id;
+                                $call_sip_id = $employeeModel->userProfile->up_sip; //$upp->upp_tw_sip_id;
                                 if($upp->upp_tw_phone_number) {
                                     $agent_phone_number = $upp->upp_tw_phone_number;
                                 }

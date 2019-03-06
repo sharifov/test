@@ -173,7 +173,8 @@ if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
                                 $str.='<td>'.Html::encode($projectParam->upp_project_id).'</td>';
                                 $str.='<td>'.Html::encode($projectParam->uppProject->name).'</td>';
                                 $str.='<td>'.Html::encode($projectParam->upp_tw_phone_number).'</td>';
-                                $str.='<td>'.Html::encode($projectParam->upp_tw_sip_id).'</td>';
+                                $str.='<td>'.Html::encode($model->userProfile->up_sip).'</td>';
+                                //$str.='<td>'.Html::encode($projectParam->upp_tw_sip_id).'</td>';
                                 //$projectsValueArr[] = Html::tag('span', Html::tag('i', '', ['class' => 'fa fa-list']) . ' ' . Html::encode($project->name), ['class' => 'label label-default']);
                                 $str.='</tr>';
                             }
