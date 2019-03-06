@@ -298,7 +298,7 @@ $c_type_id = $comForm->c_type_id;
                             <?php
                                 $typeList = [];
                                 $agentParams = \common\models\UserProjectParams::find()->where(['upp_project_id' => $leadForm->getLead()->project_id, 'upp_user_id' => Yii::$app->user->id])->limit(1)->one();
-
+                                $userModel = \common\models\Employee::findOne(Yii::$app->user->id);
                                 //\yii\helpers\VarDumper::dump($leadForm->getLead()->id, 10, true); exit;
 
                                 if($agentParams) {
@@ -321,8 +321,8 @@ $c_type_id = $comForm->c_type_id;
                                         if ($tk == \frontend\models\CommunicationForm::TYPE_VOICE) {
 
 
-                                            if ($agentParams->upp_tw_sip_id) {
-                                                $typeList[$tk] = $itemName . ($isAdmin ? ' (' . $agentParams->upp_tw_sip_id . ')' : '');
+                                            if ($userModel->userProfile->up_sip) {
+                                                $typeList[$tk] = $itemName . ($isAdmin ? ' (' . $userModel->userProfile->up_sip . ')' : '');
                                             }
                                         }
                                     }

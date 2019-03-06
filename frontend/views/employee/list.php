@@ -228,7 +228,27 @@ if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
                     'format' => 'raw',
                     'filter' => $projectList
                 ],*/
-
+                [
+                    'label' => 'Call type',
+                    'attribute' => 'user_call_type_id',
+                    'value' => function (\common\models\Employee $model) {
+                        if($model->userProfile && $model->userProfile->up_call_type_id && $model->userProfile->up_call_type_id > 0) {
+                            return ($model->userProfile->up_call_type_id === 1) ? 'SIP' : 'WEB';
+                        } else {
+                            return 'Off';
+                        }
+                    },
+                    'format' => 'raw',
+                    'filter' => [0=>'Off', 1 => 'Sip', 2=> 'Web']
+                ],
+                [
+                    'label' => 'Sip',
+                    'attribute' => 'user_sip',
+                    'value' => function (\common\models\Employee $model) {
+                        return ($model->userProfile->up_sip) ?? '';
+                    },
+                    'format' => 'raw'
+                ],
                 [
                     'label' => 'Projects Params',
                     'attribute' => 'user_params_project_id',
@@ -246,7 +266,8 @@ if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
                                 $str.='<td>'.Html::encode($projectParam->upp_project_id).'</td>';
                                 $str.='<td>'.Html::encode($projectParam->uppProject->name).'</td>';
                                 $str.='<td>'.Html::encode($projectParam->upp_tw_phone_number).'</td>';
-                                $str.='<td>'.Html::encode($projectParam->upp_tw_sip_id).'</td>';
+                                //$str.='<td>'.Html::encode($projectParam->upp_tw_sip_id).'</td>';
+                                //$str.='<td>'.Html::encode($model->userProfile->up_sip ?? null).'</td>';
                                 //$projectsValueArr[] = Html::tag('span', Html::tag('i', '', ['class' => 'fa fa-list']) . ' ' . Html::encode($project->name), ['class' => 'label label-default']);
                                 $str.='</tr>';
                             }

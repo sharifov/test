@@ -76,8 +76,8 @@ $isCoach = Yii::$app->authManager->getAssignment('coach', Yii::$app->user->id);
             //}
 
 
-
-            $sipExist = \common\models\UserProjectParams::find()->where(['upp_user_id' => Yii::$app->user->id])->andWhere(['AND', ['IS NOT', 'upp_tw_sip_id', null], ['<>', 'upp_tw_sip_id', '']])->exists();
+            $userModel = \common\models\Employee::findOne(Yii::$app->user->id);
+            $sipExist = ($userModel->userProfile->up_sip && strlen($userModel->userProfile->up_sip) > 2); //\common\models\UserProjectParams::find()->where(['upp_user_id' => Yii::$app->user->id])->andWhere(['AND', ['IS NOT', 'upp_tw_sip_id', null], ['<>', 'upp_tw_sip_id', '']])->exists();
             $smsExist = \common\models\UserProjectParams::find()->where(['upp_user_id' => Yii::$app->user->id])->andWhere(['AND', ['IS NOT', 'upp_tw_phone_number', null], ['<>', 'upp_tw_phone_number', '']])->exists();
 
             if($smsExist) {
