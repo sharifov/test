@@ -378,11 +378,22 @@ class CommunicationController extends ApiBaseController
 
 
                 if($upp && $user = $upp->uppUser) {
+
+                    if($user->userProfile) {
+                        if($user->userProfile->up_sip) {
+                            $call_sip_id = $user->userProfile->up_sip;
+                        }
+                    }
+
+                    if(!$call_sip_id) {
+                        $call_sip_id = $upp->upp_tw_sip_id;
+                    }
+
                     if($user->userProfile && $user->userProfile->up_call_type_id == 2) {
                         $call_agent_username[] = 'seller'.$user->id;
                     }
+
                     $call_user_id = (int) $upp->upp_user_id;
-                    $call_sip_id = $upp->upp_tw_sip_id;
                     $call_project_id = (int) $upp->upp_project_id;
 
                     //Yii::info('Detect - User ('.$user->username.') Id: '.$user->id.', phone: ' . $agent_phone_number, 'info\API:CommunicationController:actionVoice:UserProjectParams - 1');
