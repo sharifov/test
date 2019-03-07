@@ -482,16 +482,20 @@ JS;
 
 
             <?php if (!$leadForm->getLead()->isNewRecord) : ?>
-                <?= $this->render('communication/lead_communication', [
-                        'leadForm'      => $leadForm,
-                        'previewEmailForm' => $previewEmailForm,
-                        'previewSmsForm' => $previewSmsForm,
-                        'comForm'       => $comForm,
-                        'leadId'        => $lead->id,
-                        'dataProvider'  => $dataProviderCommunication,
-                        'isAdmin'       => $is_admin
-                    ]);
-                ?>
+                <?php if (!$is_admin && $leadForm->mode === $leadForm::VIEW_MODE) : ?>
+                    <div class="alert alert-warning" role="alert">You do not have access to view Communication messages.</div>
+                <?php else: ?>
+                    <?= $this->render('communication/lead_communication', [
+                            'leadForm'      => $leadForm,
+                            'previewEmailForm' => $previewEmailForm,
+                            'previewSmsForm' => $previewSmsForm,
+                            'comForm'       => $comForm,
+                            'leadId'        => $lead->id,
+                            'dataProvider'  => $dataProviderCommunication,
+                            'isAdmin'       => $is_admin
+                        ]);
+                    ?>
+                <?php endif;?>
             <?php endif;?>
 
 
