@@ -77,14 +77,16 @@ $isCoach = Yii::$app->authManager->getAssignment('coach', Yii::$app->user->id);
 
 
             $userModel = \common\models\Employee::findOne(Yii::$app->user->id);
-            $sipExist = ($userModel->userProfile->up_sip && strlen($userModel->userProfile->up_sip) > 2); //\common\models\UserProjectParams::find()->where(['upp_user_id' => Yii::$app->user->id])->andWhere(['AND', ['IS NOT', 'upp_tw_sip_id', null], ['<>', 'upp_tw_sip_id', '']])->exists();
+            //$sipExist = ($userModel->userProfile->up_sip && strlen($userModel->userProfile->up_sip) > 2);
+            // //\common\models\UserProjectParams::find()->where(['upp_user_id' => Yii::$app->user->id])->andWhere(['AND', ['IS NOT', 'upp_tw_sip_id', null], ['<>', 'upp_tw_sip_id', '']])->exists();
+
             $smsExist = \common\models\UserProjectParams::find()->where(['upp_user_id' => Yii::$app->user->id])->andWhere(['AND', ['IS NOT', 'upp_tw_phone_number', null], ['<>', 'upp_tw_phone_number', '']])->exists();
 
             if($smsExist) {
                 $menuItems[] = ['label' => 'My SMS <span id="sms-inbox-queue" class="label-info label pull-right"></span> ', 'url' => ['/sms/list'], 'icon' => 'comments'];
             }
 
-            if($sipExist) {
+            if($userModel->userProfile && $userModel->userProfile->up_call_type_id != \common\models\UserProfile::CALL_TYPE_OFF) {
                 $menuItems[] = ['label' => 'My Calls <span id="call-inbox-queue" class="label-info label pull-right"></span> ', 'url' => ['/call/list'], 'icon' => 'phone'];
             }
 

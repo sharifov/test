@@ -28,14 +28,20 @@ class CallBox extends \yii\bootstrap\Widget
     public function run()
     {
         $user_id = \Yii::$app->user->id;
-        $newCount = 0; //\common\models\Notifications::findNewCount($user_id);
+        //$newCount = 0; //\common\models\Notifications::findNewCount($user_id);
         //$model = \common\models\Notifications::findNew($user_id);
         $userModel = \common\models\Employee::findOne($user_id);
-        $sipExist = $sipExist = ($userModel->userProfile->up_sip && strlen($userModel->userProfile->up_sip) > 2); // \common\models\UserProjectParams::find()->where(['upp_user_id' => $user_id])->andWhere(['AND', ['IS NOT', 'upp_tw_sip_id', null], ['!=', 'upp_tw_sip_id', '']])->one();
+        //$sipExist = $sipExist = ($userModel->userProfile->up_sip && strlen($userModel->userProfile->up_sip) > 2); // \common\models\UserProjectParams::find()->where(['upp_user_id' => $user_id])->andWhere(['AND', ['IS NOT', 'upp_tw_sip_id', null], ['!=', 'upp_tw_sip_id', '']])->one();
+
+
 
         //VarDumper::dump($sipExist->attributes, 10, true);
 
-        if(!$sipExist) {
+        if(!$userModel) {
+            return '';
+        }
+
+        if(!$userModel->userProfile || $userModel->userProfile->up_call_type_id == \common\models\UserProfile::CALL_TYPE_OFF) {
             return '';
         }
 
