@@ -294,6 +294,27 @@ $this->params['breadcrumbs'][] = $this->title;
         ],
 
         [
+            'header' => 'Quotes',
+            'value' => function (\common\models\Lead $model) {
+                return $model->quotesCount ? $model->quotesCount  : '-';
+            },
+            'format' => 'raw',
+            'contentOptions' => [
+                'class' => 'text-center'
+            ]
+            ],
+
+            [
+                'header' => 'Expert Quotes',
+                'value' => function (\common\models\Lead $model) {
+                return $model->quotesExpertCount ? $model->quotesExpertCount: '-';
+            },
+            'format' => 'raw',
+            'contentOptions' => [
+                'class' => 'text-center'
+            ],
+        ],
+        [
             'header' => 'Outbound Date',
             'value' => function(\common\models\Lead $model) {
                 $segments = $model->leadFlightSegments;
