@@ -57,6 +57,7 @@ use common\components\SearchService;
  * @property double $finalProfit
  * @property int $quotesCount
  * @property int $leadFlightSegmentsCount
+ * @property int $quotesExpertCount
  * @property double $agentProcessingFee
  * @property double $agents_processing_fee
  *
@@ -402,6 +403,13 @@ class Lead extends ActiveRecord
         return $this->hasMany(Quote::class, ['lead_id' => 'id'])->count();
     }
 
+    /**
+     * @return int
+     */
+    public function getQuotesExpertCount(): int
+    {
+        return $this->hasMany(Quote::class, ['lead_id' => 'id'])->where(['created_by_seller' => 0])->count();
+    }
 
     /**
      * @return int

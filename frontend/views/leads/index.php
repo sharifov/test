@@ -434,7 +434,23 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
                 'class' => 'text-center'
             ]
         ],
-
+        [
+            'header' => 'Expert Quotes',
+            'value' => function (\common\models\Lead $model) use ($isAgent) {
+                return $model->quotesExpertCount ? Html::a($model->quotesExpertCount, [
+                    'quotes/index',
+                    "QuoteSearch[lead_id]" => $model->id
+                ], [
+                    'target' => '_blank',
+                    'data-pjax' => 0
+                ]) : '-';
+                },
+                'format' => 'raw',
+                'contentOptions' => [
+                    'class' => 'text-center'
+                ],
+                'visible' => ! $isAgent,
+        ],
         [
             'header' => 'Segments',
             'value' => function (\common\models\Lead $model) {
