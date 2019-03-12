@@ -244,6 +244,8 @@ class Lead extends ActiveRecord
             'l_grade' => 'Grade',
             'bo_flight_id' => '(BO) Flight ID',
             'agents_processing_fee' => 'Agents Processing Fee',
+            'origin_country' => 'Origin Country code',
+            'destination_country' => 'Destination Country code'
         ];
     }
 

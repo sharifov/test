@@ -108,6 +108,24 @@ use yii\widgets\ActiveForm;
                 </div>
             </div>
 
+			<div class="row">
+				<div class="col-md-6">
+                    <?php  echo $form->field($model, 'origin_airport') ?>
+                </div>
+				<div class="col-md-6">
+                    <?php  echo $form->field($model, 'destination_airport') ?>
+                </div>
+			</div>
+
+			<div class="row">
+				<div class="col-md-6">
+                    <?php  echo $form->field($model, 'origin_country') ?>
+                </div>
+				<div class="col-md-6">
+                    <?php  echo $form->field($model, 'destination_country') ?>
+                </div>
+			</div>
+
 
 
         </div>

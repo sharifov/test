@@ -51,6 +51,11 @@ class LeadSearch extends Lead
 
     public $limit;
 
+    public $origin_airport;
+    public $destination_airport;
+    public $origin_country;
+    public $destination_country;
+
 
     /**
      * {@inheritdoc}
@@ -61,7 +66,7 @@ class LeadSearch extends Lead
             [['id', 'client_id', 'employee_id', 'status', 'project_id', 'adults', 'children', 'infants', 'rating', 'called_expert', 'cnt', 'l_grade', 'l_answered', 'supervision_id', 'limit', 'bo_flight_id'], 'integer'],
             [['email_status', 'quote_status'], 'integer'],
 
-            [['client_name', 'client_email', 'client_phone','quote_pnr', 'gid'], 'string'],
+            [['client_name', 'client_email', 'client_phone','quote_pnr', 'gid', 'origin_airport','destination_airport', 'origin_country', 'destination_country'], 'string'],
 
             //['created_date_from', 'default', 'value' => '2018-01-01'],
             //['created_date_to', 'default', 'value' => date('Y-m-d')],
@@ -268,6 +273,52 @@ class LeadSearch extends Lead
             ->andFilterWhere(['like', 'offset_gmt', $this->offset_gmt])
             ->andFilterWhere(['like', 'discount_id', $this->discount_id]);
 
+        if(!empty($this->origin_airport)){
+            $subQuery = LeadFlightSegment::find()->select(['DISTINCT(lead_id)'])->andFilterWhere(['like','origin',$this->origin_airport]);
+
+            $subQuery1 = LeadFlightSegment::find()->select(['MIN(id)'])->where(['IN','lead_id', $subQuery])->groupBy('lead_id');
+
+            $subQuery2 = LeadFlightSegment::find()->select(['DISTINCT(lead_id)'])->andFilterWhere(['like','origin',$this->origin_airport])
+            ->andWhere(['IN','id', $subQuery1]);
+
+            $query->andWhere(['IN', 'leads.id', $subQuery2]);
+        }
+
+        if(!empty($this->destination_airport)){
+            $subQuery = LeadFlightSegment::find()->select(['DISTINCT(lead_id)'])->andFilterWhere(['like','destination',$this->destination_airport]);
+
+            $subQuery1 = LeadFlightSegment::find()->select(['MIN(id)'])->where(['IN','lead_id', $subQuery])->groupBy('lead_id');
+
+            $subQuery2 = LeadFlightSegment::find()->select(['DISTINCT(lead_id)'])->andFilterWhere(['like','destination',$this->destination_airport])
+            ->andWhere(['IN','id', $subQuery1]);
+
+            $query->andWhere(['IN', 'leads.id', $subQuery2]);
+        }
+
+        if(!empty($this->origin_country)){
+            $subQuery = LeadFlightSegment::find()->select(['DISTINCT(lead_id)'])->leftJoin('airports','airports.iata = lead_flight_segments.origin')
+            ->andFilterWhere(['like','airports.countryId',$this->origin_country]);
+
+            $subQuery1 = LeadFlightSegment::find()->select(['MIN(id)'])->where(['IN','lead_id', $subQuery])->groupBy('lead_id');
+
+            $subQuery2 = LeadFlightSegment::find()->select(['DISTINCT(lead_id)'])->leftJoin('airports','airports.iata = lead_flight_segments.origin')
+            ->andFilterWhere(['like','airports.countryId',$this->origin_country])
+            ->andWhere(['IN','id', $subQuery1]);
+
+            $query->andWhere(['IN', 'leads.id', $subQuery2]);
+        }
+        if(!empty($this->destination_country)){
+            $subQuery = LeadFlightSegment::find()->select(['DISTINCT(lead_id)'])->leftJoin('airports','airports.iata = lead_flight_segments.destination')
+            ->andFilterWhere(['like','airports.countryId',$this->destination_country]);
+
+            $subQuery1 = LeadFlightSegment::find()->select(['MIN(id)'])->where(['IN','lead_id', $subQuery])->groupBy('lead_id');
+
+            $subQuery2 = LeadFlightSegment::find()->select(['DISTINCT(lead_id)'])->leftJoin('airports','airports.iata = lead_flight_segments.destination')
+            ->andFilterWhere(['like','airports.countryId',$this->destination_country])
+            ->andWhere(['IN','id', $subQuery1]);
+
+            $query->andWhere(['IN', 'leads.id', $subQuery2]);
+        }
         /*  $sqlRaw = $query->createCommand()->getRawSql();
 
         VarDumper::dump($sqlRaw, 10, true); exit; */
