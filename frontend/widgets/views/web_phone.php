@@ -61,9 +61,11 @@
                     <td>
                         <?=\yii\helpers\Html::button('<i class="fa fa-close"></i> Hangup', ['class' => 'btn btn-xs btn-danger','id' => 'button-hangup', 'style' => 'display:none'])?>
                         <?/*=\yii\helpers\Html::button('<i class="fa fa-phone"></i> Call', ['class' => 'btn btn-xs btn-success', 'id' => 'button-call'])*/?>
-                        <div id="call-controls2" style="display: none">
+                        <div id="call-controls2" style="display: block;">
                             <?=\yii\helpers\Html::button('<i class="fa fa-phone"></i> Answer', ['class' => 'btn btn-sm btn-success', 'id' => 'button-answer'])?>
                             <?=\yii\helpers\Html::button('<i class="fa fa-close"></i> Reject', ['class' => 'btn btn-sm btn-danger','id' => 'button-reject'])?>
+                            <?=\yii\helpers\Html::button('<i class="fa fa-forward"></i> Forward', ['class' => 'btn btn-sm btn-info','id' => 'button-redirect'])?>
+                            <?=\yii\helpers\Html::input('text', 'redirect-to', '',  ['class' => 'form-control','id' => 'redirect-to'])?>
                         </div>
                     </td>
                 </tr>
@@ -112,13 +114,14 @@
 
 <?php
     $ajaxSaveCallUrl = \yii\helpers\Url::to(['phone/ajax-save-call']);
+    $ajaxRedirectCallUrl = \yii\helpers\Url::to(['phone/ajax-call-redirect']);
 ?>
 
 
 <script type="text/javascript">
 
     const ajaxSaveCallUrl = '<?=$ajaxSaveCallUrl?>';
-
+    const ajaxCallRedirectUrl = '<?=$ajaxRedirectCallUrl?>';
 
     function createNotify(title, message, type) {
         new PNotify({
@@ -308,6 +311,35 @@
         if (connection) {
             connection.reject();
             document.getElementById('call-controls2').style.display = 'none';
+        }
+    };
+
+    // TODO redirect call
+    document.getElementById('button-redirect').onclick = function () {
+        console.log("button-redirect: " + connection);
+        if (connection && connection.parameters.CallSid) {
+            connection.accept();
+            redirectToClient = document.getElementById('redirect-to').value;
+            if(redirectTo.length < 2) {
+                return false;
+            }
+            $.ajax({
+                type: 'post',
+                data: {
+                    'sid': connection.parameters.CallSid,
+                    'type': 'client',
+                    'from': connection.parameters.To,
+                    'to':redirectToClient,
+                },
+                url: ajaxCallRedirectUrl,
+                success: function (data) {
+                    console.log(data);
+
+                },
+                error: function (error) {
+                    console.error(error);
+                }
+            });
         }
     };
 

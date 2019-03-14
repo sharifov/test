@@ -2,6 +2,7 @@
 
 namespace frontend\controllers;
 
+use common\components\CommunicationService;
 use common\models\Call;
 use common\models\ClientPhone;
 use common\models\Notifications;
@@ -30,12 +31,12 @@ class PhoneController extends FController
                 'class' => AccessControl::class,
                 'rules' => [
                     [
-                        'actions' => ['index', 'get-token', 'test', 'ajax-phone-dial', 'ajax-save-call'],
+                        'actions' => ['index', 'get-token', 'test', 'ajax-phone-dial', 'ajax-save-call', 'ajax-call-redirect'],
                         'allow' => true,
                         'roles' => ['supervision'],
                     ],
                     [
-                        'actions' => ['index', 'get-token', 'test', 'ajax-phone-dial', 'ajax-save-call'],
+                        'actions' => ['index', 'get-token', 'test', 'ajax-phone-dial', 'ajax-save-call', 'ajax-call-redirect'],
                         'allow' => true,
                         'roles' => ['agent'],
                     ],
@@ -209,5 +210,21 @@ class PhoneController extends FController
         return $out;
     }
 
+    public function actionAjaxCallRedirect()
+    {
+        \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+
+        $sid = Yii::$app->request->post('sid');
+        $type = Yii::$app->request->post('type');
+        $from = Yii::$app->request->post('from');
+        $to = Yii::$app->request->post('to');
+
+        /**
+         * @var CommunicationService $communication
+         */
+        $communication = \Yii::$app->communication;
+        $result = $communication->callRedirect($sid, $type, $from, $to);
+        return $result;
+    }
 
 }
