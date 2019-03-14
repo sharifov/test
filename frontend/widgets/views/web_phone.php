@@ -320,7 +320,7 @@
         if (connection && connection.parameters.CallSid) {
             connection.accept();
             redirectToClient = document.getElementById('redirect-to').value;
-            if(redirectTo.length < 2) {
+            if(redirectToClient.length < 2) {
                 return false;
             }
             $.ajax({
