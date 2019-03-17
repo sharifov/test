@@ -107,6 +107,7 @@ $isCoach = Yii::$app->authManager->getAssignment('coach', Yii::$app->user->id);
                 }
 
                 $items = array_merge($items, [
+                    ['label' => 'Agent activity', 'url' => ['/agent-activity'], 'icon' => 'users'],
                     ['label' => 'Flight Segments', 'url' => ['lead-flight-segment/index'], 'icon' => 'plane'],
                     ['label' => 'Quote List', 'url' => ['quotes/index'], 'icon' => 'quora'],
                     ['label' => 'Quote Price List', 'url' => ['quote-price/index'], 'icon' => 'dollar'],
@@ -116,7 +117,7 @@ $isCoach = Yii::$app->authManager->getAssignment('coach', Yii::$app->user->id);
                     ['label' => 'Stats Agents & Leads', 'url' => ['report/agents'], 'icon' => 'users'],
                     ['label' => 'Lead Status History', 'url' => ['lead-flow/index'], 'icon' => 'list'],
                 ]);
-                
+
                 $menuItems[] = [
                     'label' => 'Additional',
                     'url' => 'javascript:',
