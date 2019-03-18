@@ -299,6 +299,19 @@ $c_type_id = $comForm->c_type_id;
                                 $typeList = [];
                                 $agentParams = \common\models\UserProjectParams::find()->where(['upp_project_id' => $leadForm->getLead()->project_id, 'upp_user_id' => Yii::$app->user->id])->limit(1)->one();
                                 $userModel = \common\models\Employee::findOne(Yii::$app->user->id);
+
+
+                                $call_type = \common\models\UserProfile::find()->select('up_call_type_id')->where(['up_user_id' => Yii::$app->user->id])->one();
+
+
+                                if($call_type && $call_type->up_call_type_id) {
+                                    $call_type_id = $call_type->up_call_type_id;
+
+                                } else {
+                                    $call_type_id = \common\models\UserProfile::CALL_TYPE_OFF;
+                                }
+
+
                                 //\yii\helpers\VarDumper::dump($leadForm->getLead()->id, 10, true); exit;
 
                                 if($agentParams) {
@@ -318,11 +331,15 @@ $c_type_id = $comForm->c_type_id;
                                             }
                                         }
 
-                                        if ($tk == \frontend\models\CommunicationForm::TYPE_VOICE) {
 
+                                        if($call_type_id) {
 
-                                            if ($userModel->userProfile->up_sip) {
-                                                $typeList[$tk] = $itemName . ($isAdmin ? ' (' . $userModel->userProfile->up_sip . ')' : '');
+                                            $callTypeName = \common\models\UserProfile::CALL_TYPE_LIST[$call_type_id] ?? '-';
+
+                                            if ($tk == \frontend\models\CommunicationForm::TYPE_VOICE) {
+                                                if ($userModel->userProfile->up_sip) {
+                                                    $typeList[$tk] = $itemName . ' ('.$callTypeName.')';
+                                                }
                                             }
                                         }
                                     }
@@ -433,12 +450,29 @@ $c_type_id = $comForm->c_type_id;
                         <?php if($comForm->c_voice_status == 1):?>
                             <div class="call-box__status call-box__status--call" style="display: block" id="div-call-time"><i class="fa fa-clock-o"></i>&nbsp;<strong id="div-call-timer">00:00</strong></div>
                         <?php endif;?>
-                        <div class="call-box__btns">
-                            <?//= Html::button('<i class="fa fa-microphone-slash"></i>', ['class' => 'btn call-box__btn call-box__btn--mute']) ?>
-                            <?= Html::submitButton('<i class="fa fa-phone"></i>', ['class' => 'btn call-box__btn call-box__btn--call', 'id' => 'btn-start-call', 'disabled' => ($comForm->c_voice_status == 1 ? true : false), 'onclick' => '$("#c_voice_status").val(1)']) ?>
-                            <?/*= Html::button('<i class="fa fa-pause"></i>', ['class' => 'btn call-box__btn call-box__btn--pause', 'disabled' => true, 'id' => 'btn-pause'])*/ ?>
-                            <?= Html::submitButton('<i class="fa fa-stop"></i>', ['class' => 'btn call-box__btn call-box__btn--stop', 'disabled' => $comForm->c_voice_status == 1 ? false : true, 'id' => 'btn-stop-call', 'onclick' => '$("#c_voice_status").val(2)']) ?>
-                        </div>
+
+
+
+                        <?php if($call_type_id == \common\models\UserProfile::CALL_TYPE_WEB): ?>
+                            <div class="call-box__btns">
+
+                                <?= Html::a('<i class="fa fa-phone"></i>', '#', ['class' => 'btn call-box__btn call-box__btn--call', 'id' => 'btn-start-web-call',
+                                    'data-project-id' => $leadForm->getLead()->project_id,
+                                    'data-lead-id' => $leadForm->getLead()->id,
+                                    'disabled' => ($comForm->c_voice_status == 1 ? true : false)
+                                ]) ?>
+
+                                <?/*<a href="#" class="call-phone" data-project-id="6" data-lead-id="92138" data-phone="+37369594567">+37369594567</a> - Alex <br/>*/?>
+
+                                <?//= Html::button('<i class="fa fa-microphone-slash"></i>', ['class' => 'btn call-box__btn call-box__btn--mute']) ?>
+                                <?/*= Html::button('<i class="fa fa-pause"></i>', ['class' => 'btn call-box__btn call-box__btn--pause', 'disabled' => true, 'id' => 'btn-pause'])*/ ?>
+                            </div>
+                        <? else: ?>
+                            <div class="call-box__btns">
+                                <?= Html::submitButton('<i class="fa fa-phone"></i>', ['class' => 'btn call-box__btn call-box__btn--call', 'id' => 'btn-start-call', 'disabled' => ($comForm->c_voice_status == 1 ? true : false), 'onclick' => '$("#c_voice_status").val(1)']) ?>
+                                <?= Html::submitButton('<i class="fa fa-stop"></i>', ['class' => 'btn call-box__btn call-box__btn--stop', 'disabled' => $comForm->c_voice_status == 1 ? false : true, 'id' => 'btn-stop-call', 'onclick' => '$("#c_voice_status").val(2)']) ?>
+                            </div>
+                        <? endif; ?>
                     </div>
 
                     <?= $form2->field($comForm, 'c_voice_status')->hiddenInput(['id' => 'c_voice_status'])->label(false); ?>
@@ -644,6 +678,32 @@ $js = <<<JS
         } else {
             $('#sms-textarea-div').show();
         }
+    });
+    
+    $('body').on('click', '#btn-start-web-call', function(e) {
+        
+        var phone_number = $('#c_phone_number').val();
+        var project_id = $(this).data('project-id');
+        var lead_id = $(this).data('lead-id');
+        
+        //alert(phoneNumber);
+        
+        e.preventDefault();
+        
+        if(phone_number) {
+        
+            $('#web-phone-dial-modal .modal-body').html('<div style="text-align:center"><img width="200px" src="https://loading.io/spinners/gear-set/index.triple-gears-loading-icon.svg"></div>');
+            $('#web-phone-dial-modal').modal();
+            
+            $.post(ajaxPhoneDialUrl, {'phone_number': phone_number, 'project_id': project_id, 'lead_id': lead_id},
+                function (data) {
+                    $('#web-phone-dial-modal .modal-body').html(data);
+                }
+            );
+        } else {
+            alert('Warning: Select client phone number');
+        }
+        
     });
     
     $('body').on("change", '#c_email_tpl_id', function () {
