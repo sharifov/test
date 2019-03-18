@@ -262,36 +262,38 @@ JS;
             <div class="row sl-itinerary-form__pax">
                 <div class="col-sm-3">
                     <?= $formLeadModel->field($leadForm->getLead(), 'cabin', [
-                        'template' => '{label}<label for="cabin-class" class="select-wrap-label">{input}</label>{error}{hint}'
+                        //'template' => '{label}<label for="cabin-class" class="select-wrap-label">{input}</label>{error}{hint}'
                     ])->dropDownList(Lead::getCabin(), [
-                        'prompt' => 'Cabin Class'
-                    ])->label() ?>
+                        'prompt' => '---'
+                    ]) ?>
                 </div>
-                <div class="col-sm-3">
+                <div class="col-sm-2">
+                </div>
+                <div class="col-sm-2">
                     <?= $formLeadModel->field($leadForm->getLead(), 'adults')->textInput([
                         'class' => 'form-control lead-form-input-element',
                         'type' => 'number',
                         'min' => 0,
                         'max' => 9,
-                        'placeholder' => 'Adult'
+                        //'placeholder' => 'Adult'
                     ]) ?>
                 </div>
-                <div class="col-sm-3">
+                <div class="col-sm-2">
                     <?= $formLeadModel->field($leadForm->getLead(), 'children')->textInput([
                         'class' => 'form-control lead-form-input-element',
                         'type' => 'number',
                         'min' => 0,
                         'max' => 9,
-                        'placeholder' => 'Child'
+                        //'placeholder' => 'Child'
                     ]) ?>
                 </div>
-                <div class="col-sm-3">
+                <div class="col-sm-2">
                     <?= $formLeadModel->field($leadForm->getLead(), 'infants')->textInput([
                         'class' => 'form-control lead-form-input-element',
                         'type' => 'number',
                         'min' => 0,
                         'max' => 9,
-                        'placeholder' => 'Infant'
+                        //'placeholder' => 'Infant'
                     ]) ?>
                 </div>
             </div>

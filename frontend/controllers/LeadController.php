@@ -134,6 +134,9 @@ class LeadController extends FController
             throw new ForbiddenHttpException('Access Denied for Agent');
         }
 
+        $user_id = Yii::$app->user->id;
+        $is_admin = Yii::$app->authManager->getAssignment('admin', $user_id);
+
 
             if (Yii::$app->request->post('hasEditable')) {
 
@@ -246,7 +249,9 @@ class LeadController extends FController
                     $lt = LeadTask::find()->where(['lt_lead_id' => $leadId, 'lt_date' => $taskDate, 'lt_task_id' => $taskId, 'lt_user_id' => $userId])->one();
                     if($lt) {
                         if($lt->lt_completed_dt) {
-                            $lt->lt_completed_dt = null;
+                            if($is_admin) {
+                                $lt->lt_completed_dt = null;
+                            }
                         } else {
                             $lt->lt_completed_dt = date('Y-m-d H:i:s');
                         }
