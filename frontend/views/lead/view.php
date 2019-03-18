@@ -22,7 +22,7 @@ $bundle = \frontend\themes\gentelella\assets\AssetLeadCommunication::register($t
 $userId = Yii::$app->user->id;
 
 $is_manager = false;
-$is_admin = (Yii::$app->authManager->getAssignment('admin', $userId));
+$is_admin = Yii::$app->authManager->getAssignment('admin', $userId);
 if(Yii::$app->authManager->getAssignment('admin', $userId) || Yii::$app->authManager->getAssignment('supervision', $userId)) {
     $is_manager = true;
 }
