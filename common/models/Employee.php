@@ -676,7 +676,8 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
             ->where(['lt_user_id' => $this->id])
             ->andFilterWhere(['>=', 'lt_date', $start_dt])
             ->andFilterWhere(['<=', 'lt_date', $end_dt])
-            ->groupBy(['lt_task_id']);
+            ->groupBy(['lt_task_id'])
+            ->orderBy(['lt_task_id' => SORT_ASC]);
 
         $taskListCheckedQuery = \common\models\LeadTask::find()->select(['COUNT(*) AS field_cnt', 'lt_task_id'])
             ->where(['lt_user_id' => $this->id])
@@ -711,6 +712,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         //$itemHeader = [];
         $item = [];
 
+
         if ($taskListAll) {
             foreach ($taskListAll as $task) {
                 //$itemHeader[] = Html::encode($task->ltTask->t_name);
@@ -718,9 +720,9 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
 
                 $completedTasks = $completed[$task->lt_task_id] ?? 0;
 
-                $str = '<b>' . Html::encode($task->ltTask->t_name) . '</b><br>' . $completedTasks . ' / ' . Html::a($task->field_cnt,
+                $str = '<tr><td><small>' . Html::encode($task->ltTask->t_name) . '</small></td><td><small>' . $completedTasks . ' / ' . Html::a($task->field_cnt,
                         ['lead-task/index', 'LeadTaskSearch[lt_task_id]' => $task->lt_task_id, 'LeadTaskSearch[lt_user_id]' => $this->id],
-                        ['data-pjax' => 0, 'target' => '_blank']) . '';
+                        ['data-pjax' => 0, 'target' => '_blank']) . '</small></td>';
 
 
                 if ($task->field_cnt > 0) {
@@ -729,11 +731,11 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
                     $percent = 0;
                 }
 
-                $str .= '<br><div class="progress" title="' . $percent . '%">
+                $str .= '<td width="100"><div class="progress" style="margin-bottom: 0" title="' . $percent . '%">
                           <div class="progress-bar" role="progressbar" aria-valuenow="' . $percent . '" aria-valuemin="0" aria-valuemax="100" style="width: ' . $percent . '%;">
                             ' . $percent . '%
                           </div>
-                        </div>';
+                        </div></td></tr>';
 
 
                 $item[] = $str;
@@ -745,9 +747,10 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
             $str = '<table class="table table-bordered table-condensed">';
             //$str .= '<tr><th class="text-center">'.implode('</th><th class="text-center">', $itemHeader).'</th></tr>';
 
-            $str .= '<tr>';
-            $str .= '<td class="text-center">' . implode('</td><td class="text-center">', $item) . '</td>';
-            $str .= '</tr>';
+            //$str .= '<tr>';
+            //$str .= '<td class="text-center">' . implode('</td><td class="text-center">', $item) . '</td>';
+            //$str .= '</tr>';
+            $str .= implode('', $item);
             $str .= '</table>';
         } else {
             $str = '-';
@@ -894,6 +897,36 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         }
 
         $query = LeadFlow::find()->select('COUNT(DISTINCT(lead_id))')->where(['employee_id' => $this->id, 'status' => $statusList]);
+        $query->andFilterWhere(['>=', 'created', $startDate]);
+        $query->andFilterWhere(['<=', 'created', $endDate]);
+        $count = $query->asArray()->scalar();
+        return $count;
+    }
+
+
+    /**
+     * @param array $statusList
+     * @param int|null $from_status_id
+     * @param string|null $startDate
+     * @param string|null $endDate
+     * @return int
+     */
+    public function getLeadCountByStatuses(array $statusList = [], int $from_status_id = null, string $startDate = null, string $endDate = null): int
+    {
+        if ($startDate) {
+            $startDate = date('Y-m-d', strtotime($startDate));
+        }
+
+        if ($endDate) {
+            $endDate = date('Y-m-d', strtotime($endDate));
+        }
+
+        $query = LeadFlow::find()->select('COUNT(DISTINCT(lead_id))')->where(['employee_id' => $this->id, 'status' => $statusList]);
+
+        if($from_status_id > 0) {
+            $query->andWhere(['lf_from_status_id' => $from_status_id]);
+        }
+
         $query->andFilterWhere(['>=', 'created', $startDate]);
         $query->andFilterWhere(['<=', 'created', $endDate]);
         $count = $query->asArray()->scalar();

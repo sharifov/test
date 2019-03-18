@@ -90,6 +90,18 @@ $isCoach = Yii::$app->authManager->getAssignment('coach', Yii::$app->user->id);
                 $menuItems[] = ['label' => 'My Calls <span id="call-inbox-queue" class="label-info label pull-right"></span> ', 'url' => ['/call/list'], 'icon' => 'phone'];
             }
 
+            if($isAdmin) {
+
+                $menuItems[] = [
+                    'label' => 'Stats',
+                    'url' => 'javascript:',
+                    'icon' => 'bar-chart',
+                    'items' => [
+                        ['label' => 'Stats Employess', 'url' => ['/stats/index'], 'icon' => 'users'],
+                    ],
+                ];
+            }
+
 
             if($isAdmin || $isSupervision) {
 
