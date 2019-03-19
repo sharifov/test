@@ -25,6 +25,7 @@ class AgentActivitySearch extends Call
     public $supervision_id;
     public $user_groups = [];
 
+    public $date_range;
     public $date_from;
     public $date_to;
     public $id;
@@ -46,7 +47,7 @@ class AgentActivitySearch extends Call
     public function rules()
     {
         return [
-            [['date_from', 'date_to', 'user_groups','id','c_project_id','c_call_type_id','s_type_id','s_project_id','project_id'], 'safe'],
+            [['date_range','date_from', 'date_to', 'user_groups','id','c_project_id','c_call_type_id','s_type_id','s_project_id','project_id'], 'safe'],
             [['to_status', 'from_status'], 'safe'],
         ];
     }
@@ -57,6 +58,7 @@ class AgentActivitySearch extends Call
     public function attributeLabels()
     {
         return [
+            'date_range' => 'Date From-To',
             'date_from' => 'Date From',
             'date_to' => 'Date To',
             'user_groups' => 'Teams',

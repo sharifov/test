@@ -20,30 +20,25 @@ use yii\widgets\ActiveForm;
     ]); ?>
 
     <div class="row">
-        <div class="col-md-4">
-		<?= $form->field($model, 'date_from')->widget(
-                \dosamigos\datepicker\DatePicker::class, [
-                'inline' => false,
-                //'template' => '<div class="well well-sm" style="background-color: #fff; width:250px">{input}</div>',
-                'clientOptions' => [
-                    'autoclose' => true,
-                    'format' => 'yyyy-mm-dd',
-                    'todayBtn' => true
-                ]
-            ]);?>
-		</div>
-		<div class="col-md-4">
-		 <?= $form->field($model, 'date_to')->widget(
-                \dosamigos\datepicker\DatePicker::class, [
-                'inline' => false,
-                //'template' => '<div class="well well-sm" style="background-color: #fff; width:250px">{input}</div>',
-                'clientOptions' => [
-                    'autoclose' => true,
-                    'format' => 'yyyy-mm-dd',
-                    'todayBtn' => true
-                ]
-            ]);?>
-		</div>
+    	<div class="col-md-4">
+    		<?= \yii\bootstrap\Html::label('Date Range','date_range')?>
+			<?=  \kartik\daterange\DateRangePicker::widget([
+                    'model'=> $model,
+                    'attribute' => 'date_range',
+                    'useWithAddon'=>true,
+                    'presetDropdown'=>true,
+                    'hideInput'=>true,
+                    'convertFormat'=>true,
+                    'startAttribute' => 'date_from',
+                    'endAttribute' => 'date_to',
+                    'pluginOptions'=>[
+                        'timePicker'=> false,
+                        'timePickerIncrement'=>15,
+                        'locale'=>['format'=>'Y-m-d']
+                    ]
+                ]);
+                ?>
+    	</div>
 		<div class="col-md-4">
 		<?php if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
                 $groups = \common\models\UserGroup::getList();
