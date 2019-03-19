@@ -199,4 +199,13 @@ class Call extends \yii\db\ActiveRecord
     {
         return self::CALL_TYPE_LIST[$this->c_call_type_id] ?? '-';
     }
+
+    /**
+     * @return mixed|string
+     */
+    public function getStatusName()
+    {
+        return self::CALL_STATUS_LIST[$this->c_call_status] ?? '-';
+    }
+
 }

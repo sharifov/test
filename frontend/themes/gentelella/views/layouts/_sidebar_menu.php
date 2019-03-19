@@ -97,7 +97,12 @@ $isCoach = Yii::$app->authManager->getAssignment('coach', Yii::$app->user->id);
                     'url' => 'javascript:',
                     'icon' => 'bar-chart',
                     'items' => [
-                        ['label' => 'Stats Employess', 'url' => ['/stats/index'], 'icon' => 'users'],
+                        ['label' => 'Agent activity', 'url' => ['/agent-activity'], 'icon' => 'users'],
+                        ['label' => 'Calls & SMS', 'url' => ['/stats/call-sms'], 'icon' => 'phone'],
+                        ['label' => 'Stats Employees', 'url' => ['/stats/index'], 'icon' => 'users'],
+                        ['label' => 'User Connections', 'url' => ['/user-connection/index'], 'icon' => 'plug'],
+                        ['label' => 'User Stats', 'url' => ['/user-connection/stats'], 'icon' => 'area-chart'],
+                        ['label' => 'Call User Map', 'url' => ['/call/user-map'], 'icon' => 'map'],
                     ],
                 ];
             }
@@ -119,7 +124,6 @@ $isCoach = Yii::$app->authManager->getAssignment('coach', Yii::$app->user->id);
                 }
 
                 $items = array_merge($items, [
-                    ['label' => 'Agent activity', 'url' => ['/agent-activity'], 'icon' => 'users'],
                     ['label' => 'Flight Segments', 'url' => ['lead-flight-segment/index'], 'icon' => 'plane'],
                     ['label' => 'Quote List', 'url' => ['quotes/index'], 'icon' => 'quora'],
                     ['label' => 'Quote Price List', 'url' => ['quote-price/index'], 'icon' => 'dollar'],
@@ -180,9 +184,6 @@ $isCoach = Yii::$app->authManager->getAssignment('coach', Yii::$app->user->id);
                     'url' => 'javascript:',
                     'icon' => 'user',
                     'items' => [
-                        ['label' => 'User Connections', 'url' => ['/user-connection/index'], 'icon' => 'plug'],
-                        ['label' => 'User Stats', 'url' => ['/user-connection/stats'], 'icon' => 'area-chart'],
-                        ['label' => 'Call User Map', 'url' => ['/call/user-map'], 'icon' => 'list'],
                         ['label' => 'Users', 'url' => ['employee/list'], 'icon' => 'user'],
                         ['label' => 'User Groups', 'url' => ['user-group/index'], 'icon' => 'users'],
                         ['label' => 'User Groups Assignments', 'url' => ['user-group-assign/index'], 'icon' => 'users'],
