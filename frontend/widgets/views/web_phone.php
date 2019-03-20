@@ -61,11 +61,38 @@
                     <td>
                         <?=\yii\helpers\Html::button('<i class="fa fa-close"></i> Hangup', ['class' => 'btn btn-xs btn-danger','id' => 'button-hangup', 'style' => 'display:none'])?>
                         <?/*=\yii\helpers\Html::button('<i class="fa fa-phone"></i> Call', ['class' => 'btn btn-xs btn-success', 'id' => 'button-call'])*/?>
-                        <div id="call-controls2" style="display: none;">
-                            <?=\yii\helpers\Html::button('<i class="fa fa-phone"></i> Answer', ['class' => 'btn btn-sm btn-success', 'id' => 'button-answer'])?>
-                            <?=\yii\helpers\Html::button('<i class="fa fa-close"></i> Reject', ['class' => 'btn btn-sm btn-danger','id' => 'button-reject'])?>
+                        <div id="call-controls2" style="display: block;">
+                            <div class="btn-group">
+                            <?=\yii\helpers\Html::button('<i class="fa fa-phone"></i> Answer', ['class' => 'btn btn-xs btn-success', 'id' => 'button-answer'])?>
+                            </div>
+                            <div class="btn-group">
+                            <?=\yii\helpers\Html::button('<i class="fa fa-forward"></i> Reject', ['class' => 'btn btn-xs btn-danger','id' => 'button-reject'])?>
+                            </div>
+                            <? /*
                             <?=\yii\helpers\Html::button('<i class="fa fa-forward"></i> Forward', ['class' => 'btn btn-sm btn-info','id' => 'button-redirect'])?>
                             <?=\yii\helpers\Html::input('text', 'redirect-to', '',  ['class' => 'form-control','id' => 'redirect-to'])?>
+                             */?>
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-xs btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    <i class="fa fa-forward"></i> Forward <span class="caret"></span>
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <?php if(count($supportGeneralPhones)): ?>
+                                    <?php foreach ($supportGeneralPhones AS $projectName => $projectPhone): ?>
+                                            <li><a href="#" class="forward-event" data-type="number" data-value="<?php echo $projectPhone;?>"><?php echo $projectName . ' ('.$projectPhone.')';?></a></li>
+                                    <?php endforeach; ?>
+                                    <?php endif;?>
+                                    <?php /*
+                                    <li><a href="#" class="forward-event" data-type="general" data-value="+37378966164">Forward to general line ()</a></li>
+                                    <li><a href="#" onclick="return false;">Forward to agent</a></li>
+                                    <li role="separator" class="divider"></li>
+                                    <li><a href="#" class="forward-event" data-type="seller" data-value="seller1">seller1</a></li>
+                                    <li><a href="#" class="forward-event" data-type="seller" data-value="seller1">seller240</a></li>
+                                    <li><a href="#" class="forward-event" data-type="seller" data-value="seller1">seller500</a></li>
+                                    <li role="separator" class="divider"></li>
+                                    */?>
+                                </ul>
+                            </div>
                         </div>
                     </td>
                 </tr>
@@ -315,7 +342,7 @@
     };
 
     // TODO redirect call
-    document.getElementById('button-redirect').onclick = function () {
+    /*document.getElementById('button-redirect').onclick = function () {
         console.log("button-redirect: " + connection);
         if (connection && connection.parameters.CallSid) {
             connection.accept();
@@ -341,7 +368,7 @@
                 }
             });
         }
-    };
+    };*/
 
 
     function saveDbCall(call_sid, call_from, call_to, call_status) {
@@ -531,40 +558,7 @@ $js = <<<JS
 
     const ajaxPhoneDialUrl = '$ajaxPhoneDialUrl';
 
-    /*$(document).on('click', '#btn-client-details', function(e) {
-        e.preventDefault();
-        var client_id = $(this).data('client-id');
-        $('#client-details-modal .modal-body').html('<div style="text-align:center"><img width="200px" src="https://loading.io/spinners/gear-set/index.triple-gears-loading-icon.svg"></div>');
-        $('#client-details-modal').modal();
-        $.post(clientInfoUrl, {client_id: client_id},
-            function (data) {
-                $('#client-details-modal .modal-body').html(data);
-            }
-        );
-    });
-   
-    $(document).on('change', '#user-call-status-select', function(e) {
-        e.preventDefault();
-        var type_id = $(this).val();
-                
-        $.ajax({
-            type: 'post',
-            data: {'type_id': type_id},
-            url: callStatusUrl,
-            success: function (data) {
-                //console.log(data);
-                //$('#preloader').addClass('hidden');
-                //modal.find('.modal-body').html(data);
-                //modal.modal('show');
-            },
-            error: function (error) {
-                console.error('Error: ' + error);
-            }
-        });
-
-    });*/
-    
-    
+     
     $('#btn-nin-max-webphone').on('click', function() {
         var iTag = $(this).find('i');
         if(iTag.hasClass('fa-angle-double-down')) {
@@ -630,14 +624,50 @@ $js = <<<JS
         webCall(phone_from, phone_to, project_id, lead_id);
     });
     
-    
-    
-    
     $('#web-phone-widget').css({left:'50%', 'margin-left':'-'+($('#web-phone-widget').width() / 2)+'px'}).slideDown();
     
     //console.log(tw_configs);
     initDevice();
     setInterval('renewTwDevice();', 50000);
+
+    $(document).on('click',  '.forward-event',  function (e) {
+        e.preventDefault();
+        elForwardSelected = $(e.target);
+        elForwardSelectedType  = elForwardSelected.data('type');
+        elForwardSelectedValue = elForwardSelected.data('value');
+        
+        
+        if(connection && connection.parameters.CallSid && elForwardSelectedType) {
+            if(elForwardSelectedValue.length < 2) {
+                console.log('Error call forward param TO');
+                return false;
+            }
+            connection.accept();
+            
+            $.ajax({
+                type: 'post',
+                data: {
+                    'sid': connection.parameters.CallSid,
+                    'type': elForwardSelectedType,
+                    'from': connection.parameters.To,
+                    'to':elForwardSelectedValue,
+                },
+                url: ajaxCallRedirectUrl,
+                success: function (data) {
+                    console.log(data);
+
+                },
+                error: function (error) {
+                    console.error(error);
+                }
+            });
+        }
+        
+        
+        
+        
+    });
+
 
 
 JS;
