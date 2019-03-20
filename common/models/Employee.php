@@ -1280,7 +1280,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         $subQuery2 = UserCallStatus::find()->select(['us_type_id'])->where('us_user_id = user_connection.uc_user_id')->orderBy(['us_id' => SORT_DESC])->limit(1);
         $subQuery3 = Call::find()->select(['c_call_status'])->where('c_created_user_id = user_connection.uc_user_id')->orderBy(['c_id' => SORT_DESC])->limit(1);
         //$subQuery4 = UserProjectParams::find()->select(['upp_tw_sip_id'])->where('upp_user_id = user_connection.uc_user_id')->andWhere(['upp_project_id' => $project_id]);
-        $subQuery4 = UserProfile::find()->select(['up_sip'])->where('up_user_id = user_connection.uc_user_id');
+        $subQuery4 = UserProfile::find()->select(['up_call_type_id'])->where('up_user_id = user_connection.uc_user_id');
         $subQuery6 = UserProjectParams::find()->select(['upp_tw_phone_number'])->where('upp_user_id = user_connection.uc_user_id')->andWhere(['upp_project_id' => $project_id]);
 
 
@@ -1291,7 +1291,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
                 'tbl_user_id' => 'user_connection.uc_user_id',
                 'tbl_call_status_id' => $subQuery2,
                 'tbl_last_call_status' => $subQuery3,
-                'tbl_sip_id' => $subQuery4,
+                'tbl_call_type_id' => $subQuery4,
                 'tbl_phone' => $subQuery6,
                 'tbl_calls_count' => $subQuery5
             ]
@@ -1320,7 +1320,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         $generalQuery->andWhere(['<>', 'tbl_user_id', $user_id]);
         $generalQuery->andWhere(['OR', ['NOT IN', 'tbl_last_call_status', [Call::CALL_STATUS_RINGING, Call::CALL_STATUS_IN_PROGRESS]], ['tbl_last_call_status' => null]]);
         $generalQuery->andWhere(['OR', ['tbl_call_status_id' => UserCallStatus::STATUS_TYPE_READY], ['tbl_call_status_id' => null]]);
-        $generalQuery->andWhere(['AND', ['<>', 'tbl_sip_id', ''], ['IS NOT', 'tbl_sip_id', null]]);
+        $generalQuery->andWhere(['AND', ['<>', 'tbl_call_type_id', UserProfile::CALL_TYPE_OFF], ['IS NOT', 'tbl_call_type_id', null]]);
         $generalQuery->orderBy(['tbl_calls_count' => SORT_ASC]);
 
         //$sqlRaw = $generalQuery->createCommand()->getRawSql();

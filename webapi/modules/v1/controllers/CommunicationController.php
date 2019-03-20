@@ -389,9 +389,7 @@ class CommunicationController extends ApiBaseController
                         $call_sip_id = $upp->upp_tw_sip_id;
                     }*/
 
-                    if($user->userProfile && $user->userProfile->up_call_type_id == 2) {
-                        $call_agent_username[] = 'seller'.$user->id;
-                    }
+
 
                     $call_user_id = (int) $upp->upp_user_id;
                     $call_project_id = (int) $upp->upp_project_id;
@@ -403,6 +401,10 @@ class CommunicationController extends ApiBaseController
                             if($user->isCallFree()) {
                                 $isRedirectCall = false;
                                 Yii::info('DIRECT - User ('.$user->username.') Id: '.$user->id.', phone: ' . $agent_phone_number, 'info\API:CommunicationController:actionVoice:Direct - 2');
+
+                                if($user->userProfile && $user->userProfile->up_call_type_id == 2) {
+                                    $call_agent_username[] = 'seller'.$user->id;
+                                }
 
                             } else {
                                 Yii::info('Call Occupied - User ('.$user->username.') Id: '.$user->id.', phone: ' . $agent_phone_number, 'info\API:CommunicationController:actionVoice:isCallFree');
