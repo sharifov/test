@@ -23,7 +23,9 @@ $userId = Yii::$app->user->id;
 
 $is_manager = false;
 $is_admin = Yii::$app->authManager->getAssignment('admin', $userId);
-if(Yii::$app->authManager->getAssignment('admin', $userId) || Yii::$app->authManager->getAssignment('supervision', $userId)) {
+$is_qa = Yii::$app->authManager->getAssignment('qa', $userId);
+
+if($is_admin || Yii::$app->authManager->getAssignment('supervision', $userId)) {
     $is_manager = true;
 }
 
@@ -482,7 +484,7 @@ JS;
 
 
             <?php if (!$leadForm->getLead()->isNewRecord) : ?>
-                <?php if (!$is_admin && $leadForm->mode === $leadForm::VIEW_MODE) : ?>
+                <?php if ((!$is_admin && !$is_qa) && $leadForm->mode === $leadForm::VIEW_MODE) : ?>
                     <div class="alert alert-warning" role="alert">You do not have access to view Communication messages.</div>
                 <?php else: ?>
                     <?= $this->render('communication/lead_communication', [
@@ -528,7 +530,7 @@ JS;
     </div>
 
 	<aside class="sidebar right-sidebar sl-right-sidebar">
-    	 <?php if($leadForm->mode == $leadForm::VIEW_MODE && (!Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) && !Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id))):?>
+    	 <?php if($leadForm->mode == $leadForm::VIEW_MODE && (!$is_admin && !$is_qa && !Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id))):?>
 			<div class="alert alert-warning" role="alert">
                 <h4 class="alert-heading">Warning!</h4>
                 <p>Client information is not available in VIEW MODE, please take lead!</p>

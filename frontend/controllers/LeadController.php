@@ -75,6 +75,14 @@ class LeadController extends FController
                         'allow' => true,
                         'roles' => ['agent', 'admin', 'supervisor'],
                     ],
+
+                    [
+                        'actions' => [
+                            'view'
+                        ],
+                        'allow' => true,
+                        'roles' => ['qa'],
+                    ],
                 ],
             ]
         ];
@@ -136,6 +144,7 @@ class LeadController extends FController
 
         $user_id = Yii::$app->user->id;
         $is_admin = Yii::$app->authManager->getAssignment('admin', $user_id);
+        $isQA = Yii::$app->authManager->getAssignment('qa', Yii::$app->user->id);
 
 
             if (Yii::$app->request->post('hasEditable')) {
@@ -266,7 +275,7 @@ class LeadController extends FController
 
 
             Yii::$app->cache->delete(sprintf('quick-search-%d-%d', $lead->id, Yii::$app->user->identity->getId()));
-            if (!$lead->permissionsView()) {
+            if (!$isQA && !$lead->permissionsView()) {
                 throw new UnauthorizedHttpException('Not permissions view lead ID: ' . $lead->id);
             }
             $leadForm = new LeadForm($lead);

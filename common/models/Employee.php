@@ -290,22 +290,47 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         return ArrayHelper::map(self::find()->where(['status' => self::STATUS_ACTIVE])->all(), 'id', 'username');
     }
 
-    public static function getAllRoles()
+    /**
+     * @return array
+     */
+    public static function getAllRoles(): array
     {
-        $roles = [];
+
         $query = new Query();
         $result = $query->select(['name', 'description'])
             ->from('auth_item')->where(['type' => 1])
             ->all();
 
-        foreach ($result as $item) {
+
+        $roles = ArrayHelper::map($result, 'name', 'description');
+        //VarDumper::dump($result, 10, true);
+
+        /*foreach ($result as $item) {
             if (($item['name'] == 'admin' || $item['name'] == 'supervision') && Yii::$app->user->identity->role != 'admin') {
                 continue;
             }
 
 
             $roles[$item['name']] = $item['description'];
+        }*/
+
+
+        if(Yii::$app->user->identity->role != 'admin') {
+            if(isset($roles['admin'])) {
+                unset($roles['admin']);
+            }
+
+            if(isset($roles['supervision'])) {
+                unset($roles['supervision']);
+            }
+
+            if(isset($roles['qa'])) {
+                unset($roles['qa']);
+            }
         }
+
+        //VarDumper::dump($roles, 10, true);
+
         return $roles;
     }
 

@@ -347,7 +347,8 @@ $userId = Yii::$app->user->id;
                         //'label' => 'Lead Id',
                         'attribute' => 'lead_id',
                         'value' => function ($model) {
-                            return $model['lead_id'];
+                            $lead = \common\models\Lead::findOne($model['lead_id']);
+                            return $lead ? Html::a($model['lead_id'], ['lead/view', 'gid' => $lead->gid], ['data-pjax' => 0, 'target' => '_blank']) : '-';
                         },
                         'format' => 'raw',
                     ],

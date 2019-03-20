@@ -36,7 +36,7 @@ class StatsController extends FController
                     [
                         'actions' => ['index', 'call-sms'],
                         'allow' => true,
-                        'roles' => ['supervision', 'admin'],
+                        'roles' => ['supervision', 'admin', 'qa'],
                     ],
                 ],
             ],

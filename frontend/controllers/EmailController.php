@@ -39,10 +39,17 @@ class EmailController extends FController
                 'class' => AccessControl::class,
                 'rules' => [
                     [
-                        'actions' => ['index', 'update', 'view', 'delete', 'create', 'inbox', 'soft-delete'],
+                        'actions' => ['index', 'update', 'view', 'inbox', 'soft-delete'],
                         'allow' => true,
-                        'roles' => ['supervision'],
+                        'roles' => ['supervision', 'qa'],
                     ],
+
+                    [
+                        'actions' => ['delete', 'create'],
+                        'allow' => true,
+                        'roles' => ['admin'],
+                    ],
+
                     [
                         'actions' => ['inbox', 'view', 'soft-delete'],
                         'allow' => true,
