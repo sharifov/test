@@ -93,6 +93,9 @@
                                     */?>
                                 </ul>
                             </div>
+                            <div class="btn-group">
+                                <button class="btn btn-xs btn-danger forward-event" data-type="hold" data-value="+15596489977"><i class="fa fa-pause"></i> Hold</button>
+                            </div>
                         </div>
                     </td>
                 </tr>
@@ -635,7 +638,6 @@ $js = <<<JS
         elForwardSelected = $(e.target);
         elForwardSelectedType  = elForwardSelected.data('type');
         elForwardSelectedValue = elForwardSelected.data('value');
-        
         
         if(connection && connection.parameters.CallSid && elForwardSelectedType) {
             if(elForwardSelectedValue.length < 2) {
