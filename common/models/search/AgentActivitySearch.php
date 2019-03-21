@@ -108,8 +108,8 @@ class AgentActivitySearch extends Call
 
         $between_condition = " BETWEEN '{$this->date_from}' AND '{$this->date_to}'";
 
-        $query->addSelect(['(SELECT COUNT(*) FROM `call` WHERE (c_created_dt '.$between_condition.') AND c_created_user_id=e.id AND c_call_type_id = '.Call::CALL_TYPE_OUT.') AS inbound_calls ']);
-        $query->addSelect(['(SELECT COUNT(*) FROM `call` WHERE (c_created_dt '.$between_condition.') AND c_created_user_id=e.id AND c_call_type_id = '.Call::CALL_TYPE_IN.') AS outbound_calls ']);
+        $query->addSelect(['(SELECT COUNT(*) FROM `call` WHERE (c_created_dt '.$between_condition.') AND c_created_user_id=e.id AND c_call_type_id = '.Call::CALL_TYPE_IN.') AS inbound_calls ']);
+        $query->addSelect(['(SELECT COUNT(*) FROM `call` WHERE (c_created_dt '.$between_condition.') AND c_created_user_id=e.id AND c_call_type_id = '.Call::CALL_TYPE_OUT.') AS outbound_calls ']);
         $query->addSelect(['(SELECT SUM(c_call_duration) FROM `call` WHERE (c_created_dt '.$between_condition.') AND c_created_user_id=e.id AND c_call_duration > 15) AS call_duration ']);
 
         $query->addSelect(['(SELECT COUNT(*) FROM sms WHERE (s_created_dt '.$between_condition.') AND s_created_user_id=e.id AND s_type_id = 1) AS sms_sent ']);
@@ -150,7 +150,7 @@ class AgentActivitySearch extends Call
         }
 
 
-        $totalCount = 20;
+        //$totalCount = 20;
 
         $command = $query->createCommand();
         $sql = $command->rawSql;
@@ -173,7 +173,7 @@ class AgentActivitySearch extends Call
                 ],
             ],
             'pagination' => [
-                'pageSize' => 20,
+                'pageSize' => 25,
             ],
         ];
 

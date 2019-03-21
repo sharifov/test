@@ -70,7 +70,7 @@ $this->registerJs("$(function() {
                                 return '-';
                             }
                             return \yii\bootstrap\Html::a($data['inbound_calls'],
-                                ['/agent-activity/calls', $searchModel->formName().'[c_call_type_id]' => Call::CALL_TYPE_OUT, $searchModel->formName().'[id]' => $data['id'],$searchModel->formName().'[date_from]' => $searchModel->date_from, $searchModel->formName().'[date_to]' => $searchModel->date_to],
+                                ['/agent-activity/calls', $searchModel->formName().'[c_call_type_id]' => Call::CALL_TYPE_IN, $searchModel->formName().'[id]' => $data['id'],$searchModel->formName().'[date_from]' => $searchModel->date_from, $searchModel->formName().'[date_to]' => $searchModel->date_to],
                                 ['target' => '_blank', 'data-pjax' => 0]);
                         },
                         'contentOptions' => ['class' => 'text-center'],
@@ -85,7 +85,7 @@ $this->registerJs("$(function() {
                                 return '-';
                             }
                             return \yii\bootstrap\Html::a($data['outbound_calls'],
-                                ['/agent-activity/calls', $searchModel->formName().'[c_call_type_id]' => Call::CALL_TYPE_IN, $searchModel->formName().'[id]' => $data['id'],$searchModel->formName().'[date_from]' => $searchModel->date_from, $searchModel->formName().'[date_to]' => $searchModel->date_to],
+                                ['/agent-activity/calls', $searchModel->formName().'[c_call_type_id]' => Call::CALL_TYPE_OUT, $searchModel->formName().'[id]' => $data['id'],$searchModel->formName().'[date_from]' => $searchModel->date_from, $searchModel->formName().'[date_to]' => $searchModel->date_to],
                                 ['target' => '_blank', 'data-pjax' => 0]);
                             },
                         'contentOptions' => ['class' => 'text-center'],
