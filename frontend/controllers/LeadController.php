@@ -585,7 +585,7 @@ class LeadController extends FController
                                     }
                                     $previewEmailForm->e_email_from = $mailFrom; //$mailPreview['data']['email_from'];
                                     $previewEmailForm->e_email_to = $comForm->c_email_to; //$mailPreview['data']['email_to'];
-                                    $previewEmailForm->e_email_from_name = Yii::$app->user->identity->full_name;
+                                    $previewEmailForm->e_email_from_name = Yii::$app->user->identity->username;
                                     $previewEmailForm->e_email_to_name = $lead->client ? $lead->client->full_name : '';
                                     $previewEmailForm->e_quote_list = @json_encode($comForm->quoteList);
                                 }
@@ -597,7 +597,7 @@ class LeadController extends FController
                             $previewEmailForm->e_email_subject = $comForm->c_email_subject;
                             $previewEmailForm->e_email_from = $mailFrom;
                             $previewEmailForm->e_email_to = $comForm->c_email_to;
-                            $previewEmailForm->e_email_from_name = Yii::$app->user->identity->full_name;
+                            $previewEmailForm->e_email_from_name = Yii::$app->user->identity->username;
                             $previewEmailForm->e_email_to_name = $lead->client ? $lead->client->full_name : '';
                         }
 
