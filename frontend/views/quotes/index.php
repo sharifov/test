@@ -32,7 +32,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'attribute' => 'lead_id',
                 'format' => 'raw',
                 'value' => function(\common\models\Quote $model) {
-                    return '<i class="fa fa-arrow-right"></i> '.Html::a('lead: '.$model->lead_id, ['leads/view', 'id' => $model->lead_id], ['target' => '_blank', 'data-pjax' => 0]);
+                    return '<i class="fa fa-arrow-right"></i> '.Html::a('lead: '.$model->lead_id, ['lead/view', 'gid' => $model->lead->gid], ['target' => '_blank', 'data-pjax' => 0]);
                 },
             ],
             [
