@@ -63,12 +63,12 @@
                         <?/*=\yii\helpers\Html::button('<i class="fa fa-phone"></i> Call', ['class' => 'btn btn-xs btn-success', 'id' => 'button-call'])*/?>
                         <div id="call-controls2" style="display: none;">
                             <div class="btn-group">
-                            <?=\yii\helpers\Html::button('<i class="fa fa-phone"></i> Answer', ['class' => 'btn btn-xs btn-success', 'id' => 'button-answer'])?>
+                                <?=\yii\helpers\Html::button('<i class="fa fa-phone"></i> Answer', ['class' => 'btn btn-xs btn-success', 'id' => 'button-answer'])?>
                             </div>
                             <div class="btn-group">
-                            <?=\yii\helpers\Html::button('<i class="fa fa-forward"></i> Reject', ['class' => 'btn btn-xs btn-danger','id' => 'button-reject'])?>
+                                <?=\yii\helpers\Html::button('<i class="fa fa-forward"></i> Reject', ['class' => 'btn btn-xs btn-danger','id' => 'button-reject'])?>
                             </div>
-                            <? /*
+                            <?php /*
                             <?=\yii\helpers\Html::button('<i class="fa fa-forward"></i> Forward', ['class' => 'btn btn-sm btn-info','id' => 'button-redirect'])?>
                             <?=\yii\helpers\Html::input('text', 'redirect-to', '',  ['class' => 'form-control','id' => 'redirect-to'])?>
                              */?>
@@ -77,10 +77,12 @@
                                     <i class="fa fa-forward"></i> Forward <span class="caret"></span>
                                 </button>
                                 <ul class="dropdown-menu">
-                                    <?php if(count($supportGeneralPhones)): ?>
-                                    <?php foreach ($supportGeneralPhones AS $projectName => $projectPhone): ?>
-                                            <li><a href="#" class="forward-event" data-type="number" data-value="<?php echo $projectPhone;?>"><?php echo $projectName . ' ('.$projectPhone.')';?></a></li>
-                                    <?php endforeach; ?>
+                                    <?php if($supportGeneralPhones): ?>
+                                        <?php foreach ($supportGeneralPhones AS $projectName => $projectPhone): ?>
+                                                <li>
+                                                    <a href="#" class="forward-event" data-type="number" data-value="<?=\yii\helpers\Html::encode($projectPhone);?>"><?php echo \yii\helpers\Html::encode($projectName) . ' ('.\yii\helpers\Html::encode($projectPhone).')';?></a>
+                                                </li>
+                                        <?php endforeach; ?>
                                     <?php endif;?>
                                     <?php /*
                                     <li><a href="#" class="forward-event" data-type="general" data-value="+37378966164">Forward to general line ()</a></li>
@@ -93,9 +95,9 @@
                                     */?>
                                 </ul>
                             </div>
-                            <div class="btn-group">
+                            <?/*<div class="btn-group">
                                 <button class="btn btn-xs btn-danger forward-event" data-type="hold" data-value="+15596489977"><i class="fa fa-pause"></i> Hold</button>
-                            </div>
+                            </div>*/?>
                         </div>
                     </td>
                 </tr>
