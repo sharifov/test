@@ -59,7 +59,35 @@
                         </table>
                     </td>
                     <td>
-                        <?=\yii\helpers\Html::button('<i class="fa fa-close"></i> Hangup', ['class' => 'btn btn-xs btn-danger','id' => 'button-hangup', 'style' => 'display:none'])?>
+                        <div class="btn-group" id="btn-group-id-hangup" style="display:none">
+                            <?=\yii\helpers\Html::button('<i class="fa fa-close"></i> Hangup', ['class' => 'btn btn-sm btn-danger','id' => 'button-hangup'])?>
+                        </div>
+
+                        <div class="btn-group dropup" style="display:none" id="btn-group-id-forward">
+                            <button type="button" class="btn btn-sm btn-info dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <i class="fa fa-forward"></i> To Support <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <?php if($supportGeneralPhones): ?>
+                                    <?php foreach ($supportGeneralPhones AS $projectName => $projectPhone): ?>
+                                        <li>
+                                            <a href="#" class="forward-event" data-type="number" data-value="<?=\yii\helpers\Html::encode($projectPhone);?>"><?php echo \yii\helpers\Html::encode($projectName) . ' ('.\yii\helpers\Html::encode($projectPhone).')';?></a>
+                                        </li>
+                                    <?php endforeach; ?>
+                                <?php endif;?>
+                                <?php /*
+                                    <li><a href="#" class="forward-event" data-type="general" data-value="+37378966164">Forward to general line ()</a></li>
+                                    <li><a href="#" onclick="return false;">Forward to agent</a></li>
+                                    <li role="separator" class="divider"></li>
+                                    <li><a href="#" class="forward-event" data-type="seller" data-value="seller1">seller1</a></li>
+                                    <li><a href="#" class="forward-event" data-type="seller" data-value="seller1">seller240</a></li>
+                                    <li><a href="#" class="forward-event" data-type="seller" data-value="seller1">seller500</a></li>
+                                    <li role="separator" class="divider"></li>
+                                    */?>
+                            </ul>
+                        </div>
+
+
                         <?/*=\yii\helpers\Html::button('<i class="fa fa-phone"></i> Call', ['class' => 'btn btn-xs btn-success', 'id' => 'button-call'])*/?>
                         <div id="call-controls2" style="display: none;">
                             <div class="btn-group">
@@ -72,29 +100,7 @@
                             <?=\yii\helpers\Html::button('<i class="fa fa-forward"></i> Forward', ['class' => 'btn btn-sm btn-info','id' => 'button-redirect'])?>
                             <?=\yii\helpers\Html::input('text', 'redirect-to', '',  ['class' => 'form-control','id' => 'redirect-to'])?>
                              */?>
-                            <div class="btn-group">
-                                <button type="button" class="btn btn-xs btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                    <i class="fa fa-forward"></i> Forward <span class="caret"></span>
-                                </button>
-                                <ul class="dropdown-menu">
-                                    <?php if($supportGeneralPhones): ?>
-                                        <?php foreach ($supportGeneralPhones AS $projectName => $projectPhone): ?>
-                                                <li>
-                                                    <a href="#" class="forward-event" data-type="number" data-value="<?=\yii\helpers\Html::encode($projectPhone);?>"><?php echo \yii\helpers\Html::encode($projectName) . ' ('.\yii\helpers\Html::encode($projectPhone).')';?></a>
-                                                </li>
-                                        <?php endforeach; ?>
-                                    <?php endif;?>
-                                    <?php /*
-                                    <li><a href="#" class="forward-event" data-type="general" data-value="+37378966164">Forward to general line ()</a></li>
-                                    <li><a href="#" onclick="return false;">Forward to agent</a></li>
-                                    <li role="separator" class="divider"></li>
-                                    <li><a href="#" class="forward-event" data-type="seller" data-value="seller1">seller1</a></li>
-                                    <li><a href="#" class="forward-event" data-type="seller" data-value="seller1">seller240</a></li>
-                                    <li><a href="#" class="forward-event" data-type="seller" data-value="seller1">seller500</a></li>
-                                    <li role="separator" class="divider"></li>
-                                    */?>
-                                </ul>
-                            </div>
+
                             <?/*<div class="btn-group">
                                 <button class="btn btn-xs btn-danger forward-event" data-type="hold" data-value="+15596489977"><i class="fa fa-pause"></i> Hold</button>
                             </div>*/?>
@@ -449,7 +455,11 @@
                     saveDbCall(conn.parameters.CallSid, conn.message.FromAgentPhone, conn.message.To, 'queued');
 
                     //document.getElementById('button-call').style.display = 'none';
-                    document.getElementById('button-hangup').style.display = 'inline';
+                    //document.getElementById('button-hangup').style.display = 'inline';
+                    document.getElementById('btn-group-id-forward').style.display = 'inline';
+                    document.getElementById('btn-group-id-hangup').style.display = 'inline';
+
+
                     volumeIndicators.style.display = 'block';
                     bindVolumeIndicators(conn);
                 });
@@ -462,7 +472,11 @@
                     saveDbCall(conn.parameters.CallSid, conn.message.FromAgentPhone, conn.message.To, 'completed');
 
                     //document.getElementById('button-call').style.display = 'inline';
-                    document.getElementById('button-hangup').style.display = 'none';
+                    //document.getElementById('button-hangup').style.display = 'none';
+                    document.getElementById('btn-group-id-forward').style.display = 'none';
+                    document.getElementById('btn-group-id-hangup').style.display = 'none';
+
+
                     volumeIndicators.style.display = 'none';
 
                     cleanPhones();
@@ -637,9 +651,9 @@ $js = <<<JS
 
     $(document).on('click',  '.forward-event',  function (e) {
         e.preventDefault();
-        elForwardSelected = $(e.target);
-        elForwardSelectedType  = elForwardSelected.data('type');
-        elForwardSelectedValue = elForwardSelected.data('value');
+        var elForwardSelected = $(e.target);
+        var elForwardSelectedType  = elForwardSelected.data('type');
+        var elForwardSelectedValue = elForwardSelected.data('value');
         
         if(connection && connection.parameters.CallSid && elForwardSelectedType) {
             if(elForwardSelectedValue.length < 2) {
