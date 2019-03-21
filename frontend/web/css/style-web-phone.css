@@ -52,9 +52,9 @@ div#call-controls input {
 }
 
 
-button#button-hangup {
+/*button#button-hangup {
   display: none;
-}
+}*/
 
 #call-log {
   border: 1px solid #686865;

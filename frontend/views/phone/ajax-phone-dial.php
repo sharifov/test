@@ -110,7 +110,11 @@ use yii\helpers\Html;
                     <?=Html::dropDownList('call-from-number', [], $fromPhoneNumbers, ['id' => 'call-from-number', 'class' => 'form-control'])?>
                 </td>
                 <td>
-                    <?=Html::textInput('call-to-number', $phone_number, ['id' => 'call-to-number', 'class' => 'form-control', 'readonly' => false, 'disable' => false])?>
+                    <?=Html::textInput('call-to-number', $phone_number, ['id' => 'call-to-number', 'class' => 'form-control',
+                            'readonly' => Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) ? false : true,
+                            'disable' => Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) ? false : true
+                        ])
+                    ?>
                     <?=Html::hiddenInput('call-lead-id', $lead_id, ['id' => 'call-lead-id'])?>
                     <?=Html::hiddenInput('call-project-id', $project ? $project->id : '', ['id' => 'call-project-id'])?>
                 </td>
