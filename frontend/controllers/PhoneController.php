@@ -86,6 +86,9 @@ class PhoneController extends FController
         $project_id = Yii::$app->request->post('project_id');
         $lead_id = Yii::$app->request->post('lead_id');
 
+
+        $selectProjectPhone = null;
+
         $project = Project::findOne($project_id);
 
         $userId = \Yii::$app->user->id; //identity;
@@ -98,6 +101,10 @@ class PhoneController extends FController
                     continue;
                 }
                 $fromPhoneNumbers[$param->upp_tw_phone_number] = $param->uppProject->name . ' (' . $param->upp_tw_phone_number . ')';
+
+                if($project_id  && $project_id == $param->upp_project_id) {
+                    $selectProjectPhone = $param->upp_tw_phone_number;
+                }
             }
         }
 
@@ -135,7 +142,8 @@ class PhoneController extends FController
             'lead_id' => $lead_id,
             //'dataProvider' => $dataProvider,
             'isAgent' => $isAgent,
-            'fromPhoneNumbers' => $fromPhoneNumbers
+            'fromPhoneNumbers' => $fromPhoneNumbers,
+            'selectProjectPhone' => $selectProjectPhone
         ]);
     }
 
