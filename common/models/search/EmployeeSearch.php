@@ -105,7 +105,9 @@ class EmployeeSearch extends Employee
         }
 
 
-        if ($this->user_call_type_id > 0) {
+        //echo $this->user_call_type_id.'+++';
+
+        if ($this->user_call_type_id > 0 || $this->user_call_type_id === '0') {
             $subQuery = UserProfile::find()->select(['DISTINCT(up_user_id)'])->where(['=', 'up_call_type_id', $this->user_call_type_id]);
             $query->andWhere(['IN', 'employees.id', $subQuery]);
         }
