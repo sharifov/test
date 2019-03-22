@@ -233,7 +233,8 @@ $isQA = Yii::$app->authManager->getAssignment('qa', Yii::$app->user->id);
                     'icon' => 'list',
                     'items' =>  [
 
-                        ['label' => 'Projects', 'url' => ['/settings/projects'], 'icon' => 'product-hunt'],
+                        ['label' => 'Projects', 'url' => ['/project/index'], 'icon' => 'product-hunt'],
+                        ['label' => 'Project Sources', 'url' => ['/sources/index'], 'icon' => 'product-hunt'],
                         ['label' => 'Airlines', 'url' => ['/settings/airlines'], 'icon' => 'plane'],
                         ['label' => 'Airports', 'url' => ['/settings/airports'], 'icon' => 'plane'],
                         ['label' => 'ACL', 'url' => ['/settings/acl'], 'icon' => 'user-secret'],
@@ -242,6 +243,8 @@ $isQA = Yii::$app->authManager->getAssignment('qa', Yii::$app->user->id);
                         ['label' => 'Lead Tasks', 'url' => ['lead-task/index'], 'icon' => 'list'],
                         ['label' => 'Email template types', 'url' => ['/email-template-type/index'], 'icon' => 'envelope-o'],
                         ['label' => 'SMS template types', 'url' => ['/sms-template-type/index'], 'icon' => 'comments-o'],
+
+                        ['label' => 'Project Settings', 'url' => ['/settings/projects'], 'icon' => 'product-hunt'],
 
                     ]
                 ];

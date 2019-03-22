@@ -77,13 +77,14 @@ $this->registerJs($js);
                     'class' => 'control-label'
                 ]) ?>
                 <div>
-                    <table class="table">
+                    <table class="table table-bordered table-striped">
                         <thead>
-                        <tr>
-                            <th>Id</th>
-                            <th>Source Name</th>
-                            <th>CID</th>
-                        </tr>
+                            <tr>
+                                <th>Id</th>
+                                <th>Source Name</th>
+                                <th>CID</th>
+                                <th>Phone</th>
+                            </tr>
                         </thead>
                         <tbody>
                         <?php foreach ($model->sources as $subSource) : ?>
@@ -91,6 +92,7 @@ $this->registerJs($js);
                                 <td><?= $subSource->id ?></td>
                                 <td><?= $subSource->name ?></td>
                                 <td><?= $subSource->cid ?></td>
+                                <td><?= $subSource->phone_number ?></td>
                             </tr>
                         <?php endforeach; ?>
                         </tbody>
