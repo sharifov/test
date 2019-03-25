@@ -647,7 +647,7 @@ $js = <<<JS
     
     //console.log(tw_configs);
     initDevice();
-    setInterval('renewTwDevice();', 50000);
+    //setInterval('renewTwDevice();', 50000);
 
     $(document).on('click',  '.forward-event',  function (e) {
         e.preventDefault();
