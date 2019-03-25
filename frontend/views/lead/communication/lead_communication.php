@@ -666,8 +666,13 @@ $this->registerJs($js);
 <?php
 
 
+$tpl_email_blank_id = \frontend\models\CommunicationForm::TPL_TYPE_EMAIL_BLANK;
+
 
 $js = <<<JS
+
+    const tpl_email_blank_id = '$tpl_email_blank_id';
+
     $('body').on("change", '#c_type_id', function () {
         initializeMessageType($(this).val());
     });
@@ -714,8 +719,8 @@ $js = <<<JS
                 
         var type_id = $('#c_type_id').val();
         
-        if(type_id == 1) {
-            if($(this).val() == 1) {
+        if(type_id != tpl_email_blank_id) {
+            if($(this).val() != tpl_email_blank_id) {
                 $('#email-textarea-div').hide();
                 $('#email-subtitle-group').hide();
             } else {

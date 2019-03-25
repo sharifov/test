@@ -54,6 +54,7 @@ class CommunicationForm extends Model
     ];
 
     public const TPL_TYPE_EMAIL_OFFER = 1;
+    public const TPL_TYPE_EMAIL_BLANK = 8;
     public const TPL_TYPE_SMS_OFFER = 2;
 
     public $c_type_id;
@@ -100,9 +101,9 @@ class CommunicationForm extends Model
 
 
             [['c_email_message', 'c_email_subject'], 'required', 'when' => function (CommunicationForm $model) {
-                return $model->c_email_tpl_id != self::TPL_TYPE_EMAIL_OFFER && $model->c_type_id == self::TYPE_EMAIL;
+                return $model->c_email_tpl_id == self::TPL_TYPE_EMAIL_BLANK && $model->c_type_id == self::TYPE_EMAIL;
             },
-                'whenClient' => "function (attribute, value) { return ($('#c_type_id').val() == " . self::TYPE_EMAIL . " && $('#c_email_tpl_id').val() != " . self::TPL_TYPE_EMAIL_OFFER . '); }'
+                'whenClient' => "function (attribute, value) { return ($('#c_type_id').val() == " . self::TYPE_EMAIL . " && $('#c_email_tpl_id').val() == " . self::TPL_TYPE_EMAIL_BLANK . '); }'
             ],
 
 
