@@ -10,9 +10,9 @@ $this->params['breadcrumbs'][] = 'Test Phone';
 <div class="phone-update">
     <h1><?= Html::encode($this->title) ?></h1>
 
-    1. <a href="#" class="call-phone" data-project-id="1" data-phone="+37369594567">+37369594567</a> - Alex <br/>
+    1. <a href="#" class="call-phone" data-project-id="6" data-lead-id="92138" data-phone="+37369594567">+37369594567</a> - Alex  project-id 6<br/>
 
-    2. <a href="#" class="call-phone" data-phone="+37378966164">+37378966164</a> - Serj<br>
+    2. <a href="#" class="call-phone" data-project-id="2" data-lead-id="92048" data-phone="+37378966164">+37378966164</a> - Serj project-id 2<br>
 
     3. <a href="#" class="call-phone" data-phone="+37379731662">+37379731662</a> - Onorine<br>
 

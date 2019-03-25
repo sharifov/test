@@ -290,22 +290,47 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         return ArrayHelper::map(self::find()->where(['status' => self::STATUS_ACTIVE])->all(), 'id', 'username');
     }
 
-    public static function getAllRoles()
+    /**
+     * @return array
+     */
+    public static function getAllRoles(): array
     {
-        $roles = [];
+
         $query = new Query();
         $result = $query->select(['name', 'description'])
             ->from('auth_item')->where(['type' => 1])
             ->all();
 
-        foreach ($result as $item) {
+
+        $roles = ArrayHelper::map($result, 'name', 'description');
+        //VarDumper::dump($result, 10, true);
+
+        /*foreach ($result as $item) {
             if (($item['name'] == 'admin' || $item['name'] == 'supervision') && Yii::$app->user->identity->role != 'admin') {
                 continue;
             }
 
 
             $roles[$item['name']] = $item['description'];
+        }*/
+
+
+        if(Yii::$app->user->identity->role != 'admin') {
+            if(isset($roles['admin'])) {
+                unset($roles['admin']);
+            }
+
+            if(isset($roles['supervision'])) {
+                unset($roles['supervision']);
+            }
+
+            if(isset($roles['qa'])) {
+                unset($roles['qa']);
+            }
         }
+
+        //VarDumper::dump($roles, 10, true);
+
         return $roles;
     }
 
@@ -676,7 +701,8 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
             ->where(['lt_user_id' => $this->id])
             ->andFilterWhere(['>=', 'lt_date', $start_dt])
             ->andFilterWhere(['<=', 'lt_date', $end_dt])
-            ->groupBy(['lt_task_id']);
+            ->groupBy(['lt_task_id'])
+            ->orderBy(['lt_task_id' => SORT_ASC]);
 
         $taskListCheckedQuery = \common\models\LeadTask::find()->select(['COUNT(*) AS field_cnt', 'lt_task_id'])
             ->where(['lt_user_id' => $this->id])
@@ -711,6 +737,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         //$itemHeader = [];
         $item = [];
 
+
         if ($taskListAll) {
             foreach ($taskListAll as $task) {
                 //$itemHeader[] = Html::encode($task->ltTask->t_name);
@@ -718,9 +745,9 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
 
                 $completedTasks = $completed[$task->lt_task_id] ?? 0;
 
-                $str = '<b>' . Html::encode($task->ltTask->t_name) . '</b><br>' . $completedTasks . ' / ' . Html::a($task->field_cnt,
+                $str = '<tr><td><small>' . Html::encode($task->ltTask->t_name) . '</small></td><td><small>' . $completedTasks . ' / ' . Html::a($task->field_cnt,
                         ['lead-task/index', 'LeadTaskSearch[lt_task_id]' => $task->lt_task_id, 'LeadTaskSearch[lt_user_id]' => $this->id],
-                        ['data-pjax' => 0, 'target' => '_blank']) . '';
+                        ['data-pjax' => 0, 'target' => '_blank']) . '</small></td>';
 
 
                 if ($task->field_cnt > 0) {
@@ -729,11 +756,11 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
                     $percent = 0;
                 }
 
-                $str .= '<br><div class="progress" title="' . $percent . '%">
+                $str .= '<td width="100"><div class="progress" style="margin-bottom: 0" title="' . $percent . '%">
                           <div class="progress-bar" role="progressbar" aria-valuenow="' . $percent . '" aria-valuemin="0" aria-valuemax="100" style="width: ' . $percent . '%;">
                             ' . $percent . '%
                           </div>
-                        </div>';
+                        </div></td></tr>';
 
 
                 $item[] = $str;
@@ -745,9 +772,10 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
             $str = '<table class="table table-bordered table-condensed">';
             //$str .= '<tr><th class="text-center">'.implode('</th><th class="text-center">', $itemHeader).'</th></tr>';
 
-            $str .= '<tr>';
-            $str .= '<td class="text-center">' . implode('</td><td class="text-center">', $item) . '</td>';
-            $str .= '</tr>';
+            //$str .= '<tr>';
+            //$str .= '<td class="text-center">' . implode('</td><td class="text-center">', $item) . '</td>';
+            //$str .= '</tr>';
+            $str .= implode('', $item);
             $str .= '</table>';
         } else {
             $str = '-';
@@ -894,6 +922,36 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         }
 
         $query = LeadFlow::find()->select('COUNT(DISTINCT(lead_id))')->where(['employee_id' => $this->id, 'status' => $statusList]);
+        $query->andFilterWhere(['>=', 'created', $startDate]);
+        $query->andFilterWhere(['<=', 'created', $endDate]);
+        $count = $query->asArray()->scalar();
+        return $count;
+    }
+
+
+    /**
+     * @param array $statusList
+     * @param int|null $from_status_id
+     * @param string|null $startDate
+     * @param string|null $endDate
+     * @return int
+     */
+    public function getLeadCountByStatuses(array $statusList = [], int $from_status_id = null, string $startDate = null, string $endDate = null): int
+    {
+        if ($startDate) {
+            $startDate = date('Y-m-d', strtotime($startDate));
+        }
+
+        if ($endDate) {
+            $endDate = date('Y-m-d', strtotime($endDate));
+        }
+
+        $query = LeadFlow::find()->select('COUNT(DISTINCT(lead_id))')->where(['employee_id' => $this->id, 'status' => $statusList]);
+
+        if($from_status_id > 0) {
+            $query->andWhere(['lf_from_status_id' => $from_status_id]);
+        }
+
         $query->andFilterWhere(['>=', 'created', $startDate]);
         $query->andFilterWhere(['<=', 'created', $endDate]);
         $count = $query->asArray()->scalar();
@@ -1221,7 +1279,8 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
 
         $subQuery2 = UserCallStatus::find()->select(['us_type_id'])->where('us_user_id = user_connection.uc_user_id')->orderBy(['us_id' => SORT_DESC])->limit(1);
         $subQuery3 = Call::find()->select(['c_call_status'])->where('c_created_user_id = user_connection.uc_user_id')->orderBy(['c_id' => SORT_DESC])->limit(1);
-        $subQuery4 = UserProjectParams::find()->select(['upp_tw_sip_id'])->where('upp_user_id = user_connection.uc_user_id')->andWhere(['upp_project_id' => $project_id]);
+        //$subQuery4 = UserProjectParams::find()->select(['upp_tw_sip_id'])->where('upp_user_id = user_connection.uc_user_id')->andWhere(['upp_project_id' => $project_id]);
+        $subQuery4 = UserProfile::find()->select(['up_call_type_id'])->where('up_user_id = user_connection.uc_user_id');
         $subQuery6 = UserProjectParams::find()->select(['upp_tw_phone_number'])->where('upp_user_id = user_connection.uc_user_id')->andWhere(['upp_project_id' => $project_id]);
 
 
@@ -1232,7 +1291,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
                 'tbl_user_id' => 'user_connection.uc_user_id',
                 'tbl_call_status_id' => $subQuery2,
                 'tbl_last_call_status' => $subQuery3,
-                'tbl_sip_id' => $subQuery4,
+                'tbl_call_type_id' => $subQuery4,
                 'tbl_phone' => $subQuery6,
                 'tbl_calls_count' => $subQuery5
             ]
@@ -1261,7 +1320,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         $generalQuery->andWhere(['<>', 'tbl_user_id', $user_id]);
         $generalQuery->andWhere(['OR', ['NOT IN', 'tbl_last_call_status', [Call::CALL_STATUS_RINGING, Call::CALL_STATUS_IN_PROGRESS]], ['tbl_last_call_status' => null]]);
         $generalQuery->andWhere(['OR', ['tbl_call_status_id' => UserCallStatus::STATUS_TYPE_READY], ['tbl_call_status_id' => null]]);
-        $generalQuery->andWhere(['AND', ['<>', 'tbl_sip_id', ''], ['IS NOT', 'tbl_sip_id', null]]);
+        $generalQuery->andWhere(['AND', ['<>', 'tbl_call_type_id', UserProfile::CALL_TYPE_OFF], ['IS NOT', 'tbl_call_type_id', null]]);
         $generalQuery->orderBy(['tbl_calls_count' => SORT_ASC]);
 
         //$sqlRaw = $generalQuery->createCommand()->getRawSql();

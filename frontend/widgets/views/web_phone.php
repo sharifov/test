@@ -8,28 +8,6 @@
 \frontend\assets\WebPhoneAsset::register($this);
 ?>
 
-<style>
-    #web-phone-widget {
-        position: fixed;
-        width: 100%;
-        max-width: 800px;
-
-        padding: 2px;
-        bottom: 10px;
-        border: 1px solid #8AC007;
-        /*margin-left: 50%;*/
-        box-shadow: 2px 2px 4px #333;
-        z-index: 999;
-        display: none;
-        /*height: 600px;*/
-        background-color: rgba(255, 255, 255, 0.8);
-        /*margin-left: -50px;*/
-
-        /*margin-left: calc(100% - calc(width / 2));*/
-
-    }
-</style>
-
 <div class="fabs2" style="display: none">
     <a id="prime2" class="fab2"><i class="fa fa-phone"></i></a>
 </div>
@@ -40,10 +18,10 @@
 
 
         <div id="web-phone-token" style="display: none"><?=$token?></div>
-            <table class="table table-bordered">
+            <table class="table" style="margin: 0">
                 <tr>
                     <?/*<td style="display: none"><i title="<?=$token?>">Token</i></td>*/?>
-                    <td width="100px"><i class="fa fa-user"></i> <?=$clientId?></td>
+                    <td width="100"><i class="fa fa-user"></i> <span><?=$clientId?></span></td>
                     <td>From: <i class="fa fa-phone"></i> <span id="web-call-from-number"></span></td>
 
                     <td>To: <i class="fa fa-phone"></i> <span id="web-call-to-number"></span></td>
@@ -57,15 +35,75 @@
                             </tr>
                         </table>
                     </td>*/?>
-                    <td>
-                        <?/*=\yii\helpers\Html::button('<i class="fa fa-phone"></i> Call', ['class' => 'btn btn-xs btn-success', 'id' => 'button-call'])*/?>
-                        <?=\yii\helpers\Html::button('<i class="fa fa-close"></i> Hangup', ['class' => 'btn btn-xs btn-danger','id' => 'button-hangup', 'style' => 'display:none'])?>
-                    </td>
                     <td width="120px">
                         <div class="text-right">
-                            <?=\yii\helpers\Html::button('<i class="fa fa-tumblr"></i>', ['class' => 'btn btn-xs btn-primary', 'id' => 'btn-webphone-token', 'onclick' => 'alert($("#web-phone-token").text())'])?>
+                            <?//=\yii\helpers\Html::button('<i class="fa fa-tumblr"></i>', ['class' => 'btn btn-xs btn-primary', 'id' => 'btn-webphone-token', 'onclick' => 'alert($("#web-phone-token").text())'])?>
                             <?=\yii\helpers\Html::button('<i class="fa fa-angle-double-up"></i>', ['class' => 'btn btn-xs btn-primary', 'id' => 'btn-nin-max-webphone'])?>
                             <?=\yii\helpers\Html::button('<i class="fa fa-close"></i>', ['class' => 'btn btn-xs btn-primary', 'id' => 'btn-webphone-close'])?>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+            <table class="table" style="margin: 0">
+                <tr>
+                    <td width="250">
+                        <table id="volume-indicators" style="display: none">
+                            <tr title="Mic Volume">
+                                <td><i class="fa fa-microphone"></i> </td>
+                                <td><div id="input-volume" style="width: 200px; height: 7px;"></div></td>
+                            </tr>
+                            <tr title="Speaker Volume">
+                                <td><i class="fa fa-volume-down"></i> </td>
+                                <td><div id="output-volume" style="width: 200px; height: 7px;"></div></td>
+                            </tr>
+                        </table>
+                    </td>
+                    <td>
+                        <div class="btn-group" id="btn-group-id-hangup" style="display:none">
+                            <?=\yii\helpers\Html::button('<i class="fa fa-close"></i> Hangup', ['class' => 'btn btn-sm btn-danger','id' => 'button-hangup'])?>
+                        </div>
+
+                        <div class="btn-group dropup" style="display:none" id="btn-group-id-forward">
+                            <button type="button" class="btn btn-sm btn-info dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <i class="fa fa-forward"></i> To Support <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <?php if($supportGeneralPhones): ?>
+                                    <?php foreach ($supportGeneralPhones AS $projectName => $projectPhone): ?>
+                                        <li>
+                                            <a href="#" class="forward-event" data-type="number" data-value="<?=\yii\helpers\Html::encode($projectPhone);?>"><?php echo \yii\helpers\Html::encode($projectName) . ' ('.\yii\helpers\Html::encode($projectPhone).')';?></a>
+                                        </li>
+                                    <?php endforeach; ?>
+                                <?php endif;?>
+                                <?php /*
+                                    <li><a href="#" class="forward-event" data-type="general" data-value="+37378966164">Forward to general line ()</a></li>
+                                    <li><a href="#" onclick="return false;">Forward to agent</a></li>
+                                    <li role="separator" class="divider"></li>
+                                    <li><a href="#" class="forward-event" data-type="seller" data-value="seller1">seller1</a></li>
+                                    <li><a href="#" class="forward-event" data-type="seller" data-value="seller1">seller240</a></li>
+                                    <li><a href="#" class="forward-event" data-type="seller" data-value="seller1">seller500</a></li>
+                                    <li role="separator" class="divider"></li>
+                                    */?>
+                            </ul>
+                        </div>
+
+
+                        <?/*=\yii\helpers\Html::button('<i class="fa fa-phone"></i> Call', ['class' => 'btn btn-xs btn-success', 'id' => 'button-call'])*/?>
+                        <div id="call-controls2" style="display: none;">
+                            <div class="btn-group">
+                                <?=\yii\helpers\Html::button('<i class="fa fa-phone"></i> Answer', ['class' => 'btn btn-xs btn-success', 'id' => 'button-answer'])?>
+                            </div>
+                            <div class="btn-group">
+                                <?=\yii\helpers\Html::button('<i class="fa fa-forward"></i> Reject', ['class' => 'btn btn-xs btn-danger','id' => 'button-reject'])?>
+                            </div>
+                            <?php /*
+                            <?=\yii\helpers\Html::button('<i class="fa fa-forward"></i> Forward', ['class' => 'btn btn-sm btn-info','id' => 'button-redirect'])?>
+                            <?=\yii\helpers\Html::input('text', 'redirect-to', '',  ['class' => 'form-control','id' => 'redirect-to'])?>
+                             */?>
+
+                            <?/*<div class="btn-group">
+                                <button class="btn btn-xs btn-danger forward-event" data-type="hold" data-value="+15596489977"><i class="fa fa-pause"></i> Hold</button>
+                            </div>*/?>
                         </div>
                     </td>
                 </tr>
@@ -74,11 +112,11 @@
 
             <div class="webphone-controls" id="controls" style="display: none">
 
-                <table class="table table-bordered">
+                <table class="table">
                     <tr>
-                        <td>
+                        <td width="250">
                             <div id="info">
-                                <div id="client-name"></div>
+                                <?/*<div id="client-name"></div>*/ ?>
                                 <div id="output-selection">
                                     <label>Ringtone Devices</label>
                                     <select id="ringtone-devices" multiple></select>
@@ -89,28 +127,8 @@
                             </div>
                         </td>
                         <td>
-                            <div id="call-controls">
-                                <?/*<p>Make a Call:</p>
-                                <input id="phone-number" type="text" placeholder="Enter a phone/client" />
-                                <br>*/?>
-
-                                <div id="volume-indicators">
-                                    <label>Mic Volume</label>
-                                    <div id="input-volume" style=" border: dashed 1px #fff; width: 200px; height: 10px;"></div>
-                                    <br/>
-                                    <label>Speaker Volume</label>
-                                    <div id="output-volume" style=" border: dashed 1px #fff; width: 200px; height: 10px;"></div>
-                                </div>
-                            </div>
-
-                            <div id="call-controls2">
-                                <?=\yii\helpers\Html::button('<i class="fa fa-phone"></i> Answer', ['class' => 'btn btn-xs btn-success', 'id' => 'button-answer'])?>
-                                <?=\yii\helpers\Html::button('<i class="fa fa-close"></i> Reject', ['class' => 'btn btn-xs btn-danger','id' => 'button-reject'])?>
-                            </div>
-                        </td>
-                        <td>
                             <i>Logs:</i>
-                            <div id="log"></div>
+                            <div id="call-log"></div>
                         </td>
                     </tr>
                 </table>
@@ -131,10 +149,32 @@
 ]); ?>
 <?php \yii\bootstrap\Modal::end(); ?>
 
-<script type="text/javascript">
-    var tw_configs = {"client":"<?= $clientId;?>"};
 
-    "use strict";
+<?php
+    $ajaxSaveCallUrl = \yii\helpers\Url::to(['phone/ajax-save-call']);
+    $ajaxRedirectCallUrl = \yii\helpers\Url::to(['phone/ajax-call-redirect']);
+?>
+
+
+<script type="text/javascript">
+
+    const ajaxSaveCallUrl = '<?=$ajaxSaveCallUrl?>';
+    const ajaxCallRedirectUrl = '<?=$ajaxRedirectCallUrl?>';
+
+    function createNotify(title, message, type) {
+        new PNotify({
+            title: title,
+            type: type,
+            text: message,
+            hide: true
+        });
+    }
+
+    var tw_configs = {"client":"<?= $clientId;?>"};
+    var webPhoneParams = {};
+    var call_acc_sid = '';
+
+   // "use strict";
 
     var device;
     var connection;
@@ -202,27 +242,33 @@
         device.audio.ringtoneDevices.set(selectedDevices);
     });
 
+
+    function volumeIndicatorsChange(inputVolume, outputVolume) {
+        var inputColor = 'red';
+        if (inputVolume < .50) {
+            inputColor = 'green';
+        } else if (inputVolume < .75) {
+            inputColor = 'yellow';
+        }
+
+        inputVolumeBar.style.width = Math.floor(inputVolume * 300) + 'px';
+        inputVolumeBar.style.background = inputColor;
+
+        var outputColor = 'red';
+        if (outputVolume < .50) {
+            outputColor = 'green';
+        } else if (outputVolume < .75) {
+            outputColor = 'yellow';
+        }
+
+        outputVolumeBar.style.width = Math.floor(outputVolume * 300) + 'px';
+        outputVolumeBar.style.background = outputColor;
+    }
+
+
     function bindVolumeIndicators(connection) {
         connection.on('volume', function (inputVolume, outputVolume) {
-            var inputColor = 'red';
-            if (inputVolume < .50) {
-                inputColor = 'green';
-            } else if (inputVolume < .75) {
-                inputColor = 'yellow';
-            }
-
-            inputVolumeBar.style.width = Math.floor(inputVolume * 300) + 'px';
-            inputVolumeBar.style.background = inputColor;
-
-            var outputColor = 'red';
-            if (outputVolume < .50) {
-                outputColor = 'green';
-            } else if (outputVolume < .75) {
-                outputColor = 'yellow';
-            }
-
-            outputVolumeBar.style.width = Math.floor(outputVolume * 300) + 'px';
-            outputVolumeBar.style.background = outputColor;
+            volumeIndicatorsChange(inputVolume, outputVolume);
         });
     }
 
@@ -258,24 +304,24 @@
 
     // Activity log
     function log(message) {
-        var logDiv = document.getElementById('log');
+        var logDiv = document.getElementById('call-log');
         logDiv.innerHTML += '<p>&gt;&nbsp;' + message + '</p>';
         logDiv.scrollTop = logDiv.scrollHeight;
     }
 
 
     function clearLog() {
-        var logDiv = document.getElementById('log');
+        var logDiv = document.getElementById('call-log');
         logDiv.innerHTML = '';
         logDiv.scrollTop = logDiv.scrollHeight;
     }
 
     // Set the client name in the UI
-    function setClientNameUI(clientName) {
+    /*function setClientNameUI(clientName) {
         var div = document.getElementById('client-name');
         div.innerHTML = 'Your client name: <strong>' + clientName +
             '</strong>';
-    }
+    }*/
 
     function renewTwDevice() {
         console.log(device.status());
@@ -294,7 +340,6 @@
         console.log("button-answer: " + connection);
         if (connection) {
             connection.accept();
-            document.getElementById('call-controls').style.display = 'block';
             document.getElementById('call-controls2').style.display = 'none';
         }
     };
@@ -303,10 +348,75 @@
         console.log("button-reject: " + connection);
         if (connection) {
             connection.reject();
-            document.getElementById('call-controls').style.display = 'block';
             document.getElementById('call-controls2').style.display = 'none';
         }
     };
+
+    // TODO redirect call
+    /*document.getElementById('button-redirect').onclick = function () {
+        console.log("button-redirect: " + connection);
+        if (connection && connection.parameters.CallSid) {
+            connection.accept();
+            redirectToClient = document.getElementById('redirect-to').value;
+            if(redirectToClient.length < 2) {
+                return false;
+            }
+            $.ajax({
+                type: 'post',
+                data: {
+                    'sid': connection.parameters.CallSid,
+                    'type': 'client',
+                    'from': connection.parameters.To,
+                    'to':redirectToClient,
+                },
+                url: ajaxCallRedirectUrl,
+                success: function (data) {
+                    console.log(data);
+
+                },
+                error: function (error) {
+                    console.error(error);
+                }
+            });
+        }
+    };*/
+
+
+    function saveDbCall(call_sid, call_from, call_to, call_status) {
+
+        var project_id = webPhoneParams.project_id;
+        var lead_id = webPhoneParams.lead_id;
+        //var call_acc_sid =
+
+        console.info('sid: ' + call_sid + ' : ' + call_from + ' : ' + call_to + ' : ' + call_status + ' : ' + project_id + ' : ' + lead_id);
+
+        //console.warn(webPhoneParams); return false;
+
+        if(call_sid) {
+            $.ajax({
+                type: 'post',
+                data: {
+                    'call_acc_sid': call_acc_sid,
+                    'call_sid': call_sid,
+                    'call_from': call_from,
+                    'call_to': call_to,
+                    'call_status': call_status,
+                    'lead_id': lead_id,
+                    'project_id': project_id
+                },
+                url: ajaxSaveCallUrl,
+                success: function (data) {
+                    console.log(data);
+                    //$('#preloader').addClass('hidden');
+                    //modal.find('.modal-body').html(data);
+                    //modal.modal('show');
+                },
+                error: function (error) {
+                    console.error(error);
+                }
+            });
+        }
+    }
 
 
     function initDevice() {
@@ -317,14 +427,19 @@
             .then(function (data_res) {
                 var data = data_res.data;
                 log('Got a token.');
-                console.log('Token: ' + data.token);
+                console.log('app_sid: ' + data.app_sid);
+                console.log('account_sid: ' + data.account_sid);
+
+                call_acc_sid = data.account_sid;
+
+                //console.log('Token: ' + data.token);
                 // Setup Twilio.Device
                 device = new Twilio.Device(data.token, {debug: true});
 
                 //console.log([data, device]);
                 device.on('ready', function (device) {
                     log('Twilio.Device Ready!');
-                    document.getElementById('call-controls').style.display = 'block';
+                    //document.getElementById('call-controls').style.display = 'block';
                 });
 
                 device.on('error', function (error) {
@@ -333,16 +448,35 @@
 
                 device.on('connect', function (conn) {
                     log('Successfully established call!');
+                    console.warn(conn);
+                    //console.info(conn.parameters);
+                    //console.log(conn.parameters.CallSid);
+
+                    saveDbCall(conn.parameters.CallSid, conn.message.FromAgentPhone, conn.message.To, 'queued');
+
                     //document.getElementById('button-call').style.display = 'none';
-                    document.getElementById('button-hangup').style.display = 'inline';
+                    //document.getElementById('button-hangup').style.display = 'inline';
+                    document.getElementById('btn-group-id-forward').style.display = 'inline';
+                    document.getElementById('btn-group-id-hangup').style.display = 'inline';
+
+
                     volumeIndicators.style.display = 'block';
                     bindVolumeIndicators(conn);
                 });
 
                 device.on('disconnect', function (conn) {
-                    log('Call ended.');
+                    log('Call ended');
+                    createNotify('Call ended', 'Call ended', 'warning');
+                    console.warn(conn);
+
+                    saveDbCall(conn.parameters.CallSid, conn.message.FromAgentPhone, conn.message.To, 'completed');
+
                     //document.getElementById('button-call').style.display = 'inline';
-                    document.getElementById('button-hangup').style.display = 'none';
+                    //document.getElementById('button-hangup').style.display = 'none';
+                    document.getElementById('btn-group-id-forward').style.display = 'none';
+                    document.getElementById('btn-group-id-hangup').style.display = 'none';
+
+
                     volumeIndicators.style.display = 'none';
 
                     cleanPhones();
@@ -352,8 +486,10 @@
                 device.on('incoming', function (conn) {
                     connection = conn;
                     log('Incoming connection from ' + conn.parameters.From);
+                    createNotify('Incoming connection', 'Incoming connection from ' + conn.parameters.From, 'success');
+
                     var archEnemyPhoneNumber = tw_configs.client;
-                    document.getElementById('call-controls').style.display = 'none';
+                    //document.getElementById('call-controls').style.display = 'none';
                     document.getElementById('call-controls2').style.display = 'block';
                     /*
                     if (conn.parameters.From === archEnemyPhoneNumber || conn.parameters.From === 'client:' + archEnemyPhoneNumber) {
@@ -372,14 +508,18 @@
 
                 device.on('cancel', function (conn) {
                     connection = conn;
-                    log('Cancel call.');
-                    document.getElementById('call-controls').style.display = 'block';
+                    log('Cancel call');
+                    createNotify('Cancel call', 'Cancel call', 'warning');
+                    saveDbCall(conn.parameters.CallSid, conn.message.FromAgentPhone, conn.message.To, 'canceled');
+
+                    //document.getElementById('call-controls').style.display = 'block';
                     document.getElementById('call-controls2').style.display = 'none';
                 });
 
 
 
-                setClientNameUI(data.client);
+                //setClientNameUI(data.client);
+
                 device.audio.on('deviceChange', updateAllDevices.bind(device));
                 // Show audio selection UI if it is supported by the browser.
                 if (device.audio.isOutputSelectionSupported) {
@@ -389,6 +529,7 @@
             .catch(function (err) {
                 console.log(err);
                 log('Could not get a token from server!');
+                createNotify('Call Token error!', 'Could not get a token from server!', 'error');
             });
     }
 
@@ -399,8 +540,11 @@
     //});
 
 
-    function webCall(phone_from, phone_to) {
-        var params = {To: phone_to, FromAgentPhone: phone_from};
+    function webCall(phone_from, phone_to, project_id, lead_id) {
+        var params = {'To': phone_to, 'FromAgentPhone': phone_from, 'project_id': project_id, 'lead_id': lead_id};
+        webPhoneParams = params;
+
+        //console.log(params); return false;
 
         if (device) {
 
@@ -408,6 +552,7 @@
             $('#web-call-to-number').text(params.To);
 
             console.log('Calling ' + params.To + '...');
+            createNotify('Calling', 'Calling ' + params.To + '...', 'success');
             device.connect(params);
         }
     }
@@ -432,40 +577,7 @@ $js = <<<JS
 
     const ajaxPhoneDialUrl = '$ajaxPhoneDialUrl';
 
-    /*$(document).on('click', '#btn-client-details', function(e) {
-        e.preventDefault();
-        var client_id = $(this).data('client-id');
-        $('#client-details-modal .modal-body').html('<div style="text-align:center"><img width="200px" src="https://loading.io/spinners/gear-set/index.triple-gears-loading-icon.svg"></div>');
-        $('#client-details-modal').modal();
-        $.post(clientInfoUrl, {client_id: client_id},
-            function (data) {
-                $('#client-details-modal .modal-body').html(data);
-            }
-        );
-    });
-   
-    $(document).on('change', '#user-call-status-select', function(e) {
-        e.preventDefault();
-        var type_id = $(this).val();
-                
-        $.ajax({
-            type: 'post',
-            data: {'type_id': type_id},
-            url: callStatusUrl,
-            success: function (data) {
-                //console.log(data);
-                //$('#preloader').addClass('hidden');
-                //modal.find('.modal-body').html(data);
-                //modal.modal('show');
-            },
-            error: function (error) {
-                console.error('Error: ' + error);
-            }
-        });
-
-    });*/
-    
-    
+     
     $('#btn-nin-max-webphone').on('click', function() {
         var iTag = $(this).find('i');
         if(iTag.hasClass('fa-angle-double-down')) {
@@ -482,7 +594,7 @@ $js = <<<JS
     
     $('#btn-webphone-close').on('click', function() {
         
-        $('#web-phone-widget').slideUp();
+        $('#web-phone-widget').slideUp('fast');
         $('.fabs2').show();
         //$(this).find('i').addClass('fa-angle-double-up');
     });
@@ -496,6 +608,8 @@ $js = <<<JS
     $('.call-phone').on('click', function(e) {
         var phone_number = $(this).data('phone');
         var project_id = $(this).data('project-id');
+        var lead_id = $(this).data('lead-id');
+        
         //alert(phoneNumber);
         
         e.preventDefault();
@@ -503,7 +617,7 @@ $js = <<<JS
         $('#web-phone-dial-modal .modal-body').html('<div style="text-align:center"><img width="200px" src="https://loading.io/spinners/gear-set/index.triple-gears-loading-icon.svg"></div>');
         $('#web-phone-dial-modal').modal();
         
-        $.post(ajaxPhoneDialUrl, {'phone_number': phone_number, 'project_id': project_id},
+        $.post(ajaxPhoneDialUrl, {'phone_number': phone_number, 'project_id': project_id, 'lead_id': lead_id},
             function (data) {
                 $('#web-phone-dial-modal .modal-body').html(data);
             }
@@ -514,6 +628,11 @@ $js = <<<JS
         e.preventDefault();
         var phone_to = $('#call-to-number').val();
         var phone_from = $('#call-from-number').val();
+        
+        var project_id = $('#call-project-id').val();
+        var lead_id = $('#call-lead-id').val();
+        
+        
         $('#web-phone-dial-modal').modal('hide');
         //alert(phone_from + ' - ' + phone_to);
         
@@ -521,17 +640,52 @@ $js = <<<JS
         $('#web-phone-widget').slideDown();
         $('.fabs2').hide();
         
-        webCall(phone_from, phone_to);
+        webCall(phone_from, phone_to, project_id, lead_id);
     });
-    
-    
-    
     
     $('#web-phone-widget').css({left:'50%', 'margin-left':'-'+($('#web-phone-widget').width() / 2)+'px'}).slideDown();
     
     //console.log(tw_configs);
     initDevice();
     setInterval('renewTwDevice();', 50000);
+
+    $(document).on('click',  '.forward-event',  function (e) {
+        e.preventDefault();
+        var elForwardSelected = $(e.target);
+        var elForwardSelectedType  = elForwardSelected.data('type');
+        var elForwardSelectedValue = elForwardSelected.data('value');
+        
+        if(connection && connection.parameters.CallSid && elForwardSelectedType) {
+            if(elForwardSelectedValue.length < 2) {
+                console.log('Error call forward param TO');
+                return false;
+            }
+            connection.accept();
+            
+            $.ajax({
+                type: 'post',
+                data: {
+                    'sid': connection.parameters.CallSid,
+                    'type': elForwardSelectedType,
+                    'from': connection.parameters.To,
+                    'to':elForwardSelectedValue,
+                },
+                url: ajaxCallRedirectUrl,
+                success: function (data) {
+                    console.log(data);
+
+                },
+                error: function (error) {
+                    console.error(error);
+                }
+            });
+        }
+        
+        
+        
+        
+    });
+
 
 
 JS;

@@ -20,7 +20,7 @@ $this->params['breadcrumbs'][] = $this->title;
         <div class="row">
             <div class="col-md-3">
                 <p>
-                    <?= Html::a('Create Sms', ['create'], ['class' => 'btn btn-success']) ?>
+                    <?/*= Html::a('Create Sms', ['create'], ['class' => 'btn btn-success'])*/ ?>
                 </p>
             </div>
             <?php /*<div class="col-md-9">
@@ -60,6 +60,8 @@ $this->params['breadcrumbs'][] = $this->title;
                 },
                 'options' => ['style' => 'width: 100px']
             ],
+
+            ['class' => 'yii\grid\ActionColumn'],
 
             //'s_is_new:boolean',
             's_tw_message_sid',
@@ -194,7 +196,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'format' => 'raw'
             ],
 
-            ['class' => 'yii\grid\ActionColumn'],
+
         ],
     ]); ?>
     <?php Pjax::end(); ?>

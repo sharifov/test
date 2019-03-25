@@ -36,12 +36,23 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
                 'attribute' => 'id',
                 'options' => ['style' => 'width:100px'],
             ],
+
+            [
+                'attribute' => 'lf_from_status_id',
+                'value' => function(\common\models\LeadFlow $model) {
+                    return '<span class="label label-info">'.\common\models\Lead::getStatus($model->lf_from_status_id).'</span></h5>';
+                },
+                'format' => 'raw',
+                'filter' => \common\models\Lead::STATUS_LIST,
+                'options' => ['style' => 'width:180px'],
+            ],
+
             [
                 'attribute' => 'status',
                 'value' => function(\common\models\LeadFlow $model) {
                     return '<span class="label label-info">'.\common\models\Lead::getStatus($model->status).'</span></h5>';
                 },
-                'format' => 'html',
+                'format' => 'raw',
                 'filter' => \common\models\Lead::STATUS_LIST,
                 'options' => ['style' => 'width:180px'],
             ],
@@ -63,7 +74,7 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
                 'value' => function(\common\models\LeadFlow $model) {
                     return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->created));
                 },
-                'format' => 'html',
+                'format' => 'raw',
                 'options' => ['style' => 'width:180px'],
             ],
             [
@@ -71,7 +82,7 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
                 'value' => function(\common\models\LeadFlow $model) {
                     return $model->employee ? '<i class="fa fa-user"></i> '. Html::encode($model->employee->username) : '-';
                 },
-                'format' => 'html',
+                'format' => 'raw',
                 'filter' => $userList
             ],
             [
@@ -108,7 +119,7 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
 
                     return $groupsValue;
                 },
-                'format' => 'html',
+                'format' => 'raw',
                 //'filter' => Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) ? \common\models\UserGroup::getList() : Yii::$app->user->identity->getUserGroupList()
             ],
 

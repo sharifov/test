@@ -31,7 +31,7 @@ filebeat.inputs:
       #- c:\programdata\elasticsearch\logs\*
     json.keys_under_root: true
     json.add_error_key: true
-    json.message_key: message
+    #json.message_key: message
 
     # Exclude lines. A list of regular expressions to match. It drops the lines that are
     # matching any regular expression from the list.

@@ -16,7 +16,6 @@ use yii\db\ActiveRecord;
  * @property string $upp_email
  * @property string $upp_phone_number
  * @property string $upp_tw_phone_number
- * @property string $upp_tw_sip_id
  * @property string $upp_created_dt
  * @property string $upp_updated_dt
  * @property int $upp_updated_user_id
@@ -44,8 +43,8 @@ class UserProjectParams extends \yii\db\ActiveRecord
             [['upp_user_id', 'upp_project_id'], 'required'],
             [['upp_user_id', 'upp_project_id', 'upp_updated_user_id'], 'integer'],
             [['upp_created_dt', 'upp_updated_dt'], 'safe'],
-            [['upp_email', 'upp_tw_sip_id'], 'string', 'max' => 100],
-            [['upp_email', 'upp_tw_sip_id'], 'trim'],
+            [['upp_email'], 'string', 'max' => 100],
+            [['upp_email'], 'trim'],
             [['upp_email'], 'email'],
 
             ['upp_tw_phone_number', 'unique', 'targetAttribute' => ['upp_tw_phone_number']], //, 'message' => 'Twillio Phone Number must be unique'],
@@ -70,7 +69,6 @@ class UserProjectParams extends \yii\db\ActiveRecord
             'upp_email' => 'Email',
             'upp_phone_number' => 'Phone Number',
             'upp_tw_phone_number' => 'Twillio Phone Number',
-            'upp_tw_sip_id' => 'Twillio SIP ID',
             'upp_created_dt' => 'Created Dt',
             'upp_updated_dt' => 'Updated Dt',
             'upp_updated_user_id' => 'Updated User',

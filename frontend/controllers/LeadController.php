@@ -75,6 +75,14 @@ class LeadController extends FController
                         'allow' => true,
                         'roles' => ['agent', 'admin', 'supervisor'],
                     ],
+
+                    [
+                        'actions' => [
+                            'view'
+                        ],
+                        'allow' => true,
+                        'roles' => ['qa'],
+                    ],
                 ],
             ]
         ];
@@ -133,6 +141,10 @@ class LeadController extends FController
         if($lead->status == Lead::STATUS_TRASH && Yii::$app->user->identity->role == 'agent') {
             throw new ForbiddenHttpException('Access Denied for Agent');
         }
+
+        $user_id = Yii::$app->user->id;
+        $is_admin = Yii::$app->authManager->getAssignment('admin', $user_id);
+        $isQA = Yii::$app->authManager->getAssignment('qa', Yii::$app->user->id);
 
 
             if (Yii::$app->request->post('hasEditable')) {
@@ -246,7 +258,9 @@ class LeadController extends FController
                     $lt = LeadTask::find()->where(['lt_lead_id' => $leadId, 'lt_date' => $taskDate, 'lt_task_id' => $taskId, 'lt_user_id' => $userId])->one();
                     if($lt) {
                         if($lt->lt_completed_dt) {
-                            $lt->lt_completed_dt = null;
+                            if($is_admin) {
+                                $lt->lt_completed_dt = null;
+                            }
                         } else {
                             $lt->lt_completed_dt = date('Y-m-d H:i:s');
                         }
@@ -261,7 +275,7 @@ class LeadController extends FController
 
 
             Yii::$app->cache->delete(sprintf('quick-search-%d-%d', $lead->id, Yii::$app->user->identity->getId()));
-            if (!$lead->permissionsView()) {
+            if (!$isQA && !$lead->permissionsView()) {
                 throw new UnauthorizedHttpException('Not permissions view lead ID: ' . $lead->id);
             }
             $leadForm = new LeadForm($lead);
@@ -571,7 +585,7 @@ class LeadController extends FController
                                     }
                                     $previewEmailForm->e_email_from = $mailFrom; //$mailPreview['data']['email_from'];
                                     $previewEmailForm->e_email_to = $comForm->c_email_to; //$mailPreview['data']['email_to'];
-                                    $previewEmailForm->e_email_from_name = Yii::$app->user->identity->full_name;
+                                    $previewEmailForm->e_email_from_name = Yii::$app->user->identity->username;
                                     $previewEmailForm->e_email_to_name = $lead->client ? $lead->client->full_name : '';
                                     $previewEmailForm->e_quote_list = @json_encode($comForm->quoteList);
                                 }
@@ -583,7 +597,7 @@ class LeadController extends FController
                             $previewEmailForm->e_email_subject = $comForm->c_email_subject;
                             $previewEmailForm->e_email_from = $mailFrom;
                             $previewEmailForm->e_email_to = $comForm->c_email_to;
-                            $previewEmailForm->e_email_from_name = Yii::$app->user->identity->full_name;
+                            $previewEmailForm->e_email_from_name = Yii::$app->user->identity->username;
                             $previewEmailForm->e_email_to_name = $lead->client ? $lead->client->full_name : '';
                         }
 
@@ -687,12 +701,12 @@ class LeadController extends FController
                     if($lead->project_id) {
                         $upp = UserProjectParams::find()->where(['upp_project_id' => $lead->project_id, 'upp_user_id' => Yii::$app->user->id])->one();
                     }
-
-                    if($upp) {
+                    $userModel = Employee::findOne(Yii::$app->user->id);
+                    if($upp && $userModel) {
 
                         if (!$upp->upp_tw_phone_number) {
                             $comForm->addError('c_sms_preview', 'Config Error: Not found TW phone number for Project Id: ' . $lead->project_id . ', agent: "' . Yii::$app->user->identity->username . '"');
-                        } elseif (!$upp->upp_tw_sip_id) {
+                        } elseif (!$userModel->userProfile->up_sip) {
                             $comForm->addError('c_sms_preview', 'Config Error: Not found TW SIP account for Project Id: ' . $lead->project_id . ', agent: "' . Yii::$app->user->identity->username . '"');
                         } else {
 
@@ -735,9 +749,9 @@ class LeadController extends FController
 
                             if($comForm->c_voice_status == 1) {
 
-                                $response = $communication->callToPhone($lead->project_id, 'sip:' . $upp->upp_tw_sip_id, $upp->upp_tw_phone_number, $comForm->c_phone_number, Yii::$app->user->identity->username);
+                                $response = $communication->callToPhone($lead->project_id, 'sip:' . $userModel->userProfile->up_sip, $upp->upp_tw_phone_number, $comForm->c_phone_number, Yii::$app->user->identity->username);
 
-                                Yii::info('ProjectId: '.$lead->project_id.', sip:' . $upp->upp_tw_sip_id.', phoneFrom:'.$upp->upp_tw_phone_number.', phoneTo:'.$comForm->c_phone_number." Logs: \r\n".VarDumper::dumpAsString($response, 10), 'info/LeadController:callToPhone');
+                                Yii::info('ProjectId: '.$lead->project_id.', sip:' . $userModel->userProfile->up_sip.', phoneFrom:'.$upp->upp_tw_phone_number.', phoneTo:'.$comForm->c_phone_number." Logs: \r\n".VarDumper::dumpAsString($response, 10), 'info/LeadController:callToPhone');
 
 
                                 if ($response && isset($response['data']['call'])) {
@@ -756,7 +770,7 @@ class LeadController extends FController
 
                                     $call->c_to = $comForm->c_phone_number; //$dataCall['to'];
                                     $call->c_from = $upp->upp_tw_phone_number; //$dataCall['from'];
-                                    $call->c_sip = $upp->upp_tw_sip_id;
+                                    $call->c_sip = $userModel->userProfile->up_sip;
                                     $call->c_caller_name = $dataCall['from'];
                                     $call->c_call_status = $dataCall['status'];
                                     $call->c_api_version = $dataCall['api_version'];

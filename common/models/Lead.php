@@ -465,7 +465,12 @@ class Lead extends ActiveRecord
             'inbox' => 'COUNT(DISTINCT CASE WHEN status IN (:inbox) THEN leads.id ELSE NULL END)',
             'follow-up' => 'COUNT(DISTINCT CASE WHEN status IN (:followup) ' . $created . '  THEN leads.id ELSE NULL END)',
             'booked' => 'COUNT(DISTINCT CASE WHEN status IN (:booked) ' . $created . ' THEN leads.id ELSE NULL END)',
-            'sold' => 'COUNT(DISTINCT CASE WHEN status IN (:sold) ' . $created . $sold .$employee . ' THEN leads.id ELSE NULL END)',
+            //'sold' => 'COUNT(DISTINCT CASE WHEN status IN (:sold) ' . $created . $sold .$employee . ' THEN leads.id ELSE NULL END)',
+            'sold' => '(SELECT COUNT(leads.id) FROM leads
+                        LEFT JOIN '.ProfitSplit::tableName().' `ps` ON ps.ps_lead_id = leads.id
+                        LEFT JOIN '.TipsSplit::tableName().' `ts` ON ts.ts_lead_id = leads.id
+                        WHERE leads.status IN (:sold) '.$created . $sold .$employee.'
+                        AND leads.`project_id` IN ('.implode(',', $projectIds).'))',
             'processing' => 'COUNT(DISTINCT CASE WHEN status IN (' . $default . ') ' . $employee . ' THEN leads.id ELSE NULL END)'];
 
         if (Yii::$app->user->identity->role != 'agent') {
@@ -474,8 +479,8 @@ class Lead extends ActiveRecord
 
         $query = self::find()
             ->select($select)
-            ->leftJoin(ProfitSplit::tableName().' ps','ps.ps_lead_id = leads.id')
-            ->leftJoin(TipsSplit::tableName().' ts','ts.ts_lead_id = leads.id')
+            //->leftJoin(ProfitSplit::tableName().' ps','ps.ps_lead_id = leads.id')
+            //->leftJoin(TipsSplit::tableName().' ts','ts.ts_lead_id = leads.id')
             ->andWhere(['IN', 'project_id', $projectIds])
             ->addParams([':inbox' => self::STATUS_PENDING,
                 ':followup' => self::STATUS_FOLLOW_UP,

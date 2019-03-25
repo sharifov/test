@@ -68,9 +68,9 @@ Migration (RBAC + LOG):
 
 Create MySQL Dump:
 ```
-mysqldump -v -u sale -p sale | gzip > `date +/var/www/backups/sql.%Y%m%d.gz`
-
-gunzip < /path/to/outputfile.sql.gz | mysql -v -u USER -pPASSWORD DATABASE
+mysqldump -Q -c -e -v -u USER -p DATABASE | gzip > /var/www/backups/sql.gz
+gunzip < /var/www/sale/sql.gz | mysql -v -u USER -pPASSWORD DATABASE
+mysqlshow -u USER -pPASSWORD DATABASE
 ```
 
 
@@ -292,6 +292,7 @@ CRONs
 10   0  *  *  *     run-this-one php /var/www/sale/yii lead/update-by-tasks
 30   0  *  *  *     run-this-one php /var/www/sale/yii db/update-airline-cabin-classes
 40   0  1  *  *     php /var/www/sale/yii kpi/calculate-salary
+*/10   *  *  *  *   run-this-one php /var/www/sale/yii call/update-status
 ```
 
 DIRECTORY STRUCTURE

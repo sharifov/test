@@ -39,7 +39,7 @@ class NotificationsController extends FController
                     [
                         'actions' => ['view', 'view2', 'soft-delete', 'all-delete', 'all-read', 'list'],
                         'allow' => true,
-                        'roles' => ['agent'],
+                        'roles' => ['agent', 'qa'],
                     ],
                 ],
             ],

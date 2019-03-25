@@ -594,5 +594,40 @@ class CommunicationService extends Component
         return $out;
     }
 
+    /**
+     * @param $cid
+     * @param $type
+     * @param $from
+     * @param $to
+     * @return array
+     * @throws \yii\httpclient\Exception
+     */
+    public function callRedirect($cid, $type, $from, $to)
+    {
+
+        $out = ['error' => false, 'data' => []];
+
+        $data = [
+            'cid' => $cid,
+            'type' => $type,
+            'redirect_from' => $from,
+            'redirect_to' => $to,
+        ];
+
+        $response = $this->sendRequest('twilio-jwt/redirect-call', $data);
+
+        if ($response->isOk) {
+            if(isset($response->data['data'])) {
+                $out['data'] = $response->data['data'];
+            } else {
+                $out['error'] = 'Not found in response array data key [data]';
+            }
+        } else {
+            $out['error'] = $response->content;
+            \Yii::error(VarDumper::dumpAsString($out['error']), 'Component:CommunicationService::callRedirect');
+        }
+
+        return $out;
+    }
 
 }

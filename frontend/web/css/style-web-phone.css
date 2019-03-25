@@ -1,11 +1,4 @@
-﻿
-div#controls div#info {
-  width: 16em;
-  text-align: center;
-}
-
-
-/*div#controls button {
+﻿/*div#controls button {
   width: 15em;
   height: 2.5em;
   margin-top: 1.75em;
@@ -16,17 +9,39 @@ div#controls div#info {
   outline: 0;
 }*/
 
+#web-phone-widget {
+  position: fixed;
+  width: 100%;
+  max-width: 800px;
 
-div#controls div#call-controls {
+  padding: 2px;
+  bottom: 10px;
+  border: 3px solid #78c286;
+  /*margin-left: 50%;*/
+  box-shadow: 3px 3px 3px rgba(0, 0, 0, .4);
+  z-index: 999;
+  display: none;
+  /*height: 600px;*/
+  background-color: rgba(255, 255, 255, 0.8);
+  border-radius: 8px;
+  /*margin-left: -50px;*/
+  /*margin-left: calc(100% - calc(width / 2));*/
+
+
+
+}
+
+
+div#call-controls {
   display: none;
 }
 
-div#controls div#call-controls2 {
+div#call-controls2 {
   display: none;
 }
 
 
-div#controls div#call-controls input {
+div#call-controls input {
   font-family: Helvetica-LightOblique, Helvetica, sans-serif;
   font-style: oblique;
   font-size: 1em;
@@ -37,11 +52,11 @@ div#controls div#call-controls input {
 }
 
 
-div#controls div#call-controls button#button-hangup {
+/*button#button-hangup {
   display: none;
-}
+}*/
 
-div#controls div#log {
+#call-log {
   border: 1px solid #686865;
   width: 100%;
   height: 12em;
@@ -51,18 +66,14 @@ div#controls div#log {
   overflow-y: scroll;
 }
 
-div#controls div#log p {
+#call-log p {
   color: #686865;
   font-family: 'Share Tech Mono', 'Courier New', Courier, fixed-width;
   font-size: 10px;
-  line-height: .8em;
-  margin-left: .8em;
+  line-height: 1.2em;
+  margin: 0px 0px 0px .8em;
   text-indent: -1.25em;
   width: 98%;
-}
-
-div#volume-indicators label {
-  color: #fff;
 }
 
 .fabs2 {

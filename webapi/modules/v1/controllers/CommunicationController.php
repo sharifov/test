@@ -38,6 +38,7 @@ class CommunicationController extends ApiBaseController
     public const TYPE_VOIP_RECORD       = 'voip_record';
     public const TYPE_VOIP_INCOMING     = 'voip_incoming';
     public const TYPE_VOIP              = 'voip';
+    public const TYPE_VOIP_CLIENT       = 'voip_client';
 
 
     public const TYPE_UPDATE_EMAIL_STATUS = 'update_email_status';
@@ -296,7 +297,7 @@ class CommunicationController extends ApiBaseController
 
         $post = Yii::$app->request->post();
 
-        $response = $post;
+        $response = []; //$post;
 
         if($type == self::TYPE_VOIP_INCOMING) {
 
@@ -373,16 +374,24 @@ class CommunicationController extends ApiBaseController
                 //$upp = UserProjectParams::find()->where(['upp_phone_number' => $agent_phone_number])->orWhere(['upp_tw_phone_number' => $agent_phone_number])->one();
                 $upp = UserProjectParams::find()->where(['upp_tw_phone_number' => $agent_phone_number])->one();
 
-
                 $user = null;
 
 
                 if($upp && $user = $upp->uppUser) {
-                    if($user->userProfile && $user->userProfile->up_call_type_id == 2) {
-                        $call_agent_username[] = 'seller'.$user->id;
+
+                    if($user->userProfile) {
+                        if($user->userProfile->up_sip) {
+                            $call_sip_id = $user->userProfile->up_sip;
+                        }
                     }
+
+                    /*if(!$call_sip_id) {
+                        $call_sip_id = $upp->upp_tw_sip_id;
+                    }*/
+
+
+
                     $call_user_id = (int) $upp->upp_user_id;
-                    $call_sip_id = $upp->upp_tw_sip_id;
                     $call_project_id = (int) $upp->upp_project_id;
 
                     //Yii::info('Detect - User ('.$user->username.') Id: '.$user->id.', phone: ' . $agent_phone_number, 'info\API:CommunicationController:actionVoice:UserProjectParams - 1');
@@ -392,6 +401,10 @@ class CommunicationController extends ApiBaseController
                             if($user->isCallFree()) {
                                 $isRedirectCall = false;
                                 Yii::info('DIRECT - User ('.$user->username.') Id: '.$user->id.', phone: ' . $agent_phone_number, 'info\API:CommunicationController:actionVoice:Direct - 2');
+
+                                if($user->userProfile && $user->userProfile->up_call_type_id == 2) {
+                                    $call_agent_username[] = 'seller'.$user->id;
+                                }
 
                             } else {
                                 Yii::info('Call Occupied - User ('.$user->username.') Id: '.$user->id.', phone: ' . $agent_phone_number, 'info\API:CommunicationController:actionVoice:isCallFree');
@@ -430,7 +443,7 @@ class CommunicationController extends ApiBaseController
                             if($upp) {
 
                                 $call_user_id = (int) $upp->upp_user_id;
-                                $call_sip_id = $upp->upp_tw_sip_id;
+                                $call_sip_id = $employeeModel->userProfile->up_sip; //$upp->upp_tw_sip_id;
                                 if($upp->upp_tw_phone_number) {
                                     $agent_phone_number = $upp->upp_tw_phone_number;
                                 }
@@ -553,6 +566,8 @@ class CommunicationController extends ApiBaseController
 
                         $data['status'] = $call->c_call_status;
 
+                        $response['call'] = $call->attributes;
+
                         //Notifications::create($call->c_created_user_id, 'New Call from '.$call->c_from. ' ('.$data['client_name'].')', 'Call from ' . $call->c_from .' ('.$data['client_name'].') to '.$call->c_to, Notifications::TYPE_INFO, true);
                         if($call->c_created_user_id) {
                             Notifications::socket($call->c_created_user_id, $lead_id = null, 'incomingCall', $data, true);
@@ -647,6 +662,71 @@ class CommunicationController extends ApiBaseController
             if (isset($post['callData']['sid']) && $post['callData']['sid']) {
                 $call = Call::find()->where(['c_call_sid' => $post['callData']['sid']])->limit(1)->one();
 
+                $callData = $post['call'];
+
+                if(!$call) {
+                    $call = new Call();
+                    $call->c_call_sid = $callData['c_call_sid'];
+                    $call->c_account_sid = $callData['c_account_sid'];
+                    $call->c_call_type_id = $callData['c_call_type_id'];
+                    $call->c_uri = $callData['c_uri'];
+
+                    $call->c_from = $callData['c_from'];
+                    $call->c_to = $callData['c_to'];
+
+                    $call->c_timestamp = $callData['c_timestamp'];
+                    $call->c_created_dt = $callData['c_created_dt'];
+                    $call->c_updated_dt = date('Y-m-d H:i:s');
+
+                    $call->c_recording_url = $callData['c_recording_url'];
+                    $call->c_recording_sid = $callData['c_recording_sid'];
+                    $call->c_recording_duration = $callData['c_recording_duration'];
+
+                    $call->c_caller_name = $callData['c_caller_name'];
+                    $call->c_direction = $callData['c_direction'];
+                    $call->c_api_version = $callData['c_api_version'];
+
+
+                    //$call->c_call_status = $post['callData']['CallStatus'] ?? '';
+                    //$call->c_sequence_number = $post['callData']['SequenceNumber'] ?? 0;
+
+                    $call->c_sip = $callData['c_sip'];
+
+                    if($callData['c_project_id']) {
+                        $call->c_project_id = $callData['c_project_id'];
+                    }
+
+
+
+                    $upp = null;
+
+                    if($call->c_project_id && $call->c_from) {
+                        $agentId = (int) str_replace('client:seller', '', $call->c_from);
+                        if($agentId) {
+                            $upp = UserProjectParams::find()->where(['upp_user_id' => $agentId, 'upp_project_id' => $call->c_project_id])->one();
+                        }
+                    }
+
+                    if(!$upp) {
+                        $upp = UserProjectParams::find()->where(['upp_phone_number' => $call->c_from])->orWhere(['upp_tw_phone_number' => $call->c_from])->one();
+                    }
+
+                    if(!$upp) {
+                        $upp = UserProjectParams::find()->where(['upp_phone_number' => $call->c_to])->orWhere(['upp_tw_phone_number' => $call->c_to])->one();
+                    }
+
+                    $user = null;
+                    if($upp && $upp->uppUser) {
+
+                        $call->c_created_user_id = $upp->uppUser->id;
+                        $call->c_project_id = $upp->upp_project_id;
+
+                        Notifications::create($upp->uppUser->id, 'Call completed', 'Call from ' . $call->c_from .' to '.$call->c_to, Notifications::TYPE_WARNING, true);
+                        Notifications::socket($upp->uppUser->id, null, 'getNewNotification', [], true);
+                    }
+
+                }
+
 
 
                 /*
@@ -721,7 +801,211 @@ class CommunicationController extends ApiBaseController
                 Yii::error('Communication Request: Not found post[callData][sid] ' . VarDumper::dumpAsString($post), 'API:CommunicationController:actionVoice:TYPE_VOIP_FINISH:post');
             }
 
-        } else {
+        }
+        elseif($type === self::TYPE_VOIP_CLIENT) {
+
+
+            if (isset($post['callData']['CallSid']) && $post['callData']['CallSid']) {
+                $call = Call::find()->where(['c_call_sid' => $post['callData']['CallSid']])->limit(1)->one();
+
+                $callData = $post['call'];
+
+                if(!$call) {
+                    $call = new Call();
+                    $call->c_call_sid = $callData['c_call_sid'];
+                    $call->c_call_type_id = $callData['c_call_type_id'];
+                    $call->c_created_dt = $callData['c_created_dt'];
+                }
+
+                if(!$call->c_com_call_id && isset($callData['c_id'])) {
+                    $call->c_com_call_id = $callData['c_id'];
+                }
+                if(!$call->c_account_sid && isset($callData['c_account_sid'])) {
+                    $call->c_account_sid = $callData['c_account_sid'];
+                }
+
+                if(!$call->c_uri && isset($callData['c_uri'])) {
+                    $call->c_uri = $callData['c_uri'];
+                }
+
+                if(!$call->c_from && isset($callData['c_from'])) {
+                    $call->c_from = $callData['c_from'];
+                }
+
+                if(!$call->c_to && isset($callData['c_to'])) {
+                    $call->c_to = $callData['c_to'];
+                }
+
+                if(!$call->c_recording_url && isset($callData['c_recording_url'])) {
+                    $call->c_recording_url = $callData['c_recording_url'];
+                }
+
+                if(!$call->c_recording_sid && isset($callData['c_recording_sid'])) {
+                    $call->c_recording_sid = $callData['c_recording_sid'];
+                }
+
+                if(!$call->c_recording_duration && isset($callData['c_recording_duration'])) {
+                    $call->c_recording_duration = $callData['c_recording_duration'];
+                }
+
+                if(!$call->c_caller_name && isset($callData['c_caller_name'])) {
+                    $call->c_caller_name = $callData['c_caller_name'];
+                }
+
+                if(!$call->c_direction && isset($callData['c_direction'])) {
+                    $call->c_direction = $callData['c_direction'];
+                }
+
+                if(!$call->c_api_version && isset($callData['c_api_version'])) {
+                    $call->c_api_version = $callData['c_api_version'];
+                }
+
+                if(!$call->c_sip && isset($callData['c_sip'])) {
+                    $call->c_sip = $callData['c_sip'];
+                }
+
+                if(!$call->c_project_id && isset($callData['c_project_id'])) {
+                    $call->c_project_id = $callData['c_project_id'];
+                }
+
+                if(!$call->c_timestamp && isset($callData['c_timestamp'])) {
+                    $call->c_timestamp = $callData['c_timestamp'];
+                }
+
+                if(!$call->c_sequence_number && isset($callData['c_sequence_number'])) {
+                    $call->c_sequence_number = $callData['c_sequence_number'];
+                }
+
+                /*if(!$call->c_call_duration && isset($callData['c_call_duration'])) {
+                    $call->c_call_duration = $callData['c_call_duration'];
+                }*/
+
+                $call->c_updated_dt = date('Y-m-d H:i:s');
+
+
+                if(isset($post['callData']['price'])) {
+                    $call->c_price = abs((float) $post['callData']['price']);
+                }
+
+                if(isset($post['callData']['status'])) {
+                    $call->c_call_status =$post['callData']['status'];
+                }
+
+                if(isset($post['callData']['duration'])) {
+                    $call->c_call_duration = (int) $post['callData']['duration'];
+                }
+
+
+                //$call->c_call_status = $post['callData']['CallStatus'] ?? '';
+                //$call->c_sequence_number = $post['callData']['SequenceNumber'] ?? 0;
+
+
+
+
+
+                if(!$call->c_created_user_id) {
+                    $upp = null;
+
+                    if ($call->c_project_id && $call->c_from) {
+                        $agentId = (int)str_replace('client:seller', '', $call->c_from);
+                        if ($agentId) {
+                            $upp = UserProjectParams::find()->where(['upp_user_id' => $agentId, 'upp_project_id' => $call->c_project_id])->one();
+                        }
+                    }
+
+                    if (!$upp) {
+                        $upp = UserProjectParams::find()->where(['upp_phone_number' => $call->c_from])->orWhere(['upp_tw_phone_number' => $call->c_from])->one();
+                    }
+
+                    if (!$upp) {
+                        $upp = UserProjectParams::find()->where(['upp_phone_number' => $call->c_to])->orWhere(['upp_tw_phone_number' => $call->c_to])->one();
+                    }
+
+                    $user = null;
+                    if ($upp && $upp->uppUser) {
+
+                        $call->c_created_user_id = $upp->uppUser->id;
+
+                        if(!$call->c_project_id) {
+                            $call->c_project_id = $upp->upp_project_id;
+                        }
+
+                        //Notifications::create($call->c_created_user_id, 'Call completed', 'Call from ' . $call->c_from .' to '.$call->c_to, Notifications::TYPE_WARNING, true);
+                        //Notifications::socket($call->c_created_user_id, null, 'getNewNotification', [], true);
+                        //Notifications::socket($call->c_created_user_id, null, 'callUpdate', ['status' => $call->c_call_status, 'duration' => $call->c_call_duration, 'snr' => $call->c_sequence_number], true);
+                    }
+                }
+
+                if($call->c_created_user_id || $call->c_lead_id) {
+                    Notifications::socket($call->c_created_user_id, $call->c_lead_id, 'callUpdate', ['status' => $call->c_call_status, 'duration' => $call->c_call_duration, 'snr' => $call->c_sequence_number], true);
+                }
+
+
+
+                /*
+                 *
+                 *
+                 *
+                 *  account_sid: "AC10f3c74efba7b492cbd7dca86077736c"
+                    annotation: null
+                    answered_by: null
+                    api_version: "2010-04-01"
+                    caller_name: ""
+                    date_created: "Wed, 06 Feb 2019 15:27:34 +0000"
+                    date_updated: "Wed, 06 Feb 2019 15:27:53 +0000"
+                    direction: "outbound-api"
+                    duration: "15"
+                    end_time: "Wed, 06 Feb 2019 15:27:53 +0000"
+                    forwarded_from: null
+                    from: "onorine.miller"
+                    from_formatted: "onorine.miller"
+                    group_sid: null
+                    parent_call_sid: null
+                    phone_number_sid: null
+                    price: "-0.00400"
+                    price_unit: "USD"
+                    sid: "CA6359554e2ac4a920427165c4b69288b7"
+                    start_time: "Wed, 06 Feb 2019 15:27:38 +0000"
+                    status: "completed"
+                    subresource_uris: {,…}
+                    notifications: "/2010-04-01/Accounts/AC10f3c74efba7b492cbd7dca86077736c/Calls/CA6359554e2ac4a920427165c4b69288b7/Notifications.json"
+                    recordings: "/2010-04-01/Accounts/AC10f3c74efba7b492cbd7dca86077736c/Calls/CA6359554e2ac4a920427165c4b69288b7/Recordings.json"
+                    to: "sip:onorine.miller@kivork.sip.us1.twilio.com"
+                    to_formatted: "sip:onorine.miller@kivork.sip.us1.twilio.com"
+                    uri: "/2010-04-01/Accounts/AC10f3c74efba7b492cbd7dca86077736c/Calls/CA6359554e2ac4a920427165c4b69288b7.json"
+                 *
+                 */
+
+                if ($call) {
+
+
+
+
+                    if(!$call->save()) {
+                        Yii::error(VarDumper::dumpAsString($call->errors), 'API:CommunicationController:actionVoice:TYPE_VOIP_CLIENT:Call:save');
+                    }
+
+                    /*if($post['callData']['RecordingUrl']) {
+                        $call->c_recording_url = $post['callData']['RecordingUrl'];
+                        $call->c_recording_duration = $post['callData']['RecordingDuration'];
+                        $call->c_recording_sid = $post['callData']['RecordingSid'];
+                        $call->c_updated_dt = date('Y-m-d H:i:s');
+
+
+                        if(!$call->save()) {
+                            Yii::error(VarDumper::dumpAsString($call->errors), 'API:CommunicationController:actionVoice:TYPE_VOIP_FINISH:Call:save');
+                        }
+
+                    }*/
+                } else {
+                    Yii::error('Communication Request: Not found Call SID: ' . $post['callData']['sid'], 'API:CommunicationController:actionVoice:TYPE_VOIP_CLIENT:Call:find');
+                }
+            } else {
+                Yii::error('Communication Request: Not found post[callData][sid] ' . VarDumper::dumpAsString($post), 'API:CommunicationController:actionVoice:TYPE_VOIP_CLIENT:post');
+            }
+
+        }
+        else {
             if (isset($post['callData']['CallSid']) && $post['callData']['CallSid']) {
                 $call = Call::find()->where(['c_call_sid' => $post['callData']['CallSid']])->one();
                 if ($call) {

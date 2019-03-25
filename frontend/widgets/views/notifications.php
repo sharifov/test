@@ -254,7 +254,8 @@ $js = <<<JS
                     
                 }
             } catch (error) {
-                console.error('Invalid JSON data');
+                console.error('Invalid JSON data on socket.onmessage');
+                console.error(e.data);
             }
             
         };

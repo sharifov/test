@@ -10,8 +10,7 @@ $isAdmin = Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id);
 $isSupervision = Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id);
 $isAgent = Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id);
 $isCoach = Yii::$app->authManager->getAssignment('coach', Yii::$app->user->id);
-
-
+$isQA = Yii::$app->authManager->getAssignment('qa', Yii::$app->user->id);
 
 ?>
 <div id="sidebar-menu" class="main_menu_side hidden-print main_menu">
@@ -49,14 +48,21 @@ $isCoach = Yii::$app->authManager->getAssignment('coach', Yii::$app->user->id);
 
 
         //$menuItems[] = ["label" => '<i class="fa fa-home"></i><span>'.Yii::t('menu', 'Home').'</span><small class="label-success label pull-right">new</small>', "url" => "/"];
-        $menuItems[] = ['label' => 'Create new Lead', 'url' => ['lead/create'], 'icon' => 'plus'];
+
+        if(!$isQA) {
+            $menuItems[] = ['label' => 'Create new Lead', 'url' => ['lead/create'], 'icon' => 'plus'];
+        }
+
         $menuItems[] = ['label' => 'Dashboard', 'url' => ['/'], 'icon' => 'area-chart'];
 
         if (Yii::$app->user->isGuest) {
             $menuItems[] = ['label' => 'Login', 'url' => ['/site/login']];
         } else {
 
-            $menuItems[] = ['label' => 'Search Leads', 'url' => ['/leads/index'], 'icon' => 'search'];
+
+            if(!$isQA) {
+                $menuItems[] = ['label' => 'Search Leads', 'url' => ['/leads/index'], 'icon' => 'search'];
+            }
 
 
             //if($isAdmin) {
@@ -69,24 +75,58 @@ $isCoach = Yii::$app->authManager->getAssignment('coach', Yii::$app->user->id);
                     'icon' => 'comment',
                 ];
 
-                //if($isAdmin || $isSupervision) {
+                if(!$isQA) {
                     $menuItems[] = ['label' => 'My Mails <span id="email-inbox-queue" class="label-info label pull-right"></span> ', 'url' => ['/email/inbox'], 'icon' => 'envelope'];
-                //}
+                }
 
             //}
 
 
+            $userModel = \common\models\Employee::findOne(Yii::$app->user->id);
+            //$sipExist = ($userModel->userProfile->up_sip && strlen($userModel->userProfile->up_sip) > 2);
+            // //\common\models\UserProjectParams::find()->where(['upp_user_id' => Yii::$app->user->id])->andWhere(['AND', ['IS NOT', 'upp_tw_sip_id', null], ['<>', 'upp_tw_sip_id', '']])->exists();
 
-            $sipExist = \common\models\UserProjectParams::find()->where(['upp_user_id' => Yii::$app->user->id])->andWhere(['AND', ['IS NOT', 'upp_tw_sip_id', null], ['<>', 'upp_tw_sip_id', '']])->exists();
             $smsExist = \common\models\UserProjectParams::find()->where(['upp_user_id' => Yii::$app->user->id])->andWhere(['AND', ['IS NOT', 'upp_tw_phone_number', null], ['<>', 'upp_tw_phone_number', '']])->exists();
 
             if($smsExist) {
                 $menuItems[] = ['label' => 'My SMS <span id="sms-inbox-queue" class="label-info label pull-right"></span> ', 'url' => ['/sms/list'], 'icon' => 'comments'];
             }
 
-            if($sipExist) {
+            if($userModel->userProfile && $userModel->userProfile->up_call_type_id != \common\models\UserProfile::CALL_TYPE_OFF) {
                 $menuItems[] = ['label' => 'My Calls <span id="call-inbox-queue" class="label-info label pull-right"></span> ', 'url' => ['/call/list'], 'icon' => 'phone'];
             }
+
+            if($isAdmin || $isQA) {
+
+                if($isAdmin) {
+                    $items =  [
+                        ['label' => 'Agent activity', 'url' => ['/agent-activity'], 'icon' => 'users'],
+                        ['label' => 'Calls & SMS', 'url' => ['/stats/call-sms'], 'icon' => 'phone'],
+                        ['label' => 'Stats Employees', 'url' => ['/stats/index'], 'icon' => 'users'],
+                        ['label' => 'User Connections', 'url' => ['/user-connection/index'], 'icon' => 'plug'],
+                        ['label' => 'User Stats', 'url' => ['/user-connection/stats'], 'icon' => 'area-chart'],
+                        ['label' => 'Call User Map', 'url' => ['/call/user-map'], 'icon' => 'map'],
+                    ];
+                }
+
+                if($isQA) {
+                    $items =  [
+                        ['label' => 'Calls & SMS', 'url' => ['/stats/call-sms'], 'icon' => 'list'],
+
+                        ['label' => 'Call List', 'url' => ['/call/index'], 'icon' => 'phone'],
+                        ['label' => 'SMS List', 'url' => ['/sms/index'], 'icon' => 'comments-o'],
+                        ['label' => 'Mail List', 'url' => ['/email/index'], 'icon' => 'envelope'],
+                    ];
+                }
+
+                $menuItems[] = [
+                    'label' => 'Stats',
+                    'url'   => 'javascript:',
+                    'icon'  => 'bar-chart',
+                    'items' =>  $items,
+                ];
+            }
+
 
 
             if($isAdmin || $isSupervision) {
@@ -114,7 +154,7 @@ $isCoach = Yii::$app->authManager->getAssignment('coach', Yii::$app->user->id);
                     ['label' => 'Stats Agents & Leads', 'url' => ['report/agents'], 'icon' => 'users'],
                     ['label' => 'Lead Status History', 'url' => ['lead-flow/index'], 'icon' => 'list'],
                 ]);
-                
+
                 $menuItems[] = [
                     'label' => 'Additional',
                     'url' => 'javascript:',
@@ -132,7 +172,7 @@ $isCoach = Yii::$app->authManager->getAssignment('coach', Yii::$app->user->id);
             }
 
 
-            if (!$isCoach) {
+            if (!$isCoach && !$isQA) {
 
                 $badges = \common\models\Lead::getBadgesSingleQuery();
 
@@ -165,9 +205,6 @@ $isCoach = Yii::$app->authManager->getAssignment('coach', Yii::$app->user->id);
                     'url' => 'javascript:',
                     'icon' => 'user',
                     'items' => [
-                        ['label' => 'User Connections', 'url' => ['/user-connection/index'], 'icon' => 'plug'],
-                        ['label' => 'User Stats', 'url' => ['/user-connection/stats'], 'icon' => 'area-chart'],
-                        ['label' => 'Call User Map', 'url' => ['/call/user-map'], 'icon' => 'list'],
                         ['label' => 'Users', 'url' => ['employee/list'], 'icon' => 'user'],
                         ['label' => 'User Groups', 'url' => ['user-group/index'], 'icon' => 'users'],
                         ['label' => 'User Groups Assignments', 'url' => ['user-group-assign/index'], 'icon' => 'users'],

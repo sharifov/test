@@ -230,7 +230,11 @@ $call2DelayTime = Yii::$app->params['lead']['call2DelayTime']; //(2 * 60 * 60);
                                 $taskCheckbox = \yii\helpers\Html::checkbox('task[]', $checked, ['class' => 'ch_task', 'disabled' => $disabledTask, 'data-pjax-id' => $date, 'data-lead-id' => $taskItem->lt_lead_id, 'data-user-id' => $taskItem->lt_user_id, 'value' => $taskItem->lt_task_id]);
 
                                 if($checked && !$is_manager) {
-                                    //$taskCheckbox = '<i class="fa fa-thumbs-o-up text-success"></i>';
+                                    $taskCheckbox = '<i class="fa fa-check-square-o text-success"></i>';
+                                }
+
+                                if(!$checked && !$is_manager && $disabledTask) {
+                                    $taskCheckbox = '<i class="fa fa-circle-o text-warning"></i>';
                                 }
 
                                 if(!$checked && $currentTS > $shiftEndTS && !$is_manager) {

@@ -8,6 +8,8 @@ use yii\helpers\Html;
 /* @var $model common\models\Client */
 /* @var $isAgent bool */
 /* @var $fromPhoneNumbers [] */
+/* @var $lead_id int */
+/* @var $selectProjectPhone string */
 
 ?>
 <div class="phone-update">
@@ -106,10 +108,16 @@ use yii\helpers\Html;
             </tr>
             <tr>
                 <td>
-                    <?=Html::dropDownList('call-from-number', [], $fromPhoneNumbers, ['id' => 'call-from-number', 'class' => 'form-control'])?>
+                    <?=Html::dropDownList('call-from-number', $selectProjectPhone, $fromPhoneNumbers, ['id' => 'call-from-number', 'class' => 'form-control'])?>
                 </td>
                 <td>
-                    <?=Html::textInput('call-to-number', $phone_number, ['id' => 'call-to-number', 'class' => 'form-control', 'readonly' => false, 'disable' => false])?>
+                    <?=Html::textInput('call-to-number', $phone_number, ['id' => 'call-to-number', 'class' => 'form-control',
+                            'readonly' => Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) ? false : true,
+                            'disable' => Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) ? false : true
+                        ])
+                    ?>
+                    <?=Html::hiddenInput('call-lead-id', $lead_id, ['id' => 'call-lead-id'])?>
+                    <?=Html::hiddenInput('call-project-id', $project ? $project->id : '', ['id' => 'call-project-id'])?>
                 </td>
                 <td>
                     <?=\yii\helpers\Html::button('<i class="fa fa-phone-square"></i> Make Call', ['class' => 'btn btn-sm btn-success', 'id' => 'btn-make-call'])?>

@@ -91,6 +91,10 @@ class SiteController extends FController
             return $this->dashboardAdmin();
         }
 
+        if (Yii::$app->authManager->getAssignment('qa', $userId)) {
+            return $this->dashboardQa();
+        }
+
         return $this->dashboardAgent();
 
     }
@@ -465,6 +469,14 @@ class SiteController extends FController
             'searchModel' => $searchModel,
         ]);
     }
+
+
+    public function dashboardQa(): string
+    {
+        return $this->render('index_qa');
+    }
+
+
 
     public function actionLogout()
     {

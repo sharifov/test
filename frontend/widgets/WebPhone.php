@@ -8,6 +8,8 @@
 namespace frontend\widgets;
 
 use common\models\Call;
+use common\models\Employee;
+use common\models\User;
 use common\models\UserCallStatus;
 use common\models\UserProfile;
 use yii\helpers\VarDumper;
@@ -43,15 +45,18 @@ class WebPhone extends \yii\bootstrap\Widget
         }
 
 
-        if (\Yii::$app->controller->uniqueId != 'phone') {
+        /*if (\Yii::$app->controller->uniqueId != 'phone') {
             return '';
-        }
+        }*/
 
         //VarDumper::dump($userProfile, 10, true);        exit;
 
         $clientId = 'seller'.$user_id;
         $tokenData = \Yii::$app->communication->getJwtTokenCache($clientId, true);
 
+        /*$userData = Employee::findOne($user_id);
+        VarDumper::dump($userData, 10, true);        exit;
+        */
 
         if($tokenData && isset($tokenData['data']['token'])) {
             $token = $tokenData['data']['token'];
@@ -59,9 +64,13 @@ class WebPhone extends \yii\bootstrap\Widget
             $token = false;
         }
 
+        //
+        $supportGeneralPhones = [
+            'Ovago' =>  '+1​8884574490',
+            'WOWFARE' =>  '+18887385190',
+            'Arangrant' =>  '+18888183963',
+        ];
 
-        $fromAgentPhone = '+15596489977';
-
-        return $this->render('web_phone', ['clientId' => $clientId, 'token' => $token, 'fromAgentPhone' => $fromAgentPhone]);
+        return $this->render('web_phone', ['clientId' => $clientId, 'token' => $token, 'supportGeneralPhones' => $supportGeneralPhones]);
     }
 }

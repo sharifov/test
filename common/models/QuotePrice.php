@@ -186,7 +186,9 @@ class QuotePrice extends \yii\db\ActiveRecord
         return [
             [['quote_id'], 'integer'],
             [['selling', 'net', 'fare', 'taxes', 'mark_up', 'extra_mark_up', 'service_fee'], 'number'],
-            [['taxes'],'number','min' => 0.01],
+            [['taxes'],'number','min' => 0.01, 'when' => function($model) {
+                return $model->passenger_type !== self::PASSENGER_INFANT;
+            }],
             [['created', 'updated', 'oldParams', 'uid'], 'safe'],
             [['passenger_type'], 'string', 'max' => 255],
             [['quote_id'], 'exist', 'skipOnError' => true, 'targetClass' => Quote::class, 'targetAttribute' => ['quote_id' => 'id']],

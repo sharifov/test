@@ -34,10 +34,17 @@ class CallController extends FController
                 'class' => AccessControl::class,
                 'rules' => [
                     [
-                        'actions' => ['index', 'update', 'view', 'delete', 'create', 'inbox', 'soft-delete', 'list', 'user-map', 'all-read'],
+                        'actions' => ['index', 'update', 'view', 'inbox', 'soft-delete', 'list', 'user-map', 'all-read'],
                         'allow' => true,
-                        'roles' => ['supervision', 'admin'],
+                        'roles' => ['supervision', 'admin', 'qa'],
                     ],
+
+                    [
+                        'actions' => ['delete', 'create'],
+                        'allow' => true,
+                        'roles' => ['admin'],
+                    ],
+
                     [
                         'actions' => ['view', 'view2', 'soft-delete', 'all-delete', 'all-read', 'list'],
                         'allow' => true,

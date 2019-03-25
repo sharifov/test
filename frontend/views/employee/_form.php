@@ -399,7 +399,7 @@ JS;
                     'upp_email:email',
                     'upp_phone_number',
                     'upp_tw_phone_number',
-                    'upp_tw_sip_id',
+                    //'upp_tw_sip_id',
 
                     /*[
                         'label' => 'Action',

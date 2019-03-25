@@ -22,8 +22,10 @@ $bundle = \frontend\themes\gentelella\assets\AssetLeadCommunication::register($t
 $userId = Yii::$app->user->id;
 
 $is_manager = false;
-$is_admin = (Yii::$app->authManager->getAssignment('admin', $userId));
-if(Yii::$app->authManager->getAssignment('admin', $userId) || Yii::$app->authManager->getAssignment('supervision', $userId)) {
+$is_admin = Yii::$app->authManager->getAssignment('admin', $userId);
+$is_qa = Yii::$app->authManager->getAssignment('qa', $userId);
+
+if($is_admin || Yii::$app->authManager->getAssignment('supervision', $userId)) {
     $is_manager = true;
 }
 
@@ -396,6 +398,7 @@ JS;
                         'id' => 'btn-declined-quotes',
                     ]) ?>
                     <!--Button Send-->
+                    <?/*
                     <span class="btn-group">
                         <?= Html::button('<i class="fa fa-send"></i> Send Email Quotes', [
                             'class' => 'btn btn-sm btn-success',
@@ -408,7 +411,8 @@ JS;
                             'title' => '',
                             'data-original-title' => 'Select Emails',
                         ]) ?>
-                    </span>
+                    </span>*/?>
+
                     <div class="hidden js-pop-emails-content sl-popover-emails">
                         <label for="send-to-email" class="select-wrap-label mb-20" style="width:250px;">
                             <?= Html::dropDownList('send_to_email', null, [], [
@@ -425,40 +429,40 @@ JS;
                         </div>
                     </div>
 
-                    <?php if($is_admin):?>
-                    <!-- New button send -->
-                    <?= Html::button('<i class="fa fa-envelope"></i> Send Email Quotes 2', [
-                        'class' => 'btn btn-primary popover-class',
-                        'title' => 'Select Emails',
-                        'data-toggle' => 'popover',
-                        'data-html' => 'true',
-                        'data-title' => 'Select Emails',
-                        'data-trigger' => 'click',
-                        'id' => 'send-quotes-btn-popover',
-                        'data-placement' => 'top',
-                        'data-container' => 'body',
-                            'data-sanitize' => 'false',
-                        'data-content' => '<label for="send-to-email-new" class="select-wrap-label mb-20">'.
-                                                Html::dropDownList('send_to_email', null, [], [
-                                                    'class' => 'form-control',
-                                                    'id' => 'send-to-email-new'
-                                                ]).'
-                                            </label>
-                                            <label for="send-to-email-lng" class="select-wrap-label mb-20">'.
-                                                Html::dropDownList('send_to_email_lng', null,
-                                                    \lajax\translatemanager\models\Language::getLanguageNames(true), [
-                                                    'class' => 'form-control',
-                                                    'id' => 'send-to-email-lng'
-                                                ]).'
-                                            </label>
-                                            <div>'.
-                                                Html::button('Send', [
-                                                    'class' => 'btn btn-success send-quotes-to-email-new',
-                                                    'id' => 'btn-send-quotes-email-new',
-                                                    'data-url' => \yii\helpers\Url::to(['quote/preview-send-quotes-new'])
-                                                ]).'</div>',
-                    ]);?>
-                    <?php endif;?>
+                    <?php /*if($is_admin):?>
+                        <!-- New button send -->
+                        <?= Html::button('<i class="fa fa-envelope"></i> Send Email Quotes 2', [
+                            'class' => 'btn btn-primary popover-class',
+                            'title' => 'Select Emails',
+                            'data-toggle' => 'popover',
+                            'data-html' => 'true',
+                            'data-title' => 'Select Emails',
+                            'data-trigger' => 'click',
+                            'id' => 'send-quotes-btn-popover',
+                            'data-placement' => 'top',
+                            'data-container' => 'body',
+                                'data-sanitize' => 'false',
+                            'data-content' => '<label for="send-to-email-new" class="select-wrap-label mb-20">'.
+                                                    Html::dropDownList('send_to_email', null, [], [
+                                                        'class' => 'form-control',
+                                                        'id' => 'send-to-email-new'
+                                                    ]).'
+                                                </label>
+                                                <label for="send-to-email-lng" class="select-wrap-label mb-20">'.
+                                                    Html::dropDownList('send_to_email_lng', null,
+                                                        \lajax\translatemanager\models\Language::getLanguageNames(true), [
+                                                        'class' => 'form-control',
+                                                        'id' => 'send-to-email-lng'
+                                                    ]).'
+                                                </label>
+                                                <div>'.
+                                                    Html::button('Send', [
+                                                        'class' => 'btn btn-success send-quotes-to-email-new',
+                                                        'id' => 'btn-send-quotes-email-new',
+                                                        'data-url' => \yii\helpers\Url::to(['quote/preview-send-quotes-new'])
+                                                    ]).'</div>',
+                        ]);?>
+                    <?php endif;*/?>
                 </div>
                 <div id="sent-messages" class="alert hidden">
                     <i class="fa fa-exclamation-triangle hidden"></i>
@@ -482,7 +486,7 @@ JS;
 
 
             <?php if (!$leadForm->getLead()->isNewRecord) : ?>
-                <?php if (!$is_admin && $leadForm->mode === $leadForm::VIEW_MODE) : ?>
+                <?php if ((!$is_admin && !$is_qa) && $leadForm->mode === $leadForm::VIEW_MODE) : ?>
                     <div class="alert alert-warning" role="alert">You do not have access to view Communication messages.</div>
                 <?php else: ?>
                     <?= $this->render('communication/lead_communication', [
@@ -528,7 +532,7 @@ JS;
     </div>
 
 	<aside class="sidebar right-sidebar sl-right-sidebar">
-    	 <?php if($leadForm->mode == $leadForm::VIEW_MODE && (!Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) && !Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id))):?>
+    	 <?php if($leadForm->mode == $leadForm::VIEW_MODE && (!$is_admin && !$is_qa && !Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id))):?>
 			<div class="alert alert-warning" role="alert">
                 <h4 class="alert-heading">Warning!</h4>
                 <p>Client information is not available in VIEW MODE, please take lead!</p>

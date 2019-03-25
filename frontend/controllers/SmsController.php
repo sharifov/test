@@ -36,10 +36,17 @@ class SmsController extends FController
                 'class' => AccessControl::class,
                 'rules' => [
                     [
-                        'actions' => ['index', 'update', 'view', 'delete', 'create', 'inbox', 'soft-delete'],
+                        'actions' => ['index', 'update', 'view', 'inbox', 'soft-delete'], //'delete', 'create',
                         'allow' => true,
-                        'roles' => ['supervision'],
+                        'roles' => ['supervision', 'qa'],
                     ],
+
+                    [
+                        'actions' => ['delete', 'create'],
+                        'allow' => true,
+                        'roles' => ['admin'],
+                    ],
+
                     [
                         'actions' => ['view', 'view2', 'soft-delete', 'all-delete', 'all-read', 'list'],
                         'allow' => true,

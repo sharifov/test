@@ -2,19 +2,18 @@
 
 namespace frontend\controllers;
 
+use common\components\CommunicationService;
+use common\models\Call;
 use common\models\ClientPhone;
+use common\models\Notifications;
 use common\models\Project;
-use common\models\search\LeadSearch;
 use common\models\UserProjectParams;
 use yii\filters\AccessControl;
 use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
-use \yii\web\Controller;
-use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use Yii;
-use common\CommunicationService;
-use yii\web\View;
+
 
 class PhoneController extends FController
 {
@@ -32,12 +31,12 @@ class PhoneController extends FController
                 'class' => AccessControl::class,
                 'rules' => [
                     [
-                        'actions' => ['index', 'get-token', 'test', 'ajax-phone-dial'],
+                        'actions' => ['index', 'get-token', 'test', 'ajax-phone-dial', 'ajax-save-call', 'ajax-call-redirect'],
                         'allow' => true,
                         'roles' => ['supervision'],
                     ],
                     [
-                        'actions' => ['index', 'get-token', 'test', 'ajax-phone-dial'],
+                        'actions' => ['index', 'get-token', 'test', 'ajax-phone-dial', 'ajax-save-call', 'ajax-call-redirect'],
                         'allow' => true,
                         'roles' => ['agent'],
                     ],
@@ -85,6 +84,10 @@ class PhoneController extends FController
     {
         $phone_number = Yii::$app->request->post('phone_number');
         $project_id = Yii::$app->request->post('project_id');
+        $lead_id = Yii::$app->request->post('lead_id');
+
+
+        $selectProjectPhone = null;
 
         $project = Project::findOne($project_id);
 
@@ -98,6 +101,10 @@ class PhoneController extends FController
                     continue;
                 }
                 $fromPhoneNumbers[$param->upp_tw_phone_number] = $param->uppProject->name . ' (' . $param->upp_tw_phone_number . ')';
+
+                if($project_id  && $project_id == $param->upp_project_id) {
+                    $selectProjectPhone = $param->upp_tw_phone_number;
+                }
             }
         }
 
@@ -132,9 +139,11 @@ class PhoneController extends FController
             'phone_number' => $phone_number,
             'project' => $project,
             'model' => $model,
+            'lead_id' => $lead_id,
             //'dataProvider' => $dataProvider,
             'isAgent' => $isAgent,
-            'fromPhoneNumbers' => $fromPhoneNumbers
+            'fromPhoneNumbers' => $fromPhoneNumbers,
+            'selectProjectPhone' => $selectProjectPhone
         ]);
     }
 
@@ -146,4 +155,84 @@ class PhoneController extends FController
         $data = Yii::$app->communication->getJwtTokenCache($username, true);
         return $data;
     }
+
+    /**
+     * @return array
+     */
+    public function actionAjaxSaveCall(): array
+    {
+        $call_sid = Yii::$app->request->post('call_sid');
+        $call_acc_sid = Yii::$app->request->post('call_acc_sid');
+
+        $call_from = Yii::$app->request->post('call_from');
+        $call_to = Yii::$app->request->post('call_to');
+        $call_status = Yii::$app->request->post('call_status', Call::CALL_STATUS_RINGING);
+
+        $lead_id = Yii::$app->request->post('lead_id');
+        $project_id = Yii::$app->request->post('project_id');
+
+        $out = ['error' => '', 'data' => []];
+
+        \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+
+        if($call_sid && $call_from && $call_to) {
+            $call = Call::find()->where(['c_call_sid' => $call_sid])->limit(1)->one();
+            if(!$call) {
+                $call = new Call();
+                $call->c_call_sid = $call_sid;
+                $call->c_from = $call_from;
+                $call->c_to = $call_to;
+                $call->c_created_dt = date('Y-m-d H:i:s');
+                $call->c_created_user_id = Yii::$app->user->id;
+                $call->c_call_type_id = Call::CALL_TYPE_OUT;
+
+                if($call_acc_sid) {
+                    $call->c_account_sid = $call_acc_sid;
+                }
+            }
+
+            if(!$call->c_lead_id && $lead_id) {
+                $call->c_lead_id = (int) $lead_id;
+            }
+
+            if(!$call->c_project_id && $project_id) {
+                $call->c_project_id = (int) $project_id;
+            }
+
+            $call->c_call_status = $call_status;
+            $call->c_updated_dt = date('Y-m-d H:i:s');
+
+            if(!$call->save()) {
+                $out['error'] = VarDumper::dumpAsString($call->errors);
+                Yii::error($out['error'], 'PhoneController:actionAjaxSaveCall:Call:save');
+            } else {
+                $out['data'] = $call->attributes;
+            }
+
+            Notifications::create(Yii::$app->user->id, 'Outgoing Call from '.$call_from, 'Outgoing Call from ' . $call_from .' to '.$call_to, Notifications::TYPE_WARNING, true);
+            Notifications::socket(Yii::$app->user->id, null, 'getNewNotification', [], true);
+            Notifications::socket(Yii::$app->user->id, null, 'callUpdate', ['status' => Call::CALL_STATUS_RINGING, 'duration' => 0, 'snr' => 0], true);
+
+        }
+
+        return $out;
+    }
+
+    public function actionAjaxCallRedirect()
+    {
+        \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+
+        $sid = Yii::$app->request->post('sid');
+        $type = Yii::$app->request->post('type');
+        $from = Yii::$app->request->post('from');
+        $to = Yii::$app->request->post('to');
+
+        /**
+         * @var CommunicationService $communication
+         */
+        $communication = \Yii::$app->communication;
+        $result = $communication->callRedirect($sid, $type, $from, $to);
+        return $result;
+    }
+
 }

@@ -79,7 +79,7 @@ $this->title = 'Create Project Params';
                     ]
                 ]) ?>
 
-                <?= $form->field($model, 'upp_tw_sip_id')->textInput(['maxlength' => true]) ?>
+                <? //= $form->field($model, 'upp_tw_sip_id')->textInput(['maxlength' => true]) ?>
 
                 <?//= Html::input('hidden', 'redirect', Yii::$app->request->get('redirect')) ?>
 

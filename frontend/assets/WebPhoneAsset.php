@@ -19,7 +19,7 @@ class WebPhoneAsset extends AssetBundle
     public $baseUrl = '@web';
 
     public $css = [
-        'css/quickstart.css'
+        'css/style-web-phone.css'
     ];
 
     public $js = [

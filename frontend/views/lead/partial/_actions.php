@@ -214,6 +214,8 @@ $js = <<<JS
             type: 'post',
             data: {'key': key, 'gds': gds},
             success: function (data) {
+                var error = '';
+                
                 $('#preloader').addClass('hidden');
                 if(data.status == true){
                     //$('#search-results__modal').modal('hide');
@@ -222,8 +224,30 @@ $js = <<<JS
 
                     $.pjax.reload({container: '#quotes_list', async: false});
                     $('.popover-class[data-toggle="popover"]').popover({ sanitize: false });
-                }else{
-                    alert('Some errors was happened during create quote. Please try again later.');
+                    
+                    new PNotify({
+                        title: "Create quote - search",
+                        type: "success",
+                        text: 'Added new quote id: ' + searchResId,
+                        hide: true
+                    });
+                    
+                } else {
+                   
+                     if(data.error) {
+                        error = data.error;    
+                    } else {
+                        error = 'Some errors was happened during create quote. Please try again later';
+                    }
+                    
+                    new PNotify({
+                        title: "Error: Create quote - search",
+                        type: "error",
+                        text: error,
+                        hide: true
+                    });
+                    
+                   
                 }
             },
             error: function (error) {

@@ -12,12 +12,12 @@ $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="call-index">
 
-    <h1><?= Html::encode($this->title) ?></h1>
+    <h1><i class="fa fa-phone"></i> <?= Html::encode($this->title) ?></h1>
     <?php Pjax::begin(); ?>
     <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
 
     <p>
-        <?= Html::a('Create Call', ['create'], ['class' => 'btn btn-success']) ?>
+        <?/*= Html::a('Create Call', ['create'], ['class' => 'btn btn-success'])*/ ?>
     </p>
 
     <?= GridView::widget([

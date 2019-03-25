@@ -99,7 +99,7 @@ class Call extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['c_call_sid', 'c_account_sid'], 'required'],
+            [['c_call_sid'], 'required'],
             [['c_call_type_id', 'c_lead_id', 'c_created_user_id', 'c_com_call_id', 'c_project_id', 'c_call_duration'], 'integer'],
             [['c_price'], 'number'],
             [['c_is_new', 'c_is_deleted'], 'boolean'],
@@ -199,4 +199,13 @@ class Call extends \yii\db\ActiveRecord
     {
         return self::CALL_TYPE_LIST[$this->c_call_type_id] ?? '-';
     }
+
+    /**
+     * @return mixed|string
+     */
+    public function getStatusName()
+    {
+        return self::CALL_STATUS_LIST[$this->c_call_status] ?? '-';
+    }
+
 }
