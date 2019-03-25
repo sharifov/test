@@ -232,14 +232,15 @@ if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
                     'label' => 'Call type',
                     'attribute' => 'user_call_type_id',
                     'value' => function (\common\models\Employee $model) {
-                        if($model->userProfile && $model->userProfile->up_call_type_id && $model->userProfile->up_call_type_id > 0) {
-                            return ($model->userProfile->up_call_type_id === 1) ? 'SIP' : 'WEB';
-                        } else {
-                            return 'Off';
+                        $call_type_id = '';
+                        if($model->userProfile && is_numeric($model->userProfile->up_call_type_id)) {
+                            $call_type_id = $model->userProfile->up_call_type_id;
                         }
+
+                        return \common\models\UserProfile::CALL_TYPE_LIST[$call_type_id] ?? '-';
                     },
                     'format' => 'raw',
-                    'filter' => [0=>'Off', 1 => 'Sip', 2=> 'Web']
+                    'filter' => \common\models\UserProfile::CALL_TYPE_LIST
                 ],
                 [
                     'label' => 'Sip',

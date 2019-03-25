@@ -398,6 +398,7 @@ JS;
                         'id' => 'btn-declined-quotes',
                     ]) ?>
                     <!--Button Send-->
+                    <?/*
                     <span class="btn-group">
                         <?= Html::button('<i class="fa fa-send"></i> Send Email Quotes', [
                             'class' => 'btn btn-sm btn-success',
@@ -410,7 +411,8 @@ JS;
                             'title' => '',
                             'data-original-title' => 'Select Emails',
                         ]) ?>
-                    </span>
+                    </span>*/?>
+
                     <div class="hidden js-pop-emails-content sl-popover-emails">
                         <label for="send-to-email" class="select-wrap-label mb-20" style="width:250px;">
                             <?= Html::dropDownList('send_to_email', null, [], [
@@ -427,40 +429,40 @@ JS;
                         </div>
                     </div>
 
-                    <?php if($is_admin):?>
-                    <!-- New button send -->
-                    <?= Html::button('<i class="fa fa-envelope"></i> Send Email Quotes 2', [
-                        'class' => 'btn btn-primary popover-class',
-                        'title' => 'Select Emails',
-                        'data-toggle' => 'popover',
-                        'data-html' => 'true',
-                        'data-title' => 'Select Emails',
-                        'data-trigger' => 'click',
-                        'id' => 'send-quotes-btn-popover',
-                        'data-placement' => 'top',
-                        'data-container' => 'body',
-                            'data-sanitize' => 'false',
-                        'data-content' => '<label for="send-to-email-new" class="select-wrap-label mb-20">'.
-                                                Html::dropDownList('send_to_email', null, [], [
-                                                    'class' => 'form-control',
-                                                    'id' => 'send-to-email-new'
-                                                ]).'
-                                            </label>
-                                            <label for="send-to-email-lng" class="select-wrap-label mb-20">'.
-                                                Html::dropDownList('send_to_email_lng', null,
-                                                    \lajax\translatemanager\models\Language::getLanguageNames(true), [
-                                                    'class' => 'form-control',
-                                                    'id' => 'send-to-email-lng'
-                                                ]).'
-                                            </label>
-                                            <div>'.
-                                                Html::button('Send', [
-                                                    'class' => 'btn btn-success send-quotes-to-email-new',
-                                                    'id' => 'btn-send-quotes-email-new',
-                                                    'data-url' => \yii\helpers\Url::to(['quote/preview-send-quotes-new'])
-                                                ]).'</div>',
-                    ]);?>
-                    <?php endif;?>
+                    <?php /*if($is_admin):?>
+                        <!-- New button send -->
+                        <?= Html::button('<i class="fa fa-envelope"></i> Send Email Quotes 2', [
+                            'class' => 'btn btn-primary popover-class',
+                            'title' => 'Select Emails',
+                            'data-toggle' => 'popover',
+                            'data-html' => 'true',
+                            'data-title' => 'Select Emails',
+                            'data-trigger' => 'click',
+                            'id' => 'send-quotes-btn-popover',
+                            'data-placement' => 'top',
+                            'data-container' => 'body',
+                                'data-sanitize' => 'false',
+                            'data-content' => '<label for="send-to-email-new" class="select-wrap-label mb-20">'.
+                                                    Html::dropDownList('send_to_email', null, [], [
+                                                        'class' => 'form-control',
+                                                        'id' => 'send-to-email-new'
+                                                    ]).'
+                                                </label>
+                                                <label for="send-to-email-lng" class="select-wrap-label mb-20">'.
+                                                    Html::dropDownList('send_to_email_lng', null,
+                                                        \lajax\translatemanager\models\Language::getLanguageNames(true), [
+                                                        'class' => 'form-control',
+                                                        'id' => 'send-to-email-lng'
+                                                    ]).'
+                                                </label>
+                                                <div>'.
+                                                    Html::button('Send', [
+                                                        'class' => 'btn btn-success send-quotes-to-email-new',
+                                                        'id' => 'btn-send-quotes-email-new',
+                                                        'data-url' => \yii\helpers\Url::to(['quote/preview-send-quotes-new'])
+                                                    ]).'</div>',
+                        ]);?>
+                    <?php endif;*/?>
                 </div>
                 <div id="sent-messages" class="alert hidden">
                     <i class="fa fa-exclamation-triangle hidden"></i>

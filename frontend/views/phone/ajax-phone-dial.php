@@ -9,6 +9,7 @@ use yii\helpers\Html;
 /* @var $isAgent bool */
 /* @var $fromPhoneNumbers [] */
 /* @var $lead_id int */
+/* @var $selectProjectPhone string */
 
 ?>
 <div class="phone-update">
@@ -107,7 +108,7 @@ use yii\helpers\Html;
             </tr>
             <tr>
                 <td>
-                    <?=Html::dropDownList('call-from-number', [], $fromPhoneNumbers, ['id' => 'call-from-number', 'class' => 'form-control'])?>
+                    <?=Html::dropDownList('call-from-number', $selectProjectPhone, $fromPhoneNumbers, ['id' => 'call-from-number', 'class' => 'form-control'])?>
                 </td>
                 <td>
                     <?=Html::textInput('call-to-number', $phone_number, ['id' => 'call-to-number', 'class' => 'form-control',

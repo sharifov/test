@@ -336,10 +336,14 @@ $c_type_id = $comForm->c_type_id;
 
                                             $callTypeName = \common\models\UserProfile::CALL_TYPE_LIST[$call_type_id] ?? '-';
 
+                                            if($call_type_id == \common\models\UserProfile::CALL_TYPE_SIP && $userModel->userProfile && !$userModel->userProfile->up_sip) {
+                                                $callTypeName .= ' [empty account]';
+                                            }
+
                                             if ($tk == \frontend\models\CommunicationForm::TYPE_VOICE) {
-                                                if ($userModel->userProfile->up_sip) {
+                                                //if ($userModel->userProfile->up_sip) {
                                                     $typeList[$tk] = $itemName . ' ('.$callTypeName.')';
-                                                }
+                                                //}
                                             }
                                         }
                                     }
