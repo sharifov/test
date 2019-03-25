@@ -394,10 +394,10 @@ $buttonSnooze = Html::a('<i class="fa fa-clock-o"></i> Snooze', '#', [
     'data-url' => Url::to(['lead/change-state', 'queue' => 'snooze', 'id' => $leadForm->getLead()->id]),
 ]);
 
-$buttonSendEmail = Html::a('<i class="fa fa-envelope"></i> Send email', '#', [
+/*$buttonSendEmail = Html::a('<i class="fa fa-envelope"></i> Send email', '#', [
     'id' => 'send-email-action',
     'data-url' => Url::to(['lead/send-email', 'id' => $leadForm->getLead()->id])
-]);
+]);*/
 
 $buttonOnWake = Html::a('<i class="fa fa-street-view"></i> On Wake', Url::to([
     'lead/take',
@@ -457,7 +457,7 @@ if (!$leadForm->getLead()->isNewRecord) {
         $buttonsSubAction[] = $buttonFollowUp;
         $buttonsSubAction[] = $buttonTrash;
         $buttonsSubAction[] = $buttonSnooze;
-        $buttonsSubAction[] = $buttonSendEmail;
+        //$buttonsSubAction[] = $buttonSendEmail;
         $buttonsSubAction[] = $buttonClone;
     }
     if ($unSnoozeConditions) {
