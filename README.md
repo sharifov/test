@@ -68,9 +68,9 @@ Migration (RBAC + LOG):
 
 Create MySQL Dump:
 ```
-mysqldump -v -u sale -p sale | gzip > `date +/var/www/backups/sql.%Y%m%d.gz`
-
-gunzip < /path/to/outputfile.sql.gz | mysql -v -u USER -pPASSWORD DATABASE
+mysqldump -Q -c -e -v -u USER -p DATABASE | gzip > /var/www/backups/sql.gz
+gunzip < /var/www/sale/sql.gz | mysql -v -u USER -pPASSWORD DATABASE
+mysqlshow -u USER -pPASSWORD DATABASE
 ```
 
 
