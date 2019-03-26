@@ -4,6 +4,7 @@ namespace frontend\controllers;
 
 use common\models\Employee;
 use common\models\Project;
+use common\models\search\EmployeeSearch;
 use common\models\UserProjectParams;
 use Yii;
 use common\models\Call;
@@ -242,23 +243,29 @@ class CallController extends FController
 
     public function actionUserMap()
     {
-        $projects = Project::getList();
-        $usersByProject = [];
 
-        if($projects) {
-            foreach ($projects as $projectId => $projectName) {
+        $userId = Yii::$app->user->id;
 
-                $query = Employee::getQueryAgentOnlineStatus(Yii::$app->user->id, $projectId);
-                $usersByProject[$projectId]['project_name'] = $projectName;
-                $usersByProject[$projectId]['project_id'] = $projectId;
-                $usersByProject[$projectId]['users'] = $query->asArray()->all();
-            }
+        $searchModel = new EmployeeSearch();
+        $params = Yii::$app->request->queryParams;
+
+        if (Yii::$app->authManager->getAssignment('supervision', $userId)) {
+            $params['EmployeeSearch']['supervision_id'] = $userId;
+            $params['EmployeeSearch']['status'] = Employee::STATUS_ACTIVE;
         }
 
-        //VarDumper::dump($usersByProject, 10, true);
+        $dataProvider = $searchModel->searchByUserGroups($params);
+
+        $searchModel->datetime_start = date('Y-m-d', strtotime('-0 day'));
+        $searchModel->datetime_end = date('Y-m-d');
+
+        //$searchModel->date_range = $searchModel->datetime_start.' - '. $searchModel->datetime_end;
+
 
         return $this->render('user-map', [
-            'usersByProject' => $usersByProject,
+            'dataProvider' => $dataProvider,
+            'searchModel' => $searchModel,
         ]);
+
     }
 }
