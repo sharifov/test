@@ -60,8 +60,12 @@ class Notifications extends \yii\bootstrap\Widget
         }, 1000);*/
 
 
-        $model = null;
-        $newCount = 0;
+        //$model = null;
+        //$newCount = 0;
+
+        $model = \common\models\Notifications::findNew($user_id);
+        $newCount = \common\models\Notifications::findNewCount($user_id);
+
         $newCallCount = 0;
         $newSmsCount = 0;
         $newEmailCount = 0;
@@ -71,8 +75,7 @@ class Notifications extends \yii\bootstrap\Widget
 
         $data = $cache->get($key);
         if ($data === false) {
-            $data['model'] = \common\models\Notifications::findNew($user_id);
-            $data['newCount'] = \common\models\Notifications::findNewCount($user_id);
+
 
             $data['newCallCount'] = Call::find()->where(['c_created_user_id' => $user_id, 'c_call_type_id' => Call::CALL_TYPE_IN, 'c_is_new' => true])->count();
             $data['newSmsCount'] = Sms::find()->where(['s_created_user_id' => $user_id, 's_type_id' => Sms::TYPE_INBOX, 's_is_new' => true])->count();
@@ -80,8 +83,8 @@ class Notifications extends \yii\bootstrap\Widget
 
             $cache->set($key, $data, $duration, $dependency);
         } else {
-            $model = $data['model'];
-            $newCount = $data['newCount'];
+            //$model = $data['model'];
+            //$newCount = $data['newCount'];
             $newCallCount = $data['newCallCount'];
             $newSmsCount = $data['newSmsCount'];
             $newEmailCount = $data['newEmailCount'];
