@@ -645,7 +645,7 @@
 
             console.log('Calling ' + params.To + '...');
             createNotify('Calling', 'Calling ' + params.To + '...', 'success');
-            device.connect(params);
+            connection = device.connect(params);
         }
     }
 
