@@ -105,7 +105,7 @@
     </ul>
     <?php
         if($soundPlay) {
-            $this->registerJs('ion.sound.play("door_bell");', \yii\web\View::POS_READY);
+            $this->registerJs('ion.sound.play("button_tiny");', \yii\web\View::POS_READY);
         }
     ?>
 

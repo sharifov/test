@@ -31,7 +31,7 @@ $this->registerJs($js);
             <div class="col-md-6">
                 <h3>General Info</h3>
                 <div class="row">
-                    <div class="col-md-12">
+                    <div class="col-md-3">
                         <div class="form-group">
                             <?= Html::label($model->getAttributeLabel('name'), null, [
                                 'class' => 'control-label'
@@ -43,9 +43,7 @@ $this->registerJs($js);
                             ]) ?>
                         </div>
                     </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-12">
+                    <div class="col-md-3">
                         <div class="form-group">
                             <?= Html::label($model->getAttributeLabel('link'), null, [
                                 'class' => 'control-label'
@@ -57,9 +55,7 @@ $this->registerJs($js);
                             ]) ?>
                         </div>
                     </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-12">
+                    <div class="col-md-6">
                         <div class="form-group">
                             <?= Html::label($model->getAttributeLabel('api_key'), null, [
                                 'class' => 'control-label'
@@ -72,6 +68,7 @@ $this->registerJs($js);
                         </div>
                     </div>
                 </div>
+
 
                 <?= Html::label('Market source', null, [
                     'class' => 'control-label'
@@ -127,7 +124,7 @@ $this->registerJs($js);
                             ]) ?>
                         </div>
                     </div>
-                    <div class="col-md-4">
+                    <?/*<div class="col-md-4">
                         <div class="form-group">
                             <?= Html::label($model->contactInfo->getAttributeLabel('password'), null, [
                                 'class' => 'control-label'
@@ -138,8 +135,9 @@ $this->registerJs($js);
                                 'disabled' => true
                             ]) ?>
                         </div>
-                    </div>
+                    </div>*/?>
                 </div>
+                <?/*
                 <div class="row">
                     <div class="col-md-4">
                         <div class="form-group">
@@ -177,7 +175,7 @@ $this->registerJs($js);
                             ]) ?>
                         </div>
                     </div>
-                </div>
+                </div>*/?>
 
                 <div class=" mb-20">
                     <?= Html::button('Email Templates', [
