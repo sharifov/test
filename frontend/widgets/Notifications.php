@@ -94,9 +94,9 @@ class Notifications extends \yii\bootstrap\Widget
 
         //if($newEmailCount > 0) {
 
-        $this->view->registerJs("$('#call-inbox-queue').text(" . ($newCallCount ?: '') . '");', \yii\web\View::POS_READY);
-        $this->view->registerJs("$('#sms-inbox-queue').text(" . ($newSmsCount ?: '') . '");', \yii\web\View::POS_READY);
-        $this->view->registerJs("$('#email-inbox-queue').text(" . ($newEmailCount ?: '') . '");', \yii\web\View::POS_READY);
+        $this->view->registerJs("$('#call-inbox-queue').text(" . ($newCallCount ?: '') . ');', \yii\web\View::POS_READY);
+        $this->view->registerJs("$('#sms-inbox-queue').text(" . ($newSmsCount ?: '') . ');', \yii\web\View::POS_READY);
+        $this->view->registerJs("$('#email-inbox-queue').text(" . ($newEmailCount ?: '') . ');', \yii\web\View::POS_READY);
 
 
         /*} else {
