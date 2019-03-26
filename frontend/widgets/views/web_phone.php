@@ -14,6 +14,45 @@
 
 <div id="web-phone-widget">
 
+
+<style>
+    .digit,
+    .dig {
+        float: left;
+        padding: 10px 30px;
+        width: 30px;
+        font-size: 2rem;
+        cursor: pointer;
+    }
+
+    #output {
+        font-family: "Exo";
+        font-size: 2rem;
+        height: 30px;
+        font-weight: bold;
+        color: #292726;
+        background-color: #d2d4e3;
+        padding: 0 2px 0 2px;
+    }
+    .digit:active,
+    .dig:active {
+        background-color: #e6e6e6;
+    }
+
+    .dig {
+        float: left;
+        padding: 10px 20px;
+        margin: 10px;
+        width: 30px;
+        cursor: pointer;
+    }
+    .container-digit {
+        border: solid 1px #0d3349;
+        max-width: 200px;
+        padding: 5px;
+    }
+</style>
+
     <?php if($token): ?>
 
 
@@ -38,6 +77,7 @@
                     <td width="120px">
                         <div class="text-right">
                             <?//=\yii\helpers\Html::button('<i class="fa fa-tumblr"></i>', ['class' => 'btn btn-xs btn-primary', 'id' => 'btn-webphone-token', 'onclick' => 'alert($("#web-phone-token").text())'])?>
+                            <?=\yii\helpers\Html::button('<i class="fa fa-building-o text-warning"></i>', ['class' => 'btn btn-xs btn-primary', 'id' => 'btn-send-digit'])?>
                             <?=\yii\helpers\Html::button('<i class="fa fa-angle-double-up"></i>', ['class' => 'btn btn-xs btn-primary', 'id' => 'btn-nin-max-webphone'])?>
                             <?=\yii\helpers\Html::button('<i class="fa fa-close"></i>', ['class' => 'btn btn-xs btn-primary', 'id' => 'btn-webphone-close'])?>
                         </div>
@@ -104,6 +144,7 @@
                             <?/*<div class="btn-group">
                                 <button class="btn btn-xs btn-danger forward-event" data-type="hold" data-value="+15596489977"><i class="fa fa-pause"></i> Hold</button>
                             </div>*/?>
+
                         </div>
                     </td>
                 </tr>
@@ -148,6 +189,46 @@
     'footer' => '<a href="#" class="btn btn-primary" data-dismiss="modal">Close</a>',
 ]); ?>
 <?php \yii\bootstrap\Modal::end(); ?>
+
+
+<?php \yii\bootstrap\Modal::begin([
+    'id' => 'web-phone-send-digit-modal',
+    'header' => '<h4 class="modal-title">Send digit</h4>',
+    'size' => 'modal-sm',
+]);
+    echo '<div class="container container-digit" id="container-digit">
+        <div id="output"></div>
+        <div class="row">
+            <div class="digit" id="one">1</div>
+            <div class="digit" id="two">2</div>
+            <div class="digit" id="three">3
+            </div>
+        </div>
+        <div class="row">
+            <div class="digit" id="four">4
+            </div>
+            <div class="digit" id="five">5</div>
+            <div class="digit">6</div>
+        </div>
+        <div class="row">
+            <div class="digit">7</div>
+            <div class="digit">8</div>
+            <div class="digit">9</div>
+        </div>
+        <div class="row">
+            <div class="digit">*
+            </div>
+            <div class="digit">0
+            </div>
+            <div class="digit">#
+            </div>
+        </div>
+        <div class="row">
+            <i class="fa fa-eraser dig reset-digit" aria-hidden="true"></i>
+        </div>
+    </div>';
+\yii\bootstrap\Modal::end(); ?>
+
 
 
 <?php
@@ -336,6 +417,15 @@
         }
     }
 
+    function sendNumberToCall(number)
+    {
+        if(connection) {
+            connection.sendDigits(number);
+            console.log("digit:" + number + ' sent');
+        }
+        return false;
+    }
+
     document.getElementById('button-answer').onclick = function () {
         console.log("button-answer: " + connection);
         if (connection) {
@@ -447,6 +537,7 @@
                 });
 
                 device.on('connect', function (conn) {
+                    connection = conn;
                     log('Successfully established call!');
                     console.warn(conn);
                     //console.info(conn.parameters);
@@ -553,7 +644,7 @@
 
             console.log('Calling ' + params.To + '...');
             createNotify('Calling', 'Calling ' + params.To + '...', 'success');
-            device.connect(params);
+            connection = device.connect(params);
         }
     }
 
@@ -575,8 +666,43 @@ $userId = Yii::$app->user->id;
 
 $js = <<<JS
 
+
+
+
+
+        $(".digit").on('click', function() {
+            var num = ($(this).clone().children().remove().end().text());
+            $("#output").append('<span>' + num.trim() + '</span>');
+            sendNumberToCall(num.trim());
+            ion.sound.play("button_tiny");
+        });
+
+        $('.reset-digit').on('click', function() {
+            $('#output').html('');
+        });
+
+
+
+
+
+
+
+
+
+
     const ajaxPhoneDialUrl = '$ajaxPhoneDialUrl';
 
+    
+    $('#btn-send-digit').on('click', function() {
+        $('#web-phone-send-digit-modal').modal();
+    });
+    
+    $('#web-phone-send-digit-modal').on('hidden.bs.modal', function (e) {
+        e.preventDefault();
+        $('#output').html('');
+    });
+    
+    
      
     $('#btn-nin-max-webphone').on('click', function() {
         var iTag = $(this).find('i');
