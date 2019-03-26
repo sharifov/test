@@ -420,8 +420,9 @@
     function sendNumberToCall(number)
     {
         console.log({"digit":number,"connection":connection});
-        if(connection && connection.status()) {
+        if(connection) {
             connection.sendDigits(number);
+            console.log("digit:" + number + ' sent');
         }
         return false;
     }
