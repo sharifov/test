@@ -537,6 +537,7 @@
                 });
 
                 device.on('connect', function (conn) {
+                    connection = conn;
                     log('Successfully established call!');
                     console.warn(conn);
                     //console.info(conn.parameters);
