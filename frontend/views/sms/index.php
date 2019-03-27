@@ -10,6 +10,14 @@ use yii\widgets\Pjax;
 
 $this->title = 'Sms';
 $this->params['breadcrumbs'][] = $this->title;
+
+if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$app->authManager->getAssignment('qa', Yii::$app->user->id)) {
+    $userList = \common\models\Employee::getList();
+    $projectList = \common\models\Project::getList();
+} else {
+    $userList = \common\models\Employee::getListByUserId(Yii::$app->user->id);
+    $projectList = \common\models\Project::getListByUser(Yii::$app->user->id);
+}
 ?>
 <div class="sms-index">
 
@@ -61,7 +69,21 @@ $this->params['breadcrumbs'][] = $this->title;
                 'options' => ['style' => 'width: 100px']
             ],
 
-            ['class' => 'yii\grid\ActionColumn'],
+            ['class' => 'yii\grid\ActionColumn',
+                'template' => '{view} {update} {delete}',
+                'visibleButtons' => [
+                    /*'view' => function ($model, $key, $index) {
+                        return User::hasPermission('viewOrder');
+                    },*/
+                    'update' => function ($model, $key, $index) {
+                        return Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id);
+                    },
+
+                    'delete' => function ($model, $key, $index) {
+                        return Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id);
+                    },
+                ],
+            ],
 
             //'s_is_new:boolean',
             's_tw_message_sid',
@@ -87,7 +109,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'value' => function (\common\models\Sms $model) {
                     return $model->sProject ? $model->sProject->name : '-';
                 },
-                'filter' => \common\models\Project::getList()
+                'filter' => $projectList
             ],
 
 
@@ -186,7 +208,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     return  ($model->sCreatedUser ? '<i class="fa fa-user"></i> ' .Html::encode($model->sCreatedUser->username) : $model->s_created_user_id);
                 },
                 'format' => 'raw',
-                'filter' => \common\models\Employee::getList()
+                'filter' => $userList
             ],
             [
                 'attribute' => 's_created_dt',
