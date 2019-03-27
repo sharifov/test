@@ -96,7 +96,7 @@ $isQA = Yii::$app->authManager->getAssignment('qa', Yii::$app->user->id);
                 $menuItems[] = ['label' => 'My Calls <span id="call-inbox-queue" class="label-info label pull-right"></span> ', 'url' => ['/call/list'], 'icon' => 'phone'];
             }
 
-            if($isAdmin || $isQA) {
+            if($isAdmin || $isQA || $isSupervision) {
 
                 if($isAdmin) {
                     $items =  [
@@ -109,7 +109,7 @@ $isQA = Yii::$app->authManager->getAssignment('qa', Yii::$app->user->id);
                     ];
                 }
 
-                if($isQA) {
+                if($isQA || $isSupervision) {
                     $items =  [
                         ['label' => 'Calls & SMS', 'url' => ['/stats/call-sms'], 'icon' => 'list'],
 

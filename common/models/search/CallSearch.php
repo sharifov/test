@@ -2,6 +2,7 @@
 
 namespace common\models\search;
 
+use common\models\UserGroupAssign;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use common\models\Call;
@@ -11,8 +12,11 @@ use common\models\Call;
  */
 class CallSearch extends Call
 {
+
     public $statuses = [];
     public $limit = 0;
+    public $supervision_id;
+
 
     /**
      * {@inheritdoc}
@@ -20,7 +24,7 @@ class CallSearch extends Call
     public function rules()
     {
         return [
-            [['c_id', 'c_call_type_id', 'c_lead_id', 'c_created_user_id', 'c_com_call_id', 'c_project_id', 'c_is_new', 'c_is_deleted'], 'integer'],
+            [['c_id', 'c_call_type_id', 'c_lead_id', 'c_created_user_id', 'c_com_call_id', 'c_project_id', 'c_is_new', 'c_is_deleted', 'supervision_id'], 'integer'],
             [['c_call_sid', 'c_account_sid', 'c_from', 'c_to', 'c_sip', 'c_call_status', 'c_api_version', 'c_direction', 'c_forwarded_from', 'c_caller_name', 'c_parent_call_sid', 'c_call_duration', 'c_sip_response_code', 'c_recording_url', 'c_recording_sid', 'c_recording_duration',
                 'c_timestamp', 'c_uri', 'c_sequence_number', 'c_created_dt', 'c_updated_dt', 'c_error_message', 'c_price', 'statuses', 'limit'], 'safe'],
         ];
@@ -63,6 +67,13 @@ class CallSearch extends Call
             // $query->where('0=1');
             return $dataProvider;
         }
+
+        if($this->supervision_id > 0) {
+            $subQuery1 = UserGroupAssign::find()->select(['ugs_group_id'])->where(['ugs_user_id' => $this->supervision_id]);
+            $subQuery = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->where(['IN', 'ugs_group_id', $subQuery1]);
+            $query->andWhere(['IN', 'c_created_user_id', $subQuery]);
+        }
+
 
         // grid filtering conditions
         $query->andFilterWhere([
