@@ -8,226 +8,222 @@ use yii\widgets\ActiveForm;
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\EmployeeSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
+/* @var $dataProvider2 yii\data\ActiveDataProvider */
 /* @var $form yii\widgets\ActiveForm */
 
-$bundle = \frontend\assets\TimelineAsset::register($this);
 $this->title = 'User Call Map';
 
 /*$js = <<<JS
     google.charts.load('current', {packages: ['corechart', 'bar']});
 JS;
 //$this->registerJs($js, \yii\web\View::POS_READY);*/
-
+$bundle = \frontend\assets\TimerAsset::register($this);
 $userId = Yii::$app->user->id;
 ?>
 
-<div class="site-index">
+<style>
+    #call-map-page table {margin-bottom: 5px}
+</style>
+
+<div id="call-map-page">
+
+<?php Pjax::begin(['id' => 'pjax-call-list']); ?>
+
+    <div class="">
+
+        <?/*<div class="animated flipInY col-md-3 col-sm-6 col-xs-12">
+            <div class="tile-stats">
+                <div class="icon"><i class="fa fa-phone"></i></div>
+                <div class="count">
+                    <?=\common\models\Call::find()->where(['or', ['c_to' => $phoneList], ['c_from' => $phoneList], ['c_created_user_id' => Yii::$app->user->id]])
+                        ->andWhere(['c_is_new' => true, 'c_is_deleted' => false])->count()?>
+                </div>
+                <h3>New Calls</h3>
+                <p>Total new Calls</p>
+            </div>
+        </div>*/?>
+
+        <div class="animated flipInY col-lg-2 col-md-2 col-sm-6 col-xs-12">
+            <div class="tile-stats">
+                <div class="icon"><i class="fa fa-users"></i></div>
+                <div class="count">
+                    <?=\common\models\UserConnection::find()->select('uc_user_id')->groupBy(['uc_user_id'])->count()?> /
+                    <?=\common\models\UserConnection::find()->count()?>
+                </div>
+                <h3>Online Agents</h3>
+                <p>Current state Online Employees / Connections</p>
+            </div>
+        </div>
+
+        <div class="animated flipInY col-md-3 col-sm-6 col-xs-12">
+            <div class="tile-stats">
+                <div class="icon"><i class="fa fa-phone"></i></div>
+                <div class="count">
+                    <?=\common\models\Call::find()
+                        ->andWhere(['c_call_type_id' => \common\models\Call::CALL_TYPE_IN, 'DATE(c_created_dt)' => 'DATE(NOW())'])->count()?>
+                </div>
+                <h3>Today Incoming Calls</h3>
+                <p>Today count of incoming Calls</p>
+            </div>
+        </div>
+
+        <div class="animated flipInY col-md-3 col-sm-2 col-xs-12">
+            <div class="tile-stats">
+                <div class="icon"><i class="fa fa-phone"></i></div>
+                <div class="count">
+                    <?=\common\models\Call::find()
+                        ->andWhere(['c_call_type_id' => \common\models\Call::CALL_TYPE_OUT, 'DATE(c_created_dt)' => 'DATE(NOW())'])->count()?>
+                </div>
+                <h3>Today Outgoing Calls</h3>
+                <p>Today count of outgoing Calls</p>
+            </div>
+        </div>
+
+        <?php /*
+            <div class="animated flipInY col-lg-2 col-md-2 col-sm-6 col-xs-12">
+                <div class="tile-stats">
+                    <div class="icon"><i class="fa fa-list"></i></div>
+                    <div class="count"><?=\frontend\models\Log::find()->where("log_time BETWEEN ".strtotime(date('Y-m-d'))." AND ".strtotime(date('Y-m-d H:i:s')))->count()?></div>
+                    <h3>System Logs</h3>
+                    <p>Today count of System Logs</p>
+                </div>
+            </div>
+            */ ?>
+    </div>
+
+    <div class="clearfix"></div>
+
+<div class="col-md-6">
 
     <?/*<h1><i class="fa fa-bar-chart"></i> <?=$this->title?></h1>*/?>
 
-    <?php Pjax::begin(['id' => 'pjax-call-list']); ?>
+
     <div class="panel panel-default">
-        <div class="panel-heading"><i class="fa fa-bar-chart"></i> User Call Map</div>
+        <div class="panel-heading"><i class="fa fa-bar-chart"></i> User Call Map (<?=Yii::$app->formatter->asTime(time(), 'php:H:i:s')?>)</div>
         <div class="panel-body">
-
-            
-
-            <?= GridView::widget([
+            <?= \yii\widgets\ListView::widget([
                 'dataProvider' => $dataProvider,
-                'filterModel' => $searchModel,
-                'rowOptions' => function (\common\models\Employee $model, $index, $widget, $grid) {
-                    if ($model->deleted) {
-                        return ['class' => 'danger'];
-                    }
+
+                /*'options' => [
+                    'tag' => 'div',
+                    'class' => 'list-wrapper',
+                    'id' => 'list-wrapper',
+                ],*/
+                'emptyText' => '<div class="text-center">Not found calls</div><br>',
+                'layout' => "{items}<div class=\"text-center\">{pager}</div>\n", //{summary}\n
+
+                'itemView' => function ($model, $key, $index, $widget) {
+                    return $this->render('_list_item',['model' => $model]);
                 },
-                'columns' => [
-                    [
-                        'attribute' => 'id',
-                        'contentOptions' => ['class' => 'text-center'],
-                        'options' => ['style' => 'width:60px'],
-                    ],
-                    [
-                        'attribute' => 'username',
-                        'value' => function (\common\models\Employee $model) {
-                            return Html::tag('i', '', ['class' => 'fa fa-user']).' '.Html::encode($model->username);
-                        },
-                        'format' => 'raw',
-                        //'contentOptions' => ['title' => 'text-center'],
-                        'options' => ['style' => 'width:180px'],
-                    ],
 
-                    [
-                        //'attribute' => 'username',
-                        'label' => 'Role',
-                        'value' => function (\common\models\Employee $model) {
-                            $roles = $model->getRoles();
-                            return $roles ? implode(', ', $roles) : '-';
-                        },
-                        'options' => ['style' => 'width:150px'],
-                        //'format' => 'raw'
-                    ],
+                'itemOptions' => [
+                    //'class' => 'item',
+                    //'tag' => false,
+                ],
+                /*'pager' => [
+                    'firstPageLabel' => 'first',
+                    'lastPageLabel' => 'last',
+                    'nextPageLabel' => 'next',
+                    'prevPageLabel' => 'previous',
+                    'maxButtonCount' => 3,
+                ],*/
 
-                    /*'email:email',
-                    [
-                        'attribute' => 'status',
-                        'filter' => [$searchModel::STATUS_ACTIVE => 'Active', $searchModel::STATUS_DELETED => 'Deleted'],
-                        'value' => function (\common\models\Employee $model) {
-                            return ($model->status === $model::STATUS_DELETED) ? '<span class="label label-danger">Deleted</span>' : '<span class="label label-success">Active</span>';
-                        },
-                        'format' => 'html'
-                    ],*/
-
-                    [
-                        'label' => 'User Groups',
-                        'attribute' => 'user_group_id',
-                        'value' => function (\common\models\Employee $model) {
-
-                            $groups = $model->getUserGroupList();
-                            $groupsValueArr = [];
-
-                            foreach ($groups as $group) {
-                                $groupsValueArr[] = Html::tag('span', Html::tag('i', '', ['class' => 'fa fa-users']) . ' ' . Html::encode($group), ['class' => 'label label-default']);
-                            }
-
-                            $groupsValue = implode(' ', $groupsValueArr);
-
-                            return $groupsValue;
-                        },
-                        'format' => 'raw',
-                        'filter' => Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) ? \common\models\UserGroup::getList() : Yii::$app->user->identity->getUserGroupList()
-                    ],
-
-                    [
-                        'label' => 'Tasks Result for Period',
-                        'value' => function(\common\models\Employee $model) use ($searchModel) {
-                            return $model->getTaskStats($searchModel->datetime_start, $searchModel->datetime_end);
-                        },
-                        'format' => 'raw',
-                        'contentOptions' => ['class' => 'text-left'],
-                        /*'filter' => \kartik\daterange\DateRangePicker::widget([
-                            'model'=> $searchModel,
-                            'attribute' => 'date_range',
-                            //'name'=>'date_range',
-                            'useWithAddon'=>true,
-                            //'value'=>'2015-10-19 12:00 AM - 2015-11-03 01:00 PM',
-                            'presetDropdown'=>true,
-                            'hideInput'=>true,
-                            'convertFormat'=>true,
-                            'startAttribute' => 'datetime_start',
-                            'endAttribute' => 'datetime_end',
-                            //'startInputOptions' => ['value' => date('Y-m-d', strtotime('-5 days'))],
-                            //'endInputOptions' => ['value' => '2017-07-20'],
-                            'pluginOptions'=>[
-                                'timePicker'=> false,
-                                'timePickerIncrement'=>15,
-                                'locale'=>['format'=>'Y-m-d']
-                            ]
-                        ])*/
-                        //'options' => ['style' => 'width:200px'],
-
-                    ],
-                    [
-                        'label' => 'Processing',
-                        'value' => function (\common\models\Employee $model) use ($searchModel) {
-                            $cnt = $model->getLeadCountByStatuses([\common\models\Lead::STATUS_PROCESSING], null, $searchModel->datetime_start, $searchModel->datetime_end);
-                            return $cnt ? Html::a($cnt, ['lead-flow/index',
-                                'LeadFlowSearch[employee_id]' => $model->id,
-                                'LeadFlowSearch[status]' => \common\models\Lead::STATUS_PROCESSING,
-                                'LeadFlowSearch[created_date_from]' => $searchModel->datetime_start,
-                                'LeadFlowSearch[created_date_to]' => $searchModel->datetime_end
-                            ], ['data-pjax' => 0, 'target' => '_blank']) : '-';
-                        },
-                        'format' => 'raw',
-                    ],
-                    [
-                        'label' => 'Processing -> Hold On',
-                        'value' => function (\common\models\Employee $model) use ($searchModel) {
-                            $cnt = $model->getLeadCountByStatuses([\common\models\Lead::STATUS_ON_HOLD], \common\models\Lead::STATUS_PROCESSING, $searchModel->datetime_start, $searchModel->datetime_end);
-                            return $cnt ? Html::a($cnt, ['lead-flow/index',
-                                'LeadFlowSearch[employee_id]' => $model->id,
-                                'LeadFlowSearch[status]' => \common\models\Lead::STATUS_ON_HOLD,
-                                'LeadFlowSearch[lf_from_status_id]' => \common\models\Lead::STATUS_PROCESSING,
-                                'LeadFlowSearch[created_date_from]' => $searchModel->datetime_start,
-                                'LeadFlowSearch[created_date_to]' => $searchModel->datetime_end
-                            ], ['data-pjax' => 0, 'target' => '_blank']) : '-';
-                        },
-                        'format' => 'raw',
-                    ],
-                    [
-                        'label' => 'Booked',
-                        'value' => function (\common\models\Employee $model) use ($searchModel) {
-                            $cnt = $model->getLeadCountByStatuses([\common\models\Lead::STATUS_BOOKED], null, $searchModel->datetime_start, $searchModel->datetime_end);
-                            return $cnt ? Html::a($cnt, ['lead-flow/index',
-                                'LeadFlowSearch[employee_id]' => $model->id,
-                                'LeadFlowSearch[status]' => \common\models\Lead::STATUS_BOOKED,
-                                'LeadFlowSearch[created_date_from]' => $searchModel->datetime_start,
-                                'LeadFlowSearch[created_date_to]' => $searchModel->datetime_end
-                            ], ['data-pjax' => 0, 'target' => '_blank']) : '-';
-                        },
-                        'format' => 'raw',
-                    ],
-                    [
-                        'label' => 'Sold',
-                        'value' => function (\common\models\Employee $model) use ($searchModel) {
-                            $cnt = $model->getLeadCountByStatuses([\common\models\Lead::STATUS_SOLD], null, $searchModel->datetime_start, $searchModel->datetime_end);
-                            return $cnt ? Html::a($cnt, ['lead-flow/index',
-                                'LeadFlowSearch[employee_id]' => $model->id,
-                                'LeadFlowSearch[status]' => \common\models\Lead::STATUS_SOLD,
-                                'LeadFlowSearch[created_date_from]' => $searchModel->datetime_start,
-                                'LeadFlowSearch[created_date_to]' => $searchModel->datetime_end
-                            ], ['data-pjax' => 0, 'target' => '_blank']) : '-';
-                        },
-                        'format' => 'raw',
-                    ],
-                    [
-                        'label' => 'Processing -> Follow Up',
-                        'value' => function (\common\models\Employee $model) use ($searchModel) {
-                            $cnt = $model->getLeadCountByStatuses([\common\models\Lead::STATUS_FOLLOW_UP], \common\models\Lead::STATUS_PROCESSING, $searchModel->datetime_start, $searchModel->datetime_end);
-                            return $cnt ? Html::a($cnt, ['lead-flow/index',
-                                'LeadFlowSearch[employee_id]' => $model->id,
-                                'LeadFlowSearch[status]' => \common\models\Lead::STATUS_FOLLOW_UP,
-                                'LeadFlowSearch[lf_from_status_id]' => \common\models\Lead::STATUS_PROCESSING,
-                                'LeadFlowSearch[created_date_from]' => $searchModel->datetime_start,
-                                'LeadFlowSearch[created_date_to]' => $searchModel->datetime_end
-                            ], ['data-pjax' => 0, 'target' => '_blank']) : '-';
-                        },
-                        'format' => 'raw',
-                    ],
-                    [
-                        'label' => 'Processing -> Trash',
-                        'value' => function (\common\models\Employee $model) use ($searchModel) {
-                            $cnt = $model->getLeadCountByStatuses([\common\models\Lead::STATUS_TRASH], \common\models\Lead::STATUS_PROCESSING, $searchModel->datetime_start, $searchModel->datetime_end);
-                            return $cnt ? Html::a($cnt, ['lead-flow/index',
-                                'LeadFlowSearch[employee_id]' => $model->id,
-                                'LeadFlowSearch[status]' => \common\models\Lead::STATUS_TRASH,
-                                'LeadFlowSearch[lf_from_status_id]' => \common\models\Lead::STATUS_PROCESSING,
-                                'LeadFlowSearch[created_date_from]' => $searchModel->datetime_start,
-                                'LeadFlowSearch[created_date_to]' => $searchModel->datetime_end
-                            ], ['data-pjax' => 0, 'target' => '_blank']) : '-';
-                        },
-                        'format' => 'raw',
-                    ]
-
-
-                    /*[
-                        'class' => 'yii\grid\ActionColumn',
-                        'template' => '{update}',
-                        'visibleButtons' => [
-                            'update' => function (\common\models\Employee $model, $key, $index) {
-                                return (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || !in_array('admin', array_keys($model->getRoles())));
-                            },
-                        ],
-
-                    ],*/
-                ]
-            ])
-            ?>
-
-
+            ]) ?>
         </div>
     </div>
-    <?php Pjax::end(); ?>
-
 
 
 </div>
+
+
+<div class="col-md-6">
+
+    <?/*<h1><i class="fa fa-bar-chart"></i> <?=$this->title?></h1>*/?>
+
+
+    <div class="panel panel-default">
+        <div class="panel-heading"><i class="fa fa-bar-chart"></i> Last 10 Calls</div>
+        <div class="panel-body">
+            <?= \yii\widgets\ListView::widget([
+                'dataProvider' => $dataProvider2,
+
+                /*'options' => [
+                    'tag' => 'div',
+                    'class' => 'list-wrapper',
+                    'id' => 'list-wrapper',
+                ],*/
+                'emptyText' => '<div class="text-center">Not found calls</div><br>',
+                //'layout' => "{summary}\n<div class=\"text-center\">{pager}</div>\n{items}<div class=\"text-center\">{pager}</div>\n",
+                'layout' => "{items}<div class=\"text-center\">{pager}</div>\n", //{summary}\n
+                'itemView' => function ($model, $key, $index, $widget) {
+                    return $this->render('_list_item',['model' => $model]);
+                },
+
+                'itemOptions' => [
+                    //'class' => 'item',
+                    //'tag' => false,
+                ],
+
+                /*'pager' => [
+                    'firstPageLabel' => 'first',
+                    'lastPageLabel' => 'last',
+                    'nextPageLabel' => 'next',
+                    'prevPageLabel' => 'previous',
+                    'maxButtonCount' => 3,
+                ],*/
+
+            ]) ?>
+        </div>
+    </div>
+
+
+</div>
+
+<?php Pjax::end(); ?>
+    <div class="text-center">
+        <?=Html::button('Refresh Data', ['class' => 'btn btn-sm btn-success', 'id' => 'btn-user-call-map-refresh'])?>
+    </div>
+</div>
+
+
+
+<?php
+$js = <<<JS
+
+    function startTimers() {
+    
+        $(".timer").each(function( index ) {
+            var sec = $( this ).data('sec');
+            var control = $( this ).data('control');
+            var format = $( this ).data('format');
+            //var id = $( this ).data('id');
+            //$( this ).addClass( "foo" );
+            $(this).timer({format: format, seconds: sec}).timer(control);
+            //console.log( index + ": " + $( this ).text() );
+        });
+    
+        //$('.timer').timer('remove');
+        //$('.timer').timer({format: '%M:%S', seconds: 0}).timer('start');
+    }
+
+    
+
+    $('#btn-user-call-map-refresh').on('click', function () {
+        // $('#modal-dialog').find('.modal-content').html('');
+        $.pjax.reload({container:'#pjax-call-list'});
+    });
+
+    $(document).on('pjax:start', function() {
+        //$("#modalUpdate .close").click();
+    });
+
+    $(document).on('pjax:end', function() {
+        startTimers();
+        //alert(2);
+    });
+    
+    startTimers();
+
+
+JS;
+$this->registerJs($js);

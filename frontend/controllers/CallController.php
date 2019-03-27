@@ -244,27 +244,35 @@ class CallController extends FController
     public function actionUserMap()
     {
 
+        $this->layout = '@frontend/themes/gentelella/views/layouts/main_tv';
+
         $userId = Yii::$app->user->id;
 
-        $searchModel = new EmployeeSearch();
+        $searchModel = new CallSearch();
         $params = Yii::$app->request->queryParams;
 
-        if (Yii::$app->authManager->getAssignment('supervision', $userId)) {
-            $params['EmployeeSearch']['supervision_id'] = $userId;
-            $params['EmployeeSearch']['status'] = Employee::STATUS_ACTIVE;
-        }
+        //if (Yii::$app->authManager->getAssignment('supervision', $userId)) {
+            //$params['CallSearch']['supervision_id'] = $userId;
+            //$params['CallSearch']['status'] = Employee::STATUS_ACTIVE;
+        //}
 
-        $dataProvider = $searchModel->searchByUserGroups($params);
+        $params['CallSearch']['statuses'] = [Call::CALL_STATUS_QUEUE, Call::CALL_STATUS_IN_PROGRESS, Call::CALL_STATUS_RINGING];
+        $dataProvider = $searchModel->searchUserCallMap($params);
 
-        $searchModel->datetime_start = date('Y-m-d', strtotime('-0 day'));
-        $searchModel->datetime_end = date('Y-m-d');
+        $params['CallSearch']['statuses'] = [Call::CALL_STATUS_COMPLETED, Call::CALL_STATUS_BUSY, Call::CALL_STATUS_FAILED, Call::CALL_STATUS_NO_ANSWER, Call::CALL_STATUS_CANCELED];
+        $params['CallSearch']['limit'] = 20;
+        $dataProvider2 = $searchModel->searchUserCallMap($params);
+
+        //$searchModel->datetime_start = date('Y-m-d', strtotime('-0 day'));
+        //$searchModel->datetime_end = date('Y-m-d');
 
         //$searchModel->date_range = $searchModel->datetime_start.' - '. $searchModel->datetime_end;
 
 
         return $this->render('user-map', [
             'dataProvider' => $dataProvider,
-            'searchModel' => $searchModel,
+            'dataProvider2' => $dataProvider2,
+            //'searchModel' => $searchModel,
         ]);
 
     }
