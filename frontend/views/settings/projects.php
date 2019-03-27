@@ -49,6 +49,7 @@ $this->registerJs($js);
     <div class="panel-body">
         <?php if (Yii::$app->user->identity->role == 'admin') : ?>
             <div class="mb-20">
+
                 <?= Html::a('Sync Project', '#', [
                     'class' => 'btn-success btn sync',
                     'data-url' => Url::to([
@@ -56,6 +57,12 @@ $this->registerJs($js);
                         'type' => 'projects'
                     ])
                 ]) ?>
+
+                <?= Html::a('Synchronization Projects from BO', ['settings/synchronization'], ['class' => 'btn btn-warning', 'data' => [
+                    'confirm' => 'Are you sure you want synchronization all projects from BackOffice Server?',
+                    'method' => 'post',
+                ],]) ?>
+
             </div>
         <?php endif; ?>
         <?= GridView::widget([
@@ -74,7 +81,15 @@ $this->registerJs($js);
                     },
                     'format' => 'raw'
                 ],
-                'api_key',
+
+                [
+                    'attribute' => 'last_update',
+                    'value' => function (\common\models\Project $model) {
+                        return $model->last_update ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->last_update)) : '-';
+                    },
+                    'format' => 'raw'
+                ],
+                //'api_key',
                 'closed:boolean',
                 [
                     'class' => 'yii\grid\ActionColumn',
@@ -84,15 +99,14 @@ $this->registerJs($js);
                             /**
                              * @var $model Project
                              */
-                            $url = \yii\helpers\Url::to([
-                                'settings/projects',
-                                'id' => $model->id
-                            ]);
-                            return Html::a('<span class="glyphicon glyphicon-edit"></span>', $url, [
+                            return Html::a('<span class="glyphicon glyphicon-edit"></span>', [
+                                    'settings/projects',
+                                    'id' => $model->id
+                                ], [
                                 'title' => 'Edit'
                             ]).'&nbsp;'.
                             Html::a('<span class="glyphicon glyphicon-cog"></span>',
-                                Url::to(['settings/project-data', 'id' => $model->id]), [
+                                ['settings/project-data', 'id' => $model->id], [
                                 'title' => 'Custom params',
                                 'class' => 'project-data-btn',
                             ]);

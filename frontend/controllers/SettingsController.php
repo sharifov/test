@@ -36,7 +36,7 @@ class SettingsController extends FController
                     [
                         'actions' => [
                             'projects', 'airlines', 'airports', 'logging', 'acl', 'email-template',
-                            'sync', 'view-log', 'acl-rule', 'project-data'
+                            'sync', 'view-log', 'acl-rule', 'project-data', 'synchronization'
                         ],
                         'allow' => true,
                         'roles' => ['supervision'],
@@ -70,6 +70,36 @@ class SettingsController extends FController
 
         return $response;
     }
+
+
+    /**
+     * @return Response
+     * @throws \yii\base\InvalidConfigException
+     * @throws \yii\httpclient\Exception
+     */
+    public function actionSynchronization() : Response
+    {
+        $result = Project::synchronizationProjects();
+
+        if($result) {
+            if($result['error']) {
+                Yii::$app->getSession()->setFlash('error', $result['error']);
+            } else {
+                $message = 'Synchronization successful<br>';
+                if($result['created']) {
+                    $message .= 'Created projects: "'.implode(', ', $result['created']).'"<br>';
+                }
+                if($result['updated']) {
+                    $message .= 'Updated projects: "'.implode(', ', $result['updated']).'"<br>';
+                }
+                Yii::$app->getSession()->setFlash('success', $message);
+            }
+        }
+
+        return $this->redirect(['settings/projects']);
+    }
+
+
 
     public function actionAcl()
     {

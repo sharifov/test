@@ -30,4 +30,10 @@ return [
 
     'ipinfodb_key' => '9079611957f72155dea3bb7ab848ee101c268564ab64921ca5345c4bce7af5b7',
 
+    'backOffice' => [
+        'ver' => '1.0.0',
+        'apiKey' => '5394bbedf41dd2c0403897ca621f188b',
+        'serverUrl' => 'https://backoffice.zeit.style/api/sync'
+    ]
+
 ];

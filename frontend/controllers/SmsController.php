@@ -67,7 +67,13 @@ class SmsController extends FController
     public function actionIndex()
     {
         $searchModel = new SmsSearch();
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+
+        $params = Yii::$app->request->queryParams;
+        if(Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id)) {
+            $params['SmsSearch']['supervision_id'] = Yii::$app->user->id;
+        }
+
+        $dataProvider = $searchModel->search($params);
 
         $inboxModel = new SmsInboxForm();
 

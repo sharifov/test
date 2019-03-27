@@ -7,6 +7,7 @@ use common\models\local\LeadAdditionalInformation;
 use common\models\local\LeadLogMessage;
 use Yii;
 use yii\behaviors\TimestampBehavior;
+use yii\caching\DbDependency;
 use yii\data\ActiveDataProvider;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
@@ -478,6 +479,7 @@ class Lead extends ActiveRecord
         }
 
         $query = self::find()
+            //->cache(600)
             ->select($select)
             //->leftJoin(ProfitSplit::tableName().' ps','ps.ps_lead_id = leads.id')
             //->leftJoin(TipsSplit::tableName().' ts','ts.ts_lead_id = leads.id')
@@ -492,7 +494,18 @@ class Lead extends ActiveRecord
 
         //echo $query->createCommand()->getRawSql();die;
 
-        return $query->createCommand()->queryOne();
+        $db = Yii::$app->db;
+        $duration = 900;     // cache query results for 60 seconds.
+        $dependency = new DbDependency();
+        $dependency->sql = 'SELECT count(*) FROM leads';
+
+        //$dependency = ...;  // optional dependency
+
+        $result = $db->cache(function ($db) use ($query) {
+            return $query->createCommand()->queryOne();
+        }, $duration, $dependency);
+
+        return $result; // $query->createCommand()->queryOne();
     }
 
     /**
