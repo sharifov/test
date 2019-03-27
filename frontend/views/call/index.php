@@ -9,6 +9,15 @@ use yii\widgets\Pjax;
 
 $this->title = 'Calls';
 $this->params['breadcrumbs'][] = $this->title;
+
+if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$app->authManager->getAssignment('qa', Yii::$app->user->id)) {
+    $userList = \common\models\Employee::getList();
+    $projectList = \common\models\Project::getList();
+} else {
+    $userList = \common\models\Employee::getListByUserId(Yii::$app->user->id);
+    $projectList = \common\models\Project::getListByUser(Yii::$app->user->id);
+}
+
 ?>
 <div class="call-index">
 
@@ -44,7 +53,21 @@ $this->params['breadcrumbs'][] = $this->title;
                 },
                 'options' => ['style' => 'width: 80px']
             ],
-            ['class' => 'yii\grid\ActionColumn'],
+            ['class' => 'yii\grid\ActionColumn',
+                'template' => '{view} {update} {delete}',
+                'visibleButtons' => [
+                    /*'view' => function ($model, $key, $index) {
+                        return User::hasPermission('viewOrder');
+                    },*/
+                    'update' => function ($model, $key, $index) {
+                        return Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id);
+                    },
+
+                    'delete' => function ($model, $key, $index) {
+                        return Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id);
+                    },
+                ],
+            ],
             'c_is_new:boolean',
             'c_com_call_id',
             'c_call_sid',
@@ -65,7 +88,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'value' => function (\common\models\Call $model) {
                     return $model->cProject ? $model->cProject->name : '-';
                 },
-                'filter' => \common\models\Project::getList()
+                'filter' => $projectList
             ],
 
             //'c_lead_id',
@@ -132,6 +155,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'value' => function (\common\models\Call $model) {
                     return  $model->cCreatedUser ? '<i class="fa fa-user"></i> ' . Html::encode($model->cCreatedUser->username) : $model->c_created_user_id;
                 },
+                'filter' => $userList,
                 'format' => 'raw'
             ],
 

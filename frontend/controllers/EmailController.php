@@ -69,7 +69,12 @@ class EmailController extends FController
     public function actionIndex()
     {
         $searchModel = new EmailSearch();
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+
+        $params = Yii::$app->request->queryParams;
+        if(Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id)) {
+            $params['EmailSearch']['supervision_id'] = Yii::$app->user->id;
+        }
+        $dataProvider = $searchModel->search($params);
 
         return $this->render('index', [
             'searchModel' => $searchModel,

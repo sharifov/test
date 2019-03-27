@@ -64,7 +64,13 @@ class CallController extends FController
     public function actionIndex()
     {
         $searchModel = new CallSearch();
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+
+        $params = Yii::$app->request->queryParams;
+        if(Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id)) {
+            $params['CallSearch']['supervision_id'] = Yii::$app->user->id;
+        }
+
+        $dataProvider = $searchModel->search($params);
 
         return $this->render('index', [
             'searchModel' => $searchModel,

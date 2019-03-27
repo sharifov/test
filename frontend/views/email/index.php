@@ -9,6 +9,14 @@ use yii\widgets\Pjax;
 
 $this->title = 'Emails';
 $this->params['breadcrumbs'][] = $this->title;
+
+if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$app->authManager->getAssignment('qa', Yii::$app->user->id)) {
+    $userList = \common\models\Employee::getList();
+    $projectList = \common\models\Project::getList();
+} else {
+    $userList = \common\models\Employee::getListByUserId(Yii::$app->user->id);
+    $projectList = \common\models\Project::getListByUser(Yii::$app->user->id);
+}
 ?>
 <div class="email-index">
 
@@ -27,8 +35,22 @@ $this->params['breadcrumbs'][] = $this->title;
             //['class' => 'yii\grid\SerialColumn'],
 
             'e_id',
-            ['class' => 'yii\grid\ActionColumn'],
-            'e_reply_id',
+            ['class' => 'yii\grid\ActionColumn',
+                'template' => '{view} {update} {delete}',
+                'visibleButtons' => [
+                    /*'view' => function ($model, $key, $index) {
+                        return User::hasPermission('viewOrder');
+                    },*/
+                    'update' => function ($model, $key, $index) {
+                        return Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id);
+                    },
+
+                    'delete' => function ($model, $key, $index) {
+                        return Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id);
+                    },
+                ],
+            ],
+            //'e_reply_id',
             'e_lead_id',
             //'e_project_id',
             [
@@ -36,7 +58,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'value' => function (\common\models\Email $model) {
                     return $model->eProject ? $model->eProject->name : '-';
                 },
-                'filter' => \common\models\Project::getList()
+                'filter' => $projectList
             ],
             'e_email_from:email',
             'e_email_to:email',
@@ -47,15 +69,22 @@ $this->params['breadcrumbs'][] = $this->title;
             //'e_email_body_text:ntext',
             //'e_attach',
             //'e_email_data:ntext',
-            'e_type_id',
-            /*[
+            //'e_type_id',
+            [
                 'attribute' => 'e_type_id',
                 'value' => function (\common\models\Email $model) {
-                    return $model->getNa ? $model->eProject->name : '-';
+                    return $model->getTypeName();
                 },
-                'filter' => \common\models\Project::getList()
-            ],*/
-            'e_template_type_id',
+                'filter' => \common\models\Email::TYPE_LIST
+            ],
+            //'e_template_type_id',
+            [
+                'attribute' => 'e_template_type_id',
+                'value' => function (\common\models\Email $model) {
+                    return $model->eTemplateType ? $model->eTemplateType->etp_name : '-';
+                },
+                //'filter' =>
+            ],
             //'e_language_id',
             [
                 'attribute' => 'e_language_id',
@@ -66,7 +95,7 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             'e_communication_id',
             //'e_is_deleted',
-            'e_is_new:boolean',
+            //'e_is_new:boolean',
             //'e_delay',
             //'e_priority',
             //'e_status_id',
@@ -77,7 +106,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 },
                 'filter' => \common\models\Email::STATUS_LIST
             ],
-            'e_status_done_dt',
+            //'e_status_done_dt',
             //'e_read_dt',
             //'e_error_message',
             /*[
@@ -85,15 +114,25 @@ $this->params['breadcrumbs'][] = $this->title;
                 'value' => function (\common\models\Email $model) {
                     return ($model->eUpdatedUser ? '<i class="fa fa-user"></i> ' .Html::encode($model->eUpdatedUser->username) : $model->e_updated_user_id);
                 },
+                'filter' => $userList,
                 'format' => 'raw'
             ],*/
+
             [
+                'attribute' => 'e_created_user_id',
+                'value' => function (\common\models\Email $model) {
+                    return ($model->eCreatedUser ? '<i class="fa fa-user"></i> ' .Html::encode($model->eCreatedUser->username) : $model->e_created_user_id);
+                },
+                'filter' => $userList,
+                'format' => 'raw'
+            ],
+            /*[
                 'attribute' => 'e_updated_dt',
                 'value' => function (\common\models\Email $model) {
                     return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->e_updated_dt));
                 },
                 'format' => 'raw'
-            ],
+            ],*/
 
             /*[
                 'attribute' => 'e_created_user_id',

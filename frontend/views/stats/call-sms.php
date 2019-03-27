@@ -22,6 +22,15 @@ JS;
 //$this->registerJs($js, \yii\web\View::POS_READY);*/
 
 $userId = Yii::$app->user->id;
+
+if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$app->authManager->getAssignment('qa', Yii::$app->user->id)) {
+    $userList = \common\models\Employee::getList();
+    $projectList = \common\models\Project::getList();
+} else {
+    $userList = \common\models\Employee::getListByUserId(Yii::$app->user->id);
+    $projectList = \common\models\Project::getListByUser(Yii::$app->user->id);
+}
+
 ?>
 
 <div class="stats-call-sms">
@@ -258,7 +267,7 @@ $userId = Yii::$app->user->id;
                             return  Html::tag('i', '', ['class' => 'fa fa-user']) . ' ' . Html::encode($agent);
                         },
                         'format' => 'raw',
-                        'filter' => \common\models\Employee::getList()
+                        'filter' => $userList
                     ],
 
                     [
@@ -386,7 +395,7 @@ $userId = Yii::$app->user->id;
                             }
 
                         },
-                        'filter' => \common\models\Project::getList()
+                        'filter' => $projectList
                         //'format' => 'raw',
                     ],
 
