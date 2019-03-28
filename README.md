@@ -295,6 +295,10 @@ CRONs
 */10   *  *  *  *   run-this-one php /var/www/sale/yii call/update-status
 ```
 
+```
+sudo chmod 777 /var/spool/cron/crontabs/root
+```
+
 DIRECTORY STRUCTURE
 -------------------
 
