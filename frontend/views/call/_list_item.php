@@ -8,6 +8,9 @@ use \common\models\Call;
 
 /* @var $this yii\web\View */
 /* @var $model Call */
+
+$phoneUtil = \libphonenumber\PhoneNumberUtil::getInstance();
+
 ?>
 
     <div class="col-md-6">
@@ -50,11 +53,15 @@ use \common\models\Call;
                     <td class="text-center">
                         <?php
                             if($model->c_call_status === Call::CALL_STATUS_RINGING) {
-                                $icon = 'fa fa-refresh fa-pulse fa-fw';
+                                $icon = 'fa fa-refresh fa-pulse fa-fw text-danger';
                             } elseif($model->c_call_status === Call::CALL_STATUS_IN_PROGRESS) {
                                 $icon = 'fa fa-spinner fa-pulse fa-fw';
                             } elseif($model->c_call_status === Call::CALL_STATUS_QUEUE) {
                                 $icon = 'fa fa-pause';
+                            } elseif($model->c_call_status === Call::CALL_STATUS_COMPLETED) {
+                                $icon = 'fa fa-trophy text-success';
+                            } elseif($model->c_call_status === Call::CALL_STATUS_CANCELED) {
+                                $icon = 'fa fa-times-circle text-danger';
                             } else {
                                 $icon = '';
                             }
@@ -102,6 +109,13 @@ use \common\models\Call;
                             <div>
                                 <i class="fa fa-male text-info fa-2x fa-border"></i>
                             </div>
+                            <?php
+                               // echo $phoneUtil->format($model->c_to, \libphonenumber\PhoneNumberFormat::INTERNATIONAL);
+
+                            ?>
+
+
+
                             <?=$model->c_to?>
                         <?php endif; ?>
                     </td>

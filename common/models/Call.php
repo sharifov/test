@@ -208,4 +208,22 @@ class Call extends \yii\db\ActiveRecord
         return self::CALL_STATUS_LIST[$this->c_call_status] ?? '-';
     }
 
+    public function afterSave($insert, $changedAttributes)
+    {
+        parent::afterSave($insert, $changedAttributes);
+
+        $users = UserConnection::find()->select('uc_user_id')
+            ->andWhere(['uc_controller_id' => 'call', 'uc_action_id' => 'user-map'])
+            ->groupBy(['uc_user_id'])->all();
+
+        if($users) {
+            foreach ($users as $user) {
+                Notifications::socket($user->uc_user_id, null, 'callMapUpdate', [], true);
+            }
+        }
+    }
+
+
+
+
 }

@@ -72,8 +72,6 @@ $isAdmin = Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id);
 
 
                 <nav class="" role="navigation">
-
-
                     <ul class="nav navbar-nav navbar-right">
                         <li class="">
                             <a href="javascript:;" class="user-profile dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
@@ -126,7 +124,8 @@ $isAdmin = Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id);
                         </li>
 
 
-                        <?//= backend\widgets\ChatNotifications::widget(); ?>
+                        <?= frontend\widgets\Notifications::widget(); ?>
+
 
                     </ul>
                 </nav>

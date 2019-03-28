@@ -53,7 +53,9 @@
 		"workerman/workerman" : "^3.5",
 		"yiisoft/yii2-queue": "^2.1",
 		"pda/pheanstalk": "^3.2",
-		"index0h/yii2-log": "0.0.3"
+		"index0h/yii2-log": "0.0.3",
+		"maxdancepro/yii2-phone-formatter": "*",
+		"giggsey/libphonenumber-for-php": "^8.10"
 	},
 	"require-dev" : {
 		"yiisoft/yii2-debug" : "~2.0.0",
