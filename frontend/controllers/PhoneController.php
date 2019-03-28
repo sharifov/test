@@ -8,6 +8,7 @@ use common\models\ClientPhone;
 use common\models\Notifications;
 use common\models\Project;
 use common\models\UserProjectParams;
+use const Grpc\CALL_ERROR;
 use yii\filters\AccessControl;
 use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
@@ -185,6 +186,7 @@ class PhoneController extends FController
                 $call->c_created_dt = date('Y-m-d H:i:s');
                 $call->c_created_user_id = Yii::$app->user->id;
                 $call->c_call_type_id = Call::CALL_TYPE_OUT;
+                $call->c_call_status = Call::CALL_STATUS_RINGING;
 
                 if($call_acc_sid) {
                     $call->c_account_sid = $call_acc_sid;
