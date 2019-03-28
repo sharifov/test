@@ -19,6 +19,7 @@ JS;
 //$this->registerJs($js, \yii\web\View::POS_READY);*/
 $bundle = \frontend\assets\TimerAsset::register($this);
 $userId = Yii::$app->user->id;
+$dtNow = date('Y-m-d H:i:s');
 ?>
 
 <style>
@@ -80,7 +81,7 @@ $userId = Yii::$app->user->id;
                 <div class="icon"><i class="fa fa-phone"></i></div>
                 <div class="count">
                     <?=\common\models\Call::find()
-                        ->andWhere(['c_call_type_id' => \common\models\Call::CALL_TYPE_IN, 'c_call_status' => \common\models\Call::CALL_STATUS_IN_PROGRESS])->count()?>
+                        ->andWhere(['c_call_status' => \common\models\Call::CALL_STATUS_IN_PROGRESS])->count()?>
                 </div>
                 <h3>In PROGRESS</h3>
                 <p>Calls in PROGRESS</p>
@@ -91,8 +92,8 @@ $userId = Yii::$app->user->id;
             <div class="tile-stats">
                 <div class="icon"><i class="fa fa-list"></i></div>
                 <div class="count">
-                    <?=\common\models\Call::find()->andWhere(['c_call_type_id' => \common\models\Call::CALL_TYPE_IN])->andWhere(['>=', 'c_created_dt', 'DATE_SUB(NOW(), INTERVAL 1 HOUR)'])->count()?> /
-                    <?=\common\models\Call::find()->andWhere(['c_call_type_id' => \common\models\Call::CALL_TYPE_OUT])->andWhere(['>=', 'c_created_dt', 'DATE_SUB(NOW(), INTERVAL 1 HOUR)'])->count()?>
+                    <?=\common\models\Call::find()->andWhere(['c_call_type_id' => \common\models\Call::CALL_TYPE_IN])->andWhere(['>=', 'c_created_dt', "DATE_SUB('".$dtNow."', INTERVAL 1 HOUR)"])->count()?> /
+                    <?=\common\models\Call::find()->andWhere(['c_call_type_id' => \common\models\Call::CALL_TYPE_OUT])->andWhere(['>=', 'c_created_dt', "DATE_SUB('".$dtNow."', INTERVAL 1 HOUR)"])->count()?>
                 </div>
                 <h3>In / Out Calls : Last 1 Hour</h3>
                 <p>Incoming / Outgoing Calls : 1 Hour</p>
