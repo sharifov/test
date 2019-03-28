@@ -252,6 +252,10 @@ $js = <<<JS
                         updateUserCallStatus(obj);
                     }
                     
+                    if(obj.command === 'callMapUpdate') {
+                        $('#btn-user-call-map-refresh').click();
+                    }
+                    
                 }
             } catch (error) {
                 console.error('Invalid JSON data on socket.onmessage');
