@@ -92,8 +92,8 @@ $dtNow = date('Y-m-d H:i:s');
             <div class="tile-stats">
                 <div class="icon"><i class="fa fa-list"></i></div>
                 <div class="count">
-                    <?=\common\models\Call::find()->andWhere(['c_call_type_id' => \common\models\Call::CALL_TYPE_IN])->andWhere(['>=', 'c_created_dt', "DATE_SUB('".$dtNow."', INTERVAL 1 HOUR)"])->count()?> /
-                    <?=\common\models\Call::find()->andWhere(['c_call_type_id' => \common\models\Call::CALL_TYPE_OUT])->andWhere(['>=', 'c_created_dt', "DATE_SUB('".$dtNow."', INTERVAL 1 HOUR)"])->count()?>
+                    <?=\common\models\Call::find()->andWhere(['c_call_type_id' => \common\models\Call::CALL_TYPE_IN])->andWhere(['>=', 'c_created_dt', new \yii\db\Expression('DATE_SUB(NOW(), INTERVAL 1 HOUR)')])->count()?> /
+                    <?=\common\models\Call::find()->andWhere(['c_call_type_id' => \common\models\Call::CALL_TYPE_OUT])->andWhere(['>=', 'c_created_dt', new \yii\db\Expression('DATE_SUB(NOW(), INTERVAL 1 HOUR)')])->count()?>
                 </div>
                 <h3>In / Out Calls : Last 1 Hour</h3>
                 <p>Incoming / Outgoing Calls : 1 Hour</p>
@@ -104,8 +104,8 @@ $dtNow = date('Y-m-d H:i:s');
             <div class="tile-stats">
                 <div class="icon"><i class="fa fa-list"></i></div>
                 <div class="count">
-                    <?=\common\models\Call::find()->andWhere(['c_call_type_id' => \common\models\Call::CALL_TYPE_IN])->andWhere(['>=', 'c_created_dt', 'DATE_SUB(NOW(), INTERVAL 6 HOUR)'])->count()?> /
-                    <?=\common\models\Call::find()->andWhere(['c_call_type_id' => \common\models\Call::CALL_TYPE_OUT])->andWhere(['>=', 'c_created_dt', 'DATE_SUB(NOW(), INTERVAL 6 HOUR)'])->count()?>
+                    <?=\common\models\Call::find()->andWhere(['c_call_type_id' => \common\models\Call::CALL_TYPE_IN])->andWhere(['>=', 'c_created_dt', new \yii\db\Expression('DATE_SUB(NOW(), INTERVAL 6 HOUR)')])->count()?> /
+                    <?=\common\models\Call::find()->andWhere(['c_call_type_id' => \common\models\Call::CALL_TYPE_OUT])->andWhere(['>=', 'c_created_dt', new \yii\db\Expression('DATE_SUB(NOW(), INTERVAL 6 HOUR)')])->count()?>
                 </div>
                 <h3>In / Out Calls : Last 6 Hours</h3>
                 <p>Incoming / Outgoing Calls : 6 Hours</p>
@@ -117,8 +117,8 @@ $dtNow = date('Y-m-d H:i:s');
             <div class="tile-stats">
                 <div class="icon"><i class="fa fa-list"></i></div>
                 <div class="count">
-                    <?=\common\models\Call::find()->andWhere(['c_call_type_id' => \common\models\Call::CALL_TYPE_IN])->andWhere(['>=', 'c_created_dt', 'DATE_SUB(NOW(), INTERVAL 24 HOUR)'])->count()?> /
-                    <?=\common\models\Call::find()->andWhere(['c_call_type_id' => \common\models\Call::CALL_TYPE_OUT])->andWhere(['>=', 'c_created_dt', 'DATE_SUB(NOW(), INTERVAL 24 HOUR)'])->count()?>
+                    <?=\common\models\Call::find()->andWhere(['c_call_type_id' => \common\models\Call::CALL_TYPE_IN])->andWhere(['>=', 'c_created_dt', new \yii\db\Expression('DATE_SUB(NOW(), INTERVAL 24 HOUR)')])->count()?> /
+                    <?=\common\models\Call::find()->andWhere(['c_call_type_id' => \common\models\Call::CALL_TYPE_OUT])->andWhere(['>=', 'c_created_dt', new \yii\db\Expression('DATE_SUB(NOW(), INTERVAL 24 HOUR)')])->count()?>
                 </div>
                 <h3>In / Out Calls : Last 24 Hours</h3>
                 <p>Incoming / Outgoing Calls : 24 Hours</p>
@@ -140,13 +140,13 @@ $dtNow = date('Y-m-d H:i:s');
 
     <div class="clearfix"></div>
 
-<div class="col-md-6">
+<div class="col-md-3">
 
     <?/*<h1><i class="fa fa-bar-chart"></i> <?=$this->title?></h1>*/?>
 
 
     <div class="panel panel-default">
-        <div class="panel-heading"><i class="fa fa-list"></i> Calls in PROGRESS, HOLD, RINGING (Last update: <?=Yii::$app->formatter->asTime(time(), 'php:H:i:s')?>)</div>
+        <div class="panel-heading"><i class="fa fa-list"></i> Calls in HOLD, RINGING (Last update: <?=Yii::$app->formatter->asTime(time(), 'php:H:i:s')?>)</div>
         <div class="panel-body">
             <?= \yii\widgets\ListView::widget([
                 'dataProvider' => $dataProvider,
@@ -183,7 +183,40 @@ $dtNow = date('Y-m-d H:i:s');
 </div>
 
 
-<div class="col-md-6">
+
+    <div class="col-md-6">
+
+
+
+
+        <div class="panel panel-default">
+            <div class="panel-heading"><i class="fa fa-list"></i> Calls in PROGRESS</div>
+            <div class="panel-body">
+                <?= \yii\widgets\ListView::widget([
+                    'dataProvider' => $dataProvider3,
+
+                    'emptyText' => '<div class="text-center">Not found calls</div><br>',
+                    'layout' => "{items}<div class=\"text-center\">{pager}</div>\n", //{summary}\n
+
+                    'itemView' => function ($model, $key, $index, $widget) {
+                        return $this->render('_list_item',['model' => $model]);
+                    },
+
+                    'itemOptions' => [
+                        //'class' => 'item',
+                        //'tag' => false,
+                    ],
+
+
+                ]) ?>
+            </div>
+        </div>
+
+
+    </div>
+
+
+<div class="col-md-3">
 
     <?/*<h1><i class="fa fa-bar-chart"></i> <?=$this->title?></h1>*/?>
 
