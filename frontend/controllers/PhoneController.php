@@ -136,7 +136,7 @@ class PhoneController extends FController
         $dataProvider->sort = false;*/
 
         $currentCall = Call::find()->where(['c_created_user_id' => Yii::$app->user->id, 'c_call_status' => [Call::CALL_STATUS_RINGING, Call::CALL_STATUS_QUEUE, Call::CALL_STATUS_IN_PROGRESS]])->orderBy(['c_id' => SORT_DESC])->limit(1)->one();
-        $currentCall = Call::find()->orderBy(['c_id' => SORT_DESC])->limit(1)->one();
+        //$currentCall = Call::find()->orderBy(['c_id' => SORT_DESC])->limit(1)->one();
 
 
         return $this->renderPartial('ajax-phone-dial', [
