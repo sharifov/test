@@ -64,75 +64,22 @@ $isAdmin = Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id);
 <?php $this->beginBody(); ?>
 <div class="container body">
     <div class="main_container">
-        <?php if(!Yii::$app->user->isGuest):?>
 
-        <div class="col-md-3 left_col">
-            <div class="left_col scroll-view">
-
-                <?php
-                    $me = \common\models\Employee::findOne(Yii::$app->user->id);
-                    $default = "identicon";
-
-                    if(!$me || !$me->email) {
-                        $grav_url = '//www.gravatar.com/avatar/?d=identicon&s=60';
-                    }
-                    else {
-                        $grav_url = "//www.gravatar.com/avatar/" . md5(strtolower(trim($me->email))) . "?d=identicon&s=128";
-                    }
-                ?>
-
-                <!-- navbar left -->
-                <?= $this->render('_navbar_left', ['host' => $host, 'grav_url' => $grav_url]) ?>
-                <!-- /navbar left -->
-
-                <!-- sidebar menu -->
-
-                <?= $this->render('_sidebar_menu') ?>
-
-                <!-- /sidebar menu -->
-
-                <!-- /menu footer buttons -->
-                <div class="sidebar-footer hidden-small">
-                    <? /*<a data-toggle="tooltip" data-placement="top" title="Settings">
-                        <span class="glyphicon glyphicon-cog" aria-hidden="true"></span>
-                    </a>
-                    <a data-toggle="tooltip" data-placement="top" title="FullScreen">
-                        <span class="glyphicon glyphicon-fullscreen" aria-hidden="true"></span>
-                    </a>
-                    <a data-toggle="tooltip" data-placement="top" title="Lock">
-                        <span class="glyphicon glyphicon-eye-close" aria-hidden="true"></span>
-                    </a>*/ ?>
-
-                    <?=Html::a('<span class="glyphicon glyphicon-off" aria-hidden="true"></span>', ['/user-management/auth/logout'],
-                        ['data-toggle' => "tooltip", 'data-placement' => "top", 'title' => "Logout"]) ?>
-
-                    <?/*=Html::a('<span class="fa fa-certificate" aria-hidden="true"></span>', ['site/index', 'snow' => 'off'],
-                        ['data-toggle' => "tooltip", 'data-placement' => "top", 'title' => "Snow Off"])*/ ?>
-
-
-                </div>
-                <!-- /menu footer buttons -->
-            </div>
-        </div>
 
 
         <!-- top navigation -->
-        <div class="top_nav">
 
-            <div class="nav_menu">
+
+
                 <nav class="" role="navigation">
-                    <div class="nav toggle">
-                        <a id="menu_toggle"><i class="fa fa-bars"></i></a>
-                    </div>
-
                     <ul class="nav navbar-nav navbar-right">
                         <li class="">
                             <a href="javascript:;" class="user-profile dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
                                 <?/*<img src="http://placehold.it/128x128" alt="">*/ ?>
 
-                                <?=Html::img($grav_url, ['alt' => 'avatar'])?>
+                                <?//=Html::img($grav_url, ['alt' => 'avatar'])?>
 
-                                <?php
+                                <?/*php
                                     $myRolesModel = \webvimark\modules\UserManagement\models\rbacDB\Role::getUserRoles(Yii::$app->user->id);
                                     $myRoles = [];
                                     if($myRolesModel) {
@@ -144,7 +91,8 @@ $isAdmin = Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id);
 
                                 ?>
                                 <b><?=implode(', ', $myRoles) ; ?></b>:
-                                <?=Html::encode(Yii::$app->user->identity->username)?>
+                                <?/*=Html::encode(Yii::$app->user->identity->username)*/?>
+                                Menu
 
                                 <span class=" fa fa-angle-down"></span>
                             </a>
@@ -162,8 +110,10 @@ $isAdmin = Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id);
                                 </li>*/ ?>
 
                                 <li>
-                                    <?=Html::a('<i class="fa fa-user pull-right"></i> My Profile', ['/site/profile'],
-                                        ['title' => "My Profile"]) ?>
+                                    <?=Html::a('<i class="fa fa-home pull-right"></i> Home', ['/site/index'],
+                                        ['title' => 'Home']) ?>
+                                    <?/*=Html::a('<i class="fa fa-user pull-right"></i> My Profile', ['/site/profile'],
+                                        ['title' => "My Profile"])*/ ?>
                                     <?=Html::a('<i class="fa fa-sign-out pull-right"></i> Log Out', ['/site/logout'],
                                         ['title' => "Logout"]) ?>
                                     <?php /*=Html::a('<i class="fa fa-sign-out pull-right"></i> Log Out', ['/user-management/auth/logout'],
@@ -172,22 +122,21 @@ $isAdmin = Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id);
                                 </li>
                             </ul>
                         </li>
-                        <?/*php if($isAdmin):*/ ?>
-                            <?= frontend\widgets\Notifications::widget(); ?>
-                        <?/*php endif;*/?>
 
-                        <?//= backend\widgets\ChatNotifications::widget(); ?>
+
+                        <?= frontend\widgets\Notifications::widget(); ?>
+
 
                     </ul>
                 </nav>
-            </div>
 
-        </div>
+
+
         <!-- /top navigation -->
-        <? endif;?>
+
 
         <!-- page content -->
-        <div class="right_col" role="main">
+        <div class="right_col2" role="main">
             <?php if (isset($this->params['h1'])): ?>
                 <div class="page-title">
                     <div class="title_left">
@@ -222,12 +171,7 @@ $isAdmin = Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id);
         </div>
         <!-- /page content -->
         <!-- footer content -->
-        <footer>
-            <p class="pull-left">&copy; <?=Yii::$app->name ?> <?= date('Y') ?></p>
-            <p class="pull-right"><small><i><?=date('Y-m-d H:i:s')?></i></small></p>
 
-            <div class="clearfix"></div>
-        </footer>
         <!-- /footer content -->
     </div>
 </div>
@@ -239,12 +183,6 @@ $isAdmin = Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id);
 </div>*/ ?>
 <!-- /footer content -->
 
-<!-- modals -->
-<?= $this->render('_modals') ?>
-<!-- /modals -->
-
-<?= frontend\widgets\CallBox::widget(); ?>
-<?= frontend\widgets\WebPhone::widget(); ?>
 
 <?php $this->endBody(); ?>
 </body>

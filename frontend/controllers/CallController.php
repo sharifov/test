@@ -4,6 +4,7 @@ namespace frontend\controllers;
 
 use common\models\Employee;
 use common\models\Project;
+use common\models\search\EmployeeSearch;
 use common\models\UserProjectParams;
 use Yii;
 use common\models\Call;
@@ -248,23 +249,41 @@ class CallController extends FController
 
     public function actionUserMap()
     {
-        $projects = Project::getList();
-        $usersByProject = [];
 
-        if($projects) {
-            foreach ($projects as $projectId => $projectName) {
+        $this->layout = '@frontend/themes/gentelella/views/layouts/main_tv';
 
-                $query = Employee::getQueryAgentOnlineStatus(Yii::$app->user->id, $projectId);
-                $usersByProject[$projectId]['project_name'] = $projectName;
-                $usersByProject[$projectId]['project_id'] = $projectId;
-                $usersByProject[$projectId]['users'] = $query->asArray()->all();
-            }
-        }
+        $userId = Yii::$app->user->id;
 
-        //VarDumper::dump($usersByProject, 10, true);
+        $searchModel = new CallSearch();
+        $params = Yii::$app->request->queryParams;
+
+        //if (Yii::$app->authManager->getAssignment('supervision', $userId)) {
+            //$params['CallSearch']['supervision_id'] = $userId;
+            //$params['CallSearch']['status'] = Employee::STATUS_ACTIVE;
+        //}
+
+        $params['CallSearch']['statuses'] = [Call::CALL_STATUS_QUEUE, Call::CALL_STATUS_RINGING];
+        $dataProvider = $searchModel->searchUserCallMap($params);
+
+        $params['CallSearch']['statuses'] = [Call::CALL_STATUS_IN_PROGRESS];
+        $dataProvider3 = $searchModel->searchUserCallMap($params);
+
+        $params['CallSearch']['statuses'] = [Call::CALL_STATUS_COMPLETED, Call::CALL_STATUS_BUSY, Call::CALL_STATUS_FAILED, Call::CALL_STATUS_NO_ANSWER, Call::CALL_STATUS_CANCELED];
+        $params['CallSearch']['limit'] = 12;
+        $dataProvider2 = $searchModel->searchUserCallMap($params);
+
+        //$searchModel->datetime_start = date('Y-m-d', strtotime('-0 day'));
+        //$searchModel->datetime_end = date('Y-m-d');
+
+        //$searchModel->date_range = $searchModel->datetime_start.' - '. $searchModel->datetime_end;
+
 
         return $this->render('user-map', [
-            'usersByProject' => $usersByProject,
+            'dataProvider' => $dataProvider,
+            'dataProvider2' => $dataProvider2,
+            'dataProvider3' => $dataProvider3,
+            //'searchModel' => $searchModel,
         ]);
+
     }
 }

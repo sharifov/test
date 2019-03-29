@@ -86,7 +86,9 @@ return [
                     'logFile' => '@runtime/logs/stash.log'
                 ],
             ],
+
         ],
+
         'errorHandler' => [
             'errorAction' => 'site/error',
         ],
