@@ -112,13 +112,13 @@ $call2DelayTime = Yii::$app->params['lead']['call2DelayTime']; //(2 * 60 * 60);
                     ?>
 
                     <li class="<?=($active ? 'active' : '')?>">
-                        <div class="hidden">
+                        <?/*<div class="hidden">
                             Active: <?=($active ? 'true' : 'false')?><br>
                             activeShown: <?=($activeShown ? 'true' : 'false')?><br>
                             dayTS: <?=($dayTS)?><br>
                             shiftEndTS: <?=($shiftEndTS)?><br>
                             currentTS: <?=($currentTS)?><br>
-                        </div>
+                        </div>*/?>
 
                         <a data-toggle="tab" href="#tab-<?=\yii\helpers\Html::encode(str_replace([' ',':'], '-', $date))?>" style="background-color: <?=$bg?>">
                             <i class="fa <?=$icon?>"></i> <?=\yii\helpers\Html::encode(Yii::$app->formatter->asDate(strtotime($date)))?>
