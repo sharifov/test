@@ -9,11 +9,9 @@ use \common\models\Call;
 /* @var $this yii\web\View */
 /* @var $model Call */
 
-$phoneUtil = \libphonenumber\PhoneNumberUtil::getInstance();
-
 ?>
 
-    <div class="col-md-6">
+    <div class="col-md-12">
 
 
             <table class="table table-striped">
@@ -109,13 +107,6 @@ $phoneUtil = \libphonenumber\PhoneNumberUtil::getInstance();
                             <div>
                                 <i class="fa fa-male text-info fa-2x fa-border"></i>
                             </div>
-                            <?php
-                               // echo $phoneUtil->format($model->c_to, \libphonenumber\PhoneNumberFormat::INTERNATIONAL);
-
-                            ?>
-
-
-
                             <?=$model->c_to?>
                         <?php endif; ?>
                     </td>
