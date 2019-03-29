@@ -82,26 +82,32 @@ $call2DelayTime = Yii::$app->params['lead']['call2DelayTime']; //(2 * 60 * 60);
 
 
             <ul class="nav nav-tabs">
-                <?php $activeShown = false;$active = false;
+                <?php
+
+                    $activeShown = false;
+                    $active = false;
+
                     foreach ($dateItem as $date):
-                    $dayTS = $dateItemShift[$date]['start']->getTimestamp();
-                    $shiftEndTS = $dateItemShift[$date]['end']->getTimestamp();
-                    $active = (($dayTS < $currentTS && $shiftEndTS > $currentTS) || ($dayTS > $currentTS && !$active && !$activeShown))?true:false;
-                    if(!$activeShown){
-                        $activeShown = ($active)?true:false;
-                    }
+                        $dayTS = $dateItemShift[$date]['start']->getTimestamp();
+                        $shiftEndTS = $dateItemShift[$date]['end']->getTimestamp();
+
+                        $active = (($dayTS < $currentTS && $shiftEndTS > $currentTS) || ($dayTS > $currentTS && !$active && !$activeShown)) ? true : false;
+
+                        if(!$activeShown){
+                            $activeShown = $active ? true : false;
+                        }
 
 
-                    if($shiftEndTS < $currentTS) {
-                        $icon = 'fa-calendar-times-o';
-                        $bg = 'lavenderblush';
-                    } elseif(!$active) {
-                        $icon = 'fa-calendar-minus-o';
-                        $bg = '';
-                    } else {
-                        $icon = 'fa-calendar';
-                        $bg = '#dff0d8';
-                    }
+                        if($shiftEndTS < $currentTS) {
+                            $icon = 'fa-calendar-times-o';
+                            $bg = 'lavenderblush';
+                        } elseif(!$active) {
+                            $icon = 'fa-calendar-minus-o';
+                            $bg = '';
+                        } else {
+                            $icon = 'fa-calendar';
+                            $bg = '#dff0d8';
+                        }
 
                     ?>
 
@@ -117,14 +123,17 @@ $call2DelayTime = Yii::$app->params['lead']['call2DelayTime']; //(2 * 60 * 60);
 
 
             <div class="tab-content">
-                <?php $activeShown = false;
+                <?php
+                    $activeShown = false;
+                    $active = false;
                     foreach ($dateItem as $date):
-                    $dayTS = $dateItemShift[$date]['start']->getTimestamp();
-                    $shiftEndTS = $dateItemShift[$date]['end']->getTimestamp();
-                    $active = (($dayTS < $currentTS && $shiftEndTS >= $currentTS) || ($dayTS > $currentTS && !$active && !$activeShown))?true:false;
-                    if(!$activeShown){
-                        $activeShown = ($active)?true:false;
-                    }
+                        $dayTS = $dateItemShift[$date]['start']->getTimestamp();
+                        $shiftEndTS = $dateItemShift[$date]['end']->getTimestamp();
+
+                        $active = (($dayTS < $currentTS && $shiftEndTS >= $currentTS) || ($dayTS > $currentTS && !$active && !$activeShown)) ? true : false;
+                        if(!$activeShown){
+                            $activeShown = $active ? true : false;
+                        }
 
                     ?>
                 <div id="tab-<?=\yii\helpers\Html::encode(str_replace([' ',':'], '-', $date))?>" class="tab-pane fade in <?=($active ? 'active' : '')?>">
