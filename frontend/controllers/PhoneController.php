@@ -208,7 +208,7 @@ class PhoneController extends FController
             $call->c_call_status = $call_status;
             $call->c_updated_dt = date('Y-m-d H:i:s');
 
-            if(!$call->save()) {
+            /*if(!$call->save()) {
                 $out['error'] = VarDumper::dumpAsString($call->errors);
                 Yii::error($out['error'], 'PhoneController:actionAjaxSaveCall:Call:save');
             } else {
@@ -217,7 +217,7 @@ class PhoneController extends FController
 
             //Notifications::create(Yii::$app->user->id, 'Outgoing Call from '.$call_from, 'Outgoing Call from ' . $call_from .' to '.$call_to, Notifications::TYPE_WARNING, true);
             //Notifications::socket(Yii::$app->user->id, null, 'getNewNotification', [], true);
-            Notifications::socket(Yii::$app->user->id, null, 'callUpdate', ['status' => Call::CALL_STATUS_RINGING, 'duration' => 0, 'snr' => 0], true);
+            Notifications::socket(Yii::$app->user->id, null, 'callUpdate', ['status' => Call::CALL_STATUS_RINGING, 'duration' => 0, 'snr' => 0], true);*/
 
         }
 

@@ -847,15 +847,15 @@ class Lead extends ActiveRecord
     }
 
 
-
     /**
      * @param null $type
      * @param null $employee_id
      * @param null $employee2_id
-     * @param  $lead
+     * @param null $lead
      * @return bool
+     * @throws \yii\base\InvalidConfigException
      */
-    public function sendNotification($type = null, $employee_id = null, $employee2_id = null, $lead = null)
+    public function sendNotification($type = null, $employee_id = null, $employee2_id = null, $lead = null): bool
     {
         $isSend = false;
 
@@ -863,11 +863,16 @@ class Lead extends ActiveRecord
 
         if ($type && $employee_id && isset(Yii::$app->params['email_from']['sales'])) {
             $user = Employee::findOne($employee_id);
-            $user2 = Employee::findOne($employee2_id);
+
+            if($employee2_id) {
+                $user2 = Employee::findOne($employee2_id);
+            } else {
+                $user2 = null;
+            }
 
             if ($user && $user->email) {
 
-                $swiftMailer = Yii::$app->mailer2;
+                //$swiftMailer = Yii::$app->mailer2;
 
                 $userName = $user->username;
 
@@ -878,27 +883,22 @@ class Lead extends ActiveRecord
                 }
 
                 $body = 'Hi!';
-                $subject = '[Sales] Default subject';
+                $subject = 'Default subject';
 
                 if ($type === 'reassigned-lead') {
 
-                    $body = Yii::t('email', "Dear {name},
-Attention!
+                    $body = Yii::t('email', "Attention!
 Your Lead (ID: {lead_id}) has been reassigned to another agent ({name2}).
-
-You can view lead here: {url}
-
-Regards,
-Sales - Kivork",
+{url}",
                         [
                             'name' => $userName,
                             'name2' => $userName2,
-                            'url' => $host . '/lead/booked/' . $this->id,
+                            'url' => $host . '/lead/view/' . $this->gid,
                             'lead_id' => $this->id,
                             'br' => "\r\n"
                         ]);
 
-                    $subject = Yii::t('email', "⚠ [Sales] Your Lead-{id} has been reassigned to another agent ({username})", ['id' => $this->id, 'username' => $userName2]);
+                    $subject = Yii::t('email', 'Lead-{id} reassigned to ({username})', ['id' => $this->id, 'username' => $userName2]);
 
                 } elseif ($type === 'lead-status-sold') {
 
@@ -914,17 +914,13 @@ Sales - Kivork",
                         $profit = number_format(Quote::countProfit($quote->id), 2);
                     }
 
-                    $body = Yii::t('email', "
-Booked quote with UID : {quote_uid},
+                    $body = Yii::t('email', "Booked quote with UID : {quote_uid},
 Source: {name},
-Sale ID: {lead_id} (Link to lead {url})
-{name} made \${profit} on {airline} to {destination}
-
-Regards,
-Sales - Kivork",
+Lead ID: {lead_id} ({url})
+{name} made \${profit} on {airline} to {destination}",
                         [
                             'name' => $userName,
-                            'url' => $host . '/lead/booked/' . $this->id,
+                            'url' => $host . '/lead/view/' . $this->gid,
                             'lead_id' => $this->id,
                             'quote_uid' => $quote ? $quote->uid : '-',
                             'destination' => $flightSegment ? $flightSegment->destination : '-',
@@ -933,25 +929,19 @@ Sales - Kivork",
                             'br' => "\r\n"
                         ]);
 
-                    $subject = Yii::t('email', "❀ [Sales] Your Lead-{id} has been changed status to SOLD", ['id' => $this->id]);
+                    $subject = Yii::t('email', 'Lead-{id} to SOLD', ['id' => $this->id]);
                 } elseif ($type === 'lead-status-booked') {
 
 
-                    $subject = Yii::t('email', "⚐ [Sales] Your Lead-{id} has been changed status to BOOKED", ['id' => $this->id]);
+                    $subject = Yii::t('email', 'Lead-{id} to BOOKED', ['id' => $this->id]);
                     $quote = Quote::find()->where(['lead_id' => $lead->id, 'status' => Quote::STATUS_APPLIED])->orderBy(['id' => SORT_DESC])->one();
 
-                    $body = Yii::t('email', "Dear {name},
-
-Your Lead (ID: {lead_id}) has been changed status to BOOKED!
+                    $body = Yii::t('email', "Your Lead (ID: {lead_id}) has been changed status to BOOKED!
 Booked quote UID: {quote_uid}
-
-You can view lead here: {url}
-
-Regards,
-Sales - Kivork",
+{url}",
                         [
                             'name' => $userName,
-                            'url' => $host . '/lead/booked/' . $this->id,
+                            'url' => $host . '/lead/view/' . $this->gid,
                             'lead_id' => $this->id,
                             'quote_uid' => $quote ? $quote->uid : '-',
                             'br' => "\r\n"
@@ -960,20 +950,14 @@ Sales - Kivork",
 
                 } elseif ($type === 'lead-status-snooze') {
 
-                    $subject = Yii::t('email', "⏱ [Sales] Your Lead-{id} has been changed status to SNOOZE", ['id' => $this->id]);
-                    $body = Yii::t('email', "Dear {name},
-
-Your Lead (ID: {lead_id}) has been changed status to SNOOZE!
+                    $subject = Yii::t('email', "Lead-{id} to SNOOZE", ['id' => $this->id]);
+                    $body = Yii::t('email', "Your Lead (ID: {lead_id}) has been changed status to SNOOZE!
 Snooze for: {datetime}.
 Reason: {reason}
-
-You can view lead here: {url}
-
-Regards,
-Sales - Kivork",
+{url}",
                         [
                             'name' => $userName,
-                            'url' => $host . '/lead/booked/' . $this->id,
+                            'url' => $host . '/lead/view/' . $this->gid,
                             'datetime' => Yii::$app->formatter->asDatetime(strtotime($this->snooze_for)),
                             'reason' => $this->status_description ?: '-',
                             'lead_id' => $this->id,
@@ -983,19 +967,13 @@ Sales - Kivork",
 
                 } elseif ($type === 'lead-status-follow-up') {
 
-                    $subject = Yii::t('email', "⚠ [Sales] Your Lead-{id} has been changed status to FOLLOW-UP", ['id' => $this->id]);
-                    $body = Yii::t('email', "Dear {name},
-
-Your Lead (ID: {lead_id}) has been changed status to FOLLOW-UP!
+                    $subject = Yii::t('email', "Lead-{id} to FOLLOW-UP", ['id' => $this->id]);
+                    $body = Yii::t('email', 'Your Lead (ID: {lead_id}) has been changed status to FOLLOW-UP!
 Reason: {reason}
-
-You can view lead here: {url}
-
-Regards,
-Sales - Kivork",
+{url}',
                         [
                             'name' => $userName,
-                            'url' => $host . '/lead/booked/' . $this->id,
+                            'url' => $host . '/lead/view/' . $this->gid,
                             'reason' => $this->status_description ?: '-',
                             'lead_id' => $this->id,
                             'br' => "\r\n"
@@ -1005,81 +983,94 @@ Sales - Kivork",
 
 
                 try {
-                    $isSend = $swiftMailer
+                    /*$isSend = $swiftMailer
                         ->compose()//'sendDeliveryEmailForClient', ['order' => $this])
                         ->setTo($user->email)
                         ->setBcc(Yii::$app->params['email_to']['bcc_sales'])
                         ->setFrom(Yii::$app->params['email_from']['sales'])
                         ->setSubject($subject)
                         ->setTextBody($body)
-                        ->send();
+                        ->send();*/
+
+                    //Notifications::create()
+
+                    $isSend = Notifications::create($user->id, $subject, $body, Notifications::TYPE_INFO, true);
+                    Notifications::socket($user->id, null, 'getNewNotification', [], true);
+
 
                     if (!$isSend) {
-                        Yii::warning('Not send to Email:' . $user->email . ' - Sale Id: ' . $this->id, 'Lead:' . $type . ':SendMail');
+                        Yii::warning('Not send Notification to UserID:' . $user->id . ' - Lead Id: ' . $this->id, 'Lead:sendNotification:' . $type);
                     }
 
                 } catch (\Throwable $e) {
-                    Yii::error($user->email . ' ' . $e->getMessage(), 'swiftMailer::send');
+                    Yii::error($user->email . ' ' . $e->getMessage(), 'Lead:sendNotification:Notifications:create');
                 }
 
             } else {
-                Yii::warning("Not found employee (" . $employee_id . ") or email: " . ($user ? $user->email : ''), 'Lead:' . $type . ':SendMail');
+                Yii::warning('Not found employee (' . $employee_id . ')', 'Lead:sendNotification:' . $type);
             }
         } else {
-            Yii::warning("type = $type, employee_id = $employee_id, employee2_id = $employee2_id", 'Lead:' . $type . ':SendMail');
+            Yii::warning("type = $type, employee_id = $employee_id, employee2_id = $employee2_id", 'Lead:sendNotification:' . $type);
         }
 
         return $isSend;
     }
 
-    public function sendClonedEmail(Lead $lead)
+    /**
+     * @param Lead $lead
+     * @return bool
+     */
+    public function sendClonedEmail(Lead $lead): bool
     {
         $isSend = false;
 
         $host = \Yii::$app->params['url_address'];
-        if (isset(Yii::$app->params['email_from']['sales'])) {
-            $swiftMailer = Yii::$app->mailer2;
+
+            //$swiftMailer = Yii::$app->mailer2;
             $user = Employee::findOne($lead->employee_id);
 
             if (!empty($user)) {
                 $agent = $user->username;
-                $subject = Yii::t('email', "⚑ [Sales] Cloned Lead-{id} by {agent}", ['id' => $lead->clone_id, 'agent' => $agent]);
+                $subject = Yii::t('email', "Cloned Lead-{id} by {agent}", ['id' => $lead->clone_id, 'agent' => $agent]);
                 $body = Yii::t('email', "Agent {agent} cloned lead {clone_id} with reason [{reason}], url: {cloned_url}.
-New lead {lead_id} you can view here: {url}
-
-Regards,
-Sales - Kivork",
+New lead {lead_id} 
+{url}",
                     [
                         'agent' => $agent,
-                        'url' => $host . '/lead/processing/' . $lead->id,
-                        'cloned_url' => $host . '/lead/processing/' . $lead->clone_id,
+                        'url' => $host . '/lead/view/' . $lead->gid,
+                        'cloned_url' => $host . '/lead/view/' . ($lead->clone ? $lead->clone->gid : $lead->gid),
                         'reason' => $lead->description,
                         'lead_id' => $lead->id,
                         'clone_id' => $lead->clone_id,
                         'br' => "\r\n"
                     ]);
 
-                $emailTo = Yii::$app->params['email_to']['bcc_sales'];
+                //$emailTo = Yii::$app->params['email_to']['bcc_sales'];
+
                 try {
-                    $isSend = $swiftMailer
+
+                    $isSend = Notifications::create($user->id, $subject, $body, Notifications::TYPE_INFO, true);
+                    Notifications::socket($user->id, null, 'getNewNotification', [], true);
+
+                    /*$isSend = $swiftMailer
                         ->compose()
                         ->setTo($emailTo)
                         ->setFrom(Yii::$app->params['email_from']['sales'])
                         ->setSubject($subject)
                         ->setTextBody($body)
-                        ->send();
+                        ->send();*/
 
                     if (!$isSend) {
-                        Yii::warning('Not send to Email:' . Yii::$app->params['email_to']['bcc_sales'] . ' - Sale Id: ' . $lead->id, 'Lead:Cloned :SendMail');
+                        Yii::warning('Not send Notification to UserID:' . $user->id . ' - Lead Id: ' . $this->id, 'Lead:sendClonedEmail:Notifications::create');
                     }
 
                 } catch (\Throwable $e) {
-                    Yii::error($user->email . ' ' . $e->getMessage(), 'swiftMailer::send');
+                    Yii::error($user->id . ' ' . $e->getMessage(), 'Lead:sendClonedEmail:Notifications::create');
                 }
             } else {
-                Yii::warning("Not found employee (" . $lead->employee_id . "), Lead:Cloned :SendMail");
+                Yii::warning('Not found employee (' . $lead->employee_id . ')', 'Lead:sendClonedEmail');
             }
-        }
+        //}
 
         return $isSend;
     }
