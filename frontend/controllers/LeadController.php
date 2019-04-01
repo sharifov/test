@@ -144,7 +144,10 @@ class LeadController extends FController
 
         $user_id = Yii::$app->user->id;
         $is_admin = Yii::$app->authManager->getAssignment('admin', $user_id);
-        $isQA = Yii::$app->authManager->getAssignment('qa', Yii::$app->user->id);
+        $isQA = Yii::$app->authManager->getAssignment('qa', $user_id);
+        $is_supervision = Yii::$app->authManager->getAssignment('supervision', $user_id);
+        $is_agent = Yii::$app->authManager->getAssignment('agent', $user_id);
+
 
 
             if (Yii::$app->request->post('hasEditable')) {
@@ -961,6 +964,27 @@ class LeadController extends FController
         }
 
 
+        $enableCommunication = false;
+
+        if(!$leadForm->getLead()->isNewRecord) {
+
+            //$leadForm->mode === $leadForm::VIEW_MODE
+
+            if ($is_admin || $isQA) {
+                $enableCommunication = true;
+            } elseif($is_supervision) {
+                $enableCommunication = Employee::isSupervisionAgent($leadForm->getLead()->employee_id);
+            } elseif ($is_agent) {
+                if($leadForm->getLead()->employee_id == Yii::$app->user->id) {
+                    $enableCommunication = true;
+                }
+            }
+
+        }
+
+
+        //VarDumper::dump(enableCommunication); exit;
+
         //$dataProviderCommunication = $lead->getQuotesProvider([]);
 
         return $this->render('view', [
@@ -970,6 +994,7 @@ class LeadController extends FController
             'comForm' => $comForm,
             'quotesProvider' => $quotesProvider,
             'dataProviderCommunication' => $dataProviderCommunication,
+            'enableCommunication' => $enableCommunication
         ]);
 
 
@@ -1807,7 +1832,8 @@ class LeadController extends FController
         }
 
         return $this->render('view', [
-            'leadForm' => $leadForm
+            'leadForm' => $leadForm,
+            'enableCommunication' => false
         ]);
     }
 
