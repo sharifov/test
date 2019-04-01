@@ -983,6 +983,7 @@ class LeadController extends FController
         }
 
 
+        //VarDumper::dump(enableCommunication); exit;
 
         //$dataProviderCommunication = $lead->getQuotesProvider([]);
 
@@ -1831,7 +1832,8 @@ class LeadController extends FController
         }
 
         return $this->render('view', [
-            'leadForm' => $leadForm
+            'leadForm' => $leadForm,
+            'enableCommunication' => false
         ]);
     }
 
