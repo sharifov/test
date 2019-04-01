@@ -6,6 +6,7 @@
  * @var $previewSmsForm \frontend\models\LeadPreviewSmsForm
  * @var $quotesProvider \yii\data\ActiveDataProvider
  * @var $dataProviderCommunication \yii\data\ActiveDataProvider
+ * @var $enableCommunication boolean
  */
 
 use yii\bootstrap\Html;
@@ -24,8 +25,9 @@ $userId = Yii::$app->user->id;
 $is_manager = false;
 $is_admin = Yii::$app->authManager->getAssignment('admin', $userId);
 $is_qa = Yii::$app->authManager->getAssignment('qa', $userId);
+$is_supervision = Yii::$app->authManager->getAssignment('supervision', $userId);
 
-if($is_admin || Yii::$app->authManager->getAssignment('supervision', $userId)) {
+if($is_admin || $is_supervision) {
     $is_manager = true;
 }
 
@@ -485,22 +487,22 @@ JS;
             <?php endif;?>
 
 
-            <?php if (!$leadForm->getLead()->isNewRecord) : ?>
-                <?php if ((!$is_admin && !$is_qa) && $leadForm->mode === $leadForm::VIEW_MODE) : ?>
-                    <div class="alert alert-warning" role="alert">You do not have access to view Communication messages.</div>
-                <?php else: ?>
-                    <?= $this->render('communication/lead_communication', [
-                            'leadForm'      => $leadForm,
-                            'previewEmailForm' => $previewEmailForm,
-                            'previewSmsForm' => $previewSmsForm,
-                            'comForm'       => $comForm,
-                            'leadId'        => $lead->id,
-                            'dataProvider'  => $dataProviderCommunication,
-                            'isAdmin'       => $is_admin
-                        ]);
-                    ?>
-                <?php endif;?>
+
+            <?php if ($enableCommunication) : ?>
+                <?= $this->render('communication/lead_communication', [
+                    'leadForm'      => $leadForm,
+                    'previewEmailForm' => $previewEmailForm,
+                    'previewSmsForm' => $previewSmsForm,
+                    'comForm'       => $comForm,
+                    'leadId'        => $lead->id,
+                    'dataProvider'  => $dataProviderCommunication,
+                    'isAdmin'       => $is_admin
+                ]);
+                ?>
+            <?php else: ?>
+                <div class="alert alert-warning" role="alert">You do not have access to view Communication messages.</div>
             <?php endif;?>
+
 
 
             <?php if (!$leadForm->getLead()->isNewRecord) : ?>
@@ -532,13 +534,13 @@ JS;
     </div>
 
 	<aside class="sidebar right-sidebar sl-right-sidebar">
-    	 <?php if($leadForm->mode == $leadForm::VIEW_MODE && (!$is_admin && !$is_qa && !Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id))):?>
+    	 <?php if($leadForm->mode == $leadForm::VIEW_MODE && (!$is_admin && !$is_qa && !$is_supervision)):?>
 			<div class="alert alert-warning" role="alert">
                 <h4 class="alert-heading">Warning!</h4>
                 <p>Client information is not available in VIEW MODE, please take lead!</p>
             </div>
 
-    	 <?php elseif(!$is_manager && ( $leadForm->getLead()->status == \common\models\Lead::STATUS_FOLLOW_UP || ($leadForm->getLead()->status == \common\models\Lead::STATUS_PENDING && !$leadForm->getLead()->isNewRecord) ) && $leadForm->getLead()->employee_id != Yii::$app->user->id):?>
+    	 <?php elseif(!$is_manager && !$is_qa && ( $leadForm->getLead()->status == \common\models\Lead::STATUS_FOLLOW_UP || ($leadForm->getLead()->status == \common\models\Lead::STATUS_PENDING && !$leadForm->getLead()->isNewRecord) ) && $leadForm->getLead()->employee_id != Yii::$app->user->id):?>
 
             <div class="alert alert-warning" role="alert">
                 <h4 class="alert-heading">Warning!</h4>

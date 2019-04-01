@@ -3,6 +3,7 @@
 namespace common\models;
 
 use borales\extensions\phoneInput\PhoneInput;
+use borales\extensions\phoneInput\PhoneInputValidator;
 use common\components\BackOffice;
 use Yii;
 use yii\base\NotSupportedException;
@@ -1329,6 +1330,25 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         //exit;
         $users = $generalQuery->all();
         return $users;
+    }
+
+
+    /**
+     * @param int $user_id
+     * @param int|null $supervision_id
+     * @return bool
+     */
+    public static function isSupervisionAgent(int $user_id, int $supervision_id = null) : bool
+    {
+        //$exist = false;
+        if(!$supervision_id) {
+            $supervision_id = Yii::$app->user->id;
+        }
+
+        $subQuery1 = UserGroupAssign::find()->select(['ugs_group_id'])->where(['ugs_user_id' => $supervision_id]);
+        $exist = UserGroupAssign::find()->select(['ugs_user_id'])->where(['IN', 'ugs_group_id', $subQuery1])->andWhere(['ugs_user_id' => $user_id])->exists();
+
+        return $exist;
     }
 
 
