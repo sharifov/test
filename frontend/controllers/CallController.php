@@ -47,7 +47,7 @@ class CallController extends FController
                     ],
 
                     [
-                        'actions' => ['view', 'view2', 'soft-delete', 'all-delete', 'all-read', 'list'],
+                        'actions' => ['view', 'view2', 'soft-delete', 'all-delete', 'all-read', 'list', 'auto-redial'],
                         'allow' => true,
                         'roles' => ['agent'],
                     ],
@@ -283,6 +283,19 @@ class CallController extends FController
             'dataProvider2' => $dataProvider2,
             'dataProvider3' => $dataProvider3,
             //'searchModel' => $searchModel,
+        ]);
+
+    }
+
+    public function actionAutoRedial()
+    {
+
+        $userId = Yii::$app->user->id;
+
+
+
+
+        return $this->render('auto-redial', [
         ]);
 
     }
