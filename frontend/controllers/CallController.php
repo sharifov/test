@@ -5,6 +5,7 @@ namespace frontend\controllers;
 use common\models\Employee;
 use common\models\Project;
 use common\models\search\EmployeeSearch;
+use common\models\search\LeadSearch;
 use common\models\UserProjectParams;
 use Yii;
 use common\models\Call;
@@ -287,15 +288,75 @@ class CallController extends FController
 
     }
 
+
+
     public function actionAutoRedial()
     {
 
-        $userId = Yii::$app->user->id;
+        $searchModel = new LeadSearch();
+
+        $params = Yii::$app->request->queryParams;
+        $params2 = Yii::$app->request->post();
+
+        $params = array_merge($params, $params2);
+
+        if(Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id)) {
+            $isAgent = true;
+        } else {
+            $isAgent = false;
+        }
+
+
+        $checkShiftTime = true;
+
+        if($isAgent) {
+            $user = Yii::$app->user->identity;
+            $checkShiftTime = $user->checkShiftTime();
+            $userParams = $user->userParams;
+
+            if($userParams) {
+                if($userParams->up_inbox_show_limit_leads > 0) {
+                    $params['LeadSearch']['limit'] = $userParams->up_inbox_show_limit_leads;
+                }
+            }
+
+
+            /*if($checkShiftTime = !$user->checkShiftTime()) {
+                throw new ForbiddenHttpException('Access denied! Invalid Agent shift time');
+            }*/
+        }
+
+        //$checkShiftTime = true;
 
 
 
+        if(Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id)) {
+            $params['LeadSearch']['supervision_id'] = Yii::$app->user->id;
+        }
+
+        $dataProvider = $searchModel->searchInbox($params);
+
+        $user = Yii::$app->user->identity;
+
+        $isAccessNewLead = $user->accessTakeNewLead();
+        $accessLeadByFrequency = [];
+
+        if($isAccessNewLead){
+            $accessLeadByFrequency = $user->accessTakeLeadByFrequencyMinutes();
+            if(!$accessLeadByFrequency['access']){
+                $isAccessNewLead = $accessLeadByFrequency['access'];
+            }
+        }
 
         return $this->render('auto-redial', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+            'checkShiftTime' => $checkShiftTime,
+            'isAgent' => $isAgent,
+            'isAccessNewLead' => $isAccessNewLead,
+            'accessLeadByFrequency' => $accessLeadByFrequency,
+            'user' => $user,
+            'newLeadsCount' => $user->getCountNewLeadCurrentShift()
         ]);
 
     }

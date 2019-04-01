@@ -13,6 +13,7 @@ use Yii;
  * @property string $up_telegram
  * @property int $up_telegram_enable
  * @property string $up_updated_dt
+ * @property boolean $up_auto_redial
  *
  * @property Employee $upUser
  */
@@ -47,7 +48,7 @@ class UserProfile extends \yii\db\ActiveRecord
             [['up_user_id'], 'required'],
             [['up_user_id', 'up_call_type_id'], 'integer'],
             [['up_user_id'], 'unique'],
-            [['up_telegram_enable'], 'boolean'],
+            [['up_telegram_enable', 'up_auto_redial'], 'boolean'],
             [['up_updated_dt'], 'safe'],
             [['up_sip'], 'string', 'max' => 255],
             [['up_telegram'], 'string', 'max' => 20],
@@ -67,6 +68,7 @@ class UserProfile extends \yii\db\ActiveRecord
             'up_telegram' => 'Telegram ID',
             'up_telegram_enable' => 'Telegram Enable',
             'up_updated_dt' => 'Updated Dt',
+            'up_auto_redial'    => 'Auto redial'
         ];
     }
 
