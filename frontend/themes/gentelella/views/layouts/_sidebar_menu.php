@@ -51,6 +51,9 @@ $isQA = Yii::$app->authManager->getAssignment('qa', Yii::$app->user->id);
 
         if(!$isQA) {
             $menuItems[] = ['label' => 'Create new Lead', 'url' => ['lead/create'], 'icon' => 'plus'];
+            if($isAdmin) {
+                $menuItems[] = ['label' => 'Auto redial', 'url' => ['call/auto-redial'], 'icon' => 'phone'];
+            }
         }
 
         $menuItems[] = ['label' => 'Dashboard', 'url' => ['/'], 'icon' => 'area-chart'];
