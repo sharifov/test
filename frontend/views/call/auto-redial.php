@@ -790,6 +790,13 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
 
             [
+                'attribute' => 'request_ip',
+                'value' => function (\common\models\Lead $model) {
+                    return $model->request_ip;
+                },
+            ],
+
+            [
                 'attribute' => 'l_call_rating',
                 'value' => function (\common\models\Lead $model) {
                     return $model->l_call_rating;

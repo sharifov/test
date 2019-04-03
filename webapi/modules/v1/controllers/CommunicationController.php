@@ -900,7 +900,7 @@ class CommunicationController extends ApiBaseController
                     $call->c_call_status = Call::CALL_STATUS_IN_PROGRESS;
                 }
 
-                
+
 
                 if(isset($post['callData']['duration'])) {
                     $call->c_call_duration = (int) $post['callData']['duration'];
