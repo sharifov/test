@@ -783,7 +783,7 @@ class CommunicationController extends ApiBaseController
                     }
 
                     if($call->c_created_user_id || $call->c_lead_id) {
-                        Notifications::socket($call->c_created_user_id, $call->c_lead_id, 'callUpdate', ['status' => $call->c_call_status, 'duration' => $call->c_call_duration, 'snr' => $call->c_sequence_number], true);
+                        Notifications::socket($call->c_created_user_id, $call->c_lead_id, 'callUpdate', ['status' => $call->c_call_status, 'duration' => $call->c_call_duration, 'debug' => 'TYPE_VOIP_FINISH'], true);
                     }
 
                     /*if($post['callData']['RecordingUrl']) {
@@ -880,6 +880,7 @@ class CommunicationController extends ApiBaseController
                     $call->c_sequence_number = $callData['c_sequence_number'];
                 }
 
+
                 /*if(!$call->c_call_duration && isset($callData['c_call_duration'])) {
                     $call->c_call_duration = $callData['c_call_duration'];
                 }*/
@@ -892,8 +893,14 @@ class CommunicationController extends ApiBaseController
                 }
 
                 if(isset($post['callData']['status'])) {
-                    $call->c_call_status =$post['callData']['status'];
+                    $call->c_call_status = $post['callData']['status'];
                 }
+
+                if(!$call->c_call_status) {
+                    $call->c_call_status = Call::CALL_STATUS_IN_PROGRESS;
+                }
+
+                
 
                 if(isset($post['callData']['duration'])) {
                     $call->c_call_duration = (int) $post['callData']['duration'];
@@ -901,6 +908,10 @@ class CommunicationController extends ApiBaseController
 
                 if(isset($post['callData']['c_user_id']) && $post['callData']['c_user_id']) {
                     $call->c_created_user_id = (int) $post['callData']['c_user_id'];
+                }
+
+                if(isset($post['callData']['lead_id']) && $post['callData']['lead_id']) {
+                    $call->c_lead_id = (int) $post['callData']['lead_id'];
                 }
 
 
@@ -943,7 +954,7 @@ class CommunicationController extends ApiBaseController
                 }
 
                 if($call->c_created_user_id || $call->c_lead_id) {
-                    Notifications::socket($call->c_created_user_id, $call->c_lead_id, 'callUpdate', ['status' => $call->c_call_status, 'duration' => $call->c_call_duration, 'snr' => $call->c_sequence_number], true);
+                    Notifications::socket($call->c_created_user_id, $call->c_lead_id, 'callUpdate', ['status' => $call->c_call_status, 'debug' => 'TYPE_VOIP_CLIENT'], true);
                 }
 
 
