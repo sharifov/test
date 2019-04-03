@@ -783,7 +783,7 @@ class CommunicationController extends ApiBaseController
                     }
 
                     if($call->c_created_user_id || $call->c_lead_id) {
-                        Notifications::socket($call->c_created_user_id, $call->c_lead_id, 'callUpdate', ['status' => $call->c_call_status, 'duration' => $call->c_call_duration, 'debug' => 'TYPE_VOIP_FINISH'], true);
+                        Notifications::socket($call->c_created_user_id, $call->c_lead_id, 'webCallUpdate', ['status' => $call->c_call_status, 'duration' => $call->c_call_duration, 'debug' => 'TYPE_VOIP_FINISH'], true);
                     }
 
                     /*if($post['callData']['RecordingUrl']) {
@@ -954,7 +954,7 @@ class CommunicationController extends ApiBaseController
                 }
 
                 if($call->c_created_user_id || $call->c_lead_id) {
-                    Notifications::socket($call->c_created_user_id, $call->c_lead_id, 'callUpdate', ['status' => $call->c_call_status, 'debug' => 'TYPE_VOIP_CLIENT'], true);
+                    Notifications::socket($call->c_created_user_id, $call->c_lead_id, 'webCallUpdate', ['status' => $call->c_call_status, 'debug' => 'TYPE_VOIP_CLIENT'], true);
                 }
 
 

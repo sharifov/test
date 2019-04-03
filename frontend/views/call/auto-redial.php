@@ -56,6 +56,32 @@ $this->params['breadcrumbs'][] = $this->title;
 
 <script>
 
+    function webCallUpdate(obj) {
+        console.log('--- webCallUpdate ---');
+        //status: "completed", duration: "1", snr: "3"
+        $('#call_autoredial_status').html(obj.status);
+
+        if(obj.status == 'completed') {
+            //stopCall(obj.duration); //updateCommunication();
+            autoredialInit();
+        } else if(obj.status == 'in-progress') {
+            //startCallTimer();
+            //$('#div-call-timer').timer('resume');
+        } else if(obj.status == 'initiated') {
+            //startCall();
+        } else if(obj.status == 'busy') {
+            //stopCall(0);
+            //updateCommunication();
+            autoredialInit();
+        } else if(obj.status == 'no-answer') {
+            //stopCall(0);
+            //updateCommunication();
+            autoredialInit();
+        }
+
+        //$('.click_after_call_update').trigger('click');
+    }
+
     function openInNewTab(url, name) {
         //var strWindowFeatures = "menubar=no,location=no,resizable=yes,scrollbars=yes,status=no";
         var windowObjectReference = window.open(url, 'window' + name); //, strWindowFeatures);
@@ -517,6 +543,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
                 </div>
                 <div class="col-md-6">
+                    <h3>Call status: <span id="call_autoredial_status"></span></h3>
                     <?php if($callModel): ?>
                         <h1>Call</h1>
                     <?php endif; ?>

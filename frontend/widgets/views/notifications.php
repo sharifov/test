@@ -220,8 +220,13 @@ $js = <<<JS
             
             try {
                 var obj = JSON.parse(e.data); // $.parseJSON( e.data );
-                
                 console.log(obj);
+            } catch (error) {
+                console.error('Invalid JSON data on socket.onmessage');
+                console.error(e.data);
+            }
+            
+            try {
                 
                 if (typeof obj.command !== 'undefined') {
                     
@@ -236,7 +241,15 @@ $js = <<<JS
                     }
                     
                     if(obj.command === 'callUpdate') {
-                        callUpdate(obj);
+                        if ($.isFunction(callUpdate)) {
+                            callUpdate(obj);
+                        }
+                    }
+                    
+                    if(obj.command === 'webCallUpdate') {
+                        if ($.isFunction(webCallUpdate)) {
+                            webCallUpdate(obj);
+                        }
                     }
                     
                     if(obj.command === 'recordingUpdate') {
@@ -245,7 +258,9 @@ $js = <<<JS
                     }
                     
                     if(obj.command === 'incomingCall') {
-                        incomingCall(obj);
+                        if ($.isFunction(incomingCall)) {
+                            incomingCall(obj);
+                        }
                     }
                     
                     if(obj.command === 'updateUserCallStatus') {
@@ -258,8 +273,8 @@ $js = <<<JS
                 }
                 
             } catch (error) {
-                console.error('Invalid JSON data on socket.onmessage');
-                console.error(e.data);
+                console.error('Error in functions - socket.onmessage');
+                console.error(error);
             }
             
         };

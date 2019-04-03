@@ -647,9 +647,6 @@ $this->registerJs($js);
             stopCall(0);
             updateCommunication();
         }
-
-        $('.click_after_call_update').trigger('click');
-
     }
 
     function startCallTimer() {
