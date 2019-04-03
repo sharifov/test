@@ -69,7 +69,9 @@ $isAdmin = Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id);
                     <div class="left_col scroll-view">
 
                         <?php
-                        $me = \common\models\Employee::findOne(Yii::$app->user->id);
+
+                        /** @var \common\models\Employee $me */
+                        $me = Yii::$app->user->identity;
                         $default = "identicon";
 
                         if(!$me || !$me->email) {

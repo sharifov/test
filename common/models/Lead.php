@@ -54,6 +54,8 @@ use common\components\SearchService;
  * @property string $description
  * @property double $final_profit
  * @property double $tips
+ * @property int $l_call_status_id
+ * @property int $l_call_rating
  *
  * @property double $finalProfit
  * @property int $quotesCount
@@ -86,39 +88,41 @@ class Lead extends ActiveRecord
 
     public const AGENT_PROCESSING_FEE_PER_PAX = 25.0;
 
-    public CONST
-        TRIP_TYPE_ONE_WAY = 'OW',
-        TRIP_TYPE_ROUND_TRIP = 'RT',
-        TRIP_TYPE_MULTI_DESTINATION = 'MC';
-    public CONST TRIP_TYPE_LIST = [
-        self::TRIP_TYPE_ROUND_TRIP => 'Round Trip',
-        self::TRIP_TYPE_ONE_WAY => 'One Way',
-        self::TRIP_TYPE_MULTI_DESTINATION => 'Multidestination'
-    ];
-    public CONST
-        STATUS_PENDING = 1,
-        STATUS_PROCESSING = 2,
-        STATUS_REJECT = 4,
-        STATUS_FOLLOW_UP = 5,
-        STATUS_ON_HOLD = 8,
-        STATUS_SOLD = 10,
-        STATUS_TRASH = 11,
-        STATUS_BOOKED = 12,
-        STATUS_SNOOZE = 13;
 
-    public CONST STATUS_LIST = [
-        self::STATUS_PENDING => 'Pending',
-        self::STATUS_PROCESSING => 'Processing',
-        self::STATUS_REJECT => 'Reject',
-        self::STATUS_FOLLOW_UP => 'Follow Up',
-        self::STATUS_ON_HOLD => 'Hold On',
-        self::STATUS_SOLD => 'Sold',
-        self::STATUS_TRASH => 'Trash',
-        self::STATUS_BOOKED => 'Booked',
-        self::STATUS_SNOOZE => 'Snooze',
+    public const TRIP_TYPE_ONE_WAY           = 'OW';
+    public const TRIP_TYPE_ROUND_TRIP        = 'RT';
+    public const TRIP_TYPE_MULTI_DESTINATION = 'MC';
+
+    public const TRIP_TYPE_LIST = [
+        self::TRIP_TYPE_ROUND_TRIP          => 'Round Trip',
+        self::TRIP_TYPE_ONE_WAY             => 'One Way',
+        self::TRIP_TYPE_MULTI_DESTINATION   => 'Multi destination'
     ];
 
-    public CONST CLONE_REASONS = [
+
+    public const STATUS_PENDING     = 1;
+    public const STATUS_PROCESSING  = 2;
+    public const STATUS_REJECT      = 4;
+    public const STATUS_FOLLOW_UP   = 5;
+    public const STATUS_ON_HOLD     = 8;
+    public const STATUS_SOLD        = 10;
+    public const STATUS_TRASH       = 11;
+    public const STATUS_BOOKED      = 12;
+    public const STATUS_SNOOZE      = 13;
+
+    public const STATUS_LIST = [
+        self::STATUS_PENDING        => 'Pending',
+        self::STATUS_PROCESSING     => 'Processing',
+        self::STATUS_REJECT         => 'Reject',
+        self::STATUS_FOLLOW_UP      => 'Follow Up',
+        self::STATUS_ON_HOLD        => 'Hold On',
+        self::STATUS_SOLD           => 'Sold',
+        self::STATUS_TRASH          => 'Trash',
+        self::STATUS_BOOKED         => 'Booked',
+        self::STATUS_SNOOZE         => 'Snooze',
+    ];
+
+    public const CLONE_REASONS = [
         1 => 'Group travel',
         2 => 'Alternative credit card',
         3 => 'Different flight',
@@ -126,44 +130,63 @@ class Lead extends ActiveRecord
         0 => 'Other',
     ];
 
-    public CONST STATUS_MULTIPLE_UPDATE_LIST = [
-        self::STATUS_FOLLOW_UP => self::STATUS_LIST[self::STATUS_FOLLOW_UP],
-        self::STATUS_ON_HOLD => self::STATUS_LIST[self::STATUS_ON_HOLD],
-        self::STATUS_PROCESSING => self::STATUS_LIST[self::STATUS_PROCESSING],
-        self::STATUS_TRASH => self::STATUS_LIST[self::STATUS_TRASH],
-        self::STATUS_BOOKED => self::STATUS_LIST[self::STATUS_BOOKED],
-        self::STATUS_SNOOZE => self::STATUS_LIST[self::STATUS_SNOOZE],
+    public const STATUS_MULTIPLE_UPDATE_LIST = [
+        self::STATUS_FOLLOW_UP      => self::STATUS_LIST[self::STATUS_FOLLOW_UP],
+        self::STATUS_ON_HOLD        => self::STATUS_LIST[self::STATUS_ON_HOLD],
+        self::STATUS_PROCESSING     => self::STATUS_LIST[self::STATUS_PROCESSING],
+        self::STATUS_TRASH          => self::STATUS_LIST[self::STATUS_TRASH],
+        self::STATUS_BOOKED         => self::STATUS_LIST[self::STATUS_BOOKED],
+        self::STATUS_SNOOZE         => self::STATUS_LIST[self::STATUS_SNOOZE],
     ];
 
-    public CONST STATUS_CLASS_LIST = [
-        self::STATUS_PENDING => 'll-pending',
-        self::STATUS_PROCESSING => 'll-processing',
-        self::STATUS_FOLLOW_UP => 'll-follow_up',
-        self::STATUS_ON_HOLD => 'll-on_hold',
-        self::STATUS_SOLD => 'll-sold',
-        self::STATUS_TRASH => 'll-trash',
-        self::STATUS_BOOKED => 'll-booked',
-        self::STATUS_SNOOZE => 'll-snooze',
+    public const STATUS_CLASS_LIST = [
+        self::STATUS_PENDING        => 'll-pending',
+        self::STATUS_PROCESSING     => 'll-processing',
+        self::STATUS_FOLLOW_UP      => 'll-follow_up',
+        self::STATUS_ON_HOLD        => 'll-on_hold',
+        self::STATUS_SOLD           => 'll-sold',
+        self::STATUS_TRASH          => 'll-trash',
+        self::STATUS_BOOKED         => 'll-booked',
+        self::STATUS_SNOOZE         => 'll-snooze',
     ];
-    public CONST
-        CABIN_ECONOMY = 'E',
-        CABIN_BUSINESS = 'B',
-        CABIN_FIRST = 'F',
-        CABIN_PREMIUM = 'P';
-    public CONST CABIN_LIST = [
-        self::CABIN_ECONOMY => 'Economy',
-        self::CABIN_PREMIUM => 'Premium eco',
-        self::CABIN_BUSINESS => 'Business',
-        self::CABIN_FIRST => 'First',
+
+
+    public const CABIN_ECONOMY      = 'E';
+    public const CABIN_BUSINESS     = 'B';
+    public const CABIN_FIRST        = 'F';
+    public const CABIN_PREMIUM      = 'P';
+
+    public const CABIN_LIST = [
+        self::CABIN_ECONOMY     => 'Economy',
+        self::CABIN_PREMIUM     => 'Premium eco',
+        self::CABIN_BUSINESS    => 'Business',
+        self::CABIN_FIRST       => 'First',
     ];
-    public CONST
+
+    public const
         DIV_GRID_WITH_OUT_EMAIL = 1,
         DIV_GRID_WITH_EMAIL = 2,
         DIV_GRID_SEND_QUOTES = 3,
         DIV_GRID_IN_SNOOZE = 4;
 
-    public CONST SCENARIO_API = 'scenario_api';
-    public CONST SCENARIO_MULTIPLE_UPDATE = 'scenario_multiple_update';
+    public const CALL_STATUS_NONE       = 0;
+    public const CALL_STATUS_READY      = 1;
+    public const CALL_STATUS_PROCESS    = 2;
+    public const CALL_STATUS_CANCEL     = 3;
+    public const CALL_STATUS_DONE       = 4;
+
+    public const CALL_STATUS_LIST = [
+        self::CALL_STATUS_NONE      => 'None',
+        self::CALL_STATUS_READY     => 'Ready',
+        self::CALL_STATUS_PROCESS   => 'Process',
+        self::CALL_STATUS_CANCEL    => 'Cancel',
+        self::CALL_STATUS_DONE      => 'Done',
+    ];
+
+
+
+    public const SCENARIO_API = 'scenario_api';
+    public const SCENARIO_MULTIPLE_UPDATE = 'scenario_multiple_update';
 
     public $additionalInformationForm;
     public $status_description;
@@ -198,7 +221,7 @@ class Lead extends ActiveRecord
 
             [['trip_type', 'cabin'], 'required'],
             [['adults', 'children', 'infants', 'source_id'], 'required'], //'except' => self::SCENARIO_API],
-            [['client_id', 'employee_id', 'status', 'project_id', 'source_id', 'rating', 'l_grade', 'clone_id', 'bo_flight_id'], 'integer'],
+            [['client_id', 'employee_id', 'status', 'project_id', 'source_id', 'rating', 'l_grade', 'clone_id', 'bo_flight_id', 'l_call_status_id', 'l_call_rating'], 'integer'],
             [['adults', 'children', 'infants'], 'integer', 'max' => 9],
             [['adults'], 'integer', 'min' => 1],
             [['l_answered'], 'boolean'],
@@ -246,7 +269,9 @@ class Lead extends ActiveRecord
             'bo_flight_id' => '(BO) Flight ID',
             'agents_processing_fee' => 'Agents Processing Fee',
             'origin_country' => 'Origin Country code',
-            'destination_country' => 'Destination Country code'
+            'destination_country' => 'Destination Country code',
+            'l_call_status_id' => 'Call status',
+            'l_call_rating' => 'Call rating',
         ];
     }
 

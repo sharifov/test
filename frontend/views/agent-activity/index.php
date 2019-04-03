@@ -327,7 +327,7 @@ $this->registerJs("$(function() {
                     [
                         'label' => 'Profit',
                         'value' => function($data) use ($searchModel) {
-                            $employee = Employee::findOne(['id' => $data['id']]);
+                            $employee = Employee::findOne($data['id']);
                             $from = new DateTime($searchModel->date_from);
                             $to = new DateTime($searchModel->date_to);
                             $salary = $employee->calculateSalaryBetween($from, $to);

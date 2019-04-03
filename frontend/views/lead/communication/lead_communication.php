@@ -298,7 +298,9 @@ $c_type_id = $comForm->c_type_id;
                             <?php
                                 $typeList = [];
                                 $agentParams = \common\models\UserProjectParams::find()->where(['upp_project_id' => $leadForm->getLead()->project_id, 'upp_user_id' => Yii::$app->user->id])->limit(1)->one();
-                                $userModel = \common\models\Employee::findOne(Yii::$app->user->id);
+
+                                /** @var \common\models\Employee $userModel */
+                                $userModel = Yii::$app->user->identity;
 
 
                                 $call_type = \common\models\UserProfile::find()->select('up_call_type_id')->where(['up_user_id' => Yii::$app->user->id])->one();
@@ -645,6 +647,8 @@ $this->registerJs($js);
             stopCall(0);
             updateCommunication();
         }
+
+        $('.click_after_call_update').trigger('click');
 
     }
 

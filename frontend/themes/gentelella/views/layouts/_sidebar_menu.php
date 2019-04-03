@@ -1,9 +1,6 @@
 <?php
 /* @var $this \yii\web\View */
 
-use yii\helpers\Html;
-use yii\bootstrap\NavBar;
-use yii\bootstrap\Nav;
 
 
 $isAdmin = Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id);
@@ -85,7 +82,8 @@ $isQA = Yii::$app->authManager->getAssignment('qa', Yii::$app->user->id);
             //}
 
 
-            $userModel = \common\models\Employee::findOne(Yii::$app->user->id);
+            /** @var \common\models\Employee $userModel */
+            $userModel = Yii::$app->user->identity;
             //$sipExist = ($userModel->userProfile->up_sip && strlen($userModel->userProfile->up_sip) > 2);
             // //\common\models\UserProjectParams::find()->where(['upp_user_id' => Yii::$app->user->id])->andWhere(['AND', ['IS NOT', 'upp_tw_sip_id', null], ['<>', 'upp_tw_sip_id', '']])->exists();
 
@@ -169,9 +167,9 @@ $isQA = Yii::$app->authManager->getAssignment('qa', Yii::$app->user->id);
 
 
 
-            if($isAdmin || $isAgent)
+            if($isAdmin || ($isAgent && $userModel->userProfile && $userModel->userProfile->up_kpi_enable))
             {
-                $menuItems[] = ['label' => 'KPI <span id="kpi" class="label-info label pull-right"></span> ', 'url' => ['/kpi'], 'icon' => 'money'];
+                $menuItems[] = ['label' => 'KPI <span id="kpi" class="label-info label pull-right"></span> ', 'url' => ['/kpi/index'], 'icon' => 'money'];
             }
 
 

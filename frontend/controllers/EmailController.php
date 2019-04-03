@@ -301,7 +301,10 @@ class EmailController extends FController
             $mailList = ArrayHelper::map($mails, 'upp_email', 'upp_email');
         }
 
-        $user = Employee::findOne(Yii::$app->user->id);
+
+        /** @var Employee $user */
+        $user = Yii::$app->user->identity;
+
         if($user && $user->email) {
             $mailList[$user->email] = $user->email;
         }

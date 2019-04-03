@@ -631,8 +631,8 @@
     //});
 
 
-    function webCall(phone_from, phone_to, project_id, lead_id) {
-        var params = {'To': phone_to, 'FromAgentPhone': phone_from, 'project_id': project_id, 'lead_id': lead_id};
+    function webCall(phone_from, phone_to, project_id, lead_id, type) {
+        var params = {'To': phone_to, 'FromAgentPhone': phone_from, 'project_id': project_id, 'lead_id': lead_id, 'type': type};
         webPhoneParams = params;
 
         //console.log(params); return false;
@@ -766,7 +766,7 @@ $js = <<<JS
         $('#web-phone-widget').slideDown();
         $('.fabs2').hide();
         
-        webCall(phone_from, phone_to, project_id, lead_id);
+        webCall(phone_from, phone_to, project_id, lead_id, 'web-call');
     });
     
     $('#web-phone-widget').css({left:'50%', 'margin-left':'-'+($('#web-phone-widget').width() / 2)+'px'}).slideDown();

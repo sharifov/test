@@ -704,7 +704,13 @@ class LeadController extends FController
                     if($lead->project_id) {
                         $upp = UserProjectParams::find()->where(['upp_project_id' => $lead->project_id, 'upp_user_id' => Yii::$app->user->id])->one();
                     }
-                    $userModel = Employee::findOne(Yii::$app->user->id);
+
+
+                    /** @var Employee $userModel */
+                    $userModel = Yii::$app->user->identity;
+
+
+
                     if($upp && $userModel) {
 
                         if (!$upp->upp_tw_phone_number) {

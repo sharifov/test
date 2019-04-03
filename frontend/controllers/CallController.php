@@ -3,8 +3,10 @@
 namespace frontend\controllers;
 
 use common\models\Employee;
+use common\models\Lead;
 use common\models\Project;
 use common\models\search\EmployeeSearch;
+use common\models\search\LeadFlightSegmentSearch;
 use common\models\search\LeadSearch;
 use common\models\UserProjectParams;
 use Yii;
@@ -293,6 +295,96 @@ class CallController extends FController
     public function actionAutoRedial()
     {
 
+        /** @var Employee $user */
+        $user = Yii::$app->user->identity;
+
+
+
+        if(Yii::$app->request->get('act')) {
+            $profile = $user->userProfile;
+            if($profile) {
+                $profile->up_updated_dt = date('Y-m-d H:i:s');
+
+                if (Yii::$app->request->get('act') == 'start') {
+                    $profile->up_auto_redial = true;
+                    $profile->save();
+                }
+                if (Yii::$app->request->get('act') == 'stop') {
+                    $profile->up_auto_redial = false;
+                    $profile->save();
+                }
+            }
+        }
+
+
+        //$callModel = null;
+        $leadModel = null;
+        $callData = [];
+
+        $callModel = Call::find()->where(['c_call_status' => [Call::CALL_STATUS_RINGING, Call::CALL_STATUS_IN_PROGRESS]])->andWhere(['c_created_user_id' => Yii::$app->user->id])->orderBy(['c_id' => SORT_DESC])->limit(1)->one();
+
+        if(Yii::$app->request->post('act') === 'find') {
+
+            $query = Lead::find();
+
+            $subQuery = UserProjectParams::find()->select(['upp_project_id'])->where(['upp_user_id' => $user->id])->andWhere(['AND', ['IS NOT', 'upp_tw_phone_number', null], ['<>', 'upp_tw_phone_number', '']]);
+
+            $query->andWhere(['status' => Lead::STATUS_PENDING]);
+            $query->andWhere(['IN', 'project_id', $subQuery]);
+            $query->andWhere(['request_ip' => ['217.26.162.22']]);
+
+            $query->orderBy(['id' => SORT_DESC]);
+            $query->limit(1);
+
+            //echo $query->createCommand()->getRawSql(); exit;
+
+            $leadModel = $query->one();
+
+            if(!$callModel) {
+                $leadModel = $query->one();
+            }
+
+            if($leadModel) {
+                $callData['error'] = null;
+                $callData['project_id'] = $leadModel->project_id;
+                $callData['lead_id'] = $leadModel->id;
+                $callData['phone_to'] = null;
+                $callData['phone_from'] = null;
+
+                if($leadModel->client && $leadModel->client->clientPhones) {
+                    foreach ($leadModel->client->clientPhones as $phone) {
+                        if(!$phone->phone) {
+                            continue;
+                        }
+                        $callData['phone_to'] = trim($phone->phone);
+                        break;
+                    }
+                }
+
+                $upp = UserProjectParams::find()->where(['upp_project_id' => $leadModel->project_id, 'upp_user_id' => $user->id])->one();
+                if($upp && $upp->upp_tw_phone_number) {
+                    $callData['phone_from'] = $upp->upp_tw_phone_number;
+                }
+
+                if(!$callData['phone_from']) {
+                    $callData['error'] = 'Not found phone number for project ('.$leadModel->project->name.')';
+                }
+
+                if(!$callData['phone_to']) {
+                    $callData['error'] = 'Not found client number';
+                }
+                //$callData['error'] = 'Not found client number';
+
+                //$callData['phone_to'] = '+37369594567';
+            }
+
+
+            $isActionFind = true;
+        } else {
+            $isActionFind = false;
+        }
+
+
         $searchModel = new LeadSearch();
 
         $params = Yii::$app->request->queryParams;
@@ -310,7 +402,6 @@ class CallController extends FController
         $checkShiftTime = true;
 
         if($isAgent) {
-            $user = Yii::$app->user->identity;
             $checkShiftTime = $user->checkShiftTime();
             $userParams = $user->userParams;
 
@@ -330,13 +421,23 @@ class CallController extends FController
 
 
 
+        //$leadModel = new Lead();
+
+
+        /*if(Yii::$app->request->isPjax) {
+            $leadModel = Lead::find()->orderBy(['id' => SORT_DESC])->limit(1)->one();
+        } else {
+            $leadModel = null; //Lead::findOne(22);
+        }*/
+
+
         if(Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id)) {
             $params['LeadSearch']['supervision_id'] = Yii::$app->user->id;
         }
 
         $dataProvider = $searchModel->searchInbox($params);
 
-        $user = Yii::$app->user->identity;
+
 
         $isAccessNewLead = $user->accessTakeNewLead();
         $accessLeadByFrequency = [];
@@ -348,6 +449,22 @@ class CallController extends FController
             }
         }
 
+        $dataProviderSegments = null;
+
+        if($leadModel) {
+            $searchModelSegments = new LeadFlightSegmentSearch();
+
+            $params = Yii::$app->request->queryParams;
+            //if($leadModel) {
+            $params['LeadFlightSegmentSearch']['lead_id'] = $leadModel ? $leadModel->id : 0;
+            //}
+            $dataProviderSegments = $searchModelSegments->search($params);
+        }
+
+
+
+
+
         return $this->render('auto-redial', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
@@ -356,7 +473,14 @@ class CallController extends FController
             'isAccessNewLead' => $isAccessNewLead,
             'accessLeadByFrequency' => $accessLeadByFrequency,
             'user' => $user,
-            'newLeadsCount' => $user->getCountNewLeadCurrentShift()
+
+            'leadModel' => $leadModel,
+            'callModel' => $callModel,
+            //'searchModelSegments' => $searchModelSegments,
+            'dataProviderSegments' => $dataProviderSegments,
+            'isActionFind' => $isActionFind,
+            'callData' => $callData
+            //'newLeadsCount' => $user->getCountNewLeadCurrentShift()
         ]);
 
     }
