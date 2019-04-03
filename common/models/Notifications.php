@@ -5,6 +5,7 @@ namespace common\models;
 use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
+use yii\helpers\Json;
 use yii\helpers\VarDumper;
 
 /**
@@ -255,7 +256,7 @@ class Notifications extends ActiveRecord
             // connect tcp-server
             $instance = stream_socket_client($socket);
             // send message
-            if (fwrite($instance, json_encode($jsonData) . "\n")) {
+            if (fwrite($instance, Json::encode($jsonData) . "\n")) {
                 return true;
             }
         } catch (\Throwable $exception) {
