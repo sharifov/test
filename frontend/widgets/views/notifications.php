@@ -241,13 +241,13 @@ $js = <<<JS
                     }
                     
                     if(obj.command === 'callUpdate') {
-                        if ($.isFunction(callUpdate)) {
+                        if (typeof callUpdate === "function") {
                             callUpdate(obj);
                         }
                     }
                     
                     if(obj.command === 'webCallUpdate') {
-                        if ($.isFunction(webCallUpdate)) {
+                        if (typeof webCallUpdate === "function") {
                             webCallUpdate(obj);
                         }
                     }
@@ -258,13 +258,15 @@ $js = <<<JS
                     }
                     
                     if(obj.command === 'incomingCall') {
-                        if ($.isFunction(incomingCall)) {
+                        if (typeof incomingCall === "function") {
                             incomingCall(obj);
                         }
                     }
                     
                     if(obj.command === 'updateUserCallStatus') {
-                        updateUserCallStatus(obj);
+                        if (typeof updateUserCallStatus === "function") {
+                            updateUserCallStatus(obj);
+                        }
                     }
                     
                     if(obj.command === 'callMapUpdate') {
