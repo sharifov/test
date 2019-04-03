@@ -241,6 +241,7 @@
 
     const ajaxSaveCallUrl = '<?=$ajaxSaveCallUrl?>';
     const ajaxCallRedirectUrl = '<?=$ajaxRedirectCallUrl?>';
+    const c_user_id = '<?=Yii::$app->user->id?>';
 
     function createNotify(title, message, type) {
         new PNotify({
@@ -632,7 +633,7 @@
 
 
     function webCall(phone_from, phone_to, project_id, lead_id, type) {
-        var params = {'To': phone_to, 'FromAgentPhone': phone_from, 'project_id': project_id, 'lead_id': lead_id, 'type': type};
+        var params = {'To': phone_to, 'FromAgentPhone': phone_from, 'project_id': project_id, 'lead_id': lead_id, 'c_type': type, 'c_user_id': c_user_id};
         webPhoneParams = params;
 
         //console.log(params); return false;

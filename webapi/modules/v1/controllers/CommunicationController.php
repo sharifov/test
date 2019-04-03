@@ -782,6 +782,10 @@ class CommunicationController extends ApiBaseController
                         Yii::error(VarDumper::dumpAsString($call->errors), 'API:CommunicationController:actionVoice:TYPE_VOIP_FINISH:Call:save');
                     }
 
+                    if($call->c_created_user_id || $call->c_lead_id) {
+                        Notifications::socket($call->c_created_user_id, $call->c_lead_id, 'callUpdate', ['status' => $call->c_call_status, 'duration' => $call->c_call_duration, 'snr' => $call->c_sequence_number], true);
+                    }
+
                     /*if($post['callData']['RecordingUrl']) {
                         $call->c_recording_url = $post['callData']['RecordingUrl'];
                         $call->c_recording_duration = $post['callData']['RecordingDuration'];
@@ -895,11 +899,13 @@ class CommunicationController extends ApiBaseController
                     $call->c_call_duration = (int) $post['callData']['duration'];
                 }
 
+                if(isset($post['callData']['c_user_id']) && $post['callData']['c_user_id']) {
+                    $call->c_created_user_id = (int) $post['callData']['c_user_id'];
+                }
+
 
                 //$call->c_call_status = $post['callData']['CallStatus'] ?? '';
                 //$call->c_sequence_number = $post['callData']['SequenceNumber'] ?? 0;
-
-
 
 
 
