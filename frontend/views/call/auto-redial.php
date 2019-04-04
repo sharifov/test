@@ -211,7 +211,7 @@ $this->params['breadcrumbs'][] = $this->title;
             <?php else: ?>
                 <div class="countdown text-center badge badge-warning" style="font-size: 35px">
                     <i class="fa fa-clock-o"></i>
-                    <span id="clock"></span>
+                    <span id="clock">00:00</span>
                 </div>
             <?php endif; ?>
 
@@ -545,7 +545,99 @@ $this->params['breadcrumbs'][] = $this->title;
                 <div class="col-md-6">
                     <h3>Call status: <span id="call_autoredial_status"></span></h3>
                     <?php if($callModel): ?>
-                        <h1>Call</h1>
+                        <h1>Call info <?=$callModel->c_id?></h1>
+
+                        <div class="col-md-6">
+
+                            <?= \yii\widgets\DetailView::widget([
+                                'model' => $callModel,
+                                'attributes' => [
+                                    'c_id',
+                                    'c_call_sid',
+                                    //'c_account_sid',
+                                    //'c_call_type_id',
+                                    [
+                                        'attribute' => 'c_call_type_id',
+                                        'value' => function (\common\models\Call $model) {
+                                            return $model->getCallTypeName();
+                                        },
+                                    ],
+                                    'c_from',
+                                    'c_to',
+                                    //'c_sip',
+                                    'c_call_status',
+                                    //'c_api_version',
+                                    //'c_direction',
+                                    //'c_forwarded_from',
+
+                                    //'c_parent_call_sid',
+
+                                ],
+                            ]) ?>
+                        </div>
+
+                        <div class="col-md-6">
+                            <?= \yii\widgets\DetailView::widget([
+                                'model' => $callModel,
+                                'attributes' => [
+                                    'c_caller_name',
+                                    'c_call_duration',
+                                    //'c_sip_response_code',
+                                    //'c_recording_url:url',
+                                    //'c_recording_sid',
+                                    //'c_recording_duration',
+                                    //'c_timestamp',
+                                    //'c_uri',
+                                    //'c_sequence_number',
+                                    //'c_lead_id',
+                                    [
+                                        'attribute' => 'c_lead_id',
+                                        'value' => function (\common\models\Call $model) {
+                                            return  $model->c_lead_id ? Html::a($model->c_lead_id, ['lead/view', 'gid' => $model->cLead->gid], ['data-pjax' => 0, 'target' => '_blank']) : '';
+                                        },
+                                        'format' => 'raw'
+                                    ],
+                                    //'c_created_user_id',
+                                    [
+                                        'attribute' => 'c_created_user_id',
+                                        'value' => function (\common\models\Call $model) {
+                                            return  $model->cCreatedUser ? '<i class="fa fa-user"></i> ' . Html::encode($model->cCreatedUser->username) : $model->c_created_user_id;
+                                        },
+                                        'format' => 'raw'
+                                    ],
+                                    //'c_created_dt',
+                                    [
+                                        'attribute' => 'c_created_dt',
+                                        'value' => function (\common\models\Call $model) {
+                                            return $model->c_created_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->c_created_dt)) : '-';
+                                        },
+                                        'format' => 'raw'
+                                    ],
+                                    [
+                                        'attribute' => 'c_updated_dt',
+                                        'value' => function (\common\models\Call $model) {
+                                            return $model->c_updated_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->c_updated_dt)) : '-';
+                                        },
+                                        'format' => 'raw'
+                                    ],
+                                    //'c_com_call_id',
+                                    //'c_updated_dt',
+                                    //'c_project_id',
+                                    [
+                                        'attribute' => 'c_project_id',
+                                        'value' => function (\common\models\Call $model) {
+                                            return $model->cProject ? $model->cProject->name : '-';
+                                        },
+                                        'filter' => \common\models\Project::getList()
+                                    ],
+                                    //'c_error_message',
+                                    //'c_is_new:boolean',
+                                    //'c_is_deleted',
+                                ],
+                            ]) ?>
+                        </div>
+
+
                     <?php endif; ?>
                 </div>
             </div>

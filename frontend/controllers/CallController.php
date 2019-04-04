@@ -323,6 +323,8 @@ class CallController extends FController
 
         $callModel = Call::find()->where(['c_call_status' => [Call::CALL_STATUS_RINGING, Call::CALL_STATUS_IN_PROGRESS]])->andWhere(['c_created_user_id' => Yii::$app->user->id])->orderBy(['c_id' => SORT_DESC])->limit(1)->one();
 
+        //echo Call::find()->where(['c_call_status' => [Call::CALL_STATUS_RINGING, Call::CALL_STATUS_IN_PROGRESS]])->andWhere(['c_created_user_id' => Yii::$app->user->id])->orderBy(['c_id' => SORT_DESC])->limit(1)->createCommand()->getRawSql(); exit;
+
         if(Yii::$app->request->post('act') === 'find') {
 
             $query = Lead::find();
@@ -461,6 +463,8 @@ class CallController extends FController
             $dataProviderSegments = $searchModelSegments->search($params);
         }
 
+
+        //echo $callModel->c_id; exit;
 
 
 
