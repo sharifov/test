@@ -57,7 +57,8 @@ $this->params['breadcrumbs'][] = $this->title;
 <script>
 
     function webCallUpdate(obj) {
-        console.log('--- webCallUpdate ---');
+        //console.log('--- webCallUpdate ---');
+        console.info('webCallUpdate - 3');
         //status: "completed", duration: "1", snr: "3"
         $('#call_autoredial_status').html(obj.status);
 
@@ -65,6 +66,7 @@ $this->params['breadcrumbs'][] = $this->title;
             //stopCall(obj.duration); //updateCommunication();
             autoredialInit();
         } else if(obj.status == 'in-progress') {
+            autoredialInit();
             //startCallTimer();
             //$('#div-call-timer').timer('resume');
         } else if(obj.status == 'initiated') {
@@ -79,6 +81,8 @@ $this->params['breadcrumbs'][] = $this->title;
             autoredialInit();
         }
 
+        console.info('webCallUpdate - 4');
+
         //$('.click_after_call_update').trigger('click');
     }
 
@@ -89,6 +93,7 @@ $this->params['breadcrumbs'][] = $this->title;
     }
 
     function autoredialInit() {
+        console.info('+++ autoredialInit +++');
         $.pjax.reload({container:'#pjax-auto-redial', 'scrollTo': false});
     }
 

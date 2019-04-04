@@ -247,7 +247,9 @@ $js = <<<JS
                     }
                     
                     if(obj.command === 'webCallUpdate') {
+                        console.info('webCallUpdate - 1');
                         if (typeof webCallUpdate === "function") {
+                            console.info('webCallUpdate - 2');
                             webCallUpdate(obj);
                         }
                     }
