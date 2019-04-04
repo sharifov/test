@@ -211,7 +211,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 </div>
             <?php elseif($callModel):?>
                 <div class="text-center badge badge-warning" style="font-size: 35px">
-                    <i class="fa fa-spinner fa-spin"></i> Called to <?=$callModel->c_to?> ...
+                    <i class="fa fa-spinner fa-spin"></i> <?=$callModel->getStatusName()?> <?=$callModel->c_to?> ...
                 </div>
             <?php else: ?>
                 <div class="countdown text-center badge badge-warning" style="font-size: 35px">
@@ -548,7 +548,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
                 </div>
                 <div class="col-md-6">
-                    <h3>Call status: <span id="call_autoredial_status"></span></h3>
+                    <h3>Call status: <span class="badge badge-info" id="call_autoredial_status"><?=$callModel ? $callModel->getStatusName() : '-'?></span></h3>
                     <?php if($callModel): ?>
                         <h1>Call info <?=$callModel->c_id?></h1>
 
