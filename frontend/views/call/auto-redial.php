@@ -97,10 +97,10 @@ $this->params['breadcrumbs'][] = $this->title;
     function openInNewTab(url, name) {
         //var strWindowFeatures = "menubar=no,location=no,resizable=yes,scrollbars=yes,status=no";
 
-        /*var windowObjectReference = window.open(url, 'window' + name); //, strWindowFeatures);
-        windowObjectReference.focus();*/
+        var windowObjectReference = window.open(url, 'window' + name); //, strWindowFeatures);
+        windowObjectReference.focus();
 
-        alert('Taked!!! ' +  url);
+        //alert('Taked!!! ' +  url);
     }
 
     function autoredialInit() {
@@ -131,7 +131,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 var project_id = $('#call-project-id').val();
                 var lead_id = $('#call-lead-id').val();*/
 
-                $.pjax.reload({container:'#pjax-auto-redial', data: 'act=find', type: 'POST', 'scrollTo': false});
+                $.pjax.reload({container:'#pjax-auto-redial', data: 'act=show', type: 'POST', 'scrollTo': false});
 
 
                 //$('#web-phone-dial-modal').modal('hide');
@@ -294,8 +294,13 @@ $this->params['breadcrumbs'][] = $this->title;
                         <?php else: ?>
 
                             <?php if($callData): ?>
+                                <div class="countdown text-center badge badge-warning" style="font-size: 15px">
+                                    <i class="fa fa-clock-o"></i>
+                                    <span id="clock">00:00</span>
+                                </div>
                                 <?=$this->registerJs("webCall('". $callData['phone_from']."', '". $callData['phone_to']."', ". $callData['project_id'].", ". $callData['lead_id'].", 'auto-redial');");?>
-                                <?=$this->registerJs("var timerId = setTimeout(function() { openInNewTab('".\yii\helpers\Url::to(['/lead/take', 'gid' => $leadModel->gid])."', '".$leadModel->id."') }, 10000);");?>
+                                <?=$this->registerJs("var timerId = setTimeout(function() { openInNewTab('".\yii\helpers\Url::to(['/lead/auto-take', 'gid' => $leadModel->gid])."', '".$leadModel->id."') }, 20000);");?>
+                                <?=$this->registerJs('startTimer(20);');?>
                             <?php endif; ?>
 
                         <?php endif; ?>

@@ -2606,4 +2606,34 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
         return $query;
     }
 
+    /**
+     * @return int
+     */
+    public function getDelayPendingTime(): int
+    {
+        $min = 0;
+
+        if($this->created) {
+            $diffSeconds = time() - strtotime($this->created);
+        } else {
+            $diffSeconds = 0;
+        }
+
+        $diffMin = ceil($diffSeconds / 60);
+
+        if($diffMin < 20) {
+            $min = 5;
+        } elseif($diffMin < 30) {
+            $min = 10;
+        } elseif($diffMin < 60) {
+            $min = 30;
+        } elseif($diffMin < (60 * 6)) {
+            $min = 60;
+        } else {
+            $min = 120;
+        }
+
+        return $min;
+    }
+
 }
