@@ -114,6 +114,7 @@ class LeadSearch extends Lead
     public function search($params)
     {
         $query = Lead::find();
+        $query->select(['*', 'l_client_time' => new Expression("TIME( CONVERT_TZ(NOW(), '+00:00', offset_gmt) )")]);
 
         // add conditions that should always apply here
 
@@ -330,6 +331,7 @@ class LeadSearch extends Lead
     {
         $projectIds = array_keys(ProjectEmployeeAccess::getProjectsByEmployee());
         $query = Lead::find();
+        $query->select(['*', 'l_client_time' => new Expression("TIME( CONVERT_TZ(NOW(), '+00:00', offset_gmt) )")]);
 
         // add conditions that should always apply here
 
@@ -486,6 +488,7 @@ class LeadSearch extends Lead
     {
         $projectIds = array_keys(ProjectEmployeeAccess::getProjectsByEmployee());
         $query = Lead::find();
+        $query->select(['*', 'l_client_time' => new Expression("TIME( CONVERT_TZ(NOW(), '+00:00', offset_gmt) )")]);
         $leadTable = Lead::tableName();
 
         // add conditions that should always apply here
@@ -609,6 +612,7 @@ class LeadSearch extends Lead
     {
         $projectIds = array_keys(ProjectEmployeeAccess::getProjectsByEmployee());
         $query = Lead::find();
+        $query->select(['*', 'l_client_time' => new Expression("TIME( CONVERT_TZ(NOW(), '+00:00', offset_gmt) )")]);
         $leadTable = Lead::tableName();
 
         // add conditions that should always apply here
@@ -697,6 +701,7 @@ class LeadSearch extends Lead
     {
         $projectIds = array_keys(ProjectEmployeeAccess::getProjectsByEmployee());
         $query = Lead::find();
+        $query->select(['*', 'l_client_time' => new Expression("TIME( CONVERT_TZ(NOW(), '+00:00', offset_gmt) )")]);
         $leadTable = Lead::tableName();
 
         // add conditions that should always apply here
@@ -812,6 +817,8 @@ class LeadSearch extends Lead
     {
         $projectIds = array_keys(ProjectEmployeeAccess::getProjectsByEmployee());
         $query = Lead::find();
+        $query->select(['*', 'l_client_time' => new Expression("TIME( CONVERT_TZ(NOW(), '+00:00', offset_gmt) )")]);
+
         $leadTable = Lead::tableName();
 
         // add conditions that should always apply here
@@ -894,6 +901,8 @@ class LeadSearch extends Lead
     {
         $projectIds = array_keys(ProjectEmployeeAccess::getProjectsByEmployee());
         $query = Lead::find();
+        $query->select(['*', 'l_client_time' => new Expression("TIME( CONVERT_TZ(NOW(), '+00:00', offset_gmt) )")]);
+
         $leadTable = Lead::tableName();
 
         // add conditions that should always apply here
@@ -983,6 +992,7 @@ class LeadSearch extends Lead
     {
         $projectIds = array_keys(ProjectEmployeeAccess::getProjectsByEmployee());
         $query = Lead::find();
+        $query->select(['*', 'l_client_time' => new Expression("TIME( CONVERT_TZ(NOW(), '+00:00', offset_gmt) )")]);
         $leadTable = Lead::tableName();
 
 
@@ -1040,6 +1050,7 @@ class LeadSearch extends Lead
     {
         $projectIds = array_keys(ProjectEmployeeAccess::getProjectsByEmployee());
         $query = Lead::find();
+        $query->select(['*', 'l_client_time' => new Expression("TIME( CONVERT_TZ(NOW(), '+00:00', offset_gmt) )")]);
         $leadTable = Lead::tableName();
 
         // add conditions that should always apply here

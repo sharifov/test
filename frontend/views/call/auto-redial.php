@@ -2,8 +2,9 @@
 
 use yii\helpers\Html;
 use yii\widgets\Pjax;
-use kartik\grid\GridView;
+//use kartik\grid\GridView;
 //use yii\grid\GridView;
+use \yiister\gentelella\widgets\grid\GridView;
 use common\models\Lead;
 
 /* @var $this yii\web\View */
@@ -25,6 +26,13 @@ use common\models\Lead;
 /* @var $isActionFind bool */
 /* @var $callData [] */
 
+/* @var $myPendingLeadsCount int */
+/* @var $allPendingLeadsCount int */
+
+
+/* @var $searchModelCall common\models\search\CallSearch */
+/* @var $dataProviderCall yii\data\ActiveDataProvider */
+/* @var $projectList [] */
 
 
 $this->title = 'Auto redial';
@@ -88,8 +96,11 @@ $this->params['breadcrumbs'][] = $this->title;
 
     function openInNewTab(url, name) {
         //var strWindowFeatures = "menubar=no,location=no,resizable=yes,scrollbars=yes,status=no";
-        var windowObjectReference = window.open(url, 'window' + name); //, strWindowFeatures);
-        windowObjectReference.focus();
+
+        /*var windowObjectReference = window.open(url, 'window' + name); //, strWindowFeatures);
+        windowObjectReference.focus();*/
+
+        alert('Taked!!! ' +  url);
     }
 
     function autoredialInit() {
@@ -146,44 +157,68 @@ $this->params['breadcrumbs'][] = $this->title;
         <i class="fa fa-phone-square"></i> <?=\yii\helpers\Html::encode($this->title)?>
     </h1>
 
-
     <div class="call-auto-redial">
+        <?php Pjax::begin(['id' => 'pjax-auto-redial', 'timeout' => 5000, 'enablePushState' => false/*, 'clientOptions' => ['method' => 'GET']*/]); ?>
 
-        <div class="row">
-            <div class="animated flipInY col-md-3 col-sm-6 col-xs-12">
-                <h5>My Project / Phone List:</h5>
+        <div class="row top_tiles">
 
+            <div class="animated flipInY col-lg-2 col-md-2 col-sm-6 col-xs-12">
+                <div class="tile-stats">
+                    <div class="icon"><i class="fa fa-list"></i></div>
+                    <div class="count">
+                        <?=Lead::find()->where(['status' => Lead::STATUS_PENDING])->count()?>
+                    </div>
+                    <h3>Total Pending Leads</h3>
+                    <p>Total Leads - status Pending</p>
+                </div>
+            </div>
+
+            <div class="animated flipInY col-lg-2 col-md-2 col-sm-6 col-xs-12">
+                <div class="tile-stats">
+                    <div class="icon"><i class="fa fa-list"></i></div>
+                    <div class="count">
+                        <?=$allPendingLeadsCount?>
+                    </div>
+                    <h3>Accessed Pending Leads</h3>
+                    <p>Accessed all pending Leads (delay, client time, 09:00 - 21:00)</p>
+                </div>
+            </div>
+
+            <div class="animated flipInY col-lg-2 col-md-2 col-sm-6 col-xs-12">
+                <div class="tile-stats">
+                    <div class="icon"><i class="fa fa-bars"></i></div>
+                    <div class="count">
+                        <?=$myPendingLeadsCount?>
+                    </div>
+                    <h3>My Pending Leads</h3>
+                    <p>Accessed for me by (project, phone, client time, 09:00 - 21:00)</p>
+                </div>
+            </div>
+
+            <div class="animated flipInY col-md-2 col-sm-6 col-xs-12" title="My Project / Phone List">
                 <?php
-                    if($user->userProjectParams):
-                ?>
+                if($user->userProjectParams):
+                    ?>
 
-                <table class="table table-bordered table-striped">
-                    <tr>
-                        <th>Nr</th>
-                        <th>Project</th>
-                        <th>Phone</th>
-                    </tr>
-                    <?php
-                    $nr = 1;
-                    foreach ($user->userProjectParams as $upp):?>
+                    <table class="table table-bordered table-striped">
                         <tr>
-                            <td width="100px"><?=($nr++)?></td>
-                            <td><?=Html::encode($upp->uppProject->name)?></td>
-                            <td><?=Html::encode($upp->upp_tw_phone_number)?></td>
+                            <th>Project</th>
+                            <th>Phone</th>
                         </tr>
-                    <? endforeach; ?>
-
-                </table>
+                        <?php
+                        $nr = 1;
+                        foreach ($user->userProjectParams as $upp):?>
+                            <tr>
+                                <td><?=Html::encode($upp->uppProject->name)?></td>
+                                <td><?=Html::encode($upp->upp_tw_phone_number)?></td>
+                            </tr>
+                        <? endforeach; ?>
+                    </table>
                 <?php endif; ?>
-
-
             </div>
         </div>
 
-        <div class="clearfix"></div>
 
-
-        <?php Pjax::begin(['id' => 'pjax-auto-redial', 'timeout' => 5000, 'enablePushState' => false/*, 'clientOptions' => ['method' => 'GET']*/]); ?>
         <?//=date('Y-m-d H:i:s')?>
 
         <?php
@@ -192,18 +227,21 @@ $this->params['breadcrumbs'][] = $this->title;
         ?>
 
         <p>
-            <?php if($user->userProfile && !$user->userProfile->up_auto_redial):?>
+
+
+
+            <?/*php if($user->userProfile && !$user->userProfile->up_auto_redial):?>
                 <?= Html::a('<i class="fa fa-play"></i> Start Call', ['auto-redial', 'act' => 'start'], ['class' => 'btn btn-success']) ?>
-            <?php else: ?>
-                <?= Html::a('<i class="fa fa-stop"></i> Stop Call ('.Yii::$app->formatter->asTime(strtotime($user->userProfile->up_updated_dt)).')', ['auto-redial', 'act' => 'stop'], [
+            <?php else:*/ ?>
+                <?/*= Html::a('<i class="fa fa-stop"></i> Stop Call ('.Yii::$app->formatter->asTime(strtotime($user->userProfile->up_updated_dt)).')', ['auto-redial', 'act' => 'stop'], [
                     'class' => 'btn btn-danger',
-                    /*'data' => [
+                    'data' => [
                         'confirm' => 'Are you sure you want to delete this item?',
                         'method' => 'post',
-                    ],*/
-                ]) ?>
+                    ],
+                ])*/ ?>
 
-            <?= Html::a('<i class="fa fa-refresh"></i> Auto Redial INIT', ['auto-redial', 'act' => 'init'], ['class' => 'btn btn-info click_after_call_update', 'id' => 'btn-auto-redial-init']) ?>
+            <?//= Html::a('<i class="fa fa-refresh"></i> Auto Redial INIT', ['auto-redial', 'act' => 'init'], ['class' => 'btn btn-info click_after_call_update', 'id' => 'btn-auto-redial-init']) ?>
 
             <?php if($isActionFind && $leadModel):?>
                 <div class="text-center badge badge-warning" style="font-size: 35px">
@@ -214,20 +252,35 @@ $this->params['breadcrumbs'][] = $this->title;
                     <i class="fa fa-spinner fa-spin"></i> <?=$callModel->getStatusName()?> <?=$callModel->c_to?> ...
                 </div>
             <?php else: ?>
-                <div class="countdown text-center badge badge-warning" style="font-size: 35px">
+
+                <?php if($checkShiftTime && $isAccessNewLead):?>
+                    <div class="text-center">
+                        <?= Html::a('<i class="fa fa-search"></i> Find new Lead and make Call', ['auto-redial', 'act' => 'find'], ['class' => 'btn btn-lg btn-success']) ?>
+                    </div>
+                <?php endif; ?>
+
+                <?php if($isActionFind):?>
+                    <div class="alert alert-warning alert-dismissible" role="alert">
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <strong>Sorry! No lead was found.</strong> Last request time: <?=Yii::$app->formatter->asTime(time())?>
+                    </div>
+                    <?/*<p>Last request time: <?=Yii::$app->formatter->asTime(time())?></p>*/?>
+                <?php endif; ?>
+
+                <?/*<div class="countdown text-center badge badge-warning" style="font-size: 35px">
                     <i class="fa fa-clock-o"></i>
                     <span id="clock">00:00</span>
-                </div>
+                </div>*/?>
             <?php endif; ?>
 
             <?//=$this->registerJs('startTimer(10);');?>
 
-            <?php endif; ?>
+            <?/*php endif;*/ ?>
         </p>
 
 
 
-        <?php if($user->userProfile && $user->userProfile->up_auto_redial):?>
+        <?php if($user->userProfile):?>
             <hr>
             <div class="row">
                 <div class="col-md-6">
@@ -242,7 +295,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
                             <?php if($callData): ?>
                                 <?=$this->registerJs("webCall('". $callData['phone_from']."', '". $callData['phone_to']."', ". $callData['project_id'].", ". $callData['lead_id'].", 'auto-redial');");?>
-                                <?=$this->registerJs("openInNewTab('".\yii\helpers\Url::to(['/lead/take', 'gid' => $leadModel->gid])."', '".$leadModel->id."')");?>
+                                <?=$this->registerJs("var timerId = setTimeout(function() { openInNewTab('".\yii\helpers\Url::to(['/lead/take', 'gid' => $leadModel->gid])."', '".$leadModel->id."') }, 10000);");?>
                             <?php endif; ?>
 
                         <?php endif; ?>
@@ -324,13 +377,13 @@ $this->params['breadcrumbs'][] = $this->title;
                                             'options' => ['style' => 'width:180px'],
                                         ],*/
 
-                                        [
+                                        /*[
                                             'attribute' => 'employee_id',
                                             'format' => 'raw',
                                             'value' => function(\common\models\Lead $model) {
                                                 return $model->employee ? '<i class="fa fa-user"></i> '.$model->employee->username : '-';
                                             },
-                                        ],
+                                        ],*/
 
                                         //'employee_id',
 
@@ -357,6 +410,32 @@ $this->params['breadcrumbs'][] = $this->title;
                                             'value' => function(\common\models\Lead $model) {
                                                 return $model->source ? $model->source->name : '-';
                                             },
+                                        ],
+
+                                        [
+                                            'label' => 'Segments',
+                                            'value' => function (\common\models\Lead $model) {
+
+                                                $segments = $model->leadFlightSegments;
+                                                $segmentData = [];
+                                                if ($segments) {
+                                                    foreach ($segments as $sk => $segment) {
+                                                        $segmentData[] = ($sk + 1) . '. <small>' . $segment->origin_label . ' <i class="fa fa-long-arrow-right"></i> ' . $segment->destination_label . ' ('.$segment->departure.')</small>';
+                                                    }
+                                                }
+
+                                                $segmentStr = implode('<br>', $segmentData);
+                                                return '' . $segmentStr . '';
+                                                // return $model->leadFlightSegmentsCount ? Html::a($model->leadFlightSegmentsCount, ['lead-flight-segment/index', "LeadFlightSegmentSearch[lead_id]" => $model->id], ['target' => '_blank', 'data-pjax' => 0]) : '-' ;
+                                            },
+                                            'format' => 'raw',
+                                            'visible' => ! $isAgent,
+                                            'contentOptions' => [
+                                                'class' => 'text-left'
+                                            ],
+                                            'options' => [
+                                                'style' => 'width:140px'
+                                            ]
                                         ],
 
                                         /*[
@@ -431,6 +510,15 @@ $this->params['breadcrumbs'][] = $this->title;
                                         'children',
                                         'infants',*/
                                         'offset_gmt',
+                                        [
+                                            'label' => 'Client time',
+                                            'format' => 'raw',
+                                            'value' => function(\common\models\Lead $model) {
+                                                return $model->getClientTime2();
+                                            },
+                                            //'options' => ['style' => 'width:80px'],
+                                            //'filter' => \common\models\Employee::getList()
+                                        ],
 
                                         //'discount_id',
 
@@ -455,6 +543,22 @@ $this->params['breadcrumbs'][] = $this->title;
                                             },
                                             'format' => 'raw',
                                         ],
+                                        [
+                                            //'attribute' => 'pending',
+                                            'label' => 'Pending Time',
+                                            'value' => function (\common\models\Lead $model) {
+                                                $createdTS = strtotime($model->created);
+
+                                                $diffTime = time() - $createdTS;
+                                                $diffHours = (int) ($diffTime / (60 * 60));
+
+                                                return ($diffHours > 3 && $diffHours < 73 ) ? $diffHours.' hours' : Yii::$app->formatter->asRelativeTime($createdTS);
+                                            },
+                                            'options' => [
+                                                'style' => 'width:180px'
+                                            ],
+                                            'format' => 'raw',
+                                        ],
 
 
                                         /*[
@@ -472,7 +576,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
                         </div>
 
-
+                        <?/*
                         <div class="row">
                             <div class="col-md-12">
                                 <h4>Flight Segments:</h4>
@@ -481,13 +585,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                     //'filterModel' => $searchModelSegments,
                                     'columns' => [
                                         //'id',
-                                        /*[
-                                            'attribute' => 'lead_id',
-                                            'format' => 'raw',
-                                            'value' => function(\common\models\LeadFlightSegment $model) {
-                                                return '<i class="fa fa-arrow-right"></i> '.Html::a('lead: '.$model->lead_id, ['leads/view', 'id' => $model->lead_id], ['target' => '_blank', 'data-pjax' => 0]);
-                                            },
-                                        ],*/
+
                                         'origin',
                                         'destination',
                                         [
@@ -497,35 +595,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                             },
                                             'format' => 'html',
                                         ],
-                                        /*[
-                                            'attribute' => 'flexibility',
-                                            'value' => function(\common\models\LeadFlightSegment $model) {
-                                                return $model->flexibility;
-                                            },
-                                            'filter' => array_combine(range(0, 5), range(0, 5)),
-                                        ],
-                                        [
-                                            'attribute' => 'flexibility_type',
-                                            'value' => function(\common\models\LeadFlightSegment $model) {
-                                                return $model->flexibility_type;
-                                            },
-                                            'filter' => \common\models\LeadFlightSegment::FLEX_TYPE_LIST
-                                        ],
-                                        [
-                                            'attribute' => 'created',
-                                            'value' => function(\common\models\LeadFlightSegment $model) {
-                                                return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->created));
-                                            },
-                                            'format' => 'html',
-                                        ],
 
-                                        [
-                                            'attribute' => 'updated',
-                                            'value' => function(\common\models\LeadFlightSegment $model) {
-                                                return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->updated));
-                                            },
-                                            'format' => 'html',
-                                        ],*/
 
                                         'origin_label',
                                         'destination_label',
@@ -535,20 +605,21 @@ $this->params['breadcrumbs'][] = $this->title;
 
 
                             </div>
-                        </div>
+                        </div>*/
+                        ?>
                     <?php else: ?>
-                        <?php
+                        <?/*php
                             if(!Yii::$app->request->isPjax || Yii::$app->request->get('act') === 'start') {
                                 $this->registerJs('startTimer(10);');
                             } else {
                                 $this->registerJs('startTimer(30);');
-                            }
+                            }*/
                         ?>
                     <?php endif; ?>
 
                 </div>
                 <div class="col-md-6">
-                    <h3>Call status: <span class="badge badge-info" id="call_autoredial_status"><?=$callModel ? $callModel->getStatusName() : '-'?></span></h3>
+                    <?/*<h3>Call status: <span class="badge badge-info" id="call_autoredial_status"><?=$callModel ? $callModel->getStatusName() : '-'?></span></h3>*/?>
                     <?php if($callModel): ?>
                         <h1>Call info <?=$callModel->c_id?></h1>
 
@@ -646,16 +717,15 @@ $this->params['breadcrumbs'][] = $this->title;
                     <?php endif; ?>
                 </div>
             </div>
+        <?php else: ?>
+            <div class="alert alert-warning alert-dismissible" role="alert">
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <strong>Warning!</strong> Not found user profile for User (<?=$user->id?>)
+            </div>
         <?php endif; ?>
-
         <hr>
 
-
         <div class="row">
-            <div class="col-md-12">
-                <h3>Last leads:</h3>
-            </div>
-
             <?php if(!$checkShiftTime): ?>
                 <div class="col-md-4">
                     <div class="alert alert-warning alert-dismissible" role="alert">
@@ -678,7 +748,7 @@ $this->params['breadcrumbs'][] = $this->title;
             <?php endif; ?>
 
 
-            <?php if(!empty($accessLeadByFrequency) && $accessLeadByFrequency['access'] == false): ?>
+            <?php if(isset($accessLeadByFrequency['access']) && $accessLeadByFrequency['access'] == false): ?>
                 <div class="col-md-4">
                     <div class="alert alert-warning alert-dismissible" role="alert">
                         <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
@@ -686,6 +756,171 @@ $this->params['breadcrumbs'][] = $this->title;
                     </div>
                 </div>
             <?php endif; ?>
+
+            <?/*<div class="col-md-12">
+                <h3>Last leads:</h3>
+            </div>*/?>
+
+        </div>
+
+        <div class="col-md-12">
+            <h3>My Last calls:</h3>
+        </div>
+
+
+        <?= \yiister\gentelella\widgets\grid\GridView::widget([
+            'dataProvider' => $dataProviderCall,
+            //'filterModel' => false, //$searchModelCall,
+            //'tableOptions' => ['class' => 'table table-bordered table-condensed table-hover'],
+            'rowOptions' => function (\common\models\Call $model, $index, $widget, $grid) {
+                if ($model->c_call_status === \common\models\Call::CALL_STATUS_BUSY) {
+                    return ['class' => 'danger'];
+                } elseif ($model->c_call_status === \common\models\Call::CALL_STATUS_RINGING || $model->c_call_status === \common\models\Call::CALL_STATUS_QUEUE) {
+                    return ['class' => 'warning'];
+                } elseif ($model->c_call_status === \common\models\Call::CALL_STATUS_COMPLETED) {
+                    return ['class' => 'success'];
+                }
+            },
+            'columns' => [
+                //['class' => 'yii\grid\SerialColumn'],
+
+                //'s_is_deleted',
+
+                [
+                    'attribute' => 'c_id',
+                    'value' => function (\common\models\Call $model) {
+                        return $model->c_id;
+                    },
+                    'options' => ['style' => 'width: 100px']
+                ],
+
+                'c_is_new:boolean',
+                //'c_com_call_id',
+                //'c_call_sid',
+                //'c_account_sid',
+                //'c_call_type_id',
+
+                [
+                    'attribute' => 'c_call_type_id',
+                    'value' => function (\common\models\Call $model) {
+                        return $model->getCallTypeName();
+                    },
+                    'filter' => \common\models\Call::CALL_TYPE_LIST
+                ],
+
+                //'c_project_id',
+
+                [
+                    'attribute' => 'c_project_id',
+                    'value' => function (\common\models\Call $model) {
+                        return $model->cProject ? $model->cProject->name : '-';
+                    },
+                    'filter' => $projectList
+                ],
+
+
+                'c_from',
+                'c_to',
+
+                //'c_sip',
+                //'c_call_status',
+                [
+                    'attribute' => 'c_call_status',
+                    'value' => function (\common\models\Call $model) {
+                        return $model->c_call_status;
+                    },
+                    'filter' => \common\models\Call::CALL_STATUS_LIST
+                ],
+                //'c_lead_id',
+                [
+                    'attribute' => 'c_lead_id',
+                    'value' => function (\common\models\Call $model) {
+                        return  $model->c_lead_id ? Html::a($model->c_lead_id, ['lead/view', 'gid' => $model->cLead->gid], ['target' => '_blank', 'data-pjax' => 0]) : '-';
+                    },
+                    'format' => 'raw'
+                ],
+                //'c_api_version',
+                //'c_direction',
+                //'c_forwarded_from',
+                'c_caller_name',
+                //'c_parent_call_sid',
+                'c_call_duration',
+                //'c_sip_response_code',
+                //'c_recording_url:url',
+                [
+                    'attribute' => 'c_recording_url',
+                    'value' => function (\common\models\Call $model) {
+                        return  $model->c_recording_url ? '<audio controls="controls" style="width: 350px; height: 25px"><source src="'.$model->c_recording_url.'" type="audio/mpeg"> </audio>' : '-';
+                    },
+                    'format' => 'raw'
+                ],
+                //'c_recording_sid',
+                'c_recording_duration',
+                //'c_timestamp',
+                //'c_uri',
+                //'c_sequence_number',
+
+                //'c_created_user_id',
+
+                /*[
+                    'attribute' => 'c_created_user_id',
+                    'value' => function (\common\models\Call $model) {
+                        return  $model->cCreatedUser ? '<i class="fa fa-user"></i> ' . Html::encode($model->cCreatedUser->username) : $model->c_created_user_id;
+                    },
+                    'format' => 'raw'
+                ],*/
+
+                //'c_created_dt',
+
+                /*[
+                    'attribute' => 'c_updated_dt',
+                    'value' => function (\common\models\Call $model) {
+                        return $model->c_updated_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->c_updated_dt)) : '-';
+                    },
+                    'format' => 'raw'
+                ],*/
+
+                [
+                    'attribute' => 'c_created_dt',
+                    'value' => function (\common\models\Call $model) {
+                        return $model->c_created_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->c_created_dt)) : '-';
+                    },
+                    'format' => 'raw'
+                ],
+
+
+                //'c_updated_dt',
+
+                //'c_error_message',
+
+                //'c_is_deleted:boolean',
+                [   'class' => 'yii\grid\ActionColumn',
+                    'template' => '{view2}',
+                    'buttons' => [
+                        'view2' => function ($url, $model) {
+                            return Html::a('<i class="glyphicon glyphicon-search"></i>', $url, [
+                                'title' => 'View',
+                            ]);
+                        },
+                        /*'soft-delete' => function ($url, $model) {
+                            return Html::a('<i class="glyphicon glyphicon-remove-circle"></i>', $url, [
+                                'title' => 'Delete',
+                                'data' => [
+                                    'confirm' => 'Are you sure you want to delete this SMS?',
+                                    //'method' => 'post',
+                                ],
+                            ]);
+                        }*/
+                    ],
+                ],
+
+
+            ],
+        ]); ?>
+
+
+        <div class="col-md-12">
+            <h3>Pending leads:</h3>
         </div>
 
         <?php
@@ -886,6 +1121,16 @@ $this->params['breadcrumbs'][] = $this->title;
                 //'filter' => \common\models\Employee::getList()
             ],
 
+            [
+                'label' => 'Client time2',
+                'format' => 'raw',
+                'value' => function(\common\models\Lead $model) {
+                    return $model->l_client_time;
+                },
+                //'options' => ['style' => 'width:80px'],
+                //'filter' => \common\models\Employee::getList()
+            ],
+
 
             [
                 'header' => 'Project',
@@ -921,9 +1166,9 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
 
             [
-                'attribute' => 'l_call_rating',
+                'attribute' => 'l_pending_delay_dt',
                 'value' => function (\common\models\Lead $model) {
-                    return $model->l_call_rating;
+                    return $model->l_pending_delay_dt ? Yii::$app->formatter->asDatetime(strtotime($model->l_pending_delay_dt)) : '-';
                 },
             ],
 
@@ -942,9 +1187,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
         ];
 
-        ?>
-        <?php
-        echo \yii\grid\GridView::widget([
+        echo GridView::widget([
 
             'dataProvider' => $dataProvider,
             'filterModel' => $searchModel,
@@ -965,9 +1208,9 @@ $this->params['breadcrumbs'][] = $this->title;
 
         <?php Pjax::end(); ?>
 
-        <?php if($user->userProfile && $user->userProfile->up_auto_redial):?>
+        <?/*php if($user->userProfile && $user->userProfile->up_auto_redial):?>
             <?//=$this->registerJs('startTimer(10);');?>
-        <?php endif; ?>
+        <?php endif;*/ ?>
     </div>
 
 

@@ -55,7 +55,7 @@ use common\components\SearchService;
  * @property double $final_profit
  * @property double $tips
  * @property int $l_call_status_id
- * @property int $l_call_rating
+ * @property string $l_pending_delay_dt
  *
  * @property double $finalProfit
  * @property int $quotesCount
@@ -63,6 +63,7 @@ use common\components\SearchService;
  * @property int $quotesExpertCount
  * @property double $agentProcessingFee
  * @property double $agents_processing_fee
+ * @property string $l_client_time
  *
  * @property Call[] $calls
  * @property Email[] $emails
@@ -197,6 +198,7 @@ class Lead extends ActiveRecord
 
     public $finalProfit = 0;
     public $agentProcessingFee = 0.00;
+    public $l_client_time;
 
     /**
      * {@inheritdoc}
@@ -221,7 +223,7 @@ class Lead extends ActiveRecord
 
             [['trip_type', 'cabin'], 'required'],
             [['adults', 'children', 'infants', 'source_id'], 'required'], //'except' => self::SCENARIO_API],
-            [['client_id', 'employee_id', 'status', 'project_id', 'source_id', 'rating', 'l_grade', 'clone_id', 'bo_flight_id', 'l_call_status_id', 'l_call_rating'], 'integer'],
+            [['client_id', 'employee_id', 'status', 'project_id', 'source_id', 'rating', 'l_grade', 'clone_id', 'bo_flight_id', 'l_call_status_id'], 'integer'],
             [['adults', 'children', 'infants'], 'integer', 'max' => 9],
             [['adults'], 'integer', 'min' => 1],
             [['l_answered'], 'boolean'],
@@ -230,7 +232,7 @@ class Lead extends ActiveRecord
             [['uid', 'request_ip', 'offset_gmt', 'discount_id', 'description'], 'string', 'max' => 255],
             [['gid'], 'string', 'max' => 32],
             [['gid'], 'unique'],
-            [['created', 'updated', 'snooze_for', 'called_expert', 'additional_information'], 'safe'],
+            [['created', 'updated', 'snooze_for', 'called_expert', 'additional_information', 'l_pending_delay_dt'], 'safe'],
             [['uid'], 'string', 'max' => 255],
             [['trip_type'], 'string', 'max' => 2],
             [['cabin'], 'string', 'max' => 1],
@@ -271,7 +273,7 @@ class Lead extends ActiveRecord
             'origin_country' => 'Origin Country code',
             'destination_country' => 'Destination Country code',
             'l_call_status_id' => 'Call status',
-            'l_call_rating' => 'Call rating',
+            'l_pending_delay_dt' => 'Pending delay',
         ];
     }
 
@@ -2578,5 +2580,30 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
         return $count;
     }
 
+
+    /**
+     * @param int|null $user_id
+     * @return ActiveQuery
+     */
+    public static function getPendingQuery(int $user_id = null): ActiveQuery
+    {
+        $query = self::find();
+        $query->select(['*', 'l_client_time' => new Expression("TIME( CONVERT_TZ(NOW(), '+00:00', offset_gmt) )")]);
+
+        $query->andWhere(['status' => self::STATUS_PENDING]);
+        $query->andWhere(['OR', ['IS', 'l_pending_delay_dt', null], ['<=', 'l_pending_delay_dt', date('Y-m-d H:i:s')]]);
+        $query->andWhere(['OR', ['BETWEEN', new Expression('TIME(CONVERT_TZ(NOW(), \'+00:00\', offset_gmt))'), '09:00', '21:00'], ['>=', 'created', date('Y-m-d H:i:s', strtotime('-10 min'))]]);
+        $query->andWhere(['employee_id' => null]);
+
+        if($user_id) {
+            $subQuery = UserProjectParams::find()->select(['upp_project_id'])->where(['upp_user_id' => $user_id])->andWhere(['AND', ['IS NOT', 'upp_tw_phone_number', null], ['<>', 'upp_tw_phone_number', '']]);
+            $query->andWhere(['IN', 'project_id', $subQuery]);
+        }
+        //$query->andWhere(['request_ip' => ['217.26.162.22']]);
+
+        $query->orderBy(['id' => SORT_DESC]);
+
+        return $query;
+    }
 
 }

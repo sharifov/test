@@ -12,6 +12,7 @@ use common\models\UserProjectParams;
 use Yii;
 use common\models\Call;
 use common\models\search\CallSearch;
+use yii\db\Expression;
 use yii\filters\AccessControl;
 use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
@@ -300,7 +301,7 @@ class CallController extends FController
 
 
 
-        if(Yii::$app->request->get('act')) {
+        /*if(Yii::$app->request->get('act')) {
             $profile = $user->userProfile;
             if($profile) {
                 $profile->up_updated_dt = date('Y-m-d H:i:s');
@@ -314,33 +315,35 @@ class CallController extends FController
                     $profile->save();
                 }
             }
-        }
+        }*/
 
 
         //$callModel = null;
         $leadModel = null;
         $callData = [];
 
+
+        $query = Lead::getPendingQuery();
+        $allPendingLeadsCount = $query->count();
+
+        $query = Lead::getPendingQuery($user->id);
+        $myPendingLeadsCount = $query->count();
+
+
         $callModel = Call::find()->where(['c_call_status' => [Call::CALL_STATUS_RINGING, Call::CALL_STATUS_IN_PROGRESS]])->andWhere(['c_created_user_id' => Yii::$app->user->id])->orderBy(['c_id' => SORT_DESC])->limit(1)->one();
 
         //echo Call::find()->where(['c_call_status' => [Call::CALL_STATUS_RINGING, Call::CALL_STATUS_IN_PROGRESS]])->andWhere(['c_created_user_id' => Yii::$app->user->id])->orderBy(['c_id' => SORT_DESC])->limit(1)->createCommand()->getRawSql(); exit;
 
-        if(Yii::$app->request->post('act') === 'find') {
+        if(Yii::$app->request->get('act') === 'find') {
 
-            $query = Lead::find();
 
-            $subQuery = UserProjectParams::find()->select(['upp_project_id'])->where(['upp_user_id' => $user->id])->andWhere(['AND', ['IS NOT', 'upp_tw_phone_number', null], ['<>', 'upp_tw_phone_number', '']]);
 
-            $query->andWhere(['status' => Lead::STATUS_PENDING]);
-            $query->andWhere(['IN', 'project_id', $subQuery]);
-            $query->andWhere(['request_ip' => ['217.26.162.22']]);
-
-            $query->orderBy(['id' => SORT_DESC]);
+            $query = Lead::getPendingQuery($user->id);
             $query->limit(1);
 
             //echo $query->createCommand()->getRawSql(); exit;
 
-            $leadModel = $query->one();
+            //$leadModel = $query->one();
 
             if(!$callModel) {
                 $leadModel = $query->one();
@@ -390,9 +393,8 @@ class CallController extends FController
         $searchModel = new LeadSearch();
 
         $params = Yii::$app->request->queryParams;
-        $params2 = Yii::$app->request->post();
-
-        $params = array_merge($params, $params2);
+        //$params2 = Yii::$app->request->post();
+        //$params = array_merge($params, $params2);
 
         if(Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id)) {
             $isAgent = true;
@@ -405,13 +407,13 @@ class CallController extends FController
 
         if($isAgent) {
             $checkShiftTime = $user->checkShiftTime();
-            $userParams = $user->userParams;
+            /*$userParams = $user->userParams;
 
             if($userParams) {
                 if($userParams->up_inbox_show_limit_leads > 0) {
                     $params['LeadSearch']['limit'] = $userParams->up_inbox_show_limit_leads;
                 }
-            }
+            }*/
 
 
             /*if($checkShiftTime = !$user->checkShiftTime()) {
@@ -451,7 +453,7 @@ class CallController extends FController
             }
         }
 
-        $dataProviderSegments = null;
+        /*$dataProviderSegments = null;
 
         if($leadModel) {
             $searchModelSegments = new LeadFlightSegmentSearch();
@@ -461,12 +463,18 @@ class CallController extends FController
             $params['LeadFlightSegmentSearch']['lead_id'] = $leadModel ? $leadModel->id : 0;
             //}
             $dataProviderSegments = $searchModelSegments->search($params);
-        }
+        }*/
 
 
         //echo $callModel->c_id; exit;
 
 
+        $searchModelCall = new CallSearch();
+
+        $params = Yii::$app->request->queryParams;
+        $params['CallSearch']['c_created_user_id'] = Yii::$app->user->id;
+        $dataProviderCall = $searchModelCall->searchAgent($params);
+        $projectList = Project::getListByUser(Yii::$app->user->id);
 
 
         return $this->render('auto-redial', [
@@ -481,9 +489,16 @@ class CallController extends FController
             'leadModel' => $leadModel,
             'callModel' => $callModel,
             //'searchModelSegments' => $searchModelSegments,
-            'dataProviderSegments' => $dataProviderSegments,
+            //'dataProviderSegments' => $dataProviderSegments,
             'isActionFind' => $isActionFind,
-            'callData' => $callData
+            'callData' => $callData,
+            'myPendingLeadsCount' => $myPendingLeadsCount,
+            'allPendingLeadsCount' => $allPendingLeadsCount,
+
+            'searchModelCall' => $searchModelCall,
+            'dataProviderCall' => $dataProviderCall,
+            'projectList'       => $projectList,
+
             //'newLeadsCount' => $user->getCountNewLeadCurrentShift()
         ]);
 
