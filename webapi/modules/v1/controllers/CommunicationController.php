@@ -1056,17 +1056,23 @@ class CommunicationController extends ApiBaseController
                     $call = Call::find()->where(['c_call_sid' => $post['callData']['ParentCallSid']])->one();
                 }
 
+
                 if ($call) {
 
-
-                    $call->c_call_status = $post['callData']['CallStatus'] ?? '';
-
-                    if($call->c_call_status === Call::CALL_STATUS_NO_ANSWER ) {
+                    if($call->c_call_status === Call::CALL_STATUS_NO_ANSWER || $call->c_call_status === Call::CALL_STATUS_BUSY || $call->c_call_status === Call::CALL_STATUS_CANCELED || $call->c_call_status === Call::CALL_STATUS_FAILED) {
 
                         if ($call->c_lead_id) {
                             $lead = $call->cLead;
                             $lead->l_call_status_id = Lead::CALL_STATUS_CANCEL;
-                            $lead->save();
+                            if(!$lead->save()) {
+                                Yii::error('lead: '. $lead->id . ' ' . VarDumper::dumpAsString($lead->errors), 'API:CommunicationController:actionVoice:TYPE_VOIP:Lead:save');
+                            }
+                        }
+
+                    } else {
+
+                        if(isset($post['callData']['CallStatus']) && $post['callData']['CallStatus']) {
+                            $call->c_call_status = $post['callData']['CallStatus'];
                         }
 
                     }
