@@ -1042,18 +1042,34 @@ class CommunicationController extends ApiBaseController
         }
         else {
             if (isset($post['callData']['CallSid']) && $post['callData']['CallSid']) {
+
                 $call = Call::find()->where(['c_call_sid' => $post['callData']['CallSid']])->one();
+
+                if(isset($post['callData']['ParentCallSid']) && $post['callData']['ParentCallSid']) {
+                    $childCall = true;
+                } else {
+                    $childCall = false;
+                }
+
+
+                if(!$call && $childCall) {
+                    $call = Call::find()->where(['c_call_sid' => $post['callData']['ParentCallSid']])->one();
+                }
+
                 if ($call) {
 
                     $call->c_call_status = $post['callData']['CallStatus'] ?? '';
-                    $call->c_sequence_number = $post['callData']['SequenceNumber'] ?? 0;
 
-                    if (isset($post['callData']['CallDuration'])) {
-                        $call->c_call_duration = (int) $post['callData']['CallDuration'];
-                    }
+                    if(!$childCall) {
+                        $call->c_sequence_number = $post['callData']['SequenceNumber'] ?? 0;
 
-                    if (isset($post['call']['c_tw_price']) && $post['call']['c_tw_price']) {
-                        $call->c_price = abs((float) $post['call']['c_tw_price']);
+                        if (isset($post['callData']['CallDuration'])) {
+                            $call->c_call_duration = (int)$post['callData']['CallDuration'];
+                        }
+
+                        if (isset($post['call']['c_tw_price']) && $post['call']['c_tw_price']) {
+                            $call->c_price = abs((float)$post['call']['c_tw_price']);
+                        }
                     }
 
                     $call->c_updated_dt = date('Y-m-d H:i:s');
