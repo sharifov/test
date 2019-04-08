@@ -8,13 +8,6 @@
 \frontend\assets\WebPhoneAsset::register($this);
 ?>
 
-<div class="fabs2" style="display: none">
-    <a id="prime2" class="fab2"><i class="fa fa-phone"></i></a>
-</div>
-
-<div id="web-phone-widget">
-
-
 <style>
     .digit,
     .dig {
@@ -53,8 +46,13 @@
     }
 </style>
 
-    <?php if($token): ?>
+<div class="fabs2" style="<?=((isset($_COOKIE['web-phone-widget-close']) && $_COOKIE['web-phone-widget-close']) ? '' : 'display: none')?>">
+    <a id="prime2" class="fab2"><i class="fa fa-phone"></i></a>
+</div>
 
+<div id="web-phone-widget">
+
+    <?php if($token): ?>
 
         <div id="web-phone-token" style="display: none"><?=$token?></div>
             <table class="table" style="margin: 0">
@@ -720,9 +718,9 @@ $js = <<<JS
     });
     
     $('#btn-webphone-close').on('click', function() {
-        
         $('#web-phone-widget').slideUp('fast');
         $('.fabs2').show();
+        setCookie('web-phone-widget-close', 1, {expires: 3600 * 24, path: "/"});
         //$(this).find('i').addClass('fa-angle-double-up');
     });
     
@@ -730,6 +728,8 @@ $js = <<<JS
     $('#prime2').on('click', function() {
         $('#web-phone-widget').slideDown();
         $('.fabs2').hide();
+        //deleteCookie('web-phone-widget-close');
+        setCookie('web-phone-widget-close', '', {expires: -1, path: "/"});
     });
     
     $('.call-phone').on('click', function(e) {
@@ -770,7 +770,7 @@ $js = <<<JS
         webCall(phone_from, phone_to, project_id, lead_id, 'web-call');
     });
     
-    $('#web-phone-widget').css({left:'50%', 'margin-left':'-'+($('#web-phone-widget').width() / 2)+'px'}).slideDown();
+    $('#web-phone-widget').css({left:'50%', 'margin-left':'-'+($('#web-phone-widget').width() / 2)+'px'}); //.slideDown();
     
     //console.log(tw_configs);
     initDevice();
@@ -824,6 +824,21 @@ JS;
 
     if (Yii::$app->controller->module->id != 'user-management') {
         $this->registerJs($js, \yii\web\View::POS_READY);
+
+        $cookies = Yii::$app->request->cookies;
+
+        //\yii\helpers\VarDumper::dump($cookies, 10, true);
+        /*echo '<h1>+++++++++';
+        \yii\helpers\VarDumper::dump($_COOKIE['web-phone-widget-close'], 10, true);
+        echo '--------</h1>';*/
+
+
+        //if (($cookie = $cookies->get('web-phone-widget-close')) !== null) {
+            if(!isset($_COOKIE['web-phone-widget-close'])) {
+                $this->registerJs("$('#web-phone-widget').slideDown();", \yii\web\View::POS_READY);
+            }
+        //}
+
     }
 //}
 

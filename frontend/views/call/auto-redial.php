@@ -318,7 +318,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
                                 <?=$this->registerJs("webCall('". $callData['phone_from']."', '". $callData['phone_to']."', ". $callData['project_id'].", ". $callData['lead_id'].", 'auto-redial');");?>
                                 <?=$this->registerJs("startAutoTake('".\yii\helpers\Url::to(['/lead/auto-take', 'gid' => $leadModel->gid])."', '".$leadModel->id."');");?>
-                                <?=$this->registerJs('startTimer(20);');?>
+                                <?//=$this->registerJs('startTimer(20);');?>
                             <?php endif; ?>
 
                         <?php endif; ?>
@@ -646,10 +646,10 @@ $this->params['breadcrumbs'][] = $this->title;
                     <?php if($callModel): ?>
                         <h1>Call info <?=$callModel->c_id?></h1>
 
-                        <div class="countdown text-center badge badge-warning" style="font-size: 15px">
+                        <?/*<div class="countdown text-center badge badge-warning" style="font-size: 15px">
                             <i class="fa fa-clock-o"></i>
                             <span id="clock">00:<?=(time() - strtotime($callModel->c_created_dt))?></span>
-                        </div>
+                        </div>*/?>
 
                         <div class="col-md-6">
 

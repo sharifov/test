@@ -1546,6 +1546,8 @@ class LeadController extends FController
         }
 
 
+        Yii::info('user: '.$user->username.' ('.$user->id.'), lead: ' . $lead->id, 'info\ControllerLead:actionAutoTake');
+
 
 
         if((int) $lead->status === Lead::STATUS_PENDING) {
@@ -1553,12 +1555,12 @@ class LeadController extends FController
             if($isAgent) {
                 $isAccessNewLead = $user->accessTakeNewLead();
                 if (!$isAccessNewLead) {
-                    throw new ForbiddenHttpException('Access is denied (limit) - "Take lead"');
+                    throw new ForbiddenHttpException('ControllerLead:actionAutoTake: Access is denied (limit) - "Take lead"');
                 }
 
                 $isAccessNewLeadByFrequency = $user->accessTakeLeadByFrequencyMinutes();
                 if (!$isAccessNewLeadByFrequency['access']) {
-                    throw new ForbiddenHttpException('Access is denied (frequency) - "Take lead"');
+                    throw new ForbiddenHttpException('ControllerLead:actionAutoTake: Access is denied (frequency) - "Take lead"');
                 }
             }
 
@@ -1573,6 +1575,7 @@ class LeadController extends FController
 
         } else {
             Yii::$app->session->setFlash('warning', 'Error: Lead not in status Pending ('.$lead->id.')');
+            Yii::warning('Error: Lead not in status Pending - user: '.$user->username.' ('.$user->id.'), lead: ' . $lead->id, 'ControllerLead:actionAutoTake');
             return $this->redirect(Yii::$app->request->referrer);
         }
 
