@@ -1058,7 +1058,20 @@ class CommunicationController extends ApiBaseController
 
                 if ($call) {
 
+
                     $call->c_call_status = $post['callData']['CallStatus'] ?? '';
+
+                    if($call->c_call_status === Call::CALL_STATUS_NO_ANSWER ) {
+
+                        if ($call->c_lead_id) {
+                            $lead = $call->cLead;
+                            $lead->l_call_status_id = Lead::CALL_STATUS_CANCEL;
+                            $lead->save();
+                        }
+
+                    }
+
+
 
                     if(!$childCall) {
                         $call->c_sequence_number = $post['callData']['SequenceNumber'] ?? 0;

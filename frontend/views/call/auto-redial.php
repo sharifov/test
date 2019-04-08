@@ -64,49 +64,70 @@ $this->params['breadcrumbs'][] = $this->title;
 
 <script>
 
+    var takeTimerId = 0;
+
+    function openInNewTab(url, name) {
+        //var strWindowFeatures = "menubar=no,location=no,resizable=yes,scrollbars=yes,status=no";
+        var windowObjectReference = window.open(url, 'window' + name); //, strWindowFeatures);
+        windowObjectReference.focus();
+    }
+
+    function autoredialInit() {
+        console.info('autoredialInit()');
+        $.pjax.reload({container:'#pjax-auto-redial', 'scrollTo': false});
+    }
+
+    function startAutoTake(url, name) {
+        takeTimerId = setTimeout(function() { openInNewTab(url, name) }, 20000);
+        console.log('Create takeTimerId: ' + takeTimerId);
+    }
+
+    function endAutoTake() {
+        console.log('endAutoTake, current takeTimerId: ' + takeTimerId);
+        console.log('endAutoTake response: ' + clearTimeout(takeTimerId));
+    }
+
     function webCallUpdate(obj) {
         //console.log('--- webCallUpdate ---');
         console.info('webCallUpdate - 3');
         //status: "completed", duration: "1", snr: "3"
-        $('#call_autoredial_status').html(obj.status);
 
-        if(obj.status == 'completed') {
-            //stopCall(obj.duration); //updateCommunication();
-            autoredialInit();
-        } else if(obj.status == 'in-progress') {
-            autoredialInit();
-            //startCallTimer();
-            //$('#div-call-timer').timer('resume');
-        } else if(obj.status == 'initiated') {
-            //startCall();
-        } else if(obj.status == 'busy') {
-            //stopCall(0);
-            //updateCommunication();
-            autoredialInit();
-        } else if(obj.status == 'no-answer') {
-            //stopCall(0);
-            //updateCommunication();
-            autoredialInit();
+
+        if(obj.status !== undefined) {
+
+            //$('#call_autoredial_status').html(obj.status);
+
+            if (obj.status === 'completed') {
+                endAutoTake();
+                //stopCall(obj.duration); //updateCommunication();
+                autoredialInit();
+            } else if (obj.status === 'in-progress') {
+                autoredialInit();
+                //startCallTimer();
+                //$('#div-call-timer').timer('resume');
+            } else if (obj.status === 'initiated') {
+                endAutoTake();
+                //startCall();
+            } else if (obj.status === 'busy') {
+                endAutoTake();
+                //stopCall(0);
+                //updateCommunication();
+                autoredialInit();
+            } else if (obj.status === 'no-answer') {
+                //stopCall(0);
+                //updateCommunication();
+                endAutoTake();
+                autoredialInit();
+            }
         }
 
-        console.info('webCallUpdate - 4');
+        //console.info('webCallUpdate - 4');
 
         //$('.click_after_call_update').trigger('click');
     }
 
-    function openInNewTab(url, name) {
-        //var strWindowFeatures = "menubar=no,location=no,resizable=yes,scrollbars=yes,status=no";
 
-        var windowObjectReference = window.open(url, 'window' + name); //, strWindowFeatures);
-        windowObjectReference.focus();
 
-        //alert('Taked!!! ' +  url);
-    }
-
-    function autoredialInit() {
-        console.info('+++ autoredialInit +++');
-        $.pjax.reload({container:'#pjax-auto-redial', 'scrollTo': false});
-    }
 
     function startTimer(sec) {
         var seconds = new Date().getTime() + (1000 * sec);
@@ -131,7 +152,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 var project_id = $('#call-project-id').val();
                 var lead_id = $('#call-lead-id').val();*/
 
-                $.pjax.reload({container:'#pjax-auto-redial', data: 'act=show', type: 'POST', 'scrollTo': false});
+                //$.pjax.reload({container:'#pjax-auto-redial', data: 'act=show', type: 'POST', 'scrollTo': false});
 
 
                 //$('#web-phone-dial-modal').modal('hide');
@@ -299,7 +320,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                     <span id="clock">00:00</span>
                                 </div>
                                 <?=$this->registerJs("webCall('". $callData['phone_from']."', '". $callData['phone_to']."', ". $callData['project_id'].", ". $callData['lead_id'].", 'auto-redial');");?>
-                                <?=$this->registerJs("var timerId = setTimeout(function() { openInNewTab('".\yii\helpers\Url::to(['/lead/auto-take', 'gid' => $leadModel->gid])."', '".$leadModel->id."') }, 20000);");?>
+                                <?=$this->registerJs("startAutoTake('".\yii\helpers\Url::to(['/lead/auto-take', 'gid' => $leadModel->gid])."', '".$leadModel->id."');");?>
                                 <?=$this->registerJs('startTimer(20);');?>
                             <?php endif; ?>
 
