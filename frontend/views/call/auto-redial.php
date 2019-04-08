@@ -801,7 +801,7 @@ $this->params['breadcrumbs'][] = $this->title;
             //'filterModel' => false, //$searchModelCall,
             //'tableOptions' => ['class' => 'table table-bordered table-condensed table-hover'],
             'rowOptions' => function (\common\models\Call $model, $index, $widget, $grid) {
-                if ($model->c_call_status === \common\models\Call::CALL_STATUS_BUSY) {
+                if ($model->c_call_status === \common\models\Call::CALL_STATUS_BUSY || $model->c_call_status === \common\models\Call::CALL_STATUS_NO_ANSWER) {
                     return ['class' => 'danger'];
                 } elseif ($model->c_call_status === \common\models\Call::CALL_STATUS_RINGING || $model->c_call_status === \common\models\Call::CALL_STATUS_QUEUE) {
                     return ['class' => 'warning'];
@@ -1222,13 +1222,13 @@ $this->params['breadcrumbs'][] = $this->title;
             'columns' => $gridColumns,
 
             'rowOptions' => function (Lead $model) {
-                if ($model->status === Lead::STATUS_PROCESSING && Yii::$app->user->id == $model->employee_id) {
-                    return [
-                        'class' => 'highlighted'
-                    ];
+                if ($model->l_pending_delay_dt && time() < strtotime($model->l_pending_delay_dt)) {
+                    return ['class' => 'danger'];
                 }
 
-
+                if (!$model->l_client_time && (time() - strtotime($model->created)) > (10 * 60)) {
+                    return ['class' => 'danger'];
+                }
             }
 
         ]);
