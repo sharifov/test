@@ -106,7 +106,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 //startCallTimer();
                 //$('#div-call-timer').timer('resume');
             } else if (obj.status === 'initiated') {
-                endAutoTake();
+                //endAutoTake();
                 //startCall();
             } else if (obj.status === 'busy') {
                 endAutoTake();
@@ -121,7 +121,7 @@ $this->params['breadcrumbs'][] = $this->title;
             }
         }
 
-        //console.info('webCallUpdate - 4');
+        console.info('webCallUpdate - 4');
 
         //$('.click_after_call_update').trigger('click');
     }
