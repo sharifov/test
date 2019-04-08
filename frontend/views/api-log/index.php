@@ -76,7 +76,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'al_request_dt',
                 'value' => function (\common\models\ApiLog $model) {
-                    return $model->al_request_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->al_request_dt)) : '-';
+                    return $model->al_request_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->al_request_dt), 'php:Y-m-d [H:i:s]') : '-';
                 },
                 'format' => 'raw'
             ],
@@ -95,7 +95,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'al_response_dt',
                 'value' => function (\common\models\ApiLog $model) {
-                    return $model->al_response_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->al_response_dt)) : '-';
+                    return $model->al_response_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->al_response_dt), 'php:Y-m-d [H:i:s]') : '-';
                 },
                 'format' => 'raw'
             ],

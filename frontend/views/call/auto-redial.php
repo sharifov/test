@@ -954,14 +954,14 @@ $this->params['breadcrumbs'][] = $this->title;
         <?php
 
         $gridColumns = [
-            ['class' => 'yii\grid\SerialColumn'],
+            //['class' => 'yii\grid\SerialColumn'],
             [
                 'attribute' => 'id',
                 'label' => 'Lead ID',
                 'value' => function (\common\models\Lead $model) {
                     return $model->id;
                 },
-                'visible' => ! $isAgent,
+                //'visible' => ! $isAgent,
                 'options' => [
                     'style' => 'width:80px'
                 ]
@@ -1092,7 +1092,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     // return $model->leadFlightSegmentsCount ? Html::a($model->leadFlightSegmentsCount, ['lead-flight-segment/index', "LeadFlightSegmentSearch[lead_id]" => $model->id], ['target' => '_blank', 'data-pjax' => 0]) : '-' ;
                 },
                 'format' => 'raw',
-                'visible' => ! $isAgent,
+                //'visible' => ! $isAgent,
                 'contentOptions' => [
                     'class' => 'text-left'
                 ],
@@ -1107,7 +1107,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     return '<span title="adult"><i class="fa fa-male"></i> '. $model->adults .'</span> / <span title="child"><i class="fa fa-child"></i> ' . $model->children . '</span> / <span title="infant"><i class="fa fa-info"></i> ' . $model->infants.'</span>';
                 },
                 'format' => 'raw',
-                'visible' => ! $isAgent,
+                //'visible' => ! $isAgent,
                 'contentOptions' => [
                     'class' => 'text-center'
                 ],
