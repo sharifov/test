@@ -915,6 +915,18 @@ class CommunicationController extends ApiBaseController
                 }
 
 
+                /*if(isset($post['callData']['duration'])) {
+                    $call->c_call_duration = (int) $post['callData']['duration'];
+                }*/
+
+                if(isset($post['callData']['c_user_id']) && $post['callData']['c_user_id']) {
+                    $call->c_created_user_id = (int) $post['callData']['c_user_id'];
+                }
+
+                if(isset($post['callData']['lead_id']) && $post['callData']['lead_id']) {
+                    $call->c_lead_id = (int) $post['callData']['lead_id'];
+                }
+
                 //$call->c_call_status = $post['callData']['CallStatus'] ?? '';
                 //$call->c_sequence_number = $post['callData']['SequenceNumber'] ?? 0;
 
