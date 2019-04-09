@@ -522,7 +522,9 @@ class SiteController extends FController
             throw new ForbiddenHttpException();
         }
 
-        $model = Employee::findOne(Yii::$app->user->id);
+        /** @var Employee $model */
+        $model = Yii::$app->user->identity;
+
         if (!$model) {
             throw new NotFoundHttpException('The requested User does not exist.');
         }

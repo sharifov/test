@@ -8,6 +8,7 @@
 namespace frontend\widgets;
 
 use common\models\Call;
+use common\models\Employee;
 use common\models\UserCallStatus;
 
 /**
@@ -30,7 +31,9 @@ class CallBox extends \yii\bootstrap\Widget
         $user_id = \Yii::$app->user->id;
         //$newCount = 0; //\common\models\Notifications::findNewCount($user_id);
         //$model = \common\models\Notifications::findNew($user_id);
-        $userModel = \common\models\Employee::findOne($user_id);
+
+        /** @var Employee $userModel */
+        $userModel = \Yii::$app->user->identity;
         //$sipExist = $sipExist = ($userModel->userProfile->up_sip && strlen($userModel->userProfile->up_sip) > 2); // \common\models\UserProjectParams::find()->where(['upp_user_id' => $user_id])->andWhere(['AND', ['IS NOT', 'upp_tw_sip_id', null], ['!=', 'upp_tw_sip_id', '']])->one();
 
 

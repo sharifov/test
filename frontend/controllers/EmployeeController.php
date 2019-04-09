@@ -141,7 +141,7 @@ class EmployeeController extends FController
             if ($model->isNewRecord) {
                 $success = $model->save();
                 Yii::$app->response->format = Response::FORMAT_JSON;
-                $employee = Employee::findOne(['id' => $model->employee_id]);
+                $employee = Employee::findOne($model->employee_id);
                 return [
                     'body' => $this->renderAjax('partial/_aclList', [
                         'models' => $employee->employeeAcl,
@@ -296,7 +296,7 @@ class EmployeeController extends FController
 
         if ($id = Yii::$app->request->get('id')) {
 
-            $model = Employee::findOne(['id' => $id]);
+            $model = Employee::findOne($id);
 
             if (!$model) {
                 throw new NotFoundHttpException('The requested user does not exist.');
@@ -409,7 +409,7 @@ class EmployeeController extends FController
                         }
                     }*/
 
-                    //$model = Employee::findOne(['id' => $id]);
+
                     Yii::$app->getSession()->setFlash('success', 'User updated');
 
 

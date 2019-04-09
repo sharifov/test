@@ -13,6 +13,9 @@ use Yii;
  * @property string $up_telegram
  * @property int $up_telegram_enable
  * @property string $up_updated_dt
+ * @property boolean $up_auto_redial
+ * @property boolean $up_kpi_enable
+ * @property int $up_skill
  *
  * @property Employee $upUser
  */
@@ -27,6 +30,16 @@ class UserProfile extends \yii\db\ActiveRecord
         self::CALL_TYPE_OFF => 'Off',
         self::CALL_TYPE_SIP => 'SIP',
         self::CALL_TYPE_WEB => 'Web',
+    ];
+
+    public const SKILL_TYPE_JUNIOR = 1;
+    public const SKILL_TYPE_MIDDLE = 2;
+    public const SKILL_TYPE_SENIOR = 3;
+
+    public const SKILL_TYPE_LIST = [
+        self::SKILL_TYPE_JUNIOR => 'Junior',
+        self::SKILL_TYPE_MIDDLE => 'Middle',
+        self::SKILL_TYPE_SENIOR => 'Senior',
     ];
 
 
@@ -45,9 +58,9 @@ class UserProfile extends \yii\db\ActiveRecord
     {
         return [
             [['up_user_id'], 'required'],
-            [['up_user_id', 'up_call_type_id'], 'integer'],
+            [['up_user_id', 'up_call_type_id', 'up_skill'], 'integer'],
             [['up_user_id'], 'unique'],
-            [['up_telegram_enable'], 'boolean'],
+            [['up_telegram_enable', 'up_auto_redial', 'up_kpi_enable'], 'boolean'],
             [['up_updated_dt'], 'safe'],
             [['up_sip'], 'string', 'max' => 255],
             [['up_telegram'], 'string', 'max' => 20],
@@ -61,12 +74,15 @@ class UserProfile extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'up_user_id' => 'User ID',
-            'up_call_type_id' => 'Call Type',
-            'up_sip' => 'Sip',
-            'up_telegram' => 'Telegram ID',
+            'up_user_id'        => 'User ID',
+            'up_call_type_id'   => 'Call Type',
+            'up_sip'            => 'Sip',
+            'up_telegram'       => 'Telegram ID',
             'up_telegram_enable' => 'Telegram Enable',
-            'up_updated_dt' => 'Updated Dt',
+            'up_updated_dt'     => 'Updated Dt',
+            'up_auto_redial'    => 'Auto redial',
+            'up_kpi_enable'     => 'KPI enable',
+            'up_skill'          => 'Skill',
         ];
     }
 

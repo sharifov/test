@@ -54,6 +54,8 @@ use common\components\SearchService;
  * @property string $description
  * @property double $final_profit
  * @property double $tips
+ * @property int $l_call_status_id
+ * @property string $l_pending_delay_dt
  *
  * @property double $finalProfit
  * @property int $quotesCount
@@ -61,6 +63,7 @@ use common\components\SearchService;
  * @property int $quotesExpertCount
  * @property double $agentProcessingFee
  * @property double $agents_processing_fee
+ * @property string $l_client_time
  *
  * @property Call[] $calls
  * @property Email[] $emails
@@ -86,39 +89,41 @@ class Lead extends ActiveRecord
 
     public const AGENT_PROCESSING_FEE_PER_PAX = 25.0;
 
-    public CONST
-        TRIP_TYPE_ONE_WAY = 'OW',
-        TRIP_TYPE_ROUND_TRIP = 'RT',
-        TRIP_TYPE_MULTI_DESTINATION = 'MC';
-    public CONST TRIP_TYPE_LIST = [
-        self::TRIP_TYPE_ROUND_TRIP => 'Round Trip',
-        self::TRIP_TYPE_ONE_WAY => 'One Way',
-        self::TRIP_TYPE_MULTI_DESTINATION => 'Multidestination'
-    ];
-    public CONST
-        STATUS_PENDING = 1,
-        STATUS_PROCESSING = 2,
-        STATUS_REJECT = 4,
-        STATUS_FOLLOW_UP = 5,
-        STATUS_ON_HOLD = 8,
-        STATUS_SOLD = 10,
-        STATUS_TRASH = 11,
-        STATUS_BOOKED = 12,
-        STATUS_SNOOZE = 13;
 
-    public CONST STATUS_LIST = [
-        self::STATUS_PENDING => 'Pending',
-        self::STATUS_PROCESSING => 'Processing',
-        self::STATUS_REJECT => 'Reject',
-        self::STATUS_FOLLOW_UP => 'Follow Up',
-        self::STATUS_ON_HOLD => 'Hold On',
-        self::STATUS_SOLD => 'Sold',
-        self::STATUS_TRASH => 'Trash',
-        self::STATUS_BOOKED => 'Booked',
-        self::STATUS_SNOOZE => 'Snooze',
+    public const TRIP_TYPE_ONE_WAY           = 'OW';
+    public const TRIP_TYPE_ROUND_TRIP        = 'RT';
+    public const TRIP_TYPE_MULTI_DESTINATION = 'MC';
+
+    public const TRIP_TYPE_LIST = [
+        self::TRIP_TYPE_ROUND_TRIP          => 'Round Trip',
+        self::TRIP_TYPE_ONE_WAY             => 'One Way',
+        self::TRIP_TYPE_MULTI_DESTINATION   => 'Multi destination'
     ];
 
-    public CONST CLONE_REASONS = [
+
+    public const STATUS_PENDING     = 1;
+    public const STATUS_PROCESSING  = 2;
+    public const STATUS_REJECT      = 4;
+    public const STATUS_FOLLOW_UP   = 5;
+    public const STATUS_ON_HOLD     = 8;
+    public const STATUS_SOLD        = 10;
+    public const STATUS_TRASH       = 11;
+    public const STATUS_BOOKED      = 12;
+    public const STATUS_SNOOZE      = 13;
+
+    public const STATUS_LIST = [
+        self::STATUS_PENDING        => 'Pending',
+        self::STATUS_PROCESSING     => 'Processing',
+        self::STATUS_REJECT         => 'Reject',
+        self::STATUS_FOLLOW_UP      => 'Follow Up',
+        self::STATUS_ON_HOLD        => 'Hold On',
+        self::STATUS_SOLD           => 'Sold',
+        self::STATUS_TRASH          => 'Trash',
+        self::STATUS_BOOKED         => 'Booked',
+        self::STATUS_SNOOZE         => 'Snooze',
+    ];
+
+    public const CLONE_REASONS = [
         1 => 'Group travel',
         2 => 'Alternative credit card',
         3 => 'Different flight',
@@ -126,44 +131,63 @@ class Lead extends ActiveRecord
         0 => 'Other',
     ];
 
-    public CONST STATUS_MULTIPLE_UPDATE_LIST = [
-        self::STATUS_FOLLOW_UP => self::STATUS_LIST[self::STATUS_FOLLOW_UP],
-        self::STATUS_ON_HOLD => self::STATUS_LIST[self::STATUS_ON_HOLD],
-        self::STATUS_PROCESSING => self::STATUS_LIST[self::STATUS_PROCESSING],
-        self::STATUS_TRASH => self::STATUS_LIST[self::STATUS_TRASH],
-        self::STATUS_BOOKED => self::STATUS_LIST[self::STATUS_BOOKED],
-        self::STATUS_SNOOZE => self::STATUS_LIST[self::STATUS_SNOOZE],
+    public const STATUS_MULTIPLE_UPDATE_LIST = [
+        self::STATUS_FOLLOW_UP      => self::STATUS_LIST[self::STATUS_FOLLOW_UP],
+        self::STATUS_ON_HOLD        => self::STATUS_LIST[self::STATUS_ON_HOLD],
+        self::STATUS_PROCESSING     => self::STATUS_LIST[self::STATUS_PROCESSING],
+        self::STATUS_TRASH          => self::STATUS_LIST[self::STATUS_TRASH],
+        self::STATUS_BOOKED         => self::STATUS_LIST[self::STATUS_BOOKED],
+        self::STATUS_SNOOZE         => self::STATUS_LIST[self::STATUS_SNOOZE],
     ];
 
-    public CONST STATUS_CLASS_LIST = [
-        self::STATUS_PENDING => 'll-pending',
-        self::STATUS_PROCESSING => 'll-processing',
-        self::STATUS_FOLLOW_UP => 'll-follow_up',
-        self::STATUS_ON_HOLD => 'll-on_hold',
-        self::STATUS_SOLD => 'll-sold',
-        self::STATUS_TRASH => 'll-trash',
-        self::STATUS_BOOKED => 'll-booked',
-        self::STATUS_SNOOZE => 'll-snooze',
+    public const STATUS_CLASS_LIST = [
+        self::STATUS_PENDING        => 'll-pending',
+        self::STATUS_PROCESSING     => 'll-processing',
+        self::STATUS_FOLLOW_UP      => 'll-follow_up',
+        self::STATUS_ON_HOLD        => 'll-on_hold',
+        self::STATUS_SOLD           => 'll-sold',
+        self::STATUS_TRASH          => 'll-trash',
+        self::STATUS_BOOKED         => 'll-booked',
+        self::STATUS_SNOOZE         => 'll-snooze',
     ];
-    public CONST
-        CABIN_ECONOMY = 'E',
-        CABIN_BUSINESS = 'B',
-        CABIN_FIRST = 'F',
-        CABIN_PREMIUM = 'P';
-    public CONST CABIN_LIST = [
-        self::CABIN_ECONOMY => 'Economy',
-        self::CABIN_PREMIUM => 'Premium eco',
-        self::CABIN_BUSINESS => 'Business',
-        self::CABIN_FIRST => 'First',
+
+
+    public const CABIN_ECONOMY      = 'E';
+    public const CABIN_BUSINESS     = 'B';
+    public const CABIN_FIRST        = 'F';
+    public const CABIN_PREMIUM      = 'P';
+
+    public const CABIN_LIST = [
+        self::CABIN_ECONOMY     => 'Economy',
+        self::CABIN_PREMIUM     => 'Premium eco',
+        self::CABIN_BUSINESS    => 'Business',
+        self::CABIN_FIRST       => 'First',
     ];
-    public CONST
+
+    public const
         DIV_GRID_WITH_OUT_EMAIL = 1,
         DIV_GRID_WITH_EMAIL = 2,
         DIV_GRID_SEND_QUOTES = 3,
         DIV_GRID_IN_SNOOZE = 4;
 
-    public CONST SCENARIO_API = 'scenario_api';
-    public CONST SCENARIO_MULTIPLE_UPDATE = 'scenario_multiple_update';
+    public const CALL_STATUS_NONE       = 0;
+    public const CALL_STATUS_READY      = 1;
+    public const CALL_STATUS_PROCESS    = 2;
+    public const CALL_STATUS_CANCEL     = 3;
+    public const CALL_STATUS_DONE       = 4;
+
+    public const CALL_STATUS_LIST = [
+        self::CALL_STATUS_NONE      => 'None',
+        self::CALL_STATUS_READY     => 'Ready',
+        self::CALL_STATUS_PROCESS   => 'Process',
+        self::CALL_STATUS_CANCEL    => 'Cancel',
+        self::CALL_STATUS_DONE      => 'Done',
+    ];
+
+
+
+    public const SCENARIO_API = 'scenario_api';
+    public const SCENARIO_MULTIPLE_UPDATE = 'scenario_multiple_update';
 
     public $additionalInformationForm;
     public $status_description;
@@ -174,6 +198,7 @@ class Lead extends ActiveRecord
 
     public $finalProfit = 0;
     public $agentProcessingFee = 0.00;
+    public $l_client_time;
 
     /**
      * {@inheritdoc}
@@ -198,7 +223,7 @@ class Lead extends ActiveRecord
 
             [['trip_type', 'cabin'], 'required'],
             [['adults', 'children', 'infants', 'source_id'], 'required'], //'except' => self::SCENARIO_API],
-            [['client_id', 'employee_id', 'status', 'project_id', 'source_id', 'rating', 'l_grade', 'clone_id', 'bo_flight_id'], 'integer'],
+            [['client_id', 'employee_id', 'status', 'project_id', 'source_id', 'rating', 'l_grade', 'clone_id', 'bo_flight_id', 'l_call_status_id'], 'integer'],
             [['adults', 'children', 'infants'], 'integer', 'max' => 9],
             [['adults'], 'integer', 'min' => 1],
             [['l_answered'], 'boolean'],
@@ -207,7 +232,7 @@ class Lead extends ActiveRecord
             [['uid', 'request_ip', 'offset_gmt', 'discount_id', 'description'], 'string', 'max' => 255],
             [['gid'], 'string', 'max' => 32],
             [['gid'], 'unique'],
-            [['created', 'updated', 'snooze_for', 'called_expert', 'additional_information'], 'safe'],
+            [['created', 'updated', 'snooze_for', 'called_expert', 'additional_information', 'l_pending_delay_dt'], 'safe'],
             [['uid'], 'string', 'max' => 255],
             [['trip_type'], 'string', 'max' => 2],
             [['cabin'], 'string', 'max' => 1],
@@ -246,7 +271,9 @@ class Lead extends ActiveRecord
             'bo_flight_id' => '(BO) Flight ID',
             'agents_processing_fee' => 'Agents Processing Fee',
             'origin_country' => 'Origin Country code',
-            'destination_country' => 'Destination Country code'
+            'destination_country' => 'Destination Country code',
+            'l_call_status_id' => 'Call status',
+            'l_pending_delay_dt' => 'Pending delay',
         ];
     }
 
@@ -803,6 +830,7 @@ class Lead extends ActiveRecord
         $out = ['error' => false, 'data' => []];
 
         if (empty($this->offset_gmt) && !empty($this->request_ip)) {
+
             $ip = $this->request_ip; //'217.26.162.22';
             $key = Yii::$app->params['ipinfodb_key'] ?? '';
             $url = 'http://api.ipinfodb.com/v3/ip-city/?format=json&key=' . $key . '&ip=' . $ip;
@@ -840,6 +868,45 @@ class Lead extends ActiveRecord
 
             } catch (\Throwable $throwable) {
                 $out['error'] = $throwable->getMessage();
+
+                if(!$this->offset_gmt && $this->leadFlightSegments) {
+                    $firstSegment = $this->leadFlightSegments[0];
+                    $airport = Airport::findIdentity($firstSegment->origin);
+                    if ($airport && $airport->dst) {
+                        $offset = $airport->dst;
+                        if(is_numeric($offset)) {
+
+                            $offsetStr = null;
+
+                            if($offset > 0) {
+                                if($offset < 10) {
+                                    $offsetStr = '+0'.$offset.':00';
+                                } else {
+                                    $offsetStr = '+'.$offset.':00';
+                                }
+                            }
+
+                            if($offset < 0) {
+                                if($offset > -10) {
+                                    $offsetStr = '-0'.$offset.':00';
+                                } else {
+                                    $offsetStr = '-'.$offset.':00';
+                                }
+                            }
+
+                            if($offset == 0) {
+                                $offsetStr = '-00:00';
+                            }
+
+                            if($offsetStr) {
+                                $this->offset_gmt = $offsetStr;
+                                self::updateAll(['offset_gmt' => $this->offset_gmt], ['id' => $this->id]);
+                            }
+
+                        }
+
+                    }
+                }
             }
         }
 
@@ -2553,5 +2620,64 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
         return $count;
     }
 
+
+    /**
+     * @param int|null $user_id
+     * @return ActiveQuery
+     */
+    public static function getPendingQuery(int $user_id = null): ActiveQuery
+    {
+        $query = self::find();
+        $query->select(['*', 'l_client_time' => new Expression("TIME( CONVERT_TZ(NOW(), '+00:00', offset_gmt) )")]);
+
+        $query->andWhere(['status' => self::STATUS_PENDING]);
+        $query->andWhere(['OR', ['IS', 'l_pending_delay_dt', null], ['<=', 'l_pending_delay_dt', date('Y-m-d H:i:s')]]);
+        $query->andWhere(['OR', ['BETWEEN', new Expression('TIME(CONVERT_TZ(NOW(), \'+00:00\', offset_gmt))'), '09:00', '21:00'], ['>=', 'created', date('Y-m-d H:i:s', strtotime('-10 min'))]]);
+        $query->andWhere(['employee_id' => null]);
+
+        if($user_id) {
+            $subQuery = UserProjectParams::find()->select(['upp_project_id'])->where(['upp_user_id' => $user_id])->andWhere(['AND', ['IS NOT', 'upp_tw_phone_number', null], ['<>', 'upp_tw_phone_number', '']]);
+            $query->andWhere(['IN', 'project_id', $subQuery]);
+        }
+        //$query->andWhere(['request_ip' => ['217.26.162.22']]);
+
+        $query->orderBy(['id' => SORT_DESC]);
+
+        return $query;
+    }
+
+    /**
+     * @return int
+     */
+    public function getDelayPendingTime(): int
+    {
+        $min = 0;
+
+        if($this->created) {
+            $diffSeconds = time() - strtotime($this->created);
+        } else {
+            $diffSeconds = 0;
+        }
+
+        $hour = 60;
+
+        $diffMin = ceil($diffSeconds / $hour);
+
+        if($diffMin < $hour) {
+            $min = 10;
+        } elseif($diffMin < ($hour * 4)) {
+            $min = 30;
+        } elseif($diffMin < ($hour * 72)) {
+            $min = 180;
+        } elseif($diffMin < ($hour * 192)) {
+            $min = 180;
+        } /*else {
+            $min = 120;
+        }*/
+
+        // 120 h - 192 h
+
+        return $min;
+    }
 
 }

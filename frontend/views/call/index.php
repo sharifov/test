@@ -32,15 +32,15 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
-        'tableOptions' => ['class' => 'table table-bordered table-condensed table-hover'],
+        //'tableOptions' => ['class' => 'table table-bordered table-condensed table-hover'],
         'rowOptions' => function (\common\models\Call $model, $index, $widget, $grid) {
             if($model->c_call_type_id == \common\models\Call::CALL_TYPE_OUT) {
-                if ($model->c_call_status === \common\models\Call::CALL_STATUS_BUSY) {
+                if ($model->c_call_status === \common\models\Call::CALL_STATUS_BUSY || $model->c_call_status === \common\models\Call::CALL_STATUS_NO_ANSWER) {
                     return ['class' => 'danger'];
                 } elseif ($model->c_call_status === \common\models\Call::CALL_STATUS_RINGING || $model->c_call_status === \common\models\Call::CALL_STATUS_QUEUE) {
                     return ['class' => 'warning'];
                 } elseif ($model->c_call_status === \common\models\Call::CALL_STATUS_COMPLETED) {
-                    return ['class' => 'success'];
+                   // return ['class' => 'success'];
                 }
             }
         },
@@ -68,8 +68,42 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$
                     },
                 ],
             ],
-            'c_is_new:boolean',
-            'c_com_call_id',
+            [
+                'attribute' => 'c_created_user_id',
+                'value' => function (\common\models\Call $model) {
+                    return  $model->cCreatedUser ? '<i class="fa fa-user"></i> ' . Html::encode($model->cCreatedUser->username) : $model->c_created_user_id;
+                },
+                'filter' => $userList,
+                'format' => 'raw'
+            ],
+
+            [
+                'attribute' => 'c_created_dt',
+                'value' => function (\common\models\Call $model) {
+                    return $model->c_created_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->c_created_dt)) : '-';
+                },
+                'format' => 'raw'
+            ],
+
+            [
+                'attribute' => 'c_recording_url',
+                'value' => function (\common\models\Call $model) {
+                    return  $model->c_recording_url ? '<audio controls="controls" style="width: 350px; height: 25px"><source src="'.$model->c_recording_url.'" type="audio/mpeg"> </audio>' : '-';
+                },
+                'format' => 'raw'
+            ],
+            'c_recording_duration',
+
+            /*[
+                'label' => 'Record Link',
+                'value' => function (\common\models\Call $model) {
+                    return  $model->c_recording_url ? Html::a('Link', $model->c_recording_url, ['target' => '_blank']) : '-';
+                },
+                'format' => 'raw'
+            ],*/
+
+            //'c_is_new:boolean',
+            //'c_com_call_id',
             'c_call_sid',
             //'c_account_sid',
 
@@ -101,13 +135,14 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$
             ],
             'c_from',
             'c_to',
-            'c_sip',
+            // 'c_sip',
             //'c_call_status',
             [
                 'attribute' => 'c_call_status',
                 'value' => function (\common\models\Call $model) {
-                    return $model->c_call_status;
+                    return '<span class="badge badge-info">'.$model->getStatusName().'</span>';
                 },
+                'format' => 'raw',
                 'filter' => \common\models\Call::CALL_STATUS_LIST
             ],
 
@@ -127,55 +162,30 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$
             ],
             //'c_sip_response_code',
             //'c_recording_url:url',
-            [
-                'attribute' => 'c_recording_url',
-                'value' => function (\common\models\Call $model) {
-                    return  $model->c_recording_url ? '<audio controls="controls" style="width: 350px; height: 25px"><source src="'.$model->c_recording_url.'" type="audio/mpeg"> </audio>' : '-';
-                },
-                'format' => 'raw'
-            ],
 
-            [
-                'label' => 'Record Link',
-                'value' => function (\common\models\Call $model) {
-                    return  $model->c_recording_url ? Html::a('Link', $model->c_recording_url, ['target' => '_blank']) : '-';
-                },
-                'format' => 'raw'
-            ],
+
+
             //'c_recording_sid',
-            'c_recording_duration',
+
             //'c_timestamp',
             //'c_uri',
             //'c_sequence_number',
 
             //'c_created_user_id',
 
-            [
-                'attribute' => 'c_created_user_id',
-                'value' => function (\common\models\Call $model) {
-                    return  $model->cCreatedUser ? '<i class="fa fa-user"></i> ' . Html::encode($model->cCreatedUser->username) : $model->c_created_user_id;
-                },
-                'filter' => $userList,
-                'format' => 'raw'
-            ],
+
 
             //'c_created_dt',
 
-            [
+            /*[
                 'attribute' => 'c_updated_dt',
                 'value' => function (\common\models\Call $model) {
                     return $model->c_updated_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->c_updated_dt)) : '-';
                 },
                 'format' => 'raw'
-            ],
+            ],*/
 
-            [
-                'attribute' => 'c_created_dt',
-                'value' => function (\common\models\Call $model) {
-                    return $model->c_created_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->c_created_dt)) : '-';
-                },
-                'format' => 'raw'
-            ],
+
 
 
             //'c_updated_dt',
