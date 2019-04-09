@@ -830,6 +830,7 @@ class Lead extends ActiveRecord
         $out = ['error' => false, 'data' => []];
 
         if (empty($this->offset_gmt) && !empty($this->request_ip)) {
+
             $ip = $this->request_ip; //'217.26.162.22';
             $key = Yii::$app->params['ipinfodb_key'] ?? '';
             $url = 'http://api.ipinfodb.com/v3/ip-city/?format=json&key=' . $key . '&ip=' . $ip;
@@ -867,6 +868,45 @@ class Lead extends ActiveRecord
 
             } catch (\Throwable $throwable) {
                 $out['error'] = $throwable->getMessage();
+
+                if(!$this->offset_gmt && $this->leadFlightSegments) {
+                    $firstSegment = $this->leadFlightSegments[0];
+                    $airport = Airport::findIdentity($firstSegment->origin);
+                    if ($airport && $airport->dst) {
+                        $offset = $airport->dst;
+                        if(is_numeric($offset)) {
+
+                            $offsetStr = null;
+
+                            if($offset > 0) {
+                                if($offset < 10) {
+                                    $offsetStr = '+0'.$offset.':00';
+                                } else {
+                                    $offsetStr = '+'.$offset.':00';
+                                }
+                            }
+
+                            if($offset < 0) {
+                                if($offset > -10) {
+                                    $offsetStr = '-0'.$offset.':00';
+                                } else {
+                                    $offsetStr = '-'.$offset.':00';
+                                }
+                            }
+
+                            if($offset == 0) {
+                                $offsetStr = '-00:00';
+                            }
+
+                            if($offsetStr) {
+                                $this->offset_gmt = $offsetStr;
+                                self::updateAll(['offset_gmt' => $this->offset_gmt], ['id' => $this->id]);
+                            }
+
+                        }
+
+                    }
+                }
             }
         }
 
