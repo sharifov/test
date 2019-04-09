@@ -667,7 +667,7 @@ $this->params['breadcrumbs'][] = $this->title;
             <?php endif; ?>
         </div>
 
-        <h3>My Last calls:</h3>
+        <h3>Last 10 Outgoing calls:</h3>
 
         <?= GridView::widget([
             'dataProvider' => $dataProviderCall,
@@ -676,11 +676,11 @@ $this->params['breadcrumbs'][] = $this->title;
             'rowOptions' => function (\common\models\Call $model, $index, $widget, $grid) {
                 if ($model->c_call_status === \common\models\Call::CALL_STATUS_BUSY || $model->c_call_status === \common\models\Call::CALL_STATUS_NO_ANSWER) {
                     return ['class' => 'danger'];
-                } elseif ($model->c_call_status === \common\models\Call::CALL_STATUS_RINGING || $model->c_call_status === \common\models\Call::CALL_STATUS_QUEUE) {
+                } elseif ($model->c_call_status === \common\models\Call::CALL_STATUS_RINGING || $model->c_call_status === \common\models\Call::CALL_STATUS_QUEUE ) {
                     return ['class' => 'warning'];
-                } elseif ($model->c_call_status === \common\models\Call::CALL_STATUS_COMPLETED) {
+                } /*elseif ($model->c_call_status === \common\models\Call::CALL_STATUS_COMPLETED) {
                     return ['class' => 'success'];
-                }
+                }*/
             },
             'columns' => [
                 //['class' => 'yii\grid\SerialColumn'],
@@ -692,30 +692,22 @@ $this->params['breadcrumbs'][] = $this->title;
                     'options' => ['style' => 'width: 100px']
                 ],
 
-                'c_is_new:boolean',
+                //'c_is_new:boolean',
                 //'c_call_sid',
-                [
+                /*[
                     'attribute' => 'c_call_type_id',
                     'value' => function (\common\models\Call $model) {
                         return $model->getCallTypeName();
                     },
                     'filter' => \common\models\Call::CALL_TYPE_LIST
-                ],
+                ],*/
                 [
                     'attribute' => 'c_project_id',
                     'value' => function (\common\models\Call $model) {
-                        return $model->cProject ? $model->cProject->name : '-';
+                        return $model->cProject ? '<span class="badge badge-info">'.Html::encode($model->cProject->name).'</span>' : '-';
                     },
+                    'format' => 'raw',
                     'filter' => $projectList
-                ],
-                'c_from',
-                'c_to',
-                [
-                    'attribute' => 'c_call_status',
-                    'value' => function (\common\models\Call $model) {
-                        return $model->c_call_status;
-                    },
-                    'filter' => \common\models\Call::CALL_STATUS_LIST
                 ],
                 [
                     'attribute' => 'c_lead_id',
@@ -724,7 +716,17 @@ $this->params['breadcrumbs'][] = $this->title;
                     },
                     'format' => 'raw'
                 ],
-                'c_caller_name',
+                'c_from',
+                'c_to',
+                [
+                    'attribute' => 'c_call_status',
+                    'value' => function (\common\models\Call $model) {
+                        return $model->getStatusName();
+                    },
+                    'filter' => \common\models\Call::CALL_STATUS_LIST
+                ],
+
+                //'c_caller_name',
                 'c_call_duration',
                 [
                     'attribute' => 'c_recording_url',

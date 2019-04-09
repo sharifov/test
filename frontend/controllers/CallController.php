@@ -480,7 +480,8 @@ class CallController extends FController
         $searchModelCall = new CallSearch();
 
         $params = Yii::$app->request->queryParams;
-        $params['CallSearch']['c_created_user_id'] = Yii::$app->user->id;
+        //$params['CallSearch']['c_created_user_id'] = Yii::$app->user->id;
+        $params['CallSearch']['c_call_type_id'] = Call::CALL_TYPE_OUT;
         $params['CallSearch']['limit'] = 10;
 
         $dataProviderCall = $searchModelCall->searchAgent($params);
