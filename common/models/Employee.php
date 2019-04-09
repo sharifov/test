@@ -1258,10 +1258,13 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     {
         $isFree = true;
         $call = Call::find()->where(['c_created_user_id' => $this->id])->orderBy(['c_id' => SORT_DESC])->limit(1)->one();
-        if($call) {
-            if(in_array($call->c_call_type_id, [Call::CALL_STATUS_QUEUE, Call::CALL_STATUS_RINGING, Call::CALL_STATUS_IN_PROGRESS])) {
+
+        $callExist = Call::find()->where(['c_created_user_id' => $this->id, 'c_call_type_id' => [Call::CALL_STATUS_QUEUE, Call::CALL_STATUS_RINGING, Call::CALL_STATUS_IN_PROGRESS]])->limit(1)->exists();
+
+        if($callExist) {
+            //if(in_array($call->c_call_type_id, [Call::CALL_STATUS_QUEUE, Call::CALL_STATUS_RINGING, Call::CALL_STATUS_IN_PROGRESS])) {
                 $isFree = false;
-            }
+            //}
         }
         return $isFree;
     }
