@@ -9,6 +9,8 @@ use common\models\Call;
 
 /**
  * CallSearch represents the model behind the search form of `common\models\Call`.
+ *
+ * @property $limit int
  */
 class CallSearch extends Call
 {
@@ -24,7 +26,7 @@ class CallSearch extends Call
     public function rules()
     {
         return [
-            [['c_id', 'c_call_type_id', 'c_lead_id', 'c_created_user_id', 'c_com_call_id', 'c_project_id', 'c_is_new', 'c_is_deleted', 'supervision_id'], 'integer'],
+            [['c_id', 'c_call_type_id', 'c_lead_id', 'c_created_user_id', 'c_com_call_id', 'c_project_id', 'c_is_new', 'c_is_deleted', 'supervision_id', 'limit'], 'integer'],
             [['c_call_sid', 'c_account_sid', 'c_from', 'c_to', 'c_sip', 'c_call_status', 'c_api_version', 'c_direction', 'c_forwarded_from', 'c_caller_name', 'c_parent_call_sid', 'c_call_duration', 'c_sip_response_code', 'c_recording_url', 'c_recording_sid', 'c_recording_duration',
                 'c_timestamp', 'c_uri', 'c_sequence_number', 'c_created_dt', 'c_updated_dt', 'c_error_message', 'c_price', 'statuses', 'limit'], 'safe'],
         ];
@@ -131,10 +133,13 @@ class CallSearch extends Call
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
             'sort'=> ['defaultOrder' => ['c_id' => SORT_DESC]],
-            'pagination' => [
-                'pageSize' => 30,
-            ],
+            'pagination' => $this->limit > 0 ? false : ['pageSize' => 30],
         ]);
+
+
+        if($this->limit > 0) {
+            $query->limit($this->limit);
+        }
 
         $this->load($params);
 

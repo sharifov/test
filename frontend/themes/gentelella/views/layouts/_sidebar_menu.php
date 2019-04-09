@@ -46,18 +46,25 @@ $isQA = Yii::$app->authManager->getAssignment('qa', Yii::$app->user->id);
 
         //$menuItems[] = ["label" => '<i class="fa fa-home"></i><span>'.Yii::t('menu', 'Home').'</span><small class="label-success label pull-right">new</small>', "url" => "/"];
 
-        if(!$isQA) {
-            $menuItems[] = ['label' => 'Create new Lead', 'url' => ['lead/create'], 'icon' => 'plus'];
-            if($isAdmin) {
-                $menuItems[] = ['label' => 'Auto redial', 'url' => ['call/auto-redial'], 'icon' => 'phone'];
-            }
-        }
 
-        $menuItems[] = ['label' => 'Dashboard', 'url' => ['/'], 'icon' => 'area-chart'];
 
         if (Yii::$app->user->isGuest) {
             $menuItems[] = ['label' => 'Login', 'url' => ['/site/login']];
         } else {
+
+            /** @var \common\models\Employee $userModel */
+            $userModel = Yii::$app->user->identity;
+
+            if(!$isQA) {
+                $menuItems[] = ['label' => 'Create new Lead', 'url' => ['lead/create'], 'icon' => 'plus'];
+                //if($isAdmin) {
+                if($userModel->userProfile && $userModel->userProfile->up_call_type_id != \common\models\UserProfile::CALL_TYPE_OFF) {
+                    $menuItems[] = ['label' => 'Auto redial', 'url' => ['/call/auto-redial'], 'icon' => 'tty'];
+                }
+                //}
+            }
+
+            $menuItems[] = ['label' => 'Dashboard', 'url' => ['/'], 'icon' => 'area-chart'];
 
 
             if(!$isQA) {
@@ -82,8 +89,7 @@ $isQA = Yii::$app->authManager->getAssignment('qa', Yii::$app->user->id);
             //}
 
 
-            /** @var \common\models\Employee $userModel */
-            $userModel = Yii::$app->user->identity;
+
             //$sipExist = ($userModel->userProfile->up_sip && strlen($userModel->userProfile->up_sip) > 2);
             // //\common\models\UserProjectParams::find()->where(['upp_user_id' => Yii::$app->user->id])->andWhere(['AND', ['IS NOT', 'upp_tw_sip_id', null], ['<>', 'upp_tw_sip_id', '']])->exists();
 

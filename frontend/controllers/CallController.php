@@ -292,7 +292,10 @@ class CallController extends FController
     }
 
 
-
+    /**
+     * @return string
+     * @throws \Exception
+     */
     public function actionAutoRedial()
     {
 
@@ -439,7 +442,12 @@ class CallController extends FController
             $params['LeadSearch']['supervision_id'] = Yii::$app->user->id;
         }
 
-        $dataProvider = $searchModel->searchInbox($params);
+
+        if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
+            $dataProvider = $searchModel->searchInbox($params);
+        } else {
+            $dataProvider = null;
+        }
 
 
 
@@ -473,6 +481,8 @@ class CallController extends FController
 
         $params = Yii::$app->request->queryParams;
         $params['CallSearch']['c_created_user_id'] = Yii::$app->user->id;
+        $params['CallSearch']['limit'] = 10;
+
         $dataProviderCall = $searchModelCall->searchAgent($params);
         $projectList = Project::getListByUser(Yii::$app->user->id);
 
@@ -495,11 +505,9 @@ class CallController extends FController
             'myPendingLeadsCount' => $myPendingLeadsCount,
             'allPendingLeadsCount' => $allPendingLeadsCount,
 
-            'searchModelCall' => $searchModelCall,
+            //'searchModelCall' => $searchModelCall,
             'dataProviderCall' => $dataProviderCall,
             'projectList'       => $projectList,
-
-            //'newLeadsCount' => $user->getCountNewLeadCurrentShift()
         ]);
 
     }
