@@ -14,6 +14,7 @@ use common\models\User;
 use common\models\UserCallStatus;
 use common\models\UserConnection;
 use common\models\UserGroupAssign;
+use common\models\UserProfile;
 use common\models\UserProjectParams;
 use Yii;
 use yii\helpers\ArrayHelper;
@@ -402,7 +403,7 @@ class CommunicationController extends ApiBaseController
                                 $isRedirectCall = false;
                                 Yii::info('DIRECT - User ('.$user->username.') Id: '.$user->id.', phone: ' . $agent_phone_number, 'info\API:CommunicationController:actionVoice:Direct - 2');
 
-                                if($user->userProfile && $user->userProfile->up_call_type_id == 2) {
+                                if($user->userProfile && $user->userProfile->up_call_type_id == UserProfile::CALL_TYPE_WEB) {
                                     $call_agent_username[] = 'seller'.$user->id;
                                 }
 
@@ -436,9 +437,18 @@ class CommunicationController extends ApiBaseController
                     if($usersForCall) {
                         foreach ($usersForCall as $userForCall) {
                             $upp = UserProjectParams::find()->where(['upp_user_id' => $userForCall['tbl_user_id'], 'upp_project_id' => $call_project_id])->one();
+
+                            if($upp && $upp->upp_tw_phone_number) {
+                                $agent_phone_number = $upp->upp_tw_phone_number;
+                            } else {
+                                $agent_phone_number = '';
+                            }
+
                             $employeeModel = Employee::findOne(['id' => $userForCall['tbl_user_id']]);
-                            if($employeeModel && $employeeModel->userProfile && $employeeModel->userProfile->up_call_type_id == 2) {
+                            if($employeeModel && $employeeModel->userProfile && $employeeModel->userProfile->up_call_type_id == UserProfile::CALL_TYPE_WEB) {
                                 $call_agent_username[] = 'seller'.$employeeModel->id; //$employeeModel->username;
+
+                                Yii::info('Redirected Call: call_user_id: '.$call_user_id.', call: '.'seller'.$employeeModel->id.', agent_phone_number: '.$agent_phone_number, 'info\API:CommunicationController:actionVoice:UserProjectParams - 5');
                             }
                             if($upp) {
 
@@ -448,9 +458,9 @@ class CommunicationController extends ApiBaseController
                                     $agent_phone_number = $upp->upp_tw_phone_number;
                                 }
 
-                                Yii::info('Redirected Call: call_user_id: '.$call_user_id.', call_sip_id: '.$call_sip_id.', agent_phone_number: '.$agent_phone_number, 'info\API:CommunicationController:actionVoice:UserProjectParams - 5');
+                                //Yii::info('Redirected Call: call_user_id: '.$call_user_id.', call_sip_id: '.$call_sip_id.', agent_phone_number: '.$agent_phone_number, 'info\API:CommunicationController:actionVoice:UserProjectParams - 5');
 
-                                break;
+                                //break;
                             }
                         }
                     }
@@ -585,7 +595,9 @@ class CommunicationController extends ApiBaseController
 
                     //if ($call_sip_id) {
 
-                        $response['agent_sip'] = $call_sip_id;
+                        //if(!$call_agent_username) {
+                            $response['agent_sip'] = $call_sip_id;
+                        //}
                         $response['agent_phone_number'] = $agent_phone_number;
                         $response['client_phone_number'] = $client_phone_number;
                         $response['general_phone_number'] = $generalLineProject;
