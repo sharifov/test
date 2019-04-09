@@ -2659,19 +2659,23 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
             $diffSeconds = 0;
         }
 
-        $diffMin = ceil($diffSeconds / 60);
+        $hour = 60;
 
-        if($diffMin < 20) {
-            $min = 5;
-        } elseif($diffMin < 30) {
+        $diffMin = ceil($diffSeconds / $hour);
+
+        if($diffMin < $hour) {
             $min = 10;
-        } elseif($diffMin < 60) {
+        } elseif($diffMin < ($hour * 4)) {
             $min = 30;
-        } elseif($diffMin < (60 * 6)) {
-            $min = 60;
-        } else {
+        } elseif($diffMin < ($hour * 72)) {
+            $min = 180;
+        } elseif($diffMin < ($hour * 192)) {
+            $min = 180;
+        } /*else {
             $min = 120;
-        }
+        }*/
+
+        // 120 h - 192 h
 
         return $min;
     }
