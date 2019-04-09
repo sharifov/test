@@ -107,7 +107,7 @@ $isQA = Yii::$app->authManager->getAssignment('qa', Yii::$app->user->id);
 
                 if($isAdmin) {
                     $items =  [
-                        ['label' => 'Agent activity', 'url' => ['/agent-activity'], 'icon' => 'users'],
+                        ['label' => 'Agents report', 'url' => ['/agent-report'], 'icon' => 'users'],
                         ['label' => 'Calls & SMS', 'url' => ['/stats/call-sms'], 'icon' => 'phone'],
                         ['label' => 'Stats Employees', 'url' => ['/stats/index'], 'icon' => 'users'],
                         ['label' => 'User Connections', 'url' => ['/user-connection/index'], 'icon' => 'plug'],

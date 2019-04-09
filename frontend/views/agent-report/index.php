@@ -14,7 +14,7 @@ use common\models\Lead;
 /* @var $searchModel common\models\search\AgentActivitySearch */
 /* @var $dataProvider yii\data\SqlDataProvider */
 
-$this->title = 'Agents Activity ( '.$searchModel->date_from.' - '.$searchModel->date_to.' )';
+$this->title = 'Agents Report ( '.$searchModel->date_from.' - '.$searchModel->date_to.' )';
 $this->params['breadcrumbs'][] = $this->title;
 
 $this->registerJs("$(function() {
@@ -27,7 +27,7 @@ $this->registerJs("$(function() {
    });
 });");
 ?>
-<div class="lead-index">
+<div class="agent-report">
 
     <h1><?= Html::encode($this->title) ?></h1>
 
