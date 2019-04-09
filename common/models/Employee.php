@@ -1257,7 +1257,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     public function isCallFree() : bool
     {
         $isFree = true;
-        $call = Call::find()->where(['c_created_user_id' => $this->id])->orderBy(['c_id' => SORT_DESC])->limit(1)->one();
+        //$call = Call::find()->where(['c_created_user_id' => $this->id])->orderBy(['c_id' => SORT_DESC])->limit(1)->one();
 
         $callExist = Call::find()->where(['c_created_user_id' => $this->id, 'c_call_type_id' => [Call::CALL_STATUS_QUEUE, Call::CALL_STATUS_RINGING, Call::CALL_STATUS_IN_PROGRESS]])->limit(1)->exists();
 
