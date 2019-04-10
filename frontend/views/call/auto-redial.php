@@ -180,7 +180,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     <p>Total Leads - status Pending</p>
                 </div>
             </div>
-            <?php endif; ?>
+
 
             <div class="animated flipInY col-md-3 col-sm-6 col-xs-12">
                 <div class="tile-stats">
@@ -189,9 +189,10 @@ $this->params['breadcrumbs'][] = $this->title;
                         <?=$allPendingLeadsCount?>
                     </div>
                     <h3>Accessed Pending Leads</h3>
-                    <p>Accessed all pending Leads (delay, client time, 09:00 - 21:00)</p>
+                    <p>Accessed all pending Leads (delay, client time: 09:00 - 21:00)</p>
                 </div>
             </div>
+            <?php endif; ?>
 
             <div class="animated flipInY col-md-3 col-sm-6 col-xs-12">
                 <div class="tile-stats">
@@ -199,8 +200,8 @@ $this->params['breadcrumbs'][] = $this->title;
                     <div class="count">
                         <?=$myPendingLeadsCount?>
                     </div>
-                    <h3>My Pending Leads</h3>
-                    <p>Accessed for me by (project, phone, client time, 09:00 - 21:00)</p>
+                    <h3>Allowed Pending Leads</h3>
+                    <p>Allowed pending leads (project, phone, client time: 09:00 - 21:00)</p>
                 </div>
             </div>
 
@@ -712,7 +713,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 [
                     'attribute' => 'c_lead_id',
                     'value' => function (\common\models\Call $model) {
-                        return  $model->c_lead_id ? Html::a($model->c_lead_id, ['lead/view', 'gid' => $model->cLead->gid], ['target' => '_blank', 'data-pjax' => 0]) : '-';
+                        return  $model->c_lead_id; //$model->c_lead_id ? Html::a($model->c_lead_id, ['lead/view', 'gid' => $model->cLead->gid], ['target' => '_blank', 'data-pjax' => 0]) : '-';
                     },
                     'format' => 'raw'
                 ],
@@ -1036,7 +1037,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         return ['class' => 'danger'];
                     }
 
-                    if (!$model->l_client_time && (time() - strtotime($model->created)) > (10 * 60)) {
+                    if (!$model->l_client_time && (time() - strtotime($model->created)) > (Lead::PENDING_ALLOW_CALL_TIME_MINUTES * 60)) {
                         return ['class' => 'danger'];
                     }
                 }

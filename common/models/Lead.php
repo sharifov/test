@@ -88,6 +88,7 @@ class Lead extends ActiveRecord
 {
 
     public const AGENT_PROCESSING_FEE_PER_PAX = 25.0;
+    public const PENDING_ALLOW_CALL_TIME_MINUTES = 20; // minutes
 
 
     public const TRIP_TYPE_ONE_WAY           = 'OW';
@@ -2632,7 +2633,7 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
 
         $query->andWhere(['status' => self::STATUS_PENDING]);
         $query->andWhere(['OR', ['IS', 'l_pending_delay_dt', null], ['<=', 'l_pending_delay_dt', date('Y-m-d H:i:s')]]);
-        $query->andWhere(['OR', ['BETWEEN', new Expression('TIME(CONVERT_TZ(NOW(), \'+00:00\', offset_gmt))'), '09:00', '21:00'], ['>=', 'created', date('Y-m-d H:i:s', strtotime('-10 min'))]]);
+        $query->andWhere(['OR', ['BETWEEN', new Expression('TIME(CONVERT_TZ(NOW(), \'+00:00\', offset_gmt))'), '09:00', '21:00'], ['>=', 'created', date('Y-m-d H:i:s', strtotime('-'.self::PENDING_ALLOW_CALL_TIME_MINUTES.' min'))]]);
         $query->andWhere(['employee_id' => null]);
 
         if($user_id) {
