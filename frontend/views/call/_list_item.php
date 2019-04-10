@@ -39,7 +39,7 @@ use \common\models\Call;
                             <?php endif; ?>
                         <?php endif; ?>
                     </td>
-                    <td class="text-center">
+                    <td class="text-center" width="130">
                         <?php if($model->c_call_type_id === Call::CALL_TYPE_IN):?>
                             Incoming
                         <?php else:?>
@@ -73,7 +73,7 @@ use \common\models\Call;
                         </td>
                     <?php //endif; ?>
 
-                    <td class="text-center">
+                    <td class="text-center" width="160">
                         <?php
                             if($model->c_call_status === Call::CALL_STATUS_RINGING) {
                                 $icon = 'fa fa-refresh fa-pulse fa-fw text-danger';
