@@ -49,7 +49,7 @@ use \common\models\Call;
                         <span class="badge badge-info"><?=$model->cProject->name?></span>
                     </td>
 
-                    <?php if($model->c_call_status === Call::CALL_STATUS_RINGING || $model->c_call_status === Call::CALL_STATUS_IN_PROGRESS): ?>
+                    <?php //if($model->c_call_status === Call::CALL_STATUS_RINGING || $model->c_call_status === Call::CALL_STATUS_IN_PROGRESS): ?>
 
                         <td class="text-left">
                             <?php if($model->c_lead_id && $model->cLead):?>
@@ -71,7 +71,7 @@ use \common\models\Call;
                                 <?//=$model->c_lead_id?>
                             <?php endif; ?>
                         </td>
-                    <?php endif; ?>
+                    <?php //endif; ?>
 
                     <td class="text-center">
                         <?php
