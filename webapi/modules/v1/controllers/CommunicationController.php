@@ -542,14 +542,14 @@ class CommunicationController extends ApiBaseController
                         $data['client_created_date'] = '';
                         $data['client_last_activity'] = '';
 
-                        $clientPhone = ClientPhone::find()->where(['phone' => $client_phone_number])->one();
+                        $clientPhone = ClientPhone::find()->where(['phone' => $client_phone_number])->orderBy(['id' => SORT_DESC])->one();
 
                         if($clientPhone && $client = $clientPhone->client) {
                             $data['client_name'] = $client->full_name;
                             $data['client_id'] = $clientPhone->client_id;
                             $data['client_created_date'] = Yii::$app->formatter->asDate(strtotime($client->created));
 
-                            $lead = Lead::find()->select(['id'])->where(['client_id' => $clientPhone->client_id])->orderBy(['id' => SORT_DESC])->limit(1)->one();
+                            $lead = Lead::find()->select(['id'])->where(['client_id' => $clientPhone->client_id])->orderBy(['id' => SORT_DESC])->limit(1)->one(); //andWhere(['<>', 'status', Lead::STATUS_TRASH])
                             if($lead) {
                                 $data['last_lead_id'] = $lead->id;
                                 $data['client_last_activity'] = Yii::$app->formatter->asDate(strtotime($client->created));
