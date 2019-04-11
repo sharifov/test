@@ -12,6 +12,7 @@ use common\models\UserCallStatus;
 use common\models\UserConnection;
 use common\models\UserGroupAssign;
 use common\models\UserProjectParams;
+use Twilio\TwiML\VoiceResponse;
 use Yii;
 use yii\db\Expression;
 use yii\db\Query;
@@ -415,5 +416,13 @@ class TestController extends FController
         echo $timezoneName. ' - ' . $dt->getOffset();
         //echo $clientTime;
 
+    }
+
+    public function actionTwml()
+    {
+        $twML = new VoiceResponse();
+        $twML->say('Hello');
+        $twML->play('https://api.twilio.com/cowbell.mp3', ['loop' => 5]);
+        echo $twML;
     }
 }

@@ -170,7 +170,7 @@ $this->params['breadcrumbs'][] = $this->title;
         <div class="row top_tiles">
 
             <?php if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)): ?>
-            <div class="animated flipInY col-md-3 col-sm-6 col-xs-12">
+            <div class="animated flipInY col-md-2 col-sm-6 col-xs-12">
                 <div class="tile-stats">
                     <div class="icon"><i class="fa fa-list"></i></div>
                     <div class="count">
@@ -182,7 +182,7 @@ $this->params['breadcrumbs'][] = $this->title;
             </div>
 
 
-            <div class="animated flipInY col-md-3 col-sm-6 col-xs-12">
+            <div class="animated flipInY col-md-2 col-sm-6 col-xs-12">
                 <div class="tile-stats">
                     <div class="icon"><i class="fa fa-list"></i></div>
                     <div class="count">
@@ -205,7 +205,26 @@ $this->params['breadcrumbs'][] = $this->title;
                 </div>
             </div>
 
-            <div class="animated flipInY col-md-3 col-sm-6 col-xs-12" title="My Project / Phone List">
+
+
+            <div class="animated flipInY col-md-2 col-sm-6 col-xs-12" title="My Project / Phone List">
+                <table class="table table-bordered">
+                    <tr>
+                        <th>Online</th>
+                        <td><?=$user->isOnline() ? '<span class="label label-success">Yes</span>' : '<span class="label label-danger">No</span>'; ?></td>
+                    </tr>
+                    <tr>
+                        <th>Call Status Ready</th>
+                        <td><?=$user->isCallStatusReady() ? '<span class="label label-success">Yes</span>' : '<span class="label label-danger">No</span>'; ?></td>
+                    </tr>
+                    <tr>
+                        <th>Call Free</th>
+                        <td><?=$user->isCallFree() ? '<span class="label label-success">Yes</span>' : '<span class="label label-danger">No</span>'; ?></td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="animated flipInY col-md-2 col-sm-6 col-xs-12" title="My Project / Phone List">
                 <?php
                 if($user->userProjectParams):
                     ?>
@@ -283,7 +302,6 @@ $this->params['breadcrumbs'][] = $this->title;
                 <div class="col-md-6">
 
                     <?php if($leadModel && !$callModel): ?>
-                        <h1>Find new Lead <?=$leadModel->id?></h1>
 
                         <?php if(isset($callData['error']) && $callData['error']):?>
                             <div class="alert alert-danger" role="alert"><strong>Error:</strong> <?=Html::encode($callData['error'])?></div>
@@ -300,237 +318,244 @@ $this->params['breadcrumbs'][] = $this->title;
                         <?php endif; ?>
 
                         <div class="hidden">
-                            <?php \yii\helpers\VarDumper::dump($callData, 10, true) ?>
+                            <?//php \yii\helpers\VarDumper::dump($callData, 10, true) ?>
                         </div>
 
                         <div class="row">
 
-                            <div class="col-md-6">
-                                <?= \yii\widgets\DetailView::widget([
-                                    'model' => $leadModel,
-                                    'attributes' => [
-                                        //'id',
-                                        'uid',
-                                        //'client_id',
-                                        [
-                                            'attribute' => 'client.name',
-                                            'header' => 'Client name',
-                                            'format' => 'raw',
-                                            'value' => function(\common\models\Lead $model) {
-                                                if($model->client) {
-                                                    $clientName = $model->client->first_name . ' ' . $model->client->last_name;
-                                                    if ($clientName === 'Client Name') {
-                                                        $clientName = '- - - ';
-                                                    } else {
-                                                        $clientName = '<i class="fa fa-user"></i> '. Html::encode($clientName);
-                                                    }
-                                                } else {
-                                                    $clientName = '-';
-                                                }
+                            <div class="x_panel">
+                                <div class="x_title">
+                                    <h2><i class="fa fa-list"></i> Find new Lead <?=$leadModel->id?></h2>
+                                    <div class="clearfix"></div>
+                                </div>
+                                <div class="x_content">
+                                    <div class="col-md-6">
+                                        <?= \yii\widgets\DetailView::widget([
+                                            'model' => $leadModel,
+                                            'attributes' => [
+                                                //'id',
+                                                'uid',
+                                                //'client_id',
+                                                [
+                                                    'attribute' => 'client.name',
+                                                    'header' => 'Client name',
+                                                    'format' => 'raw',
+                                                    'value' => function(\common\models\Lead $model) {
+                                                        if($model->client) {
+                                                            $clientName = $model->client->first_name . ' ' . $model->client->last_name;
+                                                            if ($clientName === 'Client Name') {
+                                                                $clientName = '- - - ';
+                                                            } else {
+                                                                $clientName = '<i class="fa fa-user"></i> '. Html::encode($clientName);
+                                                            }
+                                                        } else {
+                                                            $clientName = '-';
+                                                        }
 
-                                                return $clientName;
-                                            },
-                                            'options' => ['style' => 'width:160px'],
-                                            //'filter' => \common\models\Employee::getList()
-                                        ],
+                                                        return $clientName;
+                                                    },
+                                                    'options' => ['style' => 'width:160px'],
+                                                    //'filter' => \common\models\Employee::getList()
+                                                ],
 
-                                        [
-                                            'attribute' => 'client.phone',
-                                            'header' => 'Client Phones',
-                                            'format' => 'raw',
-                                            'value' => function(\common\models\Lead $model) use ($isAgent) {
-                                                if($model->client && $model->client->clientPhones) {
-                                                    if ($isAgent && Yii::$app->user->id !== $model->employee_id) {
-                                                        $str = '- // - // - // -';
-                                                    } else {
-                                                        $str = '<i class="fa fa-phone"></i> ' . implode(' <br><i class="fa fa-phone"></i> ', \yii\helpers\ArrayHelper::map($model->client->clientPhones, 'phone', 'phone'));
-                                                    }
-                                                } else {
-                                                    $str = '-';
-                                                }
+                                                [
+                                                    'attribute' => 'client.phone',
+                                                    'header' => 'Client Phones',
+                                                    'format' => 'raw',
+                                                    'value' => function(\common\models\Lead $model) use ($isAgent) {
+                                                        if($model->client && $model->client->clientPhones) {
+                                                            if ($isAgent && Yii::$app->user->id !== $model->employee_id) {
+                                                                $str = '- // - // - // -';
+                                                            } else {
+                                                                $str = '<i class="fa fa-phone"></i> ' . implode(' <br><i class="fa fa-phone"></i> ', \yii\helpers\ArrayHelper::map($model->client->clientPhones, 'phone', 'phone'));
+                                                            }
+                                                        } else {
+                                                            $str = '-';
+                                                        }
 
-                                                return $str ?? '-';
-                                            },
-                                            'options' => ['style' => 'width:180px'],
-                                        ],
-
-
-                                       /* [
-                                            'attribute' => 'client.email',
-
-                                            'format' => 'raw',
-                                            'value' => function(\common\models\Lead $model) use ($isAgent) {
-
-                                                if($model->client && $model->client->clientEmails) {
-                                                    if ($isAgent && Yii::$app->user->id !== $model->employee_id) {
-                                                        $str = '- // - // - // -';
-                                                    } else {
-                                                        $str = '<i class="fa fa-envelope"></i> '.implode(' <br><i class="fa fa-envelope"></i> ', \yii\helpers\ArrayHelper::map($model->client->clientEmails, 'email', 'email'));
-                                                    }
-                                                } else {
-                                                    $str = '-';
-                                                }
-
-                                                return $str ?? '-';
-                                            },
-                                            'options' => ['style' => 'width:180px'],
-                                        ],*/
-
-                                        /*[
-                                            'attribute' => 'employee_id',
-                                            'format' => 'raw',
-                                            'value' => function(\common\models\Lead $model) {
-                                                return $model->employee ? '<i class="fa fa-user"></i> '.$model->employee->username : '-';
-                                            },
-                                        ],*/
-
-                                        //'employee_id',
+                                                        return $str ?? '-';
+                                                    },
+                                                    'options' => ['style' => 'width:180px'],
+                                                ],
 
 
+                                               /* [
+                                                    'attribute' => 'client.email',
 
-                                        [
-                                            'attribute' => 'status',
-                                            'value' => function(\common\models\Lead $model) {
-                                                return $model->getStatusName(true);
-                                            },
-                                            'format' => 'html',
+                                                    'format' => 'raw',
+                                                    'value' => function(\common\models\Lead $model) use ($isAgent) {
 
-                                        ],
-                                        [
-                                            'attribute' => 'project_id',
-                                            'value' => function(\common\models\Lead $model) {
-                                                return $model->project ? $model->project->name : '-';
-                                            },
+                                                        if($model->client && $model->client->clientEmails) {
+                                                            if ($isAgent && Yii::$app->user->id !== $model->employee_id) {
+                                                                $str = '- // - // - // -';
+                                                            } else {
+                                                                $str = '<i class="fa fa-envelope"></i> '.implode(' <br><i class="fa fa-envelope"></i> ', \yii\helpers\ArrayHelper::map($model->client->clientEmails, 'email', 'email'));
+                                                            }
+                                                        } else {
+                                                            $str = '-';
+                                                        }
 
-                                        ],
+                                                        return $str ?? '-';
+                                                    },
+                                                    'options' => ['style' => 'width:180px'],
+                                                ],*/
 
-                                        [
-                                            'attribute' => 'source_id',
-                                            'value' => function(\common\models\Lead $model) {
-                                                return $model->source ? $model->source->name : '-';
-                                            },
-                                        ],
+                                                /*[
+                                                    'attribute' => 'employee_id',
+                                                    'format' => 'raw',
+                                                    'value' => function(\common\models\Lead $model) {
+                                                        return $model->employee ? '<i class="fa fa-user"></i> '.$model->employee->username : '-';
+                                                    },
+                                                ],*/
 
-                                        [
-                                            'label' => 'Segments',
-                                            'value' => function (\common\models\Lead $model) {
+                                                //'employee_id',
 
-                                                $segments = $model->leadFlightSegments;
-                                                $segmentData = [];
-                                                if ($segments) {
-                                                    foreach ($segments as $sk => $segment) {
-                                                        $segmentData[] = ($sk + 1) . '. <small>' . $segment->origin_label . ' <i class="fa fa-long-arrow-right"></i> ' . $segment->destination_label . ' ('.$segment->departure.')</small>';
-                                                    }
-                                                }
 
-                                                $segmentStr = implode('<br>', $segmentData);
-                                                return '' . $segmentStr . '';
-                                                // return $model->leadFlightSegmentsCount ? Html::a($model->leadFlightSegmentsCount, ['lead-flight-segment/index', "LeadFlightSegmentSearch[lead_id]" => $model->id], ['target' => '_blank', 'data-pjax' => 0]) : '-' ;
-                                            },
-                                            'format' => 'raw',
-                                            'visible' => ! $isAgent,
-                                            'contentOptions' => [
-                                                'class' => 'text-left'
+
+                                                [
+                                                    'attribute' => 'status',
+                                                    'value' => function(\common\models\Lead $model) {
+                                                        return $model->getStatusName(true);
+                                                    },
+                                                    'format' => 'html',
+
+                                                ],
+                                                [
+                                                    'attribute' => 'project_id',
+                                                    'value' => function(\common\models\Lead $model) {
+                                                        return $model->project ? $model->project->name : '-';
+                                                    },
+
+                                                ],
+
+                                                [
+                                                    'attribute' => 'source_id',
+                                                    'value' => function(\common\models\Lead $model) {
+                                                        return $model->source ? $model->source->name : '-';
+                                                    },
+                                                ],
+
+                                                [
+                                                    'label' => 'Segments',
+                                                    'value' => function (\common\models\Lead $model) {
+
+                                                        $segments = $model->leadFlightSegments;
+                                                        $segmentData = [];
+                                                        if ($segments) {
+                                                            foreach ($segments as $sk => $segment) {
+                                                                $segmentData[] = ($sk + 1) . '. <small>' . $segment->origin_label . ' <i class="fa fa-long-arrow-right"></i> ' . $segment->destination_label . ' ('.$segment->departure.')</small>';
+                                                            }
+                                                        }
+
+                                                        $segmentStr = implode('<br>', $segmentData);
+                                                        return '' . $segmentStr . '';
+                                                        // return $model->leadFlightSegmentsCount ? Html::a($model->leadFlightSegmentsCount, ['lead-flight-segment/index', "LeadFlightSegmentSearch[lead_id]" => $model->id], ['target' => '_blank', 'data-pjax' => 0]) : '-' ;
+                                                    },
+                                                    'format' => 'raw',
+                                                    'visible' => ! $isAgent,
+                                                    'contentOptions' => [
+                                                        'class' => 'text-left'
+                                                    ],
+                                                    'options' => [
+                                                        'style' => 'width:140px'
+                                                    ]
+                                                ],
+
+                                                /*[
+                                                    'header' => 'Client time',
+                                                    'format' => 'raw',
+                                                    'value' => function(\common\models\Lead $model) {
+                                                        return $model->getClientTime2();
+                                                    },
+                                                    //'options' => ['style' => 'width:80px'],
+                                                    //'filter' => \common\models\Employee::getList()
+                                                ],*/
+
                                             ],
-                                            'options' => [
-                                                'style' => 'width:140px'
-                                            ]
-                                        ],
+                                        ]) ?>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <?= \yii\widgets\DetailView::widget([
+                                            'model' => $leadModel,
+                                            'attributes' => [
+                                                [
+                                                    'attribute' => 'trip_type',
+                                                    'value' => function(\common\models\Lead $model) {
+                                                        return \common\models\Lead::getFlightType($model->trip_type) ?? '-';
+                                                    },
 
-                                        /*[
-                                            'header' => 'Client time',
-                                            'format' => 'raw',
-                                            'value' => function(\common\models\Lead $model) {
-                                                return $model->getClientTime2();
-                                            },
-                                            //'options' => ['style' => 'width:80px'],
-                                            //'filter' => \common\models\Employee::getList()
-                                        ],*/
+                                                ],
 
-                                    ],
-                                ]) ?>
-                            </div>
-                            <div class="col-md-6">
-                                <?= \yii\widgets\DetailView::widget([
-                                    'model' => $leadModel,
-                                    'attributes' => [
-                                        [
-                                            'attribute' => 'trip_type',
-                                            'value' => function(\common\models\Lead $model) {
-                                                return \common\models\Lead::getFlightType($model->trip_type) ?? '-';
-                                            },
+                                                [
+                                                    'attribute' => 'cabin',
+                                                    'value' => function(\common\models\Lead $model) {
+                                                        return \common\models\Lead::getCabin($model->cabin) ?? '-';
+                                                    },
 
-                                        ],
+                                                ],
 
-                                        [
-                                            'attribute' => 'cabin',
-                                            'value' => function(\common\models\Lead $model) {
-                                                return \common\models\Lead::getCabin($model->cabin) ?? '-';
-                                            },
+                                                /*'project_id',
+                                                'source_id',
+                                                'trip_type',
+                                                'cabin',*/
+                                                /*'adults',
+                                                'children',
+                                                'infants',*/
+                                                'offset_gmt',
+                                                [
+                                                    'label' => 'Client time',
+                                                    'format' => 'raw',
+                                                    'value' => function(\common\models\Lead $model) {
+                                                        return $model->getClientTime2();
+                                                    },
+                                                    //'options' => ['style' => 'width:80px'],
+                                                    //'filter' => \common\models\Employee::getList()
+                                                ],
 
-                                        ],
+                                                //'discount_id',
 
-                                        /*'project_id',
-                                        'source_id',
-                                        'trip_type',
-                                        'cabin',*/
-                                        /*'adults',
-                                        'children',
-                                        'infants',*/
-                                        'offset_gmt',
-                                        [
-                                            'label' => 'Client time',
-                                            'format' => 'raw',
-                                            'value' => function(\common\models\Lead $model) {
-                                                return $model->getClientTime2();
-                                            },
-                                            //'options' => ['style' => 'width:80px'],
-                                            //'filter' => \common\models\Employee::getList()
-                                        ],
+                                                [
+                                                    'label' => 'Pax',
+                                                    'value' => function (\common\models\Lead $model) {
+                                                        return '<span title="adult"><i class="fa fa-male"></i> '. $model->adults .'</span> / <span title="child"><i class="fa fa-child"></i> ' . $model->children . '</span> / <span title="infant"><i class="fa fa-info"></i> ' . $model->infants.'</span>';
+                                                    },
+                                                    'format' => 'raw',
+                                                    //'visible' => ! $isAgent,
+                                                    /*'contentOptions' => [
+                                                        'class' => 'text-center'
+                                                    ],*/
 
-                                        //'discount_id',
-
-                                        [
-                                            'label' => 'Pax',
-                                            'value' => function (\common\models\Lead $model) {
-                                                return '<span title="adult"><i class="fa fa-male"></i> '. $model->adults .'</span> / <span title="child"><i class="fa fa-child"></i> ' . $model->children . '</span> / <span title="infant"><i class="fa fa-info"></i> ' . $model->infants.'</span>';
-                                            },
-                                            'format' => 'raw',
-                                            //'visible' => ! $isAgent,
-                                            /*'contentOptions' => [
-                                                'class' => 'text-center'
-                                            ],*/
-
-                                        ],
+                                                ],
 
 
-                                        [
-                                            'attribute' => 'created',
-                                            'value' => function(\common\models\Lead $model) {
-                                                return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->created));
-                                            },
-                                            'format' => 'raw',
-                                        ],
-                                        [
-                                            //'attribute' => 'pending',
-                                            'label' => 'Pending Time',
-                                            'value' => function (\common\models\Lead $model) {
-                                                $createdTS = strtotime($model->created);
+                                                [
+                                                    'attribute' => 'created',
+                                                    'value' => function(\common\models\Lead $model) {
+                                                        return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->created));
+                                                    },
+                                                    'format' => 'raw',
+                                                ],
+                                                [
+                                                    //'attribute' => 'pending',
+                                                    'label' => 'Pending Time',
+                                                    'value' => function (\common\models\Lead $model) {
+                                                        $createdTS = strtotime($model->created);
 
-                                                $diffTime = time() - $createdTS;
-                                                $diffHours = (int) ($diffTime / (60 * 60));
+                                                        $diffTime = time() - $createdTS;
+                                                        $diffHours = (int) ($diffTime / (60 * 60));
 
-                                                return ($diffHours > 3 && $diffHours < 73 ) ? $diffHours.' hours' : Yii::$app->formatter->asRelativeTime($createdTS);
-                                            },
-                                            'options' => [
-                                                'style' => 'width:180px'
+                                                        return ($diffHours > 3 && $diffHours < 73 ) ? $diffHours.' hours' : Yii::$app->formatter->asRelativeTime($createdTS);
+                                                    },
+                                                    'options' => [
+                                                        'style' => 'width:180px'
+                                                    ],
+                                                    'format' => 'raw',
+                                                ],
                                             ],
-                                            'format' => 'raw',
-                                        ],
-                                    ],
-                                ]) ?>
+                                        ]) ?>
+                                    </div>
+                                </div>
                             </div>
-
 
 
                         </div>
@@ -549,81 +574,96 @@ $this->params['breadcrumbs'][] = $this->title;
                 <div class="col-md-6">
                     <?/*<h3>Call status: <span class="badge badge-info" id="call_autoredial_status"><?=$callModel ? $callModel->getStatusName() : '-'?></span></h3>*/?>
                     <?php if($callModel): ?>
-                        <h1>Current Call info <?=$callModel->c_id?></h1>
+                        <div class="x_panel">
+                            <div class="x_title">
+                                <h2><i class="fa fa-phone-square"></i> Current Call: <?=$callModel->c_id?></h2>
+                                <div class="clearfix"></div>
+                            </div>
+                            <div class="x_content">
 
-                        <?/*<div class="countdown text-center badge badge-warning" style="font-size: 15px">
-                            <i class="fa fa-clock-o"></i>
-                            <span id="clock">00:<?=(time() - strtotime($callModel->c_created_dt))?></span>
-                        </div>*/?>
 
-                        <div class="col-md-6">
+                                <?/*<div class="countdown text-center badge badge-warning" style="font-size: 15px">
+                                    <i class="fa fa-clock-o"></i>
+                                    <span id="clock">00:<?=(time() - strtotime($callModel->c_created_dt))?></span>
+                                </div>*/?>
 
-                            <?= \yii\widgets\DetailView::widget([
-                                'model' => $callModel,
-                                'attributes' => [
-                                    'c_id',
-                                    'c_call_sid',
-                                    //'c_call_type_id',
-                                    [
-                                        'attribute' => 'c_call_type_id',
-                                        'value' => function (\common\models\Call $model) {
-                                            return $model->getCallTypeName();
-                                        },
-                                    ],
-                                    'c_from',
-                                    'c_to',
-                                    'c_call_status',
-                                ],
-                            ]) ?>
+                                <div class="col-md-6">
+
+                                    <?= \yii\widgets\DetailView::widget([
+                                        'model' => $callModel,
+                                        'attributes' => [
+                                            //'c_call_status',
+                                            [
+                                                'attribute' => 'c_call_status',
+                                                'value' => function (\common\models\Call $model) {
+                                                    return $model->getStatusLabel();
+                                                },
+                                                'format' => 'raw'
+                                            ],
+                                            //'c_id',
+                                            //'c_call_sid',
+                                            //'c_call_type_id',
+                                            [
+                                                'attribute' => 'c_call_type_id',
+                                                'value' => function (\common\models\Call $model) {
+                                                    return $model->getCallTypeName();
+                                                },
+                                            ],
+                                            'c_from',
+                                            'c_to',
+
+                                        ],
+                                    ]) ?>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <?= \yii\widgets\DetailView::widget([
+                                        'model' => $callModel,
+                                        'attributes' => [
+                                            //'c_caller_name',
+                                            //'c_call_duration',
+                                            [
+                                                'attribute' => 'c_project_id',
+                                                'value' => function (\common\models\Call $model) {
+                                                    return $model->cProject ? $model->cProject->name : '-';
+                                                },
+                                            ],
+                                            [
+                                                'attribute' => 'c_lead_id',
+                                                'value' => function (\common\models\Call $model) {
+                                                    return  $model->c_lead_id ? Html::a($model->c_lead_id, ['lead/view', 'gid' => $model->cLead->gid], ['data-pjax' => 0, 'target' => '_blank']) : '';
+                                                },
+                                                'format' => 'raw'
+                                            ],
+                                            [
+                                                'attribute' => 'c_created_user_id',
+                                                'value' => function (\common\models\Call $model) {
+                                                    return  $model->cCreatedUser ? '<i class="fa fa-user"></i> ' . Html::encode($model->cCreatedUser->username) : $model->c_created_user_id;
+                                                },
+                                                'format' => 'raw'
+                                            ],
+                                            [
+                                                'attribute' => 'c_created_dt',
+                                                'value' => function (\common\models\Call $model) {
+                                                    return $model->c_created_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->c_created_dt)) : '-';
+                                                },
+                                                'format' => 'raw'
+                                            ],
+                                            /*[
+                                                'attribute' => 'c_updated_dt',
+                                                'value' => function (\common\models\Call $model) {
+                                                    return $model->c_updated_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->c_updated_dt)) : '-';
+                                                },
+                                                'format' => 'raw'
+                                            ],*/
+
+
+                                        ],
+                                    ]) ?>
+                                </div>
+
+                            </div>
                         </div>
-
-                        <div class="col-md-6">
-                            <?= \yii\widgets\DetailView::widget([
-                                'model' => $callModel,
-                                'attributes' => [
-                                    'c_caller_name',
-                                    'c_call_duration',
-                                    [
-                                        'attribute' => 'c_lead_id',
-                                        'value' => function (\common\models\Call $model) {
-                                            return  $model->c_lead_id ? Html::a($model->c_lead_id, ['lead/view', 'gid' => $model->cLead->gid], ['data-pjax' => 0, 'target' => '_blank']) : '';
-                                        },
-                                        'format' => 'raw'
-                                    ],
-                                    [
-                                        'attribute' => 'c_created_user_id',
-                                        'value' => function (\common\models\Call $model) {
-                                            return  $model->cCreatedUser ? '<i class="fa fa-user"></i> ' . Html::encode($model->cCreatedUser->username) : $model->c_created_user_id;
-                                        },
-                                        'format' => 'raw'
-                                    ],
-                                    [
-                                        'attribute' => 'c_created_dt',
-                                        'value' => function (\common\models\Call $model) {
-                                            return $model->c_created_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->c_created_dt)) : '-';
-                                        },
-                                        'format' => 'raw'
-                                    ],
-                                    [
-                                        'attribute' => 'c_updated_dt',
-                                        'value' => function (\common\models\Call $model) {
-                                            return $model->c_updated_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->c_updated_dt)) : '-';
-                                        },
-                                        'format' => 'raw'
-                                    ],
-
-                                    [
-                                        'attribute' => 'c_project_id',
-                                        'value' => function (\common\models\Call $model) {
-                                            return $model->cProject ? $model->cProject->name : '-';
-                                        },
-                                        'filter' => \common\models\Project::getList()
-                                    ],
-                                ],
-                            ]) ?>
-                        </div>
-
-
                     <?php endif; ?>
                 </div>
             </div>
@@ -722,8 +762,9 @@ $this->params['breadcrumbs'][] = $this->title;
                 [
                     'attribute' => 'c_call_status',
                     'value' => function (\common\models\Call $model) {
-                        return $model->getStatusName();
+                        return $model->getStatusLabel();
                     },
+                    'format' => 'raw',
                     'filter' => \common\models\Call::CALL_STATUS_LIST
                 ],
 
