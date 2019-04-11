@@ -4,6 +4,8 @@ namespace console\controllers;
 
 use common\models\Call;
 use common\models\Employee;
+use common\models\ProjectEmployeeAccess;
+use common\models\Source;
 use common\models\UserProfile;
 use yii\console\Controller;
 use Yii;
@@ -84,6 +86,72 @@ class CallController extends Controller
             }
         }
         VarDumper::dump($items); exit;
+    }
+
+    public function actionCallFromHold()
+    {
+        try {
+
+            $results = [];
+
+            /**
+             * @var \common\components\CommunicationService::class $communicationService
+             */
+            $communicationService = \Yii::$app->communication;
+            //echo VarDumper::dumpAsString($communicationService, 10, false) . PHP_EOL; exit;
+
+            $dateNowString = (new \DateTime('now'))->modify('-3 minutes')->format('Y-m-d H:i:s');
+
+            //echo VarDumper::dumpAsString($dateNowString, 10, false) . PHP_EOL;
+            // get calls with status queued
+            $itemsInHold = Call::find()->where(['>', 'c_created_dt', $dateNowString])
+                            ->andWhere(['=', 'c_call_status', Call::CALL_STATUS_QUEUE])
+                            ->orderBy(['c_id' => SORT_ASC])
+                            ->all();
+
+            if($itemsInHold && is_array($itemsInHold)) {
+                foreach ($itemsInHold AS $call) {
+
+                    if(!$call->c_to) {
+                        continue;
+                    }
+
+                    if(!$call->c_from) {
+                        continue;
+                    }
+
+                    $agent_phone_number = $call->c_to;
+                    $source = Source::findOne(['phone_number' => $agent_phone_number]);
+                    if($source && $source->project) {
+                        $project = $source->project;
+                        $project_employee_access = ProjectEmployeeAccess::find()->where(['project_id' => $project->id])->all();
+                        if ($project_employee_access && is_array($project_employee_access) && count($project_employee_access)) {
+                            foreach ($project_employee_access AS $projectEmployer) {
+                                $projectUser = Employee::findOne($projectEmployer->employee_id);
+                                if($projectUser && $projectUser->userProfile && $projectUser->userProfile->up_call_type_id === UserProfile::CALL_TYPE_WEB) {
+                                        $user = $projectUser;
+                                        if ($user->isOnline() && $user->isCallStatusReady() && $user->isCallFree()) {
+                                            $agent = 'seller' . $user->id;
+                                            echo 'Find agent:'. $agent . PHP_EOL;
+                                            $res = $communicationService->callRedirect($call->c_call_sid, 'client', $call->c_from, $agent);
+                                            if($res && isset($res['error']) && $res['error'] === false) {
+                                                $results[] = $res;
+                                                break;
+                                            } else {
+                                                echo "Bad response: " . PHP_EOL .  VarDumper::dumpAsString( $res, 10, false) . PHP_EOL;
+                                            }
+                                        }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (\Throwable $e) {
+            echo VarDumper::dumpAsString($e->getMessage(), 10, false) . PHP_EOL;
+        }
+        echo "Results redirects for hold calls: " . PHP_EOL .  VarDumper::dumpAsString( $results, 10, false) . PHP_EOL;
+        return 0;
     }
 
 }

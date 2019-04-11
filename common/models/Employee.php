@@ -1353,6 +1353,4 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
 
         return $exist;
     }
-
-
 }
