@@ -3,6 +3,7 @@
 namespace frontend\controllers;
 
 use common\models\ApiLog;
+use common\models\Call;
 use common\models\Employee;
 use common\models\Lead;
 use common\models\search\CommunicationSearch;
@@ -182,9 +183,7 @@ class StatsController extends FController
             ],
         ]);*/
 
-
-
-
+        $callsGraphData = Call::getCallStats($searchModel->datetime_start);
 
         return $this->render('call-sms', [
             //'datetime_start' => $datetime_start,
@@ -192,6 +191,7 @@ class StatsController extends FController
             //'dataProvider' => $dataProvider,
             'searchModel' => $searchModel,
             'dataProviderCommunication' => $dataProviderCommunication,
+            'callsGraphData' => $callsGraphData
         ]);
 
 

@@ -12,6 +12,7 @@ use yii\widgets\ActiveForm;
 /* @var $dataProviderCommunication \yii\data\ActiveDataProvider */
 /* @var $datetime_start string */
 /* @var $datetime_end string */
+/* @var $callsGraphData [] */
 
 $bundle = \frontend\assets\TimelineAsset::register($this);
 $this->title = 'Stats Calls & SMS';
@@ -63,7 +64,7 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$
                                      Geekbench:
                                      655
                                  </div></div></div>-->
-                        <?php if (true): ?>
+                        <?php if ($callsGraphData): ?>
                             <div class="row">
                                 <div class="col-md-12">
                                     <div id="chart_div"></div>
@@ -74,28 +75,17 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$
 
                                     <script>
                                         function drawChart() {
-                                            var data = google.visualization.arrayToDataTable([
+                                            let data = google.visualization.arrayToDataTable([
                                                 ['Time Line', 'Completed', 'Canceled', 'Busy', {role: 'annotation'}],
-
-                                                ['<?= '01:00' ?>', <?='5'?>, <?='7'?>, <?='2'?>, '<?='--'?>'],
-                                                ['<?= '02:00' ?>', <?='10'?>, <?='7'?>, <?='6'?>, '<?='--'?>'],
-                                                ['<?= '03:00' ?>', <?='5'?>, <?='7'?>, <?='6'?>, '<?='--'?>'],
-                                                ['<?= '04:00' ?>', <?='5'?>, <?='9'?>, <?='15'?>, '<?='--'?>'],
-                                                ['<?= '05:00' ?>', <?='10'?>, <?='17'?>, <?='6'?>, '<?='--'?>'],
-                                                ['<?= '06:00' ?>', <?='5'?>, <?='9'?>, <?='6'?>, '<?='--'?>'],
-                                                ['<?= '07:00' ?>', <?='8'?>, <?='12'?>, <?='6'?>, '<?='--'?>'],
-                                                ['<?= '08:00' ?>', <?='5'?>, <?='26'?>, <?='6'?>, '<?='--'?>'],
-                                                ['<?= '09:00' ?>', <?='6'?>, <?='8'?>, <?='6'?>, '<?='--'?>'],
-                                                ['<?= '10:00' ?>', <?='5'?>, <?='11'?>, <?='25'?>, '<?='--'?>'],
-                                                ['<?= '11:00' ?>', <?='12'?>, <?='21'?>, <?='6'?>, '<?='--'?>'],
-                                                ['<?= '12:00' ?>', <?='5'?>, <?='17'?>, <?='10'?>, '<?='--'?>'],
-
+                                                <?php foreach($callsGraphData as $k => $item):?>
+                                                ['<?=date('H:i', strtotime($item['time']))?>', <?=$item['completed']?>, <?=$item['no-answer']?>, <?=$item['busy']?>, '<?='--'?>'],
+                                                <?php endforeach;?>
                                             ]);
 
-                                            var options = {
+                                            let options = {
                                                 chart: {
                                                     title: 'Calls graph',
-                                                    subtitle: 'Calls info - Last 30 days',
+                                                    subtitle: 'Calls info - Last ?? days',
                                                 },
                                                 title: 'Lead data',
                                                 height: 400,
@@ -104,8 +94,7 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$
                                                 },
                                             };
                                             //var chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
-
-                                            var chart = new google.charts.Bar(document.getElementById('chart_div'));
+                                            let chart = new google.charts.Bar(document.getElementById('chart_div'));
 
                                             chart.draw(data, options);
                                             $(window).resize(function(){

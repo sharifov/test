@@ -223,7 +223,51 @@ class Call extends \yii\db\ActiveRecord
         }
     }
 
+    public function get_hours_range( $start = 0, $end = 86400, $step = 3600, $format = 'H:i' ) {
+        $times = array();
+        foreach ( range( $start, $end, $step ) as $timestamp ) {
+            $hour_mins = gmdate( 'H:i', $timestamp );
+            if ( ! empty( $format ) )
+                $times[$hour_mins] = gmdate( $format, $timestamp );
+            else $times[$hour_mins] = $hour_mins;
+        }
+        return $times;
+    }
 
+    public static function getCallStats($date)
+    {
+        $calls = self::find()->select(['c_id', 'c_call_status', 'c_updated_dt'])->where(['c_call_status' => ['completed', 'busy', 'no-answer']])->andWhere(['between', 'c_updated_dt', $date." 00:00:00", $date." 23:59:59" ])->all();
+        $hourlyCallStats = [];
+        $item = [];
+        $timeRange = self::get_hours_range();
+        $completed = $noAnswer = $busy = 0;
+        foreach ($timeRange as $key => $hour){
+            $hourEndPoint = date('H:i', strtotime($hour) + 3600);
+            foreach ($calls as $callItem){
+                $callUpdatedTime = date('H:i', strtotime($callItem->c_updated_dt));
+                if ($callUpdatedTime >= $hour && $callUpdatedTime <= $hourEndPoint)
+                {
+                    switch ($callItem->c_call_status){
+                        case 'completed':
+                            $completed++;
+                            break;
+                        case 'no-answer':
+                            $noAnswer++;
+                            break;
+                        case 'busy':
+                            $busy++;
+                            break;
+                    }
+                }
+            }
+            $item['time'] = $hour;
+            $item['completed'] = $completed;
+            $item['no-answer'] = $noAnswer;
+            $item['busy'] = $busy;
 
-
+            array_push($hourlyCallStats, $item);
+            $completed = $noAnswer = $busy = 0;
+        }
+        return $hourlyCallStats;
+    }
 }
