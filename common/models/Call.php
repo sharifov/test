@@ -3,6 +3,7 @@
 namespace common\models;
 
 use Yii;
+use yii\helpers\VarDumper;
 
 /**
  * This is the model class for table "call".
@@ -221,9 +222,88 @@ class Call extends \yii\db\ActiveRecord
                 Notifications::socket($user->uc_user_id, null, 'callMapUpdate', [], true);
             }
         }
+
+        if(!$insert) {
+            if(in_array($this->c_call_status, [Call::CALL_STATUS_COMPLETED, Call::CALL_STATUS_BUSY, Call::CALL_STATUS_NO_ANSWER])) {
+                if($this->c_created_user_id) {
+                    self::applyHoldCallToAgent($this->c_created_user_id);
+                }
+            }
+        }
     }
 
+    /**
+     * @param $agentId
+     * @return bool
+     */
+    public static function applyHoldCallToAgent(int $agentId)
+    {
+        //sleep(1);
+        try {
+            $user = Employee::findOne($agentId);
+            if (!$user) {
+                throw new \Exception('Agent not found by id. CommunicationService:redirectCallFromHold:$user:'. $agentId);
+            }
 
+            if (!$user->isOnline()) {
+                throw new \Exception('Agent is not isOnline CommunicationService:redirectCallFromHold:isOnline:$user:'. $agentId);
+            }
+
+            if (!$user->isCallStatusReady()) {
+                throw new \Exception('Agent is not isCallStatusReady. CommunicationService:redirectCallFromHold:isCallStatusReady:$user:'. $agentId);
+            }
+
+            if (!$user->isCallFree()) {
+                throw new \Exception('Agent is not isCallFree. CommunicationService:redirectCallFromHold:isCallFree:$user:'. $agentId);
+            }
+
+            $project_employee_access = ProjectEmployeeAccess::find()->where(['employee_id' => $user->id])->all();
+            if (!$project_employee_access) {
+                throw new \Exception('Not found ProjectEmployeeAccess. CommunicationService:redirectCallFromHold:$project_employee_access:$user:'. $agentId);
+            }
+
+            $projectsIds = [];
+            foreach ($project_employee_access AS $pea) {
+                $projectsIds[] = $pea->project_id;
+            }
+
+            /*$sources = Source::find()->where( ['project_id' => $projectsIds] )->all();
+            if (!$sources || !count($sources)) {
+                throw new \Exception('Not found Source. CommunicationService:redirectCallFromHold:$sources:$user:'. $agentId);
+            }
+
+            $phoneNumbersProjects = [];
+            foreach ($sources AS $source) {
+                $phoneNumbersProjects[] = $source->phone_number;
+            }
+            if (!$phoneNumbersProjects) {
+                throw new \Exception('Not found $phoneNumbersProjects. CommunicationService:redirectCallFromHold:$phoneNumbersProjects:$user:'. $agentId);
+            }*/
+
+            $calls = Call::find()->where(['=', 'c_call_status', Call::CALL_STATUS_QUEUE])
+                ->andWhere(['c_project_id' => $projectsIds])
+                ->orderBy(['c_id' => SORT_ASC])
+                ->limit(20)
+                ->all();
+
+            if(!$calls) {
+                return false;
+            }
+            foreach ($calls as $call) {
+                $agent = 'seller' . $user->id;
+                $res = (\Yii::$app->communication)->callRedirect($call->c_call_sid, 'client', $call->c_from, $agent);
+                if ($res && isset($res['error']) && $res['error'] === false) {
+                    \Yii::info(VarDumper::dumpAsString($res, 10, false), 'info\Component:CommunicationService::redirectCallFromHold:callRedirect');
+                    return true;
+                }
+            }
+
+        } catch (\Throwable $e) {
+            \Yii::error(VarDumper::dumpAsString([$e->getMessage(), $e->getFile(), $e->getLine()], 10, false), 'Component:CommunicationService::redirectCallFromHold');
+            return false;
+        }
+        return false;
+    }
 
 
 }
