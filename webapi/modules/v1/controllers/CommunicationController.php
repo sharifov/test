@@ -16,6 +16,8 @@ use common\models\UserConnection;
 use common\models\UserGroupAssign;
 use common\models\UserProfile;
 use common\models\UserProjectParams;
+use Twilio\Twiml;
+use Twilio\TwiML\VoiceResponse;
 use Yii;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
@@ -256,6 +258,7 @@ class CommunicationController extends ApiBaseController
 
         //$action = Yii::$app->request->post('action');
         $type = Yii::$app->request->post('type');
+        $twML = null;
 
         /*if(!$action) {
             throw new NotFoundHttpException('Not found action', 1);
@@ -601,7 +604,20 @@ class CommunicationController extends ApiBaseController
                     if($call_direct_agent_username) {
                         //$call_agent_username = [];
                         $call_agent_username[] = $call_direct_agent_username;
+
+                        $twML = new VoiceResponse();
+                        $twML->say('Hello world!', ['voice' => 'alice', 'language' => 'en-US']); //ru-RU
+                        //$twML->play('https://api.twilio.com/cowbell.mp3', ['loop' => 5]);
+                        //$response->say('Chapeau!', ['voice' => 'woman', 'language' => 'fr-FR']); man, woman, alice
+
+                        //$gather = $response->gather(['input' => 'speech dtmf', 'timeout' => 3, 'numDigits' => 1]);
+                        //$gather = $twML->gather(['action' => '/process_gather.php', 'method' => 'GET']);
+                        //$gather->say('Please enter your account number,\nfollowed by the pound sign');
+                        $twML->say('We didn\'t receive any input. Goodbye!');
                     }
+
+
+                    //print $response;
 
                     //if ($call_sip_id) {
 
@@ -612,6 +628,7 @@ class CommunicationController extends ApiBaseController
                         $response['client_phone_number'] = $client_phone_number;
                         $response['general_phone_number'] = $generalLineProject;
                         $response['agent_username'] = $call_agent_username;
+                        $response['twml'] = $twML;
 
                     /*} else {
                         $response['error'] = 'Agent SIP account is empty';
