@@ -176,7 +176,8 @@ $call2DelayTime = Yii::$app->params['lead']['call2DelayTime']; //(2 * 60 * 60);
                                 $userNrDay = ($dDiffUser->days + 1);
                             }
 
-                            $user = \common\models\Employee::findOne($user_id);
+                        /** @var \common\models\Employee $user */
+                        $user = Yii::$app->user->identity;
                             if($user_id != Yii::$app->user->id) {
                                 $agentName = 'Other agent';
                                 if($user && $is_manager) {

@@ -299,6 +299,13 @@ CRONs
 sudo chmod 777 /var/spool/cron/crontabs/root
 ```
 
+MemCache
+```text
+sudo apt-get install memcached libmemcached-tools
+sudo apt-get install -y php-memcached
+sudo service php7.3-fpm restart
+```
+
 DIRECTORY STRUCTURE
 -------------------
 

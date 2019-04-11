@@ -206,7 +206,7 @@ if($clientPhone && $client = $clientPhone->client) {
         //alert(123);
         //$('.fab').toggleClass('is-visible');
 
-        console.log(obj);
+        //console.log(obj);
 
 
         if(obj.status == 'initiated' || obj.status == 'ringing') {

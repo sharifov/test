@@ -51,8 +51,8 @@ class Call extends \yii\db\ActiveRecord
     public const CALL_STATUS_IN_PROGRESS    = 'in-progress';
     public const CALL_STATUS_COMPLETED      = 'completed';
     public const CALL_STATUS_BUSY           = 'busy';
-    public const CALL_STATUS_FAILED         = 'failed';
     public const CALL_STATUS_NO_ANSWER      = 'no-answer';
+    public const CALL_STATUS_FAILED         = 'failed';
     public const CALL_STATUS_CANCELED       = 'canceled';
 
     public const CALL_STATUS_LIST = [
@@ -61,9 +61,20 @@ class Call extends \yii\db\ActiveRecord
         self::CALL_STATUS_IN_PROGRESS   => 'In progress',
         self::CALL_STATUS_COMPLETED     => 'Completed',
         self::CALL_STATUS_BUSY          => 'Busy',
-        self::CALL_STATUS_FAILED        => 'Failed',
         self::CALL_STATUS_NO_ANSWER     => 'No answer',
+        self::CALL_STATUS_FAILED        => 'Failed',
         self::CALL_STATUS_CANCELED      => 'Canceled',
+    ];
+
+    public const CALL_STATUS_LABEL_LIST = [
+        self::CALL_STATUS_QUEUE         => '<span class="label label-warning"><i class="fa fa-refresh fa-spin"></i> ' . self::CALL_STATUS_LIST[self::CALL_STATUS_QUEUE] . '</span>',
+        self::CALL_STATUS_RINGING       => '<span class="label label-warning"><i class="fa fa-spinner fa-spin"></i> ' . self::CALL_STATUS_LIST[self::CALL_STATUS_RINGING] . '</span>',
+        self::CALL_STATUS_IN_PROGRESS   => '<span class="label label-success"><i class="fa fa-volume-control-phone"></i> ' . self::CALL_STATUS_LIST[self::CALL_STATUS_IN_PROGRESS] . '</span>',
+        self::CALL_STATUS_COMPLETED     => '<span class="label label-info"><i class="fa fa-check"></i> ' . self::CALL_STATUS_LIST[self::CALL_STATUS_COMPLETED] . '</span>',
+        self::CALL_STATUS_BUSY          => '<span class="label label-danger"><i class="fa fa-ban"></i> ' . self::CALL_STATUS_LIST[self::CALL_STATUS_BUSY] . '</span>',
+        self::CALL_STATUS_NO_ANSWER     => '<span class="label label-danger"><i class="fa fa-times-circle"></i> ' . self::CALL_STATUS_LIST[self::CALL_STATUS_NO_ANSWER] . '</span>',
+        self::CALL_STATUS_FAILED        => '<span class="label label-danger"><i class="fa fa-window-close"></i> ' . self::CALL_STATUS_LIST[self::CALL_STATUS_FAILED] . '</span>',
+        self::CALL_STATUS_CANCELED      => '<span class="label label-danger"><i class="fa fa-close"></i> ' . self::CALL_STATUS_LIST[self::CALL_STATUS_CANCELED] . '</span>',
     ];
 
     public const CALL_STATUS_DESCRIPTION_LIST = [
@@ -206,6 +217,14 @@ class Call extends \yii\db\ActiveRecord
     public function getStatusName()
     {
         return self::CALL_STATUS_LIST[$this->c_call_status] ?? '-';
+    }
+
+    /**
+     * @return mixed|string
+     */
+    public function getStatusLabel()
+    {
+        return self::CALL_STATUS_LABEL_LIST[$this->c_call_status] ?? '-';
     }
 
     public function afterSave($insert, $changedAttributes)

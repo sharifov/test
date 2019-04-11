@@ -220,8 +220,13 @@ $js = <<<JS
             
             try {
                 var obj = JSON.parse(e.data); // $.parseJSON( e.data );
-                
                 console.log(obj);
+            } catch (error) {
+                console.error('Invalid JSON data on socket.onmessage');
+                console.error(e.data);
+            }
+            
+            try {
                 
                 if (typeof obj.command !== 'undefined') {
                     
@@ -236,7 +241,17 @@ $js = <<<JS
                     }
                     
                     if(obj.command === 'callUpdate') {
-                        callUpdate(obj);
+                        if (typeof callUpdate === "function") {
+                            callUpdate(obj);
+                        }
+                    }
+                    
+                    if(obj.command === 'webCallUpdate') {
+                        //console.info('webCallUpdate - 1');
+                        if (typeof webCallUpdate === "function") {
+                            //console.info('webCallUpdate - 2');
+                            webCallUpdate(obj);
+                        }
                     }
                     
                     if(obj.command === 'recordingUpdate') {
@@ -245,21 +260,25 @@ $js = <<<JS
                     }
                     
                     if(obj.command === 'incomingCall') {
-                        incomingCall(obj);
+                        if (typeof incomingCall === "function") {
+                            incomingCall(obj);
+                        }
                     }
                     
                     if(obj.command === 'updateUserCallStatus') {
-                        updateUserCallStatus(obj);
+                        if (typeof updateUserCallStatus === "function") {
+                            updateUserCallStatus(obj);
+                        }
                     }
                     
                     if(obj.command === 'callMapUpdate') {
                         $('#btn-user-call-map-refresh').click();
                     }
-                    
                 }
+                
             } catch (error) {
-                console.error('Invalid JSON data on socket.onmessage');
-                console.error(e.data);
+                console.error('Error in functions - socket.onmessage');
+                console.error(error);
             }
             
         };

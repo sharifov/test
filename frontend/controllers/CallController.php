@@ -3,12 +3,16 @@
 namespace frontend\controllers;
 
 use common\models\Employee;
+use common\models\Lead;
 use common\models\Project;
 use common\models\search\EmployeeSearch;
+use common\models\search\LeadFlightSegmentSearch;
+use common\models\search\LeadSearch;
 use common\models\UserProjectParams;
 use Yii;
 use common\models\Call;
 use common\models\search\CallSearch;
+use yii\db\Expression;
 use yii\filters\AccessControl;
 use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
@@ -287,15 +291,224 @@ class CallController extends FController
 
     }
 
+
+    /**
+     * @return string
+     * @throws \Exception
+     */
     public function actionAutoRedial()
     {
 
-        $userId = Yii::$app->user->id;
+        /** @var Employee $user */
+        $user = Yii::$app->user->identity;
 
 
+
+        /*if(Yii::$app->request->get('act')) {
+            $profile = $user->userProfile;
+            if($profile) {
+                $profile->up_updated_dt = date('Y-m-d H:i:s');
+
+                if (Yii::$app->request->get('act') == 'start') {
+                    $profile->up_auto_redial = true;
+                    $profile->save();
+                }
+                if (Yii::$app->request->get('act') == 'stop') {
+                    $profile->up_auto_redial = false;
+                    $profile->save();
+                }
+            }
+        }*/
+
+
+        //$callModel = null;
+        $leadModel = null;
+        $callData = [];
+
+
+        $query = Lead::getPendingQuery();
+        $allPendingLeadsCount = $query->count();
+
+        $query = Lead::getPendingQuery($user->id);
+        $myPendingLeadsCount = $query->count();
+
+
+        $callModel = Call::find()->where(['c_call_status' => [Call::CALL_STATUS_RINGING, Call::CALL_STATUS_IN_PROGRESS]])->andWhere(['c_created_user_id' => Yii::$app->user->id])->orderBy(['c_id' => SORT_DESC])->limit(1)->one();
+
+        //echo Call::find()->where(['c_call_status' => [Call::CALL_STATUS_RINGING, Call::CALL_STATUS_IN_PROGRESS]])->andWhere(['c_created_user_id' => Yii::$app->user->id])->orderBy(['c_id' => SORT_DESC])->limit(1)->createCommand()->getRawSql(); exit;
+
+        if(Yii::$app->request->get('act') === 'find') {
+
+
+
+            $query = Lead::getPendingQuery($user->id);
+            $query->limit(1);
+
+            //echo $query->createCommand()->getRawSql(); exit;
+
+            //$leadModel = $query->one();
+
+            if(!$callModel) {
+                $leadModel = $query->one();
+            }
+
+            if($leadModel) {
+                $callData['error'] = null;
+                $callData['project_id'] = $leadModel->project_id;
+                $callData['lead_id'] = $leadModel->id;
+                $callData['phone_to'] = null;
+                $callData['phone_from'] = null;
+
+                if($leadModel->client && $leadModel->client->clientPhones) {
+                    foreach ($leadModel->client->clientPhones as $phone) {
+                        if(!$phone->phone) {
+                            continue;
+                        }
+                        $callData['phone_to'] = trim($phone->phone);
+                        break;
+                    }
+                }
+
+                $upp = UserProjectParams::find()->where(['upp_project_id' => $leadModel->project_id, 'upp_user_id' => $user->id])->one();
+                if($upp && $upp->upp_tw_phone_number) {
+                    $callData['phone_from'] = $upp->upp_tw_phone_number;
+                }
+
+                if(!$callData['phone_from']) {
+                    $callData['error'] = 'Not found phone number for project ('.$leadModel->project->name.')';
+                }
+
+                if(!$callData['phone_to']) {
+                    $callData['error'] = 'Not found client number';
+                }
+                //$callData['error'] = 'Not found client number';
+
+                //$callData['phone_to'] = '+37369594567';
+            }
+
+
+            $isActionFind = true;
+        } else {
+            $isActionFind = false;
+        }
+
+
+        $searchModel = new LeadSearch();
+
+        $params = Yii::$app->request->queryParams;
+        //$params2 = Yii::$app->request->post();
+        //$params = array_merge($params, $params2);
+
+        if(Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id)) {
+            $isAgent = true;
+        } else {
+            $isAgent = false;
+        }
+
+
+        $checkShiftTime = true;
+
+        if($isAgent) {
+            $checkShiftTime = $user->checkShiftTime();
+            /*$userParams = $user->userParams;
+
+            if($userParams) {
+                if($userParams->up_inbox_show_limit_leads > 0) {
+                    $params['LeadSearch']['limit'] = $userParams->up_inbox_show_limit_leads;
+                }
+            }*/
+
+
+            /*if($checkShiftTime = !$user->checkShiftTime()) {
+                throw new ForbiddenHttpException('Access denied! Invalid Agent shift time');
+            }*/
+        }
+
+        //$checkShiftTime = true;
+
+
+
+        //$leadModel = new Lead();
+
+
+        /*if(Yii::$app->request->isPjax) {
+            $leadModel = Lead::find()->orderBy(['id' => SORT_DESC])->limit(1)->one();
+        } else {
+            $leadModel = null; //Lead::findOne(22);
+        }*/
+
+
+        if(Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id)) {
+            $params['LeadSearch']['supervision_id'] = Yii::$app->user->id;
+        }
+
+
+        if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
+            $dataProvider = $searchModel->searchInbox($params);
+        } else {
+            $dataProvider = null;
+        }
+
+
+
+        $isAccessNewLead = $user->accessTakeNewLead();
+        $accessLeadByFrequency = [];
+
+        if($isAccessNewLead){
+            $accessLeadByFrequency = $user->accessTakeLeadByFrequencyMinutes();
+            if(!$accessLeadByFrequency['access']){
+                $isAccessNewLead = $accessLeadByFrequency['access'];
+            }
+        }
+
+        /*$dataProviderSegments = null;
+
+        if($leadModel) {
+            $searchModelSegments = new LeadFlightSegmentSearch();
+
+            $params = Yii::$app->request->queryParams;
+            //if($leadModel) {
+            $params['LeadFlightSegmentSearch']['lead_id'] = $leadModel ? $leadModel->id : 0;
+            //}
+            $dataProviderSegments = $searchModelSegments->search($params);
+        }*/
+
+
+        //echo $callModel->c_id; exit;
+
+
+        $searchModelCall = new CallSearch();
+
+        $params = Yii::$app->request->queryParams;
+        $params['CallSearch']['c_created_user_id'] = Yii::$app->user->id;
+        $params['CallSearch']['c_call_type_id'] = Call::CALL_TYPE_OUT;
+        $params['CallSearch']['limit'] = 10;
+
+        $dataProviderCall = $searchModelCall->searchAgent($params);
+        $projectList = Project::getListByUser(Yii::$app->user->id);
 
 
         return $this->render('auto-redial', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+            'checkShiftTime' => $checkShiftTime,
+            'isAgent' => $isAgent,
+            'isAccessNewLead' => $isAccessNewLead,
+            'accessLeadByFrequency' => $accessLeadByFrequency,
+            'user' => $user,
+
+            'leadModel' => $leadModel,
+            'callModel' => $callModel,
+            //'searchModelSegments' => $searchModelSegments,
+            //'dataProviderSegments' => $dataProviderSegments,
+            'isActionFind' => $isActionFind,
+            'callData' => $callData,
+            'myPendingLeadsCount' => $myPendingLeadsCount,
+            'allPendingLeadsCount' => $allPendingLeadsCount,
+
+            //'searchModelCall' => $searchModelCall,
+            'dataProviderCall' => $dataProviderCall,
+            'projectList'       => $projectList,
         ]);
 
     }

@@ -66,7 +66,7 @@ class LeadController extends FController
                 'rules' => [
                     [
                         'actions' => [
-                            'create', 'add-comment', 'change-state', 'unassign', 'take',
+                            'create', 'add-comment', 'change-state', 'unassign', 'take', 'auto-take',
                             'set-rating', 'add-note', 'unprocessed', 'call-expert', 'send-email',
                             'check-updates', 'flow-transition', 'get-user-actions', 'add-pnr', 'update2','clone',
                             'get-badges', 'sold', 'split-profit', 'split-tips','processing', 'follow-up', 'inbox', 'trash', 'booked',
@@ -704,7 +704,13 @@ class LeadController extends FController
                     if($lead->project_id) {
                         $upp = UserProjectParams::find()->where(['upp_project_id' => $lead->project_id, 'upp_user_id' => Yii::$app->user->id])->one();
                     }
-                    $userModel = Employee::findOne(Yii::$app->user->id);
+
+
+                    /** @var Employee $userModel */
+                    $userModel = Yii::$app->user->identity;
+
+
+
                     if($upp && $userModel) {
 
                         if (!$upp->upp_tw_phone_number) {
@@ -1505,6 +1511,77 @@ class LeadController extends FController
         //$taskList = ['call1', 'call2', 'voice-mail', 'email'];
 
         return $this->redirect(['lead/view', 'gid' => $model->gid]);
+    }
+
+
+    /**
+     * @param string $gid
+     * @return Response
+     * @throws ForbiddenHttpException
+     */
+    public function actionAutoTake(string $gid)
+    {
+
+        /** @var Employee $user */
+        $user = Yii::$app->user->identity;
+
+
+
+        if(Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id)) {
+            $isAgent = true;
+        } else {
+            $isAgent = false;
+        }
+
+        /*if(Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id)) {
+            $params['LeadSearch']['supervision_id'] = Yii::$app->user->id;
+        }*/
+
+
+        $lead = Lead::find()->where(['gid' => $gid])->one();
+
+        if (!$lead) {
+            Yii::$app->session->setFlash('warning', 'Not found Lead ('.$gid.') !');
+            return $this->redirect(Yii::$app->request->referrer);
+        }
+
+
+        Yii::info('user: '.$user->username.' ('.$user->id.'), lead: ' . $lead->id, 'info\ControllerLead:actionAutoTake');
+
+
+
+        if((int) $lead->status === Lead::STATUS_PENDING) {
+
+            if($isAgent) {
+                $isAccessNewLead = $user->accessTakeNewLead();
+                if (!$isAccessNewLead) {
+                    throw new ForbiddenHttpException('ControllerLead:actionAutoTake: Access is denied (limit) - "Take lead"');
+                }
+
+                $isAccessNewLeadByFrequency = $user->accessTakeLeadByFrequencyMinutes();
+                if (!$isAccessNewLeadByFrequency['access']) {
+                    throw new ForbiddenHttpException('ControllerLead:actionAutoTake: Access is denied (frequency) - "Take lead"');
+                }
+            }
+
+            $lead->employee_id = $user->id;
+            $lead->status = Lead::STATUS_PROCESSING;
+            $lead->status_description = 'Auto Dial';
+            if($lead->save()) {
+                LeadTask::createTaskList($lead->id, $lead->employee_id, 1, '', Task::CAT_NOT_ANSWERED_PROCESS);
+                LeadTask::createTaskList($lead->id, $lead->employee_id, 2, '', Task::CAT_NOT_ANSWERED_PROCESS);
+                LeadTask::createTaskList($lead->id, $lead->employee_id, 3, '', Task::CAT_NOT_ANSWERED_PROCESS);
+            }
+
+        } else {
+            Yii::$app->session->setFlash('warning', 'Error: Lead not in status Pending ('.$lead->id.')');
+            Yii::warning('Error: Lead not in status Pending - user: '.$user->username.' ('.$user->id.'), lead: ' . $lead->id, 'ControllerLead:actionAutoTake');
+            return $this->redirect(Yii::$app->request->referrer);
+        }
+
+        //$taskList = ['call1', 'call2', 'voice-mail', 'email'];
+
+        return $this->redirect(['lead/view', 'gid' => $lead->gid]);
     }
 
 

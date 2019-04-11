@@ -15,7 +15,7 @@ use common\models\Email;
 /**
  * AgentActivityController.
  */
-class AgentActivityController extends FController
+class AgentReportController extends FController
 {
 
     public function behaviors()

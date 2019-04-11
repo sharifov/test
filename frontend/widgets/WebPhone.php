@@ -54,9 +54,6 @@ class WebPhone extends \yii\bootstrap\Widget
         $clientId = 'seller'.$user_id;
         $tokenData = \Yii::$app->communication->getJwtTokenCache($clientId, true);
 
-        /*$userData = Employee::findOne($user_id);
-        VarDumper::dump($userData, 10, true);        exit;
-        */
 
         if($tokenData && isset($tokenData['data']['token'])) {
             $token = $tokenData['data']['token'];
