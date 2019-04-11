@@ -14,8 +14,8 @@ use \common\models\Call;
     <div class="col-md-12">
 
 
-            <table class="table table-striped">
-                <tr>
+            <table class="table <?=($model->c_call_status === Call::CALL_STATUS_CANCELED || $model->c_call_status === Call::CALL_STATUS_NO_ANSWER || $model->c_call_status === Call::CALL_STATUS_BUSY) ? '' : 'table-striped'?>">
+                <tr <?=($model->c_call_status === Call::CALL_STATUS_CANCELED || $model->c_call_status === Call::CALL_STATUS_NO_ANSWER || $model->c_call_status === Call::CALL_STATUS_BUSY) ? 'class="danger"' : ''?>>
                     <td width="50">
                         <u><?=$model->c_id?></u><br>
                         <?php if($model->c_call_type_id === Call::CALL_TYPE_IN):?>
@@ -39,7 +39,7 @@ use \common\models\Call;
                             <?php endif; ?>
                         <?php endif; ?>
                     </td>
-                    <td class="text-center">
+                    <td class="text-center" width="130">
                         <?php if($model->c_call_type_id === Call::CALL_TYPE_IN):?>
                             Incoming
                         <?php else:?>
@@ -48,7 +48,32 @@ use \common\models\Call;
                         <br>
                         <span class="badge badge-info"><?=$model->cProject->name?></span>
                     </td>
-                    <td class="text-center">
+
+                    <?php //if($model->c_call_status === Call::CALL_STATUS_RINGING || $model->c_call_status === Call::CALL_STATUS_IN_PROGRESS): ?>
+
+                        <td class="text-left">
+                            <?php if($model->c_lead_id && $model->cLead):?>
+                                <i><?=Html::a($model->c_lead_id, ['lead/view', 'gid' => $model->cLead->gid], ['data-pjax' => 0, 'target' => '_blank'])?></i><br>
+                                <?php
+                                    $segments = $model->cLead->leadFlightSegments;
+                                    $segmentData = [];
+                                    if ($segments) {
+                                        foreach ($segments as $sk => $segment) {
+                                            $segmentData[] = ($sk + 1) . '. <small>' . $segment->origin . ' <i class="fa fa-long-arrow-right"></i> ' . $segment->destination . '</small>';
+                                        }
+                                    }
+
+                                    $segmentStr = implode('<br>', $segmentData);
+                                    echo $segmentStr;
+                                ?>
+
+
+                                <?//=$model->c_lead_id?>
+                            <?php endif; ?>
+                        </td>
+                    <?php //endif; ?>
+
+                    <td class="text-center" width="160">
                         <?php
                             if($model->c_call_status === Call::CALL_STATUS_RINGING) {
                                 $icon = 'fa fa-refresh fa-pulse fa-fw text-danger';
@@ -58,7 +83,7 @@ use \common\models\Call;
                                 $icon = 'fa fa-pause';
                             } elseif($model->c_call_status === Call::CALL_STATUS_COMPLETED) {
                                 $icon = 'fa fa-trophy text-success';
-                            } elseif($model->c_call_status === Call::CALL_STATUS_CANCELED) {
+                            } elseif($model->c_call_status === Call::CALL_STATUS_CANCELED || $model->c_call_status === Call::CALL_STATUS_NO_ANSWER || $model->c_call_status === Call::CALL_STATUS_BUSY) {
                                 $icon = 'fa fa-times-circle text-danger';
                             } else {
                                 $icon = '';
@@ -91,6 +116,8 @@ use \common\models\Call;
                             &nbsp;&nbsp;&nbsp;<?=Yii::$app->formatter->asRelativeTime(strtotime($model->c_created_dt))?>
                         <?php endif;?>
                     </td>
+
+
 
                     <td class="text-center" width="110">
                         <?php if($model->c_call_type_id === Call::CALL_TYPE_IN):?>
