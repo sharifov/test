@@ -1400,9 +1400,18 @@ class CommunicationController extends ApiBaseController
 
         }
         else {
+
+            // 'type' => 'voip'
+
             if (isset($post['callData']['CallSid']) && $post['callData']['CallSid']) {
 
-                $call = Call::find()->where(['c_call_sid' => $post['callData']['CallSid']])->one();
+
+
+
+                $agentId = null;
+                if(isset($post['callData']['Called']) && $post['callData']['Called']) {
+                    $agentId = (int) str_replace('client:seller', '', $post['callData']['Called']);
+                }
 
                 if(isset($post['callData']['ParentCallSid']) && $post['callData']['ParentCallSid']) {
                     $childCall = true;
@@ -1411,12 +1420,61 @@ class CommunicationController extends ApiBaseController
                 }
 
 
-                if(!$call && $childCall) {
-                    $call = Call::find()->where(['c_call_sid' => $post['callData']['ParentCallSid']])->one();
+                $call = Call::find()->where(['c_call_sid' => $post['callData']['CallSid'], 'c_created_user_id' => $agentId])->one();
+
+                if(!$call) {
+                    $call = Call::find()->where(['c_call_sid' => $post['callData']['CallSid'], 'c_created_user_id' => null])->one();
+                    if($agentId) {
+                        $call->c_created_user_id = $agentId;
+                        //$call->save();
+                    }
                 }
 
 
+                if($childCall) {
+                    if(!$call) {
+                        $call = Call::find()->where(['c_call_sid' => $post['callData']['ParentCallSid'], 'c_created_user_id' => $agentId])->one();
+                    }
+
+                    if(!$call) {
+                        $call = Call::find()->where(['c_call_sid' => $post['callData']['ParentCallSid'], 'c_created_user_id' => null])->one();
+                        if($agentId) {
+                            $call->c_created_user_id = $agentId;
+                            //$call->save();
+                        }
+                    }
+                }
+
+
+                if(isset($post['callData']['CallStatus']) && $post['callData']['CallStatus']) {
+                    $call_status = $post['callData']['CallStatus'];
+                } else {
+                    $call_status = '';
+                }
+
+
+
                 if ($call) {
+
+
+                    $otherCalls = Call::find()->where(['c_call_sid' => $call->c_call_sid])->andWhere(['<>', 'c_id', $call->c_id])->all();
+
+
+                    $otherCallArr = [];
+
+                    if($otherCalls && $call_status === Call::CALL_STATUS_IN_PROGRESS) {
+                        foreach ($otherCalls as $otherCall) {
+                            $otherCallArr[] = $otherCall->attributes;
+
+                            if($otherCall->c_call_status === Call::CALL_STATUS_RINGING) {
+                                $otherCall->c_call_status = Call::CALL_STATUS_CANCELED;
+                                $otherCall->save();
+                            }
+                        }
+                    }
+
+                    Yii::info($call->c_call_sid . ' ' . VarDumper::dumpAsString($call->attributes) . ' Other Calls: ' . VarDumper::dumpAsString($otherCallArr), 'info\API:Voice:VOIP:CallBack');
+
 
                     if($call->c_call_status === Call::CALL_STATUS_NO_ANSWER || $call->c_call_status === Call::CALL_STATUS_BUSY || $call->c_call_status === Call::CALL_STATUS_CANCELED || $call->c_call_status === Call::CALL_STATUS_FAILED) {
 
