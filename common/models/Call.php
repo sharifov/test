@@ -234,14 +234,37 @@ class Call extends \yii\db\ActiveRecord
         return $times;
     }
 
-    public static function getCallStats($date)
+    public function dateRange( $first, $last, $step = '+1 day', $format = 'Y/m/d' ) {
+
+        $dates = array();
+        $current = strtotime( $first );
+        $last = strtotime( $last );
+
+        while( $current <= $last ) {
+
+            $dates[] = date( $format, $current );
+            $current = strtotime( $step, $current );
+        }
+
+        return $dates;
+    }
+
+    public static function getCallStats($startDate, $endDate)
     {
-        $calls = self::find()->select(['c_id', 'c_call_status', 'c_updated_dt'])->where(['c_call_status' => ['completed', 'busy', 'no-answer']])->andWhere(['between', 'c_updated_dt', $date." 00:00:00", $date." 23:59:59" ])->all();
+        $calls = self::find()->select(['c_id', 'c_call_status', 'c_updated_dt'])->where(['c_call_status' => ['completed', 'busy', 'no-answer']])->andWhere(['between', 'c_updated_dt', $startDate." 00:00:00", $endDate." 23:59:59" ])->all();
         $hourlyCallStats = [];
         $item = [];
+
         $timeRange = self::get_hours_range();
+        $dateRange = self::dateRange($startDate, $endDate);
+        if (strtotime($startDate) < strtotime($endDate)){
+            //var_dump($dateRange); die();
+            $timeLine = $dateRange;
+        } else {
+            $timeLine = $timeRange;
+        }
         $completed = $noAnswer = $busy = 0;
-        foreach ($timeRange as $key => $hour){
+        foreach ($timeLine as $key => $hour){
             $hourEndPoint = date('H:i', strtotime($hour) + 3600);
             foreach ($calls as $callItem){
                 $callUpdatedTime = date('H:i', strtotime($callItem->c_updated_dt));

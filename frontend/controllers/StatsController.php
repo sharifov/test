@@ -183,31 +183,32 @@ class StatsController extends FController
             ],
         ]);*/
 
-        $callsGraphData = Call::getCallStats($searchModel->datetime_start);
-
         return $this->render('call-sms', [
             //'datetime_start' => $datetime_start,
             //'datetime_end' => $datetime_end,
             //'dataProvider' => $dataProvider,
             'searchModel' => $searchModel,
             'dataProviderCommunication' => $dataProviderCommunication,
-            'callsGraphData' => $callsGraphData
         ]);
-
-
     }
 
     public function actionCallsGraph()
     {
-
         if (Yii::$app->request->isPjax) {
             $dateRange = Yii::$app->request->post('dateRange');
             $date = $pieces = explode("/", $dateRange);
-            $callsGraphData = Call::getCallStats($date[0]);
-            return $this->renderPartial('call-sms', [
+            $callsGraphData = Call::getCallStats($date[0], $date[1]);
+
+            return $this->renderAjax('calls-report', [
                 'callsGraphData' => $callsGraphData
             ]);
+        } else {
+            $currentDate =  date('Y-m-d', strtotime('-0 day'));
+            $callsGraphData = Call::getCallStats($currentDate, $currentDate);
 
+            return $this->render('calls-report', [
+                'callsGraphData' => $callsGraphData
+            ]);
         }
     }
 

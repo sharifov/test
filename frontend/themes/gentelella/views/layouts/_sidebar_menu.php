@@ -109,6 +109,7 @@ $isQA = Yii::$app->authManager->getAssignment('qa', Yii::$app->user->id);
                     $items =  [
                         ['label' => 'Agents report', 'url' => ['/agent-report'], 'icon' => 'users'],
                         ['label' => 'Calls & SMS', 'url' => ['/stats/call-sms'], 'icon' => 'phone'],
+                        ['label' => 'Calls Report', 'url' => ['/stats/calls-graph'], 'icon' => 'line-chart'],
                         ['label' => 'Stats Employees', 'url' => ['/stats/index'], 'icon' => 'users'],
                         ['label' => 'User Connections', 'url' => ['/user-connection/index'], 'icon' => 'plug'],
                         ['label' => 'User Stats', 'url' => ['/user-connection/stats'], 'icon' => 'area-chart'],
