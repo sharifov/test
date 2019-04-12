@@ -17,10 +17,10 @@ use yii\widgets\ActiveForm;
 $bundle = \frontend\assets\TimelineAsset::register($this);
 $this->title = 'Stats Calls & SMS';
 
-/*$js = <<<JS
-    google.charts.load('current', {packages: ['corechart', 'bar']});
+$js = <<<JS
+    //google.charts.load('current', {packages: ['corechart', 'bar']});
 JS;
-//$this->registerJs($js, \yii\web\View::POS_READY);*/
+$this->registerJs($js, \yii\web\View::POS_READY);
 
 $userId = Yii::$app->user->id;
 
@@ -40,6 +40,34 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$
         <div class="row">
             <div class="col-md-12 col-sm-6 col-xs-12">
                 <div class="x_panel">
+
+                    <div class="col-md-3">
+                        <?=\kartik\daterange\DateRangePicker::widget([
+                            'options'=>['id'=>'call-stats-picker'],
+                            'name'=>'callStatsRange',
+                            'convertFormat'=>true,
+                            'presetDropdown'=>true,
+                            'hideInput'=>true,
+                            'useWithAddon'=>true,
+                            'pluginOptions'=>[
+                                'timePicker'=> false,
+                                'timePickerIncrement'=>15,
+                                'locale'=>[
+                                    'format'=>'Y-m-d',
+                                    'separator' => ' / '
+                                ],
+                            ],
+                            'pluginEvents'=>[
+                                "apply.daterangepicker"=>"function(){
+                                console.log($('#call-stats-picker').val());
+                                  $.pjax({container: '#calls-graph-pjax', data: {dateRange: $('#call-stats-picker').val()}, type: 'PJAX', url: 'calls-graph', async:true, push: false});
+                                 }",
+                            ],
+
+                        ]);?>
+                    </div>
+
+
                     <!--<div class="x_title">
                         <h2>Call Chart by Status <small></small></h2>-->
                     <!--<ul class="nav navbar-right panel_toolbox">
@@ -59,11 +87,9 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$
                     </ul>-->
                     <!--    <div class="clearfix"></div>
                     </div>-->
+                    <?php Pjax::begin(['id' => 'calls-graph-pjax']); ?>
                     <div class="x_content">
-                        <!-- <div id="graph_bar" style="width: 100%; height: 280px; position: relative; -webkit-tap-highlight-color: rgba(0, 0, 0, 0);"><svg height="280" version="1.1" width="384" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" style="overflow: hidden; position: relative;"><desc style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);">Created with Raphaël @@VERSION</desc><defs style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></defs><text x="44.84375" y="212.540819576375" text-anchor="end" font-family="sans-serif" font-size="12px" stroke="none" fill="#888888" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0); text-anchor: end; font-family: sans-serif; font-size: 12px; font-weight: normal;" font-weight="normal"><tspan dy="4.009569576374986" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);">0</tspan></text><path fill="none" stroke="#aaaaaa" d="M57.34375,212.540819576375H359" stroke-width="0.5" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></path><text x="44.84375" y="165.65561468228123" text-anchor="end" font-family="sans-serif" font-size="12px" stroke="none" fill="#888888" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0); text-anchor: end; font-family: sans-serif; font-size: 12px; font-weight: normal;" font-weight="normal"><tspan dy="4.014989682281225" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);">750</tspan></text><path fill="none" stroke="#aaaaaa" d="M57.34375,165.65561468228123H359" stroke-width="0.5" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></path><text x="44.84375" y="118.7704097881875" text-anchor="end" font-family="sans-serif" font-size="12px" stroke="none" fill="#888888" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0); text-anchor: end; font-family: sans-serif; font-size: 12px; font-weight: normal;" font-weight="normal"><tspan dy="4.004784788187493" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);">1,500</tspan></text><path fill="none" stroke="#aaaaaa" d="M57.34375,118.7704097881875H359" stroke-width="0.5" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></path><text x="44.84375" y="71.88520489409373" text-anchor="end" font-family="sans-serif" font-size="12px" stroke="none" fill="#888888" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0); text-anchor: end; font-family: sans-serif; font-size: 12px; font-weight: normal;" font-weight="normal"><tspan dy="4.010204894093732" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);">2,250</tspan></text><path fill="none" stroke="#aaaaaa" d="M57.34375,71.88520489409373H359" stroke-width="0.5" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></path><text x="44.84375" y="25" text-anchor="end" font-family="sans-serif" font-size="12px" stroke="none" fill="#888888" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0); text-anchor: end; font-family: sans-serif; font-size: 12px; font-weight: normal;" font-weight="normal"><tspan dy="4" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);">3,000</tspan></text><path fill="none" stroke="#aaaaaa" d="M57.34375,25H359" stroke-width="0.5" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></path><text x="343.9171875" y="225.040819576375" text-anchor="middle" font-family="sans-serif" font-size="12px" stroke="none" fill="#888888" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0); text-anchor: middle; font-family: sans-serif; font-size: 12px; font-weight: normal;" font-weight="normal" transform="matrix(0.8192,-0.5736,0.5736,0.8192,-79.9983,252.876)"><tspan dy="4.009569576374986" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);">Other</tspan></text><text x="313.7515625" y="225.040819576375" text-anchor="middle" font-family="sans-serif" font-size="12px" stroke="none" fill="#888888" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0); text-anchor: middle; font-family: sans-serif; font-size: 12px; font-weight: normal;" font-weight="normal" transform="matrix(0.8192,-0.5736,0.5736,0.8192,-106.7655,250.4921)"><tspan dy="4.009569576374986" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);">iPhone 6S Plus</tspan></text><text x="253.4203125" y="225.040819576375" text-anchor="middle" font-family="sans-serif" font-size="12px" stroke="none" fill="#888888" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0); text-anchor: middle; font-family: sans-serif; font-size: 12px; font-weight: normal;" font-weight="normal" transform="matrix(0.8192,-0.5736,0.5736,0.8192,-114.3991,213.595)"><tspan dy="4.009569576374986" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);">iPhone 6 Plus</tspan></text><text x="193.0890625" y="225.040819576375" text-anchor="middle" font-family="sans-serif" font-size="12px" stroke="none" fill="#888888" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0); text-anchor: middle; font-family: sans-serif; font-size: 12px; font-weight: normal;" font-weight="normal" transform="matrix(0.8192,-0.5736,0.5736,0.8192,-117.6582,173.6239)"><tspan dy="4.009569576374986" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);">iPhone 5S</tspan></text><text x="162.9234375" y="225.040819576375" text-anchor="middle" font-family="sans-serif" font-size="12px" stroke="none" fill="#888888" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0); text-anchor: middle; font-family: sans-serif; font-size: 12px; font-weight: normal;" font-weight="normal" transform="matrix(0.8192,-0.5736,0.5736,0.8192,-119.94,154.2209)"><tspan dy="4.009569576374986" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);">iPhone 5</tspan></text><text x="132.7578125" y="225.040819576375" text-anchor="middle" font-family="sans-serif" font-size="12px" stroke="none" fill="#888888" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0); text-anchor: middle; font-family: sans-serif; font-size: 12px; font-weight: normal;" font-weight="normal" transform="matrix(0.8192,-0.5736,0.5736,0.8192,-132.3954,141.7008)"><tspan dy="4.009569576374986" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);">iPhone 3GS</tspan></text><text x="102.5921875" y="225.040819576375" text-anchor="middle" font-family="sans-serif" font-size="12px" stroke="none" fill="#888888" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0); text-anchor: middle; font-family: sans-serif; font-size: 12px; font-weight: normal;" font-weight="normal" transform="matrix(0.8192,-0.5736,0.5736,0.8192,-134.025,121.7152)"><tspan dy="4.009569576374986" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);">iPhone 4S</tspan></text><text x="72.4265625" y="225.040819576375" text-anchor="middle" font-family="sans-serif" font-size="12px" stroke="none" fill="#888888" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0); text-anchor: middle; font-family: sans-serif; font-size: 12px; font-weight: normal;" font-weight="normal" transform="matrix(0.8192,-0.5736,0.5736,0.8192,-136.3068,102.3122)"><tspan dy="4.009569576374986" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);">iPhone 4</tspan></text><rect x="61.114453125" y="188.7856490967008" width="22.624218749999997" height="23.755170479674177" rx="0" ry="0" fill="#26b99a" stroke="none" fill-opacity="1" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0); fill-opacity: 1;"></rect><rect x="91.280078125" y="171.59440730219978" width="22.624218749999997" height="40.9464122741752" rx="0" ry="0" fill="#26b99a" stroke="none" fill-opacity="1" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0); fill-opacity: 1;"></rect><rect x="121.445703125" y="195.34957778187396" width="22.624218749999997" height="17.191241794501025" rx="0" ry="0" fill="#26b99a" stroke="none" fill-opacity="1" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0); fill-opacity: 1;"></rect><rect x="151.611328125" y="114.33194372487995" width="22.624218749999997" height="98.20887585149504" rx="0" ry="0" fill="#26b99a" stroke="none" fill-opacity="1" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0); fill-opacity: 1;"></rect><rect x="181.776953125" y="171.59440730219978" width="22.624218749999997" height="40.9464122741752" rx="0" ry="0" fill="#26b99a" stroke="none" fill-opacity="1" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0); fill-opacity: 1;"></rect><rect x="211.942578125" y="77.88651112053773" width="22.624218749999997" height="134.65430845583725" rx="0" ry="0" fill="#26b99a" stroke="none" fill-opacity="1" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0); fill-opacity: 1;"></rect><rect x="242.108203125" y="141.02525371125066" width="22.624218749999997" height="71.51556586512433" rx="0" ry="0" fill="#26b99a" stroke="none" fill-opacity="1" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0); fill-opacity: 1;"></rect><rect x="272.27382812499997" y="64.32105850451327" width="22.624218749999997" height="148.2197610718617" rx="0" ry="0" fill="#26b99a" stroke="none" fill-opacity="1" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0); fill-opacity: 1;"></rect><rect x="302.439453125" y="120.58330437742579" width="22.624218749999997" height="91.9575151989492" rx="0" ry="0" fill="#26b99a" stroke="none" fill-opacity="1" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0); fill-opacity: 1;"></rect><rect x="332.605078125" y="126.83466502997162" width="22.624218749999997" height="85.70615454640337" rx="0" ry="0" fill="#26b99a" stroke="none" fill-opacity="1" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0); fill-opacity: 1;"></rect></svg><div class="morris-hover morris-default-style" style="left: 50.5922px; top: 111px; display: none;"><div class="morris-hover-row-label">iPhone 4S</div><div class="morris-hover-point" style="color: #26B99A">
-                                     Geekbench:
-                                     655
-                                 </div></div></div>-->
+
                         <?php if ($callsGraphData): ?>
                             <div class="row">
                                 <div class="col-md-12">
@@ -109,6 +135,7 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$
                         <?php endif; ?>
                     </div>
                 </div>
+                <?php Pjax::end(); ?>
             </div>
 
         </div>
@@ -147,7 +174,10 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$
                             'pluginOptions'=>[
                                 'timePicker'=> false,
                                 'timePickerIncrement'=>15,
-                                'locale'=>['format'=>'Y-m-d']
+                                'locale'=>[
+                                    'format'=>'Y-m-d',
+                                    'separator' => ' / '
+                                ]
                             ]
                         ]);
                         ?>

@@ -35,7 +35,7 @@ class StatsController extends FController
                 'class' => AccessControl::class,
                 'rules' => [
                     [
-                        'actions' => ['index', 'call-sms'],
+                        'actions' => ['index', 'call-sms', 'calls-graph'],
                         'allow' => true,
                         'roles' => ['supervision', 'admin', 'qa'],
                     ],
@@ -197,6 +197,18 @@ class StatsController extends FController
 
     }
 
+    public function actionCallsGraph()
+    {
 
+        if (Yii::$app->request->isPjax) {
+            $dateRange = Yii::$app->request->post('dateRange');
+            $date = $pieces = explode("/", $dateRange);
+            $callsGraphData = Call::getCallStats($date[0]);
+            return $this->renderPartial('call-sms', [
+                'callsGraphData' => $callsGraphData
+            ]);
+
+        }
+    }
 
 }
