@@ -581,6 +581,7 @@ class CommunicationController extends ApiBaseController
     protected function getDirectAgentsByPhoneNumber(string $agent_phone_number, string $client_phone_number)
     {
         $call_employee = [];
+        $call_agent_username = [];
         $upp = UserProjectParams::find()->where(['upp_tw_phone_number' => $agent_phone_number])->one();
         $user = null;
         $call_user_id = null;
@@ -596,6 +597,7 @@ class CommunicationController extends ApiBaseController
                         Yii::info('DIRECT - User ('.$user->username.') Id: '.$user->id.', phone: ' . $agent_phone_number, 'info\API:CommunicationController:actionVoice:Direct - 2');
                         if($user->userProfile && $user->userProfile->up_call_type_id == UserProfile::CALL_TYPE_WEB) {
                             $call_employee[] = $user;
+                            $call_agent_username[] = 'seller'.$user->id;
                         }
 
                     } else {
@@ -629,6 +631,7 @@ class CommunicationController extends ApiBaseController
                         $employeeModel = Employee::findOne(['id' => $userForCall['tbl_user_id']]);
                         if($employeeModel && $employeeModel->userProfile && (int) $employeeModel->userProfile->up_call_type_id === UserProfile::CALL_TYPE_WEB) {
                             $call_employee[] = $employeeModel;
+                            $call_agent_username[] = 'seller'.$employeeModel->id;
                             Yii::info('Redirected Call: call_user_id: '.$call_user_id.', call: '.'seller'.$employeeModel->id.', agent_phone_number: '.$agent_phone_number, 'info\API:CommunicationController:actionVoice:UserProjectParams - 5');
                         }
                     }
@@ -639,6 +642,7 @@ class CommunicationController extends ApiBaseController
         $result = [
             'call_employee' => $call_employee,
             'call_project_id' => $call_project_id,
+            'call_agent_username' => $call_agent_username,
         ];
 
         return $result;
@@ -825,12 +829,13 @@ class CommunicationController extends ApiBaseController
 
                 } elseif ($agentDirectCallCheck) {
 
-                    $agentDirectResults = $this->getDirectAgentsByPhoneNumber($agent_phone_number, $client_phone_number);
-                    if($agentDirectResults && isset($agentDirectResults['call_employee']) && count($agentDirectResults['call_employee'])) {
+                    $agentRes = $this->getDirectAgentsByPhoneNumber($agent_phone_number, $client_phone_number);
+                    if($agentRes && isset($agentRes['call_employee'], $agentRes['call_agent_username']) && count($agentRes['call_employee'])) {
                         $isOnHold = false;
                         $callGeneralNumber = false;
-                        $call_employee = $agentDirectResults['call_employee'];
-                        $call_project_id = (isset($agentDirectResults['call_project_id'])) ? $agentDirectResults['call_project_id'] : null;
+                        $call_employee = $agentRes['call_employee'];
+                        $call_project_id = (isset($agentRes['call_project_id'] )) ? $agentRes['call_project_id'] : null;
+                        $call_agent_username = $agentRes['call_agent_username'];
                     } else {
                         $callGeneralNumber = true;
                     }
