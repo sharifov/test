@@ -688,46 +688,11 @@ class CommunicationController extends ApiBaseController
             throw new NotFoundHttpException('Not found action', 1);
         }*/
 
-
-//        [
-//            'c_id' => '5'
-//            'c_call_status' => 'completed'
-//            'c_project_id' => '2'
-//            'callData' => [
-//                'ApiVersion' => '2010-04-01'
-//                'Called' => 'sip:alex.connor@kivork.sip.us1.twilio.com'
-//                'CallStatus' => 'completed'
-//                'Duration' => '1'
-//                'From' => 'admin'
-//                'CallerCountry' => 'CF'
-//                'Direction' => 'outbound-api'
-//                'Timestamp' => 'Wed, 23 Jan 2019 16:36:00 +0000'
-//                'CallDuration' => '18'
-//                'CallbackSource' => 'call-progress-events'
-//                'AccountSid' => 'AC10f3c74efba7b492cbd7dca86077736c'
-//                'SipCallId' => 'd39486fe63a4c8de6c946994f3c9f17f@0.0.0.0'
-//                'CallerCity' => ''
-//                'SipResponseCode' => '200'
-//                'CallerState' => ''
-//                'Caller' => 'admin'
-//                'FromCountry' => 'CF'
-//                'FromCity' => ''
-//                'SequenceNumber' => '3'
-//                'CallSid' => 'CA35e3633dd15dc2d2c50f8d62d9f94187'
-//                'To' => 'sip:alex.connor@kivork.sip.us1.twilio.com'
-//                'FromZip' => ''
-//                'CallerZip' => ''
-//                'FromState' => ''
-//            ]
-//            'action' => 'update'
-//            'type' => 'voip'
-//        ]
-
         $post = Yii::$app->request->post();
 
         $response = []; //$post;
 
-        if($type == self::TYPE_VOIP_INCOMING) {
+        if($type === self::TYPE_VOIP_INCOMING) {
 
             //$response = $this->incomingCallOld($post, $response);
 
@@ -770,19 +735,19 @@ class CommunicationController extends ApiBaseController
                 }
 
                 // detect by sources
-                if($source && $source->project) {
-                    $project = $source->project;
+                if($source && $project = $source->project) {
+
                     $call_project_id = $project->id;
+
                     $project_employee_access = ProjectEmployeeAccess::find()->where(['project_id' => $project->id])->all();
                     //Yii::info(VarDumper::dumpAsString($project_employee_access), 'info\API:CommunicationController:actionVoice:$project_employee_access');
                     $callAgents = [];
-                    if ($project_employee_access && count($project_employee_access)) {
+
+                    if ($project_employee_access) {
                         foreach ($project_employee_access AS $projectEmployer) {
-                            $projectUser = Employee::findOne($projectEmployer->employee_id);
-                            if($projectUser && $projectUser->userProfile && $projectUser->userProfile->up_call_type_id ) {
-                                if ($projectUser->userProfile->up_call_type_id === UserProfile::CALL_TYPE_WEB) {
-                                    $callAgents[] = $projectUser;
-                                }
+                            $projectUser = $projectEmployer->employee; //Employee::findOne($projectEmployer->employee_id);
+                            if($projectUser && $projectUser->userProfile && $projectUser->userProfile->up_call_type_id === UserProfile::CALL_TYPE_WEB) {
+                                $callAgents[] = $projectUser;
                             }
                         }
                     }
@@ -800,22 +765,23 @@ class CommunicationController extends ApiBaseController
                                         $call_employee[] = $user;
                                     } else {
                                         $agentsInfo[] = 'Call Occupied - User (' . $user->username . ') Id: ' . $user->id . ', phone: ' . $agent_phone_number;
-                                        Yii::info('Call Occupied - User ('.$user->username.') Id: '.$user->id.', phone: ' . $agent_phone_number, 'info\API:CommunicationController:actionVoice:isCallFree');
-                                        Notifications::create($user->id, 'Missing Call [Occupied]', 'Missing Call from ' . $client_phone_number .' to '.$agent_phone_number . "\r\n Reason: Agent Occupied", Notifications::TYPE_WARNING, true);
+
+                                        //Yii::info('Call Occupied - User ('.$user->username.') Id: '.$user->id.', phone: ' . $agent_phone_number, 'info\API:CommunicationController:actionVoice:isCallFree');
+                                        //Notifications::create($user->id, 'Missing Call [Occupied]', 'Missing Call from ' . $client_phone_number .' to '.$agent_phone_number . "\r\n Reason: Agent Occupied", Notifications::TYPE_WARNING, true);
                                         //Notifications::socket($user->id, null, 'getNewNotification', [], true);
                                     }
                                 } else {
-                                    Yii::info('Call Status not Ready - User ('.$user->username.') Id: '.$user->id.', phone: ' . $agent_phone_number, 'info\API:CommunicationController:actionVoice:isCallStatusReady');
-                                    Notifications::create($user->id, 'Missing Call [not Ready]', 'Missing Call from ' . $client_phone_number .' to '.$agent_phone_number . "\r\n Reason: Call Status not Ready", Notifications::TYPE_WARNING, true);
+                                    // Yii::info('Call Status not Ready - User ('.$user->username.') Id: '.$user->id.', phone: ' . $agent_phone_number, 'info\API:CommunicationController:actionVoice:isCallStatusReady');
+                                    // Notifications::create($user->id, 'Missing Call [not Ready]', 'Missing Call from ' . $client_phone_number .' to '.$agent_phone_number . "\r\n Reason: Call Status not Ready", Notifications::TYPE_WARNING, true);
                                     //Notifications::socket($user->id, null, 'getNewNotification', [], true);
                                 }
                             } else {
-                                Yii::info('Offline - User ('.$user->username.') Id: '.$user->id.', phone: ' . $agent_phone_number, 'info\API:CommunicationController:actionVoice:isOnline');
+                                //Yii::info('Offline - User ('.$user->username.') Id: '.$user->id.', phone: ' . $agent_phone_number, 'info\API:CommunicationController:actionVoice:isOnline');
                                 //Notifications::create($user->id, 'Missing Call [Offline]', 'Missing Call from ' . $client_phone_number .' to '.$agent_phone_number . "\r\n Reason: Agent offline", Notifications::TYPE_WARNING, true);
                                 //Notifications::socket($user->id, null, 'getNewNotification', [], true);
                             }
                         }
-                        if(!count($call_employee)) {
+                        if(!$call_employee) {
                             $isOnHold = true;
                         }
                     } else {
@@ -823,18 +789,18 @@ class CommunicationController extends ApiBaseController
                         Yii::info('Call in Hold. phone: ' . $agent_phone_number, 'info\API:CommunicationController:actionVoice:CallInHold');
                     }
 
-                    if ($agentsInfo && count($agentsInfo)) {
+                    if ($agentsInfo) {
                         Yii::info(VarDumper::dumpAsString($agentsInfo), 'info\API:CommunicationController:actionVoice:isCallFree');
                     }
 
                 } elseif ($agentDirectCallCheck) {
 
                     $agentRes = $this->getDirectAgentsByPhoneNumber($agent_phone_number, $client_phone_number);
-                    if($agentRes && isset($agentRes['call_employee'], $agentRes['call_agent_username']) && count($agentRes['call_employee'])) {
+                    if($agentRes && isset($agentRes['call_employee'], $agentRes['call_agent_username']) && $agentRes['call_employee']) {
                         $isOnHold = false;
                         $callGeneralNumber = false;
                         $call_employee = $agentRes['call_employee'];
-                        $call_project_id = (isset($agentRes['call_project_id'] )) ? $agentRes['call_project_id'] : null;
+                        $call_project_id = $agentRes['call_project_id'] ?? null;
                         $call_agent_username = $agentRes['call_agent_username'];
                     } else {
                         $callGeneralNumber = true;
@@ -846,7 +812,7 @@ class CommunicationController extends ApiBaseController
 
 
 
-                $clientPhone = ClientPhone::find()->where(['phone' => $client_phone_number])->one();
+                $clientPhone = ClientPhone::find()->where(['phone' => $client_phone_number])->orderBy(['id' => SORT_DESC])->limit(1)->one();
                 $lead = null;
                 if($clientPhone && $client = $clientPhone->client) {
                     $lead = Lead::find()->select(['id'])->where(['client_id' => $clientPhone->client_id])->orderBy(['id' => SORT_DESC])->limit(1)->one();
@@ -884,7 +850,7 @@ class CommunicationController extends ApiBaseController
 
                 ], 10, false), 'info\API:CommunicationController:actionVoice:ParamsToCall');
 
-                if (!$isOnHold && !$callGeneralNumber && count($call_employee) ) {
+                if (!$isOnHold && !$callGeneralNumber && $call_employee) {
 
                     foreach ($call_employee AS $key => $userCall) {
                         $call = new Call();
@@ -937,7 +903,7 @@ class CommunicationController extends ApiBaseController
                     }
                     Yii::info('Call add to hold : call_project_id: '.$call_project_id.', generalLine: '.$generalLineNumber, 'info\API:CommunicationController:actionVoice:isOnHold - 5');
 
-                } elseif($callGeneralNumber && $callGeneralNumber != ''){
+                } elseif($callGeneralNumber){
                     $call = new Call();
                     $call->c_call_sid = $post['call']['CallSid'] ?? null;
                     $call->c_account_sid = $post['call']['AccountSid'] ?? null;
@@ -973,8 +939,8 @@ class CommunicationController extends ApiBaseController
                     $response['client_phone_number'] = $client_phone_number;
                     $response['general_phone_number'] = $generalLineNumber;
                     $response['agent_username'] = $call_agent_username;
-                    $response['call_to_hold'] = ($isOnHold) ? 1 : 0;
-                    $response['call_to_general'] = ($callGeneralNumber) ? 1 : 0;
+                    $response['call_to_hold'] = $isOnHold ? 1 : 0;
+                    $response['call_to_general'] = $callGeneralNumber ? 1 : 0;
                 } else {
                     $response['error'] = 'Not found call destination agent, hold or general line';
                     $response['error_code'] = 13;
@@ -985,7 +951,7 @@ class CommunicationController extends ApiBaseController
                 $response['error_code'] = 12;
             }
 
-        } elseif($type == self::TYPE_VOIP_RECORD) {
+        } elseif($type === self::TYPE_VOIP_RECORD) {
 
             if (isset($post['callData']['CallSid']) && $post['callData']['CallSid']) {
                 $call = Call::find()->where(['c_call_sid' => $post['callData']['CallSid']])->one();
@@ -1404,8 +1370,6 @@ class CommunicationController extends ApiBaseController
             // 'type' => 'voip'
 
             if (isset($post['callData']['CallSid']) && $post['callData']['CallSid']) {
-
-
 
 
                 $agentId = null;
