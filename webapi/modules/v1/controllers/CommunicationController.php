@@ -1424,7 +1424,7 @@ class CommunicationController extends ApiBaseController
 
                 if(!$call) {
                     $call = Call::find()->where(['c_call_sid' => $post['callData']['CallSid'], 'c_created_user_id' => null])->one();
-                    if($agentId) {
+                    if($call && $agentId) {
                         $call->c_created_user_id = $agentId;
                         //$call->save();
                     }
@@ -1438,7 +1438,7 @@ class CommunicationController extends ApiBaseController
 
                     if(!$call) {
                         $call = Call::find()->where(['c_call_sid' => $post['callData']['ParentCallSid'], 'c_created_user_id' => null])->one();
-                        if($agentId) {
+                        if($call && $agentId) {
                             $call->c_created_user_id = $agentId;
                             //$call->save();
                         }
