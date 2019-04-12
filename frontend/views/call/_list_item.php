@@ -41,7 +41,7 @@ use \common\models\Call;
                     Outgoing
                 <?php endif;?>
                 <br>
-                <span class="badge badge-info"><?=$model->cProject->name?></span>
+                <span class="badge badge-info"><?=$model->cProject ? $model->cProject->name : '-'?></span>
             </td>
 
             <?php //if($model->c_call_status === Call::CALL_STATUS_RINGING || $model->c_call_status === Call::CALL_STATUS_IN_PROGRESS): ?>
