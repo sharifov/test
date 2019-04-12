@@ -219,7 +219,7 @@ class CallSearch extends Call
 
         if (!$this->validate()) {
             // uncomment the following line if you do not want to return any records when validation fails
-            // $query->where('0=1');
+            $query->where('0=1');
             return $dataProvider;
         }
 
@@ -271,6 +271,8 @@ class CallSearch extends Call
             ->andFilterWhere(['like', 'c_uri', $this->c_uri])
             ->andFilterWhere(['like', 'c_sequence_number', $this->c_sequence_number])
             ->andFilterWhere(['like', 'c_error_message', $this->c_error_message]);*/
+
+        $query->with(['cProject', 'cLead', 'cLead.leadFlightSegments', 'cCreatedUser']);
 
         return $dataProvider;
     }
