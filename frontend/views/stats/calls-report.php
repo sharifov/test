@@ -78,7 +78,7 @@ $this->title = 'Calls Report';
                                                 let data = google.visualization.arrayToDataTable([
                                                     ['Time Line', 'Completed', 'Canceled', 'Busy', {role: 'annotation'}],
                                                     <?php foreach($callsGraphData as $k => $item):?>
-                                                    ['<?=date('H:i', strtotime($item['time']))?>', <?=$item['completed']?>, <?=$item['no-answer']?>, <?=$item['busy']?>, '<?='--'?>'],
+                                                    ['<?=date($item['timeLine'], strtotime($item['time']))?>', <?=$item['completed']?>, <?=$item['no-answer']?>, <?=$item['busy']?>, '<?='--'?>'],
                                                     <?php endforeach;?>
                                                 ]);
 

@@ -258,13 +258,19 @@ class Call extends \yii\db\ActiveRecord
         $timeRange = self::get_hours_range();
         $dateRange = self::dateRange($startDate, $endDate);
         if (strtotime($startDate) < strtotime($endDate)){
-            //var_dump($dateRange); die();
             $timeLine = $dateRange;
+            /*foreach ($timeLine as $val){
+                echo $val; echo '<br>';
+            }
+            die();*/
+            $item['timeLine'] = 'd M';
         } else {
             $timeLine = $timeRange;
+            $item['timeLine'] = 'H:i';
         }
         $completed = $noAnswer = $busy = 0;
         foreach ($timeLine as $key => $hour){
+
             $hourEndPoint = date('H:i', strtotime($hour) + 3600);
             foreach ($calls as $callItem){
                 $callUpdatedTime = date('H:i', strtotime($callItem->c_updated_dt));
@@ -290,6 +296,7 @@ class Call extends \yii\db\ActiveRecord
 
             array_push($hourlyCallStats, $item);
             $completed = $noAnswer = $busy = 0;
+            //echo $hour; echo '<br>';
         }
         return $hourlyCallStats;
     }
