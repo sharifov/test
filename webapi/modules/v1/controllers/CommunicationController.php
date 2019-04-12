@@ -615,7 +615,7 @@ class CommunicationController extends ApiBaseController
             }
         }
 
-        if(!$call_employee && $call_user_id && $call_project_id) {
+        if(!$call_employee && !count($call_employee) && $call_user_id && $call_project_id) {
 
             Yii::info('isRedirectCall - call_user_id ('.$call_user_id.'), call_project_id: '. $call_project_id, 'info\API:CommunicationController:actionVoice:Redirect - 3');
             $usersForCall = Employee::getAgentsForCall($call_user_id, $call_project_id);
@@ -868,6 +868,14 @@ class CommunicationController extends ApiBaseController
 
                 $data['client_phone'] = $client_phone_number;
                 $data['agent_phone'] = $agent_phone_number;
+
+
+                Yii::info(VarDumper::dumpAsString([
+                    'data' => $data,
+                    'post' => $post,
+                    'call_employee' => $call_employee,
+
+                ], 10, false), 'info\API:CommunicationController:actionVoice:ParamsToCall');
 
                 if (!$isOnHold && !$callGeneralNumber && count($call_employee) ) {
 
