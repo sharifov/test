@@ -1373,7 +1373,12 @@ class CommunicationController extends ApiBaseController
 
 
                 $agentId = null;
-                if(isset($post['callData']['Called']) && $post['callData']['Called']) {
+
+                if(isset($post['callData']['c_user_id']) && $post['callData']['c_user_id']) {
+                    $agentId = $post['callData']['c_user_id'];
+                }
+
+                if(!$agentId ?? isset($post['callData']['Called']) && $post['callData']['Called']) {
                     $agentId = (int) str_replace('client:seller', '', $post['callData']['Called']);
                 }
 
@@ -1432,6 +1437,7 @@ class CommunicationController extends ApiBaseController
 
                             if($otherCall->c_call_status === Call::CALL_STATUS_RINGING) {
                                 $otherCall->c_call_status = Call::CALL_STATUS_CANCELED;
+                                $otherCall->c_updated_dt = date('Y-m-d H:i:s');
                                 $otherCall->save();
                             }
                         }
@@ -1446,7 +1452,7 @@ class CommunicationController extends ApiBaseController
                             $lead = $call->cLead;
                             $lead->l_call_status_id = Lead::CALL_STATUS_CANCEL;
                             if(!$lead->save()) {
-                                Yii::error('lead: '. $lead->id . ' ' . VarDumper::dumpAsString($lead->errors), 'API:CommunicationController:actionVoice:TYPE_VOIP:Lead:save');
+                                Yii::error('lead: '. $lead->id . ' ' . VarDumper::dumpAsString($lead->errors), 'API:CommunicationController:actionVoice:VOIP:Lead:save');
                             }
                         }
 
