@@ -784,7 +784,7 @@ class CommunicationController extends ApiBaseController
                     }
 
                     $agentsInfo = [];
-                    if ($callAgents && is_array($callAgents) && count($callAgents)) {
+                    if ($callAgents) {
                         foreach ($callAgents AS $user) {
                             if ($user->isOnline()) {
                                 if ($user->isCallStatusReady()) {
@@ -838,6 +838,8 @@ class CommunicationController extends ApiBaseController
                 } else {
                     $callGeneralNumber = true;
                 }
+
+
 
                 $clientPhone = ClientPhone::find()->where(['phone' => $client_phone_number])->one();
                 $lead = null;
