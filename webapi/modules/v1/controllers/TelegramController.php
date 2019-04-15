@@ -111,9 +111,16 @@ class TelegramController extends Controller
                     Yii::info($result['message']['text'], 'info\API:Telegram:Webhook:command');
 
                     $codeString = trim(str_replace('/start ', '', $result['message']['text']));
+
+                    $codeString = trim(str_replace('/start', '', $codeString));
+
                     if($codeString) {
                         $codeString = @base64_decode($codeString);
-                        [$user_id, $secure_code] = explode('|', $codeString);
+                        if($codeString) {
+                            [$user_id, $secure_code] = explode('|', $codeString);
+                        } else {
+                            $user_id = $secure_code = null;
+                        }
 
                         if($user_id && $secure_code) {
                             $user = Employee::findOne($user_id);
