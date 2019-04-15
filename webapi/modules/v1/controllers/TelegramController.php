@@ -93,18 +93,17 @@ class TelegramController extends Controller
         ];*/
 
         if($result) {
-            //$data = @json_decode($json, true);
             if(isset($result['message']['entities'][0]['type']) && $result['message']['entities'][0]['type'] === 'bot_command') {
 
                 $chat_id =  $result['message']['chat']['id'];
 
-                Yii::$app->telegram->sendMessage([
-                    'chat_id' => $chat_id,
-                    'text' => 'Send command ...',
-                ]);
-
-
                 if(false !== strpos($result['message']['text'], '/start')) {
+
+                    Yii::$app->telegram->sendMessage([
+                        'chat_id' => $chat_id,
+                        'text' => 'Welcome '.$result['message']['chat']['first_name'].' ('.$result['message']['chat']['username'].')!',
+                    ]);
+
 
                     Yii::info($result['message']['text'], 'info\API:Telegram:Webhook:command');
 
@@ -130,11 +129,20 @@ class TelegramController extends Controller
                                 }
 
                                 if(!$profile->up_telegram) {
-                                    $profile->up_telegram = $chat_id;
+                                    $profile->up_telegram = (string) $chat_id;
                                     $profile->up_telegram_enable = true;
                                     $profile->up_updated_dt = date('Y-m-d Hi:s');
                                     if(!$profile->save()) {
                                         Yii::error(VarDumper::dumpAsString($profile->errors), 'API:Telegram:Webhook:UserProfile:save');
+
+                                        Yii::$app->telegram->sendMessage([
+                                            'chat_id' => $chat_id,
+                                            'text' => 'Error  Telegram Auth. Not update UserProfile',
+                                        ]);
+
+                                        Notifications::create($user->id, 'Telegram Auth', 'Hi, '.$result['message']['chat']['first_name'].' ('.$result['message']['chat']['username'].')! Your Telegram Account is activated. ', Notifications::TYPE_SUCCESS, true);
+
+
                                     } else {
                                         Notifications::create($user->id, 'Telegram Auth', 'Hi, '.$result['message']['chat']['first_name'].' ('.$result['message']['chat']['username'].')! Your Telegram Account is activated. ', Notifications::TYPE_SUCCESS, true);
                                         Notifications::socket($user->id, null, 'getNewNotification', [], true);
