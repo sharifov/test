@@ -131,7 +131,7 @@ class TelegramController extends Controller
                                 if(!$profile->up_telegram) {
                                     $profile->up_telegram = (string) $chat_id;
                                     $profile->up_telegram_enable = true;
-                                    $profile->up_updated_dt = date('Y-m-d Hi:s');
+                                    $profile->up_updated_dt = date('Y-m-d H:i:s');
                                     if(!$profile->save()) {
                                         Yii::error(VarDumper::dumpAsString($profile->errors), 'API:Telegram:Webhook:UserProfile:save');
 
