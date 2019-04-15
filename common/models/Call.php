@@ -312,6 +312,9 @@ class Call extends \yii\db\ActiveRecord
                 $agent = 'seller' . $user->id;
                 $res = (\Yii::$app->communication)->callRedirect($call->c_call_sid, 'client', $call->c_from, $agent);
                 if ($res && isset($res['error']) && $res['error'] === false) {
+                    if(isset($res['data']['is_error']) && $res['data']['is_error'] ===  true) {
+                        continue;
+                    }
                     \Yii::info(VarDumper::dumpAsString($res, 10, false), 'info\Component:CommunicationService::redirectCallFromHold:callRedirect');
                     return true;
                 }
