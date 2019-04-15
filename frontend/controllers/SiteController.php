@@ -582,6 +582,21 @@ class SiteController extends FController
             ->setMargin(5)
             ->useForegroundColor(0, 0, 0);
 
+
+
+        /*$qrCode = (new QrCode('https://2amigos.us'))
+            ->useLogo(__DIR__ . '/data/logo.png')
+            ->useForegroundColor(51, 153, 255)
+            ->useBackgroundColor(200, 220, 210)
+            ->useEncoding('UTF-8')
+            ->setErrorCorrectionLevel(ErrorCorrectionLevelInterface::HIGH)
+            ->setLogoWidth(60)
+            ->setSize(300)
+            ->setMargin(5)
+            ->setLabel($label);*/
+
+        //$qrCode->writeFile(__DIR__ . '/codes/my-code.png');
+
         // now we can display the qrcode in many ways
         // saving the result to a file:
 

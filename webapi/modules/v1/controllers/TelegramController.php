@@ -98,7 +98,7 @@ class TelegramController extends Controller
         Yii::info(VarDumper::dumpAsString($out), 'info\API:Telegram:Webhook');
 
 
-        $json = @file_get_contents('https://api.telegram.org/bot'.Yii::$app->params['telegram']['token'].'/getUpdates');
+        $json = Yii::$app->telegram->hook(); //@file_get_contents('https://api.telegram.org/bot'.Yii::$app->params['telegram']['token'].'/getUpdates');
         $data = [];
         if($json) {
             $data = @json_decode($json, true);
