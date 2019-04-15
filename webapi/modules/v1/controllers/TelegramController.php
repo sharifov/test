@@ -40,42 +40,6 @@ class TelegramController extends Controller
      */
     public function actionWebhook(): void
     {
-
-        /*
-         *  [
-            'ok' => true
-            'result' => [
-                0 => [
-                    'update_id' => 831539038
-                    'message' => [
-                        'message_id' => 1
-                        'from' => [
-                            'id' => 270012521
-                            'is_bot' => false
-                            'first_name' => 'Dandy'
-                            'username' => 'chalpet'
-                            'language_code' => 'ru'
-                        ]
-                        'chat' => [
-                            'id' => 270012521
-                            'first_name' => 'Dandy'
-                            'username' => 'chalpet'
-                            'type' => 'private'
-                        ]
-                        'date' => 1555314358
-                        'text' => '/start MXwwZWYyMmQ1MzQ3ZDY1NjdhNzc1YmMyNGUyOGFiZTBiMg=='
-                        'entities' => [
-                            0 => [
-                                'offset' => 0
-                                'length' => 6
-                                'type' => 'bot_command'
-                            ]
-                        ]
-                    ]
-                ]
-         */
-
-
         /*$headers = [];
         foreach ($_SERVER as $name => $value)
         {
@@ -85,7 +49,7 @@ class TelegramController extends Controller
             }
         }*/
 
-        $out = [
+        /*$out = [
             'message'       => 'Server Name: '.Yii::$app->request->serverName,
             'datetime'      => date('Y-m-d H:i:s'),
             'ip'            => Yii::$app->request->getUserIP(),
@@ -93,17 +57,57 @@ class TelegramController extends Controller
             'post'          => Yii::$app->request->post(),
             //'files'         => $_FILES,
             //'headers'       => $headers
-        ];
+        ];*/
 
-        Yii::info(VarDumper::dumpAsString($out), 'info\API:Telegram:Webhook');
+        //Yii::info(VarDumper::dumpAsString($out), 'info\API:Telegram:Webhook');
 
-
-        //$json = Yii::$app->telegram->hook(); //@file_get_contents('https://api.telegram.org/bot'.Yii::$app->params['telegram']['token'].'/getUpdates');
         $result = Yii::$app->request->post();
+
+        /*$result = [
+            'update_id' => 831539043,
+            'message' => [
+                'message_id' => 6,
+                'from' => [
+                'id' => 270012521,
+                    'is_bot' => false,
+                    'first_name' => 'Dandy',
+                    'username' => 'chalpet',
+                    'language_code' => 'ru',
+                ],
+                'chat' => [
+                'id' => 270012521,
+                    'first_name' => 'Dandy',
+                    'username' => 'chalpet',
+                    'type' => 'private',
+                ],
+                'date' => 1555330114,
+                'text' => '/start MTY3fDQ1MzcyMWUzYWY0NGI0ZGViOGZmOGMxMmYyMTkzYzE5',
+                'entities' => [
+                0 => [
+                    'offset' => 0,
+                        'length' => 6,
+                        'type' => 'bot_command',
+                    ]
+                ]
+            ]
+        ];*/
+
         if($result) {
             //$data = @json_decode($json, true);
             if(isset($result['message']['entities'][0]['type']) && $result['message']['entities'][0]['type'] === 'bot_command') {
-                if(false !== strpos('/start', $result['message']['text'])) {
+
+                $chat_id =  $result['message']['chat']['id'];
+
+                Yii::$app->telegram->sendMessage([
+                    'chat_id' => $chat_id,
+                    'text' => 'Send command ...',
+                ]);
+
+
+                if(false !== strpos($result['message']['text'], '/start')) {
+
+                    Yii::info($result['message']['text'], 'info\API:Telegram:Webhook:command');
+
                     $codeString = trim(str_replace('/start ', '', $result['message']['text']));
                     if($codeString) {
                         $codeString = @base64_decode($codeString);
@@ -112,9 +116,13 @@ class TelegramController extends Controller
                         if($user_id && $secure_code) {
                             $user = Employee::findOne($user_id);
                             $validCode = md5($user->id . '|' . $user->username . '|' . date('Y-m-d'));
-                            $chat_id =  $result['message']['chat']['id'];
+
 
                             if($secure_code === $validCode) {
+
+
+                                //Yii::info('Error Telegram Auth. Invalid secure code! ' . $result['message']['text'], 'info\API:Telegram:Webhook:success');
+
                                 $profile = $user->userProfile;
                                 if(!$profile) {
                                     $profile = new UserProfile();
@@ -138,6 +146,8 @@ class TelegramController extends Controller
                                     }
                                 }
                             } else {
+                                Yii::info('Error Telegram Auth. Invalid secure code! ' . $secure_code .' <> '. $validCode, 'info\API:Telegram:Webhook:code');
+
                                 Yii::$app->telegram->sendMessage([
                                     'chat_id' => $chat_id,
                                     'text' => 'Error Telegram Auth. Invalid secure code!',
@@ -147,6 +157,11 @@ class TelegramController extends Controller
 
                     }
                 }
+
+
+            } else {
+                //echo 123;
+                Yii::info('Not found bot_command (message/entities[0]/type)', 'info\API:Telegram:Webhook:command');
             }
 
         }
@@ -154,7 +169,7 @@ class TelegramController extends Controller
 
         Yii::info(VarDumper::dumpAsString($result), 'info\API:Telegram:Webhook:POST');
 
-        //VarDumper::dump($data);
+        //VarDumper::dump($result);
     }
 
 
