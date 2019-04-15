@@ -200,4 +200,23 @@ ORDER BY lf.lead_id, id';
 
         printf("\n --- End %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
     }
+
+
+    public function actionTelegramWebhook()
+    {
+        /**
+         * @var $leadsFlow LeadFlow[]
+         */
+        printf("\n --- Start %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
+
+        $url = Yii::$app->params['telegram']['webhook_url'] ?: '' ;
+
+        Yii::$app->telegram->setWebhook(['url' => $url]);
+
+        print_r(@json_decode(Yii::$app->telegram->getMe(), true));
+        echo 'WebHook: ' . $url;
+
+        printf("\n --- End %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
+    }
+
 }

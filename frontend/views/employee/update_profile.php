@@ -3,6 +3,7 @@
  * @var $this \yii\web\View
  * @var $model Employee
  * @var $modelUserParams \common\models\UserParams
+ * @var $qrcodeData string
  */
 
 use yii\bootstrap\Html;
@@ -105,9 +106,14 @@ $this->params['breadcrumbs'][] = $this->title;
                 <?= Html::submitButton('Save Profile', ['class' => 'btn btn-primary']) ?>
             </div>
     <?php ActiveForm::end() ?>
+
+
+
+
+
 </div>
 
-<div class="col-sm-6">
+<div class="col-sm-4">
 
     <?= \yii\widgets\DetailView::widget([
         'model' => $modelUserParams,
@@ -143,4 +149,9 @@ $this->params['breadcrumbs'][] = $this->title;
         ],
     ]) ?>
 
+</div>
+
+<div class="col-sm-2">
+    <h3>Telegram Auth</h3>
+    <?php echo '<img src="' . $qrcodeData . '">'; ?>
 </div>
