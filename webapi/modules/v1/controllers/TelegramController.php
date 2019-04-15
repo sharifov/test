@@ -22,6 +22,7 @@ class TelegramController extends Controller
         parent::init();
         Yii::$app->user->enableSession = false;
         $this->enableCsrfValidation = false;
+
     }
 
     /**
@@ -38,8 +39,10 @@ class TelegramController extends Controller
     /**
      *
      */
-    public function actionWebhook(): void
+    public function actionWebhook()
     {
+
+
         /*$headers = [];
         foreach ($_SERVER as $name => $value)
         {
@@ -177,6 +180,9 @@ class TelegramController extends Controller
 
         Yii::info(VarDumper::dumpAsString($result), 'info\API:Telegram:Webhook:POST');
 
+        \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+
+        return ['message' => 'ok'];
         //VarDumper::dump($result);
     }
 
