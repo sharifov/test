@@ -76,14 +76,14 @@ class TelegramController extends Controller
          */
 
 
-        $headers = [];
+        /*$headers = [];
         foreach ($_SERVER as $name => $value)
         {
             if (substr($name, 0, 5) == 'HTTP_')
             {
                 $headers[str_replace(' ', '-', ucwords(strtolower(str_replace('_', ' ', substr($name, 5)))))] = $value;
             }
-        }
+        }*/
 
         $out = [
             'message'       => 'Server Name: '.Yii::$app->request->serverName,
@@ -91,74 +91,68 @@ class TelegramController extends Controller
             'ip'            => Yii::$app->request->getUserIP(),
             'get'           => Yii::$app->request->get(),
             'post'          => Yii::$app->request->post(),
-            'files'         => $_FILES,
-            'headers'       => $headers
+            //'files'         => $_FILES,
+            //'headers'       => $headers
         ];
 
         Yii::info(VarDumper::dumpAsString($out), 'info\API:Telegram:Webhook');
 
 
-        $json = Yii::$app->telegram->hook(); //@file_get_contents('https://api.telegram.org/bot'.Yii::$app->params['telegram']['token'].'/getUpdates');
-        $data = [];
-        if($json) {
-            $data = @json_decode($json, true);
+        //$json = Yii::$app->telegram->hook(); //@file_get_contents('https://api.telegram.org/bot'.Yii::$app->params['telegram']['token'].'/getUpdates');
+        $result = Yii::$app->request->post();
+        if($result) {
+            //$data = @json_decode($json, true);
+            if(isset($result['message']['entities'][0]['type']) && $result['message']['entities'][0]['type'] === 'bot_command') {
+                if(false !== strpos('/start', $result['message']['text'])) {
+                    $codeString = trim(str_replace('/start ', '', $result['message']['text']));
+                    if($codeString) {
+                        $codeString = @base64_decode($codeString);
+                        [$user_id, $secure_code] = explode('|', $codeString);
 
-            if($data && isset($data['result']) && is_array($data['result'])) {
-                foreach ($data['result'] as $result) {
-                    if(isset($result['message']['entities'][0]['type']) && $result['message']['entities'][0]['type'] === 'bot_command') {
-                        if(false !== strpos('/start', $result['message']['text'])) {
-                            $codeString = trim(str_replace('/start ', '', $result['message']['text']));
-                            if($codeString) {
-                                $codeString = @base64_decode($codeString);
-                                [$user_id, $secure_code] = explode('|', $codeString);
+                        if($user_id && $secure_code) {
+                            $user = Employee::findOne($user_id);
+                            $validCode = md5($user->id . '|' . $user->username . '|' . date('Y-m-d'));
+                            $chat_id =  $result['message']['chat']['id'];
 
-                                if($user_id && $secure_code) {
-                                    $user = Employee::findOne($user_id);
-                                    $validCode = md5($user->id . '|' . $user->username . '|' . date('Y-m-d'));
-                                    $chat_id =  $result['message']['chat']['id'];
+                            if($secure_code === $validCode) {
+                                $profile = $user->userProfile;
+                                if(!$profile) {
+                                    $profile = new UserProfile();
+                                    $profile->up_user_id = $user->id;
+                                }
 
-                                    if($secure_code === $validCode) {
-                                        $profile = $user->userProfile;
-                                        if(!$profile) {
-                                            $profile = new UserProfile();
-                                            $profile->up_user_id = $user->id;
-                                        }
-
-
-
-                                        if(!$profile->up_telegram) {
-                                            $profile->up_telegram = $chat_id;
-                                            $profile->up_telegram_enable = true;
-                                            $profile->up_updated_dt = date('Y-m-d Hi:s');
-                                            if(!$profile->save()) {
-                                                Yii::error(VarDumper::dumpAsString($profile->errors), 'API:Telegram:Webhook:UserProfile:save');
-                                            } else {
-                                                Notifications::create($user->id, 'Telegram Auth', 'Hi, '.$result['message']['chat']['first_name'].' ('.$result['message']['chat']['username'].')! Your Telegram Account is activated. ', Notifications::TYPE_SUCCESS, true);
-                                                Notifications::socket($user->id, null, 'getNewNotification', [], true);
-
-                                                Yii::$app->telegram->sendMessage([
-                                                    'chat_id' => $chat_id,
-                                                    'text' => 'Success Telegram Auth. Hi! ' . $user->username,
-                                                ]);
-                                            }
-                                        }
+                                if(!$profile->up_telegram) {
+                                    $profile->up_telegram = $chat_id;
+                                    $profile->up_telegram_enable = true;
+                                    $profile->up_updated_dt = date('Y-m-d Hi:s');
+                                    if(!$profile->save()) {
+                                        Yii::error(VarDumper::dumpAsString($profile->errors), 'API:Telegram:Webhook:UserProfile:save');
                                     } else {
+                                        Notifications::create($user->id, 'Telegram Auth', 'Hi, '.$result['message']['chat']['first_name'].' ('.$result['message']['chat']['username'].')! Your Telegram Account is activated. ', Notifications::TYPE_SUCCESS, true);
+                                        Notifications::socket($user->id, null, 'getNewNotification', [], true);
+
                                         Yii::$app->telegram->sendMessage([
                                             'chat_id' => $chat_id,
-                                            'text' => 'Error Telegram Auth. Invalid secure code!',
+                                            'text' => 'Success Telegram Auth. Hi! ' . $user->username,
                                         ]);
                                     }
                                 }
-
+                            } else {
+                                Yii::$app->telegram->sendMessage([
+                                    'chat_id' => $chat_id,
+                                    'text' => 'Error Telegram Auth. Invalid secure code!',
+                                ]);
                             }
                         }
+
                     }
                 }
             }
+
         }
 
 
-        Yii::info(VarDumper::dumpAsString($data), 'info\API:Telegram:Webhook:JSON');
+        Yii::info(VarDumper::dumpAsString($result), 'info\API:Telegram:Webhook:POST');
 
         //VarDumper::dump($data);
     }
