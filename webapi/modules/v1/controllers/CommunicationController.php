@@ -1386,7 +1386,9 @@ class CommunicationController extends ApiBaseController
                 if($call) {
 
                     if(isset($post['callData']['CallStatus']) && $post['callData']['CallStatus']) {
-                        $call->c_call_status = $post['callData']['CallStatus'];
+                        if($call->c_call_status && !in_array($call->c_call_status, [Call::CALL_STATUS_NO_ANSWER, Call::CALL_STATUS_COMPLETED, Call::CALL_STATUS_CANCELED])) {
+                            $call->c_call_status = $post['callData']['CallStatus'];
+                        }
 
                         if(isset($post['call']) && $post['call']) {
                             if(isset($post['call']['c_call_duration']) && $post['call']['c_call_duration']) {
