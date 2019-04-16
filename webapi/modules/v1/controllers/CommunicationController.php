@@ -1094,8 +1094,7 @@ class CommunicationController extends ApiBaseController
                         $call->c_price = abs((float) $post['callData']['price']);
                     }
 
-                    //if(!$call->c_call_status && isset($post['callData']['status'])) {
-                    if(isset($post['callData']['status'])) {
+                    if(!$call->c_call_status && isset($post['callData']['status'])) {
                         $call->c_call_status =$post['callData']['status'];
                     }
 
