@@ -35,7 +35,7 @@ return [
         'apiKey' => '5394bbedf41dd2c0403897ca621f188b',
         'serverUrl' => 'https://backoffice.zeit.style/api/sync'
     ],
-    'global_phone' => '+15596489977',
+    'global_phone' => '+16692011799',
 
     'telegram' => [
         'bot_username'  => 'CrmKivorkBot',
