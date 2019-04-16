@@ -911,7 +911,7 @@ class CommunicationController extends ApiBaseController
                         $company = ' ' . strtolower($projectData->name);
                     }
                     $responseTwml = new VoiceResponse();
-                    $responseTwml->pause(['length' => 5]);
+                    $responseTwml->pause(['length' => 3]);
                     $responseTwml->say('        Thank you for calling'. $company .'.  Your call is important to us.  Please hold while you are connected to the next available agent.', [
                         'language' => 'en-US',
                         'voice' => 'woman',
