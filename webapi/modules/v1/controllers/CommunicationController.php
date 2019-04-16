@@ -1099,8 +1099,17 @@ class CommunicationController extends ApiBaseController
                     }
 
                     if(!$call->c_call_status && isset($post['callData']['status'])) {
-                        $call->c_call_status =$post['callData']['status'];
+                            $call->c_call_status = $post['callData']['status'];
                     }
+
+                    if($call->c_call_status && isset($post['callData']['status'])) {
+                        if(!in_array($call->c_call_status, [Call::CALL_STATUS_CANCELED, Call::CALL_STATUS_NO_ANSWER, Call::CALL_STATUS_FAILED])) {
+                            $call->c_call_status = $post['callData']['status'];
+                        }
+                    }
+
+
+
 
                     if(isset($post['callData']['duration']) && $post['callData']['duration']) {
                         $call->c_call_duration = (int) $post['callData']['duration'];
