@@ -912,9 +912,9 @@ class CommunicationController extends ApiBaseController
                     }
                     $responseTwml = new VoiceResponse();
                     $responseTwml->pause(['length' => 5]);
-                    $responseTwml->say('        Thank you for calling'. $company .'. Your call is important to us .Please hold while you are connected to the next available agent.', [
+                    $responseTwml->say('        Thank you for calling'. $company .'.  Your call is important to us.  Please hold while you are connected to the next available agent.', [
                         'language' => 'en-US',
-                        'voice' => 'alice',
+                        'voice' => 'woman',
                     ]);
                     $responseTwml->play('https://talkdeskapp.s3.amazonaws.com/production/audio_messages/folk_hold_music.mp3');
                     $response['twml'] = (string)$responseTwml;
