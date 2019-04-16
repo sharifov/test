@@ -1382,7 +1382,7 @@ class CommunicationController extends ApiBaseController
                 $call = Call::find()->where(['c_call_sid' => $post['callData']['CallSid']])->limit(1)->one();
                 if($call && isset($post['call']['c_direction']) && $post['call']['c_direction'] === 'outbound-w') {
 
-                    if(isset($post['callData']['CallStatus']) && $post['callData']['CallStatus'] && $post['callData']['CallStatus'] === Call::CALL_STATUS_COMPLETED) {
+                    if(isset($post['callData']['CallStatus']) && $post['callData']['CallStatus']) {
                         $call->c_call_status = $post['callData']['CallStatus'];
 
                         if(isset($post['call']) && $post['call']) {
