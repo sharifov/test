@@ -905,6 +905,11 @@ class CommunicationController extends ApiBaseController
                     if (!$call->save()) {
                         Yii::error(VarDumper::dumpAsString($call->errors), 'API:CommunicationController:actionVoice:Call:save:$isOnHold');
                     }
+                    $responseTwml = new VoiceResponse();
+                    $responseTwml->say('We apologize, but all of our agents are currently assisting other customers. Please hold for the next available agent.');
+                    $responseTwml->play('http://com.twilio.sounds.music.s3.amazonaws.com/MARKOVICHAMP-Borghestral.mp3');
+                    $response['twml'] = (string)$responseTwml;
+
                     Yii::info('Call add to hold : call_project_id: '.$call_project_id.', generalLine: '.$generalLineNumber, 'info\API:CommunicationController:actionVoice:isOnHold - 5');
 
                 } elseif($callGeneralNumber){
