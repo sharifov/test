@@ -57,6 +57,8 @@ $this->title = 'Auto find & redial';
     ]
 ]);*/
 
+$bundle = \frontend\assets\TimerAsset::register($this);
+
 
 $this->params['breadcrumbs'][] = ['label' => 'Calls', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
@@ -78,8 +80,20 @@ $this->params['breadcrumbs'][] = $this->title;
     }
 
     function startAutoTake(url, name) {
-        takeTimerId = setTimeout(function() { openInNewTab(url, name) }, 20000);
+        //takeTimerId = setTimeout(function() { openInNewTab(url, name) }, 20000);
         console.log('Create takeTimerId: ' + takeTimerId);
+
+        $('#auto_take_timer').timer({format: '%M:%S', duration: 30, countdown: true, callback: function() {
+
+                //var url = $('#auto_take_timer').parent().attr('href');
+                //var name = $('#auto_take_timer').data('name');
+
+                //alert(name);
+                $(this).timer('remove');
+                openInNewTab(url, name)
+
+            },}).timer('start');
+
     }
 
     function endAutoTake() {
@@ -610,7 +624,14 @@ $this->params['breadcrumbs'][] = $this->title;
                                                 },
                                             ],
                                             'c_from',
-                                            'c_to',
+                                            [
+                                                'label' => 'Client Time',
+                                                'value' => function (\common\models\Call $model) {
+                                                    return $model->cLead ? $model->cLead->getClientTime2() : '';
+                                                },
+                                                'format' => 'raw'
+                                            ],
+                                            //'c_to',
 
                                         ],
                                     ]) ?>
@@ -625,16 +646,17 @@ $this->params['breadcrumbs'][] = $this->title;
                                             [
                                                 'attribute' => 'c_project_id',
                                                 'value' => function (\common\models\Call $model) {
-                                                    return $model->cProject ? $model->cProject->name : '-';
+                                                    return $model->cProject ? '<span class="badge badge-info">'.$model->cProject->name .'</span>' : '-';
                                                 },
+                                                'format' => 'raw'
                                             ],
-                                            [
+                                            /*[
                                                 'attribute' => 'c_lead_id',
                                                 'value' => function (\common\models\Call $model) {
                                                     return  $model->c_lead_id ? Html::a($model->c_lead_id, ['lead/view', 'gid' => $model->cLead->gid], ['data-pjax' => 0, 'target' => '_blank']) : '';
                                                 },
                                                 'format' => 'raw'
-                                            ],
+                                            ],*/
                                             [
                                                 'attribute' => 'c_created_user_id',
                                                 'value' => function (\common\models\Call $model) {
@@ -660,6 +682,16 @@ $this->params['breadcrumbs'][] = $this->title;
 
                                         ],
                                     ]) ?>
+                                </div>
+
+                                <div class="col-md-12 text-center">
+                                    <?php if($callModel->cLead && $callModel->cLead->status === Lead::STATUS_PENDING): ?>
+                                        <?=Html::a('<i class="fa fa-download"></i> Take Lead <b id="auto_take_timer" data-name="'.$callModel->cLead->id.'">00:30</b>', ['lead/auto-take', 'gid' => $callModel->cLead->gid], [
+                                            'class' => 'btn btn-success',
+                                            'target' => '_blank',
+                                            'data-pjax' => 0
+                                        ])?>
+                                    <?php endif; ?>
                                 </div>
 
                             </div>
@@ -1098,6 +1130,7 @@ $this->params['breadcrumbs'][] = $this->title;
 <?php
 $js = <<<JS
 
+
     /*function startTimers() {
     
         $(".timer").each(function( index ) {
@@ -1136,9 +1169,11 @@ $js = <<<JS
       setTimeout(runTimerRefresh, 30000);
     }, 30000);*/
 
+    
+
 
 JS;
-//$this->registerJs($js);
+$this->registerJs($js);
 
 
 
