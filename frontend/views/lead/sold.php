@@ -327,7 +327,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'template' => '{action}',
             'buttons' => [
                 'action' => function ($url, Lead $model, $key) {
-                    return Html::a('<i class="fa fa-search"></i>', [
+                    return Html::a('<i class="fa fa-search"></i> view', [
                         'lead/view',
                         'gid' => $model->gid
                     ], [

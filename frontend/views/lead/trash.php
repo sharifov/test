@@ -49,15 +49,34 @@ $this->params['breadcrumbs'][] = $this->title;
             ]
         ],
         [
+            'attribute' => 'project_id',
+            'value' => function (\common\models\Lead $model) {
+                return $model->project ? '<span class="badge badge-info">' . $model->project->name . '</span>' : '-';
+            },
+            'format' => 'raw',
+            'options' => [
+                'style' => 'width:120px'
+            ],
+            'filter' => $projectList,
+            'visible' => ! $isAgent
+        ],
+        [
             'attribute' => 'pending',
             'label' => 'Pending Time',
             'value' => function (\common\models\Lead $model) {
-                return Yii::$app->formatter->asRelativeTime(strtotime($model->created)); // Lead::getPendingAfterCreate($model->created);
+
+                $str = Yii::$app->formatter->asRelativeTime(strtotime($model->created));
+                $str .= '<br><i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->created));
+
+                return $str;
             },
+            'options' => [
+                'style' => 'width:160px'
+            ],
             'format' => 'raw'
         ],
 
-        [
+        /*[
             'attribute' => 'created',
             'value' => function (\common\models\Lead $model) {
                 return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->created));
@@ -65,7 +84,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'format' => 'raw',
             'filter' => false
 
-        ],
+        ],*/
 
         [
             // 'attribute' => 'client_id',
@@ -92,7 +111,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 return $clientName;
             },
             'options' => [
-                'style' => 'width:160px'
+                'style' => 'width:220px'
             ]
         ],/*
         [
@@ -128,16 +147,78 @@ $this->params['breadcrumbs'][] = $this->title;
             },
             'format' => 'raw'
         ],
+//        [
+//            'attribute' => 'Quotes ',
+//            'value' => function (\common\models\Lead $model) {
+//                $quotes = $model->getQuoteSendInfo();
+//                return sprintf('Total: <strong>%d</strong> <br> Sent: <strong>%d</strong>', ($quotes['send_q'] + $quotes['not_send_q']), $quotes['send_q']);
+//            },
+//            'format' => 'raw'
+//        ],
+
         [
-            'attribute' => 'Quotes ',
+            'attribute' => 'Quotes',
             'value' => function (\common\models\Lead $model) {
-                $quotes = $model->getQuoteSendInfo();
-                return sprintf('Total: <strong>%d</strong> <br> Sent: <strong>%d</strong>', ($quotes['send_q'] + $quotes['not_send_q']), $quotes['send_q']);
+                $cnt = $model->quotesCount;
+                return $cnt ?: '-';
             },
-            'format' => 'raw'
+            'options' => [
+                'style' => 'width:60px',
+            ],
+            'contentOptions' => [
+                'class' => 'text-center'
+            ],
+            //'format' => 'raw'
         ],
+
         [
-            'header' => 'Agent',
+            //'attribute' => 'Quotes',
+            'label' => 'Calls',
+            'value' => function (\common\models\Lead $model) {
+                $cnt = $model->getCountCalls();
+                return $cnt ?: '-';
+            },
+            'options' => [
+                'style' => 'width:60px'
+            ],
+            'contentOptions' => [
+                'class' => 'text-center'
+            ],
+            //'format' => 'raw'
+        ],
+
+        [
+            'label' => 'SMS',
+            'value' => function (\common\models\Lead $model) {
+                $cnt = $model->getCountSms();
+                return $cnt ?: '-';
+            },
+            'options' => [
+                'style' => 'width:60px'
+            ],
+            'contentOptions' => [
+                'class' => 'text-center'
+            ],
+            //'format' => 'raw'
+        ],
+
+        [
+            'label' => 'Emails',
+            'value' => function (\common\models\Lead $model) {
+                $cnt = $model->getCountEmails();
+                return $cnt ?: '-';
+            },
+            'options' => [
+                'style' => 'width:60px'
+            ],
+            'contentOptions' => [
+                'class' => 'text-center'
+            ],
+            //'format' => 'raw'
+        ],
+
+        [
+            //'header' => 'Agent',
             'attribute' => 'employee_id',
             'format' => 'raw',
             'value' => function (\common\models\Lead $model) {
@@ -146,26 +227,26 @@ $this->params['breadcrumbs'][] = $this->title;
             'filter' => $userList,
             'visible' => ! $isAgent
         ],
-        [
+        /*[
             'attribute' => 'update',
             'label' => 'Last Update',
             'value' => function (\common\models\Lead $model) {
                 return '<span title="' . Yii::$app->formatter->asDatetime(strtotime($model->updated)) . '">' . Yii::$app->formatter->asRelativeTime(strtotime($model->updated)) . '</span>';
             },
             'format' => 'raw'
-        ],
+        ],*/
         [
-            'attribute' => 'reason',
+            //'attribute' => 'reason',
             'label' => 'Reason',
             'contentOptions' => [
                 'style' => 'max-width: 250px;'
             ],
             'value' => function (\common\models\Lead $model) {
-                return $model->getLastReason();
+                return '<pre>'.$model->getLastReason().'</pre>';
             },
             'format' => 'raw'
         ],
-        [
+        /*[
             'label' => 'Rating',
             'contentOptions' => [
                 'style' => 'width: 90px;',
@@ -178,15 +259,8 @@ $this->params['breadcrumbs'][] = $this->title;
                 return Lead::getRating2($model->rating);
             },
             'format' => 'raw'
-        ],
-        [
-            'attribute' => 'project_id',
-            'value' => function (\common\models\Lead $model) {
-                return $model->project ? $model->project->name : '-';
-            },
-            'filter' => $projectList,
-            'visible' => ! $isAgent
-        ],
+        ],*/
+
         [
             'class' => 'yii\grid\ActionColumn',
             'template' => '{action}',
@@ -195,7 +269,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
                     $buttons = '';
 
-                    $buttons .= Html::a('<i class="fa fa-search"></i>', [
+                    $buttons .= Html::a('<i class="fa fa-search"></i> view', [
                         'lead/view',
                         'gid' => $model->gid
                     ], [

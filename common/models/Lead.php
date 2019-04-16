@@ -491,6 +491,7 @@ class Lead extends ActiveRecord
         ]);
 
         $select = [
+            'pending' => 'COUNT(DISTINCT CASE WHEN status IN (:inbox) THEN leads.id ELSE NULL END)',
             'inbox' => 'COUNT(DISTINCT CASE WHEN status IN (:inbox) THEN leads.id ELSE NULL END)',
             'follow-up' => 'COUNT(DISTINCT CASE WHEN status IN (:followup) ' . $created . '  THEN leads.id ELSE NULL END)',
             'booked' => 'COUNT(DISTINCT CASE WHEN status IN (:booked) ' . $created . ' THEN leads.id ELSE NULL END)',
@@ -502,8 +503,13 @@ class Lead extends ActiveRecord
                         AND leads.`project_id` IN ('.implode(',', $projectIds).'))',
             'processing' => 'COUNT(DISTINCT CASE WHEN status IN (' . $default . ') ' . $employee . ' THEN leads.id ELSE NULL END)'];
 
-        if (Yii::$app->user->identity->role != 'agent') {
+        /*if (Yii::$app->user->identity->role != 'agent') {
             $select['trash'] = 'COUNT(DISTINCT CASE WHEN status IN (' . self::STATUS_TRASH . ') ' . $created . $employee . ' THEN leads.id ELSE NULL END)';
+            $select['pending'] = 'COUNT(DISTINCT CASE WHEN status IN (:inbox) THEN leads.id ELSE NULL END)';
+        }*/
+
+        if (Yii::$app->user->identity->role === 'admin') {
+            $select['pending'] = 'COUNT(DISTINCT CASE WHEN status IN (:pending) THEN leads.id ELSE NULL END)';
         }
 
         $query = self::find()
@@ -513,6 +519,7 @@ class Lead extends ActiveRecord
             //->leftJoin(TipsSplit::tableName().' ts','ts.ts_lead_id = leads.id')
             ->andWhere(['IN', 'project_id', $projectIds])
             ->addParams([':inbox' => self::STATUS_PENDING,
+                ':pending' => self::STATUS_PENDING,
                 ':followup' => self::STATUS_FOLLOW_UP,
                 ':booked' => self::STATUS_BOOKED,
                 ':sold' => self::STATUS_SOLD,
@@ -542,6 +549,7 @@ class Lead extends ActiveRecord
     public static function getLeadQueueType(): array
     {
         return [
+            'pending',
             'inbox', 'follow-up', 'processing',
             'processing-all', 'booked', 'sold', 'trash'
         ];
