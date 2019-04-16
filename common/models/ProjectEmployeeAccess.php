@@ -70,7 +70,7 @@ class ProjectEmployeeAccess extends \yii\db\ActiveRecord
             $user_id = Yii::$app->user->id;
         }
 
-        if (Yii::$app->user->identity->role != 'admin') {
+        if (Yii::$app->user->identity->role != 'admin' && Yii::$app->user->identity->role != 'qa') {
             $access = ArrayHelper::map(self::find()->where(['employee_id' => $user_id])->asArray()->all(), 'project_id', 'project_id');
             $projects = Project::find()->where(['id' => $access, 'closed' => false])->asArray()->all();
         } else {

@@ -119,6 +119,12 @@ return [
                     'pattern' => 'lead/get-salary/<dateparam>',
                     'route' => 'lead/get-salary',
                 ],
+
+                [
+                    'pattern' => 'queue/pending',
+                    'route' => 'lead/pending',
+                ],
+
                 [
                     'pattern' => 'queue/sold',
                     'route' => 'lead/sold',
