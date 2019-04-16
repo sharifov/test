@@ -1236,15 +1236,19 @@ class CommunicationController extends ApiBaseController
                     $call->c_price = abs((float) $post['callData']['price']);
                 }
 
-                if(isset($post['callData']['status'])) {
-                    $call->c_call_status = $post['callData']['status'];
+                if(isset($post['callData']['status']) || isset($post['callData']['CallStatus'])) {
+                    $call_status = 'ringing';
+                    if(isset($post['callData']['status'])) {
+                        $call_status = $post['callData']['status'];
+                    } elseif (isset($post['callData']['CallStatus'])) {
+                        $call_status = $post['callData']['CallStatus'];
+                    }
+                    $call->c_call_status = $call_status;
                 }
 
                 if(!$call->c_call_status) {
                     $call->c_call_status = Call::CALL_STATUS_IN_PROGRESS;
                 }
-
-
 
                 if(isset($post['callData']['duration'])) {
                     $call->c_call_duration = (int) $post['callData']['duration'];
