@@ -315,6 +315,10 @@ class Call extends \yii\db\ActiveRecord
                     if(isset($res['data']['is_error']) && $res['data']['is_error'] ===  true) {
                         continue;
                     }
+                    $call->c_call_status = Call::CALL_STATUS_COMPLETED;
+                    $call->save();
+                    Notifications::socket(null, $call->c_lead_id, 'callUpdate', ['status' => $call->c_call_status, 'duration' => $call->c_call_duration, 'snr' => $call->c_sequence_number], true);
+
                     \Yii::info(VarDumper::dumpAsString($res, 10, false), 'info\Component:CommunicationService::redirectCallFromHold:callRedirect');
                     return true;
                 }
