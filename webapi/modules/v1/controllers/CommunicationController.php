@@ -1237,11 +1237,13 @@ class CommunicationController extends ApiBaseController
                 }
 
                 if(isset($post['callData']['status']) || isset($post['callData']['CallStatus'])) {
-                    $call_status = 'ringing';
+
                     if(isset($post['callData']['status'])) {
                         $call_status = $post['callData']['status'];
                     } elseif (isset($post['callData']['CallStatus'])) {
                         $call_status = $post['callData']['CallStatus'];
+                    } else {
+                        $call_status = Call::CALL_STATUS_IN_PROGRESS;
                     }
                     $call->c_call_status = $call_status;
                 }
