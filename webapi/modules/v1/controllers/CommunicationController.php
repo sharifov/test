@@ -984,6 +984,28 @@ class CommunicationController extends ApiBaseController
 
             //{"sid": "SMb40bfd6908184ec0a51e20789979e304", "date_created": "Wed, 06 Feb 2019 21:30:12 +0000", "date_updated": "Wed, 06 Feb 2019 21:30:12 +0000", "date_sent": "Wed, 06 Feb 2019 21:30:12 +0000", "account_sid": "AC10f3c74efba7b492cbd7dca86077736c", "to": "+15122036074", "from": "+16692011645", "messaging_service_sid": null, "body": "WOWFARE best price (per adult) to Kathmandu:\r\n$\u00a01905.05 (s short layovers), https://wowfare.com/q/5c5b5180c6d29\r\nRegards, Nancy", "status": "delivered", "num_segments": "2", "num_media": "0", "direction": "outbound-api", "api_version": "2010-04-01", "price": "-0.01500", "price_unit": "USD", "error_code": null, "error_message": null, "uri": "/2010-04-01/Accounts/AC10f3c74efba7b492cbd7dca86077736c/Messages/SMb40bfd6908184ec0a51e20789979e304.json", "subresource_uris": {"media": "/2010-04-01/Accounts/AC10f3c74efba7b492cbd7dca86077736c/Messages/SMb40bfd6908184ec0a51e20789979e304/Media.json"}}
 
+            if(isset($post['callData']['CallSid']) && $post['callData']['CallSid']) {
+                $call = Call::find()->where(['c_call_sid' => $post['callData']['CallSid']])->limit(1)->one();
+                if($call) {
+
+                    if(isset($post['callData']['CallStatus']) && $post['callData']['CallStatus'] && $post['callData']['CallStatus'] === Call::CALL_STATUS_COMPLETED) {
+                        $call->c_call_status = $post['callData']['CallStatus'];
+
+                        if(isset($post['call']) && $post['call']) {
+                            if(isset($post['call']['c_call_duration']) && $post['call']['c_call_duration']) {
+                                $call->c_call_duration = (int) $post['call']['c_call_duration'];
+                            }
+                        } else {
+                            $call->c_call_duration = 1;
+                        }
+                        if(!$call->save()) {
+                            Yii::error(VarDumper::dumpAsString($call->errors), 'API:CommunicationController:actionVoice:TYPE_VOIP:Call:save:line 1000');
+                        }
+                        Notifications::socket($call->c_created_user_id, $call->c_lead_id, 'webCallUpdate', ['status' => $call->c_call_status, 'duration' => $call->c_call_duration, 'debug' => 'TYPE_VOIP'], true);
+                    }
+                }
+            }
+
             if (isset($post['callData']['sid']) && $post['callData']['sid']) {
                 $call = Call::find()->where(['c_call_sid' => $post['callData']['sid']])->limit(1)->one();
 
