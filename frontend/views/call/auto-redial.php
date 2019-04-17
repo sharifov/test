@@ -61,6 +61,9 @@ $bundle = \frontend\assets\TimerAsset::register($this);
 
 $this->params['breadcrumbs'][] = ['label' => 'Calls', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
+
+$duration = 35;
+
 ?>
 
 <script>
@@ -82,7 +85,7 @@ $this->params['breadcrumbs'][] = $this->title;
         //takeTimerId = setTimeout(function() { openInNewTab(url, name) }, 20000);
         console.log('Create takeTimerId: ' + takeTimerId);
 
-        $('#auto_take_timer').timer({format: '%M:%S', duration: 30, countdown: true, callback: function() {
+        $('#auto_take_timer').timer({format: '%M:%S', duration: <?=$duration?>, countdown: true, callback: function() {
 
                 var url = $('#auto_take_timer').parent().attr('href');
                 var name = $('#auto_take_timer').data('name');
@@ -699,7 +702,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
                                 <div class="col-md-12 text-center">
                                     <?php if($callModel->cLead && $callModel->cLead->status === Lead::STATUS_PENDING && $callModel->c_call_status === \common\models\Call::CALL_STATUS_RINGING): ?>
-                                        <?=Html::a('<i class="fa fa-download"></i> Take Lead <b id="auto_take_timer" data-name="'.$callModel->cLead->id.'">00:30</b>', ['lead/auto-take', 'gid' => $callModel->cLead->gid], [
+                                        <?=Html::a('<i class="fa fa-download"></i> Take Lead <b id="auto_take_timer" data-name="'.$callModel->cLead->id.'"></b>', ['lead/auto-take', 'gid' => $callModel->cLead->gid], [
                                             'class' => 'btn btn-success',
                                             'target' => '_blank',
                                             'data-pjax' => 0
