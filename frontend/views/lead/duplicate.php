@@ -52,13 +52,14 @@ $this->params['breadcrumbs'][] = $this->title;
             'attribute' => 'l_duplicate_lead_id',
             'label' => 'Duplicate from',
             'value' => function (\common\models\Lead $model) {
-                return $model->l_duplicate_lead_id ? Html::a($model->l_duplicate_lead_id, ['/lead/view', 'gid' => $model->gid], ['data-pjax' => 0, 'target' => '_blank']) : '-';
+                return $model->l_duplicate_lead_id ? Html::a($model->l_duplicate_lead_id, ['/leads/view', 'id' => $model->l_duplicate_lead_id], ['data-pjax' => 0, 'target' => '_blank']) : '-';
             },
             'format' => 'raw',
             'options' => [
                 'style' => 'width:120px'
             ]
         ],
+        'l_request_hash',
 
         [
             'attribute' => 'project_id',
@@ -282,8 +283,8 @@ $this->params['breadcrumbs'][] = $this->title;
                     $buttons = '';
 
                     $buttons .= Html::a('<i class="fa fa-search"></i> view', [
-                        'lead/view',
-                        'gid' => $model->gid
+                        'leads/view',
+                        'id' => $model->id
                     ], [
                         'class' => 'btn btn-info btn-xs',
                         'target' => '_blank',

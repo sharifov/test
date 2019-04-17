@@ -26,7 +26,7 @@ $isAgent = Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id);
     <p>
         <?//= Html::a('Update', ['update', 'id' => $model->id], ['class' => 'btn btn-primary']) ?>
 
-        <?= Html::a('<i class="fa fa-search"></i> View Lead', '/lead/booked/' . $model->id, ['class' => 'btn btn-primary']) ?>
+        <?= Html::a('<i class="fa fa-search"></i> View Lead', ['/lead/view', 'gid' => $model->gid], ['class' => 'btn btn-primary']) ?>
 
 
 
@@ -42,12 +42,28 @@ $isAgent = Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id);
 
     <div class="row">
 
-        <div class="col-md-4">
+        <div class="col-md-3">
             <?= DetailView::widget([
                 'model' => $model,
                 'attributes' => [
-                    'id',
-                    'uid',
+
+                    'l_client_first_name',
+                    'l_client_last_name',
+                    'l_client_phone',
+                    'l_client_email',
+                    'l_client_ua',
+                    'l_client_lang',
+
+
+
+                ],
+            ]) ?>
+
+            <?= DetailView::widget([
+                'model' => $model,
+                'attributes' => [
+
+
                     'client_id',
                     [
                         'attribute' => 'client.name',
@@ -67,7 +83,7 @@ $isAgent = Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id);
 
                             return $clientName;
                         },
-                        'options' => ['style' => 'width:160px'],
+                        //'options' => ['style' => 'width:160px'],
                         //'filter' => \common\models\Employee::getList()
                     ],
 
@@ -88,7 +104,7 @@ $isAgent = Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id);
 
                             return $str ?? '-';
                         },
-                        'options' => ['style' => 'width:180px'],
+                        //'options' => ['style' => 'width:180px'],
                     ],
 
 
@@ -110,8 +126,20 @@ $isAgent = Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id);
 
                             return $str ?? '-';
                         },
-                        'options' => ['style' => 'width:180px'],
+                        //'options' => ['style' => 'width:180px'],
                     ],
+
+                ],
+            ]) ?>
+        </div>
+        <div class="col-md-3">
+            <?= DetailView::widget([
+                'model' => $model,
+                'attributes' => [
+                    'id',
+                    'uid',
+                    'gid',
+                    'l_request_hash',
 
                     [
                         'attribute' => 'employee_id',
@@ -151,10 +179,11 @@ $isAgent = Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id);
 
 
 
+
                 ],
             ]) ?>
         </div>
-        <div class="col-md-4">
+        <div class="col-md-3">
             <?= DetailView::widget([
                 'model' => $model,
                 'attributes' => [
@@ -203,7 +232,7 @@ $isAgent = Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id);
             ]) ?>
         </div>
 
-        <div class="col-md-4">
+        <div class="col-md-3">
 
             <?= DetailView::widget([
                 'model' => $model,
