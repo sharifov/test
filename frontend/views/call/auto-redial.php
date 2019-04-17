@@ -97,6 +97,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
     function endAutoTake() {
         console.log('endAutoTake, current takeTimerId: ' + takeTimerId);
+        $('#auto_take_timer').timer('remove');
         //console.log('endAutoTake response: ' + clearTimeout(takeTimerId));
     }
 
@@ -119,12 +120,12 @@ $this->params['breadcrumbs'][] = $this->title;
                 //startCall();
             } else if (obj.status === 'ringing') {
                 autoredialInit();
-                startAutoTake();
+                //startAutoTake();
                 //endAutoTake();
                 //startCall();
             } else if (obj.status === 'in-progress') {
                 autoredialInit();
-                startAutoTake();
+                // startAutoTake();
                 //startCallTimer();
                 //$('#div-call-timer').timer('resume');
             } else if (obj.status === 'busy') {
