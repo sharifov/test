@@ -273,7 +273,10 @@ class ApiLead extends Model
 
         if($this->flights) {
             foreach ($this->flights as $flight) {
-                $hashArray[] = $flight;
+
+                $hashArray[] = $flight['origin'];
+                $hashArray[] = $flight['destination'];
+                $hashArray[] = $flight['departure'];
             }
         }
 
