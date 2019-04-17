@@ -95,6 +95,18 @@ $this->params['breadcrumbs'][] = $this->title;
 
     }
 
+    function autoTake() {
+        //takeTimerId = setTimeout(function() { openInNewTab(url, name) }, 20000);
+        console.log('autoTake');
+
+        var url = $('#auto_take_timer').parent().attr('href');
+        var name = $('#auto_take_timer').data('name');
+
+        //alert(name);
+        $('#auto_take_timer').timer('remove');
+        openInNewTab(url, name)
+    }
+
     function endAutoTake() {
         console.log('endAutoTake, current takeTimerId: ' + takeTimerId);
         $('#auto_take_timer').timer('remove');
@@ -124,8 +136,8 @@ $this->params['breadcrumbs'][] = $this->title;
                 //endAutoTake();
                 //startCall();
             } else if (obj.status === 'in-progress') {
+                autoTake();
                 autoredialInit();
-                // startAutoTake();
                 //startCallTimer();
                 //$('#div-call-timer').timer('resume');
             } else if (obj.status === 'busy') {
@@ -686,7 +698,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                 </div>
 
                                 <div class="col-md-12 text-center">
-                                    <?php if($callModel->cLead && $callModel->cLead->status === Lead::STATUS_PENDING): ?>
+                                    <?php if($callModel->cLead && $callModel->cLead->status === Lead::STATUS_PENDING && $callModel->c_call_status === \common\models\Call::CALL_STATUS_RINGING): ?>
                                         <?=Html::a('<i class="fa fa-download"></i> Take Lead <b id="auto_take_timer" data-name="'.$callModel->cLead->id.'">00:30</b>', ['lead/auto-take', 'gid' => $callModel->cLead->gid], [
                                             'class' => 'btn btn-success',
                                             'target' => '_blank',
