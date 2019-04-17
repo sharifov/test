@@ -103,10 +103,10 @@ return [
                     'pattern' => 'queue/<type:(inbox1|follow-up1|processing1|processing-all|booked1|trash1)>',
                     'route' => 'lead/queue',
                 ],*/
-                /*[
-                    'pattern' => 'lead/view/<id>',
-                    'route' => 'lead/view',
-                ],*/
+                [
+                    'pattern' => 'leads/view/<id>',
+                    'route' => 'leads/view',
+                ],
                 [
                     'pattern' => 'lead/view/<gid>',
                     'route' => 'lead/view',

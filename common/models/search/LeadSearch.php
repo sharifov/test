@@ -63,7 +63,7 @@ class LeadSearch extends Lead
     public function rules()
     {
         return [
-            [['id', 'client_id', 'employee_id', 'status', 'project_id', 'adults', 'children', 'infants', 'rating', 'called_expert', 'cnt', 'l_grade', 'l_answered', 'supervision_id', 'limit', 'bo_flight_id'], 'integer'],
+            [['id', 'client_id', 'employee_id', 'status', 'project_id', 'adults', 'children', 'infants', 'rating', 'called_expert', 'cnt', 'l_grade', 'l_answered', 'supervision_id', 'limit', 'bo_flight_id', 'l_duplicate_lead_id'], 'integer'],
             [['email_status', 'quote_status'], 'integer'],
 
             [['client_name', 'client_email', 'client_phone','quote_pnr', 'gid', 'origin_airport','destination_airport', 'origin_country', 'destination_country'], 'string'],
@@ -153,7 +153,8 @@ class LeadSearch extends Lead
             'rating' => $this->rating,
             'called_expert' => $this->called_expert,
             'l_grade' => $this->l_grade,
-            'l_answered'    => $this->l_answered
+            'l_answered'    => $this->l_answered,
+            'l_duplicate_lead_id' => $this->l_duplicate_lead_id
 
         ]);
 
@@ -1160,6 +1161,8 @@ class LeadSearch extends Lead
             $leadTable.'.bo_flight_id' => $this->bo_flight_id,
             $leadTable.'.rating' => $this->rating,
             $leadTable.'.status' => $this->status,
+            $leadTable.'.l_duplicate_lead_id' => $this->l_duplicate_lead_id,
+
         ]);
 
         $query
