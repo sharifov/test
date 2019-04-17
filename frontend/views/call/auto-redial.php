@@ -330,7 +330,7 @@ $this->params['breadcrumbs'][] = $this->title;
                             <?php if($callData): ?>
 
                                 <?=$this->registerJs("webCall('". $callData['phone_from']."', '". $callData['phone_to']."', ". $callData['project_id'].", ". $callData['lead_id'].", 'auto-redial');");?>
-                                <?=$this->registerJs('autoredialInit(); startAutoTake();');?>
+                                <?//=$this->registerJs('autoredialInit(); startAutoTake();');?>
                                 <?//=$this->registerJs('startTimer(20);');?>
                             <?php endif; ?>
 
@@ -454,7 +454,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                                     },
                                                 ],
 
-                                                [
+                                                /*[
                                                     'label' => 'Segments',
                                                     'value' => function (\common\models\Lead $model) {
 
@@ -478,7 +478,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                                     'options' => [
                                                         'style' => 'width:140px'
                                                     ]
-                                                ],
+                                                ],*/
 
                                                 /*[
                                                     'header' => 'Client time',
@@ -533,18 +533,13 @@ $this->params['breadcrumbs'][] = $this->title;
 
                                                 //'discount_id',
 
-                                                [
+                                                /*[
                                                     'label' => 'Pax',
                                                     'value' => function (\common\models\Lead $model) {
                                                         return '<span title="adult"><i class="fa fa-male"></i> '. $model->adults .'</span> / <span title="child"><i class="fa fa-child"></i> ' . $model->children . '</span> / <span title="infant"><i class="fa fa-info"></i> ' . $model->infants.'</span>';
                                                     },
                                                     'format' => 'raw',
-                                                    //'visible' => ! $isAgent,
-                                                    /*'contentOptions' => [
-                                                        'class' => 'text-center'
-                                                    ],*/
-
-                                                ],
+                                                ],*/
 
 
                                                 [
@@ -696,6 +691,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                             'target' => '_blank',
                                             'data-pjax' => 0
                                         ])?>
+                                        <?=$this->registerJs('startAutoTake();');?>
                                     <?php endif; ?>
                                 </div>
 
