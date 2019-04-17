@@ -4,7 +4,6 @@ use yii\helpers\Html;
 use yii\widgets\Pjax;
 //use kartik\grid\GridView;
 use yii\grid\GridView;
-//use \yiister\gentelella\widgets\grid\GridView;
 use common\models\Lead;
 
 /* @var $this yii\web\View */
@@ -79,14 +78,14 @@ $this->params['breadcrumbs'][] = $this->title;
         $.pjax.reload({container:'#pjax-auto-redial', 'scrollTo': false});
     }
 
-    function startAutoTake(url, name) {
+    function startAutoTake() {
         //takeTimerId = setTimeout(function() { openInNewTab(url, name) }, 20000);
         console.log('Create takeTimerId: ' + takeTimerId);
 
         $('#auto_take_timer').timer({format: '%M:%S', duration: 30, countdown: true, callback: function() {
 
-                //var url = $('#auto_take_timer').parent().attr('href');
-                //var name = $('#auto_take_timer').data('name');
+                var url = $('#auto_take_timer').parent().attr('href');
+                var name = $('#auto_take_timer').data('name');
 
                 //alert(name);
                 $(this).timer('remove');
@@ -98,7 +97,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
     function endAutoTake() {
         console.log('endAutoTake, current takeTimerId: ' + takeTimerId);
-        console.log('endAutoTake response: ' + clearTimeout(takeTimerId));
+        //console.log('endAutoTake response: ' + clearTimeout(takeTimerId));
     }
 
     function webCallUpdate(obj) {
@@ -115,13 +114,19 @@ $this->params['breadcrumbs'][] = $this->title;
                 endAutoTake();
                 //stopCall(obj.duration); //updateCommunication();
                 autoredialInit();
-            } else if (obj.status === 'in-progress') {
-                autoredialInit();
-                //startCallTimer();
-                //$('#div-call-timer').timer('resume');
             } else if (obj.status === 'initiated') {
                 //endAutoTake();
                 //startCall();
+            } else if (obj.status === 'ringing') {
+                autoredialInit();
+                startAutoTake();
+                //endAutoTake();
+                //startCall();
+            } else if (obj.status === 'in-progress') {
+                autoredialInit();
+                startAutoTake();
+                //startCallTimer();
+                //$('#div-call-timer').timer('resume');
             } else if (obj.status === 'busy') {
                 endAutoTake();
                 //stopCall(0);
@@ -325,7 +330,7 @@ $this->params['breadcrumbs'][] = $this->title;
                             <?php if($callData): ?>
 
                                 <?=$this->registerJs("webCall('". $callData['phone_from']."', '". $callData['phone_to']."', ". $callData['project_id'].", ". $callData['lead_id'].", 'auto-redial');");?>
-                                <?=$this->registerJs("startAutoTake('".\yii\helpers\Url::to(['/lead/auto-take', 'gid' => $leadModel->gid])."', '".$leadModel->id."');");?>
+                                <?=$this->registerJs('autoredialInit(); startAutoTake();');?>
                                 <?//=$this->registerJs('startTimer(20);');?>
                             <?php endif; ?>
 
