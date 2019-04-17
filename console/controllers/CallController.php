@@ -21,25 +21,67 @@ class CallController extends Controller
     public function actionUpdateStatus()
     {
         echo $this->ansiFormat('starting console script...' . PHP_EOL, Console::FG_GREEN);
-        $dt = new \DateTime('now');
-        $dt->modify('-1 hour');
+        $dt5Min = (new \DateTime('now'))->modify('-5 minutes')->format('Y-m-d H:i:s');
+        $dt20Min = (new \DateTime('now'))->modify('-20 minutes')->format('Y-m-d H:i:s');
+        $dt1Hour= (new \DateTime('now'))->modify('-1 hour')->format('Y-m-d H:i:s');
+
+        $items = [];
+
+        /*
         $items = Call::find()
             ->where(['c_call_status' => [Call::CALL_STATUS_QUEUE, Call::CALL_STATUS_RINGING, Call::CALL_STATUS_IN_PROGRESS]])
-            ->andWhere(['<=', 'c_created_dt', $dt->format('Y-m-d H:i:s')])
+            ->andWhere(['<=', 'c_created_dt', $dt1Hour])
+            ->orderBy(['c_id' => SORT_ASC])
+            ->all();
+        */
+
+        $items_queued = Call::find()
+            ->where(['c_call_status' => Call::CALL_STATUS_QUEUE])
+            ->andWhere(['<=', 'c_created_dt', $dt20Min])
             ->orderBy(['c_id' => SORT_ASC])
             ->all();
 
+        //echo VarDumper::dumpAsString($items_queued, 5, false); exit;
+
+        if($items_queued) {
+            $items = array_merge($items, $items_queued);
+        }
+
+        $items_ringing = Call::find()
+            ->where(['c_call_status' => Call::CALL_STATUS_RINGING])
+            ->andWhere(['<=', 'c_created_dt', $dt5Min])
+            ->orderBy(['c_id' => SORT_ASC])
+            ->all();
+
+        if($items_ringing) {
+            $items = array_merge($items, $items_ringing);
+        }
+
+
+        $items_inprogress = Call::find()
+            ->where(['c_call_status' =>  Call::CALL_STATUS_IN_PROGRESS])
+            ->andWhere(['<=', 'c_created_dt', $dt1Hour])
+            ->orderBy(['c_id' => SORT_ASC])
+            ->all();
+
+        if($items_inprogress) {
+            $items =  array_merge($items, $items_inprogress);
+        }
+
+        //echo VarDumper::dumpAsString($items, 5, false); exit;
+
+
         $out = [];
         $errors = [];
-        if ($count = count($items) > 0) {
-            echo $this->ansiFormat('Find ' . $count . ' items for update' . PHP_EOL, Console::FG_GREEN);
+        if (count($items) > 0) {
+            echo $this->ansiFormat('Find ' . count($items) . ' items for update' . PHP_EOL, Console::FG_GREEN);
             foreach ($items AS $call) {
                 $old_status = $call->c_call_status;
-                $call->c_call_status = Call::CALL_STATUS_COMPLETED;
+                $call->c_call_status = Call::CALL_STATUS_CANCELED;
                 if ($call->save()) {
                     $out[] = ['c_id' => $call->c_id,
                         'old_status' => $old_status,
-                        'new_status' => Call::CALL_STATUS_COMPLETED,
+                        'new_status' => Call::CALL_STATUS_CANCELED,
                     ];
                 } else {
                     $errors[] = $call->errors;
@@ -50,7 +92,7 @@ class CallController extends Controller
             return 0;
         }
 
-        Yii::info(VarDumper::dumpAsString(['calls' => $out, 'errors' => $errors]), 'info\Console:CallController:actionUpdateStatus');
+        \Yii::warning(VarDumper::dumpAsString(['calls' => $out, 'errors' => $errors]), 'info\Console:CallController:actionUpdateStatus');
         echo $this->ansiFormat(PHP_EOL . 'Finish update' . PHP_EOL, Console::FG_GREEN);
         return 0;
     }
