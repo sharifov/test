@@ -146,6 +146,10 @@ return [
                     'route' => 'lead/trash',
                 ],
                 [
+                    'pattern' => 'queue/duplicate',
+                    'route' => 'lead/duplicate',
+                ],
+                [
                     'pattern' => 'queue/booked',
                     'route' => 'lead/booked',
                 ],
