@@ -804,10 +804,18 @@ class CommunicationController extends ApiBaseController
                         $call_agent_username = $agentRes['call_agent_username'];
                     } else {
                         if($agentRes && isset($agentRes['call_project_id'])) {
-                            $call_project_id = $agentRes['call_project_id'] ?? null;
+                            $call_project_id = ($agentRes['call_project_id'] > 0) ? $agentRes['call_project_id'] : null;
+                            if(NULL === $call_project_id) {
+                                $isOnHold = false;
+                                $callGeneralNumber = true;
+                            } else {
+                                $isOnHold = true;
+                                $callGeneralNumber = false;
+                            }
+                        } else {
+                            $isOnHold = false;
+                            $callGeneralNumber = true;
                         }
-                        $isOnHold = true;
-                        $callGeneralNumber = false;
                     }
 
                 } else {
