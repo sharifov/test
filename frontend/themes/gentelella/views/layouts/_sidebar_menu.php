@@ -190,7 +190,9 @@ $isQA = Yii::$app->authManager->getAssignment('qa', Yii::$app->user->id);
 
                 $badges = \common\models\Lead::getBadgesSingleQuery();
 
-                $menuItems[] = ['label' => 'Pending <span id="pending-queue" class="label-info label pull-right">' . $badges['pending'] . '</span> ', 'url' => ['queue/pending'], 'icon' => 'briefcase text-info'];
+                if($isAdmin) {
+                    $menuItems[] = ['label' => 'Pending <span id="pending-queue" class="label-info label pull-right">' . $badges['pending'] . '</span> ', 'url' => ['queue/pending'], 'icon' => 'briefcase text-info'];
+                }
 
                 $menuItems[] = ['label' => 'Inbox <span id="inbox-queue" class="label-info label pull-right">' . $badges['inbox'] . '</span> ', 'url' => ['queue/inbox'], 'icon' => 'briefcase text-info'];
                 $menuItems[] = ['label' => 'Follow Up <span id="follow-up-queue" class="label-success label pull-right">' . $badges['follow-up'] . '</span> ', 'url' => ['queue/follow-up'], 'icon' => 'recycle'];
