@@ -325,6 +325,7 @@ class LeadController extends ApiBaseController
 
 
         $client = null;
+        $lead = new Lead();
 
         if($modelLead->phones) {
             foreach ($modelLead->phones as $phone) {
@@ -332,6 +333,8 @@ class LeadController extends ApiBaseController
                 if(!$phone) {
                     continue;
                 }
+
+                $lead->l_client_phone = $phone;
 
                 $phoneModel = ClientPhone::find()->where(['phone' => $phone])->orderBy(['id' => SORT_DESC])->limit(1)->one();
 
@@ -341,6 +344,19 @@ class LeadController extends ApiBaseController
                 }
             }
         }
+
+        if ($modelLead->emails) {
+            foreach ($modelLead->emails as $email) {
+
+                $email = mb_strtolower(trim($email));
+
+                if(!$email) {
+                    continue;
+                }
+                $lead->l_client_email = $email;
+            }
+        }
+
 
         if(!$client) {
             $client = new Client();
@@ -366,7 +382,7 @@ class LeadController extends ApiBaseController
         }
 
 
-        $lead = new Lead();
+
         //$lead->scenario = Lead::SCENARIO_API;
         $lead->attributes = $modelLead->attributes;
 
@@ -413,6 +429,41 @@ class LeadController extends ApiBaseController
         if ($this->apiProject) {
             $lead->project_id = $this->apiProject->id;
         }
+
+
+
+        if(!$lead->l_client_lang && $modelLead->user_language) {
+            $lead->l_client_lang = $modelLead->user_language;
+        }
+
+        if(!$lead->l_client_ua && $modelLead->user_agent) {
+            $lead->l_client_ua = $modelLead->user_agent;
+        }
+
+        if(!$lead->l_client_first_name && $modelLead->client_first_name) {
+            $lead->l_client_first_name = $modelLead->client_first_name;
+        }
+
+        if(!$lead->l_client_last_name && $modelLead->client_last_name) {
+            $lead->l_client_last_name = $modelLead->client_last_name;
+        }
+
+        $request_hash = $modelLead->getRequestHash();
+
+        $duplicateLead = Lead::find()->where(['l_request_hash' => $request_hash])->orderBy(['id' => SORT_DESC])->limit(1)->one();
+
+        if($duplicateLead) {
+            $lead->l_duplicate_lead_id = $duplicateLead->id;
+            $lead->status = Lead::STATUS_TRASH;
+            Yii::info('Warning: detected duplicate Lead (Origin id: '.$duplicateLead->id.', Hash: '.$request_hash.')', 'info\API:Lead:duplicate');
+        }
+
+
+
+        if(!$lead->l_request_hash && $request_hash) {
+            $lead->l_request_hash = $request_hash;
+        }
+
 
 
         if (!$lead->validate()) {

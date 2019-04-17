@@ -56,6 +56,14 @@ use common\components\SearchService;
  * @property double $tips
  * @property int $l_call_status_id
  * @property string $l_pending_delay_dt
+ * @property string $l_client_first_name
+ * @property string $l_client_last_name
+ * @property string $l_client_phone
+ * @property string $l_client_email
+ * @property string $l_client_lang
+ * @property string $l_client_ua
+ * @property string $l_request_hash
+ * @property int $l_duplicate_lead_id
  *
  * @property double $finalProfit
  * @property int $quotesCount
@@ -76,12 +84,15 @@ use common\components\SearchService;
  * @property LeadPreferences $leadPreferences
  * @property Client $client
  * @property Employee $employee
+ * @property Lead $lDuplicateLead
+ * @property Lead[] $leads0
  * @property Source $source
  * @property Project $project
  * @property LeadAdditionalInformation[] $additionalInformationForm
  * @property Lead $clone
  * @property ProfitSplit[] $profitSplits
  * @property TipsSplit[] $tipsSplits
+ * @property UserConnection[] $userConnections
  *
  */
 class Lead extends ActiveRecord
@@ -224,23 +235,30 @@ class Lead extends ActiveRecord
 
             [['trip_type', 'cabin'], 'required'],
             [['adults', 'children', 'infants', 'source_id'], 'required'], //'except' => self::SCENARIO_API],
-            [['client_id', 'employee_id', 'status', 'project_id', 'source_id', 'rating', 'l_grade', 'clone_id', 'bo_flight_id', 'l_call_status_id'], 'integer'],
+
+            [['client_id', 'employee_id', 'status', 'project_id', 'source_id', 'rating', 'called_expert', 'bo_flight_id', 'l_grade', 'clone_id', 'l_call_status_id', 'l_duplicate_lead_id'], 'integer'],
             [['adults', 'children', 'infants'], 'integer', 'max' => 9],
             [['adults'], 'integer', 'min' => 1],
-            [['l_answered'], 'boolean'],
-            [['notes_for_experts', 'request_ip_detail'], 'string'],
+
+            [['notes_for_experts', 'request_ip_detail', 'additional_information', 'l_client_ua'], 'string'],
+            [['created', 'updated', 'snooze_for', 'l_pending_delay_dt'], 'safe'],
             [['final_profit', 'tips', 'agents_processing_fee'], 'number'],
             [['uid', 'request_ip', 'offset_gmt', 'discount_id', 'description'], 'string', 'max' => 255],
-            [['gid'], 'string', 'max' => 32],
-            [['gid'], 'unique'],
-            [['created', 'updated', 'snooze_for', 'called_expert', 'additional_information', 'l_pending_delay_dt'], 'safe'],
-            [['uid'], 'string', 'max' => 255],
             [['trip_type'], 'string', 'max' => 2],
             [['cabin'], 'string', 'max' => 1],
+            [['gid', 'l_request_hash'], 'string', 'max' => 32],
+            [['l_client_first_name', 'l_client_last_name'], 'string', 'max' => 50],
+            [['l_client_phone'], 'string', 'max' => 20],
+            [['l_client_email'], 'string', 'max' => 160],
+            [['l_client_lang'], 'string', 'max' => 5],
+            [['gid'], 'unique'],
+            [['l_answered'], 'boolean'],
             [['status_description'], 'string'],
+
             [['clone_id'], 'exist', 'skipOnError' => true, 'targetClass' => self::class, 'targetAttribute' => ['clone_id' => 'id']],
             [['client_id'], 'exist', 'skipOnError' => true, 'targetClass' => Client::class, 'targetAttribute' => ['client_id' => 'id']],
             [['employee_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['employee_id' => 'id']],
+            [['l_duplicate_lead_id'], 'exist', 'skipOnError' => true, 'targetClass' => self::class, 'targetAttribute' => ['l_duplicate_lead_id' => 'id']],
         ];
     }
 
@@ -275,6 +293,16 @@ class Lead extends ActiveRecord
             'destination_country' => 'Destination Country code',
             'l_call_status_id' => 'Call status',
             'l_pending_delay_dt' => 'Pending delay',
+
+            'l_client_first_name' => 'Client First Name',
+            'l_client_last_name' => 'Client Last Name',
+            'l_client_phone' => 'Client Phone',
+            'l_client_email' => 'Client Email',
+            'l_client_lang' => 'Client Lang',
+            'l_client_ua' => 'Client UserAgent',
+            'l_request_hash' => 'Request Hash',
+            'l_duplicate_lead_id' => 'Duplicate Lead ID',
+
         ];
     }
 
@@ -290,6 +318,22 @@ class Lead extends ActiveRecord
                 'value' => date('Y-m-d H:i:s') //new Expression('NOW()'),
             ],
         ];
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getLDuplicateLead()
+    {
+        return $this->hasOne(self::class, ['id' => 'l_duplicate_lead_id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getLeads0()
+    {
+        return $this->hasMany(self::class, ['l_duplicate_lead_id' => 'id']);
     }
 
 
@@ -449,6 +493,7 @@ class Lead extends ActiveRecord
     {
         return $this->hasMany(LeadFlightSegment::class, ['lead_id' => 'id'])->count();
     }
+
 
 
     public static function getBadgesSingleQuery()

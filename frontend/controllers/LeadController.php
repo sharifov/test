@@ -78,7 +78,7 @@ class LeadController extends FController
 
                     [
                         'actions' => [
-                            'pending'
+                            'pending', 'duplicate'
                         ],
                         'allow' => true,
                         'roles' => ['admin'],
@@ -86,10 +86,10 @@ class LeadController extends FController
 
                     [
                         'actions' => [
-                            'view', 'trash', 'sold'
+                            'view', 'trash', 'sold', 'duplicate'
                         ],
                         'allow' => true,
-                        'roles' => ['qa'],
+                        'roles' => ['qa', 'supervisor'],
                     ],
                 ],
             ]
@@ -1809,6 +1809,27 @@ class LeadController extends FController
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
             'isAgent' => $isAgent,
+        ]);
+    }
+
+    public function actionDuplicate()
+    {
+        $searchModel = new LeadSearch();
+
+        $params = Yii::$app->request->queryParams;
+        $params2 = Yii::$app->request->post();
+
+        $params = array_merge($params, $params2);
+
+        if(Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id)) {
+            $params['LeadSearch']['supervision_id'] = Yii::$app->user->id;
+        }
+
+        $dataProvider = $searchModel->searchDuplicates($params);
+
+        return $this->render('duplicate', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
         ]);
     }
 
