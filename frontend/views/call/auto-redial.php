@@ -62,8 +62,7 @@ $bundle = \frontend\assets\TimerAsset::register($this);
 $this->params['breadcrumbs'][] = ['label' => 'Calls', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 
-$duration = 35;
-
+$duration = 10;
 ?>
 
 <script>
@@ -518,7 +517,6 @@ $duration = 35;
                                                     'value' => function(\common\models\Lead $model) {
                                                         return \common\models\Lead::getFlightType($model->trip_type) ?? '-';
                                                     },
-
                                                 ],
 
                                                 [
@@ -526,7 +524,6 @@ $duration = 35;
                                                     'value' => function(\common\models\Lead $model) {
                                                         return \common\models\Lead::getCabin($model->cabin) ?? '-';
                                                     },
-
                                                 ],
 
                                                 /*'project_id',
@@ -701,7 +698,7 @@ $duration = 35;
                                 </div>
 
                                 <div class="col-md-12 text-center">
-                                    <?php if($callModel->cLead && $callModel->cLead->status === Lead::STATUS_PENDING && $callModel->c_call_status === \common\models\Call::CALL_STATUS_RINGING): ?>
+                                    <?php if($callModel->cLead && $callModel->cLead->status === Lead::STATUS_PENDING && $callModel->c_call_status === \common\models\Call::CALL_STATUS_IN_PROGRESS): ?>
                                         <?=Html::a('<i class="fa fa-download"></i> Take Lead <b id="auto_take_timer" data-name="'.$callModel->cLead->id.'"></b>', ['lead/auto-take', 'gid' => $callModel->cLead->gid], [
                                             'class' => 'btn btn-success',
                                             'target' => '_blank',
