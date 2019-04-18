@@ -1413,7 +1413,20 @@ class CommunicationController extends ApiBaseController
 
 
             if(isset($post['callData'], $post['call'], $post['callData']['CallSid']) && $post['callData']['CallSid']) {
-                $call = Call::find()->where(['c_call_sid' => $post['callData']['CallSid']])->limit(1)->one();
+
+                $agentId = false;
+                if(isset($post['callData']['Called']) && $post['callData']['Called']) {
+                    if(strpos($post['callData']['Called'], 'client:seller')) {
+                        $agentId = (int)str_replace('client:seller', '', $post['callData']['Called']);
+                    }
+                }
+
+                if($agentId) {
+                    $call = Call::find()->where(['c_call_sid' => $post['callData']['CallSid']])->andWhere(['c_created_user_id' => $agentId])->limit(1)->one();
+                } else {
+                    $call = Call::find()->where(['c_call_sid' => $post['callData']['CallSid']])->limit(1)->one();
+                }
+
                 if($call) {
 
                     if(isset($post['callData']['CallStatus']) && $post['callData']['CallStatus']) {
