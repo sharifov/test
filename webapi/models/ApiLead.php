@@ -273,14 +273,17 @@ class ApiLead extends Model
 
         if($this->flights) {
             foreach ($this->flights as $flight) {
-
                 $hashArray[] = $flight['origin'];
                 $hashArray[] = $flight['destination'];
                 $hashArray[] = $flight['departure'];
             }
         }
 
-        $hash = md5(implode('|', $hashArray));
+        $strHash = implode('|', $hashArray);
+        $hash = md5($strHash);
+
+        Yii::info('Lead ('.$this->lead_id.', StrHash: "'.$strHash.'", "'.$hash.'")', 'info\APILead:strHash');
+
         return $hash;
     }
 

@@ -104,8 +104,31 @@ $this->params['breadcrumbs'][] = $this->title;
             'format' => 'raw'
         ],
 
+        [
+            // 'attribute' => 'client_id',
+            'header' => 'Request',
+            'format' => 'raw',
+            'value' => function (\common\models\Lead $model) {
 
-        /*[
+                $clientName = trim($model->l_client_first_name . ' ' . $model->l_client_last_name);
+
+                if ($clientName) {
+                    $clientName = '<i class="fa fa-user"></i> ' . Html::encode($clientName).'';
+                }
+
+                $str = $model->l_client_email ? '<br><i class="fa fa-envelope"></i> ' . $model->l_client_email : '';
+                $str .= $model->l_client_phone ? '<br><i class="fa fa-phone"></i>' . $model->l_client_phone : '';
+                $clientName .= $str;
+
+                return $clientName;
+            },
+
+            'options' => [
+                'style' => 'width:160px'
+            ]
+        ],
+
+        [
             // 'attribute' => 'client_id',
             'header' => 'Client',
             'format' => 'raw',
@@ -113,14 +136,10 @@ $this->params['breadcrumbs'][] = $this->title;
 
                 if ($model->client) {
 
-                    if($model->client->first_name !== 'ClientName') {
-                        $clientName = trim($model->client->first_name . ' ' . $model->client->last_name);
-                    } else {
-                        $clientName = '';
-                    }
+                    $clientName = trim($model->client->first_name . ' ' . $model->client->last_name);
 
                     if ($clientName) {
-                        $clientName = '<i class="fa fa-user"></i> ' . Html::encode($clientName).'<br>';
+                        $clientName = '<i class="fa fa-user"></i> ' . Html::encode($clientName).'';
                     }
 
                     $str = $model->client->clientEmails ? '<i class="fa fa-envelope"></i> ' . implode(' <br><i class="fa fa-envelope"></i> ', \yii\helpers\ArrayHelper::map($model->client->clientEmails, 'email', 'email')) . '' : '';
@@ -137,7 +156,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'options' => [
                 'style' => 'width:160px'
             ]
-        ],*/
+        ],
 
 
         /*[
@@ -163,6 +182,14 @@ $this->params['breadcrumbs'][] = $this->title;
         ],*/
 
         [
+            'attribute' => 'client_id',
+            'value' => function (\common\models\Lead $model) {
+                return $model->client_id ? Html::a($model->client_id, ['client/view', 'id' => $model->client_id], ['data-pjax' => 0, 'target' => '_blank']) : '-';
+            },
+            'format' => 'raw',
+        ],
+
+        /*[
             'attribute' => 'client.phone',
             //'header' => 'Client Phones',
             'format' => 'raw',
@@ -175,7 +202,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 return $str ?? '-';
             },
             'options' => ['style' => 'width:180px'],
-        ],
+        ],*/
 
         [
             'header' => 'Client time',
@@ -310,7 +337,7 @@ $this->params['breadcrumbs'][] = $this->title;
             //'attribute' => 'l_request_hash',
             'label' => 'Duplicate',
             'value' => function (\common\models\Lead $model) {
-                return $model->lDuplicateLead ? count($model->lDuplicateLead) : '-';
+                return $model->leads0 ? Html::a(count($model->leads0), ['lead/duplicate', 'LeadSearch[l_request_hash]' => $model->l_request_hash], ['data-pjax' => 0, 'target' => '_blank']) : '-';
             },
         ],
 

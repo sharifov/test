@@ -452,7 +452,7 @@ class LeadController extends ApiBaseController
 
         $duplicateLead = Lead::find()
             ->where(['l_request_hash' => $request_hash])->andWhere(['>=', 'created', date('Y-m-d H:i:s', strtotime('-15 minutes'))])
-            ->orderBy(['id' => SORT_DESC])->limit(1)->one();
+            ->orderBy(['id' => SORT_ASC])->limit(1)->one();
 
         if($duplicateLead) {
             $lead->l_duplicate_lead_id = $duplicateLead->id;

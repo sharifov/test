@@ -66,7 +66,7 @@ class LeadSearch extends Lead
             [['id', 'client_id', 'employee_id', 'status', 'project_id', 'adults', 'children', 'infants', 'rating', 'called_expert', 'cnt', 'l_grade', 'l_answered', 'supervision_id', 'limit', 'bo_flight_id', 'l_duplicate_lead_id'], 'integer'],
             [['email_status', 'quote_status'], 'integer'],
 
-            [['client_name', 'client_email', 'client_phone','quote_pnr', 'gid', 'origin_airport','destination_airport', 'origin_country', 'destination_country'], 'string'],
+            [['client_name', 'client_email', 'client_phone','quote_pnr', 'gid', 'origin_airport','destination_airport', 'origin_country', 'destination_country', 'l_request_hash'], 'string'],
 
             //['created_date_from', 'default', 'value' => '2018-01-01'],
             //['created_date_to', 'default', 'value' => date('Y-m-d')],
@@ -1162,7 +1162,7 @@ class LeadSearch extends Lead
             $leadTable.'.rating' => $this->rating,
             $leadTable.'.status' => $this->status,
             $leadTable.'.l_duplicate_lead_id' => $this->l_duplicate_lead_id,
-
+            $leadTable.'.l_request_hash' => $this->l_request_hash,
         ]);
 
         $query

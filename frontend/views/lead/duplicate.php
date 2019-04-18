@@ -101,6 +101,30 @@ $this->params['breadcrumbs'][] = $this->title;
 
         [
             // 'attribute' => 'client_id',
+            'header' => 'Request',
+            'format' => 'raw',
+            'value' => function (\common\models\Lead $model) {
+
+                $clientName = trim($model->l_client_first_name . ' ' . $model->l_client_last_name);
+
+                if ($clientName) {
+                    $clientName = '<i class="fa fa-user"></i> ' . Html::encode($clientName).'';
+                }
+
+                $str = $model->l_client_email ? '<br><i class="fa fa-envelope"></i> ' . $model->l_client_email : '';
+                $str .= $model->l_client_phone ? '<br><i class="fa fa-phone"></i>' . $model->l_client_phone : '';
+                $clientName .= $str;
+
+                return $clientName;
+            },
+
+            'options' => [
+                'style' => 'width:160px'
+            ]
+        ],
+
+        [
+            // 'attribute' => 'client_id',
             'header' => 'Client',
             'format' => 'raw',
             'value' => function (\common\models\Lead $model) {
