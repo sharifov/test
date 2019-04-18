@@ -82,6 +82,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'style' => 'width:80px'
             ]
         ],
+        'bo_flight_id',
         [
             'attribute' => 'pending',
             'label' => 'Pending Time',
