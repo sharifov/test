@@ -12,9 +12,11 @@ use yii\helpers\Url;
 $this->title = 'Duplicate Queue';
 
 if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
+    $isAdmin = true;
     $userList = \common\models\Employee::getList();
     $projectList = \common\models\Project::getList();
 } else {
+    $isAdmin = false;
     $userList = \common\models\Employee::getListByUserId(Yii::$app->user->id);
     $projectList = \common\models\ProjectEmployeeAccess::getProjectsByEmployee();
 }
@@ -300,8 +302,45 @@ $this->params['breadcrumbs'][] = $this->title;
 
         [
             'class' => 'yii\grid\ActionColumn',
-            'template' => '{action}',
+            'template' => '{view} {view2} {delete}',
+            'controller' => 'leads',
+
+            'visibleButtons' => [
+                    /*'view' => function ($model, $key, $index) {
+                        return User::hasPermission('viewOrder');
+                    },
+                    'update' => function ($model, $key, $index) {
+                        return User::hasPermission('updateOrder');
+                    },*/
+                    'delete' => function ($model, $key, $index) use ($isAdmin) {
+                        return $isAdmin;
+                    },
+                    /*'soft-delete' => function ($model, $key, $index) {
+                        return User::hasPermission('deleteOrder');
+                    },*/
+            ],
+
             'buttons' => [
+                'view2' => function ($url, Lead $model) {
+                    return Html::a('<i class="glyphicon glyphicon-search"></i>', [
+                        'lead/view',
+                        'gid' => $model->gid
+                    ], [
+                        'title' => 'View',
+                    ]);
+                },
+                /*'soft-delete' => function ($url, $model) {
+                    return Html::a('<i class="glyphicon glyphicon-remove-circle"></i>', $url, [
+                        'title' => 'Delete',
+                        'data' => [
+                            'confirm' => 'Are you sure you want to delete this SMS?',
+                            //'method' => 'post',
+                        ],
+                    ]);
+                }*/
+            ],
+
+            /*'buttons' => [
                 'action' => function ($url, \common\models\Lead $model, $key) {
 
                     $buttons = '';
@@ -318,7 +357,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
                     return $buttons;
                 }
-            ]
+            ]*/
         ]
     ];
 

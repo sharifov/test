@@ -69,8 +69,8 @@ class LeadController extends FController
                             'create', 'add-comment', 'change-state', 'unassign', 'take', 'auto-take',
                             'set-rating', 'add-note', 'unprocessed', 'call-expert', 'send-email',
                             'check-updates', 'flow-transition', 'get-user-actions', 'add-pnr', 'update2','clone',
-                            'get-badges', 'sold', 'split-profit', 'split-tips','processing', 'follow-up', 'inbox', 'trash', 'booked',
-                            'test', 'view'
+                            'get-badges', 'sold', 'split-profit', 'split-tips','processing', 'follow-up',  'trash', 'booked',
+                            'test', 'view'//, 'inbox',
                         ],
                         'allow' => true,
                         'roles' => ['agent', 'admin', 'supervisor'],
