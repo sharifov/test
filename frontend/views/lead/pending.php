@@ -339,6 +339,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'value' => function (\common\models\Lead $model) {
                 return $model->leads0 ? Html::a(count($model->leads0), ['lead/duplicate', 'LeadSearch[l_request_hash]' => $model->l_request_hash], ['data-pjax' => 0, 'target' => '_blank']) : '-';
             },
+            'format' => 'raw',
         ],
 
 
