@@ -263,7 +263,7 @@ class ApiLead extends Model
         $hashArray[] = $this->children;
         $hashArray[] = $this->infants;
         $hashArray[] = $this->cabin;
-        $hashArray[] = date('Y-m-d H');
+        $hashArray[] = date('Y-m-d');
 
         if($this->phones) {
             foreach ($this->phones as $phone) {

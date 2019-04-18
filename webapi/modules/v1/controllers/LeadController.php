@@ -450,14 +450,15 @@ class LeadController extends ApiBaseController
 
         $request_hash = $modelLead->getRequestHash();
 
-        $duplicateLead = Lead::find()->where(['l_request_hash' => $request_hash])->orderBy(['id' => SORT_DESC])->limit(1)->one();
+        $duplicateLead = Lead::find()
+            ->where(['l_request_hash' => $request_hash])->andWhere(['>=', 'created', date('Y-m-d H:i:s', strtotime('-15 minutes'))])
+            ->orderBy(['id' => SORT_DESC])->limit(1)->one();
 
         if($duplicateLead) {
             $lead->l_duplicate_lead_id = $duplicateLead->id;
             $lead->status = Lead::STATUS_TRASH;
             Yii::info('Warning: detected duplicate Lead (Origin id: '.$duplicateLead->id.', Hash: '.$request_hash.')', 'info\API:Lead:duplicate');
         }
-
 
 
         if(!$lead->l_request_hash && $request_hash) {
@@ -469,7 +470,9 @@ class LeadController extends ApiBaseController
         if (!$lead->validate()) {
             if ($errors = $lead->getErrors()) {
                 throw new UnprocessableEntityHttpException($this->errorToString($errors), 7);
-            } else throw new UnprocessableEntityHttpException('Not validate Lead data', 7);
+            } else {
+                throw new UnprocessableEntityHttpException('Not validate Lead data', 7);
+            }
         }
 
         if (!$lead->save()) {

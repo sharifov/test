@@ -98,7 +98,7 @@ $duration = 35;
 
     }
 
-    function autoTake() {
+    /*function autoTake() {
         //takeTimerId = setTimeout(function() { openInNewTab(url, name) }, 20000);
         console.log('autoTake');
 
@@ -108,7 +108,7 @@ $duration = 35;
         //alert(name);
         $('#auto_take_timer').timer('remove');
         openInNewTab(url, name)
-    }
+    }*/
 
     function endAutoTake() {
         console.log('endAutoTake, current takeTimerId: ' + takeTimerId);
@@ -139,7 +139,7 @@ $duration = 35;
                 //endAutoTake();
                 //startCall();
             } else if (obj.status === 'in-progress') {
-                autoTake();
+                //autoTake();
                 autoredialInit();
                 //startCallTimer();
                 //$('#div-call-timer').timer('resume');
@@ -1146,26 +1146,7 @@ $duration = 35;
 
 <?php
 $js = <<<JS
-
-
-    /*function startTimers() {
-    
-        $(".timer").each(function( index ) {
-            var sec = $( this ).data('sec');
-            var control = $( this ).data('control');
-            var format = $( this ).data('format');
-            //var id = $( this ).data('id');
-            //$( this ).addClass( "foo" );
-            $(this).timer({format: format, seconds: sec}).timer(control);
-            //console.log( index + ": " + $( this ).text() );
-        });
-    
-        //$('.timer').timer('remove');
-        //$('.timer').timer({format: '%M:%S', seconds: 0}).timer('start');
-    }
-
-    
-
+     /*
     $('#btn-user-call-map-refresh').on('click', function () {
         // $('#modal-dialog').find('.modal-content').html('');
         $.pjax.reload({container:'#pjax-call-list'});
@@ -1185,10 +1166,6 @@ $js = <<<JS
        $('#btn-user-call-map-refresh').click();
       setTimeout(runTimerRefresh, 30000);
     }, 30000);*/
-
-    
-
-
 JS;
 $this->registerJs($js);
 

@@ -299,17 +299,20 @@ $this->params['breadcrumbs'][] = $this->title;
             },
         ],
 
-
-        /*[
-            'header' => 'Client time',
-            'format' => 'raw',
+        [
+            'attribute' => 'l_request_hash',
             'value' => function (\common\models\Lead $model) {
-                return $model->getClientTime();
+                return $model->l_request_hash ?: '-';
             },
-            'visible' => ! $isAgent,
-            //'options' => ['style' => 'width:110px'],
+        ],
 
-        ],*/
+        [
+            //'attribute' => 'l_request_hash',
+            'label' => 'Duplicate',
+            'value' => function (\common\models\Lead $model) {
+                return $model->lDuplicateLead ? count($model->lDuplicateLead) : '-';
+            },
+        ],
 
 
 
@@ -320,15 +323,17 @@ $this->params['breadcrumbs'][] = $this->title;
                 'action' => function ($url, \common\models\Lead $model, $key) {
                     $buttons = '';
 
-                    /*$buttons .= Html::a('<i class="fa fa-download"></i> Take', ['lead/take', 'gid' => $model->gid], [
-                        'class' => 'btn btn-primary btn-xs take-btn',
-                        'data-pjax' => 0
-                    ]);*/
-
                     $buttons .= Html::a('<i class="fa fa-search"></i> View', ['lead/view', 'gid' => $model->gid], [
-                        'class' => 'btn btn-info btn-xs',
-                        'data-pjax' => 0
-                    ]);
+                            'class' => 'btn btn-info btn-xs',
+                            'data-pjax' => 0,
+                            'target' => '_blank',
+                        ]);
+
+                    $buttons .= ' '. Html::a('<i class="fa fa-list-ul"></i> View', ['leads/view', 'id' => $model->id], [
+                            'class' => 'btn btn-warning btn-xs',
+                            'data-pjax' => 0,
+                            'target' => '_blank',
+                        ]);
 
                     return $buttons;
                 }
