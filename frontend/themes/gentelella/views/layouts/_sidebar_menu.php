@@ -206,7 +206,7 @@ $isQA = Yii::$app->authManager->getAssignment('qa', Yii::$app->user->id);
                 $menuItems[] = ['label' => 'Sold <span id="sold-queue" class="label-success label pull-right">' . $badges['sold'] . '</span> ', 'url' => ['queue/sold'], 'icon' => 'flag text-success'];
 
                 if($isAdmin || $isSupervision) {
-                    $menuItems[] = ['label' => 'Duplicate', 'url' => ['queue/duplicate'], 'icon' => 'list text-danger'];
+                    $menuItems[] = ['label' => 'Duplicate <span id="sold-queue" class="label-danger label pull-right">' . $badges['duplicate'] . '</span>', 'url' => ['queue/duplicate'], 'icon' => 'list text-danger'];
                     $menuItems[] = ['label' => 'Trash <span id="trash-queue" class="label-danger label pull-right"></span>', 'url' => ['queue/trash'], 'icon' => 'trash-o text-danger']; //' . $badges['trash'] . '
                 }
             }

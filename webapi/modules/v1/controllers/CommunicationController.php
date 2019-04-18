@@ -1142,16 +1142,17 @@ class CommunicationController extends ApiBaseController
                         $lead = $call->cLead;
                         $delayTimeMin = $lead->getDelayPendingTime();
                         $lead->l_pending_delay_dt = date('Y-m-d H:i:s', strtotime('+'.$delayTimeMin.' minutes'));
+                        $lead->employee_id = null;
 
 
                         if(!$lead->save()) {
                             Yii::error('lead: '. $lead->id . ' ' . VarDumper::dumpAsString($lead->errors), 'API:CommunicationController:actionVoice:TYPE_VOIP_FINISH:Lead:save');
                         }
 
-                        if($call->c_created_user_id) {
+                        /*if($call->c_created_user_id) {
                             Notifications::create($call->c_created_user_id, 'Lead delayed -' . $lead->id . '', 'Lead ID-' . $lead->id . ' is delayed. (+'.$delayTimeMin.' minutes)' , Notifications::TYPE_INFO, true);
                             Notifications::socket($call->c_created_user_id, null, 'getNewNotification', [], true);
-                        }
+                        }*/
 
                     }
 
@@ -1298,6 +1299,12 @@ class CommunicationController extends ApiBaseController
                     $call->c_lead_id = (int) $post['callData']['lead_id'];
                 }
 
+
+                if($call->c_lead_id && $call->cLead && $call->cLead->status === Lead::STATUS_PENDING && ($call->c_call_status === Call::CALL_STATUS_RINGING || $call->c_call_status === Call::CALL_STATUS_IN_PROGRESS) && !$call->cLead->employee_id && $call->c_created_user_id) {
+                    $lead = $call->cLead;
+                    $lead->employee_id = $call->c_created_user_id;
+                    $lead->save();
+                }
 
                 //$call->c_call_status = $post['callData']['CallStatus'] ?? '';
                 //$call->c_sequence_number = $post['callData']['SequenceNumber'] ?? 0;
