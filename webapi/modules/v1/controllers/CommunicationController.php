@@ -1144,7 +1144,7 @@ class CommunicationController extends ApiBaseController
 
                             $delayTimeMin = $lead->getDelayPendingTime();
                             $lead->l_pending_delay_dt = date('Y-m-d H:i:s', strtotime('+' . $delayTimeMin . ' minutes'));
-                            //$lead->employee_id = null;
+                            $lead->employee_id = null;
                             $lead->l_call_status_id = Lead::CALL_STATUS_READY;
 
 
