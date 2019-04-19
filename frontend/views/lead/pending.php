@@ -214,6 +214,31 @@ $this->params['breadcrumbs'][] = $this->title;
         ],
 
         [
+            'header' => 'Location',
+            'format' => 'raw',
+            'value' => function(\common\models\Lead $model) {
+                // {"ipAddress":"71.150.186.68","countryCode":"US","countryName":"United States","regionName":"Kentucky","cityName":"Lowmansville","zipCode":"41232","latitude":"38.0001","longitude":"-82.7151","timeZone":"-04:00"}
+                $str = '';
+                if($model->request_ip_detail) {
+                    $ipData = @json_decode($model->request_ip_detail, true);
+                    $location = [];
+                    if($ipData) {
+                        $location[] = $ipData['countryCode'] ?? '';
+                        //$location[] = $ipData['countryName'] ?? '';
+                        $location[] = $ipData['regionName'] ?? '';
+                        $location[] = $ipData['cityName'] ?? '';
+                    }
+                    $str = implode(', ', $location);
+                }
+                return $str ?: '-';
+            },
+            'options' => ['style' => 'width:90px'],
+        ],
+
+
+
+
+        [
             //'attribute' => 'Quotes',
             'label' => 'Calls',
             'value' => function (\common\models\Lead $model) {
