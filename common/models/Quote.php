@@ -1957,6 +1957,9 @@ class Quote extends \yii\db\ActiveRecord
             if ($key < $index) {
                 continue;
             }
+            if (stripos($val, "BAG ALLOWANCE") !== false && $key > $index){
+                break;
+            }
             $bags[] = $val;
             if (stripos($val, "**") !== false) {
                 if (!isset($array[($key + 1)]) || stripos($array[($key + 1)], "2NDCHECKED") === false) {
@@ -1971,9 +1974,11 @@ class Quote extends \yii\db\ActiveRecord
             'free_baggage' => [],
             'paid_baggage' => []
         ];
+
         foreach ($bagsString as $key => $val) {
             $val = str_replace('*', '', $val);
             $detail = explode('-', $val);
+
             if (stripos($val, "BAG ALLOWANCE") !== false) {
                 $bags['segment'] = $detail[1];
                 if (stripos($val, "NIL/") !== false ||
