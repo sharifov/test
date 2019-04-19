@@ -138,11 +138,15 @@ $this->params['breadcrumbs'][] = $this->title;
 
                     $clientName = trim($model->client->first_name . ' ' . $model->client->last_name);
 
+                    if($clientName === 'ClientName') {
+                        $clientName = '-';
+                    }
+
                     if ($clientName) {
                         $clientName = '<i class="fa fa-user"></i> ' . Html::encode($clientName).'';
                     }
 
-                    $str = $model->client->clientEmails ? '<i class="fa fa-envelope"></i> ' . implode(' <br><i class="fa fa-envelope"></i> ', \yii\helpers\ArrayHelper::map($model->client->clientEmails, 'email', 'email')) . '' : '';
+                    $str = $model->client->clientEmails ? '<br><i class="fa fa-envelope"></i> ' . implode(' <br><i class="fa fa-envelope"></i> ', \yii\helpers\ArrayHelper::map($model->client->clientEmails, 'email', 'email')) . '' : '';
                     $str .= $model->client->clientPhones ? '<br><i class="fa fa-phone"></i> ' . implode(' <br><i class="fa fa-phone"></i> ', \yii\helpers\ArrayHelper::map($model->client->clientPhones, 'phone', 'phone')) . '' : '';
 
                     $clientName .= $str;
