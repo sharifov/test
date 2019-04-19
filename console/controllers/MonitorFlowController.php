@@ -53,7 +53,7 @@ class MonitorFlowController extends Controller
         foreach ($objects as $object) {
             $diff = strtotime($object->snooze_for);
             if ($diff <= time()) {
-                $object->status = Lead::STATUS_ON_HOLD;
+                $object->status = Lead::STATUS_PROCESSING;
                 $object->snooze_for = null;
                 $object->save();
             }

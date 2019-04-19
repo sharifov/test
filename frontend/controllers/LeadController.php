@@ -1325,7 +1325,7 @@ class LeadController extends FController
                         $model->status = $model::STATUS_FOLLOW_UP;
                     } elseif ($attrAgent !== null) {
                         $model->employee_id = $attrAgent;
-                        $model->status = $model::STATUS_ON_HOLD;
+                        $model->status = $model::STATUS_PROCESSING;
                     }
                 } elseif ($reason->queue == 'processing-over') {
                     $model->status = $model::STATUS_PROCESSING;
@@ -1349,7 +1349,7 @@ class LeadController extends FController
                     $model->save();
                     return $this->redirect(['trash']);
                 } else {
-                    $model->status = $model::STATUS_ON_HOLD;
+                    $model->status = $model::STATUS_PROCESSING;
                 }
 
                 $model->save();
@@ -1423,7 +1423,7 @@ class LeadController extends FController
         }
 
 
-        $inProcessing = Lead::find()
+        /*$inProcessing = Lead::find()
             ->where([
                 'employee_id' => $user->getId(),
                 'status' => Lead::STATUS_PROCESSING
@@ -1432,7 +1432,7 @@ class LeadController extends FController
             $inProcessing->status = Lead::STATUS_ON_HOLD;
             $inProcessing->save();
             $inProcessing = null;
-        }
+        }*/
 
         $model = Lead::find()
             ->where(['gid' => $gid])
