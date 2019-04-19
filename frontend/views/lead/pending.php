@@ -304,13 +304,13 @@ $this->params['breadcrumbs'][] = $this->title;
         ],
 
 
-        /*[
+        [
             'attribute' => 'l_call_status_id',
             'value' => function (\common\models\Lead $model) {
                 return \common\models\Lead::CALL_STATUS_LIST[$model->l_call_status_id] ?? '-';
             },
             'filter' => \common\models\Lead::CALL_STATUS_LIST
-        ],*/
+        ],
 
         [
             'attribute' => 'request_ip',
@@ -326,11 +326,20 @@ $this->params['breadcrumbs'][] = $this->title;
             },
         ],
 
-        [
+        /*[
             'attribute' => 'l_request_hash',
             'value' => function (\common\models\Lead $model) {
                 return $model->l_request_hash ?: '-';
             },
+        ],*/
+
+        [
+            'attribute' => 'employee_id',
+            'format' => 'raw',
+            'value' => function (\common\models\Lead $model) {
+                return $model->employee ? '<i class="fa fa-user"></i> ' . $model->employee->username : '-';
+            },
+            'filter' => false //\common\models\Employee::getList()
         ],
 
         [

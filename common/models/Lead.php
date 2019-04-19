@@ -2696,10 +2696,10 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
         $query = self::find();
         $query->select(['*', 'l_client_time' => new Expression("TIME( CONVERT_TZ(NOW(), '+00:00', offset_gmt) )")]);
 
-        $query->andWhere(['status' => self::STATUS_PENDING]);
+        $query->andWhere(['status' => self::STATUS_PENDING, 'l_call_status_id' => [self::CALL_STATUS_READY, self::CALL_STATUS_NONE]]);
         $query->andWhere(['OR', ['IS', 'l_pending_delay_dt', null], ['<=', 'l_pending_delay_dt', date('Y-m-d H:i:s')]]);
         $query->andWhere(['OR', ['BETWEEN', new Expression('TIME(CONVERT_TZ(NOW(), \'+00:00\', offset_gmt))'), '09:00', '21:00'], ['>=', 'created', date('Y-m-d H:i:s', strtotime('-'.self::PENDING_ALLOW_CALL_TIME_MINUTES.' min'))]]);
-        $query->andWhere(['employee_id' => null]);
+        $query->andWhere(['OR', ['employee_id' => null], ['employee_id' => $user_id]]);
 
         if($user_id) {
             $subQuery = UserProjectParams::find()->select(['upp_project_id'])->where(['upp_user_id' => $user_id])->andWhere(['AND', ['IS NOT', 'upp_tw_phone_number', null], ['<>', 'upp_tw_phone_number', '']]);
