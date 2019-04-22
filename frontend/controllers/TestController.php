@@ -4,6 +4,7 @@ namespace frontend\controllers;
 
 use common\components\CommunicationService;
 use common\components\CountEvent;
+use common\components\jobs\TelegramSendMessageJob;
 use common\models\Call;
 use common\models\Employee;
 use common\models\Notifications;
@@ -446,5 +447,17 @@ class TestController extends FController
                 ], 10, true);
             }
         }
+    }
+
+    public function actionJob()
+    {
+        $job = new TelegramSendMessageJob();
+        $job->user_id = Yii::$app->user->id;
+        $job->text = 'Test Job';
+
+        $queue = Yii::$app->queue_job;
+        $jobId = $queue->push($job);
+
+        echo $jobId;
     }
 }

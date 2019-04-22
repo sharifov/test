@@ -37,7 +37,11 @@ class TelegramSendMessageJob extends BaseObject implements JobInterface
 
             if($this->user_id) {
                 $profile = UserProfile::find()->where(['up_user_id' => $this->user_id])->limit(1)->one();
+
+                Yii::info($this->user_id, 'info\TelegramJob:execute:info');
+
                 if ($profile && $profile->up_telegram && $profile->up_telegram_enable) {
+
                     $tgm = Yii::$app->telegram;
 
                     $tgm->sendMessage([
