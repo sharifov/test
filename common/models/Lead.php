@@ -236,12 +236,14 @@ class Lead extends ActiveRecord
             [['trip_type', 'cabin'], 'required'],
             [['adults', 'children', 'infants', 'source_id'], 'required'], //'except' => self::SCENARIO_API],
 
-            [['client_id', 'employee_id', 'status', 'project_id', 'source_id', 'rating', 'called_expert', 'bo_flight_id', 'l_grade', 'clone_id', 'l_call_status_id', 'l_duplicate_lead_id'], 'integer'],
+            [['client_id', 'employee_id', 'status', 'project_id', 'source_id', 'rating', 'bo_flight_id', 'l_grade', 'clone_id', 'l_call_status_id', 'l_duplicate_lead_id'], 'integer'],
             [['adults', 'children', 'infants'], 'integer', 'max' => 9],
             [['adults'], 'integer', 'min' => 1],
 
-            [['notes_for_experts', 'request_ip_detail', 'additional_information', 'l_client_ua'], 'string'],
-            [['created', 'updated', 'snooze_for', 'l_pending_delay_dt'], 'safe'],
+            [['notes_for_experts', 'request_ip_detail', 'l_client_ua'], 'string'],
+
+            [['created', 'updated', 'snooze_for', 'called_expert', 'additional_information', 'l_pending_delay_dt'], 'safe'],
+
             [['final_profit', 'tips', 'agents_processing_fee'], 'number'],
             [['uid', 'request_ip', 'offset_gmt', 'discount_id', 'description'], 'string', 'max' => 255],
             [['trip_type'], 'string', 'max' => 2],
@@ -546,11 +548,14 @@ class Lead extends ActiveRecord
                         LEFT JOIN '.TipsSplit::tableName().' `ts` ON ts.ts_lead_id = leads.id
                         WHERE leads.status IN (:sold) '.$created . $sold .$employee.'
                         AND leads.`project_id` IN ('.implode(',', $projectIds).'))',
-            'processing' => 'COUNT(DISTINCT CASE WHEN status IN (' . $default . ') ' . $employee . ' THEN leads.id ELSE NULL END)'];
+            'processing' => 'COUNT(DISTINCT CASE WHEN status IN (' . $default . ') ' . $employee . ' THEN leads.id ELSE NULL END)'
+        ];
 
         /*if (Yii::$app->user->identity->role != 'agent') {
-            $select['trash'] = 'COUNT(DISTINCT CASE WHEN status IN (' . self::STATUS_TRASH . ') ' . $created . $employee . ' THEN leads.id ELSE NULL END)';
-            $select['pending'] = 'COUNT(DISTINCT CASE WHEN status IN (:inbox) THEN leads.id ELSE NULL END)';
+            //$select['trash'] = 'COUNT(DISTINCT CASE WHEN status IN (' . self::STATUS_TRASH . ') ' . $created . $employee . ' THEN leads.id ELSE NULL END)';
+            //$select['pending'] = 'COUNT(DISTINCT CASE WHEN status IN (:inbox) THEN leads.id ELSE NULL END)';
+
+            $select['duplicate'] = 'COUNT(DISTINCT CASE WHEN status IN (' . self::STATUS_TRASH . ') ' . $created . $employee . ' THEN leads.id ELSE NULL END)';
         }*/
 
         if (Yii::$app->user->identity->role === 'admin') {
@@ -575,7 +580,7 @@ class Lead extends ActiveRecord
         //echo $query->createCommand()->getRawSql();die;
 
         $db = Yii::$app->db;
-        $duration = 900;     // cache query results for 60 seconds.
+        $duration = 0;     // cache query results for 60 seconds.
         $dependency = new DbDependency();
         $dependency->sql = 'SELECT count(*) FROM leads';
 
@@ -584,6 +589,13 @@ class Lead extends ActiveRecord
         $result = $db->cache(function ($db) use ($query) {
             return $query->createCommand()->queryOne();
         }, $duration, $dependency);
+
+
+        $result['duplicate'] = '';
+
+        if (Yii::$app->user->identity->role === 'admin' || Yii::$app->user->identity->role === 'qa') {
+            $result['duplicate'] = self::find()->where(['IS NOT', 'l_duplicate_lead_id', null])->count() ?: '' ;
+        }
 
         return $result; // $query->createCommand()->queryOne();
     }
@@ -2684,10 +2696,10 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
         $query = self::find();
         $query->select(['*', 'l_client_time' => new Expression("TIME( CONVERT_TZ(NOW(), '+00:00', offset_gmt) )")]);
 
-        $query->andWhere(['status' => self::STATUS_PENDING]);
+        $query->andWhere(['status' => self::STATUS_PENDING, 'l_call_status_id' => [self::CALL_STATUS_READY, self::CALL_STATUS_NONE]]);
         $query->andWhere(['OR', ['IS', 'l_pending_delay_dt', null], ['<=', 'l_pending_delay_dt', date('Y-m-d H:i:s')]]);
         $query->andWhere(['OR', ['BETWEEN', new Expression('TIME(CONVERT_TZ(NOW(), \'+00:00\', offset_gmt))'), '09:00', '21:00'], ['>=', 'created', date('Y-m-d H:i:s', strtotime('-'.self::PENDING_ALLOW_CALL_TIME_MINUTES.' min'))]]);
-        $query->andWhere(['employee_id' => null]);
+        $query->andWhere(['OR', ['employee_id' => null], ['employee_id' => $user_id]]);
 
         if($user_id) {
             $subQuery = UserProjectParams::find()->select(['upp_project_id'])->where(['upp_user_id' => $user_id])->andWhere(['AND', ['IS NOT', 'upp_tw_phone_number', null], ['<>', 'upp_tw_phone_number', '']]);

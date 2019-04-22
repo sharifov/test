@@ -450,8 +450,11 @@ class LeadController extends ApiBaseController
 
         $request_hash = $modelLead->getRequestHash();
 
+        $lead->l_call_status_id = Lead::CALL_STATUS_READY;
+
+
         $duplicateLead = Lead::find()
-            ->where(['l_request_hash' => $request_hash])->andWhere(['>=', 'created', date('Y-m-d H:i:s', strtotime('-15 minutes'))])
+            ->where(['l_request_hash' => $request_hash])->andWhere(['>=', 'created', date('Y-m-d H:i:s', strtotime('-12 hours'))])
             ->orderBy(['id' => SORT_ASC])->limit(1)->one();
 
         if($duplicateLead) {
@@ -464,6 +467,8 @@ class LeadController extends ApiBaseController
         if(!$lead->l_request_hash && $request_hash) {
             $lead->l_request_hash = $request_hash;
         }
+
+
 
 
 

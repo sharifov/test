@@ -69,8 +69,8 @@ class LeadController extends FController
                             'create', 'add-comment', 'change-state', 'unassign', 'take', 'auto-take',
                             'set-rating', 'add-note', 'unprocessed', 'call-expert', 'send-email',
                             'check-updates', 'flow-transition', 'get-user-actions', 'add-pnr', 'update2','clone',
-                            'get-badges', 'sold', 'split-profit', 'split-tips','processing', 'follow-up', 'inbox', 'trash', 'booked',
-                            'test', 'view'
+                            'get-badges', 'sold', 'split-profit', 'split-tips','processing', 'follow-up',  'trash', 'booked',
+                            'test', 'view', 'inbox',
                         ],
                         'allow' => true,
                         'roles' => ['agent', 'admin', 'supervisor'],
@@ -1325,7 +1325,7 @@ class LeadController extends FController
                         $model->status = $model::STATUS_FOLLOW_UP;
                     } elseif ($attrAgent !== null) {
                         $model->employee_id = $attrAgent;
-                        $model->status = $model::STATUS_ON_HOLD;
+                        $model->status = $model::STATUS_PROCESSING;
                     }
                 } elseif ($reason->queue == 'processing-over') {
                     $model->status = $model::STATUS_PROCESSING;
@@ -1349,7 +1349,7 @@ class LeadController extends FController
                     $model->save();
                     return $this->redirect(['trash']);
                 } else {
-                    $model->status = $model::STATUS_ON_HOLD;
+                    $model->status = $model::STATUS_PROCESSING;
                 }
 
                 $model->save();
@@ -1423,7 +1423,7 @@ class LeadController extends FController
         }
 
 
-        $inProcessing = Lead::find()
+        /*$inProcessing = Lead::find()
             ->where([
                 'employee_id' => $user->getId(),
                 'status' => Lead::STATUS_PROCESSING
@@ -1432,7 +1432,7 @@ class LeadController extends FController
             $inProcessing->status = Lead::STATUS_ON_HOLD;
             $inProcessing->save();
             $inProcessing = null;
-        }
+        }*/
 
         $model = Lead::find()
             ->where(['gid' => $gid])

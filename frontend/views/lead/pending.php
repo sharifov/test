@@ -138,11 +138,15 @@ $this->params['breadcrumbs'][] = $this->title;
 
                     $clientName = trim($model->client->first_name . ' ' . $model->client->last_name);
 
+                    if($clientName === 'ClientName') {
+                        $clientName = '-';
+                    }
+
                     if ($clientName) {
                         $clientName = '<i class="fa fa-user"></i> ' . Html::encode($clientName).'';
                     }
 
-                    $str = $model->client->clientEmails ? '<i class="fa fa-envelope"></i> ' . implode(' <br><i class="fa fa-envelope"></i> ', \yii\helpers\ArrayHelper::map($model->client->clientEmails, 'email', 'email')) . '' : '';
+                    $str = $model->client->clientEmails ? '<br><i class="fa fa-envelope"></i> ' . implode(' <br><i class="fa fa-envelope"></i> ', \yii\helpers\ArrayHelper::map($model->client->clientEmails, 'email', 'email')) . '' : '';
                     $str .= $model->client->clientPhones ? '<br><i class="fa fa-phone"></i> ' . implode(' <br><i class="fa fa-phone"></i> ', \yii\helpers\ArrayHelper::map($model->client->clientPhones, 'phone', 'phone')) . '' : '';
 
                     $clientName .= $str;
@@ -212,6 +216,31 @@ $this->params['breadcrumbs'][] = $this->title;
             },
             'options' => ['style' => 'width:90px'],
         ],
+
+        [
+            'header' => 'Location',
+            'format' => 'raw',
+            'value' => function(\common\models\Lead $model) {
+                // {"ipAddress":"71.150.186.68","countryCode":"US","countryName":"United States","regionName":"Kentucky","cityName":"Lowmansville","zipCode":"41232","latitude":"38.0001","longitude":"-82.7151","timeZone":"-04:00"}
+                $str = '';
+                if($model->request_ip_detail) {
+                    $ipData = @json_decode($model->request_ip_detail, true);
+                    $location = [];
+                    if($ipData) {
+                        $location[] = $ipData['countryCode'] ?? '';
+                        //$location[] = $ipData['countryName'] ?? '';
+                        $location[] = $ipData['regionName'] ?? '';
+                        $location[] = $ipData['cityName'] ?? '';
+                    }
+                    $str = implode(', ', $location);
+                }
+                return $str ?: '-';
+            },
+            'options' => ['style' => 'width:90px'],
+        ],
+
+
+
 
         [
             //'attribute' => 'Quotes',
@@ -304,13 +333,13 @@ $this->params['breadcrumbs'][] = $this->title;
         ],
 
 
-        /*[
+        [
             'attribute' => 'l_call_status_id',
             'value' => function (\common\models\Lead $model) {
                 return \common\models\Lead::CALL_STATUS_LIST[$model->l_call_status_id] ?? '-';
             },
             'filter' => \common\models\Lead::CALL_STATUS_LIST
-        ],*/
+        ],
 
         [
             'attribute' => 'request_ip',
@@ -326,11 +355,20 @@ $this->params['breadcrumbs'][] = $this->title;
             },
         ],
 
-        [
+        /*[
             'attribute' => 'l_request_hash',
             'value' => function (\common\models\Lead $model) {
                 return $model->l_request_hash ?: '-';
             },
+        ],*/
+
+        [
+            'attribute' => 'employee_id',
+            'format' => 'raw',
+            'value' => function (\common\models\Lead $model) {
+                return $model->employee ? '<i class="fa fa-user"></i> ' . $model->employee->username : '-';
+            },
+            'filter' => false //\common\models\Employee::getList()
         ],
 
         [

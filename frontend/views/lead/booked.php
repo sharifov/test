@@ -82,6 +82,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'style' => 'width:80px'
             ]
         ],
+        'uid',
         [
             'attribute' => 'pending',
             'label' => 'Pending Time',
