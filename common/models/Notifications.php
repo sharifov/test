@@ -2,11 +2,13 @@
 
 namespace common\models;
 
+use common\components\TelegramSendMessageJob;
 use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
 use yii\helpers\Json;
 use yii\helpers\VarDumper;
+use yii\queue\beanstalk\Queue;
 
 /**
  * This is the model class for table "notifications".
@@ -191,7 +193,7 @@ class Notifications extends ActiveRecord
 
         $md5Hash = md5($message.$user_id);
         if($unique) {
-            $exists = Notifications::find()->where(['n_unique_id' => $md5Hash])->exists();
+            $exists = self::find()->where(['n_unique_id' => $md5Hash])->exists();
             if($exists) {
                 return false;
             }
@@ -218,6 +220,16 @@ class Notifications extends ActiveRecord
                     ->setTextBody($message)
                     ->send();*/
             //}
+
+
+            $job = new TelegramSendMessageJob();
+            $job->user_id = $model->n_user_id;
+            $job->text = $model->n_message;
+
+            $queue = \Yii::$app->queue;
+            $jobId = $queue->push($job);
+            Yii::info('UserID: '.$model->n_user_id.', TelegramSendMessageJob: '.$jobId, 'info\Notifications:create:TelegramSendMessageJob');
+
             return true;
         }
 
