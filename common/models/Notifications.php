@@ -2,7 +2,7 @@
 
 namespace common\models;
 
-use common\components\TelegramSendMessageJob;
+use common\components\jobs\TelegramSendMessageJob;
 use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
@@ -226,7 +226,7 @@ class Notifications extends ActiveRecord
             $job->user_id = $model->n_user_id;
             $job->text = $model->n_message;
 
-            $queue = \Yii::$app->queue;
+            $queue = \Yii::$app->queue_job;
             $jobId = $queue->push($job);
             Yii::info('UserID: '.$model->n_user_id.', TelegramSendMessageJob: '.$jobId, 'info\Notifications:create:TelegramSendMessageJob');
 

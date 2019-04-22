@@ -151,14 +151,20 @@ $isAgent = Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id);
 
                     //'employee_id',
 
-
+                    [
+                        'attribute' => 'l_init_price',
+                        //'format' => 'raw',
+                        'value' => function(\common\models\Lead $model) {
+                            return $model->l_init_price ? number_format($model->l_init_price, 2) : '-';
+                        },
+                    ],
 
                     [
                         'attribute' => 'status',
                         'value' => function(\common\models\Lead $model) {
                             return $model->getStatusName(true);
                         },
-                        'format' => 'html',
+                        'format' => 'raw',
 
                     ],
                     [

@@ -5,7 +5,7 @@
  * Date: 2019-04-22
  */
 
-namespace common\components;
+namespace common\components\jobs;
 
 use common\models\UserProfile;
 use yii\base\BaseObject;

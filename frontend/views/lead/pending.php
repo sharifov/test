@@ -380,6 +380,14 @@ $this->params['breadcrumbs'][] = $this->title;
             'format' => 'raw',
         ],
 
+        [
+            'attribute' => 'l_init_price',
+            //'format' => 'raw',
+            'value' => function(\common\models\Lead $model) {
+                return $model->l_init_price ? number_format($model->l_init_price, 2) : '-';
+            },
+        ],
+
 
 
         [
