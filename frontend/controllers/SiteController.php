@@ -8,6 +8,7 @@ use common\models\Lead;
 use common\models\search\EmployeeSearch;
 use common\models\search\LeadTaskSearch;
 use common\models\UserParams;
+use http\Url;
 use Yii;
 use yii\helpers\ArrayHelper;
 use yii\filters\VerbFilter;
@@ -15,6 +16,7 @@ use yii\filters\AccessControl;
 use common\models\LoginForm;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
+use Da\QrCode\QrCode;
 
 /**
  * Site controller
@@ -563,9 +565,54 @@ class SiteController extends FController
         //new UserParams();
 
 
+        $secureCode = md5(Yii::$app->user->id . '|' . Yii::$app->user->identity->username . '|' . date('Y-m-d'));
+
+
+        //$host = (Yii::$app->request->isSecureConnection ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'];
+
+        //$url = \yii\helpers\Url::to(['site/telegram-activate', 'id' => Yii::$app->user->id, 'code' => $secureCode]);
+
+        //echo $host.$url; exit;
+        $code = base64_encode(Yii::$app->user->id . '|' . $secureCode);
+
+        $url = 'https://telegram.me/CrmKivorkBot?start='.$code;
+
+        $qrCode = (new QrCode($url))
+            ->setSize(160)
+            ->setMargin(5)
+            ->useForegroundColor(0, 0, 0);
+
+
+
+        /*$qrCode = (new QrCode('https://2amigos.us'))
+            ->useLogo(__DIR__ . '/data/logo.png')
+            ->useForegroundColor(51, 153, 255)
+            ->useBackgroundColor(200, 220, 210)
+            ->useEncoding('UTF-8')
+            ->setErrorCorrectionLevel(ErrorCorrectionLevelInterface::HIGH)
+            ->setLogoWidth(60)
+            ->setSize(300)
+            ->setMargin(5)
+            ->setLabel($label);*/
+
+        //$qrCode->writeFile(__DIR__ . '/codes/my-code.png');
+
+        // now we can display the qrcode in many ways
+        // saving the result to a file:
+
+        //$qrCode->writeFile(__DIR__ . '/code.png'); // writer defaults to PNG when none is specified
+
+        // display directly to the browser
+        //header('Content-Type: '.$qrCode->getContentType());
+        //echo $qrCode->writeString();
+        //echo $qrCode->writeDataUri();
+        //exit;
+
+
         return $this->render('/employee/update_profile', [
             'model' => $model,
-            'modelUserParams' => $modelUserParams
+            'modelUserParams' => $modelUserParams,
+            'qrcodeData' => $qrCode->writeDataUri()
         ]);
     }
 

@@ -8,14 +8,15 @@ use yii\helpers\Url;
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\LeadSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
-/* @var $isAgent bool */
 
-$this->title = 'Trash Queue';
+$this->title = 'Duplicate Queue';
 
 if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
+    $isAdmin = true;
     $userList = \common\models\Employee::getList();
     $projectList = \common\models\Project::getList();
 } else {
+    $isAdmin = false;
     $userList = \common\models\Employee::getListByUserId(Yii::$app->user->id);
     $projectList = \common\models\ProjectEmployeeAccess::getProjectsByEmployee();
 }
@@ -31,7 +32,7 @@ $this->params['breadcrumbs'][] = $this->title;
 <h1>
 	<?=\yii\helpers\Html::encode($this->title)?>
 </h1>
-<div class="lead-index">
+<div class="lead-duplicate">
 
     <?php Pjax::begin(); //['id' => 'lead-pjax-list', 'timeout' => 5000, 'enablePushState' => true, 'clientOptions' => ['method' => 'GET']]); ?>
 
@@ -48,6 +49,20 @@ $this->params['breadcrumbs'][] = $this->title;
                 'style' => 'width:80px'
             ]
         ],
+
+        [
+            'attribute' => 'l_duplicate_lead_id',
+            'label' => 'Duplicate from',
+            'value' => function (\common\models\Lead $model) {
+                return $model->l_duplicate_lead_id ? Html::a($model->l_duplicate_lead_id, ['/leads/view', 'id' => $model->l_duplicate_lead_id], ['data-pjax' => 0, 'target' => '_blank']) : '-';
+            },
+            'format' => 'raw',
+            'options' => [
+                'style' => 'width:120px'
+            ]
+        ],
+        'l_request_hash',
+
         [
             'attribute' => 'project_id',
             'value' => function (\common\models\Lead $model) {
@@ -58,7 +73,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'style' => 'width:120px'
             ],
             'filter' => $projectList,
-            'visible' => ! $isAgent
+            //'visible' => ! $isAgent
         ],
         [
             'attribute' => 'pending',
@@ -85,6 +100,30 @@ $this->params['breadcrumbs'][] = $this->title;
             'filter' => false
 
         ],*/
+
+        [
+            // 'attribute' => 'client_id',
+            'header' => 'Request',
+            'format' => 'raw',
+            'value' => function (\common\models\Lead $model) {
+
+                $clientName = trim($model->l_client_first_name . ' ' . $model->l_client_last_name);
+
+                if ($clientName) {
+                    $clientName = '<i class="fa fa-user"></i> ' . Html::encode($clientName).'';
+                }
+
+                $str = $model->l_client_email ? '<br><i class="fa fa-envelope"></i> ' . $model->l_client_email : '';
+                $str .= $model->l_client_phone ? '<br><i class="fa fa-phone"></i>' . $model->l_client_phone : '';
+                $clientName .= $str;
+
+                return $clientName;
+            },
+
+            'options' => [
+                'style' => 'width:160px'
+            ]
+        ],
 
         [
             // 'attribute' => 'client_id',
@@ -225,7 +264,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 return $model->employee ? '<i class="fa fa-user"></i> ' . $model->employee->username : '-';
             },
             'filter' => $userList,
-            'visible' => ! $isAgent
+            //'visible' => ! $isAgent
         ],
         /*[
             'attribute' => 'update',
@@ -263,15 +302,52 @@ $this->params['breadcrumbs'][] = $this->title;
 
         [
             'class' => 'yii\grid\ActionColumn',
-            'template' => '{action}',
+            'template' => '{view} {view2} {delete}',
+            'controller' => 'leads',
+
+            'visibleButtons' => [
+                    /*'view' => function ($model, $key, $index) {
+                        return User::hasPermission('viewOrder');
+                    },
+                    'update' => function ($model, $key, $index) {
+                        return User::hasPermission('updateOrder');
+                    },*/
+                    'delete' => function ($model, $key, $index) use ($isAdmin) {
+                        return $isAdmin;
+                    },
+                    /*'soft-delete' => function ($model, $key, $index) {
+                        return User::hasPermission('deleteOrder');
+                    },*/
+            ],
+
             'buttons' => [
+                'view2' => function ($url, Lead $model) {
+                    return Html::a('<i class="glyphicon glyphicon-search"></i>', [
+                        'lead/view',
+                        'gid' => $model->gid
+                    ], [
+                        'title' => 'View',
+                    ]);
+                },
+                /*'soft-delete' => function ($url, $model) {
+                    return Html::a('<i class="glyphicon glyphicon-remove-circle"></i>', $url, [
+                        'title' => 'Delete',
+                        'data' => [
+                            'confirm' => 'Are you sure you want to delete this SMS?',
+                            //'method' => 'post',
+                        ],
+                    ]);
+                }*/
+            ],
+
+            /*'buttons' => [
                 'action' => function ($url, \common\models\Lead $model, $key) {
 
                     $buttons = '';
 
                     $buttons .= Html::a('<i class="fa fa-search"></i> view', [
-                        'lead/view',
-                        'gid' => $model->gid
+                        'leads/view',
+                        'id' => $model->id
                     ], [
                         'class' => 'btn btn-info btn-xs',
                         'target' => '_blank',
@@ -281,7 +357,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
                     return $buttons;
                 }
-            ]
+            ]*/
         ]
     ];
 

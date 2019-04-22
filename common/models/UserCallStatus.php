@@ -82,4 +82,15 @@ class UserCallStatus extends \yii\db\ActiveRecord
     {
         return self::STATUS_TYPE_LIST[$this->us_type_id] ?? '-';
     }
+
+    public function afterSave($insert, $changedAttributes)
+    {
+        parent::afterSave($insert, $changedAttributes);
+
+        if( $this->us_type_id === self::STATUS_TYPE_READY) {
+            Call::applyHoldCallToAgent($this->us_user_id);
+        }
+    }
+
+
 }

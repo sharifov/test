@@ -67,6 +67,12 @@ return [
             'port' => 11300,
             'tube' => 'queue_phone_check',
         ],
+
+        'telegram' => [
+            'class' => \aki\telegram\Telegram::class,
+            'botToken' => '817992632:AAE6UXJRqDscAZc9gUBScEpaT_T4zGukdos',
+        ]
+
     ],
     'bootstrap' => [
         'queue_email_job',

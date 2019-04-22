@@ -323,29 +323,81 @@ class LeadController extends ApiBaseController
         $response = [];
         $transaction = Yii::$app->db->beginTransaction();
 
-        $client = new Client();
 
-        if ($modelLead->client_first_name) $client->first_name = $modelLead->client_first_name;
-        else $client->first_name = 'ClientName';
+        $client = null;
+        $lead = new Lead();
 
-        if ($modelLead->client_last_name) $client->last_name = $modelLead->client_last_name;
-        if ($modelLead->client_middle_name) $client->middle_name = $modelLead->client_middle_name;
+        if($modelLead->phones) {
+            foreach ($modelLead->phones as $phone) {
+                $phone = trim($phone);
+                if(!$phone) {
+                    continue;
+                }
+
+                $lead->l_client_phone = $phone;
+
+                $phoneModel = ClientPhone::find()->where(['phone' => $phone])->orderBy(['id' => SORT_DESC])->limit(1)->one();
+
+                if($phoneModel && $phoneModel->client) {
+                    $client = $phoneModel->client;
+                    break;
+                }
+            }
+        }
+
+        if ($modelLead->emails) {
+            foreach ($modelLead->emails as $email) {
+
+                $email = mb_strtolower(trim($email));
+
+                if(!$email) {
+                    continue;
+                }
+                $lead->l_client_email = $email;
+            }
+        }
+
+
+        if(!$client) {
+            $client = new Client();
+
+            if ($modelLead->client_first_name) {
+                $client->first_name = $modelLead->client_first_name;
+            } else {
+                $client->first_name = 'ClientName';
+            }
+
+            if ($modelLead->client_last_name) {
+                $client->last_name = $modelLead->client_last_name;
+            }
+            if ($modelLead->client_middle_name) {
+                $client->middle_name = $modelLead->client_middle_name;
+            }
+        }
+
+
 
         if (!$client->save()) {
             throw new UnprocessableEntityHttpException($this->errorToString($client->errors));
         }
 
 
-        $lead = new Lead();
+
         //$lead->scenario = Lead::SCENARIO_API;
         $lead->attributes = $modelLead->attributes;
 
         $lead->client_id = $client->id;
-        if (!$lead->status) $lead->status = Lead::STATUS_PENDING;
-        if (!$lead->uid) $lead->uid = uniqid();
+        if (!$lead->status) {
+            $lead->status = Lead::STATUS_PENDING;
+        }
 
+        if (!$lead->uid) {
+            $lead->uid = uniqid();
+        }
 
-        if (!$lead->trip_type) $lead->trip_type = Lead::TRIP_TYPE_ROUND_TRIP;
+        if (!$lead->trip_type) {
+            $lead->trip_type = Lead::TRIP_TYPE_ROUND_TRIP;
+        }
 
         if ($modelLead->flights) {
             $flightCount = count($modelLead->flights);
@@ -360,21 +412,72 @@ class LeadController extends ApiBaseController
         }
 
 
-        if (!$lead->cabin) $lead->cabin = Lead::CABIN_ECONOMY;
+        if (!$lead->cabin) {
+            $lead->cabin = Lead::CABIN_ECONOMY;
+        }
 
-        if (!$lead->children) $lead->children = 0;
-        if (!$lead->infants) $lead->infants = 0;
-        if (!$lead->request_ip) $lead->request_ip = Yii::$app->request->remoteIP;
+        if (!$lead->children) {
+            $lead->children = 0;
+        }
+        if (!$lead->infants) {
+            $lead->infants = 0;
+        }
+        if (!$lead->request_ip) {
+            $lead->request_ip = Yii::$app->request->remoteIP;
+        }
+
+        if ($this->apiProject) {
+            $lead->project_id = $this->apiProject->id;
+        }
 
 
-        if ($this->apiProject) $lead->project_id = $this->apiProject->id;
+
+        if(!$lead->l_client_lang && $modelLead->user_language) {
+            $lead->l_client_lang = $modelLead->user_language;
+        }
+
+        if(!$lead->l_client_ua && $modelLead->user_agent) {
+            $lead->l_client_ua = $modelLead->user_agent;
+        }
+
+        if(!$lead->l_client_first_name && $modelLead->client_first_name) {
+            $lead->l_client_first_name = $modelLead->client_first_name;
+        }
+
+        if(!$lead->l_client_last_name && $modelLead->client_last_name) {
+            $lead->l_client_last_name = $modelLead->client_last_name;
+        }
+
+        $request_hash = $modelLead->getRequestHash();
+
+        $lead->l_call_status_id = Lead::CALL_STATUS_READY;
+
+
+        $duplicateLead = Lead::find()
+            ->where(['l_request_hash' => $request_hash])->andWhere(['>=', 'created', date('Y-m-d H:i:s', strtotime('-12 hours'))])
+            ->orderBy(['id' => SORT_ASC])->limit(1)->one();
+
+        if($duplicateLead) {
+            $lead->l_duplicate_lead_id = $duplicateLead->id;
+            $lead->status = Lead::STATUS_TRASH;
+            Yii::info('Warning: detected duplicate Lead (Origin id: '.$duplicateLead->id.', Hash: '.$request_hash.')', 'info\API:Lead:duplicate');
+        }
+
+
+        if(!$lead->l_request_hash && $request_hash) {
+            $lead->l_request_hash = $request_hash;
+        }
+
+
 
 
 
         if (!$lead->validate()) {
             if ($errors = $lead->getErrors()) {
                 throw new UnprocessableEntityHttpException($this->errorToString($errors), 7);
-            } else throw new UnprocessableEntityHttpException('Not validate Lead data', 7);
+            } else {
+                throw new UnprocessableEntityHttpException('Not validate Lead data', 7);
+            }
         }
 
         if (!$lead->save()) {
@@ -404,8 +507,16 @@ class LeadController extends ApiBaseController
         }
 
 
-        if ($modelLead->emails)
+        if ($modelLead->emails) {
             foreach ($modelLead->emails as $email) {
+
+                $email = mb_strtolower(trim($email));
+
+                $emailExist = ClientEmail::find()->where(['email' => $email, 'client_id' => $client->id])->exists();
+                if($emailExist) {
+                    continue;
+                }
+
                 $emailModel = new ClientEmail();
 
                 $emailModel->client_id = $client->id;
@@ -418,9 +529,18 @@ class LeadController extends ApiBaseController
                     throw new UnprocessableEntityHttpException($this->errorToString($emailModel->errors), 11);
                 }
             }
+        }
 
-        if ($modelLead->phones)
+        if ($modelLead->phones) {
             foreach ($modelLead->phones as $phone) {
+
+                $phone = trim($phone);
+
+                $phoneExist = ClientPhone::find()->where(['phone' => $phone, 'client_id' => $client->id])->exists();
+                if($phoneExist) {
+                    continue;
+                }
+
                 $phoneModel = new ClientPhone();
 
                 $phoneModel->client_id = $client->id;
@@ -433,6 +553,7 @@ class LeadController extends ApiBaseController
                     throw new UnprocessableEntityHttpException($this->errorToString($phoneModel->errors), 12);
                 }
             }
+        }
 
         $transaction->commit();
 
@@ -478,8 +599,11 @@ class LeadController extends ApiBaseController
 
         if (isset($response['error']) && $response['error']) {
             $json = @json_encode($response['error']);
-            if (isset($response['error_code']) && $response['error_code']) $error_code = $response['error_code'];
-            else $error_code = 0;
+            if (isset($response['error_code']) && $response['error_code']) {
+                $error_code = $response['error_code'];
+            } else {
+                $error_code = 0;
+            }
             throw new UnprocessableEntityHttpException($json, $error_code);
         }
 

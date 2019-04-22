@@ -28,7 +28,7 @@
 		"kartik-v/yii2-widget-select2" : "@dev",
 		"authorizenet/authorizenet" : "~1.9.9",
 		"2amigos/yii2-ckeditor-widget" : "^2.1",
-		"apimatic/jsonmapper" : "~1.3.0",
+		"apimatic/jsonmapper" : "~1.3",
 		"yii2tech/csv-grid" : "^1.0@dev",
 		"borales/yii2-phone-input" : "*",
 		"keltstr/yii2-simplehtmldom" : "dev-master",
@@ -53,14 +53,17 @@
 		"workerman/workerman" : "^3.5",
 		"yiisoft/yii2-queue": "^2.2",
 		"pda/pheanstalk": "^3.2",
-		"index0h/yii2-log": "0.0.3"
+		"index0h/yii2-log": "0.0.3",
+		"twilio/sdk": "^5.31",
+		"2amigos/qrcode-library": "~1.1",
+		"aki/yii2-bot-telegram": "*"
 	},
 	"require-dev" : {
-		"yiisoft/yii2-debug" : "~2.0.14",
-		"yiisoft/yii2-gii" : "~2.0.8",
-		"yiisoft/yii2-faker" : "~2.0.4",
-		"codeception/base" : "^2.5.5",
-		"codeception/verify" : "~0.3.3"
+		"yiisoft/yii2-debug" : "~2.0",
+		"yiisoft/yii2-gii" : "~2.0",
+		"yiisoft/yii2-faker" : "~2.0",
+		"codeception/base" : "^2.5",
+		"codeception/verify" : "~0.3"
 	},
 	"config" : {
 		"process-timeout" : 1800,

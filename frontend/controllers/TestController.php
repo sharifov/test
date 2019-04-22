@@ -12,6 +12,7 @@ use common\models\UserCallStatus;
 use common\models\UserConnection;
 use common\models\UserGroupAssign;
 use common\models\UserProjectParams;
+use Twilio\TwiML\VoiceResponse;
 use Yii;
 use yii\db\Expression;
 use yii\db\Query;
@@ -417,38 +418,11 @@ class TestController extends FController
 
     }
 
-    public function actionUserTest()
+    public function actionTwml()
     {
-        $user = Employee::findOne(Yii::$app->user->id);
-
-        if($user->isOnline()) {
-            if($user->isCallStatusReady()) {
-                if($user->isCallFree()) {
-
-
-                    if($user->userProfile && $user->userProfile->up_call_type_id == UserProfile::CALL_TYPE_WEB) {
-
-                        $isRedirectCall = false;
-                        Yii::info('DIRECT - User ('.$user->username.') Id: '.$user->id.', phone: ' . $agent_phone_number, 'info\API:CommunicationController:actionVoice:Direct - 2');
-
-                        //$call_agent_username[] = 'seller'.$user->id;
-                        $call_direct_agent_username = 'seller'.$user->id;
-                    }
-
-                } else {
-                    Yii::info('Call Occupied - User ('.$user->username.') Id: '.$user->id.', phone: ' . $agent_phone_number, 'info\API:CommunicationController:actionVoice:isCallFree');
-                    Notifications::create($user->id, 'Missing Call [Occupied]', 'Missing Call from ' . $client_phone_number .' to '.$agent_phone_number . "\r\n Reason: Agent Occupied", Notifications::TYPE_WARNING, true);
-                    Notifications::socket($user->id, null, 'getNewNotification', [], true);
-                }
-            } else {
-                Yii::info('Call Status not Ready - User ('.$user->username.') Id: '.$user->id.', phone: ' . $agent_phone_number, 'info\API:CommunicationController:actionVoice:isCallStatusReady');
-                Notifications::create($user->id, 'Missing Call [not Ready]', 'Missing Call from ' . $client_phone_number .' to '.$agent_phone_number . "\r\n Reason: Call Status not Ready", Notifications::TYPE_WARNING, true);
-                Notifications::socket($user->id, null, 'getNewNotification', [], true);
-            }
-        } else {
-            Yii::info('Offline - User ('.$user->username.') Id: '.$user->id.', phone: ' . $agent_phone_number, 'info\API:CommunicationController:actionVoice:isOnline');
-            Notifications::create($user->id, 'Missing Call [Offline]', 'Missing Call from ' . $client_phone_number .' to '.$agent_phone_number . "\r\n Reason: Agent offline", Notifications::TYPE_WARNING, true);
-            Notifications::socket($user->id, null, 'getNewNotification', [], true);
-        }
+        $twML = new VoiceResponse();
+        $twML->say('Hello');
+        $twML->play('https://api.twilio.com/cowbell.mp3', ['loop' => 5]);
+        echo $twML;
     }
 }

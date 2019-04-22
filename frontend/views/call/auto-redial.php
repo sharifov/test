@@ -4,7 +4,6 @@ use yii\helpers\Html;
 use yii\widgets\Pjax;
 //use kartik\grid\GridView;
 use yii\grid\GridView;
-//use \yiister\gentelella\widgets\grid\GridView;
 use common\models\Lead;
 
 /* @var $this yii\web\View */
@@ -57,9 +56,13 @@ $this->title = 'Auto find & redial';
     ]
 ]);*/
 
+$bundle = \frontend\assets\TimerAsset::register($this);
+
 
 $this->params['breadcrumbs'][] = ['label' => 'Calls', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
+
+$duration = 10;
 ?>
 
 <script>
@@ -77,14 +80,39 @@ $this->params['breadcrumbs'][] = $this->title;
         $.pjax.reload({container:'#pjax-auto-redial', 'scrollTo': false});
     }
 
-    function startAutoTake(url, name) {
-        takeTimerId = setTimeout(function() { openInNewTab(url, name) }, 20000);
+    function startAutoTake() {
+        //takeTimerId = setTimeout(function() { openInNewTab(url, name) }, 20000);
         console.log('Create takeTimerId: ' + takeTimerId);
+
+        $('#auto_take_timer').timer({format: '%M:%S', duration: <?=$duration?>, countdown: true, callback: function() {
+
+                var url = $('#auto_take_timer').parent().attr('href');
+                var name = $('#auto_take_timer').data('name');
+
+                //alert(name);
+                $(this).timer('remove');
+                openInNewTab(url, name)
+
+            },}).timer('start');
+
     }
+
+    /*function autoTake() {
+        //takeTimerId = setTimeout(function() { openInNewTab(url, name) }, 20000);
+        console.log('autoTake');
+
+        var url = $('#auto_take_timer').parent().attr('href');
+        var name = $('#auto_take_timer').data('name');
+
+        //alert(name);
+        $('#auto_take_timer').timer('remove');
+        openInNewTab(url, name)
+    }*/
 
     function endAutoTake() {
         console.log('endAutoTake, current takeTimerId: ' + takeTimerId);
-        console.log('endAutoTake response: ' + clearTimeout(takeTimerId));
+        $('#auto_take_timer').timer('remove');
+        //console.log('endAutoTake response: ' + clearTimeout(takeTimerId));
     }
 
     function webCallUpdate(obj) {
@@ -101,13 +129,19 @@ $this->params['breadcrumbs'][] = $this->title;
                 endAutoTake();
                 //stopCall(obj.duration); //updateCommunication();
                 autoredialInit();
-            } else if (obj.status === 'in-progress') {
-                autoredialInit();
-                //startCallTimer();
-                //$('#div-call-timer').timer('resume');
             } else if (obj.status === 'initiated') {
                 //endAutoTake();
                 //startCall();
+            } else if (obj.status === 'ringing') {
+                autoredialInit();
+                //startAutoTake();
+                //endAutoTake();
+                //startCall();
+            } else if (obj.status === 'in-progress') {
+                //autoTake();
+                autoredialInit();
+                //startCallTimer();
+                //$('#div-call-timer').timer('resume');
             } else if (obj.status === 'busy') {
                 endAutoTake();
                 //stopCall(0);
@@ -311,7 +345,7 @@ $this->params['breadcrumbs'][] = $this->title;
                             <?php if($callData): ?>
 
                                 <?=$this->registerJs("webCall('". $callData['phone_from']."', '". $callData['phone_to']."', ". $callData['project_id'].", ". $callData['lead_id'].", 'auto-redial');");?>
-                                <?=$this->registerJs("startAutoTake('".\yii\helpers\Url::to(['/lead/auto-take', 'gid' => $leadModel->gid])."', '".$leadModel->id."');");?>
+                                <?//=$this->registerJs('autoredialInit(); startAutoTake();');?>
                                 <?//=$this->registerJs('startTimer(20);');?>
                             <?php endif; ?>
 
@@ -435,7 +469,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                                     },
                                                 ],
 
-                                                [
+                                                /*[
                                                     'label' => 'Segments',
                                                     'value' => function (\common\models\Lead $model) {
 
@@ -459,7 +493,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                                     'options' => [
                                                         'style' => 'width:140px'
                                                     ]
-                                                ],
+                                                ],*/
 
                                                 /*[
                                                     'header' => 'Client time',
@@ -483,7 +517,6 @@ $this->params['breadcrumbs'][] = $this->title;
                                                     'value' => function(\common\models\Lead $model) {
                                                         return \common\models\Lead::getFlightType($model->trip_type) ?? '-';
                                                     },
-
                                                 ],
 
                                                 [
@@ -491,7 +524,6 @@ $this->params['breadcrumbs'][] = $this->title;
                                                     'value' => function(\common\models\Lead $model) {
                                                         return \common\models\Lead::getCabin($model->cabin) ?? '-';
                                                     },
-
                                                 ],
 
                                                 /*'project_id',
@@ -514,18 +546,13 @@ $this->params['breadcrumbs'][] = $this->title;
 
                                                 //'discount_id',
 
-                                                [
+                                                /*[
                                                     'label' => 'Pax',
                                                     'value' => function (\common\models\Lead $model) {
                                                         return '<span title="adult"><i class="fa fa-male"></i> '. $model->adults .'</span> / <span title="child"><i class="fa fa-child"></i> ' . $model->children . '</span> / <span title="infant"><i class="fa fa-info"></i> ' . $model->infants.'</span>';
                                                     },
                                                     'format' => 'raw',
-                                                    //'visible' => ! $isAgent,
-                                                    /*'contentOptions' => [
-                                                        'class' => 'text-center'
-                                                    ],*/
-
-                                                ],
+                                                ],*/
 
 
                                                 [
@@ -610,7 +637,14 @@ $this->params['breadcrumbs'][] = $this->title;
                                                 },
                                             ],
                                             'c_from',
-                                            'c_to',
+                                            [
+                                                'label' => 'Client Time',
+                                                'value' => function (\common\models\Call $model) {
+                                                    return $model->cLead ? $model->cLead->getClientTime2() : '';
+                                                },
+                                                'format' => 'raw'
+                                            ],
+                                            //'c_to',
 
                                         ],
                                     ]) ?>
@@ -625,16 +659,17 @@ $this->params['breadcrumbs'][] = $this->title;
                                             [
                                                 'attribute' => 'c_project_id',
                                                 'value' => function (\common\models\Call $model) {
-                                                    return $model->cProject ? $model->cProject->name : '-';
+                                                    return $model->cProject ? '<span class="badge badge-info">'.$model->cProject->name .'</span>' : '-';
                                                 },
+                                                'format' => 'raw'
                                             ],
-                                            [
+                                            /*[
                                                 'attribute' => 'c_lead_id',
                                                 'value' => function (\common\models\Call $model) {
                                                     return  $model->c_lead_id ? Html::a($model->c_lead_id, ['lead/view', 'gid' => $model->cLead->gid], ['data-pjax' => 0, 'target' => '_blank']) : '';
                                                 },
                                                 'format' => 'raw'
-                                            ],
+                                            ],*/
                                             [
                                                 'attribute' => 'c_created_user_id',
                                                 'value' => function (\common\models\Call $model) {
@@ -660,6 +695,17 @@ $this->params['breadcrumbs'][] = $this->title;
 
                                         ],
                                     ]) ?>
+                                </div>
+
+                                <div class="col-md-12 text-center">
+                                    <?php if($callModel->cLead && $callModel->cLead->status === Lead::STATUS_PENDING && $callModel->c_call_status === \common\models\Call::CALL_STATUS_IN_PROGRESS): ?>
+                                        <?=Html::a('<i class="fa fa-download"></i> Take Lead <b id="auto_take_timer" data-name="'.$callModel->cLead->id.'"></b>', ['lead/auto-take', 'gid' => $callModel->cLead->gid], [
+                                            'class' => 'btn btn-success',
+                                            'target' => '_blank',
+                                            'data-pjax' => 0
+                                        ])?>
+                                        <?=$this->registerJs('startAutoTake();');?>
+                                    <?php endif; ?>
                                 </div>
 
                             </div>
@@ -1097,25 +1143,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
 <?php
 $js = <<<JS
-
-    /*function startTimers() {
-    
-        $(".timer").each(function( index ) {
-            var sec = $( this ).data('sec');
-            var control = $( this ).data('control');
-            var format = $( this ).data('format');
-            //var id = $( this ).data('id');
-            //$( this ).addClass( "foo" );
-            $(this).timer({format: format, seconds: sec}).timer(control);
-            //console.log( index + ": " + $( this ).text() );
-        });
-    
-        //$('.timer').timer('remove');
-        //$('.timer').timer({format: '%M:%S', seconds: 0}).timer('start');
-    }
-
-    
-
+     /*
     $('#btn-user-call-map-refresh').on('click', function () {
         // $('#modal-dialog').find('.modal-content').html('');
         $.pjax.reload({container:'#pjax-call-list'});
@@ -1135,10 +1163,8 @@ $js = <<<JS
        $('#btn-user-call-map-refresh').click();
       setTimeout(runTimerRefresh, 30000);
     }, 30000);*/
-
-
 JS;
-//$this->registerJs($js);
+$this->registerJs($js);
 
 
 

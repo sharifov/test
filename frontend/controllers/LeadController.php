@@ -69,8 +69,8 @@ class LeadController extends FController
                             'create', 'add-comment', 'change-state', 'unassign', 'take', 'auto-take',
                             'set-rating', 'add-note', 'unprocessed', 'call-expert', 'send-email',
                             'check-updates', 'flow-transition', 'get-user-actions', 'add-pnr', 'update2','clone',
-                            'get-badges', 'sold', 'split-profit', 'split-tips','processing', 'follow-up', 'inbox', 'trash', 'booked',
-                            'test', 'view'
+                            'get-badges', 'sold', 'split-profit', 'split-tips','processing', 'follow-up',  'trash', 'booked',
+                            'test', 'view', 'inbox',
                         ],
                         'allow' => true,
                         'roles' => ['agent', 'admin', 'supervisor'],
@@ -78,10 +78,18 @@ class LeadController extends FController
 
                     [
                         'actions' => [
-                            'view'
+                            'pending', 'duplicate'
                         ],
                         'allow' => true,
-                        'roles' => ['qa'],
+                        'roles' => ['admin'],
+                    ],
+
+                    [
+                        'actions' => [
+                            'view', 'trash', 'sold', 'duplicate'
+                        ],
+                        'allow' => true,
+                        'roles' => ['qa', 'supervisor'],
                     ],
                 ],
             ]
@@ -1317,7 +1325,7 @@ class LeadController extends FController
                         $model->status = $model::STATUS_FOLLOW_UP;
                     } elseif ($attrAgent !== null) {
                         $model->employee_id = $attrAgent;
-                        $model->status = $model::STATUS_ON_HOLD;
+                        $model->status = $model::STATUS_PROCESSING;
                     }
                 } elseif ($reason->queue == 'processing-over') {
                     $model->status = $model::STATUS_PROCESSING;
@@ -1341,7 +1349,7 @@ class LeadController extends FController
                     $model->save();
                     return $this->redirect(['trash']);
                 } else {
-                    $model->status = $model::STATUS_ON_HOLD;
+                    $model->status = $model::STATUS_PROCESSING;
                 }
 
                 $model->save();
@@ -1415,7 +1423,7 @@ class LeadController extends FController
         }
 
 
-        $inProcessing = Lead::find()
+        /*$inProcessing = Lead::find()
             ->where([
                 'employee_id' => $user->getId(),
                 'status' => Lead::STATUS_PROCESSING
@@ -1424,7 +1432,7 @@ class LeadController extends FController
             $inProcessing->status = Lead::STATUS_ON_HOLD;
             $inProcessing->save();
             $inProcessing = null;
-        }
+        }*/
 
         $model = Lead::find()
             ->where(['gid' => $gid])
@@ -1586,39 +1594,7 @@ class LeadController extends FController
 
 
 
-    public function actionSold()
-    {
-        $searchModel = new LeadSearch();
-        $salary = null;
-        $salaryBy = '';
 
-        $params = Yii::$app->request->queryParams;
-        $params2 = Yii::$app->request->post();
-
-        $params = array_merge($params, $params2);
-
-        if(Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id)) {
-            $isAgent = true;
-        } else {
-            $isAgent = false;
-        }
-
-        if(Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id)) {
-            $params['LeadSearch']['supervision_id'] = Yii::$app->user->id;
-        }
-
-        if($isAgent) {
-            $params['LeadSearch']['employee_id'] = Yii::$app->user->id;
-        }
-
-        $dataProvider = $searchModel->searchSold($params);
-
-        return $this->render('sold', [
-            'searchModel' => $searchModel,
-            'dataProvider' => $dataProvider,
-            'isAgent' => $isAgent,
-        ]);
-    }
 
 
     public function actionProcessing()
@@ -1676,6 +1652,29 @@ class LeadController extends FController
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
             'isAgent' => $isAgent,
+        ]);
+    }
+
+
+    public function actionPending()
+    {
+        $searchModel = new LeadSearch();
+
+        $params = Yii::$app->request->queryParams;
+        $params2 = Yii::$app->request->post();
+
+        $params = array_merge($params, $params2);
+
+                if(Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id)) {
+            $params['LeadSearch']['supervision_id'] = Yii::$app->user->id;
+        }
+        $dataProvider = $searchModel->searchInbox($params);
+
+        //$user = Yii::$app->user->identity;
+
+        return $this->render('pending', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
         ]);
     }
 
@@ -1751,6 +1750,39 @@ class LeadController extends FController
     }
 
 
+    public function actionSold()
+    {
+        $searchModel = new LeadSearch();
+        $salary = null;
+
+        $params = Yii::$app->request->queryParams;
+        $params2 = Yii::$app->request->post();
+
+        $params = array_merge($params, $params2);
+
+        if(Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id)) {
+            $isAgent = true;
+        } else {
+            $isAgent = false;
+        }
+
+        if(Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id)) {
+            $params['LeadSearch']['supervision_id'] = Yii::$app->user->id;
+        }
+
+        if($isAgent) {
+            $params['LeadSearch']['employee_id'] = Yii::$app->user->id;
+        }
+
+        $dataProvider = $searchModel->searchSold($params);
+
+        return $this->render('sold', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+            'isAgent' => $isAgent,
+        ]);
+    }
+
     public function actionTrash()
     {
         $searchModel = new LeadSearch();
@@ -1777,6 +1809,27 @@ class LeadController extends FController
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
             'isAgent' => $isAgent,
+        ]);
+    }
+
+    public function actionDuplicate()
+    {
+        $searchModel = new LeadSearch();
+
+        $params = Yii::$app->request->queryParams;
+        $params2 = Yii::$app->request->post();
+
+        $params = array_merge($params, $params2);
+
+        if(Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id)) {
+            $params['LeadSearch']['supervision_id'] = Yii::$app->user->id;
+        }
+
+        $dataProvider = $searchModel->searchDuplicates($params);
+
+        return $this->render('duplicate', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
         ]);
     }
 

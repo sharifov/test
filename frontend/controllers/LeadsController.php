@@ -40,7 +40,7 @@ class LeadsController extends FController
                 'class' => AccessControl::class,
                 'rules' => [
                     [
-                        'actions' => ['index', 'update', 'delete', 'create', 'export', 'duplicate'],
+                        'actions' => ['index', 'update', 'delete', 'create', 'export', 'duplicate', 'view'],
                         'allow' => true,
                         'roles' => ['supervision', 'admin'],
                     ],
@@ -311,7 +311,7 @@ class LeadsController extends FController
             $viewParams['searchModelSegments'] = null;
             $viewParams['dataProviderSegments']->sort = false;*/
 
-            return $this->renderAjax('view', $viewParams);
+            //return $this->renderAjax('view', $viewParams);
         }
 
         return $this->render('view', $viewParams);

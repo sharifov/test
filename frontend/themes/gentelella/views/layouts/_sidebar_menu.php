@@ -179,11 +179,22 @@ $isQA = Yii::$app->authManager->getAssignment('qa', Yii::$app->user->id);
             }
 
 
+            if($isQA) {
+                $menuItems[] = ['label' => 'Sold', 'url' => ['queue/sold'], 'icon' => 'flag text-success'];
+                $menuItems[] = ['label' => 'Duplicate', 'url' => ['queue/duplicate'], 'icon' => 'list text-danger'];
+                $menuItems[] = ['label' => 'Trash', 'url' => ['queue/trash'], 'icon' => 'trash-o text-danger'];
+            }
+
+
             if (!$isCoach && !$isQA) {
 
                 $badges = \common\models\Lead::getBadgesSingleQuery();
 
-                $menuItems[] = ['label' => 'Inbox <span id="inbox-queue" class="label-info label pull-right">' . $badges['inbox'] . '</span> ', 'url' => ['queue/inbox'], 'icon' => 'briefcase'];
+                if($isAdmin) {
+                    $menuItems[] = ['label' => 'Pending <span id="pending-queue" class="label-info label pull-right">' . $badges['pending'] . '</span> ', 'url' => ['queue/pending'], 'icon' => 'briefcase text-info'];
+                }
+
+                $menuItems[] = ['label' => 'Inbox <span id="inbox-queue" class="label-info label pull-right">' . $badges['inbox'] . '</span> ', 'url' => ['queue/inbox'], 'icon' => 'briefcase text-info'];
                 $menuItems[] = ['label' => 'Follow Up <span id="follow-up-queue" class="label-success label pull-right">' . $badges['follow-up'] . '</span> ', 'url' => ['queue/follow-up'], 'icon' => 'recycle'];
                 $menuItems[] = ['label' => 'Processing <span id="processing-queue" class="label-warning label pull-right">' . $badges['processing'] . '</span> ', 'url' => ['queue/processing'], 'icon' => 'spinner'];
 
@@ -191,11 +202,12 @@ $isQA = Yii::$app->authManager->getAssignment('qa', Yii::$app->user->id);
                     $menuItems[] = ['label' => 'Processing All <span id="processing-all-queue" class="label-warning label pull-right">' . $badges['processing-all'] . '</span> ', 'url' => ['queue/processing-all'], 'icon' => 'list'];
                 }*/
 
-                $menuItems[] = ['label' => 'Booked <span id="booked-queue" class="label-success label pull-right">' . $badges['booked'] . '</span> ', 'url' => ['queue/booked'], 'icon' => 'flag-o'];
-                $menuItems[] = ['label' => 'Sold <span id="sold-queue" class="label-success label pull-right">' . $badges['sold'] . '</span> ', 'url' => ['queue/sold'], 'icon' => 'flag'];
+                $menuItems[] = ['label' => 'Booked <span id="booked-queue" class="label-success label pull-right">' . $badges['booked'] . '</span>', 'url' => ['queue/booked'], 'icon' => 'flag-o text-warning'];
+                $menuItems[] = ['label' => 'Sold <span id="sold-queue" class="label-success label pull-right">' . $badges['sold'] . '</span> ', 'url' => ['queue/sold'], 'icon' => 'flag text-success'];
 
                 if($isAdmin || $isSupervision) {
-                    $menuItems[] = ['label' => 'Trash <span id="trash-queue" class="label-danger label pull-right">' . $badges['trash'] . '</span> ', 'url' => ['queue/trash'], 'icon' => 'trash-o'];
+                    $menuItems[] = ['label' => 'Duplicate <span id="sold-queue" class="label-danger label pull-right">' . $badges['duplicate'] . '</span>', 'url' => ['queue/duplicate'], 'icon' => 'list text-danger'];
+                    $menuItems[] = ['label' => 'Trash <span id="trash-queue" class="label-danger label pull-right"></span>', 'url' => ['queue/trash'], 'icon' => 'trash-o text-danger']; //' . $badges['trash'] . '
                 }
             }
 
