@@ -1314,7 +1314,12 @@ class LeadController extends FController
 
                 } elseif ($reason->queue == 'trash') {
                     $model->status = $model::STATUS_TRASH;
-                    $type = 'trash';
+
+                    if($reason->duplicateLeadId) {
+                        $model->l_duplicate_lead_id = $reason->duplicateLeadId;
+                    }
+
+                    //$type = 'trash';
                 } elseif ($reason->queue == 'snooze') {
                     $modelAttr = Yii::$app->request->post($model->formName());
                     $model->snooze_for = $modelAttr['snooze_for'];

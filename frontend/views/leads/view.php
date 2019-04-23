@@ -167,6 +167,17 @@ $isAgent = Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id);
                         'format' => 'raw',
 
                     ],
+
+                    [
+                        'attribute' => 'l_duplicate_lead_id',
+                        'label' => 'Duplicate from',
+                        'value' => function (\common\models\Lead $model) {
+                            return $model->l_duplicate_lead_id ? Html::a($model->l_duplicate_lead_id, ['/leads/view', 'id' => $model->l_duplicate_lead_id], ['data-pjax' => 0, 'target' => '_blank']) : '-';
+                        },
+                        'format' => 'raw',
+
+                    ],
+
                     [
                         'attribute' => 'project_id',
                         'value' => function(\common\models\Lead $model) {

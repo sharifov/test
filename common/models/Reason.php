@@ -203,15 +203,20 @@ class Reason extends \yii\db\ActiveRecord
 
         if ($this->duplicateLeadId) {
 
-            $aHref = Html::a($this->duplicateLeadId, [
-                'lead/view',
-                'id' => $this->duplicateLeadId
-            ], ['data-pjax' => 0]);
+            $duplicateLead = Lead::findOne($this->duplicateLeadId);
 
-            $this->reason = sprintf('%s: %s',
-                $this->reason,
-                $aHref
-            );
+            if($duplicateLead) {
+
+                $aHref = Html::a($duplicateLead->id, [
+                    'lead/view',
+                    'gid' => $duplicateLead->gid
+                ], ['data-pjax' => 0]);
+
+                $this->reason = sprintf('%s: %s',
+                    $this->reason,
+                    $aHref
+                );
+            }
         }
     }
 }
