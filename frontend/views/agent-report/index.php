@@ -70,7 +70,7 @@ $this->registerJs("$(function() {
                                 return '-';
                             }
                             return \yii\bootstrap\Html::a($data['inbound_calls'],
-                                ['/agent-activity/calls', $searchModel->formName().'[c_call_type_id]' => Call::CALL_TYPE_IN, $searchModel->formName().'[id]' => $data['id'],$searchModel->formName().'[date_from]' => $searchModel->date_from, $searchModel->formName().'[date_to]' => $searchModel->date_to],
+                                ['/agent-report/calls', $searchModel->formName().'[c_call_type_id]' => Call::CALL_TYPE_IN, $searchModel->formName().'[id]' => $data['id'],$searchModel->formName().'[date_from]' => $searchModel->date_from, $searchModel->formName().'[date_to]' => $searchModel->date_to],
                                 ['target' => '_blank', 'data-pjax' => 0]);
                         },
                         'contentOptions' => ['class' => 'text-center'],
@@ -85,7 +85,7 @@ $this->registerJs("$(function() {
                                 return '-';
                             }
                             return \yii\bootstrap\Html::a($data['outbound_calls'],
-                                ['/agent-activity/calls', $searchModel->formName().'[c_call_type_id]' => Call::CALL_TYPE_OUT, $searchModel->formName().'[id]' => $data['id'],$searchModel->formName().'[date_from]' => $searchModel->date_from, $searchModel->formName().'[date_to]' => $searchModel->date_to],
+                                ['/agent-report/calls', $searchModel->formName().'[c_call_type_id]' => Call::CALL_TYPE_OUT, $searchModel->formName().'[id]' => $data['id'],$searchModel->formName().'[date_from]' => $searchModel->date_from, $searchModel->formName().'[date_to]' => $searchModel->date_to],
                                 ['target' => '_blank', 'data-pjax' => 0]);
                             },
                         'contentOptions' => ['class' => 'text-center'],
@@ -96,15 +96,30 @@ $this->registerJs("$(function() {
                         'label' => 'Calls length',
                         'attribute' => 'call_duration',
                         'value' => function($data) {
+                            $part1 = '';
                             if(!$data['call_duration']){
-                                return '-';
+                                $part1 = '-';
+                            }else{
+                                $hours = floor($data['call_duration'] / 3600);
+                                $mins = floor($data['call_duration'] / 60 % 60);
+                                $secs = floor($data['call_duration'] % 60);
+
+                                $part1 = '<span title="'.Yii::$app->formatter->asDuration($data['call_duration']) .'">'.sprintf('%02d:%02d:%02d', $hours, $mins, $secs).'</span>';
                             }
 
-                            $hours = floor($data['call_duration'] / 3600);
-                            $mins = floor($data['call_duration'] / 60 % 60);
-                            $secs = floor($data['call_duration'] % 60);
+                            $part2 = '';
+                            if(!$data['call_recording_duration']){
+                                $part2 = '-';
+                            }else{
+                                $hours = floor($data['call_recording_duration'] / 3600);
+                                $mins = floor($data['call_recording_duration'] / 60 % 60);
+                                $secs = floor($data['call_recording_duration'] % 60);
 
-                            return '<span title="'.Yii::$app->formatter->asDuration($data['call_duration']) .'">'.sprintf('%02d:%02d:%02d', $hours, $mins, $secs).'</span>';
+                                $part2 = '<span title="'.Yii::$app->formatter->asDuration($data['call_recording_duration']) .'">'.sprintf('%02d:%02d:%02d', $hours, $mins, $secs).'</span>';
+                            }
+
+                            return $part1.' / '.$part2;
+
                         },
                         'contentOptions' => ['class' => 'text-center'],
                         'filter' => false,
@@ -118,7 +133,7 @@ $this->registerJs("$(function() {
                                 return '-';
                             }
                             return \yii\bootstrap\Html::a($data['sms_sent'],
-                                ['/agent-activity/sms', $searchModel->formName().'[s_type_id]' => Sms::TYPE_OUTBOX, $searchModel->formName().'[id]' => $data['id'],$searchModel->formName().'[date_from]' => $searchModel->date_from, $searchModel->formName().'[date_to]' => $searchModel->date_to],
+                                ['/agent-report/sms', $searchModel->formName().'[s_type_id]' => Sms::TYPE_OUTBOX, $searchModel->formName().'[id]' => $data['id'],$searchModel->formName().'[date_from]' => $searchModel->date_from, $searchModel->formName().'[date_to]' => $searchModel->date_to],
                                 ['target' => '_blank', 'data-pjax' => 0]);
                             },
                         'contentOptions' => ['class' => 'text-center'],
@@ -133,7 +148,7 @@ $this->registerJs("$(function() {
                                 return '-';
                             }
                             return \yii\bootstrap\Html::a($data['sms_received'],
-                                ['/agent-activity/sms', $searchModel->formName().'[s_type_id]' => Sms::TYPE_INBOX, $searchModel->formName().'[id]' => $data['id'],$searchModel->formName().'[date_from]' => $searchModel->date_from, $searchModel->formName().'[date_to]' => $searchModel->date_to],
+                                ['/agent-report/sms', $searchModel->formName().'[s_type_id]' => Sms::TYPE_INBOX, $searchModel->formName().'[id]' => $data['id'],$searchModel->formName().'[date_from]' => $searchModel->date_from, $searchModel->formName().'[date_to]' => $searchModel->date_to],
                                 ['target' => '_blank', 'data-pjax' => 0]);
 
                         },
@@ -149,7 +164,7 @@ $this->registerJs("$(function() {
                                 return '-';
                             }
                             return \yii\bootstrap\Html::a($data['email_sent'],
-                                ['/agent-activity/email', $searchModel->formName().'[e_type_id]' => Email::TYPE_OUTBOX, $searchModel->formName().'[id]' => $data['id'],$searchModel->formName().'[date_from]' => $searchModel->date_from, $searchModel->formName().'[date_to]' => $searchModel->date_to],
+                                ['/agent-report/email', $searchModel->formName().'[e_type_id]' => Email::TYPE_OUTBOX, $searchModel->formName().'[id]' => $data['id'],$searchModel->formName().'[date_from]' => $searchModel->date_from, $searchModel->formName().'[date_to]' => $searchModel->date_to],
                                 ['target' => '_blank', 'data-pjax' => 0]);
                         },
                         'contentOptions' => ['class' => 'text-center'],
@@ -164,7 +179,7 @@ $this->registerJs("$(function() {
                                 return '-';
                             }
                             return \yii\bootstrap\Html::a($data['email_received'],
-                                ['/agent-activity/email', $searchModel->formName().'[e_type_id]' => Email::TYPE_INBOX, $searchModel->formName().'[id]' => $data['id'],$searchModel->formName().'[date_from]' => $searchModel->date_from, $searchModel->formName().'[date_to]' => $searchModel->date_to],
+                                ['/agent-report/email', $searchModel->formName().'[e_type_id]' => Email::TYPE_INBOX, $searchModel->formName().'[id]' => $data['id'],$searchModel->formName().'[date_from]' => $searchModel->date_from, $searchModel->formName().'[date_to]' => $searchModel->date_to],
                                 ['target' => '_blank', 'data-pjax' => 0]);
                         },
                         'contentOptions' => ['class' => 'text-center'],
@@ -206,7 +221,7 @@ $this->registerJs("$(function() {
                                 return '-';
                             }
                             return \yii\bootstrap\Html::a($data['inbox_processing'],
-                                ['/agent-activity/from-to-leads', 'title' => 'From Inbox to Processing', $searchModel->formName().'[from_status]' => Lead::STATUS_PENDING,  $searchModel->formName().'[to_status]' => Lead::STATUS_PROCESSING, $searchModel->formName().'[id]' => $data['id'],$searchModel->formName().'[date_from]' => $searchModel->date_from, $searchModel->formName().'[date_to]' => $searchModel->date_to],
+                                ['/agent-report/from-to-leads', 'title' => 'From Inbox to Processing', $searchModel->formName().'[from_status]' => Lead::STATUS_PENDING,  $searchModel->formName().'[to_status]' => Lead::STATUS_PROCESSING, $searchModel->formName().'[id]' => $data['id'],$searchModel->formName().'[date_from]' => $searchModel->date_from, $searchModel->formName().'[date_to]' => $searchModel->date_to],
                                 ['target' => '_blank', 'data-pjax' => 0]);
                         },
                         'contentOptions' => ['class' => 'text-center'],
@@ -221,7 +236,7 @@ $this->registerJs("$(function() {
                                     return '-';
                                 }
                                 return \yii\bootstrap\Html::a($data['followup_processing'],
-                                    ['/agent-activity/from-to-leads', 'title' => 'From Follow-up to Processing', $searchModel->formName().'[from_status]' => Lead::STATUS_FOLLOW_UP,  $searchModel->formName().'[to_status]' => Lead::STATUS_PROCESSING, $searchModel->formName().'[id]' => $data['id'],$searchModel->formName().'[date_from]' => $searchModel->date_from, $searchModel->formName().'[date_to]' => $searchModel->date_to],
+                                    ['/agent-report/from-to-leads', 'title' => 'From Follow-up to Processing', $searchModel->formName().'[from_status]' => Lead::STATUS_FOLLOW_UP,  $searchModel->formName().'[to_status]' => Lead::STATUS_PROCESSING, $searchModel->formName().'[id]' => $data['id'],$searchModel->formName().'[date_from]' => $searchModel->date_from, $searchModel->formName().'[date_to]' => $searchModel->date_to],
                                     ['target' => '_blank', 'data-pjax' => 0]);
                         },
                         'contentOptions' => ['class' => 'text-center'],
@@ -236,7 +251,7 @@ $this->registerJs("$(function() {
                                     return '-';
                                 }
                                 return \yii\bootstrap\Html::a($data['processing_trash'],
-                                    ['/agent-activity/from-to-leads', 'title' => 'From Processing to Trash', $searchModel->formName().'[from_status]' => Lead::STATUS_PROCESSING,  $searchModel->formName().'[to_status]' => Lead::STATUS_TRASH, $searchModel->formName().'[id]' => $data['id'],$searchModel->formName().'[date_from]' => $searchModel->date_from, $searchModel->formName().'[date_to]' => $searchModel->date_to],
+                                    ['/agent-report/from-to-leads', 'title' => 'From Processing to Trash', $searchModel->formName().'[from_status]' => Lead::STATUS_PROCESSING,  $searchModel->formName().'[to_status]' => Lead::STATUS_TRASH, $searchModel->formName().'[id]' => $data['id'],$searchModel->formName().'[date_from]' => $searchModel->date_from, $searchModel->formName().'[date_to]' => $searchModel->date_to],
                                     ['target' => '_blank', 'data-pjax' => 0]);
                         },
                         'contentOptions' => ['class' => 'text-center'],
@@ -251,7 +266,7 @@ $this->registerJs("$(function() {
                                     return '-';
                                 }
                                 return \yii\bootstrap\Html::a($data['processing_followup'],
-                                    ['/agent-activity/from-to-leads', 'title' => 'From Processing to Follow-up', $searchModel->formName().'[from_status]' => Lead::STATUS_PROCESSING,  $searchModel->formName().'[to_status]' => Lead::STATUS_FOLLOW_UP, $searchModel->formName().'[id]' => $data['id'],$searchModel->formName().'[date_from]' => $searchModel->date_from, $searchModel->formName().'[date_to]' => $searchModel->date_to],
+                                    ['/agent-report/from-to-leads', 'title' => 'From Processing to Follow-up', $searchModel->formName().'[from_status]' => Lead::STATUS_PROCESSING,  $searchModel->formName().'[to_status]' => Lead::STATUS_FOLLOW_UP, $searchModel->formName().'[id]' => $data['id'],$searchModel->formName().'[date_from]' => $searchModel->date_from, $searchModel->formName().'[date_to]' => $searchModel->date_to],
                                     ['target' => '_blank', 'data-pjax' => 0]);
                         },
                         'contentOptions' => ['class' => 'text-center'],
@@ -266,7 +281,7 @@ $this->registerJs("$(function() {
                                     return '-';
                                 }
                                 return \yii\bootstrap\Html::a($data['processing_snooze'],
-                                    ['/agent-activity/from-to-leads', 'title' => 'From Processing to Snooze', $searchModel->formName().'[from_status]' => Lead::STATUS_PROCESSING,  $searchModel->formName().'[to_status]' => Lead::STATUS_SNOOZE, $searchModel->formName().'[id]' => $data['id'],$searchModel->formName().'[date_from]' => $searchModel->date_from, $searchModel->formName().'[date_to]' => $searchModel->date_to],
+                                    ['/agent-report/from-to-leads', 'title' => 'From Processing to Snooze', $searchModel->formName().'[from_status]' => Lead::STATUS_PROCESSING,  $searchModel->formName().'[to_status]' => Lead::STATUS_SNOOZE, $searchModel->formName().'[id]' => $data['id'],$searchModel->formName().'[date_from]' => $searchModel->date_from, $searchModel->formName().'[date_to]' => $searchModel->date_to],
                                     ['target' => '_blank', 'data-pjax' => 0]);
                         },
                         'contentOptions' => ['class' => 'text-center'],
@@ -282,7 +297,7 @@ $this->registerJs("$(function() {
                                 return '-';
                             }
                             return \yii\bootstrap\Html::a($data['cloned_leads'],
-                                ['/agent-activity/cloned', $searchModel->formName().'[id]' => $data['id'],$searchModel->formName().'[date_from]' => $searchModel->date_from, $searchModel->formName().'[date_to]' => $searchModel->date_to],
+                                ['/agent-report/cloned', $searchModel->formName().'[id]' => $data['id'],$searchModel->formName().'[date_from]' => $searchModel->date_from, $searchModel->formName().'[date_to]' => $searchModel->date_to],
                                 ['target' => '_blank', 'data-pjax' => 0]);
                         },
                         'contentOptions' => ['class' => 'text-center'],
@@ -317,7 +332,7 @@ $this->registerJs("$(function() {
                                 return '-';
                             }
                             return \yii\bootstrap\Html::a($data['st_sold'],
-                                ['/agent-activity/sold', $searchModel->formName().'[id]' => $data['id'],$searchModel->formName().'[date_from]' => $searchModel->date_from, $searchModel->formName().'[date_to]' => $searchModel->date_to],
+                                ['/agent-report/sold', $searchModel->formName().'[id]' => $data['id'],$searchModel->formName().'[date_from]' => $searchModel->date_from, $searchModel->formName().'[date_to]' => $searchModel->date_to],
                                 ['target' => '_blank', 'data-pjax' => 0]);
                         },
                         'contentOptions' => ['class' => 'text-center'],
@@ -344,7 +359,7 @@ $this->registerJs("$(function() {
                                 return '-';
                             }
                             return \yii\bootstrap\Html::a($data['created_leads'],
-                                ['/agent-activity/created', $searchModel->formName().'[id]' => $data['id'],$searchModel->formName().'[date_from]' => $searchModel->date_from, $searchModel->formName().'[date_to]' => $searchModel->date_to],
+                                ['/agent-report/created', $searchModel->formName().'[id]' => $data['id'],$searchModel->formName().'[date_from]' => $searchModel->date_from, $searchModel->formName().'[date_to]' => $searchModel->date_to],
                                 ['target' => '_blank', 'data-pjax' => 0]);
                         },
                         'contentOptions' => ['class' => 'text-center'],
