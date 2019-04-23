@@ -72,7 +72,7 @@ class LeadSearch extends Lead
             //['created_date_to', 'default', 'value' => date('Y-m-d')],
 
             [['uid', 'trip_type', 'cabin', 'notes_for_experts', 'created', 'updated', 'request_ip', 'request_ip_detail', 'offset_gmt', 'snooze_for', 'discount_id',
-                'created_date_from', 'created_date_to', 'depart_date_from', 'depart_date_to', 'source_id', 'statuses', 'sold_date_from', 'sold_date_to', 'processing_filter'], 'safe'],
+                'created_date_from', 'created_date_to', 'depart_date_from', 'depart_date_to', 'source_id', 'statuses', 'sold_date_from', 'sold_date_to', 'processing_filter', 'l_init_price'], 'safe'],
         ];
     }
 
@@ -154,8 +154,8 @@ class LeadSearch extends Lead
             'called_expert' => $this->called_expert,
             'l_grade' => $this->l_grade,
             'l_answered'    => $this->l_answered,
-            'l_duplicate_lead_id' => $this->l_duplicate_lead_id
-
+            'l_duplicate_lead_id' => $this->l_duplicate_lead_id,
+            'l_init_price'  => $this->l_init_price
         ]);
 
 

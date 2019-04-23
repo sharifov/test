@@ -67,6 +67,12 @@ return [
             'port' => 11300,
             'tube' => 'queue_phone_check',
         ],
+        'queue_job' => [
+            'class' => \yii\queue\beanstalk\Queue::class,
+            'host' => 'localhost',
+            'port' => 11300,
+            'tube' => 'queue_job',
+        ],
 
         'telegram' => [
             'class' => \aki\telegram\Telegram::class,
@@ -77,5 +83,6 @@ return [
     'bootstrap' => [
         'queue_email_job',
         'queue_phone_check',
+        'queue_job'
     ],
 ];

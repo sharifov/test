@@ -4,6 +4,7 @@ namespace frontend\controllers;
 
 use common\components\CommunicationService;
 use common\components\CountEvent;
+use common\components\jobs\TelegramSendMessageJob;
 use common\models\Call;
 use common\models\Employee;
 use common\models\Notifications;
@@ -11,6 +12,7 @@ use common\models\Project;
 use common\models\UserCallStatus;
 use common\models\UserConnection;
 use common\models\UserGroupAssign;
+use common\models\UserProfile;
 use common\models\UserProjectParams;
 use Twilio\TwiML\VoiceResponse;
 use Yii;
@@ -424,5 +426,38 @@ class TestController extends FController
         $twML->say('Hello');
         $twML->play('https://api.twilio.com/cowbell.mp3', ['loop' => 5]);
         echo $twML;
+    }
+
+    public function actionTelegram()
+    {
+        $user_id = Yii::$app->user->id;
+
+        if($user_id) {
+            $profile = UserProfile::find()->where(['up_user_id' => $user_id])->limit(1)->one();
+            if ($profile && $profile->up_telegram && $profile->up_telegram_enable) {
+                $tgm = Yii::$app->telegram;
+
+                $tgm->sendMessage([
+                    'chat_id' => $profile->up_telegram,
+                    'text' => 'text 12345',
+                ]);
+
+                VarDumper::dump([
+                    'chat_id' => $profile->up_telegram,
+                ], 10, true);
+            }
+        }
+    }
+
+    public function actionJob()
+    {
+        $job = new TelegramSendMessageJob();
+        $job->user_id = Yii::$app->user->id;
+        $job->text = 'Test Job';
+
+        $queue = Yii::$app->queue_job;
+        $jobId = $queue->push($job);
+
+        echo $jobId;
     }
 }

@@ -374,10 +374,10 @@ $buttonClone = Html::a('<i class="fa fa-copy"></i> Clone lead', '#', [
     'data-url' => Url::to(['lead/clone', 'id' => $leadForm->getLead()->id])
 ]);
 
-$buttonHoldOn = Html::a('<i class="fa fa-share fa-rotate-180"></i></span> Hold On', '#', [
+/*$buttonHoldOn = Html::a('<i class="fa fa-share fa-rotate-180"></i></span> Hold On', '#', [
     'class' => 'add-reason',
     'data-url' => Url::to(['lead/change-state', 'queue' => 'processing', 'id' => $leadForm->getLead()->id]),
-]);
+]);*/
 
 $buttonFollowUp = Html::a('<i class="fa fa-share-square fa-rotate-180"></i> Follow Up', '#', [
     'class' => 'add-reason',
@@ -453,7 +453,7 @@ if (!$leadForm->getLead()->isNewRecord) {
         if(Yii::$app->authManager->getAssignment('admin', $userId) || Yii::$app->authManager->getAssignment('supervision', $userId)) {
             $buttonsSubAction[] = $buttonAnswer;
         }
-        $buttonsSubAction[] = $buttonHoldOn;
+        //$buttonsSubAction[] = $buttonHoldOn;
         $buttonsSubAction[] = $buttonFollowUp;
         $buttonsSubAction[] = $buttonTrash;
         $buttonsSubAction[] = $buttonSnooze;

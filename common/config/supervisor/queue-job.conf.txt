@@ -1,0 +1,8 @@
+[program:QueueJob]
+command=/usr/bin/php /var/www/sales.zeit.test/www/yii queue-job/listen
+stdout_logfile=/var/www/sales.zeit.test/www/console/runtime/queue-job.log
+autostart=true
+autorestart=true
+user=root
+stopsignal=KILL
+numprocs=1

@@ -3,6 +3,7 @@
 namespace common\models;
 
 use common\components\EmailService;
+use common\components\jobs\QuickSearchInitPriceJob;
 use common\models\local\LeadAdditionalInformation;
 use common\models\local\LeadLogMessage;
 use Yii;
@@ -64,6 +65,7 @@ use common\components\SearchService;
  * @property string $l_client_ua
  * @property string $l_request_hash
  * @property int $l_duplicate_lead_id
+ * @property double $l_init_price
  *
  * @property double $finalProfit
  * @property int $quotesCount
@@ -244,7 +246,7 @@ class Lead extends ActiveRecord
 
             [['created', 'updated', 'snooze_for', 'called_expert', 'additional_information', 'l_pending_delay_dt'], 'safe'],
 
-            [['final_profit', 'tips', 'agents_processing_fee'], 'number'],
+            [['final_profit', 'tips', 'agents_processing_fee', 'l_init_price'], 'number'],
             [['uid', 'request_ip', 'offset_gmt', 'discount_id', 'description'], 'string', 'max' => 255],
             [['trip_type'], 'string', 'max' => 2],
             [['cabin'], 'string', 'max' => 1],
@@ -304,6 +306,8 @@ class Lead extends ActiveRecord
             'l_client_ua' => 'Client UserAgent',
             'l_request_hash' => 'Request Hash',
             'l_duplicate_lead_id' => 'Duplicate Lead ID',
+
+            'l_init_price' => 'Init Price',
 
         ];
     }
@@ -1215,6 +1219,12 @@ New lead {lead_id}
 
         if ($insert) {
             LeadFlow::addStateFlow($this);
+
+            $job = new QuickSearchInitPriceJob();
+            $job->lead_id = $this->id;
+            $jobId = Yii::$app->queue_job->push($job);
+            Yii::info('Lead: ' . $this->id . ', QuickSearchInitPriceJob: '.$jobId, 'info\Lead:afterSave:QuickSearchInitPriceJob');
+
         } else {
 
 

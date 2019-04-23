@@ -151,16 +151,33 @@ $isAgent = Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id);
 
                     //'employee_id',
 
-
+                    [
+                        'attribute' => 'l_init_price',
+                        //'format' => 'raw',
+                        'value' => function(\common\models\Lead $model) {
+                            return $model->l_init_price ? number_format($model->l_init_price, 2) : '-';
+                        },
+                    ],
 
                     [
                         'attribute' => 'status',
                         'value' => function(\common\models\Lead $model) {
                             return $model->getStatusName(true);
                         },
-                        'format' => 'html',
+                        'format' => 'raw',
 
                     ],
+
+                    [
+                        'attribute' => 'l_duplicate_lead_id',
+                        'label' => 'Duplicate from',
+                        'value' => function (\common\models\Lead $model) {
+                            return $model->l_duplicate_lead_id ? Html::a($model->l_duplicate_lead_id, ['/leads/view', 'id' => $model->l_duplicate_lead_id], ['data-pjax' => 0, 'target' => '_blank']) : '-';
+                        },
+                        'format' => 'raw',
+
+                    ],
+
                     [
                         'attribute' => 'project_id',
                         'value' => function(\common\models\Lead $model) {
