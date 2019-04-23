@@ -47,7 +47,45 @@ $this->params['breadcrumbs'][] = $this->title;
                 'style' => 'width:80px'
             ]
         ],
+
+
         [
+            'attribute' => 'project_id',
+            'value' => function (\common\models\Lead $model) {
+                return $model->project ? '<span class="badge badge-info">' . $model->project->name . '</span>' : '-';
+            },
+            'format' => 'raw',
+            'options' => [
+                'style' => 'width:120px'
+            ],
+            'filter' => $projectList,
+            'visible' => ! $isAgent
+        ],
+
+
+        [
+            'attribute' => 'created',
+            'label' => 'Pending Time',
+            'value' => function (\common\models\Lead $model) {
+
+                $createdTS = strtotime($model->created);
+
+                $diffTime = time() - $createdTS;
+                $diffHours = (int) ($diffTime / (60 * 60));
+
+
+                $str = ($diffHours > 3 && $diffHours < 73 ) ? $diffHours.' hours' : Yii::$app->formatter->asRelativeTime($createdTS);
+                $str .= '<br><i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->created));
+
+                return $str;
+            },
+            'options' => [
+                'style' => 'width:160px'
+            ],
+            'format' => 'raw'
+        ],
+
+        /*[
             'attribute' => 'created',
             'label' => 'Pending Time',
             'value' => function (\common\models\Lead $model) {
@@ -64,7 +102,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'format' => 'raw',
             'filter' => false
 
-        ],
+        ],*/
 
         [
             // 'attribute' => 'client_id',
@@ -138,7 +176,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'format' => 'raw'
         ],
         [
-            'attribute' => 'Quotes ',
+            'attribute' => 'Quotes',
             'value' => function (\common\models\Lead $model) {
                 $quotes = $model->getQuoteSendInfo();
                 return sprintf('Total: <strong>%d</strong> <br> Sent: <strong>%d</strong>', ($quotes['send_q'] + $quotes['not_send_q']), $quotes['send_q']);
@@ -159,13 +197,22 @@ $this->params['breadcrumbs'][] = $this->title;
             'attribute' => 'status',
             'value' => function (\common\models\Lead $model) {
                 $statusValue = $model->getStatusName(true);
-                return $statusValue;
+                $reasonValue =  $model->getLastReason();
+
+                if($reasonValue) {
+                    $reasonValue = '<br><pre>'.$reasonValue.'</pre>';
+                }
+
+                return $statusValue.'<br>'.$reasonValue;
             },
             'format' => 'raw',
             'filter' => \common\models\Lead::getProcessingStatuses(),
             'options' => [
-                'style' => 'width:100px'
-            ]
+                'style' => 'width:200px'
+            ],
+            'contentOptions' => [
+                'class' => 'text-center'
+            ],
 
         ],
         /*[
@@ -185,7 +232,7 @@ $this->params['breadcrumbs'][] = $this->title;
             },
             'format' => 'raw'
         ],
-        [
+        /*[
             'attribute' => 'reason',
             'label' => 'Reason',
             'contentOptions' => [
@@ -195,7 +242,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 return $model->getLastReason();
             },
             'format' => 'raw'
-        ],
+        ],*/
 
         [
             'header' => 'Answered',
@@ -233,7 +280,7 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             'visible' => ! $isAgent,
             'options' => [
-                'style' => 'width:140px'
+                'style' => 'width:170px'
             ]
         ],
 
@@ -247,14 +294,14 @@ $this->params['breadcrumbs'][] = $this->title;
             },
             'format' => 'raw'
         ],
-        [
+        /*[
             'attribute' => 'project_id',
             'value' => function(\common\models\Lead $model) {
                 return $model->project ? $model->project->name : '-';
             },
             'filter' => $projectList,
             'visible' => ! $isAgent
-        ],
+        ],*/
         [
             'label' => 'Rating',
             'contentOptions' => [
@@ -269,7 +316,20 @@ $this->params['breadcrumbs'][] = $this->title;
             },
             'format' => 'raw'
         ],
+
         [
+            'attribute' => 'l_init_price',
+            //'format' => 'raw',
+            'value' => function(\common\models\Lead $model) {
+                return $model->l_init_price ? number_format($model->l_init_price, 2) . ' $': '-';
+            },
+            'contentOptions' => [
+                'class' => 'text-right'
+            ],
+            'visible' => ! $isAgent
+        ],
+
+        /*[
             'class' => 'yii\grid\ActionColumn',
             'template' => '{action}',
             'buttons' => [
@@ -277,7 +337,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
                     $buttons = '';
 
-                    $buttons .= Html::a('<i class="fa fa-search"></i>', ['lead/view', 'gid' => $model->gid], [
+                    $buttons .= Html::a('<i class="fa fa-search"></i> View', ['lead/view', 'gid' => $model->gid], [
                         'class' => 'btn btn-info btn-xs',
                         'target' => '_blank',
                         'data-pjax' => 0,
@@ -301,7 +361,56 @@ $this->params['breadcrumbs'][] = $this->title;
                     return $buttons;
                 }
             ]
+        ]*/
+
+        [
+            'class' => 'yii\grid\ActionColumn',
+            'template' => '{view}<br>{take-over}',
+            'controller' => 'lead',
+
+            'visibleButtons' => [
+
+                /*'view' => function ($model, $key, $index) use ($isAdmin) {
+                    return $isAdmin;
+                },*/
+
+                /*'take' => function ($model, $key, $index) use ($isAdmin) {
+                    return $isAdmin;
+                },*/
+
+                'take-over' => function (Lead $model, $key, $index) {
+                    return Yii::$app->user->id !== $model->employee_id && in_array($model->status, [Lead::STATUS_ON_HOLD, Lead::STATUS_PROCESSING]);
+                },
+
+
+            ],
+
+            'buttons' => [
+                'view' => function ($url, Lead $model) {
+                    return Html::a('<i class="glyphicon glyphicon-search"></i> View Lead', [
+                        'lead/view',
+                        'gid' => $model->gid
+                    ], [
+                        'class' => 'btn btn-info btn-xs',
+                        'target' => '_blank',
+                        'data-pjax' => 0,
+                        'title' => 'View',
+                    ]);
+                },
+                'take-over' => function ($url, Lead $model) {
+                    return Html::a('<i class="fa fa-download"></i> Take Over', ['lead/take', 'gid' => $model->gid, 'over' => true], [
+                        'class' => 'btn btn-primary btn-xs take-processing-btn',
+                        'data-pjax' => 0,
+                        'data-status' => $model->status,
+                        /*'data' => [
+                            'confirm' => 'Are you sure you want to take over this Lead?',
+                            //'method' => 'post',
+                        ],*/
+                    ]);
+                }
+            ],
         ]
+
     ];
 
     ?>
