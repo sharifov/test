@@ -8,6 +8,7 @@ use common\models\Project;
 use common\models\search\EmployeeSearch;
 use common\models\search\LeadFlightSegmentSearch;
 use common\models\search\LeadSearch;
+use common\models\Source;
 use common\models\UserProjectParams;
 use Yii;
 use common\models\Call;
@@ -371,12 +372,24 @@ class CallController extends FController
 
                 $upp = UserProjectParams::find()->where(['upp_project_id' => $leadModel->project_id, 'upp_user_id' => $user->id])->one();
                 if($upp && $upp->upp_tw_phone_number) {
-                    $callData['phone_from'] = $upp->upp_tw_phone_number;
+
+                    //$callData['phone_from'] = $upp->upp_tw_phone_number;
+
+                    $source = Source::find()->where(['project_id' => $leadModel->project_id, 'default' => true])->andWhere(['OR', ['IS NOT', 'phone_number', null], ['<>', 'phone_number', '']])->limit(1)->one();
+                    if($source && $source->phone_number) {
+                        $callData['phone_from'] = $source->phone_number;
+                    } else {
+                        Yii::error('Not found Project Source or Source Phone is empty, Project Id: '. $leadModel->project_id, 'CallController:actionAutoRedial:Source');
+                    }
+
+                    if(!$callData['phone_from']) {
+                        $callData['error'] = 'Not found source phone number for project ('.$leadModel->project->name.')';
+                    }
+                } else {
+                    $callData['error'] = 'Not found agent phone number for project ('.$leadModel->project->name.')';
                 }
 
-                if(!$callData['phone_from']) {
-                    $callData['error'] = 'Not found phone number for project ('.$leadModel->project->name.')';
-                }
+
 
                 if(!$callData['phone_to']) {
                     $callData['error'] = 'Not found client number';

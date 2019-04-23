@@ -14,6 +14,7 @@ use yii\helpers\ArrayHelper;
  * @property string $cid
  * @property string $phone_number
  * @property string $last_update
+ * @property bool default
  *
  * @property Project $project
  */
@@ -34,6 +35,7 @@ class Source extends \yii\db\ActiveRecord
     {
         return [
             [['project_id'], 'integer'],
+            [['default'], 'boolean'],
             [['last_update'], 'safe'],
             [['name', 'cid', 'phone_number'], 'string', 'max' => 255],
             [['project_id'], 'exist', 'skipOnError' => true, 'targetClass' => Project::class, 'targetAttribute' => ['project_id' => 'id']],
@@ -52,6 +54,7 @@ class Source extends \yii\db\ActiveRecord
             'cid' => 'Cid',
             'phone_number' => 'Phone number',
             'last_update' => 'Last Update',
+            'default' => 'Default'
         ];
     }
 
