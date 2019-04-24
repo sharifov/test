@@ -48,13 +48,13 @@ use \common\models\Call;
 
                 <td class="text-left">
                     <?php if($model->c_lead_id && $model->cLead):?>
-                        <i><?=Html::a($model->c_lead_id, ['lead/view', 'gid' => $model->cLead->gid], ['data-pjax' => 0, 'target' => '_blank'])?></i><br>
+                        <i><?=Html::a($model->c_lead_id, ['lead/view', 'gid' => $model->cLead->gid], ['data-pjax' => 0, 'target' => '_blank'])?><?=$model->cLead->l_init_price ? ' - ' . number_format($model->cLead->l_init_price, 0) : ''?></i><br>
                         <?php
                             $segments = $model->cLead->leadFlightSegments;
                             $segmentData = [];
                             if ($segments) {
                                 foreach ($segments as $sk => $segment) {
-                                    $segmentData[] = ($sk + 1) . '. <small>' . $segment->origin . ' <i class="fa fa-long-arrow-right"></i> ' . $segment->destination . '</small>';
+                                    $segmentData[] = /*($sk + 1) .*/ '<small>' . $segment->origin . ' <i class="fa fa-long-arrow-right"></i> ' . $segment->destination . '</small>';
                                 }
                             }
 
