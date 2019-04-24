@@ -52,7 +52,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
         [
             'attribute' => 'l_duplicate_lead_id',
-            'label' => 'Duplicate from',
+            'label' => 'Origin',
             'value' => function (\common\models\Lead $model) {
                 return $model->l_duplicate_lead_id ? Html::a($model->l_duplicate_lead_id, ['/leads/view', 'id' => $model->l_duplicate_lead_id], ['data-pjax' => 0, 'target' => '_blank']) : '-';
             },
@@ -103,7 +103,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
         [
             // 'attribute' => 'client_id',
-            'header' => 'Request',
+            'header' => 'Origin Request',
             'format' => 'raw',
             'value' => function (\common\models\Lead $model) {
 
@@ -122,7 +122,37 @@ $this->params['breadcrumbs'][] = $this->title;
 
             'options' => [
                 'style' => 'width:160px'
-            ]
+            ],
+            'contentOptions' => [
+                'class' => 'text-success'
+            ],
+        ],
+
+        [
+            // 'attribute' => 'client_id',
+            'header' => 'Duplicate Request',
+            'format' => 'raw',
+            'value' => function (\common\models\Lead $model) {
+
+                $clientName = trim($model->l_client_first_name . ' ' . $model->l_client_last_name);
+
+                if ($clientName) {
+                    $clientName = '<i class="fa fa-user"></i> ' . Html::encode($clientName).'';
+                }
+
+                $str = $model->l_client_email ? '<br><i class="fa fa-envelope"></i> ' . $model->l_client_email : '';
+                $str .= $model->l_client_phone ? '<br><i class="fa fa-phone"></i>' . $model->l_client_phone : '';
+                $clientName .= $str;
+
+                return $clientName;
+            },
+
+            'options' => [
+                'style' => 'width:160px'
+            ],
+            'contentOptions' => [
+                'class' => 'text-danger'
+            ],
         ],
 
         [
@@ -173,8 +203,37 @@ $this->params['breadcrumbs'][] = $this->title;
             ]
         ],
 
+
+
+
         [
-            'attribute' => 'Request Details',
+            'label' => 'Origin Request Details',
+            'content' => function (\common\models\Lead $model) {
+
+                $parentModel = $model->lDuplicateLead;
+
+
+                $content = '';
+                if($parentModel) {
+                    $content .= $parentModel->getFlightDetails();
+                    $content .= ' (<i class="fa fa-male"></i> x' . ($parentModel->adults . '/' . $parentModel->children . '/' . $parentModel->infants) . ')<br/>';
+
+                    $content .= sprintf('<strong>Cabin:</strong> %s', Lead::getCabin($parentModel['cabin']));
+                }
+
+                return $content;
+            },
+            'format' => 'raw',
+            /*'options' => [
+                'style' => 'color:green'
+            ],*/
+            'contentOptions' => [
+                'class' => 'text-success'
+            ],
+        ],
+
+        [
+            'label' => 'Dublicate Request Details',
             'content' => function (\common\models\Lead $model) {
                 $content = '';
                 $content .= $model->getFlightDetails();
@@ -184,8 +243,12 @@ $this->params['breadcrumbs'][] = $this->title;
 
                 return $content;
             },
-            'format' => 'raw'
+            'format' => 'raw',
+            'contentOptions' => [
+                'class' => 'text-danger'
+            ],
         ],
+
 //        [
 //            'attribute' => 'Quotes ',
 //            'value' => function (\common\models\Lead $model) {
