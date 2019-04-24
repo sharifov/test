@@ -326,6 +326,14 @@ $this->params['breadcrumbs'][] = $this->title;
             },
         ],
 
+
+        [
+            'header' => 'Project info',
+            'value' => function(\common\models\Lead $model) {
+                return $model->project ? $model->project->name : '-';
+            },
+         ],
+
         [
             'header' => 'Market info',
             'value' => function(\common\models\Lead $model) {
