@@ -126,7 +126,7 @@ class AgentActivitySearch extends Call
         $query->addSelect(['(SELECT COUNT(*) FROM lead_flow lf WHERE (lf.created '.$between_condition.') AND lf.employee_id=e.id AND lf.status=' . Lead::STATUS_SNOOZE . ') AS st_snooze ']);
         $query->addSelect(['(SELECT COUNT(*) FROM lead_flow lf WHERE (lf.created '.$between_condition.') AND lf.employee_id=e.id AND lf.status=' . Lead::STATUS_PENDING . ') AS st_pending ']);
 
-        $query->addSelect(['(SELECT COUNT(lf.id) FROM lead_flow lf LEFT JOIN leads l ON lf.lead_id = l.id WHERE (lf.created '.$between_condition.') AND lf.employee_id=e.id AND lf.status=' . Lead::STATUS_PROCESSING . ' AND l.status=' . Lead::STATUS_PROCESSING . ') AS created_leads ']);
+        $query->addSelect(['(SELECT COUNT(lf.id) FROM lead_flow lf WHERE (lf.created '.$between_condition.') AND lf.employee_id=e.id AND lf.status=' . Lead::STATUS_PROCESSING . ' AND lf.lf_from_status_id IS NULL) AS created_leads ']);
         $query->addSelect(['(SELECT COUNT(lf.id) FROM lead_flow lf LEFT JOIN leads l ON lf.lead_id = l.id WHERE l.clone_id IS NOT NULL AND (lf.created '.$between_condition.') AND lf.employee_id=e.id AND lf.status=' . Lead::STATUS_PROCESSING . ') AS cloned_leads ']);
         $query->addSelect(['(SELECT COUNT(*) FROM lead_flow WHERE (created '.$between_condition.') AND employee_id=e.id AND lf_from_status_id = '.Lead::STATUS_PENDING.' AND status=' . Lead::STATUS_PROCESSING . ') AS inbox_processing ']);
         $query->addSelect(['(SELECT COUNT(*) FROM lead_flow WHERE (created '.$between_condition.') AND employee_id=e.id AND lf_from_status_id = '.Lead::STATUS_FOLLOW_UP.' AND status=' . Lead::STATUS_PROCESSING . ') AS followup_processing ']);
@@ -321,7 +321,7 @@ class AgentActivitySearch extends Call
             return $dataProvider;
         }
 
-        $query->where(['lead_flow.employee_id' => $this->id , 'lead_flow.status' => Lead::STATUS_PROCESSING, 'leads.status' => Lead::STATUS_PROCESSING]);
+        $query->where(['lead_flow.employee_id' => $this->id , 'lead_flow.status' => Lead::STATUS_PROCESSING,'lead_flow.lf_from_status_id' => null]);
         $query->andWhere(['between','lead_flow.created', $this->date_from, $this->date_to]);
         //$query->groupBy('lead_flow.lead_id');
 
