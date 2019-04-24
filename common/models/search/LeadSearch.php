@@ -1166,7 +1166,7 @@ class LeadSearch extends Lead
         ]);
 
         $query
-            //->andWhere(['IN','leads.status', [self::STATUS_TRASH]])
+            ->andWhere(['leads.status' => self::STATUS_TRASH])
             ->andWhere(['IS NOT','leads.l_duplicate_lead_id', NULL])
             //->andWhere(['IN', $leadTable . '.project_id', $projectIds])
         ;
