@@ -324,7 +324,9 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
             if(isset($roles['supervision'])) {
                 unset($roles['supervision']);
             }
+        }
 
+        if(Yii::$app->user->identity->role != 'admin' && Yii::$app->user->identity->role != 'userManager' ) {
             if(isset($roles['qa'])) {
                 unset($roles['qa']);
             }

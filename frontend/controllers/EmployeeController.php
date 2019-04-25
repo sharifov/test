@@ -43,7 +43,7 @@ class EmployeeController extends FController
                     [
                         'actions' => ['list', 'update', 'create', 'acl-rule'],
                         'allow' => true,
-                        'roles' => ['supervision'],
+                        'roles' => ['supervision', 'userManager'],
                     ],
                     [
                         'actions' => ['seller-contact-info'],

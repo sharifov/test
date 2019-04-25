@@ -33,7 +33,7 @@ class UserGroupController extends FController
                     [
                         'actions' => ['index', 'update', 'delete', 'create', 'view'],
                         'allow' => true,
-                        'roles' => ['admin'], //'supervision',
+                        'roles' => ['admin','userManager'], //'supervision',
                     ],
                     /*[
                         'actions' => ['view', 'index'],

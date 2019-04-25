@@ -97,6 +97,10 @@ class SiteController extends FController
             return $this->dashboardQa();
         }
 
+        if (Yii::$app->authManager->getAssignment('userManager', $userId)) {
+            return $this->dashboardUM();
+        }
+
         return $this->dashboardAgent();
 
     }
@@ -478,6 +482,11 @@ class SiteController extends FController
         return $this->render('index_qa');
     }
 
+
+    public function dashboardUM(): string
+    {
+        return $this->render('index_um');
+    }
 
 
     public function actionLogout()
