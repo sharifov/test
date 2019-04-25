@@ -1279,6 +1279,71 @@ class Quote extends \yii\db\ActiveRecord
         return Airline::findIdentity($this->main_airline_code);
     }
 
+    public function getQuoteTripsData()
+    {
+        $trips = [];
+
+        if(empty($this->quoteTrips)){
+            return $this->getTripsFromDumpLikeSearch();
+        }
+
+        foreach ($this->quoteTrips as $tripKey => $trip){
+            $segments = [];
+            foreach ($trip->quoteSegments as $keySegm => $segment) {
+
+                $airline = Airline::findIdentity($segment->qs_marketing_airline);
+                $departureDateTime = new \DateTime($segment->qs_departure_time);
+                $arrivalDateTime = new \DateTime($segment->qs_arrival_time);
+                $baggages = $segment->quoteSegmentBaggages;
+                $baggageCharge = $segment->quoteSegmentBaggageCharges;
+
+                $baggageInfo = [];
+                if(count($baggages)){
+                    foreach ($baggages as $baggageEntry){
+                        $baggageInfo[$baggageEntry->qsb_pax_code] = $baggageEntry->getInfo();
+                    }
+                }
+                if(count($baggageCharge)){
+                    foreach ($baggageCharge as $baggageChEntry){
+                        $baggageInfo[$baggageChEntry->qsbc_pax_code]['charge'] = $baggageChEntry->getInfo();
+                    }
+                }
+                $stops = [];
+                if(count($segment->quoteSegmentStops)){
+                    foreach ($segment->quoteSegmentStops as $stopEntry){
+                        $stops[] = $stopEntry->getInfo();
+                    }
+                }
+                $segments[] = [
+                    'segmentId' => $keySegm+1,
+                    'departureTime' => $departureDateTime->format('Y-m-d H:i'),
+                    'arrivalTime' => $arrivalDateTime->format('Y-m-d H:i'),
+                    'stop' => ($segment->qs_stop)?$segment->qs_stop:0,
+                    'stops' => (count($stops))?$stops:null,
+                    'flightNumber' => $segment->qs_flight_number,
+                    'bookingClass' => $segment->qs_booking_class,
+                    'duration' => $segment->qs_duration,
+                    'departureAirportCode' => $segment->qs_departure_airport_code,
+                    'departureAirportTerminal' => $segment->qs_departure_airport_terminal."",
+                    'arrivalAirportCode' => $segment->qs_arrival_airport_code,
+                    'arrivalAirportTerminal' => $segment->qs_arrival_airport_terminal."",
+                    'operatingAirline' => $segment->qs_operating_airline,
+                    'airEquipType' => $segment->qs_air_equip_type,
+                    'marketingAirline' => $segment->qs_marketing_airline,
+                    'cabin' => $segment->qs_cabin,
+                    'baggage' => $baggageInfo,
+                ];
+            }
+            $trips[] = [
+                'tripId' => $tripKey+1,
+                'segments' => $segments,
+                'duration' => $trip->qt_duration,
+            ];
+        }
+
+        return $trips;
+    }
+
     public function getTrips(&$title = null)
     {
         $trips = [];
@@ -1519,6 +1584,60 @@ class Quote extends \yii\db\ActiveRecord
         ];
     }
 
+    public function getTripsFromDumpLikeSearch()
+    {
+        $trips = [];
+        $tripIndex = 0;
+        $segments = self::parseDump($this->reservation_dump, false);
+        foreach ($segments as $key => $segment) {
+            if(!isset($segment['cabin']) || empty($segment['cabin'])){
+                $segment['cabin'] = $this->cabin;
+            }
+            if ($this->trip_type != Lead::TRIP_TYPE_ONE_WAY) {
+                if ($key != 0) {
+                    $lastSegment = isset($segments[$key - 1])
+                    ? $segments[$key - 1] : $segments[$key];
+                    $isMoreOneDay = $this->isMoreOneDay($lastSegment['arrivalDateTime'], $segment['departureDateTime']);
+                    if ($isMoreOneDay) {
+                        $tripIndex = $tripIndex + 1;
+                    }
+                }
+            }
+            $trips[$tripIndex]['tripId'] = $tripIndex+1;
+            $trips[$tripIndex]['segments'][] = [
+                'segmentId' => $key+1,
+                'departureTime' => $segment['departureDateTime']->format('Y-m-d H:i'),
+                'arrivalTime' => $segment['arrivalDateTime']->format('Y-m-d H:i'),
+                'stop' => 0,
+                'stops' => null,
+                'flightNumber' => $segment['flightNumber'],
+                'bookingClass' => $segment['bookingClass'],
+                'duration' => $segment['flightDuration'],
+                'departureAirportCode' => $segment['departureAirport'],
+                'arrivalAirportCode' => $segment['arrivalAirport'],
+                'marketingAirline' => $segment['carrier'],
+                'cabin' => QuoteSegment::getCabinReal($segment['cabin']),
+            ];
+        }
+        foreach ($trips as $key => $trip) {
+            $firstSegment = $trip['segments'][0];
+            $lastSegment = $trip['segments'][count($trip['segments']) - 1];
+
+            $depCity = Airport::findIdentity($firstSegment['departureAirportCode']);
+            $arrCity = Airport::findIdentity($lastSegment['arrivalAirportCode']);
+
+            $arrDt = new \DateTime($lastSegment['arrivalTime']);
+            $depDt = new \DateTime($firstSegment['departureTime']);
+            if ($depCity !== null && $arrCity !== null && $depCity->dst != $arrCity->dst) {
+                $flightDuration = ($arrDt->getTimestamp() - $depDt->getTimestamp()) / 60;
+                $trips[$key]['duration'] = intval($flightDuration) + (intval($depCity->dst) * 60) - (intval($arrCity->dst) * 60);
+            } else {
+                $trips[$key]['duration'] = ($arrDt->getTimestamp() - $depDt->getTimestamp()) / 60;
+            }
+
+        }
+        return $trips;
+    }
 
     public function getTripsFromDump(&$title = null)
     {
@@ -1712,6 +1831,35 @@ class Quote extends \yii\db\ActiveRecord
             'isCC' => boolval(!$this->check_payment),
             'fare_type' => empty($this->fare_type) ? self::FARE_TYPE_PUB : $this->fare_type,
         ];
+        return $result;
+    }
+
+    public function getQuotePricePassengersData()
+    {
+        $priceData = $this->getPricesData();
+        $result = [
+            'prices' => [
+                'totalPrice' => round($priceData['total']['selling'],2),
+                'totalTax' => 0,
+                'isCk' => boolval($this->check_payment),
+            ],
+            'passengers' => [],
+            'currency' => 'USD',
+            'currencyRate' => 1,
+            'fareType' => empty($this->fare_type) ? self::FARE_TYPE_PUB : $this->fare_type,
+        ];
+
+        $priceData = $this->getPricesData();
+        foreach ($priceData['prices'] as $paxCode => $price){
+            $result['passengers'][$paxCode]['cnt'] = $price['tickets'];
+            $result['passengers'][$paxCode]['price'] = round($price['selling']/$price['tickets'], 2);
+            $result['passengers'][$paxCode]['tax'] = round(($price['taxes'] + $price['mark_up'] + $price['extra_mark_up'] + $price['service_fee']) / $price['tickets'], 2);
+            $result['passengers'][$paxCode]['baseFare'] = round($price['fare']/$price['tickets'], 2);
+            $result['prices']['totalTax'] += $result['passengers'][$paxCode]['tax'] * $price['tickets'];
+        }
+        $result['prices']['totalTax'] = round($result['prices']['totalTax'], 2);
+
+
         return $result;
     }
 
