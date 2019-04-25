@@ -13,9 +13,6 @@ return [
     'bootstrap' => ['log'],
     'controllerNamespace' => 'frontend\controllers',
     'components' => [
-        'settings' => [
-            'class' => 'pheme\settings\components\Settings'
-        ],
         'request' => [
             'baseUrl' => '',
             'csrfParam' => '_csrf-frontend',
@@ -186,10 +183,6 @@ return [
         ],
     ],
     'modules' => [
-        'settings' => [
-            'class' => 'pheme\settings\Module',
-            'sourceLanguage' => 'en'
-        ],
         'gridview' =>  [
             'class' => '\kartik\grid\Module'
         ],
