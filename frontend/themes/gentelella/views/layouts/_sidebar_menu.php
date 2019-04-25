@@ -194,7 +194,9 @@ $isQA = Yii::$app->authManager->getAssignment('qa', Yii::$app->user->id);
                     $menuItems[] = ['label' => 'Pending <span id="pending-queue" class="label-info label pull-right">' . $badges['pending'] . '</span> ', 'url' => ['queue/pending'], 'icon' => 'briefcase text-info'];
                 }
 
-                $menuItems[] = ['label' => 'Inbox <span id="inbox-queue" class="label-info label pull-right">' . $badges['inbox'] . '</span> ', 'url' => ['queue/inbox'], 'icon' => 'briefcase text-info'];
+                if(isset(Yii::$app->params['settings']['enable_lead_inbox']) && Yii::$app->params['settings']['enable_lead_inbox']) {
+                    $menuItems[] = ['label' => 'Inbox <span id="inbox-queue" class="label-info label pull-right">' . $badges['inbox'] . '</span> ', 'url' => ['queue/inbox'], 'icon' => 'briefcase text-info'];
+                }
                 $menuItems[] = ['label' => 'Follow Up <span id="follow-up-queue" class="label-success label pull-right">' . $badges['follow-up'] . '</span> ', 'url' => ['queue/follow-up'], 'icon' => 'recycle'];
                 $menuItems[] = ['label' => 'Processing <span id="processing-queue" class="label-warning label pull-right">' . $badges['processing'] . '</span> ', 'url' => ['queue/processing'], 'icon' => 'spinner'];
 
@@ -378,6 +380,7 @@ $isQA = Yii::$app->authManager->getAssignment('qa', Yii::$app->user->id);
                         //['label' => 'Clear cache', 'url' => ['/tools/clear-cache'], 'icon' => 'remove'],
                         ['label' => 'Clean cache & assets', 'url' => ['/clean/index'], 'icon' => 'remove'],
                         //['label' => 'Supervisor Service', 'url' => ['/tools/supervisor'], 'icon' => 'user'],
+                        ['label' => 'Site Settings', 'url' => ['/setting/index'], 'icon' => 'cogs'],
                     ]
                     //'linkOptions' => ['data-method' => 'post']
                 ];

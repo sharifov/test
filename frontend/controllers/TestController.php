@@ -460,4 +460,14 @@ class TestController extends FController
 
         echo $jobId;
     }
+
+    public function actionSettings()
+    {
+        VarDumper::dump(Yii::$app->params['settings'], 10, true);
+    }
+
+
+
+
+
 }

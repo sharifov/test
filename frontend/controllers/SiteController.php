@@ -8,7 +8,6 @@ use common\models\Lead;
 use common\models\search\EmployeeSearch;
 use common\models\search\LeadTaskSearch;
 use common\models\UserParams;
-use http\Url;
 use Yii;
 use yii\helpers\ArrayHelper;
 use yii\filters\VerbFilter;
@@ -46,7 +45,7 @@ class SiteController extends FController
             'verbs' => [
                 'class' => VerbFilter::class,
                 'actions' => [
-                    'logout' => ['post', 'GET'],
+                    'logout' => ['POST', 'GET'],
                 ],
             ],
         ];
@@ -64,16 +63,6 @@ class SiteController extends FController
                 'layout' => '@frontend/themes/gentelella/views/layouts/error'
             ],
         ];
-    }
-
-    /**
-     * Displays homepage.
-     *
-     * @return mixed
-     */
-    public function actionIndex2()
-    {
-        return $this->render('index2');
     }
 
     /**

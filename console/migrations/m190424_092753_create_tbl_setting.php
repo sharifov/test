@@ -23,7 +23,7 @@ class m190424_092753_create_tbl_setting extends Migration
             's_key' => $this->string(255)->unique()->notNull(),
             's_name' => $this->string(255),
             's_type' => $this->string(10)->notNull(),
-            's_value' => $this->string(500)->notNull(),
+            's_value' => $this->string(255)->notNull(),
             's_updated_dt' => $this->dateTime(),
             's_updated_user_id' => $this->integer(),
         ], $tableOptions);
@@ -34,10 +34,26 @@ class m190424_092753_create_tbl_setting extends Migration
         $this->insert('{{%setting}}', [
             's_key' => 'enable_lead_inbox',
             's_name' => 'Enable Lead Inbox',
-            's_type' => 'bool',
+            's_type' => \common\models\Setting::TYPE_BOOL,
             's_value' => '1',
             's_updated_dt' => date('Y-m-d H:i:s'),
         ]);
+
+        /*$this->insert('{{%setting}}', [
+            's_key' => 'limit',
+            's_name' => 'Limit',
+            's_type' => \common\models\Setting::TYPE_INT,
+            's_value' => '123',
+            's_updated_dt' => date('Y-m-d H:i:s'),
+        ]);
+
+        $this->insert('{{%setting}}', [
+            's_key' => 'price',
+            's_name' => 'Price',
+            's_type' => \common\models\Setting::TYPE_DOUBLE,
+            's_value' => '1034.56',
+            's_updated_dt' => date('Y-m-d H:i:s'),
+        ]);*/
 
     }
 
