@@ -193,8 +193,6 @@ class EmployeeController extends FController
         if (Yii::$app->request->isPost) {
             $attr = Yii::$app->request->post($model->formName());
 
-
-
             $isNew = $model->prepareSave($attr);
             if ($model->validate() && $model->save()) {
 
@@ -239,16 +237,28 @@ class EmployeeController extends FController
 
                 Yii::$app->getSession()->setFlash('success', 'User created');
 
-
                 if ($modelUserParams->load(Yii::$app->request->post())) {
 
                     //VarDumper::dump(Yii::$app->request->post()); exit;
-
                     $modelUserParams->up_user_id = $model->id;
                     $modelUserParams->up_updated_user_id = Yii::$app->user->id;
 
                     if($modelUserParams->save()) {
                         //return $this->refresh();
+                    }
+                }
+
+                if($modelUserParams->up_timezone == null){
+                    $modelUserParams->up_user_id = $model->id;
+                    $modelUserParams->up_updated_user_id = Yii::$app->user->id;
+
+                    $modelUserParams->up_timezone = "Europe/Chisinau";
+                    $modelUserParams->up_work_minutes = 8 * 60;
+                    $modelUserParams->up_base_amount = 0;
+                    $modelUserParams->up_commission_percent = 0;
+                    $modelUserParams->up_work_start_tm = "16:00";
+
+                    if($modelUserParams->save()) {
                     }
                 }
 

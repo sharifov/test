@@ -1720,6 +1720,8 @@ class LeadController extends FController
                 if($userParams->up_inbox_show_limit_leads > 0) {
                     $params['LeadSearch']['limit'] = $userParams->up_inbox_show_limit_leads;
                 }
+            }else{
+                throw new NotFoundHttpException('Not set user params for agent! Please ask supervisor to set shift time and other.');
             }
 
 
