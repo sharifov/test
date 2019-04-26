@@ -153,7 +153,7 @@ if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
                     'format' => 'raw'
                 ],
 
-                [
+                /*[
                     'label' => 'Last Call Status',
                     'filter' => false,
                     //'filter' => [1 => 'Online', $searchModel::STATUS_DELETED => 'Deleted'],
@@ -164,7 +164,7 @@ if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
                         return $call ? $call->c_call_status : '-';
                     },
                     'format' => 'raw'
-                ],
+                ],*/
 
                 [
                     'label' => 'User Groups',
@@ -175,7 +175,7 @@ if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
                         $groupsValueArr = [];
 
                         foreach ($groups as $group) {
-                            $groupsValueArr[] = Html::tag('span', Html::tag('i', '', ['class' => 'fa fa-users']) . ' ' . Html::encode($group), ['class' => 'label label-info']);
+                            $groupsValueArr[] = Html::tag('span', /*Html::tag('i', '', ['class' => 'fa fa-users']) . ' ' .*/ Html::encode($group), ['class' => 'label label-info']);
                         }
 
                         $groupsValue = implode(' ', $groupsValueArr);
@@ -245,14 +245,14 @@ if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
                     'format' => 'raw',
                     'filter' => \common\models\UserProfile::CALL_TYPE_LIST
                 ],
-                [
+                /*[
                     'label' => 'Sip',
                     'attribute' => 'user_sip',
                     'value' => function (\common\models\Employee $model) {
                         return ($model->userProfile->up_sip) ?? '';
                     },
                     'format' => 'raw'
-                ],
+                ],*/
                 [
                     'label' => 'Projects Params',
                     'attribute' => 'user_params_project_id',
@@ -336,7 +336,7 @@ if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
                 'visible' => $isAdmin
                 ],*/
 
-                [
+                /*[
                     'label' => 'Bonus Profit',
                     //'attribute' => 'created_at',
                     'value' => function(\common\models\Employee $model) {
@@ -356,7 +356,7 @@ if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
                         'style' => 'width:120px'
                     ],
                     'visible' => $isAdmin
-                ],
+                ],*/
 
 
                 [
