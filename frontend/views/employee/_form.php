@@ -14,6 +14,9 @@ use common\models\Employee;
 use common\models\EmployeeAcl;
 use yii\widgets\MaskedInput;
 
+$data = [];
+$dataProjects = [];
+
 
 if($model->isNewRecord) {
     $this->title = 'Create new User';
@@ -25,7 +28,7 @@ $this->params['breadcrumbs'][] = ['label' => 'User List', 'url' => ['list']];
 $this->params['breadcrumbs'][] = $this->title;
 
 
-if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
+if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$app->authManager->getAssignment('userManager', Yii::$app->user->id)) {
     $userList = \common\models\Employee::getList();
     $projectList = \common\models\Project::getList();
 } else {
@@ -82,7 +85,7 @@ if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
                         <?php if($model->isNewRecord || Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) ||
                             (Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id) && $model->role == 'agent')):
 
-                            if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
+                            if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$app->authManager->getAssignment('userManager', Yii::$app->user->id)) {
                                 $data = \common\models\UserGroup::getList();
                                 $dataProjects = \common\models\Project::getList();
                             }

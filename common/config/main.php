@@ -83,6 +83,7 @@ return [
     'bootstrap' => [
         'queue_email_job',
         'queue_phone_check',
-        'queue_job'
+        'queue_job',
+        \common\components\SettingsBootstrap::class
     ],
 ];

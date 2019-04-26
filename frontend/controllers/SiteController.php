@@ -8,7 +8,6 @@ use common\models\Lead;
 use common\models\search\EmployeeSearch;
 use common\models\search\LeadTaskSearch;
 use common\models\UserParams;
-use http\Url;
 use Yii;
 use yii\helpers\ArrayHelper;
 use yii\filters\VerbFilter;
@@ -46,7 +45,7 @@ class SiteController extends FController
             'verbs' => [
                 'class' => VerbFilter::class,
                 'actions' => [
-                    'logout' => ['post', 'GET'],
+                    'logout' => ['POST', 'GET'],
                 ],
             ],
         ];
@@ -69,16 +68,6 @@ class SiteController extends FController
     /**
      * Displays homepage.
      *
-     * @return mixed
-     */
-    public function actionIndex2()
-    {
-        return $this->render('index2');
-    }
-
-    /**
-     * Displays homepage.
-     *
      * @return string
      */
     public function actionIndex(): string
@@ -95,6 +84,10 @@ class SiteController extends FController
 
         if (Yii::$app->authManager->getAssignment('qa', $userId)) {
             return $this->dashboardQa();
+        }
+
+        if (Yii::$app->authManager->getAssignment('userManager', $userId)) {
+            return $this->dashboardUM();
         }
 
         return $this->dashboardAgent();
@@ -478,6 +471,11 @@ class SiteController extends FController
         return $this->render('index_qa');
     }
 
+
+    public function dashboardUM(): string
+    {
+        return $this->render('index_um');
+    }
 
 
     public function actionLogout()

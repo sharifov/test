@@ -66,4 +66,25 @@ class QuoteSegmentStop extends \yii\db\ActiveRecord
     {
         return $this->hasOne(QuoteSegment::className(), ['qs_id' => 'qss_segment_id']);
     }
+
+    public function getInfo()
+    {
+        $data = [
+            'locationCode' => $this->qss_location_code,
+            'departureDateTime' => $this->qss_departure_dt,
+            'arrivalDateTime' => $this->qss_arrival_dt,
+        ];
+
+        if(!empty($this->qss_duration)){
+            $data['duration'] = $this->qss_duration;
+        }
+        if(!empty($this->qss_elapsed_time)){
+            $data['elapsedTime'] = $this->qss_elapsed_time;
+        }
+        if(!empty($this->qss_equipment)){
+            $data['equipment'] = $this->qss_equipment;
+        }
+
+        return $data;
+    }
 }

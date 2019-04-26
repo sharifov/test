@@ -3,17 +3,18 @@
 namespace frontend\controllers;
 
 use Yii;
-use common\models\UserGroupAssign;
-use common\models\search\UserGroupAssignSearch;
+use common\models\Setting;
+use common\models\search\SettingSearch;
 use yii\filters\AccessControl;
 use yii\helpers\ArrayHelper;
+use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 
 /**
- * UserGroupAssignController implements the CRUD actions for UserGroupAssign model.
+ * SettingController implements the CRUD actions for Setting model.
  */
-class UserGroupAssignController extends FController
+class SettingController extends FController
 {
     /**
      * {@inheritdoc}
@@ -31,15 +32,12 @@ class UserGroupAssignController extends FController
                 'class' => AccessControl::class,
                 'rules' => [
                     [
-                        'actions' => ['index', 'update', 'delete', 'create', 'view'],
+                        /*'actions' => [
+
+                        ],*/
                         'allow' => true,
-                        'roles' => ['admin','userManager'], //'supervision',
+                        'roles' => ['admin'],
                     ],
-                    /*[
-                        'actions' => ['view', 'index'],
-                        'allow' => true,
-                        'roles' => ['agent'],
-                    ],*/
                 ],
             ],
         ];
@@ -48,12 +46,12 @@ class UserGroupAssignController extends FController
     }
 
     /**
-     * Lists all UserGroupAssign models.
+     * Lists all Setting models.
      * @return mixed
      */
     public function actionIndex()
     {
-        $searchModel = new UserGroupAssignSearch();
+        $searchModel = new SettingSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
         return $this->render('index', [
@@ -63,30 +61,29 @@ class UserGroupAssignController extends FController
     }
 
     /**
-     * Displays a single UserGroupAssign model.
-     * @param integer $ugs_user_id
-     * @param integer $ugs_group_id
+     * Displays a single Setting model.
+     * @param integer $id
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionView($ugs_user_id, $ugs_group_id)
+    public function actionView($id)
     {
         return $this->render('view', [
-            'model' => $this->findModel($ugs_user_id, $ugs_group_id),
+            'model' => $this->findModel($id),
         ]);
     }
 
     /**
-     * Creates a new UserGroupAssign model.
+     * Creates a new Setting model.
      * If creation is successful, the browser will be redirected to the 'view' page.
      * @return mixed
      */
     public function actionCreate()
     {
-        $model = new UserGroupAssign();
+        $model = new Setting();
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'ugs_user_id' => $model->ugs_user_id, 'ugs_group_id' => $model->ugs_group_id]);
+            return $this->redirect(['view', 'id' => $model->s_id]);
         }
 
         return $this->render('create', [
@@ -95,19 +92,18 @@ class UserGroupAssignController extends FController
     }
 
     /**
-     * Updates an existing UserGroupAssign model.
+     * Updates an existing Setting model.
      * If update is successful, the browser will be redirected to the 'view' page.
-     * @param integer $ugs_user_id
-     * @param integer $ugs_group_id
+     * @param integer $id
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionUpdate($ugs_user_id, $ugs_group_id)
+    public function actionUpdate($id)
     {
-        $model = $this->findModel($ugs_user_id, $ugs_group_id);
+        $model = $this->findModel($id);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'ugs_user_id' => $model->ugs_user_id, 'ugs_group_id' => $model->ugs_group_id]);
+            return $this->redirect(['view', 'id' => $model->s_id]);
         }
 
         return $this->render('update', [
@@ -116,31 +112,29 @@ class UserGroupAssignController extends FController
     }
 
     /**
-     * Deletes an existing UserGroupAssign model.
+     * Deletes an existing Setting model.
      * If deletion is successful, the browser will be redirected to the 'index' page.
-     * @param integer $ugs_user_id
-     * @param integer $ugs_group_id
+     * @param integer $id
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionDelete($ugs_user_id, $ugs_group_id)
+    public function actionDelete($id)
     {
-        $this->findModel($ugs_user_id, $ugs_group_id)->delete();
+        $this->findModel($id)->delete();
 
         return $this->redirect(['index']);
     }
 
     /**
-     * Finds the UserGroupAssign model based on its primary key value.
+     * Finds the Setting model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
-     * @param integer $ugs_user_id
-     * @param integer $ugs_group_id
-     * @return UserGroupAssign the loaded model
+     * @param integer $id
+     * @return Setting the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
-    protected function findModel($ugs_user_id, $ugs_group_id)
+    protected function findModel($id)
     {
-        if (($model = UserGroupAssign::findOne(['ugs_user_id' => $ugs_user_id, 'ugs_group_id' => $ugs_group_id])) !== null) {
+        if (($model = Setting::findOne($id)) !== null) {
             return $model;
         }
 

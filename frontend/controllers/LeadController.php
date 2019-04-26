@@ -70,11 +70,19 @@ class LeadController extends FController
                             'set-rating', 'add-note', 'unprocessed', 'call-expert', 'send-email',
                             'check-updates', 'flow-transition', 'get-user-actions', 'add-pnr', 'update2','clone',
                             'get-badges', 'sold', 'split-profit', 'split-tips','processing', 'follow-up',  'trash', 'booked',
-                            'test', 'view', 'inbox',
+                            'test', 'view'
                         ],
                         'allow' => true,
                         'roles' => ['agent', 'admin', 'supervisor'],
                     ],
+
+                    [
+                        'actions' => ['inbox'],
+                        'allow' => Yii::$app->params['settings']['enable_lead_inbox'] ?: false,
+                        'roles' => ['agent', 'admin', 'supervisor'],
+                    ],
+
+                    //if(isset(Yii::$app->params['settings']['enable_lead_inbox']) && Yii::$app->params['settings']['enable_lead_inbox']) {
 
                     [
                         'actions' => [
@@ -1712,6 +1720,8 @@ class LeadController extends FController
                 if($userParams->up_inbox_show_limit_leads > 0) {
                     $params['LeadSearch']['limit'] = $userParams->up_inbox_show_limit_leads;
                 }
+            }else{
+                throw new NotFoundHttpException('Not set user params for agent! Please ask supervisor to set shift time and other.');
             }
 
 

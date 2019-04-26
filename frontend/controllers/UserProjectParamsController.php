@@ -37,7 +37,7 @@ class UserProjectParamsController extends FController
                     [
                         'actions' => ['index', 'update', 'delete', 'create', 'view', 'create-ajax', 'update-ajax'],
                         'allow' => true,
-                        'roles' => ['supervision', 'admin'],
+                        'roles' => ['supervision', 'admin','userManager'],
                     ],
                 ],
             ],

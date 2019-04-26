@@ -506,6 +506,11 @@ class Lead extends ActiveRecord
     {
         $projectIds = array_keys(ProjectEmployeeAccess::getProjectsByEmployee());
 
+        if(empty($projectIds)){
+            $projectIds[] = 0;
+        }
+
+
         $userId = Yii::$app->user->id;
         $created = '';
         $employee = '';
@@ -1170,7 +1175,7 @@ Reason: {reason}
                 $agent = $user->username;
                 $subject = Yii::t('email', "Cloned Lead-{id} by {agent}", ['id' => $lead->clone_id, 'agent' => $agent]);
                 $body = Yii::t('email', "Agent {agent} cloned lead {clone_id} with reason [{reason}], url: {cloned_url}.
-New lead {lead_id} 
+New lead {lead_id}
 {url}",
                     [
                         'agent' => $agent,
@@ -2528,7 +2533,7 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
         return $query->createCommand()->queryScalar();
     }
 
-    public function getFlightDetails()
+    public function getFlightDetails($tag = '<br/>')
     {
         $flightSegments = LeadFlightSegment::findAll(['lead_id' => $this->id]);
         $segmentsStr = [];
@@ -2536,7 +2541,7 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
             $segmentsStr[] = $entry['departure'] . ' ' . $entry['origin'] . '-' . $entry['destination'];
         }
 
-        return implode('<br/>', $segmentsStr);
+        return implode($tag, $segmentsStr);
     }
 
     public function getDeparture()

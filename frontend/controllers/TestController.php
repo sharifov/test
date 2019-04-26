@@ -41,9 +41,14 @@ class TestController extends FController
             'access' => [
                 'class' => AccessControl::class,
                 'rules' => [
-                    [
+                    /*[
                         'allow' => true,
                         //'roles' => ['@'],
+                        ],*/
+                    [
+                        'actions' => ['index'],
+                        'allow' => true,
+                        'roles' => ['@', 'userManager'],
                     ],
                 ],
             ],
@@ -57,8 +62,6 @@ class TestController extends FController
 
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
-
-
 
     public function actionEmail()
     {
@@ -223,7 +226,7 @@ class TestController extends FController
 
             echo \Yii::t('app', '{n, selectordinal,
      =0{У вас нет новых сообщений}
-    
+
      one{У вас # непрочитанное сообщение}
      few{У вас # непрочитанных сообщения}
      many{У вас # непрочитанных сообщений...}
@@ -460,4 +463,14 @@ class TestController extends FController
 
         echo $jobId;
     }
+
+    public function actionSettings()
+    {
+        VarDumper::dump(Yii::$app->params['settings'], 10, true);
+    }
+
+
+
+
+
 }

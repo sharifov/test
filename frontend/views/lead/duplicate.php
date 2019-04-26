@@ -22,6 +22,7 @@ if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
 }
 
 $this->params['breadcrumbs'][] = $this->title;
+$this->registerCssFile('/css/style-duplicate.css');
 ?>
 
 <style>
@@ -29,6 +30,9 @@ $this->params['breadcrumbs'][] = $this->title;
 	z-index: 1010 !important;
 }
 </style>
+
+
+
 <h1>
 	<?=\yii\helpers\Html::encode($this->title)?>
 </h1>
@@ -37,6 +41,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <?php Pjax::begin(); //['id' => 'lead-pjax-list', 'timeout' => 5000, 'enablePushState' => true, 'clientOptions' => ['method' => 'GET']]); ?>
 
     <?php
+
 
     $gridColumns = [
         [
@@ -52,7 +57,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
         [
             'attribute' => 'l_duplicate_lead_id',
-            'label' => 'Duplicate from',
+            'label' => 'Origin',
             'value' => function (\common\models\Lead $model) {
                 return $model->l_duplicate_lead_id ? Html::a($model->l_duplicate_lead_id, ['/leads/view', 'id' => $model->l_duplicate_lead_id], ['data-pjax' => 0, 'target' => '_blank']) : '-';
             },
@@ -101,9 +106,9 @@ $this->params['breadcrumbs'][] = $this->title;
 
         ],*/
 
-        [
+        /*[
             // 'attribute' => 'client_id',
-            'header' => 'Request',
+            'header' => 'Origin Request',
             'format' => 'raw',
             'value' => function (\common\models\Lead $model) {
 
@@ -122,7 +127,37 @@ $this->params['breadcrumbs'][] = $this->title;
 
             'options' => [
                 'style' => 'width:160px'
-            ]
+            ],
+            'contentOptions' => [
+                'class' => 'text-success'
+            ],
+        ],*/
+
+        [
+            // 'attribute' => 'client_id',
+            'header' => 'Request Client Info',
+            'format' => 'raw',
+            'value' => function (\common\models\Lead $model) {
+
+                $clientName = trim($model->l_client_first_name . ' ' . $model->l_client_last_name);
+
+                if ($clientName) {
+                    $clientName = '<i class="fa fa-user"></i> ' . Html::encode($clientName).'';
+                }
+
+                $str = $model->l_client_email ? '<br><i class="fa fa-envelope"></i> ' . $model->l_client_email : '';
+                $str .= $model->l_client_phone ? '<br><i class="fa fa-phone"></i>' . $model->l_client_phone : '';
+                $clientName .= $str;
+
+                return $clientName;
+            },
+
+            'options' => [
+                'style' => 'width:160px'
+            ],
+            'contentOptions' => [
+                'class' => 'text-danger'
+            ],
         ],
 
         [
@@ -169,12 +204,39 @@ $this->params['breadcrumbs'][] = $this->title;
                 return $model->getClientTime2();
             },
             'options' => [
-                'style' => 'width:110px'
+                'style' => 'width:90px'
             ]
         ],
 
+
+
+
+        /*[
+            'label' => 'Origin Request Details',
+            'content' => function (\common\models\Lead $model) {
+
+                $parentModel = $model->lDuplicateLead;
+
+
+                $content = '';
+                if($parentModel) {
+                    $content .= $parentModel->getFlightDetails();
+                    $content .= ' (<i class="fa fa-male"></i> x' . ($parentModel->adults . '/' . $parentModel->children . '/' . $parentModel->infants) . ')<br/>';
+
+                    $content .= sprintf('<strong>Cabin:</strong> %s', Lead::getCabin($parentModel['cabin']));
+                }
+
+                return $content;
+            },
+            'format' => 'raw',
+
+            'contentOptions' => [
+                'class' => 'text-success'
+            ],
+        ],*/
+
         [
-            'attribute' => 'Request Details',
+            'label' => 'Request Details',
             'content' => function (\common\models\Lead $model) {
                 $content = '';
                 $content .= $model->getFlightDetails();
@@ -184,8 +246,91 @@ $this->params['breadcrumbs'][] = $this->title;
 
                 return $content;
             },
-            'format' => 'raw'
+            'format' => 'raw',
+            'contentOptions' => [
+                //'class' => 'text-danger'
+            ],
+            'options' => [
+                'style' => 'width:220px'
+            ],
         ],
+
+
+        [
+            'label' => 'Diff Request Details',
+            'content' => function (\common\models\Lead $model) {
+                $content = '';
+                $content .= $model->getFlightDetails("\n")."\n";
+                $content .= 'pax: ' . ($model->adults . '/' . $model->children . '/' . $model->infants) . ''."\n";
+
+                $content .= sprintf('Cabin: %s', Lead::getCabin($model['cabin']));
+
+
+
+                $parentModel = $model->lDuplicateLead;
+
+
+                $contentParent = '';
+                if($parentModel) {
+                    $contentParent .= $parentModel->getFlightDetails("\n")."\n";
+                    $contentParent .= 'pax: ' . ($parentModel->adults . '/' . $parentModel->children . '/' . $parentModel->infants) . ''."\n";
+
+                    $contentParent .= sprintf('Cabin: %s', Lead::getCabin($parentModel['cabin']));
+                }
+
+
+
+
+                $options = array(
+                    'context' => 3,
+                    'ignoreNewLines' => false,
+                    'ignoreWhitespace' => false,
+                    'ignoreCase' => false
+                );
+
+
+
+                if (!is_array($content)) {
+                    $lines1 = explode("\n", $content);
+                }
+                if (!is_array($contentParent)) {
+                    $lines2 = explode("\n", $contentParent);
+                }
+                foreach ($lines1 as $i => $line) {
+                    $lines1[$i] = rtrim($line, "\r\n");
+                }
+                foreach ($lines2 as $i => $line) {
+                    $lines2[$i] = rtrim($line, "\r\n");
+                }
+
+                //\yii\helpers\VarDumper::dump($lines1);
+                //$renderer = new \yii\gii\components\DiffRendererHtmlInline();
+                /*$renderer = new Diff_Renderer_Html_SideBySide();*/
+                $renderer = new Diff_Renderer_Html_Inline();
+
+                $diff = new Diff($lines1, $lines2, $options);
+
+                return $diff->render($renderer);
+
+
+                //return $c; //$diff->Render($renderer);
+
+
+                //return $content;
+            },
+            'format' => 'raw',
+            'options' => [
+                'style' => 'width:420px'
+            ],
+            'contentOptions' => [
+                //'class' => 'text-warning'
+            ],
+        ],
+
+
+
+
+
 //        [
 //            'attribute' => 'Quotes ',
 //            'value' => function (\common\models\Lead $model) {

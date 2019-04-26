@@ -18,9 +18,14 @@ return [
 
     'modules' => [
         'v1' => [
-            'class' => 'webapi\modules\v1\Module',
-            'basePath' => '@webapi/modules/v1',
+            'class' => 'webapi\modules\v2\Module',
+            'basePath' => '@webapi/modules/v2',
             'controllerNamespace' => 'webapi\modules\v1\controllers',
+        ],
+        'v2' => [
+            'class' => 'webapi\modules\v2\Module',
+            'basePath' => '@webapi/modules/v2',
+            'controllerNamespace' => 'webapi\modules\v2\controllers',
         ],
     ],
 
