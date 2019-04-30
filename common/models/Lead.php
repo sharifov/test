@@ -1687,7 +1687,7 @@ New lead {lead_id}
             }
         }
 
-        if($this->final_profit) {
+        if($this->final_profit !== null) {
             $this->finalProfit = (float) $this->final_profit - ($processing_fee_per_pax * (int) ($this->adults + $this->children));
         } else {
             $this->finalProfit = $this->final_profit;
