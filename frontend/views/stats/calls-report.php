@@ -8,7 +8,7 @@ $this->title = 'Calls Report';
 ?>
 <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 <!-- bar chart -->
-<div class="stats-call-sms">
+<div class="">
     <h1><i class="fa fa-bar-chart"></i> <?=$this->title?></h1>
     <div class="panel panel-default">
         <div class="panel-heading"><i class="fa fa-bar-chart"></i> Calls Chart</div>
@@ -40,6 +40,36 @@ $this->title = 'Calls Report';
                                 ],
 
                             ]);?>
+                        </div>
+
+                        <div class="col-md-3 docs-toggles">
+                            <!-- <h3 class="page-header">Toggles:</h3> -->
+                            <div class="btn-group btn-group-justified" data-toggle="buttons">
+                                <label class="btn btn-primary">
+                                    <input type="radio" class="sr-only" id="viewMode0" name="viewMode" value="0" checked="">
+                                    <!--<span class="docs-tooltip" data-toggle="tooltip" title="" data-original-title="View Mode 0">-->
+                            Hours
+                          </span>
+                                </label>
+                                <label class="btn btn-primary">
+                                    <input type="radio" class="sr-only" id="viewMode1" name="viewMode" value="1">
+                                    <!--<span class="docs-tooltip" data-toggle="tooltip" title="" data-original-title="View Mode 1">-->
+                            Days
+                          </span>
+                                </label>
+                                <label class="btn btn-primary">
+                                    <input type="radio" class="sr-only" id="viewMode2" name="viewMode" value="2">
+                                    <!--<span class="docs-tooltip" data-toggle="tooltip" title="" data-original-title="View Mode 2">-->
+                            Weeks
+                          </span>
+                                </label>
+                                <label class="btn btn-primary active">
+                                    <input type="radio" class="sr-only" id="viewMode3" name="viewMode" value="3">
+                                    <!--<span class="docs-tooltip" data-toggle="tooltip" title="" data-original-title="View Mode 3">-->
+                            Month
+                          </span>
+                                </label>
+                            </div>
                         </div>
 
                         <!--<div class="x_title">

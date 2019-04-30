@@ -223,7 +223,7 @@ class Call extends \yii\db\ActiveRecord
         }
     }
 
-    public function get_hours_range( $start = 0, $end = 86400, $step = 3600, $format = 'H:i' ) {
+    public function get_hours_range( $start = 0, $end = 86400, $step = 3600, $format = 'H:i:s' ) {
         $times = array();
         foreach ( range( $start, $end, $step ) as $timestamp ) {
             $hour_mins = gmdate( 'H:i', $timestamp );
@@ -255,26 +255,27 @@ class Call extends \yii\db\ActiveRecord
         $hourlyCallStats = [];
         $item = [];
 
-        $timeRange = self::get_hours_range();
-        $dateRange = self::dateRange($startDate, $endDate);
+        $hoursRange = self::get_hours_range();
+        $daysRange = self::dateRange($startDate, $endDate);
         if (strtotime($startDate) < strtotime($endDate)){
-            $timeLine = $dateRange;
-            /*foreach ($timeLine as $val){
-                echo $val; echo '<br>';
-            }
-            die();*/
+            $timeLine = $daysRange;
             $item['timeLine'] = 'd M';
+            $timeInSeconds = 0;
+            $dateFormat = 'Y/m/d';
         } else {
-            $timeLine = $timeRange;
+            $timeLine = $hoursRange;
             $item['timeLine'] = 'H:i';
+            $dateFormat = 'H:i:s';
+            $timeInSeconds = 3600;
         }
         $completed = $noAnswer = $busy = 0;
-        foreach ($timeLine as $key => $hour){
+        foreach ($timeLine as $key => $timeSignature){
+            $EndPoint = date($dateFormat, strtotime($timeSignature) + $timeInSeconds);
 
-            $hourEndPoint = date('H:i', strtotime($hour) + 3600);
             foreach ($calls as $callItem){
-                $callUpdatedTime = date('H:i', strtotime($callItem->c_updated_dt));
-                if ($callUpdatedTime >= $hour && $callUpdatedTime <= $hourEndPoint)
+                $callUpdatedTime = date($dateFormat, strtotime($callItem->c_updated_dt));
+
+                if ($callUpdatedTime >= $timeSignature && $callUpdatedTime <= $EndPoint)
                 {
                     switch ($callItem->c_call_status){
                         case 'completed':
@@ -289,14 +290,13 @@ class Call extends \yii\db\ActiveRecord
                     }
                 }
             }
-            $item['time'] = $hour;
+            $item['time'] = $timeSignature;
             $item['completed'] = $completed;
             $item['no-answer'] = $noAnswer;
             $item['busy'] = $busy;
 
             array_push($hourlyCallStats, $item);
             $completed = $noAnswer = $busy = 0;
-            //echo $hour; echo '<br>';
         }
         return $hourlyCallStats;
     }
