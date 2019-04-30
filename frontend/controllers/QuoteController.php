@@ -886,6 +886,7 @@ class QuoteController extends FController
                                             ['qs_arrival_airport_code'=>$destination]
                                         ])
                                         ->one();
+                                        $segments = [];
                                         if(!empty($segment)){
                                             $segments = QuoteSegment::find()
                                             ->andWhere(['qs_trip_id' =>  $segment->qs_trip_id])
