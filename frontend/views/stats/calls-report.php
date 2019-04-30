@@ -3,6 +3,25 @@ use yii\widgets\Pjax;
 /**
  * @var $callsGraphData []
  */
+$js = <<<JS
+    $('#viewMode0').click(function() {
+        $.pjax({container: '#calls-graph-pjax', data: {dateRange: $('#call-stats-picker').val(), groupBy: 'hours'}, type: 'PJAX', url: 'calls-graph', async:true, push: false});
+    });
+
+    $('#viewMode1').click(function() {
+        $.pjax({container: '#calls-graph-pjax', data: {dateRange: $('#call-stats-picker').val(), groupBy: 'days'}, type: 'PJAX', url: 'calls-graph', async:true, push: false});
+    });
+    
+    $('#viewMode2').click(function() {
+        $.pjax({container: '#calls-graph-pjax', data: {dateRange: $('#call-stats-picker').val(), groupBy: 'weeks'}, type: 'PJAX', url: 'calls-graph', async:true, push: false});
+    });
+    
+    $('#viewMode3').click(function() {
+        $.pjax({container: '#calls-graph-pjax', data: {dateRange: $('#call-stats-picker').val(), groupBy: 'months'}, type: 'PJAX', url: 'calls-graph', async:true, push: false});
+    });
+JS;
+$this->registerJs($js, \yii\web\View::POS_READY);
+
 
 $this->title = 'Calls Report';
 ?>
@@ -34,37 +53,38 @@ $this->title = 'Calls Report';
                                 ],
                                 'pluginEvents'=>[
                                     "apply.daterangepicker"=>"function(){
-                                console.log($('#call-stats-picker').val());
-                                  $.pjax({container: '#calls-graph-pjax', data: {dateRange: $('#call-stats-picker').val()}, type: 'PJAX', url: 'calls-graph', async:true, push: false});
-                                 }",
+                                 console.log($('#call-stats-picker').val());
+                                     $.pjax({container: '#calls-graph-pjax', data: {dateRange: $('#call-stats-picker').val()}, type: 'PJAX', url: 'calls-graph', async:true, push: false});
+                                     //$('#viewMode').removeClass('hidden');                                 
+                                  }",
                                 ],
 
                             ]);?>
                         </div>
-
-                        <div class="col-md-3 docs-toggles">
+                        <!-- buttons for customized range-->
+                        <div class="col-md-3 hidden" id="viewMode">
                             <!-- <h3 class="page-header">Toggles:</h3> -->
                             <div class="btn-group btn-group-justified" data-toggle="buttons">
-                                <label class="btn btn-primary">
-                                    <input type="radio" class="sr-only" id="viewMode0" name="viewMode" value="0" checked="">
+                                <label class="btn btn-primary  active" id="viewMode0">
+                                    <input type="radio" class="sr-only"  name="viewMode" value="0" checked="">
                                     <!--<span class="docs-tooltip" data-toggle="tooltip" title="" data-original-title="View Mode 0">-->
                             Hours
                           </span>
                                 </label>
-                                <label class="btn btn-primary">
-                                    <input type="radio" class="sr-only" id="viewMode1" name="viewMode" value="1">
+                                <label class="btn btn-primary" id="viewMode1">
+                                    <input type="radio" class="sr-only"  name="viewMode" value="1">
                                     <!--<span class="docs-tooltip" data-toggle="tooltip" title="" data-original-title="View Mode 1">-->
                             Days
                           </span>
                                 </label>
-                                <label class="btn btn-primary">
-                                    <input type="radio" class="sr-only" id="viewMode2" name="viewMode" value="2">
+                                <label class="btn btn-primary" id="viewMode2">
+                                    <input type="radio" class="sr-only"  name="viewMode" value="2">
                                     <!--<span class="docs-tooltip" data-toggle="tooltip" title="" data-original-title="View Mode 2">-->
                             Weeks
                           </span>
                                 </label>
-                                <label class="btn btn-primary active">
-                                    <input type="radio" class="sr-only" id="viewMode3" name="viewMode" value="3">
+                                <label class="btn btn-primary" id="viewMode3">
+                                    <input type="radio" class="sr-only"  name="viewMode" value="3">
                                     <!--<span class="docs-tooltip" data-toggle="tooltip" title="" data-original-title="View Mode 3">-->
                             Month
                           </span>
