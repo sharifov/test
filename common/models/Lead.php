@@ -2533,7 +2533,7 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
         return $query->createCommand()->queryScalar();
     }
 
-    public function getFlightDetails()
+    public function getFlightDetails($tag = '<br/>')
     {
         $flightSegments = LeadFlightSegment::findAll(['lead_id' => $this->id]);
         $segmentsStr = [];
@@ -2541,7 +2541,7 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
             $segmentsStr[] = $entry['departure'] . ' ' . $entry['origin'] . '-' . $entry['destination'];
         }
 
-        return implode('<br/>', $segmentsStr);
+        return implode($tag, $segmentsStr);
     }
 
     public function getDeparture()

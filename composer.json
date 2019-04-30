@@ -56,8 +56,7 @@
 		"index0h/yii2-log": "0.0.3",
 		"twilio/sdk": "^5.31",
 		"2amigos/qrcode-library": "~1.1",
-		"aki/yii2-bot-telegram": "*",
-		"pheme/yii2-settings": "*"
+		"aki/yii2-bot-telegram": "*"
 	},
 	"require-dev" : {
 		"yiisoft/yii2-debug" : "~2.0",
