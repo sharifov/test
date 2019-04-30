@@ -376,7 +376,6 @@ $this->params['breadcrumbs'][] = $this->title;
                 return $model->project ? $model->project->name : '-';
             },
             'filter' => $projectList,
-            'visible' => !$isAgent
         ],
         [
             'class' => 'yii\grid\ActionColumn',
