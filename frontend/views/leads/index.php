@@ -35,7 +35,7 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
 
 	<h1><?= Html::encode($this->title) ?></h1>
 
-    <?php Pjax::begin(); //['id' => 'lead-pjax-list', 'timeout' => 5000, 'enablePushState' => true, 'clientOptions' => ['method' => 'GET']]); ?>
+    <?php Pjax::begin(['id' => 'lead-pjax-list', 'timeout' => 7000, 'enablePushState' => true]); //['id' => 'lead-pjax-list', 'timeout' => 5000, 'enablePushState' => true, 'clientOptions' => ['method' => 'GET']]); ?>
     <?php
 
     if ($isAgent) {
