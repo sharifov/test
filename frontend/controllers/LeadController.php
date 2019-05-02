@@ -168,7 +168,7 @@ class LeadController extends FController
 
             if (Yii::$app->request->post('hasEditable')) {
 
-                $value = '456';
+                $value = '';
                 $message = '';
 
                 // use Yii's response format to encode output as JSON
@@ -222,7 +222,7 @@ class LeadController extends FController
                     }
 
                     return [];
-                }elseif (Yii::$app->request->isPost && $taskNotes = Yii::$app->request->post('task_notes')) {
+                } elseif (Yii::$app->request->isPost && $taskNotes = Yii::$app->request->post('task_notes')) {
 
                     $taskId = $taskDate = $userId = $leadId = null;
 
@@ -258,8 +258,15 @@ class LeadController extends FController
 
                     }
 
+                } elseif (Yii::$app->request->isPost && Yii::$app->request->post('notes_for_experts', null) !== null) {
+                    $lead->notes_for_experts = Yii::$app->request->post('notes_for_experts');
+                    if($lead->save()) {
+                        $value = $lead->notes_for_experts;
+                    } else {
+                        $message = 'Not save lead';
+                    }
                 } else {
-                    $message = 'Not found task notes data';
+                    $message = 'Not found data';
                 }
 
 

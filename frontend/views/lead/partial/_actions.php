@@ -180,8 +180,17 @@ if ($leadForm->mode != $leadForm::VIEW_MODE || ($leadForm->mode == $leadForm::VI
             $('#lead-notes_for_experts').parent().removeClass('has-error');
             $.post($(this).data('url'), {notes: $('#lead-notes_for_experts').val()});
         } else {
-            $('#lead-notes_for_experts').parent().find('.help-block').html('Notes for Expert cannot be blank.')
-            $('#lead-notes_for_experts').parent().addClass('has-error');
+            //alert('Notes for Expert cannot be blank.');
+            
+            new PNotify({
+                title: 'Error: notes',
+                type: 'error',
+                text: 'Notes for Expert cannot be blank',
+                hide: true
+            });
+            
+            //$('#lead-notes_for_experts').parent().find('.help-block').html('Notes for Expert cannot be blank.')
+            //$('#lead-notes_for_experts').parent().addClass('has-error');
         }
     });
 
