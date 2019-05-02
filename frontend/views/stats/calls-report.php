@@ -62,7 +62,7 @@ $this->title = 'Calls Report';
                             ]);?>
                         </div>
                         <!-- buttons for customized range-->
-                        <div class="col-md-3 hidden" id="viewMode">
+                        <div class="col-md-3 " id="viewMode">
                             <!-- <h3 class="page-header">Toggles:</h3> -->
                             <div class="btn-group btn-group-justified" data-toggle="buttons">
                                 <label class="btn btn-primary  active" id="viewMode0">
@@ -137,11 +137,11 @@ $this->title = 'Calls Report';
                                                         title: 'Calls graph',
                                                         subtitle: 'Calls info - Last ?? days',
                                                     },
-                                                    title: 'Lead data',
                                                     height: 545,
                                                     vAxis: {
                                                         title: 'Requests'
                                                     },
+                                                    //legend: { position: 'none' },
                                                 };
                                                 //var chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
                                                 let chart = new google.charts.Bar(document.getElementById('chart_div'));

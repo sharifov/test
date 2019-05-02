@@ -249,6 +249,25 @@ class Call extends \yii\db\ActiveRecord
         return $dates;
     }
 
+    function get_months($start, $end) {
+        $startDate  = strtotime($start);
+        $endDate    = strtotime($end);
+        $firstMonth = date('Y-m', $startDate);
+        $lastMonth  = date('Y-m', $endDate);
+        $months = array($firstMonth);
+
+        while($startDate < $endDate) {
+            $startDate = strtotime(date('Y-m-d', $startDate).' +1 month');
+            if(date('Y-m', $startDate) != $lastMonth && ($startDate < $endDate))
+                $months[] = date('Y-m', $startDate);
+        }
+        if ($firstMonth != $lastMonth) {
+            $months[] = date('Y-m', $endDate);
+        }
+        return $months;
+    }
+
+
     public static function getCallStats($startDate, $endDate)
     {
         $calls = self::find()->select(['c_id', 'c_call_status', 'c_updated_dt'])->where(['c_call_status' => ['completed', 'busy', 'no-answer']])->andWhere(['between', 'c_updated_dt', $startDate." 00:00:00", $endDate." 23:59:59" ])->all();
@@ -257,6 +276,8 @@ class Call extends \yii\db\ActiveRecord
 
         $hoursRange = self::get_hours_range();
         $daysRange = self::dateRange($startDate, $endDate);
+        $monthsRange = self::get_months($startDate, $endDate);
+
         if (strtotime($startDate) < strtotime($endDate)){
             $timeLine = $daysRange;
             $item['timeLine'] = 'd M';
@@ -268,6 +289,7 @@ class Call extends \yii\db\ActiveRecord
             $dateFormat = 'H:i:s';
             $timeInSeconds = 3600;
         }
+
         $completed = $noAnswer = $busy = 0;
         foreach ($timeLine as $key => $timeSignature){
             $EndPoint = date($dateFormat, strtotime($timeSignature) + $timeInSeconds);
