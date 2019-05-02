@@ -154,7 +154,7 @@ if(Yii::$app->controller->action->uniqueId === 'lead/view') {
 $js = <<<JS
     function updatePjaxNotify() {
         //alert('ajax 1');
-        $.pjax({container : '#notify-pjax', push: false, timeout: '8000', scrollTo: false});  
+        //$.pjax({container : '#notify-pjax', push: false, timeout: '8000', scrollTo: false});  
     }
     var timerId2 = setInterval(updatePjaxNotify, 3 * 60000);
 

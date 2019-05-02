@@ -3,6 +3,9 @@
 namespace common\models;
 
 use Yii;
+use DatePeriod;
+use DateInterval;
+use DateTime;
 
 /**
  * This is the model class for table "call".
@@ -234,8 +237,7 @@ class Call extends \yii\db\ActiveRecord
         return $times;
     }
 
-    public function dateRange( $first, $last, $step = '+1 day', $format = 'Y/m/d' ) {
-
+    public function dateRange( $first, $last, $step = '+1 day', $format = 'Y-m-d' ) {
         $dates = array();
         $current = strtotime( $first );
         $last = strtotime( $last );
@@ -245,36 +247,144 @@ class Call extends \yii\db\ActiveRecord
             $dates[] = date( $format, $current );
             $current = strtotime( $step, $current );
         }
-
         return $dates;
     }
 
-    public static function getCallStats($startDate, $endDate)
+    function get_months($start, $end) {
+        $startDate  = strtotime($start);
+        $endDate    = strtotime($end);
+        $firstMonth = date('Y-m', $startDate);
+        $lastMonth  = date('Y-m', $endDate);
+        $months = array($firstMonth);
+
+        while($startDate < $endDate) {
+            $startDate = strtotime(date('Y-m-d', $startDate).' +1 month');
+            if(date('Y-m', $startDate) != $lastMonth && ($startDate < $endDate))
+                $months[] = date('Y-m', $startDate);
+        }
+        if ($firstMonth != $lastMonth) {
+            $months[] = date('Y-m', $endDate);
+        }
+        return $months;
+    }
+
+    function weeksRange($start, $end){
+        $interval = new DateInterval('P1D');
+        $dateRange = new DatePeriod($start, $interval, $end);
+        $weekNumber = 1;
+        $weeks = array();
+        foreach ($dateRange as $date) {
+            $weeks[$weekNumber][] = $date->format('Y-m-d');
+            if ($date->format('w') == 0) {
+                $weekNumber++;
+            }
+        }
+        //return $weeks;
+        $weeksRanges = [];
+        foreach ($weeks as $week) {
+            $firstEle = reset($week);
+            $lastEle = end($week);
+            array_push($weeksRanges, $firstEle .'/'.$lastEle);
+        }
+        return $weeksRanges;
+    }
+
+    public static function getCallStats($startDate, $endDate, $groupingBy)
     {
-        $calls = self::find()->select(['c_id', 'c_call_status', 'c_updated_dt'])->where(['c_call_status' => ['completed', 'busy', 'no-answer']])->andWhere(['between', 'c_updated_dt', $startDate." 00:00:00", $endDate." 23:59:59" ])->all();
+        switch ($groupingBy){
+            case null:
+                if (strtotime($startDate) == strtotime($endDate)){
+                    $hoursRange = self::get_hours_range();
+                } else {
+                    $daysRange = self::dateRange($startDate, $endDate);
+                }
+
+                $sDate = $startDate." 00:00:00";
+                $eDate = $endDate." 23:59:59";
+                break;
+            case 'hours':
+                $hoursRange = self::get_hours_range();
+                //$daysRange = self::dateRange($startDate, $endDate);
+                $sDate = $startDate." 00:00:00";
+                $eDate = $endDate." 23:59:59";
+                break;
+            case 'days':
+                //$hoursRange = self::get_hours_range();
+                $daysRange = self::dateRange($startDate, $endDate);
+                $sDate = $startDate." 00:00:00";
+                $eDate = $endDate." 23:59:59";
+                break;
+            case 'weeks':
+                //$weeks = self::weeksRange(new DateTime('02.04.2019'), new DateTime('31.05.2019 23:59'));
+                $weeksPeriods = self::weeksRange(new DateTime($startDate), new DateTime($endDate . ' 23:59'));
+                $sDate = $startDate." 00:00:00";
+                $eDate = $endDate." 23:59:59";
+                //echo '<pre>';        print_r($weeksPeriods);        echo '</pre>';        die();
+                break;
+            case 'months':
+                $monthsRange = self::get_months($startDate, $endDate);
+                $sDate = date("Y-m-01", strtotime($startDate));
+                $eDate = date('Y-m-31', strtotime($endDate));
+                break;
+        }
+        $calls = self::find()->select(['c_id', 'c_call_status', 'c_updated_dt'])->where(['c_call_status' => ['completed', 'busy', 'no-answer']])->andWhere(['between', 'c_updated_dt', $sDate, $eDate])->all();
+
         $hourlyCallStats = [];
         $item = [];
-
-        $hoursRange = self::get_hours_range();
-        $daysRange = self::dateRange($startDate, $endDate);
         if (strtotime($startDate) < strtotime($endDate)){
-            $timeLine = $daysRange;
-            $item['timeLine'] = 'd M';
-            $timeInSeconds = 0;
-            $dateFormat = 'Y/m/d';
+            if (isset($daysRange)) {
+                $timeLine = $daysRange;
+                $item['timeLine'] = 'd M';
+                $timeInSeconds = 0;
+                $dateFormat = 'Y-m-d';
+            } elseif (isset($monthsRange)){
+                $timeLine = $monthsRange;
+                $timeInSeconds = 0;
+                $dateFormat = 'Y-m';
+                $item['timeLine'] = 'Y, M';
+            } elseif (isset($weeksPeriods)){
+                $timeLine = $weeksPeriods;
+                $item['timeLine'] = 'd M';
+                $timeInSeconds = 0;
+                $dateFormat = 'Y-m-d';
+            }
         } else {
-            $timeLine = $hoursRange;
-            $item['timeLine'] = 'H:i';
-            $dateFormat = 'H:i:s';
-            $timeInSeconds = 3600;
+            if (isset($daysRange)) {
+                $timeLine = $daysRange;
+                $item['timeLine'] = 'd M';
+                $timeInSeconds = 0;
+                $dateFormat = 'Y-m-d';
+            } elseif (isset($hoursRange)){
+                $timeLine = $hoursRange;
+                $item['timeLine'] = 'H:i';
+                $dateFormat = 'H:i:s';
+                $timeInSeconds = 3600;
+            } elseif (isset($monthsRange)) {
+                $timeLine = $monthsRange;
+                $timeInSeconds = 0;
+                $dateFormat = 'Y-m';
+                $item['timeLine'] = 'Y, M';
+            } elseif (isset($weeksPeriods)){
+                $timeLine = $weeksPeriods;
+                $item['timeLine'] = 'd M';
+                $timeInSeconds = 0;
+                $dateFormat = 'Y-m-d';
+            }
         }
+
         $completed = $noAnswer = $busy = 0;
         foreach ($timeLine as $key => $timeSignature){
-            $EndPoint = date($dateFormat, strtotime($timeSignature) + $timeInSeconds);
+            $weekInterval = explode('/', $timeSignature);
+            if (count($weekInterval) != 2){
+                $EndPoint = date($dateFormat, strtotime($timeSignature) + $timeInSeconds);
+            } else
+            {
+                $EndPoint = date($dateFormat, strtotime($weekInterval[1]));
+                $timeSignature = date($dateFormat, strtotime($weekInterval[0]));
+            }
 
             foreach ($calls as $callItem){
                 $callUpdatedTime = date($dateFormat, strtotime($callItem->c_updated_dt));
-
                 if ($callUpdatedTime >= $timeSignature && $callUpdatedTime <= $EndPoint)
                 {
                     switch ($callItem->c_call_status){
@@ -291,6 +401,7 @@ class Call extends \yii\db\ActiveRecord
                 }
             }
             $item['time'] = $timeSignature;
+            $item['weeksInterval'] = (count($weekInterval) == 2) ? $EndPoint : null;
             $item['completed'] = $completed;
             $item['no-answer'] = $noAnswer;
             $item['busy'] = $busy;

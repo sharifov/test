@@ -62,32 +62,32 @@ $this->title = 'Calls Report';
                             ]);?>
                         </div>
                         <!-- buttons for customized range-->
-                        <div class="col-md-3 hidden" id="viewMode">
+                        <div class="col-md-3 " id="viewMode">
                             <!-- <h3 class="page-header">Toggles:</h3> -->
                             <div class="btn-group btn-group-justified" data-toggle="buttons">
                                 <label class="btn btn-primary  active" id="viewMode0">
                                     <input type="radio" class="sr-only"  name="viewMode" value="0" checked="">
                                     <!--<span class="docs-tooltip" data-toggle="tooltip" title="" data-original-title="View Mode 0">-->
-                            Hours
-                          </span>
+                                    Hours
+                                    </span>
                                 </label>
                                 <label class="btn btn-primary" id="viewMode1">
                                     <input type="radio" class="sr-only"  name="viewMode" value="1">
                                     <!--<span class="docs-tooltip" data-toggle="tooltip" title="" data-original-title="View Mode 1">-->
-                            Days
-                          </span>
+                                    Days
+                                    </span>
                                 </label>
                                 <label class="btn btn-primary" id="viewMode2">
                                     <input type="radio" class="sr-only"  name="viewMode" value="2">
                                     <!--<span class="docs-tooltip" data-toggle="tooltip" title="" data-original-title="View Mode 2">-->
-                            Weeks
-                          </span>
+                                    Weeks
+                                    </span>
                                 </label>
                                 <label class="btn btn-primary" id="viewMode3">
                                     <input type="radio" class="sr-only"  name="viewMode" value="3">
                                     <!--<span class="docs-tooltip" data-toggle="tooltip" title="" data-original-title="View Mode 3">-->
-                            Month
-                          </span>
+                                    Month
+                                    </span>
                                 </label>
                             </div>
                         </div>
@@ -128,20 +128,24 @@ $this->title = 'Calls Report';
                                                 let data = google.visualization.arrayToDataTable([
                                                     ['Time Line', 'Completed', 'Canceled', 'Busy', {role: 'annotation'}],
                                                     <?php foreach($callsGraphData as $k => $item):?>
-                                                    ['<?=date($item['timeLine'], strtotime($item['time']))?>', <?=$item['completed']?>, <?=$item['no-answer']?>, <?=$item['busy']?>, '<?='--'?>'],
+                                                    ['<?=  ($item['weeksInterval'] == null)
+                                                        ? date($item['timeLine'], strtotime($item['time']))
+                                                        : date($item['timeLine'], strtotime($item['time'])) .' / '. date($item['timeLine'], strtotime($item['weeksInterval']));
+
+                                                        ?>', <?=$item['completed']?>, <?=$item['no-answer']?>, <?=$item['busy']?>, '<?='--'?>'],
                                                     <?php endforeach;?>
                                                 ]);
 
                                                 let options = {
                                                     chart: {
-                                                        title: 'Calls graph',
-                                                        subtitle: 'Calls info - Last ?? days',
+                                                        //title: 'Calls graph',
+                                                        //subtitle: 'Calls info - Last ?? days',
                                                     },
-                                                    title: 'Lead data',
                                                     height: 545,
                                                     vAxis: {
                                                         title: 'Requests'
                                                     },
+                                                    //legend: { position: 'none' },
                                                 };
                                                 //var chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
                                                 let chart = new google.charts.Bar(document.getElementById('chart_div'));
