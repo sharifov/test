@@ -229,7 +229,7 @@ $this->registerJs($js);
                 $previewEmailUrl = \yii\helpers\Url::to(['quote/preview-send-quotes']);
                 $leadId = $leadForm->getLead()->id;?>
                 <?php
-if ($leadForm->mode != $leadForm::VIEW_MODE) {
+if ($leadForm->mode != $leadForm::VIEW_MODE || $is_manager) {
     $js = <<<JS
 
     $(document).on('click', '.send-quotes-to-email', function () {
@@ -393,7 +393,7 @@ JS;
     $this->registerJs($js);
 }
 ?>
-                <?php if ($leadForm->mode != $leadForm::VIEW_MODE) : ?>
+                <?php if ($leadForm->mode != $leadForm::VIEW_MODE || $is_manager) : ?>
                 <div class="btn-wrapper pt-20 mb-20">
                     <?= Html::button('<i class="fa fa-eye-slash"></i> Declined Quotes', [
                         'class' => 'btn btn-primary btn-sm',
@@ -480,7 +480,8 @@ JS;
                 'viewParams' => [
                     'appliedQuote' => $lead->getAppliedAlternativeQuotes(),
                     'leadId' => $lead->id,
-                    'leadForm' => $leadForm
+                    'leadForm' => $leadForm,
+                    'isManager' => $is_manager,
                 ],
 			]);?>
             <?php \yii\widgets\Pjax::end() ?>
@@ -579,10 +580,10 @@ $(function () {
         scrollText: 'Scroll to top', // Text for element
         activeOverlay: true, // Set CSS color to display scrollUp active point, e.g '#00FFFF'
     });
-  
-    //$("[data-toggle='tooltip']").tooltip(); 
-    //$("[data-toggle='popover']").popover({sanitize: false}); 
-  
+
+    //$("[data-toggle='tooltip']").tooltip();
+    //$("[data-toggle='popover']").popover({sanitize: false});
+
 });
 JS;
 
