@@ -6,6 +6,7 @@
  * @var $previewSmsForm \frontend\models\LeadPreviewSmsForm
  * @var $quotesProvider \yii\data\ActiveDataProvider
  * @var $dataProviderCommunication \yii\data\ActiveDataProvider
+ * @var $dataProviderCallExpert \yii\data\ActiveDataProvider
  * @var $enableCommunication boolean
  */
 
@@ -174,8 +175,18 @@ $this->registerJs($js);
         ]);
         ?>
 
-        <div class="sl-request-content">
+        <div class="col-md-12">
             <?= \common\widgets\Alert::widget() ?>
+            <br>
+        </div>
+
+        <div class="col-md-7">
+
+            <?= $this->render('partial/_flightDetails', [
+                'leadForm' => $leadForm
+            ]);
+            ?>
+
 
             <?php if (!$leadForm->getLead()->isNewRecord) : ?>
 
@@ -210,16 +221,11 @@ $this->registerJs($js);
                 <br>
 
 
-                <?= $this->render('partial/_task_list', [
-                    'lead' => $leadForm->getLead()
-                ]); ?>
+
 
             <?php endif; ?>
 
-            <?= $this->render('partial/_flightDetails', [
-                'leadForm' => $leadForm
-            ]);
-            ?>
+
 
 			<?php if (!$leadForm->getLead()->isNewRecord):?>
 			<?php
@@ -489,20 +495,7 @@ JS;
 
 
 
-            <?php if ($enableCommunication) : ?>
-                <?= $this->render('communication/lead_communication', [
-                    'leadForm'      => $leadForm,
-                    'previewEmailForm' => $previewEmailForm,
-                    'previewSmsForm' => $previewSmsForm,
-                    'comForm'       => $comForm,
-                    'leadId'        => $lead->id,
-                    'dataProvider'  => $dataProviderCommunication,
-                    'isAdmin'       => $is_admin
-                ]);
-                ?>
-            <?php else: ?>
-                <div class="alert alert-warning" role="alert">You do not have access to view Communication messages.</div>
-            <?php endif;?>
+
 
 
 
@@ -531,6 +524,42 @@ JS;
                 </div>
             <?php endif; ?>
 
+        </div>
+
+
+        <div class="col-md-5">
+            <?php if (!$leadForm->getLead()->isNewRecord) : ?>
+
+                <?= $this->render('partial/_task_list', [
+                    'lead' => $leadForm->getLead()
+                ]); ?>
+
+                <?php if ($enableCommunication) : ?>
+                    <?= $this->render('communication/lead_communication', [
+                        'leadForm'      => $leadForm,
+                        'previewEmailForm' => $previewEmailForm,
+                        'previewSmsForm' => $previewSmsForm,
+                        'comForm'       => $comForm,
+                        'leadId'        => $lead->id,
+                        'dataProvider'  => $dataProviderCommunication,
+                        'isAdmin'       => $is_admin
+                    ]);
+                    ?>
+                <?php else: ?>
+                    <div class="alert alert-warning" role="alert">You do not have access to view Communication block messages.</div>
+                <?php endif;?>
+
+
+                <?= $this->render('call-expert/lead_call_expert', [
+                    'lead' => $leadForm->getLead(),
+                    'comForm'       => $comForm,
+                    'leadId'        => $lead->id,
+                    'dataProvider'  => $dataProviderCallExpert,
+                    'isAdmin'       => $is_admin
+                ]); ?>
+
+
+            <?php endif;?>
         </div>
     </div>
 

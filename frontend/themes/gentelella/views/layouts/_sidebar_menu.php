@@ -151,6 +151,7 @@ $isUM = Yii::$app->authManager->getAssignment('userManager', Yii::$app->user->id
                         ['label' => 'SMS List', 'url' => ['/sms/index'], 'icon' => 'comments-o'],
                         ['label' => 'Mail List', 'url' => ['/email/index'], 'icon' => 'envelope'],
                         ['label' => 'User Call Statuses', 'url' => ['/user-call-status/index'], 'icon' => 'list'],
+                        ['label' => 'Lead Call Experts', 'url' => ['/lead-call-expert/index'], 'icon' => 'bell'],
 
                     ];
                 }

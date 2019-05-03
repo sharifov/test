@@ -17,6 +17,7 @@ use common\models\local\LeadAdditionalInformation;
 use common\models\Note;
 use common\models\ProjectEmailTemplate;
 use common\models\Reason;
+use common\models\search\LeadCallExpertSearch;
 use common\models\Sms;
 use common\models\SmsTemplateType;
 use common\models\Task;
@@ -1011,6 +1012,12 @@ class LeadController extends FController
 
         }
 
+        //$dataProviderCommunication
+
+        $searchModelCallExpert = new LeadCallExpertSearch();
+        $params = Yii::$app->request->queryParams;
+        //$params['LeadCallExpertSearch']['lce_lead_id'] = $lead->id;
+        $dataProviderCallExpert = $searchModelCallExpert->searchByLead($params);
 
         //VarDumper::dump(enableCommunication); exit;
 
@@ -1023,7 +1030,8 @@ class LeadController extends FController
             'comForm' => $comForm,
             'quotesProvider' => $quotesProvider,
             'dataProviderCommunication' => $dataProviderCommunication,
-            'enableCommunication' => $enableCommunication
+            'enableCommunication' => $enableCommunication,
+            'dataProviderCallExpert' => $dataProviderCallExpert,
         ]);
 
 
