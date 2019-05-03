@@ -196,15 +196,17 @@ class StatsController extends FController
     {
         if (Yii::$app->request->isPjax) {
             $dateRange = Yii::$app->request->post('dateRange');
+            $rangeBy = Yii::$app->request->post('groupBy');
+
             $date = $pieces = explode("/", $dateRange);
-            $callsGraphData = Call::getCallStats($date[0], $date[1]);
+            $callsGraphData = Call::getCallStats($date[0], $date[1], $rangeBy);
 
             return $this->renderAjax('calls-report', [
                 'callsGraphData' => $callsGraphData
             ]);
         } else {
             $currentDate =  date('Y-m-d', strtotime('-0 day'));
-            $callsGraphData = Call::getCallStats($currentDate, $currentDate);
+            $callsGraphData = Call::getCallStats($currentDate, $currentDate, null);
 
             return $this->render('calls-report', [
                 'callsGraphData' => $callsGraphData

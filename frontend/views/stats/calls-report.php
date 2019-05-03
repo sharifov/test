@@ -68,26 +68,26 @@ $this->title = 'Calls Report';
                                 <label class="btn btn-primary  active" id="viewMode0">
                                     <input type="radio" class="sr-only"  name="viewMode" value="0" checked="">
                                     <!--<span class="docs-tooltip" data-toggle="tooltip" title="" data-original-title="View Mode 0">-->
-                            Hours
-                          </span>
+                                    Hours
+                                    </span>
                                 </label>
                                 <label class="btn btn-primary" id="viewMode1">
                                     <input type="radio" class="sr-only"  name="viewMode" value="1">
                                     <!--<span class="docs-tooltip" data-toggle="tooltip" title="" data-original-title="View Mode 1">-->
-                            Days
-                          </span>
+                                    Days
+                                    </span>
                                 </label>
                                 <label class="btn btn-primary" id="viewMode2">
                                     <input type="radio" class="sr-only"  name="viewMode" value="2">
                                     <!--<span class="docs-tooltip" data-toggle="tooltip" title="" data-original-title="View Mode 2">-->
-                            Weeks
-                          </span>
+                                    Weeks
+                                    </span>
                                 </label>
                                 <label class="btn btn-primary" id="viewMode3">
                                     <input type="radio" class="sr-only"  name="viewMode" value="3">
                                     <!--<span class="docs-tooltip" data-toggle="tooltip" title="" data-original-title="View Mode 3">-->
-                            Month
-                          </span>
+                                    Month
+                                    </span>
                                 </label>
                             </div>
                         </div>
@@ -128,14 +128,18 @@ $this->title = 'Calls Report';
                                                 let data = google.visualization.arrayToDataTable([
                                                     ['Time Line', 'Completed', 'Canceled', 'Busy', {role: 'annotation'}],
                                                     <?php foreach($callsGraphData as $k => $item):?>
-                                                    ['<?=date($item['timeLine'], strtotime($item['time']))?>', <?=$item['completed']?>, <?=$item['no-answer']?>, <?=$item['busy']?>, '<?='--'?>'],
+                                                    ['<?=  ($item['weeksInterval'] == null)
+                                                        ? date($item['timeLine'], strtotime($item['time']))
+                                                        : date($item['timeLine'], strtotime($item['time'])) .' / '. date($item['timeLine'], strtotime($item['weeksInterval']));
+
+                                                        ?>', <?=$item['completed']?>, <?=$item['no-answer']?>, <?=$item['busy']?>, '<?='--'?>'],
                                                     <?php endforeach;?>
                                                 ]);
 
                                                 let options = {
                                                     chart: {
-                                                        title: 'Calls graph',
-                                                        subtitle: 'Calls info - Last ?? days',
+                                                        //title: 'Calls graph',
+                                                        //subtitle: 'Calls info - Last ?? days',
                                                     },
                                                     height: 545,
                                                     vAxis: {
