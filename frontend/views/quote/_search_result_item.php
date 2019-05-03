@@ -174,6 +174,7 @@ data-airline="<?= $result['validatingCarrier']?>" id="search-result__quote-<?= $
 						<th>Pax</th>
 						<th>Q</th>
 						<th>NP, $</th>
+						<?php if(isset($result['prices']['markup']) && $result['prices']['markup'] > 0):?><th>MU, $</th><?php endif;?>
 					</tr>
 				</thead>
 				<tbody>
@@ -183,6 +184,7 @@ data-airline="<?= $result['validatingCarrier']?>" id="search-result__quote-<?= $
 						<th><?= $paxCode?></th>
 						<td>x <?= $pax['cnt']?></td>
 						<td><?= $pax['price']?></td>
+						<?php if(isset($result['prices']['markup']) && $result['prices']['markup'] > 0):?><td><?= (isset($pax['markup']))?$pax['markup']:''?></td><?php endif;?>
 					</tr>
 					<?php endforeach;?>
 				</tbody>
@@ -191,6 +193,7 @@ data-airline="<?= $result['validatingCarrier']?>" id="search-result__quote-<?= $
 						<th>Total</th>
 						<td><?= $paxTotal?></td>
 						<td><?= $result['prices']['totalPrice']?></td>
+						<?php if(isset($result['prices']['markup']) && $result['prices']['markup'] > 0):?><td><?= $result['prices']['markup']?></td><?php endif;?>
 					</tr>
 				</tfoot>
 			</table>
