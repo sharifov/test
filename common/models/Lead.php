@@ -2345,7 +2345,8 @@ New lead {lead_id}
             'clients_budget' => $this->leadPreferences ? $this->leadPreferences->clients_budget : '',
             'market_price' => $this->leadPreferences ? $this->leadPreferences->market_price : '',
             'itinerary' => [],
-            'agent_name' => $this->employee ? $this->employee->username : 'N/A'
+            'agent_name' => $this->employee ? $this->employee->username : 'N/A',
+            'agent_id' => $this->employee_id
         ];
 
         $itinerary = [];

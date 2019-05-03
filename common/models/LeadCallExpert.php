@@ -2,6 +2,7 @@
 
 namespace common\models;
 
+use common\components\BackOffice;
 use Yii;
 
 /**
@@ -32,11 +33,21 @@ class LeadCallExpert extends \yii\db\ActiveRecord
     public const STATUS_CANCEL      = 4;
 
     public const STATUS_LIST = [
-        self::STATUS_PENDING    => 'pending',
-        self::STATUS_PROCESSING => 'processing',
-        self::STATUS_DONE       => 'done',
-        self::STATUS_CANCEL     => 'cancel',
+        self::STATUS_PENDING    => 'Pending',
+        self::STATUS_PROCESSING => 'Processing',
+        self::STATUS_DONE       => 'Done',
+        self::STATUS_CANCEL     => 'Cancel',
     ];
+
+
+    public const STATUS_LIST_LABEL = [
+        self::STATUS_PENDING    => '<span class="badge badge-warning">Pending</span>',
+        self::STATUS_PROCESSING => '<span class="badge badge-info">Processing</span>',
+        self::STATUS_DONE       => '<span class="badge badge-success">Done</span>',
+        self::STATUS_CANCEL     => '<span class="badge badge-danger">Cancel</span>',
+    ];
+
+
 
     /**
      * {@inheritdoc}
@@ -59,8 +70,27 @@ class LeadCallExpert extends \yii\db\ActiveRecord
             [['lce_expert_username'], 'string', 'max' => 30],
             [['lce_agent_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['lce_agent_user_id' => 'id']],
             [['lce_lead_id'], 'exist', 'skipOnError' => true, 'targetClass' => Lead::class, 'targetAttribute' => ['lce_lead_id' => 'id']],
+            [['lce_lead_id'], 'validateStatus']
         ];
     }
+
+    /**
+     * Validates the status.
+     * This method serves as the inline validation for status.
+     *
+     * @param string $attribute the attribute currently being validated
+     * @param array $params the additional name-value pairs given in the rule
+     */
+    public function validateStatus($attribute, $params)
+    {
+        if (!$this->hasErrors()) {
+            $call = self::find()->where(['lce_lead_id' => $this->lce_lead_id, 'lce_status_id' => [self::STATUS_PENDING, self::STATUS_PROCESSING]])->limit(1)->one();
+            if ($call) {
+                $this->addError($attribute, 'Exist Call Expert on status pending (id: '.$call->lce_id.')');
+            }
+        }
+    }
+
 
     /**
      * {@inheritdoc}
@@ -107,4 +137,58 @@ class LeadCallExpert extends \yii\db\ActiveRecord
     {
         return new LeadCallExpertQuery(get_called_class());
     }
+
+    /**
+     * @return mixed|string
+     */
+    public function getStatusName()
+    {
+        return self::STATUS_LIST[$this->lce_status_id] ?? '-';
+    }
+
+    /**
+     * @return mixed|string
+     */
+    public function getStatusLabel()
+    {
+        return self::STATUS_LIST_LABEL[$this->lce_status_id] ?? '-';
+    }
+
+
+    /**
+     * @return bool
+     */
+    public function callExpert(): bool
+    {
+        $lead = $this->lceLead;
+
+        if($lead) {
+            $data = $lead->getLeadInformationForExpert();
+            $data['call_expert'] = true;
+            $data['LeadRequest']['information']['notes_for_experts'] = $this->lce_request_text;
+
+            $result = BackOffice::sendRequest('lead/update-lead', 'POST', json_encode($data));
+
+            if ($result && isset($result['status']) && $result['status'] === 'Success') {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * @param bool $insert
+     * @param array $changedAttributes
+     */
+    public function afterSave($insert, $changedAttributes)
+    {
+        parent::afterSave($insert, $changedAttributes);
+
+        if ($insert) {
+            $this->callExpert();
+        }
+    }
+
+
 }

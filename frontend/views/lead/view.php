@@ -8,6 +8,7 @@
  * @var $dataProviderCommunication \yii\data\ActiveDataProvider
  * @var $dataProviderCallExpert \yii\data\ActiveDataProvider
  * @var $enableCommunication boolean
+ * @var $modelLeadCallExpert \common\models\LeadCallExpert
  */
 
 use yii\bootstrap\Html;
@@ -549,13 +550,13 @@ JS;
                     <div class="alert alert-warning" role="alert">You do not have access to view Communication block messages.</div>
                 <?php endif;?>
 
-
                 <?= $this->render('call-expert/lead_call_expert', [
                     'lead' => $leadForm->getLead(),
                     'comForm'       => $comForm,
                     'leadId'        => $lead->id,
                     'dataProvider'  => $dataProviderCallExpert,
-                    'isAdmin'       => $is_admin
+                    'isAdmin'       => $is_admin,
+                    'modelLeadCallExpert'       => $modelLeadCallExpert,
                 ]); ?>
 
 
