@@ -598,8 +598,8 @@ class Quote extends \yii\db\ActiveRecord
                     $operationAirlineCode = $operatedBy;
                 }
 
-                $rowExpl = explode($carrier, $row);
-                $rowFl = $rowExpl[1];
+                $posCarr = stripos($row, $carrier);
+                $rowFl = substr($row, $posCarr+strlen($carrier));
                 preg_match('/([0-9]+)\D/', $rowFl, $matches);
                 if (!empty($matches)) {
                     $flightNumber = $matches[1];
@@ -830,8 +830,9 @@ class Quote extends \yii\db\ActiveRecord
                 $operationAirlineCode = str_replace('/', '', $operatedBy);
             }
 
-            $rowExpl = explode($carrier, $row);
-            $rowFl = $rowExpl[1];
+            $posCarr = stripos($row, $carrier);
+            $rowFl = substr($row, $posCarr+strlen($carrier));
+
             preg_match('/([0-9]+)\D/', $rowFl, $matches);
             if (!empty($matches)) {
                 $flightNumber = $matches[1];
