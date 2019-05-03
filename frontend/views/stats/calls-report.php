@@ -53,7 +53,7 @@ $this->title = 'Calls Report';
                                 ],
                                 'pluginEvents'=>[
                                     "apply.daterangepicker"=>"function(){
-                                 console.log($('#call-stats-picker').val());
+                                     console.log($('#call-stats-picker').val());
                                      $.pjax({container: '#calls-graph-pjax', data: {dateRange: $('#call-stats-picker').val()}, type: 'PJAX', url: 'calls-graph', async:true, push: false});
                                      //$('#viewMode').removeClass('hidden');                                 
                                   }",
@@ -61,64 +61,33 @@ $this->title = 'Calls Report';
 
                             ]);?>
                         </div>
-                        <!-- buttons for customized range-->
+
                         <div class="col-md-3 " id="viewMode">
-                            <!-- <h3 class="page-header">Toggles:</h3> -->
                             <div class="btn-group btn-group-justified" data-toggle="buttons">
                                 <label class="btn btn-primary  active" id="viewMode0">
-                                    <input type="radio" class="sr-only"  name="viewMode" value="0" checked="">
-                                    <!--<span class="docs-tooltip" data-toggle="tooltip" title="" data-original-title="View Mode 0">-->
                                     Hours
-                                    </span>
                                 </label>
                                 <label class="btn btn-primary" id="viewMode1">
                                     <input type="radio" class="sr-only"  name="viewMode" value="1">
-                                    <!--<span class="docs-tooltip" data-toggle="tooltip" title="" data-original-title="View Mode 1">-->
                                     Days
-                                    </span>
                                 </label>
                                 <label class="btn btn-primary" id="viewMode2">
                                     <input type="radio" class="sr-only"  name="viewMode" value="2">
-                                    <!--<span class="docs-tooltip" data-toggle="tooltip" title="" data-original-title="View Mode 2">-->
                                     Weeks
-                                    </span>
                                 </label>
                                 <label class="btn btn-primary" id="viewMode3">
                                     <input type="radio" class="sr-only"  name="viewMode" value="3">
-                                    <!--<span class="docs-tooltip" data-toggle="tooltip" title="" data-original-title="View Mode 3">-->
                                     Month
-                                    </span>
                                 </label>
                             </div>
                         </div>
 
-                        <!--<div class="x_title">
-                            <h2>Call Chart by Status <small></small></h2>-->
-                        <!--<ul class="nav navbar-right panel_toolbox">
-                            <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
-                            </li>
-                            <li class="dropdown">
-                                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-wrench"></i></a>
-                                <ul class="dropdown-menu" role="menu">
-                                    <li><a href="#">Settings 1</a>
-                                    </li>
-                                    <li><a href="#">Settings 2</a>
-                                    </li>
-                                </ul>
-                            </li>
-                            <li><a class="close-link"><i class="fa fa-close"></i></a>
-                            </li>
-                        </ul>-->
-                        <!--    <div class="clearfix"></div>
-                        </div>-->
                         <?php Pjax::begin(['id' => 'calls-graph-pjax']); ?>
                         <div class="x_content">
-
                             <?php if ($callsGraphData): ?>
                                 <div class="row">
                                     <div class="col-md-12">
                                         <div id="chart_div"></div>
-
                                         <?php
                                         $this->registerJs("google.charts.load('current', {'packages':['bar']}); google.charts.setOnLoadCallback(drawChart);", \yii\web\View::POS_READY);
                                         ?>
@@ -155,7 +124,6 @@ $this->title = 'Calls Report';
                                                     chart.draw(data, options); // redraw the graph on window resize
                                                 });
                                                 //chart.draw(data, google.charts.Bar.convertOptions(options));
-
                                             }
                                         </script>
                                     </div>
