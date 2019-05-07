@@ -40,7 +40,7 @@ use yii\widgets\Pjax;
             </li>
             <li>
                 <?//=Html::a('<i class="fa fa-comment"></i>', ['lead/view', 'gid' => $lead->gid, 'act' => 'call-expert-message'], ['class' => ''])?>
-                <?=Html::a('<i class="fa fa-comment"></i>', '#', ['class' => '', 'id' => 'btn-call-expert-form'])?>
+                <?=Html::a('<i class="fa fa-plus-circle success"></i> new Call', '#', ['class' => '', 'id' => 'btn-call-expert-form'])?>
             </li>
             <li>
                 <a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
@@ -108,7 +108,7 @@ use yii\widgets\Pjax;
 
         ?>
 
-        <div class="row" style="display: none" id="div-call-expert-form">
+        <div class="row" style="display: <?=$modelLeadCallExpert->hasErrors() ? 'block' : 'none'?>" id="div-call-expert-form">
             <div class="col-md-12">
                 <?= $form->field($modelLeadCallExpert, 'lce_request_text')->textarea(['rows' => 8, 'id' => 'lce_request_text'])->label('Request Message') ?>
             </div>
@@ -131,9 +131,23 @@ use yii\widgets\Pjax;
 $this->registerJs(
     '
         $(document).on("change",".ch_task", function() {
-            
             $.pjax.reload({container: containerId, push: false, replace: false, timeout: 5000, data: {date: taskDate, task_id: taskId, lead_id: taskLeadId, user_id: taskUserId}});
         });
+        
+        
+        $(document).on("click",".link2quote", function() {
+            var uid = $(this).data("uid");
+            
+            $([document.documentElement, document.body]).animate({
+                scrollTop: $("#quote-" + uid).offset().top
+            }, 500);
+                
+            for(i = 0; i < 4; i ++) {
+                $("#quote-" + uid).fadeTo(300, 0.2).fadeTo(300, 1.0);
+            }                
+            
+        });
+        
         
         $(document).on("click","#btn-call-expert-form", function() {
             $("#div-call-expert-form").toggle();

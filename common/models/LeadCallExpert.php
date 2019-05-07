@@ -43,7 +43,7 @@ class LeadCallExpert extends \yii\db\ActiveRecord
     public const STATUS_LIST_LABEL = [
         self::STATUS_PENDING    => '<span class="badge badge-warning">Pending</span>',
         self::STATUS_PROCESSING => '<span class="badge badge-info">Processing</span>',
-        self::STATUS_DONE       => '<span class="badge badge-success">Done</span>',
+        self::STATUS_DONE       => '<span class="badge badge-green">Done</span>',
         self::STATUS_CANCEL     => '<span class="badge badge-danger">Cancel</span>',
     ];
 
@@ -84,7 +84,7 @@ class LeadCallExpert extends \yii\db\ActiveRecord
     public function validateStatus($attribute, $params)
     {
         if (!$this->hasErrors()) {
-            $call = self::find()->where(['lce_lead_id' => $this->lce_lead_id, 'lce_status_id' => [self::STATUS_PENDING, self::STATUS_PROCESSING]])->limit(1)->one();
+            $call = self::find()->where(['lce_lead_id' => $this->lce_lead_id, 'lce_status_id' => [self::STATUS_PENDING, self::STATUS_PROCESSING]])->andWhere(['<>', 'lce_id', $this->lce_id])->limit(1)->one();
             if ($call) {
                 $this->addError($attribute, 'Exist Call Expert on status pending (id: '.$call->lce_id.')');
             }
