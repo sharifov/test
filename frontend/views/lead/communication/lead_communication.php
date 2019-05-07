@@ -50,344 +50,214 @@ $c_type_id = $comForm->c_type_id;
 <?= Html::endForm() */ ?>
 
 
-<?php yii\widgets\Pjax::begin(['id' => 'pjax-lead-communication' ,'enablePushState' => false]) ?>
-    <?/*<h1><?=random_int(1, 100)?></h1>*/ ?>
-    <div class="panel chat">
-        <div class="chat__list">
-
-            <?= \yii\widgets\ListView::widget([
-                'dataProvider' => $dataProvider,
-
-                'options' => [
-                    'tag' => 'div',
-                    'class' => 'list-wrapper',
-                    'id' => 'list-wrapper',
-                ],
-                'emptyText' => '<div class="text-center">Not found communication messages</div><br>',
-                'layout' => "{summary}\n<div class=\"text-center\">{pager}</div>\n{items}<div class=\"text-center\">{pager}</div>\n",
-                'itemView' => function ($model, $key, $index, $widget) use ($dataProvider) {
-                    return $this->render('_list_item',['model' => $model, 'dataProvider' => $dataProvider]);
-                },
-
-                'itemOptions' => [
-                    //'class' => 'item',
-                    'tag' => false,
-                ],
-
-                /*'pager' => [
-                    'firstPageLabel' => 'first',
-                    'lastPageLabel' => 'last',
-                    'nextPageLabel' => 'next',
-                    'prevPageLabel' => 'previous',
-                    'maxButtonCount' => 3,
-                ],*/
-
-            ]) ?>
-
-            <div class="chat__form panel">
 
 
 
-                <?php \yii\bootstrap\Modal::begin(['id' => 'modal-email-preview',
-                    'header' => '<h2>Email preview</h2>',
-                    'size' => \yii\bootstrap\Modal::SIZE_LARGE
-                ])?>
 
-                <?php $form2 = \yii\bootstrap\ActiveForm::begin([
-                    //'action' => ['index'],
-                    //'id' => 'email-preview-form',
-                    'method' => 'post',
+<div class="x_panel">
+    <div class="x_title">
+        <h2><i class="fa fa-comments"></i> Communication Block</h2>
+        <ul class="nav navbar-right panel_toolbox">
+            <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+            </li>
+            <?/*<li class="dropdown">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-wrench"></i></a>
+                <ul class="dropdown-menu" role="menu">
+                    <li><a href="#">Settings 1</a>
+                    </li>
+                    <li><a href="#">Settings 2</a>
+                    </li>
+                </ul>
+            </li>
+            <li><a class="close-link"><i class="fa fa-close"></i></a>
+            </li>*/?>
+        </ul>
+        <div class="clearfix"></div>
+    </div>
+    <div class="x_content" style="display: block;">
+    <?php yii\widgets\Pjax::begin(['id' => 'pjax-lead-communication' ,'enablePushState' => false]) ?>
+        <?/*<h1><?=random_int(1, 100)?></h1>*/ ?>
+        <div class="panel chat">
+            <div class="chat__list">
+
+                <?= \yii\widgets\ListView::widget([
+                    'dataProvider' => $dataProvider,
+
                     'options' => [
-                        'data-pjax' => 1,
-                        'class' => 'panel-body',
+                        'tag' => 'div',
+                        'class' => 'list-wrapper',
+                        'id' => 'list-wrapper',
                     ],
-                ]);
+                    'emptyText' => '<div class="text-center">Not found communication messages</div><br>',
+                    'layout' => "{summary}\n<div class=\"text-center\">{pager}</div>\n{items}<div class=\"text-center\">{pager}</div>\n",
+                    'itemView' => function ($model, $key, $index, $widget) use ($dataProvider) {
+                        return $this->render('_list_item',['model' => $model, 'dataProvider' => $dataProvider]);
+                    },
 
-                    echo $form2->errorSummary($previewEmailForm);
-                ?>
+                    'itemOptions' => [
+                        //'class' => 'item',
+                        'tag' => false,
+                    ],
 
-                <?php /*<div class="modal fade" id="modal-email-preview" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-                    <div class="modal-dialog" role="document">
-                    <div class="modal-content">
-                    <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                        <h4 class="modal-title" id="myModalLabel">Email preview</h4>
-                    </div>
-                    <div class="modal-body">*/ ?>
+                    /*'pager' => [
+                        'firstPageLabel' => 'first',
+                        'lastPageLabel' => 'last',
+                        'nextPageLabel' => 'next',
+                        'prevPageLabel' => 'previous',
+                        'maxButtonCount' => 3,
+                    ],*/
 
-                <div class="row">
-                    <div class="col-sm-4 form-group">
+                ]) ?>
 
-                        <?= $form2->field($previewEmailForm, 'e_email_from')->textInput(['class' => 'form-control', 'maxlength' => true, 'readonly' => true]) ?>
-                        <?= $form2->field($previewEmailForm, 'e_email_from_name')->textInput(['class' => 'form-control', 'maxlength' => true, 'readonly' => true]) ?>
+                <div class="chat__form panel">
 
 
-                        <?= $form2->field($previewEmailForm, 'e_lead_id')->hiddenInput()->label(false); ?>
-                        <?= $form2->field($previewEmailForm, 'e_language_id')->hiddenInput()->label(false); ?>
-                        <?= $form2->field($previewEmailForm, 'e_email_tpl_id')->hiddenInput()->label(false); ?>
-                        <?= $form2->field($previewEmailForm, 'e_quote_list')->hiddenInput()->label(false); ?>
-                    </div>
-                    <div class="col-sm-4 form-group">
-                        <?= $form2->field($previewEmailForm, 'e_email_to')->textInput(['class' => 'form-control', 'maxlength' => true, 'readonly' => true]) ?>
-                        <?= $form2->field($previewEmailForm, 'e_email_to_name')->textInput(['class' => 'form-control', 'maxlength' => true, 'readonly' => true]) ?>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-sm-12 form-group">
-                        <?= $form2->field($previewEmailForm, 'e_email_subject')->textInput(['class' => 'form-control', 'maxlength' => true]) ?>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <?= $form2->field($previewEmailForm, 'e_email_message')->widget(\dosamigos\ckeditor\CKEditor::class, [
+
+                    <?php \yii\bootstrap\Modal::begin(['id' => 'modal-email-preview',
+                        'header' => '<h2>Email preview</h2>',
+                        'size' => \yii\bootstrap\Modal::SIZE_LARGE
+                    ])?>
+
+                    <?php $form2 = \yii\bootstrap\ActiveForm::begin([
+                        //'action' => ['index'],
+                        //'id' => 'email-preview-form',
+                        'method' => 'post',
                         'options' => [
-                            'rows' => 6,
-                            'readonly' => false
+                            'data-pjax' => 1,
+                            'class' => 'panel-body',
                         ],
-                        'preset' => 'custom',
-                        'clientOptions' => [
-                            'height' => 500,
-                            'fullPage' => true,
+                    ]);
 
-                            'allowedContent' => true,
-                            'resize_enabled' => false,
-                            'removeButtons' => 'Subscript,Superscript,Flash,Table,HorizontalRule,Smiley,SpecialChar,PageBreak,Iframe',
-                            'removePlugins' => 'elementspath',
-                        ]
-                    ]) ?>
-                </div>
-                <?php if($isAdmin):?>
-                <div class="row" style="display: none" id="email-data-content-div">
-                    <pre><?php
-                        //\yii\helpers\VarDumper::dump($previewEmailForm->e_content_data, 10, true);
-                        echo json_encode($previewEmailForm->e_content_data);
-                    ?>
-                    </pre>
-                </div>
-                <?php endif; ?>
-
-                <div class="row">
-                    <div class="col-md-12">
-                        <?php $messageSize = mb_strlen($previewEmailForm->e_email_message) ?>
-                        <b>Content size: <?=Yii::$app->formatter->asShortSize($messageSize, 1) ?></b>
-                        <?php if($messageSize > 102 * 1024): ?>
-                                &nbsp;&nbsp;&nbsp;<span class="danger">Warning: recommended MAX content size: <b><?=Yii::$app->formatter->asShortSize(102 * 1024, 1) ?></b>.</span>
-                        <?php endif; ?>
-
-                        <hr>
-                    </div>
-                </div>
-
-                <div class="btn-wrapper text-right">
-                    <?= Html::submitButton('<i class="fa fa-envelope-o"></i> Send Email', ['class' => 'btn btn-lg btn-primary']) ?>
-                    <?php if($isAdmin):?>
-                        <?= Html::button('<i class="fa fa-list"></i> Show Email data (for Admins)', ['class' => 'btn btn-lg btn-warning', 'onclick' => '$("#email-data-content-div").toggle()']) ?>
-                    <?php endif; ?>
-                </div>
-                <?php \yii\bootstrap\ActiveForm::end(); ?>
-
-                <?php \yii\bootstrap\Modal::end()?>
-
-
-
-
-
-
-                <?php \yii\bootstrap\Modal::begin(['id' => 'modal-sms-preview',
-                    'header' => '<h2>SMS preview</h2>',
-                    'size' => \yii\bootstrap\Modal::SIZE_DEFAULT
-                ])?>
-
-                    <?php $form3 = \yii\bootstrap\ActiveForm::begin([
-                            //'action' => ['index'],
-                            //'id' => 'email-preview-form',
-                            'method' => 'post',
-                            'options' => [
-                                'data-pjax' => 1,
-                                'class' => 'panel-body',
-                            ],
-                        ]);
-
-                        echo $form3->errorSummary($previewSmsForm);
-
+                        echo $form2->errorSummary($previewEmailForm);
                     ?>
 
+                    <?php /*<div class="modal fade" id="modal-email-preview" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+                        <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                            <h4 class="modal-title" id="myModalLabel">Email preview</h4>
+                        </div>
+                        <div class="modal-body">*/ ?>
 
                     <div class="row">
-                        <div class="alert alert-info alert-dismissible" role="alert">
-                            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                            <strong>Attention!</strong> Check the length of messages and try to use the minimum number of characters.
-                        </div>
+                        <div class="col-sm-4 form-group">
 
-                        <div class="col-sm-6 form-group">
-                            <?= $form3->field($previewSmsForm, 's_phone_from')->textInput(['class' => 'form-control', 'maxlength' => true, 'readonly' => true]) ?>
-                            <?//= $form3->field($previewSmsForm, 's_lead_id')->hiddenInput()->label(false); ?>
-                            <?= $form3->field($previewSmsForm, 's_language_id')->hiddenInput()->label(false); ?>
-                            <?= $form3->field($previewSmsForm, 's_sms_tpl_id')->hiddenInput()->label(false); ?>
-                            <?= $form3->field($previewSmsForm, 's_quote_list')->hiddenInput()->label(false) ?>
+                            <?= $form2->field($previewEmailForm, 'e_email_from')->textInput(['class' => 'form-control', 'maxlength' => true, 'readonly' => true]) ?>
+                            <?= $form2->field($previewEmailForm, 'e_email_from_name')->textInput(['class' => 'form-control', 'maxlength' => true, 'readonly' => true]) ?>
+
+
+                            <?= $form2->field($previewEmailForm, 'e_lead_id')->hiddenInput()->label(false); ?>
+                            <?= $form2->field($previewEmailForm, 'e_language_id')->hiddenInput()->label(false); ?>
+                            <?= $form2->field($previewEmailForm, 'e_email_tpl_id')->hiddenInput()->label(false); ?>
+                            <?= $form2->field($previewEmailForm, 'e_quote_list')->hiddenInput()->label(false); ?>
                         </div>
-                        <div class="col-sm-6 form-group">
-                            <?= $form3->field($previewSmsForm, 's_phone_to')->textInput(['class' => 'form-control', 'maxlength' => true, 'readonly' => true]) ?>
+                        <div class="col-sm-4 form-group">
+                            <?= $form2->field($previewEmailForm, 'e_email_to')->textInput(['class' => 'form-control', 'maxlength' => true, 'readonly' => true]) ?>
+                            <?= $form2->field($previewEmailForm, 'e_email_to_name')->textInput(['class' => 'form-control', 'maxlength' => true, 'readonly' => true]) ?>
                         </div>
                     </div>
-
+                    <div class="row">
+                        <div class="col-sm-12 form-group">
+                            <?= $form2->field($previewEmailForm, 'e_email_subject')->textInput(['class' => 'form-control', 'maxlength' => true]) ?>
+                        </div>
+                    </div>
                     <div class="form-group">
-                        <?= $form3->field($previewSmsForm, 's_sms_message')->textarea(['rows' => 6, 'class' => 'form-control', 'id' => 'preview-sms-message']) ?>
-                        <table class="table table-condensed table-responsive table-bordered" id="preview-sms-counter">
-                            <tr>
-                                <td>Length: <span class="length"></span></td>
-                                <td>Messages: <span class="messages"></span></td>
-                                <td>Per Message: <span class="per_message"></span></td>
-                                <td>Remaining: <span class="remaining"></span></td>
-                                <td>Encoding: <span class="encoding"></span></td>
-                            </tr>
-                        </table>
+                        <?= $form2->field($previewEmailForm, 'e_email_message')->widget(\dosamigos\ckeditor\CKEditor::class, [
+                            'options' => [
+                                'rows' => 6,
+                                'readonly' => false
+                            ],
+                            'preset' => 'custom',
+                            'clientOptions' => [
+                                'height' => 500,
+                                'fullPage' => true,
+
+                                'allowedContent' => true,
+                                'resize_enabled' => false,
+                                'removeButtons' => 'Subscript,Superscript,Flash,Table,HorizontalRule,Smiley,SpecialChar,PageBreak,Iframe',
+                                'removePlugins' => 'elementspath',
+                            ]
+                        ]) ?>
                     </div>
-                    <div class="btn-wrapper text-center">
-                        <?= Html::submitButton('Send SMS <i class="fa fa-paper-plane"></i>', ['class' => 'btn btn-lg btn-primary']) ?>
+                    <?php if($isAdmin):?>
+                    <div class="row" style="display: none" id="email-data-content-div">
+                        <pre><?php
+                            //\yii\helpers\VarDumper::dump($previewEmailForm->e_content_data, 10, true);
+                            echo json_encode($previewEmailForm->e_content_data);
+                        ?>
+                        </pre>
+                    </div>
+                    <?php endif; ?>
+
+                    <div class="row">
+                        <div class="col-md-12">
+                            <?php $messageSize = mb_strlen($previewEmailForm->e_email_message) ?>
+                            <b>Content size: <?=Yii::$app->formatter->asShortSize($messageSize, 1) ?></b>
+                            <?php if($messageSize > 102 * 1024): ?>
+                                    &nbsp;&nbsp;&nbsp;<span class="danger">Warning: recommended MAX content size: <b><?=Yii::$app->formatter->asShortSize(102 * 1024, 1) ?></b>.</span>
+                            <?php endif; ?>
+
+                            <hr>
+                        </div>
                     </div>
 
+                    <div class="btn-wrapper text-right">
+                        <?= Html::submitButton('<i class="fa fa-envelope-o"></i> Send Email', ['class' => 'btn btn-lg btn-primary']) ?>
+                        <?php if($isAdmin):?>
+                            <?= Html::button('<i class="fa fa-list"></i> Show Email data (for Admins)', ['class' => 'btn btn-lg btn-warning', 'onclick' => '$("#email-data-content-div").toggle()']) ?>
+                        <?php endif; ?>
+                    </div>
                     <?php \yii\bootstrap\ActiveForm::end(); ?>
 
-                <?php \yii\bootstrap\Modal::end()?>
+                    <?php \yii\bootstrap\Modal::end()?>
 
 
 
 
 
-                <?php $form = \yii\bootstrap\ActiveForm::begin([
-                    //'action' => ['index'],
-                    'id' => 'communication-form',
-                    'method' => 'post',
-                    'options' => [
-                        'data-pjax' => 1,
-                        'class' => 'panel-body',
-                    ],
-                ]);
+
+                    <?php \yii\bootstrap\Modal::begin(['id' => 'modal-sms-preview',
+                        'header' => '<h2>SMS preview</h2>',
+                        'size' => \yii\bootstrap\Modal::SIZE_DEFAULT
+                    ])?>
+
+                        <?php $form3 = \yii\bootstrap\ActiveForm::begin([
+                                //'action' => ['index'],
+                                //'id' => 'email-preview-form',
+                                'method' => 'post',
+                                'options' => [
+                                    'data-pjax' => 1,
+                                    'class' => 'panel-body',
+                                ],
+                            ]);
+
+                            echo $form3->errorSummary($previewSmsForm);
+
+                        ?>
 
 
-                    $clientEmails = \yii\helpers\ArrayHelper::map($leadForm->getClientEmail(), 'email', 'email');
-                    $clientEmails[Yii::$app->user->identity->email] = Yii::$app->user->identity->email;
+                        <div class="row">
+                            <div class="alert alert-info alert-dismissible" role="alert">
+                                <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                <strong>Attention!</strong> Check the length of messages and try to use the minimum number of characters.
+                            </div>
 
-                    $clientPhones = $leadForm->getClient()->getPhoneNumbersSms(); //\yii\helpers\ArrayHelper::map($leadForm->getClientPhone(), 'phone', 'phone');
-
-                    if(Yii::$app->session->hasFlash('send-success')) {
-                        echo '<div class="alert alert-success alert-dismissible" role="alert"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>';
-                        echo Yii::$app->session->getFlash('send-success');
-                        echo '</div>';
-                    }
-
-                    if(Yii::$app->session->hasFlash('sms-send-success')) {
-                        echo '<div class="alert alert-success alert-dismissible" role="alert"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>';
-                        echo Yii::$app->session->getFlash('sms-send-success');
-                        echo '</div>';
-                    }
-
-                    if(Yii::$app->session->hasFlash('send-error')) {
-                        echo '<div class="alert alert-danger alert-dismissible" role="alert"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>';
-                        echo Yii::$app->session->getFlash('send-error');
-                        echo '</div>';
-                    }
-
-                    echo $form->errorSummary($comForm);
-
-                ?>
-
-
-                    <div class="row">
-                        <div class="col-sm-3 form-group">
-                            <?php
-                                $typeList = [];
-                                $agentParams = \common\models\UserProjectParams::find()->where(['upp_project_id' => $leadForm->getLead()->project_id, 'upp_user_id' => Yii::$app->user->id])->limit(1)->one();
-
-                                /** @var \common\models\Employee $userModel */
-                                $userModel = Yii::$app->user->identity;
-
-
-                                $call_type = \common\models\UserProfile::find()->select('up_call_type_id')->where(['up_user_id' => Yii::$app->user->id])->one();
-
-
-                                if($call_type && $call_type->up_call_type_id) {
-                                    $call_type_id = $call_type->up_call_type_id;
-
-                                } else {
-                                    $call_type_id = \common\models\UserProfile::CALL_TYPE_OFF;
-                                }
-
-
-                                //\yii\helpers\VarDumper::dump($leadForm->getLead()->id, 10, true); exit;
-
-                                if($agentParams) {
-                                    foreach (\frontend\models\CommunicationForm::TYPE_LIST as $tk => $itemName) {
-
-                                        if ($tk == \frontend\models\CommunicationForm::TYPE_EMAIL) {
-
-                                            if ($agentParams->upp_email) {
-                                                $typeList[$tk] = $itemName . ' (' . $agentParams->upp_email . ')';
-                                            }
-                                        }
-
-                                        if ($tk == \frontend\models\CommunicationForm::TYPE_SMS) {
-
-                                            if ($agentParams->upp_tw_phone_number) {
-                                                $typeList[$tk] = $itemName . ' (' . $agentParams->upp_tw_phone_number . ')';
-                                            }
-                                        }
-
-
-                                        if($call_type_id) {
-
-                                            $callTypeName = \common\models\UserProfile::CALL_TYPE_LIST[$call_type_id] ?? '-';
-
-                                            if($call_type_id == \common\models\UserProfile::CALL_TYPE_SIP && $userModel->userProfile && !$userModel->userProfile->up_sip) {
-                                                $callTypeName .= ' [empty account]';
-                                            }
-
-                                            if ($tk == \frontend\models\CommunicationForm::TYPE_VOICE) {
-                                                //if ($userModel->userProfile->up_sip) {
-                                                    $typeList[$tk] = $itemName . ' ('.$callTypeName.')';
-                                                //}
-                                            }
-                                        }
-                                    }
-                                }
-
-                            ?>
-
-
-                            <?= $form->field($comForm, 'c_type_id')->dropDownList($typeList, ['prompt' => '---', 'class' => 'form-control', 'id' => 'c_type_id']) ?>
-                            <?= $form->field($comForm, 'c_quotes')->hiddenInput(['id' => 'c_quotes'])->label(false); ?>
+                            <div class="col-sm-6 form-group">
+                                <?= $form3->field($previewSmsForm, 's_phone_from')->textInput(['class' => 'form-control', 'maxlength' => true, 'readonly' => true]) ?>
+                                <?//= $form3->field($previewSmsForm, 's_lead_id')->hiddenInput()->label(false); ?>
+                                <?= $form3->field($previewSmsForm, 's_language_id')->hiddenInput()->label(false); ?>
+                                <?= $form3->field($previewSmsForm, 's_sms_tpl_id')->hiddenInput()->label(false); ?>
+                                <?= $form3->field($previewSmsForm, 's_quote_list')->hiddenInput()->label(false) ?>
+                            </div>
+                            <div class="col-sm-6 form-group">
+                                <?= $form3->field($previewSmsForm, 's_phone_to')->textInput(['class' => 'form-control', 'maxlength' => true, 'readonly' => true]) ?>
+                            </div>
                         </div>
 
-                        <div class="col-sm-3 form-group message-field-sms" id="sms-template-group">
-                            <?= $form->field($comForm, 'c_sms_tpl_id')->dropDownList(\common\models\SmsTemplateType::getList(false), ['prompt' => '---', 'class' => 'form-control', 'id' => 'c_sms_tpl_id']) ?>
-                        </div>
-
-                        <div class="col-sm-3 form-group message-field-email" id="email-template-group" style="display: none;">
-                            <?= $form->field($comForm, 'c_email_tpl_id')->dropDownList(\common\models\EmailTemplateType::getList(false), ['prompt' => '---', 'class' => 'form-control', 'id' => 'c_email_tpl_id']) ?>
-                        </div>
-
-                        <div class="col-sm-3 form-group message-field-sms message-field-email" id="language-group" style="display: block;">
-                            <?= $form->field($comForm, 'c_language_id')->dropDownList(\lajax\translatemanager\models\Language::getLanguageNames(true), ['prompt' => '---', 'class' => 'form-control', 'id' => 'language']) ?>
-                        </div>
-
-                        <div class="col-sm-3 form-group message-field-email" id="email-address" style="display: none;">
-                            <?= $form->field($comForm, 'c_email_to')->dropDownList($clientEmails, ['prompt' => '---', 'class' => 'form-control', 'id' => 'email']) ?>
-                        </div>
-
-
-                        <div class="col-sm-12 form-group message-field-email" id="email-subtitle-group" style="display: none;">
-                            <?= $form->field($comForm, 'c_email_subject')->textInput(['class' => 'form-control', 'id' => 'email-subtitle', 'maxlength' => true]) ?>
-                        </div>
-
-                        <div class="col-sm-3 form-group message-field-phone message-field-sms" id="phone-numbers-group" style="display: block;">
-                            <?= $form->field($comForm, 'c_phone_number')->dropDownList($clientPhones, ['prompt' => '---', 'class' => 'form-control', 'id' => 'c_phone_number']) ?>
-                        </div>
-                    </div>
-                    <div id="sms-input-box" class="message-field-sms">
-                        <div class="form-group" id="sms-textarea-div">
-                            <?= $form->field($comForm, 'c_sms_message')->textarea(['rows' => 4, 'class' => 'form-control', 'id' => 'sms-message']) ?>
-
-                            <table class="table table-condensed table-responsive table-bordered" id="sms-counter">
+                        <div class="form-group">
+                            <?= $form3->field($previewSmsForm, 's_sms_message')->textarea(['rows' => 6, 'class' => 'form-control', 'id' => 'preview-sms-message']) ?>
+                            <table class="table table-condensed table-responsive table-bordered" id="preview-sms-counter">
                                 <tr>
                                     <td>Length: <span class="length"></span></td>
                                     <td>Messages: <span class="messages"></span></td>
@@ -396,191 +266,348 @@ $c_type_id = $comForm->c_type_id;
                                     <td>Encoding: <span class="encoding"></span></td>
                                 </tr>
                             </table>
-
                         </div>
-                        <div class="btn-wrapper">
-                            <?= Html::submitButton('<i class="fa fa-envelope-o"></i> Send SMS', ['class' => 'btn btn-lg btn-primary']) ?>
-                        </div>
-                    </div>
-
-                    <div id="email-input-box" class="message-field-email" style="display: none;">
-                        <div class="form-group" id="email-textarea-div">
-                            <?//= $form->field($comForm, 'c_email_message')->textarea(['rows' => 4, 'class' => 'form-control', 'id' => 'email-message']) ?>
-
-                            <?= $form->field($comForm, 'c_email_message')->widget(\dosamigos\ckeditor\CKEditor::class, [
-                                'options' => [
-                                    'rows' => 6,
-                                    'readonly' => false
-                                ],
-                                'preset' => 'custom',
-                                'clientOptions' => [
-                                    'height' => 500,
-                                    'fullPage' => false,
-
-                                    'allowedContent' => true,
-                                    'resize_enabled' => false,
-                                    'removeButtons' => 'Subscript,Superscript,Flash,Table,HorizontalRule,Smiley,SpecialChar,PageBreak,Iframe',
-                                    'removePlugins' => 'elementspath',
-                                ]
-                            ]) ?>
-
-                        </div>
-                        <div class="btn-wrapper">
-                            <?= Html::submitButton('<i class="fa fa-envelope-o"></i> Preview and Send Email', ['class' => 'btn btn-lg btn-primary']) ?>
-                        </div>
-                    </div>
-                    <div class="chat__call call-box message-field-phone" id="call-box" style="display: none;">
-
-                        <div class="call-box__interlocutor">
-                            <div class="call-box__interlocutor-name"><?php echo Html::encode($leadForm->getClient()->first_name.' ' . $leadForm->getClient()->last_name); ?></div>
-                            <div class="call-box__interlocutor-number" id="div-call-phone-number"><?=$comForm->c_phone_number?></div>
-                        </div>
-                        <div class="call-box__img <?=$comForm->c_voice_status == 1 ? 'call-box__img--waiting':''?>" id="div-call-img">
-                            <?=Html::img('/img/user.png', ['class' => 'img-circle img-responsive', 'alt' => 'client'])?>
+                        <div class="btn-wrapper text-center">
+                            <?= Html::submitButton('Send SMS <i class="fa fa-paper-plane"></i>', ['class' => 'btn btn-lg btn-primary']) ?>
                         </div>
 
-                            <div class="call-box__status call-box__status--waiting" style="display: block" id="div-call-message">
-                                <?php if($comForm->c_voice_status == 0):?>
-                                    Waiting
-                                <?php endif;?>
-                                <?php if($comForm->c_voice_status == 1):?>
-                                    Connection ... <?=$comForm->c_voice_sid?>
-                                <?php endif;?>
-                                <?php if($comForm->c_voice_status == 2):?>
-                                    Canceled Call
-                                <?php endif;?>
-                                <?php if($comForm->c_voice_status == 5):?>
-                                    Error Call
-                                <?php endif;?>
-                            </div>
-                        <?php if($comForm->c_voice_status == 1):?>
-                            <div class="call-box__status call-box__status--call" style="display: block" id="div-call-time"><i class="fa fa-clock-o"></i>&nbsp;<strong id="div-call-timer">00:00</strong></div>
-                        <?php endif;?>
+                        <?php \yii\bootstrap\ActiveForm::end(); ?>
+
+                    <?php \yii\bootstrap\Modal::end()?>
 
 
 
-                        <?php if($call_type_id == \common\models\UserProfile::CALL_TYPE_WEB): ?>
-                            <div class="call-box__btns">
-
-                                <?= Html::a('<i class="fa fa-phone"></i>', '#', ['class' => 'btn call-box__btn call-box__btn--call', 'id' => 'btn-start-web-call',
-                                    'data-project-id' => $leadForm->getLead()->project_id,
-                                    'data-lead-id' => $leadForm->getLead()->id,
-                                    'disabled' => ($comForm->c_voice_status == 1 ? true : false)
-                                ]) ?>
-
-                                <?/*<a href="#" class="call-phone" data-project-id="6" data-lead-id="92138" data-phone="+37369594567">+37369594567</a> - Alex <br/>*/?>
-
-                                <?//= Html::button('<i class="fa fa-microphone-slash"></i>', ['class' => 'btn call-box__btn call-box__btn--mute']) ?>
-                                <?/*= Html::button('<i class="fa fa-pause"></i>', ['class' => 'btn call-box__btn call-box__btn--pause', 'disabled' => true, 'id' => 'btn-pause'])*/ ?>
-                            </div>
-                        <? else: ?>
-                            <div class="call-box__btns">
-                                <?= Html::submitButton('<i class="fa fa-phone"></i>', ['class' => 'btn call-box__btn call-box__btn--call', 'id' => 'btn-start-call', 'disabled' => ($comForm->c_voice_status == 1 ? true : false), 'onclick' => '$("#c_voice_status").val(1)']) ?>
-                                <?= Html::submitButton('<i class="fa fa-stop"></i>', ['class' => 'btn call-box__btn call-box__btn--stop', 'disabled' => $comForm->c_voice_status == 1 ? false : true, 'id' => 'btn-stop-call', 'onclick' => '$("#c_voice_status").val(2)']) ?>
-                            </div>
-                        <? endif; ?>
-                    </div>
-
-                    <?= $form2->field($comForm, 'c_voice_status')->hiddenInput(['id' => 'c_voice_status'])->label(false); ?>
-                    <?= $form2->field($comForm, 'c_voice_sid')->hiddenInput(['id' => 'c_voice_sid'])->label(false); ?>
-                    <?= $form2->field($comForm, 'c_call_id')->hiddenInput(['id' => 'c_call_id'])->label(false); ?>
 
 
+                    <?php $form = \yii\bootstrap\ActiveForm::begin([
+                        //'action' => ['index'],
+                        'id' => 'communication-form',
+                        'method' => 'post',
+                        'options' => [
+                            'data-pjax' => 1,
+                            'class' => 'panel-body',
+                        ],
+                    ]);
 
-                <?/*php if($comForm->c_voice_status === 1):?>
-                    <?php
-                    $js = "
-                        var previewPopup = $('#modal-email-preview');
-                        //previewPopup.find('.modal-body').html(data);
-                        previewPopup.modal('show');";
 
-                    $this->registerJs($js);
+                        $clientEmails = \yii\helpers\ArrayHelper::map($leadForm->getClientEmail(), 'email', 'email');
+                        $clientEmails[Yii::$app->user->identity->email] = Yii::$app->user->identity->email;
+
+                        $clientPhones = $leadForm->getClient()->getPhoneNumbersSms(); //\yii\helpers\ArrayHelper::map($leadForm->getClientPhone(), 'phone', 'phone');
+
+                        if(Yii::$app->session->hasFlash('send-success')) {
+                            echo '<div class="alert alert-success alert-dismissible" role="alert"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>';
+                            echo Yii::$app->session->getFlash('send-success');
+                            echo '</div>';
+                        }
+
+                        if(Yii::$app->session->hasFlash('sms-send-success')) {
+                            echo '<div class="alert alert-success alert-dismissible" role="alert"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>';
+                            echo Yii::$app->session->getFlash('sms-send-success');
+                            echo '</div>';
+                        }
+
+                        if(Yii::$app->session->hasFlash('send-error')) {
+                            echo '<div class="alert alert-danger alert-dismissible" role="alert"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>';
+                            echo Yii::$app->session->getFlash('send-error');
+                            echo '</div>';
+                        }
+
+                        echo $form->errorSummary($comForm);
 
                     ?>
-                <?php endif; */?>
 
 
-                <?php if($comForm->c_preview_email):?>
-                    <?php
+                        <div class="row">
+                            <div class="col-sm-3 form-group">
+                                <?php
+                                    $typeList = [];
+                                    $agentParams = \common\models\UserProjectParams::find()->where(['upp_project_id' => $leadForm->getLead()->project_id, 'upp_user_id' => Yii::$app->user->id])->limit(1)->one();
+
+                                    /** @var \common\models\Employee $userModel */
+                                    $userModel = Yii::$app->user->identity;
+
+
+                                    $call_type = \common\models\UserProfile::find()->select('up_call_type_id')->where(['up_user_id' => Yii::$app->user->id])->one();
+
+
+                                    if($call_type && $call_type->up_call_type_id) {
+                                        $call_type_id = $call_type->up_call_type_id;
+
+                                    } else {
+                                        $call_type_id = \common\models\UserProfile::CALL_TYPE_OFF;
+                                    }
+
+
+                                    //\yii\helpers\VarDumper::dump($leadForm->getLead()->id, 10, true); exit;
+
+                                    if($agentParams) {
+                                        foreach (\frontend\models\CommunicationForm::TYPE_LIST as $tk => $itemName) {
+
+                                            if ($tk == \frontend\models\CommunicationForm::TYPE_EMAIL) {
+
+                                                if ($agentParams->upp_email) {
+                                                    $typeList[$tk] = $itemName . ' (' . $agentParams->upp_email . ')';
+                                                }
+                                            }
+
+                                            if ($tk == \frontend\models\CommunicationForm::TYPE_SMS) {
+
+                                                if ($agentParams->upp_tw_phone_number) {
+                                                    $typeList[$tk] = $itemName . ' (' . $agentParams->upp_tw_phone_number . ')';
+                                                }
+                                            }
+
+
+                                            if($call_type_id) {
+
+                                                $callTypeName = \common\models\UserProfile::CALL_TYPE_LIST[$call_type_id] ?? '-';
+
+                                                if($call_type_id == \common\models\UserProfile::CALL_TYPE_SIP && $userModel->userProfile && !$userModel->userProfile->up_sip) {
+                                                    $callTypeName .= ' [empty account]';
+                                                }
+
+                                                if ($tk == \frontend\models\CommunicationForm::TYPE_VOICE) {
+                                                    //if ($userModel->userProfile->up_sip) {
+                                                        $typeList[$tk] = $itemName . ' ('.$callTypeName.')';
+                                                    //}
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                ?>
+
+
+                                <?= $form->field($comForm, 'c_type_id')->dropDownList($typeList, ['prompt' => '---', 'class' => 'form-control', 'id' => 'c_type_id']) ?>
+                                <?= $form->field($comForm, 'c_quotes')->hiddenInput(['id' => 'c_quotes'])->label(false); ?>
+                            </div>
+
+                            <div class="col-sm-3 form-group message-field-sms" id="sms-template-group">
+                                <?= $form->field($comForm, 'c_sms_tpl_id')->dropDownList(\common\models\SmsTemplateType::getList(false), ['prompt' => '---', 'class' => 'form-control', 'id' => 'c_sms_tpl_id']) ?>
+                            </div>
+
+                            <div class="col-sm-3 form-group message-field-email" id="email-template-group" style="display: none;">
+                                <?= $form->field($comForm, 'c_email_tpl_id')->dropDownList(\common\models\EmailTemplateType::getList(false), ['prompt' => '---', 'class' => 'form-control', 'id' => 'c_email_tpl_id']) ?>
+                            </div>
+
+                            <div class="col-sm-3 form-group message-field-sms message-field-email" id="language-group" style="display: block;">
+                                <?= $form->field($comForm, 'c_language_id')->dropDownList(\lajax\translatemanager\models\Language::getLanguageNames(true), ['prompt' => '---', 'class' => 'form-control', 'id' => 'language']) ?>
+                            </div>
+
+                            <div class="col-sm-3 form-group message-field-email" id="email-address" style="display: none;">
+                                <?= $form->field($comForm, 'c_email_to')->dropDownList($clientEmails, ['prompt' => '---', 'class' => 'form-control', 'id' => 'email']) ?>
+                            </div>
+
+
+                            <div class="col-sm-12 form-group message-field-email" id="email-subtitle-group" style="display: none;">
+                                <?= $form->field($comForm, 'c_email_subject')->textInput(['class' => 'form-control', 'id' => 'email-subtitle', 'maxlength' => true]) ?>
+                            </div>
+
+                            <div class="col-sm-3 form-group message-field-phone message-field-sms" id="phone-numbers-group" style="display: block;">
+                                <?= $form->field($comForm, 'c_phone_number')->dropDownList($clientPhones, ['prompt' => '---', 'class' => 'form-control', 'id' => 'c_phone_number']) ?>
+                            </div>
+                        </div>
+                        <div id="sms-input-box" class="message-field-sms">
+                            <div class="form-group" id="sms-textarea-div">
+                                <?= $form->field($comForm, 'c_sms_message')->textarea(['rows' => 4, 'class' => 'form-control', 'id' => 'sms-message']) ?>
+
+                                <table class="table table-condensed table-responsive table-bordered" id="sms-counter">
+                                    <tr>
+                                        <td>Length: <span class="length"></span></td>
+                                        <td>Messages: <span class="messages"></span></td>
+                                        <td>Per Message: <span class="per_message"></span></td>
+                                        <td>Remaining: <span class="remaining"></span></td>
+                                        <td>Encoding: <span class="encoding"></span></td>
+                                    </tr>
+                                </table>
+
+                            </div>
+                            <div class="btn-wrapper">
+                                <?= Html::submitButton('<i class="fa fa-envelope-o"></i> Send SMS', ['class' => 'btn btn-lg btn-primary']) ?>
+                            </div>
+                        </div>
+
+                        <div id="email-input-box" class="message-field-email" style="display: none;">
+                            <div class="form-group" id="email-textarea-div">
+                                <?//= $form->field($comForm, 'c_email_message')->textarea(['rows' => 4, 'class' => 'form-control', 'id' => 'email-message']) ?>
+
+                                <?= $form->field($comForm, 'c_email_message')->widget(\dosamigos\ckeditor\CKEditor::class, [
+                                    'options' => [
+                                        'rows' => 6,
+                                        'readonly' => false
+                                    ],
+                                    'preset' => 'custom',
+                                    'clientOptions' => [
+                                        'height' => 500,
+                                        'fullPage' => false,
+
+                                        'allowedContent' => true,
+                                        'resize_enabled' => false,
+                                        'removeButtons' => 'Subscript,Superscript,Flash,Table,HorizontalRule,Smiley,SpecialChar,PageBreak,Iframe',
+                                        'removePlugins' => 'elementspath',
+                                    ]
+                                ]) ?>
+
+                            </div>
+                            <div class="btn-wrapper">
+                                <?= Html::submitButton('<i class="fa fa-envelope-o"></i> Preview and Send Email', ['class' => 'btn btn-lg btn-primary']) ?>
+                            </div>
+                        </div>
+                        <div class="chat__call call-box message-field-phone" id="call-box" style="display: none;">
+
+                            <div class="call-box__interlocutor">
+                                <div class="call-box__interlocutor-name"><?php echo Html::encode($leadForm->getClient()->first_name.' ' . $leadForm->getClient()->last_name); ?></div>
+                                <div class="call-box__interlocutor-number" id="div-call-phone-number"><?=$comForm->c_phone_number?></div>
+                            </div>
+                            <div class="call-box__img <?=$comForm->c_voice_status == 1 ? 'call-box__img--waiting':''?>" id="div-call-img">
+                                <?=Html::img('/img/user.png', ['class' => 'img-circle img-responsive', 'alt' => 'client'])?>
+                            </div>
+
+                                <div class="call-box__status call-box__status--waiting" style="display: block" id="div-call-message">
+                                    <?php if($comForm->c_voice_status == 0):?>
+                                        Waiting
+                                    <?php endif;?>
+                                    <?php if($comForm->c_voice_status == 1):?>
+                                        Connection ... <?=$comForm->c_voice_sid?>
+                                    <?php endif;?>
+                                    <?php if($comForm->c_voice_status == 2):?>
+                                        Canceled Call
+                                    <?php endif;?>
+                                    <?php if($comForm->c_voice_status == 5):?>
+                                        Error Call
+                                    <?php endif;?>
+                                </div>
+                            <?php if($comForm->c_voice_status == 1):?>
+                                <div class="call-box__status call-box__status--call" style="display: block" id="div-call-time"><i class="fa fa-clock-o"></i>&nbsp;<strong id="div-call-timer">00:00</strong></div>
+                            <?php endif;?>
+
+
+
+                            <?php if($call_type_id == \common\models\UserProfile::CALL_TYPE_WEB): ?>
+                                <div class="call-box__btns">
+
+                                    <?= Html::a('<i class="fa fa-phone"></i>', '#', ['class' => 'btn call-box__btn call-box__btn--call', 'id' => 'btn-start-web-call',
+                                        'data-project-id' => $leadForm->getLead()->project_id,
+                                        'data-lead-id' => $leadForm->getLead()->id,
+                                        'disabled' => ($comForm->c_voice_status == 1 ? true : false)
+                                    ]) ?>
+
+                                    <?/*<a href="#" class="call-phone" data-project-id="6" data-lead-id="92138" data-phone="+37369594567">+37369594567</a> - Alex <br/>*/?>
+
+                                    <?//= Html::button('<i class="fa fa-microphone-slash"></i>', ['class' => 'btn call-box__btn call-box__btn--mute']) ?>
+                                    <?/*= Html::button('<i class="fa fa-pause"></i>', ['class' => 'btn call-box__btn call-box__btn--pause', 'disabled' => true, 'id' => 'btn-pause'])*/ ?>
+                                </div>
+                            <? else: ?>
+                                <div class="call-box__btns">
+                                    <?= Html::submitButton('<i class="fa fa-phone"></i>', ['class' => 'btn call-box__btn call-box__btn--call', 'id' => 'btn-start-call', 'disabled' => ($comForm->c_voice_status == 1 ? true : false), 'onclick' => '$("#c_voice_status").val(1)']) ?>
+                                    <?= Html::submitButton('<i class="fa fa-stop"></i>', ['class' => 'btn call-box__btn call-box__btn--stop', 'disabled' => $comForm->c_voice_status == 1 ? false : true, 'id' => 'btn-stop-call', 'onclick' => '$("#c_voice_status").val(2)']) ?>
+                                </div>
+                            <? endif; ?>
+                        </div>
+
+                        <?= $form2->field($comForm, 'c_voice_status')->hiddenInput(['id' => 'c_voice_status'])->label(false); ?>
+                        <?= $form2->field($comForm, 'c_voice_sid')->hiddenInput(['id' => 'c_voice_sid'])->label(false); ?>
+                        <?= $form2->field($comForm, 'c_call_id')->hiddenInput(['id' => 'c_call_id'])->label(false); ?>
+
+
+
+                    <?/*php if($comForm->c_voice_status === 1):?>
+                        <?php
                         $js = "
-                        var previewPopup = $('#modal-email-preview');
-                        //previewPopup.find('.modal-body').html(data);
-                        previewPopup.modal('show');";
+                            var previewPopup = $('#modal-email-preview');
+                            //previewPopup.find('.modal-body').html(data);
+                            previewPopup.modal('show');";
 
                         $this->registerJs($js);
 
-                    ?>
-                <?php endif; ?>
+                        ?>
+                    <?php endif; */?>
+
+
+                    <?php if($comForm->c_preview_email):?>
+                        <?php
+                            $js = "
+                            var previewPopup = $('#modal-email-preview');
+                            //previewPopup.find('.modal-body').html(data);
+                            previewPopup.modal('show');";
+
+                            $this->registerJs($js);
+
+                        ?>
+                    <?php endif; ?>
 
 
 
-                <?php if($comForm->c_preview_sms):?>
+                    <?php if($comForm->c_preview_sms):?>
+                        <?php
+                        $js = "
+                            var previewPopup = $('#modal-sms-preview');
+                            //previewPopup.find('.modal-body').html(data);
+                            previewPopup.modal('show');";
+
+                        $this->registerJs($js);
+                        ?>
+                    <?php endif; ?>
+
+
+
+
                     <?php
-                    $js = "
-                        var previewPopup = $('#modal-sms-preview');
-                        //previewPopup.find('.modal-body').html(data);
-                        previewPopup.modal('show');";
-
-                    $this->registerJs($js);
-                    ?>
-                <?php endif; ?>
-
-
-
-
-                <?php
-$js = <<<JS
-
-    function initializeMessageType(messageType) {
-        if (messageType == 2) {
-            $('.message-field-phone').hide();
-            $('.message-field-email').hide();
-            $('.message-field-sms').show();
-        }
-        else if (messageType == 3) {
-            $('.message-field-sms').hide();
-            $('.message-field-email').hide();
-            $('.message-field-phone').show();
-        }
-        else if (messageType == 1) {
-            $('.message-field-sms').hide();
-            $('.message-field-phone').hide();
-            $('.message-field-email').show();
-        } else {
-            $('.message-field-sms').hide();
-            $('.message-field-phone').hide();
-            $('.message-field-email').hide();
-        }
-        
-        $('#c_sms_tpl_id').trigger('change');
-        $('#c_email_tpl_id').trigger('change');
-                
-        $('#sms-message').countSms('#sms-counter');
-        $('#preview-sms-message').countSms('#preview-sms-counter');
-        
-    }
-        
-
-    initializeMessageType($c_type_id);
+    $js = <<<JS
     
+        function initializeMessageType(messageType) {
+            if (messageType == 2) {
+                $('.message-field-phone').hide();
+                $('.message-field-email').hide();
+                $('.message-field-sms').show();
+            }
+            else if (messageType == 3) {
+                $('.message-field-sms').hide();
+                $('.message-field-email').hide();
+                $('.message-field-phone').show();
+            }
+            else if (messageType == 1) {
+                $('.message-field-sms').hide();
+                $('.message-field-phone').hide();
+                $('.message-field-email').show();
+            } else {
+                $('.message-field-sms').hide();
+                $('.message-field-phone').hide();
+                $('.message-field-email').hide();
+            }
+            
+            $('#c_sms_tpl_id').trigger('change');
+            $('#c_email_tpl_id').trigger('change');
+                    
+            $('#sms-message').countSms('#sms-counter');
+            $('#preview-sms-message').countSms('#preview-sms-counter');
+            
+        }
+            
+    
+        initializeMessageType($c_type_id);
+        
 
 JS;
 
-$this->registerJs($js);
-?>
+    $this->registerJs($js);
+    ?>
 
 
 
 
 
 
-                <?php \yii\bootstrap\ActiveForm::end(); ?>
+                    <?php \yii\bootstrap\ActiveForm::end(); ?>
 
+                </div>
             </div>
         </div>
-    </div>
 
-<?php yii\widgets\Pjax::end() ?>
+    <?php yii\widgets\Pjax::end() ?>
+    </div>
+</div>
 
 
 <?php \yii\bootstrap\Modal::begin(['id' => 'modal-email-view',

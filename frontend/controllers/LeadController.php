@@ -10,6 +10,7 @@ use common\models\ClientPhone;
 use common\models\Email;
 use common\models\EmailTemplateType;
 use common\models\Lead;
+use common\models\LeadCallExpert;
 use common\models\LeadFlow;
 use common\models\LeadLog;
 use common\models\LeadTask;
@@ -17,6 +18,7 @@ use common\models\local\LeadAdditionalInformation;
 use common\models\Note;
 use common\models\ProjectEmailTemplate;
 use common\models\Reason;
+use common\models\search\LeadCallExpertSearch;
 use common\models\Sms;
 use common\models\SmsTemplateType;
 use common\models\Task;
@@ -1011,6 +1013,31 @@ class LeadController extends FController
 
         }
 
+        //$dataProviderCommunication
+
+        $modelLeadCallExpert = new LeadCallExpert();
+
+
+        if ($modelLeadCallExpert->load(Yii::$app->request->post())) {
+
+            $modelLeadCallExpert->lce_agent_user_id = Yii::$app->user->id;
+            $modelLeadCallExpert->lce_lead_id = $lead->id;
+            $modelLeadCallExpert->lce_status_id = LeadCallExpert::STATUS_PENDING;
+            $modelLeadCallExpert->lce_request_dt = date('Y-m-d H:i:s');
+
+            if($modelLeadCallExpert->save()) {
+                $modelLeadCallExpert->lce_request_text = '';
+                //Yii::info(VarDumper::dumpAsString($modelLeadCallExpert->attributes), 'info\LeadController:view:LeadCallExpert');
+            }
+            //$modelLeadCallExpert =
+            //return $this->redirect(['view', 'id' => $model->lce_id]);
+        }
+
+
+        $searchModelCallExpert = new LeadCallExpertSearch();
+        $params = Yii::$app->request->queryParams;
+        $params['LeadCallExpertSearch']['lce_lead_id'] = $lead->id;
+        $dataProviderCallExpert = $searchModelCallExpert->searchByLead($params);
 
         //VarDumper::dump(enableCommunication); exit;
 
@@ -1023,7 +1050,9 @@ class LeadController extends FController
             'comForm' => $comForm,
             'quotesProvider' => $quotesProvider,
             'dataProviderCommunication' => $dataProviderCommunication,
-            'enableCommunication' => $enableCommunication
+            'enableCommunication' => $enableCommunication,
+            'dataProviderCallExpert' => $dataProviderCallExpert,
+            'modelLeadCallExpert' => $modelLeadCallExpert
         ]);
 
 
