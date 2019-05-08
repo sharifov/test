@@ -8,7 +8,7 @@ use DatePeriod;
 
 class ChartTools
 {
-    public static function getHoursRange( $start = 0, $end = 86400, $step = 3600, $format = 'H:i:s' ) {
+    public static function getHourRange( $start = 0, $end = 86400, $step = 3600, $format = 'H:i:s' ) {
         $times = array();
         foreach ( range( $start, $end, $step ) as $timestamp ) {
             $hour_mins = gmdate( 'H:i', $timestamp );
@@ -17,6 +17,17 @@ class ChartTools
             else $times[$hour_mins] = $hour_mins;
         }
         return $times;
+    }
+
+    public static function getHoursRange($first, $last, $step, $format) {
+        $period = array();
+        $current = strtotime( $first );
+        $last = strtotime( $last );
+        while( $current <= $last ) {
+            $period[] = date( $format, $current );
+            $current = strtotime( $step, $current );
+        }
+        return $period;
     }
 
     public static function getDaysRange( $first, $last, $step = '+1 day', $format = 'Y-m-d' ) {

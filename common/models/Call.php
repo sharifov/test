@@ -237,7 +237,7 @@ class Call extends \yii\db\ActiveRecord
         switch ($groupingBy){
             case null:
                 if (strtotime($startDate) == strtotime($endDate)){
-                    $hoursRange = ChartTools::getHoursRange();
+                    $hoursRange = ChartTools::getHoursRange($startDate, $endDate." 23:59:59", $step = '+1 hour', $format = 'H:i:s');
                 } else {
                     $daysRange = ChartTools::getDaysRange($startDate, $endDate);
                 }
@@ -245,7 +245,11 @@ class Call extends \yii\db\ActiveRecord
                 $eDate = $endDate." 23:59:59";
                 break;
             case 'hours':
-                $hoursRange = ChartTools::getHoursRange();
+                if (strtotime($startDate) == strtotime($endDate)){
+                    $hoursRange = ChartTools::getHoursRange($startDate, $endDate." 23:59:59", $step = '+1 hour', $format = 'H:i:s');
+                } else {
+                    $hoursRange = ChartTools::getHoursRange($startDate, $endDate." 23:59:59", $step = '+1 hour', $format = 'Y-m-d H:i:s');
+                }
                 $sDate = $startDate." 00:00:00";
                 $eDate = $endDate." 23:59:59";
                 break;
@@ -285,6 +289,11 @@ class Call extends \yii\db\ActiveRecord
                 $item['timeLine'] = 'd M';
                 $timeInSeconds = 0;
                 $dateFormat = 'Y-m-d';
+            }elseif (isset($hoursRange)){
+                $timeLine = $hoursRange;
+                $item['timeLine'] = 'H:i';
+                $dateFormat = 'Y-m-d H:i:s';
+                $timeInSeconds = 3600;
             }
         } else {
             if (isset($daysRange)) {
@@ -318,8 +327,7 @@ class Call extends \yii\db\ActiveRecord
                 if ($EndPoint == '00:00:00'){
                     $EndPoint = '23:59:59';
                 }
-            } else
-            {
+            } else {
                 $EndPoint = date($dateFormat, strtotime($weekInterval[1]));
                 $timeSignature = date($dateFormat, strtotime($weekInterval[0]));
             }

@@ -5,18 +5,22 @@ use yii\widgets\Pjax;
  */
 $js = <<<JS
     $('#viewMode0').click(function() {
+        $('#viewMode1, #viewMode2, #viewMode3').removeClass('active focus');
         $.pjax({container: '#calls-graph-pjax', data: {dateRange: $('#call-stats-picker').val(), groupBy: 'hours'}, type: 'PJAX', url: 'calls-graph', async:true, push: false});
     });
 
     $('#viewMode1').click(function() {
+        $('#viewMode0, #viewMode2, #viewMode3').removeClass('active focus');
         $.pjax({container: '#calls-graph-pjax', data: {dateRange: $('#call-stats-picker').val(), groupBy: 'days'}, type: 'PJAX', url: 'calls-graph', async:true, push: false});
     });
     
     $('#viewMode2').click(function() {
+        $('#viewMode0, #viewMode1, #viewMode3').removeClass('active focus');
         $.pjax({container: '#calls-graph-pjax', data: {dateRange: $('#call-stats-picker').val(), groupBy: 'weeks'}, type: 'PJAX', url: 'calls-graph', async:true, push: false});
     });
     
     $('#viewMode3').click(function() {
+        $('#viewMode0, #viewMode1, #viewMode2').removeClass('active focus');
         $.pjax({container: '#calls-graph-pjax', data: {dateRange: $('#call-stats-picker').val(), groupBy: 'months'}, type: 'PJAX', url: 'calls-graph', async:true, push: false});
     });
 JS;
@@ -44,6 +48,8 @@ $this->title = 'Calls Report';
                                 'hideInput'=>true,
                                 'useWithAddon'=>true,
                                 'pluginOptions'=>[
+                                    'minDate' => '2019-01-01',
+                                    'maxDate' => date("Y-m-d"),
                                     'timePicker'=> false,
                                     'timePickerIncrement'=>15,
                                     'locale'=>[
@@ -53,9 +59,17 @@ $this->title = 'Calls Report';
                                 ],
                                 'pluginEvents'=>[
                                     "apply.daterangepicker"=>"function(){
-                                     console.log($('#call-stats-picker').val());
+                                     //console.log($('#call-stats-picker').val());
                                      $.pjax({container: '#calls-graph-pjax', data: {dateRange: $('#call-stats-picker').val()}, type: 'PJAX', url: 'calls-graph', async:true, push: false});
-                                     //$('#viewMode').removeClass('hidden');                                 
+                                     let dates = $('#call-stats-picker').val().split(' / ');
+                                     if (dates[0] == dates[1]){
+                                        $('#viewMode0').addClass('active focus');
+                                        $('#viewMode1').removeClass('active focus');
+                                     } else {
+                                        $('#viewMode0').removeClass('active focus');
+                                        $('#viewMode1').addClass('active focus');
+                                     }                                                              
+                                                            
                                   }",
                                 ],
 
@@ -64,18 +78,19 @@ $this->title = 'Calls Report';
 
                         <div class="col-md-3 " id="viewMode">
                             <div class="btn-group btn-group-justified" data-toggle="buttons">
-                                <label class="btn btn-primary  active" id="viewMode0">
+                                <label class="btn btn-success active focus" id="viewMode0">
+                                    <input type="radio" class="sr-only"  name="viewMode" value="0">
                                     Hours
                                 </label>
-                                <label class="btn btn-primary" id="viewMode1">
+                                <label class="btn btn-success" id="viewMode1">
                                     <input type="radio" class="sr-only"  name="viewMode" value="1">
                                     Days
                                 </label>
-                                <label class="btn btn-primary" id="viewMode2">
+                                <label class="btn btn-success" id="viewMode2">
                                     <input type="radio" class="sr-only"  name="viewMode" value="2">
                                     Weeks
                                 </label>
-                                <label class="btn btn-primary" id="viewMode3">
+                                <label class="btn btn-success" id="viewMode3">
                                     <input type="radio" class="sr-only"  name="viewMode" value="3">
                                     Month
                                 </label>
@@ -111,9 +126,10 @@ $this->title = 'Calls Report';
                                                     },
                                                     height: 545,
                                                     vAxis: {
-                                                        title: 'Requests'
+                                                        //title: 'Requests'
                                                     },
                                                     //legend: { position: 'none' },
+
                                                 };
                                                 //var chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
                                                 let chart = new google.charts.Bar(document.getElementById('chart_div'));
@@ -122,7 +138,6 @@ $this->title = 'Calls Report';
                                                 $(window).resize(function(){
                                                     chart.draw(data, options); // redraw the graph on window resize
                                                 });
-                                                //chart.draw(data, google.charts.Bar.convertOptions(options));
                                             }
                                         </script>
                                     </div>
