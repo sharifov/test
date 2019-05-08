@@ -41,12 +41,13 @@ class LeadCallExpert extends \yii\db\ActiveRecord
 
 
     public const STATUS_LIST_LABEL = [
-        self::STATUS_PENDING    => '<span class="badge badge-warning">Pending</span>',
-        self::STATUS_PROCESSING => '<span class="badge badge-info">Processing</span>',
+        self::STATUS_PENDING    => '<span class="badge badge-yellow">Pending</span>',
+        self::STATUS_PROCESSING => '<span class="badge badge-warning">Processing</span>',
         self::STATUS_DONE       => '<span class="badge badge-green">Done</span>',
         self::STATUS_CANCEL     => '<span class="badge badge-danger">Cancel</span>',
     ];
 
+    public const SCENARIO_API_UPDATE = 'api_update';
 
 
     /**
@@ -70,7 +71,7 @@ class LeadCallExpert extends \yii\db\ActiveRecord
             [['lce_expert_username'], 'string', 'max' => 30],
             [['lce_agent_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['lce_agent_user_id' => 'id']],
             [['lce_lead_id'], 'exist', 'skipOnError' => true, 'targetClass' => Lead::class, 'targetAttribute' => ['lce_lead_id' => 'id']],
-            [['lce_lead_id'], 'validateStatus']
+            [['lce_lead_id'], 'validateStatus', 'except' => self::SCENARIO_API_UPDATE]
         ];
     }
 
@@ -84,7 +85,14 @@ class LeadCallExpert extends \yii\db\ActiveRecord
     public function validateStatus($attribute, $params)
     {
         if (!$this->hasErrors()) {
-            $call = self::find()->where(['lce_lead_id' => $this->lce_lead_id, 'lce_status_id' => [self::STATUS_PENDING, self::STATUS_PROCESSING]])->andWhere(['<>', 'lce_id', $this->lce_id])->limit(1)->one();
+            $query = self::find();
+            $query->where(['lce_lead_id' => $this->lce_lead_id, 'lce_status_id' => [self::STATUS_PENDING, self::STATUS_PROCESSING]]);
+            /*if($this->lce_id) {
+                $query->andWhere(['<>', 'lce_id', $this->lce_id]);
+            }*/
+            $query->limit(1);
+            $call = $query->one();
+
             if ($call) {
                 $this->addError($attribute, 'Exist Call Expert on status pending (id: '.$call->lce_id.')');
             }
@@ -165,12 +173,26 @@ class LeadCallExpert extends \yii\db\ActiveRecord
         if($lead) {
             $data = $lead->getLeadInformationForExpert();
             $data['call_expert'] = true;
+
+            $call['lce_id']             = $this->lce_id;
+            $call['lce_status_id']      = $this->lce_status_id;
+            $call['lce_agent_user_id']  = $this->lce_agent_user_id;
+            $call['lce_agent_username'] = $this->lceAgentUser ? $this->lceAgentUser->username : null;
+            $call['lce_request_text']   = $this->lce_request_text;
+
+            $data['call'] = $call;
+
             $data['LeadRequest']['information']['notes_for_experts'] = $this->lce_request_text;
 
             $result = BackOffice::sendRequest('lead/update-lead', 'POST', json_encode($data));
 
             if ($result && isset($result['status']) && $result['status'] === 'Success') {
                 return true;
+            }
+
+            if(!$lead->called_expert) {
+                $lead->called_expert = true;
+                $lead->save();
             }
         }
 

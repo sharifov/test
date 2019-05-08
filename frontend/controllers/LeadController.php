@@ -1250,7 +1250,7 @@ class LeadController extends FController
         throw new BadRequestHttpException();
     }
 
-    public function actionCallExpert($id)
+    /*public function actionCallExpert($id)
     {
         $lead = Lead::findOne(['id' => $id]);
         if ($lead !== null && !$lead->called_expert) {
@@ -1269,7 +1269,7 @@ class LeadController extends FController
             $lead->save();
         }
         return $this->redirect(Yii::$app->request->referrer);
-    }
+    }*/
 
     public function actionUnprocessed($show)
     {
