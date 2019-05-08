@@ -526,7 +526,14 @@ if($project){
             echo Html::button('<span class="btn-icon"><i class="fa fa-plus"></i></span> <span class="btn-text">' . $title . '</span>', $options);
         } ?>
 
-
+		<?php if ($leadForm->mode !== $leadForm::VIEW_MODE) {
+            $title = '<span class="btn-icon"><i class="fa fa-check"></i></span><span class="btn-text">'.($leadForm->getLead()->isNewRecord ? 'Create' : 'Save').'</span>';
+            echo Html::submitButton($title, [
+                'id' => 'submit-lead-form-btn',
+                'class' => 'btn btn-primary btn-with-icon'
+            ]);
+            echo $buttonAddNote;
+        }?>
 
         <?php if($leadForm->getLead()->status == Lead::STATUS_SOLD && (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id))):?>
         	<?= Html::button('<span class="btn-icon"><i class="fa fa-money"></i></span><span class="btn-text">Split profit</span>', [
