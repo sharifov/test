@@ -106,6 +106,12 @@ class LeadTaskSearch extends LeadTask
             }]);
         }
 
+        if($this->status) {
+            $query->joinWith(['ltLead' => function ($q) {
+                $q->where(['IN', 'leads.status', $this->status]);
+            }]);
+        }
+
         $query->andWhere(['IS', 'lt_completed_dt', null]);
 
         // grid filtering conditions
