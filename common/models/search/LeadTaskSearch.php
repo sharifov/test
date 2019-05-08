@@ -13,6 +13,7 @@ use common\models\LeadTask;
 class LeadTaskSearch extends LeadTask
 {
     public $status_not_in;
+    public $status;
     /**
      * {@inheritdoc}
      */
@@ -20,7 +21,7 @@ class LeadTaskSearch extends LeadTask
     {
         return [
             [['lt_lead_id', 'lt_task_id', 'lt_user_id'], 'integer'],
-            [['lt_date', 'lt_notes', 'lt_completed_dt', 'lt_updated_dt', 'status_not_in'], 'safe'],
+            [['lt_date', 'lt_notes', 'lt_completed_dt', 'lt_updated_dt', 'status_not_in', 'status'], 'safe'],
         ];
     }
 
