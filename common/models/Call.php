@@ -3,9 +3,8 @@
 namespace common\models;
 
 use Yii;
-use DatePeriod;
-use DateInterval;
 use DateTime;
+use common\components\ChartTools;
 
 /**
  * This is the model class for table "call".
@@ -226,103 +225,42 @@ class Call extends \yii\db\ActiveRecord
         }
     }
 
-    public function get_hours_range( $start = 0, $end = 86400, $step = 3600, $format = 'H:i:s' ) {
-        $times = array();
-        foreach ( range( $start, $end, $step ) as $timestamp ) {
-            $hour_mins = gmdate( 'H:i', $timestamp );
-            if ( ! empty( $format ) )
-                $times[$hour_mins] = gmdate( $format, $timestamp );
-            else $times[$hour_mins] = $hour_mins;
-        }
-        return $times;
-    }
-
-    public function dateRange( $first, $last, $step = '+1 day', $format = 'Y-m-d' ) {
-        $dates = array();
-        $current = strtotime( $first );
-        $last = strtotime( $last );
-
-        while( $current <= $last ) {
-
-            $dates[] = date( $format, $current );
-            $current = strtotime( $step, $current );
-        }
-        return $dates;
-    }
-
-    function get_months($start, $end) {
-        $startDate  = strtotime($start);
-        $endDate    = strtotime($end);
-        $firstMonth = date('Y-m', $startDate);
-        $lastMonth  = date('Y-m', $endDate);
-        $months = array($firstMonth);
-
-        while($startDate < $endDate) {
-            $startDate = strtotime(date('Y-m-d', $startDate).' +1 month');
-            if(date('Y-m', $startDate) != $lastMonth && ($startDate < $endDate))
-                $months[] = date('Y-m', $startDate);
-        }
-        if ($firstMonth != $lastMonth) {
-            $months[] = date('Y-m', $endDate);
-        }
-        return $months;
-    }
-
-    function weeksRange($start, $end){
-        $interval = new DateInterval('P1D');
-        $dateRange = new DatePeriod($start, $interval, $end);
-        $weekNumber = 1;
-        $weeks = array();
-        foreach ($dateRange as $date) {
-            $weeks[$weekNumber][] = $date->format('Y-m-d');
-            if ($date->format('w') == 0) {
-                $weekNumber++;
-            }
-        }
-        //return $weeks;
-        $weeksRanges = [];
-        foreach ($weeks as $week) {
-            $firstEle = reset($week);
-            $lastEle = end($week);
-            array_push($weeksRanges, $firstEle .'/'.$lastEle);
-        }
-        return $weeksRanges;
-    }
-
-    public static function getCallStats($startDate, $endDate, $groupingBy)
+    /**
+     * @param string $startDate
+     * @param string $endDate
+     * @param string $groupingBy
+     * @return array
+     * @throws \Exception
+     */
+    public static function getCallStats(string $startDate, string $endDate, ?string $groupingBy) : array
     {
         switch ($groupingBy){
             case null:
                 if (strtotime($startDate) == strtotime($endDate)){
-                    $hoursRange = self::get_hours_range();
+                    $hoursRange = ChartTools::getHoursRange();
                 } else {
-                    $daysRange = self::dateRange($startDate, $endDate);
+                    $daysRange = ChartTools::getDaysRange($startDate, $endDate);
                 }
-
                 $sDate = $startDate." 00:00:00";
                 $eDate = $endDate." 23:59:59";
                 break;
             case 'hours':
-                $hoursRange = self::get_hours_range();
-                //$daysRange = self::dateRange($startDate, $endDate);
+                $hoursRange = ChartTools::getHoursRange();
                 $sDate = $startDate." 00:00:00";
                 $eDate = $endDate." 23:59:59";
                 break;
             case 'days':
-                //$hoursRange = self::get_hours_range();
-                $daysRange = self::dateRange($startDate, $endDate);
+                $daysRange = ChartTools::getDaysRange($startDate, $endDate);
                 $sDate = $startDate." 00:00:00";
                 $eDate = $endDate." 23:59:59";
                 break;
             case 'weeks':
-                //$weeks = self::weeksRange(new DateTime('02.04.2019'), new DateTime('31.05.2019 23:59'));
-                $weeksPeriods = self::weeksRange(new DateTime($startDate), new DateTime($endDate . ' 23:59'));
+                $weeksPeriods = ChartTools::getWeeksRange(new DateTime($startDate), new DateTime($endDate . ' 23:59'));
                 $sDate = $startDate." 00:00:00";
                 $eDate = $endDate." 23:59:59";
-                //echo '<pre>';        print_r($weeksPeriods);        echo '</pre>';        die();
                 break;
             case 'months':
-                $monthsRange = self::get_months($startDate, $endDate);
+                $monthsRange = ChartTools::getMonthsRange($startDate, $endDate);
                 $sDate = date("Y-m-01", strtotime($startDate));
                 $eDate = date('Y-m-31', strtotime($endDate));
                 break;
@@ -377,12 +315,14 @@ class Call extends \yii\db\ActiveRecord
             $weekInterval = explode('/', $timeSignature);
             if (count($weekInterval) != 2){
                 $EndPoint = date($dateFormat, strtotime($timeSignature) + $timeInSeconds);
+                if ($EndPoint == '00:00:00'){
+                    $EndPoint = '23:59:59';
+                }
             } else
             {
                 $EndPoint = date($dateFormat, strtotime($weekInterval[1]));
                 $timeSignature = date($dateFormat, strtotime($weekInterval[0]));
             }
-
             foreach ($calls as $callItem){
                 $callUpdatedTime = date($dateFormat, strtotime($callItem->c_updated_dt));
                 if ($callUpdatedTime >= $timeSignature && $callUpdatedTime <= $EndPoint)
@@ -393,6 +333,7 @@ class Call extends \yii\db\ActiveRecord
                             break;
                         case 'no-answer':
                             $noAnswer++;
+                            echo $noAnswer;
                             break;
                         case 'busy':
                             $busy++;

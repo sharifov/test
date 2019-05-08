@@ -91,7 +91,6 @@ $this->title = 'Calls Report';
                                         <?php
                                         $this->registerJs("google.charts.load('current', {'packages':['bar']}); google.charts.setOnLoadCallback(drawChart);", \yii\web\View::POS_READY);
                                         ?>
-
                                         <script>
                                             function drawChart() {
                                                 let data = google.visualization.arrayToDataTable([
