@@ -164,6 +164,21 @@ SearchResult = function(props) {
 	                		}
 		    		 	});
                         break;
+		    		case 'fareType':
+		    			var fareType = filterList[filter];
+
+		    			if(fareType != "any_fare"){
+		    				var obj = $(selector+'[data-fareType="'+fareType+'"]');
+		    				$(obj).removeClass('hide');
+		    				$(obj).addClass('filtered');
+		    				filterApplied = true;
+		    			}else{
+		    				var obj = $(selector+'[data-fareType!="'+fareType+'"]');
+		    				$(obj).removeClass('hide');
+		    				$(obj).addClass('filtered');
+		    			}
+
+		                break;
 		    		case 'airline':
 		    			filterList[filter].forEach(function(airline) {
 		    				var obj = $(selector+'[data-airline="'+airline+'"]');
@@ -437,6 +452,33 @@ SearchResult = function(props) {
         });
     };
 
+    this.filterFareType = function() {
+        $(".filter--fareType .custom-radio").on("click", function() {
+            var radio = $(this).find('input[type="radio"]');
+            radio.prop('checked', true);
+            if (radio.attr("id") !== "any_fare") {
+                $('.filter--fareType').addClass("selected")
+                    .find('[data-toggle="dropdown"] span').html(radio.parent().find('label:last').html());
+                scope.addFilterParams({
+                    name: 'fareType',
+                    value: radio.attr("id")
+                });
+            } else {
+                $('.filter--fareType').removeClass("selected")
+                    .find('[data-toggle="dropdown"] span').html(locale.filterStops.stops);
+                scope.unsetFilterParams('fareType');
+            }
+        });
+
+        $(".filter--fareType .js-clear-filter").on("click", function(e) {
+            e.stopImmediatePropagation();
+            $('.filter--fareType').removeClass("selected")
+                .find('[data-toggle="dropdown"] span').html(locale.filterStops.stops);
+            $(".filter--fareType .custom-radio").find('input[type="radio"]:first').prop('checked', true);
+            scope.unsetFilterParams("fareType");
+        });
+    };
+
     this.filterTravelTimeSelectedTitleText = function() {
         var headerText = 'Time';
         if (Object.keys(filterList.travelTime).length < 3) {
@@ -540,6 +582,9 @@ SearchResult = function(props) {
     }
 
     this.filterInit = function() {
+        //= fare filter
+        scope.filterFareType();
+        //=# fare filter
         //= airline filter
         scope.filterAirline();
         //=# airline filter
