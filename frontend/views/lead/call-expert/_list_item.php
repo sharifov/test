@@ -37,6 +37,7 @@
     </div>
 
     <div class="col-md-6">
+        <?php if($model->lce_response_text || $model->lce_status_id === \common\models\LeadCallExpert::STATUS_DONE): ?>
         <table class="table table-striped table-bordered">
             <tr>
                 <td>
@@ -48,5 +49,6 @@
                 <td><?=nl2br(\yii\helpers\Html::encode($model->lce_response_text))?></td>
             </tr>
         </table>
+        <?php endif; ?>
     </div>
 </div>

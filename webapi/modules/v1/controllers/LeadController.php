@@ -1254,6 +1254,8 @@ class LeadController extends ApiBaseController
         }
 
         $leadCallExpert = LeadCallExpert::findOne($model->lce_id);
+        $leadCallExpert->scenario = LeadCallExpert::SCENARIO_API_UPDATE;
+
         if (!$leadCallExpert) {
             throw new NotFoundHttpException('Not found LeadCallExpert ID: ' . $model->lce_id, 9);
         }

@@ -29,18 +29,17 @@ use yii\widgets\Pjax;
 //echo Html::a('<span class="btn-icon"><i class="fa fa-bell"></i></span> <span class="btn-text">Call</span>', null, $options);
 
 ?>
-
 <?php yii\widgets\Pjax::begin(['id' => 'pjax-lead-call-expert', 'enablePushState' => false, 'timeout' => 10000]) ?>
 <div class="x_panel">
     <div class="x_title">
-        <h2><i class="fa fa-bell-o"></i> Call Expert Block </h2>
+        <h2><i class="fa fa-bell-o"></i> Call Expert Block (<?=$dataProvider->count?>) </h2>
         <ul class="nav navbar-right panel_toolbox">
             <li>
                 &nbsp;
             </li>
             <li>
                 <?//=Html::a('<i class="fa fa-comment"></i>', ['lead/view', 'gid' => $lead->gid, 'act' => 'call-expert-message'], ['class' => ''])?>
-                <?=Html::a('<i class="fa fa-plus-circle success"></i> new Call', '#', ['class' => '', 'id' => 'btn-call-expert-form'])?>
+                <?=Html::a('<i class="fa fa-plus-circle success"></i> new Call', null, ['id' => 'btn-call-expert-form'])?>
             </li>
             <li>
                 <a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
@@ -60,7 +59,7 @@ use yii\widgets\Pjax;
         </ul>
         <div class="clearfix"></div>
     </div>
-    <div class="x_content" style="display: block;">
+    <div class="x_content" style="display: <?=Yii::$app->request->isPjax ? 'block' : 'none';?>">
 
 
         <?/*<h1><?=random_int(1, 100)?></h1>*/ ?>
@@ -97,7 +96,7 @@ use yii\widgets\Pjax;
 
         <?php $form = ActiveForm::begin([
             //'action' => ['index'],
-            //'id' => 'email-preview-form',
+            'id' => 'call-expert-form',
             'method' => 'post',
             'options' => [
                 'data-pjax' => 1,
@@ -115,7 +114,7 @@ use yii\widgets\Pjax;
 
             <div class="col-md-12">
                 <div class="form-group text-center">
-                    <?= Html::submitButton('<i class="fa fa-plus"></i> Create call Expert', ['class' => 'btn btn-success']) ?>
+                    <?= Html::submitButton('<i class="fa fa-plus"></i> Create call Expert', ['class' => 'btn btn-success', 'id' => 'btn-submit-call-expert']) ?>
                     <?= Html::button('<i class="fa fa-copy"></i>', ['title' => 'Past from Lead Notes', 'class' => 'btn btn-primary', 'onclick' => '$("#lce_request_text").val($("#lead-notes_for_experts").val())']) ?>
                 </div>
             </div>
@@ -155,13 +154,20 @@ $this->registerJs(
         });
                 
 
-        $(document).on("pjax:start", function () {
+        $("#pjax-lead-call-expert").on("pjax:start", function () {
             //$("#pjax-container").fadeOut("fast");
+            $("#btn-submit-call-expert").attr("disabled", true).prop("disabled", true).addClass("disabled");
+            $("#btn-submit-call-expert i").attr("class", "fa fa-spinner fa-pulse fa-fw")
+            
         });
 
-        $(document).on("pjax:end", function () {
+        $("#pjax-lead-call-expert").on("pjax:end", function () {
             //$("#pjax-container").fadeIn("fast");
             //alert("end");
+            
+            $("#btn-submit-call-expert").attr("disabled", false).prop("disabled", false).removeClass("disabled");
+            $("#btn-submit-call-expert i").attr("class", "fa fa-plus");
+            
         });
     '
 );

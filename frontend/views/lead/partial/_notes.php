@@ -5,19 +5,33 @@
  */
 
 ?>
+<div class="x_panel">
+    <div class="x_title">
+        <h2><i class="fa fa-th-list"></i> Agent Notes (<?=count($notes)?>)</h2>
+        <ul class="nav navbar-right panel_toolbox">
+            <li>
+                &nbsp;
+            </li>
+            <li>
+                <a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+            </li>
 
-<div class="panel panel-success panel-wrapper agents-notes-block">
-    <div class="panel-heading collapsing-heading">
-        <a data-toggle="collapse" href="#agents-notes" aria-expanded="true"
-           class="collapsing-heading__collapse-link">
-            Agents Notes
-            <i class="collapsing-heading__arrow"></i>
-        </a>
+            <?/*<li class="dropdown">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-comment"></i></a>
+
+
+                <ul class="dropdown-menu" role="menu">
+                    <li><a href="#">Settings 1</a>
+                    </li>
+                    <li><a href="#">Settings 2</a>
+                    </li>
+                </ul>
+            </li>*/?>
+        </ul>
+        <div class="clearfix"></div>
     </div>
-    <div class="collapse in" id="agents-notes" aria-expanded="true" style="">
-        <div class="panel-body">
-            <div class="table-responsive">
-                <table class="table table-neutral table-striped">
+    <div class="x_content" style="display: none;">
+        <table class="table table-neutral table-striped">
                     <thead>
                     <tr>
                         <th>Agent</th>
@@ -35,7 +49,5 @@
                     <?php endforeach; ?>
                     </tbody>
                 </table>
-            </div>
-        </div>
     </div>
 </div>
