@@ -3917,6 +3917,7 @@ input[disabled] + .radio-tab__text {
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
+	flex-flow: row wrap;
 }
 
 @media (max-width: 1499px) {
@@ -4067,7 +4068,7 @@ input[disabled] + .radio-tab__text {
 }
 
 .quote__airline-logo {
-  margin-right: 20px;
+  margin-right: 10px;
   width: 26px;
   height: 26px;
   margin-top: 5px;
