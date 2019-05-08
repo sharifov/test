@@ -74,7 +74,7 @@ $formId = sprintf('%s-form', $leadForm->getLeadPreferences()->formName());
 </style>
 
 <div class="sidebar__section">
-    <h3 class="sidebar__subtitle">Notes for Experts</h3>
+    <h3 class="sidebar__subtitle">Notes from Client</h3>
     <div class="row" style="background: #f0f3f8; padding: 5px">
 
         <?php
