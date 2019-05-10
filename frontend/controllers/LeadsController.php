@@ -40,7 +40,7 @@ class LeadsController extends FController
                 'class' => AccessControl::class,
                 'rules' => [
                     [
-                        'actions' => ['index', 'update', 'delete', 'create', 'export', 'duplicate'],
+                        'actions' => ['index', 'update', 'delete', 'create', 'export', 'duplicate', 'view'],
                         'allow' => true,
                         'roles' => ['supervision', 'admin'],
                     ],
@@ -69,18 +69,23 @@ class LeadsController extends FController
         $params = Yii::$app->request->queryParams;
         $params2 = Yii::$app->request->post();
 
-        $params = array_merge($params, $params2);
+
+        $params = ArrayHelper::merge($params, $params2);
 
         if(isset($params['reset'])){
             $params = [];
             $session->remove('LeadSearch');
         }
 
-        if ($session->has('LeadSearch') && empty($params)){
+        if (empty($params) && $session->has('LeadSearch')){
             $params = $session->get('LeadSearch');
-        }elseif (!empty($params)){
+
+            //VarDumper::dump($params, 10, true);
+
+        } elseif (!empty($params)){
             $session->set('LeadSearch', $params);
         }
+
 
         if(Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id)) {
             $isAgent = true;
@@ -311,7 +316,7 @@ class LeadsController extends FController
             $viewParams['searchModelSegments'] = null;
             $viewParams['dataProviderSegments']->sort = false;*/
 
-            return $this->renderAjax('view', $viewParams);
+            //return $this->renderAjax('view', $viewParams);
         }
 
         return $this->render('view', $viewParams);

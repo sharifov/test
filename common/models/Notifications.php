@@ -2,11 +2,13 @@
 
 namespace common\models;
 
+use common\components\jobs\TelegramSendMessageJob;
 use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
 use yii\helpers\Json;
 use yii\helpers\VarDumper;
+use yii\queue\beanstalk\Queue;
 
 /**
  * This is the model class for table "notifications".
@@ -191,7 +193,7 @@ class Notifications extends ActiveRecord
 
         $md5Hash = md5($message.$user_id);
         if($unique) {
-            $exists = Notifications::find()->where(['n_unique_id' => $md5Hash])->exists();
+            $exists = self::find()->where(['n_unique_id' => $md5Hash])->exists();
             if($exists) {
                 return false;
             }
@@ -207,21 +209,27 @@ class Notifications extends ActiveRecord
 
         $model->n_new = true;
         if($model->save()){
-            //$userEmail = User::find()->where(['id' => $user_id])->one();
-            //if($userEmail->email) {
-
-                /*Yii::$app->mailer_photolamus
-                    ->compose()
-                    ->setTo($userEmail->email)
-                    ->setFrom(Yii::$app->params['email_from']['photolamus'])
-                    ->setSubject($title)
-                    ->setTextBody($message)
-                    ->send();*/
-            //}
             return true;
         }
 
         return false;
+    }
+
+
+    public function afterSave($insert, $changedAttributes)
+    {
+
+        parent::afterSave($insert, $changedAttributes);
+
+        if ($insert) {
+            $job = new TelegramSendMessageJob();
+            $job->user_id = $this->n_user_id;
+            $job->text = $this->n_message;
+
+            $queue = Yii::$app->queue_job;
+            $jobId = $queue->push($job);
+            Yii::info('UserID: '.$job->user_id.', TelegramSendMessageJob: '.$jobId, 'info\Notifications:afterSave:TelegramSendMessageJob');
+        }
     }
 
 

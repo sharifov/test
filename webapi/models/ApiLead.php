@@ -38,9 +38,11 @@ use yii\base\Model;
  * @property array $emails
  * @property array $phones
  * @property array $flights
- * @property array $client_first_name
- * @property array $client_middle_name
- * @property array $client_last_name
+ * @property string $client_first_name
+ * @property string $client_middle_name
+ * @property string $client_last_name
+ * @property string $user_agent
+ * @property string $user_language
  *
  */
 class ApiLead extends Model
@@ -80,8 +82,8 @@ class ApiLead extends Model
     public $client_first_name;
     public $client_last_name;
     public $client_middle_name;
-
-
+    public $user_agent;
+    public $user_language;
 
 
     public function formName()
@@ -113,7 +115,7 @@ class ApiLead extends Model
             [['adults', 'children', 'infants'], 'integer', 'min' => 0, 'max' => 9],
             [['adults'], 'integer', 'min' => 1],
             [['client_id', 'employee_id', 'status', 'project_id', 'source_id', 'adults', 'children', 'infants', 'rating'], 'integer'],
-            [['notes_for_experts', 'request_ip_detail'], 'string'],
+            [['notes_for_experts', 'request_ip_detail', 'user_agent'], 'string'],
             [['created', 'updated', 'snooze_for', 'flights', 'emails', 'phones'], 'safe'],
             [['uid', 'request_ip', 'offset_gmt'], 'string', 'max' => 255],
 
@@ -121,6 +123,10 @@ class ApiLead extends Model
 
             [['trip_type'], 'string', 'max' => 2],
             [['cabin'], 'string', 'max' => 1],
+
+            [['user_language'], 'string', 'max' => 5],
+            [['user_agent'], 'string'],
+
             [['client_id'], 'exist', 'skipOnError' => true, 'targetClass' => Client::class, 'targetAttribute' => ['client_id' => 'id']],
             [['employee_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['employee_id' => 'id']],
             [['flights'], 'checkIsFlights'],
@@ -196,8 +202,8 @@ class ApiLead extends Model
     {
 
         if (empty($this->emails) && empty($this->phones)) {
-            $this->addError('emails', "Phones or Emails cannot be blank");
-            $this->addError('phones', "Phones or Emails cannot be blank");
+            $this->addError('emails', 'Phones or Emails cannot be blank');
+            $this->addError('phones', 'Phones or Emails cannot be blank');
         }
 
     }
@@ -239,7 +245,46 @@ class ApiLead extends Model
             'client_first_name' => 'Client first name',
             'client_last_name' => 'Client last name',
             'client_middle_name'    => 'Client middle name',
+
+            'user_language'    => 'Client Language',
+            'user_agent'    => 'Client UserAgent',
         ];
+    }
+
+    /**
+     * @return string
+     */
+    public function getRequestHash() : string
+    {
+        $hashArray = [];
+        $hashArray[] = $this->request_ip;
+        $hashArray[] = $this->project_id;
+        $hashArray[] = $this->adults;
+        $hashArray[] = $this->children;
+        $hashArray[] = $this->infants;
+        $hashArray[] = $this->cabin;
+        $hashArray[] = date('Y-m-d');
+
+        if($this->phones) {
+            foreach ($this->phones as $phone) {
+                $hashArray[] = $phone;
+            }
+        }
+
+        if($this->flights) {
+            foreach ($this->flights as $flight) {
+                $hashArray[] = $flight['origin'];
+                $hashArray[] = $flight['destination'];
+                $hashArray[] = $flight['departure'];
+            }
+        }
+
+        $strHash = implode('|', $hashArray);
+        $hash = md5($strHash);
+
+        Yii::info('Lead ('.$this->lead_id.', StrHash: "'.$strHash.'", "'.$hash.'")', 'info\APILead:strHash');
+
+        return $hash;
     }
 
 

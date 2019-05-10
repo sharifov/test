@@ -6,11 +6,16 @@ use common\models\Client;
 use common\models\ClientEmail;
 use common\models\ClientPhone;
 use common\models\Lead;
+use common\models\LeadCallExpert;
 use common\models\LeadFlightSegment;
+use common\models\Notifications;
 use common\models\Project;
 use common\models\Source;
 use webapi\models\ApiLead;
+use webapi\models\ApiLeadCallExpert;
 use Yii;
+use yii\helpers\Html;
+use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
 use yii\web\NotFoundHttpException;
 use yii\web\UnprocessableEntityHttpException;
@@ -323,29 +328,81 @@ class LeadController extends ApiBaseController
         $response = [];
         $transaction = Yii::$app->db->beginTransaction();
 
-        $client = new Client();
 
-        if ($modelLead->client_first_name) $client->first_name = $modelLead->client_first_name;
-        else $client->first_name = 'ClientName';
+        $client = null;
+        $lead = new Lead();
 
-        if ($modelLead->client_last_name) $client->last_name = $modelLead->client_last_name;
-        if ($modelLead->client_middle_name) $client->middle_name = $modelLead->client_middle_name;
+        if($modelLead->phones) {
+            foreach ($modelLead->phones as $phone) {
+                $phone = trim($phone);
+                if(!$phone) {
+                    continue;
+                }
+
+                $lead->l_client_phone = $phone;
+
+                $phoneModel = ClientPhone::find()->where(['phone' => $phone])->orderBy(['id' => SORT_DESC])->limit(1)->one();
+
+                if($phoneModel && $phoneModel->client) {
+                    $client = $phoneModel->client;
+                    break;
+                }
+            }
+        }
+
+        if ($modelLead->emails) {
+            foreach ($modelLead->emails as $email) {
+
+                $email = mb_strtolower(trim($email));
+
+                if(!$email) {
+                    continue;
+                }
+                $lead->l_client_email = $email;
+            }
+        }
+
+
+        if(!$client) {
+            $client = new Client();
+
+            if ($modelLead->client_first_name) {
+                $client->first_name = $modelLead->client_first_name;
+            } else {
+                $client->first_name = 'ClientName';
+            }
+
+            if ($modelLead->client_last_name) {
+                $client->last_name = $modelLead->client_last_name;
+            }
+            if ($modelLead->client_middle_name) {
+                $client->middle_name = $modelLead->client_middle_name;
+            }
+        }
+
+
 
         if (!$client->save()) {
             throw new UnprocessableEntityHttpException($this->errorToString($client->errors));
         }
 
 
-        $lead = new Lead();
+
         //$lead->scenario = Lead::SCENARIO_API;
         $lead->attributes = $modelLead->attributes;
 
         $lead->client_id = $client->id;
-        if (!$lead->status) $lead->status = Lead::STATUS_PENDING;
-        if (!$lead->uid) $lead->uid = uniqid();
+        if (!$lead->status) {
+            $lead->status = Lead::STATUS_PENDING;
+        }
 
+        if (!$lead->uid) {
+            $lead->uid = uniqid();
+        }
 
-        if (!$lead->trip_type) $lead->trip_type = Lead::TRIP_TYPE_ROUND_TRIP;
+        if (!$lead->trip_type) {
+            $lead->trip_type = Lead::TRIP_TYPE_ROUND_TRIP;
+        }
 
         if ($modelLead->flights) {
             $flightCount = count($modelLead->flights);
@@ -360,21 +417,72 @@ class LeadController extends ApiBaseController
         }
 
 
-        if (!$lead->cabin) $lead->cabin = Lead::CABIN_ECONOMY;
+        if (!$lead->cabin) {
+            $lead->cabin = Lead::CABIN_ECONOMY;
+        }
 
-        if (!$lead->children) $lead->children = 0;
-        if (!$lead->infants) $lead->infants = 0;
-        if (!$lead->request_ip) $lead->request_ip = Yii::$app->request->remoteIP;
+        if (!$lead->children) {
+            $lead->children = 0;
+        }
+        if (!$lead->infants) {
+            $lead->infants = 0;
+        }
+        if (!$lead->request_ip) {
+            $lead->request_ip = Yii::$app->request->remoteIP;
+        }
+
+        if ($this->apiProject) {
+            $lead->project_id = $this->apiProject->id;
+        }
 
 
-        if ($this->apiProject) $lead->project_id = $this->apiProject->id;
+
+        if(!$lead->l_client_lang && $modelLead->user_language) {
+            $lead->l_client_lang = $modelLead->user_language;
+        }
+
+        if(!$lead->l_client_ua && $modelLead->user_agent) {
+            $lead->l_client_ua = $modelLead->user_agent;
+        }
+
+        if(!$lead->l_client_first_name && $modelLead->client_first_name) {
+            $lead->l_client_first_name = $modelLead->client_first_name;
+        }
+
+        if(!$lead->l_client_last_name && $modelLead->client_last_name) {
+            $lead->l_client_last_name = $modelLead->client_last_name;
+        }
+
+        $request_hash = $modelLead->getRequestHash();
+
+        $lead->l_call_status_id = Lead::CALL_STATUS_READY;
+
+
+        $duplicateLead = Lead::find()
+            ->where(['l_request_hash' => $request_hash])->andWhere(['>=', 'created', date('Y-m-d H:i:s', strtotime('-12 hours'))])
+            ->orderBy(['id' => SORT_ASC])->limit(1)->one();
+
+        if($duplicateLead) {
+            $lead->l_duplicate_lead_id = $duplicateLead->id;
+            $lead->status = Lead::STATUS_TRASH;
+            Yii::info('Warning: detected duplicate Lead (Origin id: '.$duplicateLead->id.', Hash: '.$request_hash.')', 'info\API:Lead:duplicate');
+        }
+
+
+        if(!$lead->l_request_hash && $request_hash) {
+            $lead->l_request_hash = $request_hash;
+        }
+
+
 
 
 
         if (!$lead->validate()) {
             if ($errors = $lead->getErrors()) {
                 throw new UnprocessableEntityHttpException($this->errorToString($errors), 7);
-            } else throw new UnprocessableEntityHttpException('Not validate Lead data', 7);
+            } else {
+                throw new UnprocessableEntityHttpException('Not validate Lead data', 7);
+            }
         }
 
         if (!$lead->save()) {
@@ -404,8 +512,16 @@ class LeadController extends ApiBaseController
         }
 
 
-        if ($modelLead->emails)
+        if ($modelLead->emails) {
             foreach ($modelLead->emails as $email) {
+
+                $email = mb_strtolower(trim($email));
+
+                $emailExist = ClientEmail::find()->where(['email' => $email, 'client_id' => $client->id])->exists();
+                if($emailExist) {
+                    continue;
+                }
+
                 $emailModel = new ClientEmail();
 
                 $emailModel->client_id = $client->id;
@@ -418,9 +534,18 @@ class LeadController extends ApiBaseController
                     throw new UnprocessableEntityHttpException($this->errorToString($emailModel->errors), 11);
                 }
             }
+        }
 
-        if ($modelLead->phones)
+        if ($modelLead->phones) {
             foreach ($modelLead->phones as $phone) {
+
+                $phone = trim($phone);
+
+                $phoneExist = ClientPhone::find()->where(['phone' => $phone, 'client_id' => $client->id])->exists();
+                if($phoneExist) {
+                    continue;
+                }
+
                 $phoneModel = new ClientPhone();
 
                 $phoneModel->client_id = $client->id;
@@ -433,6 +558,7 @@ class LeadController extends ApiBaseController
                     throw new UnprocessableEntityHttpException($this->errorToString($phoneModel->errors), 12);
                 }
             }
+        }
 
         $transaction->commit();
 
@@ -478,8 +604,11 @@ class LeadController extends ApiBaseController
 
         if (isset($response['error']) && $response['error']) {
             $json = @json_encode($response['error']);
-            if (isset($response['error_code']) && $response['error_code']) $error_code = $response['error_code'];
-            else $error_code = 0;
+            if (isset($response['error_code']) && $response['error_code']) {
+                $error_code = $response['error_code'];
+            } else {
+                $error_code = 0;
+            }
             throw new UnprocessableEntityHttpException($json, $error_code);
         }
 
@@ -976,5 +1105,213 @@ class LeadController extends ApiBaseController
 
 
         return $responseData;
+    }
+
+
+    /**
+     * @api {post} /v1/lead/call-expert Update Lead Call Expert
+     * @apiVersion 0.1.0
+     * @apiName UpdateLeadCallExpert
+     * @apiGroup Leads
+     * @apiPermission Authorized User
+     *
+     * @apiHeader {string} Authorization    Credentials <code>base64_encode(Username:Password)</code>
+     * @apiHeaderExample {json} Header-Example:
+     *  {
+     *      "Authorization": "Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==",
+     *      "Accept-Encoding": "Accept-Encoding: gzip, deflate"
+     *  }
+     *
+     * @apiParam {object}           call                                        CallExpert data array
+     * @apiParam {int}                  call.lce_id                             Call Expert ID
+     * @apiParam {int=1-PENDING,2-PROCESSING,3-DONE,4-CANCEL}                  call.lce_status_id                    Status Id
+     * @apiParam {text}                 call.lce_response_text                  Response text from Expert (Required on lce_status_id = 3)
+     * @apiParam {string{30}}           call.lce_expert_username                Expert Username (Required on lce_status_id = 3)
+     * @apiParam {int}                  [call.lce_expert_user_id]               Expert Id
+     * @apiParam {text}                 [call.lce_response_lead_quotes]         JSON UID quote list
+     *
+     *
+     *
+     * @apiParamExample {json} Request-Example:
+     * {
+     *    "call": {
+     *        "lce_id": 38,
+     *        "lce_response_text": "Message from expert",
+     *        "lce_expert_username": "Alex",
+     *        "lce_expert_user_id": 12,
+     *        "lce_response_lead_quotes": "[\"5ccbe7a458765\", \"5ccbe797a6a22\"]",
+     *        "lce_status_id": 2
+     *    }
+     * }
+     *
+     * @apiSuccess {String}     status          Response Status
+     * @apiSuccess {String}     name            Response Name
+     * @apiSuccess {Integer}    code            Response Code
+     * @apiSuccess {String}     message         Response Message
+     * @apiSuccess {Array}      data            Response Data Array
+     * @apiSuccess {String}     action          Response API action
+     * @apiSuccess {Integer}    response_id     Response Id
+     * @apiSuccess {DateTime}   request_dt      Request Date & Time
+     * @apiSuccess {DateTime}   response_dt     Response Date & Time
+     *
+     * @apiSuccessExample Success-Response:
+     * HTTP/1.1 200 OK
+     * {
+     *  "status": 200,
+     *  "name": "Success",
+     *  "code": 0,
+     *  "message": "",
+     *  "data": {
+     *      "response": {
+     *          "lce_id": 8,
+     *          "lce_lead_id": 113947,
+     *          "lce_request_text": "12\r\n2\r\nqwe qwe qwe qwe qwe fasd asd fasdf\r\n",
+     *          "lce_request_dt": "2019-05-03 14:08:20",
+     *          "lce_response_text": "Test expert text",
+     *          "lce_response_lead_quotes": "[\"5ccbe7a458765\", \"5ccbe797a6a22\"]",
+     *          "lce_response_dt": "2019-05-07 09:14:01",
+     *          "lce_status_id": 3,
+     *          "lce_agent_user_id": 167,
+     *          "lce_expert_user_id": "2",
+     *          "lce_expert_username": "Alex",
+     *          "lce_updated_dt": "2019-05-07 09:14:01"
+     *      }
+     *  },
+     *  "action": "v1/lead/call-expert",
+     *  "response_id": 457671,
+     *  "request_dt": "2019-05-07 09:14:01",
+     *  "response_dt": "2019-05-07 09:14:01"
+     * }
+     *
+     * @apiError UserNotFound The id of the User was not found.
+     *
+     * @apiErrorExample Error-Response:
+     *
+     *
+     * HTTP/1.1 401 Unauthorized
+     *  {
+     *      "name": "Unauthorized",
+     *      "message": "Your request was made with invalid credentials.",
+     *      "code": 0,
+     *      "status": 401,
+     *      "type": "yii\\web\\UnauthorizedHttpException"
+     *  }
+     *
+     *
+     * HTTP/1.1 400 Bad Request
+     *  {
+     *      "name": "Bad Request",
+     *      "message": "Not found LeadCallExpert data on POST request",
+     *      "code": 6,
+     *      "status": 400,
+     *      "type": "yii\\web\\BadRequestHttpException"
+     *  }
+     *
+     *
+     * HTTP/1.1 404 Not Found
+     *  {
+     *      "name": "Not Found",
+     *      "message": "Not found LeadCallExpert ID: 100",
+     *      "code": 9,
+     *      "status": 404,
+     *      "type": "yii\\web\\NotFoundHttpException"
+     *  }
+     *
+     *
+     * HTTP/1.1 422 Unprocessable entity
+     *  {
+     *      "name": "Unprocessable entity",
+     *      "message": "Response Text cannot be blank.; Expert Username cannot be blank.",
+     *      "code": 5,
+     *      "status": 422,
+     *      "type": "yii\\web\\UnprocessableEntityHttpException"
+     *  }
+     *
+     * @return array
+     * @throws BadRequestHttpException
+     * @throws NotFoundHttpException
+     * @throws UnprocessableEntityHttpException
+     */
+
+    public function actionCallExpert(): array
+    {
+        $this->checkPost();
+        $apiLog = $this->startApiLog($this->action->uniqueId);
+        $response = [];
+
+        $model = new ApiLeadCallExpert();
+
+        if ($model->load(Yii::$app->request->post())) {
+            if (!$model->validate()) {
+                if ($errors = $model->getErrors()) {
+                    throw new UnprocessableEntityHttpException($this->errorToString($errors), 5);
+                }
+
+                throw new UnprocessableEntityHttpException('Not validate LeadCallExpert data', 5);
+            }
+        } else {
+            throw new BadRequestHttpException('Not found LeadCallExpert data on POST request', 6);
+        }
+
+        $leadCallExpert = LeadCallExpert::findOne($model->lce_id);
+        $leadCallExpert->scenario = LeadCallExpert::SCENARIO_API_UPDATE;
+
+        if (!$leadCallExpert) {
+            throw new NotFoundHttpException('Not found LeadCallExpert ID: ' . $model->lce_id, 9);
+        }
+
+        $leadCallExpert->lce_response_dt = date('Y-m-d H:i:s');
+        $leadCallExpert->lce_updated_dt = date('Y-m-d H:i:s');
+
+        if($model->lce_response_lead_quotes) {
+            $leadCallExpert->lce_response_lead_quotes = $model->lce_response_lead_quotes;
+        }
+
+        if($model->lce_response_text) {
+            $leadCallExpert->lce_response_text = $model->lce_response_text;
+        }
+
+        if($model->lce_expert_username) {
+            $leadCallExpert->lce_expert_username = $model->lce_expert_username;
+        }
+
+        if($model->lce_expert_user_id) {
+            $leadCallExpert->lce_expert_user_id = $model->lce_expert_user_id;
+        }
+
+        $leadCallExpert->lce_status_id = $model->lce_status_id;
+
+        if($leadCallExpert->save()) {
+
+
+            if($leadCallExpert->lce_agent_user_id) {
+                Notifications::create($leadCallExpert->lce_agent_user_id, 'Expert Response', 'Expert ('.Html::encode($leadCallExpert->lce_expert_username).') Response ('.$leadCallExpert->getStatusName().'). Lead ID: ' . $leadCallExpert->lce_lead_id, Notifications::TYPE_INFO, true);
+                Notifications::socket($leadCallExpert->lce_agent_user_id, $leadCallExpert->lce_lead_id, 'getNewNotification', [], true);
+            }
+
+            $response = $leadCallExpert->attributes;
+
+            $responseData['status']     = 200;
+            $responseData['name']       = 'Success';
+            $responseData['code']       = 0;
+            $responseData['message']    = '';
+
+        } else {
+            $response['error'] = $this->errorToString($leadCallExpert->errors); //VarDumper::dumpAsString($leadCallExpert->errors, 10);
+            $response['error_code'] = 10;
+        }
+
+        $responseData['data']['response'] = $response;
+        //$responseData['data']['request'] = $model;
+
+        $responseData = $apiLog->endApiLog($responseData);
+
+        if (isset($response['error']) && $response['error']) {
+            $error_code = $response['error_code'] ?? 0;
+            throw new UnprocessableEntityHttpException($response['error'], $error_code);
+        }
+
+        return $responseData;
+
     }
 }

@@ -75,6 +75,49 @@ if(isset($lastResult['passengers']['ADT'])){
         </div>
     </div>
     <div class="search-filters">
+        <!--Fare types-->
+        <div class="filter filter--fareType dropdown js-filter">
+            <a data-toggle="dropdown" href="#">Fare type
+                <i class="icn-clear-filter js-clear-filter"></i></a>
+
+            <!--Dropdown-->
+            <div class="dropdown-menu dropdown-menu-right">
+                <div class="search-filters__fareType">
+                    <h3 class="search-filters__header">
+                        Fare type
+                        <i class="search-filters__close-btn js-dropdown-close"></i>
+                    </h3>
+                    <div class="search-filters__body">
+                        <div class="form-group custom-radio">
+                            <input type="radio" id="any_fare" name="fareType" checked>
+                            <label for="any_fare"></label>
+                            <label for="any_fare">Any</label>
+                        </div>
+                        <div class="form-group custom-radio">
+                            <input type="radio" id="PUB" name="fareType">
+                            <label for="PUB"></label>
+                            <label for="PUB">Public</label>
+                        </div>
+                        <div class="form-group custom-radio">
+                            <input type="radio" id="SR" name="fareType">
+                            <label for="SR"></label>
+                            <label for="SR">Private</label>
+                        </div>
+                        <div class="form-group custom-radio">
+                            <input type="radio" id="COMM" name="fareType">
+                            <label for="COMM"></label>
+                            <label for="COMM">Commission</label>
+                        </div>
+                        <div class="form-group custom-radio">
+                            <input type="radio" id="TOUR" name="fareType">
+                            <label for="TOUR"></label>
+                            <label for="TOUR">Tour</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!--Price-->
         <div class="filter filter--price dropdown js-filter">
             <a data-toggle="dropdown" href="#">Price <i class="icn-clear-filter js-clear-filter"></i></a>

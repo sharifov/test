@@ -324,7 +324,9 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
             if(isset($roles['supervision'])) {
                 unset($roles['supervision']);
             }
+        }
 
+        if(Yii::$app->user->identity->role != 'admin' && Yii::$app->user->identity->role != 'userManager' ) {
             if(isset($roles['qa'])) {
                 unset($roles['qa']);
             }
@@ -865,7 +867,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
             $entry['minus_percent_profit'] = intval($entry['minus_percent_profit']);
             $entry['minus_percent_tips'] = intval($entry['minus_percent_tips']);
             $quote = Quote::findOne(['id' => $entry['q_id']]);
-            if($entry['final_profit']){
+            if($entry['final_profit'] !== null){
                 $totalProfit = $entry['final_profit'];
                 $agentsProcessingFee = ($entry['agents_processing_fee'])?$entry['agents_processing_fee']:$entry['pax_cnt']*Lead::AGENT_PROCESSING_FEE_PER_PAX;
                 $totalProfit -= $agentsProcessingFee;
@@ -1259,7 +1261,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         $isFree = true;
         //$call = Call::find()->where(['c_created_user_id' => $this->id])->orderBy(['c_id' => SORT_DESC])->limit(1)->one();
 
-        $callExist = Call::find()->where(['c_created_user_id' => $this->id, 'c_call_type_id' => [Call::CALL_STATUS_QUEUE, Call::CALL_STATUS_RINGING, Call::CALL_STATUS_IN_PROGRESS]])->limit(1)->exists();
+        $callExist = Call::find()->where(['c_created_user_id' => $this->id, 'c_call_status' => [Call::CALL_STATUS_QUEUE, Call::CALL_STATUS_RINGING, Call::CALL_STATUS_IN_PROGRESS]])->limit(1)->exists();
 
         if($callExist) {
             //if(in_array($call->c_call_type_id, [Call::CALL_STATUS_QUEUE, Call::CALL_STATUS_RINGING, Call::CALL_STATUS_IN_PROGRESS])) {
@@ -1353,6 +1355,4 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
 
         return $exist;
     }
-
-
 }

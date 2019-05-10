@@ -879,13 +879,19 @@ class QuoteController extends FController
                                         $segmentKey = $baggageAttr['segment'];
                                         $origin = substr($segmentKey, 0, 3);
                                         $destination = substr($segmentKey, 2, 3);
-                                        $segments = QuoteSegment::find()->innerJoin(QuoteTrip::tableName(),'qs_trip_id = qt_id')
+                                        $segment = QuoteSegment::find()->innerJoin(QuoteTrip::tableName(),'qs_trip_id = qt_id')
                                         ->andWhere(['qt_quote_id' =>  $quote->id])
                                         ->andWhere(['or',
                                             ['qs_departure_airport_code'=>$origin],
                                             ['qs_arrival_airport_code'=>$destination]
                                         ])
-                                        ->all();
+                                        ->one();
+                                        $segments = [];
+                                        if(!empty($segment)){
+                                            $segments = QuoteSegment::find()
+                                            ->andWhere(['qs_trip_id' =>  $segment->qs_trip_id])
+                                            ->all();
+                                        }
                                         if(!empty($segments)){
                                             if(isset($baggageAttr['free_baggage']) && isset($baggageAttr['free_baggage']['piece'])){
                                                 foreach ($segments as $segment){

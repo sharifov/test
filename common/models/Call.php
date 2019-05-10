@@ -5,6 +5,8 @@ namespace common\models;
 use Yii;
 use DateTime;
 use common\components\ChartTools;
+use yii\helpers\VarDumper;
+
 
 /**
  * This is the model class for table "call".
@@ -53,8 +55,8 @@ class Call extends \yii\db\ActiveRecord
     public const CALL_STATUS_IN_PROGRESS    = 'in-progress';
     public const CALL_STATUS_COMPLETED      = 'completed';
     public const CALL_STATUS_BUSY           = 'busy';
-    public const CALL_STATUS_FAILED         = 'failed';
     public const CALL_STATUS_NO_ANSWER      = 'no-answer';
+    public const CALL_STATUS_FAILED         = 'failed';
     public const CALL_STATUS_CANCELED       = 'canceled';
 
     public const CALL_STATUS_LIST = [
@@ -63,9 +65,20 @@ class Call extends \yii\db\ActiveRecord
         self::CALL_STATUS_IN_PROGRESS   => 'In progress',
         self::CALL_STATUS_COMPLETED     => 'Completed',
         self::CALL_STATUS_BUSY          => 'Busy',
-        self::CALL_STATUS_FAILED        => 'Failed',
         self::CALL_STATUS_NO_ANSWER     => 'No answer',
+        self::CALL_STATUS_FAILED        => 'Failed',
         self::CALL_STATUS_CANCELED      => 'Canceled',
+    ];
+
+    public const CALL_STATUS_LABEL_LIST = [
+        self::CALL_STATUS_QUEUE         => '<span class="label label-warning"><i class="fa fa-refresh fa-spin"></i> ' . self::CALL_STATUS_LIST[self::CALL_STATUS_QUEUE] . '</span>',
+        self::CALL_STATUS_RINGING       => '<span class="label label-warning"><i class="fa fa-spinner fa-spin"></i> ' . self::CALL_STATUS_LIST[self::CALL_STATUS_RINGING] . '</span>',
+        self::CALL_STATUS_IN_PROGRESS   => '<span class="label label-success"><i class="fa fa-volume-control-phone"></i> ' . self::CALL_STATUS_LIST[self::CALL_STATUS_IN_PROGRESS] . '</span>',
+        self::CALL_STATUS_COMPLETED     => '<span class="label label-info"><i class="fa fa-check"></i> ' . self::CALL_STATUS_LIST[self::CALL_STATUS_COMPLETED] . '</span>',
+        self::CALL_STATUS_BUSY          => '<span class="label label-danger"><i class="fa fa-ban"></i> ' . self::CALL_STATUS_LIST[self::CALL_STATUS_BUSY] . '</span>',
+        self::CALL_STATUS_NO_ANSWER     => '<span class="label label-danger"><i class="fa fa-times-circle"></i> ' . self::CALL_STATUS_LIST[self::CALL_STATUS_NO_ANSWER] . '</span>',
+        self::CALL_STATUS_FAILED        => '<span class="label label-danger"><i class="fa fa-window-close"></i> ' . self::CALL_STATUS_LIST[self::CALL_STATUS_FAILED] . '</span>',
+        self::CALL_STATUS_CANCELED      => '<span class="label label-danger"><i class="fa fa-close"></i> ' . self::CALL_STATUS_LIST[self::CALL_STATUS_CANCELED] . '</span>',
     ];
 
     public const CALL_STATUS_DESCRIPTION_LIST = [
@@ -210,6 +223,14 @@ class Call extends \yii\db\ActiveRecord
         return self::CALL_STATUS_LIST[$this->c_call_status] ?? '-';
     }
 
+    /**
+     * @return mixed|string
+     */
+    public function getStatusLabel()
+    {
+        return self::CALL_STATUS_LABEL_LIST[$this->c_call_status] ?? '-';
+    }
+
     public function afterSave($insert, $changedAttributes)
     {
         parent::afterSave($insert, $changedAttributes);
@@ -223,6 +244,97 @@ class Call extends \yii\db\ActiveRecord
                 Notifications::socket($user->uc_user_id, null, 'callMapUpdate', [], true);
             }
         }
+
+        if(!$insert) {
+            if(in_array($this->c_call_status, [Call::CALL_STATUS_COMPLETED, Call::CALL_STATUS_BUSY, Call::CALL_STATUS_NO_ANSWER])) {
+                if($this->c_created_user_id) {
+                    self::applyHoldCallToAgent($this->c_created_user_id);
+                }
+            }
+        }
+    }
+
+/**
+* @param $agentId
+* @return bool
+*/
+    public static function applyHoldCallToAgent(int $agentId)
+    {
+        //sleep(1);
+        try {
+            $user = Employee::findOne($agentId);
+            if (!$user) {
+                throw new \Exception('Agent not found by id. CommunicationService:redirectCallFromHold:$user:'. $agentId);
+            }
+
+            if (!$user->isOnline()) {
+                throw new \Exception('Agent is not isOnline CommunicationService:redirectCallFromHold:isOnline:$user:'. $agentId);
+            }
+
+            if (!$user->isCallStatusReady()) {
+                throw new \Exception('Agent is not isCallStatusReady. CommunicationService:redirectCallFromHold:isCallStatusReady:$user:'. $agentId);
+            }
+
+            if (!$user->isCallFree()) {
+                throw new \Exception('Agent is not isCallFree. CommunicationService:redirectCallFromHold:isCallFree:$user:'. $agentId);
+            }
+
+            $project_employee_access = ProjectEmployeeAccess::find()->where(['employee_id' => $user->id])->all();
+            if (!$project_employee_access) {
+                throw new \Exception('Not found ProjectEmployeeAccess. CommunicationService:redirectCallFromHold:$project_employee_access:$user:'. $agentId);
+            }
+
+            $projectsIds = [];
+            foreach ($project_employee_access AS $pea) {
+                $projectsIds[] = $pea->project_id;
+            }
+
+            /*$sources = Source::find()->where( ['project_id' => $projectsIds] )->all();
+            if (!$sources || !count($sources)) {
+                throw new \Exception('Not found Source. CommunicationService:redirectCallFromHold:$sources:$user:'. $agentId);
+            }
+
+            $phoneNumbersProjects = [];
+            foreach ($sources AS $source) {
+                $phoneNumbersProjects[] = $source->phone_number;
+            }
+            if (!$phoneNumbersProjects) {
+                throw new \Exception('Not found $phoneNumbersProjects. CommunicationService:redirectCallFromHold:$phoneNumbersProjects:$user:'. $agentId);
+            }*/
+
+            $calls = Call::find()->where(['=', 'c_call_status', Call::CALL_STATUS_QUEUE])
+                ->andWhere(['c_project_id' => $projectsIds])
+                ->orderBy(['c_id' => SORT_ASC])
+                ->limit(20)
+                ->all();
+
+            if(!$calls) {
+                return false;
+            }
+            foreach ($calls as $call) {
+                $agent = 'seller' . $user->id;
+                $res = (\Yii::$app->communication)->callRedirect($call->c_call_sid, 'client', $call->c_from, $agent);
+                if ($res && isset($res['error']) && $res['error'] === false) {
+                    if(isset($res['data']['is_error']) && $res['data']['is_error'] ===  true) {
+                        continue;
+                    }
+
+                    $callRedirect = Call::findOne($call->c_id);
+                    if($callRedirect) {
+                        $callRedirect->c_call_status = Call::CALL_STATUS_COMPLETED;
+                        $callRedirect->save();
+                        Notifications::socket(null, $callRedirect->c_lead_id, 'callUpdate', ['status' => $callRedirect->c_call_status, 'duration' => (int)$callRedirect->c_call_duration, 'snr' => $callRedirect->c_sequence_number], true);
+                    }
+                    \Yii::info(VarDumper::dumpAsString($res, 10, false), 'info\Component:CommunicationService::redirectCallFromHold:callRedirect');
+                    return true;
+                }
+            }
+
+        } catch (\Throwable $e) {
+            \Yii::error(VarDumper::dumpAsString([$e->getMessage(), $e->getFile(), $e->getLine()], 10, false), 'Component:CommunicationService::redirectCallFromHold');
+            return false;
+        }
+        return false;
     }
 
     /**

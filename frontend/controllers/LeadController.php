@@ -10,6 +10,7 @@ use common\models\ClientPhone;
 use common\models\Email;
 use common\models\EmailTemplateType;
 use common\models\Lead;
+use common\models\LeadCallExpert;
 use common\models\LeadFlow;
 use common\models\LeadLog;
 use common\models\LeadTask;
@@ -17,6 +18,7 @@ use common\models\local\LeadAdditionalInformation;
 use common\models\Note;
 use common\models\ProjectEmailTemplate;
 use common\models\Reason;
+use common\models\search\LeadCallExpertSearch;
 use common\models\Sms;
 use common\models\SmsTemplateType;
 use common\models\Task;
@@ -69,7 +71,7 @@ class LeadController extends FController
                             'create', 'add-comment', 'change-state', 'unassign', 'take', 'auto-take',
                             'set-rating', 'add-note', 'unprocessed', 'call-expert', 'send-email',
                             'check-updates', 'flow-transition', 'get-user-actions', 'add-pnr', 'update2','clone',
-                            'get-badges', 'sold', 'split-profit', 'split-tips','processing', 'follow-up', 'inbox', 'trash', 'booked',
+                            'get-badges', 'sold', 'split-profit', 'split-tips','processing', 'follow-up',  'trash', 'booked',
                             'test', 'view'
                         ],
                         'allow' => true,
@@ -77,11 +79,27 @@ class LeadController extends FController
                     ],
 
                     [
+                        'actions' => ['inbox'],
+                        'allow' => Yii::$app->params['settings']['enable_lead_inbox'] ?: false,
+                        'roles' => ['agent', 'admin', 'supervisor'],
+                    ],
+
+                    //if(isset(Yii::$app->params['settings']['enable_lead_inbox']) && Yii::$app->params['settings']['enable_lead_inbox']) {
+
+                    [
                         'actions' => [
-                            'view'
+                            'pending', 'duplicate'
                         ],
                         'allow' => true,
-                        'roles' => ['qa'],
+                        'roles' => ['admin'],
+                    ],
+
+                    [
+                        'actions' => [
+                            'view', 'trash', 'sold', 'duplicate'
+                        ],
+                        'allow' => true,
+                        'roles' => ['qa', 'supervisor'],
                     ],
                 ],
             ]
@@ -152,7 +170,7 @@ class LeadController extends FController
 
             if (Yii::$app->request->post('hasEditable')) {
 
-                $value = '456';
+                $value = '';
                 $message = '';
 
                 // use Yii's response format to encode output as JSON
@@ -206,7 +224,7 @@ class LeadController extends FController
                     }
 
                     return [];
-                }elseif (Yii::$app->request->isPost && $taskNotes = Yii::$app->request->post('task_notes')) {
+                } elseif (Yii::$app->request->isPost && $taskNotes = Yii::$app->request->post('task_notes')) {
 
                     $taskId = $taskDate = $userId = $leadId = null;
 
@@ -242,8 +260,15 @@ class LeadController extends FController
 
                     }
 
+                } elseif (Yii::$app->request->isPost && Yii::$app->request->post('notes_for_experts', null) !== null) {
+                    $lead->notes_for_experts = Yii::$app->request->post('notes_for_experts');
+                    if($lead->save()) {
+                        $value = $lead->notes_for_experts;
+                    } else {
+                        $message = 'Not save lead';
+                    }
                 } else {
-                    $message = 'Not found task notes data';
+                    $message = 'Not found data';
                 }
 
 
@@ -988,6 +1013,31 @@ class LeadController extends FController
 
         }
 
+        //$dataProviderCommunication
+
+        $modelLeadCallExpert = new LeadCallExpert();
+
+
+        if ($modelLeadCallExpert->load(Yii::$app->request->post())) {
+
+            $modelLeadCallExpert->lce_agent_user_id = Yii::$app->user->id;
+            $modelLeadCallExpert->lce_lead_id = $lead->id;
+            $modelLeadCallExpert->lce_status_id = LeadCallExpert::STATUS_PENDING;
+            $modelLeadCallExpert->lce_request_dt = date('Y-m-d H:i:s');
+
+            if($modelLeadCallExpert->save()) {
+                $modelLeadCallExpert->lce_request_text = '';
+                //Yii::info(VarDumper::dumpAsString($modelLeadCallExpert->attributes), 'info\LeadController:view:LeadCallExpert');
+            }
+            //$modelLeadCallExpert =
+            //return $this->redirect(['view', 'id' => $model->lce_id]);
+        }
+
+
+        $searchModelCallExpert = new LeadCallExpertSearch();
+        $params = Yii::$app->request->queryParams;
+        $params['LeadCallExpertSearch']['lce_lead_id'] = $lead->id;
+        $dataProviderCallExpert = $searchModelCallExpert->searchByLead($params);
 
         //VarDumper::dump(enableCommunication); exit;
 
@@ -1000,7 +1050,9 @@ class LeadController extends FController
             'comForm' => $comForm,
             'quotesProvider' => $quotesProvider,
             'dataProviderCommunication' => $dataProviderCommunication,
-            'enableCommunication' => $enableCommunication
+            'enableCommunication' => $enableCommunication,
+            'dataProviderCallExpert' => $dataProviderCallExpert,
+            'modelLeadCallExpert' => $modelLeadCallExpert
         ]);
 
 
@@ -1198,7 +1250,7 @@ class LeadController extends FController
         throw new BadRequestHttpException();
     }
 
-    public function actionCallExpert($id)
+    /*public function actionCallExpert($id)
     {
         $lead = Lead::findOne(['id' => $id]);
         if ($lead !== null && !$lead->called_expert) {
@@ -1217,7 +1269,7 @@ class LeadController extends FController
             $lead->save();
         }
         return $this->redirect(Yii::$app->request->referrer);
-    }
+    }*/
 
     public function actionUnprocessed($show)
     {
@@ -1306,7 +1358,12 @@ class LeadController extends FController
 
                 } elseif ($reason->queue == 'trash') {
                     $model->status = $model::STATUS_TRASH;
-                    $type = 'trash';
+
+                    if($reason->duplicateLeadId) {
+                        $model->l_duplicate_lead_id = $reason->duplicateLeadId;
+                    }
+
+                    //$type = 'trash';
                 } elseif ($reason->queue == 'snooze') {
                     $modelAttr = Yii::$app->request->post($model->formName());
                     $model->snooze_for = $modelAttr['snooze_for'];
@@ -1317,7 +1374,7 @@ class LeadController extends FController
                         $model->status = $model::STATUS_FOLLOW_UP;
                     } elseif ($attrAgent !== null) {
                         $model->employee_id = $attrAgent;
-                        $model->status = $model::STATUS_ON_HOLD;
+                        $model->status = $model::STATUS_PROCESSING;
                     }
                 } elseif ($reason->queue == 'processing-over') {
                     $model->status = $model::STATUS_PROCESSING;
@@ -1341,7 +1398,7 @@ class LeadController extends FController
                     $model->save();
                     return $this->redirect(['trash']);
                 } else {
-                    $model->status = $model::STATUS_ON_HOLD;
+                    $model->status = $model::STATUS_PROCESSING;
                 }
 
                 $model->save();
@@ -1415,7 +1472,7 @@ class LeadController extends FController
         }
 
 
-        $inProcessing = Lead::find()
+        /*$inProcessing = Lead::find()
             ->where([
                 'employee_id' => $user->getId(),
                 'status' => Lead::STATUS_PROCESSING
@@ -1424,7 +1481,7 @@ class LeadController extends FController
             $inProcessing->status = Lead::STATUS_ON_HOLD;
             $inProcessing->save();
             $inProcessing = null;
-        }
+        }*/
 
         $model = Lead::find()
             ->where(['gid' => $gid])
@@ -1586,39 +1643,7 @@ class LeadController extends FController
 
 
 
-    public function actionSold()
-    {
-        $searchModel = new LeadSearch();
-        $salary = null;
-        $salaryBy = '';
 
-        $params = Yii::$app->request->queryParams;
-        $params2 = Yii::$app->request->post();
-
-        $params = array_merge($params, $params2);
-
-        if(Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id)) {
-            $isAgent = true;
-        } else {
-            $isAgent = false;
-        }
-
-        if(Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id)) {
-            $params['LeadSearch']['supervision_id'] = Yii::$app->user->id;
-        }
-
-        if($isAgent) {
-            $params['LeadSearch']['employee_id'] = Yii::$app->user->id;
-        }
-
-        $dataProvider = $searchModel->searchSold($params);
-
-        return $this->render('sold', [
-            'searchModel' => $searchModel,
-            'dataProvider' => $dataProvider,
-            'isAgent' => $isAgent,
-        ]);
-    }
 
 
     public function actionProcessing()
@@ -1680,6 +1705,29 @@ class LeadController extends FController
     }
 
 
+    public function actionPending()
+    {
+        $searchModel = new LeadSearch();
+
+        $params = Yii::$app->request->queryParams;
+        $params2 = Yii::$app->request->post();
+
+        $params = array_merge($params, $params2);
+
+                if(Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id)) {
+            $params['LeadSearch']['supervision_id'] = Yii::$app->user->id;
+        }
+        $dataProvider = $searchModel->searchInbox($params);
+
+        //$user = Yii::$app->user->identity;
+
+        return $this->render('pending', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+        ]);
+    }
+
+
     public function actionInbox()
     {
         $searchModel = new LeadSearch();
@@ -1708,6 +1756,8 @@ class LeadController extends FController
                 if($userParams->up_inbox_show_limit_leads > 0) {
                     $params['LeadSearch']['limit'] = $userParams->up_inbox_show_limit_leads;
                 }
+            }else{
+                throw new NotFoundHttpException('Not set user params for agent! Please ask supervisor to set shift time and other.');
             }
 
 
@@ -1751,6 +1801,39 @@ class LeadController extends FController
     }
 
 
+    public function actionSold()
+    {
+        $searchModel = new LeadSearch();
+        $salary = null;
+
+        $params = Yii::$app->request->queryParams;
+        $params2 = Yii::$app->request->post();
+
+        $params = array_merge($params, $params2);
+
+        if(Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id)) {
+            $isAgent = true;
+        } else {
+            $isAgent = false;
+        }
+
+        if(Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id)) {
+            $params['LeadSearch']['supervision_id'] = Yii::$app->user->id;
+        }
+
+        if($isAgent) {
+            $params['LeadSearch']['employee_id'] = Yii::$app->user->id;
+        }
+
+        $dataProvider = $searchModel->searchSold($params);
+
+        return $this->render('sold', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+            'isAgent' => $isAgent,
+        ]);
+    }
+
     public function actionTrash()
     {
         $searchModel = new LeadSearch();
@@ -1777,6 +1860,27 @@ class LeadController extends FController
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
             'isAgent' => $isAgent,
+        ]);
+    }
+
+    public function actionDuplicate()
+    {
+        $searchModel = new LeadSearch();
+
+        $params = Yii::$app->request->queryParams;
+        $params2 = Yii::$app->request->post();
+
+        $params = array_merge($params, $params2);
+
+        if(Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id)) {
+            $params['LeadSearch']['supervision_id'] = Yii::$app->user->id;
+        }
+
+        $dataProvider = $searchModel->searchDuplicates($params);
+
+        return $this->render('duplicate', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
         ]);
     }
 

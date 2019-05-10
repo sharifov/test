@@ -34,6 +34,13 @@ return [
         'ver' => '1.0.0',
         'apiKey' => '5394bbedf41dd2c0403897ca621f188b',
         'serverUrl' => 'https://backoffice.zeit.style/api/sync'
-    ]
+    ],
+    'global_phone' => '+16692011799',
 
+    'telegram' => [
+        'bot_username'  => 'CrmKivorkBot',
+        'token'         => '817992632:AAE6UXJRqDscAZc9gUBScEpaT_T4zGukdos',
+        //'webhook_url'   => 'https://api-sales.dev.travelinsides.com/v1/telegram/webhook'
+        'webhook_url'   => 'https://sales.api.travelinsides.com/v1/telegram/webhook'
+    ]
 ];

@@ -15,6 +15,7 @@ use yii\filters\AccessControl;
 use common\models\LoginForm;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
+use Da\QrCode\QrCode;
 
 /**
  * Site controller
@@ -44,7 +45,7 @@ class SiteController extends FController
             'verbs' => [
                 'class' => VerbFilter::class,
                 'actions' => [
-                    'logout' => ['post', 'GET'],
+                    'logout' => ['POST', 'GET'],
                 ],
             ],
         ];
@@ -67,16 +68,6 @@ class SiteController extends FController
     /**
      * Displays homepage.
      *
-     * @return mixed
-     */
-    public function actionIndex2()
-    {
-        return $this->render('index2');
-    }
-
-    /**
-     * Displays homepage.
-     *
      * @return string
      */
     public function actionIndex(): string
@@ -93,6 +84,10 @@ class SiteController extends FController
 
         if (Yii::$app->authManager->getAssignment('qa', $userId)) {
             return $this->dashboardQa();
+        }
+
+        if (Yii::$app->authManager->getAssignment('userManager', $userId)) {
+            return $this->dashboardUM();
         }
 
         return $this->dashboardAgent();
@@ -411,7 +406,7 @@ class SiteController extends FController
         $params['LeadTaskSearch']['lt_user_id'] = $userId;
         $params['LeadTaskSearch']['status'] = [Lead::STATUS_PROCESSING, Lead::STATUS_ON_HOLD];
 
-        $params['LeadTaskSearch']['status_not_in'] = [Lead::STATUS_TRASH/* , Lead::STATUS_SNOOZE */];
+        //$params['LeadTaskSearch']['status_not_in'] = [Lead::STATUS_TRASH , Lead::STATUS_SNOOZE ];
 
         //VarDumper::dump($params); exit;
         $searchLeadTask = new LeadTaskSearch();
@@ -476,6 +471,11 @@ class SiteController extends FController
         return $this->render('index_qa');
     }
 
+
+    public function dashboardUM(): string
+    {
+        return $this->render('index_um');
+    }
 
 
     public function actionLogout()
@@ -563,9 +563,54 @@ class SiteController extends FController
         //new UserParams();
 
 
+        $secureCode = md5(Yii::$app->user->id . '|' . Yii::$app->user->identity->username . '|' . date('Y-m-d'));
+
+
+        //$host = (Yii::$app->request->isSecureConnection ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'];
+
+        //$url = \yii\helpers\Url::to(['site/telegram-activate', 'id' => Yii::$app->user->id, 'code' => $secureCode]);
+
+        //echo $host.$url; exit;
+        $code = base64_encode(Yii::$app->user->id . '|' . $secureCode);
+
+        $url = 'https://telegram.me/CrmKivorkBot?start='.$code;
+
+        $qrCode = (new QrCode($url))
+            ->setSize(160)
+            ->setMargin(5)
+            ->useForegroundColor(0, 0, 0);
+
+
+
+        /*$qrCode = (new QrCode('https://2amigos.us'))
+            ->useLogo(__DIR__ . '/data/logo.png')
+            ->useForegroundColor(51, 153, 255)
+            ->useBackgroundColor(200, 220, 210)
+            ->useEncoding('UTF-8')
+            ->setErrorCorrectionLevel(ErrorCorrectionLevelInterface::HIGH)
+            ->setLogoWidth(60)
+            ->setSize(300)
+            ->setMargin(5)
+            ->setLabel($label);*/
+
+        //$qrCode->writeFile(__DIR__ . '/codes/my-code.png');
+
+        // now we can display the qrcode in many ways
+        // saving the result to a file:
+
+        //$qrCode->writeFile(__DIR__ . '/code.png'); // writer defaults to PNG when none is specified
+
+        // display directly to the browser
+        //header('Content-Type: '.$qrCode->getContentType());
+        //echo $qrCode->writeString();
+        //echo $qrCode->writeDataUri();
+        //exit;
+
+
         return $this->render('/employee/update_profile', [
             'model' => $model,
-            'modelUserParams' => $modelUserParams
+            'modelUserParams' => $modelUserParams,
+            'qrcodeData' => $qrCode->writeDataUri()
         ]);
     }
 

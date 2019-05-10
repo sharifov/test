@@ -3,6 +3,7 @@
  * @var $this \yii\web\View
  * @var $model Employee
  * @var $modelUserParams \common\models\UserParams
+ * @var $qrcodeData string
  */
 
 use yii\bootstrap\Html;
@@ -105,9 +106,14 @@ $this->params['breadcrumbs'][] = $this->title;
                 <?= Html::submitButton('Save Profile', ['class' => 'btn btn-primary']) ?>
             </div>
     <?php ActiveForm::end() ?>
+
+
+
+
+
 </div>
 
-<div class="col-sm-6">
+<div class="col-sm-4">
 
     <?= \yii\widgets\DetailView::widget([
         'model' => $modelUserParams,
@@ -143,4 +149,34 @@ $this->params['breadcrumbs'][] = $this->title;
         ],
     ]) ?>
 
+    <?= \yii\widgets\DetailView::widget([
+        'model' => $model->userProfile,
+        'attributes' => [
+            /*[
+                'attribute' => 'up_base_amount',
+                'value' => function(\common\models\UserParams $model) {
+                    return $model->up_base_amount ? '$'.number_format($model->up_base_amount , 2) : '-';
+                },
+            ],*/
+            'up_telegram',
+            'up_telegram_enable:boolean',
+
+           /* @property int $up_user_id
+ * @property int $up_call_type_id
+ * @property string $up_sip
+ * @property string $up_telegram
+ * @property int $up_telegram_enable
+ * @property string $up_updated_dt
+ * @property boolean $up_auto_redial
+ * @property boolean $up_kpi_enable
+ * @property int $up_skill*/
+
+        ],
+    ]) ?>
+
+</div>
+
+<div class="col-sm-2">
+    <h3>Telegram Auth</h3>
+    <?php echo '<img src="' . $qrcodeData . '">'; ?>
 </div>

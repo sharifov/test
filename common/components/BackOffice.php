@@ -2,12 +2,13 @@
 namespace common\components;
 
 use Yii;
+use yii\httpclient\CurlTransport;
 
 class BackOffice
 {
     public static function sendRequest($endpoint, $type = 'GET', $fields = null)
     {
-        $url = sprintf('%s/%s', Yii::$app->params['sync']['serverUrl'], $endpoint);
+        $url = sprintf('%s/%s', Yii::$app->params['backOffice']['serverUrl'], $endpoint);
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
         if ($type == 'POST') {
@@ -18,8 +19,8 @@ class BackOffice
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_HTTPHEADER, [
             'Content-Type: application/json',
-            'version: ' . Yii::$app->params['sync']['ver'],
-            'signature: ' . self::getSignature()
+            'version: ' . Yii::$app->params['backOffice']['ver'],
+            'signature: ' . self::getSignatureBO(Yii::$app->params['backOffice']['apiKey'], Yii::$app->params['backOffice']['ver'])
         ]);
         $result = curl_exec($ch);
 
@@ -32,10 +33,72 @@ class BackOffice
         return json_decode($result, true);
     }
 
-    private function getSignature(): string
+
+    public static function sendRequest2($endpoint, $type = 'GET', $fields = null)
+    {
+
+        $uri = Yii::$app->params['backOffice']['serverUrl'] . '/' . $endpoint;
+        $signature = self::getSignatureBO(Yii::$app->params['backOffice']['apiKey'], Yii::$app->params['backOffice']['ver']);
+
+        $client = new \yii\httpclient\Client([
+            'transport' => CurlTransport::class,
+            'responseConfig' => [
+                'format' => \yii\httpclient\Client::FORMAT_JSON
+            ]
+        ]);
+
+        /*$headers = [
+            //"Content-Type"      => "text/xml;charset=UTF-8",
+            //"Accept"            => "gzip,deflate",
+            //"Cache-Control"     => "no-cache",
+            //"Pragma"            => "no-cache",
+            //"Authorization"     => "Basic ".$this->api_key,
+            //"Content-length"    => mb_strlen($xmlRequest),
+        ];*/
+
+
+        $headers = [
+            'version'   => Yii::$app->params['backOffice']['ver'],
+            'signature' => $signature
+        ];
+
+        //$requestData['cid'] = $this->api_cid;
+
+        $response = $client->createRequest()
+            ->setMethod($type)
+            ->setFormat(\yii\httpclient\Client::FORMAT_JSON)
+            ->setUrl($uri)
+            ->addHeaders($headers)
+            //->setContent($json)
+            ->setData($fields)
+            ->setOptions([
+                CURLOPT_CONNECTTIMEOUT => 5,
+                CURLOPT_TIMEOUT => 30,
+            ])
+            ->send();
+
+
+        //VarDumper::dump($response->content, 10, true); exit;
+
+        if ($response->isOk) {
+            $out['data'] = $response->data;
+        } else {
+            $out['error'] = print_r($response->data, true);
+        }
+
+        return $response->data;
+    }
+
+
+    /**
+     * @param string $apiKey
+     * @param string $version
+     * @return string
+     */
+    private static function getSignatureBO(string $apiKey = '', string $version = '') : string
     {
         $expired = time() + 3600;
-        $md5 = md5(sprintf('%s:%s:%s', Yii::$app->params['sync']['apiKey'], Yii::$app->params['sync']['ver'], $expired));
+        $md5 = md5(sprintf('%s:%s:%s', $apiKey, $version, $expired));
         return implode('.', [md5($md5), $expired, $md5]);
     }
 }

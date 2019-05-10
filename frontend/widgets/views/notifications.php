@@ -19,70 +19,80 @@
 
         $soundPlay = false;
 
-        if($model)
+        if($model):
             foreach ($model as $n => $item): ?>
-        <li>
-            <a href="<?=\yii\helpers\Url::to(['notifications/view2', 'id' => $item->n_id])?>" data-pjax="0">
-                <span class="glyphicon glyphicon-info-sign"> <?php //remove-sign, ok-sign, question-sign ?>
-                </span>
-                <span>
-                    <span><?=\yii\helpers\Html::encode($item->n_title)?></span>
-                    <span class="time"><?=Yii::$app->formatter->asRelativeTime(strtotime($item->n_created_dt))?></span>
-                </span>
-                <span class="message">
-                    <?=\yii\helpers\StringHelper::truncate(\common\models\Email::strip_html_tags($item->n_message), 80, '...');?><br>
-                    <?/*=$item->n_created_dt?><br>
-                    <?= Yii::$app->formatter->asRelativeTime(strtotime($item->n_created_dt))*/?>
-                </span>
-            </a>
-            <?php
-                if($item->n_popup && !$item->n_popup_show):
-                $soundPlay = true;
+            <li>
+                <a href="<?=\yii\helpers\Url::to(['notifications/view2', 'id' => $item->n_id])?>" data-pjax="0">
+                    <span class="glyphicon glyphicon-info-sign"> <?php //remove-sign, ok-sign, question-sign ?>
+                    </span>
+                    <span>
+                        <span><?=\yii\helpers\Html::encode($item->n_title)?></span>
+                        <span class="time"><?=Yii::$app->formatter->asRelativeTime(strtotime($item->n_created_dt))?></span>
+                    </span>
+                    <span class="message">
+                        <?=\yii\helpers\StringHelper::truncate(\common\models\Email::strip_html_tags($item->n_message), 80, '...');?><br>
+                        <?/*=$item->n_created_dt?><br>
+                        <?= Yii::$app->formatter->asRelativeTime(strtotime($item->n_created_dt))*/?>
+                    </span>
+                </a>
+                <?php
+                    if($item->n_popup && !$item->n_popup_show):
+                    $soundPlay = true;
 
-                $message = str_replace("\r\n", '', $item->n_message);
-                $message = str_replace("\n", '', $message);
-                $message = str_replace('"', '\"', $message);
+                    $message = str_replace("\r\n", '', $item->n_message);
+                    $message = str_replace("\n", '', $message);
+                    $message = str_replace('"', '\"', $message);
 
-                $type = $item->getNotifyType();
+                    $type = $item->getNotifyType();
 
-                if(!$item->n_popup_show) {
-                    $item->n_popup_show = true;
-                    $item->save();
-                }
+                    if(!$item->n_popup_show) {
+                        $item->n_popup_show = true;
+                        $item->save();
+                    }
 
-                $js2 = '
-                new PNotify({
-                    title: "'.\yii\helpers\Html::encode($item->n_title).'",
-                    type: "'.$type.'",
-                    text: "'.$message.'",
-                    desktop: {
-                        desktop: true
-                    },
-                    /*nonblock: {
-                        nonblock: true
-                    },*/
-                    delay: 30000,
-                    hide: true
-                }).get().click(function(e) {
-        
-                });
-                
-                new PNotify({
-                    title: "'.\yii\helpers\Html::encode($item->n_title).'",
-                    type: "'.$type.'",
-                    text: "'.$message.'",
-                    hide: true
-                });
-                
-                ';
 
-                if($n < 20) {
-                    $this->registerJs($js2, \yii\web\View::POS_READY);
-                }
-            ?>
-            <? endif;?>
-        </li>
-        <? endforeach; ?>
+                    if($n < 20) {
+
+                        $js2 = '
+                            new PNotify({
+                                title: "'.\yii\helpers\Html::encode($item->n_title).'",
+                                type: "'.$type.'",
+                                text: "'.$message.'",
+                                desktop: {
+                                    desktop: true
+                                },
+                                /*nonblock: {
+                                    nonblock: true
+                                },*/
+                                delay: 30000,
+                                hide: true
+                            }).get().click(function(e) {
+                    
+                            });
+                            
+                            new PNotify({
+                                title: "'.\yii\helpers\Html::encode($item->n_title).'",
+                                type: "'.$type.'",
+                                text: "'.$message.'",
+                                hide: true
+                            });
+                            ';
+
+                        $this->registerJs($js2, \yii\web\View::POS_READY);
+                        break;
+                    }
+                ?>
+                <? endif;?>
+
+                <?php
+                    if($n >= 10) {
+                        break;
+                    }
+                ?>
+
+            </li>
+            <? endforeach; ?>
+        <? endif;?>
         <li>
             <div class="text-center">
                 <?=\yii\helpers\Html::a('<i class="fa fa-search"></i> <strong>See all Notifications</strong>', ['notifications/list'], ['data-pjax' => 0])?>

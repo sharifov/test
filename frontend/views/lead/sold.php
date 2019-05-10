@@ -21,8 +21,10 @@ $this->title = 'Sold Queue';
 
 if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
     $userList = \common\models\Employee::getList();
+    $projectList = \common\models\Project::getList();
 } else {
     $userList = \common\models\Employee::getListByUserId(Yii::$app->user->id);
+    $projectList = \common\models\ProjectEmployeeAccess::getProjectsByEmployee();
 }
 
 $this->params['breadcrumbs'][] = $this->title;
@@ -314,6 +316,17 @@ $this->params['breadcrumbs'][] = $this->title;
             'format' => 'raw'
         ],
         [
+            'attribute' => 'project_id',
+            'value' => function (\common\models\Lead $model) {
+                    return $model->project ? $model->project->name: '-';
+                },
+                'format' => 'raw',
+                'options' => [
+                    'style' => 'width:120px'
+                ],
+                'filter' => $projectList,
+        ],
+        [
             'attribute' => 'source_id',
             'label' => 'Market Info',
             'visible' => !$isAgent,
@@ -327,7 +340,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'template' => '{action}',
             'buttons' => [
                 'action' => function ($url, Lead $model, $key) {
-                    return Html::a('<i class="fa fa-search"></i>', [
+                    return Html::a('<i class="fa fa-search"></i> view', [
                         'lead/view',
                         'gid' => $model->gid
                     ], [

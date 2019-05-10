@@ -3,6 +3,7 @@
 namespace common\models;
 
 use common\components\EmailService;
+use common\components\jobs\QuickSearchInitPriceJob;
 use common\models\local\LeadAdditionalInformation;
 use common\models\local\LeadLogMessage;
 use Yii;
@@ -56,6 +57,15 @@ use common\components\SearchService;
  * @property double $tips
  * @property int $l_call_status_id
  * @property string $l_pending_delay_dt
+ * @property string $l_client_first_name
+ * @property string $l_client_last_name
+ * @property string $l_client_phone
+ * @property string $l_client_email
+ * @property string $l_client_lang
+ * @property string $l_client_ua
+ * @property string $l_request_hash
+ * @property int $l_duplicate_lead_id
+ * @property double $l_init_price
  *
  * @property double $finalProfit
  * @property int $quotesCount
@@ -76,12 +86,15 @@ use common\components\SearchService;
  * @property LeadPreferences $leadPreferences
  * @property Client $client
  * @property Employee $employee
+ * @property Lead $lDuplicateLead
+ * @property Lead[] $leads0
  * @property Source $source
  * @property Project $project
  * @property LeadAdditionalInformation[] $additionalInformationForm
  * @property Lead $clone
  * @property ProfitSplit[] $profitSplits
  * @property TipsSplit[] $tipsSplits
+ * @property UserConnection[] $userConnections
  *
  */
 class Lead extends ActiveRecord
@@ -224,23 +237,32 @@ class Lead extends ActiveRecord
 
             [['trip_type', 'cabin'], 'required'],
             [['adults', 'children', 'infants', 'source_id'], 'required'], //'except' => self::SCENARIO_API],
-            [['client_id', 'employee_id', 'status', 'project_id', 'source_id', 'rating', 'l_grade', 'clone_id', 'bo_flight_id', 'l_call_status_id'], 'integer'],
+
+            [['client_id', 'employee_id', 'status', 'project_id', 'source_id', 'rating', 'bo_flight_id', 'l_grade', 'clone_id', 'l_call_status_id', 'l_duplicate_lead_id'], 'integer'],
             [['adults', 'children', 'infants'], 'integer', 'max' => 9],
             [['adults'], 'integer', 'min' => 1],
-            [['l_answered'], 'boolean'],
-            [['notes_for_experts', 'request_ip_detail'], 'string'],
-            [['final_profit', 'tips', 'agents_processing_fee'], 'number'],
-            [['uid', 'request_ip', 'offset_gmt', 'discount_id', 'description'], 'string', 'max' => 255],
-            [['gid'], 'string', 'max' => 32],
-            [['gid'], 'unique'],
+
+            [['notes_for_experts', 'request_ip_detail', 'l_client_ua'], 'string'],
+
             [['created', 'updated', 'snooze_for', 'called_expert', 'additional_information', 'l_pending_delay_dt'], 'safe'],
-            [['uid'], 'string', 'max' => 255],
+
+            [['final_profit', 'tips', 'agents_processing_fee', 'l_init_price'], 'number'],
+            [['uid', 'request_ip', 'offset_gmt', 'discount_id', 'description'], 'string', 'max' => 255],
             [['trip_type'], 'string', 'max' => 2],
             [['cabin'], 'string', 'max' => 1],
+            [['gid', 'l_request_hash'], 'string', 'max' => 32],
+            [['l_client_first_name', 'l_client_last_name'], 'string', 'max' => 50],
+            [['l_client_phone'], 'string', 'max' => 20],
+            [['l_client_email'], 'string', 'max' => 160],
+            [['l_client_lang'], 'string', 'max' => 5],
+            [['gid'], 'unique'],
+            [['l_answered'], 'boolean'],
             [['status_description'], 'string'],
+
             [['clone_id'], 'exist', 'skipOnError' => true, 'targetClass' => self::class, 'targetAttribute' => ['clone_id' => 'id']],
             [['client_id'], 'exist', 'skipOnError' => true, 'targetClass' => Client::class, 'targetAttribute' => ['client_id' => 'id']],
             [['employee_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['employee_id' => 'id']],
+            [['l_duplicate_lead_id'], 'exist', 'skipOnError' => true, 'targetClass' => self::class, 'targetAttribute' => ['l_duplicate_lead_id' => 'id']],
         ];
     }
 
@@ -275,6 +297,18 @@ class Lead extends ActiveRecord
             'destination_country' => 'Destination Country code',
             'l_call_status_id' => 'Call status',
             'l_pending_delay_dt' => 'Pending delay',
+
+            'l_client_first_name' => 'Client First Name',
+            'l_client_last_name' => 'Client Last Name',
+            'l_client_phone' => 'Client Phone',
+            'l_client_email' => 'Client Email',
+            'l_client_lang' => 'Client Lang',
+            'l_client_ua' => 'Client UserAgent',
+            'l_request_hash' => 'Request Hash',
+            'l_duplicate_lead_id' => 'Duplicate Lead ID',
+
+            'l_init_price' => 'Init Price',
+
         ];
     }
 
@@ -290,6 +324,22 @@ class Lead extends ActiveRecord
                 'value' => date('Y-m-d H:i:s') //new Expression('NOW()'),
             ],
         ];
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getLDuplicateLead()
+    {
+        return $this->hasOne(self::class, ['id' => 'l_duplicate_lead_id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getLeads0()
+    {
+        return $this->hasMany(self::class, ['l_duplicate_lead_id' => 'id']);
     }
 
 
@@ -451,9 +501,15 @@ class Lead extends ActiveRecord
     }
 
 
+
     public static function getBadgesSingleQuery()
     {
         $projectIds = array_keys(ProjectEmployeeAccess::getProjectsByEmployee());
+
+        if(empty($projectIds)){
+            $projectIds[] = 0;
+        }
+
 
         $userId = Yii::$app->user->id;
         $created = '';
@@ -491,6 +547,7 @@ class Lead extends ActiveRecord
         ]);
 
         $select = [
+            'pending' => 'COUNT(DISTINCT CASE WHEN status IN (:inbox) THEN leads.id ELSE NULL END)',
             'inbox' => 'COUNT(DISTINCT CASE WHEN status IN (:inbox) THEN leads.id ELSE NULL END)',
             'follow-up' => 'COUNT(DISTINCT CASE WHEN status IN (:followup) ' . $created . '  THEN leads.id ELSE NULL END)',
             'booked' => 'COUNT(DISTINCT CASE WHEN status IN (:booked) ' . $created . ' THEN leads.id ELSE NULL END)',
@@ -500,10 +557,18 @@ class Lead extends ActiveRecord
                         LEFT JOIN '.TipsSplit::tableName().' `ts` ON ts.ts_lead_id = leads.id
                         WHERE leads.status IN (:sold) '.$created . $sold .$employee.'
                         AND leads.`project_id` IN ('.implode(',', $projectIds).'))',
-            'processing' => 'COUNT(DISTINCT CASE WHEN status IN (' . $default . ') ' . $employee . ' THEN leads.id ELSE NULL END)'];
+            'processing' => 'COUNT(DISTINCT CASE WHEN status IN (' . $default . ') ' . $employee . ' THEN leads.id ELSE NULL END)'
+        ];
 
-        if (Yii::$app->user->identity->role != 'agent') {
-            $select['trash'] = 'COUNT(DISTINCT CASE WHEN status IN (' . self::STATUS_TRASH . ') ' . $created . $employee . ' THEN leads.id ELSE NULL END)';
+        /*if (Yii::$app->user->identity->role != 'agent') {
+            //$select['trash'] = 'COUNT(DISTINCT CASE WHEN status IN (' . self::STATUS_TRASH . ') ' . $created . $employee . ' THEN leads.id ELSE NULL END)';
+            //$select['pending'] = 'COUNT(DISTINCT CASE WHEN status IN (:inbox) THEN leads.id ELSE NULL END)';
+
+            $select['duplicate'] = 'COUNT(DISTINCT CASE WHEN status IN (' . self::STATUS_TRASH . ') ' . $created . $employee . ' THEN leads.id ELSE NULL END)';
+        }*/
+
+        if (Yii::$app->user->identity->role === 'admin') {
+            $select['pending'] = 'COUNT(DISTINCT CASE WHEN status IN (:pending) THEN leads.id ELSE NULL END)';
         }
 
         $query = self::find()
@@ -513,6 +578,7 @@ class Lead extends ActiveRecord
             //->leftJoin(TipsSplit::tableName().' ts','ts.ts_lead_id = leads.id')
             ->andWhere(['IN', 'project_id', $projectIds])
             ->addParams([':inbox' => self::STATUS_PENDING,
+                ':pending' => self::STATUS_PENDING,
                 ':followup' => self::STATUS_FOLLOW_UP,
                 ':booked' => self::STATUS_BOOKED,
                 ':sold' => self::STATUS_SOLD,
@@ -523,7 +589,7 @@ class Lead extends ActiveRecord
         //echo $query->createCommand()->getRawSql();die;
 
         $db = Yii::$app->db;
-        $duration = 900;     // cache query results for 60 seconds.
+        $duration = 0;     // cache query results for 60 seconds.
         $dependency = new DbDependency();
         $dependency->sql = 'SELECT count(*) FROM leads';
 
@@ -532,6 +598,13 @@ class Lead extends ActiveRecord
         $result = $db->cache(function ($db) use ($query) {
             return $query->createCommand()->queryOne();
         }, $duration, $dependency);
+
+
+        $result['duplicate'] = '';
+
+        if (Yii::$app->user->identity->role === 'admin' || Yii::$app->user->identity->role === 'qa') {
+            $result['duplicate'] = self::find()->where(['IS NOT', 'l_duplicate_lead_id', null])->count() ?: '' ;
+        }
 
         return $result; // $query->createCommand()->queryOne();
     }
@@ -542,6 +615,7 @@ class Lead extends ActiveRecord
     public static function getLeadQueueType(): array
     {
         return [
+            'pending',
             'inbox', 'follow-up', 'processing',
             'processing-all', 'booked', 'sold', 'trash'
         ];
@@ -1101,7 +1175,7 @@ Reason: {reason}
                 $agent = $user->username;
                 $subject = Yii::t('email', "Cloned Lead-{id} by {agent}", ['id' => $lead->clone_id, 'agent' => $agent]);
                 $body = Yii::t('email', "Agent {agent} cloned lead {clone_id} with reason [{reason}], url: {cloned_url}.
-New lead {lead_id} 
+New lead {lead_id}
 {url}",
                     [
                         'agent' => $agent,
@@ -1150,6 +1224,12 @@ New lead {lead_id}
 
         if ($insert) {
             LeadFlow::addStateFlow($this);
+
+            $job = new QuickSearchInitPriceJob();
+            $job->lead_id = $this->id;
+            $jobId = Yii::$app->queue_job->push($job);
+            Yii::info('Lead: ' . $this->id . ', QuickSearchInitPriceJob: '.$jobId, 'info\Lead:afterSave:QuickSearchInitPriceJob');
+
         } else {
 
 
@@ -1607,7 +1687,7 @@ New lead {lead_id}
             }
         }
 
-        if($this->final_profit) {
+        if($this->final_profit !== null) {
             $this->finalProfit = (float) $this->final_profit - ($processing_fee_per_pax * (int) ($this->adults + $this->children));
         } else {
             $this->finalProfit = $this->final_profit;
@@ -2265,7 +2345,8 @@ New lead {lead_id}
             'clients_budget' => $this->leadPreferences ? $this->leadPreferences->clients_budget : '',
             'market_price' => $this->leadPreferences ? $this->leadPreferences->market_price : '',
             'itinerary' => [],
-            'agent_name' => $this->employee ? $this->employee->username : 'N/A'
+            'agent_name' => $this->employee ? $this->employee->username : 'N/A',
+            'agent_id' => $this->employee_id
         ];
 
         $itinerary = [];
@@ -2453,7 +2534,7 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
         return $query->createCommand()->queryScalar();
     }
 
-    public function getFlightDetails()
+    public function getFlightDetails($tag = '<br/>')
     {
         $flightSegments = LeadFlightSegment::findAll(['lead_id' => $this->id]);
         $segmentsStr = [];
@@ -2461,7 +2542,7 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
             $segmentsStr[] = $entry['departure'] . ' ' . $entry['origin'] . '-' . $entry['destination'];
         }
 
-        return implode('<br/>', $segmentsStr);
+        return implode($tag, $segmentsStr);
     }
 
     public function getDeparture()
@@ -2631,10 +2712,10 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
         $query = self::find();
         $query->select(['*', 'l_client_time' => new Expression("TIME( CONVERT_TZ(NOW(), '+00:00', offset_gmt) )")]);
 
-        $query->andWhere(['status' => self::STATUS_PENDING]);
+        $query->andWhere(['status' => self::STATUS_PENDING, 'l_call_status_id' => [self::CALL_STATUS_READY, self::CALL_STATUS_NONE]]);
         $query->andWhere(['OR', ['IS', 'l_pending_delay_dt', null], ['<=', 'l_pending_delay_dt', date('Y-m-d H:i:s')]]);
         $query->andWhere(['OR', ['BETWEEN', new Expression('TIME(CONVERT_TZ(NOW(), \'+00:00\', offset_gmt))'), '09:00', '21:00'], ['>=', 'created', date('Y-m-d H:i:s', strtotime('-'.self::PENDING_ALLOW_CALL_TIME_MINUTES.' min'))]]);
-        $query->andWhere(['employee_id' => null]);
+        $query->andWhere(['OR', ['employee_id' => null], ['employee_id' => $user_id]]);
 
         if($user_id) {
             $subQuery = UserProjectParams::find()->select(['upp_project_id'])->where(['upp_user_id' => $user_id])->andWhere(['AND', ['IS NOT', 'upp_tw_phone_number', null], ['<>', 'upp_tw_phone_number', '']]);

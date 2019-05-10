@@ -62,17 +62,29 @@ $call2DelayTime = Yii::$app->params['lead']['call2DelayTime']; //(2 * 60 * 60);
 
 <?php //\yii\helpers\VarDumper::dump($dateItemShift, 10, true); ?>
 
-
-<div class="panel panel-success panel-wrapper task-list-block">
-    <div class="panel-heading collapsing-heading">
-        <a data-toggle="collapse" href="#task-list" aria-expanded="true"
-           class="collapsing-heading__collapse-link">
-            To Do Task List
-            <i class="collapsing-heading__arrow"></i>
-        </a>
+<div class="x_panel">
+    <div class="x_title">
+        <h2><i class="fa fa-list-ul"></i> Task List Block</h2>
+        <ul class="nav navbar-right panel_toolbox">
+            <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+            </li>
+            <?/*<li class="dropdown">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-wrench"></i></a>
+                <ul class="dropdown-menu" role="menu">
+                    <li><a href="#">Settings 1</a>
+                    </li>
+                    <li><a href="#">Settings 2</a>
+                    </li>
+                </ul>
+            </li>
+            <li><a class="close-link"><i class="fa fa-close"></i></a>
+            </li>*/?>
+        </ul>
+        <div class="clearfix"></div>
     </div>
-    <div class="collapse in" id="task-list" aria-expanded="true" style="">
-        <div class="panel-body">
+    <div class="x_content" style="display: block;">
+
+
 
 
             <?php
@@ -99,8 +111,12 @@ $call2DelayTime = Yii::$app->params['lead']['call2DelayTime']; //(2 * 60 * 60);
 
 
                         if($shiftEndTS < $currentTS) {
-                            $icon = 'fa-calendar-times-o';
-                            $bg = 'lavenderblush';
+                            //$icon = 'fa-calendar-times-o';
+                            //$bg = 'lavenderblush';
+
+                            $icon = '';
+                            $bg = '';
+
                         } elseif(!$active) {
                             $icon = 'fa-calendar-minus-o';
                             $bg = '';
@@ -121,7 +137,7 @@ $call2DelayTime = Yii::$app->params['lead']['call2DelayTime']; //(2 * 60 * 60);
                         </div>*/?>
 
                         <a data-toggle="tab" href="#tab-<?=\yii\helpers\Html::encode(str_replace([' ',':'], '-', $date))?>" style="background-color: <?=$bg?>">
-                            <i class="fa <?=$icon?>"></i> <?=\yii\helpers\Html::encode(Yii::$app->formatter->asDate(strtotime($date)))?>
+                            <i class="fa <?=$icon?>"></i> <?=\yii\helpers\Html::encode(Yii::$app->formatter->asDate(strtotime($date), 'php: j M'))?>
                         </a>
                     </li>
                 <?php endforeach; ?>
@@ -157,7 +173,8 @@ $call2DelayTime = Yii::$app->params['lead']['call2DelayTime']; //(2 * 60 * 60);
                     ?>
 
 
-                    <h4><i class="fa fa-calendar"></i> <?=\yii\helpers\Html::encode(Yii::$app->formatter->asDate(strtotime($date)))?> - Day #<?=$dDiff->days+1?> </h4>
+                    <?/*<h4><i class="fa fa-calendar"></i> <?=\yii\helpers\Html::encode(Yii::$app->formatter->asDate(strtotime($date)))?> - Day #<?=$dDiff->days+1?> </h4>*/?>
+
                     <?//=\yii\helpers\Html::a('Refresh', '/lead/processing/12001', ['class' => 'btn btn-warning']) ?>
                     <p>
                         <?php foreach ($taskByDate[$date] as $user_id => $userTasks):
@@ -316,7 +333,7 @@ $call2DelayTime = Yii::$app->params['lead']['call2DelayTime']; //(2 * 60 * 60);
                 <?php endforeach; ?>
             </div>
 
-        </div>
+
     </div>
 </div>
 

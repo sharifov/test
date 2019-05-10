@@ -110,7 +110,8 @@ class AgentActivitySearch extends Call
 
         $query->addSelect(['(SELECT COUNT(*) FROM `call` WHERE (c_created_dt '.$between_condition.') AND c_created_user_id=e.id AND c_call_type_id = '.Call::CALL_TYPE_IN.') AS inbound_calls ']);
         $query->addSelect(['(SELECT COUNT(*) FROM `call` WHERE (c_created_dt '.$between_condition.') AND c_created_user_id=e.id AND c_call_type_id = '.Call::CALL_TYPE_OUT.') AS outbound_calls ']);
-        $query->addSelect(['(SELECT SUM(c_call_duration) FROM `call` WHERE (c_created_dt '.$between_condition.') AND c_created_user_id=e.id AND c_call_duration > 15) AS call_duration ']);
+        $query->addSelect(['(SELECT SUM(c_call_duration) FROM `call` WHERE (c_created_dt '.$between_condition.') AND c_created_user_id=e.id) AS call_duration ']);
+        $query->addSelect(['(SELECT SUM(c_recording_duration) FROM `call` WHERE (c_created_dt '.$between_condition.') AND c_created_user_id=e.id) AS call_recording_duration ']);
 
         $query->addSelect(['(SELECT COUNT(*) FROM sms WHERE (s_created_dt '.$between_condition.') AND s_created_user_id=e.id AND s_type_id = 1) AS sms_sent ']);
         $query->addSelect(['(SELECT COUNT(*) FROM sms WHERE (s_created_dt '.$between_condition.') AND s_created_user_id=e.id AND s_type_id = 2) AS sms_received ']);
@@ -125,7 +126,7 @@ class AgentActivitySearch extends Call
         $query->addSelect(['(SELECT COUNT(*) FROM lead_flow lf WHERE (lf.created '.$between_condition.') AND lf.employee_id=e.id AND lf.status=' . Lead::STATUS_SNOOZE . ') AS st_snooze ']);
         $query->addSelect(['(SELECT COUNT(*) FROM lead_flow lf WHERE (lf.created '.$between_condition.') AND lf.employee_id=e.id AND lf.status=' . Lead::STATUS_PENDING . ') AS st_pending ']);
 
-        $query->addSelect(['(SELECT COUNT(*) FROM lead_flow WHERE (created '.$between_condition.') AND employee_id=e.id AND status=' . Lead::STATUS_PROCESSING . ') AS created_leads ']);
+        $query->addSelect(['(SELECT COUNT(lf.id) FROM lead_flow lf WHERE (lf.created '.$between_condition.') AND lf.employee_id=e.id AND lf.status=' . Lead::STATUS_PROCESSING . ' AND lf.lf_from_status_id IS NULL) AS created_leads ']);
         $query->addSelect(['(SELECT COUNT(lf.id) FROM lead_flow lf LEFT JOIN leads l ON lf.lead_id = l.id WHERE l.clone_id IS NOT NULL AND (lf.created '.$between_condition.') AND lf.employee_id=e.id AND lf.status=' . Lead::STATUS_PROCESSING . ') AS cloned_leads ']);
         $query->addSelect(['(SELECT COUNT(*) FROM lead_flow WHERE (created '.$between_condition.') AND employee_id=e.id AND lf_from_status_id = '.Lead::STATUS_PENDING.' AND status=' . Lead::STATUS_PROCESSING . ') AS inbox_processing ']);
         $query->addSelect(['(SELECT COUNT(*) FROM lead_flow WHERE (created '.$between_condition.') AND employee_id=e.id AND lf_from_status_id = '.Lead::STATUS_FOLLOW_UP.' AND status=' . Lead::STATUS_PROCESSING . ') AS followup_processing ']);
@@ -320,7 +321,7 @@ class AgentActivitySearch extends Call
             return $dataProvider;
         }
 
-        $query->where(['lead_flow.employee_id' => $this->id , 'lead_flow.status' => Lead::STATUS_PROCESSING]);
+        $query->where(['lead_flow.employee_id' => $this->id , 'lead_flow.status' => Lead::STATUS_PROCESSING,'lead_flow.lf_from_status_id' => null]);
         $query->andWhere(['between','lead_flow.created', $this->date_from, $this->date_to]);
         //$query->groupBy('lead_flow.lead_id');
 
@@ -328,7 +329,8 @@ class AgentActivitySearch extends Call
             'leads.project_id' => $this->project_id,
         ]);
 
-        // echo $query->createCommand()->rawSql;
+       /*  echo $query->createCommand()->rawSql;
+        die; */
 
         return $dataProvider;
     }

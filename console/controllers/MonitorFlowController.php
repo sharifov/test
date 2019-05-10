@@ -8,6 +8,8 @@ use common\models\Note;
 use common\models\Quote;
 use common\models\Reason;
 use yii\console\Controller;
+use common\models\LeadTask;
+use common\models\Task;
 use Yii;
 
 class MonitorFlowController extends Controller
@@ -53,8 +55,15 @@ class MonitorFlowController extends Controller
         foreach ($objects as $object) {
             $diff = strtotime($object->snooze_for);
             if ($diff <= time()) {
-                $object->status = Lead::STATUS_ON_HOLD;
+                $object->status = Lead::STATUS_PROCESSING;
                 $object->snooze_for = null;
+
+                if($object->l_answered) {
+                    LeadTask::createTaskList($object->id, $object->employee_id, 1, '', Task::CAT_ANSWERED_PROCESS);
+                    LeadTask::createTaskList($object->id, $object->employee_id, 2, '', Task::CAT_ANSWERED_PROCESS);
+                    LeadTask::createTaskList($object->id, $object->employee_id, 3, '', Task::CAT_ANSWERED_PROCESS);
+                }
+
                 $object->save();
             }
         }

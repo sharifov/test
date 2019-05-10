@@ -63,16 +63,16 @@ class LeadSearch extends Lead
     public function rules()
     {
         return [
-            [['id', 'client_id', 'employee_id', 'status', 'project_id', 'adults', 'children', 'infants', 'rating', 'called_expert', 'cnt', 'l_grade', 'l_answered', 'supervision_id', 'limit', 'bo_flight_id'], 'integer'],
+            [['id', 'client_id', 'employee_id', 'status', 'project_id', 'adults', 'children', 'infants', 'rating', 'called_expert', 'cnt', 'l_grade', 'l_answered', 'supervision_id', 'limit', 'bo_flight_id', 'l_duplicate_lead_id'], 'integer'],
             [['email_status', 'quote_status'], 'integer'],
 
-            [['client_name', 'client_email', 'client_phone','quote_pnr', 'gid', 'origin_airport','destination_airport', 'origin_country', 'destination_country'], 'string'],
+            [['client_name', 'client_email', 'client_phone','quote_pnr', 'gid', 'origin_airport','destination_airport', 'origin_country', 'destination_country', 'l_request_hash'], 'string'],
 
             //['created_date_from', 'default', 'value' => '2018-01-01'],
             //['created_date_to', 'default', 'value' => date('Y-m-d')],
 
             [['uid', 'trip_type', 'cabin', 'notes_for_experts', 'created', 'updated', 'request_ip', 'request_ip_detail', 'offset_gmt', 'snooze_for', 'discount_id',
-                'created_date_from', 'created_date_to', 'depart_date_from', 'depart_date_to', 'source_id', 'statuses', 'sold_date_from', 'sold_date_to', 'processing_filter'], 'safe'],
+                'created_date_from', 'created_date_to', 'depart_date_from', 'depart_date_to', 'source_id', 'statuses', 'sold_date_from', 'sold_date_to', 'processing_filter', 'l_init_price'], 'safe'],
         ];
     }
 
@@ -153,8 +153,9 @@ class LeadSearch extends Lead
             'rating' => $this->rating,
             'called_expert' => $this->called_expert,
             'l_grade' => $this->l_grade,
-            'l_answered'    => $this->l_answered
-
+            'l_answered'    => $this->l_answered,
+            'l_duplicate_lead_id' => $this->l_duplicate_lead_id,
+            'l_init_price'  => $this->l_init_price
         ]);
 
 
@@ -1119,6 +1120,70 @@ class LeadSearch extends Lead
 
         return $dataProvider;
     }
+
+
+    /**
+     * @param $params
+     * @return ActiveDataProvider
+     */
+    public function searchDuplicates($params)
+    {
+        //$projectIds = array_keys(ProjectEmployeeAccess::getProjectsByEmployee());
+        $query = Lead::find();
+        $query->select(['*', 'l_client_time' => new Expression("TIME( CONVERT_TZ(NOW(), '+00:00', offset_gmt) )")]);
+        $leadTable = Lead::tableName();
+
+        // add conditions that should always apply here
+
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+            'sort'=> ['defaultOrder' => ['created' => SORT_DESC]],
+            'pagination' => [
+                'pageSize' => 30,
+            ],
+        ]);
+
+        $this->load($params);
+
+        if (!$this->validate()) {
+            // uncomment the following line if you do not want to return any records when validation fails
+            // $query->where('0=1');
+            return $dataProvider;
+        }
+
+        // grid filtering conditions
+        $query->andFilterWhere([
+            $leadTable.'.id' => $this->id,
+            $leadTable.'.client_id' => $this->client_id,
+            $leadTable.'.employee_id' => $this->employee_id,
+            $leadTable.'.project_id' => $this->project_id,
+            $leadTable.'.source_id' => $this->source_id,
+            $leadTable.'.bo_flight_id' => $this->bo_flight_id,
+            $leadTable.'.rating' => $this->rating,
+            $leadTable.'.status' => $this->status,
+            $leadTable.'.l_duplicate_lead_id' => $this->l_duplicate_lead_id,
+            $leadTable.'.l_request_hash' => $this->l_request_hash,
+        ]);
+
+        $query
+            ->andWhere(['leads.status' => self::STATUS_TRASH])
+            ->andWhere(['IS NOT','leads.l_duplicate_lead_id', NULL])
+            //->andWhere(['IN', $leadTable . '.project_id', $projectIds])
+        ;
+
+
+        if($this->supervision_id > 0) {
+            $subQuery1 = UserGroupAssign::find()->select(['ugs_group_id'])->where(['ugs_user_id' => $this->supervision_id]);
+            $subQuery = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->where(['IN', 'ugs_group_id', $subQuery1]);
+            $query->andWhere(['IN', 'leads.employee_id', $subQuery]);
+        }
+
+        $query->with(['client', 'client.clientEmails', 'client.clientPhones', 'employee']);
+
+        return $dataProvider;
+    }
+
+
 
     public function searchEmail($params)
     {

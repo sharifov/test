@@ -82,6 +82,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'style' => 'width:80px'
             ]
         ],
+        'uid',
         [
             'attribute' => 'pending',
             'label' => 'Pending Time',
@@ -375,7 +376,6 @@ $this->params['breadcrumbs'][] = $this->title;
                 return $model->project ? $model->project->name : '-';
             },
             'filter' => $projectList,
-            'visible' => !$isAgent
         ],
         [
             'class' => 'yii\grid\ActionColumn',

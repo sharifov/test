@@ -83,26 +83,7 @@ if ($leadForm->mode != $leadForm::VIEW_MODE || ($leadForm->mode == $leadForm::VI
         }
     });
 
-    /***  Add/Clone quote  ***/
-    $(document).on('click','.add-clone-alt-quote', function (e) {
-        e.preventDefault();
-        var url = $(this).data('url');
-        var uid = $(this).data('uid');
-        var editBlock = $('#create-quote');
-        if (uid != 0) {
-            editBlock.find('.modal-title').html('Clone quote #' + uid);
-        } else {
-             editBlock.find('.modal-title').html('Add quote');
-        }
-        editBlock.find('.modal-body').html('');
-        editBlock.find('.modal-body').load(url, function( response, status, xhr ) {
-            $('#cancel-alt-quote').attr('data-type', 'direct');
-            editBlock.modal({
-              backdrop: 'static',
-              show: true
-            });
-        });
-    });
+   
 
     /***  Split profit  ***/
     $('#split-profit').click(function (e) {
@@ -180,8 +161,17 @@ if ($leadForm->mode != $leadForm::VIEW_MODE || ($leadForm->mode == $leadForm::VI
             $('#lead-notes_for_experts').parent().removeClass('has-error');
             $.post($(this).data('url'), {notes: $('#lead-notes_for_experts').val()});
         } else {
-            $('#lead-notes_for_experts').parent().find('.help-block').html('Notes for Expert cannot be blank.')
-            $('#lead-notes_for_experts').parent().addClass('has-error');
+            //alert('Notes for Expert cannot be blank.');
+            
+            new PNotify({
+                title: 'Error: notes',
+                type: 'error',
+                text: 'Notes for Expert cannot be blank',
+                hide: true
+            });
+            
+            //$('#lead-notes_for_experts').parent().find('.help-block').html('Notes for Expert cannot be blank.')
+            //$('#lead-notes_for_experts').parent().addClass('has-error');
         }
     });
 
@@ -374,10 +364,10 @@ $buttonClone = Html::a('<i class="fa fa-copy"></i> Clone lead', '#', [
     'data-url' => Url::to(['lead/clone', 'id' => $leadForm->getLead()->id])
 ]);
 
-$buttonHoldOn = Html::a('<i class="fa fa-share fa-rotate-180"></i></span> Hold On', '#', [
+/*$buttonHoldOn = Html::a('<i class="fa fa-share fa-rotate-180"></i></span> Hold On', '#', [
     'class' => 'add-reason',
     'data-url' => Url::to(['lead/change-state', 'queue' => 'processing', 'id' => $leadForm->getLead()->id]),
-]);
+]);*/
 
 $buttonFollowUp = Html::a('<i class="fa fa-share-square fa-rotate-180"></i> Follow Up', '#', [
     'class' => 'add-reason',
@@ -414,7 +404,7 @@ $buttonReject = Html::a('<i class="fa fa-times"></i> Reject', '#', [
     'data-url' => \yii\helpers\Url::to(['lead/change-state', 'queue' => 'reject', 'id' => $leadForm->getLead()->id]),
 ]);
 
-$buttonAddQuote = Html::button('<span class="btn-icon"><i class="fa fa-plus"></i></span><span class="btn-text">Add Quote</span>', [
+/*$buttonAddQuote = Html::button('<span class="btn-icon"><i class="fa fa-plus"></i></span><span class="btn-text">Add Quote</span>', [
     'class' => 'btn btn-success btn-with-icon add-clone-alt-quote',
     'data-uid' => 0,
     'data-url' => Url::to(['quote/create', 'leadId' => $leadForm->getLead()->id, 'qId' => 0]),
@@ -424,7 +414,7 @@ $buttonQuickSearchQuote = Html::button('<i class="fa fa-search"></i> Quick Searc
     'class' => 'btn btn-warning',
     'id' => 'quick-search-quotes-btn',
     'data-url' => Url::to(['quote/get-online-quotes', 'leadId' => $leadForm->getLead()->id]),
-]);
+]);*/
 
 $buttonAnswer = Html::a('<i class="fa fa-commenting-o"></i> </span>'. ($leadForm->getLead()->l_answered ? 'Make UnAnswered' : 'Make Answered'), ['lead/update2', 'act' => 'answer', 'id' => $leadForm->getLead()->id], [
     'class' => 'add-comment',
@@ -453,7 +443,7 @@ if (!$leadForm->getLead()->isNewRecord) {
         if(Yii::$app->authManager->getAssignment('admin', $userId) || Yii::$app->authManager->getAssignment('supervision', $userId)) {
             $buttonsSubAction[] = $buttonAnswer;
         }
-        $buttonsSubAction[] = $buttonHoldOn;
+        //$buttonsSubAction[] = $buttonHoldOn;
         $buttonsSubAction[] = $buttonFollowUp;
         $buttonsSubAction[] = $buttonTrash;
         $buttonsSubAction[] = $buttonSnooze;
@@ -535,52 +525,14 @@ if($project){
             ];
             echo Html::button('<span class="btn-icon"><i class="fa fa-plus"></i></span> <span class="btn-text">' . $title . '</span>', $options);
         } ?>
-		<?php if ($leadForm->mode != $leadForm::VIEW_MODE) {
+
+		<?php if ($leadForm->mode !== $leadForm::VIEW_MODE) {
             $title = '<span class="btn-icon"><i class="fa fa-check"></i></span><span class="btn-text">'.($leadForm->getLead()->isNewRecord ? 'Create' : 'Save').'</span>';
             echo Html::submitButton($title, [
                 'id' => 'submit-lead-form-btn',
                 'class' => 'btn btn-primary btn-with-icon'
             ]);
-
             echo $buttonAddNote;
-
-            if (!$leadForm->getLead()->isNewRecord) {
-                echo $buttonAddQuote;
-
-                /* echo Html::button('<span class="btn-icon"><i class="fa fa-plus"></i></span><span class="btn-text">Quick Search Quote</span>', [
-                    'class' => 'btn btn-warning btn-with-icon',
-                    'id' => 'quick-search-quotes',
-                    'data-url' => Url::to(['quote/get-online-quotes-old', 'leadId' => $leadForm->getLead()->id]),
-                ]); */
-
-                echo $buttonQuickSearchQuote;
-            }
-
-            if ($leadForm->getLead()->status == Lead::STATUS_PROCESSING &&
-                $leadForm->getLead()->employee_id == Yii::$app->user->identity->getId()
-            ) {
-                $title = (!$leadForm->getLead()->called_expert) ? 'Call Expert' : ' Expert Called';
-                $options = (!$leadForm->getLead()->called_expert) ? [
-                    'class' => 'btn btn-success btn-with-icon',
-                    'id' => 'btn-call-expert',
-                    'data-url' => Url::to(['lead/call-expert', 'id' => $leadForm->getLead()->id])
-                ] : [
-                    'class' => 'btn btn-default btn-with-icon',
-                ];
-                echo Html::a('<span class="btn-icon"><i class="fa fa-bell"></i></span> <span class="btn-text">' . $title . '</span>', null, $options);
-            }
-        }elseif($leadForm->mode == $leadForm::VIEW_MODE && (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id))){
-            if (!$leadForm->getLead()->isNewRecord) {
-                echo $buttonAddQuote;
-
-                /* echo Html::button('<span class="btn-icon"><i class="fa fa-plus"></i></span><span class="btn-text">Quick Search Quote</span>', [
-                    'class' => 'btn btn-warning btn-with-icon',
-                    'id' => 'quick-search-quotes',
-                    'data-url' => Url::to(['quote/get-online-quotes', 'leadId' => $leadForm->getLead()->id]),
-                ]); */
-
-                echo $buttonQuickSearchQuote;
-            }
         }?>
 
         <?php if($leadForm->getLead()->status == Lead::STATUS_SOLD && (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id))):?>

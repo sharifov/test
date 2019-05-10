@@ -103,10 +103,10 @@ return [
                     'pattern' => 'queue/<type:(inbox1|follow-up1|processing1|processing-all|booked1|trash1)>',
                     'route' => 'lead/queue',
                 ],*/
-                /*[
-                    'pattern' => 'lead/view/<id>',
-                    'route' => 'lead/view',
-                ],*/
+                [
+                    'pattern' => 'leads/view/<id>',
+                    'route' => 'leads/view',
+                ],
                 [
                     'pattern' => 'lead/view/<gid>',
                     'route' => 'lead/view',
@@ -119,6 +119,12 @@ return [
                     'pattern' => 'lead/get-salary/<dateparam>',
                     'route' => 'lead/get-salary',
                 ],
+
+                [
+                    'pattern' => 'queue/pending',
+                    'route' => 'lead/pending',
+                ],
+
                 [
                     'pattern' => 'queue/sold',
                     'route' => 'lead/sold',
@@ -138,6 +144,10 @@ return [
                 [
                     'pattern' => 'queue/trash',
                     'route' => 'lead/trash',
+                ],
+                [
+                    'pattern' => 'queue/duplicate',
+                    'route' => 'lead/duplicate',
                 ],
                 [
                     'pattern' => 'queue/booked',
