@@ -162,9 +162,9 @@ if($is_admin || $is_supervision) {
                     'notes' => $leadForm->getLead()->notes
                 ]); ?>
 
-                <?= $this->render('partial/_leadLog', [
+                <?/*= $this->render('partial/_leadLog', [
                     'logs' => $leadForm->getLead()->leadLogs
-                ]); ?>
+                ]);*/ ?>
 
             <?php endif; ?>
 
