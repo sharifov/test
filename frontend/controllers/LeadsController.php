@@ -40,9 +40,14 @@ class LeadsController extends FController
                 'class' => AccessControl::class,
                 'rules' => [
                     [
-                        'actions' => ['index', 'update', 'delete', 'create', 'export', 'duplicate', 'view'],
+                        'actions' => ['index', 'update', 'delete', 'create', 'export', 'duplicate', 'view', 'ajax-activity-logs'],
                         'allow' => true,
                         'roles' => ['supervision', 'admin'],
+                    ],
+                    [
+                        'actions' => ['ajax-activity-logs'],
+                        'allow' => true,
+                        'roles' => ['qa'],
                     ],
                     [
                         'actions' => ['index', 'ajax-reason-list'],
@@ -224,6 +229,24 @@ class LeadsController extends FController
         }
 
         return $str;
+    }
+
+
+    /**
+     * @return string
+     * @throws NotFoundHttpException
+     */
+    public function actionAjaxActivityLogs() : string
+    {
+        $lead_id = Yii::$app->request->get('id');
+        $lead = $this->findModel($lead_id);
+        $logs = $lead->leadLogs;
+
+        return $this->renderPartial('activity-logs', [
+            'logs' => $logs
+            //'searchModel' => $searchModel,
+            //'dataProvider' => $dataProvider,
+        ]);
     }
 
     /**
