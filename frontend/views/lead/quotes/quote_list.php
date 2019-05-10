@@ -189,6 +189,19 @@ if ($leadForm->mode !== $leadForm::VIEW_MODE || $is_manager) {
         });
     });
     
+    $(document).on('click','.btn-quote-details', function (e) {
+        e.preventDefault();
+        var url = $(this).data('url');
+        var modal = $('#modal-info-d');
+        modal.find('.modal-header h2').text($(this).data('title'));
+        modal.find('.modal-body').html('');
+        $('#preloader').removeClass('hidden');
+        modal.find('.modal-body').load(url, function( response, status, xhr ) {
+            $('#preloader').addClass('hidden');
+            modal.modal('show');
+        });
+    });
+    
     
 JS;
     $this->registerJs($js);

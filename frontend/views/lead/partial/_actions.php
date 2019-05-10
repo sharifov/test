@@ -626,6 +626,11 @@ if($project){
     #search-results__modal .modal-dialog {
         width: 1150px;
     }
+
+    #modal-info-d .modal-dialog {
+        width: 900px;
+    }
+
 </style>
 
 <?php Modal::begin(['id' => 'search-results__modal',
@@ -654,6 +659,12 @@ if($project){
 <?php Modal::begin(['id' => 'modal-info',
     'header' => '<h2>Info</h2>',
     'size' => Modal::SIZE_LARGE,
+])?>
+<?php Modal::end()?>
+
+<?php Modal::begin(['id' => 'modal-info-d',
+    'header' => '<h2>Info</h2>',
+    'size' => Modal::SIZE_DEFAULT,
 ])?>
 <?php Modal::end()?>
 
