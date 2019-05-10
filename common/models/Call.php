@@ -381,7 +381,7 @@ class Call extends \yii\db\ActiveRecord
                 $eDate = date('Y-m-31', strtotime($endDate));
                 break;
         }
-        $calls = self::find()->select(['c_id', 'c_call_status', 'c_updated_dt'])->where(['c_call_status' => ['completed', 'busy', 'no-answer']])->andWhere(['between', 'c_updated_dt', $sDate, $eDate])->all();
+        $calls = self::find()->select(['c_id', 'c_call_status', 'c_updated_dt'])->where(['c_call_status' => ['completed', 'busy', 'no-answer', 'failed', 'canceled']])->andWhere(['between', 'c_updated_dt', $sDate, $eDate])->all();
 
         $hourlyCallStats = [];
         $item = [];
@@ -431,7 +431,7 @@ class Call extends \yii\db\ActiveRecord
             }
         }
 
-        $completed = $noAnswer = $busy = 0;
+        $completed = $noAnswer = $busy = $failed = $canceled = 0;
         foreach ($timeLine as $key => $timeSignature){
             $weekInterval = explode('/', $timeSignature);
             if (count($weekInterval) != 2){
@@ -448,15 +448,21 @@ class Call extends \yii\db\ActiveRecord
                 if ($callUpdatedTime >= $timeSignature && $callUpdatedTime <= $EndPoint)
                 {
                     switch ($callItem->c_call_status){
-                        case 'completed':
+                        case self::CALL_STATUS_COMPLETED :
                             $completed++;
                             break;
-                        case 'no-answer':
+                        case self::CALL_STATUS_NO_ANSWER :
                             $noAnswer++;
                             echo $noAnswer;
                             break;
-                        case 'busy':
+                        case self::CALL_STATUS_BUSY :
                             $busy++;
+                            break;
+                        case self::CALL_STATUS_FAILED :
+                            $failed++;
+                            break;
+                        case self::CALL_STATUS_CANCELED :
+                            $canceled++;
                             break;
                     }
                 }
@@ -466,9 +472,11 @@ class Call extends \yii\db\ActiveRecord
             $item['completed'] = $completed;
             $item['no-answer'] = $noAnswer;
             $item['busy'] = $busy;
+            $item['failed'] = $failed;
+            $item['canceled'] = $canceled;
 
             array_push($hourlyCallStats, $item);
-            $completed = $noAnswer = $busy = 0;
+            $completed = $noAnswer = $busy = $failed = $canceled = 0;
         }
         return $hourlyCallStats;
     }

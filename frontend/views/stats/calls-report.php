@@ -109,13 +109,13 @@ $this->title = 'Calls Report';
                                         <script>
                                             function drawChart() {
                                                 let data = google.visualization.arrayToDataTable([
-                                                    ['Time Line', 'Completed', 'Canceled', 'Busy', {role: 'annotation'}],
+                                                    ['Time Line', 'Completed', 'No answer', 'Busy', 'Failed', 'Canceled', {role: 'annotation'}],
                                                     <?php foreach($callsGraphData as $k => $item):?>
                                                     ['<?=  ($item['weeksInterval'] == null)
                                                         ? date($item['timeLine'], strtotime($item['time']))
                                                         : date($item['timeLine'], strtotime($item['time'])) .' / '. date($item['timeLine'], strtotime($item['weeksInterval']));
 
-                                                        ?>', <?=$item['completed']?>, <?=$item['no-answer']?>, <?=$item['busy']?>, '<?='--'?>'],
+                                                        ?>', <?=$item['completed']?>, <?=$item['no-answer']?>, <?=$item['busy']?>, <?=$item['failed']?>, <?=$item['canceled']?>, '<?='--'?>'],
                                                     <?php endforeach;?>
                                                 ]);
 
