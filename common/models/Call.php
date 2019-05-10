@@ -3,7 +3,10 @@
 namespace common\models;
 
 use Yii;
+use DateTime;
+use common\components\ChartTools;
 use yii\helpers\VarDumper;
+
 
 /**
  * This is the model class for table "call".
@@ -251,10 +254,10 @@ class Call extends \yii\db\ActiveRecord
         }
     }
 
-    /**
-     * @param $agentId
-     * @return bool
-     */
+/**
+* @param $agentId
+* @return bool
+*/
     public static function applyHoldCallToAgent(int $agentId)
     {
         //sleep(1);
@@ -334,5 +337,139 @@ class Call extends \yii\db\ActiveRecord
         return false;
     }
 
+    /**
+     * @param string $startDate
+     * @param string $endDate
+     * @param string $groupingBy
+     * @return array
+     * @throws \Exception
+     */
+    public static function getCallStats(string $startDate, string $endDate, ?string $groupingBy) : array
+    {
+        switch ($groupingBy){
+            case null:
+                if (strtotime($startDate) == strtotime($endDate)){
+                    $hoursRange = ChartTools::getHoursRange($startDate, $endDate." 23:59:59", $step = '+1 hour', $format = 'H:i:s');
+                } else {
+                    $daysRange = ChartTools::getDaysRange($startDate, $endDate);
+                }
+                $sDate = $startDate." 00:00:00";
+                $eDate = $endDate." 23:59:59";
+                break;
+            case 'hours':
+                if (strtotime($startDate) == strtotime($endDate)){
+                    $hoursRange = ChartTools::getHoursRange($startDate, $endDate." 23:59:59", $step = '+1 hour', $format = 'H:i:s');
+                } else {
+                    $hoursRange = ChartTools::getHoursRange($startDate, $endDate." 23:59:59", $step = '+1 hour', $format = 'Y-m-d H:i:s');
+                }
+                $sDate = $startDate." 00:00:00";
+                $eDate = $endDate." 23:59:59";
+                break;
+            case 'days':
+                $daysRange = ChartTools::getDaysRange($startDate, $endDate);
+                $sDate = $startDate." 00:00:00";
+                $eDate = $endDate." 23:59:59";
+                break;
+            case 'weeks':
+                $weeksPeriods = ChartTools::getWeeksRange(new DateTime($startDate), new DateTime($endDate . ' 23:59'));
+                $sDate = $startDate." 00:00:00";
+                $eDate = $endDate." 23:59:59";
+                break;
+            case 'months':
+                $monthsRange = ChartTools::getMonthsRange($startDate, $endDate);
+                $sDate = date("Y-m-01", strtotime($startDate));
+                $eDate = date('Y-m-31', strtotime($endDate));
+                break;
+        }
+        $calls = self::find()->select(['c_id', 'c_call_status', 'c_updated_dt'])->where(['c_call_status' => ['completed', 'busy', 'no-answer']])->andWhere(['between', 'c_updated_dt', $sDate, $eDate])->all();
 
+        $hourlyCallStats = [];
+        $item = [];
+        if (strtotime($startDate) < strtotime($endDate)){
+            if (isset($daysRange)) {
+                $timeLine = $daysRange;
+                $item['timeLine'] = 'd M';
+                $timeInSeconds = 0;
+                $dateFormat = 'Y-m-d';
+            } elseif (isset($monthsRange)){
+                $timeLine = $monthsRange;
+                $timeInSeconds = 0;
+                $dateFormat = 'Y-m';
+                $item['timeLine'] = 'Y, M';
+            } elseif (isset($weeksPeriods)){
+                $timeLine = $weeksPeriods;
+                $item['timeLine'] = 'd M';
+                $timeInSeconds = 0;
+                $dateFormat = 'Y-m-d';
+            }elseif (isset($hoursRange)){
+                $timeLine = $hoursRange;
+                $item['timeLine'] = 'H:i';
+                $dateFormat = 'Y-m-d H:i:s';
+                $timeInSeconds = 3600;
+            }
+        } else {
+            if (isset($daysRange)) {
+                $timeLine = $daysRange;
+                $item['timeLine'] = 'd M';
+                $timeInSeconds = 0;
+                $dateFormat = 'Y-m-d';
+            } elseif (isset($hoursRange)){
+                $timeLine = $hoursRange;
+                $item['timeLine'] = 'H:i';
+                $dateFormat = 'H:i:s';
+                $timeInSeconds = 3600;
+            } elseif (isset($monthsRange)) {
+                $timeLine = $monthsRange;
+                $timeInSeconds = 0;
+                $dateFormat = 'Y-m';
+                $item['timeLine'] = 'Y, M';
+            } elseif (isset($weeksPeriods)){
+                $timeLine = $weeksPeriods;
+                $item['timeLine'] = 'd M';
+                $timeInSeconds = 0;
+                $dateFormat = 'Y-m-d';
+            }
+        }
+
+        $completed = $noAnswer = $busy = 0;
+        foreach ($timeLine as $key => $timeSignature){
+            $weekInterval = explode('/', $timeSignature);
+            if (count($weekInterval) != 2){
+                $EndPoint = date($dateFormat, strtotime($timeSignature) + $timeInSeconds);
+                if ($EndPoint == '00:00:00'){
+                    $EndPoint = '23:59:59';
+                }
+            } else {
+                $EndPoint = date($dateFormat, strtotime($weekInterval[1]));
+                $timeSignature = date($dateFormat, strtotime($weekInterval[0]));
+            }
+            foreach ($calls as $callItem){
+                $callUpdatedTime = date($dateFormat, strtotime($callItem->c_updated_dt));
+                if ($callUpdatedTime >= $timeSignature && $callUpdatedTime <= $EndPoint)
+                {
+                    switch ($callItem->c_call_status){
+                        case 'completed':
+                            $completed++;
+                            break;
+                        case 'no-answer':
+                            $noAnswer++;
+                            echo $noAnswer;
+                            break;
+                        case 'busy':
+                            $busy++;
+                            break;
+                    }
+                }
+            }
+            $item['time'] = $timeSignature;
+            $item['weeksInterval'] = (count($weekInterval) == 2) ? $EndPoint : null;
+            $item['completed'] = $completed;
+            $item['no-answer'] = $noAnswer;
+            $item['busy'] = $busy;
+
+            array_push($hourlyCallStats, $item);
+            $completed = $noAnswer = $busy = 0;
+        }
+        return $hourlyCallStats;
+    }
 }

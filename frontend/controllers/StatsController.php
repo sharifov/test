@@ -3,6 +3,7 @@
 namespace frontend\controllers;
 
 use common\models\ApiLog;
+use common\models\Call;
 use common\models\Employee;
 use common\models\Lead;
 use common\models\search\CommunicationSearch;
@@ -34,7 +35,7 @@ class StatsController extends FController
                 'class' => AccessControl::class,
                 'rules' => [
                     [
-                        'actions' => ['index', 'call-sms'],
+                        'actions' => ['index', 'call-sms', 'calls-graph'],
                         'allow' => true,
                         'roles' => ['supervision', 'admin', 'qa'],
                     ],
@@ -182,10 +183,6 @@ class StatsController extends FController
             ],
         ]);*/
 
-
-
-
-
         return $this->render('call-sms', [
             //'datetime_start' => $datetime_start,
             //'datetime_end' => $datetime_end,
@@ -193,10 +190,28 @@ class StatsController extends FController
             'searchModel' => $searchModel,
             'dataProviderCommunication' => $dataProviderCommunication,
         ]);
-
-
     }
 
+    public function actionCallsGraph()
+    {
+        if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
+            $dateRange = Yii::$app->request->post('dateRange');
+            $rangeBy = Yii::$app->request->post('groupBy');
 
+            $date = $pieces = explode("/", $dateRange);
+            $callsGraphData = Call::getCallStats($date[0], $date[1], $rangeBy);
+
+            return $this->renderAjax('calls-report', [
+                'callsGraphData' => $callsGraphData
+            ]);
+        } else {
+            $currentDate =  date('Y-m-d', strtotime('-0 day'));
+            $callsGraphData = Call::getCallStats($currentDate, $currentDate, null);
+
+            return $this->render('calls-report', [
+                'callsGraphData' => $callsGraphData
+            ]);
+        }
+    }
 
 }
