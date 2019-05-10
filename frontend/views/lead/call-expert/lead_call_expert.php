@@ -149,7 +149,13 @@ $this->registerJs(
         
         
         $(document).on("click","#btn-call-expert-form", function() {
-            $("#div-call-expert-form").toggle();
+            $("#div-call-expert-form").show();
+            $("#pjax-lead-call-expert .x_content").show();
+            
+            $([document.documentElement, document.body]).animate({
+                scrollTop: $("#call-expert-form").offset().top
+            }, 1000);
+            
             return false;
         });
                 
