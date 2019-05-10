@@ -4,6 +4,7 @@ namespace common\models;
 
 use common\components\EmailService;
 use common\components\jobs\QuickSearchInitPriceJob;
+use common\components\jobs\UpdateLeadBOJob;
 use common\models\local\LeadAdditionalInformation;
 use common\models\local\LeadLogMessage;
 use Yii;
@@ -1235,6 +1236,13 @@ New lead {lead_id}
 
             if (isset($changedAttributes['status']) && $changedAttributes['status'] !== $this->status) {
                 LeadFlow::addStateFlow($this);
+
+                if($this->status === self::STATUS_TRASH || $this->status === self::STATUS_FOLLOW_UP || $this->status === self::STATUS_SNOOZE) {
+                    $job = new UpdateLeadBOJob();
+                    $job->lead_id = $this->id;
+                    $jobId = Yii::$app->queue_job->push($job);
+                    Yii::info('Lead: ' . $this->id . ', UpdateLeadBOJob: ' . $jobId, 'info\Lead:afterSave:UpdateLeadBOJob');
+                }
             }
 
 
