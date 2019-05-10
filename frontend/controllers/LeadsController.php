@@ -173,18 +173,19 @@ class LeadsController extends FController
 
                                 }
 
-                                if($multipleForm->status_id == Lead::STATUS_PROCESSING && $multipleForm->employee_id > 0 ) {
-
+                                /* if($multipleForm->status_id == Lead::STATUS_PROCESSING && $multipleForm->employee_id > 0 ) {
                                     if($lead->l_answered) {
                                         $taskType = Task::CAT_ANSWERED_PROCESS;
                                     } else {
                                         $taskType = Task::CAT_NOT_ANSWERED_PROCESS;
                                     }
 
+                                    LeadTask::deleteUnnecessaryTasks(date('Y-m-d'));
+
                                     LeadTask::createTaskList($lead->id, $multipleForm->employee_id, 1, '', $taskType);
                                     LeadTask::createTaskList($lead->id, $multipleForm->employee_id, 2, '', $taskType);
                                     LeadTask::createTaskList($lead->id, $multipleForm->employee_id, 3, '', $taskType);
-                                }
+                                } */
 
 
                                 if ($is_save) {

@@ -1547,7 +1547,7 @@ class LeadController extends FController
 
         $model->employee_id = $user->getId();
 
-        if ($model->status != Lead::STATUS_ON_HOLD && $model->status != Lead::STATUS_SNOOZE && !$model->l_answered) {
+        /* if ($model->status != Lead::STATUS_ON_HOLD && $model->status != Lead::STATUS_SNOOZE && !$model->l_answered) {
             LeadTask::createTaskList($model->id, $model->employee_id, 1, '', Task::CAT_NOT_ANSWERED_PROCESS);
             LeadTask::createTaskList($model->id, $model->employee_id, 2, '', Task::CAT_NOT_ANSWERED_PROCESS);
             LeadTask::createTaskList($model->id, $model->employee_id, 3, '', Task::CAT_NOT_ANSWERED_PROCESS);
@@ -1557,9 +1557,7 @@ class LeadController extends FController
             LeadTask::createTaskList($model->id, $model->employee_id, 1, '', Task::CAT_ANSWERED_PROCESS);
             LeadTask::createTaskList($model->id, $model->employee_id, 2, '', Task::CAT_ANSWERED_PROCESS);
             LeadTask::createTaskList($model->id, $model->employee_id, 3, '', Task::CAT_ANSWERED_PROCESS);
-        }
-
-
+        } */
 
         $model->status = Lead::STATUS_PROCESSING;
         $model->save();
@@ -1624,11 +1622,14 @@ class LeadController extends FController
             $lead->employee_id = $user->id;
             $lead->status = Lead::STATUS_PROCESSING;
             $lead->status_description = 'Auto Dial';
-            if($lead->save()) {
+            if(!$lead->save()) {
+                \Yii::error(VarDumper::dumpAsString($lead->errors, 10), 'ControllerLead:actionAutoTake:Lead:save(Auto Dial)');
+            }
+            /*if($lead->save()) {
                 LeadTask::createTaskList($lead->id, $lead->employee_id, 1, '', Task::CAT_NOT_ANSWERED_PROCESS);
                 LeadTask::createTaskList($lead->id, $lead->employee_id, 2, '', Task::CAT_NOT_ANSWERED_PROCESS);
                 LeadTask::createTaskList($lead->id, $lead->employee_id, 3, '', Task::CAT_NOT_ANSWERED_PROCESS);
-            }
+            } */
 
         } else {
             Yii::$app->session->setFlash('warning', 'Error: Lead not in status Pending ('.$lead->id.')');
@@ -1954,7 +1955,7 @@ class LeadController extends FController
         if($action === 'answer') {
             $lead->l_answered = $lead->l_answered ? 0 : 1;
             if($lead->update()) {
-                if($lead->l_answered) {
+                /* if($lead->l_answered) {
                     LeadTask::deleteAll('lt_lead_id = :lead_id AND lt_date >= :date AND lt_completed_dt IS NULL',
                         [':lead_id' => $lead->id, ':date' => date('Y-m-d') ]);
 
@@ -1967,7 +1968,7 @@ class LeadController extends FController
                         [':lead_id' => $lead->id, ':date' => date('Y-m-d') ]);
 
                     LeadTask::createTaskList($lead->id, $lead->employee_id, 1, '', Task::CAT_NOT_ANSWERED_PROCESS);
-                }
+                } */
             }
         }
 
@@ -1998,9 +1999,9 @@ class LeadController extends FController
             $leadForm->getLead()->status = Lead::STATUS_PROCESSING;
             if (empty($data['errors']) && $data['load'] && $leadForm->save($errors)) {
                 $model = $leadForm->getLead();
-                LeadTask::createTaskList($model->id, $model->employee_id, 1, '', Task::CAT_NOT_ANSWERED_PROCESS);
+                /* LeadTask::createTaskList($model->id, $model->employee_id, 1, '', Task::CAT_NOT_ANSWERED_PROCESS);
                 LeadTask::createTaskList($model->id, $model->employee_id, 2, '', Task::CAT_NOT_ANSWERED_PROCESS);
-                LeadTask::createTaskList($model->id, $model->employee_id, 3, '', Task::CAT_NOT_ANSWERED_PROCESS);
+                LeadTask::createTaskList($model->id, $model->employee_id, 3, '', Task::CAT_NOT_ANSWERED_PROCESS); */
 
                 return $this->redirect(['lead/view', 'gid' => $leadForm->getLead()->gid]);
             }

@@ -1302,8 +1302,25 @@ New lead {lead_id}
 
                 }
             }
-
         }
+
+
+
+        //create or update LeadTask
+        if($this->status == self::STATUS_PROCESSING && array_key_exists('employee_id',$changedAttributes)){
+            LeadTask::deleteUnnecessaryTasks($this->id);
+
+            if($this->l_answered) {
+                $taskType = Task::CAT_ANSWERED_PROCESS;
+            } else {
+                $taskType = Task::CAT_NOT_ANSWERED_PROCESS;
+            }
+
+            LeadTask::createTaskList($this->id, $this->employee_id, 1, '', $taskType);
+            LeadTask::createTaskList($this->id, $this->employee_id, 2, '', $taskType);
+            LeadTask::createTaskList($this->id, $this->employee_id, 3, '', $taskType);
+        }
+
 
         if (!$insert) {
             foreach (['updated', 'created'] as $item) {

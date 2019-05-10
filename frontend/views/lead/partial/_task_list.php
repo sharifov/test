@@ -197,8 +197,8 @@ $call2DelayTime = Yii::$app->params['lead']['call2DelayTime']; //(2 * 60 * 60);
                         $user = Yii::$app->user->identity;
                             if($user_id != Yii::$app->user->id) {
                                 $agentName = 'Other agent';
-                                if($user && $is_manager) {
-                                    $agentName = $user->username . ' (Id: '.$user->id.')';
+                                if(isset($userTasks[0]) && $userTasks[0]->ltUser && $is_manager) {
+                                    $agentName = $userTasks[0]->ltUser->username . ' (Id: '.$userTasks[0]->ltUser->id.')';
                                 }
                             } else {
                                 $agentName = $user->username . ' (I am: '.$user->id.')';
