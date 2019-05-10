@@ -4294,7 +4294,7 @@ input[disabled] + .radio-tab__text {
 }
 
 .quote__details {
-  margin-left: 20px;
+  /*margin-left: 20px;*/
   font-weight: 600;
 }
 
