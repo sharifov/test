@@ -6,22 +6,22 @@ use yii\widgets\Pjax;
 $js = <<<JS
     $('#viewMode0').click(function() {
         $('#viewMode1, #viewMode2, #viewMode3').removeClass('active focus');
-        $.pjax({container: '#calls-graph-pjax', data: {dateRange: $('#call-stats-picker').val(), groupBy: 'hours'}, type: 'PJAX', url: 'calls-graph', async:true, push: false});
+        $.pjax({container: '#calls-graph-pjax', data: {dateRange: $('#call-stats-picker').val(), groupBy: 'hours'}, type: 'POST', url: 'calls-graph', async:true, push: false});
     });
 
     $('#viewMode1').click(function() {
         $('#viewMode0, #viewMode2, #viewMode3').removeClass('active focus');
-        $.pjax({container: '#calls-graph-pjax', data: {dateRange: $('#call-stats-picker').val(), groupBy: 'days'}, type: 'PJAX', url: 'calls-graph', async:true, push: false});
+        $.pjax({container: '#calls-graph-pjax', data: {dateRange: $('#call-stats-picker').val(), groupBy: 'days'}, type: 'POST', url: 'calls-graph', async:true, push: false});
     });
     
     $('#viewMode2').click(function() {
         $('#viewMode0, #viewMode1, #viewMode3').removeClass('active focus');
-        $.pjax({container: '#calls-graph-pjax', data: {dateRange: $('#call-stats-picker').val(), groupBy: 'weeks'}, type: 'PJAX', url: 'calls-graph', async:true, push: false});
+        $.pjax({container: '#calls-graph-pjax', data: {dateRange: $('#call-stats-picker').val(), groupBy: 'weeks'}, type: 'POST', url: 'calls-graph', async:true, push: false});
     });
     
     $('#viewMode3').click(function() {
         $('#viewMode0, #viewMode1, #viewMode2').removeClass('active focus');
-        $.pjax({container: '#calls-graph-pjax', data: {dateRange: $('#call-stats-picker').val(), groupBy: 'months'}, type: 'PJAX', url: 'calls-graph', async:true, push: false});
+        $.pjax({container: '#calls-graph-pjax', data: {dateRange: $('#call-stats-picker').val(), groupBy: 'months'}, type: 'POST', url: 'calls-graph', async:true, push: false});
     });
 JS;
 $this->registerJs($js, \yii\web\View::POS_READY);
@@ -60,7 +60,7 @@ $this->title = 'Calls Report';
                                 'pluginEvents'=>[
                                     "apply.daterangepicker"=>"function(){
                                      //console.log($('#call-stats-picker').val());
-                                     $.pjax({container: '#calls-graph-pjax', data: {dateRange: $('#call-stats-picker').val()}, type: 'PJAX', url: 'calls-graph', async:true, push: false});
+                                     $.pjax({container: '#calls-graph-pjax', data: {dateRange: $('#call-stats-picker').val()}, type: 'POST', url: 'calls-graph', async:true, push: false});
                                      let dates = $('#call-stats-picker').val().split(' / ');
                                      if (dates[0] == dates[1]){
                                         $('#viewMode0').addClass('active focus');

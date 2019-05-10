@@ -194,7 +194,7 @@ class StatsController extends FController
 
     public function actionCallsGraph()
     {
-        if (Yii::$app->request->isPjax) {
+        if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
             $dateRange = Yii::$app->request->post('dateRange');
             $rangeBy = Yii::$app->request->post('groupBy');
 
