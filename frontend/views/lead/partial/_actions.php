@@ -320,15 +320,31 @@ $js = <<<JS
             editBlock.modal('show');
         });
     });
+    
+    
+    $('#btn-lead-logs').on('click', function(e) {
+        e.preventDefault();
+        var url = $(this).data('url');
+        var modal = $('#modal-info');
+        modal.find('.modal-header h2').text('Lead Activity Logs');
+        modal.find('.modal-body').html('');
+        $('#preloader').removeClass('hidden');
+        modal.find('.modal-body').load(url, function( response, status, xhr ) {
+            $('#preloader').addClass('hidden');
+            modal.modal('show');
+        });
+        return false;
+    });
+    
 
-$(document).ready(function() {
+    //$(document).ready(function() {
     var clipboard = new ClipboardJS('.btn-clipboard');
 
     clipboard.on('success', function(e) {
         alert('Reservation dump copied successfully to clipboard');
         e.clearSelection();
     });
-});
+    //});
 JS;
 $this->registerJs($js);
 
@@ -526,6 +542,33 @@ if($project){
             echo Html::button('<span class="btn-icon"><i class="fa fa-plus"></i></span> <span class="btn-text">' . $title . '</span>', $options);
         } ?>
 
+		<?php if ($leadForm->mode !== $leadForm::VIEW_MODE) {
+            $title = '<span class="btn-icon"><i class="fa fa-check"></i></span><span class="btn-text">'.($leadForm->getLead()->isNewRecord ? 'Create' : 'Save').'</span>';
+            echo Html::submitButton($title, [
+                'id' => 'submit-lead-form-btn',
+                'class' => 'btn btn-success btn-with-icon'
+            ]);
+
+            if(!$leadForm->getLead()->isNewRecord) {
+                echo $buttonAddNote;
+            }
+
+        }?>
+
+
+        <?php
+
+            if(!$leadForm->getLead()->isNewRecord && (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id))) {
+                $countLogs = \common\models\LeadLog::find()->where(['lead_id' => $leadForm->getLead()->id])->count();
+                echo Html::a('Logs' . ($countLogs ? ' ('.$countLogs.')' : '' ), null,
+                    [
+                        'id' => 'btn-lead-logs',
+                        'class' => 'btn btn-default',
+                        'data-url' => Url::to(['leads/ajax-activity-logs', 'id' => $leadForm->getLead()->id])
+                ]);
+            }
+
+        ?>
 
 
         <?php if($leadForm->getLead()->status == Lead::STATUS_SOLD && (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id))):?>
@@ -607,6 +650,13 @@ if($project){
     'size' => Modal::SIZE_LARGE,
 ])?>
 <?php Modal::end()?>
+
+<?php Modal::begin(['id' => 'modal-info',
+    'header' => '<h2>Info</h2>',
+    'size' => Modal::SIZE_LARGE,
+])?>
+<?php Modal::end()?>
+
 <?php $this->registerCssFile('//cdnjs.cloudflare.com/ajax/libs/noUiSlider/11.1.0/nouislider.min.css',[
     'depends' => [\yii\bootstrap\BootstrapAsset::className()],
 ]);?>

@@ -40,9 +40,14 @@ class LeadsController extends FController
                 'class' => AccessControl::class,
                 'rules' => [
                     [
-                        'actions' => ['index', 'update', 'delete', 'create', 'export', 'duplicate', 'view'],
+                        'actions' => ['index', 'update', 'delete', 'create', 'export', 'duplicate', 'view', 'ajax-activity-logs'],
                         'allow' => true,
                         'roles' => ['supervision', 'admin'],
+                    ],
+                    [
+                        'actions' => ['ajax-activity-logs'],
+                        'allow' => true,
+                        'roles' => ['qa'],
                     ],
                     [
                         'actions' => ['index', 'ajax-reason-list'],
@@ -173,18 +178,19 @@ class LeadsController extends FController
 
                                 }
 
-                                if($multipleForm->status_id == Lead::STATUS_PROCESSING && $multipleForm->employee_id > 0 ) {
-
+                                /* if($multipleForm->status_id == Lead::STATUS_PROCESSING && $multipleForm->employee_id > 0 ) {
                                     if($lead->l_answered) {
                                         $taskType = Task::CAT_ANSWERED_PROCESS;
                                     } else {
                                         $taskType = Task::CAT_NOT_ANSWERED_PROCESS;
                                     }
 
+                                    LeadTask::deleteUnnecessaryTasks(date('Y-m-d'));
+
                                     LeadTask::createTaskList($lead->id, $multipleForm->employee_id, 1, '', $taskType);
                                     LeadTask::createTaskList($lead->id, $multipleForm->employee_id, 2, '', $taskType);
                                     LeadTask::createTaskList($lead->id, $multipleForm->employee_id, 3, '', $taskType);
-                                }
+                                } */
 
 
                                 if ($is_save) {
@@ -224,6 +230,24 @@ class LeadsController extends FController
         }
 
         return $str;
+    }
+
+
+    /**
+     * @return string
+     * @throws NotFoundHttpException
+     */
+    public function actionAjaxActivityLogs() : string
+    {
+        $lead_id = Yii::$app->request->get('id');
+        $lead = $this->findModel($lead_id);
+        $logs = $lead->leadLogs;
+
+        return $this->renderPartial('activity-logs', [
+            'logs' => $logs
+            //'searchModel' => $searchModel,
+            //'dataProvider' => $dataProvider,
+        ]);
     }
 
     /**

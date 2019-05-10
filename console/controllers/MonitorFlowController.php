@@ -57,13 +57,6 @@ class MonitorFlowController extends Controller
             if ($diff <= time()) {
                 $object->status = Lead::STATUS_PROCESSING;
                 $object->snooze_for = null;
-
-                if($object->l_answered) {
-                    LeadTask::createTaskList($object->id, $object->employee_id, 1, '', Task::CAT_ANSWERED_PROCESS);
-                    LeadTask::createTaskList($object->id, $object->employee_id, 2, '', Task::CAT_ANSWERED_PROCESS);
-                    LeadTask::createTaskList($object->id, $object->employee_id, 3, '', Task::CAT_ANSWERED_PROCESS);
-                }
-
                 $object->save();
             }
         }
