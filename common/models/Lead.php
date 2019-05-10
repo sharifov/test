@@ -2371,16 +2371,52 @@ New lead {lead_id}
             }
         }
 
-        return [
-            'call_expert' => false,
-            'LeadRequest' => [
-                'uid' => $this->uid,
-                'gid' => $this->gid,
-                'market_info_id' => $this->source_id,
-                'information' => $information
-            ],
-            'LeadQuotes' => $quoteArr
+
+        $similarLeads = [];
+
+        if($cloneLead = $this->clone) {
+            $similarLeads[$cloneLead->id] = [
+                'uid' => $cloneLead->uid,
+                'gid' => $cloneLead->gid,
+                'agent_username' => $cloneLead->employee ? $cloneLead->employee->username : null,
+                'agent_id' => $cloneLead->employee_id,
+                'created_dt' => $cloneLead->created,
+                'status' => $cloneLead->status
+            ];
+
+            unset($cloneLead);
+        }
+
+        /** @var self[] $childLeads */
+        $childLeads = self::find()->where(['clone_id' => $this->id])->all();
+
+        if($childLeads) {
+            foreach ($childLeads as $childLead) {
+                $similarLeads[$childLead->id] = [
+                    'uid' => $childLead->uid,
+                    'gid' => $childLead->gid,
+                    'agent_username' => $childLead->employee ? $childLead->employee->username : null,
+                    'agent_id' => $childLead->employee_id,
+                    'created_dt' => $childLead->created,
+                    'status' => $childLead->status
+                ];
+            }
+            unset($childLeads);
+        }
+
+
+        $out['call_expert'] = false;
+        $out['LeadRequest'] = [
+            'uid'               => $this->uid,
+            'gid'               => $this->gid,
+            'market_info_id'    => $this->source_id,
+            'status'            => $this->status,
+            'information'       => $information
         ];
+        $out['similar_leads'] = $similarLeads;
+        $out['LeadQuotes'] = $quoteArr;
+
+        return $out;
     }
 
 
