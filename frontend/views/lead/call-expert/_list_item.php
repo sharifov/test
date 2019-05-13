@@ -37,7 +37,7 @@
     </div>
 
     <div class="col-md-6">
-        <?php if($model->lce_response_text || $model->lce_status_id === \common\models\LeadCallExpert::STATUS_DONE): ?>
+        <?php if($model->lce_response_text || $model->lce_status_id === \common\models\LeadCallExpert::STATUS_DONE ||  $model->lce_status_id === \common\models\LeadCallExpert::STATUS_DONE ): ?>
         <table class="table table-striped table-bordered">
             <tr>
                 <td>
@@ -45,9 +45,11 @@
                     <?=$model->lce_response_dt ? ', <i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime($model->lce_response_dt): '' ?>
                 </td>
             </tr>
+            <?php if($model->lce_response_text):?>
             <tr>
                 <td><?=nl2br(\yii\helpers\Html::encode($model->lce_response_text))?></td>
             </tr>
+            <?php endif; ?>
         </table>
         <?php endif; ?>
     </div>
