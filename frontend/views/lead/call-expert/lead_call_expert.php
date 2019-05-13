@@ -39,6 +39,7 @@ use yii\widgets\Pjax;
         <?php
         /** @var TYPE_NAME $lastModel */
         $lastModel = null;
+        $label = '';
         if($dataProvider->count > 0) {
             //$lastKey = array_key_last($dataProvider->models); php 7.3
             $lastKey = array_keys($dataProvider->models)[count($dataProvider->models)-1];
@@ -46,7 +47,6 @@ use yii\widgets\Pjax;
                 $lastModel = $dataProvider->models[$lastKey];
             }
 
-            $label = '';
             if($lastModel) {
                 if($lastModel->lce_status_id === LeadCallExpert::STATUS_PENDING) {
                     $label = 'warning';
@@ -168,48 +168,48 @@ $this->registerJs(
         $(document).on("change",".ch_task", function() {
             $.pjax.reload({container: containerId, push: false, replace: false, timeout: 5000, data: {date: taskDate, task_id: taskId, lead_id: taskLeadId, user_id: taskUserId}});
         });
-        
-        
+
+
         $(document).on("click",".link2quote", function() {
             var uid = $(this).data("uid");
-            
+
             $([document.documentElement, document.body]).animate({
                 scrollTop: $("#quote-" + uid).offset().top
             }, 500);
-                
+
             for(i = 0; i < 4; i ++) {
                 $("#quote-" + uid).fadeTo(300, 0.2).fadeTo(300, 1.0);
-            }                
-            
+            }
+
         });
-        
-        
+
+
         $(document).on("click","#btn-call-expert-form", function() {
             $("#div-call-expert-form").show();
             $("#pjax-lead-call-expert .x_content").show();
-            
+
             $([document.documentElement, document.body]).animate({
                 scrollTop: $("#call-expert-form").offset().top
             }, 1000);
-            
+
             return false;
         });
-                
+
 
         $("#pjax-lead-call-expert").on("pjax:start", function () {
             //$("#pjax-container").fadeOut("fast");
             $("#btn-submit-call-expert").attr("disabled", true).prop("disabled", true).addClass("disabled");
             $("#btn-submit-call-expert i").attr("class", "fa fa-spinner fa-pulse fa-fw")
-            
+
         });
 
         $("#pjax-lead-call-expert").on("pjax:end", function () {
             //$("#pjax-container").fadeIn("fast");
             //alert("end");
-            
+
             $("#btn-submit-call-expert").attr("disabled", false).prop("disabled", false).removeClass("disabled");
             $("#btn-submit-call-expert i").attr("class", "fa fa-plus");
-            
+
         });
     '
 );
