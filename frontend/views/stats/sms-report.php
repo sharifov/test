@@ -134,7 +134,7 @@ $this->title = 'SMS Report';
                                     <div class="col-md-12">
                                         <div id="chart_div"></div>
                                         <?php
-                                        $this->registerJs("google.charts.load('current', {'packages':['bar']}); google.charts.setOnLoadCallback(drawChart);", \yii\web\View::POS_READY);
+                                        $this->registerJs("google.charts.load('current', {'packages':['corechart']}); google.charts.setOnLoadCallback(drawChart);", \yii\web\View::POS_READY);
                                         ?>
                                         <script>
                                             function drawChart() {
@@ -145,24 +145,51 @@ $this->title = 'SMS Report';
                                                         ? date($item['timeLine'], strtotime($item['time']))
                                                         : date($item['timeLine'], strtotime($item['time'])) .' / '. date($item['timeLine'], strtotime($item['weeksInterval']));
 
-                                                        ?>', <?=$item['done']?>, <?=$item['error']?>, '<?='--'?>'],
+                                                        ?>', <?=$item['done']?>, <?=$item['error']?>, '<?=''?>'],
                                                     <?php endforeach;?>
                                                 ]);
 
                                                 let options = {
-                                                    chart: {
-                                                        //title: 'Calls graph',
-                                                        //subtitle: 'Calls info - Last ?? days',
-                                                    },
-                                                    height: 545,
+                                                    height: 550,
                                                     vAxis: {
-                                                        //title: 'Requests'
+                                                        textStyle: {
+                                                            fontSize: 10
+                                                        },
+                                                        format:"#",
+                                                        viewWindow: {
+                                                            min: 1,
+                                                        },
                                                     },
-                                                    //legend: { position: 'none' },
+                                                    hAxis: {
+                                                        textStyle: {
+                                                            fontSize: 10
+                                                        },
+                                                    },
+                                                    seriesType: 'bars',
+                                                    bar: {
+                                                        groupWidth: 25
+                                                    },
+                                                    chartArea:{
+                                                        left:35,
+                                                        top:22,
+                                                        width:'100%',
+                                                        height:'85%'
+                                                    },
+                                                    legend: {
+                                                        position: 'top',
+                                                        textStyle: {
+                                                            fontSize: 10
+                                                        },
+                                                        alignment: 'end'
+                                                    },
+                                                    tooltip: {
+                                                        textStyle: {
+                                                            fontSize: 14
+                                                        }
+                                                    }
 
                                                 };
-                                                //var chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
-                                                let chart = new google.charts.Bar(document.getElementById('chart_div'));
+                                                let chart = new google.visualization.ComboChart(document.getElementById('chart_div'));
 
                                                 chart.draw(data, options);
                                                 $(window).resize(function(){
