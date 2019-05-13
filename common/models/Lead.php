@@ -1337,7 +1337,8 @@ New lead {lead_id}
                 }
             }
             $flgUnActiveRequest = false;
-            $resetCallExpert = false;
+            //$resetCallExpert = false;
+
             if (isset($changedAttributes['adults']) && $changedAttributes['adults'] != $this->adults) {
                 $flgUnActiveRequest = true;
             }
@@ -1347,19 +1348,20 @@ New lead {lead_id}
             if (isset($changedAttributes['infants']) && $changedAttributes['infants'] != $this->infants) {
                 $flgUnActiveRequest = true;
             }
-            if (isset($changedAttributes['cabin']) && $changedAttributes['cabin'] != $this->cabin) {
+
+            /*if (isset($changedAttributes['cabin']) && $changedAttributes['cabin'] != $this->cabin) {
                 $resetCallExpert = true;
             }
             if (isset($changedAttributes['notes_for_experts']) && $changedAttributes['notes_for_experts'] != $this->notes_for_experts) {
                 $resetCallExpert = true;
-            }
+            }*/
 
-            if ($resetCallExpert || $flgUnActiveRequest) {
+            /*if ($resetCallExpert || $flgUnActiveRequest) {
                 Yii::$app->db->createCommand('UPDATE ' . Lead::tableName() . ' SET called_expert = :called_expert WHERE id = :id', [
                     ':called_expert' => false,
                     ':id' => $this->id
                 ])->execute();
-            }
+            }*/
 
             if ($flgUnActiveRequest) {
                 foreach ($this->getAltQuotes() as $quote) {
