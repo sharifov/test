@@ -76,7 +76,9 @@ use yii\widgets\Pjax;
             </li>
             <li>
                 <?//=Html::a('<i class="fa fa-comment"></i>', ['lead/view', 'gid' => $lead->gid, 'act' => 'call-expert-message'], ['class' => ''])?>
-                <?=Html::a('<i class="fa fa-plus-circle success"></i> new Call', null, ['id' => 'btn-call-expert-form'])?>
+                <?php if(!$lastModel || $lastModel->lce_status_id === LeadCallExpert::STATUS_DONE):?>
+                    <?=Html::a('<i class="fa fa-plus-circle success"></i> new Call', null, ['id' => 'btn-call-expert-form'])?>
+                <?php endif; ?>
             </li>
             <li>
                 <a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
@@ -97,9 +99,6 @@ use yii\widgets\Pjax;
         <div class="clearfix"></div>
     </div>
     <div class="x_content" style="display: <?=Yii::$app->request->isPjax ? 'block' : 'none';?>">
-
-
-        <?/*<h1><?=random_int(1, 100)?></h1>*/ ?>
 
                 <?= \yii\widgets\ListView::widget([
                     'dataProvider' => $dataProvider,

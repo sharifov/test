@@ -5385,3 +5385,8 @@ input[disabled] + .radio-tab__text {
   transition:background 200ms linear
 }
 #scrollUp:hover{background:#000}
+
+.panel_toolbox  {
+  float: right;
+  min-width: 0;
+}
