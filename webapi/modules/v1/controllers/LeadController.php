@@ -1263,8 +1263,8 @@ class LeadController extends ApiBaseController
         $leadCallExpert->lce_response_dt = date('Y-m-d H:i:s');
         $leadCallExpert->lce_updated_dt = date('Y-m-d H:i:s');
 
-        if($model->lce_response_lead_quotes) {
-            $leadCallExpert->lce_response_lead_quotes = $model->lce_response_lead_quotes;
+        if($model->lce_response_lead_quotes && is_array($model->lce_response_lead_quotes)) {
+            $leadCallExpert->lce_response_lead_quotes = json_encode($model->lce_response_lead_quotes);
         }
 
         if($model->lce_response_text) {
