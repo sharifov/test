@@ -34,10 +34,14 @@ use yii\widgets\Pjax;
     <div class="x_title">
 
         <?php
+        /** @var TYPE_NAME $lastModel */
         $lastModel = null;
         if($dataProvider->count > 0) {
-            $lastKey = array_key_last($dataProvider->models);
-            $lastModel = $dataProvider->models[$lastKey];
+            //$lastKey = array_key_last($dataProvider->models); php 7.3
+            $lastKey = array_keys($dataProvider->models)[count($dataProvider->models)-1];
+            if(isset($dataProvider->models[$lastKey])) {
+                $lastModel = $dataProvider->models[$lastKey];
+            }
 
             $label = '';
             if($lastModel) {
