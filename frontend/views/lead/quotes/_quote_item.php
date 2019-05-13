@@ -215,12 +215,15 @@ use yii\helpers\Url;
     			    }
     			    if(!in_array($segment->qs_marketing_airline, $marketingAirlines)){
     			        $marketingAirlines[] = $segment->qs_marketing_airline;
-    			        $airline = Airline::findIdentity($segment->qs_marketing_airline);
+
+                        $airlineNames[] = $segment->marketingAirline ? $segment->marketingAirline->name : $segment->qs_marketing_airline;
+
+    			        /*$airline = Airline::findIdentity($segment->qs_marketing_airline);
     			        if($airline){
     			            $airlineNames[] =  $airline->name;
     			        }else{
     			            $airlineNames[] = $segment->qs_marketing_airline;
-    			        }
+    			        }*/
 
     			    }
     			}
