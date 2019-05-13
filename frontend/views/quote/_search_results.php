@@ -76,7 +76,7 @@ if(isset($lastResult['passengers']['ADT'])){
     </div>
     <div class="search-filters">
         <!--Fare types-->
-        <div class="filter filter--fareType dropdown js-filter">
+        <div class="filter filter--fareType dropdown js-filter" id="filter-fareType">
             <a data-toggle="dropdown" href="#">Fare type
                 <i class="icn-clear-filter js-clear-filter"></i></a>
 
@@ -88,28 +88,23 @@ if(isset($lastResult['passengers']['ADT'])){
                         <i class="search-filters__close-btn js-dropdown-close"></i>
                     </h3>
                     <div class="search-filters__body">
-                        <div class="form-group custom-radio">
-                            <input type="radio" id="any_fare" name="fareType" checked>
-                            <label for="any_fare"></label>
-                            <label for="any_fare">Any</label>
-                        </div>
-                        <div class="form-group custom-radio">
-                            <input type="radio" id="PUB" name="fareType">
+                        <div class="form-group custom-checkbox js-filter-fareType-item">
+                            <input type="checkbox" id="PUB" name="fareType" checked>
                             <label for="PUB"></label>
                             <label for="PUB">Public</label>
                         </div>
-                        <div class="form-group custom-radio">
-                            <input type="radio" id="SR" name="fareType">
+                        <div class="form-group custom-checkbox js-filter-fareType-item">
+                            <input type="checkbox" id="SR" name="fareType" checked>
                             <label for="SR"></label>
                             <label for="SR">Private</label>
                         </div>
-                        <div class="form-group custom-radio">
-                            <input type="radio" id="COMM" name="fareType">
+                        <div class="form-group custom-checkbox js-filter-fareType-item">
+                            <input type="checkbox" id="COMM" name="fareType" checked>
                             <label for="COMM"></label>
                             <label for="COMM">Commission</label>
                         </div>
-                        <div class="form-group custom-radio">
-                            <input type="radio" id="TOUR" name="fareType">
+                        <div class="form-group custom-checkbox js-filter-fareType-item">
+                            <input type="checkbox" id="TOUR" name="fareType" checked>
                             <label for="TOUR"></label>
                             <label for="TOUR">Tour</label>
                         </div>
