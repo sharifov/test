@@ -37,7 +37,7 @@
     </div>
 
     <div class="col-md-6">
-        <?php if($model->lce_response_text || $model->lce_status_id === \common\models\LeadCallExpert::STATUS_DONE ||  $model->lce_status_id === \common\models\LeadCallExpert::STATUS_DONE ): ?>
+        <?php if($model->lce_response_text || $model->lce_status_id === \common\models\LeadCallExpert::STATUS_DONE ||  $model->lce_status_id === \common\models\LeadCallExpert::STATUS_PROCESSING ): ?>
         <table class="table table-striped table-bordered">
             <tr>
                 <td>
