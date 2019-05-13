@@ -46,7 +46,7 @@ if($is_admin || $is_supervision) {
                     'lead/view',
                     'uid' => $cloneLead->uid
                 ]),$lead->clone_id);*/
-                
+
                 if($cloneLead) {
                     echo \yii\helpers\Html::a('(Cloned from ' . $lead->clone_id . ' )', ['lead/view', 'gid' => $cloneLead->gid], ['title' => 'Clone reason: ' . $lead->description]);
                 }

@@ -1041,17 +1041,17 @@ define({ "api": [
           },
           {
             "group": "Parameter",
-            "type": "text",
+            "type": "array[]",
             "optional": true,
             "field": "call.lce_response_lead_quotes",
-            "description": "<p>JSON UID quote list</p>"
+            "description": "<p>Array of UID quotes (string)</p>"
           }
         ]
       },
       "examples": [
         {
           "title": "Request-Example:",
-          "content": "{\n   \"call\": {\n       \"lce_id\": 38,\n       \"lce_response_text\": \"Message from expert\",\n       \"lce_expert_username\": \"Alex\",\n       \"lce_expert_user_id\": 12,\n       \"lce_response_lead_quotes\": \"[\\\"5ccbe7a458765\\\", \\\"5ccbe797a6a22\\\"]\",\n       \"lce_status_id\": 2\n   }\n}",
+          "content": "{\n   \"call\": {\n       \"lce_id\": 38,\n       \"lce_response_text\": \"Message from expert\",\n       \"lce_expert_username\": \"Alex\",\n       \"lce_expert_user_id\": 12,\n       \"lce_response_lead_quotes\": [\n             \"5ccbe7a458765\",\n             \"5ccbe797a6a22\"\n         ],\n       \"lce_status_id\": 2\n   }\n}",
           "type": "json"
         }
       ]

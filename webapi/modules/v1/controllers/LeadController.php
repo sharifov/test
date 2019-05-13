@@ -1128,7 +1128,7 @@ class LeadController extends ApiBaseController
      * @apiParam {text}                 call.lce_response_text                  Response text from Expert (Required on lce_status_id = 3)
      * @apiParam {string{30}}           call.lce_expert_username                Expert Username (Required on lce_status_id = 3)
      * @apiParam {int}                  [call.lce_expert_user_id]               Expert Id
-     * @apiParam {text}                 [call.lce_response_lead_quotes]         JSON UID quote list
+     * @apiParam {array[]}              [call.lce_response_lead_quotes]         Array of UID quotes (string)
      *
      *
      *
@@ -1139,7 +1139,10 @@ class LeadController extends ApiBaseController
      *        "lce_response_text": "Message from expert",
      *        "lce_expert_username": "Alex",
      *        "lce_expert_user_id": 12,
-     *        "lce_response_lead_quotes": "[\"5ccbe7a458765\", \"5ccbe797a6a22\"]",
+     *        "lce_response_lead_quotes": [
+     *              "5ccbe7a458765",
+     *              "5ccbe797a6a22"
+     *          ],
      *        "lce_status_id": 2
      *    }
      * }
