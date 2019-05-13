@@ -42,7 +42,7 @@ class BackOffice
      * @return mixed
      * @throws \yii\base\InvalidConfigException
      */
-    public static function sendRequest2(string $endpoint = '', array $fields = [], string $type = 'POST') : Response
+    public static function sendRequest2(string $endpoint = '', array $fields = [], string $type = 'POST')
     {
 
         $uri = Yii::$app->params['backOffice']['serverUrl'] . '/' . $endpoint;
@@ -69,8 +69,6 @@ class BackOffice
             'version'   => Yii::$app->params['backOffice']['ver'],
             'signature' => $signature
         ];
-
-        //$requestData['cid'] = $this->api_cid;
 
         $response = $client->createRequest()
             ->setMethod($type)

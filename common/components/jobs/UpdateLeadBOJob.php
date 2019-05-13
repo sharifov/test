@@ -33,11 +33,10 @@ class UpdateLeadBOJob extends BaseObject implements JobInterface
     {
 
         try {
-
             if($this->lead_id) {
                 $lead = Lead::findOne($this->lead_id);
-                if ($lead) {
 
+                if ($lead) {
                     $data['lead'] = [
                         'uid'               => $lead->uid,
                         'gid'               => $lead->gid,
@@ -54,21 +53,15 @@ class UpdateLeadBOJob extends BaseObject implements JobInterface
                         }
 
                         Yii::error(print_r($response->content, true), 'UpdateLeadBOJob:BackOffice:sendRequest2:notSuccess');
-
                     } else {
                         Yii::error(print_r($response->content, true), 'UpdateLeadBOJob:BackOffice:sendRequest2');
                     }
-
                 }
             }
 
-
-
         } catch (\Throwable $e) {
-
             Yii::error(VarDumper::dumpAsString($e->getMessage()), 'UpdateLeadBOJob:execute:catch');
         }
-
         return false;
     }
 
