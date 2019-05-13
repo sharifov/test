@@ -9,6 +9,7 @@ use common\models\Lead;
 use common\models\search\CommunicationSearch;
 use common\models\search\EmployeeSearch;
 use common\models\search\LeadTaskSearch;
+use common\models\Sms;
 use common\models\UserParams;
 use Yii;
 use yii\data\ActiveDataProvider;
@@ -35,7 +36,7 @@ class StatsController extends FController
                 'class' => AccessControl::class,
                 'rules' => [
                     [
-                        'actions' => ['index', 'call-sms', 'calls-graph'],
+                        'actions' => ['index', 'call-sms', 'calls-graph', 'sms-graph'],
                         'allow' => true,
                         'roles' => ['supervision', 'admin', 'qa'],
                     ],
@@ -210,6 +211,28 @@ class StatsController extends FController
 
             return $this->render('calls-report', [
                 'callsGraphData' => $callsGraphData
+            ]);
+        }
+    }
+
+    public function actionSmsGraph()
+    {
+        if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
+            $dateRange = Yii::$app->request->post('dateRange');
+            $rangeBy = Yii::$app->request->post('groupBy');
+
+            $date = $pieces = explode("/", $dateRange);
+            $smsGraphData = Sms::getSmsStats($date[0], $date[1], $rangeBy);
+
+            return $this->renderAjax('sms-report', [
+                'smsGraphData' => $smsGraphData
+            ]);
+        } else {
+            $currentDate =  date('Y-m-d', strtotime('-0 day'));
+            $smsGraphData = Sms::getSmsStats($currentDate, $currentDate, null);
+
+            return $this->render('sms-report', [
+                'smsGraphData' => $smsGraphData
             ]);
         }
     }
