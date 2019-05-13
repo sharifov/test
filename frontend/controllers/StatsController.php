@@ -220,16 +220,17 @@ class StatsController extends FController
         if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
             $dateRange = Yii::$app->request->post('dateRange');
             $rangeBy = Yii::$app->request->post('groupBy');
+            $smsType = Yii::$app->request->post('smsType');
 
             $date = $pieces = explode("/", $dateRange);
-            $smsGraphData = Sms::getSmsStats($date[0], $date[1], $rangeBy);
+            $smsGraphData = Sms::getSmsStats($date[0], $date[1], $rangeBy, (int)$smsType);
 
             return $this->renderAjax('sms-report', [
                 'smsGraphData' => $smsGraphData
             ]);
         } else {
             $currentDate =  date('Y-m-d', strtotime('-0 day'));
-            $smsGraphData = Sms::getSmsStats($currentDate, $currentDate, null);
+            $smsGraphData = Sms::getSmsStats($currentDate, $currentDate, null, 0);
 
             return $this->render('sms-report', [
                 'smsGraphData' => $smsGraphData

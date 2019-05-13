@@ -4,44 +4,52 @@ use yii\widgets\Pjax;
  * @var $smsGraphData []
  */
 $js = <<<JS
-    $('#viewMode0').click(function() {
+    $('#viewMode0').click(function() {        
         $('#viewMode1, #viewMode2, #viewMode3').removeClass('active focus');
-        $.pjax({container: '#calls-graph-pjax', data: {dateRange: $('#call-stats-picker').val(), groupBy: 'hours'}, type: 'POST', url: 'sms-graph', async:true, push: false});
+        $.pjax({container: '#calls-graph-pjax', data: {dateRange: $('#call-stats-picker').val(), groupBy: 'hours', smsType: $('#sms_type').val()}, type: 'POST', url: 'sms-graph', async:true, push: false});
     });
 
-    $('#viewMode1').click(function() {
+    $('#viewMode1').click(function() {        
         $('#viewMode0, #viewMode2, #viewMode3').removeClass('active focus');
-        $.pjax({container: '#calls-graph-pjax', data: {dateRange: $('#call-stats-picker').val(), groupBy: 'days'}, type: 'POST', url: 'sms-graph', async:true, push: false});
+        $.pjax({container: '#calls-graph-pjax', data: {dateRange: $('#call-stats-picker').val(), groupBy: 'days', smsType: $('#sms_type').val()}, type: 'POST', url: 'sms-graph', async:true, push: false});
     });
     
-    $('#viewMode2').click(function() {
+    $('#viewMode2').click(function() {        
         $('#viewMode0, #viewMode1, #viewMode3').removeClass('active focus');
-        $.pjax({container: '#calls-graph-pjax', data: {dateRange: $('#call-stats-picker').val(), groupBy: 'weeks'}, type: 'POST', url: 'sms-graph', async:true, push: false});
+        $.pjax({container: '#calls-graph-pjax', data: {dateRange: $('#call-stats-picker').val(), groupBy: 'weeks', smsType: $('#sms_type').val()}, type: 'POST', url: 'sms-graph', async:true, push: false});
     });
     
-    $('#viewMode3').click(function() {
+    $('#viewMode3').click(function() {        
         $('#viewMode0, #viewMode1, #viewMode2').removeClass('active focus');
-        $.pjax({container: '#calls-graph-pjax', data: {dateRange: $('#call-stats-picker').val(), groupBy: 'months'}, type: 'POST', url: 'sms-graph', async:true, push: false});
+        $.pjax({container: '#calls-graph-pjax', data: {dateRange: $('#call-stats-picker').val(), groupBy: 'months', smsType: $('#sms_type').val()}, type: 'POST', url: 'sms-graph', async:true, push: false});
     });
     
-    $('#sms_type').on('change', function() {        
+    $('#sms_type').on('change', function() {
+        let groupBy = $('input[name^="viewMode"]:checked').val();
+        if( typeof groupBy === 'undefined'){
+            let dates = $('#call-stats-picker').val().split(' / ');
+            if (dates[0] == dates[1]){
+                groupBy = '0';
+            } else {
+                groupBy = '1';
+            }
+        }
+        let groupingOps = ["hours", "days", "weeks", "months"];        
+        
         switch (this.value) {
           case '0' :
-              $.pjax({container: '#calls-graph-pjax', data: {dateRange: $('#call-stats-picker').val()}, type: 'POST', url: 'sms-graph', async:true, push: false});
+              $.pjax({container: '#calls-graph-pjax', data: {dateRange: $('#call-stats-picker').val(), groupBy: groupingOps[groupBy], smsType: this.value}, type: 'POST', url: 'sms-graph', async:true, push: false});
           break;
           case '1' :
-              $.pjax({container: '#calls-graph-pjax', data: {dateRange: $('#call-stats-picker').val()}, type: 'POST', url: 'sms-graph', async:true, push: false});
-          break;
-          
+              $.pjax({container: '#calls-graph-pjax', data: {dateRange: $('#call-stats-picker').val(), groupBy: groupingOps[groupBy], smsType: this.value}, type: 'POST', url: 'sms-graph', async:true, push: false});
+          break;          
           case '2' :
-              $.pjax({container: '#calls-graph-pjax', data: {dateRange: $('#call-stats-picker').val()}, type: 'POST', url: 'sms-graph', async:true, push: false});
+              $.pjax({container: '#calls-graph-pjax', data: {dateRange: $('#call-stats-picker').val(), groupBy: groupingOps[groupBy], smsType: this.value}, type: 'POST', url: 'sms-graph', async:true, push: false});
           break;
         }
     });
 JS;
 $this->registerJs($js, \yii\web\View::POS_READY);
-
-
 $this->title = 'SMS Report';
 ?>
 <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
@@ -73,9 +81,8 @@ $this->title = 'SMS Report';
                                     ],
                                 ],
                                 'pluginEvents'=>[
-                                    "apply.daterangepicker"=>"function(){
-                                     //console.log($('#call-stats-picker').val());
-                                     $.pjax({container: '#calls-graph-pjax', data: {dateRange: $('#call-stats-picker').val()}, type: 'POST', url: 'sms-graph', async:true, push: false});
+                                    "apply.daterangepicker"=>"function(){                                    
+                                     $.pjax({container: '#calls-graph-pjax', data: {dateRange: $('#call-stats-picker').val(), smsType: $('#sms_type').val()}, type: 'POST', url: 'sms-graph', async:true, push: false});
                                      let dates = $('#call-stats-picker').val().split(' / ');
                                      if (dates[0] == dates[1]){
                                         $('#viewMode0').addClass('active focus');
@@ -115,8 +122,8 @@ $this->title = 'SMS Report';
                         <div class="col-xs-1">
                         <select id="sms_type" class="form-control" required="">
                             <option value="0">All</option>
-                            <option value="1">INBOX</option>
-                            <option value="2">OUTBOX</option>
+                            <option value="2">INBOX</option>
+                            <option value="1">OUTBOX</option>
                         </select>
                         </div>
 
@@ -174,4 +181,3 @@ $this->title = 'SMS Report';
         </div>
     </div>
 </div>
-<!-- /bar charts -->

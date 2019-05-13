@@ -8,6 +8,7 @@ use DateTime;
 use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
+use yii\db\Query;
 use yii\helpers\VarDumper;
 
 /**
@@ -434,10 +435,11 @@ class Sms extends \yii\db\ActiveRecord
      * @param string $startDate
      * @param string $endDate
      * @param string|null $groupingBy
+     * @param int $smsType
      * @return array
      * @throws \Exception
      */
-    public static function getSmsStats(string $startDate, string $endDate, ?string $groupingBy) : array
+    public static function getSmsStats(string $startDate, string $endDate, ?string $groupingBy, int $smsType) : array
     {
         $sDate = $startDate." 00:00:00";
         $eDate = $endDate." 23:59:59";
@@ -468,7 +470,19 @@ class Sms extends \yii\db\ActiveRecord
                 $eDate = date('Y-m-31', strtotime($endDate));
                 break;
         }
-        $sms = self::find()->select(['s_id', 's_status_id', 's_updated_dt'])->where(['s_status_id' => [ self::STATUS_DONE, self::STATUS_ERROR]])->andWhere(['between', 's_updated_dt', $sDate, $eDate])->all();
+        if ($smsType == 0){
+            $sms = self::find()->select(['s_id', 's_status_id', 's_updated_dt'])
+                ->where(['s_status_id' => [ self::STATUS_DONE, self::STATUS_ERROR]])
+                ->andWhere(['between', 's_updated_dt', $sDate, $eDate])
+                ->all();
+        } else {
+            $sms = self::find()->select(['s_id', 's_status_id', 's_updated_dt'])
+                ->where(['s_status_id' => [ self::STATUS_DONE, self::STATUS_ERROR]])
+                ->andWhere(['between', 's_updated_dt', $sDate, $eDate])
+                ->andWhere(['=', 's_type_id', $smsType])
+                ->all();
+        }
+
 
         $hourlySmsStats = [];
         $item = [];
