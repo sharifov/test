@@ -32,10 +32,40 @@ use yii\widgets\Pjax;
 <?php yii\widgets\Pjax::begin(['id' => 'pjax-lead-call-expert', 'enablePushState' => false, 'timeout' => 10000]) ?>
 <div class="x_panel">
     <div class="x_title">
-        <h2><i class="fa fa-bell-o"></i> Call Expert Block (<?=$dataProvider->count?>) </h2>
+
+        <?php
+        $lastModel = null;
+        if($dataProvider->count > 0) {
+            $lastKey = array_key_last($dataProvider->models);
+            $lastModel = $dataProvider->models[$lastKey];
+
+            $label = '';
+            if($lastModel) {
+                if($lastModel->lce_status_id === LeadCallExpert::STATUS_PENDING) {
+                    $label = 'warning';
+                } else if($lastModel->lce_status_id === LeadCallExpert::STATUS_DONE) {
+                    $label = 'success';
+                } else if($lastModel->lce_status_id === LeadCallExpert::STATUS_PROCESSING) {
+                    $label = 'info';
+                }
+            }
+
+        }
+        ?>&nbsp;
+
+        <h2><i class="fa fa-bell-o <?=$label?>"></i> Call Expert Block (<?=$dataProvider->count?>)
+
+            <?php
+                if($lastModel) {
+                    echo ' : ' . $lastModel->getStatusLabel() . '';
+                }
+            ?>
+
+        </h2>
+
         <ul class="nav navbar-right panel_toolbox">
             <li>
-                &nbsp;
+
             </li>
             <li>
                 <?//=Html::a('<i class="fa fa-comment"></i>', ['lead/view', 'gid' => $lead->gid, 'act' => 'call-expert-message'], ['class' => ''])?>
