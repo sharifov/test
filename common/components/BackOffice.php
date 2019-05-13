@@ -1,6 +1,7 @@
 <?php
 namespace common\components;
 
+use http\Client\Response;
 use Yii;
 use yii\httpclient\CurlTransport;
 
@@ -34,7 +35,14 @@ class BackOffice
     }
 
 
-    public static function sendRequest2($endpoint, $type = 'GET', $fields = null)
+    /**
+     * @param string $endpoint
+     * @param array $fields
+     * @param string $type
+     * @return mixed
+     * @throws \yii\base\InvalidConfigException
+     */
+    public static function sendRequest2(string $endpoint = '', array $fields = [], string $type = 'POST')
     {
 
         $uri = Yii::$app->params['backOffice']['serverUrl'] . '/' . $endpoint;
@@ -62,8 +70,6 @@ class BackOffice
             'signature' => $signature
         ];
 
-        //$requestData['cid'] = $this->api_cid;
-
         $response = $client->createRequest()
             ->setMethod($type)
             ->setFormat(\yii\httpclient\Client::FORMAT_JSON)
@@ -80,13 +86,9 @@ class BackOffice
 
         //VarDumper::dump($response->content, 10, true); exit;
 
-        if ($response->isOk) {
-            $out['data'] = $response->data;
-        } else {
-            $out['error'] = print_r($response->data, true);
-        }
 
-        return $response->data;
+
+        return $response;
     }
 
 

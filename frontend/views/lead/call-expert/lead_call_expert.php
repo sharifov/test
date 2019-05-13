@@ -29,17 +29,56 @@ use yii\widgets\Pjax;
 //echo Html::a('<span class="btn-icon"><i class="fa fa-bell"></i></span> <span class="btn-text">Call</span>', null, $options);
 
 ?>
+<style>
+    .x_title span{color: white;}
+</style>
 <?php yii\widgets\Pjax::begin(['id' => 'pjax-lead-call-expert', 'enablePushState' => false, 'timeout' => 10000]) ?>
 <div class="x_panel">
     <div class="x_title">
-        <h2><i class="fa fa-bell-o"></i> Call Expert Block (<?=$dataProvider->count?>) </h2>
+
+        <?php
+        /** @var TYPE_NAME $lastModel */
+        $lastModel = null;
+        $label = '';
+        if($dataProvider->count > 0) {
+            //$lastKey = array_key_last($dataProvider->models); php 7.3
+            $lastKey = array_keys($dataProvider->models)[count($dataProvider->models)-1];
+            if(isset($dataProvider->models[$lastKey])) {
+                $lastModel = $dataProvider->models[$lastKey];
+            }
+
+            if($lastModel) {
+                if($lastModel->lce_status_id === LeadCallExpert::STATUS_PENDING) {
+                    $label = 'warning';
+                } else if($lastModel->lce_status_id === LeadCallExpert::STATUS_DONE) {
+                    $label = 'success';
+                } else if($lastModel->lce_status_id === LeadCallExpert::STATUS_PROCESSING) {
+                    $label = 'info';
+                }
+            }
+
+        }
+        ?>&nbsp;
+
+        <h2><i class="fa fa-bell-o <?=$label?>"></i> Call Expert Block (<?=$dataProvider->count?>)
+
+            <?php
+                if($lastModel) {
+                    echo ' : ' . $lastModel->getStatusLabel() . '';
+                }
+            ?>
+
+        </h2>
+
         <ul class="nav navbar-right panel_toolbox">
             <li>
-                &nbsp;
+
             </li>
             <li>
                 <?//=Html::a('<i class="fa fa-comment"></i>', ['lead/view', 'gid' => $lead->gid, 'act' => 'call-expert-message'], ['class' => ''])?>
-                <?=Html::a('<i class="fa fa-plus-circle success"></i> new Call', null, ['id' => 'btn-call-expert-form'])?>
+                <?php if(!$lastModel || $lastModel->lce_status_id === LeadCallExpert::STATUS_DONE):?>
+                    <?=Html::a('<i class="fa fa-plus-circle success"></i> new Call', null, ['id' => 'btn-call-expert-form'])?>
+                <?php endif; ?>
             </li>
             <li>
                 <a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
@@ -60,9 +99,6 @@ use yii\widgets\Pjax;
         <div class="clearfix"></div>
     </div>
     <div class="x_content" style="display: <?=Yii::$app->request->isPjax ? 'block' : 'none';?>">
-
-
-        <?/*<h1><?=random_int(1, 100)?></h1>*/ ?>
 
                 <?= \yii\widgets\ListView::widget([
                     'dataProvider' => $dataProvider,
@@ -132,42 +168,48 @@ $this->registerJs(
         $(document).on("change",".ch_task", function() {
             $.pjax.reload({container: containerId, push: false, replace: false, timeout: 5000, data: {date: taskDate, task_id: taskId, lead_id: taskLeadId, user_id: taskUserId}});
         });
-        
-        
+
+
         $(document).on("click",".link2quote", function() {
             var uid = $(this).data("uid");
-            
+
             $([document.documentElement, document.body]).animate({
                 scrollTop: $("#quote-" + uid).offset().top
             }, 500);
-                
+
             for(i = 0; i < 4; i ++) {
                 $("#quote-" + uid).fadeTo(300, 0.2).fadeTo(300, 1.0);
-            }                
-            
+            }
+
         });
-        
-        
+
+
         $(document).on("click","#btn-call-expert-form", function() {
-            $("#div-call-expert-form").toggle();
+            $("#div-call-expert-form").show();
+            $("#pjax-lead-call-expert .x_content").show();
+
+            $([document.documentElement, document.body]).animate({
+                scrollTop: $("#call-expert-form").offset().top
+            }, 1000);
+
             return false;
         });
-                
+
 
         $("#pjax-lead-call-expert").on("pjax:start", function () {
             //$("#pjax-container").fadeOut("fast");
             $("#btn-submit-call-expert").attr("disabled", true).prop("disabled", true).addClass("disabled");
             $("#btn-submit-call-expert i").attr("class", "fa fa-spinner fa-pulse fa-fw")
-            
+
         });
 
         $("#pjax-lead-call-expert").on("pjax:end", function () {
             //$("#pjax-container").fadeIn("fast");
             //alert("end");
-            
+
             $("#btn-submit-call-expert").attr("disabled", false).prop("disabled", false).removeClass("disabled");
             $("#btn-submit-call-expert i").attr("class", "fa fa-plus");
-            
+
         });
     '
 );

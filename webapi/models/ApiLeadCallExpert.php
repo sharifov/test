@@ -10,7 +10,7 @@ use yii\base\Model;
  *
  * @property int $lce_id
  * @property string $lce_response_text
- * @property string $lce_response_lead_quotes
+ * @property array $lce_response_lead_quotes
  * @property string $lce_response_dt
  * @property int $lce_expert_user_id
  * @property int $lce_status_id
@@ -49,9 +49,10 @@ class ApiLeadCallExpert extends Model
 
             [['lce_expert_user_id', 'lce_id', 'lce_status_id'], 'integer'],
             [['lce_status_id'], 'in', 'range' => [LeadCallExpert::STATUS_PROCESSING, LeadCallExpert::STATUS_DONE, LeadCallExpert::STATUS_CANCEL]],
-            [['lce_response_text', 'lce_response_lead_quotes'], 'string'],
+            [['lce_response_text'], 'string'],
             [['lce_expert_username'], 'string', 'max' => 30],
-            [['lce_response_lead_quotes'], 'validateJson']
+            //[['lce_response_lead_quotes'], 'validateJson']
+            [['lce_response_lead_quotes'], 'safe']
         ];
     }
 
@@ -62,7 +63,7 @@ class ApiLeadCallExpert extends Model
      * @param string $attribute the attribute currently being validated
      * @param array $params the additional name-value pairs given in the rule
      */
-    public function validateJson($attribute): void
+    /*public function validateJson($attribute): void
     {
         if (!empty($this->lce_response_lead_quotes) && !$this->hasErrors()) {
 
@@ -72,7 +73,7 @@ class ApiLeadCallExpert extends Model
                 $this->addError($attribute, 'Invalid JSON format lce_response_lead_quotes field');
             }
         }
-    }
+    }*/
 
     /**
      * @return array

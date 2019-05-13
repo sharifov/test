@@ -165,18 +165,12 @@ SearchResult = function(props) {
 		    		 	});
                         break;
 		    		case 'fareType':
-		    			var fareType = filterList[filter];
-
-		    			if(fareType != "any_fare"){
+		    			filterList[filter].forEach(function(fareType) {
 		    				var obj = $(selector+'[data-fareType="'+fareType+'"]');
 		    				$(obj).removeClass('hide');
 		    				$(obj).addClass('filtered');
 		    				filterApplied = true;
-		    			}else{
-		    				var obj = $(selector+'[data-fareType!="'+fareType+'"]');
-		    				$(obj).removeClass('hide');
-		    				$(obj).addClass('filtered');
-		    			}
+		    			});
 
 		                break;
 		    		case 'airline':
@@ -453,29 +447,22 @@ SearchResult = function(props) {
     };
 
     this.filterFareType = function() {
-        $(".filter--fareType .custom-radio").on("click", function() {
-            var radio = $(this).find('input[type="radio"]');
-            radio.prop('checked', true);
-            if (radio.attr("id") !== "any_fare") {
-                $('.filter--fareType').addClass("selected")
-                    .find('[data-toggle="dropdown"] span').html(radio.parent().find('label:last').html());
-                scope.addFilterParams({
-                    name: 'fareType',
-                    value: radio.attr("id")
-                });
-            } else {
-                $('.filter--fareType').removeClass("selected")
-                    .find('[data-toggle="dropdown"] span').html(locale.filterStops.stops);
-                scope.unsetFilterParams('fareType');
-            }
+        $('.js-filter-fareType-item input[type="checkbox"]').on('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
         });
 
-        $(".filter--fareType .js-clear-filter").on("click", function(e) {
-            e.stopImmediatePropagation();
-            $('.filter--fareType').removeClass("selected")
-                .find('[data-toggle="dropdown"] span').html(locale.filterStops.stops);
-            $(".filter--fareType .custom-radio").find('input[type="radio"]:first').prop('checked', true);
-            scope.unsetFilterParams("fareType");
+        $('.js-filter-fareType-item label').on('click', function() {
+            var inputOnly = $(this).siblings('input[type="checkbox"]');
+            inputOnly.prop('checked', !inputOnly.prop('checked'));
+            var val = [];
+            $('#filter-fareType').find('.js-filter-fareType-item input[type="checkbox"]:checked').each(function () {
+                val.push($(this).attr("id"));
+            });
+            scope.addFilterParams({
+                name: 'fareType',
+                value: val
+            });
         });
     };
 
