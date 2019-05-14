@@ -483,7 +483,6 @@ class Sms extends \yii\db\ActiveRecord
                 ->all();
         }
 
-
         $hourlySmsStats = [];
         $item = [];
         if (strtotime($startDate) < strtotime($endDate)){

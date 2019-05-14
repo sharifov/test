@@ -50,12 +50,10 @@ $js = <<<JS
     });
 JS;
 $this->registerJs($js, \yii\web\View::POS_READY);
-
-
 $this->title = 'Calls Report';
 ?>
 <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-<!-- bar chart -->
+
 <div class="">
     <h1><i class="fa fa-bar-chart"></i> <?=$this->title?></h1>
     <div class="panel panel-default">
@@ -141,13 +139,40 @@ $this->title = 'Calls Report';
                                         <script>
                                             function drawChart() {
                                                 let data = google.visualization.arrayToDataTable([
-                                                    ['Time Line', 'Completed', 'No answer', 'Busy', 'Canceled', {role: 'annotation'}],
+                                                    ['Time Line',
+                                                        'Completed',
+                                                        {'type': 'string', 'role': 'tooltip', 'p': {'html': true}},
+                                                        'No answer',
+                                                        {'type': 'string', 'role': 'tooltip', 'p': {'html': true}},
+                                                        'Busy',
+                                                        {'type': 'string', 'role': 'tooltip', 'p': {'html': true}},
+                                                        'Canceled',
+                                                        {'type': 'string', 'role': 'tooltip', 'p': {'html': true}},
+                                                        {role: 'annotation'}
+                                                    ],
                                                     <?php foreach($callsGraphData as $k => $item):?>
                                                     ['<?=  ($item['weeksInterval'] == null)
                                                         ? date($item['timeLine'], strtotime($item['time']))
                                                         : date($item['timeLine'], strtotime($item['time'])) .' / '. date($item['timeLine'], strtotime($item['weeksInterval']));
+                                                        ?>',
+                                                        <?=$item['completed']?>, createCustomHTMLContent('Completed: ','<?=  ($item['weeksInterval'] == null)
+                                                        ? date($item['timeLine'], strtotime($item['time']))
+                                                        : date($item['timeLine'], strtotime($item['time'])) .' / '. date($item['timeLine'], strtotime($item['weeksInterval']));
+                                                        ?>', <?=$item['completed']?>, <?=$item['cc_TotalPrice']?>, <?= $item['cc_Duration']?>),
+                                                        <?=$item['no-answer']?>, createCustomHTMLContent('No Answer: ','<?=  ($item['weeksInterval'] == null)
+                                                        ? date($item['timeLine'], strtotime($item['time']))
+                                                        : date($item['timeLine'], strtotime($item['time'])) .' / '. date($item['timeLine'], strtotime($item['weeksInterval']));
+                                                        ?>', <?=$item['no-answer']?>, 0, 0),
+                                                        <?=$item['busy']?>, createCustomHTMLContent('Busy: ','<?=  ($item['weeksInterval'] == null)
+                                                        ? date($item['timeLine'], strtotime($item['time']))
+                                                        : date($item['timeLine'], strtotime($item['time'])) .' / '. date($item['timeLine'], strtotime($item['weeksInterval']));
+                                                        ?>', <?=$item['busy']?>, 0, 0),
 
-                                                        ?>', <?=$item['completed']?>, <?=$item['no-answer']?>, <?=$item['busy']?>, <?=$item['canceled']?>, '<?=''?>'],
+                                                        <?=$item['canceled']?>, createCustomHTMLContent('Canceled: ','<?=  ($item['weeksInterval'] == null)
+                                                        ? date($item['timeLine'], strtotime($item['time']))
+                                                        : date($item['timeLine'], strtotime($item['time'])) .' / '. date($item['timeLine'], strtotime($item['weeksInterval']));
+                                                        ?>', <?=$item['canceled']?>, 0, 0),
+                                                        '<?=''?>'],
                                                     <?php endforeach;?>
                                                 ]);
 
@@ -187,7 +212,8 @@ $this->title = 'Calls Report';
                                                     tooltip: {
                                                         textStyle: {
                                                             fontSize: 14
-                                                        }
+                                                        },
+                                                        isHtml: true
                                                     }
                                                 };
                                                 let chart = new google.visualization.ComboChart(document.getElementById('chart_div'));
@@ -196,6 +222,23 @@ $this->title = 'Calls Report';
                                                 $(window).resize(function(){
                                                     chart.draw(data, options); // redraw the graph on window resize
                                                 });
+                                            }
+
+                                            function createCustomHTMLContent(status ,hourRange, statusAmount, totalPrice, totalDuration) {
+                                                return '<div style="padding:5px 5px 5px 5px;">' +
+                                                    '<table class="medals_layout">' +
+                                                    '<tr>' +
+                                                    '<td style="padding-right:5px;">Time: </td>' + '<td><b>' + hourRange + '</b></td>' + '</tr>' +
+                                                    '<tr>' +
+                                                    '<td style="padding-right:5px;">' + status +'</td>' + '<td><b>' + statusAmount + '</b></td>' + '</tr>' +
+                                                    '<tr>' +
+                                                    '<td style="padding-right:5px;">Total Price: </td>' +
+                                                    '<td><b>' + totalPrice + ' $</b></td>' + '</tr>' +
+                                                    '<tr>' +
+                                                    '<td style="padding-right:5px;">Duration: </td>' +
+                                                    '<td><b>' + totalDuration + ' s</b></td>' + '</tr>' +
+                                                    '</table>' +
+                                                    '</div>';
                                             }
                                         </script>
                                     </div>
@@ -209,4 +252,3 @@ $this->title = 'Calls Report';
         </div>
     </div>
 </div>
-<!-- /bar charts -->

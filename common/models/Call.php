@@ -376,10 +376,9 @@ class Call extends \yii\db\ActiveRecord
                 $eDate = date('Y-m-31', strtotime($endDate));
                 break;
         }
-        //$calls = self::find()->select(['c_id', 'c_call_status', 'c_updated_dt'])->where(['c_call_status' => ['completed', 'busy', 'no-answer', 'failed', 'canceled']])->andWhere(['between', 'c_updated_dt', $sDate, $eDate])->all();
 
         if ($callType == 0){
-            $calls = self::find()->select(['c_id', 'c_call_status', 'c_updated_dt'])
+            $calls = self::find()->select(['c_id', 'c_call_status', 'c_updated_dt', 'c_call_duration', 'c_price'])
                 ->where(['c_call_status' => ['completed', 'busy', 'no-answer', 'canceled']])
                 ->andWhere(['between', 'c_updated_dt', $sDate, $eDate])->all();
         } else {
@@ -439,6 +438,7 @@ class Call extends \yii\db\ActiveRecord
         }
 
         $completed = $noAnswer = $busy = $canceled = 0;
+        $cc_Duration = $cc_TotalPrice= 0;
         foreach ($timeLine as $key => $timeSignature){
             $weekInterval = explode('/', $timeSignature);
             if (count($weekInterval) != 2){
@@ -457,10 +457,11 @@ class Call extends \yii\db\ActiveRecord
                     switch ($callItem->c_call_status){
                         case self::CALL_STATUS_COMPLETED :
                             $completed++;
+                            $cc_Duration = $cc_Duration + $callItem->c_call_duration;
+                            $cc_TotalPrice = $cc_TotalPrice + $callItem->c_price;
                             break;
                         case self::CALL_STATUS_NO_ANSWER :
                             $noAnswer++;
-                            echo $noAnswer;
                             break;
                         case self::CALL_STATUS_BUSY :
                             $busy++;
@@ -477,9 +478,12 @@ class Call extends \yii\db\ActiveRecord
             $item['no-answer'] = $noAnswer;
             $item['busy'] = $busy;
             $item['canceled'] = $canceled;
+            $item['cc_Duration'] = $cc_Duration;
+            $item['cc_TotalPrice'] = round($cc_TotalPrice, 2);
 
             array_push($hourlyCallStats, $item);
             $completed = $noAnswer = $busy = $canceled = 0;
+            $cc_Duration = $cc_TotalPrice= 0;
         }
         return $hourlyCallStats;
     }
