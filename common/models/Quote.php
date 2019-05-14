@@ -1196,10 +1196,6 @@ class Quote extends \yii\db\ActiveRecord
             }
         } else {
             QuoteStatusLog::createNewFromQuote($this);
-
-            $quote = Quote::findOne(['id' => $this->id]);
-            $data = $quote->getQuoteInformationForExpert(true);
-            BackOffice::sendRequest('lead/update-quote', 'POST', json_encode($data));
         }
     }
 
