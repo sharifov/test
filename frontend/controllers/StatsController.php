@@ -10,6 +10,7 @@ use common\models\search\CommunicationSearch;
 use common\models\search\EmployeeSearch;
 use common\models\search\LeadTaskSearch;
 use common\models\Sms;
+use common\models\Email;
 use common\models\UserParams;
 use Yii;
 use yii\data\ActiveDataProvider;
@@ -36,7 +37,7 @@ class StatsController extends FController
                 'class' => AccessControl::class,
                 'rules' => [
                     [
-                        'actions' => ['index', 'call-sms', 'calls-graph', 'sms-graph'],
+                        'actions' => ['index', 'call-sms', 'calls-graph', 'sms-graph', 'emails-graph'],
                         'allow' => true,
                         'roles' => ['supervision', 'admin', 'qa'],
                     ],
@@ -239,4 +240,26 @@ class StatsController extends FController
         }
     }
 
+    public function actionEmailsGraph()
+    {
+        if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
+            $dateRange = Yii::$app->request->post('dateRange');
+            $rangeBy = Yii::$app->request->post('groupBy');
+            $emailsType = Yii::$app->request->post('emailsType');
+
+            $date = $pieces = explode("/", $dateRange);
+            $emailsGraphData = Email::getEmailsStats($date[0], $date[1], $rangeBy, (int)$emailsType);
+
+            return $this->renderAjax('emails-report', [
+                'emailsGraphData' => $emailsGraphData
+            ]);
+        } else {
+            $currentDate =  date('Y-m-d', strtotime('-0 day'));
+            $emailsGraphData = Email::getEmailsStats($currentDate, $currentDate, null, 0);
+
+            return $this->render('emails-report', [
+                'emailsGraphData' => $emailsGraphData
+            ]);
+        }
+    }
 }
