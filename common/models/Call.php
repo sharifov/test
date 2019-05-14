@@ -341,11 +341,14 @@ class Call extends \yii\db\ActiveRecord
      * @param string $startDate
      * @param string $endDate
      * @param string $groupingBy
+     * @param int $callType
      * @return array
      * @throws \Exception
      */
-    public static function getCallStats(string $startDate, string $endDate, ?string $groupingBy) : array
+    public static function getCallStats(string $startDate, string $endDate, ?string $groupingBy, int $callType) : array
     {
+        $sDate = $startDate." 00:00:00";
+        $eDate = $endDate." 23:59:59";
         switch ($groupingBy){
             case null:
                 if (strtotime($startDate) == strtotime($endDate)){
@@ -353,8 +356,6 @@ class Call extends \yii\db\ActiveRecord
                 } else {
                     $daysRange = ChartTools::getDaysRange($startDate, $endDate);
                 }
-                $sDate = $startDate." 00:00:00";
-                $eDate = $endDate." 23:59:59";
                 break;
             case 'hours':
                 if (strtotime($startDate) == strtotime($endDate)){
@@ -362,18 +363,12 @@ class Call extends \yii\db\ActiveRecord
                 } else {
                     $hoursRange = ChartTools::getHoursRange($startDate, $endDate." 23:59:59", $step = '+1 hour', $format = 'Y-m-d H:i:s');
                 }
-                $sDate = $startDate." 00:00:00";
-                $eDate = $endDate." 23:59:59";
                 break;
             case 'days':
                 $daysRange = ChartTools::getDaysRange($startDate, $endDate);
-                $sDate = $startDate." 00:00:00";
-                $eDate = $endDate." 23:59:59";
                 break;
             case 'weeks':
                 $weeksPeriods = ChartTools::getWeeksRange(new DateTime($startDate), new DateTime($endDate . ' 23:59'));
-                $sDate = $startDate." 00:00:00";
-                $eDate = $endDate." 23:59:59";
                 break;
             case 'months':
                 $monthsRange = ChartTools::getMonthsRange($startDate, $endDate);
@@ -381,7 +376,19 @@ class Call extends \yii\db\ActiveRecord
                 $eDate = date('Y-m-31', strtotime($endDate));
                 break;
         }
-        $calls = self::find()->select(['c_id', 'c_call_status', 'c_updated_dt'])->where(['c_call_status' => ['completed', 'busy', 'no-answer', 'failed', 'canceled']])->andWhere(['between', 'c_updated_dt', $sDate, $eDate])->all();
+        //$calls = self::find()->select(['c_id', 'c_call_status', 'c_updated_dt'])->where(['c_call_status' => ['completed', 'busy', 'no-answer', 'failed', 'canceled']])->andWhere(['between', 'c_updated_dt', $sDate, $eDate])->all();
+
+        if ($callType == 0){
+            $calls = self::find()->select(['c_id', 'c_call_status', 'c_updated_dt'])
+                ->where(['c_call_status' => ['completed', 'busy', 'no-answer', 'canceled']])
+                ->andWhere(['between', 'c_updated_dt', $sDate, $eDate])->all();
+        } else {
+            $calls =self::find()->select(['c_id', 'c_call_status', 'c_updated_dt'])
+                ->where(['c_call_status' => ['completed', 'busy', 'no-answer', 'canceled']])
+                ->andWhere(['between', 'c_updated_dt', $sDate, $eDate])
+                ->andWhere(['=', 'c_call_type_id', $callType])
+                ->all();
+        }
 
         $hourlyCallStats = [];
         $item = [];
@@ -431,7 +438,7 @@ class Call extends \yii\db\ActiveRecord
             }
         }
 
-        $completed = $noAnswer = $busy = $failed = $canceled = 0;
+        $completed = $noAnswer = $busy = $canceled = 0;
         foreach ($timeLine as $key => $timeSignature){
             $weekInterval = explode('/', $timeSignature);
             if (count($weekInterval) != 2){
@@ -458,9 +465,6 @@ class Call extends \yii\db\ActiveRecord
                         case self::CALL_STATUS_BUSY :
                             $busy++;
                             break;
-                        case self::CALL_STATUS_FAILED :
-                            $failed++;
-                            break;
                         case self::CALL_STATUS_CANCELED :
                             $canceled++;
                             break;
@@ -472,11 +476,10 @@ class Call extends \yii\db\ActiveRecord
             $item['completed'] = $completed;
             $item['no-answer'] = $noAnswer;
             $item['busy'] = $busy;
-            $item['failed'] = $failed;
             $item['canceled'] = $canceled;
 
             array_push($hourlyCallStats, $item);
-            $completed = $noAnswer = $busy = $failed = $canceled = 0;
+            $completed = $noAnswer = $busy = $canceled = 0;
         }
         return $hourlyCallStats;
     }

@@ -198,16 +198,17 @@ class StatsController extends FController
         if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
             $dateRange = Yii::$app->request->post('dateRange');
             $rangeBy = Yii::$app->request->post('groupBy');
+            $callType = Yii::$app->request->post('callType');
 
             $date = $pieces = explode("/", $dateRange);
-            $callsGraphData = Call::getCallStats($date[0], $date[1], $rangeBy);
+            $callsGraphData = Call::getCallStats($date[0], $date[1], $rangeBy, (int)$callType);
 
             return $this->renderAjax('calls-report', [
                 'callsGraphData' => $callsGraphData
             ]);
         } else {
             $currentDate =  date('Y-m-d', strtotime('-0 day'));
-            $callsGraphData = Call::getCallStats($currentDate, $currentDate, null);
+            $callsGraphData = Call::getCallStats($currentDate, $currentDate, null, 0);
 
             return $this->render('calls-report', [
                 'callsGraphData' => $callsGraphData

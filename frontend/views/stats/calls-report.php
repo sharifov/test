@@ -6,22 +6,47 @@ use yii\widgets\Pjax;
 $js = <<<JS
     $('#viewMode0').click(function() {
         $('#viewMode1, #viewMode2, #viewMode3').removeClass('active focus');
-        $.pjax({container: '#calls-graph-pjax', data: {dateRange: $('#call-stats-picker').val(), groupBy: 'hours'}, type: 'POST', url: 'calls-graph', async:true, push: false});
+        $.pjax({container: '#calls-graph-pjax', data: {dateRange: $('#call-stats-picker').val(), groupBy: 'hours', callType: $('#call_type').val()}, type: 'POST', url: 'calls-graph', async:true, push: false});
     });
 
     $('#viewMode1').click(function() {
         $('#viewMode0, #viewMode2, #viewMode3').removeClass('active focus');
-        $.pjax({container: '#calls-graph-pjax', data: {dateRange: $('#call-stats-picker').val(), groupBy: 'days'}, type: 'POST', url: 'calls-graph', async:true, push: false});
+        $.pjax({container: '#calls-graph-pjax', data: {dateRange: $('#call-stats-picker').val(), groupBy: 'days', callType: $('#call_type').val()}, type: 'POST', url: 'calls-graph', async:true, push: false});
     });
     
     $('#viewMode2').click(function() {
         $('#viewMode0, #viewMode1, #viewMode3').removeClass('active focus');
-        $.pjax({container: '#calls-graph-pjax', data: {dateRange: $('#call-stats-picker').val(), groupBy: 'weeks'}, type: 'POST', url: 'calls-graph', async:true, push: false});
+        $.pjax({container: '#calls-graph-pjax', data: {dateRange: $('#call-stats-picker').val(), groupBy: 'weeks', callType: $('#call_type').val()}, type: 'POST', url: 'calls-graph', async:true, push: false});
     });
     
     $('#viewMode3').click(function() {
         $('#viewMode0, #viewMode1, #viewMode2').removeClass('active focus');
-        $.pjax({container: '#calls-graph-pjax', data: {dateRange: $('#call-stats-picker').val(), groupBy: 'months'}, type: 'POST', url: 'calls-graph', async:true, push: false});
+        $.pjax({container: '#calls-graph-pjax', data: {dateRange: $('#call-stats-picker').val(), groupBy: 'months', callType: $('#call_type').val()}, type: 'POST', url: 'calls-graph', async:true, push: false});
+    });
+    
+    $('#call_type').on('change', function() {
+        let groupBy = $('input[name^="viewMode"]:checked').val();
+        if( typeof groupBy === 'undefined'){
+            let dates = $('#call-stats-picker').val().split(' / ');
+            if (dates[0] == dates[1]){
+                groupBy = '0';
+            } else {
+                groupBy = '1';
+            }
+        }
+        let groupingOps = ["hours", "days", "weeks", "months"];        
+        
+        switch (this.value) {
+          case '0' :
+              $.pjax({container: '#calls-graph-pjax', data: {dateRange: $('#call-stats-picker').val(), groupBy: groupingOps[groupBy], callType: this.value}, type: 'POST', url: 'calls-graph', async:true, push: false});
+          break;
+          case '1' :
+              $.pjax({container: '#calls-graph-pjax', data: {dateRange: $('#call-stats-picker').val(), groupBy: groupingOps[groupBy], callType: this.value}, type: 'POST', url: 'calls-graph', async:true, push: false});
+          break;          
+          case '2' :
+              $.pjax({container: '#calls-graph-pjax', data: {dateRange: $('#call-stats-picker').val(), groupBy: groupingOps[groupBy], callType: this.value}, type: 'POST', url: 'calls-graph', async:true, push: false});
+          break;
+        }
     });
 JS;
 $this->registerJs($js, \yii\web\View::POS_READY);
@@ -58,9 +83,8 @@ $this->title = 'Calls Report';
                                     ],
                                 ],
                                 'pluginEvents'=>[
-                                    "apply.daterangepicker"=>"function(){
-                                     //console.log($('#call-stats-picker').val());
-                                     $.pjax({container: '#calls-graph-pjax', data: {dateRange: $('#call-stats-picker').val()}, type: 'POST', url: 'calls-graph', async:true, push: false});
+                                    "apply.daterangepicker"=>"function(){                                    
+                                     $.pjax({container: '#calls-graph-pjax', data: {dateRange: $('#call-stats-picker').val(), callType: $('#call_type').val()}, type: 'POST', url: 'calls-graph', async:true, push: false});
                                      let dates = $('#call-stats-picker').val().split(' / ');
                                      if (dates[0] == dates[1]){
                                         $('#viewMode0').addClass('active focus');
@@ -97,6 +121,14 @@ $this->title = 'Calls Report';
                             </div>
                         </div>
 
+                        <div class="col-xs-1">
+                            <select id="call_type" class="form-control" required="">
+                                <option value="0">All</option>
+                                <option value="2">INCOMING</option>
+                                <option value="1">OUTGOING</option>
+                            </select>
+                        </div>
+
                         <?php Pjax::begin(['id' => 'calls-graph-pjax']); ?>
                         <div class="x_content">
                             <?php if ($callsGraphData): ?>
@@ -104,35 +136,61 @@ $this->title = 'Calls Report';
                                     <div class="col-md-12">
                                         <div id="chart_div"></div>
                                         <?php
-                                        $this->registerJs("google.charts.load('current', {'packages':['bar']}); google.charts.setOnLoadCallback(drawChart);", \yii\web\View::POS_READY);
+                                        $this->registerJs("google.charts.load('current', {'packages':['corechart']}); google.charts.setOnLoadCallback(drawChart);", \yii\web\View::POS_READY);
                                         ?>
                                         <script>
                                             function drawChart() {
                                                 let data = google.visualization.arrayToDataTable([
-                                                    ['Time Line', 'Completed', 'No answer', 'Busy', 'Failed', 'Canceled', {role: 'annotation'}],
+                                                    ['Time Line', 'Completed', 'No answer', 'Busy', 'Canceled', {role: 'annotation'}],
                                                     <?php foreach($callsGraphData as $k => $item):?>
                                                     ['<?=  ($item['weeksInterval'] == null)
                                                         ? date($item['timeLine'], strtotime($item['time']))
                                                         : date($item['timeLine'], strtotime($item['time'])) .' / '. date($item['timeLine'], strtotime($item['weeksInterval']));
 
-                                                        ?>', <?=$item['completed']?>, <?=$item['no-answer']?>, <?=$item['busy']?>, <?=$item['failed']?>, <?=$item['canceled']?>, '<?='--'?>'],
+                                                        ?>', <?=$item['completed']?>, <?=$item['no-answer']?>, <?=$item['busy']?>, <?=$item['canceled']?>, '<?=''?>'],
                                                     <?php endforeach;?>
                                                 ]);
 
                                                 let options = {
-                                                    chart: {
-                                                        //title: 'Calls graph',
-                                                        //subtitle: 'Calls info - Last ?? days',
-                                                    },
                                                     height: 545,
                                                     vAxis: {
-                                                        //title: 'Requests'
+                                                        textStyle: {
+                                                            fontSize: 10
+                                                        },
+                                                        format:"#",
+                                                        viewWindow: {
+                                                            min: 1,
+                                                        },
                                                     },
-                                                    //legend: { position: 'none' },
-
+                                                    hAxis: {
+                                                        textStyle: {
+                                                            fontSize: 10
+                                                        },
+                                                    },
+                                                    seriesType: 'bars',
+                                                    bar: {
+                                                        groupWidth: 55
+                                                    },
+                                                    chartArea:{
+                                                        left:35,
+                                                        top:22,
+                                                        width:'100%',
+                                                        height:'85%'
+                                                    },
+                                                    legend: {
+                                                        position: 'top',
+                                                        textStyle: {
+                                                            fontSize: 10
+                                                        },
+                                                        alignment: 'end'
+                                                    },
+                                                    tooltip: {
+                                                        textStyle: {
+                                                            fontSize: 14
+                                                        }
+                                                    }
                                                 };
-                                                //var chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
-                                                let chart = new google.charts.Bar(document.getElementById('chart_div'));
+                                                let chart = new google.visualization.ComboChart(document.getElementById('chart_div'));
 
                                                 chart.draw(data, options);
                                                 $(window).resize(function(){
