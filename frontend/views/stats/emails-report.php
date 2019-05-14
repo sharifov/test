@@ -50,10 +50,10 @@ $js = <<<JS
     });
 JS;
 $this->registerJs($js, \yii\web\View::POS_READY);
-$this->title = 'SMS Report';
+$this->title = 'Emails Report';
 ?>
 <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-<!-- bar chart -->
+
 <div class="">
     <h1><i class="fa fa-bar-chart"></i> <?=$this->title?></h1>
     <div class="panel panel-default">
