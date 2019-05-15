@@ -228,7 +228,7 @@ class Notifications extends ActiveRecord
 
             $queue = Yii::$app->queue_job;
             $jobId = $queue->push($job);
-            Yii::info('UserID: '.$job->user_id.', TelegramSendMessageJob: '.$jobId, 'info\Notifications:afterSave:TelegramSendMessageJob');
+            //Yii::info('UserID: '.$job->user_id.', TelegramSendMessageJob: '.$jobId, 'info\Notifications:afterSave:TelegramSendMessageJob');
         }
     }
 

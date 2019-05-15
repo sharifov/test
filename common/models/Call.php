@@ -325,7 +325,7 @@ class Call extends \yii\db\ActiveRecord
                         $callRedirect->save();
                         Notifications::socket(null, $callRedirect->c_lead_id, 'callUpdate', ['status' => $callRedirect->c_call_status, 'duration' => (int)$callRedirect->c_call_duration, 'snr' => $callRedirect->c_sequence_number], true);
                     }
-                    \Yii::info(VarDumper::dumpAsString($res, 10, false), 'info\Component:CommunicationService::redirectCallFromHold:callRedirect');
+                    //\Yii::info(VarDumper::dumpAsString($res, 10, false), 'info\Component:CommunicationService::redirectCallFromHold:callRedirect');
                     return true;
                 }
             }
