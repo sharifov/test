@@ -838,7 +838,9 @@ class QuoteController extends FController
                             $itinerary = $quote::createDump($quote->itinerary);
                             $quote->reservation_dump = str_replace('&nbsp;', ' ', implode("\n", $itinerary));
                             if($quote->save(false)) {
-                               $quote->sendUpdateBO();
+                               if($lead->called_expert) {
+                                   $quote->sendUpdateBO();
+                               }
                             }
 
                             foreach ($attr['QuotePrice'] as $key => $quotePrice) {
