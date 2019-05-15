@@ -1237,7 +1237,7 @@ New lead {lead_id}
             if (isset($changedAttributes['status']) && $changedAttributes['status'] !== $this->status) {
                 LeadFlow::addStateFlow($this);
 
-                if($this->status === self::STATUS_TRASH || $this->status === self::STATUS_FOLLOW_UP || $this->status === self::STATUS_SNOOZE || ($this->status === self::STATUS_PROCESSING && $this->called_expert)) {
+                if($this->called_expert && ($this->status === self::STATUS_TRASH || $this->status === self::STATUS_FOLLOW_UP || $this->status === self::STATUS_SNOOZE || $this->status === self::STATUS_PROCESSING)) {
                     $job = new UpdateLeadBOJob();
                     $job->lead_id = $this->id;
                     $jobId = Yii::$app->queue_job->push($job);

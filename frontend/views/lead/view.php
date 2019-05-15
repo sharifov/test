@@ -40,12 +40,17 @@ if($is_admin || $is_supervision) {
 
                 $cloneLead = \common\models\Lead::findOne($lead->clone_id);
 
-                printf(" <a title=\"%s\" href=\"%s\">(Cloned from %s)</a> ",
+                /*printf(" <a title=\"%s\" href=\"%s\">(Cloned from %s)</a> ",
                     "Clone reason: ".$lead->description,
                     \yii\helpers\Url::to([
                     'lead/view',
                     'uid' => $cloneLead->uid
-                ]),$lead->clone_id);
+                ]),$lead->clone_id);*/
+
+                if($cloneLead) {
+                    echo \yii\helpers\Html::a('(Cloned from ' . $lead->clone_id . ' )', ['lead/view', 'gid' => $cloneLead->gid], ['title' => 'Clone reason: ' . $lead->description]);
+                }
+
             }
             ?>
             <?php if ($leadForm->getLead()->isNewRecord) : ?>

@@ -1545,7 +1545,7 @@ class CommunicationController extends ApiBaseController
                         }
                     }
 
-                    Yii::info($call->c_call_sid . ' ' . VarDumper::dumpAsString($call->attributes) . ' Other Calls: ' . VarDumper::dumpAsString($otherCallArr), 'info\API:Voice:VOIP:CallBack');
+                    //Yii::info($call->c_call_sid . ' ' . VarDumper::dumpAsString($call->attributes) . ' Other Calls: ' . VarDumper::dumpAsString($otherCallArr), 'info\API:Voice:VOIP:CallBack');
 
 
                     if($call->c_call_status === Call::CALL_STATUS_NO_ANSWER || $call->c_call_status === Call::CALL_STATUS_BUSY || $call->c_call_status === Call::CALL_STATUS_CANCELED || $call->c_call_status === Call::CALL_STATUS_FAILED) {
@@ -1734,7 +1734,7 @@ class CommunicationController extends ApiBaseController
 
         try {
 
-            Yii::info(VarDumper::dumpAsString(Yii::$app->request->post()), 'info\updateSmsStatus');
+            // Yii::info(VarDumper::dumpAsString(Yii::$app->request->post()), 'info\updateSmsStatus');
 
             if(!$sq_id) {
                 throw new NotFoundHttpException('Not found sq_id', 11);
