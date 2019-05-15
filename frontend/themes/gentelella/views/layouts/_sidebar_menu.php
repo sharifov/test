@@ -114,6 +114,8 @@ $isUM = Yii::$app->authManager->getAssignment('userManager', Yii::$app->user->id
                         ['label' => 'Agents report', 'url' => ['/agent-report'], 'icon' => 'users'],
                         ['label' => 'Calls & SMS', 'url' => ['/stats/call-sms'], 'icon' => 'phone'],
                         ['label' => 'Calls Report', 'url' => ['/stats/calls-graph'], 'icon' => 'line-chart'],
+                        ['label' => 'SMS Report', 'url' => ['/stats/sms-graph'], 'icon' => 'line-chart'],
+                        ['label' => 'Emails Report', 'url' => ['/stats/emails-graph'], 'icon' => 'line-chart'],
                         ['label' => 'Stats Employees', 'url' => ['/stats/index'], 'icon' => 'users'],
                         ['label' => 'User Connections', 'url' => ['/user-connection/index'], 'icon' => 'plug'],
                         ['label' => 'User Stats', 'url' => ['/user-connection/stats'], 'icon' => 'area-chart'],
@@ -124,7 +126,9 @@ $isUM = Yii::$app->authManager->getAssignment('userManager', Yii::$app->user->id
                 if($isQA || $isSupervision) {
                     $items =  [
                         ['label' => 'Calls & SMS', 'url' => ['/stats/call-sms'], 'icon' => 'list'],
-
+                        ['label' => 'Calls Report', 'url' => ['/stats/calls-graph'], 'icon' => 'line-chart'],
+                        ['label' => 'SMS Report', 'url' => ['/stats/sms-graph'], 'icon' => 'line-chart'],
+                        ['label' => 'Emails Report', 'url' => ['/stats/emails-graph'], 'icon' => 'line-chart'],
                         ['label' => 'Call List', 'url' => ['/call/index'], 'icon' => 'phone'],
                         ['label' => 'SMS List', 'url' => ['/sms/index'], 'icon' => 'comments-o'],
                         ['label' => 'Mail List', 'url' => ['/email/index'], 'icon' => 'envelope'],

@@ -1,30 +1,30 @@
 <?php
 use yii\widgets\Pjax;
 /**
- * @var $callsGraphData []
+ * @var $emailsGraphData []
  */
 $js = <<<JS
-    $('#viewMode0').click(function() {
+    $('#viewMode0').click(function() {        
         $('#viewMode1, #viewMode2, #viewMode3').removeClass('active focus');
-        $.pjax({container: '#calls-graph-pjax', data: {dateRange: $('#call-stats-picker').val(), groupBy: 'hours', callType: $('#call_type').val()}, type: 'POST', url: 'calls-graph', async:true, push: false});
+        $.pjax({container: '#calls-graph-pjax', data: {dateRange: $('#call-stats-picker').val(), groupBy: 'hours', emailsType: $('#emails_type').val()}, type: 'POST', url: 'emails-graph', async:true, push: false});
     });
 
-    $('#viewMode1').click(function() {
+    $('#viewMode1').click(function() {        
         $('#viewMode0, #viewMode2, #viewMode3').removeClass('active focus');
-        $.pjax({container: '#calls-graph-pjax', data: {dateRange: $('#call-stats-picker').val(), groupBy: 'days', callType: $('#call_type').val()}, type: 'POST', url: 'calls-graph', async:true, push: false});
+        $.pjax({container: '#calls-graph-pjax', data: {dateRange: $('#call-stats-picker').val(), groupBy: 'days', emailsType: $('#emails_type').val()}, type: 'POST', url: 'emails-graph', async:true, push: false});
     });
     
-    $('#viewMode2').click(function() {
+    $('#viewMode2').click(function() {        
         $('#viewMode0, #viewMode1, #viewMode3').removeClass('active focus');
-        $.pjax({container: '#calls-graph-pjax', data: {dateRange: $('#call-stats-picker').val(), groupBy: 'weeks', callType: $('#call_type').val()}, type: 'POST', url: 'calls-graph', async:true, push: false});
+        $.pjax({container: '#calls-graph-pjax', data: {dateRange: $('#call-stats-picker').val(), groupBy: 'weeks', emailsType: $('#emails_type').val()}, type: 'POST', url: 'emails-graph', async:true, push: false});
     });
     
-    $('#viewMode3').click(function() {
+    $('#viewMode3').click(function() {        
         $('#viewMode0, #viewMode1, #viewMode2').removeClass('active focus');
-        $.pjax({container: '#calls-graph-pjax', data: {dateRange: $('#call-stats-picker').val(), groupBy: 'months', callType: $('#call_type').val()}, type: 'POST', url: 'calls-graph', async:true, push: false});
+        $.pjax({container: '#calls-graph-pjax', data: {dateRange: $('#call-stats-picker').val(), groupBy: 'months', emailsType: $('#emails_type').val()}, type: 'POST', url: 'emails-graph', async:true, push: false});
     });
     
-    $('#call_type').on('change', function() {
+    $('#emails_type').on('change', function() {
         let groupBy = $('input[name^="viewMode"]:checked').val();
         if( typeof groupBy === 'undefined'){
             let dates = $('#call-stats-picker').val().split(' / ');
@@ -38,26 +38,26 @@ $js = <<<JS
         
         switch (this.value) {
           case '0' :
-              $.pjax({container: '#calls-graph-pjax', data: {dateRange: $('#call-stats-picker').val(), groupBy: groupingOps[groupBy], callType: this.value}, type: 'POST', url: 'calls-graph', async:true, push: false});
+              $.pjax({container: '#calls-graph-pjax', data: {dateRange: $('#call-stats-picker').val(), groupBy: groupingOps[groupBy], emailsType: this.value}, type: 'POST', url: 'emails-graph', async:true, push: false});
           break;
           case '1' :
-              $.pjax({container: '#calls-graph-pjax', data: {dateRange: $('#call-stats-picker').val(), groupBy: groupingOps[groupBy], callType: this.value}, type: 'POST', url: 'calls-graph', async:true, push: false});
+              $.pjax({container: '#calls-graph-pjax', data: {dateRange: $('#call-stats-picker').val(), groupBy: groupingOps[groupBy], emailsType: this.value}, type: 'POST', url: 'emails-graph', async:true, push: false});
           break;          
           case '2' :
-              $.pjax({container: '#calls-graph-pjax', data: {dateRange: $('#call-stats-picker').val(), groupBy: groupingOps[groupBy], callType: this.value}, type: 'POST', url: 'calls-graph', async:true, push: false});
+              $.pjax({container: '#calls-graph-pjax', data: {dateRange: $('#call-stats-picker').val(), groupBy: groupingOps[groupBy], emailsType: this.value}, type: 'POST', url: 'emails-graph', async:true, push: false});
           break;
         }
     });
 JS;
 $this->registerJs($js, \yii\web\View::POS_READY);
-$this->title = 'Calls Report';
+$this->title = 'Emails Report';
 ?>
 <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 
 <div class="">
     <h1><i class="fa fa-bar-chart"></i> <?=$this->title?></h1>
     <div class="panel panel-default">
-        <div class="panel-heading"><i class="fa fa-bar-chart"></i> Calls Chart</div>
+        <div class="panel-heading"><i class="fa fa-bar-chart"></i> Emails Chart</div>
         <div class="panel-body">
             <div class="row">
                 <div class="col-md-12 col-sm-6 col-xs-12">
@@ -82,7 +82,7 @@ $this->title = 'Calls Report';
                                 ],
                                 'pluginEvents'=>[
                                     "apply.daterangepicker"=>"function(){                                    
-                                     $.pjax({container: '#calls-graph-pjax', data: {dateRange: $('#call-stats-picker').val(), callType: $('#call_type').val()}, type: 'POST', url: 'calls-graph', async:true, push: false});
+                                     $.pjax({container: '#calls-graph-pjax', data: {dateRange: $('#call-stats-picker').val(), emailsType: $('#emails_type').val()}, type: 'POST', url: 'emails-graph', async:true, push: false});
                                      let dates = $('#call-stats-picker').val().split(' / ');
                                      if (dates[0] == dates[1]){
                                         $('#viewMode0').addClass('active focus');
@@ -120,16 +120,16 @@ $this->title = 'Calls Report';
                         </div>
 
                         <div class="col-xs-1">
-                            <select id="call_type" class="form-control" required="">
+                            <select id="emails_type" class="form-control" required="">
                                 <option value="0">All</option>
-                                <option value="2">INCOMING</option>
-                                <option value="1">OUTGOING</option>
+                                <option value="2">INBOX</option>
+                                <option value="1">OUTBOX</option>
                             </select>
                         </div>
 
                         <?php Pjax::begin(['id' => 'calls-graph-pjax']); ?>
                         <div class="x_content">
-                            <?php if ($callsGraphData): ?>
+                            <?php if ($emailsGraphData): ?>
                                 <div class="row">
                                     <div class="col-md-12">
                                         <div id="chart_div"></div>
@@ -139,45 +139,18 @@ $this->title = 'Calls Report';
                                         <script>
                                             function drawChart() {
                                                 let data = google.visualization.arrayToDataTable([
-                                                    ['Time Line',
-                                                        'Completed',
-                                                        {'type': 'string', 'role': 'tooltip', 'p': {'html': true}},
-                                                        'No answer',
-                                                        {'type': 'string', 'role': 'tooltip', 'p': {'html': true}},
-                                                        'Busy',
-                                                        {'type': 'string', 'role': 'tooltip', 'p': {'html': true}},
-                                                        'Canceled',
-                                                        {'type': 'string', 'role': 'tooltip', 'p': {'html': true}},
-                                                        {role: 'annotation'}
-                                                    ],
-                                                    <?php foreach($callsGraphData as $k => $item):?>
+                                                    ['Time Line', 'Emails Done', 'Emails Error', {role: 'annotation'}],
+                                                    <?php foreach($emailsGraphData as $k => $item):?>
                                                     ['<?=  ($item['weeksInterval'] == null)
                                                         ? date($item['timeLine'], strtotime($item['time']))
                                                         : date($item['timeLine'], strtotime($item['time'])) .' / '. date($item['timeLine'], strtotime($item['weeksInterval']));
-                                                        ?>',
-                                                        <?=$item['completed']?>, createCustomHTMLContent('Completed: ','<?=  ($item['weeksInterval'] == null)
-                                                        ? date($item['timeLine'], strtotime($item['time']))
-                                                        : date($item['timeLine'], strtotime($item['time'])) .' / '. date($item['timeLine'], strtotime($item['weeksInterval']));
-                                                        ?>', <?=$item['completed']?>, <?=$item['cc_TotalPrice']?>, <?= $item['cc_Duration']?>),
-                                                        <?=$item['no-answer']?>, createCustomHTMLContent('No Answer: ','<?=  ($item['weeksInterval'] == null)
-                                                        ? date($item['timeLine'], strtotime($item['time']))
-                                                        : date($item['timeLine'], strtotime($item['time'])) .' / '. date($item['timeLine'], strtotime($item['weeksInterval']));
-                                                        ?>', <?=$item['no-answer']?>, 0, 0),
-                                                        <?=$item['busy']?>, createCustomHTMLContent('Busy: ','<?=  ($item['weeksInterval'] == null)
-                                                        ? date($item['timeLine'], strtotime($item['time']))
-                                                        : date($item['timeLine'], strtotime($item['time'])) .' / '. date($item['timeLine'], strtotime($item['weeksInterval']));
-                                                        ?>', <?=$item['busy']?>, 0, 0),
 
-                                                        <?=$item['canceled']?>, createCustomHTMLContent('Canceled: ','<?=  ($item['weeksInterval'] == null)
-                                                        ? date($item['timeLine'], strtotime($item['time']))
-                                                        : date($item['timeLine'], strtotime($item['time'])) .' / '. date($item['timeLine'], strtotime($item['weeksInterval']));
-                                                        ?>', <?=$item['canceled']?>, 0, 0),
-                                                        '<?=''?>'],
+                                                        ?>', <?=$item['done']?>, <?=$item['error']?>, '<?=''?>'],
                                                     <?php endforeach;?>
                                                 ]);
 
                                                 let options = {
-                                                    height: 545,
+                                                    height: 550,
                                                     vAxis: {
                                                         textStyle: {
                                                             fontSize: 10
@@ -194,7 +167,7 @@ $this->title = 'Calls Report';
                                                     },
                                                     seriesType: 'bars',
                                                     bar: {
-                                                        groupWidth: 55
+                                                        groupWidth: 25
                                                     },
                                                     chartArea:{
                                                         left:35,
@@ -212,9 +185,9 @@ $this->title = 'Calls Report';
                                                     tooltip: {
                                                         textStyle: {
                                                             fontSize: 14
-                                                        },
-                                                        isHtml: true
+                                                        }
                                                     }
+
                                                 };
                                                 let chart = new google.visualization.ComboChart(document.getElementById('chart_div'));
 
@@ -222,23 +195,6 @@ $this->title = 'Calls Report';
                                                 $(window).resize(function(){
                                                     chart.draw(data, options); // redraw the graph on window resize
                                                 });
-                                            }
-
-                                            function createCustomHTMLContent(status ,hourRange, statusAmount, totalPrice, totalDuration) {
-                                                return '<div style="padding:5px 5px 5px 5px;">' +
-                                                    '<table class="medals_layout">' +
-                                                    '<tr>' +
-                                                    '<td style="padding-right:5px;">Time: </td>' + '<td><b>' + hourRange + '</b></td>' + '</tr>' +
-                                                    '<tr>' +
-                                                    '<td style="padding-right:5px;">' + status +'</td>' + '<td><b>' + statusAmount + '</b></td>' + '</tr>' +
-                                                    '<tr>' +
-                                                    '<td style="padding-right:5px;">Total Price: </td>' +
-                                                    '<td><b>' + totalPrice + ' $</b></td>' + '</tr>' +
-                                                    '<tr>' +
-                                                    '<td style="padding-right:5px;">Duration: </td>' +
-                                                    '<td><b>' + totalDuration + ' s</b></td>' + '</tr>' +
-                                                    '</table>' +
-                                                    '</div>';
                                             }
                                         </script>
                                     </div>
