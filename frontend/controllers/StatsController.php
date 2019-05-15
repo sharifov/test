@@ -3,11 +3,14 @@
 namespace frontend\controllers;
 
 use common\models\ApiLog;
+use common\models\Call;
 use common\models\Employee;
 use common\models\Lead;
 use common\models\search\CommunicationSearch;
 use common\models\search\EmployeeSearch;
 use common\models\search\LeadTaskSearch;
+use common\models\Sms;
+use common\models\Email;
 use common\models\UserParams;
 use Yii;
 use yii\data\ActiveDataProvider;
@@ -34,7 +37,7 @@ class StatsController extends FController
                 'class' => AccessControl::class,
                 'rules' => [
                     [
-                        'actions' => ['index', 'call-sms'],
+                        'actions' => ['index', 'call-sms', 'calls-graph', 'sms-graph', 'emails-graph'],
                         'allow' => true,
                         'roles' => ['supervision', 'admin', 'qa'],
                     ],
@@ -182,10 +185,6 @@ class StatsController extends FController
             ],
         ]);*/
 
-
-
-
-
         return $this->render('call-sms', [
             //'datetime_start' => $datetime_start,
             //'datetime_end' => $datetime_end,
@@ -193,10 +192,74 @@ class StatsController extends FController
             'searchModel' => $searchModel,
             'dataProviderCommunication' => $dataProviderCommunication,
         ]);
-
-
     }
 
+    public function actionCallsGraph()
+    {
+        if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
+            $dateRange = Yii::$app->request->post('dateRange');
+            $rangeBy = Yii::$app->request->post('groupBy');
+            $callType = Yii::$app->request->post('callType');
 
+            $date = $pieces = explode("/", $dateRange);
+            $callsGraphData = Call::getCallStats($date[0], $date[1], $rangeBy, (int)$callType);
 
+            return $this->renderAjax('calls-report', [
+                'callsGraphData' => $callsGraphData
+            ]);
+        } else {
+            $currentDate =  date('Y-m-d', strtotime('-0 day'));
+            $callsGraphData = Call::getCallStats($currentDate, $currentDate, null, 0);
+
+            return $this->render('calls-report', [
+                'callsGraphData' => $callsGraphData
+            ]);
+        }
+    }
+
+    public function actionSmsGraph()
+    {
+        if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
+            $dateRange = Yii::$app->request->post('dateRange');
+            $rangeBy = Yii::$app->request->post('groupBy');
+            $smsType = Yii::$app->request->post('smsType');
+
+            $date = $pieces = explode("/", $dateRange);
+            $smsGraphData = Sms::getSmsStats($date[0], $date[1], $rangeBy, (int)$smsType);
+
+            return $this->renderAjax('sms-report', [
+                'smsGraphData' => $smsGraphData
+            ]);
+        } else {
+            $currentDate =  date('Y-m-d', strtotime('-0 day'));
+            $smsGraphData = Sms::getSmsStats($currentDate, $currentDate, null, 0);
+
+            return $this->render('sms-report', [
+                'smsGraphData' => $smsGraphData
+            ]);
+        }
+    }
+
+    public function actionEmailsGraph()
+    {
+        if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
+            $dateRange = Yii::$app->request->post('dateRange');
+            $rangeBy = Yii::$app->request->post('groupBy');
+            $emailsType = Yii::$app->request->post('emailsType');
+
+            $date = $pieces = explode("/", $dateRange);
+            $emailsGraphData = Email::getEmailsStats($date[0], $date[1], $rangeBy, (int)$emailsType);
+
+            return $this->renderAjax('emails-report', [
+                'emailsGraphData' => $emailsGraphData
+            ]);
+        } else {
+            $currentDate =  date('Y-m-d', strtotime('-0 day'));
+            $emailsGraphData = Email::getEmailsStats($currentDate, $currentDate, null, 0);
+
+            return $this->render('emails-report', [
+                'emailsGraphData' => $emailsGraphData
+            ]);
+        }
+    }
 }

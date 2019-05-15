@@ -185,7 +185,7 @@
 }
 
 .chat__form {
-  width: calc(100% - 180px);
+  /*width: calc(100% - 180px);*/
   margin: 0 auto;
 }
 

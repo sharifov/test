@@ -10,6 +10,7 @@ use common\models\ClientPhone;
 use common\models\Email;
 use common\models\EmailTemplateType;
 use common\models\Lead;
+use common\models\LeadCallExpert;
 use common\models\LeadFlow;
 use common\models\LeadLog;
 use common\models\LeadTask;
@@ -17,6 +18,7 @@ use common\models\local\LeadAdditionalInformation;
 use common\models\Note;
 use common\models\ProjectEmailTemplate;
 use common\models\Reason;
+use common\models\search\LeadCallExpertSearch;
 use common\models\Sms;
 use common\models\SmsTemplateType;
 use common\models\Task;
@@ -168,7 +170,7 @@ class LeadController extends FController
 
             if (Yii::$app->request->post('hasEditable')) {
 
-                $value = '456';
+                $value = '';
                 $message = '';
 
                 // use Yii's response format to encode output as JSON
@@ -222,7 +224,7 @@ class LeadController extends FController
                     }
 
                     return [];
-                }elseif (Yii::$app->request->isPost && $taskNotes = Yii::$app->request->post('task_notes')) {
+                } elseif (Yii::$app->request->isPost && $taskNotes = Yii::$app->request->post('task_notes')) {
 
                     $taskId = $taskDate = $userId = $leadId = null;
 
@@ -258,8 +260,15 @@ class LeadController extends FController
 
                     }
 
+                } elseif (Yii::$app->request->isPost && Yii::$app->request->post('notes_for_experts', null) !== null) {
+                    $lead->notes_for_experts = Yii::$app->request->post('notes_for_experts');
+                    if($lead->save()) {
+                        $value = $lead->notes_for_experts;
+                    } else {
+                        $message = 'Not save lead';
+                    }
                 } else {
-                    $message = 'Not found task notes data';
+                    $message = 'Not found data';
                 }
 
 
@@ -1004,6 +1013,31 @@ class LeadController extends FController
 
         }
 
+        //$dataProviderCommunication
+
+        $modelLeadCallExpert = new LeadCallExpert();
+
+
+        if ($modelLeadCallExpert->load(Yii::$app->request->post())) {
+
+            $modelLeadCallExpert->lce_agent_user_id = Yii::$app->user->id;
+            $modelLeadCallExpert->lce_lead_id = $lead->id;
+            $modelLeadCallExpert->lce_status_id = LeadCallExpert::STATUS_PENDING;
+            $modelLeadCallExpert->lce_request_dt = date('Y-m-d H:i:s');
+
+            if($modelLeadCallExpert->save()) {
+                $modelLeadCallExpert->lce_request_text = '';
+                //Yii::info(VarDumper::dumpAsString($modelLeadCallExpert->attributes), 'info\LeadController:view:LeadCallExpert');
+            }
+            //$modelLeadCallExpert =
+            //return $this->redirect(['view', 'id' => $model->lce_id]);
+        }
+
+
+        $searchModelCallExpert = new LeadCallExpertSearch();
+        $params = Yii::$app->request->queryParams;
+        $params['LeadCallExpertSearch']['lce_lead_id'] = $lead->id;
+        $dataProviderCallExpert = $searchModelCallExpert->searchByLead($params);
 
         //VarDumper::dump(enableCommunication); exit;
 
@@ -1016,7 +1050,9 @@ class LeadController extends FController
             'comForm' => $comForm,
             'quotesProvider' => $quotesProvider,
             'dataProviderCommunication' => $dataProviderCommunication,
-            'enableCommunication' => $enableCommunication
+            'enableCommunication' => $enableCommunication,
+            'dataProviderCallExpert' => $dataProviderCallExpert,
+            'modelLeadCallExpert' => $modelLeadCallExpert
         ]);
 
 
@@ -1214,7 +1250,7 @@ class LeadController extends FController
         throw new BadRequestHttpException();
     }
 
-    public function actionCallExpert($id)
+    /*public function actionCallExpert($id)
     {
         $lead = Lead::findOne(['id' => $id]);
         if ($lead !== null && !$lead->called_expert) {
@@ -1233,7 +1269,7 @@ class LeadController extends FController
             $lead->save();
         }
         return $this->redirect(Yii::$app->request->referrer);
-    }
+    }*/
 
     public function actionUnprocessed($show)
     {
@@ -1511,7 +1547,7 @@ class LeadController extends FController
 
         $model->employee_id = $user->getId();
 
-        if ($model->status != Lead::STATUS_ON_HOLD && $model->status != Lead::STATUS_SNOOZE && !$model->l_answered) {
+        /* if ($model->status != Lead::STATUS_ON_HOLD && $model->status != Lead::STATUS_SNOOZE && !$model->l_answered) {
             LeadTask::createTaskList($model->id, $model->employee_id, 1, '', Task::CAT_NOT_ANSWERED_PROCESS);
             LeadTask::createTaskList($model->id, $model->employee_id, 2, '', Task::CAT_NOT_ANSWERED_PROCESS);
             LeadTask::createTaskList($model->id, $model->employee_id, 3, '', Task::CAT_NOT_ANSWERED_PROCESS);
@@ -1521,9 +1557,7 @@ class LeadController extends FController
             LeadTask::createTaskList($model->id, $model->employee_id, 1, '', Task::CAT_ANSWERED_PROCESS);
             LeadTask::createTaskList($model->id, $model->employee_id, 2, '', Task::CAT_ANSWERED_PROCESS);
             LeadTask::createTaskList($model->id, $model->employee_id, 3, '', Task::CAT_ANSWERED_PROCESS);
-        }
-
-
+        } */
 
         $model->status = Lead::STATUS_PROCESSING;
         $model->save();
@@ -1588,11 +1622,14 @@ class LeadController extends FController
             $lead->employee_id = $user->id;
             $lead->status = Lead::STATUS_PROCESSING;
             $lead->status_description = 'Auto Dial';
-            if($lead->save()) {
+            if(!$lead->save()) {
+                \Yii::error(VarDumper::dumpAsString($lead->errors, 10), 'ControllerLead:actionAutoTake:Lead:save(Auto Dial)');
+            }
+            /*if($lead->save()) {
                 LeadTask::createTaskList($lead->id, $lead->employee_id, 1, '', Task::CAT_NOT_ANSWERED_PROCESS);
                 LeadTask::createTaskList($lead->id, $lead->employee_id, 2, '', Task::CAT_NOT_ANSWERED_PROCESS);
                 LeadTask::createTaskList($lead->id, $lead->employee_id, 3, '', Task::CAT_NOT_ANSWERED_PROCESS);
-            }
+            } */
 
         } else {
             Yii::$app->session->setFlash('warning', 'Error: Lead not in status Pending ('.$lead->id.')');
@@ -1918,7 +1955,7 @@ class LeadController extends FController
         if($action === 'answer') {
             $lead->l_answered = $lead->l_answered ? 0 : 1;
             if($lead->update()) {
-                if($lead->l_answered) {
+                /* if($lead->l_answered) {
                     LeadTask::deleteAll('lt_lead_id = :lead_id AND lt_date >= :date AND lt_completed_dt IS NULL',
                         [':lead_id' => $lead->id, ':date' => date('Y-m-d') ]);
 
@@ -1931,7 +1968,7 @@ class LeadController extends FController
                         [':lead_id' => $lead->id, ':date' => date('Y-m-d') ]);
 
                     LeadTask::createTaskList($lead->id, $lead->employee_id, 1, '', Task::CAT_NOT_ANSWERED_PROCESS);
-                }
+                } */
             }
         }
 
@@ -1962,9 +1999,9 @@ class LeadController extends FController
             $leadForm->getLead()->status = Lead::STATUS_PROCESSING;
             if (empty($data['errors']) && $data['load'] && $leadForm->save($errors)) {
                 $model = $leadForm->getLead();
-                LeadTask::createTaskList($model->id, $model->employee_id, 1, '', Task::CAT_NOT_ANSWERED_PROCESS);
+                /* LeadTask::createTaskList($model->id, $model->employee_id, 1, '', Task::CAT_NOT_ANSWERED_PROCESS);
                 LeadTask::createTaskList($model->id, $model->employee_id, 2, '', Task::CAT_NOT_ANSWERED_PROCESS);
-                LeadTask::createTaskList($model->id, $model->employee_id, 3, '', Task::CAT_NOT_ANSWERED_PROCESS);
+                LeadTask::createTaskList($model->id, $model->employee_id, 3, '', Task::CAT_NOT_ANSWERED_PROCESS); */
 
                 return $this->redirect(['lead/view', 'gid' => $leadForm->getLead()->gid]);
             }

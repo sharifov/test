@@ -3890,7 +3890,7 @@ input[disabled] + .radio-tab__text {
 }
 
 .quote__heading {
-  padding: 0 15px;
+  padding: 0 10px;
   border-bottom: 1px solid #c2cad8;
   min-height: 50px;
   display: -webkit-flex;
@@ -3917,6 +3917,7 @@ input[disabled] + .radio-tab__text {
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
+	flex-flow: row wrap;
 }
 
 @media (max-width: 1499px) {
@@ -4025,7 +4026,7 @@ input[disabled] + .radio-tab__text {
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
-  padding: 10px 20px;
+  padding: 5px 10px;
   position: relative;
 }
 
@@ -4067,7 +4068,7 @@ input[disabled] + .radio-tab__text {
 }
 
 .quote__airline-logo {
-  margin-right: 20px;
+  margin-right: 10px;
   width: 26px;
   height: 26px;
   margin-top: 5px;
@@ -4220,8 +4221,8 @@ input[disabled] + .radio-tab__text {
 }
 
 .quote__heading-left > *:not(:first-child) {
-  margin-left: 16px;
-  padding-left: 16px;
+  margin-left: 10px;
+  padding-left: 10px;
   border-left: 1px solid #c2cad8;
 }
 
@@ -4293,7 +4294,7 @@ input[disabled] + .radio-tab__text {
 }
 
 .quote__details {
-  margin-left: 20px;
+  /*margin-left: 20px;*/
   font-weight: 600;
 }
 
@@ -5201,7 +5202,7 @@ input[disabled] + .radio-tab__text {
 }
 
 .chat__form {
-  width: calc(100% - 180px);
+  width: 100%; /*calc(100% - 180px);*/
   margin: 0 auto;
 }
 
@@ -5365,3 +5366,27 @@ input[disabled] + .radio-tab__text {
 .project-logo img{max-height:70px;}
 .btn-out-a a{color:#fff!important;}
 .select2-container--open{z-index:9999;}
+
+#scrollUp{
+  bottom:20px;
+  right:20px;
+  background:#555;
+  color:#fff;
+  font-size:12px;
+  font-family:sans-serif;
+  text-decoration:none;
+  opacity:.9;
+  padding:10px 20px;
+  -webkit-border-radius:16px;
+  -moz-border-radius:16px;
+  border-radius:16px;
+  -webkit-transition:background 200ms linear;
+  -moz-transition:background 200ms linear;
+  transition:background 200ms linear
+}
+#scrollUp:hover{background:#000}
+
+.panel_toolbox  {
+  float: right;
+  min-width: 0;
+}

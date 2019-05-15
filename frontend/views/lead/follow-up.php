@@ -250,6 +250,13 @@ $this->params['breadcrumbs'][] = $this->title;
             'format' => 'raw'
         ],
         [
+            'attribute' => 'project_id',
+            'value' => function (\common\models\Lead $model) {
+                return $model->project ? $model->project->name : '-';
+            },
+            'filter' => $projectList,
+        ],
+        [
             'class' => 'yii\grid\ActionColumn',
             'template' => '{action}',
             'buttons' => [

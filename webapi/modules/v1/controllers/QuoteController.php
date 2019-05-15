@@ -334,7 +334,12 @@ class QuoteController extends ApiBaseController
                 ])
                 ->all();
                 if(!empty($segments)){
+                    $segmentsIds = [];
+                    foreach ($segments as $segment){
+                        $segmentsIds[] = $segment->qs_id;
+                    }
                     if(isset($baggageAttr['free_baggage']) && isset($baggageAttr['free_baggage']['piece'])){
+                        QuoteSegmentBaggage::deleteAll('qsb_segment_id IN (:segments)',[':segments' => implode(',', $segmentsIds)]);
                         foreach ($segments as $segment){
                             $baggage = new QuoteSegmentBaggage();
                             $baggage->qsb_allow_pieces = $baggageAttr['free_baggage']['piece'];
@@ -349,6 +354,7 @@ class QuoteController extends ApiBaseController
                         }
                     }
                     if(isset($baggageAttr['paid_baggage']) && !empty($baggageAttr['paid_baggage'])){
+                        QuoteSegmentBaggageCharge::deleteAll('qsbc_segment_id IN (:segments)',[':segments' => implode(',', $segmentsIds)]);
                         foreach ($segments as $segment){
                             foreach ($baggageAttr['paid_baggage'] as $paidBaggageAttr){
                                 $baggage = new QuoteSegmentBaggageCharge();
@@ -526,13 +532,19 @@ class QuoteController extends ApiBaseController
                     $segmentKey = $baggageAttr['segment'];
                     $origin = substr($segmentKey, 0, 3);
                     $destination = substr($segmentKey, 2, 3);
-                    $segments = QuoteSegment::find()->innerJoin(QuoteTrip::tableName(),'qs_trip_id = qt_id')
+                    $segment = QuoteSegment::find()->innerJoin(QuoteTrip::tableName(),'qs_trip_id = qt_id')
                                 ->andWhere(['qt_quote_id' =>  $model->id])
                                 ->andWhere(['or',
                                     ['qs_departure_airport_code'=>$origin],
                                     ['qs_arrival_airport_code'=>$destination]
                                 ])
-                                ->all();
+                                ->one();
+                    $segments = [];
+                    if(!empty($segment)){
+                        $segments = QuoteSegment::find()
+                        ->andWhere(['qs_trip_id' =>  $segment->qs_trip_id])
+                        ->all();
+                    }
                     if(!empty($segments)){
                         if(isset($baggageAttr['free_baggage']) && isset($baggageAttr['free_baggage']['piece'])){
                             foreach ($segments as $segment){

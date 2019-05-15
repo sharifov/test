@@ -194,4 +194,10 @@ class LeadTask extends \yii\db\ActiveRecord
         }
         return false;
     }
+
+    public static function deleteUnnecessaryTasks($leadId)
+    {
+        LeadTask::deleteAll('lt_lead_id = :lead_id AND lt_date >= :date AND lt_completed_dt IS NULL',
+            [':lead_id' => $leadId, ':date' => date('Y-m-d') ]);
+    }
 }

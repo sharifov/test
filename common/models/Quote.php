@@ -1228,7 +1228,7 @@ class Quote extends \yii\db\ActiveRecord
         $class = self::STATUS_CLASS_SPAN[$this->status] ??  '';
         $label = self::STATUS_LIST[$this->status] ?? '-';
 
-        return '<span id="q-status-' . $this->uid . '" class="quote__status '.$class.'" title="At ' . $this->updated . '" data-toggle="tooltip"><i class="fa fa-circle"></i> <span>'.$label.'</span></span>';
+        return '<span id="q-status-' . $this->uid . '" class="quote__status '.$class.'" title="' . Yii::$app->formatter->asDatetime($this->updated) . '" data-toggle="tooltip"><i class="fa fa-circle"></i> <span>'.$label.'</span></span>';
     }
 
 

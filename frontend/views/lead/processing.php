@@ -59,7 +59,6 @@ $this->params['breadcrumbs'][] = $this->title;
                 'style' => 'width:120px'
             ],
             'filter' => $projectList,
-            'visible' => ! $isAgent
         ],
 
 

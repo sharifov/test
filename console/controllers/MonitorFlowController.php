@@ -8,6 +8,8 @@ use common\models\Note;
 use common\models\Quote;
 use common\models\Reason;
 use yii\console\Controller;
+use common\models\LeadTask;
+use common\models\Task;
 use Yii;
 
 class MonitorFlowController extends Controller
