@@ -347,9 +347,15 @@ class QuoteController extends FController
                                         $quote->link('quotePrices', $price);
                                     }
                                 }
+
+                                if($lead->called_expert) {
+                                    $quote->sendUpdateBO();
+                                }
                             }
 
                             $transaction->commit();
+
+
                             $result['status'] = true;
 
                             return $result;

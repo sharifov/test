@@ -1188,15 +1188,21 @@ class Quote extends \yii\db\ActiveRecord
                     $changedAttributes['status'] != $this->status &&
                     !in_array($this->status, [self::STATUS_APPLIED])
                 ) {
-                    $quote = Quote::findOne(['id' => $this->id]);
-                    $data = $quote->getQuoteInformationForExpert(true);
-                    BackOffice::sendRequest('lead/update-quote', 'POST', json_encode($data));
+                    $this->sendUpdateBO();
                 }
                 QuoteStatusLog::createNewFromQuote($this);
             }
         } else {
             QuoteStatusLog::createNewFromQuote($this);
         }
+    }
+
+
+    public function sendUpdateBO()
+    {
+        $quote = self::findOne($this->id);
+        $data = $quote->getQuoteInformationForExpert(true);
+        return BackOffice::sendRequest('lead/update-quote', 'POST', json_encode($data));
     }
 
     public function getStatusLabel()
