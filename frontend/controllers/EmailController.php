@@ -335,8 +335,9 @@ class EmailController extends FController
         $model =$this->findModel($id);
 
         $is_admin = Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id);
+        $is_supervision = Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id);
 
-        if(!$is_admin) {
+        if(!$is_admin && $is_supervision == null) {
             $userAccess = UserProjectParams::find()->where(['or', ['upp_email' => $model->e_email_from], ['upp_email' => $model->e_email_to]])->andWhere(['upp_user_id' => Yii::$app->user->id])->exists();
             if(!$userAccess) {
                 throw new ForbiddenHttpException('Access Denied. Email ID:'.$model->e_id);
