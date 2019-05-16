@@ -471,19 +471,19 @@ class Sms extends \yii\db\ActiveRecord
                 break;
         }
         if ($smsType == 0){
-            $sms = self::find()->select(['s_id', 's_status_id', 's_updated_dt'])
+            $sms = self::find()->select(['s_id', 's_status_id', 's_updated_dt', 's_tw_price'])
                 ->where(['s_status_id' => [ self::STATUS_DONE, self::STATUS_ERROR]])
                 ->andWhere(['between', 's_updated_dt', $sDate, $eDate])
                 ->all();
         } else {
-            $sms = self::find()->select(['s_id', 's_status_id', 's_updated_dt'])
+            $sms = self::find()->select(['s_id', 's_status_id', 's_updated_dt', 's_tw_price'])
                 ->where(['s_status_id' => [ self::STATUS_DONE, self::STATUS_ERROR]])
                 ->andWhere(['between', 's_updated_dt', $sDate, $eDate])
                 ->andWhere(['=', 's_type_id', $smsType])
                 ->all();
         }
 
-        $hourlySmsStats = [];
+        $smsStats = [];
         $item = [];
         if (strtotime($startDate) < strtotime($endDate)){
             if (isset($daysRange)) {
@@ -531,7 +531,7 @@ class Sms extends \yii\db\ActiveRecord
             }
         }
 
-        $done = $error = 0;
+        $done = $error = $sd_TotalPrice = 0;
         foreach ($timeLine as $key => $timeSignature){
             $weekInterval = explode('/', $timeSignature);
             if (count($weekInterval) != 2){
@@ -549,6 +549,7 @@ class Sms extends \yii\db\ActiveRecord
                 {
                     switch ($smsItem->s_status_id){
                         case self::STATUS_DONE :
+                            $sd_TotalPrice = $sd_TotalPrice + $smsItem->s_tw_price;
                             $done++;
                             break;
                         case self::STATUS_ERROR :
@@ -561,11 +562,12 @@ class Sms extends \yii\db\ActiveRecord
             $item['weeksInterval'] = (count($weekInterval) == 2) ? $EndPoint : null;
             $item['done'] = $done;
             $item['error'] = $error;
+            $item['sd_TotalPrice'] = round($sd_TotalPrice, 2);
 
-            array_push($hourlySmsStats, $item);
-            $done = $error = 0;
+            array_push($smsStats, $item);
+            $done = $error = $sd_TotalPrice = 0;
         }
-        return $hourlySmsStats;
+        return $smsStats;
     }
 
 }

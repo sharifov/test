@@ -649,7 +649,7 @@ class Email extends \yii\db\ActiveRecord
                 ->all();
         }
 
-        $hourlyEmailStats = [];
+        $emailStats = [];
         $item = [];
         if (strtotime($startDate) < strtotime($endDate)){
             if (isset($daysRange)) {
@@ -728,9 +728,9 @@ class Email extends \yii\db\ActiveRecord
             $item['done'] = $done;
             $item['error'] = $error;
 
-            array_push($hourlyEmailStats, $item);
+            array_push($emailStats, $item);
             $done = $error = 0;
         }
-        return $hourlyEmailStats;
+        return $emailStats;
     }
 }

@@ -4,27 +4,32 @@ use yii\widgets\Pjax;
  * @var $smsGraphData []
  */
 $js = <<<JS
-    $('#viewMode0').click(function() {        
+    $('#viewMode0').click(function() { 
+        $('#chart_div').html(generateChartPreloader());
         $('#viewMode1, #viewMode2, #viewMode3').removeClass('active focus');
         $.pjax({container: '#calls-graph-pjax', data: {dateRange: $('#call-stats-picker').val(), groupBy: 'hours', smsType: $('#sms_type').val()}, type: 'POST', url: 'sms-graph', async:true, push: false});
     });
 
-    $('#viewMode1').click(function() {        
+    $('#viewMode1').click(function() {
+        $('#chart_div').html(generateChartPreloader());
         $('#viewMode0, #viewMode2, #viewMode3').removeClass('active focus');
         $.pjax({container: '#calls-graph-pjax', data: {dateRange: $('#call-stats-picker').val(), groupBy: 'days', smsType: $('#sms_type').val()}, type: 'POST', url: 'sms-graph', async:true, push: false});
     });
     
-    $('#viewMode2').click(function() {        
+    $('#viewMode2').click(function() { 
+        $('#chart_div').html(generateChartPreloader());
         $('#viewMode0, #viewMode1, #viewMode3').removeClass('active focus');
         $.pjax({container: '#calls-graph-pjax', data: {dateRange: $('#call-stats-picker').val(), groupBy: 'weeks', smsType: $('#sms_type').val()}, type: 'POST', url: 'sms-graph', async:true, push: false});
     });
     
-    $('#viewMode3').click(function() {        
+    $('#viewMode3').click(function() { 
+        $('#chart_div').html(generateChartPreloader());
         $('#viewMode0, #viewMode1, #viewMode2').removeClass('active focus');
         $.pjax({container: '#calls-graph-pjax', data: {dateRange: $('#call-stats-picker').val(), groupBy: 'months', smsType: $('#sms_type').val()}, type: 'POST', url: 'sms-graph', async:true, push: false});
     });
     
     $('#sms_type').on('change', function() {
+        $('#chart_div').html(generateChartPreloader());
         let groupBy = $('input[name^="viewMode"]:checked').val();
         if( typeof groupBy === 'undefined'){
             let dates = $('#call-stats-picker').val().split(' / ');
@@ -48,6 +53,12 @@ $js = <<<JS
           break;
         }
     });
+    
+    function generateChartPreloader() {
+              return "<div class='chartPreloader' style='width:100%; height:50%'>" + 
+              "<i class='fa fa-spinner fa-pulse fa-4x' style='color: #CCCCCC;  position: relative;  top: 250px;  left: 45%;  transform: translate(-50%, -50%);'></i>" +
+              "</div>"
+     }
 JS;
 $this->registerJs($js, \yii\web\View::POS_READY);
 $this->title = 'SMS Report';
@@ -81,7 +92,8 @@ $this->title = 'SMS Report';
                                     ],
                                 ],
                                 'pluginEvents'=>[
-                                    "apply.daterangepicker"=>"function(){                                    
+                                    "apply.daterangepicker"=>"function(){ 
+                                     $('#chart_div').html(generateChartPreloader());                                   
                                      $.pjax({container: '#calls-graph-pjax', data: {dateRange: $('#call-stats-picker').val(), smsType: $('#sms_type').val()}, type: 'POST', url: 'sms-graph', async:true, push: false});
                                      let dates = $('#call-stats-picker').val().split(' / ');
                                      if (dates[0] == dates[1]){
@@ -90,8 +102,7 @@ $this->title = 'SMS Report';
                                      } else {
                                         $('#viewMode0').removeClass('active focus');
                                         $('#viewMode1').addClass('active focus');
-                                     }                                                              
-                                                            
+                                     }                       
                                   }",
                                 ],
 
@@ -132,28 +143,49 @@ $this->title = 'SMS Report';
                             <?php if ($smsGraphData): ?>
                                 <div class="row">
                                     <div class="col-md-12">
-                                        <div id="chart_div"></div>
+                                        <div id="chart_div" style="height:550px">
+                                            <div class="chartPreloader" style="width:100%; height:50%">
+                                                <i class="fa fa-spinner fa-pulse fa-4x" style=" color: #CCCCCC;  position: relative;  top: 250px;  left: 45%;  transform: translate(-50%, -50%); "></i>
+                                            </div>
+                                        </div>
+                                    </div>
                                         <?php
                                         $this->registerJs("google.charts.load('current', {'packages':['corechart']}); google.charts.setOnLoadCallback(drawChart);", \yii\web\View::POS_READY);
                                         ?>
                                         <script>
                                             function drawChart() {
                                                 let data = google.visualization.arrayToDataTable([
-                                                    ['Time Line', 'SMS Done', 'SMS Error', {role: 'annotation'}],
+                                                    [
+                                                        'Time Line',
+                                                        'SMS Done',
+                                                        {'type': 'string', 'role': 'tooltip', 'p': {'html': true}},
+                                                        'SMS Error',
+                                                        {'type': 'string', 'role': 'tooltip', 'p': {'html': true}},
+                                                        {role: 'annotation'}
+                                                        ],
                                                     <?php foreach($smsGraphData as $k => $item):?>
                                                     ['<?=  ($item['weeksInterval'] == null)
                                                         ? date($item['timeLine'], strtotime($item['time']))
                                                         : date($item['timeLine'], strtotime($item['time'])) .' / '. date($item['timeLine'], strtotime($item['weeksInterval']));
 
-                                                        ?>', <?=$item['done']?>, <?=$item['error']?>, '<?=''?>'],
+                                                        ?>', <?=$item['done']?>, createCustomHTMLContent('SMS Done:' ,'<?= ($item['weeksInterval'] == null)
+                                                        ? date($item['timeLine'], strtotime($item['time']))
+                                                        : date($item['timeLine'], strtotime($item['time'])) .' / '. date($item['timeLine'], strtotime($item['weeksInterval']));
+                                                        ?>', <?=$item['done']?>, <?=$item['sd_TotalPrice']?>),
+                                                        <?=$item['error']?>, createCustomHTMLContent('SMS Error:' ,'<?= ($item['weeksInterval'] == null)
+                                                        ? date($item['timeLine'], strtotime($item['time']))
+                                                        : date($item['timeLine'], strtotime($item['time'])) .' / '. date($item['timeLine'], strtotime($item['weeksInterval']));
+                                                        ?>', <?=$item['error']?>, 0),
+                                                        '<?=''?>'],
                                                     <?php endforeach;?>
                                                 ]);
 
                                                 let options = {
+                                                    theme: 'material',
                                                     height: 550,
                                                     vAxis: {
                                                         textStyle: {
-                                                            fontSize: 10
+                                                            fontSize: 12
                                                         },
                                                         format:"#",
                                                         viewWindow: {
@@ -162,7 +194,7 @@ $this->title = 'SMS Report';
                                                     },
                                                     hAxis: {
                                                         textStyle: {
-                                                            fontSize: 10
+                                                            fontSize: 12
                                                         },
                                                     },
                                                     seriesType: 'bars',
@@ -178,16 +210,21 @@ $this->title = 'SMS Report';
                                                     legend: {
                                                         position: 'top',
                                                         textStyle: {
-                                                            fontSize: 10
+                                                            fontSize: 12
                                                         },
                                                         alignment: 'end'
                                                     },
                                                     tooltip: {
                                                         textStyle: {
                                                             fontSize: 14
-                                                        }
+                                                        },
+                                                        isHtml: true
+                                                    },
+                                                    animation:{
+                                                        duration: 1000,
+                                                        easing: 'linear',
+                                                        startup: true
                                                     }
-
                                                 };
                                                 let chart = new google.visualization.ComboChart(document.getElementById('chart_div'));
 
@@ -195,6 +232,20 @@ $this->title = 'SMS Report';
                                                 $(window).resize(function(){
                                                     chart.draw(data, options); // redraw the graph on window resize
                                                 });
+                                            }
+
+                                            function createCustomHTMLContent(status ,hourRange, statusAmount, totalPrice) {
+                                                return '<div style="padding:5px 5px 5px 5px;">' +
+                                                    '<table class="medals_layout">' +
+                                                    '<tr>' +
+                                                    '<td style="padding-right:5px;">Time: </td>' + '<td><b>' + hourRange + '</b></td>' + '</tr>' +
+                                                    '<tr>' +
+                                                    '<td style="padding-right:5px;">' + status +'</td>' + '<td><b>' + statusAmount + '</b></td>' + '</tr>' +
+                                                    '<tr>' +
+                                                    '<td style="padding-right:5px;">Total Price: </td>' +
+                                                    '<td><b>' + totalPrice + ' $</b></td>' + '</tr>' +
+                                                    '</table>' +
+                                                    '</div>';
                                             }
                                         </script>
                                     </div>

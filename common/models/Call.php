@@ -382,14 +382,13 @@ class Call extends \yii\db\ActiveRecord
                 ->where(['c_call_status' => ['completed', 'busy', 'no-answer', 'canceled']])
                 ->andWhere(['between', 'c_updated_dt', $sDate, $eDate])->all();
         } else {
-            $calls =self::find()->select(['c_id', 'c_call_status', 'c_updated_dt'])
+            $calls =self::find()->select(['c_id', 'c_call_status', 'c_updated_dt', 'c_call_duration', 'c_price'])
                 ->where(['c_call_status' => ['completed', 'busy', 'no-answer', 'canceled']])
                 ->andWhere(['between', 'c_updated_dt', $sDate, $eDate])
-                ->andWhere(['=', 'c_call_type_id', $callType])
-                ->all();
+                ->andWhere(['=', 'c_call_type_id', $callType])->all();
         }
 
-        $hourlyCallStats = [];
+        $callStats = [];
         $item = [];
         if (strtotime($startDate) < strtotime($endDate)){
             if (isset($daysRange)) {
@@ -481,10 +480,10 @@ class Call extends \yii\db\ActiveRecord
             $item['cc_Duration'] = $cc_Duration;
             $item['cc_TotalPrice'] = round($cc_TotalPrice, 2);
 
-            array_push($hourlyCallStats, $item);
+            array_push($callStats, $item);
             $completed = $noAnswer = $busy = $canceled = 0;
             $cc_Duration = $cc_TotalPrice= 0;
         }
-        return $hourlyCallStats;
+        return $callStats;
     }
 }
