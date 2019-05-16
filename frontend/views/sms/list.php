@@ -110,7 +110,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 <div class="icon"><i class="fa fa-comments-o"></i></div>
                 <div class="count">
                     <?=\common\models\Sms::find()->where(['or', ['s_phone_to' => $phoneList], ['s_phone_from' => $phoneList]])
-                        ->andWhere(['s_type_id' => \common\models\Sms::TYPE_INBOX, 'DATE(s_created_dt)' => 'DATE(NOW())', 's_is_deleted' => false])->count()?>
+                        ->andWhere(['s_type_id' => \common\models\Sms::TYPE_INBOX, 'DATE(s_created_dt)' => new \yii\db\Expression('DATE(NOW())'), 's_is_deleted' => false])->count()?>
                 </div>
                 <h3>Today Inbox</h3>
                 <p>Today inbox count of SMS messages</p>
@@ -122,7 +122,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 <div class="icon"><i class="fa fa-comments"></i></div>
                 <div class="count">
                     <?=\common\models\Sms::find()->where(['or', ['s_phone_to' => $phoneList], ['s_phone_from' => $phoneList]])
-                        ->andWhere(['s_type_id' => \common\models\Sms::TYPE_OUTBOX, 'DATE(s_created_dt)' => 'DATE(NOW())', 's_is_deleted' => false])->count()?>
+                        ->andWhere(['s_type_id' => \common\models\Sms::TYPE_OUTBOX, 'DATE(s_created_dt)' => new \yii\db\Expression('DATE(NOW())'), 's_is_deleted' => false])->count()?>
                 </div>
                 <h3>Today Outbox</h3>
                 <p>Today outbox count of SMS messages</p>
