@@ -27,7 +27,7 @@
         <table class="table table-striped table-bordered">
             <tr>
                 <td><i class="fa fa-user"></i> <?=$model->lceAgentUser ? $model->lceAgentUser->username : '-'?>,
-                    <i class="fa fa-calendar"></i> <?=Yii::$app->formatter->asDatetime($model->lce_request_dt) ?>
+                    <i class="fa fa-calendar"></i> <?=Yii::$app->formatter->asDatetime(strtotime($model->lce_request_dt)) ?>
                 </td>
             </tr>
             <tr>
@@ -42,7 +42,7 @@
             <tr>
                 <td>
                     <?=$model->lce_expert_username ? '<i class="fa fa-user-secret"></i> ' . \yii\helpers\Html::encode($model->lce_expert_username) . ' ('.$model->lce_expert_user_id.')': ''?>
-                    <?=$model->lce_response_dt ? ', <i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime($model->lce_response_dt): '' ?>
+                    <?=$model->lce_response_dt ? ', <i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->lce_response_dt)): '' ?>
                 </td>
             </tr>
             <?php if($model->lce_response_text):?>
