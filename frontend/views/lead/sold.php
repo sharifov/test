@@ -241,7 +241,6 @@ $this->params['breadcrumbs'][] = $this->title;
 
             },
             'format' => 'raw',
-            'visible' => !Yii::$app->authManager->getAssignment('qa', Yii::$app->user->id)
         ],
         [
             'label' => 'Tips',
@@ -272,7 +271,6 @@ $this->params['breadcrumbs'][] = $this->title;
                     (($model->employee) ? $model->employee->username : 'Main agent') . ' tips: ' . $mainAgentTipsTxt;
             },
             'format' => 'raw',
-            'visible' => !Yii::$app->authManager->getAssignment('qa', Yii::$app->user->id)
         ],
         [
             'label' => 'Date of Issue',
