@@ -202,7 +202,11 @@ if ($leadForm->mode !== $leadForm::VIEW_MODE || $is_manager) {
         });
     });
     
-    
+     $(document).keyup(function (event) {
+        if (event.which === 27) {
+            $('.popover-class').popover('hide');
+        }
+     });
 JS;
     $this->registerJs($js);
 }
