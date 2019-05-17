@@ -38,6 +38,7 @@ class KpiController extends FController
             'verbs' => [
                 'class' => VerbFilter::class,
                 'actions' => [
+                    'index' => ['POST'],
                     'delete' => ['POST'],
                 ],
             ],
