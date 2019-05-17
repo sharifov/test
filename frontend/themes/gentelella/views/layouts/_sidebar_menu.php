@@ -187,7 +187,7 @@ $isUM = Yii::$app->authManager->getAssignment('userManager', Yii::$app->user->id
             {
                 $menuItems[] = ['label' => 'KPI <span id="kpi" class="label-info label pull-right"></span> ', 'url' => ['/kpi/index'], 'icon' => 'money'];
             }
-
+            //var_dump($menuItems); die();
 
             if($isQA) {
                 $menuItems[] = ['label' => 'Sold', 'url' => ['queue/sold'], 'icon' => 'flag text-success'];
@@ -417,7 +417,7 @@ $isUM = Yii::$app->authManager->getAssignment('userManager', Yii::$app->user->id
 
         //echo frontend\themes\gentelella\widgets\Menu::widget(['items' => $menuItems, 'encodeLabels' => false, 'activateParents' => true]);
 
-        echo \yiister\gentelella\widgets\Menu::widget(['items' => $menuItems, 'encodeLabels' => false, 'activateParents' => true]);
+        echo \yiister\gentelella\widgets\Menu::widget(['items' => $menuItems, 'encodeLabels' => false, 'activateParents' => true, 'linkTemplate' => '<a href="{url}" data-method="post">{icon}<span>{label}</span>{badge}</a>']);
 
 
         ?>
