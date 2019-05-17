@@ -186,14 +186,15 @@ class LeadCallExpert extends \yii\db\ActiveRecord
 
             $result = BackOffice::sendRequest('lead/update-lead', 'POST', json_encode($data));
 
-            if ($result && isset($result['status']) && $result['status'] === 'Success') {
-                return true;
-            }
-
             if(!$lead->called_expert) {
                 $lead->called_expert = true;
                 $lead->save();
             }
+
+            if ($result && isset($result['status']) && $result['status'] === 'Success') {
+                return true;
+            }
+
         }
 
         return false;
