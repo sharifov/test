@@ -500,7 +500,10 @@ if($project){
 
 ?>
 <div class="panel-main__header" id="actions-header"<?= $projectStyles?>>
-    <div class="panel-main__actions">
+
+    <?php if (!Yii::$app->authManager->getAssignment('qa', Yii::$app->user->id)) : ?>
+
+            <div class="panel-main__actions">
     	<?php if ($takeConditions){
             if (in_array($leadForm->getLead()->status, [Lead::STATUS_PROCESSING, Lead::STATUS_ON_HOLD]) && $leadForm->getLead()->employee_id != Yii::$app->user->identity->getId()) {
                echo $buttonTakeOver;
@@ -599,6 +602,9 @@ if($project){
             <?php endif;?>
         <?php endif;?>
     </div>
+
+    <?php endif; ?>
+
 </div>
 
 

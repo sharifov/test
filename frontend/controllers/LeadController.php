@@ -96,10 +96,17 @@ class LeadController extends FController
 
                     [
                         'actions' => [
-                            'view', 'trash', 'sold', 'duplicate'
+                            'view', 'trash', 'sold', 'duplicate', 'flow-transition'
                         ],
                         'allow' => true,
-                        'roles' => ['qa', 'supervisor'],
+                        'roles' => ['supervisor'],
+                    ],
+                    [
+                        'actions' => [
+                            'view', 'trash', 'sold', 'flow-transition'
+                        ],
+                        'allow' => true,
+                        'roles' => ['qa'],
                     ],
                 ],
             ]
@@ -1043,7 +1050,9 @@ class LeadController extends FController
 
         //$dataProviderCommunication = $lead->getQuotesProvider([]);
 
-        return $this->render('view', [
+        $tmpl = $isQA ? 'view_qa' : 'view';
+
+        return $this->render($tmpl, [
             'leadForm' => $leadForm,
             'previewEmailForm' => $previewEmailForm,
             'previewSmsForm' => $previewSmsForm,
@@ -1828,7 +1837,9 @@ class LeadController extends FController
 
         $dataProvider = $searchModel->searchSold($params);
 
-        return $this->render('sold', [
+        $tmpl = Yii::$app->authManager->getAssignment('qa', Yii::$app->user->id) ? 'sold_qa' : 'sold';
+
+        return $this->render($tmpl, [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
             'isAgent' => $isAgent,
