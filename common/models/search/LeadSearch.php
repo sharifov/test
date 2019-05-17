@@ -155,7 +155,8 @@ class LeadSearch extends Lead
             'l_grade' => $this->l_grade,
             'l_answered'    => $this->l_answered,
             'l_duplicate_lead_id' => $this->l_duplicate_lead_id,
-            'l_init_price'  => $this->l_init_price
+            'l_init_price'  => $this->l_init_price,
+            'request_ip'    => $this->request_ip
         ]);
 
 
@@ -270,7 +271,7 @@ class LeadSearch extends Lead
             ->andFilterWhere(['like', 'trip_type', $this->trip_type])
             ->andFilterWhere(['like', 'cabin', $this->cabin])
             ->andFilterWhere(['like', 'notes_for_experts', $this->notes_for_experts])
-            ->andFilterWhere(['like', 'request_ip', $this->request_ip])
+            //->andFilterWhere(['like', 'request_ip', $this->request_ip])
             ->andFilterWhere(['like', 'request_ip_detail', $this->request_ip_detail])
             ->andFilterWhere(['like', 'offset_gmt', $this->offset_gmt])
             ->andFilterWhere(['like', 'discount_id', $this->discount_id]);
@@ -1312,7 +1313,9 @@ class LeadSearch extends Lead
         $query->andFilterWhere(['l.status' => [Lead::STATUS_PROCESSING, Lead::STATUS_PENDING, Lead::STATUS_FOLLOW_UP, Lead::STATUS_ON_HOLD]]);
 
         if($this->request_ip) {
-            $query->andFilterWhere(['like', 'l.request_ip', $this->request_ip]);
+            //$query->andFilterWhere(['like', 'l.request_ip', $this->request_ip]);
+            $query->andFilterWhere(['request_ip'    => $this->request_ip]);
+
         }
 
         $query->groupBy('l.request_ip');
