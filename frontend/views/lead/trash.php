@@ -1,4 +1,5 @@
 <?php
+
 use yii\helpers\Html;
 use yii\widgets\Pjax;
 use kartik\grid\GridView;
@@ -24,12 +25,12 @@ $this->params['breadcrumbs'][] = $this->title;
 ?>
 
 <style>
-.dropdown-menu {
-	z-index: 1010 !important;
-}
+    .dropdown-menu {
+        z-index: 1010 !important;
+    }
 </style>
 <h1>
-	<?=\yii\helpers\Html::encode($this->title)?>
+    <?= \yii\helpers\Html::encode($this->title) ?>
 </h1>
 <div class="lead-index">
 
@@ -58,7 +59,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'style' => 'width:120px'
             ],
             'filter' => $projectList,
-            'visible' => ! $isAgent
+            'visible' => !$isAgent
         ],
         [
             'attribute' => 'pending',
@@ -73,7 +74,8 @@ $this->params['breadcrumbs'][] = $this->title;
             'options' => [
                 'style' => 'width:160px'
             ],
-            'format' => 'raw'
+            'format' => 'raw',
+            'visible' => !Yii::$app->authManager->getAssignment('qa', Yii::$app->user->id)
         ],
 
         /*[
@@ -112,7 +114,8 @@ $this->params['breadcrumbs'][] = $this->title;
             },
             'options' => [
                 'style' => 'width:220px'
-            ]
+            ],
+            'visible' => !Yii::$app->authManager->getAssignment('qa', Yii::$app->user->id)
         ],/*
         [
             'attribute' => 'clientTime',
@@ -131,7 +134,8 @@ $this->params['breadcrumbs'][] = $this->title;
             },
             'options' => [
                 'style' => 'width:110px'
-            ]
+            ],
+            'visible' => !Yii::$app->authManager->getAssignment('qa', Yii::$app->user->id)
         ],
 
         [
@@ -145,7 +149,8 @@ $this->params['breadcrumbs'][] = $this->title;
 
                 return $content;
             },
-            'format' => 'raw'
+            'format' => 'raw',
+            'visible' => !Yii::$app->authManager->getAssignment('qa', Yii::$app->user->id)
         ],
 //        [
 //            'attribute' => 'Quotes ',
@@ -225,7 +230,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 return $model->employee ? '<i class="fa fa-user"></i> ' . $model->employee->username : '-';
             },
             'filter' => $userList,
-            'visible' => ! $isAgent
+            'visible' => !$isAgent
         ],
         /*[
             'attribute' => 'update',
@@ -242,7 +247,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'style' => 'max-width: 250px;'
             ],
             'value' => function (\common\models\Lead $model) {
-                return '<pre>'.$model->getLastReason().'</pre>';
+                return '<pre>' . $model->getLastReason() . '</pre>';
             },
             'format' => 'raw'
         ],
@@ -286,20 +291,20 @@ $this->params['breadcrumbs'][] = $this->title;
     ];
 
     ?>
-<?php
+    <?php
 
-echo \yii\grid\GridView::widget([
-    'dataProvider' => $dataProvider,
-    'filterModel' => $searchModel,
-    'columns' => $gridColumns,
-    'rowOptions' => function (Lead $model) {
-        if ($model->status === Lead::STATUS_PROCESSING && Yii::$app->user->id == $model->employee_id) {
-            return [
-                'class' => 'highlighted'
-            ];
+    echo \yii\grid\GridView::widget([
+        'dataProvider' => $dataProvider,
+        'filterModel' => $searchModel,
+        'columns' => $gridColumns,
+        'rowOptions' => function (Lead $model) {
+            if ($model->status === Lead::STATUS_PROCESSING && Yii::$app->user->id == $model->employee_id) {
+                return [
+                    'class' => 'highlighted'
+                ];
+            }
         }
-    }
-]);
-?>
-<?php Pjax::end(); ?>
+    ]);
+    ?>
+    <?php Pjax::end(); ?>
 </div>

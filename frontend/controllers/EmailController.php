@@ -41,7 +41,7 @@ class EmailController extends FController
                     [
                         'actions' => ['index', 'update', 'view', 'inbox', 'soft-delete'],
                         'allow' => true,
-                        'roles' => ['supervision', 'qa'],
+                        'roles' => ['supervision'],
                     ],
 
                     [
