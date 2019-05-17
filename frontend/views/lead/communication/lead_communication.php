@@ -109,7 +109,8 @@ $c_type_id = $comForm->c_type_id;
 
                 ]) ?>
 
-                <div class="chat__form panel">
+                <?php if(!Yii::$app->authManager->getAssignment('qa', Yii::$app->user->id)) : ?>
+                     <div class="chat__form panel">
 
 
 
@@ -602,6 +603,8 @@ JS;
                     <?php \yii\bootstrap\ActiveForm::end(); ?>
 
                 </div>
+                <?php endif; ?>
+
             </div>
         </div>
 
