@@ -1315,7 +1315,8 @@ New lead {lead_id}
 
 
         //create or update LeadTask
-        if($this->status == self::STATUS_PROCESSING && array_key_exists('employee_id',$changedAttributes)){
+        if(($this->status == self::STATUS_PROCESSING && array_key_exists('employee_id',$changedAttributes)) ||
+            (isset($changedAttributes['l_answered']) && $changedAttributes['l_answered'] != $this->l_answered)){
             LeadTask::deleteUnnecessaryTasks($this->id);
 
             if($this->l_answered) {
