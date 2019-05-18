@@ -339,7 +339,12 @@ class QuoteController extends ApiBaseController
                         $segmentsIds[] = $segment->qs_id;
                     }
                     if(isset($baggageAttr['free_baggage']) && isset($baggageAttr['free_baggage']['piece'])){
-                        QuoteSegmentBaggage::deleteAll('qsb_segment_id IN (:segments)',[':segments' => implode(',', $segmentsIds)]);
+                        //QuoteSegmentBaggage::deleteAll('qsb_segment_id IN (:segments)',[':segments' => implode(',', $segmentsIds)]);
+
+                        if ($segmentsIds) {
+                            QuoteSegmentBaggage::deleteAll(['qsb_segment_id' => $segmentsIds]);
+                        }
+
                         foreach ($segments as $segment){
                             $baggage = new QuoteSegmentBaggage();
                             $baggage->qsb_allow_pieces = $baggageAttr['free_baggage']['piece'];
