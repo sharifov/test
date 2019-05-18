@@ -802,7 +802,7 @@ class Quote extends \yii\db\ActiveRecord
             if (!is_numeric(intval($rowArr[0]))) continue;
 
             $segmentCount++;
-            $carrier = substr($rowArr[1], 0, 2);
+            $carrier = isset($rowArr[1]) ? substr($rowArr[1], 0, 2) : '';
             $depAirport = '';
             $arrAirport = '';
             $depDate = '';
