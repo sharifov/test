@@ -11,6 +11,7 @@ use common\models\Quote;
 use common\models\QuotePrice;
 use common\models\UserProjectParams;
 use Yii;
+use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
 use yii\web\NotFoundHttpException;
 use yii\web\UnprocessableEntityHttpException;
@@ -645,9 +646,12 @@ class QuoteController extends ApiBaseController
 
         if (isset($response['error']) && $response['error']) {
             $json = @json_encode($response['error']);
-            if (isset($response['error_code']) && $response['error_code']) $error_code = $response['error_code'];
-            else $error_code = 0;
-            throw new UnprocessableEntityHttpException($json, $error_code);
+            if (isset($response['error_code']) && $response['error_code']) {
+                $error_code = $response['error_code'];
+            } else {
+                $error_code = 0;
+            }
+            throw new UnprocessableEntityHttpException(VarDumper::dumpAsString($json), $error_code);
         }
 
         return $responseData;
