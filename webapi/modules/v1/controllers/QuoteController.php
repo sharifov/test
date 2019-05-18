@@ -645,13 +645,13 @@ class QuoteController extends ApiBaseController
         $responseData = $apiLog->endApiLog($responseData);
 
         if (isset($response['error']) && $response['error']) {
-            $json = @json_encode($response['error']);
+            $json = $response['error']; //@json_encode($response['error']);
             if (isset($response['error_code']) && $response['error_code']) {
-                $error_code = $response['error_code'];
+                $error_code = (int) $response['error_code'];
             } else {
                 $error_code = 0;
             }
-            throw new UnprocessableEntityHttpException(VarDumper::dumpAsString($json), $error_code);
+            throw new UnprocessableEntityHttpException(VarDumper::dumpAsString($json, 10), $error_code);
         }
 
         return $responseData;
