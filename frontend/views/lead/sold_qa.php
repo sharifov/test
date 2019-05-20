@@ -51,12 +51,25 @@ $this->params['breadcrumbs'][] = $this->title;
             'attribute' => 'id',
             'label' => 'Lead ID',
             'contentOptions' => [
-                'style' => 'width:60px'
+                'style' => 'width:80px'
             ]
         ],
+
+        [
+            'attribute' => 'project_id',
+            'value' => function (\common\models\Lead $model) {
+                return $model->project ? '<span class="badge badge-info">' . $model->project->name . '</span>' : '-';
+            },
+            'format' => 'raw',
+            'options' => [
+                'style' => 'width:120px'
+            ],
+            'filter' => $projectList,
+        ],
+
         [
             // 'attribute' => 'client_id',
-            'header' => 'Client',
+            'header' => 'Client Name',
             'format' => 'raw',
             'value' => function (\common\models\Lead $model) {
 
@@ -65,16 +78,38 @@ $this->params['breadcrumbs'][] = $this->title;
                     if ($clientName === 'Client Name') {
                         $clientName = '- - - ';
                     } else {
-                        $clientName = '<i class="fa fa-user"></i> ' . Html::encode($clientName);
+                        $clientName = Html::encode($clientName);
                     }
                 } else {
                     $clientName = '-';
                 }
-
+                return $clientName;
+            },
+            'contentOptions' => [
+                'style' => 'width: 200px;'
+            ]
+            // 'filter' => \common\models\Employee::getList()
+        ],
+        [
+            // 'attribute' => 'client_id',
+            'header' => 'Client Phones',
+            'format' => 'raw',
+            'value' => function (\common\models\Lead $model) {
+                $phones = $model->client && $model->client->clientPhones ? '<i class="fa fa-phone"></i> ' . implode(' <br><i class="fa fa-phone"></i> ', \yii\helpers\ArrayHelper::map($model->client->clientPhones, 'phone', 'phone')) . '' : '';
+                return $phones;
+            },
+            'contentOptions' => [
+                'style' => 'width: 200px;'
+            ]
+            // 'filter' => \common\models\Employee::getList()
+        ],
+        [
+            // 'attribute' => 'client_id',
+            'header' => 'Client Emails',
+            'format' => 'raw',
+            'value' => function (\common\models\Lead $model) {
                 $emails = $model->client && $model->client->clientEmails ? '<i class="fa fa-envelope"></i> ' . implode(' <br><i class="fa fa-envelope"></i> ', \yii\helpers\ArrayHelper::map($model->client->clientEmails, 'email', 'email')) . '' : '';
-                $phones = $model->client && $model->client->clientPhones ? '<br><i class="fa fa-phone"></i> ' . implode(' <br><i class="fa fa-phone"></i> ', \yii\helpers\ArrayHelper::map($model->client->clientPhones, 'phone', 'phone')) . '' : '';
-
-                return $clientName . '<br/>' . $emails . '<br/>' . $phones;
+                return $emails;
             },
             'contentOptions' => [
                 'style' => 'width: 200px;'
@@ -109,17 +144,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'style' => 'width: 100px;text-align:center;'
             ]
         ],
-        [
-            'attribute' => 'project_id',
-            'value' => function (\common\models\Lead $model) {
-                return $model->project ? $model->project->name : '-';
-            },
-            'format' => 'raw',
-            'options' => [
-                'style' => 'width:120px'
-            ],
-            'filter' => $projectList,
-        ],
+
         [
             'class' => 'yii\grid\ActionColumn',
             'template' => '{action}',

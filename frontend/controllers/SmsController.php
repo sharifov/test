@@ -42,6 +42,12 @@ class SmsController extends FController
                     ],
 
                     [
+                        'actions' => ['index', 'view', 'inbox'], //'delete', 'create',
+                        'allow' => true,
+                        'roles' => ['qa'],
+                    ],
+
+                    [
                         'actions' => ['delete', 'create'],
                         'allow' => true,
                         'roles' => ['admin'],
