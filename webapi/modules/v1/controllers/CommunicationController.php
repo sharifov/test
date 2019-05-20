@@ -1037,7 +1037,19 @@ class CommunicationController extends ApiBaseController
         } elseif($type === self::TYPE_VOIP_RECORD) {
 
             if (isset($post['callData']['CallSid']) && $post['callData']['CallSid']) {
-                $call = Call::find()->where(['c_call_sid' => $post['callData']['CallSid']])->one();
+
+                $call = null;
+                $is_call_incoming = (isset($post['call'],$post['call']['c_call_type_id']) && (int)$post['call']['c_call_type_id'] === Call::CALL_TYPE_IN);
+                if($is_call_incoming) {
+                    $call = Call::find()->where(['c_call_sid' => $post['callData']['CallSid']])
+                        //->andWhere(['c_call_status' => Call::CALL_STATUS_COMPLETED])
+                        ->andWhere([ '>', 'c_created_user_id', 0])
+                        ->orderBy(['c_updated_dt' => SORT_DESC])->limit(1)->one();
+                }
+
+                if(!$call) {
+                    $call = Call::find()->where(['c_call_sid' => $post['callData']['CallSid']])->orderBy(['c_id' => SORT_ASC])->limit(1)->one();
+                }
                 if ($call) {
 
                     if($post['callData']['RecordingUrl']) {
@@ -1067,7 +1079,21 @@ class CommunicationController extends ApiBaseController
             //{"sid": "SMb40bfd6908184ec0a51e20789979e304", "date_created": "Wed, 06 Feb 2019 21:30:12 +0000", "date_updated": "Wed, 06 Feb 2019 21:30:12 +0000", "date_sent": "Wed, 06 Feb 2019 21:30:12 +0000", "account_sid": "AC10f3c74efba7b492cbd7dca86077736c", "to": "+15122036074", "from": "+16692011645", "messaging_service_sid": null, "body": "WOWFARE best price (per adult) to Kathmandu:\r\n$\u00a01905.05 (s short layovers), https://wowfare.com/q/5c5b5180c6d29\r\nRegards, Nancy", "status": "delivered", "num_segments": "2", "num_media": "0", "direction": "outbound-api", "api_version": "2010-04-01", "price": "-0.01500", "price_unit": "USD", "error_code": null, "error_message": null, "uri": "/2010-04-01/Accounts/AC10f3c74efba7b492cbd7dca86077736c/Messages/SMb40bfd6908184ec0a51e20789979e304.json", "subresource_uris": {"media": "/2010-04-01/Accounts/AC10f3c74efba7b492cbd7dca86077736c/Messages/SMb40bfd6908184ec0a51e20789979e304/Media.json"}}
 
             if (isset($post['callData']['sid']) && $post['callData']['sid']) {
-                $call = Call::find()->where(['c_call_sid' => $post['callData']['sid']])->limit(1)->one();
+
+                //$call = Call::find()->where(['c_call_sid' => $post['callData']['sid']])->limit(1)->one();
+                $call = null;
+                $is_call_incoming = (isset($post['call'],$post['call']['c_call_type_id']) && (int)$post['call']['c_call_type_id'] === Call::CALL_TYPE_IN);
+                if($is_call_incoming) {
+                    $call = Call::find()->where(['c_call_sid' => $post['callData']['sid']])
+                        //->andWhere(['c_call_status' => Call::CALL_STATUS_COMPLETED])
+                        ->andWhere([ '>', 'c_created_user_id', 0])
+                        ->orderBy(['c_updated_dt' => SORT_DESC])->one()
+                        ->limit(1);
+                }
+
+                if(!$call) {
+                    $call = Call::find()->where(['c_call_sid' => $post['callData']['sid']])->orderBy(['c_id' => SORT_ASC])->limit(1)->one();
+                }
 
                 $callData = $post['call'];
 
@@ -1488,7 +1514,6 @@ class CommunicationController extends ApiBaseController
             $agentId = null;
             if(isset($post['callData'], $post['call'], $post['callData']['CallSid']) && $post['callData']['CallSid']) {
 
-
                 if(isset($post['callData']['Called']) && $post['callData']['Called']) {
                     if(strpos($post['callData']['Called'], 'client:seller')) {
                         $agentId = (int)str_replace('client:seller', '', $post['callData']['Called']);
@@ -1501,7 +1526,6 @@ class CommunicationController extends ApiBaseController
                     if(isset($post['call'], $post['call']['c_call_type_id']) && $post['call']['c_call_type_id'] && (int)$post['call']['c_call_type_id'] === 1) {
                         $call = Call::find()->where(['c_call_sid' => $post['callData']['CallSid']])->limit(1)->one();
                     }
-                    //$call = Call::find()->where(['c_call_sid' => $post['callData']['CallSid']])->limit(1)->one();
                 }
 
                 if($call) {
@@ -1519,7 +1543,7 @@ class CommunicationController extends ApiBaseController
                             $call->c_call_duration = 1;
                         }
                         if(!$call->save()) {
-                            Yii::error(VarDumper::dumpAsString($call->errors), 'API:CommunicationController:actionVoice:TYPE_VOIP:Call:save:line 1000');
+                            \Yii::error(VarDumper::dumpAsString($call->errors), 'API:CommunicationController:actionVoice:TYPE_VOIP:Call:save:line 1519');
                         }
                         Notifications::socket($call->c_created_user_id, $call->c_lead_id, 'webCallUpdate', ['status' => $call->c_call_status, 'duration' => $call->c_call_duration, 'debug' => 'TYPE_VOIP'], true);
                     }
