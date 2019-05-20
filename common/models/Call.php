@@ -330,7 +330,7 @@ class Call extends \yii\db\ActiveRecord
             }
 
         } catch (\Throwable $e) {
-            \Yii::error(VarDumper::dumpAsString([$e->getMessage(), $e->getFile(), $e->getLine()], 10, false), 'Component:CommunicationService::redirectCallFromHold');
+            \Yii::warning(VarDumper::dumpAsString([$e->getMessage(), $e->getFile(), $e->getLine()], 10, false), 'Component:CommunicationService::redirectCallFromHold');
             return false;
         }
         return false;
