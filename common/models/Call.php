@@ -28,7 +28,7 @@ use yii\helpers\VarDumper;
  * @property string $c_sip_response_code
  * @property string $c_recording_url
  * @property string $c_recording_sid
- * @property string $c_recording_duration
+ * @property int $c_recording_duration
  * @property string $c_timestamp
  * @property string $c_uri
  * @property string $c_sequence_number
@@ -115,7 +115,7 @@ class Call extends \yii\db\ActiveRecord
     {
         return [
             [['c_call_sid'], 'required'],
-            [['c_call_type_id', 'c_lead_id', 'c_created_user_id', 'c_com_call_id', 'c_project_id', 'c_call_duration'], 'integer'],
+            [['c_call_type_id', 'c_lead_id', 'c_created_user_id', 'c_com_call_id', 'c_project_id', 'c_call_duration', 'c_recording_duration'], 'integer'],
             [['c_price'], 'number'],
             [['c_is_new', 'c_is_deleted'], 'boolean'],
             [['c_created_dt', 'c_updated_dt'], 'safe'],
@@ -124,7 +124,6 @@ class Call extends \yii\db\ActiveRecord
             [['c_call_status', 'c_direction'], 'string', 'max' => 15],
             [['c_api_version', 'c_sip_response_code'], 'string', 'max' => 10],
             [['c_caller_name'], 'string', 'max' => 50],
-            [['c_recording_duration'], 'string', 'max' => 20],
             [['c_recording_url', 'c_uri'], 'string', 'max' => 200],
             [['c_timestamp', 'c_sequence_number'], 'string', 'max' => 40],
             [['c_error_message'], 'string', 'max' => 500],
