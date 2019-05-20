@@ -341,7 +341,7 @@ class LeadController extends FController
                 $errors = [];
                 if (empty($data['errors']) && $data['load'] && $leadForm->save($errors)) {
 
-                    if ($lead->called_expert) {
+                    /*if ($lead->called_expert) {
                         $lead = Lead::findOne(['id' => $lead->id]);
                         $data = $lead->getLeadInformationForExpert();
                         $result = BackOffice::sendRequest('lead/update-lead', 'POST', json_encode($data));
@@ -351,7 +351,7 @@ class LeadController extends FController
                                 print_r($result['errors'], true)
                             ));
                         }
-                    }
+                    }*/
 
                     return $this->redirect(['lead/view', 'gid' => $leadForm->getLead()->gid]);
                 }
