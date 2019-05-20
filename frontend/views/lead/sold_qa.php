@@ -12,20 +12,11 @@ use dosamigos\datepicker\DatePicker;
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\LeadSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
-/* @var $multipleForm \frontend\models\LeadMultipleForm */
-/* @var $isAgent bool */
-/* @var $salary float */
-/* @var $salaryBy string */
 
-$this->title = 'Sold Queue';
+$this->title = 'QA Sold Queue';
 
-if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
-    $userList = \common\models\Employee::getList();
-    $projectList = \common\models\Project::getList();
-} else {
-    $userList = \common\models\Employee::getListByUserId(Yii::$app->user->id);
-    $projectList = \common\models\ProjectEmployeeAccess::getProjectsByEmployee();
-}
+$userList = \common\models\Employee::getList();
+$projectList = \common\models\Project::getList();
 
 $this->params['breadcrumbs'][] = $this->title;
 
@@ -38,7 +29,7 @@ $this->params['breadcrumbs'][] = $this->title;
         z-index: 1010 !important;
     }
 </style>
-<div class="lead-index">
+<div class="lead-sold">
 
     <?php Pjax::begin(); //['id' => 'lead-pjax-list', 'timeout' => 5000, 'enablePushState' => true, 'clientOptions' => ['method' => 'GET']]); ?>
 
@@ -67,7 +58,7 @@ $this->params['breadcrumbs'][] = $this->title;
             // 'attribute' => 'client_id',
             'header' => 'Client',
             'format' => 'raw',
-            'value' => function (\common\models\Lead $model) use ($isAgent) {
+            'value' => function (\common\models\Lead $model) {
 
                 if ($model->client) {
                     $clientName = $model->client->first_name . ' ' . $model->client->last_name;
@@ -80,13 +71,8 @@ $this->params['breadcrumbs'][] = $this->title;
                     $clientName = '-';
                 }
 
-                if ($isAgent && Yii::$app->user->id !== $model->employee_id) {
-                    $emails = '- // - // - // -';
-                    $phones = '- // - // - // -';
-                } else {
-                    $emails = $model->client && $model->client->clientEmails ? '<i class="fa fa-envelope"></i> ' . implode(' <br><i class="fa fa-envelope"></i> ', \yii\helpers\ArrayHelper::map($model->client->clientEmails, 'email', 'email')) . '' : '';
-                    $phones = $model->client && $model->client->clientPhones ? '<br><i class="fa fa-phone"></i> ' . implode(' <br><i class="fa fa-phone"></i> ', \yii\helpers\ArrayHelper::map($model->client->clientPhones, 'phone', 'phone')) . '' : '';
-                }
+                $emails = $model->client && $model->client->clientEmails ? '<i class="fa fa-envelope"></i> ' . implode(' <br><i class="fa fa-envelope"></i> ', \yii\helpers\ArrayHelper::map($model->client->clientEmails, 'email', 'email')) . '' : '';
+                $phones = $model->client && $model->client->clientPhones ? '<br><i class="fa fa-phone"></i> ' . implode(' <br><i class="fa fa-phone"></i> ', \yii\helpers\ArrayHelper::map($model->client->clientPhones, 'phone', 'phone')) . '' : '';
 
                 return $clientName . '<br/>' . $emails . '<br/>' . $phones;
             },
@@ -103,7 +89,25 @@ $this->params['breadcrumbs'][] = $this->title;
                 return $model->employee ? '<i class="fa fa-user"></i> ' . $model->employee->username : '-';
             },
             'filter' => $userList,
-            'visible' => !$isAgent
+        ],
+        [
+            'label' => 'Date of Issue',
+            'attribute' => 'updated',
+            'value' => function (\common\models\Lead $model) {
+                return $model['updated'];
+            },
+            'format' => 'datetime',
+            'filter' => DatePicker::widget([
+                'model' => $searchModel,
+                'attribute' => 'updated',
+                'clientOptions' => [
+                    'autoclose' => true,
+                    'format' => 'dd-M-yyyy'
+                ]
+            ]),
+            'contentOptions' => [
+                'style' => 'width: 100px;text-align:center;'
+            ]
         ],
         [
             'attribute' => 'project_id',
