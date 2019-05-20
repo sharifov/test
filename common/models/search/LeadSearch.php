@@ -490,7 +490,14 @@ class LeadSearch extends Lead
     {
         $projectIds = array_keys(ProjectEmployeeAccess::getProjectsByEmployee());
         $query = Lead::find();
-        $query->select(['*', 'l_client_time' => new Expression("TIME( CONVERT_TZ(NOW(), '+00:00', offset_gmt) )")]);
+
+        $this->load($params);
+
+        if($this->employee_id) {
+            $query->select(['leads.id', 'l_client_time' => new Expression("TIME( CONVERT_TZ(NOW(), '+00:00', offset_gmt) )")]);
+        } else {
+            $query->select(['*', 'l_client_time' => new Expression("TIME( CONVERT_TZ(NOW(), '+00:00', offset_gmt) )")]);
+        }
         $leadTable = Lead::tableName();
 
         // add conditions that should always apply here
@@ -503,7 +510,7 @@ class LeadSearch extends Lead
             ],
         ]);
 
-        $this->load($params);
+
 
         if (!$this->validate()) {
             // uncomment the following line if you do not want to return any records when validation fails
