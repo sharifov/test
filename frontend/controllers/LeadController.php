@@ -1011,7 +1011,9 @@ class LeadController extends FController
             if ($is_admin || $isQA) {
                 $enableCommunication = true;
             } elseif($is_supervision) {
-                $enableCommunication = Employee::isSupervisionAgent($leadForm->getLead()->employee_id);
+                if ($leadFormEmployee_id = $leadForm->getLead()->employee_id) {
+                    $enableCommunication = Employee::isSupervisionAgent($leadFormEmployee_id);
+                }
             } elseif ($is_agent) {
                 if($leadForm->getLead()->employee_id == Yii::$app->user->id) {
                     $enableCommunication = true;
