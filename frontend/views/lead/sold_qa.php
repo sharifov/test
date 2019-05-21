@@ -12,20 +12,11 @@ use dosamigos\datepicker\DatePicker;
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\LeadSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
-/* @var $multipleForm \frontend\models\LeadMultipleForm */
-/* @var $isAgent bool */
-/* @var $salary float */
-/* @var $salaryBy string */
 
-$this->title = 'Sold Queue';
+$this->title = 'QA Sold Queue';
 
-if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
-    $userList = \common\models\Employee::getList();
-    $projectList = \common\models\Project::getList();
-} else {
-    $userList = \common\models\Employee::getListByUserId(Yii::$app->user->id);
-    $projectList = \common\models\ProjectEmployeeAccess::getProjectsByEmployee();
-}
+$userList = \common\models\Employee::getList();
+$projectList = \common\models\Project::getList();
 
 $this->params['breadcrumbs'][] = $this->title;
 
@@ -38,7 +29,7 @@ $this->params['breadcrumbs'][] = $this->title;
         z-index: 1010 !important;
     }
 </style>
-<div class="lead-index">
+<div class="lead-sold">
 
     <?php Pjax::begin(); //['id' => 'lead-pjax-list', 'timeout' => 5000, 'enablePushState' => true, 'clientOptions' => ['method' => 'GET']]); ?>
 
@@ -60,35 +51,65 @@ $this->params['breadcrumbs'][] = $this->title;
             'attribute' => 'id',
             'label' => 'Lead ID',
             'contentOptions' => [
-                'style' => 'width:60px'
+                'style' => 'width:80px'
             ]
         ],
+
+        [
+            'attribute' => 'project_id',
+            'value' => function (\common\models\Lead $model) {
+                return $model->project ? '<span class="badge badge-info">' . $model->project->name . '</span>' : '-';
+            },
+            'format' => 'raw',
+            'options' => [
+                'style' => 'width:120px'
+            ],
+            'filter' => $projectList,
+        ],
+
         [
             // 'attribute' => 'client_id',
-            'header' => 'Client',
+            'header' => 'Client Name',
             'format' => 'raw',
-            'value' => function (\common\models\Lead $model) use ($isAgent) {
+            'value' => function (\common\models\Lead $model) {
 
                 if ($model->client) {
                     $clientName = $model->client->first_name . ' ' . $model->client->last_name;
                     if ($clientName === 'Client Name') {
                         $clientName = '- - - ';
                     } else {
-                        $clientName = '<i class="fa fa-user"></i> ' . Html::encode($clientName);
+                        $clientName = Html::encode($clientName);
                     }
                 } else {
                     $clientName = '-';
                 }
-
-                if ($isAgent && Yii::$app->user->id !== $model->employee_id) {
-                    $emails = '- // - // - // -';
-                    $phones = '- // - // - // -';
-                } else {
-                    $emails = $model->client && $model->client->clientEmails ? '<i class="fa fa-envelope"></i> ' . implode(' <br><i class="fa fa-envelope"></i> ', \yii\helpers\ArrayHelper::map($model->client->clientEmails, 'email', 'email')) . '' : '';
-                    $phones = $model->client && $model->client->clientPhones ? '<br><i class="fa fa-phone"></i> ' . implode(' <br><i class="fa fa-phone"></i> ', \yii\helpers\ArrayHelper::map($model->client->clientPhones, 'phone', 'phone')) . '' : '';
-                }
-
-                return $clientName . '<br/>' . $emails . '<br/>' . $phones;
+                return $clientName;
+            },
+            'contentOptions' => [
+                'style' => 'width: 200px;'
+            ]
+            // 'filter' => \common\models\Employee::getList()
+        ],
+        [
+            // 'attribute' => 'client_id',
+            'header' => 'Client Phones',
+            'format' => 'raw',
+            'value' => function (\common\models\Lead $model) {
+                $phones = $model->client && $model->client->clientPhones ? '<i class="fa fa-phone"></i> ' . implode(' <br><i class="fa fa-phone"></i> ', \yii\helpers\ArrayHelper::map($model->client->clientPhones, 'phone', 'phone')) . '' : '';
+                return $phones;
+            },
+            'contentOptions' => [
+                'style' => 'width: 200px;'
+            ]
+            // 'filter' => \common\models\Employee::getList()
+        ],
+        [
+            // 'attribute' => 'client_id',
+            'header' => 'Client Emails',
+            'format' => 'raw',
+            'value' => function (\common\models\Lead $model) {
+                $emails = $model->client && $model->client->clientEmails ? '<i class="fa fa-envelope"></i> ' . implode(' <br><i class="fa fa-envelope"></i> ', \yii\helpers\ArrayHelper::map($model->client->clientEmails, 'email', 'email')) . '' : '';
+                return $emails;
             },
             'contentOptions' => [
                 'style' => 'width: 200px;'
@@ -103,19 +124,27 @@ $this->params['breadcrumbs'][] = $this->title;
                 return $model->employee ? '<i class="fa fa-user"></i> ' . $model->employee->username : '-';
             },
             'filter' => $userList,
-            'visible' => !$isAgent
         ],
         [
-            'attribute' => 'project_id',
+            'label' => 'Date of Issue',
+            'attribute' => 'updated',
             'value' => function (\common\models\Lead $model) {
-                return $model->project ? $model->project->name : '-';
+                return $model['updated'];
             },
-            'format' => 'raw',
-            'options' => [
-                'style' => 'width:120px'
-            ],
-            'filter' => $projectList,
+            'format' => 'datetime',
+            'filter' => DatePicker::widget([
+                'model' => $searchModel,
+                'attribute' => 'updated',
+                'clientOptions' => [
+                    'autoclose' => true,
+                    'format' => 'dd-M-yyyy'
+                ]
+            ]),
+            'contentOptions' => [
+                'style' => 'width: 100px;text-align:center;'
+            ]
         ],
+
         [
             'class' => 'yii\grid\ActionColumn',
             'template' => '{action}',

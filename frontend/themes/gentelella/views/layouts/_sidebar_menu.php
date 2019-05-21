@@ -138,6 +138,7 @@ $isUM = Yii::$app->authManager->getAssignment('userManager', Yii::$app->user->id
                 if($isQA) {
                     $items =  [
                         ['label' => 'Call List', 'url' => ['/call/index'], 'icon' => 'phone'],
+                        ['label' => 'SMS List', 'url' => ['/sms/index'], 'icon' => 'comments-o'],
                     ];
                 }
 

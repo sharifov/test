@@ -7,10 +7,12 @@ use common\models\EmployeeContactInfo;
 use common\models\Lead;
 use common\models\LeadLog;
 use common\models\local\LeadLogMessage;
+use common\models\Notifications;
 use common\models\Quote;
 use common\models\QuotePrice;
 use common\models\UserProjectParams;
 use Yii;
+use yii\helpers\Html;
 use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
 use yii\web\NotFoundHttpException;
@@ -260,12 +262,27 @@ class QuoteController extends ApiBaseController
             $response['itinerary']['trips'] = $model->getTrips();
             $response['itinerary']['price'] = $model->getQuotePriceData(); //$model->quotePrice();
 
-            if ($model->status == Quote::STATUS_SEND) {
+            if ((int)$model->status === Quote::STATUS_SEND) {
                 $excludeIP = Quote::isExcludedIP($clientIP);
-                if(!$excludeIP){
+                if (!$excludeIP) {
                     $model->status = Quote::STATUS_OPENED;
-                    $model->save();
-                    exec(dirname(Yii::getAlias('@app')) . '/yii quote/send-opened-notification '.$uid.'  > /dev/null 2>&1 &');
+                    if ($model->save()) {
+                        $host = Yii::$app->params['url_address'];
+                        $lead = $model->lead;
+                        if ($lead) {
+                            $project_name = $lead->project ? $lead->project->name : '';
+                            $subject = 'Quote- ' . $model->uid . ' OPENED';
+                            $message = 'Your Quote (UID: ' . $model->uid . ") has been OPENED by client! \r\nProject: " . Html::encode($project_name) . "! \r\n lead: " . $host . '/lead/view/' . $lead->gid;
+
+                            if ($lead->employee_id) {
+                                $isSend = Notifications::create($lead->employee_id, $subject, $message, Notifications::TYPE_INFO, true);
+                                if ($isSend) {
+                                    Notifications::socket($lead->employee_id, null, 'getNewNotification', [], true);
+                                }
+                            }
+                        }
+                    }
+                    //exec(dirname(Yii::getAlias('@app')) . '/yii quote/send-opened-notification '.$uid.'  > /dev/null 2>&1 &');
                 }
             }
 

@@ -494,7 +494,7 @@ class LeadSearch extends Lead
         $this->load($params);
 
         if($this->employee_id) {
-            $query->select(['leads.id', 'l_client_time' => new Expression("TIME( CONVERT_TZ(NOW(), '+00:00', offset_gmt) )")]);
+            $query->select(['leads.*', 'l_client_time' => new Expression("TIME( CONVERT_TZ(NOW(), '+00:00', offset_gmt) )")]);
         } else {
             $query->select(['*', 'l_client_time' => new Expression("TIME( CONVERT_TZ(NOW(), '+00:00', offset_gmt) )")]);
         }
