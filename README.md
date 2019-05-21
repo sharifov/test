@@ -287,7 +287,7 @@ CRONs
 ```
 */15  *  *  *  *     run-this-one php /var/www/sale/yii monitor-flow/follow-up
 */15  *  *  *  *     run-this-one php /var/www/sale/yii monitor-flow/on-wake
-*/30  *  *  *  *     run-this-one php /var/www/sale/yii monitor-flow/watch-dog-decline-quote
+*/10  *  *  *  *     run-this-one php /var/www/sale/yii monitor-flow/watch-dog-decline-quote
 */3   *  *  *  *     run-this-one php /var/www/sale/yii lead/update-ip-info
 10   0  *  *  *     run-this-one php /var/www/sale/yii lead/update-by-tasks
 30   0  *  *  *     run-this-one php /var/www/sale/yii db/update-airline-cabin-classes

@@ -11,25 +11,40 @@ use yii\console\Controller;
 use common\models\LeadTask;
 use common\models\Task;
 use Yii;
+use yii\helpers\Console;
+use yii\helpers\VarDumper;
 
 class MonitorFlowController extends Controller
 {
+    /**
+     * @param bool $test
+     */
     public function actionWatchDogDeclineQuote($test = false)
     {
-        /**
-         * @var $quotes Quote[]
-         */
-        $quotes = Quote::find()
-            ->where(['status' => [
-                Quote::STATUS_CREATED, Quote::STATUS_SEND,
-                Quote::STATUS_OPENED
-            ]])->all();
+
+        printf("\n --- Start %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
+
+        $quotes = Quote::find()->select(['quotes.id', 'quotes.uid', 'quotes.lead_id', 'quotes.created'])->joinWith('lead')
+            ->where(['quotes.status' => [Quote::STATUS_CREATED, Quote::STATUS_SEND, Quote::STATUS_OPENED]])
+            ->andWhere(['<=', 'quotes.created', date('Y-m-d H:i:s', strtotime('-1 day'))])
+            ->andWhere(['NOT IN', 'leads.status', [Lead::STATUS_BOOKED, Lead::STATUS_SOLD, Lead::STATUS_PENDING]])
+            ->orderBy(['quotes.id' => SORT_DESC])
+            ->limit(500)
+            ->all();
+
+
+        //echo $quotes->createCommand()->getRawSql(); exit;
+
         if ($test) {
             echo sprintf('Count: %s', count($quotes)) . PHP_EOL;
         }
+        //exit;
         $now = time();
         foreach ($quotes as $quote) {
-            if ($quote->lead->getAppliedAlternativeQuotes() !== null) {
+
+            // VarDumper::dump($quote->attributes); exit;
+
+            if ($quote->lead->getAppliedAlternativeQuotes()) {
                 continue;
             }
             $limitTime = strtotime($quote->created . '+1 day');
@@ -42,6 +57,7 @@ class MonitorFlowController extends Controller
                 }
             }
         }
+        printf("\n --- End %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
     }
 
     public function actionOnWake()
