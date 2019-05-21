@@ -2,10 +2,13 @@
 
 namespace common\models;
 
+use common\components\ChartTools;
 use common\components\CommunicationService;
+use DateTime;
 use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
+use yii\db\Query;
 use yii\helpers\VarDumper;
 
 /**
@@ -426,6 +429,145 @@ class Sms extends \yii\db\ActiveRecord
         }
 
         return $users;
+    }
+
+    /**
+     * @param string $startDate
+     * @param string $endDate
+     * @param string|null $groupingBy
+     * @param int $smsType
+     * @return array
+     * @throws \Exception
+     */
+    public static function getSmsStats(string $startDate, string $endDate, ?string $groupingBy, int $smsType) : array
+    {
+        $sDate = $startDate." 00:00:00";
+        $eDate = $endDate." 23:59:59";
+        switch ($groupingBy){
+            case null:
+                if (strtotime($startDate) == strtotime($endDate)){
+                    $hoursRange = ChartTools::getHoursRange($startDate, $endDate." 23:59:59", $step = '+1 hour', $format = 'H:i:s');
+                } else {
+                    $daysRange = ChartTools::getDaysRange($startDate, $endDate);
+                }
+                break;
+            case 'hours':
+                if (strtotime($startDate) == strtotime($endDate)){
+                    $hoursRange = ChartTools::getHoursRange($startDate, $endDate." 23:59:59", $step = '+1 hour', $format = 'H:i:s');
+                } else {
+                    $hoursRange = ChartTools::getHoursRange($startDate, $endDate." 23:59:59", $step = '+1 hour', $format = 'Y-m-d H:i:s');
+                }
+                break;
+            case 'days':
+                $daysRange = ChartTools::getDaysRange($startDate, $endDate);
+                break;
+            case 'weeks':
+                $weeksPeriods = ChartTools::getWeeksRange(new DateTime($startDate), new DateTime($endDate . ' 23:59'));
+                break;
+            case 'months':
+                $monthsRange = ChartTools::getMonthsRange($startDate, $endDate);
+                $sDate = date("Y-m-01", strtotime($startDate));
+                $eDate = date('Y-m-31', strtotime($endDate));
+                break;
+        }
+        if ($smsType == 0){
+            $sms = self::find()->select(['s_id', 's_status_id', 's_updated_dt', 's_tw_price'])
+                ->where(['s_status_id' => [ self::STATUS_DONE, self::STATUS_ERROR]])
+                ->andWhere(['between', 's_updated_dt', $sDate, $eDate])
+                ->all();
+        } else {
+            $sms = self::find()->select(['s_id', 's_status_id', 's_updated_dt', 's_tw_price'])
+                ->where(['s_status_id' => [ self::STATUS_DONE, self::STATUS_ERROR]])
+                ->andWhere(['between', 's_updated_dt', $sDate, $eDate])
+                ->andWhere(['=', 's_type_id', $smsType])
+                ->all();
+        }
+
+        $smsStats = [];
+        $item = [];
+        if (strtotime($startDate) < strtotime($endDate)){
+            if (isset($daysRange)) {
+                $timeLine = $daysRange;
+                $item['timeLine'] = 'd M';
+                $timeInSeconds = 0;
+                $dateFormat = 'Y-m-d';
+            } elseif (isset($monthsRange)){
+                $timeLine = $monthsRange;
+                $timeInSeconds = 0;
+                $dateFormat = 'Y-m';
+                $item['timeLine'] = 'Y, M';
+            } elseif (isset($weeksPeriods)){
+                $timeLine = $weeksPeriods;
+                $item['timeLine'] = 'd M';
+                $timeInSeconds = 0;
+                $dateFormat = 'Y-m-d';
+            }elseif (isset($hoursRange)){
+                $timeLine = $hoursRange;
+                $item['timeLine'] = 'H:i';
+                $dateFormat = 'Y-m-d H:i:s';
+                $timeInSeconds = 3600;
+            }
+        } else {
+            if (isset($daysRange)) {
+                $timeLine = $daysRange;
+                $item['timeLine'] = 'd M';
+                $timeInSeconds = 0;
+                $dateFormat = 'Y-m-d';
+            } elseif (isset($hoursRange)){
+                $timeLine = $hoursRange;
+                $item['timeLine'] = 'H:i';
+                $dateFormat = 'H:i:s';
+                $timeInSeconds = 3600;
+            } elseif (isset($monthsRange)) {
+                $timeLine = $monthsRange;
+                $timeInSeconds = 0;
+                $dateFormat = 'Y-m';
+                $item['timeLine'] = 'Y, M';
+            } elseif (isset($weeksPeriods)){
+                $timeLine = $weeksPeriods;
+                $item['timeLine'] = 'd M';
+                $timeInSeconds = 0;
+                $dateFormat = 'Y-m-d';
+            }
+        }
+
+        $done = $error = $sd_TotalPrice = 0;
+        foreach ($timeLine as $key => $timeSignature){
+            $weekInterval = explode('/', $timeSignature);
+            if (count($weekInterval) != 2){
+                $EndPoint = date($dateFormat, strtotime($timeSignature) + $timeInSeconds);
+                if ($EndPoint == '00:00:00'){
+                    $EndPoint = '23:59:59';
+                }
+            } else {
+                $EndPoint = date($dateFormat, strtotime($weekInterval[1]));
+                $timeSignature = date($dateFormat, strtotime($weekInterval[0]));
+            }
+            foreach ($sms as $smsItem){
+                $smsUpdatedTime = date($dateFormat, strtotime($smsItem->s_updated_dt));
+                if ($smsUpdatedTime >= $timeSignature && $smsUpdatedTime <= $EndPoint)
+                {
+                    switch ($smsItem->s_status_id){
+                        case self::STATUS_DONE :
+                            $sd_TotalPrice = $sd_TotalPrice + $smsItem->s_tw_price;
+                            $done++;
+                            break;
+                        case self::STATUS_ERROR :
+                            $error++;
+                            break;
+                    }
+                }
+            }
+            $item['time'] = $timeSignature;
+            $item['weeksInterval'] = (count($weekInterval) == 2) ? $EndPoint : null;
+            $item['done'] = $done;
+            $item['error'] = $error;
+            $item['sd_TotalPrice'] = round($sd_TotalPrice, 2);
+
+            array_push($smsStats, $item);
+            $done = $error = $sd_TotalPrice = 0;
+        }
+        return $smsStats;
     }
 
 }

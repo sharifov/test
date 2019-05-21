@@ -43,7 +43,12 @@ class TestController extends FController
                 'rules' => [
                     [
                         'allow' => true,
-                        //'roles' => ['@'],
+                        'roles' => ['admin'],
+                    ],
+                    [
+                        'actions' => ['index'],
+                        'allow' => true,
+                        'roles' => ['@', 'userManager'],
                     ],
                 ],
             ],
@@ -57,8 +62,6 @@ class TestController extends FController
 
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
-
-
 
     public function actionEmail()
     {
@@ -223,7 +226,7 @@ class TestController extends FController
 
             echo \Yii::t('app', '{n, selectordinal,
      =0{У вас нет новых сообщений}
-    
+
      one{У вас # непрочитанное сообщение}
      few{У вас # непрочитанных сообщения}
      many{У вас # непрочитанных сообщений...}
@@ -460,4 +463,26 @@ class TestController extends FController
 
         echo $jobId;
     }
+
+    public function actionSettings()
+    {
+        VarDumper::dump(Yii::$app->params['settings'], 10, true);
+    }
+
+
+    public function actionTwml2()
+    {
+        $responseTwml = new VoiceResponse();
+        $responseTwml->pause(['length' => 5]);
+        /*$responseTwml->say('        Thank you for calling.  Your call is important to us.  Please hold while you are connected to the next available agent.', [
+            'language' => 'en-US',
+            'voice' => 'woman',
+        ]);*/
+        $responseTwml->play('https://talkdeskapp.s3.amazonaws.com/production/audio_messages/folk_hold_music.mp3');
+        $responseTwml->play('https://talkdeskapp.s3.amazonaws.com/production/audio_messages/folk_hold_music.mp3');
+
+        echo $responseTwml;
+    }
+
+
 }

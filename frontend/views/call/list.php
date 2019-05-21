@@ -90,7 +90,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 <div class="icon"><i class="fa fa-phone"></i></div>
                 <div class="count">
                     <?=\common\models\Call::find()->where(['or', ['c_to' => $phoneList], ['c_from' => $phoneList], ['c_created_user_id' => Yii::$app->user->id]])
-                        ->andWhere(['c_call_type_id' => \common\models\Call::CALL_TYPE_IN, 'DATE(c_created_dt)' => 'DATE(NOW())'])->count()?>
+                        ->andWhere(['c_call_type_id' => \common\models\Call::CALL_TYPE_IN, 'DATE(c_created_dt)' => new \yii\db\Expression('DATE(NOW())')])->count()?>
                 </div>
                 <h3>Today Incoming Calls</h3>
                 <p>Today count of incoming Calls</p>
@@ -102,7 +102,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 <div class="icon"><i class="fa fa-phone"></i></div>
                 <div class="count">
                     <?=\common\models\Call::find()->where(['or', ['c_to' => $phoneList], ['c_from' => $phoneList], ['c_created_user_id' => Yii::$app->user->id]])
-                        ->andWhere(['c_call_type_id' => \common\models\Call::CALL_TYPE_OUT, 'DATE(c_created_dt)' => 'DATE(NOW())'])->count()?>
+                        ->andWhere(['c_call_type_id' => \common\models\Call::CALL_TYPE_OUT, 'DATE(c_created_dt)' => new \yii\db\Expression('DATE(NOW())')])->count()?>
                 </div>
                 <h3>Today Outgoing Calls</h3>
                 <p>Today count of outgoing Calls</p>

@@ -93,7 +93,7 @@ class QuoteSegmentBaggage extends \yii\db\ActiveRecord
         if(!empty($this->qsb_airline_code)){
             $data['airlineCode'] = $this->qsb_airline_code;
         }
-        if(!empty($this->qsb_allow_pieces)){
+        if(!is_null($this->qsb_allow_pieces)){
             $data['allowPieces'] = $this->qsb_allow_pieces;
         }
         if(!empty($this->qsb_allow_unit)){

@@ -11,6 +11,9 @@ use yii\grid\GridView;
 $this->title = 'User List';
 $this->params['breadcrumbs'][] = $this->title;
 
+$isUM = Yii::$app->authManager->getAssignment('userManager', Yii::$app->user->id);
+$isAdmin = Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id);
+
 if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
     $userList = \common\models\Employee::getList();
     $projectList = \common\models\Project::getList();
@@ -55,17 +58,17 @@ if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
                         /*'view' => function ($model, $key, $index) {
                             return User::hasPermission('viewOrder');
                         },*/
-                        'update' => function (\common\models\Employee $model, $key, $index) {
-                            return (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || !in_array('admin', array_keys($model->getRoles())));
+                        'update' => function (\common\models\Employee $model, $key, $index) use ($isAdmin, $isUM) {
+                            return ($isAdmin || !in_array('admin', array_keys($model->getRoles())));
                         },
-                        'projects' => function (\common\models\Employee $model, $key, $index) {
-                            return (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || !in_array('admin', array_keys($model->getRoles())));
+                        'projects' => function (\common\models\Employee $model, $key, $index) use ($isAdmin, $isUM)  {
+                            return ($isAdmin || !in_array('admin', array_keys($model->getRoles())));
                         },
-                        'groups' => function (\common\models\Employee $model, $key, $index) {
-                            return (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || !in_array('admin', array_keys($model->getRoles())));
+                        'groups' => function (\common\models\Employee $model, $key, $index) use ($isAdmin, $isUM)  {
+                            return ($isAdmin || !in_array('admin', array_keys($model->getRoles())));
                         },
-                        'switch' => function (\common\models\Employee $model, $key, $index) {
-                            return (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || !in_array('admin', array_keys($model->getRoles())));
+                        'switch' => function (\common\models\Employee $model, $key, $index)  use ($isAdmin, $isUM) {
+                            return (($isAdmin || !in_array('admin', array_keys($model->getRoles()))) && !$isUM);
                         },
                     ],
                     'buttons' => [
@@ -150,7 +153,7 @@ if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
                     'format' => 'raw'
                 ],
 
-                [
+                /*[
                     'label' => 'Last Call Status',
                     'filter' => false,
                     //'filter' => [1 => 'Online', $searchModel::STATUS_DELETED => 'Deleted'],
@@ -161,7 +164,7 @@ if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
                         return $call ? $call->c_call_status : '-';
                     },
                     'format' => 'raw'
-                ],
+                ],*/
 
                 [
                     'label' => 'User Groups',
@@ -172,7 +175,7 @@ if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
                         $groupsValueArr = [];
 
                         foreach ($groups as $group) {
-                            $groupsValueArr[] = Html::tag('span', Html::tag('i', '', ['class' => 'fa fa-users']) . ' ' . Html::encode($group), ['class' => 'label label-info']);
+                            $groupsValueArr[] = Html::tag('span', /*Html::tag('i', '', ['class' => 'fa fa-users']) . ' ' .*/ Html::encode($group), ['class' => 'label label-info']);
                         }
 
                         $groupsValue = implode(' ', $groupsValueArr);
@@ -180,7 +183,7 @@ if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
                         return $groupsValue;
                     },
                     'format' => 'raw',
-                    'filter' => Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) ? \common\models\UserGroup::getList() : Yii::$app->user->identity->getUserGroupList()
+                    'filter' => $isAdmin ? \common\models\UserGroup::getList() : Yii::$app->user->identity->getUserGroupList()
                 ],
 
 
@@ -242,14 +245,14 @@ if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
                     'format' => 'raw',
                     'filter' => \common\models\UserProfile::CALL_TYPE_LIST
                 ],
-                [
+                /*[
                     'label' => 'Sip',
                     'attribute' => 'user_sip',
                     'value' => function (\common\models\Employee $model) {
                         return ($model->userProfile->up_sip) ?? '';
                     },
                     'format' => 'raw'
-                ],
+                ],*/
                 [
                     'label' => 'Projects Params',
                     'attribute' => 'user_params_project_id',
@@ -297,7 +300,7 @@ if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
                     'format' => 'raw',
                     'contentOptions' => ['class' => 'text-center'],
                     'filter' => [0 => 'No', 1 => 'Yes']
-                    //'visible' => Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)
+                    //'visible' => $isAdmin
                 ],
 
                 /*[
@@ -308,7 +311,7 @@ if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
                     },
                     //'format' => '',
                     'contentOptions' => ['class' => 'text-right'],
-                    'visible' => Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)
+                    'visible' => $isAdmin
                 ],*/
 
                 /*[
@@ -319,7 +322,7 @@ if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
                     },
                     //'format' => 'html',
                     'contentOptions' => ['class' => 'text-right'],
-                    'visible' => Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)
+                    'visible' => $isAdmin
                 ],*/
 
                 /*[
@@ -330,10 +333,10 @@ if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
                 },
                 //'format' => 'html',
                 'contentOptions' => ['class' => 'text-right'],
-                'visible' => Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)
+                'visible' => $isAdmin
                 ],*/
 
-                [
+                /*[
                     'label' => 'Bonus Profit',
                     //'attribute' => 'created_at',
                     'value' => function(\common\models\Employee $model) {
@@ -352,8 +355,8 @@ if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
                     'options' => [
                         'style' => 'width:120px'
                     ],
-                    'visible' => Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)
-                ],
+                    'visible' => $isAdmin
+                ],*/
 
 
                 [
@@ -375,7 +378,7 @@ if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
                     'options' => [
                         'style' => 'width:240px;'
                     ],
-                    'visible' => Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)
+                    'visible' => $isAdmin
                 ],
 
                 [
@@ -399,7 +402,7 @@ if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
                     'options' => [
                         'style' => 'width:240px;'
                     ],
-                    'visible' => Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)
+                    'visible' => $isAdmin
                 ],
 
 

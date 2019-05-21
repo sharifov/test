@@ -28,7 +28,7 @@ $this->title = 'Create Project Params';
             //$userList = [];
             $projectList = [];
 
-            if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
+            if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$app->authManager->getAssignment('userManager', Yii::$app->user->id)) {
                 //$userList = \common\models\Employee::getList();
                 $projectList = \common\models\Project::getList();
             } else {

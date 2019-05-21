@@ -347,9 +347,15 @@ class QuoteController extends FController
                                         $quote->link('quotePrices', $price);
                                     }
                                 }
+
+                                if($lead->called_expert) {
+                                    $quote->sendUpdateBO();
+                                }
                             }
 
                             $transaction->commit();
+
+
                             $result['status'] = true;
 
                             return $result;
@@ -831,7 +837,11 @@ class QuoteController extends FController
                             $selling = 0;
                             $itinerary = $quote::createDump($quote->itinerary);
                             $quote->reservation_dump = str_replace('&nbsp;', ' ', implode("\n", $itinerary));
-                            $quote->save(false);
+                            if($quote->save(false)) {
+                               if($lead->called_expert) {
+                                   $quote->sendUpdateBO();
+                               }
+                            }
 
                             foreach ($attr['QuotePrice'] as $key => $quotePrice) {
                                 $price = empty($quotePrice['id'])
@@ -886,6 +896,7 @@ class QuoteController extends FController
                                             ['qs_arrival_airport_code'=>$destination]
                                         ])
                                         ->one();
+                                        $segments = [];
                                         if(!empty($segment)){
                                             $segments = QuoteSegment::find()
                                             ->andWhere(['qs_trip_id' =>  $segment->qs_trip_id])

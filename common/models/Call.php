@@ -3,7 +3,10 @@
 namespace common\models;
 
 use Yii;
+use DateTime;
+use common\components\ChartTools;
 use yii\helpers\VarDumper;
+
 
 /**
  * This is the model class for table "call".
@@ -25,7 +28,7 @@ use yii\helpers\VarDumper;
  * @property string $c_sip_response_code
  * @property string $c_recording_url
  * @property string $c_recording_sid
- * @property string $c_recording_duration
+ * @property int $c_recording_duration
  * @property string $c_timestamp
  * @property string $c_uri
  * @property string $c_sequence_number
@@ -112,7 +115,7 @@ class Call extends \yii\db\ActiveRecord
     {
         return [
             [['c_call_sid'], 'required'],
-            [['c_call_type_id', 'c_lead_id', 'c_created_user_id', 'c_com_call_id', 'c_project_id', 'c_call_duration'], 'integer'],
+            [['c_call_type_id', 'c_lead_id', 'c_created_user_id', 'c_com_call_id', 'c_project_id', 'c_call_duration', 'c_recording_duration'], 'integer'],
             [['c_price'], 'number'],
             [['c_is_new', 'c_is_deleted'], 'boolean'],
             [['c_created_dt', 'c_updated_dt'], 'safe'],
@@ -121,7 +124,6 @@ class Call extends \yii\db\ActiveRecord
             [['c_call_status', 'c_direction'], 'string', 'max' => 15],
             [['c_api_version', 'c_sip_response_code'], 'string', 'max' => 10],
             [['c_caller_name'], 'string', 'max' => 50],
-            [['c_recording_duration'], 'string', 'max' => 20],
             [['c_recording_url', 'c_uri'], 'string', 'max' => 200],
             [['c_timestamp', 'c_sequence_number'], 'string', 'max' => 40],
             [['c_error_message'], 'string', 'max' => 500],
@@ -251,10 +253,10 @@ class Call extends \yii\db\ActiveRecord
         }
     }
 
-    /**
-     * @param $agentId
-     * @return bool
-     */
+/**
+* @param $agentId
+* @return bool
+*/
     public static function applyHoldCallToAgent(int $agentId)
     {
         //sleep(1);
@@ -349,11 +351,159 @@ class Call extends \yii\db\ActiveRecord
             }
 
         } catch (\Throwable $e) {
-            \Yii::error(VarDumper::dumpAsString([$e->getMessage(), $e->getFile(), $e->getLine()], 10, false), 'Component:CommunicationService::redirectCallFromHold');
+            \Yii::warning(VarDumper::dumpAsString([$e->getMessage(), $e->getFile(), $e->getLine()], 10, false), 'Component:CommunicationService::redirectCallFromHold');
             return false;
         }
         return false;
     }
 
+    /**
+     * @param string $startDate
+     * @param string $endDate
+     * @param string $groupingBy
+     * @param int $callType
+     * @return array
+     * @throws \Exception
+     */
+    public static function getCallStats(string $startDate, string $endDate, ?string $groupingBy, int $callType) : array
+    {
+        $sDate = $startDate." 00:00:00";
+        $eDate = $endDate." 23:59:59";
+        switch ($groupingBy){
+            case null:
+                if (strtotime($startDate) == strtotime($endDate)){
+                    $hoursRange = ChartTools::getHoursRange($startDate, $endDate." 23:59:59", $step = '+1 hour', $format = 'H:i:s');
+                } else {
+                    $daysRange = ChartTools::getDaysRange($startDate, $endDate);
+                }
+                break;
+            case 'hours':
+                if (strtotime($startDate) == strtotime($endDate)){
+                    $hoursRange = ChartTools::getHoursRange($startDate, $endDate." 23:59:59", $step = '+1 hour', $format = 'H:i:s');
+                } else {
+                    $hoursRange = ChartTools::getHoursRange($startDate, $endDate." 23:59:59", $step = '+1 hour', $format = 'Y-m-d H:i:s');
+                }
+                break;
+            case 'days':
+                $daysRange = ChartTools::getDaysRange($startDate, $endDate);
+                break;
+            case 'weeks':
+                $weeksPeriods = ChartTools::getWeeksRange(new DateTime($startDate), new DateTime($endDate . ' 23:59'));
+                break;
+            case 'months':
+                $monthsRange = ChartTools::getMonthsRange($startDate, $endDate);
+                $sDate = date("Y-m-01", strtotime($startDate));
+                $eDate = date('Y-m-31', strtotime($endDate));
+                break;
+        }
 
+        if ($callType == 0){
+            $calls = self::find()->select(['c_id', 'c_call_status', 'c_updated_dt', 'c_call_duration', 'c_price'])
+                ->where(['c_call_status' => ['completed', 'busy', 'no-answer', 'canceled']])
+                ->andWhere(['between', 'c_updated_dt', $sDate, $eDate])->all();
+        } else {
+            $calls =self::find()->select(['c_id', 'c_call_status', 'c_updated_dt', 'c_call_duration', 'c_price'])
+                ->where(['c_call_status' => ['completed', 'busy', 'no-answer', 'canceled']])
+                ->andWhere(['between', 'c_updated_dt', $sDate, $eDate])
+                ->andWhere(['=', 'c_call_type_id', $callType])->all();
+        }
+
+        $callStats = [];
+        $item = [];
+        if (strtotime($startDate) < strtotime($endDate)){
+            if (isset($daysRange)) {
+                $timeLine = $daysRange;
+                $item['timeLine'] = 'd M';
+                $timeInSeconds = 0;
+                $dateFormat = 'Y-m-d';
+            } elseif (isset($monthsRange)){
+                $timeLine = $monthsRange;
+                $timeInSeconds = 0;
+                $dateFormat = 'Y-m';
+                $item['timeLine'] = 'Y, M';
+            } elseif (isset($weeksPeriods)){
+                $timeLine = $weeksPeriods;
+                $item['timeLine'] = 'd M';
+                $timeInSeconds = 0;
+                $dateFormat = 'Y-m-d';
+            }elseif (isset($hoursRange)){
+                $timeLine = $hoursRange;
+                $item['timeLine'] = 'H:i';
+                $dateFormat = 'Y-m-d H:i:s';
+                $timeInSeconds = 3600;
+            }
+        } else {
+            if (isset($daysRange)) {
+                $timeLine = $daysRange;
+                $item['timeLine'] = 'd M';
+                $timeInSeconds = 0;
+                $dateFormat = 'Y-m-d';
+            } elseif (isset($hoursRange)){
+                $timeLine = $hoursRange;
+                $item['timeLine'] = 'H:i';
+                $dateFormat = 'H:i:s';
+                $timeInSeconds = 3600;
+            } elseif (isset($monthsRange)) {
+                $timeLine = $monthsRange;
+                $timeInSeconds = 0;
+                $dateFormat = 'Y-m';
+                $item['timeLine'] = 'Y, M';
+            } elseif (isset($weeksPeriods)){
+                $timeLine = $weeksPeriods;
+                $item['timeLine'] = 'd M';
+                $timeInSeconds = 0;
+                $dateFormat = 'Y-m-d';
+            }
+        }
+
+        $completed = $noAnswer = $busy = $canceled = 0;
+        $cc_Duration = $cc_TotalPrice= 0;
+        foreach ($timeLine as $key => $timeSignature){
+            $weekInterval = explode('/', $timeSignature);
+            if (count($weekInterval) != 2){
+                $EndPoint = date($dateFormat, strtotime($timeSignature) + $timeInSeconds);
+                if ($EndPoint == '00:00:00'){
+                    $EndPoint = '23:59:59';
+                }
+            } else {
+                $EndPoint = date($dateFormat, strtotime($weekInterval[1]));
+                $timeSignature = date($dateFormat, strtotime($weekInterval[0]));
+            }
+            foreach ($calls as $callItem){
+                $callUpdatedTime = date($dateFormat, strtotime($callItem->c_updated_dt));
+                if ($callUpdatedTime >= $timeSignature && $callUpdatedTime <= $EndPoint)
+                {
+                    switch ($callItem->c_call_status){
+                        case self::CALL_STATUS_COMPLETED :
+                            $completed++;
+                            $cc_Duration = $cc_Duration + $callItem->c_call_duration;
+                            $cc_TotalPrice = $cc_TotalPrice + $callItem->c_price;
+                            break;
+                        case self::CALL_STATUS_NO_ANSWER :
+                            $noAnswer++;
+                            break;
+                        case self::CALL_STATUS_BUSY :
+                            $busy++;
+                            break;
+                        case self::CALL_STATUS_CANCELED :
+                            $canceled++;
+                            break;
+                    }
+                }
+            }
+            $item['time'] = $timeSignature;
+            $item['weeksInterval'] = (count($weekInterval) == 2) ? $EndPoint : null;
+            $item['completed'] = $completed;
+            $item['no-answer'] = $noAnswer;
+            $item['busy'] = $busy;
+            $item['canceled'] = $canceled;
+            $item['cc_Duration'] = $cc_Duration;
+            $item['cc_TotalPrice'] = round($cc_TotalPrice, 2);
+
+            array_push($callStats, $item);
+            $completed = $noAnswer = $busy = $canceled = 0;
+            $cc_Duration = $cc_TotalPrice= 0;
+        }
+        return $callStats;
+    }
 }

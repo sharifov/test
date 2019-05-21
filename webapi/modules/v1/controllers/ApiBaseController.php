@@ -152,7 +152,7 @@ class ApiBaseController extends Controller
      * @param array $errors
      * @return string
      */
-    public function errorToString($errors = [])
+    public function errorToString($errors = []): string
     {
         $arr_errors = [];
         foreach ($errors as $k => $v) {
@@ -165,17 +165,21 @@ class ApiBaseController extends Controller
     /**
      * @throws BadRequestHttpException
      */
-    public function checkPost()
+    public function checkPost(): void
     {
-        if (!Yii::$app->request->isPost) throw new BadRequestHttpException('Not found POST request', 1);
-        if (!Yii::$app->request->post()) throw new BadRequestHttpException('POST data request is empty', 2);
+        if (!Yii::$app->request->isPost) {
+            throw new BadRequestHttpException('Not found POST request', 1);
+        }
+        if (!Yii::$app->request->post()) {
+            throw new BadRequestHttpException('POST data request is empty', 2);
+        }
     }
 
     /**
      * @param string $action
      * @return ApiLog
      */
-    public function startApiLog(string $action = '')
+    public function startApiLog(string $action = ''): ApiLog
     {
 
         $apiLog = new ApiLog();
@@ -183,9 +187,13 @@ class ApiBaseController extends Controller
         $apiLog->al_request_dt = date('Y-m-d H:i:s');
         $apiLog->al_ip_address = Yii::$app->request->getRemoteIP();
         $apiLog->al_action = $action;
-        if($this->apiUser) $apiLog->al_user_id = $this->apiUser->au_id;
+        if($this->apiUser) {
+            $apiLog->al_user_id = $this->apiUser->au_id;
+        }
 
-        if(!$apiLog->save()) Yii::error(print_r($apiLog->errors, true), 'ApiBaseControl:startApiLog:ApiLog:save');
+        if(!$apiLog->save()) {
+            Yii::error(print_r($apiLog->errors, true), 'ApiBaseControl:startApiLog:ApiLog:save');
+        }
 
         return $apiLog;
     }

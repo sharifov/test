@@ -48,7 +48,25 @@ $this->params['breadcrumbs'][] = $this->title;
             },
             'filter' => \common\models\Lead::STATUS_LIST
         ],
-
+        'reason' => [
+            'header' => 'Trash/Reject reason.',
+            'value' => function(\common\models\Lead $model) {
+                if ($model->status === \common\models\Lead::STATUS_REJECT || $model->status === \common\models\Lead::STATUS_TRASH) {
+                    return $model->getLastReason();
+                }
+                return '';
+            },
+        ],
+        [
+            'header' => 'Customer email',
+            'value' => function(\common\models\Lead $model) {
+                $emails = [];
+                if ($model->client && $emailList = $model->client->clientEmails) {
+                    $emails = \yii\helpers\ArrayHelper::map($emailList, 'email', 'email');
+                }
+                return implode(', ', $emails);
+            },
+        ],
         [
             'header' => 'Segments',
             'value' => function(\common\models\Lead $model) {
@@ -387,7 +405,12 @@ $this->params['breadcrumbs'][] = $this->title;
             'contentOptions' => ['class' => 'text-center'],
         ],
 
-
+        [
+            'header' => 'Agent name',
+            'value' => function(\common\models\Lead $model) {
+                return $model->employee_id ? $model->employee->username : '';
+            },
+        ],
         [
             'header' => 'Created Date',
             'value' => function(\common\models\Lead $model) {
@@ -429,7 +452,7 @@ $this->params['breadcrumbs'][] = $this->title;
             ]
         ]);
 
-
+        unset($gridColumnsExport['reason']);
 
     /*$fullExportMenu = ExportMenu::widget([
         'dataProvider' => $dataProvider,

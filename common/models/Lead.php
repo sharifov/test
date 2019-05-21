@@ -4,6 +4,7 @@ namespace common\models;
 
 use common\components\EmailService;
 use common\components\jobs\QuickSearchInitPriceJob;
+use common\components\jobs\UpdateLeadBOJob;
 use common\models\local\LeadAdditionalInformation;
 use common\models\local\LeadLogMessage;
 use Yii;
@@ -505,6 +506,11 @@ class Lead extends ActiveRecord
     public static function getBadgesSingleQuery()
     {
         $projectIds = array_keys(ProjectEmployeeAccess::getProjectsByEmployee());
+
+        if(empty($projectIds)){
+            $projectIds[] = 0;
+        }
+
 
         $userId = Yii::$app->user->id;
         $created = '';
@@ -1170,7 +1176,7 @@ Reason: {reason}
                 $agent = $user->username;
                 $subject = Yii::t('email', "Cloned Lead-{id} by {agent}", ['id' => $lead->clone_id, 'agent' => $agent]);
                 $body = Yii::t('email', "Agent {agent} cloned lead {clone_id} with reason [{reason}], url: {cloned_url}.
-New lead {lead_id} 
+New lead {lead_id}
 {url}",
                     [
                         'agent' => $agent,
@@ -1230,6 +1236,13 @@ New lead {lead_id}
 
             if (isset($changedAttributes['status']) && $changedAttributes['status'] !== $this->status) {
                 LeadFlow::addStateFlow($this);
+
+                if($this->called_expert && ($this->status === self::STATUS_TRASH || $this->status === self::STATUS_FOLLOW_UP || $this->status === self::STATUS_SNOOZE || $this->status === self::STATUS_PROCESSING)) {
+                    $job = new UpdateLeadBOJob();
+                    $job->lead_id = $this->id;
+                    $jobId = Yii::$app->queue_job->push($job);
+                    Yii::info('Lead: ' . $this->id . ', UpdateLeadBOJob: ' . $jobId, 'info\Lead:afterSave:UpdateLeadBOJob');
+                }
             }
 
 
@@ -1297,8 +1310,26 @@ New lead {lead_id}
 
                 }
             }
-
         }
+
+
+
+        //create or update LeadTask
+        if(($this->status == self::STATUS_PROCESSING && array_key_exists('employee_id',$changedAttributes)) ||
+            (isset($changedAttributes['l_answered']) && $changedAttributes['l_answered'] != $this->l_answered)){
+            LeadTask::deleteUnnecessaryTasks($this->id);
+
+            if($this->l_answered) {
+                $taskType = Task::CAT_ANSWERED_PROCESS;
+            } else {
+                $taskType = Task::CAT_NOT_ANSWERED_PROCESS;
+            }
+
+            LeadTask::createTaskList($this->id, $this->employee_id, 1, '', $taskType);
+            LeadTask::createTaskList($this->id, $this->employee_id, 2, '', $taskType);
+            LeadTask::createTaskList($this->id, $this->employee_id, 3, '', $taskType);
+        }
+
 
         if (!$insert) {
             foreach (['updated', 'created'] as $item) {
@@ -1307,7 +1338,8 @@ New lead {lead_id}
                 }
             }
             $flgUnActiveRequest = false;
-            $resetCallExpert = false;
+            //$resetCallExpert = false;
+
             if (isset($changedAttributes['adults']) && $changedAttributes['adults'] != $this->adults) {
                 $flgUnActiveRequest = true;
             }
@@ -1317,19 +1349,20 @@ New lead {lead_id}
             if (isset($changedAttributes['infants']) && $changedAttributes['infants'] != $this->infants) {
                 $flgUnActiveRequest = true;
             }
-            if (isset($changedAttributes['cabin']) && $changedAttributes['cabin'] != $this->cabin) {
+
+            /*if (isset($changedAttributes['cabin']) && $changedAttributes['cabin'] != $this->cabin) {
                 $resetCallExpert = true;
             }
             if (isset($changedAttributes['notes_for_experts']) && $changedAttributes['notes_for_experts'] != $this->notes_for_experts) {
                 $resetCallExpert = true;
-            }
+            }*/
 
-            if ($resetCallExpert || $flgUnActiveRequest) {
+            /*if ($resetCallExpert || $flgUnActiveRequest) {
                 Yii::$app->db->createCommand('UPDATE ' . Lead::tableName() . ' SET called_expert = :called_expert WHERE id = :id', [
                     ':called_expert' => false,
                     ':id' => $this->id
                 ])->execute();
-            }
+            }*/
 
             if ($flgUnActiveRequest) {
                 foreach ($this->getAltQuotes() as $quote) {
@@ -1682,7 +1715,7 @@ New lead {lead_id}
             }
         }
 
-        if($this->final_profit) {
+        if($this->final_profit !== null) {
             $this->finalProfit = (float) $this->final_profit - ($processing_fee_per_pax * (int) ($this->adults + $this->children));
         } else {
             $this->finalProfit = $this->final_profit;
@@ -2340,7 +2373,8 @@ New lead {lead_id}
             'clients_budget' => $this->leadPreferences ? $this->leadPreferences->clients_budget : '',
             'market_price' => $this->leadPreferences ? $this->leadPreferences->market_price : '',
             'itinerary' => [],
-            'agent_name' => $this->employee ? $this->employee->username : 'N/A'
+            'agent_name' => $this->employee ? $this->employee->username : 'N/A',
+            'agent_id' => $this->employee_id
         ];
 
         $itinerary = [];
@@ -2365,16 +2399,52 @@ New lead {lead_id}
             }
         }
 
-        return [
-            'call_expert' => false,
-            'LeadRequest' => [
-                'uid' => $this->uid,
-                'gid' => $this->gid,
-                'market_info_id' => $this->source_id,
-                'information' => $information
-            ],
-            'LeadQuotes' => $quoteArr
+
+        $similarLeads = [];
+
+        if($cloneLead = $this->clone) {
+            $similarLeads[$cloneLead->id] = [
+                'uid' => $cloneLead->uid,
+                'gid' => $cloneLead->gid,
+                'agent_username' => $cloneLead->employee ? $cloneLead->employee->username : null,
+                'agent_id' => $cloneLead->employee_id,
+                'created_dt' => $cloneLead->created,
+                'status' => $cloneLead->status
+            ];
+
+            unset($cloneLead);
+        }
+
+        /** @var self[] $childLeads */
+        $childLeads = self::find()->where(['clone_id' => $this->id])->all();
+
+        if($childLeads) {
+            foreach ($childLeads as $childLead) {
+                $similarLeads[$childLead->id] = [
+                    'uid' => $childLead->uid,
+                    'gid' => $childLead->gid,
+                    'agent_username' => $childLead->employee ? $childLead->employee->username : null,
+                    'agent_id' => $childLead->employee_id,
+                    'created_dt' => $childLead->created,
+                    'status' => $childLead->status
+                ];
+            }
+            unset($childLeads);
+        }
+
+
+        $out['call_expert'] = false;
+        $out['LeadRequest'] = [
+            'uid'               => $this->uid,
+            'gid'               => $this->gid,
+            'market_info_id'    => $this->source_id,
+            'status'            => $this->status,
+            'information'       => $information
         ];
+        $out['similar_leads'] = $similarLeads;
+        $out['LeadQuotes'] = $quoteArr;
+
+        return $out;
     }
 
 
@@ -2528,7 +2598,7 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
         return $query->createCommand()->queryScalar();
     }
 
-    public function getFlightDetails()
+    public function getFlightDetails($tag = '<br/>')
     {
         $flightSegments = LeadFlightSegment::findAll(['lead_id' => $this->id]);
         $segmentsStr = [];
@@ -2536,7 +2606,7 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
             $segmentsStr[] = $entry['departure'] . ' ' . $entry['origin'] . '-' . $entry['destination'];
         }
 
-        return implode('<br/>', $segmentsStr);
+        return implode($tag, $segmentsStr);
     }
 
     public function getDeparture()

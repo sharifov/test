@@ -1,0 +1,106 @@
+<?php
+
+use yii\helpers\Html;
+use yii\grid\GridView;
+use yii\widgets\Pjax;
+/* @var $this yii\web\View */
+/* @var $searchModel common\models\search\LeadCallExpertSearch */
+/* @var $dataProvider yii\data\ActiveDataProvider */
+
+$this->title = 'Lead Call Experts';
+$this->params['breadcrumbs'][] = $this->title;
+?>
+<div class="lead-call-expert-index">
+
+    <h1><span class="fa fa-bell-o"></span> <?= Html::encode($this->title) ?></h1>
+
+    <p>
+        <?= Html::a('Create Lead Call Expert', ['create'], ['class' => 'btn btn-success']) ?>
+    </p>
+
+    <?php Pjax::begin(); ?>
+    <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
+
+    <?= GridView::widget([
+        'dataProvider' => $dataProvider,
+        'filterModel' => $searchModel,
+        'columns' => [
+            //['class' => 'yii\grid\SerialColumn'],
+
+            'lce_id',
+            //'lce_lead_id',
+
+            [
+                'label' => 'Lead UID',
+                'attribute' => 'lce_lead_id',
+                'value' => function(\common\models\LeadCallExpert $model) {
+                    return Html::a($model->lce_lead_id, ['lead/view', 'gid' => $model->lceLead->gid], ['target' => '_blank', 'data-pjax' => 0]);
+                },
+                'format' => 'raw',
+            ],
+
+
+            'lce_request_text:ntext',
+            //'lce_request_dt',
+            [
+                'attribute' => 'lce_request_dt',
+                'value' => function(\common\models\LeadCallExpert $model) {
+                    return $model->lce_request_dt ? '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->lce_request_dt)) : '-';
+                },
+                'format' => 'raw',
+            ],
+
+            [
+                'label' => 'Employee',
+                'attribute' => 'lce_agent_user_id',
+                'value' => function(\common\models\LeadCallExpert $model) {
+                    return $model->lceAgentUser ? $model->lceAgentUser->username : '-';
+                },
+                'filter' => \common\models\Employee::getList()
+            ],
+
+            [
+                'attribute' => 'lce_status_id',
+                'value' => function(\common\models\LeadCallExpert $model) {
+                    return $model->getStatusLabel();
+                },
+                'filter' => \common\models\LeadCallExpert::STATUS_LIST,
+                'format' => 'raw',
+            ],
+
+
+            'lce_response_text:ntext',
+            'lce_response_lead_quotes:ntext',
+            //'lce_response_dt',
+
+            [
+                'attribute' => 'lce_response_dt',
+                'value' => function(\common\models\LeadCallExpert $model) {
+                    return $model->lce_response_dt ? '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->lce_response_dt)) : '-';
+                },
+                'format' => 'raw',
+            ],
+
+            //'lce_status_id',
+            //'lce_agent_user_id',
+
+
+
+            'lce_expert_user_id',
+            'lce_expert_username',
+            //'lce_updated_dt',
+            [
+                'attribute' => 'lce_updated_dt',
+                'value' => function(\common\models\LeadCallExpert $model) {
+                    return $model->lce_updated_dt ? '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->lce_updated_dt)) : '-';
+                },
+                'format' => 'raw',
+            ],
+
+            ['class' => 'yii\grid\ActionColumn'],
+        ],
+    ]); ?>
+
+    <?php Pjax::end(); ?>
+
+</div>

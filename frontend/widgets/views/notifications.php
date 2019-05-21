@@ -26,7 +26,7 @@
                     <span class="glyphicon glyphicon-info-sign"> <?php //remove-sign, ok-sign, question-sign ?>
                     </span>
                     <span>
-                        <span><?=$n?> - <?=\yii\helpers\Html::encode($item->n_title)?></span>
+                        <span><?=\yii\helpers\Html::encode($item->n_title)?></span>
                         <span class="time"><?=Yii::$app->formatter->asRelativeTime(strtotime($item->n_created_dt))?></span>
                     </span>
                     <span class="message">

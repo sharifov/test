@@ -2,6 +2,7 @@
 
 namespace frontend\controllers;
 
+use common\models\Lead;
 use common\models\LeadFlightSegment;
 use common\models\search\QuotePriceSearch;
 use Yii;
@@ -9,7 +10,9 @@ use common\models\Quote;
 use common\models\search\QuoteSearch;
 use yii\filters\AccessControl;
 use yii\helpers\ArrayHelper;
+use yii\helpers\VarDumper;
 use yii\web\Controller;
+use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 
@@ -36,15 +39,15 @@ class QuotesController extends FController
                 'class' => AccessControl::class,
                 'rules' => [
                     [
-                        'actions' => ['index', 'update', 'view', 'delete', 'create'],
+                        'actions' => ['index', 'update', 'view', 'delete', 'create', 'ajax-details'],
                         'allow' => true,
                         'roles' => ['supervision'],
                     ],
-                    /*[
-                        'actions' => ['index'],
+                    [
+                        'actions' => ['ajax-details'],
                         'allow' => true,
                         'roles' => ['agent'],
-                    ],*/
+                    ],
                 ],
             ],
         ];
@@ -97,6 +100,26 @@ class QuotesController extends FController
 
 
     }
+
+    public function actionAjaxDetails()
+    {
+        $id = Yii::$app->request->get('id');
+
+        $model = $this->findModel($id);
+        $lead = $model->lead;
+
+        if($lead->status === Lead::STATUS_TRASH && Yii::$app->user->identity->role === 'agent') {
+            throw new ForbiddenHttpException('Access Denied for Agent');
+        }
+
+        //unset($searchModel);
+        //VarDumper::dump($model, 10, true);
+
+        return $this->renderPartial('view-details', [
+            'model' => $model,
+        ]);
+    }
+
 
     /**
      * Creates a new Quote model.

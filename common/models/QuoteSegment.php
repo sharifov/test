@@ -39,6 +39,8 @@ use Yii;
  * @property QuoteSegmentStop[] $quoteSegmentStops
  * @property Airport $arrivalAirport
  * @property Airport $departureAirport
+ * @property Airline $marketingAirline
+ * @property Airline $operatingAirline
  */
 class QuoteSegment extends \yii\db\ActiveRecord
 {
@@ -47,61 +49,7 @@ class QuoteSegment extends \yii\db\ActiveRecord
 
     public $isOvernight = false;
 
-    public function getIsOVernight()
-    {
-        $departureTime = new \DateTime($this->qs_departure_time);
-        $arrivalTime = new \DateTime($this->qs_arrival_time);
-
-        if(($departureTime->format('H') <= 1 || $departureTime->format('H') >= 22)  && $arrivalTime->format('H') <= 7){
-            $this->isOvernight = true;
-        }
-
-        return $this->isOvernight;
-    }
-
-    public function afterFind()
-    {
-        parent::afterFind();
-
-        $this->getIsOVernight();
-    }
-
-    public static function getCabin($cabin = null)
-    {
-        $mapping = [
-            self::CABIN_ECONOMY => 'Economy',
-            self::CABIN_PREMIUM_ECONOMY => 'Premium Economy',
-            self::CABIN_BUSINESS => 'Business',
-            self::CABIN_PREMIUM_BUSINESS => 'Premium Business',
-            self::CABIN_FIRST => 'First',
-            self::CABIN_PREMIUM_FIRST => 'Premium First',
-        ];
-
-        if ($cabin === null) {
-            return $mapping;
-        }
-
-        return isset($mapping[$cabin]) ? $mapping[$cabin] : $cabin;
-    }
-
-    public static function getCabinReal($cabin)
-    {
-        $mapping = [
-            'E' =>  self::CABIN_ECONOMY,
-            'Economy' =>  self::CABIN_ECONOMY,
-            'P' => self::CABIN_PREMIUM_ECONOMY ,
-            'Premium eco' => self::CABIN_PREMIUM_ECONOMY ,
-            'B'  =>  self::CABIN_BUSINESS,
-            'Business'  =>  self::CABIN_BUSINESS,
-            'PB'  =>  self::CABIN_PREMIUM_BUSINESS,
-            'F'  =>  self::CABIN_FIRST,
-            'First'  =>  self::CABIN_FIRST,
-            'PF'  =>  self::CABIN_PREMIUM_FIRST,
-        ];
-
-        return isset($mapping[$cabin]) ? $mapping[$cabin] : $cabin;
-    }
-
+    
     /**
      * {@inheritdoc}
      */
@@ -125,10 +73,10 @@ class QuoteSegment extends \yii\db\ActiveRecord
             [['qs_operating_airline'], 'string', 'max' => 100],
             [['qs_fare_code'], 'string', 'max' => 15],
             [['qs_key'], 'string', 'max' => 255],
-            [['qs_arrival_airport_code'], 'exist', 'skipOnError' => true, 'targetClass' => Airport::className(), 'targetAttribute' => ['qs_arrival_airport_code' => 'iata']],
-            [['qs_departure_airport_code'], 'exist', 'skipOnError' => true, 'targetClass' => Airport::className(), 'targetAttribute' => ['qs_departure_airport_code' => 'iata']],
-            [['qs_trip_id'], 'exist', 'skipOnError' => true, 'targetClass' => QuoteTrip::className(), 'targetAttribute' => ['qs_trip_id' => 'qt_id']],
-            [['qs_updated_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::className(), 'targetAttribute' => ['qs_updated_user_id' => 'id']],
+            [['qs_arrival_airport_code'], 'exist', 'skipOnError' => true, 'targetClass' => Airport::class, 'targetAttribute' => ['qs_arrival_airport_code' => 'iata']],
+            [['qs_departure_airport_code'], 'exist', 'skipOnError' => true, 'targetClass' => Airport::class, 'targetAttribute' => ['qs_departure_airport_code' => 'iata']],
+            [['qs_trip_id'], 'exist', 'skipOnError' => true, 'targetClass' => QuoteTrip::class, 'targetAttribute' => ['qs_trip_id' => 'qt_id']],
+            [['qs_updated_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['qs_updated_user_id' => 'id']],
         ];
     }
 
@@ -138,31 +86,48 @@ class QuoteSegment extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'qs_id' => 'Qs ID',
-            'qs_departure_time' => 'Qs Departure Time',
-            'qs_arrival_time' => 'Qs Arrival Time',
-            'qs_stop' => 'Qs Stop',
-            'qs_flight_number' => 'Qs Flight Number',
-            'qs_booking_class' => 'Qs Booking Class',
-            'qs_duration' => 'Qs Duration',
-            'qs_departure_airport_code' => 'Qs Departure Airport Code',
-            'qs_departure_airport_terminal' => 'Qs Departure Airport Terminal',
-            'qs_arrival_airport_code' => 'Qs Arrival Airport Code',
-            'qs_arrival_airport_terminal' => 'Qs Arrival Airport Terminal',
-            'qs_operating_airline' => 'Qs Operating Airline',
-            'qs_marketing_airline' => 'Qs Marketing Airline',
-            'qs_air_equip_type' => 'Qs Air Equip Type',
-            'qs_marriage_group' => 'Qs Marriage Group',
-            'qs_mileage' => 'Qs Mileage',
-            'qs_cabin' => 'Qs Cabin',
-            'qs_meal' => 'Qs Meal',
-            'qs_fare_code' => 'Qs Fare Code',
-            'qs_trip_id' => 'Qs Trip ID',
-            'qs_key' => 'Qs Key',
-            'qs_created_dt' => 'Qs Created Dt',
-            'qs_updated_dt' => 'Qs Updated Dt',
-            'qs_updated_user_id' => 'Qs Updated User ID',
+            'qs_id' => 'ID',
+            'qs_departure_time' => 'Departure Time',
+            'qs_arrival_time' => 'Arrival Time',
+            'qs_stop' => 'Stop',
+            'qs_flight_number' => 'Flight Number',
+            'qs_booking_class' => 'Booking Class',
+            'qs_duration' => 'Duration',
+            'qs_departure_airport_code' => 'Departure Airport Code',
+            'qs_departure_airport_terminal' => 'Departure Airport Terminal',
+            'qs_arrival_airport_code' => 'Arrival Airport Code',
+            'qs_arrival_airport_terminal' => 'Arrival Airport Terminal',
+            'qs_operating_airline' => 'Operating Airline',
+            'qs_marketing_airline' => 'Marketing Airline',
+            'qs_air_equip_type' => 'Air Equip Type',
+            'qs_marriage_group' => 'Marriage Group',
+            'qs_mileage' => 'Mileage',
+            'qs_cabin' => 'Cabin',
+            'qs_meal' => 'Meal',
+            'qs_fare_code' => 'Fare Code',
+            'qs_trip_id' => 'Trip ID',
+            'qs_key' => 'Key',
+            'qs_created_dt' => 'Created Dt',
+            'qs_updated_dt' => 'Updated Dt',
+            'qs_updated_user_id' => 'Updated User ID',
         ];
+    }
+
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getMarketingAirline(): \yii\db\ActiveQuery
+    {
+        return $this->hasOne(Airline::class, ['iata' => 'qs_marketing_airline']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getOperatingAirline(): \yii\db\ActiveQuery
+    {
+        return $this->hasOne(Airline::class, ['iata' => 'qs_operating_airline']);
     }
 
     /**
@@ -170,7 +135,7 @@ class QuoteSegment extends \yii\db\ActiveRecord
      */
     public function getArrivalAirport()
     {
-        return $this->hasOne(Airport::className(), ['iata' => 'qs_arrival_airport_code']);
+        return $this->hasOne(Airport::class, ['iata' => 'qs_arrival_airport_code']);
     }
 
     /**
@@ -178,7 +143,7 @@ class QuoteSegment extends \yii\db\ActiveRecord
      */
     public function getDepartureAirport()
     {
-        return $this->hasOne(Airport::className(), ['iata' => 'qs_departure_airport_code']);
+        return $this->hasOne(Airport::class, ['iata' => 'qs_departure_airport_code']);
     }
 
     /**
@@ -186,7 +151,7 @@ class QuoteSegment extends \yii\db\ActiveRecord
      */
     public function getTrip()
     {
-        return $this->hasOne(QuoteTrip::className(), ['qt_id' => 'qs_trip_id']);
+        return $this->hasOne(QuoteTrip::class, ['qt_id' => 'qs_trip_id']);
     }
 
     /**
@@ -194,7 +159,7 @@ class QuoteSegment extends \yii\db\ActiveRecord
      */
     public function getUpdatedUser()
     {
-        return $this->hasOne(Employee::className(), ['id' => 'qs_updated_user_id']);
+        return $this->hasOne(Employee::class, ['id' => 'qs_updated_user_id']);
     }
 
     /**
@@ -202,7 +167,7 @@ class QuoteSegment extends \yii\db\ActiveRecord
      */
     public function getQuoteSegmentBaggages()
     {
-        return $this->hasMany(QuoteSegmentBaggage::className(), ['qsb_segment_id' => 'qs_id']);
+        return $this->hasMany(QuoteSegmentBaggage::class, ['qsb_segment_id' => 'qs_id']);
     }
 
     /**
@@ -210,7 +175,7 @@ class QuoteSegment extends \yii\db\ActiveRecord
      */
     public function getQuoteSegmentBaggageCharges()
     {
-        return $this->hasMany(QuoteSegmentBaggageCharge::className(), ['qsbc_segment_id' => 'qs_id']);
+        return $this->hasMany(QuoteSegmentBaggageCharge::class, ['qsbc_segment_id' => 'qs_id']);
     }
 
     /**
@@ -218,6 +183,73 @@ class QuoteSegment extends \yii\db\ActiveRecord
      */
     public function getQuoteSegmentStops()
     {
-        return $this->hasMany(QuoteSegmentStop::className(), ['qss_segment_id' => 'qs_id']);
+        return $this->hasMany(QuoteSegmentStop::class, ['qss_segment_id' => 'qs_id']);
+    }
+
+    /**
+     * @return bool
+     * @throws \Exception
+     */
+    public function getIsOVernight()
+    {
+        $departureTime = new \DateTime($this->qs_departure_time);
+        $arrivalTime = new \DateTime($this->qs_arrival_time);
+
+        if(($departureTime->format('H') <= 1 || $departureTime->format('H') >= 22)  && $arrivalTime->format('H') <= 7){
+            $this->isOvernight = true;
+        }
+
+        return $this->isOvernight;
+    }
+
+    public function afterFind()
+    {
+        parent::afterFind();
+
+        $this->getIsOVernight();
+    }
+
+    /**
+     * @param null $cabin
+     * @return array|mixed|null
+     */
+    public static function getCabin($cabin = null)
+    {
+        $mapping = [
+            self::CABIN_ECONOMY => 'Economy',
+            self::CABIN_PREMIUM_ECONOMY => 'Premium Economy',
+            self::CABIN_BUSINESS => 'Business',
+            self::CABIN_PREMIUM_BUSINESS => 'Premium Business',
+            self::CABIN_FIRST => 'First',
+            self::CABIN_PREMIUM_FIRST => 'Premium First',
+        ];
+
+        if ($cabin === null) {
+            return $mapping;
+        }
+
+        return $mapping[$cabin] ?? $cabin;
+    }
+
+    /**
+     * @param $cabin
+     * @return mixed
+     */
+    public static function getCabinReal($cabin)
+    {
+        $mapping = [
+            'E' =>  self::CABIN_ECONOMY,
+            'Economy' =>  self::CABIN_ECONOMY,
+            'P' => self::CABIN_PREMIUM_ECONOMY ,
+            'Premium eco' => self::CABIN_PREMIUM_ECONOMY ,
+            'B'  =>  self::CABIN_BUSINESS,
+            'Business'  =>  self::CABIN_BUSINESS,
+            'PB'  =>  self::CABIN_PREMIUM_BUSINESS,
+            'F'  =>  self::CABIN_FIRST,
+            'First'  =>  self::CABIN_FIRST,
+            'PF'  =>  self::CABIN_PREMIUM_FIRST,
+        ];
+
+        return $mapping[$cabin] ?? $cabin;
     }
 }

@@ -164,6 +164,15 @@ SearchResult = function(props) {
 	                		}
 		    		 	});
                         break;
+		    		case 'fareType':
+		    			filterList[filter].forEach(function(fareType) {
+		    				var obj = $(selector+'[data-fareType="'+fareType+'"]');
+		    				$(obj).removeClass('hide');
+		    				$(obj).addClass('filtered');
+		    				filterApplied = true;
+		    			});
+
+		                break;
 		    		case 'airline':
 		    			filterList[filter].forEach(function(airline) {
 		    				var obj = $(selector+'[data-airline="'+airline+'"]');
@@ -437,6 +446,26 @@ SearchResult = function(props) {
         });
     };
 
+    this.filterFareType = function() {
+        $('.js-filter-fareType-item input[type="checkbox"]').on('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        });
+
+        $('.js-filter-fareType-item label').on('click', function() {
+            var inputOnly = $(this).siblings('input[type="checkbox"]');
+            inputOnly.prop('checked', !inputOnly.prop('checked'));
+            var val = [];
+            $('#filter-fareType').find('.js-filter-fareType-item input[type="checkbox"]:checked').each(function () {
+                val.push($(this).attr("id"));
+            });
+            scope.addFilterParams({
+                name: 'fareType',
+                value: val
+            });
+        });
+    };
+
     this.filterTravelTimeSelectedTitleText = function() {
         var headerText = 'Time';
         if (Object.keys(filterList.travelTime).length < 3) {
@@ -540,6 +569,9 @@ SearchResult = function(props) {
     }
 
     this.filterInit = function() {
+        //= fare filter
+        scope.filterFareType();
+        //=# fare filter
         //= airline filter
         scope.filterAirline();
         //=# airline filter

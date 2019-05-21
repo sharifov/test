@@ -145,7 +145,7 @@ JS;
             ]); ?>
             <!--region Trip Type-->
             <div class="row sl-itinerary-form__top">
-                <div class="col-lg-6">
+                <div class="col-lg-12">
                     <?= $formLeadModel->field($leadForm->getLead(), 'trip_type', [
                         'options' => [
                             'tag' => false,
