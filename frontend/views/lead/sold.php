@@ -73,7 +73,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     foreach ($additionallyInfo as $additionally) {
                         $bo_sale_id = (!empty($additionally->bo_sale_id))
                             ? $additionally->bo_sale_id : $model->bo_flight_id;
-                        $ids[] = $bo_sale_id ;
+                        $ids[] = $bo_sale_id;
                     }
 
                     $hrTag = Html::tag('hr', '', [
@@ -201,19 +201,19 @@ $this->params['breadcrumbs'][] = $this->title;
             },
             'filter' => $userList,
             'visible' => !$isAgent
-            ],
-            [
-                'label' => 'Profit',
-                'value' => function (\common\models\Lead $model) {
+        ],
+        [
+            'label' => 'Profit',
+            'value' => function (\common\models\Lead $model) {
                 $totalProfitTxt = '';
                 if ($model->finalProfit) {
                     $model->totalProfit = $model->finalProfit;
                     $totalProfitTxt = "<strong>$" . number_format($model->finalProfit, 2) . "</strong>";
-                }else{
+                } else {
                     $quote = $model->getBookedQuote();
                     if (empty($quote)) {
                         $totalProfitTxt = "<strong>$" . number_format(0, 2) . "</strong>";
-                    }else{
+                    } else {
                         $model->totalProfit = $quote->getEstimationProfit();
                         $totalProfitTxt = "<strong>$" . number_format($model->totalProfit, 2) . "</strong>";
                     }
@@ -236,42 +236,42 @@ $this->params['breadcrumbs'][] = $this->title;
                 }
                 $mainAgentProfitTxt = "<strong>$" . number_format($model->totalProfit * $mainAgentPercent / 100, 2) . "</strong>";
 
-                return 'Total profit: '.$totalProfitTxt.(($splitProfitTxt)?'<hr/>Split profit:<br/>'.$splitProfitTxt:'').
-                '<hr/> '.(($model->employee)?$model->employee->username:'Main agent').' profit: '.$mainAgentProfitTxt;
+                return 'Total profit: ' . $totalProfitTxt . (($splitProfitTxt) ? '<hr/>Split profit:<br/>' . $splitProfitTxt : '') .
+                    '<hr/> ' . (($model->employee) ? $model->employee->username : 'Main agent') . ' profit: ' . $mainAgentProfitTxt;
 
             },
-            'format' => 'raw'
-                    ],
-                    [
-                        'label' => 'Tips',
-                        'value' => function (\common\models\Lead $model) {
-                        if($model->totalTips == 0) {
-                            return '-';
-                        }
-                        $totalTipsTxt = "<strong>$" . number_format($model->totalTips, 2) . "</strong>";
+            'format' => 'raw',
+        ],
+        [
+            'label' => 'Tips',
+            'value' => function (\common\models\Lead $model) {
+                if ($model->totalTips == 0) {
+                    return '-';
+                }
+                $totalTipsTxt = "<strong>$" . number_format($model->totalTips, 2) . "</strong>";
 
-                        $splitTipsTxt = '';
-                        $splitTips = $model->getAllTipsSplits();
-                        $return = [];
-                        foreach ($splitTips as $split) {
-                            $model->splitTipsPercentSum += $split->ts_percent;
-                            $return[] = '<b>' . $split->tsUser->username . '</b> (' . $split->ts_percent . '%) $' . number_format($split->countTips($model->totalTips), 2);
-                        }
-                        if (!empty($return)) {
-                            $splitTipsTxt = implode('<br/>', $return);
-                        }
+                $splitTipsTxt = '';
+                $splitTips = $model->getAllTipsSplits();
+                $return = [];
+                foreach ($splitTips as $split) {
+                    $model->splitTipsPercentSum += $split->ts_percent;
+                    $return[] = '<b>' . $split->tsUser->username . '</b> (' . $split->ts_percent . '%) $' . number_format($split->countTips($model->totalTips), 2);
+                }
+                if (!empty($return)) {
+                    $splitTipsTxt = implode('<br/>', $return);
+                }
 
-                        $mainAgentPercent = 100;
-                        if ($model->splitTipsPercentSum > 0) {
-                            $mainAgentPercent -= $model->splitTipsPercentSum;
-                        }
-                        $mainAgentTipsTxt = "<strong>$" . number_format($model->totalTips * $mainAgentPercent / 100, 2) . "</strong>";
+                $mainAgentPercent = 100;
+                if ($model->splitTipsPercentSum > 0) {
+                    $mainAgentPercent -= $model->splitTipsPercentSum;
+                }
+                $mainAgentTipsTxt = "<strong>$" . number_format($model->totalTips * $mainAgentPercent / 100, 2) . "</strong>";
 
-                        return 'Tips: '.$totalTipsTxt.(($splitTipsTxt)?'<hr/>Split tips:<br/>'.$splitTipsTxt:'').'<hr/> '.
-                            (($model->employee)?$model->employee->username:'Main agent').' tips: '.$mainAgentTipsTxt;
-                    },
-                    'format' => 'raw'
-                    ],
+                return 'Tips: ' . $totalTipsTxt . (($splitTipsTxt) ? '<hr/>Split tips:<br/>' . $splitTipsTxt : '') . '<hr/> ' .
+                    (($model->employee) ? $model->employee->username : 'Main agent') . ' tips: ' . $mainAgentTipsTxt;
+            },
+            'format' => 'raw',
+        ],
         [
             'label' => 'Date of Issue',
             'attribute' => 'updated',
@@ -318,13 +318,13 @@ $this->params['breadcrumbs'][] = $this->title;
         [
             'attribute' => 'project_id',
             'value' => function (\common\models\Lead $model) {
-                    return $model->project ? $model->project->name: '-';
-                },
-                'format' => 'raw',
-                'options' => [
-                    'style' => 'width:120px'
-                ],
-                'filter' => $projectList,
+                return $model->project ? $model->project->name : '-';
+            },
+            'format' => 'raw',
+            'options' => [
+                'style' => 'width:120px'
+            ],
+            'filter' => $projectList,
         ],
         [
             'attribute' => 'source_id',

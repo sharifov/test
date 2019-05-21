@@ -67,7 +67,7 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$
                                 'timePickerIncrement'=>15,
                                 'locale'=>[
                                     'format'=>'Y-m-d',
-                                    'separator' => ' / '
+                                    'separator' => ' - '
                                 ]
                             ]
                         ]);

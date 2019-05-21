@@ -123,7 +123,7 @@ $isUM = Yii::$app->authManager->getAssignment('userManager', Yii::$app->user->id
                     ];
                 }
 
-                if($isQA || $isSupervision) {
+                if($isSupervision) {
                     $items =  [
                         ['label' => 'Calls & SMS', 'url' => ['/stats/call-sms'], 'icon' => 'list'],
                         ['label' => 'Calls Report', 'url' => ['/stats/calls-graph'], 'icon' => 'line-chart'],
@@ -132,6 +132,13 @@ $isUM = Yii::$app->authManager->getAssignment('userManager', Yii::$app->user->id
                         ['label' => 'Call List', 'url' => ['/call/index'], 'icon' => 'phone'],
                         ['label' => 'SMS List', 'url' => ['/sms/index'], 'icon' => 'comments-o'],
                         ['label' => 'Mail List', 'url' => ['/email/index'], 'icon' => 'envelope'],
+                    ];
+                }
+
+                if($isQA) {
+                    $items =  [
+                        ['label' => 'Call List', 'url' => ['/call/index'], 'icon' => 'phone'],
+                        ['label' => 'SMS List', 'url' => ['/sms/index'], 'icon' => 'comments-o'],
                     ];
                 }
 
@@ -187,11 +194,11 @@ $isUM = Yii::$app->authManager->getAssignment('userManager', Yii::$app->user->id
             {
                 $menuItems[] = ['label' => 'KPI <span id="kpi" class="label-info label pull-right"></span> ', 'url' => ['/kpi/index'], 'icon' => 'money'];
             }
-
+            //var_dump($menuItems); die();
 
             if($isQA) {
                 $menuItems[] = ['label' => 'Sold', 'url' => ['queue/sold'], 'icon' => 'flag text-success'];
-                $menuItems[] = ['label' => 'Duplicate', 'url' => ['queue/duplicate'], 'icon' => 'list text-danger'];
+               // $menuItems[] = ['label' => 'Duplicate', 'url' => ['queue/duplicate'], 'icon' => 'list text-danger'];
                 $menuItems[] = ['label' => 'Trash', 'url' => ['queue/trash'], 'icon' => 'trash-o text-danger'];
             }
 
@@ -417,7 +424,7 @@ $isUM = Yii::$app->authManager->getAssignment('userManager', Yii::$app->user->id
 
         //echo frontend\themes\gentelella\widgets\Menu::widget(['items' => $menuItems, 'encodeLabels' => false, 'activateParents' => true]);
 
-        echo \yiister\gentelella\widgets\Menu::widget(['items' => $menuItems, 'encodeLabels' => false, 'activateParents' => true]);
+        echo \yiister\gentelella\widgets\Menu::widget(['items' => $menuItems, 'encodeLabels' => false, 'activateParents' => true, 'linkTemplate' => '<a href="{url}" data-method="post">{icon}<span>{label}</span>{badge}</a>']);
 
 
         ?>

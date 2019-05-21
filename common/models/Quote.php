@@ -2028,7 +2028,7 @@ class Quote extends \yii\db\ActiveRecord
      * @param string $ip
      * @return bool
      */
-    public function isExcludedIP($ip)
+    public static function isExcludedIP($ip): bool
     {
         $ipInGlobal = GlobalAcl::findOne(['mask' => $ip]);
         if($ipInGlobal !== null){

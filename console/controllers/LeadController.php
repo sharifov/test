@@ -6,12 +6,15 @@ use common\models\Lead;
 use common\models\Task;
 use yii\console\Controller;
 use yii\helpers\Console;
-use yii\helpers\Url;
 use yii\helpers\VarDumper;
+use Yii;
 
 class LeadController extends Controller
 {
-    public function actionUpdateIpInfo()
+    /**
+     *
+     */
+    public function actionUpdateIpInfo(): void
     {
         printf("\n --- Start %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
 
@@ -51,12 +54,12 @@ class LeadController extends Controller
 
 
 
-    public function actionEmail()
+    /*public function actionEmail()
     {
         printf("\n --- Start %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
 
         $swiftMailer = \Yii::$app->mailer2;
-        $body = 'Hi! Меня зовут .... ! Как дела? '.date('Y-m-d H:i:s');
+        $body = 'Hi! My name is '.date('Y-m-d H:i:s');
         $subject = '✈ ⚠ [Sales] Default subject';
 
         try {
@@ -77,25 +80,26 @@ class LeadController extends Controller
             print_r($e->getMessage());
         }
         printf("\n --- End %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
-    }
+    }*/
 
 
     /**
      * @throws \Throwable
+     * @throws \yii\base\InvalidConfigException
      * @throws \yii\db\Exception
      * @throws \yii\db\StaleObjectException
      *
-     *
      * sudo crontab -e
      * "10   0  *  *  *     run-this-one php /var/www/sale/yii lead/update-by-tasks"
-     *
      */
-    public function actionUpdateByTasks()
+
+
+    public function actionUpdateByTasks(): void
     {
         printf("\n --- Start %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
 
        /* $swiftMailer = \Yii::$app->mailer2;
-        $body = 'Hi! Меня зовут .... ! Как дела? '.date('Y-m-d H:i:s');
+        $body = 'Hi! '.date('Y-m-d H:i:s');
         $subject = '✈ ⚠ [Sales] Default subject';
 
         try {
@@ -143,18 +147,18 @@ class LeadController extends Controller
 
                    if(!$leadItem['l_answered']) {
                        $lead->status = Lead::STATUS_FOLLOW_UP;
-                       $lead->status_description = 'System Autochange status to FOLLOW_UP ('.$leadItem['checked_cnt'] .'/'. $leadItem['all_cnt'] . ' tasks completed)';
+                       $lead->status_description = 'System AutoChange status to FOLLOW_UP ('.$leadItem['checked_cnt'] .'/'. $leadItem['all_cnt'] . ' tasks completed)';
 
 
                        if ($lead->employee_id && !$lead->sendNotification('lead-status-follow-up', $lead->employee_id, null, $lead)) {
-                           \Yii::warning('Not send Email notification to employee_id: ' . $lead->employee_id . ', lead: ' . $lead->id, 'Console:LeadController:UpdateByTasks:sendNotification');
+                           Yii::warning('Not send Email notification to employee_id: ' . $lead->employee_id . ', lead: ' . $lead->id, 'Console:LeadController:UpdateByTasks:sendNotification');
                        }
 
                    }
 
                    $lead->update();
 
-                   echo ' - Lead: '.$lead->id. " - " .$leadItem['checked_cnt'] ."/". $leadItem['all_cnt'] . " tasks completed \r\n";
+                   echo ' - Lead: '.$lead->id. ' - ' .$leadItem['checked_cnt'] .'/'. $leadItem['all_cnt'] . " tasks completed \r\n";
                }
            }
        }
@@ -169,17 +173,17 @@ class LeadController extends Controller
                 if($lead) {
                     if($leadItem['l_answered']) {
                         $lead->status = Lead::STATUS_SNOOZE;
-                        $lead->snooze_for = date('Y-m-d', strtotime("+3 days"));
-                        $lead->status_description = 'System Autochange status to SNOOZE ('.$leadItem['checked_cnt'] .'/'. $leadItem['all_cnt'] . ' tasks completed)';
+                        $lead->snooze_for = date('Y-m-d', strtotime('+3 days'));
+                        $lead->status_description = 'System AutoChange status to SNOOZE ('.$leadItem['checked_cnt'] .'/'. $leadItem['all_cnt'] . ' tasks completed)';
                     }
                     /*else {
                         $lead->status = Lead::STATUS_FOLLOW_UP;
-                        $lead->status_description = 'System Autochange status to FOLLOW_UP ('.$leadItem['checked_cnt'] .'/'. $leadItem['all_cnt'] . ' tasks completed)';
+                        $lead->status_description = 'System AutoChange status to FOLLOW_UP ('.$leadItem['checked_cnt'] .'/'. $leadItem['all_cnt'] . ' tasks completed)';
                     }*/
 
                     $lead->update();
 
-                    echo ' - Lead: '.$lead->id. " - " .$leadItem['checked_cnt'] ."/". $leadItem['all_cnt'] . " tasks completed \r\n";
+                    echo ' - Lead: '.$lead->id. ' - ' .$leadItem['checked_cnt'] .'/'. $leadItem['all_cnt'] . " tasks completed \r\n";
                 }
             }
         }

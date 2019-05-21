@@ -5,26 +5,31 @@ use yii\widgets\Pjax;
  */
 $js = <<<JS
     $('#viewMode0').click(function() {
+        $('#chart_div').html(generateChartPreloader());
         $('#viewMode1, #viewMode2, #viewMode3').removeClass('active focus');
         $.pjax({container: '#calls-graph-pjax', data: {dateRange: $('#call-stats-picker').val(), groupBy: 'hours', callType: $('#call_type').val()}, type: 'POST', url: 'calls-graph', async:true, push: false});
     });
 
     $('#viewMode1').click(function() {
+        $('#chart_div').html(generateChartPreloader());
         $('#viewMode0, #viewMode2, #viewMode3').removeClass('active focus');
         $.pjax({container: '#calls-graph-pjax', data: {dateRange: $('#call-stats-picker').val(), groupBy: 'days', callType: $('#call_type').val()}, type: 'POST', url: 'calls-graph', async:true, push: false});
     });
     
     $('#viewMode2').click(function() {
+        $('#chart_div').html(generateChartPreloader());
         $('#viewMode0, #viewMode1, #viewMode3').removeClass('active focus');
         $.pjax({container: '#calls-graph-pjax', data: {dateRange: $('#call-stats-picker').val(), groupBy: 'weeks', callType: $('#call_type').val()}, type: 'POST', url: 'calls-graph', async:true, push: false});
     });
     
     $('#viewMode3').click(function() {
+        $('#chart_div').html(generateChartPreloader());
         $('#viewMode0, #viewMode1, #viewMode2').removeClass('active focus');
         $.pjax({container: '#calls-graph-pjax', data: {dateRange: $('#call-stats-picker').val(), groupBy: 'months', callType: $('#call_type').val()}, type: 'POST', url: 'calls-graph', async:true, push: false});
     });
     
     $('#call_type').on('change', function() {
+        $('#chart_div').html(generateChartPreloader());
         let groupBy = $('input[name^="viewMode"]:checked').val();
         if( typeof groupBy === 'undefined'){
             let dates = $('#call-stats-picker').val().split(' / ');
@@ -48,6 +53,12 @@ $js = <<<JS
           break;
         }
     });
+    
+    function generateChartPreloader() {
+              return "<div class='chartPreloader' style='width:100%; height:50%'>" + 
+              "<i class='fa fa-spinner fa-pulse fa-4x' style='color: #CCCCCC;  position: relative;  top: 250px;  left: 45%;  transform: translate(-50%, -50%);'></i>" +
+              "</div>"
+     }
 JS;
 $this->registerJs($js, \yii\web\View::POS_READY);
 $this->title = 'Calls Report';
@@ -81,7 +92,8 @@ $this->title = 'Calls Report';
                                     ],
                                 ],
                                 'pluginEvents'=>[
-                                    "apply.daterangepicker"=>"function(){                                    
+                                    "apply.daterangepicker"=>"function(){
+                                     $('#chart_div').html(generateChartPreloader());                                    
                                      $.pjax({container: '#calls-graph-pjax', data: {dateRange: $('#call-stats-picker').val(), callType: $('#call_type').val()}, type: 'POST', url: 'calls-graph', async:true, push: false});
                                      let dates = $('#call-stats-picker').val().split(' / ');
                                      if (dates[0] == dates[1]){
@@ -90,11 +102,9 @@ $this->title = 'Calls Report';
                                      } else {
                                         $('#viewMode0').removeClass('active focus');
                                         $('#viewMode1').addClass('active focus');
-                                     }                                                              
-                                                            
+                                     }                     
                                   }",
                                 ],
-
                             ]);?>
                         </div>
 
@@ -132,7 +142,11 @@ $this->title = 'Calls Report';
                             <?php if ($callsGraphData): ?>
                                 <div class="row">
                                     <div class="col-md-12">
-                                        <div id="chart_div"></div>
+                                        <div id="chart_div" style="height:550px">
+                                            <div class="chartPreloader" style="width:100%; height:50%">
+                                                <i class="fa fa-spinner fa-pulse fa-4x" style=" color: #CCCCCC;  position: relative;  top: 250px;  left: 45%;  transform: translate(-50%, -50%); "></i>
+                                            </div>
+                                        </div>
                                         <?php
                                         $this->registerJs("google.charts.load('current', {'packages':['corechart']}); google.charts.setOnLoadCallback(drawChart);", \yii\web\View::POS_READY);
                                         ?>
@@ -177,10 +191,11 @@ $this->title = 'Calls Report';
                                                 ]);
 
                                                 let options = {
-                                                    height: 545,
+                                                    theme: 'material',
+                                                    height: 550,
                                                     vAxis: {
                                                         textStyle: {
-                                                            fontSize: 10
+                                                            fontSize: 12
                                                         },
                                                         format:"#",
                                                         viewWindow: {
@@ -189,7 +204,7 @@ $this->title = 'Calls Report';
                                                     },
                                                     hAxis: {
                                                         textStyle: {
-                                                            fontSize: 10
+                                                            fontSize: 12
                                                         },
                                                     },
                                                     seriesType: 'bars',
@@ -205,7 +220,7 @@ $this->title = 'Calls Report';
                                                     legend: {
                                                         position: 'top',
                                                         textStyle: {
-                                                            fontSize: 10
+                                                            fontSize: 12
                                                         },
                                                         alignment: 'end'
                                                     },
@@ -214,6 +229,11 @@ $this->title = 'Calls Report';
                                                             fontSize: 14
                                                         },
                                                         isHtml: true
+                                                    },
+                                                    animation:{
+                                                        duration: 1000,
+                                                        easing: 'linear',
+                                                        startup: true
                                                     }
                                                 };
                                                 let chart = new google.visualization.ComboChart(document.getElementById('chart_div'));

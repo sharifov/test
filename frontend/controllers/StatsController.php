@@ -39,7 +39,7 @@ class StatsController extends FController
                     [
                         'actions' => ['index', 'call-sms', 'calls-graph', 'sms-graph', 'emails-graph'],
                         'allow' => true,
-                        'roles' => ['supervision', 'admin', 'qa'],
+                        'roles' => ['supervision', 'admin'],
                     ],
                 ],
             ],
@@ -197,12 +197,10 @@ class StatsController extends FController
     public function actionCallsGraph()
     {
         if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
-            $dateRange = Yii::$app->request->post('dateRange');
+            $chartOptions = Yii::$app->request->post();
             $rangeBy = Yii::$app->request->post('groupBy');
-            $callType = Yii::$app->request->post('callType');
-
-            $date = $pieces = explode("/", $dateRange);
-            $callsGraphData = Call::getCallStats($date[0], $date[1], $rangeBy, (int)$callType);
+            $date = explode("/", $chartOptions['dateRange']);
+            $callsGraphData = Call::getCallStats($date[0], $date[1], $rangeBy, (int)$chartOptions['callType']);
 
             return $this->renderAjax('calls-report', [
                 'callsGraphData' => $callsGraphData
@@ -220,12 +218,10 @@ class StatsController extends FController
     public function actionSmsGraph()
     {
         if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
-            $dateRange = Yii::$app->request->post('dateRange');
+            $chartOptions = Yii::$app->request->post();
             $rangeBy = Yii::$app->request->post('groupBy');
-            $smsType = Yii::$app->request->post('smsType');
-
-            $date = $pieces = explode("/", $dateRange);
-            $smsGraphData = Sms::getSmsStats($date[0], $date[1], $rangeBy, (int)$smsType);
+            $date = explode("/", $chartOptions['dateRange']);
+            $smsGraphData = Sms::getSmsStats($date[0], $date[1], $rangeBy, (int)$chartOptions['smsType']);
 
             return $this->renderAjax('sms-report', [
                 'smsGraphData' => $smsGraphData
@@ -243,12 +239,10 @@ class StatsController extends FController
     public function actionEmailsGraph()
     {
         if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
-            $dateRange = Yii::$app->request->post('dateRange');
+            $chartOptions = Yii::$app->request->post();
             $rangeBy = Yii::$app->request->post('groupBy');
-            $emailsType = Yii::$app->request->post('emailsType');
-
-            $date = $pieces = explode("/", $dateRange);
-            $emailsGraphData = Email::getEmailsStats($date[0], $date[1], $rangeBy, (int)$emailsType);
+            $date = explode("/", $chartOptions['dateRange']);
+            $emailsGraphData = Email::getEmailsStats($date[0], $date[1], $rangeBy, (int)$chartOptions['emailsType']);
 
             return $this->renderAjax('emails-report', [
                 'emailsGraphData' => $emailsGraphData

@@ -96,10 +96,17 @@ class LeadController extends FController
 
                     [
                         'actions' => [
-                            'view', 'trash', 'sold', 'duplicate'
+                            'view', 'trash', 'sold', 'duplicate', 'flow-transition'
                         ],
                         'allow' => true,
-                        'roles' => ['qa', 'supervisor'],
+                        'roles' => ['supervisor'],
+                    ],
+                    [
+                        'actions' => [
+                            'view', 'trash', 'sold', 'flow-transition'
+                        ],
+                        'allow' => true,
+                        'roles' => ['qa'],
                     ],
                 ],
             ]
@@ -334,7 +341,7 @@ class LeadController extends FController
                 $errors = [];
                 if (empty($data['errors']) && $data['load'] && $leadForm->save($errors)) {
 
-                    if ($lead->called_expert) {
+                    /*if ($lead->called_expert) {
                         $lead = Lead::findOne(['id' => $lead->id]);
                         $data = $lead->getLeadInformationForExpert();
                         $result = BackOffice::sendRequest('lead/update-lead', 'POST', json_encode($data));
@@ -344,7 +351,7 @@ class LeadController extends FController
                                 print_r($result['errors'], true)
                             ));
                         }
-                    }
+                    }*/
 
                     return $this->redirect(['lead/view', 'gid' => $leadForm->getLead()->gid]);
                 }
@@ -1004,7 +1011,9 @@ class LeadController extends FController
             if ($is_admin || $isQA) {
                 $enableCommunication = true;
             } elseif($is_supervision) {
-                $enableCommunication = Employee::isSupervisionAgent($leadForm->getLead()->employee_id);
+                if ($leadFormEmployee_id = $leadForm->getLead()->employee_id) {
+                    $enableCommunication = Employee::isSupervisionAgent($leadFormEmployee_id);
+                }
             } elseif ($is_agent) {
                 if($leadForm->getLead()->employee_id == Yii::$app->user->id) {
                     $enableCommunication = true;
@@ -1043,7 +1052,9 @@ class LeadController extends FController
 
         //$dataProviderCommunication = $lead->getQuotesProvider([]);
 
-        return $this->render('view', [
+        $tmpl = $isQA ? 'view_qa' : 'view';
+
+        return $this->render($tmpl, [
             'leadForm' => $leadForm,
             'previewEmailForm' => $previewEmailForm,
             'previewSmsForm' => $previewSmsForm,
@@ -1828,7 +1839,9 @@ class LeadController extends FController
 
         $dataProvider = $searchModel->searchSold($params);
 
-        return $this->render('sold', [
+        $tmpl = Yii::$app->authManager->getAssignment('qa', Yii::$app->user->id) ? 'sold_qa' : 'sold';
+
+        return $this->render($tmpl, [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
             'isAgent' => $isAgent,
