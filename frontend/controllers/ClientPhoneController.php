@@ -5,6 +5,8 @@ namespace frontend\controllers;
 use Yii;
 use common\models\ClientPhone;
 use common\models\search\ClentPhoneSearch;
+use yii\filters\AccessControl;
+use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
@@ -15,20 +17,32 @@ use yii\filters\VerbFilter;
  */
 class ClientPhoneController extends FController
 {
-    /**
-     * {@inheritdoc}
-     */
+
+
     public function behaviors()
     {
-        return [
+        $behaviors = [
             'verbs' => [
                 'class' => VerbFilter::class,
                 'actions' => [
                     'delete' => ['POST'],
                 ],
             ],
+            'access' => [
+                'class' => AccessControl::class,
+                'rules' => [
+                    [
+                        //'actions' => ['index', 'update', 'view', 'delete', 'create'],
+                        'allow' => true,
+                        'roles' => ['supervision', 'admin'],
+                    ],
+                ],
+            ],
         ];
+
+        return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
+
 
     /**
      * Lists all ClientPhone models.
