@@ -18,11 +18,12 @@ $bundle = \frontend\themes\gentelella\assets\AssetLeadCommunication::register($t
 
 //$this->registerCssFile('/css/style-req.css');
 $userId = Yii::$app->user->id;
+$user = Yii::$app->user->identity;
 
 $is_manager = false;
-$is_admin = Yii::$app->authManager->getAssignment('admin', $userId);
-$is_qa = Yii::$app->authManager->getAssignment('qa', $userId);
-$is_supervision = Yii::$app->authManager->getAssignment('supervision', $userId);
+$is_admin = $user->canRole('admin');
+$is_qa = $user->canRole('qa');
+$is_supervision = $user->canRole('supervision');
 
 if($is_admin || $is_supervision) {
     $is_manager = true;

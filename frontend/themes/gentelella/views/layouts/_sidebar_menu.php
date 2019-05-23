@@ -2,13 +2,15 @@
 /* @var $this \yii\web\View */
 
 
+/** @var \common\models\Employee $userModel */
+$userModel = Yii::$app->user->identity;
 
-$isAdmin = Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id);
-$isSupervision = Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id);
-$isAgent = Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id);
-$isCoach = Yii::$app->authManager->getAssignment('coach', Yii::$app->user->id);
-$isQA = Yii::$app->authManager->getAssignment('qa', Yii::$app->user->id);
-$isUM = Yii::$app->authManager->getAssignment('userManager', Yii::$app->user->id);
+$isAdmin = $userModel->canRole('admin'); //Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id);
+$isSupervision = $userModel->canRole('supervision'); //Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id);
+$isAgent = $userModel->canRole('agent'); //Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id);
+$isCoach = $userModel->canRole('coach'); //Yii::$app->authManager->getAssignment('coach', Yii::$app->user->id);
+$isQA = $userModel->canRole('qa'); //Yii::$app->authManager->getAssignment('qa', Yii::$app->user->id);
+$isUM = $userModel->canRole('userManager'); //Yii::$app->authManager->getAssignment('userManager', Yii::$app->user->id);
 
 ?>
 <div id="sidebar-menu" class="main_menu_side hidden-print main_menu">
@@ -53,13 +55,13 @@ $isUM = Yii::$app->authManager->getAssignment('userManager', Yii::$app->user->id
             $menuItems[] = ['label' => 'Login', 'url' => ['/site/login']];
         } else {
 
-            /** @var \common\models\Employee $userModel */
-            $userModel = Yii::$app->user->identity;
+
+
 
             if(!$isQA && !$isUM) {
                 $menuItems[] = ['label' => 'Create new Lead', 'url' => ['lead/create'], 'icon' => 'plus'];
                 //if($isAdmin) {
-                if($userModel->userProfile && $userModel->userProfile->up_call_type_id != \common\models\UserProfile::CALL_TYPE_OFF) {
+                if($userModel->userProfile && $userModel->userProfile->up_call_type_id !== \common\models\UserProfile::CALL_TYPE_OFF) {
                     $menuItems[] = ['label' => 'Auto redial', 'url' => ['/call/auto-redial'], 'icon' => 'tty'];
                 }
                 //}

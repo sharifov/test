@@ -13,7 +13,7 @@ use yii\helpers\Url;
 
 $this->title = 'Trash Queue';
 
-if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
+if (Yii::$app->user->identity->canRole('admin')) {
     $userList = \common\models\Employee::getList();
     $projectList = \common\models\Project::getList();
 } else {
@@ -115,7 +115,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'options' => [
                 'style' => 'width:220px'
             ],
-            'visible' => !Yii::$app->authManager->getAssignment('qa', Yii::$app->user->id)
+            'visible' => !Yii::$app->user->identity->canRole('qa')
         ],/*
         [
             'attribute' => 'clientTime',
@@ -135,7 +135,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'options' => [
                 'style' => 'width:110px'
             ],
-            'visible' => !Yii::$app->authManager->getAssignment('qa', Yii::$app->user->id)
+            'visible' => !Yii::$app->user->identity->canRole('qa')
         ],
 
         [
@@ -150,7 +150,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 return $content;
             },
             'format' => 'raw',
-            'visible' => !Yii::$app->authManager->getAssignment('qa', Yii::$app->user->id)
+            'visible' => !Yii::$app->user->identity->canRole('qa')
         ],
 //        [
 //            'attribute' => 'Quotes ',

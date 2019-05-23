@@ -20,11 +20,7 @@ $bundle = \frontend\themes\gentelella\assets\Asset::register($this);
 //$this->registerCssFile('@backend/themes/gentelella/css/custom.css');
 //Yii::$app->view->registerCssFile('@backend/themes/gentelella/css/custom.css', ['depends'=>'yiister\gentelella\assets\Asset']);
 
-$isAdmin = Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id);
-
-//if($isAdmin) {
-    \frontend\assets\NotifyAsset::register($this);
-//}
+\frontend\assets\NotifyAsset::register($this);
 
 ?>
 <?php $this->beginPage(); ?>
@@ -60,7 +56,7 @@ $isAdmin = Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id);
     <script src="https://cdnjs.cloudflare.com/ajax/libs/respond.js/1.4.2/respond.min.js"></script>
     <![endif]-->
 </head>
-<body class="nav-<?= !empty($_COOKIE['menuIsCollapsed']) && $_COOKIE['menuIsCollapsed'] == 'true' ? 'sm' : 'md' ?>">
+<body class="nav-<?= !empty($_COOKIE['menuIsCollapsed']) && $_COOKIE['menuIsCollapsed'] === 'true' ? 'sm' : 'md' ?>">
 <?php $this->beginBody(); ?>
 <div class="container body">
     <div class="main_container">
@@ -70,21 +66,22 @@ $isAdmin = Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id);
             <div class="left_col scroll-view">
 
                 <?php
-                    /** @var \common\models\Employee $me */
-                    $me = Yii::$app->user->identity;
+                    /** @var \common\models\Employee $user */
+                    $user = Yii::$app->user->identity;
 
-                    $default = "identicon";
+                    $default = 'identicon';
 
-                    if(!$me || !$me->email) {
-                        $grav_url = '//www.gravatar.com/avatar/?d=identicon&s=60';
+                    if($user && $user->email) {
+                        $gravUrl = '//www.gravatar.com/avatar/' . md5(strtolower(trim($user->email))) . '?d=identicon&s=128';
+
+                    } else {
+                        $gravUrl = '//www.gravatar.com/avatar/?d=identicon&s=60';
                     }
-                    else {
-                        $grav_url = "//www.gravatar.com/avatar/" . md5(strtolower(trim($me->email))) . "?d=identicon&s=128";
-                    }
+
                 ?>
 
                 <!-- navbar left -->
-                <?= $this->render('_navbar_left', ['host' => $host, 'grav_url' => $grav_url]) ?>
+                <?= $this->render('_navbar_left', ['host' => $host, 'grav_url' => $gravUrl]) ?>
                 <!-- /navbar left -->
 
                 <!-- sidebar menu -->
@@ -106,7 +103,7 @@ $isAdmin = Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id);
                     </a>*/ ?>
 
                     <?=Html::a('<span class="glyphicon glyphicon-off" aria-hidden="true"></span>', ['/user-management/auth/logout'],
-                        ['data-toggle' => "tooltip", 'data-placement' => "top", 'title' => "Logout"]) ?>
+                        ['data-toggle' => 'tooltip', 'data-placement' => 'top', 'title' => 'Logout']) ?>
 
                     <?/*=Html::a('<span class="fa fa-certificate" aria-hidden="true"></span>', ['site/index', 'snow' => 'off'],
                         ['data-toggle' => "tooltip", 'data-placement' => "top", 'title' => "Snow Off"])*/ ?>
@@ -130,28 +127,15 @@ $isAdmin = Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id);
                     <ul class="nav navbar-nav navbar-right">
                         <li class="">
                             <a href="javascript:;" class="user-profile dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
-                                <?/*<img src="http://placehold.it/128x128" alt="">*/ ?>
 
-                                <?=Html::img($grav_url, ['alt' => 'avatar'])?>
-
-                                <?php
-                                    $myRolesModel = \webvimark\modules\UserManagement\models\rbacDB\Role::getUserRoles(Yii::$app->user->id);
-                                    $myRoles = [];
-                                    if($myRolesModel) {
-                                        foreach ($myRolesModel as $role) {
-                                            if ($role->name == 'guest') continue;
-                                            $myRoles[] = $role->name;
-                                        }
-                                    }
-
-                                ?>
-                                <b><?=implode(', ', $myRoles) ; ?></b>:
-                                <?=Html::encode(Yii::$app->user->identity->username)?>
+                                <?=Html::img($gravUrl, ['alt' => 'avatar'])?>
+                                <b><?=implode(', ', $user->roles) ?></b>:
+                                <?=Html::encode($user->username)?>
 
                                 <span class=" fa fa-angle-down"></span>
                             </a>
                             <ul class="dropdown-menu dropdown-usermenu pull-right">
-                                <? /*<li><a href="javascript:;">  Profile</a>
+                                <?php /*<li><a href="javascript:;">  Profile</a>
                                 </li>
                                 <li>
                                     <a href="javascript:;">
@@ -165,17 +149,15 @@ $isAdmin = Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id);
 
                                 <li>
                                     <?=Html::a('<i class="fa fa-user pull-right"></i> My Profile', ['/site/profile'],
-                                        ['title' => "My Profile"]) ?>
+                                        ['title' => 'My Profile']) ?>
                                     <?=Html::a('<i class="fa fa-sign-out pull-right"></i> Log Out', ['/site/logout'],
-                                        ['title' => "Logout"]) ?>
-                                    <?php /*=Html::a('<i class="fa fa-sign-out pull-right"></i> Log Out', ['/user-management/auth/logout'],
-                                        ['title' => "Logout"])*/ ?>
+                                        ['title' => 'Logout']) ?>
 
                                 </li>
                             </ul>
                         </li>
                         <?/*php if($isAdmin):*/ ?>
-                            <?= frontend\widgets\Notifications::widget(); ?>
+                            <?//= frontend\widgets\Notifications::widget(); ?>
                         <?/*php endif;*/?>
 
                         <?//= backend\widgets\ChatNotifications::widget(); ?>
@@ -245,8 +227,8 @@ $isAdmin = Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id);
 <?= $this->render('_modals') ?>
 <!-- /modals -->
 
-<?= frontend\widgets\CallBox::widget(); ?>
-<?= frontend\widgets\WebPhone::widget(); ?>
+<?= frontend\widgets\CallBox::widget() ?>
+<?= frontend\widgets\WebPhone::widget() ?>
 
 <?php $this->endBody(); ?>
 </body>

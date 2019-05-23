@@ -19,7 +19,7 @@ use dosamigos\datepicker\DatePicker;
 
 $this->title = 'Sold Queue';
 
-if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
+if (Yii::$app->user->identity->canRole('admin')) {
     $userList = \common\models\Employee::getList();
     $projectList = \common\models\Project::getList();
 } else {

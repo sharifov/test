@@ -515,13 +515,13 @@ class Lead extends ActiveRecord
         $userId = Yii::$app->user->id;
         $created = '';
         $employee = '';
-        if (Yii::$app->authManager->getAssignment('agent', $userId)) {
+        if (Yii::$app->user->identity->canRole('agent')) {
             $employee = ' AND employee_id = ' . $userId;
         }
 
         $sold = '';
 
-        if (Yii::$app->authManager->getAssignment('supervision', $userId)) {
+        if (Yii::$app->user->identity->canRole('supervision')) {
             $subQuery1 = UserGroupAssign::find()->select(['ugs_group_id'])->where(['ugs_user_id' => $userId]);
             $subQuery = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->where(['IN', 'ugs_group_id', $subQuery1]);
             $resEmp = $subQuery->createCommand()->queryAll();
@@ -538,7 +538,7 @@ class Lead extends ActiveRecord
 
         }
 
-        if (Yii::$app->user->identity->role == 'agent') {
+        if (Yii::$app->user->identity->canRole('agent')) {
             $sold = ' AND (employee_id = ' . $userId.' OR ps.ps_user_id ='.$userId.' OR ts.ts_user_id ='.$userId.')';
         }
         $default = implode(',', [
@@ -568,7 +568,7 @@ class Lead extends ActiveRecord
             $select['duplicate'] = 'COUNT(DISTINCT CASE WHEN status IN (' . self::STATUS_TRASH . ') ' . $created . $employee . ' THEN leads.id ELSE NULL END)';
         }*/
 
-        if (Yii::$app->user->identity->role === 'admin') {
+        if (Yii::$app->user->identity->canRole('admin')) {
             $select['pending'] = 'COUNT(DISTINCT CASE WHEN status IN (:pending) THEN leads.id ELSE NULL END)';
         }
 
@@ -592,18 +592,19 @@ class Lead extends ActiveRecord
         $db = Yii::$app->db;
         $duration = 0;     // cache query results for 60 seconds.
         $dependency = new DbDependency();
-        $dependency->sql = 'SELECT count(*) FROM leads';
+        $dependency->sql = 'SELECT MAX(id) FROM leads';
 
-        //$dependency = ...;  // optional dependency
 
         $result = $db->cache(function ($db) use ($query) {
             return $query->createCommand()->queryOne();
         }, $duration, $dependency);
 
+        //$result = $query->createCommand()->queryOne();
+
 
         $result['duplicate'] = '';
 
-        if (Yii::$app->user->identity->role === 'admin' || Yii::$app->user->identity->role === 'qa') {
+        if (Yii::$app->user->identity->canRoles(['admin', 'qa'])) {
             $result['duplicate'] = self::find()->where(['IS NOT', 'l_duplicate_lead_id', null])->count() ?: '' ;
         }
 

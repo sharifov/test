@@ -13,7 +13,7 @@ use yii\bootstrap\Modal;
 $urlUserActions = Url::to(['lead/get-user-actions', 'id' => $leadForm->getLead()->id]);
 $userId = Yii::$app->user->id;
 
-if ($leadForm->mode != $leadForm::VIEW_MODE || ($leadForm->mode == $leadForm::VIEW_MODE && (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id)))) {
+if ($leadForm->mode !== $leadForm::VIEW_MODE || ($leadForm->mode === $leadForm::VIEW_MODE && Yii::$app->user->identity->canRoles(['admin', 'supervision']))) {
     $modelFormName = sprintf('%s-', strtolower($leadForm->formName()));
     $formLeadId = sprintf('%s-form', $leadForm->getLead()->formName());
     $formClientId = sprintf('%s-form', $leadForm->getClient()->formName());
@@ -438,7 +438,7 @@ $buttonAnswer = Html::a('<i class="fa fa-commenting-o"></i> </span>'. ($leadForm
     'data-pjax' => 0
 ]);
 
-$viwModeSuperAdminCondition = ($leadForm->mode == $leadForm::VIEW_MODE && (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id)));
+$viwModeSuperAdminCondition = ($leadForm->mode === $leadForm::VIEW_MODE && Yii::$app->user->identity->canRole(['admin', 'supervidion']));
 $buttonsSubAction = [];
 $takeConditions = false;
 if (!$leadForm->getLead()->isNewRecord) {
@@ -456,7 +456,7 @@ if (!$leadForm->getLead()->isNewRecord) {
     $unTrashConditions = ($leadForm->getLead()->status == Lead::STATUS_TRASH);
 
     if($processingConditions){
-        if(Yii::$app->authManager->getAssignment('admin', $userId) || Yii::$app->authManager->getAssignment('supervision', $userId)) {
+        if (Yii::$app->user->identity->canRoles(['admin', 'supervision'])) {
             $buttonsSubAction[] = $buttonAnswer;
         }
         //$buttonsSubAction[] = $buttonHoldOn;
@@ -501,7 +501,7 @@ if($project){
 ?>
 <div class="panel-main__header" id="actions-header"<?= $projectStyles?>>
 
-    <?php if (!Yii::$app->authManager->getAssignment('qa', Yii::$app->user->id)) : ?>
+    <?php if (!Yii::$app->user->identity->canRole('qa')) : ?>
 
             <div class="panel-main__actions">
     	<?php if ($takeConditions){
@@ -561,7 +561,7 @@ if($project){
 
         <?php
 
-            if(!$leadForm->getLead()->isNewRecord && (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id))) {
+            if(!$leadForm->getLead()->isNewRecord && Yii::$app->user->identity->canRoles(['admin', 'supervision'])) {
                 $countLogs = \common\models\LeadLog::find()->where(['lead_id' => $leadForm->getLead()->id])->count();
                 echo Html::a('Logs' . ($countLogs ? ' ('.$countLogs.')' : '' ), null,
                     [
@@ -574,7 +574,7 @@ if($project){
         ?>
 
 
-        <?php if($leadForm->getLead()->status == Lead::STATUS_SOLD && (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id))):?>
+        <?php if($leadForm->getLead()->status == Lead::STATUS_SOLD && Yii::$app->user->identity->canRoles(['admin', 'supervision'])):?>
         	<?= Html::button('<span class="btn-icon"><i class="fa fa-money"></i></span><span class="btn-text">Split profit</span>', [
                     'class' => 'btn btn-warning btn-with-icon',
                     'id' => 'split-profit',

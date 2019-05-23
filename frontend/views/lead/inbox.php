@@ -18,7 +18,7 @@ use yii\helpers\Url;
 
 $this->title = 'Inbox Queue';
 
-if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
+if (Yii::$app->user->identity->canRole('admin')) {
     $userList = \common\models\Employee::getList();
 } else {
     $userList = \common\models\Employee::getListByUserId(Yii::$app->user->id);

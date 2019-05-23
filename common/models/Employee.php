@@ -32,6 +32,8 @@ use yii\web\NotFoundHttpException;
  * @property string $last_activity
  * @property boolean $acl_rules_activated
  *
+ * @property array $roles
+ *
  * @property Lead[] $leads
  * @property EmployeeAcl[] $employeeAcl
  * @property ProjectEmployeeAccess[] $projectEmployeeAccesses
@@ -61,6 +63,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     public $password;
     public $deleted;
     public $role;
+    public $roles = [];
     public $employeeAccess;
     public $viewItemsEmployeeAccess;
 
@@ -144,8 +147,10 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         if (isset(Yii::$app->user)) {
             if (Yii::$app->user && Yii::$app->user->identityClass === \webapi\models\ApiUser::class) {
                 $this->role = null;
+                $this->roles = [];
             } else {
                 $roles = $this->getRoles();
+                $this->roles = array_keys($roles);
                 $this->role = array_keys($roles)[0] ?? 'noname';
             }
         }
@@ -155,6 +160,30 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         /*if ($this->role != 'admin') {
             $this->employeeAccess = array_keys(ArrayHelper::map($this->projectEmployeeAccesses, 'project_id', 'project_id'));
         }*/
+    }
+
+
+    /**
+     * @param string $role
+     * @return bool
+     */
+    public function canRole(string $role = '') : bool
+    {
+        return in_array($role, $this->roles, false);
+    }
+
+    /**
+     * @param array $roles
+     * @return bool
+     */
+    public function canRoles(array $roles = []) : bool
+    {
+        foreach ($roles as $role) {
+            if ($this->canRole($role)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /*public function afterValidate()

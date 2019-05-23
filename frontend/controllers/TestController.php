@@ -484,5 +484,10 @@ class TestController extends FController
         echo $responseTwml;
     }
 
+    public function actionBlank()
+    {
+        return $this->render('blank');
+    }
+
 
 }
