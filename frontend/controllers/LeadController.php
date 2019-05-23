@@ -282,7 +282,6 @@ class LeadController extends FController
                 return ['output' => nl2br(Html::encode($value)), 'message' => $message];
             }
 
-
             if(Yii::$app->request->isPjax) {
                 $taskDate = Yii::$app->request->get('date');
                 $taskId = Yii::$app->request->get('task_id');
@@ -302,12 +301,12 @@ class LeadController extends FController
                         $lt->lt_updated_dt = date('Y-m-d H:i:s');
                         $lt->update();
                     }
+                    $leadToUpdate = Lead::findOne($leadId);
+                    $leadToUpdate->updated = date('Y-m-d H:i:s');
+                    $leadToUpdate->update();
                 }
 
             }
-
-
-
 
             Yii::$app->cache->delete(sprintf('quick-search-%d-%d', $lead->id, Yii::$app->user->identity->getId()));
             if (!$isQA && !$lead->permissionsView()) {
