@@ -197,7 +197,7 @@ $lead = $leadForm->getLead();
                     'dataProvider'  => $dataProviderCallExpert,
                     'isAdmin'       => $is_admin,
                     'modelLeadCallExpert'       => $modelLeadCallExpert,
-                ]); ?>
+                ]) ?>
 
 
             <?php endif;?>

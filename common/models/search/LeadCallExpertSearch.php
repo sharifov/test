@@ -126,6 +126,8 @@ class LeadCallExpertSearch extends LeadCallExpert
             ->andFilterWhere(['like', 'lce_response_lead_quotes', $this->lce_response_lead_quotes])
             ->andFilterWhere(['like', 'lce_expert_username', $this->lce_expert_username]);
 
+        $query->with(['lceAgentUser']);
+
         return $dataProvider;
     }
 

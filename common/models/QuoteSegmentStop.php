@@ -38,7 +38,7 @@ class QuoteSegmentStop extends \yii\db\ActiveRecord
             [['qss_duration', 'qss_elapsed_time', 'qss_segment_id'], 'integer'],
             [['qss_location_code'], 'string', 'max' => 3],
             [['qss_equipment'], 'string', 'max' => 5],
-            [['qss_segment_id'], 'exist', 'skipOnError' => true, 'targetClass' => QuoteSegment::className(), 'targetAttribute' => ['qss_segment_id' => 'qs_id']],
+            [['qss_segment_id'], 'exist', 'skipOnError' => true, 'targetClass' => QuoteSegment::class, 'targetAttribute' => ['qss_segment_id' => 'qs_id']],
         ];
     }
 
@@ -64,10 +64,13 @@ class QuoteSegmentStop extends \yii\db\ActiveRecord
      */
     public function getQssSegment()
     {
-        return $this->hasOne(QuoteSegment::className(), ['qs_id' => 'qss_segment_id']);
+        return $this->hasOne(QuoteSegment::class, ['qs_id' => 'qss_segment_id']);
     }
 
-    public function getInfo()
+    /**
+     * @return array
+     */
+    public function getInfo(): array
     {
         $data = [
             'locationCode' => $this->qss_location_code,

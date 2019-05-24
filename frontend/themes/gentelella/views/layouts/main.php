@@ -157,7 +157,7 @@ $bundle = \frontend\themes\gentelella\assets\Asset::register($this);
                             </ul>
                         </li>
                         <?/*php if($isAdmin):*/ ?>
-                            <?//= frontend\widgets\Notifications::widget(); ?>
+                            <?= frontend\widgets\Notifications::widget() ?>
                         <?/*php endif;*/?>
 
                         <?//= backend\widgets\ChatNotifications::widget(); ?>
@@ -168,7 +168,7 @@ $bundle = \frontend\themes\gentelella\assets\Asset::register($this);
 
         </div>
         <!-- /top navigation -->
-        <? endif;?>
+        <?php endif;?>
 
         <!-- page content -->
         <div class="right_col" role="main">

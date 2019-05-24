@@ -2705,6 +2705,9 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
             return $dataProvider;
         }
 
+        $query->with(['mainAirline', 'quoteTrips.quoteSegments.marketingAirline', 'quoteTrips.quoteSegments.quoteSegmentBaggages',
+            'quoteTrips.quoteSegments.quoteSegmentBaggageCharges', 'quoteTrips.quoteSegments.quoteSegmentStops']);
+
         return $dataProvider;
     }
 

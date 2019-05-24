@@ -44,8 +44,8 @@ use yii\helpers\Url;
                     <img src="//www.gstatic.com/flights/airline_logos/70px/<?= $model->main_airline_code?>.png" alt="" class="quote__vc-img">
                 </span>
 
-                <?php $airline = Airline::findIdentity($model->main_airline_code);
-                    if($airline) { echo $airline->name; }
+                <?php $airline = $model->mainAirline;
+                    if($airline) { echo \yii\helpers\Html::encode($airline->name); }
                 ?> &nbsp;[<strong><?= $model->main_airline_code?></strong>]
             </span>
 
