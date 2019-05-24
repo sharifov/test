@@ -96,4 +96,62 @@ class ClientSearch extends Client
 
         return $dataProvider;
     }
+
+
+    /**
+     * Creates data provider instance with search query applied
+     *
+     * @param array $params
+     *
+     * @return ActiveDataProvider
+     */
+    public function searchFromLead($params)
+    {
+        $query = Client::find();
+
+        // add conditions that should always apply here
+
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+            'sort'=> ['defaultOrder' => ['id' => SORT_DESC]],
+            'pagination' => [
+                'pageSize' => 30,
+            ],
+        ]);
+
+        $this->load($params);
+
+        if (!$this->validate()) {
+            // uncomment the following line if you do not want to return any records when validation fails
+            // $query->where('0=1');
+            return $dataProvider;
+        }
+
+        // grid filtering conditions
+        $query->andFilterWhere([
+            'id' => $this->id,
+            'DATE(created)' => $this->created,
+            'DATE(updated)' => $this->updated,
+        ]);
+
+        if($this->not_in_client_id) {
+            $query->andWhere(['NOT IN', 'id', $this->not_in_client_id]);
+        }
+
+        if ($this->client_email) {
+            $subQuery = ClientEmail::find()->select(['DISTINCT(client_id)'])->where(['email' => $this->client_email]);
+            $query->andWhere(['IN', 'id', $subQuery]);
+        }
+
+        if ($this->client_phone) {
+            $subQuery = ClientPhone::find()->select(['DISTINCT(client_id)'])->where(['phone' => $this->client_phone]);
+            $query->andWhere(['IN', 'id', $subQuery]);
+        }
+
+        $query->andFilterWhere(['like', 'first_name', $this->first_name])
+            ->andFilterWhere(['like', 'middle_name', $this->middle_name])
+            ->andFilterWhere(['like', 'last_name', $this->last_name]);
+
+        return $dataProvider;
+    }
 }
