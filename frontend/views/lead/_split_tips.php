@@ -10,7 +10,7 @@ use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 use common\models\TipsSplit;
 
-if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
+if (Yii::$app->user->identity->canRole('admin')) {
     $userList = \common\models\Employee::getList();
 } else {
     $userList = \common\models\Employee::getListByRole('agent');

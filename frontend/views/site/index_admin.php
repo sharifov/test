@@ -464,7 +464,7 @@ $userId = Yii::$app->user->id;
                 'dataProvider' => $dataProvider,
                 'filterModel' => $searchModel,
                 'rowOptions' => function (\common\models\Employee $model, $index, $widget, $grid) {
-                    if ($model->deleted) {
+                    if ($model->isDeleted()) {
                         return ['class' => 'danger'];
                     }
                 },

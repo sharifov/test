@@ -75,7 +75,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'style' => 'width:160px'
             ],
             'format' => 'raw',
-            //'visible' => !Yii::$app->authManager->getAssignment('qa', Yii::$app->user->id)
+            //'visible' => !Yii::$app->user->identity->canRole('qa')
         ],
 
         /*[

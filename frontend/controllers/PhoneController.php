@@ -118,7 +118,7 @@ class PhoneController extends FController
         }
 
 
-        if(Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id)) {
+        if(Yii::$app->user->identity->canRole('agent')) {
             $isAgent = true;
         } else {
             $isAgent = false;

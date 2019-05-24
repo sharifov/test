@@ -50,7 +50,7 @@ class KpiController extends FController
      */
     public function actionIndex()
     {
-        $isAgent = Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id);
+        $isAgent = Yii::$app->user->identity->canRole('agent');
         $searchModel = new KpiHistorySearch();
         $params = Yii::$app->request->queryParams;
         $params2 = Yii::$app->request->post();
@@ -89,15 +89,18 @@ class KpiController extends FController
         ]);
     }
 
+
     /**
-     * @return mixed
+     * @param $id
+     * @return string|\yii\web\Response
+     * @throws \Exception
      */
     public function actionDetails($id)
     {
-        $isAgent = (Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id));
+        $isAgent = Yii::$app->user->identity->canRole('agent');
 
         $kpiHistory = KpiHistory::find()->where(['kh_id' => $id])->one();
-        if(!$kpiHistory || ($isAgent && Yii::$app->user->id != $kpiHistory->kh_user_id) ){
+        if(!$kpiHistory || ($isAgent && Yii::$app->user->id !== $kpiHistory->kh_user_id) ){
             return $this->redirect([
                 'kpi/index',
             ]);

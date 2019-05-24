@@ -31,7 +31,7 @@ HTML;
 <div class="panel panel-default">
     <div class="panel-heading">Airlines</div>
     <div class="panel-body">
-        <?php if (Yii::$app->user->identity->role == 'admin') : ?>
+        <?php if (Yii::$app->user->identity->canRole('admin')) : ?>
             <div class="mb-20">
                 <?= Html::a('Sync Airlines', '#', [
                     'class' => 'btn-success btn sync',

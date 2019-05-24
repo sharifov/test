@@ -63,15 +63,14 @@ if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::
 
                 <div class="row">
                     <div class="col-sm-6">
-                        <?php if($model->isNewRecord || Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) ||
-                        (Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id) && $model->role == 'agent')): ?>
+                        <?php if($model->isNewRecord || Yii::$app->user->identity->canRole('admin') || (Yii::$app->user->identity->canRole('supervision') && $model->canRole('agent'))): ?>
                             <?= $form->field($model, 'role')->dropDownList($model::getAllRoles(), ['prompt' => '']) ?>
                         <?php else: ?>
                             <div>
                             <label class="control-label">Role</label>:
-                                <b><?=Html::encode($model->role);?></b>
+                                <b><?=implode(', ', $model->getRoles())?></b>
                             </div>
-                        <? endif; ?>
+                        <?php endif; ?>
                     </div>
                     <?php if (!$model->isNewRecord) : ?>
                         <div class="col-sm-6">
@@ -82,15 +81,15 @@ if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::
 
                 <div class="row">
                     <div class="col-sm-12">
-                        <?php if($model->isNewRecord || Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) ||
-                            (Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id) && $model->role == 'agent')):
+                        <?php if($model->isNewRecord || Yii::$app->user->identity->canRole('admin') || (Yii::$app->user->identity->canRole('supervision') && $model->canRole('agent'))):
 
-                            if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$app->authManager->getAssignment('userManager', Yii::$app->user->id)) {
+
+                            if(Yii::$app->user->identity->canRoles(['admin', 'userManager'])) {
                                 $data = \common\models\UserGroup::getList();
                                 $dataProjects = \common\models\Project::getList();
                             }
 
-                            if(Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id)) {
+                            if(Yii::$app->user->identity->canRole('supervision')) {
                                 $data = Yii::$app->user->identity->getUserGroupList();
                                 $dataProjects = \yii\helpers\ArrayHelper::map(Yii::$app->user->identity->projects, 'id', 'name');
                                 //\yii\helpers\VarDumper::dump($dataProjects, 10, true);                             //exit;
@@ -120,7 +119,7 @@ if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::
                             ]);
                             ?>
 
-                        <? else: ?>
+                        <?php else: ?>
 
                             <div class="col-md-12">
                                 <label class="control-label">User Groups</label>:

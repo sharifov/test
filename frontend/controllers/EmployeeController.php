@@ -166,7 +166,7 @@ class EmployeeController extends FController
         $searchModel = new EmployeeSearch();
         $params = Yii::$app->request->queryParams;
 
-        if(Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id)) {
+        if(Yii::$app->user->identity->canRole('supervision')) {
             $params['EmployeeSearch']['supervision_id'] = Yii::$app->user->id;
         }
 
@@ -317,13 +317,12 @@ class EmployeeController extends FController
                 $modelUserParams = new UserParams();
             }
 
-            $roles = array_keys($model->getRoles());
 
-            if(!Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) && in_array('admin', $roles)) {
+            if(!Yii::$app->user->identity->canRole('admin')) {
                 throw new ForbiddenHttpException('Access denied for this user: '.$model->id);
             }
 
-            if(Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id)) {
+            if(Yii::$app->user->identity->canRole('supervision')) {
                 $access = false;
 
                 $userGroups = array_keys($model->getUserGroupList());
@@ -438,9 +437,7 @@ class EmployeeController extends FController
             $searchModel = new UserProjectParamsSearch();
             $params = Yii::$app->request->queryParams;
 
-            /*if(Yii::$app->authManager->getAssignment('supervision', $model->id)) {
 
-            }*/
 
             $params['UserProjectParamsSearch']['upp_user_id'] = $model->id;
 

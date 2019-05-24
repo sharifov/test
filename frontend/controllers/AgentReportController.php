@@ -68,7 +68,7 @@ class AgentReportController extends FController
             $params = [];
         }
 
-        if(Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id)) {
+        if(Yii::$app->user->identity->canRole('supervision')) {
             $params['AgentActivitySearch']['supervision_id'] = Yii::$app->user->id;
         }
 

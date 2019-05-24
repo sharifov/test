@@ -804,7 +804,7 @@ class Lead extends ActiveRecord
 
     public function permissionsView()
     {
-        if (Yii::$app->user->identity->role != 'admin') {
+        if (!Yii::$app->user->identity->canRole('admin')) {
             $access = ProjectEmployeeAccess::findOne([
                 'employee_id' => Yii::$app->user->id,
                 'project_id' => $this->project_id

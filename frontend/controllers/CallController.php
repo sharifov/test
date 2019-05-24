@@ -72,7 +72,7 @@ class CallController extends FController
         $searchModel = new CallSearch();
 
         $params = Yii::$app->request->queryParams;
-        if(Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id)) {
+        if(Yii::$app->user->identity->canRole('supervision')) {
             $params['CallSearch']['supervision_id'] = Yii::$app->user->id;
         }
 
@@ -262,7 +262,7 @@ class CallController extends FController
         $searchModel = new CallSearch();
         $params = Yii::$app->request->queryParams;
 
-        //if (Yii::$app->authManager->getAssignment('supervision', $userId)) {
+        //if (Yii::$app->user->identity->canRole('supervision')) {
             //$params['CallSearch']['supervision_id'] = $userId;
             //$params['CallSearch']['status'] = Employee::STATUS_ACTIVE;
         //}
@@ -412,7 +412,7 @@ class CallController extends FController
         //$params2 = Yii::$app->request->post();
         //$params = array_merge($params, $params2);
 
-        if(Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id)) {
+        if(Yii::$app->user->identity->canRole('agent')) {
             $isAgent = true;
         } else {
             $isAgent = false;
@@ -451,12 +451,12 @@ class CallController extends FController
         }*/
 
 
-        if(Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id)) {
+        if(Yii::$app->user->identity->canRole('supervision')) {
             $params['LeadSearch']['supervision_id'] = Yii::$app->user->id;
         }
 
 
-        if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
+        if(Yii::$app->user->identity->canRole('admin')) {
             $dataProvider = $searchModel->searchInbox($params);
         } else {
             $dataProvider = null;

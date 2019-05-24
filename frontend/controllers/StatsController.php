@@ -69,7 +69,7 @@ class StatsController extends FController
         $searchModel = new EmployeeSearch();
         $params = Yii::$app->request->queryParams;
 
-        if (Yii::$app->authManager->getAssignment('supervision', $userId)) {
+        if (Yii::$app->user->identity->canRole('supervision')) {
             $params['EmployeeSearch']['supervision_id'] = $userId;
             $params['EmployeeSearch']['status'] = Employee::STATUS_ACTIVE;
         }
@@ -106,7 +106,7 @@ class StatsController extends FController
         //$searchModel = new EmployeeSearch();
         /*$params = Yii::$app->request->queryParams;
 
-        if (Yii::$app->authManager->getAssignment('supervision', $userId)) {
+        if (Yii::$app->user->identity->canRole('supervision')) {
             $params['EmployeeSearch']['supervision_id'] = $userId;
             $params['EmployeeSearch']['status'] = Employee::STATUS_ACTIVE;
         }
@@ -131,7 +131,7 @@ class StatsController extends FController
 
         $params = Yii::$app->request->queryParams;
 
-        if (Yii::$app->authManager->getAssignment('supervision', $userId)) {
+        if (Yii::$app->user->identity->canRole('supervision')) {
             $params['CommunicationSearch']['supervision_id'] = $userId;
         }
 

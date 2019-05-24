@@ -20,9 +20,9 @@ $bundle = \frontend\themes\gentelella\assets\AssetLeadCommunication::register($t
 $userId = Yii::$app->user->id;
 
 $is_manager = false;
-$is_admin = Yii::$app->authManager->getAssignment('admin', $userId);
-$is_qa = Yii::$app->authManager->getAssignment('qa', $userId);
-$is_supervision = Yii::$app->authManager->getAssignment('supervision', $userId);
+$is_admin = Yii::$app->user->identity->canRole('admin');
+$is_qa = Yii::$app->user->identity->canRole('qa');
+$is_supervision = Yii::$app->user->identity->canRole('supervision');
 
 if($is_admin || $is_supervision) {
     $is_manager = true;

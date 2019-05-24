@@ -17,10 +17,10 @@ use borales\extensions\phoneInput\PhoneInput;
 $employeeAccess = ArrayHelper::map($model->projectEmployeeAccesses, 'project_id', 'project_id');
 $availableProjects = $employeeAccess;
 
-if ($model->role == 'admin') {
+if ($model->canRole('admin')) {
     $projectIds = ArrayHelper::map(Project::find()->asArray()->all(), 'name', 'id');
 } else {
-    if (Yii::$app->user->identity->role == 'supervision') {
+    if (Yii::$app->user->identity->canRole('supervision')) {
         $availableProjects = ArrayHelper::map(Yii::$app->user->identity->projectEmployeeAccesses, 'project_id', 'project_id');
     }
     $projectIds = ArrayHelper::map(Project::find()

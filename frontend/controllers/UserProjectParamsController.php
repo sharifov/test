@@ -56,7 +56,7 @@ class UserProjectParamsController extends FController
 
         $params = Yii::$app->request->queryParams;
 
-        if(Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id)) {
+        if(Yii::$app->user->identity->canRole('supervision')) {
             $params['UserProjectParamsSearch']['supervision_id'] = Yii::$app->user->id;
         }
 

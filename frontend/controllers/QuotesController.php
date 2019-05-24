@@ -108,7 +108,7 @@ class QuotesController extends FController
         $model = $this->findModel($id);
         $lead = $model->lead;
 
-        if($lead->status === Lead::STATUS_TRASH && Yii::$app->user->identity->role === 'agent') {
+        if($lead->status === Lead::STATUS_TRASH && Yii::$app->user->identity->canRole('agent')) {
             throw new ForbiddenHttpException('Access Denied for Agent');
         }
 

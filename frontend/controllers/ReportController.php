@@ -74,7 +74,7 @@ class ReportController extends FController
         $employees = Employee::getAllEmployees();
 
         $isSupervision = true;
-        if (Yii::$app->user->identity->role == 'agent') {
+        if (Yii::$app->user->identity->canRole('agent')) {
             $model->employee = Yii::$app->user->identity->getId();
             $isSupervision = false;
         }

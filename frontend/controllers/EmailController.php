@@ -71,7 +71,7 @@ class EmailController extends FController
         $searchModel = new EmailSearch();
 
         $params = Yii::$app->request->queryParams;
-        if(Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id)) {
+        if(Yii::$app->user->identity->canRole('supervision')) {
             $params['EmailSearch']['supervision_id'] = Yii::$app->user->id;
         }
         $dataProvider = $searchModel->search($params);
@@ -334,10 +334,10 @@ class EmailController extends FController
 
         $model =$this->findModel($id);
 
-        $is_admin = Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id);
-        $is_supervision = Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id);
+        $is_admin = Yii::$app->user->identity->canRole('admin');
+        $is_supervision = Yii::$app->user->identity->canRole('supervision');
 
-        if(!$is_admin && $is_supervision == null) {
+        if(!$is_admin && !$is_supervision) {
             $userAccess = UserProjectParams::find()->where(['or', ['upp_email' => $model->e_email_from], ['upp_email' => $model->e_email_to]])->andWhere(['upp_user_id' => Yii::$app->user->id])->exists();
             if(!$userAccess) {
                 throw new ForbiddenHttpException('Access Denied. Email ID:'.$model->e_id);

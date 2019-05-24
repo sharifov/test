@@ -85,8 +85,8 @@ class LeadLog extends \yii\db\ActiveRecord
 
     public function afterFind()
     {
-        if ($this->employee_id != null) {
-            $this->agent = sprintf('%s (%s)', $this->employee->username, $this->employee->role);
+        if ($this->employee) {
+            $this->agent = sprintf('%s (%s)', $this->employee->username, implode(', ', $this->employee->getRoles()));
         } else {
             $this->agent = 'System';
         }

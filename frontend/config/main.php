@@ -23,7 +23,7 @@ return [
         ],
 
         'user' => [
-            'identityClass' => 'common\models\Employee',
+            'identityClass' => \common\models\Employee::class,
             'enableAutoLogin' => true,
             'identityCookie' => ['name' => '_identity-crm', 'httpOnly' => true],
         ],
