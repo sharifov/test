@@ -134,6 +134,11 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         ];
     }
 
+    public function isActive()
+    {
+        return $this->status === self::STATUS_ACTIVE;
+    }
+
     public function afterFind()
     {
         parent::afterFind();

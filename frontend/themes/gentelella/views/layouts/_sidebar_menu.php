@@ -6,7 +6,6 @@
 $isAdmin = Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id);
 $isSupervision = Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id);
 $isAgent = Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id);
-$isCoach = Yii::$app->authManager->getAssignment('coach', Yii::$app->user->id);
 $isQA = Yii::$app->authManager->getAssignment('qa', Yii::$app->user->id);
 $isUM = Yii::$app->authManager->getAssignment('userManager', Yii::$app->user->id);
 
@@ -57,7 +56,7 @@ $isUM = Yii::$app->authManager->getAssignment('userManager', Yii::$app->user->id
             $userModel = Yii::$app->user->identity;
 
             if(!$isQA && !$isUM) {
-                $menuItems[] = ['label' => 'Create new Lead', 'url' => ['lead/create'], 'icon' => 'plus'];
+                $menuItems[] = ['label' => 'Create new Lead', 'url' => ['/lead/create'], 'icon' => 'plus'];
                 //if($isAdmin) {
                 if($userModel->userProfile && $userModel->userProfile->up_call_type_id != \common\models\UserProfile::CALL_TYPE_OFF) {
                     $menuItems[] = ['label' => 'Auto redial', 'url' => ['/call/auto-redial'], 'icon' => 'tty'];
@@ -169,14 +168,14 @@ $isUM = Yii::$app->authManager->getAssignment('userManager', Yii::$app->user->id
                 }
 
                 $items = array_merge($items, [
-                    ['label' => 'Flight Segments', 'url' => ['lead-flight-segment/index'], 'icon' => 'plane'],
-                    ['label' => 'Quote List', 'url' => ['quotes/index'], 'icon' => 'quora'],
-                    ['label' => 'Quote Price List', 'url' => ['quote-price/index'], 'icon' => 'dollar'],
+                    ['label' => 'Flight Segments', 'url' => ['/lead-flight-segment/index'], 'icon' => 'plane'],
+                    ['label' => 'Quote List', 'url' => ['/quotes/index'], 'icon' => 'quora'],
+                    ['label' => 'Quote Price List', 'url' => ['/quote-price/index'], 'icon' => 'dollar'],
 
-                    ['label' => 'Export Leads', 'url' => ['leads/export'], 'icon' => 'export'],
-                    ['label' => 'Duplicate Leads', 'url' => ['leads/duplicate'], 'icon' => 'copy'],
-                    ['label' => 'Stats Agents & Leads', 'url' => ['report/agents'], 'icon' => 'users'],
-                    ['label' => 'Lead Status History', 'url' => ['lead-flow/index'], 'icon' => 'list'],
+                    ['label' => 'Export Leads', 'url' => ['/leads/export'], 'icon' => 'export'],
+                    ['label' => 'Duplicate Leads', 'url' => ['/leads/duplicate'], 'icon' => 'copy'],
+                    ['label' => 'Stats Agents & Leads', 'url' => ['/report/agents'], 'icon' => 'users'],
+                    ['label' => 'Lead Status History', 'url' => ['/lead-flow/index'], 'icon' => 'list'],
                 ]);
 
                 $menuItems[] = [
@@ -197,58 +196,58 @@ $isUM = Yii::$app->authManager->getAssignment('userManager', Yii::$app->user->id
             //var_dump($menuItems); die();
 
             if($isQA) {
-                $menuItems[] = ['label' => 'Sold', 'url' => ['queue/sold'], 'icon' => 'flag text-success'];
+                $menuItems[] = ['label' => 'Sold', 'url' => ['/queue/sold'], 'icon' => 'flag text-success'];
                // $menuItems[] = ['label' => 'Duplicate', 'url' => ['queue/duplicate'], 'icon' => 'list text-danger'];
-                $menuItems[] = ['label' => 'Trash', 'url' => ['queue/trash'], 'icon' => 'trash-o text-danger'];
+                $menuItems[] = ['label' => 'Trash', 'url' => ['/queue/trash'], 'icon' => 'trash-o text-danger'];
             }
 
 
-            if (!$isCoach && !$isQA && !$isUM) {
+            if (!$isQA && !$isUM) {
 
                 $badges = \common\models\Lead::getBadgesSingleQuery();
 
                 if($isAdmin) {
-                    $menuItems[] = ['label' => 'Pending <span id="pending-queue" class="label-info label pull-right">' . $badges['pending'] . '</span> ', 'url' => ['queue/pending'], 'icon' => 'briefcase text-info'];
+                    $menuItems[] = ['label' => 'Pending <span id="pending-queue" class="label-info label pull-right">' . $badges['pending'] . '</span> ', 'url' => ['/queue/pending'], 'icon' => 'briefcase text-info'];
                 }
 
                 if(isset(Yii::$app->params['settings']['enable_lead_inbox']) && Yii::$app->params['settings']['enable_lead_inbox']) {
-                    $menuItems[] = ['label' => 'Inbox <span id="inbox-queue" class="label-info label pull-right">' . $badges['inbox'] . '</span> ', 'url' => ['queue/inbox'], 'icon' => 'briefcase text-info'];
+                    $menuItems[] = ['label' => 'Inbox <span id="inbox-queue" class="label-info label pull-right">' . $badges['inbox'] . '</span> ', 'url' => ['/queue/inbox'], 'icon' => 'briefcase text-info'];
                 }
-                $menuItems[] = ['label' => 'Follow Up <span id="follow-up-queue" class="label-success label pull-right">' . $badges['follow-up'] . '</span> ', 'url' => ['queue/follow-up'], 'icon' => 'recycle'];
-                $menuItems[] = ['label' => 'Processing <span id="processing-queue" class="label-warning label pull-right">' . $badges['processing'] . '</span> ', 'url' => ['queue/processing'], 'icon' => 'spinner'];
+                $menuItems[] = ['label' => 'Follow Up <span id="follow-up-queue" class="label-success label pull-right">' . $badges['follow-up'] . '</span> ', 'url' => ['/queue/follow-up'], 'icon' => 'recycle'];
+                $menuItems[] = ['label' => 'Processing <span id="processing-queue" class="label-warning label pull-right">' . $badges['processing'] . '</span> ', 'url' => ['/queue/processing'], 'icon' => 'spinner'];
 
                 /*if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
                     $menuItems[] = ['label' => 'Processing All <span id="processing-all-queue" class="label-warning label pull-right">' . $badges['processing-all'] . '</span> ', 'url' => ['queue/processing-all'], 'icon' => 'list'];
                 }*/
 
-                $menuItems[] = ['label' => 'Booked <span id="booked-queue" class="label-success label pull-right">' . $badges['booked'] . '</span>', 'url' => ['queue/booked'], 'icon' => 'flag-o text-warning'];
-                $menuItems[] = ['label' => 'Sold <span id="sold-queue" class="label-success label pull-right">' . $badges['sold'] . '</span> ', 'url' => ['queue/sold'], 'icon' => 'flag text-success'];
+                $menuItems[] = ['label' => 'Booked <span id="booked-queue" class="label-success label pull-right">' . $badges['booked'] . '</span>', 'url' => ['/queue/booked'], 'icon' => 'flag-o text-warning'];
+                $menuItems[] = ['label' => 'Sold <span id="sold-queue" class="label-success label pull-right">' . $badges['sold'] . '</span> ', 'url' => ['/queue/sold'], 'icon' => 'flag text-success'];
 
                 if($isAdmin || $isSupervision) {
                     if($isAdmin) {
-                        $menuItems[] = ['label' => 'Duplicate <span id="sold-queue" class="label-danger label pull-right">' . $badges['duplicate'] . '</span>', 'url' => ['queue/duplicate'], 'icon' => 'list text-danger'];
+                        $menuItems[] = ['label' => 'Duplicate <span id="sold-queue" class="label-danger label pull-right">' . $badges['duplicate'] . '</span>', 'url' => ['/queue/duplicate'], 'icon' => 'list text-danger'];
                     }
-                    $menuItems[] = ['label' => 'Trash <span id="trash-queue" class="label-danger label pull-right"></span>', 'url' => ['queue/trash'], 'icon' => 'trash-o text-danger']; //' . $badges['trash'] . '
+                    $menuItems[] = ['label' => 'Trash <span id="trash-queue" class="label-danger label pull-right"></span>', 'url' => ['/queue/trash'], 'icon' => 'trash-o text-danger']; //' . $badges['trash'] . '
                 }
             }
 
 
             if($isSupervision) {
-                $menuItems[] = ['label' => 'Users', 'url' => ['employee/list'], 'icon' => 'user'];
+                $menuItems[] = ['label' => 'Users', 'url' => ['/employee/list'], 'icon' => 'user'];
             }
 
             if($isAdmin || $isUM){
                 $items = [
-                    ['label' => 'Users', 'url' => ['employee/list'], 'icon' => 'user'],
-                    ['label' => 'User Groups', 'url' => ['user-group/index'], 'icon' => 'users'],
-                    ['label' => 'User Groups Assignments', 'url' => ['user-group-assign/index'], 'icon' => 'users']
+                    ['label' => 'Users', 'url' => ['/employee/list'], 'icon' => 'user'],
+                    ['label' => 'User Groups', 'url' => ['/user-group/index'], 'icon' => 'users'],
+                    ['label' => 'User Groups Assignments', 'url' => ['/user-group-assign/index'], 'icon' => 'users']
                 ];
 
                 if($isAdmin) {
-                    $items[] = ['label' => 'User Params', 'url' => ['user-params/index'], 'icon' => 'users'];
+                    $items[] = ['label' => 'User Params', 'url' => ['/user-params/index'], 'icon' => 'users'];
                 }
 
-                $items[] = ['label' => 'User Project Params', 'url' => ['user-project-params/index'], 'icon' => 'users'];
+                $items[] = ['label' => 'User Project Params', 'url' => ['/user-project-params/index'], 'icon' => 'users'];
 
                 $menuItems[] = [
                     'label' => 'Users',
@@ -412,6 +411,19 @@ $isUM = Yii::$app->authManager->getAssignment('userManager', Yii::$app->user->id
                 ];
             }
 
+            $menuItems[] = [
+                'label' => 'RBAC',
+                'url' => 'javascript:',
+                'icon' => 'cogs',
+                'items' => [
+                    ['label' => 'Assignment', 'url' => ['/rbac/assignment']],
+                    ['label' => 'Route', 'url' => ['/rbac/route']],
+                    ['label' => 'Permission', 'url' => ['/rbac/permission']],
+                    ['label' => 'Role', 'url' => ['/rbac/role']],
+
+                ],
+            ];
+
 
             //if(\webvimark\modules\UserManagement\models\User::canRoute('/stats/index', $superAdminAllowed = true)) {
             //$menuItems[] = ['label' => \backend\widgets\ыуддштSysinfo::widget(['refresh' => 10]), 'url' => ['/stats/index']];
@@ -424,7 +436,7 @@ $isUM = Yii::$app->authManager->getAssignment('userManager', Yii::$app->user->id
 
         //echo frontend\themes\gentelella\widgets\Menu::widget(['items' => $menuItems, 'encodeLabels' => false, 'activateParents' => true]);
 
-        echo \yiister\gentelella\widgets\Menu::widget(['items' => $menuItems, 'encodeLabels' => false, 'activateParents' => true, 'linkTemplate' => '<a href="{url}" data-method="post">{icon}<span>{label}</span>{badge}</a>']);
+        echo \yiister\gentelella\widgets\Menu::widget(['items' => $menuItems, 'encodeLabels' => false, 'activateParents' => true, 'linkTemplate' => '<a href="{url}">{icon}<span>{label}</span>{badge}</a>']);
 
 
         ?>

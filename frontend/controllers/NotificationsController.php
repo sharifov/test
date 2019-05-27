@@ -28,21 +28,21 @@ class NotificationsController extends FController
                     'delete' => ['POST'],
                 ],
             ],
-            'access' => [
-                'class' => AccessControl::class,
-                'rules' => [
-                    [
-                        'actions' => ['index', 'update', 'view', 'delete', 'create', 'view2', 'soft-delete', 'all-delete', 'all-read', 'list'],
-                        'allow' => true,
-                        'roles' => ['supervision'],
-                    ],
-                    [
-                        'actions' => ['view', 'view2', 'soft-delete', 'all-delete', 'all-read', 'list'],
-                        'allow' => true,
-                        'roles' => ['agent', 'qa'],
-                    ],
-                ],
-            ],
+//            'access' => [
+//                'class' => AccessControl::class,
+//                'rules' => [
+//                    [
+//                        'actions' => ['index', 'update', 'view', 'delete', 'create', 'view2', 'soft-delete', 'all-delete', 'all-read', 'list'],
+//                        'allow' => true,
+//                        'roles' => ['supervision'],
+//                    ],
+//                    [
+//                        'actions' => ['view', 'view2', 'soft-delete', 'all-delete', 'all-read', 'list'],
+//                        'allow' => true,
+//                        'roles' => ['agent', 'qa'],
+//                    ],
+//                ],
+//            ],
         ];
 
         return ArrayHelper::merge(parent::behaviors(), $behaviors);

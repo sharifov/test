@@ -75,13 +75,13 @@ class LeadController extends FController
                             'test', 'view'
                         ],
                         'allow' => true,
-                        'roles' => ['agent', 'admin', 'supervisor'],
+                        'roles' => ['agent', 'admin', 'supervision'],
                     ],
 
                     [
                         'actions' => ['inbox'],
                         'allow' => Yii::$app->params['settings']['enable_lead_inbox'] ?: false,
-                        'roles' => ['agent', 'admin', 'supervisor'],
+                        'roles' => ['agent', 'admin', 'supervision'],
                     ],
 
                     //if(isset(Yii::$app->params['settings']['enable_lead_inbox']) && Yii::$app->params['settings']['enable_lead_inbox']) {
@@ -99,7 +99,7 @@ class LeadController extends FController
                             'view', 'trash', 'sold', 'duplicate', 'flow-transition'
                         ],
                         'allow' => true,
-                        'roles' => ['supervisor'],
+                        'roles' => ['supervision'],
                     ],
                     [
                         'actions' => [

@@ -179,6 +179,10 @@ return [
                     //'cachingDuration' => 86400,
                     //'enableCaching' => true,
                 ],
+                'yii2mod.rbac' => [
+                    'class' => 'yii\i18n\PhpMessageSource',
+                    'basePath' => '@yii2mod/rbac/messages',
+                ],
             ],
         ],
     ],
@@ -258,6 +262,20 @@ return [
                 };
             },
             ],
+        'rbac' => [
+            'class' => 'yii2mod\rbac\Module',
+            'layout' => '@frontend/themes/gentelella/views/layouts/main',
+            'as access' => [
+                'class' => yii2mod\rbac\filters\AccessControl::class,
+                'rules' => [
+                    [
+                        'allow' => true,
+                        'roles' => ['superadmin'],
+                    ]
+                ]
+            ],
+            'viewPath' => '@frontend/views/rbac',
+        ],
     ],
     'as beforeRequest' => [
         'class' => 'common\components\EmployeeActivityLogging',

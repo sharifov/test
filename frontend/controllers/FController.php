@@ -2,8 +2,10 @@
 namespace frontend\controllers;
 
 use common\models\UserConnection;
+use yii\helpers\ArrayHelper;
 use yii\web\Controller;
 use yii\web\ForbiddenHttpException;
+use yii2mod\rbac\filters\AccessControl;
 
 /**
  * FrontendEnd parent controller
@@ -21,6 +23,20 @@ class FController extends Controller
             ],
         ];
     }*/
+
+    /**
+     * {@inheritdoc}
+     */
+    public function behaviors()
+    {
+        $behaviors = [
+            'access' => [
+                'class' => AccessControl::class,
+            ],
+        ];
+
+        return ArrayHelper::merge(parent::behaviors(), $behaviors);
+    }
 
     public function beforeAction($action)
     {

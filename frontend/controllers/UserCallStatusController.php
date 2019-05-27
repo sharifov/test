@@ -38,7 +38,7 @@ class UserCallStatusController extends FController
                     [
                         'actions' => ['index', 'update-status'],
                         'allow' => true,
-                        'roles' => ['agent', 'supervisor'],
+                        'roles' => ['agent', 'supervision'],
                     ],
                 ],
             ],

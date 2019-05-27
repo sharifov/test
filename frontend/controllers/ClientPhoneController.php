@@ -5,6 +5,7 @@ namespace frontend\controllers;
 use Yii;
 use common\models\ClientPhone;
 use common\models\search\ClentPhoneSearch;
+use yii\filters\AccessControl;
 use yii\helpers\VarDumper;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
@@ -25,6 +26,16 @@ class ClientPhoneController extends FController
                 'class' => VerbFilter::class,
                 'actions' => [
                     'delete' => ['POST'],
+                ],
+            ],
+            'access' => [
+                'class' => AccessControl::class,
+                'rules' => [
+                    [
+                        'actions' => ['index', 'update', 'view', 'delete', 'create'],
+                        'allow' => true,
+                        'roles' => ['supervision', 'admin'],
+                    ],
                 ],
             ],
         ];

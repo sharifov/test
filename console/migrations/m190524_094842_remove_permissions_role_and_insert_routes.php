@@ -1,73 +1,222 @@
 <?php
 
-namespace frontend\controllers;
-
-use common\components\CommunicationService;
-use common\components\CountEvent;
-use common\components\jobs\TelegramSendMessageJob;
-use common\models\Call;
-use common\models\Employee;
-use common\models\Notifications;
-use common\models\Project;
-use common\models\UserCallStatus;
-use common\models\UserConnection;
-use common\models\UserGroupAssign;
-use common\models\UserProfile;
-use common\models\UserProjectParams;
-use Twilio\TwiML\VoiceResponse;
-use Yii;
-use yii\db\Expression;
-use yii\db\Query;
-use yii\helpers\ArrayHelper;
-use yii\filters\VerbFilter;
-use yii\filters\AccessControl;
+use yii\db\Migration;
 use yii\helpers\Inflector;
-use yii\helpers\VarDumper;
-use common\components\ReceiveEmailsJob;
-use yii\queue\Queue;
-use common\components\CheckPhoneNumberJob;
-use yii\rbac\ManagerInterface;
-
 
 /**
- * Test controller
+ * Class m190524_094842_remove_permissions_manageagents_manage_leads_trainer_agents
  */
-class TestController extends FController
+class m190524_094842_remove_permissions_role_and_insert_routes extends Migration
 {
     /**
      * {@inheritdoc}
      */
-    public function behaviors()
+    public function safeUp()
     {
-        $behaviors = [
-            'access' => [
-                'class' => AccessControl::class,
-                'rules' => [
-                    [
-                        'allow' => true,
-                        'roles' => ['admin'],
-                    ],
-                ],
-            ],
-            'verbs' => [
-                'class' => VerbFilter::class,
-                'actions' => [
-                    'logout' => ['post', 'GET'],
-                ],
-            ],
-        ];
+        $auth = Yii::$app->authManager;
 
-        return ArrayHelper::merge(parent::behaviors(), $behaviors);
-    }
+        if ($trainerAgentsPermission = $auth->getPermission('trainerAgents')) {
+            $auth->remove($trainerAgentsPermission);
+        }
 
-    public function actionT()
-    {
+        if ($manageLeadsPermission = $auth->getPermission('manageLeads')) {
+            $auth->remove($manageLeadsPermission);
+        }
 
+        if ($manageAgentsPermission = $auth->getPermission('manageAgents')) {
+            $auth->remove($manageAgentsPermission);
+        }
 
-        die;
+        if ($coachRole = $auth->getRole('coach')) {
+            $auth->revoke($coachRole, 241);
+            $auth->remove($coachRole);
+        }
+
+        foreach ($auth->getRoles() as $role) {
+            $auth->removeChildren($role);
+        }
+
+        //*************************************************
+
         $roles = [];
 
-        $array = [
+        $this->createAssArrayWithRolesAndPermissions($roles);
+
+        $this->assignParentChild($roles, 'supervision', 'agent');
+        $this->assignParentChild($roles, 'admin', 'agent');
+        $this->assignParentChild($roles, 'admin', 'supervision');
+
+        $dataItem = $this->createDataItem($roles);
+        $dataItemChild = $this->createDataItemChild($roles);
+
+        Yii::$app->db->createCommand()->batchInsert('{{%auth_item}}', ['name', 'type'], $dataItem)->execute();
+        Yii::$app->db->createCommand()->batchInsert('{{%auth_item_child}}', ['parent', 'child'], $dataItemChild)->execute();
+
+        $this->createSuperAdmin();
+
+        //  for user coach change role
+
+        $roleAgent = $auth->getRole('agent');
+        $auth->assign($roleAgent, 241);
+
+    }
+
+    private function createDataItemChild($roles) : array
+    {
+        $data = [];
+        foreach ($roles as $roleName => $controllers) {
+            foreach ($controllers as $controllerName => $actions) {
+                foreach ($actions as $actionName => $action) {
+                    $data[] = [$roleName, $this->createRoute($controllerName, $actionName)];
+                }
+            }
+        }
+        return $data;
+    }
+
+    private function createDataItem($roles) : array
+    {
+        $data = [];
+        foreach ($roles as $role => $controller) {
+            foreach ($controller as $controllerName => $actions) {
+                foreach ($actions as $actionName => $action) {
+                    $data[$this->createRoute($controllerName, $actionName)] = 2;
+                }
+            }
+        }
+        $items = [];
+        // remove duplicates
+        foreach ($data as $key => $item) {
+            $items[] = [$key, $data[$key]];
+        }
+        return $items;
+    }
+
+    private function createRoute($controller, $action) : string
+    {
+        return '/' . Inflector::camel2id(strstr($controller, 'Controller', true)) . '/' . $action;
+    }
+
+    private function assignParentChild(&$roles, $parent, $child) : void
+    {
+        foreach ($roles[$child] as $controller => $items) {
+            foreach ($items as $key => $item) {
+                $roles[$parent][$controller][$key] = 1;
+            }
+        }
+    }
+
+    private function createSuperAdmin() : void
+    {
+        $employee = new \common\models\Employee();
+        $employee->username = 'superadmin';
+        $employee->email = 'alex.connor2@techork.com';
+        $employee->acl_rules_activated = false;
+        $employee->setPassword('superadmin');
+        $employee->generateAuthKey();
+        $employee->save(false);
+
+        $auth = \Yii::$app->authManager;
+
+        $superAdmin = $auth->createRole('superadmin');
+        $superAdmin->description = 'Full access';
+        $auth->add($superAdmin);
+
+        $fullPermission = $auth->createPermission('/*');
+        $auth->add($fullPermission);
+        $auth->addChild($superAdmin, $fullPermission);
+
+        $roleAdmin = $auth->getRole('admin');
+        $auth->addChild($superAdmin, $roleAdmin);
+
+        $roleSupervision = $auth->getRole('supervision');
+        $auth->addChild($superAdmin, $roleSupervision);
+
+        $roleAgent = $auth->getRole('agent');
+        $auth->addChild($superAdmin, $roleAgent);
+
+        $auth->assign($superAdmin, $employee->getId());
+
+    }
+
+    private function createAssArrayWithRolesAndPermissions(&$roles) : void
+    {
+
+        foreach ($this->listAccess() as $arrayItem) {
+            foreach ($arrayItem['rules'] as $item) {
+                if ($item['allow']) {
+                    foreach ($item['roles'] as $role) {
+                        if (isset($item['actions'])) {
+                            foreach ($item['actions'] as $action) {
+                                $roles[$role][$arrayItem['controller']][$action] = 1;
+                            }
+                        } else {
+                            $roles[$role][$arrayItem['controller']]['*'] = 1;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    public function safeDown()
+    {
+        $auth = Yii::$app->authManager;
+
+        $this->createAssArrayWithRolesAndPermissions($roles);
+        foreach ($this->createDataItem($roles) as $item) {
+            $permission = $auth->getPermission($item[0]);
+            $auth->remove($permission);
+        }
+        $permission = $auth->getPermission('/*');
+        $auth->remove($permission);
+
+        $trainerAgents = $auth->createPermission('trainerAgents');
+        $trainerAgents->description = 'Trainer agents';
+        $auth->add($trainerAgents);
+
+        $manageLeads = $auth->createPermission('manageLeads');
+        $manageLeads->description = 'Manage leads';
+        $auth->add($manageLeads);
+
+        $manageAgents = $auth->createPermission('manageAgents');
+        $manageAgents->description = 'Manage agents';
+        $auth->add($manageAgents);
+
+        $coach = $auth->createRole('coach');
+        $coach->description = 'Agents coach';
+        $auth->add($coach);
+
+        $auth->addChild($coach, $trainerAgents);
+
+        $agent = $auth->getRole('agent');
+        $auth->addChild($agent, $coach);
+        $auth->addChild($agent, $manageLeads);
+
+        $supervision = $auth->getRole('supervision');
+        $auth->addChild($supervision, $agent);
+        $auth->addChild($supervision, $manageAgents);
+
+        $admin = $auth->getRole('admin');
+        $auth->addChild($admin, $supervision);
+
+        $roleSuperadmin = $auth->getRole('superadmin');
+        $auth->remove($roleSuperadmin);
+
+        if (($model = \common\models\Employee::findOne(['username' => 'superadmin'])) !== null) {
+            $model->delete();
+        }
+
+        if (($model = \common\models\Employee::findOne(241)) !== null) {
+            $auth->revoke($agent, 241);
+            $auth->assign($coach, 241);
+        }
+
+    }
+
+    private function listAccess() : array
+    {
+        return [
             [
                 'controller' => 'AgentReportController',
                 'rules' => [
@@ -668,503 +817,6 @@ class TestController extends FController
             ],
 
         ];
-
-//        VarDumper::dump($array);die;
-
-        foreach ($array as $arrayItem) {
-            foreach ($arrayItem['rules'] as $key => $item) {
-                if ($item['allow']) {
-                    foreach ($item['roles'] as $role) {
-                        $roles[$role][] = [
-                            'controller' => $arrayItem['controller'],
-                            'actions' => $item['actions']??['*']
-                        ];
-                    }
-                }
-            }
-        }
-
-//        VarDumper::dump($roles);
-
-        $batchTmpTableItem = [];
-        $batchTmpTableItemChild = [];
-
-        $str = '<table border="3" cellpadding="10" cellspacing="5">';
-        $str .= '<tr><td>Role</td><td>Controller</td><td>Actions</td><td>Path</td></tr>';
-        foreach ($roles as $role => $item) {
-            foreach ($item as $element) {
-                $actions = $element['actions'];
-                $controller = $element['controller'];
-                $str .= '<tr>';
-                $str .= '<td>' . $role . '</td>';
-                $str .= '<td>' .$controller . '</td>';
-                $str .= '<td>' . ($actions ? implode('<br>', $actions) : '') . '</td>';
-                $str .= '<td>' . ($actions ? implode('<br>', $this->getPathForTable($actions, $controller, $batchTmpTableItem, $batchTmpTableItemChild, $role)) : ''). '</td>';
-                $str .= '</tr>';
-            }
-        }
-        $str .= '</table>';
-
-        ksort($batchTmpTableItem);
-        ksort($batchTmpTableItemChild);
-
-//        echo count($batchTmpTableItem);
-//        echo count($batchTmpTableItemChild);
-
-//        VarDumper::dump($batchTmpTableItem);
-//        VarDumper::dump($batchTmpTableItemChild);
-//        die;
-
-        $batchTableItem = [];
-        $batchTableItemChild = [];
-        foreach ($batchTmpTableItem as $key => $item) {
-            $batchTableItem[] = [$key, $batchTmpTableItem[$key]];
-        }
-        foreach ($batchTmpTableItemChild as $key => $item) {
-            $batchTableItemChild[] = $batchTmpTableItemChild[$key];
-        }
-//        VarDumper::dump($batchTableItem);
-//        VarDumper::dump($batchTableItemChild);die;
-        Yii::$app->db->createCommand()->batchInsert('{{%auth_item}}', ['name', 'type'], $batchTableItem)->execute();
-        Yii::$app->db->createCommand()->batchInsert('{{%auth_item_child}}', ['child', 'parent'], $batchTableItemChild)->execute();
-        return $str;
-
     }
-
-    private function getPathForTable($actions, $controller, &$batchTmpTableItem, &$batchTmpTableItemChild, $role)
-    {
-        if (!$actions) {
-            return $actions;
-        }
-        foreach ($actions as $key => $action) {
-            $str = '/' . Inflector::camel2id(strstr($controller, 'Controller', true)) . '/' . $action;
-            $actions[$key] = $str;
-            $batchTmpTableItem[$str] = 2;
-            $batchTmpTableItemChild[] = [$str, $role];
-        }
-        return $actions;
-    }
-
-    public function actionEmail()
-    {
-        $swiftMailer = \Yii::$app->mailer;
-
-        $mail = $swiftMailer
-            ->compose()
-            ->setTo(['chalpet@gmail.com' => 'Alex'])
-            ->setFrom(['chalpet@gmail.com' => 'Dima'])
-            ->setSubject('Test message');
-
-
-        /*$headers = $mail->getSwiftMessage()->getHeaders();
-        $headers->addTextHeader('Content-Transfer-Encoding','base64');*/
-
-        $mail->setHeader('Message-ID', '123456.chalpet@gmail.com');
-        $mail->setHtmlBody('HTML message');
-
-        if($mail->send()) {
-            echo 'Send';
-        } else {
-            echo 'Not send';
-        }
-    }
-
-
-    public function actionComPreview()
-    {
-        /** @var CommunicationService $communication */
-        $communication = Yii::$app->communication;
-        $data['origin'] = 'ORIGIN';
-        $data['destination'] = 'DESTINATION';
-
-        //$mailPreview = $communication->mailPreview(7, 'cl_offer', 'chalpet@gmail.com', 'chalpet2@gmail.com', $data, 'ru-RU');
-        //$mailTypes = $communication->mailTypes(7);
-
-        $content_data['email_body_html'] = '1';
-        $content_data['email_body_text'] = '2';
-        $content_data['email_subject'] = '3';
-        $content_data['email_reply_to'] = 'chalpet-r@gmail.com';
-        $content_data['email_cc'] = 'chalpet-cc@gmail.com';
-        $content_data['email_bcc'] = 'chalpet-bcc@gmail.com';
-
-        $mailSend = $communication->mailSend(7, 'cl_offer', 'chalpet@gmail.com', 'chalpet2@gmail.com', $content_data, $data, 'ru-RU', 10);
-
-        /*if($mailSend['data']) {
-
-        }*/
-
-
-
-
-
-
-        VarDumper::dump($mailSend, 10, true);
-
-    }
-
-    public function actionSocket()
-    {
-
-
-        Notifications::create(Yii::$app->user->id, 'Test '.date('H:i:s'), 'Test message <h2>asdasdasd</h2>', Notifications::TYPE_SUCCESS, true);
-
-        $socket = 'tcp://127.0.0.1:1234';
-        $user_id = Yii::$app->user->id; //'tester01';
-        $lead_id = 12345;
-        $data['message'] = 'test '.date('H:i:s');
-        $data['command'] = 'getNewNotification';
-
-
-        try {
-            // соединяемся с локальным tcp-сервером
-            $instance = stream_socket_client($socket);
-            // отправляем сообщение
-            if (fwrite($instance, json_encode(['user_id' => $user_id, /*'lead_id' => $lead_id,*/ 'multiple' => false, 'data' => $data]) . "\n")) {
-                echo 'OK';
-            } else {
-                echo 'NO';
-            }
-        } catch (\Exception $exception) {
-            echo $exception->getMessage();
-        }
-
-        /*$host    = "localhost";
-        $port    = 8080;
-
-        $context = stream_context_create();
-
-        $socket = stream_socket_client(
-            $host . ':' . $port,
-            $errno,
-            $errstr,
-            30,
-            STREAM_CLIENT_CONNECT,
-            $context
-        );
-
-        $key = $this->generateWebsocketKey();
-        $headers = "HTTP/1.1 101 Switching Protocols\r\n";
-        $headers .= "Upgrade: websocket\r\n";
-        $headers .= "Connection: Upgrade\r\n";
-        $headers .= "Sec-WebSocket-Version: 13\r\n";
-        $headers .= "Sec-WebSocket-Key: $key\r\n\r\n";
-        stream_socket_sendto($socket, $headers);
-        stream_socket_sendto($socket, 'this is my socket test to websocket');*/
-
-        // echo 123;
-        ///\yiicod\socketio\Broadcast::emit(CountEvent::name(), ['count' => 10]);
-    }
-
-
-    private function generateWebsocketKey() {
-        $chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!"$&/()=[]{}0123456789';
-        $key = '';
-        $chars_length = strlen($chars);
-        for ($i = 0; $i < 16; $i++) $key .= $chars[mt_rand(0, $chars_length-1)];
-        return base64_encode($key);
-    }
-
-    public function actionDetectLead()
-    {
-        $subject = 'RE Hello [lid:78456123]';
-        $subject = 'RE Hello [uid:7asd845qwe6123]';
-        $message_id = '<kiv.1.6.345.alex.connor@gmail.com> <qwewqeqweqwe.qweqwe@mail.com> <aasdfkjal.sfasldfkl@gmail.com> <kiv.12.63.348.alex.connor@gmail.com>';
-
-        $matches = [];
-
-        //preg_match('~\[lid:(\d+)\]~si', $subject, $matches);
-        //preg_match('~\[uid:(\w+)\]~si', $subject, $matches);
-
-        preg_match_all('~<kiv\.(.+)>~iU', $message_id, $matches);
-        if(isset($matches[1]) && $matches[1]) {
-            foreach ($matches[1] as $messageId) {
-                $messageArr = explode('.', $messageId);
-                if(isset($messageArr[2]) && $messageArr[2]) {
-                    $lead_id = (int) $messageArr[2];
-
-                    echo $lead_id . '<br>';
-                }
-            }
-        }
-
-
-
-
-        //VarDumper::dump($matches, 10, true);
-
-    }
-
-    public function actionLangPlural()
-    {
-        $n = random_int(0, 10);
-
-
-        //echo Yii::t('app', 'You are the - {n,selectordinal,one{# один} two{# два} few{# мало} many{# несколько} other{# нет}} ', ['n' => $n]);
-
-        Yii::$app->language = 'en-US';
-
-
-        for($i = 0; $i<=20; $i++) {
-
-            echo \Yii::t('app', '{n, selectordinal,
-     =0{У вас нет новых сообщений}
-
-     one{У вас # непрочитанное сообщение}
-     few{У вас # непрочитанных сообщения}
-     many{У вас # непрочитанных сообщений...}
-     other{У вас # прочитанных сообщений!}}',
-                ['n' => $i]
-            ).'<br>';
-        }
-
-    }
-
-    public function actionEmailJob()
-    {
-
-        $job = new ReceiveEmailsJob();
-
-        $job->last_email_id = 18964;
-
-        $data = [
-            'last_email_id' => 18964,
-            'run_all' => 'ok',
-        ];
-
-        $job->request_data = $data;
-
-        /** @var Queue $queue */
-        $queue = \Yii::$app->queue_email_job;
-
-        $queue->push($job);
-
-        return 'ok';
-    }
-
-    public function actionCallTimer()
-    {
-
-        /*if ($vl->vl_call_status == 'initiated') {
-
-        } elseif($vl->vl_call_status == 'ringing') {
-
-        } elseif($vl->vl_call_status == 'in-progress') {
-
-        } elseif($vl->vl_call_status == 'busy') {
-
-        } elseif($vl->vl_call_status == 'completed') {
-            $call->c_call_duration = $vl->vl_call_duration;
-        }*/
-
-        $statuses = ['initiated', 'ringing', 'in-progress', 'completed'];
-        $lead_id = 54719;
-        $n = 0;
-        foreach ($statuses as $status) {
-            sleep(random_int(5, 7));
-            $n++;
-            Notifications::socket(null, $lead_id, 'callUpdate', ['status' => $status, 'duration' =>  ($status == 'completed' ? random_int(51, 180) : 0), 'snr' => $n], true);
-        }
-    }
-
-
-    public function actionIncomingCall()
-    {
-
-
-        /*if ($vl->vl_call_status == 'initiated') {
-
-        } elseif($vl->vl_call_status == 'ringing') {
-
-        } elseif($vl->vl_call_status == 'in-progress') {
-
-        } elseif($vl->vl_call_status == 'busy') {
-
-        } elseif($vl->vl_call_status == 'completed') {
-            $call->c_call_duration = $vl->vl_call_duration;
-        }*/
-
-        $statuses = ['initiated', 'ringing', 'in-progress', 'completed'];
-        $user_id = Yii::$app->user->id;
-        $n = 0;
-
-
-        $data = [];
-        $data['client_name'] = 'Alexandr Test';
-        $data['client_id'] = 345;
-        $data['client_phone'] = '+3738956478';
-        $data['last_lead_id'] = 34567;
-
-        foreach ($statuses as $status) {
-            sleep(random_int(3, 5));
-            $data['status'] = $status;
-            $n++;
-            Notifications::socket($user_id, $lead_id = null, 'incomingCall', $data, true);
-            echo '<br>'.$status;
-        }
-
-    }
-
-
-    public function actionQueryUser()
-    {
-        $user_id = Yii::$app->user->id;
-
-
-        //$sqlRaw = $query->createCommand()->getRawSql();
-        //$sqlRaw = $generalQuery->createCommand()->getRawSql();
-
-
-        //echo $sqlRaw;
-
-        //VarDumper::dump($sqlRaw, 10, true);
-        //exit;
-
-        //$users = Employee::getAgentsForCall($user_id, 8);
-
-        $projects = Project::find()->all();
-        foreach ($projects as $project) {
-            VarDumper::dump($project->contactInfo->phone, 10, true);
-        }
-
-
-        //VarDumper::dump($users, 10, true);
-    }
-
-    /*
-    public function actionLogin()
-    {
-        echo Yii::$app->user->id; exit;
-
-        $user_id = Yii::$app->request->get('id');
-        $user = Employee::findIdentity($user_id);
-        if($user) {
-            VarDumper::dump($user->attributes, 10, true);
-            //exit;
-            //Yii::$app->user->switchIdentity($user);
-
-            Yii::$app->user->logout();
-            if(!Yii::$app->user->login($user, 3600 * 24 * 30)) {
-                echo 'Not logined'; exit;
-            }
-
-
-
-            //$this->redirect(['site/index']);
-        }
-
-        //Yii::$app->user->login($user, $this->rememberMe ? 3600 * 24 * 30 : 0);
-
-        echo '--'.Yii::$app->user->id;
-
-        echo Yii::$app->user->id;
-
-        exit;
-
-        //$this->redirect(['site/index']);
-    }*/
-
-
-    public function actionTz()
-    {
-        $offset = -5; //'+05:00';
-        $timezoneName = timezone_name_from_abbr('',intval($offset) * 60 * 60,0);
-        //$timezoneName = timezone_name_from_abbr('', $offset,0);
-
-        /*$date = new \DateTime(time(), new \DateTimeZone($timezoneName));
-       // $clientTime = Yii::$app->formatter->asTime() $date->format('H:i');
-        $clientTime = $date->format('H:i');
-
-
-
-        $utcTime  = new \DateTime('now', new \DateTimeZone('UTC'));
-
-
-        $gmtTimezone = new \DateTimeZone($timezoneName);
-        $myDateTime = new \DateTime('2019-02-18 13:28', $gmtTimezone);
-
-
-
-
-
-        $clientTime = $utcTime->format('H:i');*/
-
-
-
-        //-----------------------------------------------------------
-
-
-        $dt = new \DateTime();
-        if($timezoneName) {
-            $timezone = new \DateTimeZone($timezoneName);
-            $dt->setTimezone($timezone);
-        }
-        $clientTime =  $dt->format('H:i');
-
-        echo $timezoneName. ' - ' . $dt->getOffset();
-        //echo $clientTime;
-
-    }
-
-    public function actionTwml()
-    {
-        $twML = new VoiceResponse();
-        $twML->say('Hello');
-        $twML->play('https://api.twilio.com/cowbell.mp3', ['loop' => 5]);
-        echo $twML;
-    }
-
-    public function actionTelegram()
-    {
-        $user_id = Yii::$app->user->id;
-
-        if($user_id) {
-            $profile = UserProfile::find()->where(['up_user_id' => $user_id])->limit(1)->one();
-            if ($profile && $profile->up_telegram && $profile->up_telegram_enable) {
-                $tgm = Yii::$app->telegram;
-
-                $tgm->sendMessage([
-                    'chat_id' => $profile->up_telegram,
-                    'text' => 'text 12345',
-                ]);
-
-                VarDumper::dump([
-                    'chat_id' => $profile->up_telegram,
-                ], 10, true);
-            }
-        }
-    }
-
-    public function actionJob()
-    {
-        $job = new TelegramSendMessageJob();
-        $job->user_id = Yii::$app->user->id;
-        $job->text = 'Test Job';
-
-        $queue = Yii::$app->queue_job;
-        $jobId = $queue->push($job);
-
-        echo $jobId;
-    }
-
-    public function actionSettings()
-    {
-        VarDumper::dump(Yii::$app->params['settings'], 10, true);
-    }
-
-
-    public function actionTwml2()
-    {
-        $responseTwml = new VoiceResponse();
-        $responseTwml->pause(['length' => 5]);
-        /*$responseTwml->say('        Thank you for calling.  Your call is important to us.  Please hold while you are connected to the next available agent.', [
-            'language' => 'en-US',
-            'voice' => 'woman',
-        ]);*/
-        $responseTwml->play('https://talkdeskapp.s3.amazonaws.com/production/audio_messages/folk_hold_music.mp3');
-        $responseTwml->play('https://talkdeskapp.s3.amazonaws.com/production/audio_messages/folk_hold_music.mp3');
-
-        echo $responseTwml;
-    }
-
 
 }
