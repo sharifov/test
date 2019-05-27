@@ -24,12 +24,13 @@ class MonitorFlowController extends Controller
 
         printf("\n --- Start %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
 
-        $quotes = Quote::find()->select(['quotes.id', 'quotes.uid', 'quotes.lead_id', 'quotes.created'])->joinWith('lead')
+        $quotes = Quote::find()->select(['quotes.id', 'quotes.uid', 'quotes.lead_id', 'quotes.created'])
+            ->joinWith('lead')
             ->where(['quotes.status' => [Quote::STATUS_CREATED, Quote::STATUS_SEND, Quote::STATUS_OPENED]])
             ->andWhere(['<=', 'quotes.created', date('Y-m-d H:i:s', strtotime('-1 day'))])
             ->andWhere(['NOT IN', 'leads.status', [Lead::STATUS_BOOKED, Lead::STATUS_SOLD, Lead::STATUS_PENDING]])
             ->orderBy(['quotes.id' => SORT_DESC])
-            ->limit(500)
+            //->limit(500)
             ->all();
 
 
@@ -39,23 +40,25 @@ class MonitorFlowController extends Controller
             echo sprintf('Count: %s', count($quotes)) . PHP_EOL;
         }
         //exit;
-        $now = time();
+        //$now = time();
         foreach ($quotes as $quote) {
 
             // VarDumper::dump($quote->attributes); exit;
 
-            if ($quote->lead->getAppliedAlternativeQuotes()) {
+            $existQuote = Quote::find()->where(['lead_id' => $quote->lead_id, 'status' => Quote::STATUS_APPLIED])->exists();
+            if ($existQuote) {
                 continue;
             }
-            $limitTime = strtotime($quote->created . '+1 day');
-            if ($limitTime <= $now) {
-                $quote->status = Quote::STATUS_DECLINED;
-                if ($quote->save()) {
-                    if ($test) {
-                        echo sprintf('Decline quote: %s. FR: %d, Created: %s', $quote->uid, $quote->lead_id, $quote->created) . PHP_EOL;
-                    }
+
+            //$limitTime = strtotime($quote->created . '+1 day');
+            //if ($limitTime <= $now) {
+            $quote->status = Quote::STATUS_DECLINED;
+            if ($quote->save()) {
+                if ($test) {
+                    echo sprintf('Decline quote: %s. FR: %d, Created: %s', $quote->uid, $quote->lead_id, $quote->created) . PHP_EOL;
                 }
             }
+            //}
         }
         printf("\n --- End %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
     }
