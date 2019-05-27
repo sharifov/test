@@ -347,7 +347,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         $roles = ArrayHelper::map($result, 'name', 'description');
 
 
-        if(!Yii::$app->user->identity->canRole('admin')) {
+        if(!Yii::$app->user->identity->canRole('admin') && !Yii::$app->user->identity->canRole('superadmin')) {
             if(isset($roles['admin'])) {
                 unset($roles['admin']);
             }
@@ -357,9 +357,15 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
             }
         }
 
-        if(!Yii::$app->user->identity->canRole('admin') && !Yii::$app->user->identity->canRole('userManager') ) {
+        if(!Yii::$app->user->identity->canRole('admin') && !Yii::$app->user->identity->canRole('superadmin') && !Yii::$app->user->identity->canRole('userManager') ) {
             if(isset($roles['qa'])) {
                 unset($roles['qa']);
+            }
+        }
+
+        if(!Yii::$app->user->identity->canRole('superadmin')) {
+            if(isset($roles['superadmin'])) {
+                unset($roles['superadmin']);
             }
         }
 
