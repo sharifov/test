@@ -62,6 +62,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     ];
 
     public $password;
+    public $deleted;
 
     public $roles = null;
     public $rolesName = null;
@@ -88,7 +89,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     public function rules()
     {
         return [
-            [['username', 'auth_key', 'password_hash', 'email', 'role'], 'required'],
+            [['username', 'auth_key', 'password_hash', 'email', 'roles'], 'required'],
             [['password'], 'required', 'on' => self::SCENARIO_REGISTER],
             [['email', 'password', 'username'], 'trim'],
             [['password'], 'string', 'min' => 6],
@@ -99,7 +100,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
             [['email'], 'unique'],
             ['email', 'email'],
             [['password_reset_token'], 'unique'],
-            [['created_at', 'updated_at', 'last_activity', 'acl_rules_activated', 'full_name', 'user_groups', 'user_projects'], 'safe'],
+            [['created_at', 'updated_at', 'last_activity', 'acl_rules_activated', 'full_name', 'user_groups', 'user_projects', 'deleted'], 'safe'],
         ];
     }
 

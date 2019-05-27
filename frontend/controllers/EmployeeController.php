@@ -26,36 +26,6 @@ use yii\web\Response;
  */
 class EmployeeController extends FController
 {
-    /**
-     * {@inheritdoc}
-     */
-    public function behaviors()
-    {
-        $behaviors = [
-            'access' => [
-                'class' => AccessControl::class,
-                'rules' => [
-                    [
-                        'actions' => ['switch'],
-                        'allow' => true,
-                        'roles' => ['admin'],
-                    ],
-                    [
-                        'actions' => ['list', 'update', 'create', 'acl-rule'],
-                        'allow' => true,
-                        'roles' => ['supervision', 'userManager'],
-                    ],
-                    [
-                        'actions' => ['seller-contact-info'],
-                        'allow' => true,
-                        'roles' => ['agent', 'supervision'],
-                    ],
-                ],
-            ],
-        ];
-
-        return ArrayHelper::merge(parent::behaviors(), $behaviors);
-    }
 
     public function actionSellerContactInfo($employeeId)
     {

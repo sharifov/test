@@ -5,7 +5,7 @@
 /** @var \common\models\Employee $userModel */
 $userModel = Yii::$app->user->identity;
 
-$isAdmin = $userModel->canRole('admin'); //Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id);
+$isAdmin = $userModel->canRole('admin') || $userModel->canRole('superadmin'); //Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id);
 $isSupervision = $userModel->canRole('supervision'); //Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id);
 $isAgent = $userModel->canRole('agent'); //Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id);
 $isQA = $userModel->canRole('qa'); //Yii::$app->authManager->getAssignment('qa', Yii::$app->user->id);

@@ -64,7 +64,7 @@ if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::
                 <div class="row">
                     <div class="col-sm-6">
                         <?php if($model->isNewRecord || Yii::$app->user->identity->canRole('admin') || (Yii::$app->user->identity->canRole('supervision') && $model->canRole('agent'))): ?>
-                            <?= $form->field($model, 'role')->dropDownList($model::getAllRoles(), ['prompt' => '']) ?>
+                            <?= $form->field($model, 'roles')->dropDownList($model::getAllRoles(), ['prompt' => '']) ?>
                         <?php else: ?>
                             <div>
                             <label class="control-label">Role</label>:
