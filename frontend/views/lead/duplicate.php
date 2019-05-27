@@ -11,7 +11,7 @@ use yii\helpers\Url;
 
 $this->title = 'Duplicate Queue';
 
-if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
+if (Yii::$app->user->identity->canRole('admin')) {
     $isAdmin = true;
     $userList = \common\models\Employee::getList();
     $projectList = \common\models\Project::getList();

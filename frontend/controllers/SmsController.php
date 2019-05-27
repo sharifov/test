@@ -75,7 +75,7 @@ class SmsController extends FController
         $searchModel = new SmsSearch();
 
         $params = Yii::$app->request->queryParams;
-        if(Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id)) {
+        if(Yii::$app->user->identity->canRole('supervision')) {
             $params['SmsSearch']['supervision_id'] = Yii::$app->user->id;
         }
 

@@ -20,7 +20,7 @@ $queueType = Yii::$app->request->get('type');
 $userId = Yii::$app->user->id;
 
 $is_manager = false;
-if(Yii::$app->authManager->getAssignment('admin', $userId) || Yii::$app->authManager->getAssignment('supervision', $userId)) {
+if(Yii::$app->user->identity->canRoles(['admin', 'supervision'])) {
     $is_manager = true;
 }
 
@@ -96,24 +96,6 @@ if(Yii::$app->authManager->getAssignment('admin', $userId) || Yii::$app->authMan
             'filter' => false
 
         ],
-
-        /*[
-            'attribute' => 'id',
-            'label' => in_array($queueType, ['booked', 'sold'])
-                ? 'Lead ID / Sale ID (BO)' : 'Sale ID',
-            'visible' => (
-                Yii::$app->user->identity->role != 'agent' ||
-                !in_array($queueType, ['inbox'])
-            ),
-            'value' => function ($model) use ($queueType) {
-                if (in_array($queueType, ['booked', 'sold'])) {
-                    return sprintf('%d / %d', $model['id'], $model['bo_flight_id']);
-                }
-
-                return (!empty($model['id']))
-                    ? $model['id'] : '-';
-            }
-        ],*/
         [
             'label' => 'PNR',
             'visible' => in_array($queueType, ['booked', 'sold']),
@@ -206,7 +188,7 @@ if(Yii::$app->authManager->getAssignment('admin', $userId) || Yii::$app->authMan
             'visible' => !in_array($queueType, ['booked', 'sold']),
             'content' => function ($model) use ($queueType) {
                 $content = '';
-                if($queueType === 'inbox' && Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id)) {
+                if($queueType === 'inbox' && Yii::$app->user->identity->canRole('agent')) {
                     $content .= '';
                 } else {
                     $content .= $model['flight_detail'];
@@ -402,10 +384,7 @@ if(Yii::$app->authManager->getAssignment('admin', $userId) || Yii::$app->authMan
         [
             'attribute' => 'source_id',
             'label' => 'Market Info',
-            'visible' => (
-                in_array($queueType, ['sold']) &&
-                (Yii::$app->user->identity->role != 'agent')
-            ),
+            'visible' => in_array($queueType, ['sold']) && !Yii::$app->user->identity->canRole('agent'),
             'value' => function ($model) {
                 return $model['name'];
             },

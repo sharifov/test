@@ -92,13 +92,13 @@ class LeadsController extends FController
         }
 
 
-        if(Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id)) {
+        if(Yii::$app->user->identity->canRole('agent')) {
             $isAgent = true;
         } else {
             $isAgent = false;
         }
 
-        if(Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id)) {
+        if(Yii::$app->user->identity->canRole('supervision')) {
             $params['LeadSearch']['supervision_id'] = Yii::$app->user->id;
         }
 
@@ -120,7 +120,7 @@ class LeadsController extends FController
 
         $multipleForm = new LeadMultipleForm();
 
-        if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id)) {
+        if(Yii::$app->user->identity->canRoles(['admin', 'supervision'])) {
             if ($multipleForm->load(Yii::$app->request->post()) && $multipleForm->lead_list) {
                 if ($multipleForm->validate()) {
 
@@ -260,7 +260,7 @@ class LeadsController extends FController
 
         $params = Yii::$app->request->queryParams;
 
-        if(Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id)) {
+        if(Yii::$app->user->identity->canRole('supervision')) {
             $params['LeadSearch']['supervision_id'] = Yii::$app->user->id;
         }
 

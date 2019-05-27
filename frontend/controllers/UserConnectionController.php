@@ -65,7 +65,7 @@ class UserConnectionController extends FController
             $params['EmployeeSearch']['status'] = 10;
         }
 
-        if(Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id)) {
+        if(Yii::$app->user->identity->canRole('supervision')) {
             $params['EmployeeSearch']['supervision_id'] = Yii::$app->user->id;
         }
 

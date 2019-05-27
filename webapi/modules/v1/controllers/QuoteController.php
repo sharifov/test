@@ -258,7 +258,7 @@ class QuoteController extends ApiBaseController
             $response['generalEmail'] = $model->lead->project->contactInfo->email;
             $response['generalDirectLine'] = sprintf('%s', $model->lead->project->contactInfo->phone);
             $response['itinerary']['tripType'] = $model->trip_type;
-            $response['itinerary']['mainCarrier'] = $model->getMainCarrier() ? $model->getMainCarrier()->name : $model->main_airline_code;
+            $response['itinerary']['mainCarrier'] = $model->mainAirline ? $model->mainAirline->name : $model->main_airline_code;
             $response['itinerary']['trips'] = $model->getTrips();
             $response['itinerary']['price'] = $model->getQuotePriceData(); //$model->quotePrice();
 

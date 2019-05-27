@@ -12,11 +12,6 @@
 
 use yii\helpers\Html;
 
-/*if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
-    $userList = \common\models\Employee::getList();
-} else {
-    $userList = \common\models\Employee::getListByUserId(Yii::$app->user->id);
-}*/
 
 $c_type_id = $comForm->c_type_id;
 ?>
@@ -109,7 +104,7 @@ $c_type_id = $comForm->c_type_id;
 
                 ]) ?>
 
-                <?php if(!Yii::$app->authManager->getAssignment('qa', Yii::$app->user->id)) : ?>
+                <?php if(!Yii::$app->user->identity->canRole('qa')) : ?>
                      <div class="chat__form panel">
 
 

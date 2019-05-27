@@ -285,9 +285,9 @@ sudo tail -f /var/log/filebeat/filebeat
 CRONs
 -------------------
 ```
-*/15  *  *  *  *     run-this-one php /var/www/sale/yii monitor-flow/follow-up
+*/17  *  *  *  *     run-this-one php /var/www/sale/yii monitor-flow/follow-up
 */15  *  *  *  *     run-this-one php /var/www/sale/yii monitor-flow/on-wake
-*/10  *  *  *  *     run-this-one php /var/www/sale/yii monitor-flow/watch-dog-decline-quote
+*/20  *  *  *  *     run-this-one php /var/www/sale/yii monitor-flow/watch-dog-decline-quote
 */3   *  *  *  *     run-this-one php /var/www/sale/yii lead/update-ip-info
 10   0  *  *  *     run-this-one php /var/www/sale/yii lead/update-by-tasks
 30   0  *  *  *     run-this-one php /var/www/sale/yii db/update-airline-cabin-classes

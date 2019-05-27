@@ -41,7 +41,7 @@ if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
             'filterModel' => $searchModel,
             //'layout' => $template,
             'rowOptions' => function (\common\models\Employee $model, $index, $widget, $grid) {
-                if ($model->deleted) {
+                if ($model->isDeleted()) {
                     return ['class' => 'danger'];
                 }
             },

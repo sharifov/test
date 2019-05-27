@@ -52,7 +52,7 @@ if($taskList) {
 }
 
 $is_manager = false;
-if(Yii::$app->authManager->getAssignment('admin', $userId) || Yii::$app->authManager->getAssignment('supervision', $userId)) {
+if(Yii::$app->user->identity->canRoles(['admin', 'supervision'])) {
     $is_manager = true;
 }
 

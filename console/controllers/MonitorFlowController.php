@@ -11,25 +11,37 @@ use yii\console\Controller;
 use common\models\LeadTask;
 use common\models\Task;
 use Yii;
+use yii\db\Expression;
+use yii\db\Query;
 use yii\helpers\Console;
 use yii\helpers\VarDumper;
 
 class MonitorFlowController extends Controller
 {
+
     /**
      * @param bool $test
+     * @throws \Throwable
+     * @throws \yii\db\StaleObjectException
      */
     public function actionWatchDogDeclineQuote($test = false)
     {
 
         printf("\n --- Start %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
 
-        $quotes = Quote::find()->select(['quotes.id', 'quotes.uid', 'quotes.lead_id', 'quotes.created'])->joinWith('lead')
+
+        $query = new Query();
+        $subQuery = $query->select(['COUNT(*)'])->from('quotes AS q')->where(['q.status' => Quote::STATUS_APPLIED])->andWhere('quotes.lead_id = q.lead_id')->createCommand()->getRawSql();
+
+        $quotes = Quote::find()->select(['quotes.id', 'quotes.uid', 'quotes.lead_id', 'quotes.created'])
+            ->joinWith('lead')
             ->where(['quotes.status' => [Quote::STATUS_CREATED, Quote::STATUS_SEND, Quote::STATUS_OPENED]])
             ->andWhere(['<=', 'quotes.created', date('Y-m-d H:i:s', strtotime('-1 day'))])
             ->andWhere(['NOT IN', 'leads.status', [Lead::STATUS_BOOKED, Lead::STATUS_SOLD, Lead::STATUS_PENDING]])
+            //->andWhere('(SELECT COUNT(*) FROM quotes AS q WHERE quotes.lead_id = q.lead_id AND q.status = 2) < 1')
+            ->andWhere(['<', new Expression('(' . $subQuery . ')'), 1])
             ->orderBy(['quotes.id' => SORT_DESC])
-            ->limit(500)
+            //->limit(500)
             ->all();
 
 
@@ -39,24 +51,39 @@ class MonitorFlowController extends Controller
             echo sprintf('Count: %s', count($quotes)) . PHP_EOL;
         }
         //exit;
-        $now = time();
+        //$now = time();
         foreach ($quotes as $quote) {
 
             // VarDumper::dump($quote->attributes); exit;
 
-            if ($quote->lead->getAppliedAlternativeQuotes()) {
+            $existQuote = Quote::find()->where(['lead_id' => $quote->lead_id, 'status' => Quote::STATUS_APPLIED])->exists();
+            if ($existQuote) {
+                if ($test) {
+                   echo 'Exist alternative applied quote Lead ' .   $quote->lead_id . "\r\n";
+                }
                 continue;
             }
-            $limitTime = strtotime($quote->created . '+1 day');
-            if ($limitTime <= $now) {
-                $quote->status = Quote::STATUS_DECLINED;
-                if ($quote->save()) {
-                    if ($test) {
-                        echo sprintf('Decline quote: %s. FR: %d, Created: %s', $quote->uid, $quote->lead_id, $quote->created) . PHP_EOL;
-                    }
+
+            //$limitTime = strtotime($quote->created . '+1 day');
+            //if ($limitTime <= $now) {
+            $quote->status = Quote::STATUS_DECLINED;
+            if ($quote->update(false)) {
+                if ($test) {
+                    echo sprintf('Decline quote: %s. FR: %d, Created: %s', $quote->uid, $quote->lead_id, $quote->created) . PHP_EOL;
+                }
+            } else {
+                Yii::error('Quote: ' . $quote->id .', '. VarDumper::dumpAsString($quote->errors), 'console:actionWatchDogDeclineQuote:Quote:save');
+                if($test) {
+                    echo 'Quote: ' . $quote->id . ' ' .VarDumper::dumpAsString($quote->errors)."\r\n";
                 }
             }
+            //}
         }
+
+        if ($test) {
+            echo sprintf('Count: %s', count($quotes)) . PHP_EOL;
+        }
+
         printf("\n --- End %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
     }
 

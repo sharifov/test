@@ -17,7 +17,7 @@ use yii\helpers\Html;
         <?=Html::img($grav_url, ['alt' => 'avatar', 'class' => 'img-circle profile_img'])?>
     </div>
     <div class="profile_info">
-        <span><?=Html::encode(Yii::$app->user->identity->role)?></span>
+        <span><?=implode(', ', Yii::$app->user->identity->getRoles())?></span>
         <h2><i class="fa fa-user"></i> <?=Html::encode(Yii::$app->user->identity->username)?></h2>
     </div>
 </div>

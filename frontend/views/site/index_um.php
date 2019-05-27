@@ -45,7 +45,7 @@ $userId = Yii::$app->user->id;
                 </tr>
                 <tr>
                     <th>My Role:</th>
-                    <td><?=implode(', ', Yii::$app->user->identity->roles)?></td>
+                    <td><?=implode(', ', Yii::$app->user->identity->getRoles())?></td>
                 </tr>
             </table>
 
