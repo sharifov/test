@@ -129,12 +129,6 @@ class m190524_094842_remove_permissions_role_and_insert_routes extends Migration
         $roleAdmin = $auth->getRole('admin');
         $auth->addChild($superAdmin, $roleAdmin);
 
-        $roleSupervision = $auth->getRole('supervision');
-        $auth->addChild($superAdmin, $roleSupervision);
-
-        $roleAgent = $auth->getRole('agent');
-        $auth->addChild($superAdmin, $roleAgent);
-
         $auth->assign($superAdmin, $employee->getId());
 
     }

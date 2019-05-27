@@ -16,6 +16,7 @@ use yii\web\Response;
  */
 class SmsTemplateTypeController extends FController
 {
+
     public function behaviors()
     {
         $behaviors = [
@@ -25,23 +26,7 @@ class SmsTemplateTypeController extends FController
                     'delete' => ['POST'],
                 ],
             ],
-            'access' => [
-                'class' => AccessControl::class,
-                'rules' => [
-                    [
-                        'actions' => ['index', 'update', 'view', 'delete', 'create', 'synchronization'],
-                        'allow' => true,
-                        'roles' => ['admin'],
-                    ],
-                    /*[
-                        'actions' => ['index'],
-                        'allow' => true,
-                        'roles' => ['agent'],
-                    ],*/
-                ],
-            ],
         ];
-
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
 

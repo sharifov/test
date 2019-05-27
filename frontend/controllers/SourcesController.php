@@ -17,22 +17,9 @@ use yii\filters\VerbFilter;
 class SourcesController extends FController
 {
 
-    /**
-     * {@inheritdoc}
-     */
     public function behaviors()
     {
         $behaviors = [
-            'access' => [
-                'class' => AccessControl::class,
-                'rules' => [
-                    [
-                        //'actions' => ['index', 'update', 'delete', 'create'],
-                        'allow' => true,
-                        'roles' => ['admin'],
-                    ],
-                ],
-            ],
             'verbs' => [
                 'class' => VerbFilter::class,
                 'actions' => [
@@ -40,7 +27,6 @@ class SourcesController extends FController
                 ],
             ],
         ];
-
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
 

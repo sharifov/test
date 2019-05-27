@@ -39,39 +39,6 @@ use common\models\EmailTemplateType;
  */
 class QuoteController extends FController
 {
-    /**
-     * {@inheritdoc}
-     */
-    public function behaviors()
-    {
-        $behaviors = [
-            'access' => [
-                'class' => AccessControl::class,
-                'rules' => [
-                    [
-                        'actions' => [
-                            'create', 'save', 'decline', 'calc-price', 'extra-price', 'clone',
-                            'send-quotes', 'get-online-quotes','get-online-quotes-old','status-log','preview-send-quotes',
-                            'create-quote-from-search','preview-send-quotes-new',
-                        ],
-
-                        'allow' => true,
-                        'roles' => ['agent'],
-                    ],
-                ],
-            ]
-        ];
-
-        return ArrayHelper::merge(parent::behaviors(), $behaviors);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function actions()
-    {
-        return parent::actions();
-    }
 
     /**
      * @param $leadId

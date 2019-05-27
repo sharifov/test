@@ -450,8 +450,10 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         if (isset($attr['acl_rules_activated'])) {
             $this->acl_rules_activated = $attr['acl_rules_activated'];
         }
-        if (isset($attr['role'])) {
-            $this->roles[] = $attr['role'];
+        if (isset($attr['roles']) && $attr['roles']) {
+            foreach ($attr['roles'] as $role) {
+                $this->roles[] = $role;
+            }
         }
         $this->generateAuthKey();
 

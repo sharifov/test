@@ -10,40 +10,13 @@ use common\models\KpiHistory;
 use common\models\search\KpiHistorySearch;
 use yii\base\DynamicModel;
 use common\components\KpiService;
+use yii\helpers\ArrayHelper;
 
 /**
  * KpiController.
  */
 class KpiController extends FController
 {
-
-    public function behaviors()
-    {
-        return [
-            'access' => [
-                'class' => AccessControl::class,
-                'rules' => [
-                    [
-                        'actions' => ['index', 'details'],
-                        'allow' => true,
-                        'roles' => ['supervision'],
-                    ],
-                    [
-                        'actions' => ['index','details'],
-                        'allow' => true,
-                        'roles' => ['agent'],
-                    ],
-                ],
-            ],
-            'verbs' => [
-                'class' => VerbFilter::class,
-                'actions' => [
-                    'index' => ['POST'],
-                    'delete' => ['POST'],
-                ],
-            ],
-        ];
-    }
 
     /**
      * @return mixed

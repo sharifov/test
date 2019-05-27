@@ -10,6 +10,7 @@ use common\models\search\AgentActivitySearch;
 use common\models\Call;
 use common\models\Sms;
 use common\models\Email;
+use yii\helpers\ArrayHelper;
 
 
 /**
@@ -17,28 +18,6 @@ use common\models\Email;
  */
 class AgentReportController extends FController
 {
-
-    public function behaviors()
-    {
-        return [
-            'access' => [
-                'class' => AccessControl::class,
-                'rules' => [
-                    [
-                        'actions' => ['index','calls','sms','email','cloned','created','sold','from-to-leads'],
-                        'allow' => true,
-                        'roles' => ['supervision','admin'],
-                    ],
-                ],
-            ],
-            'verbs' => [
-                'class' => VerbFilter::class,
-                'actions' => [
-                    'delete' => ['POST'],
-                ],
-            ],
-        ];
-    }
 
     public function validateDateParams($params)
     {

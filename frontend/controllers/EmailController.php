@@ -21,10 +21,6 @@ use yii\filters\VerbFilter;
  */
 class EmailController extends FController
 {
-    /**
-     * {@inheritdoc}
-     */
-
 
     public function behaviors()
     {
@@ -35,30 +31,7 @@ class EmailController extends FController
                     'delete' => ['POST'],
                 ],
             ],
-            'access' => [
-                'class' => AccessControl::class,
-                'rules' => [
-                    [
-                        'actions' => ['index', 'update', 'view', 'inbox', 'soft-delete'],
-                        'allow' => true,
-                        'roles' => ['supervision'],
-                    ],
-
-                    [
-                        'actions' => ['delete', 'create'],
-                        'allow' => true,
-                        'roles' => ['admin'],
-                    ],
-
-                    [
-                        'actions' => ['inbox', 'view', 'soft-delete'],
-                        'allow' => true,
-                        'roles' => ['agent'],
-                    ],
-                ],
-            ],
         ];
-
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
 
