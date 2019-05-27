@@ -438,7 +438,7 @@ $buttonAnswer = Html::a('<i class="fa fa-commenting-o"></i> </span>'. ($leadForm
     'data-pjax' => 0
 ]);
 
-$viwModeSuperAdminCondition = ($leadForm->mode === $leadForm::VIEW_MODE && Yii::$app->user->identity->canRole(['admin', 'supervidion']));
+$viwModeSuperAdminCondition = ($leadForm->mode === $leadForm::VIEW_MODE && Yii::$app->user->identity->canRoles(['admin', 'supervidion']));
 $buttonsSubAction = [];
 $takeConditions = false;
 if (!$leadForm->getLead()->isNewRecord) {
