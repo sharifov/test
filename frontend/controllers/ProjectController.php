@@ -18,30 +18,16 @@ use yii\web\Response;
 class ProjectController extends FController
 {
 
-    /**
-     * {@inheritdoc}
-     */
     public function behaviors()
     {
         $behaviors = [
-            'access' => [
-                'class' => AccessControl::class,
-                'rules' => [
-                    [
-                        //'actions' => ['index', 'update', 'delete', 'create'],
-                        'allow' => true,
-                        'roles' => ['admin'],
-                    ],
-                ],
-            ],
             'verbs' => [
                 'class' => VerbFilter::class,
                 'actions' => [
-                    'logout' => ['POST'],
+                    'delete' => ['POST']
                 ],
             ],
         ];
-
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
 

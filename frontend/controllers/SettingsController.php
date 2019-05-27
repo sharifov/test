@@ -24,27 +24,6 @@ use yii\web\Response;
  */
 class SettingsController extends FController
 {
-    /**
-     * {@inheritdoc}
-     */
-    public function behaviors()
-    {
-        return [
-            'access' => [
-                'class' => AccessControl::class,
-                'rules' => [
-                    [
-                        'actions' => [
-                            'projects', 'airlines', 'airports', 'logging', 'acl', 'email-template',
-                            'sync', 'view-log', 'acl-rule', 'project-data', 'synchronization'
-                        ],
-                        'allow' => true,
-                        'roles' => ['supervision'],
-                    ],
-                ],
-            ],
-        ];
-    }
 
     public function actionSync($type)
     {

@@ -18,7 +18,6 @@ use yii\filters\VerbFilter;
 class ClientPhoneController extends FController
 {
 
-
     public function behaviors()
     {
         $behaviors = [
@@ -28,21 +27,9 @@ class ClientPhoneController extends FController
                     'delete' => ['POST'],
                 ],
             ],
-            'access' => [
-                'class' => AccessControl::class,
-                'rules' => [
-                    [
-                        //'actions' => ['index', 'update', 'view', 'delete', 'create'],
-                        'allow' => true,
-                        'roles' => ['supervision', 'admin'],
-                    ],
-                ],
-            ],
         ];
-
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
-
 
     /**
      * Lists all ClientPhone models.

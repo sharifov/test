@@ -24,9 +24,7 @@ use yii\filters\VerbFilter;
  */
 class LeadsController extends FController
 {
-    /**
-     * {@inheritdoc}
-     */
+
     public function behaviors()
     {
         $behaviors = [
@@ -36,28 +34,7 @@ class LeadsController extends FController
                     'delete' => ['POST'],
                 ],
             ],
-            'access' => [
-                'class' => AccessControl::class,
-                'rules' => [
-                    [
-                        'actions' => ['index', 'update', 'delete', 'create', 'export', 'duplicate', 'view', 'ajax-activity-logs'],
-                        'allow' => true,
-                        'roles' => ['supervision', 'admin'],
-                    ],
-                    [
-                        'actions' => ['ajax-activity-logs'],
-                        'allow' => true,
-                        'roles' => ['qa'],
-                    ],
-                    [
-                        'actions' => ['index', 'ajax-reason-list'],
-                        'allow' => true,
-                        'roles' => ['agent'],
-                    ],
-                ],
-            ],
         ];
-
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
 

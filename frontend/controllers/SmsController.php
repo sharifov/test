@@ -23,6 +23,7 @@ use common\components\CommunicationService;
  */
 class SmsController extends FController
 {
+
     public function behaviors()
     {
         $behaviors = [
@@ -32,39 +33,9 @@ class SmsController extends FController
                     'delete' => ['POST'],
                 ],
             ],
-            'access' => [
-                'class' => AccessControl::class,
-                'rules' => [
-                    [
-                        'actions' => ['index', 'update', 'view', 'inbox', 'soft-delete'], //'delete', 'create',
-                        'allow' => true,
-                        'roles' => ['supervision'],
-                    ],
-
-                    [
-                        'actions' => ['index', 'view', 'inbox'], //'delete', 'create',
-                        'allow' => true,
-                        'roles' => ['qa'],
-                    ],
-
-                    [
-                        'actions' => ['delete', 'create'],
-                        'allow' => true,
-                        'roles' => ['admin'],
-                    ],
-
-                    [
-                        'actions' => ['view', 'view2', 'soft-delete', 'all-delete', 'all-read', 'list'],
-                        'allow' => true,
-                        'roles' => ['agent'],
-                    ],
-                ],
-            ],
         ];
-
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
-
 
     /**
      * Lists all Sms models.

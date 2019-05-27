@@ -44,8 +44,8 @@ class TestController extends FController
                 'class' => AccessControl::class,
                 'rules' => [
                     [
-                        'allow' => true,
                         'roles' => ['admin'],
+                        'allow' => true,
                     ],
                 ],
             ],

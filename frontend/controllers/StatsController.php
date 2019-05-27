@@ -27,35 +27,6 @@ use yii\web\NotFoundHttpException;
  */
 class StatsController extends FController
 {
-    /**
-     * {@inheritdoc}
-     */
-    public function behaviors()
-    {
-        $behaviors = [
-            'access' => [
-                'class' => AccessControl::class,
-                'rules' => [
-                    [
-                        'actions' => ['index', 'call-sms', 'calls-graph', 'sms-graph', 'emails-graph'],
-                        'allow' => true,
-                        'roles' => ['supervision', 'admin'],
-                    ],
-                ],
-            ],
-            'verbs' => [
-                'class' => VerbFilter::class,
-                'actions' => [
-                    'logout' => ['POST', 'GET'],
-                ],
-            ],
-        ];
-
-        return ArrayHelper::merge(parent::behaviors(), $behaviors);
-    }
-
-
-
 
     /**
      * Displays homepage.

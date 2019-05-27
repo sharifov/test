@@ -60,60 +60,6 @@ class LeadController extends FController
     /**
      * {@inheritdoc}
      */
-    public function behaviors()
-    {
-        $behaviors = [
-            'access' => [
-                'class' => AccessControl::class,
-                'rules' => [
-                    [
-                        'actions' => [
-                            'create', 'add-comment', 'change-state', 'unassign', 'take', 'auto-take',
-                            'set-rating', 'add-note', 'unprocessed', 'call-expert', 'send-email',
-                            'check-updates', 'flow-transition', 'get-user-actions', 'add-pnr', 'update2','clone',
-                            'get-badges', 'sold', 'split-profit', 'split-tips','processing', 'follow-up',  'trash', 'booked',
-                            'test', 'view'
-                        ],
-                        'allow' => true,
-                        'roles' => ['agent', 'admin', 'supervision'],
-                    ],
-
-                    [
-                        'actions' => ['inbox'],
-                        'allow' => Yii::$app->params['settings']['enable_lead_inbox'] ?: false,
-                        'roles' => ['agent', 'admin', 'supervision'],
-                    ],
-
-                    //if(isset(Yii::$app->params['settings']['enable_lead_inbox']) && Yii::$app->params['settings']['enable_lead_inbox']) {
-
-                    [
-                        'actions' => [
-                            'pending', 'duplicate'
-                        ],
-                        'allow' => true,
-                        'roles' => ['admin'],
-                    ],
-
-                    [
-                        'actions' => [
-                            'view', 'trash', 'sold', 'duplicate', 'flow-transition'
-                        ],
-                        'allow' => true,
-                        'roles' => ['supervision'],
-                    ],
-                    [
-                        'actions' => [
-                            'view', 'trash', 'sold', 'flow-transition'
-                        ],
-                        'allow' => true,
-                        'roles' => ['qa'],
-                    ],
-                ],
-            ]
-        ];
-
-        return ArrayHelper::merge(parent::behaviors(), $behaviors);
-    }
 
     public function beforeAction($action)
     {
@@ -128,15 +74,6 @@ class LeadController extends FController
 
         return parent::beforeAction($action);
     }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function actions()
-    {
-        return parent::actions();
-    }
-
 
     /**
      * @param string $gid

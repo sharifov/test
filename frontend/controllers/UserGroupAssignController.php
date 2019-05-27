@@ -27,23 +27,7 @@ class UserGroupAssignController extends FController
                     'delete' => ['POST'],
                 ],
             ],
-            'access' => [
-                'class' => AccessControl::class,
-                'rules' => [
-                    [
-                        'actions' => ['index', 'update', 'delete', 'create', 'view'],
-                        'allow' => true,
-                        'roles' => ['admin','userManager'], //'supervision',
-                    ],
-                    /*[
-                        'actions' => ['view', 'index'],
-                        'allow' => true,
-                        'roles' => ['agent'],
-                    ],*/
-                ],
-            ],
         ];
-
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
 

@@ -10,6 +10,7 @@ $isSupervision = $userModel->canRole('supervision'); //Yii::$app->authManager->g
 $isAgent = $userModel->canRole('agent'); //Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id);
 $isQA = $userModel->canRole('qa'); //Yii::$app->authManager->getAssignment('qa', Yii::$app->user->id);
 $isUM = $userModel->canRole('userManager'); //Yii::$app->authManager->getAssignment('userManager', Yii::$app->user->id);
+$isSuperAdmin = $userModel->canRole('superadmin');
 
 ?>
 <div id="sidebar-menu" class="main_menu_side hidden-print main_menu">
@@ -412,20 +413,20 @@ $isUM = $userModel->canRole('userManager'); //Yii::$app->authManager->getAssignm
                     //'linkOptions' => ['data-method' => 'post']
                 ];
             }
+            if ($isSuperAdmin) {
+                $menuItems[] = [
+                    'label' => 'RBAC',
+                    'url' => 'javascript:',
+                    'icon' => 'cogs',
+                    'items' => [
+                        ['label' => 'Assignment', 'url' => ['/rbac/assignment']],
+                        ['label' => 'Route', 'url' => ['/rbac/route']],
+                        ['label' => 'Permission', 'url' => ['/rbac/permission']],
+                        ['label' => 'Role', 'url' => ['/rbac/role']],
 
-            $menuItems[] = [
-                'label' => 'RBAC',
-                'url' => 'javascript:',
-                'icon' => 'cogs',
-                'items' => [
-                    ['label' => 'Assignment', 'url' => ['/rbac/assignment']],
-                    ['label' => 'Route', 'url' => ['/rbac/route']],
-                    ['label' => 'Permission', 'url' => ['/rbac/permission']],
-                    ['label' => 'Role', 'url' => ['/rbac/role']],
-
-                ],
-            ];
-
+                    ],
+                ];
+            }
 
             //if(\webvimark\modules\UserManagement\models\User::canRoute('/stats/index', $superAdminAllowed = true)) {
             //$menuItems[] = ['label' => \backend\widgets\ыуддштSysinfo::widget(['refresh' => 10]), 'url' => ['/stats/index']];

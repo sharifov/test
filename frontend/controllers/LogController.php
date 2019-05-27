@@ -5,6 +5,7 @@ namespace frontend\controllers;
 use Yii;
 use frontend\models\Log;
 use frontend\models\search\LogSearch;
+use yii\helpers\ArrayHelper;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
@@ -14,34 +15,10 @@ use yii\filters\AccessControl;
  */
 class LogController extends FController
 {
-    /*public function behaviors()
-    {
-        $behaviors = parent::behaviors();
-
-        $behaviors ['verbs'] = [
-            'class' => VerbFilter::class,
-            'actions' => [
-                'delete' => ['POST'],
-            ],
-        ];
-
-        return $behaviors;
-    }*/
-
 
     public function behaviors()
     {
-        return [
-            'access' => [
-                'class' => AccessControl::class,
-                'rules' => [
-                    [
-                        'actions' => ['index', 'clear', 'view', 'create', 'delete'],
-                        'allow' => true,
-                        'roles' => ['supervision'],
-                    ],
-                ],
-            ],
+        $behaviors = [
             'verbs' => [
                 'class' => VerbFilter::class,
                 'actions' => [
@@ -49,8 +26,8 @@ class LogController extends FController
                 ],
             ],
         ];
+        return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
-
 
     /**
      * Lists all Log models.

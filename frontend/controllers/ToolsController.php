@@ -18,23 +18,6 @@ use yii\filters\VerbFilter;
 class ToolsController extends FController
 {
 
-    public function behaviors()
-    {
-        return [
-            'access' => [
-                'class' => AccessControl::class,
-                'rules' => [
-                    [
-                        'actions' => ['clear-cache', 'supervisor'],
-                        'allow' => true,
-                        'roles' => ['supervision', 'admin'],
-                    ]
-                ],
-            ],
-        ];
-    }
-
-
     /**
      * @return \yii\web\Response
      * @throws \yii\base\ErrorException
