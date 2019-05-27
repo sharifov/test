@@ -289,7 +289,7 @@ class EmployeeController extends FController
             }
 
 
-            if(!Yii::$app->user->identity->canRole('admin')) {
+            if(!Yii::$app->user->identity->canRoles(['admin', 'userManager', 'supervision'])) {
                 throw new ForbiddenHttpException('Access denied for this user: '.$model->id);
             }
 
@@ -426,6 +426,11 @@ class EmployeeController extends FController
                     return $this->refresh();
                 }
             }
+
+
+            $model->roles = ArrayHelper::map(Yii::$app->authManager->getRolesByUser($model->id), 'name', 'name') ;
+
+            //VarDumper::dump($model->roles, 10, true); exit;
 
 
             return $this->render('_form', [
