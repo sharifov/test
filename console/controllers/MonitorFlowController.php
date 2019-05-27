@@ -11,6 +11,8 @@ use yii\console\Controller;
 use common\models\LeadTask;
 use common\models\Task;
 use Yii;
+use yii\db\Expression;
+use yii\db\Query;
 use yii\helpers\Console;
 use yii\helpers\VarDumper;
 
@@ -27,11 +29,17 @@ class MonitorFlowController extends Controller
 
         printf("\n --- Start %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
 
+
+        $query = new Query();
+        $subQuery = $query->select(['COUNT(*)'])->from('quotes AS q')->where(['q.status' => Quote::STATUS_APPLIED])->andWhere('quotes.lead_id = q.lead_id')->createCommand()->getRawSql();
+
         $quotes = Quote::find()->select(['quotes.id', 'quotes.uid', 'quotes.lead_id', 'quotes.created'])
             ->joinWith('lead')
             ->where(['quotes.status' => [Quote::STATUS_CREATED, Quote::STATUS_SEND, Quote::STATUS_OPENED]])
             ->andWhere(['<=', 'quotes.created', date('Y-m-d H:i:s', strtotime('-1 day'))])
             ->andWhere(['NOT IN', 'leads.status', [Lead::STATUS_BOOKED, Lead::STATUS_SOLD, Lead::STATUS_PENDING]])
+            //->andWhere('(SELECT COUNT(*) FROM quotes AS q WHERE quotes.lead_id = q.lead_id AND q.status = 2) < 1')
+            ->andWhere(['<', new Expression('(' . $subQuery . ')'), 1])
             ->orderBy(['quotes.id' => SORT_DESC])
             //->limit(500)
             ->all();
