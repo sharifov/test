@@ -16,8 +16,11 @@ use yii\helpers\VarDumper;
 
 class MonitorFlowController extends Controller
 {
+
     /**
      * @param bool $test
+     * @throws \Throwable
+     * @throws \yii\db\StaleObjectException
      */
     public function actionWatchDogDeclineQuote($test = false)
     {
@@ -47,19 +50,32 @@ class MonitorFlowController extends Controller
 
             $existQuote = Quote::find()->where(['lead_id' => $quote->lead_id, 'status' => Quote::STATUS_APPLIED])->exists();
             if ($existQuote) {
+                if ($test) {
+                   echo 'Exist alternative applied quote Lead ' .   $quote->lead_id . "\r\n";
+                }
                 continue;
             }
 
             //$limitTime = strtotime($quote->created . '+1 day');
             //if ($limitTime <= $now) {
             $quote->status = Quote::STATUS_DECLINED;
-            if ($quote->save()) {
+            if ($quote->update(false)) {
                 if ($test) {
                     echo sprintf('Decline quote: %s. FR: %d, Created: %s', $quote->uid, $quote->lead_id, $quote->created) . PHP_EOL;
+                }
+            } else {
+                Yii::error('Quote: ' . $quote->id .', '. VarDumper::dumpAsString($quote->errors), 'console:actionWatchDogDeclineQuote:Quote:save');
+                if($test) {
+                    echo 'Quote: ' . $quote->id . ' ' .VarDumper::dumpAsString($quote->errors)."\r\n";
                 }
             }
             //}
         }
+
+        if ($test) {
+            echo sprintf('Count: %s', count($quotes)) . PHP_EOL;
+        }
+
         printf("\n --- End %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
     }
 
