@@ -216,6 +216,16 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         return $this->hasOne(UserProfile::class, ['up_user_id' => 'id']);
     }
 
+    public function canCall()
+    {
+        return ($this->userProfile && $this->userProfile->canCall());
+    }
+
+    public function isKpiEnable()
+    {
+        return ($this->userProfile && $this->userProfile->isKpiEnable());
+    }
+
     /**
      * @return \yii\db\ActiveQuery
      */

@@ -206,7 +206,7 @@ return [
             'scanRootParentDirectory'   => true,
             'layout'                    => '@frontend/themes/gentelella/views/layouts/main',         // Name of the used layout. If using own layout use 'null'.
             'allowedIPs'                => ['*'],               // 127.0.0.1 IP addresses from which the translation interface is accessible.
-            'roles'                     => ['@'],               // For setting access levels to the translating interface.
+            'roles'                     => ['superadmin', 'admin'],               // For setting access levels to the translating interface.
             'tmpDir'                    => '@runtime',         // Writable directory for the client-side temporary language files.
             // IMPORTANT: must be identical for all applications (the AssetsManager serves the JavaScript files containing language elements from this directory).
             'phpTranslators'            => ['Yii::t', 't'],             // list of the php function for translating messages.
