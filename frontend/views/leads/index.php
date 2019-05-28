@@ -554,6 +554,23 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
                 'class' => 'text-center'
             ],
         ],
+
+        [
+            'attribute' => 'l_last_action_dt',
+            'value' => function(\common\models\Lead $model) {
+                $str = '-';
+                if($model->l_last_action_dt) {
+                    $str = '<b>' . Yii::$app->formatter->asRelativeTime(strtotime($model->l_last_action_dt)) . '</b>';
+                    $str .= '<br><i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->l_last_action_dt));
+                }
+                return $str;
+            },
+            'format' => 'raw',
+            'contentOptions' => [
+                'class' => 'text-center'
+            ],
+        ],
+
         // 'bo_flight_id',
 
         /*[

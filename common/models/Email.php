@@ -733,4 +733,16 @@ class Email extends \yii\db\ActiveRecord
         }
         return $emailStats;
     }
+
+    public function afterSave($insert, $changedAttributes)
+    {
+        parent::afterSave($insert, $changedAttributes);
+
+        if($this->e_type_id === self::TYPE_OUTBOX && $this->e_lead_id && $this->eLead) {
+            $this->eLead->updateLastAction();
+        }
+
+    }
+
+
 }

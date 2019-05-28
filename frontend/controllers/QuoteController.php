@@ -58,16 +58,14 @@ class QuoteController extends FController
             if($lead !== null){
                 $keyCache = sprintf('quick-search-new-%d-%s-%s', $lead->id, $gds, $lead->generateLeadKey());
 
-                Yii::$app->cache->delete($keyCache);
+                //Yii::$app->cache->delete($keyCache);
 
                 $result = Yii::$app->cache->get($keyCache);
-
-
 
                 if($result === false){
                     $result = SearchService::getOnlineQuotes($lead);
                     if($result) {
-                        Yii::$app->cache->set($keyCache, $result, 300);
+                        Yii::$app->cache->set($keyCache, $result, 600);
                     }
                 }
 

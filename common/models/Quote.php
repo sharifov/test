@@ -1197,6 +1197,11 @@ class Quote extends \yii\db\ActiveRecord
         } else {
             QuoteStatusLog::createNewFromQuote($this);
         }
+
+        if($this->lead_id && $this->lead) {
+            $this->lead->updateLastAction();
+        }
+
     }
 
 

@@ -251,6 +251,11 @@ class Call extends \yii\db\ActiveRecord
                 }
             }
         }
+
+        if($this->c_call_type_id === self::CALL_TYPE_OUT && $this->c_lead_id && $this->cLead) {
+            $this->cLead->updateLastAction();
+        }
+
     }
 
 /**

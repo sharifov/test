@@ -570,4 +570,14 @@ class Sms extends \yii\db\ActiveRecord
         return $smsStats;
     }
 
+
+    public function afterSave($insert, $changedAttributes)
+    {
+        parent::afterSave($insert, $changedAttributes);
+
+        if($this->s_type_id === self::TYPE_OUTBOX && $this->s_lead_id && $this->sLead) {
+            $this->sLead->updateLastAction();
+        }
+
+    }
 }

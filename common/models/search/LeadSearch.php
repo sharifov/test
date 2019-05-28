@@ -72,7 +72,7 @@ class LeadSearch extends Lead
             //['created_date_to', 'default', 'value' => date('Y-m-d')],
 
             [['uid', 'trip_type', 'cabin', 'notes_for_experts', 'created', 'updated', 'request_ip', 'request_ip_detail', 'offset_gmt', 'snooze_for', 'discount_id',
-                'created_date_from', 'created_date_to', 'depart_date_from', 'depart_date_to', 'source_id', 'statuses', 'sold_date_from', 'sold_date_to', 'processing_filter', 'l_init_price'], 'safe'],
+                'created_date_from', 'created_date_to', 'depart_date_from', 'depart_date_to', 'source_id', 'statuses', 'sold_date_from', 'sold_date_to', 'processing_filter', 'l_init_price', 'l_last_action_dt'], 'safe'],
         ];
     }
 

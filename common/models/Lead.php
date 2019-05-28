@@ -67,6 +67,7 @@ use common\components\SearchService;
  * @property string $l_request_hash
  * @property int $l_duplicate_lead_id
  * @property double $l_init_price
+ * @property string $l_last_action_dt
  *
  * @property double $finalProfit
  * @property int $quotesCount
@@ -245,7 +246,7 @@ class Lead extends ActiveRecord
 
             [['notes_for_experts', 'request_ip_detail', 'l_client_ua'], 'string'],
 
-            [['created', 'updated', 'snooze_for', 'called_expert', 'additional_information', 'l_pending_delay_dt'], 'safe'],
+            [['created', 'updated', 'snooze_for', 'called_expert', 'additional_information', 'l_pending_delay_dt', 'l_last_action_dt'], 'safe'],
 
             [['final_profit', 'tips', 'agents_processing_fee', 'l_init_price'], 'number'],
             [['uid', 'request_ip', 'offset_gmt', 'discount_id', 'description'], 'string', 'max' => 255],
@@ -309,6 +310,7 @@ class Lead extends ActiveRecord
             'l_duplicate_lead_id' => 'Duplicate Lead ID',
 
             'l_init_price' => 'Init Price',
+            'l_last_action_dt' => 'Last Action DateTime'
 
         ];
     }
@@ -319,8 +321,8 @@ class Lead extends ActiveRecord
             'timestamp' => [
                 'class' => TimestampBehavior::class,
                 'attributes' => [
-                    ActiveRecord::EVENT_BEFORE_INSERT => ['created', 'updated'],
-                    ActiveRecord::EVENT_BEFORE_UPDATE => ['updated'],
+                    ActiveRecord::EVENT_BEFORE_INSERT => ['created', 'updated', 'l_last_action_dt'],
+                    ActiveRecord::EVENT_BEFORE_UPDATE => ['updated', 'l_last_action_dt'],
                 ],
                 'value' => date('Y-m-d H:i:s') //new Expression('NOW()'),
             ],
@@ -499,6 +501,14 @@ class Lead extends ActiveRecord
     public function getLeadFlightSegmentsCount(): int
     {
         return $this->hasMany(LeadFlightSegment::class, ['lead_id' => 'id'])->count();
+    }
+
+    /**
+     * @return int
+     */
+    public function updateLastAction() : int
+    {
+        return self::updateAll(['l_last_action_dt' => date('Y-m-d H:i:s')], ['id' => $this->id]);
     }
 
 
