@@ -341,7 +341,7 @@ class EmployeeController extends FController
             if (Yii::$app->request->isPost) {
                 $attr = Yii::$app->request->post($model->formName());
 
-                $isNew = $model->prepareSave($attr);
+                $model->prepareSave($attr);
                 if ($model->validate() && $model->save()) {
 
 
@@ -358,7 +358,7 @@ class EmployeeController extends FController
                         }
                     }
 
-                    $model->addRole($isNew);
+                    $model->addRole(false);
 
 
                     if(isset($attr['user_groups'])) {

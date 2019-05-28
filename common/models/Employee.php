@@ -466,6 +466,8 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         $auth = \Yii::$app->authManager;
         if (!$isNew) {
             $auth->revokeAll($this->id);
+            //VarDumper::dump($auth->getRoles());
+            //VarDumper::dump($this->roles); exit;
         }
 
         if($this->roles) {

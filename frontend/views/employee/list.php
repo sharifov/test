@@ -69,7 +69,7 @@ if ($isAdmin || $isSuperAdmin) {
                             return ($isAdmin || !$model->canRoles(['superadmin', 'admin']));
                         },
                         'switch' => function (\common\models\Employee $model, $key, $index)  use ($isAdmin, $isUM) {
-                                return ($isAdmin && !$model->canRole(['superadmin', 'admin']));
+                                return ($isAdmin && !$model->canRoles(['superadmin', 'admin']));
                         },
                     ],
                     'buttons' => [
