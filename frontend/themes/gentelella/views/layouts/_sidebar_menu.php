@@ -64,7 +64,7 @@ $isSuperAdmin = $user->canRole('superadmin');
             'url' => 'javascript:',
             'icon' => 'bar-chart',
             'items' => [
-                ['label' => 'Agents report', 'url' => ['/agent-report'], 'icon' => 'users'],
+                ['label' => 'Agents report', 'url' => ['/agent-report/index'], 'icon' => 'users'],
                 ['label' => 'Calls & SMS', 'url' => ['/stats/call-sms'], 'icon' => 'phone'],
                 ['label' => 'Calls Report', 'url' => ['/stats/calls-graph'], 'icon' => 'line-chart'],
                 ['label' => 'SMS Report', 'url' => ['/stats/sms-graph'], 'icon' => 'line-chart'],
@@ -85,7 +85,6 @@ $isSuperAdmin = $user->canRole('superadmin');
             'icon' => 'list',
             'items' => [
                 ['label' => 'All Notifications', 'url' => ['/notifications/index'], 'icon' => 'comment-o'],
-                ['label' => 'Mail List', 'url' => ['/email/index'], 'icon' => 'envelope'],
                 ['label' => 'User Call Statuses', 'url' => ['/user-call-status/index'], 'icon' => 'list'],
                 ['label' => 'Lead Call Experts', 'url' => ['/lead-call-expert/index'], 'icon' => 'bell'],
                 ['label' => 'Flight Segments', 'url' => ['/lead-flight-segment/index'], 'icon' => 'plane'],
@@ -120,8 +119,6 @@ $isSuperAdmin = $user->canRole('superadmin');
             $menuItems[] = ['label' => 'Duplicate <span id="sold-queue" class="label-danger label pull-right">' . $badges['duplicate'] . '</span>', 'url' => ['/queue/duplicate'], 'icon' => 'list text-danger'];
             $menuItems[] = ['label' => 'Trash <span id="trash-queue" class="label-danger label pull-right"></span>', 'url' => ['/queue/trash'], 'icon' => 'trash-o text-danger']; //' . $badges['trash'] . '
         }
-
-        $menuItems[] = ['label' => 'Users', 'url' => ['/employee/list'], 'icon' => 'user'];
 
         $menuItems[] = [
             'label' => 'Users',

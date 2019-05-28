@@ -59,6 +59,9 @@ class m190524_094842_remove_permissions_role_and_insert_routes extends Migration
         $roleAgent = $auth->getRole('agent');
         $auth->assign($roleAgent, 241);
 
+        if (Yii::$app->cache) {
+            Yii::$app->cache->flush();
+        }
     }
 
     private function createDataItemChild($roles) : array
@@ -206,6 +209,10 @@ class m190524_094842_remove_permissions_role_and_insert_routes extends Migration
             $auth->assign($coach, 241);
         }
 
+        if (Yii::$app->cache) {
+            Yii::$app->cache->flush();
+        }
+
     }
 
     private function listAccess() : array
@@ -227,13 +234,9 @@ class m190524_094842_remove_permissions_role_and_insert_routes extends Migration
                     [
                         'actions' => ['index', 'update', 'view', 'create', 'delete', 'delete-all'],
                         'allow' => true,
-                        'roles' => ['supervision'],
+                        'roles' => ['admin'],
                     ],
-                    [
-                        'actions' => ['index', 'view'],
-                        'allow' => true,
-                        'roles' => ['agent'],
-                    ],
+
                 ],
             ],
             [
@@ -242,26 +245,26 @@ class m190524_094842_remove_permissions_role_and_insert_routes extends Migration
                     [
                         'actions' => ['index', 'update', 'view', 'create', 'delete'],
                         'allow' => true,
-                        'roles' => ['supervision'],
+                        'roles' => ['admin'],
                     ],
-                    [
-                        'actions' => ['index', 'view'],
-                        'allow' => true,
-                        'roles' => ['agent'],
-                    ],
+
                 ],
             ],
             [
                 'controller' => 'CallController',
                 'rules' => [
                     [
-                        'actions' => ['index', 'update', 'view', 'inbox', 'soft-delete', 'list', 'user-map', 'all-read'],
+                        'actions' => ['index', 'update', 'view', 'inbox', 'soft-delete', 'all-read'],
                         'allow' => true,
                         'roles' => ['supervision', 'admin', 'qa'],
                     ],
-
                     [
-                        'actions' => ['delete', 'create'],
+                        'actions' => ['list'],
+                        'allow' => true,
+                        'roles' => ['supervision', 'admin'],
+                    ],
+                    [
+                        'actions' => ['delete', 'create', 'user-map'],
                         'allow' => true,
                         'roles' => ['admin'],
                     ],
@@ -279,7 +282,7 @@ class m190524_094842_remove_permissions_role_and_insert_routes extends Migration
                     [
                         'actions' => ['index', 'cache', 'assets', 'runtime'],
                         'allow' => true,
-                        'roles' => ['supervision'],
+                        'roles' => ['admin'],
                     ],
 
                 ],
@@ -288,14 +291,14 @@ class m190524_094842_remove_permissions_role_and_insert_routes extends Migration
                 'controller' => 'ClientController',
                 'rules' => [
                     [
-                        'actions' => ['index', 'update', 'view', 'delete', 'create', 'test', 'ajax-get-info'],
+                        'actions' => ['index', 'update', 'view', 'delete', 'create', 'ajax-get-info'],
                         'allow' => true,
-                        'roles' => ['supervision'],
+                        'roles' => ['admin'],
                     ],
                     [
-                        'actions' => ['index', 'view', 'ajax-get-info'],
+                        'actions' => ['ajax-get-info'],
                         'allow' => true,
-                        'roles' => ['agent'],
+                        'roles' => ['supervision', 'agent'],
                     ],
                 ],
             ],
@@ -315,7 +318,7 @@ class m190524_094842_remove_permissions_role_and_insert_routes extends Migration
                     [
                         'actions' => ['index', 'update', 'view', 'inbox', 'soft-delete'],
                         'allow' => true,
-                        'roles' => ['supervision'],
+                        'roles' => ['admin'],
                     ],
 
                     [
@@ -327,7 +330,7 @@ class m190524_094842_remove_permissions_role_and_insert_routes extends Migration
                     [
                         'actions' => ['inbox', 'view', 'soft-delete'],
                         'allow' => true,
-                        'roles' => ['agent'],
+                        'roles' => ['agent', 'supervision'],
                     ],
                 ],
             ],
@@ -365,11 +368,6 @@ class m190524_094842_remove_permissions_role_and_insert_routes extends Migration
                 'controller' => 'KpiController',
                 'rules' => [
                     [
-                        'actions' => ['index', 'details'],
-                        'allow' => true,
-                        'roles' => ['supervision'],
-                    ],
-                    [
                         'actions' => ['index','details'],
                         'allow' => true,
                         'roles' => ['agent'],
@@ -394,11 +392,16 @@ class m190524_094842_remove_permissions_role_and_insert_routes extends Migration
                             'create', 'add-comment', 'change-state', 'unassign', 'take', 'auto-take',
                             'set-rating', 'add-note', 'unprocessed', 'call-expert', 'send-email',
                             'check-updates', 'flow-transition', 'get-user-actions', 'add-pnr', 'update2','clone',
-                            'get-badges', 'sold', 'split-profit', 'split-tips','processing', 'follow-up',  'trash', 'booked',
+                            'get-badges', 'sold', 'split-profit', 'split-tips','processing', 'follow-up', 'booked',
                             'test', 'view'
                         ],
                         'allow' => true,
                         'roles' => ['agent', 'admin', 'supervision'],
+                    ],
+                    [
+                        'actions' => ['trash'],
+                        'allow' => true,
+                        'roles' => ['admin', 'supervision'],
                     ],
 
                     [
@@ -415,13 +418,7 @@ class m190524_094842_remove_permissions_role_and_insert_routes extends Migration
                         'roles' => ['admin'],
                     ],
 
-                    [
-                        'actions' => [
-                            'duplicate'
-                        ],
-                        'allow' => true,
-                        'roles' => ['supervision'],
-                    ],
+
                     [
                         'actions' => [
                             'view', 'trash', 'sold', 'flow-transition'
@@ -497,7 +494,7 @@ class m190524_094842_remove_permissions_role_and_insert_routes extends Migration
                     [
                         'actions' => ['index', 'clear', 'view', 'create', 'delete'],
                         'allow' => true,
-                        'roles' => ['supervision'],
+                        'roles' => ['admin'],
                     ],
                 ],
             ],
@@ -507,12 +504,12 @@ class m190524_094842_remove_permissions_role_and_insert_routes extends Migration
                     [
                         'actions' => ['index', 'update', 'view', 'delete', 'create', 'view2', 'soft-delete', 'all-delete', 'all-read', 'list'],
                         'allow' => true,
-                        'roles' => ['supervision'],
+                        'roles' => ['admin'],
                     ],
                     [
                         'actions' => ['view', 'view2', 'soft-delete', 'all-delete', 'all-read', 'list'],
                         'allow' => true,
-                        'roles' => ['agent', 'qa'],
+                        'roles' => ['agent', 'qa', 'supervision'],
                     ],
                 ],
             ],
@@ -643,7 +640,7 @@ class m190524_094842_remove_permissions_role_and_insert_routes extends Migration
                             'sync', 'view-log', 'acl-rule', 'project-data', 'synchronization'
                         ],
                         'allow' => true,
-                        'roles' => ['supervision'],
+                        'roles' => ['admin'],
                     ],
                 ],
             ],
@@ -715,7 +712,12 @@ class m190524_094842_remove_permissions_role_and_insert_routes extends Migration
                     [
                         'actions' => ['index', 'call-sms', 'calls-graph', 'sms-graph', 'emails-graph'],
                         'allow' => true,
-                        'roles' => ['supervision', 'admin'],
+                        'roles' => ['admin'],
+                    ],
+                    [
+                        'actions' => ['call-sms', 'calls-graph', 'sms-graph', 'emails-graph'],
+                        'allow' => true,
+                        'roles' => ['supervision'],
                     ],
                 ],
             ],
@@ -752,11 +754,6 @@ class m190524_094842_remove_permissions_role_and_insert_routes extends Migration
                         'allow' => true,
                         'roles' => ['admin'],
                     ],
-                    [
-                        'actions' => ['index', 'update-status'],
-                        'allow' => true,
-                        'roles' => ['agent', 'supervision'],
-                    ],
                 ],
             ],
             [
@@ -765,7 +762,7 @@ class m190524_094842_remove_permissions_role_and_insert_routes extends Migration
                     [
                         'actions' => ['index', 'update', 'view', 'delete', 'stats'],
                         'allow' => true,
-                        'roles' => ['supervision', 'admin'],
+                        'roles' => ['admin'],
                     ],
                 ],
             ],
@@ -805,7 +802,17 @@ class m190524_094842_remove_permissions_role_and_insert_routes extends Migration
                     [
                         'actions' => ['index', 'update', 'delete', 'create', 'view', 'create-ajax', 'update-ajax'],
                         'allow' => true,
-                        'roles' => ['supervision', 'admin','userManager'],
+                        'roles' => ['admin'],
+                    ],
+                    [
+                        'actions' => ['index'],
+                        'allow' => true,
+                        'roles' => ['userManager'],
+                    ],
+                    [
+                        'actions' => ['update', 'create', 'view', 'create-ajax', 'update-ajax'],
+                        'allow' => true,
+                        'roles' => ['supervision', 'userManager'],
                     ],
                 ],
             ],
