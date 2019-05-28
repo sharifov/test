@@ -11,10 +11,11 @@ use yii\grid\GridView;
 $this->title = 'User List';
 $this->params['breadcrumbs'][] = $this->title;
 
-$isUM = Yii::$app->authManager->getAssignment('userManager', Yii::$app->user->id);
-$isAdmin = Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id);
+$isUM = Yii::$app->user->identity->canRole('userManager');
+$isAdmin = Yii::$app->user->identity->canRoles(['admin', 'superadmin']);
+$isSuperAdmin = Yii::$app->user->identity->canRole('superadmin');
 
-if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
+if ($isAdmin || $isSuperAdmin) {
     $userList = \common\models\Employee::getList();
     $projectList = \common\models\Project::getList();
 } else {
@@ -59,16 +60,16 @@ if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
                             return User::hasPermission('viewOrder');
                         },*/
                         'update' => function (\common\models\Employee $model, $key, $index) use ($isAdmin, $isUM) {
-                            return ($isAdmin || !in_array('admin', array_keys($model->getRoles())));
+                            return ($isAdmin || !$model->canRoles(['superadmin', 'admin']));
                         },
                         'projects' => function (\common\models\Employee $model, $key, $index) use ($isAdmin, $isUM)  {
-                            return ($isAdmin || !in_array('admin', array_keys($model->getRoles())));
+                            return ($isAdmin || !$model->canRoles(['superadmin', 'admin']));
                         },
                         'groups' => function (\common\models\Employee $model, $key, $index) use ($isAdmin, $isUM)  {
-                            return ($isAdmin || !in_array('admin', array_keys($model->getRoles())));
+                            return ($isAdmin || !$model->canRoles(['superadmin', 'admin']));
                         },
                         'switch' => function (\common\models\Employee $model, $key, $index)  use ($isAdmin, $isUM) {
-                            return (($isAdmin || !in_array('admin', array_keys($model->getRoles()))) && !$isUM);
+                                return ($isAdmin && !$model->canRole(['superadmin', 'admin']));
                         },
                     ],
                     'buttons' => [

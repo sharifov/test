@@ -283,15 +283,30 @@ class EmployeeController extends FController
                 throw new NotFoundHttpException('The requested user does not exist.');
             }
 
+
+            if(!Yii::$app->user->identity->canRole('superadmin')) {
+                if($model->canRole('superadmin')) {
+                    throw new NotFoundHttpException('Access denied for Superadmin user: '.$model->id);
+                }
+            }
+
+            if(Yii::$app->user->identity->canRoles(['userManager', 'supervisor'])) {
+                if($model->canRole('admin')) {
+                    throw new NotFoundHttpException('Access denied for Admin user: '.$model->id);
+                }
+            }
+
+            if(!Yii::$app->user->identity->canRoles(['superadmin', 'admin', 'userManager', 'supervision'])) {
+                throw new ForbiddenHttpException('Access denied for this user: '.$model->id);
+            }
+
+
             $modelUserParams = UserParams::findOne($model->id);
             if(!$modelUserParams) {
                 $modelUserParams = new UserParams();
             }
 
 
-            if(!Yii::$app->user->identity->canRoles(['admin', 'userManager', 'supervision'])) {
-                throw new ForbiddenHttpException('Access denied for this user: '.$model->id);
-            }
 
             if(Yii::$app->user->identity->canRole('supervision')) {
                 $access = false;
