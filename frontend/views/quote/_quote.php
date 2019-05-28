@@ -444,7 +444,7 @@ $this->registerJs($js);
                                         'tag' => false,
                                     ],
                                     'template' => '{input}',
-                                ])->dropDownList(Employee::getListByProject($project_id, true)) ?>
+                                ])->dropDownList(Employee::getListByProject($project_id, false)) ?>
                             </div>
                         </td>
                     </tr>
