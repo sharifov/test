@@ -1550,6 +1550,17 @@ class CommunicationController extends ApiBaseController
                 if(isset($post['callData']['Called']) && $post['callData']['Called']) {
                     if(strpos($post['callData']['Called'], 'client:seller')) {
                         $agentId = (int)str_replace('client:seller', '', $post['callData']['Called']);
+                    } else {
+                        // if cancel call in first seconds
+                        if( !isset($post['callData']['ParentCallSid']) &&  isset($post['callData']['CallStatus']) && in_array($post['callData']['CallStatus'], [Call::CALL_STATUS_CANCELED])) {
+                            $callsIfCancel = Call::findAll(['c_call_sid' => $post['callData']['CallSid']]);
+                            if($callsIfCancel) {
+                                foreach ($callsIfCancel AS $cancelCall) {
+                                    $cancelCall->c_call_status = $post['callData']['CallStatus'];
+                                    $cancelCall->save();
+                                }
+                            }
+                        }
                     }
                 }
                 $call = null;
