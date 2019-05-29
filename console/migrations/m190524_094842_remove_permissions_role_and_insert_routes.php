@@ -49,7 +49,13 @@ class m190524_094842_remove_permissions_role_and_insert_routes extends Migration
         $dataItem = $this->createDataItem($roles);
         $dataItemChild = $this->createDataItemChild($roles);
 
-        Yii::$app->db->createCommand()->batchInsert('{{%auth_item}}', ['name', 'type'], $dataItem)->execute();
+        $dataCreated = time();
+        foreach ($dataItem as $key => $item) {
+            $dataItem[$key][2] = $dataCreated;
+            $dataItem[$key][3] = $dataCreated;
+        }
+
+        Yii::$app->db->createCommand()->batchInsert('{{%auth_item}}', ['name', 'type', 'created_at', 'updated_at'], $dataItem)->execute();
         Yii::$app->db->createCommand()->batchInsert('{{%auth_item_child}}', ['parent', 'child'], $dataItemChild)->execute();
 
         $this->createSuperAdmin();
