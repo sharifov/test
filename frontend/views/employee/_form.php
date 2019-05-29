@@ -67,7 +67,7 @@ if (Yii::$app->user->identity->canRoles(['admin', 'userManager'])) {
                             <?//= $form->field($model, 'roles')->dropDownList($model::getAllRoles(), ['prompt' => '']) ?>
 
                             <?php
-                                echo $form->field($model, 'roles')->widget(\kartik\select2\Select2::class, [
+                                echo $form->field($model, 'form_roles')->widget(\kartik\select2\Select2::class, [
                                     'data' => $model::getAllRoles(),
                                     'size' => \kartik\select2\Select2::SMALL,
                                     'options' => ['placeholder' => 'Select user roles', 'multiple' => true],

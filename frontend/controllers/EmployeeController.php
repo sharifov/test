@@ -238,11 +238,11 @@ class EmployeeController extends FController
             }
         } else {
 
-            $modelUserParams->up_timezone = "Europe/Chisinau";
+            $modelUserParams->up_timezone = 'Europe/Chisinau';
             $modelUserParams->up_work_minutes = 8 * 60;
             $modelUserParams->up_base_amount = 0;
             $modelUserParams->up_commission_percent = 0;
-
+            $model->form_roles = ArrayHelper::map(Yii::$app->authManager->getRolesByUser($model->id), 'name', 'name') ;
         }
 
         //VarDumper::dump($model->userGroupAssigns, 10 ,true); exit;
@@ -342,8 +342,12 @@ class EmployeeController extends FController
                 $attr = Yii::$app->request->post($model->formName());
 
                 $model->prepareSave($attr);
-                if ($model->validate() && $model->save()) {
+                if ($model->save()) {
 
+
+                    //$model->roles;
+
+                    $model->addRole(false);
 
                     //VarDumper::dump(Yii::$app->request->post(), 10, true); exit;
 
@@ -357,8 +361,6 @@ class EmployeeController extends FController
                             Yii::error(VarDumper::dumpAsString($modelProfile->errors, 10), 'EmployeeController:actionUpdate:modelProfile:save');
                         }
                     }
-
-                    $model->addRole(false);
 
 
                     if(isset($attr['user_groups'])) {
@@ -409,6 +411,9 @@ class EmployeeController extends FController
 
 
                 }
+
+            } else {
+                $model->form_roles = ArrayHelper::map(Yii::$app->authManager->getRolesByUser($model->id), 'name', 'name') ;
             }
 
             //VarDumper::dump($model->userGroupAssigns, 10 ,true); exit;
@@ -443,7 +448,7 @@ class EmployeeController extends FController
             }
 
 
-            $model->roles = ArrayHelper::map(Yii::$app->authManager->getRolesByUser($model->id), 'name', 'name') ;
+
 
             //VarDumper::dump($model->roles, 10, true); exit;
 
