@@ -90,6 +90,10 @@ class SiteController extends FController
             return $this->dashboardUM();
         }
 
+        if (Yii::$app->user->identity->canRole('superadmin')) {
+            return $this->dashboardAdmin();
+        }
+
         return $this->dashboardAgent();
 
     }
