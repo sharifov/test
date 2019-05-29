@@ -122,7 +122,7 @@ class m190524_094842_remove_permissions_role_and_insert_routes extends Migration
         $auth = \Yii::$app->authManager;
 
         $superAdmin = $auth->createRole('superadmin');
-        $superAdmin->description = 'Full access';
+        $superAdmin->description = 'SuperAdmin';
         $auth->add($superAdmin);
 
         $fullPermission = $auth->createPermission('/*');
@@ -224,7 +224,7 @@ class m190524_094842_remove_permissions_role_and_insert_routes extends Migration
                     [
                         'actions' => ['index','calls','sms','email','cloned','created','sold','from-to-leads'],
                         'allow' => true,
-                        'roles' => ['supervision','admin'],
+                        'roles' => ['admin'],
                     ],
                 ],
             ],
@@ -308,7 +308,7 @@ class m190524_094842_remove_permissions_role_and_insert_routes extends Migration
                     [
                         'actions' => ['index', 'update', 'view', 'delete', 'create'],
                         'allow' => true,
-                        'roles' => ['supervision', 'admin'],
+                        'roles' => ['admin'],
                     ],
                 ],
             ],
@@ -316,17 +316,10 @@ class m190524_094842_remove_permissions_role_and_insert_routes extends Migration
                 'controller' => 'EmailController',
                 'rules' => [
                     [
-                        'actions' => ['index', 'update', 'view', 'inbox', 'soft-delete'],
+                        'actions' => ['index', 'update', 'view', 'inbox', 'soft-delete', 'delete', 'create'],
                         'allow' => true,
                         'roles' => ['admin'],
                     ],
-
-                    [
-                        'actions' => ['delete', 'create'],
-                        'allow' => true,
-                        'roles' => ['admin'],
-                    ],
-
                     [
                         'actions' => ['inbox', 'view', 'soft-delete'],
                         'allow' => true,
@@ -378,9 +371,8 @@ class m190524_094842_remove_permissions_role_and_insert_routes extends Migration
                 'controller' => 'LeadCallExpertController',
                 'rules' => [
                     [
-                        // 'actions' => ['index'],
                         'allow' => true,
-                        'roles' => ['supervision', 'admin'],
+                        'roles' => ['admin'],
                     ],
                 ],
             ],
@@ -477,14 +469,9 @@ class m190524_094842_remove_permissions_role_and_insert_routes extends Migration
                 'controller' => 'LeadTaskController',
                 'rules' => [
                     [
-                        'actions' => ['index', 'update', 'delete', 'create'],
+                        'actions' => ['index', 'update', 'delete', 'create', 'view'],
                         'allow' => true,
-                        'roles' => ['supervision', 'admin'],
-                    ],
-                    [
-                        'actions' => ['view', 'index'],
-                        'allow' => true,
-                        'roles' => ['agent'],
+                        'roles' => ['admin'],
                     ],
                 ],
             ],
@@ -725,14 +712,9 @@ class m190524_094842_remove_permissions_role_and_insert_routes extends Migration
                 'controller' => 'TaskController',
                 'rules' => [
                     [
-                        'actions' => ['index', 'update', 'delete', 'create'],
+                        'actions' => ['index', 'update', 'delete', 'create', 'view'],
                         'allow' => true,
-                        'roles' => ['supervision', 'admin'],
-                    ],
-                    [
-                        'actions' => ['view', 'index'],
-                        'allow' => true,
-                        'roles' => ['agent'],
+                        'roles' => ['admin'],
                     ],
                 ],
             ],

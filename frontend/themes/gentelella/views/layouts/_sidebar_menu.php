@@ -140,7 +140,7 @@ $isSuperAdmin = $user->canRole('superadmin');
             'icon' => 'users',
             'items' => [
                 ['label' => 'Clients', 'url' => ['/client/index'], 'icon' => 'users'],
-                ['label' => 'Clients phones', 'url' => ['/client-phone'], 'icon' => 'phone'],
+                ['label' => 'Clients phones', 'url' => ['/client-phone/index'], 'icon' => 'phone'],
             ]
         ];
 
@@ -155,8 +155,8 @@ $isSuperAdmin = $user->canRole('superadmin');
                 ['label' => 'Airports', 'url' => ['/settings/airports'], 'icon' => 'plane'],
                 ['label' => 'ACL', 'url' => ['/settings/acl'], 'icon' => 'user-secret'],
                 ['label' => 'API Users', 'url' => ['/api-user/index'], 'icon' => 'users'],
-                ['label' => 'Tasks', 'url' => ['task/index'], 'icon' => 'list'],
-                ['label' => 'Lead Tasks', 'url' => ['lead-task/index'], 'icon' => 'list'],
+                ['label' => 'Tasks', 'url' => ['/task/index'], 'icon' => 'list'],
+                ['label' => 'Lead Tasks', 'url' => ['/lead-task/index'], 'icon' => 'list'],
                 ['label' => 'Email template types', 'url' => ['/email-template-type/index'], 'icon' => 'envelope-o'],
                 ['label' => 'SMS template types', 'url' => ['/sms-template-type/index'], 'icon' => 'comments-o'],
                 ['label' => 'Project Settings', 'url' => ['/settings/projects'], 'icon' => 'product-hunt'],
@@ -226,22 +226,34 @@ $isSuperAdmin = $user->canRole('superadmin');
             foreach ($items as &$item) {
                 if (isset($item['url']) && is_array($item['url']) && !isset($item['visible'])) {
                     $url = $item['url'][0];
-                    if (Yii::$app->user->can('/*') ||  $url === '/') {
-                        //for superadmin
+                    if ($url === '/' || Yii::$app->user->can('/*')) {
+                        //for superAdmin or Dashboard
                         $item['visible'] = true;
                     } else {
                         // for ex.: /rbac/route  =>   rbac/route  for search in app->urlManager->rules
-                        $urlForMainRules =  substr($url, 1, strlen($url));
-                        $rules =\yii\helpers\ArrayHelper::map(Yii::$app->urlManager->rules, 'name', 'route');
-                        $found = false;
-                        foreach ($rules as $pattern => $route) {
-                            if ($urlForMainRules === $pattern || strpos($pattern, $urlForMainRules . '/<') === 0) {
-                                $found = true;
+                        $patternForRulesFromMainConfig =  substr($url, 1, strlen($url));
+                        $rulesFromMainConfig =\yii\helpers\ArrayHelper::map(Yii::$app->urlManager->rules, 'name', 'route');
+                        foreach ($rulesFromMainConfig as $pattern => $route) {
+                            if ($patternForRulesFromMainConfig === $pattern || strpos($pattern, $patternForRulesFromMainConfig . '/<') === 0) {
                                 $item['visible'] = Yii::$app->user->can('/' . $route);
+                                break;
                             }
                         }
-                        if (!$found) {
-                            $item['visible'] = Yii::$app->user->can($url);
+                        if (!isset($item['visible'])) {
+                            $item['visible'] = false;
+                            $chunks = explode('/', $url);
+                            $tmpRoute = '';
+                            foreach ($chunks as $chunk) {
+                                if (!empty($chunk)) {
+                                    $tmpRoute .=  '/' . $chunk;
+                                    if ($item['visible'] = Yii::$app->user->can($tmpRoute . '/*')) {
+                                        break;
+                                    }
+                                }
+                            }
+                            if (!$item['visible']) {
+                                $item['visible'] = Yii::$app->user->can($url);
+                            }
                         }
                     }
                 }
