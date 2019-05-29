@@ -742,6 +742,11 @@ class m190524_094842_remove_permissions_role_and_insert_routes extends Migration
                         'allow' => true,
                         'roles' => ['admin'],
                     ],
+                    [
+                        'actions' => ['update-status'],
+                        'allow' => true,
+                        'roles' => ['agent'],
+                    ],
                 ],
             ],
             [
