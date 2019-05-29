@@ -310,7 +310,7 @@ class Lead extends ActiveRecord
             'l_duplicate_lead_id' => 'Duplicate Lead ID',
 
             'l_init_price' => 'Init Price',
-            'l_last_action_dt' => 'Last Action DateTime'
+            'l_last_action_dt' => 'Last Action'
 
         ];
     }

@@ -834,7 +834,7 @@ class LeadSearch extends Lead
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> ['defaultOrder' => ['updated' => SORT_DESC],'attributes' => ['id','updated','created','status']],
+            'sort'=> ['defaultOrder' => ['l_last_action_dt' => SORT_DESC],'attributes' => ['id','updated','created','status', 'l_last_action_dt']],
             'pagination' => [
                 'pageSize' => 30,
             ],
@@ -918,7 +918,7 @@ class LeadSearch extends Lead
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> ['defaultOrder' => ['updated' => SORT_DESC],'attributes' => ['id','updated','created','status']],
+            'sort'=> ['defaultOrder' => ['l_last_action_dt' => SORT_DESC],'attributes' => ['id','updated','created','status','l_last_action_dt']],
             'pagination' => [
                 'pageSize' => 30,
             ],
