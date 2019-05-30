@@ -28,6 +28,7 @@ use frontend\models\LeadForm;
 use frontend\models\LeadPreviewEmailForm;
 use frontend\models\LeadPreviewSmsForm;
 use frontend\models\SendEmailForm;
+use sales\forms\lead\ItineraryForm;
 use Yii;
 use yii\data\ActiveDataProvider;
 use yii\db\Expression;
@@ -103,6 +104,45 @@ class LeadController extends FController
         if($lead->status == Lead::STATUS_TRASH && Yii::$app->user->identity->canRole('agent')) {
             throw new ForbiddenHttpException('Access Denied for Agent');
         }
+
+
+
+
+
+
+
+
+        $form = new ItineraryForm($lead);
+        VarDumper::dump($form);
+        if ($form->load(Yii::$app->request->post()) && $form->validate()) {
+            try {
+
+            } catch (\DomainException $e) {
+            }
+        }
+
+        VarDumper::dump(Yii::$app->request->post());
+        VarDumper::dump($form);
+        die;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
         $user_id = Yii::$app->user->id;
         $user = Yii::$app->user->identity;

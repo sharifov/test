@@ -1,5 +1,4 @@
 <?php
-
 use yii\widgets\ActiveForm;
 use frontend\models\LeadForm;
 use yii\helpers\Html;
@@ -18,87 +17,6 @@ $this->registerJsFile('/js/moment.min.js', [
  * @var $formLeadModel ActiveForm
  * @var $leadForm LeadForm
  */
-
-
-$leadItineraryForm = new \sales\forms\lead\ItineraryForm($leadForm->getLead());
-
-\yii\helpers\VarDumper::dump($leadItineraryForm, 10 , true);
-
-
-?>
-
-
-
-<?php $form = ActiveForm::begin([
-    'enableClientValidation' => false,
-]); ?>
-
-<div class="box box-default">
-    <div class="box-header with-border">Common</div>
-    <div class="box-body">
-        <div class="row">
-            <div class="col-md-4">
-                <?= $form->field($leadItineraryForm, 'leadId')->textInput(['maxlength' => true]) ?>
-            </div>
-            <div class="col-md-2">
-                <?= $form->field($leadItineraryForm, 'cabin')->textInput(['maxlength' => true]) ?>
-            </div>
-            <div class="col-md-6">
-                <?= $form->field($leadItineraryForm, 'adults')->textInput(['maxlength' => true]) ?>
-            </div>
-            <div class="col-md-6">
-                <?= $form->field($leadItineraryForm, 'children')->textInput(['maxlength' => true]) ?>
-            </div>
-            <div class="col-md-6">
-                <?= $form->field($leadItineraryForm, 'infants')->textInput(['maxlength' => true]) ?>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="box box-default">
-    <div class="box-header with-border">Characteristics</div>
-    <div class="box-body">
-        <?php foreach ($leadItineraryForm->segments as $i => $segment): ?>
-            <div class="col-md-6">
-                <?= $form->field($segment, 'origin')->textInput(['maxlength' => true]) ?>
-            </div>
-        <?php endforeach; ?>
-    </div>
-</div>
-
-<div class="form-group">
-    <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
-</div>
-
-<?php ActiveForm::end(); ?>
-
-
-<?php return true ?>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<?php
-
-
 
 $formId = sprintf('%s-form', $leadForm->getLead()->formName());
 if ($leadForm->mode != $leadForm::VIEW_MODE) {
@@ -167,14 +85,13 @@ JS;
 ?>
 
 <div class="panel panel-primary sl-request-wrap">
-
     <div class="panel-heading collapsing-heading">
         <a data-toggle="collapse" href="#request-form-wrap" class="collapsing-heading__collapse-link"
            aria-expanded="true">
 
             <!--Flight Details-->
             <div class="sl-request-summary">
-                <?php if ($leadItineraryForm->isEmpty()) : ?>
+                <?php if ($leadForm->getLead()->isNewRecord) : ?>
                     <div class="sl-request-summary__block">
                         <div class="sl-request-summary__locations">
                             <strong>Flight Details</strong>
@@ -219,8 +136,6 @@ JS;
             <i class="collapsing-heading__arrow"></i>
         </a>
     </div>
-
-
 
     <div class="panel-body collapse in" id="request-form-wrap" aria-expanded="true" style="">
         <div class="sl-itinerary-form">
