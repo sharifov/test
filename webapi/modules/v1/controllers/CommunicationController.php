@@ -1118,8 +1118,9 @@ class CommunicationController extends ApiBaseController
                     $call = Call::find()->where(['c_call_sid' => $post['callData']['sid']])
                         //->andWhere(['c_call_status' => Call::CALL_STATUS_COMPLETED])
                         ->andWhere([ '>', 'c_created_user_id', 0])
-                        ->orderBy(['c_updated_dt' => SORT_DESC])->one()
-                        ->limit(1);
+                        ->orderBy(['c_updated_dt' => SORT_DESC])
+                        ->limit(1)
+                        ->one();
                 }
 
                 if(!$call) {
