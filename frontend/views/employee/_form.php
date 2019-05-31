@@ -28,7 +28,7 @@ $this->params['breadcrumbs'][] = ['label' => 'User List', 'url' => ['list']];
 $this->params['breadcrumbs'][] = $this->title;
 
 
-if (Yii::$app->user->identity->canRoles(['admin', 'userManager'])) {
+if (Yii::$app->user->identity->canRoles(['admin', 'userManager', 'superadmin'])) {
     $userList = \common\models\Employee::getList();
     $projectList = \common\models\Project::getList();
 } else {
@@ -63,7 +63,7 @@ if (Yii::$app->user->identity->canRoles(['admin', 'userManager'])) {
 
                 <div class="row">
                     <div class="col-sm-6">
-                        <?php if($model->isNewRecord || Yii::$app->user->identity->canRoles(['admin', 'supervision', 'userManager'])): ?>
+                        <?php if($model->isNewRecord || Yii::$app->user->identity->canRoles(['admin', 'supervision', 'userManager', 'superadmin'])): ?>
                             <?//= $form->field($model, 'roles')->dropDownList($model::getAllRoles(), ['prompt' => '']) ?>
 
                             <?php
@@ -91,10 +91,10 @@ if (Yii::$app->user->identity->canRoles(['admin', 'userManager'])) {
 
                 <div class="row">
                     <div class="col-sm-12">
-                        <?php if($model->isNewRecord || Yii::$app->user->identity->canRoles(['admin', 'supervision', 'agent', 'userManager'])):
+                        <?php if($model->isNewRecord || Yii::$app->user->identity->canRoles(['admin', 'supervision', 'agent', 'userManager', 'superadmin'])):
 
 
-                            if(Yii::$app->user->identity->canRoles(['admin', 'userManager'])) {
+                            if(Yii::$app->user->identity->canRoles(['admin', 'userManager', 'superadmin'])) {
                                 $data = \common\models\UserGroup::getList();
                                 $dataProjects = \common\models\Project::getList();
                             }
@@ -167,7 +167,7 @@ if (Yii::$app->user->identity->canRoles(['admin', 'userManager'])) {
 
                 </div>
 
-                <?php if(Yii::$app->user->identity->canRoles(['admin', 'supervision', 'userManager'])): ?>
+                <?php if(Yii::$app->user->identity->canRoles(['admin', 'supervision', 'userManager', 'superadmin'])): ?>
 
                     <div class="row">
                         <div class="col-md-12">
