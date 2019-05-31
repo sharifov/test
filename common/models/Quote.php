@@ -8,6 +8,7 @@ use common\models\local\LeadLogMessage;
 use Yii;
 use yii\base\ErrorException;
 use yii\behaviors\TimestampBehavior;
+use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 use yii\helpers\Html;
 use yii\db\Query;
@@ -44,6 +45,7 @@ use common\components\SearchService;
  * @property Employee $employee
  * @property Lead $lead
  * @property QuoteTrip[] $quoteTrips
+ * @property Airline[] $mainAirline
  */
 class Quote extends \yii\db\ActiveRecord
 {
@@ -1195,6 +1197,11 @@ class Quote extends \yii\db\ActiveRecord
         } else {
             QuoteStatusLog::createNewFromQuote($this);
         }
+
+        if($this->lead_id && $this->lead) {
+            $this->lead->updateLastAction();
+        }
+
     }
 
 
@@ -1289,11 +1296,21 @@ class Quote extends \yii\db\ActiveRecord
         return Airline::findIdentity($this->main_airline_code);
     }
 
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getMainAirline(): ActiveQuery
+    {
+        return $this->hasOne(Airline::class, ['iata' => 'main_airline_code']);
+    }
+
+
     public function getQuoteTripsData()
     {
         $trips = [];
 
-        if(empty($this->quoteTrips)){
+        if(!$this->quoteTrips) {
             return $this->getTripsFromDumpLikeSearch();
         }
 
@@ -1301,7 +1318,7 @@ class Quote extends \yii\db\ActiveRecord
             $segments = [];
             foreach ($trip->quoteSegments as $keySegm => $segment) {
 
-                $airline = Airline::findIdentity($segment->qs_marketing_airline);
+                //$airline = $segment->marketingAirline; // ? Airline::findIdentity($segment->qs_marketing_airline);
                 $departureDateTime = new \DateTime($segment->qs_departure_time);
                 $arrivalDateTime = new \DateTime($segment->qs_arrival_time);
                 $baggages = $segment->quoteSegmentBaggages;
@@ -1325,18 +1342,18 @@ class Quote extends \yii\db\ActiveRecord
                     }
                 }
                 $segments[] = [
-                    'segmentId' => $keySegm+1,
+                    'segmentId' => $keySegm + 1,
                     'departureTime' => $departureDateTime->format('Y-m-d H:i'),
                     'arrivalTime' => $arrivalDateTime->format('Y-m-d H:i'),
-                    'stop' => ($segment->qs_stop)?$segment->qs_stop:0,
-                    'stops' => (count($stops))?$stops:null,
+                    'stop' => $segment->qs_stop ?: 0,
+                    'stops' => count($stops) ? $stops : null,
                     'flightNumber' => $segment->qs_flight_number,
                     'bookingClass' => $segment->qs_booking_class,
                     'duration' => $segment->qs_duration,
                     'departureAirportCode' => $segment->qs_departure_airport_code,
-                    'departureAirportTerminal' => $segment->qs_departure_airport_terminal."",
+                    'departureAirportTerminal' => $segment->qs_departure_airport_terminal,
                     'arrivalAirportCode' => $segment->qs_arrival_airport_code,
-                    'arrivalAirportTerminal' => $segment->qs_arrival_airport_terminal."",
+                    'arrivalAirportTerminal' => $segment->qs_arrival_airport_terminal,
                     'operatingAirline' => $segment->qs_operating_airline,
                     'airEquipType' => $segment->qs_air_equip_type,
                     'marketingAirline' => $segment->qs_marketing_airline,
@@ -1370,10 +1387,10 @@ class Quote extends \yii\db\ActiveRecord
                     $routing[] = $segment->qs_departure_airport_code;
                 }
                 $routing[] = $segment->qs_arrival_airport_code;
-                $airline = Airline::findIdentity($segment->qs_marketing_airline);
+                $airline = $segment->marketingAirline; //Airline::findIdentity($segment->qs_marketing_airline);
                 $departureDateTime = new \DateTime($segment->qs_departure_time);
                 $arrivalDateTime = new \DateTime($segment->qs_arrival_time);
-                $operatingAirline = Airline::findIdentity($segment->qs_operating_airline);
+                $operatingAirline = $segment->operatingAirline; //Airline::findIdentity($segment->qs_operating_airline);
                 $baggages = $segment->quoteSegmentBaggages;
                 $baggageCharge = $segment->quoteSegmentBaggageCharges;
 
@@ -1391,20 +1408,20 @@ class Quote extends \yii\db\ActiveRecord
                 $segments[] = [
                     'cabin' => $segment->qs_cabin,
                     'carrier' => $segment->qs_marketing_airline,
-                    'airlineName' => ($airline)?$airline->name:'',
+                    'airlineName' => $airline ? $airline->name : '',
                     'departureAirport' => $segment->qs_departure_airport_code,
-                    'departureCity' => ($segment->departureAirport)?$segment->departureAirport->city:'',
-                    'departureCountry' => ($segment->departureAirport)?$segment->departureAirport->country:'',
+                    'departureCity' => $segment->departureAirport ? $segment->departureAirport->city : '',
+                    'departureCountry' => $segment->departureAirport ? $segment->departureAirport->country : '',
                     'arrivalAirport' => $segment->qs_arrival_airport_code,
-                    'arrivalCity' => ($segment->arrivalAirport)?$segment->arrivalAirport->city:'',
-                    'arrivalCountry' => ($segment->arrivalAirport)?$segment->arrivalAirport->country:'',
+                    'arrivalCity' => $segment->arrivalAirport ? $segment->arrivalAirport->city : '',
+                    'arrivalCountry' => $segment->arrivalAirport ? $segment->arrivalAirport->country : '',
                     'departureDateTime' => $departureDateTime,
                     'arrivalDateTime' => $arrivalDateTime,
                     'flightNumber' => $segment->qs_flight_number,
                     'bookingClass' => $segment->qs_booking_class,
                     'flightDuration' => $segment->qs_duration,
-                    'operatingAirline' => ($segment->qs_operating_airline != $segment->qs_marketing_airline)?(($operatingAirline)?$operatingAirline->name:$segment->qs_operating_airline):null,
-                    'layoverDuration' => ($keySegm > 0)?(($departureDateTime->getTimestamp() - $segments[$keySegm-1]['arrivalDateTime']->getTimestamp())/60):0,
+                    'operatingAirline' => ($segment->qs_operating_airline !== $segment->qs_marketing_airline) ? ($operatingAirline ? $operatingAirline->name : $segment->qs_operating_airline) : null,
+                    'layoverDuration' => ($keySegm > 0) ? (($departureDateTime->getTimestamp() - $segments[$keySegm - 1]['arrivalDateTime']->getTimestamp()) / 60) : 0,
                     'stop' => $segment->qs_stop,
                     'baggage' => $baggageInfo,
                 ];

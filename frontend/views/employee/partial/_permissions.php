@@ -17,7 +17,7 @@ if ($isProfile || $model->id == Yii::$app->user->id) {
 }
 ?>
 
-<?php if (in_array($model->role, ['agent', 'coach']) && $model->id == Yii::$app->user->id) : ?>
+<?php if ($model->canRoles(['agent', 'coach']) && $model->id == Yii::$app->user->id) : ?>
 <?php else : ?>
     <div class="panel panel-default">
         <div class="panel-heading collapsing-heading">
@@ -33,10 +33,10 @@ if ($isProfile || $model->id == Yii::$app->user->id) {
              */
             $employeeAccess = ArrayHelper::map($model->projectEmployeeAccesses, 'project_id', 'project_id');
             $availableProjects = $employeeAccess;
-            if (Yii::$app->user->identity->role == 'admin') {
+            if (Yii::$app->user->identity->canRole('admin')) {
                 $projects = Project::find()->all();
             } else {
-                if (Yii::$app->user->identity->role == 'supervision') {
+                if (Yii::$app->user->identity->canRole('supervision')) {
                     $availableProjects = ArrayHelper::map(Yii::$app->user->identity->projectEmployeeAccesses, 'project_id', 'project_id');
                 }
                 $projects = Project::find()

@@ -27,35 +27,6 @@ use yii\web\NotFoundHttpException;
  */
 class StatsController extends FController
 {
-    /**
-     * {@inheritdoc}
-     */
-    public function behaviors()
-    {
-        $behaviors = [
-            'access' => [
-                'class' => AccessControl::class,
-                'rules' => [
-                    [
-                        'actions' => ['index', 'call-sms', 'calls-graph', 'sms-graph', 'emails-graph'],
-                        'allow' => true,
-                        'roles' => ['supervision', 'admin'],
-                    ],
-                ],
-            ],
-            'verbs' => [
-                'class' => VerbFilter::class,
-                'actions' => [
-                    'logout' => ['POST', 'GET'],
-                ],
-            ],
-        ];
-
-        return ArrayHelper::merge(parent::behaviors(), $behaviors);
-    }
-
-
-
 
     /**
      * Displays homepage.
@@ -69,7 +40,7 @@ class StatsController extends FController
         $searchModel = new EmployeeSearch();
         $params = Yii::$app->request->queryParams;
 
-        if (Yii::$app->authManager->getAssignment('supervision', $userId)) {
+        if (Yii::$app->user->identity->canRole('supervision')) {
             $params['EmployeeSearch']['supervision_id'] = $userId;
             $params['EmployeeSearch']['status'] = Employee::STATUS_ACTIVE;
         }
@@ -106,7 +77,7 @@ class StatsController extends FController
         //$searchModel = new EmployeeSearch();
         /*$params = Yii::$app->request->queryParams;
 
-        if (Yii::$app->authManager->getAssignment('supervision', $userId)) {
+        if (Yii::$app->user->identity->canRole('supervision')) {
             $params['EmployeeSearch']['supervision_id'] = $userId;
             $params['EmployeeSearch']['status'] = Employee::STATUS_ACTIVE;
         }
@@ -131,7 +102,7 @@ class StatsController extends FController
 
         $params = Yii::$app->request->queryParams;
 
-        if (Yii::$app->authManager->getAssignment('supervision', $userId)) {
+        if (Yii::$app->user->identity->canRole('supervision')) {
             $params['CommunicationSearch']['supervision_id'] = $userId;
         }
 

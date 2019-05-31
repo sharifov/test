@@ -235,7 +235,7 @@ $isAgent = Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id);
                         'value' => function(\common\models\Lead $model) {
                             return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->created));
                         },
-                        'format' => 'html',
+                        'format' => 'raw',
                     ],
 
                     [
@@ -243,8 +243,18 @@ $isAgent = Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id);
                         'value' => function(\common\models\Lead $model) {
                             return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->updated));
                         },
-                        'format' => 'html',
+                        'format' => 'raw',
                     ],
+
+                    [
+                        'attribute' => 'l_last_action_dt',
+                        'value' => function(\common\models\Lead $model) {
+                            return $model->l_last_action_dt ? '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->l_last_action_dt)) : $model->l_last_action_dt;
+                        },
+                        'format' => 'raw',
+                    ],
+
+
                 ],
             ]) ?>
         </div>

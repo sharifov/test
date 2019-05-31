@@ -74,20 +74,24 @@ class SiteController extends FController
     {
         $userId = Yii::$app->user->id;
 
-        if (Yii::$app->authManager->getAssignment('supervision', $userId)) {
+        if (Yii::$app->user->identity->canRole('supervision')) {
             return $this->dashboardSupervision();
         }
 
-        if (Yii::$app->authManager->getAssignment('admin', $userId)) {
+        if (Yii::$app->user->identity->canRole('admin')) {
             return $this->dashboardAdmin();
         }
 
-        if (Yii::$app->authManager->getAssignment('qa', $userId)) {
+        if (Yii::$app->user->identity->canRole('qa')) {
             return $this->dashboardQa();
         }
 
-        if (Yii::$app->authManager->getAssignment('userManager', $userId)) {
+        if (Yii::$app->user->identity->canRole('userManager')) {
             return $this->dashboardUM();
+        }
+
+        if (Yii::$app->user->identity->canRole('superadmin')) {
+            return $this->dashboardAdmin();
         }
 
         return $this->dashboardAgent();
@@ -102,10 +106,10 @@ class SiteController extends FController
         $searchModel = new EmployeeSearch();
         $params = Yii::$app->request->queryParams;
 
-        //if(Yii::$app->authManager->getAssignment('supervision', $userId)) {
+
         $params['EmployeeSearch']['supervision_id'] = $userId;
         $params['EmployeeSearch']['status'] = Employee::STATUS_ACTIVE;
-        //}
+
 
 
         $dataProvider = $searchModel->searchByUserGroups($params);
@@ -336,11 +340,10 @@ class SiteController extends FController
         $searchModel = new EmployeeSearch();
         $params = Yii::$app->request->queryParams;
 
-        //if(Yii::$app->authManager->getAssignment('supervision', $userId)) {
+
         //$params['EmployeeSearch']['supervision_id'] = $userId;
 
         $params['EmployeeSearch']['status'] = Employee::STATUS_ACTIVE;
-        //}
 
 
         $dataProvider = $searchModel->searchByUserGroups($params);
@@ -442,11 +445,11 @@ class SiteController extends FController
         $searchModel = new EmployeeSearch();
         $params = Yii::$app->request->queryParams;
 
-        //if(Yii::$app->authManager->getAssignment('supervision', $userId)) {
+
         //$params['EmployeeSearch']['supervision_id'] = $userId;
         $params['EmployeeSearch']['id'] = $userId;
         $params['EmployeeSearch']['status'] = Employee::STATUS_ACTIVE;
-        //}
+
 
 
         $dataProvider = $searchModel->searchByUserGroups($params);

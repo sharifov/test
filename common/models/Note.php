@@ -70,4 +70,14 @@ class Note extends \yii\db\ActiveRecord
     {
         return $this->hasOne(Lead::class, ['id' => 'lead_id']);
     }
+
+    public function afterSave($insert, $changedAttributes)
+    {
+        parent::afterSave($insert, $changedAttributes);
+
+        if($this->lead_id && $this->lead) {
+            $this->lead->updateLastAction();
+        }
+
+    }
 }

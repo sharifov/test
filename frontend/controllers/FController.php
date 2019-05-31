@@ -2,29 +2,31 @@
 namespace frontend\controllers;
 
 use common\models\UserConnection;
+use yii\helpers\ArrayHelper;
 use yii\web\Controller;
 use yii\web\ForbiddenHttpException;
+use yii2mod\rbac\filters\AccessControl;
 
 /**
  * FrontendEnd parent controller
  */
 class FController extends Controller
 {
-    /**
-     * @inheritdoc
-     */
-    /*public function behaviors()
+
+    public function behaviors()
     {
-        return [
-            'ghost-access'=> [
-                'class' => 'webvimark\modules\UserManagement\components\GhostAccessControl',
+        $behaviors = [
+            'access' => [
+                'class' => AccessControl::class,
             ],
         ];
-    }*/
+
+        return ArrayHelper::merge(parent::behaviors(), $behaviors);
+    }
 
     public function beforeAction($action)
     {
-       $this->layout = '@frontend/themes/gentelella/views/layouts/main.php';
+//       $this->layout = '@frontend/themes/gentelella/views/layouts/main.php';
 
        if(!\Yii::$app->user->isGuest){
            $user = \Yii::$app->user->identity;
@@ -32,7 +34,6 @@ class FController extends Controller
            if($timezone){
                \Yii::$app->formatter->timeZone = $timezone;
            }
-
 
            if(isset(\Yii::$app->params['limitUserConnections']) && \Yii::$app->params['limitUserConnections'] > 0) {
                $countConnections = UserConnection::find()->where(['uc_user_id' => \Yii::$app->user->id])->count();
@@ -42,11 +43,7 @@ class FController extends Controller
            }
        }
 
-        /*if(User::hasRole(['qa_manager'], false))    $this->layout = '@backend/themes/gentelella/views/layouts/main_qa_manager.php';
-            elseif(User::hasRole(['sales_manager'], false))    $this->layout = '@backend/themes/gentelella/views/layouts/main_sales_manager.php';
-                else $this->layout = '@backend/themes/gentelella/views/layouts/main.php';*/
         return parent::beforeAction($action);
     }
-    public $layout = 'main.php';
 
 }

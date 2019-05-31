@@ -6,6 +6,7 @@ use Yii;
 use common\models\ApiUser;
 use common\models\search\ApiUserSearch;
 use yii\filters\AccessControl;
+use yii\helpers\ArrayHelper;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -15,38 +16,10 @@ use yii\filters\VerbFilter;
  */
 class ApiUserController extends FController
 {
-    /*public function behaviors()
-    {
-        $behaviors = parent::behaviors();
-
-        $behaviors ['verbs'] = [
-            'class' => VerbFilter::class,
-            'actions' => [
-                'delete' => ['POST'],
-            ],
-        ];
-
-        return $behaviors;
-    }*/
 
     public function behaviors()
     {
-        return [
-            'access' => [
-                'class' => AccessControl::class,
-                'rules' => [
-                    [
-                        'actions' => ['index', 'update', 'view', 'create', 'delete'],
-                        'allow' => true,
-                        'roles' => ['supervision'],
-                    ],
-                    [
-                        'actions' => ['index', 'view'],
-                        'allow' => true,
-                        'roles' => ['agent'],
-                    ],
-                ],
-            ],
+        $behaviors = [
             'verbs' => [
                 'class' => VerbFilter::class,
                 'actions' => [
@@ -54,9 +27,8 @@ class ApiUserController extends FController
                 ],
             ],
         ];
+        return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
-
-
 
     /**
      * Lists all ApiUser models.

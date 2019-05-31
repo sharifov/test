@@ -211,6 +211,11 @@ class LeadCallExpert extends \yii\db\ActiveRecord
         if ($insert) {
             $this->callExpert();
         }
+
+        if($this->lce_lead_id && $this->lceLead) {
+            $this->lceLead->updateLastAction();
+        }
+
     }
 
 

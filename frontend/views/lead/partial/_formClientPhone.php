@@ -31,7 +31,7 @@ use borales\extensions\phoneInput\PhoneInput;
         $params = Yii::$app->request->queryParams;
         $params['ClientSearch']['client_phone'] = $phone->phone;
         $params['ClientSearch']['not_in_client_id'] = $phone->client_id;
-        $dataProvider = $searchModel->search($params);
+        $dataProvider = $searchModel->searchFromLead($params);
 
         $phoneCount = $dataProvider->count;
 

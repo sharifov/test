@@ -18,10 +18,6 @@ use yii\filters\VerbFilter;
  */
 class ClientController extends FController
 {
-    /**
-     * {@inheritdoc}
-     */
-
 
     public function behaviors()
     {
@@ -32,23 +28,7 @@ class ClientController extends FController
                     'delete' => ['POST'],
                 ],
             ],
-            'access' => [
-                'class' => AccessControl::class,
-                'rules' => [
-                    [
-                        'actions' => ['index', 'update', 'view', 'delete', 'create', 'test', 'ajax-get-info'],
-                        'allow' => true,
-                        'roles' => ['supervision'],
-                    ],
-                    [
-                        'actions' => ['index', 'view', 'ajax-get-info'],
-                        'allow' => true,
-                        'roles' => ['agent'],
-                    ],
-                ],
-            ],
         ];
-
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
 
@@ -154,7 +134,7 @@ class ClientController extends FController
 
         $model = $this->findModel($client_id);
 
-        if(Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id)) {
+        if(Yii::$app->user->identity->canRole('agent')) {
             $isAgent = true;
         } else {
             $isAgent = false;

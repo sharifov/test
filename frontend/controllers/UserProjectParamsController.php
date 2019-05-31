@@ -31,18 +31,7 @@ class UserProjectParamsController extends FController
                     'delete' => ['POST'],
                 ],
             ],
-            'access' => [
-                'class' => AccessControl::class,
-                'rules' => [
-                    [
-                        'actions' => ['index', 'update', 'delete', 'create', 'view', 'create-ajax', 'update-ajax'],
-                        'allow' => true,
-                        'roles' => ['supervision', 'admin','userManager'],
-                    ],
-                ],
-            ],
         ];
-
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
 
@@ -56,7 +45,7 @@ class UserProjectParamsController extends FController
 
         $params = Yii::$app->request->queryParams;
 
-        if(Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id)) {
+        if(Yii::$app->user->identity->canRole('supervision')) {
             $params['UserProjectParamsSearch']['supervision_id'] = Yii::$app->user->id;
         }
 

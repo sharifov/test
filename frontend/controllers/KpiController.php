@@ -10,6 +10,7 @@ use common\models\KpiHistory;
 use common\models\search\KpiHistorySearch;
 use yii\base\DynamicModel;
 use common\components\KpiService;
+use yii\helpers\ArrayHelper;
 
 /**
  * KpiController.
@@ -17,40 +18,12 @@ use common\components\KpiService;
 class KpiController extends FController
 {
 
-    public function behaviors()
-    {
-        return [
-            'access' => [
-                'class' => AccessControl::class,
-                'rules' => [
-                    [
-                        'actions' => ['index', 'details'],
-                        'allow' => true,
-                        'roles' => ['supervision'],
-                    ],
-                    [
-                        'actions' => ['index','details'],
-                        'allow' => true,
-                        'roles' => ['agent'],
-                    ],
-                ],
-            ],
-            'verbs' => [
-                'class' => VerbFilter::class,
-                'actions' => [
-                    'index' => ['POST'],
-                    'delete' => ['POST'],
-                ],
-            ],
-        ];
-    }
-
     /**
      * @return mixed
      */
     public function actionIndex()
     {
-        $isAgent = Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id);
+        $isAgent = Yii::$app->user->identity->canRole('agent');
         $searchModel = new KpiHistorySearch();
         $params = Yii::$app->request->queryParams;
         $params2 = Yii::$app->request->post();
@@ -89,15 +62,18 @@ class KpiController extends FController
         ]);
     }
 
+
     /**
-     * @return mixed
+     * @param $id
+     * @return string|\yii\web\Response
+     * @throws \Exception
      */
     public function actionDetails($id)
     {
-        $isAgent = (Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id));
+        $isAgent = Yii::$app->user->identity->canRole('agent');
 
         $kpiHistory = KpiHistory::find()->where(['kh_id' => $id])->one();
-        if(!$kpiHistory || ($isAgent && Yii::$app->user->id != $kpiHistory->kh_user_id) ){
+        if(!$kpiHistory || ($isAgent && Yii::$app->user->id !== $kpiHistory->kh_user_id) ){
             return $this->redirect([
                 'kpi/index',
             ]);

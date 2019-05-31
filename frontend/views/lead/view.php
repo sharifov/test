@@ -18,15 +18,18 @@ $bundle = \frontend\themes\gentelella\assets\AssetLeadCommunication::register($t
 
 //$this->registerCssFile('/css/style-req.css');
 $userId = Yii::$app->user->id;
+$user = Yii::$app->user->identity;
 
 $is_manager = false;
-$is_admin = Yii::$app->authManager->getAssignment('admin', $userId);
-$is_qa = Yii::$app->authManager->getAssignment('qa', $userId);
-$is_supervision = Yii::$app->authManager->getAssignment('supervision', $userId);
+$is_admin = $user->canRole('admin');
+$is_qa = $user->canRole('qa');
+$is_supervision = $user->canRole('supervision');
 
 if($is_admin || $is_supervision) {
     $is_manager = true;
 }
+
+$lead = $leadForm->getLead();
 ?>
 
 <div class="page-header">
@@ -35,23 +38,12 @@ if($is_admin || $is_supervision) {
             <h2 class="page-header__title">
             <?= Html::encode($this->title) ?>
             <?php
-            $lead = $leadForm->getLead();
-            if(!empty($lead->clone_id)){
-
-                $cloneLead = \common\models\Lead::findOne($lead->clone_id);
-
-                /*printf(" <a title=\"%s\" href=\"%s\">(Cloned from %s)</a> ",
-                    "Clone reason: ".$lead->description,
-                    \yii\helpers\Url::to([
-                    'lead/view',
-                    'uid' => $cloneLead->uid
-                ]),$lead->clone_id);*/
-
-                if($cloneLead) {
-                    echo \yii\helpers\Html::a('(Cloned from ' . $lead->clone_id . ' )', ['lead/view', 'gid' => $cloneLead->gid], ['title' => 'Clone reason: ' . $lead->description]);
+                if($lead->clone_id) {
+                    $cloneLead = \common\models\Lead::findOne($lead->clone_id);
+                    if($cloneLead) {
+                        echo \yii\helpers\Html::a('(Cloned from ' . $lead->clone_id . ' )', ['lead/view', 'gid' => $cloneLead->gid], ['title' => 'Clone reason: ' . $lead->description]);
+                    }
                 }
-
-            }
             ?>
             <?php if ($leadForm->getLead()->isNewRecord) : ?>
             	<span class="label status-label label-info">New</span>
@@ -205,7 +197,7 @@ if($is_admin || $is_supervision) {
                     'dataProvider'  => $dataProviderCallExpert,
                     'isAdmin'       => $is_admin,
                     'modelLeadCallExpert'       => $modelLeadCallExpert,
-                ]); ?>
+                ]) ?>
 
 
             <?php endif;?>

@@ -117,7 +117,7 @@ class SyncController extends Controller
                     exit;
                 } else {
 
-                    $empoloyee->role = $empoloyeeeAttr['role'];
+                    $empoloyee->roles[] = $empoloyeeeAttr['role'];
                     $empoloyee->addRole(false);
 
                     ProjectEmployeeAccess::deleteAll([
@@ -131,7 +131,7 @@ class SyncController extends Controller
                         $access->save();
                     }
 
-                    echo 'Sync success Employee id: ' . $empoloyeeId . '. Role: ' . $empoloyee->role . PHP_EOL;
+                    echo 'Sync success Employee id: ' . $empoloyeeId . '. Roles: ' . implode(', ', $empoloyee->getRoles()) . PHP_EOL;
                     if (!empty($empoloyeeeAttr['contactInfo'])) {
                         foreach ($empoloyeeeAttr['contactInfo'] as $projectId => $attr) {
                             $contactInfo = EmployeeContactInfo::findOne([

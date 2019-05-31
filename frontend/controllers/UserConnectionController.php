@@ -17,6 +17,7 @@ use yii\filters\VerbFilter;
  */
 class UserConnectionController extends FController
 {
+
     public function behaviors()
     {
         $behaviors = [
@@ -26,18 +27,7 @@ class UserConnectionController extends FController
                     'delete' => ['POST'],
                 ],
             ],
-            'access' => [
-                'class' => AccessControl::class,
-                'rules' => [
-                    [
-                        'actions' => ['index', 'update', 'view', 'delete', 'stats'],
-                        'allow' => true,
-                        'roles' => ['supervision', 'admin'],
-                    ],
-                ],
-            ],
         ];
-
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
 
@@ -65,7 +55,7 @@ class UserConnectionController extends FController
             $params['EmployeeSearch']['status'] = 10;
         }
 
-        if(Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id)) {
+        if(Yii::$app->user->identity->canRole('supervision')) {
             $params['EmployeeSearch']['supervision_id'] = Yii::$app->user->id;
         }
 

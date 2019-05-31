@@ -24,9 +24,7 @@ use yii\filters\VerbFilter;
  */
 class LeadsController extends FController
 {
-    /**
-     * {@inheritdoc}
-     */
+
     public function behaviors()
     {
         $behaviors = [
@@ -36,28 +34,7 @@ class LeadsController extends FController
                     'delete' => ['POST'],
                 ],
             ],
-            'access' => [
-                'class' => AccessControl::class,
-                'rules' => [
-                    [
-                        'actions' => ['index', 'update', 'delete', 'create', 'export', 'duplicate', 'view', 'ajax-activity-logs'],
-                        'allow' => true,
-                        'roles' => ['supervision', 'admin'],
-                    ],
-                    [
-                        'actions' => ['ajax-activity-logs'],
-                        'allow' => true,
-                        'roles' => ['qa'],
-                    ],
-                    [
-                        'actions' => ['index', 'ajax-reason-list'],
-                        'allow' => true,
-                        'roles' => ['agent'],
-                    ],
-                ],
-            ],
         ];
-
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
 
@@ -92,13 +69,13 @@ class LeadsController extends FController
         }
 
 
-        if(Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id)) {
+        if(Yii::$app->user->identity->canRole('agent')) {
             $isAgent = true;
         } else {
             $isAgent = false;
         }
 
-        if(Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id)) {
+        if(Yii::$app->user->identity->canRole('supervision')) {
             $params['LeadSearch']['supervision_id'] = Yii::$app->user->id;
         }
 
@@ -120,7 +97,7 @@ class LeadsController extends FController
 
         $multipleForm = new LeadMultipleForm();
 
-        if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id)) {
+        if(Yii::$app->user->identity->canRoles(['admin', 'supervision'])) {
             if ($multipleForm->load(Yii::$app->request->post()) && $multipleForm->lead_list) {
                 if ($multipleForm->validate()) {
 
@@ -260,7 +237,7 @@ class LeadsController extends FController
 
         $params = Yii::$app->request->queryParams;
 
-        if(Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id)) {
+        if(Yii::$app->user->identity->canRole('supervision')) {
             $params['LeadSearch']['supervision_id'] = Yii::$app->user->id;
         }
 

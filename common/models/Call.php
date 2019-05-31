@@ -251,6 +251,11 @@ class Call extends \yii\db\ActiveRecord
                 }
             }
         }
+
+        if($this->c_call_type_id === self::CALL_TYPE_OUT && $this->c_lead_id && $this->cLead) {
+            $this->cLead->updateLastAction();
+        }
+
     }
 
 /**
@@ -312,25 +317,46 @@ class Call extends \yii\db\ActiveRecord
             }
             foreach ($calls as $call) {
                 $agent = 'seller' . $user->id;
+                if($call->c_created_user_id && (int)$call->c_created_user_id > 0) {
+                    continue;
+                }
+
+                $call->c_created_user_id  = $user->id;
+                $call->save();
+
                 $res = (\Yii::$app->communication)->callRedirect($call->c_call_sid, 'client', $call->c_from, $agent);
                 if ($res && isset($res['error']) && $res['error'] === false) {
                     if(isset($res['data']['is_error']) && $res['data']['is_error'] ===  true) {
+                        $call->c_call_status = Call::CALL_STATUS_CANCELED;
+                        $call->c_created_user_id  = null;
+                        $call->save();
                         continue;
                     }
 
+                    $call->c_call_status = Call::CALL_STATUS_RINGING;
+                    $call->c_created_user_id = $user->id;
+                    $call->save();
+                    Notifications::socket(null, $call->c_lead_id, 'callUpdate', ['status' => $call->c_call_status, 'duration' => (int)$call->c_call_duration, 'snr' => $call->c_sequence_number], true);
+                    \Yii::info(VarDumper::dumpAsString($res, 10, false), 'info\Component:CommunicationService::redirectCallFromHold:callRedirect');
+                    return true;
+                    /*
                     $callRedirect = Call::findOne($call->c_id);
                     if($callRedirect) {
-                        $callRedirect->c_call_status = Call::CALL_STATUS_COMPLETED;
+                        $callRedirect->c_call_status = Call::CALL_STATUS_RINGING;
+                        $callRedirect->c_created_user_id = $user->id;
                         $callRedirect->save();
                         Notifications::socket(null, $callRedirect->c_lead_id, 'callUpdate', ['status' => $callRedirect->c_call_status, 'duration' => (int)$callRedirect->c_call_duration, 'snr' => $callRedirect->c_sequence_number], true);
+                        \Yii::info(VarDumper::dumpAsString($res, 10, false), 'info\Component:CommunicationService::redirectCallFromHold:callRedirect');
+                        return true;
                     }
                     //\Yii::info(VarDumper::dumpAsString($res, 10, false), 'info\Component:CommunicationService::redirectCallFromHold:callRedirect');
-                    return true;
+                    //return true;
+                    */
                 }
             }
 
         } catch (\Throwable $e) {
-            \Yii::error(VarDumper::dumpAsString([$e->getMessage(), $e->getFile(), $e->getLine()], 10, false), 'Component:CommunicationService::redirectCallFromHold');
+            \Yii::warning(VarDumper::dumpAsString([$e->getMessage(), $e->getFile(), $e->getLine()], 10, false), 'Component:CommunicationService::redirectCallFromHold');
             return false;
         }
         return false;

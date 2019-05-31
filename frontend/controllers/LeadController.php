@@ -60,60 +60,6 @@ class LeadController extends FController
     /**
      * {@inheritdoc}
      */
-    public function behaviors()
-    {
-        $behaviors = [
-            'access' => [
-                'class' => AccessControl::class,
-                'rules' => [
-                    [
-                        'actions' => [
-                            'create', 'add-comment', 'change-state', 'unassign', 'take', 'auto-take',
-                            'set-rating', 'add-note', 'unprocessed', 'call-expert', 'send-email',
-                            'check-updates', 'flow-transition', 'get-user-actions', 'add-pnr', 'update2','clone',
-                            'get-badges', 'sold', 'split-profit', 'split-tips','processing', 'follow-up',  'trash', 'booked',
-                            'test', 'view'
-                        ],
-                        'allow' => true,
-                        'roles' => ['agent', 'admin', 'supervisor'],
-                    ],
-
-                    [
-                        'actions' => ['inbox'],
-                        'allow' => Yii::$app->params['settings']['enable_lead_inbox'] ?: false,
-                        'roles' => ['agent', 'admin', 'supervisor'],
-                    ],
-
-                    //if(isset(Yii::$app->params['settings']['enable_lead_inbox']) && Yii::$app->params['settings']['enable_lead_inbox']) {
-
-                    [
-                        'actions' => [
-                            'pending', 'duplicate'
-                        ],
-                        'allow' => true,
-                        'roles' => ['admin'],
-                    ],
-
-                    [
-                        'actions' => [
-                            'view', 'trash', 'sold', 'duplicate', 'flow-transition'
-                        ],
-                        'allow' => true,
-                        'roles' => ['supervisor'],
-                    ],
-                    [
-                        'actions' => [
-                            'view', 'trash', 'sold', 'flow-transition'
-                        ],
-                        'allow' => true,
-                        'roles' => ['qa'],
-                    ],
-                ],
-            ]
-        ];
-
-        return ArrayHelper::merge(parent::behaviors(), $behaviors);
-    }
 
     public function beforeAction($action)
     {
@@ -128,15 +74,6 @@ class LeadController extends FController
 
         return parent::beforeAction($action);
     }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function actions()
-    {
-        return parent::actions();
-    }
-
 
     /**
      * @param string $gid
@@ -163,16 +100,17 @@ class LeadController extends FController
             throw new NotFoundHttpException('Not found lead ID: ' . $gid);
         }
 
-        if($lead->status == Lead::STATUS_TRASH && Yii::$app->user->identity->role == 'agent') {
+        if($lead->status == Lead::STATUS_TRASH && Yii::$app->user->identity->canRole('agent')) {
             throw new ForbiddenHttpException('Access Denied for Agent');
         }
 
         $user_id = Yii::$app->user->id;
-        $is_admin = Yii::$app->authManager->getAssignment('admin', $user_id);
-        $isQA = Yii::$app->authManager->getAssignment('qa', $user_id);
-        $is_supervision = Yii::$app->authManager->getAssignment('supervision', $user_id);
-        $is_agent = Yii::$app->authManager->getAssignment('agent', $user_id);
+        $user = Yii::$app->user->identity;
 
+        $is_admin = $user->canRole('admin');
+        $isQA = $user->canRole('qa');
+        $is_supervision = $user->canRole('supervision');
+        $is_agent = $user->canRole('agent');
 
 
             if (Yii::$app->request->post('hasEditable')) {
@@ -282,7 +220,6 @@ class LeadController extends FController
                 return ['output' => nl2br(Html::encode($value)), 'message' => $message];
             }
 
-
             if(Yii::$app->request->isPjax) {
                 $taskDate = Yii::$app->request->get('date');
                 $taskId = Yii::$app->request->get('task_id');
@@ -302,12 +239,12 @@ class LeadController extends FController
                         $lt->lt_updated_dt = date('Y-m-d H:i:s');
                         $lt->update();
                     }
+                    $leadToUpdate = Lead::findOne($leadId);
+                    $leadToUpdate->updated = date('Y-m-d H:i:s');
+                    $leadToUpdate->update();
                 }
 
             }
-
-
-
 
             Yii::$app->cache->delete(sprintf('quick-search-%d-%d', $lead->id, Yii::$app->user->identity->getId()));
             if (!$isQA && !$lead->permissionsView()) {
@@ -1461,13 +1398,13 @@ class LeadController extends FController
 
 
 
-        if(Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id)) {
+        if($user->canRole('agent')) {
             $isAgent = true;
         } else {
             $isAgent = false;
         }
 
-        /*if(Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id)) {
+        /*if($user->canRole('supervision')) {
             $params['LeadSearch']['supervision_id'] = Yii::$app->user->id;
         }*/
 
@@ -1593,13 +1530,13 @@ class LeadController extends FController
 
 
 
-        if(Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id)) {
+        if($user->canRole('agent')) {
             $isAgent = true;
         } else {
             $isAgent = false;
         }
 
-        /*if(Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id)) {
+        /*if($user->canRole('supervision', Yii::$app->user->id)) {
             $params['LeadSearch']['supervision_id'] = Yii::$app->user->id;
         }*/
 
@@ -1667,14 +1604,14 @@ class LeadController extends FController
 
         $params = array_merge($params, $params2);
 
-        if(Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id)) {
+        if(Yii::$app->user->identity->canRole('agent')) {
             $params['LeadSearch']['employee_id'] = Yii::$app->user->id;
             $isAgent = true;
         } else {
             $isAgent = false;
         }
 
-        if(Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id)) {
+        if(Yii::$app->user->identity->canRole('supervision')) {
             $params['LeadSearch']['supervision_id'] = Yii::$app->user->id;
         }
 
@@ -1697,13 +1634,13 @@ class LeadController extends FController
 
         $params = array_merge($params, $params2);
 
-        if(Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id)) {
+        if(Yii::$app->user->identity->canRole('agent')) {
             $isAgent = true;
         } else {
             $isAgent = false;
         }
 
-        if(Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id)) {
+        if(Yii::$app->user->identity->canRole('supervision')) {
             $params['LeadSearch']['supervision_id'] = Yii::$app->user->id;
         }
 
@@ -1726,7 +1663,7 @@ class LeadController extends FController
 
         $params = array_merge($params, $params2);
 
-                if(Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id)) {
+        if(Yii::$app->user->identity->canRole('supervision')) {
             $params['LeadSearch']['supervision_id'] = Yii::$app->user->id;
         }
         $dataProvider = $searchModel->searchInbox($params);
@@ -1749,7 +1686,7 @@ class LeadController extends FController
 
         $params = array_merge($params, $params2);
 
-        if(Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id)) {
+        if(Yii::$app->user->identity->canRole('agent')) {
             $isAgent = true;
         } else {
             $isAgent = false;
@@ -1782,7 +1719,7 @@ class LeadController extends FController
 
 
 
-        if(Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id)) {
+        if(Yii::$app->user->identity->canRole('supervision')) {
             $params['LeadSearch']['supervision_id'] = Yii::$app->user->id;
         }
 
@@ -1823,13 +1760,13 @@ class LeadController extends FController
 
         $params = array_merge($params, $params2);
 
-        if(Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id)) {
+        if(Yii::$app->user->identity->canRole('agent')) {
             $isAgent = true;
         } else {
             $isAgent = false;
         }
 
-        if(Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id)) {
+        if(Yii::$app->user->identity->canRole('supervision')) {
             $params['LeadSearch']['supervision_id'] = Yii::$app->user->id;
         }
 
@@ -1839,7 +1776,7 @@ class LeadController extends FController
 
         $dataProvider = $searchModel->searchSold($params);
 
-        $tmpl = Yii::$app->authManager->getAssignment('qa', Yii::$app->user->id) ? 'sold_qa' : 'sold';
+        $tmpl = Yii::$app->user->identity->canRole('qa') ? 'sold_qa' : 'sold';
 
         return $this->render($tmpl, [
             'searchModel' => $searchModel,
@@ -1857,14 +1794,14 @@ class LeadController extends FController
 
         $params = array_merge($params, $params2);
 
-        if(Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id)) {
+        if(Yii::$app->user->identity->canRole('agent')) {
             $params['LeadSearch']['employee_id'] = Yii::$app->user->id;
             $isAgent = true;
         } else {
             $isAgent = false;
         }
 
-        if(Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id)) {
+        if(Yii::$app->user->identity->canRole('supervision')) {
             $params['LeadSearch']['supervision_id'] = Yii::$app->user->id;
         }
 
@@ -1886,7 +1823,7 @@ class LeadController extends FController
 
         $params = array_merge($params, $params2);
 
-        if(Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id)) {
+        if(Yii::$app->user->identity->canRole('supervision')) {
             $params['LeadSearch']['supervision_id'] = Yii::$app->user->id;
         }
 
@@ -1908,14 +1845,14 @@ class LeadController extends FController
 
         $params = array_merge($params, $params2);
 
-        if(Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id)) {
+        if(Yii::$app->user->identity->canRole('agent')) {
             //$params['LeadSearch']['employee_id'] = Yii::$app->user->id;
             $isAgent = true;
         } else {
             $isAgent = false;
         }
 
-        if(Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id)) {
+        if(Yii::$app->user->identity->canRole('supervision')) {
             //$params['LeadSearch']['supervision_id'] = Yii::$app->user->id;
         }
 

@@ -30,53 +30,6 @@ class CleanController extends FController
     public $caches = ['cache'];
 
     /**
-     * @return array
-     */
-    /*public function behaviors() : array
-    {
-        $behaviors = parent::behaviors();
-
-        $behaviors ['verbs'] = [
-            'class' => VerbFilter::class,
-            'actions' => [
-                //'assets' => ['POST'],
-                //'runtime' => ['POST'],
-                //'cache' => ['POST'],
-            ],
-        ];
-
-        return $behaviors;
-    }*/
-
-
-
-
-    public function behaviors()
-    {
-        $behaviors = [
-            'verbs' => [
-                'class' => VerbFilter::class,
-                'actions' => [
-                    'delete' => ['POST'],
-                ],
-            ],
-            'access' => [
-                'class' => AccessControl::class,
-                'rules' => [
-                    [
-                        'actions' => ['index', 'cache', 'assets', 'runtime'],
-                        'allow' => true,
-                        'roles' => ['supervision'],
-                    ],
-
-                ],
-            ],
-        ];
-
-        return ArrayHelper::merge(parent::behaviors(), $behaviors);
-    }
-
-    /**
      * @return Response
      */
     public function actionIndex() : string

@@ -17,10 +17,6 @@ use yii\web\Response;
  */
 class EmailTemplateTypeController extends FController
 {
-    /**
-     * {@inheritdoc}
-     */
-
 
     public function behaviors()
     {
@@ -31,23 +27,7 @@ class EmailTemplateTypeController extends FController
                     'delete' => ['POST'],
                 ],
             ],
-            'access' => [
-                'class' => AccessControl::class,
-                'rules' => [
-                    [
-                        'actions' => ['index', 'update', 'view', 'delete', 'create', 'synchronization'],
-                        'allow' => true,
-                        'roles' => ['admin'],
-                    ],
-                    /*[
-                        'actions' => ['index'],
-                        'allow' => true,
-                        'roles' => ['agent'],
-                    ],*/
-                ],
-            ],
         ];
-
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
 

@@ -21,10 +21,6 @@ use yii\filters\VerbFilter;
  */
 class QuotesController extends FController
 {
-    /**
-     * {@inheritdoc}
-     */
-
 
     public function behaviors()
     {
@@ -35,23 +31,7 @@ class QuotesController extends FController
                     'delete' => ['POST'],
                 ],
             ],
-            'access' => [
-                'class' => AccessControl::class,
-                'rules' => [
-                    [
-                        'actions' => ['index', 'update', 'view', 'delete', 'create', 'ajax-details'],
-                        'allow' => true,
-                        'roles' => ['supervision'],
-                    ],
-                    [
-                        'actions' => ['ajax-details'],
-                        'allow' => true,
-                        'roles' => ['agent'],
-                    ],
-                ],
-            ],
         ];
-
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
 
@@ -108,7 +88,7 @@ class QuotesController extends FController
         $model = $this->findModel($id);
         $lead = $model->lead;
 
-        if($lead->status === Lead::STATUS_TRASH && Yii::$app->user->identity->role === 'agent') {
+        if($lead->status === Lead::STATUS_TRASH && Yii::$app->user->identity->canRole('agent')) {
             throw new ForbiddenHttpException('Access Denied for Agent');
         }
 

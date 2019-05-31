@@ -12,7 +12,7 @@ use common\models\Lead;
 
 $this->title = 'Processing Queue';
 
-if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
+if (Yii::$app->user->identity->canRole('admin')) {
     $userList = \common\models\Employee::getList();
     $projectList = \common\models\Project::getList();
 } else {
@@ -223,14 +223,29 @@ $this->params['breadcrumbs'][] = $this->title;
             'format' => 'raw'
         ],*/
 
-        [
+        /*[
             'attribute' => 'updated',
             'label' => 'Last Update',
             'value' => function (\common\models\Lead $model) {
                 return '<span title="'.Yii::$app->formatter->asDatetime(strtotime($model->updated)).'">'.Yii::$app->formatter->asRelativeTime(strtotime($model->updated)).'</span>';
             },
             'format' => 'raw'
+        ],*/
+
+
+        [
+            'attribute' => 'l_last_action_dt',
+            //'label' => 'Last Update',
+            'value' => function (\common\models\Lead $model) {
+                return $model->l_last_action_dt ? '<b>'.Yii::$app->formatter->asRelativeTime(strtotime($model->l_last_action_dt)).'</b><br>' .
+                    Yii::$app->formatter->asDatetime(strtotime($model->l_last_action_dt)) : $model->l_last_action_dt;
+            },
+            'format' => 'raw',
+            'contentOptions' => [
+                'class' => 'text-center'
+            ],
         ],
+
         /*[
             'attribute' => 'reason',
             'label' => 'Reason',

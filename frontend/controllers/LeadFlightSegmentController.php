@@ -16,10 +16,6 @@ use yii\filters\VerbFilter;
  */
 class LeadFlightSegmentController extends FController
 {
-    /**
-     * {@inheritdoc}
-     */
-
 
     public function behaviors()
     {
@@ -30,23 +26,7 @@ class LeadFlightSegmentController extends FController
                     'delete' => ['POST'],
                 ],
             ],
-            'access' => [
-                'class' => AccessControl::class,
-                'rules' => [
-                    [
-                        'actions' => ['index', 'update', 'view', 'delete', 'create'],
-                        'allow' => true,
-                        'roles' => ['supervision'],
-                    ],
-                    [
-                        'actions' => ['view'],
-                        'allow' => true,
-                        'roles' => ['agent'],
-                    ],
-                ],
-            ],
         ];
-
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
 

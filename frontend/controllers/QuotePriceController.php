@@ -16,10 +16,6 @@ use yii\filters\VerbFilter;
  */
 class QuotePriceController extends FController
 {
-    /**
-     * {@inheritdoc}
-     */
-
 
     public function behaviors()
     {
@@ -30,24 +26,7 @@ class QuotePriceController extends FController
                     'delete' => ['POST'],
                 ],
             ],
-            'access' => [
-                'class' => AccessControl::class,
-                'rules' => [
-                    [
-                        'actions' => ['index', 'update', 'view', 'delete', 'create'],
-                        'allow' => true,
-                        'roles' => ['supervision'],
-                    ],
-                    /*[
-                        'actions' => ['index'],
-
-                        'allow' => true,
-                        'roles' => ['agent'],
-                    ],*/
-                ],
-            ],
         ];
-
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
 

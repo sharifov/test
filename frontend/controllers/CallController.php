@@ -27,6 +27,7 @@ use yii\filters\VerbFilter;
  */
 class CallController extends FController
 {
+
     public function behaviors()
     {
         $behaviors = [
@@ -36,30 +37,7 @@ class CallController extends FController
                     'delete' => ['POST'],
                 ],
             ],
-            'access' => [
-                'class' => AccessControl::class,
-                'rules' => [
-                    [
-                        'actions' => ['index', 'update', 'view', 'inbox', 'soft-delete', 'list', 'user-map', 'all-read'],
-                        'allow' => true,
-                        'roles' => ['supervision', 'admin', 'qa'],
-                    ],
-
-                    [
-                        'actions' => ['delete', 'create'],
-                        'allow' => true,
-                        'roles' => ['admin'],
-                    ],
-
-                    [
-                        'actions' => ['view', 'view2', 'soft-delete', 'all-delete', 'all-read', 'list', 'auto-redial'],
-                        'allow' => true,
-                        'roles' => ['agent'],
-                    ],
-                ],
-            ],
         ];
-
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
 
@@ -72,7 +50,7 @@ class CallController extends FController
         $searchModel = new CallSearch();
 
         $params = Yii::$app->request->queryParams;
-        if(Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id)) {
+        if(Yii::$app->user->identity->canRole('supervision')) {
             $params['CallSearch']['supervision_id'] = Yii::$app->user->id;
         }
 
@@ -262,7 +240,7 @@ class CallController extends FController
         $searchModel = new CallSearch();
         $params = Yii::$app->request->queryParams;
 
-        //if (Yii::$app->authManager->getAssignment('supervision', $userId)) {
+        //if (Yii::$app->user->identity->canRole('supervision')) {
             //$params['CallSearch']['supervision_id'] = $userId;
             //$params['CallSearch']['status'] = Employee::STATUS_ACTIVE;
         //}
@@ -412,7 +390,7 @@ class CallController extends FController
         //$params2 = Yii::$app->request->post();
         //$params = array_merge($params, $params2);
 
-        if(Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id)) {
+        if(Yii::$app->user->identity->canRole('agent')) {
             $isAgent = true;
         } else {
             $isAgent = false;
@@ -451,12 +429,12 @@ class CallController extends FController
         }*/
 
 
-        if(Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id)) {
+        if(Yii::$app->user->identity->canRole('supervision')) {
             $params['LeadSearch']['supervision_id'] = Yii::$app->user->id;
         }
 
 
-        if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
+        if(Yii::$app->user->identity->canRole('admin')) {
             $dataProvider = $searchModel->searchInbox($params);
         } else {
             $dataProvider = null;

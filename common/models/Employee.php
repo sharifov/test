@@ -32,6 +32,10 @@ use yii\web\NotFoundHttpException;
  * @property string $last_activity
  * @property boolean $acl_rules_activated
  *
+ * @property array $roles
+ * @property array $rolesName
+ * @property array $form_roles
+ *
  * @property Lead[] $leads
  * @property EmployeeAcl[] $employeeAcl
  * @property ProjectEmployeeAccess[] $projectEmployeeAccesses
@@ -60,8 +64,11 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
 
     public $password;
     public $deleted;
-    public $role;
-    public $employeeAccess;
+
+    public $roles = null;
+    public $rolesName = null;
+    public $form_roles = [];
+
     public $viewItemsEmployeeAccess;
 
     public $user_groups;
@@ -84,7 +91,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     public function rules()
     {
         return [
-            [['username', 'auth_key', 'password_hash', 'email', 'role'], 'required'],
+            [['username', 'auth_key', 'password_hash', 'email', 'form_roles'], 'required'],
             [['password'], 'required', 'on' => self::SCENARIO_REGISTER],
             [['email', 'password', 'username'], 'trim'],
             [['password'], 'string', 'min' => 6],
@@ -95,7 +102,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
             [['email'], 'unique'],
             ['email', 'email'],
             [['password_reset_token'], 'unique'],
-            [['created_at', 'updated_at', 'last_activity', 'acl_rules_activated', 'full_name', 'user_groups', 'user_projects'], 'safe'],
+            [['created_at', 'updated_at', 'last_activity', 'acl_rules_activated', 'full_name', 'user_groups', 'user_projects', 'deleted'], 'safe'],
         ];
     }
 
@@ -115,7 +122,8 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
             'created_at' => 'Created At',
             'updated_at' => 'Updated At',
             'user_groups' => 'User groups',
-            'user_projects' => 'Projects access'
+            'user_projects' => 'Projects access',
+            'form_roles' => 'Roles'
         ];
     }
 
@@ -134,27 +142,63 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         ];
     }
 
+    public function isActive()
+    {
+        return $this->status === self::STATUS_ACTIVE;
+    }
+
     public function afterFind()
     {
         parent::afterFind();
 
         //var_dump(\webapi\models\ApiUser::class); die;
 
-
-        if (isset(Yii::$app->user)) {
+        /*if (isset(Yii::$app->user)) {
             if (Yii::$app->user && Yii::$app->user->identityClass === \webapi\models\ApiUser::class) {
-                $this->role = null;
+                $this->roles = [];
             } else {
                 $roles = $this->getRoles();
-                $this->role = array_keys($roles)[0] ?? 'noname';
+                $this->roles = array_keys($roles);
             }
+        }*/
+    }
+
+
+    /**
+     * @return bool
+     */
+    public function isDeleted() : bool
+    {
+        return !(boolean)$this->status;
+    }
+
+
+    /**
+     * @param string $role
+     * @return bool
+     */
+    public function canRole(string $role = '') : bool
+    {
+        if($this->roles === null) {
+            $roles = $this->getRoles();
+            $this->roles = array_keys($roles);
         }
 
-        $this->deleted = !$this->status;
+        return in_array($role, $this->roles, false);
+    }
 
-        /*if ($this->role != 'admin') {
-            $this->employeeAccess = array_keys(ArrayHelper::map($this->projectEmployeeAccesses, 'project_id', 'project_id'));
-        }*/
+    /**
+     * @param array $roles
+     * @return bool
+     */
+    public function canRoles(array $roles = []) : bool
+    {
+        foreach ($roles as $role) {
+            if ($this->canRole($role)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /*public function afterValidate()
@@ -170,6 +214,16 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     public function getUserProfile()
     {
         return $this->hasOne(UserProfile::class, ['up_user_id' => 'id']);
+    }
+
+    public function canCall()
+    {
+        return ($this->userProfile && $this->userProfile->canCall());
+    }
+
+    public function isKpiEnable()
+    {
+        return ($this->userProfile && $this->userProfile->isKpiEnable());
     }
 
     /**
@@ -297,26 +351,17 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     public static function getAllRoles(): array
     {
 
-        $query = new Query();
+        $auth = \Yii::$app->authManager;
+
+        /*$query = new Query();
         $result = $query->select(['name', 'description'])
             ->from('auth_item')->where(['type' => 1])
-            ->all();
+            ->all();*/
 
-
+        $result = $auth->getRoles();
         $roles = ArrayHelper::map($result, 'name', 'description');
-        //VarDumper::dump($result, 10, true);
 
-        /*foreach ($result as $item) {
-            if (($item['name'] == 'admin' || $item['name'] == 'supervision') && Yii::$app->user->identity->role != 'admin') {
-                continue;
-            }
-
-
-            $roles[$item['name']] = $item['description'];
-        }*/
-
-
-        if(Yii::$app->user->identity->role != 'admin') {
+        if(!Yii::$app->user->identity->canRole('admin') && !Yii::$app->user->identity->canRole('superadmin')) {
             if(isset($roles['admin'])) {
                 unset($roles['admin']);
             }
@@ -326,9 +371,15 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
             }
         }
 
-        if(Yii::$app->user->identity->role != 'admin' && Yii::$app->user->identity->role != 'userManager' ) {
+        if(!Yii::$app->user->identity->canRole('admin') && !Yii::$app->user->identity->canRole('superadmin') && !Yii::$app->user->identity->canRole('userManager') ) {
             if(isset($roles['qa'])) {
                 unset($roles['qa']);
+            }
+        }
+
+        if(!Yii::$app->user->identity->canRole('superadmin')) {
+            if(isset($roles['superadmin'])) {
+                unset($roles['superadmin']);
             }
         }
 
@@ -413,24 +464,35 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         if (isset($attr['acl_rules_activated'])) {
             $this->acl_rules_activated = $attr['acl_rules_activated'];
         }
-        if (isset($attr['role'])) {
-            $this->role = $attr['role'];
+        if (isset($attr['form_roles']) && $attr['form_roles']) {
+            foreach ($attr['form_roles'] as $role) {
+                $this->form_roles[] = $role;
+            }
         }
         $this->generateAuthKey();
 
         return $this->isNewRecord;
     }
 
-    public function addRole($isNew)
+
+    /**
+     * @param bool $isNew
+     * @throws \Exception
+     */
+    public function addRole(bool $isNew = false) : void
     {
-        // the following three lines were added:
         $auth = \Yii::$app->authManager;
+
         if (!$isNew) {
             $auth->revokeAll($this->id);
         }
 
-        $authorRole = $auth->getRole($this->role);
-        $auth->assign($authorRole, $this->id);
+        if ($this->form_roles) {
+            foreach ($this->form_roles as $role) {
+                $authorRole = $auth->getRole($role);
+                $auth->assign($authorRole, $this->id);
+            }
+        }
     }
 
     /**
@@ -451,9 +513,15 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         $this->auth_key = Yii::$app->security->generateRandomString();
     }
 
-    public function getRoles()
+    /**
+     * @return array
+     */
+    public function getRoles() : array
     {
-        return ArrayHelper::map(Yii::$app->authManager->getRolesByUser($this->id), 'name', 'description');
+        if ($this->rolesName === null) {
+            $this->rolesName = ArrayHelper::map(Yii::$app->authManager->getRolesByUser($this->id), 'name', 'description');
+        }
+        return $this->rolesName;
     }
 
     /**
@@ -497,7 +565,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
      */
     public static function getListByProject($projectId, $withExperts = false): array
     {
-        if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id)) {
+        if (Yii::$app->user->identity->canRoles(['admin', 'supervision'])) {
             $data = self::find()
                 ->orderBy(['username' => SORT_ASC])
                 ->asArray()->all();

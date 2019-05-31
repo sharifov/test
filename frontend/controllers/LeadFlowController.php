@@ -16,9 +16,7 @@ use yii\filters\VerbFilter;
  */
 class LeadFlowController extends FController
 {
-    /**
-     * {@inheritdoc}
-     */
+
     public function behaviors()
     {
         $behaviors = [
@@ -28,18 +26,7 @@ class LeadFlowController extends FController
                     'delete' => ['POST'],
                 ],
             ],
-            'access' => [
-                'class' => AccessControl::class,
-                'rules' => [
-                    [
-                        'actions' => ['index', 'update', 'delete', 'create', 'view'],
-                        'allow' => true,
-                        'roles' => ['supervision', 'admin'],
-                    ],
-                ],
-            ],
         ];
-
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
 
@@ -53,7 +40,7 @@ class LeadFlowController extends FController
 
         $params = Yii::$app->request->queryParams;
 
-        if(Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id)) {
+        if(Yii::$app->user->identity->canRole('supervision')) {
             $params['LeadFlowSearch']['supervision_id'] = Yii::$app->user->id;
         }
 

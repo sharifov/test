@@ -24,27 +24,6 @@ use yii\web\Response;
  */
 class SettingsController extends FController
 {
-    /**
-     * {@inheritdoc}
-     */
-    public function behaviors()
-    {
-        return [
-            'access' => [
-                'class' => AccessControl::class,
-                'rules' => [
-                    [
-                        'actions' => [
-                            'projects', 'airlines', 'airports', 'logging', 'acl', 'email-template',
-                            'sync', 'view-log', 'acl-rule', 'project-data', 'synchronization'
-                        ],
-                        'allow' => true,
-                        'roles' => ['supervision'],
-                    ],
-                ],
-            ],
-        ];
-    }
 
     public function actionSync($type)
     {
@@ -200,7 +179,7 @@ class SettingsController extends FController
         $this->view->title = sprintf('Projects - List');
 
         $availableProjects = [];
-        if (Yii::$app->user->identity->role == 'admin') {
+        if (Yii::$app->user->identity->canRole('admin')) {
             $query = Project::find();
         } else {
             $availableProjects = ArrayHelper::map(Yii::$app->user->identity->projectEmployeeAccesses, 'project_id', 'project_id');
@@ -211,7 +190,7 @@ class SettingsController extends FController
         if ($projectId !== null) {
             $project = Project::findOne(['id' => $projectId]);
             if ($project !== null) {
-                if (Yii::$app->user->identity->role != 'admin' && !in_array($project->id, $availableProjects)) {
+                if (!Yii::$app->user->identity->canRole('admin') && !in_array($project->id, $availableProjects)) {
                     throw new ForbiddenHttpException();
                 }
                 return $this->render('item/project', [

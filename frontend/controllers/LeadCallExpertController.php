@@ -6,6 +6,7 @@ use Yii;
 use common\models\LeadCallExpert;
 use common\models\search\LeadCallExpertSearch;
 use yii\filters\AccessControl;
+use yii\helpers\ArrayHelper;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -15,22 +16,10 @@ use yii\filters\VerbFilter;
  */
 class LeadCallExpertController extends FController
 {
-    /**
-     * {@inheritdoc}
-     */
+
     public function behaviors()
     {
-        return [
-            'access' => [
-                'class' => AccessControl::class,
-                'rules' => [
-                    [
-                        // 'actions' => ['index'],
-                        'allow' => true,
-                        'roles' => ['supervision', 'admin'],
-                    ],
-                ],
-            ],
+        $behaviors = [
             'verbs' => [
                 'class' => VerbFilter::class,
                 'actions' => [
@@ -38,6 +27,7 @@ class LeadCallExpertController extends FController
                 ],
             ],
         ];
+        return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
 
     /**

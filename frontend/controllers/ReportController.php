@@ -15,45 +15,11 @@ use yii\web\Response;
 
 class ReportController extends FController
 {
-    public function behaviors()
-    {
-        $behaviors = [
-            'access' => [
-                'class' => AccessControl::class,
-                'rules' => [
-                    [
-                        'actions' => [
-                            'sold', 'view-sold'
-                        ],
-                        'allow' => true,
-                        'roles' => ['agent'],
-                    ],
-                    [
-                        'actions' => [
-                            'agents'
-                        ],
-                        'allow' => true,
-                        'roles' => ['admin', 'supervision'],
-                    ],
-                ],
-            ],
-        ];
-
-        return ArrayHelper::merge(parent::behaviors(), $behaviors);
-    }
 
     public function beforeAction($action)
     {
         $this->view->title = ucwords(str_replace('-', ' ', $action->id));
         return parent::beforeAction($action);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function actions()
-    {
-        return parent::actions();
     }
 
     public function actionViewSold($ids)
@@ -74,7 +40,7 @@ class ReportController extends FController
         $employees = Employee::getAllEmployees();
 
         $isSupervision = true;
-        if (Yii::$app->user->identity->role == 'agent') {
+        if (Yii::$app->user->identity->canRole('agent')) {
             $model->employee = Yii::$app->user->identity->getId();
             $isSupervision = false;
         }

@@ -26,36 +26,6 @@ use yii\web\Response;
  */
 class EmployeeController extends FController
 {
-    /**
-     * {@inheritdoc}
-     */
-    public function behaviors()
-    {
-        $behaviors = [
-            'access' => [
-                'class' => AccessControl::class,
-                'rules' => [
-                    [
-                        'actions' => ['switch'],
-                        'allow' => true,
-                        'roles' => ['admin'],
-                    ],
-                    [
-                        'actions' => ['list', 'update', 'create', 'acl-rule'],
-                        'allow' => true,
-                        'roles' => ['supervision', 'userManager'],
-                    ],
-                    [
-                        'actions' => ['seller-contact-info'],
-                        'allow' => true,
-                        'roles' => ['agent', 'supervision'],
-                    ],
-                ],
-            ],
-        ];
-
-        return ArrayHelper::merge(parent::behaviors(), $behaviors);
-    }
 
     public function actionSellerContactInfo($employeeId)
     {
@@ -166,7 +136,7 @@ class EmployeeController extends FController
         $searchModel = new EmployeeSearch();
         $params = Yii::$app->request->queryParams;
 
-        if(Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id)) {
+        if(Yii::$app->user->identity->canRole('supervision')) {
             $params['EmployeeSearch']['supervision_id'] = Yii::$app->user->id;
         }
 
@@ -193,7 +163,8 @@ class EmployeeController extends FController
         if (Yii::$app->request->isPost) {
             $attr = Yii::$app->request->post($model->formName());
 
-            $isNew = $model->prepareSave($attr);
+            $model->prepareSave($attr);
+
             if ($model->validate() && $model->save()) {
 
                 $modelProfile->up_user_id = $model->id;
@@ -208,7 +179,7 @@ class EmployeeController extends FController
                 }
 
 
-                $model->addRole($isNew);
+                $model->addRole(true);
 
                 if(isset($attr['user_groups'])) {
                     if($attr['user_groups']) {
@@ -267,11 +238,11 @@ class EmployeeController extends FController
             }
         } else {
 
-            $modelUserParams->up_timezone = "Europe/Chisinau";
+            $modelUserParams->up_timezone = 'Europe/Chisinau';
             $modelUserParams->up_work_minutes = 8 * 60;
             $modelUserParams->up_base_amount = 0;
             $modelUserParams->up_commission_percent = 0;
-
+            $model->form_roles = ArrayHelper::map(Yii::$app->authManager->getRolesByUser($model->id), 'name', 'name') ;
         }
 
         //VarDumper::dump($model->userGroupAssigns, 10 ,true); exit;
@@ -312,18 +283,32 @@ class EmployeeController extends FController
                 throw new NotFoundHttpException('The requested user does not exist.');
             }
 
+
+            if(!Yii::$app->user->identity->canRole('superadmin')) {
+                if($model->canRole('superadmin')) {
+                    throw new NotFoundHttpException('Access denied for Superadmin user: '.$model->id);
+                }
+            }
+
+            if(Yii::$app->user->identity->canRoles(['userManager', 'supervisor'])) {
+                if($model->canRole('admin')) {
+                    throw new NotFoundHttpException('Access denied for Admin user: '.$model->id);
+                }
+            }
+
+            if(!Yii::$app->user->identity->canRoles(['superadmin', 'admin', 'userManager', 'supervision'])) {
+                throw new ForbiddenHttpException('Access denied for this user: '.$model->id);
+            }
+
+
             $modelUserParams = UserParams::findOne($model->id);
             if(!$modelUserParams) {
                 $modelUserParams = new UserParams();
             }
 
-            $roles = array_keys($model->getRoles());
 
-            if(!Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) && in_array('admin', $roles)) {
-                throw new ForbiddenHttpException('Access denied for this user: '.$model->id);
-            }
 
-            if(Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id)) {
+            if(Yii::$app->user->identity->canRole('supervision')) {
                 $access = false;
 
                 $userGroups = array_keys($model->getUserGroupList());
@@ -356,9 +341,13 @@ class EmployeeController extends FController
             if (Yii::$app->request->isPost) {
                 $attr = Yii::$app->request->post($model->formName());
 
-                $isNew = $model->prepareSave($attr);
-                if ($model->validate() && $model->save()) {
+                $model->prepareSave($attr);
+                if ($model->save()) {
 
+
+                    //$model->roles;
+
+                    $model->addRole(false);
 
                     //VarDumper::dump(Yii::$app->request->post(), 10, true); exit;
 
@@ -372,8 +361,6 @@ class EmployeeController extends FController
                             Yii::error(VarDumper::dumpAsString($modelProfile->errors, 10), 'EmployeeController:actionUpdate:modelProfile:save');
                         }
                     }
-
-                    $model->addRole($isNew);
 
 
                     if(isset($attr['user_groups'])) {
@@ -424,6 +411,9 @@ class EmployeeController extends FController
 
 
                 }
+
+            } else {
+                $model->form_roles = ArrayHelper::map(Yii::$app->authManager->getRolesByUser($model->id), 'name', 'name') ;
             }
 
             //VarDumper::dump($model->userGroupAssigns, 10 ,true); exit;
@@ -438,9 +428,7 @@ class EmployeeController extends FController
             $searchModel = new UserProjectParamsSearch();
             $params = Yii::$app->request->queryParams;
 
-            /*if(Yii::$app->authManager->getAssignment('supervision', $model->id)) {
 
-            }*/
 
             $params['UserProjectParamsSearch']['upp_user_id'] = $model->id;
 
@@ -458,6 +446,11 @@ class EmployeeController extends FController
                     return $this->refresh();
                 }
             }
+
+
+
+
+            //VarDumper::dump($model->roles, 10, true); exit;
 
 
             return $this->render('_form', [

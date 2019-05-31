@@ -15,55 +15,16 @@ use yii\helpers\ArrayHelper;
 class QuoteStatusLogController extends FController
 {
 
-    /**
-     *
-     * {@inheritdoc}
-     *
-     */
     public function behaviors()
     {
         $behaviors = [
             'verbs' => [
                 'class' => VerbFilter::class,
                 'actions' => [
-                    'delete' => [
-                        'POST'
-                    ]
+                    'delete' => ['POST']
                 ]
             ],
-            'access' => [
-                'class' => AccessControl::class,
-                'rules' => [
-                    [
-                        'actions' => [
-                            'index',
-                            'update',
-                            'delete',
-                            'create',
-                            'export',
-                            'duplicate'
-                        ],
-                        'allow' => true,
-                        'roles' => [
-                            'supervision',
-                            'admin'
-                        ]
-                    ],
-                    [
-                        'actions' => [
-                            'view',
-                            'index',
-                            'ajax-reason-list'
-                        ],
-                        'allow' => true,
-                        'roles' => [
-                            'agent'
-                        ]
-                    ]
-                ]
-            ]
         ];
-
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
 

@@ -18,6 +18,7 @@ use yii\filters\VerbFilter;
  */
 class UserCallStatusController extends FController
 {
+
     public function behaviors()
     {
         $behaviors = [
@@ -27,23 +28,7 @@ class UserCallStatusController extends FController
                     'delete' => ['POST'],
                 ],
             ],
-            'access' => [
-                'class' => AccessControl::class,
-                'rules' => [
-                    [
-                        'actions' => ['index', 'update', 'view', 'delete', 'create', 'update-status'],
-                        'allow' => true,
-                        'roles' => ['admin'],
-                    ],
-                    [
-                        'actions' => ['index', 'update-status'],
-                        'allow' => true,
-                        'roles' => ['agent', 'supervisor'],
-                    ],
-                ],
-            ],
         ];
-
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
 

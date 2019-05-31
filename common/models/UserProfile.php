@@ -68,6 +68,16 @@ class UserProfile extends \yii\db\ActiveRecord
         ];
     }
 
+    public function isKpiEnable() : bool
+    {
+        return $this->up_kpi_enable;
+    }
+
+    public function canCall() : bool
+    {
+        return $this->up_call_type_id !== self::CALL_TYPE_OFF;
+    }
+
     /**
      * {@inheritdoc}
      */

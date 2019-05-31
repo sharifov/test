@@ -12,6 +12,7 @@ return [
     'basePath' => dirname(__DIR__),
     'bootstrap' => ['log'],
     'controllerNamespace' => 'frontend\controllers',
+    'layout' => '@frontend/themes/gentelella/views/layouts/main.php',
     'components' => [
         'request' => [
             'baseUrl' => '',
@@ -23,7 +24,7 @@ return [
         ],
 
         'user' => [
-            'identityClass' => 'common\models\Employee',
+            'identityClass' => \common\models\Employee::class,
             'enableAutoLogin' => true,
             'identityCookie' => ['name' => '_identity-crm', 'httpOnly' => true],
         ],
@@ -179,6 +180,10 @@ return [
                     //'cachingDuration' => 86400,
                     //'enableCaching' => true,
                 ],
+                'yii2mod.rbac' => [
+                    'class' => 'yii\i18n\PhpMessageSource',
+                    'basePath' => '@yii2mod/rbac/messages',
+                ],
             ],
         ],
     ],
@@ -202,7 +207,7 @@ return [
             'scanRootParentDirectory'   => true,
             'layout'                    => '@frontend/themes/gentelella/views/layouts/main',         // Name of the used layout. If using own layout use 'null'.
             'allowedIPs'                => ['*'],               // 127.0.0.1 IP addresses from which the translation interface is accessible.
-            'roles'                     => ['@'],               // For setting access levels to the translating interface.
+            'roles'                     => ['superadmin', 'admin'],               // For setting access levels to the translating interface.
             'tmpDir'                    => '@runtime',         // Writable directory for the client-side temporary language files.
             // IMPORTANT: must be identical for all applications (the AssetsManager serves the JavaScript files containing language elements from this directory).
             'phpTranslators'            => ['Yii::t', 't'],             // list of the php function for translating messages.
@@ -232,36 +237,24 @@ return [
 
             //'googleApiKey'              => 'AIzaSyCBz5uH4JyegEa_vqN_OGJCORq-UpkmTiQ',
         ],
-        'user-management' => [
-            'class' => 'webvimark\modules\UserManagement\UserManagementModule',
-
-            // 'enableRegistration' => true,
-
-            // Add regexp validation to passwords. Default pattern does not restrict user and can enter any set of characters.
-            // The example below allows user to enter :
-            // any set of characters
-            // (?=\S{8,}): of at least length 8
-            // (?=\S*[a-z]): containing at least one lowercase letter
-            // (?=\S*[A-Z]): and at least one uppercase letter
-            // (?=\S*[\d]): and at least one number
-            // $: anchored to the end of the string
-
-            //'passwordRegexp' => '^\S*(?=\S{8,})(?=\S*[a-z])(?=\S*[A-Z])(?=\S*[\d])\S*$',
-            'user_table' => '{{%employees}}',
-
-
-            // Here you can set your handler to change layout for any controller or action
-            // Tip: you can use this event in any module
-            'on beforeAction'=>function(yii\base\ActionEvent $event) {
-                if ( $event->action->uniqueId === 'user-management/auth/login' ) {
-                    $event->action->controller->layout = '@frontend/themes/gentelella/views/layouts/login.php'; //loginLayout.php
-                };
-            },
+        'rbac' => [
+            'class' => 'yii2mod\rbac\Module',
+            'layout' => '@frontend/themes/gentelella/views/layouts/main',
+            'as access' => [
+                'class' => yii2mod\rbac\filters\AccessControl::class,
+                'rules' => [
+                    [
+                        'allow' => true,
+                        'roles' => ['superadmin'],
+                    ]
+                ]
             ],
+            'viewPath' => '@frontend/views/rbac',
+        ],
     ],
-    'as beforeRequest' => [
+    /*'as beforeRequest' => [
         'class' => 'common\components\EmployeeActivityLogging',
-    ],
+    ],*/
     'container' => [
         'definitions' => [
             yii\grid\GridView::class => [
