@@ -633,7 +633,7 @@ class CommunicationController extends ApiBaseController
                     if ($upp) {
                         $employeeModel = Employee::findOne(['id' => $userForCall['tbl_user_id']]);
                         if ($employeeModel && $employeeModel->userProfile && (int)$employeeModel->userProfile->up_call_type_id === UserProfile::CALL_TYPE_WEB) {
-                            if($cntCallAgents > 3) {
+                            if($cntCallAgents > 10) {
                                 break;
                             }
                             $call_employee[] = $employeeModel;
@@ -800,7 +800,7 @@ class CommunicationController extends ApiBaseController
                             if ($user->isOnline()) {
                                 if ($user->isCallStatusReady()) {
                                     if ($user->isCallFree()) {
-                                        if($cntCallAgents > 3) {
+                                        if($cntCallAgents > 10) {
                                             break;
                                         }
                                         //Yii::info('DIRECT - User (' . $user->username . ') Id: ' . $user->id . ', phone: ' . $agent_phone_number, 'info\API:CommunicationController:actionVoice:Direct - 2');
