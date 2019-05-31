@@ -11,6 +11,7 @@ use common\models\Email;
 use common\models\EmailTemplateType;
 use common\models\Lead;
 use common\models\LeadCallExpert;
+use common\models\LeadChecklist;
 use common\models\LeadFlow;
 use common\models\LeadLog;
 use common\models\LeadTask;
@@ -19,6 +20,7 @@ use common\models\Note;
 use common\models\ProjectEmailTemplate;
 use common\models\Reason;
 use common\models\search\LeadCallExpertSearch;
+use common\models\search\LeadChecklistSearch;
 use common\models\Sms;
 use common\models\SmsTemplateType;
 use common\models\Task;
@@ -985,6 +987,31 @@ class LeadController extends FController
         $params['LeadCallExpertSearch']['lce_lead_id'] = $lead->id;
         $dataProviderCallExpert = $searchModelCallExpert->searchByLead($params);
 
+
+
+        $modelLeadChecklist = new LeadChecklist();
+
+        if ($modelLeadChecklist->load(Yii::$app->request->post())) {
+
+            $modelLeadChecklist->lc_user_id = Yii::$app->user->id;
+            $modelLeadChecklist->lc_lead_id = $lead->id;
+            $modelLeadChecklist->lc_created_dt = date('Y-m-d H:i:s');
+
+            if($modelLeadChecklist->save()) {
+                //
+                //Yii::info(VarDumper::dumpAsString($modelLeadCallExpert->attributes), 'info\LeadController:view:LeadCallExpert');
+            }
+            //$modelLeadCallExpert =
+            //return $this->redirect(['view', 'id' => $model->lce_id]);
+        }
+
+
+        $searchModelLeadChecklist= new LeadChecklistSearch();
+        $params = Yii::$app->request->queryParams;
+        $params['LeadChecklistSearch']['lc_lead_id'] = $lead->id;
+        $dataProviderChecklist = $searchModelLeadChecklist->searchByLead($params);
+
+
         //VarDumper::dump(enableCommunication); exit;
 
         //$dataProviderCommunication = $lead->getQuotesProvider([]);
@@ -1000,7 +1027,10 @@ class LeadController extends FController
             'dataProviderCommunication' => $dataProviderCommunication,
             'enableCommunication' => $enableCommunication,
             'dataProviderCallExpert' => $dataProviderCallExpert,
-            'modelLeadCallExpert' => $modelLeadCallExpert
+            'modelLeadCallExpert' => $modelLeadCallExpert,
+
+            'dataProviderChecklist' => $dataProviderChecklist,
+            'modelLeadChecklist' => $modelLeadChecklist
         ]);
 
 
