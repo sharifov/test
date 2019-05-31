@@ -3,6 +3,7 @@
 namespace common\models;
 
 use Yii;
+use yii\helpers\ArrayHelper;
 
 /**
  * This is the model class for table "lead_checklist_type".
@@ -52,14 +53,14 @@ class LeadChecklistType extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'lct_id' => 'Lct ID',
-            'lct_key' => 'Lct Key',
-            'lct_name' => 'Lct Name',
-            'lct_description' => 'Lct Description',
-            'lct_enabled' => 'Lct Enabled',
-            'lct_sort_order' => 'Lct Sort Order',
-            'lct_updated_dt' => 'Lct Updated Dt',
-            'lct_updated_user_id' => 'Lct Updated User ID',
+            'lct_id' => 'ID',
+            'lct_key' => 'Key',
+            'lct_name' => 'Name',
+            'lct_description' => 'Description',
+            'lct_enabled' => 'Enabled',
+            'lct_sort_order' => 'Sort Order',
+            'lct_updated_dt' => 'Updated Dt',
+            'lct_updated_user_id' => 'Updated User',
         ];
     }
 
@@ -86,5 +87,20 @@ class LeadChecklistType extends \yii\db\ActiveRecord
     public static function find()
     {
         return new LeadChecklistTypeQuery(get_called_class());
+    }
+
+
+    /**
+     * @param bool $enabled
+     * @return array
+     */
+    public static function getList(bool $enabled = true) : array
+    {
+        $query = self::find()->orderBy(['lct_sort_order' => SORT_ASC]);
+        if($enabled) {
+            $query->andWhere(['lct_enabled' => true]);
+        }
+        $data = $query->asArray()->all();
+        return ArrayHelper::map($data, 'lct_id', 'lct_name');
     }
 }

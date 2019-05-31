@@ -5,6 +5,7 @@ namespace frontend\controllers;
 use Yii;
 use common\models\LeadChecklist;
 use common\models\search\LeadChecklistSearch;
+use yii\helpers\ArrayHelper;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -12,21 +13,19 @@ use yii\filters\VerbFilter;
 /**
  * LeadChecklistController implements the CRUD actions for LeadChecklist model.
  */
-class LeadChecklistController extends Controller
+class LeadChecklistController extends FController
 {
-    /**
-     * {@inheritdoc}
-     */
     public function behaviors()
     {
-        return [
+        $behaviors = [
             'verbs' => [
-                'class' => VerbFilter::className(),
+                'class' => VerbFilter::class,
                 'actions' => [
                     'delete' => ['POST'],
                 ],
             ],
         ];
+        return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
 
     /**

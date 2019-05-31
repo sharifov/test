@@ -68,7 +68,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'value' => function(\common\models\LeadTask $model) {
                     return $model->lt_completed_dt ? '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->lt_completed_dt)) : '-';
                 },
-                'format' => 'html',
+                'format' => 'raw',
             ],
 
             [
@@ -76,7 +76,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'value' => function(\common\models\LeadTask $model) {
                     return $model->lt_updated_dt ? '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->lt_updated_dt)) : '-';
                 },
-                'format' => 'html',
+                'format' => 'raw',
             ],
             //'lt_completed_dt',
             //'lt_updated_dt',

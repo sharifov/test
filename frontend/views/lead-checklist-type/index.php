@@ -25,16 +25,28 @@ $this->params['breadcrumbs'][] = $this->title;
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'columns' => [
-            ['class' => 'yii\grid\SerialColumn'],
+            //['class' => 'yii\grid\SerialColumn'],
 
             'lct_id',
             'lct_key',
             'lct_name',
             'lct_description',
-            'lct_enabled',
-            //'lct_sort_order',
-            //'lct_updated_dt',
-            //'lct_updated_user_id',
+            'lct_enabled:boolean',
+            'lct_sort_order',
+            [
+                'attribute' => 'lct_updated_dt',
+                'value' => function(\common\models\LeadChecklistType $model) {
+                    return $model->lct_updated_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->lct_updated_dt)) : '-';
+                },
+                'format' => 'raw',
+            ],
+            [
+                'attribute' => 'lct_updated_user_id',
+                'value' => function (\common\models\LeadChecklistType $model) {
+                    return  $model->lctUpdatedUser ? '<i class="fa fa-user"></i> ' . Html::encode($model->lctUpdatedUser->username) : $model->lct_updated_user_id;
+                },
+                'format' => 'raw'
+            ],
 
             ['class' => 'yii\grid\ActionColumn'],
         ],

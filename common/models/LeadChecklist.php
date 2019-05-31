@@ -50,11 +50,11 @@ class LeadChecklist extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'lc_type_id' => 'Lc Type ID',
-            'lc_lead_id' => 'Lc Lead ID',
-            'lc_user_id' => 'Lc User ID',
-            'lc_notes' => 'Lc Notes',
-            'lc_created_dt' => 'Lc Created Dt',
+            'lc_type_id' => 'Type ID',
+            'lc_lead_id' => 'Lead ID',
+            'lc_user_id' => 'User ID',
+            'lc_notes' => 'Notes',
+            'lc_created_dt' => 'Created Dt',
         ];
     }
 

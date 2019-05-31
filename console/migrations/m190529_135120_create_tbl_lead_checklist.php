@@ -63,6 +63,19 @@ class m190529_135120_create_tbl_lead_checklist extends Migration
             ]);
         }
 
+
+        $auth = \Yii::$app->authManager;
+
+        $adminRole = $auth->getRole('admin');
+
+        $permission = $auth->createPermission('/lead-checklist-type/*');
+        $auth->add($permission);
+        $auth->addChild($adminRole, $permission);
+
+        $permission = $auth->createPermission('/lead-checklist/*');
+        $auth->add($permission);
+        $auth->addChild($adminRole, $permission);
+
         if (Yii::$app->cache) {
             Yii::$app->cache->flush();
         }
@@ -78,6 +91,21 @@ class m190529_135120_create_tbl_lead_checklist extends Migration
     {
         $this->dropTable('{{%lead_checklist}}');
         $this->dropTable('{{%lead_checklist_type}}');
+
+        $auth = \Yii::$app->authManager;
+
+
+
+        $permission = $auth->getPermission('/lead-checklist-type/*');
+        if($permission) {
+            $auth->remove($permission);
+        }
+
+
+        $permission = $auth->createPermission('/lead-checklist/*');
+        if($permission) {
+            $auth->remove($permission);
+        }
 
         if (Yii::$app->cache) {
             Yii::$app->cache->flush();
