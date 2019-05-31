@@ -8,6 +8,7 @@ use yii\base\Model;
 class SegmentForm extends Model
 {
 
+    public $segmentId;
     public $origin;
     public $destination;
     public $originLabel;
@@ -19,6 +20,7 @@ class SegmentForm extends Model
     public function __construct(LeadFlightSegment $flightSegment = null, $config = [])
     {
         if ($flightSegment) {
+            $this->segmentId = $flightSegment->id;
             $this->origin = $flightSegment->origin;
             $this->destination = $flightSegment->destination;
             $this->originLabel = $flightSegment->origin_label;
@@ -34,8 +36,10 @@ class SegmentForm extends Model
     public function rules(): array
     {
         return [
+            [['origin'], 'integer'],
             [['origin'], 'required'],
             [['destination'], 'required'],
+            [['destination'], 'integer'],
             [['originLabel'], 'required'],
             [['destinationLabel'], 'required'],
             [['departure'], 'required'],

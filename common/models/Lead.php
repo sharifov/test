@@ -268,6 +268,13 @@ class Lead extends ActiveRecord
         ];
     }
 
+    public function editItinerary($cabin, $adults, $children, $infants)
+    {
+        $this->cabin = $cabin;
+        $this->adults = $adults;
+        $this->children = $children;
+        $this->infants = $infants;
+    }
 
     /**
      * {@inheritdoc}

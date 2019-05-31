@@ -2,6 +2,7 @@
 
 namespace sales\forms;
 
+use Yii;
 use yii\base\Model;
 use yii\helpers\ArrayHelper;
 
@@ -69,16 +70,20 @@ abstract class CompositeForm extends Model
     public function getFirstErrors(): array
     {
         $errors = parent::getFirstErrors();
+        foreach ($errors as $attribute => $error) {
+            $errors[$this->formName() . '.' . $attribute] = [$error];
+            unset($errors[$attribute]);
+        }
         foreach ($this->forms as $name => $form) {
             if (is_array($form)) {
                 foreach ($form as $i => $item) {
                     foreach ($item->getFirstErrors() as $attribute => $error) {
-                        $errors[$name . '.' . $i . '.' . $attribute] = $error;
+                        $errors[$name . '.' . $i . '.' . $attribute] = [$error];
                     }
                 }
             } else {
                 foreach ($form->getFirstErrors() as $attribute => $error) {
-                    $errors[$name . '.' . $attribute] = $error;
+                    $errors[$name . '.' . $attribute] = [$error];
                 }
             }
         }

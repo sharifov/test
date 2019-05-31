@@ -21,7 +21,6 @@ use common\models\Reason;
 use common\models\search\LeadCallExpertSearch;
 use common\models\Sms;
 use common\models\SmsTemplateType;
-use common\models\Task;
 use common\models\UserProjectParams;
 use frontend\models\CommunicationForm;
 use frontend\models\LeadForm;
@@ -33,7 +32,6 @@ use Yii;
 use yii\data\ActiveDataProvider;
 use yii\db\Expression;
 use yii\helpers\ArrayHelper;
-use yii\filters\AccessControl;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\helpers\VarDumper;
@@ -112,30 +110,14 @@ class LeadController extends FController
 
 
 
-        $form = new ItineraryForm($lead);
-        VarDumper::dump($form);
-        if ($form->load(Yii::$app->request->post()) && $form->validate()) {
+        $itineraryForm = new ItineraryForm($lead);
+//        VarDumper::dump($itineraryForm, 10 , true);
+        if ($itineraryForm->load(Yii::$app->request->post()) && $itineraryForm->validate()) {
             try {
 
             } catch (\DomainException $e) {
             }
         }
-
-        VarDumper::dump(Yii::$app->request->post());
-        VarDumper::dump($form);
-        die;
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -1040,7 +1022,12 @@ class LeadController extends FController
             'dataProviderCommunication' => $dataProviderCommunication,
             'enableCommunication' => $enableCommunication,
             'dataProviderCallExpert' => $dataProviderCallExpert,
-            'modelLeadCallExpert' => $modelLeadCallExpert
+            'modelLeadCallExpert' => $modelLeadCallExpert,
+
+
+
+
+            'itineraryForm' => $itineraryForm
         ]);
 
 

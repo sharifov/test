@@ -9,6 +9,7 @@
  * @var $dataProviderCallExpert \yii\data\ActiveDataProvider
  * @var $enableCommunication boolean
  * @var $modelLeadCallExpert \common\models\LeadCallExpert
+ * @var $itineraryForm \sales\forms\lead\ItineraryForm
  */
 
 use yii\bootstrap\Html;
@@ -99,7 +100,8 @@ $lead = $leadForm->getLead();
         <div class="col-md-7">
 
             <?= $this->render('partial/_flightDetails', [
-                'leadForm' => $leadForm
+                'leadForm' => $leadForm,
+                'itineraryForm' => $itineraryForm
             ]);
             ?>
 
