@@ -50,7 +50,7 @@ class CallSearch extends Call
      */
     public function search($params)
     {
-        $query = Call::find();
+        $query = Call::find()->with('cCreatedUser', 'cProject');
 
         // add conditions that should always apply here
 

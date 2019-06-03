@@ -40,7 +40,7 @@ class SourcesSearch extends Sources
      */
     public function search($params)
     {
-        $query = Sources::find();
+        $query = Sources::find()->with('project');
 
         // add conditions that should always apply here
 

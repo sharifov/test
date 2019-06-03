@@ -41,7 +41,7 @@ class ApiUserSearch extends ApiUser
      */
     public function search($params)
     {
-        $query = ApiUser::find();
+        $query = ApiUser::find()->with('auProject');
 
         // add conditions that should always apply here
 

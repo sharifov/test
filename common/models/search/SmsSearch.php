@@ -45,7 +45,7 @@ class SmsSearch extends Sms
      */
     public function search($params)
     {
-        $query = Sms::find();
+        $query = Sms::find()->with('sCreatedUser', 'sProject');
 
         // add conditions that should always apply here
 

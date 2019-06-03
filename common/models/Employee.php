@@ -754,7 +754,6 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
      */
     public function getTaskStats(string $start_dt = null, string $end_dt = null): string
     {
-
         if ($start_dt) {
             $start_dt = date('Y-m-d', strtotime($start_dt));
         } else {
@@ -767,21 +766,19 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
             $end_dt = null;
         }
 
-
-        $taskListAllQuery = \common\models\LeadTask::find()->select(['COUNT(*) AS field_cnt', 'lt_task_id'])
+        $taskListAllQuery = \common\models\LeadTask::find()->with('ltTask')->select(['COUNT(*) AS field_cnt', 'lt_task_id'])
             ->where(['lt_user_id' => $this->id])
             ->andFilterWhere(['>=', 'lt_date', $start_dt])
             ->andFilterWhere(['<=', 'lt_date', $end_dt])
             ->groupBy(['lt_task_id'])
             ->orderBy(['lt_task_id' => SORT_ASC]);
 
-        $taskListCheckedQuery = \common\models\LeadTask::find()->select(['COUNT(*) AS field_cnt', 'lt_task_id'])
+        $taskListCheckedQuery = \common\models\LeadTask::find()->with('ltTask')->select(['COUNT(*) AS field_cnt', 'lt_task_id'])
             ->where(['lt_user_id' => $this->id])
             ->andWhere(['IS NOT', 'lt_completed_dt', null])
             ->andFilterWhere(['>=', 'lt_date', $start_dt])
             ->andFilterWhere(['<=', 'lt_date', $end_dt])
             ->groupBy(['lt_task_id']);
-
 
         $taskListAllQuery->joinWith(['ltLead' => function ($q) {
             $q->where(['NOT IN', 'leads.status', [Lead::STATUS_TRASH, Lead::STATUS_SNOOZE]]);
@@ -791,10 +788,8 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
             $q->where(['NOT IN', 'leads.status', [Lead::STATUS_TRASH, Lead::STATUS_SNOOZE]]);
         }]);
 
-
         $taskListAll = $taskListAllQuery->all();
         $taskListChecked = $taskListCheckedQuery->all();
-
 
         //return $taskListChecked->createCommand()->getRawSql();
 

@@ -41,7 +41,7 @@ class QuoteSearch extends Quote
      */
     public function search($params)
     {
-        $query = Quote::find();
+        $query = Quote::find()->with('employee', 'lead');
 
         // add conditions that should always apply here
 

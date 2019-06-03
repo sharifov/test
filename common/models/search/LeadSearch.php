@@ -113,7 +113,7 @@ class LeadSearch extends Lead
      */
     public function search($params)
     {
-        $query = Lead::find();
+        $query = Lead::find()->with('project', 'source', 'employee', 'client');
         $query->select(['*', 'l_client_time' => new Expression("TIME( CONVERT_TZ(NOW(), '+00:00', offset_gmt) )")]);
 
         // add conditions that should always apply here
@@ -489,7 +489,7 @@ class LeadSearch extends Lead
     public function searchSold($params)
     {
         $projectIds = array_keys(ProjectEmployeeAccess::getProjectsByEmployee());
-        $query = Lead::find();
+        $query = Lead::find()->with('project', 'source');
 
         $this->load($params);
 
@@ -709,7 +709,7 @@ class LeadSearch extends Lead
     public function searchBooked($params)
     {
         $projectIds = array_keys(ProjectEmployeeAccess::getProjectsByEmployee());
-        $query = Lead::find();
+        $query = Lead::find()->with('project');
         $query->select(['*', 'l_client_time' => new Expression("TIME( CONVERT_TZ(NOW(), '+00:00', offset_gmt) )")]);
         $leadTable = Lead::tableName();
 
@@ -825,7 +825,7 @@ class LeadSearch extends Lead
     public function searchProcessing($params)
     {
         $projectIds = array_keys(ProjectEmployeeAccess::getProjectsByEmployee());
-        $query = Lead::find();
+        $query = Lead::find()->with('project');
         $query->select(['*', 'l_client_time' => new Expression("TIME( CONVERT_TZ(NOW(), '+00:00', offset_gmt) )")]);
 
         $leadTable = Lead::tableName();
@@ -909,7 +909,7 @@ class LeadSearch extends Lead
     public function searchFollowUp($params)
     {
         $projectIds = array_keys(ProjectEmployeeAccess::getProjectsByEmployee());
-        $query = Lead::find();
+        $query = Lead::find()->with('project');
         $query->select(['*', 'l_client_time' => new Expression("TIME( CONVERT_TZ(NOW(), '+00:00', offset_gmt) )")]);
 
         $leadTable = Lead::tableName();
@@ -1058,7 +1058,7 @@ class LeadSearch extends Lead
     public function searchTrash($params)
     {
         $projectIds = array_keys(ProjectEmployeeAccess::getProjectsByEmployee());
-        $query = Lead::find();
+        $query = Lead::find()->with('project', 'leadFlightSegments');
         $query->select(['*', 'l_client_time' => new Expression("TIME( CONVERT_TZ(NOW(), '+00:00', offset_gmt) )")]);
         $leadTable = Lead::tableName();
 

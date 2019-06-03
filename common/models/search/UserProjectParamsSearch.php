@@ -43,7 +43,7 @@ class UserProjectParamsSearch extends UserProjectParams
      */
     public function search($params)
     {
-        $query = UserProjectParams::find();
+        $query = UserProjectParams::find()->with('uppUpdatedUser', 'uppUser', 'uppProject');
 
         // add conditions that should always apply here
 

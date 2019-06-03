@@ -47,7 +47,7 @@ class EmailSearch extends Email
      */
     public function search($params)
     {
-        $query = Email::find();
+        $query = Email::find()->with('eCreatedUser', 'eProject', 'eTemplateType');
 
         // add conditions that should always apply here
 
