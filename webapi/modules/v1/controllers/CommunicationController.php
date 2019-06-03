@@ -578,9 +578,10 @@ class CommunicationController extends ApiBaseController
     /**
      * @param string $agent_phone_number
      * @param string $client_phone_number
+     * @param int $limit
      * @return array
      */
-    protected function getDirectAgentsByPhoneNumber(string $agent_phone_number, string $client_phone_number): array
+    protected function getDirectAgentsByPhoneNumber(string $agent_phone_number, string $client_phone_number, int $limit = 10): array
     {
         $call_employee = [];
         $call_agent_username = [];
@@ -633,7 +634,7 @@ class CommunicationController extends ApiBaseController
                     if ($upp) {
                         $employeeModel = Employee::findOne(['id' => $userForCall['tbl_user_id']]);
                         if ($employeeModel && $employeeModel->userProfile && (int)$employeeModel->userProfile->up_call_type_id === UserProfile::CALL_TYPE_WEB) {
-                            if($cntCallAgents > 10) {
+                            if($cntCallAgents > $limit) {
                                 break;
                             }
                             $call_employee[] = $employeeModel;
@@ -703,8 +704,19 @@ class CommunicationController extends ApiBaseController
         if($type === self::TYPE_VOIP_INCOMING  || $type === self::TYPE_VOIP_GATHER) {
 
             //$response = $this->incomingCallOld($post, $response);
+
+            $settings = \Yii::$app->params['settings'];
+            $general_line_call_distribution = \Yii::$app->params['general_line_call_distribution'];
+            // config for new_general line distribution. SL-370
+            $use_new_general_line_distribution = $settings['use_general_line_distribution'] ?? $general_line_call_distribution['use_general_line_distribution'];
+            $general_line_leads_limit = $settings['general_line_leads_limit'] ?? $general_line_call_distribution['general_line_leads_limit'];
+            $general_line_role_priority = $settings['general_line_role_priority'] ?? $general_line_call_distribution['general_line_role_priority'];
+            $general_line_last_hours = $settings['general_line_last_hours'] ?? $general_line_call_distribution['general_line_last_hours'];
+            $general_line_user_limit = $settings['general_line_user_limit'] ?? $general_line_call_distribution['general_line_user_limit'];
+
             $callSession = null;
             $isError = false;
+            $clientPhone = null;
             $generalLineNumber = \Yii::$app->params['global_phone'];
             $voice_gather_configs = \Yii::$app->params['voice_gather'];
             $use_voice_gather = (bool)$voice_gather_configs['use_voice_gather'];
@@ -749,6 +761,8 @@ class CommunicationController extends ApiBaseController
                 $call_agent_username = [];
                 $call_employee = [];
 
+                $clientPhone = ClientPhone::find()->where(['phone' => $client_phone_number])->orderBy(['id' => SORT_DESC])->limit(1)->one();
+
                 $source = Source::findOne(['phone_number' => $agent_phone_number]);
                 $agentDirectCallCheck = false;
                 if(!$source) {
@@ -783,8 +797,108 @@ class CommunicationController extends ApiBaseController
                     $project_employee_access = ProjectEmployeeAccess::find()->where(['project_id' => $project->id])->all();
                     //Yii::info(VarDumper::dumpAsString($project_employee_access), 'info\API:CommunicationController:actionVoice:$project_employee_access');
                     $callAgents = [];
+                    $agents_ids = [];
+                    if($use_new_general_line_distribution && $clientPhone && $clientPhone->client && $clientPhone->client->id) {
+                        $clientIds = [];
 
-                    if ($project_employee_access) {
+                        $log_data = [
+                            'find_online_agents' => 'no data',
+                            'project_id' => $call_project_id,
+                            'called_phone' => $agent_phone_number,
+                            'client_phone' => $client_phone_number,
+                            'client_ids' => (count($clientIds)) ? implode(',', $clientIds) : '',
+                            'agents_ids' => (count($agents_ids)) ? implode(',', $agents_ids) : '',
+                        ];
+
+                        try {
+                            // FIRST STEP TO DETECT AGENTS FOR CALL.  SL-370
+                            $clientIdsQuery = ClientPhone::findBySql("SELECT GROUP_CONCAT(client_id) AS client_ids FROM ".ClientPhone::tableName()."  WHERE phone = '{$client_phone_number}' ")
+                                ->asArray()->one();
+                            if (isset($clientIdsQuery['client_ids']) && $clientIdsQuery['client_ids']) {
+                                $clientIds = explode(',', $clientIdsQuery['client_ids']);
+                            }
+
+                            $latest_client_leads = Lead::find()
+                                ->select(['DISTINCT(employee_id)', 'updated'])
+                                ->where(['IN', 'client_id', $clientIds])
+                                ->andWhere(['project_id' => $call_project_id])
+                                ->andWhere([ '<>',  'status', Lead::STATUS_TRASH])
+                                ->orderBy(['updated' => SORT_DESC])
+                                ->limit( $general_line_leads_limit )->all();
+
+                            if($latest_client_leads) {
+                                foreach ($latest_client_leads AS $client_lead) {
+                                    if($client_lead->employee && $client_lead->employee->userProfile->up_call_type_id === UserProfile::CALL_TYPE_WEB) {
+                                        if($client_lead->employee->isOnline() && $client_lead->employee->isCallStatusReady() && $client_lead->employee->isCallFree()) {
+                                            $callAgents[] = $client_lead->employee;
+                                            $agents_ids[] = $client_lead->employee->id . ' ('. $client_lead->employee->username.')' . print_r($client_lead->employee->getRolesRaw(), true);
+                                        }
+                                    }
+                                }
+                            }
+
+                            // SECOND STEP TO DETECT AGENTS FOR CALL.  SL-370
+                            if(!count($callAgents) && $project_employee_access) {
+                                $only_agents = [];
+                                $only_supervisors = [];
+
+                                $agents_for_call = Employee::getAgentsForGeneralLineCall($call_project_id, $agent_phone_number, $general_line_last_hours);
+                                if($agents_for_call) {
+                                    foreach ($agents_for_call AS $agentForCall) {
+                                        $agentId = (int)$agentForCall['tbl_user_id'];
+                                        $agentObject = Employee::findOne($agentId);
+                                        if(!$agentObject) {
+                                            continue;
+                                        }
+                                        if( $agentObject->userProfile && $agentObject->userProfile->up_call_type_id !== UserProfile::CALL_TYPE_WEB ) {
+                                            continue;
+                                        }
+                                        $agents_ids[] = $agentObject->id . ' : '. $agentObject->username . ' - '. print_r($agentObject->getRolesRaw(), true);
+                                        $roles = $agentObject->getRolesRaw();
+                                        if(array_key_exists('agent', $roles)) {
+                                                $only_agents[] = $agentObject;
+                                        }
+                                        if(array_key_exists('supervision',$roles)) {
+                                                $only_supervisors[] = $agentObject;
+                                        }
+                                        if((int)$general_line_role_priority > 0) {
+                                            $callAgents = $only_agents;
+                                            if(!count($callAgents) && count($only_supervisors)) {
+                                                $callAgents = $only_supervisors;
+                                            }
+                                        } else {
+                                            $callAgents = array_merge($only_agents, $only_supervisors);
+                                        }
+                                    }
+                                }
+
+                                $log_data = [
+                                    'find_online_agents' => 'no',
+                                    'project_id' => $call_project_id,
+                                    'called_phone' => $agent_phone_number,
+                                    'client_phone' => $client_phone_number,
+                                    'client_ids' => (count($clientIds)) ? implode(',', $clientIds) : '',
+                                    'agents_ids' => (count($agents_ids)) ? implode(',', $agents_ids) : '',
+                                ];
+
+                            } else {
+                                $log_data = [
+                                    'find_online_agents' => 'yes',
+                                    'project_id' => $call_project_id,
+                                    'called_phone' => $agent_phone_number,
+                                    'client_phone' => $client_phone_number,
+                                    'client_ids' => (count($clientIds)) ? implode(',', $clientIds) : '',
+                                    'agents_ids' => (count($agents_ids)) ? implode(',', $agents_ids) : '',
+                                ];
+                            }
+                            \Yii::info(VarDumper::dumpAsString($log_data, 10, false), 'info\API:CommunicationController:actionVoice:new_general_line_distribution');
+                        } catch (\Throwable $ee) {
+                            \Yii::error(VarDumper::dumpAsString(['log_data' => $log_data, 'errors' => $ee]), 'info\API:CommunicationController:actionVoice:new_general_line_distribution_error');
+                            $callAgents = [];
+                        }
+                    }
+
+                    if (!$use_new_general_line_distribution && $project_employee_access && !count($callAgents)) {
                         foreach ($project_employee_access AS $projectEmployer) {
                             $projectUser = $projectEmployer->employee; //Employee::findOne($projectEmployer->employee_id);
                             if($projectUser && $projectUser->userProfile && $projectUser->userProfile->up_call_type_id === UserProfile::CALL_TYPE_WEB) {
@@ -800,7 +914,10 @@ class CommunicationController extends ApiBaseController
                             if ($user->isOnline()) {
                                 if ($user->isCallStatusReady()) {
                                     if ($user->isCallFree()) {
-                                        if($cntCallAgents > 10) {
+                                        if(in_array('seller' . $user->id, $call_agent_username)) {
+                                            continue;
+                                        }
+                                        if($cntCallAgents > $general_line_user_limit) {
                                             break;
                                         }
                                         //Yii::info('DIRECT - User (' . $user->username . ') Id: ' . $user->id . ', phone: ' . $agent_phone_number, 'info\API:CommunicationController:actionVoice:Direct - 2');
@@ -842,7 +959,7 @@ class CommunicationController extends ApiBaseController
 
                 } elseif ($agentDirectCallCheck) {
 
-                    $agentRes = $this->getDirectAgentsByPhoneNumber($agent_phone_number, $client_phone_number);
+                    $agentRes = $this->getDirectAgentsByPhoneNumber($agent_phone_number, $client_phone_number, $general_line_user_limit);
                     if($agentRes && isset($agentRes['call_employee'], $agentRes['call_agent_username']) && $agentRes['call_employee']) {
                         $isOnHold = false;
                         $callGeneralNumber = false;
@@ -868,8 +985,6 @@ class CommunicationController extends ApiBaseController
                 } else {
                     $callGeneralNumber = true;
                 }
-
-
 
                 $clientPhone = ClientPhone::find()->where(['phone' => $client_phone_number])->orderBy(['id' => SORT_DESC])->limit(1)->one();
                 $lead = null;
