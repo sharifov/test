@@ -10,6 +10,7 @@ use common\models\Employee;
 use common\models\Lead;
 use common\models\Notifications;
 use common\models\Project;
+use common\models\Setting;
 use common\models\Sms;
 use common\models\User;
 use common\models\UserCallStatus;
