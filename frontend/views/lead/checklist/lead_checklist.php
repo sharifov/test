@@ -27,10 +27,12 @@ use yii\widgets\ActiveForm;
                 <?//=Html::a('<i class="fa fa-comment"></i>', ['lead/view', 'gid' => $lead->gid, 'act' => 'call-expert-message'], ['class' => ''])?>
                 <?//php if(!$lastModel || $lastModel->lce_status_id === LeadCallExpert::STATUS_DONE):?>
 
-                <?php if(Yii::$app->request->get('act') === 'add-checklist-form'): ?>
-                    <?/*=Html::a('<i class="fa fa-minus-circle success"></i> Refresh', ['lead/view', 'gid' => $lead->gid])*/?>
-                <?php else: ?>
-                    <?=Html::a('<i class="fa fa-plus-circle success"></i> Add', ['lead/view', 'gid' => $lead->gid, 'act' => 'add-checklist-form'], ['id' => 'btn-checklist-form2'])?>
+                <?php if($lead->status === \common\models\Lead::STATUS_PROCESSING && ($lead->employee_id === Yii::$app->user->id || Yii::$app->user->identity->canRoles(['admin']))): ?>
+                    <?php if(Yii::$app->request->get('act') === 'add-checklist-form'): ?>
+                        <?/*=Html::a('<i class="fa fa-minus-circle success"></i> Refresh', ['lead/view', 'gid' => $lead->gid])*/?>
+                    <?php else: ?>
+                        <?=Html::a('<i class="fa fa-plus-circle success"></i> Add', ['lead/view', 'gid' => $lead->gid, 'act' => 'add-checklist-form'], ['id' => 'btn-checklist-form2'])?>
+                    <?php endif; ?>
                 <?php endif; ?>
 
                 <?//php endif; ?>
