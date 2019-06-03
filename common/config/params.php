@@ -44,7 +44,7 @@ return [
         'webhook_url'   => 'https://sales.api.travelinsides.com/v1/telegram/webhook'
     ],
     'voice_gather' => [
-        'use_voice_gather' => true,
+        'use_voice_gather' => false,
         'entry_phrase' => ' Hello, and thank you for calling {{project}}.',
         'entry_voice' => 'Polly.Joanna',
         'entry_language' => 'en-US',
@@ -70,5 +70,12 @@ return [
         ],
         'communication_voiceStatusCallbackUrl' => 'twilio/voice-status-callback',
         'communication_recordingStatusCallbackUrl' => 'twilio/recording-status-callback',
+    ],
+    'general_line_call_distribution' => [
+        'use_general_line_distribution' => 1,
+        'general_line_leads_limit' => 10,
+        'general_line_role_priority' => 1,
+        'general_line_last_hours' => 12,
+        'general_line_user_limit' => 10,
     ],
 ];
