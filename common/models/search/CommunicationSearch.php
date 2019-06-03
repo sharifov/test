@@ -101,7 +101,7 @@ class CommunicationSearch extends Model
 
         $query = (new \yii\db\Query())
             ->from(['union_table' => $query1->union($query2)]) //->union($query3)
-            ; //->orderBy(['created_dt' => SORT_DESC, 'id' => SORT_DESC]);
+        ; //->orderBy(['created_dt' => SORT_DESC, 'id' => SORT_DESC]);
 
         //$datetime_start = '2019-02-11';
         //$datetime_end = '2019-02-25';
@@ -193,10 +193,12 @@ class CommunicationSearch extends Model
 
         ]);
 
-
-        $query->andFilterWhere(['>=', 'DATE(created_dt)', $this->datetime_start])
-           ->andFilterWhere(['<=', 'DATE(created_dt)', $this->datetime_end]);
-
+        if(empty($this->created_dt)){
+            $query->andFilterWhere(['>=', 'DATE(created_dt)', $this->datetime_start])
+                ->andFilterWhere(['<=', 'DATE(created_dt)', $this->datetime_end]);
+        } else {
+            $query->andFilterWhere(['=','DATE(created_dt)', $this->created_dt]);
+        }
 
         if ($this->user_group_id > 0) {
             $subQuery = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->where(['=', 'ugs_group_id', $this->user_group_id]);
@@ -233,9 +235,9 @@ class CommunicationSearch extends Model
             }
         }
 */
-       // $query->andFilterWhere(['like', 'username', $this->username]);
-/*            ->andFilterWhere(['like', 'full_name', $this->full_name])
-            ->andFilterWhere(['like', 'email', $this->email]);*/
+        // $query->andFilterWhere(['like', 'username', $this->username]);
+        /*            ->andFilterWhere(['like', 'full_name', $this->full_name])
+                    ->andFilterWhere(['like', 'email', $this->email]);*/
 
 
         if ($this->supervision_id > 0) {
