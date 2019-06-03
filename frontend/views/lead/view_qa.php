@@ -100,6 +100,12 @@ if($is_admin || $is_supervision) {
         </div>
 
         <div class="col-md-12">
+            <?= $this->render('partial/_flightDetails', [
+                'leadForm' => $leadForm
+            ]);
+            ?>
+        </div>
+        <div class="col-md-12">
             <?php if (!$leadForm->getLead()->isNewRecord) : ?>
 
                 <?= $this->render('partial/_task_list', [

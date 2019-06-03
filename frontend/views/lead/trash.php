@@ -17,7 +17,11 @@ if (Yii::$app->user->identity->canRole('admin')) {
     $userList = \common\models\Employee::getList();
     $projectList = \common\models\Project::getList();
 } else {
-    $userList = \common\models\Employee::getListByUserId(Yii::$app->user->id);
+    if (Yii::$app->user->identity->canRole('qa')) {
+        $userList = \common\models\Employee::getListByRole('agent');
+    } else{
+        $userList = \common\models\Employee::getListByUserId(Yii::$app->user->id);
+    }
     $projectList = \common\models\ProjectEmployeeAccess::getProjectsByEmployee();
 }
 
