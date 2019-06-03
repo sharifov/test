@@ -893,8 +893,10 @@ class LeadSearch extends Lead
             $query->andWhere(['IN', 'leads.employee_id', $subQuery]);
         }
 
-        $query->with(['client', 'client.clientEmails', 'client.clientPhones', 'employee']);
+        $query->with(['client', 'client.clientEmails', 'client.clientPhones', 'employee', 'leadChecklists', 'leadChecklists.lcType']);
 
+
+        
 
         /*  $sqlRaw = $query->createCommand()->getRawSql();
          VarDumper::dump($sqlRaw, 10, true); exit; */
