@@ -167,7 +167,7 @@ if (Yii::$app->user->identity->canRoles(['admin', 'userManager', 'superadmin']))
 
                 </div>
 
-                <?php if(Yii::$app->user->identity->canRoles(['admin', 'supervision', 'userManager', 'superadmin'])): ?>
+                <?php if(Yii::$app->user->identity->canRoles(['admin', 'supervision', 'superadmin'])): ?>
 
                     <div class="row">
                         <div class="col-md-12">
