@@ -94,6 +94,7 @@ $isSuperAdmin = $user->canRole('superadmin');
                 ['label' => 'Duplicate Leads', 'url' => ['/leads/duplicate'], 'icon' => 'copy'],
                 ['label' => 'Stats Agents & Leads', 'url' => ['/report/agents'], 'icon' => 'users'],
                 ['label' => 'Lead Status History', 'url' => ['/lead-flow/index'], 'icon' => 'list'],
+                ['label' => 'Lead Check Lists', 'url' => ['/lead-checklist/index'], 'icon' => 'list'],
             ]
         ];
 
@@ -161,7 +162,6 @@ $isSuperAdmin = $user->canRole('superadmin');
                 ['label' => 'SMS template types', 'url' => ['/sms-template-type/index'], 'icon' => 'comments-o'],
                 ['label' => 'Project Settings', 'url' => ['/settings/projects'], 'icon' => 'product-hunt'],
                 ['label' => 'Check List Types', 'url' => ['/lead-checklist-type/index'], 'icon' => 'list'],
-                ['label' => 'Lead Check Lists', 'url' => ['/lead-checklist/index'], 'icon' => 'list'],
             ]
         ];
 

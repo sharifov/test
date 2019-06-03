@@ -3,6 +3,9 @@
 namespace common\models;
 
 use Yii;
+use yii\behaviors\BlameableBehavior;
+use yii\behaviors\TimestampBehavior;
+use yii\db\ActiveRecord;
 use yii\helpers\ArrayHelper;
 
 /**
@@ -61,6 +64,28 @@ class LeadChecklistType extends \yii\db\ActiveRecord
             'lct_sort_order' => 'Sort Order',
             'lct_updated_dt' => 'Updated Dt',
             'lct_updated_user_id' => 'Updated User',
+        ];
+    }
+
+    /**
+     * @return array
+     */
+    public function behaviors(): array
+    {
+        return [
+            'timestamp' => [
+                'class' => TimestampBehavior::class,
+                'attributes' => [
+                    ActiveRecord::EVENT_BEFORE_INSERT => ['lct_updated_dt'],
+                    ActiveRecord::EVENT_BEFORE_UPDATE => ['lct_updated_dt'],
+                ],
+                'value' => date('Y-m-d H:i:s') //new Expression('NOW()'),
+            ],
+            'user' => [
+                'class' => BlameableBehavior::class,
+                'createdByAttribute' => 'lct_updated_user_id',
+                'updatedByAttribute' => 'lct_updated_user_id',
+            ],
         ];
     }
 

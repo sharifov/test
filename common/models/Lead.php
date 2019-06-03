@@ -2589,7 +2589,7 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
 
         $command = $query->createCommand();
 
-        //echo $command->getRawSql(); exit;
+        echo $command->getRawSql(); exit;
 
         //VarDumper::dump($command->queryAll()); exit;
 

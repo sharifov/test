@@ -15,7 +15,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <h1><?= Html::encode($this->title) ?></h1>
 
     <p>
-        <?= Html::a('Create Lead Checklist Type', ['create'], ['class' => 'btn btn-success']) ?>
+        <?= Html::a('<i class="fa fa-plus"></i> Create Lead Checklist Type', ['create'], ['class' => 'btn btn-success']) ?>
     </p>
 
     <?php Pjax::begin(); ?>
@@ -24,6 +24,11 @@ $this->params['breadcrumbs'][] = $this->title;
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
+        'rowOptions' => function (\common\models\LeadChecklistType $model, $index, $widget, $grid) {
+            if (!$model->lct_enabled) {
+                return ['class' => 'danger'];
+            }
+        },
         'columns' => [
             //['class' => 'yii\grid\SerialColumn'],
 

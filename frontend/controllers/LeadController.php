@@ -998,10 +998,11 @@ class LeadController extends FController
             $modelLeadChecklist->lc_created_dt = date('Y-m-d H:i:s');
 
             if($modelLeadChecklist->save()) {
-                //
-                //Yii::info(VarDumper::dumpAsString($modelLeadCallExpert->attributes), 'info\LeadController:view:LeadCallExpert');
+                $modelLeadChecklist->lc_notes = null;
+            } else {
+                Yii::error('Lead id: '.$lead->id . ', ' . VarDumper::dumpAsString($modelLeadCallExpert->errors), 'Lead:view:LeadChecklist:save');
             }
-            //$modelLeadCallExpert =
+
             //return $this->redirect(['view', 'id' => $model->lce_id]);
         }
 

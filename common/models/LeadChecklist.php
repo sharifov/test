@@ -3,6 +3,9 @@
 namespace common\models;
 
 use Yii;
+use yii\behaviors\BlameableBehavior;
+use yii\behaviors\TimestampBehavior;
+use yii\db\ActiveRecord;
 
 /**
  * This is the model class for table "lead_checklist".
@@ -50,11 +53,34 @@ class LeadChecklist extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'lc_type_id' => 'Type ID',
-            'lc_lead_id' => 'Lead ID',
-            'lc_user_id' => 'User ID',
+            'lc_type_id' => 'Type',
+            'lc_lead_id' => 'Lead',
+            'lc_user_id' => 'User',
             'lc_notes' => 'Notes',
             'lc_created_dt' => 'Created Dt',
+        ];
+    }
+
+
+    /**
+     * @return array
+     */
+    public function behaviors(): array
+    {
+        return [
+            'timestamp' => [
+                'class' => TimestampBehavior::class,
+                'attributes' => [
+                    ActiveRecord::EVENT_BEFORE_INSERT => ['lc_created_dt'],
+                    ActiveRecord::EVENT_BEFORE_UPDATE => ['lc_created_dt'],
+                ],
+                'value' => date('Y-m-d H:i:s') //new Expression('NOW()'),
+            ],
+            'user' => [
+                'class' => BlameableBehavior::class,
+                'createdByAttribute' => 'lc_user_id',
+                'updatedByAttribute' => 'lc_user_id',
+            ],
         ];
     }
 

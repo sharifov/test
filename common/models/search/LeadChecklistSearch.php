@@ -46,6 +46,10 @@ class LeadChecklistSearch extends LeadChecklist
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+            'sort'=> ['defaultOrder' => ['lc_created_dt' => SORT_DESC]],
+            'pagination' => [
+                'pageSize' => 30,
+            ],
         ]);
 
         $this->load($params);
@@ -85,6 +89,10 @@ class LeadChecklistSearch extends LeadChecklist
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+            'sort'=> ['defaultOrder' => ['lc_created_dt' => SORT_ASC]],
+            'pagination' => [
+                'pageSize' => 30,
+            ],
         ]);
 
         $this->load($params);
