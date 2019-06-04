@@ -215,22 +215,23 @@ if (Yii::$app->user->identity->canRoles(['admin', 'userManager', 'superadmin']))
                         </div>
                     </div>
 
-
-                    <hr>
-                    <div class="row">
-                        <div class="col-md-3">
-                            <?= $form->field($modelUserParams, 'up_inbox_show_limit_leads')->input('number', ['step' => 1, 'min' => 0, 'max' => 500]) ?>
+                    <?php if(!Yii::$app->user->identity->canRole('supervision')): ?>
+                        <hr>
+                        <div class="row">
+                            <div class="col-md-3">
+                                <?= $form->field($modelUserParams, 'up_inbox_show_limit_leads')->input('number', ['step' => 1, 'min' => 0, 'max' => 500]) ?>
+                            </div>
+                            <div class="col-md-3">
+                                <?= $form->field($modelUserParams, 'up_default_take_limit_leads')->input('number', ['step' => 1, 'max' => 100, 'min' => 0]) ?>
+                            </div>
+                            <div class="col-md-3">
+                                <?= $form->field($modelUserParams, 'up_min_percent_for_take_leads')->input('number', ['step' => 1, 'max' => 100, 'min' => 0]) ?>
+                            </div>
+                            <div class="col-md-3">
+                                <?= $form->field($modelUserParams, 'up_frequency_minutes')->input('number', ['step' => 1, 'max' => 1000, 'min' => 0]) ?>
+                            </div>
                         </div>
-                        <div class="col-md-3">
-                            <?= $form->field($modelUserParams, 'up_default_take_limit_leads')->input('number', ['step' => 1, 'max' => 100, 'min' => 0]) ?>
-                        </div>
-                        <div class="col-md-3">
-                            <?= $form->field($modelUserParams, 'up_min_percent_for_take_leads')->input('number', ['step' => 1, 'max' => 100, 'min' => 0]) ?>
-                        </div>
-                        <div class="col-md-3">
-                            <?= $form->field($modelUserParams, 'up_frequency_minutes')->input('number', ['step' => 1, 'max' => 1000, 'min' => 0]) ?>
-                        </div>
-                    </div>
+                    <?php endif; ?>
 
                 <?php endif; ?>
 
