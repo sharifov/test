@@ -47,6 +47,10 @@ class EmailController extends FController
         if(Yii::$app->user->identity->canRole('supervision')) {
             $params['EmailSearch']['supervision_id'] = Yii::$app->user->id;
         }
+
+        $searchModel->datetime_start = date('Y-m-d', strtotime('-0 day'));
+        $searchModel->datetime_end = date('Y-m-d');
+
         $dataProvider = $searchModel->search($params);
 
         return $this->render('index', [

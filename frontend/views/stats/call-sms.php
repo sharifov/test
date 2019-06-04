@@ -1,5 +1,6 @@
 <?php
 
+use dosamigos\datepicker\DatePicker;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
@@ -187,24 +188,27 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$
                             //'filter' => Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) ? \common\models\UserGroup::getList() : Yii::$app->user->identity->getUserGroupList()
                         ],
 
-
                         [
                             'label' => 'Created Date',
                             'attribute' => 'created_dt',
                             'value' => function ($model) {
-                                return $model['created_dt'] ? '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model['created_dt']), 'php:Y-m-d [H:i:s]') : '-';
+                                return $model['created_dt'] ? '<i class="fa fa-calendar"></i> '.date('Y-m-d [H:i:s]', strtotime($model['created_dt'])) : '-';
                             },
                             'format' => 'raw',
-                            //'filter' => Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) ? \common\models\UserGroup::getList() : Yii::$app->user->identity->getUserGroupList()
+                            'filter' => DatePicker::widget([
+                                'model' => $searchModel,
+                                'attribute' => 'created_dt',
+                                'clientOptions' => [
+                                    'autoclose' => true,
+                                    'format' => 'yyyy-mm-dd'
+                                ]
+                            ]),
                         ],
 
                         [
                             'label' => 'Agent Phone',
                             'value' => function ($model) {
-
                                 $phone = '-';
-
-
                                 if($model['communication_type_id'] == \common\models\search\CommunicationSearch::COMM_TYPE_VOICE) {
 
                                     $call = \common\models\Call::findOne($model['id']);

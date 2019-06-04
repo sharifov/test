@@ -1836,6 +1836,9 @@ class LeadController extends FController
             $params['LeadSearch']['supervision_id'] = Yii::$app->user->id;
         }
 
+        $searchModel->datetime_start = date('Y-m-d', strtotime('-0 day'));
+        $searchModel->datetime_end = date('Y-m-d');
+
         $dataProvider = $searchModel->searchTrash($params);
 
         return $this->render('trash', [
