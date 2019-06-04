@@ -109,7 +109,7 @@ use yii\widgets\ActiveForm;
         $currentCheckList = $dataProvider->getModels();
 
         foreach ($currentCheckList as $currentCheck) {
-            if(isset($checkListTypes[$currentCheck->lc_type_id])) {
+            if($currentCheck->lc_user_id === Yii::$app->user->id && isset($checkListTypes[$currentCheck->lc_type_id])) {
                 unset($checkListTypes[$currentCheck->lc_type_id]);
             }
         }
