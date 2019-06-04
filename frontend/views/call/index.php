@@ -1,7 +1,9 @@
 <?php
 
+use dosamigos\datepicker\DatePicker;
 use yii\helpers\Html;
 use yii\grid\GridView;
+use yii\widgets\ActiveForm;
 use yii\widgets\Pjax;
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\CallSearch */
@@ -20,10 +22,47 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$
 
 ?>
 <div class="call-index">
-
     <h1><i class="fa fa-phone"></i> <?= Html::encode($this->title) ?></h1>
     <?php Pjax::begin(); ?>
     <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
+
+    <div class="row">
+        <?php $form = ActiveForm::begin([
+            'action' => ['index'],
+            'method' => 'get',
+            'options' => [
+                'data-pjax' => 1
+            ],
+        ]); ?>
+
+        <div class="col-md-3">
+            <?php
+            echo  \kartik\daterange\DateRangePicker::widget([
+                'model'=> $searchModel,
+                'attribute' => 'date_range',
+                'useWithAddon'=>true,
+                'presetDropdown'=>true,
+                'hideInput'=>true,
+                'convertFormat'=>true,
+                'startAttribute' => 'datetime_start',
+                'endAttribute' => 'datetime_end',
+                'pluginOptions'=>[
+                    'timePicker'=> false,
+                    'timePickerIncrement'=>15,
+                    'locale'=>[
+                        'format'=>'Y-m-d',
+                        'separator' => ' - '
+                    ]
+                ]
+            ]);
+            ?>
+        </div>
+
+        <div class="form-group">
+            <?= Html::submitButton('<i class="fa fa-search"></i> Show result', ['class' => 'btn btn-success']) ?>
+        </div>
+        <?php ActiveForm::end(); ?>
+    </div>
 
     <p>
         <?/*= Html::a('Create Call', ['create'], ['class' => 'btn btn-success'])*/ ?>
@@ -40,7 +79,7 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$
                 } elseif ($model->c_call_status === \common\models\Call::CALL_STATUS_RINGING || $model->c_call_status === \common\models\Call::CALL_STATUS_QUEUE) {
                     return ['class' => 'warning'];
                 } elseif ($model->c_call_status === \common\models\Call::CALL_STATUS_COMPLETED) {
-                   // return ['class' => 'success'];
+                    // return ['class' => 'success'];
                 }
             }
         },
@@ -80,9 +119,20 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$
             [
                 'attribute' => 'c_created_dt',
                 'value' => function (\common\models\Call $model) {
-                    return $model->c_created_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->c_created_dt)) : '-';
+                    return $model->c_created_dt ? '<i class="fa fa-calendar"></i> ' . date('d-M-Y [H:i]', strtotime($model->c_created_dt))  : '-';  //Yii::$app->formatter->asDatetime(strtotime($model->c_created_dt))
                 },
-                'format' => 'raw'
+                'format' => 'raw',
+                'filter' => DatePicker::widget([
+                    'model' => $searchModel,
+                    'attribute' => 'c_created_dt',
+                    'clientOptions' => [
+                        'autoclose' => true,
+                        'format' => 'yyyy-mm-dd',
+                    ],
+                    'options' => [
+                        'autocomplete' => 'off'
+                    ],
+                ]),
             ],
 
             [

@@ -56,6 +56,10 @@ class LeadSearch extends Lead
     public $origin_country;
     public $destination_country;
 
+    public $datetime_start;
+    public $datetime_end;
+    public $date_range;
+
 
     /**
      * {@inheritdoc}
@@ -63,6 +67,8 @@ class LeadSearch extends Lead
     public function rules()
     {
         return [
+            [['datetime_start', 'datetime_end'], 'safe'],
+            [['date_range'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
             [['id', 'client_id', 'employee_id', 'status', 'project_id', 'adults', 'children', 'infants', 'rating', 'called_expert', 'cnt', 'l_grade', 'l_answered', 'supervision_id', 'limit', 'bo_flight_id', 'l_duplicate_lead_id'], 'integer'],
             [['email_status', 'quote_status'], 'integer'],
 
@@ -1030,11 +1036,8 @@ class LeadSearch extends Lead
             $leadTable.'.status' => $this->status,
         ]);
 
-        $query
-        ->andWhere(['IN','leads.status', [self::STATUS_PENDING]])
-        ->andWhere(['IN', $leadTable . '.project_id', $projectIds])
-        ;
-
+        $query->andWhere(['IN','leads.status', [self::STATUS_PENDING]])
+        ->andWhere(['IN', $leadTable . '.project_id', $projectIds]);
 
         if($this->limit > 0) {
             $query->limit($this->limit);
@@ -1043,13 +1046,8 @@ class LeadSearch extends Lead
 
         $query->with(['client', 'client.clientEmails', 'client.clientPhones']);
 
-
-
-
-
         return $dataProvider;
     }
-
 
     /**
      * @param $params
@@ -1080,6 +1078,13 @@ class LeadSearch extends Lead
             return $dataProvider;
         }
 
+        if(empty($this->created) && isset($params['LeadSearch']['date_range'])){
+            $query->andFilterWhere(['>=', 'DATE(created)', $this->datetime_start])
+                ->andFilterWhere(['<=', 'DATE(created)', $this->datetime_end]);
+        } elseif (isset($params['LeadSearch']['created'])) {
+            $query->andFilterWhere(['=','DATE(created)', $this->created]);
+        }
+
         // grid filtering conditions
         $query->andFilterWhere([
             $leadTable.'.id' => $this->id,
@@ -1096,8 +1101,7 @@ class LeadSearch extends Lead
 
         $query
         ->andWhere(['IN','leads.status', [self::STATUS_TRASH]])
-        ->andWhere(['IN', $leadTable . '.project_id', $projectIds])
-        ;
+        ->andWhere(['IN', $leadTable . '.project_id', $projectIds]);
 
         if($this->email_status > 0) {
             if($this->email_status == 2) {
@@ -1116,7 +1120,6 @@ class LeadSearch extends Lead
                 $query->andWhere(new Expression('('.$subQuery->createCommand()->getRawSql().') = 0'));
             }
         }
-
 
         if($this->supervision_id > 0) {
             $subQuery1 = UserGroupAssign::find()->select(['ugs_group_id'])->where(['ugs_user_id' => $this->supervision_id]);
