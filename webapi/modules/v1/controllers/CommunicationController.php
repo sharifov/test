@@ -799,7 +799,7 @@ class CommunicationController extends ApiBaseController
                     //Yii::info(VarDumper::dumpAsString($project_employee_access), 'info\API:CommunicationController:actionVoice:$project_employee_access');
                     $callAgents = [];
                     $agents_ids = [];
-                    if($use_new_general_line_distribution && $clientPhone && $clientPhone->client && $clientPhone->client->id) {
+                    if($use_new_general_line_distribution) {
                         $clientIds = [];
 
                         $log_data = [
@@ -813,26 +813,28 @@ class CommunicationController extends ApiBaseController
 
                         try {
                             // FIRST STEP TO DETECT AGENTS FOR CALL.  SL-370
-                            $clientIdsQuery = ClientPhone::findBySql("SELECT GROUP_CONCAT(client_id) AS client_ids FROM ".ClientPhone::tableName()."  WHERE phone = '{$client_phone_number}' ")
-                                ->asArray()->one();
-                            if (isset($clientIdsQuery['client_ids']) && $clientIdsQuery['client_ids']) {
-                                $clientIds = explode(',', $clientIdsQuery['client_ids']);
-                            }
+                            if($clientPhone && $clientPhone->client && $clientPhone->client->id) {
+                                $clientIdsQuery = ClientPhone::findBySql("SELECT GROUP_CONCAT(client_id) AS client_ids FROM " . ClientPhone::tableName() . "  WHERE phone = '{$client_phone_number}' ")
+                                    ->asArray()->one();
+                                if (isset($clientIdsQuery['client_ids']) && $clientIdsQuery['client_ids']) {
+                                    $clientIds = explode(',', $clientIdsQuery['client_ids']);
+                                }
 
-                            $latest_client_leads = Lead::find()
-                                ->select(['DISTINCT(employee_id)', 'updated'])
-                                ->where(['IN', 'client_id', $clientIds])
-                                ->andWhere(['project_id' => $call_project_id])
-                                ->andWhere([ '<>',  'status', Lead::STATUS_TRASH])
-                                ->orderBy(['updated' => SORT_DESC])
-                                ->limit( $general_line_leads_limit )->all();
+                                $latest_client_leads = Lead::find()
+                                    ->select(['DISTINCT(employee_id)', 'updated'])
+                                    ->where(['IN', 'client_id', $clientIds])
+                                    ->andWhere(['project_id' => $call_project_id])
+                                    ->andWhere(['<>', 'status', Lead::STATUS_TRASH])
+                                    ->orderBy(['updated' => SORT_DESC])
+                                    ->limit($general_line_leads_limit)->all();
 
-                            if($latest_client_leads) {
-                                foreach ($latest_client_leads AS $client_lead) {
-                                    if($client_lead->employee && $client_lead->employee->userProfile->up_call_type_id === UserProfile::CALL_TYPE_WEB) {
-                                        if($client_lead->employee->isOnline() && $client_lead->employee->isCallStatusReady() && $client_lead->employee->isCallFree()) {
-                                            $callAgents[] = $client_lead->employee;
-                                            $agents_ids[] = $client_lead->employee->id . ' ('. $client_lead->employee->username.')' . print_r($client_lead->employee->getRolesRaw(), true);
+                                if ($latest_client_leads) {
+                                    foreach ($latest_client_leads AS $client_lead) {
+                                        if ($client_lead->employee && $client_lead->employee->userProfile->up_call_type_id === UserProfile::CALL_TYPE_WEB) {
+                                            if ($client_lead->employee->isOnline() && $client_lead->employee->isCallStatusReady() && $client_lead->employee->isCallFree()) {
+                                                $callAgents[] = $client_lead->employee;
+                                                $agents_ids[] = $client_lead->employee->id . ' (' . $client_lead->employee->username . ')' . print_r($client_lead->employee->getRolesRaw(), true);
+                                            }
                                         }
                                     }
                                 }
@@ -899,7 +901,7 @@ class CommunicationController extends ApiBaseController
                         }
                     }
 
-                    if (!$use_new_general_line_distribution && $project_employee_access && !count($callAgents)) {
+                    if ($project_employee_access && !count($callAgents)) {
                         foreach ($project_employee_access AS $projectEmployer) {
                             $projectUser = $projectEmployer->employee; //Employee::findOne($projectEmployer->employee_id);
                             if($projectUser && $projectUser->userProfile && $projectUser->userProfile->up_call_type_id === UserProfile::CALL_TYPE_WEB) {
