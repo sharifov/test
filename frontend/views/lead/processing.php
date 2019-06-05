@@ -301,7 +301,7 @@ $this->params['breadcrumbs'][] = $this->title;
         [
             'header' => 'Checklist',
             'value' => function (\common\models\Lead $model) {
-                return '<small style="font-size: 10px">' . $model->getChecklistInfo() . '</small>';
+                return '<small style="font-size: 10px">' . $model->getChecklistInfo($model->employee_id) . '</small>';
             },
             'format' => 'raw',
             'contentOptions' => [

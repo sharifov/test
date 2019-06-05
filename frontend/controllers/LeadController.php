@@ -1010,6 +1010,9 @@ class LeadController extends FController
         $searchModelLeadChecklist= new LeadChecklistSearch();
         $params = Yii::$app->request->queryParams;
         $params['LeadChecklistSearch']['lc_lead_id'] = $lead->id;
+        if ($is_agent) {
+            $params['LeadChecklistSearch']['lc_user_id'] = Yii::$app->user->id;
+        }
         $dataProviderChecklist = $searchModelLeadChecklist->searchByLead($params);
 
 

@@ -2537,15 +2537,20 @@ New lead {lead_id}
         return implode('<br> ', $item);
     }
 
+
     /**
+     * @param null $user_id
      * @return string
      */
-    public function getCheckListInfo(): string
+    public function getCheckListInfo($user_id = null): string
     {
         $checkList = $this->leadChecklists;
         $item = [];
         if ($checkList) {
             foreach ($checkList as $task) {
+                if ($user_id && $user_id !== $task->lc_user_id) {
+                    continue;
+                }
                 $item[] = $task->lcType->lct_name;
             }
         }
