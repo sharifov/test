@@ -9,6 +9,9 @@
  * @var $dataProviderCallExpert \yii\data\ActiveDataProvider
  * @var $enableCommunication boolean
  * @var $modelLeadCallExpert \common\models\LeadCallExpert
+ *
+ * @var $modelLeadChecklist \common\models\LeadChecklist
+ * @var $dataProviderChecklist \yii\data\ActiveDataProvider
  */
 
 use yii\bootstrap\Html;
@@ -107,6 +110,15 @@ if($is_admin || $is_supervision) {
         </div>
         <div class="col-md-12">
             <?php if (!$leadForm->getLead()->isNewRecord) : ?>
+
+                <?= $this->render('checklist/lead_checklist', [
+                    'lead' => $leadForm->getLead(),
+                    'comForm'       => $comForm,
+                    'leadId'        => $lead->id,
+                    'dataProvider'  => $dataProviderChecklist,
+                    'isAdmin'       => $is_admin,
+                    'modelLeadChecklist'       => $modelLeadChecklist,
+                ]) ?>
 
                 <?= $this->render('partial/_task_list', [
                     'lead' => $leadForm->getLead()

@@ -108,7 +108,7 @@ use yii\widgets\ActiveForm;
                 <?php foreach ($checkListTypes as $n => $checkListType):?>
                     <tr>
                         <td style="width: 40px">
-                            
+
                         </td>
                         <td>
                             <span class="fa fa-square-o warning"></span>
