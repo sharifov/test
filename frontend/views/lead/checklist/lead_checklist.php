@@ -91,6 +91,35 @@ use yii\widgets\ActiveForm;
                 ]) ?>
 
 
+        <?php
+            $checkListTypes = \common\models\LeadChecklistType::getList(true);
+
+            $currentCheckList = $dataProvider->getModels();
+
+            foreach ($currentCheckList as $currentCheck) {
+                if($currentCheck->lc_user_id === Yii::$app->user->id && isset($checkListTypes[$currentCheck->lc_type_id])) {
+                    unset($checkListTypes[$currentCheck->lc_type_id]);
+                }
+            }
+        ?>
+
+        <?php if($checkListTypes):?>
+            <table class="table table-bordered">
+                <?php foreach ($checkListTypes as $n => $checkListType):?>
+                    <tr>
+                        <td style="width: 40px">
+                            
+                        </td>
+                        <td>
+                            <span class="fa fa-square-o warning"></span>
+                            <?=Html::encode($checkListType)?>
+                        </td>
+                    </tr>
+                <?php endforeach; ?>
+            </table>
+        <?php endif; ?>
+
+
         <?php if(Yii::$app->request->get('act') === 'add-checklist-form'): ?>
 
         <?php $form = ActiveForm::begin([
@@ -102,17 +131,7 @@ use yii\widgets\ActiveForm;
             ],
         ]);
 
-        echo $form->errorSummary($modelLeadChecklist);
-
-        $checkListTypes = \common\models\LeadChecklistType::getList(true);
-
-        $currentCheckList = $dataProvider->getModels();
-
-        foreach ($currentCheckList as $currentCheck) {
-            if($currentCheck->lc_user_id === Yii::$app->user->id && isset($checkListTypes[$currentCheck->lc_type_id])) {
-                unset($checkListTypes[$currentCheck->lc_type_id]);
-            }
-        }
+            echo $form->errorSummary($modelLeadChecklist);
 
         ?>
 
