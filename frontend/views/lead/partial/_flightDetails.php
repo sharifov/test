@@ -1,6 +1,6 @@
 <?php
 
-use yii\widgets\ActiveForm;
+use yii\bootstrap\ActiveForm;
 use frontend\models\LeadForm;
 use yii\helpers\Html;
 use common\models\LeadFlightSegment;
@@ -10,7 +10,7 @@ use \sales\helpers\lead\LeadHelper;
  * @var $this \yii\web\View
  * @var $form ActiveForm
  * @var $leadForm LeadForm
- * @var $itineraryForm \sales\forms\lead\ItineraryForm
+ * @var $itineraryForm \sales\forms\lead\ItineraryEditForm
  */
 
 
@@ -43,7 +43,7 @@ $itineraryFormId = $itineraryForm->formName() . '-form';
                     <div class="sl-request-summary__block">
                         <?php
                         $location = $departing = [];
-                        foreach ($itineraryForm->segmentform as $segment) {
+                        foreach ($itineraryForm->segmentEditForm as $segment) {
                             $location[] = $segment->origin . ' -> ' . $segment->destination;
                             $departing[] = Yii::$app->formatter->asDate(strtotime($segment->departure));
                         }
@@ -83,28 +83,39 @@ $itineraryFormId = $itineraryForm->formName() . '-form';
     <div class="panel-body collapse in" id="request-form-wrap" aria-expanded="true" style="">
         <div class="sl-itinerary-form">
             <?php $form = ActiveForm::begin([
+                'action' => ['/lead-itinerary/edit'],
                 'enableClientValidation' => false,
                 'enableAjaxValidation' => true,
-                'validationUrl' => ['/lead-validator/edit-itinerary'],
+                'validationUrl' => ['/lead-itinerary/validation'],
+                'validateOnChange' => true,
+                'validateOnSubmit'          => true,
                 'id' => $itineraryFormId
             ]); ?>
 
-            <?= Html::hiddenInput('id', $itineraryForm->leadId)?>
+            <?= Html::hiddenInput('id', $itineraryForm->leadId) ?>
 
+            <div class="sl-itinerary-form__tabs">
+                <div class="sl-itinerary-form__tab sl-itinerary-form__tab--rt js-tab" id="lead-segments">
+                    <?php
+//                    foreach ($itineraryForm->segmentEditForm as $key => $segment) {
+                    $itineraryForm->loadSegmentsForMultiInput();
+                    echo $this->render('_formLeadSegment', [
+                            //'segment' => $segment,
+                            'segment' => $itineraryForm,
+                            'form' => $form
+                        ]);
+//                    }
+                    ?>
+                </div>
 
-
-            <div class="btn-wrapper">
-                <?= Html::button('<span class="btn-icon"><i class="fa fa-plus"></i></span><span>Add Flight</span>', [
-                    'id' => 'lead-new-segment-button',
-                    'class' => 'btn btn-success btn-with-icon js-add-mc-row ',
-                ]) ?>
             </div>
+
 
             <!--Passengers-->
             <div class="row sl-itinerary-form__pax">
                 <div class="col-sm-3">
                     <?= $form->field($itineraryForm, 'cabin', [
-                    ])->dropDownList(LeadHelper::cabinList(), [
+                    ])->dropDownList([1,2], [
                         'prompt' => '---'
                     ]) ?>
                 </div>
@@ -114,26 +125,35 @@ $itineraryFormId = $itineraryForm->formName() . '-form';
                     <?= $form->field($itineraryForm, 'adults')->textInput([
                         'class' => 'form-control lead-form-input-element',
 //                        'type' => 'number',
-                        'min' => 0,
-                        'max' => 9,
+//                        'min' => 0,
+//                        'max' => 9,
                     ]) ?>
                 </div>
                 <div class="col-sm-2">
                     <?= $form->field($itineraryForm, 'children')->textInput([
                         'class' => 'form-control lead-form-input-element',
 //                        'type' => 'number',
-                        'min' => 0,
-                        'max' => 9,
+//                        'min' => 0,
+//                        'max' => 9,
                     ]) ?>
                 </div>
                 <div class="col-sm-2">
                     <?= $form->field($itineraryForm, 'infants')->textInput([
                         'class' => 'form-control lead-form-input-element',
 //                        'type' => 'number',
-                        'min' => 0,
-                        'max' => 9,
+//                        'min' => 0,
+//                        'max' => 9,
                     ]) ?>
                 </div>
+
+
+                <div class="btn-wrapper">
+                    <?= Html::submitButton('<span class="btn-icon"><i class="fa fa-plus"></i></span><span>Save</span>', [
+                        'id' => 'lead-new-segment-button',
+                        'class' => 'btn btn-success btn-with-icon js-add-mc-row ',
+                    ]) ?>
+                </div>
+
             </div>
             <?php ActiveForm::end(); ?>
         </div>

@@ -1,4 +1,5 @@
 <?php
+
 namespace common\models;
 
 
@@ -56,11 +57,21 @@ class Airport extends ActiveRecord
     {
         $data = [];
         $airports = self::find()->where(['iata' => $iata])->all();
-        foreach ($airports as $airport){
+        foreach ($airports as $airport) {
             $data[$airport['iata']] = ['name' => $airport['name'], 'city' => $airport['city'], 'country' => $airport['country']];
         }
 
         return $data;
+    }
+
+    public function getSelection(): string
+    {
+        return $this->city . ' (' . $this->iata . ')';
+    }
+
+    public function getText(): string
+    {
+        return '(' . $this->iata . ') ' . $this->name . ', ' . $this->city  . ', ' . $this->country;
     }
 
 }

@@ -12,8 +12,11 @@ class CompositeFormAjaxValidate
         $form->validate();
         $errors = $form->getFirstErrors();
         foreach ($errors as $attribute => $error) {
-            $errors[self::getInputId($attribute)] = $error;
-            unset($errors[$attribute]);
+            $formatAttribute = self::getInputId($attribute);
+            if ($formatAttribute !== $attribute) {
+                $errors[$formatAttribute] = $error;
+                unset($errors[$attribute]);
+            }
         }
         return $errors;
     }

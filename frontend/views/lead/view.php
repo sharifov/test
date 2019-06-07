@@ -9,7 +9,7 @@
  * @var $dataProviderCallExpert \yii\data\ActiveDataProvider
  * @var $enableCommunication boolean
  * @var $modelLeadCallExpert \common\models\LeadCallExpert
- * @var $itineraryForm \sales\forms\lead\ItineraryForm
+ * @var $itineraryForm \sales\forms\lead\ItineraryEditForm
  */
 
 use yii\bootstrap\Html;

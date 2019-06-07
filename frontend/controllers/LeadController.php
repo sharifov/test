@@ -27,7 +27,9 @@ use frontend\models\LeadForm;
 use frontend\models\LeadPreviewEmailForm;
 use frontend\models\LeadPreviewSmsForm;
 use frontend\models\SendEmailForm;
-use sales\forms\lead\ItineraryForm;
+use sales\forms\CompositeFormAjaxValidate;
+use sales\forms\lead\ItineraryEditForm;
+use sales\repositories\NotFoundException;
 use Yii;
 use yii\data\ActiveDataProvider;
 use yii\db\Expression;
@@ -39,6 +41,7 @@ use yii\web\BadRequestHttpException;
 use yii\web\Cookie;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
+use yii\web\Request;
 use yii\web\Response;
 use yii\web\UnauthorizedHttpException;
 use yii\widgets\ActiveForm;
@@ -108,20 +111,21 @@ class LeadController extends FController
 
 
 
-
-
-        $itineraryForm = new ItineraryForm($lead);
-//        VarDumper::dump($itineraryForm, 10 , true);
-        if ($itineraryForm->load(Yii::$app->request->post()) && $itineraryForm->validate()) {
-            try {
-
-            } catch (\DomainException $e) {
-            }
+        try {
+            $itineraryForm = new ItineraryEditForm($lead);
+        } catch (\DomainException $e) {
+            Yii::$app->errorHandler->logException($e);
+            Yii::$app->session->setFlash('error', $e->getMessage());
+            return $this->redirect(Yii::$app->request->referrer ?: Yii::$app->homeUrl);
         }
 
 
-
-
+//        if ($itineraryForm->load(Yii::$app->request->post()) && $itineraryForm->validate()) {
+//            try {
+//
+//            } catch (\DomainException $e) {
+//            }
+//        }
 
 
 

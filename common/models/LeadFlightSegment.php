@@ -79,6 +79,26 @@ class LeadFlightSegment extends \yii\db\ActiveRecord
         ];
     }
 
+    public static function create($leadId, $origin, $destination, $departure, $flexibility, $flexibilityType): self
+    {
+        $segment = new static();
+        $segment->lead_id = $leadId;
+        $segment->origin = $origin;
+        $segment->destination = $destination;
+        $segment->departure = $departure;
+        $segment->flexibility = $flexibility;
+        $segment->flexibility_type = $flexibilityType;
+        return $segment;
+    }
+
+    public function edit($origin, $destination, $departure, $flexibility, $flexibilityType): void
+    {
+        $this->origin = $origin;
+        $this->destination = $destination;
+        $this->departure = $departure;
+        $this->flexibility = $flexibility;
+        $this->flexibility_type = $flexibilityType;
+    }
 
     /**
      * @return array

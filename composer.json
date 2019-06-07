@@ -57,7 +57,8 @@
 		"twilio/sdk": "^5.31",
 		"2amigos/qrcode-library": "~1.1",
 		"aki/yii2-bot-telegram": "*",
-		"yii2mod/yii2-rbac": "*"
+		"yii2mod/yii2-rbac": "*",
+		"unclead/yii2-multiple-input": "~2.0"
 	},
 	"require-dev" : {
 		"yiisoft/yii2-debug" : "~2.0",
