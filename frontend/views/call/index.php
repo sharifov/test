@@ -108,6 +108,14 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$
                 ],
             ],
             [
+                'attribute' => 'c_project_id',
+                'value' => function (\common\models\Call $model) {
+                    return $model->cProject ? '<span class="badge badge-info">' . Html::encode($model->cProject->name) . '</span>' : '-';
+                },
+                'format' => 'raw',
+                'filter' => $projectList
+            ],
+            [
                 'attribute' => 'c_created_user_id',
                 'value' => function (\common\models\Call $model) {
                     return  $model->cCreatedUser ? '<i class="fa fa-user"></i> ' . Html::encode($model->cCreatedUser->username) : $model->c_created_user_id;
@@ -117,9 +125,18 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$
             ],
 
             [
+                'attribute' => 'c_call_status',
+                'value' => function (\common\models\Call $model) {
+                    return $model->getStatusLabel();
+                },
+                'format' => 'raw',
+                'filter' => \common\models\Call::CALL_STATUS_LIST
+            ],
+
+            [
                 'attribute' => 'c_created_dt',
                 'value' => function (\common\models\Call $model) {
-                    return $model->c_created_dt ? '<i class="fa fa-calendar"></i> ' . date('d-M-Y [H:i]', strtotime($model->c_created_dt))  : '-';  //Yii::$app->formatter->asDatetime(strtotime($model->c_created_dt))
+                    return $model->c_created_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->c_created_dt), 'php: Y-m-d [H:i:s]')  : '-';  //Yii::$app->formatter->asDatetime(strtotime($model->c_created_dt))
                 },
                 'format' => 'raw',
                 'filter' => DatePicker::widget([
@@ -165,15 +182,17 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$
                 'filter' => \common\models\Call::CALL_TYPE_LIST
             ],
 
+            [
+                'attribute' => 'c_source_type_id',
+                'value' => function (\common\models\Call $model) {
+                    return $model->getSourceName();
+                },
+                'filter' => \common\models\Call::SOURCE_LIST
+            ],
+
             //'c_project_id',
 
-            [
-                'attribute' => 'c_project_id',
-                'value' => function (\common\models\Call $model) {
-                    return $model->cProject ? $model->cProject->name : '-';
-                },
-                'filter' => $projectList
-            ],
+
 
             //'c_lead_id',
             [
@@ -187,29 +206,22 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$
             'c_to',
             // 'c_sip',
             //'c_call_status',
-            [
-                'attribute' => 'c_call_status',
-                'value' => function (\common\models\Call $model) {
-                    return '<span class="badge badge-info">'.$model->getStatusName().'</span>';
-                },
-                'format' => 'raw',
-                'filter' => \common\models\Call::CALL_STATUS_LIST
-            ],
+
 
 
             //'c_api_version',
             //'c_direction',
             //'c_forwarded_from',
-            'c_caller_name',
+            //'c_caller_name',
             //'c_parent_call_sid',
             'c_call_duration',
             //'c_price:currency',
-            [
+            /*[
                 'attribute' => 'c_price',
                 'value' => function (\common\models\Call $model) {
                     return $model->c_price ? '$'.number_format($model->c_price, 5) : '-';
                 },
-            ],
+            ],*/
             //'c_sip_response_code',
             //'c_recording_url:url',
 

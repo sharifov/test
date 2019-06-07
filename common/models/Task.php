@@ -29,6 +29,9 @@ class Task extends \yii\db\ActiveRecord
         self::CAT_ANSWERED_PROCESS      => 'Answered process (for Book)',
     ];
 
+
+    public const TYPE_MISSED_CALL = 'missed-call';
+
     /**
      * {@inheritdoc}
      */

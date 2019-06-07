@@ -704,6 +704,8 @@ class CommunicationController extends ApiBaseController
 
         if($type === self::TYPE_VOIP_INCOMING  || $type === self::TYPE_VOIP_GATHER) {
 
+            $callSourceTypeId = null;
+
             //$response = $this->incomingCallOld($post, $response);
 
             $settings = \Yii::$app->params['settings'];
@@ -766,6 +768,7 @@ class CommunicationController extends ApiBaseController
 
                 $source = Source::findOne(['phone_number' => $agent_phone_number]);
                 $agentDirectCallCheck = false;
+
                 if(!$source) {
                     $agentDirectCallCheck = true;
                 }
@@ -774,6 +777,8 @@ class CommunicationController extends ApiBaseController
 
                 // detect by sources
                 if($source && $project = $source->project) {
+
+                    $callSourceTypeId = Call::SOURCE_GENERAL_LINE;
 
                     if($use_voice_gather) {
                         // check if is first call or is redirect from Gather
@@ -962,6 +967,8 @@ class CommunicationController extends ApiBaseController
 
                 } elseif ($agentDirectCallCheck) {
 
+                    $callSourceTypeId = Call::SOURCE_DIRECT_CALL;
+
                     $agentRes = $this->getDirectAgentsByPhoneNumber($agent_phone_number, $client_phone_number, $general_line_user_limit);
                     if($agentRes && isset($agentRes['call_employee'], $agentRes['call_agent_username']) && $agentRes['call_employee']) {
                         $isOnHold = false;
@@ -989,9 +996,9 @@ class CommunicationController extends ApiBaseController
                     $callGeneralNumber = true;
                 }
 
-                $clientPhone = ClientPhone::find()->where(['phone' => $client_phone_number])->orderBy(['id' => SORT_DESC])->limit(1)->one();
+                // $clientPhone = ClientPhone::find()->where(['phone' => $client_phone_number])->orderBy(['id' => SORT_DESC])->limit(1)->one();
                 $lead = null;
-                if($clientPhone && $client = $clientPhone->client) {
+                if($clientPhone && $clientPhone->client_id) {
                     $lead = Lead::find()->select(['id'])->where(['client_id' => $clientPhone->client_id])->orderBy(['id' => SORT_DESC])->limit(1)->one();
                 }
 
@@ -1045,6 +1052,7 @@ class CommunicationController extends ApiBaseController
                         $call->c_sip = null;
                         $call->c_to = $agent_phone_number; //$userCall->username ? $userCall->username : null;
                         $call->c_created_user_id = $userCall->id;
+                        $call->c_source_type_id = Call::SOURCE_REDIRECT_CALL;
                         if ($lead) {
                             $call->c_lead_id = $lead->id;
                         } else {
@@ -1072,6 +1080,7 @@ class CommunicationController extends ApiBaseController
                     $call->c_sip = null;
                     $call->c_to = $agent_phone_number;
                     $call->c_created_user_id = null;
+                    $call->c_source_type_id = $callSourceTypeId;
                     if ($lead) {
                         $call->c_lead_id = $lead->id;
                     }
@@ -1147,6 +1156,7 @@ class CommunicationController extends ApiBaseController
                     $call->c_sip = null;
                     $call->c_to = $generalLineNumber;
                     $call->c_created_user_id = null;
+                    $call->c_source_type_id = $callSourceTypeId;
                     if ($lead) {
                         $call->c_lead_id = $lead->id;
                     }
