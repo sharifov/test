@@ -298,7 +298,7 @@ class Call extends \yii\db\ActiveRecord
             $client = $clientPhone->client;
         } else {
             $client = new Client();
-            $client->first_name = 'Noname';
+            $client->first_name = 'ClientName';
             $client->created = date('Y-m-d H:i:s');
 
             if($client->save()) {
