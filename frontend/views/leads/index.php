@@ -547,7 +547,7 @@ if(Yii::$app->user->identity->canRole('admin')) {
             'value' => function(\common\models\Lead $model) {
                 $str = '-';
                 if($model->updated) {
-                    $str .= '<b>' . Yii::$app->formatter->asRelativeTime(strtotime($model->updated)) . '</b>';
+                    $str = '<b>' . Yii::$app->formatter->asRelativeTime(strtotime($model->updated)) . '</b>';
                     $str .= '<br><i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->updated));
                 }
                 return $str;
