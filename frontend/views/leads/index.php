@@ -655,7 +655,7 @@ echo GridView::widget([
             /*'showPageSummary' => true,*/
             'panel' => [
         'type' => GridView::TYPE_PRIMARY,
-        'heading' => '<h3 class="panel-title"><i class="glyphicon glyphicon-list"></i> Leads</h3>'
+        //'heading' => '<h3 class="panel-title"><i class="glyphicon glyphicon-list"></i> Leads</h3>'
     ]
 
 ]);
