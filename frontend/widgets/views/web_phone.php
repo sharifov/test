@@ -738,40 +738,64 @@ $js = <<<JS
             $("#redirect-agent-info").html('<h3>Redirecting to: ' + data_agent_to_redirect.data('agent') + '</h3>').show();
             if(connection) {
                 
-                if(connection.status() !== 'open') {
-                    connection.accept();
-                }
                 
-                $.ajax({
-                    type: 'post',
-                    data: {
-                        'sid': connection.parameters.CallSid,
-                        'type': 'client',
-                        'from': connection.parameters.From,
-                        'to':data_agent_to_redirect.data('agent'),
-                        'to_id': data_agent_to_redirect.data('agentid'),
-                        'project_id': data_agent_to_redirect.data('projectid'), 
-                        'lead_id':  data_agent_to_redirect.data('leadid'),
-                    },
-                    url: ajaxCallRedirectUrl,
-                    success: function (res) {
-                        console.log(res);
-                        $('#web-phone-dial-modal').modal('hide');
-                        document.getElementById('call-controls2').style.display = 'none';
-                        $("#web-phone-redirect-agents-modal").modal('hide');
-                        data_agent_to_redirect.removeAttr("disabled");
-                        $("#redirect-agent-info").html('').hide();
+                $.post(ajaxCallRedirectUrl + '?check_user=1', {to_id:data_agent_to_redirect.data('agentid')}, function(r) {
+                    
+                    
+                    if(r && r.is_ready) {
+                    
+                        if(connection.status() !== 'open') {
+                            connection.accept();
+                        }
+                        $.ajax({
+                            type: 'post',
+                            data: {
+                                'sid': connection.parameters.CallSid,
+                                'type': 'client',
+                                'from': connection.parameters.From,
+                                'to':data_agent_to_redirect.data('agent'),
+                                'to_id': data_agent_to_redirect.data('agentid'),
+                                'project_id': data_agent_to_redirect.data('projectid'), 
+                                'lead_id':  data_agent_to_redirect.data('leadid'),
+                            },
+                            url: ajaxCallRedirectUrl,
+                            success: function (res) {
+                                 console.log(res);
+                                if(res.error) {
+                                    $('#web-phone-dial-modal').modal('hide');
+                                    document.getElementById('call-controls2').style.display = 'none';
+                                    data_agent_to_redirect.removeAttr("disabled");
+                                    var error_message = 'Error redirect.';
+                                    if(res.message) {
+                                        error_message = res.message;
+                                    }
+                                    $("#redirect-agent-info").html('<h3 class="danger">' + error_message +'</h3>').show();
+                                    $("#redirect-agent-table").show();
+                                    setTimeout('initredirectToAgent();', 5000);
+                                }
+                                else {
+                                    $('#web-phone-dial-modal').modal('hide');
+                                    document.getElementById('call-controls2').style.display = 'none';
+                                    $("#web-phone-redirect-agents-modal").modal('hide');
+                                    data_agent_to_redirect.removeAttr("disabled");
+                                    $("#redirect-agent-info").html('').hide();
+                                    $("#redirect-agent-table").show();
+                                }
+                            },
+                            error: function (error) {
+                                console.error(error);
+                                data_agent_to_redirect.removeAttr("disabled");
+                                $("#redirect-agent-info").html('').hide();
+                                $("#redirect-agent-table").show();
+                            }
+                        });
+                    } else {
+                        $("#redirect-agent-info").html('<h3 class="danger">The user (' +  data_agent_to_redirect.data('agent') + ') is not available for the call</h3>').show();
                         $("#redirect-agent-table").show();
-                    },
-                    error: function (error) {
-                        console.error(error);
-                        data_agent_to_redirect.removeAttr("disabled");
-                        $("#redirect-agent-info").html('').hide();
-                        $("#redirect-agent-table").show();
+                        setTimeout('initredirectToAgent();', 5000);
                     }
-                });
+                }, 'json');
             }
-            
         });
 
 
