@@ -168,7 +168,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 $content .= $model->getFlightDetails();
                 $content .= ' (<i class="fa fa-male"></i> x' . ($model->adults .'/'. $model->children .'/'. $model->infants) . ')<br/>';
 
-                $content .= sprintf('<strong>Cabin:</strong> %s', Lead::getCabin($model['cabin']));
+                $content .= sprintf('<strong>Cabin:</strong> %s', $model->getCabinClassName());
 
                 return $content;
             },

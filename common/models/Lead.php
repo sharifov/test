@@ -691,6 +691,15 @@ class Lead extends ActiveRecord
         return isset($mapping[$cabin]) ? $mapping[$cabin] : $cabin;
     }
 
+    /**
+     * @return mixed|string
+     */
+    public function getCabinClassName()
+    {
+        return self::CABIN_LIST[$this->cabin] ?? $this->cabin;
+    }
+
+
     public static function getRating($id, $rating)
     {
         $checked1 = $checked2 = $checked3 = '';

@@ -153,7 +153,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
                 $content .= '<br/>'.$pax.'<br/>';
 
-                $content .= sprintf('<strong>Cabin:</strong> %s', Lead::getCabin($model['cabin']));
+                $content .= sprintf('<strong>Cabin:</strong> %s', $model->getCabinClassName());
 
                 return $content;
             },

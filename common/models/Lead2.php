@@ -2,6 +2,9 @@
 
 namespace common\models;
 
+use common\components\jobs\QuickSearchInitPriceJob;
+use common\components\jobs\UpdateLeadBOJob;
+use common\models\local\LeadLogMessage;
 use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
@@ -403,5 +406,46 @@ class Lead2 extends \yii\db\ActiveRecord
     public static function find()
     {
         return new LeadsQuery(get_called_class());
+    }
+
+
+    /**
+     * @param bool $insert
+     * @return bool
+     */
+    public function beforeSave($insert): bool
+    {
+        if (parent::beforeSave($insert)) {
+
+            if($insert) {
+                if (!$this->uid) {
+                    $this->uid = uniqid();
+                }
+
+                if (!$this->gid) {
+                    $this->gid = md5(uniqid('', true));
+                }
+            }
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * @param bool $insert
+     * @param array $changedAttributes
+     */
+    public function afterSave($insert, $changedAttributes)
+    {
+        parent::afterSave($insert, $changedAttributes);
+
+        if ($insert) {
+            LeadFlow::addStateFlow2($this, $insert);
+        } else {
+            if (isset($changedAttributes['status']) && $changedAttributes['status'] !== $this->status) {
+                LeadFlow::addStateFlow2($this, $insert);
+            }
+        }
+
     }
 }

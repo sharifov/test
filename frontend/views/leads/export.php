@@ -370,13 +370,11 @@ $this->params['breadcrumbs'][] = $this->title;
 
         [
             'attribute' => 'cabin',
-            'value' => function(\common\models\Lead $model) {
-                return \common\models\Lead::getCabin($model->cabin) ?? '-';
+            'value' => function (\common\models\Lead $model) {
+                return $model->getCabinClassName();
             },
             'filter' => \common\models\Lead::CABIN_LIST
         ],
-
-
 
         [
             'attribute' => 'adults',

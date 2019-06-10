@@ -365,9 +365,9 @@ $this->params['breadcrumbs'][] = $this->title;
         [
             'attribute' => 'cabin',
             'value' => function (\common\models\Lead $model) {
-                return \common\models\Lead::getCabin($model->cabin) ?? '-';
+                return $model->getCabinClassName();
             },
-            'filter' => false //\common\models\Lead::CABIN_LIST
+            'filter' => \common\models\Lead::CABIN_LIST
         ],
 
 

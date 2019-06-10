@@ -264,7 +264,10 @@ class Call extends \yii\db\ActiveRecord
                 }
             }
 
+            Yii::info(VarDumper::dumpAsString($this->attributes), 'info\Call:afterSave');
+
             if($this->c_call_type_id === self::CALL_TYPE_IN && !$this->c_lead_id && in_array($this->c_call_status, [self::CALL_STATUS_BUSY, self::CALL_STATUS_NO_ANSWER], false)) {
+                Yii::info(VarDumper::dumpAsString($this->attributes), 'info\Call:afterSave:createNewLead');
                 $this->createNewLead();
             }
         }
@@ -291,8 +294,10 @@ class Call extends \yii\db\ActiveRecord
     /**
      *
      */
-    protected function createNewLead(): void
+    protected function createNewLead(): ?int
     {
+        $lead = new Lead2();
+
         $clientPhone = ClientPhone::find()->where(['phone' => $this->c_from])->orderBy(['id' => SORT_DESC])->limit(1)->one();
 
         if($clientPhone) {
@@ -314,14 +319,24 @@ class Call extends \yii\db\ActiveRecord
         }
 
         if($client) {
-            $lead = new Lead2();
+
             $lead->status = Lead::STATUS_PENDING;
             $lead->employee_id = $this->c_created_user_id;
             $lead->client_id = $client->id;
+            $lead->project_id = $this->c_project_id;
+
+            $source = Source::find()->select('id')->where(['phone_number' => $this->c_to])->limit(1)->one();
+
+            if(!$source) {
+                $source = Source::find()->select('id')->where(['project_id' => $lead->project_id, 'default' => true])->one();
+            }
+
+            if($source) {
+                $lead->source_id = $source->id;
+            }
 
             if ($lead->save()) {
                 self::updateAll(['c_lead_id' => $lead->id], ['c_id' => $this->c_id]);
-
 
                 if($lead->employee_id) {
                     $task = Task::find()->where(['t_key' => Task::TYPE_MISSED_CALL])->limit(1)->one();
@@ -342,6 +357,8 @@ class Call extends \yii\db\ActiveRecord
                 Yii::error(VarDumper::dumpAsString($lead->errors), 'Model:Call:createNewLead:Lead2:save');
             }
         }
+
+        return $lead ? $lead->id : null;
     }
 
 
