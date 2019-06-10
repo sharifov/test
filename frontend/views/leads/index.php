@@ -139,6 +139,10 @@ if(Yii::$app->user->identity->canRole('admin')) {
 
         [
             'attribute' => 'client_id',
+            'value' => function (\common\models\Lead $model) {
+                return $model->client_id ? Html::a($model->client_id, ['client/index', 'ClientSearch[id]' => $model->client_id], ['data-pjax' => 0, 'target' => '_blank']) : '-';
+            },
+            'format' => 'raw',
             'options' => [
                 'style' => 'width:80px'
             ],
@@ -403,10 +407,25 @@ if(Yii::$app->user->identity->canRole('admin')) {
             // 'visible' => !$isAgent
         ],
 
-        [
+        /*[
             'header' => 'Task Info',
             'value' => function (\common\models\Lead $model) use ($isAgent) {
                 return '<small style="font-size: 10px">' . $model->getTaskInfo() . '</small>';
+            },
+            'format' => 'raw',
+            'contentOptions' => [
+                'class' => 'text-left'
+            ],
+            'visible' => ! $isAgent,
+            'options' => [
+                'style' => 'width:200px'
+            ]
+        ],*/
+
+        [
+            'header' => 'CheckList',
+            'value' => function (\common\models\Lead $model) use ($isAgent) {
+                return '<small style="font-size: 10px">' . $model->getCheckListInfo() . '</small>';
             },
             'format' => 'raw',
             'contentOptions' => [
