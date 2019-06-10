@@ -257,16 +257,6 @@ class Call extends \yii\db\ActiveRecord
     {
         parent::afterSave($insert, $changedAttributes);
 
-        $users = UserConnection::find()->select('uc_user_id')
-            ->andWhere(['uc_controller_id' => 'call', 'uc_action_id' => 'user-map'])
-            ->groupBy(['uc_user_id'])->all();
-
-        if($users) {
-            foreach ($users as $user) {
-                Notifications::socket($user->uc_user_id, null, 'callMapUpdate', [], true);
-            }
-        }
-
         if(!$insert) {
             if(in_array($this->c_call_status, [self::CALL_STATUS_COMPLETED, self::CALL_STATUS_BUSY, self::CALL_STATUS_NO_ANSWER], false)) {
                 if($this->c_created_user_id) {
@@ -277,11 +267,22 @@ class Call extends \yii\db\ActiveRecord
             if($this->c_call_type_id === self::CALL_TYPE_IN && !$this->c_lead_id && in_array($this->c_call_status, [self::CALL_STATUS_BUSY, self::CALL_STATUS_NO_ANSWER], false)) {
                 $this->createNewLead();
             }
-
         }
 
         if($this->c_call_type_id === self::CALL_TYPE_OUT && $this->c_lead_id && $this->cLead) {
             $this->cLead->updateLastAction();
+        }
+
+        $users = UserConnection::find()
+            ->select('uc_user_id')
+            ->andWhere(['uc_controller_id' => 'call', 'uc_action_id' => 'user-map'])
+            ->groupBy(['uc_user_id'])
+            ->column();
+
+        if($users) {
+            foreach ($users as $user_id) {
+                Notifications::socket($user_id, null, 'callMapUpdate', [], true);
+            }
         }
 
     }
