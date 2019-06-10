@@ -309,7 +309,7 @@ if(Yii::$app->user->identity->canRole('admin')) {
         [
             'attribute' => 'cabin',
             'value' => function (\common\models\Lead $model) {
-                return $model->cabin ? \common\models\Lead::getCabin($model->cabin) : '-';
+                return $model->getCabinClassName();
             },
             'filter' => \common\models\Lead::CABIN_LIST
         ],
