@@ -1182,6 +1182,10 @@ class TestController extends FController
         $agent_phone_number = '+15596489977';
 
         $clientIds = [];
+
+        $clientIds = ClientPhone::find()->select(['client_id'])->where(['phone' => $client_phone_number])->column();
+        VarDumper::dump($clientIds, 10, true); exit;
+
         $clientIdsQuery = ClientPhone::findBySql("SELECT GROUP_CONCAT(client_id) AS client_ids FROM client_phone WHERE phone = '{$client_phone_number}' ")->asArray()->one();
         //VarDumper::dump($clientIds, 10, true); exit;
         if(isset($clientIdsQuery['client_ids']) && $clientIdsQuery['client_ids'] ) {

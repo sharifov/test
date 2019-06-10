@@ -716,6 +716,7 @@ class CommunicationController extends ApiBaseController
             $general_line_role_priority = $settings['general_line_role_priority'] ?? $general_line_call_distribution['general_line_role_priority'];
             $general_line_last_hours = $settings['general_line_last_hours'] ?? $general_line_call_distribution['general_line_last_hours'];
             $general_line_user_limit = $settings['general_line_user_limit'] ?? $general_line_call_distribution['general_line_user_limit'];
+            $direct_agent_user_limit = $settings['direct_agent_user_limit'] ?? $general_line_call_distribution['direct_agent_user_limit'];
 
             $callSession = null;
             $isError = false;
@@ -819,11 +820,12 @@ class CommunicationController extends ApiBaseController
                         try {
                             // FIRST STEP TO DETECT AGENTS FOR CALL.  SL-370
                             if($clientPhone && $clientPhone->client && $clientPhone->client->id) {
-                                $clientIdsQuery = ClientPhone::findBySql("SELECT GROUP_CONCAT(client_id) AS client_ids FROM " . ClientPhone::tableName() . "  WHERE phone = '{$client_phone_number}' ")
+                                /*$clientIdsQuery = ClientPhone::findBySql("SELECT GROUP_CONCAT(client_id) AS client_ids FROM " . ClientPhone::tableName() . "  WHERE phone = '{$client_phone_number}' ")
                                     ->asArray()->one();
                                 if (isset($clientIdsQuery['client_ids']) && $clientIdsQuery['client_ids']) {
                                     $clientIds = explode(',', $clientIdsQuery['client_ids']);
-                                }
+                                }*/
+                                $clientIds = ClientPhone::find()->select(['client_id'])->where(['phone' => $client_phone_number])->column();
 
                                 $latest_client_leads = Lead::find()
                                     ->select(['DISTINCT(employee_id)', 'updated'])
@@ -967,9 +969,7 @@ class CommunicationController extends ApiBaseController
 
                 } elseif ($agentDirectCallCheck) {
 
-                    $callSourceTypeId = Call::SOURCE_DIRECT_CALL;
-
-                    $agentRes = $this->getDirectAgentsByPhoneNumber($agent_phone_number, $client_phone_number, $general_line_user_limit);
+                    $agentRes = $this->getDirectAgentsByPhoneNumber($agent_phone_number, $client_phone_number, $direct_agent_user_limit);
                     if($agentRes && isset($agentRes['call_employee'], $agentRes['call_agent_username']) && $agentRes['call_employee']) {
                         $isOnHold = false;
                         $callGeneralNumber = false;
@@ -1704,7 +1704,7 @@ class CommunicationController extends ApiBaseController
                 if($call) {
 
                     if(isset($post['callData']['CallStatus']) && $post['callData']['CallStatus']) {
-                        if($call->c_call_status && !in_array($call->c_call_status, [Call::CALL_STATUS_NO_ANSWER, Call::CALL_STATUS_BUSY,  Call::CALL_STATUS_COMPLETED, Call::CALL_STATUS_CANCELED])) {
+                        if($call->c_call_status && !in_array($call->c_call_status, [Call::CALL_STATUS_NO_ANSWER, Call::CALL_STATUS_BUSY, Call::CALL_STATUS_COMPLETED,  Call::CALL_STATUS_CANCELED])) {
                             $call->c_call_status = $post['callData']['CallStatus'];
                         }
 
