@@ -408,6 +408,29 @@ class Lead2 extends \yii\db\ActiveRecord
         return new LeadsQuery(get_called_class());
     }
 
+
+    /**
+     * @param bool $insert
+     * @return bool
+     */
+    public function beforeSave($insert): bool
+    {
+        if (parent::beforeSave($insert)) {
+
+            if($insert) {
+                if (!$this->uid) {
+                    $this->uid = uniqid();
+                }
+
+                if (!$this->gid) {
+                    $this->gid = md5(uniqid('', true));
+                }
+            }
+            return true;
+        }
+        return false;
+    }
+
     /**
      * @param bool $insert
      * @param array $changedAttributes
