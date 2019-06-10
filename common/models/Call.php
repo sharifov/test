@@ -323,10 +323,20 @@ class Call extends \yii\db\ActiveRecord
             $lead->status = Lead::STATUS_PENDING;
             $lead->employee_id = $this->c_created_user_id;
             $lead->client_id = $client->id;
+            $lead->project_id = $this->c_project_id;
+
+            $source = Source::find()->select('id')->where(['phone_number' => $this->c_to])->limit(1)->one();
+
+            if(!$source) {
+                $source = Source::find()->select('id')->where(['project_id' => $lead->project_id, 'default' => true])->one();
+            }
+
+            if($source) {
+                $lead->source_id = $source->id;
+            }
 
             if ($lead->save()) {
                 self::updateAll(['c_lead_id' => $lead->id], ['c_id' => $this->c_id]);
-
 
                 if($lead->employee_id) {
                     $task = Task::find()->where(['t_key' => Task::TYPE_MISSED_CALL])->limit(1)->one();
