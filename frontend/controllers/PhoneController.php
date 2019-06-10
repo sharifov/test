@@ -270,7 +270,7 @@ class PhoneController extends FController
                 }*/
             }
 
-            \Yii::info(VarDumper::dumpAsString([$result, \Yii::$app->request->post(), $call]), 'PhoneController:actionAjaxCallRedirect:$result');
+            \Yii::info(VarDumper::dumpAsString([$result, \Yii::$app->request->post(), $call->c_id]), 'PhoneController:actionAjaxCallRedirect:$result');
         } catch (\Throwable $e) {
             $result = [
                 'error' => true,
