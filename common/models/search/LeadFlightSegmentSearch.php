@@ -62,13 +62,19 @@ class LeadFlightSegmentSearch extends LeadFlightSegment
             return $dataProvider;
         }*/
 
+        if (isset($params['LeadFlightSegmentSearch']['created'])) {
+            $query->andFilterWhere(['=','DATE(created)', $this->created]);
+        }
+
+        if (isset($params['LeadFlightSegmentSearch']['updated'])) {
+            $query->andFilterWhere(['=','DATE(updated)', $this->updated]);
+        }
+
         // grid filtering conditions
         $query->andFilterWhere([
             'id' => $this->id,
             'lead_id' => $this->lead_id,
             'departure' => $this->departure,
-            'created' => $this->created,
-            'updated' => $this->updated,
             'flexibility' => $this->flexibility,
             'flexibility_type' => $this->flexibility_type,
         ]);

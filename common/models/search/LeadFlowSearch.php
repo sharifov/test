@@ -69,6 +69,10 @@ class LeadFlowSearch extends LeadFlow
             return $dataProvider;
         }
 
+        if (isset($params['NotificationsSearch']['created'])) {
+            $query->andFilterWhere(['=','DATE(created)', $this->created]);
+        }
+
         if($this->statuses) {
             $query->andWhere(['lead_flow.status' => $this->statuses]);
         }
@@ -99,7 +103,6 @@ class LeadFlowSearch extends LeadFlow
         // grid filtering conditions
         $query->andFilterWhere([
             'id' => $this->id,
-            'created' => $this->created,
             'employee_id' => $this->employee_id,
             'lead_id' => $this->lead_id,
             'status' => $this->status,

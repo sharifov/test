@@ -62,6 +62,14 @@ class QuotePriceSearch extends QuotePrice
             return $dataProvider;
         }
 
+        if (isset($params['QuotePriceSearch']['created'])) {
+            $query->andFilterWhere(['=','DATE(created)', $this->created]);
+        }
+
+        if (isset($params['QuotePriceSearch']['updated'])) {
+            $query->andFilterWhere(['=','DATE(updated)', $this->updated]);
+        }
+
         // grid filtering conditions
         $query->andFilterWhere([
             'id' => $this->id,
@@ -72,8 +80,6 @@ class QuotePriceSearch extends QuotePrice
             'taxes' => $this->taxes,
             'mark_up' => $this->mark_up,
             'extra_mark_up' => $this->extra_mark_up,
-            'created' => $this->created,
-            'updated' => $this->updated,
         ]);
 
         $query->andFilterWhere(['like', 'passenger_type', $this->passenger_type]);

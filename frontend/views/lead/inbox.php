@@ -1,4 +1,6 @@
 <?php
+
+use dosamigos\datepicker\DatePicker;
 use yii\helpers\Html;
 use yii\widgets\Pjax;
 use kartik\grid\GridView;
@@ -239,7 +241,18 @@ $this->params['breadcrumbs'][] = $this->title;
             'options' => [
                 'style' => 'width:180px'
             ],
-            'filter' => false,
+            'filter' => DatePicker::widget([
+                'model' => $searchModel,
+                'attribute' => 'created',
+                'clientOptions' => [
+                    'autoclose' => true,
+                    'format' => 'yyyy-mm-dd',
+                ],
+                'options' => [
+                    'autocomplete' => 'off',
+                    'placeholder' =>'Choose Date'
+                ],
+            ]),
             'enableSorting' => ! $isAgent
         ],
 

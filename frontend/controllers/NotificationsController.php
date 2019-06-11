@@ -39,10 +39,7 @@ class NotificationsController extends FController
     {
         $searchModel = new NotificationsSearch();
 
-
         $params = Yii::$app->request->queryParams;
-
-
         $params['NotificationsSearch']['n_deleted'] = 0;
         $params['NotificationsSearch']['n_user_id'] = Yii::$app->user->id;
 
@@ -62,7 +59,14 @@ class NotificationsController extends FController
     public function actionIndex()
     {
         $searchModel = new NotificationsSearch();
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+        $params = Yii::$app->request->queryParams;
+        if(isset($params['reset'])){
+            unset($params['NotificationsSearch']['date_range']);
+        }
+
+        $searchModel->datetime_start = date('Y-m-d', strtotime('-0 day'));
+        $searchModel->datetime_end = date('Y-m-d');
+        $dataProvider = $searchModel->search($params);
 
         return $this->render('index', [
             'searchModel' => $searchModel,

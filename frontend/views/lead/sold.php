@@ -88,6 +88,29 @@ $this->params['breadcrumbs'][] = $this->title;
                 'style' => 'width:80px'
             ]
         ],
+
+        [
+            'attribute' => 'project_id',
+            'value' => function (\common\models\Lead $model) {
+                return $model->project ? '<span class="badge badge-info">' . $model->project->name . '</span>' : '-';
+            },
+            'format' => 'raw',
+            'options' => [
+                'style' => 'width:120px'
+            ],
+            'filter' => $projectList,
+        ],
+
+        [
+            'attribute' => 'source_id',
+            'label' => 'Market Info',
+            'visible' => !$isAgent,
+            'value' => function (\common\models\Lead $model) {
+                return $model->source ? $model->source->name : '-';
+            },
+            'filter' => \common\models\Source::getList()
+        ],
+
         [
             'label' => 'PNR',
             'value' => function ($model) {
@@ -315,26 +338,7 @@ $this->params['breadcrumbs'][] = $this->title;
             },
             'format' => 'raw'
         ],
-        [
-            'attribute' => 'project_id',
-            'value' => function (\common\models\Lead $model) {
-                return $model->project ? $model->project->name : '-';
-            },
-            'format' => 'raw',
-            'options' => [
-                'style' => 'width:120px'
-            ],
-            'filter' => $projectList,
-        ],
-        [
-            'attribute' => 'source_id',
-            'label' => 'Market Info',
-            'visible' => !$isAgent,
-            'value' => function (\common\models\Lead $model) {
-                return $model->source ? $model->source->name : '-';
-            },
-            'filter' => \common\models\Source::getList()
-        ],
+
         [
             'class' => 'yii\grid\ActionColumn',
             'template' => '{action}',
