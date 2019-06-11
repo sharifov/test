@@ -292,8 +292,9 @@ class Call extends \yii\db\ActiveRecord
             }
 
             if($this->c_call_status === self::CALL_STATUS_IN_PROGRESS && $this->c_call_type_id === self::CALL_TYPE_IN && $this->c_lead_id && isset($changedAttributes['c_call_status']) && $changedAttributes['c_call_status'] === self::CALL_STATUS_RINGING) {
-                if($this->cLead && !$this->cLead->employee_id && $this->c_created_user_id) {
+                if($this->cLead && !$this->cLead->employee_id && $this->c_created_user_id && $this->cLead->status === Lead::STATUS_PENDING) {
                     $this->cLead->employee_id = $this->c_created_user_id;
+                    $this->cLead->status = Lead::STATUS_PROCESSING;
                     if($this->cLead->update()) {
                         Notifications::create($this->cLead->employee_id, 'A new lead ('.$this->cLead->id.') has been created for you. Call Id: ' . $this->c_id, Notifications::TYPE_SUCCESS, true);
                         Notifications::socket($this->cLead->employee_id, null, 'getNewNotification', [], true);
