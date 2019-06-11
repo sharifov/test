@@ -18,8 +18,8 @@ class ApiLogSearch extends ApiLog
     public function rules()
     {
         return [
-            [['al_id', 'al_user_id'], 'integer'],
-            [['al_request_data', 'al_request_dt', 'al_response_data', 'al_response_dt', 'al_ip_address', 'al_action'], 'safe'],
+            [['al_id', 'al_user_id', 'al_memory_usage', 'al_db_query_count'], 'integer'],
+            [['al_request_data', 'al_request_dt', 'al_response_data', 'al_response_dt', 'al_ip_address', 'al_action', 'al_execution_time', 'al_db_execution_time'], 'safe'],
         ];
     }
 
@@ -67,6 +67,8 @@ class ApiLogSearch extends ApiLog
             'al_request_dt' => $this->al_request_dt,
             'al_response_dt' => $this->al_response_dt,
             'al_user_id' => $this->al_user_id,
+            'al_memory_usage' => $this->al_memory_usage,
+            'al_db_query_count' => $this->al_db_query_count,
         ]);
 
         $query->andFilterWhere(['like', 'al_request_data', $this->al_request_data])

@@ -1255,4 +1255,11 @@ class TestController extends FController
         VarDumper::dump($items, 10, true); exit;
     }
 
+    public function actionTest2()
+    {
+        $lead = Lead::find()->innerJoinWith(['client.clientPhones'])->where(['l_client_phone' => '123'])->andWhere(['<>', 'leads.status', Lead::STATUS_TRASH])->orderBy(['leads.id' => SORT_DESC])->limit(1);
+
+        echo $lead->createCommand()->getRawSql();
+    }
+
 }

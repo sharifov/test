@@ -8,6 +8,7 @@ use common\models\local\LeadLogMessage;
 use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
+use yii\helpers\VarDumper;
 
 /**
  * This is the model class for table "leads".
@@ -448,4 +449,90 @@ class Lead2 extends \yii\db\ActiveRecord
         }
 
     }
+
+
+    /**
+     * @param string $phoneNumber
+     * @return array|Lead2|ActiveRecord|null
+     */
+    public static function findLastLeadByClientPhone(string $phoneNumber = '')
+    {
+        return self::find()->innerJoinWith(['client.clientPhones'])
+            ->where(['l_client_phone' => $phoneNumber])->andWhere(['<>', 'leads.status', Lead::STATUS_TRASH])
+            ->orderBy(['leads.id' => SORT_DESC])
+            ->limit(1)->one();
+    }
+
+
+    /**
+     * @param string $phoneNumber
+     * @param int $project_id
+     * @return Lead2
+     */
+    public static function createNewLeadByPhone(string $phoneNumber = '', int $project_id = 0): Lead2
+    {
+        $lead = new self();
+        $clientPhone = ClientPhone::find()->where(['phone' => $phoneNumber])->orderBy(['id' => SORT_DESC])->limit(1)->one();
+
+        if($clientPhone) {
+            $client = $clientPhone->client;
+        } else {
+            $client = new Client();
+            $client->first_name = 'ClientName';
+            $client->created = date('Y-m-d H:i:s');
+
+            if($client->save()) {
+                $clientPhone = new ClientPhone();
+                $clientPhone->phone = $phoneNumber;
+                $clientPhone->client_id = $client->id;
+                $clientPhone->comments = 'incoming';
+                if (!$clientPhone->save()) {
+                    Yii::error(VarDumper::dumpAsString($clientPhone->errors), 'Model:Lead2:createNewLeadByPhone:ClientPhone:save');
+                }
+            }
+        }
+
+        if($client) {
+
+            $lead->status = Lead::STATUS_PENDING;
+            //$lead->employee_id = $this->c_created_user_id;
+            $lead->client_id = $client->id;
+            $lead->project_id = $project_id;
+
+            //$source = Source::find()->select('id')->where(['phone_number' => $this->c_to])->limit(1)->one();
+
+            //if(!$source) {
+            $source = Source::find()->select('id')->where(['project_id' => $lead->project_id, 'default' => true])->one();
+            //}
+
+            if($source) {
+                $lead->source_id = $source->id;
+            }
+
+            if ($lead->save()) {
+                /*self::updateAll(['c_lead_id' => $lead->id], ['c_id' => $this->c_id]);
+
+                if($lead->employee_id) {
+                    $task = Task::find()->where(['t_key' => Task::TYPE_MISSED_CALL])->limit(1)->one();
+
+                    if ($task) {
+                        $lt = new LeadTask();
+                        $lt->lt_lead_id = $lead->id;
+                        $lt->lt_task_id = $task->t_id;
+                        $lt->lt_user_id = $lead->employee_id;
+                        $lt->lt_date = date('Y-m-d');
+                        if (!$lt->save()) {
+                            Yii::error(VarDumper::dumpAsString($lt->errors), 'Model:Lead:createNewLeadByPhone:LeadTask:save');
+                        }
+                    }
+                }*/
+
+            } else {
+                Yii::error(VarDumper::dumpAsString($lead->errors), 'Model:Lead2:createNewLeadByPhone:Lead2:save');
+            }
+        }
+
+        return $lead;
+    }
+
 }

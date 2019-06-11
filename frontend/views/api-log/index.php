@@ -99,6 +99,36 @@ $this->params['breadcrumbs'][] = $this->title;
                 },
                 'format' => 'raw'
             ],
+
+            [
+                'attribute' => 'al_execution_time',
+                //'format' => 'html',
+                'value' => function(\common\models\ApiLog $model) {
+                    return $model->al_execution_time;
+                },
+            ],
+            [
+                'attribute' => 'al_memory_usage',
+                'format' => 'raw',
+                'value' => function(\common\models\ApiLog $model) {
+                    return Yii::$app->formatter->asShortSize($model->al_memory_usage, 2);
+                },
+            ],
+
+            [
+                'attribute' => 'al_db_execution_time',
+                'value' => function(\common\models\ApiLog $model) {
+                    return $model->al_db_execution_time;
+                },
+            ],
+
+            [
+                'attribute' => 'al_db_query_count',
+                'value' => function(\common\models\ApiLog $model) {
+                    return $model->al_db_query_count;
+                },
+            ],
+
             //'al_user_id',
 
             [

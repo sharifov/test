@@ -8,6 +8,7 @@ use common\models\ClientPhone;
 use common\models\Email;
 use common\models\Employee;
 use common\models\Lead;
+use common\models\Lead2;
 use common\models\Notifications;
 use common\models\Project;
 use common\models\Setting;
@@ -705,6 +706,7 @@ class CommunicationController extends ApiBaseController
         if($type === self::TYPE_VOIP_INCOMING  || $type === self::TYPE_VOIP_GATHER) {
 
             $callSourceTypeId = null;
+            $lead2 = null;
 
             //$response = $this->incomingCallOld($post, $response);
 
@@ -781,6 +783,19 @@ class CommunicationController extends ApiBaseController
 
                     $callSourceTypeId = Call::SOURCE_GENERAL_LINE;
 
+                    if($type === self::TYPE_VOIP_INCOMING) {
+
+                        if ($clientPhone) {
+                            $lead2 = Lead2::findLastLeadByClientPhone($client_phone_number);
+                        }
+
+                        if (!$lead2) {
+                            $lead2 = Lead2::createNewLeadByPhone($client_phone_number, $project->id);
+                        }
+                    }
+
+
+
                     if($use_voice_gather) {
                         // check if is first call or is redirect from Gather
                         if ($callSession && isset($get_data['step']) && (int)$get_data['step'] === 1) {
@@ -813,8 +828,8 @@ class CommunicationController extends ApiBaseController
                             'project_id' => $call_project_id,
                             'called_phone' => $agent_phone_number,
                             'client_phone' => $client_phone_number,
-                            'client_ids' => (count($clientIds)) ? implode(',', $clientIds) : '',
-                            'agents_ids' => (count($agents_ids)) ? implode(',', $agents_ids) : '',
+                            'client_ids' => $clientIds ? implode(',', $clientIds) : '',
+                            'agents_ids' => $agents_ids ? implode(',', $agents_ids) : '',
                         ];
 
                         try {
@@ -848,7 +863,7 @@ class CommunicationController extends ApiBaseController
                             }
 
                             // SECOND STEP TO DETECT AGENTS FOR CALL.  SL-370
-                            if(!count($callAgents) && $project_employee_access) {
+                            if(!$callAgents && $project_employee_access) {
                                 $only_agents = [];
                                 $only_supervisors = [];
 
@@ -887,8 +902,8 @@ class CommunicationController extends ApiBaseController
                                     'project_id' => $call_project_id,
                                     'called_phone' => $agent_phone_number,
                                     'client_phone' => $client_phone_number,
-                                    'client_ids' => (count($clientIds)) ? implode(',', $clientIds) : '',
-                                    'agents_ids' => (count($agents_ids)) ? implode(',', $agents_ids) : '',
+                                    'client_ids' => $clientIds ? implode(',', $clientIds) : '',
+                                    'agents_ids' => $agents_ids ? implode(',', $agents_ids) : '',
                                 ];
 
                             } else {
@@ -897,8 +912,8 @@ class CommunicationController extends ApiBaseController
                                     'project_id' => $call_project_id,
                                     'called_phone' => $agent_phone_number,
                                     'client_phone' => $client_phone_number,
-                                    'client_ids' => (count($clientIds)) ? implode(',', $clientIds) : '',
-                                    'agents_ids' => (count($agents_ids)) ? implode(',', $agents_ids) : '',
+                                    'client_ids' => $clientIds ? implode(',', $clientIds) : '',
+                                    'agents_ids' => $agents_ids ? implode(',', $agents_ids) : '',
                                 ];
                             }
                             \Yii::info(VarDumper::dumpAsString($log_data, 10, false), 'info\API:CommunicationController:actionVoice:new_general_line_distribution');
@@ -908,7 +923,7 @@ class CommunicationController extends ApiBaseController
                         }
                     }
 
-                    if ($project_employee_access && !count($callAgents)) {
+                    if ($project_employee_access && !$callAgents) {
                         foreach ($project_employee_access AS $projectEmployer) {
                             $projectUser = $projectEmployer->employee; //Employee::findOne($projectEmployer->employee_id);
                             if($projectUser && $projectUser->userProfile && $projectUser->userProfile->up_call_type_id === UserProfile::CALL_TYPE_WEB) {
@@ -998,9 +1013,12 @@ class CommunicationController extends ApiBaseController
 
                 // $clientPhone = ClientPhone::find()->where(['phone' => $client_phone_number])->orderBy(['id' => SORT_DESC])->limit(1)->one();
                 $lead = null;
-                if($clientPhone && $clientPhone->client_id) {
-                    $lead = Lead::find()->select(['id'])->where(['client_id' => $clientPhone->client_id])->orderBy(['id' => SORT_DESC])->limit(1)->one();
-                }
+
+                //if(!$lead) {
+                    if ($clientPhone && $clientPhone->client_id) {
+                        $lead = Lead::find()->select(['id'])->where(['client_id' => $clientPhone->client_id])->orderBy(['id' => SORT_DESC])->limit(1)->one();
+                    }
+                //}
 
                 $data = [];
                 $data['client_name'] = 'Noname';
@@ -1053,8 +1071,8 @@ class CommunicationController extends ApiBaseController
                         $call->c_to = $agent_phone_number; //$userCall->username ? $userCall->username : null;
                         $call->c_created_user_id = $userCall->id;
                         $call->c_source_type_id = Call::SOURCE_REDIRECT_CALL;
-                        if ($lead) {
-                            $call->c_lead_id = $lead->id;
+                        if ($lead2) {
+                            $call->c_lead_id = $lead2->id;
                         } else {
                             $call->c_lead_id = null;
                         }
@@ -1081,13 +1099,12 @@ class CommunicationController extends ApiBaseController
                     $call->c_to = $agent_phone_number;
                     $call->c_created_user_id = null;
                     $call->c_source_type_id = $callSourceTypeId;
-                    if ($lead) {
-                        $call->c_lead_id = $lead->id;
+                    if ($lead2) {
+                        $call->c_lead_id = $lead2->id;
                     }
                     if (!$call->save()) {
                         Yii::error(VarDumper::dumpAsString($call->errors), 'API:CommunicationController:actionVoice:Call:save:$isOnHold');
                     }
-                    $company = '';
 
                     if($call_project_id) {
                         $project = Project::findOne($call_project_id);
@@ -1157,17 +1174,17 @@ class CommunicationController extends ApiBaseController
                     $call->c_to = $generalLineNumber;
                     $call->c_created_user_id = null;
                     $call->c_source_type_id = $callSourceTypeId;
-                    if ($lead) {
-                        $call->c_lead_id = $lead->id;
+                    if ($lead2) {
+                        $call->c_lead_id = $lead2->id;
                     }
                     if (!$call->save()) {
-                        \Yii::error(VarDumper::dumpAsString($call->errors), 'API:CommunicationController:actionVoice:Call:save:$callGeneralNumber');
+                        Yii::error(VarDumper::dumpAsString($call->errors), 'API:CommunicationController:actionVoice:Call:save:$callGeneralNumber');
                     }
                     Yii::info('Redirected to General Line : call_project_id: '.$call_project_id.', generalLine: '.$generalLineNumber, 'info\API:CommunicationController:actionVoice:callGeneralNumber - 6');
                 } else {
                     if(!$isOnHold && !$callGeneralNumber) {
                         $isError = true;
-                        \Yii::error('Not found call destination agent, hold or general line for call number:'. $agent_phone_number);
+                        Yii::error('Not found call destination agent, hold or general line for call number:'. $agent_phone_number);
                     }
                 }
 
