@@ -200,7 +200,7 @@ class PhoneController extends FController
     public function actionAjaxCallRedirect()
     {
         \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
-
+        sleep(1);
         try {
             $sid = Yii::$app->request->post('sid');
             $type = Yii::$app->request->post('type');

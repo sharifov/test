@@ -584,6 +584,7 @@ echo '<div class="container" id="container-redirect-agents"></div>';
                 });
 
                 device.on('connect', function (conn) {
+                    //console.log("connect call: status: " + connection.status() + "\n" + 'connection: ' + JSON.stringify(connection) + "\n conn:" + JSON.stringify(conn));
                     connection = conn;
                     log('Successfully established call!');
                     console.warn(conn);
@@ -623,9 +624,12 @@ echo '<div class="container" id="container-redirect-agents"></div>';
                 });
 
                 device.on('incoming', function (conn) {
-                    if(connection &&  ['open', 'ringing'].inArray(connection.status())) {
-                        conn.reject();
-                        return false;
+                    if(connection && Object.prototype.hasOwnProperty.call(connection, "status")) {
+                        console.log("incoming call: status: " + connection.status() + "\n" + 'connection: ' + JSON.stringify(connection) + "\n conn:" + JSON.stringify(conn));
+                        if (connection && ['open', 'ringing'].inArray(connection.status())) {
+                            conn.reject();
+                            return false;
+                        }
                     }
                     connection = conn;
                     log('Incoming connection from ' + conn.parameters.From);
@@ -870,18 +874,27 @@ $js = <<<JS
     
     $(document).on('click', '#btn-make-call', function(e) {
         e.preventDefault();
-        var phone_to = $('#call-to-number').val();
-        var phone_from = $('#call-from-number').val();
         
-        var project_id = $('#call-project-id').val();
-        var lead_id = $('#call-lead-id').val();
+        $.post(ajaxCallRedirectUrl + '?check_user=1', {to_id:c_user_id}, function(r) {
+            if(r && r.is_ready) {
+                var phone_to = $('#call-to-number').val();
+                var phone_from = $('#call-from-number').val();
+                
+                var project_id = $('#call-project-id').val();
+                var lead_id = $('#call-lead-id').val();
+                
+                $('#web-phone-dial-modal').modal('hide');
+                //alert(phone_from + ' - ' + phone_to);
+                $('#web-phone-widget').slideDown();
+                $('.fabs2').hide();
+                
+                webCall(phone_from, phone_to, project_id, lead_id, 'web-call');
+            } else {
+                alert('You have active call');
+                return false;
+            }
+        }, 'json');
         
-        $('#web-phone-dial-modal').modal('hide');
-        //alert(phone_from + ' - ' + phone_to);
-        $('#web-phone-widget').slideDown();
-        $('.fabs2').hide();
-        
-        webCall(phone_from, phone_to, project_id, lead_id, 'web-call');
     });
     
     $('#web-phone-widget').css({left:'50%', 'margin-left':'-'+($('#web-phone-widget').width() / 2)+'px'}); //.slideDown();
