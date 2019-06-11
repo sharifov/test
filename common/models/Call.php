@@ -253,6 +253,10 @@ class Call extends \yii\db\ActiveRecord
         return self::CALL_STATUS_LABEL_LIST[$this->c_call_status] ?? '-';
     }
 
+    /**
+     * @param bool $insert
+     * @param array $changedAttributes
+     */
     public function afterSave($insert, $changedAttributes)
     {
         parent::afterSave($insert, $changedAttributes);
@@ -264,11 +268,22 @@ class Call extends \yii\db\ActiveRecord
                 }
             }
 
-            Yii::info(VarDumper::dumpAsString($this->attributes), 'info\Call:afterSave');
+            //Yii::info(VarDumper::dumpAsString($this->attributes), 'info\Call:afterSave');
 
-            if($this->c_call_type_id === self::CALL_TYPE_IN && !$this->c_lead_id && in_array($this->c_call_status, [self::CALL_STATUS_BUSY, self::CALL_STATUS_NO_ANSWER], false)) {
-                Yii::info(VarDumper::dumpAsString($this->attributes), 'info\Call:afterSave:createNewLead');
-                $this->createNewLead();
+            if($this->c_call_type_id === self::CALL_TYPE_IN && $this->c_lead_id && in_array($this->c_call_status, [self::CALL_STATUS_BUSY, self::CALL_STATUS_NO_ANSWER], false)) {
+
+                if($this->c_created_user_id) {
+                    Notifications::create($this->c_created_user_id, 'Missing Call ('.$this->getSourceName().')  from ' . $this->c_from . ' to ' . $this->c_to . ' <br>Lead ID: ' . $this->c_lead_id , Notifications::TYPE_WARNING, true);
+                    Notifications::socket($this->c_created_user_id, null, 'getNewNotification', [], true);
+                }
+
+                /*if($this->cLead && $this->cLead->employee_id && $this->c_created_user_id !== $this->cLead->employee_id) {
+                    Notifications::create($this->c_created_user_id, 'On your Lead Missing Call ('.$this->getSourceName().')  from ' . $this->c_from . ' to ' . $this->c_to . ' <br>Lead ID: ' . $this->c_lead_id , Notifications::TYPE_WARNING, true);
+                    Notifications::socket($this->c_created_user_id, null, 'getNewNotification', [], true);
+                }*/
+
+                //Yii::info(VarDumper::dumpAsString($this->attributes), 'info\Call:afterSave:createNewLead');
+                //$this->createNewLead();
             }
         }
 
@@ -292,9 +307,9 @@ class Call extends \yii\db\ActiveRecord
 
 
     /**
-     *
+     * @return int|null
      */
-    protected function createNewLead(): ?int
+    /*protected function createNewLead(): ?int
     {
         $lead = new Lead2();
 
@@ -359,7 +374,7 @@ class Call extends \yii\db\ActiveRecord
         }
 
         return $lead ? $lead->id : null;
-    }
+    }*/
 
 
 /**
