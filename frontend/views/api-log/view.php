@@ -25,6 +25,8 @@ $this->params['breadcrumbs'][] = $this->title;
         ]) ?>
     </p>
 
+    <div class="col-md-4">
+
     <?= DetailView::widget([
         'model' => $model,
         'attributes' => [
@@ -34,8 +36,48 @@ $this->params['breadcrumbs'][] = $this->title;
             //'al_response_data:ntext',
             'al_response_dt',
             'al_ip_address',
+
         ],
     ]) ?>
+    </div>
+
+    <div class="col-md-4">
+
+        <?= DetailView::widget([
+            'model' => $model,
+            'attributes' => [
+
+                [
+                    'attribute' => 'al_execution_time',
+                    //'format' => 'html',
+                    'value' => function(\common\models\ApiLog $model) {
+                        return $model->al_execution_time;
+                    },
+                ],
+                [
+                    'attribute' => 'al_memory_usage',
+                    'format' => 'raw',
+                    'value' => function(\common\models\ApiLog $model) {
+                        return Yii::$app->formatter->asShortSize($model->al_memory_usage, 2);
+                    },
+                ],
+
+                [
+                    'attribute' => 'al_db_execution_time',
+                    'value' => function(\common\models\ApiLog $model) {
+                        return $model->al_db_execution_time;
+                    },
+                ],
+
+                [
+                    'attribute' => 'al_db_query_count',
+                    'value' => function(\common\models\ApiLog $model) {
+                        return $model->al_db_query_count;
+                    },
+                ],
+            ],
+        ]) ?>
+    </div>
 
     <div class="row">
     <div class="col-md-6">

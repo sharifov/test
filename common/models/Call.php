@@ -253,9 +253,12 @@ class Call extends \yii\db\ActiveRecord
         return self::CALL_STATUS_LABEL_LIST[$this->c_call_status] ?? '-';
     }
 
+
     /**
      * @param bool $insert
      * @param array $changedAttributes
+     * @throws \Throwable
+     * @throws \yii\db\StaleObjectException
      */
     public function afterSave($insert, $changedAttributes)
     {
@@ -282,9 +285,23 @@ class Call extends \yii\db\ActiveRecord
                     Notifications::socket($this->c_created_user_id, null, 'getNewNotification', [], true);
                 }*/
 
+
+
                 //Yii::info(VarDumper::dumpAsString($this->attributes), 'info\Call:afterSave:createNewLead');
                 //$this->createNewLead();
             }
+
+            if($this->c_call_status === self::CALL_STATUS_IN_PROGRESS && $this->c_call_type_id === self::CALL_TYPE_IN && $this->c_lead_id && isset($changedAttributes['c_call_status']) && $changedAttributes['c_call_status'] === self::CALL_STATUS_RINGING) {
+                if($this->cLead && !$this->cLead->employee_id && $this->c_created_user_id && $this->cLead->status === Lead::STATUS_PENDING) {
+                    $this->cLead->employee_id = $this->c_created_user_id;
+                    $this->cLead->status = Lead::STATUS_PROCESSING;
+                    if($this->cLead->update()) {
+                        Notifications::create($this->cLead->employee_id, 'A new lead ('.$this->cLead->id.') has been created for you. Call Id: ' . $this->c_id, Notifications::TYPE_SUCCESS, true);
+                        Notifications::socket($this->cLead->employee_id, null, 'getNewNotification', [], true);
+                    }
+                }
+            }
+
         }
 
         if($this->c_call_type_id === self::CALL_TYPE_OUT && $this->c_lead_id && $this->cLead) {
