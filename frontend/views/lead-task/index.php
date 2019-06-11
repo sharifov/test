@@ -113,7 +113,8 @@ $this->params['breadcrumbs'][] = $this->title;
                         'format' => 'yyyy-mm-dd',
                     ],
                     'options' => [
-                        'autocomplete' => 'off'
+                        'autocomplete' => 'off',
+                        'placeholder' =>'Choose Date'
                     ],
                 ]),
             ],

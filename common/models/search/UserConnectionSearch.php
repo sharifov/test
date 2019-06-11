@@ -56,13 +56,15 @@ class UserConnectionSearch extends UserConnection
             return $dataProvider;
         }
 
+        if (isset($params['UserConnectionSearch']['uc_created_dt'])) {
+            $query->andFilterWhere(['=','DATE(uc_created_dt)', $this->uc_created_dt]);
+        }
         // grid filtering conditions
         $query->andFilterWhere([
             'uc_id' => $this->uc_id,
             'uc_connection_id' => $this->uc_connection_id,
             'uc_user_id' => $this->uc_user_id,
             'uc_lead_id' => $this->uc_lead_id,
-            'uc_created_dt' => $this->uc_created_dt,
         ]);
 
         $query->andFilterWhere(['like', 'uc_user_agent', $this->uc_user_agent])

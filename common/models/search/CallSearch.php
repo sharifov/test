@@ -165,9 +165,9 @@ class CallSearch extends Call
             return $dataProvider;
         }
 
-
-
-
+        if (isset($params['CallSearch']['c_created_dt'])) {
+            $query->andFilterWhere(['=','DATE(c_created_dt)', $this->c_created_dt]);
+        }
 
         // grid filtering conditions
         $query->andFilterWhere([
@@ -175,7 +175,6 @@ class CallSearch extends Call
             'c_call_type_id' => $this->c_call_type_id,
             'c_lead_id' => $this->c_lead_id,
             'c_created_user_id' => $this->c_created_user_id,
-            'c_created_dt' => $this->c_created_dt,
             'c_com_call_id' => $this->c_com_call_id,
             'c_updated_dt' => $this->c_updated_dt,
             'c_project_id' => $this->c_project_id,
