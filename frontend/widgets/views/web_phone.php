@@ -625,7 +625,7 @@ echo '<div class="container" id="container-redirect-agents"></div>';
 
                 device.on('incoming', function (conn) {
                     if(connection && Object.prototype.hasOwnProperty.call(connection, "status")) {
-                        console.log("incoming call: status: " + connection.status() + "\n" + 'connection: ' + JSON.stringify(connection) + "\n conn:" + JSON.stringify(conn));
+                        //console.log("incoming call: status: " + connection.status() + "\n" + 'connection: ' + JSON.stringify(connection) + "\n conn:" + JSON.stringify(conn));
                         if (connection && ['open', 'ringing'].inArray(connection.status())) {
                             conn.reject();
                             return false;
