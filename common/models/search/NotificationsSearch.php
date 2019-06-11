@@ -12,12 +12,18 @@ use common\models\Notifications;
  */
 class NotificationsSearch extends Notifications
 {
+    public $datetime_start;
+    public $datetime_end;
+    public $date_range;
+
     /**
      * @inheritdoc
      */
     public function rules()
     {
         return [
+            [['datetime_start', 'datetime_end'], 'safe'],
+            [['date_range'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
             [['n_id', 'n_user_id', 'n_type_id'], 'integer'],
             [['n_title', 'n_message', 'n_read_dt', 'n_created_dt'], 'safe'],
             [['n_new', 'n_deleted', 'n_popup', 'n_popup_show'], 'boolean'],
@@ -62,6 +68,15 @@ class NotificationsSearch extends Notifications
             return $dataProvider;
         }
 
+        if(empty($this->n_created_dt) && isset($params['NotificationsSearch']['date_range'])){
+            $query->andFilterWhere(['>=', 'DATE(n_created_dt)', $this->datetime_start])
+                ->andFilterWhere(['<=', 'DATE(n_created_dt)', $this->datetime_end]);
+        }
+
+        if (isset($params['NotificationsSearch']['n_created_dt'])) {
+            $query->andFilterWhere(['=','DATE(n_created_dt)', $this->n_created_dt]);
+        }
+
         // grid filtering conditions
         $query->andFilterWhere([
             'n_id' => $this->n_id,
@@ -72,7 +87,6 @@ class NotificationsSearch extends Notifications
             'n_popup' => $this->n_popup,
             'n_popup_show' => $this->n_popup_show,
             'n_read_dt' => $this->n_read_dt,
-            'n_created_dt' => $this->n_created_dt,
         ]);
 
         $query->andFilterWhere(['like', 'n_title', $this->n_title])

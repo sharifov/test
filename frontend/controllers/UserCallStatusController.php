@@ -39,7 +39,14 @@ class UserCallStatusController extends FController
     public function actionIndex()
     {
         $searchModel = new UserCallStatusSearch();
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+        $params = Yii::$app->request->queryParams;
+        if(isset($params['reset'])){
+            unset($params['UserCallStatusSearch']['date_range']);
+        }
+
+        $searchModel->datetime_start = date('Y-m-d', strtotime('-0 day'));
+        $searchModel->datetime_end = date('Y-m-d');
+        $dataProvider = $searchModel->search($params);
 
         return $this->render('index', [
             'searchModel' => $searchModel,

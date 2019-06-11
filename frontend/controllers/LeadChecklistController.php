@@ -35,7 +35,14 @@ class LeadChecklistController extends FController
     public function actionIndex()
     {
         $searchModel = new LeadChecklistSearch();
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+        $params = Yii::$app->request->queryParams;
+        if(isset($params['reset'])){
+            unset($params['LeadChecklistSearch']['date_range']);
+        }
+
+        $searchModel->datetime_start = date('Y-m-d', strtotime('-0 day'));
+        $searchModel->datetime_end = date('Y-m-d');
+        $dataProvider = $searchModel->search($params);
 
         return $this->render('index', [
             'searchModel' => $searchModel,

@@ -1,7 +1,9 @@
 <?php
 
+use dosamigos\datepicker\DatePicker;
 use yii\helpers\Html;
 use yii\grid\GridView;
+use yii\widgets\ActiveForm;
 use yii\widgets\Pjax;
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\NotificationsSearch */
@@ -11,14 +13,51 @@ $this->title = Yii::t('notifications', 'Notifications');
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="notifications-index">
-
     <h1><i class="fa fa-comment-o"></i> <?= Html::encode($this->title) ?></h1>
     <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
-
     <p>
         <?= Html::a(Yii::t('notifications', 'Create Notifications'), ['create'], ['class' => 'btn btn-success']) ?>
     </p>
-<?php Pjax::begin(); ?>    <?= GridView::widget([
+    <?php Pjax::begin(); ?>
+    <div class="row">
+        <?php $form = ActiveForm::begin([
+            'action' => ['index'],
+            'method' => 'get',
+            'options' => [
+                'data-pjax' => 1
+            ],
+        ]); ?>
+
+        <div class="col-md-3">
+            <?php
+            echo  \kartik\daterange\DateRangePicker::widget([
+                'model'=> $searchModel,
+                'attribute' => 'date_range',
+                'useWithAddon'=>true,
+                'presetDropdown'=>true,
+                'hideInput'=>true,
+                'convertFormat'=>true,
+                'startAttribute' => 'datetime_start',
+                'endAttribute' => 'datetime_end',
+                'pluginOptions'=>[
+                    'timePicker'=> false,
+                    'timePickerIncrement'=>15,
+                    'locale'=>[
+                        'format'=>'Y-m-d',
+                        'separator' => ' - '
+                    ]
+                ]
+            ]);
+            ?>
+        </div>
+        <div class="form-group">
+            <?= Html::submitButton('<i class="fa fa-search"></i> Show result', ['class' => 'btn btn-success']) ?>
+            <?= Html::submitButton('<i class="fa fa-close"></i> Reset', ['name' => 'reset', 'class' => 'btn btn-warning']) ?>
+        </div>
+        <?php ActiveForm::end(); ?>
+    </div>
+
+    <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'columns' => [
@@ -54,16 +93,27 @@ $this->params['breadcrumbs'][] = $this->title;
                 },
                 'format' => 'raw'
             ],
-
             [
                 'attribute' => 'n_created_dt',
                 'value' => function (\common\models\Notifications $model) {
                     return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->n_created_dt));
                 },
-                'format' => 'raw'
+                'format' => 'raw',
+                'filter' => DatePicker::widget([
+                    'model' => $searchModel,
+                    'attribute' => 'n_created_dt',
+                    'clientOptions' => [
+                        'autoclose' => true,
+                        'format' => 'yyyy-mm-dd',
+                    ],
+                    'options' => [
+                        'autocomplete' => 'off'
+                    ],
+                ]),
             ],
 
             ['class' => 'yii\grid\ActionColumn'],
         ],
     ]); ?>
-<?php Pjax::end(); ?></div>
+    <?php Pjax::end(); ?>
+</div>

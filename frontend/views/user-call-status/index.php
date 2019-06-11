@@ -1,7 +1,9 @@
 <?php
 
+use dosamigos\datepicker\DatePicker;
 use yii\helpers\Html;
 use yii\grid\GridView;
+use yii\widgets\ActiveForm;
 use yii\widgets\Pjax;
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\UserCallStatusSearch */
@@ -19,6 +21,44 @@ $this->params['breadcrumbs'][] = $this->title;
     <p>
         <?//= Html::a('Create User Call Status', ['create'], ['class' => 'btn btn-success']) ?>
     </p>
+
+    <div class="row">
+        <?php $form = ActiveForm::begin([
+            'action' => ['index'],
+            'method' => 'get',
+            'options' => [
+                'data-pjax' => 1
+            ],
+        ]); ?>
+
+        <div class="col-md-3">
+            <?php
+            echo  \kartik\daterange\DateRangePicker::widget([
+                'model'=> $searchModel,
+                'attribute' => 'date_range',
+                'useWithAddon'=>true,
+                'presetDropdown'=>true,
+                'hideInput'=>true,
+                'convertFormat'=>true,
+                'startAttribute' => 'datetime_start',
+                'endAttribute' => 'datetime_end',
+                'pluginOptions'=>[
+                    'timePicker'=> false,
+                    'timePickerIncrement'=>15,
+                    'locale'=>[
+                        'format'=>'Y-m-d',
+                        'separator' => ' - '
+                    ]
+                ]
+            ]);
+            ?>
+        </div>
+        <div class="form-group">
+            <?= Html::submitButton('<i class="fa fa-search"></i> Show result', ['class' => 'btn btn-success']) ?>
+            <?= Html::submitButton('<i class="fa fa-close"></i> Reset', ['name' => 'reset', 'class' => 'btn btn-warning']) ?>
+        </div>
+        <?php ActiveForm::end(); ?>
+    </div>
 
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
@@ -51,7 +91,18 @@ $this->params['breadcrumbs'][] = $this->title;
                 'value' => function (\common\models\UserCallStatus $model) {
                     return $model->us_created_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->us_created_dt)) : $model->us_created_dt;
                 },
-                'format' => 'raw'
+                'format' => 'raw',
+                'filter' => DatePicker::widget([
+                    'model' => $searchModel,
+                    'attribute' => 'us_created_dt',
+                    'clientOptions' => [
+                        'autoclose' => true,
+                        'format' => 'yyyy-mm-dd',
+                    ],
+                    'options' => [
+                        'autocomplete' => 'off'
+                    ],
+                ]),
             ],
 
             ['class' => 'yii\grid\ActionColumn'],

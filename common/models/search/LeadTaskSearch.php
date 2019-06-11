@@ -14,12 +14,18 @@ class LeadTaskSearch extends LeadTask
 {
     public $status_not_in;
     public $status;
+
+    public $datetime_start;
+    public $datetime_end;
+    public $date_range;
     /**
      * {@inheritdoc}
      */
     public function rules()
     {
         return [
+            [['datetime_start', 'datetime_end'], 'safe'],
+            [['date_range'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
             [['lt_lead_id', 'lt_task_id', 'lt_user_id'], 'integer'],
             [['lt_date', 'lt_notes', 'lt_completed_dt', 'lt_updated_dt', 'status_not_in', 'status'], 'safe'],
         ];
@@ -63,12 +69,20 @@ class LeadTaskSearch extends LeadTask
             return $dataProvider;
         }
 
+        if(empty($this->lt_date) && isset($params['LeadTaskSearch']['date_range'])){
+            $query->andFilterWhere(['>=', 'DATE(lt_date)', $this->datetime_start])
+                ->andFilterWhere(['<=', 'DATE(lt_date)', $this->datetime_end]);
+        }
+
+        if (isset($params['LeadTaskSearch']['lt_date'])) {
+            $query->andFilterWhere(['=','DATE(lt_date)', $this->lt_date]);
+        }
+
         // grid filtering conditions
         $query->andFilterWhere([
             'lt_lead_id' => $this->lt_lead_id,
             'lt_task_id' => $this->lt_task_id,
             'lt_user_id' => $this->lt_user_id,
-            'lt_date' => $this->lt_date,
             'lt_completed_dt' => $this->lt_completed_dt,
             'lt_updated_dt' => $this->lt_updated_dt,
         ]);

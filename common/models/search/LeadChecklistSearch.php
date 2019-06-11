@@ -11,12 +11,17 @@ use common\models\LeadChecklist;
  */
 class LeadChecklistSearch extends LeadChecklist
 {
+    public $datetime_start;
+    public $datetime_end;
+    public $date_range;
     /**
      * {@inheritdoc}
      */
     public function rules()
     {
         return [
+            [['datetime_start', 'datetime_end'], 'safe'],
+            [['date_range'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
             [['lc_type_id', 'lc_lead_id', 'lc_user_id'], 'integer'],
             [['lc_notes', 'lc_created_dt'], 'safe'],
         ];
@@ -60,12 +65,20 @@ class LeadChecklistSearch extends LeadChecklist
             return $dataProvider;
         }
 
+        if(empty($this->lc_created_dt) && isset($params['LeadChecklistSearch']['date_range'])){
+            $query->andFilterWhere(['>=', 'DATE(lc_created_dt)', $this->datetime_start])
+                ->andFilterWhere(['<=', 'DATE(lc_created_dt)', $this->datetime_end]);
+        }
+
+        if (isset($params['LeadChecklistSearch']['lc_created_dt'])) {
+            $query->andFilterWhere(['=','DATE(lc_created_dt)', $this->lc_created_dt]);
+        }
+
         // grid filtering conditions
         $query->andFilterWhere([
             'lc_type_id' => $this->lc_type_id,
             'lc_lead_id' => $this->lc_lead_id,
             'lc_user_id' => $this->lc_user_id,
-            'lc_created_dt' => $this->lc_created_dt,
         ]);
 
         $query->andFilterWhere(['like', 'lc_notes', $this->lc_notes]);
