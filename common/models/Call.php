@@ -291,13 +291,21 @@ class Call extends \yii\db\ActiveRecord
                 //$this->createNewLead();
             }
 
+            Yii::info(VarDumper::dumpAsString(['changedAttributes' => $changedAttributes, 'Call' => $this->attributes, 'Lead' => $this->cLead->attributes]), 'info\Call:afterSave');
+
             if($this->c_call_status === self::CALL_STATUS_IN_PROGRESS && $this->c_call_type_id === self::CALL_TYPE_IN && $this->c_lead_id && isset($changedAttributes['c_call_status']) && $changedAttributes['c_call_status'] === self::CALL_STATUS_RINGING) {
+
+                Yii::info(VarDumper::dumpAsString(['changedAttributes' => $changedAttributes, 'Call' => $this->attributes, 'Lead' => $this->cLead->attributes]), 'info\Call:afterSave1');
+
                 if($this->cLead && !$this->cLead->employee_id && $this->c_created_user_id && $this->cLead->status === Lead::STATUS_PENDING) {
+                    Yii::info(VarDumper::dumpAsString(['changedAttributes' => $changedAttributes, 'Call' => $this->attributes, 'Lead' => $this->cLead->attributes]), 'info\Call:afterSave2');
                     $this->cLead->employee_id = $this->c_created_user_id;
                     $this->cLead->status = Lead::STATUS_PROCESSING;
                     if($this->cLead->update()) {
                         Notifications::create($this->cLead->employee_id, 'A new lead ('.$this->cLead->id.') has been created for you. Call Id: ' . $this->c_id, Notifications::TYPE_SUCCESS, true);
                         Notifications::socket($this->cLead->employee_id, null, 'getNewNotification', [], true);
+                    } else {
+                        Yii::error(VarDumper::dumpAsString($this->cLead->errors), 'Call:afterSave:Lead:update');
                     }
                 }
             }
