@@ -92,7 +92,7 @@ class MonitorFlowController extends Controller
 
         /** @var Lead[] $leads */
 
-        $leads = Lead::find()->select(['id'])->where(['status' => Lead::STATUS_SNOOZE])->andWhere(['<=', 'snooze_for', date('Y-m-d H:i:s')])->all();
+        $leads = Lead::find()->where(['status' => Lead::STATUS_SNOOZE])->andWhere(['<=', 'snooze_for', date('Y-m-d H:i:s')])->limit(100)->all();
 
         if($leads) {
             foreach ($leads as $lead) {
