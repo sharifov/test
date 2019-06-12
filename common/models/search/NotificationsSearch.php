@@ -42,7 +42,7 @@ class NotificationsSearch extends Notifications
      */
     public function search($params)
     {
-        $query = Notifications::find();
+        $query = Notifications::find()->with('nUser');
 
         // add conditions that should always apply here
 

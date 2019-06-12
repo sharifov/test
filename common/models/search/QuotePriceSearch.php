@@ -42,7 +42,7 @@ class QuotePriceSearch extends QuotePrice
      */
     public function search($params)
     {
-        $query = QuotePrice::find();
+        $query = QuotePrice::find()->with('quote');
 
         // add conditions that should always apply here
 

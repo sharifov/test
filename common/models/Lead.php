@@ -79,6 +79,8 @@ use common\components\SearchService;
  *
  * @property Call[] $calls
  * @property Email[] $emails
+ * @property LeadCallExpert[] $leadCallExperts
+ * @property LeadChecklist[] $leadChecklists
  * @property Sms[] $sms
  * @property Quote[] $quotes
  * @property Note[] $notes
@@ -332,7 +334,23 @@ class Lead extends ActiveRecord
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getLDuplicateLead()
+    public function getLeadCallExperts()
+    {
+        return $this->hasMany(LeadCallExpert::class, ['lce_lead_id' => 'id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getLeadChecklists(): ActiveQuery
+    {
+        return $this->hasMany(LeadChecklist::class, ['lc_lead_id' => 'id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getLDuplicateLead(): ActiveQuery
     {
         return $this->hasOne(self::class, ['id' => 'l_duplicate_lead_id']);
     }
@@ -2498,8 +2516,8 @@ New lead {lead_id}
     public function getTaskInfo(): string
     {
 
-        $taskListAll = \common\models\LeadTask::find()->select(['COUNT(*) AS field_cnt', 'lt_task_id'])->where(['lt_lead_id' => $this->id])->groupBy(['lt_task_id'])->all();
-        $taskListChecked = \common\models\LeadTask::find()->select(['COUNT(*) AS field_cnt', 'lt_task_id'])->where(['lt_lead_id' => $this->id])->andWhere(['IS NOT', 'lt_completed_dt', null])->groupBy(['lt_task_id'])->all();
+        $taskListAll = \common\models\LeadTask::find()->with('ltTask')->select(['COUNT(*) AS field_cnt', 'lt_task_id'])->where(['lt_lead_id' => $this->id])->groupBy(['lt_task_id'])->all();
+        $taskListChecked = \common\models\LeadTask::find()->with('ltTask')->select(['COUNT(*) AS field_cnt', 'lt_task_id'])->where(['lt_lead_id' => $this->id])->andWhere(['IS NOT', 'lt_completed_dt', null])->groupBy(['lt_task_id'])->all();
 
         $completed = [];
         if ($taskListChecked) {
@@ -2519,6 +2537,26 @@ New lead {lead_id}
         return implode('<br> ', $item);
     }
 
+
+    /**
+     * @param null $user_id
+     * @return string
+     */
+    public function getCheckListInfo($user_id = null): string
+    {
+        $checkList = $this->leadChecklists;
+        $item = [];
+        if ($checkList) {
+            foreach ($checkList as $task) {
+                if ($user_id && $user_id !== $task->lc_user_id) {
+                    continue;
+                }
+                $item[] = $task->lcType->lct_name;
+            }
+        }
+        return $item ? '- ' . implode('<br>- ', $item) . '' : '';
+    }
+
     /**
      * @param int $lead_id
      * @return string
@@ -2533,6 +2571,9 @@ New lead {lead_id}
         }
         return $out;
     }
+
+
+
 
     /**
      * @param int|null $category_id
@@ -2589,7 +2630,7 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
 
         $command = $query->createCommand();
 
-        //echo $command->getRawSql(); exit;
+        echo $command->getRawSql(); exit;
 
         //VarDumper::dump($command->queryAll()); exit;
 

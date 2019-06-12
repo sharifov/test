@@ -43,7 +43,7 @@ class LeadTaskSearch extends LeadTask
      */
     public function search($params)
     {
-        $query = LeadTask::find();
+        $query = LeadTask::find()->with('ltUser', 'ltLead', 'ltTask');
 
         // add conditions that should always apply here
 

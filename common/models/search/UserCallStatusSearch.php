@@ -40,7 +40,7 @@ class UserCallStatusSearch extends UserCallStatus
      */
     public function search($params)
     {
-        $query = UserCallStatus::find();
+        $query = UserCallStatus::find()->with('usUser');
 
         // add conditions that should always apply here
 

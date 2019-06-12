@@ -306,6 +306,12 @@ sudo apt-get install -y php-memcached
 sudo service php7.3-fpm restart
 ```
 
+Create a Cert
+```text
+# https://github.com/loganstellway/self-signed-ssl
+./self-signed-tls.sh -c=MD -s=Chisinau -l=Chisinau -o=Kivork -u=Kivork -n=sales.zeit.test -e=alex.connor@techork.com
+```
+
 DIRECTORY STRUCTURE
 -------------------
 

@@ -40,7 +40,7 @@ class LeadCallExpertSearch extends LeadCallExpert
      */
     public function search($params)
     {
-        $query = LeadCallExpert::find();
+        $query = LeadCallExpert::find()->with('lceAgentUser');
 
         // add conditions that should always apply here
 

@@ -49,7 +49,7 @@ class LeadFlowSearch extends LeadFlow
      */
     public function search($params)
     {
-        $query = LeadFlow::find();
+        $query = LeadFlow::find()->with('employee', 'lead');
 
         // add conditions that should always apply here
 

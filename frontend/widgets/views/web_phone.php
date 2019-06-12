@@ -50,12 +50,12 @@
     <a id="prime2" class="fab2"><i class="fa fa-phone"></i></a>
 </div>
 
-<div id="web-phone-widget">
+<div id="web-phone-widget" style="background-color: rgba(255,255,255,.3);">
 
     <?php if($token): ?>
 
         <div id="web-phone-token" style="display: none"><?=$token?></div>
-            <table class="table" style="margin: 0">
+            <table class="table" style="margin: 0; background-color: rgba(255,255,255,.3);">
                 <tr>
                     <?/*<td style="display: none"><i title="<?=$token?>">Token</i></td>*/?>
                     <td width="100"><i class="fa fa-user"></i> <span><?=$clientId?></span></td>

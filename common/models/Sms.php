@@ -471,12 +471,12 @@ class Sms extends \yii\db\ActiveRecord
                 break;
         }
         if ($smsType == 0){
-            $sms = self::find()->select(['s_id', 's_status_id', 's_updated_dt', 's_tw_price'])
+            $sms = self::find()->select(['s_status_id', 's_updated_dt', 's_tw_price'])
                 ->where(['s_status_id' => [ self::STATUS_DONE, self::STATUS_ERROR]])
                 ->andWhere(['between', 's_updated_dt', $sDate, $eDate])
                 ->all();
         } else {
-            $sms = self::find()->select(['s_id', 's_status_id', 's_updated_dt', 's_tw_price'])
+            $sms = self::find()->select(['s_status_id', 's_updated_dt', 's_tw_price'])
                 ->where(['s_status_id' => [ self::STATUS_DONE, self::STATUS_ERROR]])
                 ->andWhere(['between', 's_updated_dt', $sDate, $eDate])
                 ->andWhere(['=', 's_type_id', $smsType])

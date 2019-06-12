@@ -403,11 +403,11 @@ class Call extends \yii\db\ActiveRecord
         }
 
         if ($callType == 0){
-            $calls = self::find()->select(['c_id', 'c_call_status', 'c_updated_dt', 'c_call_duration', 'c_price'])
+            $calls = self::find()->select(['c_call_status', 'c_updated_dt', 'c_call_duration', 'c_price'])
                 ->where(['c_call_status' => ['completed', 'busy', 'no-answer', 'canceled']])
                 ->andWhere(['between', 'c_updated_dt', $sDate, $eDate])->all();
         } else {
-            $calls =self::find()->select(['c_id', 'c_call_status', 'c_updated_dt', 'c_call_duration', 'c_price'])
+            $calls =self::find()->select(['c_call_status', 'c_updated_dt', 'c_call_duration', 'c_price'])
                 ->where(['c_call_status' => ['completed', 'busy', 'no-answer', 'canceled']])
                 ->andWhere(['between', 'c_updated_dt', $sDate, $eDate])
                 ->andWhere(['=', 'c_call_type_id', $callType])->all();

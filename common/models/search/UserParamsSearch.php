@@ -42,7 +42,7 @@ class UserParamsSearch extends UserParams
      */
     public function search($params)
     {
-        $query = UserParams::find();
+        $query = UserParams::find()->with('upUpdatedUser');
 
         // add conditions that should always apply here
 

@@ -41,7 +41,7 @@ class EmailTemplateTypeSearch extends EmailTemplateType
      */
     public function search($params)
     {
-        $query = EmailTemplateType::find();
+        $query = EmailTemplateType::find()->with('etpCreatedUser', 'etpUpdatedUser');
 
         // add conditions that should always apply here
 

@@ -41,7 +41,7 @@ class UserGroupAssignSearch extends UserGroupAssign
      */
     public function search($params)
     {
-        $query = UserGroupAssign::find();
+        $query = UserGroupAssign::find()->with('ugsGroup');
 
         // add conditions that should always apply here
 

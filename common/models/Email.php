@@ -637,12 +637,12 @@ class Email extends \yii\db\ActiveRecord
                 break;
         }
         if ($emailsType == 0){
-            $emails = self::find()->select(['e_id', 'e_status_id', 'e_created_dt'])
+            $emails = self::find()->select(['e_status_id', 'e_created_dt'])
                 ->where(['e_status_id' => [ self::STATUS_DONE, self::STATUS_ERROR]])
                 ->andWhere(['between', 'e_created_dt', $sDate, $eDate])
                 ->all();
         } else {
-            $emails = self::find()->select(['e_id', 'e_status_id', 'e_created_dt'])
+            $emails = self::find()->select(['e_status_id', 'e_created_dt'])
                 ->where(['e_status_id' => [ self::STATUS_DONE, self::STATUS_ERROR]])
                 ->andWhere(['between', 'e_created_dt', $sDate, $eDate])
                 ->andWhere(['=', 'e_type_id', $emailsType])

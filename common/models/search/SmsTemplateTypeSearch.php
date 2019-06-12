@@ -41,7 +41,7 @@ class SmsTemplateTypeSearch extends SmsTemplateType
      */
     public function search($params)
     {
-        $query = SmsTemplateType::find();
+        $query = SmsTemplateType::find()->with('stpCreatedUser', 'stpUpdatedUser');
 
         // add conditions that should always apply here
 

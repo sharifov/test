@@ -60,7 +60,7 @@ use yii\widgets\Pjax;
         }
         ?>&nbsp;
 
-        <h2><i class="fa fa-bell-o <?=$label?>"></i> Call Expert Block (<?=$dataProvider->count?>)
+        <h2><i class="fa fa-bell-o <?=$label?>"></i> Call Expert (<?=$dataProvider->count?>)
 
             <?php
                 if($lastModel) {

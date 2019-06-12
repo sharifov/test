@@ -49,7 +49,7 @@ class ClientSearch extends Client
      */
     public function search($params)
     {
-        $query = Client::find();
+        $query = Client::find()->with('leads.employee.ugsGroups');
 
         // add conditions that should always apply here
 

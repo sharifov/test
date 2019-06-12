@@ -288,7 +288,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'value' => function (\common\models\Lead $model) {
                 return '<small style="font-size: 10px">' . Lead::getTaskInfo2($model->id) . '</small>';
             },
-            'format' => 'html',
+            'format' => 'raw',
             'contentOptions' => [
                 'class' => 'text-left'
             ],
@@ -299,6 +299,21 @@ $this->params['breadcrumbs'][] = $this->title;
         ],
 
         [
+            'header' => 'Checklist',
+            'value' => function (\common\models\Lead $model) {
+                return '<small style="font-size: 10px">' . $model->getChecklistInfo($model->employee_id) . '</small>';
+            },
+            'format' => 'raw',
+            'contentOptions' => [
+                'class' => 'text-left'
+            ],
+            //'visible' => ! $isAgent,
+            'options' => [
+                'style' => 'width:170px'
+            ]
+        ],
+
+        /*[
             'label' => 'Countdown',
             'contentOptions' => [
                 'style' => 'width: 115px;'
@@ -307,7 +322,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 return Lead::getSnoozeCountdown($model->id, $model->snooze_for);
             },
             'format' => 'raw'
-        ],
+        ],*/
         /*[
             'attribute' => 'project_id',
             'value' => function(\common\models\Lead $model) {
