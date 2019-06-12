@@ -36,6 +36,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'attributes' => [
                 'c_id',
                 'c_call_sid',
+                'c_parent_call_sid',
                 //'c_account_sid',
                 //'c_call_type_id',
                 [

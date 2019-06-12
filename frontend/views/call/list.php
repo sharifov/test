@@ -214,13 +214,25 @@ $this->params['breadcrumbs'][] = $this->title;
             'c_call_duration',
             //'c_sip_response_code',
             //'c_recording_url:url',
-            [
+            /*[
                 'attribute' => 'c_recording_url',
                 'value' => function (\common\models\Call $model) {
                     return  $model->c_recording_url ? '<audio controls="controls" style="width: 350px; height: 25px"><source src="'.$model->c_recording_url.'" type="audio/mpeg"> </audio>' : '-';
                 },
                 'format' => 'raw'
+            ],*/
+
+            [
+                'attribute' => 'c_recording_duration',
+                'label' => 'Recording',
+                'value' => function (\common\models\Call $model) {
+                    return  $model->c_recording_url ? Html::button($model->c_recording_duration . ' <i class="fa fa-volume-up"></i>', ['class' => 'btn btn-success btn-xs btn-recording_url', 'data-source_src' => $model->c_recording_url]) : '-';
+                },
+                'format' => 'raw',
+                'contentOptions' => ['class' => 'text-right'],
+
             ],
+
             //'c_recording_sid',
             'c_recording_duration',
             //'c_timestamp',
@@ -294,3 +306,36 @@ $this->params['breadcrumbs'][] = $this->title;
     ]); ?>
     <?php Pjax::end(); ?>
 </div>
+
+<?php
+\yii\bootstrap\Modal::begin([
+    'header' => '<b>Call Recording</b>',
+    // 'toggleButton' => ['label' => 'click me'],
+    'id' => 'modalCallRecording',
+    'size' => \yii\bootstrap\Modal::SIZE_LARGE,
+]);
+?>
+    <div class="row">
+        <div class="col-md-12" id="audio_recording">
+
+        </div>
+    </div>
+<?php \yii\bootstrap\Modal::end(); ?>
+
+
+<?php
+
+$js = <<<JS
+$(document).on('click', '.btn-recording_url', function() {
+     var source_src = $(this).data('source_src');
+     $('#audio_recording').html('<audio controls="controls" autoplay="true" id="audio_controls" style="width: 100%;"><source src="'+ source_src +'" type="audio/mpeg"></audio>');
+     $('#modalCallRecording').modal('show');
+});
+
+$('#modalCallRecording').on('hidden.bs.modal', function () {
+    $('#audio_recording').html('');
+})
+
+JS;
+$this->registerJs($js, \yii\web\View::POS_READY);
+?>
