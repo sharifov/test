@@ -386,7 +386,7 @@ $this->registerJs($js);
                                     'tag' => false,
                                 ],
                                 'template' => '{input}'
-                            ])->dropDownList(Lead::getCabin()) ?>
+                            ])->dropDownList(Lead::getCabinList()) ?>
                         </div>
                     </td>
                     <th><label for="v-carrier">Validating Carrier</label></th>

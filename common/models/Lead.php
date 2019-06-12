@@ -680,15 +680,22 @@ class Lead extends ActiveRecord
         return null;
     }
 
+    /**
+     * @param null $cabin
+     * @return mixed|null
+     */
     public static function getCabin($cabin = null)
     {
         $mapping = self::CABIN_LIST;
-
-        if ($cabin === null) {
-            return $mapping;
-        }
-
         return isset($mapping[$cabin]) ? $mapping[$cabin] : $cabin;
+    }
+
+    /**
+     * @return array
+     */
+    public static function getCabinList(): array
+    {
+        return self::CABIN_LIST;
     }
 
     /**
@@ -1967,7 +1974,7 @@ New lead {lead_id}
             'origin' => $origin,
             'destination' => $destination,
             'quotes' => $models,
-            'leadCabin' => self::getCabin($this->cabin),
+            'leadCabin' => $this->getCabinClassName(),
             'nrPax' => ($this->adults + $this->children + $this->infants),
             'project' => $this->project,
             'agentName' => ucfirst($this->employee->username),
@@ -2067,7 +2074,7 @@ New lead {lead_id}
             'origin' => $origin,
             'destination' => $destination,
             'quotes' => $models,
-            'leadCabin' => self::getCabin($this->cabin),
+            'leadCabin' => $this->getCabinClassName(),
             'nrPax' => ($this->adults + $this->children + $this->infants),
             'project' => $this->project,
             'agentName' => ucfirst($this->employee->username),
@@ -2365,7 +2372,7 @@ New lead {lead_id}
             'request' => [
                 'originCity' => $origin,
                 'destinationCity' => $destination,
-                'cabinType' => self::getCabin($this->cabin),
+                'cabinType' => $this->getCabinClassName(),
                 'tripType' => strtolower($this->trip_type),
                 'pax' => ($this->adults + $this->children + $this->infants)
             ],

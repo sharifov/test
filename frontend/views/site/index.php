@@ -402,7 +402,7 @@ JS;
                 'label' => 'Cabin',
                 'attribute' => 'leads.cabin',
                 'value' => function(\common\models\LeadTask $model) {
-                    return \common\models\Lead::getCabin($model->ltLead->cabin) ?? '-';
+                    return $model->ltLead->getCabinClassName();
                 },
             ],
 
