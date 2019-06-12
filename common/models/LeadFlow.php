@@ -113,7 +113,6 @@ class LeadFlow extends \yii\db\ActiveRecord
         return $stateFlow->save();
     }
 
-
     /**
      * @param Lead2 $lead
      * @param bool $insert
