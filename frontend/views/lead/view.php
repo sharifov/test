@@ -251,41 +251,7 @@ if (!$leadForm->getLead()->isNewRecord) {
         'leadId' => $leadForm->getLead()->id
     ]);
 
-    $checkUpdatesUrl = \yii\helpers\Url::to([
-        'lead/check-updates',
-        'leadId' => $leadForm->getLead()->id,
-        'lastUpdate' => date('Y-m-d H:i:s')
-    ]);
-
     $js = <<<JS
-    function checkRequestUpdates(checkUrl) {
-        $.get(checkUrl)
-            .done(function (data) {
-                if (data.logs.length != 0) {
-                    $('#agents-activity-logs').html(data.logs);
-                }
-                if (data.needRefresh) {
-                    var modal = $('#modal-error');
-                    modal.find('.modal-body').html(data.content);
-                    modal.modal({
-                        backdrop: 'static',
-                        show: true
-                    });
-                } else {
-                    setTimeout(function() {
-                        checkRequestUpdates(data.checkUpdatesUrl);
-                    }, 120000);
-                }
-            })
-            .fail(function () {
-                setTimeout(function() {
-                    checkRequestUpdates('$checkUpdatesUrl');
-                }, 120000);
-            });
-    }
-    setTimeout(function() {
-        checkRequestUpdates('$checkUpdatesUrl');
-    }, 120000);
 
     $('#view-flow-transition').click(function() {
         $('#preloader').removeClass('hidden');
