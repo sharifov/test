@@ -1274,7 +1274,7 @@ New lead {lead_id}
             $job = new QuickSearchInitPriceJob();
             $job->lead_id = $this->id;
             $jobId = Yii::$app->queue_job->push($job);
-            Yii::info('Lead: ' . $this->id . ', QuickSearchInitPriceJob: '.$jobId, 'info\Lead:afterSave:QuickSearchInitPriceJob');
+            //Yii::info('Lead: ' . $this->id . ', QuickSearchInitPriceJob: '.$jobId, 'info\Lead:afterSave:QuickSearchInitPriceJob');
 
         } else {
 
@@ -1286,7 +1286,7 @@ New lead {lead_id}
                     $job = new UpdateLeadBOJob();
                     $job->lead_id = $this->id;
                     $jobId = Yii::$app->queue_job->push($job);
-                    Yii::info('Lead: ' . $this->id . ', UpdateLeadBOJob: ' . $jobId, 'info\Lead:afterSave:UpdateLeadBOJob');
+                    // Yii::info('Lead: ' . $this->id . ', UpdateLeadBOJob: ' . $jobId, 'info\Lead:afterSave:UpdateLeadBOJob');
                 }
             }
 

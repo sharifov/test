@@ -228,6 +228,11 @@ $ws_worker->onClose = function(\Workerman\Connection\TcpConnection $connection) 
             unset($userConnections[$user_id][$connection->id]);
             if(isset($userConnections[$user_id]) && count($userConnections[$user_id]) > 0) {
 
+                foreach ($userConnections[$user_id] as $connectionId) {
+                    $user[$user_id] = $connectionId;
+                    //break;
+                }
+
             } else {
                 if(isset($user[$user_id])) {
                     unset($user[$user_id]);

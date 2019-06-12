@@ -314,8 +314,10 @@ class Call extends \yii\db\ActiveRecord
                     $lead->status = Lead::STATUS_PROCESSING;
                     $lead->l_answered = true;
                     if($lead->save()) {
-                        Notifications::create($lead->employee_id, 'A new lead ('.$lead->id.') has been created for you. Call Id: ' . $this->c_id, Notifications::TYPE_SUCCESS, true);
+                        $host = \Yii::$app->params['url_address'] ?? '';
+                        Notifications::create($lead->employee_id, 'AutoCreated new Lead ('.$lead->id.')', 'A new lead ('.$lead->id.') has been created for you. Call Id: ' . $this->c_id, Notifications::TYPE_SUCCESS, true);
                         Notifications::socket($lead->employee_id, null, 'getNewNotification', [], true);
+                        Notifications::socket($lead->employee_id, null, 'openUrl', ['url' => $host . '/lead/view/'. $lead->gid], false);
                     } else {
                         Yii::error(VarDumper::dumpAsString($lead->errors), 'Call:afterSave:Lead:update');
                     }
