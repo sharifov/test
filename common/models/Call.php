@@ -308,11 +308,12 @@ class Call extends \yii\db\ActiveRecord
 
                 $lead = $this->cLead2;
 
-                if($lead  && !$lead->employee_id && $this->c_created_user_id && $lead->status === Lead::STATUS_PENDING) {
+                if($lead && !$lead->employee_id && $this->c_created_user_id && $lead->status === Lead::STATUS_PENDING) {
                     Yii::info(VarDumper::dumpAsString(['changedAttributes' => $changedAttributes, 'Call' => $this->attributes, 'Lead' => $lead->attributes]), 'info\Call:afterSave2');
                     $lead->employee_id = $this->c_created_user_id;
                     $lead->status = Lead::STATUS_PROCESSING;
-                    if($lead->update()) {
+                    $lead->l_answered = true;
+                    if($lead->save()) {
                         Notifications::create($lead->employee_id, 'A new lead ('.$lead->id.') has been created for you. Call Id: ' . $this->c_id, Notifications::TYPE_SUCCESS, true);
                         Notifications::socket($lead->employee_id, null, 'getNewNotification', [], true);
                     } else {

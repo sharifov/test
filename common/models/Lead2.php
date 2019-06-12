@@ -448,6 +448,21 @@ class Lead2 extends \yii\db\ActiveRecord
             }
         }
 
+
+        if(($this->status === Lead::STATUS_PROCESSING && isset($changedAttributes['employee_id'])) || (isset($changedAttributes['l_answered']) && $changedAttributes['l_answered'] !== $this->l_answered)) {
+            LeadTask::deleteUnnecessaryTasks($this->id);
+
+            if($this->l_answered) {
+                $taskType = Task::CAT_ANSWERED_PROCESS;
+            } else {
+                $taskType = Task::CAT_NOT_ANSWERED_PROCESS;
+            }
+
+            LeadTask::createTaskList($this->id, $this->employee_id, 1, '', $taskType);
+            LeadTask::createTaskList($this->id, $this->employee_id, 2, '', $taskType);
+            LeadTask::createTaskList($this->id, $this->employee_id, 3, '', $taskType);
+        }
+
     }
 
 
