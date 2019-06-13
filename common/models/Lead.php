@@ -245,7 +245,7 @@ class Lead extends ActiveRecord
 
             [['client_id', 'employee_id', 'status', 'project_id', 'source_id', 'rating', 'bo_flight_id', 'l_grade', 'clone_id', 'l_call_status_id', 'l_duplicate_lead_id'], 'integer'],
             [['adults', 'children', 'infants'], 'integer', 'max' => 9],
-            
+
             [['notes_for_experts', 'request_ip_detail', 'l_client_ua'], 'string'],
 
             [['created', 'updated', 'snooze_for', 'called_expert', 'additional_information', 'l_pending_delay_dt', 'l_last_action_dt'], 'safe'],
@@ -1962,7 +1962,7 @@ New lead {lead_id}
             ? $airport->city
             : $this->leadFlightSegments[0]->destination;
 
-        $tripType = Lead::getFlightType($this->trip_type);
+        $tripType = $this->getFlightTypeName();
 
         $userProjectParams = UserProjectParams::findOne([
             'upp_user_id' => $this->employee->id,
@@ -2063,7 +2063,7 @@ New lead {lead_id}
             ? $airport->city
             : $this->leadFlightSegments[0]->destination;
 
-        $tripType = Lead::getFlightType($this->trip_type);
+        $tripType = $this->getFlightTypeName();
 
         $userProjectParams = UserProjectParams::findOne([
             'upp_user_id' => $this->employee->id,
@@ -2386,20 +2386,33 @@ New lead {lead_id}
         return $emailData;
     }
 
+
+    /**
+     * @return array
+     */
+    public static function getFlightTypeList(): array
+    {
+        return self::TRIP_TYPE_LIST;
+    }
+
     /**
      * @param null $flightType
-     * @return array|mixed|null
+     * @return string
      */
-    public static function getFlightType($flightType = null)
+    public static function getFlightType($flightType = null): string
     {
-        $mapping = self::TRIP_TYPE_LIST;
-
-        if ($flightType === null) {
-            return $mapping;
-        }
-
-        return $mapping[$flightType] ?? $flightType;
+        return self::TRIP_TYPE_LIST[$flightType] ?? '-';
     }
+
+
+    /**
+     * @return string
+     */
+    public function getFlightTypeName(): string
+    {
+        return self::TRIP_TYPE_LIST[$this->trip_type] ?? '-';
+    }
+
 
     /**
      * @return array

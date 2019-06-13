@@ -515,14 +515,14 @@ $duration = 10;
                                                 [
                                                     'attribute' => 'trip_type',
                                                     'value' => function(\common\models\Lead $model) {
-                                                        return \common\models\Lead::getFlightType($model->trip_type) ?? '-';
+                                                        return $model->getFlightTypeName();
                                                     },
                                                 ],
 
                                                 [
                                                     'attribute' => 'cabin',
                                                     'value' => function(\common\models\Lead $model) {
-                                                        return \common\models\Lead::getCabin($model->cabin) ?? '-';
+                                                        return $model->getCabinClassName();
                                                     },
                                                 ],
 

@@ -363,9 +363,9 @@ $this->params['breadcrumbs'][] = $this->title;
         [
             'attribute' => 'trip_type',
             'value' => function(\common\models\Lead $model) {
-                return \common\models\Lead::getFlightType($model->trip_type) ?? '-';
+                return $model->getFlightTypeName();
             },
-            'filter' => \common\models\Lead::TRIP_TYPE_LIST
+            'filter' => \common\models\Lead::getFlightTypeList()
         ],
 
         [

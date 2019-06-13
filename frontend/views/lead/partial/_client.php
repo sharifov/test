@@ -321,17 +321,17 @@ $formId = sprintf('%s-form', $leadForm->getClient()->formName());
                                 [
                                     'attribute' => 'trip_type',
                                     'value' => function(\common\models\Lead $model) {
-                                        return \common\models\Lead::getFlightType($model->trip_type) ?? '-';
+                                        return $model->getFlightTypeName();
                                     },
-                                    'filter' => \common\models\Lead::TRIP_TYPE_LIST
+                                    'filter' => \common\models\Lead::getFlightTypeList()
                                 ],
 
                                 [
                                     'attribute' => 'cabin',
                                     'value' => function(\common\models\Lead $model) {
-                                        return \common\models\Lead::getCabin($model->cabin) ?? '-';
+                                        return $model->getCabinClassName();
                                     },
-                                    'filter' => \common\models\Lead::CABIN_LIST
+                                    'filter' => \common\models\Lead::getCabinList()
                                 ],
 
                                 [

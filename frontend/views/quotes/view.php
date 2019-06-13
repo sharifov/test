@@ -64,7 +64,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         'value' => function(\common\models\Quote $model) {
                             return $model->getStatusName(true);
                         },
-                        'format' => 'html',
+                        'format' => 'raw',
                         'filter' => \common\models\Quote::STATUS_LIST
                     ],
 
@@ -117,7 +117,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         'value' => function(\common\models\Quote $model) {
                             return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->created));
                         },
-                        'format' => 'html',
+                        'format' => 'raw',
                     ],
 
                     [
@@ -125,7 +125,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         'value' => function(\common\models\Quote $model) {
                             return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->updated));
                         },
-                        'format' => 'html',
+                        'format' => 'raw',
                     ],
                 ],
             ]) ?>
@@ -203,7 +203,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         'value' => function(\common\models\QuotePrice $model) {
                             return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->created));
                         },
-                        'format' => 'html',
+                        'format' => 'raw',
                     ],
 
                     [
@@ -211,7 +211,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         'value' => function(\common\models\QuotePrice $model) {
                             return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->updated));
                         },
-                        'format' => 'html',
+                        'format' => 'raw',
                     ],
 
 

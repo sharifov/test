@@ -150,7 +150,7 @@ JS;
                         'options' => [
                             'tag' => false,
                         ]])->label(false)
-                        ->radioList(Lead::getFlightType(),
+                        ->radioList(Lead::getFlightTypeList(),
                             [
                                 'tag' => 'ul',
                                 'class' => 'sl-itinerary-form__trip-type nav nav-tabs js-trip-type',

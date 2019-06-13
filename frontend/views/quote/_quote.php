@@ -373,7 +373,7 @@ $this->registerJs($js);
                                     'tag' => false,
                                 ],
                                 'template' => '{input}'
-                            ])->dropDownList(Lead::getFlightType()) ?>
+                            ])->dropDownList(Lead::getFlightTypeList()) ?>
                         </div>
                     </td>
                 </tr>
