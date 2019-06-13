@@ -1011,17 +1011,36 @@ class CommunicationController extends ApiBaseController
                         }
                     }
 
+
+
+
+                        if ($clientPhone) {
+                            $lead2 = Lead2::findLastLeadByClientPhone($client_phone_number);
+                        }
+
+                        if (!$lead2) {
+                            //$sql = Lead2::findLastLeadByClientPhone($client_phone_number, true);
+                            //Yii::info('phone: '. $client_phone_number.', sql: '. $sql, 'info\API:Communication:findLastLeadByClientPhone');
+                            if(isset($agentRes['call_project_id']) && $agentRes['call_project_id']) {
+                                $lead2 = Lead2::createNewLeadByPhone($client_phone_number, $agentRes['call_project_id']);
+                            }
+                        } /*else {
+                            Yii::info('Find LastLead ('.$lead2->id.') By ClientPhone: ' . $client_phone_number, 'info\API:Communication:findLastLeadByClientPhone');
+                        }*/
+
+
+
                 } else {
                     $callGeneralNumber = true;
                 }
 
                 // $clientPhone = ClientPhone::find()->where(['phone' => $client_phone_number])->orderBy(['id' => SORT_DESC])->limit(1)->one();
-                $lead = null;
+                //$lead = null;
 
                 //if(!$lead) {
-                    if ($clientPhone && $clientPhone->client_id) {
+                    /*if ($clientPhone && $clientPhone->client_id) {
                         $lead = Lead::find()->select(['id'])->where(['client_id' => $clientPhone->client_id])->orderBy(['id' => SORT_DESC])->limit(1)->one();
-                    }
+                    }*/
                 //}
 
                 $data = [];
@@ -1039,8 +1058,8 @@ class CommunicationController extends ApiBaseController
                     $data['client_name'] = $client->full_name;
                     $data['client_id'] = $clientPhone->client_id;
                     $data['client_created_date'] = Yii::$app->formatter->asDate(strtotime($client->created));
-                    if ($lead) {
-                        $data['last_lead_id'] = $lead->id;
+                    if ($lead2) {
+                        $data['last_lead_id'] = $lead2->id;
                         $data['client_last_activity'] = Yii::$app->formatter->asDate(strtotime($client->created));
                     }
                 }
@@ -1576,11 +1595,14 @@ class CommunicationController extends ApiBaseController
                 }
 
 
-                if($call->c_lead_id && $call->cLead && $call->cLead->status === Lead::STATUS_PENDING && $call->cLead->l_call_status_id === Lead::CALL_STATUS_READY && ($call->c_call_status === Call::CALL_STATUS_RINGING || $call->c_call_status === Call::CALL_STATUS_IN_PROGRESS) && $call->c_created_user_id) {
+                if($call->c_lead_id && $call->cLead && $call->cLead->status === Lead::STATUS_PENDING && $call->cLead->l_call_status_id === Lead::CALL_STATUS_READY &&
+                    ($call->c_call_status === Call::CALL_STATUS_RINGING || $call->c_call_status === Call::CALL_STATUS_IN_PROGRESS) && $call->c_created_user_id) {
                     $lead = $call->cLead;
                     $lead->employee_id = $call->c_created_user_id;
                     $lead->l_call_status_id = Lead::CALL_STATUS_PROCESS;
-                    $lead->save();
+                    if(!$lead->save()) {
+                        Yii::error('lead: ' . $lead->id . ' ' . VarDumper::dumpAsString($lead->errors), 'API:CommunicationController:actionVoice:TYPE_VOIP_CLIENT:Lead:save');
+                    }
                 }
 
                 //$call->c_call_status = $post['callData']['CallStatus'] ?? '';
