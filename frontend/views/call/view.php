@@ -30,6 +30,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <div class="col-md-6">
     <?php if($model->c_recording_url):?>
         <audio controls="controls" style="width: 100%;"><source src="<?=$model->c_recording_url?>" type="audio/mpeg"></audio>
+    <?php endif;?>
         <?= DetailView::widget([
             'model' => $model,
             'attributes' => [
@@ -57,7 +58,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
             ],
         ]) ?>
-    <?php endif;?>
+
 
     </div>
     <div class="col-md-6">
