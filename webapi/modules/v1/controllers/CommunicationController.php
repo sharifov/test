@@ -787,15 +787,11 @@ class CommunicationController extends ApiBaseController
 
                         if ($clientPhone) {
                             $lead2 = Lead2::findLastLeadByClientPhone($client_phone_number);
-
-                            if(!$lead2) {
-                                $sql = Lead2::findLastLeadByClientPhone($client_phone_number, true);
-                                Yii::info('Not find LastLead By ClientPhone: ' . $client_phone_number.', sql: '. $sql, 'info\API:Communication:findLastLeadByClientPhone');
-                            }
                         }
 
                         if (!$lead2) {
-                            Yii::info('Not find LastLead By ClientPhone: ' . $client_phone_number, 'info\API:Communication:findLastLeadByClientPhone2');
+                            $sql = Lead2::findLastLeadByClientPhone($client_phone_number, true);
+                            Yii::info('phone: '. $client_phone_number.', sql: '. $sql, 'info\API:Communication:findLastLeadByClientPhone');
                             $lead2 = Lead2::createNewLeadByPhone($client_phone_number, $project->id);
                         } else {
                             Yii::info('Find LastLead ('.$lead2->id.') By ClientPhone: ' . $client_phone_number, 'info\API:Communication:findLastLeadByClientPhone');
