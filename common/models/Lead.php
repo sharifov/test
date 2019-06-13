@@ -241,11 +241,11 @@ class Lead extends ActiveRecord
 
             [['trip_type', 'cabin'], 'required', 'on' => self::SCENARIO_API],
             [['adults', 'children', 'source_id'], 'required', 'on' => self::SCENARIO_API], //'except' => self::SCENARIO_API],
+            [['adults'], 'integer', 'min' => 1, 'on' => self::SCENARIO_API],
 
             [['client_id', 'employee_id', 'status', 'project_id', 'source_id', 'rating', 'bo_flight_id', 'l_grade', 'clone_id', 'l_call_status_id', 'l_duplicate_lead_id'], 'integer'],
             [['adults', 'children', 'infants'], 'integer', 'max' => 9],
-            [['adults'], 'integer', 'min' => 1],
-
+            
             [['notes_for_experts', 'request_ip_detail', 'l_client_ua'], 'string'],
 
             [['created', 'updated', 'snooze_for', 'called_expert', 'additional_information', 'l_pending_delay_dt', 'l_last_action_dt'], 'safe'],
