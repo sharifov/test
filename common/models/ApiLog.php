@@ -107,12 +107,27 @@ class ApiLog extends \yii\db\ActiveRecord
         $this->end_microtime = microtime(true);
         $this->end_memory_usage = memory_get_usage();
 
-        $time = round($this->end_microtime - $this->start_microtime, 3);
+        if($this->start_microtime) {
+            $time = round($this->end_microtime - $this->start_microtime, 3);
+        } else {
+            $time = 0;
+        }
+
+        if($time > 999) {
+            $time = 999;
+        }
+
+        if($this->start_memory_usage) {
+            $memory_usage = $this->end_memory_usage - $this->start_memory_usage;
+        } else {
+            $memory_usage = 0;
+        }
+
 
         //VarDumper::dump($time);exit;
 
         $this->al_execution_time = $time;
-        $this->al_memory_usage = $this->end_memory_usage - $this->start_memory_usage;
+        $this->al_memory_usage = $memory_usage;
 
         $profiling = Yii::getLogger()->getDbProfiling();
 

@@ -263,7 +263,7 @@ JS;
                 <div class="col-sm-3">
                     <?= $formLeadModel->field($leadForm->getLead(), 'cabin', [
                         //'template' => '{label}<label for="cabin-class" class="select-wrap-label">{input}</label>{error}{hint}'
-                    ])->dropDownList(Lead::getCabin(), [
+                    ])->dropDownList(Lead::getCabinList(), [
                         'prompt' => '---'
                     ]) ?>
                 </div>

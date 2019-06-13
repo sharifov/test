@@ -1105,7 +1105,7 @@ class LeadController extends FController
         return null;
     }
 
-    public function actionCheckUpdates($leadId, $lastUpdate)
+    /*public function actionCheckUpdates($leadId, $lastUpdate)
     {
         Yii::$app->response->format = Response::FORMAT_JSON;
         $response = [
@@ -1146,7 +1146,7 @@ class LeadController extends FController
         }
 
         return $response;
-    }
+    }*/
 
     public function actionGetBadges()
     {

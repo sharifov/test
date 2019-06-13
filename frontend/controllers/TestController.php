@@ -1262,4 +1262,10 @@ class TestController extends FController
         echo $lead->createCommand()->getRawSql();
     }
 
+    public function actionNotify()
+    {
+        $host = \Yii::$app->params['url_address'] ?? '';
+        Notifications::socket(Yii::$app->user->id, null, 'openUrl', ['url' => $host . '/lead/view/b5d963c9241dd741e22b37d1fa80a9b6'], false);
+    }
+
 }
