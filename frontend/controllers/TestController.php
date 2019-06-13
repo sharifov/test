@@ -9,6 +9,7 @@ use common\models\Call;
 use common\models\ClientPhone;
 use common\models\Employee;
 use common\models\Lead;
+use common\models\Lead2;
 use common\models\Notifications;
 use common\models\Project;
 use common\models\Source;
@@ -1266,6 +1267,11 @@ class TestController extends FController
     {
         $host = \Yii::$app->params['url_address'] ?? '';
         Notifications::socket(Yii::$app->user->id, null, 'openUrl', ['url' => $host . '/lead/view/b5d963c9241dd741e22b37d1fa80a9b6'], false);
+    }
+
+    public function actionTest3()
+    {
+        echo Lead2::findLastLeadByClientPhone('+3736959', true);
     }
 
 }
