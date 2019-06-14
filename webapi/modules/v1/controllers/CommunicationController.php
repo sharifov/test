@@ -1835,7 +1835,7 @@ class CommunicationController extends ApiBaseController
                             $otherCallArr[] = $otherCall->attributes;
 
                             if($otherCall->c_call_status === Call::CALL_STATUS_RINGING) {
-                                $otherCall->c_call_status = Call::CALL_STATUS_CANCELED;
+                                $otherCall->c_call_status = Call::CALL_STATUS_NO_ANSWER;
                                 $otherCall->c_updated_dt = date('Y-m-d H:i:s');
                                 $otherCall->save();
                             }
