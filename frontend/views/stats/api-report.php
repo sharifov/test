@@ -4,6 +4,11 @@
  */
 $js = <<<JS
 
+function generateChartPreloader() {
+              return "<div class='chartPreloader' style='width:100%; height:50%'>" + 
+              "<i class='fa fa-spinner fa-pulse fa-4x' style='color: #CCCCCC;  position: relative;  top: 250px;  left: 45%;  transform: translate(-50%, -50%);'></i>" +
+              "</div>"
+}
 JS;
 $this->registerJs($js);
 $this->title = 'API Logs Report';
@@ -19,7 +24,7 @@ use yii\widgets\Pjax; ?>
                 <div class="col-md-12 col-sm-6 col-xs-12">
                     <div class="x_panel">
                         <div class="col-md-3">
-                            <?/*=\kartik\daterange\DateRangePicker::widget([
+                            <?=\kartik\daterange\DateRangePicker::widget([
                                 'options'=>['id'=>'api-stats-picker'],
                                 'name'=>'callStatsRange',
                                 'convertFormat'=>true,
@@ -39,7 +44,7 @@ use yii\widgets\Pjax; ?>
                                 'pluginEvents'=>[
                                     "apply.daterangepicker"=>"function(){
                                      $('#chart_div').html(generateChartPreloader());                                    
-                                     $.pjax({container: '#calls-graph-pjax', data: {dateRange: $('#api-stats-picker').val(), callType: $('#call_type').val()}, type: 'POST', url: 'calls-graph', async:true, push: false});
+                                     $.pjax({container: '#api-graph-pjax', data: {dateRange: $('#api-stats-picker').val(), callType: $('#call_type').val()}, type: 'POST', url: 'api-graph', async:true, push: false});
                                      let dates = $('#api-stats-picker').val().split(' / ');
                                      if (dates[0] == dates[1]){
                                         $('#viewMode0').addClass('active focus');
@@ -50,7 +55,7 @@ use yii\widgets\Pjax; ?>
                                      }                     
                                   }",
                                 ],
-                            ]);*/?>
+                            ]);?>
                         </div>
 
                         <!--<div class="col-md-3 " id="viewMode">
@@ -88,9 +93,9 @@ use yii\widgets\Pjax; ?>
                                 <div class="row">
                                     <div class="col-md-12">
                                         <div id="chart_div" style="height:550px">
-                                            <!--<div class="chartPreloader" style="width:100%; height:50%">
+                                            <div class="chartPreloader" style="width:100%; height:50%">
                                                 <i class="fa fa-spinner fa-pulse fa-4x" style=" color: #CCCCCC;  position: relative;  top: 250px;  left: 45%;  transform: translate(-50%, -50%); "></i>
-                                            </div>-->
+                                            </div>
                                         </div>
                                         <?php
                                         $this->registerJs("google.charts.load('current', {'packages':['corechart']}); google.charts.setOnLoadCallback(drawChart);", \yii\web\View::POS_READY);
@@ -98,55 +103,10 @@ use yii\widgets\Pjax; ?>
                                         <script>
                                             function drawChart() {
                                                 let data = google.visualization.arrayToDataTable([
-                                                    ['Time Line', 'comunication/voice'],
+                                                    ['Time Line', 'communication/voice', 'communication/sms', 'communication/email', 'lead/create', 'lead/sold-update', 'quote/create', 'quote/update', 'quote/get-info'],
                                                     <?php foreach($apiStats as $k => $item):?>
-                                                    ['<?= date('d M', strtotime($item['timeLine']))?>', <?= $item['cVoice'] ?>],
+                                                    ['<?= date('d M', strtotime($item['timeLine']))?>', <?= $item['cVoice'] ?>, <?= $item['cSms'] ?>, <?= $item['cEmail'] ?>, <?= $item['lCreate'] ?>, <?= $item['leadSU']?>, <?= $item['qCreate']?>, <?= $item['qUpdate']?>, <?= $item['qInfo']?>],
                                                     <?php endforeach; ?>
-
-                                                   /* ['Time Line',
-                                                        'Completed',
-                                                        {'type': 'string', 'role': 'tooltip', 'p': {'html': true}},
-                                                        'No answer',
-                                                        {'type': 'string', 'role': 'tooltip', 'p': {'html': true}},
-                                                        'Busy',
-                                                        {'type': 'string', 'role': 'tooltip', 'p': {'html': true}},
-                                                        'Canceled',
-                                                        {'type': 'string', 'role': 'tooltip', 'p': {'html': true}},
-                                                        {role: 'annotation'}
-                                                    ],*/
-                                                    <?php /*foreach($apiStats as $k => $item):*/?>/*
-                                                    ['<?/*=  ($item['weeksInterval'] == null)
-                                                        ? date($item['timeLine'], strtotime($item['time']))
-                                                        : date($item['timeLine'], strtotime($item['time'])) .' / '. date($item['timeLine'], strtotime($item['weeksInterval']));
-                                                        */?>',
-                                                        <?/*=$item['completed']*/?>, createCustomHTMLContent('Completed: ','<?/*=  ($item['weeksInterval'] == null)
-                                                        ? date($item['timeLine'], strtotime($item['time']))
-                                                        : date($item['timeLine'], strtotime($item['time'])) .' / '. date($item['timeLine'], strtotime($item['weeksInterval']));
-                                                        */?>', <?/*=$item['completed']*/?>, <?/*=$item['cc_TotalPrice']*/?>, <?/*= $item['cc_Duration']*/?>),
-                                                        <?/*=$item['no-answer']*/?>, createCustomHTMLContent('No Answer: ','<?/*=  ($item['weeksInterval'] == null)
-                                                        ? date($item['timeLine'], strtotime($item['time']))
-                                                        : date($item['timeLine'], strtotime($item['time'])) .' / '. date($item['timeLine'], strtotime($item['weeksInterval']));
-                                                        */?>', <?/*=$item['no-answer']*/?>, 0, 0),
-                                                        <?/*=$item['busy']*/?>, createCustomHTMLContent('Busy: ','<?/*=  ($item['weeksInterval'] == null)
-                                                        ? date($item['timeLine'], strtotime($item['time']))
-                                                        : date($item['timeLine'], strtotime($item['time'])) .' / '. date($item['timeLine'], strtotime($item['weeksInterval']));
-                                                        */?>', <?/*=$item['busy']*/?>, 0, 0),
-
-                                                        <?/*=$item['canceled']*/?>, createCustomHTMLContent('Canceled: ','<?/*=  ($item['weeksInterval'] == null)
-                                                        ? date($item['timeLine'], strtotime($item['time']))
-                                                        : date($item['timeLine'], strtotime($item['time'])) .' / '. date($item['timeLine'], strtotime($item['weeksInterval']));
-                                                        */?>', <?/*=$item['canceled']*/?>, 0, 0),
-                                                        '<?/*=''*/?>'],
-                                                    */<?php /*endforeach;*/?>
-
-                                                    /*test data chart*/
-                                                   /* ['Month', 'Bolivia', 'Ecuador', 'Madagascar', 'Papua New Guinea', 'Rwanda', 'Average'],
-                                                    ['2004/05',  165,      938,         522,             998,           450,      614.6],
-                                                    ['2005/06',  135,      1120,        599,             1268,          288,      682],
-                                                    ['2006/07',  157,      1167,        587,             807,           397,      623],
-                                                    ['2007/08',  139,      1110,        615,             968,           215,      609.4],
-                                                    ['2008/09',  136,      691,         629,             1026,          366,      569.6]*/
-                                                    /*test data chart*/
                                                 ]);
 
                                                 let options = {

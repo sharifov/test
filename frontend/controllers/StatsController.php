@@ -230,27 +230,29 @@ class StatsController extends FController
 
     public function actionApiGraph()
     {
-        $days = 90;
-        $days2 = 80;
+        if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
+            $chartOptions = Yii::$app->request->post();
+            $rangeBy = Yii::$app->request->post('groupBy');
+            $date = explode("/", $chartOptions['dateRange']);
+           /* $smsGraphData = Sms::getSmsStats($date[0], $date[1], $rangeBy, (int)$chartOptions['smsType']);*/
 
-        $communicationVoice = ApiLog::find()->select("DATE(al_request_dt) AS timeLine, COUNT(*) AS cVoice")
-            ->where(['between', 'DATE(al_request_dt)', date('Y-m-d', strtotime("-" . $days . " days")), date('Y-m-d', strtotime("-" . $days2 . " days"))])
-            ->andwhere(['=', 'al_action', 'v1/communication/voice'])
-            ->groupBy("DATE(al_request_dt)")
-            //->orderBy("COUNT(*), DATE(al_request_dt)")
-            ->asArray()/*->limit(30)*/->all();
+            $apiStats = ApiLog::getApiLogStats($date[0], $date[1]);
 
-        $apiStats = [];
+            return $this->renderAjax('api-report', [
+                'apiStats' => $apiStats
+            ]);
+        } else {
+           /* $currentDate =  date('Y-m-d', strtotime('-0 day'));
+            $smsGraphData = Sms::getSmsStats($currentDate, $currentDate, null, 0);*/
 
-        foreach ($communicationVoice as $item) {
-            //$item['commVoice'] = 0;
-            $apiStats[] = $item;
+            $currentDate =  date('Y-m-d', strtotime('2019-03-22')); //for develop only
+
+            $apiStats = ApiLog::getApiLogStats($currentDate, $currentDate);
+
+            return $this->render('api-report', [
+                'apiStats' => $apiStats
+            ]);
         }
 
-        //var_dump($apiStats); die();
-
-        return $this->render('api-report', [
-            'apiStats' => $apiStats
-        ]);
     }
 }

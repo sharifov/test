@@ -132,7 +132,7 @@ class SiteController extends FController
 
         //$userId = Yii::$app->user->id;
 
-        $days = 30;
+        $days = 20;
         $dataStatsDone = Lead::find()->select("COUNT(*) AS done_count, DATE(created) AS created_date")
             ->where(['<>', 'status', Lead::STATUS_TRASH])
             //->andWhere("DATE(created) >= DATE(NOW() - interval '".$days." days')")
@@ -386,7 +386,7 @@ class SiteController extends FController
             }
         }
 
-var_dump($dataStats); die();
+
         return $this->render('index_admin', [
             'dataProvider' => $dataProvider,
             'searchModel' => $searchModel,

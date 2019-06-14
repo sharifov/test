@@ -180,4 +180,114 @@ class ApiLog extends \yii\db\ActiveRecord
 
         return $arr;
     }
+
+    /**
+     * @param string $fromDate
+     * @param string $todate
+     * @return array
+     */
+    public static function getApiLogStats(string $fromDate, string $todate) : array
+    {
+        /*$days = 90;
+        $days2 = 80;
+
+        $fromDate = date('Y-m-d', strtotime("-" . $days . " days"));
+        $todate = date('Y-m-d', strtotime("-" . $days2 . " days"));*/
+
+        $communicationVoice = ApiLog::find()->select("DATE(al_request_dt) AS timeLine, COUNT(*) AS cVoice")
+            ->where(['between', 'DATE(al_request_dt)', $fromDate , $todate])
+            ->andwhere(['=', 'al_action', 'v1/communication/voice'])->groupBy("DATE(al_request_dt)")->asArray()->all(); //->orderBy("COUNT(*), DATE(al_request_dt)")
+
+        $communicationSms = ApiLog::find()->select("DATE(al_request_dt) AS timeLine, COUNT(*) AS cSms")
+            ->where(['between', 'DATE(al_request_dt)', $fromDate, $todate])
+            ->andwhere(['=', 'al_action', 'v1/communication/sms']) ->groupBy("DATE(al_request_dt)")->asArray()->all();
+
+        $communicationEmail = ApiLog::find()->select("DATE(al_request_dt) AS timeLine, COUNT(*) AS cEmail")
+            ->where(['between', 'DATE(al_request_dt)', $fromDate, $todate])
+            ->andwhere(['=', 'al_action', 'v1/communication/email'])->groupBy("DATE(al_request_dt)")->asArray()->all();
+
+        $leadCreate = ApiLog::find()->select("DATE(al_request_dt) AS timeLine, COUNT(*) AS lCreate")
+            ->where(['between', 'DATE(al_request_dt)', $fromDate, $todate])
+            ->andwhere(['=', 'al_action', 'v1/lead/create'])->groupBy("DATE(al_request_dt)")->asArray()->all();
+
+        $leadSoldUpdate = ApiLog::find()->select("DATE(al_request_dt) AS timeLine, COUNT(*) AS leadSU")
+            ->where(['between', 'DATE(al_request_dt)', $fromDate, $todate])
+            ->andwhere(['=', 'al_action', 'v1/lead/sold-update'])->groupBy("DATE(al_request_dt)")->asArray()->all();
+
+        $quoteCreate = ApiLog::find()->select("DATE(al_request_dt) AS timeLine, COUNT(*) AS qCreate")
+            ->where(['between', 'DATE(al_request_dt)', $fromDate, $todate])
+            ->andwhere(['=', 'al_action', 'v1/quote/create'])->groupBy("DATE(al_request_dt)")->asArray()->all();
+
+        $quoteUpdate = ApiLog::find()->select("DATE(al_request_dt) AS timeLine, COUNT(*) AS qUpdate")
+            ->where(['between', 'DATE(al_request_dt)', $fromDate, $todate])
+            ->andwhere(['=', 'al_action', 'v1/quote/update'])->groupBy("DATE(al_request_dt)")->asArray()->all();
+
+        $quoteGetInfo = ApiLog::find()->select("DATE(al_request_dt) AS timeLine, COUNT(*) AS qInfo")
+            ->where(['between', 'DATE(al_request_dt)', $fromDate, $todate])
+            ->andwhere(['=', 'al_action', 'v2/quote/get-info'])->groupBy("DATE(al_request_dt)")->asArray()->all();
+
+        $apiStats = [];
+
+        foreach ($communicationVoice as $item) {
+            $apiStats[$item['timeLine']] = $item;
+        }
+
+        foreach ($communicationSms as $item) {
+            if (isset($apiStats[$item['timeLine']])) {
+                $apiStats[$item['timeLine']]['cSms'] = $item['cSms'];
+            } else {
+                $apiStats[$item['cSms']] = $item;
+            }
+        }
+
+        foreach ($communicationEmail as $item) {
+            if (isset($apiStats[$item['timeLine']])) {
+                $apiStats[$item['timeLine']]['cEmail'] = $item['cEmail'];
+            } else {
+                $apiStats[$item['cEmail']] = $item;
+            }
+        }
+
+        foreach ($leadCreate as $item) {
+            if (isset($apiStats[$item['timeLine']])) {
+                $apiStats[$item['timeLine']]['lCreate'] = $item['lCreate'];
+            } else {
+                $apiStats[$item['lCreate']] = $item;
+            }
+        }
+
+        foreach ($leadSoldUpdate as $item) {
+            if (isset($apiStats[$item['timeLine']])) {
+                $apiStats[$item['timeLine']]['leadSU'] = $item['leadSU'];
+            } else {
+                $apiStats[$item['leadSU']] = $item;
+            }
+        }
+
+        foreach ($quoteCreate as $item) {
+            if (isset($apiStats[$item['timeLine']])) {
+                $apiStats[$item['timeLine']]['qCreate'] = $item['qCreate'];
+            } else {
+                $apiStats[$item['qCreate']] = $item;
+            }
+        }
+
+        foreach ($quoteUpdate as $item) {
+            if (isset($apiStats[$item['timeLine']])) {
+                $apiStats[$item['timeLine']]['qUpdate'] = $item['qUpdate'];
+            } else {
+                $apiStats[$item['qUpdate']] = $item;
+            }
+        }
+
+        foreach ($quoteGetInfo as $item) {
+            if (isset($apiStats[$item['timeLine']])) {
+                $apiStats[$item['timeLine']]['qInfo'] = $item['qInfo'];
+            } else {
+                $apiStats[$item['qInfo']] = $item;
+            }
+        }
+
+        return $apiStats;
+    }
 }
