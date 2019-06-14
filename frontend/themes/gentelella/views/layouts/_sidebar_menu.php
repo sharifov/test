@@ -195,6 +195,7 @@ $isSuperAdmin = $user->canRole('superadmin');
             'icon' => 'cog',
             'items' => [
                 ['label' => 'API Logs', 'url' => ['/api-log/index'], 'icon' => 'sitemap'],
+                ['label' => 'API Report', 'url' => ['/stats/api-graph'], 'icon' => 'bar-chart'],
                 ['label' => 'System Logs', 'url' => ['/log/index'], 'icon' => 'bars'],
                 ['label' => 'Clean cache & assets', 'url' => ['/clean/index'], 'icon' => 'remove'],
                 ['label' => 'Site Settings', 'url' => ['/setting/index'], 'icon' => 'cogs'],

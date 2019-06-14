@@ -227,4 +227,30 @@ class StatsController extends FController
             ]);
         }
     }
+
+    public function actionApiGraph()
+    {
+        $days = 90;
+        $days2 = 80;
+
+        $communicationVoice = ApiLog::find()->select("DATE(al_request_dt) AS timeLine, COUNT(*) AS cVoice")
+            ->where(['between', 'DATE(al_request_dt)', date('Y-m-d', strtotime("-" . $days . " days")), date('Y-m-d', strtotime("-" . $days2 . " days"))])
+            ->andwhere(['=', 'al_action', 'v1/communication/voice'])
+            ->groupBy("DATE(al_request_dt)")
+            //->orderBy("COUNT(*), DATE(al_request_dt)")
+            ->asArray()/*->limit(30)*/->all();
+
+        $apiStats = [];
+
+        foreach ($communicationVoice as $item) {
+            //$item['commVoice'] = 0;
+            $apiStats[] = $item;
+        }
+
+        //var_dump($apiStats); die();
+
+        return $this->render('api-report', [
+            'apiStats' => $apiStats
+        ]);
+    }
 }
