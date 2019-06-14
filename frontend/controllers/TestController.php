@@ -1271,7 +1271,46 @@ class TestController extends FController
 
     public function actionTest3()
     {
-        echo Lead2::findLastLeadByClientPhone('+3736959', true);
+
+        $a = [
+            'lead' => [
+                'sub_sources_code' => 'Q6R5L3',
+        'adults' => '1',
+        'cabin' => 'E',
+        'emails' => [],
+        'phones' => [
+        0 => '+18885324041'
+    ],
+        'flights' => [
+        0 => [
+            'origin' => 'JFK',
+                'destination' => 'MAD',
+                'departure' => '06/29/2019'
+            ],
+            1 => [
+        'origin' => 'MAD',
+                'destination' => 'JFK',
+                'departure' => '07/25/2019'
+            ]
+        ],
+        'trip_type' => 'RT',
+        'children' => '0',
+        'infants' => 0,
+        'uid' => 'W3ACBD0',
+        'request_ip' => '188.131.53.1',
+        'discount_id' => '2766',
+        'user_agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36',
+        'offset_gmt' => null,
+        'user_language' => null,
+    ]
+];
+
+        echo json_encode($a);
+
+        exit;
+        //VarDumper::dump($a, 10, true);
+
+        //echo Lead2::findLastLeadByClientPhone('+3736959', true);
     }
 
 }
