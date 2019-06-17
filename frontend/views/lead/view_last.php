@@ -98,7 +98,7 @@ $lead = $leadForm->getLead();
 
         <div class="col-md-7">
 
-            <?= $this->render('partial/_flightDetails', [
+            <?= $this->render('partial/_flightDetails_last', [
                 'leadForm' => $leadForm
             ]);
             ?>

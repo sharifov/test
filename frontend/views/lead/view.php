@@ -99,12 +99,11 @@ $lead = $leadForm->getLead();
 
         <div class="col-md-7">
 
-            <?= $this->render('partial/_flightDetails', [
-                'leadForm' => $leadForm,
-                'itineraryForm' => $itineraryForm
-            ]);
-            ?>
-
+            <?php \yii\widgets\Pjax::begin(['id' => 'pj-itinerary', 'enablePushState' => false, 'timeout' => 10000])?>
+                <?= $this->render('partial/_flightDetails', [
+                    'itineraryForm' => $itineraryForm
+                ]) ?>
+            <?php \yii\widgets\Pjax::end()?>
 
             <?php if (!$leadForm->getLead()->isNewRecord) : ?>
                 <div class="row">
@@ -303,6 +302,11 @@ if (!$leadForm->getLead()->isNewRecord) {
         //$("[data-toggle='popover']").popover({sanitize: false});
     
     });
+     $("#pj-itinerary").on("pjax:end", function () {
+         if ($('#modeFlightSegments').data('value') == 'view') {
+            $.pjax.reload({container: '#quotes_list', timeout: 10000});     
+         }
+     });
     
 JS;
 

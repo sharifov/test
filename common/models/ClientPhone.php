@@ -39,6 +39,14 @@ class ClientPhone extends \yii\db\ActiveRecord
         return 'client_phone';
     }
 
+    public static function create($phone, $clientId): self
+    {
+        $clientPhone = new static();
+        $clientPhone->phone = $phone;
+        $clientPhone->client_id = $clientId;
+        return $clientPhone;
+    }
+
     /**
      * {@inheritdoc}
      */

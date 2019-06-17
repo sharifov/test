@@ -4,15 +4,17 @@ namespace sales\services;
 
 class TransactionManager
 {
-    public function wrap(callable $function): void
+    public function wrap(callable $function)
     {
+        $result = null;
         $transaction = \Yii::$app->db->beginTransaction();
         try {
-            $function();
+            $result = $function();
             $transaction->commit();
         } catch (\Exception $e) {
             $transaction->rollBack();
             throw $e;
         }
+        return $result;
     }
 }

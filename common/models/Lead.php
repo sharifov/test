@@ -7,6 +7,7 @@ use common\components\jobs\QuickSearchInitPriceJob;
 use common\components\jobs\UpdateLeadBOJob;
 use common\models\local\LeadAdditionalInformation;
 use common\models\local\LeadLogMessage;
+use sales\helpers\lead\LeadHelper;
 use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\caching\DbDependency;
@@ -268,13 +269,86 @@ class Lead extends ActiveRecord
         ];
     }
 
-    public function editItinerary($cabin, $adults, $children, $infants)
+    public static function create(
+        $clientId,
+        $clientFirstName,
+        $clientLastName,
+        $employeeId,
+        $cabin,
+        $adults,
+        $children,
+        $infants,
+        $requestIp,
+        $sourceId,
+        $projectId,
+        $notesForExperts,
+        $clientPhone,
+        $clientEmail
+    ): self
+    {
+        $lead = new static();
+        $lead->client_id = $clientId;
+        $lead->l_client_first_name = $clientFirstName;
+        $lead->l_client_last_name = $clientLastName;
+        $lead->employee_id = $employeeId;
+        $lead->cabin = $cabin;
+        $lead->adults = $adults;
+        $lead->children = $children;
+        $lead->infants = $infants;
+        $lead->request_ip = $requestIp;
+        $lead->source_id = $sourceId;
+        $lead->project_id = $projectId;
+        $lead->notes_for_experts = $notesForExperts;
+        $lead->status = self::STATUS_PENDING;
+        $lead->uid = uniqid();
+        $lead->gid = md5(uniqid('', true));
+        $lead->l_client_phone = $clientPhone;
+        $lead->l_client_email = $clientEmail;
+        return $lead;
+    }
+
+    public function editItinerary($cabin, $adults, $children, $infants): void
     {
         $this->cabin = $cabin;
         $this->adults = $adults;
         $this->children = $children;
         $this->infants = $infants;
     }
+
+    public function setTripType($type): void
+    {
+        $list = LeadHelper::tripTypeList();
+        if (isset($list[$type])) {
+            $this->trip_type = $type;
+        } else {
+            throw new \InvalidArgumentException('Error trip type');
+        }
+    }
+
+/*    public function updateTripType(): void
+    {
+        $countSegments = $this->getLeadFlightSegmentsCount();
+        if ($countSegments === 0) {
+            $this->trip_type = '';
+            return;
+        }
+        if ($countSegments === 1) {
+            $this->trip_type = self::TRIP_TYPE_ONE_WAY;
+            return;
+        }
+        if ($countSegments === 2) {
+            $segments = $this->getleadFlightSegments()->orderBy(['departure' => SORT_ASC])->limit(2)->all();
+            $origin1 = strtoupper($segments[0]->origin);
+            $destination1 = strtoupper($segments[0]->destination);
+            $origin2 = strtoupper($segments[1]->origin);
+            $destination2 = strtoupper($segments[1]->destination);
+            if ($origin1 === $destination2 && $destination1 === $origin2) {
+                $this->trip_type = self::TRIP_TYPE_ROUND_TRIP;
+                return;
+            }
+        }
+        $this->trip_type = self::TRIP_TYPE_MULTI_DESTINATION;
+    }*/
 
     /**
      * {@inheritdoc}

@@ -1,7 +1,8 @@
 <?php
 /**
  * @var $form ActiveForm
- * @var $segment \sales\forms\lead\SegmentEditForm
+ * @var $segment sales\forms\lead\SegmentEditForm
+ * @var $model sales\forms\lead\ItineraryEditForm
  */
 
 use yii\widgets\ActiveForm;
@@ -36,15 +37,16 @@ $select2Properties = [
 ];
 ?>
 
-<?= $form->field($segment, 'segments')->widget(MultipleInput::class, [
+<?= $form->field($model, 'segments')->widget(MultipleInput::class, [
     'max' => 10,
-    'cloneButton' => true,
+//    'allowEmptyList' => true,
     'enableError' => true,
+    'showGeneralError' => true,
     'columns' => [
         [
             'name' => 'origin',
-            //'type' => Select2::class,
-            'title' => 'Origin Location',
+            'type' => Select2::class,
+            'title' => 'Origin',
             'value' => function ($segment) {
                 return $segment['origin'];
             },
@@ -67,24 +69,22 @@ $select2Properties = [
         ],
         [
             'name' => 'departure',
-//            'type' => DatePicker::class,
+            'type' => DatePicker::class,
             'title' => 'Departure',
             'value' => function ($segment) {
-                return date('d-M-Y', strtotime($segment['departure']));
+                return $segment['departure'] ? date('d-M-Y', strtotime($segment['departure'])) : date('d-M-Y');
             },
-            'enableError' => true,
             'options' => [
+                'addon' => '',
                 'clientOptions' => [
-                    'inline' => false,
                     'autoclose' => true,
                     'format' => 'dd-M-yyyy',
                     'todayHighlight' => true,
-                    //'defaultValue' => date('d-M-Y')
                 ],
                 'options' => [
                     'class' => 'depart-date form-control',
-                    'placeholder' => 'Departing Date',
-                    'readonly' => true
+                    'placeholder' => 'Departure',
+                    'readonly' => true,
                 ],
             ]
         ],
@@ -116,14 +116,14 @@ function formatRepo( repo ) {
 				if (repo.loading) return repo.text;
 
 				var markup = "<div class='select2-result-repository clearfix'>" +
-					"<div class='select2-result-repository__avatar'><img src='/img/incoming-call.png' /></div>" +
+					//"<div class='select2-result-repository__avatar'><i class=\"fa fa-plane\"></div>" +
 					"<div class='select2-result-repository__meta'>" +
 						"<div class='select2-result-repository__title'>" + repo.text + "</div>";
 				
-				markup += "<div class='select2-result-repository__statistics'>" +
-							"<div class='select2-result-repository__forks'><span class='glyphicon glyphicon-flash'></span> " + repo.id + " Forks</div>" +
-						"</div>" +
-					"</div></div>";
+				/*markup += "<div class='select2-result-repository__statistics'>" +
+							"<div class='select2-result-repository__forks'>" + repo.id + "</div>" +
+						"</div>" +*/
+				markup +=	"</div></div>";
 
 				return markup;
 			}

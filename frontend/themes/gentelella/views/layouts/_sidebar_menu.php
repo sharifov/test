@@ -18,6 +18,7 @@ $isSuperAdmin = $user->canRole('superadmin');
         <br>
         <br>
         <br>
+        <?= \yii\helpers\Html::a('Create', ['/lead/create-new-version'])?>
         <?php
 
         $menuItems = [];

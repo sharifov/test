@@ -170,7 +170,7 @@ JS;
                 <div class="sl-itinerary-form__tab sl-itinerary-form__tab--rt js-tab" id="lead-segments">
                     <?php
                     foreach ($leadForm->getLeadFlightSegment() as $key => $_segment) {
-                        echo $this->render('_formLeadSegment', [
+                        echo $this->render('_formLeadSegment_last', [
                             'key' => $_segment->isNewRecord
                                 ? (strpos($key, 'new') !== false ? $key : 'new' . $key)
                                 : $_segment->id,
@@ -182,7 +182,7 @@ JS;
                     <!-- new lead segment fields -->
                     <div id="lead-new-segment-block" style="display: none;">
                         <?php $newSegment = new LeadFlightSegment(); ?>
-                        <?= $this->render('_formLeadSegment', [
+                        <?= $this->render('_formLeadSegment_last', [
                             'key' => '__id__',
                             'form' => $formLeadModel,
                             'segment' => $newSegment,

@@ -35,6 +35,15 @@ class Client extends \yii\db\ActiveRecord
         return 'clients';
     }
 
+    public static function create($firstName, $middleName, $lastName)
+    {
+        $client = new static();
+        $client->first_name = $firstName;
+        $client->middle_name= $middleName;
+        $client->last_name = $lastName;
+        return $client;
+    }
+
     /**
      * {@inheritdoc}
      */

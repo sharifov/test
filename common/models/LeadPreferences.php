@@ -30,6 +30,16 @@ class LeadPreferences extends \yii\db\ActiveRecord
         return 'lead_preferences';
     }
 
+    public static function create($leadId, $marketPrice, $clientsBudget, $numberStops): self
+    {
+        $preferences = new static();
+        $preferences->lead_id = $leadId;
+        $preferences->market_price = $marketPrice;
+        $preferences->clients_budget = $clientsBudget;
+        $preferences->number_stops = $numberStops;
+        return $preferences;
+    }
+
     /**
      * {@inheritdoc}
      */

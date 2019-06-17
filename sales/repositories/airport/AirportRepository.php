@@ -9,18 +9,18 @@ class AirportRepository
 {
     public function get($id): Airport
     {
-        if (!$airport = Airport::findOne($id)) {
-            throw new NotFoundException('Airport is not found.');
+        if ($airport = Airport::findOne($id)) {
+            return $airport;
         }
-        return $airport;
+        throw new NotFoundException('Airport is not found.');
     }
 
     public function getByIata($iata): Airport
     {
-        if (!$airport = Airport::findOne(['iata' => $iata])) {
-            throw new NotFoundException('Airport (' . $iata . ') is not found.');
+        if ($airport = Airport::findOne(['iata' => $iata])) {
+            return $airport;
         }
-        return $airport;
+        throw new NotFoundException('Airport (' . $iata . ') is not found.');
     }
 
     public function iataExists($iata): bool
