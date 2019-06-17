@@ -189,6 +189,12 @@ JS;
                         ]) ?>
                     </div>
                 </div>
+
+                <?php if(!$leadForm->getLeadFlightSegment()): ?>
+                    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css" />
+                    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+                <?php endif;?>
+
                 <?php ob_start(); // output buffer the javascript to register later ?>
                 <script>
                     // add segment button
