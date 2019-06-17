@@ -234,7 +234,6 @@ class StatsController extends FController
             $chartOptions = Yii::$app->request->post();
             $rangeBy = Yii::$app->request->post('groupBy');
             $date = explode("/", $chartOptions['dateRange']);
-           /* $smsGraphData = Sms::getSmsStats($date[0], $date[1], $rangeBy, (int)$chartOptions['smsType']);*/
 
             if (date('Y-m-d', strtotime($date[0])) == date('Y-m-d', strtotime($date[1]))){
                 $range = 'H';

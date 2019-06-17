@@ -220,7 +220,7 @@ class ApiLog extends \yii\db\ActiveRecord
             $quoteGetInfo = ApiLog::find()->select(["DATE_FORMAT( al_request_dt, '%H:00') AS timeLine, COUNT(*) AS qInfo, SUM(CASE WHEN al_execution_time >=0 THEN al_execution_time ELSE 0 END) AS qAvgTimeI"])
                 ->where(['between', 'DATE(al_request_dt)', $fromDate, $todate])
                 ->andwhere(['=', 'al_action', 'v2/quote/get-info'])->groupBy(["DATE_FORMAT( al_request_dt, '%H:00')"])->asArray()->all();
-        } else {
+        } elseif ($range =='D') {
             $communicationVoice = ApiLog::find()->select("DATE(al_request_dt) AS timeLine, COUNT(*) AS cVoice, SUM(CASE WHEN al_execution_time >=0 THEN al_execution_time ELSE 0 END) AS cAvgTimeV")
                 ->where(['between', 'DATE(al_request_dt)', $fromDate , $todate])
                 ->andwhere(['=', 'al_action', 'v1/communication/voice'])->groupBy("DATE(al_request_dt)")->asArray()->all(); //->orderBy("COUNT(*), DATE(al_request_dt)")
