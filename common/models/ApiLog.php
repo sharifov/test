@@ -188,71 +188,43 @@ class ApiLog extends \yii\db\ActiveRecord
      */
     public static function getApiLogStats(string $fromDate, string $todate, string $range) : array
     {
-        if ($range == 'H') {
-            $communicationVoice = ApiLog::find()->select(["DATE_FORMAT( al_request_dt, '%H:00') AS timeLine, COUNT(*) AS cVoice, SUM(CASE WHEN al_execution_time >=0 THEN al_execution_time ELSE 0 END) AS cAvgTimeV"])
-                ->where(['between', 'DATE(al_request_dt)', $fromDate, $todate])
-                ->andwhere(['=', 'al_action', 'v1/communication/voice'])->groupBy(["DATE_FORMAT( al_request_dt, '%H:00')"])->asArray()->all(); //->orderBy("COUNT(*), DATE(al_request_dt)")
-
-            $communicationSms = ApiLog::find()->select(["DATE_FORMAT( al_request_dt, '%H:00') AS timeLine, COUNT(*) AS cSms, SUM(CASE WHEN al_execution_time >=0 THEN al_execution_time ELSE 0 END) AS cAvgTimeS"])
-                ->where(['between', 'DATE(al_request_dt)', $fromDate, $todate])
-                ->andwhere(['=', 'al_action', 'v1/communication/sms'])->groupBy(["DATE_FORMAT( al_request_dt, '%H:00')"])->asArray()->all();
-
-            $communicationEmail = ApiLog::find()->select(["DATE_FORMAT( al_request_dt, '%H:00') AS timeLine, COUNT(*) AS cEmail, SUM(CASE WHEN al_execution_time >=0 THEN al_execution_time ELSE 0 END) AS cAvgTimeE"])
-                ->where(['between', 'DATE(al_request_dt)', $fromDate, $todate])
-                ->andwhere(['=', 'al_action', 'v1/communication/email'])->groupBy(["DATE_FORMAT( al_request_dt, '%H:00')"])->asArray()->all();
-
-            $leadCreate = ApiLog::find()->select(["DATE_FORMAT( al_request_dt, '%H:00') AS timeLine, COUNT(*) AS lCreate, SUM(CASE WHEN al_execution_time >=0 THEN al_execution_time ELSE 0 END) AS lAvgTimeC"])
-                ->where(['between', 'DATE(al_request_dt)', $fromDate, $todate])
-                ->andwhere(['=', 'al_action', 'v1/lead/create'])->groupBy(["DATE_FORMAT( al_request_dt, '%H:00')"])->asArray()->all();
-
-            $leadSoldUpdate = ApiLog::find()->select(["DATE_FORMAT( al_request_dt, '%H:00') AS timeLine, COUNT(*) AS leadSU, SUM(CASE WHEN al_execution_time >=0 THEN al_execution_time ELSE 0 END) AS lAvgTimeSU"])
-                ->where(['between', 'DATE(al_request_dt)', $fromDate, $todate])
-                ->andwhere(['=', 'al_action', 'v1/lead/sold-update'])->groupBy(["DATE_FORMAT( al_request_dt, '%H:00')"])->asArray()->all();
-
-            $quoteCreate = ApiLog::find()->select(["DATE_FORMAT( al_request_dt, '%H:00') AS timeLine, COUNT(*) AS qCreate, SUM(CASE WHEN al_execution_time >=0 THEN al_execution_time ELSE 0 END) AS qAvgTimeC"])
-                ->where(['between', 'DATE(al_request_dt)', $fromDate, $todate])
-                ->andwhere(['=', 'al_action', 'v1/quote/create'])->groupBy(["DATE_FORMAT( al_request_dt, '%H:00')"])->asArray()->all();
-
-            $quoteUpdate = ApiLog::find()->select(["DATE_FORMAT( al_request_dt, '%H:00') AS timeLine, COUNT(*) AS qUpdate, SUM(CASE WHEN al_execution_time >=0 THEN al_execution_time ELSE 0 END) AS qAvgTimeU"])
-                ->where(['between', 'DATE(al_request_dt)', $fromDate, $todate])
-                ->andwhere(['=', 'al_action', 'v1/quote/update'])->groupBy(["DATE_FORMAT( al_request_dt, '%H:00')"])->asArray()->all();
-
-            $quoteGetInfo = ApiLog::find()->select(["DATE_FORMAT( al_request_dt, '%H:00') AS timeLine, COUNT(*) AS qInfo, SUM(CASE WHEN al_execution_time >=0 THEN al_execution_time ELSE 0 END) AS qAvgTimeI"])
-                ->where(['between', 'DATE(al_request_dt)', $fromDate, $todate])
-                ->andwhere(['=', 'al_action', 'v2/quote/get-info'])->groupBy(["DATE_FORMAT( al_request_dt, '%H:00')"])->asArray()->all();
-        } elseif ($range =='D') {
-            $communicationVoice = ApiLog::find()->select("DATE(al_request_dt) AS timeLine, COUNT(*) AS cVoice, SUM(CASE WHEN al_execution_time >=0 THEN al_execution_time ELSE 0 END) AS cAvgTimeV")
-                ->where(['between', 'DATE(al_request_dt)', $fromDate , $todate])
-                ->andwhere(['=', 'al_action', 'v1/communication/voice'])->groupBy("DATE(al_request_dt)")->asArray()->all(); //->orderBy("COUNT(*), DATE(al_request_dt)")
-
-            $communicationSms = ApiLog::find()->select("DATE(al_request_dt) AS timeLine, COUNT(*) AS cSms, SUM(CASE WHEN al_execution_time >=0 THEN al_execution_time ELSE 0 END) AS cAvgTimeS")
-                ->where(['between', 'DATE(al_request_dt)', $fromDate, $todate])
-                ->andwhere(['=', 'al_action', 'v1/communication/sms']) ->groupBy("DATE(al_request_dt)")->asArray()->all();
-
-            $communicationEmail = ApiLog::find()->select("DATE(al_request_dt) AS timeLine, COUNT(*) AS cEmail, SUM(CASE WHEN al_execution_time >=0 THEN al_execution_time ELSE 0 END) AS cAvgTimeE")
-                ->where(['between', 'DATE(al_request_dt)', $fromDate, $todate])
-                ->andwhere(['=', 'al_action', 'v1/communication/email'])->groupBy("DATE(al_request_dt)")->asArray()->all();
-
-            $leadCreate = ApiLog::find()->select("DATE(al_request_dt) AS timeLine, COUNT(*) AS lCreate, SUM(CASE WHEN al_execution_time >=0 THEN al_execution_time ELSE 0 END) AS lAvgTimeC")
-                ->where(['between', 'DATE(al_request_dt)', $fromDate, $todate])
-                ->andwhere(['=', 'al_action', 'v1/lead/create'])->groupBy("DATE(al_request_dt)")->asArray()->all();
-
-            $leadSoldUpdate = ApiLog::find()->select("DATE(al_request_dt) AS timeLine, COUNT(*) AS leadSU, SUM(CASE WHEN al_execution_time >=0 THEN al_execution_time ELSE 0 END) AS lAvgTimeSU")
-                ->where(['between', 'DATE(al_request_dt)', $fromDate, $todate])
-                ->andwhere(['=', 'al_action', 'v1/lead/sold-update'])->groupBy("DATE(al_request_dt)")->asArray()->all();
-
-            $quoteCreate = ApiLog::find()->select("DATE(al_request_dt) AS timeLine, COUNT(*) AS qCreate, SUM(CASE WHEN al_execution_time >=0 THEN al_execution_time ELSE 0 END) AS qAvgTimeC")
-                ->where(['between', 'DATE(al_request_dt)', $fromDate, $todate])
-                ->andwhere(['=', 'al_action', 'v1/quote/create'])->groupBy("DATE(al_request_dt)")->asArray()->all();
-
-            $quoteUpdate = ApiLog::find()->select("DATE(al_request_dt) AS timeLine, COUNT(*) AS qUpdate, SUM(CASE WHEN al_execution_time >=0 THEN al_execution_time ELSE 0 END) AS qAvgTimeU")
-                ->where(['between', 'DATE(al_request_dt)', $fromDate, $todate])
-                ->andwhere(['=', 'al_action', 'v1/quote/update'])->groupBy("DATE(al_request_dt)")->asArray()->all();
-
-            $quoteGetInfo = ApiLog::find()->select("DATE(al_request_dt) AS timeLine, COUNT(*) AS qInfo, SUM(CASE WHEN al_execution_time >=0 THEN al_execution_time ELSE 0 END) AS qAvgTimeI")
-                ->where(['between', 'DATE(al_request_dt)', $fromDate, $todate])
-                ->andwhere(['=', 'al_action', 'v2/quote/get-info'])->groupBy("DATE(al_request_dt)")->asArray()->all();
+        if ($range == 'H'){
+            $queryDateFormat = '%H:00';
+        } elseif ($range == 'D'){
+            $queryDateFormat = '%Y-%m-%d';
         }
+
+        $communicationVoice = ApiLog::find()->select(["DATE_FORMAT( al_request_dt, '. $queryDateFormat .') AS timeLine, COUNT(*) AS cVoice, SUM(CASE WHEN al_execution_time >=0 THEN al_execution_time ELSE 0 END) AS cAvgTimeV"])
+            ->where(['between', 'DATE(al_request_dt)', $fromDate, $todate])
+            ->andwhere(['=', 'al_action', 'v1/communication/voice'])->groupBy(["DATE_FORMAT( al_request_dt, '. $queryDateFormat .')"])->asArray()->all(); //->orderBy("COUNT(*), DATE(al_request_dt)")
+
+        $communicationSms = ApiLog::find()->select(["DATE_FORMAT( al_request_dt, '. $queryDateFormat .') AS timeLine, COUNT(*) AS cSms, SUM(CASE WHEN al_execution_time >=0 THEN al_execution_time ELSE 0 END) AS cAvgTimeS"])
+            ->where(['between', 'DATE(al_request_dt)', $fromDate, $todate])
+            ->andwhere(['=', 'al_action', 'v1/communication/sms'])->groupBy(["DATE_FORMAT( al_request_dt, '. $queryDateFormat .')"])->asArray()->all();
+
+        $communicationEmail = ApiLog::find()->select(["DATE_FORMAT( al_request_dt, '. $queryDateFormat .') AS timeLine, COUNT(*) AS cEmail, SUM(CASE WHEN al_execution_time >=0 THEN al_execution_time ELSE 0 END) AS cAvgTimeE"])
+            ->where(['between', 'DATE(al_request_dt)', $fromDate, $todate])
+            ->andwhere(['=', 'al_action', 'v1/communication/email'])->groupBy(["DATE_FORMAT( al_request_dt, '. $queryDateFormat .')"])->asArray()->all();
+
+        $leadCreate = ApiLog::find()->select(["DATE_FORMAT( al_request_dt, '. $queryDateFormat .') AS timeLine, COUNT(*) AS lCreate, SUM(CASE WHEN al_execution_time >=0 THEN al_execution_time ELSE 0 END) AS lAvgTimeC"])
+            ->where(['between', 'DATE(al_request_dt)', $fromDate, $todate])
+            ->andwhere(['=', 'al_action', 'v1/lead/create'])->groupBy(["DATE_FORMAT( al_request_dt, '. $queryDateFormat .')"])->asArray()->all();
+
+        $leadSoldUpdate = ApiLog::find()->select(["DATE_FORMAT( al_request_dt, '. $queryDateFormat .') AS timeLine, COUNT(*) AS leadSU, SUM(CASE WHEN al_execution_time >=0 THEN al_execution_time ELSE 0 END) AS lAvgTimeSU"])
+            ->where(['between', 'DATE(al_request_dt)', $fromDate, $todate])
+            ->andwhere(['=', 'al_action', 'v1/lead/sold-update'])->groupBy(["DATE_FORMAT( al_request_dt, '. $queryDateFormat .')"])->asArray()->all();
+
+        $quoteCreate = ApiLog::find()->select(["DATE_FORMAT( al_request_dt, '. $queryDateFormat .') AS timeLine, COUNT(*) AS qCreate, SUM(CASE WHEN al_execution_time >=0 THEN al_execution_time ELSE 0 END) AS qAvgTimeC"])
+            ->where(['between', 'DATE(al_request_dt)', $fromDate, $todate])
+            ->andwhere(['=', 'al_action', 'v1/quote/create'])->groupBy(["DATE_FORMAT( al_request_dt, '. $queryDateFormat .')"])->asArray()->all();
+
+        $quoteUpdate = ApiLog::find()->select(["DATE_FORMAT( al_request_dt, '. $queryDateFormat .') AS timeLine, COUNT(*) AS qUpdate, SUM(CASE WHEN al_execution_time >=0 THEN al_execution_time ELSE 0 END) AS qAvgTimeU"])
+            ->where(['between', 'DATE(al_request_dt)', $fromDate, $todate])
+            ->andwhere(['=', 'al_action', 'v1/quote/update'])->groupBy(["DATE_FORMAT( al_request_dt, '. $queryDateFormat .')"])->asArray()->all();
+
+        $quoteGetInfo = ApiLog::find()->select(["DATE_FORMAT( al_request_dt, '. $queryDateFormat .') AS timeLine, COUNT(*) AS qInfo, SUM(CASE WHEN al_execution_time >=0 THEN al_execution_time ELSE 0 END) AS qAvgTimeI"])
+            ->where(['between', 'DATE(al_request_dt)', $fromDate, $todate])
+            ->andwhere(['=', 'al_action', 'v2/quote/get-info'])->groupBy(["DATE_FORMAT( al_request_dt, '. $queryDateFormat .')"])->asArray()->all();
 
         $apiStats = [];
         //var_dump($communicationVoice); die();

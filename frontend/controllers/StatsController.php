@@ -243,8 +243,8 @@ class StatsController extends FController
             } else {
                 $range = 'D';
                 $chartTimeFormat = 'd M';
-                $currentDate =  date('Y-m-d H:i:s', strtotime($date[0]));
-                $lastDate =  date('Y-m-d H:i:s', strtotime($date[1]));
+                $currentDate =  date('Y-m-d', strtotime($date[0]));
+                $lastDate =  date('Y-m-d', strtotime($date[1]));
             }
 
             $apiStats = ApiLog::getApiLogStats($currentDate, $lastDate, $range);
