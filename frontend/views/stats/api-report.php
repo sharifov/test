@@ -1,6 +1,7 @@
 <?php
 /**
  * @var $apiStats []
+ * @var $format string
  */
 $js = <<<JS
 
@@ -105,7 +106,7 @@ use yii\widgets\Pjax; ?>
                                                 let data = google.visualization.arrayToDataTable([
                                                     ['Time Line', 'communication/voice', 'communication/sms', 'communication/email', 'lead/create', 'lead/sold-update', 'quote/create', 'quote/update', 'quote/get-info'],
                                                     <?php foreach($apiStats as $k => $item):?>
-                                                    ['<?= date('d M', strtotime($item['timeLine']))?>', <?= $item['cVoice'] ?>, <?= $item['cSms'] ?>, <?= $item['cEmail'] ?>, <?= $item['lCreate'] ?>, <?= $item['leadSU']?>, <?= $item['qCreate']?>, <?= $item['qUpdate']?>, <?= $item['qInfo']?>],
+                                                    ['<?= date($format, strtotime($item['timeLine']))?>', <?= $item['cVoice'] ?>, <?= $item['cSms'] ?>, <?= $item['cEmail'] ?>, <?= $item['lCreate'] ?>, <?= $item['leadSU']?>, <?= $item['qCreate']?>, <?= $item['qUpdate']?>, <?= $item['qInfo']?>],
                                                     <?php endforeach; ?>
                                                 ]);
 

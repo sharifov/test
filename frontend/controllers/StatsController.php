@@ -236,21 +236,36 @@ class StatsController extends FController
             $date = explode("/", $chartOptions['dateRange']);
            /* $smsGraphData = Sms::getSmsStats($date[0], $date[1], $rangeBy, (int)$chartOptions['smsType']);*/
 
-            $apiStats = ApiLog::getApiLogStats($date[0], $date[1]);
+            if (date('Y-m-d', strtotime($date[0])) == date('Y-m-d', strtotime($date[1]))){
+                $range = 'H';
+                $chartTimeFormat = 'H:i';
+                $currentDate =  date('Y-m-d H:i:s', strtotime($date[0].' 00:00:00'));
+                $lastDate =  date('Y-m-d H:i:s', strtotime($date[1].' 23:59:59'));
+            } else {
+                $range = 'D';
+                $chartTimeFormat = 'd M';
+                $currentDate =  date('Y-m-d H:i:s', strtotime($date[0]));
+                $lastDate =  date('Y-m-d H:i:s', strtotime($date[1]));
+            }
+
+            $apiStats = ApiLog::getApiLogStats($currentDate, $lastDate, $range);
 
             return $this->renderAjax('api-report', [
-                'apiStats' => $apiStats
+                'apiStats' => $apiStats,
+                'format' => $chartTimeFormat
             ]);
         } else {
-           /* $currentDate =  date('Y-m-d', strtotime('-0 day'));
-            $smsGraphData = Sms::getSmsStats($currentDate, $currentDate, null, 0);*/
+           /* $currentDate =  date('Y-m-d', strtotime('-0 day'));*/
 
-            $currentDate =  date('Y-m-d', strtotime('2019-03-22')); //for develop only
+            $currentDate =  date('Y-m-d H:i:s', strtotime('2019-03-21 00:00:00')); //for develop only
+            $lastDate =  date('Y-m-d H:i:s', strtotime('2019-03-21 23:59:59')); //for develop only
+            $chartTimeFormat = 'H:i';
 
-            $apiStats = ApiLog::getApiLogStats($currentDate, $currentDate);
+            $apiStats = ApiLog::getApiLogStats($currentDate, $lastDate, $range = 'H');
 
             return $this->render('api-report', [
-                'apiStats' => $apiStats
+                'apiStats' => $apiStats,
+                'format' => $chartTimeFormat
             ]);
         }
 
