@@ -203,6 +203,35 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         return false;
     }
 
+
+    /**
+     * @param string $url
+     * @return bool
+     */
+    public function canRoute(string $url = ''): bool
+    {
+
+        if ($url && $url[0] !== '/') {
+            $url = '/' . $url;
+        }
+        if (Yii::$app->user->can('/*')) {
+            //for superAdmin or Dashboard
+            return true;
+        } elseif (Yii::$app->user->can($url)) {
+            return true;
+        } else {
+            $chunks = explode('/', $url);
+
+            if (isset($chunks[0]) && $chunks[0]) {
+                $url2 = '/' . $chunks[0] . '/*';
+                if (Yii::$app->user->can($url2)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     /*public function afterValidate()
     {
         parent::afterValidate();
