@@ -260,9 +260,13 @@ class LeadController extends FController
             }
 
             $flightSegments = $leadForm->getLeadFlightSegment();
-            foreach ($flightSegments as $segment){
-                $this->view->title = 'Lead #'.$lead->id.' ✈ '.$segment->destination;
-                break;
+            if($flightSegments) {
+                foreach ($flightSegments as $segment) {
+                    $this->view->title = 'Lead #' . $lead->id . ' ✈ ' . $segment->destination;
+                    break;
+                }
+            } else {
+                $this->view->title = 'Lead #' . $lead->id;
             }
 
 

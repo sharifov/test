@@ -3,6 +3,8 @@
 /* @var $clientId string */
 /* @var $token string */
 /* @var $fromAgentPhone string */
+/* @var $supportGeneralPhones array */
+
 
 
 \frontend\assets\WebPhoneAsset::register($this);

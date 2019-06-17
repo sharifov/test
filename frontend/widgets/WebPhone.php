@@ -61,12 +61,11 @@ class WebPhone extends \yii\bootstrap\Widget
             $token = false;
         }
 
-        //
-        $supportGeneralPhones = [
-            'Ovago' =>  '+1​8884574490',
-            'WOWFARE' =>  '+18887385190',
-            'Arangrant' =>  '+18888183963',
-        ];
+        $supportGeneralPhones = isset(\Yii::$app->params['settings']['support_phone_numbers']) ? @json_decode(\Yii::$app->params['settings']['support_phone_numbers'], true) : [];
+
+        if(!$supportGeneralPhones) {
+            $supportGeneralPhones = [];
+        }
 
         return $this->render('web_phone', ['clientId' => $clientId, 'token' => $token, 'supportGeneralPhones' => $supportGeneralPhones]);
     }
