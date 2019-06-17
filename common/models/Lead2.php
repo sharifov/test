@@ -468,15 +468,22 @@ class Lead2 extends \yii\db\ActiveRecord
 
     /**
      * @param string $phoneNumber
+     * @param int $project_id
      * @param bool $sql
      * @return array|Lead2|string|null
      */
-    public static function findLastLeadByClientPhone(string $phoneNumber = '', bool $sql = false)
+    public static function findLastLeadByClientPhone(string $phoneNumber = '', ?int $project_id = null, bool $sql = false)
     {
         $query = self::find()->innerJoinWith(['client.clientPhones'])
-            ->where(['client_phone.phone' => $phoneNumber])->andWhere(['<>', 'leads.status', Lead::STATUS_TRASH])
+            ->where(['client_phone.phone' => $phoneNumber])
+            ->andWhere(['<>', 'leads.status', Lead::STATUS_TRASH])
             ->orderBy(['leads.id' => SORT_DESC])
             ->limit(1);
+
+        if($project_id) {
+            $query->andWhere(['leads.project_id' => $project_id]);
+        }
+
         return $sql ? $query->createCommand()->getRawSql() : $query->one();
     }
 

@@ -1272,7 +1272,7 @@ class TestController extends FController
     public function actionTest3()
     {
 
-        $a = [
+       /* $a = [
             'lead' => [
                 'sub_sources_code' => 'Q6R5L3',
         'adults' => '1',
@@ -1308,9 +1308,9 @@ class TestController extends FController
         echo json_encode($a);
 
         exit;
-        //VarDumper::dump($a, 10, true);
+        //VarDumper::dump($a, 10, true);*/
 
-        //echo Lead2::findLastLeadByClientPhone('+3736959', true);
+        echo Lead2::findLastLeadByClientPhone('+3736959', 1, true);
     }
 
 }
