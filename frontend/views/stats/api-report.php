@@ -5,6 +5,24 @@
  */
 $js = <<<JS
 
+$('#viewMode0').click(function() {
+        $('#chart_div').html(generateChartPreloader());
+        $('#viewMode1, #viewMode2').removeClass('active focus');
+        $.pjax({container: '#api-graph-pjax', data: {dateRange: $('#api-stats-picker').val(), groupBy: 'H', /*callType: $('#call_type').val()*/}, type: 'POST', url: 'api-graph', async:true, push: false});
+    });
+
+    $('#viewMode1').click(function() {
+        $('#chart_div').html(generateChartPreloader());
+        $('#viewMode0, #viewMode2').removeClass('active focus');
+        $.pjax({container: '#api-graph-pjax', data: {dateRange: $('#api-stats-picker').val(), groupBy: 'D', /*callType: $('#call_type').val()*/}, type: 'POST', url: 'api-graph', async:true, push: false});
+    });
+    
+    $('#viewMode2').click(function() {
+        $('#chart_div').html(generateChartPreloader());
+        $('#viewMode0, #viewMode1').removeClass('active focus');
+        $.pjax({container: '#api-graph-pjax', data: {dateRange: $('#api-stats-picker').val(), groupBy: 'M', /*callType: $('#call_type').val()*/}, type: 'POST', url: 'api-graph', async:true, push: false});
+    });
+
 function generateChartPreloader() {
               return "<div class='chartPreloader' style='width:100%; height:50%'>" + 
               "<i class='fa fa-spinner fa-pulse fa-4x' style='color: #CCCCCC;  position: relative;  top: 250px;  left: 45%;  transform: translate(-50%, -50%);'></i>" +
@@ -59,7 +77,7 @@ use yii\widgets\Pjax; ?>
                             ]);?>
                         </div>
 
-                        <!--<div class="col-md-3 " id="viewMode">
+                        <div class="col-md-3 " id="viewMode">
                             <div class="btn-group btn-group-justified" data-toggle="buttons">
                                 <label class="btn btn-success active focus" id="viewMode0">
                                     <input type="radio" class="sr-only"  name="viewMode" value="0">
@@ -71,16 +89,12 @@ use yii\widgets\Pjax; ?>
                                 </label>
                                 <label class="btn btn-success" id="viewMode2">
                                     <input type="radio" class="sr-only"  name="viewMode" value="2">
-                                    Weeks
-                                </label>
-                                <label class="btn btn-success" id="viewMode3">
-                                    <input type="radio" class="sr-only"  name="viewMode" value="3">
                                     Month
                                 </label>
                             </div>
                         </div>
 
-                        <div class="col-xs-1">
+                        <!--<div class="col-xs-1">
                             <select id="call_type" class="form-control" required="">
                                 <option value="0">All</option>
                                 <option value="2">INCOMING</option>

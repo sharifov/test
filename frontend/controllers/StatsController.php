@@ -235,16 +235,41 @@ class StatsController extends FController
             $rangeBy = Yii::$app->request->post('groupBy');
             $date = explode("/", $chartOptions['dateRange']);
 
-            if (date('Y-m-d', strtotime($date[0])) == date('Y-m-d', strtotime($date[1]))){
+            if (date('Y-m-d', strtotime($date[0])) == date('Y-m-d', strtotime($date[1])) && $rangeBy != 'D' && $rangeBy != 'M'){
                 $range = 'H';
                 $chartTimeFormat = 'H:i';
                 $currentDate =  date('Y-m-d H:i:s', strtotime($date[0].' 00:00:00'));
                 $lastDate =  date('Y-m-d H:i:s', strtotime($date[1].' 23:59:59'));
-            } else {
+            } else if(date('Y-m-d', strtotime($date[0])) != date('Y-m-d', strtotime($date[1])) && $rangeBy == 'D') {
                 $range = 'D';
                 $chartTimeFormat = 'd M';
                 $currentDate =  date('Y-m-d', strtotime($date[0]));
                 $lastDate =  date('Y-m-d', strtotime($date[1]));
+            } else if(date('Y-m-d', strtotime($date[0])) == date('Y-m-d', strtotime($date[1])) && $rangeBy == 'D') {
+                $range = 'D';
+                $chartTimeFormat = 'd M';
+                $currentDate =  date('Y-m-d', strtotime($date[0]));
+                $lastDate =  date('Y-m-d', strtotime($date[1]));
+            } else if(date('Y-m-d', strtotime($date[0])) == date('Y-m-d', strtotime($date[1])) && $rangeBy == 'M') {
+                $range = 'M';
+                $chartTimeFormat = 'Y-m';
+                $currentDate =  date('Y-m-01', strtotime($date[0]));
+                $lastDate =  date('Y-m-31', strtotime($date[1]));
+            } if (date('Y-m-d', strtotime($date[0])) != date('Y-m-d', strtotime($date[1])) && $rangeBy != 'H' && $rangeBy != 'M'){
+                $range = 'D';
+                $chartTimeFormat = 'd M';
+                $currentDate =  date('Y-m-d', strtotime($date[0]));
+                $lastDate =  date('Y-m-d', strtotime($date[1]));
+            } else if(date('Y-m-d', strtotime($date[0])) != date('Y-m-d', strtotime($date[1])) && $rangeBy == 'M') {
+                $range = 'M';
+                $chartTimeFormat = 'Y-m';
+                $currentDate = date('Y-m-01', strtotime($date[0]));
+                $lastDate = date('Y-m-31', strtotime($date[1]));
+            } else if (date('Y-m-d', strtotime($date[0])) != date('Y-m-d', strtotime($date[1])) && $rangeBy == 'H') {
+                $range = 'HD';
+                $chartTimeFormat = 'Y-m-d H:i';
+                $currentDate = date('Y-m-d H:i:s', strtotime($date[0] . ' 00:00:00'));
+                $lastDate = date('Y-m-d H:i:s', strtotime($date[1] . ' 23:59:59'));
             }
 
             $apiStats = ApiLog::getApiLogStats($currentDate, $lastDate, $range);
@@ -254,7 +279,7 @@ class StatsController extends FController
                 'format' => $chartTimeFormat
             ]);
         } else {
-           /* $currentDate =  date('Y-m-d', strtotime('-0 day'));*/
+            /* $currentDate =  date('Y-m-d', strtotime('-0 day'));*/
 
             $currentDate =  date('Y-m-d H:i:s', strtotime('2019-03-21 00:00:00')); //for develop only
             $lastDate =  date('Y-m-d H:i:s', strtotime('2019-03-21 23:59:59')); //for develop only

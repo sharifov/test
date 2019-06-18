@@ -192,42 +192,46 @@ class ApiLog extends \yii\db\ActiveRecord
             $queryDateFormat = '%H:00';
         } elseif ($range == 'D'){
             $queryDateFormat = '%Y-%m-%d';
+        } elseif ($range == 'M'){
+            $queryDateFormat = '%Y-%m';
+        } elseif ($range == 'HD'){
+            $queryDateFormat = '%Y-%m-%d %H:00';
         }
 
-        $communicationVoice = ApiLog::find()->select(["DATE_FORMAT( al_request_dt, '. $queryDateFormat .') AS timeLine, COUNT(*) AS cVoice, SUM(CASE WHEN al_execution_time >=0 THEN al_execution_time ELSE 0 END) AS cAvgTimeV"])
+        $communicationVoice = ApiLog::find()->select(["DATE_FORMAT( al_request_dt, ' $queryDateFormat ') AS timeLine, COUNT(*) AS cVoice, SUM(CASE WHEN al_execution_time >=0 THEN al_execution_time ELSE 0 END) AS cAvgTimeV"])
             ->where(['between', 'DATE(al_request_dt)', $fromDate, $todate])
-            ->andwhere(['=', 'al_action', 'v1/communication/voice'])->groupBy(["DATE_FORMAT( al_request_dt, '. $queryDateFormat .')"])->asArray()->all(); //->orderBy("COUNT(*), DATE(al_request_dt)")
+            ->andwhere(['=', 'al_action', 'v1/communication/voice'])->groupBy(["DATE_FORMAT( al_request_dt, ' $queryDateFormat ')"])->asArray()->all(); //->orderBy("COUNT(*), DATE(al_request_dt)")
 
-        $communicationSms = ApiLog::find()->select(["DATE_FORMAT( al_request_dt, '. $queryDateFormat .') AS timeLine, COUNT(*) AS cSms, SUM(CASE WHEN al_execution_time >=0 THEN al_execution_time ELSE 0 END) AS cAvgTimeS"])
+        $communicationSms = ApiLog::find()->select(["DATE_FORMAT( al_request_dt, ' $queryDateFormat ') AS timeLine, COUNT(*) AS cSms, SUM(CASE WHEN al_execution_time >=0 THEN al_execution_time ELSE 0 END) AS cAvgTimeS"])
             ->where(['between', 'DATE(al_request_dt)', $fromDate, $todate])
-            ->andwhere(['=', 'al_action', 'v1/communication/sms'])->groupBy(["DATE_FORMAT( al_request_dt, '. $queryDateFormat .')"])->asArray()->all();
+            ->andwhere(['=', 'al_action', 'v1/communication/sms'])->groupBy(["DATE_FORMAT( al_request_dt, ' $queryDateFormat ')"])->asArray()->all();
 
-        $communicationEmail = ApiLog::find()->select(["DATE_FORMAT( al_request_dt, '. $queryDateFormat .') AS timeLine, COUNT(*) AS cEmail, SUM(CASE WHEN al_execution_time >=0 THEN al_execution_time ELSE 0 END) AS cAvgTimeE"])
+        $communicationEmail = ApiLog::find()->select(["DATE_FORMAT( al_request_dt, ' $queryDateFormat ') AS timeLine, COUNT(*) AS cEmail, SUM(CASE WHEN al_execution_time >=0 THEN al_execution_time ELSE 0 END) AS cAvgTimeE"])
             ->where(['between', 'DATE(al_request_dt)', $fromDate, $todate])
-            ->andwhere(['=', 'al_action', 'v1/communication/email'])->groupBy(["DATE_FORMAT( al_request_dt, '. $queryDateFormat .')"])->asArray()->all();
+            ->andwhere(['=', 'al_action', 'v1/communication/email'])->groupBy(["DATE_FORMAT( al_request_dt, ' $queryDateFormat ')"])->asArray()->all();
 
-        $leadCreate = ApiLog::find()->select(["DATE_FORMAT( al_request_dt, '. $queryDateFormat .') AS timeLine, COUNT(*) AS lCreate, SUM(CASE WHEN al_execution_time >=0 THEN al_execution_time ELSE 0 END) AS lAvgTimeC"])
+        $leadCreate = ApiLog::find()->select(["DATE_FORMAT( al_request_dt, ' $queryDateFormat ') AS timeLine, COUNT(*) AS lCreate, SUM(CASE WHEN al_execution_time >=0 THEN al_execution_time ELSE 0 END) AS lAvgTimeC"])
             ->where(['between', 'DATE(al_request_dt)', $fromDate, $todate])
-            ->andwhere(['=', 'al_action', 'v1/lead/create'])->groupBy(["DATE_FORMAT( al_request_dt, '. $queryDateFormat .')"])->asArray()->all();
+            ->andwhere(['=', 'al_action', 'v1/lead/create'])->groupBy(["DATE_FORMAT( al_request_dt, ' $queryDateFormat ')"])->asArray()->all();
 
-        $leadSoldUpdate = ApiLog::find()->select(["DATE_FORMAT( al_request_dt, '. $queryDateFormat .') AS timeLine, COUNT(*) AS leadSU, SUM(CASE WHEN al_execution_time >=0 THEN al_execution_time ELSE 0 END) AS lAvgTimeSU"])
+        $leadSoldUpdate = ApiLog::find()->select(["DATE_FORMAT( al_request_dt, ' $queryDateFormat ') AS timeLine, COUNT(*) AS leadSU, SUM(CASE WHEN al_execution_time >=0 THEN al_execution_time ELSE 0 END) AS lAvgTimeSU"])
             ->where(['between', 'DATE(al_request_dt)', $fromDate, $todate])
-            ->andwhere(['=', 'al_action', 'v1/lead/sold-update'])->groupBy(["DATE_FORMAT( al_request_dt, '. $queryDateFormat .')"])->asArray()->all();
+            ->andwhere(['=', 'al_action', 'v1/lead/sold-update'])->groupBy(["DATE_FORMAT( al_request_dt, ' $queryDateFormat ')"])->asArray()->all();
 
-        $quoteCreate = ApiLog::find()->select(["DATE_FORMAT( al_request_dt, '. $queryDateFormat .') AS timeLine, COUNT(*) AS qCreate, SUM(CASE WHEN al_execution_time >=0 THEN al_execution_time ELSE 0 END) AS qAvgTimeC"])
+        $quoteCreate = ApiLog::find()->select(["DATE_FORMAT( al_request_dt, ' $queryDateFormat ') AS timeLine, COUNT(*) AS qCreate, SUM(CASE WHEN al_execution_time >=0 THEN al_execution_time ELSE 0 END) AS qAvgTimeC"])
             ->where(['between', 'DATE(al_request_dt)', $fromDate, $todate])
-            ->andwhere(['=', 'al_action', 'v1/quote/create'])->groupBy(["DATE_FORMAT( al_request_dt, '. $queryDateFormat .')"])->asArray()->all();
+            ->andwhere(['=', 'al_action', 'v1/quote/create'])->groupBy(["DATE_FORMAT( al_request_dt, ' $queryDateFormat ')"])->asArray()->all();
 
-        $quoteUpdate = ApiLog::find()->select(["DATE_FORMAT( al_request_dt, '. $queryDateFormat .') AS timeLine, COUNT(*) AS qUpdate, SUM(CASE WHEN al_execution_time >=0 THEN al_execution_time ELSE 0 END) AS qAvgTimeU"])
+        $quoteUpdate = ApiLog::find()->select(["DATE_FORMAT( al_request_dt, ' $queryDateFormat ') AS timeLine, COUNT(*) AS qUpdate, SUM(CASE WHEN al_execution_time >=0 THEN al_execution_time ELSE 0 END) AS qAvgTimeU"])
             ->where(['between', 'DATE(al_request_dt)', $fromDate, $todate])
-            ->andwhere(['=', 'al_action', 'v1/quote/update'])->groupBy(["DATE_FORMAT( al_request_dt, '. $queryDateFormat .')"])->asArray()->all();
+            ->andwhere(['=', 'al_action', 'v1/quote/update'])->groupBy(["DATE_FORMAT( al_request_dt, ' $queryDateFormat ')"])->asArray()->all();
 
-        $quoteGetInfo = ApiLog::find()->select(["DATE_FORMAT( al_request_dt, '. $queryDateFormat .') AS timeLine, COUNT(*) AS qInfo, SUM(CASE WHEN al_execution_time >=0 THEN al_execution_time ELSE 0 END) AS qAvgTimeI"])
+        $quoteGetInfo = ApiLog::find()->select(["DATE_FORMAT( al_request_dt, ' $queryDateFormat ') AS timeLine, COUNT(*) AS qInfo, SUM(CASE WHEN al_execution_time >=0 THEN al_execution_time ELSE 0 END) AS qAvgTimeI"])
             ->where(['between', 'DATE(al_request_dt)', $fromDate, $todate])
-            ->andwhere(['=', 'al_action', 'v2/quote/get-info'])->groupBy(["DATE_FORMAT( al_request_dt, '. $queryDateFormat .')"])->asArray()->all();
+            ->andwhere(['=', 'al_action', 'v2/quote/get-info'])->groupBy(["DATE_FORMAT( al_request_dt, ' $queryDateFormat ')"])->asArray()->all();
 
         $apiStats = [];
-        //var_dump($communicationVoice); die();
+
         foreach ($communicationVoice as $item) {
             $item['cSms'] = (isset($item['cSms']) ? $item['cSms'] : 0);
             $item['qUpdate'] = (isset($item['qUpdate']) ? $item['qUpdate'] : 0);
@@ -254,9 +258,7 @@ class ApiLog extends \yii\db\ActiveRecord
             if (isset($apiStats[$item['timeLine']])) {
                 $apiStats[$item['timeLine']]['cSms'] = $item['cSms'];
                 $apiStats[$item['timeLine']]['cAvgTimeS'] = $item['cAvgTimeS'];
-            } /*else {
-                $apiStats[$item['cSms']] = $item;
-            }*/
+            }
         }
 
         foreach ($communicationEmail as $item) {
@@ -272,9 +274,7 @@ class ApiLog extends \yii\db\ActiveRecord
             if (isset($apiStats[$item['timeLine']])) {
                 $apiStats[$item['timeLine']]['cEmail'] = $item['cEmail'];
                 $apiStats[$item['timeLine']]['cAvgTimeE'] = $item['cAvgTimeE'];
-            } /*else {
-                $apiStats[$item['cEmail']] = $item;
-            }*/
+            }
         }
 
         foreach ($leadCreate as $item) {
@@ -290,9 +290,7 @@ class ApiLog extends \yii\db\ActiveRecord
             if (isset($apiStats[$item['timeLine']])) {
                 $apiStats[$item['timeLine']]['lCreate'] = $item['lCreate'];
                 $apiStats[$item['timeLine']]['lAvgTimeC'] = $item['lAvgTimeC'];
-            } /*else {
-                $apiStats[$item['lCreate']] = $item;
-            }*/
+            }
         }
 
         foreach ($leadSoldUpdate as $item) {
@@ -308,9 +306,7 @@ class ApiLog extends \yii\db\ActiveRecord
             if (isset($apiStats[$item['timeLine']])) {
                 $apiStats[$item['timeLine']]['leadSU'] = $item['leadSU'];
                 $apiStats[$item['timeLine']]['lAvgTimeSU'] = $item['lAvgTimeSU'];
-            } /*else {
-                $apiStats[$item['leadSU']] = $item;
-            }*/
+            }
         }
 
         foreach ($quoteCreate as $item) {
@@ -326,9 +322,7 @@ class ApiLog extends \yii\db\ActiveRecord
             if (isset($apiStats[$item['timeLine']])) {
                 $apiStats[$item['timeLine']]['qCreate'] = $item['qCreate'];
                 $apiStats[$item['timeLine']]['qAvgTimeC'] = $item['qAvgTimeC'];
-            } /*else {
-                $apiStats[$item['qCreate']] = $item;
-            }*/
+            }
         }
 
         foreach ($quoteUpdate as $item) {
@@ -344,9 +338,7 @@ class ApiLog extends \yii\db\ActiveRecord
             if (isset($apiStats[$item['timeLine']])) {
                 $apiStats[$item['timeLine']]['qUpdate'] = $item['qUpdate'];
                 $apiStats[$item['timeLine']]['qAvgTimeU'] = $item['qAvgTimeU'];
-            } /*else {
-                $apiStats[$item['qUpdate']] = $item;
-            }*/
+            }
         }
 
         foreach ($quoteGetInfo as $item) {
@@ -362,11 +354,8 @@ class ApiLog extends \yii\db\ActiveRecord
             if (isset($apiStats[$item['timeLine']])) {
                 $apiStats[$item['timeLine']]['qInfo'] = $item['qInfo'];
                 $apiStats[$item['timeLine']]['qAvgTimeI'] = $item['qAvgTimeI'];
-            } /*else {
-                $apiStats[$item['qInfo']] = $item;
-            }*/
+            }
         }
-        //var_dump($apiStats); die();
         return $apiStats;
     }
 }
