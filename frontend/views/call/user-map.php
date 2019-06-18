@@ -1,5 +1,6 @@
 <?php
 
+use yii\data\ActiveDataProvider;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
@@ -7,7 +8,8 @@ use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\EmployeeSearch */
-/* @var $dataProvider yii\data\ActiveDataProvider */
+
+/* @var $dataProviderOnline yii\data\ActiveDataProvider */
 /* @var $dataProvider2 yii\data\ActiveDataProvider */
 /* @var $dataProvider3 yii\data\ActiveDataProvider */
 /* @var $form yii\widgets\ActiveForm */
@@ -32,27 +34,27 @@ $dtNow = date('Y-m-d H:i:s');
     <?php Pjax::begin(['id' => 'pjax-call-list']); ?>
 
         <div class="row">
-            <div class="animated flipInY col-md-2 col-sm-6 col-xs-12">
+            <div class="animated flipInY col-md-4 col-sm-6 col-xs-12">
                 <div class="tile-stats">
                     <div class="icon"><i class="fa fa-users"></i></div>
                     <div class="count">
                         <?=\common\models\UserConnection::find()->select('uc_user_id')
-                            ->andWhere(['and', ['<>', 'uc_controller_id', 'call'], ['<>', 'uc_action_id', 'user-map']])
+                            //->andWhere(['and', ['<>', 'uc_controller_id', 'call'], ['<>', 'uc_action_id', 'user-map']])
                             ->andWhere(['<>', 'uc_user_id', Yii::$app->user->id])
-                            ->groupBy(['uc_user_id'])->count()?> /
+                            ->groupBy(['uc_user_id'])->count()?> <?/* /
                         <?=\common\models\UserConnection::find()->select(['uc_user_id'])
                             ->where('(SELECT cs.us_type_id FROM user_call_status as cs WHERE cs.us_user_id  = us_user_id  ORDER BY cs.us_id DESC LIMIT 1) = '.\common\models\UserCallStatus::STATUS_TYPE_READY)
                             ->andWhere(['and', ['<>', 'uc_controller_id', 'call'], ['<>', 'uc_action_id', 'user-map']])
                             ->andWhere(['<>', 'uc_user_id', Yii::$app->user->id])
-                            ->groupBy(['uc_user_id'])->count()?>
+                            ->groupBy(['uc_user_id'])->count()*/?>
                     </div>
-                    <h3>Agents Online / Free </h3>
-                    <p>Current state Online Employees / Free for Call</p>
+                    <h3>Agents Online</h3>
+                    <p>Current state Online Employees</p>
                 </div>
             </div>
 
 
-            <div class="animated flipInY col-md-2 col-sm-6 col-xs-12">
+            <?/*<div class="animated flipInY col-md-2 col-sm-6 col-xs-12">
                 <div class="tile-stats">
                     <div class="icon"><i class="fa fa-phone"></i></div>
                     <div class="count">
@@ -74,9 +76,9 @@ $dtNow = date('Y-m-d H:i:s');
                     <h3>In PROGRESS</h3>
                     <p>Calls in PROGRESS</p>
                 </div>
-            </div>
+            </div>*/?>
 
-            <div class="animated flipInY col-md-2 col-sm-6 col-xs-12">
+            <div class="animated flipInY col-md-4 col-sm-6 col-xs-12">
                 <div class="tile-stats">
                     <div class="icon"><i class="fa fa-list"></i></div>
                     <div class="count">
@@ -88,7 +90,7 @@ $dtNow = date('Y-m-d H:i:s');
                 </div>
             </div>
 
-            <div class="animated flipInY col-md-2 col-sm-6 col-xs-12">
+            <?/*<div class="animated flipInY col-md-2 col-sm-6 col-xs-12">
                 <div class="tile-stats">
                     <div class="icon"><i class="fa fa-list"></i></div>
                     <div class="count">
@@ -98,10 +100,10 @@ $dtNow = date('Y-m-d H:i:s');
                     <h3>In / Out Calls: 6 Hours</h3>
                     <p>Incoming / Outgoing Calls : 6 Hours</p>
                 </div>
-            </div>
+            </div>*/?>
 
 
-            <div class="animated flipInY col-md-2 col-sm-6 col-xs-12">
+            <div class="animated flipInY col-md-4 col-sm-6 col-xs-12">
                 <div class="tile-stats">
                     <div class="icon"><i class="fa fa-list"></i></div>
                     <div class="count">
@@ -131,43 +133,33 @@ $dtNow = date('Y-m-d H:i:s');
             <div class="col-md-4">
                 <?/*<h1><i class="fa fa-bar-chart"></i> <?=$this->title?></h1>*/?>
                 <div class="panel panel-default">
-                    <div class="panel-heading"><i class="fa fa-list"></i> Calls in HOLD, RINGING (Last update: <?=Yii::$app->formatter->asTime(time(), 'php:H:i:s')?>)</div>
+                    <div class="panel-heading"><i class="fa fa-users"></i> OnLine Users</div>
                     <div class="panel-body">
                         <?= \yii\widgets\ListView::widget([
-                            'dataProvider' => $dataProvider,
+                            'dataProvider' => $dataProviderOnline,
 
-                            /*'options' => [
-                                'tag' => 'div',
-                                'class' => 'list-wrapper',
-                                'id' => 'list-wrapper',
-                            ],*/
-                            'emptyText' => '<div class="text-center">Not found calls</div><br>',
+
+                            'emptyText' => '<div class="text-center">Not found online users</div><br>',
                             'layout' => "{items}<div class=\"text-center\">{pager}</div>\n", //{summary}\n
 
                             'itemView' => function ($model, $key, $index, $widget) {
-                                return $this->render('_list_item',['model' => $model]);
+                                return $this->render('_list_item_online', ['model' => $model]);
                             },
 
                             'itemOptions' => [
                                 //'class' => 'item',
                                 //'tag' => false,
                             ],
-                            /*'pager' => [
-                                'firstPageLabel' => 'first',
-                                'lastPageLabel' => 'last',
-                                'nextPageLabel' => 'next',
-                                'prevPageLabel' => 'previous',
-                                'maxButtonCount' => 3,
-                            ],*/
 
-                        ]) ?>
+
+                        ])?>
                     </div>
                 </div>
             </div>
 
             <div class="col-md-4">
                 <div class="panel panel-default">
-                    <div class="panel-heading"><i class="fa fa-list"></i> Calls in PROGRESS</div>
+                    <div class="panel-heading"><i class="fa fa-list"></i> Calls in PROGRESS, HOLD, RINGING (Last update: <?=Yii::$app->formatter->asTime(time(), 'php:H:i:s')?>)</div>
                     <div class="panel-body">
                         <?= \yii\widgets\ListView::widget([
                             'dataProvider' => $dataProvider3,
