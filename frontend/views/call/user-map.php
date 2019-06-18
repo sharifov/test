@@ -125,7 +125,7 @@ $dtNow = date('Y-m-d H:i:s');
 
 
         <div class="row">
-            <div class="col-md-4">
+            <div class="col-md-2">
                 <?/*<h1><i class="fa fa-bar-chart"></i> <?=$this->title?></h1>*/?>
                 <div class="panel panel-default">
                     <div class="panel-heading"><i class="fa fa-users"></i> OnLine Users</div>
@@ -152,7 +152,7 @@ $dtNow = date('Y-m-d H:i:s');
                 </div>
             </div>
 
-            <div class="col-md-4">
+            <div class="col-md-5">
                 <div class="panel panel-default">
                     <div class="panel-heading"><i class="fa fa-list"></i> Calls in PROGRESS, HOLD, RINGING (Last update: <?=Yii::$app->formatter->asTime(time(), 'php:H:i:s')?>)</div>
                     <div class="panel-body">
@@ -172,7 +172,7 @@ $dtNow = date('Y-m-d H:i:s');
                 </div>
             </div>
 
-            <div class="col-md-4">
+            <div class="col-md-5">
                 <?/*<h1><i class="fa fa-bar-chart"></i> <?=$this->title?></h1>*/?>
                 <div class="panel panel-default">
                     <div class="panel-heading"><i class="fa fa-list"></i> Last 10 Calls</div>

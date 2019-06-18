@@ -19,9 +19,7 @@ if($isCallFree && $isCallStatusReady) {
 
 ?>
 
-<div class="col-md-3">
+<div class="col-md-6" style="margin-bottom: 5px">
     <?=Html::tag('i', '', ['class' => 'fa fa-user fa-lg '.$class, 'title' => $model->uc_user_id])?>
     <?=Html::encode($model->ucUser->username)?>
 </div>
-
-
