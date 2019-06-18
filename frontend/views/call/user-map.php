@@ -128,7 +128,7 @@ $dtNow = date('Y-m-d H:i:s');
             <div class="col-md-2">
                 <?/*<h1><i class="fa fa-bar-chart"></i> <?=$this->title?></h1>*/?>
                 <div class="panel panel-default">
-                    <div class="panel-heading"><i class="fa fa-users"></i> OnLine Users</div>
+                    <div class="panel-heading"><i class="fa fa-users"></i> OnLine Users (<?=$dataProviderOnline->totalCount?>)</div>
                     <div class="panel-body">
                         <?= \yii\widgets\ListView::widget([
                             'dataProvider' => $dataProviderOnline,
@@ -138,7 +138,7 @@ $dtNow = date('Y-m-d H:i:s');
                             'layout' => "{items}<div class=\"text-center\">{pager}</div>\n", //{summary}\n
 
                             'itemView' => function ($model, $key, $index, $widget) {
-                                return $this->render('_list_item_online', ['model' => $model]);
+                                return $this->render('_list_item_online', ['model' => $model, 'index' => $index]);
                             },
 
                             'itemOptions' => [
