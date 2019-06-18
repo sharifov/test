@@ -101,7 +101,7 @@ class UserConnectionSearch extends UserConnection
             return $dataProvider;
         }
 
-        $query->select(['cnt' => 'COUNT(*)', 'uc_user_id']);
+        $query->select(['uc_user_id']); //'cnt' => 'COUNT(*)',
         $query->groupBy(['uc_user_id']);
         //$query->with(['ucUser']);
 

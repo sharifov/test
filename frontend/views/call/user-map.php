@@ -34,24 +34,19 @@ $dtNow = date('Y-m-d H:i:s');
     <?php Pjax::begin(['id' => 'pjax-call-list']); ?>
 
         <div class="row">
-            <div class="animated flipInY col-md-4 col-sm-6 col-xs-12">
+            <?/*<div class="animated flipInY col-md-4 col-sm-6 col-xs-12">
                 <div class="tile-stats">
                     <div class="icon"><i class="fa fa-users"></i></div>
                     <div class="count">
                         <?=\common\models\UserConnection::find()->select('uc_user_id')
                             //->andWhere(['and', ['<>', 'uc_controller_id', 'call'], ['<>', 'uc_action_id', 'user-map']])
                             ->andWhere(['<>', 'uc_user_id', Yii::$app->user->id])
-                            ->groupBy(['uc_user_id'])->count()?> <?/* /
-                        <?=\common\models\UserConnection::find()->select(['uc_user_id'])
-                            ->where('(SELECT cs.us_type_id FROM user_call_status as cs WHERE cs.us_user_id  = us_user_id  ORDER BY cs.us_id DESC LIMIT 1) = '.\common\models\UserCallStatus::STATUS_TYPE_READY)
-                            ->andWhere(['and', ['<>', 'uc_controller_id', 'call'], ['<>', 'uc_action_id', 'user-map']])
-                            ->andWhere(['<>', 'uc_user_id', Yii::$app->user->id])
-                            ->groupBy(['uc_user_id'])->count()*/?>
+                            ->groupBy(['uc_user_id'])->count()?>
                     </div>
                     <h3>Agents Online</h3>
                     <p>Current state Online Employees</p>
                 </div>
-            </div>
+            </div>*/?>
 
 
             <?/*<div class="animated flipInY col-md-2 col-sm-6 col-xs-12">
@@ -78,7 +73,7 @@ $dtNow = date('Y-m-d H:i:s');
                 </div>
             </div>*/?>
 
-            <div class="animated flipInY col-md-4 col-sm-6 col-xs-12">
+            <?/*<div class="animated flipInY col-md-4 col-sm-6 col-xs-12">
                 <div class="tile-stats">
                     <div class="icon"><i class="fa fa-list"></i></div>
                     <div class="count">
@@ -88,7 +83,7 @@ $dtNow = date('Y-m-d H:i:s');
                     <h3>In / Out Calls: 1 Hour</h3>
                     <p>Incoming / Outgoing Calls : 1 Hour</p>
                 </div>
-            </div>
+            </div>*/?>
 
             <?/*<div class="animated flipInY col-md-2 col-sm-6 col-xs-12">
                 <div class="tile-stats">
@@ -103,7 +98,7 @@ $dtNow = date('Y-m-d H:i:s');
             </div>*/?>
 
 
-            <div class="animated flipInY col-md-4 col-sm-6 col-xs-12">
+            <?/*<div class="animated flipInY col-md-4 col-sm-6 col-xs-12">
                 <div class="tile-stats">
                     <div class="icon"><i class="fa fa-list"></i></div>
                     <div class="count">
@@ -113,7 +108,7 @@ $dtNow = date('Y-m-d H:i:s');
                     <h3>In / Out Calls: 24 Hours</h3>
                     <p>Incoming / Outgoing Calls : 24 Hours</p>
                 </div>
-            </div>
+            </div>*/?>
 
 
             <?php /*
