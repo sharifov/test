@@ -234,6 +234,7 @@ class StatsController extends FController
             $chartOptions = Yii::$app->request->post();
             $rangeBy = Yii::$app->request->post('groupBy');
             $date = explode("/", $chartOptions['dateRange']);
+            $userApiId = $chartOptions['project'];
 
             if (date('Y-m-d', strtotime($date[0])) == date('Y-m-d', strtotime($date[1])) && $rangeBy != 'D' && $rangeBy != 'M'){
                 $range = 'H';
@@ -272,7 +273,7 @@ class StatsController extends FController
                 $lastDate = date('Y-m-d H:i:s', strtotime($date[1] . ' 23:59:59'));
             }
 
-            $apiStats = ApiLog::getApiLogStats($currentDate, $lastDate, $range);
+            $apiStats = ApiLog::getApiLogStats($currentDate, $lastDate, $range, $userApiId);
 
             return $this->renderAjax('api-report', [
                 'apiStats' => $apiStats,
@@ -285,7 +286,7 @@ class StatsController extends FController
             $lastDate =  date('Y-m-d H:i:s', strtotime('2019-03-21 23:59:59')); //for develop only
             $chartTimeFormat = 'H:i';
 
-            $apiStats = ApiLog::getApiLogStats($currentDate, $lastDate, $range = 'H');
+            $apiStats = ApiLog::getApiLogStats($currentDate, $lastDate, $range = 'H', '');
 
             return $this->render('api-report', [
                 'apiStats' => $apiStats,

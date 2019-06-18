@@ -186,7 +186,7 @@ class ApiLog extends \yii\db\ActiveRecord
      * @param string $todate
      * @return array
      */
-    public static function getApiLogStats(string $fromDate, string $todate, string $range) : array
+    public static function getApiLogStats(string $fromDate, string $todate, string $range, $apiUserId) : array
     {
         if ($range == 'H'){
             $queryDateFormat = '%H:00';

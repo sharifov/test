@@ -3,31 +3,65 @@
  * @var $apiStats []
  * @var $format string
  */
+use yii\helpers\Html;
 $js = <<<JS
 
 $('#viewMode0').click(function() {
         $('#chart_div').html(generateChartPreloader());
         $('#viewMode1, #viewMode2').removeClass('active focus');
-        $.pjax({container: '#api-graph-pjax', data: {dateRange: $('#api-stats-picker').val(), groupBy: 'H', /*callType: $('#call_type').val()*/}, type: 'POST', url: 'api-graph', async:true, push: false});
+        $.pjax({container: '#api-graph-pjax', data: {dateRange: $('#api-stats-picker').val(), groupBy: 'H', project: ''}, type: 'POST', url: 'api-graph', async:true, push: false});
     });
 
     $('#viewMode1').click(function() {
         $('#chart_div').html(generateChartPreloader());
         $('#viewMode0, #viewMode2').removeClass('active focus');
-        $.pjax({container: '#api-graph-pjax', data: {dateRange: $('#api-stats-picker').val(), groupBy: 'D', /*callType: $('#call_type').val()*/}, type: 'POST', url: 'api-graph', async:true, push: false});
+        $.pjax({container: '#api-graph-pjax', data: {dateRange: $('#api-stats-picker').val(), groupBy: 'D', project: ''}, type: 'POST', url: 'api-graph', async:true, push: false});
     });
     
     $('#viewMode2').click(function() {
         $('#chart_div').html(generateChartPreloader());
         $('#viewMode0, #viewMode1').removeClass('active focus');
-        $.pjax({container: '#api-graph-pjax', data: {dateRange: $('#api-stats-picker').val(), groupBy: 'M', /*callType: $('#call_type').val()*/}, type: 'POST', url: 'api-graph', async:true, push: false});
+        $.pjax({container: '#api-graph-pjax', data: {dateRange: $('#api-stats-picker').val(), groupBy: 'M', project: ''}, type: 'POST', url: 'api-graph', async:true, push: false});
     });
+    
+    $('#projects').on('change', function() {
+        $('#chart_div').html(generateChartPreloader());
+        let groupBy = $('input[name^="viewMode"]:checked').val();
+        if( typeof groupBy === 'undefined'){
+            let dates = $('#api-stats-picker').val().split(' / ');
+            if (dates[0] == dates[1]){
+                groupBy = '0';
+            } else {
+                groupBy = '1';
+            }
+        }
+        let groupingOps = ["H", "D", "M"];   
+        
+        $.pjax({container: '#api-graph-pjax', data: {dateRange: $('#api-stats-picker').val(), groupBy: groupingOps[groupBy], project: this.value}, type: 'POST', url: 'api-graph', async:true, push: false});
+
+        
+        /*switch (this.value) {
+          case '0' :
+              $.pjax({container: '#api-graph-pjax', data: {dateRange: $('#api-stats-picker').val(), groupBy: groupingOps[groupBy], project: this.value}, type: 'POST', url: 'api-graph', async:true, push: false});
+          break;
+          case '1' :
+              $.pjax({container: '#api-graph-pjax', data: {dateRange: $('#api-stats-picker').val(), groupBy: groupingOps[groupBy], project: this.value}, type: 'POST', url: 'api-graph', async:true, push: false});
+          break;          
+          case '2' :
+              $.pjax({container: '#api-graph-pjax', data: {dateRange: $('#api-stats-picker').val(), groupBy: groupingOps[groupBy], project: this.value}, type: 'POST', url: 'api-graph', async:true, push: false});
+          break;
+        }*/
+    });
+    
+    
+    
 
 function generateChartPreloader() {
               return "<div class='chartPreloader' style='width:100%; height:50%'>" + 
               "<i class='fa fa-spinner fa-pulse fa-4x' style='color: #CCCCCC;  position: relative;  top: 250px;  left: 45%;  transform: translate(-50%, -50%);'></i>" +
               "</div>"
 }
+
 JS;
 $this->registerJs($js);
 $this->title = 'API Logs Report';
@@ -63,7 +97,7 @@ use yii\widgets\Pjax; ?>
                                 'pluginEvents'=>[
                                     "apply.daterangepicker"=>"function(){
                                      $('#chart_div').html(generateChartPreloader());                                    
-                                     $.pjax({container: '#api-graph-pjax', data: {dateRange: $('#api-stats-picker').val(), callType: $('#call_type').val()}, type: 'POST', url: 'api-graph', async:true, push: false});
+                                     $.pjax({container: '#api-graph-pjax', data: {dateRange: $('#api-stats-picker').val(), project: ''}, type: 'POST', url: 'api-graph', async:true, push: false});
                                      let dates = $('#api-stats-picker').val().split(' / ');
                                      if (dates[0] == dates[1]){
                                         $('#viewMode0').addClass('active focus');
@@ -101,6 +135,14 @@ use yii\widgets\Pjax; ?>
                                 <option value="1">OUTGOING</option>
                             </select>
                         </div>-->
+
+                        <div class="col-xs-1">
+                            <?= Html::dropDownList('projectsList', null,  \common\models\ApiUser::getList(), [
+                                'prompt' => 'All',
+                                'id' => 'projects',
+                                'class' => 'form-control'
+                            ]) ?>
+                        </div>
 
                         <?php Pjax::begin(['id' => 'api-graph-pjax']); ?>
                         <div class="x_content">
