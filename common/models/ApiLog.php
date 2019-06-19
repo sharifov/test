@@ -199,8 +199,6 @@ class ApiLog extends \yii\db\ActiveRecord
             $queryDateFormat = '%Y-%m-%d %H:00';
         }
 
-        //var_dump($apiUserId); die();
-
         $cVoiceQuery = new Query();
         $cVoiceQuery->select(["DATE_FORMAT( al_request_dt, ' $queryDateFormat ') AS timeLine, COUNT(*) AS cVoice, SUM(CASE WHEN al_execution_time >=0 THEN al_execution_time ELSE 0 END) AS cAvgTimeV"]);
         $cVoiceQuery->from('api_log');
@@ -291,142 +289,145 @@ class ApiLog extends \yii\db\ActiveRecord
 
         $apiStats = [];
 
-        foreach ($communicationVoice as $item) {
-            $item['cSms'] = (isset($item['cSms']) ? $item['cSms'] : 0);
-            $item['qUpdate'] = (isset($item['qUpdate']) ? $item['qUpdate'] : 0);
-            $item['cEmail'] = (isset($item['cEmail']) ? $item['cEmail'] : 0);
-            $item['lCreate'] = (isset($item['lCreate']) ? $item['lCreate'] : 0);
-            $item['leadSU'] = (isset($item['leadSU']) ? $item['leadSU'] : 0);
-            $item['qCreate'] = (isset($item['qCreate']) ? $item['qCreate'] : 0);
-            $item['qInfo'] = (isset($item['qInfo']) ? $item['qInfo'] : 0);
-            $item['cVoice'] = (isset($item['cVoice']) ? $item['cVoice'] : 0);
+            foreach ($communicationVoice as $item) {
+                $item['cSms'] = (isset($item['cSms']) ? $item['cSms'] : 0);
+                $item['qUpdate'] = (isset($item['qUpdate']) ? $item['qUpdate'] : 0);
+                $item['cEmail'] = (isset($item['cEmail']) ? $item['cEmail'] : 0);
+                $item['lCreate'] = (isset($item['lCreate']) ? $item['lCreate'] : 0);
+                $item['leadSU'] = (isset($item['leadSU']) ? $item['leadSU'] : 0);
+                $item['qCreate'] = (isset($item['qCreate']) ? $item['qCreate'] : 0);
+                $item['qInfo'] = (isset($item['qInfo']) ? $item['qInfo'] : 0);
+                $item['cVoice'] = (isset($item['cVoice']) ? $item['cVoice'] : 0);
 
-            $apiStats[$item['timeLine']] = $item;
-        }
-
-        foreach ($communicationSms as $item) {
-            $item['cSms'] = (isset($item['cSms']) ? $item['cSms'] : 0);
-            $item['qUpdate'] = (isset($item['qUpdate']) ? $item['qUpdate'] : 0);
-            $item['cEmail'] = (isset($item['cEmail']) ? $item['cEmail'] : 0);
-            $item['lCreate'] = (isset($item['lCreate']) ? $item['lCreate'] : 0);
-            $item['leadSU'] = (isset($item['leadSU']) ? $item['leadSU'] : 0);
-            $item['qCreate'] = (isset($item['qCreate']) ? $item['qCreate'] : 0);
-            $item['qInfo'] = (isset($item['qInfo']) ? $item['qInfo'] : 0);
-            $item['cVoice'] = (isset($item['cVoice']) ? $item['cVoice'] : 0);
-
-            if (isset($apiStats[$item['timeLine']])) {
-                $apiStats[$item['timeLine']]['cSms'] = $item['cSms'];
-                $apiStats[$item['timeLine']]['cAvgTimeS'] = $item['cAvgTimeS'];
-            }else {
                 $apiStats[$item['timeLine']] = $item;
             }
-        }
 
-        foreach ($communicationEmail as $item) {
-            $item['cSms'] = (isset($item['cSms']) ? $item['cSms'] : 0);
-            $item['qUpdate'] = (isset($item['qUpdate']) ? $item['qUpdate'] : 0);
-            $item['cEmail'] = (isset($item['cEmail']) ? $item['cEmail'] : 0);
-            $item['lCreate'] = (isset($item['lCreate']) ? $item['lCreate'] : 0);
-            $item['leadSU'] = (isset($item['leadSU']) ? $item['leadSU'] : 0);
-            $item['qCreate'] = (isset($item['qCreate']) ? $item['qCreate'] : 0);
-            $item['qInfo'] = (isset($item['qInfo']) ? $item['qInfo'] : 0);
-            $item['cVoice'] = (isset($item['cVoice']) ? $item['cVoice'] : 0);
+            foreach ($communicationSms as $item) {
+                $item['cSms'] = (isset($item['cSms']) ? $item['cSms'] : 0);
+                $item['qUpdate'] = (isset($item['qUpdate']) ? $item['qUpdate'] : 0);
+                $item['cEmail'] = (isset($item['cEmail']) ? $item['cEmail'] : 0);
+                $item['lCreate'] = (isset($item['lCreate']) ? $item['lCreate'] : 0);
+                $item['leadSU'] = (isset($item['leadSU']) ? $item['leadSU'] : 0);
+                $item['qCreate'] = (isset($item['qCreate']) ? $item['qCreate'] : 0);
+                $item['qInfo'] = (isset($item['qInfo']) ? $item['qInfo'] : 0);
+                $item['cVoice'] = (isset($item['cVoice']) ? $item['cVoice'] : 0);
 
-            if (isset($apiStats[$item['timeLine']])) {
-                $apiStats[$item['timeLine']]['cEmail'] = $item['cEmail'];
-                $apiStats[$item['timeLine']]['cAvgTimeE'] = $item['cAvgTimeE'];
-            }else {
-                $apiStats[$item['timeLine']] = $item;
+                if (isset($apiStats[$item['timeLine']])) {
+                    $apiStats[$item['timeLine']]['cSms'] = $item['cSms'];
+                    $apiStats[$item['timeLine']]['cAvgTimeS'] = $item['cAvgTimeS'];
+                }else {
+                    $apiStats[$item['timeLine']] = $item;
+                }
             }
-        }
 
-        foreach ($leadCreate as $item) {
-            $item['cSms'] = (isset($item['cSms']) ? $item['cSms'] : 0);
-            $item['qUpdate'] = (isset($item['qUpdate']) ? $item['qUpdate'] : 0);
-            $item['cEmail'] = (isset($item['cEmail']) ? $item['cEmail'] : 0);
-            $item['lCreate'] = (isset($item['lCreate']) ? $item['lCreate'] : 0);
-            $item['leadSU'] = (isset($item['leadSU']) ? $item['leadSU'] : 0);
-            $item['qCreate'] = (isset($item['qCreate']) ? $item['qCreate'] : 0);
-            $item['qInfo'] = (isset($item['qInfo']) ? $item['qInfo'] : 0);
-            $item['cVoice'] = (isset($item['cVoice']) ? $item['cVoice'] : 0);
+            foreach ($communicationEmail as $item) {
+                $item['cSms'] = (isset($item['cSms']) ? $item['cSms'] : 0);
+                $item['qUpdate'] = (isset($item['qUpdate']) ? $item['qUpdate'] : 0);
+                $item['cEmail'] = (isset($item['cEmail']) ? $item['cEmail'] : 0);
+                $item['lCreate'] = (isset($item['lCreate']) ? $item['lCreate'] : 0);
+                $item['leadSU'] = (isset($item['leadSU']) ? $item['leadSU'] : 0);
+                $item['qCreate'] = (isset($item['qCreate']) ? $item['qCreate'] : 0);
+                $item['qInfo'] = (isset($item['qInfo']) ? $item['qInfo'] : 0);
+                $item['cVoice'] = (isset($item['cVoice']) ? $item['cVoice'] : 0);
 
-            if (isset($apiStats[$item['timeLine']])) {
-                $apiStats[$item['timeLine']]['lCreate'] = $item['lCreate'];
-                $apiStats[$item['timeLine']]['lAvgTimeC'] = $item['lAvgTimeC'];
-            }else {
-                $apiStats[$item['timeLine']] = $item;
+                if (isset($apiStats[$item['timeLine']])) {
+                    $apiStats[$item['timeLine']]['cEmail'] = $item['cEmail'];
+                    $apiStats[$item['timeLine']]['cAvgTimeE'] = $item['cAvgTimeE'];
+                }else {
+                    $apiStats[$item['timeLine']] = $item;
+                }
             }
-        }
 
-         foreach ($leadSoldUpdate as $item) {
-             $item['cSms'] = (isset($item['cSms']) ? $item['cSms'] : 0);
-             $item['qUpdate'] = (isset($item['qUpdate']) ? $item['qUpdate'] : 0);
-             $item['cEmail'] = (isset($item['cEmail']) ? $item['cEmail'] : 0);
-             $item['lCreate'] = (isset($item['lCreate']) ? $item['lCreate'] : 0);
-             $item['leadSU'] = (isset($item['leadSU']) ? $item['leadSU'] : 0);
-             $item['qCreate'] = (isset($item['qCreate']) ? $item['qCreate'] : 0);
-             $item['qInfo'] = (isset($item['qInfo']) ? $item['qInfo'] : 0);
-             $item['cVoice'] = (isset($item['cVoice']) ? $item['cVoice'] : 0);
+            foreach ($leadCreate as $item) {
+                $item['cSms'] = (isset($item['cSms']) ? $item['cSms'] : 0);
+                $item['qUpdate'] = (isset($item['qUpdate']) ? $item['qUpdate'] : 0);
+                $item['cEmail'] = (isset($item['cEmail']) ? $item['cEmail'] : 0);
+                $item['lCreate'] = (isset($item['lCreate']) ? $item['lCreate'] : 0);
+                $item['leadSU'] = (isset($item['leadSU']) ? $item['leadSU'] : 0);
+                $item['qCreate'] = (isset($item['qCreate']) ? $item['qCreate'] : 0);
+                $item['qInfo'] = (isset($item['qInfo']) ? $item['qInfo'] : 0);
+                $item['cVoice'] = (isset($item['cVoice']) ? $item['cVoice'] : 0);
 
-             if (isset($apiStats[$item['timeLine']])) {
-                 $apiStats[$item['timeLine']]['leadSU'] = $item['leadSU'];
-                 $apiStats[$item['timeLine']]['lAvgTimeSU'] = $item['lAvgTimeSU'];
-             }
-         }
-
-        foreach ($quoteCreate as $item) {
-            $item['cSms'] = (isset($item['cSms']) ? $item['cSms'] : 0);
-            $item['qUpdate'] = (isset($item['qUpdate']) ? $item['qUpdate'] : 0);
-            $item['cEmail'] = (isset($item['cEmail']) ? $item['cEmail'] : 0);
-            $item['lCreate'] = (isset($item['lCreate']) ? $item['lCreate'] : 0);
-            $item['leadSU'] = (isset($item['leadSU']) ? $item['leadSU'] : 0);
-            $item['qCreate'] = (isset($item['qCreate']) ? $item['qCreate'] : 0);
-            $item['qInfo'] = (isset($item['qInfo']) ? $item['qInfo'] : 0);
-            $item['cVoice'] = (isset($item['cVoice']) ? $item['cVoice'] : 0);
-
-            if (isset($apiStats[$item['timeLine']])) {
-                $apiStats[$item['timeLine']]['qCreate'] = $item['qCreate'];
-                $apiStats[$item['timeLine']]['qAvgTimeC'] = $item['qAvgTimeC'];
-            }else {
-                $apiStats[$item['timeLine']] = $item;
+                if (isset($apiStats[$item['timeLine']])) {
+                    $apiStats[$item['timeLine']]['lCreate'] = $item['lCreate'];
+                    $apiStats[$item['timeLine']]['lAvgTimeC'] = $item['lAvgTimeC'];
+                }else {
+                    $apiStats[$item['timeLine']] = $item;
+                }
             }
-        }
 
-        foreach ($quoteUpdate as $item) {
-            $item['cSms'] = (isset($item['cSms']) ? $item['cSms'] : 0);
-            $item['qUpdate'] = (isset($item['qUpdate']) ? $item['qUpdate'] : 0);
-            $item['cEmail'] = (isset($item['cEmail']) ? $item['cEmail'] : 0);
-            $item['lCreate'] = (isset($item['lCreate']) ? $item['lCreate'] : 0);
-            $item['leadSU'] = (isset($item['leadSU']) ? $item['leadSU'] : 0);
-            $item['qCreate'] = (isset($item['qCreate']) ? $item['qCreate'] : 0);
-            $item['qInfo'] = (isset($item['qInfo']) ? $item['qInfo'] : 0);
-            $item['cVoice'] = (isset($item['cVoice']) ? $item['cVoice'] : 0);
+            foreach ($leadSoldUpdate as $item) {
+                $item['cSms'] = (isset($item['cSms']) ? $item['cSms'] : 0);
+                $item['qUpdate'] = (isset($item['qUpdate']) ? $item['qUpdate'] : 0);
+                $item['cEmail'] = (isset($item['cEmail']) ? $item['cEmail'] : 0);
+                $item['lCreate'] = (isset($item['lCreate']) ? $item['lCreate'] : 0);
+                $item['leadSU'] = (isset($item['leadSU']) ? $item['leadSU'] : 0);
+                $item['qCreate'] = (isset($item['qCreate']) ? $item['qCreate'] : 0);
+                $item['qInfo'] = (isset($item['qInfo']) ? $item['qInfo'] : 0);
+                $item['cVoice'] = (isset($item['cVoice']) ? $item['cVoice'] : 0);
 
-            if (isset($apiStats[$item['timeLine']])) {
-                $apiStats[$item['timeLine']]['qUpdate'] = $item['qUpdate'];
-                $apiStats[$item['timeLine']]['qAvgTimeU'] = $item['qAvgTimeU'];
-            }else {
-                $apiStats[$item['timeLine']] = $item;
+                if (isset($apiStats[$item['timeLine']])) {
+                    $apiStats[$item['timeLine']]['leadSU'] = $item['leadSU'];
+                    $apiStats[$item['timeLine']]['lAvgTimeSU'] = $item['lAvgTimeSU'];
+                }else {
+                    $apiStats[$item['timeLine']] = $item;
+                }
             }
-        }
 
-        foreach ($quoteGetInfo as $item) {
-            $item['cSms'] = (isset($item['cSms']) ? $item['cSms'] : 0);
-            $item['qUpdate'] = (isset($item['qUpdate']) ? $item['qUpdate'] : 0);
-            $item['cEmail'] = (isset($item['cEmail']) ? $item['cEmail'] : 0);
-            $item['lCreate'] = (isset($item['lCreate']) ? $item['lCreate'] : 0);
-            $item['leadSU'] = (isset($item['leadSU']) ? $item['leadSU'] : 0);
-            $item['qCreate'] = (isset($item['qCreate']) ? $item['qCreate'] : 0);
-            $item['qInfo'] = (isset($item['qInfo']) ? $item['qInfo'] : 0);
-            $item['cVoice'] = (isset($item['cVoice']) ? $item['cVoice'] : 0);
+            foreach ($quoteCreate as $item) {
+                $item['cSms'] = (isset($item['cSms']) ? $item['cSms'] : 0);
+                $item['qUpdate'] = (isset($item['qUpdate']) ? $item['qUpdate'] : 0);
+                $item['cEmail'] = (isset($item['cEmail']) ? $item['cEmail'] : 0);
+                $item['lCreate'] = (isset($item['lCreate']) ? $item['lCreate'] : 0);
+                $item['leadSU'] = (isset($item['leadSU']) ? $item['leadSU'] : 0);
+                $item['qCreate'] = (isset($item['qCreate']) ? $item['qCreate'] : 0);
+                $item['qInfo'] = (isset($item['qInfo']) ? $item['qInfo'] : 0);
+                $item['cVoice'] = (isset($item['cVoice']) ? $item['cVoice'] : 0);
 
-            if (isset($apiStats[$item['timeLine']])) {
-                $apiStats[$item['timeLine']]['qInfo'] = $item['qInfo'];
-                $apiStats[$item['timeLine']]['qAvgTimeI'] = $item['qAvgTimeI'];
-            }else {
-                $apiStats[$item['timeLine']] = $item;
+                if (isset($apiStats[$item['timeLine']])) {
+                    $apiStats[$item['timeLine']]['qCreate'] = $item['qCreate'];
+                    $apiStats[$item['timeLine']]['qAvgTimeC'] = $item['qAvgTimeC'];
+                }else {
+                    $apiStats[$item['timeLine']] = $item;
+                }
             }
-        }
+
+            foreach ($quoteUpdate as $item) {
+                $item['cSms'] = (isset($item['cSms']) ? $item['cSms'] : 0);
+                $item['qUpdate'] = (isset($item['qUpdate']) ? $item['qUpdate'] : 0);
+                $item['cEmail'] = (isset($item['cEmail']) ? $item['cEmail'] : 0);
+                $item['lCreate'] = (isset($item['lCreate']) ? $item['lCreate'] : 0);
+                $item['leadSU'] = (isset($item['leadSU']) ? $item['leadSU'] : 0);
+                $item['qCreate'] = (isset($item['qCreate']) ? $item['qCreate'] : 0);
+                $item['qInfo'] = (isset($item['qInfo']) ? $item['qInfo'] : 0);
+                $item['cVoice'] = (isset($item['cVoice']) ? $item['cVoice'] : 0);
+
+                if (isset($apiStats[$item['timeLine']])) {
+                    $apiStats[$item['timeLine']]['qUpdate'] = $item['qUpdate'];
+                    $apiStats[$item['timeLine']]['qAvgTimeU'] = $item['qAvgTimeU'];
+                }else {
+                    $apiStats[$item['timeLine']] = $item;
+                }
+            }
+
+            foreach ($quoteGetInfo as $item) {
+                $item['cSms'] = (isset($item['cSms']) ? $item['cSms'] : 0);
+                $item['qUpdate'] = (isset($item['qUpdate']) ? $item['qUpdate'] : 0);
+                $item['cEmail'] = (isset($item['cEmail']) ? $item['cEmail'] : 0);
+                $item['lCreate'] = (isset($item['lCreate']) ? $item['lCreate'] : 0);
+                $item['leadSU'] = (isset($item['leadSU']) ? $item['leadSU'] : 0);
+                $item['qCreate'] = (isset($item['qCreate']) ? $item['qCreate'] : 0);
+                $item['qInfo'] = (isset($item['qInfo']) ? $item['qInfo'] : 0);
+                $item['cVoice'] = (isset($item['cVoice']) ? $item['cVoice'] : 0);
+
+                if (isset($apiStats[$item['timeLine']])) {
+                    $apiStats[$item['timeLine']]['qInfo'] = $item['qInfo'];
+                    $apiStats[$item['timeLine']]['qAvgTimeI'] = $item['qAvgTimeI'];
+                }else {
+                    $apiStats[$item['timeLine']] = $item;
+                }
+            }
+        ksort($apiStats);
         return $apiStats;
     }
 }
