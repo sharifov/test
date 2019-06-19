@@ -312,7 +312,6 @@ class ApiLog extends \yii\db\ActiveRecord
                 $item['qCreate'] = (isset($item['qCreate']) ? $item['qCreate'] : 0);
                 $item['qInfo'] = (isset($item['qInfo']) ? $item['qInfo'] : 0);
                 $item['cVoice'] = (isset($item['cVoice']) ? $item['cVoice'] : 0);
-                $item['cMemV'] = (isset($item['cMemV']) ? $item['cMemV'] : 0);
 
                 if (isset($apiStats[$item['timeLine']])) {
                     $apiStats[$item['timeLine']]['cSms'] = $item['cSms'];
