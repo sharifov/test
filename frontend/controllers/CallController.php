@@ -8,6 +8,7 @@ use common\models\Project;
 use common\models\search\EmployeeSearch;
 use common\models\search\LeadFlightSegmentSearch;
 use common\models\search\LeadSearch;
+use common\models\search\UserConnectionSearch;
 use common\models\Source;
 use common\models\UserProjectParams;
 use Yii;
@@ -241,6 +242,7 @@ class CallController extends FController
         $userId = Yii::$app->user->id;
 
         $searchModel = new CallSearch();
+        $searchModel2 = new UserConnectionSearch();
         $params = Yii::$app->request->queryParams;
 
         //if (Yii::$app->user->identity->canRole('supervision')) {
@@ -248,10 +250,10 @@ class CallController extends FController
             //$params['CallSearch']['status'] = Employee::STATUS_ACTIVE;
         //}
 
-        $params['CallSearch']['statuses'] = [Call::CALL_STATUS_QUEUE];
-        $dataProvider = $searchModel->searchUserCallMap($params);
+        //$params['CallSearch']['statuses'] = [Call::CALL_STATUS_QUEUE];
+        $dataProviderOnline = $searchModel2->searchUserCallMap($params);
 
-        $params['CallSearch']['statuses'] = [Call::CALL_STATUS_IN_PROGRESS, Call::CALL_STATUS_RINGING];
+        $params['CallSearch']['statuses'] = [Call::CALL_STATUS_IN_PROGRESS, Call::CALL_STATUS_RINGING, Call::CALL_STATUS_QUEUE];
         $dataProvider3 = $searchModel->searchUserCallMap($params);
 
         $params['CallSearch']['statuses'] = [Call::CALL_STATUS_COMPLETED, Call::CALL_STATUS_BUSY, Call::CALL_STATUS_FAILED, Call::CALL_STATUS_NO_ANSWER, Call::CALL_STATUS_CANCELED];
@@ -265,7 +267,7 @@ class CallController extends FController
 
 
         return $this->render('user-map', [
-            'dataProvider' => $dataProvider,
+            'dataProviderOnline' => $dataProviderOnline,
             'dataProvider2' => $dataProvider2,
             'dataProvider3' => $dataProvider3,
             //'searchModel' => $searchModel,

@@ -51,9 +51,21 @@ $this->params['breadcrumbs'][] = $this->title;
                 'style' => 'width:80px'
             ]
         ],
+
+        [
+            'attribute' => 'uid',
+            'value' => function (\common\models\Lead $model) {
+                return $model->uid;
+            },
+            'options' => [
+                'style' => 'width:120px'
+            ]
+        ],
+
+
         [
             'attribute' => 'bo_flight_id',
-            'label' => 'Sale ID (BO)',
+            'label' => 'BO ID',
             'value' => function (\common\models\Lead $model) {
                 if (!empty($model['additional_information'])) {
                     $additionallyInfo = Lead::getLeadAdditionalInfo($model['additional_information']);
@@ -82,7 +94,18 @@ $this->params['breadcrumbs'][] = $this->title;
                 'style' => 'width:80px'
             ]
         ],
-        'uid',
+
+        [
+            'attribute' => 'project_id',
+            'value' => function (\common\models\Lead $model) {
+                return $model->project ? '<span class="badge badge-info">' . Html::encode($model->project->name) . '</span>' : '-';
+            },
+            'format' => 'raw',
+            'options' => [
+                'style' => 'width:120px'
+            ],
+            'filter' => $projectList,
+        ],
         [
             'attribute' => 'pending',
             'label' => 'Pending Time',
@@ -101,6 +124,9 @@ $this->params['breadcrumbs'][] = $this->title;
             },
             'format' => 'raw'
         ],
+
+
+
         [
             'label' => 'PNR',
             'value' => function ($model) {
@@ -138,7 +164,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         if (!empty($additionally->passengers)) {
                             $pax = [];
                             foreach ($additionally->passengers as $passenger) {
-                                $pax[] = strtoupper($passenger);
+                                $pax[] = '<i class="fa fa-user-o success"></i> '.strtoupper($passenger);
                             }
                             $content[] = implode('<br/>', $pax);
                         }
@@ -147,11 +173,11 @@ $this->params['breadcrumbs'][] = $this->title;
                 $divTag = Html::tag('div', '', [
                     'style' => 'border: 1px solid #a3b3bd; margin: 0px 0 5px;'
                 ]);
-                return implode($divTag, $content);
+                return '<small>'.implode($divTag, $content).'</small>';
             },
             'format' => 'raw',
             'contentOptions' => [
-                'style' => 'width: 200px;'
+                'style' => 'width: 300px;'
             ]
         ],
         [
@@ -371,11 +397,25 @@ $this->params['breadcrumbs'][] = $this->title;
             'format' => 'raw'
         ],
         [
-            'attribute' => 'project_id',
+            'attribute' => 'created',
+            //'label' => 'Pending Time',
             'value' => function (\common\models\Lead $model) {
-                return $model->project ? $model->project->name : '-';
+
+                $createdTS = strtotime($model->created);
+
+                $diffTime = time() - $createdTS;
+                $diffHours = (int) ($diffTime / (60 * 60));
+
+
+                $str = ($diffHours > 3 && $diffHours < 73 ) ? $diffHours.' hours' : Yii::$app->formatter->asRelativeTime($createdTS);
+                $str .= '<br><i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->created));
+
+                return $str;
             },
-            'filter' => $projectList,
+            'options' => [
+                'style' => 'width:160px'
+            ],
+            'format' => 'raw'
         ],
         [
             'class' => 'yii\grid\ActionColumn',
@@ -385,7 +425,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
                     $buttons = '';
 
-                    $buttons .= Html::a('<i class="fa fa-search"></i>', [
+                    $buttons .= Html::a('<i class="fa fa-search"></i> View', [
                         'lead/view',
                         'gid' => $model->gid
                     ], [
