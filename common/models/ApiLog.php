@@ -185,9 +185,11 @@ class ApiLog extends \yii\db\ActiveRecord
     /**
      * @param string $fromDate
      * @param string $todate
+     * @param string $range
+     * @param string $apiUserId
      * @return array
      */
-    public static function getApiLogStats(string $fromDate, string $todate, string $range, $apiUserId) : array
+    public static function getApiLogStats(string $fromDate, string $todate, string $range, string $apiUserId) : array
     {
         if ($range == 'H'){
             $queryDateFormat = '%H:00';
@@ -200,7 +202,7 @@ class ApiLog extends \yii\db\ActiveRecord
         }
 
         $cVoiceQuery = new Query();
-        $cVoiceQuery->select(["DATE_FORMAT( al_request_dt, ' $queryDateFormat ') AS timeLine, COUNT(*) AS cVoice, SUM(CASE WHEN al_execution_time >=0 THEN al_execution_time ELSE 0 END) AS cAvgTimeV"]);
+        $cVoiceQuery->select(["DATE_FORMAT( al_request_dt, ' $queryDateFormat ') AS timeLine, COUNT(*) AS cVoice, SUM(CASE WHEN al_execution_time >=0 THEN al_execution_time ELSE 0 END) AS cAvgTimeV", "SUM(CASE WHEN al_memory_usage >=0 THEN al_memory_usage ELSE 0 END) AS cMemV"]);
         $cVoiceQuery->from('api_log');
         $cVoiceQuery->where(['between', 'DATE(al_request_dt)', $fromDate, $todate]);
         $cVoiceQuery->andWhere(['=', 'al_action', 'v1/communication/voice']);
@@ -211,7 +213,7 @@ class ApiLog extends \yii\db\ActiveRecord
         $communicationVoice = $cVoiceQuery->all();
 
         $cSmsQuery = new Query();
-        $cSmsQuery->select(["DATE_FORMAT( al_request_dt, ' $queryDateFormat ') AS timeLine, COUNT(*) AS cSms, SUM(CASE WHEN al_execution_time >=0 THEN al_execution_time ELSE 0 END) AS cAvgTimeS"]);
+        $cSmsQuery->select(["DATE_FORMAT( al_request_dt, ' $queryDateFormat ') AS timeLine, COUNT(*) AS cSms, SUM(CASE WHEN al_execution_time >=0 THEN al_execution_time ELSE 0 END) AS cAvgTimeS", "SUM(CASE WHEN al_memory_usage >=0 THEN al_memory_usage ELSE 0 END) AS cMemS"]);
         $cSmsQuery->from('api_log');
         $cSmsQuery->where(['between', 'DATE(al_request_dt)', $fromDate, $todate]);
         $cSmsQuery->andWhere(['=', 'al_action', 'v1/communication/sms']);
@@ -222,7 +224,7 @@ class ApiLog extends \yii\db\ActiveRecord
         $communicationSms = $cSmsQuery->all();
 
         $cEmailQuery = new Query();
-        $cEmailQuery->select(["DATE_FORMAT( al_request_dt, ' $queryDateFormat ') AS timeLine, COUNT(*) AS cEmail, SUM(CASE WHEN al_execution_time >=0 THEN al_execution_time ELSE 0 END) AS cAvgTimeE"]);
+        $cEmailQuery->select(["DATE_FORMAT( al_request_dt, ' $queryDateFormat ') AS timeLine, COUNT(*) AS cEmail, SUM(CASE WHEN al_execution_time >=0 THEN al_execution_time ELSE 0 END) AS cAvgTimeE", "SUM(CASE WHEN al_memory_usage >=0 THEN al_memory_usage ELSE 0 END) AS cMemE"]);
         $cEmailQuery->from('api_log');
         $cEmailQuery->where(['between', 'DATE(al_request_dt)', $fromDate, $todate]);
         $cEmailQuery->andWhere(['=', 'al_action', 'v1/communication/email']);
@@ -233,7 +235,7 @@ class ApiLog extends \yii\db\ActiveRecord
         $communicationEmail = $cEmailQuery->all();
 
         $lCreateQuery = new Query();
-        $lCreateQuery->select(["DATE_FORMAT( al_request_dt, ' $queryDateFormat ') AS timeLine, COUNT(*) AS lCreate, SUM(CASE WHEN al_execution_time >=0 THEN al_execution_time ELSE 0 END) AS lAvgTimeC"]);
+        $lCreateQuery->select(["DATE_FORMAT( al_request_dt, ' $queryDateFormat ') AS timeLine, COUNT(*) AS lCreate, SUM(CASE WHEN al_execution_time >=0 THEN al_execution_time ELSE 0 END) AS lAvgTimeC", "SUM(CASE WHEN al_memory_usage >=0 THEN al_memory_usage ELSE 0 END) AS lMemC"]);
         $lCreateQuery->from('api_log');
         $lCreateQuery->where(['between', 'DATE(al_request_dt)', $fromDate, $todate]);
         $lCreateQuery->andWhere(['=', 'al_action', 'v1/lead/create']);
@@ -244,7 +246,7 @@ class ApiLog extends \yii\db\ActiveRecord
         $leadCreate = $lCreateQuery->all();
 
         $lSoldUpdateQuery = new Query();
-        $lSoldUpdateQuery->select(["DATE_FORMAT( al_request_dt, ' $queryDateFormat ') AS timeLine, COUNT(*) AS leadSU, SUM(CASE WHEN al_execution_time >=0 THEN al_execution_time ELSE 0 END) AS lAvgTimeSU"]);
+        $lSoldUpdateQuery->select(["DATE_FORMAT( al_request_dt, ' $queryDateFormat ') AS timeLine, COUNT(*) AS leadSU, SUM(CASE WHEN al_execution_time >=0 THEN al_execution_time ELSE 0 END) AS lAvgTimeSU", "SUM(CASE WHEN al_memory_usage >=0 THEN al_memory_usage ELSE 0 END) AS lMemSU"]);
         $lSoldUpdateQuery->from('api_log');
         $lSoldUpdateQuery->where(['between', 'DATE(al_request_dt)', $fromDate, $todate]);
         $lSoldUpdateQuery->andWhere(['=', 'al_action', 'v1/lead/sold-update']);
@@ -255,7 +257,7 @@ class ApiLog extends \yii\db\ActiveRecord
         $leadSoldUpdate = $lSoldUpdateQuery->all();
 
         $qCreateQuery = new Query();
-        $qCreateQuery->select(["DATE_FORMAT( al_request_dt, ' $queryDateFormat ') AS timeLine, COUNT(*) AS qCreate, SUM(CASE WHEN al_execution_time >=0 THEN al_execution_time ELSE 0 END) AS qAvgTimeC"]);
+        $qCreateQuery->select(["DATE_FORMAT( al_request_dt, ' $queryDateFormat ') AS timeLine, COUNT(*) AS qCreate, SUM(CASE WHEN al_execution_time >=0 THEN al_execution_time ELSE 0 END) AS qAvgTimeC", "SUM(CASE WHEN al_memory_usage >=0 THEN al_memory_usage ELSE 0 END) AS qMemC"]);
         $qCreateQuery->from('api_log');
         $qCreateQuery->where(['between', 'DATE(al_request_dt)', $fromDate, $todate]);
         $qCreateQuery->andWhere(['=', 'al_action', 'v1/quote/create']);
@@ -266,7 +268,7 @@ class ApiLog extends \yii\db\ActiveRecord
         $quoteCreate = $qCreateQuery->all();
 
         $qUpdateQuery = new Query();
-        $qUpdateQuery->select(["DATE_FORMAT( al_request_dt, ' $queryDateFormat ') AS timeLine, COUNT(*) AS qUpdate, SUM(CASE WHEN al_execution_time >=0 THEN al_execution_time ELSE 0 END) AS qAvgTimeU"]);
+        $qUpdateQuery->select(["DATE_FORMAT( al_request_dt, ' $queryDateFormat ') AS timeLine, COUNT(*) AS qUpdate, SUM(CASE WHEN al_execution_time >=0 THEN al_execution_time ELSE 0 END) AS qAvgTimeU", "SUM(CASE WHEN al_memory_usage >=0 THEN al_memory_usage ELSE 0 END) AS qMemU"]);
         $qUpdateQuery->from('api_log');
         $qUpdateQuery->where(['between', 'DATE(al_request_dt)', $fromDate, $todate]);
         $qUpdateQuery->andWhere(['=', 'al_action', 'v1/quote/update']);
@@ -277,7 +279,7 @@ class ApiLog extends \yii\db\ActiveRecord
         $quoteUpdate = $qUpdateQuery->all();
 
         $qGetInfoQuery = new Query();
-        $qGetInfoQuery->select(["DATE_FORMAT( al_request_dt, ' $queryDateFormat ') AS timeLine, COUNT(*) AS qInfo, SUM(CASE WHEN al_execution_time >=0 THEN al_execution_time ELSE 0 END) AS qAvgTimeI"]);
+        $qGetInfoQuery->select(["DATE_FORMAT( al_request_dt, ' $queryDateFormat ') AS timeLine, COUNT(*) AS qInfo, SUM(CASE WHEN al_execution_time >=0 THEN al_execution_time ELSE 0 END) AS qAvgTimeI", "SUM(CASE WHEN al_memory_usage >=0 THEN al_memory_usage ELSE 0 END) AS qMemI"]);
         $qGetInfoQuery->from('api_log');
         $qGetInfoQuery->where(['between', 'DATE(al_request_dt)', $fromDate, $todate]);
         $qGetInfoQuery->andWhere(['=', 'al_action', 'v2/quote/get-info']);
@@ -288,7 +290,6 @@ class ApiLog extends \yii\db\ActiveRecord
         $quoteGetInfo = $qGetInfoQuery->all();
 
         $apiStats = [];
-
             foreach ($communicationVoice as $item) {
                 $item['cSms'] = (isset($item['cSms']) ? $item['cSms'] : 0);
                 $item['qUpdate'] = (isset($item['qUpdate']) ? $item['qUpdate'] : 0);
@@ -311,10 +312,12 @@ class ApiLog extends \yii\db\ActiveRecord
                 $item['qCreate'] = (isset($item['qCreate']) ? $item['qCreate'] : 0);
                 $item['qInfo'] = (isset($item['qInfo']) ? $item['qInfo'] : 0);
                 $item['cVoice'] = (isset($item['cVoice']) ? $item['cVoice'] : 0);
+                $item['cMemV'] = (isset($item['cMemV']) ? $item['cMemV'] : 0);
 
                 if (isset($apiStats[$item['timeLine']])) {
                     $apiStats[$item['timeLine']]['cSms'] = $item['cSms'];
                     $apiStats[$item['timeLine']]['cAvgTimeS'] = $item['cAvgTimeS'];
+                    $apiStats[$item['timeLine']]['cMemS'] = $item['cMemS'];
                 }else {
                     $apiStats[$item['timeLine']] = $item;
                 }
@@ -333,6 +336,7 @@ class ApiLog extends \yii\db\ActiveRecord
                 if (isset($apiStats[$item['timeLine']])) {
                     $apiStats[$item['timeLine']]['cEmail'] = $item['cEmail'];
                     $apiStats[$item['timeLine']]['cAvgTimeE'] = $item['cAvgTimeE'];
+                    $apiStats[$item['timeLine']]['cMemE'] = $item['cMemE'];
                 }else {
                     $apiStats[$item['timeLine']] = $item;
                 }
@@ -351,6 +355,7 @@ class ApiLog extends \yii\db\ActiveRecord
                 if (isset($apiStats[$item['timeLine']])) {
                     $apiStats[$item['timeLine']]['lCreate'] = $item['lCreate'];
                     $apiStats[$item['timeLine']]['lAvgTimeC'] = $item['lAvgTimeC'];
+                    $apiStats[$item['timeLine']]['lMemC'] = $item['lMemC'];
                 }else {
                     $apiStats[$item['timeLine']] = $item;
                 }
@@ -369,6 +374,7 @@ class ApiLog extends \yii\db\ActiveRecord
                 if (isset($apiStats[$item['timeLine']])) {
                     $apiStats[$item['timeLine']]['leadSU'] = $item['leadSU'];
                     $apiStats[$item['timeLine']]['lAvgTimeSU'] = $item['lAvgTimeSU'];
+                    $apiStats[$item['timeLine']]['lMemSU'] = $item['lMemSU'];
                 }else {
                     $apiStats[$item['timeLine']] = $item;
                 }
@@ -387,6 +393,7 @@ class ApiLog extends \yii\db\ActiveRecord
                 if (isset($apiStats[$item['timeLine']])) {
                     $apiStats[$item['timeLine']]['qCreate'] = $item['qCreate'];
                     $apiStats[$item['timeLine']]['qAvgTimeC'] = $item['qAvgTimeC'];
+                    $apiStats[$item['timeLine']]['qMemC'] = $item['qMemC'];
                 }else {
                     $apiStats[$item['timeLine']] = $item;
                 }
@@ -405,6 +412,7 @@ class ApiLog extends \yii\db\ActiveRecord
                 if (isset($apiStats[$item['timeLine']])) {
                     $apiStats[$item['timeLine']]['qUpdate'] = $item['qUpdate'];
                     $apiStats[$item['timeLine']]['qAvgTimeU'] = $item['qAvgTimeU'];
+                    $apiStats[$item['timeLine']]['qMemU'] = $item['qMemU'];
                 }else {
                     $apiStats[$item['timeLine']] = $item;
                 }
@@ -423,6 +431,7 @@ class ApiLog extends \yii\db\ActiveRecord
                 if (isset($apiStats[$item['timeLine']])) {
                     $apiStats[$item['timeLine']]['qInfo'] = $item['qInfo'];
                     $apiStats[$item['timeLine']]['qAvgTimeI'] = $item['qAvgTimeI'];
+                    $apiStats[$item['timeLine']]['qMemI'] = $item['qMemI'];
                 }else {
                     $apiStats[$item['timeLine']] = $item;
                 }

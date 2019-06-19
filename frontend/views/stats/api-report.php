@@ -35,26 +35,9 @@ $('#viewMode0').click(function() {
                 groupBy = '1';
             }
         }
-        let groupingOps = ["H", "D", "M"];   
-        
+        let groupingOps = ["H", "D", "M"];
         $.pjax({container: '#api-graph-pjax', data: {dateRange: $('#api-stats-picker').val(), groupBy: groupingOps[groupBy], project: this.value}, type: 'POST', url: 'api-graph', async:true, push: false});
-
-        
-        /*switch (this.value) {
-          case '0' :
-              $.pjax({container: '#api-graph-pjax', data: {dateRange: $('#api-stats-picker').val(), groupBy: groupingOps[groupBy], project: this.value}, type: 'POST', url: 'api-graph', async:true, push: false});
-          break;
-          case '1' :
-              $.pjax({container: '#api-graph-pjax', data: {dateRange: $('#api-stats-picker').val(), groupBy: groupingOps[groupBy], project: this.value}, type: 'POST', url: 'api-graph', async:true, push: false});
-          break;          
-          case '2' :
-              $.pjax({container: '#api-graph-pjax', data: {dateRange: $('#api-stats-picker').val(), groupBy: groupingOps[groupBy], project: this.value}, type: 'POST', url: 'api-graph', async:true, push: false});
-          break;
-        }*/
     });
-    
-    
-    
 
 function generateChartPreloader() {
               return "<div class='chartPreloader' style='width:100%; height:50%'>" + 
@@ -128,14 +111,6 @@ use yii\widgets\Pjax; ?>
                             </div>
                         </div>
 
-                        <!--<div class="col-xs-1">
-                            <select id="call_type" class="form-control" required="">
-                                <option value="0">All</option>
-                                <option value="2">INCOMING</option>
-                                <option value="1">OUTGOING</option>
-                            </select>
-                        </div>-->
-
                         <div class="col-xs-1">
                             <?= Html::dropDownList('projectsList', null,  \common\models\ApiUser::getList(), [
                                 'prompt' => 'All',
@@ -160,9 +135,34 @@ use yii\widgets\Pjax; ?>
                                         <script>
                                             function drawChart() {
                                                 let data = google.visualization.arrayToDataTable([
-                                                    ['Time Line', 'communication/voice', 'communication/sms', 'communication/email', 'lead/create', 'lead/sold-update', 'quote/create', 'quote/update', 'quote/get-info'],
-                                                    <?php foreach($apiStats as $k => $item):?>
-                                                    ['<?= date($format, strtotime($item['timeLine']))?>', <?= $item['cVoice'] ?>, <?= $item['cSms'] ?>, <?= $item['cEmail'] ?>, <?= $item['lCreate'] ?>, <?= $item['leadSU']?>, <?= $item['qCreate']?>, <?= $item['qUpdate']?>, <?= $item['qInfo']?>],
+                                                    ['Time Line',
+                                                        'communication/voice',
+                                                        {'type': 'string', 'role': 'tooltip', 'p': {'html': true}},
+                                                        'communication/sms',
+                                                        {'type': 'string', 'role': 'tooltip', 'p': {'html': true}},
+                                                        'communication/email',
+                                                        {'type': 'string', 'role': 'tooltip', 'p': {'html': true}},
+                                                        'lead/create',
+                                                        {'type': 'string', 'role': 'tooltip', 'p': {'html': true}},
+                                                        'lead/sold-update',
+                                                        {'type': 'string', 'role': 'tooltip', 'p': {'html': true}},
+                                                        'quote/create',
+                                                        {'type': 'string', 'role': 'tooltip', 'p': {'html': true}},
+                                                        'quote/update',
+                                                        {'type': 'string', 'role': 'tooltip', 'p': {'html': true}},
+                                                        'quote/get-info',
+                                                        {'type': 'string', 'role': 'tooltip', 'p': {'html': true}}
+                                                    ],
+                                                    <?php foreach($apiStats as $k => $item): ?>
+                                                    ['<?= date($format, strtotime($item['timeLine']))?>',
+                                                        <?= $item['cVoice'] ?>, customHTMLContent('<?= date($format, strtotime($item['timeLine']))?>', 'communication/voice', '<?= $item['cVoice'] ?>', '<?= isset($item['cAvgTimeV']) ? $item['cAvgTimeV'] : ''?>', '<?= isset($item['cMemV']) ? Yii::$app->formatter->asShortSize($item['cMemV'],2) : '' ?>'),
+                                                        <?= $item['cSms'] ?>, customHTMLContent('<?= date($format, strtotime($item['timeLine']))?>', 'communication/sms', '<?= $item['cSms'] ?>', '<?= isset($item['cAvgTimeS']) ? $item['cAvgTimeS'] : ''?>', '<?= isset($item['cMemS']) ? Yii::$app->formatter->asShortSize($item['cMemS'], 2) : '' ?>'),
+                                                        <?= $item['cEmail'] ?>, customHTMLContent('<?= date($format, strtotime($item['timeLine']))?>', 'communication/email', '<?= $item['cEmail'] ?>', '<?= isset($item['cAvgTimeE']) ? $item['cAvgTimeE'] : ''?>', '<?= isset($item['cMemE']) ? Yii::$app->formatter->asShortSize($item['cMemE'], 2) : '' ?>'),
+                                                        <?= $item['lCreate'] ?>, customHTMLContent('<?= date($format, strtotime($item['timeLine']))?>', 'lead/create', '<?= $item['lCreate'] ?>', '<?= isset($item['lAvgTimeC']) ? $item['lAvgTimeC'] : ''?>', '<?= isset($item['lMemC']) ? Yii::$app->formatter->asShortSize($item['lMemC'], 2) : '' ?>'),
+                                                        <?= $item['leadSU']?>, customHTMLContent('<?= date($format, strtotime($item['timeLine']))?>', 'lead/sold-update', '<?= $item['leadSU'] ?>', '<?= isset($item['lAvgTimeSU']) ? $item['lAvgTimeSU'] : ''?>', '<?= isset($item['lMemSU']) ? Yii::$app->formatter->asShortSize($item['lMemSU'], 2) : '' ?>'),
+                                                        <?= $item['qCreate']?>, customHTMLContent('<?= date($format, strtotime($item['timeLine']))?>', 'quote/create', '<?= $item['qCreate'] ?>', '<?= isset($item['qAvgTimeC']) ? $item['qAvgTimeC'] : ''?>', '<?= isset($item['qMemC']) ? Yii::$app->formatter->asShortSize($item['qMemC'], 2) : '' ?>'),
+                                                        <?= $item['qUpdate']?>, customHTMLContent('<?= date($format, strtotime($item['timeLine']))?>', 'quote/update', '<?= $item['qUpdate'] ?>', '<?= isset($item['qAvgTimeU']) ? $item['qAvgTimeU'] : ''?>', '<?= isset($item['qMemU']) ? Yii::$app->formatter->asShortSize($item['qMemU'], 2) : '' ?>'),
+                                                        <?= $item['qInfo']?>, customHTMLContent('<?= date($format, strtotime($item['timeLine']))?>', 'quote/get-info', '<?= $item['qInfo'] ?>', '<?= isset($item['qAvgTimeI']) ? $item['qAvgTimeI'] : ''?>', '<?= isset($item['qMemI']) ? Yii::$app->formatter->asShortSize($item['qMemI'], 2) : '' ?>')],
                                                     <?php endforeach; ?>
                                                 ]);
 
@@ -220,22 +220,20 @@ use yii\widgets\Pjax; ?>
                                                 });
                                             }
 
-                                            /*function createCustomHTMLContent(status ,hourRange, statusAmount, totalPrice, totalDuration) {
+                                            function customHTMLContent(timeLine, api, apiCnt, avgTime, avgMem) {
                                                 return '<div style="padding:5px 5px 5px 5px;">' +
                                                     '<table class="medals_layout">' +
                                                     '<tr>' +
-                                                    '<td style="padding-right:5px;">Time: </td>' + '<td><b>' + hourRange + '</b></td>' + '</tr>' +
+                                                    '<td style="padding-right:5px;">Time: </td>' + '<td><b>' + timeLine + '</b></td>' + '</tr>' +
                                                     '<tr>' +
-                                                    '<td style="padding-right:5px;">' + status +'</td>' + '<td><b>' + statusAmount + '</b></td>' + '</tr>' +
+                                                    '<td style="padding-right:5px;">' + api +':</td>' + '<td><b>' + apiCnt + '</b></td>' + '</tr>' +
                                                     '<tr>' +
-                                                    '<td style="padding-right:5px;">Total Price: </td>' +
-                                                    '<td><b>' + totalPrice + ' $</b></td>' + '</tr>' +
+                                                    '<td style="padding-right:5px;">Avg. Execution Time: </td>' + '<td><b>' + avgTime + ' ms</b></td>' + '</tr>' +
                                                     '<tr>' +
-                                                    '<td style="padding-right:5px;">Duration: </td>' +
-                                                    '<td><b>' + totalDuration + ' s</b></td>' + '</tr>' +
+                                                    '<td style="padding-right:5px;">Avg. Memory usage: </td>' + '<td><b>' + avgMem + '</b></td>' + '</tr>' +
                                                     '</table>' +
                                                     '</div>';
-                                            }*/
+                                            }
                                         </script>
                                     </div>
                                 </div>
