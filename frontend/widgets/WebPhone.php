@@ -60,12 +60,7 @@ class WebPhone extends \yii\bootstrap\Widget
         } else {
             $token = false;
         }
-
-        $supportGeneralPhones = isset(\Yii::$app->params['settings']['support_phone_numbers']) ? @json_decode(\Yii::$app->params['settings']['support_phone_numbers'], true) : [];
-
-        if(!$supportGeneralPhones) {
-            $supportGeneralPhones = [];
-        }
+        $supportGeneralPhones = \Yii::$app->params['settings']['support_phone_numbers'] ?? [];
 
         return $this->render('web_phone', ['clientId' => $clientId, 'token' => $token, 'supportGeneralPhones' => $supportGeneralPhones]);
     }
