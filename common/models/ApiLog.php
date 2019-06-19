@@ -202,7 +202,7 @@ class ApiLog extends \yii\db\ActiveRecord
         }
 
         $cVoiceQuery = new Query();
-        $cVoiceQuery->select(["DATE_FORMAT( al_request_dt, ' $queryDateFormat ') AS timeLine, COUNT(*) AS cVoice, SUM(CASE WHEN al_execution_time >=0 THEN al_execution_time ELSE 0 END) AS cAvgTimeV", "SUM(CASE WHEN al_memory_usage >=0 THEN al_memory_usage ELSE 0 END) AS cMemV"]);
+        $cVoiceQuery->select(["DATE_FORMAT( al_request_dt, ' $queryDateFormat ') AS timeLine, COUNT(*) AS cVoice, AVG(CASE WHEN al_execution_time >=0 THEN al_execution_time ELSE 0 END) AS cAvgTimeV", "AVG(CASE WHEN al_memory_usage >=0 THEN al_memory_usage ELSE 0 END) AS cMemV"]);
         $cVoiceQuery->from('api_log');
         $cVoiceQuery->where(['between', 'DATE(al_request_dt)', $fromDate, $todate]);
         $cVoiceQuery->andWhere(['=', 'al_action', 'v1/communication/voice']);
@@ -213,7 +213,7 @@ class ApiLog extends \yii\db\ActiveRecord
         $communicationVoice = $cVoiceQuery->all();
 
         $cSmsQuery = new Query();
-        $cSmsQuery->select(["DATE_FORMAT( al_request_dt, ' $queryDateFormat ') AS timeLine, COUNT(*) AS cSms, SUM(CASE WHEN al_execution_time >=0 THEN al_execution_time ELSE 0 END) AS cAvgTimeS", "SUM(CASE WHEN al_memory_usage >=0 THEN al_memory_usage ELSE 0 END) AS cMemS"]);
+        $cSmsQuery->select(["DATE_FORMAT( al_request_dt, ' $queryDateFormat ') AS timeLine, COUNT(*) AS cSms, AVG(CASE WHEN al_execution_time >=0 THEN al_execution_time ELSE 0 END) AS cAvgTimeS", "AVG(CASE WHEN al_memory_usage >=0 THEN al_memory_usage ELSE 0 END) AS cMemS"]);
         $cSmsQuery->from('api_log');
         $cSmsQuery->where(['between', 'DATE(al_request_dt)', $fromDate, $todate]);
         $cSmsQuery->andWhere(['=', 'al_action', 'v1/communication/sms']);
@@ -224,7 +224,7 @@ class ApiLog extends \yii\db\ActiveRecord
         $communicationSms = $cSmsQuery->all();
 
         $cEmailQuery = new Query();
-        $cEmailQuery->select(["DATE_FORMAT( al_request_dt, ' $queryDateFormat ') AS timeLine, COUNT(*) AS cEmail, SUM(CASE WHEN al_execution_time >=0 THEN al_execution_time ELSE 0 END) AS cAvgTimeE", "SUM(CASE WHEN al_memory_usage >=0 THEN al_memory_usage ELSE 0 END) AS cMemE"]);
+        $cEmailQuery->select(["DATE_FORMAT( al_request_dt, ' $queryDateFormat ') AS timeLine, COUNT(*) AS cEmail, AVG(CASE WHEN al_execution_time >=0 THEN al_execution_time ELSE 0 END) AS cAvgTimeE", "AVG(CASE WHEN al_memory_usage >=0 THEN al_memory_usage ELSE 0 END) AS cMemE"]);
         $cEmailQuery->from('api_log');
         $cEmailQuery->where(['between', 'DATE(al_request_dt)', $fromDate, $todate]);
         $cEmailQuery->andWhere(['=', 'al_action', 'v1/communication/email']);
@@ -235,7 +235,7 @@ class ApiLog extends \yii\db\ActiveRecord
         $communicationEmail = $cEmailQuery->all();
 
         $lCreateQuery = new Query();
-        $lCreateQuery->select(["DATE_FORMAT( al_request_dt, ' $queryDateFormat ') AS timeLine, COUNT(*) AS lCreate, SUM(CASE WHEN al_execution_time >=0 THEN al_execution_time ELSE 0 END) AS lAvgTimeC", "SUM(CASE WHEN al_memory_usage >=0 THEN al_memory_usage ELSE 0 END) AS lMemC"]);
+        $lCreateQuery->select(["DATE_FORMAT( al_request_dt, ' $queryDateFormat ') AS timeLine, COUNT(*) AS lCreate, AVG(CASE WHEN al_execution_time >=0 THEN al_execution_time ELSE 0 END) AS lAvgTimeC", "AVG(CASE WHEN al_memory_usage >=0 THEN al_memory_usage ELSE 0 END) AS lMemC"]);
         $lCreateQuery->from('api_log');
         $lCreateQuery->where(['between', 'DATE(al_request_dt)', $fromDate, $todate]);
         $lCreateQuery->andWhere(['=', 'al_action', 'v1/lead/create']);
@@ -246,7 +246,7 @@ class ApiLog extends \yii\db\ActiveRecord
         $leadCreate = $lCreateQuery->all();
 
         $lSoldUpdateQuery = new Query();
-        $lSoldUpdateQuery->select(["DATE_FORMAT( al_request_dt, ' $queryDateFormat ') AS timeLine, COUNT(*) AS leadSU, SUM(CASE WHEN al_execution_time >=0 THEN al_execution_time ELSE 0 END) AS lAvgTimeSU", "SUM(CASE WHEN al_memory_usage >=0 THEN al_memory_usage ELSE 0 END) AS lMemSU"]);
+        $lSoldUpdateQuery->select(["DATE_FORMAT( al_request_dt, ' $queryDateFormat ') AS timeLine, COUNT(*) AS leadSU, AVG(CASE WHEN al_execution_time >=0 THEN al_execution_time ELSE 0 END) AS lAvgTimeSU", "AVG(CASE WHEN al_memory_usage >=0 THEN al_memory_usage ELSE 0 END) AS lMemSU"]);
         $lSoldUpdateQuery->from('api_log');
         $lSoldUpdateQuery->where(['between', 'DATE(al_request_dt)', $fromDate, $todate]);
         $lSoldUpdateQuery->andWhere(['=', 'al_action', 'v1/lead/sold-update']);
@@ -257,7 +257,7 @@ class ApiLog extends \yii\db\ActiveRecord
         $leadSoldUpdate = $lSoldUpdateQuery->all();
 
         $qCreateQuery = new Query();
-        $qCreateQuery->select(["DATE_FORMAT( al_request_dt, ' $queryDateFormat ') AS timeLine, COUNT(*) AS qCreate, SUM(CASE WHEN al_execution_time >=0 THEN al_execution_time ELSE 0 END) AS qAvgTimeC", "SUM(CASE WHEN al_memory_usage >=0 THEN al_memory_usage ELSE 0 END) AS qMemC"]);
+        $qCreateQuery->select(["DATE_FORMAT( al_request_dt, ' $queryDateFormat ') AS timeLine, COUNT(*) AS qCreate, AVG(CASE WHEN al_execution_time >=0 THEN al_execution_time ELSE 0 END) AS qAvgTimeC", "AVG(CASE WHEN al_memory_usage >=0 THEN al_memory_usage ELSE 0 END) AS qMemC"]);
         $qCreateQuery->from('api_log');
         $qCreateQuery->where(['between', 'DATE(al_request_dt)', $fromDate, $todate]);
         $qCreateQuery->andWhere(['=', 'al_action', 'v1/quote/create']);
@@ -268,7 +268,7 @@ class ApiLog extends \yii\db\ActiveRecord
         $quoteCreate = $qCreateQuery->all();
 
         $qUpdateQuery = new Query();
-        $qUpdateQuery->select(["DATE_FORMAT( al_request_dt, ' $queryDateFormat ') AS timeLine, COUNT(*) AS qUpdate, SUM(CASE WHEN al_execution_time >=0 THEN al_execution_time ELSE 0 END) AS qAvgTimeU", "SUM(CASE WHEN al_memory_usage >=0 THEN al_memory_usage ELSE 0 END) AS qMemU"]);
+        $qUpdateQuery->select(["DATE_FORMAT( al_request_dt, ' $queryDateFormat ') AS timeLine, COUNT(*) AS qUpdate, AVG(CASE WHEN al_execution_time >=0 THEN al_execution_time ELSE 0 END) AS qAvgTimeU", "AVG(CASE WHEN al_memory_usage >=0 THEN al_memory_usage ELSE 0 END) AS qMemU"]);
         $qUpdateQuery->from('api_log');
         $qUpdateQuery->where(['between', 'DATE(al_request_dt)', $fromDate, $todate]);
         $qUpdateQuery->andWhere(['=', 'al_action', 'v1/quote/update']);
@@ -279,7 +279,7 @@ class ApiLog extends \yii\db\ActiveRecord
         $quoteUpdate = $qUpdateQuery->all();
 
         $qGetInfoQuery = new Query();
-        $qGetInfoQuery->select(["DATE_FORMAT( al_request_dt, ' $queryDateFormat ') AS timeLine, COUNT(*) AS qInfo, SUM(CASE WHEN al_execution_time >=0 THEN al_execution_time ELSE 0 END) AS qAvgTimeI", "SUM(CASE WHEN al_memory_usage >=0 THEN al_memory_usage ELSE 0 END) AS qMemI"]);
+        $qGetInfoQuery->select(["DATE_FORMAT( al_request_dt, ' $queryDateFormat ') AS timeLine, COUNT(*) AS qInfo, AVG(CASE WHEN al_execution_time >=0 THEN al_execution_time ELSE 0 END) AS qAvgTimeI", "AVG(CASE WHEN al_memory_usage >=0 THEN al_memory_usage ELSE 0 END) AS qMemI"]);
         $qGetInfoQuery->from('api_log');
         $qGetInfoQuery->where(['between', 'DATE(al_request_dt)', $fromDate, $todate]);
         $qGetInfoQuery->andWhere(['=', 'al_action', 'v2/quote/get-info']);

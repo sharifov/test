@@ -233,6 +233,8 @@ class StatsController extends FController
         if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
             $chartOptions = Yii::$app->request->post();
             $rangeBy = Yii::$app->request->post('groupBy');
+            $actionId = Yii::$app->request->post('action');
+
             $date = explode("/", $chartOptions['dateRange']);
             $userApiId = $chartOptions['project'];
 
@@ -277,7 +279,8 @@ class StatsController extends FController
 
             return $this->renderAjax('api-report', [
                 'apiStats' => $apiStats,
-                'format' => $chartTimeFormat
+                'format' => $chartTimeFormat,
+                'action' => $actionId
             ]);
         } else {
             $currentDate =  date('Y-m-d', strtotime('-0 day'));
@@ -287,7 +290,8 @@ class StatsController extends FController
 
             return $this->render('api-report', [
                 'apiStats' => $apiStats,
-                'format' => $chartTimeFormat
+                'format' => $chartTimeFormat,
+                'action' => ''
             ]);
         }
 

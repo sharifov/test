@@ -9,19 +9,19 @@ $js = <<<JS
 $('#viewMode0').click(function() {
         $('#chart_div').html(generateChartPreloader());
         $('#viewMode1, #viewMode2').removeClass('active focus');
-        $.pjax({container: '#api-graph-pjax', data: {dateRange: $('#api-stats-picker').val(), groupBy: 'H', project: $('#projects').val()}, type: 'POST', url: 'api-graph', async:true, push: false});
+        $.pjax({container: '#api-graph-pjax', data: {dateRange: $('#api-stats-picker').val(), groupBy: 'H', project: $('#projects').val(), action: $('#apiList').val()}, type: 'POST', url: 'api-graph', async:true, push: false});
     });
 
     $('#viewMode1').click(function() {
         $('#chart_div').html(generateChartPreloader());
         $('#viewMode0, #viewMode2').removeClass('active focus');
-        $.pjax({container: '#api-graph-pjax', data: {dateRange: $('#api-stats-picker').val(), groupBy: 'D', project: $('#projects').val()}, type: 'POST', url: 'api-graph', async:true, push: false});
+        $.pjax({container: '#api-graph-pjax', data: {dateRange: $('#api-stats-picker').val(), groupBy: 'D', project: $('#projects').val(), action: $('#apiList').val()}, type: 'POST', url: 'api-graph', async:true, push: false});
     });
     
     $('#viewMode2').click(function() {
         $('#chart_div').html(generateChartPreloader());
         $('#viewMode0, #viewMode1').removeClass('active focus');
-        $.pjax({container: '#api-graph-pjax', data: {dateRange: $('#api-stats-picker').val(), groupBy: 'M', project: $('#projects').val()}, type: 'POST', url: 'api-graph', async:true, push: false});
+        $.pjax({container: '#api-graph-pjax', data: {dateRange: $('#api-stats-picker').val(), groupBy: 'M', project: $('#projects').val(), action: $('#apiList').val()}, type: 'POST', url: 'api-graph', async:true, push: false});
     });
     
     $('#projects').on('change', function() {
@@ -36,7 +36,50 @@ $('#viewMode0').click(function() {
             }
         }
         let groupingOps = ["H", "D", "M"];
-        $.pjax({container: '#api-graph-pjax', data: {dateRange: $('#api-stats-picker').val(), groupBy: groupingOps[groupBy], project: this.value}, type: 'POST', url: 'api-graph', async:true, push: false});
+        $.pjax({container: '#api-graph-pjax', data: {dateRange: $('#api-stats-picker').val(), groupBy: groupingOps[groupBy], project: this.value, action: $('#apiList').val()}, type: 'POST', url: 'api-graph', async:true, push: false});
+    });
+    
+    $('#apiList').on('change', function() {
+        $('#chart_div').html(generateChartPreloader());
+        let groupBy = $('input[name^="viewMode"]:checked').val();
+        if( typeof groupBy === 'undefined'){
+            let dates = $('#api-stats-picker').val().split(' / ');
+            if (dates[0] == dates[1]){
+                groupBy = '0';
+            } else {
+                groupBy = '1';
+            }
+        }
+        let groupingOps = ["H", "D", "M"];        
+        
+        let api = '';
+        switch (this.value) {
+          case 'v1/communication/voice' :
+              api = 0;
+              break;
+          case 'v1/communication/sms' :
+              api = 1;
+              break;
+          case 'v1/communication/email' :
+              api = 2;
+              break;
+          case 'v1/lead/create' :
+              api = 3;
+              break;
+          case 'v1/lead/sold-update' :
+              api = 4;
+              break;
+          case 'v1/quote/create' :
+              api = 5;
+              break;
+          case 'v1/quote/update' :
+              api = 6;
+              break;
+          case 'v2/quote/get-info' :
+              api = 7;
+              break;
+        }        
+        $.pjax({container: '#api-graph-pjax', data: {dateRange: $('#api-stats-picker').val(), groupBy: groupingOps[groupBy], project: $('#projects').val(), action: api}, type: 'POST', url: 'api-graph', async:true, push: false});
     });
 
 function generateChartPreloader() {
@@ -80,7 +123,7 @@ use yii\widgets\Pjax; ?>
                                 'pluginEvents'=>[
                                     "apply.daterangepicker"=>"function(){
                                      $('#chart_div').html(generateChartPreloader());                                    
-                                     $.pjax({container: '#api-graph-pjax', data: {dateRange: $('#api-stats-picker').val(), project: $('#projects').val()}, type: 'POST', url: 'api-graph', async:true, push: false});
+                                     $.pjax({container: '#api-graph-pjax', data: {dateRange: $('#api-stats-picker').val(), project: $('#projects').val(), action: $('#apiList').val()}, type: 'POST', url: 'api-graph', async:true, push: false});
                                      let dates = $('#api-stats-picker').val().split(' / ');
                                      if (dates[0] == dates[1]){
                                         $('#viewMode0').addClass('active focus');
@@ -119,6 +162,14 @@ use yii\widgets\Pjax; ?>
                             ]) ?>
                         </div>
 
+                        <div class="col-xs-1">
+                            <?= Html::dropDownList('projectsList', null,  \common\models\ApiLog::getActionFilter(), [
+                                'prompt' => 'All',
+                                'id' => 'apiList',
+                                'class' => 'form-control'
+                            ]) ?>
+                        </div>
+
                         <?php Pjax::begin(['id' => 'api-graph-pjax']); ?>
                         <div class="x_content">
                             <?php if ($apiStats): ?>
@@ -136,33 +187,66 @@ use yii\widgets\Pjax; ?>
                                             function drawChart() {
                                                 let data = google.visualization.arrayToDataTable([
                                                     ['Time Line',
+                                                        <?php if ($action == '' || $action == 0) :?>
                                                         'communication/voice',
                                                         {'type': 'string', 'role': 'tooltip', 'p': {'html': true}},
+                                                        <?php endif;?>
+                                                        <?php if ($action == '' || $action == 1) :?>
                                                         'communication/sms',
                                                         {'type': 'string', 'role': 'tooltip', 'p': {'html': true}},
+                                                        <?php endif;?>
+                                                        <?php if ($action == '' || $action == 2) :?>
                                                         'communication/email',
                                                         {'type': 'string', 'role': 'tooltip', 'p': {'html': true}},
+                                                        <?php endif;?>
+                                                        <?php if ($action == '' || $action == 3) :?>
                                                         'lead/create',
                                                         {'type': 'string', 'role': 'tooltip', 'p': {'html': true}},
+                                                        <?php endif;?>
+                                                        <?php if ($action == '' || $action == 4) :?>
                                                         'lead/sold-update',
                                                         {'type': 'string', 'role': 'tooltip', 'p': {'html': true}},
+                                                        <?php endif;?>
+                                                        <?php if ($action == '' || $action == 5) :?>
                                                         'quote/create',
                                                         {'type': 'string', 'role': 'tooltip', 'p': {'html': true}},
+                                                        <?php endif;?>
+                                                        <?php if ($action == '' || $action == 6) :?>
                                                         'quote/update',
                                                         {'type': 'string', 'role': 'tooltip', 'p': {'html': true}},
+                                                        <?php endif;?>
+                                                        <?php if ($action == '' || $action == 7) :?>
                                                         'quote/get-info',
                                                         {'type': 'string', 'role': 'tooltip', 'p': {'html': true}}
+                                                        <?php endif;?>
                                                     ],
                                                     <?php foreach($apiStats as $k => $item): ?>
                                                     ['<?= date($format, strtotime($item['timeLine']))?>',
-                                                        <?= $item['cVoice'] ?>, customHTMLContent('<?= date($format, strtotime($item['timeLine']))?>', 'communication/voice', '<?= $item['cVoice'] ?>', '<?= isset($item['cAvgTimeV']) ? $item['cAvgTimeV'] : ''?>', '<?= isset($item['cMemV']) ? Yii::$app->formatter->asShortSize($item['cMemV'],2) : '' ?>'),
-                                                        <?= $item['cSms'] ?>, customHTMLContent('<?= date($format, strtotime($item['timeLine']))?>', 'communication/sms', '<?= $item['cSms'] ?>', '<?= isset($item['cAvgTimeS']) ? $item['cAvgTimeS'] : ''?>', '<?= isset($item['cMemS']) ? Yii::$app->formatter->asShortSize($item['cMemS'], 2) : '' ?>'),
-                                                        <?= $item['cEmail'] ?>, customHTMLContent('<?= date($format, strtotime($item['timeLine']))?>', 'communication/email', '<?= $item['cEmail'] ?>', '<?= isset($item['cAvgTimeE']) ? $item['cAvgTimeE'] : ''?>', '<?= isset($item['cMemE']) ? Yii::$app->formatter->asShortSize($item['cMemE'], 2) : '' ?>'),
-                                                        <?= $item['lCreate'] ?>, customHTMLContent('<?= date($format, strtotime($item['timeLine']))?>', 'lead/create', '<?= $item['lCreate'] ?>', '<?= isset($item['lAvgTimeC']) ? $item['lAvgTimeC'] : ''?>', '<?= isset($item['lMemC']) ? Yii::$app->formatter->asShortSize($item['lMemC'], 2) : '' ?>'),
-                                                        <?= $item['leadSU']?>, customHTMLContent('<?= date($format, strtotime($item['timeLine']))?>', 'lead/sold-update', '<?= $item['leadSU'] ?>', '<?= isset($item['lAvgTimeSU']) ? $item['lAvgTimeSU'] : ''?>', '<?= isset($item['lMemSU']) ? Yii::$app->formatter->asShortSize($item['lMemSU'], 2) : '' ?>'),
-                                                        <?= $item['qCreate']?>, customHTMLContent('<?= date($format, strtotime($item['timeLine']))?>', 'quote/create', '<?= $item['qCreate'] ?>', '<?= isset($item['qAvgTimeC']) ? $item['qAvgTimeC'] : ''?>', '<?= isset($item['qMemC']) ? Yii::$app->formatter->asShortSize($item['qMemC'], 2) : '' ?>'),
-                                                        <?= $item['qUpdate']?>, customHTMLContent('<?= date($format, strtotime($item['timeLine']))?>', 'quote/update', '<?= $item['qUpdate'] ?>', '<?= isset($item['qAvgTimeU']) ? $item['qAvgTimeU'] : ''?>', '<?= isset($item['qMemU']) ? Yii::$app->formatter->asShortSize($item['qMemU'], 2) : '' ?>'),
-                                                        <?= $item['qInfo']?>, customHTMLContent('<?= date($format, strtotime($item['timeLine']))?>', 'quote/get-info', '<?= $item['qInfo'] ?>', '<?= isset($item['qAvgTimeI']) ? $item['qAvgTimeI'] : ''?>', '<?= isset($item['qMemI']) ? Yii::$app->formatter->asShortSize($item['qMemI'], 2) : '' ?>')],
+                                                        <?php if ($action == '' || $action == 0) :?>
+                                                        <?= $item['cVoice'] ?>, customHTMLContent('<?= date($format, strtotime($item['timeLine']))?>', 'communication/voice', '<?= $item['cVoice'] ?>', '<?= isset($item['cAvgTimeV']) ? round($item['cAvgTimeV'], 2) : ''?>', '<?= isset($item['cMemV']) ? Yii::$app->formatter->asShortSize($item['cMemV'],2) : '' ?>'),
+                                                        <?php endif;?>
+                                                        <?php if ($action == '' || $action == 1) :?>
+                                                        <?= $item['cSms'] ?>, customHTMLContent('<?= date($format, strtotime($item['timeLine']))?>', 'communication/sms', '<?= $item['cSms'] ?>', '<?= isset($item['cAvgTimeS']) ? round($item['cAvgTimeS'], 2) : ''?>', '<?= isset($item['cMemS']) ? Yii::$app->formatter->asShortSize($item['cMemS'], 2) : '' ?>'),
+                                                        <?php endif;?>
+                                                        <?php if ($action == '' || $action == 2) :?>
+                                                        <?= $item['cEmail'] ?>, customHTMLContent('<?= date($format, strtotime($item['timeLine']))?>', 'communication/email', '<?= $item['cEmail'] ?>', '<?= isset($item['cAvgTimeE']) ? round($item['cAvgTimeE'], 2) : ''?>', '<?= isset($item['cMemE']) ? Yii::$app->formatter->asShortSize($item['cMemE'], 2) : '' ?>'),
+                                                        <?php endif;?>
+                                                        <?php if ($action == '' || $action == 3) :?>
+                                                        <?= $item['lCreate'] ?>, customHTMLContent('<?= date($format, strtotime($item['timeLine']))?>', 'lead/create', '<?= $item['lCreate'] ?>', '<?= isset($item['lAvgTimeC']) ? round($item['lAvgTimeC'], 2) : ''?>', '<?= isset($item['lMemC']) ? Yii::$app->formatter->asShortSize($item['lMemC'], 2) : '' ?>'),
+                                                        <?php endif;?>
+                                                        <?php if ($action == '' || $action == 4) :?>
+                                                        <?= $item['leadSU']?>, customHTMLContent('<?= date($format, strtotime($item['timeLine']))?>', 'lead/sold-update', '<?= $item['leadSU'] ?>', '<?= isset($item['lAvgTimeSU']) ? round($item['lAvgTimeSU'], 2) : ''?>', '<?= isset($item['lMemSU']) ? Yii::$app->formatter->asShortSize($item['lMemSU'], 2) : '' ?>'),
+                                                        <?php endif;?>
+                                                        <?php if ($action == '' || $action == 5) :?>
+                                                        <?= $item['qCreate']?>, customHTMLContent('<?= date($format, strtotime($item['timeLine']))?>', 'quote/create', '<?= $item['qCreate'] ?>', '<?= isset($item['qAvgTimeC']) ? round($item['qAvgTimeC'], 2) : ''?>', '<?= isset($item['qMemC']) ? Yii::$app->formatter->asShortSize($item['qMemC'], 2) : '' ?>'),
+                                                        <?php endif;?>
+                                                        <?php if ($action == '' || $action == 6) :?>
+                                                        <?= $item['qUpdate']?>, customHTMLContent('<?= date($format, strtotime($item['timeLine']))?>', 'quote/update', '<?= $item['qUpdate'] ?>', '<?= isset($item['qAvgTimeU']) ? round($item['qAvgTimeU'], 2) : ''?>', '<?= isset($item['qMemU']) ? Yii::$app->formatter->asShortSize($item['qMemU'], 2) : '' ?>'),
+                                                        <?php endif;?>
+                                                        <?php if ($action == '' || $action == 7) :?>
+                                                        <?= $item['qInfo']?>, customHTMLContent('<?= date($format, strtotime($item['timeLine']))?>', 'quote/get-info', '<?= $item['qInfo'] ?>', '<?= isset($item['qAvgTimeI']) ? round($item['qAvgTimeI'], 2) : ''?>', '<?= isset($item['qMemI']) ? Yii::$app->formatter->asShortSize($item['qMemI'], 2) : '' ?>')
+                                                        <?php endif;?>
+                                                    ],
                                                     <?php endforeach; ?>
                                                 ]);
 
