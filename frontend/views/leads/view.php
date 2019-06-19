@@ -207,7 +207,7 @@ $isAgent = Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id);
                     [
                         'attribute' => 'trip_type',
                         'value' => function(\common\models\Lead $model) {
-                            return \common\models\Lead::getFlightType($model->trip_type) ?? '-';
+                            return $model->getFlightTypeName();
                         },
 
                     ],
@@ -215,7 +215,7 @@ $isAgent = Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id);
                     [
                         'attribute' => 'cabin',
                         'value' => function(\common\models\Lead $model) {
-                            return \common\models\Lead::getCabin($model->cabin) ?? '-';
+                            return $model->getCabinClassName();
                         },
 
                     ],

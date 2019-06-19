@@ -15,7 +15,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
 $statusList = \common\models\Lead::STATUS_LIST;
 
-if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
+if(Yii::$app->user->identity->canRole('admin')) {
     $userList = \common\models\Employee::getList();
 } else {
     $userList = \common\models\Employee::getListByUserId(Yii::$app->user->id);
@@ -51,7 +51,7 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
     ?>
 
 
-    <?php if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id)) : ?>
+    <?php if(Yii::$app->user->identity->canRoles(['admin', 'supervision'])) : ?>
         <p>
             <?//= Html::a('Create Lead', ['create'], ['class' => 'btn btn-success']) ?>
             <?= Html::button('<i class="fa fa-edit"></i> Multiple update', ['class' => 'btn btn-info', 'data-toggle'=> "modal", 'data-target'=>"#modalUpdate" ])?>
@@ -139,6 +139,10 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
 
         [
             'attribute' => 'client_id',
+            'value' => function (\common\models\Lead $model) {
+                return $model->client_id ? Html::a($model->client_id, ['client/index', 'ClientSearch[id]' => $model->client_id], ['data-pjax' => 0, 'target' => '_blank']) : '-';
+            },
+            'format' => 'raw',
             'options' => [
                 'style' => 'width:80px'
             ],
@@ -305,7 +309,7 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
         [
             'attribute' => 'cabin',
             'value' => function (\common\models\Lead $model) {
-                return \common\models\Lead::getCabin($model->cabin) ?? '-';
+                return $model->getCabinClassName();
             },
             'filter' => \common\models\Lead::CABIN_LIST
         ],
@@ -403,10 +407,25 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
             // 'visible' => !$isAgent
         ],
 
-        [
+        /*[
             'header' => 'Task Info',
             'value' => function (\common\models\Lead $model) use ($isAgent) {
                 return '<small style="font-size: 10px">' . $model->getTaskInfo() . '</small>';
+            },
+            'format' => 'raw',
+            'contentOptions' => [
+                'class' => 'text-left'
+            ],
+            'visible' => ! $isAgent,
+            'options' => [
+                'style' => 'width:200px'
+            ]
+        ],*/
+
+        [
+            'header' => 'CheckList',
+            'value' => function (\common\models\Lead $model) use ($isAgent) {
+                return '<small style="font-size: 10px">' . $model->getCheckListInfo() . '</small>';
             },
             'format' => 'raw',
             'contentOptions' => [
@@ -423,7 +442,7 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
             'value' => function (\common\models\Lead $model) use ($isAgent) {
                 return $model->quotesCount ? ($isAgent ? $model->quotesCount : Html::a($model->quotesCount, [
                     'quotes/index',
-                    "QuoteSearch[lead_id]" => $model->id
+                    'QuoteSearch[lead_id]' => $model->id
                 ], [
                     'target' => '_blank',
                     'data-pjax' => 0
@@ -516,7 +535,7 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
             'attribute' => 'employee_id',
             'format' => 'raw',
             'value' => function (\common\models\Lead $model) {
-                return $model->employee ? '<i class="fa fa-user"></i> ' . $model->employee->username : '-';
+                return $model->employee ? '<i class="fa fa-user"></i> ' . Html::encode($model->employee->username) : '-';
             },
             'filter' => $userList
         ],
@@ -536,7 +555,7 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
         [
             'attribute' => 'created',
             'value' => function (\common\models\Lead $model) {
-                return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->created));
+                return $model->created ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->created)) : '-';
             },
             'format' => 'raw'
         ],
@@ -545,8 +564,11 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
         [
             'attribute' => 'updated',
             'value' => function(\common\models\Lead $model) {
-                $str = '<b>'.Yii::$app->formatter->asRelativeTime(strtotime($model->updated)).'</b>';
-                $str .= '<br><i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->updated));
+                $str = '-';
+                if($model->updated) {
+                    $str = '<b>' . Yii::$app->formatter->asRelativeTime(strtotime($model->updated)) . '</b>';
+                    $str .= '<br><i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->updated));
+                }
                 return $str;
             },
             'format' => 'raw',

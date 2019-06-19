@@ -77,11 +77,11 @@ class CallController extends Controller
             echo $this->ansiFormat('Find ' . count($items) . ' items for update' . PHP_EOL, Console::FG_GREEN);
             foreach ($items AS $call) {
                 $old_status = $call->c_call_status;
-                $call->c_call_status = Call::CALL_STATUS_CANCELED;
+                $call->c_call_status = Call::CALL_STATUS_FAILED;
                 if ($call->save()) {
                     $out[] = ['c_id' => $call->c_id,
                         'old_status' => $old_status,
-                        'new_status' => Call::CALL_STATUS_CANCELED,
+                        'new_status' => Call::CALL_STATUS_FAILED,
                     ];
                 } else {
                     $errors[] = $call->errors;

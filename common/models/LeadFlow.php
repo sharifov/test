@@ -81,7 +81,7 @@ class LeadFlow extends \yii\db\ActiveRecord
     public static function addStateFlow(Lead $lead)
     {
 
-        $logPrev = \common\models\LeadFlow::find()->where(['lead_id' => $lead->id])->orderBy(['id' => SORT_DESC])->one();
+        $logPrev = self::find()->where(['lead_id' => $lead->id])->orderBy(['id' => SORT_DESC])->limit(1)->one();
 
         if($logPrev) {
             $logPrev->lf_end_dt = date('Y-m-d H:i:s');
@@ -102,6 +102,47 @@ class LeadFlow extends \yii\db\ActiveRecord
         if($lead->status_description) {
             $stateFlow->lf_description = mb_substr($lead->status_description, 0, 250);
         }
+
+
+        if (!is_a(\Yii::$app, 'yii\console\Application') &&
+            !Yii::$app->user->isGuest &&
+            Yii::$app->user->identityClass != 'webapi\models\ApiUser'
+        ) {
+            $stateFlow->employee_id = Yii::$app->user->id;
+        }
+        return $stateFlow->save();
+    }
+
+    /**
+     * @param Lead2 $lead
+     * @param bool $insert
+     * @return bool
+     */
+    public static function addStateFlow2(Lead2 $lead, bool $insert = true): bool
+    {
+
+        $stateFlow = new self();
+        $stateFlow->lead_id = $lead->id;
+        $stateFlow->status = $lead->status;
+        $stateFlow->created = date('Y-m-d H:i:s');
+
+        if(!$insert) {
+            $logPrev = self::find()->where(['lead_id' => $lead->id])->orderBy(['id' => SORT_DESC])->limit(1)->one();
+
+            if ($logPrev) {
+                $logPrev->lf_end_dt = date('Y-m-d H:i:s');
+                $logPrev->lf_time_duration = (int)(strtotime($logPrev->lf_end_dt) - strtotime($logPrev->created));
+                if($logPrev->save()) {
+                    if ($logPrev->status) {
+                        $stateFlow->lf_from_status_id = $logPrev->status;
+                    }
+                }
+            }
+        }
+
+        /*if($lead->status_description) {
+            $stateFlow->lf_description = mb_substr($lead->status_description, 0, 250);
+        }*/
 
 
         if (!is_a(\Yii::$app, 'yii\console\Application') &&

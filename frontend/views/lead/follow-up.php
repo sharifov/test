@@ -1,4 +1,6 @@
 <?php
+
+use dosamigos\datepicker\DatePicker;
 use yii\helpers\Html;
 use yii\widgets\Pjax;
 use kartik\grid\GridView;
@@ -59,7 +61,8 @@ $this->params['breadcrumbs'][] = $this->title;
             'value' => function (\common\models\Lead $model) {
                 return Yii::$app->formatter->asRelativeTime(strtotime($model->created)); //Lead::getPendingAfterCreate($model->created);
             },
-            'format' => 'raw'
+            'format' => 'raw',
+            'filter' => false
         ],
 
         [
@@ -68,8 +71,18 @@ $this->params['breadcrumbs'][] = $this->title;
                 return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->created));
             },
             'format' => 'raw',
-            'filter' => false
-
+            'filter' => DatePicker::widget([
+                'model' => $searchModel,
+                'attribute' => 'created',
+                'clientOptions' => [
+                    'autoclose' => true,
+                    'format' => 'yyyy-mm-dd',
+                ],
+                'options' => [
+                    'autocomplete' => 'off',
+                    'placeholder' =>'Choose Date'
+                ],
+            ]),
         ],
 
         [
@@ -153,7 +166,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
                 $content .= '<br/>'.$pax.'<br/>';
 
-                $content .= sprintf('<strong>Cabin:</strong> %s', Lead::getCabin($model['cabin']));
+                $content .= sprintf('<strong>Cabin:</strong> %s', $model->getCabinClassName());
 
                 return $content;
             },
@@ -196,6 +209,18 @@ $this->params['breadcrumbs'][] = $this->title;
             'contentOptions' => [
                 'class' => 'text-center'
             ],
+            'filter' => DatePicker::widget([
+                'model' => $searchModel,
+                'attribute' => 'l_last_action_dt',
+                'clientOptions' => [
+                    'autoclose' => true,
+                    'format' => 'yyyy-mm-dd',
+                ],
+                'options' => [
+                    'autocomplete' => 'off',
+                    'placeholder' =>'Choose Date'
+                ],
+            ]),
         ],
 
         [

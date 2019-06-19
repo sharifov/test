@@ -331,6 +331,7 @@ class LeadController extends ApiBaseController
 
         $client = null;
         $lead = new Lead();
+        $lead->scenario = Lead::SCENARIO_API;
 
         if($modelLead->phones) {
             foreach ($modelLead->phones as $phone) {

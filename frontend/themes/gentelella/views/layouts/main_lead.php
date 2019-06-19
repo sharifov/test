@@ -3,23 +3,12 @@
 /* @var $this \yii\web\View */
 /* @var $content string */
 
-
 use yii\helpers\Html;
-use \webvimark\modules\UserManagement\UserManagementModule;
-
-//use common\widgets\Alert;
-
-//use webvimark\modules\UserManagement\UserManagementModule;
-//$bundle = yiister\gentelella\assets\Asset::register($this);
 
 //\backend\assets\AppAsset::register($this);
 $bundle = \frontend\themes\gentelella\assets\Asset::register($this);
 
-$isAdmin = Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id);
-
-//if($isAdmin) {
-    \frontend\assets\NotifyAsset::register($this);
-//}
+\frontend\assets\NotifyAsset::register($this);
 
 //$this->registerCssFile('@backend/themes/gentelella/css/custom.css');
 //Yii::$app->view->registerCssFile('@backend/themes/gentelella/css/custom.css', ['depends'=>'yiister\gentelella\assets\Asset']);
@@ -69,21 +58,22 @@ $isAdmin = Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id);
                     <div class="left_col scroll-view">
 
                         <?php
+                            /** @var \common\models\Employee $user */
+                            $user = Yii::$app->user->identity;
 
-                        /** @var \common\models\Employee $me */
-                        $me = Yii::$app->user->identity;
-                        $default = "identicon";
+                            $default = 'identicon';
 
-                        if(!$me || !$me->email) {
-                            $grav_url = '//www.gravatar.com/avatar/?d=identicon&s=60';
-                        }
-                        else {
-                            $grav_url = "//www.gravatar.com/avatar/" . md5(strtolower(trim($me->email))) . "?d=identicon&s=128";
-                        }
+                            if($user && $user->email) {
+                                $gravUrl = '//www.gravatar.com/avatar/' . md5(strtolower(trim($user->email))) . '?d=identicon&s=128';
+
+                            } else {
+                                $gravUrl = '//www.gravatar.com/avatar/?d=identicon&s=60';
+                            }
+
                         ?>
 
                         <!-- navbar left -->
-                        <?= $this->render('_navbar_left', ['host' => $host, 'grav_url' => $grav_url]) ?>
+                        <?= $this->render('_navbar_left', ['host' => $host, 'grav_url' => $gravUrl]) ?>
                         <!-- /navbar left -->
 
                         <!-- sidebar menu -->
@@ -91,25 +81,7 @@ $isAdmin = Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id);
                         <!-- /sidebar menu -->
 
                         <!-- /menu footer buttons -->
-                        <div class="sidebar-footer hidden-small">
-                            <? /*<a data-toggle="tooltip" data-placement="top" title="Settings">
-                        <span class="glyphicon glyphicon-cog" aria-hidden="true"></span>
-                    </a>
-                    <a data-toggle="tooltip" data-placement="top" title="FullScreen">
-                        <span class="glyphicon glyphicon-fullscreen" aria-hidden="true"></span>
-                    </a>
-                    <a data-toggle="tooltip" data-placement="top" title="Lock">
-                        <span class="glyphicon glyphicon-eye-close" aria-hidden="true"></span>
-                    </a>*/ ?>
-
-                            <?=Html::a('<span class="glyphicon glyphicon-off" aria-hidden="true"></span>', ['/user-management/auth/logout'],
-                                ['data-toggle' => "tooltip", 'data-placement' => "top", 'title' => "Logout"]) ?>
-
-                            <?/*=Html::a('<span class="fa fa-certificate" aria-hidden="true"></span>', ['site/index', 'snow' => 'off'],
-                        ['data-toggle' => "tooltip", 'data-placement' => "top", 'title' => "Snow Off"])*/ ?>
-
-
-                        </div>
+                        <?= $this->render('_sidebar_footer') ?>
                         <!-- /menu footer buttons -->
                     </div>
                 </div>
@@ -127,22 +99,9 @@ $isAdmin = Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id);
                             <ul class="nav navbar-nav navbar-right">
                                 <li class="">
                                     <a href="javascript:;" class="user-profile dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
-                                        <? /*<img src="http://placehold.it/128x128" alt="">*/ ?>
-
-                                        <?=Html::img($grav_url, ['alt' => 'avatar'])?>
-
-                                        <?
-                                        $myRolesModel = \webvimark\modules\UserManagement\models\rbacDB\Role::getUserRoles(Yii::$app->user->id);
-                                        $myRoles = [];
-                                        if($myRolesModel)
-                                            foreach ($myRolesModel as $role) {
-                                                if($role->name == 'guest') continue;
-                                                $myRoles[] = $role->name;
-                                            }
-
-                                        ?>
-                                        <b><?=implode(', ', $myRoles) ; ?></b>:
-                                        <?=Html::encode(Yii::$app->user->identity->username)?>
+                                        <?=Html::img($gravUrl, ['alt' => 'avatar'])?>
+                                        <b><?=implode(', ', $user->roles) ?></b>:
+                                        <?=Html::encode($user->username)?>
 
                                         <span class=" fa fa-angle-down"></span>
                                     </a>

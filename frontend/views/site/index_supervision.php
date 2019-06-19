@@ -343,7 +343,7 @@ JS;
                             },
                             'format' => 'raw',
                     ],
-                    [
+                    /*[
                         'label' => 'Hold On',
                         'value' => function (\common\models\Employee $model) use ($searchModel) {
                             $cnt = $model->getLeadCountByStatus([\common\models\Lead::STATUS_ON_HOLD], $searchModel->datetime_start, $searchModel->datetime_end);
@@ -355,7 +355,7 @@ JS;
                             ], ['data-pjax' => 0, 'target' => '_blank']) : '-';
                         },
                         'format' => 'raw',
-                    ],
+                    ],*/
                     [
                         'label' => 'Booked',
                         'value' => function (\common\models\Employee $model) use ($searchModel) {

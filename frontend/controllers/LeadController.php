@@ -260,9 +260,13 @@ class LeadController extends FController
             }
 
             $flightSegments = $leadForm->getLeadFlightSegment();
-            foreach ($flightSegments as $segment){
-                $this->view->title = 'Lead #'.$lead->id.' ✈ '.$segment->destination;
-                break;
+            if($flightSegments) {
+                foreach ($flightSegments as $segment) {
+                    $this->view->title = 'Lead #' . $lead->id . ' ✈ ' . $segment->destination;
+                    break;
+                }
+            } else {
+                $this->view->title = 'Lead #' . $lead->id;
             }
 
 
@@ -1105,7 +1109,7 @@ class LeadController extends FController
         return null;
     }
 
-    public function actionCheckUpdates($leadId, $lastUpdate)
+    /*public function actionCheckUpdates($leadId, $lastUpdate)
     {
         Yii::$app->response->format = Response::FORMAT_JSON;
         $response = [
@@ -1146,7 +1150,7 @@ class LeadController extends FController
         }
 
         return $response;
-    }
+    }*/
 
     public function actionGetBadges()
     {

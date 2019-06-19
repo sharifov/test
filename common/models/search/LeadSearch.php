@@ -854,6 +854,10 @@ class LeadSearch extends Lead
             return $dataProvider;
         }
 
+        if (isset($params['LeadSearch']['l_last_action_dt'])) {
+            $query->andFilterWhere(['=','DATE(l_last_action_dt)', $this->l_last_action_dt]);
+        }
+
         // grid filtering conditions
        $query->andFilterWhere([
             $leadTable.'.id' => $this->id,
@@ -868,11 +872,8 @@ class LeadSearch extends Lead
             $leadTable.'.l_answered' => $this->l_answered,
         ]);
 
-
-        $query
-        ->andWhere(['IN','leads.status', [self::STATUS_SNOOZE, self::STATUS_PROCESSING, self::STATUS_ON_HOLD]])
-        ->andWhere(['IN', $leadTable . '.project_id', $projectIds])
-        ;
+        $query->andWhere(['IN','leads.status', [self::STATUS_SNOOZE, self::STATUS_PROCESSING, self::STATUS_ON_HOLD]])
+        ->andWhere(['IN', $leadTable . '.project_id', $projectIds]);
 
         if($this->email_status > 0) {
             if($this->email_status == 2) {
@@ -892,7 +893,6 @@ class LeadSearch extends Lead
             }
         }
 
-
         if($this->supervision_id > 0) {
             $subQuery1 = UserGroupAssign::find()->select(['ugs_group_id'])->where(['ugs_user_id' => $this->supervision_id]);
             $subQuery = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->where(['IN', 'ugs_group_id', $subQuery1]);
@@ -900,9 +900,6 @@ class LeadSearch extends Lead
         }
 
         $query->with(['client', 'client.clientEmails', 'client.clientPhones', 'employee', 'leadChecklists', 'leadChecklists.lcType']);
-
-
-        
 
         /*  $sqlRaw = $query->createCommand()->getRawSql();
          VarDumper::dump($sqlRaw, 10, true); exit; */
@@ -938,6 +935,14 @@ class LeadSearch extends Lead
             // uncomment the following line if you do not want to return any records when validation fails
             // $query->where('0=1');
             return $dataProvider;
+        }
+
+        if (isset($params['LeadSearch']['created'])) {
+            $query->andFilterWhere(['=','DATE(created)', $this->created]);
+        }
+
+        if (isset($params['LeadSearch']['l_last_action_dt'])) {
+            $query->andFilterWhere(['=','DATE(l_last_action_dt)', $this->l_last_action_dt]);
         }
 
         // grid filtering conditions
@@ -1027,6 +1032,10 @@ class LeadSearch extends Lead
             // uncomment the following line if you do not want to return any records when validation fails
             // $query->where('0=1');
             return $dataProvider;
+        }
+
+        if (isset($params['LeadSearch']['created'])) {
+            $query->andFilterWhere(['=','DATE(created)', $this->created]);
         }
 
         // grid filtering conditions

@@ -1,4 +1,6 @@
 <?php
+
+use dosamigos\datepicker\DatePicker;
 use yii\helpers\Html;
 use yii\widgets\Pjax;
 use kartik\grid\GridView;
@@ -168,7 +170,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 $content .= $model->getFlightDetails();
                 $content .= ' (<i class="fa fa-male"></i> x' . ($model->adults .'/'. $model->children .'/'. $model->infants) . ')<br/>';
 
-                $content .= sprintf('<strong>Cabin:</strong> %s', Lead::getCabin($model['cabin']));
+                $content .= sprintf('<strong>Cabin:</strong> %s', $model->getCabinClassName());
 
                 return $content;
             },
@@ -244,6 +246,18 @@ $this->params['breadcrumbs'][] = $this->title;
             'contentOptions' => [
                 'class' => 'text-center'
             ],
+            'filter' => DatePicker::widget([
+                'model' => $searchModel,
+                'attribute' => 'l_last_action_dt',
+                'clientOptions' => [
+                    'autoclose' => true,
+                    'format' => 'yyyy-mm-dd',
+                ],
+                'options' => [
+                    'autocomplete' => 'off',
+                    'placeholder' =>'Choose Date'
+                ],
+            ]),
         ],
 
         /*[

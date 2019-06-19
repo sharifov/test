@@ -239,12 +239,12 @@ class Lead extends ActiveRecord
     {
         return [
 
-            [['trip_type', 'cabin'], 'required'],
-            [['adults', 'children', 'infants', 'source_id'], 'required'], //'except' => self::SCENARIO_API],
+            [['trip_type', 'cabin'], 'required', 'on' => self::SCENARIO_API],
+            [['adults', 'children', 'source_id'], 'required', 'on' => self::SCENARIO_API], //'except' => self::SCENARIO_API],
+            [['adults'], 'integer', 'min' => 1, 'on' => self::SCENARIO_API],
 
             [['client_id', 'employee_id', 'status', 'project_id', 'source_id', 'rating', 'bo_flight_id', 'l_grade', 'clone_id', 'l_call_status_id', 'l_duplicate_lead_id'], 'integer'],
             [['adults', 'children', 'infants'], 'integer', 'max' => 9],
-            [['adults'], 'integer', 'min' => 1],
 
             [['notes_for_experts', 'request_ip_detail', 'l_client_ua'], 'string'],
 
@@ -680,16 +680,32 @@ class Lead extends ActiveRecord
         return null;
     }
 
+    /**
+     * @param null $cabin
+     * @return mixed|null
+     */
     public static function getCabin($cabin = null)
     {
         $mapping = self::CABIN_LIST;
-
-        if ($cabin === null) {
-            return $mapping;
-        }
-
         return isset($mapping[$cabin]) ? $mapping[$cabin] : $cabin;
     }
+
+    /**
+     * @return array
+     */
+    public static function getCabinList(): array
+    {
+        return self::CABIN_LIST;
+    }
+
+    /**
+     * @return mixed|string
+     */
+    public function getCabinClassName()
+    {
+        return self::CABIN_LIST[$this->cabin] ?? $this->cabin;
+    }
+
 
     public static function getRating($id, $rating)
     {
@@ -1258,7 +1274,7 @@ New lead {lead_id}
             $job = new QuickSearchInitPriceJob();
             $job->lead_id = $this->id;
             $jobId = Yii::$app->queue_job->push($job);
-            Yii::info('Lead: ' . $this->id . ', QuickSearchInitPriceJob: '.$jobId, 'info\Lead:afterSave:QuickSearchInitPriceJob');
+            //Yii::info('Lead: ' . $this->id . ', QuickSearchInitPriceJob: '.$jobId, 'info\Lead:afterSave:QuickSearchInitPriceJob');
 
         } else {
 
@@ -1270,7 +1286,7 @@ New lead {lead_id}
                     $job = new UpdateLeadBOJob();
                     $job->lead_id = $this->id;
                     $jobId = Yii::$app->queue_job->push($job);
-                    Yii::info('Lead: ' . $this->id . ', UpdateLeadBOJob: ' . $jobId, 'info\Lead:afterSave:UpdateLeadBOJob');
+                    // Yii::info('Lead: ' . $this->id . ', UpdateLeadBOJob: ' . $jobId, 'info\Lead:afterSave:UpdateLeadBOJob');
                 }
             }
 
@@ -1946,7 +1962,7 @@ New lead {lead_id}
             ? $airport->city
             : $this->leadFlightSegments[0]->destination;
 
-        $tripType = Lead::getFlightType($this->trip_type);
+        $tripType = $this->getFlightTypeName();
 
         $userProjectParams = UserProjectParams::findOne([
             'upp_user_id' => $this->employee->id,
@@ -1958,7 +1974,7 @@ New lead {lead_id}
             'origin' => $origin,
             'destination' => $destination,
             'quotes' => $models,
-            'leadCabin' => self::getCabin($this->cabin),
+            'leadCabin' => $this->getCabinClassName(),
             'nrPax' => ($this->adults + $this->children + $this->infants),
             'project' => $this->project,
             'agentName' => ucfirst($this->employee->username),
@@ -2047,7 +2063,7 @@ New lead {lead_id}
             ? $airport->city
             : $this->leadFlightSegments[0]->destination;
 
-        $tripType = Lead::getFlightType($this->trip_type);
+        $tripType = $this->getFlightTypeName();
 
         $userProjectParams = UserProjectParams::findOne([
             'upp_user_id' => $this->employee->id,
@@ -2058,7 +2074,7 @@ New lead {lead_id}
             'origin' => $origin,
             'destination' => $destination,
             'quotes' => $models,
-            'leadCabin' => self::getCabin($this->cabin),
+            'leadCabin' => $this->getCabinClassName(),
             'nrPax' => ($this->adults + $this->children + $this->infants),
             'project' => $this->project,
             'agentName' => ucfirst($this->employee->username),
@@ -2356,7 +2372,7 @@ New lead {lead_id}
             'request' => [
                 'originCity' => $origin,
                 'destinationCity' => $destination,
-                'cabinType' => self::getCabin($this->cabin),
+                'cabinType' => $this->getCabinClassName(),
                 'tripType' => strtolower($this->trip_type),
                 'pax' => ($this->adults + $this->children + $this->infants)
             ],
@@ -2370,20 +2386,33 @@ New lead {lead_id}
         return $emailData;
     }
 
+
+    /**
+     * @return array
+     */
+    public static function getFlightTypeList(): array
+    {
+        return self::TRIP_TYPE_LIST;
+    }
+
     /**
      * @param null $flightType
-     * @return array|mixed|null
+     * @return string
      */
-    public static function getFlightType($flightType = null)
+    public static function getFlightType($flightType = null): string
     {
-        $mapping = self::TRIP_TYPE_LIST;
-
-        if ($flightType === null) {
-            return $mapping;
-        }
-
-        return $mapping[$flightType] ?? $flightType;
+        return self::TRIP_TYPE_LIST[$flightType] ?? '-';
     }
+
+
+    /**
+     * @return string
+     */
+    public function getFlightTypeName(): string
+    {
+        return self::TRIP_TYPE_LIST[$this->trip_type] ?? '-';
+    }
+
 
     /**
      * @return array
@@ -2880,5 +2909,8 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
 
         return $min;
     }
+
+
+
 
 }

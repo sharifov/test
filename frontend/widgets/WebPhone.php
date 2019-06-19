@@ -60,13 +60,7 @@ class WebPhone extends \yii\bootstrap\Widget
         } else {
             $token = false;
         }
-
-        //
-        $supportGeneralPhones = [
-            'Ovago' =>  '+1​8884574490',
-            'WOWFARE' =>  '+18887385190',
-            'Arangrant' =>  '+18888183963',
-        ];
+        $supportGeneralPhones = \Yii::$app->params['settings']['support_phone_numbers'] ?? [];
 
         return $this->render('web_phone', ['clientId' => $clientId, 'token' => $token, 'supportGeneralPhones' => $supportGeneralPhones]);
     }

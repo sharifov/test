@@ -3,18 +3,10 @@
 /* @var $this \yii\web\View */
 /* @var $content string */
 
-
 use yii\helpers\Html;
-use \webvimark\modules\UserManagement\UserManagementModule;
-
-//use common\widgets\Alert;
-
-//use webvimark\modules\UserManagement\UserManagementModule;
-//$bundle = yiister\gentelella\assets\Asset::register($this);
 
 //\backend\assets\AppAsset::register($this);
 $bundle = \frontend\themes\gentelella\assets\Asset::register($this);
-
 
 
 //$this->registerCssFile('@backend/themes/gentelella/css/custom.css');
@@ -85,31 +77,11 @@ $bundle = \frontend\themes\gentelella\assets\Asset::register($this);
                 <!-- /navbar left -->
 
                 <!-- sidebar menu -->
-
                 <?= $this->render('_sidebar_menu') ?>
-
                 <!-- /sidebar menu -->
 
                 <!-- /menu footer buttons -->
-                <div class="sidebar-footer hidden-small">
-                    <? /*<a data-toggle="tooltip" data-placement="top" title="Settings">
-                        <span class="glyphicon glyphicon-cog" aria-hidden="true"></span>
-                    </a>
-                    <a data-toggle="tooltip" data-placement="top" title="FullScreen">
-                        <span class="glyphicon glyphicon-fullscreen" aria-hidden="true"></span>
-                    </a>
-                    <a data-toggle="tooltip" data-placement="top" title="Lock">
-                        <span class="glyphicon glyphicon-eye-close" aria-hidden="true"></span>
-                    </a>*/ ?>
-
-                    <?=Html::a('<span class="glyphicon glyphicon-off" aria-hidden="true"></span>', ['/user-management/auth/logout'],
-                        ['data-toggle' => 'tooltip', 'data-placement' => 'top', 'title' => 'Logout']) ?>
-
-                    <?/*=Html::a('<span class="fa fa-certificate" aria-hidden="true"></span>', ['site/index', 'snow' => 'off'],
-                        ['data-toggle' => "tooltip", 'data-placement' => "top", 'title' => "Snow Off"])*/ ?>
-
-
-                </div>
+                <?= $this->render('_sidebar_footer') ?>
                 <!-- /menu footer buttons -->
             </div>
         </div>

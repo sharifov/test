@@ -11,12 +11,17 @@ use common\models\UserCallStatus;
  */
 class UserCallStatusSearch extends UserCallStatus
 {
+    public $datetime_start;
+    public $datetime_end;
+    public $date_range;
     /**
      * {@inheritdoc}
      */
     public function rules()
     {
         return [
+            [['datetime_start', 'datetime_end'], 'safe'],
+            [['date_range'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
             [['us_id', 'us_type_id', 'us_user_id'], 'integer'],
             [['us_created_dt'], 'safe'],
         ];
@@ -63,12 +68,20 @@ class UserCallStatusSearch extends UserCallStatus
             return $dataProvider;
         }
 
+        if(empty($this->us_created_dt) && isset($params['UserCallStatusSearch']['date_range'])){
+            $query->andFilterWhere(['>=', 'DATE(us_created_dt)', $this->datetime_start])
+                ->andFilterWhere(['<=', 'DATE(us_created_dt)', $this->datetime_end]);
+        }
+
+        if (isset($params['UserCallStatusSearch']['us_created_dt'])) {
+            $query->andFilterWhere(['=','DATE(us_created_dt)', $this->us_created_dt]);
+        }
+
         // grid filtering conditions
         $query->andFilterWhere([
             'us_id' => $this->us_id,
             'us_type_id' => $this->us_type_id,
             'us_user_id' => $this->us_user_id,
-            'us_created_dt' => $this->us_created_dt,
         ]);
 
         return $dataProvider;

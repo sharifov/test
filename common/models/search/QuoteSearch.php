@@ -12,12 +12,17 @@ use common\models\Quote;
  */
 class QuoteSearch extends Quote
 {
+    public $datetime_start;
+    public $datetime_end;
+    public $date_range;
     /**
      * {@inheritdoc}
      */
     public function rules()
     {
         return [
+            [['datetime_start', 'datetime_end'], 'safe'],
+            [['date_range'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
             [['id', 'lead_id', 'employee_id', 'status', 'check_payment'], 'integer'],
             [['uid', 'record_locator', 'pcc', 'cabin', 'gds', 'trip_type', 'main_airline_code', 'reservation_dump', 'fare_type', 'created', 'updated'], 'safe'],
         ];
@@ -60,6 +65,19 @@ class QuoteSearch extends Quote
             return $dataProvider;
         }
 
+        if(empty($this->created) && isset($params['QuoteSearch']['date_range'])){
+            $query->andFilterWhere(['>=', 'DATE(created)', $this->datetime_start])
+                ->andFilterWhere(['<=', 'DATE(created)', $this->datetime_end]);
+        }
+
+        if (isset($params['QuoteSearch']['created'])) {
+            $query->andFilterWhere(['=','DATE(created)', $this->created]);
+        }
+
+        if (isset($params['QuoteSearch']['updated'])) {
+            $query->andFilterWhere(['=','DATE(updated)', $this->updated]);
+        }
+
         // grid filtering conditions
         $query->andFilterWhere([
             'id' => $this->id,
@@ -67,8 +85,8 @@ class QuoteSearch extends Quote
             'employee_id' => $this->employee_id,
             'status' => $this->status,
             'check_payment' => $this->check_payment,
-            'created' => $this->created,
-            'updated' => $this->updated,
+            //'created' => $this->created,
+            //'updated' => $this->updated,
         ]);
 
         $query->andFilterWhere(['like', 'uid', $this->uid])

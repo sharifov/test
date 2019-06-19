@@ -60,14 +60,14 @@ $this->params['breadcrumbs'][] = $this->title;
                 'value' => function(\common\models\Quote $model) {
                     return \common\models\Lead::getFlightType($model->trip_type) ?? '-';
                 },
-                'filter' => \common\models\Lead::TRIP_TYPE_LIST
+                'filter' => \common\models\Lead::getFlightTypeList()
             ],
             [
                 'attribute' => 'cabin',
                 'value' => function(\common\models\Quote $model) {
                     return \common\models\Lead::getCabin($model->cabin) ?? '-';
                 },
-                'filter' => \common\models\Lead::CABIN_LIST
+                'filter' => \common\models\Lead::getCabinList()
             ],
             'main_airline_code',
             //'reservation_dump:ntext',

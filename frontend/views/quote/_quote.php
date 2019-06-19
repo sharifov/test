@@ -74,7 +74,28 @@ $js = <<<JS
             $(this).removeClass('field-error');
         });
         $('.parent-error').removeClass('has-error');
+        
+        if($('#quote-gds').val() == '') {
+            alert('Select GDS please');
+            $('#quote-gds').focus();
+            return false;
+        }
+        
+        if($('#quote-main_airline_code').val() == '') {
+            alert('Select Validating Carrier please');
+            $('#quote-main_airline_code').focus();
+            return false;
+        }
+        
+        if($('#quote-reservation_dump').val() == '') {
+            alert('Insert Reservation dump please');
+            $('#quote-reservation_dump').focus();
+            return false;
+        }
+        
         $('#preloader').removeClass('hidden');
+        
+        
         $.ajax({
             url: url,
             type: form.attr("method"),
@@ -350,7 +371,8 @@ $this->registerJs($js);
                                 ],
                                 'template' => '{input}'
                             ])->dropDownList($quote::getGDSName(), [
-                                'prompt' => 'Select'
+                                'prompt' => 'Select',
+                                'required' => 'required'
                             ]) ?>
                         </div>
                     </td>
@@ -373,7 +395,7 @@ $this->registerJs($js);
                                     'tag' => false,
                                 ],
                                 'template' => '{input}'
-                            ])->dropDownList(Lead::getFlightType()) ?>
+                            ])->dropDownList(Lead::getFlightTypeList()) ?>
                         </div>
                     </td>
                 </tr>
@@ -386,7 +408,7 @@ $this->registerJs($js);
                                     'tag' => false,
                                 ],
                                 'template' => '{input}'
-                            ])->dropDownList(Lead::getCabin()) ?>
+                            ])->dropDownList(Lead::getCabinList()) ?>
                         </div>
                     </td>
                     <th><label for="v-carrier">Validating Carrier</label></th>

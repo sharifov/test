@@ -187,6 +187,11 @@ class ApiBaseController extends Controller
         $apiLog->al_request_dt = date('Y-m-d H:i:s');
         $apiLog->al_ip_address = Yii::$app->request->getRemoteIP();
         $apiLog->al_action = $action;
+
+        $apiLog->start_microtime = microtime(true);
+        $apiLog->start_memory_usage = memory_get_usage();
+
+
         if($this->apiUser) {
             $apiLog->al_user_id = $this->apiUser->au_id;
         }

@@ -1,4 +1,6 @@
 <?php
+
+use dosamigos\datepicker\DatePicker;
 use yii\helpers\Html;
 use yii\widgets\Pjax;
 use kartik\grid\GridView;
@@ -239,7 +241,18 @@ $this->params['breadcrumbs'][] = $this->title;
             'options' => [
                 'style' => 'width:180px'
             ],
-            'filter' => false,
+            'filter' => DatePicker::widget([
+                'model' => $searchModel,
+                'attribute' => 'created',
+                'clientOptions' => [
+                    'autoclose' => true,
+                    'format' => 'yyyy-mm-dd',
+                ],
+                'options' => [
+                    'autocomplete' => 'off',
+                    'placeholder' =>'Choose Date'
+                ],
+            ]),
             'enableSorting' => ! $isAgent
         ],
 
@@ -365,9 +378,9 @@ $this->params['breadcrumbs'][] = $this->title;
         [
             'attribute' => 'cabin',
             'value' => function (\common\models\Lead $model) {
-                return \common\models\Lead::getCabin($model->cabin) ?? '-';
+                return $model->getCabinClassName();
             },
-            'filter' => false //\common\models\Lead::CABIN_LIST
+            'filter' => \common\models\Lead::CABIN_LIST
         ],
 
 

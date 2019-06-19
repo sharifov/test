@@ -282,7 +282,7 @@ class ApiLead extends Model
         $strHash = implode('|', $hashArray);
         $hash = md5($strHash);
 
-        Yii::info('Lead ('.$this->lead_id.', StrHash: "'.$strHash.'", "'.$hash.'")', 'info\APILead:strHash');
+        //Yii::info('Lead ('.$this->lead_id.', StrHash: "'.$strHash.'", "'.$hash.'")', 'info\APILead:strHash');
 
         return $hash;
     }

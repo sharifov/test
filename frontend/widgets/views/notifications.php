@@ -284,6 +284,10 @@ $js = <<<JS
                     if(obj.command === 'callMapUpdate') {
                         $('#btn-user-call-map-refresh').click();
                     }
+                    
+                    if(obj.command === 'openUrl') {
+                        window.open(obj.url, 'openUrl');
+                    }
                 }
                 
             } catch (error) {

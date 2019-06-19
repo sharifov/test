@@ -108,6 +108,14 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$
                 ],
             ],
             [
+                'attribute' => 'c_project_id',
+                'value' => function (\common\models\Call $model) {
+                    return $model->cProject ? '<span class="badge badge-info">' . Html::encode($model->cProject->name) . '</span>' : '-';
+                },
+                'format' => 'raw',
+                'filter' => $projectList
+            ],
+            [
                 'attribute' => 'c_created_user_id',
                 'value' => function (\common\models\Call $model) {
                     return  $model->cCreatedUser ? '<i class="fa fa-user"></i> ' . Html::encode($model->cCreatedUser->username) : $model->c_created_user_id;
@@ -117,9 +125,18 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$
             ],
 
             [
+                'attribute' => 'c_call_status',
+                'value' => function (\common\models\Call $model) {
+                    return $model->getStatusLabel();
+                },
+                'format' => 'raw',
+                'filter' => \common\models\Call::CALL_STATUS_LIST
+            ],
+
+            [
                 'attribute' => 'c_created_dt',
                 'value' => function (\common\models\Call $model) {
-                    return $model->c_created_dt ? '<i class="fa fa-calendar"></i> ' . date('d-M-Y [H:i]', strtotime($model->c_created_dt))  : '-';  //Yii::$app->formatter->asDatetime(strtotime($model->c_created_dt))
+                    return $model->c_created_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->c_created_dt), 'php: Y-m-d [H:i:s]')  : '-';  //Yii::$app->formatter->asDatetime(strtotime($model->c_created_dt))
                 },
                 'format' => 'raw',
                 'filter' => DatePicker::widget([
@@ -135,14 +152,27 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$
                 ]),
             ],
 
-            [
+            /*[
                 'attribute' => 'c_recording_url',
                 'value' => function (\common\models\Call $model) {
                     return  $model->c_recording_url ? '<audio controls="controls" style="width: 350px; height: 25px"><source src="'.$model->c_recording_url.'" type="audio/mpeg"> </audio>' : '-';
                 },
                 'format' => 'raw'
+            ],*/
+
+            [
+                'attribute' => 'c_recording_duration',
+                'label' => 'Recording',
+                'value' => function (\common\models\Call $model) {
+                    return  $model->c_recording_url ? Html::button(gmdate('i:s', $model->c_recording_duration) . ' <i class="fa fa-volume-up"></i>', ['class' => 'btn btn-' . ($model->c_recording_duration < 30 ? 'warning' : 'success') . ' btn-xs btn-recording_url', 'data-source_src' => $model->c_recording_url]) : '-';
+                },
+                'format' => 'raw',
+                'contentOptions' => ['class' => 'text-right'],
+                'options' => ['style' => 'width: 80px']
+
             ],
-            'c_recording_duration',
+
+            //'c_recording_duration',
 
             /*[
                 'label' => 'Record Link',
@@ -154,7 +184,22 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$
 
             //'c_is_new:boolean',
             //'c_com_call_id',
-            'c_call_sid',
+            [
+                'attribute' => 'c_call_sid',
+                'value' => function (\common\models\Call $model) {
+                    return  $model->c_call_sid ? '<small>' . $model->c_call_sid . '</small>' : '-';
+                },
+                'format' => 'raw'
+            ],
+            [
+                'attribute' => 'c_parent_call_sid',
+                'value' => function (\common\models\Call $model) {
+                    return  $model->c_parent_call_sid ? '<small>' . $model->c_parent_call_sid . '</small>' : '-';
+                },
+                'format' => 'raw'
+            ],
+            //'c_call_sid',
+            //'c_parent_call_sid',
             //'c_account_sid',
 
             [
@@ -165,15 +210,17 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$
                 'filter' => \common\models\Call::CALL_TYPE_LIST
             ],
 
+            [
+                'attribute' => 'c_source_type_id',
+                'value' => function (\common\models\Call $model) {
+                    return $model->getSourceName();
+                },
+                'filter' => \common\models\Call::SOURCE_LIST
+            ],
+
             //'c_project_id',
 
-            [
-                'attribute' => 'c_project_id',
-                'value' => function (\common\models\Call $model) {
-                    return $model->cProject ? $model->cProject->name : '-';
-                },
-                'filter' => $projectList
-            ],
+
 
             //'c_lead_id',
             [
@@ -187,29 +234,22 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$
             'c_to',
             // 'c_sip',
             //'c_call_status',
-            [
-                'attribute' => 'c_call_status',
-                'value' => function (\common\models\Call $model) {
-                    return '<span class="badge badge-info">'.$model->getStatusName().'</span>';
-                },
-                'format' => 'raw',
-                'filter' => \common\models\Call::CALL_STATUS_LIST
-            ],
+
 
 
             //'c_api_version',
             //'c_direction',
             //'c_forwarded_from',
-            'c_caller_name',
+            //'c_caller_name',
             //'c_parent_call_sid',
             'c_call_duration',
             //'c_price:currency',
-            [
+            /*[
                 'attribute' => 'c_price',
                 'value' => function (\common\models\Call $model) {
                     return $model->c_price ? '$'.number_format($model->c_price, 5) : '-';
                 },
-            ],
+            ],*/
             //'c_sip_response_code',
             //'c_recording_url:url',
 
@@ -249,3 +289,36 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$
     ]); ?>
     <?php Pjax::end(); ?>
 </div>
+
+<?php
+\yii\bootstrap\Modal::begin([
+    'header' => '<b>Call Recording</b>',
+    // 'toggleButton' => ['label' => 'click me'],
+    'id' => 'modalCallRecording',
+    'size' => \yii\bootstrap\Modal::SIZE_LARGE,
+]);
+?>
+    <div class="row">
+        <div class="col-md-12" id="audio_recording">
+
+        </div>
+    </div>
+<?php \yii\bootstrap\Modal::end(); ?>
+
+
+<?php
+
+$js = <<<JS
+$(document).on('click', '.btn-recording_url', function() {
+     var source_src = $(this).data('source_src');
+     $('#audio_recording').html('<audio controls="controls" autoplay="true" id="audio_controls" style="width: 100%;"><source src="'+ source_src +'" type="audio/mpeg"></audio>');
+     $('#modalCallRecording').modal('show');
+});
+
+$('#modalCallRecording').on('hidden.bs.modal', function () {
+    $('#audio_recording').html('');
+})
+
+JS;
+$this->registerJs($js, \yii\web\View::POS_READY);
+?>

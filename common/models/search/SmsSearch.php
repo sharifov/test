@@ -160,6 +160,10 @@ class SmsSearch extends Sms
             return $dataProvider;
         }
 
+        if (isset($params['SmsSearch']['s_created_dt'])) {
+            $query->andFilterWhere(['=','DATE(s_created_dt)', $this->s_created_dt]);
+        }
+
         // grid filtering conditions
         $query->andFilterWhere([
             's_id' => $this->s_id,
@@ -181,7 +185,6 @@ class SmsSearch extends Sms
             's_tw_num_segments' => $this->s_tw_num_segments,
             's_created_user_id' => $this->s_created_user_id,
             's_updated_user_id' => $this->s_updated_user_id,
-            's_created_dt' => $this->s_created_dt,
             's_updated_dt' => $this->s_updated_dt,
         ]);
 

@@ -171,11 +171,12 @@ class ApiBaseController extends Controller
         if (!Yii::$app->request->post()) throw new BadRequestHttpException('POST data request is empty', 2);
     }
 
+
     /**
      * @param string $action
      * @return ApiLog
      */
-    public function startApiLog(string $action = '')
+    public function startApiLog(string $action = ''): ApiLog
     {
 
         $apiLog = new ApiLog();
@@ -183,11 +184,21 @@ class ApiBaseController extends Controller
         $apiLog->al_request_dt = date('Y-m-d H:i:s');
         $apiLog->al_ip_address = Yii::$app->request->getRemoteIP();
         $apiLog->al_action = $action;
-        if($this->apiUser) $apiLog->al_user_id = $this->apiUser->au_id;
 
-        if(!$apiLog->save()) Yii::error(print_r($apiLog->errors, true), 'ApiBaseControl:startApiLog:ApiLog:save');
+        $apiLog->start_microtime = microtime(true);
+        $apiLog->start_memory_usage = memory_get_usage();
+
+
+        if($this->apiUser) {
+            $apiLog->al_user_id = $this->apiUser->au_id;
+        }
+
+        if(!$apiLog->save()) {
+            Yii::error(print_r($apiLog->errors, true), 'ApiBaseControl:startApiLog:ApiLog:save');
+        }
 
         return $apiLog;
     }
+
 
 }

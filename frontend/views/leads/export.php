@@ -363,20 +363,18 @@ $this->params['breadcrumbs'][] = $this->title;
         [
             'attribute' => 'trip_type',
             'value' => function(\common\models\Lead $model) {
-                return \common\models\Lead::getFlightType($model->trip_type) ?? '-';
+                return $model->getFlightTypeName();
             },
-            'filter' => \common\models\Lead::TRIP_TYPE_LIST
+            'filter' => \common\models\Lead::getFlightTypeList()
         ],
 
         [
             'attribute' => 'cabin',
-            'value' => function(\common\models\Lead $model) {
-                return \common\models\Lead::getCabin($model->cabin) ?? '-';
+            'value' => function (\common\models\Lead $model) {
+                return $model->getCabinClassName();
             },
             'filter' => \common\models\Lead::CABIN_LIST
         ],
-
-
 
         [
             'attribute' => 'adults',

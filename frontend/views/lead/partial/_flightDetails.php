@@ -150,7 +150,7 @@ JS;
                         'options' => [
                             'tag' => false,
                         ]])->label(false)
-                        ->radioList(Lead::getFlightType(),
+                        ->radioList(Lead::getFlightTypeList(),
                             [
                                 'tag' => 'ul',
                                 'class' => 'sl-itinerary-form__trip-type nav nav-tabs js-trip-type',
@@ -189,6 +189,12 @@ JS;
                         ]) ?>
                     </div>
                 </div>
+
+                <?php if(!$leadForm->getLeadFlightSegment()): ?>
+                    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css" />
+                    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+                <?php endif;?>
+
                 <?php ob_start(); // output buffer the javascript to register later ?>
                 <script>
                     // add segment button
@@ -263,7 +269,7 @@ JS;
                 <div class="col-sm-3">
                     <?= $formLeadModel->field($leadForm->getLead(), 'cabin', [
                         //'template' => '{label}<label for="cabin-class" class="select-wrap-label">{input}</label>{error}{hint}'
-                    ])->dropDownList(Lead::getCabin(), [
+                    ])->dropDownList(Lead::getCabinList(), [
                         'prompt' => '---'
                     ]) ?>
                 </div>

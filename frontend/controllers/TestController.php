@@ -9,6 +9,7 @@ use common\models\Call;
 use common\models\ClientPhone;
 use common\models\Employee;
 use common\models\Lead;
+use common\models\Lead2;
 use common\models\Notifications;
 use common\models\Project;
 use common\models\Source;
@@ -1182,6 +1183,10 @@ class TestController extends FController
         $agent_phone_number = '+15596489977';
 
         $clientIds = [];
+
+        $clientIds = ClientPhone::find()->select(['client_id'])->where(['phone' => $client_phone_number])->column();
+        VarDumper::dump($clientIds, 10, true); exit;
+
         $clientIdsQuery = ClientPhone::findBySql("SELECT GROUP_CONCAT(client_id) AS client_ids FROM client_phone WHERE phone = '{$client_phone_number}' ")->asArray()->one();
         //VarDumper::dump($clientIds, 10, true); exit;
         if(isset($clientIdsQuery['client_ids']) && $clientIdsQuery['client_ids'] ) {
@@ -1249,6 +1254,63 @@ class TestController extends FController
 
 
         VarDumper::dump($items, 10, true); exit;
+    }
+
+    public function actionTest2()
+    {
+        $lead = Lead::find()->innerJoinWith(['client.clientPhones'])->where(['l_client_phone' => '123'])->andWhere(['<>', 'leads.status', Lead::STATUS_TRASH])->orderBy(['leads.id' => SORT_DESC])->limit(1);
+
+        echo $lead->createCommand()->getRawSql();
+    }
+
+    public function actionNotify()
+    {
+        $host = \Yii::$app->params['url_address'] ?? '';
+        Notifications::socket(Yii::$app->user->id, null, 'openUrl', ['url' => $host . '/lead/view/b5d963c9241dd741e22b37d1fa80a9b6'], false);
+    }
+
+    public function actionTest3()
+    {
+
+       /* $a = [
+            'lead' => [
+                'sub_sources_code' => 'Q6R5L3',
+        'adults' => '1',
+        'cabin' => 'E',
+        'emails' => [],
+        'phones' => [
+        0 => '+18885324041'
+    ],
+        'flights' => [
+        0 => [
+            'origin' => 'JFK',
+                'destination' => 'MAD',
+                'departure' => '06/29/2019'
+            ],
+            1 => [
+        'origin' => 'MAD',
+                'destination' => 'JFK',
+                'departure' => '07/25/2019'
+            ]
+        ],
+        'trip_type' => 'RT',
+        'children' => '0',
+        'infants' => 0,
+        'uid' => 'W3ACBD0',
+        'request_ip' => '188.131.53.1',
+        'discount_id' => '2766',
+        'user_agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36',
+        'offset_gmt' => null,
+        'user_language' => null,
+    ]
+];
+
+        echo json_encode($a);
+
+        exit;
+        //VarDumper::dump($a, 10, true);*/
+
+        echo Lead2::findLastLeadByClientPhone('+3736959', 1, true);
     }
 
 }

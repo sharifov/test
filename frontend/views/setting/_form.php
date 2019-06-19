@@ -30,8 +30,26 @@ use yii\widgets\ActiveForm;
             } else if($model->s_type === \common\models\Setting::TYPE_DOUBLE) {
 
                 echo $form->field($model, 's_value')->input('number', ['step' => 0.01]);//->label($model->s_name);
-            }
+            } else if($model->s_type === \common\models\Setting::TYPE_ARRAY) {
 
+
+                try {
+                    echo $form->field($model, 's_value')->widget(
+                        \kdn\yii2\JsonEditor::class,
+                        [
+                            'clientOptions' => [
+                                'modes' => ['code', 'form', 'tree', 'view'], //'text',
+                                'mode' => 'tree'
+                            ],
+                            //'collapseAll' => ['view'],
+                            'expandAll' => ['tree', 'form'],
+                        ]
+                    );
+                } catch (Exception $exception) {
+                    echo $form->field($model, 's_value')->textarea(['rows' => 5]);//->label($model->s_name);
+                }
+
+            }
 
             else {
                 echo $form->field($model, 's_value')->textInput(['maxlength' => true])->label($model->s_name);

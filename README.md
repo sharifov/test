@@ -73,6 +73,13 @@ gunzip < /var/www/sale/sql.gz | mysql -v -u USER -pPASSWORD DATABASE
 mysqlshow -u USER -pPASSWORD DATABASE
 ```
 
+sudo nano /etc/mysql/conf.d/mysql.cnf
+``` 
+[mysqld]
+sql_mode=only_full_group_by
+```
+sudo service mysql restart
+
 
 
 Prod Hosts:

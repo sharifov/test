@@ -3,6 +3,8 @@
 /* @var $clientId string */
 /* @var $token string */
 /* @var $fromAgentPhone string */
+/* @var $supportGeneralPhones array */
+
 
 
 \frontend\assets\WebPhoneAsset::register($this);
@@ -97,11 +99,10 @@
                         </table>
                     </td>
                     <td>
-                        <div class="btn-group" id="btn-group-id-hangup" style="display:none">
+                        <div class="btn-group" id="btn-group-id-hangup" style="display:none;">
                             <?=\yii\helpers\Html::button('<i class="fa fa-close"></i> Hangup', ['class' => 'btn btn-sm btn-danger','id' => 'button-hangup'])?>
                         </div>
-
-                        <div class="btn-group dropup" style="display:none" id="btn-group-id-forward">
+                        <div class="btn-group dropup" style="display:none;" id="btn-group-id-forward">
                             <button type="button" class="btn btn-sm btn-info dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                 <i class="fa fa-forward"></i> To Support <span class="caret"></span>
                             </button>
@@ -125,6 +126,10 @@
                             </ul>
                         </div>
 
+                        <div class="btn-group" id="btn-group-id-redirect" style="display: none;">
+                            <?=\yii\helpers\Html::button('<i class="fa fa-forward"></i> To Agents ', ['class' => 'btn btn-sm btn-info button-redirect-to-agents','id' => 'button-redirect-to-agents'])?>
+                        </div>
+
 
                         <?/*=\yii\helpers\Html::button('<i class="fa fa-phone"></i> Call', ['class' => 'btn btn-xs btn-success', 'id' => 'button-call'])*/?>
                         <div id="call-controls2" style="display: none;">
@@ -142,7 +147,9 @@
                             <?/*<div class="btn-group">
                                 <button class="btn btn-xs btn-danger forward-event" data-type="hold" data-value="+15596489977"><i class="fa fa-pause"></i> Hold</button>
                             </div>*/?>
-
+                            <div class="btn-group" id="btn-group-id-redirect2">
+                                <?=\yii\helpers\Html::button('<i class="fa fa-forward"></i> To Agents ', ['class' => 'btn btn-sm btn-info button-redirect-to-agents','id' => 'button-redirect-to-agents2'])?>
+                            </div>
                         </div>
                     </td>
                 </tr>
@@ -229,9 +236,22 @@
 
 
 
+<?php \yii\bootstrap\Modal::begin([
+    'id' => 'web-phone-redirect-agents-modal',
+    'header' => '<h4 class="modal-title">Redirect to Agents</h4>',
+    //'size' => 'modal-sm',
+]);
+echo '<div class="container" id="container-redirect-agents"></div>';
+\yii\bootstrap\Modal::end(); ?>
+
+
+
+
+
 <?php
     $ajaxSaveCallUrl = \yii\helpers\Url::to(['phone/ajax-save-call']);
     $ajaxRedirectCallUrl = \yii\helpers\Url::to(['phone/ajax-call-redirect']);
+    $ajaxCallRedirectGetAgents = \yii\helpers\Url::to(['phone/ajax-call-get-agents']);
 ?>
 
 
@@ -239,6 +259,7 @@
 
     const ajaxSaveCallUrl = '<?=$ajaxSaveCallUrl?>';
     const ajaxCallRedirectUrl = '<?=$ajaxRedirectCallUrl?>';
+    const ajaxCallRedirectGetAgents = '<?=$ajaxCallRedirectGetAgents;?>';
     const c_user_id = '<?=Yii::$app->user->id?>';
 
     function createNotify(title, message, type) {
@@ -270,6 +291,7 @@
             return this.indexOf(element) > -1;
         };
     }
+
 
     // Bind button to make call
     /*document.getElementById('button-call').onclick = function () {
@@ -441,6 +463,34 @@
         }
     };
 
+
+    function initredirectToAgent()
+    {
+        if (connection && connection.parameters.CallSid) {
+            $.ajax({
+                type: 'post',
+                data: {
+                    'sid': connection.parameters.CallSid,
+                    'type': 'client',
+                    'from': connection.parameters.From,
+                    'to': connection.parameters.To,
+                    'agent_id' : c_user_id,
+                },
+                url: ajaxCallRedirectGetAgents,
+                success: function (response) {
+                    if(response.status == 'ok') {
+                        //connection.accept();
+                        $("#container-redirect-agents").html(response.html);
+                        $("#web-phone-redirect-agents-modal").modal();
+                    }
+                },
+                error: function (error) {
+                    console.error(error);
+                }
+            });
+        }
+    }
+
     // TODO redirect call
     /*document.getElementById('button-redirect').onclick = function () {
         console.log("button-redirect: " + connection);
@@ -536,6 +586,7 @@
                 });
 
                 device.on('connect', function (conn) {
+                    //console.log("connect call: status: " + connection.status() + "\n" + 'connection: ' + JSON.stringify(connection) + "\n conn:" + JSON.stringify(conn));
                     connection = conn;
                     log('Successfully established call!');
                     console.warn(conn);
@@ -548,13 +599,14 @@
                     //document.getElementById('button-hangup').style.display = 'inline';
                     document.getElementById('btn-group-id-forward').style.display = 'inline';
                     document.getElementById('btn-group-id-hangup').style.display = 'inline';
-
+                    document.getElementById('btn-group-id-redirect').style.display = 'inline';
 
                     volumeIndicators.style.display = 'block';
                     bindVolumeIndicators(conn);
                 });
 
                 device.on('disconnect', function (conn) {
+                    connection = conn;
                     log('Call ended');
                     createNotify('Call ended', 'Call ended', 'warning');
                     console.warn(conn);
@@ -565,7 +617,7 @@
                     //document.getElementById('button-hangup').style.display = 'none';
                     document.getElementById('btn-group-id-forward').style.display = 'none';
                     document.getElementById('btn-group-id-hangup').style.display = 'none';
-
+                    document.getElementById('btn-group-id-redirect').style.display = 'none';
 
                     volumeIndicators.style.display = 'none';
 
@@ -574,6 +626,13 @@
                 });
 
                 device.on('incoming', function (conn) {
+                    if(connection && Object.prototype.hasOwnProperty.call(connection, "status")) {
+                        //console.log("incoming call: status: " + connection.status() + "\n" + 'connection: ' + JSON.stringify(connection) + "\n conn:" + JSON.stringify(conn));
+                        if (connection && ['open', 'ringing'].inArray(connection.status())) {
+                            conn.reject();
+                            return false;
+                        }
+                    }
                     connection = conn;
                     log('Incoming connection from ' + conn.parameters.From);
                     createNotify('Incoming connection', 'Incoming connection from ' + conn.parameters.From, 'success');
@@ -604,6 +663,7 @@
 
                     //document.getElementById('call-controls').style.display = 'block';
                     document.getElementById('call-controls2').style.display = 'none';
+                    document.getElementById('btn-group-id-redirect').style.display = 'none';
                 });
 
 
@@ -644,6 +704,7 @@
             console.log('Calling ' + params.To + '...');
             createNotify('Calling', 'Calling ' + params.To + '...', 'success');
             connection = device.connect(params);
+            document.getElementById('btn-group-id-redirect').style.display = 'none';
         }
     }
 
@@ -652,6 +713,7 @@
         $('#web-call-from-number').text('');
         $('#web-call-to-number').text('');
     }
+
 
 
 </script>
@@ -666,7 +728,81 @@ $userId = Yii::$app->user->id;
 $js = <<<JS
 
 
+        $(document).on('click', '.button-redirect-to-agents', function(e) {
+            
+            e.preventDefault();
+            initredirectToAgent();
+        });
 
+
+        $(document).on('click', '.redirect-agent-data', function(e) {
+            e.preventDefault();
+           
+            var data_agent_to_redirect = $(e.target);
+            data_agent_to_redirect.attr("disabled", true);
+            $("#redirect-agent-table").hide();
+            $("#redirect-agent-info").html('<h3>Redirecting to: ' + data_agent_to_redirect.data('agent') + '</h3>').show();
+            if(connection) {
+                
+                
+                $.post(ajaxCallRedirectUrl + '?check_user=1', {to_id:data_agent_to_redirect.data('agentid')}, function(r) {
+                    
+                    
+                    if(r && r.is_ready) {
+                    
+                        if(connection.status() !== 'open') {
+                            connection.accept();
+                        }
+                        $.ajax({
+                            type: 'post',
+                            data: {
+                                'sid': connection.parameters.CallSid,
+                                'type': 'client',
+                                'from': connection.parameters.From,
+                                'to':data_agent_to_redirect.data('agent'),
+                                'to_id': data_agent_to_redirect.data('agentid'),
+                                'project_id': data_agent_to_redirect.data('projectid'), 
+                                'lead_id':  data_agent_to_redirect.data('leadid'),
+                            },
+                            url: ajaxCallRedirectUrl,
+                            success: function (res) {
+                                 console.log(res);
+                                if(res.error) {
+                                    $('#web-phone-dial-modal').modal('hide');
+                                    document.getElementById('call-controls2').style.display = 'none';
+                                    data_agent_to_redirect.removeAttr("disabled");
+                                    var error_message = 'Error redirect.';
+                                    if(res.message) {
+                                        error_message = res.message;
+                                    }
+                                    $("#redirect-agent-info").html('<h3 class="danger">' + error_message +'</h3>').show();
+                                    $("#redirect-agent-table").show();
+                                    setTimeout('initredirectToAgent();', 5000);
+                                }
+                                else {
+                                    $('#web-phone-dial-modal').modal('hide');
+                                    document.getElementById('call-controls2').style.display = 'none';
+                                    $("#web-phone-redirect-agents-modal").modal('hide');
+                                    data_agent_to_redirect.removeAttr("disabled");
+                                    $("#redirect-agent-info").html('').hide();
+                                    $("#redirect-agent-table").show();
+                                }
+                            },
+                            error: function (error) {
+                                console.error(error);
+                                data_agent_to_redirect.removeAttr("disabled");
+                                $("#redirect-agent-info").html('').hide();
+                                $("#redirect-agent-table").show();
+                            }
+                        });
+                    } else {
+                        $("#redirect-agent-info").html('<h3 class="danger">The user (' +  data_agent_to_redirect.data('agent') + ') is not available for the call</h3>').show();
+                        $("#redirect-agent-table").show();
+                        setTimeout('initredirectToAgent();', 5000);
+                    }
+                }, 'json');
+            }
+        });
 
 
         $(".digit").on('click', function() {
@@ -682,13 +818,6 @@ $js = <<<JS
 
 
 
-
-
-
-
-
-
-
     const ajaxPhoneDialUrl = '$ajaxPhoneDialUrl';
 
     
@@ -700,8 +829,6 @@ $js = <<<JS
         e.preventDefault();
         $('#output').html('');
     });
-    
-    
      
     $('#btn-nin-max-webphone').on('click', function() {
         var iTag = $(this).find('i');
@@ -713,7 +840,6 @@ $js = <<<JS
             iTag.removeClass('fa-angle-double-up').addClass('fa-angle-double-down');
             $('.webphone-controls').slideDown();
         }
-        
         //$(this).find('i').addClass('fa-angle-double-up');
     });
     
@@ -723,7 +849,6 @@ $js = <<<JS
         setCookie('web-phone-widget-close', 1, {expires: 3600 * 24, path: "/"});
         //$(this).find('i').addClass('fa-angle-double-up');
     });
-    
     
     $('#prime2').on('click', function() {
         $('#web-phone-widget').slideDown();
@@ -736,9 +861,7 @@ $js = <<<JS
         var phone_number = $(this).data('phone');
         var project_id = $(this).data('project-id');
         var lead_id = $(this).data('lead-id');
-        
         //alert(phoneNumber);
-        
         e.preventDefault();
         
         $('#web-phone-dial-modal .modal-body').html('<div style="text-align:center"><img width="200px" src="https://loading.io/spinners/gear-set/index.triple-gears-loading-icon.svg"></div>');
@@ -753,21 +876,27 @@ $js = <<<JS
     
     $(document).on('click', '#btn-make-call', function(e) {
         e.preventDefault();
-        var phone_to = $('#call-to-number').val();
-        var phone_from = $('#call-from-number').val();
         
-        var project_id = $('#call-project-id').val();
-        var lead_id = $('#call-lead-id').val();
+        $.post(ajaxCallRedirectUrl + '?check_user=1', {to_id:c_user_id}, function(r) {
+            if(r && r.is_ready) {
+                var phone_to = $('#call-to-number').val();
+                var phone_from = $('#call-from-number').val();
+                
+                var project_id = $('#call-project-id').val();
+                var lead_id = $('#call-lead-id').val();
+                
+                $('#web-phone-dial-modal').modal('hide');
+                //alert(phone_from + ' - ' + phone_to);
+                $('#web-phone-widget').slideDown();
+                $('.fabs2').hide();
+                
+                webCall(phone_from, phone_to, project_id, lead_id, 'web-call');
+            } else {
+                alert('You have active call');
+                return false;
+            }
+        }, 'json');
         
-        
-        $('#web-phone-dial-modal').modal('hide');
-        //alert(phone_from + ' - ' + phone_to);
-        
-        
-        $('#web-phone-widget').slideDown();
-        $('.fabs2').hide();
-        
-        webCall(phone_from, phone_to, project_id, lead_id, 'web-call');
     });
     
     $('#web-phone-widget').css({left:'50%', 'margin-left':'-'+($('#web-phone-widget').width() / 2)+'px'}); //.slideDown();
@@ -775,7 +904,6 @@ $js = <<<JS
     //console.log(tw_configs);
     initDevice();
     //setInterval('renewTwDevice();', 50000);
-
     $(document).on('click',  '.forward-event',  function (e) {
         e.preventDefault();
         var elForwardSelected = $(e.target);
@@ -788,7 +916,6 @@ $js = <<<JS
                 return false;
             }
             connection.accept();
-            
             $.ajax({
                 type: 'post',
                 data: {
@@ -807,10 +934,6 @@ $js = <<<JS
                 }
             });
         }
-        
-        
-        
-        
     });
 
 

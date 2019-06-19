@@ -203,6 +203,35 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         return false;
     }
 
+
+    /**
+     * @param string $url
+     * @return bool
+     */
+    public function canRoute(string $url = ''): bool
+    {
+
+        if ($url && $url[0] !== '/') {
+            $url = '/' . $url;
+        }
+        if (Yii::$app->user->can('/*')) {
+            //for superAdmin or Dashboard
+            return true;
+        } elseif (Yii::$app->user->can($url)) {
+            return true;
+        } else {
+            $chunks = explode('/', $url);
+
+            if (isset($chunks[0]) && $chunks[0]) {
+                $url2 = '/' . $chunks[0] . '/*';
+                if (Yii::$app->user->can($url2)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     /*public function afterValidate()
     {
         parent::afterValidate();
@@ -1404,7 +1433,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         $subQuery = self::getQueryAgentOnlineStatus($user_id, $project_id, 10);
         $generalQuery = new Query();
         $generalQuery->from(['tbl' => $subQuery]);
-        $generalQuery->andWhere(['<>', 'tbl_user_id', $user_id]);
+        //$generalQuery->andWhere(['<>', 'tbl_user_id', $user_id]);
         $generalQuery->andWhere(['OR', ['NOT IN', 'tbl_last_call_status', [Call::CALL_STATUS_RINGING, Call::CALL_STATUS_IN_PROGRESS]], ['tbl_last_call_status' => null]]);
         $generalQuery->andWhere(['OR', ['tbl_call_status_id' => UserCallStatus::STATUS_TYPE_READY], ['tbl_call_status_id' => null]]);
         $generalQuery->andWhere(['AND', ['<>', 'tbl_call_type_id', UserProfile::CALL_TYPE_OFF], ['IS NOT', 'tbl_call_type_id', null]]);
@@ -1437,7 +1466,13 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         return $exist;
     }
 
-    public static function getAgentsForGeneralLineCall( int $project_id, string $called_phone,  int $hours = 1)
+    /**
+     * @param int $project_id
+     * @param string $called_phone
+     * @param int $hours
+     * @return array
+     */
+    public static function getAgentsForGeneralLineCall( int $project_id, string $called_phone = '',  int $hours = 1)
     {
         $query = UserConnection::find();
         $date_time = date('Y-m-d H:i:s', strtotime('-' . $hours .' hours'));
@@ -1450,8 +1485,10 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
             ->andWhere(['c_call_type_id' => Call::CALL_TYPE_IN])
             ->andWhere(['c_call_status' => Call::CALL_STATUS_COMPLETED])
             ->andWhere(['c_project_id' => $project_id])
-            ->andWhere(['>=', 'c_created_dt', $date_time])
-            ->andWhere(['c_to' => $called_phone]);
+            ->andWhere(['>=', 'c_created_dt', $date_time]);
+        if($called_phone != '') {
+            $subQuery5->andWhere(['c_to' => $called_phone]);
+        }
 
         $query->select([
                 'tbl_user_id' => 'user_connection.uc_user_id',

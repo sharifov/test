@@ -77,5 +77,6 @@ return [
         'general_line_role_priority' => 1,
         'general_line_last_hours' => 12,
         'general_line_user_limit' => 10,
+        'direct_agent_user_limit' => 3,
     ],
 ];

@@ -42,9 +42,11 @@ use yii\helpers\VarDumper;
  * @property bool $c_is_new
  * @property bool $c_is_deleted
  * @property float $c_price
+ * @property int $c_source_type_id
  *
  * @property Employee $cCreatedUser
  * @property Lead $cLead
+ * @property Lead2 $cLead2
  * @property Project $cProject
  */
 class Call extends \yii\db\ActiveRecord
@@ -98,6 +100,19 @@ class Call extends \yii\db\ActiveRecord
     public const CALL_TYPE_LIST = [
         self::CALL_TYPE_OUT => 'Outgoing',
         self::CALL_TYPE_IN  => 'Incoming',
+    ];
+
+
+    public const SOURCE_GENERAL_LINE    = 1;
+    public const SOURCE_DIRECT_CALL     = 2;
+    public const SOURCE_REDIRECT_CALL   = 3;
+    public const SOURCE_TRANSFER_CALL   = 4;
+
+    public const SOURCE_LIST = [
+        self::SOURCE_GENERAL_LINE => 'General Line',
+        self::SOURCE_DIRECT_CALL  => 'Direct Call',
+        self::SOURCE_REDIRECT_CALL  => 'Redirect Call',
+        self::SOURCE_TRANSFER_CALL  => 'Transfer Call',
     ];
 
     /**
@@ -169,7 +184,8 @@ class Call extends \yii\db\ActiveRecord
             'c_error_message' => 'Error Message',
             'c_is_new' => 'Is New',
             'c_is_deleted' => 'Is Deleted',
-            'c_price' => 'Price'
+            'c_price' => 'Price',
+            'c_source_type_id' => 'Source Type',
         ];
     }
 
@@ -195,6 +211,14 @@ class Call extends \yii\db\ActiveRecord
     public function getCLead()
     {
         return $this->hasOne(Lead::class, ['id' => 'c_lead_id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getCLead2()
+    {
+        return $this->hasOne(Lead2::class, ['id' => 'c_lead_id']);
     }
 
     /**
@@ -225,38 +249,172 @@ class Call extends \yii\db\ActiveRecord
     /**
      * @return mixed|string
      */
+    public function getSourceName()
+    {
+        return self::SOURCE_LIST[$this->c_source_type_id] ?? '-';
+    }
+
+    /**
+     * @return mixed|string
+     */
     public function getStatusLabel()
     {
         return self::CALL_STATUS_LABEL_LIST[$this->c_call_status] ?? '-';
     }
 
+
+    /**
+     * @param bool $insert
+     * @param array $changedAttributes
+     * @throws \Throwable
+     * @throws \yii\db\StaleObjectException
+     */
     public function afterSave($insert, $changedAttributes)
     {
         parent::afterSave($insert, $changedAttributes);
 
-        $users = UserConnection::find()->select('uc_user_id')
-            ->andWhere(['uc_controller_id' => 'call', 'uc_action_id' => 'user-map'])
-            ->groupBy(['uc_user_id'])->all();
-
-        if($users) {
-            foreach ($users as $user) {
-                Notifications::socket($user->uc_user_id, null, 'callMapUpdate', [], true);
-            }
-        }
-
         if(!$insert) {
-            if(in_array($this->c_call_status, [Call::CALL_STATUS_COMPLETED, Call::CALL_STATUS_BUSY, Call::CALL_STATUS_NO_ANSWER])) {
+            if(in_array($this->c_call_status, [self::CALL_STATUS_COMPLETED, self::CALL_STATUS_BUSY, self::CALL_STATUS_NO_ANSWER], false)) {
                 if($this->c_created_user_id) {
                     self::applyHoldCallToAgent($this->c_created_user_id);
                 }
             }
+
+            //Yii::info(VarDumper::dumpAsString($this->attributes), 'info\Call:afterSave');
+
+            if($this->c_call_type_id === self::CALL_TYPE_IN && $this->c_lead_id && in_array($this->c_call_status, [self::CALL_STATUS_BUSY, self::CALL_STATUS_NO_ANSWER], false)) {
+
+                if($this->c_created_user_id) {
+                    Notifications::create($this->c_created_user_id, 'Missing Call ('.$this->getSourceName().')  from ' . $this->c_from . ' to ' . $this->c_to . ' <br>Lead ID: ' . $this->c_lead_id , Notifications::TYPE_WARNING, true);
+                    Notifications::socket($this->c_created_user_id, null, 'getNewNotification', [], true);
+                }
+
+                /*if($this->cLead && $this->cLead->employee_id && $this->c_created_user_id !== $this->cLead->employee_id) {
+                    Notifications::create($this->c_created_user_id, 'On your Lead Missing Call ('.$this->getSourceName().')  from ' . $this->c_from . ' to ' . $this->c_to . ' <br>Lead ID: ' . $this->c_lead_id , Notifications::TYPE_WARNING, true);
+                    Notifications::socket($this->c_created_user_id, null, 'getNewNotification', [], true);
+                }*/
+
+
+
+                //Yii::info(VarDumper::dumpAsString($this->attributes), 'info\Call:afterSave:createNewLead');
+                //$this->createNewLead();
+            }
+
+
+
+            //Yii::info(VarDumper::dumpAsString(['changedAttributes' => $changedAttributes, 'Call' => $this->attributes, 'Lead' => $lead->attributes]), 'info\Call:afterSave');
+
+            if($this->c_call_status === self::CALL_STATUS_IN_PROGRESS && $this->c_call_type_id === self::CALL_TYPE_IN && $this->c_lead_id && isset($changedAttributes['c_call_status']) && $changedAttributes['c_call_status'] === self::CALL_STATUS_RINGING) {
+
+                $lead = $this->cLead2;
+
+                if($lead && !$lead->employee_id && $this->c_created_user_id && $lead->status === Lead::STATUS_PENDING) {
+                    Yii::info(VarDumper::dumpAsString(['changedAttributes' => $changedAttributes, 'Call' => $this->attributes, 'Lead' => $lead->attributes]), 'info\Call:afterSave2');
+                    $lead->employee_id = $this->c_created_user_id;
+                    $lead->status = Lead::STATUS_PROCESSING;
+                    $lead->l_answered = true;
+                    if($lead->save()) {
+                        $host = \Yii::$app->params['url_address'] ?? '';
+                        Notifications::create($lead->employee_id, 'AutoCreated new Lead ('.$lead->id.')', 'A new lead ('.$lead->id.') has been created for you. Call Id: ' . $this->c_id, Notifications::TYPE_SUCCESS, true);
+                        Notifications::socket($lead->employee_id, null, 'getNewNotification', [], true);
+                        Notifications::socket($lead->employee_id, null, 'openUrl', ['url' => $host . '/lead/view/'. $lead->gid], false);
+                    } else {
+                        Yii::error(VarDumper::dumpAsString($lead->errors), 'Call:afterSave:Lead:update');
+                    }
+                }
+            }
+
         }
 
         if($this->c_call_type_id === self::CALL_TYPE_OUT && $this->c_lead_id && $this->cLead) {
             $this->cLead->updateLastAction();
         }
 
+        $users = UserConnection::find()
+            ->select('uc_user_id')
+            ->andWhere(['uc_controller_id' => 'call', 'uc_action_id' => 'user-map'])
+            ->groupBy(['uc_user_id'])
+            ->column();
+
+        if($users) {
+            foreach ($users as $user_id) {
+                Notifications::socket($user_id, null, 'callMapUpdate', [], true);
+            }
+        }
+
     }
+
+
+    /**
+     * @return int|null
+     */
+    /*protected function createNewLead(): ?int
+    {
+        $lead = new Lead2();
+
+        $clientPhone = ClientPhone::find()->where(['phone' => $this->c_from])->orderBy(['id' => SORT_DESC])->limit(1)->one();
+
+        if($clientPhone) {
+            $client = $clientPhone->client;
+        } else {
+            $client = new Client();
+            $client->first_name = 'ClientName';
+            $client->created = date('Y-m-d H:i:s');
+
+            if($client->save()) {
+                $clientPhone = new ClientPhone();
+                $clientPhone->phone = $this->c_from;
+                $clientPhone->client_id = $client->id;
+                $clientPhone->comments = 'incoming';
+                if (!$clientPhone->save()) {
+                    Yii::error(VarDumper::dumpAsString($clientPhone->errors), 'Model:Call:createNewLead:ClientPhone:save');
+                }
+            }
+        }
+
+        if($client) {
+
+            $lead->status = Lead::STATUS_PENDING;
+            $lead->employee_id = $this->c_created_user_id;
+            $lead->client_id = $client->id;
+            $lead->project_id = $this->c_project_id;
+
+            $source = Source::find()->select('id')->where(['phone_number' => $this->c_to])->limit(1)->one();
+
+            if(!$source) {
+                $source = Source::find()->select('id')->where(['project_id' => $lead->project_id, 'default' => true])->one();
+            }
+
+            if($source) {
+                $lead->source_id = $source->id;
+            }
+
+            if ($lead->save()) {
+                self::updateAll(['c_lead_id' => $lead->id], ['c_id' => $this->c_id]);
+
+                if($lead->employee_id) {
+                    $task = Task::find()->where(['t_key' => Task::TYPE_MISSED_CALL])->limit(1)->one();
+
+                    if ($task) {
+                        $lt = new LeadTask();
+                        $lt->lt_lead_id = $lead->id;
+                        $lt->lt_task_id = $task->t_id;
+                        $lt->lt_user_id = $lead->employee_id;
+                        $lt->lt_date = date('Y-m-d');
+                        if (!$lt->save()) {
+                            Yii::error(VarDumper::dumpAsString($lt->errors), 'Model:Call:createNewLead:LeadTask:save');
+                        }
+                    }
+                }
+
+            } else {
+                Yii::error(VarDumper::dumpAsString($lead->errors), 'Model:Call:createNewLead:Lead2:save');
+            }
+        }
+
+        return $lead ? $lead->id : null;
+    }*/
+
 
 /**
 * @param $agentId

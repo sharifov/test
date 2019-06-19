@@ -402,7 +402,7 @@ JS;
                 'label' => 'Cabin',
                 'attribute' => 'leads.cabin',
                 'value' => function(\common\models\LeadTask $model) {
-                    return \common\models\Lead::getCabin($model->ltLead->cabin) ?? '-';
+                    return $model->ltLead->getCabinClassName();
                 },
             ],
 
@@ -687,21 +687,6 @@ JS;
                             /*return $cnt ? Html::a($cnt, ['lead-flow/index',
                                 'LeadFlowSearch[employee_id]' => $model->id,
                                 'LeadFlowSearch[status]' => \common\models\Lead::STATUS_PROCESSING,
-                                'LeadFlowSearch[created_date_from]' => $searchModel->datetime_start,
-                                'LeadFlowSearch[created_date_to]' => $searchModel->datetime_end
-                            ], ['data-pjax' => 0, 'target' => '_blank']) : '-';*/
-                            return $cnt ?: '-';
-                        },
-                        'format' => 'raw',
-                        'contentOptions' => ['class' => 'text-center', 'style' => 'width: 100px']
-                    ],
-                    [
-                        'label' => 'Hold On',
-                        'value' => function (\common\models\Employee $model) use ($searchModel) {
-                            $cnt = $model->getLeadCountByStatus([\common\models\Lead::STATUS_ON_HOLD], $searchModel->datetime_start, $searchModel->datetime_end);
-                            /*return $cnt ? Html::a($cnt, ['lead-flow/index',
-                                'LeadFlowSearch[employee_id]' => $model->id,
-                                'LeadFlowSearch[status]' => \common\models\Lead::STATUS_ON_HOLD,
                                 'LeadFlowSearch[created_date_from]' => $searchModel->datetime_start,
                                 'LeadFlowSearch[created_date_to]' => $searchModel->datetime_end
                             ], ['data-pjax' => 0, 'target' => '_blank']) : '-';*/
