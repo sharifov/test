@@ -29,26 +29,17 @@ class AirportSearchService
     public function search(string $term): array
     {
         $out = [];
-        if (!is_null($term)) {
-            $term = mb_strtolower($term);
+        if ($term) {
+            $term = mb_strtolower(trim($term));
             /** @var Airport[] $airports */
             $airports = $this->airports->getListForSearch($term);
             $data = [];
-            $memoryKey = 0;
             foreach ($airports as $key => $airport) {
                 $data[] = [
                     'id' => $airport->iata,
                     'text' => $airport->getText(),
                     'selection' => $airport->getSelection(),
                 ];
-                if (strtolower($airport->iata) === strtolower($term)) {
-                    $memoryKey = $key;
-                }
-            }
-            if ($memoryKey !== 0) {
-                $tmp = $data[0];
-                $data[0] = $data[$memoryKey];
-                $data[$memoryKey] = $tmp;
             }
             $out['results'] = array_values($data);
         }

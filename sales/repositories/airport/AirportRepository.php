@@ -61,11 +61,20 @@ class AirportRepository
      */
     public function getListForSearch(string $term): array
     {
+        $countTerm = mb_strlen($term);
+
         $query = Airport::find();
-        $query->orfilterWhere(['like', 'LOWER(iata)', $term]);
-        $query->orFilterWhere(['like', 'LOWER(name)', $term]);
-        $query->orFilterWhere(['like', 'LOWER(city)', $term]);
-        $query->orFilterWhere(['like', 'LOWER(country)', $term]);
+
+        if($countTerm < 4) {
+            $query->orfilterWhere(['like', 'LOWER(iata)', $term]);
+        }
+
+        if($countTerm > 3) {
+            $query->orFilterWhere(['like', 'LOWER(name)', $term]);
+            $query->orFilterWhere(['like', 'LOWER(city)', $term]);
+            $query->orFilterWhere(['like', 'LOWER(country)', $term]);
+        }
+
         $query->orderBy(['iata' => SORT_ASC]);
         $query->limit(30);
         return $query->all();
