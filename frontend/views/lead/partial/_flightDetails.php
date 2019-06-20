@@ -144,25 +144,16 @@ $itineraryFormId = $itineraryForm->formName() . '-form';
                     <div class="col-sm-2">
                     </div>
                     <div class="col-sm-2">
-                        <?= $form->field($itineraryForm, 'adults')->textInput([
-                            'class' => 'form-control lead-form-input-element',
-                            'type' => 'number',
-                            'min' => 0,
-                            'max' => 9]) ?>
+                        <?= $form->field($itineraryForm, 'adults', [
+                        ])->dropDownList(LeadHelper::AdultsChildrenInfantsList()) ?>
                     </div>
                     <div class="col-sm-2">
-                        <?= $form->field($itineraryForm, 'children')->textInput([
-                            'class' => 'form-control lead-form-input-element',
-                            'type' => 'number',
-                            'min' => 0,
-                            'max' => 9]) ?>
+                        <?= $form->field($itineraryForm, 'children', [
+                        ])->dropDownList(LeadHelper::AdultsChildrenInfantsList()) ?>
                     </div>
                     <div class="col-sm-2">
-                        <?= $form->field($itineraryForm, 'infants')->textInput([
-                            'class' => 'form-control lead-form-input-element',
-                            'type' => 'number',
-                            'min' => 0,
-                            'max' => 9]) ?>
+                        <?= $form->field($itineraryForm, 'infants', [
+                        ])->dropDownList(LeadHelper::AdultsChildrenInfantsList()) ?>
                     </div>
 
                 </div>

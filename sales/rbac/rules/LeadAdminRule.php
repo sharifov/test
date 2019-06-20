@@ -9,9 +9,9 @@ use yii\rbac\Rule;
  * Class LeadOwnerRule
  * @param LeadRepository $leadRepository
  */
-class LeadOwnerRule extends Rule
+class LeadAdminRule extends Rule
 {
-    public $name = 'isLeadOwner';
+    public $name = 'isLeadAdmin';
 
     private $leadRepository;
 
@@ -28,7 +28,7 @@ class LeadOwnerRule extends Rule
             $id = (int)$params['id'];
         }
         try {
-            return $this->leadRepository->get($id)->canAgentEdit($user);
+            return $this->leadRepository->get($id)->canAdminEdit();
         } catch (\Throwable $e) {}
         return false;
     }

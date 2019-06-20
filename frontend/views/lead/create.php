@@ -78,29 +78,16 @@ $this->title = 'Create Lead';
                             </div>
 
                             <div class="col-sm-2">
-                                <?= $form->field($leadForm, 'adults')->textInput([
-                                    'class' => 'form-control lead-form-input-element',
-                                    'type' => 'number',
-                                    'min' => 0,
-                                    'max' => 9,
-                                ]) ?>
+                                <?= $form->field($leadForm, 'adults', [
+                                ])->dropDownList(LeadHelper::AdultsChildrenInfantsList()) ?>
                             </div>
                             <div class="col-sm-2">
-                                <?= $form->field($leadForm, 'children')->textInput([
-                                    'class' => 'form-control lead-form-input-element',
-                                    'type' => 'number',
-                                    'min' => 0,
-                                    'max' => 9,
-                                ]) ?>
-
+                                <?= $form->field($leadForm, 'children', [
+                                ])->dropDownList(LeadHelper::AdultsChildrenInfantsList()) ?>
                             </div>
                             <div class="col-sm-2">
-                                <?= $form->field($leadForm, 'infants')->textInput([
-                                    'class' => 'form-control lead-form-input-element',
-                                    'type' => 'number',
-                                    'min' => 0,
-                                    'max' => 9,
-                                ]) ?>
+                                <?= $form->field($leadForm, 'infants', [
+                                ])->dropDownList(LeadHelper::AdultsChildrenInfantsList()) ?>
                             </div>
 
                         </div>

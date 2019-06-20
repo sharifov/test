@@ -37,7 +37,7 @@ class m190619_110832_create_roles_for_manage_lead extends Migration
         //----------------------------------------------------------
 
         //----------------------------------------------------------
-        $leadOwnerRule = new \sales\rbac\rules\LeadOwnerRule;
+        $leadOwnerRule = new \sales\rbac\rules\LeadOwnerRule();
         $auth->add($leadOwnerRule);
 
         $updateOwnLead = $auth->createPermission('updateOwnLead');
@@ -50,7 +50,7 @@ class m190619_110832_create_roles_for_manage_lead extends Migration
         //----------------------------------------------------------
 
         //----------------------------------------------------------
-        $leadGroupRule = new \sales\rbac\rules\LeadSupervisionRule;
+        $leadGroupRule = new \sales\rbac\rules\LeadSupervisionRule();
         $auth->add($leadGroupRule);
         $updateLeadGroup = $auth->createPermission('updateLeadSupervision');
         $updateLeadGroup->description = 'Update Lead Supervision';
@@ -80,8 +80,8 @@ class m190619_110832_create_roles_for_manage_lead extends Migration
         $updateOwnLead = $auth->getPermission('updateOwnLead');
         $updateLeadGroup = $auth->getPermission('updateLeadSupervision');
 
-        $leadOwnerRule = new \sales\rbac\rules\LeadOwnerRule;
-        $leadGroupRule = new \sales\rbac\rules\LeadSupervisionRule;
+        $leadOwnerRule = $auth->getRule('isLeadOwner');
+        $leadGroupRule = $auth->getRule('isLeadSupervision');
         $auth->remove($leadOwnerRule);
         $auth->remove($leadGroupRule);
         $auth->remove($createLead);
