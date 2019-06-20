@@ -751,8 +751,12 @@ class CommunicationController extends ApiBaseController
     }
 
 
-
-    private function voiceIncoming($type): array
+    /**
+     * @param string $type
+     * @return array
+     * @throws \yii\base\InvalidConfigException
+     */
+    private function voiceIncoming(string $type): array
     {
         $response = [];
         $post = Yii::$app->request->post();
@@ -845,7 +849,7 @@ class CommunicationController extends ApiBaseController
                         // Yii::info('phone: '. $client_phone_number.', sql: '. $sql, 'info\API:Communication:findLastLeadByClientPhone');
                         $lead2 = Lead2::createNewLeadByPhone($client_phone_number, $project->id);
                     } else {
-                        Yii::info('Find LastLead ('.$lead2->id.') By ClientPhone: ' . $client_phone_number, 'info\API:Communication:findLastLeadByClientPhone');
+                        Yii::info('Find LastLead ('.$lead2->id.') By ClientPhone: ' . $client_phone_number, 'info\API:Communication:voiceIncoming:findLastLeadByClientPhone');
                     }
                 }
 
@@ -971,9 +975,9 @@ class CommunicationController extends ApiBaseController
                                 'agents_ids' => $agents_ids ? implode(',', $agents_ids) : '',
                             ];
                         }
-                        \Yii::info(VarDumper::dumpAsString($log_data, 10, false), 'info\API:CommunicationController:actionVoice:new_general_line_distribution');
+                        \Yii::info(VarDumper::dumpAsString($log_data, 10, false), 'info\API:Communication:voiceIncoming:new_general_line_distribution');
                     } catch (\Throwable $ee) {
-                        \Yii::error(VarDumper::dumpAsString(['log_data' => $log_data, 'errors' => $ee]), 'info\API:CommunicationController:actionVoice:new_general_line_distribution_error');
+                        \Yii::error(VarDumper::dumpAsString(['log_data' => $log_data, 'errors' => $ee]), 'API:Communication:voiceIncoming:general_line_distribution');
                         $callAgents = [];
                     }
                 }
@@ -1030,11 +1034,11 @@ class CommunicationController extends ApiBaseController
                     }
                 } else {
                     $isOnHold = true;
-                    Yii::info('Call in Hold. phone: ' . $agent_phone_number, 'info\API:CommunicationController:actionVoice:CallInHold');
+                    Yii::info('Call in Hold. phone: ' . $agent_phone_number, 'info\API:Communication:voiceIncoming:CallInHold');
                 }
 
                 if ($agentsInfo) {
-                    Yii::info(VarDumper::dumpAsString($agentsInfo), 'info\API:CommunicationController:actionVoice:isCallFree');
+                    Yii::info(VarDumper::dumpAsString($agentsInfo), 'info\API:Communication:voiceIncoming:isCallFree');
                 }
 
             } elseif ($agentDirectCallCheck) {
@@ -1124,7 +1128,7 @@ class CommunicationController extends ApiBaseController
                 'post' => $post,
                 'call_employee' => $call_employee,
 
-            ], 10, false), 'info\API:CommunicationController:actionVoice:ParamsToCall');
+            ], 10, false), 'info\API:Communication:voiceIncoming:ParamsToCall');
 
             if (!$isOnHold && !$callGeneralNumber && $call_employee) {
 
@@ -1151,7 +1155,7 @@ class CommunicationController extends ApiBaseController
                         $call->c_lead_id = null;
                     }
                     if (!$call->save()) {
-                        Yii::error(VarDumper::dumpAsString($call->errors), 'API:CommunicationController:actionVoice:Call:save');
+                        Yii::error(VarDumper::dumpAsString($call->errors), 'API:Communication:voiceIncoming:Call:save');
                     }
                     $data['status'] = $call->c_call_status;
                     Notifications::socket($call->c_created_user_id, $call->c_lead_id, 'incomingCall', $data, true);
@@ -1177,7 +1181,7 @@ class CommunicationController extends ApiBaseController
                     $call->c_lead_id = $lead2->id;
                 }
                 if (!$call->save()) {
-                    Yii::error(VarDumper::dumpAsString($call->errors), 'API:CommunicationController:actionVoice:Call:save:$isOnHold');
+                    Yii::error(VarDumper::dumpAsString($call->errors), 'API:Communication:voiceIncoming:save:isOnHold');
                 }
 
                 if($call_project_id) {
@@ -1229,7 +1233,7 @@ class CommunicationController extends ApiBaseController
 
                 $response['twml'] = (string) $responseTwml;
 
-                Yii::info('Call add to hold : call_project_id: '.$call_project_id.', generalLine: '.$generalLineNumber.', TWML: ' . $response['twml'], 'info\API:CommunicationController:actionVoice:isOnHold - 5');
+                Yii::info('Call add to hold : call_project_id: '.$call_project_id.', generalLine: '.$generalLineNumber.', TWML: ' . $response['twml'], 'info\API:Communication:voiceIncoming:isOnHold - 5');
 
             } elseif($callGeneralNumber){
                 $call = new Call();
@@ -1252,13 +1256,13 @@ class CommunicationController extends ApiBaseController
                     $call->c_lead_id = $lead2->id;
                 }
                 if (!$call->save()) {
-                    Yii::error(VarDumper::dumpAsString($call->errors), 'API:CommunicationController:actionVoice:Call:save:$callGeneralNumber');
+                    Yii::error(VarDumper::dumpAsString($call->errors), 'API:Communication:voiceIncoming:Call:save:callGeneralNumber');
                 }
-                Yii::info('Redirected to General Line : call_project_id: '.$call_project_id.', generalLine: '.$generalLineNumber, 'info\API:CommunicationController:actionVoice:callGeneralNumber - 6');
+                Yii::info('Redirected to General Line : call_project_id: '.$call_project_id.', generalLine: '.$generalLineNumber, 'info\API:Communication:voiceIncoming:callGeneralNumber - 6');
             } else {
                 if(!$isOnHold && !$callGeneralNumber) {
                     $isError = true;
-                    Yii::error('Not found call destination agent, hold or general line for call number:'. $agent_phone_number);
+                    Yii::error('Not found call destination agent, hold or general line for call number:'. $agent_phone_number, 'API:Communication:voiceIncoming:isOnHold_callGeneralNumber');
                 }
             }
 
@@ -1283,8 +1287,9 @@ class CommunicationController extends ApiBaseController
         return $response;
     }
 
-
-
+    /**
+     * @return array
+     */
     private function voiceRecord(): array
     {
         $response = [];
@@ -1318,7 +1323,7 @@ class CommunicationController extends ApiBaseController
 
 
                     if(!$call->save()) {
-                        Yii::error(VarDumper::dumpAsString($call->errors), 'API:CommunicationController:actionVoice:Call1:save');
+                        Yii::error(VarDumper::dumpAsString($call->errors), 'API:Communication:voiceRecord:Call1:save');
                     }
                     if ($call->c_lead_id) {
 
@@ -1334,6 +1339,9 @@ class CommunicationController extends ApiBaseController
         return $response;
     }
 
+    /**
+     * @return array
+     */
     private function voiceFinish(): array
     {
         $response = [];
@@ -1497,7 +1505,7 @@ class CommunicationController extends ApiBaseController
 
 
                         if (!$lead->save()) {
-                            Yii::error('lead: ' . $lead->id . ' ' . VarDumper::dumpAsString($lead->errors), 'API:CommunicationController:actionVoice:TYPE_VOIP_FINISH:Lead:save');
+                            Yii::error('lead: ' . $lead->id . ' ' . VarDumper::dumpAsString($lead->errors), 'API:Communication:voiceFinish:Lead:save');
                         }
 
                         /*if($call->c_created_user_id) {
@@ -1511,7 +1519,7 @@ class CommunicationController extends ApiBaseController
                     if ((int) $lead->status === Lead::STATUS_PROCESSING) {
                         $lead->l_call_status_id = Lead::CALL_STATUS_DONE;
                         if (!$lead->save()) {
-                            Yii::error('lead: ' . $lead->id . ' ' . VarDumper::dumpAsString($lead->errors), 'API:CommunicationController:actionVoice:TYPE_VOIP_FINISH:Lead:save2');
+                            Yii::error('lead: ' . $lead->id . ' ' . VarDumper::dumpAsString($lead->errors), 'API:Communication:voiceFinish:Lead:save2');
                         }
                     }
                 }
@@ -1538,16 +1546,19 @@ class CommunicationController extends ApiBaseController
 
                 }*/
             } else {
-                Yii::error('Communication Request: Not found Call SID: ' . $post['callData']['sid'], 'API:CommunicationController:actionVoice:TYPE_VOIP_FINISH:Call:find');
+                Yii::error('Communication Request: Not found Call SID: ' . $post['callData']['sid'], 'API:Communication:voiceFinish:Call:find');
             }
         }
         else {
-            Yii::error('Communication Request: Not found post[callData][sid] ' . VarDumper::dumpAsString($post), 'API:CommunicationController:actionVoice:TYPE_VOIP_FINISH:post');
+            Yii::error('Communication Request: Not found post[callData][sid] ' . VarDumper::dumpAsString($post), 'API:Communication:voiceFinish:post');
         }
 
         return $response;
     }
 
+    /**
+     * @return array
+     */
     private function voiceClient(): array
     {
         $response = [];
@@ -1711,7 +1722,7 @@ class CommunicationController extends ApiBaseController
 
 
                         if (!$lead->save()) {
-                            Yii::error('lead: ' . $lead->id . ' ' . VarDumper::dumpAsString($lead->errors), 'API:CommunicationController:actionVoice:TYPE_VOIP_FINISH:Lead:save');
+                            Yii::error('lead: ' . $lead->id . ' ' . VarDumper::dumpAsString($lead->errors), 'API:Communication:voiceClient:Lead:save');
                         }
 
                         /*if($call->c_created_user_id) {
@@ -1725,14 +1736,14 @@ class CommunicationController extends ApiBaseController
                     if ((int) $lead->status === Lead::STATUS_PROCESSING) {
                         $lead->l_call_status_id = Lead::CALL_STATUS_DONE;
                         if (!$lead->save()) {
-                            Yii::error('lead: ' . $lead->id . ' ' . VarDumper::dumpAsString($lead->errors), 'API:CommunicationController:actionVoice:TYPE_VOIP_FINISH:Lead:save2');
+                            Yii::error('lead: ' . $lead->id . ' ' . VarDumper::dumpAsString($lead->errors), 'API:Communication:voiceClient:Lead:save2');
                         }
                     }
                 }
 
 
                 if(!$call->save()) {
-                    Yii::error(VarDumper::dumpAsString($call->errors), 'API:CommunicationController:actionVoice:TYPE_VOIP_FINISH:Call:save');
+                    Yii::error(VarDumper::dumpAsString($call->errors), 'API:Communication:voiceClient:Call:save');
                 }
 
                 if($call->c_created_user_id || $call->c_lead_id) {
@@ -1752,16 +1763,19 @@ class CommunicationController extends ApiBaseController
 
                 }*/
             } else {
-                Yii::error('Communication Request: Not found Call SID: ' . $post['callData']['sid'], 'API:CommunicationController:actionVoice:TYPE_VOIP_FINISH:Call:find');
+                Yii::error('Communication Request: Not found Call SID: ' . $post['callData']['sid'], 'API:Communication:voiceClient:Call:find');
             }
         }
         else {
-            Yii::error('Communication Request: Not found post[callData][sid] ' . VarDumper::dumpAsString($post), 'API:CommunicationController:actionVoice:TYPE_VOIP_FINISH:post');
+            Yii::error('Communication Request: Not found post[callData][sid] ' . VarDumper::dumpAsString($post), 'API:Communication:voiceClient:post');
         }
 
         return $response;
     }
 
+    /**
+     * @return array
+     */
     private function voiceDefault(): array
     {
         $response = [];
@@ -1812,7 +1826,7 @@ class CommunicationController extends ApiBaseController
                         $call->c_call_duration = 1;
                     }
                     if(!$call->save()) {
-                        \Yii::error(VarDumper::dumpAsString($call->errors), 'API:CommunicationController:actionVoice:TYPE_VOIP:Call:save:line 1519');
+                        \Yii::error(VarDumper::dumpAsString($call->errors), 'API:Communication:voiceDefault:Call:save');
                     }
                     Notifications::socket($call->c_created_user_id, $call->c_lead_id, 'webCallUpdate', ['status' => $call->c_call_status, 'duration' => $call->c_call_duration, 'debug' => 'TYPE_VOIP'], true);
                 }
@@ -1878,7 +1892,6 @@ class CommunicationController extends ApiBaseController
 
                 $otherCalls = Call::find()->where(['c_call_sid' => $call->c_call_sid])->andWhere(['<>', 'c_id', $call->c_id])->all();
 
-
                 $otherCallArr = [];
 
                 if($otherCalls && $call_status === Call::CALL_STATUS_IN_PROGRESS) {
@@ -1886,9 +1899,13 @@ class CommunicationController extends ApiBaseController
                         $otherCallArr[] = $otherCall->attributes;
 
                         if($otherCall->c_call_status === Call::CALL_STATUS_RINGING) {
-                            $otherCall->c_call_status = Call::CALL_STATUS_NO_ANSWER;
+                            $otherCall->c_call_status = Call::CALL_STATUS_CANCELED;
+                            //$otherCall->c_call_status = Call::CALL_STATUS_NO_ANSWER;
                             $otherCall->c_updated_dt = date('Y-m-d H:i:s');
-                            $otherCall->save();
+
+                            if(!$otherCall->save()) {
+                                Yii::error('Call ID: '. $otherCall->c_id . ' ' . VarDumper::dumpAsString($otherCall->errors), 'API:Communication:voiceDefault:otherCall:save');
+                            }
                         }
                     }
                 }
@@ -1902,7 +1919,7 @@ class CommunicationController extends ApiBaseController
                         $lead = $call->cLead;
                         $lead->l_call_status_id = Lead::CALL_STATUS_CANCEL;
                         if(!$lead->save()) {
-                            Yii::error('lead: '. $lead->id . ' ' . VarDumper::dumpAsString($lead->errors), 'API:CommunicationController:actionVoice:VOIP:Lead:save');
+                            Yii::error('lead: '. $lead->id . ' ' . VarDumper::dumpAsString($lead->errors), 'API:Communication:voiceDefault:Lead:save');
                         }
                     }
 
@@ -1913,8 +1930,6 @@ class CommunicationController extends ApiBaseController
                     }
 
                 }
-
-
 
                 if(!$childCall) {
                     $call->c_sequence_number = $post['callData']['SequenceNumber'] ?? 0;
@@ -1930,7 +1945,7 @@ class CommunicationController extends ApiBaseController
 
                 $call->c_updated_dt = date('Y-m-d H:i:s');
                 if(!$call->save()) {
-                    Yii::error(VarDumper::dumpAsString($call->errors), 'API:CommunicationController:actionVoice:Call2:save');
+                    Yii::error(VarDumper::dumpAsString($call->errors), 'API:Communication:voiceDefault:Call2:save');
                 }
                 if ($call->c_lead_id) {
                     /*Notifications::create($user_id, 'New SMS '.$sms->s_phone_from, 'SMS from ' . $sms->s_phone_from .' ('.$clientName.') to '.$sms->s_phone_to.' <br> '.nl2br(Html::encode($sms->s_sms_text))
