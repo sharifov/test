@@ -264,23 +264,18 @@ class LeadController extends FController
 
         }
 
-                    $leadToUpdate = Lead::findOne($leadId);
-                    $leadToUpdate->updated = date('Y-m-d H:i:s');
-                    $leadToUpdate->update();
-                }
 
-            }
 
-            Yii::$app->cache->delete(sprintf('quick-search-%d-%d', $lead->id, Yii::$app->user->identity->getId()));
-            if (!$isQA && !$lead->permissionsView()) {
-                throw new UnauthorizedHttpException('Not permissions view lead ID: ' . $lead->id);
-            }
-            $leadForm = new LeadForm($lead);
-            if ($leadForm->getLead()->status != Lead::STATUS_PROCESSING ||
-                $leadForm->getLead()->employee_id != Yii::$app->user->identity->getId()
-            ) {
-                $leadForm->mode = $leadForm::VIEW_MODE;
-            }
+        Yii::$app->cache->delete(sprintf('quick-search-%d-%d', $lead->id, Yii::$app->user->identity->getId()));
+        if (!$isQA && !$lead->permissionsView()) {
+            throw new UnauthorizedHttpException('Not permissions view lead ID: ' . $lead->id);
+        }
+        $leadForm = new LeadForm($lead);
+        if ($leadForm->getLead()->status != Lead::STATUS_PROCESSING ||
+            $leadForm->getLead()->employee_id != Yii::$app->user->identity->getId()
+        ) {
+            $leadForm->mode = $leadForm::VIEW_MODE;
+        }
 
           
 /*        $flightSegments = $leadForm->getLeadFlightSegment();
