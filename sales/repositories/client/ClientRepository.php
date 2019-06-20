@@ -7,7 +7,11 @@ use sales\repositories\NotFoundException;
 
 class ClientRepository
 {
-    public function get($id): Client
+    /**
+     * @param int $id
+     * @return Client
+     */
+    public function get(int $id): Client
     {
         if ($client = Client::findOne($id)) {
             return $client;
@@ -15,6 +19,10 @@ class ClientRepository
         throw new NotFoundException('Client is not found');
     }
 
+    /**
+     * @param Client $client
+     * @return int
+     */
     public function save(Client $client): int
     {
         if ($client->save(false)) {
@@ -23,6 +31,11 @@ class ClientRepository
         throw new \RuntimeException('Saving error');
     }
 
+    /**
+     * @param Client $client
+     * @throws \Throwable
+     * @throws \yii\db\StaleObjectException
+     */
     public function remove(Client $client): void
     {
         if (!$client->delete()) {

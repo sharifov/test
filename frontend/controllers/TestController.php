@@ -8,6 +8,7 @@ use common\components\jobs\TelegramSendMessageJob;
 use common\models\Call;
 use common\models\ClientPhone;
 use common\models\Employee;
+use common\models\Lead;
 use common\models\Notifications;
 use common\models\Project;
 use common\models\UserCallStatus;
@@ -16,10 +17,12 @@ use common\models\UserGroupAssign;
 use common\models\UserProfile;
 use common\models\UserProjectParams;
 use frontend\models\ExampleModels;
+use sales\rules\LeadOwnerRule;
 use Twilio\TwiML\VoiceResponse;
 use Yii;
 use yii\db\Expression;
 use yii\db\Query;
+use yii\filters\AccessRule;
 use yii\helpers\ArrayHelper;
 use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
@@ -48,8 +51,8 @@ class TestController extends FController
                 'class' => AccessControl::class,
                 'rules' => [
                     [
-                        'roles' => ['admin'],
                         'allow' => true,
+                        'roles' => ['admin'],
                     ],
                 ],
             ],
@@ -67,6 +70,32 @@ class TestController extends FController
     public function actionT()
     {
 
+
+        die;
+
+        $id = (int)\Yii::$app->request->post('id');
+        $id = 51614;
+//        try {
+            $lead = Lead::findOne($id);
+
+            $userGroups = array_keys(\Yii::$app->user->identity->userGroupList);
+            $employeeGroups = array_keys($lead->employee->userGroupList);
+
+            VarDumper::dump($userGroups);
+            VarDumper::dump($employeeGroups);
+
+            foreach ($userGroups as $key) {
+                if (in_array($key, $employeeGroups)) {
+                    echo 1;
+                    break;
+                }
+            }
+
+
+//            return $lead->isOwner($userId);
+//        } catch (\Throwable $e) {
+//            return false;
+//        }
 
 
         die;

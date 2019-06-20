@@ -5,11 +5,13 @@ use yii\helpers\Html;
 use \sales\helpers\lead\LeadHelper;
 use \yii\web\JqueryAsset;
 use \yii\web\View;
+use \common\widgets\Alert;
 
 /**
- * @var $this \yii\web\View
+ * @var $this yii\web\View
  * @var $form ActiveForm
- * @var $itineraryForm \sales\forms\lead\ItineraryEditForm
+ * @var $itineraryForm sales\forms\lead\ItineraryEditForm
+ * @var $leadForm frontend\models\LeadForm
  */
 
 
@@ -25,7 +27,7 @@ $itineraryFormId = $itineraryForm->formName() . '-form';
 ?>
 <div class="row">
     <div class="col-md-12">
-        <?= \common\widgets\Alert::widget() ?>
+        <?= Alert::widget() ?>
     </div>
 </div>
 
@@ -90,14 +92,26 @@ $itineraryFormId = $itineraryForm->formName() . '-form';
          style="">
 
         <?php if ($itineraryForm->isViewMode()) : ?>
-
-            <?= Html::a('Edit', ['/lead-itinerary/view-edit-form', 'id' => $itineraryForm->leadId]) ?>
-
-            <div id="modeFlightSegments" data-value="view" style="display: none" ></div>
+            <?php if (Yii::$app->user->can('updateLead', ['id' => $itineraryForm->leadId])) : ?>
+                <?php $form = ActiveForm::begin([
+                    'action' => ['/lead-itinerary/view-edit-form'],
+                    'options' => [
+                        'data-pjax' => 1
+                    ]
+                ]); ?>
+                <?= Html::hiddenInput('id', $itineraryForm->leadId) ?>
+                <div style="margin:20px">
+                    <?= Html::a('<span class="btn-icon"><i class="fa fa-edit"></i></span><span>Edit</span>',
+                        ['/lead-itinerary/view-edit-form'],
+                        ['class' => 'btn btn-success btn-with-icon', 'data' => ['method' => 'post']]) ?>
+                </div>
+                <div id="modeFlightSegments" data-value="view" style="display: none"></div>
+                <?php ActiveForm::end() ?>
+            <?php endif; ?>
 
         <?php elseif ($itineraryForm->isEditMode()) : ?>
 
-            <div id="modeFlightSegments" data-value="edit" style="display: none" ></div>
+            <div id="modeFlightSegments" data-value="edit" style="display: none"></div>
 
             <div class="sl-itinerary-form">
                 <?php $form = ActiveForm::begin([

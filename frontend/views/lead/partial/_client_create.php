@@ -2,7 +2,8 @@
 
 use unclead\multipleinput\MultipleInput;
 use yii\widgets\ActiveForm;
-use \unclead\multipleinput\MultipleInputColumn;
+use unclead\multipleinput\MultipleInputColumn;
+use borales\extensions\phoneInput\PhoneInput;
 
 /**
  * @var $this yii\web\View
@@ -54,6 +55,13 @@ use \unclead\multipleinput\MultipleInputColumn;
                     [
                         'name' => 'phone',
                         'title' => 'Phone',
+                        'type' => PhoneInput::class,
+                        'options' => [
+                            'jsOptions' => [
+                                'nationalMode' => false,
+                                'preferredCountries' => ['us'],
+                            ]
+                        ]
                     ],
                     [
                         'name' => 'help',

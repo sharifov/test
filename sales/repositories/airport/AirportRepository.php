@@ -4,10 +4,17 @@ namespace sales\repositories\airport;
 
 use common\models\Airport;
 use sales\repositories\NotFoundException;
+use yii\db\ActiveQuery;
+use yii\db\ActiveRecord;
 
 class AirportRepository
 {
-    public function get($id): Airport
+
+    /**
+     * @param int $id
+     * @return Airport
+     */
+    public function get(int $id): Airport
     {
         if ($airport = Airport::findOne($id)) {
             return $airport;
@@ -15,7 +22,11 @@ class AirportRepository
         throw new NotFoundException('Airport is not found.');
     }
 
-    public function getByIata($iata): Airport
+    /**
+     * @param string $iata
+     * @return Airport
+     */
+    public function getByIata(string $iata): Airport
     {
         if ($airport = Airport::findOne(['iata' => $iata])) {
             return $airport;
@@ -23,7 +34,11 @@ class AirportRepository
         throw new NotFoundException('Airport (' . $iata . ') is not found.');
     }
 
-    public function iataExists($iata): bool
+    /**
+     * @param string $iata
+     * @return bool
+     */
+    public function iataExists(string $iata): bool
     {
         if (Airport::find()->where(['iata' => $iata])->exists()) {
             return true;
@@ -37,14 +52,17 @@ class AirportRepository
         foreach (Airport::find()->where(['iata' => $iata])->all() as $airport){
             $data[$airport['iata']] = ['name' => $airport['name'], 'city' => $airport['city'], 'country' => $airport['country']];
         }
-
         return $data;
     }
 
-    public function getListForSearch($term)
+    /**
+     * @param string $term
+     * @return array|ActiveRecord[]
+     */
+    public function getListForSearch(string $term): array
     {
         $query = Airport::find();
-        $query->filterWhere(['like', 'LOWER(iata)', $term]);
+        $query->orfilterWhere(['like', 'LOWER(iata)', $term]);
         $query->orFilterWhere(['like', 'LOWER(name)', $term]);
         $query->orFilterWhere(['like', 'LOWER(city)', $term]);
         $query->orFilterWhere(['like', 'LOWER(country)', $term]);

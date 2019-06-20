@@ -546,11 +546,11 @@ if($project){
         } ?>
 
 		<?php if ($leadForm->mode !== $leadForm::VIEW_MODE) {
-            $title = '<span class="btn-icon"><i class="fa fa-check"></i></span><span class="btn-text">'.($leadForm->getLead()->isNewRecord ? 'Create' : 'Save').'</span>';
-            echo Html::submitButton($title, [
-                'id' => 'submit-lead-form-btn',
-                'class' => 'btn btn-success btn-with-icon'
-            ]);
+//            $title = '<span class="btn-icon"><i class="fa fa-check"></i></span><span class="btn-text">'.($leadForm->getLead()->isNewRecord ? 'Create' : 'Save').'</span>';
+//            echo Html::submitButton($title, [
+//                'id' => 'submit-lead-form-btn',
+//                'class' => 'btn btn-success btn-with-icon'
+//            ]);
 
             if(!$leadForm->getLead()->isNewRecord) {
                 echo $buttonAddNote;

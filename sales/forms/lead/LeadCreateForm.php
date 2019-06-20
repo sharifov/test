@@ -2,6 +2,7 @@
 
 namespace sales\forms\lead;
 
+use common\models\Lead;
 use common\models\ProjectEmployeeAccess;
 use common\models\Sources;
 use sales\forms\CompositeForm;
@@ -18,6 +19,7 @@ use sales\helpers\lead\LeadHelper;
  * @property string $notesForExperts
  * @property string $clientPhone
  * @property string $clientEmail
+ * @property string $status
  * @property ClientCreateForm $client
  * @property EmailCreateForm[] $emails
  * @property PhoneCreateForm[] $phones
@@ -36,12 +38,21 @@ class LeadCreateForm extends CompositeForm
     public $notesForExperts;
     public $clientPhone;
     public $clientEmail;
+    public $status;
 
+    /**
+     * LeadCreateForm constructor.
+     * @param int $countEmails
+     * @param int $countPhones
+     * @param int $countSegments
+     * @param array $config
+     */
     public function __construct(int $countEmails = 1, int $countPhones = 1, int $countSegments = 1, $config = [])
     {
         $this->adults = 1;
         $this->children = 0;
         $this->infants = 0;
+        $this->status = Lead::STATUS_PROCESSING;
 
         $this->client = new ClientCreateForm();
 
@@ -62,6 +73,9 @@ class LeadCreateForm extends CompositeForm
         parent::__construct($config);
     }
 
+    /**
+     * @return array
+     */
     public function rules(): array
     {
         return [
@@ -117,7 +131,9 @@ class LeadCreateForm extends CompositeForm
                 if (count($this->segments) < 1) {
                     $this->addError('segments', 'Segments must be more than 0');
                 }
-            }]
+            }],
+
+            ['status', 'in', 'range' => array_keys(LeadHelper::statusList())]
 
         ];
     }
@@ -126,25 +142,38 @@ class LeadCreateForm extends CompositeForm
     {
         parent::afterValidate();
         if (!$this->hasErrors()) {
-            if (isset($this->emails[0])) {
+            if (isset($this->emails[0]) && $this->emails[0]->email) {
                 $this->clientEmail = $this->emails[0]->email;
+            } else {
+                $this->clientEmail = '';
             }
-            if (isset($this->phones[0])) {
+            if (isset($this->phones[0]) && $this->phones[0]->phone) {
                 $this->clientPhone = $this->phones[0]->phone;
+            } else {
+                $this->clientPhone = '';
             }
         }
     }
 
-    public function listSourceId()
+    /**
+     * @return array
+     */
+    public function listSourceId(): array
     {
         return ProjectEmployeeAccess::getAllSourceByEmployee();
     }
 
+    /**
+     * @return array
+     */
     public function internalForms(): array
     {
         return ['segments', 'client', 'emails', 'phones', 'preferences'];
     }
 
+    /**
+     * @return array
+     */
     public function attributeLabels(): array
     {
         return [

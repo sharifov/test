@@ -101,7 +101,8 @@ $lead = $leadForm->getLead();
 
             <?php \yii\widgets\Pjax::begin(['id' => 'pj-itinerary', 'enablePushState' => false, 'timeout' => 10000])?>
                 <?= $this->render('partial/_flightDetails', [
-                    'itineraryForm' => $itineraryForm
+                    'itineraryForm' => $itineraryForm,
+                    'leadForm' => $leadForm
                 ]) ?>
             <?php \yii\widgets\Pjax::end()?>
 
@@ -229,7 +230,19 @@ $lead = $leadForm->getLead();
             'leadForm' => $leadForm
         ]);
         ?>
+        <?php if (Yii::$app->user->can('updateLead', ['id' => $itineraryForm->leadId])) : ?>
+            <?php if ($leadForm->mode !== $leadForm::VIEW_MODE) : ?>
+                <div class="text-center">
+                    <?= Html::submitButton('<span class="fa fa-check"></span> Save', [
+                        'id' => 'submit-lead-form-btn',
+                        'class' => 'btn btn-success'
+                    ]) ?>
+                </div>
+            <?php endif; ?>
+        <?php endif; ?>
+
     </aside>
+
 </div>
 
 <?php

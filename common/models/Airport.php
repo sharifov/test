@@ -64,11 +64,17 @@ class Airport extends ActiveRecord
         return $data;
     }
 
+    /**
+     * @return string
+     */
     public function getSelection(): string
     {
         return $this->city . ' (' . $this->iata . ')';
     }
 
+    /**
+     * @return string
+     */
     public function getText(): string
     {
         return '(' . $this->iata . ') ' . $this->name . ', ' . $this->city  . ', ' . $this->country;

@@ -32,6 +32,12 @@ class ItineraryEditForm extends CompositeForm
 
     public $mode = self::MODE_VIEW;
 
+    /**
+     * ItineraryEditForm constructor.
+     * @param Lead $lead
+     * @param int|null $countSegmentForms
+     * @param array $config
+     */
     public function __construct(Lead $lead, int $countSegmentForms = null, $config = [])
     {
 
@@ -49,6 +55,9 @@ class ItineraryEditForm extends CompositeForm
         parent::__construct($config);
     }
 
+    /**
+     * @return array
+     */
     public function rules(): array
     {
         return [
@@ -92,10 +101,14 @@ class ItineraryEditForm extends CompositeForm
         ];
     }
 
+    /**
+     * @return array
+     */
     public function internalForms(): array
     {
         return ['segments'];
     }
+
 
     public function setViewMode(): void
     {
@@ -107,16 +120,27 @@ class ItineraryEditForm extends CompositeForm
         $this->mode = self::MODE_EDIT;
     }
 
+    /**
+     * @return bool
+     */
     public function isViewMode(): bool
     {
         return $this->mode === self::MODE_VIEW;
     }
 
+    /**
+     * @return bool
+     */
     public function isEditMode(): bool
     {
         return $this->mode === self::MODE_EDIT;
     }
 
+    /**
+     * @param Lead $lead
+     * @param int|null $countSegmentForms
+     * @return array
+     */
     private function getSegmentsForms(Lead $lead, int $countSegmentForms = null): array
     {
         $countRelations = $lead->getleadFlightSegments()->count();

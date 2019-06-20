@@ -1,5 +1,6 @@
 <?php
 
+use sales\helpers\lead\LeadPreferencesHelper;
 use yii\widgets\ActiveForm;
 
 /**
@@ -24,7 +25,7 @@ use yii\widgets\ActiveForm;
             <?= $form->field($leadForm->preferences, 'clientsBudget')->input('number', ['min' => 0, 'max' => 99000]) ?>
         </div>
         <div class="col-md-3">
-            <?= $form->field($leadForm->preferences, 'numberStops')->dropDownList($leadForm->preferences::listNumberStops(), ['prompt' => '-']) ?>
+            <?= $form->field($leadForm->preferences, 'numberStops')->dropDownList(LeadPreferencesHelper::listNumberStops(), ['prompt' => '-']) ?>
         </div>
     </div>
     <?= $form->field($leadForm, 'notesForExperts')->textarea(['rows' => 7]) ?>

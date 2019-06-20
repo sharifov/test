@@ -27,19 +27,14 @@ use frontend\models\LeadForm;
 use frontend\models\LeadPreviewEmailForm;
 use frontend\models\LeadPreviewSmsForm;
 use frontend\models\SendEmailForm;
-use sales\forms\CompositeFormAjaxValidate;
 use sales\forms\CompositeFormHelper;
-use sales\forms\lead\EmailCreateForm;
 use sales\forms\lead\ItineraryEditForm;
 use sales\forms\lead\LeadCreateForm;
 use sales\repositories\lead\LeadRepository;
-use sales\repositories\NotFoundException;
 use sales\services\lead\LeadManageService;
 use Yii;
 use yii\data\ActiveDataProvider;
 use yii\db\Expression;
-use yii\filters\AjaxFilter;
-use yii\filters\ContentNegotiator;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\helpers\Url;
@@ -48,7 +43,6 @@ use yii\web\BadRequestHttpException;
 use yii\web\Cookie;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
-use yii\web\Request;
 use yii\web\Response;
 use yii\web\UnauthorizedHttpException;
 use yii\widgets\ActiveForm;
@@ -84,7 +78,7 @@ class LeadController extends FController
                 'class' => AccessControl::class,
                 'rules' => [
                     [
-                        'actions' => ['create-new-version', 'validate-lead-create'],
+                        'actions' => ['create-new-version', 'validate-lead-create', 'take-over'],
                         'allow' => true,
                         'roles' => ['admin'],
                     ],
@@ -298,11 +292,12 @@ class LeadController extends FController
             $leadForm->mode = $leadForm::VIEW_MODE;
         }
 
-        $flightSegments = $leadForm->getLeadFlightSegment();
+/*        $flightSegments = $leadForm->getLeadFlightSegment();
         foreach ($flightSegments as $segment) {
             $this->view->title = 'Lead #' . $lead->id . ' ✈ ' . $segment->destination;
             break;
-        }
+        }*/
+        $this->view->title = 'Lead #' . $lead->id ;
 
 
         if (Yii::$app->request->isAjax && !Yii::$app->request->isPjax) {
@@ -1412,11 +1407,12 @@ class LeadController extends FController
         return null;
     }
 
+
     /**
      * @param string $gid
-     * @return Response
+     * @return string|Response
      * @throws ForbiddenHttpException
-     * @throws UnauthorizedHttpException
+     * @throws NotFoundHttpException
      */
     public function actionTake(string $gid)
     {
@@ -1424,8 +1420,32 @@ class LeadController extends FController
          * @var $inProcessing Lead
          */
 
-        $user = Yii::$app->user->identity;
+        $lead = $this->findLeadByGid($gid);
 
+        if ($lead->isCompleted()) {
+            Yii::$app->getSession()->setFlash('warning', 'Lead is unavailable to "Take" now!');
+            return $this->redirect(Yii::$app->request->referrer ?: ['/']);
+        }
+
+        if (Yii::$app->request->isAjax && Yii::$app->request->get('over')) {
+            if ($lead->isAvailableToTakeOver()) {
+                $reason = new Reason();
+                $reason->queue = 'processing-over';
+                return $this->renderAjax('partial/_reason', [
+                    'reason' => $reason,
+                    'lead' => $lead
+                ]);
+            }
+            Yii::$app->getSession()->setFlash('warning', 'Lead is unavailable to "Take Over" now!');
+            return $this->redirect(['lead/view', 'gid' => $lead->gid]);
+        }
+
+        if (!$lead->isAvailableToTake()) {
+            Yii::$app->getSession()->setFlash('warning', 'Lead is unavailable to "Take" now!');
+            return $this->redirect(Yii::$app->request->referrer ?: ['/']);
+        }
+
+        $user = Yii::$app->user->identity;
 
         if ($user->canRole('agent')) {
             $isAgent = true;
@@ -1438,15 +1458,15 @@ class LeadController extends FController
         }*/
 
 
-        $allowLead = Lead::find()->where([
-            'gid' => $gid
-        ])->andWhere([
-            'IN', 'status', [Lead::STATUS_BOOKED, Lead::STATUS_SOLD]
-        ])->one();
-        if ($allowLead !== null) {
-            Yii::$app->getSession()->setFlash('warning', 'Lead is unavailable to "Take" now!');
-            return $this->redirect(Yii::$app->request->referrer);
-        }
+//        $allowLead = Lead::find()->where([
+//            'gid' => $gid
+//        ])->andWhere([
+//            'IN', 'status', [Lead::STATUS_BOOKED, Lead::STATUS_SOLD]
+//        ])->one();
+//        if ($allowLead !== null) {
+//            Yii::$app->getSession()->setFlash('warning', 'Lead is unavailable to "Take" now!');
+//            return $this->redirect(Yii::$app->request->referrer);
+//        }
 
 
         /*$inProcessing = Lead::find()
@@ -1460,45 +1480,50 @@ class LeadController extends FController
             $inProcessing = null;
         }*/
 
-        $model = Lead::find()
-            ->where(['gid' => $gid])
-            ->andWhere(['IN', 'status', [
-                Lead::STATUS_PENDING,
-                Lead::STATUS_FOLLOW_UP,
-                Lead::STATUS_SNOOZE
-            ]])->one();
-
-        if ($model === null) {
-
-            if (Yii::$app->request->get('over', 0)) {
-                $lead = Lead::findOne(['gid' => $gid]);
-                if ($lead !== null) {
-                    $reason = new Reason();
-                    $reason->queue = 'processing-over';
-                    return $this->renderAjax('partial/_reason', [
-                        'reason' => $reason,
-                        'lead' => $lead
-                    ]);
-                }
-                return null;
-            } else {
-                $model = Lead::findOne([
-                    'gid' => $gid,
-                    'employee_id' => $user->getId()
-                ]);
-                if ($model === null) {
-                    Yii::$app->getSession()->setFlash('warning', 'Lead is unavailable to access now!');
-                    return $this->redirect(Yii::$app->request->referrer);
-                }
-            }
-        }
-
-        if (!$model->permissionsView()) {
-            throw new UnauthorizedHttpException('Not permissions view lead GID: ' . $gid);
-        }
+//        $model = Lead::find()
+//            ->where(['gid' => $gid])
+//            ->andWhere(['IN', 'status', [
+//                Lead::STATUS_PENDING,
+//                Lead::STATUS_FOLLOW_UP,
+//                Lead::STATUS_SNOOZE
+//            ]])->one();
 
 
-        if ($model->status == Lead::STATUS_PENDING && $isAgent) {
+//
+//        if ($model === null) {
+//
+//            if (Yii::$app->request->get('over', 0)) {
+//                $lead = Lead::findOne(['gid' => $gid]);
+//                if ($lead !== null) {
+//                    $reason = new Reason();
+//                    $reason->queue = 'processing-over';
+//                    return $this->renderAjax('partial/_reason', [
+//                        'reason' => $reason,
+//                        'lead' => $lead
+//                    ]);
+//                }
+//                return null;
+//
+//            } else {
+//                $model = Lead::findOne([
+//                    'gid' => $gid,
+//                    'employee_id' => $user->getId()
+//                ]);
+//                if ($model === null) {
+//                    Yii::$app->getSession()->setFlash('warning', 'Lead is unavailable to access now!');
+//                    return $this->redirect(Yii::$app->request->referrer);
+//                }
+//            }
+//        }
+
+
+
+//        if (!$lead->permissionsView()) {
+//            throw new UnauthorizedHttpException('Not permissions view lead GID: ' . $gid);
+//        }
+
+
+        if ($lead->status == Lead::STATUS_PENDING && $isAgent) {
             $isAccessNewLead = $user->accessTakeNewLead();
             if (!$isAccessNewLead) {
                 throw new ForbiddenHttpException('Access is denied (limit) - "Take lead"');
@@ -1510,19 +1535,19 @@ class LeadController extends FController
             }
         }
 
-        if ($model->status == Lead::STATUS_FOLLOW_UP) {
+        if ($lead->status == Lead::STATUS_FOLLOW_UP) {
             $checkProccessingByAgent = LeadFlow::findOne([
-                'lead_id' => $model->id,
-                'status' => $model::STATUS_PROCESSING,
+                'lead_id' => $lead->id,
+                'status' => $lead::STATUS_PROCESSING,
                 'employee_id' => $user->getId()
             ]);
             if ($checkProccessingByAgent === null) {
-                $model->called_expert = false;
+                $lead->called_expert = false;
             }
         }
 
 
-        $model->employee_id = $user->getId();
+        $lead->employee_id = $user->getId();
 
         /* if ($model->status != Lead::STATUS_ON_HOLD && $model->status != Lead::STATUS_SNOOZE && !$model->l_answered) {
             LeadTask::createTaskList($model->id, $model->employee_id, 1, '', Task::CAT_NOT_ANSWERED_PROCESS);
@@ -1536,13 +1561,13 @@ class LeadController extends FController
             LeadTask::createTaskList($model->id, $model->employee_id, 3, '', Task::CAT_ANSWERED_PROCESS);
         } */
 
-        $model->status = Lead::STATUS_PROCESSING;
-        $model->save();
+        $lead->status = Lead::STATUS_PROCESSING;
+        $lead->save();
 
 
         //$taskList = ['call1', 'call2', 'voice-mail', 'email'];
 
-        return $this->redirect(['lead/view', 'gid' => $model->gid]);
+        return $this->redirect(['lead/view', 'gid' => $lead->gid]);
     }
 
 
@@ -1948,7 +1973,9 @@ class LeadController extends FController
         return $this->redirect($referrer);
     }
 
-
+    /**
+     * @return string|Response
+     */
     public function actionCreateNewVersion()
     {
         $data = CompositeFormHelper::prepareDataForMultiInput(
@@ -1970,6 +1997,9 @@ class LeadController extends FController
         return $this->render('create', ['leadForm' => $form]);
     }
 
+    /**
+     * @return array
+     */
     public function actionValidateLeadCreate(): array
     {
         Yii::$app->response->format = Response::FORMAT_JSON;
@@ -2262,5 +2292,18 @@ class LeadController extends FController
 
         }
         return null;
+    }
+
+    /**
+     * @param string $gid
+     * @return Lead the loaded model
+     * @throws NotFoundHttpException if the model cannot be found
+     */
+    protected function findLeadByGid($gid): Lead
+    {
+        if (($model = Lead::findOne(['gid' => $gid])) !== null) {
+            return $model;
+        }
+        throw new NotFoundHttpException('The requested page does not exist.');
     }
 }

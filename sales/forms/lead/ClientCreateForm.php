@@ -17,6 +17,9 @@ class ClientCreateForm extends Model
     public $middleName;
     public $lastName;
 
+    /**
+     * @return array
+     */
     public function rules(): array
     {
         return [

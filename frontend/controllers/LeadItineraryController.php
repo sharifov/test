@@ -10,6 +10,7 @@ use Yii;
 use yii\filters\AjaxFilter;
 use yii\filters\ContentNegotiator;
 use yii\helpers\ArrayHelper;
+use yii\helpers\VarDumper;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
 use \yii2mod\rbac\filters\AccessControl;
@@ -35,7 +36,7 @@ class LeadItineraryController extends FController
                     [
                         'actions' => ['validate', 'edit', 'view-edit-form'],
                         'allow' => true,
-                        'roles' => ['admin'],
+                        'roles' => ['updateLead'],
                     ],
                 ],
             ],
@@ -54,16 +55,16 @@ class LeadItineraryController extends FController
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
 
-    public function actionViewEditForm()
+    public function actionViewEditForm(): string
     {
-        $id = Yii::$app->request->get('id');
+        $id = Yii::$app->request->post('id');
         $lead = $this->findLead($id);
         $form = new ItineraryEditForm($lead);
         $form->setEditMode();
         return $this->renderAjax('/lead/partial/_flightDetails', ['itineraryForm' => $form]);
     }
 
-    public function actionEdit()
+    public function actionEdit(): string
     {
         $id = Yii::$app->request->post('id');
         $lead = $this->findLead($id);

@@ -14,6 +14,11 @@ class SegmentEditForm extends SegmentForm
 {
     public $segmentId;
 
+    /**
+     * SegmentEditForm constructor.
+     * @param LeadFlightSegment $segment
+     * @param array $config
+     */
     public function __construct(LeadFlightSegment $segment, $config = [])
     {
         if (!$segment->getIsNewRecord()) {
@@ -29,7 +34,11 @@ class SegmentEditForm extends SegmentForm
         parent::__construct($config);
     }
 
-    private function loadAirportLabel($iata): string
+    /**
+     * @param string $iata
+     * @return string
+     */
+    private function loadAirportLabel(string $iata): string
     {
         try {
             return (new AirportRepository())->getByIata($iata)->getSelection();

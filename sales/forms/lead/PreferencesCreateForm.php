@@ -2,6 +2,7 @@
 
 namespace sales\forms\lead;
 
+use sales\helpers\lead\LeadPreferencesHelper;
 use yii\base\Model;
 
 /**
@@ -17,31 +18,24 @@ class PreferencesCreateForm extends Model
     public $clientsBudget;
     public $numberStops;
 
+    /**
+     * @return array
+     */
     public function rules(): array
     {
         return [
 
             [['marketPrice', 'clientsBudget'], 'number', 'min' => 500, 'max' => 99000],
 
-            ['numberStops', 'integer','min' => 0, 'max' => 7],
+            ['numberStops', 'integer'],
+            ['numberStops', 'in', 'range' => array_keys(LeadPreferencesHelper::listNumberStops())],
 
         ];
     }
 
-    public static function listNumberStops(): array
-    {
-        return [
-            0 => 0,
-            1 => 1,
-            2 => 2,
-            3 => 3,
-            4 => 4,
-            5 => 5,
-            6 => 6,
-            7 => 7,
-        ];
-    }
-
+    /**
+     * @return array
+     */
     public function attributeLabels(): array
     {
         return [

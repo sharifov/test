@@ -7,7 +7,11 @@ use sales\repositories\NotFoundException;
 
 class LeadRepository
 {
-    public function get($id): Lead
+    /**
+     * @param int $id
+     * @return Lead
+     */
+    public function get(int $id): Lead
     {
         if ($lead = Lead::findOne($id)) {
             return $lead;
@@ -15,7 +19,11 @@ class LeadRepository
         throw new NotFoundException('Lead is not found');
     }
 
-    public function getByGid($gid): Lead
+    /**
+     * @param string $gid
+     * @return Lead
+     */
+    public function getByGid(string $gid): Lead
     {
         if ($lead = Lead::findOne(['gid' => $gid])) {
             return $lead;
@@ -23,6 +31,24 @@ class LeadRepository
         throw new NotFoundException('Lead is not found');
     }
 
+    /**
+     * @param string $requestHash
+     * @return Lead|null
+     */
+    public function getByRequestHash(string $requestHash):? Lead
+    {
+        return Lead::find()
+            ->where(['l_request_hash' => $requestHash])
+            ->andWhere(['>=', 'created', date('Y-m-d H:i:s', strtotime('-12 hours'))])
+            ->orderBy(['id' => SORT_ASC])
+            ->limit(1)
+            ->one();
+    }
+
+    /**
+     * @param Lead $lead
+     * @return int
+     */
     public function save(Lead $lead): int
     {
         if ($lead->save(false)) {
@@ -31,6 +57,9 @@ class LeadRepository
         throw new \RuntimeException('Saving error');
     }
 
+    /**
+     * @param Lead $lead
+     */
     public function updateOnlyTripType(Lead $lead): void
     {
         if (!$lead->updateAttributes(['trip_type'])) {
@@ -38,6 +67,11 @@ class LeadRepository
         }
     }
 
+    /**
+     * @param Lead $lead
+     * @throws \Throwable
+     * @throws \yii\db\StaleObjectException
+     */
     public function remove(Lead $lead): void
     {
         if (!$lead->delete()) {

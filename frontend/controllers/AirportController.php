@@ -29,7 +29,7 @@ class AirportController extends FController
                     [
                         'actions' => ['get-list'],
                         'allow' => true,
-                        'roles' => ['admin']
+                        'roles' => ['admin', 'agent', 'supervision']
                     ],
                 ],
             ],

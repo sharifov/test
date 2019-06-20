@@ -15,10 +15,12 @@ class EmailCreateForm extends Model
     public $email;
     public $help;
 
+    /**
+     * @return array
+     */
     public function rules(): array
     {
         return [
-            ['email', 'required'],
             ['email', 'string', 'max' => 100],
             ['email', 'email'],
             ['email', 'filter', 'filter' => function($value) {

@@ -2,6 +2,7 @@
 
 namespace sales\forms\lead;
 
+use borales\extensions\phoneInput\PhoneInputValidator;
 use yii\base\Model;
 
 /**
@@ -15,11 +16,15 @@ class PhoneCreateForm extends Model
     public $phone;
     public $help;
 
+    /**
+     * @return array
+     */
     public function rules(): array
     {
         return [
             ['phone', 'required'],
             ['phone', 'string', 'max' => 100],
+            ['phone', PhoneInputValidator::class],
             ['phone', 'filter', 'filter' => function($value) {
                 return trim($value);
             }]

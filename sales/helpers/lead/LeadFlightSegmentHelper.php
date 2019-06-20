@@ -8,6 +8,9 @@ use yii\helpers\ArrayHelper;
 class LeadFlightSegmentHelper
 {
 
+    /**
+     * @return array
+     */
     public static function flexibilityList(): array
     {
         return [
@@ -19,6 +22,9 @@ class LeadFlightSegmentHelper
         ];
     }
 
+    /**
+     * @return array
+     */
     public static function flexibilityTypeList(): array
     {
         return [
@@ -28,7 +34,11 @@ class LeadFlightSegmentHelper
         ];
     }
 
-    public static function flexibilityTypeName($type): string
+    /**
+     * @param string $type
+     * @return string
+     */
+    public static function flexibilityTypeName(string $type): string
     {
         return ArrayHelper::getValue(self::flexibilityTypeList(), $type);
     }

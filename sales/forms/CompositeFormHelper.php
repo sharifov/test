@@ -30,6 +30,10 @@ class CompositeFormHelper
         return ['post' => $post, 'keys' => $keys];
     }
 
+    /**
+     * @param array $form
+     * @return array
+     */
     private static function sortElements(array $form): array
     {
         $sort = [];
@@ -41,7 +45,7 @@ class CompositeFormHelper
         return [$sort, $relationKeys];
     }
 
-    public static function ajaxValidate($model, $keys = null, $attributes = null): array
+    public static function ajaxValidate($model, array $keys = null, $attributes = null): array
     {
         $result = [];
         if ($attributes instanceof Model) {
@@ -74,7 +78,12 @@ class CompositeFormHelper
         return self::returnLastKeys($result, $keys);
     }
 
-    private static function returnLastKeys($result, $keys): array
+    /**
+     * @param array $result
+     * @param array $keys
+     * @return array
+     */
+    private static function returnLastKeys(array $result, array $keys): array
     {
         $errors = [];
         foreach ($result as $key => $error) {

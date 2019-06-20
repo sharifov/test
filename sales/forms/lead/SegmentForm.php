@@ -28,6 +28,9 @@ class SegmentForm extends Model
     public $flexibility;
     public $flexibilityType;
 
+    /**
+     * @return array
+     */
     public function rules(): array
     {
         return [
@@ -55,6 +58,9 @@ class SegmentForm extends Model
         ];
     }
 
+    /**
+     * @return array
+     */
     public function attributeLabels(): array
     {
         return [
