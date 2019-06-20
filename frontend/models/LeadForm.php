@@ -46,7 +46,7 @@ class LeadForm extends Model
     /**
      * @var $_leadFlightSegment LeadFlightSegment[]
      */
-    private $_leadFlightSegment;
+//    private $_leadFlightSegment;
     /**
      * @var $_leadPreferences LeadPreferences
      */
@@ -59,10 +59,10 @@ class LeadForm extends Model
             $this->setClient((new Client()));
             $this->setClientEmail([(new ClientEmail())]);
             $this->setClientPhone([(new ClientPhone())]);
-            $this->setLeadFlightSegment([
-                (new LeadFlightSegment()),
-                (new LeadFlightSegment())
-            ]);
+//            $this->setLeadFlightSegment([
+//                (new LeadFlightSegment()),
+//                (new LeadFlightSegment())
+//            ]);
             $this->setLeadPreferences((new LeadPreferences()));
         } else {
             $this->setLead($lead);
@@ -80,7 +80,7 @@ class LeadForm extends Model
                 $this->setClientPhone($lead->client->clientPhones);
             }
 
-            $this->setLeadFlightSegment($lead->leadFlightSegments);
+//            $this->setLeadFlightSegment($lead->leadFlightSegments);
 
             if(!$this->getLeadFlightSegment()) {
                 $this->setLeadFlightSegment([
@@ -106,7 +106,8 @@ class LeadForm extends Model
     public function rules()
     {
         return [
-            [['Client', 'Lead', 'LeadFlightSegment'], 'required'],
+            [['Client', 'Lead'], 'required'],
+//            ['LeadFlightSegment', 'required'],
             [['ClientPhone', 'ClientEmail', 'LeadPreferences'], 'safe'],
         ];
     }
@@ -152,9 +153,9 @@ class LeadForm extends Model
             'Lead' => $this->getLead(),
             'LeadPreferences' => $this->getLeadPreferences(),
         ];
-        foreach ($this->getLeadFlightSegment() as $id => $segment) {
-            $models['LeadFlightSegment'][$id] = $this->getLeadFlightSegment()[$id];
-        }
+//        foreach ($this->getLeadFlightSegment() as $id => $segment) {
+//            $models['LeadFlightSegment'][$id] = $this->getLeadFlightSegment()[$id];
+//        }
         foreach ($this->getClientEmail() as $id => $email) {
             $models['ClientEmail'][$id] = $this->getClientEmail()[$id];
         }
@@ -225,25 +226,25 @@ class LeadForm extends Model
     /**
      * @return LeadFlightSegment[]
      */
-    public function getLeadFlightSegment()
-    {
-        return $this->_leadFlightSegment;
-    }
+//    public function getLeadFlightSegment()
+//    {
+//        return $this->_leadFlightSegment;
+//    }
 
     /**
      * @param LeadFlightSegment[] $leadFlightSegment
      */
-    public function setLeadFlightSegment($leadFlightSegment)
-    {
-        $this->_leadFlightSegment = [];
-        foreach ($leadFlightSegment as $key => $segment) {
-            if (!$segment->isNewRecord) {
-                $this->_leadFlightSegment[$segment->id] = $segment;
-            } else {
-                $this->_leadFlightSegment[$key] = $segment;
-            }
-        }
-    }
+//    public function setLeadFlightSegment($leadFlightSegment)
+//    {
+//        $this->_leadFlightSegment = [];
+//        foreach ($leadFlightSegment as $key => $segment) {
+//            if (!$segment->isNewRecord) {
+//                $this->_leadFlightSegment[$segment->id] = $segment;
+//            } else {
+//                $this->_leadFlightSegment[$key] = $segment;
+//            }
+//        }
+//    }
 
     /**
      * @return ClientEmail[]
@@ -304,30 +305,30 @@ class LeadForm extends Model
             } else {
                 $lead = $this->getLead();
                 $lead->client_id = $client->id;
-                if (count($this->getLeadFlightSegment()) == 1) {
-                    $lead->trip_type = Lead::TRIP_TYPE_ONE_WAY;
-                }
+//                if (count($this->getLeadFlightSegment()) == 1) {
+//                    $lead->trip_type = Lead::TRIP_TYPE_ONE_WAY;
+//                }
                 if (!$lead->save()) {
                     $hasErrors = true;
                     $errors['Lead'] = $lead->getErrors();
                 } else {
-                    $keep = [];
-                    foreach ($this->getLeadFlightSegment() as $key => $flightSegment) {
-                        $flightSegment->lead_id = $lead->id;
-                        if (!$flightSegment->save()) {
-                            $hasErrors = true;
-                            $errors['LeadFlightSegment'][$key] = $flightSegment->getErrors();
-                        }
-                        $keep[] = $flightSegment->id;
-                    }
-
-                    $query = LeadFlightSegment::find()->andWhere(['lead_id' => $lead->id]);
-                    if ($keep) {
-                        $query->andWhere(['NOT IN', 'id', $keep]);
-                    }
-                    foreach ($query->all() as $segment) {
-                        $segment->delete();
-                    }
+//                    $keep = [];
+//                    foreach ($this->getLeadFlightSegment() as $key => $flightSegment) {
+//                        $flightSegment->lead_id = $lead->id;
+//                        if (!$flightSegment->save()) {
+//                            $hasErrors = true;
+//                            $errors['LeadFlightSegment'][$key] = $flightSegment->getErrors();
+//                        }
+//                        $keep[] = $flightSegment->id;
+//                    }
+//
+//                    $query = LeadFlightSegment::find()->andWhere(['lead_id' => $lead->id]);
+//                    if ($keep) {
+//                        $query->andWhere(['NOT IN', 'id', $keep]);
+//                    }
+//                    foreach ($query->all() as $segment) {
+//                        $segment->delete();
+//                    }
 
                     $preference = $this->getLeadPreferences();
                     $preference->lead_id = $lead->id;
@@ -380,7 +381,8 @@ class LeadForm extends Model
         $models = $this->getAllModels();
         foreach ($data as $modelName => $attributes) {
             if (isset($models[$modelName])) {
-                if (in_array($modelName, ['LeadFlightSegment', 'ClientEmail', 'ClientPhone'])) {
+//                if (in_array($modelName, ['LeadFlightSegment', 'ClientEmail', 'ClientPhone'])) {
+                if (in_array($modelName, ['ClientEmail', 'ClientPhone'])) {
                     $modelsPopulate = [];
                     foreach ($attributes as $key => $item) {
                         if ($key == '__id__') {
@@ -417,7 +419,7 @@ class LeadForm extends Model
         $mapping = [
             'Lead' => 'common/models/Lead',
             'LeadPreferences' => 'common\models\LeadPreferences',
-            'LeadFlightSegment' => 'common\models\LeadFlightSegment',
+//            'LeadFlightSegment' => 'common\models\LeadFlightSegment',
             'ClientEmail' => 'common\models\ClientEmail',
             'ClientPhone' => 'common\models\ClientPhone',
             'Client' => 'common\models\Client',
@@ -440,9 +442,9 @@ class LeadForm extends Model
      */
     private function modelsPopulate($modelsPopulate, $model)
     {
-        if ($model == 'LeadFlightSegment') {
-            $this->setLeadFlightSegment($modelsPopulate);
-        } else if ($model == 'ClientEmail') {
+//        if ($model == 'LeadFlightSegment') {
+//            $this->setLeadFlightSegment($modelsPopulate);
+        if ($model == 'ClientEmail') {
             $this->setClientEmail($modelsPopulate);
         } else if ($model == 'ClientPhone') {
             $this->setClientPhone($modelsPopulate);

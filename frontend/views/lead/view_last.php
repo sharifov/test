@@ -9,9 +9,6 @@
  * @var $dataProviderCallExpert \yii\data\ActiveDataProvider
  * @var $enableCommunication boolean
  * @var $modelLeadCallExpert \common\models\LeadCallExpert
- * @var $modelLeadChecklist \common\models\LeadChecklist
- * @var $dataProviderChecklist \yii\data\ActiveDataProvider
- * @var $itineraryForm \sales\forms\lead\ItineraryEditForm
  */
 
 use yii\bootstrap\Html;
@@ -101,12 +98,11 @@ $lead = $leadForm->getLead();
 
         <div class="col-md-7">
 
-            <?php \yii\widgets\Pjax::begin(['id' => 'pj-itinerary', 'enablePushState' => false, 'timeout' => 10000])?>
-                <?= $this->render('partial/_flightDetails', [
-                    'itineraryForm' => $itineraryForm,
-                    'leadForm' => $leadForm
-                ]) ?>
-            <?php \yii\widgets\Pjax::end()?>
+            <?= $this->render('partial/_flightDetails_last', [
+                'leadForm' => $leadForm
+            ]);
+            ?>
+
 
             <?php if (!$leadForm->getLead()->isNewRecord) : ?>
                 <div class="row">
@@ -175,15 +171,6 @@ $lead = $leadForm->getLead();
         <div class="col-md-5">
             <?php if (!$leadForm->getLead()->isNewRecord) : ?>
 
-                <?= $this->render('checklist/lead_checklist', [
-                    'lead' => $leadForm->getLead(),
-                    'comForm'       => $comForm,
-                    'leadId'        => $lead->id,
-                    'dataProvider'  => $dataProviderChecklist,
-                    'isAdmin'       => $is_admin,
-                    'modelLeadChecklist'       => $modelLeadChecklist,
-                ]) ?>
-
                 <?= $this->render('partial/_task_list', [
                     'lead' => $leadForm->getLead()
                 ]); ?>
@@ -241,19 +228,7 @@ $lead = $leadForm->getLead();
             'leadForm' => $leadForm
         ]);
         ?>
-        <?php if (Yii::$app->user->can('updateLead', ['id' => $itineraryForm->leadId])) : ?>
-            <?php if ($leadForm->mode !== $leadForm::VIEW_MODE) : ?>
-                <div class="text-center">
-                    <?= Html::submitButton('<span class="fa fa-check"></span> Save', [
-                        'id' => 'submit-lead-form-btn',
-                        'class' => 'btn btn-success'
-                    ]) ?>
-                </div>
-            <?php endif; ?>
-        <?php endif; ?>
-
     </aside>
-
 </div>
 
 <?php
@@ -264,7 +239,41 @@ if (!$leadForm->getLead()->isNewRecord) {
         'leadId' => $leadForm->getLead()->id
     ]);
 
+    $checkUpdatesUrl = \yii\helpers\Url::to([
+        'lead/check-updates',
+        'leadId' => $leadForm->getLead()->id,
+        'lastUpdate' => date('Y-m-d H:i:s')
+    ]);
+
     $js = <<<JS
+    function checkRequestUpdates(checkUrl) {
+        $.get(checkUrl)
+            .done(function (data) {
+                if (data.logs.length != 0) {
+                    $('#agents-activity-logs').html(data.logs);
+                }
+                if (data.needRefresh) {
+                    var modal = $('#modal-error');
+                    modal.find('.modal-body').html(data.content);
+                    modal.modal({
+                        backdrop: 'static',
+                        show: true
+                    });
+                } else {
+                    setTimeout(function() {
+                        checkRequestUpdates(data.checkUpdatesUrl);
+                    }, 120000);
+                }
+            })
+            .fail(function () {
+                setTimeout(function() {
+                    checkRequestUpdates('$checkUpdatesUrl');
+                }, 120000);
+            });
+    }
+    setTimeout(function() {
+        checkRequestUpdates('$checkUpdatesUrl');
+    }, 120000);
 
     $('#view-flow-transition').click(function() {
         $('#preloader').removeClass('hidden');
@@ -292,11 +301,6 @@ if (!$leadForm->getLead()->isNewRecord) {
         //$("[data-toggle='popover']").popover({sanitize: false});
     
     });
-     $("#pj-itinerary").on("pjax:end", function () {
-         if ($('#modeFlightSegments').data('value') == 'view') {
-            $.pjax.reload({container: '#quotes_list', timeout: 10000});     
-         }
-     });
     
 JS;
 

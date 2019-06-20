@@ -7,6 +7,7 @@ use common\components\jobs\QuickSearchInitPriceJob;
 use common\components\jobs\UpdateLeadBOJob;
 use common\models\local\LeadAdditionalInformation;
 use common\models\local\LeadLogMessage;
+use sales\helpers\lead\LeadHelper;
 use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\caching\DbDependency;
@@ -270,6 +271,134 @@ class Lead extends ActiveRecord
         ];
     }
 
+    /**
+     * @param $clientId
+     * @param $clientFirstName
+     * @param $clientLastName
+     * @param $employeeId
+     * @param $cabin
+     * @param $adults
+     * @param $children
+     * @param $infants
+     * @param $requestIp
+     * @param $sourceId
+     * @param $projectId
+     * @param $notesForExperts
+     * @param $clientPhone
+     * @param $clientEmail
+     * @param $status
+     * @return Lead
+     */
+    public static function create(
+        $clientId,
+        $clientFirstName,
+        $clientLastName,
+        $employeeId,
+        $cabin,
+        $adults,
+        $children,
+        $infants,
+        $requestIp,
+        $sourceId,
+        $projectId,
+        $notesForExperts,
+        $clientPhone,
+        $clientEmail,
+        $status
+    ): self
+    {
+        $lead = new static();
+        $lead->client_id = $clientId;
+        $lead->l_client_first_name = $clientFirstName;
+        $lead->l_client_last_name = $clientLastName;
+        $lead->employee_id = $employeeId;
+        $lead->cabin = $cabin;
+        $lead->adults = $adults;
+        $lead->children = $children;
+        $lead->infants = $infants;
+        $lead->request_ip = $requestIp;
+        $lead->source_id = $sourceId;
+        $lead->project_id = $projectId;
+        $lead->notes_for_experts = $notesForExperts;
+        $lead->uid = uniqid();
+        $lead->gid = md5(uniqid('', true));
+        $lead->l_client_phone = $clientPhone;
+        $lead->l_client_email = $clientEmail;
+        $lead->status = $status;
+        return $lead;
+    }
+
+    public function editItinerary($cabin, $adults, $children, $infants): void
+    {
+        $this->cabin = $cabin;
+        $this->adults = $adults;
+        $this->children = $children;
+        $this->infants = $infants;
+    }
+
+    public function setTripType(string $type = null): void
+    {
+        if ($type) {
+            $list = LeadHelper::tripTypeList();
+            if (isset($list[$type])) {
+                $this->trip_type = $type;
+                return;
+            }
+        }
+        $this->trip_type = '';
+    }
+
+    /**
+     * @return bool
+     */
+    public function isEmptyRequestHash(): bool
+    {
+        return $this->l_request_hash ? false : true;
+    }
+
+    public function setRequestHash(string $hash): void
+    {
+        $this->l_request_hash = $hash;
+    }
+
+    public function setDuplicate($duplicateId): void
+    {
+        $this->l_duplicate_lead_id = $duplicateId;
+        $this->status = self::STATUS_TRASH;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isCompleted(): bool
+    {
+        return in_array($this->status, [self::STATUS_BOOKED, self::STATUS_SOLD], true);
+    }
+
+    /**
+     * @return bool
+     */
+    public function isAvailableToTakeOver(): bool
+    {
+        return in_array($this->status, [self::STATUS_ON_HOLD, self::STATUS_PROCESSING], true);
+    }
+
+    /**
+     * @return bool
+     */
+    public function isAvailableToTake(): bool
+    {
+        return in_array($this->status, [self::STATUS_PENDING, self::STATUS_FOLLOW_UP, self::STATUS_SNOOZE], true);
+    }
+
+    /**
+     * @param int $employeeId
+     * @return bool
+     */
+    public function isOwner(int $employeeId): bool
+    {
+        return ($this->employee && $this->employee->id === $employeeId);
+    }
 
     /**
      * {@inheritdoc}
@@ -1358,10 +1487,13 @@ New lead {lead_id}
         }
 
 
-
         //create or update LeadTask
-        if(($this->status == self::STATUS_PROCESSING && array_key_exists('employee_id',$changedAttributes)) ||
-            (isset($changedAttributes['l_answered']) && $changedAttributes['l_answered'] != $this->l_answered)){
+        if(
+            ($this->status === self::STATUS_PROCESSING && isset($changedAttributes['status'])) ||
+            (isset($changedAttributes['employee_id']) && $this->status === self::STATUS_PROCESSING) ||
+            (isset($changedAttributes['l_answered']) && $changedAttributes['l_answered'] != $this->l_answered)
+        )
+        {
             LeadTask::deleteUnnecessaryTasks($this->id);
 
             if($this->l_answered) {

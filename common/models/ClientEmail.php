@@ -26,6 +26,14 @@ class ClientEmail extends \yii\db\ActiveRecord
         return 'client_email';
     }
 
+    public static function create($email, $clientId): self
+    {
+        $clientEmail = new static();
+        $clientEmail->email = $email;
+        $clientEmail->client_id = $clientId;
+        return $clientEmail;
+    }
+
     /**
      * {@inheritdoc}
      */
