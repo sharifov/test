@@ -16,6 +16,7 @@ use sales\forms\lead\PhoneCreateForm;
 use sales\forms\lead\PreferencesCreateForm;
 use sales\forms\lead\SegmentCreateForm;
 use sales\forms\lead\SegmentEditForm;
+use sales\repositories\airport\AirportRepository;
 use sales\repositories\client\ClientEmailRepository;
 use sales\repositories\client\ClientPhoneRepository;
 use sales\repositories\client\ClientRepository;
@@ -34,6 +35,7 @@ use Yii;
  * @property LeadPreferencesRepository $leadPreferencesRepository
  * @property ClientRepository $clientRepository
  * @property LeadHashGenerator $leadHashGenerator
+ * @property AirportRepository $airportRepository
  * @property TransactionManager $transaction
  */
 class LeadManageService
@@ -45,6 +47,7 @@ class LeadManageService
     private $leadPreferencesRepository;
     private $clientRepository;
     private $leadHashGenerator;
+    private $airportRepository;
     private $transaction;
 
     public function __construct(
@@ -55,6 +58,7 @@ class LeadManageService
         LeadPreferencesRepository $leadPreferencesRepository,
         ClientRepository $clientRepository,
         LeadHashGenerator $leadHashGenerator,
+        AirportRepository $airportRepository,
         TransactionManager $transaction)
     {
         $this->leadRepository = $leadRepository;
@@ -64,6 +68,7 @@ class LeadManageService
         $this->leadPreferencesRepository = $leadPreferencesRepository;
         $this->clientRepository = $clientRepository;
         $this->leadHashGenerator = $leadHashGenerator;
+        $this->airportRepository = $airportRepository;
         $this->transaction = $transaction;
     }
 
@@ -285,7 +290,7 @@ class LeadManageService
      * @param array $segments
      * @return string
      */
-    private static function calculateTripType(array $segments): string
+    private function calculateTripType(array $segments): string
     {
         $countSegments = count($segments);
         if ($countSegments === 0) {
@@ -295,13 +300,25 @@ class LeadManageService
             return Lead::TRIP_TYPE_ONE_WAY;
         }
         if ($countSegments === 2) {
-            $origin1 = strtoupper($segments[0]->origin);
-            $destination1 = strtoupper($segments[0]->destination);
-            $origin2 = strtoupper($segments[1]->origin);
-            $destination2 = strtoupper($segments[1]->destination);
-            if ($origin1 === $destination2 && $destination1 === $origin2) {
-                return Lead::TRIP_TYPE_ROUND_TRIP;
-            }
+            try {
+                $airport1 = $segments[0]->origin;
+                $airport2 = $segments[0]->destination;
+                $airport3 = $segments[1]->origin;
+                $airport4 = $segments[1]->destination;
+                if ($airport1 == $airport4 && $airport3 == $airport2) {
+                    return Lead::TRIP_TYPE_ROUND_TRIP;
+                }
+                if (
+                ($airport1 = $this->airportRepository->getByIata($segments[0]->origin)) &&
+                ($airport2 = $this->airportRepository->getByIata($segments[0]->destination)) &&
+                ($airport3 = $this->airportRepository->getByIata($segments[1]->origin)) &&
+                ($airport4 = $this->airportRepository->getByIata($segments[1]->destination))
+                ) {
+                    if ($airport1->city == $airport4->city && $airport3->city == $airport2->city) {
+                        return Lead::TRIP_TYPE_ROUND_TRIP;
+                    }
+                }
+            } catch (\Throwable $e) {}
         }
         return Lead::TRIP_TYPE_MULTI_DESTINATION;
     }

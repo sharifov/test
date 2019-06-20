@@ -277,14 +277,14 @@ class LeadController extends FController
             $leadForm->mode = $leadForm::VIEW_MODE;
         }
 
-          
-/*        $flightSegments = $leadForm->getLeadFlightSegment();
-        foreach ($flightSegments as $segment) {
-            $this->view->title = 'Lead #' . $lead->id . ' ✈ ' . $segment->destination;
-            break;
-        }*/
-        $this->view->title = 'Lead #' . $lead->id ;
-
+        if ($itineraryForm->segments) {
+            foreach ($itineraryForm->segments as $segment) {
+                $this->view->title = 'Lead #' . $lead->id . ' ✈ ' . $segment->destination;
+                break;
+            }
+        } else {
+            $this->view->title = 'Lead #' . $lead->id;
+        }
 
         if (Yii::$app->request->isAjax && !Yii::$app->request->isPjax) {
             Yii::$app->response->format = Response::FORMAT_JSON;

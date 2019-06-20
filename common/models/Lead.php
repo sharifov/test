@@ -395,9 +395,35 @@ class Lead extends ActiveRecord
      * @param int $employeeId
      * @return bool
      */
-    public function isOwner(int $employeeId): bool
+    public function canAgentEdit(int $employeeId): bool
     {
-        return ($this->employee && $this->employee->id === $employeeId);
+        return $this->status === self::STATUS_PROCESSING && ($this->employee && $this->employee->id === $employeeId);
+    }
+
+    /**
+     * @param array $supervisionGroups
+     * @return bool
+     */
+    public function canSupervisionEdit(array $supervisionGroups): bool
+    {
+        if (!in_array($this->status, [self::STATUS_PROCESSING, self::STATUS_PENDING, self::STATUS_FOLLOW_UP, self::STATUS_SNOOZE], true)) {
+            return false;
+        }
+        $employeeGroups = $this->employee ? array_keys($this->employee->userGroupList) : [];
+        foreach (array_keys($supervisionGroups) as $group) {
+            if (in_array($group, $employeeGroups)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * @return bool
+     */
+    public function canAdminEdit(): bool
+    {
+        return in_array($this->status, [self::STATUS_PROCESSING, self::STATUS_PENDING, self::STATUS_FOLLOW_UP, self::STATUS_SNOOZE], true);
     }
 
     /**

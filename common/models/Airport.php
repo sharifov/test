@@ -80,4 +80,12 @@ class Airport extends ActiveRecord
         return '(' . $this->iata . ') ' . $this->name . ', ' . $this->city  . ', ' . $this->country;
     }
 
+    /**
+     * @return string
+     */
+    public function getCityName(): string
+    {
+        return $this->city;
+    }
+
 }
