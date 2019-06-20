@@ -62,30 +62,11 @@ use yii2mod\rbac\filters\AccessControl;
 class LeadController extends FController
 {
     private $leadManageService;
-    private $leadRepository;
 
-    public function __construct($id, $module, LeadManageService $leadManageService, LeadRepository $leadRepository, $config = [])
+    public function __construct($id, $module, LeadManageService $leadManageService, $config = [])
     {
         parent::__construct($id, $module, $config);
         $this->leadManageService = $leadManageService;
-        $this->leadRepository = $leadRepository;
-    }
-
-    public function behaviors(): array
-    {
-        $behaviors = [
-            'access' => [
-                'class' => AccessControl::class,
-                'rules' => [
-                    [
-                        'actions' => ['create-new-version', 'validate-lead-create', 'take-over'],
-                        'allow' => true,
-                        'roles' => ['admin'],
-                    ],
-                ],
-            ],
-        ];
-        return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
 
     /**
@@ -1976,7 +1957,7 @@ class LeadController extends FController
     /**
      * @return string|Response
      */
-    public function actionCreateNewVersion()
+    public function actionCreate()
     {
         $data = CompositeFormHelper::prepareDataForMultiInput(
             Yii::$app->request->post(),
@@ -2013,7 +1994,7 @@ class LeadController extends FController
         return CompositeFormHelper::ajaxValidate($form, $data['keys']);
     }
 
-    public function actionCreate()
+    public function actionCreate_last()
     {
         $this->view->title = sprintf('Create Lead');
 

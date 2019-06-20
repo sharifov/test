@@ -113,10 +113,6 @@ return [
                     'route' => 'lead/view',
                 ],
                 [
-                    'pattern' => 'take-over/<gid>',
-                    'route' => 'lead/take-over',
-                ],
-                [
                     'pattern' => 'take/<gid>',
                     'route' => 'lead/take',
                 ],

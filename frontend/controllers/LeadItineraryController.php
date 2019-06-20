@@ -30,16 +30,6 @@ class LeadItineraryController extends FController
     public function behaviors(): array
     {
         $behaviors = [
-            'access' => [
-                'class' => AccessControl::class,
-                'rules' => [
-                    [
-                        'actions' => ['validate', 'edit', 'view-edit-form'],
-                        'allow' => true,
-                        'roles' => ['updateLead'],
-                    ],
-                ],
-            ],
             [
                 'class' => ContentNegotiator::class,
                 'only' => ['validate'],

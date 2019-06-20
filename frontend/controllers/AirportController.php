@@ -23,16 +23,6 @@ class AirportController extends FController
     public function behaviors(): array
     {
         $behaviors = [
-            'access' => [
-                'class' => AccessControl::class,
-                'rules' => [
-                    [
-                        'actions' => ['get-list'],
-                        'allow' => true,
-                        'roles' => ['admin', 'agent', 'supervision']
-                    ],
-                ],
-            ],
             [
                 'class' => ContentNegotiator::class,
                 'only' => ['get-list'],
