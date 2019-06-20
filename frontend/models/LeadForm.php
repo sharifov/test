@@ -80,15 +80,6 @@ class LeadForm extends Model
                 $this->setClientPhone($lead->client->clientPhones);
             }
 
-//            $this->setLeadFlightSegment($lead->leadFlightSegments);
-
-            if(!$this->getLeadFlightSegment()) {
-                $this->setLeadFlightSegment([
-                    (new LeadFlightSegment()),
-                    (new LeadFlightSegment())
-                ]);
-            }
-
             if ($lead->leadPreferences === null) {
                 $this->setLeadPreferences(new LeadPreferences());
             } else {
