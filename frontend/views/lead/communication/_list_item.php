@@ -58,7 +58,7 @@ use \common\models\Call;
         </div>
         <div class="panel-body">
             <?php if($call->c_recording_url):?>
-                <audio controls="controls" class="chat__audio">
+                <audio controls="controls" controlsList="nodownload" class="chat__audio">
                     <source src="<?=$call->c_recording_url?>" type="audio/mpeg">
                     Your browser does not support the audio element
                 </audio>

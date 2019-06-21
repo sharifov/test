@@ -47,29 +47,41 @@ $itineraryFormId = $itineraryForm->formName() . '-form';
                     <span style="font-weight: 600; font-size: 18px;">Flight Request</span>
                     <span style="font-size: 16px; padding: 0 7px"><i class="fa fa-random text-success" aria-hidden="true"></i> <?= LeadHelper::tripTypeName($itineraryForm->tripType) ?> • <?=LeadHelper::cabinName($itineraryForm->cabin)?> • <?= (int) $itineraryForm->adults + (int) $itineraryForm->children + (int) $itineraryForm->infants ?> pax</span>
                     <span>
-                        <span><strong class="label label-success" style="margin-left: 7px;"><?= $itineraryForm->adults ?></strong> ADT</span>
-                        <span><strong class="label label-success" style="margin-left: 7px;"><?= $itineraryForm->children ?></strong> CHD</span>
-                        <span><strong class="label label-success" style="margin-left: 7px;"><?= $itineraryForm->infants ?></strong> INF</span>
+                        <?php if($itineraryForm->adults):?>
+                            <span><strong class="label label-success" style="margin-left: 7px;"><?= $itineraryForm->adults ?></strong> ADT</span>
+                        <?php endif;?>
+                        <?php if($itineraryForm->children):?>
+                            <span><strong class="label label-success" style="margin-left: 7px;"><?= $itineraryForm->children ?></strong> CHD</span>
+                        <?php endif;?>
+                        <?php if($itineraryForm->infants):?>
+                            <span><strong class="label label-success" style="margin-left: 7px;"><?= $itineraryForm->infants ?></strong> INF</span>
+                        <?php endif;?>
                     </span>
                 </div>
                 <div style="padding-top: 10px; align-items: flex-end" class="row-flex-justify">
                     <div>
-                        <table class="table table-bordered">
+                        <table class="table table-bordered table-hover">
                             <tr>
-                                <td></td>
-                                <td class="text-center">Origin</td>
-                                <td class="text-center">Destination</td>
-                                <td class="text-center">Departure</td>
-                                <td class="text-center">Flex</td>
+                                <th></th>
+                                <th class="text-center">Origin</th>
+                                <th class="text-center">Destination</th>
+                                <th class="text-center">Departure</th>
+                                <th class="text-center">Flex</th>
                             </tr>
                         <?php foreach ($itineraryForm->segments as $keySegment => $segment):?>
                             <tr>
                                 <td><span style="font-size: 18px; color: #91a5ae; margin-right: 7px; vertical-align: -1px;"><?= $keySegment + 1 ?>. </span></td>
                                 <td>
-                                    <span style="font-size: 16px; white-space: nowrap; margin-right: 10px; color: #4a525f"><?=$segment->originLabel?> <strong>(<?=Html::encode($segment->origin)?>)</strong></span>
+                                    <span style="font-size: 16px; white-space: nowrap; margin-right: 10px; color: #4a525f">
+                                        (<b><?=Html::encode($segment->origin)?></b>)
+                                        <?=Html::encode($segment->originCity)?>
+                                    </span>
                                 </td>
-                                <td><span style="font-size: 16px; white-space: nowrap; margin-right: 10px; color: #4a525f">
-                                        <?=$segment->destinationLabel?> <strong>(<?=Html::encode($segment->destination)?>)</strong></span>
+                                <td>
+                                    <span style="font-size: 16px; white-space: nowrap; margin-right: 10px; color: #4a525f">
+                                        (<b><?=Html::encode($segment->destination)?></b>)
+                                        <?=Html::encode($segment->destinationCity)?>
+                                    </span>
                                 </td>
                                 <td>
                                     <span style="font-size: 14px;">

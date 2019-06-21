@@ -5164,6 +5164,8 @@ input[disabled] + .radio-tab__text {
 }
 
 .chat__audio {
+  width: 100%;
+  height: 28px;
   -webkit-text-fill-color: #61687d;
 }
 

@@ -16,6 +16,9 @@ use yii\base\Model;
  * @property string $departure
  * @property integer $flexibility
  * @property string $flexibilityType
+ *
+ * @property string $originCity
+ * @property string $destinationCity
  */
 class SegmentForm extends Model
 {
@@ -27,6 +30,9 @@ class SegmentForm extends Model
     public $departure;
     public $flexibility;
     public $flexibilityType;
+
+    public $originCity;
+    public $destinationCity;
 
     /**
      * @return array

@@ -819,7 +819,7 @@ $duration = 10;
                 [
                     'attribute' => 'c_recording_url',
                     'value' => function (\common\models\Call $model) {
-                        return  $model->c_recording_url ? '<audio controls="controls" style="width: 350px; height: 25px"><source src="'.$model->c_recording_url.'" type="audio/mpeg"> </audio>' : '-';
+                        return  $model->c_recording_url ? '<audio controls="controls" controlsList="nodownload" style="width: 350px; height: 25px"><source src="'.$model->c_recording_url.'" type="audio/mpeg"> </audio>' : '-';
                     },
                     'format' => 'raw'
                 ],
