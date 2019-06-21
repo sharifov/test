@@ -24,6 +24,10 @@ class LeadOwnerRule extends Rule
     public function execute($user, $item, $params): bool
     {
         $id = (int)\Yii::$app->request->post('id');
+        if (!$id) {
+            $id = (int) \Yii::$app->request->get('id');
+        }
+
         if (!$id && isset($params['id'])) {
             $id = (int)$params['id'];
         }
