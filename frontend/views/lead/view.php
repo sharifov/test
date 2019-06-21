@@ -19,7 +19,7 @@ use frontend\models\LeadForm;
 
 $bundle = \frontend\themes\gentelella\assets\AssetLeadCommunication::register($this);
 
-//$this->registerCssFile('/css/style-req.css');
+
 $userId = Yii::$app->user->id;
 $user = Yii::$app->user->identity;
 
