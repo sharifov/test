@@ -12,6 +12,8 @@ use frontend\models\Log;
  */
 class LogSearch extends Log
 {
+
+    public $days;
     /**
      * @inheritdoc
      */
@@ -20,6 +22,7 @@ class LogSearch extends Log
         return [
             [['id', 'level'], 'integer'],
             [['category', 'prefix', 'message', 'log_time'], 'safe'],
+            [['days'], 'integer', 'min' => 0, 'max' => 365]
         ];
     }
 
