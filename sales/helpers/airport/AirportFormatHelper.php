@@ -27,7 +27,7 @@ class AirportFormatHelper
      */
     public static function formatText(string $str, string $term): string
     {
-        return str_ireplace($term, '<b style="color: #dd0000"><u>' . $term . '</u></b>', $str);
+        return preg_replace('~'.$term.'~i', "<b style=\"color: #e15554\"><u>\$0</u></b>", $str);
     }
 
 }

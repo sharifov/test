@@ -41,65 +41,67 @@ $this->title = 'Create Lead';
                 <br>
             </div>
 
-            <div class="col-md-2">
+            <div class="col-md-1">
             </div>
-            <div class="col-md-8">
-                <div class="panel panel-primary sl-request-wrap">
 
-                    <div class="panel-heading ">
+            <div class="col-md-10">
+                <div class="request">
+                    <div class="request-overview">
+                        <div style="letter-spacing: 0.8px; padding-bottom: 13px;" class="row-flex row-flex-justify">
+                            <span style="font-weight: 600; font-size: 18px;">Flight Request</span>
+                        </div>
+                        <div class="separator"></div>
+                        <div class="request-form collapse in" id="request" aria-expanded="true">
+                            <div class="panel panel-primary sl-request-wrap">
 
-                        <div class="sl-request-summary">
-                            <div class="sl-request-summary__block">
-                                <div class="sl-request-summary__locations">
-                                    <strong>Flight Details</strong>
+
+
+                                <div class="sl-itinerary-form">
+                                    <div class="sl-request-summary__block">
+                                        <?= $this->render('partial/_formLeadSegment', [
+                                            'model' => $leadForm,
+                                            'form' => $form]) ?>
+                                    </div>
+
+                                    <div class="row sl-itinerary-form__pax">
+
+                                        <div class="col-sm-3">
+                                            <?= $form->field($leadForm, 'cabin', [
+                                            ])->dropDownList(LeadHelper::cabinList(), [
+                                                'prompt' => '---'
+                                            ]) ?>
+                                        </div>
+
+                                        <div class="col-sm-2">
+                                        </div>
+
+                                        <div class="col-sm-1">
+                                            <?= $form->field($leadForm, 'adults', [
+                                            ])->dropDownList(LeadHelper::AdultsChildrenInfantsList()) ?>
+                                        </div>
+                                        <div class="col-sm-1">
+                                            <?= $form->field($leadForm, 'children', [
+                                            ])->dropDownList(LeadHelper::AdultsChildrenInfantsList()) ?>
+                                        </div>
+                                        <div class="col-sm-1">
+                                            <?= $form->field($leadForm, 'infants', [
+                                            ])->dropDownList(LeadHelper::AdultsChildrenInfantsList()) ?>
+                                        </div>
+
+                                    </div>
+
                                 </div>
+
+                            </div>
+                            <div class="text-right">
+                                <?=Html::submitButton('<i class="fa fa-check"></i> Create Lead', ['class' => 'btn btn-success']) ?>
                             </div>
                         </div>
-
                     </div>
-
-                    <div class="sl-itinerary-form">
-                        <div class="sl-request-summary__block">
-                            <?= $this->render('partial/_formLeadSegment', [
-                                'model' => $leadForm,
-                                'form' => $form]) ?>
-                        </div>
-
-                        <div class="row sl-itinerary-form__pax">
-
-                            <div class="col-sm-3">
-                                <?= $form->field($leadForm, 'cabin', [
-                                ])->dropDownList(LeadHelper::cabinList(), [
-                                    'prompt' => '---'
-                                ]) ?>
-                            </div>
-
-                            <div class="col-sm-2">
-                            </div>
-
-                            <div class="col-sm-2">
-                                <?= $form->field($leadForm, 'adults', [
-                                ])->dropDownList(LeadHelper::AdultsChildrenInfantsList()) ?>
-                            </div>
-                            <div class="col-sm-2">
-                                <?= $form->field($leadForm, 'children', [
-                                ])->dropDownList(LeadHelper::AdultsChildrenInfantsList()) ?>
-                            </div>
-                            <div class="col-sm-2">
-                                <?= $form->field($leadForm, 'infants', [
-                                ])->dropDownList(LeadHelper::AdultsChildrenInfantsList()) ?>
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                </div>
-                <div class="text-right">
-                    <?=Html::submitButton('<i class="fa fa-plus"></i> Create Lead', ['class' => 'btn btn-success']) ?>
                 </div>
             </div>
-            <div class="col-md-2"></div>
+
+            <div class="col-md-1"></div>
         </div>
 
         <aside class="sidebar right-sidebar sl-right-sidebar">
