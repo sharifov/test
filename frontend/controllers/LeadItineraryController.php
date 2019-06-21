@@ -39,15 +39,20 @@ class LeadItineraryController extends FController
             ],
             [
                 'class' => AjaxFilter::class,
-                'only' => ['validate', 'edit', 'view-edit-form']
+                'only' => ['validate', 'edit']
             ],
+
+            /*[
+                'class' => AjaxFilter::class,
+                'only' => ['view-edit-form']
+            ],*/
         ];
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
 
     public function actionViewEditForm(): string
     {
-        $id = Yii::$app->request->post('id');
+        $id = Yii::$app->request->get('id');
         $lead = $this->findLead($id);
         $form = new ItineraryEditForm($lead);
         $form->setEditMode();
