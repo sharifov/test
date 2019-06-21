@@ -16,6 +16,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <h1><?= Html::encode($this->title) ?></h1>
 
     <?php \yii\widgets\Pjax::begin(); ?>
+    <?= $this->render('_detele_logs', ['model' => $searchModel]); ?>
 
     <div class="row">
         <div class="col-md-12">
@@ -34,7 +35,6 @@ $this->params['breadcrumbs'][] = $this->title;
                         'contentOptions'=>['style'=>'width: 70px;text-align:center;']
                     ],
                     //'level',
-
                     [
                         'attribute'=>'level',
                         'value'=>function ($model) {
@@ -144,10 +144,7 @@ $this->params['breadcrumbs'][] = $this->title;
     echo "<div id='modalContent'></div>";
     yii\bootstrap\Modal::end();
 
-
-
 $jsCode = <<<JS
-
     $(document).on('click', '.showModalButton', function(){
         
         $('#modal').modal('show').find('#modalContent').html('<div style="text-align:center"><img width="200px" src="https://loading.io/spinners/gear-set/index.triple-gears-loading-icon.svg"></div>');
@@ -160,8 +157,6 @@ $jsCode = <<<JS
         });
        return false;
     });
-
-
 JS;
 
 $this->registerJs($jsCode, \yii\web\View::POS_READY);
