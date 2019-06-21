@@ -101,7 +101,7 @@ $lead = $leadForm->getLead();
 
         <div class="col-md-7">
 
-            <?php \yii\widgets\Pjax::begin(['id' => 'pj-itinerary', 'enablePushState' => true, 'timeout' => 10000])?>
+            <?php \yii\widgets\Pjax::begin(['id' => 'pj-itinerary', 'enablePushState' => false, 'timeout' => 10000])?>
                 <?= $this->render('partial/_flightDetails', [
                     'itineraryForm' => $itineraryForm,
                     'leadForm' => $leadForm
