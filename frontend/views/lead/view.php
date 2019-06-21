@@ -231,17 +231,19 @@ $lead = $leadForm->getLead();
                 <p>Client information is not available for this status (<?=strtoupper($leadForm->getLead()->getStatusName())?>)!</p>
             </div>
 
-        <? else: ?>
+        <?php else: ?>
             <?= $this->render('partial/_client', [
                 'leadForm' => $leadForm
             ]);
             ?>
-        <? endif; ?>
+        <?php endif; ?>
         <?= $this->render('partial/_preferences', [
             'leadForm' => $leadForm
         ]);
         ?>
-        <?php if (Yii::$app->user->can('updateLead', ['id' => $itineraryForm->leadId])) : ?>
+        <?php
+
+        if (Yii::$app->user->can('updateLead', ['id' => $itineraryForm->leadId])) : ?>
             <div class="text-center">
                 <?= Html::submitButton('<span class="fa fa-check"></span> Save', [
                     'id' => 'submit-lead-form-btn',

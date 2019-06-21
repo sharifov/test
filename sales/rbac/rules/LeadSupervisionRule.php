@@ -22,17 +22,21 @@ class LeadSupervisionRule extends Rule
         $this->leadRepository = new LeadRepository();
     }
 
-    public function execute($user, $item, $params): bool
+    public function execute($userId, $item, $params): bool
     {
-        $id = (int)Yii::$app->request->post('id');
-        if (!$id && isset($params['id'])) {
-            $id = (int)$params['id'];
+        $leadId = LeadRequestHelper::getId($params);
+        $key = $this->name . '-' . $userId . '-' . $leadId;
+        $can = Yii::$app->user->identity->getCache($key);
+        if ($can === null) {
+            try {
+                $lead = $this->leadRepository->get($leadId);
+                $bool = $lead->canAgentEdit($userId) || $lead->canSupervisionEdit(Yii::$app->user->identity->userGroupList);
+                $can = Yii::$app->user->identity->setCache($key, $bool);
+            } catch (\Throwable $e) {
+                return false;
+            }
         }
-        try {
-            $lead = $this->leadRepository->get($id);
-            return ($lead->canAgentEdit($user) || $lead->canSupervisionEdit(Yii::$app->user->identity->userGroupList));
-        } catch (\Throwable $e) {}
-        return false;
+        return $can;
     }
 
 }

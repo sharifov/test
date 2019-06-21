@@ -4,6 +4,7 @@ namespace sales\rbac\rules;
 
 use sales\repositories\lead\LeadRepository;
 use yii\rbac\Rule;
+use Yii;
 
 /**
  * Class LeadOwnerRule
@@ -21,16 +22,19 @@ class LeadAdminRule extends Rule
         $this->leadRepository = new LeadRepository();
     }
 
-    public function execute($user, $item, $params): bool
+    public function execute($userId, $item, $params): bool
     {
-        $id = (int)\Yii::$app->request->post('id');
-        if (!$id && isset($params['id'])) {
-            $id = (int)$params['id'];
+        $leadId = LeadRequestHelper::getId($params);
+        $key = $this->name . '-' . $userId . '-' . $leadId;
+        $can = Yii::$app->user->identity->getCache($key);
+        if ($can === null) {
+            try {
+                $can = Yii::$app->user->identity->setCache($key, $this->leadRepository->get($leadId)->canAdminEdit());
+            } catch (\Throwable $e) {
+                return false;
+            }
         }
-        try {
-            return $this->leadRepository->get($id)->canAdminEdit();
-        } catch (\Throwable $e) {}
-        return false;
+        return $can;
     }
 
 }

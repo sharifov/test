@@ -79,6 +79,29 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     public $shiftData = [];
     public $currentShiftTaskInfoSummary = [];
 
+    private $cache = [];
+
+
+    /**
+     * @param string $key
+     * @return mixed|null
+     */
+    public function getCache(string $key)
+    {
+        return $this->cache[$key] ?? null;
+    }
+
+    /**
+     * @param string $key
+     * @param $data
+     * @return mixed
+     */
+    public function setCache(string $key, $data)
+    {
+        $this->cache[$key] = $data;
+        return $this->cache[$key];
+    }
+
     /**
      * {@inheritdoc}
      */
