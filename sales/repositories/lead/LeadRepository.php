@@ -8,10 +8,10 @@ use sales\repositories\NotFoundException;
 class LeadRepository
 {
     /**
-     * @param int $id
+     * @param $id
      * @return Lead
      */
-    public function get(int $id): Lead
+    public function get($id): Lead
     {
         if ($lead = Lead::findOne($id)) {
             return $lead;
