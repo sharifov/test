@@ -242,8 +242,7 @@ $lead = $leadForm->getLead();
         ]);
         ?>
         <?php
-
-        if (Yii::$app->user->can('updateLead', ['id' => $itineraryForm->leadId])) : ?>
+        if (Yii::$app->user->can('updateLead', ['leadId' => $itineraryForm->leadId])) : ?>
             <div class="text-center">
                 <?= Html::submitButton('<span class="fa fa-check"></span> Save', [
                     'id' => 'submit-lead-form-btn',

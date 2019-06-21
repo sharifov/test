@@ -10,7 +10,7 @@ use Yii;
 use yii\filters\AjaxFilter;
 use yii\filters\ContentNegotiator;
 use yii\helpers\ArrayHelper;
-use yii\helpers\VarDumper;
+use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
 use \yii2mod\rbac\filters\AccessControl;
@@ -30,6 +30,15 @@ class LeadItineraryController extends FController
     public function behaviors(): array
     {
         $behaviors = [
+            'access' => [
+                'class' => AccessControl::class,
+                'rules' => [
+                    [
+                        'allow' => true,
+                        'actions' => ['view-edit-form', 'edit', 'validate']
+                    ]
+                ]
+            ],
             [
                 'class' => ContentNegotiator::class,
                 'only' => ['validate'],
@@ -41,11 +50,6 @@ class LeadItineraryController extends FController
                 'class' => AjaxFilter::class,
                 'only' => ['validate', 'edit']
             ],
-
-            /*[
-                'class' => AjaxFilter::class,
-                'only' => ['view-edit-form']
-            ],*/
         ];
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
@@ -54,6 +58,11 @@ class LeadItineraryController extends FController
     {
         $id = Yii::$app->request->get('id');
         $lead = $this->findLead($id);
+
+        if (!Yii::$app->user->can('updateLead', ['lead' => $lead])) {
+            throw new ForbiddenHttpException();
+        }
+
         $form = new ItineraryEditForm($lead);
         $form->setEditMode();
         return $this->renderAjax('/lead/partial/_flightDetails', ['itineraryForm' => $form]);
@@ -63,6 +72,11 @@ class LeadItineraryController extends FController
     {
         $id = Yii::$app->request->post('id');
         $lead = $this->findLead($id);
+
+        if (!Yii::$app->user->can('updateLead', ['lead' => $lead])) {
+            throw new ForbiddenHttpException();
+        }
+
         $data = CompositeFormHelper::prepareDataForMultiInput(
             Yii::$app->request->post(),
             'ItineraryEditForm',
@@ -90,6 +104,11 @@ class LeadItineraryController extends FController
     {
         $id = Yii::$app->request->post('id');
         $lead = $this->findLead($id);
+
+        if (!Yii::$app->user->can('updateLead', ['lead' => $lead])) {
+            throw new ForbiddenHttpException();
+        }
+
         $data = CompositeFormHelper::prepareDataForMultiInput(
             Yii::$app->request->post(),
             'ItineraryEditForm',

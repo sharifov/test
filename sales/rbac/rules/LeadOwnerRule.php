@@ -2,36 +2,34 @@
 
 namespace sales\rbac\rules;
 
-use sales\repositories\lead\LeadRepository;
-use yii\rbac\Rule;
+use common\models\Lead;
 use Yii;
 
-/**
- * Class LeadOwnerRule
- * @param LeadRepository $leadRepository
- */
-class LeadOwnerRule extends Rule
+class LeadOwnerRule extends LeadRule
 {
     public $name = 'isLeadOwner';
 
-    private $leadRepository;
-
-    public function __construct($config = [])
-    {
-        parent::__construct($config);
-        $this->leadRepository = new LeadRepository();
-    }
-
+    /**
+     * @param int|string $userId
+     * @param yii\rbac\Item $item
+     * @param array $params
+     * @return bool
+     */
     public function execute($userId, $item, $params): bool
     {
-        $leadId = LeadRequestHelper::getId($params);
+        if (!isset($params['leadId']) && !isset($params['lead'])) {
+            throw new \InvalidArgumentException;
+        }
+        /** @var  Lead $params['lead'] */
+        $leadId = $params['leadId'] ?? $params['lead']->id;
         $key = $this->name . '-' . $userId . '-' . $leadId;
         $can = Yii::$app->user->identity->getCache($key);
         if ($can === null) {
             try {
-                $can = Yii::$app->user->identity->setCache($key, $this->leadRepository->get($leadId)->canAgentEdit($userId));
+                $lead = $params['lead'] ?? $this->leadRepository->get($leadId);
+                $can = Yii::$app->user->identity->setCache($key, $lead->canAgentEdit($userId));
             } catch (\Throwable $e) {
-                return false;
+                $can = false;
             }
         }
         return $can;
