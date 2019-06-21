@@ -77,15 +77,15 @@ $this->title = 'Create Lead';
 
                                         <div class="col-sm-1">
                                             <?= $form->field($leadForm, 'adults', [
-                                            ])->dropDownList(LeadHelper::AdultsChildrenInfantsList()) ?>
+                                            ])->dropDownList(LeadHelper::adultsChildrenInfantsList()) ?>
                                         </div>
                                         <div class="col-sm-1">
                                             <?= $form->field($leadForm, 'children', [
-                                            ])->dropDownList(LeadHelper::AdultsChildrenInfantsList()) ?>
+                                            ])->dropDownList(LeadHelper::adultsChildrenInfantsList()) ?>
                                         </div>
                                         <div class="col-sm-1">
                                             <?= $form->field($leadForm, 'infants', [
-                                            ])->dropDownList(LeadHelper::AdultsChildrenInfantsList()) ?>
+                                            ])->dropDownList(LeadHelper::adultsChildrenInfantsList()) ?>
                                         </div>
 
                                     </div>

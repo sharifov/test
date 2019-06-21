@@ -35,7 +35,8 @@ class LeadItineraryController extends FController
                 'rules' => [
                     [
                         'allow' => true,
-                        'actions' => ['view-edit-form', 'edit', 'validate']
+                        'actions' => ['view-edit-form', 'edit', 'validate'],
+                        'roles' => ['@']
                     ]
                 ]
             ],

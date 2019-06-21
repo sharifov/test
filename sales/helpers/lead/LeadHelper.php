@@ -8,6 +8,8 @@ use yii\helpers\ArrayHelper;
 class LeadHelper
 {
 
+
+
     /**
      * @return array
      */
@@ -81,20 +83,9 @@ class LeadHelper
     /**
      * @return array
      */
-    public static function AdultsChildrenInfantsList(): array
+    public static function adultsChildrenInfantsList(): array
     {
-        return [
-            0 => 0,
-            1 => 1,
-            2 => 2,
-            3 => 3,
-            4 => 4,
-            5 => 5,
-            6 => 6,
-            7 => 7,
-            8 => 8,
-            9 => 9,
-        ];
+        return array_combine(range(0, 9), range(0, 9));
     }
 
 }
