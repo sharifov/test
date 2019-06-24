@@ -187,65 +187,15 @@ use yii\widgets\Pjax; ?>
                                             function drawChart() {
                                                 let data = google.visualization.arrayToDataTable([
                                                     ['Time Line',
-                                                        <?php if ($action == '' || $action == 0) :?>
                                                         'communication/voice',
-                                                        {'type': 'string', 'role': 'tooltip', 'p': {'html': true}},
-                                                        <?php endif;?>
-                                                        <?php if ($action == '' || $action == 1) :?>
-                                                        'communication/sms',
-                                                        {'type': 'string', 'role': 'tooltip', 'p': {'html': true}},
-                                                        <?php endif;?>
-                                                        <?php if ($action == '' || $action == 2) :?>
-                                                        'communication/email',
-                                                        {'type': 'string', 'role': 'tooltip', 'p': {'html': true}},
-                                                        <?php endif;?>
-                                                        <?php if ($action == '' || $action == 3) :?>
-                                                        'lead/create',
-                                                        {'type': 'string', 'role': 'tooltip', 'p': {'html': true}},
-                                                        <?php endif;?>
-                                                        <?php if ($action == '' || $action == 4) :?>
-                                                        'lead/sold-update',
-                                                        {'type': 'string', 'role': 'tooltip', 'p': {'html': true}},
-                                                        <?php endif;?>
-                                                        <?php if ($action == '' || $action == 5) :?>
-                                                        'quote/create',
-                                                        {'type': 'string', 'role': 'tooltip', 'p': {'html': true}},
-                                                        <?php endif;?>
-                                                        <?php if ($action == '' || $action == 6) :?>
-                                                        'quote/update',
-                                                        {'type': 'string', 'role': 'tooltip', 'p': {'html': true}},
-                                                        <?php endif;?>
-                                                        <?php if ($action == '' || $action == 7) :?>
-                                                        'quote/get-info',
-                                                        {'type': 'string', 'role': 'tooltip', 'p': {'html': true}}
-                                                        <?php endif;?>
+                                                        //{'type': 'string', 'role': 'tooltip', 'p': {'html': true}},
+
                                                     ],
                                                     <?php foreach($apiStats as $k => $item): ?>
-                                                    ['<?= date($format, strtotime($item['timeLine']))?>',
-                                                        <?php if ($action == '' || $action == 0) :?>
-                                                        <?= $item['cVoice'] ?>, customHTMLContent('<?= date($format, strtotime($item['timeLine']))?>', 'communication/voice', '<?= $item['cVoice'] ?>', '<?= isset($item['cAvgTimeV']) ? round($item['cAvgTimeV'], 2) : ''?>', '<?= isset($item['cMemV']) ? Yii::$app->formatter->asShortSize($item['cMemV'],2) : '' ?>'),
-                                                        <?php endif;?>
-                                                        <?php if ($action == '' || $action == 1) :?>
-                                                        <?= $item['cSms'] ?>, customHTMLContent('<?= date($format, strtotime($item['timeLine']))?>', 'communication/sms', '<?= $item['cSms'] ?>', '<?= isset($item['cAvgTimeS']) ? round($item['cAvgTimeS'], 2) : ''?>', '<?= isset($item['cMemS']) ? Yii::$app->formatter->asShortSize($item['cMemS'], 2) : '' ?>'),
-                                                        <?php endif;?>
-                                                        <?php if ($action == '' || $action == 2) :?>
-                                                        <?= $item['cEmail'] ?>, customHTMLContent('<?= date($format, strtotime($item['timeLine']))?>', 'communication/email', '<?= $item['cEmail'] ?>', '<?= isset($item['cAvgTimeE']) ? round($item['cAvgTimeE'], 2) : ''?>', '<?= isset($item['cMemE']) ? Yii::$app->formatter->asShortSize($item['cMemE'], 2) : '' ?>'),
-                                                        <?php endif;?>
-                                                        <?php if ($action == '' || $action == 3) :?>
-                                                        <?= $item['lCreate'] ?>, customHTMLContent('<?= date($format, strtotime($item['timeLine']))?>', 'lead/create', '<?= $item['lCreate'] ?>', '<?= isset($item['lAvgTimeC']) ? round($item['lAvgTimeC'], 2) : ''?>', '<?= isset($item['lMemC']) ? Yii::$app->formatter->asShortSize($item['lMemC'], 2) : '' ?>'),
-                                                        <?php endif;?>
-                                                        <?php if ($action == '' || $action == 4) :?>
-                                                        <?= $item['leadSU']?>, customHTMLContent('<?= date($format, strtotime($item['timeLine']))?>', 'lead/sold-update', '<?= $item['leadSU'] ?>', '<?= isset($item['lAvgTimeSU']) ? round($item['lAvgTimeSU'], 2) : ''?>', '<?= isset($item['lMemSU']) ? Yii::$app->formatter->asShortSize($item['lMemSU'], 2) : '' ?>'),
-                                                        <?php endif;?>
-                                                        <?php if ($action == '' || $action == 5) :?>
-                                                        <?= $item['qCreate']?>, customHTMLContent('<?= date($format, strtotime($item['timeLine']))?>', 'quote/create', '<?= $item['qCreate'] ?>', '<?= isset($item['qAvgTimeC']) ? round($item['qAvgTimeC'], 2) : ''?>', '<?= isset($item['qMemC']) ? Yii::$app->formatter->asShortSize($item['qMemC'], 2) : '' ?>'),
-                                                        <?php endif;?>
-                                                        <?php if ($action == '' || $action == 6) :?>
-                                                        <?= $item['qUpdate']?>, customHTMLContent('<?= date($format, strtotime($item['timeLine']))?>', 'quote/update', '<?= $item['qUpdate'] ?>', '<?= isset($item['qAvgTimeU']) ? round($item['qAvgTimeU'], 2) : ''?>', '<?= isset($item['qMemU']) ? Yii::$app->formatter->asShortSize($item['qMemU'], 2) : '' ?>'),
-                                                        <?php endif;?>
-                                                        <?php if ($action == '' || $action == 7) :?>
-                                                        <?= $item['qInfo']?>, customHTMLContent('<?= date($format, strtotime($item['timeLine']))?>', 'quote/get-info', '<?= $item['qInfo'] ?>', '<?= isset($item['qAvgTimeI']) ? round($item['qAvgTimeI'], 2) : ''?>', '<?= isset($item['qMemI']) ? Yii::$app->formatter->asShortSize($item['qMemI'], 2) : '' ?>')
-                                                        <?php endif;?>
+                                                    ['<?= date('H:00', strtotime($item['timeLine']))?>',
+                                                    <?= $item['cnt']?>,
+
+
                                                     ],
                                                     <?php endforeach; ?>
                                                 ]);

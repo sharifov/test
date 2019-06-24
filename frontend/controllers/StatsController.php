@@ -283,10 +283,11 @@ class StatsController extends FController
                 'action' => $actionId
             ]);
         } else {
-            $currentDate =  date('Y-m-d', strtotime('-0 day'));
+            //$currentDate =  date('Y-m-d', strtotime('-0 day'));
+            $currentDate =  date('Y-m-d', strtotime('-95 day'));
             $chartTimeFormat = 'H:i';
 
-            $apiStats = ApiLog::getApiLogStats($currentDate . ' 00:00:00', $currentDate . ' 23:59:59', $range = 'H', '');
+            $apiStats = ApiLog::getApiLogStats($currentDate, $currentDate, $range = 'H', '');
 
             return $this->render('api-report', [
                 'apiStats' => $apiStats,

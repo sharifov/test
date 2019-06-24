@@ -182,6 +182,11 @@ class ApiLog extends \yii\db\ActiveRecord
         return $arr;
     }
 
+    public static function getActionsList()
+    {
+        return self::find()->select('al_action')->where('al_action IS NOT NULL')->distinct()->asArray()->all();
+    }
+
     /**
      * @param string $fromDate
      * @param string $todate
@@ -191,7 +196,37 @@ class ApiLog extends \yii\db\ActiveRecord
      */
     public static function getApiLogStats(string $fromDate, string $todate, string $range, string $apiUserId) : array
     {
-        if ($range == 'H'){
+        $actionList = self::getActionsList();
+
+        $apiStatsQuery = new Query();
+        $apiStatsQuery->select('al_action, AVG(al_execution_time) AS execution_time, DATE(al_request_dt) as create_date, HOUR(al_request_dt) as timeLine, COUNT(*) AS cnt');
+        $apiStatsQuery->from('api_log');
+        $apiStatsQuery->where("DATE(al_request_dt) = '$fromDate' AND al_execution_time IS NOT NULL");
+        $apiStatsQuery->groupBy('al_action, DATE(al_request_dt), HOUR(al_request_dt)');
+        $apiStatsQuery->orderBy('create_date ASC, execution_time DESC, timeLine ASC');
+        $result = $apiStatsQuery->all();
+
+        $apiStats = [];
+
+        foreach ($actionList as $action) {
+            foreach ($result as $key => $item) {
+                if (isset($apiStats[$item['timeLine']])) {
+                    $apiStats[$item['timeLine']] = $item;
+                }else {
+                    $apiStats[$item['timeLine']] = $item;
+                }
+            }
+        }
+
+
+
+       // ksort($apiStats);
+
+        var_dump($apiStats); die();
+
+        return $apiStats;
+
+        /*if ($range == 'H'){
             $queryDateFormat = '%H:00';
         } elseif ($range == 'D'){
             $queryDateFormat = '%Y-%m-%d';
@@ -436,6 +471,6 @@ class ApiLog extends \yii\db\ActiveRecord
                 }
             }
         ksort($apiStats);
-        return $apiStats;
+        return $apiStats;*/
     }
 }
