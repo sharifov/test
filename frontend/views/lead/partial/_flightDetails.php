@@ -178,10 +178,17 @@ $itineraryFormId = $itineraryForm->formName() . '-form';
 
                             <div class="separator"></div>
                             <div class="btn-wrapper text-right">
+
+
+                                <?= Html::a('<i class="fa fa-remove"></i> Close',  ['/lead-itinerary/view-edit-form', 'id'=> $itineraryForm->leadId, 'mode' => 'view'], [
+                                    'class' => 'btn btn-danger',
+                                ]) ?>
+
                                 <?= Html::submitButton('<i class="fa fa-check"></i> Save flight request', [
                                     'id' => 'lead-new-segment-button',
                                     'class' => 'btn btn-success',
                                 ]) ?>
+
                             </div>
 
                             <?php ActiveForm::end(); ?>

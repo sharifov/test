@@ -54,6 +54,9 @@ $select2Properties = [
                 $select2Properties['data'] = [$segment['origin'] => $segment['originLabel']];
                 return $select2Properties;
             },
+            'headerOptions' => [
+                //'style' => 'width: 35%;',
+            ]
         ],
         [
             'name' => 'destination',
@@ -66,6 +69,7 @@ $select2Properties = [
                 $select2Properties['data'] = [$segment['destination'] => $segment['destinationLabel']];
                 return $select2Properties;
             },
+
         ],
         [
             'name' => 'departure',
@@ -80,22 +84,17 @@ $select2Properties = [
                     'autoclose' => true,
                     'format' => 'dd-M-yyyy',
                     'todayHighlight' => true,
+                    'sty'
                 ],
                 'options' => [
                     'class' => 'depart-date form-control',
                     'placeholder' => 'Departure',
                     'readonly' => true,
                 ],
+            ],
+            'headerOptions' => [
+                'style' => 'width: 130px;',
             ]
-        ],
-        [
-            'name' => 'flexibility',
-            'type' => 'dropDownList',
-            'title' => 'Flex (days)',
-            'value' => function ($segment) {
-                return $segment['flexibility'];
-            },
-            'items' => LeadFlightSegmentHelper::flexibilityList()
         ],
         [
             'name' => 'flexibilityType',
@@ -104,8 +103,25 @@ $select2Properties = [
             'value' => function ($segment) {
                 return $segment['flexibilityType'];
             },
-            'items' => LeadFlightSegmentHelper::flexibilityTypeList()
+            'items' => LeadFlightSegmentHelper::flexibilityTypeList(),
+            'headerOptions' => [
+                'style' => 'width: 80px;',
+            ]
         ],
+
+        [
+            'name' => 'flexibility',
+            'type' => 'dropDownList',
+            'title' => 'Flex (days)',
+            'value' => function ($segment) {
+                return $segment['flexibility'];
+            },
+            'items' => LeadFlightSegmentHelper::flexibilityList(),
+            'headerOptions' => [
+                'style' => 'width: 80px;',
+            ]
+        ],
+
     ]
 ])->label(false) ?>
 

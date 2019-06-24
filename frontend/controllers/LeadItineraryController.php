@@ -58,6 +58,8 @@ class LeadItineraryController extends FController
     public function actionViewEditForm(): string
     {
         $id = Yii::$app->request->get('id');
+        $mode = Yii::$app->request->get('mode');
+
         $lead = $this->findLead($id);
 
         if (!Yii::$app->user->can('updateLead', ['lead' => $lead])) {
@@ -65,7 +67,9 @@ class LeadItineraryController extends FController
         }
 
         $form = new ItineraryEditForm($lead);
-        $form->setEditMode();
+        if($mode !== 'view') {
+            $form->setEditMode();
+        }
         return $this->renderAjax('/lead/partial/_flightDetails', ['itineraryForm' => $form]);
     }
 
