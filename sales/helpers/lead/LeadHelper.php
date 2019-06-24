@@ -22,11 +22,12 @@ class LeadHelper
         ];
     }
 
+
     /**
-     * @param string $type
-     * @return string
+     * @param string|null $type
+     * @return string|null
      */
-    public static function tripTypeName(string $type): string
+    public static function tripTypeName(?string $type): ?string
     {
         return ArrayHelper::getValue(self::tripTypeList(), $type);
     }
@@ -44,11 +45,12 @@ class LeadHelper
         ];
     }
 
+
     /**
-     * @param string $type
-     * @return string
+     * @param string|null $type
+     * @return string|null
      */
-    public static function cabinName(string $type): string
+    public static function cabinName(?string $type): ?string
     {
         return ArrayHelper::getValue(self::cabinList(), $type);
     }
@@ -71,11 +73,12 @@ class LeadHelper
         ];
     }
 
+
     /**
-     * @param string $status
-     * @return string
+     * @param string|null $status
+     * @return string|null
      */
-    public static function statusName(string $status): string
+    public static function statusName(?string $status): ?string
     {
         return ArrayHelper::getValue(self::statusList(), $status);
     }
