@@ -66,6 +66,7 @@ class SourcesSearch extends Sources
             'project_id' => $this->project_id,
             'last_update' => $this->last_update,
             'default' => $this->default,
+            'hidden' => $this->hidden,
         ]);
 
         $query->andFilterWhere(['like', 'name', $this->name])
