@@ -1,8 +1,6 @@
 <?php
 namespace webapi\modules\v1\controllers;
 
-use common\components\CommunicationService;
-use common\models\ApiLog;
 use common\models\Call;
 use common\models\CallSession;
 use common\models\ClientPhone;
@@ -12,15 +10,10 @@ use common\models\Lead;
 use common\models\Lead2;
 use common\models\Notifications;
 use common\models\Project;
-use common\models\Setting;
 use common\models\Sms;
-use common\models\User;
-use common\models\UserCallStatus;
-use common\models\UserConnection;
-use common\models\UserGroupAssign;
+use common\models\Sources;
 use common\models\UserProfile;
 use common\models\UserProjectParams;
-use Twilio\Twiml;
 use Twilio\TwiML\VoiceResponse;
 use Yii;
 use yii\helpers\ArrayHelper;
@@ -32,7 +25,6 @@ use yii\web\UnprocessableEntityHttpException;
 use common\components\ReceiveEmailsJob;
 use yii\queue\Queue;
 use common\models\ProjectEmployeeAccess;
-use common\models\Source;
 
 class CommunicationController extends ApiBaseController
 {
@@ -824,7 +816,7 @@ class CommunicationController extends ApiBaseController
 
             $clientPhone = ClientPhone::find()->where(['phone' => $client_phone_number])->orderBy(['id' => SORT_DESC])->limit(1)->one();
 
-            $source = Source::findOne(['phone_number' => $agent_phone_number]);
+            $source = Sources::findOne(['phone_number' => $agent_phone_number]);
             $agentDirectCallCheck = false;
 
             if(!$source) {
@@ -1971,7 +1963,7 @@ class CommunicationController extends ApiBaseController
 
 
 
-    protected function voiceGatherSteps($callSid, Source $source, Project $project, $client_phone_number, $step = 1)
+    protected function voiceGatherSteps($callSid, Sources $source, Project $project, $client_phone_number, $step = 1)
     {
         try {
             $call = null;

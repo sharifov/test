@@ -164,13 +164,13 @@ $itineraryFormId = $itineraryForm->formName() . '-form';
                                 </div>
                                 <div class="col-sm-1">
                                 </div>
-                                <div class="col-sm-1">
+                                <div class="col-sm-2">
                                     <?= $form->field($itineraryForm, 'adults')->dropDownList(LeadHelper::adultsChildrenInfantsList(), ['prompt' => '-']) ?>
                                 </div>
-                                <div class="col-sm-1">
+                                <div class="col-sm-2">
                                     <?= $form->field($itineraryForm, 'children')->dropDownList(LeadHelper::adultsChildrenInfantsList(), ['prompt' => '-']) ?>
                                 </div>
-                                <div class="col-sm-1">
+                                <div class="col-sm-2">
                                     <?= $form->field($itineraryForm, 'infants')->dropDownList(LeadHelper::adultsChildrenInfantsList(), ['prompt' => '-']) ?>
                                 </div>
 

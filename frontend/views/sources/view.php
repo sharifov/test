@@ -32,6 +32,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'id',
             'phone_number',
             'default:boolean',
+            'hidden:boolean',
             [
                 'attribute' => 'project_id',
                 'value' => function (\common\models\Sources $model) {

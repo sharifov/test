@@ -4,6 +4,8 @@ namespace common\models;
 
 use borales\extensions\phoneInput\PhoneInputValidator;
 use Yii;
+use yii\behaviors\TimestampBehavior;
+use yii\db\ActiveRecord;
 use yii\helpers\ArrayHelper;
 
 /**
@@ -15,7 +17,9 @@ use yii\helpers\ArrayHelper;
  * @property string $cid
  * @property string $last_update
  * @property string $phone_number
- * @property int $default
+ * @property boolean $default
+ * @property boolean $hidden
+ *
  *
  * @property Project $project
  */
@@ -36,10 +40,12 @@ class Sources extends \yii\db\ActiveRecord
     {
         return [
             [['project_id'], 'required'],
-            [['project_id', 'default'], 'integer'],
+            [['project_id'], 'integer'],
+            [['default', 'hidden'], 'boolean'],
             [['last_update'], 'safe'],
             [['name', 'cid'], 'string', 'max' => 255],
             [['phone_number'], 'string', 'max' => 20],
+            [['phone_number'], 'default', 'value' => null],
             [['phone_number'], 'unique'],
             [['phone_number'], PhoneInputValidator::class],
 
@@ -60,6 +66,21 @@ class Sources extends \yii\db\ActiveRecord
             'last_update' => 'Last Update',
             'phone_number' => 'Phone Number',
             'default' => 'Default',
+            'hidden' => 'Hidden',
+        ];
+    }
+
+    public function behaviors(): array
+    {
+        return [
+            'timestamp' => [
+                'class' => TimestampBehavior::class,
+                'attributes' => [
+                    ActiveRecord::EVENT_BEFORE_INSERT => ['last_update'],
+                    ActiveRecord::EVENT_BEFORE_UPDATE => ['last_update'],
+                ],
+                'value' => date('Y-m-d H:i:s') //new Expression('NOW()'),
+            ],
         ];
     }
 
@@ -80,12 +101,16 @@ class Sources extends \yii\db\ActiveRecord
         return new SourcesQuery(get_called_class());
     }
 
-    /**
-     * @return array
-     */
-    public static function getList(): array
+
+    public static function getList(bool $noHidden = false): array
     {
-        $data = self::find()->joinWith('project')->orderBy(['name' => SORT_ASC])->asArray()->all();
+        $query = self::find()->select(['id', 'name', 'project.name'])->joinWith('project')->orderBy(['name' => SORT_ASC]);
+
+        if($noHidden) {
+            $query->andWhere(['hidden' => false]);
+        }
+
+        $data = $query->asArray()->all();
         return ArrayHelper::map($data, 'id', 'name', 'project.name');
     }
 

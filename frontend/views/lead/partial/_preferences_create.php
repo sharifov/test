@@ -1,5 +1,6 @@
 <?php
 
+use common\models\Employee;
 use sales\helpers\lead\LeadPreferencesHelper;
 use yii\widgets\ActiveForm;
 
@@ -12,7 +13,17 @@ use yii\widgets\ActiveForm;
 
 <div class="sidebar__section">
     <h3 class="sidebar__subtitle">Lead Info</h3>
-    <?= $form->field($leadForm, 'sourceId')->dropDownList($leadForm->listSourceId(), ['prompt' => 'Select']) ?>
+    <?//= $form->field($leadForm, 'sourceId')->dropDownList($leadForm->listSourceId(), ['prompt' => '---']) ?>
+
+    <?php
+        echo $form->field($leadForm, 'sourceId')->widget(\kartik\select2\Select2::class, [
+            'data' => $leadForm->listSourceId(),
+            'size' => \kartik\select2\Select2::SMALL,
+            'options' => ['placeholder' => 'Select market', 'multiple' => false],
+            'pluginOptions' => ['allowClear' => true],
+        ]);
+    ?>
+
 </div>
 
 <div class="sidebar__section">

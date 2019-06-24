@@ -1,31 +1,14 @@
 <?php
 namespace console\controllers;
 
-use common\components\BackOffice;
 use common\models\Airline;
-use common\models\Airport;
-use common\models\Client;
-use common\models\ClientEmail;
-use common\models\ClientPhone;
-use common\models\Employee;
-use common\models\EmployeeAcl;
-use common\models\EmployeeContactInfo;
 use common\models\Lead;
-use common\models\LeadFlightSegment;
 use common\models\LeadFlow;
-use common\models\LeadPreferences;
-use common\models\Note;
-use common\models\Project;
-use common\models\ProjectEmployeeAccess;
 use common\models\Quote;
-use common\models\QuotePrice;
-use common\models\Reason;
-use common\models\Source;
 use yii\console\Controller;
 use Yii;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Console;
-use yii\helpers\VarDumper;
 
 class DbController extends Controller
 {

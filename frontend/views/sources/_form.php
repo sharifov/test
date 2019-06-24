@@ -26,6 +26,9 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'default')->checkbox() ?>
 
+        <?= $form->field($model, 'hidden')->checkbox() ?>
+
+
         <div class="form-group">
             <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
         </div>

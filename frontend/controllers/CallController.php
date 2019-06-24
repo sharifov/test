@@ -5,20 +5,14 @@ namespace frontend\controllers;
 use common\models\Employee;
 use common\models\Lead;
 use common\models\Project;
-use common\models\search\EmployeeSearch;
-use common\models\search\LeadFlightSegmentSearch;
 use common\models\search\LeadSearch;
 use common\models\search\UserConnectionSearch;
-use common\models\Source;
+use common\models\Sources;
 use common\models\UserProjectParams;
 use Yii;
 use common\models\Call;
 use common\models\search\CallSearch;
-use yii\db\Expression;
-use yii\filters\AccessControl;
 use yii\helpers\ArrayHelper;
-use yii\helpers\VarDumper;
-use yii\web\Controller;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -358,7 +352,7 @@ class CallController extends FController
 
                     //$callData['phone_from'] = $upp->upp_tw_phone_number;
 
-                    $source = Source::find()->where(['project_id' => $leadModel->project_id, 'default' => true])->andWhere(['OR', ['IS NOT', 'phone_number', null], ['<>', 'phone_number', '']])->limit(1)->one();
+                    $source = Sources::find()->where(['project_id' => $leadModel->project_id, 'default' => true])->andWhere(['OR', ['IS NOT', 'phone_number', null], ['<>', 'phone_number', '']])->limit(1)->one();
                     if($source && $source->phone_number) {
                         $callData['phone_from'] = $source->phone_number;
                     } else {

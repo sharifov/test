@@ -17,7 +17,7 @@ class SourcesSearch extends Sources
     public function rules()
     {
         return [
-            [['id', 'project_id', 'default'], 'integer'],
+            [['id', 'project_id', 'default', 'hidden'], 'integer'],
             [['name', 'cid', 'last_update', 'phone_number'], 'safe'],
         ];
     }
@@ -46,6 +46,10 @@ class SourcesSearch extends Sources
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+            'sort'=> ['defaultOrder' => ['hidden' => SORT_ASC, 'last_update' => SORT_DESC]],
+            'pagination' => [
+                'pageSize' => 30,
+            ],
         ]);
 
         $this->load($params);

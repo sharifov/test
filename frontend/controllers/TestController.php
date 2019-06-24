@@ -5,23 +5,16 @@ namespace frontend\controllers;
 use common\components\CommunicationService;
 use common\components\CountEvent;
 use common\components\jobs\TelegramSendMessageJob;
-use common\models\Call;
 use common\models\ClientPhone;
 use common\models\Employee;
 use common\models\Lead;
 use common\models\Lead2;
 use common\models\Notifications;
 use common\models\Project;
-use common\models\Source;
-use common\models\UserCallStatus;
-use common\models\UserConnection;
-use common\models\UserGroupAssign;
+use common\models\Sources;
 use common\models\UserProfile;
-use common\models\UserProjectParams;
 use Twilio\TwiML\VoiceResponse;
 use Yii;
-use yii\db\Expression;
-use yii\db\Query;
 use yii\helpers\ArrayHelper;
 use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
@@ -29,8 +22,6 @@ use yii\helpers\Inflector;
 use yii\helpers\VarDumper;
 use common\components\ReceiveEmailsJob;
 use yii\queue\Queue;
-use common\components\CheckPhoneNumberJob;
-use yii\rbac\ManagerInterface;
 
 
 /**
@@ -1193,7 +1184,7 @@ class TestController extends FController
             $clientIds = explode(',', $clientIdsQuery['client_ids']);
         }
 
-        $source = Source::findOne(['phone_number' => $agent_phone_number]);
+        $source = Sources::findOne(['phone_number' => $agent_phone_number]);
         $project = $source->project;
         $call_project_id = $project->id;
 

@@ -9,15 +9,13 @@ use common\models\Lead;
 use common\models\LeadCallExpert;
 use common\models\LeadFlightSegment;
 use common\models\Notifications;
-use common\models\Project;
-use common\models\Source;
+use common\models\Sources;
 use sales\repositories\lead\LeadRepository;
 use sales\services\lead\LeadHashGenerator;
 use webapi\models\ApiLead;
 use webapi\models\ApiLeadCallExpert;
 use Yii;
 use yii\helpers\Html;
-use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
 use yii\web\NotFoundHttpException;
 use yii\web\UnprocessableEntityHttpException;
@@ -311,11 +309,11 @@ class LeadController extends ApiBaseController
 
             if($modelLead->project_id) {
 
-                $source = Source::findOne(['cid' => $modelLead->sub_sources_code, 'project_id' => $modelLead->project_id]);
+                $source = Sources::findOne(['cid' => $modelLead->sub_sources_code, 'project_id' => $modelLead->project_id]);
 
                 if(!$source) {
                     $old_sub_sources_code = $modelLead->sub_sources_code;
-                    $source = Source::find()->where(['project_id' => $modelLead->project_id])->orderBy(['id' => SORT_ASC])->one();
+                    $source = Sources::find()->where(['project_id' => $modelLead->project_id])->orderBy(['id' => SORT_ASC])->one();
                     if($source) {
                         $modelLead->source_id = $source->id;
                         $modelLead->sub_sources_code = $source->cid;

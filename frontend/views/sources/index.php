@@ -23,6 +23,21 @@ $this->params['breadcrumbs'][] = $this->title;
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
+        'tableOptions' => ['class' => 'table table-bordered table-hover'],
+        'rowOptions' => function (\common\models\Sources $model) {
+
+            if ($model->hidden) {
+                return [
+                    'class' => 'danger'
+                ];
+            }
+
+            if ($model->default) {
+                return [
+                    'class' => 'warning'
+                ];
+            }
+        },
         'columns' => [
             //['class' => 'yii\grid\SerialColumn'],
 
@@ -63,6 +78,7 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             //'phone_number',
             'default:boolean',
+            'hidden:boolean',
 
             ['class' => 'yii\grid\ActionColumn'],
         ],

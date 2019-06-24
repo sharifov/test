@@ -158,7 +158,7 @@ class Project extends \yii\db\ActiveRecord
                             foreach ($projectItem['sources'] as $sourceId => $sourceAttr) {
                                 $source = Sources::findOne(['id' => $sourceId]);
                                 if (!$source) {
-                                    $source = new Source();
+                                    $source = new Sources();
                                     $source->project_id = $pr->id;
                                 }
 

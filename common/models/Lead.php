@@ -93,7 +93,7 @@ use common\components\SearchService;
  * @property Employee $employee
  * @property Lead $lDuplicateLead
  * @property Lead[] $leads0
- * @property Source $source
+ * @property Sources $source
  * @property Project $project
  * @property LeadAdditionalInformation[] $additionalInformationForm
  * @property Lead $clone
@@ -640,7 +640,7 @@ class Lead extends ActiveRecord
      */
     public function getSource(): ActiveQuery
     {
-        return $this->hasOne(Source::class, ['id' => 'source_id']);
+        return $this->hasOne(Sources::class, ['id' => 'source_id']);
     }
 
     /**
@@ -1874,7 +1874,7 @@ New lead {lead_id}
     public function afterValidate()
     {
         if ($this->isNewRecord && !empty($this->source_id)) {
-            $source = Source::findOne(['id' => $this->source_id]);
+            $source = Sources::findOne(['id' => $this->source_id]);
             if ($source !== null) {
                 $this->project_id = $source->project_id;
             }
