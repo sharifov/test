@@ -79,4 +79,5 @@ return [
         'general_line_user_limit' => 10,
         'direct_agent_user_limit' => 3,
     ],
+    'use_browser_call_access' => true,
 ];
