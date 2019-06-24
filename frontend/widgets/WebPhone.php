@@ -61,7 +61,12 @@ class WebPhone extends \yii\bootstrap\Widget
             $token = false;
         }
         $supportGeneralPhones = \Yii::$app->params['settings']['support_phone_numbers'] ?? [];
+        $use_browser_call_access = \Yii::$app->params['settings']['use_browser_call_access'] ?? \Yii::$app->params['use_browser_call_access'];
 
-        return $this->render('web_phone', ['clientId' => $clientId, 'token' => $token, 'supportGeneralPhones' => $supportGeneralPhones]);
+        return $this->render('web_phone', [
+            'user_id' => $user_id,
+            'clientId' => $clientId, 'token' => $token,
+            'supportGeneralPhones' => $supportGeneralPhones,
+            'use_browser_call_access' => $use_browser_call_access]);
     }
 }
