@@ -1,9 +1,10 @@
 <?php
-
+/* @var $user_id integer */
 /* @var $clientId string */
 /* @var $token string */
 /* @var $fromAgentPhone string */
 /* @var $supportGeneralPhones array */
+/* @var $use_browser_call_access bool */
 
 
 
@@ -244,23 +245,129 @@
 echo '<div class="container" id="container-redirect-agents"></div>';
 \yii\bootstrap\Modal::end(); ?>
 
-
-
-
-
 <?php
     $ajaxSaveCallUrl = \yii\helpers\Url::to(['phone/ajax-save-call']);
     $ajaxRedirectCallUrl = \yii\helpers\Url::to(['phone/ajax-call-redirect']);
     $ajaxCallRedirectGetAgents = \yii\helpers\Url::to(['phone/ajax-call-get-agents']);
 ?>
-
-
 <script type="text/javascript">
 
     const ajaxSaveCallUrl = '<?=$ajaxSaveCallUrl?>';
     const ajaxCallRedirectUrl = '<?=$ajaxRedirectCallUrl?>';
     const ajaxCallRedirectGetAgents = '<?=$ajaxCallRedirectGetAgents;?>';
     const c_user_id = '<?=Yii::$app->user->id?>';
+    use_browser_call_access =  <?= $use_browser_call_access?>;
+    agentId = <?= $user_id;?>;
+    access_to_interval_check = false;
+
+    if(window.localStorage.agent_tab_conn_state === undefined) {
+        var agent_tab_conn_state = [{"user":agentId,"status":"closed"}];
+        window.localStorage.setItem('agent_tab_conn_state', JSON.stringify(agent_tab_conn_state));
+    }
+    window.addEventListener('storage', function (event) {
+        console.log(" localStorage_EVENT:" + JSON.stringify(event) + " ");
+    });
+
+    
+    function clearAgentStatus(cn) {
+        if(access_to_interval_check && cn && cn.status()) {
+            console.log('updateAgentStatus:' + access_to_interval_check  + ' : ' + cn.status());
+            updateAgentStatus(cn, true);
+        }
+    }
+    
+    function updateAgentStatus(cn, update = false) {
+        if(!use_browser_call_access) {
+            return true;
+        }
+        var access = true;
+        var agent_tab_conn_state = JSON.parse(window.localStorage.agent_tab_conn_state);
+        var del = false;
+        var plus_minute = parseInt(Math.floor(Date.now() /1000) + 5);
+        var seconds_now = parseInt(Math.floor(Date.now() /1000));
+
+        if(agent_tab_conn_state.length > 0) {
+            for(var i=0; i<agent_tab_conn_state.length; i++){
+                var element = agent_tab_conn_state[i];
+                if(! element) {
+                    agent_tab_conn_state.splice(i, 1);
+                    continue;
+                }
+
+                if(element && element.user && element.status && element.user === agentId) {
+
+                        if(element.status !== 'closed' && !update) {
+                            access = false;
+                        }
+                        if(cn && cn.status() && access) {
+                            agent_tab_conn_state[i].status = cn.status();
+                            if(cn.status() === 'open') {
+                                access =false;
+                            }
+                        }
+                }
+            }
+        }
+        window.localStorage.setItem('agent_tab_conn_state', JSON.stringify(agent_tab_conn_state));
+        return access;
+    }
+    
+    function updateAgentStatusOld(conn) {
+        if(!use_browser_call_access) {
+            return true;
+        }
+        var access = true;
+        var agent_tab_conn_state = JSON.parse(window.localStorage.agent_tab_conn_state);
+        //console.log(agent_tab_conn_state);
+        var plus_minute = parseInt(Math.floor(Date.now() /1000) + 5);
+        var seconds_now = parseInt(Math.floor(Date.now() /1000));
+        var del = false;
+        if(agent_tab_conn_state.length > 0) {
+            for(var i=0; i<agent_tab_conn_state.length; i++){
+                var element = agent_tab_conn_state[i];
+                if(! element) {
+                    agent_tab_conn_state.splice(i, 1);
+                    continue;
+                }
+
+                if(element.exp && parseInt(element.exp) < seconds_now) {
+                    del = true;
+                }
+                if(conn && conn.parameters.CallSid) {
+                    if(element.sid && element.sid == conn.parameters.CallSid) {
+                        del = true;
+                    }
+                    if(conn.status() !== 'open' || conn.status() !== 'ringing') {
+                        del = true;
+                    }
+                }
+                if(del){
+                    agent_tab_conn_state.splice(i, 1);
+                }
+            }
+        }
+
+        if(conn && conn.parameters.CallSid && conn.status() && ( conn.status() === 'open' || conn.status() === 'ringing' ) ) {
+            connData = {"sid":conn.parameters.CallSid,"status":conn.status(),"exp":plus_minute};
+            agent_tab_conn_state.push(connData);
+            console.log(window.localStorage.agent_tab_conn_state);
+        }
+
+        if(agent_tab_conn_state.length > 0) {
+            for(var ii=0; ii<agent_tab_conn_state.length; ii++){
+                var element2 = agent_tab_conn_state[i];
+                if(element2 && element2.status) {
+                    if(element2.status === 'open' || element2.status === 'ringing') {
+                        access = false;
+                    }
+                }
+            }
+        }
+
+        window.localStorage.setItem('agent_tab_conn_state', JSON.stringify(agent_tab_conn_state));
+        return access;
+    }
+
 
     function createNotify(title, message, type) {
         new PNotify({
@@ -311,6 +418,7 @@ echo '<div class="container" id="container-redirect-agents"></div>';
     document.getElementById('button-hangup').onclick = function () {
         log('Hanging up...');
         if (device) {
+            updateAgentStatus(connection, true);
             device.disconnectAll();
         }
     };
@@ -449,8 +557,11 @@ echo '<div class="container" id="container-redirect-agents"></div>';
 
     document.getElementById('button-answer').onclick = function () {
         console.log("button-answer: " + connection);
+
         if (connection) {
             connection.accept();
+            updateAgentStatus(connection, true);
+            access_to_interval_check = true;
             document.getElementById('call-controls2').style.display = 'none';
         }
     };
@@ -459,6 +570,8 @@ echo '<div class="container" id="container-redirect-agents"></div>';
         console.log("button-reject: " + connection);
         if (connection) {
             connection.reject();
+            access_to_interval_check = false;
+            updateAgentStatus(connection, true);
             document.getElementById('call-controls2').style.display = 'none';
         }
     };
@@ -577,15 +690,19 @@ echo '<div class="container" id="container-redirect-agents"></div>';
 
                 //console.log([data, device]);
                 device.on('ready', function (device) {
+
                     log('Twilio.Device Ready!');
                     //document.getElementById('call-controls').style.display = 'block';
                 });
 
                 device.on('error', function (error) {
+                    updateAgentStatus(connection);
                     log('Twilio.Device Error: ' + error.message);
                 });
 
                 device.on('connect', function (conn) {
+                    updateAgentStatus(conn, true);
+                    access_to_interval_check = true;
                     //console.log("connect call: status: " + connection.status() + "\n" + 'connection: ' + JSON.stringify(connection) + "\n conn:" + JSON.stringify(conn));
                     connection = conn;
                     log('Successfully established call!');
@@ -606,6 +723,8 @@ echo '<div class="container" id="container-redirect-agents"></div>';
                 });
 
                 device.on('disconnect', function (conn) {
+                    updateAgentStatus(connection, true);
+                    access_to_interval_check = false;
                     connection = conn;
                     log('Call ended');
                     createNotify('Call ended', 'Call ended', 'warning');
@@ -626,6 +745,14 @@ echo '<div class="container" id="container-redirect-agents"></div>';
                 });
 
                 device.on('incoming', function (conn) {
+                    var access =  updateAgentStatus(conn, false);
+
+                    if(!access) {
+                        conn.reject();
+                        access_to_interval_check = false;
+                        return false;
+                    }
+
                     if(connection && Object.prototype.hasOwnProperty.call(connection, "status")) {
                         //console.log("incoming call: status: " + connection.status() + "\n" + 'connection: ' + JSON.stringify(connection) + "\n conn:" + JSON.stringify(conn));
                         if (connection && ['open', 'ringing'].inArray(connection.status())) {
@@ -656,6 +783,8 @@ echo '<div class="container" id="container-redirect-agents"></div>';
 
 
                 device.on('cancel', function (conn) {
+                    updateAgentStatus(conn, true);
+                    access_to_interval_check = false;
                     connection = conn;
                     log('Cancel call');
                     createNotify('Cancel call', 'Cancel call', 'warning');
@@ -678,6 +807,7 @@ echo '<div class="container" id="container-redirect-agents"></div>';
             })
             .catch(function (err) {
                 console.log(err);
+                access_to_interval_check = true;
                 log('Could not get a token from server!');
                 createNotify('Call Token error!', 'Could not get a token from server!', 'error');
             });
@@ -691,6 +821,13 @@ echo '<div class="container" id="container-redirect-agents"></div>';
 
 
     function webCall(phone_from, phone_to, project_id, lead_id, type) {
+
+        var access =  updateAgentStatus(connection);
+        if(!access) {
+            alert('No access to call');
+            return false;
+        }
+
         var params = {'To': phone_to, 'FromAgentPhone': phone_from, 'project_id': project_id, 'lead_id': lead_id, 'c_type': type, 'c_user_id': c_user_id};
         webPhoneParams = params;
 
@@ -704,6 +841,8 @@ echo '<div class="container" id="container-redirect-agents"></div>';
             console.log('Calling ' + params.To + '...');
             createNotify('Calling', 'Calling ' + params.To + '...', 'success');
             connection = device.connect(params);
+            updateAgentStatus(connection, true);
+            access_to_interval_check = true;
             document.getElementById('btn-group-id-redirect').style.display = 'none';
         }
     }
@@ -727,7 +866,8 @@ $userId = Yii::$app->user->id;
 
 $js = <<<JS
 
-
+        setInterval('clearAgentStatus(connection)', 1000);
+       
         $(document).on('click', '.button-redirect-to-agents', function(e) {
             
             e.preventDefault();
