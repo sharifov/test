@@ -230,11 +230,12 @@ class StatsController extends FController
 
     public function actionApiGraph()
     {
+        $actionList = ApiLog::getActionsList();
+
         if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
             $chartOptions = Yii::$app->request->post();
             $rangeBy = Yii::$app->request->post('groupBy');
             $action = Yii::$app->request->post('action');
-
             $date = explode("/", $chartOptions['dateRange']);
             $userApiId = $chartOptions['project'];
 
@@ -280,17 +281,17 @@ class StatsController extends FController
             return $this->renderAjax('api-report', [
                 'apiStats' => $apiStats,
                 'format' => $chartTimeFormat,
+                'actions' => $actionList
             ]);
         } else {
-            //$currentDate =  date('Y-m-d', strtotime('-0 day'));
-            $currentDate =  date('Y-m-d', strtotime('-96 day'));
+            $currentDate =  date('Y-m-d', strtotime('-0 day'));
             $chartTimeFormat = 'H:i';
 
             $apiStats = ApiLog::getApiLogStats($currentDate, $currentDate, $range = 'H', '', '');
-
             return $this->render('api-report', [
                 'apiStats' => $apiStats,
                 'format' => $chartTimeFormat,
+                'actions' => $actionList
             ]);
         }
 

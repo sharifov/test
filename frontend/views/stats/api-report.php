@@ -2,6 +2,7 @@
 /**
  * @var $apiStats []
  * @var $format string
+ * @var $actions []
  */
 use yii\helpers\Html;
 $js = <<<JS
@@ -50,35 +51,8 @@ $('#viewMode0').click(function() {
                 groupBy = '1';
             }
         }
-        let groupingOps = ["H", "D", "M"];        
-        
-        /*let api = '';
-        switch (this.value) {
-          case 'v1/communication/voice' :
-              api = 0;
-              break;
-          case 'v1/communication/sms' :
-              api = 1;
-              break;
-          case 'v1/communication/email' :
-              api = 2;
-              break;
-          case 'v1/lead/create' :
-              api = 3;
-              break;
-          case 'v1/lead/sold-update' :
-              api = 4;
-              break;
-          case 'v1/quote/create' :
-              api = 5;
-              break;
-          case 'v1/quote/update' :
-              api = 6;
-              break;
-          case 'v2/quote/get-info' :
-              api = 7;
-              break;
-        }      */  
+        let groupingOps = ["H", "D", "M"];      
+                   
         $.pjax({container: '#api-graph-pjax', data: {dateRange: $('#api-stats-picker').val(), groupBy: groupingOps[groupBy], project: $('#projects').val(), action: $('#apiList').val()}, type: 'POST', url: 'api-graph', async:true, push: false});
     });
 
@@ -187,33 +161,16 @@ use yii\widgets\Pjax; ?>
                                             function drawChart() {
                                                 let data = google.visualization.arrayToDataTable([
                                                     ['Time Line',
-                                                        'communication/email',
+                                                        <?php foreach ($actions as $k => $action) :?>
+                                                        '<?=$action['al_action']?>',
                                                         {'type': 'string', 'role': 'tooltip', 'p': {'html': true}},
-                                                        'communication/sms',
-                                                        {'type': 'string', 'role': 'tooltip', 'p': {'html': true}},
-                                                        'communication/voice',
-                                                        {'type': 'string', 'role': 'tooltip', 'p': {'html': true}},
-                                                        'lead/create',
-                                                        {'type': 'string', 'role': 'tooltip', 'p': {'html': true}},
-                                                        'lead/sold-update',
-                                                        {'type': 'string', 'role': 'tooltip', 'p': {'html': true}},
-                                                        'quote/create',
-                                                        {'type': 'string', 'role': 'tooltip', 'p': {'html': true}},
-                                                        'quote/update',
-                                                        {'type': 'string', 'role': 'tooltip', 'p': {'html': true}},
-                                                        'quote/get-info',
-                                                        {'type': 'string', 'role': 'tooltip', 'p': {'html': true}},
+                                                        <?php endforeach; ?>
                                                     ],
                                                     <?php foreach($apiStats as $k => $item): ?>
                                                     ['<?= date($format, strtotime($item['timeLine']))?>',
-                                                    <?= isset($item['cnt0']) ? $item['cnt0'] : 0 ?>, customHTMLContent('<?= date($format, strtotime($item['timeLine']))?>', 'communication/email', '<?= isset($item['cnt0']) ? $item['cnt0'] : 0 ?>', '<?= isset($item['exeTime0']) ? round($item['exeTime0'], 2) : ''?>', '<?= isset($item['memUsage0']) ? Yii::$app->formatter->asShortSize($item['memUsage0'],2) : '' ?>'),
-                                                    <?= isset($item['cnt1']) ? $item['cnt1'] : 0 ?>, customHTMLContent('<?= date($format, strtotime($item['timeLine']))?>', 'communication/sms', '<?= isset($item['cnt1']) ? $item['cnt1'] : 0 ?>', '<?= isset($item['exeTime1']) ? round($item['exeTime1'], 2) : ''?>', '<?= isset($item['memUsage1']) ? Yii::$app->formatter->asShortSize($item['memUsage1'],2) : '' ?>'),
-                                                    <?= isset($item['cnt2']) ? $item['cnt2'] : 0 ?>, customHTMLContent('<?= date($format, strtotime($item['timeLine']))?>', 'communication/voice', '<?= isset($item['cnt2']) ? $item['cnt2'] : 0 ?>', '<?= isset($item['exeTime2']) ? round($item['exeTime2'], 2) : ''?>', '<?= isset($item['memUsage2']) ? Yii::$app->formatter->asShortSize($item['memUsage2'],2) : '' ?>'),
-                                                    <?= isset($item['cnt3']) ? $item['cnt3'] : 0 ?>, customHTMLContent('<?= date($format, strtotime($item['timeLine']))?>', 'lead/create', '<?= isset($item['cnt3']) ? $item['cnt3'] : 0 ?>', '<?= isset($item['exeTime3']) ? round($item['exeTime3'], 2) : ''?>', '<?= isset($item['memUsage3']) ? Yii::$app->formatter->asShortSize($item['memUsage3'],2) : '' ?>'),
-                                                    <?= isset($item['cnt4']) ? $item['cnt4'] : 0 ?>, customHTMLContent('<?= date($format, strtotime($item['timeLine']))?>', 'lead/sold-update', '<?= isset($item['cnt4']) ? $item['cnt4'] : 0 ?>', '<?= isset($item['exeTime4']) ? round($item['exeTime4'], 2) : ''?>', '<?= isset($item['memUsage4']) ? Yii::$app->formatter->asShortSize($item['memUsage4'],2) : '' ?>'),
-                                                    <?= isset($item['cnt5']) ? $item['cnt5'] : 0 ?>, customHTMLContent('<?= date($format, strtotime($item['timeLine']))?>', 'quote/create', '<?= isset($item['cnt5']) ? $item['cnt5'] : 0 ?>', '<?= isset($item['exeTime5']) ? round($item['exeTime5'], 2) : ''?>', '<?= isset($item['memUsage5']) ? Yii::$app->formatter->asShortSize($item['memUsage5'],2) : '' ?>'),
-                                                    <?= isset($item['cnt6']) ? $item['cnt6'] : 0 ?>, customHTMLContent('<?= date($format, strtotime($item['timeLine']))?>', 'quote/update', '<?= isset($item['cnt6']) ? $item['cnt6'] : 0 ?>', '<?= isset($item['exeTime6']) ? round($item['exeTime6'], 2) : ''?>', '<?= isset($item['memUsage6']) ? Yii::$app->formatter->asShortSize($item['memUsage6'],2) : '' ?>'),
-                                                    <?= isset($item['cnt7']) ? $item['cnt7'] : 0 ?>, customHTMLContent('<?= date($format, strtotime($item['timeLine']))?>', 'quote/get-info', '<?= isset($item['cnt7']) ? $item['cnt7'] : 0 ?>', '<?= isset($item['exeTime7']) ? round($item['exeTime7'], 2) : ''?>', '<?= isset($item['memUsage7']) ? Yii::$app->formatter->asShortSize($item['memUsage7'],2) : '' ?>'),
+                                                        <?php foreach ($actions as $k => $action) :?>
+                                                        <?= isset($item['cnt' . $k]) ? $item['cnt' . $k] : 0 ?>, customHTMLContent('<?= date($format, strtotime($item['timeLine']))?>', '<?=$action['al_action']?>', '<?= isset($item['cnt' . $k]) ? $item['cnt' . $k] : 0 ?>', '<?= isset($item['exeTime' . $k]) ? round($item['exeTime' . $k], 2) : ''?>', '<?= isset($item['memUsage' . $k]) ? Yii::$app->formatter->asShortSize($item['memUsage' . $k],2) : '' ?>'),
+                                                        <?php endforeach; ?>
                                                     ],
                                                     <?php endforeach; ?>
                                                 ]);
