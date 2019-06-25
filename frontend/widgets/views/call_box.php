@@ -5,7 +5,7 @@
 /* @var $userCallStatus \common\models\UserCallStatus */
 
 \frontend\assets\CallBoxAsset::register($this);
-$bundle = \frontend\assets\TimerAsset::register($this);
+\frontend\assets\TimerAsset::register($this);
 
 
 /*$client = $lastCall->cLead ? $lastCall->cLead->client : ;
@@ -42,7 +42,7 @@ if($clientPhone && $client = $clientPhone->client) {
 
 
 $iconClass = 'fa fa-list';
-if (in_array($lastCall->c_call_status, [\common\models\Call::CALL_STATUS_RINGING, \common\models\Call::CALL_STATUS_IN_PROGRESS], true)) {
+if ($lastCall && in_array($lastCall->c_call_status, [\common\models\Call::CALL_STATUS_RINGING, \common\models\Call::CALL_STATUS_IN_PROGRESS], true)) {
     $isVisible = true;
 } else {
     $isVisible = false;
@@ -219,10 +219,13 @@ use yii\widgets\Pjax; ?>
         <?/*<i class="prime fa fa-list"></i>*/?>
         <?php
             $iconClass = 'fa fa-list';
-            if($lastCall->c_call_status === \common\models\Call::CALL_STATUS_RINGING) {
-                $iconClass = 'fa fa-spinner fa-spin';
-            } elseif($lastCall->c_call_status === \common\models\Call::CALL_STATUS_IN_PROGRESS) {
-                $iconClass = 'fa fa-refresh fa-spin';
+
+            if($lastCall) {
+                if ($lastCall->c_call_status === \common\models\Call::CALL_STATUS_RINGING) {
+                    $iconClass = 'fa fa-spinner fa-spin';
+                } elseif ($lastCall->c_call_status === \common\models\Call::CALL_STATUS_IN_PROGRESS) {
+                    $iconClass = 'fa fa-refresh fa-spin';
+                }
             }
         //$iconClass = 'fa fa-refresh fa-spin';
         ?>
@@ -317,23 +320,8 @@ use yii\widgets\Pjax; ?>
 </script>
 
 <?php
-
 $callStatusUrl = \yii\helpers\Url::to(['user-call-status/update-status']);
 $clientInfoUrl = \yii\helpers\Url::to(['client/ajax-get-info']);
-
-
-
-/*echo  \yii\helpers\Url::home().'<br>';
-echo  \yii\helpers\Url::base().'<br>';
-
-echo  \yii\helpers\Url::home(true).'<br>';
-echo  \yii\helpers\Url::base(true).'<br>';
-
-exit;*/
-
-//\yii\helpers\VarDumper::dump($_SERVER, 10, true); exit;
-
-//$jsPath = Yii::$app->request->baseUrl.'/js/sounds/';
 
 $userId = Yii::$app->user->id;
 
@@ -377,14 +365,11 @@ $js = <<<JS
    
 
     $("#call-box-pjax").on("pjax:start", function() {
-        //console.log('#call-box-pjax pjax:start');
         $('.prime').addClass('fa-recycle fa-spin');
     });
     
-    $("#call-box-pjax").on("pjax:end", function() {
-        //console.log('#call-box-pjax pjax:end');
-        //$('.prime').removeClass('fa-recycle');
-    });
+    /*$("#call-box-pjax").on("pjax:end", function() {
+    });*/
 
 JS;
 
@@ -395,9 +380,7 @@ JS;
 
 } else {*/
 
-    if (Yii::$app->controller->module->id != 'user-management') {
-        $this->registerJs($js, \yii\web\View::POS_READY);
-    }
+if (Yii::$app->controller->module->id != 'user-management') {
+    $this->registerJs($js, \yii\web\View::POS_READY);
+}
 //}
-
-
