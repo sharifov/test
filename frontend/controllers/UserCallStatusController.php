@@ -149,7 +149,7 @@ class UserCallStatusController extends FController
             if(!$ucs->save()) {
                 Yii::error(VarDumper::dumpAsString($ucs->errors), 'UserCallStatusController:actionUpdateStatus:save');
             } else {
-                Notifications::socket($ucs->us_user_id, null, 'updateUserCallStatus', ['type_id' => $type_id]);
+                Notifications::socket($ucs->us_user_id, null, 'updateUserCallStatus', ['id' => 'ucs'.$ucs->us_id, 'type_id' => $type_id]);
             }
         }
 

@@ -952,12 +952,19 @@ class TestController extends FController
         }*/
 
         $statuses = ['initiated', 'ringing', 'in-progress', 'completed'];
-        $lead_id = 54719;
+
+        $statuses = ['ringing', 'in-progress', 'completed'];
+
+        $statuses = ['ringing'];
+        //$lead_id = 54719;
+
+        $user_id = Yii::$app->user->id;
+
         $n = 0;
         foreach ($statuses as $status) {
-            sleep(random_int(5, 7));
+            sleep(random_int(2, 3));
             $n++;
-            Notifications::socket(null, $lead_id, 'callUpdate', ['status' => $status, 'duration' =>  ($status == 'completed' ? random_int(51, 180) : 0), 'snr' => $n], true);
+            Notifications::socket($user_id, null, 'callUpdate', ['id' => 123, 'status' => $status, 'duration' =>  ($status == 'completed' ? random_int(51, 180) : 0), 'snr' => $n], true);
         }
     }
 

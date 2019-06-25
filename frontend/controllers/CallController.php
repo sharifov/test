@@ -2,6 +2,7 @@
 
 namespace frontend\controllers;
 
+use common\components\SearchService;
 use common\models\Employee;
 use common\models\Lead;
 use common\models\Project;
@@ -9,10 +10,12 @@ use common\models\search\LeadSearch;
 use common\models\search\UserConnectionSearch;
 use common\models\Sources;
 use common\models\UserProjectParams;
+use frontend\widgets\CallBox;
 use Yii;
 use common\models\Call;
 use common\models\search\CallSearch;
 use yii\helpers\ArrayHelper;
+use yii\helpers\VarDumper;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -501,5 +504,31 @@ class CallController extends FController
             'projectList'       => $projectList,
         ]);
 
+    }
+
+    /**
+     * @return string
+     */
+    public function actionCallBox(): string
+    {
+        $id = Yii::$app->request->get('id');
+        $keyCache = 'cal-box-request-' . $id;
+
+        //Yii::$app->cache->delete($keyCache);
+
+        $result = Yii::$app->cache->get($keyCache);
+
+        if($result === false) {
+
+            $box = CallBox::getInstance();
+            $result = $box->run();
+            if($result) {
+                Yii::$app->cache->set($keyCache, $result, 30);
+            }
+        }
+
+        //VarDumper::dump($data); exit;
+
+        return $result;
     }
 }

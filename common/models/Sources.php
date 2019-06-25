@@ -102,12 +102,16 @@ class Sources extends \yii\db\ActiveRecord
     }
 
 
+    /**
+     * @param bool $noHidden
+     * @return array
+     */
     public static function getList(bool $noHidden = false): array
     {
-        $query = self::find()->select(['id', 'name', 'project.name'])->joinWith('project')->orderBy(['name' => SORT_ASC]);
+        $query = self::find()->select(['id' => 'sources.id', 'name' => 'sources.name', 'project.name'])->joinWith('project')->orderBy(['project.name' => SORT_ASC, 'sources.name' => SORT_ASC]);
 
         if($noHidden) {
-            $query->andWhere(['hidden' => false]);
+            $query->andWhere(['sources.hidden' => false]);
         }
 
         $data = $query->asArray()->all();
