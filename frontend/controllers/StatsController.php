@@ -230,11 +230,12 @@ class StatsController extends FController
 
     public function actionApiGraph()
     {
+        $actionList = ApiLog::getActionsList();
+
         if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
             $chartOptions = Yii::$app->request->post();
             $rangeBy = Yii::$app->request->post('groupBy');
-            $actionId = Yii::$app->request->post('action');
-
+            $action = Yii::$app->request->post('action');
             $date = explode("/", $chartOptions['dateRange']);
             $userApiId = $chartOptions['project'];
 
@@ -275,23 +276,22 @@ class StatsController extends FController
                 $lastDate = date('Y-m-d H:i:s', strtotime($date[1] . ' 23:59:59'));
             }
 
-            $apiStats = ApiLog::getApiLogStats($currentDate, $lastDate, $range, $userApiId);
+            $apiStats = ApiLog::getApiLogStats($currentDate, $lastDate, $range, $userApiId, $action);
 
             return $this->renderAjax('api-report', [
                 'apiStats' => $apiStats,
                 'format' => $chartTimeFormat,
-                'action' => $actionId
+                'actions' => $actionList
             ]);
         } else {
             $currentDate =  date('Y-m-d', strtotime('-0 day'));
             $chartTimeFormat = 'H:i';
 
-            $apiStats = ApiLog::getApiLogStats($currentDate . ' 00:00:00', $currentDate . ' 23:59:59', $range = 'H', '');
-
+            $apiStats = ApiLog::getApiLogStats($currentDate, $currentDate, $range = 'H', '', '');
             return $this->render('api-report', [
                 'apiStats' => $apiStats,
                 'format' => $chartTimeFormat,
-                'action' => ''
+                'actions' => $actionList
             ]);
         }
 
