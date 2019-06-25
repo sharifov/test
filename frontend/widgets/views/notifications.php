@@ -277,7 +277,7 @@ $js = <<<JS
                     
                     if(obj.command === 'incomingCall') {
                         if (typeof incomingCall === "function") {
-                            incomingCall(obj);
+                            // incomingCall(obj);
                         }
                     }
                     
