@@ -192,9 +192,10 @@ class ApiLog extends \yii\db\ActiveRecord
      * @param string $todate
      * @param string $range
      * @param string $apiUserId
+     * @param string $selectedAction
      * @return array
      */
-    public static function getApiLogStats(string $fromDate, string $todate, string $range, string $apiUserId) : array
+    public static function getApiLogStats(string $fromDate, string $todate, string $range, string $apiUserId, string $selectedAction) : array
     {
         if ($range == 'H'){
             $queryDateFormat = '%H:00';
@@ -211,8 +212,15 @@ class ApiLog extends \yii\db\ActiveRecord
         $apiStatsQuery = new Query();
         $apiStatsQuery->select(["al_action, AVG(al_execution_time) AS execution_time, DATE(al_request_dt) as create_date, DATE_FORMAT(al_request_dt, '$queryDateFormat' ) as timeLine, COUNT(*) AS cnt"]);
         $apiStatsQuery->from('api_log');
-        $apiStatsQuery->where("DATE(al_request_dt) = '$fromDate' AND al_execution_time IS NOT NULL");
-        $apiStatsQuery->groupBy(["al_action, DATE(al_request_dt), DATE_FORMAT(al_request_dt, '$queryDateFormat')"]);
+        $apiStatsQuery->where(['between','DATE(al_request_dt)', $fromDate, $todate]);
+        $apiStatsQuery->andWhere('al_execution_time IS NOT NULL');
+        if($apiUserId != ''){
+            $apiStatsQuery->andWhere(['=', 'al_user_id', $apiUserId]);
+        }
+        if($selectedAction != ''){
+            $apiStatsQuery->andWhere(['=', 'al_action', $selectedAction]);
+        }
+        $apiStatsQuery->groupBy(["al_action, DATE_FORMAT(al_request_dt, '$queryDateFormat')"]);
         $apiStatsQuery->orderBy('create_date ASC, execution_time DESC, timeLine ASC');
         $result = $apiStatsQuery->all();
 
@@ -229,258 +237,10 @@ class ApiLog extends \yii\db\ActiveRecord
             }
         }
 
-
         ksort($apiStats);
 
-        //var_dump($apiStats); die();
+        //var_dump($result); die();
 
         return $apiStats;
-
-        /*if ($range == 'H'){
-            $queryDateFormat = '%H:00';
-        } elseif ($range == 'D'){
-            $queryDateFormat = '%Y-%m-%d';
-        } elseif ($range == 'M'){
-            $queryDateFormat = '%Y-%m';
-        } elseif ($range == 'HD'){
-            $queryDateFormat = '%Y-%m-%d %H:00';
-        }
-
-        $cVoiceQuery = new Query();
-        $cVoiceQuery->select(["DATE_FORMAT( al_request_dt, ' $queryDateFormat ') AS timeLine, COUNT(*) AS cVoice, AVG(CASE WHEN al_execution_time >=0 THEN al_execution_time ELSE 0 END) AS cAvgTimeV", "AVG(CASE WHEN al_memory_usage >=0 THEN al_memory_usage ELSE 0 END) AS cMemV"]);
-        $cVoiceQuery->from('api_log');
-        $cVoiceQuery->where(['between', 'DATE(al_request_dt)', $fromDate, $todate]);
-        $cVoiceQuery->andWhere(['=', 'al_action', 'v1/communication/voice']);
-        if($apiUserId != ''){
-            $cVoiceQuery->andWhere(['=', 'al_user_id', $apiUserId]);
-        }
-        $cVoiceQuery->groupBy(["DATE_FORMAT( al_request_dt, ' $queryDateFormat ')"]);
-        $communicationVoice = $cVoiceQuery->all();
-
-        $cSmsQuery = new Query();
-        $cSmsQuery->select(["DATE_FORMAT( al_request_dt, ' $queryDateFormat ') AS timeLine, COUNT(*) AS cSms, AVG(CASE WHEN al_execution_time >=0 THEN al_execution_time ELSE 0 END) AS cAvgTimeS", "AVG(CASE WHEN al_memory_usage >=0 THEN al_memory_usage ELSE 0 END) AS cMemS"]);
-        $cSmsQuery->from('api_log');
-        $cSmsQuery->where(['between', 'DATE(al_request_dt)', $fromDate, $todate]);
-        $cSmsQuery->andWhere(['=', 'al_action', 'v1/communication/sms']);
-        if($apiUserId != ''){
-            $cSmsQuery->andWhere(['=', 'al_user_id', $apiUserId]);
-        }
-        $cSmsQuery->groupBy(["DATE_FORMAT( al_request_dt, ' $queryDateFormat ')"]);
-        $communicationSms = $cSmsQuery->all();
-
-        $cEmailQuery = new Query();
-        $cEmailQuery->select(["DATE_FORMAT( al_request_dt, ' $queryDateFormat ') AS timeLine, COUNT(*) AS cEmail, AVG(CASE WHEN al_execution_time >=0 THEN al_execution_time ELSE 0 END) AS cAvgTimeE", "AVG(CASE WHEN al_memory_usage >=0 THEN al_memory_usage ELSE 0 END) AS cMemE"]);
-        $cEmailQuery->from('api_log');
-        $cEmailQuery->where(['between', 'DATE(al_request_dt)', $fromDate, $todate]);
-        $cEmailQuery->andWhere(['=', 'al_action', 'v1/communication/email']);
-        if($apiUserId != ''){
-            $cEmailQuery->andWhere(['=', 'al_user_id', $apiUserId]);
-        }
-        $cEmailQuery->groupBy(["DATE_FORMAT( al_request_dt, ' $queryDateFormat ')"]);
-        $communicationEmail = $cEmailQuery->all();
-
-        $lCreateQuery = new Query();
-        $lCreateQuery->select(["DATE_FORMAT( al_request_dt, ' $queryDateFormat ') AS timeLine, COUNT(*) AS lCreate, AVG(CASE WHEN al_execution_time >=0 THEN al_execution_time ELSE 0 END) AS lAvgTimeC", "AVG(CASE WHEN al_memory_usage >=0 THEN al_memory_usage ELSE 0 END) AS lMemC"]);
-        $lCreateQuery->from('api_log');
-        $lCreateQuery->where(['between', 'DATE(al_request_dt)', $fromDate, $todate]);
-        $lCreateQuery->andWhere(['=', 'al_action', 'v1/lead/create']);
-        if($apiUserId != ''){
-            $lCreateQuery->andWhere(['=', 'al_user_id', $apiUserId]);
-        }
-        $lCreateQuery->groupBy(["DATE_FORMAT( al_request_dt, ' $queryDateFormat ')"]);
-        $leadCreate = $lCreateQuery->all();
-
-        $lSoldUpdateQuery = new Query();
-        $lSoldUpdateQuery->select(["DATE_FORMAT( al_request_dt, ' $queryDateFormat ') AS timeLine, COUNT(*) AS leadSU, AVG(CASE WHEN al_execution_time >=0 THEN al_execution_time ELSE 0 END) AS lAvgTimeSU", "AVG(CASE WHEN al_memory_usage >=0 THEN al_memory_usage ELSE 0 END) AS lMemSU"]);
-        $lSoldUpdateQuery->from('api_log');
-        $lSoldUpdateQuery->where(['between', 'DATE(al_request_dt)', $fromDate, $todate]);
-        $lSoldUpdateQuery->andWhere(['=', 'al_action', 'v1/lead/sold-update']);
-        if($apiUserId != ''){
-            $lSoldUpdateQuery->andWhere(['=', 'al_user_id', $apiUserId]);
-        }
-        $lSoldUpdateQuery->groupBy(["DATE_FORMAT( al_request_dt, ' $queryDateFormat ')"]);
-        $leadSoldUpdate = $lSoldUpdateQuery->all();
-
-        $qCreateQuery = new Query();
-        $qCreateQuery->select(["DATE_FORMAT( al_request_dt, ' $queryDateFormat ') AS timeLine, COUNT(*) AS qCreate, AVG(CASE WHEN al_execution_time >=0 THEN al_execution_time ELSE 0 END) AS qAvgTimeC", "AVG(CASE WHEN al_memory_usage >=0 THEN al_memory_usage ELSE 0 END) AS qMemC"]);
-        $qCreateQuery->from('api_log');
-        $qCreateQuery->where(['between', 'DATE(al_request_dt)', $fromDate, $todate]);
-        $qCreateQuery->andWhere(['=', 'al_action', 'v1/quote/create']);
-        if($apiUserId != ''){
-            $qCreateQuery->andWhere(['=', 'al_user_id', $apiUserId]);
-        }
-        $qCreateQuery->groupBy(["DATE_FORMAT( al_request_dt, ' $queryDateFormat ')"]);
-        $quoteCreate = $qCreateQuery->all();
-
-        $qUpdateQuery = new Query();
-        $qUpdateQuery->select(["DATE_FORMAT( al_request_dt, ' $queryDateFormat ') AS timeLine, COUNT(*) AS qUpdate, AVG(CASE WHEN al_execution_time >=0 THEN al_execution_time ELSE 0 END) AS qAvgTimeU", "AVG(CASE WHEN al_memory_usage >=0 THEN al_memory_usage ELSE 0 END) AS qMemU"]);
-        $qUpdateQuery->from('api_log');
-        $qUpdateQuery->where(['between', 'DATE(al_request_dt)', $fromDate, $todate]);
-        $qUpdateQuery->andWhere(['=', 'al_action', 'v1/quote/update']);
-        if($apiUserId != ''){
-            $qUpdateQuery->andWhere(['=', 'al_user_id', $apiUserId]);
-        }
-        $qUpdateQuery->groupBy(["DATE_FORMAT( al_request_dt, ' $queryDateFormat ')"]);
-        $quoteUpdate = $qUpdateQuery->all();
-
-        $qGetInfoQuery = new Query();
-        $qGetInfoQuery->select(["DATE_FORMAT( al_request_dt, ' $queryDateFormat ') AS timeLine, COUNT(*) AS qInfo, AVG(CASE WHEN al_execution_time >=0 THEN al_execution_time ELSE 0 END) AS qAvgTimeI", "AVG(CASE WHEN al_memory_usage >=0 THEN al_memory_usage ELSE 0 END) AS qMemI"]);
-        $qGetInfoQuery->from('api_log');
-        $qGetInfoQuery->where(['between', 'DATE(al_request_dt)', $fromDate, $todate]);
-        $qGetInfoQuery->andWhere(['=', 'al_action', 'v2/quote/get-info']);
-        if($apiUserId != ''){
-            $qGetInfoQuery->andWhere(['=', 'al_user_id', $apiUserId]);
-        }
-        $qGetInfoQuery->groupBy(["DATE_FORMAT( al_request_dt, ' $queryDateFormat ')"]);
-        $quoteGetInfo = $qGetInfoQuery->all();
-
-        $apiStats = [];
-            foreach ($communicationVoice as $item) {
-                $item['cSms'] = (isset($item['cSms']) ? $item['cSms'] : 0);
-                $item['qUpdate'] = (isset($item['qUpdate']) ? $item['qUpdate'] : 0);
-                $item['cEmail'] = (isset($item['cEmail']) ? $item['cEmail'] : 0);
-                $item['lCreate'] = (isset($item['lCreate']) ? $item['lCreate'] : 0);
-                $item['leadSU'] = (isset($item['leadSU']) ? $item['leadSU'] : 0);
-                $item['qCreate'] = (isset($item['qCreate']) ? $item['qCreate'] : 0);
-                $item['qInfo'] = (isset($item['qInfo']) ? $item['qInfo'] : 0);
-                $item['cVoice'] = (isset($item['cVoice']) ? $item['cVoice'] : 0);
-
-                $apiStats[$item['timeLine']] = $item;
-            }
-
-            foreach ($communicationSms as $item) {
-                $item['cSms'] = (isset($item['cSms']) ? $item['cSms'] : 0);
-                $item['qUpdate'] = (isset($item['qUpdate']) ? $item['qUpdate'] : 0);
-                $item['cEmail'] = (isset($item['cEmail']) ? $item['cEmail'] : 0);
-                $item['lCreate'] = (isset($item['lCreate']) ? $item['lCreate'] : 0);
-                $item['leadSU'] = (isset($item['leadSU']) ? $item['leadSU'] : 0);
-                $item['qCreate'] = (isset($item['qCreate']) ? $item['qCreate'] : 0);
-                $item['qInfo'] = (isset($item['qInfo']) ? $item['qInfo'] : 0);
-                $item['cVoice'] = (isset($item['cVoice']) ? $item['cVoice'] : 0);
-
-                if (isset($apiStats[$item['timeLine']])) {
-                    $apiStats[$item['timeLine']]['cSms'] = $item['cSms'];
-                    $apiStats[$item['timeLine']]['cAvgTimeS'] = $item['cAvgTimeS'];
-                    $apiStats[$item['timeLine']]['cMemS'] = $item['cMemS'];
-                }else {
-                    $apiStats[$item['timeLine']] = $item;
-                }
-            }
-
-            foreach ($communicationEmail as $item) {
-                $item['cSms'] = (isset($item['cSms']) ? $item['cSms'] : 0);
-                $item['qUpdate'] = (isset($item['qUpdate']) ? $item['qUpdate'] : 0);
-                $item['cEmail'] = (isset($item['cEmail']) ? $item['cEmail'] : 0);
-                $item['lCreate'] = (isset($item['lCreate']) ? $item['lCreate'] : 0);
-                $item['leadSU'] = (isset($item['leadSU']) ? $item['leadSU'] : 0);
-                $item['qCreate'] = (isset($item['qCreate']) ? $item['qCreate'] : 0);
-                $item['qInfo'] = (isset($item['qInfo']) ? $item['qInfo'] : 0);
-                $item['cVoice'] = (isset($item['cVoice']) ? $item['cVoice'] : 0);
-
-                if (isset($apiStats[$item['timeLine']])) {
-                    $apiStats[$item['timeLine']]['cEmail'] = $item['cEmail'];
-                    $apiStats[$item['timeLine']]['cAvgTimeE'] = $item['cAvgTimeE'];
-                    $apiStats[$item['timeLine']]['cMemE'] = $item['cMemE'];
-                }else {
-                    $apiStats[$item['timeLine']] = $item;
-                }
-            }
-
-            foreach ($leadCreate as $item) {
-                $item['cSms'] = (isset($item['cSms']) ? $item['cSms'] : 0);
-                $item['qUpdate'] = (isset($item['qUpdate']) ? $item['qUpdate'] : 0);
-                $item['cEmail'] = (isset($item['cEmail']) ? $item['cEmail'] : 0);
-                $item['lCreate'] = (isset($item['lCreate']) ? $item['lCreate'] : 0);
-                $item['leadSU'] = (isset($item['leadSU']) ? $item['leadSU'] : 0);
-                $item['qCreate'] = (isset($item['qCreate']) ? $item['qCreate'] : 0);
-                $item['qInfo'] = (isset($item['qInfo']) ? $item['qInfo'] : 0);
-                $item['cVoice'] = (isset($item['cVoice']) ? $item['cVoice'] : 0);
-
-                if (isset($apiStats[$item['timeLine']])) {
-                    $apiStats[$item['timeLine']]['lCreate'] = $item['lCreate'];
-                    $apiStats[$item['timeLine']]['lAvgTimeC'] = $item['lAvgTimeC'];
-                    $apiStats[$item['timeLine']]['lMemC'] = $item['lMemC'];
-                }else {
-                    $apiStats[$item['timeLine']] = $item;
-                }
-            }
-
-            foreach ($leadSoldUpdate as $item) {
-                $item['cSms'] = (isset($item['cSms']) ? $item['cSms'] : 0);
-                $item['qUpdate'] = (isset($item['qUpdate']) ? $item['qUpdate'] : 0);
-                $item['cEmail'] = (isset($item['cEmail']) ? $item['cEmail'] : 0);
-                $item['lCreate'] = (isset($item['lCreate']) ? $item['lCreate'] : 0);
-                $item['leadSU'] = (isset($item['leadSU']) ? $item['leadSU'] : 0);
-                $item['qCreate'] = (isset($item['qCreate']) ? $item['qCreate'] : 0);
-                $item['qInfo'] = (isset($item['qInfo']) ? $item['qInfo'] : 0);
-                $item['cVoice'] = (isset($item['cVoice']) ? $item['cVoice'] : 0);
-
-                if (isset($apiStats[$item['timeLine']])) {
-                    $apiStats[$item['timeLine']]['leadSU'] = $item['leadSU'];
-                    $apiStats[$item['timeLine']]['lAvgTimeSU'] = $item['lAvgTimeSU'];
-                    $apiStats[$item['timeLine']]['lMemSU'] = $item['lMemSU'];
-                }else {
-                    $apiStats[$item['timeLine']] = $item;
-                }
-            }
-
-            foreach ($quoteCreate as $item) {
-                $item['cSms'] = (isset($item['cSms']) ? $item['cSms'] : 0);
-                $item['qUpdate'] = (isset($item['qUpdate']) ? $item['qUpdate'] : 0);
-                $item['cEmail'] = (isset($item['cEmail']) ? $item['cEmail'] : 0);
-                $item['lCreate'] = (isset($item['lCreate']) ? $item['lCreate'] : 0);
-                $item['leadSU'] = (isset($item['leadSU']) ? $item['leadSU'] : 0);
-                $item['qCreate'] = (isset($item['qCreate']) ? $item['qCreate'] : 0);
-                $item['qInfo'] = (isset($item['qInfo']) ? $item['qInfo'] : 0);
-                $item['cVoice'] = (isset($item['cVoice']) ? $item['cVoice'] : 0);
-
-                if (isset($apiStats[$item['timeLine']])) {
-                    $apiStats[$item['timeLine']]['qCreate'] = $item['qCreate'];
-                    $apiStats[$item['timeLine']]['qAvgTimeC'] = $item['qAvgTimeC'];
-                    $apiStats[$item['timeLine']]['qMemC'] = $item['qMemC'];
-                }else {
-                    $apiStats[$item['timeLine']] = $item;
-                }
-            }
-
-            foreach ($quoteUpdate as $item) {
-                $item['cSms'] = (isset($item['cSms']) ? $item['cSms'] : 0);
-                $item['qUpdate'] = (isset($item['qUpdate']) ? $item['qUpdate'] : 0);
-                $item['cEmail'] = (isset($item['cEmail']) ? $item['cEmail'] : 0);
-                $item['lCreate'] = (isset($item['lCreate']) ? $item['lCreate'] : 0);
-                $item['leadSU'] = (isset($item['leadSU']) ? $item['leadSU'] : 0);
-                $item['qCreate'] = (isset($item['qCreate']) ? $item['qCreate'] : 0);
-                $item['qInfo'] = (isset($item['qInfo']) ? $item['qInfo'] : 0);
-                $item['cVoice'] = (isset($item['cVoice']) ? $item['cVoice'] : 0);
-
-                if (isset($apiStats[$item['timeLine']])) {
-                    $apiStats[$item['timeLine']]['qUpdate'] = $item['qUpdate'];
-                    $apiStats[$item['timeLine']]['qAvgTimeU'] = $item['qAvgTimeU'];
-                    $apiStats[$item['timeLine']]['qMemU'] = $item['qMemU'];
-                }else {
-                    $apiStats[$item['timeLine']] = $item;
-                }
-            }
-
-            foreach ($quoteGetInfo as $item) {
-                $item['cSms'] = (isset($item['cSms']) ? $item['cSms'] : 0);
-                $item['qUpdate'] = (isset($item['qUpdate']) ? $item['qUpdate'] : 0);
-                $item['cEmail'] = (isset($item['cEmail']) ? $item['cEmail'] : 0);
-                $item['lCreate'] = (isset($item['lCreate']) ? $item['lCreate'] : 0);
-                $item['leadSU'] = (isset($item['leadSU']) ? $item['leadSU'] : 0);
-                $item['qCreate'] = (isset($item['qCreate']) ? $item['qCreate'] : 0);
-                $item['qInfo'] = (isset($item['qInfo']) ? $item['qInfo'] : 0);
-                $item['cVoice'] = (isset($item['cVoice']) ? $item['cVoice'] : 0);
-
-                if (isset($apiStats[$item['timeLine']])) {
-                    $apiStats[$item['timeLine']]['qInfo'] = $item['qInfo'];
-                    $apiStats[$item['timeLine']]['qAvgTimeI'] = $item['qAvgTimeI'];
-                    $apiStats[$item['timeLine']]['qMemI'] = $item['qMemI'];
-                }else {
-                    $apiStats[$item['timeLine']] = $item;
-                }
-            }
-        ksort($apiStats);
-        return $apiStats;*/
     }
 }

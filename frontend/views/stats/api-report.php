@@ -52,7 +52,7 @@ $('#viewMode0').click(function() {
         }
         let groupingOps = ["H", "D", "M"];        
         
-        let api = '';
+        /*let api = '';
         switch (this.value) {
           case 'v1/communication/voice' :
               api = 0;
@@ -78,8 +78,8 @@ $('#viewMode0').click(function() {
           case 'v2/quote/get-info' :
               api = 7;
               break;
-        }        
-        $.pjax({container: '#api-graph-pjax', data: {dateRange: $('#api-stats-picker').val(), groupBy: groupingOps[groupBy], project: $('#projects').val(), action: api}, type: 'POST', url: 'api-graph', async:true, push: false});
+        }      */  
+        $.pjax({container: '#api-graph-pjax', data: {dateRange: $('#api-stats-picker').val(), groupBy: groupingOps[groupBy], project: $('#projects').val(), action: $('#apiList').val()}, type: 'POST', url: 'api-graph', async:true, push: false});
     });
 
 function generateChartPreloader() {
@@ -163,7 +163,7 @@ use yii\widgets\Pjax; ?>
                         </div>
 
                         <div class="col-xs-1">
-                            <?= Html::dropDownList('projectsList', null,  \common\models\ApiLog::getActionFilter(), [
+                            <?= Html::dropDownList('actionList', null,  \common\models\ApiLog::getActionFilter(), [
                                 'prompt' => 'All',
                                 'id' => 'apiList',
                                 'class' => 'form-control'
