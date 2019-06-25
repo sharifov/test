@@ -7,6 +7,7 @@ use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
 use yii\helpers\ArrayHelper;
+use yii\helpers\VarDumper;
 
 /**
  * This is the model class for table "sources".
@@ -108,14 +109,13 @@ class Sources extends \yii\db\ActiveRecord
      */
     public static function getList(bool $noHidden = false): array
     {
-        $query = self::find()->select(['id' => 'sources.id', 'name' => 'sources.name', 'project_name' => 'projects.name'])->joinWith('project')->orderBy(['projects.name' => SORT_ASC, 'sources.name' => SORT_ASC]);
+        $query = self::find()->select(['sources_id' => 'sources.id', 'sources_name' => 'sources.name', 'project_name' => 'projects.name'])->innerJoin(['projects'])->orderBy(['project_name' => SORT_ASC, 'sources_name' => SORT_ASC]);
 
         if($noHidden) {
             $query->andWhere(['sources.hidden' => false]);
         }
-
         $data = $query->asArray()->all();
-        return ArrayHelper::map($data, 'id', 'name', 'project_name');
+        return ArrayHelper::map($data, 'sources_id', 'sources_name', 'project_name');
     }
 
     public static function getGroupList()
