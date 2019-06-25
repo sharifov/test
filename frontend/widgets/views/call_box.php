@@ -88,7 +88,10 @@ use yii\widgets\Pjax; ?>
                     <?php
                         if($lastCall->c_updated_dt) {
                             $timerSeconds = time() - strtotime($lastCall->c_updated_dt);
-                            if( $timerSeconds > 0 ) {
+                            if(!$timerSeconds) {
+                                $timerSeconds = 0;
+                            }
+                            if( $timerSeconds >= 0 ) {
                                 echo '<span id="call-box-timer" class="badge badge-warning timer"></span>';
                                 $js = "$('#call-box-timer').timer({format: '%M:%S', seconds: " . $timerSeconds . "}).timer('start');";
                                 $this->registerJs($js, \yii\web\View::POS_READY);

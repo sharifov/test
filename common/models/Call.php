@@ -5,6 +5,8 @@ namespace common\models;
 use Yii;
 use DateTime;
 use common\components\ChartTools;
+use yii\behaviors\TimestampBehavior;
+use yii\db\ActiveRecord;
 use yii\helpers\VarDumper;
 
 
@@ -189,6 +191,20 @@ class Call extends \yii\db\ActiveRecord
         ];
     }
 
+    public function behaviors()
+    {
+        return [
+            'timestamp' => [
+                'class' => TimestampBehavior::class,
+                'attributes' => [
+                    ActiveRecord::EVENT_BEFORE_INSERT => ['c_created_dt', 'c_updated_dt'],
+                    ActiveRecord::EVENT_BEFORE_UPDATE => ['c_updated_dt'],
+                ],
+                'value' => date('Y-m-d H:i:s') //new Expression('NOW()'),
+            ],
+        ];
+    }
+
     /**
      * @return \yii\db\ActiveQuery
      */
@@ -326,8 +342,7 @@ class Call extends \yii\db\ActiveRecord
 
         }
 
-        if ($this->c_created_user_id) {
-            // && isset($changedAttributes['c_call_status'])
+        if (($insert && $this->c_created_user_id) || (isset($changedAttributes['c_call_status']) && $this->c_created_user_id))  {
             Notifications::socket($this->c_created_user_id, null, 'callUpdate', ['id' => $this->c_id, 'status' => $this->c_call_status, 'duration' => $this->c_call_duration, 'snr' => $this->c_sequence_number], true);
         }
 
