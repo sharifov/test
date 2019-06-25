@@ -284,7 +284,7 @@ class StatsController extends FController
             ]);
         } else {
             //$currentDate =  date('Y-m-d', strtotime('-0 day'));
-            $currentDate =  date('Y-m-d', strtotime('-95 day'));
+            $currentDate =  date('Y-m-d', strtotime('-96 day'));
             $chartTimeFormat = 'H:i';
 
             $apiStats = ApiLog::getApiLogStats($currentDate, $currentDate, $range = 'H', '');

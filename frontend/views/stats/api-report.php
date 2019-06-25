@@ -187,15 +187,25 @@ use yii\widgets\Pjax; ?>
                                             function drawChart() {
                                                 let data = google.visualization.arrayToDataTable([
                                                     ['Time Line',
+                                                        'communication/email',
+                                                        'communication/sms',
                                                         'communication/voice',
-                                                        //{'type': 'string', 'role': 'tooltip', 'p': {'html': true}},
-
+                                                        'lead/create',
+                                                        'lead/sold-update',
+                                                        'quote/create',
+                                                        'quote/update',
+                                                        'quote/get-info',
                                                     ],
                                                     <?php foreach($apiStats as $k => $item): ?>
-                                                    ['<?= date('H:00', strtotime($item['timeLine']))?>',
-                                                    <?= $item['cnt']?>,
-
-
+                                                    ['<?= date($format, strtotime($item['timeLine']))?>',
+                                                    <?= isset($item['cnt0']) ? $item['cnt0'] : 0 ?>,
+                                                    <?= isset($item['cnt1']) ? $item['cnt1'] : 0 ?>,
+                                                    <?= isset($item['cnt2']) ? $item['cnt2'] : 0 ?>,
+                                                    <?= isset($item['cnt3']) ? $item['cnt3'] : 0 ?>,
+                                                    <?= isset($item['cnt4']) ? $item['cnt4'] : 0 ?>,
+                                                    <?= isset($item['cnt5']) ? $item['cnt5'] : 0 ?>,
+                                                    <?= isset($item['cnt6']) ? $item['cnt6'] : 0 ?>,
+                                                    <?= isset($item['cnt7']) ? $item['cnt7'] : 0 ?>,
                                                     ],
                                                     <?php endforeach; ?>
                                                 ]);

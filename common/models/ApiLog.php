@@ -196,33 +196,43 @@ class ApiLog extends \yii\db\ActiveRecord
      */
     public static function getApiLogStats(string $fromDate, string $todate, string $range, string $apiUserId) : array
     {
+        if ($range == 'H'){
+            $queryDateFormat = '%H:00';
+        } elseif ($range == 'D'){
+            $queryDateFormat = '%Y-%m-%d';
+        } elseif ($range == 'M'){
+            $queryDateFormat = '%Y-%m';
+        } elseif ($range == 'HD'){
+            $queryDateFormat = '%Y-%m-%d %H:00';
+        }
+
         $actionList = self::getActionsList();
 
         $apiStatsQuery = new Query();
-        $apiStatsQuery->select('al_action, AVG(al_execution_time) AS execution_time, DATE(al_request_dt) as create_date, HOUR(al_request_dt) as timeLine, COUNT(*) AS cnt');
+        $apiStatsQuery->select(["al_action, AVG(al_execution_time) AS execution_time, DATE(al_request_dt) as create_date, DATE_FORMAT(al_request_dt, '$queryDateFormat' ) as timeLine, COUNT(*) AS cnt"]);
         $apiStatsQuery->from('api_log');
         $apiStatsQuery->where("DATE(al_request_dt) = '$fromDate' AND al_execution_time IS NOT NULL");
-        $apiStatsQuery->groupBy('al_action, DATE(al_request_dt), HOUR(al_request_dt)');
+        $apiStatsQuery->groupBy(["al_action, DATE(al_request_dt), DATE_FORMAT(al_request_dt, '$queryDateFormat')"]);
         $apiStatsQuery->orderBy('create_date ASC, execution_time DESC, timeLine ASC');
         $result = $apiStatsQuery->all();
 
         $apiStats = [];
 
-        foreach ($actionList as $action) {
+        foreach ($actionList as $actionKey => $action) {
             foreach ($result as $key => $item) {
-                if (isset($apiStats[$item['timeLine']])) {
-                    $apiStats[$item['timeLine']] = $item;
-                }else {
-                    $apiStats[$item['timeLine']] = $item;
+                if ($action['al_action'] == $item['al_action']){
+                    $apiStats[$item['timeLine']]['action' . $actionKey] = $item['al_action'];
+                    $apiStats[$item['timeLine']]['exeTime' . $actionKey] = $item['execution_time'];
+                    $apiStats[$item['timeLine']]['cnt' . $actionKey] = $item['cnt'];
+                    $apiStats[$item['timeLine']]['timeLine'] = $item['timeLine'];
                 }
             }
         }
 
 
+        ksort($apiStats);
 
-       // ksort($apiStats);
-
-        var_dump($apiStats); die();
+        //var_dump($apiStats); die();
 
         return $apiStats;
 
