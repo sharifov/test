@@ -108,14 +108,14 @@ class Sources extends \yii\db\ActiveRecord
      */
     public static function getList(bool $noHidden = false): array
     {
-        $query = self::find()->select(['id' => 'sources.id', 'name' => 'sources.name', 'project.name'])->joinWith('project')->orderBy(['project.name' => SORT_ASC, 'sources.name' => SORT_ASC]);
+        $query = self::find()->select(['id' => 'sources.id', 'name' => 'sources.name', 'project_name' => 'projects.name'])->joinWith('project')->orderBy(['projects.name' => SORT_ASC, 'sources.name' => SORT_ASC]);
 
         if($noHidden) {
             $query->andWhere(['sources.hidden' => false]);
         }
 
         $data = $query->asArray()->all();
-        return ArrayHelper::map($data, 'id', 'name', 'project.name');
+        return ArrayHelper::map($data, 'id', 'name', 'project_name');
     }
 
     public static function getGroupList()
