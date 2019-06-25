@@ -326,6 +326,10 @@ class Call extends \yii\db\ActiveRecord
 
         }
 
+        if ($this->c_created_user_id && isset($changedAttributes['c_call_status']) ) {
+            Notifications::socket($this->c_created_user_id, null, 'callUpdate', ['id' => $this->c_id, 'status' => $this->c_call_status, 'duration' => $this->c_call_duration, 'snr' => $this->c_sequence_number], true);
+        }
+
         if($this->c_call_type_id === self::CALL_TYPE_OUT && $this->c_lead_id && $this->cLead) {
             $this->cLead->updateLastAction();
         }
@@ -424,6 +428,12 @@ class Call extends \yii\db\ActiveRecord
     {
         //sleep(1);
         try {
+
+            $callsCount = self::find()->where(['c_call_status' => self::CALL_STATUS_QUEUE])->count();
+            if(!$callsCount) {
+                return false;
+            }
+
             $user = Employee::findOne($agentId);
             if (!$user) {
                 throw new \Exception('Agent not found by id. CommunicationService:redirectCallFromHold:$user:'. $agentId);

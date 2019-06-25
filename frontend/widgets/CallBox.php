@@ -21,6 +21,23 @@ use common\models\UserCallStatus;
  */
 class CallBox extends \yii\bootstrap\Widget
 {
+
+    private static $instance;
+
+    /**
+     * Returns *CallBox* instance of this class.
+     *
+     * @return CallBox The *CallBox* instance.
+     */
+    public static function getInstance(): CallBox
+    {
+        if (null === static::$instance) {
+            static::$instance = new static();
+        }
+
+        return static::$instance;
+    }
+
     public function init()
     {
         parent::init();
@@ -50,10 +67,10 @@ class CallBox extends \yii\bootstrap\Widget
 
 
         $lastCall = Call::find()->where(['c_created_user_id' => $user_id])->orderBy(['c_id' => SORT_DESC])->limit(1)->one();
-        $lastCalls = Call::find()->where(['c_created_user_id' => $user_id])->orderBy(['c_id' => SORT_DESC])->limit(5)->all();
+        //$lastCalls = Call::find()->where(['c_created_user_id' => $user_id])->orderBy(['c_id' => SORT_DESC])->limit(5)->all();
 
         $userCallStatus = UserCallStatus::find()->where(['us_user_id' => $user_id])->orderBy(['us_id' => SORT_DESC])->limit(1)->one();
 
-        return $this->render('call_box', ['lastCall' => $lastCall, 'lastCalls' => $lastCalls, 'userCallStatus' => $userCallStatus]);
+        return $this->render('call_box', ['lastCall' => $lastCall, /*'lastCalls' => $lastCalls,*/ 'userCallStatus' => $userCallStatus]);
     }
 }

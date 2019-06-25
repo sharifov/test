@@ -251,8 +251,12 @@ $js = <<<JS
                     }
                     
                     if(obj.command === 'callUpdate') {
-                        if (typeof callUpdate === "function") {
+                        /*if (typeof callUpdate === "function") {
                             callUpdate(obj);
+                        }*/
+                        
+                        if (typeof refreshCallBox === "function") {
+                            refreshCallBox(obj);
                         }
                     }
                     
@@ -262,6 +266,8 @@ $js = <<<JS
                             //console.info('webCallUpdate - 2');
                             webCallUpdate(obj);
                         }
+                        
+                        
                     }
                     
                     if(obj.command === 'recordingUpdate') {
@@ -276,9 +282,15 @@ $js = <<<JS
                     }
                     
                     if(obj.command === 'updateUserCallStatus') {
-                        if (typeof updateUserCallStatus === "function") {
+                        /*if (typeof updateUserCallStatus === "function") {
                             updateUserCallStatus(obj);
+                        }*/
+                        
+                        if (typeof refreshCallBox === "function") {
+                            refreshCallBox(obj);
                         }
+                        
+                        
                     }
                     
                     if(obj.command === 'callMapUpdate') {
