@@ -326,7 +326,8 @@ class Call extends \yii\db\ActiveRecord
 
         }
 
-        if ($this->c_created_user_id && isset($changedAttributes['c_call_status']) ) {
+        if ($this->c_created_user_id) {
+            // && isset($changedAttributes['c_call_status'])
             Notifications::socket($this->c_created_user_id, null, 'callUpdate', ['id' => $this->c_id, 'status' => $this->c_call_status, 'duration' => $this->c_call_duration, 'snr' => $this->c_sequence_number], true);
         }
 
