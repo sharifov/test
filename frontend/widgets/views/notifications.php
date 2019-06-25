@@ -275,11 +275,11 @@ $js = <<<JS
                         updateCommunication();
                     }
                     
-                    if(obj.command === 'incomingCall') {
+                    /*if(obj.command === 'incomingCall') {
                         if (typeof incomingCall === "function") {
-                            // incomingCall(obj);
+                            incomingCall(obj);
                         }
-                    }
+                    }*/
                     
                     if(obj.command === 'updateUserCallStatus') {
                         /*if (typeof updateUserCallStatus === "function") {

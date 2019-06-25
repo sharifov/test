@@ -505,9 +505,9 @@ class CommunicationController extends ApiBaseController
                     $response['call'] = $call->attributes;
 
                     //Notifications::create($call->c_created_user_id, 'New Call from '.$call->c_from. ' ('.$data['client_name'].')', 'Call from ' . $call->c_from .' ('.$data['client_name'].') to '.$call->c_to, Notifications::TYPE_INFO, true);
-                    if($call->c_created_user_id) {
+                    /*if($call->c_created_user_id) {
                         Notifications::socket($call->c_created_user_id, $lead_id = null, 'incomingCall', $data, true);
-                    }
+                    }*/
 
                     //Notifications::socket(null, $call->c_lead_id, 'callUpdate', ['status' => $call->c_call_status, 'duration' => $call->c_call_duration, 'snr' => $call->c_sequence_number], true);
                 }
@@ -1150,7 +1150,7 @@ class CommunicationController extends ApiBaseController
                         Yii::error(VarDumper::dumpAsString($call->errors), 'API:Communication:voiceIncoming:Call:save');
                     }
                     $data['status'] = $call->c_call_status;
-                    Notifications::socket($call->c_created_user_id, $call->c_lead_id, 'incomingCall', $data, true);
+                    // Notifications::socket($call->c_created_user_id, $call->c_lead_id, 'incomingCall', $data, true);
                 }
             } elseif($isOnHold) {
                 $call = new Call();
@@ -1948,7 +1948,7 @@ class CommunicationController extends ApiBaseController
                 }
 
                 if($call->c_created_user_id) {
-                    Notifications::socket($call->c_created_user_id, $lead_id = null, 'incomingCall', ['status' => $call->c_call_status, 'duration' => $call->c_call_duration, 'snr' => $call->c_sequence_number], true);
+                    //Notifications::socket($call->c_created_user_id, $lead_id = null, 'incomingCall', ['status' => $call->c_call_status, 'duration' => $call->c_call_duration, 'snr' => $call->c_sequence_number], true);
                     Notifications::socket($call->c_created_user_id, null, 'webCallUpdate', ['status' => $call->c_call_status, 'duration' => $call->c_call_duration, 'debug' => 'DEFAULT'], true);
                 }
 
@@ -2387,7 +2387,7 @@ class CommunicationController extends ApiBaseController
                                 Yii::error(VarDumper::dumpAsString($callAgent->errors), 'API:CommunicationController:actionVoiceGather:callAgent:save');
                             }
                             $data['status'] = $call->c_call_status;
-                            Notifications::socket($call->c_created_user_id, $call->c_lead_id, 'incomingCall', $data, true);
+                            //Notifications::socket($call->c_created_user_id, $call->c_lead_id, 'incomingCall', $data, true);
                             $dial->client('seller' . $userCall->id, [
                                 'statusCallbackEvent' => 'ringing answered completed',
                                 'statusCallback' => $communicationApiUrl . $params_voice_gather['communication_voiceStatusCallbackUrl'],
