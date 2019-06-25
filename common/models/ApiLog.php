@@ -210,7 +210,7 @@ class ApiLog extends \yii\db\ActiveRecord
         $actionList = self::getActionsList();
 
         $apiStatsQuery = new Query();
-        $apiStatsQuery->select(["al_action, AVG(al_execution_time) AS execution_time, DATE(al_request_dt) as create_date, DATE_FORMAT(al_request_dt, '$queryDateFormat' ) as timeLine, COUNT(*) AS cnt"]);
+        $apiStatsQuery->select(["al_action, AVG(al_execution_time) AS execution_time, AVG(al_memory_usage) AS memUsage, DATE(al_request_dt) as create_date, DATE_FORMAT(al_request_dt, '$queryDateFormat' ) as timeLine, COUNT(*) AS cnt"]);
         $apiStatsQuery->from('api_log');
         $apiStatsQuery->where(['between','DATE(al_request_dt)', $fromDate, $todate]);
         $apiStatsQuery->andWhere('al_execution_time IS NOT NULL');
@@ -231,6 +231,7 @@ class ApiLog extends \yii\db\ActiveRecord
                 if ($action['al_action'] == $item['al_action']){
                     $apiStats[$item['timeLine']]['action' . $actionKey] = $item['al_action'];
                     $apiStats[$item['timeLine']]['exeTime' . $actionKey] = $item['execution_time'];
+                    $apiStats[$item['timeLine']]['memUsage' . $actionKey] = $item['memUsage'];
                     $apiStats[$item['timeLine']]['cnt' . $actionKey] = $item['cnt'];
                     $apiStats[$item['timeLine']]['timeLine'] = $item['timeLine'];
                 }
@@ -239,7 +240,7 @@ class ApiLog extends \yii\db\ActiveRecord
 
         ksort($apiStats);
 
-        //var_dump($result); die();
+        //var_dump($apiStats); die();
 
         return $apiStats;
     }
