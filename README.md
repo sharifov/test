@@ -72,6 +72,10 @@ mysqldump -Q -c -e -v -u USER -p DATABASE | gzip > /var/www/backups/sql.gz
 gunzip < /var/www/sale/sql.gz | mysql -v -u USER -pPASSWORD DATABASE
 mysqlshow -u USER -pPASSWORD DATABASE
 ```
+Create Pg Dump:
+```
+pg_dump -h localhost --username=postgres -Fc sales3 > /home/user/db.dump
+```
 
 sudo nano /etc/mysql/conf.d/mysql.cnf
 ``` 

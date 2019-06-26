@@ -737,10 +737,10 @@ class Lead extends ActiveRecord
             'booked' => 'COUNT(DISTINCT CASE WHEN status IN (:booked) ' . $created . ' THEN leads.id ELSE NULL END)',
             //'sold' => 'COUNT(DISTINCT CASE WHEN status IN (:sold) ' . $created . $sold .$employee . ' THEN leads.id ELSE NULL END)',
             'sold' => '(SELECT COUNT(leads.id) FROM leads
-                        LEFT JOIN '.ProfitSplit::tableName().' `ps` ON ps.ps_lead_id = leads.id
-                        LEFT JOIN '.TipsSplit::tableName().' `ts` ON ts.ts_lead_id = leads.id
+                        LEFT JOIN '.ProfitSplit::tableName().' ps ON ps.ps_lead_id = leads.id
+                        LEFT JOIN '.TipsSplit::tableName().' ts ON ts.ts_lead_id = leads.id
                         WHERE leads.status IN (:sold) '.$created . $sold .$employee.'
-                        AND leads.`project_id` IN ('.implode(',', $projectIds).'))',
+                        AND leads.project_id IN ('.implode(',', $projectIds).'))',
             'processing' => 'COUNT(DISTINCT CASE WHEN status IN (' . $default . ') ' . $employee . ' THEN leads.id ELSE NULL END)'
         ];
 
