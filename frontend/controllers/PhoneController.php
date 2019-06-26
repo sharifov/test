@@ -216,7 +216,8 @@ class PhoneController extends FController
                 $is_ready = true;
                 $userRedirect = Employee::findOne($to_id);
                 if($userRedirect) {
-                    if(!$userRedirect->isOnline() || !$userRedirect->isCallStatusReady() || !$userRedirect->isCallFree()) {
+                    //if(!$userRedirect->isOnline() || !$userRedirect->isCallStatusReady() || !$userRedirect->isCallFree()) {
+                    if(!$userRedirect->isOnline() || !$userRedirect->isCallFree()) {
                         $is_ready = false;
                     }
                 } else {
