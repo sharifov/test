@@ -291,18 +291,11 @@ echo '<div class="container" id="container-redirect-agents"></div>';
             return true;
         }
 
-       /* if(window.localStorage.lock === 'true') {
-            setTimeout('updateAgentStatus(connection)', 500);
-        }
-
-        window.localStorage.setItem('lock', 'true');
-*/
-
         window.localStorage.setItem('lock', 'true');
 
-        if(conn && conn.status()) {
+        /*if(conn && conn.status()) {
             console.log("CONN: " + conn.parameters.CallSid + ' - ' + conn.status());
-        }
+        }*/
 
         var access = true;
         try {
@@ -375,63 +368,6 @@ echo '<div class="container" id="container-redirect-agents"></div>';
         window.localStorage.setItem('lock', 'false');
         return access;
     }
-
-    function updateAgentStatusOld(conn) {
-        if(!use_browser_call_access) {
-            return true;
-        }
-        var access = true;
-        var agent_tab_conn_state = JSON.parse(window.localStorage.agent_tab_conn_state);
-        //console.log(agent_tab_conn_state);
-        var plus_minute = parseInt(Math.floor(Date.now() /1000) + 5);
-        var seconds_now = parseInt(Math.floor(Date.now() /1000));
-        var del = false;
-        if(agent_tab_conn_state.length > 0) {
-            for(var i=0; i<agent_tab_conn_state.length; i++){
-                var element = agent_tab_conn_state[i];
-                if(! element) {
-                    agent_tab_conn_state.splice(i, 1);
-                    continue;
-                }
-
-                if(element.exp && parseInt(element.exp) < seconds_now) {
-                    del = true;
-                }
-                if(conn && conn.parameters.CallSid) {
-                    if(element.sid && element.sid == conn.parameters.CallSid) {
-                        del = true;
-                    }
-                    if(conn.status() !== 'open' || conn.status() !== 'ringing') {
-                        del = true;
-                    }
-                }
-                if(del){
-                    agent_tab_conn_state.splice(i, 1);
-                }
-            }
-        }
-
-        if(conn && conn.parameters.CallSid && conn.status() && ( conn.status() === 'open' || conn.status() === 'ringing' ) ) {
-            connData = {"sid":conn.parameters.CallSid,"status":conn.status(),"exp":plus_minute};
-            agent_tab_conn_state.push(connData);
-            console.log(window.localStorage.agent_tab_conn_state);
-        }
-
-        if(agent_tab_conn_state.length > 0) {
-            for(var ii=0; ii<agent_tab_conn_state.length; ii++){
-                var element2 = agent_tab_conn_state[i];
-                if(element2 && element2.status) {
-                    if(element2.status === 'open' || element2.status === 'ringing') {
-                        access = false;
-                    }
-                }
-            }
-        }
-
-        window.localStorage.setItem('agent_tab_conn_state', JSON.stringify(agent_tab_conn_state));
-        return access;
-    }
-
 
     function createNotify(title, message, type) {
         new PNotify({
