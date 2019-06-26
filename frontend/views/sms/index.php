@@ -247,7 +247,7 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$
             [
                 'attribute' => 's_created_dt',
                 'value' => function (\common\models\Sms $model) {
-                    return '<i class="fa fa-calendar"></i> ' . date('d-M-Y [H:i]', strtotime($model->s_created_dt));
+                    return $model->s_created_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->s_created_dt), 'php: Y-m-d [H:i:s]')  : '-';
                 },
                 'format' => 'raw',
                 'filter' => DatePicker::widget([

@@ -136,7 +136,7 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$
             [
                 'attribute' => 'c_created_dt',
                 'value' => function (\common\models\Call $model) {
-                    return $model->c_created_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->c_created_dt), 'php: Y-m-d [H:i:s]')  : '-';  //Yii::$app->formatter->asDatetime(strtotime($model->c_created_dt))
+                    return $model->c_created_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->c_created_dt), 'php: Y-m-d [H:i:s]')  : '-';
                 },
                 'format' => 'raw',
                 'filter' => DatePicker::widget([
