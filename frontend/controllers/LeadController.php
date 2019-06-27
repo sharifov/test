@@ -1014,7 +1014,6 @@ class LeadController extends FController
             //return $this->redirect(['view', 'id' => $model->lce_id]);
         }
 
-
         $searchModelLeadChecklist= new LeadChecklistSearch();
         $params = Yii::$app->request->queryParams;
         $params['LeadChecklistSearch']['lc_lead_id'] = $lead->id;
@@ -1023,13 +1022,21 @@ class LeadController extends FController
         }
         $dataProviderChecklist = $searchModelLeadChecklist->searchByLead($params);
 
-
+        $modelNote = new Note();
+        if ($modelNote->load(Yii::$app->request->post())) {
+            $model = new Note();
+            $model->employee_id = Yii::$app->user->identity->getId();
+            $model->lead_id = $lead->id;
+            $model->message = $modelNote->message;
+            $model->created = date('Y-m-d H:i:s');
+            $model->save();
+        }
 
         $dataProviderNotes = new ActiveDataProvider([
-            'query' => Note::find()->where(['employee_id' => Yii::$app->user->id])->andWhere(['lead_id' => $lead->id])->orderBy('id ASC'),
-            /*'pagination' => [
-                'pageSize' => 10,
-            ],*/
+            'query' => Note::find()/*->where(['employee_id' => Yii::$app->user->id])*/->where(['lead_id' => $lead->id])->orderBy('id ASC'),
+            'pagination' => [
+                'pageSize' => 2,
+            ],
         ]);
 
 
@@ -1053,7 +1060,8 @@ class LeadController extends FController
             'dataProviderChecklist' => $dataProviderChecklist,
             'modelLeadChecklist' => $modelLeadChecklist,
             'itineraryForm' => $itineraryForm,
-            'dataProviderNotes' => $dataProviderNotes
+            'dataProviderNotes' => $dataProviderNotes,
+            'modelNote' => $modelNote
         ]);
 
     }
@@ -1285,7 +1293,7 @@ class LeadController extends FController
         return $this->redirect(['follow-up']);
     }
 
-    public function actionAddNote()
+    /*public function actionAddNote()
     {
         $lead = Lead::findOne(['id' => Yii::$app->request->get('id', 0)]);
 
@@ -1298,7 +1306,7 @@ class LeadController extends FController
             $model->save();
         }
         return $this->redirect(Yii::$app->request->referrer);
-    }
+    }*/
 
     public function actionSetRating($id)
     {
