@@ -84,6 +84,7 @@ class LeadCreateForm extends CompositeForm
             ['cabin', 'string', 'max' => 1],
             ['cabin', 'in', 'range' => array_keys(LeadHelper::cabinList())],
 
+            [['adults', 'children', 'infants'], 'required'],
             [['adults', 'children', 'infants'], 'integer', 'min' => 0, 'max' => 9],
             [['adults', 'children', 'infants'], 'in', 'range' => array_keys(LeadHelper::adultsChildrenInfantsList())],
 
