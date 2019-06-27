@@ -273,4 +273,21 @@ class Notifications extends ActiveRecord
         return false;
     }
 
+
+    public static function pingUserMap(): void
+    {
+        $users = UserConnection::find()
+            ->select('uc_user_id')
+            ->andWhere(['uc_controller_id' => 'call', 'uc_action_id' => 'user-map'])
+            ->groupBy(['uc_user_id'])
+            ->cache(60)
+            ->column();
+
+        if($users) {
+            foreach ($users as $user_id) {
+                self::socket($user_id, null, 'callMapUpdate', [], true);
+            }
+        }
+    }
+
 }

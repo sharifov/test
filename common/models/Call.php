@@ -350,18 +350,7 @@ class Call extends \yii\db\ActiveRecord
             $this->cLead->updateLastAction();
         }
 
-        $users = UserConnection::find()
-            ->select('uc_user_id')
-            ->andWhere(['uc_controller_id' => 'call', 'uc_action_id' => 'user-map'])
-            ->groupBy(['uc_user_id'])
-            ->column();
-
-        if($users) {
-            foreach ($users as $user_id) {
-                Notifications::socket($user_id, null, 'callMapUpdate', [], true);
-            }
-        }
-
+        Notifications::pingUserMap();
     }
 
 
@@ -444,7 +433,7 @@ class Call extends \yii\db\ActiveRecord
     {
         try {
 
-            $callsCount = self::find()->where(['c_call_status' => self::CALL_STATUS_QUEUE])->count();
+            $callsCount = self::find()->where(['c_call_status' => self::CALL_STATUS_QUEUE])->cache(10)->count();
             if (!$callsCount) {
                 return false;
             }

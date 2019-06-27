@@ -5,6 +5,7 @@ namespace frontend\controllers;
 use common\components\CommunicationService;
 use common\components\CountEvent;
 use common\components\jobs\TelegramSendMessageJob;
+use common\models\Call;
 use common\models\ClientPhone;
 use common\models\Employee;
 use common\models\Lead;
@@ -12,6 +13,7 @@ use common\models\Lead2;
 use common\models\Notifications;
 use common\models\Project;
 use common\models\Sources;
+use common\models\UserConnection;
 use common\models\UserProfile;
 use Twilio\TwiML\VoiceResponse;
 use Yii;
@@ -1308,7 +1310,23 @@ class TestController extends FController
         exit;
         //VarDumper::dump($a, 10, true);*/
 
-        echo Lead2::findLastLeadByClientPhone('+3736959', 1, true);
+        //echo Lead2::findLastLeadByClientPhone('+3736959', 1, true);
+
+
+        $users = UserConnection::find()
+            ->select('uc_user_id')
+            ->andWhere(['uc_controller_id' => 'call', 'uc_action_id' => 'user-map'])
+            ->groupBy(['uc_user_id'])
+            //->cache(10)
+            ->column();
+        $callsCount = Call::find()->where(['c_call_status' => Call::CALL_STATUS_QUEUE])->cache(10)->count();
+
+        return $this->render('blank');
+
+        /*if (!$callsCount) {
+            return false;
+        }*/
+
     }
 
 }
