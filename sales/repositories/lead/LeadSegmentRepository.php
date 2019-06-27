@@ -8,10 +8,10 @@ use sales\repositories\NotFoundException;
 class LeadSegmentRepository
 {
     /**
-     * @param int $id
+     * @param $id
      * @return LeadFlightSegment
      */
-    public function get(int $id): LeadFlightSegment
+    public function get($id): LeadFlightSegment
     {
         if ($segment = LeadFlightSegment::findOne($id)) {
             return $segment;
@@ -44,8 +44,10 @@ class LeadSegmentRepository
     }
 
     /**
-     * @param LeadFlightSegment[] $segments
+     * @param array $segments
      * @param array $newIds
+     * @throws \Throwable
+     * @throws \yii\db\StaleObjectException
      */
     public function removeOld(array $segments, array $newIds): void
     {

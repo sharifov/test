@@ -20,10 +20,10 @@ class LeadRepository
     }
 
     /**
-     * @param string $gid
+     * @param $gid
      * @return Lead
      */
-    public function getByGid(string $gid): Lead
+    public function getByGid($gid): Lead
     {
         if ($lead = Lead::findOne(['gid' => $gid])) {
             return $lead;
@@ -32,10 +32,10 @@ class LeadRepository
     }
 
     /**
-     * @param string $requestHash
+     * @param $requestHash
      * @return Lead|null
      */
-    public function getByRequestHash(string $requestHash):? Lead
+    public function getByRequestHash($requestHash):? Lead
     {
         return Lead::find()
             ->where(['l_request_hash' => $requestHash])

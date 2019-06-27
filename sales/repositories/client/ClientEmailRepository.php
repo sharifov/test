@@ -8,10 +8,10 @@ use sales\repositories\NotFoundException;
 class ClientEmailRepository
 {
     /**
-     * @param int $id
+     * @param $id
      * @return ClientEmail
      */
-    public function get(int $id): ClientEmail
+    public function get($id): ClientEmail
     {
         if ($clientEmail = ClientEmail::findOne($id)) {
             return $clientEmail;
@@ -20,10 +20,10 @@ class ClientEmailRepository
     }
 
     /**
-     * @param string $email
+     * @param $email
      * @return ClientEmail
      */
-    public function getByEmail(string $email): ClientEmail
+    public function getByEmail($email): ClientEmail
     {
         if ($clientEmail = ClientEmail::find()->where(['email' => $email])->orderBy(['id' => SORT_ASC])->limit(1)->one()) {
             return $clientEmail;
@@ -32,11 +32,11 @@ class ClientEmailRepository
     }
 
     /**
-     * @param int $clientId
-     * @param string $email
+     * @param $clientId
+     * @param $email
      * @return bool
      */
-    public function exists(int $clientId, string $email): bool
+    public function exists($clientId, $email): bool
     {
         return ClientEmail::find()->where(['client_id' => $clientId, 'email' => $email])->exists();
     }

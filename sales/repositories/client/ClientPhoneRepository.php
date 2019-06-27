@@ -8,10 +8,10 @@ use sales\repositories\NotFoundException;
 class ClientPhoneRepository
 {
     /**
-     * @param int $id
+     * @param $id
      * @return ClientPhone
      */
-    public function get(int $id): ClientPhone
+    public function get($id): ClientPhone
     {
         if ($phone = ClientPhone::findOne($id)) {
             return $phone;
@@ -20,10 +20,10 @@ class ClientPhoneRepository
     }
 
     /**
-     * @param string $phone
+     * @param $phone
      * @return ClientPhone
      */
-    public function getByPhone(string $phone): ClientPhone
+    public function getByPhone($phone): ClientPhone
     {
         if ($clientPhone = ClientPhone::find()->where(['phone' => $phone])->orderBy(['id' => SORT_DESC])->limit(1)->one()) {
             return $clientPhone;
@@ -32,11 +32,11 @@ class ClientPhoneRepository
     }
 
     /**
-     * @param int $clientId
-     * @param string $phone
+     * @param $clientId
+     * @param $phone
      * @return bool
      */
-    public function exists(int $clientId, string $phone): bool
+    public function exists($clientId, $phone): bool
     {
         return ClientPhone::find()->where(['client_id' => $clientId, 'phone' => $phone])->exists();
     }

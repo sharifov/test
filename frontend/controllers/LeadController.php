@@ -1461,6 +1461,7 @@ class LeadController extends FController
             return $this->redirect(Yii::$app->request->referrer ?: ['/']);
         }
 
+        /** @var Employee $user */
         $user = Yii::$app->user->identity;
 
         if ($user->canRole('agent')) {

@@ -8,10 +8,10 @@ use sales\repositories\NotFoundException;
 class ClientRepository
 {
     /**
-     * @param int $id
+     * @param $id
      * @return Client
      */
-    public function get(int $id): Client
+    public function get($id): Client
     {
         if ($client = Client::findOne($id)) {
             return $client;
