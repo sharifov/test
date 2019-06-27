@@ -1024,6 +1024,16 @@ class LeadController extends FController
         $dataProviderChecklist = $searchModelLeadChecklist->searchByLead($params);
 
 
+
+        $dataProviderNotes = new ActiveDataProvider([
+            'query' => Note::find()->where(['employee_id' => Yii::$app->user->id])->andWhere(['lead_id' => $lead->id])->orderBy('id ASC'),
+            /*'pagination' => [
+                'pageSize' => 10,
+            ],*/
+        ]);
+
+
+
         //VarDumper::dump(enableCommunication); exit;
 
         //$dataProviderCommunication = $lead->getQuotesProvider([]);
@@ -1042,7 +1052,8 @@ class LeadController extends FController
             'modelLeadCallExpert' => $modelLeadCallExpert,
             'dataProviderChecklist' => $dataProviderChecklist,
             'modelLeadChecklist' => $modelLeadChecklist,
-            'itineraryForm' => $itineraryForm
+            'itineraryForm' => $itineraryForm,
+            'dataProviderNotes' => $dataProviderNotes
         ]);
 
     }

@@ -7,6 +7,7 @@
  * @var $quotesProvider \yii\data\ActiveDataProvider
  * @var $dataProviderCommunication \yii\data\ActiveDataProvider
  * @var $dataProviderCallExpert \yii\data\ActiveDataProvider
+ * @var $dataProviderNotes \yii\data\ActiveDataProvider
  * @var $enableCommunication boolean
  * @var $modelLeadCallExpert \common\models\LeadCallExpert
  * @var $modelLeadChecklist \common\models\LeadChecklist
@@ -161,6 +162,11 @@ $lead = $leadForm->getLead();
 
                 <?= $this->render('partial/_notes', [
                     'notes' => $leadForm->getLead()->notes
+                ]); ?>
+
+                <?= $this->render('notes/agent_notes', [
+                    'lead' => $leadForm->getLead(),
+                    'dataProviderNotes'  => $dataProviderNotes,
                 ]); ?>
 
                 <?/*= $this->render('partial/_leadLog', [
