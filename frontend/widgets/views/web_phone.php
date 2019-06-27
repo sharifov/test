@@ -657,6 +657,11 @@ echo '<div class="container" id="container-redirect-agents"></div>';
                     //$('#preloader').addClass('hidden');
                     //modal.find('.modal-body').html(data);
                     //modal.modal('show');
+
+                    if (typeof refreshCallBox === "function") {
+                        var obj = {id: data.c_id, status: data.c_call_status};
+                        refreshCallBox(obj);
+                    }
                 },
                 error: function (error) {
                     console.error(error);
