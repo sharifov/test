@@ -1813,16 +1813,15 @@ class CommunicationController extends ApiBaseController
 
             if($agentId) {
                 $call = Call::find()->where(['c_call_sid' => $post['callData']['CallSid']])->andWhere(['c_created_user_id' => $agentId])->limit(1)->one();
-                $trace[] = 'call 1812' .  ($call && $call->c_id) ? $call->c_id : 0;
+                //$trace[] = 'call 1812' .  ($call && $call->c_id) ? $call->c_id : 0;
             } else {
                 if(isset($post['call'], $post['call']['c_call_type_id']) && $post['call']['c_call_type_id'] && (int)$post['call']['c_call_type_id'] === Call::CALL_TYPE_OUT) {
                     $call = Call::find()->where(['c_call_sid' => $post['callData']['CallSid']])->limit(1)->one();
-                    $trace[] = 'call 1818' .  ($call && $call->c_id) ? $call->c_id : 0;
+                    //$trace[] = 'call 1818' .  ($call && $call->c_id) ? $call->c_id : 0;
                 }
             }
 
-            $trace[] = 'call 1823' . ($call && $call->c_id) ? $call->c_id : 0;
-
+            //$trace[] = 'call 1823' . ($call && $call->c_id) ? $call->c_id : 0;
 
             if(isset($post['callData']['ParentCallSid']) && $post['callData']['ParentCallSid']) {
                 $childCall = true;
@@ -1945,6 +1944,8 @@ class CommunicationController extends ApiBaseController
                         Notifications::socket($call->c_created_user_id, null, 'webCallUpdate', ['status' => $call->c_call_status, 'duration' => $call->c_call_duration, 'debug' => 'DEFAULT'], true);
                     }
 
+            } else {
+                $trace[] = 'No call find by params';
             }
         }
 
