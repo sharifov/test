@@ -512,7 +512,9 @@ class CallController extends FController
     public function actionCallBox(): string
     {
         $id = Yii::$app->request->get('id');
-        $keyCache = 'cal-box-request-' . $id;
+        $status = Yii::$app->request->get('status');
+
+        $keyCache = 'cal-box-request-' . $id . '-' . $status;
 
         //Yii::$app->cache->delete($keyCache);
 
