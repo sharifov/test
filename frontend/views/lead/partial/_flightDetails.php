@@ -115,18 +115,11 @@ $itineraryFormId = $itineraryForm->formName() . '-form';
                                         <?= $segment->flexibility ? '<strong class="text-success">' . $segment->flexibilityType . ' ' . $segment->flexibility . ' days</strong>' : 'exact' ?>
                                     </td>
                                 </tr>
-                                <? /*<div>
-                                <span style="font-size: 18px; color: #91a5ae; margin-right: 7px; vertical-align: -1px;"><?= $keySegment + 1 ?>. </span>
-                                <span style="font-size: 16px; white-space: nowrap; margin-right: 10px; color: #4a525f"><?=$segment->originLabel?> <strong>(<?=Html::encode($segment->origin)?>)</strong> → <?=$segment->destinationLabel?> <strong>(<?=Html::encode($segment->destination)?>)</strong></span>
-                                <span style="font-size: 14px;">
-                            <?=date('d-M-Y', strtotime($segment->departure))?></span>
-                                <strong style="font-size: 13px; margin-left: 3px;" class="text-success"><?= $segment->flexibility ? $segment->flexibilityType . ' ' . $segment->flexibility . ' days': 'Exact'?></strong>
-                            </div>*/ ?>
                             <?php endforeach; ?>
                         </table>
                     </div>
 
-                    <? /*= Html::a('<i class="fa fa-edit"></i> Edit',
+                    <?/*= Html::a('<i class="fa fa-edit"></i> Edit',
                         ['/lead-itinerary/view-edit-form'],
                         ['class' => 'btn btn-default', 'data' => ['method' => 'post', 'params'=> ['id'=> $itineraryForm->leadId]]])*/ ?>
 
