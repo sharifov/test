@@ -351,7 +351,7 @@ $this->registerJs($js);
 ?>
 <?php
 $buttonAddNote = Html::a('<span class="btn-icon"><i class="fa fa-file-text-o"></i></span> <span class="btn-text">Add Note</span>', null, [
-    'class' => 'btn btn-primary btn-with-icon',
+    'class' => 'btn btn-primary btn-with-icon hidden',
     'data-toggle' => 'popover',
     'title' => '',
     'data-content' => '',
