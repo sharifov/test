@@ -1035,7 +1035,7 @@ class LeadController extends FController
         $dataProviderNotes = new ActiveDataProvider([
             'query' => Note::find()/*->where(['employee_id' => Yii::$app->user->id])*/->where(['lead_id' => $lead->id])->orderBy('id ASC'),
             'pagination' => [
-                'pageSize' => 2,
+                'pageSize' => 10,
             ],
         ]);
 
