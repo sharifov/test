@@ -19,7 +19,7 @@ class CallBoxAsset extends AssetBundle
     public $baseUrl = '@web';
 
     public $css = [
-        'css/style-call-box.css?v=13'
+        'css/style-call-box.css?v=15'
     ];
 
     public $js = [

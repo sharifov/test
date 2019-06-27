@@ -653,13 +653,14 @@ echo '<div class="container" id="container-redirect-agents"></div>';
                 },
                 url: ajaxSaveCallUrl,
                 success: function (data) {
-                    console.log(data);
+                    console.info(data);
                     //$('#preloader').addClass('hidden');
                     //modal.find('.modal-body').html(data);
                     //modal.modal('show');
 
                     if (typeof refreshCallBox === "function") {
-                        var obj = {id: data.c_id, status: data.c_call_status};
+                        var obj = {'id': data.c_id, 'status': data.c_call_status};
+                        console.log(obj);
                         refreshCallBox(obj);
                     }
                 },

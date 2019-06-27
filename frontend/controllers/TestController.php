@@ -1313,13 +1313,41 @@ class TestController extends FController
         //echo Lead2::findLastLeadByClientPhone('+3736959', 1, true);
 
 
-        $users = UserConnection::find()
-            ->select('uc_user_id')
-            ->andWhere(['uc_controller_id' => 'call', 'uc_action_id' => 'user-map'])
-            ->groupBy(['uc_user_id'])
-            //->cache(10)
-            ->column();
-        $callsCount = Call::find()->where(['c_call_status' => Call::CALL_STATUS_QUEUE])->cache(10)->count();
+
+        $call = Call::find()->where(['c_call_sid' => '123'])->limit(1)->one();
+        if(!$call) {
+            $call = new Call();
+            $call->c_call_sid = uniqid();
+            $call->c_from = '+373';
+            $call->c_to = uniqid();
+            $call->c_created_dt = date('Y-m-d H:i:s');
+            $call->c_created_user_id = Yii::$app->user->id;
+            $call->c_call_type_id = Call::CALL_TYPE_OUT;
+            $call->c_call_status = Call::CALL_STATUS_RINGING;
+
+        }
+
+        /*if(!$call->c_lead_id && $lead_id) {
+            $call->c_lead_id = (int) $lead_id;
+        }
+
+        if(!$call->c_project_id && $project_id) {
+            $call->c_project_id = (int) $project_id;
+        }
+
+        $call->c_call_status = $call_status;*/
+        //$call->c_updated_dt = date('Y-m-d H:i:s');
+
+        if(!$call->save()) {
+            $out['error'] = VarDumper::dumpAsString($call->errors);
+            Yii::error($out['error'], 'PhoneController:actionAjaxSaveCall:Call:save');
+        } else {
+            $out['data'] = $call->attributes;
+        }
+
+
+        VarDumper::dump($out, 10, true); exit;
+
 
         return $this->render('blank');
 

@@ -130,7 +130,7 @@
   -webkit-transition: all .2s ease-out;
   -webkit-transition: all .2s ease-in-out;
   transition: all .2s ease-in-out;
-  /*display: none;*/
+  display: none;
 }
 
 .call_box_fullscreen {
@@ -177,7 +177,8 @@
   display: block;
 }
 .is-hide{
-  opacity: 0
+  opacity: 0;
+  display: none;
 }
 
 .call_box_option {
