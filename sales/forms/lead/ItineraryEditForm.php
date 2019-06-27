@@ -66,6 +66,7 @@ class ItineraryEditForm extends CompositeForm
             ['leadId', 'integer'],
             ['leadId', 'exist', 'targetClass' => Lead::class, 'targetAttribute' => ['leadId' => 'id']],
 
+            ['cabin', 'required'],
             ['cabin', 'string', 'max' => 1],
             ['cabin', 'in', 'range' => array_keys(LeadHelper::cabinList())],
 
