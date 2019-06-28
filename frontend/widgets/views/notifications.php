@@ -170,10 +170,8 @@ $js = <<<JS
     function updatePjaxNotify() {
         $.pjax({url: notifyUrl, container : '#notify-pjax', push: false, timeout: '10000', scrollTo: false, async: false});  
     }
-    var timerId2 = setInterval(updatePjaxNotify, 3 * 1000);
-
+    var timerId2 = setInterval(updatePjaxNotify, 3 * 60000);
     var socket   = null;
-
 
     /**
      * Send a message to the WebSocket server
