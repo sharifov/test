@@ -65,7 +65,7 @@ use yii\widgets\Pjax;
                 ?>
 
                 <div class="row" id="div-notes-form">
-                    <div class="col-md-12">
+                    <div class="col-md-12"  style="padding-top:10px">
                         <?= $form->field($modelNote, 'message')->textarea(['rows' => 3]) ?>
                     </div>
 
