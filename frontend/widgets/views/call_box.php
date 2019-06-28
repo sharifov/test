@@ -368,8 +368,9 @@ $js = <<<JS
         $('.prime').addClass('fa-recycle fa-spin');
     });
     
-    /*$("#call-box-pjax").on("pjax:end", function() {
-    });*/
+    $("#call-box-pjax").on("pjax:end", function() {
+        $('.prime').removeClass('fa-recycle');
+    });
 
 JS;
 
