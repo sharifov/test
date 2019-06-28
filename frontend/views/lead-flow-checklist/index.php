@@ -8,7 +8,7 @@ use yii\widgets\Pjax;
 /* @var $searchModel common\models\search\LeadFlowSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-$this->title = 'Lead Status History';
+$this->title = 'Lead Flow Checklist Status History';
 $this->params['breadcrumbs'][] = $this->title;
 
 if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
@@ -129,43 +129,85 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
                 'format' => 'raw',
                 'filter' => $userList
             ],
+
+
             [
-                //'attribute' => 'username',
-                'label' => 'User Role',
+                'attribute' => 'leadFlowChecklist',
                 'value' => function (\common\models\LeadFlow $model) {
-                    if($model->employee) {
-                        $roles = $model->employee->getRoles();
-                    } else {
-                        $roles = [];
+                    $data = [];
+                    foreach ($model->leadFlowChecklist as $item) {
+                        $data[] = $item->checklistType ? Html::tag('span', Html::encode($item->checklistType->lct_name), ['class' => 'badge']) : $item->lfc_lc_type_id;
                     }
-                    return $roles ? implode(', ', $roles) : '-';
+                    return implode(' ', $data);
                 },
-                'options' => ['style' => 'width:150px'],
-                //'format' => 'raw'
+                'format' => 'raw'
             ],
             [
-                'label' => 'User Groups',
-                //'attribute' => 'user_group_id',
+                //'attribute' => 'employee_id',
+                'label' => 'CheckList Owner',
                 'value' => function (\common\models\LeadFlow $model) {
-
-                    $groupsValueArr = [];
-                    if($model->employee) {
-                        $groups = $model->employee->getUserGroupList();
-                        $groupsValueArr = [];
-
-                        foreach ($groups as $group) {
-                            $groupsValueArr[] = Html::tag('span', Html::tag('i', '', ['class' => 'fa fa-users']) . ' ' . Html::encode($group), ['class' => 'label label-default']);
+                    $userName = '-';
+                    if ($model->leadFlowChecklist) {
+                        foreach ($model->leadFlowChecklist as $item) {
+                            if ($item->user) {
+                                if (Yii::$app->user->can('manageLeadChecklist')) {
+                                    $userName = Html::a(
+                                        Html::encode($item->user->username),
+                                        [
+                                            'lead-checklist/index',
+                                            'LeadChecklistSearch[lc_lead_id]' => $model->lead_id,
+                                            'LeadChecklistSearch[lc_user_id]' => $item->lfc_lc_user_id,
+                                        ], ['data-pjax' => 0]
+                                    );
+                                } else {
+                                    $userName = Html::encode($item->user->username);
+                                }
+                            }
+                            break;
                         }
-
-
                     }
-                    $groupsValue = implode(' ', $groupsValueArr);
-
-                    return $groupsValue;
+                    return $userName;
                 },
                 'format' => 'raw',
-                //'filter' => Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) ? \common\models\UserGroup::getList() : Yii::$app->user->identity->getUserGroupList()
+                //'filter' => $userList
             ],
+//            [
+//                //'attribute' => 'username',
+//                'label' => 'User Role',
+//                'value' => function (\common\models\LeadFlow $model) {
+//                    if($model->employee) {
+//                        $roles = $model->employee->getRoles();
+//                    } else {
+//                        $roles = [];
+//                    }
+//                    return $roles ? implode(', ', $roles) : '-';
+//                },
+//                'options' => ['style' => 'width:150px'],
+//                //'format' => 'raw'
+//            ],
+//            [
+//                'label' => 'User Groups',
+//                //'attribute' => 'user_group_id',
+//                'value' => function (\common\models\LeadFlow $model) {
+//
+//                    $groupsValueArr = [];
+//                    if($model->employee) {
+//                        $groups = $model->employee->getUserGroupList();
+//                        $groupsValueArr = [];
+//
+//                        foreach ($groups as $group) {
+//                            $groupsValueArr[] = Html::tag('span', Html::tag('i', '', ['class' => 'fa fa-users']) . ' ' . Html::encode($group), ['class' => 'label label-default']);
+//                        }
+//
+//
+//                    }
+//                    $groupsValue = implode(' ', $groupsValueArr);
+//
+//                    return $groupsValue;
+//                },
+//                'format' => 'raw',
+//                //'filter' => Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) ? \common\models\UserGroup::getList() : Yii::$app->user->identity->getUserGroupList()
+//            ],
 
             //'employee_id',
             //'status',

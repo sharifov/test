@@ -32,14 +32,12 @@ use frontend\models\SendEmailForm;
 use sales\forms\CompositeFormHelper;
 use sales\forms\lead\ItineraryEditForm;
 use sales\forms\lead\LeadCreateForm;
-use sales\repositories\lead\LeadRepository;
 use sales\services\lead\LeadManageService;
 use Yii;
 use yii\data\ActiveDataProvider;
 use yii\db\Expression;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
-use yii\helpers\Url;
 use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
 use yii\web\Cookie;
@@ -56,7 +54,6 @@ use frontend\models\ProfitSplitForm;
 use common\models\QuotePrice;
 use frontend\models\TipsSplitForm;
 use common\models\local\LeadLogMessage;
-use yii2mod\rbac\filters\AccessControl;
 
 /**
  * Site controller
@@ -1401,16 +1398,22 @@ class LeadController extends FController
     {
         $lead = Lead::findOne(['id' => $id]);
         if ($lead !== null) {
+
             $activeLeads = Lead::find()
+                ->select(['id'])
                 ->where([
                     'status' => [
                         Lead::STATUS_ON_HOLD, Lead::STATUS_PROCESSING,
                         Lead::STATUS_SNOOZE, Lead::STATUS_FOLLOW_UP
                     ]
-                ])->andWhere(['<>', 'id', $id]);
+                ])->andWhere(['<>', 'id', $id])->asArray()->all();
 
-            $activeLeadIds = ArrayHelper::map($activeLeads->asArray()->all(), 'id', 'id');
-            $activeLeadIds = $activeLeadIds ?: [];
+
+            if ($activeLeads) {
+                $activeLeadIds = ArrayHelper::map($activeLeads, 'id', 'id');
+            } else {
+                $activeLeadIds = [];
+            }
 
             $reason = new Reason();
             $reason->queue = $queue;
