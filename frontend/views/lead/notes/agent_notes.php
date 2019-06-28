@@ -17,7 +17,7 @@ use yii\widgets\Pjax;
 <?php Pjax::begin(['id' => 'pjax-notes', 'enablePushState' => false, 'timeout' => 10000]) ?>
     <div class="x_panel">
         <div class="x_title" >
-            <h2><i class="fa fa-th-list"></i> Agent Notes</h2>
+            <h2><i class="fa fa-th-list"></i> Agent Notes (<?=$dataProviderNotes->query->count('message')?>)</h2>
             <ul class="nav navbar-right panel_toolbox">
                 <li>
                     <?php if($lead->status === \common\models\Lead::STATUS_PROCESSING && ($lead->employee_id === Yii::$app->user->id || Yii::$app->user->identity->canRoles(['admin']))): ?>
@@ -29,7 +29,7 @@ use yii\widgets\Pjax;
                     <?php endif; ?>
                 </li>
                 <li>
-                    <a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+                    <a class="collapse-link"><i class="fa fa-chevron-down"></i></a>
                 </li>
             </ul>
             <div class="clearfix"></div>
