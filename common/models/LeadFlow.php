@@ -3,6 +3,7 @@
 namespace common\models;
 
 use Yii;
+use yii\helpers\VarDumper;
 
 /**
  * This is the model class for table "lead_flow".
@@ -19,6 +20,7 @@ use Yii;
  *
  * @property Employee $employee
  * @property Lead $lead
+ * @property LeadFlowChecklist[] $leadFlowChecklist
  */
 class LeadFlow extends \yii\db\ActiveRecord
 {
@@ -58,7 +60,8 @@ class LeadFlow extends \yii\db\ActiveRecord
             'lf_from_status_id' => 'From Status',
             'lf_end_dt' => 'End DateTime',
             'lf_time_duration' => 'Duration',
-            'lf_description' => 'Description'
+            'lf_description' => 'Description',
+            'leadFlowChecklist' => 'Lead Flow Checklist'
         ];
     }
 
@@ -76,6 +79,14 @@ class LeadFlow extends \yii\db\ActiveRecord
     public function getLead()
     {
         return $this->hasOne(Lead::class, ['id' => 'lead_id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getLeadFlowChecklist()
+    {
+        return $this->hasMany(LeadFlowChecklist::class, ['lfc_lf_id' => 'id']);
     }
 
     public static function addStateFlow(Lead $lead)
@@ -110,7 +121,30 @@ class LeadFlow extends \yii\db\ActiveRecord
         ) {
             $stateFlow->employee_id = Yii::$app->user->id;
         }
-        return $stateFlow->save();
+
+        //return $stateFlow->save();
+
+        if ($stateFlow->save()) {
+            if ($lead->employee_id) {
+                if ($checkLists = LeadChecklist::find()
+                    ->andWhere(['lc_user_id' => $lead->employee_id, 'lc_lead_id' => $lead->id])
+                    ->orderBy(['lc_created_dt' => SORT_ASC])
+                    ->all()
+                ) {
+                    foreach ($checkLists as $checkList) {
+                        $leadFlowChecklist = new LeadFlowChecklist();
+                        $leadFlowChecklist->lfc_lf_id = $stateFlow->id;
+                        $leadFlowChecklist->lfc_lc_type_id = $checkList->lc_type_id;
+                        $leadFlowChecklist->lfc_lc_user_id = $checkList->lc_user_id;
+                        if (!$leadFlowChecklist->save()) {
+                            Yii::error(VarDumper::dumpAsString($leadFlowChecklist->errors), 'LeadFlow:addStateFlow:leadFlowChecklist:save');
+                        }
+                    }
+                }
+            }
+        } else {
+            Yii::error(VarDumper::dumpAsString($stateFlow->errors), 'LeadFlow:addStateFlow:stateFlow:save');
+        }
     }
 
     /**

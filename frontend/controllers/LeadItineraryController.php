@@ -13,7 +13,6 @@ use yii\helpers\ArrayHelper;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
-use \yii2mod\rbac\filters\AccessControl;
 
 class LeadItineraryController extends FController
 {
@@ -31,7 +30,6 @@ class LeadItineraryController extends FController
     {
         $behaviors = [
             'access' => [
-                'class' => AccessControl::class,
                 'rules' => [
                     [
                         'allow' => true,

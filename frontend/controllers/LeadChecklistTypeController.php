@@ -6,7 +6,6 @@ use Yii;
 use common\models\LeadChecklistType;
 use common\models\search\LeadChecklistTypeSearch;
 use yii\helpers\ArrayHelper;
-use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 
@@ -15,9 +14,18 @@ use yii\filters\VerbFilter;
  */
 class LeadChecklistTypeController extends FController
 {
-    public function behaviors()
+    public function behaviors(): array
     {
         $behaviors = [
+            'access' => [
+                'rules' => [
+                    [
+                        'allow' => true,
+                        'actions' => ['index', 'view', 'create', 'update', 'delete'],
+                        'roles' => ['manageLeadChecklistType']
+                    ]
+                ]
+            ],
             'verbs' => [
                 'class' => VerbFilter::class,
                 'actions' => [

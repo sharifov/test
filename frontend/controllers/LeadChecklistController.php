@@ -6,7 +6,6 @@ use Yii;
 use common\models\LeadChecklist;
 use common\models\search\LeadChecklistSearch;
 use yii\helpers\ArrayHelper;
-use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 
@@ -15,9 +14,18 @@ use yii\filters\VerbFilter;
  */
 class LeadChecklistController extends FController
 {
-    public function behaviors()
+    public function behaviors(): array
     {
         $behaviors = [
+            'access' => [
+                'rules' => [
+                    [
+                        'allow' => true,
+                        'actions' => ['index', 'view', 'create', 'update', 'delete'],
+                        'roles' => ['manageLeadChecklist']
+                    ]
+                ]
+            ],
             'verbs' => [
                 'class' => VerbFilter::class,
                 'actions' => [
@@ -36,7 +44,7 @@ class LeadChecklistController extends FController
     {
         $searchModel = new LeadChecklistSearch();
         $params = Yii::$app->request->queryParams;
-        if(isset($params['reset'])){
+        if (isset($params['reset'])) {
             unset($params['LeadChecklistSearch']['date_range']);
         }
 

@@ -2,13 +2,15 @@
 /**
  * @var $lead \common\models\Lead
  * @var $reason \common\models\Reason
- * @var $activeLeadIds array
+ * @var $activeLeadIdsStr array
+ *
  */
 
 use yii\helpers\Html;
 
-$activeLeadIds = isset($activeLeadIds) ? $activeLeadIds : [];
-$activeLeadIds = '[' . implode(',', $activeLeadIds) . ']';
+$activeLeadIds = $activeLeadIds ?? [];
+$activeLeadIdsStr = '[' . implode(',', $activeLeadIds) . ']';
+
 
 $js = <<<JS
 $('#salesale-snooze_for').attr('readonly', true);
@@ -24,8 +26,8 @@ $('#unassign-form').on('beforeSubmit', function () {
             $('#reason-duplicateleadid').parent().addClass('has-error');
             return false
         } else {
-            var activeLeadIds = $activeLeadIds;
-            if ($.inArray(parseInt($('#reason-duplicateleadid').val()), $activeLeadIds) != -1) {
+            var activeLeadIds = $activeLeadIdsStr;
+            if ($.inArray(parseInt($('#reason-duplicateleadid').val()), $activeLeadIdsStr) != -1) {
                 $('#reason-duplicateleadid').parent().removeClass('has-error');
                 return true;
             }
