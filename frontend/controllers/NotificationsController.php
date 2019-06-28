@@ -213,4 +213,31 @@ class NotificationsController extends FController
             throw new NotFoundHttpException('The requested page does not exist.');
         }
     }
+
+    /**
+     * @return string
+     */
+    public function actionPjaxNotify(): string
+    {
+        //$id = Yii::$app->request->get('id');
+        //$status = Yii::$app->request->get('status');
+
+        $keyCache = 'pjax-notify';
+
+        //Yii::$app->cache->delete($keyCache);
+
+        //$result = Yii::$app->cache->get($keyCache);
+
+        //if($result === false) {
+            $box = \frontend\widgets\Notifications::getInstance();
+            $result = $box->run();
+            if($result) {
+                Yii::$app->cache->set($keyCache, $result, 10);
+            }
+        //}
+
+        //VarDumper::dump($data); exit;
+
+        return $result;
+    }
 }

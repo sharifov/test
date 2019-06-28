@@ -242,11 +242,11 @@ use yii\widgets\Pjax; ?>
 <?php \yii\bootstrap\Modal::end(); ?>
 
 <?php
-    $callBoxUrl = \yii\helpers\Url::to(['call/call-box']);
+    $callBoxUrl = \yii\helpers\Url::to(['/call/call-box']);
 ?>
 
 <script>
-    const callBoxUr = '<?=$callBoxUrl?>';
+    const callBoxUrl = '<?=$callBoxUrl?>';
 
     function incomingCall(obj) {
 
@@ -314,7 +314,7 @@ use yii\widgets\Pjax; ?>
 
     function refreshCallBox(obj) {
         // console.log(obj);
-        $.pjax.reload({url: callBoxUr, container: '#call-box-pjax', push: false, replace: false, 'scrollTo': false, timeout: 10000, data: {id: obj.id, status: obj.status}});
+        $.pjax.reload({url: callBoxUrl, container: '#call-box-pjax', push: false, replace: false, 'scrollTo': false, timeout: 10000, async: false, data: {id: obj.id, status: obj.status}});
     }
 
 </script>

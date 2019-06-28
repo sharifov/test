@@ -639,7 +639,7 @@ echo '<div class="container" id="container-redirect-agents"></div>';
 
         //console.warn(webPhoneParams); return false;
 
-        /*if(call_sid) {
+        if(call_sid) {
             $.ajax({
                 type: 'post',
                 data: {
@@ -658,17 +658,17 @@ echo '<div class="container" id="container-redirect-agents"></div>';
                     //modal.find('.modal-body').html(data);
                     //modal.modal('show');
 
-                    if (typeof refreshCallBox === "function") {
+                    /*if (typeof refreshCallBox === "function") {
                         var obj = {'id': data.c_id, 'status': data.c_call_status};
                         console.log(obj);
                         refreshCallBox(obj);
-                    }
+                    }*/
                 },
                 error: function (error) {
                     console.error(error);
                 }
             });
-        }*/
+        }
     }
 
 

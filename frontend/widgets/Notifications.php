@@ -21,6 +21,22 @@ use yii\helpers\VarDumper;
  */
 class Notifications extends \yii\bootstrap\Widget
 {
+    private static $instance;
+
+    /**
+     * Returns *Notifications* instance of this class.
+     *
+     * @return Notifications The *Notifications* instance.
+     */
+    public static function getInstance(): Notifications
+    {
+        if (null === static::$instance) {
+            static::$instance = new static();
+        }
+
+        return static::$instance;
+    }
+
     public function init()
     {
         parent::init();
@@ -74,7 +90,7 @@ class Notifications extends \yii\bootstrap\Widget
         //$cache->delete($key);
 
         $data = $cache->get($key);
-        if ($data === false) {
+        /*if ($data === false) {
 
 
             $data['newCallCount'] = Call::find()->where(['c_created_user_id' => $user_id, 'c_call_type_id' => Call::CALL_TYPE_IN, 'c_is_new' => true])->count();
@@ -88,7 +104,7 @@ class Notifications extends \yii\bootstrap\Widget
             $newCallCount = $data['newCallCount'];
             $newSmsCount = $data['newSmsCount'];
             $newEmailCount = $data['newEmailCount'];
-        }
+        }*/
 
         //$model = \common\models\Notifications::findNew($user_id);
         /*$newCallCount = Call::find()->where(['c_created_user_id' => $user_id, 'c_call_type_id' => Call::CALL_TYPE_IN, 'c_is_new' => true])->count();
@@ -97,9 +113,9 @@ class Notifications extends \yii\bootstrap\Widget
 
         //if($newEmailCount > 0) {
 
-        $this->view->registerJs("$('#call-inbox-queue').text(" . ($newCallCount ?: '') . ');', \yii\web\View::POS_READY);
+        /*$this->view->registerJs("$('#call-inbox-queue').text(" . ($newCallCount ?: '') . ');', \yii\web\View::POS_READY);
         $this->view->registerJs("$('#sms-inbox-queue').text(" . ($newSmsCount ?: '') . ');', \yii\web\View::POS_READY);
-        $this->view->registerJs("$('#email-inbox-queue').text(" . ($newEmailCount ?: '') . ');', \yii\web\View::POS_READY);
+        $this->view->registerJs("$('#email-inbox-queue').text(" . ($newEmailCount ?: '') . ');', \yii\web\View::POS_READY);*/
 
 
         /*} else {

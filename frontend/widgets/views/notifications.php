@@ -11,7 +11,7 @@
         <i class="fa fa-comment-o"></i>
         <?php if($newCount): ?>
             <span class="badge bg-green"><?=$newCount?></span>
-        <? endif;?>
+        <?php endif;?>
     </a>
 
     <ul id="menu1" class="dropdown-menu list-unstyled msg_list" role="menu">
@@ -161,12 +161,16 @@ if(Yii::$app->controller->action->uniqueId === 'lead/view') {
     }
 }
 
+
+$notifyUrl = \yii\helpers\Url::to(['/notifications/pjax-notify']);
+
+
 $js = <<<JS
+    const notifyUrl = '$notifyUrl';
     function updatePjaxNotify() {
-        //alert('ajax 1');
-        $.pjax({container : '#notify-pjax', push: false, timeout: '8000', scrollTo: false});  
+        $.pjax({url: notifyUrl, container : '#notify-pjax', push: false, timeout: '10000', scrollTo: false, async: false});  
     }
-    var timerId2 = setInterval(updatePjaxNotify, 3 * 60000);
+    var timerId2 = setInterval(updatePjaxNotify, 3 * 1000);
 
     var socket   = null;
 
