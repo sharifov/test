@@ -635,11 +635,11 @@ echo '<div class="container" id="container-redirect-agents"></div>';
         var lead_id = webPhoneParams.lead_id;
         //var call_acc_sid =
 
-        console.info('sid: ' + call_sid + ' : ' + call_from + ' : ' + call_to + ' : ' + call_status + ' : ' + project_id + ' : ' + lead_id);
+        console.info('saveDbCall - sid: ' + call_sid + ' : ' + call_from + ' : ' + call_to + ' : ' + call_status + ' : ' + project_id + ' : ' + lead_id);
 
         //console.warn(webPhoneParams); return false;
 
-        if(call_sid) {
+        /*if(call_sid) {
             $.ajax({
                 type: 'post',
                 data: {
@@ -668,7 +668,7 @@ echo '<div class="container" id="container-redirect-agents"></div>';
                     console.error(error);
                 }
             });
-        }
+        }*/
     }
 
 
