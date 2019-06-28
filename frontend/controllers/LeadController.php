@@ -1024,22 +1024,20 @@ class LeadController extends FController
 
         $modelNote = new Note();
         if ($modelNote->load(Yii::$app->request->post())) {
-            $model = new Note();
-            $model->employee_id = Yii::$app->user->identity->getId();
-            $model->lead_id = $lead->id;
-            $model->message = $modelNote->message;
-            $model->created = date('Y-m-d H:i:s');
-            $model->save();
+            $modelNote->employee_id = Yii::$app->user->id;
+            $modelNote->lead_id = $lead->id;
+            $modelNote->created = date('Y-m-d H:i:s');
+            if (!$modelNote->save()) {
+                Yii::error('Lead id: '.$lead->id . ', ' . VarDumper::dumpAsString($modelNote->errors), 'Lead:view:Note:save');
+            }
         }
 
         $dataProviderNotes = new ActiveDataProvider([
-            'query' => Note::find()/*->where(['employee_id' => Yii::$app->user->id])*/->where(['lead_id' => $lead->id])->orderBy('id ASC'),
+            'query' => Note::find()->where(['lead_id' => $lead->id])->orderBy('id DESC'),
             'pagination' => [
-                'pageSize' => 10,
+                'pageSize' => 5,
             ],
         ]);
-
-
 
         //VarDumper::dump(enableCommunication); exit;
 

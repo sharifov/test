@@ -10,12 +10,11 @@
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 use yii\widgets\Pjax;
-
 ?>
     <style>
         .x_title span{color: white;}
     </style>
-<?php yii\widgets\Pjax::begin(['id' => 'pjax-notes', 'enablePushState' => false, 'timeout' => 10000]) ?>
+<?php Pjax::begin(['id' => 'pjax-notes', 'enablePushState' => false, 'timeout' => 10000]) ?>
     <div class="x_panel">
         <div class="x_title" >
             <h2><i class="fa fa-th-list"></i> Agent Notes</h2>
@@ -25,7 +24,7 @@ use yii\widgets\Pjax;
                         <?php if(Yii::$app->request->get('act') === 'add-note-form'): ?>
                             <?/*=Html::a('<i class="fa fa-minus-circle success"></i> Refresh', ['lead/view', 'gid' => $lead->gid])*/?>
                         <?php else: ?>
-                            <?=Html::a('<i class="fa fa-plus-circle success"></i> Add', ['lead/view', 'gid' => $lead->gid, 'act' => 'add-note-form'], ['id' => 'btn-notes-form2'])?>
+                            <?=Html::a('<i class="fa fa-plus-circle success"></i> Add', ['lead/view', 'gid' => $lead->gid, 'act' => 'add-note-form'], ['id' => 'btn-notes-form'])?>
                         <?php endif; ?>
                     <?php endif; ?>
                 </li>
@@ -35,7 +34,7 @@ use yii\widgets\Pjax;
             </ul>
             <div class="clearfix"></div>
         </div>
-        <div class="x_content" style="display: block">
+        <div class="x_content" style="display: none; margin-top: -10px;">
             <?= \yii\widgets\ListView::widget([
                 'dataProvider' => $dataProviderNotes,
                 'options' => [
@@ -46,7 +45,7 @@ use yii\widgets\Pjax;
                 'itemView' => function ($model, $key, $index, $widget) {
                     return $this->render('_list_notes', ['model' => $model, 'index' => $index]);
                 },
-                'layout' => "\n{items}<div class=\"text-center\">{pager}</div>\n", // {summary}\n<div class="text-center">{pager}</div>
+                'layout' => "{items}<div class=\"text-center\" style='margin-top: -20px; margin-bottom: -25px'>{pager}</div>", // {summary}\n<div class="text-center">{pager}</div>
                 'itemOptions' => [
                     //'class' => 'item',
                     'tag' => false,
@@ -66,8 +65,8 @@ use yii\widgets\Pjax;
                 ?>
 
                 <div class="row" id="div-notes-form">
-                    <div class="col-md-7">
-                        <?= $form->field($modelNote, 'message')->textInput(['maxlength' => true]) ?>
+                    <div class="col-md-12">
+                        <?= $form->field($modelNote, 'message')->textarea(['rows' => 3]) ?>
                     </div>
 
                     <div class="col-md-12">
@@ -81,14 +80,14 @@ use yii\widgets\Pjax;
             <?php endif; ?>
         </div>
     </div>
-<?php yii\widgets\Pjax::end() ?>
+<?php Pjax::end() ?>
 
 <?php
 $this->registerJs(
     '
-        $(document).on("click","#btn-checklist-form", function() {
+        $(document).on("click","#btn-notes-form", function() {
             $("#div-notes-form").show();
-            $("#pjax-notes .x_content").show();
+            $("#pjax-notes .x_content").show();            
             return false;
         });
 
@@ -101,7 +100,11 @@ $this->registerJs(
         $("#pjax-notes").on("pjax:end", function () {           
             $("#btn-submit-note").attr("disabled", false).prop("disabled", false).removeClass("disabled");
             $("#btn-submit-note i").attr("class", "fa fa-plus");
-        });
+            $("#pjax-notes .x_content").show();
+            $([document.documentElement, document.body]).animate({
+                scrollTop: $("#div-notes-form").offset().top
+            }, 1000);
+        }); 
     '
 );
 ?>
