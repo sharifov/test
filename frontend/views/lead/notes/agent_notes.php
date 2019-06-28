@@ -17,7 +17,7 @@ use yii\widgets\Pjax;
 <?php Pjax::begin(['id' => 'pjax-notes', 'enablePushState' => false, 'timeout' => 10000]) ?>
     <div class="x_panel">
         <div class="x_title" >
-            <h2><i class="fa fa-th-list"></i> Agent Notes (<?=$dataProviderNotes->query->count('message')?>)</h2>
+            <h2><i class="fa fa-sticky-note-o"></i> Notes (<?=$dataProviderNotes->query->count('message')?>)</h2>
             <ul class="nav navbar-right panel_toolbox">
                 <li>
                     <?php if($lead->status === \common\models\Lead::STATUS_PROCESSING && ($lead->employee_id === Yii::$app->user->id || Yii::$app->user->identity->canRoles(['admin']))): ?>
@@ -43,7 +43,7 @@ use yii\widgets\Pjax;
                 ],
                 'emptyText' => '<div class="text-center">Not found any notes</div><br>',
                 'itemView' => function ($model, $key, $index, $widget) {
-                    return $this->render('_list_notes', ['model' => $model, 'index' => $index]);
+                    return $this->render('_list_notes', ['model' => $model, 'index' => $index, 'key' => $key]);
                 },
                 'layout' => "{items}<div class=\"text-center\" style='margin-top: -20px; margin-bottom: -25px'>{pager}</div>", // {summary}\n<div class="text-center">{pager}</div>
                 'itemOptions' => [
@@ -87,7 +87,12 @@ $this->registerJs(
     '
         $(document).on("click","#btn-notes-form", function() {
             $("#div-notes-form").show();
-            $("#pjax-notes .x_content").show();            
+            $("#pjax-notes .x_content").show();
+            
+             $([document.documentElement, document.body]).animate({
+                scrollTop: $("#div-notes-form").offset().top
+            }, 1000);
+                        
             return false;
         });
 
@@ -101,9 +106,7 @@ $this->registerJs(
             $("#btn-submit-note").attr("disabled", false).prop("disabled", false).removeClass("disabled");
             $("#btn-submit-note i").attr("class", "fa fa-plus");
             $("#pjax-notes .x_content").show();
-            $([document.documentElement, document.body]).animate({
-                scrollTop: $("#div-notes-form").offset().top
-            }, 1000);
+           
         }); 
     '
 );

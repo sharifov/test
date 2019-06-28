@@ -1029,13 +1029,15 @@ class LeadController extends FController
             $modelNote->created = date('Y-m-d H:i:s');
             if (!$modelNote->save()) {
                 Yii::error('Lead id: '.$lead->id . ', ' . VarDumper::dumpAsString($modelNote->errors), 'Lead:view:Note:save');
+            } else {
+                $modelNote->message = '';
             }
         }
 
         $dataProviderNotes = new ActiveDataProvider([
-            'query' => Note::find()->where(['lead_id' => $lead->id])->orderBy('id DESC'),
+            'query' => Note::find()->where(['lead_id' => $lead->id])->orderBy(['id' => SORT_ASC]),
             'pagination' => [
-                'pageSize' => 5,
+                'pageSize' => 10,
             ],
         ]);
 
