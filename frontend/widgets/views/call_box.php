@@ -364,13 +364,13 @@ $js = <<<JS
     });
    
 
-    $("#call-box-pjax").on("pjax:start", function() {
+    /*$("#call-box-pjax").on("pjax:start", function() {
         $('.prime').addClass('fa-recycle fa-spin');
     });
     
     $("#call-box-pjax").on("pjax:end", function() {
-        $('.prime').removeClass('fa-recycle');
-    });
+        $('.prime').removeClass('fa-recycle fa-spin');
+    });*/
 
 JS;
 
