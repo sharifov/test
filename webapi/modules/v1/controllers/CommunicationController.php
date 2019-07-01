@@ -1561,11 +1561,12 @@ class CommunicationController extends ApiBaseController
         $callSid = $post['callData']['sid'] ?? $post['callData']['CallSid'] ?? null;
 
         if ($callSid) {
-            //$call = Call::find()->where(['c_call_sid' => $post['callData']['sid']])->limit(1)->one();
+
             $call = null;
             $is_call_incoming = (isset($post['call'],$post['call']['c_call_type_id']) && (int)$post['call']['c_call_type_id'] === Call::CALL_TYPE_IN);
+            
             if($is_call_incoming) {
-                $call = Call::find()->where(['c_call_sid' => $post['callData']['sid']])
+                $call = Call::find()->where(['c_call_sid' => $callSid])
                     //->andWhere(['c_call_status' => Call::CALL_STATUS_COMPLETED])
                     ->andWhere([ '>', 'c_created_user_id', 0])
                     ->orderBy(['c_updated_dt' => SORT_DESC])
@@ -1574,7 +1575,7 @@ class CommunicationController extends ApiBaseController
             }
 
             if(!$call) {
-                $call = Call::find()->where(['c_call_sid' => $post['callData']['sid']])->orderBy(['c_id' => SORT_ASC])->limit(1)->one();
+                $call = Call::find()->where(['c_call_sid' => $callSid])->orderBy(['c_id' => SORT_ASC])->limit(1)->one();
             }
 
             $callData = $post['call'];
@@ -1757,7 +1758,7 @@ class CommunicationController extends ApiBaseController
 
                 }*/
             } else {
-                Yii::error('Communication Request: Not found Call SID: ' . $post['callData']['sid'], 'API:Communication:voiceClient:Call:find');
+                Yii::error('Communication Request: Not found Call SID: ' . $callSid, 'API:Communication:voiceClient:Call:find');
             }
         }
         else {
