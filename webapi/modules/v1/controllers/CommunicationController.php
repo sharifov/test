@@ -1558,7 +1558,9 @@ class CommunicationController extends ApiBaseController
 
         Yii::info(VarDumper::dumpAsString($post), 'info\API:Communication:voiceClient');
 
-        if (isset($post['callData']['sid']) && $post['callData']['sid']) {
+        $callSid = $post['callData']['sid'] ?? $post['callData']['CallSid'] ?? null;
+
+        if ($callSid) {
             //$call = Call::find()->where(['c_call_sid' => $post['callData']['sid']])->limit(1)->one();
             $call = null;
             $is_call_incoming = (isset($post['call'],$post['call']['c_call_type_id']) && (int)$post['call']['c_call_type_id'] === Call::CALL_TYPE_IN);
@@ -1759,7 +1761,7 @@ class CommunicationController extends ApiBaseController
             }
         }
         else {
-            Yii::error('Communication Request: Not found post[callData][sid] ' . VarDumper::dumpAsString($post), 'API:Communication:voiceClient:post');
+            Yii::error('Communication Request: Not found post[callData][sid] / post[callData][CallSid] ' . VarDumper::dumpAsString($post), 'API:Communication:voiceClient:post');
         }
 
         return $response;
