@@ -139,6 +139,27 @@ class PhoneController extends FController
      */
     public function actionAjaxSaveCall(): array
     {
+        \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+        $out = ['error' => '', 'data' => []];
+
+        // update call status when agent reject call
+        if (Yii::$app->request->getIsGet() ) {
+            $get_sid = Yii::$app->request->get('sid');
+            $get_agent = Yii::$app->request->get('agent');
+            //VarDumper::dump([$get_sid,$get_agent]); exit;
+            $call = Call::find()->where(['c_created_user_id' => $get_agent])->orderBy(['c_id' => SORT_DESC])->limit(1)->one();
+            if($call) {
+                $call->c_call_status = Call::CALL_STATUS_CANCELED;
+                if (!$call->save()) {
+                    $out['error'] = VarDumper::dumpAsString($call->errors);
+                    Yii::error($out['error'], 'PhoneController:actionAjaxSaveCall:Call:save_1');
+                } else {
+                    $out['data'] = $call->attributes;
+                }
+            }
+            return $out;
+        }
+
         $call_sid = Yii::$app->request->post('call_sid');
         $call_acc_sid = Yii::$app->request->post('call_acc_sid');
 
@@ -148,10 +169,6 @@ class PhoneController extends FController
 
         $lead_id = Yii::$app->request->post('lead_id');
         $project_id = Yii::$app->request->post('project_id');
-
-        $out = ['error' => '', 'data' => []];
-
-        \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
 
         if($call_sid && $call_from && $call_to) {
             $call = Call::find()->where(['c_call_sid' => $call_sid])->limit(1)->one();
