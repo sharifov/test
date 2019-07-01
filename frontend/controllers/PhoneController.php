@@ -143,13 +143,13 @@ class PhoneController extends FController
         $out = ['error' => '', 'data' => []];
 
         // update call status when agent reject call
-        if (Yii::$app->request->getIsGet() ) {
-            $get_sid = Yii::$app->request->get('sid');
-            $get_agent = Yii::$app->request->get('agent');
-            //VarDumper::dump([$get_sid,$get_agent]); exit;
-            $call = Call::find()->where(['c_created_user_id' => $get_agent])->orderBy(['c_id' => SORT_DESC])->limit(1)->one();
-            if($call) {
-                $call->c_call_status = Call::CALL_STATUS_CANCELED;
+        if (Yii::$app->request->getIsGet()) {
+            //$get_sid = Yii::$app->request->get('sid');
+            $userId = (int) Yii::$app->request->get('user_id');
+
+            $call = Call::find()->where(['c_created_user_id' => $userId])->orderBy(['c_id' => SORT_DESC])->limit(1)->one();
+            if ($call) {
+                $call->c_call_status = Call::CALL_STATUS_NO_ANSWER;
                 if (!$call->save()) {
                     $out['error'] = VarDumper::dumpAsString($call->errors);
                     Yii::error($out['error'], 'PhoneController:actionAjaxSaveCall:Call:save_1');

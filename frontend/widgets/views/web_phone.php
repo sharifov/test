@@ -567,7 +567,7 @@ echo '<div class="container" id="container-redirect-agents"></div>';
         if (connection) {
             console.log("button-reject: " + JSON.stringify(connection.parameters));
             connection.reject();
-            $.get(ajaxSaveCallUrl + '?sid=' + connection.parameters.CallSid + '&agent=' + agentId, function (r) {
+                $.get(ajaxSaveCallUrl + '?sid=' + connection.parameters.CallSid + '&user_id=' + agentId, function (r) {
                 console.log(r);
             });
             document.getElementById('call-controls2').style.display = 'none';
