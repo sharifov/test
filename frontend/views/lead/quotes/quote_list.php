@@ -13,6 +13,12 @@ use yii\widgets\ListView;
 use yii\widgets\Pjax;
 
 ?>
+<style>
+.select2-container--krajee {
+    display: block;
+    z-index: 9999;
+}
+</style>
 <div class="x_panel">
     <div class="x_title">
         <h2><i class="fa fa-folder-o"></i> Quotes</h2>
