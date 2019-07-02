@@ -3,6 +3,7 @@
 namespace common\models;
 
 use Yii;
+use yii\db\Query;
 use yii\helpers\VarDumper;
 
 /**
@@ -179,5 +180,65 @@ class ApiLog extends \yii\db\ActiveRecord
         }
 
         return $arr;
+    }
+
+    public static function getActionsList()
+    {
+        return self::find()->select('al_action')->where('al_action IS NOT NULL')->distinct()->orderBy('al_id ASC')->asArray()->all();
+    }
+
+    /**
+     * @param string $fromDate
+     * @param string $todate
+     * @param string $range
+     * @param string $apiUserId
+     * @param string $selectedAction
+     * @return array
+     */
+    public static function getApiLogStats(string $fromDate, string $todate, string $range, string $apiUserId, string $selectedAction) : array
+    {
+        if ($range == 'H'){
+            $queryDateFormat = '%H:00';
+        } elseif ($range == 'D'){
+            $queryDateFormat = '%Y-%m-%d';
+        } elseif ($range == 'M'){
+            $queryDateFormat = '%Y-%m';
+        } elseif ($range == 'HD'){
+            $queryDateFormat = '%Y-%m-%d %H:00';
+        }
+
+        $actionList = self::getActionsList();
+
+        $apiStatsQuery = new Query();
+        $apiStatsQuery->select(["al_action, AVG(al_execution_time) AS execution_time, AVG(al_memory_usage) AS memUsage, DATE(al_request_dt) as create_date, DATE_FORMAT(al_request_dt, '$queryDateFormat' ) as timeLine, COUNT(*) AS cnt"]);
+        $apiStatsQuery->from('api_log');
+        $apiStatsQuery->where(['between','DATE(al_request_dt)', $fromDate, $todate]);
+        $apiStatsQuery->andWhere('al_execution_time IS NOT NULL');
+        if($apiUserId != ''){
+            $apiStatsQuery->andWhere(['=', 'al_user_id', $apiUserId]);
+        }
+        if($selectedAction != ''){
+            $apiStatsQuery->andWhere(['=', 'al_action', $selectedAction]);
+        }
+        $apiStatsQuery->groupBy(["al_action, DATE_FORMAT(al_request_dt, '$queryDateFormat')"]);
+        $apiStatsQuery->orderBy('create_date ASC, execution_time DESC, timeLine ASC');
+        $result = $apiStatsQuery->all();
+
+        $apiStats = [];
+
+        foreach ($actionList as $actionKey => $action) {
+            foreach ($result as $key => $item) {
+                if ($action['al_action'] == $item['al_action']){
+                    $apiStats[$item['timeLine']]['action' . $actionKey] = $item['al_action'];
+                    $apiStats[$item['timeLine']]['exeTime' . $actionKey] = $item['execution_time'];
+                    $apiStats[$item['timeLine']]['memUsage' . $actionKey] = $item['memUsage'];
+                    $apiStats[$item['timeLine']]['cnt' . $actionKey] = $item['cnt'];
+                    $apiStats[$item['timeLine']]['timeLine'] = $item['timeLine'];
+                }
+            }
+        }
+
+        ksort($apiStats);
+        return $apiStats;
     }
 }

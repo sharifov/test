@@ -5,7 +5,7 @@ namespace webapi\models;
 use common\models\Client;
 use common\models\Employee;
 use common\models\Lead;
-use common\models\Source;
+use common\models\Sources;
 use Yii;
 use yii\base\Model;
 
@@ -174,7 +174,7 @@ class ApiLead extends Model
         if (empty($this->source_id)) {
             $this->addError('source_id', "Source ID cannot be empty");
         } else {
-            $source = Source::findOne(['id' => $this->source_id, 'project_id' => $this->project_id]);
+            $source = Sources::findOne(['id' => $this->source_id, 'project_id' => $this->project_id]);
             if(!$source) $this->addError('source_id', "Invalid Source ID (project: ".$this->project_id.")");
         }
     }
@@ -182,14 +182,14 @@ class ApiLead extends Model
     public function checkIsSourceCode()
     {
         if (!empty($this->sub_sources_code)) {
-            $source = Source::findOne(['cid' => $this->sub_sources_code, 'project_id' => $this->project_id]);
+            $source = Sources::findOne(['cid' => $this->sub_sources_code, 'project_id' => $this->project_id]);
             if(!$source) {
                 $this->addError('source_id', "Invalid Source Code (project: ".$this->project_id.")");
             } else {
                 $this->source_id = $source->id;
             }
         } else {
-            $sources = Source::findAll(['project_id' => $this->project_id]);
+            $sources = Sources::findAll(['project_id' => $this->project_id]);
             $this->source_id = $sources[0]->id;
         }
     }

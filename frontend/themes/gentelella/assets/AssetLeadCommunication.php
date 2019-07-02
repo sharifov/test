@@ -14,7 +14,7 @@ class AssetLeadCommunication extends \yii\web\AssetBundle
     public $baseUrl = '@web';
 
     public $css = [
-        'css/style-lead-communication.css',
+        // 'css/style-lead-communication.css',
     ];
 
     public $js = [

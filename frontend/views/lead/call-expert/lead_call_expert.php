@@ -81,7 +81,7 @@ use yii\widgets\Pjax;
                 <?php endif; ?>
             </li>
             <li>
-                <a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+                <a class="collapse-link"><i class="fa fa-chevron-down"></i></a>
             </li>
 
             <?/*<li class="dropdown">

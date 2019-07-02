@@ -170,7 +170,7 @@ use yii\widgets\ActiveForm;
                 ?>
 
 				<div class="col-md-6"><?php  echo $form->field($model, 'project_id')->dropDownList($projectList, ['prompt' => '-']) ?></div>
-				<div class="col-md-6"><?php  echo $form->field($model, 'source_id')->dropDownList(\common\models\Source::getList(), ['prompt' => '-']) ?></div>
+				<div class="col-md-6"><?php  echo $form->field($model, 'source_id')->dropDownList(\common\models\Sources::getList(), ['prompt' => '-']) ?></div>
 			</div>
 
 

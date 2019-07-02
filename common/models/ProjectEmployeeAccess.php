@@ -48,9 +48,15 @@ class ProjectEmployeeAccess extends \yii\db\ActiveRecord
             $sources = $project->sources;
             $child_options = [];
             foreach ($sources as $source) {
+                if($source->hidden) {
+                    continue;
+                }
                 $child_options[$source->id] = $source->name;
             }
-            $options[$project->name] = $child_options;
+
+            if($child_options) {
+                $options[$project->name] = $child_options;
+            }
         }
         return $options;
     }

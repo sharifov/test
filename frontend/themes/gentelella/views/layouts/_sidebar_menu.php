@@ -94,7 +94,8 @@ $isSuperAdmin = $user->canRole('superadmin');
                 ['label' => 'Duplicate Leads', 'url' => ['/leads/duplicate'], 'icon' => 'copy'],
                 ['label' => 'Stats Agents & Leads', 'url' => ['/report/agents'], 'icon' => 'users'],
                 ['label' => 'Lead Status History', 'url' => ['/lead-flow/index'], 'icon' => 'list'],
-                ['label' => 'Lead Check Lists', 'url' => ['/lead-checklist/index'], 'icon' => 'list'],
+                ['label' => 'Lead Check Lists', 'url' => ['/lead-checklist/index'], 'icon' => 'list', 'visible' => Yii::$app->user->can('manageLeadChecklist')],
+                ['label' => 'LF Checklist Status History', 'url' => ['/lead-flow-checklist/index'], 'icon' => 'list', 'visible' => Yii::$app->user->can('viewLeadFlowChecklist')],
             ]
         ];
 
@@ -161,7 +162,7 @@ $isSuperAdmin = $user->canRole('superadmin');
                 ['label' => 'Email template types', 'url' => ['/email-template-type/index'], 'icon' => 'envelope-o'],
                 ['label' => 'SMS template types', 'url' => ['/sms-template-type/index'], 'icon' => 'comments-o'],
                 ['label' => 'Project Settings', 'url' => ['/settings/projects'], 'icon' => 'product-hunt'],
-                ['label' => 'Check List Types', 'url' => ['/lead-checklist-type/index'], 'icon' => 'list'],
+                ['label' => 'Check List Types', 'url' => ['/lead-checklist-type/index'], 'icon' => 'list', 'visible' => Yii::$app->user->can('manageLeadChecklistType')],
             ]
         ];
 
@@ -195,6 +196,7 @@ $isSuperAdmin = $user->canRole('superadmin');
             'icon' => 'cog',
             'items' => [
                 ['label' => 'API Logs', 'url' => ['/api-log/index'], 'icon' => 'sitemap'],
+                ['label' => 'API Report', 'url' => ['/stats/api-graph'], 'icon' => 'bar-chart'],
                 ['label' => 'System Logs', 'url' => ['/log/index'], 'icon' => 'bars'],
                 ['label' => 'Clean cache & assets', 'url' => ['/clean/index'], 'icon' => 'remove'],
                 ['label' => 'Site Settings', 'url' => ['/setting/index'], 'icon' => 'cogs'],

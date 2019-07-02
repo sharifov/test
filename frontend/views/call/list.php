@@ -329,7 +329,7 @@ $this->params['breadcrumbs'][] = $this->title;
 $js = <<<JS
 $(document).on('click', '.btn-recording_url', function() {
      var source_src = $(this).data('source_src');
-     $('#audio_recording').html('<audio controls="controls" autoplay="true" id="audio_controls" style="width: 100%;"><source src="'+ source_src +'" type="audio/mpeg"></audio>');
+     $('#audio_recording').html('<audio controls="controls" controlsList="nodownload" autoplay="true" id="audio_controls" style="width: 100%;"><source src="'+ source_src +'" type="audio/mpeg"></audio>');
      $('#modalCallRecording').modal('show');
 });
 

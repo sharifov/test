@@ -9,13 +9,13 @@ use common\models\Lead;
 use common\models\LeadCallExpert;
 use common\models\LeadFlightSegment;
 use common\models\Notifications;
-use common\models\Project;
-use common\models\Source;
+use common\models\Sources;
+use sales\repositories\lead\LeadRepository;
+use sales\services\lead\LeadHashGenerator;
 use webapi\models\ApiLead;
 use webapi\models\ApiLeadCallExpert;
 use Yii;
 use yii\helpers\Html;
-use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
 use yii\web\NotFoundHttpException;
 use yii\web\UnprocessableEntityHttpException;
@@ -23,7 +23,15 @@ use yii\web\UnprocessableEntityHttpException;
 
 class LeadController extends ApiBaseController
 {
+    private $leadHashGenerator;
+    private $leadRepository;
 
+    public function __construct($id, $module, LeadHashGenerator $leadHashGenerator, LeadRepository $leadRepository, $config = [])
+    {
+        parent::__construct($id, $module, $config);
+        $this->leadHashGenerator = $leadHashGenerator;
+        $this->leadRepository = $leadRepository;
+    }
 
     /**
      *
@@ -301,11 +309,11 @@ class LeadController extends ApiBaseController
 
             if($modelLead->project_id) {
 
-                $source = Source::findOne(['cid' => $modelLead->sub_sources_code, 'project_id' => $modelLead->project_id]);
+                $source = Sources::findOne(['cid' => $modelLead->sub_sources_code, 'project_id' => $modelLead->project_id]);
 
                 if(!$source) {
                     $old_sub_sources_code = $modelLead->sub_sources_code;
-                    $source = Source::find()->where(['project_id' => $modelLead->project_id])->orderBy(['id' => SORT_ASC])->one();
+                    $source = Sources::find()->where(['project_id' => $modelLead->project_id])->orderBy(['id' => SORT_ASC])->one();
                     if($source) {
                         $modelLead->source_id = $source->id;
                         $modelLead->sub_sources_code = $source->cid;
@@ -454,25 +462,44 @@ class LeadController extends ApiBaseController
             $lead->l_client_last_name = $modelLead->client_last_name;
         }
 
-        $request_hash = $modelLead->getRequestHash();
-
         $lead->l_call_status_id = Lead::CALL_STATUS_READY;
 
+        $request_hash = $this->leadHashGenerator->generate(
+            $modelLead->request_ip,
+            $modelLead->project_id,
+            $modelLead->adults,
+            $modelLead->children,
+            $modelLead->infants,
+            $modelLead->cabin,
+            $modelLead->phones,
+            $modelLead->flights
+        );
 
-        $duplicateLead = Lead::find()
-            ->where(['l_request_hash' => $request_hash])->andWhere(['>=', 'created', date('Y-m-d H:i:s', strtotime('-12 hours'))])
-            ->orderBy(['id' => SORT_ASC])->limit(1)->one();
-
-        if($duplicateLead) {
-            $lead->l_duplicate_lead_id = $duplicateLead->id;
-            $lead->status = Lead::STATUS_TRASH;
-            Yii::info('Warning: detected duplicate Lead (Origin id: '.$duplicateLead->id.', Hash: '.$request_hash.')', 'info\API:Lead:duplicate');
+        if ($duplicate = $this->leadRepository->getByRequestHash($request_hash)) {
+            $lead->setDuplicate($duplicate->id);
+            Yii::info('Warning: detected duplicate Lead (Origin id: ' . $duplicate->id . ', Hash: ' . $request_hash . ')', 'nfo\API:Lead:duplicate');
         }
 
-
-        if(!$lead->l_request_hash && $request_hash) {
-            $lead->l_request_hash = $request_hash;
+        if ($request_hash && $lead->isEmptyRequestHash()) {
+            $lead->setRequestHash($request_hash);
         }
+
+//        $request_hash = $modelLead->getRequestHash();
+//
+//        $duplicateLead = Lead::find()
+//            ->where(['l_request_hash' => $request_hash])->andWhere(['>=', 'created', date('Y-m-d H:i:s', strtotime('-12 hours'))])
+//            ->orderBy(['id' => SORT_ASC])->limit(1)->one();
+//
+//        if($duplicateLead) {
+//            $lead->l_duplicate_lead_id = $duplicateLead->id;
+//            $lead->status = Lead::STATUS_TRASH;
+//            Yii::info('Warning: detected duplicate Lead (Origin id: '.$duplicateLead->id.', Hash: '.$request_hash.')', 'info\API:Lead:duplicate');
+//        }
+//
+//
+//        if(!$lead->l_request_hash && $request_hash) {
+//            $lead->l_request_hash = $request_hash;
+//        }
 
 
 

@@ -351,7 +351,7 @@ $this->registerJs($js);
 ?>
 <?php
 $buttonAddNote = Html::a('<span class="btn-icon"><i class="fa fa-file-text-o"></i></span> <span class="btn-text">Add Note</span>', null, [
-    'class' => 'btn btn-primary btn-with-icon',
+    'class' => 'btn btn-primary btn-with-icon hidden',
     'data-toggle' => 'popover',
     'title' => '',
     'data-content' => '',
@@ -546,11 +546,11 @@ if($project){
         } ?>
 
 		<?php if ($leadForm->mode !== $leadForm::VIEW_MODE) {
-            $title = '<span class="btn-icon"><i class="fa fa-check"></i></span><span class="btn-text">'.($leadForm->getLead()->isNewRecord ? 'Create' : 'Save').'</span>';
-            echo Html::submitButton($title, [
-                'id' => 'submit-lead-form-btn',
-                'class' => 'btn btn-success btn-with-icon'
-            ]);
+//            $title = '<span class="btn-icon"><i class="fa fa-check"></i></span><span class="btn-text">'.($leadForm->getLead()->isNewRecord ? 'Create' : 'Save').'</span>';
+//            echo Html::submitButton($title, [
+//                'id' => 'submit-lead-form-btn',
+//                'class' => 'btn btn-success btn-with-icon'
+//            ]);
 
             if(!$leadForm->getLead()->isNewRecord) {
                 echo $buttonAddNote;

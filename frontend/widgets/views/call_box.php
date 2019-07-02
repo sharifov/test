@@ -2,10 +2,11 @@
 /* @var $model \common\models\Notifications[] */
 /* @var $newCount integer */
 /* @var $lastCall \common\models\Call */
-/* @var $lastCalls \common\models\Call[] */
 /* @var $userCallStatus \common\models\UserCallStatus */
+/* @var $countMissedCalls integer*/
 
 \frontend\assets\CallBoxAsset::register($this);
+\frontend\assets\TimerAsset::register($this);
 
 
 /*$client = $lastCall->cLead ? $lastCall->cLead->client : ;
@@ -17,7 +18,7 @@ if($client) {
 $client_phone = '';
 
 if($lastCall) {
-    if ($lastCall->c_call_type_id == \common\models\Call::CALL_TYPE_IN) {
+    if ($lastCall->c_call_type_id === \common\models\Call::CALL_TYPE_IN) {
         $client_phone = $lastCall->c_from;
     } else {
         $client_phone = $lastCall->c_to;
@@ -33,20 +34,29 @@ if($client_phone) {
 $client = null;
 if($clientPhone && $client = $clientPhone->client) {
     $client_name = $client->full_name;
+    if($client_name === 'ClientName') {
+        $client_name = '- - - - -';
+    }
 } else {
     $client_name = '';
 }
 
 
-?>
-<?php /*yii\widgets\Pjax::begin(['id' => 'call-box-pjax', 'timeout' => 10000, 'enablePushState' => false, 'options' => [
-        //'tag' => 'li',
-        //'class' => 'dropdown',
-        //'role' => 'presentation',
-]])*/?>
+$iconClass = 'fa fa-list';
+if ($lastCall && in_array($lastCall->c_call_status, [\common\models\Call::CALL_STATUS_RINGING, \common\models\Call::CALL_STATUS_IN_PROGRESS], true)) {
+    $isVisible = true;
+} else {
+    $isVisible = false;
+}
+//$iconClass = 'fa fa-refresh fa-spin';
+
+
+use yii\widgets\Pjax; ?>
+
+<?php yii\widgets\Pjax::begin(['id' => 'call-box-pjax', 'timeout' => 10000, 'enablePushState' => false, 'options' => []])?>
 <div class="fabs">
-    <div class="call_box">
-        <div class="call_box_header">
+    <div class="call_box <?=$isVisible ? 'is-visible' : ''?>">
+        <div class="call_box_header" style="<?=($userCallStatus && $userCallStatus->us_type_id === \common\models\UserCallStatus::STATUS_TYPE_OCCUPIED) ? 'background: #f55f42' : ''?>">
             <div class="call_box_option">
                 <div class="header_img">
                     <?=\yii\helpers\Html::img('/img/user.png')?>
@@ -58,21 +68,51 @@ if($clientPhone && $client = $clientPhone->client) {
                     <?php endif; ?>
                 </span>*/?>
                 <?/* <i class="fa fa-phone"></i>*/?>
+
+                <?/*
                 <span id="call_box_fullscreen_loader" class="call_box_fullscreen_loader"><i class="fullscreen fa fa-window-maximize"></i></span>
+                */?>
 
             </div>
 
         </div>
         <div class="call_box_body call_box_login">
-            <h4 id="call_box_call_status">
-                <?php if($lastCall):?>
-                    <?=ucfirst($lastCall->c_call_status)?> ... (<?=Yii::$app->formatter->asRelativeTime(strtotime($lastCall->c_created_dt))?>)
+            <?php if($lastCall):?>
+                <h4 title="<?=$lastCall->c_updated_dt ? Yii::$app->formatter->asDatetime(strtotime($lastCall->c_updated_dt)) : '-'?>">
+                    <?=$lastCall->getStatusLabel()?>
+                    <?/*Id: <?=$lastCall->c_id?> [<?=date('H:i:s')?>]*/ ?>
+                </h4>
+                <h4 id="call_box_call_status">
+                    <span class="badge"><?=$lastCall->cProject ? \yii\helpers\Html::encode($lastCall->cProject->name) : '-'?></span>, <?=$lastCall->getCallTypeName()?>
+                </h4>
+                <?php if (in_array($lastCall->c_call_status, [\common\models\Call::CALL_STATUS_RINGING, \common\models\Call::CALL_STATUS_IN_PROGRESS], true)): ?>
+                    <?php
+                        if($lastCall->c_updated_dt) {
+                            $timerSeconds = time() - strtotime($lastCall->c_updated_dt);
+                            if(!$timerSeconds) {
+                                $timerSeconds = 0;
+                            }
+                            if( $timerSeconds >= 0 ) {
+                                echo '<div  style="font-size: 16px" class="badge badge-warning"><i class="fa fa-clock-o fa-spin" title="updated: '.date('H:i:s', strtotime($lastCall->c_updated_dt)).'"></i> <span id="call-box-timer" class="timer">' .gmdate('i:s', $timerSeconds). '</span></div>';
+                                $js = "$('#call-box-timer').timer({format: '%M:%S', seconds: " . $timerSeconds . "}).timer('start');";
+                                $this->registerJs($js, \yii\web\View::POS_READY);
+                            }
+                        }
+                    ?>
+                <?php else:?>
+
+                    <?php if($lastCall->c_updated_dt):?>
+                        <i class="fa fa-calendar"></i> <?=Yii::$app->formatter->asDatetime(strtotime($lastCall->c_updated_dt))?>
+                        (<?=Yii::$app->formatter->asRelativeTime(strtotime($lastCall->c_updated_dt))?>)
+                    <?php endif; ?>
+
                 <?php endif; ?>
-            </h4>
+            <?php endif; ?>
+
 
             <?/*<a id="call_box_first_screen2" class="fab"><i class="fa fa-arrow-right"></i></a>*/ ?>
-            <div style="padding: 10px">
-
+            <div style="padding: 0 10px 0 10px">
+                <hr>
                 <div class="row">
                     <div class="col-md-6">
                         My Call Status:
@@ -89,7 +129,7 @@ if($clientPhone && $client = $clientPhone->client) {
                 </div>
 
 
-                <?php if($lastCalls): $n = 1; ?>
+                <?/*php if($lastCalls): $n = 1; ?>
                     <h5>Last Calls:</h5>
                 <table class="table table-bordered">
                     <?php foreach ($lastCalls as $call):?>
@@ -107,38 +147,37 @@ if($clientPhone && $client = $clientPhone->client) {
                     </tr>
                    <?php endforeach; ?>
                 </table>
-                <?php endif; ?>
+                <?php endif;*/ ?>
 
-                <?/* <table class="table table-bordered">
-                    <tr>
-                        <th>Last Lead</th>
-                        <td id="call_last_lead_id">-</td>
-                    </tr>
-                    <tr>
-                        <th>Count of Calls</th>
-                        <td id="call_count_calls">-</td>
-                    </tr>
-                    <tr>
-                        <th>Count of SMS</th>
-                        <td id="call_count_sms">-</td>
-                    </tr>
-                    <tr>
-                        <th>Created Date</th>
-                        <td id="call_created_date">-</td>
-                    </tr>
-                    <tr>
-                        <th>Last Activity</th>
-                        <td id="call_last_activity">-</td>
-                    </tr>
-                </table>*/?>
-
-                <?//php if($client): ?>
-                    <?=\yii\helpers\Html::button('<i class="fa fa-user"></i> Client Details', [
-                        'class' => 'btn btn-sm btn-info',
+                <?php if($client): ?>
+                    <?=\yii\helpers\Html::button('<i class="fa fa-user"></i> Client Info', [
+                        'class' => 'btn btn-xs btn-info',
                         'id' => 'btn-client-details',
                         'data-client-id' => $client ? $client->id : 0, 'style' => $client ? '' : 'display:none'
                     ])?>
-                <?// endif; ?>
+                <?php endif; ?>
+
+                <?php if($lastCall): ?>
+                    <?=\yii\helpers\Html::button('<i class="fa fa-phone"></i> Call Info', [
+                        'class' => 'btn btn-xs btn-default',
+                        'title' => 'Call Info Id: '.$lastCall->c_id,
+                        'data-call-id' => $lastCall->c_id,
+                        'id' => 'btn-call-info'
+                    ])?>
+
+
+                    <?//php if($countMissedCalls): ?>
+                        <?=\yii\helpers\Html::button('<i class="fa fa-phone"></i> Missed' . ($countMissedCalls ? ' (' . $countMissedCalls .')' : '') , [
+                            'class' => 'btn btn-xs btn-danger',
+                            'title' => 'Missed Calls' . ($countMissedCalls ? ' (' . $countMissedCalls .')' : ''),
+                            'id' => 'btn-missed-calls'
+                        ])?>
+                    <?//php endif; ?>
+
+                <?php endif; ?>
+
+
+
             </div>
 
 
@@ -167,18 +206,18 @@ if($clientPhone && $client = $clientPhone->client) {
         </div>
 
 
+        <?/*
         <div class="text-right">
             <div id="call_box_body" class="call_box_body">
                 <div class="call_box_category">
                     <a id="call_box_third_screen" class="fab"><i class="fa fa-arrow-left"></i></a>
                     <p>What would you like to talk about?</p>
                     <ul>
-                        <li>List of Leads<?/*=\yii\helpers\Html::a('List of Leads', '#')*/?></li>
-                        <?/*<li class="active">Sales</li>*/?>
+                        <li><?=\yii\helpers\Html::a('List of Leads', '#')?></li>
                     </ul>
                 </div>
             </div>
-        </div>
+        </div>*/?>
 
 
         <div class="fab_field">
@@ -187,20 +226,42 @@ if($clientPhone && $client = $clientPhone->client) {
         <textarea id="call_boxSend" name="call_box_message" placeholder="Send a message" class="call_box_field call_box_message"></textarea>*/?>
         </div>
     </div>
-    <a id="prime" class="fab <?=($userCallStatus && $userCallStatus->us_type_id == \common\models\UserCallStatus::STATUS_TYPE_OCCUPIED ? 'call-status-occupied' : 'call-status-ready')?>"><i class="prime fa fa-list"></i></a>
-</div>
+    <a id="prime" class="fab <?=($userCallStatus && $userCallStatus->us_type_id === \common\models\UserCallStatus::STATUS_TYPE_OCCUPIED ? 'call-status-occupied' : 'call-status-ready')?>">
+        <?/*<i class="prime fa fa-list"></i>*/?>
+        <?php
+            $iconClass = 'fa fa-list';
 
-<?php //yii\widgets\Pjax::end() ?>
+            if($lastCall) {
+                if ($lastCall->c_call_status === \common\models\Call::CALL_STATUS_RINGING) {
+                    $iconClass = 'fa fa-spinner fa-spin';
+                } elseif ($lastCall->c_call_status === \common\models\Call::CALL_STATUS_IN_PROGRESS) {
+                    $iconClass = 'fa fa-refresh fa-spin';
+                }
+            }
+        //$iconClass = 'fa fa-refresh fa-spin';
+        ?>
+            <i class="prime <?=$iconClass?>"></i>
+    </a>
+</div>
+<?php yii\widgets\Pjax::end() ?>
+
 
 <?php \yii\bootstrap\Modal::begin([
-    'id' => 'client-details-modal',
-    'header' => '<h4 class="modal-title">Client Details</h4>',
+    'id' => 'call-box-modal',
+    'header' => '<h4 class="modal-title">Missed Calls</h4>',
     'footer' => '<a href="#" class="btn btn-primary" data-dismiss="modal">Close</a>',
+    'size' => \yii\bootstrap\Modal::SIZE_LARGE
 ]); ?>
 <?php \yii\bootstrap\Modal::end(); ?>
 
 
+<?php
+    $callBoxUrl = \yii\helpers\Url::to(['/call/call-box']);
+?>
+
 <script>
+    const callBoxUrl = '<?=$callBoxUrl?>';
+
     function incomingCall(obj) {
 
         //alert(123);
@@ -265,25 +326,18 @@ if($clientPhone && $client = $clientPhone->client) {
         }
     }
 
+    function refreshCallBox(obj) {
+        // console.log(obj);
+        $.pjax.reload({url: callBoxUrl, container: '#call-box-pjax', push: false, replace: false, 'scrollTo': false, timeout: 10000, async: false, data: {id: obj.id, status: obj.status}});
+    }
+
 </script>
 
 <?php
-
 $callStatusUrl = \yii\helpers\Url::to(['user-call-status/update-status']);
 $clientInfoUrl = \yii\helpers\Url::to(['client/ajax-get-info']);
-
-
-/*echo  \yii\helpers\Url::home().'<br>';
-echo  \yii\helpers\Url::base().'<br>';
-
-echo  \yii\helpers\Url::home(true).'<br>';
-echo  \yii\helpers\Url::base(true).'<br>';
-
-exit;*/
-
-//\yii\helpers\VarDumper::dump($_SERVER, 10, true); exit;
-
-//$jsPath = Yii::$app->request->baseUrl.'/js/sounds/';
+$missedCallsUrl = \yii\helpers\Url::to(['call/ajax-missed-calls']);
+$callInfoUrl = \yii\helpers\Url::to(['call/ajax-call-info']);
 
 $userId = Yii::$app->user->id;
 
@@ -291,18 +345,48 @@ $js = <<<JS
 
     var callStatusUrl = '$callStatusUrl';
     var clientInfoUrl = '$clientInfoUrl';
+    var missedCallsUrl = '$missedCallsUrl';
+    var callInfoUrl = '$callInfoUrl';
+    
 
     $(document).on('click', '#btn-client-details', function(e) {
         e.preventDefault();
         var client_id = $(this).data('client-id');
-        $('#client-details-modal .modal-body').html('<div style="text-align:center"><img width="200px" src="https://loading.io/spinners/gear-set/index.triple-gears-loading-icon.svg"></div>');
-        $('#client-details-modal').modal();
+        $('#call-box-modal .modal-body').html('<div style="text-align:center"><img width="200px" src="https://loading.io/spinners/gear-set/index.triple-gears-loading-icon.svg"></div>');
+        $('#call-box-modal .modal-title').html('Client Details (' + client_id + ')');
+        $('#call-box-modal').modal();
         $.post(clientInfoUrl, {client_id: client_id},
             function (data) {
-                $('#client-details-modal .modal-body').html(data);
+                $('#call-box-modal .modal-body').html(data);
             }
         );
     });
+    
+    $(document).on('click', '#btn-missed-calls', function(e) {
+        e.preventDefault();
+        $('#call-box-modal .modal-body').html('<div style="text-align:center"><img width="200px" src="https://loading.io/spinners/gear-set/index.triple-gears-loading-icon.svg"></div>');
+        $('#call-box-modal .modal-title').html('Missed Calls');
+        $('#call-box-modal').modal();
+        $.post(missedCallsUrl, 
+            function (data) {
+                $('#call-box-modal .modal-body').html(data);
+            }
+        );
+    });
+    
+    $(document).on('click', '#btn-call-info', function(e) {
+        e.preventDefault();
+        var callId = $(this).data('call-id');
+        $('#call-box-modal .modal-body').html('<div style="text-align:center"><img width="200px" src="https://loading.io/spinners/gear-set/index.triple-gears-loading-icon.svg"></div>');
+        $('#call-box-modal .modal-title').html('Call Info');
+        $('#call-box-modal').modal();
+        $.post(callInfoUrl, {id: callId}, 
+            function (data) {
+                $('#call-box-modal .modal-body').html(data);
+            }
+        );
+    });
+    
    
     $(document).on('change', '#user-call-status-select', function(e) {
         e.preventDefault();
@@ -324,18 +408,26 @@ $js = <<<JS
         });
 
     });
+   
 
+    /*$("#call-box-pjax").on("pjax:start", function() {
+        $('.prime').addClass('fa-recycle fa-spin');
+    });
+    
+    $("#call-box-pjax").on("pjax:end", function() {
+        $('.prime').removeClass('fa-recycle fa-spin');
+    });*/
 
 JS;
+
+$this->registerJs($js, \yii\web\View::POS_READY);
 
 //if(Yii::$app->controller->uniqueId)
 /*if(in_array(Yii::$app->controller->action->uniqueId, ['orders/create'])) {
 
 } else {*/
 
-    if (Yii::$app->controller->module->id != 'user-management') {
-        $this->registerJs($js, \yii\web\View::POS_READY);
-    }
+//if (Yii::$app->controller->module->id != 'user-management') {
+
 //}
-
-
+//}

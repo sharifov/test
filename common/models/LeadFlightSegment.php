@@ -4,6 +4,8 @@ namespace common\models;
 
 use common\models\local\LeadLogMessage;
 use Yii;
+use yii\behaviors\TimestampBehavior;
+use yii\db\ActiveRecord;
 
 /**
  * This is the model class for table "lead_flight_segments".
@@ -79,6 +81,40 @@ class LeadFlightSegment extends \yii\db\ActiveRecord
         ];
     }
 
+    public function behaviors(): array
+    {
+        return [
+            'timestamp' => [
+                'class' => TimestampBehavior::class,
+                'attributes' => [
+                    ActiveRecord::EVENT_BEFORE_INSERT => ['created', 'updated'],
+                    ActiveRecord::EVENT_BEFORE_UPDATE => ['updated'],
+                ],
+                'value' => date('Y-m-d H:i:s') //new Expression('NOW()'),
+            ],
+        ];
+    }
+
+    public static function create($leadId, $origin, $destination, $departure, $flexibility, $flexibilityType): self
+    {
+        $segment = new static();
+        $segment->lead_id = $leadId;
+        $segment->origin = $origin;
+        $segment->destination = $destination;
+        $segment->departure = $departure;
+        $segment->flexibility = $flexibility;
+        $segment->flexibility_type = $flexibilityType;
+        return $segment;
+    }
+
+    public function edit($origin, $destination, $departure, $flexibility, $flexibilityType): void
+    {
+        $this->origin = $origin;
+        $this->destination = $destination;
+        $this->departure = $departure;
+        $this->flexibility = $flexibility;
+        $this->flexibility_type = $flexibilityType;
+    }
 
     /**
      * @return array
@@ -227,7 +263,7 @@ class LeadFlightSegment extends \yii\db\ActiveRecord
     {
         if (parent::beforeSave($insert)) {
 
-            $this->updated = date('Y-m-d H:i:s');
+            //$this->updated = date('Y-m-d H:i:s');
 
             if ($this->departure) {
                 $this->departure = date('Y-m-d', strtotime($this->departure));

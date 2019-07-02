@@ -2,23 +2,20 @@
 
 namespace frontend\controllers;
 
+use common\components\SearchService;
 use common\models\Employee;
 use common\models\Lead;
 use common\models\Project;
-use common\models\search\EmployeeSearch;
-use common\models\search\LeadFlightSegmentSearch;
 use common\models\search\LeadSearch;
 use common\models\search\UserConnectionSearch;
-use common\models\Source;
+use common\models\Sources;
 use common\models\UserProjectParams;
+use frontend\widgets\CallBox;
 use Yii;
 use common\models\Call;
 use common\models\search\CallSearch;
-use yii\db\Expression;
-use yii\filters\AccessControl;
 use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
-use yii\web\Controller;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -215,7 +212,7 @@ class CallController extends FController
             ->andWhere(['or', ['upp_tw_phone_number' => $phoneList], ['upp_phone_number' => $phoneList]])->exists();*/
 
 
-        $access = $model->c_created_user_id == Yii::$app->user->id ? true : false;
+        $access = $model->c_created_user_id === Yii::$app->user->id ? true : false;
 
 
         if(!$access) {
@@ -358,7 +355,7 @@ class CallController extends FController
 
                     //$callData['phone_from'] = $upp->upp_tw_phone_number;
 
-                    $source = Source::find()->where(['project_id' => $leadModel->project_id, 'default' => true])->andWhere(['OR', ['IS NOT', 'phone_number', null], ['<>', 'phone_number', '']])->limit(1)->one();
+                    $source = Sources::find()->where(['project_id' => $leadModel->project_id, 'default' => true])->andWhere(['OR', ['IS NOT', 'phone_number', null], ['<>', 'phone_number', '']])->limit(1)->one();
                     if($source && $source->phone_number) {
                         $callData['phone_from'] = $source->phone_number;
                     } else {
@@ -508,4 +505,81 @@ class CallController extends FController
         ]);
 
     }
+
+    /**
+     * @return string
+     */
+    public function actionCallBox(): string
+    {
+        $id = Yii::$app->request->get('id');
+        $status = Yii::$app->request->get('status');
+
+        $keyCache = 'cal-box-request-' . $id . '-' . $status;
+
+        //Yii::$app->cache->delete($keyCache);
+
+        $result = Yii::$app->cache->get($keyCache);
+
+        if($result === false) {
+
+            $box = CallBox::getInstance();
+            $result = $box->run();
+            if($result) {
+                Yii::$app->cache->set($keyCache, $result, 30);
+            }
+        }
+
+        //VarDumper::dump($data); exit;
+
+        return $result;
+    }
+
+
+    public function actionAjaxMissedCalls()
+    {
+        $searchModel = new CallSearch();
+
+        $params = Yii::$app->request->queryParams;
+        $params['CallSearch']['c_created_user_id'] = Yii::$app->user->id;
+        $params['CallSearch']['c_call_type_id'] = Call::CALL_TYPE_IN;
+        $params['CallSearch']['c_call_status'] = Call::CALL_STATUS_NO_ANSWER;
+        $params['CallSearch']['c_call_type_id'] = Call::CALL_TYPE_IN;
+
+        $params['CallSearch']['limit'] = 20;
+        //$params['CallSearch']['sort'] = false;
+
+        $dataProvider = $searchModel->searchAgent($params);
+
+        foreach ($dataProvider->models as $model) {
+            if($model->c_is_new) {
+                $model->c_is_new = false;
+                $model->update(false);
+            }
+        }
+        //$dataProvider->sort->so
+
+        return $this->renderPartial('ajax_missed_calls', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+        ]);
+    }
+
+    public function actionAjaxCallInfo()
+    {
+        $id = (int) Yii::$app->request->post('id');
+
+        $model = $this->findModel($id);
+        $this->checkAccess($model);
+
+        if($model->c_is_new) {
+            //$model->c_read_dt = date('Y-m-d H:i:s');
+            $model->c_is_new = false;
+            $model->update();
+        }
+
+        return $this->renderPartial('ajax_call_info', [
+            'model' => $model,
+        ]);
+    }
+
 }

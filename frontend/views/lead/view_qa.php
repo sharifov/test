@@ -12,6 +12,7 @@
  *
  * @var $modelLeadChecklist \common\models\LeadChecklist
  * @var $dataProviderChecklist \yii\data\ActiveDataProvider
+ * @var $itineraryForm \sales\forms\lead\ItineraryEditForm
  */
 
 use yii\bootstrap\Html;
@@ -104,6 +105,7 @@ if($is_admin || $is_supervision) {
 
         <div class="col-md-12">
             <?= $this->render('partial/_flightDetails', [
+                'itineraryForm' => $itineraryForm,
                 'leadForm' => $leadForm
             ]);
             ?>

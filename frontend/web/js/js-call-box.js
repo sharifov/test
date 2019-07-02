@@ -1,11 +1,11 @@
-$('#prime').on('click', function () {
+$(document).on('click', '#prime', function () {
     toggleFab();
 });
 
 
 //Toggle call_box and links
 function toggleFab() {
-    $('.prime').toggleClass('fa-list');
+    //$('.prime').toggleClass('fa-list');
     $('.prime').toggleClass('fa-close');
     $('.prime').toggleClass('is-active');
     $('.prime').toggleClass('is-visible');
@@ -14,7 +14,7 @@ function toggleFab() {
     $('.fab').toggleClass('is-visible');
 }
 
-$('#call_box_first_screen').on('click', function (e) {
+$(document).on('click', '#call_box_first_screen', function (e) {
     hideCallBox(2);
 });
 
@@ -26,12 +26,12 @@ $('#call_box_first_screen').on('click', function (e) {
     hideChat(0);
 });*/
 
-$('#call_box_third_screen').on('click', function(e) {
+$(document).on('click', '#call_box_third_screen', function(e) {
     hideCallBox(0);
 });
 
 
-$('#call_box_fullscreen_loader').on('click', function (e) {
+$(document).on('click', '#call_box_fullscreen_loader', function (e) {
     $('.fullscreen').toggleClass('fa-window-maximize');
     $('.fullscreen').toggleClass('fa-window-restore');
     $('.call_box').toggleClass('call_box_fullscreen');
@@ -52,7 +52,7 @@ function hideCallBox(hide) {
     switch (hide) {
         case 0:
             $('#call_box_converse').css('display', 'none');
-            $('#call_box_body').css('display', 'none');
+            //$('#call_box_body').css('display', 'none');
             $('#call_box_form').css('display', 'none');
             $('.call_box_login').css('display', 'block');
             $('.call_box_fullscreen_loader').css('display', 'none');
@@ -60,14 +60,14 @@ function hideCallBox(hide) {
             break;
         case 1:
             $('#call_box_converse').css('display', 'block');
-            $('#call_box_body').css('display', 'none');
+            //$('#call_box_body').css('display', 'none');
             $('#call_box_form').css('display', 'none');
             $('.call_box_login').css('display', 'none');
             $('.call_box_fullscreen_loader').css('display', 'block');
             break;
         case 2:
             $('#call_box_converse').css('display', 'none');
-            $('#call_box_body').css('display', 'block');
+            //$('#call_box_body').css('display', 'block');
             $('#call_box_form').css('display', 'none');
             $('.call_box_login').css('display', 'none');
             $('.call_box_fullscreen_loader').css('display', 'block');
@@ -118,4 +118,4 @@ function deleteCookie(name) {
 
 
 //toggleFab();
-hideCallBox(0);
+//hideCallBox(0);

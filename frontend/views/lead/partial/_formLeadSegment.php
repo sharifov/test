@@ -1,145 +1,147 @@
 <?php
 /**
  * @var $form ActiveForm
- * @var $segment LeadFlightSegment
- * @var $key string|integer
+ * @var $segment sales\forms\lead\SegmentEditForm
+ * @var $model sales\forms\lead\ItineraryEditForm
  */
 
 use yii\widgets\ActiveForm;
-use common\models\LeadFlightSegment;
-use yii\helpers\Html;
 use dosamigos\datepicker\DatePicker;
-use yii\jui\AutoComplete;
 use yii\web\JsExpression;
-use yii\helpers\Url;
+use \kartik\select2\Select2;
+use yii\web\View;
+use \sales\helpers\lead\LeadFlightSegmentHelper;
+use \unclead\multipleinput\MultipleInput;
 
+$select2Properties = [
+    'options' => [
+        'placeholder' => 'Select location ...',
+        'multiple' => false,
+    ],
+    'pluginOptions' => [
+        'width' => '100%',
+        'allowClear' => true,
+        'minimumInputLength' => 1,
+        'language' => [
+            'errorLoading' => new JsExpression("function () { return 'Waiting for results...'; }"),
+        ],
+        'ajax' => [
+            'url' => ['/airport/get-list'],
+            'dataType' => 'json',
+            'data' => new JsExpression('function(params) { return {term:params.term}; }'),
+        ],
+        'escapeMarkup' => new JsExpression('function (markup) { return markup; }'),
+        'templateResult' => new JsExpression('formatRepo'),
+        'templateSelection' => new JsExpression('function (data) { return data.selection || data.text;}'),
+    ]
+];
 ?>
-<div class="form-group sl-itinerary-form__row js-mc-row">
-    <span class="sl-itinerary-form__mc-row-nr"></span>
 
-    <?php
-    echo Html::a('<i class="fa fa-times"></i>', 'javascript:void(0);', [
-        'class' => 'lead-remove-segment-button sl-itinerary-form__mc-row-del js-del-row',
-    ]);
-    if ($key == '__id__') {
-        echo $form->field($segment, '[' . $key . ']origin_label', [
-            'options' => [
-                'class' => 'sl-itinerary-form__option'
-            ],
-            'template' => '{label}{input}{error}{hint}'
-        ])->textInput([
-            'class' => 'origin form-control lead-form-input-element',
-            'placeholder' => 'From',
-        ]);
-
-        echo $form->field($segment, '[' . $key . ']destination_label', [
-            'options' => [
-                'class' => 'sl-itinerary-form__option'
-            ],
-            'template' => '{label}{input}{error}{hint}'
-        ])->textInput([
-            'class' => 'destination form-control lead-form-input-element',
-            'placeholder' => 'To',
-        ]);
-
-    } else {
-        echo $form->field($segment, '[' . $key . ']origin_label', [
-            'options' => [
-                'class' => 'sl-itinerary-form__option'
-            ],
-        ])->widget(AutoComplete::class, [
-            'options' => [
-                'class' => 'origin form-control lead-form-input-element',
-                'placeholder' => 'From',
-            ],
-            'clientOptions' => [
-                'autoFocus' => true,
-                'source' => new JsExpression("function(request, response) {
-                $.getJSON('" . Url::to(['site/get-airport']) . "', {
-                    term: request.term
-                }, response);
-            }"),
-                'minLength' => '2',
+<?= $form->field($model, 'segments')->widget(MultipleInput::class, [
+    'max' => 10,
+//    'allowEmptyList' => true,
+    'enableError' => true,
+    'showGeneralError' => true,
+    'columns' => [
+        [
+            'name' => 'origin',
+            'type' => Select2::class,
+            'title' => 'Origin',
+            'value' => function ($segment) {
+                return $segment['origin'];
+            },
+            'options' => function ($segment) use ($select2Properties) {
+                $select2Properties['data'] = [$segment['origin'] => $segment['originLabel']];
+                return $select2Properties;
+            },
+            'headerOptions' => [
+                //'style' => 'width: 35%;',
             ]
-        ]);
+        ],
+        [
+            'name' => 'destination',
+            'type' => Select2::class,
+            'title' => 'Destination',
+            'value' => function ($segment) {
+                return $segment['destination'];
+            },
+            'options' => function ($segment) use ($select2Properties) {
+                $select2Properties['data'] = [$segment['destination'] => $segment['destinationLabel']];
+                return $select2Properties;
+            },
 
-        echo $form->field($segment, '[' . $key . ']destination_label', [
+        ],
+        [
+            'name' => 'departure',
+            'type' => DatePicker::class,
+            'title' => 'Departure',
+            'value' => function ($segment) {
+                return $segment['departure'] ? date('d-M-Y', strtotime($segment['departure'])) : date('d-M-Y');
+            },
             'options' => [
-                'class' => 'sl-itinerary-form__option'
+                'addon' => '',
+                'clientOptions' => [
+                    'autoclose' => true,
+                    'format' => 'dd-M-yyyy',
+                    'todayHighlight' => true,
+                    'sty'
+                ],
+                'options' => [
+                    'class' => 'depart-date form-control',
+                    'placeholder' => 'Departure',
+                    'readonly' => true,
+                ],
             ],
-        ])->widget(AutoComplete::class, [
-            'options' => [
-                'class' => 'destination form-control lead-form-input-element',
-                'placeholder' => 'From',
-            ],
-            'clientOptions' => [
-                'autoFocus' => true,
-                'source' => new JsExpression("function(request, response) {
-                $.getJSON('" . Url::to(['site/get-airport']) . "', {
-                    term: request.term
-                }, response);
-            }"),
-                'minLength' => '2',
+            'headerOptions' => [
+                'style' => 'width: 130px;',
             ]
-        ]);
-    }
-
-    if(!empty($segment->departure)){
-        $segment->departure = date('d-M-Y',strtotime($segment->departure));
-    }
-
-    echo $form->field($segment, '[' . $key . ']departure', [
-        'options' => [
-            'class' => 'sl-itinerary-form__option'
         ],
-    ])->widget(
-        DatePicker::class, [
-        'options' => [
-            'class' => 'depart-date form-control',
-            'placeholder' => 'Departing Date',
-            'readonly' => true
+        [
+            'name' => 'flexibilityType',
+            'type' => 'dropDownList',
+            'title' => 'Flex (+/-)',
+            'value' => function ($segment) {
+                return $segment['flexibilityType'];
+            },
+            'items' => LeadFlightSegmentHelper::flexibilityTypeList(),
+            'headerOptions' => [
+                'style' => 'width: 80px;',
+            ]
         ],
-        'clientOptions' => [
-            'inline' => false,
-            'autoclose' => true,
-            'format' => 'dd-M-yyyy',
-            'todayHighlight' => true
-        ]
-    ]);
 
-    echo $form->field($segment, '[' . $key . ']id', [
-        'options' => [
-            'tag' => false
+        [
+            'name' => 'flexibility',
+            'type' => 'dropDownList',
+            'title' => 'Flex (days)',
+            'value' => function ($segment) {
+                return $segment['flexibility'];
+            },
+            'items' => LeadFlightSegmentHelper::flexibilityList(),
+            'headerOptions' => [
+                'style' => 'width: 80px;',
+            ]
         ],
-    ])->hiddenInput()->label(false);
-    ?>
 
-    <div class="sl-itinerary-form__option sl-itinerary-form__option--flexibility">
-        <label for="flexibility-<?= $key ?>">Flex (days)</label>
-        <label for="flexibility-<?= $key ?>" class="select-wrap-label">
-            <?= $form->field($segment, '[' . $key . ']flexibility', [
-                'options' => [
-                    'tag' => false,
-                ],
-                'template' => '{input}'
-            ])->dropDownList([0, 1, 2, 3, 4], [
-                'class' => 'form-control',
-            ])->label(false) ?>
-        </label>
-    </div>
+    ]
+])->label(false) ?>
 
-    <div class="sl-itinerary-form__option sl-itinerary-form__option--flexibility">
-        <label for="flexibility-<?= $key ?>">Flex (+/-)</label>
-        <label for="flexibility-<?= $key ?>" class="select-wrap-label">
-            <?= $form->field($segment, '[' . $key . ']flexibility_type', [
-                'options' => [
-                    'tag' => false,
-                ],
-                'template' => '{input}'
-            ])->dropDownList(['-' => '-', '+/-' => '+/-', '+' => '+'], [
-                'class' => 'form-control',
-            ])->label(false) ?>
-        </label>
-    </div>
+<?php
 
-</div>
+$js = <<<JS
+function formatRepo( repo ) {
+				if (repo.loading) return repo.text;
+
+				var markup = "<div class='select2-result-repository clearfix'>" +
+					//"<div class='select2-result-repository__avatar'><i class=\"fa fa-plane\"></div>" +
+					"<div class='select2-result-repository__meta'>" +
+						"<div class='select2-result-repository__title'>" + repo.text + "</div>";
+				
+				/*markup += "<div class='select2-result-repository__statistics'>" +
+							"<div class='select2-result-repository__forks'>" + repo.id + "</div>" +
+						"</div>" +*/
+				markup +=	"</div></div>";
+
+				return markup;
+			}
+JS;
+$this->registerJs($js, View::POS_HEAD);

@@ -10,7 +10,7 @@
 }
 
 .fabs ul li{
-  list-style: none;
+  /*list-style: none;*/
 }
 
 .fab {
@@ -160,7 +160,7 @@
 }
 
 .call_box_fullscreen_loader {
-  display: none;
+  /*display: none;*/
   float: right;
   cursor: pointer;
   /* margin: 10px; */
@@ -172,12 +172,13 @@
 
 .call_box.is-visible {
   opacity: 1;
-  -webkit-animation: zoomIn .2s cubic-bezier(.42, 0, .58, 1);
-  animation: zoomIn .2s cubic-bezier(.42, 0, .58, 1);
+  /*-webkit-animation: zoomIn .2s cubic-bezier(.42, 0, .58, 1);
+  animation: zoomIn .2s cubic-bezier(.42, 0, .58, 1);*/
   display: block;
 }
 .is-hide{
-  opacity: 0
+  opacity: 0;
+  display: none;
 }
 
 .call_box_option {
@@ -238,22 +239,22 @@
 }
 
 .call_box_login p,.call_box_body li,.fabs p,.fabs a{
-  -webkit-animation: zoomIn .5s cubic-bezier(.42, 0, .58, 1);
-  animation: zoomIn .5s cubic-bezier(.42, 0, .58, 1);
+  /*-webkit-animation: zoomIn .5s cubic-bezier(.42, 0, .58, 1);
+  animation: zoomIn .5s cubic-bezier(.42, 0, .58, 1);*/
 }
 
 .call_box_body p {
   padding: 20px;
   color: #888
 }
-.call_box_body a {
+/*.call_box_body a {
   width: 10%;
   text-align: center;
   border: none;
   box-shadow: none;
   line-height: 40px;
   font-size: 15px;
-}
+}*/
 
 
 
@@ -416,8 +417,8 @@
   display: block;
   word-wrap: break-word;
   border-radius: 3px;
-  -webkit-animation: zoomIn .5s cubic-bezier(.42, 0, .58, 1);
-  animation: zoomIn .5s cubic-bezier(.42, 0, .58, 1);
+  /*-webkit-animation: zoomIn .5s cubic-bezier(.42, 0, .58, 1);
+  animation: zoomIn .5s cubic-bezier(.42, 0, .58, 1);*/
   clear: both;
   z-index: 999;
 }
@@ -598,8 +599,8 @@ strong.call_box_time {
 
 .is-loading {
   display: block;
-  -webkit-animation: load 1s cubic-bezier(0, .99, 1, 0.6) infinite;
-  animation: load 1s cubic-bezier(0, .99, 1, 0.6) infinite;
+  /*-webkit-animation: load 1s cubic-bezier(0, .99, 1, 0.6) infinite;
+  animation: load 1s cubic-bezier(0, .99, 1, 0.6) infinite;*/
 }
 /*Animation*/
 
@@ -647,7 +648,7 @@ strong.call_box_time {
   }
 }
 
-@keyframes load {
+/*@keyframes load {
   0% {
     -webkit-transform: scale(0);
     transform: scale(0);
@@ -663,7 +664,7 @@ strong.call_box_time {
     transform: scale(1);
     opacity: 0;
   }
-}
+}*/
 /* SMARTPHONES PORTRAIT */
 
 @media only screen and (min-width: 300px) {

@@ -1,6 +1,6 @@
 <?php
 /**
- * @var $project \common\models\Source
+ * @var $project \common\models\Project
  * @var $agentName string
  * @var $employee \common\models\Employee
  * @var $body string

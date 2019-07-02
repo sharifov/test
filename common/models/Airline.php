@@ -60,7 +60,7 @@ class Airline extends ActiveRecord
     {
         return [
             [
-                'class' => AttributeBehavior::className(),
+                'class' => AttributeBehavior::class,
                 'attributes' => [
                     ActiveRecord::EVENT_BEFORE_INSERT => [
                         'updated_dt'
@@ -148,12 +148,18 @@ class Airline extends ActiveRecord
         }
     }
 
-    public static function getAirlinesListByIata($iata = [])
+    /**
+     * @param array $iata
+     * @return array
+     */
+    public static function getAirlinesListByIata($iata = []): array
     {
         $data = [];
-        $airlines = self::find()->where(['iata' => $iata])->all();
-        foreach ($airlines as $airline){
-            $data[$airline['iata']] = $airline['name'];
+        $airlines = self::find()->where(['iata' => $iata])->asArray()->all();
+        if($airlines) {
+            foreach ($airlines as $airline) {
+                $data[$airline['iata']] = $airline['name'];
+            }
         }
 
         return $data;

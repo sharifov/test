@@ -114,6 +114,10 @@ class SearchService
         $request->setMethod('GET')->setUrl($url)->setOptions([CURLOPT_ENCODING => 'gzip']);
         $response = $request->send();
 
+        //VarDumper::dump($fields)
+
+        Yii::info($url, 'info\CURL:getOnlineQuotes:quickSearch');
+
         if ($response->isOk) {
             return $response->data;
         } else {

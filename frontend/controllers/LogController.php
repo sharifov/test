@@ -35,14 +35,18 @@ class LogController extends FController
      */
     public function actionIndex()
     {
-
         $searchModel = new LogSearch();
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
-
-        return $this->render('index', [
-            'searchModel' => $searchModel,
-            'dataProvider' => $dataProvider,
-        ]);
+        if ($searchModel->load(Yii::$app->request->post())){
+            $deletedRowsCnt = Log::removeSysLogs($searchModel);
+            Yii::$app->session->addFlash('logsCleaner','Was removed ' . $deletedRowsCnt . ' logs from database.');
+            return $this->redirect(['index']);
+        } else{
+            $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+            return $this->render('index', [
+                'searchModel' => $searchModel,
+                'dataProvider' => $dataProvider,
+            ]);
+        }
     }
 
 

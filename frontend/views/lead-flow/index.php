@@ -62,7 +62,7 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
                 //'label' => 'Lead UID',
                 'attribute' => 'lead_id',
                 'value' => function(\common\models\LeadFlow $model) {
-                    return 'Lead: '. Html::a('' . $model->lead_id, ['lead/view', 'gid' => $model->lead->gid], ['target' => '_blank', 'data-pjax' => 0]);
+                    return Html::a('' . $model->lead_id, ['lead/view', 'gid' => $model->lead->gid], ['target' => '_blank', 'data-pjax' => 0]);
                 },
                 'format' => 'raw',
                 'options' => ['style' => 'width:140px'],
@@ -89,6 +89,37 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
                         'placeholder' =>'Choose Date'
                     ],
                 ]),
+            ],
+            [
+                'label' => 'Status end date',
+                'attribute' => 'created',
+                'value' => function(\common\models\LeadFlow $model) {
+                    return $model->lf_end_dt ? '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->lf_end_dt)) : '-';
+                },
+                'format' => 'raw',
+                'options' => ['style' => 'width:180px'],
+                'filter' => DatePicker::widget([
+                    'model' => $searchModel,
+                    'attribute' => 'created',
+                    'clientOptions' => [
+                        'autoclose' => true,
+                        'format' => 'yyyy-mm-dd',
+                    ],
+                    'options' => [
+                        'autocomplete' => 'off',
+                        'placeholder' =>'Choose Date'
+                    ],
+                ]),
+            ],
+
+            [
+                //'label' => 'Status end date',
+                'attribute' => 'lf_time_duration',
+                'value' => function(\common\models\LeadFlow $model) {
+                    return $model->lf_time_duration ?: '-';
+                },
+                //'format' => 'raw',
+
             ],
             [
                 'attribute' => 'employee_id',

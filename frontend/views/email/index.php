@@ -183,7 +183,7 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$
             [
                 'attribute' => 'e_created_dt',
                 'value' => function (\common\models\Email $model) {
-                    return '<i class="fa fa-calendar"></i> ' . date('d-M-Y [H:i]', strtotime($model->e_created_dt));
+                    return $model->e_created_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->e_created_dt), 'php: Y-m-d [H:i:s]')  : '-';
                 },
                 'format' => 'raw',
                 'filter' => DatePicker::widget([

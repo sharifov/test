@@ -108,7 +108,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'value' => function (\common\models\Lead $model) {
                 return $model->source ? $model->source->name : '-';
             },
-            'filter' => \common\models\Source::getList()
+            'filter' => \common\models\Sources::getList(true)
         ],
 
         [

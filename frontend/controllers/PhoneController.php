@@ -139,6 +139,27 @@ class PhoneController extends FController
      */
     public function actionAjaxSaveCall(): array
     {
+        \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+        $out = ['error' => '', 'data' => []];
+
+        // update call status when agent reject call
+        if (Yii::$app->request->getIsGet()) {
+            //$get_sid = Yii::$app->request->get('sid');
+            $userId = (int) Yii::$app->request->get('user_id');
+
+            $call = Call::find()->where(['c_created_user_id' => $userId])->orderBy(['c_id' => SORT_DESC])->limit(1)->one();
+            if ($call) {
+                $call->c_call_status = Call::CALL_STATUS_NO_ANSWER;
+                if (!$call->save()) {
+                    $out['error'] = VarDumper::dumpAsString($call->errors);
+                    Yii::error($out['error'], 'PhoneController:actionAjaxSaveCall:Call:save_1');
+                } else {
+                    $out['data'] = $call->attributes;
+                }
+            }
+            return $out;
+        }
+
         $call_sid = Yii::$app->request->post('call_sid');
         $call_acc_sid = Yii::$app->request->post('call_acc_sid');
 
@@ -148,10 +169,6 @@ class PhoneController extends FController
 
         $lead_id = Yii::$app->request->post('lead_id');
         $project_id = Yii::$app->request->post('project_id');
-
-        $out = ['error' => '', 'data' => []];
-
-        \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
 
         if($call_sid && $call_from && $call_to) {
             $call = Call::find()->where(['c_call_sid' => $call_sid])->limit(1)->one();
@@ -181,7 +198,7 @@ class PhoneController extends FController
             $call->c_call_status = $call_status;
             $call->c_updated_dt = date('Y-m-d H:i:s');
 
-            /*if(!$call->save()) {
+            if(!$call->save()) {
                 $out['error'] = VarDumper::dumpAsString($call->errors);
                 Yii::error($out['error'], 'PhoneController:actionAjaxSaveCall:Call:save');
             } else {
@@ -190,7 +207,7 @@ class PhoneController extends FController
 
             //Notifications::create(Yii::$app->user->id, 'Outgoing Call from '.$call_from, 'Outgoing Call from ' . $call_from .' to '.$call_to, Notifications::TYPE_WARNING, true);
             //Notifications::socket(Yii::$app->user->id, null, 'getNewNotification', [], true);
-            Notifications::socket(Yii::$app->user->id, null, 'callUpdate', ['status' => Call::CALL_STATUS_RINGING, 'duration' => 0, 'snr' => 0], true);*/
+            //Notifications::socket(Yii::$app->user->id, null, 'callUpdate', ['status' => Call::CALL_STATUS_RINGING, 'duration' => 0, 'snr' => 0], true);
 
         }
 
@@ -216,7 +233,8 @@ class PhoneController extends FController
                 $is_ready = true;
                 $userRedirect = Employee::findOne($to_id);
                 if($userRedirect) {
-                    if(!$userRedirect->isOnline() || !$userRedirect->isCallStatusReady() || !$userRedirect->isCallFree()) {
+                    //if(!$userRedirect->isOnline() || !$userRedirect->isCallStatusReady() || !$userRedirect->isCallFree()) {
+                    if(!$userRedirect->isOnline() || !$userRedirect->isCallFree()) {
                         $is_ready = false;
                     }
                 } else {

@@ -21,6 +21,23 @@ use common\models\UserCallStatus;
  */
 class CallBox extends \yii\bootstrap\Widget
 {
+
+    private static $instance;
+
+    /**
+     * Returns *CallBox* instance of this class.
+     *
+     * @return CallBox The *CallBox* instance.
+     */
+    public static function getInstance(): CallBox
+    {
+        if (null === static::$instance) {
+            static::$instance = new static();
+        }
+
+        return static::$instance;
+    }
+
     public function init()
     {
         parent::init();
@@ -36,8 +53,6 @@ class CallBox extends \yii\bootstrap\Widget
         $userModel = \Yii::$app->user->identity;
         //$sipExist = $sipExist = ($userModel->userProfile->up_sip && strlen($userModel->userProfile->up_sip) > 2); // \common\models\UserProjectParams::find()->where(['upp_user_id' => $user_id])->andWhere(['AND', ['IS NOT', 'upp_tw_sip_id', null], ['!=', 'upp_tw_sip_id', '']])->one();
 
-
-
         //VarDumper::dump($sipExist->attributes, 10, true);
 
         if(!$userModel) {
@@ -48,12 +63,12 @@ class CallBox extends \yii\bootstrap\Widget
             return '';
         }
 
-
         $lastCall = Call::find()->where(['c_created_user_id' => $user_id])->orderBy(['c_id' => SORT_DESC])->limit(1)->one();
-        $lastCalls = Call::find()->where(['c_created_user_id' => $user_id])->orderBy(['c_id' => SORT_DESC])->limit(5)->all();
-
         $userCallStatus = UserCallStatus::find()->where(['us_user_id' => $user_id])->orderBy(['us_id' => SORT_DESC])->limit(1)->one();
+        $countMissedCalls = Call::find()->where(['c_created_user_id' => $user_id, 'c_call_status' => Call::CALL_STATUS_NO_ANSWER, 'c_call_type_id' => Call::CALL_TYPE_IN, 'c_is_new' => true])->count();
+        //$countMissedCalls = 10;
 
-        return $this->render('call_box', ['lastCall' => $lastCall, 'lastCalls' => $lastCalls, 'userCallStatus' => $userCallStatus]);
+
+        return $this->render('call_box', ['lastCall' => $lastCall, 'userCallStatus' => $userCallStatus, 'countMissedCalls' => $countMissedCalls]);
     }
 }

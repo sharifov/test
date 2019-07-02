@@ -498,6 +498,7 @@ class QuoteController extends ApiBaseController
         return $responseData;
     }
 
+
     /**
      * @return array
      * @throws BadRequestHttpException
@@ -565,6 +566,7 @@ class QuoteController extends ApiBaseController
 
         return $responseData;
     }
+
 
     /**
      * @return mixed

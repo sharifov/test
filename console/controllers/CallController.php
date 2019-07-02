@@ -5,7 +5,7 @@ namespace console\controllers;
 use common\models\Call;
 use common\models\Employee;
 use common\models\ProjectEmployeeAccess;
-use common\models\Source;
+use common\models\Sources;
 use common\models\UserProfile;
 use yii\console\Controller;
 use Yii;
@@ -163,7 +163,7 @@ class CallController extends Controller
                     }
 
                     $agent_phone_number = $call->c_to;
-                    $source = Source::findOne(['phone_number' => $agent_phone_number]);
+                    $source = Sources::findOne(['phone_number' => $agent_phone_number]);
                     if($source && $source->project) {
                         $project = $source->project;
                         $project_employee_access = ProjectEmployeeAccess::find()->where(['project_id' => $project->id])->all();

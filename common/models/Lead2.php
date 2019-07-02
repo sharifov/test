@@ -526,7 +526,7 @@ class Lead2 extends \yii\db\ActiveRecord
             //$source = Source::find()->select('id')->where(['phone_number' => $this->c_to])->limit(1)->one();
 
             //if(!$source) {
-            $source = Source::find()->select('id')->where(['project_id' => $lead->project_id, 'default' => true])->one();
+            $source = Sources::find()->select('id')->where(['project_id' => $lead->project_id, 'default' => true])->one();
             //}
 
             if($source) {

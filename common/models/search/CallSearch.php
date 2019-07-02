@@ -182,14 +182,15 @@ class CallSearch extends Call
             'c_is_deleted' => $this->c_is_deleted,
             'c_source_type_id' => $this->c_source_type_id,
             'c_call_sid' => $this->c_call_sid,
-            'c_parent_call_sid' => $this->c_parent_call_sid
+            'c_parent_call_sid' => $this->c_parent_call_sid,
+            'c_call_status' => $this->c_call_status
         ]);
 
         $query->andFilterWhere(['like', 'c_account_sid', $this->c_account_sid])
             ->andFilterWhere(['like', 'c_from', $this->c_from])
             ->andFilterWhere(['like', 'c_to', $this->c_to])
             ->andFilterWhere(['like', 'c_sip', $this->c_sip])
-            ->andFilterWhere(['like', 'c_call_status', $this->c_call_status])
+            //->andFilterWhere(['like', 'c_call_status', $this->c_call_status])
             ->andFilterWhere(['like', 'c_api_version', $this->c_api_version])
             ->andFilterWhere(['like', 'c_direction', $this->c_direction])
             ->andFilterWhere(['like', 'c_forwarded_from', $this->c_forwarded_from])

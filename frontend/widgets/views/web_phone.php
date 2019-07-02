@@ -1,9 +1,10 @@
 <?php
-
+/* @var $user_id integer */
 /* @var $clientId string */
 /* @var $token string */
 /* @var $fromAgentPhone string */
 /* @var $supportGeneralPhones array */
+/* @var $use_browser_call_access bool */
 
 
 
@@ -244,23 +245,129 @@
 echo '<div class="container" id="container-redirect-agents"></div>';
 \yii\bootstrap\Modal::end(); ?>
 
-
-
-
-
 <?php
     $ajaxSaveCallUrl = \yii\helpers\Url::to(['phone/ajax-save-call']);
     $ajaxRedirectCallUrl = \yii\helpers\Url::to(['phone/ajax-call-redirect']);
     $ajaxCallRedirectGetAgents = \yii\helpers\Url::to(['phone/ajax-call-get-agents']);
 ?>
-
-
 <script type="text/javascript">
 
     const ajaxSaveCallUrl = '<?=$ajaxSaveCallUrl?>';
     const ajaxCallRedirectUrl = '<?=$ajaxRedirectCallUrl?>';
     const ajaxCallRedirectGetAgents = '<?=$ajaxCallRedirectGetAgents;?>';
     const c_user_id = '<?=Yii::$app->user->id?>';
+    use_browser_call_access =  <?= ($use_browser_call_access) ? 'true' : 'false' ?>;
+    agentId = <?= $user_id;?>;
+
+    if(window.localStorage.agent_tab_conn_state === undefined) {
+        var agent_tab_conn_state = [{"user":agentId, "items":[]}];
+        window.localStorage.setItem('agent_tab_conn_state', JSON.stringify(agent_tab_conn_state));
+    }
+
+    if(window.localStorage.lock === undefined) {
+        window.localStorage.setItem('lock', 'false');
+    }
+
+    window.addEventListener('storage', function (event) {
+        console.log(" localStorage_EVENT:" + JSON.stringify(event) + " ");
+    });
+
+    
+    function clearAgentStatus(cn) {
+        if(window.localStorage.lock !== undefined && window.localStorage.lock !== 'true') {
+            if (cn && cn.parameters && cn.status() && cn.status() !== 'closed') {
+                updateAgentStatus(cn, true);
+            }
+        }
+    }
+    
+    function updateAgentStatus(conn, update = false, canceled = false) {
+        if(!use_browser_call_access) {
+            if(window.localStorage.agent_tab_conn_state !== undefined) {
+                var agent_tab_conn_state = [{"user":agentId, "items":[]}];
+                window.localStorage.setItem('agent_tab_conn_state', JSON.stringify(agent_tab_conn_state));
+            }
+            window.localStorage.setItem('lock', 'false');
+            return true;
+        }
+
+        window.localStorage.setItem('lock', 'true');
+
+        /*if(conn && conn.status()) {
+            console.log("CONN: " + conn.parameters.CallSid + ' - ' + conn.status());
+        }*/
+
+        var access = true;
+        try {
+            var agent_tab_conn_state = JSON.parse(window.localStorage.agent_tab_conn_state);
+        } catch (e) {
+            var agent_tab_conn_state = [{"user":agentId, "items":[]}];
+        }
+        var del = false;
+        var plus_minute = parseInt(Math.floor(Date.now() /1000) + 5);
+        var seconds_now = parseInt(Math.floor(Date.now() /1000));
+
+        if(agent_tab_conn_state.length > 0) {
+            var agent_elements = [];
+            var dataKey = -1;
+            for(var i=0; i<agent_tab_conn_state.length; i++){
+                var agentData = agent_tab_conn_state[i];
+                if(agentData && agentData.user && agentData.user === agentId) {
+                    dataKey = i;
+                    agent_elements = agentData.items;
+                }
+            }
+
+            if(agent_elements.length > 0 && dataKey > -1) {
+                for(var ii=0; ii<agent_elements.length; ii++){
+                    del = false;
+                    var element = agent_elements[ii];
+                    if(! element) {
+                        agent_elements.splice(ii, 1);
+                        continue;
+                    }
+                    if(element.exp && parseInt(element.exp) < seconds_now) {
+                        del = true;
+                    }
+
+                    if(conn && conn.parameters.CallSid && conn.parameters.CallSid === element.sid) {
+                        del = true;
+                    }
+
+                    if(element.status && (element.status === 'closed' || element.status === 'pending')) {
+                    //if(element.status && element.status === 'closed') {
+                        del = true;
+                    }
+
+                    if(del){
+                        agent_elements.splice(ii, 1);
+                    }
+                }
+            }
+
+            if(agent_elements.length > 0 && dataKey > -1) {
+                for(var ii=0; ii<agent_elements.length; ii++){
+                    var element = agent_elements[ii];
+                    if(element.status && element.status !== 'closed') {
+                        access = false;
+                    }
+                }
+            }
+
+            if(conn && conn.parameters.CallSid && conn.status() && conn.status() !== 'closed' && conn.status() !== 'pending') {
+            //if(conn && conn.parameters.CallSid && conn.status() && conn.status() !== 'closed' && !canceled) {
+                var connData = {"sid":conn.parameters.CallSid,"status":conn.status(),"exp":plus_minute};
+                agent_elements.push(connData);
+            }
+
+            if(dataKey > -1) {
+                agent_tab_conn_state[dataKey] = {"user":agentId,"items":agent_elements};
+            }
+        }
+        window.localStorage.setItem('agent_tab_conn_state', JSON.stringify(agent_tab_conn_state));
+        window.localStorage.setItem('lock', 'false');
+        return access;
+    }
 
     function createNotify(title, message, type) {
         new PNotify({
@@ -449,6 +556,7 @@ echo '<div class="container" id="container-redirect-agents"></div>';
 
     document.getElementById('button-answer').onclick = function () {
         console.log("button-answer: " + connection);
+
         if (connection) {
             connection.accept();
             document.getElementById('call-controls2').style.display = 'none';
@@ -456,9 +564,12 @@ echo '<div class="container" id="container-redirect-agents"></div>';
     };
 
     document.getElementById('button-reject').onclick = function () {
-        console.log("button-reject: " + connection);
         if (connection) {
+            console.log("button-reject: " + JSON.stringify(connection.parameters));
             connection.reject();
+                $.get(ajaxSaveCallUrl + '?sid=' + connection.parameters.CallSid + '&user_id=' + agentId, function (r) {
+                console.log(r);
+            });
             document.getElementById('call-controls2').style.display = 'none';
         }
     };
@@ -527,7 +638,7 @@ echo '<div class="container" id="container-redirect-agents"></div>';
         var lead_id = webPhoneParams.lead_id;
         //var call_acc_sid =
 
-        console.info('sid: ' + call_sid + ' : ' + call_from + ' : ' + call_to + ' : ' + call_status + ' : ' + project_id + ' : ' + lead_id);
+        console.info('saveDbCall - sid: ' + call_sid + ' : ' + call_from + ' : ' + call_to + ' : ' + call_status + ' : ' + project_id + ' : ' + lead_id);
 
         //console.warn(webPhoneParams); return false;
 
@@ -545,10 +656,16 @@ echo '<div class="container" id="container-redirect-agents"></div>';
                 },
                 url: ajaxSaveCallUrl,
                 success: function (data) {
-                    console.log(data);
+                    console.info(data);
                     //$('#preloader').addClass('hidden');
                     //modal.find('.modal-body').html(data);
                     //modal.modal('show');
+
+                    /*if (typeof refreshCallBox === "function") {
+                        var obj = {'id': data.c_id, 'status': data.c_call_status};
+                        console.log(obj);
+                        refreshCallBox(obj);
+                    }*/
                 },
                 error: function (error) {
                     console.error(error);
@@ -577,16 +694,20 @@ echo '<div class="container" id="container-redirect-agents"></div>';
 
                 //console.log([data, device]);
                 device.on('ready', function (device) {
+
                     log('Twilio.Device Ready!');
                     //document.getElementById('call-controls').style.display = 'block';
                 });
 
                 device.on('error', function (error) {
+                    updateAgentStatus(connection);
                     log('Twilio.Device Error: ' + error.message);
                 });
 
                 device.on('connect', function (conn) {
                     //console.log("connect call: status: " + connection.status() + "\n" + 'connection: ' + JSON.stringify(connection) + "\n conn:" + JSON.stringify(conn));
+                    updateAgentStatus(connection, true);
+                    updateAgentStatus(conn, true);
                     connection = conn;
                     log('Successfully established call!');
                     console.warn(conn);
@@ -606,6 +727,8 @@ echo '<div class="container" id="container-redirect-agents"></div>';
                 });
 
                 device.on('disconnect', function (conn) {
+                    updateAgentStatus(connection, true);
+                    updateAgentStatus(conn, true);
                     connection = conn;
                     log('Call ended');
                     createNotify('Call ended', 'Call ended', 'warning');
@@ -626,6 +749,12 @@ echo '<div class="container" id="container-redirect-agents"></div>';
                 });
 
                 device.on('incoming', function (conn) {
+                    var access =  updateAgentStatus(conn, false);
+                    if(!access) {
+                        conn.reject();
+                        return false;
+                    }
+
                     if(connection && Object.prototype.hasOwnProperty.call(connection, "status")) {
                         //console.log("incoming call: status: " + connection.status() + "\n" + 'connection: ' + JSON.stringify(connection) + "\n conn:" + JSON.stringify(conn));
                         if (connection && ['open', 'ringing'].inArray(connection.status())) {
@@ -634,6 +763,7 @@ echo '<div class="container" id="container-redirect-agents"></div>';
                         }
                     }
                     connection = conn;
+                    updateAgentStatus(connection, true);
                     log('Incoming connection from ' + conn.parameters.From);
                     createNotify('Incoming connection', 'Incoming connection from ' + conn.parameters.From, 'success');
 
@@ -656,6 +786,7 @@ echo '<div class="container" id="container-redirect-agents"></div>';
 
 
                 device.on('cancel', function (conn) {
+                    updateAgentStatus(conn, true, true);
                     connection = conn;
                     log('Cancel call');
                     createNotify('Cancel call', 'Cancel call', 'warning');
@@ -691,6 +822,13 @@ echo '<div class="container" id="container-redirect-agents"></div>';
 
 
     function webCall(phone_from, phone_to, project_id, lead_id, type) {
+
+        /*var access =  updateAgentStatus(connection);
+        if(!access) {
+            alert('No access to call');
+            return false;
+        }*/
+
         var params = {'To': phone_to, 'FromAgentPhone': phone_from, 'project_id': project_id, 'lead_id': lead_id, 'c_type': type, 'c_user_id': c_user_id};
         webPhoneParams = params;
 
@@ -727,7 +865,8 @@ $userId = Yii::$app->user->id;
 
 $js = <<<JS
 
-
+        setInterval('clearAgentStatus(connection)', 1000);
+       
         $(document).on('click', '.button-redirect-to-agents', function(e) {
             
             e.preventDefault();

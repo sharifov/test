@@ -80,4 +80,37 @@ class Log extends \yii\db\ActiveRecord
 
         return $arr;
     }
+
+    /**
+     * @param $model Log
+     * @return int|string
+     */
+    public static function removeSysLogs($model){
+        $beforeDelete = self::find()->count();
+
+        if ($model->level != '' && $model->category == '' && $model->days == ''){
+            self::deleteAll('level = :l', [':l' => $model->level]);
+        }
+        if ($model->level == '' && $model->category != '' && $model->days == ''){
+            self::deleteAll('category = :c', [':c' => $model->category]);
+        }
+        if ($model->level == '' && $model->category == '' && $model->days != ''){
+            self::deleteAll('log_time <= :d', [':d' => strtotime('-'.$model->days.' day')]);
+        }
+        if ($model->level != '' && $model->category != '' && $model->days == ''){
+            self::deleteAll(['AND','level = :l', 'category = :c'], [':l' => $model->level, ':c' => $model->category]);
+        }
+        if ($model->level != '' && $model->category == '' && $model->days != ''){
+            self::deleteAll(['AND','level = :l', 'log_time <= :d'], [':l' => $model->level, ':d' => strtotime('-'.$model->days.' day')]);
+        }
+        if ($model->level == '' && $model->category != '' && $model->days != ''){
+            self::deleteAll(['AND','category = :c', 'log_time <= :d'], [':c' => $model->category, ':d' => strtotime('-'.$model->days.' day')]);
+        }
+        if ($model->level != '' && $model->category != '' && $model->days != ''){
+            self::deleteAll('level = :l AND category = :c AND log_time <= :d', [':l' => $model->level, ':c' => $model->category, ':d' => strtotime('-'.$model->days.' day')]);
+        }
+        $afterDelete = self::find()->count();
+
+        return $beforeDelete - $afterDelete;
+    }
 }

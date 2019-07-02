@@ -7,11 +7,13 @@
  * @var $quotesProvider \yii\data\ActiveDataProvider
  * @var $dataProviderCommunication \yii\data\ActiveDataProvider
  * @var $dataProviderCallExpert \yii\data\ActiveDataProvider
+ * @var $dataProviderNotes \yii\data\ActiveDataProvider
  * @var $enableCommunication boolean
  * @var $modelLeadCallExpert \common\models\LeadCallExpert
- *
+ * @var  $modelNote \common\models\Note
  * @var $modelLeadChecklist \common\models\LeadChecklist
  * @var $dataProviderChecklist \yii\data\ActiveDataProvider
+ * @var $itineraryForm \sales\forms\lead\ItineraryEditForm
  */
 
 use yii\bootstrap\Html;
@@ -19,7 +21,7 @@ use frontend\models\LeadForm;
 
 $bundle = \frontend\themes\gentelella\assets\AssetLeadCommunication::register($this);
 
-//$this->registerCssFile('/css/style-req.css');
+
 $userId = Yii::$app->user->id;
 $user = Yii::$app->user->identity;
 
@@ -101,11 +103,12 @@ $lead = $leadForm->getLead();
 
         <div class="col-md-7">
 
-            <?= $this->render('partial/_flightDetails', [
-                'leadForm' => $leadForm
-            ]);
-            ?>
-
+            <?php \yii\widgets\Pjax::begin(['id' => 'pj-itinerary', 'enablePushState' => false, 'timeout' => 10000])?>
+                <?= $this->render('partial/_flightDetails', [
+                    'itineraryForm' => $itineraryForm,
+                    'leadForm' => $leadForm
+                ]) ?>
+            <?php \yii\widgets\Pjax::end()?>
 
             <?php if (!$leadForm->getLead()->isNewRecord) : ?>
                 <div class="row">
@@ -158,8 +161,14 @@ $lead = $leadForm->getLead();
                     'lead' => $leadForm->getLead()
                 ]);*/ ?>
 
-                <?= $this->render('partial/_notes', [
+                <?/*= $this->render('partial/_notes', [
                     'notes' => $leadForm->getLead()->notes
+                ]); */?>
+
+                <?= $this->render('notes/agent_notes', [
+                    'lead' => $leadForm->getLead(),
+                    'dataProviderNotes'  => $dataProviderNotes,
+                    'modelNote'  => $modelNote,
                 ]); ?>
 
                 <?/*= $this->render('partial/_leadLog', [
@@ -230,17 +239,28 @@ $lead = $leadForm->getLead();
                 <p>Client information is not available for this status (<?=strtoupper($leadForm->getLead()->getStatusName())?>)!</p>
             </div>
 
-        <? else: ?>
+        <?php else: ?>
             <?= $this->render('partial/_client', [
                 'leadForm' => $leadForm
             ]);
             ?>
-        <? endif; ?>
+        <?php endif; ?>
         <?= $this->render('partial/_preferences', [
             'leadForm' => $leadForm
         ]);
         ?>
+        <?php
+        if (Yii::$app->user->can('updateLead', ['leadId' => $itineraryForm->leadId])) : ?>
+            <div class="text-center">
+                <?= Html::submitButton('<span class="fa fa-check"></span> Save', [
+                    'id' => 'submit-lead-form-btn',
+                    'class' => 'btn btn-success'
+                ]) ?>
+            </div>
+        <?php endif; ?>
+
     </aside>
+
 </div>
 
 <?php
@@ -279,6 +299,11 @@ if (!$leadForm->getLead()->isNewRecord) {
         //$("[data-toggle='popover']").popover({sanitize: false});
     
     });
+     $("#pj-itinerary").on("pjax:end", function () {
+         if ($('#modeFlightSegments').data('value') == 'view') {
+            $.pjax.reload({container: '#quotes_list', timeout: 10000});     
+         }
+     });
     
 JS;
 

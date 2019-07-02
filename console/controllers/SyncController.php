@@ -21,7 +21,7 @@ use common\models\ProjectEmployeeAccess;
 use common\models\Quote;
 use common\models\QuotePrice;
 use common\models\Reason;
-use common\models\Source;
+use common\models\Sources;
 use yii\console\Controller;
 use Yii;
 
@@ -42,9 +42,9 @@ class SyncController extends Controller
                     exit;
                 }
                 foreach ($projectAttr['sources'] as $sourceId => $sourceAttr) {
-                    $source = Source::findOne(['id' => $sourceId]);
+                    $source = Sources::findOne(['id' => $sourceId]);
                     if ($source === null) {
-                        $source = new Source();
+                        $source = new Sources();
                     }
                     $source->attributes = $sourceAttr;
                     if (!$source->save()) {

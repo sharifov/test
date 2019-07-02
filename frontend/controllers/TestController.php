@@ -12,16 +12,11 @@ use common\models\Lead;
 use common\models\Lead2;
 use common\models\Notifications;
 use common\models\Project;
-use common\models\Source;
-use common\models\UserCallStatus;
+use common\models\Sources;
 use common\models\UserConnection;
-use common\models\UserGroupAssign;
 use common\models\UserProfile;
-use common\models\UserProjectParams;
 use Twilio\TwiML\VoiceResponse;
 use Yii;
-use yii\db\Expression;
-use yii\db\Query;
 use yii\helpers\ArrayHelper;
 use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
@@ -29,8 +24,6 @@ use yii\helpers\Inflector;
 use yii\helpers\VarDumper;
 use common\components\ReceiveEmailsJob;
 use yii\queue\Queue;
-use common\components\CheckPhoneNumberJob;
-use yii\rbac\ManagerInterface;
 
 
 /**
@@ -961,12 +954,19 @@ class TestController extends FController
         }*/
 
         $statuses = ['initiated', 'ringing', 'in-progress', 'completed'];
-        $lead_id = 54719;
+
+        $statuses = ['ringing', 'in-progress', 'completed'];
+
+        $statuses = ['ringing'];
+        //$lead_id = 54719;
+
+        $user_id = Yii::$app->user->id;
+
         $n = 0;
         foreach ($statuses as $status) {
-            sleep(random_int(5, 7));
+            sleep(random_int(2, 3));
             $n++;
-            Notifications::socket(null, $lead_id, 'callUpdate', ['status' => $status, 'duration' =>  ($status == 'completed' ? random_int(51, 180) : 0), 'snr' => $n], true);
+            Notifications::socket($user_id, null, 'callUpdate', ['id' => 123, 'status' => $status, 'duration' =>  ($status == 'completed' ? random_int(51, 180) : 0), 'snr' => $n], true);
         }
     }
 
@@ -1193,7 +1193,7 @@ class TestController extends FController
             $clientIds = explode(',', $clientIdsQuery['client_ids']);
         }
 
-        $source = Source::findOne(['phone_number' => $agent_phone_number]);
+        $source = Sources::findOne(['phone_number' => $agent_phone_number]);
         $project = $source->project;
         $call_project_id = $project->id;
 
@@ -1310,7 +1310,51 @@ class TestController extends FController
         exit;
         //VarDumper::dump($a, 10, true);*/
 
-        echo Lead2::findLastLeadByClientPhone('+3736959', 1, true);
+        //echo Lead2::findLastLeadByClientPhone('+3736959', 1, true);
+
+
+
+        $call = Call::find()->where(['c_call_sid' => '123'])->limit(1)->one();
+        if(!$call) {
+            $call = new Call();
+            $call->c_call_sid = uniqid();
+            $call->c_from = '+373';
+            $call->c_to = uniqid();
+            $call->c_created_dt = date('Y-m-d H:i:s');
+            $call->c_created_user_id = Yii::$app->user->id;
+            $call->c_call_type_id = Call::CALL_TYPE_OUT;
+            $call->c_call_status = Call::CALL_STATUS_RINGING;
+
+        }
+
+        /*if(!$call->c_lead_id && $lead_id) {
+            $call->c_lead_id = (int) $lead_id;
+        }
+
+        if(!$call->c_project_id && $project_id) {
+            $call->c_project_id = (int) $project_id;
+        }
+
+        $call->c_call_status = $call_status;*/
+        //$call->c_updated_dt = date('Y-m-d H:i:s');
+
+        if(!$call->save()) {
+            $out['error'] = VarDumper::dumpAsString($call->errors);
+            Yii::error($out['error'], 'PhoneController:actionAjaxSaveCall:Call:save');
+        } else {
+            $out['data'] = $call->attributes;
+        }
+
+
+        VarDumper::dump($out, 10, true); exit;
+
+
+        return $this->render('blank');
+
+        /*if (!$callsCount) {
+            return false;
+        }*/
+
     }
 
 }

@@ -227,4 +227,73 @@ class StatsController extends FController
             ]);
         }
     }
+
+    public function actionApiGraph()
+    {
+        $actionList = ApiLog::getActionsList();
+
+        if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
+            $chartOptions = Yii::$app->request->post();
+            $rangeBy = Yii::$app->request->post('groupBy');
+            $action = Yii::$app->request->post('action');
+            $date = explode("/", $chartOptions['dateRange']);
+            $userApiId = $chartOptions['project'];
+
+            if (date('Y-m-d', strtotime($date[0])) == date('Y-m-d', strtotime($date[1])) && $rangeBy != 'D' && $rangeBy != 'M'){
+                $range = 'H';
+                $chartTimeFormat = 'H:i';
+                $currentDate =  date('Y-m-d H:i:s', strtotime($date[0].' 00:00:00'));
+                $lastDate =  date('Y-m-d H:i:s', strtotime($date[1].' 23:59:59'));
+            } else if(date('Y-m-d', strtotime($date[0])) != date('Y-m-d', strtotime($date[1])) && $rangeBy == 'D') {
+                $range = 'D';
+                $chartTimeFormat = 'd M';
+                $currentDate =  date('Y-m-d', strtotime($date[0]));
+                $lastDate =  date('Y-m-d', strtotime($date[1]));
+            } else if(date('Y-m-d', strtotime($date[0])) == date('Y-m-d', strtotime($date[1])) && $rangeBy == 'D') {
+                $range = 'D';
+                $chartTimeFormat = 'd M';
+                $currentDate =  date('Y-m-d', strtotime($date[0]));
+                $lastDate =  date('Y-m-d', strtotime($date[1]));
+            } else if(date('Y-m-d', strtotime($date[0])) == date('Y-m-d', strtotime($date[1])) && $rangeBy == 'M') {
+                $range = 'M';
+                $chartTimeFormat = 'Y-m';
+                $currentDate =  date('Y-m-01', strtotime($date[0]));
+                $lastDate =  date('Y-m-31', strtotime($date[1]));
+            } if (date('Y-m-d', strtotime($date[0])) != date('Y-m-d', strtotime($date[1])) && $rangeBy != 'H' && $rangeBy != 'M'){
+                $range = 'D';
+                $chartTimeFormat = 'd M';
+                $currentDate =  date('Y-m-d', strtotime($date[0]));
+                $lastDate =  date('Y-m-d', strtotime($date[1]));
+            } else if(date('Y-m-d', strtotime($date[0])) != date('Y-m-d', strtotime($date[1])) && $rangeBy == 'M') {
+                $range = 'M';
+                $chartTimeFormat = 'Y-m';
+                $currentDate = date('Y-m-01', strtotime($date[0]));
+                $lastDate = date('Y-m-31', strtotime($date[1]));
+            } else if (date('Y-m-d', strtotime($date[0])) != date('Y-m-d', strtotime($date[1])) && $rangeBy == 'H') {
+                $range = 'HD';
+                $chartTimeFormat = 'Y-m-d H:i';
+                $currentDate = date('Y-m-d H:i:s', strtotime($date[0] . ' 00:00:00'));
+                $lastDate = date('Y-m-d H:i:s', strtotime($date[1] . ' 23:59:59'));
+            }
+
+            $apiStats = ApiLog::getApiLogStats($currentDate, $lastDate, $range, $userApiId, $action);
+
+            return $this->renderAjax('api-report', [
+                'apiStats' => $apiStats,
+                'format' => $chartTimeFormat,
+                'actions' => $actionList
+            ]);
+        } else {
+            $currentDate =  date('Y-m-d', strtotime('-0 day'));
+            $chartTimeFormat = 'H:i';
+
+            $apiStats = ApiLog::getApiLogStats($currentDate, $currentDate, $range = 'H', '', '');
+            return $this->render('api-report', [
+                'apiStats' => $apiStats,
+                'format' => $chartTimeFormat,
+                'actions' => $actionList
+            ]);
+        }
+
+    }
 }

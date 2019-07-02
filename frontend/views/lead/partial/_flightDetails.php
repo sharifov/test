@@ -1,310 +1,221 @@
 <?php
+
 use yii\widgets\ActiveForm;
-use frontend\models\LeadForm;
 use yii\helpers\Html;
-use common\models\Lead;
-use common\models\LeadFlightSegment;
+use \sales\helpers\lead\LeadHelper;
+use \yii\web\JqueryAsset;
+use \yii\web\View;
+use \common\widgets\Alert;
+
+/**
+ * @var $this yii\web\View
+ * @var $form ActiveForm
+ * @var $itineraryForm sales\forms\lead\ItineraryEditForm
+ * @var $leadForm frontend\models\LeadForm
+ */
 
 
 $this->registerJsFile('/js/moment.min.js', [
-    'position' => \yii\web\View::POS_HEAD,
+    'position' => View::POS_HEAD,
     'depends' => [
-        \yii\web\JqueryAsset::class
+        JqueryAsset::class
     ]
 ]);
-/**
- * @var $this \yii\web\View
- * @var $formLeadModel ActiveForm
- * @var $leadForm LeadForm
- */
 
-$formId = sprintf('%s-form', $leadForm->getLead()->formName());
-if ($leadForm->mode != $leadForm::VIEW_MODE) {
-    $js = <<<JS
+/*$this->registerCssFile('/css/style-request-form.css', [
+    'position' => View::POS_HEAD,
+    'depends' => [
+        JqueryAsset::class
+    ]
+]);*/
 
-    //----Switch Form Tabs
-    function switchTabs(inputSel) {
-        $(".js-mc-row:visible").first().find('.lead-remove-segment-button').addClass('hidden');
-        //mc
-        if (inputSel === 'mc') {
-            $('#lead-new-segment-button').removeClass('hidden');
-            $(".js-mc-row:hidden").show();
-            $('.js-tab').addClass('sl-itinerary-form__tab--mc').removeClass('sl-itinerary-form__tab--ow').removeClass('sl-itinerary-form__tab--rt');
-        }//ow
-        else if (inputSel === 'ow'){
-            if($(".js-mc-row:visible").length > 1){
-                $(".js-mc-row:visible").each(function(idx, elm){ if(idx > 0) $(elm).remove(); });
-            }
-            $('#lead-new-segment-button').addClass('hidden');
-            $('.js-tab').addClass('sl-itinerary-form__tab--ow').removeClass('sl-itinerary-form__tab--mc').removeClass('sl-itinerary-form__tab--rt');
-        }//rt
-        else{
-            if($(".js-mc-row:visible").length > 2){
-                $(".js-mc-row:visible").each(function(idx, elm){ if(idx > 1) $(elm).remove(); });
-            }else if($(".js-mc-row:visible").length == 1){
-                $('#lead-new-segment-button').trigger('click');
-            }else if($(".js-mc-row:visible").length == 0){
-                $('#lead-new-segment-button').trigger('click');
-                $('#lead-new-segment-button').trigger('click');
-            }
+$itineraryFormId = $itineraryForm->formName() . '-form';
 
-            $(".js-mc-row:visible:eq(1) .origin").val($(".js-mc-row:eq(0) .destination").val()).trigger('change');
-            $(".js-mc-row:visible:eq(1) .destination").val($(".js-mc-row:visible:eq(0) .origin").val()).trigger('change');
-
-            $(".js-mc-row:visible:eq(0) .destination").on("change",function(){
-                $(".js-mc-row:visible:eq(1) .origin").val($(this).val()).trigger('change');
-            });
-            $(".js-mc-row:visible:eq(0) .origin").on("change",function(){
-                $(".js-mc-row:visible:eq(1) .destination").val($(this).val()).trigger('change');
-            });
-
-            $(".js-mc-row:visible:eq(0) .depart-date").on("change",function(){
-                var dtStr = $(this).val();
-                var newdate;
-                if(dtStr != '' && $(".js-mc-row:visible:eq(1) .depart-date").val() == '' ) {
-                    newdate = moment(dtStr, "DD-MMM-YYYY").add(7, 'days');
-                    $(".js-mc-row:visible:eq(1) .depart-date").val(newdate.format('DD-MMM-YYYY')).trigger('change');
-                }
-            });
-
-            $('#lead-new-segment-button').addClass('hidden');
-            $('.js-tab').addClass('sl-itinerary-form__tab--rt').removeClass('sl-itinerary-form__tab--mc').removeClass('sl-itinerary-form__tab--ow');
-        }
-    }
-
-    $("#$formId input[type='radio']").change(function () {
-        switchTabs(this.id);
-    });
-
-    $(function(){
-        switchTabs($("#$formId input[type='radio']:checked").attr('id'));
-    });
-JS;
-    $this->registerJs($js);
-}
 ?>
-
-<div class="panel panel-primary sl-request-wrap">
-    <div class="panel-heading collapsing-heading">
-        <a data-toggle="collapse" href="#request-form-wrap" class="collapsing-heading__collapse-link"
-           aria-expanded="true">
-
-            <!--Flight Details-->
-            <div class="sl-request-summary">
-                <?php if ($leadForm->getLead()->isNewRecord) : ?>
-                    <div class="sl-request-summary__block">
-                        <div class="sl-request-summary__locations">
-                            <strong>Flight Details</strong>
-                        </div>
-                    </div>
-                <?php else : ?>
-                    <div class="sl-request-summary__block">
-                        <?php
-                        $location = $departing = [];
-                        foreach ($leadForm->getLeadFlightSegment() as $key => $_segment) {
-                            $location[] = sprintf('%s → %s', $_segment->origin, $_segment->destination);
-                            $departing[] = Yii::$app->formatter->asDate(strtotime($_segment->departure));
-                        }
-                        ?>
-                        <div class="sl-request-summary__locations">
-                            <strong><?= implode(', ', $location) ?></strong>
-                        </div>
-                        <div class="sl-request-summary__dates"><?= implode(', ', $departing) ?></div>
-                    </div>
-                    <div class="sl-request-summary__block">
-                        <?php if (!empty($leadForm->getLead()->adults)) : ?>
-                            <div>
-                                <i class="fa fa-user"></i> <strong><?= $leadForm->getLead()->adults ?></strong>
-                                adult
-                            </div>
-                        <?php endif; ?>
-                        <?php if (!empty($leadForm->getLead()->children)) : ?>
-                            <div>
-                                <i class="fa fa-user"></i> <strong><?= $leadForm->getLead()->children ?></strong>
-                                children
-                            </div>
-                        <?php endif; ?>
-                        <?php if (!empty($leadForm->getLead()->infants)) : ?>
-                            <div>
-                                <i class="fa fa-user"></i> <strong><?= $leadForm->getLead()->infants ?></strong>
-                                infants
-                            </div>
-                        <?php endif; ?>
-                    </div>
-                <?php endif; ?>
-            </div>
-            <i class="collapsing-heading__arrow"></i>
-        </a>
+<div class="row">
+    <div class="col-md-12">
+        <?= Alert::widget() ?>
     </div>
+</div>
 
-    <div class="panel-body collapse in" id="request-form-wrap" aria-expanded="true" style="">
-        <div class="sl-itinerary-form">
-            <?php $formLeadModel = ActiveForm::begin([
-                'enableClientValidation' => false,
-                'id' => $formId
-            ]); ?>
-            <!--region Trip Type-->
-            <div class="row sl-itinerary-form__top">
-                <div class="col-lg-12">
-                    <?= $formLeadModel->field($leadForm->getLead(), 'trip_type', [
-                        'options' => [
-                            'tag' => false,
-                        ]])->label(false)
-                        ->radioList(Lead::getFlightTypeList(),
-                            [
-                                'tag' => 'ul',
-                                'class' => 'sl-itinerary-form__trip-type nav nav-tabs js-trip-type',
-                                'item' => function ($index, $label, $name, $checked, $value) {
-                                    $return = '<li class="radio-tab' . (($checked) ? ' active' : '') . '">';
-                                    $return .= '<input type="radio" id="' . strtolower($value) . '" name="' . $name . '" value="' . $value . '" autocomplete="off" ' . (($checked) ? 'checked' : '') . '>';
-                                    $return .= '<label for="' . strtolower($value) . '" class="radio-tab__text">' . ucwords($label) . '</label>';
-                                    $return .= '</li>';
-                                    return $return;
-                                },
-                            ]) ?>
+
+<div class="row" style="margin-bottom: 10px">
+    <div class="col-sm-12">
+        <div class="request">
+            <div class="request-overview" style="">
+                <div style="letter-spacing: 0.8px; border-bottom: 1px dotted rgb(165, 177, 197); padding-bottom: 13px;"
+                     class="row-flex row-flex-justify">
+                    <span style="font-weight: 600; font-size: 16px;">Flight Request</span>
+                    <span style="font-size: 13px; padding: 0 7px">
+                        <?php
+                            switch ($itineraryForm->tripType) {
+                                case \common\models\Lead::TRIP_TYPE_ONE_WAY : $iconClass = 'fa fa-long-arrow-right';
+                                    break;
+                                case \common\models\Lead::TRIP_TYPE_ROUND_TRIP : $iconClass = 'fa fa-exchange';
+                                    break;
+                                case \common\models\Lead::TRIP_TYPE_MULTI_DESTINATION : $iconClass = 'fa fa-random';
+                                    break;
+                                default: $iconClass = '';
+                            }
+                        ?>
+                        <i class="<?=$iconClass?> text-success" aria-hidden="true"></i>
+                        <?= LeadHelper::tripTypeName($itineraryForm->tripType) ?> •
+                        <b><?= LeadHelper::cabinName($itineraryForm->cabin) ?></b> •
+                        <?= (int)$itineraryForm->adults + (int)$itineraryForm->children + (int)$itineraryForm->infants ?> pax</span>
+                    <span>
+                        <?php if ($itineraryForm->adults): ?>
+                            <span><strong class="label label-success"
+                                          style="margin-left: 7px;"><?= $itineraryForm->adults ?></strong> ADT</span>
+                        <?php endif; ?>
+                        <?php if ($itineraryForm->children): ?>
+                            <span><strong class="label label-success"
+                                          style="margin-left: 7px;"><?= $itineraryForm->children ?></strong> CHD</span>
+                        <?php endif; ?>
+                        <?php if ($itineraryForm->infants): ?>
+                            <span><strong class="label label-success"
+                                          style="margin-left: 7px;"><?= $itineraryForm->infants ?></strong> INF</span>
+                        <?php endif; ?>
+                    </span>
                 </div>
-            </div>
-            <!--endregion-->
+                <div class="request-overview__table-wrap">
+                    <div>
+                        <table class="table request-overview__table">
+                            <tr>
+                                <th>Nr</th>
+                                <th>Origin</th>
+                                <th></th>
+                                <th>Destination</th>
+                                <th>Departure</th>
+                                <th>Flex</th>
+                            </tr>
+                            <?php foreach ($itineraryForm->segments as $keySegment => $segment): ?>
+                                <tr>
+                                    <td>
+                                        <?= $keySegment + 1 ?>.
+                                    </td>
+                                    <td>
 
-            <div class="sl-itinerary-form__tabs">
-                <div class="sl-itinerary-form__tab sl-itinerary-form__tab--rt js-tab" id="lead-segments">
-                    <?php
-                    foreach ($leadForm->getLeadFlightSegment() as $key => $_segment) {
-                        echo $this->render('_formLeadSegment', [
-                            'key' => $_segment->isNewRecord
-                                ? (strpos($key, 'new') !== false ? $key : 'new' . $key)
-                                : $_segment->id,
-                            'form' => $formLeadModel,
-                            'segment' => $_segment,
-                        ]);
-                    }
-                    ?>
-                    <!-- new lead segment fields -->
-                    <div id="lead-new-segment-block" style="display: none;">
-                        <?php $newSegment = new LeadFlightSegment(); ?>
-                        <?= $this->render('_formLeadSegment', [
-                            'key' => '__id__',
-                            'form' => $formLeadModel,
-                            'segment' => $newSegment,
-                        ]) ?>
+                                        (<b><?= Html::encode($segment->origin) ?></b>)
+                                        <?= Html::encode($segment->originCity) ?>
+
+                                    </td>
+                                    <td>
+                                        <i class="fa fa-long-arrow-right"></i>
+                                    </td>
+                                    <td>
+
+                                        (<b><?= Html::encode($segment->destination) ?></b>)
+                                        <?= Html::encode($segment->destinationCity) ?>
+
+                                    </td>
+                                    <td style="<?=time() > strtotime($segment->departure) ? 'color: red;' : ''?>">
+                                        <i class="fa fa-calendar"></i> <?= date('d-M-Y', strtotime($segment->departure)) ?>
+                                    </td>
+                                    <td>
+                                        <?= $segment->flexibility ? '<strong class="text-success">' . $segment->flexibilityType . ' ' . $segment->flexibility . ' days</strong>' : 'exact' ?>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </table>
                     </div>
+
+                    <?/*= Html::a('<i class="fa fa-edit"></i> Edit',
+                        ['/lead-itinerary/view-edit-form'],
+                        ['class' => 'btn btn-default', 'data' => ['method' => 'post', 'params'=> ['id'=> $itineraryForm->leadId]]])*/ ?>
+
+                    <?php if ($itineraryForm->isViewMode()) : ?>
+
+
+                        <?php if (Yii::$app->user->can('updateLead', ['leadId' => $itineraryForm->leadId])) : ?>
+                        <div class="btn-wrapper text-right">
+                            <?= Html::a('<i class="fa fa-edit"></i> Edit',
+                                ['/lead-itinerary/view-edit-form', 'id' => $itineraryForm->leadId],
+                                ['class' => 'btn btn-default']) ?>
+                        </div>
+                        <?php endif; ?>
+
+                        <div id="modeFlightSegments" data-value="view" style="display: none"></div>
+
+                    <?php endif; ?>
+
                 </div>
 
-                <?php if(!$leadForm->getLeadFlightSegment()): ?>
-                    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css" />
-                    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
-                <?php endif;?>
 
-                <?php ob_start(); // output buffer the javascript to register later ?>
-                <script>
-                    // add segment button
-                    var segment_k = <?php echo isset($key) ? str_replace('new', '', $key) : 1; ?>;
-                    $('#lead-new-segment-button').on('click', function () {
 
-                        var startDate = $(".js-mc-row:visible").last().find('.depart-date').val();
-                        segment_k += 1;
-                        $('#lead-segments').append($('#lead-new-segment-block').html().replace(/__id__/g, 'new' + segment_k));
 
-                        var originId = '<?= strtolower($newSegment->formName()) ?>-new' + segment_k + '-origin_label',
-                            destinationId = '<?= strtolower($newSegment->formName()) ?>-new' + segment_k + '-destination_label',
-                            departureId = '<?= strtolower($newSegment->formName()) ?>-new' + segment_k + '-departure';
+                <?php if ($itineraryForm->isEditMode()) : ?>
 
-                        $('#' + originId).autocomplete({
-                            "autoFocus": true,
-                            "source": function (request, response) {
-                                $.getJSON('/site/get-airport', {
-                                    term: request.term
-                                }, response);
-                            },
-                            "minLength": "2"
-                        });
+                    <div class="clearfix"></div>
+                    <div class="request-form collapse in" id="request" aria-expanded="true">
+                        <div class="separator"></div>
 
-                        $('#' + destinationId).autocomplete({
-                            "autoFocus": true,
-                            "source": function (request, response) {
-                                $.getJSON('/site/get-airport', {
-                                    term: request.term
-                                }, response);
-                            },
-                            "minLength": "2"
-                        });
+                        <div id="modeFlightSegments" data-value="edit" style="display: none"></div>
 
-                        $('#' + departureId).datepicker({
-                            "autoclose": true,
-                            "todayHighlight": true,
-                            "format": "dd-M-yyyy",
-                            "orientation": "top left",
-                            "startDate": startDate
-                        });
+                        <div class="sl-itinerary-form2">
+                            <?php $form = ActiveForm::begin([
+                                'action' => ['/lead-itinerary/edit'],
+                                'enableClientValidation' => false,
+                                'enableAjaxValidation' => true,
+                                'validationUrl' => ['/lead-itinerary/validate'],
+                                'id' => $itineraryFormId,
+                                'options' => [
+                                    'data-pjax' => 1
+                                ]
+                            ]); ?>
 
-                    });
+                            <?= Html::hiddenInput('id', $itineraryForm->leadId) ?>
 
-                    // remove segment button
-                    $(document).on('click', '.lead-remove-segment-button', function () {
-                        var rowsCnt = $(".js-mc-row:visible").length;
-                        if (rowsCnt > 2) {
-                            $(this).closest('div.js-mc-row').remove();
-                        } else {
-                            $('#rt').prop("checked", true);
-                            switchTabs('#rt');
-                        }
-                    });
-                </script>
-                <?php $this->registerJs(str_replace(['<script>', '</script>'], '', ob_get_clean())); ?>
+                            <div class="sl-itinerary-form__tabs">
+                                <div class="sl-itinerary-form__tab sl-itinerary-form__tab--rt js-tab"
+                                     id="lead-segments">
+                                    <?= $this->render('_formLeadSegment', [
+                                        'model' => $itineraryForm,
+                                        'form' => $form]) ?>
+                                </div>
+                            </div>
+
+                            <div class="row ">
+                                <div class="col-sm-3">
+                                    <?= $form->field($itineraryForm, 'cabin', [
+                                    ])->dropDownList(LeadHelper::cabinList(), [
+                                        'prompt' => '---']) ?>
+                                </div>
+                                <div class="col-sm-1">
+                                </div>
+                                <div class="col-sm-2">
+                                    <?= $form->field($itineraryForm, 'adults')->dropDownList(LeadHelper::adultsChildrenInfantsList(), ['prompt' => '-']) ?>
+                                </div>
+                                <div class="col-sm-2">
+                                    <?= $form->field($itineraryForm, 'children')->dropDownList(LeadHelper::adultsChildrenInfantsList(), ['prompt' => '-']) ?>
+                                </div>
+                                <div class="col-sm-2">
+                                    <?= $form->field($itineraryForm, 'infants')->dropDownList(LeadHelper::adultsChildrenInfantsList(), ['prompt' => '-']) ?>
+                                </div>
+
+                            </div>
+
+                            <div class="separator"></div>
+                            <div class="btn-wrapper text-right">
+
+
+                                <?= Html::a('<i class="fa fa-remove"></i> Close',  ['/lead-itinerary/view-edit-form', 'id'=> $itineraryForm->leadId, 'mode' => 'view'], [
+                                    'class' => 'btn btn-default',
+                                ]) ?>
+
+                                <?= Html::submitButton('<i class="fa fa-check"></i> Save flight request', [
+                                    'id' => 'lead-new-segment-button',
+                                    'class' => 'btn btn-success',
+                                ]) ?>
+
+                            </div>
+
+                            <?php ActiveForm::end(); ?>
+                        </div>
+                    </div>
+
+                <?php endif; ?>
+
             </div>
-
-            <div class="btn-wrapper">
-                <?php
-                $hidden = ($leadForm->getLead()->trip_type != Lead::TRIP_TYPE_MULTI_DESTINATION) ? 'hidden' : '';
-                $title = '<span class="btn-icon"><i class="fa fa-plus"></i></span><span>Add Flight</span>';
-                echo Html::button($title, [
-                    'id' => 'lead-new-segment-button',
-                    'class' => 'btn btn-success btn-with-icon js-add-mc-row ' . $hidden,
-                ]);
-                ?>
-            </div>
-
-            <!--Passengers-->
-            <div class="row sl-itinerary-form__pax">
-                <div class="col-sm-3">
-                    <?= $formLeadModel->field($leadForm->getLead(), 'cabin', [
-                        //'template' => '{label}<label for="cabin-class" class="select-wrap-label">{input}</label>{error}{hint}'
-                    ])->dropDownList(Lead::getCabinList(), [
-                        'prompt' => '---'
-                    ]) ?>
-                </div>
-                <div class="col-sm-2">
-                </div>
-                <div class="col-sm-2">
-                    <?= $formLeadModel->field($leadForm->getLead(), 'adults')->textInput([
-                        'class' => 'form-control lead-form-input-element',
-                        'type' => 'number',
-                        'min' => 0,
-                        'max' => 9,
-                        //'placeholder' => 'Adult'
-                    ]) ?>
-                </div>
-                <div class="col-sm-2">
-                    <?= $formLeadModel->field($leadForm->getLead(), 'children')->textInput([
-                        'class' => 'form-control lead-form-input-element',
-                        'type' => 'number',
-                        'min' => 0,
-                        'max' => 9,
-                        //'placeholder' => 'Child'
-                    ]) ?>
-                </div>
-                <div class="col-sm-2">
-                    <?= $formLeadModel->field($leadForm->getLead(), 'infants')->textInput([
-                        'class' => 'form-control lead-form-input-element',
-                        'type' => 'number',
-                        'min' => 0,
-                        'max' => 9,
-                        //'placeholder' => 'Infant'
-                    ]) ?>
-                </div>
-            </div>
-            <?php ActiveForm::end(); ?>
         </div>
     </div>
-
 </div>

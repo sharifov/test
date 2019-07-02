@@ -110,7 +110,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'label' => 'Pending Time',
             'value' => function (\common\models\Lead $model) {
                 $str = Yii::$app->formatter->asRelativeTime(strtotime($model->created));
-                $str .= '<br><i class="fa fa-calendar"></i> ' . date('d-M-Y [H:i]', strtotime($model->created));
+                $str .= $model->created ? '<br><i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->created), 'php: Y-m-d [H:i:s]')  : '-';
                 return $str;
             },
             'options' => [
