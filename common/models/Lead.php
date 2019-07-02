@@ -1369,50 +1369,50 @@ Reason: {reason}
 
         $host = \Yii::$app->params['url_address'];
 
-            //$swiftMailer = Yii::$app->mailer2;
-            $user = Employee::findOne($lead->employee_id);
+        //$swiftMailer = Yii::$app->mailer2;
+        $user = Employee::findOne($lead->employee_id);
 
-            if (!empty($user)) {
-                $agent = $user->username;
-                $subject = Yii::t('email', "Cloned Lead-{id} by {agent}", ['id' => $lead->clone_id, 'agent' => $agent]);
-                $body = Yii::t('email', "Agent {agent} cloned lead {clone_id} with reason [{reason}], url: {cloned_url}.
+        if (!empty($user)) {
+            $agent = $user->username;
+            $subject = Yii::t('email', "Cloned Lead-{id} by {agent}", ['id' => $lead->clone_id, 'agent' => $agent]);
+            $body = Yii::t('email', "Agent {agent} cloned lead {clone_id} with reason [{reason}], url: {cloned_url}.
 New lead {lead_id}
 {url}",
-                    [
-                        'agent' => $agent,
-                        'url' => $host . '/lead/view/' . $lead->gid,
-                        'cloned_url' => $host . '/lead/view/' . ($lead->clone ? $lead->clone->gid : $lead->gid),
-                        'reason' => $lead->description,
-                        'lead_id' => $lead->id,
-                        'clone_id' => $lead->clone_id,
-                        'br' => "\r\n"
-                    ]);
+                [
+                    'agent' => $agent,
+                    'url' => $host . '/lead/view/' . $lead->gid,
+                    'cloned_url' => $host . '/lead/view/' . ($lead->clone ? $lead->clone->gid : $lead->gid),
+                    'reason' => $lead->description,
+                    'lead_id' => $lead->id,
+                    'clone_id' => $lead->clone_id,
+                    'br' => "\r\n"
+                ]);
 
-                //$emailTo = Yii::$app->params['email_to']['bcc_sales'];
+            //$emailTo = Yii::$app->params['email_to']['bcc_sales'];
 
-                try {
+            try {
 
-                    $isSend = Notifications::create($user->id, $subject, $body, Notifications::TYPE_INFO, true);
-                    Notifications::socket($user->id, null, 'getNewNotification', [], true);
+                $isSend = Notifications::create($user->id, $subject, $body, Notifications::TYPE_INFO, true);
+                Notifications::socket($user->id, null, 'getNewNotification', [], true);
 
-                    /*$isSend = $swiftMailer
-                        ->compose()
-                        ->setTo($emailTo)
-                        ->setFrom(Yii::$app->params['email_from']['sales'])
-                        ->setSubject($subject)
-                        ->setTextBody($body)
-                        ->send();*/
+                /*$isSend = $swiftMailer
+                    ->compose()
+                    ->setTo($emailTo)
+                    ->setFrom(Yii::$app->params['email_from']['sales'])
+                    ->setSubject($subject)
+                    ->setTextBody($body)
+                    ->send();*/
 
-                    if (!$isSend) {
-                        Yii::warning('Not send Notification to UserID:' . $user->id . ' - Lead Id: ' . $this->id, 'Lead:sendClonedEmail:Notifications::create');
-                    }
-
-                } catch (\Throwable $e) {
-                    Yii::error($user->id . ' ' . $e->getMessage(), 'Lead:sendClonedEmail:Notifications::create');
+                if (!$isSend) {
+                    Yii::warning('Not send Notification to UserID:' . $user->id . ' - Lead Id: ' . $this->id, 'Lead:sendClonedEmail:Notifications::create');
                 }
-            } else {
-                Yii::warning('Not found employee (' . $lead->employee_id . ')', 'Lead:sendClonedEmail');
+
+            } catch (\Throwable $e) {
+                Yii::error($user->id . ' ' . $e->getMessage(), 'Lead:sendClonedEmail:Notifications::create');
             }
+        } else {
+            Yii::warning('Not found employee (' . $lead->employee_id . ')', 'Lead:sendClonedEmail');
+        }
         //}
 
         return $isSend;
@@ -1434,10 +1434,12 @@ New lead {lead_id}
         } else {
 
 
-            if (isset($changedAttributes['status']) && $changedAttributes['status'] !== $this->status) {
+
+
+            if (isset($changedAttributes['status']) && $changedAttributes['status'] != $this->status) {
                 LeadFlow::addStateFlow($this);
 
-                if($this->called_expert && ($this->status === self::STATUS_TRASH || $this->status === self::STATUS_FOLLOW_UP || $this->status === self::STATUS_SNOOZE || $this->status === self::STATUS_PROCESSING)) {
+                if($this->called_expert && ($this->status == self::STATUS_TRASH || $this->status == self::STATUS_FOLLOW_UP || $this->status == self::STATUS_SNOOZE || $this->status == self::STATUS_PROCESSING)) {
                     $job = new UpdateLeadBOJob();
                     $job->lead_id = $this->id;
                     $jobId = Yii::$app->queue_job->push($job);
@@ -1512,11 +1514,10 @@ New lead {lead_id}
             }
         }
 
-
         //create or update LeadTask
         if(
-            ($this->status === self::STATUS_PROCESSING && isset($changedAttributes['status'])) ||
-            (isset($changedAttributes['employee_id']) && $this->status === self::STATUS_PROCESSING) ||
+            ($this->status == self::STATUS_PROCESSING && isset($changedAttributes['status'])) ||
+            (isset($changedAttributes['employee_id']) && $this->status == self::STATUS_PROCESSING) ||
             (isset($changedAttributes['l_answered']) && $changedAttributes['l_answered'] != $this->l_answered)
         )
         {
@@ -1532,6 +1533,7 @@ New lead {lead_id}
             LeadTask::createTaskList($this->id, $this->employee_id, 2, '', $taskType);
             LeadTask::createTaskList($this->id, $this->employee_id, 3, '', $taskType);
         }
+
 
 
         if (!$insert) {
@@ -2401,14 +2403,14 @@ New lead {lead_id}
 
 
             /** @property string $origin
-            * @property string $destination
-            * @property string $departure
-            * @property int $flexibility
-            * @property string $flexibility_type
-            * @property string $created
-            * @property string $updated
-            * @property string $origin_label
-            * @property string $destination_label*/
+             * @property string $destination
+             * @property string $departure
+             * @property int $flexibility
+             * @property string $flexibility_type
+             * @property string $created
+             * @property string $updated
+             * @property string $origin_label
+             * @property string $destination_label*/
 
 
             foreach($leadSegments as $segmentModel) {
