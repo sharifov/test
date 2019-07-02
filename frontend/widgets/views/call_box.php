@@ -3,6 +3,7 @@
 /* @var $newCount integer */
 /* @var $lastCall \common\models\Call */
 /* @var $userCallStatus \common\models\UserCallStatus */
+/* @var $countMissedCalls integer*/
 
 \frontend\assets\CallBoxAsset::register($this);
 \frontend\assets\TimerAsset::register($this);
@@ -157,12 +158,22 @@ use yii\widgets\Pjax; ?>
                 <?php endif; ?>
 
                 <?php if($lastCall): ?>
-                    <?=\yii\helpers\Html::a('<i class="fa fa-phone"></i> Call Info', ['call/view2', 'id' => $lastCall->c_id], [
+                    <?=\yii\helpers\Html::button('<i class="fa fa-phone"></i> Call Info', [
                         'class' => 'btn btn-xs btn-default',
-                        'target' => '_blank',
                         'title' => 'Call Info Id: '.$lastCall->c_id,
-                        'data-pjax' => 0
+                        'data-call-id' => $lastCall->c_id,
+                        'id' => 'btn-call-info'
                     ])?>
+
+
+                    <?//php if($countMissedCalls): ?>
+                        <?=\yii\helpers\Html::button('<i class="fa fa-phone"></i> Missed' . ($countMissedCalls ? ' (' . $countMissedCalls .')' : '') , [
+                            'class' => 'btn btn-xs btn-danger',
+                            'title' => 'Missed Calls' . ($countMissedCalls ? ' (' . $countMissedCalls .')' : ''),
+                            'id' => 'btn-missed-calls'
+                        ])?>
+                    <?//php endif; ?>
+
                 <?php endif; ?>
 
 
@@ -234,12 +245,15 @@ use yii\widgets\Pjax; ?>
 </div>
 <?php yii\widgets\Pjax::end() ?>
 
+
 <?php \yii\bootstrap\Modal::begin([
-    'id' => 'client-details-modal',
-    'header' => '<h4 class="modal-title">Client Details</h4>',
+    'id' => 'call-box-modal',
+    'header' => '<h4 class="modal-title">Missed Calls</h4>',
     'footer' => '<a href="#" class="btn btn-primary" data-dismiss="modal">Close</a>',
+    'size' => \yii\bootstrap\Modal::SIZE_LARGE
 ]); ?>
 <?php \yii\bootstrap\Modal::end(); ?>
+
 
 <?php
     $callBoxUrl = \yii\helpers\Url::to(['/call/call-box']);
@@ -322,6 +336,8 @@ use yii\widgets\Pjax; ?>
 <?php
 $callStatusUrl = \yii\helpers\Url::to(['user-call-status/update-status']);
 $clientInfoUrl = \yii\helpers\Url::to(['client/ajax-get-info']);
+$missedCallsUrl = \yii\helpers\Url::to(['call/ajax-missed-calls']);
+$callInfoUrl = \yii\helpers\Url::to(['call/ajax-call-info']);
 
 $userId = Yii::$app->user->id;
 
@@ -329,18 +345,48 @@ $js = <<<JS
 
     var callStatusUrl = '$callStatusUrl';
     var clientInfoUrl = '$clientInfoUrl';
+    var missedCallsUrl = '$missedCallsUrl';
+    var callInfoUrl = '$callInfoUrl';
+    
 
     $(document).on('click', '#btn-client-details', function(e) {
         e.preventDefault();
         var client_id = $(this).data('client-id');
-        $('#client-details-modal .modal-body').html('<div style="text-align:center"><img width="200px" src="https://loading.io/spinners/gear-set/index.triple-gears-loading-icon.svg"></div>');
-        $('#client-details-modal').modal();
+        $('#call-box-modal .modal-body').html('<div style="text-align:center"><img width="200px" src="https://loading.io/spinners/gear-set/index.triple-gears-loading-icon.svg"></div>');
+        $('#call-box-modal .modal-title').html('Client Details (' + client_id + ')');
+        $('#call-box-modal').modal();
         $.post(clientInfoUrl, {client_id: client_id},
             function (data) {
-                $('#client-details-modal .modal-body').html(data);
+                $('#call-box-modal .modal-body').html(data);
             }
         );
     });
+    
+    $(document).on('click', '#btn-missed-calls', function(e) {
+        e.preventDefault();
+        $('#call-box-modal .modal-body').html('<div style="text-align:center"><img width="200px" src="https://loading.io/spinners/gear-set/index.triple-gears-loading-icon.svg"></div>');
+        $('#call-box-modal .modal-title').html('Missed Calls');
+        $('#call-box-modal').modal();
+        $.post(missedCallsUrl, 
+            function (data) {
+                $('#call-box-modal .modal-body').html(data);
+            }
+        );
+    });
+    
+    $(document).on('click', '#btn-call-info', function(e) {
+        e.preventDefault();
+        var callId = $(this).data('call-id');
+        $('#call-box-modal .modal-body').html('<div style="text-align:center"><img width="200px" src="https://loading.io/spinners/gear-set/index.triple-gears-loading-icon.svg"></div>');
+        $('#call-box-modal .modal-title').html('Call Info');
+        $('#call-box-modal').modal();
+        $.post(callInfoUrl, {id: callId}, 
+            function (data) {
+                $('#call-box-modal .modal-body').html(data);
+            }
+        );
+    });
+    
    
     $(document).on('change', '#user-call-status-select', function(e) {
         e.preventDefault();

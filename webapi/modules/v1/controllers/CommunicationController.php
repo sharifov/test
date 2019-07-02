@@ -1564,7 +1564,7 @@ class CommunicationController extends ApiBaseController
 
             $call = null;
             $is_call_incoming = (isset($post['call'],$post['call']['c_call_type_id']) && (int)$post['call']['c_call_type_id'] === Call::CALL_TYPE_IN);
-            
+
             if($is_call_incoming) {
                 $call = Call::find()->where(['c_call_sid' => $callSid])
                     //->andWhere(['c_call_status' => Call::CALL_STATUS_COMPLETED])
