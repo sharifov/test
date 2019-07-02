@@ -1558,12 +1558,15 @@ class CommunicationController extends ApiBaseController
 
         Yii::info(VarDumper::dumpAsString($post), 'info\API:Communication:voiceClient');
 
-        if (isset($post['callData']['sid']) && $post['callData']['sid']) {
-            //$call = Call::find()->where(['c_call_sid' => $post['callData']['sid']])->limit(1)->one();
+        $callSid = $post['callData']['sid'] ?? $post['callData']['CallSid'] ?? null;
+
+        if ($callSid) {
+
             $call = null;
             $is_call_incoming = (isset($post['call'],$post['call']['c_call_type_id']) && (int)$post['call']['c_call_type_id'] === Call::CALL_TYPE_IN);
+
             if($is_call_incoming) {
-                $call = Call::find()->where(['c_call_sid' => $post['callData']['sid']])
+                $call = Call::find()->where(['c_call_sid' => $callSid])
                     //->andWhere(['c_call_status' => Call::CALL_STATUS_COMPLETED])
                     ->andWhere([ '>', 'c_created_user_id', 0])
                     ->orderBy(['c_updated_dt' => SORT_DESC])
@@ -1572,7 +1575,7 @@ class CommunicationController extends ApiBaseController
             }
 
             if(!$call) {
-                $call = Call::find()->where(['c_call_sid' => $post['callData']['sid']])->orderBy(['c_id' => SORT_ASC])->limit(1)->one();
+                $call = Call::find()->where(['c_call_sid' => $callSid])->orderBy(['c_id' => SORT_ASC])->limit(1)->one();
             }
 
             $callData = $post['call'];
@@ -1755,11 +1758,11 @@ class CommunicationController extends ApiBaseController
 
                 }*/
             } else {
-                Yii::error('Communication Request: Not found Call SID: ' . $post['callData']['sid'], 'API:Communication:voiceClient:Call:find');
+                Yii::error('Communication Request: Not found Call SID: ' . $callSid, 'API:Communication:voiceClient:Call:find');
             }
         }
         else {
-            Yii::error('Communication Request: Not found post[callData][sid] ' . VarDumper::dumpAsString($post), 'API:Communication:voiceClient:post');
+            Yii::error('Communication Request: Not found post[callData][sid] / post[callData][CallSid] ' . VarDumper::dumpAsString($post), 'API:Communication:voiceClient:post');
         }
 
         return $response;

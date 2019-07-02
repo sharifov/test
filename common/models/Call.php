@@ -134,6 +134,7 @@ class Call extends \yii\db\ActiveRecord
             [['c_call_sid'], 'required'],
             [['c_call_type_id', 'c_lead_id', 'c_created_user_id', 'c_com_call_id', 'c_project_id', 'c_call_duration', 'c_recording_duration'], 'integer'],
             [['c_price'], 'number'],
+            [['c_is_new'], 'default', 'value' => true],
             [['c_is_new', 'c_is_deleted'], 'boolean'],
             [['c_created_dt', 'c_updated_dt'], 'safe'],
             [['c_call_sid', 'c_account_sid', 'c_parent_call_sid', 'c_recording_sid'], 'string', 'max' => 34],

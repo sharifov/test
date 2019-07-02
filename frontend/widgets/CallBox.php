@@ -64,9 +64,11 @@ class CallBox extends \yii\bootstrap\Widget
         }
 
         $lastCall = Call::find()->where(['c_created_user_id' => $user_id])->orderBy(['c_id' => SORT_DESC])->limit(1)->one();
-
         $userCallStatus = UserCallStatus::find()->where(['us_user_id' => $user_id])->orderBy(['us_id' => SORT_DESC])->limit(1)->one();
+        $countMissedCalls = Call::find()->where(['c_created_user_id' => $user_id, 'c_call_status' => Call::CALL_STATUS_NO_ANSWER, 'c_call_type_id' => Call::CALL_TYPE_IN, 'c_is_new' => true])->count();
+        //$countMissedCalls = 10;
 
-        return $this->render('call_box', ['lastCall' => $lastCall, 'userCallStatus' => $userCallStatus]);
+
+        return $this->render('call_box', ['lastCall' => $lastCall, 'userCallStatus' => $userCallStatus, 'countMissedCalls' => $countMissedCalls]);
     }
 }
