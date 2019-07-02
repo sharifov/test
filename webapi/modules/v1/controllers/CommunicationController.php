@@ -1590,7 +1590,7 @@ class CommunicationController extends ApiBaseController
                 $call->c_from = $callData['c_from'];
                 $call->c_to = $callData['c_to'];
 
-                $call->c_timestamp = $callData['c_timestamp'];
+                // $call->c_timestamp = $callData['c_timestamp'] ?? null;
                 $call->c_created_dt = $callData['c_created_dt'];
                 $call->c_updated_dt = date('Y-m-d H:i:s');
 
