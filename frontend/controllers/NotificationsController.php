@@ -7,6 +7,7 @@ use common\models\Notifications;
 use common\models\search\NotificationsSearch;
 use yii\filters\AccessControl;
 use yii\helpers\ArrayHelper;
+use yii\helpers\VarDumper;
 use yii\web\Controller;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
@@ -219,25 +220,9 @@ class NotificationsController extends FController
      */
     public function actionPjaxNotify(): string
     {
-        //$id = Yii::$app->request->get('id');
-        //$status = Yii::$app->request->get('status');
 
-        $keyCache = 'pjax-notify';
-
-        //Yii::$app->cache->delete($keyCache);
-
-        //$result = Yii::$app->cache->get($keyCache);
-
-        //if($result === false) {
-            $box = \frontend\widgets\Notifications::getInstance();
-            $result = $box->run();
-            if($result) {
-                Yii::$app->cache->set($keyCache, $result, 10);
-            }
-        //}
-
-        //VarDumper::dump($data); exit;
-
+        $box = \frontend\widgets\Notifications::getInstance();
+        $result = $box->run();
         return $result;
     }
 }
