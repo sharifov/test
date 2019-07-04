@@ -3,6 +3,7 @@
 /* @var $this \yii\web\View */
 /* @var $content string */
 
+use frontend\widgets\OnlineConnection;
 use yii\helpers\Html;
 
 //\backend\assets\AppAsset::register($this);
@@ -130,7 +131,8 @@ $bundle = \frontend\themes\gentelella\assets\Asset::register($this);
                                     </ul>
                                 </li>
                                 <?/*php if($isAdmin):*/ ?>
-                                    <?= frontend\widgets\Notifications::widget(); ?>
+                                    <?= frontend\widgets\Notifications::widget() ?>
+                                    <?= frontend\widgets\OnlineConnection::widget() ?>
                                 <?/*php endif;*/ ?>
 
                                 <?//= backend\widgets\ChatNotifications::widget(); ?>

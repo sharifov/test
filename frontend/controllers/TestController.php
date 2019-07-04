@@ -17,6 +17,7 @@ use common\models\UserConnection;
 use common\models\UserProfile;
 use Twilio\TwiML\VoiceResponse;
 use Yii;
+use yii\caching\DbDependency;
 use yii\helpers\ArrayHelper;
 use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
@@ -1269,6 +1270,12 @@ class TestController extends FController
         Notifications::socket(Yii::$app->user->id, null, 'openUrl', ['url' => $host . '/lead/view/b5d963c9241dd741e22b37d1fa80a9b6'], false);
     }
 
+    public function actionNotify2()
+    {
+        Notifications::create(Yii::$app->user->id, 'Test '.date('H:i:s'), 'Test message <h2>asdasdasd</h2>', Notifications::TYPE_SUCCESS, true);
+        //Notifications::socket(Yii::$app->user->id, null, 'openUrl', ['url' => $host . '/lead/view/b5d963c9241dd741e22b37d1fa80a9b6'], false);
+    }
+
     public function actionTest3()
     {
 
@@ -1354,6 +1361,38 @@ class TestController extends FController
         /*if (!$callsCount) {
             return false;
         }*/
+
+    }
+
+    public function actionCache()
+    {
+
+       /* $user_id = Yii::$app->user->id;
+
+        $sql = \common\models\Notifications::find()->select('MAX(n_id)')->where(['n_user_id' => $user_id])->createCommand()->rawSql;
+        //echo $sql; exit;
+
+
+        $db = \Yii::$app->db;
+        $duration = 0;
+        $dependency = new DbDependency();
+        $dependency->sql = $sql;
+
+        $dependency = null;  // optional dependency
+
+
+        $newCount = $db->cache(function ($db) use ($user_id) {
+            return \common\models\Notifications::findNewCount($user_id);
+        }, $duration, $dependency);
+
+        $model = $db->cache(function ($db) use ($user_id) {
+            return \common\models\Notifications::findNew($user_id);
+        }, $duration, $dependency);
+
+        VarDumper::dump($newCount, 10, true);
+        //VarDumper::dump($model, 10, true);*/
+
+        return $this->render('blank');
 
     }
 

@@ -45,51 +45,46 @@ class Notifications extends \yii\bootstrap\Widget
     public function run()
     {
         $user_id = \Yii::$app->user->id;
-
         $cache = \Yii::$app->cache;
 
-        //$newCount = \common\models\Notifications::findNewCount($user_id);
+        $sql = \common\models\Notifications::find()->select('COUNT(*)')->where(['n_user_id' => $user_id, 'n_new' => true])->createCommand()->rawSql;
 
-        $sql = \common\models\Notifications::find()->select('COUNT(*)')->where(['n_user_id' => $user_id])->createCommand()->rawSql;
-        //echo $sql; exit;
-
-
-        //$db = \Yii::$app->db;
-        $duration = 600;
+        $duration = null;
         $dependency = new DbDependency();
         $dependency->sql = $sql;
 
-        //$dependency = ...;  // optional dependency
+        //$dependency = null; //...;  // optional dependency
 
-
-        /*$newCount = $db->cache(function ($db) use ($user_id) {
-            return \common\models\Notifications::findNewCount($user_id);
-        }, $duration, $dependency);
-
-        $model = $db->cache(function ($db) use ($user_id) {
-            return \common\models\Notifications::findNew($user_id);
-        }, $duration, $dependency);
-
-
-        $model =  $cache->getOrSet(['top-n-products', 'n' => $count], function ($cache) use ($count) {
-            return Products::find()->mostPopular()->limit(10)->all();
-        }, 1000);*/
-
-
-        //$model = null;
-        //$newCount = 0;
-
-        $model = \common\models\Notifications::findNew($user_id);
-        $newCount = \common\models\Notifications::findNewCount($user_id);
-
-        $newCallCount = 0;
-        $newSmsCount = 0;
-        $newEmailCount = 0;
 
         $key = 'notify_' . $user_id;
+
         //$cache->delete($key);
 
-        $data = $cache->get($key);
+        $result = $cache->get($key);
+        if ($result === false) {
+            $result['newCount'] = \common\models\Notifications::findNewCount($user_id);
+            $result['model'] = \common\models\Notifications::findNew($user_id);
+
+            $cache->set($key, $result, $duration, $dependency);
+        }
+
+
+        /*$result = $cache->getOrSet($key, function () use ($user_id) {
+            $result['newCount'] = \common\models\Notifications::findNewCount($user_id) + 10;
+            $result['model'] = \common\models\Notifications::findNew($user_id);
+            return $result;
+        }, $duration, $dependency);*/
+
+
+
+        /*$newCallCount = 0;
+        $newSmsCount = 0;
+        $newEmailCount = 0;*/
+
+        //$key = 'notify_' . $user_id;
+        //$cache->delete($key);
+
+        //$data = $cache->get($key);
         /*if ($data === false) {
 
 
@@ -122,6 +117,26 @@ class Notifications extends \yii\bootstrap\Widget
 
         }*/
 
-        return $this->render('notifications', ['model' => $model, 'newCount' => $newCount]);
+        $content = $this->render('notifications', ['model' => $result['model'], 'newCount' => $result['newCount']]);
+
+        $removeCache = false;
+        if($result['model']) {
+            /** @var \common\models\Notifications $notify */
+            foreach ($result['model'] as $notify) {
+                if($notify->n_popup && !$notify->n_popup_show) {
+                    $notify->n_popup_show = true;
+                    if( $notify->save())  {
+                        $removeCache = true;
+                    }
+                }
+            }
+        }
+
+        if($removeCache) {
+            $cache->delete($key);
+        }
+
+
+        return $content;
     }
 }
