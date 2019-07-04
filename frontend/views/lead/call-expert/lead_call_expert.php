@@ -76,8 +76,12 @@ use yii\widgets\Pjax;
             </li>
             <li>
                 <?//=Html::a('<i class="fa fa-comment"></i>', ['lead/view', 'gid' => $lead->gid, 'act' => 'call-expert-message'], ['class' => ''])?>
-                <?php if(!$lastModel || $lastModel->lce_status_id === LeadCallExpert::STATUS_DONE):?>
-                    <?=Html::a('<i class="fa fa-plus-circle success"></i> new Call', null, ['id' => 'btn-call-expert-form'])?>
+                <?php if($lead->leadFlightSegmentsCount):?>
+                    <?php if(!$lastModel || $lastModel->lce_status_id === LeadCallExpert::STATUS_DONE):?>
+                        <?=Html::a('<i class="fa fa-plus-circle success"></i> new Call', null, ['id' => 'btn-call-expert-form'])?>
+                    <?php endif; ?>
+                <?php else: ?>
+                    <span class="badge badge-warning"><i class="fa fa-warning"></i> Warning: Flight Segments is empty!</span>
                 <?php endif; ?>
             </li>
             <li>
