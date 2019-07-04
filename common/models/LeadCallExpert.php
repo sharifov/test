@@ -71,7 +71,8 @@ class LeadCallExpert extends \yii\db\ActiveRecord
             [['lce_expert_username'], 'string', 'max' => 30],
             [['lce_agent_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['lce_agent_user_id' => 'id']],
             [['lce_lead_id'], 'exist', 'skipOnError' => true, 'targetClass' => Lead::class, 'targetAttribute' => ['lce_lead_id' => 'id']],
-            [['lce_lead_id'], 'validateStatus', 'except' => self::SCENARIO_API_UPDATE]
+            [['lce_lead_id'], 'validateStatus', 'except' => self::SCENARIO_API_UPDATE],
+            [['lce_lead_id'], 'validateFlights', 'except' => self::SCENARIO_API_UPDATE]
         ];
     }
 
@@ -95,6 +96,29 @@ class LeadCallExpert extends \yii\db\ActiveRecord
 
             if ($call) {
                 $this->addError($attribute, 'Exist Call Expert on status pending (id: '.$call->lce_id.')');
+            }
+        }
+    }
+
+
+    /**
+     * Validates the flights.
+     * This method serves as the inline validation for flights.
+     *
+     * @param string $attribute the attribute currently being validated
+     * @param array $params the additional name-value pairs given in the rule
+     */
+    public function validateFlights($attribute, $params)
+    {
+        if (!$this->hasErrors()) {
+            /*$query = LeadFlightSegment::find();
+            $query->where(['lead_id' => $this->lce_lead_id]);
+            $exists = $query->exists();*/
+
+            $count = $this->lceLead->leadFlightSegmentsCount;
+
+            if (!$count) {
+                $this->addError($attribute, 'Flight Segments is empty');
             }
         }
     }

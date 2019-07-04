@@ -301,7 +301,8 @@ if (!$leadForm->getLead()->isNewRecord) {
     });
      $("#pj-itinerary").on("pjax:end", function () {
          if ($('#modeFlightSegments').data('value') == 'view') {
-            $.pjax.reload({container: '#quotes_list', timeout: 10000});     
+            $.pjax.reload({container: '#quotes_list', timeout: 10000});
+            $.pjax.reload({container: '#pjax-lead-call-expert', timeout: 10000});
          }
      });
     
