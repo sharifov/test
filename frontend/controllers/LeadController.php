@@ -1486,7 +1486,7 @@ class LeadController extends FController
         /** @var Employee $user */
         $user = Yii::$app->user->identity;
 
-        if ($user->canRole('agent')) {
+        if ($user->isAgent()) {
             $isAgent = true;
         } else {
             $isAgent = false;
@@ -1622,7 +1622,7 @@ class LeadController extends FController
         $user = Yii::$app->user->identity;
 
 
-        if ($user->canRole('agent')) {
+        if ($user->isAgent()) {
             $isAgent = true;
         } else {
             $isAgent = false;
@@ -1681,8 +1681,10 @@ class LeadController extends FController
         return $this->redirect(['lead/view', 'gid' => $lead->gid]);
     }
 
-
-    public function actionProcessing()
+    /**
+     * @return string
+     */
+    public function actionProcessing(): string
     {
         $searchModel = new LeadSearch();
 
@@ -1691,18 +1693,16 @@ class LeadController extends FController
 
         $params = array_merge($params, $params2);
 
-        if (Yii::$app->user->identity->canRole('agent')) {
-            $params['LeadSearch']['employee_id'] = Yii::$app->user->id;
+        /** @var Employee $user */
+        $user = Yii::$app->user->identity;
+
+        if ($user->isAgent()) {
             $isAgent = true;
         } else {
             $isAgent = false;
         }
 
-        if (Yii::$app->user->identity->canRole('supervision')) {
-            $params['LeadSearch']['supervision_id'] = Yii::$app->user->id;
-        }
-
-        $dataProvider = $searchModel->searchProcessing($params);
+        $dataProvider = $searchModel->searchProcessing($params, $user);
 
         return $this->render('processing', [
             'searchModel' => $searchModel,
@@ -1712,7 +1712,10 @@ class LeadController extends FController
     }
 
 
-    public function actionFollowUp()
+    /**
+     * @return string
+     */
+    public function actionFollowUp(): string
     {
         $searchModel = new LeadSearch();
 
@@ -1721,17 +1724,16 @@ class LeadController extends FController
 
         $params = array_merge($params, $params2);
 
-        if (Yii::$app->user->identity->canRole('agent')) {
+        /** @var Employee $user */
+        $user = Yii::$app->user->identity;
+
+        if ($user->isAgent()) {
             $isAgent = true;
         } else {
             $isAgent = false;
         }
 
-        if (Yii::$app->user->identity->canRole('supervision')) {
-            $params['LeadSearch']['supervision_id'] = Yii::$app->user->id;
-        }
-
-        $dataProvider = $searchModel->searchFollowUp($params);
+        $dataProvider = $searchModel->searchFollowUp($params, $user);
 
         return $this->render('follow-up', [
             'searchModel' => $searchModel,
@@ -1741,21 +1743,17 @@ class LeadController extends FController
     }
 
 
-    public function actionPending()
+    /**
+     * @return string
+     */
+    public function actionPending(): string
     {
         $searchModel = new LeadSearch();
 
-        $params = Yii::$app->request->queryParams;
-        $params2 = Yii::$app->request->post();
+        /** @var Employee $user */
+        $user = Yii::$app->user->identity;
 
-        $params = array_merge($params, $params2);
-
-        if (Yii::$app->user->identity->canRole('supervision')) {
-            $params['LeadSearch']['supervision_id'] = Yii::$app->user->id;
-        }
-        $dataProvider = $searchModel->searchInbox($params);
-
-        //$user = Yii::$app->user->identity;
+        $dataProvider = $searchModel->searchPending(Yii::$app->request->queryParams, $user);
 
         return $this->render('pending', [
             'searchModel' => $searchModel,
@@ -1764,27 +1762,27 @@ class LeadController extends FController
     }
 
 
-    public function actionInbox()
+    /**
+     * @return string
+     * @throws NotFoundHttpException
+     */
+    public function actionInbox(): string
     {
-        $searchModel = new LeadSearch();
 
         $params = Yii::$app->request->queryParams;
-        $params2 = Yii::$app->request->post();
 
-        $params = array_merge($params, $params2);
+        /** @var Employee $user */
+        $user = Yii::$app->user->identity;
 
-        if (Yii::$app->user->identity->canRole('agent')) {
+        if ($user->isAgent()) {
             $isAgent = true;
         } else {
             $isAgent = false;
         }
 
-
         $checkShiftTime = true;
 
         if ($isAgent) {
-            $user = Yii::$app->user->identity;
-            /** @var Employee $user */
             $checkShiftTime = $user->checkShiftTime();
             $userParams = $user->userParams;
 
@@ -1804,14 +1802,9 @@ class LeadController extends FController
 
         //$checkShiftTime = true;
 
+        $searchModel = new LeadSearch();
 
-        if (Yii::$app->user->identity->canRole('supervision')) {
-            $params['LeadSearch']['supervision_id'] = Yii::$app->user->id;
-        }
-
-        $dataProvider = $searchModel->searchInbox($params);
-
-        $user = Yii::$app->user->identity;
+        $dataProvider = $searchModel->searchInbox($params, $user);
 
         $isAccessNewLead = $user->accessTakeNewLead();
         $accessLeadByFrequency = [];
@@ -1835,34 +1828,29 @@ class LeadController extends FController
         ]);
     }
 
-
-    public function actionSold()
+    /**
+     * @return string
+     */
+    public function actionSold(): string
     {
         $searchModel = new LeadSearch();
-        $salary = null;
 
         $params = Yii::$app->request->queryParams;
         $params2 = Yii::$app->request->post();
 
         $params = array_merge($params, $params2);
 
-        if (Yii::$app->user->identity->canRole('agent')) {
+        /** @var Employee $user */
+        $user = Yii::$app->user->identity;
+        if ($user->isAgent()) {
             $isAgent = true;
         } else {
             $isAgent = false;
         }
 
-        if (Yii::$app->user->identity->canRole('supervision')) {
-            $params['LeadSearch']['supervision_id'] = Yii::$app->user->id;
-        }
+        $dataProvider = $searchModel->searchSold($params, $user);
 
-        if ($isAgent) {
-            $params['LeadSearch']['employee_id'] = Yii::$app->user->id;
-        }
-
-        $dataProvider = $searchModel->searchSold($params);
-
-        $tmpl = Yii::$app->user->identity->canRole('qa') ? 'sold_qa' : 'sold';
+        $tmpl = $user->isQa() ? 'sold_qa' : 'sold';
 
         return $this->render($tmpl, [
             'searchModel' => $searchModel,
@@ -1871,7 +1859,10 @@ class LeadController extends FController
         ]);
     }
 
-    public function actionTrash()
+    /**
+     * @return string
+     */
+    public function actionTrash(): string
     {
         $searchModel = new LeadSearch();
 
@@ -1879,44 +1870,33 @@ class LeadController extends FController
         $params2 = Yii::$app->request->post();
 
         $params = array_merge($params, $params2);
-
-        if (Yii::$app->user->identity->canRole('agent')) {
-            $params['LeadSearch']['employee_id'] = Yii::$app->user->id;
-            $isAgent = true;
-        } else {
-            $isAgent = false;
-        }
-
-        if (Yii::$app->user->identity->canRole('supervision')) {
-            $params['LeadSearch']['supervision_id'] = Yii::$app->user->id;
-        }
 
         $searchModel->datetime_start = date('Y-m-d', strtotime('-0 day'));
         $searchModel->datetime_end = date('Y-m-d');
 
-        $dataProvider = $searchModel->searchTrash($params);
+        /** @var Employee $user */
+        $user = Yii::$app->user->identity;
+
+        $dataProvider = $searchModel->searchTrash($params, $user);
 
         return $this->render('trash', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
-            'isAgent' => $isAgent,
+            'user' => $user
         ]);
     }
 
-    public function actionDuplicate()
+    /**
+     * @return string
+     */
+    public function actionDuplicate(): string
     {
         $searchModel = new LeadSearch();
 
-        $params = Yii::$app->request->queryParams;
-        $params2 = Yii::$app->request->post();
+        /** @var Employee $user */
+        $user = Yii::$app->user->identity;
 
-        $params = array_merge($params, $params2);
-
-        if (Yii::$app->user->identity->canRole('supervision')) {
-            $params['LeadSearch']['supervision_id'] = Yii::$app->user->id;
-        }
-
-        $dataProvider = $searchModel->searchDuplicates($params);
+        $dataProvider = $searchModel->searchDuplicate(Yii::$app->request->queryParams, $user);
 
         return $this->render('duplicate', [
             'searchModel' => $searchModel,
@@ -1924,28 +1904,23 @@ class LeadController extends FController
         ]);
     }
 
-
-    public function actionBooked()
+    /**
+     * @return string
+     */
+    public function actionBooked(): string
     {
         $searchModel = new LeadSearch();
 
-        $params = Yii::$app->request->queryParams;
-        $params2 = Yii::$app->request->post();
+        /** @var Employee $user */
+        $user = Yii::$app->user->identity;
 
-        $params = array_merge($params, $params2);
-
-        if (Yii::$app->user->identity->canRole('agent')) {
-            //$params['LeadSearch']['employee_id'] = Yii::$app->user->id;
+        if ($user->isAgent()) {
             $isAgent = true;
         } else {
             $isAgent = false;
         }
 
-        if (Yii::$app->user->identity->canRole('supervision')) {
-            //$params['LeadSearch']['supervision_id'] = Yii::$app->user->id;
-        }
-
-        $dataProvider = $searchModel->searchBooked($params);
+        $dataProvider = $searchModel->searchBooked(Yii::$app->request->queryParams, $user);
 
         return $this->render('booked', [
             'searchModel' => $searchModel,

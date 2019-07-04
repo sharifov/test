@@ -2,7 +2,6 @@
 
 namespace frontend\controllers;
 
-use common\components\SearchService;
 use common\models\Employee;
 use common\models\Lead;
 use common\models\Project;
@@ -314,7 +313,7 @@ class CallController extends FController
         $myPendingLeadsCount = $query->count();
 
 
-        $callModel = Call::find()->where(['c_call_status' => [Call::CALL_STATUS_RINGING, Call::CALL_STATUS_IN_PROGRESS]])->andWhere(['c_created_user_id' => Yii::$app->user->id])->orderBy(['c_id' => SORT_DESC])->limit(1)->one();
+        $callModel = Call::find()->where(['c_call_status' => [Call::CALL_STATUS_RINGING, Call::CALL_STATUS_IN_PROGRESS]])->andWhere(['c_created_user_id' => $user->id])->orderBy(['c_id' => SORT_DESC])->limit(1)->one();
 
         //echo Call::find()->where(['c_call_status' => [Call::CALL_STATUS_RINGING, Call::CALL_STATUS_IN_PROGRESS]])->andWhere(['c_created_user_id' => Yii::$app->user->id])->orderBy(['c_id' => SORT_DESC])->limit(1)->createCommand()->getRawSql(); exit;
 
@@ -392,7 +391,7 @@ class CallController extends FController
         //$params2 = Yii::$app->request->post();
         //$params = array_merge($params, $params2);
 
-        if(Yii::$app->user->identity->canRole('agent')) {
+        if ($user->isAgent()) {
             $isAgent = true;
         } else {
             $isAgent = false;
@@ -430,14 +429,14 @@ class CallController extends FController
             $leadModel = null; //Lead::findOne(22);
         }*/
 
+//
+//        if(Yii::$app->user->identity->canRole('supervision')) {
+//            $params['LeadSearch']['supervision_id'] = Yii::$app->user->id;
+//        }
 
-        if(Yii::$app->user->identity->canRole('supervision')) {
-            $params['LeadSearch']['supervision_id'] = Yii::$app->user->id;
-        }
 
-
-        if(Yii::$app->user->identity->canRole('admin')) {
-            $dataProvider = $searchModel->searchInbox($params);
+        if ($user->isAdmin()) {
+            $dataProvider = $searchModel->searchInbox($params, $user);
         } else {
             $dataProvider = null;
         }
@@ -473,12 +472,12 @@ class CallController extends FController
         $searchModelCall = new CallSearch();
 
         $params = Yii::$app->request->queryParams;
-        $params['CallSearch']['c_created_user_id'] = Yii::$app->user->id;
+        $params['CallSearch']['c_created_user_id'] = $user->id;
         $params['CallSearch']['c_call_type_id'] = Call::CALL_TYPE_OUT;
         $params['CallSearch']['limit'] = 10;
 
         $dataProviderCall = $searchModelCall->searchAgent($params);
-        $projectList = Project::getListByUser(Yii::$app->user->id);
+        $projectList = Project::getListByUser($user->id);
 
 
         return $this->render('auto-redial', [

@@ -1,5 +1,6 @@
 <?php
 
+use dosamigos\datepicker\DatePicker;
 use yii\helpers\Html;
 use yii\widgets\Pjax;
 use kartik\grid\GridView;
@@ -44,9 +45,9 @@ $this->params['breadcrumbs'][] = $this->title;
         [
             'attribute' => 'id',
             'label' => 'Lead ID',
-            'value' => function (\common\models\Lead $model) {
-                return $model->id;
-            },
+//            'value' => function (\common\models\Lead $model) {
+//                return $model->id;
+//            },
             'options' => [
                 'style' => 'width:80px'
             ]
@@ -54,9 +55,9 @@ $this->params['breadcrumbs'][] = $this->title;
 
         [
             'attribute' => 'uid',
-            'value' => function (\common\models\Lead $model) {
-                return $model->uid;
-            },
+//            'value' => function (\common\models\Lead $model) {
+//                return $model->uid;
+//            },
             'options' => [
                 'style' => 'width:120px'
             ]
@@ -415,7 +416,22 @@ $this->params['breadcrumbs'][] = $this->title;
             'options' => [
                 'style' => 'width:160px'
             ],
-            'format' => 'raw'
+            'format' => 'raw',
+            'contentOptions' => [
+                'class' => 'text-center'
+            ],
+            'filter' => DatePicker::widget([
+                'model' => $searchModel,
+                'attribute' => 'created',
+                'clientOptions' => [
+                    'autoclose' => true,
+                    'format' => 'yyyy-mm-dd',
+                ],
+                'options' => [
+                    'autocomplete' => 'off',
+                    'placeholder' =>'Choose Date'
+                ],
+            ]),
         ],
         [
             'class' => 'yii\grid\ActionColumn',
