@@ -23,7 +23,7 @@ class WebPhoneAsset extends AssetBundle
     ];
 
     public $js = [
-        'https://media.twiliocdn.com/sdk/js/client/v1.6/twilio.min.js',
+        'https://media.twiliocdn.com/sdk/js/client/v1.7/twilio.min.js',
         //'/js/quickstart.js',
     ];
 

@@ -683,14 +683,13 @@ echo '<div class="container" id="container-redirect-agents"></div>';
             .then(function (data_res) {
                 var data = data_res.data;
                 log('Got a token.');
-                console.log('app_sid: ' + data.app_sid);
-                console.log('account_sid: ' + data.account_sid);
+                console.log('app_sid: ' + data.app_sid + 'account_sid: ' + data.account_sid);
 
                 call_acc_sid = data.account_sid;
 
                 //console.log('Token: ' + data.token);
                 // Setup Twilio.Device
-                device = new Twilio.Device(data.token, {debug: true});
+                device = new Twilio.Device(data.token, {codecPreferences: ['opus', 'pcmu'], debug: true});
 
                 //console.log([data, device]);
                 device.on('ready', function (device) {
