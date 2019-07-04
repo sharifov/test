@@ -52,6 +52,13 @@ use yii\web\NotFoundHttpException;
  */
 class Employee extends \yii\db\ActiveRecord implements IdentityInterface
 {
+    public const ROLE_SUPER_ADMIN = 'superadmin';
+    public const ROLE_ADMIN = 'admin';
+    public const ROLE_AGENT = 'agent';
+    public const ROLE_SUPERVISION = 'supervision';
+    public const ROLE_QA = 'qa';
+    public const ROLE_USER_MANAGER = 'userManager';
+
     public const SCENARIO_REGISTER = 'register';
 
     public const STATUS_DELETED = 0;
@@ -81,6 +88,54 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
 
     private $cache = [];
 
+
+    /**
+     * @return bool
+     */
+    public function isSuperAdmin(): bool
+    {
+        return in_array(self::ROLE_SUPER_ADMIN, $this->getRoles(true), true);
+    }
+
+    /**
+     * @return bool
+     */
+    public function isAdmin(): bool
+    {
+        return in_array(self::ROLE_ADMIN, $this->getRoles(true), true);
+    }
+
+    /**
+     * @return bool
+     */
+    public function isAgent(): bool
+    {
+        return in_array(self::ROLE_AGENT, $this->getRoles(true), true);
+    }
+
+    /**
+     * @return bool
+     */
+    public function isSupervision(): bool
+    {
+        return in_array(self::ROLE_SUPERVISION, $this->getRoles(true), true);
+    }
+
+    /**
+     * @return bool
+     */
+    public function isQa(): bool
+    {
+        return in_array(self::ROLE_QA, $this->getRoles(true), true);
+    }
+
+    /**
+     * @return bool
+     */
+    public function isUserManager(): bool
+    {
+        return in_array(self::ROLE_USER_MANAGER, $this->getRoles(true), true);
+    }
 
     /**
      * @param string $key
@@ -568,12 +623,16 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     }
 
     /**
+     * @param bool $onlyNames
      * @return array
      */
-    public function getRoles() : array
+    public function getRoles($onlyNames = false) : array
     {
         if ($this->rolesName === null) {
             $this->rolesName = ArrayHelper::map(Yii::$app->authManager->getRolesByUser($this->id), 'name', 'description');
+        }
+        if ($onlyNames) {
+            return array_keys($this->rolesName);
         }
         return $this->rolesName;
     }

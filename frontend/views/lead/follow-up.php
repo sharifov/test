@@ -16,10 +16,10 @@ use yii\helpers\Url;
 $this->title = 'Follow Up Queue';
 
 if (Yii::$app->user->identity->canRole('admin')) {
-    $userList = \common\models\Employee::getList();
+//    $userList = \common\models\Employee::getList();
     $projectList = \common\models\Project::getList();
 } else {
-    $userList = \common\models\Employee::getListByUserId(Yii::$app->user->id);
+//    $userList = \common\models\Employee::getListByUserId(Yii::$app->user->id);
     $projectList = \common\models\ProjectEmployeeAccess::getProjectsByEmployee();
 }
 
