@@ -1,6 +1,6 @@
 <?php
 
-namespace shop\dispatchers;
+namespace sales\dispatchers;
 
 interface EventDispatcher
 {
