@@ -3,10 +3,18 @@
 namespace sales\repositories\client;
 
 use common\models\ClientEmail;
+use sales\dispatchers\EventDispatcher;
 use sales\repositories\NotFoundException;
 
 class ClientEmailRepository
 {
+    private $eventDispatcher;
+
+    public function __construct(EventDispatcher $eventDispatcher)
+    {
+        $this->eventDispatcher = $eventDispatcher;
+    }
+
     /**
      * @param $id
      * @return ClientEmail
@@ -47,10 +55,11 @@ class ClientEmailRepository
      */
     public function save(ClientEmail $email): int
     {
-        if ($email->save(false)) {
-            return $email->id;
+        if (!$email->save(false)) {
+            throw new \RuntimeException('Saving error');
         }
-        throw new \RuntimeException('Saving error');
+        $this->eventDispatcher->dispatchAll($email->releaseEvents());
+        return $email->id;
     }
 
     /**
@@ -63,5 +72,6 @@ class ClientEmailRepository
         if (!$email->delete()) {
             throw new \RuntimeException('Removing error');
         }
+        $this->eventDispatcher->dispatchAll($email->releaseEvents());
     }
 }

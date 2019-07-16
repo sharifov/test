@@ -3,10 +3,19 @@
 namespace sales\repositories\lead;
 
 use common\models\LeadFlightSegment;
+use sales\dispatchers\EventDispatcher;
 use sales\repositories\NotFoundException;
 
 class LeadSegmentRepository
 {
+
+    private $eventDispatcher;
+
+    public function __construct(EventDispatcher $eventDispatcher)
+    {
+        $this->eventDispatcher = $eventDispatcher;
+    }
+
     /**
      * @param $id
      * @return LeadFlightSegment
@@ -25,10 +34,11 @@ class LeadSegmentRepository
      */
     public function save(LeadFlightSegment $segment): int
     {
-        if ($segment->save(false)) {
-            return $segment->id;
+        if (!$segment->save(false)) {
+            throw new \RuntimeException('Saving error.');
         }
-        throw new \RuntimeException('Saving error.');
+        $this->eventDispatcher->dispatchAll($segment->releaseEvents());
+        return $segment->id;
     }
 
     /**
@@ -41,6 +51,7 @@ class LeadSegmentRepository
         if (!$segment->delete()) {
             throw new \RuntimeException('Removing error.');
         }
+        $this->eventDispatcher->dispatchAll($segment->releaseEvents());
     }
 
     /**

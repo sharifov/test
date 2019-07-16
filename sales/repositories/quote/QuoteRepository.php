@@ -1,12 +1,12 @@
 <?php
 
-namespace sales\repositories\lead;
+namespace sales\repositories\quote;
 
 use common\models\Quote;
 use sales\dispatchers\EventDispatcher;
 use sales\repositories\NotFoundException;
 
-class LeadQuoteRepository
+class QuoteRepository
 {
     private $eventDispatcher;
 

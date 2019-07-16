@@ -3,10 +3,18 @@
 namespace sales\repositories\client;
 
 use common\models\ClientPhone;
+use sales\dispatchers\EventDispatcher;
 use sales\repositories\NotFoundException;
 
 class ClientPhoneRepository
 {
+    private $eventDispatcher;
+
+    public function __construct(EventDispatcher $eventDispatcher)
+    {
+        $this->eventDispatcher = $eventDispatcher;
+    }
+
     /**
      * @param $id
      * @return ClientPhone
@@ -47,10 +55,11 @@ class ClientPhoneRepository
      */
     public function save(ClientPhone $phone): int
     {
-        if ($phone->save(false)) {
-            return $phone->id;
+        if (!$phone->save(false)) {
+            throw new \RuntimeException('Saving error');
         }
-        throw new \RuntimeException('Saving error');
+        $this->eventDispatcher->dispatchAll($phone->releaseEvents());
+        return $phone->id;
     }
 
     /**
@@ -63,5 +72,6 @@ class ClientPhoneRepository
         if (!$phone->delete()) {
             throw new \RuntimeException('Removing error');
         }
+        $this->eventDispatcher->dispatchAll($phone->releaseEvents());
     }
 }

@@ -3,10 +3,18 @@
 namespace sales\repositories\lead;
 
 use common\models\Lead;
+use sales\dispatchers\EventDispatcher;
 use sales\repositories\NotFoundException;
 
 class LeadRepository
 {
+    private $eventDispatcher;
+
+    public function __construct(EventDispatcher $eventDispatcher)
+    {
+        $this->eventDispatcher = $eventDispatcher;
+    }
+
     /**
      * @param $id
      * @return Lead
@@ -46,15 +54,34 @@ class LeadRepository
     }
 
     /**
+     * @param int $current
+     * @return array
+     */
+    public function getActive(int $current): array
+    {
+        return Lead::find()
+            ->select(['id'])
+            ->where([
+                'status' => [
+                    Lead::STATUS_ON_HOLD, Lead::STATUS_PROCESSING,
+                    Lead::STATUS_SNOOZE, Lead::STATUS_FOLLOW_UP
+                ]
+            ])->andWhere(['<>', 'id', $current])->asArray()->all();
+    }
+
+    /**
      * @param Lead $lead
      * @return int
      */
     public function save(Lead $lead): int
     {
-        if ($lead->save(false)) {
-            return $lead->id;
+        $lead->disableAREvents();
+
+        if (!$lead->save(false)) {
+            throw new \RuntimeException('Saving error');
         }
-        throw new \RuntimeException('Saving error');
+        $this->eventDispatcher->dispatchAll($lead->releaseEvents());
+        return $lead->id;
     }
 
     /**
@@ -77,5 +104,6 @@ class LeadRepository
         if (!$lead->delete()) {
             throw new \RuntimeException('Removing error');
         }
+        $this->eventDispatcher->dispatchAll($lead->releaseEvents());
     }
 }

@@ -1,12 +1,12 @@
 <?php
 
-namespace sales\repositories\lead;
+namespace sales\repositories\reason;
 
 use common\models\Reason;
 use sales\dispatchers\EventDispatcher;
 use sales\repositories\NotFoundException;
 
-class LeadReasonRepository
+class ReasonRepository
 {
     private $eventDispatcher;
 
