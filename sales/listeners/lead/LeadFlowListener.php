@@ -13,17 +13,23 @@ use yii\console\Application;
 use Yii;
 
 /**
- * Class LeadStatusChangedEventListener
+ * Class LeadFlowListener
  * @property LeadFlowRepository $leadFlowRepository
  * @property LeadFlowChecklistRepository $leadFlowChecklistRepository
  * @property LeadChecklistRepository $leadChecklistRepository
  */
-class LeadStatusChangedEventListener
+class LeadFlowListener
 {
     private $leadFlowRepository;
     private $leadFlowChecklistRepository;
     private $leadChecklistRepository;
 
+    /**
+     * LeadFlowListener constructor.
+     * @param LeadFlowRepository $leadFlowRepository
+     * @param LeadFlowChecklistRepository $leadFlowChecklistRepository
+     * @param LeadChecklistRepository $leadChecklistRepository
+     */
     public function __construct(
         LeadFlowRepository $leadFlowRepository,
         LeadFlowChecklistRepository $leadFlowChecklistRepository,
@@ -35,15 +41,19 @@ class LeadStatusChangedEventListener
         $this->leadChecklistRepository = $leadChecklistRepository;
     }
 
+    /**
+     * @param LeadStatusChangedEvent $event
+     */
     public function handle(LeadStatusChangedEvent $event): void
     {
+        $lead = $event->lead;
 
-        if ($preview = $this->leadFlowRepository->getPreview($event->lead->id)) {
+        if ($preview = $this->leadFlowRepository->getPreview($lead->id)) {
             $preview->setEndedTime();
             try {
                 $this->leadFlowRepository->save($preview);
             } catch (\Exception $e) {
-                Yii::error($e->getMessage(), 'LeadStatusChangedEventListener:leadFlow:preview:save');
+                Yii::error($e->getMessage(), static::class . ':leadFlow:preview:save');
                 $preview = null;
             }
         } else {
@@ -51,27 +61,27 @@ class LeadStatusChangedEventListener
         }
 
         $current = LeadFlow::create(
-            $event->lead->id,
+            $lead->id,
             ($preview && $preview->status) ? $preview->status : $event->oldStatus,
             $event->newStatus,
             (!is_a(Yii::$app, Application::class) && !Yii::$app->user->isGuest && Yii::$app->user->identityClass !== ApiUser::class) ? Yii::$app->user->id : null,
-            $event->lead->status_description ? mb_substr($event->lead->status_description, 0, 250) : null
+            $lead->status_description ? mb_substr($lead->status_description, 0, 250) : null
         );
 
         try {
             $this->leadFlowRepository->save($current);
-            if ($event->employeeId && $checkLists = $this->leadChecklistRepository->get($event->employeeId, $event->lead->id)) {
+            if ($event->employeeId && $checkLists = $this->leadChecklistRepository->get($event->employeeId, $lead->id)) {
                 foreach ($checkLists as $checkList) {
                     $leadFlowChecklist = LeadFlowChecklist::create($current->id, $checkList->lc_type_id, $checkList->lc_user_id);
                     try {
                         $this->leadFlowChecklistRepository->save($leadFlowChecklist);
                     } catch (\Exception $e) {
-                        Yii::error($e->getMessage(), 'LeadStatusChangedEventListener:leadFlowChecklist:save');
+                        Yii::error($e->getMessage(), static::class .  ':leadFlowChecklist:save');
                     }
                 }
             }
         } catch (\Exception $e) {
-            Yii::error($e->getMessage(), 'LeadStatusChangedEventListener:leadFlow:current:save');
+            Yii::error($e->getMessage(), static::class . ':leadFlow:current:save');
         }
     }
 

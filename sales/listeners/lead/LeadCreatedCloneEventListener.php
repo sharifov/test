@@ -2,39 +2,70 @@
 
 namespace sales\listeners\lead;
 
-use common\models\LeadTask;
-use common\models\Task;
-use sales\events\lead\LeadTaskEvent;
+use common\models\Notifications;
+use sales\events\lead\LeadCreatedCloneEvent;
+use sales\repositories\NotFoundException;
+use sales\repositories\user\UserRepository;
+use Yii;
 
 /**
- * Class LeadTaskEventListener
+ * Class LeadCreatedCloneEventListener
+ * @property UserRepository $userRepository
  */
-class LeadTaskEventListener
+class LeadCreatedCloneEventListener
 {
 
+    private $userRepository;
+
     /**
-     * @param LeadTaskEvent $event
+     * LeadCreatedCloneEventListener constructor.
+     * @param UserRepository $userRepository
      */
-    public function handle(LeadTaskEvent $event): void
+    public function __construct(UserRepository $userRepository)
+    {
+        $this->userRepository = $userRepository;
+    }
+
+    /**
+     * @param LeadCreatedCloneEvent $event
+     */
+    public function handle(LeadCreatedCloneEvent $event): void
     {
 
         $lead = $event->lead;
 
-        if (!$lead->isGetOwner()) {
+        $host = \Yii::$app->params['url_address'];
+
+        try {
+            $owner = $this->userRepository->get($lead->employee_id);
+        } catch (NotFoundException $e) {
+            Yii::$app->errorHandler->logException($e);
+            Yii::warning('Not found employee (' . $lead->employee_id . ')', static::class . ':notFoundOwner');
             return;
         }
 
-        LeadTask::deleteUnnecessaryTasks($lead->id);
+        $agent = $owner->username;
+        $subject = Yii::t('email', "Cloned Lead-{id} by {agent}", ['id' => $lead->clone_id, 'agent' => $agent]);
+        $body = Yii::t('email', "Agent {agent} cloned lead {clone_id} with reason [{reason}], url: {cloned_url}.
+New lead {lead_id}
+{url}",
+            [
+                'agent' => $agent,
+                'url' => $host . '/lead/view/' . $lead->gid,
+                'cloned_url' => $host . '/lead/view/' . ($lead->clone ? $lead->clone->gid : $lead->gid),
+                'reason' => $lead->description,
+                'lead_id' => $lead->id,
+                'clone_id' => $lead->clone_id
+            ]);
 
-        if ($lead->l_answered) {
-            $taskType = Task::CAT_ANSWERED_PROCESS;
+        if (Notifications::create($owner->id, $subject, $body, Notifications::TYPE_INFO, true)) {
+            Notifications::socket($owner->id, null, 'getNewNotification', [], true);
         } else {
-            $taskType = Task::CAT_NOT_ANSWERED_PROCESS;
+            Yii::warning(
+                'Not created Email notification to employee_id: ' . $owner->id . ', lead: ' . $lead->id,
+                self::class . ':createNotification:Lead:Clone'
+            );
         }
-
-        LeadTask::createTaskList($lead->id, $lead->employee_id, 1, '', $taskType);
-        LeadTask::createTaskList($lead->id, $lead->employee_id, 2, '', $taskType);
-        LeadTask::createTaskList($lead->id, $lead->employee_id, 3, '', $taskType);
 
     }
 

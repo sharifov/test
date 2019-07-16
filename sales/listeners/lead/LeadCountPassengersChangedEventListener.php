@@ -6,16 +6,16 @@ use sales\events\lead\LeadCountPassengersChangedEvent;
 use sales\repositories\quote\QuoteRepository;
 
 /**
- * Class LeadPassengersChangedEventListener
+ * Class LeadCountPassengersChangedEventListener
  * @property QuoteRepository $quoteRepository
  */
-class LeadPassengersChangedEventListener
+class LeadCountPassengersChangedEventListener
 {
 
     private $quoteRepository;
 
     /**
-     * LeadPassengersChangedEventListener constructor.
+     * LeadCountPassengersChangedEventListener constructor.
      * @param QuoteRepository $quoteRepository
      */
     public function __construct(QuoteRepository $quoteRepository)

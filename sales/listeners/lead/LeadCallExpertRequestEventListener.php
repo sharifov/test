@@ -7,9 +7,9 @@ use sales\events\lead\LeadCallExpertRequestEvent;
 use Yii;
 
 /**
- * Class LeadCallExpertRequestListener
+ * Class LeadCallExpertRequestEventListener
  */
-class LeadCallExpertRequestListener
+class LeadCallExpertRequestEventListener
 {
 
     /**
@@ -22,8 +22,7 @@ class LeadCallExpertRequestListener
         $job = new UpdateLeadBOJob();
         $job->lead_id = $lead->id;
         $jobId = Yii::$app->queue_job->push($job);
-        // Yii::info('Lead: ' . $this->id . ', UpdateLeadBOJob: ' . $jobId, 'info\Lead:afterSave:UpdateLeadBOJob');
-
+//        Yii::info('Lead: ' . $lead->id . ', UpdateLeadBOJob: ' . $jobId, 'info\\' . static::class);
     }
 
 }

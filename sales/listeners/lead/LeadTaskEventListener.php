@@ -2,73 +2,40 @@
 
 namespace sales\listeners\lead;
 
-use common\models\Notifications;
-use common\models\Quote;
-use sales\events\lead\LeadBookedEvent;
-use sales\repositories\NotFoundException;
-use sales\repositories\user\UserRepository;
-use Yii;
+use common\models\LeadTask;
+use common\models\Task;
+use sales\events\lead\LeadTaskEvent;
 
 /**
- * Class LeadBookedEventListener
- * @property UserRepository $userRepository
+ * Class LeadTaskEventListener
  */
-class LeadBookedEventListener
+class LeadTaskEventListener
 {
 
-    private $userRepository;
-
     /**
-     * LeadBookedEventListener constructor.
-     * @param UserRepository $userRepository
+     * @param LeadTaskEvent $event
      */
-    public function __construct(UserRepository $userRepository)
-    {
-        $this->userRepository = $userRepository;
-    }
-
-    /**
-     * @param LeadBookedEvent $event
-     */
-    public function handle(LeadBookedEvent $event): void
+    public function handle(LeadTaskEvent $event): void
     {
 
         $lead = $event->lead;
 
-        try {
-            $owner = $this->userRepository->get($lead->employee_id);
-        } catch (NotFoundException $e) {
-            Yii::warning(
-                'Not found owner for booked lead: ' . $lead->id,
-                self::class . ':ownerNotFound'
-            );
+        if (!$lead->isGetOwner()) {
             return;
         }
 
-        $host = Yii::$app->params['url_address'];
+        LeadTask::deleteUnnecessaryTasks($lead->id);
 
-        $subject = Yii::t('email', 'Lead-{id} to BOOKED', ['id' => $lead->id]);
-
-        $quote = Quote::find()->where(['lead_id' => $lead->id, 'status' => Quote::STATUS_APPLIED])->orderBy(['id' => SORT_DESC])->one();
-
-        $body = Yii::t('email', "Your Lead (ID: {lead_id}) has been changed status to BOOKED!
-Booked quote UID: {quote_uid}
-{url}",
-            [
-                'url' => $host . '/lead/view/' . $lead->gid,
-                'lead_id' => $lead->id,
-                'quote_uid' => $quote ? $quote->uid : '-'
-            ]);
-
-        $isSend = Notifications::create($owner->id, $subject, $body, Notifications::TYPE_INFO, true);
-        Notifications::socket($owner->id, null, 'getNewNotification', [], true);
-
-        if (!$isSend) {
-            Yii::warning(
-                'Not send Email notification to employee_id: ' . $owner->id . ', lead: ' . $lead->id,
-                self::class . ':sendNotification'
-            );
+        if ($lead->l_answered) {
+            $taskType = Task::CAT_ANSWERED_PROCESS;
+        } else {
+            $taskType = Task::CAT_NOT_ANSWERED_PROCESS;
         }
+
+        LeadTask::createTaskList($lead->id, $lead->employee_id, 1, '', $taskType);
+        LeadTask::createTaskList($lead->id, $lead->employee_id, 2, '', $taskType);
+        LeadTask::createTaskList($lead->id, $lead->employee_id, 3, '', $taskType);
+
     }
 
 }

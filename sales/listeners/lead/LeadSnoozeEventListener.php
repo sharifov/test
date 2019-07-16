@@ -3,23 +3,23 @@
 namespace sales\listeners\lead;
 
 use common\models\Notifications;
-use common\models\Quote;
-use sales\events\lead\LeadBookedEvent;
+use common\models\Reason;
+use sales\events\lead\LeadSnoozeEvent;
 use sales\repositories\NotFoundException;
 use sales\repositories\user\UserRepository;
 use Yii;
 
 /**
- * Class LeadBookedEventListener
+ * Class LeadSnoozeEventListener
  * @property UserRepository $userRepository
  */
-class LeadBookedEventListener
+class LeadSnoozeEventListener
 {
 
     private $userRepository;
 
     /**
-     * LeadOwnerChangedEventListener constructor.
+     * LeadSnoozeEventListener constructor.
      * @param UserRepository $userRepository
      */
     public function __construct(UserRepository $userRepository)
@@ -28,18 +28,27 @@ class LeadBookedEventListener
     }
 
     /**
-     * @param LeadBookedEvent $event
+     * @param LeadSnoozeEvent $event
+     * @throws \yii\base\InvalidConfigException
      */
-    public function handle(LeadBookedEvent $event): void
+    public function handle(LeadSnoozeEvent $event): void
     {
-
         $lead = $event->lead;
+
+        if ($lead->status_description) {
+            $reason = new Reason();
+            $reason->lead_id = $lead->id;
+            $reason->employee_id = $lead->employee_id;
+            $reason->created = date('Y-m-d H:i:s');
+            $reason->reason = $lead->status_description;
+            $reason->save();
+        }
 
         try {
             $owner = $this->userRepository->get($lead->employee_id);
         } catch (NotFoundException $e) {
             Yii::warning(
-                'Not found owner for booked lead: ' . $lead->id,
+                'Not found owner for snooze lead: ' . $lead->id,
                 self::class . ':ownerNotFound'
             );
             return;
@@ -47,25 +56,24 @@ class LeadBookedEventListener
 
         $host = Yii::$app->params['url_address'];
 
-        $subject = Yii::t('email', 'Lead-{id} to BOOKED', ['id' => $lead->id]);
+        $subject = Yii::t('email', "Lead-{id} to SNOOZE", ['id' => $lead->id]);
 
-        $quote = Quote::find()->where(['lead_id' => $lead->id, 'status' => Quote::STATUS_APPLIED])->orderBy(['id' => SORT_DESC])->one();
-
-        $body = Yii::t('email', "Your Lead (ID: {lead_id}) has been changed status to BOOKED!
-Booked quote UID: {quote_uid}
+        $body = Yii::t('email', "Your Lead (ID: {lead_id}) has been changed status to SNOOZE!
+Snooze for: {datetime}.
+Reason: {reason}
 {url}",
             [
                 'url' => $host . '/lead/view/' . $lead->gid,
+                'datetime' => Yii::$app->formatter->asDatetime(strtotime($lead->snooze_for)),
+                'reason' => $lead->status_description ?: '-',
                 'lead_id' => $lead->id,
-                'quote_uid' => $quote ? $quote->uid : '-'
             ]);
 
-        $isSend = Notifications::create($owner->id, $subject, $body, Notifications::TYPE_INFO, true);
-        Notifications::socket($owner->id, null, 'getNewNotification', [], true);
-
-        if (!$isSend) {
+        if (Notifications::create($owner->id, $subject, $body, Notifications::TYPE_INFO, true)) {
+            Notifications::socket($owner->id, null, 'getNewNotification', [], true);
+        } else {
             Yii::warning(
-                'Not send Email notification to employee_id: ' . $owner->id . ', lead: ' . $lead->id,
+                'Not created Email notification to employee_id: ' . $owner->id . ', lead: ' . $lead->id,
                 self::class . ':sendNotification'
             );
         }
