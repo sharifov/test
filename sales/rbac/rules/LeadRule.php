@@ -14,7 +14,7 @@ abstract class LeadRule extends Rule
     public function __construct($config = [])
     {
         parent::__construct($config);
-        $this->leadRepository = new LeadRepository();
+        $this->leadRepository = Yii::createObject(LeadRepository::class);
     }
 
     /**
