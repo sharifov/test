@@ -1,8 +1,10 @@
 <?php
 
-namespace shop\jobs;
+namespace sales\jobs;
 
-abstract class Job implements \yii\queue\Job
+use yii\queue\JobInterface;
+
+abstract class Job implements JobInterface
 {
     public function execute($queue): void
     {
