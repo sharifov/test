@@ -5,8 +5,11 @@ namespace common\models;
 use common\components\BackOffice;
 use common\models\local\FlightSegment;
 use common\models\local\LeadLogMessage;
+use sales\entities\AggregateRoot;
+use sales\entities\EventTrait;
 use Yii;
 use yii\base\ErrorException;
+use yii\base\InvalidArgumentException;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
@@ -47,8 +50,11 @@ use common\components\SearchService;
  * @property QuoteTrip[] $quoteTrips
  * @property Airline[] $mainAirline
  */
-class Quote extends \yii\db\ActiveRecord
+class Quote extends \yii\db\ActiveRecord implements AggregateRoot
 {
+
+    use EventTrait;
+
     public const SERVICE_FEE = 0.035;
 
     public const
@@ -113,6 +119,43 @@ class Quote extends \yii\db\ActiveRecord
     public $freeBaggageInfo2;
     public $hasAirportChange = false;
     public $hasOvernight = false;
+
+    public function apply(): void
+    {
+        $this->setStatus(self::STATUS_APPLIED);
+    }
+
+    /**
+     * @return bool
+     */
+    public function isApplied(): bool
+    {
+        return $this->status === self::STATUS_APPLIED;
+    }
+
+    public function decline(): void
+    {
+        $this->setStatus(self::STATUS_DECLINED);
+    }
+
+    /**
+     * @return bool
+     */
+    public function isDeclined(): bool
+    {
+        return $this->status === self::STATUS_DECLINED;
+    }
+
+    /**
+     * @param int $status
+     */
+    private function setStatus(int $status): void
+    {
+        if (!array_key_exists($status, self::STATUS_LIST)) {
+            throw new InvalidArgumentException('Invalid Status');
+        }
+        $this->status = $status;
+    }
 
     /**
      * {@inheritdoc}

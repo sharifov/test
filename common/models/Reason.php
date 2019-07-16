@@ -2,6 +2,8 @@
 
 namespace common\models;
 
+use sales\entities\AggregateRoot;
+use sales\entities\EventTrait;
 use Yii;
 use yii\helpers\Html;
 
@@ -14,11 +16,19 @@ use yii\helpers\Html;
  * @property string $reason
  * @property string $created
  *
+ * @property $returnToQueue
+ * @property $queue
+ * @property $other
+ * @property $duplicateLeadId
+ *
  * @property Employee $employee
  * @property Lead $lead
  */
-class Reason extends \yii\db\ActiveRecord
+class Reason extends \yii\db\ActiveRecord implements AggregateRoot
 {
+
+    use EventTrait;
+
     public $returnToQueue;
     public $queue;
     public $other;
@@ -67,6 +77,15 @@ class Reason extends \yii\db\ActiveRecord
         ],
     ];
 
+    /**
+     * @param $userId
+     * @param $leadId
+     */
+    public function setOwner($userId, $leadId): void
+    {
+        $this->employee_id = $userId;
+        $this->lead_id = $leadId;
+    }
 
     /**
      * {@inheritdoc}

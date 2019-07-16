@@ -2,6 +2,8 @@
 
 namespace common\models;
 
+use sales\entities\AggregateRoot;
+use sales\entities\EventTrait;
 use Yii;
 use yii\helpers\VarDumper;
 
@@ -22,14 +24,43 @@ use yii\helpers\VarDumper;
  * @property Lead $lead
  * @property LeadFlowChecklist[] $leadFlowChecklist
  */
-class LeadFlow extends \yii\db\ActiveRecord
+class LeadFlow extends \yii\db\ActiveRecord implements AggregateRoot
 {
+
+    use EventTrait;
+
     /**
      * {@inheritdoc}
      */
     public static function tableName()
     {
         return 'lead_flow';
+    }
+
+    /**
+     * @param $leadId
+     * @param $oldStatus
+     * @param $newStatus
+     * @param null $userId
+     * @param null $description
+     * @return LeadFlow
+     */
+    public static function create($leadId, $oldStatus, $newStatus, $userId = null, $description = null): self
+    {
+        $leadFlow = new static();
+        $leadFlow->lead_id = $leadId;
+        $leadFlow->lf_from_status_id = $oldStatus;
+        $leadFlow->status = $newStatus;
+        $leadFlow->employee_id = $userId;
+        $leadFlow->lf_description = $description;
+        $leadFlow->created = date('Y-m-d H:i:s');
+        return $leadFlow;
+    }
+
+    public function setEndedTime()
+    {
+        $this->lf_end_dt = date('Y-m-d H:i:s');
+        $this->lf_time_duration = (int) (strtotime($this->lf_end_dt) - strtotime($this->created));
     }
 
     /**
