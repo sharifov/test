@@ -89,7 +89,6 @@ class LeadManageService
                 $clientId,
                 $form->client->firstName,
                 $form->client->lastName,
-                $employeeId,
                 $form->cabin,
                 $form->adults,
                 $form->children,
@@ -99,9 +98,10 @@ class LeadManageService
                 $form->projectId,
                 $form->notesForExperts,
                 $form->clientPhone,
-                $form->clientEmail,
-                $form->status
+                $form->clientEmail
             );
+
+            $lead->take($employeeId);
 
             $phones = $this->createClientPhones($clientId, $form->phones);
 
@@ -122,9 +122,8 @@ class LeadManageService
 
             $lead->setRequestHash($hash);
 
-            if ($duplicate = $this->leadRepository->getByRequestHash($hash)) {
-                $lead->setDuplicate($duplicate->id);
-                Yii::info('Warning: detected duplicate Lead (Origin id: ' . $duplicate->id . ', Hash: ' . $hash . ')', 'info\Create:Lead:duplicate');
+            if ($origin = $this->leadRepository->getByRequestHash($lead->l_request_hash)) {
+                $lead->setDuplicate($origin->id);
             }
 
             $lead->setTripType(self::calculateTripType($form->segments));
