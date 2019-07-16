@@ -2,98 +2,60 @@
 
 namespace sales\services\lead;
 
-use common\models\Employee;
 use common\models\Lead;
-use common\models\LeadFlow;
 use sales\repositories\lead\LeadRepository;
-use sales\repositories\user\UserRepository;
-use yii\web\ForbiddenHttpException;
+use sales\repositories\lead\LeadSegmentRepository;
+use sales\services\TransactionManager;
 
 /**
  * Class LeadAssignService
  * @property LeadRepository $leadRepository
- * @property UserRepository $userRepository
+ * @property LeadSegmentRepository $leadSegmentRepository
+ * @property TransactionManager $transactionManager
  */
-class LeadAssignService
+class LeadCloneService
 {
     private $leadRepository;
-    private $userRepository;
+    private $leadSegmentRepository;
+    private $transactionManager;
 
-    public function __construct(LeadRepository $leadRepository, UserRepository $userRepository)
+    public function __construct(
+        LeadRepository $leadRepository,
+        LeadSegmentRepository $leadSegmentRepository,
+        TransactionManager $transactionManager)
     {
         $this->leadRepository = $leadRepository;
-        $this->userRepository = $userRepository;
-    }
-
-    /**
-     * @param Lead $lead
-     * @param Employee $user
-     * @throws ForbiddenHttpException
-     */
-    private function checkAccess(Lead $lead, Employee $user): void
-    {
-        if ($lead->isPending() && $user->isAgent()) {
-            $isAccessNewLead = $user->accessTakeNewLead();
-            if (!$isAccessNewLead) {
-                throw new ForbiddenHttpException('Access is denied (limit) - "Take lead"');
-            }
-            $isAccessNewLeadByFrequency = $user->accessTakeLeadByFrequencyMinutes();
-            if (!$isAccessNewLeadByFrequency['access']) {
-                throw new ForbiddenHttpException('Access is denied (frequency) - "Take lead"');
-            }
-        }
+        $this->leadSegmentRepository = $leadSegmentRepository;
+        $this->transactionManager = $transactionManager;
     }
 
     /**
      * @param int $leadId
-     * @param int $userId
-     * @throws ForbiddenHttpException
+     * @param int $ownerId
+     * @param $description
+     * @return Lead
+     * @throws \Exception
      */
-    public function take(int $leadId, int $userId): void
+    public function cloneLead(int $leadId, int $ownerId, $description): Lead
     {
         $lead = $this->leadRepository->get($leadId);
-        $user = $this->userRepository->get($userId);
 
-        $this->checkAccess($lead, $user);
+        $clone = $this->transactionManager->wrap(function () use ($lead, $ownerId, $description) {
 
-        if ($lead->isFollowUp()) {
-            $checkProcessingByAgent = LeadFlow::findOne([
-                'lead_id' => $lead->id,
-                'status' => Lead::STATUS_PROCESSING,
-                'employee_id' => $user->id
-            ]);
-            if ($checkProcessingByAgent === null) {
-                $lead->setCalledExpert(false);
+            $clone = $lead->createClone($ownerId, $description);
+
+            $this->leadRepository->save($clone);
+
+            foreach ($lead->leadFlightSegments as $segment) {
+                $cloneSegment = $segment->createClone($clone->id);
+                $this->leadSegmentRepository->save($cloneSegment);
             }
-        }
-        $lead->take($user->id);
-        $this->leadRepository->save($lead);
-    }
 
-    /**
-     * @param int $leadId
-     * @param int $userId
-     * @throws ForbiddenHttpException
-     */
-    public function takeOver(int $leadId, int $userId): void
-    {
-        $lead = $this->leadRepository->get($leadId);
-        $user = $this->userRepository->get($userId);
+            return $clone;
 
-        $this->checkAccess($lead, $user);
+        });
 
-        if ($lead->isFollowUp()) {
-            $checkProcessingByAgent = LeadFlow::findOne([
-                'lead_id' => $lead->id,
-                'status' => Lead::STATUS_PROCESSING,
-                'employee_id' => $user->id
-            ]);
-            if ($checkProcessingByAgent === null) {
-                $lead->setCalledExpert(false);
-            }
-        }
-        $lead->takeOver($user->id);
-        $this->leadRepository->save($lead);
+        return $clone;
     }
 
 }
