@@ -32,13 +32,19 @@ use frontend\models\SendEmailForm;
 use sales\forms\CompositeFormHelper;
 use sales\forms\lead\ItineraryEditForm;
 use sales\forms\lead\LeadCreateForm;
+use sales\repositories\lead\LeadRepository;
+use sales\repositories\NotFoundException;
+use sales\services\lead\LeadAssignService;
+use sales\services\lead\LeadCloneService;
 use sales\services\lead\LeadManageService;
+use sales\services\lead\LeadUnassignService;
 use Yii;
 use yii\data\ActiveDataProvider;
 use yii\db\Expression;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\helpers\VarDumper;
+use yii\validators\StringValidator;
 use yii\web\BadRequestHttpException;
 use yii\web\Cookie;
 use yii\web\ForbiddenHttpException;
@@ -55,17 +61,40 @@ use common\models\QuotePrice;
 use frontend\models\TipsSplitForm;
 use common\models\local\LeadLogMessage;
 
+
 /**
- * Site controller
+ * Class LeadController
+ * @property LeadManageService $leadManageService
+ * @property LeadAssignService $leadAssignService
+ * @property LeadRepository $leadRepository
+ * @property LeadUnassignService $leadUnassignService,
+ * @property LeadCloneService $leadCloneService
  */
 class LeadController extends FController
 {
     private $leadManageService;
+    private $leadAssignService;
+    private $leadRepository;
+    private $leadUnassignService;
+    private $leadCloneService;
 
-    public function __construct($id, $module, LeadManageService $leadManageService, $config = [])
+    public function __construct(
+        $id,
+        $module,
+        LeadManageService $leadManageService,
+        LeadAssignService $leadAssignService,
+        LeadRepository $leadRepository,
+        LeadUnassignService $leadUnassignService,
+        LeadCloneService $leadCloneService,
+        $config = []
+    )
     {
         parent::__construct($id, $module, $config);
         $this->leadManageService = $leadManageService;
+        $this->leadAssignService = $leadAssignService;
+        $this->leadRepository = $leadRepository;
+        $this->leadUnassignService = $leadUnassignService;
+        $this->leadCloneService = $leadCloneService;
     }
 
     /**
@@ -1309,140 +1338,190 @@ class LeadController extends FController
     {
         Yii::$app->response->format = Response::FORMAT_JSON;
         $lead = Lead::findOne(['id' => $id]);
-        if ($lead !== null &&
-            $lead->status == Lead::STATUS_PROCESSING &&
-            Yii::$app->request->isPost
-        ) {
-            $rating = Yii::$app->request->post('rating', 0);
-            $lead->rating = $rating;
-            $lead->save(false);
-            return true;
+        if ($lead !== null && $lead->isProcessing() && Yii::$app->request->isPost) {
+            $rating = (int)Yii::$app->request->post('rating', 0);
+            try {
+                $lead->changeRating($rating);
+                $this->leadRepository->save($lead);
+                return true;
+            } catch (\Exception $e) {
+                Yii::$app->errorHandler->logException($e);
+                return false;
+            }
         }
         return false;
     }
 
     public function actionUnassign($id)
     {
-        /**
-         * @var $model Lead
-         */
-        $model = Lead::find()->where([
-            'id' => $id
-        ])->andWhere([
-            'NOT IN', 'status', [Lead::STATUS_BOOKED, Lead::STATUS_SOLD]
-        ])->one();
 
-        $type = 'inbox';
-
-        if ($model !== null) {
-            $reason = new Reason();
-            $attr = Yii::$app->request->post($reason->formName());
-            if (empty($attr)) {
-                if ($attr['queue'] == 'processing') {
-                    $model->status = $model::STATUS_PROCESSING;
-                    $model->snooze_for = '';
-                    $model->save();
-
-                    return $this->redirect(['lead/view', 'gid' => $model->gid]);
-
-                } elseif ($attr['queue'] == 'reject') {
-                    $model->status = $model::STATUS_REJECT;
-                    $model->save();
-                    return $this->redirect(['trash']);
-                }
-            } else {
-                $reason->attributes = $attr;
-                $reason->employee_id = Yii::$app->user->identity->getId();
-                $reason->lead_id = $model->id;
-                $reason->save();
-                if ($reason->queue == 'follow-up') {
-                    $model->status = $model::STATUS_FOLLOW_UP;
-                    $model->employee_id = null;
-                    $model->save();
-                    return $this->redirect(['follow-up']);
-
-                } elseif ($reason->queue == 'trash') {
-                    $model->status = $model::STATUS_TRASH;
-
-                    if ($reason->duplicateLeadId) {
-                        $model->l_duplicate_lead_id = $reason->duplicateLeadId;
-                    }
-
-                    //$type = 'trash';
-                } elseif ($reason->queue == 'snooze') {
-                    $modelAttr = Yii::$app->request->post($model->formName());
-                    $model->snooze_for = $modelAttr['snooze_for'];
-                    $model->status = $model::STATUS_SNOOZE;
-                } elseif ($reason->queue == 'return') {
-                    $attrAgent = Yii::$app->request->post('agent', null);
-                    if ($reason->returnToQueue == 'follow-up') {
-                        $model->status = $model::STATUS_FOLLOW_UP;
-                    } elseif ($attrAgent !== null) {
-                        $model->employee_id = $attrAgent;
-                        $model->status = $model::STATUS_PROCESSING;
-                    }
-                } elseif ($reason->queue == 'processing-over') {
-                    $model->status = $model::STATUS_PROCESSING;
-                    $lastAgent = $model->employee->username;
-                    $model->employee_id = $reason->employee_id;
-                    $model->save();
-
-                    $note = new Note();
-                    $note->employee_id = Yii::$app->user->identity->getId();
-                    $note->lead_id = $model->id;
-                    $note->message = sprintf('Take Over in PROCESSING status.<br>Reason: %s<br>Last Agent: %s',
-                        $reason->reason,
-                        $lastAgent
-                    );
-                    $note->save();
-
-                    return $this->redirect(['lead/view', 'gid' => $model->gid]);
-
-                } elseif ($reason->queue == 'reject') {
-                    $model->status = $model::STATUS_REJECT;
-                    $model->save();
-                    return $this->redirect(['trash']);
-                } else {
-                    $model->status = $model::STATUS_PROCESSING;
-                }
-
-                $model->save();
+        try {
+            $lead = $this->leadRepository->get($id);
+            if ($lead->isCompleted()) {
+                Yii::$app->session->setFlash('warning', 'Lead: ' . $id . ' is completed!');
+                return $this->redirect(['processing']);
             }
+        } catch (NotFoundException $e) {
+            Yii::$app->errorHandler->logException($e);
+            Yii::$app->session->setFlash('warning', 'Lead: ' . $id . ' not found!');
+            return $this->redirect(['processing']);
         }
 
-        return $this->redirect(['processing']);
+        $reason = new Reason();
+        $url = [];
+        if ($reason->load(Yii::$app->request->post()) && $reason->validate()) {
+            try {
+                $leadForm = Yii::$app->request->post('Lead');
+                $snoozeFor = $leadForm['snooze_for'] ?? null;
+                $agent = Yii::$app->request->post('agent', null);
+                $url = $this->leadUnassignService->unassign($lead, $reason, Yii::$app->user->id, $snoozeFor, $agent);
+            } catch (\Exception $e) {
+                Yii::$app->errorHandler->logException($e);
+                Yii::$app->session->setFlash('warning', $e->getMessage());
+            }
+        }
+        return $this->redirect($url ?: ['processing']);
+
+
+//        $model = Lead::find()->where([
+//            'id' => $id
+//        ])->andWhere([
+//            'NOT IN', 'status', [Lead::STATUS_BOOKED, Lead::STATUS_SOLD]
+//        ])->one();
+//
+//        $type = 'inbox';
+//
+//        if ($model !== null) {
+//            $reason = new Reason();
+//            $attr = Yii::$app->request->post($reason->formName());
+//            if (empty($attr)) {
+//                if ($attr['queue'] == 'processing') {
+//                    $model->status = $model::STATUS_PROCESSING;
+//                    $model->snooze_for = '';
+//                    $model->save();
+//
+//                    return $this->redirect(['lead/view', 'gid' => $model->gid]);
+//
+//                } elseif ($attr['queue'] == 'reject') {
+//                    $model->status = $model::STATUS_REJECT;
+//                    $model->save();
+//                    return $this->redirect(['trash']);
+//                }
+//            } else {
+//                $reason->attributes = $attr;
+//                $reason->employee_id = Yii::$app->user->identity->getId();
+//                $reason->lead_id = $model->id;
+//                $reason->save();
+//                if ($reason->queue == 'follow-up') {
+//                    $model->status = $model::STATUS_FOLLOW_UP;
+//                    $model->employee_id = null;
+//                    $model->save();
+//                    return $this->redirect(['follow-up']);
+//
+//                } elseif ($reason->queue == 'trash') {
+//                    $model->status = $model::STATUS_TRASH;
+//
+//                    if ($reason->duplicateLeadId) {
+//                        $model->l_duplicate_lead_id = $reason->duplicateLeadId;
+//                    }
+//
+//                    //$type = 'trash';
+//                } elseif ($reason->queue == 'snooze') {
+//                    $modelAttr = Yii::$app->request->post($model->formName());
+//                    $model->snooze_for = $modelAttr['snooze_for'];
+//                    $model->status = $model::STATUS_SNOOZE;
+//                } elseif ($reason->queue == 'return') {
+//                    $attrAgent = Yii::$app->request->post('agent', null);
+//                    if ($reason->returnToQueue == 'follow-up') {
+//                        $model->status = $model::STATUS_FOLLOW_UP;
+//                    } elseif ($attrAgent !== null) {
+//                        $model->employee_id = $attrAgent;
+//                        $model->status = $model::STATUS_PROCESSING;
+//                    }
+//                } elseif ($reason->queue == 'processing-over') {
+//                    $model->status = $model::STATUS_PROCESSING;
+//                    $lastAgent = $model->employee->username;
+//                    $model->employee_id = $reason->employee_id;
+//                    $model->save();
+//
+//                    $note = new Note();
+//                    $note->employee_id = Yii::$app->user->identity->getId();
+//                    $note->lead_id = $model->id;
+//                    $note->message = sprintf('Take Over in PROCESSING status.<br>Reason: %s<br>Last Agent: %s',
+//                        $reason->reason,
+//                        $lastAgent
+//                    );
+//                    $note->save();
+//
+//                    return $this->redirect(['lead/view', 'gid' => $model->gid]);
+//
+//                } elseif ($reason->queue == 'reject') {
+//                    $model->status = $model::STATUS_REJECT;
+//                    $model->save();
+//                    return $this->redirect(['trash']);
+//                } else {
+//                    $model->status = $model::STATUS_PROCESSING;
+//                }
+//
+//                $model->save();
+//            }
+//        }
+//
+//        return $this->redirect(['processing']);
     }
 
     public function actionChangeState($id, $queue)
     {
-        $lead = Lead::findOne(['id' => $id]);
-        if ($lead !== null) {
 
-            $activeLeads = Lead::find()
-                ->select(['id'])
-                ->where([
-                    'status' => [
-                        Lead::STATUS_ON_HOLD, Lead::STATUS_PROCESSING,
-                        Lead::STATUS_SNOOZE, Lead::STATUS_FOLLOW_UP
-                    ]
-                ])->andWhere(['<>', 'id', $id])->asArray()->all();
-
-
-            if ($activeLeads) {
-                $activeLeadIds = ArrayHelper::map($activeLeads, 'id', 'id');
-            } else {
-                $activeLeadIds = [];
-            }
-
-            $reason = new Reason();
-            $reason->queue = $queue;
-            return $this->renderAjax('partial/_reason', [
-                'reason' => $reason,
-                'lead' => $lead,
-                'activeLeadIds' => $activeLeadIds
-            ]);
+        try {
+            $lead = $this->leadRepository->get($id);
+        } catch (NotFoundException $e) {
+            Yii::$app->errorHandler->logException($e);
+            return null;
         }
-        return null;
+        if ($activeLeads = $this->leadRepository->getActive($lead->id)) {
+            $activeLeadIds = ArrayHelper::map($activeLeads, 'id', 'id');
+        } else {
+            $activeLeadIds = [];
+        }
+
+        $reason = new Reason();
+        $reason->queue = $queue;
+        return $this->renderAjax('partial/_reason', [
+            'reason' => $reason,
+            'lead' => $lead,
+            'activeLeadIds' => $activeLeadIds
+        ]);
+
+
+//        $lead = Lead::findOne(['id' => $id]);
+//        if ($lead !== null) {
+//
+//            $activeLeads = Lead::find()
+//                ->select(['id'])
+//                ->where([
+//                    'status' => [
+//                        Lead::STATUS_ON_HOLD, Lead::STATUS_PROCESSING,
+//                        Lead::STATUS_SNOOZE, Lead::STATUS_FOLLOW_UP
+//                    ]
+//                ])->andWhere(['<>', 'id', $id])->asArray()->all();
+//
+//
+//            if ($activeLeads) {
+//                $activeLeadIds = ArrayHelper::map($activeLeads, 'id', 'id');
+//            } else {
+//                $activeLeadIds = [];
+//            }
+//
+//            $reason = new Reason();
+//            $reason->queue = $queue;
+//            return $this->renderAjax('partial/_reason', [
+//                'reason' => $reason,
+//                'lead' => $lead,
+//                'activeLeadIds' => $activeLeadIds
+//            ]);
+//        }
+//        return null;
     }
 
 
@@ -1454,16 +1533,7 @@ class LeadController extends FController
      */
     public function actionTake(string $gid)
     {
-        /**
-         * @var $inProcessing Lead
-         */
-
         $lead = $this->findLeadByGid($gid);
-
-        if ($lead->isCompleted()) {
-            Yii::$app->getSession()->setFlash('warning', 'Lead is unavailable to "Take" now!');
-            return $this->redirect(Yii::$app->request->referrer ?: ['/']);
-        }
 
         if (Yii::$app->request->isAjax && Yii::$app->request->get('over')) {
             if ($lead->isAvailableToTakeOver()) {
@@ -1478,135 +1548,166 @@ class LeadController extends FController
             return $this->redirect(['lead/view', 'gid' => $lead->gid]);
         }
 
-        if (!$lead->isAvailableToTake()) {
-            Yii::$app->getSession()->setFlash('warning', 'Lead is unavailable to "Take" now!');
-            return $this->redirect(Yii::$app->request->referrer ?: ['/']);
+        try {
+            $this->leadAssignService->take($lead->id, Yii::$app->user->identity->getId());
+            Yii::$app->getSession()->setFlash('success', 'Lead taken!');
+        } catch (\Exception $e) {
+            Yii::$app->errorHandler->logException($e);
+            Yii::$app->getSession()->setFlash('warning', $e->getMessage());
         }
-
-        /** @var Employee $user */
-        $user = Yii::$app->user->identity;
-
-        if ($user->isAgent()) {
-            $isAgent = true;
-        } else {
-            $isAgent = false;
-        }
-
-        /*if($user->canRole('supervision')) {
-            $params['LeadSearch']['supervision_id'] = Yii::$app->user->id;
-        }*/
-
-
-//        $allowLead = Lead::find()->where([
-//            'gid' => $gid
-//        ])->andWhere([
-//            'IN', 'status', [Lead::STATUS_BOOKED, Lead::STATUS_SOLD]
-//        ])->one();
-//        if ($allowLead !== null) {
-//            Yii::$app->getSession()->setFlash('warning', 'Lead is unavailable to "Take" now!');
-//            return $this->redirect(Yii::$app->request->referrer);
-//        }
-
-
-        /*$inProcessing = Lead::find()
-            ->where([
-                'employee_id' => $user->getId(),
-                'status' => Lead::STATUS_PROCESSING
-            ])->one();
-        if ($inProcessing !== null) {
-            $inProcessing->status = Lead::STATUS_ON_HOLD;
-            $inProcessing->save();
-            $inProcessing = null;
-        }*/
-
-//        $model = Lead::find()
-//            ->where(['gid' => $gid])
-//            ->andWhere(['IN', 'status', [
-//                Lead::STATUS_PENDING,
-//                Lead::STATUS_FOLLOW_UP,
-//                Lead::STATUS_SNOOZE
-//            ]])->one();
-
-
-//
-//        if ($model === null) {
-//
-//            if (Yii::$app->request->get('over', 0)) {
-//                $lead = Lead::findOne(['gid' => $gid]);
-//                if ($lead !== null) {
-//                    $reason = new Reason();
-//                    $reason->queue = 'processing-over';
-//                    return $this->renderAjax('partial/_reason', [
-//                        'reason' => $reason,
-//                        'lead' => $lead
-//                    ]);
-//                }
-//                return null;
-//
-//            } else {
-//                $model = Lead::findOne([
-//                    'gid' => $gid,
-//                    'employee_id' => $user->getId()
-//                ]);
-//                if ($model === null) {
-//                    Yii::$app->getSession()->setFlash('warning', 'Lead is unavailable to access now!');
-//                    return $this->redirect(Yii::$app->request->referrer);
-//                }
-//            }
-//        }
-
-
-
-//        if (!$lead->permissionsView()) {
-//            throw new UnauthorizedHttpException('Not permissions view lead GID: ' . $gid);
-//        }
-
-
-        if ($lead->status == Lead::STATUS_PENDING && $isAgent) {
-            $isAccessNewLead = $user->accessTakeNewLead();
-            if (!$isAccessNewLead) {
-                throw new ForbiddenHttpException('Access is denied (limit) - "Take lead"');
-            }
-
-            $isAccessNewLeadByFrequency = $user->accessTakeLeadByFrequencyMinutes();
-            if (!$isAccessNewLeadByFrequency['access']) {
-                throw new ForbiddenHttpException('Access is denied (frequency) - "Take lead"');
-            }
-        }
-
-        if ($lead->status == Lead::STATUS_FOLLOW_UP) {
-            $checkProccessingByAgent = LeadFlow::findOne([
-                'lead_id' => $lead->id,
-                'status' => $lead::STATUS_PROCESSING,
-                'employee_id' => $user->getId()
-            ]);
-            if ($checkProccessingByAgent === null) {
-                $lead->called_expert = false;
-            }
-        }
-
-
-        $lead->employee_id = $user->getId();
-
-        /* if ($model->status != Lead::STATUS_ON_HOLD && $model->status != Lead::STATUS_SNOOZE && !$model->l_answered) {
-            LeadTask::createTaskList($model->id, $model->employee_id, 1, '', Task::CAT_NOT_ANSWERED_PROCESS);
-            LeadTask::createTaskList($model->id, $model->employee_id, 2, '', Task::CAT_NOT_ANSWERED_PROCESS);
-            LeadTask::createTaskList($model->id, $model->employee_id, 3, '', Task::CAT_NOT_ANSWERED_PROCESS);
-        }
-
-        if($model->l_answered && $model->status == Lead::STATUS_SNOOZE) {
-            LeadTask::createTaskList($model->id, $model->employee_id, 1, '', Task::CAT_ANSWERED_PROCESS);
-            LeadTask::createTaskList($model->id, $model->employee_id, 2, '', Task::CAT_ANSWERED_PROCESS);
-            LeadTask::createTaskList($model->id, $model->employee_id, 3, '', Task::CAT_ANSWERED_PROCESS);
-        } */
-
-        $lead->status = Lead::STATUS_PROCESSING;
-        $lead->save();
-
-
-        //$taskList = ['call1', 'call2', 'voice-mail', 'email'];
 
         return $this->redirect(['lead/view', 'gid' => $lead->gid]);
+
+
+//        $lead = $this->findLeadByGid($gid);
+//
+//        if ($lead->isCompleted()) {
+//            Yii::$app->getSession()->setFlash('warning', 'Lead is unavailable to "Take" now!');
+//            return $this->redirect(Yii::$app->request->referrer ?: ['/']);
+//        }
+//
+//        if (Yii::$app->request->isAjax && Yii::$app->request->get('over')) {
+//            if ($lead->isAvailableToTakeOver()) {
+//                $reason = new Reason();
+//                $reason->queue = 'processing-over';
+//                return $this->renderAjax('partial/_reason', [
+//                    'reason' => $reason,
+//                    'lead' => $lead
+//                ]);
+//            }
+//            Yii::$app->getSession()->setFlash('warning', 'Lead is unavailable to "Take Over" now!');
+//            return $this->redirect(['lead/view', 'gid' => $lead->gid]);
+//        }
+//
+//        if (!$lead->isAvailableToTake()) {
+//            Yii::$app->getSession()->setFlash('warning', 'Lead is unavailable to "Take" now!');
+//            return $this->redirect(Yii::$app->request->referrer ?: ['/']);
+//        }
+//
+//        /** @var Employee $user */
+//        $user = Yii::$app->user->identity;
+//
+//        if ($user->isAgent()) {
+//            $isAgent = true;
+//        } else {
+//            $isAgent = false;
+//        }
+//
+//        /*if($user->canRole('supervision')) {
+//            $params['LeadSearch']['supervision_id'] = Yii::$app->user->id;
+//        }*/
+//
+//
+////        $allowLead = Lead::find()->where([
+////            'gid' => $gid
+////        ])->andWhere([
+////            'IN', 'status', [Lead::STATUS_BOOKED, Lead::STATUS_SOLD]
+////        ])->one();
+////        if ($allowLead !== null) {
+////            Yii::$app->getSession()->setFlash('warning', 'Lead is unavailable to "Take" now!');
+////            return $this->redirect(Yii::$app->request->referrer);
+////        }
+//
+//
+//        /*$inProcessing = Lead::find()
+//            ->where([
+//                'employee_id' => $user->getId(),
+//                'status' => Lead::STATUS_PROCESSING
+//            ])->one();
+//        if ($inProcessing !== null) {
+//            $inProcessing->status = Lead::STATUS_ON_HOLD;
+//            $inProcessing->save();
+//            $inProcessing = null;
+//        }*/
+//
+////        $model = Lead::find()
+////            ->where(['gid' => $gid])
+////            ->andWhere(['IN', 'status', [
+////                Lead::STATUS_PENDING,
+////                Lead::STATUS_FOLLOW_UP,
+////                Lead::STATUS_SNOOZE
+////            ]])->one();
+//
+//
+////
+////        if ($model === null) {
+////
+////            if (Yii::$app->request->get('over', 0)) {
+////                $lead = Lead::findOne(['gid' => $gid]);
+////                if ($lead !== null) {
+////                    $reason = new Reason();
+////                    $reason->queue = 'processing-over';
+////                    return $this->renderAjax('partial/_reason', [
+////                        'reason' => $reason,
+////                        'lead' => $lead
+////                    ]);
+////                }
+////                return null;
+////
+////            } else {
+////                $model = Lead::findOne([
+////                    'gid' => $gid,
+////                    'employee_id' => $user->getId()
+////                ]);
+////                if ($model === null) {
+////                    Yii::$app->getSession()->setFlash('warning', 'Lead is unavailable to access now!');
+////                    return $this->redirect(Yii::$app->request->referrer);
+////                }
+////            }
+////        }
+//
+//
+//
+////        if (!$lead->permissionsView()) {
+////            throw new UnauthorizedHttpException('Not permissions view lead GID: ' . $gid);
+////        }
+//
+//
+//        if ($lead->status == Lead::STATUS_PENDING && $isAgent) {
+//            $isAccessNewLead = $user->accessTakeNewLead();
+//            if (!$isAccessNewLead) {
+//                throw new ForbiddenHttpException('Access is denied (limit) - "Take lead"');
+//            }
+//
+//            $isAccessNewLeadByFrequency = $user->accessTakeLeadByFrequencyMinutes();
+//            if (!$isAccessNewLeadByFrequency['access']) {
+//                throw new ForbiddenHttpException('Access is denied (frequency) - "Take lead"');
+//            }
+//        }
+//
+//        if ($lead->status == Lead::STATUS_FOLLOW_UP) {
+//            $checkProccessingByAgent = LeadFlow::findOne([
+//                'lead_id' => $lead->id,
+//                'status' => $lead::STATUS_PROCESSING,
+//                'employee_id' => $user->getId()
+//            ]);
+//            if ($checkProccessingByAgent === null) {
+//                $lead->called_expert = false;
+//            }
+//        }
+//
+//
+//        $lead->employee_id = $user->getId();
+//
+//        /* if ($model->status != Lead::STATUS_ON_HOLD && $model->status != Lead::STATUS_SNOOZE && !$model->l_answered) {
+//            LeadTask::createTaskList($model->id, $model->employee_id, 1, '', Task::CAT_NOT_ANSWERED_PROCESS);
+//            LeadTask::createTaskList($model->id, $model->employee_id, 2, '', Task::CAT_NOT_ANSWERED_PROCESS);
+//            LeadTask::createTaskList($model->id, $model->employee_id, 3, '', Task::CAT_NOT_ANSWERED_PROCESS);
+//        }
+//
+//        if($model->l_answered && $model->status == Lead::STATUS_SNOOZE) {
+//            LeadTask::createTaskList($model->id, $model->employee_id, 1, '', Task::CAT_ANSWERED_PROCESS);
+//            LeadTask::createTaskList($model->id, $model->employee_id, 2, '', Task::CAT_ANSWERED_PROCESS);
+//            LeadTask::createTaskList($model->id, $model->employee_id, 3, '', Task::CAT_ANSWERED_PROCESS);
+//        } */
+//
+//        $lead->status = Lead::STATUS_PROCESSING;
+//        $lead->save();
+//
+//
+//        //$taskList = ['call1', 'call2', 'voice-mail', 'email'];
+//
+//        return $this->redirect(['lead/view', 'gid' => $lead->gid]);
     }
 
 
@@ -1957,33 +2058,32 @@ class LeadController extends FController
     public function actionUpdate2()
     {
 
-        //echo 123; exit;
-
         $lead_id = (int)Yii::$app->request->get('id');
         $action = Yii::$app->request->get('act');
-        $lead = Lead::findOne(['id' => $lead_id]);
-        if (!$lead) {
-            throw new NotFoundHttpException('Not found lead ID: ' . $lead_id);
-        }
+
+        $lead = $this->findLeadById($lead_id);
 
         if ($action === 'answer') {
-            $lead->l_answered = $lead->l_answered ? 0 : 1;
-            if ($lead->update()) {
-                /* if($lead->l_answered) {
-                    LeadTask::deleteAll('lt_lead_id = :lead_id AND lt_date >= :date AND lt_completed_dt IS NULL',
-                        [':lead_id' => $lead->id, ':date' => date('Y-m-d') ]);
+            $lead->changeAnswered();
+            $this->leadRepository->save($lead);
 
-                    LeadTask::createTaskList($lead->id, $lead->employee_id, 1, '', Task::CAT_ANSWERED_PROCESS);
-                    LeadTask::createTaskList($lead->id, $lead->employee_id, 2, '', Task::CAT_ANSWERED_PROCESS);
-                    LeadTask::createTaskList($lead->id, $lead->employee_id, 3, '', Task::CAT_ANSWERED_PROCESS);
-
-                } else {
-                    LeadTask::deleteAll('lt_lead_id = :lead_id AND lt_date >= :date AND lt_completed_dt IS NULL',
-                        [':lead_id' => $lead->id, ':date' => date('Y-m-d') ]);
-
-                    LeadTask::createTaskList($lead->id, $lead->employee_id, 1, '', Task::CAT_NOT_ANSWERED_PROCESS);
-                } */
-            }
+//            $lead->l_answered = $lead->l_answered ? 0 : 1;
+//            if ($lead->update()) {
+//                /* if($lead->l_answered) {
+//                    LeadTask::deleteAll('lt_lead_id = :lead_id AND lt_date >= :date AND lt_completed_dt IS NULL',
+//                        [':lead_id' => $lead->id, ':date' => date('Y-m-d') ]);
+//
+//                    LeadTask::createTaskList($lead->id, $lead->employee_id, 1, '', Task::CAT_ANSWERED_PROCESS);
+//                    LeadTask::createTaskList($lead->id, $lead->employee_id, 2, '', Task::CAT_ANSWERED_PROCESS);
+//                    LeadTask::createTaskList($lead->id, $lead->employee_id, 3, '', Task::CAT_ANSWERED_PROCESS);
+//
+//                } else {
+//                    LeadTask::deleteAll('lt_lead_id = :lead_id AND lt_date >= :date AND lt_completed_dt IS NULL',
+//                        [':lead_id' => $lead->id, ':date' => date('Y-m-d') ]);
+//
+//                    LeadTask::createTaskList($lead->id, $lead->employee_id, 1, '', Task::CAT_NOT_ANSWERED_PROCESS);
+//                } */
+//            }
         }
 
         $referrer = Yii::$app->request->referrer; //$_SERVER["HTTP_REFERER"];
@@ -2030,47 +2130,47 @@ class LeadController extends FController
         return CompositeFormHelper::ajaxValidate($form, $data['keys']);
     }
 
-    public function actionCreate_last()
-    {
-        $this->view->title = sprintf('Create Lead');
-
-        $leadForm = new LeadForm(null);
-
-        if (Yii::$app->request->isAjax) {
-            Yii::$app->response->format = Response::FORMAT_JSON;
-            $data = [
-                'load' => false,
-                'errors' => []
-            ];
-            if ($leadForm->loadModels(Yii::$app->request->post())) {
-                $data['load'] = true;
-                $data['errors'] = ActiveForm::validate($leadForm);
-            }
-
-            $errors = [];
-            $leadForm->getLead()->employee_id = \Yii::$app->user->identity->getId();
-            $leadForm->getLead()->status = Lead::STATUS_PROCESSING;
-            if (empty($data['errors']) && $data['load'] && $leadForm->save($errors)) {
-                $model = $leadForm->getLead();
-                /* LeadTask::createTaskList($model->id, $model->employee_id, 1, '', Task::CAT_NOT_ANSWERED_PROCESS);
-                LeadTask::createTaskList($model->id, $model->employee_id, 2, '', Task::CAT_NOT_ANSWERED_PROCESS);
-                LeadTask::createTaskList($model->id, $model->employee_id, 3, '', Task::CAT_NOT_ANSWERED_PROCESS); */
-
-                return $this->redirect(['lead/view', 'gid' => $leadForm->getLead()->gid]);
-            }
-
-            if (!empty($errors)) {
-                $data['errors'] = $errors;
-            }
-
-            return $data;
-        }
-
-        return $this->render('view_last', [
-            'leadForm' => $leadForm,
-            'enableCommunication' => false
-        ]);
-    }
+//    public function actionCreate()
+//    {
+//        $this->view->title = sprintf('Create Lead');
+//
+//        $leadForm = new LeadForm(null);
+//
+//        if (Yii::$app->request->isAjax) {
+//            Yii::$app->response->format = Response::FORMAT_JSON;
+//            $data = [
+//                'load' => false,
+//                'errors' => []
+//            ];
+//            if ($leadForm->loadModels(Yii::$app->request->post())) {
+//                $data['load'] = true;
+//                $data['errors'] = ActiveForm::validate($leadForm);
+//            }
+//
+//            $errors = [];
+//            $leadForm->getLead()->employee_id = \Yii::$app->user->identity->getId();
+//            $leadForm->getLead()->status = Lead::STATUS_PROCESSING;
+//            if (empty($data['errors']) && $data['load'] && $leadForm->save($errors)) {
+//                $model = $leadForm->getLead();
+//                /* LeadTask::createTaskList($model->id, $model->employee_id, 1, '', Task::CAT_NOT_ANSWERED_PROCESS);
+//                LeadTask::createTaskList($model->id, $model->employee_id, 2, '', Task::CAT_NOT_ANSWERED_PROCESS);
+//                LeadTask::createTaskList($model->id, $model->employee_id, 3, '', Task::CAT_NOT_ANSWERED_PROCESS); */
+//
+//                return $this->redirect(['lead/view', 'gid' => $leadForm->getLead()->gid]);
+//            }
+//
+//            if (!empty($errors)) {
+//                $data['errors'] = $errors;
+//            }
+//
+//            return $data;
+//        }
+//
+//        return $this->render('view_last', [
+//            'leadForm' => $leadForm,
+//            'enableCommunication' => false
+//        ]);
+//    }
 
     public function actionGetUserActions($id)
     {
@@ -2123,73 +2223,124 @@ class LeadController extends FController
 
     public function actionClone($id)
     {
-        $errors = [];
-        $lead = Lead::findOne(['id' => $id]);
-        if ($lead !== null) {
-            $newLead = new Lead();
-            $newLead->attributes = $lead->attributes;
-            if (Yii::$app->request->isAjax) {
-                return $this->renderAjax('partial/_clone', [
-                    'lead' => $newLead,
-                    'errors' => $errors,
-                ]);
-            } elseif (Yii::$app->request->isPost) {
-                $data = Yii::$app->request->post();
 
-                if ($data['Lead']['description'] != 0) {
-                    if (isset(Lead::CLONE_REASONS[$data['Lead']['description']])) {
-                        $newLead->description = Lead::CLONE_REASONS[$data['Lead']['description']];
-                    }
-                } else {
-                    if (isset($data['other'])) {
-                        $newLead->description = trim($data['other']);
-                    }
-                }
-                $newLead->status = Lead::STATUS_PROCESSING;
-                $newLead->clone_id = $id;
-                $newLead->employee_id = Yii::$app->user->id;
-                $newLead->notes_for_experts = null;
-                $newLead->rating = 0;
-                $newLead->additional_information = null;
-                $newLead->l_answered = 0;
-                $newLead->l_grade = 0;
-                $newLead->snooze_for = null;
-                $newLead->called_expert = false;
-                $newLead->created = null;
-                $newLead->updated = null;
-                $newLead->tips = 0;
-                $newLead->gid = null;
+        try {
+            $lead = $this->leadRepository->get($id);
+        } catch (\Exception $e) {
+            Yii::$app->errorHandler->logException($e);
+            return null;
+        }
 
-                if (!$newLead->save()) {
-                    $errors = array_merge($errors, $newLead->getErrors());
-                }
+        if (Yii::$app->request->isAjax) {
+            return $this->renderAjax('partial/_clone', [
+                'lead' => $lead,
+                'errors' => [],
+            ]);
+        } elseif (Yii::$app->request->isPost) {
 
-                if (empty($errors)) {
-                    $flightSegments = LeadFlightSegment::findAll(['lead_id' => $id]);
-                    foreach ($flightSegments as $segment) {
-                        $flightSegment = new LeadFlightSegment();
-                        $flightSegment->attributes = $segment->attributes;
-                        $flightSegment->lead_id = $newLead->id;
-                        if (!$flightSegment->save()) {
-                            $errors = array_merge($errors, $flightSegment->getErrors());
-                        }
-                    }
-                }
+            $data = Yii::$app->request->post();
 
-                if (!empty($errors)) {
-                    return $this->renderAjax('partial/_clone', [
-                        'lead' => $newLead,
-                        'errors' => $errors,
-                    ]);
-                } else {
-                    Lead::sendClonedEmail($newLead);
-                    return $this->redirect(['lead/view', 'gid' => $newLead->gid]);
-                }
+            $description = '';
+            if ($data['Lead']['description'] != 0 && isset(Lead::CLONE_REASONS[$data['Lead']['description']])) {
+                    $description = Lead::CLONE_REASONS[$data['Lead']['description']];
+            } elseif (isset($data['other'])) {
+                $description = trim($data['other']);
             }
 
+            $validator = new StringValidator(['max' => 255]);
+            $error = '';
+            if (!$validator->validate($description, $error)) {
+                return $this->renderAjax('partial/_clone', [
+                    'lead' => $lead,
+                    'errors' => $error,
+                ]);
+            }
+
+            try {
+                $clone = $this->leadCloneService->cloneLead($lead->id, Yii::$app->user->id, $description);
+                return $this->redirect(['lead/view', 'gid' => $clone->gid]);
+            } catch (\Exception $e) {
+                Yii::$app->errorHandler->logException($e);
+                return $this->renderAjax('partial/_clone', [
+                    'lead' => $lead,
+                    'errors' => $e->getMessage(),
+                ]);
+            }
         }
         return null;
     }
+
+
+//    public function actionClone($id)
+//    {
+//        $errors = [];
+//        $lead = Lead::findOne(['id' => $id]);
+//        if ($lead !== null) {
+//            $newLead = new Lead();
+//            $newLead->attributes = $lead->attributes;
+//            if (Yii::$app->request->isAjax) {
+//                return $this->renderAjax('partial/_clone', [
+//                    'lead' => $newLead,
+//                    'errors' => $errors,
+//                ]);
+//            } elseif (Yii::$app->request->isPost) {
+//                $data = Yii::$app->request->post();
+//
+//                if ($data['Lead']['description'] != 0) {
+//                    if (isset(Lead::CLONE_REASONS[$data['Lead']['description']])) {
+//                        $newLead->description = Lead::CLONE_REASONS[$data['Lead']['description']];
+//                    }
+//                } else {
+//                    if (isset($data['other'])) {
+//                        $newLead->description = trim($data['other']);
+//                    }
+//                }
+//                $newLead->status = Lead::STATUS_PROCESSING;
+//                $newLead->clone_id = $id;
+//                $newLead->employee_id = Yii::$app->user->id;
+//                $newLead->notes_for_experts = null;
+//                $newLead->rating = 0;
+//                $newLead->additional_information = null;
+//                $newLead->l_answered = 0;
+//                $newLead->l_grade = 0;
+//                $newLead->snooze_for = null;
+//                $newLead->called_expert = false;
+//                $newLead->created = null;
+//                $newLead->updated = null;
+//                $newLead->tips = 0;
+//                $newLead->gid = null;
+//
+//                if (!$newLead->save()) {
+//                    $errors = array_merge($errors, $newLead->getErrors());
+//                }
+//
+//                if (empty($errors)) {
+//                    $flightSegments = LeadFlightSegment::findAll(['lead_id' => $id]);
+//                    foreach ($flightSegments as $segment) {
+//                        $flightSegment = new LeadFlightSegment();
+//                        $flightSegment->attributes = $segment->attributes;
+//                        $flightSegment->lead_id = $newLead->id;
+//                        if (!$flightSegment->save()) {
+//                            $errors = array_merge($errors, $flightSegment->getErrors());
+//                        }
+//                    }
+//                }
+//
+//                if (!empty($errors)) {
+//                    return $this->renderAjax('partial/_clone', [
+//                        'lead' => $newLead,
+//                        'errors' => $errors,
+//                    ]);
+//                } else {
+//                    Lead::sendClonedEmail($newLead);
+//                    return $this->redirect(['lead/view', 'gid' => $newLead->gid]);
+//                }
+//            }
+//
+//        }
+//        return null;
+//    }
+
 
     public function actionSplitProfit($id)
     {
@@ -2312,13 +2463,26 @@ class LeadController extends FController
     }
 
     /**
+     * @param $id
+     * @return Lead the loaded model
+     * @throws NotFoundHttpException if the model cannot be found
+     */
+    protected function findLeadById($id): Lead
+    {
+        if ($model = Lead::findOne($id)) {
+            return $model;
+        }
+        throw new NotFoundHttpException('Not found lead ID:' . $id);
+    }
+
+    /**
      * @param string $gid
      * @return Lead the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
     protected function findLeadByGid($gid): Lead
     {
-        if (($model = Lead::findOne(['gid' => $gid])) !== null) {
+        if ($model = Lead::findOne(['gid' => $gid])) {
             return $model;
         }
         throw new NotFoundHttpException('The requested page does not exist.');

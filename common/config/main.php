@@ -84,6 +84,7 @@ return [
         'queue_email_job',
         'queue_phone_check',
         'queue_job',
-        \common\components\SettingsBootstrap::class
+        \common\components\SettingsBootstrap::class,
+        common\bootstrap\SetUp::class
     ],
 ];
