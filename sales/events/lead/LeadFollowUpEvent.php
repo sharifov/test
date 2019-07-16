@@ -5,19 +5,23 @@ namespace sales\events\lead;
 use common\models\Lead;
 
 /**
- * Class LeadSnoozeEvent
+ * Class LeadFollowUpEvent
  * @property Lead $lead
+ * @property $oldOwnerId
  */
-class LeadSnoozeEvent
+class LeadFollowUpEvent
 {
     public $lead;
+    public $oldOwnerId;
 
     /**
-     * LeadSnoozeEvent constructor.
+     * LeadFollowUpEvent constructor.
      * @param Lead $lead
+     * @param $oldOwnerId
      */
-    public function __construct(Lead $lead)
+    public function __construct(Lead $lead, $oldOwnerId)
     {
         $this->lead = $lead;
+        $this->oldOwnerId = $oldOwnerId;
     }
 }

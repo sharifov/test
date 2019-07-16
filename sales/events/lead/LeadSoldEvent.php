@@ -5,27 +5,19 @@ namespace sales\events\lead;
 use common\models\Lead;
 
 /**
- * Class LeadStatusChangedEvent
+ * Class LeadSoldEvent
  * @property Lead $lead
- * @property $oldEmployeeId
- * @property $newEmployeeId
- * @property $oldStatus
- * @property $newStatus
  */
-class LeadAssignedEvent
+class LeadSoldEvent
 {
     public $lead;
-    public $oldEmployeeId;
-    public $newEmployeeId;
-    public $oldStatus;
-    public $newStatus;
 
-    public function __construct(Lead $lead, $oldEmployeeId, $newEmployeeId, $oldStatus, $newStatus)
+    /**
+     * LeadSoldEvent constructor.
+     * @param Lead $lead
+     */
+    public function __construct(Lead $lead)
     {
         $this->lead = $lead;
-        $this->oldEmployeeId = $oldEmployeeId;
-        $this->newEmployeeId = $newEmployeeId;
-        $this->oldStatus = $oldStatus;
-        $this->newStatus = $newStatus;
     }
 }

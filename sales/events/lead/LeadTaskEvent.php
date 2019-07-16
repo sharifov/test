@@ -8,13 +8,9 @@ use common\models\Lead;
  * Class LeadTaskEvent
  * @property Lead $lead
  */
-class LeadAnsweredEvent
+class LeadTaskEvent
 {
     public $lead;
-    public $oldEmployeeId;
-    public $newEmployeeId;
-    public $oldStatus;
-    public $newStatus;
 
     /**
      * LeadTaskEvent constructor.

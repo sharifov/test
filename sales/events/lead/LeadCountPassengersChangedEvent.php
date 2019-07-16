@@ -5,15 +5,15 @@ namespace sales\events\lead;
 use common\models\Lead;
 
 /**
- * Class LeadPassengersChangedEvent
+ * Class LeadCountPassengersChangedEvent
  * @property Lead $lead
  */
-class LeadPassengersChangedEvent
+class LeadCountPassengersChangedEvent
 {
     public $lead;
 
     /**
-     * LeadPassengersChangedEvent constructor.
+     * LeadCountPassengersChangedEvent constructor.
      * @param Lead $lead
      */
     public function __construct(Lead $lead)

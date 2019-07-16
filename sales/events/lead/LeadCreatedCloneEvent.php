@@ -5,19 +5,15 @@ namespace sales\events\lead;
 use common\models\Lead;
 
 /**
- * Class LeadTaskEvent
+ * Class LeadCreatedCloneEvent
  * @property Lead $lead
  */
-class LeadTaskEvent
+class LeadCreatedCloneEvent
 {
     public $lead;
-    public $oldEmployeeId;
-    public $newEmployeeId;
-    public $oldStatus;
-    public $newStatus;
 
     /**
-     * LeadTaskEvent constructor.
+     * LeadCreatedCloneEvent constructor.
      * @param Lead $lead
      */
     public function __construct(Lead $lead)
