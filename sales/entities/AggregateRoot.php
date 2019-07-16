@@ -1,6 +1,6 @@
 <?php
 
-namespace shop\entities;
+namespace sales\entities;
 
 interface AggregateRoot
 {
