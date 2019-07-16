@@ -2,11 +2,11 @@
 
 namespace sales\repositories\lead;
 
-use common\models\Lead;
+use common\models\LeadFlow;
 use sales\dispatchers\EventDispatcher;
 use sales\repositories\NotFoundException;
 
-class LeadRepository
+class LeadFlowRepository
 {
     private $eventDispatcher;
 
@@ -16,76 +16,52 @@ class LeadRepository
     }
 
     /**
+     * @param $leadId
+     * @return LeadFlow|null
+     */
+    public function getPreview($leadId): ?LeadFlow
+    {
+        if ($leadFlow = LeadFlow::find()->where(['lead_id' => $leadId])->orderBy(['id' => SORT_DESC])->limit(1)->one()) {
+            return $leadFlow;
+        }
+        return null;
+    }
+
+    /**
      * @param $id
-     * @return Lead
+     * @return LeadFlow
      */
-    public function get($id): Lead
+    public function get($id): LeadFlow
     {
-        if ($lead = Lead::findOne($id)) {
-            return $lead;
+        if ($leadFlow = LeadFlow::findOne($id)) {
+            return $leadFlow;
         }
-        throw new NotFoundException('Lead is not found');
+        throw new NotFoundException('LeadFlow is not found');
     }
 
     /**
-     * @param $gid
-     * @return Lead
-     */
-    public function getByGid($gid): Lead
-    {
-        if ($lead = Lead::findOne(['gid' => $gid])) {
-            return $lead;
-        }
-        throw new NotFoundException('Lead is not found');
-    }
-
-    /**
-     * @param $requestHash
-     * @return Lead|null
-     */
-    public function getByRequestHash($requestHash):? Lead
-    {
-        return Lead::find()
-            ->where(['l_request_hash' => $requestHash])
-            ->andWhere(['>=', 'created', date('Y-m-d H:i:s', strtotime('-12 hours'))])
-            ->orderBy(['id' => SORT_ASC])
-            ->limit(1)
-            ->one();
-    }
-
-    /**
-     * @param Lead $lead
+     * @param LeadFlow $leadFlow
      * @return int
      */
-    public function save(Lead $lead): int
+    public function save(LeadFlow $leadFlow): int
     {
-        if (!$lead->save(false)) {
+        if (!$leadFlow->save(false)) {
             throw new \RuntimeException('Saving error');
         }
-        $this->eventDispatcher->dispatchAll($lead->releaseEvents());
-        return $lead->id;
+        $this->eventDispatcher->dispatchAll($leadFlow->releaseEvents());
+        return $leadFlow->id;
     }
 
     /**
-     * @param Lead $lead
-     */
-    public function updateOnlyTripType(Lead $lead): void
-    {
-        if (!$lead->updateAttributes(['trip_type'])) {
-            throw new \RuntimeException('Update trip type error');
-        }
-    }
-
-    /**
-     * @param Lead $lead
+     * @param LeadFlow $leadFlow
      * @throws \Throwable
      * @throws \yii\db\StaleObjectException
      */
-    public function remove(Lead $lead): void
+    public function remove(LeadFlow $leadFlow): void
     {
-        if (!$lead->delete()) {
+        if (!$leadFlow->delete()) {
             throw new \RuntimeException('Removing error');
         }
-        $this->eventDispatcher->dispatchAll($lead->releaseEvents());
+        $this->eventDispatcher->dispatchAll($leadFlow->releaseEvents());
     }
 }
