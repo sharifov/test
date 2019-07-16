@@ -2,42 +2,39 @@
 
 namespace sales\repositories\lead;
 
-use common\models\LeadFlowChecklist;
-use sales\repositories\NotFoundException;
+use common\models\LeadChecklist;
 
-class LeadFlowChecklistRepository
+class LeadChecklistRepository
 {
 
     /**
-     * @param $id
-     * @return LeadFlowChecklist
+     * @param $userId
+     * @param $leadId
+     * @return array|LeadChecklist[]
      */
-    public function get($id): LeadFlowChecklist
+    public function get($userId, $leadId): array
     {
-        if ($leadFlowChecklist = LeadFlowChecklist::findOne($id)) {
-            return $leadFlowChecklist;
-        }
-        throw new NotFoundException('LeadFlowChecklist is not found');
+        return LeadChecklist::find()->andWhere(['lc_user_id' => $userId, 'lc_lead_id' => $leadId])->orderBy(['lc_created_dt' => SORT_ASC])->all();
     }
 
     /**
-     * @param LeadFlowChecklist $leadFlowChecklist
+     * @param LeadChecklist $leadChecklist
      */
-    public function save(LeadFlowChecklist $leadFlowChecklist): void
+    public function save(LeadChecklist $leadChecklist): void
     {
-        if (!$leadFlowChecklist->save(false)) {
+        if (!$leadChecklist->save(false)) {
             throw new \RuntimeException('Saving error');
         }
     }
 
     /**
-     * @param LeadFlowChecklist $leadFlowChecklist
+     * @param LeadChecklist $leadChecklist
      * @throws \Throwable
      * @throws \yii\db\StaleObjectException
      */
-    public function remove(LeadFlowChecklist $leadFlowChecklist): void
+    public function remove(LeadChecklist $leadChecklist): void
     {
-        if (!$leadFlowChecklist->delete()) {
+        if (!$leadChecklist->delete()) {
             throw new \RuntimeException('Removing error');
         }
     }
