@@ -56,4 +56,12 @@ class CallDataForm extends Model
     {
         return $this->CallSid ? false : true;
     }
+
+    /**
+     * @return bool
+     */
+    public function isEmptyRecordingUrl(): bool
+    {
+        return $this->RecordingUrl ? false : true;
+    }
 }
