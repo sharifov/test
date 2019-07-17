@@ -458,7 +458,7 @@ class Lead extends ActiveRecord implements AggregateRoot
      * @param int $userId
      * @return bool
      */
-    public function isAlreadyTakenUser(int $userId): bool
+    private function isAlreadyTakenUser(int $userId): bool
     {
         return $this->isOwner($userId) && $this->isProcessing();
     }
