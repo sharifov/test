@@ -2,6 +2,8 @@
 
 namespace common\models;
 
+use sales\entities\AggregateRoot;
+use sales\entities\EventTrait;
 use Yii;
 use DateTime;
 use common\components\ChartTools;
@@ -51,8 +53,10 @@ use yii\helpers\VarDumper;
  * @property Lead2 $cLead2
  * @property Project $cProject
  */
-class Call extends \yii\db\ActiveRecord
+class Call extends \yii\db\ActiveRecord implements AggregateRoot
 {
+    
+    use EventTrait;
 
     public const CALL_STATUS_QUEUE          = 'queued';
     public const CALL_STATUS_RINGING        = 'ringing';
