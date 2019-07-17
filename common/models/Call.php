@@ -122,6 +122,75 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
     ];
 
     /**
+     * @param $callSid
+     * @param $accountSid
+     * @param $callTypeId
+     * @param $uri
+     * @param $from
+     * @param $to
+     * @param $createdDt
+     * @param $recordingUrl
+     * @param $recordingSid
+     * @param $recordingDuration
+     * @param $callerName
+     * @param $direction
+     * @param $apiVersion
+     * @param $sip
+     * @param $projectId
+     * @return Call
+     */
+    public static function create(
+        $callSid,
+        $accountSid,
+        $callTypeId,
+        $uri,
+        $from,
+        $to,
+        $createdDt,
+        $recordingUrl,
+        $recordingSid,
+        $recordingDuration,
+        $callerName,
+        $direction,
+        $apiVersion,
+        $sip,
+        $projectId
+    ): self
+    {
+        $call = new static();
+        $call->c_call_sid = $callSid;
+        $call->c_account_sid = $accountSid;
+        $call->c_call_type_id = $callTypeId;
+        $call->c_uri = $uri;
+        $call->c_from = $from;
+        $call->c_to = $to;
+        $call->c_created_dt = $createdDt;
+        $call->c_updated_dt = date('Y-m-d H:i:s');
+        $call->c_recording_url = $recordingUrl;
+        $call->c_recording_sid = $recordingSid;
+        $call->c_recording_duration = $recordingDuration;
+        $call->c_caller_name = $callerName;
+        $call->c_direction = $direction;
+        $call->c_api_version = $apiVersion;
+        $call->c_sip = $sip;
+        $call->c_project_id = $projectId;
+        return $call;
+    }
+
+    /**
+     * @param string $recordingUrl
+     * @param string $recordingSid
+     * @param int $recordingDuration
+     */
+    public function updateRecordingData(string $recordingUrl, string $recordingSid, int $recordingDuration): void
+    {
+        $this->c_recording_url = $recordingUrl;
+        $this->c_recording_sid = $recordingSid;
+        $this->c_recording_duration = $recordingDuration;
+        $this->c_updated_dt = date('Y-m-d H:i:s');
+    }
+
+    /**
      * {@inheritdoc}
      */
     public static function tableName()
