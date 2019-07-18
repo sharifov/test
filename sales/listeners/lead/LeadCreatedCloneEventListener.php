@@ -40,7 +40,7 @@ class LeadCreatedCloneEventListener
             $owner = $this->userRepository->get($lead->employee_id);
         } catch (NotFoundException $e) {
             Yii::$app->errorHandler->logException($e);
-            Yii::warning('Not found employee (' . $lead->employee_id . ')', static::class . ':notFoundOwner');
+            Yii::warning('Not found employee (' . $lead->employee_id . ')', 'LeadCreatedCloneEventListener:notFoundOwner');
             return;
         }
 
