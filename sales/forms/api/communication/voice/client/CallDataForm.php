@@ -22,6 +22,9 @@ use yii\base\Model;
  * @property $CallSid;
  * @property $sid;
  * @property $lead_id;
+ *
+ * @property $price;
+ * @property $status;
  */
 class CallDataForm extends Model
 {
@@ -42,6 +45,10 @@ class CallDataForm extends Model
     public $CallSid;
     public $sid;
     public $lead_id;
+
+    public $price;
+    public $status;
+    public $duration;
 
     /**
      * @return bool
@@ -84,6 +91,10 @@ class CallDataForm extends Model
             ['CallSid', 'string'],
             ['sid', 'string'],
             ['lead_id', 'integer'],
+
+            ['price', 'double'],
+            ['status', 'string'],
+            ['duration', 'integer'],
         ];
     }
 
