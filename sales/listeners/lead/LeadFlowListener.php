@@ -53,7 +53,7 @@ class LeadFlowListener
             try {
                 $this->leadFlowRepository->save($preview);
             } catch (\Exception $e) {
-                Yii::error($e->getMessage(), static::class . ':leadFlow:preview:save');
+                Yii::error($e->getMessage(), 'LeadFlowListener:leadFlow:preview:save');
                 $preview = null;
             }
         } else {
@@ -76,12 +76,12 @@ class LeadFlowListener
                     try {
                         $this->leadFlowChecklistRepository->save($leadFlowChecklist);
                     } catch (\Exception $e) {
-                        Yii::error($e->getMessage(), static::class .  ':leadFlowChecklist:save');
+                        Yii::error($e->getMessage(), 'LeadFlowListener:leadFlowChecklist:save');
                     }
                 }
             }
         } catch (\Exception $e) {
-            Yii::error($e->getMessage(), static::class . ':leadFlow:current:save');
+            Yii::error($e->getMessage(), 'LeadFlowListener:leadFlow:current:save');
         }
     }
 
