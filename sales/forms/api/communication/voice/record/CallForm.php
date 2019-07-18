@@ -54,6 +54,14 @@ class CallForm extends Model
     public $c_endpoint;
 
     /**
+     * @return bool
+     */
+    public function isIncoming(): bool
+    {
+        return $this->c_call_type_id === Call::CALL_TYPE_IN;
+    }
+
+    /**
      * @return array
      */
     public function rules(): array
@@ -83,8 +91,4 @@ class CallForm extends Model
         ];
     }
 
-    public function isIncoming(): bool
-    {
-        return $this->c_call_type_id === Call::CALL_TYPE_IN;
-    }
 }
