@@ -11,6 +11,7 @@ use sales\entities\AggregateRoot;
 use sales\entities\EventTrait;
 use sales\events\lead\LeadBookedEvent;
 use sales\events\lead\LeadCallExpertRequestEvent;
+use sales\events\lead\LeadCallStatusChangeEvent;
 use sales\events\lead\LeadCreatedCloneEvent;
 use sales\events\lead\LeadCreatedEvent;
 use sales\events\lead\LeadDuplicateDetectedEvent;
@@ -566,6 +567,20 @@ class Lead extends ActiveRecord implements AggregateRoot
     }
 
     /**
+     * @param int $status
+     */
+    private function setCallStatus(int $status): void
+    {
+        if (!array_key_exists($status, self::CALL_STATUS_LIST)) {
+            throw new InvalidArgumentException('Invalid Call Status');
+        }
+        if ($this->l_call_status_id !== $status) {
+            $this->recordEvent(new LeadCallStatusChangeEvent($this, $this->l_call_status_id, $status, $this->employee_id));
+        }
+        $this->l_call_status_id = $status;
+    }
+
+    /**
      * @param string $cabin
      * @param int $adults
      * @param int $children
@@ -704,6 +719,45 @@ class Lead extends ActiveRecord implements AggregateRoot
     public function reject(): void
     {
         $this->setStatus(self::STATUS_REJECT);
+    }
+
+    public function callProcessing(): void
+    {
+        $this->setCallStatus(self::CALL_STATUS_PROCESS);
+    }
+
+    /**
+     * @return bool
+     */
+    public function isCallProcessing(): bool
+    {
+        return $this->l_call_status_id === self::CALL_STATUS_PROCESS;
+    }
+
+    public function callReady(): void
+    {
+        $this->setCallStatus(self::CALL_STATUS_READY);
+    }
+
+    /**
+     * @return bool
+     */
+    public function isCallReady(): bool
+    {
+        return $this->l_call_status_id === self::CALL_STATUS_READY;
+    }
+
+    public function callDone()
+    {
+        $this->setCallStatus(self::CALL_STATUS_DONE);
+    }
+
+    /**
+     * @return bool
+     */
+    public function isCallDone(): bool
+    {
+        return $this->l_call_status_id === self::CALL_STATUS_DONE;
     }
 
     /**
