@@ -191,6 +191,54 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
     }
 
     /**
+     * @param int|null $userId
+     */
+    public function setCreatedUser(?int $userId): void
+    {
+        $this->c_created_user_id = $userId;
+    }
+
+    /**
+     * @param int|null $projectId
+     */
+    public function setProject(?int $projectId): void
+    {
+        $this->c_project_id = $projectId;
+    }
+
+    /**
+     * @param $price
+     */
+    public function setPrice($price): void
+    {
+        $this->c_price = $price;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isEmptyStatus(): bool
+    {
+        return $this->c_call_status ? false : true;
+    }
+
+    /**
+     * @param string|null $status
+     */
+    public function setStatus(?string $status): void
+    {
+        $this->c_call_status = $status;
+    }
+
+    /**
+     * @param int|null $duration
+     */
+    public function setDuration(?int $duration): void
+    {
+        $this->c_call_duration = $duration;
+    }
+
+    /**
      * {@inheritdoc}
      */
     public static function tableName()
