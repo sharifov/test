@@ -137,6 +137,7 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
      * @param $apiVersion
      * @param $sip
      * @param $projectId
+     * @param $timestamp
      * @return Call
      */
     public static function create(
@@ -154,7 +155,8 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
         $direction,
         $apiVersion,
         $sip,
-        $projectId
+        $projectId,
+        $timestamp = null
     ): self
     {
         $call = new static();
@@ -174,6 +176,7 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
         $call->c_api_version = $apiVersion;
         $call->c_sip = $sip;
         $call->c_project_id = $projectId;
+        $call->c_timestamp = $timestamp;
         return $call;
     }
 
