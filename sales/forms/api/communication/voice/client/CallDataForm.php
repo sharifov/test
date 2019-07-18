@@ -53,7 +53,7 @@ class CallDataForm extends Model
     /**
      * @return bool
      */
-    public function isEmptyCallSid(): bool
+    public function isEmptySid(): bool
     {
         return $this->sid ? false : true;
     }
