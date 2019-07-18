@@ -70,7 +70,7 @@ class LeadFlowListener
 
         try {
             $this->leadFlowRepository->save($current);
-            if ($event->employeeId && $checkLists = $this->leadChecklistRepository->get($event->employeeId, $lead->id)) {
+            if ($event->ownerId && $checkLists = $this->leadChecklistRepository->get($event->ownerId, $lead->id)) {
                 foreach ($checkLists as $checkList) {
                     $leadFlowChecklist = LeadFlowChecklist::create($current->id, $checkList->lc_type_id, $checkList->lc_user_id);
                     try {
