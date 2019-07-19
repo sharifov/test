@@ -3,7 +3,6 @@
 namespace sales\settings;
 
 use Yii;
-use yii\base\BaseObject;
 
 /**
  * Class GeneralLineSettings
@@ -13,8 +12,9 @@ use yii\base\BaseObject;
  * @property  $general_line_last_hours
  * @property  $general_line_user_limit
  * @property  $direct_agent_user_limit
+ * @property  $generalLineNumber
  */
-class GeneralLineSettings extends BaseObject
+class GeneralLineSettings
 {
     public $use_general_line_distribution;
     public $general_line_leads_limit;
@@ -22,11 +22,14 @@ class GeneralLineSettings extends BaseObject
     public $general_line_last_hours;
     public $general_line_user_limit;
     public $direct_agent_user_limit;
+    public $generalLineNumber;
 
-    public function __construct($config = [])
+    public function __construct()
     {
-        $settings = Yii::$app->params['settings'];
-        $general_line_call_distribution = Yii::$app->params['general_line_call_distribution'];
+        $params = Yii::$app->params;
+
+        $settings = $params['settings'];
+        $general_line_call_distribution = $params['general_line_call_distribution'];
 
         $this->use_general_line_distribution = $settings['use_general_line_distribution'] ?? $general_line_call_distribution['use_general_line_distribution'];
         $this->general_line_leads_limit = $settings['general_line_leads_limit'] ?? $general_line_call_distribution['general_line_leads_limit'];
@@ -35,6 +38,8 @@ class GeneralLineSettings extends BaseObject
         $this->general_line_user_limit = $settings['general_line_user_limit'] ?? $general_line_call_distribution['general_line_user_limit'];
         $this->direct_agent_user_limit = $settings['direct_agent_user_limit'] ?? $general_line_call_distribution['direct_agent_user_limit'];
 
-        parent::__construct($config);
+        $this->generalLineNumber  = $params['global_phone'];
+
     }
+
 }
