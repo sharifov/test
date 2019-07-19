@@ -5,7 +5,7 @@ namespace sales\settings;
 use Yii;
 
 /**
- * Class GeneralLineSettings
+ * Class CommunicationSettings
  * @property  $use_general_line_distribution
  * @property  $general_line_leads_limit
  * @property  $general_line_role_priority
@@ -13,8 +13,9 @@ use Yii;
  * @property  $general_line_user_limit
  * @property  $direct_agent_user_limit
  * @property  $generalLineNumber
+ * @property  $use_voice_gather
  */
-class GeneralLineSettings
+class CommunicationSettings
 {
     public $use_general_line_distribution;
     public $general_line_leads_limit;
@@ -23,6 +24,7 @@ class GeneralLineSettings
     public $general_line_user_limit;
     public $direct_agent_user_limit;
     public $generalLineNumber;
+    public $use_voice_gather;
 
     public function __construct()
     {
@@ -38,7 +40,8 @@ class GeneralLineSettings
         $this->general_line_user_limit = $settings['general_line_user_limit'] ?? $general_line_call_distribution['general_line_user_limit'];
         $this->direct_agent_user_limit = $settings['direct_agent_user_limit'] ?? $general_line_call_distribution['direct_agent_user_limit'];
 
-        $this->generalLineNumber  = $params['global_phone'];
+        $this->generalLineNumber = $params['global_phone'];
+        $this->use_voice_gather = (bool)$params['voice_gather']['use_voice_gather'];
 
     }
 
