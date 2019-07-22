@@ -51,8 +51,8 @@ class LeadAssignService
      */
     public function take(int $leadId, int $userId): void
     {
-        $lead = $this->leadRepository->get($leadId);
-        $user = $this->userRepository->get($userId);
+        $lead = $this->leadRepository->find($leadId);
+        $user = $this->userRepository->find($userId);
 
         $this->checkAccess($lead, $user);
 
@@ -77,8 +77,8 @@ class LeadAssignService
      */
     public function takeOver(int $leadId, int $userId): void
     {
-        $lead = $this->leadRepository->get($leadId);
-        $user = $this->userRepository->get($userId);
+        $lead = $this->leadRepository->find($leadId);
+        $user = $this->userRepository->find($userId);
 
         $this->checkAccess($lead, $user);
 

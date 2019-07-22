@@ -38,7 +38,7 @@ class LeadCloneService
      */
     public function cloneLead(int $leadId, int $ownerId, $description): Lead
     {
-        $lead = $this->leadRepository->get($leadId);
+        $lead = $this->leadRepository->find($leadId);
 
         $clone = $this->transactionManager->wrap(function () use ($lead, $ownerId, $description) {
 

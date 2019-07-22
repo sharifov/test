@@ -70,7 +70,7 @@ class LeadUnassignService
                     if ($reason->returnToQueue === 'follow-up') {
                         $lead->followUp();
                     } elseif ($agent !== null) {
-                        $user = $this->userRepository->get($agent);
+                        $user = $this->userRepository->find($agent);
                         $lead->take($user->id);
                     }
                     break;
