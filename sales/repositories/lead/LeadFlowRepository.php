@@ -5,11 +5,21 @@ namespace sales\repositories\lead;
 use common\models\LeadFlow;
 use sales\dispatchers\EventDispatcher;
 use sales\repositories\NotFoundException;
+use sales\repositories\Repository;
 
-class LeadFlowRepository
+/**
+ * Class LeadFlowRepository
+ * @method null|LeadFlow get($id)
+ * @method null|LeadFlow getPreview($leadId)
+ */
+class LeadFlowRepository extends Repository
 {
     private $eventDispatcher;
 
+    /**
+     * LeadFlowRepository constructor.
+     * @param EventDispatcher $eventDispatcher
+     */
     public function __construct(EventDispatcher $eventDispatcher)
     {
         $this->eventDispatcher = $eventDispatcher;
@@ -17,21 +27,21 @@ class LeadFlowRepository
 
     /**
      * @param $leadId
-     * @return LeadFlow|null
+     * @return LeadFlow
      */
-    public function getPreview($leadId): ?LeadFlow
+    public function findPreview($leadId): LeadFlow
     {
         if ($leadFlow = LeadFlow::find()->where(['lead_id' => $leadId])->orderBy(['id' => SORT_DESC])->limit(1)->one()) {
             return $leadFlow;
         }
-        return null;
+        throw new NotFoundException('LeadFlow is not found');
     }
 
     /**
      * @param $id
      * @return LeadFlow
      */
-    public function get($id): LeadFlow
+    public function find($id): LeadFlow
     {
         if ($leadFlow = LeadFlow::findOne($id)) {
             return $leadFlow;

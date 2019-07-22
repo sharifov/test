@@ -5,11 +5,21 @@ namespace sales\repositories\client;
 use common\models\ClientPhone;
 use sales\dispatchers\EventDispatcher;
 use sales\repositories\NotFoundException;
+use sales\repositories\Repository;
 
-class ClientPhoneRepository
+/**
+ * Class ClientPhoneRepository
+ * @method null|ClientPhone get($id)
+ * @method null|ClientPhone getByPhone($phone)
+ */
+class ClientPhoneRepository extends Repository
 {
     private $eventDispatcher;
 
+    /**
+     * ClientPhoneRepository constructor.
+     * @param EventDispatcher $eventDispatcher
+     */
     public function __construct(EventDispatcher $eventDispatcher)
     {
         $this->eventDispatcher = $eventDispatcher;
@@ -19,7 +29,7 @@ class ClientPhoneRepository
      * @param $id
      * @return ClientPhone
      */
-    public function get($id): ClientPhone
+    public function find($id): ClientPhone
     {
         if ($phone = ClientPhone::findOne($id)) {
             return $phone;
@@ -31,7 +41,7 @@ class ClientPhoneRepository
      * @param $phone
      * @return ClientPhone
      */
-    public function getByPhone($phone): ClientPhone
+    public function findByPhone($phone): ClientPhone
     {
         if ($clientPhone = ClientPhone::find()->where(['phone' => $phone])->orderBy(['id' => SORT_DESC])->limit(1)->one()) {
             return $clientPhone;

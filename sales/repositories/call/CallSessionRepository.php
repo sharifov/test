@@ -4,23 +4,37 @@ namespace sales\repositories\call;
 
 use common\models\CallSession;
 use sales\dispatchers\EventDispatcher;
+use sales\repositories\NotFoundException;
+use sales\repositories\Repository;
 
-class CallSessionRepository
+/**
+ * Class CallSessionRepository
+ * @package sales\repositories\call
+ * @method null|CallSession getBySid($sid)
+ */
+class CallSessionRepository extends Repository
 {
     private $eventDispatcher;
 
+    /**
+     * CallSessionRepository constructor.
+     * @param EventDispatcher $eventDispatcher
+     */
     public function __construct(EventDispatcher $eventDispatcher)
     {
         $this->eventDispatcher = $eventDispatcher;
     }
 
     /**
-     * @param string $sid
-     * @return CallSession|null
+     * @param $sid
+     * @return CallSession
      */
-    public function getBySid(string $sid): ?CallSession
+    public function findBySid($sid): CallSession
     {
-        return CallSession::find()->andWhere(['cs_cid' => $sid])->limit(1)->one();
+        if ($callSession = CallSession::findOne(['cs_cid' => $sid])) {
+            return $callSession;
+        }
+        throw new NotFoundException('CallSession is not found');
     }
 
     /**

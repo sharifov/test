@@ -12,7 +12,7 @@ class LeadChecklistRepository
      * @param $leadId
      * @return array|LeadChecklist[]
      */
-    public function get($userId, $leadId): array
+    public function getAll($userId, $leadId): array
     {
         return LeadChecklist::find()->andWhere(['lc_user_id' => $userId, 'lc_lead_id' => $leadId])->orderBy(['lc_created_dt' => SORT_ASC])->all();
     }

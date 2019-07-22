@@ -5,12 +5,21 @@ namespace sales\repositories\lead;
 use common\models\LeadPreferences;
 use sales\dispatchers\EventDispatcher;
 use sales\repositories\NotFoundException;
+use sales\repositories\Repository;
 
-class LeadPreferencesRepository
+/**
+ * Class LeadPreferencesRepository
+ * @method null|LeadPreferences get($id)
+ */
+class LeadPreferencesRepository extends Repository
 {
 
     private $eventDispatcher;
 
+    /**
+     * LeadPreferencesRepository constructor.
+     * @param EventDispatcher $eventDispatcher
+     */
     public function __construct(EventDispatcher $eventDispatcher)
     {
         $this->eventDispatcher = $eventDispatcher;
@@ -20,7 +29,7 @@ class LeadPreferencesRepository
      * @param $id
      * @return LeadPreferences
      */
-    public function get($id): LeadPreferences
+    public function find($id): LeadPreferences
     {
         if ($preferences = LeadPreferences::findOne($id)) {
             return $preferences;

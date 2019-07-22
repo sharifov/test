@@ -11,7 +11,7 @@ class UserProjectParamsRepository
      * @param string $phone
      * @return UserProjectParams|null
      */
-    public function findByPhone(string $phone): ?UserProjectParams
+    public function getByPhone(string $phone): ?UserProjectParams
     {
         return UserProjectParams::find()
             ->where(['upp_phone_number' => $phone])
@@ -38,11 +38,11 @@ class UserProjectParamsRepository
         }
 
         if (!$upp) {
-            $upp = $this->findByPhone($from);
+            $upp = $this->getByPhone($from);
         }
 
         if (!$upp) {
-            $upp = $this->findByPhone($to);
+            $upp = $this->getByPhone($to);
         }
 
         return $upp;

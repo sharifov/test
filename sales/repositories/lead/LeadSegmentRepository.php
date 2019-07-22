@@ -5,12 +5,21 @@ namespace sales\repositories\lead;
 use common\models\LeadFlightSegment;
 use sales\dispatchers\EventDispatcher;
 use sales\repositories\NotFoundException;
+use sales\repositories\Repository;
 
-class LeadSegmentRepository
+/**
+ * Class LeadSegmentRepository
+ * @method null|LeadFlightSegment get($id)
+ */
+class LeadSegmentRepository extends Repository
 {
 
     private $eventDispatcher;
 
+    /**
+     * LeadSegmentRepository constructor.
+     * @param EventDispatcher $eventDispatcher
+     */
     public function __construct(EventDispatcher $eventDispatcher)
     {
         $this->eventDispatcher = $eventDispatcher;
@@ -20,7 +29,7 @@ class LeadSegmentRepository
      * @param $id
      * @return LeadFlightSegment
      */
-    public function get($id): LeadFlightSegment
+    public function find($id): LeadFlightSegment
     {
         if ($segment = LeadFlightSegment::findOne($id)) {
             return $segment;

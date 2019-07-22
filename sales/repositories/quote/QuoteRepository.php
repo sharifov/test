@@ -5,11 +5,20 @@ namespace sales\repositories\quote;
 use common\models\Quote;
 use sales\dispatchers\EventDispatcher;
 use sales\repositories\NotFoundException;
+use sales\repositories\Repository;
 
-class QuoteRepository
+/**
+ * Class QuoteRepository
+ * @method null|Quote get($id)
+ */
+class QuoteRepository extends Repository
 {
     private $eventDispatcher;
 
+    /**
+     * QuoteRepository constructor.
+     * @param EventDispatcher $eventDispatcher
+     */
     public function __construct(EventDispatcher $eventDispatcher)
     {
         $this->eventDispatcher = $eventDispatcher;
@@ -19,7 +28,7 @@ class QuoteRepository
      * @param $id
      * @return Quote
      */
-    public function get($id): Quote
+    public function find($id): Quote
     {
         if ($quote = Quote::findOne($id)) {
             return $quote;

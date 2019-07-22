@@ -5,21 +5,32 @@ namespace sales\repositories\lead;
 use common\models\Lead;
 use sales\dispatchers\EventDispatcher;
 use sales\repositories\NotFoundException;
+use sales\repositories\Repository;
 
-class LeadRepository
+/**
+ * Class LeadRepository
+ * @property EventDispatcher $eventDispatcher
+ * @method null|Lead get(int $id)
+ * @method null|Lead getByGid(string $gid)
+ */
+class LeadRepository extends Repository
 {
     private $eventDispatcher;
 
+    /**
+     * LeadRepository constructor.
+     * @param EventDispatcher $eventDispatcher
+     */
     public function __construct(EventDispatcher $eventDispatcher)
     {
         $this->eventDispatcher = $eventDispatcher;
     }
 
     /**
-     * @param $id
+     * @param int $id
      * @return Lead
      */
-    public function get($id): Lead
+    public function find(int $id): Lead
     {
         if ($lead = Lead::findOne($id)) {
             return $lead;
@@ -28,10 +39,10 @@ class LeadRepository
     }
 
     /**
-     * @param $gid
+     * @param string $gid
      * @return Lead
      */
-    public function getByGid($gid): Lead
+    public function findByGid(string $gid): Lead
     {
         if ($lead = Lead::findOne(['gid' => $gid])) {
             return $lead;

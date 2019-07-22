@@ -5,11 +5,21 @@ namespace sales\repositories\client;
 use common\models\ClientEmail;
 use sales\dispatchers\EventDispatcher;
 use sales\repositories\NotFoundException;
+use sales\repositories\Repository;
 
-class ClientEmailRepository
+/**
+ * Class ClientEmailRepository
+ * @method null|ClientEmail get($id)
+ * @method null|ClientEmail getByEmail($email)
+ */
+class ClientEmailRepository extends Repository
 {
     private $eventDispatcher;
 
+    /**
+     * ClientEmailRepository constructor.
+     * @param EventDispatcher $eventDispatcher
+     */
     public function __construct(EventDispatcher $eventDispatcher)
     {
         $this->eventDispatcher = $eventDispatcher;
@@ -19,7 +29,7 @@ class ClientEmailRepository
      * @param $id
      * @return ClientEmail
      */
-    public function get($id): ClientEmail
+    public function find($id): ClientEmail
     {
         if ($clientEmail = ClientEmail::findOne($id)) {
             return $clientEmail;
@@ -31,7 +41,7 @@ class ClientEmailRepository
      * @param $email
      * @return ClientEmail
      */
-    public function getByEmail($email): ClientEmail
+    public function findByEmail($email): ClientEmail
     {
         if ($clientEmail = ClientEmail::find()->where(['email' => $email])->orderBy(['id' => SORT_ASC])->limit(1)->one()) {
             return $clientEmail;

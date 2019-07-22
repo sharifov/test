@@ -5,12 +5,23 @@ namespace sales\repositories\call;
 use common\models\Call;
 use sales\dispatchers\EventDispatcher;
 use sales\repositories\NotFoundException;
+use sales\repositories\Repository;
 
-class CallRepository
+/**
+ * Class CallRepository
+ * @property EventDispatcher $eventDispatcher
+ * @method null|Call getLastCallByUserCreated(string $callSid)
+ * @method null|Call getFirstCall(string $callSid)
+ * @method null|Call get($id)
+ */
+class CallRepository extends Repository
 {
-
     private $eventDispatcher;
 
+    /**
+     * CallRepository constructor.
+     * @param EventDispatcher $eventDispatcher
+     */
     public function __construct(EventDispatcher $eventDispatcher)
     {
         $this->eventDispatcher = $eventDispatcher;
@@ -18,31 +29,38 @@ class CallRepository
 
     /**
      * @param string $callSid
-     * @return Call|null
+     * @return Call
      */
-    public function getLastCallByUserCreated(string $callSid): ?Call
+    public function findLastCallByUserCreated(string $callSid): Call
     {
-        return Call::find()
+        if ($call = Call::find()
             ->where(['c_call_sid' => $callSid])
             //->andWhere(['c_call_status' => Call::CALL_STATUS_COMPLETED])
             ->andWhere(['>', 'c_created_user_id', 0])
-            ->orderBy(['c_updated_dt' => SORT_DESC])->limit(1)->one();
+            ->orderBy(['c_updated_dt' => SORT_DESC])->limit(1)->one()
+        ) {
+            return $call;
+        }
+        throw new NotFoundException('Call is not found');
     }
 
     /**
      * @param string $callSid
-     * @return Call|null
+     * @return Call
      */
-    public function getFirstCall(string $callSid): ?Call
+    public function findFirstCall(string $callSid): Call
     {
-        return Call::find()->where(['c_call_sid' => $callSid])->orderBy(['c_id' => SORT_ASC])->limit(1)->one();
+        if ($call = Call::find()->where(['c_call_sid' => $callSid])->orderBy(['c_id' => SORT_ASC])->limit(1)->one()) {
+            return $call;
+        }
+        throw new NotFoundException('Call is not found');
     }
 
     /**
      * @param $id
      * @return Call
      */
-    public function get($id): Call
+    public function find($id): Call
     {
         if ($call = Call::findOne($id)) {
             return $call;

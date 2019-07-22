@@ -5,11 +5,20 @@ namespace sales\repositories\reason;
 use common\models\Reason;
 use sales\dispatchers\EventDispatcher;
 use sales\repositories\NotFoundException;
+use sales\repositories\Repository;
 
-class ReasonRepository
+/**
+ * Class ReasonRepository
+ * @method null|Reason get($id)
+ */
+class ReasonRepository extends Repository
 {
     private $eventDispatcher;
 
+    /**
+     * ReasonRepository constructor.
+     * @param EventDispatcher $eventDispatcher
+     */
     public function __construct(EventDispatcher $eventDispatcher)
     {
         $this->eventDispatcher = $eventDispatcher;
@@ -19,7 +28,7 @@ class ReasonRepository
      * @param $id
      * @return Reason
      */
-    public function get($id): Reason
+    public function find($id): Reason
     {
         if ($reason = Reason::findOne($id)) {
             return $reason;
