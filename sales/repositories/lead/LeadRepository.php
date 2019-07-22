@@ -68,7 +68,7 @@ class LeadRepository extends Repository
      * @param int $current
      * @return array
      */
-    public function getActive(int $current): array
+    public function getActiveAll(int $current): array
     {
         return Lead::find()
             ->select(['id'])

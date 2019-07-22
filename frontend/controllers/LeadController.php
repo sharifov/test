@@ -1482,7 +1482,7 @@ class LeadController extends FController
             Yii::$app->errorHandler->logException($e);
             return null;
         }
-        if ($activeLeads = $this->leadRepository->getActive($lead->id)) {
+        if ($activeLeads = $this->leadRepository->getActiveAll($lead->id)) {
             $activeLeadIds = ArrayHelper::map($activeLeads, 'id', 'id');
         } else {
             $activeLeadIds = [];
