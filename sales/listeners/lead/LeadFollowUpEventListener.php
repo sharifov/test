@@ -53,7 +53,7 @@ class LeadFollowUpEventListener
         }
 
         try {
-            $owner = $this->userRepository->get($lead->employee_id);
+            $owner = $this->userRepository->find($lead->employee_id);
         } catch (NotFoundException $e) {
             Yii::warning(
                 'Not found owner for follow up lead: ' . $lead->id,

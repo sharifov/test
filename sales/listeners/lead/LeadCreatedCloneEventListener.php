@@ -37,7 +37,7 @@ class LeadCreatedCloneEventListener
         $host = \Yii::$app->params['url_address'];
 
         try {
-            $owner = $this->userRepository->get($lead->employee_id);
+            $owner = $this->userRepository->find($lead->employee_id);
         } catch (NotFoundException $e) {
             Yii::$app->errorHandler->logException($e);
             Yii::warning('Not found employee (' . $lead->employee_id . ')', 'LeadCreatedCloneEventListener:notFoundOwner');

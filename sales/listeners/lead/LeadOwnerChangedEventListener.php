@@ -37,13 +37,13 @@ class LeadOwnerChangedEventListener
         }
 
         try {
-            $oldOwner = $this->userRepository->get($event->oldOwnerId);
+            $oldOwner = $this->userRepository->find($event->oldOwnerId);
         } catch (NotFoundException $e) {
             Yii::warning('Not found employee (' . $event->oldOwnerId . ')', self::class . ':sendNotification:oldOwner');
             return;
         }
         try {
-            $newOwner = $this->userRepository->get($event->newOwnerId);
+            $newOwner = $this->userRepository->find($event->newOwnerId);
         } catch (NotFoundException $e) {
             Yii::warning('Not found employee (' . $event->newOwnerId . ')', self::class . ':sendNotification:newOwner');
             return;
