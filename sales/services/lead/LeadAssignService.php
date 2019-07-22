@@ -55,17 +55,17 @@ class LeadAssignService
         $user = $this->userRepository->find($userId);
 
         $this->checkAccess($lead, $user);
-
-        if ($lead->isFollowUp()) {
-            $checkProcessingByAgent = LeadFlow::findOne([
-                'lead_id' => $lead->id,
-                'status' => Lead::STATUS_PROCESSING,
-                'employee_id' => $user->id
-            ]);
-            if ($checkProcessingByAgent === null) {
-                $lead->setCalledExpert(false);
-            }
-        }
+//
+//        if ($lead->isFollowUp()) {
+//            $checkProcessingByAgent = LeadFlow::findOne([
+//                'lead_id' => $lead->id,
+//                'status' => Lead::STATUS_PROCESSING,
+//                'employee_id' => $user->id
+//            ]);
+//            if ($checkProcessingByAgent === null) {
+//                $lead->setCalledExpert(false);
+//            }
+//        }
         $lead->take($user->id);
         $this->leadRepository->save($lead);
     }
@@ -82,16 +82,16 @@ class LeadAssignService
 
         $this->checkAccess($lead, $user);
 
-        if ($lead->isFollowUp()) {
-            $checkProcessingByAgent = LeadFlow::findOne([
-                'lead_id' => $lead->id,
-                'status' => Lead::STATUS_PROCESSING,
-                'employee_id' => $user->id
-            ]);
-            if ($checkProcessingByAgent === null) {
-                $lead->setCalledExpert(false);
-            }
-        }
+//        if ($lead->isFollowUp()) {
+//            $checkProcessingByAgent = LeadFlow::findOne([
+//                'lead_id' => $lead->id,
+//                'status' => Lead::STATUS_PROCESSING,
+//                'employee_id' => $user->id
+//            ]);
+//            if ($checkProcessingByAgent === null) {
+//                $lead->setCalledExpert(false);
+//            }
+//        }
         $lead->takeOver($user->id);
         $this->leadRepository->save($lead);
     }

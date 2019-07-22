@@ -448,6 +448,14 @@ class Lead extends ActiveRecord implements AggregateRoot
     }
 
     /**
+     * @return bool
+     */
+    public function isCalledExpert(): bool
+    {
+        return $this->called_expert == 1 ? true : false;
+    }
+
+    /**
      * @param bool $value
      */
     public function setCalledExpert(bool $value): void
@@ -558,9 +566,15 @@ class Lead extends ActiveRecord implements AggregateRoot
             throw new InvalidArgumentException('Invalid Status');
         }
         if ($this->status !== $status) {
+
             $this->recordEvent(new LeadStatusChangedEvent($this, $this->status, $status, $this->employee_id));
+
             if ($status === self::STATUS_PROCESSING) {
                 $this->recordEvent(new LeadTaskEvent($this), LeadTaskEvent::class);
+            }
+
+            if ($this->isCalledExpert() && in_array($status, [self::STATUS_TRASH, self::STATUS_FOLLOW_UP, self::STATUS_SNOOZE, self::STATUS_PROCESSING], true)) {
+                $this->recordEvent(new LeadCallExpertRequestEvent($this));
             }
         }
         $this->status = $status;
