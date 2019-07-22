@@ -14,6 +14,7 @@ use common\models\Sms;
 use common\models\Sources;
 use common\models\UserProfile;
 use common\models\UserProjectParams;
+use sales\services\api\communication\CommunicationService;
 use Twilio\TwiML\VoiceResponse;
 use Yii;
 use yii\helpers\ArrayHelper;
@@ -26,6 +27,10 @@ use common\components\ReceiveEmailsJob;
 use yii\queue\Queue;
 use common\models\ProjectEmployeeAccess;
 
+/**
+ * Class CommunicationController
+ * @property CommunicationService $communicationService
+ */
 class CommunicationController extends ApiBaseController
 {
 
@@ -51,6 +56,14 @@ class CommunicationController extends ApiBaseController
 
     public const TYPE_VOIP_FINISH       = 'voip_finish';
     public const TYPE_SMS_FINISH        = 'sms_finish';
+
+    private $communicationService;
+
+    public function __construct($id, $module, CommunicationService $communicationService, $config = [])
+    {
+        $this->communicationService = $communicationService;
+        parent::__construct($id, $module, $config);
+    }
 
     /**
      * @api {post} /v1/communication/email Communication Email
@@ -699,17 +712,25 @@ class CommunicationController extends ApiBaseController
             case self::TYPE_VOIP_INCOMING:
             case self::TYPE_VOIP_GATHER:
                 $response = $this->voiceIncoming($type);
+//                $response = $this->communicationService->voiceIncoming($type, Yii::$app->request->post());
                 break;
             case self::TYPE_VOIP_RECORD:
+//                $this->communicationService->voiceRecord(Yii::$app->request->post());
+//                $response = [];
                 $response = $this->voiceRecord();
                 break;
             case self::TYPE_VOIP_FINISH:
+//                $this->communicationService->voiceFinish(Yii::$app->request->post());
+//                $response = [];
                 $response = $this->voiceFinish();
                 break;
             case self::TYPE_VOIP_CLIENT:
+//                $this->communicationService->voiceClient(Yii::$app->request->post());
+//                $response = [];
                 $response = $this->voiceClient();
                 break;
             default:
+//                $response = $this->communicationService->voiceDefault(Yii::$app->request->post());
                 $response = $this->voiceDefault();
         }
 
