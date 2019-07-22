@@ -1354,9 +1354,10 @@ class LeadController extends FController
 
     public function actionUnassign($id)
     {
+        $id = (int)$id;
 
         try {
-            $lead = $this->leadRepository->get($id);
+            $lead = $this->leadRepository->find($id);
             if ($lead->isCompleted()) {
                 Yii::$app->session->setFlash('warning', 'Lead: ' . $id . ' is completed!');
                 return $this->redirect(['processing']);
@@ -1473,8 +1474,10 @@ class LeadController extends FController
     public function actionChangeState($id, $queue)
     {
 
+        $id = (int)$id;
+
         try {
-            $lead = $this->leadRepository->get($id);
+            $lead = $this->leadRepository->find($id);
         } catch (NotFoundException $e) {
             Yii::$app->errorHandler->logException($e);
             return null;
@@ -2223,9 +2226,10 @@ class LeadController extends FController
 
     public function actionClone($id)
     {
+        $id = (int)$id;
 
         try {
-            $lead = $this->leadRepository->get($id);
+            $lead = $this->leadRepository->find($id);
         } catch (\Exception $e) {
             Yii::$app->errorHandler->logException($e);
             return null;
