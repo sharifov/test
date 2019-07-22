@@ -15,6 +15,7 @@ use common\models\Project;
 use common\models\Sources;
 use common\models\UserConnection;
 use common\models\UserProfile;
+use sales\repositories\lead\LeadBadgesRepository;
 use Twilio\TwiML\VoiceResponse;
 use Yii;
 use yii\caching\DbDependency;
@@ -61,7 +62,17 @@ class TestController extends FController
     public function actionT()
     {
 
-
+        $leadBadgesRepository = new LeadBadgesRepository();
+        $user = Yii::$app->user->identity;
+//        $count = $leadBadgesRepository->getPendingCount($user);
+        $count = $leadBadgesRepository->getInboxCount($user);
+//        $count = $leadBadgesRepository->getFollowUpCount($user);
+//        $count = $leadBadgesRepository->getProcessingCount($user);
+//        $count = $leadBadgesRepository->getBookedCount($user);
+//        $count = $leadBadgesRepository->getSoldCount($user);
+//        $count = $leadBadgesRepository->getTrashCount($user);
+//        $count = $leadBadgesRepository->getDuplicateCount($user);
+        return $this->render('blank');
         die;
         $roles = [];
 

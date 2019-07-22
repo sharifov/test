@@ -10,14 +10,6 @@ use yii\grid\GridView;
 
 $this->title = 'Pending Queue';
 
-if (Yii::$app->user->identity->canRole('admin')) {
-    $userList = \common\models\Employee::getList();
-    $projectList = \common\models\Project::getList();
-} else {
-    $userList = \common\models\Employee::getListByUserId(Yii::$app->user->id);
-    $projectList = \common\models\ProjectEmployeeAccess::getProjectsByEmployee();
-}
-
 /*
 $this->registerJsFile('/js/moment.min.js', [
     'position' => \yii\web\View::POS_HEAD,
@@ -72,7 +64,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'options' => [
                 'style' => 'width:120px'
             ],
-            'filter' => $projectList,
+            'filter' => \common\models\Project::getList(),
         ],
 
         [
@@ -80,6 +72,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'value' => function(\common\models\Lead $model) {
                 return $model->source ? $model->source->name : '-';
             },
+            'filter' => \common\models\Sources::getList(true)
         ],
 
         [

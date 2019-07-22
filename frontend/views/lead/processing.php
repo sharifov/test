@@ -83,7 +83,22 @@ $this->params['breadcrumbs'][] = $this->title;
             'options' => [
                 'style' => 'width:160px'
             ],
-            'format' => 'raw'
+            'format' => 'raw',
+            'contentOptions' => [
+                'class' => 'text-center'
+            ],
+            'filter' => DatePicker::widget([
+                'model' => $searchModel,
+                'attribute' => 'created',
+                'clientOptions' => [
+                    'autoclose' => true,
+                    'format' => 'yyyy-mm-dd',
+                ],
+                'options' => [
+                    'autocomplete' => 'off',
+                    'placeholder' =>'Choose Date'
+                ],
+            ]),
         ],
 
         /*[

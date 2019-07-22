@@ -4,27 +4,21 @@ use dosamigos\datepicker\DatePicker;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 use yii\widgets\Pjax;
-use kartik\grid\GridView;
 use common\models\Lead;
-use yii\helpers\Url;
 
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\LeadSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
-/* @var $isAgent bool */
+/** @var common\models\Employee $user */
 
 $this->title = 'Trash Queue';
 
-if (Yii::$app->user->identity->canRole('admin')) {
+if ($user->isAdmin()) {
     $userList = \common\models\Employee::getList();
     $projectList = \common\models\Project::getList();
 } else {
-    if (Yii::$app->user->identity->canRole('qa')) {
-        $userList = \common\models\Employee::getListByRole('agent');
-    } else{
-        $userList = \common\models\Employee::getListByUserId(Yii::$app->user->id);
-    }
-    $projectList = \common\models\ProjectEmployeeAccess::getProjectsByEmployee();
+    $userList = \common\models\Employee::getListByUserId($user->id);
+    $projectList = \common\models\ProjectEmployeeAccess::getProjectsByEmployee($user->id);
 }
 
 $this->params['breadcrumbs'][] = $this->title;
@@ -103,7 +97,6 @@ $this->params['breadcrumbs'][] = $this->title;
                 'style' => 'width:120px'
             ],
             'filter' => $projectList,
-            'visible' => !$isAgent
         ],
         [
             'attribute' => 'pending',
@@ -167,7 +160,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'options' => [
                 'style' => 'width:220px'
             ],
-            'visible' => !Yii::$app->user->identity->canRole('qa')
+            'visible' => !$user->isQa()
         ],/*
         [
             'attribute' => 'clientTime',
@@ -187,7 +180,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'options' => [
                 'style' => 'width:110px'
             ],
-            'visible' => !Yii::$app->user->identity->canRole('qa')
+            'visible' => !$user->isQa()
         ],
 
         [
@@ -202,7 +195,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 return $content;
             },
             'format' => 'raw',
-            'visible' => !Yii::$app->user->identity->canRole('qa')
+            'visible' => !$user->isQa()
         ],
 //        [
 //            'attribute' => 'Quotes ',
@@ -282,7 +275,6 @@ $this->params['breadcrumbs'][] = $this->title;
                 return $model->employee ? '<i class="fa fa-user"></i> ' . $model->employee->username : '-';
             },
             'filter' => $userList,
-            'visible' => !$isAgent
         ],
         /*[
             'attribute' => 'update',
