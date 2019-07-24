@@ -1111,115 +1111,115 @@ class Lead extends ActiveRecord implements AggregateRoot
         return self::updateAll(['l_last_action_dt' => date('Y-m-d H:i:s')], ['id' => $this->id]);
     }
 
-
-
-    public static function getBadgesSingleQuery()
-    {
-        $projectIds = array_keys(ProjectEmployeeAccess::getProjectsByEmployee());
-
-        if(empty($projectIds)){
-            $projectIds[] = 0;
-        }
-
-
-        $userId = Yii::$app->user->id;
-        $created = '';
-        $employee = '';
-        if (Yii::$app->user->identity->canRole('agent')) {
-            $employee = ' AND employee_id = ' . $userId;
-        }
-
-        $sold = '';
-
-        if (Yii::$app->user->identity->canRole('supervision')) {
-            $subQuery1 = UserGroupAssign::find()->select(['ugs_group_id'])->where(['ugs_user_id' => $userId]);
-            $subQuery = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->where(['IN', 'ugs_group_id', $subQuery1]);
-            $resEmp = $subQuery->createCommand()->queryAll();
-            $empArr = [];
-            if ($resEmp) {
-                foreach ($resEmp as $entry) {
-                    $empArr[] = $entry['ugs_user_id'];
-                }
-            }
-
-            if (!empty($empArr)) {
-                $employee = 'AND leads.employee_id IN (' . implode(',', $empArr) . ')';
-            }
-
-        }
-
-        if (Yii::$app->user->identity->canRole('agent')) {
-            $sold = ' AND (employee_id = ' . $userId.' OR ps.ps_user_id ='.$userId.' OR ts.ts_user_id ='.$userId.')';
-        }
-        $default = implode(',', [
-            self::STATUS_PROCESSING,
-            self::STATUS_ON_HOLD,
-            self::STATUS_SNOOZE
-        ]);
-
-        $select = [
-            'pending' => 'COUNT(DISTINCT CASE WHEN status IN (:inbox) THEN leads.id ELSE NULL END)',
-            'inbox' => 'COUNT(DISTINCT CASE WHEN status IN (:inbox) THEN leads.id ELSE NULL END)',
-            'follow-up' => 'COUNT(DISTINCT CASE WHEN status IN (:followup) ' . $created . '  THEN leads.id ELSE NULL END)',
-            'booked' => 'COUNT(DISTINCT CASE WHEN status IN (:booked) ' . $created . ' THEN leads.id ELSE NULL END)',
-            //'sold' => 'COUNT(DISTINCT CASE WHEN status IN (:sold) ' . $created . $sold .$employee . ' THEN leads.id ELSE NULL END)',
-            'sold' => '(SELECT COUNT(leads.id) FROM leads
-                        LEFT JOIN '.ProfitSplit::tableName().' ps ON ps.ps_lead_id = leads.id
-                        LEFT JOIN '.TipsSplit::tableName().' ts ON ts.ts_lead_id = leads.id
-                        WHERE leads.status IN (:sold) '.$created . $sold .$employee.'
-                        AND leads.project_id IN ('.implode(',', $projectIds).'))',
-            'processing' => 'COUNT(DISTINCT CASE WHEN status IN (' . $default . ') ' . $employee . ' THEN leads.id ELSE NULL END)'
-        ];
-
-        /*if (Yii::$app->user->identity->role != 'agent') {
-            //$select['trash'] = 'COUNT(DISTINCT CASE WHEN status IN (' . self::STATUS_TRASH . ') ' . $created . $employee . ' THEN leads.id ELSE NULL END)';
-            //$select['pending'] = 'COUNT(DISTINCT CASE WHEN status IN (:inbox) THEN leads.id ELSE NULL END)';
-
-            $select['duplicate'] = 'COUNT(DISTINCT CASE WHEN status IN (' . self::STATUS_TRASH . ') ' . $created . $employee . ' THEN leads.id ELSE NULL END)';
-        }*/
-
-        if (Yii::$app->user->identity->canRole('admin')) {
-            $select['pending'] = 'COUNT(DISTINCT CASE WHEN status IN (:pending) THEN leads.id ELSE NULL END)';
-        }
-
-        $query = self::find()
-            //->cache(600)
-            ->select($select)
-            //->leftJoin(ProfitSplit::tableName().' ps','ps.ps_lead_id = leads.id')
-            //->leftJoin(TipsSplit::tableName().' ts','ts.ts_lead_id = leads.id')
-            ->andWhere(['IN', 'project_id', $projectIds])
-            ->addParams([':inbox' => self::STATUS_PENDING,
-                ':pending' => self::STATUS_PENDING,
-                ':followup' => self::STATUS_FOLLOW_UP,
-                ':booked' => self::STATUS_BOOKED,
-                ':sold' => self::STATUS_SOLD,
-            ])
-            ->limit(1);
-
-
-        //echo $query->createCommand()->getRawSql();die;
-
-        $db = Yii::$app->db;
-        $duration = 0;     // cache query results for 60 seconds.
-        $dependency = new DbDependency();
-        $dependency->sql = 'SELECT MAX(id) FROM leads';
-
-
-        $result = $db->cache(function ($db) use ($query) {
-            return $query->createCommand()->queryOne();
-        }, $duration, $dependency);
-
-        //$result = $query->createCommand()->queryOne();
-
-
-        $result['duplicate'] = '';
-
-        if (Yii::$app->user->identity->canRoles(['admin', 'qa'])) {
-            $result['duplicate'] = self::find()->where(['IS NOT', 'l_duplicate_lead_id', null])->count() ?: '' ;
-        }
-
-        return $result; // $query->createCommand()->queryOne();
-    }
+//
+//
+//    public static function getBadgesSingleQuery()
+//    {
+//        $projectIds = array_keys(ProjectEmployeeAccess::getProjectsByEmployee());
+//
+//        if(empty($projectIds)){
+//            $projectIds[] = 0;
+//        }
+//
+//
+//        $userId = Yii::$app->user->id;
+//        $created = '';
+//        $employee = '';
+//        if (Yii::$app->user->identity->canRole('agent')) {
+//            $employee = ' AND employee_id = ' . $userId;
+//        }
+//
+//        $sold = '';
+//
+//        if (Yii::$app->user->identity->canRole('supervision')) {
+//            $subQuery1 = UserGroupAssign::find()->select(['ugs_group_id'])->where(['ugs_user_id' => $userId]);
+//            $subQuery = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->where(['IN', 'ugs_group_id', $subQuery1]);
+//            $resEmp = $subQuery->createCommand()->queryAll();
+//            $empArr = [];
+//            if ($resEmp) {
+//                foreach ($resEmp as $entry) {
+//                    $empArr[] = $entry['ugs_user_id'];
+//                }
+//            }
+//
+//            if (!empty($empArr)) {
+//                $employee = 'AND leads.employee_id IN (' . implode(',', $empArr) . ')';
+//            }
+//
+//        }
+//
+//        if (Yii::$app->user->identity->canRole('agent')) {
+//            $sold = ' AND (employee_id = ' . $userId.' OR ps.ps_user_id ='.$userId.' OR ts.ts_user_id ='.$userId.')';
+//        }
+//        $default = implode(',', [
+//            self::STATUS_PROCESSING,
+//            self::STATUS_ON_HOLD,
+//            self::STATUS_SNOOZE
+//        ]);
+//
+//        $select = [
+//            'pending' => 'COUNT(DISTINCT CASE WHEN status IN (:inbox) THEN leads.id ELSE NULL END)',
+//            'inbox' => 'COUNT(DISTINCT CASE WHEN status IN (:inbox) THEN leads.id ELSE NULL END)',
+//            'follow-up' => 'COUNT(DISTINCT CASE WHEN status IN (:followup) ' . $created . '  THEN leads.id ELSE NULL END)',
+//            'booked' => 'COUNT(DISTINCT CASE WHEN status IN (:booked) ' . $created . ' THEN leads.id ELSE NULL END)',
+//            //'sold' => 'COUNT(DISTINCT CASE WHEN status IN (:sold) ' . $created . $sold .$employee . ' THEN leads.id ELSE NULL END)',
+//            'sold' => '(SELECT COUNT(leads.id) FROM leads
+//                        LEFT JOIN '.ProfitSplit::tableName().' ps ON ps.ps_lead_id = leads.id
+//                        LEFT JOIN '.TipsSplit::tableName().' ts ON ts.ts_lead_id = leads.id
+//                        WHERE leads.status IN (:sold) '.$created . $sold .$employee.'
+//                        AND leads.project_id IN ('.implode(',', $projectIds).'))',
+//            'processing' => 'COUNT(DISTINCT CASE WHEN status IN (' . $default . ') ' . $employee . ' THEN leads.id ELSE NULL END)'
+//        ];
+//
+//        /*if (Yii::$app->user->identity->role != 'agent') {
+//            //$select['trash'] = 'COUNT(DISTINCT CASE WHEN status IN (' . self::STATUS_TRASH . ') ' . $created . $employee . ' THEN leads.id ELSE NULL END)';
+//            //$select['pending'] = 'COUNT(DISTINCT CASE WHEN status IN (:inbox) THEN leads.id ELSE NULL END)';
+//
+//            $select['duplicate'] = 'COUNT(DISTINCT CASE WHEN status IN (' . self::STATUS_TRASH . ') ' . $created . $employee . ' THEN leads.id ELSE NULL END)';
+//        }*/
+//
+//        if (Yii::$app->user->identity->canRole('admin')) {
+//            $select['pending'] = 'COUNT(DISTINCT CASE WHEN status IN (:pending) THEN leads.id ELSE NULL END)';
+//        }
+//
+//        $query = self::find()
+//            //->cache(600)
+//            ->select($select)
+//            //->leftJoin(ProfitSplit::tableName().' ps','ps.ps_lead_id = leads.id')
+//            //->leftJoin(TipsSplit::tableName().' ts','ts.ts_lead_id = leads.id')
+//            ->andWhere(['IN', 'project_id', $projectIds])
+//            ->addParams([':inbox' => self::STATUS_PENDING,
+//                ':pending' => self::STATUS_PENDING,
+//                ':followup' => self::STATUS_FOLLOW_UP,
+//                ':booked' => self::STATUS_BOOKED,
+//                ':sold' => self::STATUS_SOLD,
+//            ])
+//            ->limit(1);
+//
+//
+//        //echo $query->createCommand()->getRawSql();die;
+//
+//        $db = Yii::$app->db;
+//        $duration = 0;     // cache query results for 60 seconds.
+//        $dependency = new DbDependency();
+//        $dependency->sql = 'SELECT MAX(id) FROM leads';
+//
+//
+//        $result = $db->cache(function ($db) use ($query) {
+//            return $query->createCommand()->queryOne();
+//        }, $duration, $dependency);
+//
+//        //$result = $query->createCommand()->queryOne();
+//
+//
+//        $result['duplicate'] = '';
+//
+//        if (Yii::$app->user->identity->canRoles(['admin', 'qa'])) {
+//            $result['duplicate'] = self::find()->where(['IS NOT', 'l_duplicate_lead_id', null])->count() ?: '' ;
+//        }
+//
+//        return $result; // $query->createCommand()->queryOne();
+//    }
 
     /**
      * @return array

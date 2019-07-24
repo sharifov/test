@@ -153,8 +153,8 @@ use \kartik\form\ActiveForm;
     <div class="row">
         <div class="col-md-12">
             <div class="form-group text-center">
-                <?= Html::submitButton('<i class="fa fa-search"></i> Search', ['class' => 'btn btn-success']) ?>
-                <?= Html::resetButton('<i class="fa fa-close"></i> Reset', ['class' => 'btn btn-default']) ?>
+                <?= Html::submitButton('<i class="fa fa-search"></i> Search', ['class' => 'btn btn-primary']) ?>
+                <?= Html::resetButton('<i class="fa fa-close"></i> Reset form', ['class' => 'btn btn-default']) ?>
             </div>
         </div>
     </div>
