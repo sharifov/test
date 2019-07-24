@@ -2,10 +2,12 @@
 
 namespace common\models\search;
 
+use common\models\Employee;
 use common\models\UserGroupAssign;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use common\models\Call;
+use yii\helpers\VarDumper;
 
 /**
  * CallSearch represents the model behind the search form of `common\models\Call`.
@@ -76,9 +78,44 @@ class CallSearch extends Call
             return $dataProvider;
         }
 
-        if(empty($this->c_created_dt) && isset($params['CallSearch']['date_range'])){
-            $query->andFilterWhere(['>=', 'DATE(c_created_dt)', $this->datetime_start])
-                ->andFilterWhere(['<=', 'DATE(c_created_dt)', $this->datetime_end]);
+        if(empty($this->c_created_dt) && isset($params['CallSearch']['date_range'])) {
+
+            $datetime_start = null;
+            $datetime_end = null;
+
+            /** @var Employee $user */
+            $user = \Yii::$app->user->identity;
+            $timezone = $user->userParams ? $user->userParams->up_timezone : null;
+
+            if($this->datetime_start) {
+                $datetime_start = date('Y-m-d H:i:s', strtotime($this->datetime_start));
+
+                if($timezone) {
+                    $date = new \DateTime($datetime_start, new \DateTimeZone($timezone));
+                    $date->setTimezone(new \DateTimeZone('UTC'));
+                    $datetime_start = $date->format('Y-m-d H:i:s');
+                }
+
+            }
+
+            if($this->datetime_end) {
+                $datetime_end = date('Y-m-d H:i:s', strtotime($this->datetime_end));
+
+                if($timezone) {
+                    $date = new \DateTime($datetime_end, new \DateTimeZone($timezone));
+                    $date->setTimezone(new \DateTimeZone('UTC'));
+                    $datetime_end = $date->format('Y-m-d H:i:s');
+                }
+            }
+
+
+            //echo $datetime_start. ' - ' . $datetime_end; exit;
+
+            $query->andFilterWhere(['>=', 'c_created_dt', $datetime_start])
+                ->andFilterWhere(['<=', 'c_created_dt', $datetime_end]);
+
+
+
         } elseif (isset($params['CallSearch']['c_created_dt'])) {
             $query->andFilterWhere(['=','DATE(c_created_dt)', $this->c_created_dt]);
         }

@@ -47,10 +47,11 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$
                 'startAttribute' => 'datetime_start',
                 'endAttribute' => 'datetime_end',
                 'pluginOptions'=>[
-                    'timePicker'=> false,
-                    'timePickerIncrement'=>15,
+                    'timePicker'=> true,
+                    'timePickerIncrement'=>1,
+                    'timePicker24Hour' => true,
                     'locale'=>[
-                        'format'=>'Y-m-d',
+                        'format'=>'Y-m-d H:i',
                         'separator' => ' - '
                     ]
                 ]
@@ -151,6 +152,16 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$
                     ],
                 ]),
             ],
+
+
+            /*[
+                'attribute' => 'c_created_dt',
+                'value' => function (\common\models\Call $model) {
+                    return $model->c_created_dt ? '<i class="fa fa-calendar"></i> ' . date('Y-m-d H:i:s', strtotime($model->c_created_dt))  : '-';
+                },
+                'format' => 'raw',
+
+            ],*/
 
             /*[
                 'attribute' => 'c_recording_url',
