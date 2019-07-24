@@ -124,7 +124,7 @@ $isSuperAdmin = $user->canRole('superadmin');
             $menuItems[] = [
                 'label' => 'Leads',
                 'url' => 'javascript:',
-                'icon' => 'list',
+                'icon' => 'cubes',
                 'items' => $menuLItems
             ];
         } else {
