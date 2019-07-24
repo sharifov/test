@@ -9,7 +9,7 @@ use yii\widgets\Pjax;
 /* @var $searchModel common\models\search\CallSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-$this->title = 'Calls';
+$this->title = 'Call List';
 $this->params['breadcrumbs'][] = $this->title;
 
 if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$app->authManager->getAssignment('qa', Yii::$app->user->id)) {
@@ -23,47 +23,8 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$
 ?>
 <div class="call-index">
     <h1><i class="fa fa-phone"></i> <?= Html::encode($this->title) ?></h1>
-    <?php Pjax::begin(); ?>
-    <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
-
-    <div class="row">
-        <?php $form = ActiveForm::begin([
-            'action' => ['index'],
-            'method' => 'get',
-            'options' => [
-                'data-pjax' => 1
-            ],
-        ]); ?>
-
-        <div class="col-md-3">
-            <?php
-            echo  \kartik\daterange\DateRangePicker::widget([
-                'model'=> $searchModel,
-                'attribute' => 'date_range',
-                'useWithAddon'=>true,
-                'presetDropdown'=>true,
-                'hideInput'=>true,
-                'convertFormat'=>true,
-                'startAttribute' => 'datetime_start',
-                'endAttribute' => 'datetime_end',
-                'pluginOptions'=>[
-                    'timePicker'=> false,
-                    'timePickerIncrement'=>15,
-                    'locale'=>[
-                        'format'=>'Y-m-d',
-                        'separator' => ' - '
-                    ]
-                ]
-            ]);
-            ?>
-        </div>
-
-        <div class="form-group">
-            <?= Html::submitButton('<i class="fa fa-search"></i> Show result', ['class' => 'btn btn-success']) ?>
-        </div>
-        <?php ActiveForm::end(); ?>
-    </div>
-
+    <?php Pjax::begin(['timeout' => 10000]); ?>
+    <?php echo $this->render('_search', ['model' => $searchModel]); ?>
     <p>
         <?/*= Html::a('Create Call', ['create'], ['class' => 'btn btn-success'])*/ ?>
     </p>
@@ -151,6 +112,16 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$
                     ],
                 ]),
             ],
+
+
+            /*[
+                'attribute' => 'c_created_dt',
+                'value' => function (\common\models\Call $model) {
+                    return $model->c_created_dt ? '<i class="fa fa-calendar"></i> ' . date('Y-m-d H:i:s', strtotime($model->c_created_dt))  : '-';
+                },
+                'format' => 'raw',
+
+            ],*/
 
             /*[
                 'attribute' => 'c_recording_url',
