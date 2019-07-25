@@ -423,10 +423,15 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
 
             //Yii::info(VarDumper::dumpAsString($this->attributes), 'info\Call:afterSave');
 
-            if($this->c_call_type_id === self::CALL_TYPE_IN && $this->c_lead_id && in_array($this->c_call_status, [self::CALL_STATUS_BUSY, self::CALL_STATUS_NO_ANSWER], false)) {
+            if($this->c_call_type_id == self::CALL_TYPE_IN && $this->c_lead_id && in_array($this->c_call_status, [self::CALL_STATUS_BUSY, self::CALL_STATUS_NO_ANSWER])) {
 
                 if($this->c_created_user_id) {
-                    Notifications::create($this->c_created_user_id, 'Missing Call ('.$this->getSourceName().')  from ' . $this->c_from . ' to ' . $this->c_to . ' <br>Lead ID: ' . $this->c_lead_id , Notifications::TYPE_WARNING, true);
+                    Notifications::create(
+                        $this->c_created_user_id,
+                        'Missing Call ('.$this->getSourceName().')',
+                        'Missing Call ('.$this->getSourceName().')  from ' . $this->c_from . ' to ' . $this->c_to . ' <br>Lead ID: ' . $this->c_lead_id ,
+                        Notifications::TYPE_WARNING,
+                        true);
                     Notifications::socket($this->c_created_user_id, null, 'getNewNotification', [], true);
                 }
 
