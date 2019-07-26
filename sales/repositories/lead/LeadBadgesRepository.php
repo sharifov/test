@@ -54,7 +54,7 @@ class LeadBadgesRepository
     public function getInboxQuery(Employee $user): ActiveQuery
     {
 
-        $query = Lead::find()->andWhere(['status' => Lead::STATUS_PENDING]);
+        $query = Lead::find()->andWhere(['status' => Lead::STATUS_PENDING])->andWhere(['<>', 'l_call_status_id', Lead::CALL_STATUS_QUEUE]);
 
         if ($user->isAdmin()) {
             return $query;

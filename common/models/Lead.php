@@ -214,6 +214,7 @@ class Lead extends ActiveRecord implements AggregateRoot
     public const CALL_STATUS_PROCESS    = 2;
     public const CALL_STATUS_CANCEL     = 3;
     public const CALL_STATUS_DONE       = 4;
+    public const CALL_STATUS_QUEUE      = 5;
 
     public const CALL_STATUS_LIST = [
         self::CALL_STATUS_NONE      => 'None',
@@ -221,8 +222,8 @@ class Lead extends ActiveRecord implements AggregateRoot
         self::CALL_STATUS_PROCESS   => 'Process',
         self::CALL_STATUS_CANCEL    => 'Cancel',
         self::CALL_STATUS_DONE      => 'Done',
+        self::CALL_STATUS_QUEUE     => 'Queue',
     ];
-
 
 
     public const SCENARIO_API = 'scenario_api';
