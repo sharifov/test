@@ -35,7 +35,7 @@ class LeadBadgesRepository
             return $query;
         }
 
-        return $query->andWhere('0=1');
+        return $query->andWhere('0 = 1');
     }
 
     /**
@@ -292,7 +292,7 @@ class LeadBadgesRepository
             return $query;
         }
 
-        return $query->andWhere(['0=1']);
+        return $query->andWhere('0 = 1');
     }
 
     /**
@@ -356,6 +356,6 @@ class LeadBadgesRepository
         if ($used) {
             return $subQuery;
         }
-        return '0=1';
+        return '0 = 1';
     }
 }

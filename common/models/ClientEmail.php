@@ -2,6 +2,8 @@
 
 namespace common\models;
 
+use sales\entities\AggregateRoot;
+use sales\entities\EventTrait;
 use Yii;
 
 /**
@@ -16,8 +18,11 @@ use Yii;
  *
  * @property Client $client
  */
-class ClientEmail extends \yii\db\ActiveRecord
+class ClientEmail extends \yii\db\ActiveRecord implements AggregateRoot
 {
+
+    use EventTrait;
+
     /**
      * {@inheritdoc}
      */

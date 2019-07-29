@@ -2,7 +2,6 @@
 
 namespace frontend\controllers;
 
-use common\components\CommunicationService;
 use common\components\CountEvent;
 use common\components\jobs\TelegramSendMessageJob;
 use common\models\Call;
@@ -13,9 +12,20 @@ use common\models\Lead2;
 use common\models\Notifications;
 use common\models\Project;
 use common\models\Sources;
+use common\models\Test1;
 use common\models\UserConnection;
 use common\models\UserProfile;
+use sales\dispatchers\DeferredEventDispatcher;
+use sales\dispatchers\EventDispatcher;
+use sales\forms\api\communication\voice\finish\FinishForm;
+use sales\forms\api\communication\voice\record\RecordForm;
+use sales\repositories\airport\AirportRepository;
 use sales\repositories\lead\LeadBadgesRepository;
+use sales\repositories\lead\LeadRepository;
+use sales\repositories\Repository;
+use sales\repositories\TestRepository;
+use sales\services\api\communication\CommunicationService;
+use sales\services\TransactionManager;
 use Twilio\TwiML\VoiceResponse;
 use Yii;
 use yii\caching\DbDependency;
@@ -30,9 +40,30 @@ use yii\queue\Queue;
 
 /**
  * Test controller
+ * @property LeadRepository $leadRepository
+ * @property DeferredEventDispatcher $dispatcher
+ * @property TransactionManager $transactionManager
  */
 class TestController extends FController
 {
+    private $leadRepository;
+    private $dispatcher;
+    private $transactionManager;
+
+    public function __construct(
+        $id,
+        $module,
+        LeadRepository $leadRepository,
+        DeferredEventDispatcher $dispatcher,
+        TransactionManager $transactionManager, $config = []
+    )
+    {
+        $this->leadRepository = $leadRepository;
+        $this->dispatcher = $dispatcher;
+        $this->transactionManager= $transactionManager;
+        parent::__construct($id, $module, $config);
+    }
+
     /**
      * {@inheritdoc}
      */
@@ -62,17 +93,67 @@ class TestController extends FController
     public function actionT()
     {
 
-        $leadBadgesRepository = new LeadBadgesRepository();
-        $user = Yii::$app->user->identity;
-//        $count = $leadBadgesRepository->getPendingCount($user);
-        $count = $leadBadgesRepository->getInboxCount($user);
-//        $count = $leadBadgesRepository->getFollowUpCount($user);
-//        $count = $leadBadgesRepository->getProcessingCount($user);
-//        $count = $leadBadgesRepository->getBookedCount($user);
-//        $count = $leadBadgesRepository->getSoldCount($user);
-//        $count = $leadBadgesRepository->getTrashCount($user);
-//        $count = $leadBadgesRepository->getDuplicateCount($user);
-        return $this->render('blank');
+
+//        VarDumper::dump($lead);
+
+
+//        die;
+
+        /** @var AirportRepository $repo */
+        $repo = Yii::createObject(AirportRepository::class);
+
+        $lead = $repo->getByIata(215);
+
+
+
+
+        VarDumper::dump($lead);
+//        $repo->findOne(3);
+//        $repo->agetOne(11, 2);
+//        $repo->agetOne(11, 2);
+
+
+
+        die;
+
+        $post = [
+            'type' => 'voip_incoming',
+            'call_id' => '1256',
+            'call' => [
+                'Called' => '+16692011812',
+                'ToState' => 'CA',
+                'CallerCountry' => 'LS',
+                'Direction' => 'inbound',
+                'CallerState' => '',
+                'ToZip' => '',
+                'CallSid' => 'CA4f67c57472019afe38aa48cf6dd7c22f',
+                'To' => '+16692011812',
+                'CallerZip' => '',
+                'ToCountry' => 'US',
+                'ApiVersion' => '2010-04-01',
+                'CalledZip' => '',
+                'CalledCity' => '',
+                'CallStatus' => 'ringing',
+                'From' => '+266696687',
+                'AccountSid' => 'AC10f3c74efba7b492cbd7dca86077736c',
+                'CalledCountry' => 'US',
+                'CallerCity' => '',
+                'ApplicationSid' => 'APd65ba6826de6314e0780220d89fc6cde',
+                'Caller' => '+266696687',
+                'FromCountry' => 'LS',
+                'ToCity' => '',
+                'FromCity' => '',
+                'CalledState' => 'CA',
+                'FromZip' => '',
+                'FromState' => '',
+            ]
+        ];
+
+        /** @var CommunicationService $service */
+        $service = Yii::createObject(CommunicationService::class);
+        $service->voiceIncoming('1', $post);
+
+
         die;
         $roles = [];
 

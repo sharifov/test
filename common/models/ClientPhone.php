@@ -2,6 +2,8 @@
 
 namespace common\models;
 
+use sales\entities\AggregateRoot;
+use sales\entities\EventTrait;
 use Yii;
 use yii\behaviors\AttributeBehavior;
 use yii\behaviors\TimestampBehavior;
@@ -25,8 +27,10 @@ use common\components\CheckPhoneNumberJob;
  *
  * @property Client $client
  */
-class ClientPhone extends \yii\db\ActiveRecord
+class ClientPhone extends \yii\db\ActiveRecord implements AggregateRoot
 {
+
+    use EventTrait;
 
     // old phone value. need for afterSave() method
     private $old_phone = '';

@@ -2,6 +2,8 @@
 
 namespace common\models;
 
+use sales\entities\AggregateRoot;
+use sales\entities\EventTrait;
 use Yii;
 
 /**
@@ -17,8 +19,11 @@ use Yii;
  * @property string $cs_create_dt
  * @property string $cs_updated_dt
  */
-class CallSession extends \yii\db\ActiveRecord
+class CallSession extends \yii\db\ActiveRecord implements AggregateRoot
 {
+
+    use EventTrait;
+
     /**
      * {@inheritdoc}
      */

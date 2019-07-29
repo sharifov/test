@@ -1054,6 +1054,7 @@ $js = <<<JS
                 return false;
             }
             connection.accept();
+            console.error(connection.parameters);
             $.ajax({
                 type: 'post',
                 data: {

@@ -2,6 +2,8 @@
 
 namespace common\models;
 
+use sales\entities\AggregateRoot;
+use sales\entities\EventTrait;
 use Yii;
 
 /**
@@ -16,8 +18,20 @@ use Yii;
  * @property Employee $employee
  * @property Lead $lead
  */
-class Note extends \yii\db\ActiveRecord
+class Note extends \yii\db\ActiveRecord implements AggregateRoot
 {
+
+    use EventTrait;
+
+    public static function create($userId, $leadId, $message): self
+    {
+        $note = new static();
+        $note->employee_id = $userId;
+        $note->lead_id = $leadId;
+        $note->message = $message;
+        return $note;
+    }
+
     /**
      * {@inheritdoc}
      */

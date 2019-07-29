@@ -3,6 +3,8 @@
 namespace common\models;
 
 use borales\extensions\phoneInput\PhoneInputValidator;
+use sales\entities\AggregateRoot;
+use sales\entities\EventTrait;
 use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
@@ -24,8 +26,11 @@ use yii\helpers\VarDumper;
  *
  * @property Project $project
  */
-class Sources extends \yii\db\ActiveRecord
+class Sources extends \yii\db\ActiveRecord implements AggregateRoot
 {
+
+    use EventTrait;
+
     /**
      * {@inheritdoc}
      */

@@ -3,15 +3,34 @@
 namespace sales\repositories\lead;
 
 use common\models\Lead;
+use sales\dispatchers\EventDispatcher;
 use sales\repositories\NotFoundException;
+use sales\repositories\Repository;
 
-class LeadRepository
+/**
+ * Class LeadRepository
+ * @property EventDispatcher $eventDispatcher
+ * @method null|Lead get(int $id)
+ * @method null|Lead getByGid(string $gid)
+ */
+class LeadRepository extends Repository
 {
+    private $eventDispatcher;
+
     /**
-     * @param $id
+     * LeadRepository constructor.
+     * @param EventDispatcher $eventDispatcher
+     */
+    public function __construct(EventDispatcher $eventDispatcher)
+    {
+        $this->eventDispatcher = $eventDispatcher;
+    }
+
+    /**
+     * @param int $id
      * @return Lead
      */
-    public function get($id): Lead
+    public function find(int $id): Lead
     {
         if ($lead = Lead::findOne($id)) {
             return $lead;
@@ -20,10 +39,10 @@ class LeadRepository
     }
 
     /**
-     * @param $gid
+     * @param string $gid
      * @return Lead
      */
-    public function getByGid($gid): Lead
+    public function findByGid(string $gid): Lead
     {
         if ($lead = Lead::findOne(['gid' => $gid])) {
             return $lead;
@@ -46,15 +65,34 @@ class LeadRepository
     }
 
     /**
+     * @param int $current
+     * @return array
+     */
+    public function getActiveAll(int $current): array
+    {
+        return Lead::find()
+            ->select(['id'])
+            ->where([
+                'status' => [
+                    Lead::STATUS_ON_HOLD, Lead::STATUS_PROCESSING,
+                    Lead::STATUS_SNOOZE, Lead::STATUS_FOLLOW_UP
+                ]
+            ])->andWhere(['<>', 'id', $current])->asArray()->all();
+    }
+
+    /**
      * @param Lead $lead
      * @return int
      */
     public function save(Lead $lead): int
     {
-        if ($lead->save(false)) {
-            return $lead->id;
+        $lead->disableAREvents();
+
+        if (!$lead->save(false)) {
+            throw new \RuntimeException('Saving error');
         }
-        throw new \RuntimeException('Saving error');
+        $this->eventDispatcher->dispatchAll($lead->releaseEvents());
+        return $lead->id;
     }
 
     /**
@@ -77,5 +115,6 @@ class LeadRepository
         if (!$lead->delete()) {
             throw new \RuntimeException('Removing error');
         }
+        $this->eventDispatcher->dispatchAll($lead->releaseEvents());
     }
 }

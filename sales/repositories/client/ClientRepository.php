@@ -3,15 +3,33 @@
 namespace sales\repositories\client;
 
 use common\models\Client;
+use sales\dispatchers\EventDispatcher;
 use sales\repositories\NotFoundException;
+use sales\repositories\Repository;
 
-class ClientRepository
+/**
+ * Class ClientRepository
+ * @method null|Client get($id)
+ */
+class ClientRepository extends Repository
 {
+
+    private $eventDispatcher;
+
+    /**
+     * ClientRepository constructor.
+     * @param EventDispatcher $eventDispatcher
+     */
+    public function __construct(EventDispatcher $eventDispatcher)
+    {
+        $this->eventDispatcher = $eventDispatcher;
+    }
+
     /**
      * @param $id
      * @return Client
      */
-    public function get($id): Client
+    public function find($id): Client
     {
         if ($client = Client::findOne($id)) {
             return $client;
@@ -25,10 +43,11 @@ class ClientRepository
      */
     public function save(Client $client): int
     {
-        if ($client->save(false)) {
-            return $client->id;
+        if (!$client->save(false)) {
+            throw new \RuntimeException('Saving error');
         }
-        throw new \RuntimeException('Saving error');
+        $this->eventDispatcher->dispatchAll($client->releaseEvents());
+        return $client->id;
     }
 
     /**
@@ -41,5 +60,6 @@ class ClientRepository
         if (!$client->delete()) {
             throw new \RuntimeException('Removing error');
         }
+        $this->eventDispatcher->dispatchAll($client->releaseEvents());
     }
 }

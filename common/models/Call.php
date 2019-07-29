@@ -2,6 +2,8 @@
 
 namespace common\models;
 
+use sales\entities\AggregateRoot;
+use sales\entities\EventTrait;
 use Yii;
 use DateTime;
 use common\components\ChartTools;
@@ -51,8 +53,10 @@ use yii\helpers\VarDumper;
  * @property Lead2 $cLead2
  * @property Project $cProject
  */
-class Call extends \yii\db\ActiveRecord
+class Call extends \yii\db\ActiveRecord implements AggregateRoot
 {
+    
+    use EventTrait;
 
     public const CALL_STATUS_QUEUE          = 'queued';
     public const CALL_STATUS_RINGING        = 'ringing';
@@ -116,6 +120,126 @@ class Call extends \yii\db\ActiveRecord
         self::SOURCE_REDIRECT_CALL  => 'Redirect Call',
         self::SOURCE_TRANSFER_CALL  => 'Transfer Call',
     ];
+
+    /**
+     * @param $callSid
+     * @param $accountSid
+     * @param $callTypeId
+     * @param $uri
+     * @param $from
+     * @param $to
+     * @param $createdDt
+     * @param $recordingUrl
+     * @param $recordingSid
+     * @param $recordingDuration
+     * @param $callerName
+     * @param $direction
+     * @param $apiVersion
+     * @param $sip
+     * @param $projectId
+     * @param $timestamp
+     * @return Call
+     */
+    public static function create(
+        $callSid,
+        $accountSid,
+        $callTypeId,
+        $uri,
+        $from,
+        $to,
+        $createdDt,
+        $recordingUrl,
+        $recordingSid,
+        $recordingDuration,
+        $callerName,
+        $direction,
+        $apiVersion,
+        $sip,
+        $projectId,
+        $timestamp = null
+    ): self
+    {
+        $call = new static();
+        $call->c_call_sid = $callSid;
+        $call->c_account_sid = $accountSid;
+        $call->c_call_type_id = $callTypeId;
+        $call->c_uri = $uri;
+        $call->c_from = $from;
+        $call->c_to = $to;
+        $call->c_created_dt = $createdDt;
+        $call->c_updated_dt = date('Y-m-d H:i:s');
+        $call->c_recording_url = $recordingUrl;
+        $call->c_recording_sid = $recordingSid;
+        $call->c_recording_duration = $recordingDuration;
+        $call->c_caller_name = $callerName;
+        $call->c_direction = $direction;
+        $call->c_api_version = $apiVersion;
+        $call->c_sip = $sip;
+        $call->c_project_id = $projectId;
+        $call->c_timestamp = $timestamp;
+        return $call;
+    }
+
+    /**
+     * @param string $recordingUrl
+     * @param string $recordingSid
+     * @param int $recordingDuration
+     */
+    public function updateRecordingData(string $recordingUrl, string $recordingSid, int $recordingDuration): void
+    {
+        $this->c_recording_url = $recordingUrl;
+        $this->c_recording_sid = $recordingSid;
+        $this->c_recording_duration = $recordingDuration;
+        $this->c_updated_dt = date('Y-m-d H:i:s');
+    }
+
+    /**
+     * @param int|null $userId
+     */
+    public function setCreatedUser(?int $userId): void
+    {
+        $this->c_created_user_id = $userId;
+    }
+
+    /**
+     * @param int|null $projectId
+     */
+    public function setProject(?int $projectId): void
+    {
+        $this->c_project_id = $projectId;
+    }
+
+    /**
+     * @param $price
+     */
+    public function setPrice($price): void
+    {
+        $this->c_price = $price;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isEmptyStatus(): bool
+    {
+        return $this->c_call_status ? false : true;
+    }
+
+    /**
+     * @param string|null $status
+     */
+    public function setStatus(?string $status): void
+    {
+        $this->c_call_status = $status;
+    }
+
+    /**
+     * @param int|null $duration
+     */
+    public function setDuration(?int $duration): void
+    {
+        $this->c_call_duration = $duration;
+    }
 
     /**
      * {@inheritdoc}

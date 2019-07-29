@@ -3,6 +3,8 @@
 namespace common\models;
 
 use common\models\local\LeadLogMessage;
+use sales\entities\AggregateRoot;
+use sales\entities\EventTrait;
 use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
@@ -24,9 +26,10 @@ use yii\db\ActiveRecord;
  *
  * @property Lead $lead
  */
-class LeadFlightSegment extends \yii\db\ActiveRecord
+class LeadFlightSegment extends \yii\db\ActiveRecord implements AggregateRoot
 {
 
+    use EventTrait;
 
     public CONST FLEX_TYPE_MINUS = '-';
     public CONST FLEX_TYPE_PLUS = '+';
@@ -93,6 +96,14 @@ class LeadFlightSegment extends \yii\db\ActiveRecord
                 'value' => date('Y-m-d H:i:s') //new Expression('NOW()'),
             ],
         ];
+    }
+
+    public function createClone(int $leadId): self
+    {
+        $clone = new static();
+        $clone->attributes = $this->attributes;
+        $clone->lead_id = $leadId;
+        return $clone;
     }
 
     public static function create($leadId, $origin, $destination, $departure, $flexibility, $flexibilityType): self

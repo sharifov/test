@@ -89,7 +89,6 @@ class LeadManageService
                 $clientId,
                 $form->client->firstName,
                 $form->client->lastName,
-                $employeeId,
                 $form->cabin,
                 $form->adults,
                 $form->children,
@@ -99,9 +98,10 @@ class LeadManageService
                 $form->projectId,
                 $form->notesForExperts,
                 $form->clientPhone,
-                $form->clientEmail,
-                $form->status
+                $form->clientEmail
             );
+
+            $lead->take($employeeId);
 
             $phones = $this->createClientPhones($clientId, $form->phones);
 
@@ -122,9 +122,8 @@ class LeadManageService
 
             $lead->setRequestHash($hash);
 
-            if ($duplicate = $this->leadRepository->getByRequestHash($hash)) {
-                $lead->setDuplicate($duplicate->id);
-                Yii::info('Warning: detected duplicate Lead (Origin id: ' . $duplicate->id . ', Hash: ' . $hash . ')', 'info\Create:Lead:duplicate');
+            if ($origin = $this->leadRepository->getByRequestHash($lead->l_request_hash)) {
+                $lead->setDuplicate($origin->id);
             }
 
             $lead->setTripType(self::calculateTripType($form->segments));
@@ -149,7 +148,7 @@ class LeadManageService
      */
     public function editItinerary(int $id, ItineraryEditForm $form): void
     {
-        $lead = $this->leadRepository->get($id);
+        $lead = $this->leadRepository->find($id);
 
         $lead->editItinerary(
             $form->cabin,
@@ -236,11 +235,8 @@ class LeadManageService
     private function getClientId(array $phonesForm, ClientCreateForm $clientForm): int
     {
         foreach ($phonesForm as $phoneForm) {
-            try {
-                if (($clientPhone = $this->clientPhoneRepository->getByPhone($phoneForm->phone)) && ($client = $clientPhone->client)) {
-                    return $client->id;
-                }
-            } catch (NotFoundException $e) {
+            if (($clientPhone = $this->clientPhoneRepository->getByPhone($phoneForm->phone)) && ($client = $clientPhone->client)) {
+                return $client->id;
             }
         }
 
@@ -300,25 +296,25 @@ class LeadManageService
             return Lead::TRIP_TYPE_ONE_WAY;
         }
         if ($countSegments === 2) {
-            try {
-                $airport1 = $segments[0]->origin;
-                $airport2 = $segments[0]->destination;
-                $airport3 = $segments[1]->origin;
-                $airport4 = $segments[1]->destination;
-                if ($airport1 == $airport4 && $airport3 == $airport2) {
-                    return Lead::TRIP_TYPE_ROUND_TRIP;
-                }
-                if (
+
+            $airport1 = $segments[0]->origin;
+            $airport2 = $segments[0]->destination;
+            $airport3 = $segments[1]->origin;
+            $airport4 = $segments[1]->destination;
+            if ($airport1 == $airport4 && $airport3 == $airport2) {
+                return Lead::TRIP_TYPE_ROUND_TRIP;
+            }
+            if (
                 ($airport1 = $this->airportRepository->getByIata($segments[0]->origin)) &&
                 ($airport2 = $this->airportRepository->getByIata($segments[0]->destination)) &&
                 ($airport3 = $this->airportRepository->getByIata($segments[1]->origin)) &&
                 ($airport4 = $this->airportRepository->getByIata($segments[1]->destination))
-                ) {
-                    if ($airport1->city == $airport4->city && $airport3->city == $airport2->city) {
-                        return Lead::TRIP_TYPE_ROUND_TRIP;
-                    }
+            ) {
+                if ($airport1->city == $airport4->city && $airport3->city == $airport2->city) {
+                    return Lead::TRIP_TYPE_ROUND_TRIP;
                 }
-            } catch (\Throwable $e) {}
+            }
+
         }
         return Lead::TRIP_TYPE_MULTI_DESTINATION;
     }
@@ -331,7 +327,7 @@ class LeadManageService
     private function getSegment(int $leadId, SegmentEditForm $segmentForm): LeadFlightSegment
     {
         if ($segmentForm->segmentId) {
-            $segment = $this->segmentRepository->get($segmentForm->segmentId);
+            $segment = $this->segmentRepository->find($segmentForm->segmentId);
             $segment->edit(
                 $segmentForm->origin,
                 $segmentForm->destination,

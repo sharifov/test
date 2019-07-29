@@ -47,7 +47,7 @@ class Notifications extends \yii\bootstrap\Widget
         $user_id = \Yii::$app->user->id;
         $cache = \Yii::$app->cache;
 
-        $sql = \common\models\Notifications::find()->select('COUNT(*)')->where(['n_user_id' => $user_id, 'n_new' => true])->createCommand()->rawSql;
+        $sql = \common\models\Notifications::find()->select('COUNT(*)')->where(['n_user_id' => $user_id, 'n_new' => true, 'n_deleted' => false])->createCommand()->rawSql;
 
         $duration = null;
         $dependency = new DbDependency();
