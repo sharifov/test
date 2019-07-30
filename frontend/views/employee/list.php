@@ -39,7 +39,9 @@ if ($isAdmin || $isSuperAdmin) {
         'class' => 'btn-success btn',
     ]) ?>
 
-    <?php Pjax::begin(['id' => 'user-pjax-list', 'timeout' => 8000, 'enablePushState' => true]); //['id' => 'user-pjax-list', 'timeout' => 5000, 'enablePushState' => true, 'clientOptions' => ['method' => 'GET']]); ?>
+    <?php Pjax::begin(['id' => 'user-pjax-list', 'timeout' => 8000, 'enablePushState' => false, 'enableReplaceState' => false]); //['id' => 'user-pjax-list', 'timeout' => 5000, 'enablePushState' => true, 'clientOptions' => ['method' => 'GET']]); ?>
+
+
     <?php
 
        /*echo $this->render('_search', [
@@ -47,16 +49,35 @@ if ($isAdmin || $isSuperAdmin) {
     ]);*/
     ?>
 
+    <?/*= Html::label( Yii::t('frontend', 'Page size: '), 'pagesize', array( 'style' => 'margin-left:10px; margin-top:8px;' ) ) ?>
+    <?= Html::dropDownList(
+        'pagesize',
+        ( isset($_GET['pagesize']) ? $_GET['pagesize'] : 20 ),  // set the default value for the dropdown list
+        // set the key and value for the drop down list
+        array(
+            20 => 20,
+            50 => 50,
+            100 => 100),
+        // add the HTML attritutes for the dropdown list
+        // I add pagesize as an id of dropdown list. later on, I will add into the Gridview widget.
+        // so when the form is submitted, I can get the $_POST value in InvoiceSearch model.
+        array(
+            'id' => 'pagesize',
+            'style' => 'margin-left:5px; margin-top:8px;'
+        )
+    )*/
+    ?>
 
-    <?/*php if(Yii::$app->user->identity->canRoles(['admin', 'supervision'])) : ?>
+
+    <?php if(Yii::$app->user->identity->canRoles(['admin', 'supervision'])) : ?>
         <p>
             <?//= Html::a('Create Lead', ['create'], ['class' => 'btn btn-success']) ?>
-            <?= \yii\helpers\Html::button('<i class="fa fa-edit"></i> Multiple update', ['class' => 'btn btn-info', 'data-toggle'=> "modal", 'data-target'=>"#modalUpdate" ])?>
+            <?= \yii\helpers\Html::button('<i class="fa fa-edit"></i> Multiple update', ['class' => 'btn btn-info', 'data-toggle'=> 'modal', 'data-target'=>'#modalUpdate' ])?>
         </p>
-    <?php endif; */?>
+    <?php endif; ?>
 
 
-    <?//php $form = \yii\bootstrap\ActiveForm::begin(['options' => ['data-pjax' => true]]); // ['action' => ['leads/update-multiple'] ?>
+    <?php $form = \yii\bootstrap\ActiveForm::begin(['id' => 'user-list-update-form', /*'action' => ['employee/list'],*/ 'method' => 'get', 'options' => ['data-pjax' => true]]); // ['action' => ['leads/update-multiple'] ?>
 
 
         <?/*php if($isAdmin):?>
@@ -68,6 +89,7 @@ if ($isAdmin || $isSuperAdmin) {
         <?= GridView::widget([
             'dataProvider' => $dataProvider,
             'filterModel' => $searchModel,
+            //'layout'=>'{summary}'.Html::activeDropDownList($searchModel, 'perpage', [10 => 10, 30 => 30, 20 => 20, 50 => 50, 100 => 100],['id'=>'perpage'])."{items}<br/>{pager}",
             'pjax' => false,
             //'layout' => $template,
             'rowOptions' => function (\common\models\Employee $model, $index, $widget, $grid) {
@@ -468,7 +490,7 @@ if ($isAdmin || $isSuperAdmin) {
         ])
         ?>
 
-    <?/*php if($isAdmin) : ?>
+    <?php if($isAdmin) : ?>
         <p>
             <?= \yii\helpers\Html::button('<i class="fa fa-edit"></i> Multiple update', ['class' => 'btn btn-info','data-toggle' => 'modal','data-target' => '#modalUpdate'])?>
         </p>
@@ -504,33 +526,37 @@ if ($isAdmin || $isSuperAdmin) {
         </div>
 
         <?php \yii\bootstrap\Modal::end(); ?>
-    <?php endif;*/ ?>
+    <?php endif; ?>
 
-    <?//php \yii\bootstrap\ActiveForm::end(); ?>
+    <?php \yii\bootstrap\ActiveForm::end(); ?>
 
 
 
     <?php Pjax::end(); ?>
 
     <?php
-    $ajaxUrl = \yii\helpers\Url::to([
-        "leads/ajax-reason-list"
-    ]);
+
     $js = <<<JS
 
     $(document).on('pjax:start', function() {
         $("#modalUpdate .close").click();
     });
 
-    $(document).on('pjax:end', function() {
+    /*$(document).on('pjax:end', function() {
          $('[data-toggle="tooltip"]').tooltip();
-    });
+    });*/
    
     //$('[data-toggle="tooltip"]').tooltip();
 
 
 JS;
 $this->registerJs($js, \yii\web\View::POS_READY);
+
+    /*$this->registerJs('$("#user-list-update-form").on("beforeSubmit", function (e) {
+    $("#modalUpdate .close").click();
+$("#modalUpdate").modal("hide");
+});', \yii\web\View::POS_READY);*/
+
 ?>
 
 </div>

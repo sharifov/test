@@ -12,6 +12,7 @@ use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use common\models\Employee;
 use kartik\daterange\DateRangeBehavior;
+use yii\helpers\VarDumper;
 
 /**
  * EmployeeSearch represents the model behind the search form of `common\models\Employee`.
@@ -31,6 +32,7 @@ class EmployeeSearch extends Employee
     public $date_range;
 
     public $online;
+    public $pageSize;
 
 
     /**
@@ -40,7 +42,7 @@ class EmployeeSearch extends Employee
     {
         return [
             [['id', 'status', 'acl_rules_activated', 'supervision_id', 'user_group_id', 'user_project_id', 'user_params_project_id', 'online', 'user_call_type_id'], 'integer'],
-            [['username', 'full_name', 'auth_key', 'password_hash', 'password_reset_token', 'email', 'last_activity', 'created_at', 'updated_at', 'user_sip'], 'safe'],
+            [['username', 'full_name', 'auth_key', 'password_hash', 'password_reset_token', 'email', 'last_activity', 'created_at', 'updated_at', 'user_sip', 'pageSize'], 'safe'],
             [['datetime_start', 'datetime_end'], 'safe'],
             [['date_range'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
         ];
@@ -67,14 +69,17 @@ class EmployeeSearch extends Employee
         $query = Employee::find()->with('ugsGroups', 'userParams', 'userProfile', 'userProjectParams');
 
         // add conditions that should always apply here
+        //VarDumper::dump($params);
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
             'sort' => ['defaultOrder' => ['id' => SORT_DESC]],
             'pagination' => [
-                'pageSize' => 40,
+                'pageSize' => isset($params['per-page']) ? (int)$params['per-page'] : 30,
             ],
         ]);
+
+        //$dataProvider->pagination->pageSize = ($this->pageSize !== NULL) ? $this->pageSize : 40;
 
         $this->load($params);
 
