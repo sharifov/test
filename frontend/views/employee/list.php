@@ -11,6 +11,8 @@ use yii\grid\GridView;
 $this->title = 'User List';
 $this->params['breadcrumbs'][] = $this->title;
 
+
+
 $isUM = Yii::$app->user->identity->canRole('userManager');
 $isAdmin = Yii::$app->user->identity->canRoles(['admin', 'superadmin']);
 $isSuperAdmin = Yii::$app->user->identity->canRole('superadmin');
@@ -27,16 +29,12 @@ if ($isAdmin || $isSuperAdmin) {
 
 
 ?>
-<div class="panel panel-default">
-    <div class="panel-heading">Employees</div>
-    <div class="panel-body">
-        <div class="row mb-20">
-            <div class="col-md-6">
-                <?= Html::a('<i class="glyphicon glyphicon-plus"></i> Create new User', 'create', [
-                    'class' => 'btn-success btn',
-                ]) ?>
-            </div>
-        </div>
+<div class="employee-index">
+    <h1><?=$this->title?></h1>
+        <?= Html::a('<i class="glyphicon glyphicon-plus"></i> Add new User', 'create', [
+            'class' => 'btn-success btn',
+        ]) ?>
+
         <?= GridView::widget([
             'dataProvider' => $dataProvider,
             'filterModel' => $searchModel,
@@ -271,6 +269,8 @@ if ($isAdmin || $isSuperAdmin) {
                                 $str.='<td>'.Html::encode($projectParam->upp_project_id).'</td>';
                                 $str.='<td>'.Html::encode($projectParam->uppProject->name).'</td>';
                                 $str.='<td>'.Html::encode($projectParam->upp_tw_phone_number).'</td>';
+
+
                                 //$str.='<td>'.Html::encode($projectParam->upp_tw_sip_id).'</td>';
                                 //$str.='<td>'.Html::encode($model->userProfile->up_sip ?? null).'</td>';
                                 //$projectsValueArr[] = Html::tag('span', Html::tag('i', '', ['class' => 'fa fa-list']) . ' ' . Html::encode($project->name), ['class' => 'label label-default']);
@@ -392,6 +392,8 @@ if ($isAdmin || $isSuperAdmin) {
                             $str .= '<tr><td>'.$params->getAttributeLabel('up_default_take_limit_leads').'</td><td>'.$params->up_default_take_limit_leads.'</td></tr>';
                             $str .= '<tr><td>'.$params->getAttributeLabel('up_min_percent_for_take_leads').'</td><td>'.$params->up_min_percent_for_take_leads.'%</td></tr>';
                             $str .= '<tr><td>'.$params->getAttributeLabel('up_frequency_minutes').'</td><td>'.$params->up_frequency_minutes.'</td></tr>';
+                            $str .= '<tr><td>'.$params->getAttributeLabel('up_call_expert_limit').'</td><td>'.$params->up_call_expert_limit.'</td></tr>';
+
                             $str .= '</table>';
                         } else {
                             $str = '-';
@@ -427,5 +429,4 @@ if ($isAdmin || $isSuperAdmin) {
             ]
         ])
         ?>
-    </div>
 </div>
