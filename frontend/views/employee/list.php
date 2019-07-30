@@ -3,10 +3,13 @@
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\EmployeeSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
+/* @var $multipleForm \frontend\models\UserMultipleForm */
 /* @var $employees [] */
 
 use yii\bootstrap\Html;
-use yii\grid\GridView;
+//use yii\grid\GridView;
+use kartik\grid\GridView;
+use yii\widgets\Pjax;
 
 $this->title = 'User List';
 $this->params['breadcrumbs'][] = $this->title;
@@ -31,9 +34,36 @@ if ($isAdmin || $isSuperAdmin) {
 ?>
 <div class="employee-index">
     <h1><?=$this->title?></h1>
-        <?= Html::a('<i class="glyphicon glyphicon-plus"></i> Add new User', 'create', [
-            'class' => 'btn-success btn',
-        ]) ?>
+
+    <?= Html::a('<i class="glyphicon glyphicon-plus"></i> Add new User', 'create', [
+        'class' => 'btn-success btn',
+    ]) ?>
+
+    <?php Pjax::begin(['id' => 'user-pjax-list', 'timeout' => 7000, 'enablePushState' => true]); //['id' => 'user-pjax-list', 'timeout' => 5000, 'enablePushState' => true, 'clientOptions' => ['method' => 'GET']]); ?>
+    <?php
+
+       echo $this->render('_search', [
+        'model' => $searchModel,
+    ]);
+    ?>
+
+
+    <?/*php if(Yii::$app->user->identity->canRoles(['admin', 'supervision'])) : ?>
+        <p>
+            <?//= Html::a('Create Lead', ['create'], ['class' => 'btn btn-success']) ?>
+            <?= \yii\helpers\Html::button('<i class="fa fa-edit"></i> Multiple update', ['class' => 'btn btn-info', 'data-toggle'=> "modal", 'data-target'=>"#modalUpdate" ])?>
+        </p>
+    <?php endif; */?>
+
+
+    <?php $form = \yii\bootstrap\ActiveForm::begin(['options' => ['data-pjax' => true]]); // ['action' => ['leads/update-multiple'] ?>
+
+
+        <?php if($isAdmin):?>
+            <p>
+                <?= \yii\helpers\Html::button('<i class="fa fa-edit"></i> Multiple update', ['class' => 'btn btn-info','data-toggle' => 'modal','data-target' => '#modalUpdate'])?>
+            </p>
+        <?php endif;?>
 
         <?= GridView::widget([
             'dataProvider' => $dataProvider,
@@ -45,6 +75,12 @@ if ($isAdmin || $isSuperAdmin) {
                 }
             },
             'columns' => [
+                [
+                    'class' => \kartik\grid\CheckboxColumn::class,
+                    'name' => 'UserMultipleForm[user_list]',
+                    'pageSummary' => true,
+                    'rowSelectedClass' => \kartik\grid\GridView::TYPE_INFO,
+                ],
                 [
                     'attribute' => 'id',
                     'contentOptions' => ['class' => 'text-left', 'style' => 'width: 60px'],
@@ -174,14 +210,15 @@ if ($isAdmin || $isSuperAdmin) {
                         $groupsValueArr = [];
 
                         foreach ($groups as $group) {
-                            $groupsValueArr[] = Html::tag('span', /*Html::tag('i', '', ['class' => 'fa fa-users']) . ' ' .*/ Html::encode($group), ['class' => 'label label-info']);
+                            $groupsValueArr[] = '<div class="col-md-4">'.Html::tag('div', /*Html::tag('i', '', ['class' => 'fa fa-users']) . ' ' .*/ Html::encode($group), ['class' => 'label label-info']).'</div>';
                         }
 
-                        $groupsValue = implode(' ', $groupsValueArr);
+                        $groupsValue = '<div class="row">'.implode(' ', $groupsValueArr).'</div>';
 
                         return $groupsValue;
                     },
                     'format' => 'raw',
+                    'contentOptions' => ['class' => 'text-left', 'style' => 'width: 280px'],
                     'filter' => $isAdmin ? \common\models\UserGroup::getList() : Yii::$app->user->identity->getUserGroupList()
                 ],
 
@@ -429,4 +466,70 @@ if ($isAdmin || $isSuperAdmin) {
             ]
         ])
         ?>
+
+    <?php if($isAdmin) : ?>
+        <p>
+            <?= \yii\helpers\Html::button('<i class="fa fa-edit"></i> Multiple update', ['class' => 'btn btn-info','data-toggle' => 'modal','data-target' => '#modalUpdate'])?>
+        </p>
+
+        <?= $form->errorSummary($multipleForm) ?>
+
+        <?php
+
+        \yii\bootstrap\Modal::begin([
+            'header' => '<b>Multiple update selected Users</b>',
+            // 'toggleButton' => ['label' => 'click me'],
+            'id' => 'modalUpdate'
+            // 'size' => 'modal-lg',
+        ]);
+        ?>
+
+
+        <div class="row">
+            <div class="col-md-12">
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <div class="col-md-6">
+                            <?= $form->field($multipleForm, 'up_call_expert_limit')->input('number', ['min' => -1, 'max' => 1000]) ?>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="form-group text-center">
+                                <?= Html::submitButton('<i class="fa fa-check-square"></i> Update selected Users', ['class' => 'btn btn-info']) ?>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <?php \yii\bootstrap\Modal::end(); ?>
+    <?php endif; ?>
+
+    <?php \yii\bootstrap\ActiveForm::end(); ?>
+
+
+
+    <?php Pjax::end(); ?>
+
+    <?php
+    $ajaxUrl = \yii\helpers\Url::to([
+        "leads/ajax-reason-list"
+    ]);
+    $js = <<<JS
+
+    $(document).on('pjax:start', function() {
+        $("#modalUpdate .close").click();
+    });
+
+    $(document).on('pjax:end', function() {
+         $('[data-toggle="tooltip"]').tooltip();
+    });
+   
+    //$('[data-toggle="tooltip"]').tooltip();
+
+
+JS;
+$this->registerJs($js, \yii\web\View::POS_READY);
+?>
+
 </div>

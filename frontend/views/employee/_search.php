@@ -9,28 +9,62 @@ use yii\widgets\ActiveForm;
 ?>
 
 <div class="employee-search">
+    <div class="x_panel">
+        <div class="x_title">
+            <h2><i class="fa fa-search"></i> Search</h2>
 
-    <?php $form = ActiveForm::begin([
-        'action' => ['index'],
-        'method' => 'get',
-        'options' => [
-            'data-pjax' => 1
-        ],
-    ]); ?>
+            <ul class="nav navbar-right panel_toolbox">
+                <li>
+                    <a class="collapse-link"><i class="fa fa-chevron-down"></i></a>
+                </li>
 
-    <?= $form->field($model, 'id') ?>
+                <?/*<li class="dropdown">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-comment"></i></a>
 
-    <?= $form->field($model, 'username') ?>
 
-    <?= $form->field($model, 'full_name') ?>
+                <ul class="dropdown-menu" role="menu">
+                    <li><a href="#">Settings 1</a>
+                    </li>
+                    <li><a href="#">Settings 2</a>
+                    </li>
+                </ul>
+            </li>*/?>
+            </ul>
+            <div class="clearfix"></div>
+        </div>
+        <div class="x_content" style="display: <?=(Yii::$app->request->isPjax || Yii::$app->request->get('EmployeeSearch') || Yii::$app->request->get('createTimeRange')) ? 'block' : 'none'?>">
+            <?php $form = ActiveForm::begin([
+                'action' => ['list'],
+                'method' => 'get',
+                'options' => [
+                    'data-pjax' => 1
+                ],
+            ]); ?>
 
-    <?= $form->field($model, 'auth_key') ?>
+<!--            <div class="col-md-1">-->
+<!--                --><?//= $form->field($model, 'id') ?>
+<!--            </div>-->
+<!---->
+<!--            <div class="col-md-2">-->
+<!--                --><?//= $form->field($model, 'username') ?>
+<!--            </div>-->
+<!---->
+<!---->
+<!--            <div class="col-md-2">-->
+<!--                --><?php //echo $form->field($model, 'email') ?>
+<!--            </div>-->
 
-    <?= $form->field($model, 'password_hash') ?>
+            <div class="col-md-1">
+                <?php echo $form->field($model, 'status')->dropDownList([\common\models\Employee::STATUS_ACTIVE => 'Active', \common\models\Employee::STATUS_DELETED => 'Deleted'], ['prompt' => '---']) ?>
+            </div>
 
-    <?php // echo $form->field($model, 'password_reset_token') ?>
+            <div class="col-md-1">
+                <?php echo $form->field($model, 'online')->dropDownList([1 => 'Online', 2 => 'Offline'], ['prompt' => '---']) ?>
+            </div>
 
-    <?php // echo $form->field($model, 'email') ?>
+            <div class="col-md-2">
+                <?php echo $form->field($model, 'user_group_id')->dropDownList(\common\models\UserGroup::getList(), ['prompt' => '---']) ?>
+            </div>
 
     <?php // echo $form->field($model, 'status') ?>
 
@@ -42,11 +76,17 @@ use yii\widgets\ActiveForm;
 
     <?php // echo $form->field($model, 'updated_at') ?>
 
-    <div class="form-group">
-        <?= Html::submitButton('Search', ['class' => 'btn btn-primary']) ?>
-        <?= Html::resetButton('Reset', ['class' => 'btn btn-default']) ?>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="form-group text-center">
+                <?= Html::submitButton('<i class="fa fa-search"></i> Search', ['class' => 'btn btn-primary']) ?>
+                <?= Html::resetButton('<i class="fa fa-close"></i> Reset form', ['class' => 'btn btn-default']) ?>
+            </div>
+        </div>
     </div>
 
-    <?php ActiveForm::end(); ?>
+            <?php ActiveForm::end(); ?>
+        </div>
+    </div>
 
 </div>

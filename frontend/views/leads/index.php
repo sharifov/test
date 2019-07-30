@@ -686,7 +686,7 @@ echo GridView::widget([
 ?>
 
 
-    <?php if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id)) : ?>
+    <?php if(Yii::$app->user->identity->canRoles(['admin', 'supervision'])) : ?>
         <p>
             <?=Html::button('<i class="fa fa-edit"></i> Multiple update', ['class' => 'btn btn-info','data-toggle' => "modal",'data-target' => "#modalUpdate"])?>
         </p>

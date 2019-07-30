@@ -297,8 +297,16 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     public function isEnableCallExpert(): bool
     {
         $params = $this->userParams;
-        if($params && (int) $params->up_call_expert_limit >= 0 && $this->callExpertCountByShiftTime >= $params->up_call_expert_limit) {
-            return false;
+
+        if($params) {
+
+            if ((int)$params->up_call_expert_limit === 0) {
+                return true;
+            }
+
+            if ((int)$params->up_call_expert_limit > 0 && $this->callExpertCountByShiftTime >= $params->up_call_expert_limit) {
+                return false;
+            }
         }
 
         return true;
