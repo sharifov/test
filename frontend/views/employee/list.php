@@ -39,12 +39,12 @@ if ($isAdmin || $isSuperAdmin) {
         'class' => 'btn-success btn',
     ]) ?>
 
-    <?php Pjax::begin(['id' => 'user-pjax-list', 'timeout' => 7000, 'enablePushState' => true]); //['id' => 'user-pjax-list', 'timeout' => 5000, 'enablePushState' => true, 'clientOptions' => ['method' => 'GET']]); ?>
+    <?php Pjax::begin(['id' => 'user-pjax-list', 'timeout' => 8000, 'enablePushState' => true]); //['id' => 'user-pjax-list', 'timeout' => 5000, 'enablePushState' => true, 'clientOptions' => ['method' => 'GET']]); ?>
     <?php
 
-       echo $this->render('_search', [
+       /*echo $this->render('_search', [
         'model' => $searchModel,
-    ]);
+    ]);*/
     ?>
 
 
@@ -56,18 +56,19 @@ if ($isAdmin || $isSuperAdmin) {
     <?php endif; */?>
 
 
-    <?php $form = \yii\bootstrap\ActiveForm::begin(['options' => ['data-pjax' => true]]); // ['action' => ['leads/update-multiple'] ?>
+    <?//php $form = \yii\bootstrap\ActiveForm::begin(['options' => ['data-pjax' => true]]); // ['action' => ['leads/update-multiple'] ?>
 
 
-        <?php if($isAdmin):?>
+        <?/*php if($isAdmin):?>
             <p>
                 <?= \yii\helpers\Html::button('<i class="fa fa-edit"></i> Multiple update', ['class' => 'btn btn-info','data-toggle' => 'modal','data-target' => '#modalUpdate'])?>
             </p>
-        <?php endif;?>
+        <?php endif;*/?>
 
         <?= GridView::widget([
             'dataProvider' => $dataProvider,
             'filterModel' => $searchModel,
+            'pjax' => false,
             //'layout' => $template,
             'rowOptions' => function (\common\models\Employee $model, $index, $widget, $grid) {
                 if ($model->isDeleted()) {
@@ -467,7 +468,7 @@ if ($isAdmin || $isSuperAdmin) {
         ])
         ?>
 
-    <?php if($isAdmin) : ?>
+    <?/*php if($isAdmin) : ?>
         <p>
             <?= \yii\helpers\Html::button('<i class="fa fa-edit"></i> Multiple update', ['class' => 'btn btn-info','data-toggle' => 'modal','data-target' => '#modalUpdate'])?>
         </p>
@@ -503,9 +504,9 @@ if ($isAdmin || $isSuperAdmin) {
         </div>
 
         <?php \yii\bootstrap\Modal::end(); ?>
-    <?php endif; ?>
+    <?php endif;*/ ?>
 
-    <?php \yii\bootstrap\ActiveForm::end(); ?>
+    <?//php \yii\bootstrap\ActiveForm::end(); ?>
 
 
 

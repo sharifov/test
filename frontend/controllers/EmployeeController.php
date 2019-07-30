@@ -138,7 +138,7 @@ class EmployeeController extends FController
     {
         $multipleForm = new UserMultipleForm();
 
-        if ($multipleForm->load(Yii::$app->request->post()) && $multipleForm->user_list) {
+        /*if ($multipleForm->load(Yii::$app->request->post()) && $multipleForm->user_list) {
             if ($multipleForm->validate()) {
 
                 if (\is_array($multipleForm->user_list)) {
@@ -174,7 +174,7 @@ class EmployeeController extends FController
                 }
 
             }
-        }
+        }*/
 
         $searchModel = new EmployeeSearch();
         $params = Yii::$app->request->queryParams;
