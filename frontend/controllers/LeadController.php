@@ -1200,12 +1200,12 @@ class LeadController extends FController
         return $response;
     }*/
 
-    public function actionGetBadges()
+    /*public function actionGetBadges()
     {
         Yii::$app->response->format = Response::FORMAT_JSON;
         $response = Lead::getBadgesSingleQuery();
         return $response;
-    }
+    }*/
 
     public function actionSendEmail($id)
     {

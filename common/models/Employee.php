@@ -49,6 +49,7 @@ use yii\web\NotFoundHttpException;
  * @property UserProjectParams[] $userProjectParams
  * @property Project[] $uppProjects
  * @property UserProfile $userProfile
+ * @property string|bool|null $timezone
  */
 class Employee extends \yii\db\ActiveRecord implements IdentityInterface
 {
@@ -87,6 +88,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     public $currentShiftTaskInfoSummary = [];
 
     private $cache = [];
+    private $_timezone;
 
 
     /**
@@ -225,6 +227,19 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     public function isActive()
     {
         return $this->status === self::STATUS_ACTIVE;
+    }
+
+    public function getTimezone()
+    {
+        if($this->_timezone === null) {
+            $params = $this->userParams;
+            if($params && $params->up_timezone) {
+                $this->_timezone = $params->up_timezone;
+            } else {
+                $this->_timezone = false;
+            }
+        }
+        return $this->_timezone;
     }
 
     public function afterFind()
@@ -1572,5 +1587,32 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         //VarDumper::dump($sqlRaw, 10, true); exit;
         $users = $generalQuery->all();
         return $users;
+    }
+
+    /**
+     * @param int $time
+     * @return string
+     * @throws \Exception
+     */
+    public static function convertDtTimezone(int $time): string
+    {
+        $dateTime = '';
+
+        if($time >= 0) {
+
+            /** @var Employee $user */
+            $user = \Yii::$app->user->identity;
+            $timezone = $user->timezone;
+
+            $dateTime = date('Y-m-d H:i:s', $time);
+
+            if ($timezone) {
+                $date = new \DateTime($dateTime, new \DateTimeZone($timezone));
+                $date->setTimezone(new \DateTimeZone('UTC'));
+                $dateTime = $date->format('Y-m-d H:i:s');
+            }
+        }
+
+        return $dateTime;
     }
 }

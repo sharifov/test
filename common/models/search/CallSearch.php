@@ -2,15 +2,22 @@
 
 namespace common\models\search;
 
+use common\models\Employee;
 use common\models\UserGroupAssign;
+use kartik\daterange\DateRangeBehavior;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use common\models\Call;
+use yii\helpers\VarDumper;
 
 /**
  * CallSearch represents the model behind the search form of `common\models\Call`.
  *
- * @property $limit int
+ * @property int $limit
+ *
+ * @property string $createTimeRange
+ * @property int $createTimeStart
+ * @property int $createTimeEnd
  */
 class CallSearch extends Call
 {
@@ -19,10 +26,12 @@ class CallSearch extends Call
     public $limit = 0;
     public $supervision_id;
 
-    public $datetime_start;
-    public $datetime_end;
-    public $date_range;
+    public $createTimeRange;
+    public $createTimeStart;
+    public $createTimeEnd;
 
+    public $call_duration_from;
+    public $call_duration_to;
 
     /**
      * {@inheritdoc}
@@ -30,13 +39,26 @@ class CallSearch extends Call
     public function rules()
     {
         return [
-            [['datetime_start', 'datetime_end'], 'safe'],
-            [['date_range'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
-            [['c_id', 'c_call_type_id', 'c_lead_id', 'c_created_user_id', 'c_com_call_id', 'c_project_id', 'c_is_new', 'c_is_deleted', 'supervision_id', 'limit', 'c_recording_duration', 'c_source_type_id'], 'integer'],
+            [['c_id', 'c_call_type_id', 'c_lead_id', 'c_created_user_id', 'c_com_call_id', 'c_project_id', 'c_is_new', 'c_is_deleted', 'supervision_id', 'limit', 'c_recording_duration', 'c_source_type_id', 'call_duration_from', 'call_duration_to'], 'integer'],
             [['c_call_sid', 'c_account_sid', 'c_from', 'c_to', 'c_sip', 'c_call_status', 'c_api_version', 'c_direction', 'c_forwarded_from', 'c_caller_name', 'c_parent_call_sid', 'c_call_duration', 'c_sip_response_code', 'c_recording_url', 'c_recording_sid',
                 'c_timestamp', 'c_uri', 'c_sequence_number', 'c_created_dt', 'c_updated_dt', 'c_error_message', 'c_price', 'statuses', 'limit'], 'safe'],
+            [['createTimeRange'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
         ];
     }
+
+
+    public function behaviors()
+    {
+        return [
+            [
+                'class' => DateRangeBehavior::class,
+                'attribute' => 'createTimeRange',
+                'dateStartAttribute' => 'createTimeStart',
+                'dateEndAttribute' => 'createTimeEnd',
+            ]
+        ];
+    }
+
 
     /**
      * {@inheritdoc}
@@ -51,7 +73,6 @@ class CallSearch extends Call
      * Creates data provider instance with search query applied
      *
      * @param array $params
-     *
      * @return ActiveDataProvider
      */
     public function search($params)
@@ -76,12 +97,26 @@ class CallSearch extends Call
             return $dataProvider;
         }
 
-        if(empty($this->c_created_dt) && isset($params['CallSearch']['date_range'])){
-            $query->andFilterWhere(['>=', 'DATE(c_created_dt)', $this->datetime_start])
-                ->andFilterWhere(['<=', 'DATE(c_created_dt)', $this->datetime_end]);
-        } elseif (isset($params['CallSearch']['c_created_dt'])) {
-            $query->andFilterWhere(['=','DATE(c_created_dt)', $this->c_created_dt]);
+        $dateTimeStart = $dateTimeEnd = null;
+
+        if ($this->createTimeStart) {
+            $dateTimeStart = Employee::convertDtTimezone($this->createTimeStart);
         }
+
+        if ($this->createTimeEnd) {
+            $dateTimeEnd = Employee::convertDtTimezone($this->createTimeEnd);
+        }
+
+        $query->andFilterWhere(['>=', 'c_created_dt', $dateTimeStart])
+            ->andFilterWhere(['<=', 'c_created_dt', $dateTimeEnd]);
+
+
+        $query->andFilterWhere(['=','DATE(c_created_dt)', $this->c_created_dt]);
+
+        $query->andFilterWhere(['>=','c_call_duration', $this->call_duration_from]);
+        $query->andFilterWhere(['<=','c_call_duration', $this->call_duration_to]);
+
+
 
         if($this->supervision_id > 0) {
             $subQuery1 = UserGroupAssign::find()->select(['ugs_group_id'])->where(['ugs_user_id' => $this->supervision_id]);
@@ -124,7 +159,6 @@ class CallSearch extends Call
             ->andFilterWhere(['like', 'c_recording_duration', $this->c_recording_duration])
             ->andFilterWhere(['like', 'c_timestamp', $this->c_timestamp])
             ->andFilterWhere(['like', 'c_uri', $this->c_uri])
-            ->andFilterWhere(['like', 'c_created_dt', $this->c_created_dt])
             ->andFilterWhere(['like', 'c_sequence_number', $this->c_sequence_number])
             ->andFilterWhere(['like', 'c_error_message', $this->c_error_message]);
 
@@ -165,9 +199,22 @@ class CallSearch extends Call
             return $dataProvider;
         }
 
-        if (isset($params['CallSearch']['c_created_dt'])) {
-            $query->andFilterWhere(['=','DATE(c_created_dt)', $this->c_created_dt]);
+        $dateTimeStart = $dateTimeEnd = null;
+
+        if ($this->createTimeStart) {
+            $dateTimeStart = Employee::convertDtTimezone($this->createTimeStart);
         }
+
+        if ($this->createTimeEnd) {
+            $dateTimeEnd = Employee::convertDtTimezone($this->createTimeEnd);
+        }
+
+        $query->andFilterWhere(['>=', 'c_created_dt', $dateTimeStart])
+            ->andFilterWhere(['<=', 'c_created_dt', $dateTimeEnd]);
+
+
+        $query->andFilterWhere(['=','DATE(c_created_dt)', $this->c_created_dt]);
+
 
         // grid filtering conditions
         $query->andFilterWhere([

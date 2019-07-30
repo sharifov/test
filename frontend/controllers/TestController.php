@@ -1488,4 +1488,41 @@ class TestController extends FController
 
     }
 
+    public function actionMysql()
+    {
+
+        $sqlData = [];
+        $sqlData[] = "SELECT COUNT(*) FROM `call`";
+        $sqlData[] = "SELECT * FROM `call` WHERE c_call_sid = 'CA4cd4b85d370ee0d517119e50da556b16'";
+        $sqlData[] = "SELECT * FROM `call` WHERE c_call_sid = 'CAbba5c4a2d05fa83c35d5eb458d68eb39'";
+        $sqlData[] = "SELECT * FROM `call` WHERE c_call_sid = 'CA95891e5bf4bb6d509dcd167bbd898142'";
+        $sqlData[] = "SELECT COUNT(*) FROM `sms`";
+        $sqlData[] = "SELECT COUNT(*) FROM `email`";
+        $sqlData[] = "SELECT COUNT(*) FROM `leads`";
+        $sqlData[] = "SELECT COUNT(*) FROM `quotes`";
+
+
+        echo '<h2>SQL x 1</h2><table border="1" cellpadding="3" cellspacing="1">';
+        foreach ($sqlData as $sql) {
+            $time_start = microtime(true);
+            $result = Yii::$app->db->createCommand($sql)->queryAll();
+            $time_end = microtime(true);
+            echo '<tr><td>'.$sql.'</td><td>Time: ' . round($time_end - $time_start, 6).'</td></tr>';
+        }
+        echo '</table>';
+
+
+        echo '<hr><h2>SQL x 10</h2><table border="1" cellpadding="3" cellspacing="1">';
+        foreach ($sqlData as $sql) {
+            $time_start = microtime(true);
+            for($i = 0; $i < 10; $i++) {
+                $result = Yii::$app->db->createCommand($sql)->queryAll();
+            }
+            $time_end = microtime(true);
+            echo '<tr><td>'.$sql.'</td><td>Time: ' . round($time_end - $time_start, 6).'</td></tr>';
+        }
+        echo '</table>';
+
+    }
+
 }

@@ -138,11 +138,27 @@ class LeadSearch extends Lead
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> ['defaultOrder' => ['id' => SORT_DESC]],
+            'sort'=> [
+                'defaultOrder' => ['leads.id' => SORT_DESC]
+            ],
             'pagination' => [
                 'pageSize' => 30,
             ],
         ]);
+
+
+        $sort = $dataProvider->getSort();
+        $sort->attributes = array_merge($sort->attributes, [
+            'leads.id' => [
+                'asc' => [Lead::tableName() . '.id' => SORT_ASC],
+                'desc' => [Lead::tableName() .'.id' => SORT_DESC]
+            ],
+            'id' => [
+                'asc' => [Lead::tableName() . '.id' => SORT_ASC],
+                'desc' => [Lead::tableName() .'.id' => SORT_DESC]
+            ]
+        ]);
+        $dataProvider->setSort($sort);
 
         $this->load($params);
 
