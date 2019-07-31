@@ -1107,7 +1107,7 @@ class LeadSearch extends Lead
         }
 
         if ($user->isAdmin()) {
-            $query->with(['client', 'client.clientEmails', 'client.clientPhones']);
+            $query->with(['client', 'client.clientEmails', 'client.clientPhones', 'project', 'leadFlightSegments']);
         }
 
         return $dataProvider;

@@ -39,6 +39,7 @@ use sales\services\lead\LeadCloneService;
 use sales\services\lead\LeadManageService;
 use sales\services\lead\LeadUnassignService;
 use Yii;
+use yii\caching\DbDependency;
 use yii\data\ActiveDataProvider;
 use yii\db\Expression;
 use yii\helpers\ArrayHelper;
@@ -1907,10 +1908,39 @@ class LeadController extends FController
         //$checkShiftTime = true;
 
         $searchModel = new LeadSearch();
+        //$dataProvider = $searchModel->searchInbox($params, $user);
 
-        $dataProvider = $searchModel->searchInbox($params, $user);
+        $user_id = \Yii::$app->user->id;
+        $cache = \Yii::$app->cache;
 
-        $isAccessNewLead = $user->accessTakeNewLead();
+        $sql = \common\models\Lead::find()->select('COUNT(*)')->where(['status' => Lead::STATUS_PENDING])->createCommand()->rawSql;
+
+        $duration = null;
+        $dependency = new DbDependency();
+        $dependency->sql = $sql;
+
+        $key = 'queue_inbox_' . $user_id;
+
+        //$cache->delete($key);
+
+        $result = $cache->get($key);
+        if ($result === false) {
+            $result['isAccessNewLead'] = $user->accessTakeNewLead();
+            $result['taskSummary'] = $user->getCurrentShiftTaskInfoSummary();
+            $result['dataProvider'] = $searchModel->searchInbox($params, $user);
+
+            $cache->set($key, $result, $duration, $dependency);
+
+            //echo 123; exit;
+        } else {
+            //echo 'cache'; exit;
+        }
+
+        $isAccessNewLead = $result['isAccessNewLead']; //$user->accessTakeNewLead();
+        $taskSummary = $result['taskSummary']; //$user->getCurrentShiftTaskInfoSummary();
+        $dataProvider = $result['dataProvider'];
+
+
         $accessLeadByFrequency = [];
 
         if ($isAccessNewLead) {
@@ -1920,6 +1950,8 @@ class LeadController extends FController
             }
         }
 
+
+
         return $this->render('inbox', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
@@ -1928,7 +1960,8 @@ class LeadController extends FController
             'isAccessNewLead' => $isAccessNewLead,
             'accessLeadByFrequency' => $accessLeadByFrequency,
             'user' => $user,
-            'newLeadsCount' => $user->getCountNewLeadCurrentShift()
+            'newLeadsCount' => $user->getCountNewLeadCurrentShift(),
+            'taskSummary' => $taskSummary
         ]);
     }
 
