@@ -198,9 +198,9 @@ return [
             'viewPath' => '@frontend/views/rbac',
         ],
     ],
-    /*'as beforeRequest' => [
-        'class' => 'common\components\EmployeeActivityLogging',
-    ],*/
+    'as beforeRequest' => [
+        'class' => \frontend\components\UserSiteActivityLog::class,
+    ],
     'container' => [
         'definitions' => [
             yii\grid\GridView::class => [

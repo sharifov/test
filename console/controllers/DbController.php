@@ -5,10 +5,12 @@ use common\models\Airline;
 use common\models\Lead;
 use common\models\LeadFlow;
 use common\models\Quote;
+use frontend\models\UserSiteActivity;
 use yii\console\Controller;
 use Yii;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Console;
+use yii\helpers\VarDumper;
 
 class DbController extends Controller
 {
@@ -211,6 +213,17 @@ ORDER BY lf.lead_id, id';
 
           //  $jsonResponse = $this->curl_call("https://api.telegram.org/bot" . $this->botToken . "/setWebhook", $option);
 
+        printf("\n --- End %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
+    }
+
+    /**
+     *
+     */
+    public function actionClearUserSiteActivityLogs(): void
+    {
+        printf("\n --- Start %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
+        $count = UserSiteActivity::clearHistoryLogs();
+        echo 'Removed: ' . $count;
         printf("\n --- End %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
     }
 

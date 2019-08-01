@@ -210,6 +210,7 @@ $isSuperAdmin = $user->canRole('superadmin');
                 ['label' => 'System Logs', 'url' => ['/log/index'], 'icon' => 'bars'],
                 ['label' => 'Clean cache & assets', 'url' => ['/clean/index'], 'icon' => 'remove'],
                 ['label' => 'Site Settings', 'url' => ['/setting/index'], 'icon' => 'cogs'],
+                ['label' => 'User Site Activity', 'url' => ['/user-site-activity/index'], 'icon' => 'bars'],
             ]
         ];
 
