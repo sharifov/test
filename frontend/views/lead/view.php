@@ -211,14 +211,21 @@ $lead = $leadForm->getLead();
                     <div class="alert alert-warning" role="alert">You do not have access to view Communication block messages.</div>
                 <?php endif;?>
 
-                <?= $this->render('call-expert/lead_call_expert', [
-                    'lead' => $leadForm->getLead(),
-                    'comForm'       => $comForm,
-                    'leadId'        => $lead->id,
-                    'dataProvider'  => $dataProviderCallExpert,
-                    'isAdmin'       => $is_admin,
-                    'modelLeadCallExpert'       => $modelLeadCallExpert,
-                ]) ?>
+
+            <?//php \yii\helpers\VarDumper::dump(Yii::$app->user->identity->callExpertCountByShiftTime) ?>
+
+
+
+                <?php if(Yii::$app->user->identity->isAllowCallExpert): ?>
+                    <?= $this->render('call-expert/lead_call_expert', [
+                        'lead' => $leadForm->getLead(),
+                        'comForm'       => $comForm,
+                        'leadId'        => $lead->id,
+                        'dataProvider'  => $dataProviderCallExpert,
+                        'isAdmin'       => $is_admin,
+                        'modelLeadCallExpert'       => $modelLeadCallExpert,
+                    ]) ?>
+                <?php endif;?>
 
 
             <?php endif;?>

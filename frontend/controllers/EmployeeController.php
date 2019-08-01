@@ -5,12 +5,15 @@ namespace frontend\controllers;
 use common\models\Employee;
 use common\models\EmployeeAcl;
 use common\models\EmployeeContactInfo;
+use common\models\Lead;
 use common\models\ProjectEmployeeAccess;
+use common\models\Reason;
 use common\models\search\EmployeeSearch;
 use common\models\search\UserProjectParamsSearch;
 use common\models\UserGroupAssign;
 use common\models\UserParams;
 use common\models\UserProfile;
+use frontend\models\UserMultipleForm;
 use Yii;
 use yii\bootstrap\Html;
 use yii\filters\AccessControl;
@@ -133,6 +136,48 @@ class EmployeeController extends FController
      */
     public function actionList()
     {
+        $multipleForm = new UserMultipleForm();
+
+        if ($multipleForm->load(Yii::$app->request->post()) && $multipleForm->validate()) {
+
+            //VarDumper::dump(json_decode($multipleForm->user_list_json)); exit;
+            //VarDumper::dump($multipleForm->user_list); exit;
+
+            if (\is_array($multipleForm->user_list)) {
+                foreach ($multipleForm->user_list as $user_id) {
+
+                    $user_id = (int) $user_id;
+                    $user = Employee::findOne($user_id);
+
+                    if ($user) {
+                        $is_save = false;
+
+//                            if ($multipleForm->status_id) {
+//                                $lead->status = $multipleForm->status_id;
+//                                $is_save = true;
+//                            }
+//
+
+                        if (is_numeric($multipleForm->up_call_expert_limit)) {
+                            $up = $user->userParams;
+                            if($up) {
+                                $up->up_call_expert_limit = (int) $multipleForm->up_call_expert_limit;
+                                if(!$up->save()) {
+                                    Yii::error(VarDumper::dumpAsString($up->errors), 'Employee:list:multipleupdate:userParams:save');
+                                }
+                            }
+                        }
+
+                        if ($is_save) {
+                            $user->save();
+                        }
+                    }
+                }
+            }
+
+
+        }
+
         $searchModel = new EmployeeSearch();
         $params = Yii::$app->request->queryParams;
 
@@ -142,9 +187,12 @@ class EmployeeController extends FController
 
         $dataProvider = $searchModel->search($params);
 
+
+
         return $this->render('list', [
             'dataProvider' => $dataProvider,
             'searchModel' => $searchModel,
+            'multipleForm' => $multipleForm,
         ]);
     }
 

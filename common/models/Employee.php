@@ -50,6 +50,8 @@ use yii\web\NotFoundHttpException;
  * @property Project[] $uppProjects
  * @property UserProfile $userProfile
  * @property string|bool|null $timezone
+ * @property bool $isAllowCallExpert
+ * @property int $callExpertCountByShiftTime
  */
 class Employee extends \yii\db\ActiveRecord implements IdentityInterface
 {
@@ -88,7 +90,10 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     public $currentShiftTaskInfoSummary = [];
 
     private $cache = [];
+
     private $_timezone;
+    private $_isAllowCallExpert;
+    private $_callExpertCountByShiftTime;
 
 
     /**
@@ -229,6 +234,9 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         return $this->status === self::STATUS_ACTIVE;
     }
 
+    /**
+     * @return bool|string
+     */
     public function getTimezone()
     {
         if($this->_timezone === null) {
@@ -241,6 +249,73 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         }
         return $this->_timezone;
     }
+
+    /**
+     * @return bool
+     */
+    public function getIsAllowCallExpert(): bool
+    {
+
+        if($this->_isAllowCallExpert === null) {
+            $this->_isAllowCallExpert = false;
+            $params = $this->userParams;
+            if($params && (int) $params->up_call_expert_limit >= 0) {
+                $this->_isAllowCallExpert = true;
+            }
+        }
+        return $this->_isAllowCallExpert;
+    }
+
+    /**
+     * @return int
+     * @throws \Exception
+     */
+    public function getCallExpertCountByShiftTime(): int
+    {
+
+        if($this->_callExpertCountByShiftTime === null) {
+            //$this->_callExpertCountByShiftTime = 0;
+
+            $shiftTime = $this->getShiftTime();
+
+            if (isset($shiftTime['start_utc_dt']) && $shiftTime['start_utc_dt']) {
+                $startShiftDateTime = date('Y-m-d', strtotime($shiftTime['start_utc_dt']) - (3 * 60 * 60));
+            } else {
+                $startShiftDateTime = date('Y-m-d', strtotime('-3 hours'));
+            }
+
+
+            $this->_callExpertCountByShiftTime = LeadCallExpert::find()->where(['lce_agent_user_id' => $this->id])->andWhere(['>=', 'lce_request_dt', $startShiftDateTime])->count();
+        }
+        return $this->_callExpertCountByShiftTime;
+    }
+
+
+    /**
+     * @return bool
+     */
+    public function isEnableCallExpert(): bool
+    {
+        $params = $this->userParams;
+
+        if($params) {
+
+            if ((int)$params->up_call_expert_limit === 0) {
+                return true;
+            }
+
+            if ((int)$params->up_call_expert_limit > 0 && $this->callExpertCountByShiftTime >= $params->up_call_expert_limit) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+
+
+
+
 
     public function afterFind()
     {

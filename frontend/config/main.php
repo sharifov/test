@@ -25,6 +25,7 @@ return [
 
         'user' => [
             'identityClass' => \common\models\Employee::class,
+            'class' => \frontend\components\User::class,
             'enableAutoLogin' => true,
             'identityCookie' => ['name' => '_identity-crm', 'httpOnly' => true],
         ],

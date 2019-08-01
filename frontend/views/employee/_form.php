@@ -220,6 +220,7 @@ if (Yii::$app->user->identity->canRoles(['admin', 'userManager', 'superadmin']))
                         <div class="row">
                             <div class="col-md-3">
                                 <?= $form->field($modelUserParams, 'up_inbox_show_limit_leads')->input('number', ['step' => 1, 'min' => 0, 'max' => 500]) ?>
+                                <?= $form->field($modelUserParams, 'up_call_expert_limit')->input('number', ['step' => 1, 'min' => -1, 'max' => 1000]) ?>
                             </div>
                             <div class="col-md-3">
                                 <?= $form->field($modelUserParams, 'up_default_take_limit_leads')->input('number', ['step' => 1, 'max' => 100, 'min' => 0]) ?>

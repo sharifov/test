@@ -17,6 +17,7 @@ use yii\helpers\Url;
 /* @var $accessLeadByFrequency array */
 /* @var $user \common\models\Employee */
 /* @var $newLeadsCount integer */
+/* @var $taskSummary array */
 
 $this->title = 'Inbox Queue';
 
@@ -56,10 +57,6 @@ $this->params['breadcrumbs'][] = $this->title;
 <div class="lead-index">
 
     <div class="col-md-12">
-        <?php
-        $taskSummary = $user->getCurrentShiftTaskInfoSummary();
-        //\yii\helpers\VarDumper::dump($taskSummary, 10, true);
-        ?>
 
         <div class="animated flipInY col-lg-2 col-md-2 col-sm-6 col-xs-12">
             <div class="tile-stats">

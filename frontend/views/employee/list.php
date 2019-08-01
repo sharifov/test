@@ -3,13 +3,18 @@
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\EmployeeSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
+/* @var $multipleForm \frontend\models\UserMultipleForm */
 /* @var $employees [] */
 
 use yii\bootstrap\Html;
-use yii\grid\GridView;
+//use yii\grid\GridView;
+use kartik\grid\GridView;
+use yii\widgets\Pjax;
 
 $this->title = 'User List';
 $this->params['breadcrumbs'][] = $this->title;
+
+
 
 $isUM = Yii::$app->user->identity->canRole('userManager');
 $isAdmin = Yii::$app->user->identity->canRoles(['admin', 'superadmin']);
@@ -27,19 +32,66 @@ if ($isAdmin || $isSuperAdmin) {
 
 
 ?>
-<div class="panel panel-default">
-    <div class="panel-heading">Employees</div>
-    <div class="panel-body">
-        <div class="row mb-20">
-            <div class="col-md-6">
-                <?= Html::a('<i class="glyphicon glyphicon-plus"></i> Create new User', 'create', [
-                    'class' => 'btn-success btn',
-                ]) ?>
-            </div>
-        </div>
+<div class="employee-index">
+    <h1><?=$this->title?></h1>
+
+    <?= Html::a('<i class="glyphicon glyphicon-plus"></i> Add new User', 'create', [
+        'class' => 'btn-success btn',
+    ]) ?>
+
+    <?php Pjax::begin(['id' => 'user-pjax-list', 'timeout' => 8000, 'enablePushState' => true, 'enableReplaceState' => false]); //['id' => 'user-pjax-list', 'timeout' => 5000, 'enablePushState' => true, 'clientOptions' => ['method' => 'GET']]); ?>
+
+
+    <?php
+
+       echo $this->render('_search', [
+        'model' => $searchModel,
+    ]);
+    ?>
+
+    <?/*= Html::label( Yii::t('frontend', 'Page size: '), 'pagesize', array( 'style' => 'margin-left:10px; margin-top:8px;' ) ) ?>
+    <?= Html::dropDownList(
+        'pagesize',
+        ( isset($_GET['pagesize']) ? $_GET['pagesize'] : 20 ),  // set the default value for the dropdown list
+        // set the key and value for the drop down list
+        array(
+            20 => 20,
+            50 => 50,
+            100 => 100),
+        // add the HTML attritutes for the dropdown list
+        // I add pagesize as an id of dropdown list. later on, I will add into the Gridview widget.
+        // so when the form is submitted, I can get the $_POST value in InvoiceSearch model.
+        array(
+            'id' => 'pagesize',
+            'style' => 'margin-left:5px; margin-top:8px;'
+        )
+    )*/
+    ?>
+
+
+    <?php if(Yii::$app->user->identity->canRoles(['admin', 'supervision'])) : ?>
+        <p>
+            <?//= Html::a('Create Lead', ['create'], ['class' => 'btn btn-success']) ?>
+            <?= \yii\helpers\Html::button('<i class="fa fa-edit"></i> Multiple update', ['class' => 'btn btn-warning', 'data-toggle'=> 'modal', 'data-target'=>'#modalUpdate' ])?>
+        </p>
+    <?php endif; ?>
+
+
+
+
+
+        <?/*php if($isAdmin):?>
+            <p>
+                <?= \yii\helpers\Html::button('<i class="fa fa-edit"></i> Multiple update', ['class' => 'btn btn-info','data-toggle' => 'modal','data-target' => '#modalUpdate'])?>
+            </p>
+        <?php endif;*/?>
+
         <?= GridView::widget([
+                'id' => 'user-list-grid',
             'dataProvider' => $dataProvider,
             'filterModel' => $searchModel,
+            //'layout'=>'{summary}'.Html::activeDropDownList($searchModel, 'perpage', [10 => 10, 30 => 30, 20 => 20, 50 => 50, 100 => 100],['id'=>'perpage'])."{items}<br/>{pager}",
+            'pjax' => false,
             //'layout' => $template,
             'rowOptions' => function (\common\models\Employee $model, $index, $widget, $grid) {
                 if ($model->isDeleted()) {
@@ -47,6 +99,12 @@ if ($isAdmin || $isSuperAdmin) {
                 }
             },
             'columns' => [
+                [
+                    'class' => \kartik\grid\CheckboxColumn::class,
+                    'name' => 'UserMultipleForm[user_list]',
+                    //'pageSummary' => true,
+                    'rowSelectedClass' => \kartik\grid\GridView::TYPE_INFO,
+                ],
                 [
                     'attribute' => 'id',
                     'contentOptions' => ['class' => 'text-left', 'style' => 'width: 60px'],
@@ -176,14 +234,15 @@ if ($isAdmin || $isSuperAdmin) {
                         $groupsValueArr = [];
 
                         foreach ($groups as $group) {
-                            $groupsValueArr[] = Html::tag('span', /*Html::tag('i', '', ['class' => 'fa fa-users']) . ' ' .*/ Html::encode($group), ['class' => 'label label-info']);
+                            $groupsValueArr[] = '<div class="col-md-4">'.Html::tag('div', /*Html::tag('i', '', ['class' => 'fa fa-users']) . ' ' .*/ Html::encode($group), ['class' => 'label label-info']).'</div>';
                         }
 
-                        $groupsValue = implode(' ', $groupsValueArr);
+                        $groupsValue = '<div class="row">'.implode(' ', $groupsValueArr).'</div>';
 
                         return $groupsValue;
                     },
                     'format' => 'raw',
+                    'contentOptions' => ['class' => 'text-left', 'style' => 'width: 280px'],
                     'filter' => $isAdmin ? \common\models\UserGroup::getList() : Yii::$app->user->identity->getUserGroupList()
                 ],
 
@@ -271,6 +330,8 @@ if ($isAdmin || $isSuperAdmin) {
                                 $str.='<td>'.Html::encode($projectParam->upp_project_id).'</td>';
                                 $str.='<td>'.Html::encode($projectParam->uppProject->name).'</td>';
                                 $str.='<td>'.Html::encode($projectParam->upp_tw_phone_number).'</td>';
+
+
                                 //$str.='<td>'.Html::encode($projectParam->upp_tw_sip_id).'</td>';
                                 //$str.='<td>'.Html::encode($model->userProfile->up_sip ?? null).'</td>';
                                 //$projectsValueArr[] = Html::tag('span', Html::tag('i', '', ['class' => 'fa fa-list']) . ' ' . Html::encode($project->name), ['class' => 'label label-default']);
@@ -392,6 +453,8 @@ if ($isAdmin || $isSuperAdmin) {
                             $str .= '<tr><td>'.$params->getAttributeLabel('up_default_take_limit_leads').'</td><td>'.$params->up_default_take_limit_leads.'</td></tr>';
                             $str .= '<tr><td>'.$params->getAttributeLabel('up_min_percent_for_take_leads').'</td><td>'.$params->up_min_percent_for_take_leads.'%</td></tr>';
                             $str .= '<tr><td>'.$params->getAttributeLabel('up_frequency_minutes').'</td><td>'.$params->up_frequency_minutes.'</td></tr>';
+                            $str .= '<tr><td>'.$params->getAttributeLabel('up_call_expert_limit').'</td><td>'.$params->up_call_expert_limit.'</td></tr>';
+
                             $str .= '</table>';
                         } else {
                             $str = '-';
@@ -427,5 +490,92 @@ if ($isAdmin || $isSuperAdmin) {
             ]
         ])
         ?>
-    </div>
+
+    <?php $form = \yii\bootstrap\ActiveForm::begin(['id' => 'user-list-update-form', /*'action' => ['employee/list'],*/ 'method' => 'post', 'options' => ['data-pjax' => true]]); // ['action' => ['leads/update-multiple'] ?>
+
+        <?php if($isAdmin) : ?>
+            <p>
+                <?= \yii\helpers\Html::button('<i class="fa fa-edit"></i> Multiple update', ['class' => 'btn btn-warning','data-toggle' => 'modal','data-target' => '#modalUpdate'])?>
+            </p>
+
+            <?= $form->errorSummary($multipleForm) ?>
+
+            <?php
+
+            \yii\bootstrap\Modal::begin([
+                'header' => '<b>Multiple update selected Users</b>',
+                // 'toggleButton' => ['label' => 'click me'],
+                'id' => 'modalUpdate'
+                // 'size' => 'modal-lg',
+            ]);
+            ?>
+
+
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="panel panel-default">
+                        <div class="panel-body">
+                            <div class="col-md-6">
+                                <?= $form->field($multipleForm, 'up_call_expert_limit')->input('number', ['min' => -1, 'max' => 1000]) ?>
+                                <?= $form->field($multipleForm, 'user_list_json')->hiddenInput(['id' => 'user_list_json'])->label(false) ?>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="form-group text-center">
+                                    <?= Html::submitButton('<i class="fa fa-check-square"></i> Update selected Users', ['id' => 'btn-submit-multiple-update', 'class' => 'btn btn-success']) ?>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <?php \yii\bootstrap\Modal::end(); ?>
+        <?php endif; ?>
+
+    <?php \yii\bootstrap\ActiveForm::end(); ?>
+
+
+
+    <?php Pjax::end(); ?>
+
+    <?php
+
+    $js = <<<JS
+
+    $(document).ready(function () {
+        
+        $(document).on('click', '#btn-submit-multiple-update', function() {
+            var keys = $('#user-list-grid').yiiGridView('getSelectedRows');
+            $('#user_list_json').attr('value', JSON.stringify(keys));
+        });
+        
+        /*$('#user-list-update-form').on('beforeSubmit', function () {
+           
+            return true;
+        });*/
+    
+    }); 
+
+
+    $(document).on('pjax:start', function() {
+        $("#modalUpdate .close").click();
+    });
+
+    /*$(document).on('pjax:end', function() {
+         $('[data-toggle="tooltip"]').tooltip();
+    });*/
+   
+    //$('[data-toggle="tooltip"]').tooltip();
+
+
+JS;
+$this->registerJs($js, \yii\web\View::POS_READY);
+
+    /*$this->registerJs('$("#user-list-update-form").on("beforeSubmit", function (e) {
+    $("#modalUpdate .close").click();
+$("#modalUpdate").modal("hide");
+});', \yii\web\View::POS_READY);*/
+
+?>
+
 </div>
