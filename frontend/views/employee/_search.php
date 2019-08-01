@@ -41,18 +41,17 @@ use yii\widgets\ActiveForm;
                 ],
             ]); ?>
 
-<!--            <div class="col-md-1">-->
-<!--                --><?//= $form->field($model, 'id') ?>
-<!--            </div>-->
-<!---->
-<!--            <div class="col-md-2">-->
-<!--                --><?//= $form->field($model, 'username') ?>
-<!--            </div>-->
-<!---->
-<!---->
-<!--            <div class="col-md-2">-->
-<!--                --><?php //echo $form->field($model, 'email') ?>
-<!--            </div>-->
+            <div class="col-md-1">
+                <?= $form->field($model, 'id') ?>
+            </div>
+
+            <div class="col-md-2">
+                <?= $form->field($model, 'username') ?>
+            </div>
+
+            <div class="col-md-2">
+                <?php echo $form->field($model, 'email') ?>
+            </div>
 
             <div class="col-md-1">
                 <?php echo $form->field($model, 'status')->dropDownList([\common\models\Employee::STATUS_ACTIVE => 'Active', \common\models\Employee::STATUS_DELETED => 'Deleted'], ['prompt' => '---']) ?>

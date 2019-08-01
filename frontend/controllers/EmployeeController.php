@@ -138,17 +138,19 @@ class EmployeeController extends FController
     {
         $multipleForm = new UserMultipleForm();
 
-        if ($multipleForm->load(Yii::$app->request->post()) && $multipleForm->user_list) {
-            if ($multipleForm->validate()) {
+        if ($multipleForm->load(Yii::$app->request->post()) && $multipleForm->validate()) {
 
-                if (\is_array($multipleForm->user_list)) {
-                    foreach ($multipleForm->user_list as $user_id) {
+            //VarDumper::dump(json_decode($multipleForm->user_list_json)); exit;
+            //VarDumper::dump($multipleForm->user_list); exit;
 
-                        $user_id = (int) $user_id;
-                        $user = Employee::findOne($user_id);
+            if (\is_array($multipleForm->user_list)) {
+                foreach ($multipleForm->user_list as $user_id) {
 
-                        if ($user) {
-                            $is_save = false;
+                    $user_id = (int) $user_id;
+                    $user = Employee::findOne($user_id);
+
+                    if ($user) {
+                        $is_save = false;
 
 //                            if ($multipleForm->status_id) {
 //                                $lead->status = $multipleForm->status_id;
@@ -156,24 +158,24 @@ class EmployeeController extends FController
 //                            }
 //
 
-                            if (is_numeric($multipleForm->up_call_expert_limit)) {
-                                $up = $user->userParams;
-                                if($up) {
-                                    $up->up_call_expert_limit = (int) $multipleForm->up_call_expert_limit;
-                                    if(!$up->save()) {
-                                        Yii::error(VarDumper::dumpAsString($up->errors), 'Employee:list:multipleupdate:userParams:save');
-                                    }
+                        if (is_numeric($multipleForm->up_call_expert_limit)) {
+                            $up = $user->userParams;
+                            if($up) {
+                                $up->up_call_expert_limit = (int) $multipleForm->up_call_expert_limit;
+                                if(!$up->save()) {
+                                    Yii::error(VarDumper::dumpAsString($up->errors), 'Employee:list:multipleupdate:userParams:save');
                                 }
                             }
+                        }
 
-                            if ($is_save) {
-                                $user->save();
-                            }
+                        if ($is_save) {
+                            $user->save();
                         }
                     }
                 }
-
             }
+
+
         }
 
         $searchModel = new EmployeeSearch();
