@@ -46,6 +46,23 @@ class UserSiteActivityController extends FController
         ]);
     }
 
+
+    /**
+     * Lists all UserSiteActivity models.
+     * @return mixed
+     */
+    public function actionReport()
+    {
+        $searchModel = new UserSiteActivitySearch();
+        $data = $searchModel->searchReport(Yii::$app->request->queryParams);
+
+        return $this->render('report', [
+            'searchModel' => $searchModel,
+            'data' => $data,
+        ]);
+    }
+
+
     /**
      * Displays a single UserSiteActivity model.
      * @param integer $id
