@@ -714,7 +714,7 @@ echo '<div class="container" id="container-redirect-agents"></div>';
                     //console.info(conn.parameters);
                     //console.log(conn.parameters.CallSid);
 
-                    saveDbCall(conn.parameters.CallSid, conn.message.FromAgentPhone, conn.message.To, 'queued');
+                    //saveDbCall(conn.parameters.CallSid, conn.message.FromAgentPhone, conn.message.To, 'queued');
 
                     //document.getElementById('button-call').style.display = 'none';
                     //document.getElementById('button-hangup').style.display = 'inline';

@@ -431,8 +431,8 @@ class CommunicationController extends ApiBaseController
             $client_phone_number = null;
             $agent_phone_number = null;
             $gatherDigits = false;
-            $callSid = $post['call']['CallSid'] ?? false;
-            $parentCallSid = $post['call']['ParentCallSid'] ?? false;
+            $callSid = $post['call']['CallSid'] ?? null;
+            $parentCallSid = $post['call']['ParentCallSid'] ?? null;
 
             if($callSid && $use_voice_gather) {
                 $callSession = CallSession::findOne(['cs_cid' => $callSid]);
@@ -776,7 +776,34 @@ class CommunicationController extends ApiBaseController
 
             if (!$isOnHold && !$callGeneralNumber && $call_employee) {
 
-                foreach ($call_employee AS $key => $userCall) {
+                $call = new Call();
+                $call->c_call_sid = $post['call']['CallSid'] ?? null;
+                $call->c_account_sid = $post['call']['AccountSid'] ?? null;
+                $call->c_call_type_id = Call::CALL_TYPE_IN;
+                $call->c_call_status = $post['call']['CallStatus'] ?? Call::CALL_STATUS_RINGING;
+                $call->c_com_call_id = $post['call_id'] ?? null;
+                $call->c_direction = $post['call']['Direction'] ?? null;
+                $call->c_project_id = $call_project_id;
+                $call->c_is_new = true;
+                $call->c_api_version = $post['call']['ApiVersion'] ?? null;
+                $call->c_created_dt = date('Y-m-d H:i:s');
+                $call->c_from = $client_phone_number;
+                $call->c_sip = null;
+                $call->c_to = $agent_phone_number; //$userCall->username ? $userCall->username : null;
+                $call->c_created_user_id = null;
+                $call->c_source_type_id = Call::SOURCE_REDIRECT_CALL;
+                $call->c_parent_call_sid = null;
+                if ($lead2) {
+                    $call->c_lead_id = $lead2->id;
+                } else {
+                    $call->c_lead_id = null;
+                }
+                if (!$call->save()) {
+                    Yii::error(VarDumper::dumpAsString($call->errors), 'API:Communication:voiceIncoming:Call:save');
+                }
+
+
+                /*foreach ($call_employee AS $key => $userCall) {
                     $call = new Call();
                     $call->c_call_sid = $post['call']['CallSid'] ?? null;
                     $call->c_account_sid = $post['call']['AccountSid'] ?? null;
@@ -803,7 +830,8 @@ class CommunicationController extends ApiBaseController
                     }
                     $data['status'] = $call->c_call_status;
                     // Notifications::socket($call->c_created_user_id, $call->c_lead_id, 'incomingCall', $data, true);
-                }
+
+                }*/
             } elseif($isOnHold) {
                 $call = new Call();
                 $call->c_call_sid = $post['call']['CallSid'] ?? null;
@@ -1026,11 +1054,11 @@ class CommunicationController extends ApiBaseController
                 $call->c_created_dt = $callData['c_created_dt'];
                 $call->c_updated_dt = date('Y-m-d H:i:s');
 
-                $call->c_recording_url = $callData['c_recording_url'];
-                $call->c_recording_sid = $callData['c_recording_sid'];
-                $call->c_recording_duration = $callData['c_recording_duration'];
+                $call->c_recording_url = $callData['c_recording_url'] ?? null;
+                $call->c_recording_sid = $callData['c_recording_sid'] ?? null;
+                $call->c_recording_duration = $callData['c_recording_duration'] ?? null;
 
-                $call->c_caller_name = $callData['c_caller_name'];
+                $call->c_caller_name = $callData['c_caller_name'] ?? null;
                 $call->c_direction = $callData['c_direction'];
                 $call->c_api_version = $callData['c_api_version'];
 
@@ -1038,9 +1066,9 @@ class CommunicationController extends ApiBaseController
                 //$call->c_call_status = $post['callData']['CallStatus'] ?? '';
                 //$call->c_sequence_number = $post['callData']['SequenceNumber'] ?? 0;
 
-                $call->c_sip = $callData['c_sip'];
+                $call->c_sip = $callData['c_sip'] ?? null;
 
-                if($callData['c_project_id']) {
+                if(isset($callData['c_project_id'])) {
                     $call->c_project_id = $callData['c_project_id'];
                 }
 
@@ -1049,7 +1077,9 @@ class CommunicationController extends ApiBaseController
                 $upp = null;
 
                 if($call->c_project_id && $call->c_from) {
-                    $agentId = (int) str_replace('client:seller', '', $call->c_from);
+                    if(strpos($call->c_from, 'client:seller') !== false) {
+                        $agentId = (int)str_replace('client:seller', '', $call->c_from);
+                    }
                     if($agentId) {
                         $upp = UserProjectParams::find()->where(['upp_user_id' => $agentId, 'upp_project_id' => $call->c_project_id])->one();
                     }
@@ -1228,6 +1258,13 @@ class CommunicationController extends ApiBaseController
             }
 
             $callData = $post['call'];
+            $callTwData = $post['callData'];
+
+            $isChildCall = $callTwData['ParentCallSid'] ?? false;
+            $parentCall = null;
+            if($isChildCall) {
+                $parentCall = Call::findOne(['c_call_sid' => $callTwData['ParentCallSid']]);
+            }
 
             if(!$call) {
                 $call = new Call();
@@ -1247,26 +1284,39 @@ class CommunicationController extends ApiBaseController
                 $call->c_recording_sid = $callData['c_recording_sid'] ?? null;
                 $call->c_recording_duration = $callData['c_recording_duration'] ?? null;
 
-                $call->c_caller_name = $callData['c_caller_name'];
-                $call->c_direction = $callData['c_direction'];
-                $call->c_api_version = $callData['c_api_version'];
+                $call->c_caller_name = $callData['c_caller_name'] ?? null;
+                $call->c_direction = $callData['c_direction'] ?? null;
+                $call->c_api_version = $callData['c_api_version'] ?? null;
+                $call->c_parent_call_sid = $callTwData['ParentCallSid'] ?? null;
 
-                //$call->c_call_status = $post['callData']['CallStatus'] ?? '';
+                $call->c_call_status = $post['callData']['CallStatus'] ?? Call::CALL_STATUS_RINGING;
                 //$call->c_sequence_number = $post['callData']['SequenceNumber'] ?? 0;
 
                 $call->c_sip = $callData['c_sip'] ?? null;
 
+                if($parentCall && $parentCall->c_lead_id) {
+                    $call->c_lead_id = $parentCall->c_lead_id;
+                } else {
+                    $call->c_lead_id = $callTwData['lead_id'] ?? null;
+                }
+
                 if(isset($callData['c_project_id'])) {
                     $call->c_project_id = $callData['c_project_id'];
                 }
-                if(isset($callData['c_user_id'])) {
-                    $call->c_created_user_id = $callData['c_user_id'];
+
+                if(isset($callTwData['agent_id']) && (int)$callTwData['agent_id'] > 0) {
+                    $call->c_created_user_id = (int)$callTwData['agent_id'];
+                } else {
+                    if (isset($callData['c_user_id'])) {
+                        $call->c_created_user_id = $callData['c_user_id'];
+                    }
                 }
 
                 $upp = null;
+                $agentId = null;
 
                 if($call->c_project_id && $call->c_from) {
-                    $agentId = (int) str_replace('client:seller', '', $call->c_from);
+                    $agentId = $call->c_created_user_id;
                     if($agentId) {
                         $upp = UserProjectParams::find()->where(['upp_user_id' => $agentId, 'upp_project_id' => $call->c_project_id])->one();
                     }
@@ -1280,54 +1330,35 @@ class CommunicationController extends ApiBaseController
                     $upp = UserProjectParams::find()->where(['upp_phone_number' => $call->c_to])->orWhere(['upp_tw_phone_number' => $call->c_to])->one();
                 }
 
+
+                if($agentId) {
+                    $from = $call->cCreatedUser->username;
+                    $usr = Employee::findOne($agentId);
+
+                    if($usr) {
+                        $from = $usr->username;
+                        $call->c_from = $from;
+                    }
+                } else {
+                    $from = $call->c_from;
+                }
+
                 $user = null;
                 if($upp && $upp->uppUser) {
-                    if(!$call->c_created_user_id )
-                    $call->c_created_user_id = $upp->uppUser->id;
+                    //if(!$call->c_created_user_id )
+                    //$call->c_created_user_id = $upp->uppUser->id;
 
-                    $call->c_project_id = $upp->upp_project_id;
-
-                    Notifications::create($upp->uppUser->id, 'Call ID-'.$call->c_id.' completed', 'Call ID-'.$call->c_id.' completed. From ' . $call->c_from .' to '.$call->c_to, Notifications::TYPE_INFO, true);
-                    Notifications::socket($upp->uppUser->id, null, 'getNewNotification', [], true);
+                    //$call->c_project_id = $upp->upp_project_id;
+                    if($call->c_parent_call_sid) {
+                        Notifications::create($upp->uppUser->id, 'Call ID-' . $call->c_id . ' completed', 'Call ID-' . $call->c_id . ' completed. From ' . $from . ' to ' . $call->c_to, Notifications::TYPE_INFO, true);
+                        Notifications::socket($upp->uppUser->id, null, 'getNewNotification', [], true);
+                    }
                 }
+
+
 
             }
 
-
-
-            /*
-             *
-             *
-             *
-             *  account_sid: "AC10f3c74efba7b492cbd7dca86077736c"
-                annotation: null
-                answered_by: null
-                api_version: "2010-04-01"
-                caller_name: ""
-                date_created: "Wed, 06 Feb 2019 15:27:34 +0000"
-                date_updated: "Wed, 06 Feb 2019 15:27:53 +0000"
-                direction: "outbound-api"
-                duration: "15"
-                end_time: "Wed, 06 Feb 2019 15:27:53 +0000"
-                forwarded_from: null
-                from: "onorine.miller"
-                from_formatted: "onorine.miller"
-                group_sid: null
-                parent_call_sid: null
-                phone_number_sid: null
-                price: "-0.00400"
-                price_unit: "USD"
-                sid: "CA6359554e2ac4a920427165c4b69288b7"
-                start_time: "Wed, 06 Feb 2019 15:27:38 +0000"
-                status: "completed"
-                subresource_uris: {,…}
-                notifications: "/2010-04-01/Accounts/AC10f3c74efba7b492cbd7dca86077736c/Calls/CA6359554e2ac4a920427165c4b69288b7/Notifications.json"
-                recordings: "/2010-04-01/Accounts/AC10f3c74efba7b492cbd7dca86077736c/Calls/CA6359554e2ac4a920427165c4b69288b7/Recordings.json"
-                to: "sip:onorine.miller@kivork.sip.us1.twilio.com"
-                to_formatted: "sip:onorine.miller@kivork.sip.us1.twilio.com"
-                uri: "/2010-04-01/Accounts/AC10f3c74efba7b492cbd7dca86077736c/Calls/CA6359554e2ac4a920427165c4b69288b7.json"
-             *
-             */
 
             if ($call) {
 
@@ -1335,8 +1366,8 @@ class CommunicationController extends ApiBaseController
                     $call->c_price = abs((float) $post['callData']['price']);
                 }
 
-                if(!$call->c_call_status && isset($post['callData']['status'])) {
-                    $call->c_call_status = $post['callData']['status'];
+                if(!$call->c_call_status && isset($post['callData']['CallStatus'])) {
+                    $call->c_call_status = $post['callData']['CallStatus'];
                 }
 
                 /*if($call->c_call_status && isset($post['callData']['status'])) {
@@ -1345,9 +1376,9 @@ class CommunicationController extends ApiBaseController
                     }
                 }*/
 
-                if($call->c_call_status && isset($post['callData']['status'])) {
+                if($call->c_call_status && isset($post['callData']['CallStatus'])) {
                     if(!in_array($call->c_call_status, [Call::CALL_STATUS_CANCELED, Call::CALL_STATUS_BUSY, Call::CALL_STATUS_NO_ANSWER])) {
-                        $call->c_call_status = $post['callData']['status'];
+                        $call->c_call_status = $post['callData']['CallStatus'];
                     }
                 }
 
@@ -1356,8 +1387,16 @@ class CommunicationController extends ApiBaseController
                 }
 
 
-                if($call->c_lead_id && $lead = $call->cLead) {
+                /*if($call->c_parent_call_sid !== NULL) {
+                    $call->c_created_user_id = () ? : null;
+                }*/
 
+                if(!$call->save()) {
+                    Yii::error(VarDumper::dumpAsString($call->errors), 'API:Communication:voiceClient:Call:save');
+                }
+
+                if($call->c_lead_id && $lead = $call->cLead) {
+                    $response['c_lead_id'] = $call->c_lead_id;
                     if ((int) $lead->status === Lead::STATUS_PENDING && (int) $lead->l_call_status_id === Lead::CALL_STATUS_PROCESS) {
 
                         $delayTimeMin = $lead->getDelayPendingTime();
@@ -1387,13 +1426,11 @@ class CommunicationController extends ApiBaseController
                 }
 
 
-                if(!$call->save()) {
-                    Yii::error(VarDumper::dumpAsString($call->errors), 'API:Communication:voiceClient:Call:save');
-                }
-
-                if($call->c_created_user_id || $call->c_lead_id) {
+                  if($call->c_created_user_id || $call->c_lead_id) {
                     Notifications::socket($call->c_created_user_id, $call->c_lead_id, 'webCallUpdate', ['status' => $call->c_call_status, 'duration' => $call->c_call_duration, 'debug' => 'TYPE_VOIP_FINISH'], true);
                 }
+
+                $response['c_id'] = $call->c_id;
 
                 /*if($post['callData']['RecordingUrl']) {
                     $call->c_recording_url = $post['callData']['RecordingUrl'];
@@ -1432,6 +1469,119 @@ class CommunicationController extends ApiBaseController
         Yii::info(VarDumper::dumpAsString($post), 'info\API:Communication:voiceDefault');
 
         $agentId = null;
+        $parentCallSid = null;
+        $callSid = null;
+        $call = null;
+        $parentCall = null;
+
+        if(isset($post['callData'], $post['call'], $post['callData']['CallSid']) && $post['callData']['CallSid']) {
+
+            $callData = $post['call'];
+            $callTwData = $post['callData'];
+
+            $callSid = $callTwData['CallSid'];
+
+            if(isset($callTwData['agent_id'])) {
+                $agentId = (int)$callTwData['agent_id'];
+                $trace[] = 'find  $agentId (1): ' . $agentId;
+            } else {
+                if(strpos($callTwData['Called'], 'client:seller') !== false) {
+                    $agentId = (int)str_replace('client:seller', '', $callTwData['Called']);
+                    $trace[] = 'find  $agentId (2): ' . $agentId;
+                }
+            }
+
+            $parentCallSid = $callTwData['ParentCallSid'] ?? null;
+
+            if($agentId) {
+                $call = Call::findOne(['c_call_sid' => $callSid, 'c_created_user_id' => $agentId]);
+            } else {
+                $call = Call::findOne(['c_call_sid' => $callSid]);
+            }
+
+            if($parentCallSid) {
+                $parentCall = Call::findOne(['c_call_sid' => $parentCallSid]);
+                $parentCallId = ($parentCall) ? $parentCall->c_id : 0;
+                $trace[] = '$parentCall (1): ' . $parentCallId;
+            }
+
+            if(!$call) {
+                $call = new Call();
+            }
+                $call->c_call_sid = $callSid;
+                $call->c_account_sid = $callData['c_account_sid'];
+                $call->c_call_type_id = $callData['c_call_type_id'];
+                $call->c_uri = $callData['c_uri'];
+                $call->c_from = $callData['c_from'];
+                $call->c_to = $callData['c_to'];
+                $call->c_timestamp = $callData['c_timestamp'];
+                $call->c_created_dt = $callData['c_created_dt'];
+                $call->c_updated_dt = date('Y-m-d H:i:s');
+                $call->c_recording_url = $callData['c_recording_url'] ?? null;
+                $call->c_recording_sid = $callData['c_recording_sid'] ?? null;
+                $call->c_recording_duration = $callData['c_recording_duration'] ?? null;
+                $call->c_caller_name = $callData['c_caller_name'] ?? null;
+                $call->c_direction = $callData['c_direction'] ?? null;
+                $call->c_api_version = $callData['c_api_version'] ?? null;
+                $call->c_parent_call_sid = $callTwData['ParentCallSid'] ?? null;
+                $call->c_call_status = $callTwData['CallStatus'] ?? Call::CALL_STATUS_RINGING;
+                $call->c_sequence_number = $callTwData['SequenceNumber'] ?? 0;
+                $call->c_sip = $callData['c_sip'] ?? null;
+
+                if($parentCall && $parentCall->c_lead_id) {
+                    $call->c_lead_id = $parentCall->c_lead_id;
+                } else {
+                    $call->c_lead_id = $callTwData['lead_id'] ?? null;
+                }
+
+                if(isset($callData['c_project_id'])) {
+                    $call->c_project_id = $callData['c_project_id'];
+                } else {
+                    if($parentCall && $parentCall->c_project_id) {
+                        $call->c_project_id = $parentCall->c_project_id;
+                    }
+                }
+
+                if($agentId) {
+                    $call->c_created_user_id = $agentId;
+                }
+
+                if (isset($post['callData']['CallDuration'])) {
+                    $call->c_call_duration = (int)$post['callData']['CallDuration'];
+                }
+
+                if (isset($post['call']['c_tw_price']) && $post['call']['c_tw_price']) {
+                    $call->c_price = abs((float)$post['call']['c_tw_price']);
+                }
+
+                if($parentCall && $call->c_call_status === Call::CALL_STATUS_IN_PROGRESS) {
+                    $parentCall->c_call_status = Call::CALL_STATUS_IN_PROGRESS;
+                    if(!$parentCall->save()) {
+                        \Yii::error(VarDumper::dumpAsString($call->errors), 'API:Communication:voiceDefault:Call:save_parentCall(1)');
+                    }
+                }
+
+                if(!$call->save()) {
+                    \Yii::error(VarDumper::dumpAsString($call->errors), 'API:Communication:voiceDefault:Call:save(1)');
+                }
+
+                if(!$parentCall) {
+                    if(in_array($call->c_call_status, [Call::CALL_STATUS_CANCELED, Call::CALL_STATUS_FAILED, Call::CALL_STATUS_NO_ANSWER])) {
+                        $callsIfCancel = Call::findAll(['c_parent_call_sid' => $callSid]);
+                        if($callsIfCancel) {
+                            foreach ($callsIfCancel AS $cancelCall) {
+                                $cancelCall->c_call_status = $post['callData']['CallStatus'];
+                                $cancelCall->save();
+                            }
+                        }
+                    }
+                }
+
+
+        }
+
+
+/*
         if(isset($post['callData'], $post['call'], $post['callData']['CallSid']) && $post['callData']['CallSid']) {
 
             if(isset($post['callData']['Called']) && $post['callData']['Called']) {
@@ -1521,6 +1671,7 @@ class CommunicationController extends ApiBaseController
                     } else {
                         $call->c_call_duration = 1;
                     }
+                    $call->c_parent_call_sid = $post['callData']['ParentCallSid'] ?? null;
                     if(!$call->save()) {
                         \Yii::error(VarDumper::dumpAsString($call->errors), 'API:Communication:voiceDefault:Call:save');
                     }
@@ -1601,139 +1752,9 @@ class CommunicationController extends ApiBaseController
                 $trace[] = 'No call find by params';
             }
         }
-
+*/
         $response['trace'] = $trace;
-        /*
-                if (isset($post['callData']['CallSid']) && $post['callData']['CallSid']) {
 
-
-                    //$agentId = null;
-
-                    if(isset($post['callData']['c_user_id']) && $post['callData']['c_user_id']) {
-                        $agentId = $post['callData']['c_user_id'];
-                    }
-
-                    if(!$agentId ?? isset($post['callData']['Called']) && $post['callData']['Called']) {
-                        if(strpos($post['callData']['Called'], 'client:seller')) {
-                            $agentId = (int) str_replace('client:seller', '', $post['callData']['Called']);
-                        }
-                    }
-
-                    if(isset($post['callData']['ParentCallSid']) && $post['callData']['ParentCallSid']) {
-                        $childCall = true;
-                    } else {
-                        $childCall = false;
-                    }
-
-
-                    $call = Call::find()->where(['c_call_sid' => $post['callData']['CallSid'], 'c_created_user_id' => $agentId])->one();
-
-                    if(!$call) {
-                        $call = Call::find()->where(['c_call_sid' => $post['callData']['CallSid'], 'c_created_user_id' => null])->one();
-                        if($call && $agentId) {
-                            $call->c_created_user_id = $agentId;
-                            //$call->save();
-                        }
-                    }
-
-
-                    if($childCall) {
-                        if(!$call) {
-                            $call = Call::find()->where(['c_call_sid' => $post['callData']['ParentCallSid'], 'c_created_user_id' => $agentId])->one();
-                        }
-
-                        if(!$call) {
-                            $call = Call::find()->where(['c_call_sid' => $post['callData']['ParentCallSid'], 'c_created_user_id' => null])->one();
-                            if($call && $agentId) {
-                                $call->c_created_user_id = $agentId;
-                                //$call->save();
-                            }
-                        }
-                    }
-
-
-                    if(isset($post['callData']['CallStatus']) && $post['callData']['CallStatus']) {
-                        $call_status = $post['callData']['CallStatus'];
-                    } else {
-                        $call_status = '';
-                    }
-
-
-
-                    if ($call) {
-
-
-                        $otherCalls = Call::find()->where(['c_call_sid' => $call->c_call_sid])->andWhere(['<>', 'c_id', $call->c_id])->all();
-
-                        $otherCallArr = [];
-
-                        if($otherCalls && $call_status === Call::CALL_STATUS_IN_PROGRESS) {
-                            foreach ($otherCalls as $otherCall) {
-                                $otherCallArr[] = $otherCall->attributes;
-
-                                if($otherCall->c_call_status === Call::CALL_STATUS_RINGING) {
-                                    $otherCall->c_call_status = Call::CALL_STATUS_CANCELED;
-                                    //$otherCall->c_call_status = Call::CALL_STATUS_NO_ANSWER;
-                                    $otherCall->c_updated_dt = date('Y-m-d H:i:s');
-
-                                    if(!$otherCall->save()) {
-                                        Yii::error('Call ID: '. $otherCall->c_id . ' ' . VarDumper::dumpAsString($otherCall->errors), 'API:Communication:voiceDefault:otherCall:save');
-                                    }
-                                }
-                            }
-                        }
-
-                        //Yii::info($call->c_call_sid . ' ' . VarDumper::dumpAsString($call->attributes) . ' Other Calls: ' . VarDumper::dumpAsString($otherCallArr), 'info\API:Voice:VOIP:CallBack');
-
-
-                        if($call->c_call_status === Call::CALL_STATUS_NO_ANSWER || $call->c_call_status === Call::CALL_STATUS_BUSY || $call->c_call_status === Call::CALL_STATUS_CANCELED || $call->c_call_status === Call::CALL_STATUS_FAILED) {
-
-                            if ($call->c_lead_id) {
-                                $lead = $call->cLead;
-                                $lead->l_call_status_id = Lead::CALL_STATUS_CANCEL;
-                                if(!$lead->save()) {
-                                    Yii::error('lead: '. $lead->id . ' ' . VarDumper::dumpAsString($lead->errors), 'API:Communication:voiceDefault:Lead:save');
-                                }
-                            }
-
-                        } else {
-
-                            if(isset($post['callData']['CallStatus']) && $post['callData']['CallStatus']) {
-                                $call->c_call_status = $post['callData']['CallStatus'];
-                            }
-
-                        }
-
-                        if(!$childCall) {
-                            $call->c_sequence_number = $post['callData']['SequenceNumber'] ?? 0;
-
-                            if (isset($post['callData']['CallDuration'])) {
-                                $call->c_call_duration = (int)$post['callData']['CallDuration'];
-                            }
-
-                            if (isset($post['call']['c_tw_price']) && $post['call']['c_tw_price']) {
-                                $call->c_price = abs((float)$post['call']['c_tw_price']);
-                            }
-                        }
-
-                        $call->c_updated_dt = date('Y-m-d H:i:s');
-                        if(!$call->save()) {
-                            Yii::error(VarDumper::dumpAsString($call->errors), 'API:Communication:voiceDefault:Call2:save');
-                        }
-                        if ($call->c_lead_id) {
-                            //Notifications::create($user_id, 'New SMS '.$sms->s_phone_from, 'SMS from ' . $sms->s_phone_from .' ('.$clientName.') to '.$sms->s_phone_to.' <br> '.nl2br(Html::encode($sms->s_sms_text))
-                               // . ($lead_id ? '<br>Lead ID: '.$lead_id : ''), Notifications::TYPE_INFO, true);
-                            //Notifications::socket(null, $call->c_lead_id, 'callUpdate', ['status' => $call->c_call_status, 'duration' => $call->c_call_duration, 'snr' => $call->c_sequence_number], true);
-                        }
-
-                        if($call->c_created_user_id) {
-                            //Notifications::socket($call->c_created_user_id, $lead_id = null, 'incomingCall', ['status' => $call->c_call_status, 'duration' => $call->c_call_duration, 'snr' => $call->c_sequence_number], true);
-                            Notifications::socket($call->c_created_user_id, null, 'webCallUpdate', ['status' => $call->c_call_status, 'duration' => $call->c_call_duration, 'debug' => 'DEFAULT'], true);
-                        }
-
-                    }
-                }
-        */
         return $response;
     }
 
