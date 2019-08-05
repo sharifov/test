@@ -435,7 +435,7 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
                     Notifications::socket($this->c_created_user_id, null, 'getNewNotification', [], true);
                 }
 
-                if($this->c_call_status == self::CALL_STATUS_NO_ANSWER && $lead = $this->cLead2) {
+                if(in_array($this->c_call_status, [self::CALL_STATUS_NO_ANSWER, self::CALL_STATUS_COMPLETED]) && $lead = $this->cLead2) {
                     if($lead->l_call_status_id == Lead::CALL_STATUS_QUEUE) {
                         $lead->l_call_status_id = Lead::CALL_STATUS_READY;
                         if(!$lead->save()) {

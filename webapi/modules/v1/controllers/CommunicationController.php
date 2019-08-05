@@ -2891,7 +2891,7 @@ class CommunicationController extends ApiBaseController
             $dateTime = null;
             if(NULL === $last_id) {
 
-                $lastEmail = Email::find()->where('e_inbox_email_id > 0')->orderBy(['e_inbox_email_id' => SORT_DESC])->one();
+                $lastEmail = Email::find()->where(['>', 'e_inbox_email_id', 0])->orderBy(['e_inbox_email_id' => SORT_DESC])->limit(1)->one();
 
                 if ($lastEmail) {
                     //$filter['last_dt'] = $lastEmail->e_inbox_created_dt;
@@ -2902,7 +2902,7 @@ class CommunicationController extends ApiBaseController
             } else {
                 $filter['last_id'] = (int)$last_id;
 
-                $checkLastEmail = Email::find()->where('e_inbox_email_id = ' . $filter['last_id'] )->one();
+                $checkLastEmail = Email::find()->where(['e_inbox_email_id' => $filter['last_id']])->limit(1)->one();
                 if($checkLastEmail) {
                     $response[] = 'Last ID ' . $filter['last_id'] . ' Exists';
                     return $response;
@@ -2927,6 +2927,9 @@ class CommunicationController extends ApiBaseController
                 'mail_list' => $filter['mail_list'],
                 'limit' => $filter['limit'],
             ];
+
+
+
             $job->request_data = $data;
             /** @var Queue $queue */
             $queue = \Yii::$app->queue_email_job;
@@ -2935,6 +2938,8 @@ class CommunicationController extends ApiBaseController
                 'job_id' => $jobId,
                 'last_id' => $filter['last_id'],
             ];
+
+            Yii::info('JOB (' .VarDumper::dumpAsString($response).') Push ' . VarDumper::dumpAsString($data) . ' last_id: ' . $last_id, 'info\API:newEmailMessagesReceived');
 
         } catch (\Throwable $e) {
             Yii::error($e->getTraceAsString(), 'API:Communication:newEmailMessagesReceived:Email:try');
