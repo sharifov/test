@@ -51,7 +51,7 @@ class UserSiteActivityLog extends Behavior
             $activity->usa_page_url     = Yii::$app->request->pathInfo;
             $activity->usa_request_type = Yii::$app->request->isPost ? UserSiteActivity::REQUEST_TYPE_POST : UserSiteActivity::REQUEST_TYPE_GET;
             $activity->usa_request_get  = Yii::$app->request->get() ? json_encode(Yii::$app->request->get()) : null;
-            $activity->usa_request_post = Yii::$app->request->post() ? json_encode(Yii::$app->request->post()) : null;
+            // $activity->usa_request_post = Yii::$app->request->post() ? json_encode(Yii::$app->request->post()) : null;
             if(!$activity->save()) {
                 Yii::error(VarDumper::dumpAsString($activity->errors), 'UserSiteActivityLog:UserSiteActivity:save');
             }
