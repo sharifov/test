@@ -304,6 +304,7 @@ CRONs
 30   0  *  *  *     run-this-one php /var/www/sale/yii db/update-airline-cabin-classes
 40   0  1  *  *     php /var/www/sale/yii kpi/calculate-salary
 */10   *  *  *  *   run-this-one php /var/www/sale/yii call/update-status
+20   0  *  *  *     php /var/www/sale/yii db/clear-user-site-activity-logs
 ```
 
 ```

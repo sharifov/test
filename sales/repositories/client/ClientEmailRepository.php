@@ -3,15 +3,33 @@
 namespace sales\repositories\client;
 
 use common\models\ClientEmail;
+use sales\dispatchers\EventDispatcher;
 use sales\repositories\NotFoundException;
+use sales\repositories\Repository;
 
-class ClientEmailRepository
+/**
+ * Class ClientEmailRepository
+ * @method null|ClientEmail get($id)
+ * @method null|ClientEmail getByEmail($email)
+ */
+class ClientEmailRepository extends Repository
 {
+    private $eventDispatcher;
+
+    /**
+     * ClientEmailRepository constructor.
+     * @param EventDispatcher $eventDispatcher
+     */
+    public function __construct(EventDispatcher $eventDispatcher)
+    {
+        $this->eventDispatcher = $eventDispatcher;
+    }
+
     /**
      * @param $id
      * @return ClientEmail
      */
-    public function get($id): ClientEmail
+    public function find($id): ClientEmail
     {
         if ($clientEmail = ClientEmail::findOne($id)) {
             return $clientEmail;
@@ -23,7 +41,7 @@ class ClientEmailRepository
      * @param $email
      * @return ClientEmail
      */
-    public function getByEmail($email): ClientEmail
+    public function findByEmail($email): ClientEmail
     {
         if ($clientEmail = ClientEmail::find()->where(['email' => $email])->orderBy(['id' => SORT_ASC])->limit(1)->one()) {
             return $clientEmail;
@@ -47,10 +65,11 @@ class ClientEmailRepository
      */
     public function save(ClientEmail $email): int
     {
-        if ($email->save(false)) {
-            return $email->id;
+        if (!$email->save(false)) {
+            throw new \RuntimeException('Saving error');
         }
-        throw new \RuntimeException('Saving error');
+        $this->eventDispatcher->dispatchAll($email->releaseEvents());
+        return $email->id;
     }
 
     /**
@@ -63,5 +82,6 @@ class ClientEmailRepository
         if (!$email->delete()) {
             throw new \RuntimeException('Removing error');
         }
+        $this->eventDispatcher->dispatchAll($email->releaseEvents());
     }
 }

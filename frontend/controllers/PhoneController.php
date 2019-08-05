@@ -143,13 +143,13 @@ class PhoneController extends FController
         $out = ['error' => '', 'data' => []];
 
         // update call status when agent reject call
-        if (Yii::$app->request->getIsGet() ) {
-            $get_sid = Yii::$app->request->get('sid');
-            $get_agent = Yii::$app->request->get('agent');
-            //VarDumper::dump([$get_sid,$get_agent]); exit;
-            $call = Call::find()->where(['c_created_user_id' => $get_agent])->orderBy(['c_id' => SORT_DESC])->limit(1)->one();
-            if($call) {
-                $call->c_call_status = Call::CALL_STATUS_CANCELED;
+        if (Yii::$app->request->getIsGet()) {
+            //$get_sid = Yii::$app->request->get('sid');
+            $userId = (int) Yii::$app->request->get('user_id');
+
+            $call = Call::find()->where(['c_created_user_id' => $userId])->orderBy(['c_id' => SORT_DESC])->limit(1)->one();
+            if ($call) {
+                $call->c_call_status = Call::CALL_STATUS_NO_ANSWER;
                 if (!$call->save()) {
                     $out['error'] = VarDumper::dumpAsString($call->errors);
                     Yii::error($out['error'], 'PhoneController:actionAjaxSaveCall:Call:save_1');
@@ -221,7 +221,7 @@ class PhoneController extends FController
         try {
             $sid = Yii::$app->request->post('sid');
             $type = Yii::$app->request->post('type');
-            $from = Yii::$app->request->post('from');
+            $from = Yii::$app->request->post('from', '');
             $to = Yii::$app->request->post('to');
             $to_id = (int)Yii::$app->request->post('to_id');
             $projectid = (int)Yii::$app->request->post('project_id');
@@ -245,13 +245,14 @@ class PhoneController extends FController
                 ];
             }
 
+
             /**
              * @var CommunicationService $communication
              */
             $communication = \Yii::$app->communication;
             $result = $communication->callRedirect($sid, $type, $from, $to);
 
-            if ($to_id) {
+            if ($to_id > 0) {
 
                 $call = Call::findOne(['c_id' => $sid]);
                 if (!$call && $result && isset($result['data'], $result['data']['result'], $result['data']['result']['sid'])) {
@@ -288,11 +289,11 @@ class PhoneController extends FController
                 }*/
             }
 
-            \Yii::info(VarDumper::dumpAsString([$result, \Yii::$app->request->post(), $call->c_id]), 'PhoneController:actionAjaxCallRedirect:$result');
+            \Yii::info(VarDumper::dumpAsString([$result, \Yii::$app->request->post()]), 'PhoneController:actionAjaxCallRedirect:$result');
         } catch (\Throwable $e) {
             $result = [
                 'error' => true,
-                'message' => $e->getMessage(),
+                'message' => $e->getMessage() . '   File/Line: ' . $e->getFile() . ':' . $e->getLine(),
             ];
         }
         return $result;

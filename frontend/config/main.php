@@ -25,6 +25,7 @@ return [
 
         'user' => [
             'identityClass' => \common\models\Employee::class,
+            'class' => \frontend\components\User::class,
             'enableAutoLogin' => true,
             'identityCookie' => ['name' => '_identity-crm', 'httpOnly' => true],
         ],
@@ -197,9 +198,9 @@ return [
             'viewPath' => '@frontend/views/rbac',
         ],
     ],
-    /*'as beforeRequest' => [
-        'class' => 'common\components\EmployeeActivityLogging',
-    ],*/
+    'as beforeRequest' => [
+        'class' => \frontend\components\UserSiteActivityLog::class,
+    ],
     'container' => [
         'definitions' => [
             yii\grid\GridView::class => [

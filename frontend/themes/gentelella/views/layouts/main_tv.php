@@ -3,6 +3,7 @@
 /* @var $this \yii\web\View */
 /* @var $content string */
 
+use frontend\widgets\OnlineConnection;
 use yii\helpers\Html;
 
 $bundle = \frontend\themes\gentelella\assets\Asset::register($this);
@@ -88,7 +89,8 @@ $bundle = \frontend\themes\gentelella\assets\Asset::register($this);
                         </li>
                     </ul>
                 </li>
-                <?= frontend\widgets\Notifications::widget(); ?>
+                <?//= frontend\widgets\Notifications::widget(); ?>
+                <?= frontend\widgets\OnlineConnection::widget() ?>
             </ul>
         </nav>
         <!-- /top navigation -->

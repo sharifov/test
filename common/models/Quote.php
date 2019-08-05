@@ -5,8 +5,11 @@ namespace common\models;
 use common\components\BackOffice;
 use common\models\local\FlightSegment;
 use common\models\local\LeadLogMessage;
+use sales\entities\AggregateRoot;
+use sales\entities\EventTrait;
 use Yii;
 use yii\base\ErrorException;
+use yii\base\InvalidArgumentException;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
@@ -39,6 +42,7 @@ use common\components\SearchService;
  * @property string $employee_name
  * @property string $last_ticket_date
  * @property double $service_fee_percent
+ * @property boolean $alternative
  *
  * @property QuotePrice[] $quotePrices
  * @property int $quotePricesCount
@@ -47,8 +51,11 @@ use common\components\SearchService;
  * @property QuoteTrip[] $quoteTrips
  * @property Airline[] $mainAirline
  */
-class Quote extends \yii\db\ActiveRecord
+class Quote extends \yii\db\ActiveRecord implements AggregateRoot
 {
+
+    use EventTrait;
+
     public const SERVICE_FEE = 0.035;
 
     public const
@@ -114,6 +121,7 @@ class Quote extends \yii\db\ActiveRecord
     public $hasAirportChange = false;
     public $hasOvernight = false;
 
+
     /**
      * {@inheritdoc}
      */
@@ -121,6 +129,119 @@ class Quote extends \yii\db\ActiveRecord
     {
         return 'quotes';
     }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function rules()
+    {
+        return [
+            [['uid', 'reservation_dump', 'main_airline_code'], 'required'],
+            [['lead_id', 'status' ], 'integer'],
+            [[ 'check_payment', 'alternative'], 'boolean'],
+            [['created', 'updated', 'reservation_dump', 'created_by_seller', 'employee_name', 'employee_id', 'pcc', 'gds', 'last_ticket_date', 'service_fee_percent'], 'safe'],
+            [['uid', 'record_locator', 'pcc', 'cabin', 'gds', 'trip_type', 'main_airline_code', 'fare_type'], 'string', 'max' => 255],
+
+            [['reservation_dump'], 'checkReservationDump'],
+            [['pricing_info'], 'string'],
+            [['status'], 'checkStatus'],
+
+            [['employee_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['employee_id' => 'id']],
+            [['lead_id'], 'exist', 'skipOnError' => true, 'targetClass' => Lead::class, 'targetAttribute' => ['lead_id' => 'id']],
+        ];
+    }
+
+
+    /**
+     * {@inheritdoc}
+     */
+    public function attributeLabels()
+    {
+        return [
+            'id' => 'ID',
+            'uid' => 'Uid',
+            'lead_id' => 'Lead ID',
+            'employee_id' => 'Employee ID',
+            'record_locator' => 'Record Locator',
+            'pcc' => 'Pcc',
+            'cabin' => 'Cabin',
+            'gds' => 'Gds',
+            'trip_type' => 'Trip Type',
+            'main_airline_code' => 'Main Airline Code',
+            'status' => 'Status',
+            'check_payment' => 'Check Payment',
+            'fare_type' => 'Fare Type',
+            'created' => 'Created',
+            'updated' => 'Updated',
+            'last_ticket_date' => 'Last Ticket Date',
+            'service_fee_percent' => 'Service Fee Percent',
+            'reservation_dump' => 'Reservation Dump',
+            'pricing_info' => 'Pricing info',
+            'alternative' => 'Alternative'
+        ];
+    }
+
+    public function behaviors(): array
+    {
+        return [
+            'timestamp' => [
+                'class' => TimestampBehavior::class,
+                'attributes' => [
+                    ActiveRecord::EVENT_BEFORE_INSERT => ['created', 'updated'],
+                    ActiveRecord::EVENT_BEFORE_UPDATE => ['updated'],
+                ],
+                'value' => date('Y-m-d H:i:s') //new Expression('NOW()'),
+            ],
+        ];
+    }
+
+
+    public function apply(): void
+    {
+        $this->setStatus(self::STATUS_APPLIED);
+    }
+
+    /**
+     * @return bool
+     */
+    public function isApplied(): bool
+    {
+        return $this->status === self::STATUS_APPLIED;
+    }
+
+    public function decline(): void
+    {
+        $this->setStatus(self::STATUS_DECLINED);
+    }
+
+    /**
+     * @return bool
+     */
+    public function isAlternative(): bool
+    {
+        return (bool)$this->alternative;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isDeclined(): bool
+    {
+        return $this->status === self::STATUS_DECLINED;
+    }
+
+    /**
+     * @param int $status
+     */
+    private function setStatus(int $status): void
+    {
+        if (!array_key_exists($status, self::STATUS_LIST)) {
+            throw new InvalidArgumentException('Invalid Status');
+        }
+        $this->status = $status;
+    }
+
+
 
     public static function getGDSName($gds = null)
     {
@@ -348,26 +469,7 @@ class Quote extends \yii\db\ActiveRecord
         return $elapsedTime;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function rules()
-    {
-        return [
-            [['uid', 'reservation_dump', 'main_airline_code'], 'required'],
-            [['lead_id', 'status' ], 'integer'],
-            [[ 'check_payment'], 'boolean'],
-            [['created', 'updated', 'reservation_dump', 'created_by_seller', 'employee_name', 'employee_id', 'pcc', 'gds', 'last_ticket_date', 'service_fee_percent'], 'safe'],
-            [['uid', 'record_locator', 'pcc', 'cabin', 'gds', 'trip_type', 'main_airline_code', 'fare_type'], 'string', 'max' => 255],
 
-            [['reservation_dump'], 'checkReservationDump'],
-            [['pricing_info'], 'string'],
-            [['status'], 'checkStatus'],
-
-            [['employee_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['employee_id' => 'id']],
-            [['lead_id'], 'exist', 'skipOnError' => true, 'targetClass' => Lead::class, 'targetAttribute' => ['lead_id' => 'id']],
-        ];
-    }
 
 
     public function checkReservationDump()
@@ -390,48 +492,6 @@ class Quote extends \yii\db\ActiveRecord
                 $this->addError('status', 'Exist applied quote!');
             }
         }
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function attributeLabels()
-    {
-        return [
-            'id' => 'ID',
-            'uid' => 'Uid',
-            'lead_id' => 'Lead ID',
-            'employee_id' => 'Employee ID',
-            'record_locator' => 'Record Locator',
-            'pcc' => 'Pcc',
-            'cabin' => 'Cabin',
-            'gds' => 'Gds',
-            'trip_type' => 'Trip Type',
-            'main_airline_code' => 'Main Airline Code',
-            'status' => 'Status',
-            'check_payment' => 'Check Payment',
-            'fare_type' => 'Fare Type',
-            'created' => 'Created',
-            'updated' => 'Updated',
-            'last_ticket_date' => 'Last Ticket Date',
-            'service_fee_percent' => 'Service Fee Percent',
-            'reservation_dump' => 'Reservation Dump',
-            'pricing_info' => 'Pricing info',
-        ];
-    }
-
-    public function behaviors(): array
-    {
-        return [
-            'timestamp' => [
-                'class' => TimestampBehavior::class,
-                'attributes' => [
-                    ActiveRecord::EVENT_BEFORE_INSERT => ['created', 'updated'],
-                    ActiveRecord::EVENT_BEFORE_UPDATE => ['updated'],
-                ],
-                'value' => date('Y-m-d H:i:s') //new Expression('NOW()'),
-            ],
-        ];
     }
 
     /**

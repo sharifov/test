@@ -567,7 +567,7 @@ echo '<div class="container" id="container-redirect-agents"></div>';
         if (connection) {
             console.log("button-reject: " + JSON.stringify(connection.parameters));
             connection.reject();
-            $.get(ajaxSaveCallUrl + '?sid=' + connection.parameters.CallSid + '&agent=' + agentId, function (r) {
+                $.get(ajaxSaveCallUrl + '?sid=' + connection.parameters.CallSid + '&user_id=' + agentId, function (r) {
                 console.log(r);
             });
             document.getElementById('call-controls2').style.display = 'none';
@@ -683,14 +683,13 @@ echo '<div class="container" id="container-redirect-agents"></div>';
             .then(function (data_res) {
                 var data = data_res.data;
                 log('Got a token.');
-                console.log('app_sid: ' + data.app_sid);
-                console.log('account_sid: ' + data.account_sid);
+                console.log('app_sid: ' + data.app_sid + 'account_sid: ' + data.account_sid);
 
                 call_acc_sid = data.account_sid;
 
                 //console.log('Token: ' + data.token);
                 // Setup Twilio.Device
-                device = new Twilio.Device(data.token, {debug: true});
+                device = new Twilio.Device(data.token, {codecPreferences: ['opus', 'pcmu'], debug: true});
 
                 //console.log([data, device]);
                 device.on('ready', function (device) {
@@ -1055,6 +1054,7 @@ $js = <<<JS
                 return false;
             }
             connection.accept();
+            console.error(connection.parameters);
             $.ajax({
                 type: 'post',
                 data: {

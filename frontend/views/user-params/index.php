@@ -69,6 +69,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'up_inbox_show_limit_leads',
             'up_default_take_limit_leads',
             'up_min_percent_for_take_leads',
+            'up_call_expert_limit',
             [
                 'attribute' => 'up_updated_dt',
                 'value' => function(\common\models\UserParams $model) {

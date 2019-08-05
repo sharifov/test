@@ -2,6 +2,8 @@
 
 namespace common\models;
 
+use sales\entities\AggregateRoot;
+use sales\entities\EventTrait;
 use Yii;
 use DateTime;
 use common\components\ChartTools;
@@ -51,8 +53,10 @@ use yii\helpers\VarDumper;
  * @property Lead2 $cLead2
  * @property Project $cProject
  */
-class Call extends \yii\db\ActiveRecord
+class Call extends \yii\db\ActiveRecord implements AggregateRoot
 {
+    
+    use EventTrait;
 
     public const CALL_STATUS_QUEUE          = 'queued';
     public const CALL_STATUS_RINGING        = 'ringing';
@@ -118,6 +122,126 @@ class Call extends \yii\db\ActiveRecord
     ];
 
     /**
+     * @param $callSid
+     * @param $accountSid
+     * @param $callTypeId
+     * @param $uri
+     * @param $from
+     * @param $to
+     * @param $createdDt
+     * @param $recordingUrl
+     * @param $recordingSid
+     * @param $recordingDuration
+     * @param $callerName
+     * @param $direction
+     * @param $apiVersion
+     * @param $sip
+     * @param $projectId
+     * @param $timestamp
+     * @return Call
+     */
+    public static function create(
+        $callSid,
+        $accountSid,
+        $callTypeId,
+        $uri,
+        $from,
+        $to,
+        $createdDt,
+        $recordingUrl,
+        $recordingSid,
+        $recordingDuration,
+        $callerName,
+        $direction,
+        $apiVersion,
+        $sip,
+        $projectId,
+        $timestamp = null
+    ): self
+    {
+        $call = new static();
+        $call->c_call_sid = $callSid;
+        $call->c_account_sid = $accountSid;
+        $call->c_call_type_id = $callTypeId;
+        $call->c_uri = $uri;
+        $call->c_from = $from;
+        $call->c_to = $to;
+        $call->c_created_dt = $createdDt;
+        $call->c_updated_dt = date('Y-m-d H:i:s');
+        $call->c_recording_url = $recordingUrl;
+        $call->c_recording_sid = $recordingSid;
+        $call->c_recording_duration = $recordingDuration;
+        $call->c_caller_name = $callerName;
+        $call->c_direction = $direction;
+        $call->c_api_version = $apiVersion;
+        $call->c_sip = $sip;
+        $call->c_project_id = $projectId;
+        $call->c_timestamp = $timestamp;
+        return $call;
+    }
+
+    /**
+     * @param string $recordingUrl
+     * @param string $recordingSid
+     * @param int $recordingDuration
+     */
+    public function updateRecordingData(string $recordingUrl, string $recordingSid, int $recordingDuration): void
+    {
+        $this->c_recording_url = $recordingUrl;
+        $this->c_recording_sid = $recordingSid;
+        $this->c_recording_duration = $recordingDuration;
+        $this->c_updated_dt = date('Y-m-d H:i:s');
+    }
+
+    /**
+     * @param int|null $userId
+     */
+    public function setCreatedUser(?int $userId): void
+    {
+        $this->c_created_user_id = $userId;
+    }
+
+    /**
+     * @param int|null $projectId
+     */
+    public function setProject(?int $projectId): void
+    {
+        $this->c_project_id = $projectId;
+    }
+
+    /**
+     * @param $price
+     */
+    public function setPrice($price): void
+    {
+        $this->c_price = $price;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isEmptyStatus(): bool
+    {
+        return $this->c_call_status ? false : true;
+    }
+
+    /**
+     * @param string|null $status
+     */
+    public function setStatus(?string $status): void
+    {
+        $this->c_call_status = $status;
+    }
+
+    /**
+     * @param int|null $duration
+     */
+    public function setDuration(?int $duration): void
+    {
+        $this->c_call_duration = $duration;
+    }
+
+    /**
      * {@inheritdoc}
      */
     public static function tableName()
@@ -134,6 +258,7 @@ class Call extends \yii\db\ActiveRecord
             [['c_call_sid'], 'required'],
             [['c_call_type_id', 'c_lead_id', 'c_created_user_id', 'c_com_call_id', 'c_project_id', 'c_call_duration', 'c_recording_duration'], 'integer'],
             [['c_price'], 'number'],
+            [['c_is_new'], 'default', 'value' => true],
             [['c_is_new', 'c_is_deleted'], 'boolean'],
             [['c_created_dt', 'c_updated_dt'], 'safe'],
             [['c_call_sid', 'c_account_sid', 'c_parent_call_sid', 'c_recording_sid'], 'string', 'max' => 34],
@@ -298,11 +423,25 @@ class Call extends \yii\db\ActiveRecord
 
             //Yii::info(VarDumper::dumpAsString($this->attributes), 'info\Call:afterSave');
 
-            if($this->c_call_type_id === self::CALL_TYPE_IN && $this->c_lead_id && in_array($this->c_call_status, [self::CALL_STATUS_BUSY, self::CALL_STATUS_NO_ANSWER], false)) {
+            if(isset($changedAttributes['c_call_status']) && $this->c_call_type_id == self::CALL_TYPE_IN && $this->c_lead_id && in_array($this->c_call_status, [self::CALL_STATUS_NO_ANSWER])) { //self::CALL_STATUS_BUSY,
 
                 if($this->c_created_user_id) {
-                    Notifications::create($this->c_created_user_id, 'Missing Call ('.$this->getSourceName().')  from ' . $this->c_from . ' to ' . $this->c_to . ' <br>Lead ID: ' . $this->c_lead_id , Notifications::TYPE_WARNING, true);
+                    Notifications::create(
+                        $this->c_created_user_id,
+                        'Missing Call ('.$this->getSourceName().')',
+                        'Missing Call ('.$this->getSourceName().')  from ' . $this->c_from . ' to ' . $this->c_to . ' <br>Lead ID: ' . $this->c_lead_id ,
+                        Notifications::TYPE_WARNING,
+                        true);
                     Notifications::socket($this->c_created_user_id, null, 'getNewNotification', [], true);
+                }
+
+                if(in_array($this->c_call_status, [self::CALL_STATUS_NO_ANSWER, self::CALL_STATUS_COMPLETED]) && $lead = $this->cLead2) {
+                    if($lead->l_call_status_id == Lead::CALL_STATUS_QUEUE) {
+                        $lead->l_call_status_id = Lead::CALL_STATUS_READY;
+                        if(!$lead->save()) {
+                            Yii::error(VarDumper::dumpAsString($lead->errors), 'Call:afterSave:Lead2:update');
+                        }
+                    }
                 }
 
                 /*if($this->cLead && $this->cLead->employee_id && $this->c_created_user_id !== $this->cLead->employee_id) {
@@ -328,6 +467,7 @@ class Call extends \yii\db\ActiveRecord
                     Yii::info(VarDumper::dumpAsString(['changedAttributes' => $changedAttributes, 'Call' => $this->attributes, 'Lead' => $lead->attributes]), 'info\Call:afterSave2');
                     $lead->employee_id = $this->c_created_user_id;
                     $lead->status = Lead::STATUS_PROCESSING;
+                    // $lead->l_call_status_id = Lead::CALL_STATUS_PROCESS;
                     $lead->l_answered = true;
                     if($lead->save()) {
                         $host = \Yii::$app->params['url_address'] ?? '';

@@ -1086,8 +1086,10 @@ $duration = 10;
                 'value' => function (\common\models\Lead $model) {
                     return $model->getStatusLabel(); //Lead::STATUS_LIST[$model->status] ?? '-';
                 },
-                'filter' => Lead::STATUS_LIST,
+                'filter' => false,
+//                'filter' => Lead::STATUS_LIST,
                 'format' => 'raw',
+
             ],
 
             [

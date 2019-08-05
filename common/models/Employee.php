@@ -49,9 +49,19 @@ use yii\web\NotFoundHttpException;
  * @property UserProjectParams[] $userProjectParams
  * @property Project[] $uppProjects
  * @property UserProfile $userProfile
+ * @property string|bool|null $timezone
+ * @property bool $isAllowCallExpert
+ * @property int $callExpertCountByShiftTime
  */
 class Employee extends \yii\db\ActiveRecord implements IdentityInterface
 {
+    public const ROLE_SUPER_ADMIN = 'superadmin';
+    public const ROLE_ADMIN = 'admin';
+    public const ROLE_AGENT = 'agent';
+    public const ROLE_SUPERVISION = 'supervision';
+    public const ROLE_QA = 'qa';
+    public const ROLE_USER_MANAGER = 'userManager';
+
     public const SCENARIO_REGISTER = 'register';
 
     public const STATUS_DELETED = 0;
@@ -81,6 +91,58 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
 
     private $cache = [];
 
+    private $_timezone;
+    private $_isAllowCallExpert;
+    private $_callExpertCountByShiftTime;
+
+
+    /**
+     * @return bool
+     */
+    public function isSuperAdmin(): bool
+    {
+        return in_array(self::ROLE_SUPER_ADMIN, $this->getRoles(true), true);
+    }
+
+    /**
+     * @return bool
+     */
+    public function isAdmin(): bool
+    {
+        return in_array(self::ROLE_ADMIN, $this->getRoles(true), true);
+    }
+
+    /**
+     * @return bool
+     */
+    public function isAgent(): bool
+    {
+        return in_array(self::ROLE_AGENT, $this->getRoles(true), true);
+    }
+
+    /**
+     * @return bool
+     */
+    public function isSupervision(): bool
+    {
+        return in_array(self::ROLE_SUPERVISION, $this->getRoles(true), true);
+    }
+
+    /**
+     * @return bool
+     */
+    public function isQa(): bool
+    {
+        return in_array(self::ROLE_QA, $this->getRoles(true), true);
+    }
+
+    /**
+     * @return bool
+     */
+    public function isUserManager(): bool
+    {
+        return in_array(self::ROLE_USER_MANAGER, $this->getRoles(true), true);
+    }
 
     /**
      * @param string $key
@@ -171,6 +233,89 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     {
         return $this->status === self::STATUS_ACTIVE;
     }
+
+    /**
+     * @return bool|string
+     */
+    public function getTimezone()
+    {
+        if($this->_timezone === null) {
+            $params = $this->userParams;
+            if($params && $params->up_timezone) {
+                $this->_timezone = $params->up_timezone;
+            } else {
+                $this->_timezone = false;
+            }
+        }
+        return $this->_timezone;
+    }
+
+    /**
+     * @return bool
+     */
+    public function getIsAllowCallExpert(): bool
+    {
+
+        if($this->_isAllowCallExpert === null) {
+            $this->_isAllowCallExpert = false;
+            $params = $this->userParams;
+            if($params && (int) $params->up_call_expert_limit >= 0) {
+                $this->_isAllowCallExpert = true;
+            }
+        }
+        return $this->_isAllowCallExpert;
+    }
+
+    /**
+     * @return int
+     * @throws \Exception
+     */
+    public function getCallExpertCountByShiftTime(): int
+    {
+
+        if($this->_callExpertCountByShiftTime === null) {
+            //$this->_callExpertCountByShiftTime = 0;
+
+            $shiftTime = $this->getShiftTime();
+
+            if (isset($shiftTime['start_utc_dt']) && $shiftTime['start_utc_dt']) {
+                $startShiftDateTime = date('Y-m-d', strtotime($shiftTime['start_utc_dt']) - (3 * 60 * 60));
+            } else {
+                $startShiftDateTime = date('Y-m-d', strtotime('-3 hours'));
+            }
+
+
+            $this->_callExpertCountByShiftTime = LeadCallExpert::find()->where(['lce_agent_user_id' => $this->id])->andWhere(['>=', 'lce_request_dt', $startShiftDateTime])->count();
+        }
+        return $this->_callExpertCountByShiftTime;
+    }
+
+
+    /**
+     * @return bool
+     */
+    public function isEnableCallExpert(): bool
+    {
+        $params = $this->userParams;
+
+        if($params) {
+
+            if ((int)$params->up_call_expert_limit === 0) {
+                return true;
+            }
+
+            if ((int)$params->up_call_expert_limit > 0 && $this->callExpertCountByShiftTime >= $params->up_call_expert_limit) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+
+
+
+
 
     public function afterFind()
     {
@@ -568,12 +713,16 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     }
 
     /**
+     * @param bool $onlyNames
      * @return array
      */
-    public function getRoles() : array
+    public function getRoles($onlyNames = false) : array
     {
         if ($this->rolesName === null) {
             $this->rolesName = ArrayHelper::map(Yii::$app->authManager->getRolesByUser($this->id), 'name', 'description');
+        }
+        if ($onlyNames) {
+            return array_keys($this->rolesName);
         }
         return $this->rolesName;
     }
@@ -823,11 +972,13 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
             ->groupBy(['lt_task_id']);
 
         $taskListAllQuery->joinWith(['ltLead' => function ($q) {
-            $q->where(['NOT IN', 'leads.status', [Lead::STATUS_TRASH, Lead::STATUS_SNOOZE]]);
+            //$q->where(['NOT IN', 'leads.status', [Lead::STATUS_TRASH, Lead::STATUS_SNOOZE]]);
+            $q->where(['leads.status' => Lead::STATUS_PROCESSING]);
         }]);
 
         $taskListCheckedQuery->joinWith(['ltLead' => function ($q) {
-            $q->where(['NOT IN', 'leads.status', [Lead::STATUS_TRASH, Lead::STATUS_SNOOZE]]);
+            //$q->where(['NOT IN', 'leads.status', [Lead::STATUS_TRASH, Lead::STATUS_SNOOZE]]);
+            $q->where(['leads.status' => Lead::STATUS_PROCESSING]);
         }]);
 
         $taskListAll = $taskListAllQuery->all();
@@ -1511,5 +1662,32 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         //VarDumper::dump($sqlRaw, 10, true); exit;
         $users = $generalQuery->all();
         return $users;
+    }
+
+    /**
+     * @param int $time
+     * @return string
+     * @throws \Exception
+     */
+    public static function convertDtTimezone(int $time): string
+    {
+        $dateTime = '';
+
+        if($time >= 0) {
+
+            /** @var Employee $user */
+            $user = \Yii::$app->user->identity;
+            $timezone = $user->timezone;
+
+            $dateTime = date('Y-m-d H:i:s', $time);
+
+            if ($timezone) {
+                $date = new \DateTime($dateTime, new \DateTimeZone($timezone));
+                $date->setTimezone(new \DateTimeZone('UTC'));
+                $dateTime = $date->format('Y-m-d H:i:s');
+            }
+        }
+
+        return $dateTime;
     }
 }

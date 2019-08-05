@@ -1,5 +1,7 @@
 <?php
 
+use \yii\helpers\Url;
+
 /* @var $this \yii\web\View */
 /** @var \common\models\Employee $user */
 
@@ -103,24 +105,32 @@ $isSuperAdmin = $user->canRole('superadmin');
             $menuItems[] = ['label' => 'KPI <span id="kpi" class="label-info label pull-right"></span> ', 'url' => ['/kpi/index'], 'icon' => 'money'];
         }
 
-        if($isQA) {
-            $menuItems[] = ['label' => 'Sold', 'url' => ['/queue/sold'], 'icon' => 'flag text-success'];
-            $menuItems[] = ['label' => 'Trash', 'url' => ['/queue/trash'], 'icon' => 'trash-o text-danger'];
+        $menuLItems = [];
+        $menuLItems[] = ['label' => 'Pending <span id="badges-pending" data-type="pending" class="label-info label pull-right bginfo"></span> ', 'url' => ['/queue/pending'], 'icon' => 'briefcase text-info'];
+
+        if (isset(Yii::$app->params['settings']['enable_lead_inbox']) && Yii::$app->params['settings']['enable_lead_inbox']) {
+            $menuLItems[] = ['label' => 'Inbox <span id="badges-inbox" data-type="inbox" class="label-info label pull-right bginfo"></span> ', 'url' => ['/queue/inbox'], 'icon' => 'briefcase text-info'];
         }
 
-        if (!$isQA && !$isUM) {
-            $badges = \common\models\Lead::getBadgesSingleQuery();
-            $menuItems[] = ['label' => 'Pending <span id="pending-queue" class="label-info label pull-right">' . $badges['pending'] . '</span> ', 'url' => ['/queue/pending'], 'icon' => 'briefcase text-info'];
-            if (isset(Yii::$app->params['settings']['enable_lead_inbox']) && Yii::$app->params['settings']['enable_lead_inbox']) {
-                $menuItems[] = ['label' => 'Inbox <span id="inbox-queue" class="label-info label pull-right">' . $badges['inbox'] . '</span> ', 'url' => ['/queue/inbox'], 'icon' => 'briefcase text-info'];
-            }
-            $menuItems[] = ['label' => 'Follow Up <span id="follow-up-queue" class="label-success label pull-right">' . $badges['follow-up'] . '</span> ', 'url' => ['/queue/follow-up'], 'icon' => 'recycle'];
-            $menuItems[] = ['label' => 'Processing <span id="processing-queue" class="label-warning label pull-right">' . $badges['processing'] . '</span> ', 'url' => ['/queue/processing'], 'icon' => 'spinner'];
-            $menuItems[] = ['label' => 'Booked <span id="booked-queue" class="label-success label pull-right">' . $badges['booked'] . '</span>', 'url' => ['/queue/booked'], 'icon' => 'flag-o text-warning'];
-            $menuItems[] = ['label' => 'Sold <span id="sold-queue" class="label-success label pull-right">' . $badges['sold'] . '</span> ', 'url' => ['/queue/sold'], 'icon' => 'flag text-success'];
-            $menuItems[] = ['label' => 'Duplicate <span id="sold-queue" class="label-danger label pull-right">' . $badges['duplicate'] . '</span>', 'url' => ['/queue/duplicate'], 'icon' => 'list text-danger'];
-            $menuItems[] = ['label' => 'Trash <span id="trash-queue" class="label-danger label pull-right"></span>', 'url' => ['/queue/trash'], 'icon' => 'trash-o text-danger']; //' . $badges['trash'] . '
+        $menuLItems[] = ['label' => 'Follow Up <span id="badges-follow-up" data-type="follow-up" class="label-success label pull-right bginfo"></span> ', 'url' => ['/queue/follow-up'], 'icon' => 'recycle'];
+        $menuLItems[] = ['label' => 'Processing <span id="badges-processing" data-type="processing" class="label-warning label pull-right bginfo"></span> ', 'url' => ['/queue/processing'], 'icon' => 'spinner'];
+        $menuLItems[] = ['label' => 'Booked <span id="badges-booked" data-type="booked" class="label-success label pull-right bginfo"></span>', 'url' => ['/queue/booked'], 'icon' => 'flag-o text-warning'];
+        $menuLItems[] = ['label' => 'Sold <span id="badges-sold" data-type="sold" class="label-success label pull-right bginfo"></span> ', 'url' => ['/queue/sold'], 'icon' => 'flag text-success'];
+        $menuLItems[] = ['label' => 'Duplicate <span id="badges-duplicate" data-type="duplicate" class="label-danger label pull-right bginfo"></span>', 'url' => ['/queue/duplicate'], 'icon' => 'list text-danger'];
+        $menuLItems[] = ['label' => 'Trash <span id="badges-trash" class="label-danger label pull-right"></span>', 'url' => ['/queue/trash'], 'icon' => 'trash-o text-danger'];
+
+
+        if($isAdmin) {
+            $menuItems[] = [
+                'label' => 'Leads',
+                'url' => 'javascript:',
+                'icon' => 'cubes',
+                'items' => $menuLItems
+            ];
+        } else {
+            $menuItems = \yii\helpers\ArrayHelper::merge($menuItems, $menuLItems);
         }
+
 
         $menuItems[] = [
             'label' => 'Users',
@@ -129,9 +139,9 @@ $isSuperAdmin = $user->canRole('superadmin');
             'items' => [
                 ['label' => 'Users', 'url' => ['/employee/list'], 'icon' => 'user'],
                 ['label' => 'User Groups', 'url' => ['/user-group/index'], 'icon' => 'users'],
-                ['label' => 'User Groups Assignments', 'url' => ['/user-group-assign/index'], 'icon' => 'users'],
-                ['label' => 'User Params', 'url' => ['/user-params/index'], 'icon' => 'users'],
-                ['label' => 'User Project Params', 'url' => ['/user-project-params/index'], 'icon' => 'users']
+                ['label' => 'User Params', 'url' => ['/user-params/index'], 'icon' => 'bars'],
+                ['label' => 'User Project Params', 'url' => ['/user-project-params/index'], 'icon' => 'list'],
+                ['label' => 'User Groups Assignments', 'url' => ['/user-group-assign/index'], 'icon' => 'list'],
 
             ]
         ];
@@ -200,6 +210,8 @@ $isSuperAdmin = $user->canRole('superadmin');
                 ['label' => 'System Logs', 'url' => ['/log/index'], 'icon' => 'bars'],
                 ['label' => 'Clean cache & assets', 'url' => ['/clean/index'], 'icon' => 'remove'],
                 ['label' => 'Site Settings', 'url' => ['/setting/index'], 'icon' => 'cogs'],
+                ['label' => 'User Site Activity', 'url' => ['/user-site-activity/index'], 'icon' => 'bars'],
+                ['label' => 'User Activity Report', 'url' => ['/user-site-activity/report'], 'icon' => 'bar-chart'],
             ]
         ];
 
@@ -275,3 +287,44 @@ $isSuperAdmin = $user->canRole('superadmin');
 
     </div>
 </div>
+
+
+<?php
+$urlBadgesCount = Url::to(['/badges/get-badges-count']);
+$js =<<<JS
+function updateBadgesCounters() {
+    $(".bginfo").each(function(i) {
+        var id = $(this).attr('id');
+        var type = $(this).data('type');
+        if (typeof(type) != "undefined" && type != null && typeof(id) != "undefined" && id != null ) {
+              setTimeout(function () {
+                  $('#' + id).html('<i style="font-size:9px" class="fa fa-spin fa-spinner"></i>');
+              $.ajax({
+                url: '$urlBadgesCount',
+                data: {type: type}, 
+                dataType: 'json',
+                success: function(data){
+                    if (typeof (data) != "undefined" && data != null) {
+                        if (data.result == 'success' && data.count != 0) {
+                            $("#" + id).html(data.count);
+                        } else {
+                            $("#" + id).html('');
+                        }
+                    } else {
+                        $("#" + id).html('-');
+                    }
+         
+                },
+                error: function(data){
+                    console.log(data);
+                    $("#" + id).html('-');
+                }, 
+            });    
+              }, i*300)
+        }
+    });
+}
+
+updateBadgesCounters();
+JS;
+$this->registerJs($js, $this::POS_LOAD);

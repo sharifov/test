@@ -2,7 +2,6 @@
 
 namespace frontend\controllers;
 
-use common\components\CommunicationService;
 use common\components\CountEvent;
 use common\components\jobs\TelegramSendMessageJob;
 use common\models\Call;
@@ -13,10 +12,23 @@ use common\models\Lead2;
 use common\models\Notifications;
 use common\models\Project;
 use common\models\Sources;
+use common\models\Test1;
 use common\models\UserConnection;
 use common\models\UserProfile;
+use sales\dispatchers\DeferredEventDispatcher;
+use sales\dispatchers\EventDispatcher;
+use sales\forms\api\communication\voice\finish\FinishForm;
+use sales\forms\api\communication\voice\record\RecordForm;
+use sales\repositories\airport\AirportRepository;
+use sales\repositories\lead\LeadBadgesRepository;
+use sales\repositories\lead\LeadRepository;
+use sales\repositories\Repository;
+use sales\repositories\TestRepository;
+use sales\services\api\communication\CommunicationService;
+use sales\services\TransactionManager;
 use Twilio\TwiML\VoiceResponse;
 use Yii;
+use yii\caching\DbDependency;
 use yii\helpers\ArrayHelper;
 use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
@@ -28,9 +40,30 @@ use yii\queue\Queue;
 
 /**
  * Test controller
+ * @property LeadRepository $leadRepository
+ * @property DeferredEventDispatcher $dispatcher
+ * @property TransactionManager $transactionManager
  */
 class TestController extends FController
 {
+    private $leadRepository;
+    private $dispatcher;
+    private $transactionManager;
+
+    public function __construct(
+        $id,
+        $module,
+        LeadRepository $leadRepository,
+        DeferredEventDispatcher $dispatcher,
+        TransactionManager $transactionManager, $config = []
+    )
+    {
+        $this->leadRepository = $leadRepository;
+        $this->dispatcher = $dispatcher;
+        $this->transactionManager= $transactionManager;
+        parent::__construct($id, $module, $config);
+    }
+
     /**
      * {@inheritdoc}
      */
@@ -59,6 +92,66 @@ class TestController extends FController
 
     public function actionT()
     {
+
+
+//        VarDumper::dump($lead);
+
+
+//        die;
+
+        /** @var AirportRepository $repo */
+        $repo = Yii::createObject(AirportRepository::class);
+
+        $lead = $repo->getByIata(215);
+
+
+
+
+        VarDumper::dump($lead);
+//        $repo->findOne(3);
+//        $repo->agetOne(11, 2);
+//        $repo->agetOne(11, 2);
+
+
+
+        die;
+
+        $post = [
+            'type' => 'voip_incoming',
+            'call_id' => '1256',
+            'call' => [
+                'Called' => '+16692011812',
+                'ToState' => 'CA',
+                'CallerCountry' => 'LS',
+                'Direction' => 'inbound',
+                'CallerState' => '',
+                'ToZip' => '',
+                'CallSid' => 'CA4f67c57472019afe38aa48cf6dd7c22f',
+                'To' => '+16692011812',
+                'CallerZip' => '',
+                'ToCountry' => 'US',
+                'ApiVersion' => '2010-04-01',
+                'CalledZip' => '',
+                'CalledCity' => '',
+                'CallStatus' => 'ringing',
+                'From' => '+266696687',
+                'AccountSid' => 'AC10f3c74efba7b492cbd7dca86077736c',
+                'CalledCountry' => 'US',
+                'CallerCity' => '',
+                'ApplicationSid' => 'APd65ba6826de6314e0780220d89fc6cde',
+                'Caller' => '+266696687',
+                'FromCountry' => 'LS',
+                'ToCity' => '',
+                'FromCity' => '',
+                'CalledState' => 'CA',
+                'FromZip' => '',
+                'FromState' => '',
+            ]
+        ];
+
+        /** @var CommunicationService $service */
+        $service = Yii::createObject(CommunicationService::class);
+        $service->voiceIncoming('1', $post);
 
 
         die;
@@ -1269,6 +1362,12 @@ class TestController extends FController
         Notifications::socket(Yii::$app->user->id, null, 'openUrl', ['url' => $host . '/lead/view/b5d963c9241dd741e22b37d1fa80a9b6'], false);
     }
 
+    public function actionNotify2()
+    {
+        Notifications::create(Yii::$app->user->id, 'Test '.date('H:i:s'), 'Test message <h2>asdasdasd</h2>', Notifications::TYPE_SUCCESS, true);
+        //Notifications::socket(Yii::$app->user->id, null, 'openUrl', ['url' => $host . '/lead/view/b5d963c9241dd741e22b37d1fa80a9b6'], false);
+    }
+
     public function actionTest3()
     {
 
@@ -1354,6 +1453,75 @@ class TestController extends FController
         /*if (!$callsCount) {
             return false;
         }*/
+
+    }
+
+    public function actionCache()
+    {
+
+       /* $user_id = Yii::$app->user->id;
+
+        $sql = \common\models\Notifications::find()->select('MAX(n_id)')->where(['n_user_id' => $user_id])->createCommand()->rawSql;
+        //echo $sql; exit;
+
+
+        $db = \Yii::$app->db;
+        $duration = 0;
+        $dependency = new DbDependency();
+        $dependency->sql = $sql;
+
+        $dependency = null;  // optional dependency
+
+
+        $newCount = $db->cache(function ($db) use ($user_id) {
+            return \common\models\Notifications::findNewCount($user_id);
+        }, $duration, $dependency);
+
+        $model = $db->cache(function ($db) use ($user_id) {
+            return \common\models\Notifications::findNew($user_id);
+        }, $duration, $dependency);
+
+        VarDumper::dump($newCount, 10, true);
+        //VarDumper::dump($model, 10, true);*/
+
+        return $this->render('blank');
+
+    }
+
+    public function actionMysql()
+    {
+
+        $sqlData = [];
+        $sqlData[] = "SELECT COUNT(*) FROM `call`";
+        $sqlData[] = "SELECT * FROM `call` WHERE c_call_sid = 'CA4cd4b85d370ee0d517119e50da556b16'";
+        $sqlData[] = "SELECT * FROM `call` WHERE c_call_sid = 'CAbba5c4a2d05fa83c35d5eb458d68eb39'";
+        $sqlData[] = "SELECT * FROM `call` WHERE c_call_sid = 'CA95891e5bf4bb6d509dcd167bbd898142'";
+        $sqlData[] = "SELECT COUNT(*) FROM `sms`";
+        $sqlData[] = "SELECT COUNT(*) FROM `email`";
+        $sqlData[] = "SELECT COUNT(*) FROM `leads`";
+        $sqlData[] = "SELECT COUNT(*) FROM `quotes`";
+
+
+        echo '<h2>SQL x 1</h2><table border="1" cellpadding="3" cellspacing="1">';
+        foreach ($sqlData as $sql) {
+            $time_start = microtime(true);
+            $result = Yii::$app->db->createCommand($sql)->queryAll();
+            $time_end = microtime(true);
+            echo '<tr><td>'.$sql.'</td><td>Time: ' . round($time_end - $time_start, 6).'</td></tr>';
+        }
+        echo '</table>';
+
+
+        echo '<hr><h2>SQL x 10</h2><table border="1" cellpadding="3" cellspacing="1">';
+        foreach ($sqlData as $sql) {
+            $time_start = microtime(true);
+            for($i = 0; $i < 10; $i++) {
+                $result = Yii::$app->db->createCommand($sql)->queryAll();
+            }
+            $time_end = microtime(true);
+            echo '<tr><td>'.$sql.'</td><td>Time: ' . round($time_end - $time_start, 6).'</td></tr>';
+        }
+        echo '</table>';
 
     }
 

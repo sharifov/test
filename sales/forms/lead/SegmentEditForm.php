@@ -43,7 +43,7 @@ class SegmentEditForm extends SegmentForm
     private function loadAirportLabel(string $iata): string
     {
         try {
-            return (new AirportRepository())->getByIata($iata)->getSelection();
+            return (new AirportRepository())->findByIata($iata)->getSelection();
         } catch (\Exception $e) {
             Yii::$app->errorHandler->logException($e);
             return '';
@@ -57,7 +57,7 @@ class SegmentEditForm extends SegmentForm
     private function loadCityName(string $iata): string
     {
         try {
-            return (new AirportRepository())->getByIata($iata)->getCityName();
+            return (new AirportRepository())->findByIata($iata)->getCityName();
         } catch (\Exception $e) {
             Yii::$app->errorHandler->logException($e);
             return '';

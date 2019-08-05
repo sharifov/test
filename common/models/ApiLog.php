@@ -184,7 +184,7 @@ class ApiLog extends \yii\db\ActiveRecord
 
     public static function getActionsList()
     {
-        return self::find()->select('al_action')->where('al_action IS NOT NULL')->distinct()->orderBy('al_id ASC')->asArray()->all();
+        return self::find()->select('al_action')->where('al_action IS NOT NULL')->distinct()->asArray()->all();
     }
 
     /**

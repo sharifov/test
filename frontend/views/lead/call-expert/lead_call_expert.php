@@ -4,6 +4,7 @@
  * @var $lead \common\models\Lead
  * @var $dataProvider \yii\data\ActiveDataProvider
  * @var $modelLeadCallExpert LeadCallExpert
+ * @var $user \common\models\Employee
  */
 
 
@@ -28,6 +29,10 @@ use yii\widgets\Pjax;
 ];*/
 //echo Html::a('<span class="btn-icon"><i class="fa fa-bell"></i></span> <span class="btn-text">Call</span>', null, $options);
 
+
+
+$user = Yii::$app->user->identity;
+
 ?>
 <style>
     .x_title span{color: white;}
@@ -37,7 +42,7 @@ use yii\widgets\Pjax;
     <div class="x_title">
 
         <?php
-        /** @var TYPE_NAME $lastModel */
+        /** @var LeadCallExpert $lastModel */
         $lastModel = null;
         $label = '';
         if($dataProvider->count > 0) {
@@ -68,6 +73,10 @@ use yii\widgets\Pjax;
                 }
             ?>
 
+            <?php if($user->userParams && $user->userParams->up_call_expert_limit > 0):?>
+                [limit: <?=$user->callExpertCountByShiftTime?> /  <?= $user->userParams->up_call_expert_limit?>]
+            <?php endif;?>
+
         </h2>
 
         <ul class="nav navbar-right panel_toolbox">
@@ -76,8 +85,14 @@ use yii\widgets\Pjax;
             </li>
             <li>
                 <?//=Html::a('<i class="fa fa-comment"></i>', ['lead/view', 'gid' => $lead->gid, 'act' => 'call-expert-message'], ['class' => ''])?>
-                <?php if(!$lastModel || $lastModel->lce_status_id === LeadCallExpert::STATUS_DONE):?>
-                    <?=Html::a('<i class="fa fa-plus-circle success"></i> new Call', null, ['id' => 'btn-call-expert-form'])?>
+                <?php if($lead->leadFlightSegmentsCount):?>
+                    <?php if(!$lastModel || $lastModel->lce_status_id === LeadCallExpert::STATUS_DONE):?>
+                        <?php if($user->isEnableCallExpert()): ?>
+                            <?=Html::a('<i class="fa fa-plus-circle success"></i> new Call', null, ['id' => 'btn-call-expert-form'])?>
+                        <?php endif; ?>
+                    <?php endif; ?>
+                <?php else: ?>
+                    <span class="badge badge-warning"><i class="fa fa-warning"></i> Warning: Flight Segments is empty!</span>
                 <?php endif; ?>
             </li>
             <li>

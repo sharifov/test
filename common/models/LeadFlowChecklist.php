@@ -18,6 +18,22 @@ use yii\db\ActiveQuery;
  */
 class LeadFlowChecklist extends ActiveRecord
 {
+
+    /**
+     * @param $leadFlowId
+     * @param $leadChecklistTypeId
+     * @param $leadChecklistUserId
+     * @return LeadFlowChecklist
+     */
+    public static function create($leadFlowId, $leadChecklistTypeId, $leadChecklistUserId): self
+    {
+        $leadFlowChecklist = new static();
+        $leadFlowChecklist->lfc_lf_id = $leadFlowId;
+        $leadFlowChecklist->lfc_lc_type_id = $leadChecklistTypeId;
+        $leadFlowChecklist->lfc_lc_user_id = $leadChecklistUserId;
+        return $leadFlowChecklist;
+    }
+
     /**
      * {@inheritdoc}
      */

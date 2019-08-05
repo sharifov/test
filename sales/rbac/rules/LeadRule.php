@@ -14,7 +14,7 @@ abstract class LeadRule extends Rule
     public function __construct($config = [])
     {
         parent::__construct($config);
-        $this->leadRepository = new LeadRepository();
+        $this->leadRepository = Yii::createObject(LeadRepository::class);
     }
 
     /**
@@ -30,11 +30,12 @@ abstract class LeadRule extends Rule
         }
         /** @var  Lead $params['lead'] */
         $leadId = $params['leadId'] ?? $params['lead']->id;
+        $leadId = (int)$leadId;
         $key = $this->name . '-' . $userId . '-' . $leadId;
         $can = Yii::$app->user->identity->getCache($key);
         if ($can === null) {
             try {
-                $lead = $params['lead'] ?? $this->leadRepository->get($leadId);
+                $lead = $params['lead'] ?? $this->leadRepository->find($leadId);
                 $data = $this->getData($userId, $lead);
                 $can = Yii::$app->user->identity->setCache($key, $data);
             } catch (\Throwable $e) {

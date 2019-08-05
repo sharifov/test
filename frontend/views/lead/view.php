@@ -211,14 +211,21 @@ $lead = $leadForm->getLead();
                     <div class="alert alert-warning" role="alert">You do not have access to view Communication block messages.</div>
                 <?php endif;?>
 
-                <?= $this->render('call-expert/lead_call_expert', [
-                    'lead' => $leadForm->getLead(),
-                    'comForm'       => $comForm,
-                    'leadId'        => $lead->id,
-                    'dataProvider'  => $dataProviderCallExpert,
-                    'isAdmin'       => $is_admin,
-                    'modelLeadCallExpert'       => $modelLeadCallExpert,
-                ]) ?>
+
+            <?//php \yii\helpers\VarDumper::dump(Yii::$app->user->identity->callExpertCountByShiftTime) ?>
+
+
+
+                <?php if(Yii::$app->user->identity->isAllowCallExpert): ?>
+                    <?= $this->render('call-expert/lead_call_expert', [
+                        'lead' => $leadForm->getLead(),
+                        'comForm'       => $comForm,
+                        'leadId'        => $lead->id,
+                        'dataProvider'  => $dataProviderCallExpert,
+                        'isAdmin'       => $is_admin,
+                        'modelLeadCallExpert'       => $modelLeadCallExpert,
+                    ]) ?>
+                <?php endif;?>
 
 
             <?php endif;?>
@@ -301,7 +308,8 @@ if (!$leadForm->getLead()->isNewRecord) {
     });
      $("#pj-itinerary").on("pjax:end", function () {
          if ($('#modeFlightSegments').data('value') == 'view') {
-            $.pjax.reload({container: '#quotes_list', timeout: 10000});     
+            $.pjax.reload({container: '#quotes_list', timeout: 10000, async: false});
+            $.pjax.reload({container: '#pjax-lead-call-expert', timeout: 10000, async: false});
          }
      });
     

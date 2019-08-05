@@ -122,7 +122,9 @@ $this->params['breadcrumbs'][] = $this->title;
             */ ?>
     </div>
 
-    <?php Pjax::begin(); ?>
+    <?php Pjax::begin(['timeout' => 10000]); ?>
+
+    <?php echo $this->render('_my_call_search', ['model' => $searchModel]); ?>
 
     <?= GridView::widget([
         'dataProvider' => $dataProvider,

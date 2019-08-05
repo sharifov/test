@@ -7,8 +7,24 @@ use common\components\jobs\QuickSearchInitPriceJob;
 use common\components\jobs\UpdateLeadBOJob;
 use common\models\local\LeadAdditionalInformation;
 use common\models\local\LeadLogMessage;
+use sales\entities\AggregateRoot;
+use sales\entities\EventTrait;
+use sales\events\lead\LeadBookedEvent;
+use sales\events\lead\LeadCallExpertRequestEvent;
+use sales\events\lead\LeadCallStatusChangeEvent;
+use sales\events\lead\LeadCreatedCloneEvent;
+use sales\events\lead\LeadCreatedEvent;
+use sales\events\lead\LeadDuplicateDetectedEvent;
+use sales\events\lead\LeadFollowUpEvent;
+use sales\events\lead\LeadOwnerChangedEvent;
+use sales\events\lead\LeadCountPassengersChangedEvent;
+use sales\events\lead\LeadSnoozeEvent;
+use sales\events\lead\LeadSoldEvent;
+use sales\events\lead\LeadStatusChangedEvent;
+use sales\events\lead\LeadTaskEvent;
 use sales\helpers\lead\LeadHelper;
 use Yii;
+use yii\base\InvalidArgumentException;
 use yii\behaviors\TimestampBehavior;
 use yii\caching\DbDependency;
 use yii\data\ActiveDataProvider;
@@ -77,6 +93,9 @@ use common\components\SearchService;
  * @property double $agentProcessingFee
  * @property double $agents_processing_fee
  * @property string $l_client_time
+ * @property boolean $enableActiveRecordEvents
+ *
+ * @property $status_description;
  *
  * @property Call[] $calls
  * @property Email[] $emails
@@ -102,8 +121,9 @@ use common\components\SearchService;
  * @property UserConnection[] $userConnections
  *
  */
-class Lead extends ActiveRecord
+class Lead extends ActiveRecord implements AggregateRoot
 {
+    use EventTrait;
 
     public const AGENT_PROCESSING_FEE_PER_PAX = 25.0;
     public const PENDING_ALLOW_CALL_TIME_MINUTES = 20; // minutes
@@ -194,6 +214,7 @@ class Lead extends ActiveRecord
     public const CALL_STATUS_PROCESS    = 2;
     public const CALL_STATUS_CANCEL     = 3;
     public const CALL_STATUS_DONE       = 4;
+    public const CALL_STATUS_QUEUE      = 5;
 
     public const CALL_STATUS_LIST = [
         self::CALL_STATUS_NONE      => 'None',
@@ -201,8 +222,8 @@ class Lead extends ActiveRecord
         self::CALL_STATUS_PROCESS   => 'Process',
         self::CALL_STATUS_CANCEL    => 'Cancel',
         self::CALL_STATUS_DONE      => 'Done',
+        self::CALL_STATUS_QUEUE     => 'Queue',
     ];
-
 
 
     public const SCENARIO_API = 'scenario_api';
@@ -218,6 +239,8 @@ class Lead extends ActiveRecord
     public $finalProfit = 0;
     public $agentProcessingFee = 0.00;
     public $l_client_time;
+
+    public $enableActiveRecordEvents = true;
 
     /**
      * {@inheritdoc}
@@ -275,7 +298,6 @@ class Lead extends ActiveRecord
      * @param $clientId
      * @param $clientFirstName
      * @param $clientLastName
-     * @param $employeeId
      * @param $cabin
      * @param $adults
      * @param $children
@@ -286,14 +308,12 @@ class Lead extends ActiveRecord
      * @param $notesForExperts
      * @param $clientPhone
      * @param $clientEmail
-     * @param $status
      * @return Lead
      */
     public static function create(
         $clientId,
         $clientFirstName,
         $clientLastName,
-        $employeeId,
         $cabin,
         $adults,
         $children,
@@ -303,15 +323,13 @@ class Lead extends ActiveRecord
         $projectId,
         $notesForExperts,
         $clientPhone,
-        $clientEmail,
-        $status
+        $clientEmail
     ): self
     {
         $lead = new static();
         $lead->client_id = $clientId;
         $lead->l_client_first_name = $clientFirstName;
         $lead->l_client_last_name = $clientLastName;
-        $lead->employee_id = $employeeId;
         $lead->cabin = $cabin;
         $lead->adults = $adults;
         $lead->children = $children;
@@ -320,22 +338,293 @@ class Lead extends ActiveRecord
         $lead->source_id = $sourceId;
         $lead->project_id = $projectId;
         $lead->notes_for_experts = $notesForExperts;
-        $lead->uid = uniqid();
-        $lead->gid = md5(uniqid('', true));
+        $lead->uid = self::generateUid();
+        $lead->gid = self::generateGid();
         $lead->l_client_phone = $clientPhone;
         $lead->l_client_email = $clientEmail;
-        $lead->status = $status;
+        $lead->status = self::STATUS_PENDING;
+        $lead->recordEvent(new LeadCreatedEvent($lead));
         return $lead;
     }
 
-    public function editItinerary($cabin, $adults, $children, $infants): void
+    /**
+     * @param int $ownerId
+     * @param string|null $description
+     * @return Lead
+     */
+    public function createClone(int $ownerId, ?string $description): self
+    {
+        $clone = new static();
+        $clone->attributes = $this->attributes;
+        $clone->description = $description;
+        $clone->notes_for_experts = null;
+        $clone->rating = 0;
+        $clone->additional_information = null;
+        $clone->l_answered = 0;
+        $clone->l_grade = 0;
+        $clone->snooze_for = null;
+        $clone->called_expert = false;
+        $clone->created = null;
+        $clone->updated = null;
+        $clone->tips = 0;
+        $clone->uid = self::generateUid();
+        $clone->gid = self::generateGid();
+        $clone->status = self::STATUS_PENDING;
+        $clone->clone_id = $this->id;
+        $clone->employee_id = null;
+        $clone->take($ownerId);
+        $clone->recordEvent(new LeadCreatedCloneEvent($clone));
+        return $clone;
+    }
+
+    /**
+     * @return string
+     */
+    private static function generateUid(): string
+    {
+        return uniqid();
+    }
+
+    /**
+     * @return string
+     */
+    private static function generateGid(): string
+    {
+        return md5(uniqid('', true));
+    }
+
+    /**
+     * @param int $value
+     */
+    public function changeRating(int $value): void
+    {
+        $this->setRating($value);
+    }
+
+    /**
+     * @param int $rating
+     */
+    private function setRating(int $rating): void
+    {
+        if ($rating < 0 || $rating > 3) {
+            throw new InvalidArgumentException('Invalid rating!');
+        }
+        $this->rating = $rating;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isAnswered(): bool
+    {
+        return $this->l_answered ? true : false;
+    }
+
+    public function changeAnswered(): void
+    {
+        if ($this->isAnswered()) {
+            $this->setAnswered(false);
+        } else {
+            $this->setAnswered(true);
+        }
+    }
+
+    /**
+     * @param bool $value
+     */
+    private function setAnswered(bool $value): void
+    {
+        if ($this->l_answered !== $value) {
+            $this->recordEvent(new LeadTaskEvent($this), LeadTaskEvent::class);
+        }
+        $this->l_answered = $value;
+    }
+
+    public function sendCallExpertRequest(): void
+    {
+        if (in_array($this->status, [self::STATUS_TRASH, self::STATUS_FOLLOW_UP, self::STATUS_SNOOZE, self::STATUS_PROCESSING], true)) {
+            $this->recordEvent(new LeadCallExpertRequestEvent($this));
+        }
+        $this->setCalledExpert(true);
+    }
+
+    /**
+     * @return bool
+     */
+    public function isCalledExpert(): bool
+    {
+        return $this->called_expert == 1 ? true : false;
+    }
+
+    /**
+     * @param bool $value
+     */
+    public function setCalledExpert(bool $value): void
+    {
+        $this->called_expert = $value;
+    }
+
+    /**
+     * @param int $userId
+     * @return bool
+     */
+    private function isAlreadyTakenUser(int $userId): bool
+    {
+        return $this->isOwner($userId) && $this->isProcessing();
+    }
+
+    /**
+     * @param int $userId
+     */
+    public function take(int $userId): void
+    {
+        if ($this->isCompleted()) {
+            throw new \DomainException('Lead is completed!');
+        }
+
+        if ($this->isAlreadyTakenUser($userId)) {
+            throw new \DomainException('Lead is already taken to this user!');
+        }
+
+        if (!$this->isAvailableToTake()) {
+            throw new \DomainException('Lead is unavailable to "Take" now!');
+        }
+
+        $this->assign($userId, self::STATUS_PROCESSING);
+    }
+
+    /**
+     * @param int $userId
+     */
+    public function takeOver(int $userId): void
+    {
+        if ($this->isCompleted()) {
+            throw new \DomainException('Lead is completed!');
+        }
+
+        if ($this->isAlreadyTakenUser($userId)) {
+            throw new \DomainException('Lead is already taken to this user!');
+        }
+
+        if (!$this->isAvailableToTakeOver()) {
+            throw new \DomainException('Lead is unavailable to "Take Over" now!');
+        }
+
+        $this->assign($userId, self::STATUS_PROCESSING);
+    }
+
+    /**
+     * @param int|null $userId
+     * @param int $status
+     */
+    private function assign(?int $userId, int $status): void
+    {
+        if ($this->status === $status && $this->isOwner($userId)) {
+            throw new \DomainException('Lead is already assigned to this user!');
+        }
+//        $this->recordEvent(new LeadAssignedEvent($this, $this->employee_id, $userId, $this->status, $status));
+        $this->setStatus($status);
+        $this->setOwner($userId);
+    }
+
+    public function isGetOwner(): bool
+    {
+        return $this->employee_id ? true : false;
+    }
+
+    /**
+     * @param int|null $userId
+     * @return bool
+     */
+    private function isOwner(?int $userId): bool
+    {
+        if ($userId === null) {
+            return false;
+        }
+        return $this->employee && $this->employee->id === $userId;
+    }
+
+    /**
+     * @param int|null $userId
+     */
+    private function setOwner(?int $userId): void
+    {
+        if (!$this->isOwner($userId)) {
+            $this->recordEvent(new LeadOwnerChangedEvent($this, $this->employee_id, $userId));
+            if ($this->isProcessing()) {
+                $this->recordEvent(new LeadTaskEvent($this), LeadTaskEvent::class);
+            }
+        }
+        $this->employee_id = $userId;
+    }
+
+    /**
+     * @param int $status
+     */
+    private function setStatus(int $status): void
+    {
+        if (!array_key_exists($status, self::STATUS_LIST)) {
+            throw new InvalidArgumentException('Invalid Status');
+        }
+        if ($this->status !== $status) {
+
+            $this->recordEvent(new LeadStatusChangedEvent($this, $this->status, $status, $this->employee_id));
+
+            if ($status === self::STATUS_PROCESSING) {
+                $this->recordEvent(new LeadTaskEvent($this), LeadTaskEvent::class);
+            }
+
+            if ($this->isCalledExpert() && in_array($status, [self::STATUS_TRASH, self::STATUS_FOLLOW_UP, self::STATUS_SNOOZE, self::STATUS_PROCESSING], true)) {
+                $this->recordEvent(new LeadCallExpertRequestEvent($this));
+            }
+        }
+        $this->status = $status;
+    }
+
+    /**
+     * @param int $status
+     */
+    private function setCallStatus(int $status): void
+    {
+        if (!array_key_exists($status, self::CALL_STATUS_LIST)) {
+            throw new InvalidArgumentException('Invalid Call Status');
+        }
+        if ($this->l_call_status_id !== $status) {
+            $this->recordEvent(new LeadCallStatusChangeEvent($this, $this->l_call_status_id, $status, $this->employee_id));
+        }
+        $this->l_call_status_id = $status;
+    }
+
+    /**
+     * @param string $cabin
+     * @param int $adults
+     * @param int $children
+     * @param int $infants
+     */
+    public function editItinerary(string $cabin, int $adults, int $children, int $infants): void
     {
         $this->cabin = $cabin;
+        $this->editPassengers($adults, $children, $infants);
+    }
+
+    /**
+     * @param int $adults
+     * @param int $children
+     * @param int $infants
+     */
+    public function editPassengers(int $adults, int $children, int $infants): void
+    {
+        if ($this->adults !== $adults || $this->children !== $children || $this->infants !== $infants) {
+            $this->recordEvent(new LeadCountPassengersChangedEvent($this));
+        }
         $this->adults = $adults;
         $this->children = $children;
         $this->infants = $infants;
     }
 
+    /**
+     * @param string|null $type
+     */
     public function setTripType(string $type = null): void
     {
         if ($type) {
@@ -346,6 +635,144 @@ class Lead extends ActiveRecord
             }
         }
         $this->trip_type = '';
+    }
+
+    public function sold(): void
+    {
+        if ($this->isSold()) {
+            throw new \DomainException('Lead is already sold!');
+        }
+        $this->setStatus(self::STATUS_SOLD);
+        $this->recordEvent(new LeadSoldEvent($this));
+    }
+
+    /**
+     * @return bool
+     */
+    public function isSold(): bool
+    {
+        return $this->status === self::STATUS_SOLD;
+    }
+
+    public function booked(): void
+    {
+        if ($this->isBooked()) {
+            throw new \DomainException('Lead is already booked!');
+        }
+        $this->setStatus(self::STATUS_BOOKED);
+        $this->recordEvent(new LeadBookedEvent($this));
+    }
+
+    /**
+     * @return bool
+     */
+    public function isBooked(): bool
+    {
+        return $this->status === self::STATUS_BOOKED;
+    }
+
+    /**
+     * @param $snoozeFor
+     */
+    public function snooze($snoozeFor): void
+    {
+        if ($this->isSnooze()) {
+            throw new \DomainException('Lead is already snooze!');
+        }
+        $this->setStatus(self::STATUS_SNOOZE);
+        $snoozeFor = $snoozeFor ? date('Y-m-d H:i:s', strtotime($snoozeFor)) : null;
+        $this->snooze_for = $snoozeFor;
+        $this->recordEvent(new LeadSnoozeEvent($this));
+    }
+
+    /**
+     * @return bool
+     */
+    public function isSnooze(): bool
+    {
+        return $this->status === self::STATUS_SNOOZE;
+    }
+
+    public function followUp(): void
+    {
+        if ($this->isFollowUp()) {
+            throw new \DomainException('Lead is already follow up!');
+        }
+        $this->recordEvent(new LeadFollowUpEvent($this, $this->employee_id));
+        $this->assign(null, self::STATUS_FOLLOW_UP);
+    }
+
+    /**
+     * @return bool
+     */
+    public function isFollowUp(): bool
+    {
+        return $this->status === self::STATUS_FOLLOW_UP;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isProcessing(): bool
+    {
+        return $this->status === self::STATUS_PROCESSING;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isPending(): bool
+    {
+        return $this->status === self::STATUS_PENDING;
+    }
+
+    public function trash(): void
+    {
+        $this->setStatus(self::STATUS_TRASH);
+    }
+
+    public function reject(): void
+    {
+        $this->setStatus(self::STATUS_REJECT);
+    }
+
+    public function callProcessing(): void
+    {
+        $this->setCallStatus(self::CALL_STATUS_PROCESS);
+    }
+
+    /**
+     * @return bool
+     */
+    public function isCallProcessing(): bool
+    {
+        return $this->l_call_status_id === self::CALL_STATUS_PROCESS;
+    }
+
+    public function callReady(): void
+    {
+        $this->setCallStatus(self::CALL_STATUS_READY);
+    }
+
+    /**
+     * @return bool
+     */
+    public function isCallReady(): bool
+    {
+        return $this->l_call_status_id === self::CALL_STATUS_READY;
+    }
+
+    public function callDone()
+    {
+        $this->setCallStatus(self::CALL_STATUS_DONE);
+    }
+
+    /**
+     * @return bool
+     */
+    public function isCallDone(): bool
+    {
+        return $this->l_call_status_id === self::CALL_STATUS_DONE;
     }
 
     /**
@@ -361,10 +788,11 @@ class Lead extends ActiveRecord
         $this->l_request_hash = $hash;
     }
 
-    public function setDuplicate($duplicateId): void
+    public function setDuplicate(int $originId): void
     {
-        $this->l_duplicate_lead_id = $duplicateId;
-        $this->status = self::STATUS_TRASH;
+        $this->l_duplicate_lead_id = $originId;
+        $this->trash();
+        $this->recordEvent(new LeadDuplicateDetectedEvent($this));
     }
 
     /**
@@ -684,115 +1112,115 @@ class Lead extends ActiveRecord
         return self::updateAll(['l_last_action_dt' => date('Y-m-d H:i:s')], ['id' => $this->id]);
     }
 
-
-
-    public static function getBadgesSingleQuery()
-    {
-        $projectIds = array_keys(ProjectEmployeeAccess::getProjectsByEmployee());
-
-        if(empty($projectIds)){
-            $projectIds[] = 0;
-        }
-
-
-        $userId = Yii::$app->user->id;
-        $created = '';
-        $employee = '';
-        if (Yii::$app->user->identity->canRole('agent')) {
-            $employee = ' AND employee_id = ' . $userId;
-        }
-
-        $sold = '';
-
-        if (Yii::$app->user->identity->canRole('supervision')) {
-            $subQuery1 = UserGroupAssign::find()->select(['ugs_group_id'])->where(['ugs_user_id' => $userId]);
-            $subQuery = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->where(['IN', 'ugs_group_id', $subQuery1]);
-            $resEmp = $subQuery->createCommand()->queryAll();
-            $empArr = [];
-            if ($resEmp) {
-                foreach ($resEmp as $entry) {
-                    $empArr[] = $entry['ugs_user_id'];
-                }
-            }
-
-            if (!empty($empArr)) {
-                $employee = 'AND leads.employee_id IN (' . implode(',', $empArr) . ')';
-            }
-
-        }
-
-        if (Yii::$app->user->identity->canRole('agent')) {
-            $sold = ' AND (employee_id = ' . $userId.' OR ps.ps_user_id ='.$userId.' OR ts.ts_user_id ='.$userId.')';
-        }
-        $default = implode(',', [
-            self::STATUS_PROCESSING,
-            self::STATUS_ON_HOLD,
-            self::STATUS_SNOOZE
-        ]);
-
-        $select = [
-            'pending' => 'COUNT(DISTINCT CASE WHEN status IN (:inbox) THEN leads.id ELSE NULL END)',
-            'inbox' => 'COUNT(DISTINCT CASE WHEN status IN (:inbox) THEN leads.id ELSE NULL END)',
-            'follow-up' => 'COUNT(DISTINCT CASE WHEN status IN (:followup) ' . $created . '  THEN leads.id ELSE NULL END)',
-            'booked' => 'COUNT(DISTINCT CASE WHEN status IN (:booked) ' . $created . ' THEN leads.id ELSE NULL END)',
-            //'sold' => 'COUNT(DISTINCT CASE WHEN status IN (:sold) ' . $created . $sold .$employee . ' THEN leads.id ELSE NULL END)',
-            'sold' => '(SELECT COUNT(leads.id) FROM leads
-                        LEFT JOIN '.ProfitSplit::tableName().' ps ON ps.ps_lead_id = leads.id
-                        LEFT JOIN '.TipsSplit::tableName().' ts ON ts.ts_lead_id = leads.id
-                        WHERE leads.status IN (:sold) '.$created . $sold .$employee.'
-                        AND leads.project_id IN ('.implode(',', $projectIds).'))',
-            'processing' => 'COUNT(DISTINCT CASE WHEN status IN (' . $default . ') ' . $employee . ' THEN leads.id ELSE NULL END)'
-        ];
-
-        /*if (Yii::$app->user->identity->role != 'agent') {
-            //$select['trash'] = 'COUNT(DISTINCT CASE WHEN status IN (' . self::STATUS_TRASH . ') ' . $created . $employee . ' THEN leads.id ELSE NULL END)';
-            //$select['pending'] = 'COUNT(DISTINCT CASE WHEN status IN (:inbox) THEN leads.id ELSE NULL END)';
-
-            $select['duplicate'] = 'COUNT(DISTINCT CASE WHEN status IN (' . self::STATUS_TRASH . ') ' . $created . $employee . ' THEN leads.id ELSE NULL END)';
-        }*/
-
-        if (Yii::$app->user->identity->canRole('admin')) {
-            $select['pending'] = 'COUNT(DISTINCT CASE WHEN status IN (:pending) THEN leads.id ELSE NULL END)';
-        }
-
-        $query = self::find()
-            //->cache(600)
-            ->select($select)
-            //->leftJoin(ProfitSplit::tableName().' ps','ps.ps_lead_id = leads.id')
-            //->leftJoin(TipsSplit::tableName().' ts','ts.ts_lead_id = leads.id')
-            ->andWhere(['IN', 'project_id', $projectIds])
-            ->addParams([':inbox' => self::STATUS_PENDING,
-                ':pending' => self::STATUS_PENDING,
-                ':followup' => self::STATUS_FOLLOW_UP,
-                ':booked' => self::STATUS_BOOKED,
-                ':sold' => self::STATUS_SOLD,
-            ])
-            ->limit(1);
-
-
-        //echo $query->createCommand()->getRawSql();die;
-
-        $db = Yii::$app->db;
-        $duration = 0;     // cache query results for 60 seconds.
-        $dependency = new DbDependency();
-        $dependency->sql = 'SELECT MAX(id) FROM leads';
-
-
-        $result = $db->cache(function ($db) use ($query) {
-            return $query->createCommand()->queryOne();
-        }, $duration, $dependency);
-
-        //$result = $query->createCommand()->queryOne();
-
-
-        $result['duplicate'] = '';
-
-        if (Yii::$app->user->identity->canRoles(['admin', 'qa'])) {
-            $result['duplicate'] = self::find()->where(['IS NOT', 'l_duplicate_lead_id', null])->count() ?: '' ;
-        }
-
-        return $result; // $query->createCommand()->queryOne();
-    }
+//
+//
+//    public static function getBadgesSingleQuery()
+//    {
+//        $projectIds = array_keys(ProjectEmployeeAccess::getProjectsByEmployee());
+//
+//        if(empty($projectIds)){
+//            $projectIds[] = 0;
+//        }
+//
+//
+//        $userId = Yii::$app->user->id;
+//        $created = '';
+//        $employee = '';
+//        if (Yii::$app->user->identity->canRole('agent')) {
+//            $employee = ' AND employee_id = ' . $userId;
+//        }
+//
+//        $sold = '';
+//
+//        if (Yii::$app->user->identity->canRole('supervision')) {
+//            $subQuery1 = UserGroupAssign::find()->select(['ugs_group_id'])->where(['ugs_user_id' => $userId]);
+//            $subQuery = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->where(['IN', 'ugs_group_id', $subQuery1]);
+//            $resEmp = $subQuery->createCommand()->queryAll();
+//            $empArr = [];
+//            if ($resEmp) {
+//                foreach ($resEmp as $entry) {
+//                    $empArr[] = $entry['ugs_user_id'];
+//                }
+//            }
+//
+//            if (!empty($empArr)) {
+//                $employee = 'AND leads.employee_id IN (' . implode(',', $empArr) . ')';
+//            }
+//
+//        }
+//
+//        if (Yii::$app->user->identity->canRole('agent')) {
+//            $sold = ' AND (employee_id = ' . $userId.' OR ps.ps_user_id ='.$userId.' OR ts.ts_user_id ='.$userId.')';
+//        }
+//        $default = implode(',', [
+//            self::STATUS_PROCESSING,
+//            self::STATUS_ON_HOLD,
+//            self::STATUS_SNOOZE
+//        ]);
+//
+//        $select = [
+//            'pending' => 'COUNT(DISTINCT CASE WHEN status IN (:inbox) THEN leads.id ELSE NULL END)',
+//            'inbox' => 'COUNT(DISTINCT CASE WHEN status IN (:inbox) THEN leads.id ELSE NULL END)',
+//            'follow-up' => 'COUNT(DISTINCT CASE WHEN status IN (:followup) ' . $created . '  THEN leads.id ELSE NULL END)',
+//            'booked' => 'COUNT(DISTINCT CASE WHEN status IN (:booked) ' . $created . ' THEN leads.id ELSE NULL END)',
+//            //'sold' => 'COUNT(DISTINCT CASE WHEN status IN (:sold) ' . $created . $sold .$employee . ' THEN leads.id ELSE NULL END)',
+//            'sold' => '(SELECT COUNT(leads.id) FROM leads
+//                        LEFT JOIN '.ProfitSplit::tableName().' ps ON ps.ps_lead_id = leads.id
+//                        LEFT JOIN '.TipsSplit::tableName().' ts ON ts.ts_lead_id = leads.id
+//                        WHERE leads.status IN (:sold) '.$created . $sold .$employee.'
+//                        AND leads.project_id IN ('.implode(',', $projectIds).'))',
+//            'processing' => 'COUNT(DISTINCT CASE WHEN status IN (' . $default . ') ' . $employee . ' THEN leads.id ELSE NULL END)'
+//        ];
+//
+//        /*if (Yii::$app->user->identity->role != 'agent') {
+//            //$select['trash'] = 'COUNT(DISTINCT CASE WHEN status IN (' . self::STATUS_TRASH . ') ' . $created . $employee . ' THEN leads.id ELSE NULL END)';
+//            //$select['pending'] = 'COUNT(DISTINCT CASE WHEN status IN (:inbox) THEN leads.id ELSE NULL END)';
+//
+//            $select['duplicate'] = 'COUNT(DISTINCT CASE WHEN status IN (' . self::STATUS_TRASH . ') ' . $created . $employee . ' THEN leads.id ELSE NULL END)';
+//        }*/
+//
+//        if (Yii::$app->user->identity->canRole('admin')) {
+//            $select['pending'] = 'COUNT(DISTINCT CASE WHEN status IN (:pending) THEN leads.id ELSE NULL END)';
+//        }
+//
+//        $query = self::find()
+//            //->cache(600)
+//            ->select($select)
+//            //->leftJoin(ProfitSplit::tableName().' ps','ps.ps_lead_id = leads.id')
+//            //->leftJoin(TipsSplit::tableName().' ts','ts.ts_lead_id = leads.id')
+//            ->andWhere(['IN', 'project_id', $projectIds])
+//            ->addParams([':inbox' => self::STATUS_PENDING,
+//                ':pending' => self::STATUS_PENDING,
+//                ':followup' => self::STATUS_FOLLOW_UP,
+//                ':booked' => self::STATUS_BOOKED,
+//                ':sold' => self::STATUS_SOLD,
+//            ])
+//            ->limit(1);
+//
+//
+//        //echo $query->createCommand()->getRawSql();die;
+//
+//        $db = Yii::$app->db;
+//        $duration = 0;     // cache query results for 60 seconds.
+//        $dependency = new DbDependency();
+//        $dependency->sql = 'SELECT MAX(id) FROM leads';
+//
+//
+//        $result = $db->cache(function ($db) use ($query) {
+//            return $query->createCommand()->queryOne();
+//        }, $duration, $dependency);
+//
+//        //$result = $query->createCommand()->queryOne();
+//
+//
+//        $result['duplicate'] = '';
+//
+//        if (Yii::$app->user->identity->canRoles(['admin', 'qa'])) {
+//            $result['duplicate'] = self::find()->where(['IS NOT', 'l_duplicate_lead_id', null])->count() ?: '' ;
+//        }
+//
+//        return $result; // $query->createCommand()->queryOne();
+//    }
 
     /**
      * @return array
@@ -1369,53 +1797,58 @@ Reason: {reason}
 
         $host = \Yii::$app->params['url_address'];
 
-            //$swiftMailer = Yii::$app->mailer2;
-            $user = Employee::findOne($lead->employee_id);
+        //$swiftMailer = Yii::$app->mailer2;
+        $user = Employee::findOne($lead->employee_id);
 
-            if (!empty($user)) {
-                $agent = $user->username;
-                $subject = Yii::t('email', "Cloned Lead-{id} by {agent}", ['id' => $lead->clone_id, 'agent' => $agent]);
-                $body = Yii::t('email', "Agent {agent} cloned lead {clone_id} with reason [{reason}], url: {cloned_url}.
+        if (!empty($user)) {
+            $agent = $user->username;
+            $subject = Yii::t('email', "Cloned Lead-{id} by {agent}", ['id' => $lead->clone_id, 'agent' => $agent]);
+            $body = Yii::t('email', "Agent {agent} cloned lead {clone_id} with reason [{reason}], url: {cloned_url}.
 New lead {lead_id}
 {url}",
-                    [
-                        'agent' => $agent,
-                        'url' => $host . '/lead/view/' . $lead->gid,
-                        'cloned_url' => $host . '/lead/view/' . ($lead->clone ? $lead->clone->gid : $lead->gid),
-                        'reason' => $lead->description,
-                        'lead_id' => $lead->id,
-                        'clone_id' => $lead->clone_id,
-                        'br' => "\r\n"
-                    ]);
+                [
+                    'agent' => $agent,
+                    'url' => $host . '/lead/view/' . $lead->gid,
+                    'cloned_url' => $host . '/lead/view/' . ($lead->clone ? $lead->clone->gid : $lead->gid),
+                    'reason' => $lead->description,
+                    'lead_id' => $lead->id,
+                    'clone_id' => $lead->clone_id,
+                    'br' => "\r\n"
+                ]);
 
-                //$emailTo = Yii::$app->params['email_to']['bcc_sales'];
+            //$emailTo = Yii::$app->params['email_to']['bcc_sales'];
 
-                try {
+            try {
 
-                    $isSend = Notifications::create($user->id, $subject, $body, Notifications::TYPE_INFO, true);
-                    Notifications::socket($user->id, null, 'getNewNotification', [], true);
+                $isSend = Notifications::create($user->id, $subject, $body, Notifications::TYPE_INFO, true);
+                Notifications::socket($user->id, null, 'getNewNotification', [], true);
 
-                    /*$isSend = $swiftMailer
-                        ->compose()
-                        ->setTo($emailTo)
-                        ->setFrom(Yii::$app->params['email_from']['sales'])
-                        ->setSubject($subject)
-                        ->setTextBody($body)
-                        ->send();*/
+                /*$isSend = $swiftMailer
+                    ->compose()
+                    ->setTo($emailTo)
+                    ->setFrom(Yii::$app->params['email_from']['sales'])
+                    ->setSubject($subject)
+                    ->setTextBody($body)
+                    ->send();*/
 
-                    if (!$isSend) {
-                        Yii::warning('Not send Notification to UserID:' . $user->id . ' - Lead Id: ' . $this->id, 'Lead:sendClonedEmail:Notifications::create');
-                    }
-
-                } catch (\Throwable $e) {
-                    Yii::error($user->id . ' ' . $e->getMessage(), 'Lead:sendClonedEmail:Notifications::create');
+                if (!$isSend) {
+                    Yii::warning('Not send Notification to UserID:' . $user->id . ' - Lead Id: ' . $this->id, 'Lead:sendClonedEmail:Notifications::create');
                 }
-            } else {
-                Yii::warning('Not found employee (' . $lead->employee_id . ')', 'Lead:sendClonedEmail');
+
+            } catch (\Throwable $e) {
+                Yii::error($user->id . ' ' . $e->getMessage(), 'Lead:sendClonedEmail:Notifications::create');
             }
+        } else {
+            Yii::warning('Not found employee (' . $lead->employee_id . ')', 'Lead:sendClonedEmail');
+        }
         //}
 
         return $isSend;
+    }
+
+    public function disableAREvents(): void
+    {
+        $this->enableActiveRecordEvents = false;
     }
 
     public function afterSave($insert, $changedAttributes)
@@ -1423,159 +1856,164 @@ New lead {lead_id}
 
         parent::afterSave($insert, $changedAttributes);
 
-        if ($insert) {
-            LeadFlow::addStateFlow($this);
+        if ($this->enableActiveRecordEvents) {
 
-            $job = new QuickSearchInitPriceJob();
-            $job->lead_id = $this->id;
-            $jobId = Yii::$app->queue_job->push($job);
-            //Yii::info('Lead: ' . $this->id . ', QuickSearchInitPriceJob: '.$jobId, 'info\Lead:afterSave:QuickSearchInitPriceJob');
-
-        } else {
-
-
-            if (isset($changedAttributes['status']) && $changedAttributes['status'] !== $this->status) {
+            if ($insert) {
                 LeadFlow::addStateFlow($this);
 
-                if($this->called_expert && ($this->status === self::STATUS_TRASH || $this->status === self::STATUS_FOLLOW_UP || $this->status === self::STATUS_SNOOZE || $this->status === self::STATUS_PROCESSING)) {
-                    $job = new UpdateLeadBOJob();
-                    $job->lead_id = $this->id;
-                    $jobId = Yii::$app->queue_job->push($job);
-                    // Yii::info('Lead: ' . $this->id . ', UpdateLeadBOJob: ' . $jobId, 'info\Lead:afterSave:UpdateLeadBOJob');
+                $job = new QuickSearchInitPriceJob();
+                $job->lead_id = $this->id;
+                $jobId = Yii::$app->queue_job->push($job);
+                //Yii::info('Lead: ' . $this->id . ', QuickSearchInitPriceJob: '.$jobId, 'info\Lead:afterSave:QuickSearchInitPriceJob');
+
+            } else {
+
+
+
+
+                if (isset($changedAttributes['status']) && $changedAttributes['status'] != $this->status) {
+                    LeadFlow::addStateFlow($this);
+
+                    if($this->called_expert && ($this->status == self::STATUS_TRASH || $this->status == self::STATUS_FOLLOW_UP || $this->status == self::STATUS_SNOOZE || $this->status == self::STATUS_PROCESSING)) {
+                        $job = new UpdateLeadBOJob();
+                        $job->lead_id = $this->id;
+                        $jobId = Yii::$app->queue_job->push($job);
+                        // Yii::info('Lead: ' . $this->id . ', UpdateLeadBOJob: ' . $jobId, 'info\Lead:afterSave:UpdateLeadBOJob');
+                    }
+                }
+
+
+                if ($this->status != self::STATUS_TRASH && isset($changedAttributes['employee_id']) && $this->employee_id && $changedAttributes['employee_id'] != $this->employee_id) {
+                    //echo $changedAttributes['employee_id'].' - '. $this->employee_id;
+
+                    if (isset($changedAttributes['status']) && ($changedAttributes['status'] == self::STATUS_TRASH || $changedAttributes['status'] == self::STATUS_FOLLOW_UP)) {
+
+                    } else {
+
+                        if (!$this->sendNotification('reassigned-lead', $changedAttributes['employee_id'], $this->employee_id)) {
+                            Yii::warning('Not send Email notification to employee_id: ' . $changedAttributes['employee_id'] . ', lead: ' . $this->id, 'Lead:afterSave:sendNotification');
+                        }
+                    }
+                }
+
+                if (isset($changedAttributes['status']) && $changedAttributes['status'] != $this->status) {
+
+
+                    if ($this->status == self::STATUS_SOLD) {
+                        //echo $changedAttributes['status'].' - '. $this->status; exit;
+                        if ($this->employee_id && !$this->sendNotification('lead-status-sold', $this->employee_id)) {
+                            Yii::warning('Not send Email notification to employee_id: ' . $this->employee_id . ', lead: ' . $this->id, 'Lead:afterSave:sendNotification');
+                        }
+                    } elseif ($this->status == self::STATUS_BOOKED) {
+
+                        if ($this->employee_id && !$this->sendNotification('lead-status-booked', $this->employee_id, null, $this)) {
+                            Yii::warning('Not send Email notification to employee_id: ' . $this->employee_id . ', lead: ' . $this->id, 'Lead:afterSave:sendNotification');
+                        }
+                    } elseif ($this->status == self::STATUS_FOLLOW_UP) {
+
+                        $this->l_grade = (int)$this->l_grade + 1;
+                        Yii::$app->db->createCommand('UPDATE ' . Lead::tableName() . ' SET l_grade = :grade WHERE id = :id', [
+                            ':grade' => $this->l_grade,
+                            ':id' => $this->id
+                        ])->execute();
+
+                        if ($this->status_description) {
+                            $reason = new Reason();
+                            $reason->lead_id = $this->id;
+                            $reason->employee_id = $this->employee_id;
+                            $reason->created = date('Y-m-d H:i:s');
+                            $reason->reason = $this->status_description;
+                            $reason->save();
+                        }
+
+                        /*if (!$this->sendNotification('lead-status-booked', $this->employee_id, null, $this)) {
+                            Yii::warning('Not send Email notification to employee_id: ' . $this->employee_id . ', lead: ' . $this->id, 'Lead:afterSave:sendNotification');
+                        }*/
+                    } elseif ($this->status == self::STATUS_SNOOZE) {
+
+                        if ($this->status_description) {
+                            $reason = new Reason();
+                            $reason->lead_id = $this->id;
+                            $reason->employee_id = $this->employee_id;
+                            $reason->created = date('Y-m-d H:i:s');
+                            $reason->reason = $this->status_description;
+                            $reason->save();
+                        }
+
+
+                        if ($this->employee_id && !$this->sendNotification('lead-status-snooze', $this->employee_id, null, $this)) {
+                            Yii::warning('Not send Email notification to employee_id: ' . $this->employee_id . ', lead: ' . $this->id, 'Lead:afterSave:sendNotification');
+                        }
+
+                    }
                 }
             }
 
+            //create or update LeadTask
+            if(
+                ($this->status == self::STATUS_PROCESSING && isset($changedAttributes['status'])) ||
+                (isset($changedAttributes['employee_id']) && $this->status == self::STATUS_PROCESSING) ||
+                (isset($changedAttributes['l_answered']) && $changedAttributes['l_answered'] != $this->l_answered)
+            )
+            {
+                LeadTask::deleteUnnecessaryTasks($this->id);
 
-            if ($this->status != self::STATUS_TRASH && isset($changedAttributes['employee_id']) && $this->employee_id && $changedAttributes['employee_id'] != $this->employee_id) {
-                //echo $changedAttributes['employee_id'].' - '. $this->employee_id;
-
-                if (isset($changedAttributes['status']) && ($changedAttributes['status'] == self::STATUS_TRASH || $changedAttributes['status'] == self::STATUS_FOLLOW_UP)) {
-
+                if($this->l_answered) {
+                    $taskType = Task::CAT_ANSWERED_PROCESS;
                 } else {
-
-                    if (!$this->sendNotification('reassigned-lead', $changedAttributes['employee_id'], $this->employee_id)) {
-                        Yii::warning('Not send Email notification to employee_id: ' . $changedAttributes['employee_id'] . ', lead: ' . $this->id, 'Lead:afterSave:sendNotification');
-                    }
+                    $taskType = Task::CAT_NOT_ANSWERED_PROCESS;
                 }
+
+                LeadTask::createTaskList($this->id, $this->employee_id, 1, '', $taskType);
+                LeadTask::createTaskList($this->id, $this->employee_id, 2, '', $taskType);
+                LeadTask::createTaskList($this->id, $this->employee_id, 3, '', $taskType);
             }
 
-            if (isset($changedAttributes['status']) && $changedAttributes['status'] != $this->status) {
-
-
-                if ($this->status == self::STATUS_SOLD) {
-                    //echo $changedAttributes['status'].' - '. $this->status; exit;
-                    if ($this->employee_id && !$this->sendNotification('lead-status-sold', $this->employee_id)) {
-                        Yii::warning('Not send Email notification to employee_id: ' . $this->employee_id . ', lead: ' . $this->id, 'Lead:afterSave:sendNotification');
+            if (!$insert) {
+                foreach (['updated', 'created'] as $item) {
+                    if (in_array($item, array_keys($changedAttributes))) {
+                        unset($changedAttributes[$item]);
                     }
-                } elseif ($this->status == self::STATUS_BOOKED) {
+                }
+                $flgUnActiveRequest = false;
+                //$resetCallExpert = false;
 
-                    if ($this->employee_id && !$this->sendNotification('lead-status-booked', $this->employee_id, null, $this)) {
-                        Yii::warning('Not send Email notification to employee_id: ' . $this->employee_id . ', lead: ' . $this->id, 'Lead:afterSave:sendNotification');
-                    }
-                } elseif ($this->status == self::STATUS_FOLLOW_UP) {
+                if (isset($changedAttributes['adults']) && $changedAttributes['adults'] != $this->adults) {
+                    $flgUnActiveRequest = true;
+                }
+                if (isset($changedAttributes['children']) && $changedAttributes['children'] != $this->children) {
+                    $flgUnActiveRequest = true;
+                }
+                if (isset($changedAttributes['infants']) && $changedAttributes['infants'] != $this->infants) {
+                    $flgUnActiveRequest = true;
+                }
 
-                    $this->l_grade = (int)$this->l_grade + 1;
-                    Yii::$app->db->createCommand('UPDATE ' . Lead::tableName() . ' SET l_grade = :grade WHERE id = :id', [
-                        ':grade' => $this->l_grade,
+                /*if (isset($changedAttributes['cabin']) && $changedAttributes['cabin'] != $this->cabin) {
+                    $resetCallExpert = true;
+                }
+                if (isset($changedAttributes['notes_for_experts']) && $changedAttributes['notes_for_experts'] != $this->notes_for_experts) {
+                    $resetCallExpert = true;
+                }*/
+
+                /*if ($resetCallExpert || $flgUnActiveRequest) {
+                    Yii::$app->db->createCommand('UPDATE ' . Lead::tableName() . ' SET called_expert = :called_expert WHERE id = :id', [
+                        ':called_expert' => false,
                         ':id' => $this->id
                     ])->execute();
+                }*/
 
-                    if ($this->status_description) {
-                        $reason = new Reason();
-                        $reason->lead_id = $this->id;
-                        $reason->employee_id = $this->employee_id;
-                        $reason->created = date('Y-m-d H:i:s');
-                        $reason->reason = $this->status_description;
-                        $reason->save();
-                    }
-
-                    /*if (!$this->sendNotification('lead-status-booked', $this->employee_id, null, $this)) {
-                        Yii::warning('Not send Email notification to employee_id: ' . $this->employee_id . ', lead: ' . $this->id, 'Lead:afterSave:sendNotification');
-                    }*/
-                } elseif ($this->status == self::STATUS_SNOOZE) {
-
-                    if ($this->status_description) {
-                        $reason = new Reason();
-                        $reason->lead_id = $this->id;
-                        $reason->employee_id = $this->employee_id;
-                        $reason->created = date('Y-m-d H:i:s');
-                        $reason->reason = $this->status_description;
-                        $reason->save();
-                    }
-
-
-                    if ($this->employee_id && !$this->sendNotification('lead-status-snooze', $this->employee_id, null, $this)) {
-                        Yii::warning('Not send Email notification to employee_id: ' . $this->employee_id . ', lead: ' . $this->id, 'Lead:afterSave:sendNotification');
-                    }
-
-                }
-            }
-        }
-
-
-        //create or update LeadTask
-        if(
-            ($this->status === self::STATUS_PROCESSING && isset($changedAttributes['status'])) ||
-            (isset($changedAttributes['employee_id']) && $this->status === self::STATUS_PROCESSING) ||
-            (isset($changedAttributes['l_answered']) && $changedAttributes['l_answered'] != $this->l_answered)
-        )
-        {
-            LeadTask::deleteUnnecessaryTasks($this->id);
-
-            if($this->l_answered) {
-                $taskType = Task::CAT_ANSWERED_PROCESS;
-            } else {
-                $taskType = Task::CAT_NOT_ANSWERED_PROCESS;
-            }
-
-            LeadTask::createTaskList($this->id, $this->employee_id, 1, '', $taskType);
-            LeadTask::createTaskList($this->id, $this->employee_id, 2, '', $taskType);
-            LeadTask::createTaskList($this->id, $this->employee_id, 3, '', $taskType);
-        }
-
-
-        if (!$insert) {
-            foreach (['updated', 'created'] as $item) {
-                if (in_array($item, array_keys($changedAttributes))) {
-                    unset($changedAttributes[$item]);
-                }
-            }
-            $flgUnActiveRequest = false;
-            //$resetCallExpert = false;
-
-            if (isset($changedAttributes['adults']) && $changedAttributes['adults'] != $this->adults) {
-                $flgUnActiveRequest = true;
-            }
-            if (isset($changedAttributes['children']) && $changedAttributes['children'] != $this->children) {
-                $flgUnActiveRequest = true;
-            }
-            if (isset($changedAttributes['infants']) && $changedAttributes['infants'] != $this->infants) {
-                $flgUnActiveRequest = true;
-            }
-
-            /*if (isset($changedAttributes['cabin']) && $changedAttributes['cabin'] != $this->cabin) {
-                $resetCallExpert = true;
-            }
-            if (isset($changedAttributes['notes_for_experts']) && $changedAttributes['notes_for_experts'] != $this->notes_for_experts) {
-                $resetCallExpert = true;
-            }*/
-
-            /*if ($resetCallExpert || $flgUnActiveRequest) {
-                Yii::$app->db->createCommand('UPDATE ' . Lead::tableName() . ' SET called_expert = :called_expert WHERE id = :id', [
-                    ':called_expert' => false,
-                    ':id' => $this->id
-                ])->execute();
-            }*/
-
-            if ($flgUnActiveRequest) {
-                foreach ($this->getAltQuotes() as $quote) {
-                    if ($quote->status != $quote::STATUS_APPLIED) {
-                        $quote->status = $quote::STATUS_DECLINED;
-                        $quote->save(false);
+                if ($flgUnActiveRequest) {
+                    foreach ($this->getAltQuotes() as $quote) {
+                        if ($quote->status != $quote::STATUS_APPLIED) {
+                            $quote->status = $quote::STATUS_DECLINED;
+                            $quote->save(false);
+                        }
                     }
                 }
             }
+
         }
+
 
         //Add logs after changed model attributes
         $leadLog = new LeadLog(new LeadLogMessage());
@@ -1809,40 +2247,44 @@ New lead {lead_id}
     {
         if (parent::beforeSave($insert)) {
 
-            if ($insert) {
-                //$this->created = date('Y-m-d H:i:s');
-                if (!empty($this->project_id) && empty($this->source_id)) {
-                    $project = Project::findOne(['id' => $this->project_id]);
-                    if ($project !== null) {
-                        $this->source_id = $project->sources[0]->id;
+            if ($this->enableActiveRecordEvents) {
+
+                if ($insert) {
+                    //$this->created = date('Y-m-d H:i:s');
+                    if (!empty($this->project_id) && empty($this->source_id)) {
+                        $project = Project::findOne(['id' => $this->project_id]);
+                        if ($project !== null) {
+                            $this->source_id = $project->sources[0]->id;
+                        }
                     }
+
+                    $leadExistByUID = Lead::findOne([
+                        'uid' => $this->uid,
+                        'source_id' => $this->source_id
+                    ]);
+                    if ($leadExistByUID !== null) {
+                        $this->uid = uniqid();
+                    }
+
+                    /*if(!$this->gid) {
+                        $this->gid = md5(uniqid('', true));
+                    }*/
+
+                } else {
+                    //$this->updated = date('Y-m-d H:i:s');
                 }
 
-                $leadExistByUID = Lead::findOne([
-                    'uid' => $this->uid,
-                    'source_id' => $this->source_id
-                ]);
-                if ($leadExistByUID !== null) {
-                    $this->uid = uniqid();
-                }
-
-                /*if(!$this->gid) {
+                if(!$this->gid) {
                     $this->gid = md5(uniqid('', true));
-                }*/
+                }
 
-            } else {
-                //$this->updated = date('Y-m-d H:i:s');
+                $this->adults = (int) $this->adults;
+                $this->children = (int) $this->children;
+                $this->infants = (int) $this->infants;
+                $this->bo_flight_id = (int) $this->bo_flight_id;
+                $this->agents_processing_fee = ($this->adults + $this->children) * self::AGENT_PROCESSING_FEE_PER_PAX;
+
             }
-
-            if(!$this->gid) {
-                $this->gid = md5(uniqid('', true));
-            }
-
-            $this->adults = (int) $this->adults;
-            $this->children = (int) $this->children;
-            $this->infants = (int) $this->infants;
-            $this->bo_flight_id = (int) $this->bo_flight_id;
-            $this->agents_processing_fee = ($this->adults + $this->children) * self::AGENT_PROCESSING_FEE_PER_PAX;
 
             return true;
         }
@@ -2401,14 +2843,14 @@ New lead {lead_id}
 
 
             /** @property string $origin
-            * @property string $destination
-            * @property string $departure
-            * @property int $flexibility
-            * @property string $flexibility_type
-            * @property string $created
-            * @property string $updated
-            * @property string $origin_label
-            * @property string $destination_label*/
+             * @property string $destination
+             * @property string $departure
+             * @property int $flexibility
+             * @property string $flexibility_type
+             * @property string $created
+             * @property string $updated
+             * @property string $origin_label
+             * @property string $destination_label*/
 
 
             foreach($leadSegments as $segmentModel) {

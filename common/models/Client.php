@@ -3,6 +3,8 @@
 namespace common\models;
 
 use common\models\local\LeadLogMessage;
+use sales\entities\AggregateRoot;
+use sales\entities\EventTrait;
 use Yii;
 use yii\helpers\ArrayHelper;
 
@@ -22,8 +24,10 @@ use yii\helpers\ArrayHelper;
  * @property ClientPhone[] $clientPhones
  * @property Lead[] $leads
  */
-class Client extends \yii\db\ActiveRecord
+class Client extends \yii\db\ActiveRecord implements AggregateRoot
 {
+
+    use EventTrait;
 
     public $full_name;
 

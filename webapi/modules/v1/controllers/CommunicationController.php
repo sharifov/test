@@ -14,6 +14,7 @@ use common\models\Sms;
 use common\models\Sources;
 use common\models\UserProfile;
 use common\models\UserProjectParams;
+use sales\services\api\communication\CommunicationService;
 use Twilio\TwiML\VoiceResponse;
 use Yii;
 use yii\helpers\ArrayHelper;
@@ -26,6 +27,10 @@ use common\components\ReceiveEmailsJob;
 use yii\queue\Queue;
 use common\models\ProjectEmployeeAccess;
 
+/**
+ * Class CommunicationController
+ * @property CommunicationService $communicationService
+ */
 class CommunicationController extends ApiBaseController
 {
 
@@ -51,6 +56,14 @@ class CommunicationController extends ApiBaseController
 
     public const TYPE_VOIP_FINISH       = 'voip_finish';
     public const TYPE_SMS_FINISH        = 'sms_finish';
+
+    private $communicationService;
+
+    public function __construct($id, $module, CommunicationService $communicationService, $config = [])
+    {
+        $this->communicationService = $communicationService;
+        parent::__construct($id, $module, $config);
+    }
 
     /**
      * @api {post} /v1/communication/email Communication Email
@@ -699,17 +712,25 @@ class CommunicationController extends ApiBaseController
             case self::TYPE_VOIP_INCOMING:
             case self::TYPE_VOIP_GATHER:
                 $response = $this->voiceIncoming($type);
+//                $response = $this->communicationService->voiceIncoming($type, Yii::$app->request->post());
                 break;
             case self::TYPE_VOIP_RECORD:
+//                $this->communicationService->voiceRecord(Yii::$app->request->post());
+//                $response = [];
                 $response = $this->voiceRecord();
                 break;
             case self::TYPE_VOIP_FINISH:
+//                $this->communicationService->voiceFinish(Yii::$app->request->post());
+//                $response = [];
                 $response = $this->voiceFinish();
                 break;
             case self::TYPE_VOIP_CLIENT:
+//                $this->communicationService->voiceClient(Yii::$app->request->post());
+//                $response = [];
                 $response = $this->voiceClient();
                 break;
             default:
+//                $response = $this->communicationService->voiceDefault(Yii::$app->request->post());
                 $response = $this->voiceDefault();
         }
 
@@ -1558,12 +1579,15 @@ class CommunicationController extends ApiBaseController
 
         Yii::info(VarDumper::dumpAsString($post), 'info\API:Communication:voiceClient');
 
-        if (isset($post['callData']['sid']) && $post['callData']['sid']) {
-            //$call = Call::find()->where(['c_call_sid' => $post['callData']['sid']])->limit(1)->one();
+        $callSid = $post['callData']['sid'] ?? $post['callData']['CallSid'] ?? null;
+
+        if ($callSid) {
+
             $call = null;
             $is_call_incoming = (isset($post['call'],$post['call']['c_call_type_id']) && (int)$post['call']['c_call_type_id'] === Call::CALL_TYPE_IN);
+
             if($is_call_incoming) {
-                $call = Call::find()->where(['c_call_sid' => $post['callData']['sid']])
+                $call = Call::find()->where(['c_call_sid' => $callSid])
                     //->andWhere(['c_call_status' => Call::CALL_STATUS_COMPLETED])
                     ->andWhere([ '>', 'c_created_user_id', 0])
                     ->orderBy(['c_updated_dt' => SORT_DESC])
@@ -1572,7 +1596,7 @@ class CommunicationController extends ApiBaseController
             }
 
             if(!$call) {
-                $call = Call::find()->where(['c_call_sid' => $post['callData']['sid']])->orderBy(['c_id' => SORT_ASC])->limit(1)->one();
+                $call = Call::find()->where(['c_call_sid' => $callSid])->orderBy(['c_id' => SORT_ASC])->limit(1)->one();
             }
 
             $callData = $post['call'];
@@ -1582,30 +1606,30 @@ class CommunicationController extends ApiBaseController
                 $call->c_call_sid = $callData['c_call_sid'];
                 $call->c_account_sid = $callData['c_account_sid'];
                 $call->c_call_type_id = $callData['c_call_type_id'];
-                $call->c_uri = $callData['c_uri'];
+                $call->c_uri = $callData['c_uri'] ?? null;
 
-                $call->c_from = $callData['c_from'];
-                $call->c_to = $callData['c_to'];
+                $call->c_from = $callData['c_from'] ?? null;
+                $call->c_to = $callData['c_to'] ?? null;
 
-                $call->c_timestamp = $callData['c_timestamp'];
+                // $call->c_timestamp = $callData['c_timestamp'] ?? null;
                 $call->c_created_dt = $callData['c_created_dt'];
                 $call->c_updated_dt = date('Y-m-d H:i:s');
 
-                $call->c_recording_url = $callData['c_recording_url'];
-                $call->c_recording_sid = $callData['c_recording_sid'];
-                $call->c_recording_duration = $callData['c_recording_duration'];
+                $call->c_recording_url = $callData['c_recording_url'] ?? null;
+                $call->c_recording_sid = $callData['c_recording_sid'] ?? null;
+                $call->c_recording_duration = $callData['c_recording_duration'] ?? null;
 
-                $call->c_caller_name = $callData['c_caller_name'];
-                $call->c_direction = $callData['c_direction'];
-                $call->c_api_version = $callData['c_api_version'];
+                $call->c_caller_name = $callData['c_caller_name'] ?? null;
+                $call->c_direction = $callData['c_direction'] ?? null;
+                $call->c_api_version = $callData['c_api_version'] ?? null;
 
 
                 //$call->c_call_status = $post['callData']['CallStatus'] ?? '';
                 //$call->c_sequence_number = $post['callData']['SequenceNumber'] ?? 0;
 
-                $call->c_sip = $callData['c_sip'];
+                $call->c_sip = $callData['c_sip'] ?? null;
 
-                if($callData['c_project_id']) {
+                if(isset($callData['c_project_id']) && $callData['c_project_id']) {
                     $call->c_project_id = $callData['c_project_id'];
                 }
 
@@ -1634,8 +1658,8 @@ class CommunicationController extends ApiBaseController
                     $call->c_created_user_id = $upp->uppUser->id;
                     $call->c_project_id = $upp->upp_project_id;
 
-                    Notifications::create($upp->uppUser->id, 'Call ID-'.$call->c_id.' completed', 'Call ID-'.$call->c_id.' completed. From ' . $call->c_from .' to '.$call->c_to, Notifications::TYPE_INFO, true);
-                    Notifications::socket($upp->uppUser->id, null, 'getNewNotification', [], true);
+                    //Notifications::create($upp->uppUser->id, 'Call ID-'.$call->c_id.' completed', 'Call ID-'.$call->c_id.' completed. From ' . $call->c_from .' to '.$call->c_to, Notifications::TYPE_INFO, true);
+                    //Notifications::socket($upp->uppUser->id, null, 'getNewNotification', [], true);
                 }
 
             }
@@ -1755,11 +1779,11 @@ class CommunicationController extends ApiBaseController
 
                 }*/
             } else {
-                Yii::error('Communication Request: Not found Call SID: ' . $post['callData']['sid'], 'API:Communication:voiceClient:Call:find');
+                Yii::error('Communication Request: Not found Call SID: ' . $callSid, 'API:Communication:voiceClient:Call:find');
             }
         }
         else {
-            Yii::error('Communication Request: Not found post[callData][sid] ' . VarDumper::dumpAsString($post), 'API:Communication:voiceClient:post');
+            Yii::error('Communication Request: Not found post[callData][sid] / post[callData][CallSid] ' . VarDumper::dumpAsString($post), 'API:Communication:voiceClient:post');
         }
 
         return $response;
@@ -2867,7 +2891,7 @@ class CommunicationController extends ApiBaseController
             $dateTime = null;
             if(NULL === $last_id) {
 
-                $lastEmail = Email::find()->where('e_inbox_email_id > 0')->orderBy(['e_inbox_email_id' => SORT_DESC])->one();
+                $lastEmail = Email::find()->where(['>', 'e_inbox_email_id', 0])->orderBy(['e_inbox_email_id' => SORT_DESC])->limit(1)->one();
 
                 if ($lastEmail) {
                     //$filter['last_dt'] = $lastEmail->e_inbox_created_dt;
@@ -2878,7 +2902,7 @@ class CommunicationController extends ApiBaseController
             } else {
                 $filter['last_id'] = (int)$last_id;
 
-                $checkLastEmail = Email::find()->where('e_inbox_email_id = ' . $filter['last_id'] )->one();
+                $checkLastEmail = Email::find()->where(['e_inbox_email_id' => $filter['last_id']])->limit(1)->one();
                 if($checkLastEmail) {
                     $response[] = 'Last ID ' . $filter['last_id'] . ' Exists';
                     return $response;
@@ -2903,6 +2927,9 @@ class CommunicationController extends ApiBaseController
                 'mail_list' => $filter['mail_list'],
                 'limit' => $filter['limit'],
             ];
+
+
+
             $job->request_data = $data;
             /** @var Queue $queue */
             $queue = \Yii::$app->queue_email_job;
@@ -2911,6 +2938,8 @@ class CommunicationController extends ApiBaseController
                 'job_id' => $jobId,
                 'last_id' => $filter['last_id'],
             ];
+
+            Yii::info('JOB (' .VarDumper::dumpAsString($response).') Push ' . VarDumper::dumpAsString($data) . ' last_id: ' . $last_id, 'info\API:newEmailMessagesReceived');
 
         } catch (\Throwable $e) {
             Yii::error($e->getTraceAsString(), 'API:Communication:newEmailMessagesReceived:Email:try');

@@ -7,12 +7,21 @@
  * @var $is_manager boolean
  */
 
+use common\models\LeadCallExpert;
 use yii\bootstrap\Html;
 use yii\helpers\Url;
 use yii\widgets\ListView;
 use yii\widgets\Pjax;
 
 ?>
+<style>
+.select2-container--krajee {
+    display: block;
+    z-index: 9999;
+}
+</style>
+
+<?php Pjax::begin(['id' => 'quotes_list', 'timeout' => 10000]); ?>
 <div class="x_panel">
     <div class="x_title">
         <h2><i class="fa fa-folder-o"></i> Quotes</h2>
@@ -22,7 +31,11 @@ use yii\widgets\Pjax;
                 <?=Html::a('<i class="fa fa-plus-circle success"></i> Add Quote', null, ['class' => 'add-clone-alt-quote', 'data-uid' => 0, 'data-url' => Url::to(['quote/create', 'leadId' => $leadForm->getLead()->id, 'qId' => 0])])?>
             </li>
             <li>
-                <?=Html::a('<i class="fa fa-search warning"></i> Quick Search', null, ['class' => '', 'id' => 'quick-search-quotes-btn', 'data-url' => Url::to(['quote/get-online-quotes', 'leadId' => $leadForm->getLead()->id])])?>
+                <?php if($lead->leadFlightSegmentsCount):?>
+                    <?=Html::a('<i class="fa fa-search warning"></i> Quick Search', null, ['class' => '', 'id' => 'quick-search-quotes-btn', 'data-url' => Url::to(['quote/get-online-quotes', 'leadId' => $leadForm->getLead()->id])])?>
+                <?php else: ?>
+                    <span class="badge badge-warning"><i class="fa fa-warning"></i> Warning: Flight Segments is empty!</span>
+                <?php endif; ?>
             </li>
             <li class="dropdown">
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-wrench"></i></a>
@@ -45,7 +58,7 @@ use yii\widgets\Pjax;
         <div class="clearfix"></div>
     </div>
     <div class="x_content" style="display: block">
-        <?php Pjax::begin(['id' => 'quotes_list', 'timeout' => 10000]); ?>
+
         <?= ListView::widget([
             'dataProvider' => $dataProvider,
             'itemView' => '_quote_item',
@@ -62,9 +75,10 @@ use yii\widgets\Pjax;
                 'tag' => false,
             ],
         ]);?>
-        <?php Pjax::end() ?>
+
     </div>
 </div>
+<?php Pjax::end() ?>
 
 
 <?php
