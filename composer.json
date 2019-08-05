@@ -19,10 +19,10 @@
 	"minimum-stability" : "stable",
 	"require" : {
 		"php" : ">=7.2.0",
-		"yiisoft/yii2" : "~2.0.17",
-		"yiisoft/yii2-bootstrap" : "^2.0.9",
+		"yiisoft/yii2" : "~2.0.24",
+		"yiisoft/yii2-bootstrap" : "^2.0.10",
 		"yiisoft/yii2-swiftmailer" : "^2.1",
-		"yiisoft/yii2-httpclient" : "^2.0.7",
+		"yiisoft/yii2-httpclient" : "^2.0.11",
 		"2amigos/yii2-date-picker-widget" : "~1.0",
 		"andrewblake1/yii2-credit-card" : "dev-master",
 		"kartik-v/yii2-widget-select2" : "@dev",
@@ -51,21 +51,21 @@
 		"vova07/yii2-imperavi-widget" : "*",
         "kdn/yii2-json-editor" : "*",
 		"workerman/workerman" : "^3.5",
-		"yiisoft/yii2-queue": "^2.2",
+		"yiisoft/yii2-queue": "^2.3",
 		"pda/pheanstalk": "^3.2",
 		"index0h/yii2-log": "0.0.3",
-		"twilio/sdk": "^5.31",
+		"twilio/sdk": "^5.34",
 		"2amigos/qrcode-library": "~1.1",
 		"aki/yii2-bot-telegram": "*",
 		"yii2mod/yii2-rbac": "*",
 		"unclead/yii2-multiple-input": "~2.0"
 	},
 	"require-dev" : {
-		"yiisoft/yii2-debug" : "~2.0",
-		"yiisoft/yii2-gii" : "~2.0",
+		"yiisoft/yii2-debug" : "~2.1",
+		"yiisoft/yii2-gii" : "~2.1",
 		"yiisoft/yii2-faker" : "~2.0",
 		"codeception/base" : "^2.5",
-		"codeception/verify" : "~0.3"
+		"codeception/verify" : "~0.4"
 	},
 	"config" : {
 		"process-timeout" : 1800,
