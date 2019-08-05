@@ -57,6 +57,7 @@ class Quote extends \yii\db\ActiveRecord implements AggregateRoot
     use EventTrait;
 
     public const SERVICE_FEE = 0.035;
+    public const CHECKOUT_URL_PAGE = 'checkout/quote-preview';
 
     public const
         GDS_SABRE = 'S',
@@ -2307,5 +2308,18 @@ class Quote extends \yii\db\ActiveRecord implements AggregateRoot
             $arr['fare'] = (float)substr($lastRow, 0, -2) - $arr['taxes'];
         }
         return $arr;
+    }
+
+    /**
+     * @return string
+     */
+    public function getCheckoutUrlPage(): string
+    {
+        $url = '#';
+        if($this->lead && $this->lead->project && $this->lead->project->link) {
+            $url = $this->lead->project->link . '/' . self::CHECKOUT_URL_PAGE . '/' . $this->uid;
+        }
+
+        return $url;
     }
 }

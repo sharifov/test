@@ -146,6 +146,16 @@ use yii\helpers\Url;
                             </li>
                         <?php endif; ?>
 
+                        <?php if($model->status != Quote::STATUS_DECLINED):?>
+                        <li>
+                            <?php  echo Html::a('<i class="fa fa-eye"></i> Checkout Page', $model->getCheckoutUrlPage(), [
+                                'target'    => '_blank',
+                                'title'     => 'View checkout',
+                                'data-pjax' => 0
+                            ]);
+                            ?>
+                        </li>
+                        <?php endif; ?>
                     </ul>
                 </div>
             </div>
