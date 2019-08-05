@@ -1531,7 +1531,9 @@ class CommunicationController extends ApiBaseController
                 if($parentCall && $parentCall->c_lead_id) {
                     $call->c_lead_id = $parentCall->c_lead_id;
                 } else {
-                    $call->c_lead_id = $callTwData['lead_id'] ?? null;
+                    if(!$call->c_lead_id) {
+                        $call->c_lead_id = $callTwData['lead_id'] ?? null;
+                    }
                 }
 
                 if(isset($callData['c_project_id'])) {
