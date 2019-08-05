@@ -728,7 +728,26 @@ class Lead extends ActiveRecord implements AggregateRoot
 
     public function trash(): void
     {
+        if ($this->isTrash()) {
+            throw new \DomainException('Lead is already trash!');
+        }
         $this->setStatus(self::STATUS_TRASH);
+    }
+
+    /**
+     * @return bool
+     */
+    public function isTrash(): bool
+    {
+        return $this->status === self::STATUS_TRASH;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isOnHold(): bool
+    {
+        return $this->status === self::STATUS_ON_HOLD;
     }
 
     public function reject(): void

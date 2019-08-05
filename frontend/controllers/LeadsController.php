@@ -106,7 +106,7 @@ class LeadsController extends FController
                             $lead = Lead::findOne($lead_id);
 
 
-                            if ($lead) {
+                            if ($lead && Yii::$app->user->can('leadSearchMultipleUpdate', ['lead' => $lead])) {
                                 //$lead->scenario = Lead::SCENARIO_MULTIPLE_UPDATE;
                                 $is_save = false;
 
