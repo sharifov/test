@@ -27,7 +27,7 @@ use yii\helpers\Url;
         			$firstSegment->qs_departure_airport_code.' → '.$lastSegment->qs_arrival_airport_code;
 	?>
 	<?php endforeach;?>
-	<div class="quote__heading">
+	<div class="quote__heading" <?=$model->isAlternative() ? 'style="background-color: #fdffe5;"' : ''?>>
 		<div class="quote__heading-left">
 			<?php if (($leadForm->mode !== $leadForm::VIEW_MODE || $isManager) && in_array($model->status, [$model::STATUS_CREATED, $model::STATUS_SEND])) : ?>
 			<div class="custom-checkbox">
@@ -35,6 +35,8 @@ use yii\helpers\Url;
                 <label for="q<?= $model->uid ?>"></label>
 			</div>
             <?php endif; ?>
+
+            <?=$model->isAlternative() ? \yii\helpers\Html::tag('i', '', ['class' => 'fa fa-font', 'title' => 'Alternative quote']) : ''?>
 
             <?= $model->getStatusSpan()?>
 

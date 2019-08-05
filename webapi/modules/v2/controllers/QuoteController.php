@@ -2,6 +2,7 @@
 
 namespace webapi\modules\v2\controllers;
 
+use common\models\Lead;
 use common\models\Notifications;
 use common\models\Quote;
 use common\models\UserProjectParams;
@@ -313,6 +314,30 @@ class QuoteController extends ApiBaseController
     "agentDirectLine": "",
     "generalEmail": "info@wowfare.com",
     "generalDirectLine": "+37379731662",
+    "quote": {
+        "id": 382366,
+        "uid": "5d43e1ec36372",
+        "lead_id": 178363,
+        "employee_id": 167,
+        "record_locator": "",
+        "pcc": "DFWG32100",
+        "cabin": "E",
+        "gds": "A",
+        "trip_type": "OW",
+        "main_airline_code": "SU",
+        "reservation_dump": "1  SU1845T  22AUG  KIVSVO    255A    555A  TH",
+        "status": 5,
+        "check_payment": 1,
+        "fare_type": "PUB",
+        "created": "2019-08-02 07:10:36",
+        "updated": "2019-08-05 08:58:18",
+        "created_by_seller": 1,
+        "employee_name": "alex.connor2",
+        "last_ticket_date": "2019-08-09 00:00:00",
+        "service_fee_percent": null,
+        "pricing_info": null,
+        "alternative": 1
+    },
     "action": "v2/quote/get-info",
     "response_id": 298939,
     "request_dt": "2019-04-25 13:12:44",
@@ -369,7 +394,7 @@ class QuoteController extends ApiBaseController
 
         try {
 
-            $response['status'] = ($model->status != $model::STATUS_DECLINED) ? 'Success' : 'Failed';
+            $response['status'] = $model->status != $model::STATUS_DECLINED ? 'Success' : 'Failed';
 
             $userProjectParams = UserProjectParams::findOne([
                 'upp_user_id' => $model->lead->employee_id,
@@ -382,8 +407,8 @@ class QuoteController extends ApiBaseController
             $response['lead_status'] = null;
             $response['booked_quote_uid'] = null;
 
-            if(in_array($model->lead->status,[10,12])){
-                $response['lead_status'] = ($model->lead->status == 10)?'sold':'booked';
+            if(in_array($model->lead->status,[Lead::STATUS_SOLD, Lead::STATUS_BOOKED])){
+                $response['lead_status'] = $model->lead->status == Lead::STATUS_SOLD ? 'sold' : 'booked';
                 $response['booked_quote_uid'] = $model->lead->getBookedQuoteUid();
             }
 
@@ -392,6 +417,9 @@ class QuoteController extends ApiBaseController
             $response['agentDirectLine'] = $userProjectParams ? $userProjectParams->upp_phone_number : sprintf('%s', $model->lead->project->contactInfo->phone);
             $response['generalEmail'] = $model->lead->project->contactInfo->email;
             $response['generalDirectLine'] = sprintf('%s', $model->lead->project->contactInfo->phone);
+
+
+            $response['quote'] = $model->attributes;
 
             $response['result'] = [
                 'prices' => [],
@@ -403,6 +431,11 @@ class QuoteController extends ApiBaseController
                 'currency' => 'USD',
                 'currencyRate' => 1,
             ];
+
+
+
+
+
             $paxPriceData = $model->getQuotePricePassengersData();
             $response['result'] = array_merge($response['result'], $paxPriceData);
             $response['result']['trips'] = $model->getQuoteTripsData();
