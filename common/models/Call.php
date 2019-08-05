@@ -483,7 +483,18 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
         }
 
         if (($insert && $this->c_created_user_id) || (isset($changedAttributes['c_call_status']) && $this->c_created_user_id))  {
-            Notifications::socket($this->c_created_user_id, null, 'callUpdate', ['id' => $this->c_id, 'status' => $this->c_call_status, 'duration' => $this->c_call_duration, 'snr' => $this->c_sequence_number], true);
+
+            Notifications::socket($this->c_created_user_id, $this->c_lead_id, 'callUpdate', ['id' => $this->c_id, 'status' => $this->c_call_status, 'duration' => $this->c_call_duration, 'snr' => $this->c_sequence_number], true);
+
+            /*
+            if($this->c_call_type_id === self::CALL_TYPE_OUT && NULL === $this->c_parent_call_sid) {
+                Notifications::socket($this->c_created_user_id, $this->c_lead_id, 'callUpdate', ['id' => $this->c_id, 'status' => $this->c_call_status, 'duration' => $this->c_call_duration, 'snr' => $this->c_sequence_number], true);
+            }
+
+            if($this->c_call_type_id === self::CALL_TYPE_IN && $this->c_parent_call_sid) {
+                Notifications::socket($this->c_created_user_id, $this->c_lead_id, 'incomingCall', ['id' => $this->c_id, 'status' => $this->c_call_status, 'duration' => $this->c_call_duration, 'snr' => $this->c_sequence_number], true);
+            }*/
+
         }
 
         if($this->c_call_type_id === self::CALL_TYPE_OUT && $this->c_lead_id && $this->cLead) {
@@ -574,6 +585,7 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
         try {
 
             $callsCount = self::find()->where(['c_call_status' => self::CALL_STATUS_QUEUE])->cache(10)->count();
+            \Yii::info(VarDumper::dumpAsString($callsCount, 10, false), 'info\Call:applyHoldCallToAgent:callRedirect_$callsCount');
             if (!$callsCount) {
                 return false;
             }
@@ -611,7 +623,7 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
                 ->limit(20)
                 ->all();
 
-            if (!$calls) {
+            if ($calls) {
                 foreach ($calls as $call) {
 
                     if ($call->c_created_user_id) {
@@ -638,6 +650,8 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
 
                         \Yii::info(VarDumper::dumpAsString($res, 10, false), 'info\Call:applyHoldCallToAgent:callRedirect');
                         return true;
+                    } else {
+                        \Yii::warning(VarDumper::dumpAsString($res, 10, false), 'info\Call:applyHoldCallToAgent:callRedirect:warning');
                     }
                 }
             }
