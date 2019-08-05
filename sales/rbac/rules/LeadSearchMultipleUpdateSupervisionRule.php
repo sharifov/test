@@ -3,24 +3,29 @@
 namespace sales\rbac\rules;
 
 use common\models\Lead;
-use yii\helpers\VarDumper;
 use yii\rbac\Rule;
 
-class LeadSearchMultipleSelectSupervisionRule extends Rule
+/**
+ * Class LeadSearchMultipleUpdateSupervisionRule
+ */
+class LeadSearchMultipleUpdateSupervisionRule extends Rule
 {
 
-    public $name = 'LeadSearchMultipleSelectSupervisionRule';
+    public $name = 'LeadSearchMultipleUpdateSupervisionRule';
 
-    public function execute($user, $item, $params)
+    /**
+     * @param int|string $user
+     * @param \yii\rbac\Item $item
+     * @param array $params
+     * @return bool
+     */
+    public function execute($user, $item, $params): bool
     {
         if (!isset($params['lead']) || !$params['lead'] instanceof Lead) {
             return false;
         }
         /** @var Lead $lead */
         $lead = $params['lead'];
-        if ($lead->isProcessing() || $lead->isFollowUp()) {
-            return true;
-        }
-        return false;
+        return ($lead->isProcessing() || $lead->isFollowUp() || $lead->isOnHold() || $lead->isTrash());
     }
 }
