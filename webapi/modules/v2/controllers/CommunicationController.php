@@ -1845,7 +1845,7 @@ class CommunicationController extends ApiBaseController
                 'voice' => $params_voice_gather['entry_voice'],
             ]);
             $gather = $responseTwml->gather([
-                'action' => '/v1/twilio/voice-gather/?step=2',
+                'action' => $params_voice_gather['voice_gather_callback_url_v2'] . '?step=2',
                 'method' => 'POST',
                 'numDigits' => 1,
                 'timeout' => 5,
@@ -1859,7 +1859,7 @@ class CommunicationController extends ApiBaseController
                 $gather->pause(['length' => 1]);
             }
             $responseTwml->say($params_voice_gather['error_phrase']);
-            $responseTwml->redirect('/v1/twilio/voice-gather/?step=1', ['method' => 'POST']);
+            $responseTwml->redirect($params_voice_gather['voice_gather_callback_url_v2'] . '?step=1', ['method' => 'POST']);
 
             $response['twml'] = (string)$responseTwml;
             $responseData = [
@@ -1895,7 +1895,7 @@ class CommunicationController extends ApiBaseController
             $get = Yii::$app->request->get();
             $step = $get['step'] ?? 2;
             $step = (int)$step;
-            $communicationApiUrl = \Yii::$app->communication->url;
+            $communicationApiUrl = \Yii::$app->communication->url2;
             $params_voice_gather = \Yii::$app->params['voice_gather'];
             $callSid = $post['call']['CallSid'] ?? null;
 
@@ -1942,7 +1942,7 @@ class CommunicationController extends ApiBaseController
 
                 $responseTwml->pause(['length' => 4]);
                 $gather = $responseTwml->gather([
-                    'action' => '/v1/twilio/voice-gather/?step=2',
+                    'action' => $params_voice_gather['voice_gather_callback_url'] . '?step=2',
                     'method' => 'POST',
                     'numDigits' => 1,
                     'timeout' => 5,
@@ -1955,7 +1955,7 @@ class CommunicationController extends ApiBaseController
                     $gather->pause(['length' => 1]);
                 }
                 $responseTwml->say($params_voice_gather['error_phrase']);
-                $responseTwml->redirect('/v1/twilio/voice-gather/?step=1', ['method' => 'POST']);
+                $responseTwml->redirect($params_voice_gather['voice_gather_callback_url_v2'] . '?step=1', ['method' => 'POST']);
 
             } elseif($step == 2) {
                 $paramsToSay = [];
@@ -1973,7 +1973,7 @@ class CommunicationController extends ApiBaseController
 
                 $responseTwml->pause(['length' => 2]);
                 $gather = $responseTwml->gather([
-                    'action' => '/v1/twilio/voice-gather/?step=3',
+                    'action' => $params_voice_gather['voice_gather_callback_url_v2'] . '?step=3',
                     'method' => 'POST',
                     'numDigits' => 1,
                     'timeout' => 5,
@@ -1983,7 +1983,7 @@ class CommunicationController extends ApiBaseController
                     'voice' => $paramsToSay['voice'],
                 ]);
                 $responseTwml->say($params_voice_gather['error_phrase']);
-                $responseTwml->redirect('/v1/twilio/voice-gather/?step=2', ['method' => 'POST']);
+                $responseTwml->redirect($params_voice_gather['voice_gather_callback_url_v2'] . '?step=2', ['method' => 'POST']);
 
                 $callSession->cs_step = 3;
                 if($cs_data_params && is_array($cs_data_params)) {
@@ -2164,7 +2164,7 @@ class CommunicationController extends ApiBaseController
                             'recordingStatusCallback' => $communicationApiUrl . $params_voice_gather['communication_recordingStatusCallbackUrl']
                         ]);
                         foreach ($call_employee AS $key => $userCall) {
-                            $callAgent = new Call();
+                            /*$callAgent = new Call();
                             $callAgent->c_call_sid = $post['call']['CallSid'] ?? null;
                             $callAgent->c_account_sid = $post['call']['AccountSid'] ?? null;
                             $callAgent->c_call_type_id = Call::CALL_TYPE_IN;
@@ -2187,12 +2187,12 @@ class CommunicationController extends ApiBaseController
                             }
                             if (!$callAgent->save()) {
                                 Yii::error(VarDumper::dumpAsString($callAgent->errors), 'API:CommunicationController:actionVoiceGather:callAgent:save');
-                            }
+                            }*/
                             $data['status'] = $call->c_call_status;
                             //Notifications::socket($call->c_created_user_id, $call->c_lead_id, 'incomingCall', $data, true);
                             $dial->client('seller' . $userCall->id, [
                                 'statusCallbackEvent' => 'ringing answered completed',
-                                'statusCallback' => $communicationApiUrl . $params_voice_gather['communication_voiceStatusCallbackUrl'],
+                                'statusCallback' => $communicationApiUrl . $params_voice_gather['communication_voiceStatusCallbackUrl'] . '?agent_id=' . $userCall->id,
                                 'statusCallbackMethod' => 'POST',
                             ]);
                         }
@@ -2204,7 +2204,7 @@ class CommunicationController extends ApiBaseController
                         $response['twml'] = (string)$responseTwml;
                     }
                 } else {
-                    $responseTwml->redirect('/v1/twilio/voice-gather/?step=2', ['method' => 'POST']);
+                    $responseTwml->redirect($params_voice_gather['voice_gather_callback_url_v2'] . '?step=2', ['method' => 'POST']);
                 }
                 // end step 3
 
