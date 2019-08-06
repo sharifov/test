@@ -52,6 +52,7 @@ return [
         'communication' => [
             'class' => \common\components\CommunicationService::class,
             'url' => 'https://communication.api.travelinsides.com/v1/',
+            'url2' => 'https://communication.api.travelinsides.com/v2/',
             'username' => 'sales',
             'password' => '',
         ],
