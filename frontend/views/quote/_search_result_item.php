@@ -276,7 +276,32 @@ data-airline="<?= $result['validatingCarrier']?>" id="search-result__quote-<?= $
                                 	<?php endif;?>
                                 	<?php if(isset($segment['meal'])):?><span class="badge badge-light" title="<?= $segment['meal']?>"><i class="fa fa-cutlery"></i></span><?php endif;?>
                                 	<?php if(isset($segment['stop']) && $segment['stop'] > 0):?>
-                                		<div class="text-danger"><i class="fa fa-warning"></i> <?= \Yii::t('search', '{n, plural, =0{no technical stops} one{# technical stop} other{# technical stops}}', ['n' => $segment['stop']]);?></div>
+
+                                        <h5 class="danger"><i class="fa fa-warning"></i> <?= \Yii::t('search', '{n, plural, =0{no technical stops} one{# technical stop} other{# technical stops}}', ['n' => $segment['stop']])?></h5>
+
+                                        <table class="table table-bordered table-striped">
+                                            <?php if(isset($segment['stops']) && is_array($segment['stops'])): ?>
+                                                <tr>
+                                                    <th>Location</th>
+                                                    <th>Departure DateTime</th>
+                                                    <th>Arrival DateTime</th>
+                                                    <th>Duration</th>
+                                                    <th>Elapsed Time</th>
+                                                    <th>Equipment</th>
+                                                </tr>
+                                                <?php foreach ($segment['stops'] as $stop):?>
+                                                    <tr>
+                                                        <td><?=isset($stop['locationCode'], $locations[$stop['locationCode']]) ? \yii\helpers\Html::encode('('.$stop['locationCode'].') '.$locations[$stop['locationCode']]['city'] . ', '. $locations[$stop['locationCode']]['country']) : ($stop['locationCode'] ?? '-')?></td>
+                                                        <td><?=$stop['departureDateTime'] ? Yii::$app->formatter_search->asDatetime(strtotime($stop['departureDateTime']), 'EEEE, MMM d [h:mm a]') : '-'?></td>
+                                                        <td><?=$stop['arrivalDateTime'] ? Yii::$app->formatter_search->asDatetime(strtotime($stop['arrivalDateTime']), 'EEEE, MMM d [h:mm a]') : '-'?></td>
+                                                        <td><?=isset($stop['duration']) ? SearchService::durationInMinutes($stop['duration']) : '-'?></td>
+                                                        <td><?=(isset($stop['elapsedTime']) && $stop['elapsedTime']) ? SearchService::durationInMinutes($stop['elapsedTime']) : '-'?></td>
+                                                        <td><?=isset($stop['equipment']) ? \yii\helpers\Html::encode($stop['equipment']) : '-'?></td>
+                                                    </tr>
+                                                <?php endforeach; ?>
+                                            <?php endif;?>
+                                        </table>
+
                                 	<?php endif;?>
                                 </div>
                             </div>
