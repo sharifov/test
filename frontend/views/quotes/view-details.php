@@ -87,8 +87,12 @@ use yii\helpers\Html;
                                             <?php endforeach;?>
                                         <?php endif;?>
                                         <?php if(isset($segment->qs_meal)):?><span class="badge badge-light" title="<?= $segment->qs_meal?>"><i class="fa fa-cutlery"></i></span><?php endif;?>
+
                                         <?php if(isset($segment->qs_stop) && $segment->qs_stop > 0):?>
-                                            <div class="text-danger"><i class="fa fa-warning"></i> <?= \Yii::t('search', '{n, plural, =0{no technical stops} one{# technical stop} other{# technical stops}}', ['n' => $segment->qs_stop]);?></div>
+                                            <div class="text-danger">
+                                                <i class="fa fa-warning"></i>
+                                                <?= \Yii::t('search', '{n, plural, =0{no technical stops} one{# technical stop} other{# technical stops}}', ['n' => $segment->qs_stop]);?>
+                                            </div>
                                         <?php endif;?>
                                     </div>
                                 </div>
