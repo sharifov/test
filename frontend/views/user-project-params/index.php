@@ -63,6 +63,12 @@ if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
             'upp_email:email',
             'upp_phone_number',
             'upp_tw_phone_number',
+            [
+                'attribute' => 'upp_allow_general_line',
+                'filter' => [1 => 'Yes', 0 => 'No'],
+                'format' => 'boolean'
+
+            ],
             //'upp_tw_sip_id',
             //'upp_created_dt',
             //'upp_updated_dt',

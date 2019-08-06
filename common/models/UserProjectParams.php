@@ -19,6 +19,7 @@ use yii\db\ActiveRecord;
  * @property string $upp_created_dt
  * @property string $upp_updated_dt
  * @property int $upp_updated_user_id
+ * @property bool $upp_allow_general_line
  *
  * @property Project $uppProject
  * @property Employee $uppUpdatedUser
@@ -55,6 +56,8 @@ class UserProjectParams extends \yii\db\ActiveRecord
             [['upp_updated_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['upp_updated_user_id' => 'id']],
             [['upp_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['upp_user_id' => 'id']],
             [['upp_phone_number', 'upp_tw_phone_number'], PhoneInputValidator::class],
+
+            ['upp_allow_general_line', 'boolean']
         ];
     }
 
@@ -72,6 +75,7 @@ class UserProjectParams extends \yii\db\ActiveRecord
             'upp_created_dt' => 'Created Dt',
             'upp_updated_dt' => 'Updated Dt',
             'upp_updated_user_id' => 'Updated User',
+            'upp_allow_general_line' => 'Allow General Line',
         ];
     }
 

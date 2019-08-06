@@ -415,6 +415,16 @@ JS;
                     'upp_email:email',
                     'upp_phone_number',
                     'upp_tw_phone_number',
+                    [
+                        'attribute' => 'upp_allow_general_line',
+                        'format' => 'raw',
+                        'value' => function(\common\models\UserProjectParams $model) {
+                            if ($model->upp_allow_general_line) {
+                                return '<span class="label label-success">Yes</span>';
+                            }
+                            return '<span class="label label-danger">No</span>';
+                        }
+                    ],
                     //'upp_tw_sip_id',
 
                     /*[

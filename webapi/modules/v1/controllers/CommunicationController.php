@@ -944,12 +944,18 @@ class CommunicationController extends ApiBaseController
                                 foreach ($agents_for_call AS $agentForCall) {
                                     $agentId = (int)$agentForCall['tbl_user_id'];
                                     $agentObject = Employee::findOne($agentId);
+
                                     if(!$agentObject) {
                                         continue;
                                     }
                                     if( $agentObject->userProfile && $agentObject->userProfile->up_call_type_id !== UserProfile::CALL_TYPE_WEB ) {
                                         continue;
                                     }
+
+                                    if (!$agentObject->getUserProjectParams()->andWhere(['upp_project_id' => $call_project_id, 'upp_allow_general_line' => 1])->limit(1)->one()) {
+                                        continue;
+                                    }
+
                                     $agents_ids[] = $agentObject->id . ' : '. $agentObject->username . ' - '. print_r($agentObject->getRolesRaw(), true);
                                     $roles = $agentObject->getRolesRaw();
                                     if(array_key_exists('agent', $roles)) {
