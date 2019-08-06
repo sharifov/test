@@ -2278,7 +2278,7 @@ class LeadController extends FController
             $data = Yii::$app->request->post();
 
             $description = '';
-            if ($data['Lead']['description'] != 0 && isset(Lead::CLONE_REASONS[$data['Lead']['description']])) {
+            if (isset($data['Lead']['description']) && $data['Lead']['description'] != 0 && isset(Lead::CLONE_REASONS[$data['Lead']['description']])) {
                     $description = Lead::CLONE_REASONS[$data['Lead']['description']];
             } elseif (isset($data['other'])) {
                 $description = trim($data['other']);

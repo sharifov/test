@@ -481,6 +481,12 @@ if (!$leadForm->getLead()->isNewRecord) {
     if ($viwModeSuperAdminCondition){
         $buttonsSubAction[] = $buttonClone;
     }
+
+    if (Yii::$app->user->identity->isAgent() && ($leadForm->getLead()->isBooked() || $leadForm->getLead()->isSold())) {
+        $buttonsSubAction[] = $buttonClone;
+    }
+
+
 }
 $project = $leadForm->getLead()->project;
 $projectStyles = '';
