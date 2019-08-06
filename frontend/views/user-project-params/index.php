@@ -65,9 +65,14 @@ if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
             'upp_tw_phone_number',
             [
                 'attribute' => 'upp_allow_general_line',
+                'format' => 'raw',
                 'filter' => [1 => 'Yes', 0 => 'No'],
-                'format' => 'boolean'
-
+                'value' => function(\common\models\UserProjectParams $model) {
+                    if ($model->upp_allow_general_line) {
+                        return '<span class="label label-success">Yes</span>';
+                    }
+                    return '<span class="label label-danger">No</span>';
+                }
             ],
             //'upp_tw_sip_id',
             //'upp_created_dt',
