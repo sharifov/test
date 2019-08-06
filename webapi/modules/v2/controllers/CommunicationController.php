@@ -1513,7 +1513,7 @@ class CommunicationController extends ApiBaseController
                 $call->c_call_type_id = $callData['c_call_type_id'];
                 $call->c_uri = $callData['c_uri'];
                 $call->c_from = $callData['c_from'];
-                $call->c_to = $callData['c_to'];
+                $call->c_to = ($agentId && (strpos($callData['c_to'], 'client:seller') !== false)) ? 'client:seller'. $agentId :$callData['c_to'];
                 $call->c_timestamp = $callData['c_timestamp'];
                 $call->c_created_dt = $callData['c_created_dt'];
                 $call->c_updated_dt = date('Y-m-d H:i:s');
