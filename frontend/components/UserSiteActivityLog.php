@@ -37,7 +37,12 @@ class UserSiteActivityLog extends Behavior
 
                 $sec = (int) $settings['user_site_activity_time'];
 
-                $requestCount = UserSiteActivity::find()->where(['usa_user_id' => Yii::$app->user->id, 'usa_request_url' => $request_url])->andWhere(['>=', 'usa_created_dt', date('Y-m-d H:i:s', time() - $sec)])->count();
+                $requestCount = UserSiteActivity::find()
+                    ->where(['usa_user_id' => Yii::$app->user->id, 'usa_page_url' => Yii::$app->request->pathInfo])
+                    //->where(['usa_user_id' => Yii::$app->user->id, 'usa_request_url' => $request_url])
+                    ->andWhere(['>=', 'usa_created_dt', date('Y-m-d H:i:s', time() - $sec)])
+                    ->count();
+
                 if($requestCount > $settings['user_site_activity_count']) {
                     Yii::warning(VarDumper::dumpAsString(['usa_user_id' => Yii::$app->user->id, 'usa_request_url' => $request_url]), 'UserSiteActivityLog:block');
                     throw new NotAcceptableHttpException('Many requests for this url. With frequent requests, the system may block you. Please wait any time ...', 111);
