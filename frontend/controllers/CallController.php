@@ -581,4 +581,18 @@ class CallController extends FController
         ]);
     }
 
+    public function actionAjaxCallCancel()
+    {
+        $id = (int) Yii::$app->request->get('id');
+        $model = $this->findModel($id);
+        $this->checkAccess($model);
+
+        if($model->c_call_status == Call::CALL_STATUS_RINGING || $model->c_call_status == Call::CALL_STATUS_IN_PROGRESS || $model->c_call_status == Call::CALL_STATUS_QUEUE) {
+            $model->c_call_status = Call::CALL_STATUS_FAILED;
+            $model->update();
+        }
+
+        return $this->redirect(Yii::$app->request->referrer);
+    }
+
 }

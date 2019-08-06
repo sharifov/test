@@ -142,6 +142,13 @@ use yii\helpers\Html;
                 <p>If there is no call and an error has occurred, please inform the manager of the problem.</p>
             </div>
 
+            <div class="text-center">
+                <?=Html::a('<i class="fa fa-remove"></i> Emergency Cancel Call Process', ['call/ajax-call-cancel', 'id' => $currentCall->c_id], ['class' => 'btn btn-sm btn-danger', 'data' => [
+                    'confirm' => 'Attention! This function is used only for emergency cases. ' . "\r\n". 'Are you sure you want to cancel this Call?',
+                    'method' => 'post',
+                ] ])?>
+            </div>
+
         <?php else: ?>
             <h2>Call</h2>
             <table class="table table-bordered">
