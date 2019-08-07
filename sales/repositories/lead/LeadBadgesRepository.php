@@ -10,6 +10,7 @@ use common\models\ProjectEmployeeAccess;
 use common\models\TipsSplit;
 use common\models\UserGroupAssign;
 use yii\db\ActiveQuery;
+use yii\helpers\VarDumper;
 
 class LeadBadgesRepository
 {
@@ -214,13 +215,12 @@ class LeadBadgesRepository
 
         if ($user->isAgent()) {
             $conditions['own']['enable'] = true;
-            $conditions['inSold']['enable'] = true;
+            $conditions['inSplit']['enable'] = true;
         }
         if ($user->isSupervision()) {
             $conditions['own']['enable'] = true;
-            $conditions['inSold']['enable'] = true;
-            $conditions['inProjects']['enable'] = true;
-            $conditions['inGroups']['enable'] = true;
+            $conditions['inSplit']['enable'] = true;
+            $conditions['inProjectsSupervision']['enable'] = true;
         }
         if ($user->isQa()) {
             $conditions['inProjects']['enable'] = true;
@@ -325,6 +325,31 @@ class LeadBadgesRepository
                     ])
                 ]
             ],
+            'inProjectsSupervision' => [
+                'enable' => false,
+                'query' => ['and',
+                    [
+                        'project_id' => Project::find()->select('id')->andWhere([
+                            'closed' => false,
+                            'id' => ProjectEmployeeAccess::find()->select('project_id')->andWhere(['employee_id' => $userId])
+                        ])
+                    ],
+                    ['or',
+                        [
+                            'employee_id' => UserGroupAssign::find()->select('ugs_user_id')->distinct()->andWhere([
+                                'ugs_group_id' => UserGroupAssign::find()->select(['ugs_group_id'])->andWhere(['ugs_user_id' => $userId])
+                            ])
+                        ],
+                        [
+                            Lead::tableName() . '.id' => ProfitSplit::find()->select('ps_lead_id')->andWhere([
+                                'ps_user_id' => UserGroupAssign::find()->select('ugs_user_id')->distinct()->andWhere([
+                                    'ugs_group_id' => UserGroupAssign::find()->select(['ugs_group_id'])->andWhere(['ugs_user_id' => $userId])
+                                ])
+                            ])
+                        ]
+                    ]
+                ]
+            ],
             'inGroups' => [
                 'enable' => false,
                 'query' => [
@@ -333,7 +358,7 @@ class LeadBadgesRepository
                     ])
                 ]
             ],
-            'inSold' => [
+            'inSplit' => [
                 'enable' => false,
                 'query' => ['or',
                     [Lead::tableName() . '.id' => ProfitSplit::find()->select('ps_lead_id')->andWhere(['ps_user_id' => $userId])],
