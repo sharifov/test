@@ -7,7 +7,7 @@
         'class' => 'dropdown',
         'role' => 'presentation',
 ]])?>
-    <a href="javascript:;" class="dropdown-toggle info-number" data-toggle="dropdown" aria-expanded="false">
+    <a href="javascript:;" class="dropdown-toggle info-number" title="Notifications" data-toggle="dropdown" aria-expanded="false">
         <i class="fa fa-comment-o"></i>
         <?php if($newCount): ?>
             <span class="badge bg-green"><?=$newCount?></span>

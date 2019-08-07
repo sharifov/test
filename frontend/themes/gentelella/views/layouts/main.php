@@ -97,7 +97,7 @@ $bundle = \frontend\themes\gentelella\assets\Asset::register($this);
                     </div>
 
                     <ul class="nav navbar-nav navbar-right">
-                        <li class="">
+                        <li>
                             <a href="javascript:;" class="user-profile dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
 
                                 <?=Html::img($gravUrl, ['alt' => 'avatar'])?>
@@ -129,8 +129,9 @@ $bundle = \frontend\themes\gentelella\assets\Asset::register($this);
                             </ul>
                         </li>
                         <?/*php if($isAdmin):*/ ?>
-                            <?= frontend\widgets\Notifications::widget() ?>
                             <?= frontend\widgets\OnlineConnection::widget() ?>
+                            <?= frontend\widgets\Notifications::widget() ?>
+
                         <?/*php endif;*/?>
 
                         <?//= backend\widgets\ChatNotifications::widget(); ?>
