@@ -131,8 +131,9 @@ $bundle = \frontend\themes\gentelella\assets\Asset::register($this);
                                     </ul>
                                 </li>
                                 <?/*php if($isAdmin):*/ ?>
-                                    <?= frontend\widgets\Notifications::widget() ?>
-                                    <?= frontend\widgets\OnlineConnection::widget() ?>
+                                <?= frontend\widgets\OnlineConnection::widget() ?>
+                                <?= frontend\widgets\Notifications::widget() ?>
+
                                 <?/*php endif;*/ ?>
 
                                 <?//= backend\widgets\ChatNotifications::widget(); ?>
