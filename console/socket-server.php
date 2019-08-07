@@ -1,6 +1,5 @@
 <?php
 /**
- * Created by PhpStorm.
  * User: alexandr
  * Date: 12/20/18
  * Time: 5:27 PM
@@ -165,12 +164,15 @@ $ws_worker->onConnect = function(\Workerman\Connection\TcpConnection $connection
         $sql = 'INSERT INTO user_connection (uc_connection_id, uc_user_id, uc_lead_id, uc_user_agent, uc_controller_id, uc_action_id, uc_page_url, uc_ip, uc_created_dt) 
                 VALUES (:uc_connection_id, :uc_user_id, :uc_lead_id, :uc_user_agent, :uc_controller_id, :uc_action_id, :uc_page_url, :uc_ip, :uc_created_dt)';
 
+        $uc_id = 0;
 
         try {
             //$db->exec('DELETE FROM user_connection');
 
             $stmt= $db->prepare($sql);
             $stmt->execute($data);
+
+            $uc_id = $db->lastInsertId();
 
             /*foreach($dbh->query('SELECT * from employees') as $row) {
                 print_r($row);
@@ -180,8 +182,7 @@ $ws_worker->onConnect = function(\Workerman\Connection\TcpConnection $connection
             print 'Error!: ' . $e->getMessage() . "\r\n";
         }
 
-
-        $json = json_encode(['connection_id' => $connection->id, 'command' => 'initConnection']);
+        $json = json_encode(['connection_id' => $connection->id, 'command' => 'initConnection', 'uc_id' => $uc_id]);
 
         $connection->send($json);
 

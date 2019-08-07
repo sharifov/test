@@ -65,7 +65,7 @@ $js = <<<JS
         socket.onopen = function (e) {
             //socket.send('{"user2_id":' + user_id + '}');
             console.info('Socket Status: ' + socket.readyState + ' (Open)');
-            onlineObj.attr('title', 'Online Connection: true').find('i').removeClass('danger').addClass('success');
+            onlineObj.attr('title', 'Online Connection: opened').find('i').removeClass('danger').addClass('warning');
             //console.log(e);
         };
         
@@ -81,6 +81,14 @@ $js = <<<JS
             
             try {
                 if (typeof obj.command !== 'undefined') {
+                    
+                    if(obj.command === 'initConnection') {
+                        if (typeof obj.uc_id !== 'undefined') {
+                            if(obj.uc_id > 0) {
+                                onlineObj.attr('title', 'Online Connection (' + obj.uc_id +'): true').find('i').removeClass('warning').removeClass('danger').addClass('success');
+                            }    
+                        }
+                    }
                     
                     if(obj.command === 'getNewNotification') {
                         //alert(obj.command);
