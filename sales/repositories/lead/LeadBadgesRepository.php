@@ -292,6 +292,10 @@ class LeadBadgesRepository
             return $query;
         }
 
+        if ($user->isSupervision()) {
+            return $query;
+        }
+
         return $query->andWhere('0 = 1');
     }
 
