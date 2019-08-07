@@ -285,7 +285,18 @@ class LeadSearch extends Lead
 
         if($this->supervision_id > 0) {
 
-            if($this->id || $this->uid || $this->client_id || $this->client_email || $this->client_phone || $this->status == Lead::STATUS_FOLLOW_UP) {
+            if(
+                $this->id
+                || $this->uid
+                || $this->client_id
+                || $this->client_email
+                || $this->client_phone
+                || $this->status == Lead::STATUS_FOLLOW_UP
+                || $this->request_ip
+                || $this->discount_id
+                || $this->gid
+                || $this->bo_flight_id
+            ) {
 
             } else {
 
