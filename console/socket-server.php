@@ -22,13 +22,15 @@ $config = yii\helpers\ArrayHelper::merge(
 echo 'Current DT: ' . date('Y-m-d H:i:s')."\r\n";
 
 date_default_timezone_set('UTC');
+ini_set('mysql.connect_timeout',0);
 //date_timezone_set('UTC');
 
 echo 'Current UTC: ' . date('Y-m-d H:i:s')."\r\n";
 
 
 try {
-    $db = new PDO($config['components']['db']['dsn'], $config['components']['db']['username'], $config['components']['db']['password']);
+    //$options = [PDO::ATTR_TIMEOUT => 1, PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION];
+    $db = new PDO($config['components']['db']['dsn'], $config['components']['db']['username'], $config['components']['db']['password']); // , $options
     $db->exec('DELETE FROM user_connection');
 } catch (PDOException $e) {
     print 'Error!: ' . $e->getMessage() . "\r\n";
