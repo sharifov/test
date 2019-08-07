@@ -706,8 +706,9 @@ echo '<div class="container" id="container-redirect-agents"></div>';
                 device.on('connect', function (conn) {
                     //console.log("connect call: status: " + connection.status() + "\n" + 'connection: ' + JSON.stringify(connection) + "\n conn:" + JSON.stringify(conn));
                     updateAgentStatus(connection, true);
-                    updateAgentStatus(conn, true);
+                    var access = updateAgentStatus(conn, true);
                     connection = conn;
+                    console.log({"action":"connect", "cid":connection.parameters.CallSid, "access": access});
                     log('Successfully established call!');
                     console.warn(conn);
                     //console.info(conn.parameters);
@@ -727,7 +728,8 @@ echo '<div class="container" id="container-redirect-agents"></div>';
 
                 device.on('disconnect', function (conn) {
                     updateAgentStatus(connection, true);
-                    updateAgentStatus(conn, true);
+                    var access = updateAgentStatus(conn, true);
+                    console.log({"action":"disconnect", "cid":conn.parameters.CallSid, "access": access});
                     connection = conn;
                     log('Call ended');
                     createNotify('Call ended', 'Call ended', 'warning');
@@ -749,6 +751,9 @@ echo '<div class="container" id="container-redirect-agents"></div>';
 
                 device.on('incoming', function (conn) {
                     var access =  updateAgentStatus(conn, false);
+
+                    console.log({"action":"incoming", "cid":conn.parameters.CallSid, "access": access});
+
                     if(!access) {
                         conn.reject();
                         return false;
@@ -786,6 +791,7 @@ echo '<div class="container" id="container-redirect-agents"></div>';
 
                 device.on('cancel', function (conn) {
                     updateAgentStatus(conn, true, true);
+                    console.log({"action":"cancel", "cid":conn.parameters.CallSid, "access": access});
                     connection = conn;
                     log('Cancel call');
                     createNotify('Cancel call', 'Cancel call', 'warning');
