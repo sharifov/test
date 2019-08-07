@@ -123,14 +123,48 @@ class QuoteController extends FController
                             $quote->employee_id = Yii::$app->user->id;
                             $quote->employee_name = Yii::$app->user->identity->username;
 
+                            if(isset($entry['tickets'])) {
+                                $quote->tickets = json_encode($entry['tickets']);
+                            } /*else {
+
+                                $tickets[] = ["trips" => [
+                                    [
+                                        "tripId"=> 1,
+                                        "segmentIds"=> [1,2]
+                                    ],
+                                    [
+                                        "tripId"=> 2,
+                                        "segmentIds"=> [1]
+                                    ],
+                                ]];
+
+                                $tickets[] = ["trips" => [
+                                    [
+                                        "tripId"=> 2,
+                                        "segmentIds" => [2]
+                                    ]
+                                ]];
+
+                                $quote->tickets = json_encode($tickets);
+                            }*/
+
                             if (!$quote->save()) {
                                 $result['error'] = VarDumper::dumpAsString($quote->errors);
                                 Yii::error(VarDumper::dumpAsString($quote->getErrors()), 'QuoteController:create-quote-from-search:quote:save');
                                 $transaction->rollBack();
                                 return $result;
+
                             }else{
+
                                 if(isset($entry['trips']) && is_array($entry['trips'])) {
-                                    foreach ($entry['trips'] as $tripEntry){
+
+                                    $ticketSegments = $quote->getTicketSegments();
+
+                                    foreach ($entry['trips'] as $tripKey => $tripEntry){
+
+                                        $tripNr = $tripKey + 1;
+                                        $segmentNr = 1;
+
                                         $trip = new QuoteTrip();
                                         $trip->qt_duration = $tripEntry['duration'];
 
@@ -145,6 +179,7 @@ class QuoteController extends FController
 
                                         if(isset($tripEntry['segments']) && is_array($tripEntry['segments'])) {
                                             foreach ($tripEntry['segments'] as $segmentEntry){
+
                                                 $segment = new QuoteSegment();
                                                 $segment->qs_departure_airport_code = $segmentEntry['departureAirportCode'];
                                                 if(isset($segmentEntry['departureAirportTerminal']) && !empty($segmentEntry['departureAirportTerminal'])){
@@ -164,6 +199,11 @@ class QuoteController extends FController
                                                 $segment->qs_operating_airline = $segmentEntry['operatingAirline'];
                                                 $segment->qs_marketing_airline = $segmentEntry['marketingAirline'];
                                                 $segment->qs_cabin = $segmentEntry['cabin'];
+
+                                                if($quote->tickets && isset($ticketSegments[$tripNr][$segmentNr])) {
+                                                    $segment->qs_ticket_id = $ticketSegments[$tripNr][$segmentNr];
+                                                }
+
                                                 if(isset($segmentEntry['mileage'])){
                                                     $segment->qs_mileage = $segmentEntry['mileage'];
                                                 }
@@ -277,6 +317,8 @@ class QuoteController extends FController
                                                         }
                                                     }
                                                 }
+
+                                                $segmentNr++;
                                             }
                                         }
 

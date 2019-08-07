@@ -43,6 +43,7 @@ use common\components\SearchService;
  * @property string $last_ticket_date
  * @property double $service_fee_percent
  * @property boolean $alternative
+ * @property string $tickets
  *
  * @property QuotePrice[] $quotePrices
  * @property int $quotePricesCount
@@ -144,7 +145,7 @@ class Quote extends \yii\db\ActiveRecord implements AggregateRoot
             [['uid', 'record_locator', 'pcc', 'cabin', 'gds', 'trip_type', 'main_airline_code', 'fare_type'], 'string', 'max' => 255],
 
             [['reservation_dump'], 'checkReservationDump'],
-            [['pricing_info'], 'string'],
+            [['pricing_info', 'tickets'], 'string'],
             [['status'], 'checkStatus'],
 
             [['employee_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['employee_id' => 'id']],
@@ -178,7 +179,8 @@ class Quote extends \yii\db\ActiveRecord implements AggregateRoot
             'service_fee_percent' => 'Service Fee Percent',
             'reservation_dump' => 'Reservation Dump',
             'pricing_info' => 'Pricing info',
-            'alternative' => 'Alternative'
+            'alternative' => 'Alternative',
+            'tickets'   => 'Tickets JSON'
         ];
     }
 
@@ -2321,5 +2323,39 @@ class Quote extends \yii\db\ActiveRecord implements AggregateRoot
         }
 
         return $url;
+    }
+
+    /**
+     * @return array
+     */
+    public function getTicketSegments(): array
+    {
+        $segments = [];
+
+        if($this->tickets) {
+            $ticketsArr = @json_decode($this->tickets, true);
+            if(is_array($ticketsArr)) {
+                $ticketNr = 1;
+                foreach ($ticketsArr as $ticket) {
+
+                    if(isset($ticket['trips']) && $ticket['trips']) {
+
+                        //VarDumper::dump()
+
+                        foreach ($ticket['trips'] as $trip) {
+                            if(isset($trip['segmentIds']) && $trip['segmentIds']) {
+                                foreach ($trip['segmentIds'] as $segmentId) {
+                                    $segments[$trip['tripId']][$segmentId] = $ticketNr;
+                                }
+                            }
+                        }
+                    }
+
+                    $ticketNr ++;
+                }
+            }
+        }
+
+        return $segments;
     }
 }
