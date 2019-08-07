@@ -26,7 +26,7 @@ class PhoneCreateForm extends Model
             ['phone', 'string', 'max' => 100],
             ['phone', PhoneInputValidator::class],
             ['phone', 'filter', 'filter' => function($value) {
-                return trim($value);
+                return str_replace('-', '', trim($value));
             }]
         ];
     }
