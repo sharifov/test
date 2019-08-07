@@ -94,34 +94,6 @@ class TestController extends FController
     {
 
 
-        $employee = Employee::findOne(291);
-
-
-        foreach ($employee->getUserProjectParams()->andWhere(['upp_allow_general_line' => 0, 'upp_project_id' => 6])->all() as $param) {
-            VarDumper::dump($param, 10, true);
-        }
-
-
-        die;
-
-
-//        VarDumper::dump($lead);
-
-
-//        die;
-
-        /** @var AirportRepository $repo */
-        $repo = Yii::createObject(AirportRepository::class);
-
-        $lead = $repo->getByIata(215);
-
-
-
-
-        VarDumper::dump($lead);
-//        $repo->findOne(3);
-//        $repo->agetOne(11, 2);
-//        $repo->agetOne(11, 2);
 
 
 
