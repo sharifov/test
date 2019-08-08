@@ -97,6 +97,8 @@ $this->params['breadcrumbs'][] = $this->title;
                 'contentOptions' => ['class' => 'text-center'],
             ],
 
+            'alternative:boolean',
+
             //'created',
             //'updated',
 

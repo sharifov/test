@@ -27,14 +27,16 @@ use yii\helpers\Url;
         			$firstSegment->qs_departure_airport_code.' → '.$lastSegment->qs_arrival_airport_code;
 	?>
 	<?php endforeach;?>
-	<div class="quote__heading">
+	<div class="quote__heading" <?=$model->isAlternative() ? 'style="background-color: #fdffe5;"' : ''?>>
 		<div class="quote__heading-left">
-			<?php if (($leadForm->mode !== $leadForm::VIEW_MODE || $isManager) && in_array($model->status, [$model::STATUS_CREATED, $model::STATUS_SEND])) : ?>
+			<?php if (($leadForm->mode !== $leadForm::VIEW_MODE || $isManager) && in_array($model->status, [Quote::STATUS_CREATED, Quote::STATUS_SEND, Quote::STATUS_OPENED])) : ?>
 			<div class="custom-checkbox">
 				<input class="quotes-uid" id="q<?= $model->uid ?>" value="<?= $model->uid ?>" data-id="<?=$model->id?>" type="checkbox" name="quote[<?= $model->uid ?>]">
                 <label for="q<?= $model->uid ?>"></label>
 			</div>
             <?php endif; ?>
+
+            <?=$model->isAlternative() ? \yii\helpers\Html::tag('i', '', ['class' => 'fa fa-font', 'title' => 'Alternative quote']) : ''?>
 
             <?= $model->getStatusSpan()?>
 
@@ -144,6 +146,16 @@ use yii\helpers\Url;
                             </li>
                         <?php endif; ?>
 
+                        <?php if($model->status != Quote::STATUS_DECLINED):?>
+                        <li>
+                            <?php  echo Html::a('<i class="fa fa-eye"></i> Checkout Page', $model->getCheckoutUrlPage(), [
+                                'target'    => '_blank',
+                                'title'     => 'View checkout',
+                                'data-pjax' => 0
+                            ]);
+                            ?>
+                        </li>
+                        <?php endif; ?>
                     </ul>
                 </div>
             </div>

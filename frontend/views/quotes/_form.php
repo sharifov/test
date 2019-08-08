@@ -32,15 +32,17 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'reservation_dump')->textarea(['rows' => 6]) ?>
 
-    <?= $form->field($model, 'status')->textInput() ?>
+    <?= $form->field($model, 'status')->dropDownList(\common\models\Quote::STATUS_LIST) ?>
 
-    <?= $form->field($model, 'check_payment')->textInput() ?>
+    <?= $form->field($model, 'check_payment')->checkbox() ?>
+
+    <?= $form->field($model, 'alternative')->checkbox() ?>
 
     <?= $form->field($model, 'fare_type')->textInput(['maxlength' => true]) ?>
 
-    <?= $form->field($model, 'created')->textInput() ?>
+    <?//= $form->field($model, 'created')->textInput() ?>
 
-    <?= $form->field($model, 'updated')->textInput() ?>
+    <?//= $form->field($model, 'updated')->textInput() ?>
 
     <div class="form-group">
         <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>

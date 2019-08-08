@@ -327,10 +327,15 @@ if ($isAdmin || $isSuperAdmin) {
                         if($projectParams) {
                             foreach ($projectParams as $projectParam) {
                                 $str.='<tr>';
-                                $str.='<td>'.Html::encode($projectParam->upp_project_id).'</td>';
+//                                $str.='<td>'.Html::encode($projectParam->upp_project_id).'</td>';
                                 $str.='<td>'.Html::encode($projectParam->uppProject->name).'</td>';
                                 $str.='<td>'.Html::encode($projectParam->upp_tw_phone_number).'</td>';
 
+                                if ($projectParam->upp_allow_general_line) {
+                                    $str.='<td><span class="label label-success">Yes</span></td>';
+                                } else {
+                                    $str.='<td><span class="label label-danger">No</span></td>';
+                                }
 
                                 //$str.='<td>'.Html::encode($projectParam->upp_tw_sip_id).'</td>';
                                 //$str.='<td>'.Html::encode($model->userProfile->up_sip ?? null).'</td>';

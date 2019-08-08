@@ -83,6 +83,8 @@ $this->title = 'Update Project Params';
                     ]
                 ]) ?>
 
+                <?= $form->field($model, 'upp_allow_general_line')->checkbox() ?>
+
                 <?/*= $form->field($model, 'upp_phone_number')->textInput(['maxlength' => true]) ?>
 
                 <?= $form->field($model, 'upp_tw_phone_number')->textInput(['maxlength' => true])*/ ?>

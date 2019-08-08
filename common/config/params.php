@@ -44,6 +44,8 @@ return [
         'webhook_url'   => 'https://sales.api.travelinsides.com/v1/telegram/webhook'
     ],
     'voice_gather' => [
+        'voice_gather_callback_url' => '/v1/twilio/voice-gather/',
+        'voice_gather_callback_url_v2' => '/v2/twilio/voice-gather/',
         'use_voice_gather' => false,
         'entry_phrase' => ' Hello, and thank you for calling {{project}}.',
         'entry_voice' => 'Polly.Joanna',

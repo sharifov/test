@@ -28,6 +28,7 @@ use yii\httpclient\Response;
 class CommunicationService extends Component
 {
     public $url;
+    public $url2;
     public $username;
     public $password;
     public $request;

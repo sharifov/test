@@ -296,15 +296,16 @@ $this->params['breadcrumbs'][] = $this->title;
             'format' => 'raw',
         ],
         [
-            'label' => 'Date of Issue',
-            'attribute' => 'updated',
-            'value' => function ($model) {
-                return $model['updated'];
+            'label' => 'Ticket Date',
+            'attribute' => 'last_ticket_date',
+            'value' => function (Lead $model) {
+
+                return ($model->appliedQuote && $model->appliedQuote->last_ticket_date) ? Yii::$app->formatter->asDate($model->appliedQuote->last_ticket_date) : '-';
             },
-            'format' => 'datetime',
+            //'format' => 'datetime',
             'filter' => DatePicker::widget([
                 'model' => $searchModel,
-                'attribute' => 'updated',
+                'attribute' => 'last_ticket_date',
                 'clientOptions' => [
                     'autoclose' => true,
                     'format' => 'dd-M-yyyy'

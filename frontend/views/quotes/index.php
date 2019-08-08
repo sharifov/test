@@ -126,6 +126,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'filter' => \common\models\Quote::STATUS_LIST
             ],
             'check_payment:boolean',
+            'alternative:boolean',
             'fare_type',
             [
                 'header' => 'Prices',

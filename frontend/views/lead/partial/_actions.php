@@ -136,6 +136,8 @@ if ($leadForm->mode !== $leadForm::VIEW_MODE || ($leadForm->mode === $leadForm::
         var url = $('#quick-search-quotes-btn').data('url');
         $('#preloader').removeClass('hidden');
         var modal = $('#search-results__modal');
+        
+        
 
          $.ajax({
             type: 'post',
@@ -147,8 +149,11 @@ if ($leadForm->mode !== $leadForm::VIEW_MODE || ($leadForm->mode === $leadForm::
                 modal.modal('show');
             },
             error: function (error) {
-                $('#preloader').removeClass('hidden');
-                console.log('Error: ' + error);
+               // var obj = JSON.parse(error.data); // $.parseJSON( e.data );
+                $('#preloader').addClass('hidden');
+                console.error(error.responseText);
+                
+                alert('Server Error: ' + error.statusText);
             }
         });
     });
@@ -476,6 +481,12 @@ if (!$leadForm->getLead()->isNewRecord) {
     if ($viwModeSuperAdminCondition){
         $buttonsSubAction[] = $buttonClone;
     }
+
+    if (Yii::$app->user->identity->isAgent() && ($leadForm->getLead()->isBooked() || $leadForm->getLead()->isSold())) {
+        $buttonsSubAction[] = $buttonClone;
+    }
+
+
 }
 $project = $leadForm->getLead()->project;
 $projectStyles = '';

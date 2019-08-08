@@ -9,7 +9,16 @@ $actionId = Yii::$app->controller->action->id;
 $pageUrl = urlencode(\yii\helpers\Url::current());
 $ipAddress = Yii::$app->request->remoteIP;
 $webSocketHost = (Yii::$app->request->isSecureConnection ? 'wss': 'ws') . '://'.Yii::$app->request->serverName . '/ws';// . ':8888';
-
+?>
+    <li>
+        <a href="javascript:;" title="Online Connection" id="online-connection-indicator">
+            <i class="fa fa-plug"></i>
+            <?/*php if($newCount): ?>
+                <span class="badge bg-green"><?=$newCount?></span>
+            <?php endif;*/?>
+        </a>
+    </li>
+<?php
 // $userAgent = urlencode(Yii::$app->request->userAgent);
 // const socket = new WebSocket('wss:\\sales.dev.travelinsides.com:8888/?user_id=1&controller_id=test&action_id=test&page_url=test&lead_id=15636');
 
@@ -37,6 +46,7 @@ $js = <<<JS
     var ipAddress = '$ipAddress';
     var webSocketHost = '$webSocketHost';
           
+    var onlineObj = $('#online-connection-indicator');
 
     try {
 
@@ -54,12 +64,13 @@ $js = <<<JS
         
         socket.onopen = function (e) {
             //socket.send('{"user2_id":' + user_id + '}');
-            console.log('Socket Status: ' + socket.readyState + ' (Open)');
+            console.info('Socket Status: ' + socket.readyState + ' (Open)');
+            onlineObj.attr('title', 'Online Connection: opened').find('i').removeClass('danger').addClass('warning');
             //console.log(e);
         };
         
         socket.onmessage = function (e) {
-            
+            // onlineObj.find('i').removeClass('danger').removeClass('success').addClass('warning');
             try {
                 var obj = JSON.parse(e.data); // $.parseJSON( e.data );
                 console.log(obj);
@@ -69,8 +80,17 @@ $js = <<<JS
             }
             
             try {
-                
                 if (typeof obj.command !== 'undefined') {
+                    
+                    if(obj.command === 'initConnection') {
+                        if (typeof obj.uc_id !== 'undefined') {
+                            if(obj.uc_id > 0) {
+                                onlineObj.attr('title', 'Online Connection (' + obj.uc_id +'): true').find('i').removeClass('warning').removeClass('danger').addClass('success');
+                            } else {
+                                onlineObj.attr('title', 'Timeout DB connection: restart service').find('i').removeClass('danger').removeClass('success').addClass('warning');
+                            }    
+                        }
+                    }
                     
                     if(obj.command === 'getNewNotification') {
                         //alert(obj.command);
@@ -133,7 +153,7 @@ $js = <<<JS
                         window.open(obj.url, 'openUrl');
                     }
                 }
-                
+                // onlineObj.find('i').removeClass('danger').removeClass('warning').addClass('success');
             } catch (error) {
                 console.error('Error in functions - socket.onmessage');
                 console.error(error);
@@ -148,8 +168,9 @@ $js = <<<JS
             } else {
                 console.error('Disconnect (Error)'); // Example kill process of server
             }
-            console.log('Code: ' + event.code);
+            //console.log('Code: ' + event.code);
             
+            onlineObj.attr('title', 'Disconnect').find('i').removeClass('success').addClass('danger');
             //console.log('Socket Status: ' + socket.readyState + ' (Closed)');
         };
 
@@ -157,6 +178,7 @@ $js = <<<JS
             //if (socket.readyState == 1) {
                 console.log('Socket error: ' + event.message);
             //}
+            onlineObj.attr('title', 'Online Connection: false').find('i').removeClass('success').addClass('danger');
         };
         
         /*socket.setTimeout(function () {
@@ -167,6 +189,7 @@ $js = <<<JS
 
     } catch (error) {
         console.error(error);
+        onlineObj.attr('title', 'Online Connection: error').find('i').removeClass('success').addClass('danger');
     }
 
 JS;

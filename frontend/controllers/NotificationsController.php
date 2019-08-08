@@ -215,14 +215,19 @@ class NotificationsController extends FController
         }
     }
 
-    /**
-     * @return string
-     */
-    public function actionPjaxNotify(): string
-    {
 
-        $box = \frontend\widgets\Notifications::getInstance();
-        $result = $box->run();
-        return $result;
+    /**
+     * @return string|\yii\web\Response
+     */
+    public function actionPjaxNotify()
+    {
+        if(Yii::$app->request->isAjax) {
+            $box = \frontend\widgets\Notifications::getInstance();
+            $result = $box->run();
+            return $result;
+        } elseif(Yii::$app->request->referrer) {
+            return $this->redirect(Yii::$app->request->referrer);
+        }
+        return $this->redirect(['site/profile']);
     }
 }

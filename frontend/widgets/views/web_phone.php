@@ -258,6 +258,7 @@ echo '<div class="container" id="container-redirect-agents"></div>';
     const c_user_id = '<?=Yii::$app->user->id?>';
     use_browser_call_access =  <?= ($use_browser_call_access) ? 'true' : 'false' ?>;
     agentId = <?= $user_id;?>;
+    call_access_log = [];
 
     if(window.localStorage.agent_tab_conn_state === undefined) {
         var agent_tab_conn_state = [{"user":agentId, "items":[]}];
@@ -366,6 +367,13 @@ echo '<div class="container" id="container-redirect-agents"></div>';
         }
         window.localStorage.setItem('agent_tab_conn_state', JSON.stringify(agent_tab_conn_state));
         window.localStorage.setItem('lock', 'false');
+        if(conn.parameters && conn.parameters.CallSid) {
+            var type = 'in';
+            if(conn._direction === 'OUTGOING') {
+                type = 'out';
+            }
+            //call_access_log.push({"sid":conn.parameters.CallSid, "access":access, "type":type})
+        }
         return access;
     }
 
@@ -706,14 +714,15 @@ echo '<div class="container" id="container-redirect-agents"></div>';
                 device.on('connect', function (conn) {
                     //console.log("connect call: status: " + connection.status() + "\n" + 'connection: ' + JSON.stringify(connection) + "\n conn:" + JSON.stringify(conn));
                     updateAgentStatus(connection, true);
-                    updateAgentStatus(conn, true);
+                    var access = updateAgentStatus(conn, true);
                     connection = conn;
+                    console.log({"action":"connect", "cid":connection.parameters.CallSid, "access": access});
                     log('Successfully established call!');
                     console.warn(conn);
                     //console.info(conn.parameters);
                     //console.log(conn.parameters.CallSid);
 
-                    saveDbCall(conn.parameters.CallSid, conn.message.FromAgentPhone, conn.message.To, 'queued');
+                    //saveDbCall(conn.parameters.CallSid, conn.message.FromAgentPhone, conn.message.To, 'queued');
 
                     //document.getElementById('button-call').style.display = 'none';
                     //document.getElementById('button-hangup').style.display = 'inline';
@@ -727,7 +736,8 @@ echo '<div class="container" id="container-redirect-agents"></div>';
 
                 device.on('disconnect', function (conn) {
                     updateAgentStatus(connection, true);
-                    updateAgentStatus(conn, true);
+                    var access = updateAgentStatus(conn, true);
+                    console.log({"action":"disconnect", "cid":conn.parameters.CallSid, "access": access});
                     connection = conn;
                     log('Call ended');
                     createNotify('Call ended', 'Call ended', 'warning');
@@ -749,6 +759,9 @@ echo '<div class="container" id="container-redirect-agents"></div>';
 
                 device.on('incoming', function (conn) {
                     var access =  updateAgentStatus(conn, false);
+
+                    console.log({"action":"incoming", "cid":conn.parameters.CallSid, "access": access});
+
                     if(!access) {
                         conn.reject();
                         return false;
@@ -785,7 +798,8 @@ echo '<div class="container" id="container-redirect-agents"></div>';
 
 
                 device.on('cancel', function (conn) {
-                    updateAgentStatus(conn, true, true);
+                    var  access = updateAgentStatus(conn, true, true);
+                    console.log({"action":"cancel", "cid":conn.parameters.CallSid, "access": access});
                     connection = conn;
                     log('Cancel call');
                     createNotify('Cancel call', 'Cancel call', 'warning');

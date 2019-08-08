@@ -78,7 +78,9 @@ class UserProjectParamsController extends FController
      */
     public function actionCreate()
     {
-        $model = new UserProjectParams();
+        $model = new UserProjectParams([
+            'upp_allow_general_line' => true
+        ]);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
 
@@ -97,7 +99,9 @@ class UserProjectParamsController extends FController
 
     public function actionCreateAjax()
     {
-        $model = new UserProjectParams();
+        $model = new UserProjectParams([
+            'upp_allow_general_line' => true
+        ]);
 
 
         //VarDumper::dump(Yii::$app->request->post(), 10, true); exit;

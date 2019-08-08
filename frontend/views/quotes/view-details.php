@@ -87,8 +87,36 @@ use yii\helpers\Html;
                                             <?php endforeach;?>
                                         <?php endif;?>
                                         <?php if(isset($segment->qs_meal)):?><span class="badge badge-light" title="<?= $segment->qs_meal?>"><i class="fa fa-cutlery"></i></span><?php endif;?>
+
                                         <?php if(isset($segment->qs_stop) && $segment->qs_stop > 0):?>
-                                            <div class="text-danger"><i class="fa fa-warning"></i> <?= \Yii::t('search', '{n, plural, =0{no technical stops} one{# technical stop} other{# technical stops}}', ['n' => $segment->qs_stop]);?></div>
+
+                                            <h5 class="danger">
+                                                <i class="fa fa-warning"></i> <?= \Yii::t('search', '{n, plural, =0{no technical stops} one{# technical stop} other{# technical stops}}', ['n' => $segment->qs_stop])?>
+                                            </h5>
+
+                                            <table class="table table-bordered table-striped">
+                                                <?php if($segment->quoteSegmentStops): ?>
+                                                    <tr>
+                                                        <th>Location</th>
+                                                        <th>Departure DateTime</th>
+                                                        <th>Arrival DateTime</th>
+                                                        <th>Duration</th>
+                                                        <th>Elapsed Time</th>
+                                                        <th>Equipment</th>
+                                                    </tr>
+                                                    <?php foreach ($segment->quoteSegmentStops as $stop):?>
+                                                        <tr>
+                                                            <td><?=$stop->locationAirport ? \yii\helpers\Html::encode('('.$stop->locationAirport->iata.') '.$stop->locationAirport->city . ', '. $stop->locationAirport->country) : ($stop->qss_location_code ?? '-')?></td>
+                                                            <td><?=$stop->qss_departure_dt ? Yii::$app->formatter_search->asDatetime(strtotime($stop->qss_departure_dt), 'EE, MMM d, h:mm a') : '-'?></td>
+                                                            <td><?=$stop->qss_arrival_dt ? Yii::$app->formatter_search->asDatetime(strtotime($stop->qss_arrival_dt), 'EE, MMM d, h:mm a') : '-'?></td>
+                                                            <td><?=$stop->qss_duration ? SearchService::durationInMinutes($stop->qss_duration) : '-'?></td>
+                                                            <td><?=$stop->qss_elapsed_time ? SearchService::durationInMinutes($stop->qss_elapsed_time) : '-'?></td>
+                                                            <td><?=$stop->qss_equipment ? \yii\helpers\Html::encode($stop->qss_equipment) : '-'?></td>
+                                                        </tr>
+                                                    <?php endforeach; ?>
+                                                <?php endif;?>
+                                            </table>
+
                                         <?php endif;?>
                                     </div>
                                 </div>
