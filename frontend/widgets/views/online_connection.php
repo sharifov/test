@@ -166,9 +166,9 @@ $js = <<<JS
             } else {
                 console.error('Disconnect (Error)'); // Example kill process of server
             }
-            console.log('Code: ' + event.code);
+            //console.log('Code: ' + event.code);
             
-            onlineObj.attr('title', 'Online Connection: close').find('i').removeClass('success').addClass('info');
+            onlineObj.attr('title', 'Disconnect').find('i').removeClass('success').addClass('danger');
             //console.log('Socket Status: ' + socket.readyState + ' (Closed)');
         };
 

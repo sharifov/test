@@ -600,7 +600,8 @@
             "dist": {
                 "type": "zip",
                 "url": "https://api.github.com/repos/twbs/bootstrap/zipball/68b0d231a13201eb14acd3dc84e51543d16e5f7e",
-                "reference": "68b0d231a13201eb14acd3dc84e51543d16e5f7e"
+                "reference": "68b0d231a13201eb14acd3dc84e51543d16e5f7e",
+                "shasum": null
             },
             "require": {
                 "bower-asset/jquery": ">=1.9.1,<4.0"
@@ -621,7 +622,8 @@
             "dist": {
                 "type": "zip",
                 "url": "https://api.github.com/repos/uxsolutions/bootstrap-datepicker/zipball/d364be5b066b38f3675a5a1dc174ce1ab1f3360e",
-                "reference": "d364be5b066b38f3675a5a1dc174ce1ab1f3360e"
+                "reference": "d364be5b066b38f3675a5a1dc174ce1ab1f3360e",
+                "shasum": null
             },
             "require": {
                 "bower-asset/jquery": ">=1.7.1,<4.0.0"
@@ -642,7 +644,8 @@
             "dist": {
                 "type": "zip",
                 "url": "https://api.github.com/repos/FortAwesome/Font-Awesome/zipball/a8386aae19e200ddb0f6845b5feeee5eb7013687",
-                "reference": "a8386aae19e200ddb0f6845b5feeee5eb7013687"
+                "reference": "a8386aae19e200ddb0f6845b5feeee5eb7013687",
+                "shasum": null
             },
             "type": "bower-asset",
             "license": [
@@ -662,7 +665,8 @@
             "dist": {
                 "type": "zip",
                 "url": "https://api.github.com/repos/ColorlibHQ/gentelella/zipball/3448fdfdf16a41707d6e2a8154d592a88d85c41c",
-                "reference": "3448fdfdf16a41707d6e2a8154d592a88d85c41c"
+                "reference": "3448fdfdf16a41707d6e2a8154d592a88d85c41c",
+                "shasum": null
             },
             "type": "bower-asset",
             "license": [
@@ -680,7 +684,8 @@
             "dist": {
                 "type": "zip",
                 "url": "https://api.github.com/repos/RobinHerbots/Inputmask/zipball/5e670ad62f50c738388d4dcec78d2888505ad77b",
-                "reference": "5e670ad62f50c738388d4dcec78d2888505ad77b"
+                "reference": "5e670ad62f50c738388d4dcec78d2888505ad77b",
+                "shasum": null
             },
             "require": {
                 "bower-asset/jquery": ">=1.7"
@@ -701,7 +706,8 @@
             "dist": {
                 "type": "zip",
                 "url": "https://api.github.com/repos/jackocnr/intl-tel-input/zipball/2afde58af3d7db953ba505946a5aac3c3176ed0b",
-                "reference": "2afde58af3d7db953ba505946a5aac3c3176ed0b"
+                "reference": "2afde58af3d7db953ba505946a5aac3c3176ed0b",
+                "shasum": null
             },
             "require": {
                 "bower-asset/jquery": ">=1.7"
@@ -719,7 +725,8 @@
             "dist": {
                 "type": "zip",
                 "url": "https://api.github.com/repos/jquery/jquery-dist/zipball/15bc73803f76bc53b654b9fdbbbc096f56d7c03d",
-                "reference": "15bc73803f76bc53b654b9fdbbbc096f56d7c03d"
+                "reference": "15bc73803f76bc53b654b9fdbbbc096f56d7c03d",
+                "shasum": null
             },
             "type": "bower-asset",
             "license": [
@@ -737,7 +744,8 @@
             "dist": {
                 "type": "zip",
                 "url": "https://api.github.com/repos/components/jqueryui/zipball/44ecf3794cc56b65954cc19737234a3119d036cc",
-                "reference": "44ecf3794cc56b65954cc19737234a3119d036cc"
+                "reference": "44ecf3794cc56b65954cc19737234a3119d036cc",
+                "shasum": null
             },
             "require": {
                 "bower-asset/jquery": ">=1.6"
@@ -758,7 +766,8 @@
             "dist": {
                 "type": "zip",
                 "url": "https://api.github.com/repos/stripe/jquery.payment/zipball/88fcc8a48a7f1d2e77bb6cf90089ea7cfa59765e",
-                "reference": "88fcc8a48a7f1d2e77bb6cf90089ea7cfa59765e"
+                "reference": "88fcc8a48a7f1d2e77bb6cf90089ea7cfa59765e",
+                "shasum": null
             },
             "require": {
                 "bower-asset/jquery": ">=1.5"
@@ -776,7 +785,8 @@
             "dist": {
                 "type": "zip",
                 "url": "https://api.github.com/repos/bestiejs/punycode.js/zipball/38c8d3131a82567bfef18da09f7f4db68c84f8a3",
-                "reference": "38c8d3131a82567bfef18da09f7f4db68c84f8a3"
+                "reference": "38c8d3131a82567bfef18da09f7f4db68c84f8a3",
+                "shasum": null
             },
             "type": "bower-asset"
         },
@@ -791,7 +801,8 @@
             "dist": {
                 "type": "zip",
                 "url": "https://api.github.com/repos/smalot/bootstrap-datetimepicker/zipball/32143c8b45575e51c92a8e29997cbe556d1bbba3",
-                "reference": "32143c8b45575e51c92a8e29997cbe556d1bbba3"
+                "reference": "32143c8b45575e51c92a8e29997cbe556d1bbba3",
+                "shasum": null
             },
             "type": "bower-asset"
         },
@@ -806,7 +817,8 @@
             "dist": {
                 "type": "zip",
                 "url": "https://api.github.com/repos/yiisoft/jquery-pjax/zipball/aef7b953107264f00234902a3880eb50dafc48be",
-                "reference": "aef7b953107264f00234902a3880eb50dafc48be"
+                "reference": "aef7b953107264f00234902a3880eb50dafc48be",
+                "shasum": null
             },
             "require": {
                 "bower-asset/jquery": ">=1.8"
@@ -3390,7 +3402,7 @@
             ],
             "authors": [
                 {
-                    "name": "Lajos Molnár",
+                    "name": "Lajos Molnar",
                     "email": "lajax.m@gmail.com"
                 }
             ],
@@ -3690,7 +3702,9 @@
             "version": "6.10.2",
             "dist": {
                 "type": "tar",
-                "url": "https://registry.npmjs.org/ajv/-/ajv-6.10.2.tgz"
+                "url": "https://registry.npmjs.org/ajv/-/ajv-6.10.2.tgz",
+                "reference": null,
+                "shasum": null
             },
             "require": {
                 "npm-asset/fast-deep-equal": ">=2.0.1,<3.0.0",
@@ -3708,7 +3722,9 @@
             "version": "0.11.1",
             "dist": {
                 "type": "tar",
-                "url": "https://registry.npmjs.org/brace/-/brace-0.11.1.tgz"
+                "url": "https://registry.npmjs.org/brace/-/brace-0.11.1.tgz",
+                "reference": null,
+                "shasum": null
             },
             "type": "npm-asset",
             "license": [
@@ -3720,7 +3736,9 @@
             "version": "2.0.1",
             "dist": {
                 "type": "tar",
-                "url": "https://registry.npmjs.org/fast-deep-equal/-/fast-deep-equal-2.0.1.tgz"
+                "url": "https://registry.npmjs.org/fast-deep-equal/-/fast-deep-equal-2.0.1.tgz",
+                "reference": null,
+                "shasum": null
             },
             "type": "npm-asset",
             "license": [
@@ -3732,7 +3750,9 @@
             "version": "2.0.0",
             "dist": {
                 "type": "tar",
-                "url": "https://registry.npmjs.org/fast-json-stable-stringify/-/fast-json-stable-stringify-2.0.0.tgz"
+                "url": "https://registry.npmjs.org/fast-json-stable-stringify/-/fast-json-stable-stringify-2.0.0.tgz",
+                "reference": null,
+                "shasum": null
             },
             "type": "npm-asset",
             "license": [
@@ -3744,7 +3764,9 @@
             "version": "0.7.1",
             "dist": {
                 "type": "tar",
-                "url": "https://registry.npmjs.org/javascript-natural-sort/-/javascript-natural-sort-0.7.1.tgz"
+                "url": "https://registry.npmjs.org/javascript-natural-sort/-/javascript-natural-sort-0.7.1.tgz",
+                "reference": null,
+                "shasum": null
             },
             "type": "npm-asset",
             "license": [
@@ -3756,7 +3778,9 @@
             "version": "0.15.0",
             "dist": {
                 "type": "tar",
-                "url": "https://registry.npmjs.org/jmespath/-/jmespath-0.15.0.tgz"
+                "url": "https://registry.npmjs.org/jmespath/-/jmespath-0.15.0.tgz",
+                "reference": null,
+                "shasum": null
             },
             "type": "npm-asset"
         },
@@ -3765,7 +3789,9 @@
             "version": "0.4.1",
             "dist": {
                 "type": "tar",
-                "url": "https://registry.npmjs.org/json-schema-traverse/-/json-schema-traverse-0.4.1.tgz"
+                "url": "https://registry.npmjs.org/json-schema-traverse/-/json-schema-traverse-0.4.1.tgz",
+                "reference": null,
+                "shasum": null
             },
             "type": "npm-asset",
             "license": [
@@ -3777,7 +3803,9 @@
             "version": "0.4.0",
             "dist": {
                 "type": "tar",
-                "url": "https://registry.npmjs.org/json-source-map/-/json-source-map-0.4.0.tgz"
+                "url": "https://registry.npmjs.org/json-source-map/-/json-source-map-0.4.0.tgz",
+                "reference": null,
+                "shasum": null
             },
             "type": "npm-asset",
             "license": [
@@ -3789,7 +3817,9 @@
             "version": "6.2.1",
             "dist": {
                 "type": "tar",
-                "url": "https://registry.npmjs.org/jsoneditor/-/jsoneditor-6.2.1.tgz"
+                "url": "https://registry.npmjs.org/jsoneditor/-/jsoneditor-6.2.1.tgz",
+                "reference": null,
+                "shasum": null
             },
             "require": {
                 "npm-asset/ajv": "6.10.2",
@@ -3811,7 +3841,9 @@
             "version": "2.4.13",
             "dist": {
                 "type": "tar",
-                "url": "https://registry.npmjs.org/mobius1-selectr/-/mobius1-selectr-2.4.13.tgz"
+                "url": "https://registry.npmjs.org/mobius1-selectr/-/mobius1-selectr-2.4.13.tgz",
+                "reference": null,
+                "shasum": null
             },
             "type": "npm-asset",
             "license": [
@@ -3823,7 +3855,9 @@
             "version": "3.0.0",
             "dist": {
                 "type": "tar",
-                "url": "https://registry.npmjs.org/picomodal/-/picomodal-3.0.0.tgz"
+                "url": "https://registry.npmjs.org/picomodal/-/picomodal-3.0.0.tgz",
+                "reference": null,
+                "shasum": null
             },
             "type": "npm-asset",
             "license": [
@@ -3835,7 +3869,9 @@
             "version": "2.1.1",
             "dist": {
                 "type": "tar",
-                "url": "https://registry.npmjs.org/punycode/-/punycode-2.1.1.tgz"
+                "url": "https://registry.npmjs.org/punycode/-/punycode-2.1.1.tgz",
+                "reference": null,
+                "shasum": null
             },
             "type": "npm-asset",
             "license": [
@@ -3847,7 +3883,9 @@
             "version": "2.2.1",
             "dist": {
                 "type": "tar",
-                "url": "https://registry.npmjs.org/@sphinxxxx/color-conversion/-/color-conversion-2.2.1.tgz"
+                "url": "https://registry.npmjs.org/@sphinxxxx/color-conversion/-/color-conversion-2.2.1.tgz",
+                "reference": null,
+                "shasum": null
             },
             "type": "npm-asset",
             "license": [
@@ -3859,7 +3897,9 @@
             "version": "4.2.2",
             "dist": {
                 "type": "tar",
-                "url": "https://registry.npmjs.org/uri-js/-/uri-js-4.2.2.tgz"
+                "url": "https://registry.npmjs.org/uri-js/-/uri-js-4.2.2.tgz",
+                "reference": null,
+                "shasum": null
             },
             "require": {
                 "npm-asset/punycode": ">=2.1.0,<3.0.0"
@@ -3874,7 +3914,9 @@
             "version": "2.9.2",
             "dist": {
                 "type": "tar",
-                "url": "https://registry.npmjs.org/vanilla-picker/-/vanilla-picker-2.9.2.tgz"
+                "url": "https://registry.npmjs.org/vanilla-picker/-/vanilla-picker-2.9.2.tgz",
+                "reference": null,
+                "shasum": null
             },
             "require": {
                 "npm-asset/sphinxxxx--color-conversion": ">=2.2.1,<3.0.0"
@@ -5162,9 +5204,9 @@
             "authors": [
                 {
                     "name": "walkor",
+                    "role": "Developer",
                     "email": "walkor@workerman.net",
-                    "homepage": "http://www.workerman.net",
-                    "role": "Developer"
+                    "homepage": "http://www.workerman.net"
                 }
             ],
             "description": "An asynchronous event driven PHP framework for easily building fast, scalable network applications.",
