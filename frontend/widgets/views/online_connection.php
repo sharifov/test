@@ -83,7 +83,9 @@ $js = <<<JS
                 if (typeof obj.command !== 'undefined') {
                     
                     if(obj.command === 'initConnection') {
+                        console.log(obj.uc_id);
                         if (typeof obj.uc_id !== 'undefined') {
+                            console.log(obj.uc_id);
                             if(obj.uc_id > 0) {
                                 onlineObj.attr('title', 'Online Connection (' + obj.uc_id +'): true').find('i').removeClass('warning').removeClass('danger').addClass('success');
                             }    
