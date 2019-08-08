@@ -546,7 +546,7 @@ class LeadSearch extends Lead
 
         $query->select([$leadTable . '.*', 'l_client_time' => new Expression("TIME( CONVERT_TZ(NOW(), '+00:00', offset_gmt) )")]);
 
-        $query->leftJoin(Quote::tableName(), [Quote::tableName() . '.lead_id' => new Expression('leads.id')])->where([Quote::tableName() . '.status' => Quote::STATUS_APPLIED]);
+        // $query->leftJoin(Quote::tableName(), [Quote::tableName() . '.lead_id' => new Expression('leads.id')])->where([Quote::tableName() . '.status' => Quote::STATUS_APPLIED]);
 
         // add conditions that should always apply here
 
@@ -598,7 +598,7 @@ class LeadSearch extends Lead
         }
 
         if ($this->last_ticket_date) {
-            $query->andWhere(['=', 'DATE(' . Quote::tableName() . '.last_ticket_date)', date('Y-m-d', strtotime($this->last_ticket_date))]);
+            //$query->andWhere(['=', 'DATE(' . Quote::tableName() . '.last_ticket_date)', date('Y-m-d', strtotime($this->last_ticket_date))]);
         }
 
         if($this->sold_date_from || $this->sold_date_to) {

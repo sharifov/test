@@ -640,7 +640,7 @@ class QuoteController extends FController
             if (isset($attr['quotes'])) {
                 foreach ($attr['quotes'] as $quote) {
                     $model = Quote::findOne(['uid' => $quote]);
-                    if ($model !== null && in_array($model->status, [$model::STATUS_SEND, $model::STATUS_CREATED])) {
+                    if ($model !== null && in_array($model->status, [Quote::STATUS_SEND, Quote::STATUS_CREATED, Quote::STATUS_OPENED])) {
                         $model->status = $model::STATUS_DECLINED;
                         if (!$model->save()) {
                             $result['errors'][] = $model->getErrors();

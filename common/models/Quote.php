@@ -57,7 +57,7 @@ class Quote extends \yii\db\ActiveRecord implements AggregateRoot
     use EventTrait;
 
     public const SERVICE_FEE = 0.035;
-    public const CHECKOUT_URL_PAGE = 'checkout/quote-preview';
+    public const CHECKOUT_URL_PAGE = 'checkout/quote';
 
     public const
         GDS_SABRE = 'S',

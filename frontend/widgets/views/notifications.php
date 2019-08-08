@@ -138,7 +138,7 @@ $js = <<<JS
         event.preventDefault()
     });
 
-    var timerId2 = setInterval(updatePjaxNotify, 3 * 60000);
+    var timerId2 = setInterval(updatePjaxNotify, 10 * 60000);
 JS;
 
 $this->registerJs($js, \yii\web\View::POS_READY);
