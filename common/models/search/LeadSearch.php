@@ -61,6 +61,8 @@ class LeadSearch extends Lead
     public $datetime_end;
     public $date_range;
 
+    public $last_ticket_date;
+
     private $leadBadgesRepository;
 
     public function __construct($config = [])
@@ -89,7 +91,9 @@ class LeadSearch extends Lead
                 'created_date_from', 'created_date_to', 'depart_date_from', 'depart_date_to', 'source_id', 'statuses', 'sold_date_from', 'sold_date_to', 'processing_filter', 'l_init_price', 'l_last_action_dt'], 'safe'],
             ['l_init_price', 'filter', 'filter' => function($value) {
                 return $value ? filter_var($value, FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION) : null;
-            }]
+            }],
+
+            ['last_ticket_date', 'safe'],
 
         ];
     }
@@ -542,11 +546,25 @@ class LeadSearch extends Lead
 
         $query->select([$leadTable . '.*', 'l_client_time' => new Expression("TIME( CONVERT_TZ(NOW(), '+00:00', offset_gmt) )")]);
 
+        $query->leftJoin(Quote::tableName(), [Quote::tableName() . '.lead_id' => new Expression('leads.id')])->where([Quote::tableName() . '.status' => Quote::STATUS_APPLIED]);
+
         // add conditions that should always apply here
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> ['defaultOrder' => ['updated' => SORT_DESC]],
+            'sort' => [
+                'attributes' => [
+                    'id',
+                    'bo_flight_id',
+                    'project_id',
+                    'source_id',
+                    'last_ticket_date' => [
+                        'asc' => [Quote::tableName() . '.last_ticket_date' => SORT_ASC],
+                        'desc' => [Quote::tableName() . '.last_ticket_date' => SORT_DESC],
+                    ],
+                ],
+                'defaultOrder' => ['id' => SORT_DESC],
+            ],
             'pagination' => [
                 'pageSize' => 30,
             ],
@@ -557,6 +575,9 @@ class LeadSearch extends Lead
             // $query->where('0=1');
             return $dataProvider;
         }
+
+
+
 
         // grid filtering conditions
         $query->andFilterWhere([
@@ -576,15 +597,11 @@ class LeadSearch extends Lead
             $query->andFilterWhere(['=', 'DATE(leads.updated)', date('Y-m-d', strtotime($this->updated))]);
         }
 
+        if ($this->last_ticket_date) {
+            $query->andWhere(['=', 'DATE(' . Quote::tableName() . '.last_ticket_date)', date('Y-m-d', strtotime($this->last_ticket_date))]);
+        }
+
         if($this->sold_date_from || $this->sold_date_to) {
-
-            /*if ($this->sold_date_from) {
-             $query->andFilterWhere(['>=', 'DATE(leads.updated)', date('Y-m-d', strtotime($this->sold_date_from))]);
-             }
-             if ($this->sold_date_to) {
-             $query->andFilterWhere(['<=', 'DATE(leads.updated)', date('Y-m-d', strtotime($this->sold_date_to))]);
-             }*/
-
 
             $subQuery = LeadFlow::find()->select(['DISTINCT(lead_flow.lead_id)'])->where('lead_flow.status = leads.status AND lead_flow.lead_id = leads.id');
 

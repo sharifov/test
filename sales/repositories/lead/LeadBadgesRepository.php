@@ -10,7 +10,6 @@ use common\models\ProjectEmployeeAccess;
 use common\models\TipsSplit;
 use common\models\UserGroupAssign;
 use yii\db\ActiveQuery;
-use yii\helpers\VarDumper;
 
 class LeadBadgesRepository
 {
@@ -30,7 +29,7 @@ class LeadBadgesRepository
      */
     public function getPendingQuery(Employee $user): ActiveQuery
     {
-        $query = Lead::find()->andWhere(['status' => Lead::STATUS_PENDING]);
+        $query = Lead::find()->andWhere([Lead::tableName() . '.status' => Lead::STATUS_PENDING]);
 
         if ($user->isAdmin()) {
             return $query;
@@ -55,7 +54,7 @@ class LeadBadgesRepository
     public function getInboxQuery(Employee $user): ActiveQuery
     {
 
-        $query = Lead::find()->andWhere(['status' => Lead::STATUS_PENDING])->andWhere(['<>', 'l_call_status_id', Lead::CALL_STATUS_QUEUE]);
+        $query = Lead::find()->andWhere([Lead::tableName() . '.status' => Lead::STATUS_PENDING])->andWhere(['<>', 'l_call_status_id', Lead::CALL_STATUS_QUEUE]);
 
         if ($user->isAdmin()) {
             return $query;
@@ -93,7 +92,7 @@ class LeadBadgesRepository
      */
     public function getFollowUpQuery(Employee $user): ActiveQuery
     {
-        $query = Lead::find()->andWhere(['status' => Lead::STATUS_FOLLOW_UP]);
+        $query = Lead::find()->andWhere([Lead::tableName() . '.status' => Lead::STATUS_FOLLOW_UP]);
 
         if ($user->isAdmin()) {
             return $query;
@@ -131,7 +130,7 @@ class LeadBadgesRepository
      */
     public function getProcessingQuery(Employee $user): ActiveQuery
     {
-        $query = Lead::find()->andWhere(['status' => array_keys(Lead::getProcessingStatuses())]);
+        $query = Lead::find()->andWhere([Lead::tableName() . '.status' => array_keys(Lead::getProcessingStatuses())]);
 
         if ($user->isAdmin()) {
             return $query;
@@ -167,7 +166,7 @@ class LeadBadgesRepository
      */
     public function getBookedQuery(Employee $user): ActiveQuery
     {
-        $query = Lead::find()->andWhere(['status' => Lead::STATUS_BOOKED]);
+        $query = Lead::find()->andWhere([Lead::tableName() . '.status' => Lead::STATUS_BOOKED]);
 
         if ($user->isAdmin()) {
             return $query;
@@ -205,7 +204,7 @@ class LeadBadgesRepository
      */
     public function getSoldQuery(Employee $user): ActiveQuery
     {
-        $query = Lead::find()->where(['status' => Lead::STATUS_SOLD]);
+        $query = Lead::find()->where([Lead::tableName() . '.status' => Lead::STATUS_SOLD]);
 
         if ($user->isAdmin()) {
             return $query;
@@ -247,7 +246,7 @@ class LeadBadgesRepository
      */
     public function getTrashQuery(Employee $user): ActiveQuery
     {
-        $query = Lead::find()->andWhere(['status' => Lead::STATUS_TRASH]);
+        $query = Lead::find()->andWhere([Lead::tableName() . '.status' => Lead::STATUS_TRASH]);
 
         if ($user->isAdmin()) {
             return $query;
@@ -285,7 +284,7 @@ class LeadBadgesRepository
     public function getDuplicateQuery(Employee $user): ActiveQuery
     {
         $query = Lead::find()
-            ->andWhere(['status' => Lead::STATUS_TRASH])
+            ->andWhere([Lead::tableName() . '.status' => Lead::STATUS_TRASH])
             ->andWhere(['IS NOT', 'l_duplicate_lead_id', NULL]);
 
         if ($user->isAdmin()) {

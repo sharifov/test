@@ -2250,6 +2250,11 @@ New lead {lead_id}
         ]);
     }
 
+    public function getAppliedQuote()
+    {
+        return $this->getQuotes()->andWhere(['status' => Quote::STATUS_APPLIED])->one();
+    }
+
 
 
 
