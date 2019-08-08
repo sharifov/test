@@ -258,6 +258,7 @@ echo '<div class="container" id="container-redirect-agents"></div>';
     const c_user_id = '<?=Yii::$app->user->id?>';
     use_browser_call_access =  <?= ($use_browser_call_access) ? 'true' : 'false' ?>;
     agentId = <?= $user_id;?>;
+    call_access_log = [];
 
     if(window.localStorage.agent_tab_conn_state === undefined) {
         var agent_tab_conn_state = [{"user":agentId, "items":[]}];
@@ -366,6 +367,13 @@ echo '<div class="container" id="container-redirect-agents"></div>';
         }
         window.localStorage.setItem('agent_tab_conn_state', JSON.stringify(agent_tab_conn_state));
         window.localStorage.setItem('lock', 'false');
+        if(conn.parameters && conn.parameters.CallSid) {
+            var type = 'in';
+            if(conn._direction === 'OUTGOING') {
+                type = 'out';
+            }
+            //call_access_log.push({"sid":conn.parameters.CallSid, "access":access, "type":type})
+        }
         return access;
     }
 
@@ -790,7 +798,7 @@ echo '<div class="container" id="container-redirect-agents"></div>';
 
 
                 device.on('cancel', function (conn) {
-                    updateAgentStatus(conn, true, true);
+                    var  access = updateAgentStatus(conn, true, true);
                     console.log({"action":"cancel", "cid":conn.parameters.CallSid, "access": access});
                     connection = conn;
                     log('Cancel call');
