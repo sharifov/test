@@ -70,7 +70,7 @@ $js = <<<JS
         };
         
         socket.onmessage = function (e) {
-            onlineObj.find('i').removeClass('danger').removeClass('success').addClass('warning');
+            // onlineObj.find('i').removeClass('danger').removeClass('success').addClass('warning');
             try {
                 var obj = JSON.parse(e.data); // $.parseJSON( e.data );
                 console.log(obj);
@@ -83,11 +83,11 @@ $js = <<<JS
                 if (typeof obj.command !== 'undefined') {
                     
                     if(obj.command === 'initConnection') {
-                        console.log(obj.uc_id);
                         if (typeof obj.uc_id !== 'undefined') {
-                            console.log(obj.uc_id);
                             if(obj.uc_id > 0) {
                                 onlineObj.attr('title', 'Online Connection (' + obj.uc_id +'): true').find('i').removeClass('warning').removeClass('danger').addClass('success');
+                            } else {
+                                onlineObj.attr('title', 'Timeout DB connection: restart service').find('i').removeClass('danger').removeClass('success').addClass('warning');
                             }    
                         }
                     }
@@ -153,7 +153,7 @@ $js = <<<JS
                         window.open(obj.url, 'openUrl');
                     }
                 }
-                onlineObj.find('i').removeClass('danger').removeClass('warning').addClass('success');
+                // onlineObj.find('i').removeClass('danger').removeClass('warning').addClass('success');
             } catch (error) {
                 console.error('Error in functions - socket.onmessage');
                 console.error(error);
