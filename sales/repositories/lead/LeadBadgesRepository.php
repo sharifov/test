@@ -128,7 +128,7 @@ class LeadBadgesRepository
 
         if ($user->isSupervision()) {
             $conditions = [
-                'employee_id' => $this->usersInCommonGroups($user->id)
+                Lead::tableName() . '.employee_id' => $this->usersIdsInCommonGroups($user->id)
             ];
         }
 
@@ -195,9 +195,9 @@ class LeadBadgesRepository
         if ($user->isSupervision()) {
             $conditions = ['or',
                 $this->inSplit($user->id),
-                $this->inSplit($this->usersInCommonGroups($user->id)),
+                $this->inSplit($this->usersIdsInCommonGroups($user->id)),
                 [
-                    'employee_id' => $this->usersInCommonGroups($user->id)
+                    Lead::tableName() . '.employee_id' => $this->usersIdsInCommonGroups($user->id)
                 ]
             ];
         }
@@ -275,7 +275,7 @@ class LeadBadgesRepository
      */
     private function isOwner($userId): array
     {
-        return ['employee_id' => $userId];
+        return [Lead::tableName() . '.employee_id' => $userId];
     }
 
     /**
@@ -285,9 +285,9 @@ class LeadBadgesRepository
     private function inProject($userId): array
     {
         return [
-            'project_id' => Project::find()->select('id')->andWhere([
+            'project_id' => Project::find()->select(Project::tableName() . '.id')->andWhere([
                 'closed' => false,
-                'id' => ProjectEmployeeAccess::find()->select('project_id')->andWhere(['employee_id' => $userId])
+                'id' => ProjectEmployeeAccess::find()->select(ProjectEmployeeAccess::tableName() . '.project_id')->andWhere([ProjectEmployeeAccess::tableName() . '.employee_id' => $userId])
             ])
         ];
     }
@@ -297,14 +297,14 @@ class LeadBadgesRepository
      */
     private function freeLead(): array
     {
-        return ['employee_id' => null];
+        return [Lead::tableName() . '.employee_id' => null];
     }
 
     /**
      * @param $userId
      * @return ActiveQuery
      */
-    private function usersInCommonGroups($userId): ActiveQuery
+    private function usersIdsInCommonGroups($userId): ActiveQuery
     {
         return UserGroupAssign::find()->select('ugs_user_id')->distinct()->andWhere([
             'ugs_group_id' => UserGroupAssign::find()->select(['ugs_group_id'])->andWhere(['ugs_user_id' => $userId])

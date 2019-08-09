@@ -538,7 +538,7 @@ class LeadSearch extends Lead
 //        $projectIds = array_keys(ProjectEmployeeAccess::getProjectsByEmployee());
 //        $query = Lead::find()->with('project', 'source');
 
-        $query = $this->leadBadgesRepository->getSoldQuery($user)->with('project', 'source');
+        $query = $this->leadBadgesRepository->getSoldQuery($user)->with('project', 'source')->joinWith('appliedQuote');
 
         $this->load($params);
 
@@ -598,7 +598,7 @@ class LeadSearch extends Lead
         }
 
         if ($this->last_ticket_date) {
-            //$query->andWhere(['=', 'DATE(' . Quote::tableName() . '.last_ticket_date)', date('Y-m-d', strtotime($this->last_ticket_date))]);
+            $query->andWhere(['=', 'DATE(' . Quote::tableName() . '.last_ticket_date)', date('Y-m-d', strtotime($this->last_ticket_date))]);
         }
 
         if($this->sold_date_from || $this->sold_date_to) {

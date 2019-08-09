@@ -2250,9 +2250,13 @@ New lead {lead_id}
         ]);
     }
 
-    public function getAppliedQuote()
+    public function getAppliedQuote(): ActiveQuery
     {
-        return $this->getQuotes()->andWhere(['status' => Quote::STATUS_APPLIED])->one();
+        return $this->hasOne(Quote::class, ['lead_id' => 'id'])->andWhere([
+            'or',
+            [Quote::tableName() . '.status' => Quote::STATUS_APPLIED],
+            [Quote::tableName() . '.status' => null]]
+        );
     }
 
 
