@@ -1421,6 +1421,7 @@ class Quote extends \yii\db\ActiveRecord implements AggregateRoot
                     'airEquipType' => $segment->qs_air_equip_type,
                     'marketingAirline' => $segment->qs_marketing_airline,
                     'cabin' => $segment->qs_cabin,
+                    'ticket_id' => $segment->qs_ticket_id,
                     'baggage' => $baggageInfo,
                 ];
             }

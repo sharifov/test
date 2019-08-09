@@ -54,6 +54,7 @@ class QuoteController extends FController
             ];*/
 
             $gds = Yii::$app->request->post('gds', '');
+            //$gds = 'G';
 
             if($lead !== null){
                 $keyCache = sprintf('quick-search-new-%d-%s-%s', $lead->id, $gds, $lead->generateLeadKey());

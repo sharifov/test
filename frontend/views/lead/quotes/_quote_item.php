@@ -38,6 +38,8 @@ use yii\helpers\Url;
 
             <?=$model->isAlternative() ? \yii\helpers\Html::tag('i', '', ['class' => 'fa fa-font', 'title' => 'Alternative quote']) : ''?>
 
+
+
             <?= $model->getStatusSpan()?>
 
 			<span class="quote__id">QUID: <strong><?= $model->uid ?></strong></span>
@@ -58,23 +60,30 @@ use yii\helpers\Url;
                 <?php echo $model->created_by_seller ? '<i class="fa fa-user text-info"></i>' : '<i class="fa fa-user-secret text-warning"></i>'; ?>
                 <strong><?= $model->employee_name?></strong>
             </span>
+            <?php if($model->tickets):?>
+                <span title="Separate Ticket">
+                    <i class="fa fa-ticket warning"></i> (<?=count($model->getTicketSegments())?>)
+                </span>
+            <?php endif; ?>
+
 			<?php \yii\widgets\Pjax::begin(['id' => 'pjax-quote_estimation_profit-'.$model->id, 'enablePushState' => false, 'enableReplaceState' => false]); ?>
-			<?php $priceData = $model->getPricesData();	?>
+                <?php $priceData = $model->getPricesData();	?>
 
-			<?php if($model->status == $model::STATUS_APPLIED && $model->lead->final_profit !== null):?>
-                <button id="quote_profit_<?= $model->id?>" data-toggle="popover" data-html="true" data-trigger="click" data-placement="top" data-container="body" title="Final Profit" class="popover-class quote__profit btn btn-info"
+                <?php if($model->status == $model::STATUS_APPLIED && $model->lead->final_profit !== null):?>
+                    <button id="quote_profit_<?= $model->id?>" data-toggle="popover" data-html="true" data-trigger="click" data-placement="top" data-container="body" title="Final Profit" class="popover-class quote__profit btn btn-info"
+                     data-content='<?= $model->getEstimationProfitText();?>'>
+                        <?= '$'.$model->getFinalProfit();?>
+                    </button>
+                <?php else:?>
+
+                    <a id="quote_profit_<?= $model->id?>" data-toggle="popover" data-html="true" data-trigger="click" data-placement="top" data-container="body" title="Estimation Profit" class="popover-class quote__profit"
                  data-content='<?= $model->getEstimationProfitText();?>'>
-                    <?= '$'.$model->getFinalProfit();?>
-                </button>
-			<?php else:?>
+                        <?php if(isset($priceData['total'])):?>
+                            <?=number_format($model->getEstimationProfit(),2);?>$
+                        <?php endif;?>
+                    </a>
+                <?php endif;?>
 
-                <a id="quote_profit_<?= $model->id?>" data-toggle="popover" data-html="true" data-trigger="click" data-placement="top" data-container="body" title="Estimation Profit" class="popover-class quote__profit"
-			 data-content='<?= $model->getEstimationProfitText();?>'>
-                    <?php if(isset($priceData['total'])):?>
-                        <?=number_format($model->getEstimationProfit(),2);?>$
-                    <?php endif;?>
-                </a>
-			<?php endif;?>
 
             <?php \yii\widgets\Pjax::end(); ?>
 		</div>
