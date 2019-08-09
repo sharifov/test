@@ -105,9 +105,9 @@ $ws_worker->onWorkerStart = function() use (&$user, &$userConnections, &$leadCon
     $inner_tcp_worker->listen();
 };
 
-$ws_worker->onConnect = function(\Workerman\Connection\TcpConnection $connection) use (&$user, &$userConnections, &$leadConnections, &$connectionsUser, &$connectionsLead, &$db)
+$ws_worker->onConnect = function(\Workerman\Connection\TcpConnection $connection) use (&$user, &$userConnections, &$leadConnections, &$connectionsUser, &$connectionsLead, &$db, &$config)
 {
-    $connection->onWebSocketConnect = function(\Workerman\Connection\TcpConnection $connection) use (&$user, &$userConnections, &$leadConnections, &$connectionsUser, &$connectionsLead, &$db)
+    $connection->onWebSocketConnect = function(\Workerman\Connection\TcpConnection $connection) use (&$user, &$userConnections, &$leadConnections, &$connectionsUser, &$connectionsLead, &$db, &$config)
     {
 
         date_default_timezone_set('UTC');
@@ -180,6 +180,13 @@ $ws_worker->onConnect = function(\Workerman\Connection\TcpConnection $connection
             //$db = null;
         } catch (PDOException $e) {
             print 'Error!: ' . $e->getMessage() . "\r\n";
+        }
+
+        if(!$uc_id) {
+            $db = new PDO($config['components']['db']['dsn'], $config['components']['db']['username'], $config['components']['db']['password']);
+            $stmt= $db->prepare($sql);
+            $stmt->execute($data);
+            $uc_id = $db->lastInsertId();
         }
 
         $json = json_encode(['connection_id' => $connection->id, 'command' => 'initConnection', 'uc_id' => $uc_id]);
