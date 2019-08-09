@@ -15,6 +15,9 @@ class SearchService
 {
 
     const GDS_SABRE = 'S', GDS_AMADEUS = 'A', GDS_TRAVELPORT = 'W';
+    const GDS_AIRWANDER = 'G';
+
+
     const CABIN_ECONOMY = 'Y', CABIN_PREMIUM_ECONOMY = 'S', CABIN_BUSINESS = 'C',
     CABIN_PREMIUM_BUSINESS = 'J', CABIN_FIRST = 'F', CABIN_PREMIUM_FIRST = 'P';
 
@@ -32,7 +35,8 @@ class SearchService
         $mapping = [
             self::GDS_SABRE => 'Sabre',
             self::GDS_AMADEUS => 'Amadeus',
-            self::GDS_TRAVELPORT => 'Travelport'
+            self::GDS_TRAVELPORT => 'TravelPort',
+            self::GDS_AIRWANDER => 'AirWander'
         ];
 
         if ($gds === null) {

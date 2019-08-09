@@ -112,6 +112,7 @@ class QuoteController extends ApiBaseController
                         "airEquipType": null,
                         "marketingAirline": "AC",
                         "cabin": "Y",
+                        "ticket_id": 1,
                         "baggage": {
                             "": {
                                 "allowPieces": 2,
@@ -144,6 +145,7 @@ class QuoteController extends ApiBaseController
                         "airEquipType": null,
                         "marketingAirline": "AC",
                         "cabin": "Y",
+                        "ticket_id": 2,
                         "baggage": {
                             "": {
                                 "allowPieces": 2,
@@ -176,6 +178,7 @@ class QuoteController extends ApiBaseController
                         "airEquipType": null,
                         "marketingAirline": "AC",
                         "cabin": "Y",
+                        "ticket_id": 2,
                         "baggage": {
                             "": {
                                 "allowPieces": 2,
@@ -214,6 +217,7 @@ class QuoteController extends ApiBaseController
                         "airEquipType": null,
                         "marketingAirline": "AC",
                         "cabin": "Y",
+                        "ticket_id": 1,
                         "baggage": {
                             "": {
                                 "allowPieces": 1,
@@ -246,6 +250,7 @@ class QuoteController extends ApiBaseController
                         "airEquipType": null,
                         "marketingAirline": "AC",
                         "cabin": "Y",
+                        "ticket_id": 2,
                         "baggage": {
                             "": {
                                 "allowPieces": 1,
@@ -278,6 +283,7 @@ class QuoteController extends ApiBaseController
                         "airEquipType": null,
                         "marketingAirline": "AC",
                         "cabin": "Y",
+                        "ticket_id": 2,
                         "baggage": {
                             "": {
                                 "allowPieces": 1,
@@ -336,7 +342,8 @@ class QuoteController extends ApiBaseController
         "last_ticket_date": "2019-08-09 00:00:00",
         "service_fee_percent": null,
         "pricing_info": null,
-        "alternative": 1
+        "alternative": 1,
+        "tickets": "[{\"key\":\"02_QVdBUlFBKlkxMDAwL05ZQ01BRDIwMTktMDgtMjYvTUFETllDMjAxOS0wOS0wNipVQX4jVUE1MSNVQTUw\",\"routingId\":0,\"prices\":{\"lastTicketDate\":\"2019-08-11\",\"totalPrice\":392.73,\"totalTax\":272.73,\"markup\":50,\"markupId\":0,\"isCk\":false,\"oMarkup\":{\"amount\":50,\"currency\":\"USD\"}},\"passengers\":{\"ADT\":{\"codeAs\":\"JWZ\",\"cnt\":1,\"price\":392.73,\"tax\":272.73,\"baseFare\":120,\"pubBaseFare\":120,\"baseTax\":222.73,\"markup\":50,\"refundPenalty\":\"\",\"changePenalty\":\"Percentage: 100.00%\",\"endorsementPenalty\":\"\",\"publishFare\":false,\"fareDescription\":\"\",\"oBaseFare\":{\"amount\":120,\"currency\":\"USD\"},\"oBaseTax\":{\"amount\":222.73,\"currency\":\"USD\"},\"oMarkup\":{\"amount\":50,\"currency\":\"USD\"}}},\"maxSeats\":0,\"validatingCarrier\":\"UA\",\"gds\":\"T\",\"pcc\":\"E9V\",\"fareType\":\"SR\",\"tripType\":\"RT\",\"cabin\":\"Y\",\"currency\":\"USD\",\"trips\":[{\"tripId\":1,\"segmentIds\":[1]},{\"tripId\":2,\"segmentIds\":[3]}]},{\"key\":\"02_QVdBUlFBKlkxMDAwL01BRFZJRTIwMTktMDgtMjcvVklFTUFEMjAxOS0wOS0wNSpMWH4jTFgyMDI3I0xYMzU2OCNMWDM1NjMjTFgyMDQ4\",\"routingId\":0,\"prices\":{\"lastTicketDate\":\"2019-08-09\",\"totalPrice\":305.3,\"totalTax\":184.3,\"markup\":50,\"markupId\":0,\"isCk\":false,\"oMarkup\":{\"amount\":50,\"currency\":\"USD\"}},\"passengers\":{\"ADT\":{\"codeAs\":\"ADT\",\"cnt\":1,\"price\":305.3,\"tax\":184.3,\"baseFare\":121,\"pubBaseFare\":121,\"baseTax\":134.3,\"markup\":50,\"refundPenalty\":\"Percentage: 100.00%\",\"changePenalty\":\"Percentage: 100.00%\",\"endorsementPenalty\":\"\",\"publishFare\":false,\"fareDescription\":\"\",\"oBaseFare\":{\"amount\":121,\"currency\":\"USD\"},\"oBaseTax\":{\"amount\":134.3,\"currency\":\"USD\"},\"oMarkup\":{\"amount\":50,\"currency\":\"USD\"}}},\"maxSeats\":0,\"validatingCarrier\":\"LX\",\"gds\":\"T\",\"pcc\":\"E9V\",\"fareType\":\"PUB\",\"tripType\":\"RT\",\"cabin\":\"Y\",\"currency\":\"USD\",\"trips\":[{\"tripId\":1,\"segmentIds\":[2,3]},{\"tripId\":2,\"segmentIds\":[1,2]}]}]"
     },
     "action": "v2/quote/get-info",
     "response_id": 298939,

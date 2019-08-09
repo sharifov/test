@@ -31,6 +31,7 @@ use Yii;
  * @property string $qs_created_dt
  * @property string $qs_updated_dt
  * @property int $qs_updated_user_id
+ * @property int $qs_ticket_id
  *
  * @property QuoteTrip $trip
  * @property Employee $updatedUser
@@ -65,7 +66,7 @@ class QuoteSegment extends \yii\db\ActiveRecord
     {
         return [
             [['qs_departure_time', 'qs_arrival_time', 'qs_created_dt', 'qs_updated_dt'], 'safe'],
-            [['qs_stop', 'qs_duration', 'qs_mileage', 'qs_trip_id', 'qs_updated_user_id'], 'integer'],
+            [['qs_stop', 'qs_duration', 'qs_mileage', 'qs_trip_id', 'qs_updated_user_id', 'qs_ticket_id'], 'integer'],
             [['qs_flight_number', 'qs_departure_airport_terminal', 'qs_arrival_airport_terminal'], 'string', 'max' => 5],
             [['qs_booking_class', 'qs_cabin'], 'string', 'max' => 1],
             [['qs_departure_airport_code', 'qs_arrival_airport_code', 'qs_air_equip_type', 'qs_meal'], 'string', 'max' => 3],
@@ -110,6 +111,7 @@ class QuoteSegment extends \yii\db\ActiveRecord
             'qs_created_dt' => 'Created Dt',
             'qs_updated_dt' => 'Updated Dt',
             'qs_updated_user_id' => 'Updated User ID',
+            'qs_ticket_id'  => 'Ticket Id'
         ];
     }
 

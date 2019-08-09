@@ -58,6 +58,9 @@ use yii\helpers\Html;
                                         <div class="segment__duration-wrapper">
                                             <div class="segment__duration-time"><?= SearchService::durationInMinutes($segment->qs_duration)?></div>
                                             <div class="segment__cabin"><?= SearchService::getCabin($segment->qs_cabin)?></div>
+                                            <?php if($segment->qs_ticket_id):?>
+                                                <div class="warning" title="Ticket <?=$segment->qs_ticket_id?>"><span class="fa fa-ticket"></span> Tick <?=$segment->qs_ticket_id?></div>
+                                            <?php endif;?>
                                         </div>
                                     </div>
                                     <div class="segment__note">
