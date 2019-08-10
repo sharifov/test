@@ -47,7 +47,11 @@ class m190809_104922_add_support_role_tbl_auth_item extends Migration
             //$auth->addChild($auth->getRole('supervisor'), $permission);
         }
 
-        $permission = $auth->createPermission('/sale/search');
+        $permission = $auth->getPermission('/sale/search');
+        if(!$permission) {
+            $permission = $auth->createPermission('/sale/search');
+            $auth->add($permission);
+        }
         $auth->addChild($auth->getRole('admin'), $permission);
 
         $employee = new \common\models\Employee();
