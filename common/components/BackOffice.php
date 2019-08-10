@@ -1,6 +1,7 @@
 <?php
 namespace common\components;
 
+use http\Client\Request;
 use http\Client\Response;
 use Yii;
 use yii\httpclient\CurlTransport;
@@ -42,7 +43,7 @@ class BackOffice
      * @return mixed
      * @throws \yii\base\InvalidConfigException
      */
-    public static function sendRequest2(string $endpoint = '', array $fields = [], string $type = 'POST')
+    public static function sendRequest2(string $endpoint = '', array $fields = [], string $type = 'POST'): \yii\httpclient\Response
     {
 
         $uri = Yii::$app->params['backOffice']['serverUrl'] . '/' . $endpoint;

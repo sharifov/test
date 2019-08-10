@@ -19,23 +19,32 @@ $this->params['breadcrumbs'][] = $this->title;
 </style>
 <div class="sale-search">
 
-	<h1><?= Html::encode($this->title) ?></h1>
+	<h1 title="<?=Yii::$app->params['backOffice']['serverUrl']?>"><?= Html::encode($this->title) ?></h1>
 
     <?php Pjax::begin(['id' => 'sale-pjax-list', 'timeout' => 15000, 'enablePushState' => true]); ?>
+
+
     <?php
+        //if(Yii::$app->request->isAjax) {
+            echo \yiister\gentelella\widgets\FlashAlert::widget();
+        //}
+
         echo $this->render('_search', [
             'model' => $searchModel
         ]);
 
+        //\yii\helpers\VarDumper::dump($dataProvider->allModels, 10, true);
+
+
         echo GridView::widget([
             'dataProvider' => $dataProvider,
-            'filterModel' => $searchModel,
+            'filterModel' => null, //$searchModel,
             'columns' => [
             // ['class' => 'yii\grid\SerialColumn'],
             [
                 'attribute' => 'sale_id',
                 'value' => function ($model) {
-                    return $model['sale_id'];
+                    return $model['saleId'];
                 },
                 'format' => 'raw',
                 'options' => [
@@ -43,20 +52,68 @@ $this->params['breadcrumbs'][] = $this->title;
                 ],
                 'contentOptions' => [
                     'class' => 'text-center'
-                ]
+                ],
+                'filter' => false
             ],
 
-
             /*[
-                'attribute' => 'created',
-                'value' => function (\common\models\Lead $model) {
-                    return $model->created ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->created)) : '-';
+                'label' => 'Air Routing Id',
+                'value' => function ($model) {
+                    return $model['airRoutingId'] ?: '-';
+                },
+            ],*/
+            [
+                'label' => 'Confirmation Number',
+                'value' => function ($model) {
+                    return $model['confirmationNumber'] ?: '-';
+                },
+            ],
+
+            [
+                'label' => 'Status',
+                'value' => function ($model) {
+                    return $model['saleStatus'] ?: '-';
+                },
+            ],
+
+            [
+                'label' => 'Project',
+                'value' => function ($model) {
+                    return $model['project'] ?: '-';
+                },
+            ],
+
+            [
+                'label' => 'Trips',
+                'value' => function ($model) {
+                    $tripArr = [];
+                    if(isset($model['requestDetail']['trips'])) {
+                        foreach ($model['requestDetail']['trips'] as $trip) {
+                            $tripArr[] = '<span class="label label-default">'.$trip['from'] . '</span> -> <span class="label label-default">' . $trip['to'] . '</span> ['.$trip['departure'].']';
+                        }
+                    }
+                    return implode('<br>', $tripArr);
+                },
+                'format' => 'raw'
+            ],
+
+            [
+                'label' => 'Passengers',
+                'value' => function ($model) {
+                    return isset($model['requestDetail']['passengersCnt']) ? $model['requestDetail']['passengersCnt']: '-';
+                },
+            ],
+
+            [
+                'label' => 'created',
+                'value' => function ($model) {
+                    return $model['created'] ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model['created'])) : '-';
                 },
                 'format' => 'raw'
             ],
             // 'created:date',
 
-            [
+            /*[
                 'attribute' => 'updated',
                 'value' => function(\common\models\Lead $model) {
                     $str = '-';
@@ -76,7 +133,12 @@ $this->params['breadcrumbs'][] = $this->title;
 
             [
                 'class' => 'yii\grid\ActionColumn',
-                'template' => '{view}'
+                'template' => '{view}',
+                'buttons' => [
+                    'view' => function ($url, $model, $key) {
+                        return Html::a('<span class="fa fa-search"></span>', ['view', 'h' => base64_encode($model['confirmationNumber'] . '|' . $model['saleId'])], ['title' => 'View', 'data-pjax' => 0]);
+                    },
+                ]
             ]
         ],
 

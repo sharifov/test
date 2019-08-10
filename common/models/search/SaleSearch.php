@@ -2,31 +2,48 @@
 
 namespace common\models\search;
 
+use borales\extensions\phoneInput\PhoneInputValidator;
+use common\components\BackOffice;
 use sales\repositories\lead\LeadBadgesRepository;
 use Yii;
+use yii\base\Exception;
 use yii\base\Model;
-use yii\data\ActiveDataProvider;
 use yii\data\ArrayDataProvider;
-
+use yii\helpers\VarDumper;
+use yii\web\BadRequestHttpException;
 
 /**
- * LeadSearch represents the model behind the search form of `common\models\Lead`.
+ * SaleSearch represents the model behind the search form API BackOffice.
+ *
+ * @param int $sale_id
+ * @param string $first_name
+ * @param string $last_name
+ * @param string $phone
+ * @param string $email
+ * @param string $card
+ * @param string $acn
+ * @param string $pnr
+ * @param string $ticket_number
+ * @param string $booking_id
+ *
  * @param LeadBadgesRepository $leadBadgesRepository
  */
 class SaleSearch extends Model
 {
     public $sale_id;
+    public $acn;
+    public $pnr;
+    public $ticket_number;
+    public $booking_id;
     public $first_name;
     public $last_name;
     public $phone;
     public $email;
     public $card;
-    public $acn;
-    public $pnr;
 
-    public $datetime_start;
-    public $datetime_end;
-    public $date_range;
+//    public $datetime_start;
+//    public $datetime_end;
+//    public $date_range;
 
     /*private $leadBadgesRepository;
 
@@ -42,9 +59,17 @@ class SaleSearch extends Model
     public function rules()
     {
         return [
-            [['datetime_start', 'datetime_end'], 'safe'],
-            [['date_range'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
-            [['sale_id', 'first_name', 'last_name', 'phone', 'acn', 'card', 'email', 'pnr'], 'string'],
+            //[['datetime_start', 'datetime_end'], 'safe'],
+            //[['date_range'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
+
+            [['sale_id', 'first_name', 'last_name', 'phone', 'email', 'card', 'acn', 'pnr', 'booking_id', 'ticket_number'], 'trim'],
+
+            [['sale_id'], 'integer'],
+            [['phone', 'card', 'ticket_number', 'booking_id'], 'string', 'min' => 6, 'max' => 20],
+            [['first_name', 'last_name'], 'string', 'min' => 2, 'max' => 50],
+            [['acn', 'pnr'], 'string', 'min' => 6, 'max' => 6],
+            [['email'], 'email'],
+            [['phone'], PhoneInputValidator::class],
         ];
     }
 
@@ -55,9 +80,18 @@ class SaleSearch extends Model
     public function attributeLabels()
     {
 
-
         $labels = [
-            'sale_id' => 'Sale',
+            'sale_id' => 'Sale Id',
+            'acn' => 'Airline Confirmation Number',
+            'pnr' => 'Quote PNR',
+            'booking_id' => 'Confirmation Number (Booking ID)',
+            'ticket_number' => 'Ticket Number',
+
+            'first_name' => 'First Name',
+            'last_name' => 'Last Name',
+            'phone' => 'Phone',
+            'email' => 'Email',
+            'card' => 'Credit Card',
         ];
         return $labels;
     }
@@ -84,34 +118,88 @@ class SaleSearch extends Model
 
         $searchData = [];
 
-        $dataProvider = new ArrayDataProvider([
-            'allModels' => $searchData,
-            //'sort'=> ['defaultOrder' => ['id' => SORT_DESC]],
-            'sort' => [
-                'attributes' => ['sale_id', 'pnr', 'email'],
-            ],
-            'pagination' => false,
-            /*'pagination' => [
-                'pageSize' => 10,
-            ],*/
-        ]);
-
         $this->load($params);
 
         if (!$this->validate()) {
             $searchData = [];
-            return $dataProvider;
+            return new ArrayDataProvider([
+                'allModels' => $searchData,
+                'pagination' => false,
+            ]);
         }
 
+        if (isset($params['SaleSearch']) && $params['SaleSearch']) {
 
 
-        // get the posts in the current page
-        //$posts = $provider->getModels();
+            //VarDumper::dump($params['SaleSearch']); exit;
+            $data = [];
 
+            if($this->sale_id) {
+                $data['sale_id'] = $this->sale_id;
+            }
 
-       /*  $sqlRaw = $query->createCommand()->getRawSql();
+            if($this->pnr) {
+                $data['pnr'] = $this->pnr;
+            }
 
-        VarDumper::dump($sqlRaw, 10, true); exit; */
+            if($this->email) {
+                $data['email'] = $this->email;
+            }
+
+            if($this->phone) {
+                $data['phone'] = $this->phone;
+            }
+
+            if($this->first_name) {
+                $data['pax_first_name'] = $this->first_name;
+            }
+
+            if($this->last_name) {
+                $data['pax_last_name'] = $this->last_name;
+            }
+
+            if($this->ticket_number) {
+                $data['ticket_number'] = $this->ticket_number;
+            }
+
+            if($this->booking_id) {
+                $data['confirmation_number'] = $this->booking_id;
+            }
+
+            if($this->acn) {
+                $data['airline_confirmation_number'] = $this->acn;
+            }
+
+            if($this->card) {
+                $data['card'] = $this->card;
+            }
+
+            $response = BackOffice::sendRequest2('cs/search', $data);
+
+            //VarDumper::dump($response); exit;
+
+            if ($response->isOk) {
+                $result = $response->data;
+                if($result && is_array($result)) {
+                    $searchData = $result;
+                }
+            } else {
+                //Yii::error(print_r($response->content, true), 'SaleSearch:search:BackOffice:sendRequest2');
+                throw new Exception('BO request Error: '. VarDumper::dumpAsString($response->content), 10);
+            }
+        }
+
+        $dataProvider = new ArrayDataProvider([
+            'allModels' => $searchData,
+            'sort'=> ['defaultOrder' => ['sale_id' => SORT_DESC]],
+            'sort' => [
+                'attributes' => ['sale_id', 'pnr', 'email'],
+            ],
+            //'pagination' => false,
+            'pagination' => [
+                'pageSize' => 20,
+            ],
+        ]);
 
         return $dataProvider;
     }

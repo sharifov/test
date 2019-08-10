@@ -2,21 +2,14 @@
 
 namespace frontend\controllers;
 
-use common\models\LeadFlow;
-use common\models\LeadTask;
-use common\models\Reason;
-use common\models\search\LeadFlightSegmentSearch;
-use common\models\search\LeadSearch;
-use common\models\search\QuoteSearch;
+use common\components\BackOffice;
 use common\models\search\SaleSearch;
-use common\models\Task;
-use frontend\models\LeadMultipleForm;
 use Yii;
-use common\models\Lead;
-use yii\filters\AccessControl;
+use yii\base\Exception;
+use yii\data\ArrayDataProvider;
 use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
-use yii\web\Controller;
+use yii\web\BadRequestHttpException;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 
@@ -39,34 +32,24 @@ class SaleController extends FController
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
 
+
     /**
-     * Lists all Lead models.
-     * @return mixed
+     * @return string
      */
     public function actionSearch()
     {
-        $session = Yii::$app->session;
-
         $searchModel = new SaleSearch();
-
         $params = Yii::$app->request->queryParams;
-        $params2 = Yii::$app->request->post();
 
+        try {
+            $dataProvider = $searchModel->search($params);
+        } catch (\Exception $exception) {
+            $dataProvider = new ArrayDataProvider();
+            Yii::error(VarDumper::dumpAsString([$exception->getFile(), $exception->getCode(), $exception->getMessage()]), 'SaleController:actionSearch');
+            Yii::$app->session->setFlash('error', $exception->getMessage());
+        }
 
-        $params = ArrayHelper::merge($params, $params2);
-
-        $dataProvider = $searchModel->search($params);
-
-
-        /*if($isAgent) {
-            $user = Yii::$app->user->identity;
-            $checkShiftTime = $user->checkShiftTime();
-
-        }*/
-
-        $multipleForm = new LeadMultipleForm();
-
-
+        //VarDumper::dump($dataProvider->allModels); exit;
 
         return $this->render('search', [
             'searchModel' => $searchModel,
@@ -76,53 +59,57 @@ class SaleController extends FController
 
 
     /**
-     * Displays a single Lead model.
-     * @param integer $id
-     * @return mixed
-     * @throws NotFoundHttpException if the model cannot be found
+     * @return string
+     * @throws BadRequestHttpException
+     * @throws NotFoundHttpException
      */
-    public function actionView($id)
+    public function actionView()
     {
 
-        $model = $this->findModel($id);
+        $hash = Yii::$app->request->get('h');
 
-        $searchModel = new QuoteSearch();
-        $searchModelSegments = new LeadFlightSegmentSearch();
+        $arr = explode('|', base64_decode($hash));
+        $id = (int) ($arr[1] ?? 0);
 
-        $params = Yii::$app->request->queryParams;
-        $params['QuoteSearch']['lead_id'] = $model->id;
-        $dataProvider = $searchModel->search($params);
+        $model = $this->findSale($id);
 
+//        if (Yii::$app->request->isAjax) {
+//            //return $this->renderAjax('view', $viewParams);
+//        }
 
-        $params = Yii::$app->request->queryParams;
-        $params['LeadFlightSegmentSearch']['lead_id'] = $model->id;
-        $dataProviderSegments = $searchModelSegments->search($params);
-
-        //unset($searchModel);
-
-        // VarDumper::dump($quotes, 10, true);
+        return $this->render('view', ['data' => $model]);
+    }
 
 
-        $viewParams = [
-            'model' => $model,
-            'searchModel' => $searchModel,
-            'dataProvider' => $dataProvider,
+    /**
+     * @param int $id
+     * @return mixed
+     * @throws BadRequestHttpException
+     * @throws NotFoundHttpException
+     */
+    protected function findSale(int $id)
+    {
 
-            'searchModelSegments' => $searchModelSegments,
-            'dataProviderSegments' => $dataProviderSegments,
-        ];
+        try {
+            $data['sale_id'] = $id;
+            $response = BackOffice::sendRequest2('cs/detail', $data);
 
-        if (Yii::$app->request->isAjax) {
-            /*$viewParams['searchModel'] = null;
-            $viewParams['dataProvider']->sort = false;
-            $viewParams['searchModelSegments'] = null;
-            $viewParams['dataProviderSegments']->sort = false;*/
+            if ($response->isOk) {
+                $result = $response->data;
+                //VarDumper::dump($result); exit;
 
-            //return $this->renderAjax('view', $viewParams);
+                if ($result && is_array($result)) {
+                    return $result;
+                }
+            } else {
+                throw new Exception('BO request Error: ' . VarDumper::dumpAsString($response->content), 10);
+            }
+
+        } catch (\Throwable $exception) {
+            throw new BadRequestHttpException($exception->getMessage());
         }
 
-        return $this->render('view', $viewParams);
-
+        throw new NotFoundHttpException('The requested Sale does not exist.');
     }
 
 }

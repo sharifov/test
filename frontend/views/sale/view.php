@@ -1,495 +1,296 @@
 <?php
 
 use yii\helpers\Html;
-use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
-/* @var $model common\models\Lead */
-/* @var $searchModel common\models\search\QuoteSearch */
-/* @var $dataProvider yii\data\ActiveDataProvider */
-
-/* @var $searchModelSegments common\models\search\LeadFlightSegmentSearch */
-/* @var $dataProviderSegments yii\data\ActiveDataProvider */
+/* @var $data array */
 
 
-$this->title = 'Lead ID: ' . $model->id . ', UID: '.$model->uid;
-$this->params['breadcrumbs'][] = ['label' => 'Leads', 'url' => ['index']];
+$this->title = 'Sale ID: ' . $data['saleId'] . ', BookId: '.$data['bookingId'];
+$this->params['breadcrumbs'][] = ['label' => 'Sales', 'url' => ['search']];
 $this->params['breadcrumbs'][] = $this->title;
 
-$isAgent = Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id);
+//$isAgent = Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id);
 
 ?>
-<div class="lead-view">
-
+<div class="sale-view">
     <h1><?= Html::encode($this->title) ?></h1>
-
-    <p>
-        <?//= Html::a('Update', ['update', 'id' => $model->id], ['class' => 'btn btn-primary']) ?>
-
-        <?= Html::a('<i class="fa fa-search"></i> View Lead', ['/lead/view', 'gid' => $model->gid], ['class' => 'btn btn-primary']) ?>
-
-
-
-
-        <?/*= Html::a('Delete', ['delete', 'id' => $model->id], [
-            'class' => 'btn btn-danger',
-            'data' => [
-                'confirm' => 'Are you sure you want to delete this item?',
-                'method' => 'post',
-            ],
-        ])*/ ?>
-    </p>
-
     <div class="row">
 
         <div class="col-md-3">
-            <?= DetailView::widget([
-                'model' => $model,
-                'attributes' => [
+            <h2>General</h2>
+            <table class="table table-bordered table-hover table-striped">
 
-                    'l_client_first_name',
-                    'l_client_last_name',
-                    'l_client_phone',
-                    'l_client_email',
-                    'l_client_ua',
-                    'l_client_lang',
-
-
-
-                ],
-            ]) ?>
-
-            <?= DetailView::widget([
-                'model' => $model,
-                'attributes' => [
-
-
-                    'client_id',
-                    [
-                        'attribute' => 'client.name',
-                        'header' => 'Client name',
-                        'format' => 'raw',
-                        'value' => function(\common\models\Lead $model) {
-                            if($model->client) {
-                                $clientName = $model->client->first_name . ' ' . $model->client->last_name;
-                                if ($clientName === 'Client Name') {
-                                    $clientName = '- - - ';
-                                } else {
-                                    $clientName = '<i class="fa fa-user"></i> '. Html::encode($clientName);
-                                }
-                            } else {
-                                $clientName = '-';
-                            }
-
-                            return $clientName;
-                        },
-                        //'options' => ['style' => 'width:160px'],
-                        //'filter' => \common\models\Employee::getList()
-                    ],
-
-                    [
-                        'attribute' => 'client.phone',
-                        'header' => 'Client Phones',
-                        'format' => 'raw',
-                        'value' => function(\common\models\Lead $model) use ($isAgent) {
-                            if($model->client && $model->client->clientPhones) {
-                                if ($isAgent && Yii::$app->user->id !== $model->employee_id) {
-                                    $str = '- // - // - // -';
-                                } else {
-                                    $str = '<i class="fa fa-phone"></i> ' . implode(' <br><i class="fa fa-phone"></i> ', \yii\helpers\ArrayHelper::map($model->client->clientPhones, 'phone', 'phone'));
-                                }
-                            } else {
-                                $str = '-';
-                            }
-
-                            return $str ?? '-';
-                        },
-                        //'options' => ['style' => 'width:180px'],
-                    ],
+                <tr>
+                    <th>Sale Id</th>
+                    <td><?=Html::encode($data['saleId'])?></td>
+                </tr>
+                <tr>
+                    <th>Confirmation Number (Booking Id)</th>
+                    <td><?=Html::encode($data['bookingId'])?></td>
+                </tr>
+                <tr>
+                    <th>PNR</th>
+                    <td><?=Html::encode($data['pnr'])?></td>
+                </tr>
+                <tr>
+                    <th>Charge Type</th>
+                    <td><?=Html::encode($data['chargeType'])?></td>
+                </tr>
+                <tr>
+                    <th>Fare Type</th>
+                    <td><?=Html::encode($data['fareType'])?></td>
+                </tr>
+                <tr>
+                    <th>GDS</th>
+                    <td><?=Html::encode($data['gds'])?></td>
+                </tr>
+                <tr>
+                    <th>PCC</th>
+                    <td><?=Html::encode($data['pcc'])?></td>
+                </tr>
+                <tr>
+                    <th>validating Carrier</th>
+                    <td><?=Html::encode($data['validatingCarrier'])?></td>
+                </tr>
+                <tr>
+                    <th>Consolidator</th>
+                    <td><?=Html::encode($data['consolidator'])?></td>
+                </tr>
+                <tr>
+                    <th>Project</th>
+                    <td><span class="label label-default"><?=Html::encode($data['project'])?></span></td>
+                </tr>
+                <tr>
+                    <th>Trip Type</th>
+                    <td><?=Html::encode($data['tripType'])?></td>
+                </tr>
+                <tr>
+                    <th>Created</th>
+                    <td><?=Yii::$app->formatter->asDatetime(strtotime($data['created']))?></td>
+                </tr>
+            </table>
 
 
-                    [
-                        'attribute' => 'client.email',
-                        'header' => 'Client Emails',
-                        'format' => 'raw',
-                        'value' => function(\common\models\Lead $model) use ($isAgent) {
-
-                            if($model->client && $model->client->clientEmails) {
-                                if ($isAgent && Yii::$app->user->id !== $model->employee_id) {
-                                    $str = '- // - // - // -';
-                                } else {
-                                    $str = '<i class="fa fa-envelope"></i> '.implode(' <br><i class="fa fa-envelope"></i> ', \yii\helpers\ArrayHelper::map($model->client->clientEmails, 'email', 'email'));
-                                }
-                            } else {
-                                $str = '-';
-                            }
-
-                            return $str ?? '-';
-                        },
-                        //'options' => ['style' => 'width:180px'],
-                    ],
-
-                ],
-            ]) ?>
-        </div>
-        <div class="col-md-3">
-            <?= DetailView::widget([
-                'model' => $model,
-                'attributes' => [
-                    'id',
-                    'uid',
-                    'gid',
-                    'l_request_hash',
-
-                    [
-                        'attribute' => 'employee_id',
-                        'format' => 'raw',
-                        'value' => function(\common\models\Lead $model) {
-                            return $model->employee ? '<i class="fa fa-user"></i> '.$model->employee->username : '-';
-                        },
-                    ],
-
-                    //'employee_id',
-
-                    [
-                        'attribute' => 'l_init_price',
-                        //'format' => 'raw',
-                        'value' => function(\common\models\Lead $model) {
-                            return $model->l_init_price ? number_format($model->l_init_price, 2) : '-';
-                        },
-                    ],
-
-                    [
-                        'attribute' => 'status',
-                        'value' => function(\common\models\Lead $model) {
-                            return $model->getStatusName(true);
-                        },
-                        'format' => 'raw',
-
-                    ],
-
-                    [
-                        'attribute' => 'l_duplicate_lead_id',
-                        'label' => 'Duplicate from',
-                        'value' => function (\common\models\Lead $model) {
-                            return $model->l_duplicate_lead_id ? Html::a($model->l_duplicate_lead_id, ['/leads/view', 'id' => $model->l_duplicate_lead_id], ['data-pjax' => 0, 'target' => '_blank']) : '-';
-                        },
-                        'format' => 'raw',
-
-                    ],
-
-                    [
-                        'attribute' => 'project_id',
-                        'value' => function(\common\models\Lead $model) {
-                            return $model->project ? $model->project->name : '-';
-                        },
-
-                    ],
-
-                    [
-                        'attribute' => 'source_id',
-                        'value' => function(\common\models\Lead $model) {
-                            return $model->source ? $model->source->name : '-';
-                        },
-                        'visible' => !$isAgent
-                    ],
-
-
-
-
-                ],
-            ]) ?>
-        </div>
-        <div class="col-md-3">
-            <?= DetailView::widget([
-                'model' => $model,
-                'attributes' => [
-                    [
-                        'attribute' => 'trip_type',
-                        'value' => function(\common\models\Lead $model) {
-                            return $model->getFlightTypeName();
-                        },
-
-                    ],
-
-                    [
-                        'attribute' => 'cabin',
-                        'value' => function(\common\models\Lead $model) {
-                            return $model->getCabinClassName();
-                        },
-
-                    ],
-
-                    /*'project_id',
-                    'source_id',
-                    'trip_type',
-                    'cabin',*/
-                    'adults',
-                    'children',
-                    'infants',
-                    'notes_for_experts:ntext',
-
-
-                    [
-                        'attribute' => 'created',
-                        'value' => function(\common\models\Lead $model) {
-                            return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->created));
-                        },
-                        'format' => 'raw',
-                    ],
-
-                    [
-                        'attribute' => 'updated',
-                        'value' => function(\common\models\Lead $model) {
-                            return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->updated));
-                        },
-                        'format' => 'raw',
-                    ],
-
-                    [
-                        'attribute' => 'l_last_action_dt',
-                        'value' => function(\common\models\Lead $model) {
-                            return $model->l_last_action_dt ? '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->l_last_action_dt)) : $model->l_last_action_dt;
-                        },
-                        'format' => 'raw',
-                    ],
-
-
-                ],
-            ]) ?>
         </div>
 
-        <div class="col-md-3">
+        <div class="col-md-4">
+            <h2>Passengers</h2>
+            <?php if(isset($data['passengers']) && $data['passengers']): ?>
+                <table class="table table-bordered table-hover">
+                    <tr>
+                        <th>Type</th>
+                        <th>First name</th>
+                        <th>Middle name</th>
+                        <th>Last name</th>
+                        <th>Birth date</th>
+                        <th>Gender</th>
+                        <th>Ticket number</th>
+                    </tr>
+                <?php foreach($data['passengers'] as $passenger): ?>
+                    <tr>
+                        <td><?=Html::encode($passenger['type'])?></td>
+                        <td><?=Html::encode($passenger['first_name'])?></td>
+                        <td><?=Html::encode($passenger['middle_name'])?></td>
+                        <td><?=Html::encode($passenger['last_name'])?></td>
+                        <td><?=Html::encode($passenger['birth_date'])?></td>
+                        <td><?=Html::encode($passenger['gender'])?></td>
+                        <td><?=Html::encode($passenger['ticket_number'])?></td>
+                    </tr>
+                <?php endforeach;?>
+                </table>
+            <?php endif;?>
 
-            <?= DetailView::widget([
-                'model' => $model,
-                'attributes' => [
+            <h2>Processing Teams Status</h2>
+            <?php if(isset($data['processingTeamsStatus']) && $data['processingTeamsStatus']): ?>
+                <table class="table table-bordered table-hover">
+                    <tr>
+                        <th>Type</th>
+                        <th>Value</th>
+                    </tr>
+                    <?php foreach($data['processingTeamsStatus'] as $pStatusKey => $pStatusValue): ?>
+                        <tr>
+                            <td><?=Html::encode($pStatusKey)?></td>
+                            <td><?=Html::encode($pStatusValue)?></td>
+                        </tr>
+                    <?php endforeach;?>
+                </table>
+            <?php endif;?>
+
+            <h2>Notes</h2>
+            <?php if(isset($data['notes']) && $data['notes']): ?>
+                <table class="table table-bordered table-hover">
+                    <tr>
+                        <th>Created</th>
+                        <th>Message</th>
+                        <th>Agent</th>
+                        <th>Team</th>
+                    </tr>
+                    <?php foreach($data['notes'] as $note): ?>
+                        <tr>
+                            <td><?=Yii::$app->formatter->asDatetime(strtotime($note['created']))?></td>
+                            <td><?=Html::encode($note['message'])?></td>
+                            <td><?=Html::encode($note['agent'])?></td>
+                            <td><?=Html::encode($note['team'])?></td>
+                        </tr>
+                    <?php endforeach;?>
+                </table>
+            <?php endif;?>
+
+        </div>
+
+        <div class="col-md-5">
+            <h2>Price</h2>
+            <?php if(isset($data['price']) && $data['price']): ?>
+
+                <?php if(isset($data['price']['priceQuotes']) && $data['price']['priceQuotes']): ?>
+                <table class="table table-bordered table-hover">
+                    <tr>
+                        <th>Pax Type</th>
+                        <th>Selling</th>
+                        <th>Net</th>
+                        <th>Fare</th>
+                        <th>Taxes</th>
+                        <th>Mark Up</th>
+                        <th>Over Cap</th>
+                        <th>Source Fee</th>
+                    </tr>
+                    <?php foreach($data['price']['priceQuotes'] as $paxType => $price): ?>
+                        <tr>
+                            <td><?=Html::encode($paxType)?></td>
+                            <td><?=Html::encode($price['selling'])?></td>
+                            <td><?=Html::encode($price['net'])?></td>
+                            <td><?=Html::encode($price['fare'])?></td>
+                            <td><?=Html::encode($price['taxes'])?></td>
+                            <td><?=Html::encode($price['mark_up'])?></td>
+                            <td><?=Html::encode($price['over_cap'])?></td>
+                            <td><?=Html::encode($price['source_fee'])?></td>
+                        </tr>
+                    <?php endforeach;?>
+                </table>
 
 
-                    //'request_ip',
-                    [
-                        'attribute' => 'request_ip',
-                        'value' => function(\common\models\Lead $model) {
-                            return $model->request_ip ? Html::button($model->request_ip, ['class' => 'btn btn-info',  'id' => 'btn_show_modal', 'title' => 'Detail IP info: ' . $model->request_ip]) : '-';
-                        },
-                        'format' => 'raw'
+                    <table class="table table-bordered table-hover">
+                        <tr>
+                            <th>Amount Charged</th>
+                            <td><?=($data['price']['amountCharged'])?></td>
+                        </tr>
+                        <tr>
+                            <th>Profit</th>
+                            <td><?=number_format($data['price']['profit'], 2)?> <?=Html::encode($data['price']['currency'])?></td>
+                        </tr>
+                    </table>
 
-                    ],
-                    //'request_ip_detail:ntext',
-                    'offset_gmt',
-                    'snooze_for',
-                    'rating',
-                    'called_expert',
-                    'discount_id',
-                    'bo_flight_id',
-                ],
-            ]) ?>
+                <?php endif;?>
+            <?php endif;?>
 
-            <? /*if($model->request_ip_detail): ?>
-            <pre>
-                <?
-                    $data = @json_decode($model->request_ip_detail);
-                    \yii\helpers\VarDumper::dump($data, 10, true);
-                ?>
-            </pre>
-            <? endif;*/ ?>
+            <h2>Auth List</h2>
+            <?php if(isset($data['authList']) && $data['authList']): ?>
+                <table class="table table-bordered table-hover table-striped">
+                    <tr>
+                        <th>Created</th>
+                        <th>Auth system</th>
+                        <th>For what</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                        <th>Message</th>
+                        <th>CC Number</th>
+                    </tr>
+                    <?php foreach($data['authList'] as $list): ?>
+                        <tr>
+                            <td><?=Yii::$app->formatter->asDatetime(strtotime($list['created']))?></td>
+                            <td><?=Html::encode($list['auth_system'])?></td>
+                            <td><?=Html::encode($list['for_what'])?></td>
+                            <td><?=number_format($list['amount'], 2)?></td>
+                            <td><?=Html::encode($list['status'])?></td>
+                            <td><?=Html::encode($list['message'])?></td>
+                            <td><?=Html::encode($list['ccNumber'])?></td>
+                        </tr>
+                    <?php endforeach;?>
+                </table>
+            <?php endif;?>
         </div>
 
     </div>
 
     <div class="row">
         <div class="col-md-12">
-            <h3>Flight Segments:</h3>
-            <?php \yii\widgets\Pjax::begin(); ?>
+            <?php if(isset($data['itinerary']) && $data['itinerary']): ?>
+                <?php foreach($data['itinerary'] as $itNr => $itinerary): ?>
+                <h4>Itinerary <?=($itNr + 1)?></h4>
+                <?php if($itinerary['segments']): ?>
+                    <table class="table table-bordered table-hover table-striped">
+                        <tr>
+                            <th>Airline</th>
+                            <th>Airline Name</th>
+                            <th>Main Airline</th>
+                            <th>Arrival Airport</th>
+                            <th>Arrival Time</th>
+                            <th>Departure Airport</th>
+                            <th>Departure Time</th>
+                            <th>Booking Class</th>
+                            <th>Flight Number</th>
+                            <th>Status Code</th>
+                            <th>Operating Airline</th>
+                            <th>Cabin</th>
+                            <th>DepartureCity</th>
+                            <th>Arrival City</th>
+                            <th>Departure Country</th>
+                            <th>Arrival Country</th>
+                            <th>Departure AirportName</th>
+                            <th>Arrival AirportName</th>
+                            <th>Flight Duration</th>
+                            <th>Layover Duration</th>
+                            <th>Airline RecordLocator</th>
+                            <th>Air craft</th>
+                            <th>Baggage</th>
+                        </tr>
+                        <?php foreach($itinerary['segments'] as $segment): ?>
+                            <tr>
+                                <td><?=Html::encode($segment['airline'])?></td>
+                                <td><?=Html::encode($segment['airlineName'])?></td>
+                                <td><?=Html::encode($segment['mainAirline'])?></td>
+                                <td><?=Html::encode($segment['arrivalAirport'])?></td>
+                                <td><?=Html::encode($segment['arrivalTime'])?></td>
+                                <td><?=Html::encode($segment['departureAirport'])?></td>
+                                <td><?=Html::encode($segment['departureTime'])?></td>
+                                <td><?=Html::encode($segment['bookingClass'])?></td>
+                                <td><?=Html::encode($segment['flightNumber'])?></td>
+                                <td><?=Html::encode($segment['statusCode'])?></td>
+                                <td><?=Html::encode($segment['operatingAirline'])?></td>
+                                <td><?=Html::encode($segment['cabin'])?></td>
+                                <td><?=Html::encode($segment['departureCity'])?></td>
+                                <td><?=Html::encode($segment['arrivalCity'])?></td>
+                                <td><?=Html::encode($segment['departureCountry'])?></td>
+                                <td><?=Html::encode($segment['arrivalCountry'])?></td>
+                                <td><?=Html::encode($segment['departureAirportName'])?></td>
+                                <td><?=Html::encode($segment['arrivalAirportName'])?></td>
+                                <td><?=Html::encode($segment['flightDuration'])?></td>
+                                <td><?=Html::encode($segment['layoverDuration'])?></td>
+                                <td><?=Html::encode($segment['airlineRecordLocator'])?></td>
+                                <td><?=Html::encode($segment['aircraft'])?></td>
+                                <td><?=Html::encode($segment['baggage'])?></td>
+                            </tr>
+                        <?php endforeach;?>
+                    </table>
 
-            <?= \yii\grid\GridView::widget([
-                'dataProvider' => $dataProviderSegments,
-                'filterModel' => $searchModelSegments,
-                'columns' => [
-                    'id',
-                    /*[
-                        'attribute' => 'lead_id',
-                        'format' => 'raw',
-                        'value' => function(\common\models\LeadFlightSegment $model) {
-                            return '<i class="fa fa-arrow-right"></i> '.Html::a('lead: '.$model->lead_id, ['leads/view', 'id' => $model->lead_id], ['target' => '_blank', 'data-pjax' => 0]);
-                        },
-                    ],*/
-                    'origin',
-                    'destination',
-                    [
-                        'attribute' => 'departure',
-                        'value' => function(\common\models\LeadFlightSegment $model) {
-                            return '<i class="fa fa-calendar"></i> '.date("Y-m-d", strtotime($model->departure));
-                        },
-                        'format' => 'html',
-                    ],
-                    [
-                        'attribute' => 'flexibility',
-                        'value' => function(\common\models\LeadFlightSegment $model) {
-                            return $model->flexibility;
-                        },
-                        'filter' => array_combine(range(0, 5), range(0, 5)),
-                    ],
-                    [
-                        'attribute' => 'flexibility_type',
-                        'value' => function(\common\models\LeadFlightSegment $model) {
-                            return $model->flexibility_type;
-                        },
-                        'filter' => \common\models\LeadFlightSegment::FLEX_TYPE_LIST
-                    ],
-                    [
-                        'attribute' => 'created',
-                        'value' => function(\common\models\LeadFlightSegment $model) {
-                            return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->created));
-                        },
-                        'format' => 'html',
-                    ],
 
-                    [
-                        'attribute' => 'updated',
-                        'value' => function(\common\models\LeadFlightSegment $model) {
-                            return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->updated));
-                        },
-                        'format' => 'html',
-                    ],
 
-                    'origin_label',
-                    'destination_label',
-
-                    ['class' => 'yii\grid\ActionColumn', 'template' => '{view}', 'controller' => 'lead-flight-segment'],
-                ],
-            ]); ?>
-
-            <?php \yii\widgets\Pjax::end(); ?>
+                <?php endif;?>
+                <?php endforeach;?>
+            <?php endif;?>
         </div>
     </div>
 
     <div class="row">
-        <div class="col-md-12">
-            <h3>Quotes:</h3>
-        <?php \yii\widgets\Pjax::begin(); ?>
-        <p>
-            <?//= Html::a('Create Lead', ['create'], ['class' => 'btn btn-success']) ?>
-        </p>
-
-        <?= \yii\grid\GridView::widget([
-            'dataProvider' => $dataProvider,
-            'filterModel' => $searchModel,
-            'columns' => [
-                //['class' => 'yii\grid\SerialColumn'],
-
-                'id',
-                'uid',
-                //'lead_id',
-                //'employee_id',
-                [
-                    'attribute' => 'employee_id',
-                    'format' => 'raw',
-                    'value' => function(\common\models\Quote $model) {
-                        return $model->employee ? '<i class="fa fa-user"></i> '.$model->employee->username : '-';
-                    },
-                    'filter' => \common\models\Employee::getList()
-                ],
-                'record_locator',
-
-                //'cabin',
-                //'gds',
-
-                [
-                    'attribute' => 'gds',
-                    'value' => function(\common\models\Quote $model) {
-                        return '<i class="fa fa-plane"></i> '.$model->getGdsName2();
-                    },
-                    'format' => 'raw',
-                    'filter' => \common\models\Quote::GDS_LIST
-                ],
-
-                'pcc',
-
-                [
-                    'attribute' => 'trip_type',
-                    'value' => function(\common\models\Quote $model) {
-                        return \common\models\Lead::getFlightType($model->trip_type) ?? '-';
-                    },
-                    'filter' => \common\models\Lead::TRIP_TYPE_LIST
-                ],
-
-                [
-                    'attribute' => 'cabin',
-                    'value' => function(\common\models\Quote $model) {
-                        return \common\models\Lead::getCabin($model->cabin) ?? '-';
-                    },
-                    'filter' => \common\models\Lead::CABIN_LIST
-                ],
-                //'trip_type',
-                'main_airline_code',
-                //'reservation_dump:ntext',
-
-                [
-                    'attribute' => 'reservation_dump',
-                    'value' => function(\common\models\Quote $model) {
-                        return '<pre style="font-size: 9px">'. $model->reservation_dump . '</pre>';
-                    },
-                    'format' => 'html',
-                ],
-
-                //'status',
-                [
-                    'attribute' => 'status',
-                    'value' => function(\common\models\Quote $model) {
-                        return $model->getStatusName(true);
-                    },
-                    'format' => 'html',
-                    'filter' => \common\models\Quote::STATUS_LIST
-                ],
-                'check_payment:boolean',
-                'fare_type',
-
-
-                [
-                    'header' => 'Prices',
-                    'value' => function(\common\models\Quote $model) {
-                        return $model->quotePricesCount ? Html::a($model->quotePricesCount, ['quote-price/index', "QuotePriceSearch[quote_id]" => $model->id], ['target' => '_blank', 'data-pjax' => 0]) : '-' ;
-                    },
-                    'format' => 'raw',
-                    'contentOptions' => ['class' => 'text-center'],
-                ],
-
-                //'created',
-                //'updated',
-
-                [
-                    'attribute' => 'created',
-                    'value' => function(\common\models\Quote $model) {
-                    return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->created));
-                    },
-                    'format' => 'html',
-                ],
-
-                [
-                    'attribute' => 'updated',
-                    'value' => function(\common\models\Quote $model) {
-                    return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->updated));
-                    },
-                    'format' => 'html',
-                ],
-
-                ['class' => 'yii\grid\ActionColumn', 'template' => '{view}', 'controller' => 'quote'],
-
-                //['class' => 'yii\grid\ActionColumn'],
-            ],
-        ]); ?>
-        <?php \yii\widgets\Pjax::end(); ?>
-        </div>
+        <?php
+            //\yii\helpers\VarDumper::dump($data, 10, true);
+        ?>
     </div>
-
-
 </div>
 
-
-
 <?php
-yii\bootstrap\Modal::begin([
+/*yii\bootstrap\Modal::begin([
     'headerOptions' => ['id' => 'modal-ip-Header'],
     'id' => 'modal-ip',
     'size' => 'modal-lg',
@@ -516,4 +317,4 @@ $jsCode = <<<JS
     });
 JS;
 
-$this->registerJs($jsCode, \yii\web\View::POS_READY);
+$this->registerJs($jsCode, \yii\web\View::POS_READY);*/

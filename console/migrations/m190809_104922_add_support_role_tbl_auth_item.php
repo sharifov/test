@@ -16,7 +16,8 @@ class m190809_104922_add_support_role_tbl_auth_item extends Migration
         '/email/list',
         '/sms/list',
         '/call/list',
-        '/sales/search',
+        '/sale/search',
+        '/sale/view',
     ];
 
     /**
@@ -41,18 +42,23 @@ class m190809_104922_add_support_role_tbl_auth_item extends Migration
             }
 
 
+            if(!$auth->hasChild($auth->getRole('support'), $permission)) {
+                $auth->addChild($auth->getRole('support'), $permission);
+            }
 
+            if(!$auth->hasChild($auth->getRole('admin'), $permission)) {
+                $auth->addChild($auth->getRole('admin'), $permission);
+            }
 
-            $auth->addChild($auth->getRole('support'), $permission);
             //$auth->addChild($auth->getRole('supervisor'), $permission);
         }
 
-        $permission = $auth->getPermission('/sale/search');
+        /*$permission = $auth->getPermission('/sale/search');
         if(!$permission) {
             $permission = $auth->createPermission('/sale/search');
             $auth->add($permission);
         }
-        $auth->addChild($auth->getRole('admin'), $permission);
+        $auth->addChild($auth->getRole('admin'), $permission);*/
 
         $employee = new \common\models\Employee();
         $employee->username = 'support.test';
