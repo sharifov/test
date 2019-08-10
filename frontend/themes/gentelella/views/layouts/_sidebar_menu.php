@@ -32,6 +32,7 @@ $isSuperAdmin = $user->canRole('superadmin');
 
         $menuItems[] = ['label' => 'Dashboard', 'url' => ['/'], 'icon' => 'area-chart'];
         $menuItems[] = ['label' => 'Search Leads', 'url' => ['/leads/index'], 'icon' => 'search'];
+        $menuItems[] = ['label' => 'Search Sale', 'url' => ['/sale/search'], 'icon' => 'search'];
 
         if (!$isUM) {
             $cntNotifications = \common\models\Notifications::findNewCount(Yii::$app->user->id);
