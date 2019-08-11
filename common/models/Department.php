@@ -6,6 +6,7 @@ use Yii;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
+use yii\helpers\ArrayHelper;
 
 /**
  * This is the model class for table "department".
@@ -18,7 +19,9 @@ use yii\db\ActiveRecord;
  *
  * @property Call[] $calls
  * @property Employee $depUpdatedUser
+ * @property DepartmentPhoneProject[] $departmentPhoneProjects
  * @property Lead[] $leads
+ * @property UserDepartment[] $userDepartments
  */
 class Department extends \yii\db\ActiveRecord
 {
@@ -104,6 +107,22 @@ class Department extends \yii\db\ActiveRecord
     /**
      * @return \yii\db\ActiveQuery
      */
+    public function getDepartmentPhoneProjects()
+    {
+        return $this->hasMany(DepartmentPhoneProject::class, ['dpp_dep_id' => 'dep_id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getUserDepartments()
+    {
+        return $this->hasMany(UserDepartment::class, ['ud_dep_id' => 'dep_id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
     public function getDepUpdatedUser()
     {
         return $this->hasOne(Employee::class, ['id' => 'dep_updated_user_id']);
@@ -131,6 +150,7 @@ class Department extends \yii\db\ActiveRecord
      */
     public static function getList(): array
     {
-        return self::DEPARTMENT_LIST;
+        $data = self::find()->orderBy(['dep_id' => SORT_ASC])->asArray()->all();
+        return ArrayHelper::map($data, 'dep_id', 'dep_name');
     }
 }
