@@ -38,6 +38,10 @@ use yii\web\NotFoundHttpException;
  * @property array $form_roles
  *
  * @property Lead[] $leads
+ * @property Department[] $departments
+ * @property DepartmentPhoneProject[] $departmentPhoneProjects
+ * @property UserDepartment[] $userDepartments
+ * @property Department[] $udDeps
  * @property EmployeeAcl[] $employeeAcl
  * @property ProjectEmployeeAccess[] $projectEmployeeAccesses
  * @property Project[] $projects
@@ -85,6 +89,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
 
     public $user_groups;
     public $user_projects;
+    public $user_departments;
 
     public $shiftData = [];
     public $currentShiftTaskInfoSummary = [];
@@ -189,7 +194,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
             [['email'], 'unique'],
             ['email', 'email'],
             [['password_reset_token'], 'unique'],
-            [['created_at', 'updated_at', 'last_activity', 'acl_rules_activated', 'full_name', 'user_groups', 'user_projects', 'deleted'], 'safe'],
+            [['created_at', 'updated_at', 'last_activity', 'acl_rules_activated', 'full_name', 'user_groups', 'user_projects', 'deleted', 'user_departments'], 'safe'],
         ];
     }
 
@@ -210,7 +215,8 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
             'updated_at' => 'Updated At',
             'user_groups' => 'User groups',
             'user_projects' => 'Projects access',
-            'form_roles' => 'Roles'
+            'form_roles' => 'Roles',
+            'user_departments' => 'Departments'
         ];
     }
 
@@ -227,6 +233,39 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
                 'value' => date('Y-m-d H:i:s') //new Expression('NOW()'),
             ],
         ];
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getDepartments()
+    {
+        return $this->hasMany(Department::class, ['dep_updated_user_id' => 'id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getDepartmentPhoneProjects()
+    {
+        return $this->hasMany(DepartmentPhoneProject::class, ['dpp_updated_user_id' => 'id']);
+    }
+
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getUserDepartments()
+    {
+        return $this->hasMany(UserDepartment::class, ['ud_user_id' => 'id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getUdDeps()
+    {
+        return $this->hasMany(Department::class, ['dep_id' => 'ud_dep_id'])->viaTable('user_department', ['ud_user_id' => 'id']);
     }
 
     public function isActive()
@@ -857,6 +896,19 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         $groups = [];
         if ($groupsModel = $this->ugsGroups) {
             $groups = \yii\helpers\ArrayHelper::map($groupsModel, 'ug_id', 'ug_name');
+        }
+
+        return $groups;
+    }
+
+    /**
+     * @return array
+     */
+    public function getUserDepartmentList(): array
+    {
+        $groups = [];
+        if ($model = $this->udDeps) {
+            $groups = \yii\helpers\ArrayHelper::map($model, 'dep_id', 'dep_name');
         }
 
         return $groups;

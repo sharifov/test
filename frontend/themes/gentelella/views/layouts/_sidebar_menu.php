@@ -32,6 +32,7 @@ $isSuperAdmin = $user->canRole('superadmin');
 
         $menuItems[] = ['label' => 'Dashboard', 'url' => ['/'], 'icon' => 'area-chart'];
         $menuItems[] = ['label' => 'Search Leads', 'url' => ['/leads/index'], 'icon' => 'search'];
+        $menuItems[] = ['label' => 'Search Sale', 'url' => ['/sale/search'], 'icon' => 'search'];
 
         if (!$isUM) {
             $cntNotifications = \common\models\Notifications::findNewCount(Yii::$app->user->id);
@@ -163,6 +164,8 @@ $isSuperAdmin = $user->canRole('superadmin');
             'items' => [
                 ['label' => 'Projects', 'url' => ['/project/index'], 'icon' => 'product-hunt'],
                 ['label' => 'Project Sources', 'url' => ['/sources/index'], 'icon' => 'product-hunt'],
+                ['label' => 'Departments', 'url' => ['/department/index'], 'icon' => 'sitemap'],
+                ['label' => 'Department Phones', 'url' => ['/department-phone-project/index'], 'icon' => 'phone'],
                 ['label' => 'Airlines', 'url' => ['/settings/airlines'], 'icon' => 'plane'],
                 ['label' => 'Airports', 'url' => ['/settings/airports'], 'icon' => 'plane'],
                 ['label' => 'ACL', 'url' => ['/settings/acl'], 'icon' => 'user-secret'],

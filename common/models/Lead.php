@@ -85,6 +85,7 @@ use common\components\SearchService;
  * @property int $l_duplicate_lead_id
  * @property double $l_init_price
  * @property string $l_last_action_dt
+ * @property int $l_dep_id
  *
  * @property double $finalProfit
  * @property int $quotesCount
@@ -112,6 +113,7 @@ use common\components\SearchService;
  * @property Employee $employee
  * @property Lead $lDuplicateLead
  * @property Lead[] $leads0
+ * @property Department $lDep
  * @property Sources $source
  * @property Project $project
  * @property LeadAdditionalInformation[] $additionalInformationForm
@@ -267,7 +269,7 @@ class Lead extends ActiveRecord implements AggregateRoot
             [['adults', 'children', 'source_id'], 'required', 'on' => self::SCENARIO_API], //'except' => self::SCENARIO_API],
             [['adults'], 'integer', 'min' => 1, 'on' => self::SCENARIO_API],
 
-            [['client_id', 'employee_id', 'status', 'project_id', 'source_id', 'rating', 'bo_flight_id', 'l_grade', 'clone_id', 'l_call_status_id', 'l_duplicate_lead_id'], 'integer'],
+            [['client_id', 'employee_id', 'status', 'project_id', 'source_id', 'rating', 'bo_flight_id', 'l_grade', 'clone_id', 'l_call_status_id', 'l_duplicate_lead_id', 'l_dep_id'], 'integer'],
             [['adults', 'children', 'infants'], 'integer', 'max' => 9],
 
             [['notes_for_experts', 'request_ip_detail', 'l_client_ua'], 'string'],
@@ -291,6 +293,7 @@ class Lead extends ActiveRecord implements AggregateRoot
             [['client_id'], 'exist', 'skipOnError' => true, 'targetClass' => Client::class, 'targetAttribute' => ['client_id' => 'id']],
             [['employee_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['employee_id' => 'id']],
             [['l_duplicate_lead_id'], 'exist', 'skipOnError' => true, 'targetClass' => self::class, 'targetAttribute' => ['l_duplicate_lead_id' => 'id']],
+            [['l_dep_id'], 'exist', 'skipOnError' => true, 'targetClass' => Department::class, 'targetAttribute' => ['l_dep_id' => 'dep_id']],
         ];
     }
 
@@ -914,7 +917,8 @@ class Lead extends ActiveRecord implements AggregateRoot
             'l_duplicate_lead_id' => 'Duplicate Lead ID',
 
             'l_init_price' => 'Init Price',
-            'l_last_action_dt' => 'Last Action'
+            'l_last_action_dt' => 'Last Action',
+            'l_dep_id' => 'Department ID',
 
         ];
     }
@@ -931,6 +935,15 @@ class Lead extends ActiveRecord implements AggregateRoot
                 'value' => date('Y-m-d H:i:s') //new Expression('NOW()'),
             ],
         ];
+    }
+
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getLDep()
+    {
+        return $this->hasOne(Department::class, ['dep_id' => 'l_dep_id']);
     }
 
     /**

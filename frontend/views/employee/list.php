@@ -246,6 +246,27 @@ if ($isAdmin || $isSuperAdmin) {
                     'filter' => $isAdmin ? \common\models\UserGroup::getList() : Yii::$app->user->identity->getUserGroupList()
                 ],
 
+                [
+                    'label' => 'User Departments',
+                    'attribute' => 'user_department_id',
+                    'value' => function (\common\models\Employee $model) {
+
+                        $list = $model->getUserDepartmentList();
+                        $valueArr = [];
+
+                        foreach ($list as $item) {
+                            $valueArr[] = '<div class="col-md-4">'.Html::tag('div', /*Html::tag('i', '', ['class' => 'fa fa-users']) . ' ' .*/ Html::encode($item), ['class' => 'label label-info']).'</div>';
+                        }
+
+                        $value = '<div class="row">'.implode(' ', $valueArr).'</div>';
+
+                        return $value;
+                    },
+                    'format' => 'raw',
+                    'contentOptions' => ['class' => 'text-left', 'style' => 'width: 280px'],
+                    'filter' => \common\models\Department::getList()
+                ],
+
 
 
                 /*[

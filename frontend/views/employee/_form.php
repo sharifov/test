@@ -109,12 +109,12 @@ if (Yii::$app->user->identity->canRoles(['admin', 'userManager', 'superadmin']))
                             ?>
 
                             <?php
-                            echo $form->field($model, 'user_groups')->widget(\kartik\select2\Select2::class, [
-                                'data' => $data,
-                                'size' => \kartik\select2\Select2::SMALL,
-                                'options' => ['placeholder' => 'Select user groups', 'multiple' => true],
-                                'pluginOptions' => ['allowClear' => true],
-                            ]);
+                                echo $form->field($model, 'user_groups')->widget(\kartik\select2\Select2::class, [
+                                    'data' => $data,
+                                    'size' => \kartik\select2\Select2::SMALL,
+                                    'options' => ['placeholder' => 'Select user groups', 'multiple' => true],
+                                    'pluginOptions' => ['allowClear' => true],
+                                ]);
                             ?>
 
 
@@ -125,6 +125,15 @@ if (Yii::$app->user->identity->canRoles(['admin', 'userManager', 'superadmin']))
                                 'options' => ['placeholder' => 'Select user projects', 'multiple' => true],
                                 'pluginOptions' => ['allowClear' => true],
                             ]);
+                            ?>
+
+                            <?php
+                                echo $form->field($model, 'user_departments')->widget(\kartik\select2\Select2::class, [
+                                    'data' => \common\models\Department::getList(),
+                                    'size' => \kartik\select2\Select2::SMALL,
+                                    'options' => ['placeholder' => 'Select departments', 'multiple' => true],
+                                    'pluginOptions' => ['allowClear' => true],
+                                ]);
                             ?>
 
                         <?php else: ?>

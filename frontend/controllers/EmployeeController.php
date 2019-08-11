@@ -10,6 +10,7 @@ use common\models\ProjectEmployeeAccess;
 use common\models\Reason;
 use common\models\search\EmployeeSearch;
 use common\models\search\UserProjectParamsSearch;
+use common\models\UserDepartment;
 use common\models\UserGroupAssign;
 use common\models\UserParams;
 use common\models\UserProfile;
@@ -241,6 +242,20 @@ class EmployeeController extends FController
                 }
 
 
+                if(isset($attr['user_departments'])) {
+                    if($attr['user_departments']) {
+                        foreach ($attr['user_departments'] as $udId) {
+                            $ud = new UserDepartment();
+                            $ud->ud_user_id = $model->id;
+                            $ud->ud_dep_id = (int) $udId;
+                            if(!$ud->save()) {
+                                Yii::error(VarDumper::dumpAsString($ud->errors), 'Employee:Create:UserDepartment:save');
+                            }
+                        }
+                    }
+                }
+
+
                 if(isset($attr['user_projects'])) {
                     if($attr['user_projects']) {
                         foreach ($attr['user_projects'] as $ugId) {
@@ -424,6 +439,21 @@ class EmployeeController extends FController
                     }
 
 
+                    if(isset($attr['user_departments'])) {
+                        UserDepartment::deleteAll(['ud_user_id' => $model->id]);
+                        if($attr['user_departments']) {
+                            foreach ($attr['user_departments'] as $udId) {
+                                $ud = new UserDepartment();
+                                $ud->ud_user_id = $model->id;
+                                $ud->ud_dep_id = (int) $udId;
+                                if(!$ud->save()) {
+                                    Yii::error(VarDumper::dumpAsString($ud->errors), 'Employee:Create:UserDepartment:save');
+                                }
+                            }
+                        }
+                    }
+
+
                     if(isset($attr['user_projects'])) {
                         ProjectEmployeeAccess::deleteAll(['employee_id' => $model->id]);
                         if($attr['user_projects']) {
@@ -468,6 +498,7 @@ class EmployeeController extends FController
 
             $model->user_groups = ArrayHelper::map($model->userGroupAssigns, 'ugs_group_id', 'ugs_group_id');
             $model->user_projects = ArrayHelper::map($model->projects, 'id', 'id');
+            $model->user_departments = ArrayHelper::map($model->userDepartments, 'ud_dep_id', 'ud_dep_id');
 
             //VarDumper::dump($model->user_projects, 10, true); exit;
 
