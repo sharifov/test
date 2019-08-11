@@ -56,6 +56,14 @@ $this->params['breadcrumbs'][] = $this->title;
                 'filter' => false
             ],
 
+                [
+                    'label' => 'Project',
+                    'value' => function ($model) {
+                        return $model['project'] ? '<span class="badge badge-info">'.Html::encode($model['project']).'</span>': '-';
+                    },
+                    'format' => 'raw'
+                ],
+
             /*[
                 'label' => 'Air Routing Id',
                 'value' => function ($model) {
@@ -76,12 +84,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 },
             ],
 
-            [
-                'label' => 'Project',
-                'value' => function ($model) {
-                    return $model['project'] ?: '-';
-                },
-            ],
+
 
             [
                 'label' => 'Trips',
@@ -96,6 +99,13 @@ $this->params['breadcrumbs'][] = $this->title;
                 },
                 'format' => 'raw'
             ],
+
+                [
+                    'label' => 'PNR Number',
+                    'value' => function ($model) {
+                        return $model['pnr'] ?: '-';
+                    },
+                ],
 
             [
                 'label' => 'Passengers',

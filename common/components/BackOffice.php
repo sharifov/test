@@ -4,6 +4,7 @@ namespace common\components;
 use http\Client\Request;
 use http\Client\Response;
 use Yii;
+use yii\helpers\VarDumper;
 use yii\httpclient\CurlTransport;
 
 class BackOffice
@@ -70,6 +71,8 @@ class BackOffice
             'version'   => Yii::$app->params['backOffice']['ver'],
             'signature' => $signature
         ];
+
+        //VarDumper::dump([$uri, $headers, $fields]);exit;
 
         $response = $client->createRequest()
             ->setMethod($type)

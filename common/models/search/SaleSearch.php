@@ -9,6 +9,7 @@ use Yii;
 use yii\base\Exception;
 use yii\base\Model;
 use yii\data\ArrayDataProvider;
+use yii\data\Pagination;
 use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
 
@@ -105,14 +106,13 @@ class SaleSearch extends Model
         return Model::scenarios();
     }
 
-    /**
-     * Creates data provider instance with search query applied
-     *
-     * @param array $params
-     *
-     * @return ArrayDataProvider
-     */
 
+    /**
+     * @param $params
+     * @return array|ArrayDataProvider
+     * @throws Exception
+     * @throws \yii\base\InvalidConfigException
+     */
     public function search($params)
     {
 
@@ -127,6 +127,10 @@ class SaleSearch extends Model
                 'pagination' => false,
             ]);
         }
+
+        $totalCount = 0;
+        $pageSize = 20;
+        $currentPage = Yii::$app->request->get('page', 1);
 
         if (isset($params['SaleSearch']) && $params['SaleSearch']) {
 
@@ -174,32 +178,63 @@ class SaleSearch extends Model
                 $data['card'] = $this->card;
             }
 
+            if($currentPage) {
+                $data['page'] = $currentPage;
+            }
+
+            if($pageSize) {
+                $data['limit'] = $pageSize;
+            }
+
+
+
             $response = BackOffice::sendRequest2('cs/search', $data);
 
             //VarDumper::dump($response); exit;
 
             if ($response->isOk) {
                 $result = $response->data;
-                if($result && is_array($result)) {
-                    $searchData = $result;
+                if(isset($result['items']) && is_array($result['items'])) {
+                    $searchData = $result['items'];
+                    $totalCount = $result['totalItems'];
                 }
+
+                //VarDumper::dump($result, 10, true);
+
             } else {
                 //Yii::error(print_r($response->content, true), 'SaleSearch:search:BackOffice:sendRequest2');
                 throw new Exception('BO request Error: '. VarDumper::dumpAsString($response->content), 10);
             }
         }
 
+
+        $arr = array_fill(0, (($currentPage - 1) * $pageSize), ['items' => ['saleId' => 0]]);
+
+        $searchData = array_merge($arr, $searchData);
+
+
+
         $dataProvider = new ArrayDataProvider([
             'allModels' => $searchData,
-            'sort'=> ['defaultOrder' => ['sale_id' => SORT_DESC]],
-            'sort' => [
+            'totalCount' => $totalCount,
+            //'sort'=> ['defaultOrder' => ['sale_id' => SORT_DESC]],
+            /*'sort' => [
+                'defaultOrder' => ['sale_id' => SORT_DESC],
                 'attributes' => ['sale_id', 'pnr', 'email'],
-            ],
+            ],*/
             //'pagination' => false,
             'pagination' => [
-                'pageSize' => 20,
+                'pageSize' => $pageSize,
+                //'pageSizeLimit' => 0
             ],
         ]);
+
+        /*$dataProvider->sort->attributes['sale_id'] = [
+            'asc' => ['saleId' => SORT_DESC],
+            'desc' => ['saleId' => SORT_ASC],
+        ];*/
+
+
 
         return $dataProvider;
     }
