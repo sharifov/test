@@ -93,9 +93,7 @@ class TestController extends FController
     public function actionT()
     {
 
-        return $this->render('blank');
-
-        die;
+        //return $this->render('blank'); die;
 
         $post = [
             'type' => 'voip_incoming',
@@ -129,6 +127,8 @@ class TestController extends FController
                 'FromState' => '',
             ]
         ];
+
+        echo json_encode($post); exit;
 
         /** @var CommunicationService $service */
         $service = Yii::createObject(CommunicationService::class);

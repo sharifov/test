@@ -15,8 +15,8 @@ use yii\db\ActiveRecord;
  * @property string $dpp_phone_number
  * @property int $dpp_source_id
  * @property array $dpp_params
- * @property int $dpp_avr_enable
- * @property int $dpp_enable
+ * @property bool $dpp_avr_enable
+ * @property bool $dpp_enable
  * @property int $dpp_updated_user_id
  * @property string $dpp_updated_dt
  *
@@ -43,6 +43,7 @@ class DepartmentPhoneProject extends \yii\db\ActiveRecord
         return [
             [['dpp_dep_id', 'dpp_project_id', 'dpp_phone_number'], 'required'],
             [['dpp_dep_id', 'dpp_project_id', 'dpp_source_id', 'dpp_avr_enable', 'dpp_enable', 'dpp_updated_user_id'], 'integer'],
+            [['dpp_avr_enable', 'dpp_enable'], 'boolean'],
             [['dpp_params', 'dpp_updated_dt'], 'safe'],
             [['dpp_phone_number'], 'string', 'max' => 18],
             [['dpp_dep_id', 'dpp_project_id', 'dpp_phone_number'], 'unique', 'targetAttribute' => ['dpp_dep_id', 'dpp_project_id', 'dpp_phone_number']],
