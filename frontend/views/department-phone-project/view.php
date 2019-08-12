@@ -6,7 +6,7 @@ use yii\widgets\DetailView;
 /* @var $this yii\web\View */
 /* @var $model common\models\DepartmentPhoneProject */
 
-$this->title = $model->dppProject->name . ' - ' .$model->dpp_dep_id;
+$this->title = $model->dppProject->name . ' - ' .$model->dpp_id;
 $this->params['breadcrumbs'][] = ['label' => 'Department Phone Projects', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 \yii\web\YiiAsset::register($this);
@@ -16,8 +16,8 @@ $this->params['breadcrumbs'][] = $this->title;
     <h1><?= Html::encode($this->title) ?></h1>
 
     <p>
-        <?= Html::a('Update', ['update', 'dpp_dep_id' => $model->dpp_dep_id, 'dpp_project_id' => $model->dpp_project_id, 'dpp_phone_number' => $model->dpp_phone_number], ['class' => 'btn btn-primary']) ?>
-        <?= Html::a('Delete', ['delete', 'dpp_dep_id' => $model->dpp_dep_id, 'dpp_project_id' => $model->dpp_project_id, 'dpp_phone_number' => $model->dpp_phone_number], [
+        <?= Html::a('Update', ['update', 'id' => $model->dpp_id], ['class' => 'btn btn-primary']) ?>
+        <?= Html::a('Delete', ['delete', 'id' => $model->dpp_id], [
             'class' => 'btn btn-danger',
             'data' => [
                 'confirm' => 'Are you sure you want to delete this item?',
@@ -29,6 +29,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <?= DetailView::widget([
         'model' => $model,
         'attributes' => [
+            'dpp_id',
             [
                 'attribute' => 'dpp_dep_id',
                 'value' => function (\common\models\DepartmentPhoneProject $model) {
@@ -50,8 +51,8 @@ $this->params['breadcrumbs'][] = $this->title;
                     return $model->dppSource ? $model->dppSource->name : '-';
                 },
             ],
-            'dpp_params',
-            'dpp_avr_enable:boolean',
+            //'dpp_params',
+            'dpp_ivr_enable:boolean',
             'dpp_enable:boolean',
             [
                 'attribute' => 'dpp_updated_user_id',

@@ -17,7 +17,7 @@ class DepartmentPhoneProjectSearch extends DepartmentPhoneProject
     public function rules()
     {
         return [
-            [['dpp_dep_id', 'dpp_project_id', 'dpp_source_id', 'dpp_avr_enable', 'dpp_enable', 'dpp_updated_user_id'], 'integer'],
+            [['dpp_id', 'dpp_project_id', 'dpp_dep_id', 'dpp_source_id', 'dpp_ivr_enable', 'dpp_enable', 'dpp_updated_user_id'], 'integer'],
             [['dpp_phone_number', 'dpp_params', 'dpp_updated_dt'], 'safe'],
         ];
     }
@@ -58,10 +58,11 @@ class DepartmentPhoneProjectSearch extends DepartmentPhoneProject
 
         // grid filtering conditions
         $query->andFilterWhere([
-            'dpp_dep_id' => $this->dpp_dep_id,
+            'dpp_id' => $this->dpp_id,
             'dpp_project_id' => $this->dpp_project_id,
+            'dpp_dep_id' => $this->dpp_dep_id,
             'dpp_source_id' => $this->dpp_source_id,
-            'dpp_avr_enable' => $this->dpp_avr_enable,
+            'dpp_ivr_enable' => $this->dpp_ivr_enable,
             'dpp_enable' => $this->dpp_enable,
             'dpp_updated_user_id' => $this->dpp_updated_user_id,
             'dpp_updated_dt' => $this->dpp_updated_dt,

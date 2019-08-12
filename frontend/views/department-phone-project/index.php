@@ -27,14 +27,8 @@ $this->params['breadcrumbs'][] = $this->title;
         'columns' => [
             //['class' => 'yii\grid\SerialColumn'],
 
-            //'dpp_dep_id',
-            [
-                'attribute' => 'dpp_dep_id',
-                'value' => function (\common\models\DepartmentPhoneProject $model) {
-                    return $model->dppDep ? $model->dppDep->dep_name : '-';
-                },
-                'filter' => \common\models\Project::getList(true)
-            ],
+            'dpp_id',
+
             //'dpp_project_id',
             [
                 'attribute' => 'dpp_project_id',
@@ -44,6 +38,13 @@ $this->params['breadcrumbs'][] = $this->title;
                 'filter' => \common\models\Project::getList(true)
             ],
             'dpp_phone_number',
+            [
+                'attribute' => 'dpp_dep_id',
+                'value' => function (\common\models\DepartmentPhoneProject $model) {
+                    return $model->dppDep ? $model->dppDep->dep_name : '-';
+                },
+                'filter' => \common\models\Department::getList()
+            ],
             //'dpp_source_id',
             [
                 'attribute' => 'dpp_source_id',
@@ -53,7 +54,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'filter' => \common\models\Sources::getList(true)
             ],
             //'dpp_params',
-            'dpp_avr_enable:boolean',
+            'dpp_ivr_enable:boolean',
             'dpp_enable:boolean',
 
             [
