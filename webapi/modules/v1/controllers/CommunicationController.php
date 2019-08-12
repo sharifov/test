@@ -1861,6 +1861,15 @@ class CommunicationController extends ApiBaseController
     {
         $response = [];
 
+        //Yii::info('');
+        Yii::info(VarDumper::dumpAsString([
+            'callModel' => $callModel->attributes,
+            'department' => $department->attributes,
+            'ivrSelectedDigit' => $ivrSelectedDigit,
+            'ivrStep' => $ivrStep,
+
+        ], 10, false), 'info\API:Communication:ivrService');
+
 
         if($ivrStep === 2) {
             /*switch ($ivrSelectedDigit) {
@@ -1870,9 +1879,10 @@ class CommunicationController extends ApiBaseController
             $responseTwml = new VoiceResponse();
             $responseTwml->pause(['length' => 2]);
             $responseTwml->say('Selected number '.$ivrSelectedDigit,'. Goodbye! ');
+            $responseTwml->reject(['reason' => 'busy']);
             //$responseTwml->redirect('/v1/twilio/voice-gather/?step=1', ['method' => 'POST']);
 
-            $response['twml'] = (string)$responseTwml;
+            $response['twml'] = (string) $responseTwml;
             $responseData = [
                 'status' => 200,
                 'name' => 'Success',
@@ -1884,14 +1894,7 @@ class CommunicationController extends ApiBaseController
             return $responseData;
         }
 
-        //Yii::info('');
-        Yii::info(VarDumper::dumpAsString([
-            'callModel' => $callModel->attributes,
-            'department' => $department->attributes,
-            'ivrSelectedDigit' => $ivrSelectedDigit,
-            'ivrStep' => $ivrStep,
 
-        ], 10, false), 'info\API:Communication:ivrService');
 
         try {
             //$params_voice_gather = \Yii::$app->params['voice_gather'];
