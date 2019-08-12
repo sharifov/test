@@ -1945,6 +1945,9 @@ class CommunicationController extends ApiBaseController
 
 
             if($ivrStep === 2) {
+
+                $ivrSelectedDigit = (int) $ivrSelectedDigit;
+
                 switch ($ivrSelectedDigit) {
                     case 1: $this->startSaleService($callModel, $department, $stepParams['digits'][$ivrSelectedDigit]);
                         break;
@@ -1954,7 +1957,7 @@ class CommunicationController extends ApiBaseController
                 }
 
                 $responseTwml = new VoiceResponse();
-                //$responseTwml->pause(['length' => 2]);
+                $responseTwml->pause(['length' => 2]);
                 //$responseTwml->say('Selected number '.$ivrSelectedDigit . '. Goodbye! ');
                 //$responseTwml->reject(['reason' => 'busy']);
                 $responseTwml->say($ivrParas['error_phrase'], ['language' => $ivrParas['entry_language'], 'voice' => $ivrParas['entry_voice']]);
