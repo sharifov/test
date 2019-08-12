@@ -1878,9 +1878,10 @@ class CommunicationController extends ApiBaseController
 
             $responseTwml = new VoiceResponse();
             $responseTwml->pause(['length' => 2]);
-            $responseTwml->say('Selected number '.$ivrSelectedDigit,'. Goodbye! ');
-            $responseTwml->reject(['reason' => 'busy']);
+            $responseTwml->say('Selected number '.$ivrSelectedDigit . '. Goodbye! ');
+            //$responseTwml->reject(['reason' => 'busy']);
             //$responseTwml->redirect('/v1/twilio/voice-gather/?step=1', ['method' => 'POST']);
+
 
             $response['twml'] = (string) $responseTwml;
             $responseData = [
@@ -1893,7 +1894,6 @@ class CommunicationController extends ApiBaseController
 
             return $responseData;
         }
-
 
 
         try {
