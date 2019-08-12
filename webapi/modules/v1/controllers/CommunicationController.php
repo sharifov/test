@@ -498,21 +498,21 @@ class CommunicationController extends ApiBaseController
 
             $clientPhone = ClientPhone::find()->where(['phone' => $client_phone_number])->orderBy(['id' => SORT_DESC])->limit(1)->one();
 
-            $department = DepartmentPhoneProject::find()->where(['dpp_phone_number' => $incoming_phone_number, 'dpp_enable' => true])->limit(1)->one();
+            $departmentPhone = DepartmentPhoneProject::find()->where(['dpp_phone_number' => $incoming_phone_number, 'dpp_enable' => true])->limit(1)->one();
 
             //VarDumper::dump($department); exit;
 
-            if($department) {
-                $project = $department->dppProject;
-                $source = $department->dppSource;
+            if($departmentPhone) {
+                $project = $departmentPhone->dppProject;
+                $source = $departmentPhone->dppSource;
                 if($project && !$source) {
                     $source = Sources::find()->where(['project_id' => $project->id, 'default' => true])->one();
                     if($source) {
-                        $department->dpp_source_id = $source->id;
+                        $departmentPhone->dpp_source_id = $source->id;
                     }
                 }
 
-                $ivrEnable = (bool) $department->dpp_avr_enable; ////(bool) ($settings['call_avr_enable'] ?? $voice_gather_configs['use_voice_gather']);
+                $ivrEnable = (bool) $departmentPhone->dpp_ivr_enable; ////(bool) ($settings['call_avr_enable'] ?? $voice_gather_configs['use_voice_gather']);
 
             } /*else {
                 $source = Sources::findOne(['phone_number' => $incoming_phone_number]);
@@ -521,35 +521,37 @@ class CommunicationController extends ApiBaseController
                 }
             }*/
 
-            $callModel = $this->findOrCreateCall($callSid, $post['call'], $department);
+
+
+            $callModel = $this->findOrCreateCall($callSid, $post['call'], $departmentPhone);
 
 
 
             $agentDirectCallCheck = false;
 
-            if(!$department) {
+            if(!$departmentPhone) {
                 $agentDirectCallCheck = true;
             }
 
-            $get_data = Yii::$app->request->get();
-
-            if($department) {
-
+            if($departmentPhone) {
                 $callSourceTypeId = Call::SOURCE_GENERAL_LINE;
-                $callSession = null;
-
-                if($callSid && $ivrEnable) {
-                    $callSession = CallSession::findOne(['cs_cid' => $callSid]);
-                }
 
                 if($ivrEnable) {
 
-                    return $this->ivrService($callModel);
+                    $callSession = null;
+                    if($callSid) {
+                        $callSession = CallSession::findOne(['cs_cid' => $callSid]);
+                    }
 
+                    $ivrSelectedDigit = isset($post['call']['Digits']) ? (int) $post['call']['Digits'] : null;
+                    $ivrStep = (int) Yii::$app->request->get('step', 1);
+
+                    return $this->ivrService($callModel, $departmentPhone, $ivrStep, $ivrSelectedDigit);
 
 
                     // check if is first call or is redirect from Gather
-                    if ($callSession && isset($get_data['step']) && (int)$get_data['step'] === 1) {
+                    // $get_data = Yii::$app->request->get();
+                    /*if ($callSession && isset($get_data['step']) && (int)$get_data['step'] === 1) {
                         return $this->voiceGatherSteps($callSid, $source, $project, $client_phone_number, 1);
                     }
 
@@ -563,7 +565,7 @@ class CommunicationController extends ApiBaseController
 
                     if ($gatherDigits && $callSession && !$parentCallSid) {
                         return $this->actionVoiceGather();
-                    }
+                    }*/
                 }
 
 
@@ -1855,12 +1857,21 @@ class CommunicationController extends ApiBaseController
         return $call;
     }
 
-    protected function ivrService(Call $callModel, DepartmentPhoneProject $department, $step = 1)
+    protected function ivrService(Call $callModel, DepartmentPhoneProject $department, int $ivrStep, $ivrSelectedDigit)
     {
         $response = [];
 
+        //Yii::info('');
+        Yii::info(VarDumper::dumpAsString([
+            'callModel' => $callModel->attributes,
+            'department' => $department->attributes,
+            'ivrSelectedDigit' => $ivrSelectedDigit,
+            'ivrStep' => $ivrStep,
+
+        ], 10, false), 'info\API:Communication:ivrService');
+
         try {
-            $params_voice_gather = \Yii::$app->params['voice_gather'];
+            //$params_voice_gather = \Yii::$app->params['voice_gather'];
 
             $dParams = @json_decode($department->dpp_params, true);
             $ivrParas = $dParams['ivr'] ?? [];
@@ -1876,7 +1887,7 @@ class CommunicationController extends ApiBaseController
                 'project_id' => $callModel->c_project_id,
                 'client_phone_number' => $callModel->c_from,
                 'to_phone_number' => $callModel->c_to,
-                'step' => $step,
+                'step' => $ivrStep,
                 'call_end_point' => '',
             ];
 
@@ -1898,11 +1909,10 @@ class CommunicationController extends ApiBaseController
 
             $responseTwml = new VoiceResponse();
             $responseTwml->pause(['length' => 4]);
-            $entry_phrase = str_replace('{{project}}', $company, $ivrParas['entry_phrase']);
-            $responseTwml->say($entry_phrase, [
-                'language' => $ivrParas['entry_language'],
-                'voice' => $ivrParas['entry_voice'],
-            ]);
+
+            $entry_phrase = isset($ivrParas['entry_phrase']) ? str_replace('{{project}}', $company, $ivrParas['entry_phrase']) : 'Hello,';
+
+            $responseTwml->say($entry_phrase, ['language' => $ivrParas['entry_language'], 'voice' => $ivrParas['entry_voice']]);
 
             $gather = $responseTwml->gather([
                 'action' => '/v1/twilio/voice-gather/?step=2',
@@ -1911,17 +1921,29 @@ class CommunicationController extends ApiBaseController
                 'timeout' => 5,
                 //'actionOnEmptyResult' => true,
             ]);
-            foreach ($ivrParas['languages'] AS $langId => $langData) {
+
+            if(isset($ivrParas['steps']) && $ivrParas['steps']) {
+                foreach ($ivrParas['steps'] as $step) {
+                    $gather->say(', '.$step['say'] . ', ', ['language' => $step['language'], 'voice' => $step['voice']]);
+                    $gather->pause(['length' => 1]);
+                }
+            }
+
+            //$selectedDigit = (int) ($post['call']['Digits'] ?? 1);
+
+
+            /*foreach ($ivrParas['languages'] AS $langId => $langData) {
                 $gather->say(', '.$langData['say'] . ', ', [
                     'language' => $langData['language'],
                     'voice' => $langData['voice'],
                 ]);
                 $gather->pause(['length' => 1]);
-            }
+            }*/
+
             $responseTwml->say($ivrParas['error_phrase']);
             $responseTwml->redirect('/v1/twilio/voice-gather/?step=1', ['method' => 'POST']);
 
-            $response['twml'] = (string)$responseTwml;
+            $response['twml'] = (string) $responseTwml;
             $responseData = [
                 'status' => 200,
                 'name' => 'Success',
@@ -1933,12 +1955,12 @@ class CommunicationController extends ApiBaseController
         } catch (\Throwable $e) {
             $responseTwml = new VoiceResponse();
             $responseTwml->reject(['reason' => 'busy']);
-            $response['twml'] = (string)$responseTwml;
+            $response['twml'] = (string) $responseTwml;
             $responseData = [
                 'status' => 404,
                 'name' => 'Error',
                 'code' => 404,
-                'message' => 'Sales error: '. $e->getMessage(). "\n" . $e->getFile() . ':' . $e->getLine(),
+                'message' => 'Sales Communication error: '. $e->getMessage(). "\n" . $e->getFile() . ':' . $e->getLine(),
             ];
             $responseData['data']['response'] = $response;
         }
