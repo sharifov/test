@@ -1861,6 +1861,29 @@ class CommunicationController extends ApiBaseController
     {
         $response = [];
 
+
+        if($ivrStep === 2) {
+            /*switch ($ivrSelectedDigit) {
+                case 2: $this
+            }*/
+
+            $responseTwml = new VoiceResponse();
+            $responseTwml->pause(['length' => 2]);
+            $responseTwml->say('Selected number '.$ivrSelectedDigit,'. Goodbye! ');
+            //$responseTwml->redirect('/v1/twilio/voice-gather/?step=1', ['method' => 'POST']);
+
+            $response['twml'] = (string)$responseTwml;
+            $responseData = [
+                'status' => 200,
+                'name' => 'Success',
+                'code' => 0,
+                'message' => ''
+            ];
+            $responseData['data']['response'] = $response;
+
+            return $responseData;
+        }
+
         //Yii::info('');
         Yii::info(VarDumper::dumpAsString([
             'callModel' => $callModel->attributes,
