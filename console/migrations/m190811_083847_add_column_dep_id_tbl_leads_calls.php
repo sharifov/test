@@ -31,6 +31,9 @@ class m190811_083847_add_column_dep_id_tbl_leads_calls extends Migration
      */
     public function safeDown()
     {
+        $this->dropForeignKey('FK-leads_l_dep_id', '{{%leads}}');
+        $this->dropForeignKey('FK-call_c_dep_id', '{{%call}}');
+
         $this->dropColumn('{{%leads}}', 'l_dep_id');
         $this->dropColumn('{{%call}}', 'c_dep_id');
 

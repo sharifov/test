@@ -18,17 +18,19 @@ use yii\widgets\ActiveForm;
         ],
     ]); ?>
 
-    <?= $form->field($model, 'dpp_dep_id') ?>
-
-    <?= $form->field($model, 'dpp_project_id') ?>
+    <?= $form->field($model, 'dpp_id') ?>
 
     <?= $form->field($model, 'dpp_phone_number') ?>
 
+    <?= $form->field($model, 'dpp_project_id') ?>
+
+    <?= $form->field($model, 'dpp_dep_id') ?>
+
     <?= $form->field($model, 'dpp_source_id') ?>
 
-    <?= $form->field($model, 'dpp_params') ?>
+    <?php // echo $form->field($model, 'dpp_params') ?>
 
-    <?php // echo $form->field($model, 'dpp_avr_enable') ?>
+    <?php // echo $form->field($model, 'dpp_ivr_enable') ?>
 
     <?php // echo $form->field($model, 'dpp_enable') ?>
 

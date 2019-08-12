@@ -46,16 +46,14 @@ class DepartmentPhoneProjectController extends FController
 
     /**
      * Displays a single DepartmentPhoneProject model.
-     * @param integer $dpp_dep_id
-     * @param integer $dpp_project_id
-     * @param string $dpp_phone_number
+     * @param integer $id
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionView($dpp_dep_id, $dpp_project_id, $dpp_phone_number)
+    public function actionView($id)
     {
         return $this->render('view', [
-            'model' => $this->findModel($dpp_dep_id, $dpp_project_id, $dpp_phone_number),
+            'model' => $this->findModel($id),
         ]);
     }
 
@@ -69,7 +67,7 @@ class DepartmentPhoneProjectController extends FController
         $model = new DepartmentPhoneProject();
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'dpp_dep_id' => $model->dpp_dep_id, 'dpp_project_id' => $model->dpp_project_id, 'dpp_phone_number' => $model->dpp_phone_number]);
+            return $this->redirect(['view', 'id' => $model->dpp_id]);
         }
 
         return $this->render('create', [
@@ -80,18 +78,16 @@ class DepartmentPhoneProjectController extends FController
     /**
      * Updates an existing DepartmentPhoneProject model.
      * If update is successful, the browser will be redirected to the 'view' page.
-     * @param integer $dpp_dep_id
-     * @param integer $dpp_project_id
-     * @param string $dpp_phone_number
+     * @param integer $id
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionUpdate($dpp_dep_id, $dpp_project_id, $dpp_phone_number)
+    public function actionUpdate($id)
     {
-        $model = $this->findModel($dpp_dep_id, $dpp_project_id, $dpp_phone_number);
+        $model = $this->findModel($id);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'dpp_dep_id' => $model->dpp_dep_id, 'dpp_project_id' => $model->dpp_project_id, 'dpp_phone_number' => $model->dpp_phone_number]);
+            return $this->redirect(['view', 'id' => $model->dpp_id]);
         }
 
         return $this->render('update', [
@@ -102,15 +98,13 @@ class DepartmentPhoneProjectController extends FController
     /**
      * Deletes an existing DepartmentPhoneProject model.
      * If deletion is successful, the browser will be redirected to the 'index' page.
-     * @param integer $dpp_dep_id
-     * @param integer $dpp_project_id
-     * @param string $dpp_phone_number
+     * @param integer $id
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionDelete($dpp_dep_id, $dpp_project_id, $dpp_phone_number)
+    public function actionDelete($id)
     {
-        $this->findModel($dpp_dep_id, $dpp_project_id, $dpp_phone_number)->delete();
+        $this->findModel($id)->delete();
 
         return $this->redirect(['index']);
     }
@@ -118,15 +112,13 @@ class DepartmentPhoneProjectController extends FController
     /**
      * Finds the DepartmentPhoneProject model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
-     * @param integer $dpp_dep_id
-     * @param integer $dpp_project_id
-     * @param string $dpp_phone_number
+     * @param integer $id
      * @return DepartmentPhoneProject the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
-    protected function findModel($dpp_dep_id, $dpp_project_id, $dpp_phone_number)
+    protected function findModel($id)
     {
-        if (($model = DepartmentPhoneProject::findOne(['dpp_dep_id' => $dpp_dep_id, 'dpp_project_id' => $dpp_project_id, 'dpp_phone_number' => $dpp_phone_number])) !== null) {
+        if (($model = DepartmentPhoneProject::findOne($id)) !== null) {
             return $model;
         }
 

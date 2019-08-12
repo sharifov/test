@@ -10,12 +10,13 @@ use yii\db\ActiveRecord;
 /**
  * This is the model class for table "department_phone_project".
  *
+ * @property int $dpp_id
  * @property int $dpp_dep_id
  * @property int $dpp_project_id
  * @property string $dpp_phone_number
  * @property int $dpp_source_id
  * @property array $dpp_params
- * @property int $dpp_avr_enable
+ * @property int $dpp_ivr_enable
  * @property int $dpp_enable
  * @property int $dpp_updated_user_id
  * @property string $dpp_updated_dt
@@ -41,8 +42,9 @@ class DepartmentPhoneProject extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['dpp_dep_id', 'dpp_project_id', 'dpp_phone_number'], 'required'],
-            [['dpp_dep_id', 'dpp_project_id', 'dpp_source_id', 'dpp_avr_enable', 'dpp_enable', 'dpp_updated_user_id'], 'integer'],
+            [['dpp_project_id', 'dpp_phone_number'], 'required'],
+            [['dpp_dep_id', 'dpp_project_id', 'dpp_source_id', 'dpp_ivr_enable', 'dpp_enable', 'dpp_updated_user_id'], 'integer'],
+            [['dpp_phone_number'], 'unique'],
             [['dpp_params', 'dpp_updated_dt'], 'safe'],
             [['dpp_phone_number'], 'string', 'max' => 18],
             [['dpp_dep_id', 'dpp_project_id', 'dpp_phone_number'], 'unique', 'targetAttribute' => ['dpp_dep_id', 'dpp_project_id', 'dpp_phone_number']],
@@ -59,12 +61,13 @@ class DepartmentPhoneProject extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'dpp_dep_id' => 'ID',
-            'dpp_project_id' => 'Project ID',
+            'dpp_id' => 'ID',
             'dpp_phone_number' => 'Phone Number',
-            'dpp_source_id' => 'Source ID',
+            'dpp_dep_id' => 'Department',
+            'dpp_project_id' => 'Project',
+            'dpp_source_id' => 'Source',
             'dpp_params' => 'Params',
-            'dpp_avr_enable' => 'AVR Enable',
+            'dpp_ivr_enable' => 'IVR Enable',
             'dpp_enable' => 'Enable',
             'dpp_updated_user_id' => 'Updated User',
             'dpp_updated_dt' => 'Updated Date',
