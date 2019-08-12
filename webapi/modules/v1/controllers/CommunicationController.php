@@ -1949,11 +1949,11 @@ class CommunicationController extends ApiBaseController
                 $ivrSelectedDigit = (int) $ivrSelectedDigit;
 
                 switch ($ivrSelectedDigit) {
-                    case 1: $this->startSaleService($callModel, $department, $stepParams['digits'][$ivrSelectedDigit]);
+                    case 1: return $this->startSaleService($callModel, $department, $stepParams['digits'][$ivrSelectedDigit]);
                         break;
-                    case 2: $this->startExcangeService($callModel, $department, $stepParams['digits'][$ivrSelectedDigit]);
+                    case 2: return $this->startExcangeService($callModel, $department, $stepParams['digits'][$ivrSelectedDigit]);
                         break;
-                    case 3: $this->startSupportService($callModel, $department, $stepParams['digits'][$ivrSelectedDigit]);
+                    case 3: return $this->startSupportService($callModel, $department, $stepParams['digits'][$ivrSelectedDigit]);
                 }
 
                 $responseTwml = new VoiceResponse();
