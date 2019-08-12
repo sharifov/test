@@ -1828,7 +1828,7 @@ class CommunicationController extends ApiBaseController
             $call->c_call_sid = $calData['CallSid'] ?? null;
             $call->c_account_sid = $calData['AccountSid'] ?? null;
             $call->c_call_type_id = Call::CALL_TYPE_IN;
-            $call->c_call_status = $calData['CallStatus'] ?? Call::CALL_STATUS_RINGING;
+            $call->c_call_status = $calData['CallStatus'] ?? Call::CALL_STATUS_QUEUE;
             $call->c_com_call_id = $calData['c_com_call_id'] ?? null;
             $call->c_direction = $calData['Direction'] ?? null;
             $call->c_parent_call_sid = $calData['ParentCallSid'] ?? null;
@@ -1857,6 +1857,60 @@ class CommunicationController extends ApiBaseController
         return $call;
     }
 
+    protected function startSaleService(Call $callModel, DepartmentPhoneProject $department, $stepParams)
+    {
+        $responseTwml = new VoiceResponse();
+        $responseTwml->pause(['length' => 1]);
+        $responseTwml->say($stepParams['say'], ['language' => $stepParams['language'], 'voice' => $stepParams['voice']]);
+        $responseTwml->play($stepParams['play']);
+        $response['twml'] = (string)$responseTwml;
+        $responseData = [
+            'status' => 200,
+            'name' => 'Success',
+            'code' => 0,
+            'message' => '',
+            'data' => ['response' => $response]
+        ];
+        return $responseData;
+    }
+
+    protected function startExcangeService(Call $callModel, DepartmentPhoneProject $department, $stepParams)
+    {
+        $responseTwml = new VoiceResponse();
+        $responseTwml->pause(['length' => 1]);
+        $responseTwml->say($stepParams['say'], ['language' => $stepParams['language'], 'voice' => $stepParams['voice']]);
+        $responseTwml->play($stepParams['play']);
+        $response['twml'] = (string)$responseTwml;
+        $responseData = [
+            'status' => 200,
+            'name' => 'Success',
+            'code' => 0,
+            'message' => '',
+            'data' => ['response' => $response]
+        ];
+        return $responseData;
+    }
+
+    protected function startSupportService(Call $callModel, DepartmentPhoneProject $department, $stepParams)
+    {
+        $responseTwml = new VoiceResponse();
+        $responseTwml->pause(['length' => 1]);
+        $responseTwml->say($stepParams['say'], ['language' => $stepParams['language'], 'voice' => $stepParams['voice']]);
+        $responseTwml->play($stepParams['play']);
+        $response['twml'] = (string)$responseTwml;
+        $responseData = [
+            'status' => 200,
+            'name' => 'Success',
+            'code' => 0,
+            'message' => '',
+            'data' => ['response' => $response]
+        ];
+        return $responseData;
+    }
+
+
+
+
     protected function ivrService(Call $callModel, DepartmentPhoneProject $department, int $ivrStep, $ivrSelectedDigit)
     {
         $response = [];
@@ -1871,43 +1925,57 @@ class CommunicationController extends ApiBaseController
         ], 10, false), 'info\API:Communication:ivrService');
 
 
-        if($ivrStep === 2) {
-            /*switch ($ivrSelectedDigit) {
-                case 2: $this
-            }*/
-
-            $responseTwml = new VoiceResponse();
-            $responseTwml->pause(['length' => 2]);
-            $responseTwml->say('Selected number '.$ivrSelectedDigit . '. Goodbye! ');
-            //$responseTwml->reject(['reason' => 'busy']);
-            //$responseTwml->redirect('/v1/twilio/voice-gather/?step=1', ['method' => 'POST']);
-
-
-            $response['twml'] = (string) $responseTwml;
-            $responseData = [
-                'status' => 200,
-                'name' => 'Success',
-                'code' => 0,
-                'message' => ''
-            ];
-            $responseData['data']['response'] = $response;
-
-            return $responseData;
-        }
-
-
         try {
             //$params_voice_gather = \Yii::$app->params['voice_gather'];
 
             $dParams = @json_decode($department->dpp_params, true);
             $ivrParas = $dParams['ivr'] ?? [];
 
+            $stepParams = [];
+
+            if(isset($ivrParas['steps'][$ivrStep])) {
+                $stepParams = $ivrParas['steps'][$ivrStep];
+            }
+
+
             $company = '';
             if ($callModel->cProject && $callModel->cProject->name) {
                 $company = ' ' . strtolower($callModel->cProject->name);
             }
 
-            $dataSession = [
+
+            if($ivrStep === 2) {
+                switch ($ivrSelectedDigit) {
+                    case 1: $this->startSaleService($callModel, $department, $stepParams['digits'][$ivrSelectedDigit]);
+                        break;
+                    case 2: $this->startExcangeService($callModel, $department, $stepParams['digits'][$ivrSelectedDigit]);
+                        break;
+                    case 3: $this->startSupportService($callModel, $department, $stepParams['digits'][$ivrSelectedDigit]);
+                }
+
+                $responseTwml = new VoiceResponse();
+                //$responseTwml->pause(['length' => 2]);
+                //$responseTwml->say('Selected number '.$ivrSelectedDigit . '. Goodbye! ');
+                //$responseTwml->reject(['reason' => 'busy']);
+                $responseTwml->say($ivrParas['error_phrase'], ['language' => $ivrParas['entry_language'], 'voice' => $ivrParas['entry_voice']]);
+                $responseTwml->redirect('/v1/twilio/voice-gather/?step=1', ['method' => 'POST']);
+
+
+                $response['twml'] = (string) $responseTwml;
+                $responseData = [
+                    'status' => 200,
+                    'name' => 'Success',
+                    'code' => 0,
+                    'message' => '',
+                    'data' => ['response' => $response]
+                ];
+
+
+                return $responseData;
+            }
+
+
+            /*$dataSession = [
                 'call' => Yii::$app->request->post(),
                 'language' => 0,
                 'project_id' => $callModel->c_project_id,
@@ -1931,7 +1999,7 @@ class CommunicationController extends ApiBaseController
                     \Yii::error(VarDumper::dumpAsString($callSession->errors), 'API:CommunicationController:avrService:CallSession:save');
                     throw new \Exception('avrService: CallSession: can not save CallSession in db');
                 }
-            }
+            }*/
 
             $responseTwml = new VoiceResponse();
             $responseTwml->pause(['length' => 4]);
@@ -1948,23 +2016,11 @@ class CommunicationController extends ApiBaseController
                 //'actionOnEmptyResult' => true,
             ]);
 
-            if(isset($ivrParas['steps']) && $ivrParas['steps']) {
-                foreach ($ivrParas['steps'] as $step) {
-                    $gather->say(', '.$step['say'] . ', ', ['language' => $step['language'], 'voice' => $step['voice']]);
-                    $gather->pause(['length' => 1]);
-                }
+            if(isset($ivrParas['steps'][$ivrStep]) && $stepParams = $ivrParas['steps'][$ivrStep]) {
+                $gather->say(', '.$stepParams['say'] . ', ', ['language' => $stepParams['language'], 'voice' => $stepParams['voice']]);
+                $gather->pause(['length' => 1]);
             }
 
-            //$selectedDigit = (int) ($post['call']['Digits'] ?? 1);
-
-
-            /*foreach ($ivrParas['languages'] AS $langId => $langData) {
-                $gather->say(', '.$langData['say'] . ', ', [
-                    'language' => $langData['language'],
-                    'voice' => $langData['voice'],
-                ]);
-                $gather->pause(['length' => 1]);
-            }*/
 
             $responseTwml->say($ivrParas['error_phrase']);
             $responseTwml->redirect('/v1/twilio/voice-gather/?step=1', ['method' => 'POST']);
