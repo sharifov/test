@@ -103,7 +103,7 @@ class CallQueueJob extends BaseObject implements JobInterface
 
     public function getTtr()
     {
-        return 1 * 7;
+        return 1 * 15;
     }
 
     /*public function canRetry($attempt, $error)
