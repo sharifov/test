@@ -5,6 +5,7 @@ namespace common\models;
 use common\components\ChartTools;
 use common\components\CommunicationService;
 use DateTime;
+use sales\entities\cases\Cases;
 use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
@@ -51,8 +52,10 @@ use yii\helpers\VarDumper;
  * @property int $s_updated_user_id
  * @property string $s_created_dt
  * @property string $s_updated_dt
+ * @property int $s_case_id
  *
  * @property Employee $sCreatedUser
+ * @property Cases $sCase
  * @property Language $sLanguage
  * @property Lead $sLead
  * @property Project $sProject
@@ -131,7 +134,7 @@ class Sms extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['s_reply_id', 's_lead_id', 's_project_id', 's_type_id', 's_template_type_id', 's_communication_id', 's_delay', 's_priority', 's_status_id', 's_tw_num_segments', 's_created_user_id', 's_updated_user_id'], 'integer'],
+            [['s_reply_id', 's_lead_id', 's_project_id', 's_type_id', 's_template_type_id', 's_communication_id', 's_delay', 's_priority', 's_status_id', 's_tw_num_segments', 's_created_user_id', 's_updated_user_id', 's_case_id'], 'integer'],
             [['s_is_new', 's_is_deleted'], 'boolean'],
             [['s_phone_from', 's_phone_to'], 'required'],
             [['s_sms_text', 's_sms_data'], 'string'],
@@ -143,6 +146,7 @@ class Sms extends \yii\db\ActiveRecord
             [['s_tw_account_sid', 's_tw_message_sid'], 'string', 'max' => 40],
             [['s_tw_to_state', 's_tw_to_city', 's_tw_from_state', 's_tw_from_city'], 'string', 'max' => 30],
             [['s_tw_to_zip', 's_tw_from_zip'], 'string', 'max' => 10],
+            [['s_case_id'], 'exist', 'skipOnError' => true, 'targetClass' => Cases::class, 'targetAttribute' => ['s_case_id' => 'cs_id']],
             [['s_created_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['s_created_user_id' => 'id']],
             [['s_language_id'], 'exist', 'skipOnError' => true, 'targetClass' => Language::class, 'targetAttribute' => ['s_language_id' => 'language_id']],
             [['s_lead_id'], 'exist', 'skipOnError' => true, 'targetClass' => Lead::class, 'targetAttribute' => ['s_lead_id' => 'id']],
@@ -195,6 +199,7 @@ class Sms extends \yii\db\ActiveRecord
             's_updated_user_id' => 'Updated User ID',
             's_created_dt' => 'Created Dt',
             's_updated_dt' => 'Updated Dt',
+            's_case_id' => 'Case ID',
         ];
     }
 
@@ -246,6 +251,13 @@ class Sms extends \yii\db\ActiveRecord
         return self::TYPE_LIST[$this->s_type_id] ?? '-';
     }
 
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getSCase()
+    {
+        return $this->hasOne(Cases::class, ['cs_id' => 's_case_id']);
+    }
 
     /**
      * @return \yii\db\ActiveQuery

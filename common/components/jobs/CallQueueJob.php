@@ -11,6 +11,7 @@ use common\models\Call;
 use common\models\Department;
 use common\models\Employee;
 use common\models\Lead2;
+use sales\services\cases\CasesCreateService;
 use yii\base\BaseObject;
 use yii\helpers\VarDumper;
 use yii\queue\JobInterface;
@@ -21,11 +22,22 @@ use yii\queue\Queue;
  * This is the Job class for Call Queue.
  *
  * @property int $call_id
+ *
+ * @property CasesCreateService $casesCreateService
  */
 
 class CallQueueJob extends BaseObject implements JobInterface
 {
     public $call_id;
+
+    private $casesCreateService;
+
+    public function __construct(CasesCreateService $casesCreateService, $config = [])
+    {
+        parent::__construct($config);
+        $this->casesCreateService = $casesCreateService;
+    }
+
 
     /**
      * @param Queue $queue
@@ -64,9 +76,12 @@ class CallQueueJob extends BaseObject implements JobInterface
                             }
                         }
 
-                    } /*elseif((int) $call->c_dep_id === Department::DEPARTMENT_EXCHANGE || (int) $call->c_dep_id === Department::DEPARTMENT_SUPPORT) {
+                    } elseif((int) $call->c_dep_id === Department::DEPARTMENT_EXCHANGE || (int) $call->c_dep_id === Department::DEPARTMENT_SUPPORT) {
 
-                    }*/
+                        //$clientId =
+
+                        //$case = $this->casesCreateService->createByCall($clientId, $call->c_id, $call->c_project_id, $call->c_dep_id);
+                    }
 
                     $isCalled = false;
 

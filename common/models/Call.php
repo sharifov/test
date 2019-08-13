@@ -3,6 +3,7 @@
 namespace common\models;
 
 use sales\entities\AggregateRoot;
+use sales\entities\cases\Cases;
 use sales\entities\EventTrait;
 use Yii;
 use DateTime;
@@ -48,12 +49,15 @@ use yii\helpers\VarDumper;
  * @property float $c_price
  * @property int $c_source_type_id
  * @property int $c_dep_id
+ * @property int $c_case_id
  *
  * @property Employee $cCreatedUser
+ * @property Cases $cCase
  * @property Department $cDep
  * @property Lead $cLead
  * @property Lead2 $cLead2
  * @property Project $cProject
+ * @property Cases[] $cases
  */
 class Call extends \yii\db\ActiveRecord implements AggregateRoot
 {
@@ -262,7 +266,7 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
     {
         return [
             [['c_call_sid'], 'required'],
-            [['c_call_type_id', 'c_lead_id', 'c_created_user_id', 'c_com_call_id', 'c_project_id', 'c_call_duration', 'c_recording_duration', 'c_dep_id'], 'integer'],
+            [['c_call_type_id', 'c_lead_id', 'c_created_user_id', 'c_com_call_id', 'c_project_id', 'c_call_duration', 'c_recording_duration', 'c_dep_id', 'c_case_id'], 'integer'],
             [['c_price'], 'number'],
             [['c_is_new'], 'default', 'value' => true],
             [['c_is_new', 'c_is_deleted'], 'boolean'],
@@ -275,6 +279,7 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
             [['c_recording_url', 'c_uri'], 'string', 'max' => 200],
             [['c_timestamp', 'c_sequence_number'], 'string', 'max' => 40],
             [['c_error_message'], 'string', 'max' => 500],
+            [['c_case_id'], 'exist', 'skipOnError' => true, 'targetClass' => Cases::class, 'targetAttribute' => ['c_case_id' => 'cs_id']],
             [['c_created_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['c_created_user_id' => 'id']],
             [['c_dep_id'], 'exist', 'skipOnError' => true, 'targetClass' => Department::class, 'targetAttribute' => ['c_dep_id' => 'dep_id']],
             [['c_lead_id'], 'exist', 'skipOnError' => true, 'targetClass' => Lead::class, 'targetAttribute' => ['c_lead_id' => 'id']],
@@ -321,6 +326,7 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
             'c_price' => 'Price',
             'c_source_type_id' => 'Source Type',
             'c_dep_id' => 'Department ID',
+            'c_case_id' => 'Case ID',
         ];
     }
 
@@ -336,6 +342,19 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
                 'value' => date('Y-m-d H:i:s') //new Expression('NOW()'),
             ],
         ];
+    }
+
+    public function getCases()
+    {
+        return $this->hasMany(Cases::class, ['cs_call_id' => 'c_id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getCCase()
+    {
+        return $this->hasOne(Cases::class, ['cs_id' => 'c_case_id']);
     }
 
     /**
