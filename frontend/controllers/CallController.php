@@ -249,7 +249,7 @@ class CallController extends FController
         //$params['CallSearch']['statuses'] = [Call::CALL_STATUS_QUEUE];
         $dataProviderOnline = $searchModel2->searchUserCallMap($params);
 
-        $params['CallSearch']['statuses'] = [Call::CALL_STATUS_IN_PROGRESS, Call::CALL_STATUS_RINGING, Call::CALL_STATUS_QUEUE];
+        $params['CallSearch']['statuses'] = [Call::CALL_STATUS_IN_PROGRESS, Call::CALL_STATUS_RINGING, Call::CALL_STATUS_QUEUE, Call::CALL_STATUS_IVR];
         $dataProvider3 = $searchModel->searchUserCallMap($params);
 
         $params['CallSearch']['statuses'] = [Call::CALL_STATUS_COMPLETED, Call::CALL_STATUS_BUSY, Call::CALL_STATUS_FAILED, Call::CALL_STATUS_NO_ANSWER, Call::CALL_STATUS_CANCELED];

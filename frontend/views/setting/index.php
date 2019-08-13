@@ -41,7 +41,25 @@ $this->params['breadcrumbs'][] = $this->title;
                 'filter' => \common\models\Setting::TYPE_LIST
             ],
 
-            's_value',
+            [
+                'attribute' => 's_value',
+                'value' => function (\common\models\Setting $model) {
+
+                    $val = Html::encode($model->s_value);
+
+                    if($model->s_type == \common\models\Setting::TYPE_BOOL) {
+                        $val = $model->s_value ? '<span class="label label-success">true</span>' : '<span class="label label-danger">false</span>';
+                    }
+
+                    if($model->s_type == \common\models\Setting::TYPE_ARRAY) {
+                        $val = '<pre>' . ($model->s_value ? print_r(@json_decode($model->s_value, true), true) : '-') .'</pre>';
+                    }
+
+                    return $val;
+                },
+                'format' => 'raw',
+                //'filter' => false
+            ],
 
             [
                 'attribute' => 's_updated_user_id',

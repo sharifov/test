@@ -131,9 +131,7 @@ die;
 
         $this->repository->save($case);
 
-        return $this->render('blank');
-
-        die;
+        //return $this->render('blank'); die;
 
         $post = [
             'type' => 'voip_incoming',
@@ -167,6 +165,8 @@ die;
                 'FromState' => '',
             ]
         ];
+
+        echo json_encode($post); exit;
 
         /** @var CommunicationService $service */
         $service = Yii::createObject(CommunicationService::class);
