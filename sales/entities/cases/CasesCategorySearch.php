@@ -5,18 +5,19 @@ namespace sales\entities\cases;
 use yii\data\ActiveDataProvider;
 
 /**
- * Class CasesSearch
+ * Class CasesCategorySearch
  */
-class CasesSearch extends Cases
+class CasesCategorySearch extends CasesCategory
 {
+
     /**
      * @return array
      */
     public function rules(): array
     {
         return [
-            [['cs_id', 'cs_category', 'cs_status', 'cs_user_id', 'cs_lead_id', 'cs_call_id', 'cs_dep_id'], 'integer'],
-            [['cs_subject', 'cs_description', 'cs_created_dt'], 'safe'],
+            [['cc_key', 'cc_name'], 'string'],
+            [['cc_dep_id', 'cc_system'], 'integer'],
         ];
     }
 
@@ -26,7 +27,7 @@ class CasesSearch extends Cases
      */
     public function search($params): ActiveDataProvider
     {
-        $query = Cases::find();
+        $query = CasesCategory::find();
 
         // add conditions that should always apply here
 
@@ -44,18 +45,12 @@ class CasesSearch extends Cases
 
         // grid filtering conditions
         $query->andFilterWhere([
-            'cs_id' => $this->cs_id,
-            'cs_category' => $this->cs_category,
-            'cs_status' => $this->cs_status,
-            'cs_user_id' => $this->cs_user_id,
-            'cs_lead_id' => $this->cs_lead_id,
-            'cs_call_id' => $this->cs_call_id,
-            'cs_dep_id' => $this->cs_dep_id,
-            'cs_created_dt' => $this->cs_created_dt,
+            'cc_dep_id' => $this->cc_dep_id,
+            'cc_system' => $this->cc_system,
         ]);
 
-        $query->andFilterWhere(['like', 'cs_subject', $this->cs_subject])
-            ->andFilterWhere(['like', 'cs_description', $this->cs_description]);
+        $query->andFilterWhere(['like', 'cc_key', $this->cc_key])
+            ->andFilterWhere(['like', 'cc_name', $this->cc_name]);
 
         return $dataProvider;
     }

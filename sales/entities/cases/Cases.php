@@ -3,8 +3,11 @@
 namespace sales\entities\cases;
 
 use common\models\Call;
+use common\models\Client;
+use common\models\Department;
 use common\models\Employee;
 use common\models\Lead;
+use common\models\Project;
 use sales\entities\cases\events\CasesFollowUpStatusEvent;
 use sales\entities\cases\events\CasesOwnerChangeEvent;
 use sales\entities\cases\events\CasesOwnerFreedEvent;
@@ -28,8 +31,19 @@ use yii\db\ActiveRecord;
  * @property int $cs_user_id
  * @property int $cs_lead_id
  * @property int $cs_call_id
- * @property int $cs_depart_id
+ * @property int $cs_dep_id
+ * @property int $cs_project_id
+ * @property int $cs_client_id
  * @property string $cs_created_dt
+ * @property string $cs_updated_dt
+ *
+ * @property CasesCategory $category
+ * @property Department $department
+ * @property Lead $lead
+ * @property Call $call
+ * @property Employee $owner
+ * @property CasesStatusLog $lastLogRecord
+ * @property Client $client
  */
 class Cases extends ActiveRecord
 {
@@ -42,13 +56,24 @@ class Cases extends ActiveRecord
     public const STATUS_SOLVED      = 10;
     public const STATUS_TRASH       = 11;
 
-    public const STATUS_LIST = [
-        self::STATUS_PENDING        => 'Pending',
-        self::STATUS_PROCESSING     => 'Processing',
-        self::STATUS_FOLLOW_UP      => 'Follow Up',
-        self::STATUS_SOLVED         => 'Solved',
-        self::STATUS_TRASH          => 'Trash',
-    ];
+    /**
+     * @param int $clientId
+     * @param int $callId
+     * @param int $projectId
+     * @param int|null $depId
+     * @return Cases
+     */
+    public static function createByCall(int $clientId, int $callId, int $projectId, ?int $depId): self
+    {
+        $case = new static();
+        $case->cs_client_id = $clientId;
+        $case->cs_call_id = $callId;
+        $case->cs_project_id = $projectId;
+        $case->cs_dep_id = $depId;
+        $case->setStatus(self::STATUS_PENDING);
+        $case->cs_created_dt = date('Y-m-d H:i:s');
+        return $case;
+    }
 
     public function pending(): void
     {
@@ -75,7 +100,7 @@ class Cases extends ActiveRecord
         if ($this->isProcessing() && $this->isOwner($userId)) {
             throw new \DomainException('Case is already processing to this user');
         }
-        $this->recordEvent(new CasesProcessingStatusEvent($this, $this->cs_status, $this->cs_user_id, $userId));
+        $this->recordEvent(new CasesProcessingStatusEvent($this, $this->cs_status, $userId, $this->cs_user_id));
         if (!$this->isOwner($userId)) {
             $this->setOwner($userId);
         }
@@ -196,12 +221,12 @@ class Cases extends ActiveRecord
      */
     private function setStatus(int $status): void
     {
-        if (!array_key_exists($status, self::STATUS_LIST)) {
+        if (!array_key_exists($status, CasesStatusHelper::STATUS_LIST)) {
             throw new \InvalidArgumentException('Invalid Status');
         }
         if ($this->cs_status !== $status) {
             /** prob. for logs */
-            $this->recordEvent(new CasesStatusChangeEvent($this, $this->cs_status, $status, $this->cs_user_id));
+            $this->recordEvent(new CasesStatusChangeEvent($this, $status, $this->cs_status, $this->cs_user_id));
         }
         $this->cs_status = $status;
     }
@@ -230,6 +255,45 @@ class Cases extends ActiveRecord
         return $this->hasOne(Lead::class, ['id' => 'cs_lead_id']);
     }
 
+    /**
+     * @return ActiveQuery
+     */
+    public function getDepartment(): ActiveQuery
+    {
+        return $this->hasOne(Department::class, ['dep_id' => 'cs_dep_id']);
+    }
+
+    /**
+     * @return ActiveQuery
+     */
+    public function getCategory(): ActiveQuery
+    {
+        return $this->hasOne(CasesCategory::class, ['cc_key' => 'cs_category']);
+    }
+
+    /**
+     * @return ActiveQuery
+     */
+    public function getLastLogRecord(): ActiveQuery
+    {
+        return $this->hasOne(CasesStatusLog::class, ['csl_case_id' => 'cs_id'])->orderBy(['csl_id' => SORT_DESC]);
+    }
+
+    /**
+     * @return ActiveQuery
+     */
+    public function getClient(): ActiveQuery
+    {
+        return $this->hasOne(Client::class, ['id' => 'cs_client_id']);
+    }
+
+    /**
+     * @return ActiveQuery
+     */
+    public function getProject(): ActiveQuery
+    {
+        return $this->hasOne(Project::class, ['id' => 'cs_project_id']);
+    }
 
     /**
      * @return array
@@ -239,7 +303,7 @@ class Cases extends ActiveRecord
         return [
             [['cs_subject', 'cs_category', 'cs_status'], 'required'],
             [['cs_description'], 'string'],
-            [['cs_category', 'cs_status', 'cs_user_id', 'cs_lead_id', 'cs_call_id', 'cs_depart_id'], 'integer'],
+            [['cs_category', 'cs_status', 'cs_user_id', 'cs_lead_id', 'cs_call_id', 'cs_dep_id'], 'integer'],
             [['cs_created_dt'], 'safe'],
             [['cs_subject'], 'string', 'max' => 255],
         ];
@@ -251,25 +315,20 @@ class Cases extends ActiveRecord
     public function attributeLabels(): array
     {
         return [
-            'cs_id' => 'Cs ID',
-            'cs_subject' => 'Cs Subject',
-            'cs_description' => 'Cs Description',
-            'cs_category' => 'Cs Category',
-            'cs_status' => 'Cs Status',
-            'cs_user_id' => 'Cs User ID',
-            'cs_lead_id' => 'Cs Lead ID',
-            'cs_call_id' => 'Cs Call ID',
-            'cs_depart_id' => 'Cs Depart ID',
-            'cs_created_dt' => 'Cs Created Dt',
+            'cs_id' => 'ID',
+            'cs_subject' => 'Subject',
+            'cs_description' => 'Description',
+            'cs_category' => 'Category',
+            'cs_status' => 'Status',
+            'cs_user_id' => 'User',
+            'cs_lead_id' => 'Lead',
+            'cs_call_id' => 'Call',
+            'cs_dep_id' => 'Depart',
+            'cs_project_id' => 'Project',
+            'cs_client_id' => 'Client',
+            'cs_created_dt' => 'Created',
+            'cs_updated_dt' => 'Updated',
         ];
-    }
-
-    /**
-     * @return CasesQuery
-     */
-    public static function find(): CasesQuery
-    {
-        return new CasesQuery(get_called_class());
     }
 
     /**

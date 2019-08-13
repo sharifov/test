@@ -3,9 +3,9 @@
 use yii\db\Migration;
 
 /**
- * Class m190811_081837_create_table_cases
+ * Class m190811_181837_create_table_cases
  */
-class m190811_081837_create_table_cases extends Migration
+class m190811_181837_create_table_cases extends Migration
 {
     /**
      * {@inheritdoc}
@@ -28,6 +28,8 @@ class m190811_081837_create_table_cases extends Migration
             'cs_lead_id' => $this->integer(),
             'cs_call_id' => $this->integer(),
             'cs_dep_id' => $this->integer(),
+            'cs_project_id' => $this->integer(),
+            'cs_client_id' => $this->integer(),
             'cs_created_dt' => $this->dateTime(),
             'cs_updated_dt' => $this->dateTime(),
         ], $tableOptions);
@@ -35,6 +37,7 @@ class m190811_081837_create_table_cases extends Migration
         $this->createTable('{{%cases_category}}', [
             'cc_key' => $this->string(50)->notNull(),
             'cc_name' => $this->string(255)->notNull(),
+            'cc_dep_id' => $this->integer()->notNull(),
             'cc_system' => $this->boolean()->defaultValue(false),
             'cc_created_dt' => $this->dateTime(),
             'cc_updated_dt' => $this->dateTime(),
@@ -64,6 +67,16 @@ class m190811_081837_create_table_cases extends Migration
             '{{%employees}}',
             'id',
             'SET NULL',
+            'CASCADE'
+        );
+
+        $this->addForeignKey(
+            'FK-cases_category_cc_dep_id',
+            '{{%cases_category}}',
+            'cc_dep_id',
+            '{{%department}}',
+            'dep_id',
+            'CASCADE',
             'CASCADE'
         );
 
@@ -103,6 +116,16 @@ class m190811_081837_create_table_cases extends Migration
             'cs_dep_id',
             '{{%department}}',
             'dep_id',
+            'SET NULL',
+            'CASCADE'
+        );
+
+        $this->addForeignKey(
+            'FK-cases_cs_client_id',
+            '{{%cases}}',
+            'cs_client_id',
+            '{{%clients}}',
+            'id',
             'SET NULL',
             'CASCADE'
         );

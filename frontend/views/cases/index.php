@@ -2,6 +2,8 @@
 
 use yii\helpers\Html;
 use yii\grid\GridView;
+use sales\entities\cases\Cases;
+use \sales\entities\cases\CasesStatusHelper;
 
 /* @var $this yii\web\View */
 /* @var $searchModel sales\entities\cases\CasesSearch */
@@ -15,7 +17,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <h1><?= Html::encode($this->title) ?></h1>
 
     <p>
-        <?= Html::a('Create Cases', ['create'], ['class' => 'btn btn-success']) ?>
+        <?php //= Html::a('Create Cases', ['create'], ['class' => 'btn btn-success']) ?>
     </p>
 
     <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
@@ -24,20 +26,37 @@ $this->params['breadcrumbs'][] = $this->title;
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'columns' => [
-            ['class' => 'yii\grid\SerialColumn'],
+            ['class' => yii\grid\SerialColumn::class],
 
             'cs_id',
             'cs_subject',
             'cs_description:ntext',
             'cs_category',
-            'cs_status',
+            [
+                'attribute' => 'cs_status',
+                'value' => function (Cases $model) {
+                    $value = CasesStatusHelper::getName($model->cs_status);
+                    $str = '<span class="label ' . CasesStatusHelper::getClass($model->cs_status) . '">' . $value . '</span>';
+                    if ($model->lastLogRecord) {
+                        $str .= '<br><br><span class="label label-default">' . Yii::$app->formatter->asDatetime(strtotime($model->lastLogRecord->csl_start_dt)) . '</span>';
+                        $str .= '<br>';
+                        $str .= $model->lastLogRecord ? Yii::$app->formatter->asRelativeTime(strtotime($model->lastLogRecord->csl_start_dt)) : '';
+                    }
+                    return $str;
+                },
+                'format' => 'raw',
+                'filter' => CasesStatusHelper::STATUS_LIST,
+                'contentOptions' => [
+                    'class' => 'text-center'
+                ]
+            ],
             //'cs_user_id',
             //'cs_lead_id',
             //'cs_call_id',
             //'cs_depart_id',
             //'cs_created_dt',
 
-            ['class' => 'yii\grid\ActionColumn'],
+            ['class' => yii\grid\ActionColumn::class],
         ],
     ]); ?>
 

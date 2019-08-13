@@ -26,9 +26,10 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'cs_call_id')->textInput() ?>
 
-    <?= $form->field($model, 'cs_depart_id')->textInput() ?>
+    <?= $form->field($model, 'cs_dep_id')->textInput() ?>
 
-    <?= $form->field($model, 'cs_created_dt')->textInput() ?>
+    <?= $form->field($model, 'cs_client_id')->textInput() ?>
+
 
     <div class="form-group">
         <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>

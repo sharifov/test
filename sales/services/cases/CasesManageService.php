@@ -28,6 +28,22 @@ class CasesManageService
     }
 
     /**
+     * For system
+     *
+     * @param int $caseId
+     * @param int $userId
+     */
+    public function assign(int $caseId, int $userId): void
+    {
+        $case = $this->casesRepository->find($caseId);
+        $user = $this->userRepository->find($userId);
+        $case->processing($user->id);
+        $this->casesRepository->save($case);
+    }
+
+    /**
+     * For user
+     *
      * @param int $caseId
      * @param int $userId
      */
@@ -43,6 +59,8 @@ class CasesManageService
     }
 
     /**
+     * For user
+     *
      * @param int $caseId
      * @param int $userId
      */

@@ -9,28 +9,28 @@ use sales\entities\cases\Cases;
  *
  * @property Cases $cases
  * @property int $oldStatus
- * @property int|null $oldOwnerId
  * @property int $newOwnerId
+ * @property int|null $oldOwnerId
  */
 class CasesProcessingStatusEvent
 {
     public $cases;
     public $oldStatus;
-    public $oldOwnerId;
     public $newOwnerId;
+    public $oldOwnerId;
 
     /**
      * CasesProcessingStatusEvent constructor.
      * @param Cases $cases
      * @param int $oldStatus
-     * @param int|null $oldOwnerId
      * @param int $newOwnerId
+     * @param int|null $oldOwnerId
      */
-    public function __construct(Cases $cases, int $oldStatus, ?int $oldOwnerId, int $newOwnerId)
+    public function __construct(Cases $cases, int $oldStatus, int $newOwnerId, ?int $oldOwnerId)
     {
         $this->cases = $cases;
         $this->oldStatus = $oldStatus;
-        $this->oldOwnerId = $oldOwnerId;
         $this->newOwnerId = $newOwnerId;
+        $this->oldOwnerId = $oldOwnerId;
     }
 }

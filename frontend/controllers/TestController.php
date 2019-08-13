@@ -17,15 +17,19 @@ use common\models\UserConnection;
 use common\models\UserProfile;
 use sales\dispatchers\DeferredEventDispatcher;
 use sales\dispatchers\EventDispatcher;
+use sales\entities\cases\Cases;
 use sales\forms\api\communication\voice\finish\FinishForm;
 use sales\forms\api\communication\voice\record\RecordForm;
 use sales\repositories\airport\AirportRepository;
+use sales\repositories\cases\CasesRepository;
+use sales\repositories\cases\CasesStatusLogRepository;
 use sales\repositories\lead\LeadBadgesRepository;
 use sales\repositories\lead\LeadRepository;
 use sales\repositories\Repository;
 use sales\repositories\TestRepository;
 use sales\services\api\communication\CommunicationService;
 use sales\services\TransactionManager;
+use SebastianBergmann\CodeCoverage\Report\PHP;
 use Twilio\TwiML\VoiceResponse;
 use Yii;
 use yii\caching\DbDependency;
@@ -40,25 +44,25 @@ use yii\queue\Queue;
 
 /**
  * Test controller
- * @property LeadRepository $leadRepository
+ * @property CasesRepository $repository
  * @property DeferredEventDispatcher $dispatcher
  * @property TransactionManager $transactionManager
  */
 class TestController extends FController
 {
-    private $leadRepository;
+    private $repository;
     private $dispatcher;
     private $transactionManager;
 
     public function __construct(
         $id,
         $module,
-        LeadRepository $leadRepository,
+        CasesRepository $repository,
         DeferredEventDispatcher $dispatcher,
         TransactionManager $transactionManager, $config = []
     )
     {
-        $this->leadRepository = $leadRepository;
+        $this->repository = $repository;
         $this->dispatcher = $dispatcher;
         $this->transactionManager= $transactionManager;
         parent::__construct($id, $module, $config);
@@ -90,8 +94,42 @@ class TestController extends FController
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
 
+    public function test(Lead $lead)
+    {
+        $lead->client->first_name = '1';
+
+    }
+
     public function actionT()
     {
+die;
+
+//        $case->processing(294);
+//        $case->followUp();
+        $case = Cases::createSystem();
+
+
+//        $case = Cases::findOne(17);
+
+        $case->followUp();
+
+        $case->processing(16);
+
+        $case->followUp();
+
+        $case->processing(45);
+
+        $case->trash();
+
+        $case->processing(64);
+
+        $case->solved();
+
+        $case->processing(23);
+
+//        VarDumper::dump($case->releaseEvents());die;
+
+        $this->repository->save($case);
 
         return $this->render('blank');
 

@@ -5,14 +5,13 @@ namespace frontend\controllers;
 use Yii;
 use sales\entities\cases\Cases;
 use sales\entities\cases\CasesSearch;
-use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 
 /**
  * CasesController implements the CRUD actions for Cases model.
  */
-class CasesController extends Controller
+class CasesController extends FController
 {
     /**
      * {@inheritdoc}

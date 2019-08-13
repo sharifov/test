@@ -132,6 +132,16 @@ $isSuperAdmin = $user->canRole('superadmin');
             $menuItems = \yii\helpers\ArrayHelper::merge($menuItems, $menuLItems);
         }
 
+        $menuItems[] = [
+            'label' => 'Cases',
+            'url' => 'javascript:',
+            'icon' => 'user',
+            'items' => [
+                ['label' => 'Cases', 'url' => ['/cases'], 'icon' => 'user'],
+                ['label' => 'Cases categories', 'url' => ['/cases-category'], 'icon' => 'users'],
+                ['label' => 'Cases status history', 'url' => ['/cases-status-log'], 'icon' => 'bars'],
+            ]
+        ];
 
         $menuItems[] = [
             'label' => 'Users',

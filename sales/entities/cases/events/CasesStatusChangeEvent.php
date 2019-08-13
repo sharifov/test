@@ -6,30 +6,31 @@ use sales\entities\cases\Cases;
 
 /**
  * Class CasesStatusChangeEvent
- * @property Cases $cases
- * @property int|null $oldStatus
- * @property int $newStatus
+ *
+ * @property Cases $case
+ * @property int $toStatus
+ * @property int|null $fromStatus
  * @property int|null $ownerId
  */
 class CasesStatusChangeEvent
 {
-    public $cases;
-    public $oldStatus;
-    public $newStatus;
+    public $case;
+    public $toStatus;
+    public $fromStatus;
     public $ownerId;
 
     /**
      * CasesStatusChangeEvent constructor.
-     * @param Cases $cases
-     * @param int|null $oldStatus
-     * @param int $newStatus
+     * @param Cases $case
+     * @param int $toStatus
+     * @param int|null $fromStatus
      * @param int|null $ownerId
      */
-    public function __construct(Cases $cases, ?int $oldStatus, int $newStatus, ?int $ownerId)
+    public function __construct(Cases $case, int $toStatus, ?int $fromStatus, ?int $ownerId)
     {
-        $this->cases = $cases;
-        $this->oldStatus = $oldStatus;
-        $this->newStatus = $newStatus;
+        $this->case = $case;
+        $this->toStatus = $toStatus;
+        $this->fromStatus = $fromStatus;
         $this->ownerId = $ownerId;
     }
 
