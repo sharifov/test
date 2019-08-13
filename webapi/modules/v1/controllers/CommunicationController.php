@@ -2029,11 +2029,16 @@ class CommunicationController extends ApiBaseController
             }*/
 
             $responseTwml = new VoiceResponse();
-            $responseTwml->pause(['length' => 4]);
 
-            $entry_phrase = isset($ivrParams['entry_phrase']) ? str_replace('{{project}}', $company, $ivrParams['entry_phrase']) : 'Hello,';
+            if(isset($ivrParams['entry_pause']) && $ivrParams['entry_pause']) {
+                $responseTwml->pause(['length' => $ivrParams['entry_pause']]);
+            }
 
-            $responseTwml->say($entry_phrase, ['language' => $ivrParams['entry_language'], 'voice' => $ivrParams['entry_voice']]);
+            $entry_phrase = isset($ivrParams['entry_phrase']) ? str_replace('{{project}}', $company, $ivrParams['entry_phrase']) : null;
+
+            if($entry_phrase) {
+                $responseTwml->say($entry_phrase, ['language' => $ivrParams['entry_language'], 'voice' => $ivrParams['entry_voice']]);
+            }
 
             $gather = $responseTwml->gather([
                 'action' => '/v1/twilio/voice-gather/?step=2',
@@ -2044,21 +2049,23 @@ class CommunicationController extends ApiBaseController
             ]);
 
 
-            if(isset($ivrParams['steps'][$ivrStep]['before_say']) && $ivrParams['steps'][$ivrStep]['before_say']) {
-                $gather->say($ivrParams['steps'][$ivrStep]['before_say'], ['language' => $ivrParams['steps'][$ivrStep]['language'], 'voice' => $ivrParams['steps'][$ivrStep]['voice']]);
+            $stepParams = $ivrParams['steps'][$ivrStep] ?? [];
+
+            if(isset($stepParams['before_say']) && $stepParams['before_say']) {
+                $gather->say($ivrParams['steps'][$ivrStep]['before_say'], ['language' => $stepParams['language'], 'voice' => $stepParams['voice']]);
             }
 
-            if(isset($ivrParams['steps'][$ivrStep]['choice']) && $stepParams = $ivrParams['steps'][$ivrStep]['choice']) {
-                foreach ($ivrParams['steps'][$ivrStep]['choice'] as $sayItem) {
-                    $gather->say(', ' . $sayItem['say'] . ', ', ['language' => $sayItem['language'], 'voice' => $sayItem['voice']]);
+            if(isset($stepParams['choice']) && $stepParams['choice']) {
+                foreach ($stepParams['choice'] as $sayItem) {
+                    $gather->say(', ' . $sayItem['say'] . ', ', ['language' => $stepParams['language'], 'voice' => $stepParams['voice']]);
                     if(isset($sayItem['pause']) && $sayItem['pause']) {
                         $gather->pause(['length' => $sayItem['pause']]);
                     }
                 }
             }
 
-            if(isset($ivrParams['steps'][$ivrStep]['after_say']) && $ivrParams['steps'][$ivrStep]['after_say']) {
-                $gather->say($ivrParams['steps'][$ivrStep]['after_say'], ['language' => $ivrParams['steps'][$ivrStep]['language'], 'voice' => $ivrParams['steps'][$ivrStep]['voice']]);
+            if(isset($stepParams['after_say']) && $stepParams['after_say']) {
+                $gather->say($stepParams['after_say'], ['language' => $stepParams['language'], 'voice' => $stepParams['voice']]);
             }
 
 
