@@ -43,6 +43,12 @@ class CallQueueJob extends BaseObject implements JobInterface
 
                 $call = Call::findOne($this->call_id);
                 if($call) {
+
+                    if($call->c_call_status == Call::CALL_STATUS_IVR) {
+                        $call->c_call_status = Call::CALL_STATUS_QUEUE;
+                        $call->update();
+                    }
+
                     if((int) $call->c_dep_id === Department::DEPARTMENT_SALES) {
                         if ($call->c_from) {
                             $lead = Lead2::findLastLeadByClientPhone($call->c_from, $call->c_project_id);
@@ -95,10 +101,10 @@ class CallQueueJob extends BaseObject implements JobInterface
         return false;
     }
 
-    /*public function getTtr()
+    public function getTtr()
     {
-        return 1 * 60;
-    }*/
+        return 1 * 7;
+    }
 
     /*public function canRetry($attempt, $error)
     {

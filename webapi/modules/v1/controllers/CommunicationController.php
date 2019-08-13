@@ -1906,47 +1906,15 @@ class CommunicationController extends ApiBaseController
         return $responseData;
     }
 
-    protected function startExcangeService(Call $callModel, DepartmentPhoneProject $department, $stepParams)
-    {
-        $responseTwml = new VoiceResponse();
-        $responseTwml->pause(['length' => 1]);
-        $responseTwml->say($stepParams['say'], ['language' => $stepParams['language'], 'voice' => $stepParams['voice']]);
-        $responseTwml->play($stepParams['play']);
-        $response['twml'] = (string)$responseTwml;
-        $responseData = [
-            'status' => 200,
-            'name' => 'Success',
-            'code' => 0,
-            'message' => '',
-            'data' => ['response' => $response]
-        ];
-        return $responseData;
-    }
 
-    protected function startSupportService(Call $callModel, DepartmentPhoneProject $department, $stepParams)
-    {
-        $responseTwml = new VoiceResponse();
-        $responseTwml->pause(['length' => 1]);
-        $responseTwml->say($stepParams['say'], ['language' => $stepParams['language'], 'voice' => $stepParams['voice']]);
-        $responseTwml->play($stepParams['play']);
-        $response['twml'] = (string)$responseTwml;
-        $responseData = [
-            'status' => 200,
-            'name' => 'Success',
-            'code' => 0,
-            'message' => '',
-            'data' => ['response' => $response]
-        ];
-        return $responseData;
-    }
-
-
-
-
-
-
-
-    protected function ivrService(Call $callModel, DepartmentPhoneProject $department, int $ivrStep, ?int $ivrSelectedDigit)
+    /**
+     * @param Call $callModel
+     * @param DepartmentPhoneProject $department
+     * @param int $ivrStep
+     * @param int|null $ivrSelectedDigit
+     * @return array
+     */
+    protected function ivrService(Call $callModel, DepartmentPhoneProject $department, int $ivrStep, ?int $ivrSelectedDigit): array
     {
         $response = [];
 
@@ -2008,33 +1976,6 @@ class CommunicationController extends ApiBaseController
                 return $responseData;
             }
 
-
-            /*$dataSession = [
-                'call' => Yii::$app->request->post(),
-                'language' => 0,
-                'project_id' => $callModel->c_project_id,
-                'client_phone_number' => $callModel->c_from,
-                'to_phone_number' => $callModel->c_to,
-                'step' => $ivrStep,
-                'call_end_point' => '',
-            ];
-
-            $callSession = CallSession::find()->where(['cs_cid' => $callModel->c_call_sid])->limit(1)->one();
-
-            if (!$callSession) {
-                $callSession = new CallSession();
-                $callSession->cs_cid = $callModel->c_call_sid;
-                $callSession->cs_call_id = $callModel->c_id;
-                $callSession->cs_step = 2;
-                $callSession->cs_project_id = $callModel->c_project_id;
-                $callSession->cs_lang_id = 0;
-                $callSession->cs_data_params = serialize($dataSession);
-                if (!$callSession->save()) {
-                    \Yii::error(VarDumper::dumpAsString($callSession->errors), 'API:CommunicationController:avrService:CallSession:save');
-                    throw new \Exception('avrService: CallSession: can not save CallSession in db');
-                }
-            }*/
-
             if($callModel && $callModel->c_call_status != Call::CALL_STATUS_IVR) {
                 $callModel->c_call_status = Call::CALL_STATUS_IVR;
                 $callModel->update();
@@ -2067,9 +2008,14 @@ class CommunicationController extends ApiBaseController
                 $gather->say($ivrParams['steps'][$ivrStep]['before_say'], ['language' => $stepParams['language'], 'voice' => $stepParams['voice']]);
             }
 
+            $after_say = '';
+            if(isset($stepParams['after_say']) && $stepParams['after_say']) {
+                $after_say = $stepParams['after_say'];
+            }
+
             if(isset($stepParams['choice']) && $stepParams['choice']) {
                 foreach ($stepParams['choice'] as $sayItem) {
-                    $gather->say(', ' . $sayItem['say'] . ', ', ['language' => $stepParams['language'], 'voice' => $stepParams['voice']]);
+                    $gather->say($sayItem['say'] . ' ' . $after_say, ['language' => $stepParams['language'], 'voice' => $stepParams['voice']]);
                     if(isset($sayItem['pause']) && $sayItem['pause']) {
                         $gather->pause(['length' => $sayItem['pause']]);
                     }
