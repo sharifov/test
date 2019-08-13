@@ -36,12 +36,12 @@ class CallQueueJob extends BaseObject implements JobInterface
     private $casesCreateService;
     private $clientManageService;
 
-    public function __construct(CasesCreateService $casesCreateService, ClientManageService $clientManageService, $config = [])
+    /*public function __construct(CasesCreateService $casesCreateService, ClientManageService $clientManageService, $config = [])
     {
         parent::__construct($config);
-        $this->casesCreateService = $casesCreateService;
-        $this->clientManageService = $clientManageService;
-    }
+        $this->casesCreateService = Yii::createObject(CasesCreateService::class);
+        $this->clientManageService = Yii::createObject(ClientManageService::class);
+    }*/
 
 
     /**
@@ -50,7 +50,12 @@ class CallQueueJob extends BaseObject implements JobInterface
      */
     public function execute($queue) : bool
     {
+
         try {
+
+            $this->casesCreateService = Yii::createObject(CasesCreateService::class);
+            $this->clientManageService = Yii::createObject(ClientManageService::class);
+
             if($this->call_id) {
 
                 $originalAgentId = null;
