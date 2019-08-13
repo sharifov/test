@@ -7,13 +7,10 @@
 
 namespace common\components\jobs;
 
-use common\components\SearchService;
 use common\models\Call;
 use common\models\Department;
 use common\models\Employee;
-use common\models\Lead;
 use common\models\Lead2;
-use common\models\UserProfile;
 use yii\base\BaseObject;
 use yii\helpers\VarDumper;
 use yii\queue\JobInterface;
@@ -101,11 +98,11 @@ class CallQueueJob extends BaseObject implements JobInterface
 
     public function getTtr()
     {
-        return 1 * 35;
+        return 1 * 20;
     }
 
-    /*public function canRetry($attempt, $error)
+    public function canRetry($attempt, $error)
     {
-        return ($attempt < 5) && ($error instanceof TemporaryException);
-    }*/
+        return ($attempt < 2) && ($error instanceof \Throwable);
+    }
 }
