@@ -1,6 +1,7 @@
 <?php
 namespace webapi\modules\v1\controllers;
 
+use common\components\jobs\CallQueueJob;
 use common\models\Call;
 use common\models\CallSession;
 use common\models\ClientPhone;
@@ -1857,15 +1858,21 @@ class CommunicationController extends ApiBaseController
         return $call;
     }
 
-    /**
-     * @param Call $callModel
-     * @param DepartmentPhoneProject $department
-     * @param int $ivrSelectedDigit
-     * @param array $stepParams
-     * @return array
-     */
+
     protected function startCallService(Call $callModel, DepartmentPhoneProject $department, int $ivrSelectedDigit, array $stepParams): array
     {
+
+        if(isset(Department::DEPARTMENT_LIST[$ivrSelectedDigit])) {
+            $callModel->c_dep_id = $ivrSelectedDigit;
+            if(!$callModel->update()) {
+                Yii::error(VarDumper::dumpAsString($callModel->errors), 'API:Communication:startCallService:Call:update');
+            }
+
+            $job = new CallQueueJob();
+            $job->call_id = $callModel->c_id;
+            $jobId = Yii::$app->queue_job->push($job);
+        }
+
         $choice = $stepParams['digits'][$ivrSelectedDigit] ?? null;
         $responseTwml = new VoiceResponse();
 

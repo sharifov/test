@@ -60,6 +60,7 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
     
     use EventTrait;
 
+    public const CALL_STATUS_IVR          = 'ivr';
     public const CALL_STATUS_QUEUE          = 'queued';
     public const CALL_STATUS_RINGING        = 'ringing';
     public const CALL_STATUS_IN_PROGRESS    = 'in-progress';
@@ -70,6 +71,7 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
     public const CALL_STATUS_CANCELED       = 'canceled';
 
     public const CALL_STATUS_LIST = [
+        self::CALL_STATUS_IVR         => 'IVR',
         self::CALL_STATUS_QUEUE         => 'Queued',
         self::CALL_STATUS_RINGING       => 'Ringing',
         self::CALL_STATUS_IN_PROGRESS   => 'In progress',
@@ -81,6 +83,7 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
     ];
 
     public const CALL_STATUS_LABEL_LIST = [
+        self::CALL_STATUS_IVR         => '<span class="label label-warning"><i class="fa fa-refresh fa-spin"></i> ' . self::CALL_STATUS_LIST[self::CALL_STATUS_IVR] . '</span>',
         self::CALL_STATUS_QUEUE         => '<span class="label label-warning"><i class="fa fa-refresh fa-spin"></i> ' . self::CALL_STATUS_LIST[self::CALL_STATUS_QUEUE] . '</span>',
         self::CALL_STATUS_RINGING       => '<span class="label label-warning"><i class="fa fa-spinner fa-spin"></i> ' . self::CALL_STATUS_LIST[self::CALL_STATUS_RINGING] . '</span>',
         self::CALL_STATUS_IN_PROGRESS   => '<span class="label label-success"><i class="fa fa-volume-control-phone"></i> ' . self::CALL_STATUS_LIST[self::CALL_STATUS_IN_PROGRESS] . '</span>',
@@ -92,6 +95,7 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
     ];
 
     public const CALL_STATUS_DESCRIPTION_LIST = [
+        self::CALL_STATUS_IVR           => 'The call is IVR.',
         self::CALL_STATUS_QUEUE         => 'The call is ready and waiting in line before going out.',
         self::CALL_STATUS_RINGING       => 'The call is currently ringing.',
         self::CALL_STATUS_IN_PROGRESS   => 'The call was answered and is actively in progress.',
@@ -588,6 +592,52 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
 
         return $lead ? $lead->id : null;
     }*/
+
+
+    /**
+     * @param Call $call
+     * @param int $user_id
+     * @return bool
+     */
+    public static function applyCallToAgent(Call $call, int $user_id): bool
+    {
+        try {
+            if ($call) {
+                if ($call->c_created_user_id) {
+                    return false;
+                }
+
+                $call->c_created_user_id = $user_id;
+                $call->update();
+
+                $agent = 'seller' . $user_id;
+                $res = \Yii::$app->communication->callRedirect($call->c_call_sid, 'client', $call->c_from, $agent);
+
+                if ($res && isset($res['error']) && $res['error'] === false) {
+                    if (isset($res['data']['is_error']) && $res['data']['is_error'] === true) {
+                        $call->c_call_status = self::CALL_STATUS_CANCELED;
+                        $call->c_created_user_id = null;
+                        $call->update();
+                        return false;
+                    }
+
+                    $call->c_call_status = self::CALL_STATUS_RINGING;
+                    $call->c_created_user_id = $user_id;
+                    $call->update();
+
+                    \Yii::info(VarDumper::dumpAsString($res), 'info\Call:applyCallToAgent:callRedirect');
+                    return true;
+                }
+
+                \Yii::warning('Error: ' . VarDumper::dumpAsString($res), 'Call:applyCallToAgent:callRedirect');
+
+            }
+
+        } catch (\Throwable $e) {
+            \Yii::error(VarDumper::dumpAsString([$e->getMessage(), $e->getFile(), $e->getLine()]), 'Call:applyCallToAgent');
+        }
+        return false;
+    }
 
 
     /**
