@@ -44,7 +44,7 @@ class CallQueueJob extends BaseObject implements JobInterface
                 $call = Call::findOne($this->call_id);
                 if($call) {
 
-                    if($call->c_call_status == Call::CALL_STATUS_IVR) {
+                    if((int) $call->c_call_status === Call::CALL_STATUS_IVR) {
                         $call->c_call_status = Call::CALL_STATUS_QUEUE;
                         $call->update();
                     }
@@ -92,8 +92,6 @@ class CallQueueJob extends BaseObject implements JobInterface
                     }
                 }
             }
-
-
 
         } catch (\Throwable $e) {
             Yii::error(VarDumper::dumpAsString($e->getMessage()), 'CallQueueJob:execute:catch');

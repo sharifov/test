@@ -689,14 +689,17 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
                 ->andWhere(['c_project_id' => $projectsIds])
                 ->andWhere(['IN', 'c_dep_id', $subQueryUd])
                 ->orderBy(['c_id' => SORT_ASC])
-                ->limit(20)
+                ->limit(5)
                 ->all();
 
             //->andWhere(['c_project_id' => $projectsIds])
 
             if ($calls) {
                 foreach ($calls as $call) {
-                    self::applyCallToAgent($call, $user->id);
+                    $isCalled = self::applyCallToAgent($call, $user->id);
+                    if($isCalled) {
+                        return true;
+                    }
                 }
             }
         } catch (\Throwable $e) {
