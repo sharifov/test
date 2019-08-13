@@ -69,34 +69,71 @@ class DepartmentPhoneProjectController extends FController
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
             return $this->redirect(['view', 'id' => $model->dpp_id]);
         } else {
-            $model->dpp_params = json_encode(['ivr' => [
-                'voice_gather_callback_url' => '/v1/twilio/voice-gather/',
-                'voice_gather_callback_url_v2' => '/v2/twilio/voice-gather/',
-                'entry_phrase' => ' Hello, and thank you for calling {{project}}.',
-                'entry_voice' => 'Polly.Joanna',
-                'entry_language' => 'en-US',
-                'error_phrase' => ' No options were selected',
-                'hold_play' => 'https://talkdeskapp.s3.amazonaws.com/production/audio_messages/folk_hold_music.mp3',
-                'steps' => [
-                    1 => [
-                        'language' => 'en-US',
-                        'digit' => 1,
-                        'voice' => 'Polly.Joanna',
-                        //'say' => ' To continue in English, press one. ',
-                        'say' => 'To speak with our sales representative, press 1. To reach a Customer Exchange agent, press 2. To reach a Customer Support agent, press 3.',
-                        'hold_voice' => ' Your call is very important to us.  Please hold, while you are connected to the next available agent. This call will be recorded for quality assurance.',
-                    ],
-                    2 => [
-                        'language' => 'ru-RU',
-                        'digit' => 2,
-                        'voice' => 'Polly.Tatyana',
-                        'say' => ' Для связи с отделом продаж, нажмите, 1. для связи со службой обмена, нажмите, два. для связи со службой поддержки, нажмите, три. ',
-                        'hold_voice' => ' Ваш звонок очень  важен для нас.  Пожалуйста, подождите соединения с нашим агентом.',
-                    ],
-                ],
-                'communication_voiceStatusCallbackUrl' => 'twilio/voice-status-callback',
-                'communication_recordingStatusCallbackUrl' => 'twilio/recording-status-callback',
-            ]]);
+            $model->dpp_params = '{
+  "ivr": {
+    "voice_gather_callback_url": "/v1/twilio/voice-gather/",
+    "voice_gather_callback_url_v2": "/v2/twilio/voice-gather/",
+    "communication_voiceStatusCallbackUrl": "twilio/voice-status-callback",
+    "communication_recordingStatusCallbackUrl": "twilio/recording-status-callback",
+    "entry_phrase": "Hello, and thank you for calling {{project}}.",
+    "entry_voice": "Polly.Joanna",
+    "entry_language": "en-US",
+    "entry_pause": 2,
+    "error_phrase": "No options selected",
+    "hold_play": "https://talkdeskapp.s3.amazonaws.com/production/audio_messages/folk_hold_music.mp3",
+    "steps": {
+      "1": {
+        "language": "en-US",
+        "voice": "Polly.Joanna",
+        "before_say": "",
+        "after_say": "",
+        "choice": {
+          "1": {
+            "say": "To speak with our sales representative, press 1.",
+            "pause": 1
+          },
+          "2": {
+            "say": "To reach a Customer Exchange agent, press 2.",
+            "pause": 1
+          },
+          "3": {
+            "say": "To reach a Customer Support agent, press 3.",
+            "pause": 1
+          }
+        }
+      },
+      "2": {
+        "language": "en-US",
+        "voice": "Polly.Joanna",
+        "before_say": "Your call is very important to us.",
+        "after_say": "This call will be recorded for quality assurance.",
+        "digits": {
+          "1": {
+            "language": "en-US",
+            "voice": "Polly.Joanna",
+            "pause": 1,
+            "say": "Please hold, while you are connected to the next available agent.",
+            "play": "https://talkdeskapp.s3.amazonaws.com/production/audio_messages/folk_hold_music.mp3"
+          },
+          "2": {
+            "language": "en-US",
+            "voice": "Polly.Joanna",
+            "pause": 1,
+            "say": "Please hold, while you are connected to the next available agent.",
+            "play": "https://talkdeskapp.s3.amazonaws.com/production/audio_messages/folk_hold_music.mp3"
+          },
+          "3": {
+            "language": "en-US",
+            "voice": "Polly.Joanna",
+            "pause": 1,
+            "say": "Please hold, while you are connected to the next available agent.",
+            "play": "https://talkdeskapp.s3.amazonaws.com/production/audio_messages/folk_hold_music.mp3"
+          }
+        }
+      }
+    }
+  }
+}';
         }
 
         return $this->render('create', [
