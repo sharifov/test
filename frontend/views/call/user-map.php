@@ -154,7 +154,7 @@ $dtNow = date('Y-m-d H:i:s');
 
             <div class="col-md-5">
                 <div class="panel panel-default">
-                    <div class="panel-heading"><i class="fa fa-list"></i> Calls in PROGRESS, HOLD, RINGING (Last update: <?=Yii::$app->formatter->asTime(time(), 'php:H:i:s')?>)</div>
+                    <div class="panel-heading"><i class="fa fa-list"></i> Calls in IVR, QUEUE, RINGING, PROGRESS (Last update: <?=Yii::$app->formatter->asTime(time(), 'php:H:i:s')?>)</div>
                     <div class="panel-body">
                         <?= \yii\widgets\ListView::widget([
                             'dataProvider' => $dataProvider3,
