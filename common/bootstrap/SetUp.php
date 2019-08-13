@@ -5,6 +5,7 @@ namespace common\bootstrap;
 use sales\dispatchers\DeferredEventDispatcher;
 use sales\dispatchers\EventDispatcher;
 use sales\dispatchers\SimpleEventDispatcher;
+use sales\entities\cases\events\CasesStatusChangeEvent;
 use sales\events\lead\LeadBookedEvent;
 use sales\events\lead\LeadCallExpertRequestEvent;
 use sales\events\lead\LeadCreatedCloneEvent;
@@ -17,6 +18,7 @@ use sales\events\lead\LeadSnoozeEvent;
 use sales\events\lead\LeadSoldEvent;
 use sales\events\lead\LeadStatusChangedEvent;
 use sales\events\lead\LeadTaskEvent;
+use sales\listeners\cases\CasesStatusChangeEventListener;
 use sales\listeners\lead\LeadBookedEventListener;
 use sales\listeners\lead\LeadCallExpertRequestEventListener;
 use sales\listeners\lead\LeadCreatedCloneEventListener;
@@ -54,6 +56,8 @@ class SetUp implements BootstrapInterface
                 LeadTaskEvent::class => [LeadTaskEventListener::class],
                 LeadCountPassengersChangedEvent::class => [LeadCountPassengersChangedEventListener::class],
                 LeadCreatedCloneEvent::class => [LeadCreatedCloneEventListener::class],
+
+                CasesStatusChangeEvent::class => [CasesStatusChangeEventListener::class]
             ]));
         });
     }
