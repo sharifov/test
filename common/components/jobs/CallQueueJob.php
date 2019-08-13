@@ -11,7 +11,9 @@ use common\models\Call;
 use common\models\Department;
 use common\models\Employee;
 use common\models\Lead2;
+use sales\forms\lead\PhoneCreateForm;
 use sales\services\cases\CasesCreateService;
+use sales\services\client\ClientManageService;
 use yii\base\BaseObject;
 use yii\helpers\VarDumper;
 use yii\queue\JobInterface;
@@ -24,6 +26,7 @@ use yii\queue\Queue;
  * @property int $call_id
  *
  * @property CasesCreateService $casesCreateService
+ * @property ClientManageService $clientManageService
  */
 
 class CallQueueJob extends BaseObject implements JobInterface
@@ -31,11 +34,13 @@ class CallQueueJob extends BaseObject implements JobInterface
     public $call_id;
 
     private $casesCreateService;
+    private $clientManageService;
 
-    public function __construct(CasesCreateService $casesCreateService, $config = [])
+    public function __construct(CasesCreateService $casesCreateService, ClientManageService $clientManageService, $config = [])
     {
         parent::__construct($config);
         $this->casesCreateService = $casesCreateService;
+        $this->clientManageService = $clientManageService;
     }
 
 
@@ -78,9 +83,17 @@ class CallQueueJob extends BaseObject implements JobInterface
 
                     } elseif((int) $call->c_dep_id === Department::DEPARTMENT_EXCHANGE || (int) $call->c_dep_id === Department::DEPARTMENT_SUPPORT) {
 
-                        //$clientId =
+                        try {
+                            $client = $this->clientManageService->getOrCreateClient([new PhoneCreateForm(['phone' => $call->c_from])]);
+                            $case = $this->casesCreateService->createByCall($client->id, $call->c_id, $call->c_project_id, $call->c_dep_id);
+                            $call->c_case_id = $case->cs_id;
+                            if(!$call->update()) {
+                                Yii::error(VarDumper::dumpAsString($call->errors), 'CallQueueJob:execute:Call:update2');
+                            }
 
-                        //$case = $this->casesCreateService->createByCall($clientId, $call->c_id, $call->c_project_id, $call->c_dep_id);
+                        } catch (\Throwable $exception) {
+                            Yii::error(VarDumper::dumpAsString($exception), 'CallQueueJob:createClient:catch');
+                        }
                     }
 
                     $isCalled = false;
@@ -113,11 +126,11 @@ class CallQueueJob extends BaseObject implements JobInterface
 
     public function getTtr()
     {
-        return 1 * 20;
+        return 1 * 10;
     }
 
-    public function canRetry($attempt, $error)
+    /*public function canRetry($attempt, $error)
     {
         return ($attempt < 2) && ($error instanceof \Throwable);
-    }
+    }*/
 }

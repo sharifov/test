@@ -72,17 +72,23 @@ class ClientManageService
      * Find or create Client
      *
      * @param PhoneCreateForm[] $phonesForm
-     * @param ClientCreateForm $clientForm
+     * @param ClientCreateForm|null $clientForm
      * @return Client
      */
-    public function getClient(array $phonesForm, ClientCreateForm $clientForm): Client
+    public function getOrCreateClient(array $phonesForm, ?ClientCreateForm $clientForm = null): Client
     {
         foreach ($phonesForm as $phoneForm) {
             if (($clientPhone = $this->clientPhoneRepository->getByPhone($phoneForm->phone)) && ($client = $clientPhone->client)) {
                 return $client;
             }
         }
+
+        if (!$clientForm) {
+            $clientForm = new ClientCreateForm(['firstName' => 'ClientName']);
+        }
         $client = $this->create($clientForm);
+        $this->addPhones($client, $phonesForm);
+
         return $client;
     }
 
