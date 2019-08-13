@@ -2035,6 +2035,11 @@ class CommunicationController extends ApiBaseController
                 }
             }*/
 
+            if($callModel && $callModel->c_call_status != Call::CALL_STATUS_IVR) {
+                $callModel->c_call_status = Call::CALL_STATUS_IVR;
+                $callModel->update();
+            }
+
             $responseTwml = new VoiceResponse();
 
             if(isset($ivrParams['entry_pause']) && $ivrParams['entry_pause']) {
