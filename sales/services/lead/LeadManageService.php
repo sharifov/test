@@ -24,6 +24,7 @@ use sales\repositories\lead\LeadPreferencesRepository;
 use sales\repositories\lead\LeadRepository;
 use sales\repositories\lead\LeadSegmentRepository;
 use sales\repositories\NotFoundException;
+use sales\services\client\ClientManageService;
 use sales\services\TransactionManager;
 use Yii;
 
@@ -36,6 +37,7 @@ use Yii;
  * @property ClientRepository $clientRepository
  * @property LeadHashGenerator $leadHashGenerator
  * @property AirportRepository $airportRepository
+ * @property ClientManageService $clientManageService
  * @property TransactionManager $transaction
  */
 class LeadManageService
@@ -48,6 +50,7 @@ class LeadManageService
     private $clientRepository;
     private $leadHashGenerator;
     private $airportRepository;
+    private $clientManageService;
     private $transaction;
 
     public function __construct(
@@ -59,6 +62,7 @@ class LeadManageService
         ClientRepository $clientRepository,
         LeadHashGenerator $leadHashGenerator,
         AirportRepository $airportRepository,
+        ClientManageService $clientManageService,
         TransactionManager $transaction)
     {
         $this->leadRepository = $leadRepository;
@@ -69,6 +73,7 @@ class LeadManageService
         $this->clientRepository = $clientRepository;
         $this->leadHashGenerator = $leadHashGenerator;
         $this->airportRepository = $airportRepository;
+        $this->clientManageService = $clientManageService;
         $this->transaction = $transaction;
     }
 
@@ -83,10 +88,10 @@ class LeadManageService
 
         $lead = $this->transaction->wrap(function () use ($form, $employeeId) {
 
-            $clientId = $this->getClientId($form->phones, $form->client);
+            $client = $this->clientManageService->getClient($form->phones, $form->client);
 
             $lead = Lead::create(
-                $clientId,
+                $client->id,
                 $form->client->firstName,
                 $form->client->lastName,
                 $form->cabin,
@@ -103,9 +108,14 @@ class LeadManageService
 
             $lead->take($employeeId);
 
-            $phones = $this->createClientPhones($clientId, $form->phones);
+            $this->clientManageService->addPhones($client, $form->phones);
 
-            $this->createClientEmails($clientId, $form->emails);
+            $phones = [];
+            foreach ($form->phones as $phone) {
+                $phones[] = $phone->phone;
+            }
+
+            $this->createClientEmails($client->id, $form->emails);
 
             $segments = $this->getSegments($form->segments);
 
@@ -204,48 +214,6 @@ class LeadManageService
                 $this->clientEmailRepository->save($email);
             }
         }
-    }
-
-    /**
-     * @param int $clientId
-     * @param PhoneCreateForm[] $phonesForm
-     * @return array
-     */
-    private function createClientPhones(int $clientId, array $phonesForm): array
-    {
-        $phones = [];
-        foreach ($phonesForm as $phoneForm) {
-            if ($phoneForm->phone && !$this->clientPhoneRepository->exists($clientId, $phoneForm->phone)) {
-                $phone = ClientPhone::create(
-                    $phoneForm->phone,
-                    $clientId
-                );
-                $this->clientPhoneRepository->save($phone);
-            }
-            $phones[] = $phoneForm->phone;
-        }
-        return $phones;
-    }
-
-    /**
-     * @param PhoneCreateForm[] $phonesForm
-     * @param ClientCreateForm $clientForm
-     * @return int
-     */
-    private function getClientId(array $phonesForm, ClientCreateForm $clientForm): int
-    {
-        foreach ($phonesForm as $phoneForm) {
-            if (($clientPhone = $this->clientPhoneRepository->getByPhone($phoneForm->phone)) && ($client = $clientPhone->client)) {
-                return $client->id;
-            }
-        }
-
-        $client = Client::create(
-            $clientForm->firstName,
-            $clientForm->middleName,
-            $clientForm->lastName
-        );
-        return $this->clientRepository->save($client);
     }
 
     /**

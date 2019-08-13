@@ -20,6 +20,8 @@ use sales\dispatchers\EventDispatcher;
 use sales\entities\cases\Cases;
 use sales\forms\api\communication\voice\finish\FinishForm;
 use sales\forms\api\communication\voice\record\RecordForm;
+use sales\forms\lead\ClientCreateForm;
+use sales\forms\lead\PhoneCreateForm;
 use sales\repositories\airport\AirportRepository;
 use sales\repositories\cases\CasesRepository;
 use sales\repositories\cases\CasesStatusLogRepository;
@@ -28,6 +30,7 @@ use sales\repositories\lead\LeadRepository;
 use sales\repositories\Repository;
 use sales\repositories\TestRepository;
 use sales\services\api\communication\CommunicationService;
+use sales\services\client\ClientManageService;
 use sales\services\TransactionManager;
 use SebastianBergmann\CodeCoverage\Report\PHP;
 use Twilio\TwiML\VoiceResponse;
@@ -44,7 +47,7 @@ use yii\queue\Queue;
 
 /**
  * Test controller
- * @property CasesRepository $repository
+ * @property ClientManageService $clientManageService
  * @property DeferredEventDispatcher $dispatcher
  * @property TransactionManager $transactionManager
  */
@@ -53,16 +56,17 @@ class TestController extends FController
     private $repository;
     private $dispatcher;
     private $transactionManager;
+    private $clientManageService;
 
     public function __construct(
         $id,
         $module,
-        CasesRepository $repository,
+        ClientManageService $clientManageService,
         DeferredEventDispatcher $dispatcher,
         TransactionManager $transactionManager, $config = []
     )
     {
-        $this->repository = $repository;
+        $this->clientManageService = $clientManageService;
         $this->dispatcher = $dispatcher;
         $this->transactionManager= $transactionManager;
         parent::__construct($id, $module, $config);
@@ -102,6 +106,20 @@ class TestController extends FController
 
     public function actionT()
     {
+
+        $client = $this->clientManageService->create(new ClientCreateForm([
+            'firstName' => '11 firstname',
+            'lastName' => '12 last name',
+            'middleName' => '13 middlename'
+        ]));
+
+        $this->clientManageService->addPhones($client, [
+            new PhoneCreateForm(['phone' => '+11']),
+            new PhoneCreateForm(['phone' => '+22']),
+            new PhoneCreateForm(['phone' => '+33']),
+        ]);
+
+
 die;
 
 //        $case->processing(294);
