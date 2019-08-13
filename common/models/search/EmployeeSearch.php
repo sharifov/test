@@ -4,6 +4,7 @@ namespace common\models\search;
 
 use common\models\ProjectEmployeeAccess;
 use common\models\UserConnection;
+use common\models\UserDepartment;
 use common\models\UserGroupAssign;
 use common\models\UserProfile;
 use common\models\UserProjectParams;
@@ -23,6 +24,7 @@ class EmployeeSearch extends Employee
     public $user_group_id;
     public $user_project_id;
     public $user_params_project_id;
+    public $user_department_id;
 
     public $user_call_type_id;
     public $user_sip;
@@ -41,7 +43,7 @@ class EmployeeSearch extends Employee
     public function rules()
     {
         return [
-            [['id', 'status', 'acl_rules_activated', 'supervision_id', 'user_group_id', 'user_project_id', 'user_params_project_id', 'online', 'user_call_type_id'], 'integer'],
+            [['id', 'status', 'acl_rules_activated', 'supervision_id', 'user_group_id', 'user_project_id', 'user_params_project_id', 'online', 'user_call_type_id', 'user_department_id'], 'integer'],
             [['username', 'full_name', 'auth_key', 'password_hash', 'password_reset_token', 'email', 'last_activity', 'created_at', 'updated_at', 'user_sip', 'pageSize'], 'safe'],
             [['datetime_start', 'datetime_end'], 'safe'],
             [['date_range'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
@@ -103,6 +105,14 @@ class EmployeeSearch extends Employee
             $subQuery = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->where(['=', 'ugs_group_id', $this->user_group_id]);
             $query->andWhere(['IN', 'employees.id', $subQuery]);
         }
+
+        if ($this->user_department_id > 0) {
+            $subQuery = UserDepartment::find()->select(['DISTINCT(ud_user_id)'])->where(['=', 'ud_dep_id', $this->user_department_id]);
+            $query->andWhere(['IN', 'employees.id', $subQuery]);
+        }
+
+
+
 
         if ($this->user_params_project_id > 0) {
             $subQuery = UserProjectParams::find()->select(['DISTINCT(upp_user_id)'])->where(['=', 'upp_project_id', $this->user_params_project_id]);
@@ -196,6 +206,11 @@ class EmployeeSearch extends Employee
 
         if ($this->user_group_id > 0) {
             $subQuery = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->where(['=', 'ugs_group_id', $this->user_group_id]);
+            $query->andWhere(['IN', 'employees.id', $subQuery]);
+        }
+
+        if ($this->user_department_id > 0) {
+            $subQuery = UserDepartment::find()->select(['DISTINCT(ud_user_id)'])->where(['=', 'ud_dep_id', $this->user_department_id]);
             $query->andWhere(['IN', 'employees.id', $subQuery]);
         }
 

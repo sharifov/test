@@ -1,8 +1,10 @@
 <?php
 namespace common\components;
 
+use http\Client\Request;
 use http\Client\Response;
 use Yii;
+use yii\helpers\VarDumper;
 use yii\httpclient\CurlTransport;
 
 class BackOffice
@@ -42,7 +44,7 @@ class BackOffice
      * @return mixed
      * @throws \yii\base\InvalidConfigException
      */
-    public static function sendRequest2(string $endpoint = '', array $fields = [], string $type = 'POST')
+    public static function sendRequest2(string $endpoint = '', array $fields = [], string $type = 'POST'): \yii\httpclient\Response
     {
 
         $uri = Yii::$app->params['backOffice']['serverUrl'] . '/' . $endpoint;
@@ -69,6 +71,8 @@ class BackOffice
             'version'   => Yii::$app->params['backOffice']['ver'],
             'signature' => $signature
         ];
+
+        //VarDumper::dump([$uri, $headers, $fields]);exit;
 
         $response = $client->createRequest()
             ->setMethod($type)

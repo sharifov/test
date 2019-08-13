@@ -315,14 +315,20 @@ data-airline="<?= $result['validatingCarrier']?>" id="search-result__quote-<?= $
 	</div>
 
 	<div class="quote__footer">
-		<div class="quote__footer-left"></div>
+
+
+		<div class="quote__footer-left">
+            <?php if(isset($result['tickets']) && $result['tickets']):?>
+                <span class="fa fa-warning warning"></span> Separate Ticket (<?=count($result['tickets'])?>)
+            <?php endif;?>
+        </div>
 		<div class="quote__footer-right">
 			 <?= Html::button('<i class="fa fa-eye"></i>&nbsp; <span>Details</span>', [
                  'class' => 'btn btn-primary search_details__btn',
 			     'data-title' => implode(', ',$tripsInfo),
 			     'data-target' => '#result_'.$resultKey,
                 ]) ?>
-            <?= Html::button('<i class="fa fa-check"></i>&nbsp; <span>Select</span>', [
+            <?= Html::button('<i class="fa fa-plus"></i>&nbsp; <span>Add Quote</span>', [
                  'class' => 'btn btn-success create_quote__btn',
 		         'data-title' => implode(', ',$tripsInfo),
                 'data-key' => $result['key'],

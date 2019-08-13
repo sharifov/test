@@ -93,9 +93,7 @@ class TestController extends FController
     public function actionT()
     {
 
-
-
-
+        return $this->render('blank');
 
         die;
 

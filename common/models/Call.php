@@ -47,8 +47,10 @@ use yii\helpers\VarDumper;
  * @property bool $c_is_deleted
  * @property float $c_price
  * @property int $c_source_type_id
+ * @property int $c_dep_id
  *
  * @property Employee $cCreatedUser
+ * @property Department $cDep
  * @property Lead $cLead
  * @property Lead2 $cLead2
  * @property Project $cProject
@@ -256,7 +258,7 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
     {
         return [
             [['c_call_sid'], 'required'],
-            [['c_call_type_id', 'c_lead_id', 'c_created_user_id', 'c_com_call_id', 'c_project_id', 'c_call_duration', 'c_recording_duration'], 'integer'],
+            [['c_call_type_id', 'c_lead_id', 'c_created_user_id', 'c_com_call_id', 'c_project_id', 'c_call_duration', 'c_recording_duration', 'c_dep_id'], 'integer'],
             [['c_price'], 'number'],
             [['c_is_new'], 'default', 'value' => true],
             [['c_is_new', 'c_is_deleted'], 'boolean'],
@@ -270,6 +272,7 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
             [['c_timestamp', 'c_sequence_number'], 'string', 'max' => 40],
             [['c_error_message'], 'string', 'max' => 500],
             [['c_created_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['c_created_user_id' => 'id']],
+            [['c_dep_id'], 'exist', 'skipOnError' => true, 'targetClass' => Department::class, 'targetAttribute' => ['c_dep_id' => 'dep_id']],
             [['c_lead_id'], 'exist', 'skipOnError' => true, 'targetClass' => Lead::class, 'targetAttribute' => ['c_lead_id' => 'id']],
             [['c_project_id'], 'exist', 'skipOnError' => true, 'targetClass' => Project::class, 'targetAttribute' => ['c_project_id' => 'id']],
         ];
@@ -313,6 +316,7 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
             'c_is_deleted' => 'Is Deleted',
             'c_price' => 'Price',
             'c_source_type_id' => 'Source Type',
+            'c_dep_id' => 'Department ID',
         ];
     }
 
@@ -328,6 +332,14 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
                 'value' => date('Y-m-d H:i:s') //new Expression('NOW()'),
             ],
         ];
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getCDep()
+    {
+        return $this->hasOne(Department::class, ['dep_id' => 'c_dep_id']);
     }
 
     /**

@@ -70,7 +70,7 @@ $js = <<<JS
         };
         
         socket.onmessage = function (e) {
-            onlineObj.find('i').removeClass('danger').removeClass('success').addClass('warning');
+            // onlineObj.find('i').removeClass('danger').removeClass('success').addClass('warning');
             try {
                 var obj = JSON.parse(e.data); // $.parseJSON( e.data );
                 console.log(obj);
@@ -86,6 +86,8 @@ $js = <<<JS
                         if (typeof obj.uc_id !== 'undefined') {
                             if(obj.uc_id > 0) {
                                 onlineObj.attr('title', 'Online Connection (' + obj.uc_id +'): true').find('i').removeClass('warning').removeClass('danger').addClass('success');
+                            } else {
+                                onlineObj.attr('title', 'Timeout DB connection: restart service').find('i').removeClass('danger').removeClass('success').addClass('warning');
                             }    
                         }
                     }
@@ -151,7 +153,7 @@ $js = <<<JS
                         window.open(obj.url, 'openUrl');
                     }
                 }
-                onlineObj.find('i').removeClass('danger').removeClass('warning').addClass('success');
+                // onlineObj.find('i').removeClass('danger').removeClass('warning').addClass('success');
             } catch (error) {
                 console.error('Error in functions - socket.onmessage');
                 console.error(error);
@@ -166,9 +168,9 @@ $js = <<<JS
             } else {
                 console.error('Disconnect (Error)'); // Example kill process of server
             }
-            console.log('Code: ' + event.code);
+            //console.log('Code: ' + event.code);
             
-            onlineObj.attr('title', 'Online Connection: close').find('i').removeClass('success').addClass('info');
+            onlineObj.attr('title', 'Disconnect').find('i').removeClass('success').addClass('danger');
             //console.log('Socket Status: ' + socket.readyState + ' (Closed)');
         };
 
