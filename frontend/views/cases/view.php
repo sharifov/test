@@ -64,7 +64,7 @@ $bundle = \frontend\themes\gentelella\assets\AssetLeadCommunication::register($t
             ]) ?>
         </div>
         <div class="col-md-6">
-            <?php if ($enableCommunication) : ?>
+                <?php if ($enableCommunication) : ?>
                 <?= $this->render('communication/case_communication', [
                     'model'      => $model,
                     'previewEmailForm' => $previewEmailForm,

@@ -788,7 +788,7 @@ echo '<div class="container" id="container-redirect-agents"></div>';
     //});
 
 
-    function webCall(phone_from, phone_to, project_id, lead_id, type) {
+    function webCall(phone_from, phone_to, project_id, lead_id, case_id, type) {
 
         /*var access =  updateAgentStatus(connection);
         if(!access) {
@@ -796,7 +796,7 @@ echo '<div class="container" id="container-redirect-agents"></div>';
             return false;
         }*/
 
-        var params = {'To': phone_to, 'FromAgentPhone': phone_from, 'project_id': project_id, 'lead_id': lead_id, 'c_type': type, 'c_user_id': c_user_id};
+        var params = {'To': phone_to, 'FromAgentPhone': phone_from, 'project_id': project_id, 'lead_id': lead_id, 'case_id': case_id, 'c_type': type, 'c_user_id': c_user_id};
         webPhoneParams = params;
 
         //console.log(params); return false;
@@ -991,13 +991,14 @@ $js = <<<JS
                 
                 var project_id = $('#call-project-id').val();
                 var lead_id = $('#call-lead-id').val();
+                var case_id = $('#call-case-id').val();
                 
                 $('#web-phone-dial-modal').modal('hide');
                 //alert(phone_from + ' - ' + phone_to);
                 $('#web-phone-widget').slideDown();
                 $('.fabs2').hide();
                 
-                webCall(phone_from, phone_to, project_id, lead_id, 'web-call');
+                webCall(phone_from, phone_to, project_id, lead_id, case_id, 'web-call');
             } else {
                 alert('You have active call');
                 return false;

@@ -306,17 +306,23 @@ class Cases extends ActiveRecord
         return $this->hasOne(Project::class, ['id' => 'cs_project_id']);
     }
 
-    /**
-     * @return array
-     */
-    public function rules(): array
+    public function rules()
     {
         return [
-            [['cs_subject', 'cs_category', 'cs_status', 'cs_project_id'], 'required'],
             [['cs_description'], 'string'],
-            [['cs_status', 'cs_user_id', 'cs_lead_id', 'cs_call_id', 'cs_dep_id', 'cs_project_id'], 'integer'],
-            [['cs_created_dt'], 'safe'],
-            [['cs_subject', 'cs_category'], 'string', 'max' => 255],
+            [['cs_status'], 'required'],
+            [['cs_status', 'cs_user_id', 'cs_lead_id', 'cs_call_id', 'cs_dep_id', 'cs_project_id', 'cs_client_id'], 'integer'],
+            [['cs_created_dt', 'cs_updated_dt'], 'safe'],
+            [['cs_gid'], 'string', 'max' => 32],
+            [['cs_subject'], 'string', 'max' => 255],
+            [['cs_category'], 'string', 'max' => 50],
+            [['cs_gid'], 'unique'],
+            [['cs_call_id'], 'exist', 'skipOnError' => true, 'targetClass' => Call::class, 'targetAttribute' => ['cs_call_id' => 'c_id']],
+            [['cs_category'], 'exist', 'skipOnError' => true, 'targetClass' => CasesCategory::class, 'targetAttribute' => ['cs_category' => 'cc_key']],
+            [['cs_client_id'], 'exist', 'skipOnError' => true, 'targetClass' => Client::class, 'targetAttribute' => ['cs_client_id' => 'id']],
+            [['cs_dep_id'], 'exist', 'skipOnError' => true, 'targetClass' => Department::class, 'targetAttribute' => ['cs_dep_id' => 'dep_id']],
+            [['cs_lead_id'], 'exist', 'skipOnError' => true, 'targetClass' => Lead::class, 'targetAttribute' => ['cs_lead_id' => 'id']],
+            [['cs_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['cs_user_id' => 'id']],
         ];
     }
 

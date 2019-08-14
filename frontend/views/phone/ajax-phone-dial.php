@@ -9,6 +9,7 @@ use yii\helpers\Html;
 /* @var $isAgent bool */
 /* @var $fromPhoneNumbers [] */
 /* @var $lead_id int */
+/* @var $case_id int */
 /* @var $selectProjectPhone string */
 /* @var $currentCall \common\models\Call */
 
@@ -119,13 +120,20 @@ use yii\helpers\Html;
                         'c_to',
                         'c_call_status',
                         'c_lead_id',
+                        'c_case_id',
+                        //'c_dep_id',
+                        [
+                            'attribute' => 'c_dep_id',
+                            'value' => function (\common\models\Call $model) {
+                                return $model->cDep ? $model->cDep->dep_name : '-';
+                            },
+                        ],
                         'c_caller_name',
                         [
                             'attribute' => 'c_project_id',
                             'value' => function (\common\models\Call $model) {
                                 return $model->cProject ? $model->cProject->name : '-';
                             },
-                            'filter' => \common\models\Project::getList()
                         ],
                         [
                             'attribute' => 'c_created_dt',
@@ -173,6 +181,7 @@ use yii\helpers\Html;
                             ])
                         ?>
                         <?=Html::hiddenInput('call-lead-id', $lead_id, ['id' => 'call-lead-id'])?>
+                        <?=Html::hiddenInput('call-case-id', $case_id, ['id' => 'call-case-id'])?>
                         <?=Html::hiddenInput('call-project-id', $project ? $project->id : '', ['id' => 'call-project-id'])?>
                     </td>
                     <td>

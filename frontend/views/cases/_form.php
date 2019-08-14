@@ -24,7 +24,9 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'cs_status')->dropDownList(\sales\entities\cases\CasesStatusHelper::STATUS_LIST) ?>
 
-        <?= $form->field($model, 'cs_user_id')->textInput() ?>
+        <?//= $form->field($model, 'cs_user_id')->textInput() ?>
+
+        <?= $form->field($model, 'cs_client_id')->textInput() ?>
 
         <?= $form->field($model, 'cs_lead_id')->textInput() ?>
 

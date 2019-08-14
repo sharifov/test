@@ -718,7 +718,7 @@ class CasesController extends FController
         $model = new Cases();
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->cs_id]);
+            return $this->redirect(['view', 'gid' => $model->cs_gid]);
         }
 
         return $this->render('create', [
@@ -738,7 +738,7 @@ class CasesController extends FController
         $model = $this->findModel($id);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->cs_id]);
+            return $this->redirect(['view', 'gid' => $model->cs_gid]);
         }
 
         return $this->render('update', [
