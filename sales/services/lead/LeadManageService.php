@@ -2,17 +2,11 @@
 
 namespace sales\services\lead;
 
-use common\models\Client;
-use common\models\ClientEmail;
-use common\models\ClientPhone;
 use common\models\Lead;
 use common\models\LeadFlightSegment;
 use common\models\LeadPreferences;
-use sales\forms\lead\ClientCreateForm;
-use sales\forms\lead\EmailCreateForm;
 use sales\forms\lead\ItineraryEditForm;
 use sales\forms\lead\LeadCreateForm;
-use sales\forms\lead\PhoneCreateForm;
 use sales\forms\lead\PreferencesCreateForm;
 use sales\forms\lead\SegmentCreateForm;
 use sales\forms\lead\SegmentEditForm;
@@ -23,10 +17,8 @@ use sales\repositories\client\ClientRepository;
 use sales\repositories\lead\LeadPreferencesRepository;
 use sales\repositories\lead\LeadRepository;
 use sales\repositories\lead\LeadSegmentRepository;
-use sales\repositories\NotFoundException;
 use sales\services\client\ClientManageService;
 use sales\services\TransactionManager;
-use Yii;
 
 /**
  * @property LeadRepository $leadRepository
@@ -115,7 +107,7 @@ class LeadManageService
                 $phones[] = $phone->phone;
             }
 
-            $this->createClientEmails($client->id, $form->emails);
+            $this->clientManageService->addEmails($client, $form->emails);
 
             $segments = $this->getSegments($form->segments);
 
@@ -197,23 +189,6 @@ class LeadManageService
             ];
         }
         return $segments;
-    }
-
-    /**
-     * @param int $clientId
-     * @param EmailCreateForm[] $emailsForm
-     */
-    private function createClientEmails(int $clientId, array $emailsForm): void
-    {
-        foreach ($emailsForm as $emailForm) {
-            if ($emailForm->email && !$this->clientEmailRepository->exists($clientId, $emailForm->email)) {
-                $email = ClientEmail::create(
-                    $emailForm->email,
-                    $clientId
-                );
-                $this->clientEmailRepository->save($email);
-            }
-        }
     }
 
     /**

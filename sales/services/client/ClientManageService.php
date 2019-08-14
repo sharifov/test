@@ -3,9 +3,12 @@
 namespace sales\services\client;
 
 use common\models\Client;
+use common\models\ClientEmail;
 use common\models\ClientPhone;
 use sales\forms\lead\ClientCreateForm;
+use sales\forms\lead\EmailCreateForm;
 use sales\forms\lead\PhoneCreateForm;
+use sales\repositories\client\ClientEmailRepository;
 use sales\repositories\client\ClientPhoneRepository;
 use sales\repositories\client\ClientRepository;
 
@@ -14,17 +17,26 @@ use sales\repositories\client\ClientRepository;
  *
  * @property ClientRepository $clientRepository
  * @property ClientPhoneRepository $clientPhoneRepository
+ * @property ClientEmailRepository $clientEmailRepository
  */
 class ClientManageService
 {
 
     private $clientRepository;
     private $clientPhoneRepository;
+    private $clientEmailRepository;
 
-    public function __construct(ClientRepository $clientRepository, ClientPhoneRepository $clientPhoneRepository)
+    /**
+     * ClientManageService constructor.
+     * @param ClientRepository $clientRepository
+     * @param ClientPhoneRepository $clientPhoneRepository
+     * @param ClientEmailRepository $clientEmailRepository
+     */
+    public function __construct(ClientRepository $clientRepository, ClientPhoneRepository $clientPhoneRepository, ClientEmailRepository $clientEmailRepository)
     {
         $this->clientRepository = $clientRepository;
         $this->clientPhoneRepository = $clientPhoneRepository;
+        $this->clientEmailRepository = $clientEmailRepository;
     }
 
     /**
@@ -65,6 +77,32 @@ class ClientManageService
                 $client->id
             );
             $this->clientPhoneRepository->save($phone);
+        }
+    }
+
+    /**
+     * @param Client $client
+     * @param EmailCreateForm[] $emails
+     */
+    public function addEmails(Client $client, array $emails): void
+    {
+        foreach ($emails as $email) {
+            $this->addEmail($client, $email);
+        }
+    }
+
+    /**
+     * @param Client $client
+     * @param EmailCreateForm $email
+     */
+    private function addEmail(Client $client, EmailCreateForm $email): void
+    {
+        if (!$this->clientEmailRepository->exists($client->id, $email->email)) {
+            $email = ClientEmail::create(
+                $email->email,
+                $client->id
+            );
+            $this->clientEmailRepository->save($email);
         }
     }
 

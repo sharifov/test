@@ -36,6 +36,7 @@ use yii\db\ActiveRecord;
  * @property int $cs_client_id
  * @property string $cs_created_dt
  * @property string $cs_updated_dt
+ * @property string $cs_gid
  *
  * @property CasesCategory $category
  * @property Department $department
@@ -71,9 +72,18 @@ class Cases extends ActiveRecord
         $case->cs_call_id = $callId;
         $case->cs_project_id = $projectId;
         $case->cs_dep_id = $depId;
-        $case->setStatus(self::STATUS_PENDING);
+        $case->cs_gid = self::generateGid();
         $case->cs_created_dt = date('Y-m-d H:i:s');
+        $case->setStatus(self::STATUS_PENDING);
         return $case;
+    }
+
+    /**
+     * @return string
+     */
+    private static function generateGid(): string
+    {
+        return md5(uniqid('', true));
     }
 
     public function pending(): void
