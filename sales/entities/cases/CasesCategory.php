@@ -58,7 +58,7 @@ class CasesCategory extends \yii\db\ActiveRecord
         return [
             ['cc_key', 'required'],
             ['cc_key', 'string', 'max' => 50],
-            ['cc_key', AlphabetValidator::class],
+            ['cc_key', 'match', 'pattern' => '/^[a-zA-Z0-9_-]+$/', 'message' =>  'Key can only contain alphanumeric characters, underscores and dashes.'],
             ['cc_key', 'unique'],
 
             ['cc_name', 'required'],
@@ -121,5 +121,5 @@ class CasesCategory extends \yii\db\ActiveRecord
     {
         return '{{%cases_category}}';
     }
-    
+
 }

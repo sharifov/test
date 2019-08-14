@@ -29,6 +29,7 @@ $this->params['breadcrumbs'][] = $this->title;
             ['class' => yii\grid\SerialColumn::class],
 
             'cs_id',
+            'cs_gid',
             'cs_subject',
             'cs_description:ntext',
             'cs_category',

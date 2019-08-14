@@ -12,6 +12,7 @@ use sales\repositories\Repository;
  * @property EventDispatcher $eventDispatcher
  * @method null|Cases get(int $id)
  * @method null|Cases getByClient(int $clientId)
+ * @method null|Cases getByGid(string $gid)
  */
 class CasesRepository extends Repository
 {
@@ -38,6 +39,18 @@ class CasesRepository extends Repository
             ->andWhere(['<>', Cases::STATUS_SOLVED, 'cs_status'])
             ->orderBy(['cs_id' => SORT_DESC])
             ->limit(1)->one()) {
+            return $case;
+        }
+        throw new NotFoundException('Case is not found');
+    }
+
+    /**
+     * @param string $gid
+     * @return Cases
+     */
+    public function findByGid(string $gid): Cases
+    {
+        if ($case = Cases::find()->andWhere(['cs_gid' => $gid])->limit(1)->one()) {
             return $case;
         }
         throw new NotFoundException('Case is not found');

@@ -31,7 +31,12 @@ class ClientEmail extends \yii\db\ActiveRecord implements AggregateRoot
         return 'client_email';
     }
 
-    public static function create($email, $clientId): self
+    /**
+     * @param string $email
+     * @param int $clientId
+     * @return ClientEmail
+     */
+    public static function create(string $email, int $clientId): self
     {
         $clientEmail = new static();
         $clientEmail->email = $email;
