@@ -12,27 +12,32 @@ use yii\widgets\ActiveForm;
 
     <?php $form = ActiveForm::begin(); ?>
 
-    <?= $form->field($model, 'cs_subject')->textInput(['maxlength' => true]) ?>
+    <div class="col-md-4">
+        <?= $form->field($model, 'cs_project_id')->dropDownList(\common\models\Project::getList()) ?>
 
-    <?= $form->field($model, 'cs_description')->textarea(['rows' => 6]) ?>
+        <?= $form->field($model, 'cs_subject')->textInput(['maxlength' => true]) ?>
 
-    <?= $form->field($model, 'cs_category')->textInput() ?>
-
-    <?= $form->field($model, 'cs_status')->textInput() ?>
-
-    <?= $form->field($model, 'cs_user_id')->textInput() ?>
-
-    <?= $form->field($model, 'cs_lead_id')->textInput() ?>
-
-    <?= $form->field($model, 'cs_call_id')->textInput() ?>
-
-    <?= $form->field($model, 'cs_dep_id')->textInput() ?>
-
-    <?= $form->field($model, 'cs_client_id')->textInput() ?>
+        <?= $form->field($model, 'cs_description')->textarea(['rows' => 6]) ?>
 
 
-    <div class="form-group">
-        <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
+        <?= $form->field($model, 'cs_category')->dropDownList(\yii\helpers\ArrayHelper::map(\sales\entities\cases\CasesCategory::find()->asArray()->all(), 'cc_key', 'cc_name'), ['prompt' => '-']) ?>
+
+        <?= $form->field($model, 'cs_status')->dropDownList(\sales\entities\cases\CasesStatusHelper::STATUS_LIST) ?>
+
+        <?= $form->field($model, 'cs_user_id')->textInput() ?>
+
+        <?= $form->field($model, 'cs_lead_id')->textInput() ?>
+
+        <?//= $form->field($model, 'cs_call_id')->textInput() ?>
+
+        <?= $form->field($model, 'cs_dep_id')->dropDownList(\common\models\Department::getList(), ['prompt' => '-']) ?>
+
+        <?//= $form->field($model, 'cs_client_id')->textInput() ?>
+
+
+        <div class="form-group">
+            <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
+        </div>
     </div>
 
     <?php ActiveForm::end(); ?>

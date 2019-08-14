@@ -25,6 +25,7 @@ $isSuperAdmin = $user->canRole('superadmin');
         $menuItems = [];
 
         $menuItems[] = ['label' => 'Create new Lead', 'url' => ['/lead/create'], 'icon' => 'plus'];
+        $menuItems[] = ['label' => 'Create new Case', 'url' => ['/cases/create'], 'icon' => 'plus'];
 
         if ($user->canCall()) {
             $menuItems[] = ['label' => 'Auto redial', 'url' => ['/call/auto-redial'], 'icon' => 'tty'];
