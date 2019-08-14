@@ -12,6 +12,7 @@ use common\models\Department;
 use common\models\Employee;
 use common\models\Lead2;
 use sales\forms\lead\PhoneCreateForm;
+use sales\repositories\cases\CasesRepository;
 use sales\services\cases\CasesCreateService;
 use sales\services\client\ClientManageService;
 use yii\base\BaseObject;
@@ -27,6 +28,7 @@ use yii\queue\Queue;
  *
  * @property CasesCreateService $casesCreateService
  * @property ClientManageService $clientManageService
+ * @property CasesRepository $casesRepository
  */
 
 class CallQueueJob extends BaseObject implements JobInterface
@@ -34,6 +36,7 @@ class CallQueueJob extends BaseObject implements JobInterface
     public $call_id;
 
     private $casesCreateService;
+    private $casesRepository;
     private $clientManageService;
 
     /*public function __construct(CasesCreateService $casesCreateService, ClientManageService $clientManageService, $config = [])
@@ -55,6 +58,7 @@ class CallQueueJob extends BaseObject implements JobInterface
 
             $this->casesCreateService = Yii::createObject(CasesCreateService::class);
             $this->clientManageService = Yii::createObject(ClientManageService::class);
+            $this->casesRepository = Yii::createObject(CasesRepository::class);
 
             Yii::info('CallId: ' . $this->call_id ,'info\CallQueueJob');
 
@@ -93,12 +97,12 @@ class CallQueueJob extends BaseObject implements JobInterface
                         try {
                             $client = $this->clientManageService->getOrCreateClient([new PhoneCreateForm(['phone' => $call->c_from])]);
 
-                            $case = $this->casesCreateService->getByClientProjectDepartment($client->id, $call->c_project_id, $call->c_dep_id);
+                            $case = $this->casesRepository->getByClientProjectDepartment($client->id, $call->c_project_id, $call->c_dep_id);
                             if(!$case) {
-                                Yii::info('Not found case  ' . VarDumper::dumpAsString([$client->id, $call->c_project_id, $call->c_dep_id]), 'info\getByClientProjectDepartment');
+                                Yii::info('Not found case:  ' . VarDumper::dumpAsString([$client->id, $call->c_project_id, $call->c_dep_id]), 'info\getByClientProjectDepartment');
                                 $case = $this->casesCreateService->createByCall($client->id, $call->c_id, $call->c_project_id, $call->c_dep_id);
                             } else {
-                                Yii::info('Find case '.$case->cs_id.' ' . VarDumper::dumpAsString([$client->id, $call->c_project_id, $call->c_dep_id]), 'info\getByClientProjectDepartment');
+                                Yii::info('Find case: '.$case->cs_id.' - ' . VarDumper::dumpAsString([$client->id, $call->c_project_id, $call->c_dep_id]), 'info\getByClientProjectDepartment');
                             }
 
                             $call->c_case_id = $case->cs_id;
