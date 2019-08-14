@@ -46,7 +46,7 @@ class OnlineConnection extends \yii\bootstrap\Widget
             }
         }
 
-        if(Yii::$app->controller->action->uniqueId === 'case/view') {
+        if(Yii::$app->controller->action->uniqueId === 'cases/view') {
             $gid = Yii::$app->request->get('gid');
             if($gid) {
                 $case = Cases::find()->select(['cs_id'])->where(['cs_gid' => $gid])->limit(1)->asArray()->one();
