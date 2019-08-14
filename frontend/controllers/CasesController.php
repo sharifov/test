@@ -62,14 +62,14 @@ class CasesController extends FController
 
     /**
      * Displays a single Cases model.
-     * @param integer $id
+     * @param string $gid
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionView($id)
+    public function actionView($gid)
     {
 
-        $model = $this->findModel($id);
+        $model = $this->findModelByGid($gid);
 
         $previewEmailForm = new CasePreviewEmailForm();
         $previewEmailForm->is_send = false;
@@ -774,5 +774,19 @@ class CasesController extends FController
         }
 
         throw new NotFoundHttpException('The requested page does not exist.');
+    }
+
+    /**
+     * @param $gid
+     * @return Cases|null
+     * @throws NotFoundHttpException
+     */
+    protected function findModelByGid($gid)
+    {
+        if (($model = Cases::findOne(['cs_gid' => $gid])) !== null) {
+            return $model;
+        }
+
+        throw new NotFoundHttpException('The requested case does not exist.');
     }
 }
