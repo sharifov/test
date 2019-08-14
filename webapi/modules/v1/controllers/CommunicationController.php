@@ -539,10 +539,10 @@ class CommunicationController extends ApiBaseController
 
                 if($ivrEnable) {
 
-                    $callSession = null;
-                    if($callSid) {
-                        $callSession = CallSession::findOne(['cs_cid' => $callSid]);
-                    }
+//                    $callSession = null;
+//                    if($callSid) {
+//                        $callSession = CallSession::findOne(['cs_cid' => $callSid]);
+//                    }
 
                     $ivrSelectedDigit = isset($post['call']['Digits']) ? (int) $post['call']['Digits'] : null;
                     $ivrStep = (int) Yii::$app->request->get('step', 1);
