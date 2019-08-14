@@ -38,6 +38,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'filter' => \common\models\Employee::getList()
             ],
             'uc_lead_id',
+            'uc_case_id',
             'uc_user_agent',
             'uc_controller_id',
             'uc_action_id',

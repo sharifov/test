@@ -601,9 +601,10 @@ echo '<div class="container" id="container-redirect-agents"></div>';
 
         var project_id = webPhoneParams.project_id;
         var lead_id = webPhoneParams.lead_id;
+        var case_id = webPhoneParams.case_id;
         //var call_acc_sid =
 
-        console.info('saveDbCall - sid: ' + call_sid + ' : ' + call_from + ' : ' + call_to + ' : ' + call_status + ' : ' + project_id + ' : ' + lead_id);
+        console.info('saveDbCall - sid: ' + call_sid + ' : ' + call_from + ' : ' + call_to + ' : ' + call_status + ' : ' + project_id + ' : ' + lead_id + ' : ' + case_id);
 
         //console.warn(webPhoneParams); return false;
 
@@ -617,6 +618,7 @@ echo '<div class="container" id="container-redirect-agents"></div>';
                     'call_to': call_to,
                     'call_status': call_status,
                     'lead_id': lead_id,
+                    'case_id': case_id,
                     'project_id': project_id
                 },
                 url: ajaxSaveCallUrl,
@@ -870,6 +872,7 @@ $js = <<<JS
                                 'to_id': data_agent_to_redirect.data('agentid'),
                                 'project_id': data_agent_to_redirect.data('projectid'), 
                                 'lead_id':  data_agent_to_redirect.data('leadid'),
+                                'case_id':  data_agent_to_redirect.data('caseid'),
                             },
                             url: ajaxCallRedirectUrl,
                             success: function (res) {
@@ -968,13 +971,14 @@ $js = <<<JS
         var phone_number = $(this).data('phone');
         var project_id = $(this).data('project-id');
         var lead_id = $(this).data('lead-id');
+        var case_id = $(this).data('case-id');
         //alert(phoneNumber);
         e.preventDefault();
         
         $('#web-phone-dial-modal .modal-body').html('<div style="text-align:center"><img width="200px" src="https://loading.io/spinners/gear-set/index.triple-gears-loading-icon.svg"></div>');
         $('#web-phone-dial-modal').modal();
         
-        $.post(ajaxPhoneDialUrl, {'phone_number': phone_number, 'project_id': project_id, 'lead_id': lead_id},
+        $.post(ajaxPhoneDialUrl, {'phone_number': phone_number, 'project_id': project_id, 'lead_id': lead_id, 'case_id': case_id},
             function (data) {
                 $('#web-phone-dial-modal .modal-body').html(data);
             }

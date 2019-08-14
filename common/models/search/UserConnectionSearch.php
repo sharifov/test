@@ -17,7 +17,7 @@ class UserConnectionSearch extends UserConnection
     public function rules()
     {
         return [
-            [['uc_id', 'uc_connection_id', 'uc_user_id', 'uc_lead_id'], 'integer'],
+            [['uc_id', 'uc_connection_id', 'uc_user_id', 'uc_lead_id', 'uc_case_id'], 'integer'],
             [['uc_user_agent', 'uc_controller_id', 'uc_action_id', 'uc_page_url', 'uc_ip', 'uc_created_dt'], 'safe'],
         ];
     }
@@ -65,6 +65,7 @@ class UserConnectionSearch extends UserConnection
             'uc_connection_id' => $this->uc_connection_id,
             'uc_user_id' => $this->uc_user_id,
             'uc_lead_id' => $this->uc_lead_id,
+            'uc_case_id' => $this->uc_case_id
         ]);
 
         $query->andFilterWhere(['like', 'uc_user_agent', $this->uc_user_agent])

@@ -48,22 +48,26 @@ $userConnections = [];
 /** @var \Workerman\Connection\TcpConnection[] $leadConnections */
 $leadConnections = [];
 
+/** @var \Workerman\Connection\TcpConnection[] $caseConnections */
+$caseConnections = [];
+
 $connectionsUser = [];
 $connectionsLead = [];
+$connectionsCase = [];
 
 $ws_worker = new Worker('websocket://0.0.0.0:8080');
 $ws_worker->name = 'WebsocketWorker';
 $ws_worker->user = 'www-data';
 
 
-$ws_worker->onWorkerStart = function() use (&$user, &$userConnections, &$leadConnections)
+$ws_worker->onWorkerStart = function() use (&$user, &$userConnections, &$leadConnections, &$caseConnections)
 {
 
     $inner_tcp_worker = new Worker('tcp://0.0.0.0:1234');
     $inner_tcp_worker->name = 'TcpWorker';
     //$inner_tcp_worker->user = 'www-data';
 
-    $inner_tcp_worker->onMessage = function(\Workerman\Connection\TcpConnection $connection, $data) use (&$user, &$userConnections, &$leadConnections)
+    $inner_tcp_worker->onMessage = function(\Workerman\Connection\TcpConnection $connection, $data) use (&$user, &$userConnections, &$leadConnections, &$caseConnections)
     {
 
         //$connection->send('Hello '.$data);
@@ -99,21 +103,31 @@ $ws_worker->onWorkerStart = function() use (&$user, &$userConnections, &$leadCon
                 }
             }
 
+            if(isset($data->case_id)) {
+                if (isset($caseConnections[$data->case_id]) && is_array($caseConnections[$data->case_id])) {
+                    foreach ($caseConnections[$data->case_id] as $wc) {
+                        $wc->send(json_encode($data->data));
+                        echo '>> send multiple message to con: "' . $wc->id . '", case_id: ' . $data->case_id . "\r\n";
+                    }
+                }
+            }
+
 
         }
     };
     $inner_tcp_worker->listen();
 };
 
-$ws_worker->onConnect = function(\Workerman\Connection\TcpConnection $connection) use (&$user, &$userConnections, &$leadConnections, &$connectionsUser, &$connectionsLead, &$db, &$config)
+$ws_worker->onConnect = function(\Workerman\Connection\TcpConnection $connection) use (&$user, &$userConnections, &$leadConnections, &$caseConnections, &$connectionsUser, &$connectionsLead, &$connectionsCase, &$db, &$config)
 {
-    $connection->onWebSocketConnect = function(\Workerman\Connection\TcpConnection $connection) use (&$user, &$userConnections, &$leadConnections, &$connectionsUser, &$connectionsLead, &$db, &$config)
+    $connection->onWebSocketConnect = function(\Workerman\Connection\TcpConnection $connection) use (&$user, &$userConnections, &$leadConnections, &$caseConnections, &$connectionsUser, &$connectionsLead, &$connectionsCase, &$db, &$config)
     {
 
         date_default_timezone_set('UTC');
 
         $user_id = isset($_GET['user_id']) && $_GET['user_id'] > 0 ? (int) $_GET['user_id'] : null;
         $lead_id = isset($_GET['lead_id']) && $_GET['lead_id'] > 0 ? (int) $_GET['lead_id'] : null;
+        $case_id = isset($_GET['case_id']) && $_GET['case_id'] > 0 ? (int) $_GET['case_id'] : null;
 
         if($user_id) {
             $user[$user_id] = $connection;
@@ -124,6 +138,11 @@ $ws_worker->onConnect = function(\Workerman\Connection\TcpConnection $connection
         if($lead_id) {
             $leadConnections[$lead_id][$connection->id] = $connection;
             $connectionsLead[$connection->id] = $lead_id;
+        }
+
+        if($case_id) {
+            $caseConnections[$case_id][$connection->id] = $connection;
+            $connectionsCase[$connection->id] = $case_id;
         }
 
 
@@ -138,6 +157,10 @@ $ws_worker->onConnect = function(\Workerman\Connection\TcpConnection $connection
 
         if($lead_id) {
             echo 'lead_id: "'.$lead_id.'", ';
+        }
+
+        if($case_id) {
+            echo 'case_id: "'.$case_id.'", ';
         }
 
 
@@ -159,10 +182,11 @@ $ws_worker->onConnect = function(\Workerman\Connection\TcpConnection $connection
             'uc_page_url'               => $_GET['page_url'] ?? null,
             'uc_ip'                     => $ip, //$connection->getRemoteIp(),
             'uc_created_dt'             => date('Y-m-d H:i:s'),
+            'uc_case_id'                => $case_id,
         ];
 
-        $sql = 'INSERT INTO user_connection (uc_connection_id, uc_user_id, uc_lead_id, uc_user_agent, uc_controller_id, uc_action_id, uc_page_url, uc_ip, uc_created_dt) 
-                VALUES (:uc_connection_id, :uc_user_id, :uc_lead_id, :uc_user_agent, :uc_controller_id, :uc_action_id, :uc_page_url, :uc_ip, :uc_created_dt)';
+        $sql = 'INSERT INTO user_connection (uc_connection_id, uc_user_id, uc_lead_id, uc_user_agent, uc_controller_id, uc_action_id, uc_page_url, uc_ip, uc_created_dt, uc_case_id) 
+                VALUES (:uc_connection_id, :uc_user_id, :uc_lead_id, :uc_user_agent, :uc_controller_id, :uc_action_id, :uc_page_url, :uc_ip, :uc_created_dt, :uc_case_id)';
 
         $uc_id = 0;
 
@@ -200,7 +224,7 @@ $ws_worker->onConnect = function(\Workerman\Connection\TcpConnection $connection
     };
 };
 
-$ws_worker->onClose = function(\Workerman\Connection\TcpConnection $connection) use(&$user, &$userConnections, &$leadConnections, &$connectionsUser, &$connectionsLead, &$db)
+$ws_worker->onClose = function(\Workerman\Connection\TcpConnection $connection) use(&$user, &$userConnections, &$leadConnections, &$caseConnections, &$connectionsUser, &$connectionsLead, &$connectionsCase, &$db)
 {
     /*$user_id = array_search($connection, $user);
     if($user_id) {
@@ -256,6 +280,7 @@ $ws_worker->onClose = function(\Workerman\Connection\TcpConnection $connection) 
     if(isset($connectionsLead[$connection->id]) && $connectionsLead[$connection->id]) {
 
         $lead_id = $connectionsLead[$connection->id];
+
         unset($connectionsLead[$connection->id]);
 
         if(isset($leadConnections[$lead_id][$connection->id])) {
@@ -266,6 +291,19 @@ $ws_worker->onClose = function(\Workerman\Connection\TcpConnection $connection) 
 
     }
 
+    if(isset($connectionsCase[$connection->id]) && $connectionsCase[$connection->id]) {
+
+        $case_id = $connectionsCase[$connection->id];
+        unset($connectionsCase[$connection->id]);
+
+        if(isset($caseConnections[$case_id][$connection->id])) {
+            unset($caseConnections[$case_id][$connection->id]);
+        }
+
+        echo '- disconnect "'.$connection->id.'" case: ' . $case_id . "\r\n";
+
+    }
+
     $json = json_encode(['connection_id' => $connection->id, 'command' => 'closeConnection']);
 
     $connection->send($json);
@@ -273,7 +311,7 @@ $ws_worker->onClose = function(\Workerman\Connection\TcpConnection $connection) 
 
 
 
-$ws_worker->onMessage = function(\Workerman\Connection\TcpConnection $connection, $data) use (&$connectionsUser, &$connectionsLead)
+$ws_worker->onMessage = function(\Workerman\Connection\TcpConnection $connection, $data) use (&$connectionsUser, &$connectionsLead, &$connectionsCase)
 {
     $dataObj = @json_decode($data);
 
@@ -285,6 +323,8 @@ $ws_worker->onMessage = function(\Workerman\Connection\TcpConnection $connection
                 case 'getUserConnections': $dataResponse = ['command' => 'countUserConnection', 'cnt' => count($connectionsUser)];
                     break;
                 case 'getLeadConnections': $dataResponse = ['command' => 'countLeadConnection', 'cnt' => count($connectionsLead)];
+                    break;
+                case 'getCaseConnections': $dataResponse = ['command' => 'countCaseConnection', 'cnt' => count($connectionsCase)];
                     break;
             }
         }
