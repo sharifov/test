@@ -45,6 +45,7 @@ use yii\db\ActiveRecord;
  * @property Employee $owner
  * @property CasesStatusLog $lastLogRecord
  * @property Client $client
+ * @property Project $project
  */
 class Cases extends ActiveRecord
 {
@@ -311,11 +312,11 @@ class Cases extends ActiveRecord
     public function rules(): array
     {
         return [
-            [['cs_subject', 'cs_category', 'cs_status'], 'required'],
+            [['cs_subject', 'cs_category', 'cs_status', 'cs_project_id'], 'required'],
             [['cs_description'], 'string'],
-            [['cs_category', 'cs_status', 'cs_user_id', 'cs_lead_id', 'cs_call_id', 'cs_dep_id'], 'integer'],
+            [['cs_status', 'cs_user_id', 'cs_lead_id', 'cs_call_id', 'cs_dep_id', 'cs_project_id'], 'integer'],
             [['cs_created_dt'], 'safe'],
-            [['cs_subject'], 'string', 'max' => 255],
+            [['cs_subject', 'cs_category'], 'string', 'max' => 255],
         ];
     }
 

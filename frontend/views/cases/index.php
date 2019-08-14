@@ -4,6 +4,7 @@ use yii\helpers\Html;
 use yii\grid\GridView;
 use sales\entities\cases\Cases;
 use \sales\entities\cases\CasesStatusHelper;
+use yii\helpers\Url;
 
 /* @var $this yii\web\View */
 /* @var $searchModel sales\entities\cases\CasesSearch */
@@ -26,7 +27,7 @@ $this->params['breadcrumbs'][] = $this->title;
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'columns' => [
-            ['class' => yii\grid\SerialColumn::class],
+            //['class' => yii\grid\SerialColumn::class],
 
             'cs_id',
             'cs_gid',
@@ -51,13 +52,36 @@ $this->params['breadcrumbs'][] = $this->title;
                     'class' => 'text-center'
                 ]
             ],
-            //'cs_user_id',
-            //'cs_lead_id',
-            //'cs_call_id',
-            //'cs_depart_id',
-            //'cs_created_dt',
+            'cs_user_id',
+            'cs_lead_id',
+            'cs_call_id',
+            'cs_dep_id',
+            'cs_created_dt',
 
-            ['class' => yii\grid\ActionColumn::class],
+            //['class' => yii\grid\ActionColumn::class],
+
+            [
+                'class' => 'yii\grid\ActionColumn',
+                'template' => '{view} {update} {delete}',
+                'visibleButtons' => [
+                    'update' => function ($model, $key, $index) {
+                        return Yii::$app->user->can('admin');
+                    },
+
+                    'delete' => function ($model, $key, $index) {
+                        return Yii::$app->user->can('admin');
+                    },
+                ],
+                'buttons' => [
+                    'view' => function ($url, Cases $model, $key) {
+                        return Html::a('<span class="glyphicon glyphicon-eye-open"></span>', Url::to([
+                            'cases/view',
+                            'gid' => $model->cs_gid
+                        ]));
+                    }
+                ]
+            ]
+
         ],
     ]); ?>
 

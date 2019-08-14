@@ -12,6 +12,21 @@ return [
         'pattern' => 'lead/view/<gid>',
         'route' => 'lead/view',
     ],
+
+    [
+        'pattern' => 'cases/info/<id>',
+        'route' => 'cases/info',
+    ],
+    [
+        'pattern' => 'cases/view/<gid>',
+        'route' => 'cases/view',
+    ],
+
+    [
+        'pattern' => 'cases/take/<gid>',
+        'route' => 'cases/take',
+    ],
+
     [
         'pattern' => 'take/<gid>',
         'route' => 'lead/take',
@@ -54,4 +69,6 @@ return [
         'pattern' => 'queue/booked',
         'route' => 'lead/booked',
     ],
+
+
 ];
