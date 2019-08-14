@@ -2881,7 +2881,7 @@ class CommunicationController extends ApiBaseController
                 'last_id' => $filter['last_id'],
             ];
 
-            Yii::info('JOB (' .VarDumper::dumpAsString($response).') Push ' . VarDumper::dumpAsString($data) . ' last_id: ' . $last_id, 'info\API:newEmailMessagesReceived');
+            //Yii::info('JOB (' .VarDumper::dumpAsString($response).') Push ' . VarDumper::dumpAsString($data) . ' last_id: ' . $last_id, 'info\API:newEmailMessagesReceived');
 
         } catch (\Throwable $e) {
             Yii::error($e->getTraceAsString(), 'API:Communication:newEmailMessagesReceived:Email:try');
