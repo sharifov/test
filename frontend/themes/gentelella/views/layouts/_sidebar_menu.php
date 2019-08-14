@@ -133,16 +133,26 @@ $isSuperAdmin = $user->canRole('superadmin');
             $menuItems = \yii\helpers\ArrayHelper::merge($menuItems, $menuLItems);
         }
 
-        $menuItems[] = [
-            'label' => 'Cases',
-            'url' => 'javascript:',
-            'icon' => 'user',
-            'items' => [
-                ['label' => 'Cases', 'url' => ['/cases'], 'icon' => 'user'],
-                ['label' => 'Cases categories', 'url' => ['/cases-category'], 'icon' => 'users'],
-                ['label' => 'Cases status history', 'url' => ['/cases-status-log'], 'icon' => 'bars'],
-            ]
-        ];
+        $menuCases = [];
+        $menuCases[] = ['label' => 'Cases', 'url' => ['/cases'], 'icon' => 'user'];
+        $menuCases[] = ['label' => 'Cases categories', 'url' => ['/cases-category'], 'icon' => 'users'];
+        $menuCases[] = ['label' => 'Cases status history', 'url' => ['/cases-status-log'], 'icon' => 'bars'];
+        $menuCases[] = ['label' => 'Pending <span id="badges-pending" data-type="pending" class="label-warning label pull-right bginfo"></span> ', 'url' => ['/cases-q/pending'], 'icon' => 'briefcase text-info'];
+        $menuCases[] = ['label' => 'Processing <span id="badges-processing" data-type="processing" class="label-warning label pull-right bginfo"></span> ', 'url' => ['/cases-q/processing'], 'icon' => 'spinner'];
+        $menuCases[] = ['label' => 'Follow Up <span id="badges-follow-up" data-type="follow-up" class="label-success label pull-right bginfo"></span> ', 'url' => ['/cases-q/followup'], 'icon' => 'recycle'];
+        $menuCases[] = ['label' => 'Solved <span id="badges-sold" data-type="sold" class="label-success label pull-right bginfo"></span> ', 'url' => ['/cases-q/solved'], 'icon' => 'flag text-success'];
+        $menuCases[] = ['label' => 'Trash <span id="badges-trash" class="label-danger label pull-right"></span>', 'url' => ['/cases-q/trash'], 'icon' => 'trash-o text-danger'];
+
+        if ($isAdmin) {
+            $menuItems[] = [
+                'label' => 'Cases',
+                'url' => 'javascript:',
+                'icon' => 'cubes',
+                'items' => $menuCases
+            ];
+        } else {
+            $menuItems = \yii\helpers\ArrayHelper::merge($menuItems, $menuCases);
+        }
 
         $menuItems[] = [
             'label' => 'Users',
