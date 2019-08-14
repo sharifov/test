@@ -56,6 +56,8 @@ class CallQueueJob extends BaseObject implements JobInterface
             $this->casesCreateService = Yii::createObject(CasesCreateService::class);
             $this->clientManageService = Yii::createObject(ClientManageService::class);
 
+            Yii::info('CallId: ' . $this->call_id ,'info\CallQueueJob');
+
             if($this->call_id) {
 
                 $originalAgentId = null;
@@ -91,7 +93,7 @@ class CallQueueJob extends BaseObject implements JobInterface
                         try {
                             $client = $this->clientManageService->getOrCreateClient([new PhoneCreateForm(['phone' => $call->c_from])]);
 
-                            $case = $this->casesCreateService->getByClientProjectDepartment($client->id, $call->c_id, $call->c_project_id, $call->c_dep_id);
+                            $case = $this->casesCreateService->getByClientProjectDepartment($client->id, $call->c_project_id, $call->c_dep_id);
                             if(!$case) {
                                 $case = $this->casesCreateService->createByCall($client->id, $call->c_id, $call->c_project_id, $call->c_dep_id);
                             }
