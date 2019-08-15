@@ -9,6 +9,7 @@ use common\models\CaseSale;
 use common\models\Email;
 use common\models\EmailTemplateType;
 use common\models\Employee;
+use common\models\Lead;
 use common\models\Quote;
 use common\models\search\CaseSaleSearch;
 use common\models\search\LeadSearch;
@@ -762,7 +763,7 @@ class CasesController extends FController
 
 
         $leadSearchModel = new LeadSearch();
-        $leadDataProvider = $leadSearchModel->searchAgent($params);
+        $leadDataProvider = $leadSearchModel->searchByCase($params);
 
 
        //VarDumper::dump($dataProvider->allModels); exit;
@@ -792,6 +793,9 @@ class CasesController extends FController
         ]);
     }
 
+    /**
+     * @return array
+     */
     public function actionAddSale()
     {
         \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
@@ -832,6 +836,52 @@ class CasesController extends FController
         }
 
         return $out;
+    }
+
+
+    /**
+     * @return array
+     */
+    public function actionAssignLead()
+    {
+        \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+        $out = ['error' => '', 'data' => []];
+
+        $gid = Yii::$app->request->post('gid');
+        $lead_gid = Yii::$app->request->post('lead_gid');
+
+        try {
+            $model = $this->findModelByGid($gid);
+            $lead = $this->findLeadModel($lead_gid);
+
+            if($model->cs_lead_id != $lead->id) {
+                $model->cs_lead_id = $lead->id;
+                if(!$model->update()) {
+                    Yii::error(VarDumper::dumpAsString($model->errors), 'CasesController:actionAssignLead:Case:save');
+                }
+            }
+
+            $out['data'] = ['lead_id' => $lead->id, 'gid' => $gid];
+
+        } catch (\Throwable $exception) {
+            $out['error'] = $exception->getMessage();
+        }
+
+        return $out;
+    }
+
+    /**
+     * @param $gid
+     * @return Lead|null
+     * @throws NotFoundHttpException
+     */
+    protected function findLeadModel($gid): ?Lead
+    {
+        if (($model = Lead::findOne(['gid' => $gid])) !== null) {
+            return $model;
+        }
+
+        throw new NotFoundHttpException('The requested Lead does not exist.');
     }
 
     /**

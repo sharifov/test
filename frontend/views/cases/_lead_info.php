@@ -19,6 +19,8 @@ $isAgent = false;
 ?>
 
 <div class="x_panel">
+    <?php Pjax::begin(['id' => 'pjax-lead-info', 'timeout' => 7000, 'enablePushState' => true]); //['id' => 'lead-pjax-list', 'timeout' => 5000, 'enablePushState' => true, 'clientOptions' => ['method' => 'GET']]); ?>
+
     <div class="x_title">
         <h2><i class="fa fa-cube"></i> Lead Info</h2>
         <ul class="nav navbar-right panel_toolbox">
@@ -57,6 +59,83 @@ $isAgent = false;
                     'model' => $leadModel,
                     'attributes' => [
                         'id',
+                        [
+                            'label' => 'Client / Emails / Phones',
+                            'format' => 'raw',
+                            'value' => function (\common\models\Lead $model) {
+
+                                if ($model->client) {
+                                    $clientName = $model->client->first_name . ' ' . $model->client->last_name;
+                                    if ($clientName === 'Client Name') {
+                                        $clientName = '- - - ';
+                                    } else {
+                                        $clientName = '<i class="fa fa-user"></i> ' . Html::encode($clientName);
+                                    }
+                                } else {
+                                    $clientName = '-';
+                                }
+
+                                $str = $clientName.'<br>';
+
+                                if (Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id) && Yii::$app->user->id !== $model->employee_id) {
+                                    $str .= '- // - // - // -';
+                                } else {
+                                    $str .= $model->client && $model->client->clientEmails ? '<i class="fa fa-envelope"></i> ' . implode(' <br><i class="fa fa-envelope"></i> ', \yii\helpers\ArrayHelper::map($model->client->clientEmails, 'email', 'email')) . '' : '';
+                                    $str .= $model->client && $model->client->clientPhones ? '<br><i class="fa fa-phone"></i> ' . implode(' <br><i class="fa fa-phone"></i> ', \yii\helpers\ArrayHelper::map($model->client->clientPhones, 'phone', 'phone')) . '' : '';
+                                }
+
+                                return $str ?? '-';
+                            },
+                        ],
+
+                        [
+                            'attribute' => 'status',
+                            'value' => function (\common\models\Lead $model) {
+                                $statusValue = $model->getStatusName(true);
+
+                                if ($model->status === \common\models\Lead::STATUS_TRASH) {
+                                    $reason = \common\models\Reason::find()->where([
+                                        'lead_id' => $model->id
+                                    ])
+                                        ->orderBy([
+                                            'id' => SORT_DESC
+                                        ])
+                                        ->one();
+                                    if ($reason) {
+                                        $statusValue .= ' <span data-toggle="tooltip" data-placement="top" title="' . Html::encode($reason->reason) . '"><i class="fa fa-warning"></i></span>';
+                                    }
+                                }
+
+                                $statusLog = \common\models\LeadFlow::find()->where([
+                                    'lead_id' => $model->id,
+                                    'status' => $model->status
+                                ])
+                                    ->orderBy([
+                                        'id' => SORT_DESC
+                                    ])
+                                    ->one();
+
+                                if ($statusLog) {
+                                    // $statusValue .= '<br><span class="label label-default">'.Yii::$app->formatter->asDatetime(strtotime($statusLog->created)).'</span>';
+                                    $statusValue .= '<br><br><span class="label label-default">' . Yii::$app->formatter->asDatetime(strtotime($statusLog->created)) . '</span>';
+                                    $statusValue .= '<br>' . Yii::$app->formatter->asRelativeTime(strtotime($statusLog->created)) . '';
+                                }
+
+                                return $statusValue;
+                            },
+                            'format' => 'raw',
+
+
+                        ],
+                        [
+                            'attribute' => 'created',
+                            //'header' => 'Pending Time',
+                            'value' => function (\common\models\Lead $model) {
+                                return Yii::$app->formatter->asRelativeTime(strtotime($model->created)); // Lead::getPendingAfterCreate($model->created);
+                            },
+                            'format' => 'raw'
+                        ],
+
                     ],
                 ]) ?>
             </div>
@@ -64,7 +143,77 @@ $isAgent = false;
                 <?= \yii\widgets\DetailView::widget([
                     'model' => $leadModel,
                     'attributes' => [
+                        [
+                            'attribute' => 'project_id',
+                            'value' => function (\common\models\Lead $model) {
+                                return $model->project ? $model->project->name : '-';
+                            },
+                        ],
 
+                        [
+                            'attribute' => 'cabin',
+                            'value' => function (\common\models\Lead $model) {
+                                return $model->getCabinClassName();
+                            },
+                        ],
+
+                        //'trip_type',
+
+                        [
+                            'label' => 'Pax / Communication',
+                            'value' => function (\common\models\Lead $model) {
+                                //$str = '';
+                                $str = '<i class="fa fa-male"></i> <span title="adult">'. $model->adults .'</span> / <span title="child">' . $model->children . '</span> / <span title="infant">' . $model->infants.'</span><br>';
+                                $str .= '<span title="Calls Out / In"><i class="fa fa-phone success"></i> '. $model->getCountCalls(\common\models\Call::CALL_TYPE_OUT) .'/'.  $model->getCountCalls(\common\models\Call::CALL_TYPE_IN) .'</span> | ';
+                                $str .= '<span title="SMS Out / In"><i class="fa fa-comments info"></i> '. $model->getCountSms(\common\models\Sms::TYPE_OUTBOX) .'/'.  $model->getCountCalls(\common\models\Sms::TYPE_INBOX) .'</span> | ';
+                                $str .= '<span title="Email Out / In"><i class="fa fa-envelope danger"></i> '. $model->getCountEmails(\common\models\Email::TYPE_OUTBOX) .'/'.  $model->getCountEmails(\common\models\Email::TYPE_INBOX) .'</span>';
+                                return $str;
+                            },
+                            'format' => 'raw',
+                        ],
+
+                        [
+                            'label' => 'Quotes',
+                            'value' => function (\common\models\Lead $model) use ($isAgent) {
+                                return $model->quotesCount;
+                            },
+                            'format' => 'raw',
+                        ],
+
+                        [
+                            'label' => 'Segments',
+                            'value' => function (\common\models\Lead $model) {
+
+                                $segments = $model->leadFlightSegments;
+                                $segmentData = [];
+                                if ($segments) {
+                                    foreach ($segments as $sk => $segment) {
+                                        $segmentData[] = ($sk + 1) . '. <code>' . ($segment->origin . ' <i class="fa fa-long-arrow-right"></i> ' . $segment->destination) . '</code>';
+                                    }
+                                }
+
+                                $segmentStr = implode('<br>', $segmentData);
+                                return '' . $segmentStr . '';
+                            },
+                            'format' => 'raw',
+                        ],
+
+                        [
+                            'label' => 'Depart',
+                            'value' => function (\common\models\Lead $model) {
+
+                                $segments = $model->leadFlightSegments;
+
+                                if ($segments) {
+                                    foreach ($segments as $sk => $segment) {
+                                        return date('d-M-Y', strtotime($segment->departure));
+                                    }
+                                }
+                                return '-';
+
+                            },
+                            'format' => 'raw',
+                        ],
                         [
                             'attribute' => 'created',
                             'value' => function(\common\models\Lead $model) {
@@ -85,6 +234,7 @@ $isAgent = false;
         </div>
         <?php endif; ?>
     </div>
+    <?php Pjax::end(); ?>
 </div>
 
 
@@ -402,12 +552,22 @@ echo $this->render('_search_lead_form', [
 
         [
             'class' => 'yii\grid\ActionColumn',
-            'template' => '{view}'
+            'template' => '{assign}',
+            'controller' => 'case',
+            'buttons' => [
+                /*'view' => function ($url, $model, $key) {
+                    return Html::a('<span class="fa fa-search"></span> View', ['sale/view', 'h' => base64_encode($model['confirmationNumber'] . '|' . $model['saleId'])],
+                        ['title' => 'View', 'class' => 'btn btn-xs btn-info showModalCaseInfo', 'data-pjax' => 0]);
+                },*/
+                'assign' => function ($url, $model, $key) use ($caseModel) {
+                    return Html::a('<span class="fa fa-check"></span> Assign', ['cases/assign-lead'],
+                        ['title' => 'Assign', 'class' => 'btn btn-xs btn-success assignLead', 'data-pjax' => 0, 'data-gid' => $caseModel->cs_gid, 'data-lead-gid' => $model->gid]);
+                },
+            ]
         ]
+
     ];
 ?>
-
-
 
 <?php
     echo \yii\grid\GridView::widget([
@@ -426,46 +586,45 @@ $jsCode = <<<JS
     $(document).on('click', '#search-lead-btn', function(){
         $('#modalLeadSearch').modal('show').find('#modalLeadSearchContent').html('<div style="text-align:center"><img width="200px" src="https://loading.io/spinners/gear-set/index.triple-gears-loading-icon.svg"></div>');
         $('#modalLeadSearchHeader').html('<h3>' + $(this).attr('title') + ' ' + '<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button></h3>');
-        /*$.get($(this).attr('href'), function(data) {
-            $('#modalLeadSearch').find('#modalLeadSearchContent').html(data);
-        });*/
        return false;
     });
 
-    $(document).on('click', '.addSale2', function()
+    $(document).on('click', '.assignLead', function()
     {
         var btn = $(this);
-        var h = btn.data('h');
+        var lead_gid = btn.data('lead-gid');
         var gid = btn.data('gid');
         
         btn.addClass('disabled');
-        btn.find('span').removeClass('fa-plus').addClass('fa-spinner fa-spin');
+        btn.find('span').removeClass('fa-check').addClass('fa-spinner fa-spin');
         
         $.ajax({
             url: btn.attr('href'),
             type: 'post',
-            data: {gid: gid, h: h},
+            data: {gid: gid, lead_gid: lead_gid},
             success: function (data) {
                 if (data.error != '') {
                     alert('Error: ' + data.error);
                     btn.removeClass('disabled');
-                    btn.find('span').removeClass('fa-spinner fa-spin').addClass('fa-plus');
+                    btn.find('span').removeClass('fa-spinner fa-spin').addClass('fa-check');
                     new PNotify({
-                        title: "Error add Sale",
+                        title: "Error add Lead",
                         type: "error",
-                        text: 'Error add sale in case',
+                        text: 'Lead add sale in case',
                         hide: true
                     });
                 } else {
                     btn.parent().parent().addClass('success');
-                    btn.find('span').removeClass('fa-spinner fa-spin').addClass('fa-check');
-                    $.pjax.reload({container: '#pjax-sale-list', push: false, replace: false, timeout: 10000, async: false});
+                    btn.removeClass('disabled');
+                    btn.find('span').removeClass('fa-spinner fa-spin').addClass('fa-check-circle-o');
+                    $.pjax.reload({container: '#pjax-lead-info', push: false, replace: false, timeout: 10000, async: false});
                     new PNotify({
-                        title: "Sale successfully added",
+                        title: "Lead successfully added",
                         type: "success",
-                        text: 'Sale Id: ' + data.data.sale_id +' successfully added',
+                        text: 'Lead Id: ' + data.data.lead_id +' successfully added',
                         hide: true
                     });
+                    $('#modalLeadSearch').modal('hide');
                 }
                 
             },
@@ -473,7 +632,7 @@ $jsCode = <<<JS
                 alert('Server Error');
                 console.error('Error: ' + error);
                 btn.removeClass('disabled');
-                btn.find('span').removeClass('fa-spinner fa-spin').addClass('fa-plus');                
+                btn.find('span').removeClass('fa-spinner fa-spin').addClass('fa-check');                
             }
         });
         

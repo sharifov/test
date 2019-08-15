@@ -110,12 +110,12 @@ $bundle = \frontend\themes\gentelella\assets\AssetLeadCommunication::register($t
     </div>
     <div class="row">
         <div class="col-md-12">
-            <?= $this->render('_sale_list', [
+            <?/*= $this->render('_sale_list', [
                 'searchModel' => $csSearchModel,
                 'dataProvider' => $csDataProvider,
                 'caseModel' => $model,
                 'isAdmin'       => $isAdmin
-            ])
+            ])*/
             ?>
         </div>
     </div>
@@ -125,41 +125,10 @@ $bundle = \frontend\themes\gentelella\assets\AssetLeadCommunication::register($t
 </div>
 
 <?php
-
-
-    $flowTransitionUrl = \yii\helpers\Url::to([
-        'case/flow-transition',
-        'caseId' => $model->cs_id
-    ]);
-
     $js = <<<JS
-    /*$('#view-flow-transition').click(function() {
-        $('#preloader').removeClass('hidden');
-        var editBlock = $('#get-request-flow-transition');
-        editBlock.find('.modal-body').html('');
-        editBlock.find('.modal-body').load('$flowTransitionUrl', function( response, status, xhr ) {
-            $('#preloader').addClass('hidden');
-            editBlock.modal('show');
-        });
-    });*/
-    
-    $(function () {
-        $.scrollUp({
-            scrollName: 'scrollUp', // Element ID
-            topDistance: '300', // Distance from top before showing element (px)
-            topSpeed: 300, // Speed back to top (ms)
-            animation: 'fade', // Fade, slide, none
-            animationInSpeed: 200, // Animation in speed (ms)
-            animationOutSpeed: 200, // Animation out speed (ms)
-            scrollText: 'Scroll to top', // Text for element
-            activeOverlay: true, // Set CSS color to display scrollUp active point, e.g '#00FFFF'
-        });
-    
-        //$("[data-toggle='tooltip']").tooltip();
-        //$("[data-toggle='popover']").popover({sanitize: false});
-    
+  
     });
     
 JS;
 
-    $this->registerJs($js);
+    //$this->registerJs($js);
