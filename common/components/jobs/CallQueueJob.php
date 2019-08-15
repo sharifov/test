@@ -89,8 +89,7 @@ class CallQueueJob extends BaseObject implements JobInterface
                     } elseif((int) $call->c_dep_id === Department::DEPARTMENT_EXCHANGE || (int) $call->c_dep_id === Department::DEPARTMENT_SUPPORT) {
 
                         try {
-                            $client = $this->clientManageService->getOrCreateClient([new PhoneCreateForm(['phone' => $call->c_from])]);
-                            $case = $this->casesCreateService->createByCall($client->id, $call->c_id, $call->c_project_id, $call->c_dep_id);
+                            $case = $this->casesCreateService->createByCall([new PhoneCreateForm(['phone' => $call->c_from])], $call->c_id, $call->c_project_id, $call->c_dep_id);
                             $call->c_case_id = $case->cs_id;
                             if(!$call->update()) {
                                 Yii::error(VarDumper::dumpAsString($call->errors), 'CallQueueJob:execute:Call:update2');

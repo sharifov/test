@@ -15,8 +15,10 @@ use frontend\models\CaseCommunicationForm;
 use frontend\models\CasePreviewEmailForm;
 use frontend\models\CasePreviewSmsForm;
 use frontend\models\CommunicationForm;
-use frontend\models\LeadPreviewEmailForm;
-use frontend\models\LeadPreviewSmsForm;
+use sales\forms\cases\CasesCreateByWebForm;
+use sales\repositories\cases\CasesCategoryRepository;
+use sales\services\cases\CasesCreateService;
+use sales\services\cases\CasesManageService;
 use Yii;
 use sales\entities\cases\Cases;
 use sales\entities\cases\CasesSearch;
@@ -24,15 +26,54 @@ use yii\data\ActiveDataProvider;
 use yii\db\Expression;
 use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
+use yii\web\BadRequestHttpException;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+use yii\web\Response;
+use yii\widgets\ActiveForm;
 
 /**
- * CasesController implements the CRUD actions for Cases model.
+ * Class CasesController
+ *
+ * @property CasesCreateService $casesCreateService
+ * @property CasesManageService $casesManageService
+ * @property CasesCategoryRepository $casesCategoryRepository
  */
 class CasesController extends FController
 {
-    public function behaviors()
+
+    private $casesCreateService;
+    private $casesManageService;
+    private $casesCategoryRepository;
+
+    /**
+     * CasesController constructor.
+     * @param $id
+     * @param $module
+     * @param CasesCreateService $casesCreateService
+     * @param CasesManageService $casesManageService
+     * @param CasesCategoryRepository $casesCategoryRepository
+     * @param array $config
+     */
+    public function __construct(
+        $id,
+        $module,
+        CasesCreateService $casesCreateService,
+        CasesManageService $casesManageService,
+        CasesCategoryRepository $casesCategoryRepository,
+        $config = []
+    )
+    {
+        parent::__construct($id, $module, $config);
+        $this->casesCreateService = $casesCreateService;
+        $this->casesManageService = $casesManageService;
+        $this->casesCategoryRepository = $casesCategoryRepository;
+    }
+
+    /**
+     * @return array
+     */
+    public function behaviors(): array
     {
         $behaviors = [
             'verbs' => [
@@ -709,21 +750,58 @@ class CasesController extends FController
     }
 
     /**
-     * Creates a new Cases model.
-     * If creation is successful, the browser will be redirected to the 'view' page.
-     * @return mixed
+     * @return string|yii\web\Response
      */
     public function actionCreate()
     {
-        $model = new Cases();
-
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'gid' => $model->cs_gid]);
+        $form = new CasesCreateByWebForm(Yii::$app->user->identity);
+        if ($form->load(Yii::$app->request->post()) && $form->validate()) {
+            try {
+                $case = $this->casesCreateService->createByWeb($form);
+                $this->casesManageService->take($case->cs_id, Yii::$app->user->id);
+                Yii::$app->session->setFlash('success', 'Case created');
+                return $this->redirect(['view', 'gid' => $case->cs_gid]);
+            } catch (\Throwable $e){
+                Yii::$app->session->setFlash('error', $e->getMessage());
+                Yii::error($e, 'Case:Create:Web');
+            }
         }
-
         return $this->render('create', [
-            'model' => $model,
+            'model' => $form,
         ]);
+    }
+
+    /**
+     * @return array
+     * @throws BadRequestHttpException
+     */
+    public function actionCreateValidation(): array
+    {
+        $form = new CasesCreateByWebForm(Yii::$app->user->identity);
+        if (Yii::$app->request->isAjax && $form->load(Yii::$app->request->post())) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            return ActiveForm::validate($form);
+        }
+        throw new BadRequestHttpException();
+    }
+
+    /**
+     * @param $id
+     * @return string
+     */
+    public function actionGetCategories($id): string
+    {
+        $id = (int)$id;
+        $str = '';
+        if ($categories = $this->casesCategoryRepository->getAllByDep($id)) {
+            $str .= '<option>Choose a category</option>';
+            foreach ($categories as $category) {
+                $str .= '<option value="' . $category->cc_key . '">' . $category->cc_name . '</option>';
+            }
+        } else {
+            $str = '<option>-</option>';
+        }
+        return $str;
     }
 
     /**
