@@ -3,37 +3,58 @@
 namespace sales\services\cases;
 
 use sales\repositories\cases\CasesRepository;
+use sales\repositories\lead\LeadRepository;
 use sales\repositories\user\UserRepository;
 
 /**
  * Class CasesManageService
  * @property CasesRepository $casesRepository
  * @property UserRepository $userRepository
+ * @property LeadRepository $leadRepository
  */
 class CasesManageService
 {
 
     private $casesRepository;
     private $userRepository;
+    private $leadRepository;
 
     /**
      * CasesManageService constructor.
      * @param CasesRepository $casesRepository
      * @param UserRepository $userRepository
+     * @param LeadRepository $leadRepository
      */
-    public function __construct(CasesRepository $casesRepository, UserRepository $userRepository)
+    public function __construct(
+        CasesRepository $casesRepository,
+        UserRepository $userRepository,
+        LeadRepository $leadRepository
+    )
     {
         $this->casesRepository = $casesRepository;
         $this->userRepository = $userRepository;
+        $this->leadRepository = $leadRepository;
     }
 
+    /**
+     * @param int $caseId
+     * @param int $leadId
+     */
+    public function assignLead(int $caseId, int $leadId): void
+    {
+        $case = $this->casesRepository->find($caseId);
+        $lead = $this->leadRepository->find($leadId);
+        $case->assignLead($lead->id);
+        $this->casesRepository->save($case);
+    }
+    
     /**
      * For system
      *
      * @param int $caseId
      * @param int $userId
      */
-    public function assign(int $caseId, int $userId): void
+    public function assignUser(int $caseId, int $userId): void
     {
         $case = $this->casesRepository->find($caseId);
         $user = $this->userRepository->find($userId);

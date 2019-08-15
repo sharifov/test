@@ -253,9 +253,10 @@ $c_type_id = $comForm->c_type_id;
                     ]);
 
 
-                        $clientEmails = ['chalpet@mail.com' => 'chalpet@mail.com']; //\yii\helpers\ArrayHelper::map($model->client->clientEmails, 'email', 'email');
-                        $clientEmails[Yii::$app->user->identity->email] = Yii::$app->user->identity->email;
+//                        $clientEmails = ['chalpet@mail.com' => 'chalpet@mail.com']; //\yii\helpers\ArrayHelper::map($model->client->clientEmails, 'email', 'email');
+//                        $clientEmails[Yii::$app->user->identity->email] = Yii::$app->user->identity->email;
 
+                        $clientEmails = $model->client ? $model->client->getEmailList() : [];
                         $clientPhones = $model->client ? $model->client->getPhoneNumbersSms() : [];
 
                         if(Yii::$app->session->hasFlash('send-success')) {

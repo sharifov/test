@@ -8,6 +8,7 @@ use common\models\Department;
 use common\models\Employee;
 use common\models\Lead;
 use common\models\Project;
+use sales\entities\cases\events\CasesAssignLeadEvent;
 use sales\entities\cases\events\CasesFollowUpStatusEvent;
 use sales\entities\cases\events\CasesOwnerChangeEvent;
 use sales\entities\cases\events\CasesOwnerFreedEvent;
@@ -115,6 +116,18 @@ class Cases extends ActiveRecord
     private static function generateGid(): string
     {
         return md5(uniqid('', true));
+    }
+
+    /**
+     * @param int $leadId
+     */
+    public function assignLead(int $leadId): void
+    {
+        if ($this->cs_lead_id === $leadId) {
+            throw new \DomainException('This Lead is already assigned to this case');
+        }
+        $this->recordEvent(new CasesAssignLeadEvent($this, $this->cs_lead_id, $leadId));
+        $this->cs_lead_id = $leadId;
     }
 
     public function pending(): void

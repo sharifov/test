@@ -30,6 +30,7 @@ use sales\repositories\lead\LeadRepository;
 use sales\repositories\Repository;
 use sales\repositories\TestRepository;
 use sales\services\api\communication\CommunicationService;
+use sales\services\cases\CasesManageService;
 use sales\services\client\ClientManageService;
 use sales\services\TransactionManager;
 use SebastianBergmann\CodeCoverage\Report\PHP;
@@ -106,18 +107,8 @@ class TestController extends FController
 
     public function actionT()
     {
-
-        $client = $this->clientManageService->create(new ClientCreateForm([
-            'firstName' => '11 firstname',
-            'lastName' => '12 last name',
-            'middleName' => '13 middlename'
-        ]));
-
-        $this->clientManageService->addPhones($client, [
-            new PhoneCreateForm(['phone' => '+11']),
-            new PhoneCreateForm(['phone' => '+22']),
-            new PhoneCreateForm(['phone' => '+33']),
-        ]);
+        $service = Yii::createObject(CasesManageService::class);
+        $service->followUp(8);
 
 
 die;

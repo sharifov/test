@@ -33,7 +33,12 @@ $this->params['breadcrumbs'][] = $this->title;
             'cs_gid',
             'cs_subject',
             'cs_description:ntext',
-            'cs_category',
+            [
+                'attribute' => 'cs_category',
+                'value' => function (Cases $model) {
+                    return $model->category ? $model->category->cc_name : '';
+                },
+            ],
             [
                 'attribute' => 'cs_status',
                 'value' => function (Cases $model) {
@@ -52,10 +57,20 @@ $this->params['breadcrumbs'][] = $this->title;
                     'class' => 'text-center'
                 ]
             ],
-            'cs_user_id',
+            [
+                'attribute' => 'cs_user_id',
+                'value' => function (Cases $model) {
+                    return $model->owner ? $model->owner->username : '';
+                },
+            ],
             'cs_lead_id',
             'cs_call_id',
-            'cs_dep_id',
+            [
+                    'attribute' => 'cs_dep_id',
+                    'value' => function (Cases $model) {
+                        return $model->department ? $model->department->dep_name : '';
+                    }
+            ],
             'cs_created_dt',
 
             //['class' => yii\grid\ActionColumn::class],

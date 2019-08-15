@@ -147,4 +147,12 @@ class Client extends \yii\db\ActiveRecord implements AggregateRoot
         return $phoneList;
     }
 
+    /**
+     * @return array
+     */
+    public function getEmailList(): array
+    {
+        return ArrayHelper::map($this->clientEmails, 'email', 'email');
+    }
+
 }

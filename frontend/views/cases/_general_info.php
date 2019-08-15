@@ -1,5 +1,7 @@
 <?php
 
+use sales\entities\cases\Cases;
+use sales\entities\cases\CasesStatusHelper;
 use yii\helpers\Html;
 use yii\widgets\DetailView;
 
@@ -36,9 +38,24 @@ use yii\widgets\DetailView;
                     'model' => $model,
                     'attributes' => [
                         'cs_id',
-                        'cs_status',
-                        'cs_project_id',
-                        'cs_user_id',
+                        [
+                            'attribute' => 'cs_status',
+                            'value' => function (Cases $model) {
+                                return CasesStatusHelper::getName($model->cs_status);
+                            },
+                        ],
+                        [
+                            'attribute' => 'cs_project_id',
+                            'value' => function (Cases $model) {
+                                return $model->project ? $model->project->name : '';
+                            },
+                        ],
+                        [
+                            'attribute' => 'cs_user_id',
+                            'value' => function (Cases $model) {
+                                return $model->owner ? $model->owner->username : '';
+                            },
+                        ],
                         'cs_subject',
                         'cs_description:ntext',
                     ],
