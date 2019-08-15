@@ -36,7 +36,7 @@ use yii\widgets\Pjax;
 
             <h1 title="<?=Yii::$app->params['backOffice']['serverUrl']?>"></h1>
 
-            <?php Pjax::begin(['id' => 'sale-pjax-list', 'timeout' => 15000, 'enablePushState' => true]); ?>
+            <?php Pjax::begin(['id' => 'pjax-sale-search-list', 'timeout' => 15000, 'enablePushState' => true]); ?>
 
 
             <?php
@@ -273,10 +273,22 @@ $jsCode = <<<JS
                     alert('Error: ' + data.error);
                     btn.removeClass('disabled');
                     btn.find('span').removeClass('fa-spinner fa-spin').addClass('fa-plus');
+                    new PNotify({
+                        title: "Error add Sale",
+                        type: "error",
+                        text: 'Error add sale in case',
+                        hide: true
+                    });
                 } else {
                     btn.parent().parent().addClass('success');
                     btn.find('span').removeClass('fa-spinner fa-spin').addClass('fa-check');
-                    alert('Sale successfully added');
+                    $.pjax.reload({container: '#pjax-sale-list', push: false, replace: false, timeout: 10000, async: false});
+                    new PNotify({
+                        title: "Sale successfully added",
+                        type: "success",
+                        text: 'Sale Id: ' + data.data.sale_id +' successfully added',
+                        hide: true
+                    });
                 }
                 
             },

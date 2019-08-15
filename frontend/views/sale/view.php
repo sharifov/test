@@ -6,15 +6,19 @@ use yii\helpers\Html;
 /* @var $data array */
 
 
-$this->title = 'Sale ID: ' . $data['saleId'] . ', BookId: '.$data['bookingId'];
-$this->params['breadcrumbs'][] = ['label' => 'Sales', 'url' => ['search']];
-$this->params['breadcrumbs'][] = $this->title;
+if(Yii::$app->request->isAjax) {
+
+    $this->params['breadcrumbs'][] = ['label' => 'Sales', 'url' => ['search']];
+    $this->params['breadcrumbs'][] = $this->title;
+}
+
+$this->title = 'Sale ID: ' . $data['saleId'] . ', BookId: ' . $data['bookingId'];
 
 //$isAgent = Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id);
 
 ?>
 <div class="sale-view">
-    <h1><?= Html::encode($this->title) ?></h1>
+    <h3><?= Html::encode($this->title) ?></h3>
     <div class="row">
 
         <div class="col-md-3">

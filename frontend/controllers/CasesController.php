@@ -10,6 +10,7 @@ use common\models\Email;
 use common\models\EmailTemplateType;
 use common\models\Employee;
 use common\models\Quote;
+use common\models\search\CaseSaleSearch;
 use common\models\search\SaleSearch;
 use common\models\Sms;
 use common\models\SmsTemplateType;
@@ -751,6 +752,14 @@ class CasesController extends FController
             Yii::$app->session->setFlash('error', $exception->getMessage());
         }
 
+
+
+
+        $csSearchModel = new CaseSaleSearch();
+        $params['CaseSaleSearch[css_cs_id]'] = $model->cs_id;
+        $csDataProvider = $csSearchModel->searchByCase($params);
+
+
        //VarDumper::dump($dataProvider->allModels); exit;
 
 
@@ -766,8 +775,12 @@ class CasesController extends FController
             'enableCommunication' => $enableCommunication,
             'dataProviderCommunication' => $dataProviderCommunication,
             'isAdmin' => $isAdmin,
+
             'saleSearchModel' => $saleSearchModel,
             'saleDataProvider' => $saleDataProvider,
+
+            'csSearchModel' => $csSearchModel,
+            'csDataProvider' => $csDataProvider,
         ]);
     }
 
@@ -804,7 +817,7 @@ class CasesController extends FController
                 }
             }
 
-            $out['data'] = ['gid' => $gid, 'h' => $hash];
+            $out['data'] = ['sale_id' => $saleData['saleId'], 'gid' => $gid, 'h' => $hash];
 
         } catch (\Throwable $exception) {
             $out['error'] = $exception->getMessage();

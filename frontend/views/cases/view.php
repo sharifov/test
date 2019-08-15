@@ -15,9 +15,14 @@ use yii\widgets\DetailView;
  *
  * @var $saleSearchModel common\models\search\SaleSearch
  * @var $saleDataProvider yii\data\ArrayDataProvider
+ *
+ * @var $csSearchModel common\models\search\CaseSaleSearch
+ * @var $csDataProvider yii\data\ArrayDataProvider
+ *
+ *
  */
 
-$this->title = $model->cs_id;
+$this->title = 'Case: ' . $model->cs_id;
 $this->params['breadcrumbs'][] = ['label' => 'Cases', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 \yii\web\YiiAsset::register($this);
@@ -72,6 +77,7 @@ $bundle = \frontend\themes\gentelella\assets\AssetLeadCommunication::register($t
             ])
             ?>
         </div>
+
         <div class="col-md-6">
                 <?php if ($enableCommunication) : ?>
                 <?= $this->render('communication/case_communication', [
@@ -86,6 +92,17 @@ $bundle = \frontend\themes\gentelella\assets\AssetLeadCommunication::register($t
             <?php else: ?>
                 <div class="alert alert-warning" role="alert">You do not have access to view Communication block messages.</div>
             <?php endif;?>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <?= $this->render('_sale_list', [
+                'searchModel' => $csSearchModel,
+                'dataProvider' => $csDataProvider,
+                'caseModel' => $model,
+                'isAdmin'       => $isAdmin
+            ])
+            ?>
         </div>
     </div>
 
