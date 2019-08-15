@@ -19,6 +19,8 @@ use yii\widgets\DetailView;
  * @var $csSearchModel common\models\search\CaseSaleSearch
  * @var $csDataProvider yii\data\ArrayDataProvider
  *
+ * @var $leadSearchModel common\models\search\LeadSearch
+ * @var $leadDataProvider yii\data\ArrayDataProvider
  *
  */
 
@@ -61,6 +63,18 @@ $bundle = \frontend\themes\gentelella\assets\AssetLeadCommunication::register($t
         <div class="col-md-4">
             <?= $this->render('_client_info', [
                 'model'      => $model->client,
+                'isAdmin'       => $isAdmin
+            ])
+            ?>
+        </div>
+        <div class="col-md-4">
+            <?= $this->render('_lead_info', [
+                'caseModel'      => $model,
+                'leadModel'      => $model->lead,
+
+                'leadSearchModel' => $leadSearchModel,
+                'leadDataProvider' => $leadDataProvider,
+
                 'isAdmin'       => $isAdmin
             ])
             ?>

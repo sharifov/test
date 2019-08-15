@@ -11,6 +11,7 @@ use common\models\EmailTemplateType;
 use common\models\Employee;
 use common\models\Quote;
 use common\models\search\CaseSaleSearch;
+use common\models\search\LeadSearch;
 use common\models\search\SaleSearch;
 use common\models\Sms;
 use common\models\SmsTemplateType;
@@ -760,6 +761,10 @@ class CasesController extends FController
         $csDataProvider = $csSearchModel->searchByCase($params);
 
 
+        $leadSearchModel = new LeadSearch();
+        $leadDataProvider = $leadSearchModel->searchAgent($params);
+
+
        //VarDumper::dump($dataProvider->allModels); exit;
 
 
@@ -781,6 +786,9 @@ class CasesController extends FController
 
             'csSearchModel' => $csSearchModel,
             'csDataProvider' => $csDataProvider,
+
+            'leadSearchModel' => $leadSearchModel,
+            'leadDataProvider' => $leadDataProvider,
         ]);
     }
 

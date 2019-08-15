@@ -211,24 +211,24 @@ use yii\widgets\Pjax;
     </div>
 </div>
 
-    <style type="text/css">
-        @media screen and (min-width: 768px) {
-            .modal-dialog {
-                width: 700px; /* New width for default modal */
-            }
-            .modal-sm {
-                width: 350px; /* New width for small modal */
-            }
+<style type="text/css">
+    @media screen and (min-width: 768px) {
+        .modal-dialog {
+            width: 700px; /* New width for default modal */
         }
-        @media screen and (min-width: 992px) {
-            .modal-lg {
-                width: 80%; /* New width for large modal */
-            }
+        .modal-sm {
+            width: 350px; /* New width for small modal */
         }
-        .grid-view pre {
-            max-width: 1000px;
+    }
+    @media screen and (min-width: 992px) {
+        .modal-lg {
+            width: 80%; /* New width for large modal */
         }
-    </style>
+    }
+    .grid-view pre {
+        max-width: 1000px;
+    }
+</style>
 
 
 <?php
