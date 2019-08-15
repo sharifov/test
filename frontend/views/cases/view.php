@@ -12,6 +12,9 @@ use yii\widgets\DetailView;
  * @var $dataProviderCommunication \yii\data\ActiveDataProvider
  * @var $enableCommunication boolean
  * @var $isAdmin boolean
+ *
+ * @var $saleSearchModel common\models\search\SaleSearch
+ * @var $saleDataProvider yii\data\ArrayDataProvider
  */
 
 $this->title = $model->cs_id;
@@ -43,25 +46,31 @@ $bundle = \frontend\themes\gentelella\assets\AssetLeadCommunication::register($t
     </p>
 
     <div class="row">
+        <div class="col-md-4">
+            <?= $this->render('_general_info', [
+                'model'      => $model,
+                'isAdmin'       => $isAdmin
+            ])
+            ?>
+        </div>
+        <div class="col-md-4">
+            <?= $this->render('_client_info', [
+                'model'      => $model->client,
+                'isAdmin'       => $isAdmin
+            ])
+            ?>
+        </div>
+    </div>
+
+    <div class="row">
         <div class="col-md-6">
-            <?= DetailView::widget([
-                'model' => $model,
-                'attributes' => [
-                    'cs_id',
-                    'cs_status',
-                    'cs_project_id',
-                    'cs_user_id',
-                    'cs_subject',
-                    'cs_description:ntext',
-                    'cs_category',
-                    'cs_lead_id',
-                    'cs_call_id',
-                    'cs_dep_id',
-                    'cs_client_id',
-                    'cs_created_dt',
-                    'cs_updated_dt',
-                ],
-            ]) ?>
+            <?= $this->render('_sale_search', [
+                'searchModel' => $saleSearchModel,
+                'dataProvider' => $saleDataProvider,
+                'caseModel' => $model,
+                'isAdmin'       => $isAdmin
+            ])
+            ?>
         </div>
         <div class="col-md-6">
                 <?php if ($enableCommunication) : ?>

@@ -195,6 +195,7 @@ $isSuperAdmin = $user->canRole('superadmin');
                 ['label' => 'Lead Tasks', 'url' => ['/lead-task/index'], 'icon' => 'list'],
                 ['label' => 'Email template types', 'url' => ['/email-template-type/index'], 'icon' => 'envelope-o'],
                 ['label' => 'SMS template types', 'url' => ['/sms-template-type/index'], 'icon' => 'comments-o'],
+                ['label' => 'Case Sales', 'url' => ['/case-sale/index'], 'icon' => 'list'],
                 ['label' => 'Project Settings', 'url' => ['/settings/projects'], 'icon' => 'product-hunt'],
                 ['label' => 'Check List Types', 'url' => ['/lead-checklist-type/index'], 'icon' => 'list', 'visible' => Yii::$app->user->can('manageLeadChecklistType')],
             ]

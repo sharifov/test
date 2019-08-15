@@ -73,9 +73,9 @@ class SaleController extends FController
 
         $model = $this->findSale($id);
 
-//        if (Yii::$app->request->isAjax) {
-//            //return $this->renderAjax('view', $viewParams);
-//        }
+        if (Yii::$app->request->isAjax) {
+            return $this->renderAjax('view', ['data' => $model]);
+        }
 
         return $this->render('view', ['data' => $model]);
     }

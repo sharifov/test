@@ -99,7 +99,7 @@ class CallQueueJob extends BaseObject implements JobInterface
 
                             $case = $this->casesRepository->getByClientProjectDepartment($client->id, $call->c_project_id, $call->c_dep_id);
                             if(!$case) {
-                                Yii::info('Not found case:  ' . VarDumper::dumpAsString([$client->id, $call->c_project_id, $call->c_dep_id]), 'info\getByClientProjectDepartment');
+                                //Yii::info('Not found case:  ' . VarDumper::dumpAsString([$client->id, $call->c_project_id, $call->c_dep_id]), 'info\getByClientProjectDepartment');
                                 $case = $this->casesCreateService->createByCall($client->id, $call->c_id, $call->c_project_id, $call->c_dep_id);
                             } else {
                                 Yii::info('Find case: '.$case->cs_id.' - ' . VarDumper::dumpAsString([$client->id, $call->c_project_id, $call->c_dep_id]), 'info\getByClientProjectDepartment');

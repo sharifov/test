@@ -2,12 +2,15 @@
 
 namespace frontend\controllers;
 
+use common\components\BackOffice;
 use common\components\CommunicationService;
 use common\models\Call;
+use common\models\CaseSale;
 use common\models\Email;
 use common\models\EmailTemplateType;
 use common\models\Employee;
 use common\models\Quote;
+use common\models\search\SaleSearch;
 use common\models\Sms;
 use common\models\SmsTemplateType;
 use common\models\UserProjectParams;
@@ -20,10 +23,13 @@ use frontend\models\LeadPreviewSmsForm;
 use Yii;
 use sales\entities\cases\Cases;
 use sales\entities\cases\CasesSearch;
+use yii\base\Exception;
 use yii\data\ActiveDataProvider;
+use yii\data\ArrayDataProvider;
 use yii\db\Expression;
 use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
+use yii\web\BadRequestHttpException;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 
@@ -694,6 +700,21 @@ class CasesController extends FController
         }
 
 
+        $saleSearchModel = new SaleSearch();
+        $params = Yii::$app->request->queryParams;
+
+        try {
+            $saleDataProvider = $saleSearchModel->search($params);
+        } catch (\Exception $exception) {
+            $saleDataProvider = new ArrayDataProvider();
+            Yii::error(VarDumper::dumpAsString([$exception->getFile(), $exception->getCode(), $exception->getMessage()]), 'SaleController:actionSearch');
+            Yii::$app->session->setFlash('error', $exception->getMessage());
+        }
+
+       //VarDumper::dump($dataProvider->allModels); exit;
+
+
+
         $enableCommunication = true;
         $isAdmin = true;
 
@@ -704,8 +725,52 @@ class CasesController extends FController
             'comForm' => $comForm,
             'enableCommunication' => $enableCommunication,
             'dataProviderCommunication' => $dataProviderCommunication,
-            'isAdmin' => $isAdmin
+            'isAdmin' => $isAdmin,
+            'saleSearchModel' => $saleSearchModel,
+            'saleDataProvider' => $saleDataProvider,
         ]);
+    }
+
+    public function actionAddSale()
+    {
+        \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+        $out = ['error' => '', 'data' => []];
+
+        $gid = Yii::$app->request->post('gid');
+        $hash = Yii::$app->request->post('h');
+
+        try {
+            $model = $this->findModelByGid($gid);
+
+            $arr = explode('|', base64_decode($hash));
+            $id = (int)($arr[1] ?? 0);
+            $saleData = $this->findSale($id);
+
+            $cs = CaseSale::find()->where(['css_cs_id' => $model->cs_id, 'css_sale_id' => $saleData['saleId']])->limit(1)->one();
+            if($cs) {
+                $data['error'] = 'This sale ('.$saleData['saleId'].') exist in this Case Id '.$model->cs_id;
+            } else {
+                $cs = new CaseSale();
+                $cs->css_cs_id = $model->cs_id;
+                $cs->css_sale_id = $saleData['saleId'];
+                $cs->css_sale_data = json_encode($saleData);
+                $cs->css_sale_pnr = $saleData['pnr'] ?? null;
+                $cs->css_sale_created_dt = $saleData['created'] ?? null;
+                $cs->css_sale_book_id = $saleData['bookingId'] ?? null;
+                $cs->css_sale_pax = isset($saleData['passengers']) && is_array($saleData['passengers']) ? count($saleData['passengers']) : null;
+
+                if(!$cs->save()) {
+                    Yii::error(VarDumper::dumpAsString($cs->errors), 'CasesController:actionAddSale:CaseSale:save');
+                }
+            }
+
+            $out['data'] = ['gid' => $gid, 'h' => $hash];
+
+        } catch (\Throwable $exception) {
+            $out['error'] = $exception->getMessage();
+        }
+
+        return $out;
     }
 
     /**
@@ -788,5 +853,34 @@ class CasesController extends FController
         }
 
         throw new NotFoundHttpException('The requested case does not exist.');
+    }
+
+    /**
+     * @param int $id
+     * @return mixed
+     * @throws BadRequestHttpException
+     * @throws NotFoundHttpException
+     */
+    protected function findSale(int $id)
+    {
+
+        try {
+            $data['sale_id'] = $id;
+            $response = BackOffice::sendRequest2('cs/detail', $data);
+
+            if ($response->isOk) {
+                $result = $response->data;
+                if ($result && is_array($result)) {
+                    return $result;
+                }
+            } else {
+                throw new Exception('BO request Error: ' . VarDumper::dumpAsString($response->content), 10);
+            }
+
+        } catch (\Throwable $exception) {
+            throw new BadRequestHttpException($exception->getMessage());
+        }
+
+        throw new NotFoundHttpException('The requested Sale does not exist.');
     }
 }

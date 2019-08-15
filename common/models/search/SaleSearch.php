@@ -208,11 +208,10 @@ class SaleSearch extends Model
         }
 
 
-        $arr = array_fill(0, (($currentPage - 1) * $pageSize), ['items' => ['saleId' => 0]]);
-
-        $searchData = array_merge($arr, $searchData);
-
-
+        if($searchData) {
+            $arr = array_fill(0, ($currentPage - 1) * $pageSize, ['items' => ['saleId' => 0]]);
+            $searchData = array_merge($arr, $searchData);
+        }
 
         $dataProvider = new ArrayDataProvider([
             'allModels' => $searchData,
