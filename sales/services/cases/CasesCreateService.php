@@ -8,6 +8,7 @@ use sales\forms\lead\PhoneCreateForm;
 use sales\repositories\cases\CasesRepository;
 use sales\services\client\ClientManageService;
 use sales\services\TransactionManager;
+use yii\helpers\VarDumper;
 
 /**
  * Class CasesCreateService
@@ -49,7 +50,7 @@ class CasesCreateService
     {
         $case = $this->transaction->wrap(function () use ($form) {
 
-            $client = $this->clientManageService->getOrCreateClient([new PhoneCreateForm(['phone' => $form->clientPhone])]);
+            $client = $this->clientManageService->getOrCreate([new PhoneCreateForm(['phone' => $form->clientPhone])]);
             $case = Cases::createByWeb(
                 $form->projectId,
                 $form->category,
@@ -78,7 +79,7 @@ class CasesCreateService
     {
         $case = $this->transaction->wrap(function () use ($clientPhones, $callId, $projectId, $depId) {
 
-            $client = $this->clientManageService->getOrCreateClient($clientPhones);
+            $client = $this->clientManageService->getOrCreate($clientPhones);
             $case = Cases::createByCall(
                 $client->id,
                 $callId,
@@ -86,6 +87,39 @@ class CasesCreateService
                 $depId
             );
             $this->casesRepository->save($case);
+            return $case;
+
+        });
+
+        return $case;
+    }
+
+    /**
+     * @param PhoneCreateForm[] $clientPhones
+     * @param int $callId
+     * @param int $projectId
+     * @param int|null $depId
+     * @return Cases
+     * @throws \Exception
+     */
+    public function getOrCreateByCall(array $clientPhones, int $callId, int $projectId, ?int $depId): Cases
+    {
+
+        $case = $this->transaction->wrap(function () use ($clientPhones, $callId, $projectId, $depId) {
+
+            $client = $this->clientManageService->getOrCreate($clientPhones);
+            if (!$case = $this->casesRepository->getByClientProjectDepartment($client->id, $projectId, $depId)) {
+                \Yii::info('Not found case:  ' . VarDumper::dumpAsString([$client->id, $projectId, $depId]), 'info\getByClientProjectDepartment');
+                $case = Cases::createByCall(
+                    $client->id,
+                    $callId,
+                    $projectId,
+                    $depId
+                );
+                $this->casesRepository->save($case);
+            } else {
+                \Yii::info('Find case: ' . $case->cs_id . ' - ' . VarDumper::dumpAsString([$client->id, $projectId, $depId]), 'info\getByClientProjectDepartment');
+            }
             return $case;
 
         });

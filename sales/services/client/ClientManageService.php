@@ -113,7 +113,7 @@ class ClientManageService
      * @param ClientCreateForm|null $clientForm
      * @return Client
      */
-    public function getOrCreateClient(array $phones, ?ClientCreateForm $clientForm = null): Client
+    public function getOrCreate(array $phones, ?ClientCreateForm $clientForm = null): Client
     {
         foreach ($phones as $phone) {
             if (($clientPhone = $this->clientPhoneRepository->getByPhone($phone->phone)) && ($client = $clientPhone->client)) {

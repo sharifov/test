@@ -13,6 +13,7 @@ use sales\repositories\Repository;
  * @method null|Cases get(int $id)
  * @method null|Cases getByClient(int $clientId)
  * @method null|Cases getByGid(string $gid)
+ * @method null|Cases getByClientProjectDepartment(int $clientId, int $projectId, ?int $departmentId)
  */
 class CasesRepository extends Repository
 {
@@ -37,6 +38,25 @@ class CasesRepository extends Repository
             ->andWhere(['cs_client_id' => $clientId])
             ->andWhere(['<>', Cases::STATUS_TRASH, 'cs_status'])
             ->andWhere(['<>', Cases::STATUS_SOLVED, 'cs_status'])
+            ->orderBy(['cs_id' => SORT_DESC])
+            ->limit(1)->one()) {
+            return $case;
+        }
+        throw new NotFoundException('Case is not found');
+    }
+
+
+    /**
+     * @param int $clientId
+     * @param int $projectId
+     * @param int|null $departmentId
+     * @return Cases
+     */
+    public function findByClientProjectDepartment(int $clientId, int $projectId, ?int $departmentId): Cases
+    {
+        if ($case = Cases::find()
+            ->andWhere(['cs_client_id' => $clientId, 'cs_project_id' => $projectId, 'cs_dep_id' => $departmentId])
+            ->andWhere(['NOT IN', 'cs_status', [Cases::STATUS_TRASH, Cases::STATUS_SOLVED]])
             ->orderBy(['cs_id' => SORT_DESC])
             ->limit(1)->one()) {
             return $case;
