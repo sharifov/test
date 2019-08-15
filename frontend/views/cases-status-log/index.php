@@ -79,7 +79,7 @@ $userList = Employee::getList();
                 'label' => 'Status end date',
                 'attribute' => 'csl_end_dt',
                 'value' => function (CasesStatusLog $model) {
-                    return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->csl_end_dt));
+                    return $model->csl_end_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->csl_end_dt)) : '';
                 },
                 'format' => 'raw',
                 'options' => ['style' => 'width:180px'],
@@ -98,10 +98,17 @@ $userList = Employee::getList();
             ],
             'csl_time_duration',
             [
-                    'attribute' => 'csl_owner_id',
-                    'value' => function(CasesStatusLog $model) {
-                        return $model->owner ? $model->owner->username : '';
-                    },
+                'attribute' => 'csl_owner_id',
+                'value' => function (CasesStatusLog $model) {
+                    return $model->owner ? $model->owner->username : '';
+                },
+                'filter' => $userList
+            ],
+            [
+                'attribute' => 'csl_created_user_id',
+                'value' => function (CasesStatusLog $model) {
+                    return $model->createdUser ? $model->createdUser->username : '';
+                },
                 'filter' => $userList
             ],
         ],

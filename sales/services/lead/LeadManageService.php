@@ -80,7 +80,7 @@ class LeadManageService
 
         $lead = $this->transaction->wrap(function () use ($form, $employeeId) {
 
-            $client = $this->clientManageService->getOrCreateClient($form->phones, $form->client);
+            $client = $this->clientManageService->getOrCreate($form->phones, $form->client);
 
             $lead = Lead::create(
                 $client->id,

@@ -15,6 +15,7 @@ use sales\repositories\Repository;
  * @method null|Cases getByClient(int $clientId)
  * @method null|Cases getByClientProjectDepartment(int $clientId, int $projectId, ?int $departmentId)
  * @method null|Cases getByGid(string $gid)
+ * @method null|Cases getByClientProjectDepartment(int $clientId, int $projectId, ?int $departmentId)
  */
 class CasesRepository extends Repository
 {

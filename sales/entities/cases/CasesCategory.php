@@ -4,7 +4,6 @@ namespace sales\entities\cases;
 
 use common\models\Department;
 use common\models\Employee;
-use sales\validators\AlphabetValidator;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
@@ -25,7 +24,7 @@ use yii\db\ActiveRecord;
  * @property Department $dep
  * @property Employee $updatedUser
  */
-class CasesCategory extends \yii\db\ActiveRecord
+class CasesCategory extends ActiveRecord
 {
 
     /**

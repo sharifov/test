@@ -109,14 +109,14 @@ class ClientManageService
     /**
      * Find or create Client
      *
-     * @param PhoneCreateForm[] $phonesForm
+     * @param PhoneCreateForm[] $phones
      * @param ClientCreateForm|null $clientForm
      * @return Client
      */
-    public function getOrCreateClient(array $phonesForm, ?ClientCreateForm $clientForm = null): Client
+    public function getOrCreate(array $phones, ?ClientCreateForm $clientForm = null): Client
     {
-        foreach ($phonesForm as $phoneForm) {
-            if (($clientPhone = $this->clientPhoneRepository->getByPhone($phoneForm->phone)) && ($client = $clientPhone->client)) {
+        foreach ($phones as $phone) {
+            if (($clientPhone = $this->clientPhoneRepository->getByPhone($phone->phone)) && ($client = $clientPhone->client)) {
                 return $client;
             }
         }
@@ -125,7 +125,7 @@ class ClientManageService
             $clientForm = new ClientCreateForm(['firstName' => 'ClientName']);
         }
         $client = $this->create($clientForm);
-        $this->addPhones($client, $phonesForm);
+        $this->addPhones($client, $phones);
 
         return $client;
     }

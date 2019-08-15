@@ -79,6 +79,37 @@ class Cases extends ActiveRecord
     }
 
     /**
+     * @param int $projectId
+     * @param string $category
+     * @param string $clientId
+     * @param int $depId
+     * @param string|null $subject
+     * @param string|null $description
+     * @return Cases
+     */
+    public static function createByWeb(
+        int $projectId,
+        string $category,
+        string $clientId,
+        int $depId,
+        ?string $subject,
+        ?string $description
+    ): self
+    {
+        $case = new static();
+        $case->cs_project_id = $projectId;
+        $case->cs_category = $category;
+        $case->cs_client_id = $clientId;
+        $case->cs_dep_id = $depId;
+        $case->cs_subject = $subject;
+        $case->cs_description = $description;
+        $case->cs_gid = self::generateGid();
+        $case->cs_created_dt = date('Y-m-d H:i:s');
+        $case->setStatus(self::STATUS_PENDING);
+        return $case;
+    }
+
+    /**
      * @return string
      */
     private static function generateGid(): string
@@ -304,26 +335,6 @@ class Cases extends ActiveRecord
     public function getProject(): ActiveQuery
     {
         return $this->hasOne(Project::class, ['id' => 'cs_project_id']);
-    }
-
-    public function rules()
-    {
-        return [
-            [['cs_description'], 'string'],
-            [['cs_status'], 'required'],
-            [['cs_status', 'cs_user_id', 'cs_lead_id', 'cs_call_id', 'cs_dep_id', 'cs_project_id', 'cs_client_id'], 'integer'],
-            [['cs_created_dt', 'cs_updated_dt'], 'safe'],
-            [['cs_gid'], 'string', 'max' => 32],
-            [['cs_subject'], 'string', 'max' => 255],
-            [['cs_category'], 'string', 'max' => 50],
-            [['cs_gid'], 'unique'],
-            [['cs_call_id'], 'exist', 'skipOnError' => true, 'targetClass' => Call::class, 'targetAttribute' => ['cs_call_id' => 'c_id']],
-            [['cs_category'], 'exist', 'skipOnError' => true, 'targetClass' => CasesCategory::class, 'targetAttribute' => ['cs_category' => 'cc_key']],
-            [['cs_client_id'], 'exist', 'skipOnError' => true, 'targetClass' => Client::class, 'targetAttribute' => ['cs_client_id' => 'id']],
-            [['cs_dep_id'], 'exist', 'skipOnError' => true, 'targetClass' => Department::class, 'targetAttribute' => ['cs_dep_id' => 'dep_id']],
-            [['cs_lead_id'], 'exist', 'skipOnError' => true, 'targetClass' => Lead::class, 'targetAttribute' => ['cs_lead_id' => 'id']],
-            [['cs_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['cs_user_id' => 'id']],
-        ];
     }
 
     /**
