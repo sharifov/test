@@ -59,8 +59,10 @@ $isAgent = false;
                     'model' => $leadModel,
                     'attributes' => [
                         'id',
+
+
                         [
-                            'label' => 'Client / Emails / Phones',
+                            'label' => 'Client Name',
                             'format' => 'raw',
                             'value' => function (\common\models\Lead $model) {
 
@@ -74,16 +76,17 @@ $isAgent = false;
                                 } else {
                                     $clientName = '-';
                                 }
+                                $str = $clientName;
+                                return $str ?? '-';
+                            },
+                        ],
 
-                                $str = $clientName.'<br>';
-
-                                if (Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id) && Yii::$app->user->id !== $model->employee_id) {
-                                    $str .= '- // - // - // -';
-                                } else {
-                                    $str .= $model->client && $model->client->clientEmails ? '<i class="fa fa-envelope"></i> ' . implode(' <br><i class="fa fa-envelope"></i> ', \yii\helpers\ArrayHelper::map($model->client->clientEmails, 'email', 'email')) . '' : '';
-                                    $str .= $model->client && $model->client->clientPhones ? '<br><i class="fa fa-phone"></i> ' . implode(' <br><i class="fa fa-phone"></i> ', \yii\helpers\ArrayHelper::map($model->client->clientPhones, 'phone', 'phone')) . '' : '';
-                                }
-
+                        [
+                            'label' => 'Client Emails / Phones',
+                            'format' => 'raw',
+                            'value' => function (\common\models\Lead $model) {
+                                $str = $model->client && $model->client->clientEmails ? ' <i class="fa fa-envelope"></i> ' . implode(' <i class="fa fa-envelope"></i> ', \yii\helpers\ArrayHelper::map($model->client->clientEmails, 'email', 'email')) . '' : '';
+                                $str .= $model->client && $model->client->clientPhones ? ' <i class="fa fa-phone"></i> ' . implode(' <i class="fa fa-phone"></i> ', \yii\helpers\ArrayHelper::map($model->client->clientPhones, 'phone', 'phone')) . '' : '';
                                 return $str ?? '-';
                             },
                         ],
@@ -92,19 +95,17 @@ $isAgent = false;
                             'attribute' => 'status',
                             'value' => function (\common\models\Lead $model) {
                                 $statusValue = $model->getStatusName(true);
+                                return $statusValue;
+                            },
+                            'format' => 'raw',
 
-                                if ($model->status === \common\models\Lead::STATUS_TRASH) {
-                                    $reason = \common\models\Reason::find()->where([
-                                        'lead_id' => $model->id
-                                    ])
-                                        ->orderBy([
-                                            'id' => SORT_DESC
-                                        ])
-                                        ->one();
-                                    if ($reason) {
-                                        $statusValue .= ' <span data-toggle="tooltip" data-placement="top" title="' . Html::encode($reason->reason) . '"><i class="fa fa-warning"></i></span>';
-                                    }
-                                }
+
+                        ],
+
+                        [
+                            'attribute' => 'status',
+                            'value' => function (\common\models\Lead $model) {
+                                $statusValue = '';
 
                                 $statusLog = \common\models\LeadFlow::find()->where([
                                     'lead_id' => $model->id,
@@ -116,8 +117,7 @@ $isAgent = false;
                                     ->one();
 
                                 if ($statusLog) {
-                                    // $statusValue .= '<br><span class="label label-default">'.Yii::$app->formatter->asDatetime(strtotime($statusLog->created)).'</span>';
-                                    $statusValue .= '<br><br><span class="label label-default">' . Yii::$app->formatter->asDatetime(strtotime($statusLog->created)) . '</span>';
+                                    $statusValue .= '<span class="label label-default">' . Yii::$app->formatter->asDatetime(strtotime($statusLog->created)) . '</span>';
                                     $statusValue .= '<br>' . Yii::$app->formatter->asRelativeTime(strtotime($statusLog->created)) . '';
                                 }
 
@@ -128,12 +128,26 @@ $isAgent = false;
 
                         ],
                         [
-                            'attribute' => 'created',
-                            //'header' => 'Pending Time',
+                            //'attribute' => 'created',
+                            'label' => 'Pending Time',
                             'value' => function (\common\models\Lead $model) {
                                 return Yii::$app->formatter->asRelativeTime(strtotime($model->created)); // Lead::getPendingAfterCreate($model->created);
                             },
-                            'format' => 'raw'
+                            //'format' => 'raw'
+                        ],
+                        [
+                            'attribute' => 'created',
+                            'value' => function(\common\models\Lead $model) {
+                                return $model->created ? '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->created)) : '';
+                            },
+                            'format' => 'raw',
+                        ],
+                        [
+                            'attribute' => 'updated',
+                            'value' => function(\common\models\Lead $model) {
+                                return $model->updated ? '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->updated)) : '';
+                            },
+                            'format' => 'raw',
                         ],
 
                     ],
@@ -160,10 +174,19 @@ $isAgent = false;
                         //'trip_type',
 
                         [
-                            'label' => 'Pax / Communication',
+                            'label' => 'Pax',
                             'value' => function (\common\models\Lead $model) {
                                 //$str = '';
-                                $str = '<i class="fa fa-male"></i> <span title="adult">'. $model->adults .'</span> / <span title="child">' . $model->children . '</span> / <span title="infant">' . $model->infants.'</span><br>';
+                                $str = '<i class="fa fa-male"></i> <span title="adult">'. $model->adults .'</span> / <span title="child">' . $model->children . '</span> / <span title="infant">' . $model->infants.'</span>';
+                                return $str;
+                            },
+                            'format' => 'raw',
+                        ],
+
+                        [
+                            'label' => 'Communication',
+                            'value' => function (\common\models\Lead $model) {
+                                $str = '';
                                 $str .= '<span title="Calls Out / In"><i class="fa fa-phone success"></i> '. $model->getCountCalls(\common\models\Call::CALL_TYPE_OUT) .'/'.  $model->getCountCalls(\common\models\Call::CALL_TYPE_IN) .'</span> | ';
                                 $str .= '<span title="SMS Out / In"><i class="fa fa-comments info"></i> '. $model->getCountSms(\common\models\Sms::TYPE_OUTBOX) .'/'.  $model->getCountCalls(\common\models\Sms::TYPE_INBOX) .'</span> | ';
                                 $str .= '<span title="Email Out / In"><i class="fa fa-envelope danger"></i> '. $model->getCountEmails(\common\models\Email::TYPE_OUTBOX) .'/'.  $model->getCountEmails(\common\models\Email::TYPE_INBOX) .'</span>';
@@ -214,20 +237,7 @@ $isAgent = false;
                             },
                             'format' => 'raw',
                         ],
-                        [
-                            'attribute' => 'created',
-                            'value' => function(\common\models\Lead $model) {
-                                return $model->created ? '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->created)) : '';
-                            },
-                            'format' => 'raw',
-                        ],
-                        [
-                            'attribute' => 'updated',
-                            'value' => function(\common\models\Lead $model) {
-                                return $model->updated ? '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->updated)) : '';
-                            },
-                            'format' => 'raw',
-                        ],
+
                     ],
                 ]) ?>
             </div>

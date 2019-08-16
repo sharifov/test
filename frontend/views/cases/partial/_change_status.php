@@ -8,7 +8,7 @@ use yii\widgets\Pjax;
 /* @var $model \sales\forms\cases\CasesChangeStatusForm */
 /* @var $form yii\widgets\ActiveForm */
 ?>
-
+<?php Pjax::begin(['id' => 'pjax-cases-change-status-form', 'enablePushState' => false, 'enableReplaceState' => false]); ?>
 <div class="cases-change-status">
 
     <?php $form = ActiveForm::begin([
@@ -16,7 +16,12 @@ use yii\widgets\Pjax;
         'enableAjaxValidation' => true,
         'validationUrl' => \yii\helpers\Url::to(['cases/change-status-validate']),
         'method' => 'post',
+        'options' => ['data-pjax' => true ]
     ]); ?>
+
+    <?php
+        echo $form->errorSummary($model);
+    ?>
 
     <?= $form->field($model, 'case_id')->hiddenInput()->label(false) ?>
 
@@ -30,3 +35,4 @@ use yii\widgets\Pjax;
 
     <?php ActiveForm::end(); ?>
 </div>
+<?php Pjax::end(); ?>

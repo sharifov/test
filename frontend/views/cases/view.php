@@ -148,11 +148,11 @@ $bundle = \frontend\themes\gentelella\assets\AssetLeadCommunication::register($t
 
 </div>
 
-<?php Pjax::begin(); ?>
+
 <?php
 yii\bootstrap\Modal::begin([
-    'headerOptions' => ['id' => 'modalCaseHeader'],
     'id' => 'modalCase',
+    'headerOptions' => ['id' => 'modalCaseHeader'],
     'size' => \yii\bootstrap\Modal::SIZE_SMALL,
     'clientOptions' => ['backdrop' => 'static']//, 'keyboard' => FALSE]
 ]);
@@ -160,11 +160,10 @@ yii\bootstrap\Modal::begin([
 
 <?php
 yii\bootstrap\Modal::end();
-$ajaxUrl = \yii\helpers\Url::to(['cases/change-status', 'gid' => $model->cs_gid]);
 ?>
-<?php Pjax::end(); ?>
 
 <?php
+    $ajaxUrl = \yii\helpers\Url::to(['cases/change-status', 'gid' => $model->cs_gid]);
     $js = <<<JS
      $(document).on('click', '#btn-change-status', function(){
             var modal = $('#modalCase');

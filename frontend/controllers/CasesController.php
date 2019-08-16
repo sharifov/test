@@ -1068,7 +1068,7 @@ class CasesController extends FController
 
                 $formModel->case_id = (int) $formModel->case_id;
                 switch ((int) $formModel->status) {
-                    case Cases::STATUS_FOLLOW_UP : $this->casesManageService->pending($formModel->case_id);
+                    case Cases::STATUS_FOLLOW_UP : $this->casesManageService->followUp($formModel->case_id);
                         break;
                     case Cases::STATUS_TRASH : $this->casesManageService->trash($formModel->case_id);
                         break;
@@ -1079,7 +1079,8 @@ class CasesController extends FController
 
                 $case = $this->casesRepository->find($formModel->case_id);
                 Yii::$app->session->setFlash('success', 'Case Status changed successfully ("'.CasesStatusHelper::getName($case->cs_status).'")');
-                $this->redirect(['cases/view', 'gid' => $case->cs_gid]);
+                //return '<script>alert(123);</script>'; //$this->view->registerJs('alert(123);');
+                return $this->redirect(['cases/view', 'gid' => $case->cs_gid]);
 
             } else {
                 $caseGId = Yii::$app->request->get('gid');
