@@ -12,17 +12,20 @@ use yii\widgets\ActiveForm;
 
     <?php $form = ActiveForm::begin(); ?>
 
-    <?= $form->field($model, 'etp_key')->textInput(['maxlength' => true]) ?>
+    <div class="col-md-4">
+    <?= $form->field($model, 'etp_key')->textInput(['maxlength' => true, 'disabled' => true]) ?>
 
     <?= $form->field($model, 'etp_origin_name')->textInput(['maxlength' => true, 'disabled' => true]) ?>
 
     <?= $form->field($model, 'etp_name')->textInput(['maxlength' => true]) ?>
 
-    <?= $form->field($model, 'etp_hidden')->checkbox() ?>
+    <?= $form->field($model, 'etp_dep_id')->dropDownList(\common\models\Department::getList(), ['prompt' => '-']) ?>
 
+    <?= $form->field($model, 'etp_hidden')->checkbox() ?>
 
     <div class="form-group">
         <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
+    </div>
     </div>
 
     <?php ActiveForm::end(); ?>

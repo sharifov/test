@@ -34,6 +34,12 @@ $this->params['breadcrumbs'][] = $this->title;
             'etp_name',
             'etp_hidden:boolean',
             [
+                'attribute' => 'etp_dep_id',
+                'value' => function (\common\models\EmailTemplateType $model) {
+                    return $model->etpDep ? $model->etpDep->dep_name : '-';
+                },
+            ],
+            [
                 'attribute' => 'etp_updated_user_id',
                 'value' => function (\common\models\EmailTemplateType $model) {
                     return ($model->etpUpdatedUser ? '<i class="fa fa-user"></i> ' .Html::encode($model->etpUpdatedUser->username) : $model->etp_updated_user_id);
