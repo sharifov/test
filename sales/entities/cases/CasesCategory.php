@@ -8,6 +8,7 @@ use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
+use yii\helpers\ArrayHelper;
 
 /**
  * Class CasesCategory
@@ -111,6 +112,15 @@ class CasesCategory extends ActiveRecord
     public function getUpdatedUser(): ActiveQuery
     {
         return $this->hasOne(Employee::className(), ['id' => 'cc_updated_user_id']);
+    }
+
+    /**
+     * @return array
+     */
+    public static function getList() : array
+    {
+        $data = self::find()->orderBy(['cc_created_dt' => SORT_ASC])->asArray()->all();
+        return ArrayHelper::map($data,'cc_key', 'cc_name');
     }
 
     /**

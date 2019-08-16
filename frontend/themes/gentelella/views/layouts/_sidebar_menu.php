@@ -34,6 +34,7 @@ $isSuperAdmin = $user->canRole('superadmin');
         $menuItems[] = ['label' => 'Dashboard', 'url' => ['/'], 'icon' => 'area-chart'];
         $menuItems[] = ['label' => 'Search Leads', 'url' => ['/leads/index'], 'icon' => 'search'];
         $menuItems[] = ['label' => 'Search Sale', 'url' => ['/sale/search'], 'icon' => 'search'];
+        $menuItems[] = ['label' => 'Search Cases', 'url' => ['/cases'], 'icon' => 'search'];
 
         if (!$isUM) {
             $cntNotifications = \common\models\Notifications::findNewCount(Yii::$app->user->id);
@@ -134,8 +135,6 @@ $isSuperAdmin = $user->canRole('superadmin');
         }
 
         $menuCases = [];
-        $menuCases[] = ['label' => 'Cases', 'url' => ['/cases'], 'icon' => 'user'];
-        $menuCases[] = ['label' => 'Cases categories', 'url' => ['/cases-category'], 'icon' => 'users'];
         $menuCases[] = ['label' => 'Cases status history', 'url' => ['/cases-status-log'], 'icon' => 'bars'];
         $menuCases[] = ['label' => 'Pending <span id="cases-q-pending" data-type="pending" class="label-warning label pull-right cases-q-info"></span> ', 'url' => ['/cases-q/pending'], 'icon' => 'briefcase text-info'];
         $menuCases[] = ['label' => 'Inbox <span id="cases-q-inbox" data-type="inbox" class="label-warning label pull-right cases-q-info"></span> ', 'url' => ['/cases-q/inbox'], 'icon' => 'briefcase text-info'];
@@ -199,6 +198,7 @@ $isSuperAdmin = $user->canRole('superadmin');
                 ['label' => 'Case Sales', 'url' => ['/case-sale/index'], 'icon' => 'list'],
                 ['label' => 'Project Settings', 'url' => ['/settings/projects'], 'icon' => 'product-hunt'],
                 ['label' => 'Check List Types', 'url' => ['/lead-checklist-type/index'], 'icon' => 'list', 'visible' => Yii::$app->user->can('manageLeadChecklistType')],
+                ['label' => 'Cases categories', 'url' => ['/cases-category'], 'icon' => 'users'],
             ]
         ];
 

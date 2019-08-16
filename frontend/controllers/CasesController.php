@@ -77,22 +77,6 @@ class CasesController extends FController
     }
 
     /**
-     * @return array
-     */
-    public function behaviors(): array
-    {
-        $behaviors = [
-            'verbs' => [
-                'class' => VerbFilter::class,
-                'actions' => [
-                    'delete' => ['POST'],
-                ],
-            ],
-        ];
-        return ArrayHelper::merge(parent::behaviors(), $behaviors);
-    }
-
-    /**
      * Lists all Cases models.
      * @return mixed
      */
@@ -835,7 +819,7 @@ class CasesController extends FController
         if ($form->load(Yii::$app->request->post()) && $form->validate()) {
             try {
                 $case = $this->casesCreateService->createByWeb($form);
-                $this->casesManageService->take($case->cs_id, Yii::$app->user->id);
+                $this->casesManageService->take($case->cs_gid, Yii::$app->user->id);
                 Yii::$app->session->setFlash('success', 'Case created');
                 return $this->redirect(['view', 'gid' => $case->cs_gid]);
             } catch (\Throwable $e){
@@ -882,47 +866,55 @@ class CasesController extends FController
     }
 
     /**
-     * Updates an existing Cases model.
-     * If update is successful, the browser will be redirected to the 'view' page.
-     * @param integer $id
-     * @return mixed
-     * @throws NotFoundHttpException if the model cannot be found
+     * @param $gid
+     * @param $uid
+     * @return Response
+     * @throws NotFoundHttpException
      */
-    public function actionUpdate($id)
+    public function actionTake($gid, $uid): Response
     {
-        $model = $this->findModel($id);
-
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'gid' => $model->cs_gid]);
+        $gid = (string) $gid;
+        $uid = (int) $uid;
+        $case = $this->findModelByGid($gid);
+        try {
+            $this->casesManageService->take($case->cs_gid, $uid);
+            Yii::$app->session->setFlash('success', 'Success');
+        } catch (\Throwable $e) {
+            Yii::$app->session->setFlash('error', $e->getMessage());
+            Yii::error($e, 'Cases:CasesController:Take');
         }
-
-        return $this->render('update', [
-            'model' => $model,
-        ]);
+        return $this->redirect(['cases/view', 'gid' => $case->cs_gid]);
     }
 
     /**
-     * Deletes an existing Cases model.
-     * If deletion is successful, the browser will be redirected to the 'index' page.
-     * @param integer $id
-     * @return mixed
-     * @throws NotFoundHttpException if the model cannot be found
+     * @param $gid
+     * @param $uid
+     * @return Response
+     * @throws NotFoundHttpException
      */
-    public function actionDelete($id)
+    public function actionTakeOver($gid, $uid): Response
     {
-        $this->findModel($id)->delete();
-
-        return $this->redirect(['index']);
+        $gid = (string) $gid;
+        $uid = (int) $uid;
+        $case = $this->findModelByGid($gid);
+        try {
+            $this->casesManageService->takeOver($case->cs_gid, $uid);
+            Yii::$app->session->setFlash('success', 'Success');
+        } catch (\Throwable $e) {
+            Yii::$app->session->setFlash('error', $e->getMessage());
+            Yii::error($e, 'Cases:CasesController:TakeOver');
+        }
+        return $this->redirect(['cases/view', 'gid' => $case->cs_gid]);
     }
 
     /**
      * Finds the Cases model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
      * @param integer $id
-     * @return Cases the loaded model
+     * @return Cases
      * @throws NotFoundHttpException if the model cannot be found
      */
-    protected function findModel($id)
+    protected function findModel($id): Cases
     {
         if (($model = Cases::findOne($id)) !== null) {
             return $model;
@@ -933,10 +925,10 @@ class CasesController extends FController
 
     /**
      * @param $gid
-     * @return Cases|null
+     * @return Cases
      * @throws NotFoundHttpException
      */
-    protected function findModelByGid($gid)
+    protected function findModelByGid($gid): Cases
     {
         if (($model = Cases::findOne(['cs_gid' => $gid])) !== null) {
             return $model;

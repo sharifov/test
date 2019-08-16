@@ -1,5 +1,8 @@
 <?php
 
+use common\models\Department;
+use common\models\Project;
+use sales\entities\cases\CasesCategory;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use sales\entities\cases\Cases;
@@ -17,27 +20,27 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <h1><?= Html::encode($this->title) ?></h1>
 
-    <p>
-        <?php //= Html::a('Create Cases', ['create'], ['class' => 'btn btn-success']) ?>
-    </p>
-
     <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
 
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'columns' => [
-            //['class' => yii\grid\SerialColumn::class],
-
-            'cs_id',
             'cs_gid',
+            [
+                'attribute' => 'cs_project_id',
+                'value' => function (Cases $model) {
+                    return $model->project ? $model->project->name : '';
+                },
+                'filter' => Project::getList()
+            ],
             'cs_subject',
-            'cs_description:ntext',
             [
                 'attribute' => 'cs_category',
                 'value' => function (Cases $model) {
                     return $model->category ? $model->category->cc_name : '';
                 },
+                'filter' => CasesCategory::getList()
             ],
             [
                 'attribute' => 'cs_status',
@@ -63,30 +66,28 @@ $this->params['breadcrumbs'][] = $this->title;
                     return $model->owner ? $model->owner->username : '';
                 },
             ],
-            'cs_lead_id',
-            'cs_call_id',
             [
-                    'attribute' => 'cs_dep_id',
-                    'value' => function (Cases $model) {
-                        return $model->department ? $model->department->dep_name : '';
-                    }
+                'attribute' => 'cs_lead_id',
+                'value' => function (Cases $model) {
+                    return $model->lead ? $model->lead->uid : '';
+                },
+            ],
+            [
+                'attribute' => 'cs_dep_id',
+                'value' => function (Cases $model) {
+                    return $model->department ? $model->department->dep_name : '';
+                },
+                'filter' => Department::getList()
             ],
             'cs_created_dt',
-
-            //['class' => yii\grid\ActionColumn::class],
-
             [
                 'class' => 'yii\grid\ActionColumn',
-                'template' => '{view} {update} {delete}',
-                'visibleButtons' => [
-                    'update' => function ($model, $key, $index) {
-                        return Yii::$app->user->can('admin');
-                    },
-
-                    'delete' => function ($model, $key, $index) {
-                        return Yii::$app->user->can('admin');
-                    },
-                ],
+                'template' => '{view}',
+//                'visibleButtons' => [
+//                    'view' => function ($model, $key, $index) {
+//                        return Yii::$app->user->can('admin');
+//                    },
+//                ],
                 'buttons' => [
                     'view' => function ($url, Cases $model, $key) {
                         return Html::a('<span class="glyphicon glyphicon-eye-open"></span>', Url::to([

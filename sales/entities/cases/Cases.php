@@ -263,7 +263,7 @@ class Cases extends ActiveRecord
      * @param int|null $userId
      * @return bool
      */
-    private function isOwner(?int $userId): bool
+    public function isOwner(?int $userId): bool
     {
         if ($userId === null) {
             return false;
@@ -357,6 +357,7 @@ class Cases extends ActiveRecord
     {
         return [
             'cs_id' => 'ID',
+            'cs_gid' => 'GID',
             'cs_subject' => 'Subject',
             'cs_description' => 'Description',
             'cs_category' => 'Category',
@@ -364,7 +365,7 @@ class Cases extends ActiveRecord
             'cs_user_id' => 'User',
             'cs_lead_id' => 'Lead',
             'cs_call_id' => 'Call',
-            'cs_dep_id' => 'Depart',
+            'cs_dep_id' => 'Department',
             'cs_project_id' => 'Project',
             'cs_client_id' => 'Client',
             'cs_created_dt' => 'Created',
