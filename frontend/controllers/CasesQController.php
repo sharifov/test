@@ -23,12 +23,12 @@ class CasesQController extends Controller
         ]);
     }
 
-    public function actionProcessing()
+    public function actionInbox()
     {
         $searchModel = new CasesQSearch();
-        $dataProvider = $searchModel->searchProcessing(Yii::$app->request->queryParams, Yii::$app->user->identity);
+        $dataProvider = $searchModel->searchInbox(Yii::$app->request->queryParams, Yii::$app->user->identity);
 
-        return $this->render('processing', [
+        return $this->render('inbox', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
         ]);
@@ -40,6 +40,17 @@ class CasesQController extends Controller
         $dataProvider = $searchModel->searchFollowup(Yii::$app->request->queryParams, Yii::$app->user->identity);
 
         return $this->render('followup', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+        ]);
+    }
+
+    public function actionProcessing()
+    {
+        $searchModel = new CasesQSearch();
+        $dataProvider = $searchModel->searchProcessing(Yii::$app->request->queryParams, Yii::$app->user->identity);
+
+        return $this->render('processing', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
         ]);

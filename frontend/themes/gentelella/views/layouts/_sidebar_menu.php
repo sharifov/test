@@ -137,11 +137,12 @@ $isSuperAdmin = $user->canRole('superadmin');
         $menuCases[] = ['label' => 'Cases', 'url' => ['/cases'], 'icon' => 'user'];
         $menuCases[] = ['label' => 'Cases categories', 'url' => ['/cases-category'], 'icon' => 'users'];
         $menuCases[] = ['label' => 'Cases status history', 'url' => ['/cases-status-log'], 'icon' => 'bars'];
-        $menuCases[] = ['label' => 'Pending <span id="badges-pending" data-type="pending" class="label-warning label pull-right bginfo"></span> ', 'url' => ['/cases-q/pending'], 'icon' => 'briefcase text-info'];
-        $menuCases[] = ['label' => 'Processing <span id="badges-processing" data-type="processing" class="label-warning label pull-right bginfo"></span> ', 'url' => ['/cases-q/processing'], 'icon' => 'spinner'];
-        $menuCases[] = ['label' => 'Follow Up <span id="badges-follow-up" data-type="follow-up" class="label-success label pull-right bginfo"></span> ', 'url' => ['/cases-q/followup'], 'icon' => 'recycle'];
-        $menuCases[] = ['label' => 'Solved <span id="badges-sold" data-type="sold" class="label-success label pull-right bginfo"></span> ', 'url' => ['/cases-q/solved'], 'icon' => 'flag text-success'];
-        $menuCases[] = ['label' => 'Trash <span id="badges-trash" class="label-danger label pull-right"></span>', 'url' => ['/cases-q/trash'], 'icon' => 'trash-o text-danger'];
+        $menuCases[] = ['label' => 'Pending <span id="cases-q-pending" data-type="pending" class="label-warning label pull-right cases-q-info"></span> ', 'url' => ['/cases-q/pending'], 'icon' => 'briefcase text-info'];
+        $menuCases[] = ['label' => 'Inbox <span id="cases-q-inbox" data-type="inbox" class="label-warning label pull-right cases-q-info"></span> ', 'url' => ['/cases-q/inbox'], 'icon' => 'briefcase text-info'];
+        $menuCases[] = ['label' => 'Processing <span id="cases-q-processing" data-type="processing" class="label-warning label pull-right cases-q-info"></span> ', 'url' => ['/cases-q/processing'], 'icon' => 'spinner'];
+        $menuCases[] = ['label' => 'Follow Up <span id="cases-q-followup" data-type="followup" class="label-success label pull-right cases-q-info"></span> ', 'url' => ['/cases-q/followup'], 'icon' => 'recycle'];
+        $menuCases[] = ['label' => 'Solved <span id="cases-q-solved" data-type="solved" class="label-success label pull-right cases-q-info"></span> ', 'url' => ['/cases-q/solved'], 'icon' => 'flag text-success'];
+        $menuCases[] = ['label' => 'Trash <span id="cases-q-trash" class="label-danger label pull-right"></span>', 'url' => ['/cases-q/trash'], 'icon' => 'trash-o text-danger'];
 
         if ($isAdmin) {
             $menuItems[] = [
@@ -351,5 +352,44 @@ function updateBadgesCounters() {
 }
 
 updateBadgesCounters();
+JS;
+$this->registerJs($js, $this::POS_LOAD);
+
+$urlCasesQCount = Url::to(['/cases-q-counters/get-q-count']);
+$js =<<<JS
+function updateCasesQCounters() {
+    $(".cases-q-info").each(function(i) {
+        var id = $(this).attr('id');
+        var type = $(this).data('type');
+        if (typeof(type) != "undefined" && type != null && typeof(id) != "undefined" && id != null ) {
+              setTimeout(function () {
+                  $('#' + id).html('<i style="font-size:9px" class="fa fa-spin fa-spinner"></i>');
+              $.ajax({
+                url: '$urlCasesQCount',
+                data: {type: type}, 
+                dataType: 'json',
+                success: function(data){
+                    if (typeof (data) != "undefined" && data != null) {
+                        if (data.result == 'success' && data.count != 0) {
+                            $("#" + id).html(data.count);
+                        } else {
+                            $("#" + id).html('');
+                        }
+                    } else {
+                        $("#" + id).html('-');
+                    }
+         
+                },
+                error: function(data){
+                    console.log(data);
+                    $("#" + id).html('-');
+                }, 
+            });    
+              }, i*300)
+        }
+    });
+}
+
+updateCasesQCounters();
 JS;
 $this->registerJs($js, $this::POS_LOAD);
