@@ -6,24 +6,34 @@ use yii\widgets\Pjax;
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\CaseSaleSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
+/* @var $caseModel \sales\entities\cases\Cases */
+/* @var $saleSearchModel common\models\search\SaleSearch */
+/* @var $saleDataProvider yii\data\ArrayDataProvider */
+
 ?>
+
 <div class="x_panel">
     <div class="x_title">
         <h2><i class="fa fa-list"></i> Sale List</h2>
         <ul class="nav navbar-right panel_toolbox">
-            <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+            <?php if (true) : ?>
+                <li>
+                    <?=Html::a('<i class="fa fa-search warning"></i> Search Sales', null, ['class' => 'modal', 'id' => 'search-sale-btn', 'title' => 'Search Sales for Case'])?>
+                </li>
+                <?/*<li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-wrench"></i></a>
+                    <ul class="dropdown-menu" role="menu">
+                        <li> <?= Html::a('<i class="fa fa-remove"></i> Decline Quotes', null, [
+                                //'class' => 'btn btn-primary btn-sm',
+                                'id' => 'btn-declined-quotes',
+                            ]) ?>
+                        </li>
+                    </ul>
+                </li>*/?>
+            <?php endif; ?>
+            <li>
+                <a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
             </li>
-            <?/*<li class="dropdown">
-            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-wrench"></i></a>
-            <ul class="dropdown-menu" role="menu">
-                <li><a href="#">Settings 1</a>
-                </li>
-                <li><a href="#">Settings 2</a>
-                </li>
-            </ul>
-        </li>
-        <li><a class="close-link"><i class="fa fa-close"></i></a>
-        </li>*/?>
         </ul>
         <div class="clearfix"></div>
     </div>
@@ -32,7 +42,7 @@ use yii\widgets\Pjax;
 
             <table class="table table-bordered table-striped" style="padding: 10px; color: #0d3349;"><tr>
                     <td style="width: 11%">Sale ID</td>
-                    <td style="width: 15%">BOOK Id</td>
+                    <td style="width: 15%">Book Id</td>
                     <td style="width: 15%">PNR</td>
                     <td style="width: 10%">Pax</td>
                     <td>Sale Created Date</td>
@@ -61,7 +71,9 @@ use yii\widgets\Pjax;
 
                     $dataSale = @json_decode($item->css_sale_data, true);
                     if(is_array($dataSale)) {
-                        $content = $this->renderAjax('/sale/view', ['data' => $dataSale]);
+                        $content = $this->render('/sale/view', ['data' => $dataSale]);
+                        //echo '******';
+                        //\yii\helpers\VarDumper::dump($content); exit;
                     }
 
 
@@ -111,3 +123,35 @@ use yii\widgets\Pjax;
         </div>
     </div>
 </div>
+
+
+
+<?php
+/*yii\bootstrap\Modal::begin([
+    'headerOptions' => ['id' => 'modalSaleSearchHeader'],
+    'id' => 'modalSaleSearch',
+    'size' => 'modal-lg',
+    'clientOptions' => ['backdrop' => 'static']//, 'keyboard' => FALSE]
+]);
+?>
+    <?= $this->render('_sale_search', [
+        'searchModel' => $saleSearchModel,
+        'dataProvider' => $saleDataProvider,
+        'caseModel' => $caseModel,
+        'isAdmin'       => $isAdmin
+    ])
+    ?>
+<?php
+yii\bootstrap\Modal::end();
+*/
+$jsCode = <<<JS
+    $(document).on('click', '#search-sale-btn', function(){
+        $('#search-sale-panel').toggle();
+        //$('#modalSaleSearch').modal('show').find('#modalLeadSearchContent').html('<div style="text-align:center"><img width="200px" src="https://loading.io/spinners/gear-set/index.triple-gears-loading-icon.svg"></div>');
+        //$('#modalSaleSearchHeader').html('<h3>' + $(this).attr('title') + ' ' + '<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button></h3>');
+       return false;
+    });
+
+JS;
+
+$this->registerJs($jsCode, \yii\web\View::POS_READY);

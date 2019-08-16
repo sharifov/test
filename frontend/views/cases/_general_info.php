@@ -33,11 +33,16 @@ use yii\widgets\DetailView;
     <div class="x_content" style="display: block;">
         <?php if($model):?>
         <div class="row">
+            <div class="col-md-12">
+                <h4><?=$model->category ? Html::encode($model->category->cc_name) : '' ?></h4>
+                <h4><?=$model->cs_subject ? Html::encode($model->cs_subject) : '' ?></h4>
+                <pre><?=$model->cs_description ? nl2br(trim($model->cs_description)) : '' ?></pre>
+            </div>
             <div class="col-md-6">
                 <?= DetailView::widget([
                     'model' => $model,
                     'attributes' => [
-                        'cs_id',
+                        //'cs_id',
                         [
                             'attribute' => 'cs_status',
                             'value' => function (Cases $model) {
@@ -47,8 +52,9 @@ use yii\widgets\DetailView;
                         [
                             'attribute' => 'cs_project_id',
                             'value' => function (Cases $model) {
-                                return $model->project ? $model->project->name : '';
+                                return '<span class="badge badge-info">'.($model->project ? $model->project->name : '').'</span>';
                             },
+                            'format' => 'raw'
                         ],
                         [
                             'attribute' => 'cs_user_id',
@@ -56,8 +62,8 @@ use yii\widgets\DetailView;
                                 return $model->owner ? $model->owner->username : '';
                             },
                         ],
-                        'cs_subject',
-                        'cs_description:ntext',
+                        //'cs_subject',
+                        //'cs_description:ntext',
                     ],
                 ]) ?>
             </div>
@@ -65,10 +71,16 @@ use yii\widgets\DetailView;
                 <?= DetailView::widget([
                     'model' => $model,
                     'attributes' => [
-                        'cs_category',
-                        'cs_lead_id',
-                        'cs_call_id',
-                        'cs_dep_id',
+                        //'cs_category',
+                        //'cs_lead_id',
+                        //'cs_call_id',
+                        //'cs_dep_id',
+                        [
+                            'attribute' => 'cs_dep_id',
+                            'value' => function (Cases $model) {
+                                return $model->department ? $model->department->dep_name : '';
+                            },
+                        ],
                         //'cs_client_id',
                         'cs_created_dt',
                         //'cs_updated_dt',

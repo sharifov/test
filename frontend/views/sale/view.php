@@ -6,19 +6,19 @@ use yii\helpers\Html;
 /* @var $data array */
 
 
-if(Yii::$app->request->isAjax) {
+if(Yii::$app->request->isPjax) {
 
     $this->params['breadcrumbs'][] = ['label' => 'Sales', 'url' => ['search']];
     $this->params['breadcrumbs'][] = $this->title;
 }
 
-$this->title = 'Sale ID: ' . $data['saleId'] . ', BookId: ' . $data['bookingId'];
+$title = 'Sale ID: ' . $data['saleId'] . ', BookId: ' . $data['bookingId'];
 
 //$isAgent = Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id);
 
 ?>
 <div class="sale-view">
-    <h3><?= Html::encode($this->title) ?></h3>
+    <h3><?= Html::encode($title) ?></h3>
     <div class="row">
 
         <div class="col-md-3">
@@ -292,33 +292,3 @@ $this->title = 'Sale ID: ' . $data['saleId'] . ', BookId: ' . $data['bookingId']
         ?>
     </div>
 </div>
-
-<?php
-/*yii\bootstrap\Modal::begin([
-    'headerOptions' => ['id' => 'modal-ip-Header'],
-    'id' => 'modal-ip',
-    'size' => 'modal-lg',
-    'clientOptions' => ['backdrop' => 'static']//, 'keyboard' => FALSE]
-]);
-
-if($model->request_ip_detail){
-    $data = @json_decode($model->request_ip_detail);
-
-    if($data) {
-        echo '<pre>';
-        \yii\helpers\VarDumper::dump($data, 10, true);
-        echo '</pre>';
-    }
-}
-yii\bootstrap\Modal::end();
-
-
-$jsCode = <<<JS
-    $(document).on('click', '#btn_show_modal', function(){
-        $('#modal-ip-Header').html('<h3>' + $(this).attr('title') + ' ' + '<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button></h3>');
-        $('#modal-ip').modal('show');
-        return false;
-    });
-JS;
-
-$this->registerJs($jsCode, \yii\web\View::POS_READY);*/

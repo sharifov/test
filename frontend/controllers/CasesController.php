@@ -5,6 +5,7 @@ namespace frontend\controllers;
 use common\components\BackOffice;
 use common\components\CommunicationService;
 use common\models\Call;
+use common\models\CaseNote;
 use common\models\CaseSale;
 use common\models\Email;
 use common\models\EmailTemplateType;
@@ -21,8 +22,11 @@ use frontend\models\CaseCommunicationForm;
 use frontend\models\CasePreviewEmailForm;
 use frontend\models\CasePreviewSmsForm;
 use frontend\models\CommunicationForm;
+use sales\entities\cases\CasesStatusHelper;
+use sales\forms\cases\CasesChangeStatusForm;
 use sales\forms\cases\CasesCreateByWebForm;
 use sales\repositories\cases\CasesCategoryRepository;
+use sales\repositories\cases\CasesRepository;
 use sales\services\cases\CasesCreateService;
 use sales\services\cases\CasesManageService;
 use Yii;
@@ -46,6 +50,7 @@ use yii\widgets\ActiveForm;
  * @property CasesCreateService $casesCreateService
  * @property CasesManageService $casesManageService
  * @property CasesCategoryRepository $casesCategoryRepository
+ * @property CasesRepository $casesRepository
  */
 class CasesController extends FController
 {
@@ -53,6 +58,7 @@ class CasesController extends FController
     private $casesCreateService;
     private $casesManageService;
     private $casesCategoryRepository;
+    private $casesRepository;
 
     /**
      * CasesController constructor.
@@ -61,6 +67,7 @@ class CasesController extends FController
      * @param CasesCreateService $casesCreateService
      * @param CasesManageService $casesManageService
      * @param CasesCategoryRepository $casesCategoryRepository
+     * @param casesRepository $casesRepository
      * @param array $config
      */
     public function __construct(
@@ -69,6 +76,7 @@ class CasesController extends FController
         CasesCreateService $casesCreateService,
         CasesManageService $casesManageService,
         CasesCategoryRepository $casesCategoryRepository,
+        CasesRepository $casesRepository,
         $config = []
     )
     {
@@ -76,6 +84,7 @@ class CasesController extends FController
         $this->casesCreateService = $casesCreateService;
         $this->casesManageService = $casesManageService;
         $this->casesCategoryRepository = $casesCategoryRepository;
+        $this->casesRepository = $casesRepository;
     }
 
     /**
@@ -750,6 +759,25 @@ class CasesController extends FController
         $leadDataProvider = $leadSearchModel->searchByCase($params);
 
 
+        $modelNote = new CaseNote();
+        if ($modelNote->load(Yii::$app->request->post())) {
+            $modelNote->cn_user_id = Yii::$app->user->id;
+            $modelNote->cn_cs_id = $model->cs_id;
+            $modelNote->cn_created_dt = date('Y-m-d H:i:s');
+            if (!$modelNote->save()) {
+                Yii::error('Case id: ' . $model->cs_id . ', ' . VarDumper::dumpAsString($modelNote->errors), 'CaseController:view:CaseNote:save');
+            } else {
+                $modelNote->cn_text = '';
+            }
+        }
+
+        $dataProviderNotes = new ActiveDataProvider([
+            'query' => CaseNote::find()->where(['cn_cs_id' => $model->cs_id])->orderBy(['cn_id' => SORT_ASC]),
+            'pagination' => [
+                'pageSize' => 10,
+            ],
+        ]);
+
        //VarDumper::dump($dataProvider->allModels); exit;
 
 
@@ -774,6 +802,9 @@ class CasesController extends FController
 
             'leadSearchModel' => $leadSearchModel,
             'leadDataProvider' => $leadDataProvider,
+
+            'modelNote' => $modelNote,
+            'dataProviderNotes' => $dataProviderNotes,
         ]);
     }
 
@@ -1022,5 +1053,60 @@ class CasesController extends FController
         }
 
         throw new NotFoundHttpException('The requested Sale does not exist.');
+    }
+
+
+    /**
+     * @return string
+     */
+    public function actionChangeStatus()
+    {
+        $formModel = new CasesChangeStatusForm();
+
+        try {
+            if ($formModel->load(Yii::$app->request->post()) && $formModel->validate()) {
+
+                $formModel->case_id = (int) $formModel->case_id;
+                switch ((int) $formModel->status) {
+                    case Cases::STATUS_FOLLOW_UP : $this->casesManageService->pending($formModel->case_id);
+                        break;
+                    case Cases::STATUS_TRASH : $this->casesManageService->trash($formModel->case_id);
+                        break;
+                    case Cases::STATUS_SOLVED : $this->casesManageService->solved($formModel->case_id);
+                        break;
+                    case Cases::STATUS_PENDING : $this->casesManageService->pending($formModel->case_id);
+                }
+
+                $case = $this->casesRepository->find($formModel->case_id);
+                Yii::$app->session->setFlash('success', 'Case Status changed successfully ("'.CasesStatusHelper::getName($case->cs_status).'")');
+                $this->redirect(['cases/view', 'gid' => $case->cs_gid]);
+
+            } else {
+                $caseGId = Yii::$app->request->get('gid');
+                $case = $this->casesRepository->findByGid($caseGId);
+                $formModel->case_id = $case->cs_id;
+            }
+
+        } catch (\Throwable $exception) {
+            //throw new BadRequestHttpException($exception->getMessage());
+            $formModel->addError('status', $exception->getMessage());
+        }
+
+        return $this->renderAjax('partial/_change_status', [
+            'model' => $formModel,
+        ]);
+    }
+
+
+    /**
+     * @return array
+     */
+    public function actionChangeStatusValidate()
+    {
+        $model = new CasesChangeStatusForm();
+        if (Yii::$app->request->isAjax && $model->load(Yii::$app->request->post())) {
+            \Yii::$app->response->format = Response::FORMAT_JSON;
+            return ActiveForm::validate($model);
+        }
     }
 }

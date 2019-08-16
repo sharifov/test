@@ -11,7 +11,7 @@ use yii\widgets\Pjax;
 /* @var $dataProvider yii\data\ArrayDataProvider */
 ?>
 
-<div class="x_panel">
+<div class="x_panel" id="search-sale-panel" style="display: none;">
     <div class="x_title">
         <h2><i class="fa fa-search"></i> Sale Search</h2>
         <ul class="nav navbar-right panel_toolbox">

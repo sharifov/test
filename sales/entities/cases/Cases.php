@@ -59,6 +59,14 @@ class Cases extends ActiveRecord
     public const STATUS_SOLVED      = 10;
     public const STATUS_TRASH       = 11;
 
+    public const STATUS_ROUTE_RULES = [
+        self::STATUS_PENDING        => [self::STATUS_PROCESSING, self::STATUS_TRASH],
+        self::STATUS_PROCESSING     => [self::STATUS_FOLLOW_UP, self::STATUS_TRASH, self::STATUS_SOLVED],
+        self::STATUS_FOLLOW_UP      => [self::STATUS_TRASH], //self::STATUS_PROCESSING,
+        self::STATUS_SOLVED         => [],
+        self::STATUS_TRASH          => [self::STATUS_FOLLOW_UP],
+    ];
+
     /**
      * @param int $clientId
      * @param int $callId
@@ -117,6 +125,25 @@ class Cases extends ActiveRecord
     {
         return md5(uniqid('', true));
     }
+
+
+    /**
+     * @param int $status
+     * @return array
+     */
+    public static function statusRouteRules(int $status): array
+    {
+        return self::STATUS_ROUTE_RULES[$status] ?? [];
+    }
+
+    /**
+     * @return array
+     */
+    public function getStatusRouteRules(): array
+    {
+        return self::statusRouteRules($this->cs_status);
+    }
+
 
     /**
      * @param int $leadId
