@@ -65,6 +65,10 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     public const ROLE_SUPERVISION = 'supervision';
     public const ROLE_QA = 'qa';
     public const ROLE_USER_MANAGER = 'userManager';
+    public const ROLE_SUP_AGENT = 'sup_agent';
+    public const ROLE_SUP_SUPER = 'sup_super';
+    public const ROLE_EX_AGENT = 'ex_agent';
+    public const ROLE_EX_SUPER = 'ex_super';
 
     public const SCENARIO_REGISTER = 'register';
 
@@ -100,6 +104,38 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     private $_isAllowCallExpert;
     private $_callExpertCountByShiftTime;
 
+
+    /**
+     * @return bool
+     */
+    public function isExSuper(): bool
+    {
+        return in_array(self::ROLE_EX_SUPER, $this->getRoles(true), true);
+    }
+
+    /**
+     * @return bool
+     */
+    public function isExAgent(): bool
+    {
+        return in_array(self::ROLE_EX_AGENT, $this->getRoles(true), true);
+    }
+
+    /**
+     * @return bool
+     */
+    public function isSupSuper(): bool
+    {
+        return in_array(self::ROLE_SUP_SUPER, $this->getRoles(true), true);
+    }
+
+    /**
+     * @return bool
+     */
+    public function isSupAgent(): bool
+    {
+        return in_array(self::ROLE_SUP_AGENT, $this->getRoles(true), true);
+    }
 
     /**
      * @return bool

@@ -3,6 +3,10 @@
 namespace sales\repositories\cases;
 
 use common\models\Employee;
+use common\models\Project;
+use common\models\ProjectEmployeeAccess;
+use common\models\UserDepartment;
+use common\models\UserGroupAssign;
 use sales\entities\cases\Cases;
 use yii\db\ActiveQuery;
 
@@ -37,24 +41,30 @@ class CasesQRepository
      * @param Employee $user
      * @return int
      */
-    public function getProcessingCount(Employee $user): int
+    public function getInboxCount(Employee $user): int
     {
-        return $this->getProcessingQuery($user)->count();
+        return $this->getInboxQuery($user)->count();
     }
 
     /**
      * @param Employee $user
      * @return ActiveQuery
      */
-    public function getProcessingQuery(Employee $user): ActiveQuery
+    public function getInboxQuery(Employee $user): ActiveQuery
     {
-        $query = Cases::find()->andWhere(['cs_status' => Cases::STATUS_PROCESSING]);
+        $query = Cases::find()->andWhere(['cs_status' => Cases::STATUS_PENDING]);
 
         if ($user->isAdmin()) {
             return $query;
         }
 
-        $query->andWhere('0 = 1');
+        $conditions = [];
+
+        if ($user->isSupAgent() || $user->isExAgent()) {
+            $conditions = $this->freeCase();
+        }
+
+        $query->andWhere($this->createSubQuery($user->id, $conditions));
 
         return $query;
     }
@@ -80,7 +90,47 @@ class CasesQRepository
             return $query;
         }
 
-        $query->andWhere('0 = 1');
+        $conditions = [];
+
+        $query->andWhere($this->createSubQuery($user->id, $conditions));
+
+        return $query;
+    }
+
+    /**
+     * @param Employee $user
+     * @return int
+     */
+    public function getProcessingCount(Employee $user): int
+    {
+        return $this->getProcessingQuery($user)->count();
+    }
+
+    /**
+     * @param Employee $user
+     * @return ActiveQuery
+     */
+    public function getProcessingQuery(Employee $user): ActiveQuery
+    {
+        $query = Cases::find()->andWhere(['cs_status' => Cases::STATUS_PROCESSING]);
+
+        if ($user->isAdmin()) {
+            return $query;
+        }
+
+        $conditions = [];
+
+        if ($user->isSupAgent() || $user->isExAgent()) {
+            $conditions = $this->isOwner($user->id);
+        }
+
+        if ($user->isExSuper() || $user->isSupSuper()) {
+            $conditions = [
+                'cs_user_id' => $this->usersIdsInCommonGroups($user->id)
+            ];
+        }
+
+        $query->andWhere($this->createSubQuery($user->id, $conditions));
 
         return $query;
     }
@@ -106,7 +156,19 @@ class CasesQRepository
             return $query;
         }
 
-        $query->andWhere('0 = 1');
+        $conditions = [];
+
+        if ($user->isSupAgent() || $user->isExAgent()) {
+            $conditions = $this->isOwner($user->id);
+        }
+
+        if ($user->isExSuper() || $user->isSupSuper()) {
+            $conditions = [
+                'cs_user_id' => $this->usersIdsInCommonGroups($user->id)
+            ];
+        }
+
+        $query->andWhere($this->createSubQuery($user->id, $conditions));
 
         return $query;
     }
@@ -132,9 +194,22 @@ class CasesQRepository
             return $query;
         }
 
-        $query->andWhere('0 = 1');
+        $conditions = [];
+
+        $query->andWhere($this->createSubQuery($user->id, $conditions));
 
         return $query;
+    }
+
+    /**
+     * @param $userId
+     * @return ActiveQuery
+     */
+    private function usersIdsInCommonGroups($userId): ActiveQuery
+    {
+        return UserGroupAssign::find()->select('ugs_user_id')->distinct()->andWhere([
+            'ugs_group_id' => UserGroupAssign::find()->select(['ugs_group_id'])->andWhere(['ugs_user_id' => $userId])
+        ]);
     }
 
     /**
@@ -154,4 +229,47 @@ class CasesQRepository
         return ['cs_user_id' => null];
     }
 
+    /**
+     * @param $userId
+     * @return array
+     */
+    private function inProject($userId): array
+    {
+        return [
+            'cs_project_id' => Project::find()->select(Project::tableName() . '.id')->andWhere([
+                'closed' => false,
+                'id' => ProjectEmployeeAccess::find()->select(ProjectEmployeeAccess::tableName() . '.project_id')->andWhere([ProjectEmployeeAccess::tableName() . '.employee_id' => $userId])
+            ])
+        ];
+    }
+
+    /**
+     * @param $userId
+     * @return array
+     */
+    private function inDepartment($userId): array
+    {
+        return [
+            'cs_dep_id' => UserDepartment::find()->select('ud_dep_id')->andWhere(['ud_user_id' => $userId])
+        ];
+    }
+
+    /**
+     * @param $userId
+     * @param $conditions
+     * @return array
+     */
+    private function createSubQuery($userId, $conditions): array
+    {
+        return [
+            'or',
+            $this->isOwner($userId),
+            [
+                'and',
+                $this->inProject($userId),
+                $this->inDepartment($userId),
+                $conditions
+            ]
+        ];
+    }
 }

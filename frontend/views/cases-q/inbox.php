@@ -11,22 +11,17 @@ use sales\entities\cases\Cases;
 /* @var $searchModel sales\entities\cases\CasesQSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-$this->title = 'Follow Up Queue';
+$this->title = 'Inbox Queue';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
-<style>
-    .dropdown-menu {
-        z-index: 1010 !important;
-    }
-</style>
+
 <h1>
-    <i class="fa fa-recycle"></i> <?= Html::encode($this->title)?>
+    <i class="fa fa-briefcase"></i> <?= Html::encode($this->title) ?>
 </h1>
 
 <div class="cases-index">
 
     <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
-
 
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
@@ -38,7 +33,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'value' => function (Cases $model) {
                     return $model->project ? $model->project->name : '';
                 },
-                //'filter' => Project::getList()
+//                'filter' => Project::getList()
             ],
             'cs_subject',
             [
@@ -46,7 +41,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'value' => function (Cases $model) {
                     return $model->category ? $model->category->cc_name : '';
                 },
-                //'filter' => CasesCategory::getList()
+//                'filter' => CasesCategory::getList()
             ],
             [
                 'attribute' => 'cs_lead_id',
@@ -59,12 +54,17 @@ $this->params['breadcrumbs'][] = $this->title;
                 'value' => function (Cases $model) {
                     return $model->department ? $model->department->dep_name : '';
                 },
-                //'filter' => Department::getList()
+//                'filter' => Department::getList()
             ],
             'cs_created_dt',
             [
                 'class' => 'yii\grid\ActionColumn',
                 'template' => '{view} {take}',
+                'visibleButtons' => [
+                    'take' => function (Cases $model, $key, $index) {
+                        return !$model->isOwner(Yii::$app->user->id);
+                    },
+                ],
                 'buttons' => [
                     'view' => function ($url, Cases $model) {
                         return Html::a('<i class="glyphicon glyphicon-search"></i> View Case', [
