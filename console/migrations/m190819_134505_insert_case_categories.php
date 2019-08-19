@@ -36,7 +36,7 @@ class m190819_134505_insert_case_categories extends Migration
         ['cc_key' => 'inaccurate_prices', 'cc_name' => 'Inaccurate prices', 'cc_dep_id' =>  3, 'cc_system' => false],
         ['cc_key' => 'wrong_name', 'cc_name' => 'Wrong name, not issued', 'cc_dep_id' =>  3, 'cc_system' => false],
         ['cc_key' => 'add_passengers', 'cc_name' => 'Add passengers', 'cc_dep_id' =>  3, 'cc_system' => false],
-        ['cc_key' => 'add_unmr__pets', 'cc_name' => 'Add UNMR or pets', 'cc_dep_id' =>  3, 'cc_system' => false],
+        ['cc_key' => 'add_unmr_pets', 'cc_name' => 'Add UNMR or pets', 'cc_dep_id' =>  3, 'cc_system' => false],
         ['cc_key' => 'cancel_insurance', 'cc_name' => 'Cancel insurance', 'cc_dep_id' =>  3, 'cc_system' => false],
         ['cc_key' => 'chargeback', 'cc_name' => 'Chargeback', 'cc_dep_id' =>  3, 'cc_system' => false],
         ['cc_key' => 'airport_transfer_issue', 'cc_name' => 'Airport transfer issue', 'cc_dep_id' =>  3, 'cc_system' => false],
@@ -51,10 +51,12 @@ class m190819_134505_insert_case_categories extends Migration
     public function safeUp()
     {
 
-        $this->truncateTable('{{%cases_category}}');
+        //$this->truncateTable('{{%cases_category}}');
+        \sales\entities\cases\CasesCategory::deleteAll();
 
         foreach ($this->categoryList as $item) {
             $item['cc_created_dt'] = date('Y-m-d H:i:s');
+
             $this->insert('{{%cases_category}}', $item);
         }
     }
