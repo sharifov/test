@@ -2,6 +2,7 @@
 
 namespace common\models;
 
+use common\components\jobs\AgentCallQueueJob;
 use sales\entities\AggregateRoot;
 use sales\entities\cases\Cases;
 use sales\entities\EventTrait;
@@ -452,7 +453,10 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
         if(!$insert) {
             if(isset($changedAttributes['c_call_status']) && in_array($this->c_call_status, [self::CALL_STATUS_COMPLETED, self::CALL_STATUS_BUSY, self::CALL_STATUS_NO_ANSWER], false)) {
                 if($this->c_created_user_id) {
-                    self::applyHoldCallToAgent($this->c_created_user_id);
+                    // self::applyHoldCallToAgent($this->c_created_user_id);
+                    $job = new AgentCallQueueJob();
+                    $job->user_id = $this->c_created_user_id;
+                    $jobId = Yii::$app->queue_job->push($job);
                 }
             }
 
