@@ -109,7 +109,7 @@ class CasesCreateService
 
             $client = $this->clientManageService->getOrCreate($clientPhones);
             if (!$case = $this->casesRepository->getByClientProjectDepartment($client->id, $projectId, $depId)) {
-                \Yii::info('Not found case:  ' . VarDumper::dumpAsString([$client->id, $projectId, $depId]), 'info\getByClientProjectDepartment');
+                \Yii::info('Not found case:  ' . VarDumper::dumpAsString(['ClientId' => $client->id, 'projectId' => $projectId, 'depId' => $depId]), 'info\getByClientProjectDepartment');
                 $case = Cases::createByCall(
                     $client->id,
                     $callId,
@@ -118,7 +118,7 @@ class CasesCreateService
                 );
                 $this->casesRepository->save($case);
             } else {
-                \Yii::info('Find case: ' . $case->cs_id . ' - ' . VarDumper::dumpAsString([$client->id, $projectId, $depId]), 'info\getByClientProjectDepartment');
+                \Yii::info('Find case: ' . $case->cs_id . ' - ' . VarDumper::dumpAsString(['ClientId' => $client->id, 'projectId' => $projectId, 'depId' => $depId]), 'info\getByClientProjectDepartment');
             }
             return $case;
 

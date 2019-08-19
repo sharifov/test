@@ -521,6 +521,9 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
                 }
             }
 
+
+
+
         }
 
         if (($insert && $this->c_created_user_id) || (isset($changedAttributes['c_call_status']) && $this->c_created_user_id))  {
