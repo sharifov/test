@@ -61,6 +61,7 @@ class CallQueueJob extends BaseObject implements JobInterface
             $this->casesRepository = Yii::createObject(CasesRepository::class);
 
             Yii::info('CallId: ' . $this->call_id ,'info\CallQueueJob');
+            sleep(8);
 
             if($this->call_id) {
 
@@ -147,10 +148,10 @@ class CallQueueJob extends BaseObject implements JobInterface
         return false;
     }
 
-    public function getTtr()
-    {
-        return 1 * 5;
-    }
+//    public function getTtr()
+//    {
+//        return 1 * 5;
+//    }
 
     /*public function canRetry($attempt, $error)
     {

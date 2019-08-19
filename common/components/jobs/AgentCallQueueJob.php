@@ -61,6 +61,9 @@ class AgentCallQueueJob extends BaseObject implements JobInterface
 //            $this->casesRepository = Yii::createObject(CasesRepository::class);
 
             Yii::info('UserId: ' . $this->user_id ,'info\AgentCallQueueJob');
+
+            sleep(5);
+
             $last_hours = (int)(Yii::$app->params['settings']['general_line_last_hours'] ?? 1);
 
             $calls = Call::find()->where(['c_call_status' => Call::CALL_STATUS_QUEUE])->orderBy(['c_id' => SORT_ASC])->limit(10)->all();
@@ -108,10 +111,10 @@ class AgentCallQueueJob extends BaseObject implements JobInterface
         return false;
     }
 
-    public function getTtr()
-    {
-        return 1 * 5;
-    }
+//    public function getTtr()
+//    {
+//        return 1 * 5;
+//    }
 
     /*public function canRetry($attempt, $error)
     {
