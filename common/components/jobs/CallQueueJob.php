@@ -66,9 +66,7 @@ class CallQueueJob extends BaseObject implements JobInterface
 
                 $originalAgentId = null;
 
-
-
-                $call = Call::findOne($this->call_id);
+                $call = Call::find()->where(['c_id' => $this->call_id])->limit(1)->one();
 
                 Yii::info('CallId: ' . $this->call_id . ', c_call_status: ' .$call->c_call_status . ', ' . VarDumper::dumpAsString($call->attributes),'info\CallQueueJob-call_id');
 
