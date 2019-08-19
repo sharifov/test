@@ -35,7 +35,7 @@ $this->title = 'Create Lead';
             : ['/lead/validate-lead-create', 'depId' => $leadForm->depId],
     'action' =>
         $leadForm->caseGid
-            ? ['/lead/create-from-case', 'case_gid' => $leadForm->caseGid]
+            ? ['/lead/create-case', 'case_gid' => $leadForm->caseGid]
             : ['/lead/create'],
 ]) ?>
 

@@ -16,7 +16,7 @@ class m190819_075930_add_permissions_for_route_create_from_case extends Migratio
 
         $roles = ['admin', 'ex_agent', 'ex_super'];
 
-        $route = $auth->createPermission('/lead/create-from-case');
+        $route = $auth->createPermission('/lead/create-case');
         $auth->add($route);
         foreach ($roles as $item) {
             $role = $auth->getRole($item);
@@ -36,8 +36,15 @@ class m190819_075930_add_permissions_for_route_create_from_case extends Migratio
     {
         $auth = Yii::$app->authManager;
 
+        $route = $auth->getPermission('/lead/create-case');
+        if($route) {
+            $auth->remove($route);
+        }
+
         $route = $auth->getPermission('/lead/create-from-case');
-        $auth->remove($route);
+        if($route) {
+            $auth->remove($route);
+        }
 
         if (Yii::$app->cache) {
             Yii::$app->cache->flush();

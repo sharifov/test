@@ -2163,7 +2163,7 @@ class LeadController extends FController
      * @throws BadRequestHttpException
      * @throws NotFoundHttpException
      */
-    public function actionCreateFromCase()
+    public function actionCreateCase()
     {
         $case = $this->findCase((string)Yii::$app->request->get('case_gid', 'null'));
         $data = CompositeFormHelper::prepareDataForMultiInput(
