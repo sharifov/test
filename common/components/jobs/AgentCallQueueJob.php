@@ -62,7 +62,7 @@ class AgentCallQueueJob extends BaseObject implements JobInterface
 
             Yii::info('UserId: ' . $this->user_id ,'info\AgentCallQueueJob');
 
-            sleep(5);
+            sleep(4);
 
             $last_hours = (int)(Yii::$app->params['settings']['general_line_last_hours'] ?? 1);
 
