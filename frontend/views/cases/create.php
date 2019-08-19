@@ -30,6 +30,9 @@ $this->params['breadcrumbs'][] = $this->title;
             ]); ?>
             <div class="col-md-4">
 
+                <?php
+                    echo $form->errorSummary($model);
+                ?>
                 <?= $form->field($model, 'projectId')->dropDownList($model->getProjects(), ['prompt' => 'Choose a project']) ?>
 
                 <?= $form->field($model, 'depId')->dropDownList($model->getDepartments(), [
