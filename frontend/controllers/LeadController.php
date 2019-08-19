@@ -7,6 +7,7 @@ use common\components\CommunicationService;
 use common\models\Call;
 use common\models\ClientEmail;
 use common\models\ClientPhone;
+use common\models\Department;
 use common\models\Email;
 use common\models\EmailTemplateType;
 use common\models\Lead;
@@ -29,9 +30,11 @@ use frontend\models\LeadForm;
 use frontend\models\LeadPreviewEmailForm;
 use frontend\models\LeadPreviewSmsForm;
 use frontend\models\SendEmailForm;
+use sales\entities\cases\Cases;
 use sales\forms\CompositeFormHelper;
 use sales\forms\lead\ItineraryEditForm;
 use sales\forms\lead\LeadCreateForm;
+use sales\repositories\cases\CasesRepository;
 use sales\repositories\lead\LeadRepository;
 use sales\repositories\NotFoundException;
 use sales\services\lead\LeadAssignService;
@@ -70,6 +73,7 @@ use common\models\local\LeadLogMessage;
  * @property LeadRepository $leadRepository
  * @property LeadUnassignService $leadUnassignService,
  * @property LeadCloneService $leadCloneService
+ * @property CasesRepository $casesRepository
  */
 class LeadController extends FController
 {
@@ -78,6 +82,7 @@ class LeadController extends FController
     private $leadRepository;
     private $leadUnassignService;
     private $leadCloneService;
+    private $casesRepository;
 
     public function __construct(
         $id,
@@ -87,6 +92,7 @@ class LeadController extends FController
         LeadRepository $leadRepository,
         LeadUnassignService $leadUnassignService,
         LeadCloneService $leadCloneService,
+        CasesRepository $casesRepository,
         $config = []
     )
     {
@@ -96,6 +102,7 @@ class LeadController extends FController
         $this->leadRepository = $leadRepository;
         $this->leadUnassignService = $leadUnassignService;
         $this->leadCloneService = $leadCloneService;
+        $this->casesRepository = $casesRepository;
     }
 
     /**
@@ -2137,6 +2144,7 @@ class LeadController extends FController
             ['emails' => 'EmailCreateForm', 'phones' => 'PhoneCreateForm', 'segments' => 'SegmentCreateForm']
         );
         $form = new LeadCreateForm(count($data['post']['EmailCreateForm']), count($data['post']['PhoneCreateForm']), count($data['post']['SegmentCreateForm']));
+        $form->assignDep(Department::DEPARTMENT_SALES);
         if ($form->load($data['post']) && $form->validate()) {
             try {
                 $lead = $this->leadManageService->create($form, Yii::$app->user->identity->getId());
@@ -2148,6 +2156,53 @@ class LeadController extends FController
             }
         }
         return $this->render('create', ['leadForm' => $form]);
+    }
+
+    /**
+     * @return string|Response
+     * @throws BadRequestHttpException
+     * @throws NotFoundHttpException
+     */
+    public function actionCreateFromCase()
+    {
+        $case = $this->findCase((string)Yii::$app->request->get('case_gid', 'null'));
+        $data = CompositeFormHelper::prepareDataForMultiInput(
+            Yii::$app->request->post(),
+            'LeadCreateForm',
+            ['emails' => 'EmailCreateForm', 'phones' => 'PhoneCreateForm', 'segments' => 'SegmentCreateForm']
+        );
+        $form = new LeadCreateForm(count($data['post']['EmailCreateForm']), count($data['post']['PhoneCreateForm']), count($data['post']['SegmentCreateForm']));
+        $form->assignCase($case->cs_gid);
+        $form->assignDep(Department::DEPARTMENT_EXCHANGE);
+        if ($form->load($data['post']) && $form->validate()) {
+            try {
+                $lead = $this->leadManageService->create($form, Yii::$app->user->identity->getId());
+                Yii::$app->session->setFlash('success', 'Lead save');
+                return $this->redirect(['/lead/view', 'gid' => $lead->gid]);
+            } catch (\Throwable $e) {
+                Yii::$app->errorHandler->logException($e);
+                Yii::$app->session->setFlash('error', $e->getMessage());
+            }
+        }
+        return $this->render('create', ['leadForm' => $form]);
+    }
+
+    /**
+     * @param $caseGid
+     * @return Cases
+     * @throws BadRequestHttpException
+     * @throws NotFoundHttpException
+     */
+    private function findCase($caseGid): Cases
+    {
+        try {
+            $case = $this->casesRepository->findFreeByGid((string)$caseGid);
+        } catch (NotFoundException $e) {
+            throw new NotFoundHttpException('Case is not found');
+        } catch (\DomainException $e) {
+            throw new BadRequestHttpException('Case is already assigned to Lead');
+        }
+        return $case;
     }
 
     /**
@@ -2163,6 +2218,8 @@ class LeadController extends FController
         );
         $form = new LeadCreateForm(count($data['post']['EmailCreateForm']), count($data['post']['PhoneCreateForm']), count($data['post']['SegmentCreateForm']));
         $form->load($data['post']);
+        $form->assignCase((string)Yii::$app->request->get('case_gid'));
+        $form->assignDep((int)Yii::$app->request->get('depId'));
         return CompositeFormHelper::ajaxValidate($form, $data['keys']);
     }
 

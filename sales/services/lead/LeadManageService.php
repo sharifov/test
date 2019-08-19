@@ -2,6 +2,7 @@
 
 namespace sales\services\lead;
 
+use common\models\Department;
 use common\models\Lead;
 use common\models\LeadFlightSegment;
 use common\models\LeadPreferences;
@@ -11,12 +12,14 @@ use sales\forms\lead\PreferencesCreateForm;
 use sales\forms\lead\SegmentCreateForm;
 use sales\forms\lead\SegmentEditForm;
 use sales\repositories\airport\AirportRepository;
+use sales\repositories\cases\CasesRepository;
 use sales\repositories\client\ClientEmailRepository;
 use sales\repositories\client\ClientPhoneRepository;
 use sales\repositories\client\ClientRepository;
 use sales\repositories\lead\LeadPreferencesRepository;
 use sales\repositories\lead\LeadRepository;
 use sales\repositories\lead\LeadSegmentRepository;
+use sales\services\cases\CasesManageService;
 use sales\services\client\ClientManageService;
 use sales\services\TransactionManager;
 
@@ -30,6 +33,8 @@ use sales\services\TransactionManager;
  * @property LeadHashGenerator $leadHashGenerator
  * @property AirportRepository $airportRepository
  * @property ClientManageService $clientManageService
+ * @property CasesRepository $casesRepository
+ * @property CasesManageService $casesManageService
  * @property TransactionManager $transaction
  */
 class LeadManageService
@@ -43,6 +48,8 @@ class LeadManageService
     private $leadHashGenerator;
     private $airportRepository;
     private $clientManageService;
+    private $casesRepository;
+    private $casesManageService;
     private $transaction;
 
     public function __construct(
@@ -55,6 +62,8 @@ class LeadManageService
         LeadHashGenerator $leadHashGenerator,
         AirportRepository $airportRepository,
         ClientManageService $clientManageService,
+        CasesRepository $casesRepository,
+        CasesManageService $casesManageService,
         TransactionManager $transaction)
     {
         $this->leadRepository = $leadRepository;
@@ -66,6 +75,8 @@ class LeadManageService
         $this->leadHashGenerator = $leadHashGenerator;
         $this->airportRepository = $airportRepository;
         $this->clientManageService = $clientManageService;
+        $this->casesRepository = $casesRepository;
+        $this->casesManageService = $casesManageService;
         $this->transaction = $transaction;
     }
 
@@ -79,6 +90,12 @@ class LeadManageService
     {
 
         $lead = $this->transaction->wrap(function () use ($form, $employeeId) {
+
+            $case = null;
+
+            if ($form->caseGid) {
+                $case = $this->casesRepository->findFreeByGid($form->caseGid);
+            }
 
             $client = $this->clientManageService->getOrCreate($form->phones, $form->client);
 
@@ -95,7 +112,8 @@ class LeadManageService
                 $form->projectId,
                 $form->notesForExperts,
                 $form->clientPhone,
-                $form->clientEmail
+                $form->clientEmail,
+                $form->depId
             );
 
             $lead->take($employeeId);
@@ -135,6 +153,10 @@ class LeadManageService
             $this->createFlightSegments($leadId, $form->segments);
 
             $this->createLeadPreferences($leadId, $form->preferences);
+
+            if ($case) {
+                $this->casesManageService->assignLead($case->cs_id, $lead->id);
+            }
 
             return $lead;
 

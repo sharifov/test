@@ -4,6 +4,7 @@
  * @var $leadForm sales\forms\lead\LeadCreateForm
  */
 
+use common\models\Department;
 use yii\bootstrap\Html;
 use \yii\widgets\ActiveForm;
 use \common\widgets\Alert;
@@ -18,7 +19,7 @@ $this->title = 'Create Lead';
             <div class="page-header__wrapper">
                 <h2 class="page-header__title">
                     <?= Html::encode($this->title) ?>
-                    <span class="label status-label label-info">New</span>
+                    <span class="label status-label label-info">New</span> Department: <?= Department::getName($leadForm->depId) ?>
                 </h2>
             </div>
         </div>
@@ -28,8 +29,14 @@ $this->title = 'Create Lead';
     'id' => $leadForm->formName() . '-form',
     'enableClientValidation' => false,
     'enableAjaxValidation' => true,
-    'validationUrl' => ['/lead/validate-lead-create']
-
+    'validationUrl' =>
+        $leadForm->caseGid
+            ? ['/lead/validate-lead-create', 'depId' => $leadForm->depId, 'case_gid' => $leadForm->caseGid]
+            : ['/lead/validate-lead-create', 'depId' => $leadForm->depId],
+    'action' =>
+        $leadForm->caseGid
+            ? ['/lead/create-from-case', 'case_gid' => $leadForm->caseGid]
+            : ['/lead/create'],
 ]) ?>
 
     <div class="main-sidebars">

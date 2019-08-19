@@ -78,6 +78,21 @@ class CasesRepository extends Repository
     }
 
     /**
+     * @param string $gid
+     * @return Cases
+     */
+    public function findFreeByGid(string $gid): Cases
+    {
+        if ($case = Cases::find()->andWhere(['cs_gid' => $gid])->limit(1)->one()) {
+            if ($case->lead) {
+                throw new \DomainException('Case is already assigned to Lead');
+            }
+            return $case;
+        }
+        throw new NotFoundException('Case is not found');
+    }
+
+    /**
      * @param int $id
      * @return Cases
      */

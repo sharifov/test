@@ -37,6 +37,15 @@ class Department extends \yii\db\ActiveRecord
     ];
 
     /**
+     * @param int $depId
+     * @return string
+     */
+    public static function getName(int $depId): string
+    {
+        return self::DEPARTMENT_LIST[$depId] ?? 'Undefined';
+    }
+
+    /**
      * {@inheritdoc}
      */
     public static function tableName()
