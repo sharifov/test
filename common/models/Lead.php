@@ -311,6 +311,7 @@ class Lead extends ActiveRecord implements AggregateRoot
      * @param $notesForExperts
      * @param $clientPhone
      * @param $clientEmail
+     * @param $depId
      * @return Lead
      */
     public static function create(
@@ -326,7 +327,8 @@ class Lead extends ActiveRecord implements AggregateRoot
         $projectId,
         $notesForExperts,
         $clientPhone,
-        $clientEmail
+        $clientEmail,
+        $depId
     ): self
     {
         $lead = new static();
@@ -345,6 +347,7 @@ class Lead extends ActiveRecord implements AggregateRoot
         $lead->gid = self::generateGid();
         $lead->l_client_phone = $clientPhone;
         $lead->l_client_email = $clientEmail;
+        $lead->l_dep_id = $depId;
         $lead->status = self::STATUS_PENDING;
         $lead->recordEvent(new LeadCreatedEvent($lead));
         return $lead;

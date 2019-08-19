@@ -2,11 +2,16 @@
 
 namespace sales\forms\lead;
 
+use common\models\Department;
 use common\models\Lead;
 use common\models\ProjectEmployeeAccess;
 use common\models\Sources;
+use sales\entities\cases\Cases;
 use sales\forms\CompositeForm;
 use sales\helpers\lead\LeadHelper;
+use sales\repositories\cases\CasesRepository;
+use sales\repositories\NotFoundException;
+use function GuzzleHttp\Psr7\str;
 
 /**
  * @property string $cabin
@@ -20,6 +25,8 @@ use sales\helpers\lead\LeadHelper;
  * @property string $clientPhone
  * @property string $clientEmail
  * @property string $status
+ * @property string $caseGid
+ * @property int $depId
  * @property ClientCreateForm $client
  * @property EmailCreateForm[] $emails
  * @property PhoneCreateForm[] $phones
@@ -39,6 +46,8 @@ class LeadCreateForm extends CompositeForm
     public $clientPhone;
     public $clientEmail;
     public $status;
+    public $caseGid;
+    public $depId;
 
     /**
      * LeadCreateForm constructor.
@@ -135,9 +144,43 @@ class LeadCreateForm extends CompositeForm
                 }
             }],
 
-            ['status', 'in', 'range' => array_keys(LeadHelper::statusList())]
+            ['status', 'in', 'range' => array_keys(LeadHelper::statusList())],
+
+            ['caseGid', 'string'],
+            ['caseGid', function () {
+                if (!$this->caseGid) {
+                    return;
+                }
+                $casesRepository = \Yii::createObject(CasesRepository::class);
+                try {
+                    $case = $casesRepository->findFreeByGid((string)$this->caseGid);
+                } catch (NotFoundException $e) {
+                    $this->addError('caseGid', 'Case not found');
+                } catch (\DomainException $e) {
+                    $this->addError('caseGid', 'Case is already assigned to Lead');
+                }
+            }],
+
+            ['depId', 'required'],
+            ['depId', 'in', 'range' => [Department::DEPARTMENT_SALES, Department::DEPARTMENT_EXCHANGE]],
 
         ];
+    }
+
+    /**
+     * @param int $depId
+     */
+    public function assignDep(int $depId): void
+    {
+        $this->depId = $depId;
+    }
+
+    /**
+     * @param string $caseGid
+     */
+    public function assignCase(string $caseGid): void
+    {
+        $this->caseGid = $caseGid;
     }
 
     public function afterValidate()
