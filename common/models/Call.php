@@ -6,6 +6,7 @@ use common\components\jobs\AgentCallQueueJob;
 use sales\entities\AggregateRoot;
 use sales\entities\cases\Cases;
 use sales\entities\EventTrait;
+use sales\services\cases\CasesManageService;
 use Yii;
 use DateTime;
 use common\components\ChartTools;
@@ -457,6 +458,23 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
                     $job = new AgentCallQueueJob();
                     $job->user_id = $this->c_created_user_id;
                     $jobId = Yii::$app->queue_job->push($job);
+                }
+            }
+
+            if(isset($changedAttributes['c_call_status']) && (int) $this->c_call_type_id === self::CALL_TYPE_IN && $this->c_case_id && $this->c_call_status === self::CALL_STATUS_IN_PROGRESS) {
+                if($this->c_created_user_id && $this->cCase && $this->c_created_user_id !== $this->cCase->cs_user_id) {
+                    try {
+                        $casesManageService = Yii::createObject(CasesManageService::class);
+                        if($this->cCase->isProcessing()) {
+                            $casesManageService->takeOver($this->c_case_id, $this->c_created_user_id);
+                        } else {
+                            $casesManageService->take($this->c_case_id, $this->c_created_user_id);
+                        }
+                        
+                    } catch (\Throwable $exception) {
+                        Yii::error(VarDumper::dumpAsString($exception), 'Call:afterSave:CasesManageService:Case:Take');
+                    }
+
                 }
             }
 

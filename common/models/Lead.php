@@ -1896,9 +1896,10 @@ New lead {lead_id}
             if ($insert) {
                 LeadFlow::addStateFlow($this);
 
-                $job = new QuickSearchInitPriceJob();
+                /*$job = new QuickSearchInitPriceJob();
                 $job->lead_id = $this->id;
-                $jobId = Yii::$app->queue_job->push($job);
+                $jobId = Yii::$app->queue_job->push($job);*/
+
                 //Yii::info('Lead: ' . $this->id . ', QuickSearchInitPriceJob: '.$jobId, 'info\Lead:afterSave:QuickSearchInitPriceJob');
 
             } else {

@@ -135,7 +135,6 @@ $isSuperAdmin = $user->canRole('superadmin');
         }
 
         $menuCases = [];
-        $menuCases[] = ['label' => 'Cases status history', 'url' => ['/cases-status-log'], 'icon' => 'bars'];
         $menuCases[] = ['label' => 'Pending <span id="cases-q-pending" data-type="pending" class="label-warning label pull-right cases-q-info"></span> ', 'url' => ['/cases-q/pending'], 'icon' => 'briefcase text-info'];
         $menuCases[] = ['label' => 'Inbox <span id="cases-q-inbox" data-type="inbox" class="label-warning label pull-right cases-q-info"></span> ', 'url' => ['/cases-q/inbox'], 'icon' => 'briefcase text-info'];
         $menuCases[] = ['label' => 'Processing <span id="cases-q-processing" data-type="processing" class="label-warning label pull-right cases-q-info"></span> ', 'url' => ['/cases-q/processing'], 'icon' => 'spinner'];
@@ -199,6 +198,7 @@ $isSuperAdmin = $user->canRole('superadmin');
                 ['label' => 'Case Notes', 'url' => ['/case-note/index'], 'icon' => 'list'],
                 ['label' => 'Project Settings', 'url' => ['/settings/projects'], 'icon' => 'product-hunt'],
                 ['label' => 'Check List Types', 'url' => ['/lead-checklist-type/index'], 'icon' => 'list', 'visible' => Yii::$app->user->can('manageLeadChecklistType')],
+                ['label' => 'Cases status history', 'url' => ['/cases-status-log'], 'icon' => 'bars'],
                 ['label' => 'Cases categories', 'url' => ['/cases-category'], 'icon' => 'users'],
             ]
         ];
