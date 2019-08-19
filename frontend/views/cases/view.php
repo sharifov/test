@@ -51,7 +51,7 @@ $bundle = \frontend\themes\gentelella\assets\AssetLeadCommunication::register($t
         <div class="x_content" style="display: block;">
             <p>
                 <?= Html::button('<i class="fa fa-exchange"></i> Change Status', ['class' => 'btn btn-warning', 'id' => 'btn-change-status', 'title' => 'Change Case status']) ?>
-                <?= Html::button('<i class="fa fa-list"></i> Status History', ['class' => 'btn btn-info', 'id' => 'btn-status-history', 'title' => 'Status history']) ?>
+                <?= Html::button('<i class="fa fa-list"></i> Status History ' . ($model->casesStatusLogs ? '(' . count($model->casesStatusLogs) . ')' : ''), ['class' => 'btn btn-info', 'id' => 'btn-status-history', 'title' => 'Status history']) ?>
                 <?/*= Html::a('Update', ['update', 'id' => $model->cs_id], ['class' => 'btn btn-primary']) ?>
         <?= Html::a('Delete', ['delete', 'id' => $model->cs_id], [
             'class' => 'btn btn-danger',

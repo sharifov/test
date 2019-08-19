@@ -1077,7 +1077,7 @@ class CasesController extends FController
         $searchModel = new CasesStatusLogSearch();
 
         $params = Yii::$app->request->queryParams;
-        $params['CasesStatusLogSearch[csl_case_id]'] = $case->cs_id;
+        $params['CasesStatusLogSearch']['csl_case_id'] = $case->cs_id;
 
         $dataProvider = $searchModel->searchByCase($params);
 

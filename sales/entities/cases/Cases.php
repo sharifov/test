@@ -47,6 +47,7 @@ use yii\db\ActiveRecord;
  * @property CasesStatusLog $lastLogRecord
  * @property Client $client
  * @property Project $project
+ * @property CasesStatusLog[] $casesStatusLogs
  */
 class Cases extends ActiveRecord
 {
@@ -343,6 +344,14 @@ class Cases extends ActiveRecord
     public function getDepartment(): ActiveQuery
     {
         return $this->hasOne(Department::class, ['dep_id' => 'cs_dep_id']);
+    }
+
+    /**
+     * @return ActiveQuery
+     */
+    public function getCasesStatusLogs()
+    {
+        return $this->hasMany(CasesStatusLog::class, ['csl_case_id' => 'cs_id']);
     }
 
     /**

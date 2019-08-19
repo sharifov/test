@@ -33,19 +33,19 @@ class CasesStatusHelper
     }
 
     /**
-     * @param int $status
+     * @param int|null $status
      * @return string
      */
-    public static function getClass(int $status): string
+    public static function getClass(?int $status): string
     {
         return self::STATUS_LIST_CLASS[$status] ?? 'll-default';
     }
 
     /**
-     * @param int $status
+     * @param int|null $status
      * @return string
      */
-    public static function getLabel(int $status): string
+    public static function getLabel(?int $status): string
     {
         return Html::tag('span', self::getName($status), ['class' => 'label ' . self::getClass($status), 'style' => 'font-size: 13px']);
     }
