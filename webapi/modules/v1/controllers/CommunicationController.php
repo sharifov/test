@@ -1868,7 +1868,7 @@ class CommunicationController extends ApiBaseController
                 Yii::error(VarDumper::dumpAsString($callModel->errors), 'API:Communication:startCallService:Call:update');
             }
 
-            $job = Yii::createObject(CallQueueJob::class);
+            $job = new CallQueueJob();
             $job->call_id = $callModel->c_id;
             $jobId = Yii::$app->queue_job->push($job);
         }
