@@ -6,7 +6,7 @@ use sales\entities\cases\CasesCategory;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use sales\entities\cases\Cases;
-use \sales\entities\cases\CasesStatusHelper;
+use \sales\entities\cases\CasesStatus;
 use yii\helpers\Url;
 
 /* @var $this yii\web\View */
@@ -46,8 +46,8 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'cs_status',
                 'value' => function (Cases $model) {
-                    $value = CasesStatusHelper::getName($model->cs_status);
-                    $str = '<span class="label ' . CasesStatusHelper::getClass($model->cs_status) . '">' . $value . '</span>';
+                    $value = CasesStatus::getName($model->cs_status);
+                    $str = '<span class="label ' . CasesStatus::getClass($model->cs_status) . '">' . $value . '</span>';
                     if ($model->lastLogRecord) {
                         $str .= '<br><br><span class="label label-default">' . Yii::$app->formatter->asDatetime(strtotime($model->lastLogRecord->csl_start_dt)) . '</span>';
                         $str .= '<br>';
@@ -56,7 +56,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     return $str;
                 },
                 'format' => 'raw',
-                'filter' => CasesStatusHelper::STATUS_LIST,
+                'filter' => CasesStatus::STATUS_LIST,
                 'contentOptions' => [
                     'class' => 'text-center'
                 ]

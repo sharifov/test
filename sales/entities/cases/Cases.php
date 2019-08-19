@@ -54,20 +54,6 @@ class Cases extends ActiveRecord
 
     use EventTrait;
 
-    public const STATUS_PENDING     = 1;
-    public const STATUS_PROCESSING  = 2;
-    public const STATUS_FOLLOW_UP   = 5;
-    public const STATUS_SOLVED      = 10;
-    public const STATUS_TRASH       = 11;
-
-    public const STATUS_ROUTE_RULES = [
-        self::STATUS_PENDING        => [self::STATUS_PROCESSING, self::STATUS_TRASH],
-        self::STATUS_PROCESSING     => [self::STATUS_FOLLOW_UP, self::STATUS_TRASH, self::STATUS_SOLVED],
-        self::STATUS_FOLLOW_UP      => [self::STATUS_TRASH, self::STATUS_PROCESSING],
-        self::STATUS_SOLVED         => [],
-        self::STATUS_TRASH          => [self::STATUS_FOLLOW_UP],
-    ];
-
     /**
      * @param int $clientId
      * @param int $callId
@@ -84,7 +70,7 @@ class Cases extends ActiveRecord
         $case->cs_dep_id = $depId;
         $case->cs_gid = self::generateGid();
         $case->cs_created_dt = date('Y-m-d H:i:s');
-        $case->setStatus(self::STATUS_PENDING);
+        $case->setStatus(CasesStatus::STATUS_PENDING);
         return $case;
     }
 
@@ -115,7 +101,7 @@ class Cases extends ActiveRecord
         $case->cs_description = $description;
         $case->cs_gid = self::generateGid();
         $case->cs_created_dt = date('Y-m-d H:i:s');
-        $case->setStatus(self::STATUS_PENDING);
+        $case->setStatus(CasesStatus::STATUS_PENDING);
         return $case;
     }
 
@@ -126,25 +112,6 @@ class Cases extends ActiveRecord
     {
         return md5(uniqid('', true));
     }
-
-
-    /**
-     * @param int $status
-     * @return array
-     */
-    public static function statusRouteRules(int $status): array
-    {
-        return self::STATUS_ROUTE_RULES[$status] ?? [];
-    }
-
-    /**
-     * @return array
-     */
-    public function getStatusRouteRules(): array
-    {
-        return self::statusRouteRules($this->cs_status);
-    }
-
 
     /**
      * @param int $leadId
@@ -160,11 +127,9 @@ class Cases extends ActiveRecord
 
     public function pending(): void
     {
-        if ($this->isPending()) {
-            throw new \DomainException('Case is already is pending');
-        }
+        CasesStatus::guard($this->cs_status, CasesStatus::STATUS_PENDING);
         $this->recordEvent(new CasesPendingStatusEvent($this, $this->cs_status, $this->cs_user_id));
-        $this->setStatus(self::STATUS_PENDING);
+        $this->setStatus(CasesStatus::STATUS_PENDING);
     }
 
     /**
@@ -172,7 +137,7 @@ class Cases extends ActiveRecord
      */
     public function isPending(): bool
     {
-        return $this->cs_status === self::STATUS_PENDING;
+        return $this->cs_status === CasesStatus::STATUS_PENDING;
     }
 
     /**
@@ -180,6 +145,7 @@ class Cases extends ActiveRecord
      */
     public function processing(int $userId): void
     {
+        CasesStatus::guard($this->cs_status, CasesStatus::STATUS_PROCESSING);
         if ($this->isProcessing() && $this->isOwner($userId)) {
             throw new \DomainException('Case is already processing to this user');
         }
@@ -188,7 +154,7 @@ class Cases extends ActiveRecord
             $this->setOwner($userId);
         }
         if (!$this->isProcessing()) {
-            $this->setStatus(self::STATUS_PROCESSING);
+            $this->setStatus(CasesStatus::STATUS_PROCESSING);
         }
     }
 
@@ -197,19 +163,17 @@ class Cases extends ActiveRecord
      */
     public function isProcessing(): bool
     {
-        return $this->cs_status === self::STATUS_PROCESSING;
+        return $this->cs_status === CasesStatus::STATUS_PROCESSING;
     }
 
     public function followUp(): void
     {
-        if ($this->isFollowUp()) {
-            throw new \DomainException('Case is already follow-up');
-        }
+        CasesStatus::guard($this->cs_status, CasesStatus::STATUS_FOLLOW_UP);
         $this->recordEvent(new CasesFollowUpStatusEvent($this, $this->cs_status, $this->cs_user_id));
         if (!$this->isFreedOwner()) {
             $this->freedOwner();
         }
-        $this->setStatus(self::STATUS_FOLLOW_UP);
+        $this->setStatus(CasesStatus::STATUS_FOLLOW_UP);
     }
 
     /**
@@ -217,19 +181,14 @@ class Cases extends ActiveRecord
      */
     public function isFollowUp(): bool
     {
-        return $this->cs_status === self::STATUS_FOLLOW_UP;
+        return $this->cs_status === CasesStatus::STATUS_FOLLOW_UP;
     }
 
     public function solved(): void
     {
-        if ($this->isSolved()) {
-            throw new \DomainException('Case is already solved');
-        }
-        if (!$this->isProcessing()) {
-            throw new \DomainException('Case must be in processing');
-        }
+        CasesStatus::guard($this->cs_status, CasesStatus::STATUS_SOLVED);
         $this->recordEvent(new CasesSolvedStatusEvent($this, $this->cs_status, $this->cs_user_id));
-        $this->setStatus(self::STATUS_SOLVED);
+        $this->setStatus(CasesStatus::STATUS_SOLVED);
     }
 
     /**
@@ -237,16 +196,14 @@ class Cases extends ActiveRecord
      */
     public function isSolved(): bool
     {
-        return $this->cs_status === self::STATUS_SOLVED;
+        return $this->cs_status === CasesStatus::STATUS_SOLVED;
     }
 
     public function trash(): void
     {
-        if ($this->isTrash()) {
-            throw new \DomainException('Case is already trash');
-        }
+        CasesStatus::guard($this->cs_status, CasesStatus::STATUS_TRASH);
         $this->recordEvent(new CasesTrashStatusEvent($this, $this->cs_status, $this->cs_user_id));
-        $this->setStatus(self::STATUS_TRASH);
+        $this->setStatus(CasesStatus::STATUS_TRASH);
     }
 
     /**
@@ -254,7 +211,7 @@ class Cases extends ActiveRecord
      */
     public function isTrash(): bool
     {
-        return $this->cs_status === self::STATUS_TRASH;
+        return $this->cs_status === CasesStatus::STATUS_TRASH;
     }
 
     /**
@@ -304,7 +261,7 @@ class Cases extends ActiveRecord
      */
     private function setStatus(int $status): void
     {
-        if (!array_key_exists($status, CasesStatusHelper::STATUS_LIST)) {
+        if (!array_key_exists($status, CasesStatus::STATUS_LIST)) {
             throw new \InvalidArgumentException('Invalid Status');
         }
         if ($this->cs_status !== $status) {
@@ -349,7 +306,7 @@ class Cases extends ActiveRecord
     /**
      * @return ActiveQuery
      */
-    public function getCasesStatusLogs()
+    public function getCasesStatusLogs(): ActiveQuery
     {
         return $this->hasMany(CasesStatusLog::class, ['csl_case_id' => 'cs_id']);
     }

@@ -2,10 +2,8 @@
 
 namespace sales\forms\cases;
 
-use common\models\Employee;
 use sales\entities\cases\Cases;
-use sales\entities\cases\CasesStatusHelper;
-use sales\repositories\cases\CasesRepository;
+use sales\entities\cases\CasesStatus;
 use yii\base\Model;
 
 /**
@@ -13,31 +11,28 @@ use yii\base\Model;
  *
  * @property int $status
  * @property string $message
- *
- * @property Cases $case
- * @property Employee $user
- * @property CasesRepository $casesRepository
+ * @property int $caseStatus
+ * @property string $caseGid
  */
 class CasesChangeStatusForm extends Model
 {
 
     public $status;
     public $message;
-    public $case_id;
 
-    private $user;
-    private $case;
+    public $caseGid;
+    private $caseStatus;
 
-    private $casesRepository;
-
-
-
-    public function __construct($config = [])
+    /**
+     * CasesChangeStatusForm constructor.
+     * @param Cases $case
+     * @param array $config
+     */
+    public function __construct(Cases $case, $config = [])
     {
         parent::__construct($config);
-        $this->casesRepository = \Yii::createObject(CasesRepository::class);
-        //$this->case = $case;
-        //$this->user = $user;
+        $this->caseStatus = $case->cs_status;
+        $this->caseGid = $case->cs_gid;
     }
 
     /**
@@ -46,10 +41,11 @@ class CasesChangeStatusForm extends Model
     public function rules(): array
     {
         return [
-            [['status', 'case_id'], 'required'],
+            ['status', 'required'],
+            ['status', 'integer'],
+            ['status', 'in', 'range' => array_keys($this->getStatusList()), 'message' => 'This status disallow'],
+
             ['message', 'string'],
-            ['status', 'in', 'range' => array_keys(CasesStatusHelper::STATUS_LIST)], //$this->getStatusList())],
-            [['case_id'], 'exist', 'skipOnError' => true, 'targetClass' => Cases::class, 'targetAttribute' => ['case_id' => 'cs_id']],
         ];
     }
 
@@ -61,24 +57,19 @@ class CasesChangeStatusForm extends Model
         return [
             'status' => 'Status',
             'message' => 'Message',
-            'case_id' => 'Case'
         ];
     }
 
+    /**
+     * @return array
+     */
     public function getStatusList(): array
     {
-        $this->case = $this->casesRepository->find((int) $this->case_id);
-        $rules = Cases::statusRouteRules((int) $this->case->cs_status);
-
-        if($rules) {
-            foreach ($rules as $statusId) {
-                if(isset(CasesStatusHelper::STATUS_LIST[$statusId])) {
-                    $statusList[$statusId] = CasesStatusHelper::STATUS_LIST[$statusId];
-                }
-            }
+        $list = CasesStatus::getAllowList($this->caseStatus);
+        if (isset($list[CasesStatus::STATUS_PROCESSING])) {
+            unset($list[CasesStatus::STATUS_PROCESSING]);
         }
-
-        return $statusList;
+      return $list;
     }
 
 }

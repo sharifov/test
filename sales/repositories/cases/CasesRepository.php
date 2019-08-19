@@ -4,6 +4,7 @@ namespace sales\repositories\cases;
 
 use sales\dispatchers\EventDispatcher;
 use sales\entities\cases\Cases;
+use sales\entities\cases\CasesStatus;
 use sales\repositories\NotFoundException;
 use sales\repositories\Repository;
 
@@ -37,8 +38,8 @@ class CasesRepository extends Repository
     {
         if ($case = Cases::find()
             ->andWhere(['cs_client_id' => $clientId])
-            ->andWhere(['<>', Cases::STATUS_TRASH, 'cs_status'])
-            ->andWhere(['<>', Cases::STATUS_SOLVED, 'cs_status'])
+            ->andWhere(['<>', CasesStatus::STATUS_TRASH, 'cs_status'])
+            ->andWhere(['<>', CasesStatus::STATUS_SOLVED, 'cs_status'])
             ->orderBy(['cs_id' => SORT_DESC])
             ->limit(1)->one()) {
             return $case;
@@ -57,7 +58,7 @@ class CasesRepository extends Repository
     {
         if ($case = Cases::find()
             ->andWhere(['cs_client_id' => $clientId, 'cs_project_id' => $projectId, 'cs_dep_id' => $departmentId])
-            ->andWhere(['NOT IN', 'cs_status', [Cases::STATUS_TRASH, Cases::STATUS_SOLVED]])
+            ->andWhere(['NOT IN', 'cs_status', [CasesStatus::STATUS_TRASH, CasesStatus::STATUS_SOLVED]])
             ->orderBy(['cs_id' => SORT_DESC])
             ->limit(1)->one()) {
             return $case;

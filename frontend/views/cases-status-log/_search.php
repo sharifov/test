@@ -3,7 +3,7 @@
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 use common\models\Employee;
-use sales\entities\cases\CasesStatusHelper;
+use sales\entities\cases\CasesStatus;
 use dosamigos\datepicker\DatePicker;
 use kartik\select2\Select2;
 
@@ -41,7 +41,7 @@ $userList = Employee::getList();
                 <div class="col-md-12">
                     <?php
                     echo $form->field($model, 'statuses')->widget(Select2::class, [
-                        'data' => CasesStatusHelper::STATUS_LIST,
+                        'data' => CasesStatus::STATUS_LIST,
                         'size' => Select2::SMALL,
                         'options' => ['placeholder' => 'Select status', 'multiple' => true],
                         'pluginOptions' => ['allowClear' => true],

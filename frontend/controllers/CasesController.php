@@ -22,7 +22,8 @@ use frontend\models\CaseCommunicationForm;
 use frontend\models\CasePreviewEmailForm;
 use frontend\models\CasePreviewSmsForm;
 use frontend\models\CommunicationForm;
-use sales\entities\cases\CasesStatusHelper;
+use http\Exception\InvalidArgumentException;
+use sales\entities\cases\CasesStatus;
 use sales\entities\cases\CasesStatusLogSearch;
 use sales\forms\cases\CasesChangeStatusForm;
 use sales\forms\cases\CasesCreateByWebForm;
@@ -44,6 +45,7 @@ use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\web\Response;
 use yii\widgets\ActiveForm;
+use function GuzzleHttp\Psr7\str;
 
 /**
  * Class CasesController
@@ -1022,49 +1024,50 @@ class CasesController extends FController
         throw new NotFoundHttpException('The requested Sale does not exist.');
     }
 
-
     /**
-     * @return string
+     * @return string|Response
+     * @throws NotFoundHttpException
      */
     public function actionChangeStatus()
     {
-        $formModel = new CasesChangeStatusForm();
+        $gid = (string)Yii::$app->request->get('gid');
+        $case = $this->findModelByGid($gid);
+
+        $form = new CasesChangeStatusForm($case);
 
         try {
-            if ($formModel->load(Yii::$app->request->post()) && $formModel->validate()) {
+            if ($form->load(Yii::$app->request->post()) && $form->validate()) {
 
-                $formModel->case_id = (int) $formModel->case_id;
-                switch ((int) $formModel->status) {
-                    case Cases::STATUS_FOLLOW_UP : $this->casesManageService->followUp($formModel->case_id);
+                switch ((int)$form->status) {
+                    case CasesStatus::STATUS_FOLLOW_UP :
+                        $this->casesManageService->followUp($case->cs_id);
                         break;
-                    case Cases::STATUS_TRASH : $this->casesManageService->trash($formModel->case_id);
+                    case CasesStatus::STATUS_TRASH :
+                        $this->casesManageService->trash($case->cs_id);
                         break;
-                    case Cases::STATUS_SOLVED : $this->casesManageService->solved($formModel->case_id);
+                    case CasesStatus::STATUS_SOLVED :
+                        $this->casesManageService->solved($case->cs_id);
                         break;
-                    case Cases::STATUS_PENDING : $this->casesManageService->pending($formModel->case_id);
+                    case CasesStatus::STATUS_PENDING :
+                        $this->casesManageService->pending($case->cs_id);
+                        break;
+                    default:
+                        Yii::$app->session->setFlash('error', 'Undefined status');
+                        return $this->redirect(['cases/view', 'gid' => $case->cs_gid]);
                 }
 
-                $case = $this->casesRepository->find($formModel->case_id);
-                Yii::$app->session->setFlash('success', 'Case Status changed successfully ("'.CasesStatusHelper::getName($case->cs_status).'")');
-                //return '<script>alert(123);</script>'; //$this->view->registerJs('alert(123);');
+                Yii::$app->session->setFlash('success', 'Case Status changed successfully ("' . CasesStatus::getName($form->status) . '")');
                 return $this->redirect(['cases/view', 'gid' => $case->cs_gid]);
-
-            } else {
-                $caseGId = Yii::$app->request->get('gid');
-                $case = $this->casesRepository->findByGid($caseGId);
-                $formModel->case_id = $case->cs_id;
             }
 
         } catch (\Throwable $exception) {
-            //throw new BadRequestHttpException($exception->getMessage());
-            $formModel->addError('status', $exception->getMessage());
+            $form->addError('status', $exception->getMessage());
         }
 
         return $this->renderAjax('partial/_change_status', [
-            'model' => $formModel,
+            'model' => $form,
         ]);
     }
-
 
     /**
      * @return string
@@ -1087,16 +1090,4 @@ class CasesController extends FController
         ]);
     }
 
-
-    /**
-     * @return array
-     */
-    public function actionChangeStatusValidate()
-    {
-        $model = new CasesChangeStatusForm();
-        if (Yii::$app->request->isAjax && $model->load(Yii::$app->request->post())) {
-            \Yii::$app->response->format = Response::FORMAT_JSON;
-            return ActiveForm::validate($model);
-        }
-    }
 }

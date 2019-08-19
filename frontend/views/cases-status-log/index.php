@@ -3,7 +3,7 @@
 use dosamigos\datepicker\DatePicker;
 use yii\helpers\Html;
 use yii\grid\GridView;
-use sales\entities\cases\CasesStatusHelper;
+use sales\entities\cases\CasesStatus;
 use sales\entities\cases\CasesStatusLog;
 use common\models\Employee;
 
@@ -35,19 +35,19 @@ $userList = Employee::getList();
             [
                 'attribute' => 'csl_from_status',
                 'value' => function (CasesStatusLog $model) {
-                    return CasesStatusHelper::getLabel($model->csl_from_status); //'<span class="label label-info">' . CasesStatusHelper::getName($model->csl_from_status) . '</span></h5>';
+                    return CasesStatus::getLabel($model->csl_from_status); //'<span class="label label-info">' . CasesStatus::getName($model->csl_from_status) . '</span></h5>';
                 },
                 'format' => 'raw',
-                'filter' => CasesStatusHelper::STATUS_LIST,
+                'filter' => CasesStatus::STATUS_LIST,
                 //'options' => ['style' => 'width:180px'],
             ],
             [
                 'attribute' => 'csl_to_status',
                 'value' => function (CasesStatusLog $model) {
-                    return CasesStatusHelper::getLabel($model->csl_to_status); //'<span class="label label-info">' . CasesStatusHelper::getName($model->csl_to_status) . '</span></h5>';
+                    return CasesStatus::getLabel($model->csl_to_status); //'<span class="label label-info">' . CasesStatus::getName($model->csl_to_status) . '</span></h5>';
                 },
                 'format' => 'raw',
-                'filter' => CasesStatusHelper::STATUS_LIST,
+                'filter' => CasesStatus::STATUS_LIST,
                 //'options' => ['style' => 'width:180px'],
             ],
             [

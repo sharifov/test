@@ -5,25 +5,21 @@ use yii\widgets\ActiveForm;
 use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
-/* @var $model \sales\forms\cases\CasesChangeStatusForm */
+/* @var $model sales\forms\cases\CasesChangeStatusForm */
 /* @var $form yii\widgets\ActiveForm */
 ?>
 <?php Pjax::begin(['id' => 'pjax-cases-change-status-form', 'enablePushState' => false, 'enableReplaceState' => false]); ?>
 <div class="cases-change-status">
 
     <?php $form = ActiveForm::begin([
-        'action' => ['cases/change-status'],
-        'enableAjaxValidation' => true,
-        'validationUrl' => \yii\helpers\Url::to(['cases/change-status-validate']),
+        'action' => ['cases/change-status', 'gid' => $model->caseGid],
         'method' => 'post',
-        'options' => ['data-pjax' => true ]
+        'options' => ['data-pjax' => true]
     ]); ?>
 
     <?php
-        echo $form->errorSummary($model);
+    echo $form->errorSummary($model);
     ?>
-
-    <?= $form->field($model, 'case_id')->hiddenInput()->label(false) ?>
 
     <?= $form->field($model, 'status')->dropDownList($model->getStatusList(), ['prompt' => '-']) ?>
 

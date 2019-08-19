@@ -1,7 +1,7 @@
 <?php
 
 use sales\entities\cases\Cases;
-use sales\entities\cases\CasesStatusHelper;
+use sales\entities\cases\CasesStatus;
 use yii\helpers\Html;
 use yii\widgets\DetailView;
 
@@ -46,7 +46,7 @@ use yii\widgets\DetailView;
                         [
                             'attribute' => 'cs_status',
                             'value' => function (Cases $model) {
-                                return CasesStatusHelper::getLabel($model->cs_status);
+                                return CasesStatus::getName($model->cs_status);
                             },
                             'format' => 'raw'
                         ],
