@@ -554,7 +554,6 @@ class CasesController extends FController
 
                                     $call->c_to = $comForm->c_phone_number; //$dataCall['to'];
                                     $call->c_from = $upp->upp_tw_phone_number; //$dataCall['from'];
-                                    $call->c_sip = $userModel->userProfile->up_sip;
                                     $call->c_caller_name = $dataCall['from'];
                                     $call->c_call_status = $dataCall['status'];
                                     $call->c_api_version = $dataCall['api_version'];
@@ -577,48 +576,6 @@ class CasesController extends FController
                                         $comForm->c_voice_sid = $dataCall['sid'];
                                     }
 
-//
-//                                    $response['call']['sid'] = $call->sid;
-//                                    $response['call']['to'] = $call->to;
-//                                    $response['call']['from'] = $call->from;
-//                                    $response['call']['status'] = $call->status;
-//                                    $response['call']['price'] = $call->price;
-//                                    $response['call']['account_sid'] = $call->accountSid;
-//                                    $response['call']['api_version'] = $call->apiVersion;
-//                                    $response['call']['annotation'] = $call->annotation;
-//                                    $response['call']['uri'] = $call->uri;
-//                                    $response['call']['direction'] = $call->direction;
-//                                    $response['call']['phone_number_sid'] = $call->phoneNumberSid;
-//                                    $response['call']['caller_name'] = $call->callerName;
-//                                    $response['call']['start_time'] = $call->startTime;
-//                                    $response['call']['date_created'] = $call->dateCreated;
-//                                    $response['call']['date_updated'] = $call->dateUpdated;
-
-
-//                                "response": {
-//                                    "url": "https://communication.api.travelinsides.com/v1/twilio/voice-request?callerId=sip%3Aalex.connor%40kivork.sip.us1.twilio.com&number=%2B37369594567",
-//                                    "statusCallback": "https://communication.api.travelinsides.com/v1/twilio/voice-status-callback",
-//                                    "statusCallbackMethod": "POST",
-//                                    "statusCallbackEvent": [
-//                                                                "initiated",
-//                                                                "ringing",
-//                                                                "answered",
-//                                                                "completed"
-//                                                            ],
-//                                    "call": {
-//                                        "sid": "CAc447aee392051e4733fa59ade185db67",
-//                                        "to": "sip:alex.connor@kivork.sip.us1.twilio.com",
-//                                        "from": "BotDialer",
-//                                        "status": "queued",
-//                                        "price": null,
-//                                        "account_sid": "AC10f3c74efba7b492cbd7dca86077736c",
-//                                        "api_version": "2010-04-01",
-//                                        "annotation": null,
-//                                        "uri": "/2010-04-01/Accounts/AC10f3c74efba7b492cbd7dca86077736c/Calls/CAc447aee392051e4733fa59ade185db67.json",
-//                                        "direction": "outbound-api",
-//                                        "phone_number_sid": null
-//                                    }
-//                                },
                                 } else {
                                     $comForm->c_voice_status = 5; // Error
 
@@ -696,37 +653,7 @@ class CasesController extends FController
         }
 
 
-        $query1 = (new \yii\db\Query())
-            ->select(['e_id AS id', new Expression('"email" AS type'), 'e_case_id AS case_id', 'e_created_dt AS created_dt'])
-            ->from('email')
-            ->where(['e_case_id' => $model->cs_id]);
-
-        $query2 = (new \yii\db\Query())
-            ->select(['s_id AS id', new Expression('"sms" AS type'), 's_case_id AS case_id', 's_created_dt AS created_dt'])
-            ->from('sms')
-            ->where(['s_case_id' => $model->cs_id]);
-
-
-        $query3 = (new \yii\db\Query())
-            ->select(['c_id AS id', new Expression('"voice" AS type'), 'c_case_id AS case_id', 'c_created_dt AS created_dt'])
-            ->from('call')
-            ->where(['c_case_id' => $model->cs_id]);
-
-
-        $unionQuery = (new \yii\db\Query())
-            ->from(['union_table' => $query1->union($query2)->union($query3)])
-            ->orderBy(['created_dt' => SORT_ASC]);
-
-        //echo $query1->count(); exit;
-
-        $dataProviderCommunication = new ActiveDataProvider([
-            'query' => $unionQuery,
-            'pagination' => [
-                'pageSize' => 10,
-                //'page' => 0
-            ],
-        ]);
-
+        $dataProviderCommunication = $this->getCommunicationDataProvider($model);
 
         if (!Yii::$app->request->isAjax || !Yii::$app->request->get('page')) {
             $pageCount = ceil($dataProviderCommunication->totalCount / $dataProviderCommunication->pagination->pageSize) - 1;
@@ -736,7 +663,7 @@ class CasesController extends FController
             $dataProviderCommunication->pagination->page = $pageCount;
         }
 
-
+        // Sale Search
         $saleSearchModel = new SaleSearch();
         $params = Yii::$app->request->queryParams;
 
@@ -749,13 +676,12 @@ class CasesController extends FController
         }
 
 
-
-
+        // Sale List
         $csSearchModel = new CaseSaleSearch();
-        $params['CaseSaleSearch[css_cs_id]'] = $model->cs_id;
+        $params['CaseSaleSearch']['css_cs_id'] = $model->cs_id;
         $csDataProvider = $csSearchModel->searchByCase($params);
 
-
+        // Lead Search
         $leadSearchModel = new LeadSearch();
         $leadDataProvider = $leadSearchModel->searchByCase($params);
 
@@ -807,6 +733,46 @@ class CasesController extends FController
             'modelNote' => $modelNote,
             'dataProviderNotes' => $dataProviderNotes,
         ]);
+    }
+
+    /**
+     * @param Cases $model
+     * @return ActiveDataProvider
+     */
+    private function getCommunicationDataProvider(Cases $model): ActiveDataProvider
+    {
+        $query1 = (new \yii\db\Query())
+            ->select(['e_id AS id', new Expression('"email" AS type'), 'e_case_id AS case_id', 'e_created_dt AS created_dt'])
+            ->from('email')
+            ->where(['e_case_id' => $model->cs_id]);
+
+        $query2 = (new \yii\db\Query())
+            ->select(['s_id AS id', new Expression('"sms" AS type'), 's_case_id AS case_id', 's_created_dt AS created_dt'])
+            ->from('sms')
+            ->where(['s_case_id' => $model->cs_id]);
+
+
+        $query3 = (new \yii\db\Query())
+            ->select(['c_id AS id', new Expression('"voice" AS type'), 'c_case_id AS case_id', 'c_created_dt AS created_dt'])
+            ->from('call')
+            ->where(['c_case_id' => $model->cs_id]);
+
+
+        $unionQuery = (new \yii\db\Query())
+            ->from(['union_table' => $query1->union($query2)->union($query3)])
+            ->orderBy(['created_dt' => SORT_ASC]);
+
+        //echo $query1->count(); exit;
+
+        $dataProviderCommunication = new ActiveDataProvider([
+            'query' => $unionQuery,
+            'pagination' => [
+                'pageSize' => 10,
+                //'page' => 0
+            ],
+        ]);
+
+        return $dataProviderCommunication;
     }
 
     /**
@@ -1098,6 +1064,7 @@ class CasesController extends FController
             'model' => $formModel,
         ]);
     }
+
 
     /**
      * @return string

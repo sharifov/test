@@ -5,6 +5,7 @@ namespace common\models\search;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use common\models\CaseSale;
+use yii\helpers\VarDumper;
 
 /**
  * CaseSaleSearch represents the model behind the search form of `common\models\CaseSale`.
@@ -75,6 +76,10 @@ class CaseSaleSearch extends CaseSale
         return $dataProvider;
     }
 
+    /**
+     * @param $params
+     * @return ActiveDataProvider
+     */
     public function searchByCase($params)
     {
         $query = CaseSale::find();
@@ -83,6 +88,10 @@ class CaseSaleSearch extends CaseSale
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+            'sort'=> ['defaultOrder' => ['css_created_dt' => SORT_DESC]],
+            'pagination' => [
+                'pageSize' => 10,
+            ],
         ]);
 
         $this->load($params);
@@ -93,9 +102,10 @@ class CaseSaleSearch extends CaseSale
             return $dataProvider;
         }
 
+        $query->andWhere(['css_cs_id' => $this->css_cs_id]);
+
         // grid filtering conditions
         $query->andFilterWhere([
-            'css_cs_id' => $this->css_cs_id,
             'css_sale_id' => $this->css_sale_id,
             'css_sale_pax' => $this->css_sale_pax,
             'css_sale_created_dt' => $this->css_sale_created_dt,
