@@ -46,21 +46,24 @@ use yii\widgets\DetailView;
                         [
                             'attribute' => 'cs_status',
                             'value' => function (Cases $model) {
-                                return CasesStatusHelper::getName($model->cs_status);
-                            },
-                        ],
-                        [
-                            'attribute' => 'cs_project_id',
-                            'value' => function (Cases $model) {
-                                return '<span class="badge badge-info">'.($model->project ? $model->project->name : '').'</span>';
+                                return CasesStatusHelper::getLabel($model->cs_status);
                             },
                             'format' => 'raw'
                         ],
                         [
+                            'attribute' => 'cs_project_id',
+                            'value' => function (Cases $model) {
+                                return $model->project ? '<span class="badge badge-info">' . $model->project->name .'</span>' : '';
+                            },
+                            'format' => 'raw'
+                        ],
+                        [
+                                'label' => 'Agent',
                             'attribute' => 'cs_user_id',
                             'value' => function (Cases $model) {
-                                return $model->owner ? $model->owner->username : '';
+                                return $model->owner ? '<i class="fa fa-user"></i> ' . Html::encode($model->owner->username) : '-';
                             },
+                            'format' => 'raw'
                         ],
                         //'cs_subject',
                         //'cs_description:ntext',

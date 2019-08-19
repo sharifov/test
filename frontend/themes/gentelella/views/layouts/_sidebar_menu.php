@@ -34,7 +34,7 @@ $isSuperAdmin = $user->canRole('superadmin');
         $menuItems[] = ['label' => 'Dashboard', 'url' => ['/'], 'icon' => 'area-chart'];
         $menuItems[] = ['label' => 'Search Leads', 'url' => ['/leads/index'], 'icon' => 'search'];
         $menuItems[] = ['label' => 'Search Sale', 'url' => ['/sale/search'], 'icon' => 'search'];
-        $menuItems[] = ['label' => 'Search Cases', 'url' => ['/cases'], 'icon' => 'search'];
+
 
         if (!$isUM) {
             $cntNotifications = \common\models\Notifications::findNewCount(Yii::$app->user->id);
@@ -65,7 +65,20 @@ $isSuperAdmin = $user->canRole('superadmin');
         }
 
         $menuItems[] = [
-            'label' => 'Stats',
+            'label' => 'Data Lists',
+            'url' => 'javascript:',
+            'icon' => 'th-list',
+            'items' => [
+                ['label' => 'Call List', 'url' => ['/call/index'], 'icon' => 'phone'],
+                ['label' => 'SMS List', 'url' => ['/sms/index'], 'icon' => 'comments-o'],
+                ['label' => 'Mail List', 'url' => ['/email/index'], 'icon' => 'envelope'],
+                ['label' => 'Cases List', 'url' => ['/cases/index'], 'icon' => 'search'],
+                ['label' => 'Notification List', 'url' => ['/notifications/index'], 'icon' => 'comment-o'],
+            ]
+        ];
+
+        $menuItems[] = [
+            'label' => 'Stats & Reports',
             'url' => 'javascript:',
             'icon' => 'bar-chart',
             'items' => [
@@ -78,9 +91,6 @@ $isSuperAdmin = $user->canRole('superadmin');
                 ['label' => 'User Connections', 'url' => ['/user-connection/index'], 'icon' => 'plug'],
                 ['label' => 'User Stats', 'url' => ['/user-connection/stats'], 'icon' => 'area-chart'],
                 ['label' => 'Call User Map', 'url' => ['/call/user-map'], 'icon' => 'map'],
-                ['label' => 'Call List', 'url' => ['/call/index'], 'icon' => 'phone'],
-                ['label' => 'SMS List', 'url' => ['/sms/index'], 'icon' => 'comments-o'],
-                ['label' => 'Mail List', 'url' => ['/email/index'], 'icon' => 'envelope'],
             ]
         ];
 
@@ -89,7 +99,6 @@ $isSuperAdmin = $user->canRole('superadmin');
             'url' => 'javascript:',
             'icon' => 'list',
             'items' => [
-                ['label' => 'All Notifications', 'url' => ['/notifications/index'], 'icon' => 'comment-o'],
                 ['label' => 'User Call Statuses', 'url' => ['/user-call-status/index'], 'icon' => 'list'],
                 ['label' => 'Lead Call Experts', 'url' => ['/lead-call-expert/index'], 'icon' => 'bell'],
                 ['label' => 'Flight Segments', 'url' => ['/lead-flight-segment/index'], 'icon' => 'plane'],
@@ -115,12 +124,12 @@ $isSuperAdmin = $user->canRole('superadmin');
             $menuLItems[] = ['label' => 'Inbox <span id="badges-inbox" data-type="inbox" class="label-info label pull-right bginfo"></span> ', 'url' => ['/queue/inbox'], 'icon' => 'briefcase text-info'];
         }
 
-        $menuLItems[] = ['label' => 'Follow Up <span id="badges-follow-up" data-type="follow-up" class="label-success label pull-right bginfo"></span> ', 'url' => ['/queue/follow-up'], 'icon' => 'recycle'];
-        $menuLItems[] = ['label' => 'Processing <span id="badges-processing" data-type="processing" class="label-warning label pull-right bginfo"></span> ', 'url' => ['/queue/processing'], 'icon' => 'spinner'];
-        $menuLItems[] = ['label' => 'Booked <span id="badges-booked" data-type="booked" class="label-success label pull-right bginfo"></span>', 'url' => ['/queue/booked'], 'icon' => 'flag-o text-warning'];
-        $menuLItems[] = ['label' => 'Sold <span id="badges-sold" data-type="sold" class="label-success label pull-right bginfo"></span> ', 'url' => ['/queue/sold'], 'icon' => 'flag text-success'];
-        $menuLItems[] = ['label' => 'Duplicate <span id="badges-duplicate" data-type="duplicate" class="label-danger label pull-right bginfo"></span>', 'url' => ['/queue/duplicate'], 'icon' => 'list text-danger'];
-        $menuLItems[] = ['label' => 'Trash <span id="badges-trash" class="label-danger label pull-right"></span>', 'url' => ['/queue/trash'], 'icon' => 'trash-o text-danger'];
+        $menuLItems[] = ['label' => 'Lead Follow Up <span id="badges-follow-up" data-type="follow-up" class="label-success label pull-right bginfo"></span> ', 'url' => ['/queue/follow-up'], 'icon' => 'recycle'];
+        $menuLItems[] = ['label' => 'Lead Processing <span id="badges-processing" data-type="processing" class="label-warning label pull-right bginfo"></span> ', 'url' => ['/queue/processing'], 'icon' => 'spinner'];
+        $menuLItems[] = ['label' => 'Lead Booked <span id="badges-booked" data-type="booked" class="label-success label pull-right bginfo"></span>', 'url' => ['/queue/booked'], 'icon' => 'flag-o text-warning'];
+        $menuLItems[] = ['label' => 'Lead Sold <span id="badges-sold" data-type="sold" class="label-success label pull-right bginfo"></span> ', 'url' => ['/queue/sold'], 'icon' => 'flag text-success'];
+        $menuLItems[] = ['label' => 'Lead Duplicate <span id="badges-duplicate" data-type="duplicate" class="label-danger label pull-right bginfo"></span>', 'url' => ['/queue/duplicate'], 'icon' => 'list text-danger'];
+        $menuLItems[] = ['label' => 'Lead Trash <span id="badges-trash" class="label-danger label pull-right"></span>', 'url' => ['/queue/trash'], 'icon' => 'trash-o text-danger'];
 
 
         if($isAdmin) {
@@ -135,12 +144,12 @@ $isSuperAdmin = $user->canRole('superadmin');
         }
 
         $menuCases = [];
-        $menuCases[] = ['label' => 'Pending <span id="cases-q-pending" data-type="pending" class="label-warning label pull-right cases-q-info"></span> ', 'url' => ['/cases-q/pending'], 'icon' => 'briefcase text-info'];
-        $menuCases[] = ['label' => 'Inbox <span id="cases-q-inbox" data-type="inbox" class="label-warning label pull-right cases-q-info"></span> ', 'url' => ['/cases-q/inbox'], 'icon' => 'briefcase text-info'];
-        $menuCases[] = ['label' => 'Processing <span id="cases-q-processing" data-type="processing" class="label-warning label pull-right cases-q-info"></span> ', 'url' => ['/cases-q/processing'], 'icon' => 'spinner'];
-        $menuCases[] = ['label' => 'Follow Up <span id="cases-q-followup" data-type="followup" class="label-success label pull-right cases-q-info"></span> ', 'url' => ['/cases-q/followup'], 'icon' => 'recycle'];
-        $menuCases[] = ['label' => 'Solved <span id="cases-q-solved" data-type="solved" class="label-success label pull-right cases-q-info"></span> ', 'url' => ['/cases-q/solved'], 'icon' => 'flag text-success'];
-        $menuCases[] = ['label' => 'Trash <span id="cases-q-trash" class="label-danger label pull-right"></span>', 'url' => ['/cases-q/trash'], 'icon' => 'trash-o text-danger'];
+        $menuCases[] = ['label' => 'Case Pending <span id="cases-q-pending" data-type="pending" class="label-warning label pull-right cases-q-info"></span> ', 'url' => ['/cases-q/pending'], 'icon' => 'briefcase text-info'];
+        $menuCases[] = ['label' => 'Case Inbox <span id="cases-q-inbox" data-type="inbox" class="label-warning label pull-right cases-q-info"></span> ', 'url' => ['/cases-q/inbox'], 'icon' => 'briefcase text-info'];
+        $menuCases[] = ['label' => 'Case Processing <span id="cases-q-processing" data-type="processing" class="label-warning label pull-right cases-q-info"></span> ', 'url' => ['/cases-q/processing'], 'icon' => 'spinner'];
+        $menuCases[] = ['label' => 'Case Follow Up <span id="cases-q-followup" data-type="followup" class="label-success label pull-right cases-q-info"></span> ', 'url' => ['/cases-q/followup'], 'icon' => 'recycle'];
+        $menuCases[] = ['label' => 'Case Solved <span id="cases-q-solved" data-type="solved" class="label-success label pull-right cases-q-info"></span> ', 'url' => ['/cases-q/solved'], 'icon' => 'flag text-success'];
+        $menuCases[] = ['label' => 'Case Trash <span id="cases-q-trash" class="label-danger label pull-right"></span>', 'url' => ['/cases-q/trash'], 'icon' => 'trash-o text-danger'];
 
         if ($isAdmin) {
             $menuItems[] = [
