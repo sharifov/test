@@ -62,7 +62,7 @@ class Cases extends ActiveRecord
     public const STATUS_ROUTE_RULES = [
         self::STATUS_PENDING        => [self::STATUS_PROCESSING, self::STATUS_TRASH],
         self::STATUS_PROCESSING     => [self::STATUS_FOLLOW_UP, self::STATUS_TRASH, self::STATUS_SOLVED],
-        self::STATUS_FOLLOW_UP      => [self::STATUS_TRASH], //self::STATUS_PROCESSING,
+        self::STATUS_FOLLOW_UP      => [self::STATUS_TRASH, self::STATUS_PROCESSING],
         self::STATUS_SOLVED         => [],
         self::STATUS_TRASH          => [self::STATUS_FOLLOW_UP],
     ];

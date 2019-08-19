@@ -28,7 +28,7 @@ $isAgent = false;
             <?php if (true) : ?>
                 <?php if(!$leadModel && (int) $caseModel->cs_dep_id === \common\models\Department::DEPARTMENT_EXCHANGE): ?>
                 <li>
-                    <?= \yii\bootstrap\Html::a('<i class="fa fa-plus-circle success"></i> Create Lead', ['lead/create', 'case_id' => $caseModel->cs_id], ['data-pjax' => 0, 'target' => '_blank'])?>
+                    <?= \yii\bootstrap\Html::a('<i class="fa fa-plus-circle success"></i> Create Lead', ['lead/create', 'case_gid' => $caseModel->cs_gid], ['data-pjax' => 0, 'target' => '_blank'])?>
                 </li>
                 <?php endif; ?>
                 <li>
