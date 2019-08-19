@@ -4,6 +4,7 @@ use borales\extensions\phoneInput\PhoneInput;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\widgets\ActiveForm;
+use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
 /* @var $form yii\widgets\ActiveForm */
@@ -14,25 +15,22 @@ $this->params['breadcrumbs'][] = ['label' => 'Cases', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 
 ?>
-    <div class="cases-create">
-
-        <h1><?= Html::encode($this->title) ?></h1>
-
-        <div class="cases-form">
-
+<div class="cases-create">
+    <div class="x_panel">
+        <div class="x_title">
+           <h2><i class="fa fa-cube"></i> Create New Case</h2>
+            <div class="clearfix"></div>
+        </div>
+        <div class="x_content" style="display: block;">
+            <?/*<h1><?= Html::encode($this->title) ?></h1>*/?>
             <?php $form = ActiveForm::begin([
                 'enableClientValidation' => false,
                 'enableAjaxValidation' => true,
                 'validationUrl' => ['/cases/create-validation']
             ]); ?>
-
             <div class="col-md-4">
 
                 <?= $form->field($model, 'projectId')->dropDownList($model->getProjects(), ['prompt' => 'Choose a project']) ?>
-
-                <?= $form->field($model, 'subject')->textInput(['maxlength' => true]) ?>
-
-                <?= $form->field($model, 'description')->textarea(['rows' => 6]) ?>
 
                 <?= $form->field($model, 'depId')->dropDownList($model->getDepartments(), [
                     'prompt' => 'Choose a department',
@@ -55,17 +53,21 @@ $this->params['breadcrumbs'][] = $this->title;
                     ]
                 ]) ?>
 
-                <div class="form-group">
-                    <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
+                <?= $form->field($model, 'subject')->textInput(['maxlength' => true]) ?>
+
+                <?= $form->field($model, 'description')->textarea(['rows' => 6]) ?>
+
+
+
+                <div class="form-group text-center">
+                    <?= Html::submitButton('<i class="fa fa-plus"></i> Create Case', ['class' => 'btn btn-success']) ?>
                 </div>
 
             </div>
-
             <?php ActiveForm::end(); ?>
-
         </div>
-
     </div>
+</div>
 
 <?php
 if (count($model->getProjects()) === 1) {
