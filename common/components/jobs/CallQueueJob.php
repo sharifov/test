@@ -70,8 +70,11 @@ class CallQueueJob extends BaseObject implements JobInterface
                 if($call) {
 
                     if((int) $call->c_call_status === Call::CALL_STATUS_IVR) {
+                        Yii::info('CallId: ' . $this->call_id . ', CALL_STATUS_IVR' ,'info\CallQueueJob-CALL_STATUS_IVR');
                         $call->c_call_status = Call::CALL_STATUS_QUEUE;
-                        $call->update();
+                        if(!$call->update()) {
+                            Yii::error(VarDumper::dumpAsString($call->errors), 'CallQueueJob:execute:Call:update');
+                        }
                     }
 
                     if((int) $call->c_dep_id === Department::DEPARTMENT_SALES) {
@@ -83,7 +86,7 @@ class CallQueueJob extends BaseObject implements JobInterface
                             if($lead) {
                                 $call->c_lead_id = $lead->id;
                                 if(!$call->update()) {
-                                    Yii::error(VarDumper::dumpAsString($call->errors), 'CallQueueJob:execute:Call:update');
+                                    Yii::error(VarDumper::dumpAsString($call->errors), 'CallQueueJob:execute:Call:update2');
                                 }
                             }
 
@@ -103,7 +106,7 @@ class CallQueueJob extends BaseObject implements JobInterface
                             );
                             $call->c_case_id = $case->cs_id;
                             if(!$call->update()) {
-                                Yii::error(VarDumper::dumpAsString($call->errors), 'CallQueueJob:execute:Call:update2');
+                                Yii::error(VarDumper::dumpAsString($call->errors), 'CallQueueJob:execute:Call:update3');
                             }
 
                         } catch (\Throwable $exception) {
