@@ -50,8 +50,8 @@ $bundle = \frontend\themes\gentelella\assets\AssetLeadCommunication::register($t
     <div class="x_panel">
         <div class="x_content" style="display: block;">
             <p>
-                <?= Html::button('Change Status', ['class' => 'btn btn-primary', 'id' => 'btn-change-status', 'title' => 'Change Case status']) ?>
-
+                <?= Html::button('<i class="fa fa-exchange"></i> Change Status', ['class' => 'btn btn-warning', 'id' => 'btn-change-status', 'title' => 'Change Case status']) ?>
+                <?= Html::button('<i class="fa fa-list"></i> Status History', ['class' => 'btn btn-info', 'id' => 'btn-status-history', 'title' => 'Status history']) ?>
                 <?/*= Html::a('Update', ['update', 'id' => $model->cs_id], ['class' => 'btn btn-primary']) ?>
         <?= Html::a('Delete', ['delete', 'id' => $model->cs_id], [
             'class' => 'btn btn-danger',
@@ -148,11 +148,26 @@ $bundle = \frontend\themes\gentelella\assets\AssetLeadCommunication::register($t
 
 </div>
 
+<style type="text/css">
+    @media screen and (min-width: 768px) {
+        .modal-dialog {
+            width: 800px; /* New width for default modal */
+        }
+        .modal-sm {
+            width: 350px; /* New width for small modal */
+        }
+    }
+    @media screen and (min-width: 992px) {
+        .modal-lg {
+            width: 80%; /* New width for large modal */
+        }
+    }
+</style>
 
 <?php
 yii\bootstrap\Modal::begin([
-    'id' => 'modalCase',
-    'headerOptions' => ['id' => 'modalCaseHeader'],
+    'id' => 'modalCaseSm',
+    //'headerOptions' => ['id' => 'modalCaseSmHeader'],
     'size' => \yii\bootstrap\Modal::SIZE_SMALL,
     'clientOptions' => ['backdrop' => 'static']//, 'keyboard' => FALSE]
 ]);
@@ -163,15 +178,44 @@ yii\bootstrap\Modal::end();
 ?>
 
 <?php
+yii\bootstrap\Modal::begin([
+    'id' => 'modalCase',
+    //'headerOptions' => ['id' => 'modalCaseHeader'],
+    'size' => \yii\bootstrap\Modal::SIZE_DEFAULT,
+    'clientOptions' => ['backdrop' => 'static']//, 'keyboard' => FALSE]
+]);
+?>
+
+<?php
+yii\bootstrap\Modal::end();
+?>
+
+
+<?php
     $ajaxUrl = \yii\helpers\Url::to(['cases/change-status', 'gid' => $model->cs_gid]);
+    $statusHistoryajaxUrl = \yii\helpers\Url::to(['cases/status-history', 'gid' => $model->cs_gid]);
+
     $js = <<<JS
      $(document).on('click', '#btn-change-status', function(){
-            var modal = $('#modalCase');
+            var modal = $('#modalCaseSm');
             //$('#search-sale-panel').toggle();
             modal.modal('show').find('.modal-body').html('<div style="text-align:center"><img width="200px" src="https://loading.io/spinners/gear-set/index.triple-gears-loading-icon.svg"></div>');
             modal.modal('show').find('.modal-header').html('<h3>' + $(this).attr('title') + ' ' + '<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button></h3>');
             
             $.get('$ajaxUrl', function(data) {
+                modal.find('.modal-body').html(data);
+            });
+            
+           return false;
+     });
+
+    $(document).on('click', '#btn-status-history', function(){
+            var modal = $('#modalCase');
+            //$('#search-sale-panel').toggle();
+            modal.modal('show').find('.modal-body').html('<div style="text-align:center"><img width="200px" src="https://loading.io/spinners/gear-set/index.triple-gears-loading-icon.svg"></div>');
+            modal.modal('show').find('.modal-header').html('<h3>' + $(this).attr('title') + ' ' + '<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button></h3>');
+            
+            $.get('$statusHistoryajaxUrl', function(data) {
                 modal.find('.modal-body').html(data);
             });
             

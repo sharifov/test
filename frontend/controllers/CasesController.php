@@ -23,6 +23,7 @@ use frontend\models\CasePreviewEmailForm;
 use frontend\models\CasePreviewSmsForm;
 use frontend\models\CommunicationForm;
 use sales\entities\cases\CasesStatusHelper;
+use sales\entities\cases\CasesStatusLogSearch;
 use sales\forms\cases\CasesChangeStatusForm;
 use sales\forms\cases\CasesCreateByWebForm;
 use sales\repositories\cases\CasesCategoryRepository;
@@ -1095,6 +1096,27 @@ class CasesController extends FController
 
         return $this->renderAjax('partial/_change_status', [
             'model' => $formModel,
+        ]);
+    }
+
+    /**
+     * @return string
+     */
+    public function actionStatusHistory()
+    {
+
+        $caseGId = Yii::$app->request->get('gid');
+        $case = $this->casesRepository->findByGid($caseGId);
+        $searchModel = new CasesStatusLogSearch();
+
+        $params = Yii::$app->request->queryParams;
+        $params['CasesStatusLogSearch[csl_case_id]'] = $case->cs_id;
+
+        $dataProvider = $searchModel->searchByCase($params);
+
+        return $this->renderAjax('partial/_status_history', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
         ]);
     }
 
