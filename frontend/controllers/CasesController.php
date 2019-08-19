@@ -875,7 +875,7 @@ class CasesController extends FController
         if ($form->load(Yii::$app->request->post()) && $form->validate()) {
             try {
                 $case = $this->casesCreateService->createByWeb($form);
-                $this->casesManageService->take($case->cs_gid, Yii::$app->user->id);
+                $this->casesManageService->takeByGid($case->cs_gid, Yii::$app->user->id);
                 Yii::$app->session->setFlash('success', 'Case created');
                 return $this->redirect(['view', 'gid' => $case->cs_gid]);
             } catch (\Throwable $e){
@@ -933,7 +933,7 @@ class CasesController extends FController
         $uid = (int) $uid;
         $case = $this->findModelByGid($gid);
         try {
-            $this->casesManageService->take($case->cs_gid, $uid);
+            $this->casesManageService->takeByGid($case->cs_gid, $uid);
             Yii::$app->session->setFlash('success', 'Success');
         } catch (\Throwable $e) {
             Yii::$app->session->setFlash('error', $e->getMessage());
@@ -954,7 +954,7 @@ class CasesController extends FController
         $uid = (int) $uid;
         $case = $this->findModelByGid($gid);
         try {
-            $this->casesManageService->takeOver($case->cs_gid, $uid);
+            $this->casesManageService->takeOverByGid($case->cs_gid, $uid);
             Yii::$app->session->setFlash('success', 'Success');
         } catch (\Throwable $e) {
             Yii::$app->session->setFlash('error', $e->getMessage());

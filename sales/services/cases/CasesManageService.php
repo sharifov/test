@@ -65,12 +65,12 @@ class CasesManageService
     /**
      * For user
      *
-     * @param string $caseGid
+     * @param int $caseId
      * @param int $userId
      */
-    public function take(string $caseGid, int $userId): void
+    public function take(int $caseId, int $userId): void
     {
-        $case = $this->casesRepository->findByGid($caseGid);
+        $case = $this->casesRepository->find($caseId);
         if ($case->isProcessing()) {
             throw new \DomainException('Case is already processing. You can make only take over');
         }
@@ -85,7 +85,41 @@ class CasesManageService
      * @param string $caseGid
      * @param int $userId
      */
-    public function takeOver(string $caseGid, int $userId): void
+    public function takeByGid(string $caseGid, int $userId): void
+    {
+        $case = $this->casesRepository->findByGid($caseGid);
+        if ($case->isProcessing()) {
+            throw new \DomainException('Case is already processing. You can make only take over');
+        }
+        $user = $this->userRepository->find($userId);
+        $case->processing($user->id);
+        $this->casesRepository->save($case);
+    }
+
+    /**
+     * For user
+     *
+     * @param int $caseId
+     * @param int $userId
+     */
+    public function takeOver(int $caseId, int $userId): void
+    {
+        $case = $this->casesRepository->find($caseId);
+        if (!$case->isProcessing()) {
+            throw new \DomainException('Case must be in processing');
+        }
+        $user = $this->userRepository->find($userId);
+        $case->processing($user->id);
+        $this->casesRepository->save($case);
+    }
+
+    /**
+     * For user
+     *
+     * @param string $caseGid
+     * @param int $userId
+     */
+    public function takeOverByGid(string $caseGid, int $userId): void
     {
         $case = $this->casesRepository->findByGid($caseGid);
         if (!$case->isProcessing()) {
