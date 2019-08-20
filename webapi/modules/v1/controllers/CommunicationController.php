@@ -459,7 +459,7 @@ class CommunicationController extends ApiBaseController
         if(isset($post['call']) && $post['call']) {
             $client_phone_number = null;
             $incoming_phone_number = null;
-            $gatherDigits = false;
+
             $callSid = $post['call']['CallSid'] ?? false;
             $parentCallSid = $post['call']['ParentCallSid'] ?? false;
 
@@ -485,10 +485,6 @@ class CommunicationController extends ApiBaseController
             if (!$incoming_phone_number) {
                 $response['error'] = 'Not found Call Called (Agent phone number)';
                 $response['error_code'] = 11;
-            }
-
-            if (isset($post['call']['Digits']) && $post['call']['Digits']) {
-                $gatherDigits = $post['call']['Digits'];
             }
 
             $isOnHold = false;
@@ -539,53 +535,16 @@ class CommunicationController extends ApiBaseController
                         }
                     }
                 }
-
-                /*$source = Sources::findOne(['phone_number' => $incoming_phone_number]);
-                if($source) {
-                    $project = $source->project;
-                }*/
             }
-
-
-
-
 
 
             if($departmentPhone) {
                 $callSourceTypeId = Call::SOURCE_GENERAL_LINE;
-
                 if($ivrEnable) {
-
-//                    $callSession = null;
-//                    if($callSid) {
-//                        $callSession = CallSession::findOne(['cs_cid' => $callSid]);
-//                    }
-
                     $ivrSelectedDigit = isset($post['call']['Digits']) ? (int) $post['call']['Digits'] : null;
                     $ivrStep = (int) Yii::$app->request->get('step', 1);
-
                     return $this->ivrService($callModel, $departmentPhone, $ivrStep, $ivrSelectedDigit);
-
-
-                    // check if is first call or is redirect from Gather
-                    // $get_data = Yii::$app->request->get();
-                    /*if ($callSession && isset($get_data['step']) && (int)$get_data['step'] === 1) {
-                        return $this->voiceGatherSteps($callSid, $source, $project, $client_phone_number, 1);
-                    }
-
-                    if ($callSession && isset($get_data['step']) && (int)$get_data['step'] === 2) {
-                        return $this->actionVoiceGather();
-                    }
-
-                    if (!$callSession && !$parentCallSid) {
-                        return $this->voiceGatherSteps($callSid, $source, $project, $client_phone_number, 1);
-                    }
-
-                    if ($gatherDigits && $callSession && !$parentCallSid) {
-                        return $this->actionVoiceGather();
-                    }*/
                 }
-
 
 
                 if($type === self::TYPE_VOIP_INCOMING) {
@@ -601,180 +560,6 @@ class CommunicationController extends ApiBaseController
                     } else {
                         Yii::info('Find LastLead ('.$lead2->id.') By ClientPhone: ' . $client_phone_number, 'info\API:Communication:voiceIncoming:findLastLeadByClientPhone');
                     }
-                }
-
-
-                $call_project_id = $project->id;
-                $project_employee_access = ProjectEmployeeAccess::find()->where(['project_id' => $project->id])->all();
-                //Yii::info(VarDumper::dumpAsString($project_employee_access), 'info\API:CommunicationController:actionVoice:$project_employee_access');
-                $callAgents = [];
-                $agents_ids = [];
-                if($use_new_general_line_distribution) {
-                    $clientIds = [];
-
-                    $log_data = [
-                        'find_online_agents' => 'no data',
-                        'project_id' => $call_project_id,
-                        'called_phone' => $incoming_phone_number,
-                        'client_phone' => $client_phone_number,
-                        'client_ids' => $clientIds ? implode(',', $clientIds) : '',
-                        'agents_ids' => $agents_ids ? implode(',', $agents_ids) : '',
-                    ];
-
-                    try {
-                        // FIRST STEP TO DETECT AGENTS FOR CALL.  SL-370
-                        if($clientPhone && $clientPhone->client && $clientPhone->client->id) {
-                            /*$clientIdsQuery = ClientPhone::findBySql("SELECT GROUP_CONCAT(client_id) AS client_ids FROM " . ClientPhone::tableName() . "  WHERE phone = '{$client_phone_number}' ")
-                                ->asArray()->one();
-                            if (isset($clientIdsQuery['client_ids']) && $clientIdsQuery['client_ids']) {
-                                $clientIds = explode(',', $clientIdsQuery['client_ids']);
-                            }*/
-                            $clientIds = ClientPhone::find()->select(['client_id'])->where(['phone' => $client_phone_number])->column();
-
-                            $latest_client_leads = Lead::find()
-                                ->select(['DISTINCT(employee_id)', 'updated'])
-                                ->where(['IN', 'client_id', $clientIds])
-                                ->andWhere(['project_id' => $call_project_id])
-                                ->andWhere(['<>', 'status', Lead::STATUS_TRASH])
-                                ->orderBy(['updated' => SORT_DESC])
-                                ->limit($general_line_leads_limit)->all();
-
-                            if ($latest_client_leads) {
-                                foreach ($latest_client_leads AS $client_lead) {
-                                    if ($client_lead->employee && $client_lead->employee->userProfile->up_call_type_id === UserProfile::CALL_TYPE_WEB) {
-                                        if ($client_lead->employee->isOnline() && $client_lead->employee->isCallStatusReady() && $client_lead->employee->isCallFree()) {
-                                            $callAgents[] = $client_lead->employee;
-                                            $agents_ids[] = $client_lead->employee->id . ' (' . $client_lead->employee->username . ')' . print_r($client_lead->employee->getRolesRaw(), true);
-                                        }
-                                    }
-                                }
-                            }
-                        }
-
-                        // SECOND STEP TO DETECT AGENTS FOR CALL.  SL-370
-                        if(!$callAgents && $project_employee_access) {
-                            $only_agents = [];
-                            $only_supervisors = [];
-
-                            $agents_for_call = Employee::getAgentsForGeneralLineCall($call_project_id, $incoming_phone_number, $general_line_last_hours);
-                            if($agents_for_call) {
-                                foreach ($agents_for_call AS $agentForCall) {
-                                    $agentId = (int)$agentForCall['tbl_user_id'];
-                                    $agentObject = Employee::findOne($agentId);
-
-                                    if(!$agentObject) {
-                                        continue;
-                                    }
-                                    if( $agentObject->userProfile && $agentObject->userProfile->up_call_type_id !== UserProfile::CALL_TYPE_WEB ) {
-                                        continue;
-                                    }
-
-                                    if (!$agentObject->getUserProjectParams()->andWhere(['upp_project_id' => $call_project_id, 'upp_allow_general_line' => 1])->limit(1)->one()) {
-                                        continue;
-                                    }
-
-                                    $agents_ids[] = $agentObject->id . ' : '. $agentObject->username . ' - '. print_r($agentObject->getRolesRaw(), true);
-                                    $roles = $agentObject->getRolesRaw();
-                                    if(array_key_exists('agent', $roles)) {
-                                        $only_agents[] = $agentObject;
-                                    }
-                                    if(array_key_exists('supervision',$roles)) {
-                                        $only_supervisors[] = $agentObject;
-                                    }
-                                    if((int)$general_line_role_priority > 0) {
-                                        $callAgents = $only_agents;
-                                        if(!count($callAgents) && count($only_supervisors)) {
-                                            $callAgents = $only_supervisors;
-                                        }
-                                    } else {
-                                        $callAgents = array_merge($only_agents, $only_supervisors);
-                                    }
-                                }
-                            }
-
-                            $log_data = [
-                                'find_online_agents' => 'no',
-                                'project_id' => $call_project_id,
-                                'called_phone' => $incoming_phone_number,
-                                'client_phone' => $client_phone_number,
-                                'client_ids' => $clientIds ? implode(',', $clientIds) : '',
-                                'agents_ids' => $agents_ids ? implode(',', $agents_ids) : '',
-                            ];
-
-                        } else {
-                            $log_data = [
-                                'find_online_agents' => 'yes',
-                                'project_id' => $call_project_id,
-                                'called_phone' => $incoming_phone_number,
-                                'client_phone' => $client_phone_number,
-                                'client_ids' => $clientIds ? implode(',', $clientIds) : '',
-                                'agents_ids' => $agents_ids ? implode(',', $agents_ids) : '',
-                            ];
-                        }
-                        \Yii::info(VarDumper::dumpAsString($log_data, 10, false), 'info\API:Communication:voiceIncoming:new_general_line_distribution');
-                    } catch (\Throwable $ee) {
-                        \Yii::error(VarDumper::dumpAsString(['log_data' => $log_data, 'errors' => $ee]), 'API:Communication:voiceIncoming:general_line_distribution');
-                        $callAgents = [];
-                    }
-                }
-
-                if ($project_employee_access && !$callAgents) {
-                    foreach ($project_employee_access AS $projectEmployer) {
-                        $projectUser = $projectEmployer->employee; //Employee::findOne($projectEmployer->employee_id);
-                        if($projectUser && $projectUser->userProfile && $projectUser->userProfile->up_call_type_id === UserProfile::CALL_TYPE_WEB) {
-                            $callAgents[] = $projectUser;
-                        }
-                    }
-                }
-
-                $agentsInfo = [];
-                if ($callAgents) {
-                    $cntCallAgents = 1;
-                    foreach ($callAgents AS $user) {
-                        if ($user->isOnline()) {
-                            if ($user->isCallStatusReady()) {
-                                if ($user->isCallFree()) {
-                                    if(in_array('seller' . $user->id, $call_agent_username)) {
-                                        continue;
-                                    }
-                                    if($cntCallAgents > $general_line_user_limit) {
-                                        break;
-                                    }
-                                    //Yii::info('DIRECT - User (' . $user->username . ') Id: ' . $user->id . ', phone: ' . $agent_phone_number, 'info\API:CommunicationController:actionVoice:Direct - 2');
-                                    $agentsInfo[] = 'DIRECT - User (' . $user->username . ') Id: ' . $user->id . ', phone: ' . $incoming_phone_number;
-                                    $isOnHold = false;
-                                    $call_agent_username[] = 'seller' . $user->id;
-                                    $call_employee[] = $user;
-                                    //break;
-                                    $cntCallAgents ++ ;
-                                } else {
-                                    $agentsInfo[] = 'Call Occupied - User (' . $user->username . ') Id: ' . $user->id . ', phone: ' . $incoming_phone_number;
-
-                                    //Yii::info('Call Occupied - User ('.$user->username.') Id: '.$user->id.', phone: ' . $agent_phone_number, 'info\API:CommunicationController:actionVoice:isCallFree');
-                                    //Notifications::create($user->id, 'Missing Call [Occupied]', 'Missing Call from ' . $client_phone_number .' to '.$agent_phone_number . "\r\n Reason: Agent Occupied", Notifications::TYPE_WARNING, true);
-                                    //Notifications::socket($user->id, null, 'getNewNotification', [], true);
-                                }
-                            } else {
-                                // Yii::info('Call Status not Ready - User ('.$user->username.') Id: '.$user->id.', phone: ' . $agent_phone_number, 'info\API:CommunicationController:actionVoice:isCallStatusReady');
-                                // Notifications::create($user->id, 'Missing Call [not Ready]', 'Missing Call from ' . $client_phone_number .' to '.$agent_phone_number . "\r\n Reason: Call Status not Ready", Notifications::TYPE_WARNING, true);
-                                //Notifications::socket($user->id, null, 'getNewNotification', [], true);
-                            }
-                        } else {
-                            //Yii::info('Offline - User ('.$user->username.') Id: '.$user->id.', phone: ' . $agent_phone_number, 'info\API:CommunicationController:actionVoice:isOnline');
-                            //Notifications::create($user->id, 'Missing Call [Offline]', 'Missing Call from ' . $client_phone_number .' to '.$agent_phone_number . "\r\n Reason: Agent offline", Notifications::TYPE_WARNING, true);
-                            //Notifications::socket($user->id, null, 'getNewNotification', [], true);
-                        }
-                    }
-                    if(!$call_employee) {
-                        $isOnHold = true;
-                    }
-                } else {
-                    $isOnHold = true;
-                    Yii::info('Call in Hold. phone: ' . $incoming_phone_number, 'info\API:Communication:voiceIncoming:CallInHold');
-                }
-
-                if ($agentsInfo) {
-                    Yii::info(VarDumper::dumpAsString($agentsInfo), 'info\API:Communication:voiceIncoming:isCallFree');
                 }
 
             } elseif ($agentDirectCallCheck) {
@@ -801,9 +586,6 @@ class CommunicationController extends ApiBaseController
                         $callGeneralNumber = true;
                     }
                 }
-
-
-
 
                 if ($clientPhone) {
                     $lead2 = Lead2::findLastLeadByClientPhone($client_phone_number, $agentRes['call_project_id'] ?? null);
@@ -834,7 +616,7 @@ class CommunicationController extends ApiBaseController
             }*/
             //}
 
-            $data = [];
+            /*$data = [];
             $data['client_name'] = 'Noname';
             $data['client_id'] = null;
             $data['last_lead_id'] = null;
@@ -864,7 +646,7 @@ class CommunicationController extends ApiBaseController
                 'post' => $post,
                 'call_employee' => $call_employee,
 
-            ], 10, false), 'info\API:Communication:voiceIncoming:ParamsToCall');
+            ], 10, false), 'info\API:Communication:voiceIncoming:ParamsToCall');*/
 
             if (!$isOnHold && !$callGeneralNumber && $call_employee) {
 
@@ -1870,10 +1652,11 @@ class CommunicationController extends ApiBaseController
             $call->c_to = $calData['To']; //Called
             $call->c_created_user_id = null;
 
-            $lead = Lead2::findLastLeadByClientPhone($call->c_from, $call->c_project_id);
-
-            if ($lead) {
-                $call->c_lead_id = $lead->id;
+            if($call->c_dep_id === Department::DEPARTMENT_SALES) {
+                $lead = Lead2::findLastLeadByClientPhone($call->c_from, $call->c_project_id);
+                if ($lead) {
+                    $call->c_lead_id = $lead->id;
+                }
             }
 
             if (!$call->save()) {
@@ -2102,488 +1885,6 @@ class CommunicationController extends ApiBaseController
             ];
             $responseData['data']['response'] = $response;
         }
-        return $responseData;
-    }
-
-
-    protected function voiceGatherSteps($callSid, Sources $source, Project $project, $client_phone_number, $step = 1)
-    {
-        try {
-            $call = null;
-            $params_voice_gather = \Yii::$app->params['voice_gather'];
-            $response = [];
-            $post = Yii::$app->request->post();
-
-            $company = '';
-            if ($project->name) {
-                $company = ' ' . strtolower($project->name);
-            }
-
-            $clientPhone = ClientPhone::find()->where(['phone' => $client_phone_number])->orderBy(['id' => SORT_DESC])->limit(1)->one();
-            $lead = null;
-            if ($clientPhone && $client = $clientPhone->client) {
-                $lead = Lead::find()->select(['id'])->where(['client_id' => $clientPhone->client_id])->orderBy(['id' => SORT_DESC])->limit(1)->one();
-            }
-            if($callSid) {
-                $call = Call::findOne(['c_call_sid' => $callSid]);
-            }
-            if(!$call) {
-                $call = new Call();
-            }
-            $call->c_call_sid = $post['call']['CallSid'] ?? null;
-            $call->c_account_sid = $post['call']['AccountSid'] ?? null;
-            $call->c_call_type_id = Call::CALL_TYPE_IN;
-            $call->c_call_status = $post['call']['CallStatus'] ?? Call::CALL_STATUS_RINGING;
-            $call->c_com_call_id = $post['call_id'] ?? null;
-            $call->c_direction = $post['call']['Direction'] ?? null;
-            $call->c_parent_call_sid = $post['call']['ParentCallSid'] ?? null;
-            $call->c_project_id = $project->id;
-            $call->c_is_new = true;
-            $call->c_api_version = $post['call']['ApiVersion'] ?? null;
-            $call->c_created_dt = date('Y-m-d H:i:s');
-            $call->c_from = $client_phone_number;
-            $call->c_sip = null;
-            $call->c_to = $source->phone_number;
-            $call->c_created_user_id = null;
-            if ($lead) {
-                $call->c_lead_id = $lead->id;
-            }
-            if (!$call->save()) {
-                \Yii::error(VarDumper::dumpAsString($call->errors), 'API:CommunicationController:voiceGatherSteps:Call:save');
-                throw new \Exception('can not save call in db');
-            }
-
-            $dataSession = [
-                'call' => $post,
-                'language' => 0,
-                'project_id' => $project->id,
-                'client_phone_number' => $client_phone_number,
-                'to_phone_number' => $source->phone_number,
-                'step' => $step,
-                'call_end_point' => '',
-            ];
-
-            $callSession = CallSession::findOne(['cs_cid' => $callSid]);
-            if (!$callSession) {
-                $callSession = new CallSession();
-                $callSession->cs_cid = $callSid;
-                $callSession->cs_call_id = $call->c_id;
-                $callSession->cs_step = 2;
-                $callSession->cs_project_id = $project->id;
-                $callSession->cs_lang_id = 0;
-                $callSession->cs_data_params = serialize($dataSession);
-                if (!$callSession->save()) {
-                    \Yii::error(VarDumper::dumpAsString($callSession->errors), 'API:CommunicationController:voiceGatherSteps:CallSession:save');
-                    throw new \Exception('can not save CallSession in db');
-                }
-            }
-
-            $responseTwml = new VoiceResponse();
-            $responseTwml->pause(['length' => 4]);
-            $entry_phrase = str_replace('{{project}}', $company, $params_voice_gather['entry_phrase']);
-            $responseTwml->say($entry_phrase, [
-                'language' => $params_voice_gather['entry_language'],
-                'voice' => $params_voice_gather['entry_voice'],
-            ]);
-            $gather = $responseTwml->gather([
-                'action' => '/v1/twilio/voice-gather/?step=2',
-                'method' => 'POST',
-                'numDigits' => 1,
-                'timeout' => 5,
-                //'actionOnEmptyResult' => true,
-            ]);
-            foreach ($params_voice_gather['languages'] AS $langId => $langData) {
-                $gather->say(', '.$langData['say'] . ', ', [
-                    'language' => $langData['language'],
-                    'voice' => $langData['voice'],
-                ]);
-                $gather->pause(['length' => 1]);
-            }
-            $responseTwml->say($params_voice_gather['error_phrase']);
-            $responseTwml->redirect('/v1/twilio/voice-gather/?step=1', ['method' => 'POST']);
-
-            $response['twml'] = (string)$responseTwml;
-            $responseData = [
-                'status' => 200,
-                'name' => 'Success',
-                'code' => 0,
-                'message' => ''
-            ];
-            $responseData['data']['response'] = $response;
-
-        } catch (\Throwable $e) {
-            $responseTwml = new VoiceResponse();
-            $responseTwml->reject(['reason' => 'busy']);
-            $response['twml'] = (string)$responseTwml;
-            $responseData = [
-                'status' => 404,
-                'name' => 'Error',
-                'code' => 404,
-                'message' => 'Sales error: '. $e->getMessage(). "\n" . $e->getFile() . ':' . $e->getLine(),
-            ];
-            $responseData['data']['response'] = $response;
-        }
-        return $responseData;
-    }
-
-    protected function actionVoiceGather()
-    {
-        try {
-            $response = [];
-            $direct_access = false;
-
-            $post = Yii::$app->request->post();
-            $get = Yii::$app->request->get();
-            $step = $get['step'] ?? 2;
-            $step = (int)$step;
-            $communicationApiUrl = \Yii::$app->communication->url;
-            $params_voice_gather = \Yii::$app->params['voice_gather'];
-            $callSid = $post['call']['CallSid'] ?? null;
-
-            if(!$callSid && isset($get['CallSid']) && $get['CallSid']) {
-                $direct_access = true;
-                $callSid = $get['CallSid'];
-            }
-
-            if(!$callSid) {
-                \Yii::error(VarDumper::dumpAsString(['post' => $post, 'get' => $get]), 'API:CommunicationController:actionVoiceGather:$callSid');
-                throw new \Exception('can not find param CallSid');
-            }
-            $call = Call::findOne(['c_call_sid' => $callSid]);
-            if(!$call) {
-                \Yii::error(VarDumper::dumpAsString(['post' => $post, 'get' => $get]), 'API:CommunicationController:actionVoiceGather:$call');
-                throw new \Exception('can not find Call by CallSid');
-            }
-            $callSession = CallSession::findOne(['cs_cid' => $callSid]);
-            if(!$callSession) {
-                \Yii::error(VarDumper::dumpAsString(['post' => $post, 'get' => $get]), 'API:CommunicationController:actionVoiceGather:$callSession');
-                throw new \Exception(' not find Call Session by CallSid');
-            }
-
-            $cs_data_params = unserialize($callSession->cs_data_params);
-
-            // rewrite call data if gather is timeout or fail
-            if($direct_access) {
-                $post = $cs_data_params['call'];
-            }
-
-            $client_phone_number = $cs_data_params['client_phone_number'] ?? $call->c_from;
-            $agent_phone_number = $cs_data_params['to_phone_number'] ?? $call->c_to;
-            //$first_call_post_data = $cs_data_params['call'] ?? null;
-
-            if(!$cs_data_params || !is_array($cs_data_params)) {
-                \Yii::error(VarDumper::dumpAsString(['post' => $post, 'get' => $get]), 'API:CommunicationController:actionVoiceGather:$cs_data_params');
-                throw new \Exception(' error call session $cs_data_params. Callsid:' .  $callSid);
-            }
-
-            $responseTwml = new VoiceResponse();
-            $selectedDigit = $post['call']['Digits'] ?? 1;
-            $selectedDigit = (int)$selectedDigit;
-            if($step == 1) {
-
-                $responseTwml->pause(['length' => 4]);
-                $gather = $responseTwml->gather([
-                    'action' => '/v1/twilio/voice-gather/?step=2',
-                    'method' => 'POST',
-                    'numDigits' => 1,
-                    'timeout' => 5,
-                ]);
-                foreach ($params_voice_gather['languages'] AS $langId => $langData) {
-                    $gather->say(', '.$langData['say'] . ', ', [
-                        'language' => $langData['language'],
-                        'voice' => $langData['voice'],
-                    ]);
-                    $gather->pause(['length' => 1]);
-                }
-                $responseTwml->say($params_voice_gather['error_phrase']);
-                $responseTwml->redirect('/v1/twilio/voice-gather/?step=1', ['method' => 'POST']);
-
-            } elseif($step == 2) {
-                $paramsToSay = [];
-                if($callSession->cs_lang_id > 0) {
-                    $selectedDigit = $callSession->cs_lang_id;
-                }
-
-                if(isset($params_voice_gather['languages'][$selectedDigit])) {
-                    $paramsToSay = $params_voice_gather['languages'][$selectedDigit];
-                } else {
-                    $selectedDigit = 1;
-                    $paramsToSay = $params_voice_gather['languages'][1];
-                }
-                $callSession->cs_lang_id = $selectedDigit;
-
-                $responseTwml->pause(['length' => 2]);
-                $gather = $responseTwml->gather([
-                    'action' => '/v1/twilio/voice-gather/?step=3',
-                    'method' => 'POST',
-                    'numDigits' => 1,
-                    'timeout' => 5,
-                ]);
-                $gather->say(', '.$paramsToSay['say_step2'] . ', ', [
-                    'language' => $paramsToSay['language'],
-                    'voice' => $paramsToSay['voice'],
-                ]);
-                $responseTwml->say($params_voice_gather['error_phrase']);
-                $responseTwml->redirect('/v1/twilio/voice-gather/?step=2', ['method' => 'POST']);
-
-                $callSession->cs_step = 3;
-                if($cs_data_params && is_array($cs_data_params)) {
-                    if(isset($cs_data_params['call'], $cs_data_params['language'])) {
-                        $cs_data_params['call'] = $post;
-                        $cs_data_params['step'] = 3;
-                        $cs_data_params['language'] = $selectedDigit;
-                        $callSession->cs_data_params = serialize($cs_data_params);
-                    }
-                }
-                $callSession->save();
-
-            } elseif ($step == 3) {
-                $isOnHold = false;
-                $call_employee = [];
-
-                $langId = $cs_data_params['language'] ?? $callSession->cs_lang_id;
-                if(isset($params_voice_gather['languages'][$langId])) {
-                    $paramsToSay = $params_voice_gather['languages'][$langId];
-                } else {
-                    $paramsToSay = $params_voice_gather['languages'][1];
-                }
-
-                $clientPhone = ClientPhone::find()->where(['phone' => $client_phone_number])->orderBy(['id' => SORT_DESC])->limit(1)->one();
-                $lead = null;
-                if($clientPhone && $client = $clientPhone->client) {
-                    $lead = Lead::find()->select(['id'])->where(['client_id' => $clientPhone->client_id])->orderBy(['id' => SORT_DESC])->limit(1)->one();
-                }
-
-                $data = [];
-                $data['client_name'] = 'Noname';
-                $data['client_id'] = null;
-                $data['last_lead_id'] = null;
-                $data['client_emails'] = [];
-                $data['client_phones'] = [];
-                $data['client_count_calls'] = 0;
-                $data['client_count_sms'] = 0;
-                $data['client_created_date'] = '';
-                $data['client_last_activity'] = '';
-
-                if($clientPhone && $client = $clientPhone->client) {
-                    $data['client_name'] = $client->full_name;
-                    $data['client_id'] = $clientPhone->client_id;
-                    $data['client_created_date'] = Yii::$app->formatter->asDate(strtotime($client->created));
-                    if ($lead) {
-                        $data['last_lead_id'] = $lead->id;
-                        $data['client_last_activity'] = Yii::$app->formatter->asDate(strtotime($client->created));
-                    }
-                }
-
-                $data['client_phone'] = $client_phone_number;
-                $data['agent_phone'] = $agent_phone_number;
-
-                Yii::info(VarDumper::dumpAsString([
-                    'data' => $data,
-                    'post' => $post,
-                    'get' => $get,
-                    'call_employee' => $call_employee,
-
-                ], 10, false), 'info\API:CommunicationController:actionVoiceGather:ParamsToCall');
-
-                // call support phone
-                if($selectedDigit == 2) {
-
-                    $call_project_id = $cs_data_params['project_id'] ?? null;
-                    $generalLineNumber =  \Yii::$app->params['global_phone'];
-
-                    $call->c_call_sid = $post['call']['CallSid'] ?? null;
-                    $call->c_account_sid = $post['call']['AccountSid'] ?? null;
-                    $call->c_call_type_id = Call::CALL_TYPE_IN;
-                    $call->c_call_status = $post['call']['CallStatus'] ?? Call::CALL_STATUS_RINGING;
-                    $call->c_com_call_id = $post['call_id'] ?? null;
-                    $call->c_direction = $post['call']['Direction'] ?? null;
-                    $call->c_project_id = $call_project_id;
-                    $call->c_is_new = true;
-                    $call->c_api_version = $post['call']['ApiVersion'] ?? null;
-                    $call->c_created_dt = date('Y-m-d H:i:s');
-                    $call->c_from = $client_phone_number;
-                    $call->c_sip = null;
-                    $call->c_to = $generalLineNumber;
-                    $call->c_created_user_id = null;
-                    //$call->c_parent_call_sid = $cs_data_params['call']['CallSid'];
-                    if ($lead) {
-                        $call->c_lead_id = $lead->id;
-                    }
-                    if (!$call->save()) {
-                        \Yii::error(VarDumper::dumpAsString($call->errors), 'API:CommunicationController:actionVoiceGather:Call:save:$callGeneralNumber');
-                    }
-                    Yii::info('Redirected to General Line : call_project_id: '.$call_project_id.', generalLine: '.$generalLineNumber, 'info\API:CommunicationController:actionVoiceGather:callGeneralNumber - 6');
-
-                    $dial = $responseTwml->dial('', [
-                        'recordingStatusCallbackMethod' => 'POST',
-                        'callerId' => $call->c_from,
-                        'record' => 'record-from-answer-dual',
-                        'recordingStatusCallback' => $communicationApiUrl . $params_voice_gather['communication_recordingStatusCallbackUrl'],
-                    ]);
-                    $dial->number($generalLineNumber, [
-                        'statusCallbackEvent' => 'ringing answered completed',
-                        'statusCallback' => $communicationApiUrl . $params_voice_gather['communication_voiceStatusCallbackUrl'],
-                        'statusCallbackMethod' => 'POST',
-                    ]);
-                    $response['twml'] = (string)$responseTwml;
-
-                } elseif ($selectedDigit === 1) { // search for agents to call
-                    $call_project_id = $cs_data_params['project_id'] ?? null;
-                    if(!$call_project_id) {
-                        throw new \Exception('Not found project id in call session.' . "\n". "$cs_data_params:\n". print_r($cs_data_params, true));
-                    }
-
-                    $project_employee_access = ProjectEmployeeAccess::find()->where(['project_id' => $call_project_id])->all();
-                    $callAgents = [];
-                    if ($project_employee_access) {
-                        foreach ($project_employee_access AS $projectEmployer) {
-                            $projectUser = $projectEmployer->employee;
-                            if($projectUser && $projectUser->userProfile && $projectUser->userProfile->up_call_type_id === UserProfile::CALL_TYPE_WEB) {
-                                $callAgents[] = $projectUser;
-                            }
-                        }
-                    }
-                    \Yii::info('Find agents num: ' . count($callAgents), 'info\API:CommunicationController:actionVoiceGather:callGeneralNumber - 6');
-                    $agentsInfo = [];
-                    if ($callAgents) {
-                        foreach ($callAgents AS $user) {
-                            if ($user->isOnline()) {
-                                if ($user->isCallStatusReady()) {
-                                    if ($user->isCallFree()) {
-                                        //Yii::info('DIRECT - User (' . $user->username . ') Id: ' . $user->id . ', phone: ' . $agent_phone_number, 'info\API:CommunicationController:actionVoice:Direct - 2');
-                                        $agentsInfo[] = 'DIRECT - User (' . $user->username . ') Id: ' . $user->id . ', phone: ' . $cs_data_params['to_phone_number'];
-                                        $isOnHold = false;
-                                        $call_agent_username[] = 'seller' . $user->id;
-                                        $call_employee[] = $user;
-                                    } else {
-                                        $agentsInfo[] = 'Call Occupied - User (' . $user->username . ') Id: ' . $user->id . ', phone: ' . $cs_data_params['to_phone_number'];
-                                    }
-                                }
-                            }
-                        }
-                        if(!$call_employee) {
-                            $isOnHold = true;
-                        }
-                    } else {
-                        $isOnHold = true;
-                    }
-                    if ($agentsInfo) {
-                        Yii::info(VarDumper::dumpAsString($agentsInfo), 'info\API:CommunicationController:actionVoiceGather:isCallFree');
-                    }
-
-                    if($isOnHold) {
-                        $call->c_call_type_id = Call::CALL_TYPE_IN;
-                        $call->c_call_status =  Call::CALL_STATUS_QUEUE;
-                        $call->c_project_id = $call_project_id;
-                        $call->c_is_new = true;
-                        $call->c_created_dt = date('Y-m-d H:i:s');
-                        $call->c_from = $client_phone_number;
-                        $call->c_sip = null;
-                        $call->c_to = $agent_phone_number;
-                        $call->c_created_user_id = null;
-                        if ($lead) {
-                            $call->c_lead_id = $lead->id;
-                        }
-                        if (!$call->save()) {
-                            Yii::error(VarDumper::dumpAsString([ 'CallSid' => $callSid, 'errors' => $call->errors]), 'API:CommunicationController:actionVoiceGather:Call:save:$isOnHold');
-                        }
-
-                        $responseTwml->pause(['length' => 3]);
-                        $responseTwml->say($paramsToSay['hold_voice'], [
-                            'language' => $paramsToSay['language'],
-                            'voice' => $paramsToSay['voice'],
-                        ]);
-                        $responseTwml->play($params_voice_gather['hold_play']);
-                        $response['twml'] = (string)$responseTwml;
-
-                    } else {
-                        $dial = $responseTwml->dial('', [
-                            'recordingStatusCallbackMethod' => 'POST',
-                            'callerId' => $client_phone_number,
-                            'record' => 'record-from-answer-dual',
-                            'recordingStatusCallback' => $communicationApiUrl . $params_voice_gather['communication_recordingStatusCallbackUrl']
-                        ]);
-                        foreach ($call_employee AS $key => $userCall) {
-                            $callAgent = new Call();
-                            $callAgent->c_call_sid = $post['call']['CallSid'] ?? null;
-                            $callAgent->c_account_sid = $post['call']['AccountSid'] ?? null;
-                            $callAgent->c_call_type_id = Call::CALL_TYPE_IN;
-                            $callAgent->c_call_status = $post['call']['CallStatus'] ?? Call::CALL_STATUS_RINGING;
-                            $callAgent->c_com_call_id = $post['call_id'] ?? null;
-                            $callAgent->c_direction = $post['call']['Direction'] ?? null;
-                            $callAgent->c_project_id = $call_project_id;
-                            $callAgent->c_is_new = true;
-                            $callAgent->c_api_version = $post['call']['ApiVersion'] ?? null;
-                            $callAgent->c_created_dt = date('Y-m-d H:i:s');
-                            $callAgent->c_from = $client_phone_number;
-                            $callAgent->c_sip = null;
-                            $callAgent->c_to = $agent_phone_number; //$userCall->username ? $userCall->username : null;
-                            $callAgent->c_created_user_id = $userCall->id;
-                            $callAgent->c_parent_call_sid = $cs_data_params['call']['CallSid'] ?? $call->c_call_sid;
-                            if ($lead) {
-                                $callAgent->c_lead_id = $lead->id;
-                            } else {
-                                $callAgent->c_lead_id = null;
-                            }
-                            if (!$callAgent->save()) {
-                                Yii::error(VarDumper::dumpAsString($callAgent->errors), 'API:CommunicationController:actionVoiceGather:callAgent:save');
-                            }
-                            $data['status'] = $call->c_call_status;
-                            //Notifications::socket($call->c_created_user_id, $call->c_lead_id, 'incomingCall', $data, true);
-                            $dial->client('seller' . $userCall->id, [
-                                'statusCallbackEvent' => 'ringing answered completed',
-                                'statusCallback' => $communicationApiUrl . $params_voice_gather['communication_voiceStatusCallbackUrl'],
-                                'statusCallbackMethod' => 'POST',
-                            ]);
-                        }
-                        $call->c_call_status = Call::CALL_STATUS_COMPLETED;
-                        if (!$call->save()) {
-                            Yii::error(VarDumper::dumpAsString($call->errors), 'API:CommunicationController:actionVoiceGather:call:save');
-                        }
-
-                        $response['twml'] = (string)$responseTwml;
-                    }
-                } else {
-                    $responseTwml->redirect('/v1/twilio/voice-gather/?step=2', ['method' => 'POST']);
-                }
-                // end step 3
-
-                $callSession->cs_step = 4;
-                if($cs_data_params && is_array($cs_data_params)) {
-                    if(isset($cs_data_params['call'], $cs_data_params['language'])) {
-                        $cs_data_params['call'] = $post['call'];
-                        $cs_data_params['step'] = 4;
-                        $callSession->cs_data_params = serialize($cs_data_params);
-                    }
-                }
-                $callSession->save();
-            } else {
-                throw new \Exception('Not select options for call');
-            }
-
-            $response['twml'] = (string)$responseTwml;
-            $responseData = [
-                'status' => 200,
-                'name' => 'Success',
-                'code' => 0,
-                'message' => ''
-            ];
-            $responseData['data']['response'] = $response;
-
-        } catch (\Throwable $e) {
-            $responseTwml = new VoiceResponse();
-            $responseTwml->reject(['reason' => 'busy']);
-            $response['twml'] = (string)$responseTwml;
-            $responseData = [
-                'status' => 404,
-                'name' => 'Error',
-                'code' => 404,
-                'message' => 'Sales error: '. $e->getMessage() . "\n". $e->getFile(). ":" . $e->getLine(),
-            ];
-            $responseData['data']['response'] = $response;
-        }
-
         return $responseData;
     }
 
