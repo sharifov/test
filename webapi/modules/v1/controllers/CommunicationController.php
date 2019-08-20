@@ -508,6 +508,7 @@ class CommunicationController extends ApiBaseController
             $call_dep_id = null;
 
             if($departmentPhone) {
+                $agentDirectCallCheck = false;
                 $project = $departmentPhone->dppProject;
                 $source = $departmentPhone->dppSource;
                 if($project && !$source) {
@@ -522,7 +523,11 @@ class CommunicationController extends ApiBaseController
 
                 $ivrEnable = (bool) $departmentPhone->dpp_ivr_enable; ////(bool) ($settings['call_avr_enable'] ?? $voice_gather_configs['use_voice_gather']);
 
+                $callModel = $this->findOrCreateCall($callSid, $post['call'], $call_project_id, $call_dep_id);
+
             } else {
+
+                $agentDirectCallCheck = true;
 
                 $upp = UserProjectParams::find()->where(['upp_tw_phone_number' => $incoming_phone_number])->limit(1)->one();
                 if ($upp) {
@@ -541,15 +546,10 @@ class CommunicationController extends ApiBaseController
                 }*/
             }
 
-            //$departmentPhone
 
-            $callModel = $this->findOrCreateCall($callSid, $post['call'], $call_project_id, $call_dep_id);
 
-            $agentDirectCallCheck = false;
 
-            if(!$departmentPhone) {
-                $agentDirectCallCheck = true;
-            }
+
 
             if($departmentPhone) {
                 $callSourceTypeId = Call::SOURCE_GENERAL_LINE;
@@ -878,6 +878,9 @@ class CommunicationController extends ApiBaseController
                     $call->c_direction = $post['call']['Direction'] ?? null;
                     $call->c_project_id = $call_project_id;
                     $call->c_is_new = true;
+                    if($call_dep_id) {
+                        $call->c_dep_id = $call_dep_id;
+                    }
                     $call->c_api_version = $post['call']['ApiVersion'] ?? null;
                     $call->c_created_dt = date('Y-m-d H:i:s');
                     $call->c_from = $client_phone_number;
@@ -897,6 +900,7 @@ class CommunicationController extends ApiBaseController
                     // Notifications::socket($call->c_created_user_id, $call->c_lead_id, 'incomingCall', $data, true);
                 }
             } elseif($isOnHold) {
+
                 $call = new Call();
                 $call->c_call_sid = $post['call']['CallSid'] ?? null;
                 $call->c_account_sid = $post['call']['AccountSid'] ?? null;
