@@ -107,9 +107,10 @@ class TestController extends FController
 
     public function actionT()
     {
-        $service = Yii::createObject(CasesManageService::class);
-        $service->followUp(8);
 
+        $repo = Yii::createObject(CasesRepository::class);
+        $case = Cases::createByCall(17, 9, 1, null);
+        $repo->save($case);
 
 die;
 

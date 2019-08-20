@@ -82,7 +82,7 @@ $this->params['breadcrumbs'][] = $this->title;
                             'class' => 'btn btn-primary btn-xs take-processing-btn',
                             'data-pjax' => 0,
                             /*'data' => [
-                                'confirm' => 'Are you sure you want to take over this Case?',
+                                'confirm' => 'Are you sure you want to take this Case?',
                                 //'method' => 'post',
                             ],*/
                         ]);

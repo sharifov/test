@@ -28,7 +28,14 @@ class CasesStatusChangeEventListener
     {
         $createdUserId = Yii::$app->user->id ?? null;
         try {
-            $this->casesStatusLogService->log($event->case->cs_id, $event->toStatus, $event->fromStatus, $event->ownerId, $createdUserId);
+            $this->casesStatusLogService->log(
+                $event->case->cs_id,
+                $event->toStatus,
+                $event->fromStatus,
+                $event->ownerId,
+                $createdUserId,
+                $event->description
+            );
         } catch (\Throwable $e) {
             Yii::error($e, 'Listeners:CasesStatusChangeEventListener');
         }

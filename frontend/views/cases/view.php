@@ -1,18 +1,15 @@
 <?php
 
-use sales\entities\cases\CasesStatus;
-use sales\helpers\cases\CasesActionsHelper;
+use sales\helpers\cases\CasesViewRenderHelper;
 use yii\helpers\Html;
-use yii\widgets\DetailView;
-use yii\widgets\Pjax;
 
 /**
  * @var $this yii\web\View
  * @var $model sales\entities\cases\Cases
- * @var $comForm \frontend\models\CaseCommunicationForm
- * @var $previewEmailForm \frontend\models\CasePreviewEmailForm
- * @var $previewSmsForm \frontend\models\CasePreviewSmsForm
- * @var $dataProviderCommunication \yii\data\ActiveDataProvider
+ * @var $comForm frontend\models\CaseCommunicationForm
+ * @var $previewEmailForm frontend\models\CasePreviewEmailForm
+ * @var $previewSmsForm frontend\models\CasePreviewSmsForm
+ * @var $dataProviderCommunication yii\data\ActiveDataProvider
  * @var $enableCommunication boolean
  * @var $isAdmin boolean
  *
@@ -38,8 +35,6 @@ $this->params['breadcrumbs'][] = $this->title;
 
 $bundle = \frontend\themes\gentelella\assets\AssetLeadCommunication::register($this);
 
-$allowActionsList = CasesStatus::getAllowList($model->cs_status);
-
 ?>
 <div class="cases-view">
 
@@ -54,9 +49,9 @@ $allowActionsList = CasesStatus::getAllowList($model->cs_status);
     <div class="x_panel">
         <div class="x_content" style="display: block;">
             <p>
-                <?= $allowActionsList ? Html::button('<i class="fa fa-exchange"></i> Change Status', ['class' => 'btn btn-warning', 'id' => 'btn-change-status', 'title' => 'Change Case status']) : ''?>
+                <?= CasesViewRenderHelper::renderChangeStatusButton($model->cs_status)?>
                 <?= Html::button('<i class="fa fa-list"></i> Status History ' . ($model->casesStatusLogs ? '(' . count($model->casesStatusLogs) . ')' : ''), ['class' => 'btn btn-info', 'id' => 'btn-status-history', 'title' => 'Status history']) ?>
-                <?= CasesActionsHelper::renderTakeButton($model, Yii::$app->user->id) ?>
+                <?= CasesViewRenderHelper::renderTakeButton($model, Yii::$app->user->id) ?>
                 <?/*= Html::a('Update', ['update', 'id' => $model->cs_id], ['class' => 'btn btn-primary']) ?>
         <?= Html::a('Delete', ['delete', 'id' => $model->cs_id], [
             'class' => 'btn btn-danger',

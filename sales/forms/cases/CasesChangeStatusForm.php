@@ -69,9 +69,6 @@ class CasesChangeStatusForm extends Model
         if (isset($list[CasesStatus::STATUS_PROCESSING])) {
             unset($list[CasesStatus::STATUS_PROCESSING]);
         }
-        if (!$list) {
-            return [];
-        }
         return $list;
     }
 

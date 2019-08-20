@@ -7,7 +7,7 @@ use sales\entities\cases\CasesStatus;
 use yii\helpers\Html;
 use Yii;
 
-class CasesActionsHelper
+class CasesViewRenderHelper
 {
 
     /**
@@ -26,5 +26,18 @@ class CasesActionsHelper
             }
         }
         return '';
+    }
+
+    /**
+     * @param int $status
+     * @return string
+     */
+    public static function renderChangeStatusButton(int $status): string
+    {
+        $list = CasesStatus::getAllowList($status);
+        if (isset($list[CasesStatus::STATUS_PROCESSING])) {
+            unset($list[CasesStatus::STATUS_PROCESSING]);
+        }
+        return $list ? Html::button('<i class="fa fa-exchange"></i> Change Status', ['class' => 'btn btn-warning', 'id' => 'btn-change-status', 'title' => 'Change Case status']) : '';
     }
 }
