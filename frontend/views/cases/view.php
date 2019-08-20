@@ -79,7 +79,7 @@ $allowActionsList = CasesStatus::getAllowList($model->cs_status);
         </div>
         <div class="col-md-4">
             <?= $this->render('_client_info', [
-                'model'      => $model->client,
+                'caseModel'      => $model,
                 'isAdmin'       => $isAdmin
             ])
             ?>

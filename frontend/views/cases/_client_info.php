@@ -3,7 +3,7 @@
 use yii\helpers\Html;
 
 /* @var $this yii\web\View */
-/* @var $model \common\models\Client */
+/* @var $caseModel \sales\entities\cases\Cases */
 /* @var $isAdmin boolean */
 ?>
 
@@ -11,7 +11,14 @@ use yii\helpers\Html;
     <div class="x_title">
         <h2><i class="fa fa-user"></i> Client Info</h2>
         <ul class="nav navbar-right panel_toolbox">
-            <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+            <li>
+                <?= \yii\bootstrap\Html::a('<i class="fa fa-plus-circle success"></i> Add Email', '#', ['id' => 'btn-add-email', 'title' => 'Add Email'])?>
+            </li>
+            <li>
+                <?= \yii\bootstrap\Html::a('<i class="fa fa-edit warning"></i> Update', '#', ['id' => 'btn-client-update', 'title' => 'Update Client Info'])?>
+            </li>
+            <li>
+                <a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
             </li>
             <?/*<li class="dropdown">
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-wrench"></i></a>
@@ -28,11 +35,11 @@ use yii\helpers\Html;
         <div class="clearfix"></div>
     </div>
     <div class="x_content" style="display: block;">
-        <?php if($model):?>
+        <?php if($caseModel->client):?>
         <div class="row">
             <div class="col-md-6">
                 <?= \yii\widgets\DetailView::widget([
-                    'model' => $model,
+                    'model' => $caseModel->client,
                     'attributes' => [
                         'id',
                         'first_name',
@@ -43,7 +50,7 @@ use yii\helpers\Html;
             </div>
             <div class="col-md-6">
                 <?= \yii\widgets\DetailView::widget([
-                    'model' => $model,
+                    'model' => $caseModel->client,
                     'attributes' => [
                         [
                             'label' => 'Phones',
@@ -108,3 +115,37 @@ use yii\helpers\Html;
     </div>
 </div>
 
+<?php
+$addEmailAjaxUrl = \yii\helpers\Url::to(['cases/add-email', 'gid' => $caseModel->cs_gid]);
+$clientUpdateAjaxUrl = \yii\helpers\Url::to(['cases/client-update', 'gid' => $caseModel->cs_gid]);
+
+$js = <<<JS
+     $(document).on('click', '#btn-add-email', function(){
+            var modal = $('#modalCaseSm');
+            //$('#search-sale-panel').toggle();
+            modal.modal('show').find('.modal-body').html('<div style="text-align:center"><img width="200px" src="https://loading.io/spinners/gear-set/index.triple-gears-loading-icon.svg"></div>');
+            modal.modal('show').find('.modal-header').html('<h3>' + $(this).attr('title') + ' ' + '<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button></h3>');
+            
+            $.get('$addEmailAjaxUrl', function(data) {
+                modal.find('.modal-body').html(data);
+            });
+            
+           return false;
+     });
+
+    $(document).on('click', '#btn-client-update', function(){
+            var modal = $('#modalCaseSm');
+            //$('#search-sale-panel').toggle();
+            modal.modal('show').find('.modal-body').html('<div style="text-align:center"><img width="200px" src="https://loading.io/spinners/gear-set/index.triple-gears-loading-icon.svg"></div>');
+            modal.modal('show').find('.modal-header').html('<h3>' + $(this).attr('title') + ' ' + '<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button></h3>');
+            
+            $.get('$clientUpdateAjaxUrl', function(data) {
+                modal.find('.modal-body').html(data);
+            });
+            
+           return false;
+     });
+
+JS;
+
+$this->registerJs($js);

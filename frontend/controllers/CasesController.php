@@ -7,6 +7,8 @@ use common\components\CommunicationService;
 use common\models\Call;
 use common\models\CaseNote;
 use common\models\CaseSale;
+use common\models\ClientEmail;
+use common\models\ClientPhone;
 use common\models\Email;
 use common\models\EmailTemplateType;
 use common\models\Employee;
@@ -25,7 +27,9 @@ use frontend\models\CommunicationForm;
 use http\Exception\InvalidArgumentException;
 use sales\entities\cases\CasesStatus;
 use sales\entities\cases\CasesStatusLogSearch;
+use sales\forms\cases\CasesAddEmailForm;
 use sales\forms\cases\CasesChangeStatusForm;
+use sales\forms\cases\CasesClientUpdateForm;
 use sales\forms\cases\CasesCreateByWebForm;
 use sales\repositories\cases\CasesCategoryRepository;
 use sales\repositories\cases\CasesRepository;
@@ -1087,6 +1091,97 @@ class CasesController extends FController
         return $this->renderAjax('partial/_status_history', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
+        ]);
+    }
+
+
+    /**
+     * @return string|Response
+     * @throws NotFoundHttpException
+     */
+    public function actionAddEmail()
+    {
+        $gid = (string)Yii::$app->request->get('gid');
+        $case = $this->findModelByGid($gid);
+
+        $form = new CasesAddEmailForm($case);
+
+        try {
+            if ($form->load(Yii::$app->request->post()) && $form->validate()) {
+
+                if($case->client) {
+                    $existClientEmail = ClientEmail::find()->where(['client_id' => $case->client->id, 'email' => $form->email])->exists();
+                    if($existClientEmail) {
+                        Yii::$app->session->setFlash('warning', 'This email already exists ("' . $form->email . '"), Client Id: '.$case->client->id);
+                    } else {
+                        $clientEmail = new ClientEmail();
+                        $clientEmail->client_id = $case->client->id;
+                        $clientEmail->email = $form->email;
+                        if($clientEmail->save()) {
+                            Yii::$app->session->setFlash('success', 'Added new Email ("' . $form->email . '")');
+                        } else {
+                            Yii::$app->session->setFlash('error', VarDumper::dumpAsString($clientEmail->errors));
+                        }
+                    }
+                } else {
+                    Yii::$app->session->setFlash('warning', 'Client not found (Client Id: '.$case->cs_client_id.')');
+                }
+                return $this->redirect(['cases/view', 'gid' => $case->cs_gid]);
+            }
+
+        } catch (\Throwable $exception) {
+            $form->addError('email', $exception->getMessage());
+        }
+
+        return $this->renderAjax('partial/_add_email', [
+            'model' => $form,
+        ]);
+    }
+
+    /**
+     * @return string|Response
+     * @throws NotFoundHttpException
+     */
+    public function actionClientUpdate()
+    {
+        $gid = (string)Yii::$app->request->get('gid');
+        $case = $this->findModelByGid($gid);
+
+        $form = new CasesClientUpdateForm($case);
+
+        try {
+            if ($form->load(Yii::$app->request->post())) {
+                if($form->validate()) {
+                    if ($client = $case->client) {
+                        $client->first_name = $form->first_name;
+                        $client->last_name = $form->last_name;
+                        $client->middle_name = $form->middle_name;
+
+                        if ($client->save()) {
+                            Yii::$app->session->setFlash('success', 'Client information has been updated successfully.');
+                        } else {
+                            Yii::$app->session->setFlash('error', VarDumper::dumpAsString($client->errors));
+                        }
+
+                    } else {
+                        Yii::$app->session->setFlash('warning', 'Client not found (Client Id: ' . $case->cs_client_id . ')');
+                    }
+                    return $this->redirect(['cases/view', 'gid' => $case->cs_gid]);
+                }
+            } else {
+                if($client = $case->client) {
+                    $form->first_name = $client->first_name;
+                    $form->last_name = $client->last_name;
+                    $form->middle_name = $client->middle_name;
+                }
+            }
+
+        } catch (\Throwable $exception) {
+            $form->addError('email', $exception->getMessage());
+        }
+
+        return $this->renderAjax('partial/_client_update', [
+            'model' => $form,
         ]);
     }
 
