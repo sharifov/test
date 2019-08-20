@@ -52,7 +52,7 @@ use yii\widgets\DetailView;
                         [
                             'attribute' => 'cs_status',
                             'value' => function (Cases $model) {
-                                return CasesStatus::getName($model->cs_status);
+                                return CasesStatus::getLabel($model->cs_status);
                             },
                             'format' => 'raw'
                         ],
