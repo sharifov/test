@@ -522,7 +522,7 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
             if($this->c_call_status === self::CALL_STATUS_IN_PROGRESS && $this->c_call_type_id === self::CALL_TYPE_IN && ( $this->c_lead_id || $this->c_case_id ) && isset($changedAttributes['c_call_status'])
                 && ($changedAttributes['c_call_status'] === self::CALL_STATUS_RINGING || $changedAttributes['c_call_status'] === self::CALL_STATUS_QUEUE)) {
 
-                if($this->c_lead_id) {
+                if($this->c_lead_id && (int) $this->c_dep_id === Department::DEPARTMENT_SALES) {
                     $lead = $this->cLead2;
 
                     if ($lead && !$lead->employee_id && $this->c_created_user_id && $lead->status === Lead::STATUS_PENDING) {
@@ -543,7 +543,7 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
                 }
 
 
-                if($this->c_case_id) {
+                if($this->c_case_id && ((int) $this->c_dep_id === Department::DEPARTMENT_EXCHANGE || (int) $this->c_dep_id === Department::DEPARTMENT_SUPPORT)) {
                     $case = $this->cCase;
 
                     if ($case && !$case->cs_user_id && $this->c_created_user_id && $case->isPending()) {
@@ -556,7 +556,7 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
                             $host = \Yii::$app->params['url_address'] ?? '';
                             Notifications::create($case->cs_user_id, 'AutoCreated new Case (' . $case->cs_id . ')', 'A new Case (' . $case->cs_id . ') has been created for you. Call Id: ' . $this->c_id, Notifications::TYPE_SUCCESS, true);
                             Notifications::socket($case->cs_user_id, null, 'getNewNotification', [], true);
-                            Notifications::socket($case->cs_user_id, null, 'openUrl', ['url' => $host . '/case/view/' . $case->cs_gid], false);
+                            Notifications::socket($case->cs_user_id, null, 'openUrl', ['url' => $host . '/cases/view/' . $case->cs_gid], false);
                         } else {
                             Yii::error(VarDumper::dumpAsString($case->errors), 'Call:afterSave:Case:update');
                         }
