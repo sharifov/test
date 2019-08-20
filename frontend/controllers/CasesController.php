@@ -34,6 +34,7 @@ use sales\forms\cases\CasesCreateByWebForm;
 use sales\forms\cases\CasesUpdateForm;
 use sales\repositories\cases\CasesCategoryRepository;
 use sales\repositories\cases\CasesRepository;
+use sales\services\cases\CasesCommunicationService;
 use sales\services\cases\CasesCreateService;
 use sales\services\cases\CasesManageService;
 use Yii;
@@ -59,12 +60,14 @@ use function GuzzleHttp\Psr7\str;
  * @property CasesManageService $casesManageService
  * @property CasesCategoryRepository $casesCategoryRepository
  * @property CasesRepository $casesRepository
+ * @property CasesCommunicationService $casesCommunicationService
  */
 class CasesController extends FController
 {
 
     private $casesCreateService;
     private $casesManageService;
+    private $casesCommunicationService;
     private $casesCategoryRepository;
     private $casesRepository;
 
@@ -75,7 +78,8 @@ class CasesController extends FController
      * @param CasesCreateService $casesCreateService
      * @param CasesManageService $casesManageService
      * @param CasesCategoryRepository $casesCategoryRepository
-     * @param casesRepository $casesRepository
+     * @param CasesRepository $casesRepository
+     * @param CasesCommunicationService $casesCommunicationService
      * @param array $config
      */
     public function __construct(
@@ -85,6 +89,7 @@ class CasesController extends FController
         CasesManageService $casesManageService,
         CasesCategoryRepository $casesCategoryRepository,
         CasesRepository $casesRepository,
+        CasesCommunicationService $casesCommunicationService,
         $config = []
     )
     {
@@ -93,6 +98,7 @@ class CasesController extends FController
         $this->casesManageService = $casesManageService;
         $this->casesCategoryRepository = $casesCategoryRepository;
         $this->casesRepository = $casesRepository;
+        $this->casesCommunicationService = $casesCommunicationService;
     }
 
     /**
@@ -110,16 +116,23 @@ class CasesController extends FController
         ]);
     }
 
+
     /**
      * Displays a single Cases model.
-     * @param string $gid
-     * @return mixed
-     * @throws NotFoundHttpException if the model cannot be found
+     *
+     * @param $gid
+     * @return string
+     * @throws NotFoundHttpException
+     * @throws \Throwable
+     * @throws \yii\db\StaleObjectException
+     * @throws \yii\httpclient\Exception
      */
-    public function actionView($gid)
+    public function actionView($gid): string
     {
 
         $model = $this->findModelByGid($gid);
+        /** @var Employee $userModel */
+        $userModel = Yii::$app->user->identity;
 
         $previewEmailForm = new CasePreviewEmailForm();
         $previewEmailForm->is_send = false;
@@ -290,7 +303,7 @@ class CasesController extends FController
 
                     $comForm->c_preview_email = 1;
 
-                    $mailFrom = Yii::$app->user->identity->email;
+                    $mailFrom = $userModel->email;
 
                     /** @var CommunicationService $communication */
                     $communication = Yii::$app->communication;
@@ -342,7 +355,7 @@ class CasesController extends FController
 
 
                         //VarDumper::dump($content_data, 10 , true); exit;
-                        $content_data = []; //$lead->getEmailData2($comForm->quoteList, $projectContactInfo);
+                        $content_data = $this->casesCommunicationService->getEmailData($model, $userModel);
                         $content_data['content'] = $comForm->c_email_message;
                         $content_data['subject'] = $comForm->c_email_subject;
 
@@ -372,7 +385,7 @@ class CasesController extends FController
                                 }
                                 $previewEmailForm->e_email_from = $mailFrom; //$mailPreview['data']['email_from'];
                                 $previewEmailForm->e_email_to = $comForm->c_email_to; //$mailPreview['data']['email_to'];
-                                $previewEmailForm->e_email_from_name = Yii::$app->user->identity->username;
+                                $previewEmailForm->e_email_from_name = $userModel->username;
                                 $previewEmailForm->e_email_to_name = $model->client ? $model->client->full_name : '';
                                 $previewEmailForm->e_quote_list = @json_encode($comForm->quoteList);
                             }
@@ -384,7 +397,7 @@ class CasesController extends FController
                         $previewEmailForm->e_email_subject = $comForm->c_email_subject;
                         $previewEmailForm->e_email_from = $mailFrom;
                         $previewEmailForm->e_email_to = $comForm->c_email_to;
-                        $previewEmailForm->e_email_from_name = Yii::$app->user->identity->username;
+                        $previewEmailForm->e_email_from_name = $userModel->username;
                         $previewEmailForm->e_email_to_name = $model->client ? $model->client->full_name : '';
                     }
 
@@ -423,7 +436,7 @@ class CasesController extends FController
 
                     if (!$phoneFrom) {
                         $comForm->c_preview_sms = 0;
-                        $comForm->addError('c_sms_preview', 'Config Error: Not found phone number for Project Id: ' . $model->cs_project_id . ', agent: "' . Yii::$app->user->identity->username . '"');
+                        $comForm->addError('c_sms_preview', 'Config Error: Not found phone number for Project Id: ' . $model->cs_project_id . ', agent: "' . $userModel->username . '"');
 
                     } else {
 
@@ -440,7 +453,8 @@ class CasesController extends FController
 
                             $previewSmsForm->s_sms_tpl_id = $comForm->c_sms_tpl_id;
 
-                            $content_data = []; //$lead->getEmailData2($comForm->quoteList, $projectContactInfo);
+                            //$content_data = []; //$lead->getEmailData2($comForm->quoteList, $projectContactInfo);
+                            $content_data = $this->casesCommunicationService->getEmailData($model, $userModel);
                             $content_data['content'] = $comForm->c_sms_message;
 
                             //VarDumper::dump($content_data, 10, true); exit;
@@ -488,17 +502,12 @@ class CasesController extends FController
                         $upp = UserProjectParams::find()->where(['upp_project_id' => $model->cs_project_id, 'upp_user_id' => Yii::$app->user->id])->one();
                     }
 
-
-                    /** @var Employee $userModel */
-                    $userModel = Yii::$app->user->identity;
-
-
                     if ($upp && $userModel) {
 
                         if (!$upp->upp_tw_phone_number) {
-                            $comForm->addError('c_sms_preview', 'Config Error: Not found TW phone number for Project Id: ' . $model->cs_project_id . ', agent: "' . Yii::$app->user->identity->username . '"');
+                            $comForm->addError('c_sms_preview', 'Config Error: Not found TW phone number for Project Id: ' . $model->cs_project_id . ', agent: "' . $userModel->username . '"');
                         } elseif (!$userModel->userProfile->up_sip) {
-                            $comForm->addError('c_sms_preview', 'Config Error: Not found TW SIP account for Project Id: ' . $model->cs_project_id . ', agent: "' . Yii::$app->user->identity->username . '"');
+                            $comForm->addError('c_sms_preview', 'Config Error: Not found TW SIP account for Project Id: ' . $model->cs_project_id . ', agent: "' . $userModel->username . '"');
                         } else {
 
 
@@ -538,67 +547,67 @@ class CasesController extends FController
                                 }
                             }
 
-                            if ($comForm->c_voice_status == 1) {
-
-                                $response = $communication->callToPhone($model->cs_project_id, 'sip:' . $userModel->userProfile->up_sip, $upp->upp_tw_phone_number, $comForm->c_phone_number, Yii::$app->user->identity->username);
-
-                                Yii::info('ProjectId: ' . $model->cs_project_id . ', sip:' . $userModel->userProfile->up_sip . ', phoneFrom:' . $upp->upp_tw_phone_number . ', phoneTo:' . $comForm->c_phone_number . " Logs: \r\n" . VarDumper::dumpAsString($response, 10), 'info/CaseController:callToPhone');
-
-
-                                if ($response && isset($response['data']['call'])) {
-
-
-                                    $dataCall = $response['data']['call'];
-
-
-                                    $call = new Call();
-
-                                    $call->c_com_call_id = isset($response['data']['com_call_id']) ? (int)$response['data']['com_call_id'] : null;
-
-                                    $call->c_call_type_id = 1;
-                                    $call->c_call_sid = $dataCall['sid'];
-                                    $call->c_account_sid = $dataCall['account_sid'];
-
-                                    $call->c_to = $comForm->c_phone_number; //$dataCall['to'];
-                                    $call->c_from = $upp->upp_tw_phone_number; //$dataCall['from'];
-                                    $call->c_caller_name = $dataCall['from'];
-                                    $call->c_call_status = $dataCall['status'];
-                                    $call->c_api_version = $dataCall['api_version'];
-                                    $call->c_direction = $dataCall['direction'];
-                                    $call->c_uri = $dataCall['uri'];
-                                    $call->c_case_id = $model->cs_id;
-                                    $call->c_project_id = $model->cs_project_id;
-
-                                    $call->c_created_dt = date('Y-m-d H:i:s');
-                                    $call->c_created_user_id = Yii::$app->user->id;
-
-                                    if (!$call->save()) {
-                                        Yii::error(VarDumper::dumpAsString($call->errors, 10), '');
-                                        $comForm->addError('c_sms_preview', 'Error call: ' . VarDumper::dumpAsString($call->errors, 10));
-                                    } else {
-                                        $comForm->c_call_id = $call->c_id;
-                                    }
-
-                                    if (isset($dataCall['sid'])) {
-                                        $comForm->c_voice_sid = $dataCall['sid'];
-                                    }
-
-                                } else {
-                                    $comForm->c_voice_status = 5; // Error
-
-                                    if (isset($response['error']) && $response['error']) {
-                                        $error = $response['error'];
-                                    } else {
-                                        $error = VarDumper::dumpAsString($response, 10);
-                                    }
-
-                                    $comForm->addError('c_sms_preview', 'Error call: ' . $error);
-                                }
-
-                            }
+//                            if ($comForm->c_voice_status == 1) {
+//
+//                                $response = $communication->callToPhone($model->cs_project_id, 'sip:' . $userModel->userProfile->up_sip, $upp->upp_tw_phone_number, $comForm->c_phone_number, $userModel->username);
+//
+//                                Yii::info('ProjectId: ' . $model->cs_project_id . ', sip:' . $userModel->userProfile->up_sip . ', phoneFrom:' . $upp->upp_tw_phone_number . ', phoneTo:' . $comForm->c_phone_number . " Logs: \r\n" . VarDumper::dumpAsString($response, 10), 'info/CaseController:callToPhone');
+//
+//
+//                                if ($response && isset($response['data']['call'])) {
+//
+//
+//                                    $dataCall = $response['data']['call'];
+//
+//
+//                                    $call = new Call();
+//
+//                                    $call->c_com_call_id = isset($response['data']['com_call_id']) ? (int)$response['data']['com_call_id'] : null;
+//
+//                                    $call->c_call_type_id = 1;
+//                                    $call->c_call_sid = $dataCall['sid'];
+//                                    $call->c_account_sid = $dataCall['account_sid'];
+//
+//                                    $call->c_to = $comForm->c_phone_number; //$dataCall['to'];
+//                                    $call->c_from = $upp->upp_tw_phone_number; //$dataCall['from'];
+//                                    $call->c_caller_name = $dataCall['from'];
+//                                    $call->c_call_status = $dataCall['status'];
+//                                    $call->c_api_version = $dataCall['api_version'];
+//                                    $call->c_direction = $dataCall['direction'];
+//                                    $call->c_uri = $dataCall['uri'];
+//                                    $call->c_case_id = $model->cs_id;
+//                                    $call->c_project_id = $model->cs_project_id;
+//
+//                                    $call->c_created_dt = date('Y-m-d H:i:s');
+//                                    $call->c_created_user_id = Yii::$app->user->id;
+//
+//                                    if (!$call->save()) {
+//                                        Yii::error(VarDumper::dumpAsString($call->errors, 10), '');
+//                                        $comForm->addError('c_sms_preview', 'Error call: ' . VarDumper::dumpAsString($call->errors, 10));
+//                                    } else {
+//                                        $comForm->c_call_id = $call->c_id;
+//                                    }
+//
+//                                    if (isset($dataCall['sid'])) {
+//                                        $comForm->c_voice_sid = $dataCall['sid'];
+//                                    }
+//
+//                                } else {
+//                                    $comForm->c_voice_status = 5; // Error
+//
+//                                    if (isset($response['error']) && $response['error']) {
+//                                        $error = $response['error'];
+//                                    } else {
+//                                        $error = VarDumper::dumpAsString($response, 10);
+//                                    }
+//
+//                                    $comForm->addError('c_sms_preview', 'Error call: ' . $error);
+//                                }
+//
+//                            }
 
                             //$comForm->c_voice_status = 1;
-                            //$comForm->addError('c_sms_preview', 'Ok: Not found TW SIP account for Project Id: ' . $lead->project_id . ', agent: "' . Yii::$app->user->identity->username . '"');
+                            //$comForm->addError('c_sms_preview', 'Ok: Not found TW SIP account for Project Id: ' . $lead->project_id . ', agent: "' . $user->username . '"');
 
                             /*$previewSmsForm->s_phone_to = $comForm->c_phone_number;
                             $previewSmsForm->s_phone_from = $phoneFrom;
@@ -643,7 +652,7 @@ class CasesController extends FController
                             }*/
                         }
                     } else {
-                        $comForm->addError('c_sms_preview', 'Config Error: Not found User Params for Project Id: ' . $model->cs_project_id . ', agent: "' . Yii::$app->user->identity->username . '"');
+                        $comForm->addError('c_sms_preview', 'Config Error: Not found User Params for Project Id: ' . $model->cs_project_id . ', agent: "' . $userModel->username . '"');
                     }
 
                 }
