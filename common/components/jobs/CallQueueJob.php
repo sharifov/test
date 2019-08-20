@@ -115,6 +115,10 @@ class CallQueueJob extends BaseObject implements JobInterface
                                 Yii::error(VarDumper::dumpAsString($call->errors), 'CallQueueJob:execute:Call:update3');
                             }
 
+                            if($case && $case->cs_user_id) {
+                                $originalAgentId = $case->cs_user_id;
+                            }
+
                         } catch (\Throwable $exception) {
                             Yii::error(VarDumper::dumpAsString($exception), 'CallQueueJob:createClient:catch');
                         }
