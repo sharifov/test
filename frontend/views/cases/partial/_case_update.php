@@ -24,6 +24,10 @@ use yii\widgets\Pjax;
 
     <?= $form->field($model, 'category')->dropDownList($categoryList, ['prompt' => '-']) ?>
 
+    <?= $form->field($model, 'subject')->textInput(['maxlength' => true]) ?>
+
+    <?= $form->field($model, 'description')->textarea(['rows' => 4]) ?>
+
     <div class="form-group text-center">
         <?= Html::submitButton('Update', ['class' => 'btn btn-warning']) ?>
     </div>

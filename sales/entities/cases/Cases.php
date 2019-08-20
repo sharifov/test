@@ -283,6 +283,26 @@ class Cases extends ActiveRecord
     }
 
     /**
+     * @param string|null $subject
+     * @return string
+     */
+    public function updateSubject(?string $subject): string
+    {
+        $this->cs_subject = $subject;
+        return $this->cs_subject;
+    }
+
+    /**
+     * @param string|null $description
+     * @return string
+     */
+    public function updateDescription(?string $description): string
+    {
+        $this->cs_description = $description;
+        return $this->cs_description;
+    }
+
+    /**
      * @return ActiveQuery
      */
     public function getOwner(): ActiveQuery

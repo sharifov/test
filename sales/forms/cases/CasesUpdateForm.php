@@ -9,11 +9,15 @@ use yii\base\Model;
  * Class CasesUpdateForm
  *
  * @property string $category
+ * @property string $subject
+ * @property string $description
  * @property string $caseGid
  */
 class CasesUpdateForm extends Model
 {
     public $category;
+    public $subject;
+    public $description;
     public $caseGid;
 
     /**
@@ -34,7 +38,9 @@ class CasesUpdateForm extends Model
     {
         return [
             ['category', 'required'],
-            [['category'], 'string'],
+            [['category'], 'string', 'max' => 100],
+            [['subject'], 'string', 'max' => 200],
+            [['description'], 'string']
         ];
     }
 
@@ -44,7 +50,9 @@ class CasesUpdateForm extends Model
     public function attributeLabels(): array
     {
         return [
-            'category_id' => 'Category',
+            'category' => 'Category',
+            'subject' => 'Subject',
+            'description' => 'Description'
         ];
     }
 }

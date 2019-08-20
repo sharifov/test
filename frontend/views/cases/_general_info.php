@@ -89,7 +89,22 @@ use yii\widgets\DetailView;
                             },
                         ],
                         //'cs_client_id',
-                        'cs_created_dt',
+                        //'cs_created_dt',
+                        [
+                            'attribute' => 'cs_created_dt',
+                            'value' => function (Cases $model) {
+                                return $model->cs_created_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->cs_created_dt)) : '-';
+                            },
+                            'format' => 'raw'
+                        ],
+                        [
+                            'attribute' => 'cs_updated_dt',
+                            'value' => function (Cases $model) {
+                                return $model->cs_updated_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->cs_updated_dt)) : '-';
+                            },
+                            'format' => 'raw'
+                        ],
+
                         //'cs_updated_dt',
                     ],
                 ]) ?>

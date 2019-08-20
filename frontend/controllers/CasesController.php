@@ -1202,7 +1202,12 @@ class CasesController extends FController
             if ($form->load(Yii::$app->request->post())) {
                 if($form->validate()) {
                     try {
-                        $this->casesManageService->updateCategory($case, $form->category);
+                        $case->updateCategory($form->category);
+                        $case->updateSubject($form->subject);
+                        $case->updateDescription($form->description);
+
+                        $this->casesRepository->save($case);
+                        //$this->casesManageService->updateCategory($case, $form->category);
                         Yii::$app->session->setFlash('success', 'Case information has been updated successfully.');
                     } catch (\Throwable $exception) {
                         Yii::$app->session->setFlash('error', VarDumper::dumpAsString($exception));
@@ -1211,10 +1216,12 @@ class CasesController extends FController
                 }
             } else {
                 $form->category = $case->cs_category;
+                $form->subject = $case->cs_subject;
+                $form->description = $case->cs_description;
             }
 
         } catch (\Throwable $exception) {
-            $form->addError('category_id', $exception->getMessage());
+            $form->addError('category', $exception->getMessage());
         }
 
         $categories = $this->casesCategoryRepository->getAllByDep($case->cs_dep_id);
