@@ -72,7 +72,7 @@ $c_type_id = $comForm->c_type_id;
 
                 ]) ?>
 
-                <?php if(!Yii::$app->user->identity->canRole('qa')) : ?>
+                <?php if($model->isProcessing()):?>
                      <div class="chat__form panel">
 
 

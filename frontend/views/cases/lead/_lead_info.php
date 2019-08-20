@@ -31,9 +31,11 @@ $isAgent = false;
                     <?= \yii\bootstrap\Html::a('<i class="fa fa-plus-circle success"></i> Create Lead', ['lead/create-case', 'case_gid' => $caseModel->cs_gid], ['data-pjax' => 0, 'target' => '_blank'])?>
                 </li>
                 <?php endif; ?>
+                <?php if($caseModel->isProcessing()):?>
                 <li>
                     <?=Html::a('<i class="fa fa-search warning"></i> Search Lead', null, ['class' => 'modal', 'id' => 'search-lead-btn', 'title' => 'Search Lead for Case'])?>
                 </li>
+                <?php endif; ?>
                 <?/*<li class="dropdown">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-wrench"></i></a>
                     <ul class="dropdown-menu" role="menu">

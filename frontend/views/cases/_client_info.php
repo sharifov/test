@@ -11,12 +11,14 @@ use yii\helpers\Html;
     <div class="x_title">
         <h2><i class="fa fa-user"></i> Client Info</h2>
         <ul class="nav navbar-right panel_toolbox">
+            <?php if($caseModel->isProcessing()):?>
             <li>
                 <?= \yii\bootstrap\Html::a('<i class="fa fa-plus-circle success"></i> Add Email', '#', ['id' => 'btn-add-email', 'title' => 'Add Email'])?>
             </li>
             <li>
                 <?= \yii\bootstrap\Html::a('<i class="fa fa-edit warning"></i> Update', '#', ['id' => 'btn-client-update', 'title' => 'Update Client Info'])?>
             </li>
+            <?php endif;?>
             <li>
                 <a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
             </li>

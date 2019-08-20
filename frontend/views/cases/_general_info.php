@@ -14,9 +14,11 @@ use yii\widgets\DetailView;
     <div class="x_title">
         <h2><i class="fa fa-info"></i> General Info</h2>
         <ul class="nav navbar-right panel_toolbox">
+            <?php if($model->isProcessing()):?>
             <li>
                 <?= \yii\bootstrap\Html::a('<i class="fa fa-edit warning"></i> Update', '#', ['id' => 'btn-case-update', 'title' => 'Update Case'])?>
             </li>
+            <?php endif; ?>
             <li>
                 <a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
             </li>

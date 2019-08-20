@@ -20,11 +20,13 @@ use yii\widgets\Pjax;
             <h2><i class="fa fa-sticky-note-o"></i> Notes (<?=$dataProviderNotes->count?>)</h2>
             <ul class="nav navbar-right panel_toolbox">
                 <li>
-                    <?php if(($caseModel->cs_user_id === Yii::$app->user->id || Yii::$app->user->identity->canRoles(['admin']))): ?>
+                    <?php if($caseModel->cs_user_id === Yii::$app->user->id || Yii::$app->user->identity->canRoles(['admin'])): ?>
                         <?php if(Yii::$app->request->get('act') === 'add-note-form'): ?>
                             <?/*=Html::a('<i class="fa fa-minus-circle success"></i> Refresh', ['cases/view', 'gid' => $caseModel->gid])*/?>
                         <?php else: ?>
+                            <?php if($caseModel->isProcessing()):?>
                             <?=Html::a('<i class="fa fa-plus-circle success"></i> Add', ['cases/view', 'gid' => $caseModel->cs_gid, 'act' => 'add-note-form'], ['id' => 'btn-notes-form'])?>
+                            <?php endif; ?>
                         <?php endif; ?>
                     <?php endif; ?>
                 </li>

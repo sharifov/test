@@ -16,7 +16,7 @@ use yii\widgets\Pjax;
     <div class="x_title">
         <h2><i class="fa fa-list"></i> Sale List</h2>
         <ul class="nav navbar-right panel_toolbox">
-            <?php if (true) : ?>
+            <?php if($caseModel->isProcessing()):?>
                 <li>
                     <?=Html::a('<i class="fa fa-search warning"></i> Search Sales', null, ['class' => 'modal', 'id' => 'search-sale-btn', 'title' => 'Search Sales for Case'])?>
                 </li>
