@@ -240,12 +240,13 @@ class CommunicationController extends ApiBaseController
 
 
     /**
+     * @param Call $callModel
      * @param string $agent_phone_number
      * @param string $client_phone_number
      * @param int $limit
      * @return array
      */
-    protected function getDirectAgentsByPhoneNumber(string $agent_phone_number, string $client_phone_number, int $limit = 10): array
+    protected function getDirectAgentsByPhoneNumber(Call $callModel, string $agent_phone_number, string $client_phone_number, int $limit = 10): array
     {
         $call_employee = [];
         $call_agent_username = [];
@@ -257,6 +258,8 @@ class CommunicationController extends ApiBaseController
         if ($upp && $user = $upp->uppUser) {
             $call_user_id = (int)$upp->upp_user_id;
             $call_project_id = (int)$upp->upp_project_id;
+
+
 
             if ($user->isOnline()) {
                 if ($user->isCallStatusReady()) {
@@ -503,6 +506,8 @@ class CommunicationController extends ApiBaseController
 
             //VarDumper::dump($department); exit;
 
+            $call_dep_id = null;
+
             if($departmentPhone) {
                 $project = $departmentPhone->dppProject;
                 $source = $departmentPhone->dppSource;
@@ -513,20 +518,33 @@ class CommunicationController extends ApiBaseController
                     }
                 }
 
+                $call_project_id = $departmentPhone->dpp_project_id;
+                $call_dep_id = $departmentPhone->dpp_dep_id;
+
                 $ivrEnable = (bool) $departmentPhone->dpp_ivr_enable; ////(bool) ($settings['call_avr_enable'] ?? $voice_gather_configs['use_voice_gather']);
 
-            } /*else {
-                $source = Sources::findOne(['phone_number' => $incoming_phone_number]);
+            } else {
+
+                $upp = UserProjectParams::find()->where(['upp_tw_phone_number' => $incoming_phone_number])->limit(1)->one();
+                if ($upp) {
+                    $call_project_id = $upp->upp_project_id;
+                    if ($upp->uppUser && $upp->uppUser->userDepartments) {
+                        foreach ($upp->uppUser->userDepartments as $userDepartment) {
+                            $call_dep_id = $userDepartment->ud_dep_id;
+                            break;
+                        }
+                    }
+                }
+
+                /*$source = Sources::findOne(['phone_number' => $incoming_phone_number]);
                 if($source) {
                     $project = $source->project;
-                }
-            }*/
+                }*/
+            }
 
+            //$departmentPhone
 
-
-            $callModel = $this->findOrCreateCall($callSid, $post['call'], $departmentPhone);
-
-
+            $callModel = $this->findOrCreateCall($callSid, $post['call'], $call_project_id, $call_dep_id);
 
             $agentDirectCallCheck = false;
 
@@ -1816,7 +1834,7 @@ class CommunicationController extends ApiBaseController
 
 
 
-    protected function findOrCreateCall(string $callSid, array $calData, DepartmentPhoneProject $department): Call
+    protected function findOrCreateCall(string $callSid, array $calData, int $call_project_id, ?int $call_dep_id): Call
     {
         $call = null;
 
@@ -1833,8 +1851,14 @@ class CommunicationController extends ApiBaseController
             $call->c_com_call_id = $calData['c_com_call_id'] ?? null;
             $call->c_direction = $calData['Direction'] ?? null;
             $call->c_parent_call_sid = $calData['ParentCallSid'] ?? null;
-            $call->c_project_id = $department->dpp_project_id;
-            $call->c_dep_id = $department->dpp_dep_id;
+
+            if($call_project_id) {
+                $call->c_project_id = $call_project_id;
+            }
+            if($call_dep_id) {
+                $call->c_dep_id = $call_dep_id;
+            }
+
             $call->c_is_new = true;
             $call->c_api_version = $calData['ApiVersion'] ?? null;
             $call->c_created_dt = date('Y-m-d H:i:s');
