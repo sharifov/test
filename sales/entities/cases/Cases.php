@@ -27,7 +27,7 @@ use yii\db\ActiveRecord;
  * @property int $cs_id
  * @property string $cs_subject
  * @property string $cs_description
- * @property int $cs_category
+ * @property string $cs_category
  * @property int $cs_status
  * @property int $cs_user_id
  * @property int $cs_lead_id
@@ -139,6 +139,7 @@ class Cases extends ActiveRecord
     {
         return $this->cs_status === CasesStatus::STATUS_PENDING;
     }
+
 
     /**
      * @param int $userId
@@ -269,6 +270,16 @@ class Cases extends ActiveRecord
             $this->recordEvent(new CasesStatusChangeEvent($this, $status, $this->cs_status, $this->cs_user_id));
         }
         $this->cs_status = $status;
+    }
+
+    /**
+     * @param string $category
+     * @return string
+     */
+    public function updateCategory(string $category): string
+    {
+        $this->cs_category = $category;
+        return $this->cs_category;
     }
 
     /**

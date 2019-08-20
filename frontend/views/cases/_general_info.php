@@ -14,7 +14,11 @@ use yii\widgets\DetailView;
     <div class="x_title">
         <h2><i class="fa fa-info"></i> General Info</h2>
         <ul class="nav navbar-right panel_toolbox">
-            <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+            <li>
+                <?= \yii\bootstrap\Html::a('<i class="fa fa-edit warning"></i> Update', '#', ['id' => 'btn-case-update', 'title' => 'Update Case'])?>
+            </li>
+            <li>
+                <a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
             </li>
             <?/*<li class="dropdown">
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-wrench"></i></a>
@@ -34,8 +38,8 @@ use yii\widgets\DetailView;
         <?php if($model):?>
         <div class="row">
             <div class="col-md-12">
-                <h4><?=$model->category ? Html::encode($model->category->cc_name) : '' ?></h4>
-                <h4><?=$model->cs_subject ? Html::encode($model->cs_subject) : '' ?></h4>
+                <h4>Category: <span style="color: #0a0a0a"><?=$model->category ? Html::encode($model->category->cc_name) : '' ?></span></h4>
+                <h4>Subject: <span style="color: #0a0a0a"><?=$model->cs_subject ? Html::encode($model->cs_subject) : '' ?></span></h4>
                 <pre><?=$model->cs_description ? nl2br(trim($model->cs_description)) : '' ?></pre>
             </div>
             <div class="col-md-6">
@@ -95,3 +99,25 @@ use yii\widgets\DetailView;
     </div>
 </div>
 
+
+<?php
+$caseUpdateAjaxUrl = \yii\helpers\Url::to(['cases/ajax-update', 'gid' => $model->cs_gid]);
+
+$js = <<<JS
+
+    $(document).on('click', '#btn-case-update', function(){
+            var modal = $('#modalCaseSm');
+            //$('#search-sale-panel').toggle();
+            modal.modal('show').find('.modal-body').html('<div style="text-align:center"><img width="200px" src="https://loading.io/spinners/gear-set/index.triple-gears-loading-icon.svg"></div>');
+            modal.modal('show').find('.modal-header').html('<h3>' + $(this).attr('title') + ' ' + '<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button></h3>');
+            
+            $.get('$caseUpdateAjaxUrl', function(data) {
+                modal.find('.modal-body').html(data);
+            });
+            
+           return false;
+     });
+
+JS;
+
+$this->registerJs($js);

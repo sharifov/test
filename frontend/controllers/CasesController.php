@@ -31,6 +31,7 @@ use sales\forms\cases\CasesAddEmailForm;
 use sales\forms\cases\CasesChangeStatusForm;
 use sales\forms\cases\CasesClientUpdateForm;
 use sales\forms\cases\CasesCreateByWebForm;
+use sales\forms\cases\CasesUpdateForm;
 use sales\repositories\cases\CasesCategoryRepository;
 use sales\repositories\cases\CasesRepository;
 use sales\services\cases\CasesCreateService;
@@ -1177,11 +1178,51 @@ class CasesController extends FController
             }
 
         } catch (\Throwable $exception) {
-            $form->addError('email', $exception->getMessage());
+            $form->addError('first_name', $exception->getMessage());
         }
 
         return $this->renderAjax('partial/_client_update', [
             'model' => $form,
+        ]);
+    }
+
+
+
+    /**
+     * @return string|Response
+     * @throws NotFoundHttpException
+     */
+    public function actionAjaxUpdate()
+    {
+        $gid = (string)Yii::$app->request->get('gid');
+        $case = $this->findModelByGid($gid);
+        $form = new CasesUpdateForm($case);
+
+        try {
+            if ($form->load(Yii::$app->request->post())) {
+                if($form->validate()) {
+                    try {
+                        $this->casesManageService->updateCategory($case, $form->category);
+                        Yii::$app->session->setFlash('success', 'Case information has been updated successfully.');
+                    } catch (\Throwable $exception) {
+                        Yii::$app->session->setFlash('error', VarDumper::dumpAsString($exception));
+                    }
+                    return $this->redirect(['cases/view', 'gid' => $case->cs_gid]);
+                }
+            } else {
+                $form->category = $case->cs_category;
+            }
+
+        } catch (\Throwable $exception) {
+            $form->addError('category_id', $exception->getMessage());
+        }
+
+        $categories = $this->casesCategoryRepository->getAllByDep($case->cs_dep_id);
+        $categoryList = ArrayHelper::map($categories, 'cc_key', 'cc_name');
+
+        return $this->renderAjax('partial/_case_update', [
+            'model' => $form,
+            'categoryList' => $categoryList
         ]);
     }
 

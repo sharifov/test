@@ -2,6 +2,9 @@
 
 namespace sales\services\cases;
 
+use sales\entities\cases\Cases;
+use sales\entities\cases\CasesCategory;
+use sales\repositories\cases\CasesCategoryRepository;
 use sales\repositories\cases\CasesRepository;
 use sales\repositories\lead\LeadRepository;
 use sales\repositories\user\UserRepository;
@@ -11,6 +14,7 @@ use sales\repositories\user\UserRepository;
  * @property CasesRepository $casesRepository
  * @property UserRepository $userRepository
  * @property LeadRepository $leadRepository
+ * @property CasesCategoryRepository $casesCategoryRepository
  */
 class CasesManageService
 {
@@ -18,22 +22,26 @@ class CasesManageService
     private $casesRepository;
     private $userRepository;
     private $leadRepository;
+    private $casesCategoryRepository;
 
     /**
      * CasesManageService constructor.
      * @param CasesRepository $casesRepository
      * @param UserRepository $userRepository
      * @param LeadRepository $leadRepository
+     * @param CasesCategoryRepository $casesCategoryRepository
      */
     public function __construct(
         CasesRepository $casesRepository,
         UserRepository $userRepository,
-        LeadRepository $leadRepository
+        LeadRepository $leadRepository,
+        CasesCategoryRepository $casesCategoryRepository
     )
     {
         $this->casesRepository = $casesRepository;
         $this->userRepository = $userRepository;
         $this->leadRepository = $leadRepository;
+        $this->casesCategoryRepository = $casesCategoryRepository;
     }
 
     /**
@@ -167,6 +175,28 @@ class CasesManageService
     {
         $case = $this->casesRepository->find($caseId);
         $case->trash();
+        $this->casesRepository->save($case);
+    }
+
+    /**
+     * @param int $caseId
+     * @param string $category
+     */
+    public function updateCategoryByCaseId(int $caseId, string $category): void
+    {
+        $case = $this->casesRepository->find($caseId);
+        $this->updateCategory($case, $category);
+    }
+
+
+    /**
+     * @param Cases $case
+     * @param string $category
+     */
+    public function updateCategory(Cases $case, string $category): void
+    {
+        $category = $this->casesCategoryRepository->findByKey($category);
+        $case->updateCategory($category->cc_key);
         $this->casesRepository->save($case);
     }
 
