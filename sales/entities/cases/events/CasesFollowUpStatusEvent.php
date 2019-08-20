@@ -7,26 +7,30 @@ use sales\entities\cases\Cases;
 /**
  * Class CasesFollowUpStatusEvent
  *
- * @property Cases $cases
+ * @property Cases $case
  * @property int $oldStatus
  * @property int|null $oldOwnerId
+ * @property string|null $description
  */
 class CasesFollowUpStatusEvent
 {
-    public $cases;
+    public $case;
     public $oldStatus;
     public $oldOwnerId;
+    public $description;
 
     /**
      * CasesFollowUpStatusEvent constructor.
-     * @param Cases $cases
+     * @param Cases $case
      * @param int $oldStatus
      * @param int|null $oldOwnerId
+     * @param string|null $description
      */
-    public function __construct(Cases $cases, int $oldStatus, ?int $oldOwnerId)
+    public function __construct(Cases $case, int $oldStatus, ?int $oldOwnerId, ?string $description)
     {
-        $this->cases = $cases;
+        $this->case = $case;
         $this->oldStatus = $oldStatus;
         $this->oldOwnerId = $oldOwnerId;
+        $this->description = $description;
     }
 }

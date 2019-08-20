@@ -89,7 +89,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         ]);
                     },
                     'take-over' => function ($url, Cases $model) {
-                        return Html::a('<i class="fa fa-download"></i> Take Over', ['cases/take-over', 'gid' => $model->cs_gid, 'uid' => Yii::$app->user->id], [
+                        return Html::a('<i class="fa fa-download"></i> Take Over', ['cases/take', 'gid' => $model->cs_gid, 'uid' => Yii::$app->user->id], [
                             'class' => 'btn btn-primary btn-xs take-processing-btn',
                             'data-pjax' => 0,
                             /*'data' => [

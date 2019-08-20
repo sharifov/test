@@ -70,7 +70,7 @@ class Cases extends ActiveRecord
         $case->cs_dep_id = $depId;
         $case->cs_gid = self::generateGid();
         $case->cs_created_dt = date('Y-m-d H:i:s');
-        $case->pending();
+        $case->pending('created by call');
         return $case;
     }
 
@@ -104,7 +104,7 @@ class Cases extends ActiveRecord
         $case->cs_description = $description;
         $case->cs_gid = self::generateGid();
         $case->cs_created_dt = date('Y-m-d H:i:s');
-        $case->pending();
+        $case->pending('created by web');
         return $case;
     }
 
@@ -134,8 +134,8 @@ class Cases extends ActiveRecord
     public function pending(string $description = ''): void
     {
         CasesStatus::guard($this->cs_status, CasesStatus::STATUS_PENDING);
-        $this->recordEvent(new CasesPendingStatusEvent($this, $this->cs_status, $this->cs_user_id));
-        $this->setStatus(CasesStatus::STATUS_PENDING, $description);
+        $this->recordEvent(new CasesPendingStatusEvent($this, $this->cs_status, $this->cs_user_id, $description));
+        $this->setStatus(CasesStatus::STATUS_PENDING);
     }
 
     /**
@@ -145,7 +145,6 @@ class Cases extends ActiveRecord
     {
         return $this->cs_status === CasesStatus::STATUS_PENDING;
     }
-
 
     /**
      * @param int $userId
@@ -157,12 +156,12 @@ class Cases extends ActiveRecord
         if ($this->isProcessing() && $this->isOwner($userId)) {
             throw new \DomainException('Case is already processing to this user');
         }
-        $this->recordEvent(new CasesProcessingStatusEvent($this, $this->cs_status, $userId, $this->cs_user_id));
+        $this->recordEvent(new CasesProcessingStatusEvent($this, $this->cs_status, $userId, $this->cs_user_id, $description));
         if (!$this->isOwner($userId)) {
             $this->setOwner($userId);
         }
         if (!$this->isProcessing()) {
-            $this->setStatus(CasesStatus::STATUS_PROCESSING, $description);
+            $this->setStatus(CasesStatus::STATUS_PROCESSING);
         }
     }
 
@@ -180,11 +179,11 @@ class Cases extends ActiveRecord
     public function followUp(string $description = ''): void
     {
         CasesStatus::guard($this->cs_status, CasesStatus::STATUS_FOLLOW_UP);
-        $this->recordEvent(new CasesFollowUpStatusEvent($this, $this->cs_status, $this->cs_user_id));
+        $this->recordEvent(new CasesFollowUpStatusEvent($this, $this->cs_status, $this->cs_user_id, $description));
         if (!$this->isFreedOwner()) {
             $this->freedOwner();
         }
-        $this->setStatus(CasesStatus::STATUS_FOLLOW_UP, $description);
+        $this->setStatus(CasesStatus::STATUS_FOLLOW_UP);
     }
 
     /**
@@ -201,8 +200,8 @@ class Cases extends ActiveRecord
     public function solved(string $description = ''): void
     {
         CasesStatus::guard($this->cs_status, CasesStatus::STATUS_SOLVED);
-        $this->recordEvent(new CasesSolvedStatusEvent($this, $this->cs_status, $this->cs_user_id));
-        $this->setStatus(CasesStatus::STATUS_SOLVED, $description);
+        $this->recordEvent(new CasesSolvedStatusEvent($this, $this->cs_status, $this->cs_user_id, $description));
+        $this->setStatus(CasesStatus::STATUS_SOLVED);
     }
 
     /**
@@ -219,8 +218,8 @@ class Cases extends ActiveRecord
     public function trash(string $description = ''): void
     {
         CasesStatus::guard($this->cs_status, CasesStatus::STATUS_TRASH);
-        $this->recordEvent(new CasesTrashStatusEvent($this, $this->cs_status, $this->cs_user_id));
-        $this->setStatus(CasesStatus::STATUS_TRASH, $description);
+        $this->recordEvent(new CasesTrashStatusEvent($this, $this->cs_status, $this->cs_user_id, $description));
+        $this->setStatus(CasesStatus::STATUS_TRASH);
     }
 
     /**
@@ -275,48 +274,41 @@ class Cases extends ActiveRecord
 
     /**
      * @param int $status
-     * @param string $description
      */
-    private function setStatus(int $status, string $description = ''): void
+    private function setStatus(int $status): void
     {
         if (!array_key_exists($status, CasesStatus::STATUS_LIST)) {
             throw new \InvalidArgumentException('Invalid Status');
         }
         if ($this->cs_status !== $status) {
             /** prob. for logs */
-            $this->recordEvent(new CasesStatusChangeEvent($this, $status, $this->cs_status, $this->cs_user_id, $description));
+            $this->recordEvent(new CasesStatusChangeEvent($this, $status, $this->cs_status, $this->cs_user_id));
         }
         $this->cs_status = $status;
     }
 
     /**
      * @param string $category
-     * @return string
      */
-    public function updateCategory(string $category): string
+    public function updateCategory(string $category): void
     {
         $this->cs_category = $category;
-        return $this->cs_category;
     }
 
     /**
      * @param string|null $subject
-     * @return string
      */
-    public function updateSubject(?string $subject): string
+    public function updateSubject(?string $subject): void
     {
         $this->cs_subject = $subject;
-        return $this->cs_subject;
     }
 
     /**
      * @param string|null $description
-     * @return string
      */
-    public function updateDescription(?string $description): string
+    public function updateDescription(?string $description): void
     {
         $this->cs_description = $description;
-        return $this->cs_description;
     }
 
     /**

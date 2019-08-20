@@ -35,6 +35,7 @@ use sales\forms\cases\CasesUpdateForm;
 use sales\repositories\cases\CasesCategoryRepository;
 use sales\repositories\cases\CasesRepository;
 use sales\services\cases\CasesCommunicationService;
+use sales\repositories\user\UserRepository;
 use sales\services\cases\CasesCreateService;
 use sales\services\cases\CasesManageService;
 use Yii;
@@ -61,6 +62,7 @@ use function GuzzleHttp\Psr7\str;
  * @property CasesCategoryRepository $casesCategoryRepository
  * @property CasesRepository $casesRepository
  * @property CasesCommunicationService $casesCommunicationService
+ * @property UserRepository $userRepository,
  */
 class CasesController extends FController
 {
@@ -70,6 +72,7 @@ class CasesController extends FController
     private $casesCommunicationService;
     private $casesCategoryRepository;
     private $casesRepository;
+    private $userRepository;
 
     /**
      * CasesController constructor.
@@ -80,6 +83,7 @@ class CasesController extends FController
      * @param CasesCategoryRepository $casesCategoryRepository
      * @param CasesRepository $casesRepository
      * @param CasesCommunicationService $casesCommunicationService
+     * @param UserRepository $userRepository,
      * @param array $config
      */
     public function __construct(
@@ -90,6 +94,7 @@ class CasesController extends FController
         CasesCategoryRepository $casesCategoryRepository,
         CasesRepository $casesRepository,
         CasesCommunicationService $casesCommunicationService,
+        UserRepository $userRepository,
         $config = []
     )
     {
@@ -99,6 +104,7 @@ class CasesController extends FController
         $this->casesCategoryRepository = $casesCategoryRepository;
         $this->casesRepository = $casesRepository;
         $this->casesCommunicationService = $casesCommunicationService;
+        $this->userRepository = $userRepository;
     }
 
     /**
@@ -891,7 +897,7 @@ class CasesController extends FController
         if ($form->load(Yii::$app->request->post()) && $form->validate()) {
             try {
                 $case = $this->casesCreateService->createByWeb($form);
-                $this->casesManageService->takeByGid($case->cs_gid, Yii::$app->user->id);
+                $this->casesManageService->processing($case, Yii::$app->user->id);
                 Yii::$app->session->setFlash('success', 'Case created');
                 return $this->redirect(['view', 'gid' => $case->cs_gid]);
             } catch (\Throwable $e){
@@ -945,36 +951,16 @@ class CasesController extends FController
      */
     public function actionTake($gid, $uid): Response
     {
-        $gid = (string) $gid;
-        $uid = (int) $uid;
-        $case = $this->findModelByGid($gid);
+        $gId = (string) $gid;
+        $userId = (int) $uid;
+        $case = $this->findModelByGid($gId);
         try {
-            $this->casesManageService->takeByGid($case->cs_gid, $uid);
+            $user = $this->userRepository->find($userId);
+            $this->casesManageService->processing($case, $user->id);
             Yii::$app->session->setFlash('success', 'Success');
         } catch (\Throwable $e) {
             Yii::$app->session->setFlash('error', $e->getMessage());
             Yii::error($e, 'Cases:CasesController:Take');
-        }
-        return $this->redirect(['cases/view', 'gid' => $case->cs_gid]);
-    }
-
-    /**
-     * @param $gid
-     * @param $uid
-     * @return Response
-     * @throws NotFoundHttpException
-     */
-    public function actionTakeOver($gid, $uid): Response
-    {
-        $gid = (string) $gid;
-        $uid = (int) $uid;
-        $case = $this->findModelByGid($gid);
-        try {
-            $this->casesManageService->takeOverByGid($case->cs_gid, $uid);
-            Yii::$app->session->setFlash('success', 'Success');
-        } catch (\Throwable $e) {
-            Yii::$app->session->setFlash('error', $e->getMessage());
-            Yii::error($e, 'Cases:CasesController:TakeOver');
         }
         return $this->redirect(['cases/view', 'gid' => $case->cs_gid]);
     }
@@ -1054,16 +1040,16 @@ class CasesController extends FController
 
                 switch ((int)$form->status) {
                     case CasesStatus::STATUS_FOLLOW_UP :
-                        $this->casesManageService->followUp($case->cs_id);
+                        $this->casesManageService->followUp($case->cs_id, $form->message);
                         break;
                     case CasesStatus::STATUS_TRASH :
-                        $this->casesManageService->trash($case->cs_id);
+                        $this->casesManageService->trash($case->cs_id, $form->message);
                         break;
                     case CasesStatus::STATUS_SOLVED :
-                        $this->casesManageService->solved($case->cs_id);
+                        $this->casesManageService->solved($case->cs_id, $form->message);
                         break;
                     case CasesStatus::STATUS_PENDING :
-                        $this->casesManageService->pending($case->cs_id);
+                        $this->casesManageService->pending($case->cs_id, $form->message);
                         break;
                     default:
                         Yii::$app->session->setFlash('error', 'Undefined status');

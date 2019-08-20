@@ -3,7 +3,6 @@
 namespace sales\services\cases;
 
 use sales\entities\cases\Cases;
-use sales\entities\cases\CasesCategory;
 use sales\repositories\cases\CasesCategoryRepository;
 use sales\repositories\cases\CasesRepository;
 use sales\repositories\lead\LeadRepository;
@@ -71,131 +70,101 @@ class CasesManageService
     }
 
     /**
-     * For user
-     *
      * @param int $caseId
      * @param int $userId
+     * @param string $description
      */
-    public function take(int $caseId, int $userId): void
+    public function take(int $caseId, int $userId, string $description = ''): void
     {
         $case = $this->casesRepository->find($caseId);
-        if ($case->isProcessing()) {
-            throw new \DomainException('Case is already processing. You can make only take over');
-        }
         $user = $this->userRepository->find($userId);
-        $case->processing($user->id);
-        $this->casesRepository->save($case);
+        $this->processing($case, $user->id, $description);
     }
 
     /**
-     * For user
-     *
      * @param string $caseGid
      * @param int $userId
+     * @param string $description
      */
-    public function takeByGid(string $caseGid, int $userId): void
+    public function takeByGid(string $caseGid, int $userId, string $description = ''): void
     {
         $case = $this->casesRepository->findByGid($caseGid);
-        if ($case->isProcessing()) {
-            throw new \DomainException('Case is already processing. You can make only take over');
-        }
         $user = $this->userRepository->find($userId);
-        $case->processing($user->id);
-        $this->casesRepository->save($case);
+        $this->processing($case, $user->id, $description);
     }
-
-    /**
-     * For user
-     *
-     * @param int $caseId
-     * @param int $userId
-     */
-    public function takeOver(int $caseId, int $userId): void
-    {
-        $case = $this->casesRepository->find($caseId);
-        if (!$case->isProcessing()) {
-            throw new \DomainException('Case must be in processing');
-        }
-        $user = $this->userRepository->find($userId);
-        $case->processing($user->id);
-        $this->casesRepository->save($case);
-    }
-
-    /**
-     * For user
-     *
-     * @param string $caseGid
-     * @param int $userId
-     */
-    public function takeOverByGid(string $caseGid, int $userId): void
-    {
-        $case = $this->casesRepository->findByGid($caseGid);
-        if (!$case->isProcessing()) {
-            throw new \DomainException('Case must be in processing');
-        }
-        $user = $this->userRepository->find($userId);
-        $case->processing($user->id);
-        $this->casesRepository->save($case);
-    }
-
-    /**
-     * @param int $caseId
-     */
-    public function pending(int $caseId): void
-    {
-        $case = $this->casesRepository->find($caseId);
-        $case->pending();
-        $this->casesRepository->save($case);
-    }
-
-    /**
-     * @param int $caseId
-     */
-    public function followUp(int $caseId): void
-    {
-        $case = $this->casesRepository->find($caseId);
-        $case->followUp();
-        $this->casesRepository->save($case);
-    }
-
-    /**
-     * @param int $caseId
-     */
-    public function solved(int $caseId): void
-    {
-        $case = $this->casesRepository->find($caseId);
-        $case->solved();
-        $this->casesRepository->save($case);
-    }
-
-    /**
-     * @param int $caseId
-     */
-    public function trash(int $caseId): void
-    {
-        $case = $this->casesRepository->find($caseId);
-        $case->trash();
-        $this->casesRepository->save($case);
-    }
-
-    /**
-     * @param int $caseId
-     * @param string $category
-     */
-    public function updateCategoryByCaseId(int $caseId, string $category): void
-    {
-        $case = $this->casesRepository->find($caseId);
-        $this->updateCategory($case, $category);
-    }
-
 
     /**
      * @param Cases $case
-     * @param string $category
+     * @param int $userId
+     * @param string $description
      */
-    public function updateCategory(Cases $case, string $category): void
+    public function processing(Cases $case, int $userId, string $description = ''): void
     {
-        $category = $this->casesCategoryRepository->findByKey($category);
+        $case->processing($userId, $description);
+        $this->casesRepository->save($case);
+    }
+
+    /**
+     * @param int $caseId
+     * @param string $description
+     */
+    public function pending(int $caseId, string $description = ''): void
+    {
+        $case = $this->casesRepository->find($caseId);
+        $case->pending($description);
+        $this->casesRepository->save($case);
+    }
+
+    /**
+     * @param int $caseId
+     * @param string $description
+     */
+    public function followUp(int $caseId, string $description = ''): void
+    {
+        $case = $this->casesRepository->find($caseId);
+        $case->followUp($description);
+        $this->casesRepository->save($case);
+    }
+
+    /**
+     * @param int $caseId
+     * @param string $description
+     */
+    public function solved(int $caseId, string $description = ''): void
+    {
+        $case = $this->casesRepository->find($caseId);
+        $case->solved($description);
+        $this->casesRepository->save($case);
+    }
+
+    /**
+     * @param int $caseId
+     * @param string $description
+     */
+    public function trash(int $caseId, string $description = ''): void
+    {
+        $case = $this->casesRepository->find($caseId);
+        $case->trash($description);
+        $this->casesRepository->save($case);
+    }
+
+    /**
+     * @param int $caseId
+     * @param string $categoryKey
+     */
+    public function updateCategoryByCaseId(int $caseId, string $categoryKey): void
+    {
+        $case = $this->casesRepository->find($caseId);
+        $this->updateCategory($case, $categoryKey);
+    }
+
+    /**
+     * @param Cases $case
+     * @param string $categoryKey
+     */
+    public function updateCategory(Cases $case, string $categoryKey): void
+    {
+        $category = $this->casesCategoryRepository->findByKey($categoryKey);
         $case->updateCategory($category->cc_key);
         $this->casesRepository->save($case);
     }

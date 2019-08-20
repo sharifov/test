@@ -7,26 +7,30 @@ use sales\entities\cases\Cases;
 /**
  * Class CasesPendingStatusEvent
  *
- * @property Cases $cases
+ * @property Cases $case
  * @property int|null $oldStatus
  * @property int|null $ownerId
+ * @property string|null $description
  */
 class CasesPendingStatusEvent
 {
-    public $cases;
+    public $case;
     public $oldStatus;
     public $ownerId;
+    public $description;
 
     /**
      * CasesPendingStatusEvent constructor.
-     * @param Cases $cases
+     * @param Cases $case
      * @param int|null $oldStatus
      * @param int|null $ownerId
+     * @param string|null $description
      */
-    public function __construct(Cases $cases, ?int $oldStatus, ?int $ownerId)
+    public function __construct(Cases $case, ?int $oldStatus, ?int $ownerId, ?string $description)
     {
-        $this->cases = $cases;
+        $this->case = $case;
         $this->oldStatus = $oldStatus;
         $this->ownerId = $ownerId;
+        $this->description = $description;
     }
 }

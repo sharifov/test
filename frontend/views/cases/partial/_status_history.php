@@ -68,24 +68,32 @@ use yii\widgets\Pjax;
                 'format' => 'raw',
                 //'options' => ['style' => 'width:180px'],
             ],
-
             [
                 'label' => 'Duration',
                 'attribute' => 'csl_time_duration',
                 'value' => function (CasesStatusLog $model) {
-                    return $model->csl_time_duration ? Yii::$app->formatter->asDuration($model->csl_time_duration) : Yii::$app->formatter->asDuration(time() - strtotime($model->csl_start_dt));
+                    return $model->csl_time_duration > -1 ? Yii::$app->formatter->asDuration($model->csl_time_duration) : Yii::$app->formatter->asDuration(time() - strtotime($model->csl_start_dt));
                 },
                 'format' => 'raw',
                 'options' => ['style' => 'width:180px'],
             ],
-
-            /*[
+            [
+//                'label' => 'Description',
+                'attribute' => 'csl_description',
+                'value' => function (CasesStatusLog $model) {
+                    return nl2br(Html::encode($model->csl_description));
+                },
+                'format' => 'raw',
+                'options' => ['style' => 'width:280px'],
+            ],
+            [
+                'label' => 'Owner',
                 'attribute' => 'csl_owner_id',
                 'value' => function (CasesStatusLog $model) {
 
                     return $model->owner ? $model->owner->username : '';
                 },
-            ],*/
+            ],
             [
                 'label' => 'Created Agent',
                 'attribute' => 'csl_created_user_id',

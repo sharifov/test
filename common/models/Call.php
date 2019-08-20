@@ -466,12 +466,7 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
                 if($this->c_created_user_id && $this->cCase && $this->c_created_user_id !== $this->cCase->cs_user_id) {
                     try {
                         $casesManageService = Yii::createObject(CasesManageService::class);
-                        if($this->cCase->isProcessing()) {
-                            $casesManageService->takeOver($this->c_case_id, $this->c_created_user_id);
-                        } else {
-                            $casesManageService->take($this->c_case_id, $this->c_created_user_id);
-                        }
-                        
+                        $casesManageService->take($this->c_case_id, $this->c_created_user_id);
                     } catch (\Throwable $exception) {
                         Yii::error(VarDumper::dumpAsString($exception), 'Call:afterSave:CasesManageService:Case:Take');
                     }

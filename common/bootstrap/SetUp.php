@@ -5,7 +5,12 @@ namespace common\bootstrap;
 use sales\dispatchers\DeferredEventDispatcher;
 use sales\dispatchers\EventDispatcher;
 use sales\dispatchers\SimpleEventDispatcher;
+use sales\entities\cases\events\CasesFollowUpStatusEvent;
+use sales\entities\cases\events\CasesPendingStatusEvent;
+use sales\entities\cases\events\CasesProcessingStatusEvent;
+use sales\entities\cases\events\CasesSolvedStatusEvent;
 use sales\entities\cases\events\CasesStatusChangeEvent;
+use sales\entities\cases\events\CasesTrashStatusEvent;
 use sales\events\lead\LeadBookedEvent;
 use sales\events\lead\LeadCallExpertRequestEvent;
 use sales\events\lead\LeadCreatedCloneEvent;
@@ -18,7 +23,12 @@ use sales\events\lead\LeadSnoozeEvent;
 use sales\events\lead\LeadSoldEvent;
 use sales\events\lead\LeadStatusChangedEvent;
 use sales\events\lead\LeadTaskEvent;
+use sales\listeners\cases\CasesFollowUpStatusEventLogListener;
+use sales\listeners\cases\CasesPendingStatusEventLogListener;
+use sales\listeners\cases\CasesProcessingStatusEventLogListener;
+use sales\listeners\cases\CasesSolvedStatusEventLogListener;
 use sales\listeners\cases\CasesStatusChangeEventListener;
+use sales\listeners\cases\CasesTrashStatusEventLogListener;
 use sales\listeners\lead\LeadBookedEventListener;
 use sales\listeners\lead\LeadCallExpertRequestEventListener;
 use sales\listeners\lead\LeadCreatedCloneEventListener;
@@ -57,7 +67,12 @@ class SetUp implements BootstrapInterface
                 LeadCountPassengersChangedEvent::class => [LeadCountPassengersChangedEventListener::class],
                 LeadCreatedCloneEvent::class => [LeadCreatedCloneEventListener::class],
 
-                CasesStatusChangeEvent::class => [CasesStatusChangeEventListener::class]
+                //CasesStatusChangeEvent::class => [CasesStatusChangeEventListener::class]
+                CasesPendingStatusEvent::class => [CasesPendingStatusEventLogListener::class],
+                CasesProcessingStatusEvent::class => [CasesProcessingStatusEventLogListener::class],
+                CasesFollowUpStatusEvent::class => [CasesFollowUpStatusEventLogListener::class],
+                CasesSolvedStatusEvent::class => [CasesSolvedStatusEventLogListener::class],
+                CasesTrashStatusEvent::class => [CasesTrashStatusEventLogListener::class],
             ]));
         });
     }
