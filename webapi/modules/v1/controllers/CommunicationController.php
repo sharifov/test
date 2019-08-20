@@ -240,13 +240,12 @@ class CommunicationController extends ApiBaseController
 
 
     /**
-     * @param Call $callModel
      * @param string $agent_phone_number
      * @param string $client_phone_number
      * @param int $limit
      * @return array
      */
-    protected function getDirectAgentsByPhoneNumber(Call $callModel, string $agent_phone_number, string $client_phone_number, int $limit = 10): array
+    protected function getDirectAgentsByPhoneNumber(string $agent_phone_number, string $client_phone_number, int $limit = 10): array
     {
         $call_employee = [];
         $call_agent_username = [];
