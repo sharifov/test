@@ -242,10 +242,11 @@ class CommunicationController extends ApiBaseController
     /**
      * @param string $agent_phone_number
      * @param string $client_phone_number
+     * @param int|null $call_dep_id
      * @param int $limit
      * @return array
      */
-    protected function getDirectAgentsByPhoneNumber(string $agent_phone_number, string $client_phone_number, int $limit = 10): array
+    protected function getDirectAgentsByPhoneNumber(string $agent_phone_number, string $client_phone_number, ?int $call_dep_id, int $limit = 10): array
     {
         $call_employee = [];
         $call_agent_username = [];
@@ -564,7 +565,7 @@ class CommunicationController extends ApiBaseController
 
             } elseif ($agentDirectCallCheck) {
 
-                $agentRes = $this->getDirectAgentsByPhoneNumber($incoming_phone_number, $client_phone_number, $direct_agent_user_limit);
+                $agentRes = $this->getDirectAgentsByPhoneNumber($incoming_phone_number, $client_phone_number, $call_dep_id, $direct_agent_user_limit);
                 if($agentRes && isset($agentRes['call_employee'], $agentRes['call_agent_username']) && $agentRes['call_employee']) {
                     $isOnHold = false;
                     $callGeneralNumber = false;
@@ -699,6 +700,11 @@ class CommunicationController extends ApiBaseController
                 $call->c_to = $incoming_phone_number;
                 $call->c_created_user_id = null;
                 $call->c_source_type_id = $callSourceTypeId;
+
+                if($call_dep_id) {
+                    $call->c_dep_id = $call_dep_id;
+                }
+
                 if ($lead2) {
                     $call->c_lead_id = $lead2->id;
                 }
@@ -774,6 +780,9 @@ class CommunicationController extends ApiBaseController
                 $call->c_to = $generalLineNumber;
                 $call->c_created_user_id = null;
                 $call->c_source_type_id = $callSourceTypeId;
+                if($call_dep_id) {
+                    $call->c_dep_id = $call_dep_id;
+                }
                 if ($lead2) {
                     $call->c_lead_id = $lead2->id;
                 }
