@@ -724,25 +724,39 @@ class CommunicationController extends ApiBaseController
                 $project = $call->cProject;
 
 
-                $url_say_play_hold = '';
+                //$url_say_play_hold = '';
                 $url_music_play_hold = 'https://talkdeskapp.s3.amazonaws.com/production/audio_messages/folk_hold_music.mp3';
+
+                $responseTwml = new VoiceResponse();
 
                 if($project && $project->custom_data) {
                     $customData = @json_decode($project->custom_data, true);
                     if($customData) {
-                        if(isset($customData['url_say_play_hold']) && $customData['url_say_play_hold']) {
-                            $url_say_play_hold = $customData['url_say_play_hold'];
+
+                        if(isset($customData['pause']) && $customData['pause']) {
+                            $responseTwml->pause((int) $customData['pause']);
+                        }
+
+                        if(isset($customData['say_hold']) && $customData['say_hold']) {
+                            $responseTwml->say($customData['say_hold'], [
+                                'language' => $customData['language'],
+                                'voice' => $customData['voice'],
+                            ]);
+                        } else if(isset($customData['url_say_play_hold']) && $customData['url_say_play_hold']) {
+                            $responseTwml->play($customData['url_say_play_hold']);
                         }
 
                         if(isset($customData['url_music_play_hold']) && $customData['url_music_play_hold']) {
-                            $url_music_play_hold = $customData['url_music_play_hold'];
+                            $responseTwml->play($customData['url_music_play_hold']);
                         }
                     }
+                } else {
+                    $responseTwml->play($url_music_play_hold);
                 }
 
-                $responseTwml = new VoiceResponse();
 
-                if($url_say_play_hold) {
+
+                /*if($url_say_play_hold) {
                     $responseTwml->play($url_say_play_hold);
                     if($url_music_play_hold) {
                         $responseTwml->play($url_music_play_hold);
@@ -762,7 +776,7 @@ class CommunicationController extends ApiBaseController
                     ]);
                     $responseTwml->play($say_params['hold_play']);
                     $response['twml'] = (string)$responseTwml;
-                }
+                }*/
 
 
                 $response['twml'] = (string) $responseTwml;
