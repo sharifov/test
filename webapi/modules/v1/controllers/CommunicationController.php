@@ -687,13 +687,13 @@ class CommunicationController extends ApiBaseController
                 }
             } elseif($isOnHold) {
 
-                $callModel = $this->findOrCreateCall($callSid, $post['call'], $call_project_id, $call_dep_id);
+                /*$callModel = $this->findOrCreateCall($callSid, $post['call'], $call_project_id, $call_dep_id);
                 $callModel->c_source_type_id = Call::SOURCE_DIRECT_CALL;
                 if (!$callModel->update()) {
                     Yii::error(VarDumper::dumpAsString($callModel->errors), 'API:Communication:Direct:Hold:Call:save');
-                }
+                }*/
 
-                /*$call = new Call();
+                $call = new Call();
                 $call->c_call_sid = $post['call']['CallSid'] ?? null;
                 $call->c_account_sid = $post['call']['AccountSid'] ?? null;
                 $call->c_call_type_id = Call::CALL_TYPE_IN;
@@ -713,19 +713,15 @@ class CommunicationController extends ApiBaseController
                 if($call_dep_id) {
                     $call->c_dep_id = $call_dep_id;
                 }
-
                 if ($lead2) {
                     $call->c_lead_id = $lead2->id;
                 }
                 if (!$call->save()) {
-                    Yii::error(VarDumper::dumpAsString($call->errors), 'API:Communication:voiceIncoming:save:isOnHold');
+                    Yii::error(VarDumper::dumpAsString($call->errors), 'API:Communication:Direct:OnHold:save');
                 }
 
-                if($call_project_id) {
-                    $project = Project::findOne($call_project_id);
-                } else {
-                    $project = null;
-                }*/
+
+                $project = $call->cProject;
 
 
                 $url_say_play_hold = '';
@@ -752,7 +748,7 @@ class CommunicationController extends ApiBaseController
                         $responseTwml->play($url_music_play_hold);
                     }
 
-                } /*else {
+                } else {
 
                     $say_params = \Yii::$app->params['voice_gather'];
                     $responseTwml = new VoiceResponse();
@@ -766,7 +762,7 @@ class CommunicationController extends ApiBaseController
                     ]);
                     $responseTwml->play($say_params['hold_play']);
                     $response['twml'] = (string)$responseTwml;
-                }*/
+                }
 
 
                 $response['twml'] = (string) $responseTwml;
