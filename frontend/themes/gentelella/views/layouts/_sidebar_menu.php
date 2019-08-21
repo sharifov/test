@@ -34,6 +34,7 @@ $isSuperAdmin = $user->canRole('superadmin');
         $menuItems[] = ['label' => 'Dashboard', 'url' => ['/'], 'icon' => 'area-chart'];
         $menuItems[] = ['label' => 'Search Leads', 'url' => ['/leads/index'], 'icon' => 'search'];
         $menuItems[] = ['label' => 'Search Sale', 'url' => ['/sale/search'], 'icon' => 'search'];
+        $menuItems[] = ['label' => 'Search Cases', 'url' => ['/cases/index'], 'icon' => 'search'];
 
 
         if (!$isUM) {
@@ -72,7 +73,6 @@ $isSuperAdmin = $user->canRole('superadmin');
                 ['label' => 'Call List', 'url' => ['/call/index'], 'icon' => 'phone'],
                 ['label' => 'SMS List', 'url' => ['/sms/index'], 'icon' => 'comments-o'],
                 ['label' => 'Mail List', 'url' => ['/email/index'], 'icon' => 'envelope'],
-                ['label' => 'Cases List', 'url' => ['/cases/index'], 'icon' => 'search'],
                 ['label' => 'Notification List', 'url' => ['/notifications/index'], 'icon' => 'comment-o'],
             ]
         ];

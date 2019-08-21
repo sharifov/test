@@ -13,12 +13,12 @@ use yii\helpers\Url;
 /* @var $searchModel sales\entities\cases\CasesSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-$this->title = 'Cases';
+$this->title = 'Search Cases';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="cases-index">
 
-    <h1><?= Html::encode($this->title) ?></h1>
+    <h1><i class="fa fa-search"></i> <?= Html::encode($this->title) ?></h1>
 
     <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
 
@@ -31,11 +31,18 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'cs_project_id',
                 'value' => function (Cases $model) {
-                    return $model->project ? $model->project->name : '';
+                    return $model->project ? '<span class="badge badge-info">' . Html::encode($model->project->name) . '</span>' : '-';
                 },
+                'format' => 'raw',
                 'filter' => Project::getList()
             ],
-            'cs_subject',
+            [
+                'attribute' => 'cs_dep_id',
+                'value' => function (Cases $model) {
+                    return $model->department ? $model->department->dep_name : '';
+                },
+                'filter' => Department::getList()
+            ],
             [
                 'attribute' => 'cs_category',
                 'value' => function (Cases $model) {
@@ -61,26 +68,29 @@ $this->params['breadcrumbs'][] = $this->title;
                     'class' => 'text-center'
                 ]
             ],
+            'cs_subject',
             [
                 'attribute' => 'cs_user_id',
                 'value' => function (Cases $model) {
-                    return $model->owner ? $model->owner->username : '';
+                    return $model->owner ? '<i class="fa fa-user"></i> ' .Html::encode($model->owner->username) : '-';
                 },
+                'format' => 'raw'
             ],
             [
                 'attribute' => 'cs_lead_id',
                 'value' => function (Cases $model) {
-                    return $model->lead ? $model->lead->uid : '';
+                    return $model->lead ? $model->lead->uid : '-';
                 },
             ],
+
             [
-                'attribute' => 'cs_dep_id',
+                'attribute' => 'cs_created_dt',
                 'value' => function (Cases $model) {
-                    return $model->department ? $model->department->dep_name : '';
+                    return $model->cs_created_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->cs_created_dt)) : '-';
                 },
-                'filter' => Department::getList()
+                'format' => 'raw'
             ],
-            'cs_created_dt',
+
             [
                 'class' => 'yii\grid\ActionColumn',
                 'template' => '{view}',

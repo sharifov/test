@@ -21,7 +21,7 @@ class CasesSearch extends Cases
 
             ['cs_gid', 'string'],
 
-            ['cs_project_id', 'integer'],
+            [['cs_id', 'cs_project_id'], 'integer'],
 
             ['cs_subject', 'string'],
 
@@ -52,13 +52,17 @@ class CasesSearch extends Cases
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+            'sort'=> ['defaultOrder' => ['cs_id' => SORT_DESC]],
+            'pagination' => [
+                'pageSize' => 20,
+            ],
         ]);
 
         $this->load($params);
 
         if (!$this->validate()) {
             // uncomment the following line if you do not want to return any records when validation fails
-            // $query->where('0=1');
+            $query->where('0=1');
             return $dataProvider;
         }
 

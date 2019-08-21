@@ -114,7 +114,8 @@ class CasesController extends FController
     public function actionIndex()
     {
         $searchModel = new CasesSearch();
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+        $params = Yii::$app->request->queryParams;
+        $dataProvider = $searchModel->search($params);
 
         return $this->render('index', [
             'searchModel' => $searchModel,
