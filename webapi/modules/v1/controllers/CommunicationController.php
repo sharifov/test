@@ -737,12 +737,12 @@ class CommunicationController extends ApiBaseController
                             $responseTwml->pause((int) $customData['pause']);
                         }
 
-                        if(isset($customData['say_hold']) && $customData['say_hold']) {
+                        if(isset($customData['say_hold'], $customData['language'], $customData['voice']) && $customData['say_hold']) {
                             $responseTwml->say($customData['say_hold'], [
                                 'language' => $customData['language'],
                                 'voice' => $customData['voice'],
                             ]);
-                        } else if(isset($customData['url_say_play_hold']) && $customData['url_say_play_hold']) {
+                        } elseif (isset($customData['url_say_play_hold']) && $customData['url_say_play_hold']) {
                             $responseTwml->play($customData['url_say_play_hold']);
                         }
 
@@ -783,6 +783,7 @@ class CommunicationController extends ApiBaseController
 
                 $job = new CallQueueJob();
                 $job->call_id = $call->c_id;
+                $job->delay = 10;
                 $jobId = Yii::$app->queue_job->push($job);
 
                 Yii::info('JobId: '.$jobId.', Call ('.$call->c_id.') add to hold : project_id: '.$call_project_id.', generalLine: '.$generalLineNumber.', TWML: ' . $response['twml'], 'info\API:Communication:Direct:Hold');
@@ -1714,6 +1715,7 @@ class CommunicationController extends ApiBaseController
 
             $job = new CallQueueJob();
             $job->call_id = $callModel->c_id;
+            $job->delay = 7;
             $jobId = Yii::$app->queue_job->push($job);
         }
 
@@ -1889,6 +1891,7 @@ class CommunicationController extends ApiBaseController
 
                     $job = new CallQueueJob();
                     $job->call_id = $callModel->c_id;
+                    $job->delay = 7;
                     $jobId = Yii::$app->queue_job->push($job);
                 }
 
