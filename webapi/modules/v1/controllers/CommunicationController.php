@@ -768,10 +768,10 @@ class CommunicationController extends ApiBaseController
                 $response['twml'] = (string) $responseTwml;
 
                 $job = new CallQueueJob();
-                $job->call_id = $callModel->c_id;
+                $job->call_id = $call->c_id;
                 $jobId = Yii::$app->queue_job->push($job);
 
-                Yii::info('JobId: '.$jobId.', Call ('.$callModel->c_id.') add to hold : project_id: '.$call_project_id.', generalLine: '.$generalLineNumber.', TWML: ' . $response['twml'], 'info\API:Communication:Direct:Hold');
+                Yii::info('JobId: '.$jobId.', Call ('.$call->c_id.') add to hold : project_id: '.$call_project_id.', generalLine: '.$generalLineNumber.', TWML: ' . $response['twml'], 'info\API:Communication:Direct:Hold');
 
 
             } elseif($callGeneralNumber){
