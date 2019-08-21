@@ -688,7 +688,7 @@ class CommunicationController extends ApiBaseController
                 $call->c_call_sid = $post['call']['CallSid'] ?? null;
                 $call->c_account_sid = $post['call']['AccountSid'] ?? null;
                 $call->c_call_type_id = Call::CALL_TYPE_IN;
-                $call->c_call_status =  Call::CALL_STATUS_QUEUE;
+                $call->c_call_status =  Call::CALL_STATUS_IVR;
                 $call->c_com_call_id = $post['call_id'] ?? null;
                 $call->c_direction = $post['call']['Direction'] ?? null;
                 $call->c_project_id = $call_project_id;
@@ -759,9 +759,16 @@ class CommunicationController extends ApiBaseController
                     $response['twml'] = (string)$responseTwml;
                 }
 
+
+
                 $response['twml'] = (string) $responseTwml;
 
-                Yii::info('Call add to hold : call_project_id: '.$call_project_id.', generalLine: '.$generalLineNumber.', TWML: ' . $response['twml'], 'info\API:Communication:voiceIncoming:isOnHold - 5');
+                $job = new CallQueueJob();
+                $job->call_id = $call->c_id;
+                $jobId = Yii::$app->queue_job->push($job);
+                
+                Yii::info('JobId: '.$jobId.', Call add to hold : call_project_id: '.$call_project_id.', generalLine: '.$generalLineNumber.', TWML: ' . $response['twml'], 'info\API:Communication:Direct:Hold');
+
 
             } elseif($callGeneralNumber){
                 $call = new Call();
