@@ -121,7 +121,7 @@ class UserConnectionSearch extends UserConnection
             $query->andWhere(['NOT IN', 'uc_user_id', $subQuery]);
         }
 
-        $query->cache(10);
+        $query->cache(20);
         //$query->with(['ucUser']);
 
         return $dataProvider;
