@@ -1674,7 +1674,7 @@ class CommunicationController extends ApiBaseController
 
         if(isset(Department::DEPARTMENT_LIST[$ivrSelectedDigit])) {
             $callModel->c_dep_id = $ivrSelectedDigit;
-            if(!$callModel->update()) {
+            if(!$callModel->save()) {
                 Yii::error(VarDumper::dumpAsString($callModel->errors), 'API:Communication:startCallService:Call:update');
             }
 
@@ -1849,8 +1849,8 @@ class CommunicationController extends ApiBaseController
 
                 if(isset(Department::DEPARTMENT_LIST[$department->dpp_dep_id])) {
                     $callModel->c_dep_id = $department->dpp_dep_id;
-                    if(!$callModel->update()) {
-                        Yii::error(VarDumper::dumpAsString($callModel->errors), 'API:Communication:startCallService:Call:update');
+                    if(!$callModel->save()) {
+                        Yii::error(VarDumper::dumpAsString($callModel->errors), 'API:Communication:startCallService:Call:update2');
                     }
 
                     $job = new CallQueueJob();
