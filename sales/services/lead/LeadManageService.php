@@ -91,78 +91,104 @@ class LeadManageService
 
         $lead = $this->transaction->wrap(function () use ($form, $employeeId) {
 
-            $case = null;
+           return $this->createLead($form, $employeeId);
 
-            if ($form->caseGid) {
-                $case = $this->casesRepository->findFreeByGid($form->caseGid);
-            }
+        });
 
-            $client = $this->clientManageService->getOrCreate($form->phones, $form->client);
+        return $lead;
+    }
 
-            $lead = Lead::create(
-                $client->id,
-                $form->client->firstName,
-                $form->client->lastName,
-                $form->cabin,
-                $form->adults,
-                $form->children,
-                $form->infants,
-                $form->requestIp,
-                $form->sourceId,
-                $form->projectId,
-                $form->notesForExperts,
-                $form->clientPhone,
-                $form->clientEmail,
-                $form->depId
-            );
+    /**
+     * @param LeadCreateForm $form
+     * @param int $employeeId
+     * @return Lead
+     * @throws \Exception
+     */
+    public function createWithCase(LeadCreateForm $form, int $employeeId): Lead
+    {
 
-            $lead->take($employeeId);
+        $lead = $this->transaction->wrap(function () use ($form, $employeeId) {
 
-            $this->clientManageService->addPhones($client, $form->phones);
+            $case = $this->casesRepository->findFreeByGid($form->caseGid);
 
-            $phones = [];
-            foreach ($form->phones as $phone) {
-                $phones[] = $phone->phone;
-            }
+            $lead = $this->createLead($form, $employeeId);
 
-            $this->clientManageService->addEmails($client, $form->emails);
-
-            $segments = $this->getSegments($form->segments);
-
-            $hash = $this->leadHashGenerator->generate(
-                $form->requestIp,
-                $form->projectId,
-                $form->adults,
-                $form->children,
-                $form->infants,
-                $form->cabin,
-                $phones,
-                $segments
-            );
-
-            $lead->setRequestHash($hash);
-
-            if ($origin = $this->leadRepository->getByRequestHash($lead->l_request_hash)) {
-                $lead->setDuplicate($origin->id);
-            }
-
-            $lead->setTripType(self::calculateTripType($form->segments));
-
-            $leadId = $this->leadRepository->save($lead);
-
-            $this->createFlightSegments($leadId, $form->segments);
-
-            $this->createLeadPreferences($leadId, $form->preferences);
-
-            if ($case) {
-                $this->casesManageService->assignLead($case->cs_id, $lead->id);
-            }
+            $this->casesManageService->assignLead($case->cs_id, $lead->id);
 
             return $lead;
 
         });
 
         return $lead;
+    }
+
+    /**
+     * @param LeadCreateForm $form
+     * @param int $employeeId
+     * @return Lead
+     */
+    private function createLead(LeadCreateForm $form, int $employeeId): Lead
+    {
+
+        $client = $this->clientManageService->getOrCreate($form->phones, $form->client);
+
+        $lead = Lead::create(
+            $client->id,
+            $form->client->firstName,
+            $form->client->lastName,
+            $form->cabin,
+            $form->adults,
+            $form->children,
+            $form->infants,
+            $form->requestIp,
+            $form->sourceId,
+            $form->projectId,
+            $form->notesForExperts,
+            $form->clientPhone,
+            $form->clientEmail,
+            $form->depId
+        );
+
+        $lead->take($employeeId);
+
+        $this->clientManageService->addPhones($client, $form->phones);
+
+        $phones = [];
+        foreach ($form->phones as $phone) {
+            $phones[] = $phone->phone;
+        }
+
+        $this->clientManageService->addEmails($client, $form->emails);
+
+        $segments = $this->getSegments($form->segments);
+
+        $hash = $this->leadHashGenerator->generate(
+            $form->requestIp,
+            $form->projectId,
+            $form->adults,
+            $form->children,
+            $form->infants,
+            $form->cabin,
+            $phones,
+            $segments
+        );
+
+        $lead->setRequestHash($hash);
+
+        if ($origin = $this->leadRepository->getByRequestHash($lead->l_request_hash)) {
+            $lead->setDuplicate($origin->id);
+        }
+
+        $lead->setTripType($this->calculateTripType($form->segments));
+
+        $leadId = $this->leadRepository->save($lead);
+
+        $this->createFlightSegments($leadId, $form->segments);
+
+        $this->createLeadPreferences($leadId, $form->preferences);
+
+        return $lead;
+
     }
 
     /**
