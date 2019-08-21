@@ -2,6 +2,7 @@
 
 namespace common\models\search;
 
+use common\models\Client;
 use common\models\ClientEmail;
 use common\models\ClientPhone;
 use common\models\Employee;
@@ -538,11 +539,27 @@ class LeadSearch extends Lead
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> ['defaultOrder' => ['id' => SORT_DESC]],
+            'sort'=> [
+                'defaultOrder' => [Lead::tableName() . '.id' => SORT_DESC]
+            ],
             'pagination' => [
                 'pageSize' => 8,
             ],
         ]);
+
+
+        $sort = $dataProvider->getSort();
+        $sort->attributes = array_merge($sort->attributes, [
+            Lead::tableName() . '.id' => [
+                'asc' => [Lead::tableName() . '.id' => SORT_ASC],
+                'desc' => [Lead::tableName() .'.id' => SORT_DESC]
+            ],
+            'id' => [
+                'asc' => [Lead::tableName() . '.id' => SORT_ASC],
+                'desc' => [Lead::tableName() .'.id' => SORT_DESC]
+            ]
+        ]);
+        $dataProvider->setSort($sort);
 
         $this->load($params);
 
@@ -556,7 +573,19 @@ class LeadSearch extends Lead
             ->andWhere(['IN', Lead::tableName() . '.project_id', $projectIds])
         ;
 
-        if($this->id || $this->uid || $this->gid || $this->client_id || $this->client_name || $this->client_email || $this->client_phone || $this->bo_flight_id || $this->employee_id || $this->request_ip) {
+        if(
+            $this->id
+            || $this->uid
+            || $this->gid
+            || $this->quote_pnr
+            || $this->client_id
+            || $this->client_name
+            || $this->client_email
+            || $this->client_phone
+            || $this->bo_flight_id
+            || $this->employee_id
+            || $this->request_ip
+        ) {
 
         } else {
             $query->where('0=1');
@@ -567,11 +596,11 @@ class LeadSearch extends Lead
 
         // grid filtering conditions
         $query->andFilterWhere([
-            'id' => $this->id,
-            'gid' => $this->gid,
+            Lead::tableName() . '.id' => $this->id,
+//            'gid' => $this->gid,
             'client_id' => $this->client_id,
             'employee_id' => $this->employee_id,
-            'status' => $this->status,
+            Lead::tableName() . '.status' => $this->status,
             'project_id' => $this->project_id,
             'source_id' => $this->source_id,
             'adults' => $this->adults,
@@ -590,10 +619,10 @@ class LeadSearch extends Lead
 
 
         if($this->statuses) {
-            $query->andWhere(['status' => $this->statuses]);
+            $query->andWhere([Lead::tableName() . '.status' => $this->statuses]);
         }
 
-        $query->andWhere(['<>', 'status', Lead::STATUS_PENDING]);
+        $query->andWhere(['<>', Lead::tableName() . '.status', Lead::STATUS_PENDING]);
 
 
         if($this->created_date_from || $this->created_date_to) {
@@ -626,13 +655,19 @@ class LeadSearch extends Lead
             $query->andWhere(['IN', 'leads.id', $subQuery]);
         }
 
+//        if($this->client_name) {
+//            $query->joinWith(['client' => function ($q) {
+//                if($this->client_name) {
+//                    $q->where(['=', 'clients.last_name', $this->client_name])
+//                        ->orWhere(['=', 'clients.first_name', $this->client_name]);
+//                }
+//            }]);
+//        }
+
         if($this->client_name) {
-            $query->joinWith(['client' => function ($q) {
-                if($this->client_name) {
-                    $q->where(['=', 'clients.last_name', $this->client_name])
-                        ->orWhere(['=', 'clients.first_name', $this->client_name]);
-                }
-            }]);
+            $subQuery = Client::find()->select(['clients.id'])->distinct('clients.id')->where(['=', 'clients.last_name', $this->client_name])
+                ->orWhere(['=', 'clients.first_name', $this->client_name]);
+            $query->andWhere(['IN', 'client_id', $subQuery]);
         }
 
         if($this->client_email) {
@@ -658,9 +693,9 @@ class LeadSearch extends Lead
 
 
 
-        /*  $sqlRaw = $query->createCommand()->getRawSql();
+          /*$sqlRaw = $query->createCommand()->getRawSql();
 
-         VarDumper::dump($sqlRaw, 10, true); exit; */
+         VarDumper::dump($sqlRaw, 10, true); exit;*/
 
         return $dataProvider;
     }
