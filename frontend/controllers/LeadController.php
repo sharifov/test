@@ -1926,22 +1926,22 @@ class LeadController extends FController
         $dependency = new DbDependency();
         $dependency->sql = $sql;
 
-        $key = 'queue_inbox_' . $user_id;
+        //$key = 'queue_inbox_' . $user_id;
 
         //$cache->delete($key);
 
-        $result = $cache->get($key);
-        if ($result === false) {
+        //$result = $cache->get($key);
+//        if ($result === false) {
             $result['isAccessNewLead'] = $user->accessTakeNewLead();
             $result['taskSummary'] = $user->getCurrentShiftTaskInfoSummary();
             $result['dataProvider'] = $searchModel->searchInbox($params, $user);
 
-            $cache->set($key, $result, $duration, $dependency);
+//            $cache->set($key, $result, $duration, $dependency);
 
             //echo 123; exit;
-        } else {
+//        } else {
             //echo 'cache'; exit;
-        }
+//        }
 
         $isAccessNewLead = $result['isAccessNewLead']; //$user->accessTakeNewLead();
         $taskSummary = $result['taskSummary']; //$user->getCurrentShiftTaskInfoSummary();
