@@ -14,6 +14,7 @@ use yii\helpers\VarDumper;
  * CallSearch represents the model behind the search form of `common\models\Call`.
  *
  * @property int $limit
+ * @property array $dep_ids
  *
  * @property string $createTimeRange
  * @property int $createTimeStart
@@ -33,6 +34,8 @@ class CallSearch extends Call
     public $call_duration_from;
     public $call_duration_to;
 
+    public $dep_ids = [];
+
     /**
      * {@inheritdoc}
      */
@@ -41,7 +44,7 @@ class CallSearch extends Call
         return [
             [['c_id', 'c_call_type_id', 'c_lead_id', 'c_created_user_id', 'c_com_call_id', 'c_project_id', 'c_is_new', 'c_is_deleted', 'supervision_id', 'limit', 'c_recording_duration', 'c_source_type_id', 'call_duration_from', 'call_duration_to', 'c_case_id'], 'integer'],
             [['c_call_sid', 'c_account_sid', 'c_from', 'c_to', 'c_sip', 'c_call_status', 'c_api_version', 'c_direction', 'c_forwarded_from', 'c_caller_name', 'c_parent_call_sid', 'c_call_duration', 'c_sip_response_code', 'c_recording_url', 'c_recording_sid',
-                'c_timestamp', 'c_uri', 'c_sequence_number', 'c_created_dt', 'c_updated_dt', 'c_error_message', 'c_price', 'statuses', 'limit'], 'safe'],
+                'c_timestamp', 'c_uri', 'c_sequence_number', 'c_created_dt', 'c_updated_dt', 'c_error_message', 'c_price', 'statuses', 'limit', 'dep_ids'], 'safe'],
             [['createTimeRange'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
         ];
     }
@@ -258,7 +261,11 @@ class CallSearch extends Call
         return $dataProvider;
     }
 
-    public function searchUserCallMap($params)
+    /**
+     * @param $params
+     * @return ActiveDataProvider
+     */
+    public function searchUserCallMap($params): ActiveDataProvider
     {
         $query = Call::find();
 
@@ -280,8 +287,6 @@ class CallSearch extends Call
             ]
         ]);
 
-
-
         if (!$this->validate()) {
             // uncomment the following line if you do not want to return any records when validation fails
             $query->where('0=1');
@@ -292,9 +297,12 @@ class CallSearch extends Call
         $query->orWhere(['c_call_status' => [Call::CALL_STATUS_IN_PROGRESS]]);
         $query->orWhere(['c_call_status' => [Call::CALL_STATUS_QUEUE]]);*/
 
-
         if($this->statuses) {
             $query->andWhere(['c_call_status' => $this->statuses]);
+        }
+
+        if($this->dep_ids) {
+            $query->andWhere(['c_dep_id' => $this->dep_ids]);
         }
 
 
