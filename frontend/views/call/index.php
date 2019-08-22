@@ -201,6 +201,15 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$
                 },
                 'format' => 'raw'
             ],
+
+            [
+                'attribute' => 'c_case_id',
+                'value' => function (\common\models\Call $model) {
+                    return  $model->c_case_id ? Html::a($model->c_case_id, ['cases/view', 'gid' => $model->cCase->cs_gid], ['target' => '_blank', 'data-pjax' => 0]) : '-';
+                },
+                'format' => 'raw'
+            ],
+
             'c_from',
             'c_to',
             // 'c_sip',

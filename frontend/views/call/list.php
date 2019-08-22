@@ -208,6 +208,14 @@ $this->params['breadcrumbs'][] = $this->title;
                 },
                 'format' => 'raw'
             ],
+
+            [
+                'attribute' => 'c_case_id',
+                'value' => function (\common\models\Call $model) {
+                    return  $model->c_case_id && $model->cCase->cs_user_id == Yii::$app->user->id ? Html::a($model->c_lead_id, ['cases/view', 'gid' => $model->cCase->cs_gid], ['target' => '_blank', 'data-pjax' => 0]) : $model->c_case_id ?: '-';
+                },
+                'format' => 'raw'
+            ],
             //'c_api_version',
             //'c_direction',
             //'c_forwarded_from',

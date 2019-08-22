@@ -265,6 +265,11 @@ echo '<div class="container" id="container-redirect-agents"></div>';
         window.localStorage.setItem('agent_tab_conn_state', JSON.stringify(agent_tab_conn_state));
     }
 
+    if(window.localStorage.agent_tab_conn_access === undefined) {
+        var agent_tab_conn_access = [{"user":agentId, "access":1}];
+        window.localStorage.setItem('agent_tab_conn_access', JSON.stringify(agent_tab_conn_access));
+    }
+
     if(window.localStorage.lock === undefined) {
         window.localStorage.setItem('lock', 'false');
     }
@@ -275,106 +280,57 @@ echo '<div class="container" id="container-redirect-agents"></div>';
 
     
     function clearAgentStatus(cn) {
-        if(window.localStorage.lock !== undefined && window.localStorage.lock !== 'true') {
+        //if(window.localStorage.lock !== undefined && window.localStorage.lock !== 'true') {
             if (cn && cn.parameters && cn.status() && cn.status() !== 'closed') {
-                updateAgentStatus(cn, true);
+                //updateAgentStatus(cn, true);
             }
-        }
+        //}
     }
-    
-    function updateAgentStatus(conn, update = false, canceled = false) {
-        if(!use_browser_call_access) {
-            if(window.localStorage.agent_tab_conn_state !== undefined) {
-                var agent_tab_conn_state = [{"user":agentId, "items":[]}];
-                window.localStorage.setItem('agent_tab_conn_state', JSON.stringify(agent_tab_conn_state));
+
+
+    function updateAgentStatus(conn, check, status) {
+        try {
+        var agent_tab_conn_access = [];
+        if (!use_browser_call_access) {
+            if (window.localStorage.agent_tab_conn_access !== undefined) {
+                agent_tab_conn_access = [{"user": agentId, "access": 1}];
+                window.localStorage.setItem('agent_tab_conn_access', JSON.stringify(agent_tab_conn_access));
             }
-            window.localStorage.setItem('lock', 'false');
             return true;
         }
 
-        window.localStorage.setItem('lock', 'true');
-
-        /*if(conn && conn.status()) {
-            console.log("CONN: " + conn.parameters.CallSid + ' - ' + conn.status());
-        }*/
-
-        var access = true;
+        var agent_access = 1;
         try {
-            var agent_tab_conn_state = JSON.parse(window.localStorage.agent_tab_conn_state);
+            agent_tab_conn_access = JSON.parse(window.localStorage.agent_tab_conn_access);
         } catch (e) {
-            var agent_tab_conn_state = [{"user":agentId, "items":[]}];
+            agent_tab_conn_access = [{"user": agentId, "access": 1}];
         }
-        var del = false;
-        var plus_minute = parseInt(Math.floor(Date.now() /1000) + 5);
-        var seconds_now = parseInt(Math.floor(Date.now() /1000));
 
-        if(agent_tab_conn_state.length > 0) {
-            var agent_elements = [];
-            var dataKey = -1;
-            for(var i=0; i<agent_tab_conn_state.length; i++){
-                var agentData = agent_tab_conn_state[i];
-                if(agentData && agentData.user && agentData.user === agentId) {
-                    dataKey = i;
-                    agent_elements = agentData.items;
+        var key_index = 0;
+        if (agent_tab_conn_access.length > 0) {
+            for (var i = 0; i < agent_tab_conn_access.length; i++) {
+                var agentData = agent_tab_conn_access[i];
+                if (agentData && agentData.user && agentData.user === agentId) {
+                    agent_access = agentData.access;
+                    key_index = i;
                 }
             }
-
-            if(agent_elements.length > 0 && dataKey > -1) {
-                for(var ii=0; ii<agent_elements.length; ii++){
-                    del = false;
-                    var element = agent_elements[ii];
-                    if(! element) {
-                        agent_elements.splice(ii, 1);
-                        continue;
-                    }
-                    if(element.exp && parseInt(element.exp) < seconds_now) {
-                        del = true;
-                    }
-
-                    if(conn && conn.parameters.CallSid && conn.parameters.CallSid === element.sid) {
-                        del = true;
-                    }
-
-                    if(element.status && (element.status === 'closed' || element.status === 'pending')) {
-                    //if(element.status && element.status === 'closed') {
-                        del = true;
-                    }
-
-                    if(del){
-                        agent_elements.splice(ii, 1);
-                    }
-                }
-            }
-
-            if(agent_elements.length > 0 && dataKey > -1) {
-                for(var ii=0; ii<agent_elements.length; ii++){
-                    var element = agent_elements[ii];
-                    if(element.status && element.status !== 'closed') {
-                        access = false;
-                    }
-                }
-            }
-
-            if(conn && conn.parameters.CallSid && conn.status() && conn.status() !== 'closed' && conn.status() !== 'pending') {
-            //if(conn && conn.parameters.CallSid && conn.status() && conn.status() !== 'closed' && !canceled) {
-                var connData = {"sid":conn.parameters.CallSid,"status":conn.status(),"exp":plus_minute};
-                agent_elements.push(connData);
-            }
-
-            if(dataKey > -1) {
-                agent_tab_conn_state[dataKey] = {"user":agentId,"items":agent_elements};
-            }
         }
-        window.localStorage.setItem('agent_tab_conn_state', JSON.stringify(agent_tab_conn_state));
-        window.localStorage.setItem('lock', 'false');
-        if(conn.parameters && conn.parameters.CallSid) {
-            var type = 'in';
-            if(conn._direction === 'OUTGOING') {
-                type = 'out';
+
+        if (check) {
+            if (agent_access > 0) {
+                return true;
+            } else {
+                return false;
             }
-            //call_access_log.push({"sid":conn.parameters.CallSid, "access":access, "type":type})
+        } else {
+            agent_tab_conn_access[key_index] = {"user": agentId, "access": status}
         }
-        return access;
+        window.localStorage.setItem('agent_tab_conn_access', JSON.stringify(agent_tab_conn_access));
+        return (agent_access > 0);
+        } catch (e) {
+            return true;
+        }
     }
 
     function createNotify(title, message, type) {
@@ -426,6 +382,7 @@ echo '<div class="container" id="container-redirect-agents"></div>';
     document.getElementById('button-hangup').onclick = function () {
         log('Hanging up...');
         if (device) {
+            updateAgentStatus(connection, false, 1);
             device.disconnectAll();
         }
     };
@@ -644,9 +601,10 @@ echo '<div class="container" id="container-redirect-agents"></div>';
 
         var project_id = webPhoneParams.project_id;
         var lead_id = webPhoneParams.lead_id;
+        var case_id = webPhoneParams.case_id;
         //var call_acc_sid =
 
-        console.info('saveDbCall - sid: ' + call_sid + ' : ' + call_from + ' : ' + call_to + ' : ' + call_status + ' : ' + project_id + ' : ' + lead_id);
+        console.info('saveDbCall - sid: ' + call_sid + ' : ' + call_from + ' : ' + call_to + ' : ' + call_status + ' : ' + project_id + ' : ' + lead_id + ' : ' + case_id);
 
         //console.warn(webPhoneParams); return false;
 
@@ -660,6 +618,7 @@ echo '<div class="container" id="container-redirect-agents"></div>';
                     'call_to': call_to,
                     'call_status': call_status,
                     'lead_id': lead_id,
+                    'case_id': case_id,
                     'project_id': project_id
                 },
                 url: ajaxSaveCallUrl,
@@ -692,38 +651,33 @@ echo '<div class="container" id="container-redirect-agents"></div>';
                 var data = data_res.data;
                 log('Got a token.');
                 console.log('app_sid: ' + data.app_sid + 'account_sid: ' + data.account_sid);
-
                 call_acc_sid = data.account_sid;
-
                 //console.log('Token: ' + data.token);
                 // Setup Twilio.Device
                 device = new Twilio.Device(data.token, {codecPreferences: ['opus', 'pcmu'], debug: true});
 
                 //console.log([data, device]);
                 device.on('ready', function (device) {
-
                     log('Twilio.Device Ready!');
                     //document.getElementById('call-controls').style.display = 'block';
                 });
 
                 device.on('error', function (error) {
-                    updateAgentStatus(connection);
+                    updateAgentStatus(connection, false, 1);
                     log('Twilio.Device Error: ' + error.message);
                 });
 
                 device.on('connect', function (conn) {
                     //console.log("connect call: status: " + connection.status() + "\n" + 'connection: ' + JSON.stringify(connection) + "\n conn:" + JSON.stringify(conn));
-                    updateAgentStatus(connection, true);
-                    var access = updateAgentStatus(conn, true);
+                    //updateAgentStatus(connection, true);
+                    var access = updateAgentStatus(connection, true, 0);
                     connection = conn;
                     console.log({"action":"connect", "cid":connection.parameters.CallSid, "access": access});
                     log('Successfully established call!');
                     console.warn(conn);
                     //console.info(conn.parameters);
                     //console.log(conn.parameters.CallSid);
-
                     //saveDbCall(conn.parameters.CallSid, conn.message.FromAgentPhone, conn.message.To, 'queued');
-
                     //document.getElementById('button-call').style.display = 'none';
                     //document.getElementById('button-hangup').style.display = 'inline';
                     document.getElementById('btn-group-id-forward').style.display = 'inline';
@@ -735,8 +689,8 @@ echo '<div class="container" id="container-redirect-agents"></div>';
                 });
 
                 device.on('disconnect', function (conn) {
-                    updateAgentStatus(connection, true);
-                    var access = updateAgentStatus(conn, true);
+                    //updateAgentStatus(connection, true);
+                    var access = updateAgentStatus(connection, false, 1);
                     console.log({"action":"disconnect", "cid":conn.parameters.CallSid, "access": access});
                     connection = conn;
                     log('Call ended');
@@ -758,8 +712,8 @@ echo '<div class="container" id="container-redirect-agents"></div>';
                 });
 
                 device.on('incoming', function (conn) {
-                    var access =  updateAgentStatus(conn, false);
 
+                    var access =  updateAgentStatus(connection, true, 0);
                     console.log({"action":"incoming", "cid":conn.parameters.CallSid, "access": access});
 
                     if(!access) {
@@ -775,7 +729,7 @@ echo '<div class="container" id="container-redirect-agents"></div>';
                         }
                     }
                     connection = conn;
-                    updateAgentStatus(connection, true);
+                    //updateAgentStatus(connection, true);
                     log('Incoming connection from ' + conn.parameters.From);
                     createNotify('Incoming connection', 'Incoming connection from ' + conn.parameters.From, 'success');
 
@@ -798,7 +752,8 @@ echo '<div class="container" id="container-redirect-agents"></div>';
 
 
                 device.on('cancel', function (conn) {
-                    var  access = updateAgentStatus(conn, true, true);
+                    //var  access = updateAgentStatus(conn, true, true);
+                    var access = updateAgentStatus(connection, false, 1);
                     console.log({"action":"cancel", "cid":conn.parameters.CallSid, "access": access});
                     connection = conn;
                     log('Cancel call');
@@ -821,6 +776,7 @@ echo '<div class="container" id="container-redirect-agents"></div>';
                 }
             })
             .catch(function (err) {
+                var access = updateAgentStatus(connection, false, 1);
                 console.log(err);
                 log('Could not get a token from server!');
                 createNotify('Call Token error!', 'Could not get a token from server!', 'error');
@@ -834,7 +790,7 @@ echo '<div class="container" id="container-redirect-agents"></div>';
     //});
 
 
-    function webCall(phone_from, phone_to, project_id, lead_id, type) {
+    function webCall(phone_from, phone_to, project_id, lead_id, case_id, type) {
 
         /*var access =  updateAgentStatus(connection);
         if(!access) {
@@ -842,7 +798,7 @@ echo '<div class="container" id="container-redirect-agents"></div>';
             return false;
         }*/
 
-        var params = {'To': phone_to, 'FromAgentPhone': phone_from, 'project_id': project_id, 'lead_id': lead_id, 'c_type': type, 'c_user_id': c_user_id};
+        var params = {'To': phone_to, 'FromAgentPhone': phone_from, 'project_id': project_id, 'lead_id': lead_id, 'case_id': case_id, 'c_type': type, 'c_user_id': c_user_id};
         webPhoneParams = params;
 
         //console.log(params); return false;
@@ -854,6 +810,7 @@ echo '<div class="container" id="container-redirect-agents"></div>';
 
             console.log('Calling ' + params.To + '...');
             createNotify('Calling', 'Calling ' + params.To + '...', 'success');
+            updateAgentStatus(connection, false, 0);
             connection = device.connect(params);
             document.getElementById('btn-group-id-redirect').style.display = 'none';
         }
@@ -878,7 +835,7 @@ $userId = Yii::$app->user->id;
 
 $js = <<<JS
 
-        setInterval('clearAgentStatus(connection)', 1000);
+        //setInterval('clearAgentStatus(connection)', 1000);
        
         $(document).on('click', '.button-redirect-to-agents', function(e) {
             
@@ -895,7 +852,7 @@ $js = <<<JS
             $("#redirect-agent-table").hide();
             $("#redirect-agent-info").html('<h3>Redirecting to: ' + data_agent_to_redirect.data('agent') + '</h3>').show();
             if(connection) {
-                
+                updateAgentStatus(connection, false, 1);
                 
                 $.post(ajaxCallRedirectUrl + '?check_user=1', {to_id:data_agent_to_redirect.data('agentid')}, function(r) {
                     
@@ -915,6 +872,7 @@ $js = <<<JS
                                 'to_id': data_agent_to_redirect.data('agentid'),
                                 'project_id': data_agent_to_redirect.data('projectid'), 
                                 'lead_id':  data_agent_to_redirect.data('leadid'),
+                                'case_id':  data_agent_to_redirect.data('caseid'),
                             },
                             url: ajaxCallRedirectUrl,
                             success: function (res) {
@@ -1013,13 +971,14 @@ $js = <<<JS
         var phone_number = $(this).data('phone');
         var project_id = $(this).data('project-id');
         var lead_id = $(this).data('lead-id');
+        var case_id = $(this).data('case-id');
         //alert(phoneNumber);
         e.preventDefault();
         
         $('#web-phone-dial-modal .modal-body').html('<div style="text-align:center"><img width="200px" src="https://loading.io/spinners/gear-set/index.triple-gears-loading-icon.svg"></div>');
         $('#web-phone-dial-modal').modal();
         
-        $.post(ajaxPhoneDialUrl, {'phone_number': phone_number, 'project_id': project_id, 'lead_id': lead_id},
+        $.post(ajaxPhoneDialUrl, {'phone_number': phone_number, 'project_id': project_id, 'lead_id': lead_id, 'case_id': case_id},
             function (data) {
                 $('#web-phone-dial-modal .modal-body').html(data);
             }
@@ -1036,13 +995,14 @@ $js = <<<JS
                 
                 var project_id = $('#call-project-id').val();
                 var lead_id = $('#call-lead-id').val();
+                var case_id = $('#call-case-id').val();
                 
                 $('#web-phone-dial-modal').modal('hide');
                 //alert(phone_from + ' - ' + phone_to);
                 $('#web-phone-widget').slideDown();
                 $('.fabs2').hide();
                 
-                webCall(phone_from, phone_to, project_id, lead_id, 'web-call');
+                webCall(phone_from, phone_to, project_id, lead_id, case_id, 'web-call');
             } else {
                 alert('You have active call');
                 return false;
@@ -1067,6 +1027,7 @@ $js = <<<JS
                 console.log('Error call forward param TO');
                 return false;
             }
+            updateAgentStatus(connection, false, 1);
             connection.accept();
             console.error(connection.parameters);
             $.ajax({

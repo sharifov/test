@@ -5,6 +5,7 @@ namespace common\models;
 use common\components\ChartTools;
 use common\components\CommunicationService;
 use DateTime;
+use sales\entities\cases\Cases;
 use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\behaviors\BlameableBehavior;
@@ -49,8 +50,10 @@ use yii\helpers\VarDumper;
  * @property int $e_inbox_email_id
  * @property string $e_email_from_name
  * @property string $e_email_to_name
+ * @property int $e_case_id
  *
  * @property Employee $eCreatedUser
+ * @property Cases $eCase
  * @property Language $eLanguage
  * @property Lead $eLead
  * @property Project $eProject
@@ -128,7 +131,7 @@ class Email extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['e_reply_id', 'e_lead_id', 'e_project_id', 'e_type_id', 'e_template_type_id', 'e_communication_id', 'e_is_deleted', 'e_priority', 'e_status_id', 'e_created_user_id', 'e_updated_user_id', 'e_inbox_email_id'], 'integer'],
+            [['e_reply_id', 'e_lead_id', 'e_project_id', 'e_type_id', 'e_template_type_id', 'e_communication_id', 'e_is_deleted', 'e_priority', 'e_status_id', 'e_created_user_id', 'e_updated_user_id', 'e_inbox_email_id', 'e_case_id'], 'integer'],
             [['e_is_new', 'e_is_deleted'], 'boolean'],
             [['e_email_from', 'e_email_to'], 'required'],
             [['e_email_body_html', 'e_email_body_text', 'e_email_data', 'e_ref_message_id'], 'string'],
@@ -136,6 +139,7 @@ class Email extends \yii\db\ActiveRecord
             [['e_email_from', 'e_email_to', 'e_email_cc', 'e_email_bc', 'e_email_subject', 'e_attach', 'e_message_id', 'e_email_from_name', 'e_email_to_name'], 'string', 'max' => 255],
             [['e_language_id'], 'string', 'max' => 5],
             [['e_error_message'], 'string', 'max' => 500],
+            [['e_case_id'], 'exist', 'skipOnError' => true, 'targetClass' => Cases::class, 'targetAttribute' => ['e_case_id' => 'cs_id']],
             [['e_created_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['e_created_user_id' => 'id']],
             [['e_language_id'], 'exist', 'skipOnError' => true, 'targetClass' => Language::class, 'targetAttribute' => ['e_language_id' => 'language_id']],
             [['e_lead_id'], 'exist', 'skipOnError' => true, 'targetClass' => Lead::class, 'targetAttribute' => ['e_lead_id' => 'id']],
@@ -187,6 +191,7 @@ class Email extends \yii\db\ActiveRecord
             'e_ref_message_id' => 'Reference Message ID',
             'e_inbox_created_dt' => 'Inbox Created Dt',
             'e_inbox_email_id' => 'Inbox Email ID',
+            'e_case_id' => 'Case ID',
         ];
     }
 
@@ -237,6 +242,14 @@ class Email extends \yii\db\ActiveRecord
     public function getTypeName()
     {
         return self::TYPE_LIST[$this->e_type_id] ?? '-';
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getECase()
+    {
+        return $this->hasOne(Cases::class, ['cs_id' => 'e_case_id']);
     }
 
     /**

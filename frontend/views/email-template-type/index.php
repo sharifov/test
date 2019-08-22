@@ -41,6 +41,14 @@ $this->params['breadcrumbs'][] = $this->title;
             'etp_origin_name',
             'etp_name',
             'etp_hidden:boolean',
+
+            [
+                'attribute' => 'etp_dep_id',
+                'value' => function (\common\models\EmailTemplateType $model) {
+                    return $model->etpDep ? $model->etpDep->dep_name : '-';
+                },
+                'filter' => \common\models\Department::getList()
+            ],
             [
                 'attribute' => 'etp_updated_user_id',
                 'value' => function (\common\models\EmailTemplateType $model) {

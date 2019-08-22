@@ -75,7 +75,6 @@ if(Yii::$app->user->identity->canRole('admin')) {
                 $can = Yii::$app->user->can('leadSearchMultipleUpdate', ['lead' => $model]);
                 return ['style' => 'display:' . ($can ? 'visible' : 'none')];
             },
-            'multiple' => Yii::$app->user->can('leadSearchMultipleSelectAll'),
             'visible' => Yii::$app->user->can('leadSearchMultipleSelect')
         ],
 

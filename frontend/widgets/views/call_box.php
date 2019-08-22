@@ -83,7 +83,9 @@ use yii\widgets\Pjax; ?>
                     <?/*Id: <?=$lastCall->c_id?> [<?=date('H:i:s')?>]*/ ?>
                 </h4>
                 <h4 id="call_box_call_status">
-                    <span class="badge"><?=$lastCall->cProject ? \yii\helpers\Html::encode($lastCall->cProject->name) : '-'?></span>, <?=$lastCall->getCallTypeName()?>
+                    <span class="badge"><?=$lastCall->cProject ? \yii\helpers\Html::encode($lastCall->cProject->name) : '-'?></span>,
+                    <span class="label label-default"><?=$lastCall->cDep ? \yii\helpers\Html::encode($lastCall->cDep->dep_name) : '-'?></span><br>
+                    <?=$lastCall->getCallTypeName()?>
                 </h4>
                 <?php if (in_array($lastCall->c_call_status, [\common\models\Call::CALL_STATUS_RINGING, \common\models\Call::CALL_STATUS_IN_PROGRESS], true)): ?>
                     <?php
@@ -93,7 +95,8 @@ use yii\widgets\Pjax; ?>
                                 $timerSeconds = 0;
                             }
                             if( $timerSeconds >= 0 ) {
-                                echo '<div  style="font-size: 16px" class="badge badge-warning"><i class="fa fa-clock-o fa-spin" title="updated: '.date('H:i:s', strtotime($lastCall->c_updated_dt)).'"></i> <span id="call-box-timer" class="timer">' .gmdate('i:s', $timerSeconds). '</span></div>';
+                                echo '<div  style="font-size: 16px" class="badge badge-warning">
+<i class="fa fa-clock-o fa-spin" title="updated: '.date('H:i:s', strtotime($lastCall->c_updated_dt)).'"></i> <span id="call-box-timer" class="timer">' .gmdate('i:s', $timerSeconds). '</span></div>';
                                 $js = "$('#call-box-timer').timer({format: '%M:%S', seconds: " . $timerSeconds . "}).timer('start');";
                                 $this->registerJs($js, \yii\web\View::POS_READY);
                             }

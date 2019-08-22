@@ -2,30 +2,26 @@
 
 namespace sales\services\lead;
 
-use common\models\Client;
-use common\models\ClientEmail;
-use common\models\ClientPhone;
+use common\models\Department;
 use common\models\Lead;
 use common\models\LeadFlightSegment;
 use common\models\LeadPreferences;
-use sales\forms\lead\ClientCreateForm;
-use sales\forms\lead\EmailCreateForm;
 use sales\forms\lead\ItineraryEditForm;
 use sales\forms\lead\LeadCreateForm;
-use sales\forms\lead\PhoneCreateForm;
 use sales\forms\lead\PreferencesCreateForm;
 use sales\forms\lead\SegmentCreateForm;
 use sales\forms\lead\SegmentEditForm;
 use sales\repositories\airport\AirportRepository;
+use sales\repositories\cases\CasesRepository;
 use sales\repositories\client\ClientEmailRepository;
 use sales\repositories\client\ClientPhoneRepository;
 use sales\repositories\client\ClientRepository;
 use sales\repositories\lead\LeadPreferencesRepository;
 use sales\repositories\lead\LeadRepository;
 use sales\repositories\lead\LeadSegmentRepository;
-use sales\repositories\NotFoundException;
+use sales\services\cases\CasesManageService;
+use sales\services\client\ClientManageService;
 use sales\services\TransactionManager;
-use Yii;
 
 /**
  * @property LeadRepository $leadRepository
@@ -36,6 +32,9 @@ use Yii;
  * @property ClientRepository $clientRepository
  * @property LeadHashGenerator $leadHashGenerator
  * @property AirportRepository $airportRepository
+ * @property ClientManageService $clientManageService
+ * @property CasesRepository $casesRepository
+ * @property CasesManageService $casesManageService
  * @property TransactionManager $transaction
  */
 class LeadManageService
@@ -48,6 +47,9 @@ class LeadManageService
     private $clientRepository;
     private $leadHashGenerator;
     private $airportRepository;
+    private $clientManageService;
+    private $casesRepository;
+    private $casesManageService;
     private $transaction;
 
     public function __construct(
@@ -59,6 +61,9 @@ class LeadManageService
         ClientRepository $clientRepository,
         LeadHashGenerator $leadHashGenerator,
         AirportRepository $airportRepository,
+        ClientManageService $clientManageService,
+        CasesRepository $casesRepository,
+        CasesManageService $casesManageService,
         TransactionManager $transaction)
     {
         $this->leadRepository = $leadRepository;
@@ -69,6 +74,9 @@ class LeadManageService
         $this->clientRepository = $clientRepository;
         $this->leadHashGenerator = $leadHashGenerator;
         $this->airportRepository = $airportRepository;
+        $this->clientManageService = $clientManageService;
+        $this->casesRepository = $casesRepository;
+        $this->casesManageService = $casesManageService;
         $this->transaction = $transaction;
     }
 
@@ -83,62 +91,104 @@ class LeadManageService
 
         $lead = $this->transaction->wrap(function () use ($form, $employeeId) {
 
-            $clientId = $this->getClientId($form->phones, $form->client);
+           return $this->createLead($form, $employeeId);
 
-            $lead = Lead::create(
-                $clientId,
-                $form->client->firstName,
-                $form->client->lastName,
-                $form->cabin,
-                $form->adults,
-                $form->children,
-                $form->infants,
-                $form->requestIp,
-                $form->sourceId,
-                $form->projectId,
-                $form->notesForExperts,
-                $form->clientPhone,
-                $form->clientEmail
-            );
+        });
 
-            $lead->take($employeeId);
+        return $lead;
+    }
 
-            $phones = $this->createClientPhones($clientId, $form->phones);
+    /**
+     * @param LeadCreateForm $form
+     * @param int $employeeId
+     * @return Lead
+     * @throws \Exception
+     */
+    public function createWithCase(LeadCreateForm $form, int $employeeId): Lead
+    {
 
-            $this->createClientEmails($clientId, $form->emails);
+        $lead = $this->transaction->wrap(function () use ($form, $employeeId) {
 
-            $segments = $this->getSegments($form->segments);
+            $case = $this->casesRepository->findFreeByGid($form->caseGid);
 
-            $hash = $this->leadHashGenerator->generate(
-                $form->requestIp,
-                $form->projectId,
-                $form->adults,
-                $form->children,
-                $form->infants,
-                $form->cabin,
-                $phones,
-                $segments
-            );
+            $lead = $this->createLead($form, $employeeId);
 
-            $lead->setRequestHash($hash);
-
-            if ($origin = $this->leadRepository->getByRequestHash($lead->l_request_hash)) {
-                $lead->setDuplicate($origin->id);
-            }
-
-            $lead->setTripType(self::calculateTripType($form->segments));
-
-            $leadId = $this->leadRepository->save($lead);
-
-            $this->createFlightSegments($leadId, $form->segments);
-
-            $this->createLeadPreferences($leadId, $form->preferences);
+            $this->casesManageService->assignLead($case->cs_id, $lead->id);
 
             return $lead;
 
         });
 
         return $lead;
+    }
+
+    /**
+     * @param LeadCreateForm $form
+     * @param int $employeeId
+     * @return Lead
+     */
+    private function createLead(LeadCreateForm $form, int $employeeId): Lead
+    {
+
+        $client = $this->clientManageService->getOrCreate($form->phones, $form->client);
+
+        $lead = Lead::create(
+            $client->id,
+            $form->client->firstName,
+            $form->client->lastName,
+            $form->cabin,
+            $form->adults,
+            $form->children,
+            $form->infants,
+            $form->requestIp,
+            $form->sourceId,
+            $form->projectId,
+            $form->notesForExperts,
+            $form->clientPhone,
+            $form->clientEmail,
+            $form->depId
+        );
+
+        $lead->take($employeeId);
+
+        $this->clientManageService->addPhones($client, $form->phones);
+
+        $phones = [];
+        foreach ($form->phones as $phone) {
+            $phones[] = $phone->phone;
+        }
+
+        $this->clientManageService->addEmails($client, $form->emails);
+
+        $segments = $this->getSegments($form->segments);
+
+        $hash = $this->leadHashGenerator->generate(
+            $form->requestIp,
+            $form->projectId,
+            $form->adults,
+            $form->children,
+            $form->infants,
+            $form->cabin,
+            $phones,
+            $segments
+        );
+
+        $lead->setRequestHash($hash);
+
+        if ($origin = $this->leadRepository->getByRequestHash($lead->l_request_hash)) {
+            $lead->setDuplicate($origin->id);
+        }
+
+        $lead->setTripType($this->calculateTripType($form->segments));
+
+        $leadId = $this->leadRepository->save($lead);
+
+        $this->createFlightSegments($leadId, $form->segments);
+
+        $this->createLeadPreferences($leadId, $form->preferences);
+
+        return $lead;
+
     }
 
     /**
@@ -187,65 +237,6 @@ class LeadManageService
             ];
         }
         return $segments;
-    }
-
-    /**
-     * @param int $clientId
-     * @param EmailCreateForm[] $emailsForm
-     */
-    private function createClientEmails(int $clientId, array $emailsForm): void
-    {
-        foreach ($emailsForm as $emailForm) {
-            if ($emailForm->email && !$this->clientEmailRepository->exists($clientId, $emailForm->email)) {
-                $email = ClientEmail::create(
-                    $emailForm->email,
-                    $clientId
-                );
-                $this->clientEmailRepository->save($email);
-            }
-        }
-    }
-
-    /**
-     * @param int $clientId
-     * @param PhoneCreateForm[] $phonesForm
-     * @return array
-     */
-    private function createClientPhones(int $clientId, array $phonesForm): array
-    {
-        $phones = [];
-        foreach ($phonesForm as $phoneForm) {
-            if ($phoneForm->phone && !$this->clientPhoneRepository->exists($clientId, $phoneForm->phone)) {
-                $phone = ClientPhone::create(
-                    $phoneForm->phone,
-                    $clientId
-                );
-                $this->clientPhoneRepository->save($phone);
-            }
-            $phones[] = $phoneForm->phone;
-        }
-        return $phones;
-    }
-
-    /**
-     * @param PhoneCreateForm[] $phonesForm
-     * @param ClientCreateForm $clientForm
-     * @return int
-     */
-    private function getClientId(array $phonesForm, ClientCreateForm $clientForm): int
-    {
-        foreach ($phonesForm as $phoneForm) {
-            if (($clientPhone = $this->clientPhoneRepository->getByPhone($phoneForm->phone)) && ($client = $clientPhone->client)) {
-                return $client->id;
-            }
-        }
-
-        $client = Client::create(
-            $clientForm->firstName,
-            $clientForm->middleName,
-            $clientForm->lastName
-        );
-        return $this->clientRepository->save($client);
     }
 
     /**

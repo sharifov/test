@@ -56,10 +56,10 @@ class QuickSearchInitPriceJob extends BaseObject implements JobInterface
         return false;
     }
 
-    /*public function getTtr()
+    public function getTtr()
     {
-        return 1 * 60;
-    }*/
+        return 1 * 5;
+    }
 
     /*public function canRetry($attempt, $error)
     {

@@ -17,15 +17,23 @@ use common\models\UserConnection;
 use common\models\UserProfile;
 use sales\dispatchers\DeferredEventDispatcher;
 use sales\dispatchers\EventDispatcher;
+use sales\entities\cases\Cases;
 use sales\forms\api\communication\voice\finish\FinishForm;
 use sales\forms\api\communication\voice\record\RecordForm;
+use sales\forms\lead\ClientCreateForm;
+use sales\forms\lead\PhoneCreateForm;
 use sales\repositories\airport\AirportRepository;
+use sales\repositories\cases\CasesRepository;
+use sales\repositories\cases\CasesStatusLogRepository;
 use sales\repositories\lead\LeadBadgesRepository;
 use sales\repositories\lead\LeadRepository;
 use sales\repositories\Repository;
 use sales\repositories\TestRepository;
 use sales\services\api\communication\CommunicationService;
+use sales\services\cases\CasesManageService;
+use sales\services\client\ClientManageService;
 use sales\services\TransactionManager;
+use SebastianBergmann\CodeCoverage\Report\PHP;
 use Twilio\TwiML\VoiceResponse;
 use Yii;
 use yii\caching\DbDependency;
@@ -40,25 +48,26 @@ use yii\queue\Queue;
 
 /**
  * Test controller
- * @property LeadRepository $leadRepository
+ * @property ClientManageService $clientManageService
  * @property DeferredEventDispatcher $dispatcher
  * @property TransactionManager $transactionManager
  */
 class TestController extends FController
 {
-    private $leadRepository;
+    private $repository;
     private $dispatcher;
     private $transactionManager;
+    private $clientManageService;
 
     public function __construct(
         $id,
         $module,
-        LeadRepository $leadRepository,
+        ClientManageService $clientManageService,
         DeferredEventDispatcher $dispatcher,
         TransactionManager $transactionManager, $config = []
     )
     {
-        $this->leadRepository = $leadRepository;
+        $this->clientManageService = $clientManageService;
         $this->dispatcher = $dispatcher;
         $this->transactionManager= $transactionManager;
         parent::__construct($id, $module, $config);
@@ -90,11 +99,49 @@ class TestController extends FController
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
 
+    public function test(Lead $lead)
+    {
+        $lead->client->first_name = '1';
+
+    }
+
     public function actionT()
     {
 
+        $repo = Yii::createObject(CasesRepository::class);
+        $case = Cases::createByCall(17, 9, 1, null);
+        $repo->save($case);
 
-        die;
+die;
+
+//        $case->processing(294);
+//        $case->followUp();
+        $case = Cases::createSystem();
+
+
+//        $case = Cases::findOne(17);
+
+        $case->followUp();
+
+        $case->processing(16);
+
+        $case->followUp();
+
+        $case->processing(45);
+
+        $case->trash();
+
+        $case->processing(64);
+
+        $case->solved();
+
+        $case->processing(23);
+
+//        VarDumper::dump($case->releaseEvents());die;
+
+        $this->repository->save($case);
+
+        //return $this->render('blank'); die;
 
         $post = [
             'type' => 'voip_incoming',
@@ -128,6 +175,8 @@ class TestController extends FController
                 'FromState' => '',
             ]
         ];
+
+        echo json_encode($post); exit;
 
         /** @var CommunicationService $service */
         $service = Yii::createObject(CommunicationService::class);

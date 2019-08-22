@@ -9,6 +9,7 @@ namespace frontend\widgets;
 
 
 use common\models\Lead2;
+use sales\entities\cases\Cases;
 use Yii;
 
 /**
@@ -28,6 +29,7 @@ class OnlineConnection extends \yii\bootstrap\Widget
     {
 
         $leadId = null;
+        $caseId = null;
 
         if(Yii::$app->controller->action->uniqueId === 'lead/view') {
 
@@ -44,6 +46,17 @@ class OnlineConnection extends \yii\bootstrap\Widget
             }
         }
 
-        return $this->render('online_connection', ['leadId' => $leadId]);
+        if(Yii::$app->controller->action->uniqueId === 'cases/view') {
+            $gid = Yii::$app->request->get('gid');
+            if($gid) {
+                $case = Cases::find()->select(['cs_id'])->where(['cs_gid' => $gid])->limit(1)->asArray()->one();
+                if ($case && $case['cs_id']) {
+                    $caseId = $case['cs_id'];
+                    unset($case);
+                }
+            }
+        }
+
+        return $this->render('online_connection', ['leadId' => $leadId, 'caseId' => $caseId]);
     }
 }

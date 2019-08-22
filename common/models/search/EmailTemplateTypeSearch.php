@@ -18,7 +18,7 @@ class EmailTemplateTypeSearch extends EmailTemplateType
     public function rules()
     {
         return [
-            [['etp_id', 'etp_created_user_id', 'etp_updated_user_id'], 'integer'],
+            [['etp_id', 'etp_created_user_id', 'etp_updated_user_id', 'etp_dep_id'], 'integer'],
             [['etp_key', 'etp_name', 'etp_origin_name', 'etp_hidden', 'etp_created_dt', 'etp_updated_dt'], 'safe'],
         ];
     }
@@ -65,6 +65,7 @@ class EmailTemplateTypeSearch extends EmailTemplateType
             'etp_updated_user_id' => $this->etp_updated_user_id,
             'etp_created_dt' => $this->etp_created_dt,
             'etp_updated_dt' => $this->etp_updated_dt,
+            'etp_dep_id'    => $this->etp_dep_id
         ]);
 
         $query->andFilterWhere(['like', 'etp_key', $this->etp_key])

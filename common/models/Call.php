@@ -2,8 +2,12 @@
 
 namespace common\models;
 
+use common\components\jobs\AgentCallQueueJob;
 use sales\entities\AggregateRoot;
+use sales\entities\cases\Cases;
+use sales\entities\cases\CasesStatus;
 use sales\entities\EventTrait;
+use sales\services\cases\CasesManageService;
 use Yii;
 use DateTime;
 use common\components\ChartTools;
@@ -47,17 +51,23 @@ use yii\helpers\VarDumper;
  * @property bool $c_is_deleted
  * @property float $c_price
  * @property int $c_source_type_id
+ * @property int $c_dep_id
+ * @property int $c_case_id
  *
  * @property Employee $cCreatedUser
+ * @property Cases $cCase
+ * @property Department $cDep
  * @property Lead $cLead
  * @property Lead2 $cLead2
  * @property Project $cProject
+ * @property Cases[] $cases
  */
 class Call extends \yii\db\ActiveRecord implements AggregateRoot
 {
     
     use EventTrait;
 
+    public const CALL_STATUS_IVR          = 'ivr';
     public const CALL_STATUS_QUEUE          = 'queued';
     public const CALL_STATUS_RINGING        = 'ringing';
     public const CALL_STATUS_IN_PROGRESS    = 'in-progress';
@@ -68,6 +78,7 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
     public const CALL_STATUS_CANCELED       = 'canceled';
 
     public const CALL_STATUS_LIST = [
+        self::CALL_STATUS_IVR         => 'IVR',
         self::CALL_STATUS_QUEUE         => 'Queued',
         self::CALL_STATUS_RINGING       => 'Ringing',
         self::CALL_STATUS_IN_PROGRESS   => 'In progress',
@@ -79,6 +90,7 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
     ];
 
     public const CALL_STATUS_LABEL_LIST = [
+        self::CALL_STATUS_IVR         => '<span class="label label-warning"><i class="fa fa-refresh fa-spin"></i> ' . self::CALL_STATUS_LIST[self::CALL_STATUS_IVR] . '</span>',
         self::CALL_STATUS_QUEUE         => '<span class="label label-warning"><i class="fa fa-refresh fa-spin"></i> ' . self::CALL_STATUS_LIST[self::CALL_STATUS_QUEUE] . '</span>',
         self::CALL_STATUS_RINGING       => '<span class="label label-warning"><i class="fa fa-spinner fa-spin"></i> ' . self::CALL_STATUS_LIST[self::CALL_STATUS_RINGING] . '</span>',
         self::CALL_STATUS_IN_PROGRESS   => '<span class="label label-success"><i class="fa fa-volume-control-phone"></i> ' . self::CALL_STATUS_LIST[self::CALL_STATUS_IN_PROGRESS] . '</span>',
@@ -90,6 +102,7 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
     ];
 
     public const CALL_STATUS_DESCRIPTION_LIST = [
+        self::CALL_STATUS_IVR           => 'The call is IVR.',
         self::CALL_STATUS_QUEUE         => 'The call is ready and waiting in line before going out.',
         self::CALL_STATUS_RINGING       => 'The call is currently ringing.',
         self::CALL_STATUS_IN_PROGRESS   => 'The call was answered and is actively in progress.',
@@ -256,7 +269,7 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
     {
         return [
             [['c_call_sid'], 'required'],
-            [['c_call_type_id', 'c_lead_id', 'c_created_user_id', 'c_com_call_id', 'c_project_id', 'c_call_duration', 'c_recording_duration'], 'integer'],
+            [['c_call_type_id', 'c_lead_id', 'c_created_user_id', 'c_com_call_id', 'c_project_id', 'c_call_duration', 'c_recording_duration', 'c_dep_id', 'c_case_id'], 'integer'],
             [['c_price'], 'number'],
             [['c_is_new'], 'default', 'value' => true],
             [['c_is_new', 'c_is_deleted'], 'boolean'],
@@ -269,7 +282,9 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
             [['c_recording_url', 'c_uri'], 'string', 'max' => 200],
             [['c_timestamp', 'c_sequence_number'], 'string', 'max' => 40],
             [['c_error_message'], 'string', 'max' => 500],
+            [['c_case_id'], 'exist', 'skipOnError' => true, 'targetClass' => Cases::class, 'targetAttribute' => ['c_case_id' => 'cs_id']],
             [['c_created_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['c_created_user_id' => 'id']],
+            [['c_dep_id'], 'exist', 'skipOnError' => true, 'targetClass' => Department::class, 'targetAttribute' => ['c_dep_id' => 'dep_id']],
             [['c_lead_id'], 'exist', 'skipOnError' => true, 'targetClass' => Lead::class, 'targetAttribute' => ['c_lead_id' => 'id']],
             [['c_project_id'], 'exist', 'skipOnError' => true, 'targetClass' => Project::class, 'targetAttribute' => ['c_project_id' => 'id']],
         ];
@@ -313,6 +328,8 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
             'c_is_deleted' => 'Is Deleted',
             'c_price' => 'Price',
             'c_source_type_id' => 'Source Type',
+            'c_dep_id' => 'Department ID',
+            'c_case_id' => 'Case ID',
         ];
     }
 
@@ -328,6 +345,27 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
                 'value' => date('Y-m-d H:i:s') //new Expression('NOW()'),
             ],
         ];
+    }
+
+    public function getCases()
+    {
+        return $this->hasMany(Cases::class, ['cs_call_id' => 'c_id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getCCase()
+    {
+        return $this->hasOne(Cases::class, ['cs_id' => 'c_case_id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getCDep()
+    {
+        return $this->hasOne(Department::class, ['dep_id' => 'c_dep_id']);
     }
 
     /**
@@ -415,9 +453,24 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
         parent::afterSave($insert, $changedAttributes);
 
         if(!$insert) {
-            if(isset($changedAttributes['c_call_status']) && in_array($this->c_call_status, [self::CALL_STATUS_COMPLETED, self::CALL_STATUS_BUSY, self::CALL_STATUS_NO_ANSWER], false)) {
-                if($this->c_created_user_id) {
-                    self::applyHoldCallToAgent($this->c_created_user_id);
+//            if(isset($changedAttributes['c_call_status']) && in_array($this->c_call_status, [self::CALL_STATUS_COMPLETED, self::CALL_STATUS_BUSY, self::CALL_STATUS_NO_ANSWER], false)) {
+//                if($this->c_created_user_id) {
+//                    // self::applyHoldCallToAgent($this->c_created_user_id);
+//                    $job = new AgentCallQueueJob();
+//                    $job->user_id = $this->c_created_user_id;
+//                    $jobId = Yii::$app->queue_job->push($job);
+//                }
+//            }
+
+            if(isset($changedAttributes['c_call_status']) && (int) $this->c_call_type_id === self::CALL_TYPE_IN && $this->c_case_id && $this->c_call_status === self::CALL_STATUS_IN_PROGRESS) {
+                if($this->c_created_user_id && $this->cCase && $this->c_created_user_id !== $this->cCase->cs_user_id) {
+                    try {
+                        $casesManageService = Yii::createObject(CasesManageService::class);
+                        $casesManageService->take($this->c_case_id, $this->c_created_user_id);
+                    } catch (\Throwable $exception) {
+                        Yii::error(VarDumper::dumpAsString($exception), 'Call:afterSave:CasesManageService:Case:Take');
+                    }
+
                 }
             }
 
@@ -461,26 +514,54 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
 
             //Yii::info(VarDumper::dumpAsString(['changedAttributes' => $changedAttributes, 'Call' => $this->attributes, 'Lead' => $lead->attributes]), 'info\Call:afterSave');
 
-            if($this->c_call_status === self::CALL_STATUS_IN_PROGRESS && $this->c_call_type_id === self::CALL_TYPE_IN && $this->c_lead_id && isset($changedAttributes['c_call_status']) && $changedAttributes['c_call_status'] === self::CALL_STATUS_RINGING) {
+            if($this->c_call_status === self::CALL_STATUS_IN_PROGRESS && $this->c_call_type_id === self::CALL_TYPE_IN && ( $this->c_lead_id || $this->c_case_id ) && isset($changedAttributes['c_call_status'])
+                && ($changedAttributes['c_call_status'] === self::CALL_STATUS_RINGING || $changedAttributes['c_call_status'] === self::CALL_STATUS_QUEUE)) {
 
-                $lead = $this->cLead2;
+                if($this->c_lead_id && (int) $this->c_dep_id === Department::DEPARTMENT_SALES) {
+                    $lead = $this->cLead2;
 
-                if($lead && !$lead->employee_id && $this->c_created_user_id && $lead->status === Lead::STATUS_PENDING) {
-                    Yii::info(VarDumper::dumpAsString(['changedAttributes' => $changedAttributes, 'Call' => $this->attributes, 'Lead' => $lead->attributes]), 'info\Call:afterSave2');
-                    $lead->employee_id = $this->c_created_user_id;
-                    $lead->status = Lead::STATUS_PROCESSING;
-                    // $lead->l_call_status_id = Lead::CALL_STATUS_PROCESS;
-                    $lead->l_answered = true;
-                    if($lead->save()) {
-                        $host = \Yii::$app->params['url_address'] ?? '';
-                        Notifications::create($lead->employee_id, 'AutoCreated new Lead ('.$lead->id.')', 'A new lead ('.$lead->id.') has been created for you. Call Id: ' . $this->c_id, Notifications::TYPE_SUCCESS, true);
-                        Notifications::socket($lead->employee_id, null, 'getNewNotification', [], true);
-                        Notifications::socket($lead->employee_id, null, 'openUrl', ['url' => $host . '/lead/view/'. $lead->gid], false);
-                    } else {
-                        Yii::error(VarDumper::dumpAsString($lead->errors), 'Call:afterSave:Lead:update');
+                    if ($lead && !$lead->employee_id && $this->c_created_user_id && $lead->status === Lead::STATUS_PENDING) {
+                        Yii::info(VarDumper::dumpAsString(['changedAttributes' => $changedAttributes, 'Call' => $this->attributes, 'Lead' => $lead->attributes]), 'info\Call:Lead:afterSave');
+                        $lead->employee_id = $this->c_created_user_id;
+                        $lead->status = Lead::STATUS_PROCESSING;
+                        // $lead->l_call_status_id = Lead::CALL_STATUS_PROCESS;
+                        $lead->l_answered = true;
+                        if ($lead->save()) {
+                            $host = \Yii::$app->params['url_address'] ?? '';
+                            Notifications::create($lead->employee_id, 'AutoCreated new Lead (' . $lead->id . ')', 'A new lead (' . $lead->id . ') has been created for you. Call Id: ' . $this->c_id, Notifications::TYPE_SUCCESS, true);
+                            Notifications::socket($lead->employee_id, null, 'getNewNotification', [], true);
+                            Notifications::socket($lead->employee_id, null, 'openUrl', ['url' => $host . '/lead/view/' . $lead->gid], false);
+                        } else {
+                            Yii::error(VarDumper::dumpAsString($lead->errors), 'Call:afterSave:Lead:update');
+                        }
                     }
                 }
+
+
+                if($this->c_case_id && ((int) $this->c_dep_id === Department::DEPARTMENT_EXCHANGE || (int) $this->c_dep_id === Department::DEPARTMENT_SUPPORT)) {
+                    $case = $this->cCase;
+
+                    if ($case && !$case->cs_user_id && $this->c_created_user_id && $case->isPending()) {
+                        Yii::info(VarDumper::dumpAsString(['changedAttributes' => $changedAttributes, 'Call' => $this->attributes, 'Case' => $case->attributes]), 'info\Call:Case:afterSave');
+                        $case->cs_user_id = $this->c_created_user_id;
+                        //$case->processing($this->c_created_user_id);
+                        $case->cs_status = CasesStatus::STATUS_PROCESSING;
+
+                        if ($case->save()) {
+                            $host = \Yii::$app->params['url_address'] ?? '';
+                            Notifications::create($case->cs_user_id, 'AutoCreated new Case (' . $case->cs_id . ')', 'A new Case (' . $case->cs_id . ') has been created for you. Call Id: ' . $this->c_id, Notifications::TYPE_SUCCESS, true);
+                            Notifications::socket($case->cs_user_id, null, 'getNewNotification', [], true);
+                            Notifications::socket($case->cs_user_id, null, 'openUrl', ['url' => $host . '/cases/view/' . $case->cs_gid], false);
+                        } else {
+                            Yii::error(VarDumper::dumpAsString($case->errors), 'Call:afterSave:Case:update');
+                        }
+                    }
+                }
+
             }
+
+
+
 
         }
 
@@ -579,6 +660,50 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
 
 
     /**
+     * @param Call $call
+     * @param int $user_id
+     * @return bool
+     */
+    public static function applyCallToAgent(Call $call, int $user_id): bool
+    {
+        try {
+            if ($call) {
+                if ($call->c_created_user_id) {
+                    return false;
+                }
+
+                $call->c_created_user_id = $user_id;
+                $call->update();
+
+                $agent = 'seller' . $user_id;
+                $res = \Yii::$app->communication->callRedirect($call->c_call_sid, 'client', $call->c_from, $agent);
+
+                if ($res && isset($res['error']) && $res['error'] === false) {
+                    if (isset($res['data']['is_error']) && $res['data']['is_error'] === true) {
+                        $call->c_call_status = self::CALL_STATUS_CANCELED;
+                        $call->c_created_user_id = null;
+                        $call->update();
+                        return false;
+                    }
+
+                    $call->c_call_status = self::CALL_STATUS_RINGING;
+                    $call->c_created_user_id = $user_id;
+                    $call->update();
+
+                    \Yii::info(VarDumper::dumpAsString($res), 'info\Call:applyCallToAgent:callRedirect');
+                    return true;
+                }
+                \Yii::warning('Error: ' . VarDumper::dumpAsString($res), 'Call:applyCallToAgent:callRedirect');
+            }
+
+        } catch (\Throwable $e) {
+            \Yii::error(VarDumper::dumpAsString([$e->getMessage(), $e->getFile(), $e->getLine()]), 'Call:applyCallToAgent');
+        }
+        return false;
+    }
+
+
+    /**
      * @param int $agentId
      * @return bool
      */
@@ -586,7 +711,7 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
     {
         try {
 
-            $callsCount = self::find()->where(['c_call_status' => self::CALL_STATUS_QUEUE])->cache(10)->count();
+            $callsCount = self::find()->where(['c_call_status' => self::CALL_STATUS_QUEUE])->count(); //cache(10)
             \Yii::info(VarDumper::dumpAsString($callsCount, 10, false), 'info\Call:applyHoldCallToAgent:callRedirect_$callsCount');
             if (!$callsCount) {
                 return false;
@@ -609,55 +734,39 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
                 throw new \Exception('Agent is not isCallFree. Call:applyHoldCallToAgent:isCallFree:$user:' . $agentId);
             }
 
-            $project_employee_access = ProjectEmployeeAccess::find()->where(['employee_id' => $user->id])->all();
+            $project_employee_access = ProjectEmployeeAccess::find()->select(['project_id'])->where(['employee_id' => $user->id])->all();
             if (!$project_employee_access) {
                 throw new \Exception('Not found ProjectEmployeeAccess. Call:applyHoldCallToAgent:$project_employee_access:$user:' . $agentId);
             }
 
             $projectsIds = [];
-            foreach ($project_employee_access AS $pea) {
-                $projectsIds[] = $pea->project_id;
-            }
-
-            $calls = self::find()->where(['c_call_status' => self::CALL_STATUS_QUEUE])
-                ->andWhere(['c_project_id' => $projectsIds])
-                ->orderBy(['c_id' => SORT_ASC])
-                ->limit(20)
-                ->all();
-
-            if ($calls) {
-                foreach ($calls as $call) {
-
-                    if ($call->c_created_user_id) {
-                        continue;
-                    }
-
-                    $call->c_created_user_id = $user->id;
-                    $call->update();
-
-                    $agent = 'seller' . $user->id;
-                    $res = \Yii::$app->communication->callRedirect($call->c_call_sid, 'client', $call->c_from, $agent);
-
-                    if ($res && isset($res['error']) && $res['error'] === false) {
-                        if (isset($res['data']['is_error']) && $res['data']['is_error'] === true) {
-                            $call->c_call_status = self::CALL_STATUS_CANCELED;
-                            $call->c_created_user_id = null;
-                            $call->update();
-                            continue;
-                        }
-
-                        $call->c_call_status = self::CALL_STATUS_RINGING;
-                        $call->c_created_user_id = $user->id;
-                        $call->update();
-
-                        \Yii::info(VarDumper::dumpAsString($res, 10, false), 'info\Call:applyHoldCallToAgent:callRedirect');
-                        return true;
-                    } else {
-                        \Yii::warning(VarDumper::dumpAsString($res, 10, false), 'info\Call:applyHoldCallToAgent:callRedirect:warning');
-                    }
+            if($project_employee_access) {
+                foreach ($project_employee_access AS $pea) {
+                    $projectsIds[] = $pea->project_id;
                 }
             }
 
+            //$subQuery = ProjectEmployeeAccess::find()->select(['DISTINCT(project_id)'])->where(['employee_id' => $user->id]);
+            $subQueryUd = UserDepartment::find()->select(['DISTINCT(ud_dep_id)'])->where(['ud_user_id' => $user->id]);
+
+            $calls = self::find()->where(['c_call_status' => self::CALL_STATUS_QUEUE])
+                //->andWhere(['IN', 'c_project_id', $subQuery])
+                ->andWhere(['c_project_id' => $projectsIds])
+                ->andWhere(['IN', 'c_dep_id', $subQueryUd])
+                ->orderBy(['c_id' => SORT_ASC])
+                ->limit(5)
+                ->all();
+
+            //->andWhere(['c_project_id' => $projectsIds])
+
+            if ($calls) {
+                foreach ($calls as $call) {
+                    $isCalled = self::applyCallToAgent($call, $user->id);
+                    if($isCalled) {
+                        return true;
+                    }
+                }
+            }
         } catch (\Throwable $e) {
             \Yii::warning(VarDumper::dumpAsString([$e->getMessage(), $e->getFile(), $e->getLine()], 10, false), 'Call:applyHoldCallToAgent');
         }

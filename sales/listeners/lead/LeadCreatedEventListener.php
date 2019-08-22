@@ -18,9 +18,10 @@ class LeadCreatedEventListener
     {
         $lead = $event->lead;
 
-        $job = new QuickSearchInitPriceJob();
+        /*$job = new QuickSearchInitPriceJob();
         $job->lead_id = $lead->id;
-        $jobId = Yii::$app->queue_job->push($job);
+        $jobId = Yii::$app->queue_job->push($job);*/
+
 //        Yii::info('Lead: ' . $event->lead->id . ', QuickSearchInitPriceJob: ' . $jobId, 'info\LeadCreatedEventListener');
     }
 }

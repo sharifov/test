@@ -25,6 +25,7 @@ $isSuperAdmin = $user->canRole('superadmin');
         $menuItems = [];
 
         $menuItems[] = ['label' => 'Create new Lead', 'url' => ['/lead/create'], 'icon' => 'plus'];
+        $menuItems[] = ['label' => 'Create new Case', 'url' => ['/cases/create'], 'icon' => 'plus'];
 
         if ($user->canCall()) {
             $menuItems[] = ['label' => 'Auto redial', 'url' => ['/call/auto-redial'], 'icon' => 'tty'];
@@ -32,6 +33,9 @@ $isSuperAdmin = $user->canRole('superadmin');
 
         $menuItems[] = ['label' => 'Dashboard', 'url' => ['/'], 'icon' => 'area-chart'];
         $menuItems[] = ['label' => 'Search Leads', 'url' => ['/leads/index'], 'icon' => 'search'];
+        $menuItems[] = ['label' => 'Search Sale', 'url' => ['/sale/search'], 'icon' => 'search'];
+        $menuItems[] = ['label' => 'Search Cases', 'url' => ['/cases/index'], 'icon' => 'search'];
+
 
         if (!$isUM) {
             $cntNotifications = \common\models\Notifications::findNewCount(Yii::$app->user->id);
@@ -62,7 +66,19 @@ $isSuperAdmin = $user->canRole('superadmin');
         }
 
         $menuItems[] = [
-            'label' => 'Stats',
+            'label' => 'Data Lists',
+            'url' => 'javascript:',
+            'icon' => 'th-list',
+            'items' => [
+                ['label' => 'Call List', 'url' => ['/call/index'], 'icon' => 'phone'],
+                ['label' => 'SMS List', 'url' => ['/sms/index'], 'icon' => 'comments-o'],
+                ['label' => 'Mail List', 'url' => ['/email/index'], 'icon' => 'envelope'],
+                ['label' => 'Notification List', 'url' => ['/notifications/index'], 'icon' => 'comment-o'],
+            ]
+        ];
+
+        $menuItems[] = [
+            'label' => 'Stats & Reports',
             'url' => 'javascript:',
             'icon' => 'bar-chart',
             'items' => [
@@ -75,9 +91,6 @@ $isSuperAdmin = $user->canRole('superadmin');
                 ['label' => 'User Connections', 'url' => ['/user-connection/index'], 'icon' => 'plug'],
                 ['label' => 'User Stats', 'url' => ['/user-connection/stats'], 'icon' => 'area-chart'],
                 ['label' => 'Call User Map', 'url' => ['/call/user-map'], 'icon' => 'map'],
-                ['label' => 'Call List', 'url' => ['/call/index'], 'icon' => 'phone'],
-                ['label' => 'SMS List', 'url' => ['/sms/index'], 'icon' => 'comments-o'],
-                ['label' => 'Mail List', 'url' => ['/email/index'], 'icon' => 'envelope'],
             ]
         ];
 
@@ -86,7 +99,6 @@ $isSuperAdmin = $user->canRole('superadmin');
             'url' => 'javascript:',
             'icon' => 'list',
             'items' => [
-                ['label' => 'All Notifications', 'url' => ['/notifications/index'], 'icon' => 'comment-o'],
                 ['label' => 'User Call Statuses', 'url' => ['/user-call-status/index'], 'icon' => 'list'],
                 ['label' => 'Lead Call Experts', 'url' => ['/lead-call-expert/index'], 'icon' => 'bell'],
                 ['label' => 'Flight Segments', 'url' => ['/lead-flight-segment/index'], 'icon' => 'plane'],
@@ -112,12 +124,12 @@ $isSuperAdmin = $user->canRole('superadmin');
             $menuLItems[] = ['label' => 'Inbox <span id="badges-inbox" data-type="inbox" class="label-info label pull-right bginfo"></span> ', 'url' => ['/queue/inbox'], 'icon' => 'briefcase text-info'];
         }
 
-        $menuLItems[] = ['label' => 'Follow Up <span id="badges-follow-up" data-type="follow-up" class="label-success label pull-right bginfo"></span> ', 'url' => ['/queue/follow-up'], 'icon' => 'recycle'];
-        $menuLItems[] = ['label' => 'Processing <span id="badges-processing" data-type="processing" class="label-warning label pull-right bginfo"></span> ', 'url' => ['/queue/processing'], 'icon' => 'spinner'];
-        $menuLItems[] = ['label' => 'Booked <span id="badges-booked" data-type="booked" class="label-success label pull-right bginfo"></span>', 'url' => ['/queue/booked'], 'icon' => 'flag-o text-warning'];
-        $menuLItems[] = ['label' => 'Sold <span id="badges-sold" data-type="sold" class="label-success label pull-right bginfo"></span> ', 'url' => ['/queue/sold'], 'icon' => 'flag text-success'];
-        $menuLItems[] = ['label' => 'Duplicate <span id="badges-duplicate" data-type="duplicate" class="label-danger label pull-right bginfo"></span>', 'url' => ['/queue/duplicate'], 'icon' => 'list text-danger'];
-        $menuLItems[] = ['label' => 'Trash <span id="badges-trash" class="label-danger label pull-right"></span>', 'url' => ['/queue/trash'], 'icon' => 'trash-o text-danger'];
+        $menuLItems[] = ['label' => 'Lead Follow Up <span id="badges-follow-up" data-type="follow-up" class="label-success label pull-right bginfo"></span> ', 'url' => ['/queue/follow-up'], 'icon' => 'recycle'];
+        $menuLItems[] = ['label' => 'Lead Processing <span id="badges-processing" data-type="processing" class="label-warning label pull-right bginfo"></span> ', 'url' => ['/queue/processing'], 'icon' => 'spinner'];
+        $menuLItems[] = ['label' => 'Lead Booked <span id="badges-booked" data-type="booked" class="label-success label pull-right bginfo"></span>', 'url' => ['/queue/booked'], 'icon' => 'flag-o text-warning'];
+        $menuLItems[] = ['label' => 'Lead Sold <span id="badges-sold" data-type="sold" class="label-success label pull-right bginfo"></span> ', 'url' => ['/queue/sold'], 'icon' => 'flag text-success'];
+        $menuLItems[] = ['label' => 'Lead Duplicate <span id="badges-duplicate" data-type="duplicate" class="label-danger label pull-right bginfo"></span>', 'url' => ['/queue/duplicate'], 'icon' => 'list text-danger'];
+        $menuLItems[] = ['label' => 'Lead Trash <span id="badges-trash" class="label-danger label pull-right"></span>', 'url' => ['/queue/trash'], 'icon' => 'trash-o text-danger'];
 
 
         if($isAdmin) {
@@ -131,6 +143,24 @@ $isSuperAdmin = $user->canRole('superadmin');
             $menuItems = \yii\helpers\ArrayHelper::merge($menuItems, $menuLItems);
         }
 
+        $menuCases = [];
+        $menuCases[] = ['label' => 'Case Pending <span id="cases-q-pending" data-type="pending" class="label-warning label pull-right cases-q-info"></span> ', 'url' => ['/cases-q/pending'], 'icon' => 'briefcase text-info'];
+        $menuCases[] = ['label' => 'Case Inbox <span id="cases-q-inbox" data-type="inbox" class="label-warning label pull-right cases-q-info"></span> ', 'url' => ['/cases-q/inbox'], 'icon' => 'briefcase text-info'];
+        $menuCases[] = ['label' => 'Case Processing <span id="cases-q-processing" data-type="processing" class="label-warning label pull-right cases-q-info"></span> ', 'url' => ['/cases-q/processing'], 'icon' => 'spinner'];
+        $menuCases[] = ['label' => 'Case Follow Up <span id="cases-q-followup" data-type="followup" class="label-success label pull-right cases-q-info"></span> ', 'url' => ['/cases-q/followup'], 'icon' => 'recycle'];
+        $menuCases[] = ['label' => 'Case Solved <span id="cases-q-solved" data-type="solved" class="label-success label pull-right cases-q-info"></span> ', 'url' => ['/cases-q/solved'], 'icon' => 'flag text-success'];
+        $menuCases[] = ['label' => 'Case Trash <span id="cases-q-trash" class="label-danger label pull-right"></span>', 'url' => ['/cases-q/trash'], 'icon' => 'trash-o text-danger'];
+
+        if ($isAdmin) {
+            $menuItems[] = [
+                'label' => 'Cases',
+                'url' => 'javascript:',
+                'icon' => 'cubes',
+                'items' => $menuCases
+            ];
+        } else {
+            $menuItems = \yii\helpers\ArrayHelper::merge($menuItems, $menuCases);
+        }
 
         $menuItems[] = [
             'label' => 'Users',
@@ -163,6 +193,8 @@ $isSuperAdmin = $user->canRole('superadmin');
             'items' => [
                 ['label' => 'Projects', 'url' => ['/project/index'], 'icon' => 'product-hunt'],
                 ['label' => 'Project Sources', 'url' => ['/sources/index'], 'icon' => 'product-hunt'],
+                ['label' => 'Departments', 'url' => ['/department/index'], 'icon' => 'sitemap'],
+                ['label' => 'Department Phones', 'url' => ['/department-phone-project/index'], 'icon' => 'phone'],
                 ['label' => 'Airlines', 'url' => ['/settings/airlines'], 'icon' => 'plane'],
                 ['label' => 'Airports', 'url' => ['/settings/airports'], 'icon' => 'plane'],
                 ['label' => 'ACL', 'url' => ['/settings/acl'], 'icon' => 'user-secret'],
@@ -171,8 +203,12 @@ $isSuperAdmin = $user->canRole('superadmin');
                 ['label' => 'Lead Tasks', 'url' => ['/lead-task/index'], 'icon' => 'list'],
                 ['label' => 'Email template types', 'url' => ['/email-template-type/index'], 'icon' => 'envelope-o'],
                 ['label' => 'SMS template types', 'url' => ['/sms-template-type/index'], 'icon' => 'comments-o'],
+                ['label' => 'Case Sales', 'url' => ['/case-sale/index'], 'icon' => 'list'],
+                ['label' => 'Case Notes', 'url' => ['/case-note/index'], 'icon' => 'list'],
                 ['label' => 'Project Settings', 'url' => ['/settings/projects'], 'icon' => 'product-hunt'],
                 ['label' => 'Check List Types', 'url' => ['/lead-checklist-type/index'], 'icon' => 'list', 'visible' => Yii::$app->user->can('manageLeadChecklistType')],
+                ['label' => 'Cases status history', 'url' => ['/cases-status-log'], 'icon' => 'bars'],
+                ['label' => 'Cases categories', 'url' => ['/cases-category'], 'icon' => 'users'],
             ]
         ];
 
@@ -326,5 +362,44 @@ function updateBadgesCounters() {
 }
 
 updateBadgesCounters();
+JS;
+$this->registerJs($js, $this::POS_LOAD);
+
+$urlCasesQCount = Url::to(['/cases-q-counters/get-q-count']);
+$js =<<<JS
+function updateCasesQCounters() {
+    $(".cases-q-info").each(function(i) {
+        var id = $(this).attr('id');
+        var type = $(this).data('type');
+        if (typeof(type) != "undefined" && type != null && typeof(id) != "undefined" && id != null ) {
+              setTimeout(function () {
+                  $('#' + id).html('<i style="font-size:9px" class="fa fa-spin fa-spinner"></i>');
+              $.ajax({
+                url: '$urlCasesQCount',
+                data: {type: type}, 
+                dataType: 'json',
+                success: function(data){
+                    if (typeof (data) != "undefined" && data != null) {
+                        if (data.result == 'success' && data.count != 0) {
+                            $("#" + id).html(data.count);
+                        } else {
+                            $("#" + id).html('');
+                        }
+                    } else {
+                        $("#" + id).html('-');
+                    }
+         
+                },
+                error: function(data){
+                    console.log(data);
+                    $("#" + id).html('-');
+                }, 
+            });    
+              }, i*300)
+        }
+    });
+}
+
+updateCasesQCounters();
 JS;
 $this->registerJs($js, $this::POS_LOAD);

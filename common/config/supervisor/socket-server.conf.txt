@@ -1,4 +1,5 @@
 [program:SoketServer]
+process_name=%(program_name)s_%(process_num)02d
 command=/usr/bin/php /var/www/sale/console/socket-server.php start
 stdout_logfile=/var/www/sale/console/runtime/socket-server.log
 autostart=true

@@ -299,7 +299,6 @@ $this->params['breadcrumbs'][] = $this->title;
             'label' => 'Ticket Date',
             'attribute' => 'last_ticket_date',
             'value' => function (Lead $model) {
-
                 return ($model->appliedQuote && $model->appliedQuote->last_ticket_date) ? Yii::$app->formatter->asDate($model->appliedQuote->last_ticket_date) : '-';
             },
             //'format' => 'datetime',

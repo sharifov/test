@@ -85,6 +85,7 @@ use common\components\SearchService;
  * @property int $l_duplicate_lead_id
  * @property double $l_init_price
  * @property string $l_last_action_dt
+ * @property int $l_dep_id
  *
  * @property double $finalProfit
  * @property int $quotesCount
@@ -112,6 +113,7 @@ use common\components\SearchService;
  * @property Employee $employee
  * @property Lead $lDuplicateLead
  * @property Lead[] $leads0
+ * @property Department $lDep
  * @property Sources $source
  * @property Project $project
  * @property LeadAdditionalInformation[] $additionalInformationForm
@@ -267,7 +269,7 @@ class Lead extends ActiveRecord implements AggregateRoot
             [['adults', 'children', 'source_id'], 'required', 'on' => self::SCENARIO_API], //'except' => self::SCENARIO_API],
             [['adults'], 'integer', 'min' => 1, 'on' => self::SCENARIO_API],
 
-            [['client_id', 'employee_id', 'status', 'project_id', 'source_id', 'rating', 'bo_flight_id', 'l_grade', 'clone_id', 'l_call_status_id', 'l_duplicate_lead_id'], 'integer'],
+            [['client_id', 'employee_id', 'status', 'project_id', 'source_id', 'rating', 'bo_flight_id', 'l_grade', 'clone_id', 'l_call_status_id', 'l_duplicate_lead_id', 'l_dep_id'], 'integer'],
             [['adults', 'children', 'infants'], 'integer', 'max' => 9],
 
             [['notes_for_experts', 'request_ip_detail', 'l_client_ua'], 'string'],
@@ -291,6 +293,7 @@ class Lead extends ActiveRecord implements AggregateRoot
             [['client_id'], 'exist', 'skipOnError' => true, 'targetClass' => Client::class, 'targetAttribute' => ['client_id' => 'id']],
             [['employee_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['employee_id' => 'id']],
             [['l_duplicate_lead_id'], 'exist', 'skipOnError' => true, 'targetClass' => self::class, 'targetAttribute' => ['l_duplicate_lead_id' => 'id']],
+            [['l_dep_id'], 'exist', 'skipOnError' => true, 'targetClass' => Department::class, 'targetAttribute' => ['l_dep_id' => 'dep_id']],
         ];
     }
 
@@ -308,6 +311,7 @@ class Lead extends ActiveRecord implements AggregateRoot
      * @param $notesForExperts
      * @param $clientPhone
      * @param $clientEmail
+     * @param $depId
      * @return Lead
      */
     public static function create(
@@ -323,7 +327,8 @@ class Lead extends ActiveRecord implements AggregateRoot
         $projectId,
         $notesForExperts,
         $clientPhone,
-        $clientEmail
+        $clientEmail,
+        $depId
     ): self
     {
         $lead = new static();
@@ -342,6 +347,7 @@ class Lead extends ActiveRecord implements AggregateRoot
         $lead->gid = self::generateGid();
         $lead->l_client_phone = $clientPhone;
         $lead->l_client_email = $clientEmail;
+        $lead->l_dep_id = $depId;
         $lead->status = self::STATUS_PENDING;
         $lead->recordEvent(new LeadCreatedEvent($lead));
         return $lead;
@@ -914,7 +920,8 @@ class Lead extends ActiveRecord implements AggregateRoot
             'l_duplicate_lead_id' => 'Duplicate Lead ID',
 
             'l_init_price' => 'Init Price',
-            'l_last_action_dt' => 'Last Action'
+            'l_last_action_dt' => 'Last Action',
+            'l_dep_id' => 'Department ID',
 
         ];
     }
@@ -931,6 +938,15 @@ class Lead extends ActiveRecord implements AggregateRoot
                 'value' => date('Y-m-d H:i:s') //new Expression('NOW()'),
             ],
         ];
+    }
+
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getLDep()
+    {
+        return $this->hasOne(Department::class, ['dep_id' => 'l_dep_id']);
     }
 
     /**
@@ -1880,9 +1896,10 @@ New lead {lead_id}
             if ($insert) {
                 LeadFlow::addStateFlow($this);
 
-                $job = new QuickSearchInitPriceJob();
+                /*$job = new QuickSearchInitPriceJob();
                 $job->lead_id = $this->id;
-                $jobId = Yii::$app->queue_job->push($job);
+                $jobId = Yii::$app->queue_job->push($job);*/
+
                 //Yii::info('Lead: ' . $this->id . ', QuickSearchInitPriceJob: '.$jobId, 'info\Lead:afterSave:QuickSearchInitPriceJob');
 
             } else {
@@ -1896,7 +1913,7 @@ New lead {lead_id}
                     if($this->called_expert && ($this->status == self::STATUS_TRASH || $this->status == self::STATUS_FOLLOW_UP || $this->status == self::STATUS_SNOOZE || $this->status == self::STATUS_PROCESSING)) {
                         $job = new UpdateLeadBOJob();
                         $job->lead_id = $this->id;
-                        $jobId = Yii::$app->queue_job->push($job);
+                        $jobId = Yii::$app->queue_job->priority(200)->push($job);
                         // Yii::info('Lead: ' . $this->id . ', UpdateLeadBOJob: ' . $jobId, 'info\Lead:afterSave:UpdateLeadBOJob');
                     }
                 }
@@ -2250,9 +2267,13 @@ New lead {lead_id}
         ]);
     }
 
-    public function getAppliedQuote()
+    public function getAppliedQuote(): ActiveQuery
     {
-        return $this->getQuotes()->andWhere(['status' => Quote::STATUS_APPLIED])->one();
+        return $this->hasOne(Quote::class, ['lead_id' => 'id'])->andWhere([
+            'or',
+            [Quote::tableName() . '.status' => Quote::STATUS_APPLIED],
+            [Quote::tableName() . '.status' => null]]
+        );
     }
 
 

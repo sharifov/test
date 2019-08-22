@@ -59,6 +59,7 @@ class PhoneController extends FController
         $phone_number = Yii::$app->request->post('phone_number');
         $project_id = Yii::$app->request->post('project_id');
         $lead_id = Yii::$app->request->post('lead_id');
+        $case_id = Yii::$app->request->post('case_id');
 
 
         $selectProjectPhone = null;
@@ -117,6 +118,7 @@ class PhoneController extends FController
             'project' => $project,
             'model' => $model,
             'lead_id' => $lead_id,
+            'case_id' => $case_id,
             //'dataProvider' => $dataProvider,
             'isAgent' => $isAgent,
             'fromPhoneNumbers' => $fromPhoneNumbers,
@@ -168,6 +170,7 @@ class PhoneController extends FController
         $call_status = Yii::$app->request->post('call_status', Call::CALL_STATUS_RINGING);
 
         $lead_id = Yii::$app->request->post('lead_id');
+        $case_id = Yii::$app->request->post('case_id');
         $project_id = Yii::$app->request->post('project_id');
 
         if($call_sid && $call_from && $call_to) {
@@ -189,6 +192,10 @@ class PhoneController extends FController
 
             if(!$call->c_lead_id && $lead_id) {
                 $call->c_lead_id = (int) $lead_id;
+            }
+
+            if(!$call->c_case_id && $case_id) {
+                $call->c_case_id = (int) $case_id;
             }
 
             if(!$call->c_project_id && $project_id) {
@@ -226,6 +233,7 @@ class PhoneController extends FController
             $to_id = (int)Yii::$app->request->post('to_id');
             $projectid = (int)Yii::$app->request->post('project_id');
             $lead_id = (int)Yii::$app->request->post('lead_id');
+            $case_id = (int)Yii::$app->request->post('case_id');
             $check_user = Yii::$app->request->get('check_user');
             $call = null;
 
@@ -280,6 +288,7 @@ class PhoneController extends FController
                     $call->c_to = $result['data']['result']['forwardedFrom'] ?? null;
                     $call->c_created_user_id = $to_id;
                     $call->c_lead_id = ($lead_id > 0) ? $lead_id : null;
+                    $call->c_case_id = ($case_id > 0) ? $case_id : null;
                     $call->save();
 
                 }
@@ -330,7 +339,9 @@ class PhoneController extends FController
 
             //$agents_for_call = Employee::getAgentsForCall($agent_id, $project_id);
             $agents_for_call = Employee::getAgentsForGeneralLineCall($project_id, '', 50000);
-            $lead_id = ($call->c_lead_id) ? $call->c_lead_id : 0;
+            $lead_id = $call->c_lead_id ?: 0;
+            $case_id = $call->c_case_id ?: 0;
+
             if($agents_for_call) {
                 $html .= '<div id="redirect-agent-info" style="display: none;"><h3></h3></div>';
                 $html .= '<table class="table" style="margin: 0" id="redirect-agent-table"><tr><th>Username</th><th>Roles</th><th>Action</th></tr>';
@@ -359,7 +370,7 @@ class PhoneController extends FController
                         $html .= '<td>'.$agentObject->username.'</td><td>'.implode(",", $roles).'</td>';
                         $html .= '<td><button class="btn btn-sm btn-primary redirect-agent-data" 
                             data-agentid="'.$agentObject->id.'" data-called="'.$from.'" data-agent="seller'.$agentObject->id.'" 
-                            data-projectid="'.$project_id.'" data-leadid="'.$lead_id.'" id="redirect-agent-id">Redirect</button></td>';
+                            data-projectid="'.$project_id.'" data-leadid="'.$lead_id.'" data-caseid="'.$case_id.'" id="redirect-agent-id">Redirect</button></td>';
                         $html .= '</tr>';
                     }
                 }
@@ -375,7 +386,7 @@ class PhoneController extends FController
                 'from' => $from,
                 'items' => $callAgents,
                 'html' => $html,
-                'call' => ($call) ? $call->c_id : 0,
+                'call' => $call ? $call->c_id : 0,
                 'agents_for_call' => $agents_for_call,
             ];
         } catch (\Throwable $e) {

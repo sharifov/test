@@ -9,7 +9,11 @@ use yii\widgets\ActiveForm;
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\EmployeeSearch */
 
+/* @var $dataProviderOnlineDep1 yii\data\ActiveDataProvider */
+/* @var $dataProviderOnlineDep2 yii\data\ActiveDataProvider */
+/* @var $dataProviderOnlineDep3 yii\data\ActiveDataProvider */
 /* @var $dataProviderOnline yii\data\ActiveDataProvider */
+
 /* @var $dataProvider2 yii\data\ActiveDataProvider */
 /* @var $dataProvider3 yii\data\ActiveDataProvider */
 /* @var $form yii\widgets\ActiveForm */
@@ -127,34 +131,89 @@ $dtNow = date('Y-m-d H:i:s');
         <div class="row">
             <div class="col-md-2">
                 <?/*<h1><i class="fa fa-bar-chart"></i> <?=$this->title?></h1>*/?>
+
+
                 <div class="panel panel-default">
-                    <div class="panel-heading"><i class="fa fa-users"></i> OnLine Users (<?=$dataProviderOnline->totalCount?>)</div>
+                    <div class="panel-heading"><i class="fa fa-users"></i> OnLine Users - Department SALES (<?=$dataProviderOnlineDep1->totalCount?>)</div>
                     <div class="panel-body">
                         <?= \yii\widgets\ListView::widget([
-                            'dataProvider' => $dataProviderOnline,
-
-
+                            'dataProvider' => $dataProviderOnlineDep1,
                             'emptyText' => '<div class="text-center">Not found online users</div><br>',
                             'layout' => "{items}<div class=\"text-center\">{pager}</div>\n", //{summary}\n
-
                             'itemView' => function ($model, $key, $index, $widget) {
                                 return $this->render('_list_item_online', ['model' => $model, 'index' => $index]);
                             },
-
                             'itemOptions' => [
                                 //'class' => 'item',
                                 //'tag' => false,
                             ],
-
-
                         ])?>
                     </div>
                 </div>
+
+
+                <div class="panel panel-default">
+                    <div class="panel-heading"><i class="fa fa-users"></i> OnLine Users - Department EXCHANGE (<?=$dataProviderOnlineDep2->totalCount?>)</div>
+                    <div class="panel-body">
+                        <?= \yii\widgets\ListView::widget([
+                            'dataProvider' => $dataProviderOnlineDep2,
+                            'emptyText' => '<div class="text-center">Not found online users</div><br>',
+                            'layout' => "{items}<div class=\"text-center\">{pager}</div>\n", //{summary}\n
+                            'itemView' => function ($model, $key, $index, $widget) {
+                                return $this->render('_list_item_online', ['model' => $model, 'index' => $index]);
+                            },
+                            'itemOptions' => [
+                                //'class' => 'item',
+                                //'tag' => false,
+                            ],
+                        ])?>
+                    </div>
+                </div>
+
+
+                <div class="panel panel-default">
+                    <div class="panel-heading"><i class="fa fa-users"></i> OnLine Users - Department SUPPORT (<?=$dataProviderOnlineDep3->totalCount?>)</div>
+                    <div class="panel-body">
+                        <?= \yii\widgets\ListView::widget([
+                            'dataProvider' => $dataProviderOnlineDep3,
+                            'emptyText' => '<div class="text-center">Not found online users</div><br>',
+                            'layout' => "{items}<div class=\"text-center\">{pager}</div>\n", //{summary}\n
+                            'itemView' => function ($model, $key, $index, $widget) {
+                                return $this->render('_list_item_online', ['model' => $model, 'index' => $index]);
+                            },
+                            'itemOptions' => [
+                                //'class' => 'item',
+                                //'tag' => false,
+                            ],
+                        ])?>
+                    </div>
+                </div>
+
+
+                <div class="panel panel-default">
+                    <div class="panel-heading"><i class="fa fa-users"></i> OnLine Users - W/O Department (<?=$dataProviderOnline->totalCount?>)</div>
+                    <div class="panel-body">
+                        <?= \yii\widgets\ListView::widget([
+                            'dataProvider' => $dataProviderOnline,
+                            'emptyText' => '<div class="text-center">Not found online users</div><br>',
+                            'layout' => "{items}<div class=\"text-center\">{pager}</div>\n", //{summary}\n
+                            'itemView' => function ($model, $key, $index, $widget) {
+                                return $this->render('_list_item_online', ['model' => $model, 'index' => $index]);
+                            },
+                            'itemOptions' => [
+                                //'class' => 'item',
+                                //'tag' => false,
+                            ],
+                        ])?>
+                    </div>
+                </div>
+
+
             </div>
 
             <div class="col-md-5">
                 <div class="panel panel-default">
-                    <div class="panel-heading"><i class="fa fa-list"></i> Calls in PROGRESS, HOLD, RINGING (Last update: <?=Yii::$app->formatter->asTime(time(), 'php:H:i:s')?>)</div>
+                    <div class="panel-heading"><i class="fa fa-list"></i> Calls in IVR, QUEUE, RINGING, PROGRESS (Last update: <?=Yii::$app->formatter->asTime(time(), 'php:H:i:s')?>)</div>
                     <div class="panel-body">
                         <?= \yii\widgets\ListView::widget([
                             'dataProvider' => $dataProvider3,

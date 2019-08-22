@@ -101,7 +101,7 @@ $bundle = \frontend\themes\gentelella\assets\Asset::register($this);
                                 <li class="">
                                     <a href="javascript:;" class="user-profile dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
                                         <?=Html::img($gravUrl, ['alt' => 'avatar'])?>
-                                        <b><?=implode(', ', $user->roles) ?></b>:
+                                        <b><?=implode(', ', $user->getRoles()) ?></b>:
                                         <?=Html::encode($user->username)?>
 
                                         <span class=" fa fa-angle-down"></span>

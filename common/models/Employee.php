@@ -38,6 +38,10 @@ use yii\web\NotFoundHttpException;
  * @property array $form_roles
  *
  * @property Lead[] $leads
+ * @property Department[] $departments
+ * @property DepartmentPhoneProject[] $departmentPhoneProjects
+ * @property UserDepartment[] $userDepartments
+ * @property Department[] $udDeps
  * @property EmployeeAcl[] $employeeAcl
  * @property ProjectEmployeeAccess[] $projectEmployeeAccesses
  * @property Project[] $projects
@@ -61,6 +65,10 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     public const ROLE_SUPERVISION = 'supervision';
     public const ROLE_QA = 'qa';
     public const ROLE_USER_MANAGER = 'userManager';
+    public const ROLE_SUP_AGENT = 'sup_agent';
+    public const ROLE_SUP_SUPER = 'sup_super';
+    public const ROLE_EX_AGENT = 'ex_agent';
+    public const ROLE_EX_SUPER = 'ex_super';
 
     public const SCENARIO_REGISTER = 'register';
 
@@ -85,6 +93,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
 
     public $user_groups;
     public $user_projects;
+    public $user_departments;
 
     public $shiftData = [];
     public $currentShiftTaskInfoSummary = [];
@@ -95,6 +104,38 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     private $_isAllowCallExpert;
     private $_callExpertCountByShiftTime;
 
+
+    /**
+     * @return bool
+     */
+    public function isExSuper(): bool
+    {
+        return in_array(self::ROLE_EX_SUPER, $this->getRoles(true), true);
+    }
+
+    /**
+     * @return bool
+     */
+    public function isExAgent(): bool
+    {
+        return in_array(self::ROLE_EX_AGENT, $this->getRoles(true), true);
+    }
+
+    /**
+     * @return bool
+     */
+    public function isSupSuper(): bool
+    {
+        return in_array(self::ROLE_SUP_SUPER, $this->getRoles(true), true);
+    }
+
+    /**
+     * @return bool
+     */
+    public function isSupAgent(): bool
+    {
+        return in_array(self::ROLE_SUP_AGENT, $this->getRoles(true), true);
+    }
 
     /**
      * @return bool
@@ -189,7 +230,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
             [['email'], 'unique'],
             ['email', 'email'],
             [['password_reset_token'], 'unique'],
-            [['created_at', 'updated_at', 'last_activity', 'acl_rules_activated', 'full_name', 'user_groups', 'user_projects', 'deleted'], 'safe'],
+            [['created_at', 'updated_at', 'last_activity', 'acl_rules_activated', 'full_name', 'user_groups', 'user_projects', 'deleted', 'user_departments'], 'safe'],
         ];
     }
 
@@ -210,7 +251,8 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
             'updated_at' => 'Updated At',
             'user_groups' => 'User groups',
             'user_projects' => 'Projects access',
-            'form_roles' => 'Roles'
+            'form_roles' => 'Roles',
+            'user_departments' => 'Departments'
         ];
     }
 
@@ -227,6 +269,39 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
                 'value' => date('Y-m-d H:i:s') //new Expression('NOW()'),
             ],
         ];
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getDepartments()
+    {
+        return $this->hasMany(Department::class, ['dep_updated_user_id' => 'id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getDepartmentPhoneProjects()
+    {
+        return $this->hasMany(DepartmentPhoneProject::class, ['dpp_updated_user_id' => 'id']);
+    }
+
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getUserDepartments()
+    {
+        return $this->hasMany(UserDepartment::class, ['ud_user_id' => 'id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getUdDeps()
+    {
+        return $this->hasMany(Department::class, ['dep_id' => 'ud_dep_id'])->viaTable('user_department', ['ud_user_id' => 'id']);
     }
 
     public function isActive()
@@ -857,6 +932,19 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         $groups = [];
         if ($groupsModel = $this->ugsGroups) {
             $groups = \yii\helpers\ArrayHelper::map($groupsModel, 'ug_id', 'ug_name');
+        }
+
+        return $groups;
+    }
+
+    /**
+     * @return array
+     */
+    public function getUserDepartmentList(): array
+    {
+        $groups = [];
+        if ($model = $this->udDeps) {
+            $groups = \yii\helpers\ArrayHelper::map($model, 'dep_id', 'dep_name');
         }
 
         return $groups;
@@ -1656,6 +1744,65 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         $generalQuery->andWhere(['OR', ['tbl_call_status_id' => UserCallStatus::STATUS_TYPE_READY], ['tbl_call_status_id' => null]]);
         $generalQuery->andWhere(['AND', ['<>', 'tbl_call_type_id', UserProfile::CALL_TYPE_OFF], ['IS NOT', 'tbl_call_type_id', null]]);
         $generalQuery->orderBy(['tbl_calls_count' => SORT_ASC]);
+
+        //$sqlRaw = $generalQuery->createCommand()->getRawSql();
+        //echo '<pre>'; print_r($sqlRaw);  exit;
+        //VarDumper::dump($sqlRaw, 10, true); exit;
+        $users = $generalQuery->all();
+        return $users;
+    }
+
+
+    public static function getUsersForCallQueue( int $project_id, ?int $department_id = null, int $limit = 0, int $hours = 1)
+    {
+        $query = UserConnection::find();
+        $date_time = date('Y-m-d H:i:s', strtotime('-' . $hours .' hours'));
+
+        $subQuery2 = UserCallStatus::find()->select(['us_type_id'])->where('us_user_id = user_connection.uc_user_id')->orderBy(['us_id' => SORT_DESC])->limit(1);
+        $subQuery3 = Call::find()->select(['c_call_status'])->where('c_created_user_id = user_connection.uc_user_id')->orderBy(['c_id' => SORT_DESC])->limit(1);
+        $subQuery4 = UserProfile::find()->select(['up_call_type_id'])->where('up_user_id = user_connection.uc_user_id');
+        $subQuery5 = Call::find()->select(['COUNT(*)'])
+            ->where('c_created_user_id = user_connection.uc_user_id')
+            ->andWhere(['c_call_type_id' => Call::CALL_TYPE_IN])
+            ->andWhere(['c_call_status' => Call::CALL_STATUS_COMPLETED])
+            ->andWhere(['c_project_id' => $project_id])
+            ->andWhere(['>=', 'c_created_dt', $date_time]);
+
+
+        $query->select([
+                'tbl_user_id' => 'user_connection.uc_user_id',
+                'tbl_call_status_id' => $subQuery2,
+                'tbl_last_call_status' => $subQuery3,
+                'tbl_call_type_id' => $subQuery4,
+                'tbl_calls_count' => $subQuery5,
+            ]
+        );
+
+        //$subQuery = ProjectEmployeeAccess::find()->select(['DISTINCT(employee_id)'])->where(['project_id' => $project_id]);
+        //$query->andWhere(['IN', 'user_connection.uc_user_id', $subQuery]);
+
+        $subQueryUpp = UserProjectParams::find()->select(['DISTINCT(upp_user_id)'])->where(['upp_project_id' => $project_id, 'upp_allow_general_line' => true]);
+        $query->andWhere(['IN', 'user_connection.uc_user_id', $subQueryUpp]);
+
+        if($department_id) {
+            $subQueryUd = UserDepartment::find()->select(['DISTINCT(ud_user_id)'])->where(['ud_dep_id' => $department_id]);
+            $query->andWhere(['IN', 'user_connection.uc_user_id', $subQueryUd]);
+        }
+
+
+        $query->groupBy(['user_connection.uc_user_id']);
+        $query->orderBy(['tbl_calls_count' => SORT_ASC]);
+
+        $generalQuery = new Query();
+        $generalQuery->from(['tbl' => $query]);
+        $generalQuery->andWhere(['OR', ['NOT IN', 'tbl_last_call_status', [Call::CALL_STATUS_RINGING, Call::CALL_STATUS_IN_PROGRESS]], ['tbl_last_call_status' => null]]);
+        $generalQuery->andWhere(['OR', ['tbl_call_status_id' => UserCallStatus::STATUS_TYPE_READY], ['tbl_call_status_id' => null]]);
+        $generalQuery->andWhere(['AND', ['=', 'tbl_call_type_id', UserProfile::CALL_TYPE_WEB], ['IS NOT', 'tbl_call_type_id', null]]);
+        $generalQuery->orderBy(['tbl_calls_count' => SORT_ASC]);
+
+        if($limit > 0) {
+            $generalQuery->limit($limit);
+        }
 
         //$sqlRaw = $generalQuery->createCommand()->getRawSql();
         //echo '<pre>'; print_r($sqlRaw);  exit;

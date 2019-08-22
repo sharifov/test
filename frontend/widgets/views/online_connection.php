@@ -1,5 +1,6 @@
 <?php
 /* @var $leadId integer */
+/* @var $caseId integer */
 
 //$jsPath = Yii::$app->request->baseUrl.'/js/sounds/';
 
@@ -43,6 +44,7 @@ $js = <<<JS
     var actionId = '$actionId';
     var pageUrl = '$pageUrl';
     var leadId = '$leadId';
+    var caseId = '$caseId';
     var ipAddress = '$ipAddress';
     var webSocketHost = '$webSocketHost';
           
@@ -50,7 +52,7 @@ $js = <<<JS
 
     try {
 
-        const socket = new WebSocket(webSocketHost + '/?user_id=' + userId + '&controller_id=' + controllerId + '&action_id=' + actionId + '&page_url=' + pageUrl + '&lead_id=' + leadId + '&ip=' + ipAddress);
+        const socket = new WebSocket(webSocketHost + '/?user_id=' + userId + '&controller_id=' + controllerId + '&action_id=' + actionId + '&page_url=' + pageUrl + '&lead_id=' + leadId + '&case_id=' + caseId + '&ip=' + ipAddress);
         
         /*initWebsocket('ws:\\localhost:8090', null, 5000, 10).then(function(socket){
                 console.log('socket initialized!');

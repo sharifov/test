@@ -43,7 +43,12 @@ class ClientPhone extends \yii\db\ActiveRecord implements AggregateRoot
         return 'client_phone';
     }
 
-    public static function create($phone, $clientId): self
+    /**
+     * @param string $phone
+     * @param int $clientId
+     * @return ClientPhone
+     */
+    public static function create(string $phone, int $clientId): self
     {
         $clientPhone = new static();
         $clientPhone->phone = $phone;

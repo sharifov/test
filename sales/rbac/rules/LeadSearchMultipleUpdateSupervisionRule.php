@@ -15,7 +15,7 @@ class LeadSearchMultipleUpdateSupervisionRule extends Rule
 
     /**
      * @param int|string $user
-     * @param \yii\rbac\Item $item
+     * @param yii\rbac\Item $item
      * @param array $params
      * @return bool
      */
@@ -26,6 +26,6 @@ class LeadSearchMultipleUpdateSupervisionRule extends Rule
         }
         /** @var Lead $lead */
         $lead = $params['lead'];
-        return ($lead->isProcessing() || $lead->isFollowUp() || $lead->isOnHold() || $lead->isTrash());
+        return ($lead->isProcessing() || $lead->isFollowUp() || $lead->isOnHold() || $lead->isTrash() || $lead->isSnooze());
     }
 }

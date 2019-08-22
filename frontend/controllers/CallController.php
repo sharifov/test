@@ -2,6 +2,7 @@
 
 namespace frontend\controllers;
 
+use common\models\Department;
 use common\models\Employee;
 use common\models\Lead;
 use common\models\Project;
@@ -246,14 +247,23 @@ class CallController extends FController
             //$params['CallSearch']['status'] = Employee::STATUS_ACTIVE;
         //}
 
-        //$params['CallSearch']['statuses'] = [Call::CALL_STATUS_QUEUE];
+        $params['UserConnectionSearch']['dep_id'] = Department::DEPARTMENT_SALES;
+        $dataProviderOnlineDep1 = $searchModel2->searchUserCallMap($params);
+
+        $params['UserConnectionSearch']['dep_id'] = Department::DEPARTMENT_EXCHANGE;
+        $dataProviderOnlineDep2 = $searchModel2->searchUserCallMap($params);
+
+        $params['UserConnectionSearch']['dep_id'] = Department::DEPARTMENT_SUPPORT;
+        $dataProviderOnlineDep3 = $searchModel2->searchUserCallMap($params);
+
+        $params['UserConnectionSearch']['dep_id'] = 0;
         $dataProviderOnline = $searchModel2->searchUserCallMap($params);
 
-        $params['CallSearch']['statuses'] = [Call::CALL_STATUS_IN_PROGRESS, Call::CALL_STATUS_RINGING, Call::CALL_STATUS_QUEUE];
+        $params['CallSearch']['statuses'] = [Call::CALL_STATUS_IN_PROGRESS, Call::CALL_STATUS_RINGING, Call::CALL_STATUS_QUEUE, Call::CALL_STATUS_IVR];
         $dataProvider3 = $searchModel->searchUserCallMap($params);
 
         $params['CallSearch']['statuses'] = [Call::CALL_STATUS_COMPLETED, Call::CALL_STATUS_BUSY, Call::CALL_STATUS_FAILED, Call::CALL_STATUS_NO_ANSWER, Call::CALL_STATUS_CANCELED];
-        $params['CallSearch']['limit'] = 12;
+        $params['CallSearch']['limit'] = 14;
         $dataProvider2 = $searchModel->searchUserCallMap($params);
 
         //$searchModel->datetime_start = date('Y-m-d', strtotime('-0 day'));
@@ -263,7 +273,12 @@ class CallController extends FController
 
 
         return $this->render('user-map', [
+            'dataProviderOnlineDep1' => $dataProviderOnlineDep1,
+            'dataProviderOnlineDep2' => $dataProviderOnlineDep2,
+            'dataProviderOnlineDep3' => $dataProviderOnlineDep3,
             'dataProviderOnline' => $dataProviderOnline,
+
+
             'dataProvider2' => $dataProvider2,
             'dataProvider3' => $dataProvider3,
             //'searchModel' => $searchModel,

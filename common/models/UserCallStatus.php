@@ -2,6 +2,7 @@
 
 namespace common\models;
 
+use common\components\jobs\AgentCallQueueJob;
 use Yii;
 
 /**
@@ -88,7 +89,10 @@ class UserCallStatus extends \yii\db\ActiveRecord
         parent::afterSave($insert, $changedAttributes);
 
         if( $this->us_type_id === self::STATUS_TYPE_READY) {
-            Call::applyHoldCallToAgent($this->us_user_id);
+            //Call::applyHoldCallToAgent($this->us_user_id);
+            $job = new AgentCallQueueJob();
+            $job->user_id = $this->us_user_id;
+            $jobId = Yii::$app->queue_job->delay(5)->priority(150)->push($job);
         }
     }
 

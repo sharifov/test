@@ -22,10 +22,12 @@ use yii\helpers\VarDumper;
  * @property int $etp_updated_user_id
  * @property string $etp_created_dt
  * @property string $etp_updated_dt
+ * @property int $etp_dep_id
  *
  * @property Email[] $emails
  * @property Employee $etpCreatedUser
  * @property Employee $etpUpdatedUser
+ * @property Department $etpDep
  */
 class EmailTemplateType extends \yii\db\ActiveRecord
 {
@@ -44,7 +46,7 @@ class EmailTemplateType extends \yii\db\ActiveRecord
     {
         return [
             [['etp_key', 'etp_name', 'etp_origin_name'], 'required'],
-            [['etp_created_user_id', 'etp_updated_user_id'], 'integer'],
+            [['etp_created_user_id', 'etp_updated_user_id', 'etp_dep_id'], 'integer'],
             [['etp_created_dt', 'etp_updated_dt'], 'safe'],
             [['etp_key'], 'string', 'max' => 50],
             [['etp_name', 'etp_origin_name'], 'string', 'max' => 100],
@@ -52,6 +54,7 @@ class EmailTemplateType extends \yii\db\ActiveRecord
             [['etp_hidden'], 'boolean'],
             [['etp_created_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['etp_created_user_id' => 'id']],
             [['etp_updated_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['etp_updated_user_id' => 'id']],
+            [['etp_dep_id'], 'exist', 'skipOnError' => true, 'targetClass' => Department::class, 'targetAttribute' => ['etp_dep_id' => 'dep_id']],
         ];
     }
 
@@ -70,6 +73,7 @@ class EmailTemplateType extends \yii\db\ActiveRecord
             'etp_updated_user_id' => 'Updated User ID',
             'etp_created_dt' => 'Created Dt',
             'etp_updated_dt' => 'Updated Dt',
+            'etp_dep_id' => 'Department',
         ];
     }
 
@@ -117,6 +121,14 @@ class EmailTemplateType extends \yii\db\ActiveRecord
     public function getEtpUpdatedUser()
     {
         return $this->hasOne(Employee::class, ['id' => 'etp_updated_user_id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getEtpDep()
+    {
+        return $this->hasOne(Department::class, ['dep_id' => 'etp_dep_id']);
     }
 
     /**
@@ -186,15 +198,22 @@ class EmailTemplateType extends \yii\db\ActiveRecord
 
     /**
      * @param bool $withHidden
+     * @param int|null $dep_id
      * @return array
      */
-    public static function getList($withHidden = true) : array
+    public static function getList(?bool $withHidden = true, ?int $dep_id) : array
     {
         $query = self::find()->orderBy(['etp_name' => SORT_ASC]);
         if(!$withHidden) {
             $query->andWhere(['etp_hidden' => false]);
         }
+
+        if($dep_id !== null) {
+            $query->andWhere(['etp_dep_id' => $dep_id]);
+        }
+
         $data = $query->asArray()->all();
         return ArrayHelper::map($data, 'etp_id', 'etp_name');
     }
+
 }

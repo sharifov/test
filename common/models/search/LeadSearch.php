@@ -528,6 +528,143 @@ class LeadSearch extends Lead
         return $dataProvider;
     }
 
+    public function searchByCase($params)
+    {
+        $projectIds = array_keys(ProjectEmployeeAccess::getProjectsByEmployee());
+        $query = Lead::find();
+        $query->select(['*', 'l_client_time' => new Expression("TIME( CONVERT_TZ(NOW(), '+00:00', offset_gmt) )")]);
+
+        // add conditions that should always apply here
+
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+            'sort'=> ['defaultOrder' => ['id' => SORT_DESC]],
+            'pagination' => [
+                'pageSize' => 8,
+            ],
+        ]);
+
+        $this->load($params);
+
+        if (!$this->validate()) {
+            // uncomment the following line if you do not want to return any records when validation fails
+            $query->where('0=1');
+            return $dataProvider;
+        }
+
+        $query
+            ->andWhere(['IN', Lead::tableName() . '.project_id', $projectIds])
+        ;
+
+        if($this->id || $this->uid || $this->gid || $this->client_id || $this->client_name || $this->client_email || $this->client_phone || $this->bo_flight_id || $this->employee_id || $this->request_ip) {
+
+        } else {
+            $query->where('0=1');
+            $this->employee_id = Yii::$app->user->id;
+        }
+
+        //VarDumper::dump($params, 10, true); exit;
+
+        // grid filtering conditions
+        $query->andFilterWhere([
+            'id' => $this->id,
+            'gid' => $this->gid,
+            'client_id' => $this->client_id,
+            'employee_id' => $this->employee_id,
+            'status' => $this->status,
+            'project_id' => $this->project_id,
+            'source_id' => $this->source_id,
+            'adults' => $this->adults,
+            'children' => $this->children,
+            'infants' => $this->infants,
+            //'created' => $this->created,
+            //'updated' => $this->updated,
+
+            'bo_flight_id' => $this->bo_flight_id,
+
+            'uid' => $this->uid,
+            'trip_type' => $this->trip_type,
+            'cabin' => $this->cabin,
+            'request_ip' => $this->request_ip,
+        ]);
+
+
+        if($this->statuses) {
+            $query->andWhere(['status' => $this->statuses]);
+        }
+
+        $query->andWhere(['<>', 'status', Lead::STATUS_PENDING]);
+
+
+        if($this->created_date_from || $this->created_date_to) {
+
+            if ($this->created_date_from) {
+                $query->andFilterWhere(['>=', 'DATE(leads.created)', date('Y-m-d', strtotime($this->created_date_from))]);
+            }
+            if ($this->created_date_to) {
+                $query->andFilterWhere(['<=', 'DATE(leads.created)', date('Y-m-d', strtotime($this->created_date_to))]);
+            }
+
+        } else {
+
+            if($this->created) {
+                $query->andFilterWhere(['DATE(created)'=> date('Y-m-d', strtotime($this->created))]);
+            }
+        }
+
+        if($this->depart_date_from || $this->depart_date_to) {
+            $having = [];
+            if ($this->depart_date_from) {
+                $having[] = "MIN(departure) >= '".date('Y-m-d', strtotime($this->depart_date_from))."'";
+            }
+            if ($this->depart_date_to) {
+                $having[] = "MIN(departure) <= '".date('Y-m-d', strtotime($this->depart_date_to))."'";
+            }
+
+            $subQuery = LeadFlightSegment::find()->select(['DISTINCT(lead_id)'])->groupBy('lead_id')->having(implode(" AND ", $having));
+
+            $query->andWhere(['IN', 'leads.id', $subQuery]);
+        }
+
+        if($this->client_name) {
+            $query->joinWith(['client' => function ($q) {
+                if($this->client_name) {
+                    $q->where(['=', 'clients.last_name', $this->client_name])
+                        ->orWhere(['=', 'clients.first_name', $this->client_name]);
+                }
+            }]);
+        }
+
+        if($this->client_email) {
+            $subQuery = ClientEmail::find()->select(['DISTINCT(client_id)'])->where(['=', 'email', $this->client_email]);
+            $query->andWhere(['IN', 'client_id', $subQuery]);
+        }
+
+        if($this->client_phone) {
+
+            $this->client_phone = preg_replace('~[^0-9\+]~', '', $this->client_phone);
+            $this->client_phone = ($this->client_phone[0] === "+" ? '+' : '') . str_replace("+", '', $this->client_phone);
+
+            $subQuery = ClientPhone::find()->select(['DISTINCT(client_id)'])->where(['=', 'phone', $this->client_phone]);
+            $query->andWhere(['IN', 'client_id', $subQuery]);
+        }
+
+        if($this->quote_pnr) {
+            /* $subQuery = Quote::find()->select(['DISTINCT(lead_id)'])->where(['=', 'record_locator', mb_strtoupper($this->quote_pnr)]);
+            $query->andWhere(['IN', 'leads.id', $subQuery]); */
+
+            $query->andWhere(['LIKE','leads.additional_information', new Expression('\'%"pnr":%"'.$this->quote_pnr.'"%\'')]);
+        }
+
+
+
+        /*  $sqlRaw = $query->createCommand()->getRawSql();
+
+         VarDumper::dump($sqlRaw, 10, true); exit; */
+
+        return $dataProvider;
+    }
+
     /**
      * @param $params
      * @param Employee $user
@@ -538,7 +675,7 @@ class LeadSearch extends Lead
 //        $projectIds = array_keys(ProjectEmployeeAccess::getProjectsByEmployee());
 //        $query = Lead::find()->with('project', 'source');
 
-        $query = $this->leadBadgesRepository->getSoldQuery($user)->with('project', 'source');
+        $query = $this->leadBadgesRepository->getSoldQuery($user)->with('project', 'source')->joinWith('appliedQuote');
 
         $this->load($params);
 
@@ -598,7 +735,7 @@ class LeadSearch extends Lead
         }
 
         if ($this->last_ticket_date) {
-            //$query->andWhere(['=', 'DATE(' . Quote::tableName() . '.last_ticket_date)', date('Y-m-d', strtotime($this->last_ticket_date))]);
+            $query->andWhere(['=', 'DATE(' . Quote::tableName() . '.last_ticket_date)', date('Y-m-d', strtotime($this->last_ticket_date))]);
         }
 
         if($this->sold_date_from || $this->sold_date_to) {
