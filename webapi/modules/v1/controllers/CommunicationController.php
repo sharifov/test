@@ -242,10 +242,11 @@ class CommunicationController extends ApiBaseController
     /**
      * @param string $agent_phone_number
      * @param string $client_phone_number
+     * @param int|null $call_dep_id
      * @param int $limit
      * @return array
      */
-    protected function getDirectAgentsByPhoneNumber(string $agent_phone_number, string $client_phone_number, int $limit = 10): array
+    protected function getDirectAgentsByPhoneNumber(string $agent_phone_number, string $client_phone_number, ?int $call_dep_id, int $limit = 10): array
     {
         $call_employee = [];
         $call_agent_username = [];
@@ -502,6 +503,7 @@ class CommunicationController extends ApiBaseController
             //VarDumper::dump($department); exit;
 
             $call_dep_id = null;
+            $callModel = null;
 
             if($departmentPhone) {
                 $agentDirectCallCheck = false;
@@ -534,7 +536,9 @@ class CommunicationController extends ApiBaseController
                             break;
                         }
                     }
+
                 }
+
             }
 
 
@@ -564,7 +568,7 @@ class CommunicationController extends ApiBaseController
 
             } elseif ($agentDirectCallCheck) {
 
-                $agentRes = $this->getDirectAgentsByPhoneNumber($incoming_phone_number, $client_phone_number, $direct_agent_user_limit);
+                $agentRes = $this->getDirectAgentsByPhoneNumber($incoming_phone_number, $client_phone_number, $call_dep_id, $direct_agent_user_limit);
                 if($agentRes && isset($agentRes['call_employee'], $agentRes['call_agent_username']) && $agentRes['call_employee']) {
                     $isOnHold = false;
                     $callGeneralNumber = false;
@@ -683,11 +687,17 @@ class CommunicationController extends ApiBaseController
                 }
             } elseif($isOnHold) {
 
+                /*$callModel = $this->findOrCreateCall($callSid, $post['call'], $call_project_id, $call_dep_id);
+                $callModel->c_source_type_id = Call::SOURCE_DIRECT_CALL;
+                if (!$callModel->update()) {
+                    Yii::error(VarDumper::dumpAsString($callModel->errors), 'API:Communication:Direct:Hold:Call:save');
+                }*/
+
                 $call = new Call();
                 $call->c_call_sid = $post['call']['CallSid'] ?? null;
                 $call->c_account_sid = $post['call']['AccountSid'] ?? null;
                 $call->c_call_type_id = Call::CALL_TYPE_IN;
-                $call->c_call_status =  Call::CALL_STATUS_QUEUE;
+                $call->c_call_status =  Call::CALL_STATUS_IVR;
                 $call->c_com_call_id = $post['call_id'] ?? null;
                 $call->c_direction = $post['call']['Direction'] ?? null;
                 $call->c_project_id = $call_project_id;
@@ -698,21 +708,21 @@ class CommunicationController extends ApiBaseController
                 $call->c_sip = null;
                 $call->c_to = $incoming_phone_number;
                 $call->c_created_user_id = null;
-                $call->c_source_type_id = $callSourceTypeId;
+                $call->c_source_type_id = Call::SOURCE_DIRECT_CALL;
+
+                if($call_dep_id) {
+                    $call->c_dep_id = $call_dep_id;
+                }
                 if ($lead2) {
                     $call->c_lead_id = $lead2->id;
                 }
                 if (!$call->save()) {
-                    Yii::error(VarDumper::dumpAsString($call->errors), 'API:Communication:voiceIncoming:save:isOnHold');
+                    Yii::error(VarDumper::dumpAsString($call->errors), 'API:Communication:Direct:OnHold:save');
                 }
 
-                if($call_project_id) {
-                    $project = Project::findOne($call_project_id);
-                } else {
-                    $project = null;
-                }
 
-                $responseTwml = new VoiceResponse();
+                $project = $call->cProject;
+
 
                 $url_say_play_hold = '';
                 $url_music_play_hold = 'https://talkdeskapp.s3.amazonaws.com/production/audio_messages/folk_hold_music.mp3';
@@ -730,6 +740,8 @@ class CommunicationController extends ApiBaseController
                     }
                 }
 
+                $responseTwml = new VoiceResponse();
+
                 if($url_say_play_hold) {
                     $responseTwml->play($url_say_play_hold);
                     if($url_music_play_hold) {
@@ -737,7 +749,6 @@ class CommunicationController extends ApiBaseController
                     }
 
                 } else {
-
 
                     $say_params = \Yii::$app->params['voice_gather'];
                     $responseTwml = new VoiceResponse();
@@ -753,9 +764,49 @@ class CommunicationController extends ApiBaseController
                     $response['twml'] = (string)$responseTwml;
                 }
 
+
+//                //$url_say_play_hold = '';
+//                $url_music_play_hold = 'https://talkdeskapp.s3.amazonaws.com/production/audio_messages/folk_hold_music.mp3';
+//
+//                $responseTwml = new VoiceResponse();
+//
+//                if($project && $project->custom_data) {
+//                    $customData = @json_decode($project->custom_data, true);
+//                    if($customData) {
+//
+//                        if(isset($customData['pause']) && $customData['pause']) {
+//                            $responseTwml->pause((int) $customData['pause']);
+//                        }
+//
+//                        if(isset($customData['say_hold'], $customData['language'], $customData['voice']) && $customData['say_hold']) {
+//                            $responseTwml->say($customData['say_hold'], [
+//                                'language' => $customData['language'],
+//                                'voice' => $customData['voice'],
+//                            ]);
+//                        } elseif (isset($customData['url_say_play_hold']) && $customData['url_say_play_hold']) {
+//                            $responseTwml->play($customData['url_say_play_hold']);
+//                        }
+//
+//                        if(isset($customData['url_music_play_hold']) && $customData['url_music_play_hold']) {
+//                            $responseTwml->play($customData['url_music_play_hold']);
+//                        }
+//                    }
+//                } else {
+//                    $responseTwml->play($url_music_play_hold);
+//                }
+
+
+
+
                 $response['twml'] = (string) $responseTwml;
 
-                Yii::info('Call add to hold : call_project_id: '.$call_project_id.', generalLine: '.$generalLineNumber.', TWML: ' . $response['twml'], 'info\API:Communication:voiceIncoming:isOnHold - 5');
+                $job = new CallQueueJob();
+                $job->call_id = $call->c_id;
+                $job->delay = 0;
+                $jobId = Yii::$app->queue_job->delay(10)->priority(120)->push($job);
+
+                Yii::info('JobId: '.$jobId.', Call ('.$call->c_id.') add to hold : project_id: '.$call_project_id.', generalLine: '.$generalLineNumber.', TWML: ' . $response['twml'], 'info\API:Communication:Direct:Hold');
+
 
             } elseif($callGeneralNumber){
                 $call = new Call();
@@ -774,6 +825,9 @@ class CommunicationController extends ApiBaseController
                 $call->c_to = $generalLineNumber;
                 $call->c_created_user_id = null;
                 $call->c_source_type_id = $callSourceTypeId;
+                if($call_dep_id) {
+                    $call->c_dep_id = $call_dep_id;
+                }
                 if ($lead2) {
                     $call->c_lead_id = $lead2->id;
                 }
@@ -1680,7 +1734,8 @@ class CommunicationController extends ApiBaseController
 
             $job = new CallQueueJob();
             $job->call_id = $callModel->c_id;
-            $jobId = Yii::$app->queue_job->push($job);
+            $job->delay = 0;
+            $jobId = Yii::$app->queue_job->delay(7)->priority(100)->push($job);
         }
 
         $choice = $stepParams['digits'][$ivrSelectedDigit] ?? null;
@@ -1855,7 +1910,8 @@ class CommunicationController extends ApiBaseController
 
                     $job = new CallQueueJob();
                     $job->call_id = $callModel->c_id;
-                    $jobId = Yii::$app->queue_job->push($job);
+                    $job->delay = 0;
+                    $jobId = Yii::$app->queue_job->delay(7)->priority(80)->push($job);
                 }
 
                 if(isset($ivrParams['hold_play']) && $ivrParams['hold_play']) {

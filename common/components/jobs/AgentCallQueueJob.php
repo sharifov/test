@@ -111,10 +111,10 @@ class AgentCallQueueJob extends BaseObject implements JobInterface
         return false;
     }
 
-//    public function getTtr()
-//    {
-//        return 1 * 5;
-//    }
+    public function getTtr()
+    {
+        return 1 * 5;
+    }
 
     /*public function canRetry($attempt, $error)
     {

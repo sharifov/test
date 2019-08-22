@@ -453,14 +453,14 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
         parent::afterSave($insert, $changedAttributes);
 
         if(!$insert) {
-            if(isset($changedAttributes['c_call_status']) && in_array($this->c_call_status, [self::CALL_STATUS_COMPLETED, self::CALL_STATUS_BUSY, self::CALL_STATUS_NO_ANSWER], false)) {
-                if($this->c_created_user_id) {
-                    // self::applyHoldCallToAgent($this->c_created_user_id);
-                    $job = new AgentCallQueueJob();
-                    $job->user_id = $this->c_created_user_id;
-                    $jobId = Yii::$app->queue_job->push($job);
-                }
-            }
+//            if(isset($changedAttributes['c_call_status']) && in_array($this->c_call_status, [self::CALL_STATUS_COMPLETED, self::CALL_STATUS_BUSY, self::CALL_STATUS_NO_ANSWER], false)) {
+//                if($this->c_created_user_id) {
+//                    // self::applyHoldCallToAgent($this->c_created_user_id);
+//                    $job = new AgentCallQueueJob();
+//                    $job->user_id = $this->c_created_user_id;
+//                    $jobId = Yii::$app->queue_job->push($job);
+//                }
+//            }
 
             if(isset($changedAttributes['c_call_status']) && (int) $this->c_call_type_id === self::CALL_TYPE_IN && $this->c_case_id && $this->c_call_status === self::CALL_STATUS_IN_PROGRESS) {
                 if($this->c_created_user_id && $this->cCase && $this->c_created_user_id !== $this->cCase->cs_user_id) {

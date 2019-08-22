@@ -25,6 +25,7 @@ use yii\queue\Queue;
  * This is the Job class for Call Queue.
  *
  * @property int $call_id
+ * @property int $delay
  *
  * @property CasesCreateService $casesCreateService
  * @property ClientManageService $clientManageService
@@ -34,6 +35,7 @@ use yii\queue\Queue;
 class CallQueueJob extends BaseObject implements JobInterface
 {
     public $call_id;
+    public $delay;
 
     private $casesCreateService;
     private $casesRepository;
@@ -61,7 +63,10 @@ class CallQueueJob extends BaseObject implements JobInterface
             $this->casesRepository = Yii::createObject(CasesRepository::class);
 
             Yii::info('CallId: ' . $this->call_id ,'info\CallQueueJob');
-            sleep(7);
+
+            if($this->delay) {
+                sleep($this->delay);
+            }
 
             if($this->call_id) {
 
@@ -152,10 +157,10 @@ class CallQueueJob extends BaseObject implements JobInterface
         return false;
     }
 
-//    public function getTtr()
-//    {
-//        return 1 * 5;
-//    }
+    public function getTtr()
+    {
+        return 1 * 5;
+    }
 
     /*public function canRetry($attempt, $error)
     {
