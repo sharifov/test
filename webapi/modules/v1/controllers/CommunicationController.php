@@ -802,8 +802,8 @@ class CommunicationController extends ApiBaseController
 
                 $job = new CallQueueJob();
                 $job->call_id = $call->c_id;
-                $job->delay = 10;
-                $jobId = Yii::$app->queue_job->push($job);
+                $job->delay = 0;
+                $jobId = Yii::$app->queue_job->delay(10)->priority(120)->push($job);
 
                 Yii::info('JobId: '.$jobId.', Call ('.$call->c_id.') add to hold : project_id: '.$call_project_id.', generalLine: '.$generalLineNumber.', TWML: ' . $response['twml'], 'info\API:Communication:Direct:Hold');
 
@@ -1734,8 +1734,8 @@ class CommunicationController extends ApiBaseController
 
             $job = new CallQueueJob();
             $job->call_id = $callModel->c_id;
-            $job->delay = 7;
-            $jobId = Yii::$app->queue_job->push($job);
+            $job->delay = 0;
+            $jobId = Yii::$app->queue_job->delay(7)->priority(100)->push($job);
         }
 
         $choice = $stepParams['digits'][$ivrSelectedDigit] ?? null;
@@ -1910,8 +1910,8 @@ class CommunicationController extends ApiBaseController
 
                     $job = new CallQueueJob();
                     $job->call_id = $callModel->c_id;
-                    $job->delay = 7;
-                    $jobId = Yii::$app->queue_job->push($job);
+                    $job->delay = 0;
+                    $jobId = Yii::$app->queue_job->delay(7)->priority(80)->push($job);
                 }
 
                 if(isset($ivrParams['hold_play']) && $ivrParams['hold_play']) {

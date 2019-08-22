@@ -1,4 +1,5 @@
 [program:QueueEmailJob]
+process_name=%(program_name)s_%(process_num)02d
 command=/usr/bin/php /var/www/sales.zeit.test/www/yii queue-email-job/listen
 stdout_logfile=/var/www/sales.zeit.test/www/console/runtime/queue-email-job.log
 autostart=true

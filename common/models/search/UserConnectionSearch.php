@@ -11,6 +11,7 @@ use common\models\UserConnection;
 /**
  * UserConnectionSearch represents the model behind the search form of `common\models\UserConnection`.
  *
+ * @property int $dep_id
  */
 class UserConnectionSearch extends UserConnection
 {
