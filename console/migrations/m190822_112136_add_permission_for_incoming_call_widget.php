@@ -12,7 +12,7 @@ class m190822_112136_add_permission_for_incoming_call_widget extends Migration
     ];
 
     public $roles = [
-        'admin', 'agent', 'supervisor', 'ex_agent', 'ex_supervisor', 'sup_agent', 'sup_supervisor'
+        'admin', 'agent', 'supervision', 'ex_agent', 'ex_super', 'sup_agent', 'sup_super'
     ];
 
     /**

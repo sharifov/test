@@ -1,29 +1,59 @@
 <?php
 
 /* @var $newCount integer */
-/* @var $lastCall \common\models\Call */
-/* @var $userCallStatus \common\models\UserCallStatus */
-/* @var $countMissedCalls integer*/
 
-//\frontend\assets\CallBoxAsset::register($this);
+\frontend\assets\CallBoxAsset::register($this);
 \frontend\assets\TimerAsset::register($this);
 
 use yii\widgets\Pjax;
 
 ?>
 
+<style>
+    #incoming-call-widget {
+        position: fixed;
+        width: 100%;
+        max-width: 800px;
+
+        padding: 1px;
+        top: 1px;
+        border: 2px solid #78c286;
+        /*margin-left: 50%;*/
+        box-shadow: 3px 3px 3px rgba(0, 0, 0, .3);
+        z-index: 999;
+        display: none;
+        /*height: 600px;*/
+        background-color: rgba(255, 255, 255, 0.7);
+        border-radius: 4px;
+        /*margin-left: -50px;*/
+        /*margin-left: calc(100% - calc(width / 2));*/
+    }
+</style>
+
 <?php Pjax::begin(['id' => 'incoming-call-pjax', 'timeout' => 10000, 'enablePushState' => false, 'enableReplaceState' => false, 'options' => []])?>
-    <?=date('Y-m-d H:i:s')?>
+    <div id="incoming-call-widget" style="background-color: rgba(255,255,255,.3);">
+        <div class="row" style="margin-top: 4px;  margin-right: 0px">
+            <div class="col-md-8">
+            </div>
+            <div class="col-md-4 text-right">
+                <?=\yii\helpers\Html::button('<i class="fa fa-check"></i> Accept', ['class' => 'btn btn-sm btn-success', 'id' => 'btn-incoming-call-success'])?>
+                <?=\yii\helpers\Html::button('<i class="fa fa-angle-double-right"></i> Skip', ['class' => 'btn btn-sm btn-info', 'id' => 'btn-incoming-call-skip'])?>
+                <?=\yii\helpers\Html::button('<i class="fa fa-close"></i> Busy', ['class' => 'btn btn-sm btn-danger', 'id' => 'btn-incoming-call-busy'])?>
+            </div>
+        </div>
+        <?/*<table class="table" style="margin: 0; background-color: rgba(255,255,255,.3);">
+            <tr>
+                <td style="width:100px"><i class="fa fa-user"></i> <span></span></td>
+                <td style="width:120px">
+                    <div class="text-right">
+                        <?=\yii\helpers\Html::button('<i class="fa fa-close"></i>', ['class' => 'btn btn-xs btn-primary', 'id' => 'btn-incoming-call-close'])?>
+                    </div>
+                </td>
+            </tr>
+        </table>
+        */?>
+    </div>
 <?php Pjax::end() ?>
-
-
-<?php \yii\bootstrap\Modal::begin([
-    'id' => 'call-box-modal',
-    'header' => '<h4 class="modal-title">Missed Calls</h4>',
-    'footer' => '<a href="#" class="btn btn-primary" data-dismiss="modal">Close</a>',
-    'size' => \yii\bootstrap\Modal::SIZE_LARGE
-]); ?>
-<?php \yii\bootstrap\Modal::end(); ?>
 
 
 <?php
@@ -124,7 +154,10 @@ $js = <<<JS
     $("#call-box-pjax").on("pjax:end", function() {
         $('.prime').removeClass('fa-recycle fa-spin');
     });*/
+    
+    $('#incoming-call-widget').css({left:'50%', 'margin-left':'-'+($('#incoming-call-widget').width() / 2)+'px'}); //.slideDown();
 
 JS;
 
 $this->registerJs($js, \yii\web\View::POS_READY);
+$this->registerJs("$('#incoming-call-widget').slideDown();", \yii\web\View::POS_READY);
