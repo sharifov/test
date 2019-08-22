@@ -10,32 +10,58 @@ use yii\widgets\Pjax;
 ?>
 
 <style>
-    #incoming-call-widget {
-        position: fixed;
-        width: 100%;
-        max-width: 800px;
+#incoming-call-widget {
+    position: fixed;
+    width: 100%;
+    max-width: 800px;
 
-        padding: 1px;
-        top: 1px;
-        border: 2px solid #78c286;
-        /*margin-left: 50%;*/
-        box-shadow: 3px 3px 3px rgba(0, 0, 0, .3);
-        z-index: 999;
-        display: none;
-        /*height: 600px;*/
-        background-color: rgba(255, 255, 255, 0.7);
-        border-radius: 4px;
-        /*margin-left: -50px;*/
-        /*margin-left: calc(100% - calc(width / 2));*/
+    padding: 1px;
+    top: 1px;
+    border: 2px solid #a3b3bd;
+    /*margin-left: 50%;*/
+    /*box-shadow: 3px 3px 3px rgba(0, 0, 0, .3);*/
+    z-index: 999;
+    display: none;
+    /*height: 600px;*/
+    background-color: rgba(255, 255, 255, 0.7);
+    border-radius: 4px;
+    /*margin-left: -50px;*/
+    /*margin-left: calc(100% - calc(width / 2));*/
+}
+
+@keyframes blinking {
+    0%{
+        background-color: rgba(255, 48, 0, 0.34);
     }
+    100%{
+        background-color: rgba(255,255,255,.3);
+    }
+}
+#incoming-call-widget{
+    /*font-size: 1.3em;
+    font-weight: bold;
+    padding: 10px;*/
+
+    animation: blinking 1s infinite;
+}
+
 </style>
 
 <?php Pjax::begin(['id' => 'incoming-call-pjax', 'timeout' => 10000, 'enablePushState' => false, 'enableReplaceState' => false, 'options' => []])?>
     <div id="incoming-call-widget" style="background-color: rgba(255,255,255,.3);">
-        <div class="row" style="margin-top: 4px;  margin-right: 0px">
-            <div class="col-md-8">
+        <div class="row" style="margin-top: 4px;  margin-right: 0px; margin-left: 1px">
+            <div class="col-md-3" style="padding-top: 5px;">
+                <span class="badge badge-info">Wefare</span>
+                <span class="badge label-info">Exchange</span>
+                <span class="label label-warning">Direct</span>
+            </div>
+            <div class="col-md-5 text-right" style="padding-top: 3px; padding-bottom: 4px; " id="demo">
+
+                <span class="badge badge-awake" style="font-size: 14px"><span class="fa fa-phone fa-spin"></span> +37369457896</span>
+                <span class="badge badge-warning"><i class="fa fa-clock-o"></i> 18:35</span>
             </div>
             <div class="col-md-4 text-right">
+
                 <?=\yii\helpers\Html::button('<i class="fa fa-check"></i> Accept', ['class' => 'btn btn-sm btn-success', 'id' => 'btn-incoming-call-success'])?>
                 <?=\yii\helpers\Html::button('<i class="fa fa-angle-double-right"></i> Skip', ['class' => 'btn btn-sm btn-info', 'id' => 'btn-incoming-call-skip'])?>
                 <?=\yii\helpers\Html::button('<i class="fa fa-close"></i> Busy', ['class' => 'btn btn-sm btn-danger', 'id' => 'btn-incoming-call-busy'])?>
