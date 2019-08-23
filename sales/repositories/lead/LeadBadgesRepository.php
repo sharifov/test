@@ -62,7 +62,7 @@ class LeadBadgesRepository
 
         $conditions = [];
 
-        if ($user->isAgent()) {
+        if ($user->isAgent() || $user->isExAgent()) {
             $conditions = $this->freeLead();
         }
 
@@ -122,11 +122,11 @@ class LeadBadgesRepository
 
         $conditions = [];
 
-        if ($user->isAgent()) {
+        if ($user->isAgent() || $user->isExAgent()) {
             $conditions = $this->isOwner($user->id);
         }
 
-        if ($user->isSupervision()) {
+        if ($user->isSupervision() || $user->isExSuper()) {
             $conditions = [
                 Lead::tableName() . '.employee_id' => $this->usersIdsInCommonGroups($user->id)
             ];
@@ -188,11 +188,11 @@ class LeadBadgesRepository
 
         $conditions = [];
 
-        if ($user->isAgent()) {
+        if ($user->isAgent() || $user->isExAgent()) {
             $conditions = $this->inSplit($user->id);
         }
 
-        if ($user->isSupervision()) {
+        if ($user->isSupervision() || $user->isExSuper()) {
             $conditions = ['or',
                 $this->inSplit($user->id),
                 $this->inSplit($this->usersIdsInCommonGroups($user->id)),

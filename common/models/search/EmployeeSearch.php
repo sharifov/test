@@ -107,7 +107,7 @@ class EmployeeSearch extends Employee
         }
 
         if ($this->user_department_id > 0) {
-            $subQuery = UserDepartment::find()->select(['DISTINCT(ud_user_id)'])->where(['=', 'ud_dep_id', $this->user_department_id]);
+            $subQuery = UserDepartment::find()->usersByDep($this->user_department_id);
             $query->andWhere(['IN', 'employees.id', $subQuery]);
         }
 
@@ -210,7 +210,7 @@ class EmployeeSearch extends Employee
         }
 
         if ($this->user_department_id > 0) {
-            $subQuery = UserDepartment::find()->select(['DISTINCT(ud_user_id)'])->where(['=', 'ud_dep_id', $this->user_department_id]);
+            $subQuery = UserDepartment::find()->usersByDep($this->user_department_id);
             $query->andWhere(['IN', 'employees.id', $subQuery]);
         }
 

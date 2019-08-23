@@ -791,7 +791,7 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
             }
 
             //$subQuery = ProjectEmployeeAccess::find()->select(['DISTINCT(project_id)'])->where(['employee_id' => $user->id]);
-            $subQueryUd = UserDepartment::find()->select(['DISTINCT(ud_dep_id)'])->where(['ud_user_id' => $user->id]);
+            $subQueryUd = UserDepartment::find()->depsByUser($user->id);
 
             $calls = self::find()->where(['c_call_status' => self::CALL_STATUS_QUEUE])
                 //->andWhere(['IN', 'c_project_id', $subQuery])

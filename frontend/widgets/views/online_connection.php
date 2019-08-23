@@ -159,7 +159,12 @@ $js = <<<JS
                     }
                     
                     if(obj.command === 'openUrl') {
-                        window.open(obj.url, 'openUrl');
+                        window.open(obj.url); //, '_blank'
+                        /*var hiddenLink = $("#hidden_link");
+                        hiddenLink.attr("href", obj.url);
+                        hiddenLink.attr("target", "_blank");
+                        hiddenLink.attr("data-pjax", "0");
+                        hiddenLink[0].click();*/
                     }
                 }
                 // onlineObj.find('i').removeClass('danger').removeClass('warning').addClass('success');

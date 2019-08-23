@@ -6,6 +6,7 @@ use common\models\Employee;
 use sales\repositories\lead\LeadBadgesRepository;
 use yii\filters\ContentNegotiator;
 use yii\helpers\ArrayHelper;
+use yii\helpers\VarDumper;
 use yii\web\ForbiddenHttpException;
 use yii\web\Response;
 use Yii;
@@ -17,6 +18,8 @@ use Yii;
 class BadgesController extends FController
 {
     private $leadBadgesRepository;
+
+    public $enableCsrfValidation = false;
 
     public function __construct($id, $module, LeadBadgesRepository $leadBadgesRepository, $config = [])
     {
@@ -34,7 +37,7 @@ class BadgesController extends FController
                 'rules' => [
                     [
                         'allow' => true,
-                        'roles' => ['admin', 'supervision', 'agent', 'qa']
+                        'roles' => ['admin', 'supervision', 'agent', 'qa', 'ex_agent', 'ex_super']
                     ]
                 ]
             ],
@@ -49,160 +52,168 @@ class BadgesController extends FController
     }
 
     /**
-     * @param $type
      * @return array
-     * @throws ForbiddenHttpException
      */
-    public function actionGetBadgesCount($type): array
+    public function actionGetBadgesCount(): array
     {
-        switch ($type) {
-            case 'pending':
-                $count = $this->getPending();
-                break;
-            case 'inbox':
-                $count = $this->getInbox();
-                break;
-            case 'follow-up':
-                $count = $this->getFollowUp();
-                break;
-            case 'processing':
-                $count = $this->getProcessing();
-                break;
-            case 'booked':
-                $count = $this->getBooked();
-                break;
-            case 'sold':
-                $count = $this->getSold();
-                break;
-            case 'duplicate':
-                $count = $this->getDuplicate();
-                break;
-            case 'trash':
-                $count = $this->getTrash();
-                break;
-            default: $count = null;
+
+        $types = Yii::$app->request->post('types');
+
+        if (!is_array($types)) {
+            return [];
         }
-        return $count;
+
+        $result = [];
+
+        foreach ($types as $type) {
+            switch ($type) {
+                case 'pending':
+                    if ($count = $this->getPending()) {
+                        $result['pending'] = $count;
+                    }
+                    break;
+                case 'inbox':
+                    if ($count = $this->getInbox()) {
+                        $result['inbox'] = $count;
+                    }
+                    break;
+                case 'follow-up':
+                    if ($count = $this->getFollowUp()) {
+                        $result['follow-up'] = $count;
+                    }
+                    break;
+                case 'processing':
+                    if ($count = $this->getProcessing()) {
+                        $result['processing'] = $count;
+                    }
+                    break;
+                case 'booked':
+                    if ($count = $this->getBooked()) {
+                        $result['booked'] = $count;
+                    }
+                    break;
+                case 'sold':
+                    if ($count = $this->getSold()) {
+                        $result['sold'] = $count;
+                    }
+                    break;
+                case 'duplicate':
+                    if ($count = $this->getDuplicate()) {
+                        $result['duplicate'] = $count;
+                    }
+                    break;
+                case 'trash':
+                    if ($count = $this->getTrash()) {
+                        $result['trash'] = $count;
+                    }
+                    break;
+            }
+        }
+        return $result;
     }
 
     /**
-     * @return array
-     * @throws ForbiddenHttpException
+     * @return int|null
      */
-    private function getPending(): array
+    private function getPending(): ?int
     {
         if (!Yii::$app->user->can('/lead/pending')) {
-            throw new ForbiddenHttpException();
+           return null;
         }
         /** @var Employee $user */
         $user = Yii::$app->user->identity;
-        $count = $this->leadBadgesRepository->getPendingCount($user);
-        return ['result' => 'success', 'count' => $count];
+        return $this->leadBadgesRepository->getPendingCount($user);
     }
 
     /**
-     * @return array
-     * @throws ForbiddenHttpException
+     * @return int|null
      */
-    private function getInbox(): array
+    private function getInbox(): ?int
     {
         if (!Yii::$app->user->can('/lead/inbox')) {
-            throw new ForbiddenHttpException();
+            return null;
         }
         /** @var Employee $user */
         $user = Yii::$app->user->identity;
-        $count = $this->leadBadgesRepository->getInboxCount($user);
-        return ['result' => 'success', 'count' => $count];
+        return $this->leadBadgesRepository->getInboxCount($user);
     }
 
     /**
-     * @return array
-     * @throws ForbiddenHttpException
+     * @return int|null
      */
-    private function getFollowUp(): array
+    private function getFollowUp(): ?int
     {
         if (!Yii::$app->user->can('/lead/follow-up')) {
-            throw new ForbiddenHttpException();
+            return null;
         }
         /** @var Employee $user */
         $user = Yii::$app->user->identity;
-        $count = $this->leadBadgesRepository->getFollowUpCount($user);
-        return ['result' => 'success', 'count' => $count];
+        return $this->leadBadgesRepository->getFollowUpCount($user);
     }
 
     /**
-     * @return array
-     * @throws ForbiddenHttpException
+     * @return int|null
      */
-    private function getProcessing(): array
+    private function getProcessing(): ?int
     {
         if (!Yii::$app->user->can('/lead/processing')) {
-            throw new ForbiddenHttpException();
+            return null;
         }
         /** @var Employee $user */
         $user = Yii::$app->user->identity;
-        $count = $this->leadBadgesRepository->getProcessingCount($user);
-        return ['result' => 'success', 'count' => $count];
+        return $this->leadBadgesRepository->getProcessingCount($user);
     }
 
     /**
-     * @return array
-     * @throws ForbiddenHttpException
+     * @return int|null
      */
-    private function getBooked(): array
+    private function getBooked(): ?int
     {
         if (!Yii::$app->user->can('/lead/booked')) {
-            throw new ForbiddenHttpException();
+            return null;
         }
         /** @var Employee $user */
         $user = Yii::$app->user->identity;
-        $count = $this->leadBadgesRepository->getBookedCount($user);
-        return ['result' => 'success', 'count' => $count];
+        return $this->leadBadgesRepository->getBookedCount($user);
     }
 
     /**
-     * @return array
-     * @throws ForbiddenHttpException
+     * @return int|null
      */
-    private function getSold(): array
+    private function getSold(): ?int
     {
         if (!Yii::$app->user->can('/lead/sold')) {
-            throw new ForbiddenHttpException();
+            return null;
         }
         /** @var Employee $user */
         $user = Yii::$app->user->identity;
-        $count = $this->leadBadgesRepository->getSoldCount($user);
-        return ['result' => 'success', 'count' => $count];
+        return $this->leadBadgesRepository->getSoldCount($user);
     }
 
     /**
-     * @return array
-     * @throws ForbiddenHttpException
+     * @return int|null
      */
-    private function getTrash(): array
+    private function getTrash(): ?int
     {
         if (!Yii::$app->user->can('/lead/trash')) {
-            throw new ForbiddenHttpException();
+            return null;
         }
         /** @var Employee $user */
         $user = Yii::$app->user->identity;
-        $count = $this->leadBadgesRepository->getTrashCount($user);
-        return ['result' => 'success', 'count' => $count];
+        return $this->leadBadgesRepository->getTrashCount($user);
     }
 
     /**
-     * @return array
-     * @throws ForbiddenHttpException
+     * @return int|null
      */
-    private function getDuplicate(): array
+    private function getDuplicate(): ?int
     {
         if (!Yii::$app->user->can('/lead/duplicate')) {
-            throw new ForbiddenHttpException();
+            return null;
         }
         /** @var Employee $user */
         $user = Yii::$app->user->identity;
-        $count = $this->leadBadgesRepository->getDuplicateCount($user);
-        return ['result' => 'success', 'count' => $count];
+        return $this->leadBadgesRepository->getDuplicateCount($user);
     }
 
 }

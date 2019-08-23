@@ -1304,8 +1304,7 @@ class Lead extends ActiveRecord implements AggregateRoot
      */
     public static function getCabin($cabin = null)
     {
-        $mapping = self::CABIN_LIST;
-        return isset($mapping[$cabin]) ? $mapping[$cabin] : $cabin;
+        return self::CABIN_LIST[$cabin] ?? $cabin;
     }
 
     /**

@@ -41,22 +41,18 @@ class CallController extends FController
     }
 
     /**
-     * Lists all Call models.
-     * @return mixed
+     * @return string
+     * @throws \Exception
      */
-    public function actionIndex()
+    public function actionIndex(): string
     {
         $searchModel = new CallSearch();
 
         $params = Yii::$app->request->queryParams;
-        if(Yii::$app->user->identity->canRole('supervision')) {
-            $params['CallSearch']['supervision_id'] = Yii::$app->user->id;
-        }
 
-        //$searchModel->datetime_start = date('Y-m-d', strtotime('-0 day'));
-        //$searchModel->datetime_end = date('Y-m-d');
-
-        $dataProvider = $searchModel->search($params);
+        /** @var Employee $user */
+        $user = Yii::$app->user->identity;
+        $dataProvider = $searchModel->search($params, $user);
 
         return $this->render('index', [
             'searchModel' => $searchModel,
@@ -237,7 +233,10 @@ class CallController extends FController
 
         $this->layout = '@frontend/themes/gentelella/views/layouts/main_tv';
 
-        $userId = Yii::$app->user->id;
+        /** @var Employee $user */
+        $user = Yii::$app->user->identity;
+
+
 
         $searchModel = new CallSearch();
         $searchModel2 = new UserConnectionSearch();
@@ -248,18 +247,47 @@ class CallController extends FController
             //$params['CallSearch']['status'] = Employee::STATUS_ACTIVE;
         //}
 
-        $params['UserConnectionSearch']['dep_id'] = Department::DEPARTMENT_SALES;
-        $dataProviderOnlineDep1 = $searchModel2->searchUserCallMap($params);
+        $accessDepartmentModels = $user->udDeps;
 
-        $params['UserConnectionSearch']['dep_id'] = Department::DEPARTMENT_EXCHANGE;
-        $dataProviderOnlineDep2 = $searchModel2->searchUserCallMap($params);
+        if($accessDepartmentModels) {
+            $accessDepartments = ArrayHelper::map($accessDepartmentModels, 'dep_id', 'dep_id');
+        } else {
+            $accessDepartments = [];
+        }
 
-        $params['UserConnectionSearch']['dep_id'] = Department::DEPARTMENT_SUPPORT;
-        $dataProviderOnlineDep3 = $searchModel2->searchUserCallMap($params);
+        //VarDumper::dump($accessDepartments, 10, true); exit;
 
-        $params['UserConnectionSearch']['dep_id'] = 0;
-        $dataProviderOnline = $searchModel2->searchUserCallMap($params);
 
+        if(in_array(Department::DEPARTMENT_SALES, $accessDepartments, true) || !$accessDepartments) {
+            $params['UserConnectionSearch']['dep_id'] = Department::DEPARTMENT_SALES;
+            $dataProviderOnlineDep1 = $searchModel2->searchUserCallMap($params);
+        } else {
+            $dataProviderOnlineDep1 = null;
+        }
+
+        if(in_array(Department::DEPARTMENT_EXCHANGE, $accessDepartments, true) || !$accessDepartments) {
+            $params['UserConnectionSearch']['dep_id'] = Department::DEPARTMENT_EXCHANGE;
+            $dataProviderOnlineDep2 = $searchModel2->searchUserCallMap($params);
+        } else {
+            $dataProviderOnlineDep2 = null;
+        }
+
+        if(in_array(Department::DEPARTMENT_SUPPORT, $accessDepartments, true) || !$accessDepartments) {
+            $params['UserConnectionSearch']['dep_id'] = Department::DEPARTMENT_SUPPORT;
+            $dataProviderOnlineDep3 = $searchModel2->searchUserCallMap($params);
+        } else {
+            $dataProviderOnlineDep3 = null;
+        }
+
+        if(!$accessDepartments) {
+            $params['UserConnectionSearch']['dep_id'] = 0;
+            $dataProviderOnline = $searchModel2->searchUserCallMap($params);
+        } else {
+            $dataProviderOnline = null;
+        }
+
+
+        $params['CallSearch']['dep_ids'] = $accessDepartments;
         $params['CallSearch']['statuses'] = [Call::CALL_STATUS_IN_PROGRESS, Call::CALL_STATUS_RINGING, Call::CALL_STATUS_QUEUE, Call::CALL_STATUS_IVR];
         $dataProvider3 = $searchModel->searchUserCallMap($params);
 

@@ -133,6 +133,7 @@ $dtNow = date('Y-m-d H:i:s');
                 <?/*<h1><i class="fa fa-bar-chart"></i> <?=$this->title?></h1>*/?>
 
 
+                <?php if($dataProviderOnlineDep1):?>
                 <div class="panel panel-default">
                     <div class="panel-heading"><i class="fa fa-users"></i> OnLine Users - Department SALES (<?=$dataProviderOnlineDep1->totalCount?>)</div>
                     <div class="panel-body">
@@ -150,8 +151,10 @@ $dtNow = date('Y-m-d H:i:s');
                         ])?>
                     </div>
                 </div>
+                <?php endif;?>
 
 
+                <?php if($dataProviderOnlineDep2):?>
                 <div class="panel panel-default">
                     <div class="panel-heading"><i class="fa fa-users"></i> OnLine Users - Department EXCHANGE (<?=$dataProviderOnlineDep2->totalCount?>)</div>
                     <div class="panel-body">
@@ -169,8 +172,9 @@ $dtNow = date('Y-m-d H:i:s');
                         ])?>
                     </div>
                 </div>
+                <?php endif;?>
 
-
+                <?php if($dataProviderOnlineDep3):?>
                 <div class="panel panel-default">
                     <div class="panel-heading"><i class="fa fa-users"></i> OnLine Users - Department SUPPORT (<?=$dataProviderOnlineDep3->totalCount?>)</div>
                     <div class="panel-body">
@@ -188,8 +192,9 @@ $dtNow = date('Y-m-d H:i:s');
                         ])?>
                     </div>
                 </div>
+                <?php endif;?>
 
-
+                <?php if($dataProviderOnline):?>
                 <div class="panel panel-default">
                     <div class="panel-heading"><i class="fa fa-users"></i> OnLine Users - W/O Department (<?=$dataProviderOnline->totalCount?>)</div>
                     <div class="panel-body">
@@ -207,7 +212,7 @@ $dtNow = date('Y-m-d H:i:s');
                         ])?>
                     </div>
                 </div>
-
+                <?php endif;?>
 
             </div>
 

@@ -34,12 +34,12 @@ class CasesQController extends Controller
         ]);
     }
 
-    public function actionFollowup()
+    public function actionFollowUp()
     {
         $searchModel = new CasesQSearch();
-        $dataProvider = $searchModel->searchFollowup(Yii::$app->request->queryParams, Yii::$app->user->identity);
+        $dataProvider = $searchModel->searchFollowUp(Yii::$app->request->queryParams, Yii::$app->user->identity);
 
-        return $this->render('followup', [
+        return $this->render('follow-up', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
         ]);
