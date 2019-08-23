@@ -142,7 +142,7 @@ class CallQueueJob extends BaseObject implements JobInterface
                     if(!$isCalled) {
                         $last_hours = (int)(Yii::$app->params['settings']['general_line_last_hours'] ?? 1);
 
-                        $limitCallUsers = (int)(Yii::$app->params['settings']['general_line_last_hours'] ?? 1);
+                        $limitCallUsers = (int)(Yii::$app->params['settings']['general_line_user_limit'] ?? 1);
 
                         $users = Employee::getUsersForCallQueue($call->c_project_id, $call->c_dep_id, $limitCallUsers, $last_hours);
                         if ($users) {
