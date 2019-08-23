@@ -3,12 +3,11 @@
 namespace common\models\search;
 
 use common\models\Employee;
-use common\models\UserGroupAssign;
 use kartik\daterange\DateRangeBehavior;
+use sales\repositories\call\CallSearchRepository;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use common\models\Call;
-use yii\helpers\VarDumper;
 
 /**
  * CallSearch represents the model behind the search form of `common\models\Call`.
@@ -19,6 +18,8 @@ use yii\helpers\VarDumper;
  * @property string $createTimeRange
  * @property int $createTimeStart
  * @property int $createTimeEnd
+ *
+ * @property CallSearchRepository $callSearchRepository
  */
 class CallSearch extends Call
 {
@@ -35,6 +36,19 @@ class CallSearch extends Call
     public $call_duration_to;
 
     public $dep_ids = [];
+
+    private $callSearchRepository;
+
+    /**
+     * CallSearch constructor.
+     * @param array $config
+     * @throws \yii\base\InvalidConfigException
+     */
+    public function __construct($config = [])
+    {
+        $this->callSearchRepository = \Yii::createObject(CallSearchRepository::class);
+        parent::__construct($config);
+    }
 
     /**
      * {@inheritdoc}
@@ -73,14 +87,14 @@ class CallSearch extends Call
     }
 
     /**
-     * Creates data provider instance with search query applied
-     *
-     * @param array $params
+     * @param $params
+     * @param Employee $user
      * @return ActiveDataProvider
+     * @throws \Exception
      */
-    public function search($params)
+    public function search($params, Employee $user): ActiveDataProvider
     {
-        $query = Call::find()->with('cCreatedUser', 'cProject');
+        $query = $this->callSearchRepository->getSearchQuery($user);
 
         // add conditions that should always apply here
 
@@ -118,14 +132,6 @@ class CallSearch extends Call
 
         $query->andFilterWhere(['>=','c_call_duration', $this->call_duration_from]);
         $query->andFilterWhere(['<=','c_call_duration', $this->call_duration_to]);
-
-
-
-        if($this->supervision_id > 0) {
-            $subQuery1 = UserGroupAssign::find()->select(['ugs_group_id'])->where(['ugs_user_id' => $this->supervision_id]);
-            $subQuery = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->where(['IN', 'ugs_group_id', $subQuery1]);
-            $query->andWhere(['IN', 'c_created_user_id', $subQuery]);
-        }
 
 
         // grid filtering conditions

@@ -40,22 +40,18 @@ class CallController extends FController
     }
 
     /**
-     * Lists all Call models.
-     * @return mixed
+     * @return string
+     * @throws \Exception
      */
-    public function actionIndex()
+    public function actionIndex(): string
     {
         $searchModel = new CallSearch();
 
         $params = Yii::$app->request->queryParams;
-        if(Yii::$app->user->identity->canRole('supervision')) {
-            $params['CallSearch']['supervision_id'] = Yii::$app->user->id;
-        }
 
-        //$searchModel->datetime_start = date('Y-m-d', strtotime('-0 day'));
-        //$searchModel->datetime_end = date('Y-m-d');
-
-        $dataProvider = $searchModel->search($params);
+        /** @var Employee $user */
+        $user = Yii::$app->user->identity;
+        $dataProvider = $searchModel->search($params, $user);
 
         return $this->render('index', [
             'searchModel' => $searchModel,
