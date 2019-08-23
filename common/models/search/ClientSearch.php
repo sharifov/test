@@ -4,7 +4,6 @@ namespace common\models\search;
 
 use common\models\ClientEmail;
 use common\models\ClientPhone;
-use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use common\models\Client;
@@ -20,9 +19,9 @@ class ClientSearch extends Client
     public $not_in_client_id;
 
     /**
-     * {@inheritdoc}
+     * @return array
      */
-    public function rules()
+    public function rules(): array
     {
         return [
             [['id', 'not_in_client_id'], 'integer'],
@@ -32,22 +31,10 @@ class ClientSearch extends Client
     }
 
     /**
-     * {@inheritdoc}
-     */
-    public function scenarios()
-    {
-        // bypass scenarios() implementation in the parent class
-        return Model::scenarios();
-    }
-
-    /**
-     * Creates data provider instance with search query applied
-     *
-     * @param array $params
-     *
+     * @param $params
      * @return ActiveDataProvider
      */
-    public function search($params)
+    public function search($params): ActiveDataProvider
     {
         $query = Client::find()->with('leads.employee.ugsGroups');
 
@@ -97,15 +84,11 @@ class ClientSearch extends Client
         return $dataProvider;
     }
 
-
     /**
-     * Creates data provider instance with search query applied
-     *
-     * @param array $params
-     *
+     * @param $params
      * @return ActiveDataProvider
      */
-    public function searchFromLead($params)
+    public function searchFromLead($params): ActiveDataProvider
     {
         $query = Client::find();
 

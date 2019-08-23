@@ -21,7 +21,7 @@ class CasesSearch extends Cases
 
             ['cs_gid', 'string'],
 
-            [['cs_id', 'cs_project_id'], 'integer'],
+            ['cs_id', 'integer'],
 
             ['cs_subject', 'string'],
 
@@ -33,9 +33,13 @@ class CasesSearch extends Cases
 
             ['cs_lead_id', 'string'],
 
-            ['cs_dep_id', 'integer'],
+            ['cs_dep_id', 'safe'],
 
             ['cs_created_dt', 'string'],
+
+            ['cs_client_id', 'integer'],
+
+            ['cs_project_id', 'safe']
 
         ];
     }
@@ -64,6 +68,10 @@ class CasesSearch extends Cases
             // uncomment the following line if you do not want to return any records when validation fails
             $query->where('0=1');
             return $dataProvider;
+        }
+
+        if ($this->cs_client_id) {
+            $query->andWhere(['cs_client_id' => $this->cs_client_id]);
         }
 
         // grid filtering conditions

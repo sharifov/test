@@ -251,7 +251,7 @@ class CasesQRepository
     private function inDepartment($userId): array
     {
         return [
-            'cs_dep_id' => UserDepartment::find()->select('ud_dep_id')->andWhere(['ud_user_id' => $userId])
+            'cs_dep_id' => UserDepartment::find()->depsByUser($userId)
         ];
     }
 
