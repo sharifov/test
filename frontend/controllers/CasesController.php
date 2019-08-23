@@ -114,12 +114,19 @@ class CasesController extends FController
     public function actionIndex()
     {
         $searchModel = new CasesSearch();
+        if(Yii::$app->user->identity->canRole('agent')) {
+            $isAgent = true;
+        } else {
+            $isAgent = false;
+        }
+
         $params = Yii::$app->request->queryParams;
-        $dataProvider = $searchModel->search($params);
+        $dataProvider = $searchModel->search($params, $isAgent);
 
         return $this->render('index', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
+            'isAgent' => $isAgent
         ]);
     }
 
@@ -568,7 +575,7 @@ class CasesController extends FController
             ],
         ]);
 
-       //VarDumper::dump($dataProvider->allModels); exit;
+        //VarDumper::dump($dataProvider->allModels); exit;
 
 
 

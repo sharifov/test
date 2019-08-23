@@ -81,8 +81,11 @@ use yii\widgets\ActiveForm;
 </div>
 
 <div class="form-group text-center">
-    <?= Html::submitButton('Search', ['class' => 'btn btn-primary']) ?>
-    <?= Html::resetButton('Reset form', ['class' => 'btn btn-outline-secondary']) ?>
+    <?/*= Html::submitButton('Search', ['class' => 'btn btn-primary']) */?><!--
+    --><?/*= Html::resetButton('Reset form', ['class' => 'btn btn-outline-secondary']) */?>
+
+    <?= Html::submitButton('<i class="fa fa-search"></i> Search cases', ['class' => 'btn btn-primary']) ?>
+    <?= Html::a('<i class="glyphicon glyphicon-repeat"></i> Reset form', ['cases/index'], ['class' => 'btn btn-warning']) ?>
 </div>
 
 <?php ActiveForm::end(); ?>

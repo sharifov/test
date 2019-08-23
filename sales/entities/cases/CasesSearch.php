@@ -42,9 +42,10 @@ class CasesSearch extends Cases
 
     /**
      * @param $params
+     * @param $isAgent
      * @return ActiveDataProvider
      */
-    public function search($params): ActiveDataProvider
+    public function search($params, $isAgent): ActiveDataProvider
     {
         $query = Cases::find();
 
@@ -59,6 +60,10 @@ class CasesSearch extends Cases
         ]);
 
         $this->load($params);
+
+        if (empty($params) && $isAgent === true){
+            $query->where('0=1');
+        }
 
         if (!$this->validate()) {
             // uncomment the following line if you do not want to return any records when validation fails

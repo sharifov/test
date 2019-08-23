@@ -12,6 +12,7 @@ use yii\helpers\Url;
 /* @var $this yii\web\View */
 /* @var $searchModel sales\entities\cases\CasesSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
+/* @var $isAgent bool */
 
 $this->title = 'Search Cases';
 $this->params['breadcrumbs'][] = $this->title;
@@ -31,11 +32,17 @@ $this->params['breadcrumbs'][] = $this->title;
                 <div class="clearfix"></div>
             </div>
             <div class="x_content" style="display: block">
-                <?= $this->render('_search', ['model' => $searchModel]); ?>
+                <?php
+                if ($isAgent) {
+                    $searchTpl = '_search_agents';
+                } else {
+                    $searchTpl = '_search';
+                }
+                ?>
+                <?= $this->render($searchTpl, ['model' => $searchModel]); ?>
             </div>
         </div>
     </div>
-
 
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
@@ -134,6 +141,4 @@ $this->params['breadcrumbs'][] = $this->title;
 
         ],
     ]); ?>
-
-
 </div>
