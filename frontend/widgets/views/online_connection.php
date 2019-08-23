@@ -147,6 +147,13 @@ $js = <<<JS
                         
                     }
                     
+                    if(obj.command === 'updateIncomingCall') {
+                        if (typeof refreshInboxCallWidget === "function") {
+                            refreshInboxCallWidget(obj);
+                        }
+                    }
+                    
+                    
                     if(obj.command === 'callMapUpdate') {
                         $('#btn-user-call-map-refresh').click();
                     }

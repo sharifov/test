@@ -1,7 +1,8 @@
 <?php
 
 /* @var \common\models\Call $call  */
-/* @var integer $newCount */
+/* @var \common\models\CallUserAccess $callUserAccess  */
+
 
 
 \frontend\assets\CallBoxAsset::register($this);
@@ -61,7 +62,7 @@ use yii\widgets\Pjax;
             <div class="col-md-5 text-right" style="padding-top: 3px; padding-bottom: 4px; ">
                 <span class="badge badge-awake" style="font-size: 14px"><span class="fa fa-phone fa-spin"></span> <?=\yii\helpers\Html::encode($call->c_from)?></span>
                 <?php
-                    $durationSec =  $call->c_updated_dt ? (time() - strtotime($call->c_updated_dt)) : 0;
+                    $durationSec =  $callUserAccess->cua_created_dt ? (time() - strtotime($callUserAccess->cua_created_dt)) : 0;
                 ?>
                 <span class="badge badge-warning"><i class="fa fa-clock-o"></i> <span class="timer" data-sec="<?=$durationSec?>" data-control="start" data-format="%M:%S" title="<?=Yii::$app->formatter->asDuration($durationSec)?>"> 00:00 </span></span>
 
@@ -98,12 +99,11 @@ use yii\widgets\Pjax;
 
 <script>
     const incomingCallUrl = '<?=$incomingCallUrl?>';
-    function refreshInboxCallWidget()
+    function refreshInboxCallWidget(obj)
     {
         // console.log(obj);
         $.pjax.reload({url: incomingCallUrl, container: '#incoming-call-pjax', push: false, replace: false, 'scrollTo': false, timeout: 10000, async: false}); // , data: {id: obj.id, status: obj.status}
     }
-
 </script>
 
 <?php

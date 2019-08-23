@@ -75,11 +75,11 @@ class IncomingCallWidget extends \yii\bootstrap\Widget
 
                         switch ($action) {
                             case 'accept':
-                                $this->acceptCall($callUserAccess);
+                                $this->acceptCall($callUserAccess, $userModel);
                                 break;
-                            case 'skip':
-                                $this->skipCall($callUserAccess);
-                                break;
+//                            case 'skip':
+//                                $this->skipCall($callUserAccess);
+//                                break;
                             case 'busy':
                                 $this->busyCall($callUserAccess, $userModel);
                                 break;
@@ -105,42 +105,58 @@ class IncomingCallWidget extends \yii\bootstrap\Widget
         // $countMissedCalls = Call::find()->where(['c_created_user_id' => $user_id, 'c_call_status' => Call::CALL_STATUS_NO_ANSWER, 'c_call_type_id' => Call::CALL_TYPE_IN, 'c_is_new' => true])->count();
         //$countMissedCalls = 10;
 
-        return $this->render('incoming_call_widget', ['call' => $incomingCall]);
+        return $this->render('incoming_call_widget', ['call' => $incomingCall, 'callUserAccess' => $callUserAccess]);
     }
+
 
     /**
      * @param CallUserAccess $callUserAccess
+     * @param Employee $user
+     * @return bool
      * @throws \Throwable
      * @throws \yii\db\StaleObjectException
      */
-    private function acceptCall(CallUserAccess $callUserAccess): void
+    private function acceptCall(CallUserAccess $callUserAccess, Employee $user): bool
     {
         $callUserAccess->acceptCall();
         if($callUserAccess->update()) {
-            $callUserAccessAny = CallUserAccess::find()->where(['cua_status_id' => [CallUserAccess::STATUS_TYPE_PENDING], 'cua_call_id' => $callUserAccess->cua_call_id])->andWhere(['<>', 'cua_user_id', $callUserAccess->cua_user_id])->all();
-            if($callUserAccessAny) {
-                foreach ($callUserAccessAny as $callAccess) {
-                    $callAccess->noAnsweredCall();
-                    if(!$callAccess->update()) {
-                        Yii::error(VarDumper::dumpAsString($callAccess->errors), 'IncomingCallWidget:acceptCall:UserCallStatus:save');
-                    }
-                }
+
+            if ($call = $callUserAccess->cuaCall) {
+                /*$call->c_created_user_id = $user->id;
+                $call->c_call_status = Call::CALL_STATUS_IN_PROGRESS;
+
+                if (!$call->update()) {
+                    Yii::error(VarDumper::dumpAsString($call->errors), 'IncomingCallWidget:acceptCall:Call:update');
+                }*/
+
+                return Call::applyCallToAgent($call, $user->id);
             }
+
+//            $callUserAccessAny = CallUserAccess::find()->where(['cua_status_id' => [CallUserAccess::STATUS_TYPE_PENDING], 'cua_call_id' => $callUserAccess->cua_call_id])->andWhere(['<>', 'cua_user_id', $callUserAccess->cua_user_id])->all();
+//            if($callUserAccessAny) {
+//                foreach ($callUserAccessAny as $callAccess) {
+//                    $callAccess->noAnsweredCall();
+//                    if(!$callAccess->update()) {
+//                        Yii::error(VarDumper::dumpAsString($callAccess->errors), 'IncomingCallWidget:acceptCall:UserCallStatus:save');
+//                    }
+//                }
+//            }
         }
+        return false;
     }
 
-    /**
-     * @param CallUserAccess $callUserAccess
-     * @throws \Throwable
-     * @throws \yii\db\StaleObjectException
-     */
-    private function skipCall(CallUserAccess $callUserAccess): void
-    {
-        $callUserAccess->skipCall();
-        if(!$callUserAccess->update()) {
-            Yii::error(VarDumper::dumpAsString($callUserAccess->errors), 'IncomingCallWidget:skipCall:UserCallStatus:save');
-        }
-    }
+//    /**
+//     * @param CallUserAccess $callUserAccess
+//     * @throws \Throwable
+//     * @throws \yii\db\StaleObjectException
+//     */
+//    private function skipCall(CallUserAccess $callUserAccess): void
+//    {
+//        $callUserAccess->skipCall();
+//        if(!$callUserAccess->update()) {
+//            Yii::error(VarDumper::dumpAsString($callUserAccess->errors), 'IncomingCallWidget:skipCall:UserCallStatus:save');
+//        }
+//    }
 
 
     /**

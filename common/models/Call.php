@@ -462,6 +462,21 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
 //                }
 //            }
 
+
+            if(isset($changedAttributes['c_call_status']) && $this->c_call_type_id == self::CALL_TYPE_IN && in_array($this->c_call_status, [self::CALL_STATUS_NO_ANSWER, self::CALL_STATUS_COMPLETED, self::CALL_STATUS_BUSY, self::CALL_STATUS_IN_PROGRESS])) { //self::CALL_STATUS_BUSY,
+                $callUserAccessAny = CallUserAccess::find()->where(['cua_status_id' => [CallUserAccess::STATUS_TYPE_PENDING], 'cua_call_id' => $this->c_id])->all();
+                if ($callUserAccessAny) {
+                    foreach ($callUserAccessAny as $callAccess) {
+                        $callAccess->noAnsweredCall();
+                        if (!$callAccess->update()) {
+                            Yii::error(VarDumper::dumpAsString($callAccess->errors), 'IncomingCallWidget:acceptCall:UserCallStatus:save');
+                        }
+                    }
+                }
+            }
+
+
+
             if(isset($changedAttributes['c_call_status']) && (int) $this->c_call_type_id === self::CALL_TYPE_IN && $this->c_case_id && $this->c_call_status === self::CALL_STATUS_IN_PROGRESS) {
                 if($this->c_created_user_id && $this->cCase && $this->c_created_user_id !== $this->cCase->cs_user_id) {
                     try {
@@ -696,6 +711,35 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
                 \Yii::warning('Error: ' . VarDumper::dumpAsString($res), 'Call:applyCallToAgent:callRedirect');
             }
 
+        } catch (\Throwable $e) {
+            \Yii::error(VarDumper::dumpAsString([$e->getMessage(), $e->getFile(), $e->getLine()]), 'Call:applyCallToAgent');
+        }
+        return false;
+    }
+
+
+    /**
+     * @param Call $call
+     * @param int $user_id
+     * @return bool
+     */
+    public static function applyCallToAgentAccess(Call $call, int $user_id): bool
+    {
+        try {
+            if ($call) {
+                $exist = CallUserAccess::find()->where(['cua_user_id' => $user_id, 'cua_call_id' => $call->c_id])->exists();
+                if(!$exist) {
+                    $callUserAccess = new CallUserAccess();
+                    $callUserAccess->cua_call_id = $call->c_id;
+                    $callUserAccess->cua_user_id = $user_id;
+                    $callUserAccess->acceptPending();
+                    if(!$callUserAccess->save()) {
+                        Yii::error(VarDumper::dumpAsString($callUserAccess->errors), 'CallQueueJob:execute:CallUserAccess:save');
+                    } else {
+                        return true;
+                    }
+                }
+            }
         } catch (\Throwable $e) {
             \Yii::error(VarDumper::dumpAsString([$e->getMessage(), $e->getFile(), $e->getLine()]), 'Call:applyCallToAgent');
         }

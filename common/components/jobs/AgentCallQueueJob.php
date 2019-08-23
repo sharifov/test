@@ -8,6 +8,7 @@
 namespace common\components\jobs;
 
 use common\models\Call;
+use common\models\CallUserAccess;
 use common\models\Department;
 use common\models\Employee;
 use common\models\Lead2;
@@ -88,7 +89,7 @@ class AgentCallQueueJob extends BaseObject implements JobInterface
                     if($originalAgentId) {
                         $user = Employee::findOne($originalAgentId);
                         if($user && $user->isOnline() && $user->isCallStatusReady() && $user->isCallFree()) {
-                            $isCalled = Call::applyCallToAgent($call, $user->id);
+                            $isCalled = Call::applyCallToAgentAccess($call, $user->id);
                         }
                     }
 
@@ -97,7 +98,7 @@ class AgentCallQueueJob extends BaseObject implements JobInterface
                         if ($users) {
                             foreach ($users as $userItem) {
                                 $user_id = (int)$userItem['tbl_user_id'];
-                                Call::applyCallToAgent($call, $user_id);
+                                Call::applyCallToAgentAccess($call, $user_id);
                             }
                             Yii::info('UserId: ' . $this->user_id . ', Call Id: ' . $call->c_id . ', Users: '. VarDumper::dumpAsString($users),'info\AgentCallQueueJob:getUsersForCallQueue');
                         }

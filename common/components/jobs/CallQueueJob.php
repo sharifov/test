@@ -8,6 +8,7 @@
 namespace common\components\jobs;
 
 use common\models\Call;
+use common\models\CallUserAccess;
 use common\models\Department;
 use common\models\Employee;
 use common\models\Lead2;
@@ -134,17 +135,20 @@ class CallQueueJob extends BaseObject implements JobInterface
                     if($originalAgentId) {
                         $user = Employee::findOne($originalAgentId);
                         if($user && $user->isOnline() && $user->isCallStatusReady() && $user->isCallFree()) {
-                            $isCalled = Call::applyCallToAgent($call, $user->id);
+                            $isCalled = Call::applyCallToAgentAccess($call, $user->id);
                         }
                     }
 
                     if(!$isCalled) {
                         $last_hours = (int)(Yii::$app->params['settings']['general_line_last_hours'] ?? 1);
-                        $users = Employee::getUsersForCallQueue($call->c_project_id, $call->c_dep_id, 1, $last_hours);
+
+                        $limitCallUsers = (int)(Yii::$app->params['settings']['general_line_last_hours'] ?? 1);
+
+                        $users = Employee::getUsersForCallQueue($call->c_project_id, $call->c_dep_id, $limitCallUsers, $last_hours);
                         if ($users) {
                             foreach ($users as $userItem) {
-                                $user_id = (int)$userItem['tbl_user_id'];
-                                Call::applyCallToAgent($call, $user_id);
+                                $user_id = (int) $userItem['tbl_user_id'];
+                                Call::applyCallToAgentAccess($call, $user_id);
                             }
                         }
                     }
