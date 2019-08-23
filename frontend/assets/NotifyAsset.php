@@ -38,7 +38,7 @@ class NotifyAsset extends AssetBundle
         'https://cdnjs.cloudflare.com/ajax/libs/pnotify/3.2.1/pnotify.nonblock.js',
         'https://cdnjs.cloudflare.com/ajax/libs/pnotify/3.2.1/pnotify.mobile.js',*/
 
-        'js/init-objects.js',
+        'js/init-objects.js?v=1',
     ];
 
     public $depends = [

@@ -8,8 +8,12 @@
 namespace frontend\widgets;
 
 use common\models\Call;
+use common\models\CallUserAccess;
 use common\models\Employee;
+use common\models\Notifications;
 use common\models\UserCallStatus;
+use Yii;
+use yii\helpers\VarDumper;
 
 /**
  * Alert widget renders a message from
@@ -47,21 +51,116 @@ class IncomingCallWidget extends \yii\bootstrap\Widget
     {
         /** @var Employee $userModel */
         $userModel = \Yii::$app->user->identity;
-        //$sipExist = $sipExist = ($userModel->userProfile->up_sip && strlen($userModel->userProfile->up_sip) > 2); // \common\models\UserProjectParams::find()->where(['upp_user_id' => $user_id])->andWhere(['AND', ['IS NOT', 'upp_tw_sip_id', null], ['!=', 'upp_tw_sip_id', '']])->one();
-
-        //VarDumper::dump($sipExist->attributes, 10, true);
 
         if(!$userModel) {
             return '';
         }
 
 
-        // $lastCall = Call::find()->where(['c_created_user_id' => $user_id])->orderBy(['c_id' => SORT_DESC])->limit(1)->one();
+        $action = \Yii::$app->request->get('act');
+        $call_id = \Yii::$app->request->get('call_id');
+
+        if(\Yii::$app->request->isPjax && $action && $call_id) {
+            try {
+                $call = Call::findOne($call_id);
+
+                if ($call  ) { // && $call->c_call_status === Call::CALL_STATUS_QUEUE && (!$call->c_created_user_id || $call->c_created_user_id == $userModel->id)
+
+                    //VarDumper::dump($action); exit;
+
+                    $callUserAccess = CallUserAccess::find()->where(['cua_user_id' => $userModel->id, 'cua_call_id' => $call->c_id])->one();
+                    if ($callUserAccess) {
+
+                        //VarDumper::dump($action); exit;
+
+                        switch ($action) {
+                            case 'accept':
+                                $this->acceptCall($callUserAccess);
+                                break;
+                            case 'skip':
+                                $this->skipCall($callUserAccess);
+                                break;
+                            case 'busy':
+                                $this->busyCall($callUserAccess, $userModel);
+                                break;
+                        }
+                    }
+                }
+            } catch (\Throwable $exception) {
+                \Yii::error($exception->getMessage(), 'IncomingCallWidget:Pjax:Throwable');
+            }
+        }
+
+        //$lastCall = Call::find()->where(['c_created_user_id' => $userModel->id])->orderBy(['c_id' => SORT_DESC])->limit(1)->one();
+
+        $callUserAccess = CallUserAccess::find()->where(['cua_user_id' => $userModel->id, 'cua_status_id' => CallUserAccess::STATUS_TYPE_PENDING])->orderBy(['cua_created_dt' => SORT_ASC])->limit(1)->one();
+
+        if($callUserAccess) {
+            $incomingCall = $callUserAccess->cuaCall;
+        } else {
+            $incomingCall = null;
+        }
+
         // $userCallStatus = UserCallStatus::find()->where(['us_user_id' => $user_id])->orderBy(['us_id' => SORT_DESC])->limit(1)->one();
         // $countMissedCalls = Call::find()->where(['c_created_user_id' => $user_id, 'c_call_status' => Call::CALL_STATUS_NO_ANSWER, 'c_call_type_id' => Call::CALL_TYPE_IN, 'c_is_new' => true])->count();
         //$countMissedCalls = 10;
 
+        return $this->render('incoming_call_widget', ['call' => $incomingCall]);
+    }
 
-        return $this->render('incoming_call_widget', []);
+    /**
+     * @param CallUserAccess $callUserAccess
+     * @throws \Throwable
+     * @throws \yii\db\StaleObjectException
+     */
+    private function acceptCall(CallUserAccess $callUserAccess): void
+    {
+        $callUserAccess->acceptCall();
+        if($callUserAccess->update()) {
+            $callUserAccessAny = CallUserAccess::find()->where(['cua_status_id' => [CallUserAccess::STATUS_TYPE_PENDING], 'cua_call_id' => $callUserAccess->cua_call_id])->andWhere(['<>', 'cua_user_id', $callUserAccess->cua_user_id])->all();
+            if($callUserAccessAny) {
+                foreach ($callUserAccessAny as $callAccess) {
+                    $callAccess->noAnsweredCall();
+                    if(!$callAccess->update()) {
+                        Yii::error(VarDumper::dumpAsString($callAccess->errors), 'IncomingCallWidget:acceptCall:UserCallStatus:save');
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * @param CallUserAccess $callUserAccess
+     * @throws \Throwable
+     * @throws \yii\db\StaleObjectException
+     */
+    private function skipCall(CallUserAccess $callUserAccess): void
+    {
+        $callUserAccess->skipCall();
+        if(!$callUserAccess->update()) {
+            Yii::error(VarDumper::dumpAsString($callUserAccess->errors), 'IncomingCallWidget:skipCall:UserCallStatus:save');
+        }
+    }
+
+
+    /**
+     * @param CallUserAccess $callUserAccess
+     * @param Employee $user
+     * @throws \Throwable
+     * @throws \yii\db\StaleObjectException
+     */
+    private function busyCall(CallUserAccess $callUserAccess, Employee $user): void
+    {
+        $callUserAccess->busyCall();
+        $ucs = new UserCallStatus();
+        $ucs->us_type_id = UserCallStatus::STATUS_TYPE_OCCUPIED;
+        $ucs->us_user_id = $user->id;
+        $ucs->us_created_dt = date('Y-m-d H:i:s');
+        if($ucs->save()) {
+            $callUserAccess->update();
+            Notifications::socket($ucs->us_user_id, null, 'updateUserCallStatus', ['id' => 'ucs'.$ucs->us_id, 'type_id' => $ucs->us_type_id]);
+        } else {
+            Yii::error(VarDumper::dumpAsString($ucs->errors), 'IncomingCallWidget:busyCall:UserCallStatus:save');
+        }
     }
 }
