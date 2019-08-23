@@ -68,6 +68,7 @@ class CasesSearch extends Cases
 
         // grid filtering conditions
         $query->andFilterWhere([
+            'cs_id' => $this->cs_id,
             'cs_gid' => $this->cs_gid,
             'cs_project_id' => $this->cs_project_id,
             'cs_category' => $this->cs_category,
@@ -98,6 +99,7 @@ class CasesSearch extends Cases
     public function attributeLabels(): array
     {
         return [
+            'cs_id' => 'ID',
             'cs_gid' => 'GID',
             'cs_project_id' => 'Project',
             'cs_subject' => 'Subject',
