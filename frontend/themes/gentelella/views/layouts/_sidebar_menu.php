@@ -147,7 +147,7 @@ $isSuperAdmin = $user->canRole('superadmin');
         $menuCases[] = ['label' => 'Case Pending <span id="cases-q-pending" data-type="pending" class="label-warning label pull-right cases-q-info"></span> ', 'url' => ['/cases-q/pending'], 'icon' => 'briefcase text-info'];
         $menuCases[] = ['label' => 'Case Inbox <span id="cases-q-inbox" data-type="inbox" class="label-warning label pull-right cases-q-info"></span> ', 'url' => ['/cases-q/inbox'], 'icon' => 'briefcase text-info'];
         $menuCases[] = ['label' => 'Case Processing <span id="cases-q-processing" data-type="processing" class="label-warning label pull-right cases-q-info"></span> ', 'url' => ['/cases-q/processing'], 'icon' => 'spinner'];
-        $menuCases[] = ['label' => 'Case Follow Up <span id="cases-q-followup" data-type="followup" class="label-success label pull-right cases-q-info"></span> ', 'url' => ['/cases-q/followup'], 'icon' => 'recycle'];
+        $menuCases[] = ['label' => 'Case Follow Up <span id="cases-q-follow-up" data-type="follow-up" class="label-success label pull-right cases-q-info"></span> ', 'url' => ['/cases-q/follow-up'], 'icon' => 'recycle'];
         $menuCases[] = ['label' => 'Case Solved <span id="cases-q-solved" data-type="solved" class="label-success label pull-right cases-q-info"></span> ', 'url' => ['/cases-q/solved'], 'icon' => 'flag text-success'];
         $menuCases[] = ['label' => 'Case Trash <span id="cases-q-trash" class="label-danger label pull-right"></span>', 'url' => ['/cases-q/trash'], 'icon' => 'trash-o text-danger'];
 
@@ -326,80 +326,43 @@ $isSuperAdmin = $user->canRole('superadmin');
 
 
 <?php
-$urlBadgesCount = Url::to(['/badges/get-badges-count']);
-$js =<<<JS
-function updateBadgesCounters() {
-    $(".bginfo").each(function(i) {
-        var id = $(this).attr('id');
-        var type = $(this).data('type');
-        if (typeof(type) != "undefined" && type != null && typeof(id) != "undefined" && id != null ) {
-              setTimeout(function () {
-                  $('#' + id).html('<i style="font-size:9px" class="fa fa-spin fa-spinner"></i>');
-              $.ajax({
-                url: '$urlBadgesCount',
-                data: {type: type}, 
-                dataType: 'json',
-                success: function(data){
-                    if (typeof (data) != "undefined" && data != null) {
-                        if (data.result == 'success' && data.count != 0) {
-                            $("#" + id).html(data.count);
-                        } else {
-                            $("#" + id).html('');
-                        }
-                    } else {
-                        $("#" + id).html('-');
-                    }
-         
-                },
-                error: function(data){
-                    console.log(data);
-                    $("#" + id).html('-');
-                }, 
-            });    
-              }, i*300)
-        }
-    });
-}
 
-updateBadgesCounters();
+$js =<<<JS
+function updateCounters(url, className, idName) {
+    
+    var types = [];
+    $("." + className).each(function(i) {
+        types.push($(this).data('type'));
+    });
+    
+    $.ajax({
+        type: "POST",
+        url: url,
+        data: {types: types}, 
+        dataType: 'json',
+        success: function(data){
+            if (typeof (data) != "undefined" && data != null) {
+                $.each( data, function( key, val ) {
+                    if (val != 0) {
+                        $("#" + idName + "-" + key).html(val);
+                    }
+                });
+            }
+        },
+        error: function(data){
+            console.log(data);
+        }, 
+    });    
+    
+}
 JS;
 $this->registerJs($js, $this::POS_LOAD);
 
-$urlCasesQCount = Url::to(['/cases-q-counters/get-q-count']);
-$js =<<<JS
-function updateCasesQCounters() {
-    $(".cases-q-info").each(function(i) {
-        var id = $(this).attr('id');
-        var type = $(this).data('type');
-        if (typeof(type) != "undefined" && type != null && typeof(id) != "undefined" && id != null ) {
-              setTimeout(function () {
-                  $('#' + id).html('<i style="font-size:9px" class="fa fa-spin fa-spinner"></i>');
-              $.ajax({
-                url: '$urlCasesQCount',
-                data: {type: type}, 
-                dataType: 'json',
-                success: function(data){
-                    if (typeof (data) != "undefined" && data != null) {
-                        if (data.result == 'success' && data.count != 0) {
-                            $("#" + id).html(data.count);
-                        } else {
-                            $("#" + id).html('');
-                        }
-                    } else {
-                        $("#" + id).html('-');
-                    }
-         
-                },
-                error: function(data){
-                    console.log(data);
-                    $("#" + id).html('-');
-                }, 
-            });    
-              }, i*300)
-        }
-    });
+if (Yii::$app->user->can('leadSection')) {
+    $urlBadgesCount = Url::to(['/badges/get-badges-count']);
+    $this->registerJs("updateCounters('$urlBadgesCount', 'bginfo', 'badges');", $this::POS_LOAD);
 }
-
-updateCasesQCounters();
-JS;
-$this->registerJs($js, $this::POS_LOAD);
+if (Yii::$app->user->can('caseSection')) {
+    $urlCasesQCount = Url::to(['/cases-q-counters/get-q-count']);
+    $this->registerJs("updateCounters('$urlCasesQCount', 'cases-q-info', 'cases-q');", $this::POS_LOAD);
+}

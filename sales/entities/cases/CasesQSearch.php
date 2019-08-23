@@ -210,9 +210,9 @@ class CasesQSearch extends Cases
      * @param Employee $user
      * @return ActiveDataProvider
      */
-    public function searchFollowup($params, Employee $user): ActiveDataProvider
+    public function searchFollowUp($params, Employee $user): ActiveDataProvider
     {
-        $query = $this->casesQRepository->getFollowupQuery($user);
+        $query = $this->casesQRepository->getFollowUpQuery($user);
 
         // add conditions that should always apply here
 

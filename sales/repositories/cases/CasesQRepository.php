@@ -74,16 +74,16 @@ class CasesQRepository
      * @param Employee $user
      * @return int
      */
-    public function getFollowupCount(Employee $user): int
+    public function getFollowUpCount(Employee $user): int
     {
-        return $this->getFollowupQuery($user)->count();
+        return $this->getFollowUpQuery($user)->count();
     }
 
     /**
      * @param Employee $user
      * @return ActiveQuery
      */
-    public function getFollowupQuery(Employee $user): ActiveQuery
+    public function getFollowUpQuery(Employee $user): ActiveQuery
     {
         $query = Cases::find()->andWhere(['cs_status' => CasesStatus::STATUS_FOLLOW_UP]);
 
