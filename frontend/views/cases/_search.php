@@ -17,59 +17,74 @@ use yii\widgets\ActiveForm;
         'action' => ['index'],
         'method' => 'get',
     ]); ?>
-
+    <div class="row">
+        <div class="col-md-12">
+            <div class="row">
+                <div class="col-md-1">
+                    <?= $form->field($model, 'cs_id') ?>
+                </div>
+                <div class="col-md-2">
+                    <?= $form->field($model, 'cs_gid') ?>
+                </div>
+                <div class="col-md-1">
+                    <?= $form->field($model, 'cs_project_id')->dropDownList(Project::getList(), ['prompt' => '-']) ?>
+                </div>
+                <div class="col-md-1">
+                    <?= $form->field($model, 'cs_dep_id')->dropDownList(Department::getList(), ['prompt' => '-']) ?>
+                </div>
+                <div class="col-md-1">
+                    <?= $form->field($model, 'cs_category')->dropDownList(CasesCategory::getList(), ['prompt' => '-']) ?>
+                </div>
+                <div class="col-md-1">
+                    <?= $form->field($model, 'cs_status')->dropDownList(CasesStatus::STATUS_LIST, ['prompt' => '-']) ?>
+                </div>
+                <div class="col-md-1">
+                    <?= $form->field($model, 'cs_subject') ?>
+                </div>
+                <div class="col-md-1">
+                    <?= $form->field($model, 'cs_user_id') ?>
+                </div>
+                <div class="col-md-1">
+                    <?= $form->field($model, 'cs_lead_id') ?>
+                </div>
+                <div class="col-md-1">
+                    <?= $form->field($model, 'cs_created_dt')->widget(
+                        \dosamigos\datepicker\DatePicker::class, [
+                        'inline' => false,
+                        'clientOptions' => [
+                            'autoclose' => true,
+                            'format' => 'dd-M-yyyy',
+                        ]
+                    ]);?>
+                </div>
+            </div>
+        </div>
+    </div>
     <div class="row">
         <div class="col-md-1">
-            <?= $form->field($model, 'cs_id') ?>
+            <?= $form->field($model, 'cssSaleId') ?>
+        </div>
+        <div class="col-md-1">
+            <?= $form->field($model, 'cssBookId') ?>
+        </div>
+        <div class="col-md-1">
+            <?= $form->field($model, 'salePNR') ?>
+        </div>
+        <div class="col-md-1">
+            <?= $form->field($model, 'clientPhone') ?>
         </div>
         <div class="col-md-2">
-            <?= $form->field($model, 'cs_gid') ?>
-        </div>
-        <div class="col-md-1">
-            <?= $form->field($model, 'cs_project_id')->dropDownList(Project::getList(), ['prompt' => '-']) ?>
-        </div>
-        <div class="col-md-1">
-            <?= $form->field($model, 'cs_dep_id')->dropDownList(Department::getList(), ['prompt' => '-']) ?>
-        </div>
-        <div class="col-md-1">
-            <?= $form->field($model, 'cs_category')->dropDownList(CasesCategory::getList(), ['prompt' => '-']) ?>
-        </div>
-        <div class="col-md-1">
-            <?= $form->field($model, 'cs_status')->dropDownList(CasesStatus::STATUS_LIST, ['prompt' => '-']) ?>
-        </div>
-        <div class="col-md-1">
-            <?= $form->field($model, 'cs_subject') ?>
-        </div>
-        <div class="col-md-1">
-            <?= $form->field($model, 'cs_user_id') ?>
-        </div>
-        <div class="col-md-1">
-            <?= $form->field($model, 'cs_lead_id') ?>
-        </div>
-        <div class="col-md-1">
-            <?= $form->field($model, 'cs_created_dt')->widget(
-                \dosamigos\datepicker\DatePicker::class, [
-                'inline' => false,
-                //'template' => '<div class="well well-sm" style="background-color: #fff; width:250px">{input}</div>',
-                'clientOptions' => [
-                    'autoclose' => true,
-                    'format' => 'dd-M-yyyy',
-                ]
-            ]);?>
+            <?= $form->field($model, 'clientEmail') ?>
         </div>
     </div>
 
-    <?php // echo $form->field($model, 'cs_call_id') ?>
+</div>
 
-    <?php // echo $form->field($model, 'cs_depart_id') ?>
+<div class="form-group text-center">
+    <?= Html::submitButton('Search', ['class' => 'btn btn-primary']) ?>
+    <?= Html::resetButton('Reset form', ['class' => 'btn btn-outline-secondary']) ?>
+</div>
 
-    <?php // echo $form->field($model, 'cs_created_dt') ?>
-
-    <div class="form-group">
-        <?= Html::submitButton('Search', ['class' => 'btn btn-primary']) ?>
-        <?= Html::resetButton('Reset', ['class' => 'btn btn-outline-secondary']) ?>
-    </div>
-
-    <?php ActiveForm::end(); ?>
+<?php ActiveForm::end(); ?>
 
 </div>

@@ -2,6 +2,9 @@
 
 namespace sales\entities\cases;
 
+use common\models\CaseSale;
+use common\models\ClientEmail;
+use common\models\ClientPhone;
 use common\models\Employee;
 use common\models\Lead;
 use yii\data\ActiveDataProvider;
@@ -11,6 +14,11 @@ use yii\data\ActiveDataProvider;
  */
 class CasesSearch extends Cases
 {
+    public $cssSaleId;
+    public $cssBookId;
+    public $salePNR;
+    public $clientPhone;
+    public $clientEmail;
 
     /**
      * @return array
@@ -18,25 +26,17 @@ class CasesSearch extends Cases
     public function rules(): array
     {
         return [
-
             ['cs_gid', 'string'],
-
             [['cs_id', 'cs_project_id'], 'integer'],
-
             ['cs_subject', 'string'],
-
             ['cs_category', 'string'],
-
             ['cs_status', 'integer'],
-
             ['cs_user_id', 'string'],
-
             ['cs_lead_id', 'string'],
-
             ['cs_dep_id', 'integer'],
-
             ['cs_created_dt', 'string'],
-
+            ['cssSaleId', 'integer'],
+            [['cssBookId', 'salePNR', 'clientPhone', 'clientEmail'], 'string']
         ];
     }
 
@@ -84,6 +84,25 @@ class CasesSearch extends Cases
             $query->andWhere(['cs_lead_id' => Lead::find()->select('id')->andWhere(['uid' => $this->cs_lead_id])]);
         }
 
+        if ($this->cssSaleId){
+            $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['css_sale_id' => $this->cssSaleId])]);
+        }
+
+        if ($this->cssBookId){
+            $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['css_sale_book_id' => $this->cssBookId])]);
+        }
+
+        if ($this->salePNR){
+            $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['css_sale_pnr' => $this->salePNR])]);
+        }
+
+        if ($this->clientPhone){
+            $query->andWhere(['cs_client_id' => ClientPhone::find()->select('client_id')->andWhere(['phone' => $this->clientPhone])]);
+        }
+        if ($this->clientEmail){
+            $query->andWhere(['cs_client_id' => ClientEmail::find()->select('client_id')->andWhere(['email' => $this->clientEmail])]);
+        }
+
         if ($this->cs_created_dt) {
             $query->andFilterWhere(['DATE(cs_created_dt)' => date('Y-m-d', strtotime($this->cs_created_dt))]);
         }
@@ -109,6 +128,9 @@ class CasesSearch extends Cases
             'cs_lead_id' => 'Lead',
             'cs_dep_id' => 'Department',
             'cs_created_dt' => 'Created',
+            'cssSaleId' => 'Sale ID',
+            'cssBookId' => 'Booking ID',
+            'salePNR' => 'Sale PNR'
         ];
     }
 }
