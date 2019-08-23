@@ -34,7 +34,7 @@ class BadgesController extends FController
                 'rules' => [
                     [
                         'allow' => true,
-                        'roles' => ['admin', 'supervision', 'agent', 'qa']
+                        'roles' => ['admin', 'supervision', 'agent', 'qa', 'ex_agent', 'ex_super']
                     ]
                 ]
             ],

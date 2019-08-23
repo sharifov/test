@@ -14,6 +14,7 @@ use common\models\Project;
 use common\models\Sources;
 use common\models\Test1;
 use common\models\UserConnection;
+use common\models\UserDepartment;
 use common\models\UserProfile;
 use sales\dispatchers\DeferredEventDispatcher;
 use sales\dispatchers\EventDispatcher;
@@ -108,9 +109,7 @@ class TestController extends FController
     public function actionT()
     {
 
-        $repo = Yii::createObject(CasesRepository::class);
-        $case = Cases::createByCall(17, 9, 1, null);
-        $repo->save($case);
+      VarDumper::dump(UserDepartment::getDepartmentsAccess(48));
 
 die;
 

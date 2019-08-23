@@ -1785,7 +1785,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         $query->andWhere(['IN', 'user_connection.uc_user_id', $subQueryUpp]);
 
         if($department_id) {
-            $subQueryUd = UserDepartment::find()->select(['DISTINCT(ud_user_id)'])->where(['ud_dep_id' => $department_id]);
+            $subQueryUd = UserDepartment::find()->usersByDep($department_id);
             $query->andWhere(['IN', 'user_connection.uc_user_id', $subQueryUd]);
         }
 

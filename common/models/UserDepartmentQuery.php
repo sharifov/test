@@ -2,33 +2,30 @@
 
 namespace common\models;
 
+use yii\db\ActiveQuery;
+
 /**
- * This is the ActiveQuery class for [[UserDepartment]].
- *
- * @see UserDepartment
+ * Class UserDepartmentQuery
  */
-class UserDepartmentQuery extends \yii\db\ActiveQuery
+class UserDepartmentQuery extends ActiveQuery
 {
-    /*public function active()
-    {
-        return $this->andWhere('[[status]]=1');
-    }*/
 
     /**
-     * {@inheritdoc}
-     * @return UserDepartment[]|array
+     * @param $depId
+     * @return UserDepartmentQuery
      */
-    public function all($db = null)
+    public function usersByDep($depId): self
     {
-        return parent::all($db);
+        return $this->select('ud_user_id')->distinct('ud_user_id')->andWhere(['ud_dep_id' => $depId]);
     }
 
     /**
-     * {@inheritdoc}
-     * @return UserDepartment|array|null
+     * @param $userId
+     * @return UserDepartmentQuery
      */
-    public function one($db = null)
+    public function depsByUser($userId): self
     {
-        return parent::one($db);
+        return $this->select('ud_dep_id')->distinct('ud_dep_id')->andWhere(['ud_user_id' => $userId]);
     }
+
 }
