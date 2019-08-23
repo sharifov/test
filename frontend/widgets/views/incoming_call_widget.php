@@ -87,7 +87,13 @@ use yii\widgets\Pjax;
         */?>
     </div>
     <?php
-        $this->registerJs('ion.sound.play("incoming_call", {loop: 100});', \yii\web\View::POS_READY);
+        $this->registerJs('ion.sound.play("incoming_call", {loop: 10});', \yii\web\View::POS_READY);
+    ?>
+
+    <?php else: ?>
+
+    <?php
+        $this->registerJs('ion.sound.stop("incoming_call");', \yii\web\View::POS_READY);
     ?>
     <?php endif; ?>
 <?php Pjax::end() ?>
