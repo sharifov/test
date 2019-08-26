@@ -993,6 +993,14 @@ class Lead extends ActiveRecord implements AggregateRoot
     /**
      * @return \yii\db\ActiveQuery
      */
+    public function getLeadFlowSold()
+    {
+        return $this->hasOne(LeadFlow::class, ['lead_id' => 'id'])->onCondition([LeadFlow::tableName() . '.status' => static::STATUS_SOLD]);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
     public function getLeadLogs()
     {
         return $this->hasMany(LeadLog::class, ['lead_id' => 'id']);

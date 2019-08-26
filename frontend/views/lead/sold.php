@@ -33,17 +33,15 @@ $this->params['breadcrumbs'][] = $this->title;
 
 <h1><i class="fa fa-flag"></i> <?= \yii\helpers\Html::encode($this->title) ?></h1>
 
-<style>
-    .dropdown-menu {
-        z-index: 1010 !important;
-    }
-</style>
+
 <div class="lead-index">
 
     <?php Pjax::begin(); //['id' => 'lead-pjax-list', 'timeout' => 5000, 'enablePushState' => true, 'clientOptions' => ['method' => 'GET']]); ?>
 
     <?= $this->render('_search_sold', ['model' => $searchModel]); ?>
+<p>
 
+</p>
     <?php
 
     $gridColumns = [
@@ -295,11 +293,13 @@ $this->params['breadcrumbs'][] = $this->title;
             },
             'format' => 'raw',
         ],
+
         [
-            'label' => 'Ticket Date',
+            'label' => 'Sold Date',
             'attribute' => 'last_ticket_date',
             'value' => function (Lead $model) {
-                return ($model->appliedQuote && $model->appliedQuote->last_ticket_date) ? Yii::$app->formatter->asDate($model->appliedQuote->last_ticket_date) : '-';
+//                return ($model->appliedQuote && $model->appliedQuote->last_ticket_date) ? Yii::$app->formatter->asDate($model->appliedQuote->last_ticket_date) : '-';
+                return $model->leadFlowSold ? date('Y-m-d H:i', strtotime($model->leadFlowSold->created)): '';
             },
             //'format' => 'datetime',
             'filter' => DatePicker::widget([
@@ -307,7 +307,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'attribute' => 'last_ticket_date',
                 'clientOptions' => [
                     'autoclose' => true,
-                    'format' => 'dd-M-yyyy'
+                    'format' => 'dd-mm-yyyy'
                 ]
             ]),
             'contentOptions' => [
@@ -317,7 +317,11 @@ $this->params['breadcrumbs'][] = $this->title;
         [
             'label' => 'Date of Departure',
             'value' => function ($model) {
-                return $model->getDeparture();
+                if ($date = $model->getDeparture()) {
+                    return  date('Y-m-d', strtotime($date));
+                }
+                return '';
+
             },
             'format' => 'raw',
             'contentOptions' => [
@@ -360,26 +364,37 @@ $this->params['breadcrumbs'][] = $this->title;
 
     ?>
     <?php
-    echo GridView::widget([
+    echo \yii\grid\GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'columns' => $gridColumns,
-        'toolbar' => false,
-        'pjax' => false,
-        'striped' => true,
-        'condensed' => false,
-        'responsive' => true,
-        'hover' => true,
-        'floatHeader' => true,
-        'floatHeaderOptions' => [
-            'scrollingTop' => 20
-        ],
+
         /*'panel' => [
             'type' => GridView::TYPE_PRIMARY,
             'heading' => '<h3 class="panel-title"><i class="glyphicon glyphicon-list"></i> Sold</h3>'
         ]*/
 
     ]);
+//  echo GridView::widget([
+//        'dataProvider' => $dataProvider,
+//        'filterModel' => $searchModel,
+//        'columns' => $gridColumns,
+//        'toolbar' => false,
+//        'pjax' => false,
+//        'striped' => true,
+//        'condensed' => false,
+//        'responsive' => true,
+//        'hover' => true,
+//        'floatHeader' => true,
+//        'floatHeaderOptions' => [
+//            'scrollingTop' => 20
+//        ],
+//        /*'panel' => [
+//            'type' => GridView::TYPE_PRIMARY,
+//            'heading' => '<h3 class="panel-title"><i class="glyphicon glyphicon-list"></i> Sold</h3>'
+//        ]*/
+//
+//    ]);
 
     ?>
 
