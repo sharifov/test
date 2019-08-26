@@ -984,11 +984,13 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
 
 
         $taskListAllQuery->joinWith(['ltLead' => function ($q) {
-            $q->where(['NOT IN', 'leads.status', [Lead::STATUS_TRASH, Lead::STATUS_SNOOZE]]);
+//            $q->where(['NOT IN', 'leads.status', [Lead::STATUS_TRASH, Lead::STATUS_SNOOZE]]);
+            $q->where(['leads.status' => Lead::STATUS_PROCESSING]);
         }]);
 
         $taskListCheckedQuery->joinWith(['ltLead' => function ($q) {
-            $q->where(['NOT IN', 'leads.status', [Lead::STATUS_TRASH, Lead::STATUS_SNOOZE]]);
+//            $q->where(['NOT IN', 'leads.status', [Lead::STATUS_TRASH, Lead::STATUS_SNOOZE]]);
+            $q->where(['leads.status' => Lead::STATUS_PROCESSING]);
         }]);
 
 
