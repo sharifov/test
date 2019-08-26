@@ -45,7 +45,7 @@
 
                     $type = $item->getNotifyType();
 
-                    if($n < 20) {
+                    if($n == 0) {
 
                         $js2 = '
                             new PNotify({
@@ -73,15 +73,15 @@
                             ';
 
                         $this->registerJs($js2, \yii\web\View::POS_READY);
-                        break;
+//                        break;
                     }
                 ?>
                 <?php endif;?>
 
                 <?php
-                    if($n >= 10) {
-                        break;
-                    }
+//                    if($n >= 10) {
+//                        break;
+//                    }
                 ?>
 
             </li>
