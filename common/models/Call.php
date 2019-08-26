@@ -688,7 +688,7 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
                 }
 
                 $call->c_created_user_id = $user_id;
-                $call->update();
+                //$call->update();
 
                 $agent = 'seller' . $user_id;
                 $res = \Yii::$app->communication->callRedirect($call->c_call_sid, 'client', $call->c_from, $agent);

@@ -206,7 +206,7 @@ class CallController extends FController
         $phoneList[$model->c_from] = $model->c_from;
 
         $access = UserProjectParams::find()->where(['upp_user_id' => Yii::$app->user->id])
-            ->andWhere(['or', ['upp_tw_phone_number' => $phoneList], ['upp_phone_number' => $phoneList]])->exists();*/
+            ->andWhere(['upp_tw_phone_number' => $phoneList])->exists();*/
 
 
         $access = $model->c_created_user_id === Yii::$app->user->id ? true : false;

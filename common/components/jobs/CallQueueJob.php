@@ -77,6 +77,8 @@ class CallQueueJob extends BaseObject implements JobInterface
 
                 if($call) {
 
+                    $originalAgentId = $call->c_created_user_id;
+
                     Yii::info('CallId: ' . $this->call_id . ', c_call_status: ' . $call->c_call_status . ', ' . VarDumper::dumpAsString($call->attributes),'info\CallQueueJob-call');
 
                     if($call->c_call_status === Call::CALL_STATUS_IVR) {
@@ -102,7 +104,7 @@ class CallQueueJob extends BaseObject implements JobInterface
                                 }
                             }
 
-                            if($lead && $lead->employee_id) {
+                            if(!$originalAgentId && $lead && $lead->employee_id) {
                                 $originalAgentId = $lead->employee_id;
                             }
                         }
@@ -121,7 +123,7 @@ class CallQueueJob extends BaseObject implements JobInterface
                                 Yii::error(VarDumper::dumpAsString($call->errors), 'CallQueueJob:execute:Call:update3');
                             }
 
-                            if($case && $case->cs_user_id) {
+                            if(!$originalAgentId && $case && $case->cs_user_id) {
                                 $originalAgentId = $case->cs_user_id;
                             }
 
@@ -134,7 +136,7 @@ class CallQueueJob extends BaseObject implements JobInterface
 
                     if($originalAgentId) {
                         $user = Employee::findOne($originalAgentId);
-                        if($user && $user->isOnline() && $user->isCallStatusReady() && $user->isCallFree()) {
+                        if($user && $user->isOnline() /*&& $user->isCallStatusReady() && $user->isCallFree()*/) {
                             $isCalled = Call::applyCallToAgentAccess($call, $user->id);
                         }
                     }

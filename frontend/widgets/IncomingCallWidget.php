@@ -93,19 +93,36 @@ class IncomingCallWidget extends \yii\bootstrap\Widget
 
         //$lastCall = Call::find()->where(['c_created_user_id' => $userModel->id])->orderBy(['c_id' => SORT_DESC])->limit(1)->one();
 
-        $callUserAccess = CallUserAccess::find()->where(['cua_user_id' => $userModel->id, 'cua_status_id' => CallUserAccess::STATUS_TYPE_PENDING])->orderBy(['cua_created_dt' => SORT_ASC])->limit(1)->one();
+        $generalCallUserAccessList = CallUserAccess::find()
+            ->innerJoin('call', 'call.c_id = call_user_access.cua_call_id')
+            ->where(['cua_user_id' => $userModel->id, 'cua_status_id' => CallUserAccess::STATUS_TYPE_PENDING])
+            ->andWhere(['c_created_user_id' => null])
+            ->orderBy(['cua_created_dt' => SORT_ASC])
+            ->limit(1)
+            ->all();
 
-        if($callUserAccess) {
+        $directCallUserAccessList = CallUserAccess::find()
+            ->innerJoin('call', 'call.c_id = call_user_access.cua_call_id')
+            ->where(['cua_user_id' => $userModel->id, 'cua_status_id' => CallUserAccess::STATUS_TYPE_PENDING])
+            ->andWhere(['c_created_user_id' => $userModel->id])
+            ->orderBy(['cua_created_dt' => SORT_ASC])
+            ->limit(10)
+            ->all();
+
+
+        //VarDumper::dump($directCallUserAccessList, 10, true); exit;
+
+        /*if($callUserAccess) {
             $incomingCall = $callUserAccess->cuaCall;
         } else {
             $incomingCall = null;
-        }
+        }*/
 
         // $userCallStatus = UserCallStatus::find()->where(['us_user_id' => $user_id])->orderBy(['us_id' => SORT_DESC])->limit(1)->one();
         // $countMissedCalls = Call::find()->where(['c_created_user_id' => $user_id, 'c_call_status' => Call::CALL_STATUS_NO_ANSWER, 'c_call_type_id' => Call::CALL_TYPE_IN, 'c_is_new' => true])->count();
         //$countMissedCalls = 10;
 
-        return $this->render('incoming_call_widget', ['call' => $incomingCall, 'callUserAccess' => $callUserAccess]);
+        return $this->render('incoming_call_widget', ['generalCallUserAccessList' => $generalCallUserAccessList, 'directCallUserAccessList' => $directCallUserAccessList]);
     }
 
 

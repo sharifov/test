@@ -24,8 +24,6 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'upp_email') ?>
 
-    <?= $form->field($model, 'upp_phone_number') ?>
-
     <?= $form->field($model, 'upp_tw_phone_number') ?>
 
     <?php // echo $form->field($model, 'upp_tw_sip_id') ?>
