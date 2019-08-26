@@ -134,8 +134,8 @@ use yii\widgets\Pjax;
                     </div>
                 </div>
                 <?php
-                //$this->registerJs('ion.sound.play("incoming_call", {loop: 10});', \yii\web\View::POS_READY);
-
+                    //$this->registerJs('ion.sound.play("incoming_call", {loop: 10});', \yii\web\View::POS_READY);
+                    $this->registerJs('getVisible();', \yii\web\View::POS_READY);
                 ?>
             <?php endforeach; ?>
 -            <audio id="incomingCallAudio" loop="loop" style="display: none;"><source src="/js/sounds/incoming_call.mp3" type="audio/mpeg"></audio>
@@ -204,43 +204,36 @@ $js = <<<JS
     
     
    // var intercom = Intercom.getInstance();
-   
-//    function playCoinDrop() {
-//        //new Audio('/js/sounds/incoming_call.mp3').play();
-//        $("#incomingCallAudio").trigger('play');
-//       //$('#audio-box').html('<audio loop="loop" autoplay="true" style="display: none;"><source src="/js/sounds/incoming_call.mp3" type="audio/mpeg"></audio>');
-//       //soundDiv.innerHTML = '<audio autoplay="autoplay"><source src="/js/sounds/incoming_call.mp3" type="audio/wav" /><embed hidden="true" autostart="true" loop="true" src="/js/sounds/incoming_call.mp3" /></audio>';
-//       //soundDiv.innerHTML = ;
-//    }
-//
-//    document.addEventListener("visibilitychange", getVisible);
-//    
-//    function getVisible (evt) {
-//      //document.getElementById("fg-indicate").style.visibility = document.visibilityState;
-//      if (document.visibilityState == "visible") {    
-//         // tab comes to front => listen to intercom
-//         //intercom.on('notice', play);
-//         
-//         //alert('Visible');
-//         
-//         console.log('Visible');
-//         //playCoinDrop();
-//         $("#incomingCallAudio").trigger('play');
-//         
-//       } else {
-//         // kill callback
-//         /*intercom.off('notice', play);
-//         // call intercom with delay
-//         window.setTimeout(function f() {
-//           intercom.emit('notice', {message: 'Hello, all windows!'});
-//         }, 3000);
-//         
-//          */
-//         console.log('No Visible');
-//         $("#incomingCallAudio").trigger('pause').prop("currentTime",0);
-//         //alert('No Visible');
-//       }
-//    }
+     
+
+    document.addEventListener("visibilitychange", getVisible);
+    
+    function getVisible (evt) {
+      //document.getElementById("fg-indicate").style.visibility = document.visibilityState;
+      if (document.visibilityState == "visible") {    
+         // tab comes to front => listen to intercom
+         //intercom.on('notice', play);
+         
+         //alert('Visible');
+         
+         console.log('Visible');
+         //playCoinDrop();
+         $("#incomingCallAudio").trigger('play');
+         
+       } else {
+         // kill callback
+         /*intercom.off('notice', play);
+         // call intercom with delay
+         window.setTimeout(function f() {
+           intercom.emit('notice', {message: 'Hello, all windows!'});
+         }, 3000);
+         
+          */
+         console.log('No Visible');
+         $("#incomingCallAudio").trigger('pause').prop("currentTime",0);
+         //alert('No Visible');
+       }
+    }
     
     function play() {
       //document.getElementsByTagName("audio")[0].play();
