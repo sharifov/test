@@ -9,7 +9,7 @@ use yii\web\Controller;
 /**
  * Class CasesQController
  */
-class CasesQController extends Controller
+class CasesQController extends FController
 {
 
     public function actionPending()
