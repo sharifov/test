@@ -703,12 +703,19 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
     {
         try {
             if ($call) {
-                if ($call->c_created_user_id) {
+
+                /*if ($call->c_created_user_id) {
+                    return false;
+                }*/
+
+                if($call->c_call_status !== self::CALL_STATUS_QUEUE) {
+                    \Yii::warning('Error: Call ('.$call->c_call_status.') not in status QUEUE: ' . $call->c_id. ',  User: ' . $user_id, 'Call:applyCallToAgent:callRedirect');
                     return false;
                 }
 
+                $call->c_call_status = self::CALL_STATUS_RINGING;
                 $call->c_created_user_id = $user_id;
-                //$call->update();
+                $call->update();
 
                 $agent = 'seller' . $user_id;
                 $res = \Yii::$app->communication->callRedirect($call->c_call_sid, 'client', $call->c_from, $agent);
@@ -721,9 +728,9 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
                         return false;
                     }
 
-                    $call->c_call_status = self::CALL_STATUS_RINGING;
+                    /*$call->c_call_status = self::CALL_STATUS_RINGING;
                     $call->c_created_user_id = $user_id;
-                    $call->update();
+                    $call->update();*/
 
                     \Yii::info(VarDumper::dumpAsString($res), 'info\Call:applyCallToAgent:callRedirect');
                     return true;
