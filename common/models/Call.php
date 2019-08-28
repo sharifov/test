@@ -61,6 +61,8 @@ use yii\helpers\VarDumper;
  * @property Lead2 $cLead2
  * @property Project $cProject
  * @property Cases[] $cases
+ * @property CallUserAccess[] $callUserAccesses
+ * @property Employee[] $cuaUsers
  */
 class Call extends \yii\db\ActiveRecord implements AggregateRoot
 {
@@ -346,6 +348,24 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
             ],
         ];
     }
+
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getCallUserAccesses()
+    {
+        return $this->hasMany(CallUserAccess::class, ['cua_call_id' => 'c_id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getCuaUsers()
+    {
+        return $this->hasMany(Employee::class, ['id' => 'cua_user_id'])->viaTable('call_user_access', ['cua_call_id' => 'c_id']);
+    }
+
 
     public function getCases()
     {

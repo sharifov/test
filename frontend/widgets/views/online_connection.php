@@ -12,11 +12,11 @@ $ipAddress = Yii::$app->request->remoteIP;
 $webSocketHost = (Yii::$app->request->isSecureConnection ? 'wss': 'ws') . '://'.Yii::$app->request->serverName . '/ws';// . ':8888';
 ?>
     <li>
-        <a href="javascript:;" title="Online Connection" id="online-connection-indicator">
+        <a href="javascript:;" class="info-number" title="Online Connection" id="online-connection-indicator">
             <i class="fa fa-plug"></i>
-            <?/*php if($newCount): ?>
-                <span class="badge bg-green"><?=$newCount?></span>
-            <?php endif;*/?>
+            <?//php if($newCount): ?>
+                <span class="badge" title="Open tabs"></span>
+            <?//php endif;?>
         </a>
     </li>
 <?php
@@ -24,6 +24,37 @@ $webSocketHost = (Yii::$app->request->isSecureConnection ? 'wss': 'ws') . '://'.
 // const socket = new WebSocket('wss:\\sales.dev.travelinsides.com:8888/?user_id=1&controller_id=test&action_id=test&page_url=test&lead_id=15636');
 
 $js = <<<JS
+
+    var stor = window.localStorage;
+            window.addEventListener("load", function(e) {
+                var openTabs = stor.getItem("openTabs");
+                if (openTabs) {
+                    openTabs++;
+                    stor.setItem("openTabs", openTabs)
+                } else {
+                    stor.setItem("openTabs", 1);
+                }
+                onlineConnectionIndicator();
+            })
+            window.addEventListener("unload", function(e) {
+                e.preventDefault();
+                var openTabs = stor.getItem("openTabs");
+                if (openTabs) {
+                    openTabs--;
+                    stor.setItem("openTabs", openTabs)
+                }
+                e.returnValue = '';
+            });
+            
+            window.addEventListener('storage', function(e) {
+                onlineConnectionIndicator();
+            });
+            
+            function onlineConnectionIndicator() {
+                var openTabs = stor.getItem("openTabs");
+                $('#online-connection-indicator span').text(openTabs);
+            }
+
     var socket   = null;
 
     /**

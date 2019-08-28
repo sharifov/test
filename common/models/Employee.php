@@ -1567,6 +1567,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
      */
     public function isOnline() : bool
     {
+        return true;
         $online = UserConnection::find()->where(['uc_user_id' => $this->id])->exists();
         return $online;
     }

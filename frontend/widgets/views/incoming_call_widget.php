@@ -51,19 +51,23 @@ use yii\widgets\Pjax;
 </style>
 
 <?php Pjax::begin(['id' => 'incoming-call-pjax', 'timeout' => 10000, 'enablePushState' => false, 'enableReplaceState' => false, 'options' => []])?>
+
+    <?php if ($directCallUserAccessList || $generalCallUserAccessList):?>
+
     <div id="incoming-call-widget" style="background-color: rgba(255,255,255,.3);">
         <?php if ($directCallUserAccessList):?>
 
             <?php foreach ($directCallUserAccessList as $directCallUserAccess):
-                $call = $directCallUserAccess->cuaCall;
+                    $call = $directCallUserAccess->cuaCall;
                 ?>
                 <div class="row" style="margin-top: 4px;  margin-right: 0px; margin-left: 1px; background-color: rgba(58,199,200,0.26)">
-                    <div class="col-md-3" style="padding-top: 5px;">
+                    <div class="col-md-4" style="padding-top: 5px;">
+                        <?//=$call->c_id?>
                         <?php if($call->cProject):?> <span class="badge badge-info"><?=\yii\helpers\Html::encode($call->cProject->name)?></span> <?php endif; ?>
                         <?php if($call->cDep):?> <span class="badge badge-info"><?=\yii\helpers\Html::encode($call->cDep->dep_name)?></span> <?php endif; ?>
                         <?php if($call->c_source_type_id):?> <span class="label label-warning"><?=\yii\helpers\Html::encode($call->getSourceName())?></span> <?php endif; ?>
                     </div>
-                    <div class="col-md-5 text-right" style="padding-top: 3px; padding-bottom: 4px; ">
+                    <div class="col-md-4 text-right" style="padding-top: 3px; padding-bottom: 4px; ">
                         <span class="badge badge-awake" style="font-size: 14px"><span class="fa fa-phone fa-spin"></span> <?=\yii\helpers\Html::encode($call->c_from)?></span>
                         <?php
                         $durationSec =  $directCallUserAccess->cua_created_dt ? (time() - strtotime($directCallUserAccess->cua_created_dt)) : 0;
@@ -103,19 +107,17 @@ use yii\widgets\Pjax;
             ?>
         <?php endif; ?>
 
-
-
         <?php if ($generalCallUserAccessList):?>
             <?php foreach ($generalCallUserAccessList as $generalCallUserAccess):
                 $call = $generalCallUserAccess->cuaCall;
                 ?>
                 <div class="row" style="margin-top: 4px;  margin-right: 0px; margin-left: 1px; background-color: rgba(135,200,72,0.26)">
-                    <div class="col-md-3" style="padding-top: 5px;">
+                    <div class="col-md-4" style="padding-top: 5px;">
                         <?php if($call->cProject):?> <span class="badge badge-info"><?=\yii\helpers\Html::encode($call->cProject->name)?></span> <?php endif; ?>
                         <?php if($call->cDep):?> <span class="badge badge-info"><?=\yii\helpers\Html::encode($call->cDep->dep_name)?></span> <?php endif; ?>
                         <?php if($call->c_source_type_id):?> <span class="label label-warning"><?=\yii\helpers\Html::encode($call->getSourceName())?></span> <?php endif; ?>
                     </div>
-                    <div class="col-md-5 text-right" style="padding-top: 3px; padding-bottom: 4px; ">
+                    <div class="col-md-4 text-right" style="padding-top: 3px; padding-bottom: 4px; ">
                         <span class="badge badge-awake" style="font-size: 14px"><span class="fa fa-phone fa-spin"></span> <?=\yii\helpers\Html::encode($call->c_from)?></span>
                         <?php
                         $durationSec =  $generalCallUserAccess->cua_created_dt ? (time() - strtotime($generalCallUserAccess->cua_created_dt)) : 0;
@@ -125,9 +127,12 @@ use yii\widgets\Pjax;
                     </div>
                     <div class="col-md-4 text-right">
 
-                        <?=\yii\helpers\Html::a('<i class="fa fa-ban"></i> Busy', ['call/incoming-call-widget', 'act' => 'busy', 'call_id' => $call->c_id], ['class' => 'btn btn-sm btn-danger', 'id' => 'btn-incoming-call-busy', 'data' => [
-                            'confirm' => 'Are you sure you want to set BUSY status for all Incoming Calls?',
-                        ]])?>
+                        <?=\yii\helpers\Html::a('<i class="fa fa-ban"></i> Busy', ['call/incoming-call-widget', 'act' => 'busy', 'call_id' => $call->c_id], ['class' => 'btn btn-sm btn-danger', 'id' => 'btn-incoming-call-busy'
+                            ,
+                            /*'data' => [
+                                'confirm' => 'Are you sure you want to set BUSY status for all Incoming Calls?',
+                            ]*/
+                        ])?>
                         <?=\yii\helpers\Html::a('<i class="fa fa-check"></i> Accept', ['call/incoming-call-widget', 'act' => 'accept', 'call_id' => $call->c_id], ['class' => 'btn btn-sm btn-success', 'id' => 'btn-incoming-call-success'])?>
                         <?//=\yii\helpers\Html::a('<i class="fa fa-angle-double-right"></i> Skip', ['call/incoming-call-widget', 'act' => 'skip', 'call_id' => $call->c_id], ['class' => 'btn btn-sm btn-info', 'id' => 'btn-incoming-call-skip'])?>
 
@@ -138,14 +143,15 @@ use yii\widgets\Pjax;
                     $this->registerJs('getVisible();', \yii\web\View::POS_READY);
                 ?>
             <?php endforeach; ?>
--            <audio id="incomingCallAudio" loop="loop" style="display: none;"><source src="/js/sounds/incoming_call.mp3" type="audio/mpeg"></audio>
+            <audio id="incomingCallAudio" loop="loop" style="display: none;"><source src="/js/sounds/incoming_call.mp3" type="audio/mpeg"></audio>
+
         <?php else: ?>
             <?php
             //$this->registerJs('ion.sound.play("incoming_call"); ', \yii\web\View::POS_READY);
             ?>
         <?php endif; ?>
-
     </div>
+    <?php endif; ?>
 <?php Pjax::end() ?>
 
 
@@ -159,6 +165,17 @@ use yii\widgets\Pjax;
     {
         // console.log(obj);
         $.pjax.reload({url: incomingCallUrl, container: '#incoming-call-pjax', push: false, replace: false, 'scrollTo': false, timeout: 10000, async: false}); // , data: {id: obj.id, status: obj.status}
+    }
+
+    function getVisible (evt) {
+        //document.getElementById("fg-indicate").style.visibility = document.visibilityState;
+        if (document.visibilityState == "visible") {
+            console.log('Visible');
+            $("#incomingCallAudio").trigger('play');
+        } else {
+            console.log('No Visible');
+            $("#incomingCallAudio").trigger('pause').prop("currentTime", 0);
+        }
     }
 </script>
 
@@ -207,33 +224,7 @@ $js = <<<JS
      
 
     document.addEventListener("visibilitychange", getVisible);
-    
-    function getVisible (evt) {
-      //document.getElementById("fg-indicate").style.visibility = document.visibilityState;
-      if (document.visibilityState == "visible") {    
-         // tab comes to front => listen to intercom
-         //intercom.on('notice', play);
-         
-         //alert('Visible');
-         
-         console.log('Visible');
-         //playCoinDrop();
-         $("#incomingCallAudio").trigger('play');
-         
-       } else {
-         // kill callback
-         /*intercom.off('notice', play);
-         // call intercom with delay
-         window.setTimeout(function f() {
-           intercom.emit('notice', {message: 'Hello, all windows!'});
-         }, 3000);
-         
-          */
-         console.log('No Visible');
-         $("#incomingCallAudio").trigger('pause').prop("currentTime",0);
-         //alert('No Visible');
-       }
-    }
+       
     
     function play() {
       //document.getElementsByTagName("audio")[0].play();

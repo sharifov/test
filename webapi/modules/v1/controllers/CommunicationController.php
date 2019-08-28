@@ -511,8 +511,7 @@ class CommunicationController extends ApiBaseController
                 $ivrEnable = (bool) $departmentPhone->dpp_ivr_enable;
 
                 $callModel = $this->findOrCreateCall($callSid, $post['call'], $call_project_id, $call_dep_id);
-
-                $callSourceTypeId = Call::SOURCE_GENERAL_LINE;
+                $callModel->c_source_type_id = Call::SOURCE_GENERAL_LINE;
 
                 if($ivrEnable) {
                     $ivrSelectedDigit = isset($post['call']['Digits']) ? (int) $post['call']['Digits'] : null;
@@ -539,7 +538,7 @@ class CommunicationController extends ApiBaseController
                     }
 
                     $callModel = $this->findOrCreateCall($callSid, $post['call'], $call_project_id, $call_dep_id);
-                    $callModel->c_call_type_id = Call::SOURCE_DIRECT_CALL;
+                    $callModel->c_source_type_id = Call::SOURCE_DIRECT_CALL;
 
 
                     $user = $upp->uppUser;
@@ -569,6 +568,7 @@ class CommunicationController extends ApiBaseController
                     }
 
                     Notifications::socket($user->id, null, 'getNewNotification', [], true);
+                    $callModel->c_source_type_id = Call::SOURCE_REDIRECT_CALL;
                     return $this->createHoldCall($callModel, $user);
 
                 }
@@ -1456,9 +1456,9 @@ class CommunicationController extends ApiBaseController
      */
     protected function createDirectCall(Call $callModel, Employee $user): array
     {
-
+        $jobId = null;
         $callModel->c_created_user_id = $user->id;
-        $callModel->c_call_type_id = Call::SOURCE_DIRECT_CALL;
+        $callModel->c_source_type_id = Call::SOURCE_DIRECT_CALL;
 
         if(!$callModel->update()) {
             Yii::error(VarDumper::dumpAsString($callModel->errors), 'API:Communication:createDirectCall:Call:update');
@@ -1487,6 +1487,14 @@ class CommunicationController extends ApiBaseController
             }
         }
 
+        $callInfo = [];
+
+        $callInfo['id'] = $callModel->c_id;
+        $callInfo['project_id'] = $callModel->c_project_id;
+        $callInfo['dep_id'] = $callModel->c_dep_id;
+        $callInfo['status'] = $callModel->c_call_status;
+        $callInfo['source_type'] = $callModel->c_source_type_id;
+
         $responseTwml = new VoiceResponse();
 
         if($url_say_play_hold) {
@@ -1510,6 +1518,8 @@ class CommunicationController extends ApiBaseController
         }*/
 
         $response = [];
+        $response['jobId'] = $jobId;
+        $response['call'] = $callInfo;
         $response['twml'] = (string) $responseTwml;
         $responseData = [
             'status' => 200,
