@@ -1463,7 +1463,6 @@ class CommunicationController extends ApiBaseController
         if(!$callModel->update()) {
             Yii::error(VarDumper::dumpAsString($callModel->errors), 'API:Communication:createDirectCall:Call:update');
         } else {
-
             $job = new CallQueueJob();
             $job->call_id = $callModel->c_id;
             $job->delay = 0;
@@ -1471,28 +1470,31 @@ class CommunicationController extends ApiBaseController
         }
 
         $project = $callModel->cProject;
-        $url_say_play_hold = '';
-        $url_music_play_hold = 'https://talkdeskapp.s3.amazonaws.com/production/audio_messages/folk_hold_music.mp3';
+//        $url_say_play_hold = '';
+//        $url_music_play_hold = 'https://talkdeskapp.s3.amazonaws.com/production/audio_messages/folk_hold_music.mp3';
 
         $responseTwml = new VoiceResponse();
 
-        if($project && $project->custom_data) {
+        if ($project && $project->custom_data) {
             $customData = @json_decode($project->custom_data, true);
-            if($customData) {
-                if(isset($customData['url_say_play_hold']) && $customData['url_say_play_hold']) {
-                    $url_say_play_hold = $customData['url_say_play_hold'];
+            if ($customData) {
+//                if(isset($customData['url_say_play_hold']) && $customData['url_say_play_hold']) {
+//                    $url_say_play_hold = $customData['url_say_play_hold'];
+//                }
+
+                if (isset($customData['play_direct_message'])) {
+                    if($customData['play_direct_message']) {
+                        $responseTwml->play($customData['play_direct_message']);
+                    } else  {
+                        if (isset($customData['say_direct_message']) && $customData['say_direct_message']) {
+                            $responseTwml->say($customData['say_direct_message'], [
+                                'language' => 'en-US',
+                                'voice' => 'alice'
+                            ]);
+                        }
+                    }
                 }
 
-                if(isset($customData['url_music_play_hold']) && $customData['url_music_play_hold']) {
-                    $url_music_play_hold = $customData['url_music_play_hold'];
-                }
-
-                if(isset($customData['say_direct_message']) && $customData['say_direct_message']) {
-                    $responseTwml->say($customData['say_direct_message'], [
-                        'language' => 'en-US',
-                        'voice' => 'alice'
-                    ]);
-                }
             }
         }
 
@@ -1505,26 +1507,6 @@ class CommunicationController extends ApiBaseController
         $callInfo['source_type'] = $callModel->c_source_type_id;
 
 
-
-        if($url_say_play_hold) {
-            //$responseTwml->play($url_say_play_hold);
-            if($url_music_play_hold) {
-                $responseTwml->play($url_music_play_hold);
-            }
-
-        } /*else {
-
-            $say_params = \Yii::$app->params['voice_gather'];
-            $responseTwml->pause(['length' => 5]);
-
-            $company = ' ' . strtolower($project->name);
-            $entry_phrase = str_replace('{{project}}', $company, $say_params['entry_phrase']);
-            $responseTwml->say('    '.$entry_phrase.'  '. $say_params['languages'][1]['hold_voice'], [
-                'language' => $say_params['languages'][1]['language'],
-                'voice' => $say_params['languages'][1]['voice'],
-            ]);
-            $responseTwml->play($say_params['hold_play']);
-        }*/
 
         $response = [];
         $response['jobId'] = $jobId;
@@ -1564,53 +1546,40 @@ class CommunicationController extends ApiBaseController
 
 
         $project = $callModel->cProject;
-        $url_say_play_hold = '';
-        $url_music_play_hold = 'https://talkdeskapp.s3.amazonaws.com/production/audio_messages/folk_hold_music.mp3';
+
+        //$url_say_play_hold = '';
+        //$url_music_play_hold = 'https://talkdeskapp.s3.amazonaws.com/production/audio_messages/folk_hold_music.mp3';
 
         $responseTwml = new VoiceResponse();
 
         if($project && $project->custom_data) {
             $customData = @json_decode($project->custom_data, true);
             if($customData) {
-                if(isset($customData['url_say_play_hold']) && $customData['url_say_play_hold']) {
-                    $url_say_play_hold = $customData['url_say_play_hold'];
+
+//                if(isset($customData['url_say_play_hold']) && $customData['url_say_play_hold']) {
+//                    $url_say_play_hold = $customData['url_say_play_hold'];
+//                }
+
+                if(isset($customData['play_redirect_message'])) {
+                    if($customData['play_redirect_message']) {
+                        $responseTwml->play($customData['play_redirect_message']);
+                    } else  {
+                        if(isset($customData['say_redirect_message']) && $customData['say_redirect_message']) {
+                            $responseTwml->say($customData['say_redirect_message'], [
+                                'language' => 'en-US',
+                                'voice' => 'alice'
+                            ]);
+                        }
+                    }
                 }
 
                 if(isset($customData['url_music_play_hold']) && $customData['url_music_play_hold']) {
-                    $url_music_play_hold = $customData['url_music_play_hold'];
+                    $responseTwml->play($customData['url_music_play_hold']);
                 }
 
-                if(isset($customData['say_redirect_message']) && $customData['say_redirect_message']) {
-                    $responseTwml->say($customData['say_redirect_message'], [
-                        'language' => 'en-US',
-                        'voice' => 'alice'
-                    ]);
-                }
             }
         }
 
-
-
-        //if($url_say_play_hold) {
-            //$responseTwml->play($url_say_play_hold);
-            if($url_music_play_hold) {
-                $responseTwml->play($url_music_play_hold);
-            }
-
-        //}
-         /*else {
-
-            $say_params = \Yii::$app->params['voice_gather'];
-            $responseTwml->pause(['length' => 5]);
-
-            $company = ' ' . strtolower($project->name);
-            $entry_phrase = str_replace('{{project}}', $company, $say_params['entry_phrase']);
-            $responseTwml->say('    '.$entry_phrase.'  '. $say_params['languages'][1]['hold_voice'], [
-                'language' => $say_params['languages'][1]['language'],
-                'voice' => $say_params['languages'][1]['voice'],
-            ]);
-            $responseTwml->play($say_params['hold_play']);
-        }*/
 
         $response = [];
         $response['twml'] = (string) $responseTwml;
