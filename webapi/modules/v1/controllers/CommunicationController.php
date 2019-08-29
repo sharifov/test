@@ -1467,12 +1467,14 @@ class CommunicationController extends ApiBaseController
             $job = new CallQueueJob();
             $job->call_id = $callModel->c_id;
             $job->delay = 0;
-            $jobId = Yii::$app->queue_job->delay(5)->priority(90)->push($job);
+            $jobId = Yii::$app->queue_job->delay(7)->priority(90)->push($job);
         }
 
         $project = $callModel->cProject;
         $url_say_play_hold = '';
         $url_music_play_hold = 'https://talkdeskapp.s3.amazonaws.com/production/audio_messages/folk_hold_music.mp3';
+
+        $responseTwml = new VoiceResponse();
 
         if($project && $project->custom_data) {
             $customData = @json_decode($project->custom_data, true);
@@ -1483,6 +1485,13 @@ class CommunicationController extends ApiBaseController
 
                 if(isset($customData['url_music_play_hold']) && $customData['url_music_play_hold']) {
                     $url_music_play_hold = $customData['url_music_play_hold'];
+                }
+
+                if(isset($customData['say_direct_message']) && $customData['say_direct_message']) {
+                    $responseTwml->say($customData['say_direct_message'], [
+                        'language' => 'en-US',
+                        'voice' => 'alice'
+                    ]);
                 }
             }
         }
@@ -1495,10 +1504,10 @@ class CommunicationController extends ApiBaseController
         $callInfo['status'] = $callModel->c_call_status;
         $callInfo['source_type'] = $callModel->c_source_type_id;
 
-        $responseTwml = new VoiceResponse();
+
 
         if($url_say_play_hold) {
-            $responseTwml->play($url_say_play_hold);
+            //$responseTwml->play($url_say_play_hold);
             if($url_music_play_hold) {
                 $responseTwml->play($url_music_play_hold);
             }
@@ -1550,13 +1559,15 @@ class CommunicationController extends ApiBaseController
             $job = new CallQueueJob();
             $job->call_id = $callModel->c_id;
             $job->delay = 0;
-            $jobId = Yii::$app->queue_job->delay(5)->priority(100)->push($job);
+            $jobId = Yii::$app->queue_job->delay(7)->priority(100)->push($job);
         }
 
 
         $project = $callModel->cProject;
         $url_say_play_hold = '';
         $url_music_play_hold = 'https://talkdeskapp.s3.amazonaws.com/production/audio_messages/folk_hold_music.mp3';
+
+        $responseTwml = new VoiceResponse();
 
         if($project && $project->custom_data) {
             $customData = @json_decode($project->custom_data, true);
@@ -1568,18 +1579,26 @@ class CommunicationController extends ApiBaseController
                 if(isset($customData['url_music_play_hold']) && $customData['url_music_play_hold']) {
                     $url_music_play_hold = $customData['url_music_play_hold'];
                 }
+
+                if(isset($customData['say_redirect_message']) && $customData['say_redirect_message']) {
+                    $responseTwml->say($customData['say_redirect_message'], [
+                        'language' => 'en-US',
+                        'voice' => 'alice'
+                    ]);
+                }
             }
         }
 
-        $responseTwml = new VoiceResponse();
 
-        if($url_say_play_hold) {
-            $responseTwml->play($url_say_play_hold);
+
+        //if($url_say_play_hold) {
+            //$responseTwml->play($url_say_play_hold);
             if($url_music_play_hold) {
                 $responseTwml->play($url_music_play_hold);
             }
 
-        } /*else {
+        //}
+         /*else {
 
             $say_params = \Yii::$app->params['voice_gather'];
             $responseTwml->pause(['length' => 5]);
