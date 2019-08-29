@@ -136,9 +136,12 @@ class CallQueueJob extends BaseObject implements JobInterface
                     $isCalled = false;
 
                     if($originalAgentId) {
+
                         $user = Employee::findOne($originalAgentId);
                         if($user && $user->isOnline() /*&& $user->isCallStatusReady() && $user->isCallFree()*/) {
                             $isCalled = Call::applyCallToAgentAccess($call, $user->id);
+
+                            Yii::info('Accept one user ('. ($isCalled ? 'isCalled' : 'NotIsCalled' ) .') - CallId: ' . $this->call_id . ', c_call_status: ' . $call->c_call_status . ', ' . VarDumper::dumpAsString($call->attributes),'info\CallQueueJob-Accept-one');
 
                             $timeStartCallUserAccess = (int) Yii::$app->params['settings']['time_start_call_user_access_direct'] ?? 0;
 
@@ -151,6 +154,9 @@ class CallQueueJob extends BaseObject implements JobInterface
                     }
 
                     if(!$isCalled) {
+
+                        Yii::info('Accept multiple users - CallId: ' . $this->call_id . ', c_call_status: ' . $call->c_call_status . ', ' . VarDumper::dumpAsString($call->attributes),'info\CallQueueJob-Accept-multi');
+
                         $last_hours = (int)(Yii::$app->params['settings']['general_line_last_hours'] ?? 1);
 
                         $limitCallUsers = (int)(Yii::$app->params['settings']['general_line_user_limit'] ?? 1);
