@@ -11,6 +11,7 @@ use common\models\search\UserConnectionSearch;
 use common\models\Sources;
 use common\models\UserProjectParams;
 use frontend\widgets\CallBox;
+use frontend\widgets\IncomingCallWidget;
 use Yii;
 use common\models\Call;
 use common\models\search\CallSearch;
@@ -205,7 +206,7 @@ class CallController extends FController
         $phoneList[$model->c_from] = $model->c_from;
 
         $access = UserProjectParams::find()->where(['upp_user_id' => Yii::$app->user->id])
-            ->andWhere(['or', ['upp_tw_phone_number' => $phoneList], ['upp_phone_number' => $phoneList]])->exists();*/
+            ->andWhere(['upp_tw_phone_number' => $phoneList])->exists();*/
 
 
         $access = $model->c_created_user_id === Yii::$app->user->id ? true : false;
@@ -570,6 +571,35 @@ class CallController extends FController
                 Yii::$app->cache->set($keyCache, $result, 30);
             }
         }
+
+        //VarDumper::dump($data); exit;
+
+        return $result;
+    }
+
+    /**
+     * @return string
+     */
+    public function actionIncomingCallWidget(): string
+    {
+        //$id = Yii::$app->request->get('id');
+        // $status = Yii::$app->request->get('status');
+
+        // $keyCache = 'cal-box-request-' . $id . '-' . $status;
+
+        //Yii::$app->cache->delete($keyCache);
+
+        //$result = Yii::$app->cache->get($keyCache);
+
+        //if($result === false) {
+
+            $box = IncomingCallWidget::getInstance();
+            $result = $box->run();
+
+            /*if($result) {
+                Yii::$app->cache->set($keyCache, $result, 30);
+            }*/
+        //}
 
         //VarDumper::dump($data); exit;
 

@@ -20,10 +20,12 @@ use yii\db\ActiveRecord;
  * @property string $upp_updated_dt
  * @property int $upp_updated_user_id
  * @property bool $upp_allow_general_line
+ * @property int $upp_dep_id
  *
  * @property Project $uppProject
  * @property Employee $uppUpdatedUser
  * @property Employee $uppUser
+ * @property Department $uppDep
  */
 class UserProjectParams extends \yii\db\ActiveRecord
 {
@@ -42,7 +44,7 @@ class UserProjectParams extends \yii\db\ActiveRecord
     {
         return [
             [['upp_user_id', 'upp_project_id'], 'required'],
-            [['upp_user_id', 'upp_project_id', 'upp_updated_user_id'], 'integer'],
+            [['upp_user_id', 'upp_project_id', 'upp_updated_user_id', 'upp_dep_id'], 'integer'],
             [['upp_created_dt', 'upp_updated_dt'], 'safe'],
             [['upp_email'], 'string', 'max' => 100],
             [['upp_email'], 'trim'],
@@ -55,6 +57,7 @@ class UserProjectParams extends \yii\db\ActiveRecord
             [['upp_project_id'], 'exist', 'skipOnError' => true, 'targetClass' => Project::class, 'targetAttribute' => ['upp_project_id' => 'id']],
             [['upp_updated_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['upp_updated_user_id' => 'id']],
             [['upp_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['upp_user_id' => 'id']],
+            [['upp_dep_id'], 'exist', 'skipOnError' => true, 'targetClass' => Department::class, 'targetAttribute' => ['upp_dep_id' => 'dep_id']],
             [['upp_phone_number', 'upp_tw_phone_number'], PhoneInputValidator::class],
 
             ['upp_allow_general_line', 'boolean']
@@ -70,12 +73,13 @@ class UserProjectParams extends \yii\db\ActiveRecord
             'upp_user_id' => 'User',
             'upp_project_id' => 'Project',
             'upp_email' => 'Email',
-            'upp_phone_number' => 'Phone Number',
-            'upp_tw_phone_number' => 'Twillio Phone Number',
+            'upp_phone_number' => 'Old Phone Number',
+            'upp_tw_phone_number' => 'Phone Number',
             'upp_created_dt' => 'Created Dt',
             'upp_updated_dt' => 'Updated Dt',
             'upp_updated_user_id' => 'Updated User',
             'upp_allow_general_line' => 'Allow General Line',
+            'upp_dep_id' => 'Department'
         ];
     }
 
@@ -99,6 +103,14 @@ class UserProjectParams extends \yii\db\ActiveRecord
                 'value' => isset(Yii::$app->user) ? Yii::$app->user->id : null,
             ],
         ];
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getUppDep()
+    {
+        return $this->hasOne(Department::class, ['dep_id' => 'upp_dep_id']);
     }
 
     /**

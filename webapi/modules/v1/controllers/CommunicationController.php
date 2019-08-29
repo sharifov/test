@@ -17,6 +17,7 @@ use common\models\Sms;
 use common\models\Sources;
 use common\models\UserProfile;
 use common\models\UserProjectParams;
+use sales\entities\cases\Cases;
 use sales\services\api\communication\CommunicationService;
 use Twilio\TwiML\VoiceResponse;
 use Yii;
@@ -425,7 +426,8 @@ class CommunicationController extends ApiBaseController
     /**
      * @param string $type
      * @return array
-     * @throws \yii\base\InvalidConfigException
+     * @throws \Throwable
+     * @throws \yii\db\StaleObjectException
      */
     private function voiceIncoming(string $type): array
     {
@@ -440,20 +442,16 @@ class CommunicationController extends ApiBaseController
 
         $general_line_call_distribution = \Yii::$app->params['general_line_call_distribution'];
 
-        $use_new_general_line_distribution = $settings['use_general_line_distribution'] ?? $general_line_call_distribution['use_general_line_distribution'];
-        $general_line_leads_limit = $settings['general_line_leads_limit'] ?? $general_line_call_distribution['general_line_leads_limit'];
-        $general_line_role_priority = $settings['general_line_role_priority'] ?? $general_line_call_distribution['general_line_role_priority'];
-        $general_line_last_hours = $settings['general_line_last_hours'] ?? $general_line_call_distribution['general_line_last_hours'];
-        $general_line_user_limit = $settings['general_line_user_limit'] ?? $general_line_call_distribution['general_line_user_limit'];
-        $direct_agent_user_limit = $settings['direct_agent_user_limit'] ?? $general_line_call_distribution['direct_agent_user_limit'];
+//        $use_new_general_line_distribution = $settings['use_general_line_distribution'] ?? $general_line_call_distribution['use_general_line_distribution'];
+//        $general_line_leads_limit = $settings['general_line_leads_limit'] ?? $general_line_call_distribution['general_line_leads_limit'];
+//        $general_line_role_priority = $settings['general_line_role_priority'] ?? $general_line_call_distribution['general_line_role_priority'];
+//        $general_line_last_hours = $settings['general_line_last_hours'] ?? $general_line_call_distribution['general_line_last_hours'];
+//        $general_line_user_limit = $settings['general_line_user_limit'] ?? $general_line_call_distribution['general_line_user_limit'];
+//        $direct_agent_user_limit = $settings['direct_agent_user_limit'] ?? $general_line_call_distribution['direct_agent_user_limit'];
 
 
-        $isError = false;
         $clientPhone = null;
-        $generalLineNumber = \Yii::$app->params['global_phone'];
-        $voice_gather_configs = \Yii::$app->params['voice_gather'];
-
-        $ivrEnable = (bool) ($settings['call_ivr_enable'] ?? $voice_gather_configs['use_voice_gather']);
+        $ciscoPhoneNumber = \Yii::$app->params['global_phone'];
 
         //VarDumper::dump($avrEnable); exit;
 
@@ -488,25 +486,16 @@ class CommunicationController extends ApiBaseController
                 $response['error_code'] = 11;
             }
 
-            $isOnHold = false;
-            $callGeneralNumber = false;
-            $call_project_id = null;
-            $call_agent_username = [];
-            $call_employee = [];
-
-            $project = null;
-
-            $clientPhone = ClientPhone::find()->where(['phone' => $client_phone_number])->orderBy(['id' => SORT_DESC])->limit(1)->one();
+            //$clientPhone = ClientPhone::find()->where(['phone' => $client_phone_number])->orderBy(['id' => SORT_DESC])->limit(1)->one();
 
             $departmentPhone = DepartmentPhoneProject::find()->where(['dpp_phone_number' => $incoming_phone_number, 'dpp_enable' => true])->limit(1)->one();
 
-            //VarDumper::dump($department); exit;
-
             $call_dep_id = null;
             $callModel = null;
+            $upp = null;
 
             if($departmentPhone) {
-                $agentDirectCallCheck = false;
+
                 $project = $departmentPhone->dppProject;
                 $source = $departmentPhone->dppSource;
                 if($project && !$source) {
@@ -519,347 +508,79 @@ class CommunicationController extends ApiBaseController
                 $call_project_id = $departmentPhone->dpp_project_id;
                 $call_dep_id = $departmentPhone->dpp_dep_id;
 
-                $ivrEnable = (bool) $departmentPhone->dpp_ivr_enable; ////(bool) ($settings['call_avr_enable'] ?? $voice_gather_configs['use_voice_gather']);
+                $ivrEnable = (bool) $departmentPhone->dpp_ivr_enable;
 
                 $callModel = $this->findOrCreateCall($callSid, $post['call'], $call_project_id, $call_dep_id);
+                $callModel->c_source_type_id = Call::SOURCE_GENERAL_LINE;
 
-            } else {
-
-                $agentDirectCallCheck = true;
-
-                $upp = UserProjectParams::find()->where(['upp_tw_phone_number' => $incoming_phone_number])->limit(1)->one();
-                if ($upp) {
-                    $call_project_id = $upp->upp_project_id;
-                    if ($upp->uppUser && $upp->uppUser->userDepartments) {
-                        foreach ($upp->uppUser->userDepartments as $userDepartment) {
-                            $call_dep_id = $userDepartment->ud_dep_id;
-                            break;
-                        }
-                    }
-
-                }
-
-            }
-
-
-            if($departmentPhone) {
-                $callSourceTypeId = Call::SOURCE_GENERAL_LINE;
                 if($ivrEnable) {
                     $ivrSelectedDigit = isset($post['call']['Digits']) ? (int) $post['call']['Digits'] : null;
                     $ivrStep = (int) Yii::$app->request->get('step', 1);
                     return $this->ivrService($callModel, $departmentPhone, $ivrStep, $ivrSelectedDigit);
                 }
 
+            } else {
 
-                if($type === self::TYPE_VOIP_INCOMING) {
 
-                    if ($clientPhone) {
-                        $lead2 = Lead2::findLastLeadByClientPhone($client_phone_number, $project->id);
-                    }
+                $upp = UserProjectParams::find()->where(['upp_tw_phone_number' => $incoming_phone_number])->limit(1)->one();
+                if ($upp) {
 
-                    if (!$lead2) {
-                        // $sql = Lead2::findLastLeadByClientPhone($client_phone_number, $project->id, true);
-                        // Yii::info('phone: '. $client_phone_number.', sql: '. $sql, 'info\API:Communication:findLastLeadByClientPhone');
-                        $lead2 = Lead2::createNewLeadByPhone($client_phone_number, $project->id);
+                    $call_project_id = $upp->upp_project_id;
+                    if($upp->upp_dep_id) {
+                        $call_dep_id = $upp->upp_dep_id;
                     } else {
-                        Yii::info('Find LastLead ('.$lead2->id.') By ClientPhone: ' . $client_phone_number, 'info\API:Communication:voiceIncoming:findLastLeadByClientPhone');
+                        if ($upp->uppUser && $upp->uppUser->userDepartments) {
+                            foreach ($upp->uppUser->userDepartments as $userDepartment) {
+                                $call_dep_id = $userDepartment->ud_dep_id;
+                                break;
+                            }
+                        }
                     }
-                }
 
-            } elseif ($agentDirectCallCheck) {
+                    $callModel = $this->findOrCreateCall($callSid, $post['call'], $call_project_id, $call_dep_id);
+                    $callModel->c_source_type_id = Call::SOURCE_DIRECT_CALL;
 
-                $agentRes = $this->getDirectAgentsByPhoneNumber($incoming_phone_number, $client_phone_number, $call_dep_id, $direct_agent_user_limit);
-                if($agentRes && isset($agentRes['call_employee'], $agentRes['call_agent_username']) && $agentRes['call_employee']) {
-                    $isOnHold = false;
-                    $callGeneralNumber = false;
-                    $call_employee = $agentRes['call_employee'];
-                    $call_project_id = $agentRes['call_project_id'] ?? null;
-                    $call_agent_username = $agentRes['call_agent_username'];
-                } else {
-                    if($agentRes && isset($agentRes['call_project_id'])) {
-                        $call_project_id = ($agentRes['call_project_id'] > 0) ? $agentRes['call_project_id'] : null;
-                        if(NULL === $call_project_id) {
-                            $isOnHold = false;
-                            $callGeneralNumber = true;
+
+                    $user = $upp->uppUser;
+
+                    if ($user->isOnline()) {
+                        //if ($user->isCallStatusReady()) {
+                            //if ($user->isCallFree()) {
+                                Yii::info('DIRECT CALL - User (' . $user->username . ') Id: ' . $user->id . ', phone: ' . $incoming_phone_number, 'info\API:Communication:Incoming:DirectCall');
+                                return $this->createDirectCall($callModel, $user);
+
+                                /*if ($user->userProfile && (int) $user->userProfile->up_call_type_id === UserProfile::CALL_TYPE_WEB) {
+                                    $call_employee[] = $user;
+                                    $call_agent_username[] = 'seller' . $user->id;
+                                }*/
+
+                            /*} else {
+                                Yii::info('Call Occupied - User (' . $user->username . ') Id: ' . $user->id . ', phone: ' . $incoming_phone_number, 'info\API:Communication:Incoming:Occupied');
+                                Notifications::create($user->id, 'Missing Call [Occupied]', 'Missing Call from ' . $client_phone_number . ' to ' . $incoming_phone_number . "\r\n Reason: Agent Occupied", Notifications::TYPE_WARNING, true);
+                            }
                         } else {
-                            $isOnHold = true;
-                            $callGeneralNumber = false;
-                        }
-                    } else {
-                        $isOnHold = false;
-                        $callGeneralNumber = true;
-                    }
-                }
-
-                if ($clientPhone) {
-                    $lead2 = Lead2::findLastLeadByClientPhone($client_phone_number, $agentRes['call_project_id'] ?? null);
-                }
-
-                if (!$lead2) {
-                    //$sql = Lead2::findLastLeadByClientPhone($client_phone_number, true);
-                    //Yii::info('phone: '. $client_phone_number.', sql: '. $sql, 'info\API:Communication:findLastLeadByClientPhone');
-                    if(isset($agentRes['call_project_id']) && $agentRes['call_project_id']) {
-                        $lead2 = Lead2::createNewLeadByPhone($client_phone_number, $agentRes['call_project_id']);
-                    }
-                } /*else {
-                            Yii::info('Find LastLead ('.$lead2->id.') By ClientPhone: ' . $client_phone_number, 'info\API:Communication:findLastLeadByClientPhone');
+                            Yii::info('Call Status not Ready - User (' . $user->username . ') Id: ' . $user->id . ', phone: ' . $incoming_phone_number, 'info\API:Communication:Incoming:notReady');
+                            Notifications::create($user->id, 'Missing Call [not Ready]', 'Missing Call from ' . $client_phone_number . ' to ' . $incoming_phone_number . "\r\n Reason: Call Status not Ready", Notifications::TYPE_WARNING, true);
                         }*/
-
-
-
-            } else {
-                $callGeneralNumber = true;
-            }
-
-            // $clientPhone = ClientPhone::find()->where(['phone' => $client_phone_number])->orderBy(['id' => SORT_DESC])->limit(1)->one();
-            //$lead = null;
-
-            //if(!$lead) {
-            /*if ($clientPhone && $clientPhone->client_id) {
-                $lead = Lead::find()->select(['id'])->where(['client_id' => $clientPhone->client_id])->orderBy(['id' => SORT_DESC])->limit(1)->one();
-            }*/
-            //}
-
-            /*$data = [];
-            $data['client_name'] = 'Noname';
-            $data['client_id'] = null;
-            $data['last_lead_id'] = null;
-            $data['client_emails'] = [];
-            $data['client_phones'] = [];
-            $data['client_count_calls'] = 0;
-            $data['client_count_sms'] = 0;
-            $data['client_created_date'] = '';
-            $data['client_last_activity'] = '';
-
-            if($clientPhone && $client = $clientPhone->client) {
-                $data['client_name'] = $client->full_name;
-                $data['client_id'] = $clientPhone->client_id;
-                $data['client_created_date'] = Yii::$app->formatter->asDate(strtotime($client->created));
-                if ($lead2) {
-                    $data['last_lead_id'] = $lead2->id;
-                    $data['client_last_activity'] = Yii::$app->formatter->asDate(strtotime($client->created));
-                }
-            }
-
-            $data['client_phone'] = $client_phone_number;
-            $data['agent_phone'] = $incoming_phone_number;
-
-
-            Yii::info(VarDumper::dumpAsString([
-                'data' => $data,
-                'post' => $post,
-                'call_employee' => $call_employee,
-
-            ], 10, false), 'info\API:Communication:voiceIncoming:ParamsToCall');*/
-
-            if (!$isOnHold && !$callGeneralNumber && $call_employee) {
-
-                foreach ($call_employee AS $key => $userCall) {
-                    $call = new Call();
-                    $call->c_call_sid = $post['call']['CallSid'] ?? null;
-                    $call->c_account_sid = $post['call']['AccountSid'] ?? null;
-                    $call->c_call_type_id = Call::CALL_TYPE_IN;
-                    $call->c_call_status = $post['call']['CallStatus'] ?? Call::CALL_STATUS_RINGING;
-                    $call->c_com_call_id = $post['call_id'] ?? null;
-                    $call->c_direction = $post['call']['Direction'] ?? null;
-                    $call->c_project_id = $call_project_id;
-                    $call->c_is_new = true;
-                    if($call_dep_id) {
-                        $call->c_dep_id = $call_dep_id;
-                    }
-                    $call->c_api_version = $post['call']['ApiVersion'] ?? null;
-                    $call->c_created_dt = date('Y-m-d H:i:s');
-                    $call->c_from = $client_phone_number;
-                    $call->c_sip = null;
-                    $call->c_to = $incoming_phone_number; //$userCall->username ? $userCall->username : null;
-                    $call->c_created_user_id = $userCall->id;
-                    $call->c_source_type_id = Call::SOURCE_REDIRECT_CALL;
-                    if ($lead2) {
-                        $call->c_lead_id = $lead2->id;
                     } else {
-                        $call->c_lead_id = null;
-                    }
-                    if (!$call->save()) {
-                        Yii::error(VarDumper::dumpAsString($call->errors), 'API:Communication:voiceIncoming:Call:save');
-                    }
-                    $data['status'] = $call->c_call_status;
-                    // Notifications::socket($call->c_created_user_id, $call->c_lead_id, 'incomingCall', $data, true);
-                }
-            } elseif($isOnHold) {
-
-                /*$callModel = $this->findOrCreateCall($callSid, $post['call'], $call_project_id, $call_dep_id);
-                $callModel->c_source_type_id = Call::SOURCE_DIRECT_CALL;
-                if (!$callModel->update()) {
-                    Yii::error(VarDumper::dumpAsString($callModel->errors), 'API:Communication:Direct:Hold:Call:save');
-                }*/
-
-                $call = new Call();
-                $call->c_call_sid = $post['call']['CallSid'] ?? null;
-                $call->c_account_sid = $post['call']['AccountSid'] ?? null;
-                $call->c_call_type_id = Call::CALL_TYPE_IN;
-                $call->c_call_status =  Call::CALL_STATUS_IVR;
-                $call->c_com_call_id = $post['call_id'] ?? null;
-                $call->c_direction = $post['call']['Direction'] ?? null;
-                $call->c_project_id = $call_project_id;
-                $call->c_is_new = true;
-                $call->c_api_version = $post['call']['ApiVersion'] ?? null;
-                $call->c_created_dt = date('Y-m-d H:i:s');
-                $call->c_from = $client_phone_number;
-                $call->c_sip = null;
-                $call->c_to = $incoming_phone_number;
-                $call->c_created_user_id = null;
-                $call->c_source_type_id = Call::SOURCE_DIRECT_CALL;
-
-                if($call_dep_id) {
-                    $call->c_dep_id = $call_dep_id;
-                }
-                if ($lead2) {
-                    $call->c_lead_id = $lead2->id;
-                }
-                if (!$call->save()) {
-                    Yii::error(VarDumper::dumpAsString($call->errors), 'API:Communication:Direct:OnHold:save');
-                }
-
-
-                $project = $call->cProject;
-
-
-                $url_say_play_hold = '';
-                $url_music_play_hold = 'https://talkdeskapp.s3.amazonaws.com/production/audio_messages/folk_hold_music.mp3';
-
-                if($project && $project->custom_data) {
-                    $customData = @json_decode($project->custom_data, true);
-                    if($customData) {
-                        if(isset($customData['url_say_play_hold']) && $customData['url_say_play_hold']) {
-                            $url_say_play_hold = $customData['url_say_play_hold'];
-                        }
-
-                        if(isset($customData['url_music_play_hold']) && $customData['url_music_play_hold']) {
-                            $url_music_play_hold = $customData['url_music_play_hold'];
-                        }
-                    }
-                }
-
-                $responseTwml = new VoiceResponse();
-
-                if($url_say_play_hold) {
-                    $responseTwml->play($url_say_play_hold);
-                    if($url_music_play_hold) {
-                        $responseTwml->play($url_music_play_hold);
+                        Yii::info('Offline - User (' . $user->username . ') Id: ' . $user->id . ', phone: ' . $incoming_phone_number, 'info\API:Communication:Incoming:Offline');
+                        Notifications::create($user->id, 'Missing Call [Offline]', 'Missing Call from ' . $client_phone_number . ' to ' . $incoming_phone_number . "\r\n Reason: Agent offline", Notifications::TYPE_WARNING, true);
                     }
 
-                } else {
+                    Notifications::socket($user->id, null, 'getNewNotification', [], true);
+                    $callModel->c_source_type_id = Call::SOURCE_REDIRECT_CALL;
+                    return $this->createHoldCall($callModel, $user);
 
-                    $say_params = \Yii::$app->params['voice_gather'];
-                    $responseTwml = new VoiceResponse();
-                    $responseTwml->pause(['length' => 5]);
-
-                    $company = ' ' . strtolower($project->name);
-                    $entry_phrase = str_replace('{{project}}', $company, $say_params['entry_phrase']);
-                    $responseTwml->say('    '.$entry_phrase.'  '. $say_params['languages'][1]['hold_voice'], [
-                        'language' => $say_params['languages'][1]['language'],
-                        'voice' => $say_params['languages'][1]['voice'],
-                    ]);
-                    $responseTwml->play($say_params['hold_play']);
-                    $response['twml'] = (string)$responseTwml;
                 }
 
-
-//                //$url_say_play_hold = '';
-//                $url_music_play_hold = 'https://talkdeskapp.s3.amazonaws.com/production/audio_messages/folk_hold_music.mp3';
-//
-//                $responseTwml = new VoiceResponse();
-//
-//                if($project && $project->custom_data) {
-//                    $customData = @json_decode($project->custom_data, true);
-//                    if($customData) {
-//
-//                        if(isset($customData['pause']) && $customData['pause']) {
-//                            $responseTwml->pause((int) $customData['pause']);
-//                        }
-//
-//                        if(isset($customData['say_hold'], $customData['language'], $customData['voice']) && $customData['say_hold']) {
-//                            $responseTwml->say($customData['say_hold'], [
-//                                'language' => $customData['language'],
-//                                'voice' => $customData['voice'],
-//                            ]);
-//                        } elseif (isset($customData['url_say_play_hold']) && $customData['url_say_play_hold']) {
-//                            $responseTwml->play($customData['url_say_play_hold']);
-//                        }
-//
-//                        if(isset($customData['url_music_play_hold']) && $customData['url_music_play_hold']) {
-//                            $responseTwml->play($customData['url_music_play_hold']);
-//                        }
-//                    }
-//                } else {
-//                    $responseTwml->play($url_music_play_hold);
-//                }
-
-
-
-
-                $response['twml'] = (string) $responseTwml;
-
-                $job = new CallQueueJob();
-                $job->call_id = $call->c_id;
-                $job->delay = 0;
-                $jobId = Yii::$app->queue_job->delay(10)->priority(120)->push($job);
-
-                Yii::info('JobId: '.$jobId.', Call ('.$call->c_id.') add to hold : project_id: '.$call_project_id.', generalLine: '.$generalLineNumber.', TWML: ' . $response['twml'], 'info\API:Communication:Direct:Hold');
-
-
-            } elseif($callGeneralNumber){
-                $call = new Call();
-                $call->c_call_sid = $post['call']['CallSid'] ?? null;
-                $call->c_account_sid = $post['call']['AccountSid'] ?? null;
-                $call->c_call_type_id = Call::CALL_TYPE_IN;
-                $call->c_call_status = $post['call']['CallStatus'] ?? Call::CALL_STATUS_RINGING;
-                $call->c_com_call_id = $post['call_id'] ?? null;
-                $call->c_direction = $post['call']['Direction'] ?? null;
-                $call->c_project_id = $call_project_id;
-                $call->c_is_new = true;
-                $call->c_api_version = $post['call']['ApiVersion'] ?? null;
-                $call->c_created_dt = date('Y-m-d H:i:s');
-                $call->c_from = $client_phone_number;
-                $call->c_sip = null;
-                $call->c_to = $generalLineNumber;
-                $call->c_created_user_id = null;
-                $call->c_source_type_id = $callSourceTypeId;
-                if($call_dep_id) {
-                    $call->c_dep_id = $call_dep_id;
-                }
-                if ($lead2) {
-                    $call->c_lead_id = $lead2->id;
-                }
-                if (!$call->save()) {
-                    Yii::error(VarDumper::dumpAsString($call->errors), 'API:Communication:voiceIncoming:Call:save:callGeneralNumber');
-                }
-                Yii::info('Redirected to General Line : call_project_id: '.$call_project_id.', generalLine: '.$generalLineNumber, 'info\API:Communication:voiceIncoming:callGeneralNumber - 6');
-            } else {
-                if(!$isOnHold && !$callGeneralNumber) {
-                    $isError = true;
-                    Yii::error('Not found call destination agent, hold or general line for call number:'. $incoming_phone_number, 'API:Communication:voiceIncoming:isOnHold_callGeneralNumber');
-                }
             }
 
-            if(!$isError) {
-                $response['agent_sip'] = '';
-                $response['agent_phone_number'] = $incoming_phone_number;
-                $response['client_phone_number'] = $client_phone_number;
-                $response['general_phone_number'] = $generalLineNumber;
-                $response['agent_username'] = $call_agent_username;
-                $response['call_to_hold'] = $isOnHold ? 1 : 0;
-                $response['call_to_general'] = $callGeneralNumber ? 1 : 0;
-            } else {
-                $response['error'] = 'Not found call destination agent, hold or general line';
-                $response['error_code'] = 13;
-            }
+            return $this->createExceptionCall($incoming_phone_number); //$ciscoPhoneNumber
 
         } else {
             $response['error'] = 'Not found "call" array';
             $response['error_code'] = 12;
         }
-
         return $response;
     }
 
@@ -988,11 +709,11 @@ class CommunicationController extends ApiBaseController
                 }
 
                 if(!$upp) {
-                    $upp = UserProjectParams::find()->where(['upp_phone_number' => $call->c_from])->orWhere(['upp_tw_phone_number' => $call->c_from])->one();
+                    $upp = UserProjectParams::find()->where(['upp_tw_phone_number' => $call->c_from])->one();
                 }
 
                 if(!$upp) {
-                    $upp = UserProjectParams::find()->where(['upp_phone_number' => $call->c_to])->orWhere(['upp_tw_phone_number' => $call->c_to])->one();
+                    $upp = UserProjectParams::find()->where(['upp_tw_phone_number' => $call->c_to])->one();
                 }
 
                 $user = null;
@@ -1208,11 +929,11 @@ class CommunicationController extends ApiBaseController
                 }
 
                 if(!$upp) {
-                    $upp = UserProjectParams::find()->where(['upp_phone_number' => $call->c_from])->orWhere(['upp_tw_phone_number' => $call->c_from])->one();
+                    $upp = UserProjectParams::find()->where(['upp_tw_phone_number' => $call->c_from])->one();
                 }
 
                 if(!$upp) {
-                    $upp = UserProjectParams::find()->where(['upp_phone_number' => $call->c_to])->orWhere(['upp_tw_phone_number' => $call->c_to])->one();
+                    $upp = UserProjectParams::find()->where(['upp_tw_phone_number' => $call->c_to])->one();
                 }
 
                 $user = null;
@@ -1686,7 +1407,7 @@ class CommunicationController extends ApiBaseController
             $call->c_call_sid = $calData['CallSid'] ?? null;
             $call->c_account_sid = $calData['AccountSid'] ?? null;
             $call->c_call_type_id = Call::CALL_TYPE_IN;
-            $call->c_call_status = $calData['CallStatus'] ?? Call::CALL_STATUS_QUEUE;
+            $call->c_call_status = Call::CALL_STATUS_IVR; //$calData['CallStatus'] ?? Call::CALL_STATUS_QUEUE;
             $call->c_com_call_id = $calData['c_com_call_id'] ?? null;
             $call->c_direction = $calData['Direction'] ?? null;
             $call->c_parent_call_sid = $calData['ParentCallSid'] ?? null;
@@ -1707,11 +1428,13 @@ class CommunicationController extends ApiBaseController
             $call->c_created_user_id = null;
 
             if($call->c_dep_id === Department::DEPARTMENT_SALES) {
-                $lead = Lead2::findLastLeadByClientPhone($call->c_from, $call->c_project_id);
+                /*$lead = Lead2::findLastLeadByClientPhone($call->c_from, $call->c_project_id);
                 if ($lead) {
                     $call->c_lead_id = $lead->id;
-                }
-            }
+                }*////
+            } /*elseif ($call->c_dep_id === Department::DEPARTMENT_EXCHANGE || $call->c_dep_id === Department::DEPARTMENT_SUPPORT) {
+
+            }*/
 
             if (!$call->save()) {
                 \Yii::error(VarDumper::dumpAsString($call->errors), 'API:CommunicationController:findOrCreateCall:Call:save');
@@ -1720,6 +1443,193 @@ class CommunicationController extends ApiBaseController
         }
 
         return $call;
+    }
+
+
+    /**
+     * @param Call $callModel
+     * @param Employee $user
+     * @param array $stepParams
+     * @return array
+     * @throws \Throwable
+     * @throws \yii\db\StaleObjectException
+     */
+    protected function createDirectCall(Call $callModel, Employee $user): array
+    {
+        $jobId = null;
+        $callModel->c_created_user_id = $user->id;
+        $callModel->c_source_type_id = Call::SOURCE_DIRECT_CALL;
+
+        if(!$callModel->update()) {
+            Yii::error(VarDumper::dumpAsString($callModel->errors), 'API:Communication:createDirectCall:Call:update');
+        } else {
+
+            $job = new CallQueueJob();
+            $job->call_id = $callModel->c_id;
+            $job->delay = 0;
+            $jobId = Yii::$app->queue_job->delay(5)->priority(90)->push($job);
+        }
+
+        $project = $callModel->cProject;
+        $url_say_play_hold = '';
+        $url_music_play_hold = 'https://talkdeskapp.s3.amazonaws.com/production/audio_messages/folk_hold_music.mp3';
+
+        if($project && $project->custom_data) {
+            $customData = @json_decode($project->custom_data, true);
+            if($customData) {
+                if(isset($customData['url_say_play_hold']) && $customData['url_say_play_hold']) {
+                    $url_say_play_hold = $customData['url_say_play_hold'];
+                }
+
+                if(isset($customData['url_music_play_hold']) && $customData['url_music_play_hold']) {
+                    $url_music_play_hold = $customData['url_music_play_hold'];
+                }
+            }
+        }
+
+        $callInfo = [];
+
+        $callInfo['id'] = $callModel->c_id;
+        $callInfo['project_id'] = $callModel->c_project_id;
+        $callInfo['dep_id'] = $callModel->c_dep_id;
+        $callInfo['status'] = $callModel->c_call_status;
+        $callInfo['source_type'] = $callModel->c_source_type_id;
+
+        $responseTwml = new VoiceResponse();
+
+        if($url_say_play_hold) {
+            $responseTwml->play($url_say_play_hold);
+            if($url_music_play_hold) {
+                $responseTwml->play($url_music_play_hold);
+            }
+
+        } /*else {
+
+            $say_params = \Yii::$app->params['voice_gather'];
+            $responseTwml->pause(['length' => 5]);
+
+            $company = ' ' . strtolower($project->name);
+            $entry_phrase = str_replace('{{project}}', $company, $say_params['entry_phrase']);
+            $responseTwml->say('    '.$entry_phrase.'  '. $say_params['languages'][1]['hold_voice'], [
+                'language' => $say_params['languages'][1]['language'],
+                'voice' => $say_params['languages'][1]['voice'],
+            ]);
+            $responseTwml->play($say_params['hold_play']);
+        }*/
+
+        $response = [];
+        $response['jobId'] = $jobId;
+        $response['call'] = $callInfo;
+        $response['twml'] = (string) $responseTwml;
+        $responseData = [
+            'status' => 200,
+            'name' => 'Success',
+            'code' => 0,
+            'message' => '',
+            'data' => ['response' => $response]
+        ];
+        return $responseData;
+    }
+
+    /**
+     * @param Call $callModel
+     * @param Employee $user
+     * @return array
+     * @throws \Throwable
+     * @throws \yii\db\StaleObjectException
+     */
+    protected function createHoldCall(Call $callModel, Employee $user): array
+    {
+
+        $callModel->c_created_user_id = null;
+        $callModel->c_call_type_id = Call::SOURCE_REDIRECT_CALL;
+
+        if(!$callModel->update()) {
+            Yii::error(VarDumper::dumpAsString($callModel->errors), 'API:Communication:createDirectCall:Call:update');
+        } else {
+            $job = new CallQueueJob();
+            $job->call_id = $callModel->c_id;
+            $job->delay = 0;
+            $jobId = Yii::$app->queue_job->delay(5)->priority(100)->push($job);
+        }
+
+
+        $project = $callModel->cProject;
+        $url_say_play_hold = '';
+        $url_music_play_hold = 'https://talkdeskapp.s3.amazonaws.com/production/audio_messages/folk_hold_music.mp3';
+
+        if($project && $project->custom_data) {
+            $customData = @json_decode($project->custom_data, true);
+            if($customData) {
+                if(isset($customData['url_say_play_hold']) && $customData['url_say_play_hold']) {
+                    $url_say_play_hold = $customData['url_say_play_hold'];
+                }
+
+                if(isset($customData['url_music_play_hold']) && $customData['url_music_play_hold']) {
+                    $url_music_play_hold = $customData['url_music_play_hold'];
+                }
+            }
+        }
+
+        $responseTwml = new VoiceResponse();
+
+        if($url_say_play_hold) {
+            $responseTwml->play($url_say_play_hold);
+            if($url_music_play_hold) {
+                $responseTwml->play($url_music_play_hold);
+            }
+
+        } /*else {
+
+            $say_params = \Yii::$app->params['voice_gather'];
+            $responseTwml->pause(['length' => 5]);
+
+            $company = ' ' . strtolower($project->name);
+            $entry_phrase = str_replace('{{project}}', $company, $say_params['entry_phrase']);
+            $responseTwml->say('    '.$entry_phrase.'  '. $say_params['languages'][1]['hold_voice'], [
+                'language' => $say_params['languages'][1]['language'],
+                'voice' => $say_params['languages'][1]['voice'],
+            ]);
+            $responseTwml->play($say_params['hold_play']);
+        }*/
+
+        $response = [];
+        $response['twml'] = (string) $responseTwml;
+        $responseData = [
+            'status' => 200,
+            'name' => 'Success',
+            'code' => 0,
+            'message' => '',
+            'data' => ['response' => $response]
+        ];
+        return $responseData;
+    }
+
+    /**
+     * @param string $phoneNumber
+     * @return array
+     */
+    protected function createExceptionCall(string $phoneNumber): array
+    {
+        Yii::error('Number is temporarily not working ('.$phoneNumber.')', 'API:Communication:createExceptionCall');
+
+        $responseTwml = new VoiceResponse();
+        $responseTwml->say('Sorry, this number is temporarily not working.', [
+                'language' => 'en-US',
+                'voice' => 'alice'
+            ]);
+        $responseTwml->reject(['reason' => 'busy']);
+
+        $response = [];
+        $response['twml'] = (string) $responseTwml;
+        $responseData = [
+            'status' => 200,
+            'name' => 'Success',
+            'code' => 0,
+            'message' => '',
+            'data' => ['response' => $response]
+        ];
+        return $responseData;
     }
 
 

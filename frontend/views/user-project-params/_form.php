@@ -32,26 +32,23 @@ if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::
 
         <?= $form->field($model, 'upp_project_id')->dropDownList($projectList, ['prompt' => '-']) ?>
 
+        <?= $form->field($model, 'upp_dep_id')->dropDownList(\common\models\Department::getList(), ['prompt' => '-']) ?>
+
         <?= $form->field($model, 'upp_email')->input('email', ['maxlength' => true]) ?>
 
-        <?//= $form->field($model, 'upp_phone_number')->textInput(['maxlength' => true]) ?>
 
-        <?= $form->field($model, 'upp_phone_number')->widget(\borales\extensions\phoneInput\PhoneInput::class, [
-            'jsOptions' => [
-                'allowExtensions' => true,
-                'preferredCountries' => ['us'],
-            ]
-        ]) ?>
 
         <?= $form->field($model, 'upp_tw_phone_number')->widget(\borales\extensions\phoneInput\PhoneInput::class, [
             'jsOptions' => [
+                'formatOnDisplay' => false,
+                'autoPlaceholder' => 'off',
+                'customPlaceholder' => '',
+                'allowDropdown' => false,
                 'preferredCountries' => ['us'],
             ]
         ]) ?>
 
         <?= $form->field($model, 'upp_allow_general_line')->checkbox() ?>
-
-        <?//= $form->field($model, 'upp_tw_phone_number')->textInput(['maxlength' => true]) ?>
 
         <?// = $form->field($model, 'upp_tw_sip_id')->textInput(['maxlength' => true]) ?>
 

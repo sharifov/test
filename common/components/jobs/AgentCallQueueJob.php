@@ -8,9 +8,11 @@
 namespace common\components\jobs;
 
 use common\models\Call;
+use common\models\CallUserAccess;
 use common\models\Department;
 use common\models\Employee;
 use common\models\Lead2;
+use common\models\Notifications;
 use sales\forms\lead\PhoneCreateForm;
 use sales\repositories\cases\CasesRepository;
 use sales\services\cases\CasesCreateService;
@@ -62,7 +64,7 @@ class AgentCallQueueJob extends BaseObject implements JobInterface
 
             Yii::info('UserId: ' . $this->user_id ,'info\AgentCallQueueJob');
 
-            sleep(4);
+            //sleep(4);
 
             $last_hours = (int)(Yii::$app->params['settings']['general_line_last_hours'] ?? 1);
 
@@ -70,39 +72,43 @@ class AgentCallQueueJob extends BaseObject implements JobInterface
 
             if($calls) {
                 foreach ($calls as $call) {
-                    $originalAgentId = null;
+
+                    $originalAgentId = $call->c_created_user_id;
                     $isCalled = false;
 
-                    if($call->c_lead_id && $call->cLead2) {
+                    if(!$originalAgentId && $call->c_lead_id && $call->cLead2) {
                         $originalAgentId = $call->cLead2->employee_id;
                     }
 
-                    if($call->c_case_id && $call->cCase) {
+                    if(!$originalAgentId && $call->c_case_id && $call->cCase) {
                         $originalAgentId = $call->cCase->cs_user_id;
                     }
 
-                    if(!$originalAgentId && $call->c_created_user_id) {
+                    /*if(!$originalAgentId && $call->c_created_user_id) {
                         $originalAgentId = $call->c_created_user_id;
-                    }
+                    }*/
 
                     if($originalAgentId) {
                         $user = Employee::findOne($originalAgentId);
-                        if($user && $user->isOnline() && $user->isCallStatusReady() && $user->isCallFree()) {
-                            $isCalled = Call::applyCallToAgent($call, $user->id);
+                        if($user && $user->isOnline() /*&& $user->isCallStatusReady() && $user->isCallFree()*/) {
+                            $isCalled = Call::applyCallToAgentAccess($call, $user->id);
                         }
                     }
 
                     if(!$isCalled) {
-                        $users = Employee::getUsersForCallQueue($call->c_project_id, $call->c_dep_id, 1, $last_hours);
+                        $limitCallUsers = (int) (Yii::$app->params['settings']['general_line_user_limit'] ?? 1); //direct_agent_user_limit
+                        $users = Employee::getUsersForCallQueue($call->c_project_id, $call->c_dep_id, $limitCallUsers, $last_hours);
                         if ($users) {
                             foreach ($users as $userItem) {
-                                $user_id = (int)$userItem['tbl_user_id'];
-                                Call::applyCallToAgent($call, $user_id);
+                                $user_id = (int) $userItem['tbl_user_id'];
+                                Call::applyCallToAgentAccess($call, $user_id);
                             }
                             Yii::info('UserId: ' . $this->user_id . ', Call Id: ' . $call->c_id . ', Users: '. VarDumper::dumpAsString($users),'info\AgentCallQueueJob:getUsersForCallQueue');
                         }
                     }
                 }
+
+                Notifications::pingUserMap();
             }
 
         } catch (\Throwable $e) {

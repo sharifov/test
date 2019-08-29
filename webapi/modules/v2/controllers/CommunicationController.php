@@ -1086,11 +1086,11 @@ class CommunicationController extends ApiBaseController
                 }
 
                 if(!$upp) {
-                    $upp = UserProjectParams::find()->where(['upp_phone_number' => $call->c_from])->orWhere(['upp_tw_phone_number' => $call->c_from])->one();
+                    $upp = UserProjectParams::find()->where(['upp_tw_phone_number' => $call->c_from])->one();
                 }
 
                 if(!$upp) {
-                    $upp = UserProjectParams::find()->where(['upp_phone_number' => $call->c_to])->orWhere(['upp_tw_phone_number' => $call->c_to])->one();
+                    $upp = UserProjectParams::find()->where(['upp_tw_phone_number' => $call->c_to])->one();
                 }
 
                 $user = null;
@@ -1323,11 +1323,11 @@ class CommunicationController extends ApiBaseController
                 }
 
                 if(!$upp) {
-                    $upp = UserProjectParams::find()->where(['upp_phone_number' => $call->c_from])->orWhere(['upp_tw_phone_number' => $call->c_from])->one();
+                    $upp = UserProjectParams::find()->where(['upp_tw_phone_number' => $call->c_from])->one();
                 }
 
                 if(!$upp) {
-                    $upp = UserProjectParams::find()->where(['upp_phone_number' => $call->c_to])->orWhere(['upp_tw_phone_number' => $call->c_to])->one();
+                    $upp = UserProjectParams::find()->where(['upp_tw_phone_number' => $call->c_to])->one();
                 }
 
 

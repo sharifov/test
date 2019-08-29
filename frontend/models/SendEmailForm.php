@@ -105,7 +105,7 @@ class SendEmailForm extends Model
                         ? 'Customer'
                         : ucfirst($client->first_name),
                     'agentName' => ucfirst($userProjectParams->uppUser->username),
-                    'agentPhone' => $userProjectParams->upp_phone_number,
+                    'agentPhone' => $userProjectParams->upp_tw_phone_number,
                     'projectPhone' => $source->contactInfo->phone,
                     'projectLink' => $source->link,
                     'body' => empty($additionalParams['body'])
@@ -123,7 +123,7 @@ class SendEmailForm extends Model
                         ? 'Customer'
                         : ucfirst($client->first_name),
                     'agentName' => ucfirst($userProjectParams->uppUser->username),
-                    'agentPhone' => $userProjectParams->upp_phone_number,
+                    'agentPhone' => $userProjectParams->upp_tw_phone_number,
                     'projectPhone' => $source->contactInfo->phone,
                     'projectLink' => $source->link
                 ];
@@ -134,7 +134,7 @@ class SendEmailForm extends Model
                         ? 'Customer'
                         : ucfirst($client->first_name),
                     'agentName' => ucfirst($userProjectParams->uppUser->username),
-                    'agentPhone' => $userProjectParams->upp_phone_number,
+                    'agentPhone' => $userProjectParams->upp_tw_phone_number,
                     'projectPhone' => $source->contactInfo->phone,
                     'projectLink' => $source->link,
                     'airlineName' => $additionalParams['airlineName']

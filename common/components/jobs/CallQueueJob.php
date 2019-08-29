@@ -8,9 +8,11 @@
 namespace common\components\jobs;
 
 use common\models\Call;
+use common\models\CallUserAccess;
 use common\models\Department;
 use common\models\Employee;
 use common\models\Lead2;
+use common\models\Notifications;
 use sales\forms\lead\PhoneCreateForm;
 use sales\repositories\cases\CasesRepository;
 use sales\services\cases\CasesCreateService;
@@ -76,6 +78,8 @@ class CallQueueJob extends BaseObject implements JobInterface
 
                 if($call) {
 
+                    $originalAgentId = $call->c_created_user_id;
+
                     Yii::info('CallId: ' . $this->call_id . ', c_call_status: ' . $call->c_call_status . ', ' . VarDumper::dumpAsString($call->attributes),'info\CallQueueJob-call');
 
                     if($call->c_call_status === Call::CALL_STATUS_IVR) {
@@ -101,7 +105,7 @@ class CallQueueJob extends BaseObject implements JobInterface
                                 }
                             }
 
-                            if($lead && $lead->employee_id) {
+                            if(!$originalAgentId && $lead && $lead->employee_id) {
                                 $originalAgentId = $lead->employee_id;
                             }
                         }
@@ -120,7 +124,7 @@ class CallQueueJob extends BaseObject implements JobInterface
                                 Yii::error(VarDumper::dumpAsString($call->errors), 'CallQueueJob:execute:Call:update3');
                             }
 
-                            if($case && $case->cs_user_id) {
+                            if(!$originalAgentId && $case && $case->cs_user_id) {
                                 $originalAgentId = $case->cs_user_id;
                             }
 
@@ -133,21 +137,37 @@ class CallQueueJob extends BaseObject implements JobInterface
 
                     if($originalAgentId) {
                         $user = Employee::findOne($originalAgentId);
-                        if($user && $user->isOnline() && $user->isCallStatusReady() && $user->isCallFree()) {
-                            $isCalled = Call::applyCallToAgent($call, $user->id);
+                        if($user && $user->isOnline() /*&& $user->isCallStatusReady() && $user->isCallFree()*/) {
+                            $isCalled = Call::applyCallToAgentAccess($call, $user->id);
+
+
+
+                            $timeStartCallUserAccess = (int) Yii::$app->params['settings']['time_start_call_user_access'] ?? 0;
+
+                            if($timeStartCallUserAccess) {
+                                $job = new CallUserAccessJob();
+                                $job->call_id = $call->c_id;
+                                $job->delay = 0;
+                                $jobId = Yii::$app->queue_job->delay($timeStartCallUserAccess)->priority(100)->push($job);
+                            }
                         }
                     }
 
                     if(!$isCalled) {
                         $last_hours = (int)(Yii::$app->params['settings']['general_line_last_hours'] ?? 1);
-                        $users = Employee::getUsersForCallQueue($call->c_project_id, $call->c_dep_id, 1, $last_hours);
+
+                        $limitCallUsers = (int)(Yii::$app->params['settings']['general_line_user_limit'] ?? 1);
+
+                        $users = Employee::getUsersForCallQueue($call->c_project_id, $call->c_dep_id, $limitCallUsers, $last_hours);
                         if ($users) {
                             foreach ($users as $userItem) {
-                                $user_id = (int)$userItem['tbl_user_id'];
-                                Call::applyCallToAgent($call, $user_id);
+                                $user_id = (int) $userItem['tbl_user_id'];
+                                Call::applyCallToAgentAccess($call, $user_id);
                             }
                         }
                     }
+
+                    Notifications::pingUserMap();
                 }
             }
 
