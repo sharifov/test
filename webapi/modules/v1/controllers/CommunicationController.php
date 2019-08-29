@@ -1658,12 +1658,15 @@ class CommunicationController extends ApiBaseController
             if(isset($choice['say'])) {
                 $responseTwml->say($choice['say'], ['language' => $choice['language'], 'voice' => $choice['voice']]);
             }
+
+            if(isset($stepParams['after_say']) && $stepParams['after_say']) {
+                $responseTwml->say($stepParams['after_say'], ['language' => $stepParams['language'], 'voice' => $stepParams['voice']]);
+            }
+
             $responseTwml->play($choice['play'], ['loop' => 0]);
         }
 
-        if(isset($stepParams['after_say']) && $stepParams['after_say']) {
-            $responseTwml->say($stepParams['after_say'], ['language' => $stepParams['language'], 'voice' => $stepParams['voice']]);
-        }
+
 
         $response = [];
         $response['twml'] = (string) $responseTwml;
