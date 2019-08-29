@@ -100,7 +100,7 @@ class CallUserAccessJob extends BaseObject implements JobInterface
                         Notifications::pingUserMap();
                     }
 
-                    $timeStartCallUserAccess = (int) Yii::$app->params['settings']['time_start_call_user_access'] ?? 0;
+                    $timeStartCallUserAccess = (int) Yii::$app->params['settings']['time_repeat_call_user_access'] ?? 0;
 
                     if($timeStartCallUserAccess) {
                         $job = new CallUserAccessJob();
