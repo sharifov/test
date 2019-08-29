@@ -140,9 +140,7 @@ class CallQueueJob extends BaseObject implements JobInterface
                         if($user && $user->isOnline() /*&& $user->isCallStatusReady() && $user->isCallFree()*/) {
                             $isCalled = Call::applyCallToAgentAccess($call, $user->id);
 
-
-
-                            $timeStartCallUserAccess = (int) Yii::$app->params['settings']['time_start_call_user_access'] ?? 0;
+                            $timeStartCallUserAccess = (int) Yii::$app->params['settings']['time_start_call_user_access_direct'] ?? 0;
 
                             if($timeStartCallUserAccess) {
                                 $job = new CallUserAccessJob();
@@ -164,6 +162,16 @@ class CallQueueJob extends BaseObject implements JobInterface
                                 Call::applyCallToAgentAccess($call, $user_id);
                             }
                         }
+
+
+                        $timeStartCallUserAccess = (int) Yii::$app->params['settings']['time_start_call_user_access_general'] ?? 0;
+
+                        if($timeStartCallUserAccess) {
+                            $job = new CallUserAccessJob();
+                            $job->call_id = $call->c_id;
+                            $jobId = Yii::$app->queue_job->delay($timeStartCallUserAccess)->priority(100)->push($job);
+                        }
+
                     }
 
                     Notifications::pingUserMap();
