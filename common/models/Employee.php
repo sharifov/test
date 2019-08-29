@@ -1753,7 +1753,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
      * @param array|null $exceptUserIds
      * @return array
      */
-    public static function getUsersForCallQueue(int $project_id, ?int $department_id = null, int $limit = 0, int $hours = 1, ?array $exceptUserIds): array
+    public static function getUsersForCallQueue(int $project_id, ?int $department_id = null, int $limit = 0, int $hours = 1, ?array $exceptUserIds = null): array
     {
         $query = UserConnection::find();
         $date_time = date('Y-m-d H:i:s', strtotime('-' . $hours .' hours'));

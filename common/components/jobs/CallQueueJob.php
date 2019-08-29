@@ -155,7 +155,7 @@ class CallQueueJob extends BaseObject implements JobInterface
 
                     if(!$isCalled) {
 
-                        Yii::info('Accept multiple users - CallId: ' . $this->call_id . ', c_call_status: ' . $call->c_call_status . ', ' . VarDumper::dumpAsString($call->attributes),'info\CallQueueJob-Accept-multi');
+                        Yii::info('Accept multiple users - CallId: ' . $call->c_id . ', c_call_status: ' . $call->c_call_status . ', ' . VarDumper::dumpAsString($call->attributes),'info\CallQueueJob-Accept-multi');
 
                         $last_hours = (int)(Yii::$app->params['settings']['general_line_last_hours'] ?? 1);
 
