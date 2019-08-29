@@ -1569,7 +1569,6 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
      */
     public function isOnline() : bool
     {
-        return true;
         $online = UserConnection::find()->where(['uc_user_id' => $this->id])->exists();
         return $online;
     }
@@ -1780,6 +1779,9 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
 
         //$subQuery = ProjectEmployeeAccess::find()->select(['DISTINCT(employee_id)'])->where(['project_id' => $project_id]);
         //$query->andWhere(['IN', 'user_connection.uc_user_id', $subQuery]);
+
+        $subQuery = CallUserAccess::find()->select(['DISTINCT(cua_user_id)'])->where(['cua_status_id' => CallUserAccess::STATUS_TYPE_PENDING]);
+        $query->andWhere(['NOT IN', 'user_connection.uc_user_id', $subQuery]);
 
         $subQueryUpp = UserProjectParams::find()->select(['DISTINCT(upp_user_id)'])->where(['upp_project_id' => $project_id, 'upp_allow_general_line' => true]);
         $query->andWhere(['IN', 'user_connection.uc_user_id', $subQueryUpp]);
