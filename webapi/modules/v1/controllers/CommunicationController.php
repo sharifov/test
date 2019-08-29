@@ -1499,6 +1499,10 @@ class CommunicationController extends ApiBaseController
                     }
                 }
 
+                if(isset($customData['url_music_play_hold']) && $customData['url_music_play_hold']) {
+                    $responseTwml->play($customData['url_music_play_hold'], ['loop' => 0]);
+                }
+
             }
         }
 
