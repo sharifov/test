@@ -18,6 +18,7 @@ use sales\repositories\cases\CasesRepository;
 use sales\services\cases\CasesCreateService;
 use sales\services\client\ClientManageService;
 use yii\base\BaseObject;
+use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
 use yii\queue\JobInterface;
 use Yii;
@@ -97,7 +98,9 @@ class AgentCallQueueJob extends BaseObject implements JobInterface
 
                     if(!$isCalled) {
                         $limitCallUsers = (int) (Yii::$app->params['settings']['general_line_user_limit'] ?? 1); //direct_agent_user_limit
-                        $users = Employee::getUsersForCallQueue($call->c_project_id, $call->c_dep_id, $limitCallUsers, $last_hours);
+
+                        $exceptUserIds = ArrayHelper::map($call->callUserAccesses, 'cua_user_id', 'cua_user_id');
+                        $users = Employee::getUsersForCallQueue($call->c_project_id, $call->c_dep_id, $limitCallUsers, $last_hours, $exceptUserIds);
                         if ($users) {
                             foreach ($users as $userItem) {
                                 $user_id = (int) $userItem['tbl_user_id'];
