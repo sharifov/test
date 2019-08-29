@@ -274,6 +274,9 @@ class Notifications extends ActiveRecord
     }
 
 
+    /**
+     *
+     */
     public static function pingUserMap(): void
     {
         $users = UserConnection::find()

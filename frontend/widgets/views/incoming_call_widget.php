@@ -2,6 +2,7 @@
 
 /* @var \common\models\CallUserAccess[] $generalCallUserAccessList  */
 /* @var \common\models\CallUserAccess[] $directCallUserAccessList  */
+/* @var \common\models\Employee $userModel */
 
 
 
@@ -50,15 +51,26 @@ use yii\widgets\Pjax;
 
 </style>
 
+
 <?php Pjax::begin(['id' => 'incoming-call-pjax', 'timeout' => 10000, 'enablePushState' => false, 'enableReplaceState' => false, 'options' => []])?>
 
     <?php if ($directCallUserAccessList || $generalCallUserAccessList):?>
+
+    <?php if($generalCallUserAccessList || ($directCallUserAccessList && $userModel->isCallFree() && $userModel->isCallStatusReady())): ?>
+        <audio id="incomingCallAudio" loop="loop" style="display: none;"><source src="/js/sounds/incoming_call.mp3" type="audio/mpeg"></audio>
+        <?php
+            //$this->registerJs('ion.sound.play("incoming_call", {loop: 10});', \yii\web\View::POS_READY);
+            $this->registerJs('getVisible();', \yii\web\View::POS_READY);
+        ?>
+    <?php endif; ?>
 
     <div id="incoming-call-widget" style="background-color: rgba(255,255,255,.3);">
         <?php if ($directCallUserAccessList):?>
 
             <?php foreach ($directCallUserAccessList as $directCallUserAccess):
                     $call = $directCallUserAccess->cuaCall;
+
+
                 ?>
                 <div class="row" style="margin-top: 4px;  margin-right: 0px; margin-left: 1px; background-color: rgba(58,199,200,0.26)">
                     <div class="col-md-4" style="padding-top: 5px;">
@@ -110,6 +122,11 @@ use yii\widgets\Pjax;
         <?php if ($generalCallUserAccessList):?>
             <?php foreach ($generalCallUserAccessList as $generalCallUserAccess):
                 $call = $generalCallUserAccess->cuaCall;
+
+                if ((int) $call->c_source_type_id === \common\models\Call::SOURCE_DIRECT_CALL && $call->c_created_user_id != $userModel->id) {
+                    $call->c_source_type_id =  \common\models\Call::SOURCE_REDIRECT_CALL;
+                }
+
                 ?>
                 <div class="row" style="margin-top: 4px;  margin-right: 0px; margin-left: 1px; background-color: rgba(135,200,72,0.26)">
                     <div class="col-md-4" style="padding-top: 5px;">
@@ -138,12 +155,9 @@ use yii\widgets\Pjax;
 
                     </div>
                 </div>
-                <?php
-                    //$this->registerJs('ion.sound.play("incoming_call", {loop: 10});', \yii\web\View::POS_READY);
-                    $this->registerJs('getVisible();', \yii\web\View::POS_READY);
-                ?>
+
             <?php endforeach; ?>
-            <audio id="incomingCallAudio" loop="loop" style="display: none;"><source src="/js/sounds/incoming_call.mp3" type="audio/mpeg"></audio>
+
 
         <?php else: ?>
             <?php
@@ -160,6 +174,14 @@ use yii\widgets\Pjax;
 ?>
 
 <script>
+
+
+    /*const audio = new Audio('/js/sounds/incoming_call.mp3');
+    audio.loop = true;
+    audio.play();
+    audio.pause();
+    audio.currentTime = 0;*/
+
     const incomingCallUrl = '<?=$incomingCallUrl?>';
     function refreshInboxCallWidget(obj)
     {
@@ -168,12 +190,18 @@ use yii\widgets\Pjax;
     }
 
     function getVisible (evt) {
+
         //document.getElementById("fg-indicate").style.visibility = document.visibilityState;
         if (document.visibilityState == "visible") {
-            console.log('Visible');
+            // console.log('Visible');
+
+            //var time = window.localStorage.getItem('incomingCallAudio_currentTime');
+            //$("#incomingCallAudio").prop("currentTime", time);
+
             $("#incomingCallAudio").trigger('play');
         } else {
-            console.log('No Visible');
+            // console.log('No Visible');
+            //window.localStorage.setItem('incomingCallAudio_currentTime', $("#incomingCallAudio").prop("currentTime"));
             $("#incomingCallAudio").trigger('pause').prop("currentTime", 0);
         }
     }
@@ -188,28 +216,7 @@ $userId = Yii::$app->user->id;
 
 $js = <<<JS
    
-   
-    /*$(document).on('change', '#user-call-status-select', function(e) {
-        e.preventDefault();
-        var type_id = $(this).val();
-                
-        $.ajax({
-            type: 'post',
-            data: {'type_id': type_id},
-            url: callStatusUrl,
-            success: function (data) {
-                // //console.log(data);
-                // $('#preloader').addClass('hidden');
-                // modal.find('.modal-body').html(data);
-                // modal.modal('show');
-            },
-            error: function (error) {
-                console.error('Error: ' + error);
-            }
-        });
-
-    });
-   */
+     
 
     /*$("#call-box-pjax").on("pjax:start", function() {
         $('.prime').addClass('fa-recycle fa-spin');
@@ -219,18 +226,8 @@ $js = <<<JS
         $('.prime').removeClass('fa-recycle fa-spin');
     });*/
     
-    
-   // var intercom = Intercom.getInstance();
-     
-
+   
     document.addEventListener("visibilitychange", getVisible);
-       
-    
-    function play() {
-      //document.getElementsByTagName("audio")[0].play();
-    }
-    
-    
     
     function startTimers() {
     

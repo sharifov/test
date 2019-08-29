@@ -12,6 +12,7 @@ use common\models\CallUserAccess;
 use common\models\Department;
 use common\models\Employee;
 use common\models\Lead2;
+use common\models\Notifications;
 use sales\forms\lead\PhoneCreateForm;
 use sales\repositories\cases\CasesRepository;
 use sales\services\cases\CasesCreateService;
@@ -138,6 +139,17 @@ class CallQueueJob extends BaseObject implements JobInterface
                         $user = Employee::findOne($originalAgentId);
                         if($user && $user->isOnline() /*&& $user->isCallStatusReady() && $user->isCallFree()*/) {
                             $isCalled = Call::applyCallToAgentAccess($call, $user->id);
+
+
+
+                            $timeStartCallUserAccess = (int) Yii::$app->params['settings']['time_start_call_user_access'] ?? 0;
+
+                            if($timeStartCallUserAccess) {
+                                $job = new CallUserAccessJob();
+                                $job->call_id = $call->c_id;
+                                $job->delay = 0;
+                                $jobId = Yii::$app->queue_job->delay($timeStartCallUserAccess)->priority(100)->push($job);
+                            }
                         }
                     }
 
@@ -154,6 +166,8 @@ class CallQueueJob extends BaseObject implements JobInterface
                             }
                         }
                     }
+
+                    Notifications::pingUserMap();
                 }
             }
 

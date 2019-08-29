@@ -12,6 +12,7 @@ use common\models\CallUserAccess;
 use common\models\Department;
 use common\models\Employee;
 use common\models\Lead2;
+use common\models\Notifications;
 use sales\forms\lead\PhoneCreateForm;
 use sales\repositories\cases\CasesRepository;
 use sales\services\cases\CasesCreateService;
@@ -63,7 +64,7 @@ class AgentCallQueueJob extends BaseObject implements JobInterface
 
             Yii::info('UserId: ' . $this->user_id ,'info\AgentCallQueueJob');
 
-            sleep(4);
+            //sleep(4);
 
             $last_hours = (int)(Yii::$app->params['settings']['general_line_last_hours'] ?? 1);
 
@@ -106,6 +107,8 @@ class AgentCallQueueJob extends BaseObject implements JobInterface
                         }
                     }
                 }
+
+                Notifications::pingUserMap();
             }
 
         } catch (\Throwable $e) {

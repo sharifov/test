@@ -483,7 +483,7 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
 //            }
 
 
-            if(isset($changedAttributes['c_call_status']) && $this->c_call_type_id == self::CALL_TYPE_IN && in_array($this->c_call_status, [self::CALL_STATUS_NO_ANSWER, self::CALL_STATUS_COMPLETED, self::CALL_STATUS_BUSY, self::CALL_STATUS_IN_PROGRESS])) { //self::CALL_STATUS_BUSY,
+            if(isset($changedAttributes['c_call_status']) && $this->c_call_type_id == self::CALL_TYPE_IN && in_array($this->c_call_status, [self::CALL_STATUS_NO_ANSWER, self::CALL_STATUS_COMPLETED, self::CALL_STATUS_BUSY, self::CALL_STATUS_IN_PROGRESS, self::CALL_STATUS_CANCELED])) { //self::CALL_STATUS_BUSY,
                 $callUserAccessAny = CallUserAccess::find()->where(['cua_status_id' => [CallUserAccess::STATUS_TYPE_PENDING], 'cua_call_id' => $this->c_id])->all();
                 if ($callUserAccessAny) {
                     foreach ($callUserAccessAny as $callAccess) {
@@ -714,6 +714,11 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
                 }
 
                 $call->c_call_status = self::CALL_STATUS_RINGING;
+
+                if($call->c_created_user_id && (int) $call->c_created_user_id !== $user_id) {
+                    $call->c_source_type_id = self::SOURCE_REDIRECT_CALL;
+                }
+
                 $call->c_created_user_id = $user_id;
                 $call->update();
 

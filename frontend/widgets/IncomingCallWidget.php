@@ -96,7 +96,7 @@ class IncomingCallWidget extends \yii\bootstrap\Widget
         $generalCallUserAccessList = CallUserAccess::find()
             ->innerJoin('call', 'call.c_id = call_user_access.cua_call_id')
             ->where(['cua_user_id' => $userModel->id, 'cua_status_id' => CallUserAccess::STATUS_TYPE_PENDING])
-            ->andWhere(['c_created_user_id' => null])
+            ->andWhere(['<>', 'c_created_user_id', $userModel->id])
             ->orderBy(['cua_created_dt' => SORT_ASC])
             ->limit(1)
             ->all();
@@ -122,7 +122,11 @@ class IncomingCallWidget extends \yii\bootstrap\Widget
         // $countMissedCalls = Call::find()->where(['c_created_user_id' => $user_id, 'c_call_status' => Call::CALL_STATUS_NO_ANSWER, 'c_call_type_id' => Call::CALL_TYPE_IN, 'c_is_new' => true])->count();
         //$countMissedCalls = 10;
 
-        return $this->render('incoming_call_widget', ['generalCallUserAccessList' => $generalCallUserAccessList, 'directCallUserAccessList' => $directCallUserAccessList]);
+        return $this->render('incoming_call_widget', [
+            'generalCallUserAccessList' => $generalCallUserAccessList,
+            'directCallUserAccessList' => $directCallUserAccessList,
+            'userModel' => $userModel]
+        );
     }
 
 
@@ -146,7 +150,10 @@ class IncomingCallWidget extends \yii\bootstrap\Widget
                     Yii::error(VarDumper::dumpAsString($call->errors), 'IncomingCallWidget:acceptCall:Call:update');
                 }*/
 
-                return Call::applyCallToAgent($call, $user->id);
+                if (Call::applyCallToAgent($call, $user->id)) {
+                    Notifications::pingUserMap();
+                    return true;
+                }
             }
 
 //            $callUserAccessAny = CallUserAccess::find()->where(['cua_status_id' => [CallUserAccess::STATUS_TYPE_PENDING], 'cua_call_id' => $callUserAccess->cua_call_id])->andWhere(['<>', 'cua_user_id', $callUserAccess->cua_user_id])->all();
@@ -192,6 +199,7 @@ class IncomingCallWidget extends \yii\bootstrap\Widget
         if($ucs->save()) {
             $callUserAccess->update();
             Notifications::socket($ucs->us_user_id, null, 'updateUserCallStatus', ['id' => 'ucs'.$ucs->us_id, 'type_id' => $ucs->us_type_id]);
+            Notifications::pingUserMap();
         } else {
             Yii::error(VarDumper::dumpAsString($ucs->errors), 'IncomingCallWidget:busyCall:UserCallStatus:save');
         }

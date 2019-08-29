@@ -14,9 +14,9 @@ $webSocketHost = (Yii::$app->request->isSecureConnection ? 'wss': 'ws') . '://'.
     <li>
         <a href="javascript:;" class="info-number" title="Online Connection" id="online-connection-indicator">
             <i class="fa fa-plug"></i>
-            <?//php if($newCount): ?>
+            <?/*//php if($newCount): ?>
                 <span class="badge" title="Open tabs"></span>
-            <?//php endif;?>
+            <?//php endif;*/?>
         </a>
     </li>
 <?php
@@ -25,35 +25,35 @@ $webSocketHost = (Yii::$app->request->isSecureConnection ? 'wss': 'ws') . '://'.
 
 $js = <<<JS
 
-    var stor = window.localStorage;
-            window.addEventListener("load", function(e) {
-                var openTabs = stor.getItem("openTabs");
-                if (openTabs) {
-                    openTabs++;
-                    stor.setItem("openTabs", openTabs)
-                } else {
-                    stor.setItem("openTabs", 1);
-                }
-                onlineConnectionIndicator();
-            })
-            window.addEventListener("unload", function(e) {
-                e.preventDefault();
-                var openTabs = stor.getItem("openTabs");
-                if (openTabs) {
-                    openTabs--;
-                    stor.setItem("openTabs", openTabs)
-                }
-                e.returnValue = '';
-            });
-            
-            window.addEventListener('storage', function(e) {
-                onlineConnectionIndicator();
-            });
-            
-            function onlineConnectionIndicator() {
-                var openTabs = stor.getItem("openTabs");
-                $('#online-connection-indicator span').text(openTabs);
-            }
+    // var stor = window.localStorage;
+    //         window.addEventListener("load", function(e) {
+    //             var openTabs = stor.getItem("openTabs");
+    //             if (openTabs) {
+    //                 openTabs++;
+    //                 stor.setItem("openTabs", openTabs)
+    //             } else {
+    //                 stor.setItem("openTabs", 1);
+    //             }
+    //             onlineConnectionIndicator();
+    //         })
+    //         window.addEventListener("unload", function(e) {
+    //             e.preventDefault();
+    //             var openTabs = stor.getItem("openTabs");
+    //             if (openTabs) {
+    //                 openTabs--;
+    //                 stor.setItem("openTabs", openTabs)
+    //             }
+    //             e.returnValue = '';
+    //         });
+    //        
+    //         window.addEventListener('storage', function(e) {
+    //             onlineConnectionIndicator();
+    //         });
+    //        
+    //         function onlineConnectionIndicator() {
+    //             var openTabs = stor.getItem("openTabs");
+    //             $('#online-connection-indicator span').text(openTabs);
+    //         }
 
     var socket   = null;
 
@@ -104,6 +104,7 @@ $js = <<<JS
         
         socket.onmessage = function (e) {
             // onlineObj.find('i').removeClass('danger').removeClass('success').addClass('warning');
+            console.info('socket.onmessage');
             try {
                 var obj = JSON.parse(e.data); // $.parseJSON( e.data );
                 console.log(obj);

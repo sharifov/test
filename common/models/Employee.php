@@ -1595,7 +1595,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         $isFree = true;
         //$call = Call::find()->where(['c_created_user_id' => $this->id])->orderBy(['c_id' => SORT_DESC])->limit(1)->one();
 
-        $callExist = Call::find()->where(['c_created_user_id' => $this->id, 'c_call_status' => [Call::CALL_STATUS_QUEUE, Call::CALL_STATUS_RINGING, Call::CALL_STATUS_IN_PROGRESS]])->limit(1)->exists();
+        $callExist = Call::find()->where(['c_created_user_id' => $this->id, 'c_call_status' => [Call::CALL_STATUS_RINGING, Call::CALL_STATUS_IN_PROGRESS]])->limit(1)->exists(); //Call::CALL_STATUS_QUEUE,
 
         if($callExist) {
             //if(in_array($call->c_call_type_id, [Call::CALL_STATUS_QUEUE, Call::CALL_STATUS_RINGING, Call::CALL_STATUS_IN_PROGRESS])) {
@@ -1743,7 +1743,15 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     }
 
 
-    public static function getUsersForCallQueue( int $project_id, ?int $department_id = null, int $limit = 0, int $hours = 1)
+    /**
+     * @param int $project_id
+     * @param int|null $department_id
+     * @param int $limit
+     * @param int $hours
+     * @param array|null $exceptUserIds
+     * @return array
+     */
+    public static function getUsersForCallQueue(int $project_id, ?int $department_id = null, int $limit = 0, int $hours = 1, ?array $exceptUserIds): array
     {
         $query = UserConnection::find();
         $date_time = date('Y-m-d H:i:s', strtotime('-' . $hours .' hours'));
@@ -1773,6 +1781,10 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
 
         $subQueryUpp = UserProjectParams::find()->select(['DISTINCT(upp_user_id)'])->where(['upp_project_id' => $project_id, 'upp_allow_general_line' => true]);
         $query->andWhere(['IN', 'user_connection.uc_user_id', $subQueryUpp]);
+
+        if($exceptUserIds) {
+            $query->andWhere(['NOT IN', 'user_connection.uc_user_id', $exceptUserIds]);
+        }
 
         if($department_id) {
             $subQueryUd = UserDepartment::find()->usersByDep($department_id);
