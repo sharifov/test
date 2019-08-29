@@ -1541,7 +1541,7 @@ class CommunicationController extends ApiBaseController
     {
 
         $callModel->c_created_user_id = null;
-        $callModel->c_call_type_id = Call::SOURCE_REDIRECT_CALL;
+        $callModel->c_source_type_id = Call::SOURCE_REDIRECT_CALL;
 
         if(!$callModel->update()) {
             Yii::error(VarDumper::dumpAsString($callModel->errors), 'API:Communication:createDirectCall:Call:update');
