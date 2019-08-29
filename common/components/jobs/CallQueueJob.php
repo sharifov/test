@@ -64,7 +64,7 @@ class CallQueueJob extends BaseObject implements JobInterface
             $this->clientManageService = Yii::createObject(ClientManageService::class);
             $this->casesRepository = Yii::createObject(CasesRepository::class);
 
-            Yii::info('CallId: ' . $this->call_id ,'info\CallQueueJob');
+            Yii::info('CallQueueJob - CallId: ' . $this->call_id ,'info\CallQueueJob');
 
             if($this->delay) {
                 sleep($this->delay);
@@ -80,7 +80,7 @@ class CallQueueJob extends BaseObject implements JobInterface
 
                     $originalAgentId = $call->c_created_user_id;
 
-                    Yii::info('CallId: ' . $this->call_id . ', c_call_status: ' . $call->c_call_status . ', ' . VarDumper::dumpAsString($call->attributes),'info\CallQueueJob-call');
+                    Yii::info('CallQueueJob - CallId: ' . $this->call_id . ', c_call_status: ' . $call->c_call_status . ', ' . VarDumper::dumpAsString($call->attributes),'info\CallQueueJob-call');
 
                     if($call->c_call_status === Call::CALL_STATUS_IVR) {
                         Yii::info('CallId: ' . $this->call_id . ', CALL_STATUS_IVR' ,'info\CallQueueJob-CALL_STATUS_IVR');
@@ -90,7 +90,6 @@ class CallQueueJob extends BaseObject implements JobInterface
                         }
                     }
 
-                    Yii::info('CallId: ' . $this->call_id . ', c_call_status: ' . $call->c_call_status . ', ' . VarDumper::dumpAsString($call->attributes),'info\CallQueueJob-call2');
 
                     if((int) $call->c_dep_id === Department::DEPARTMENT_SALES) {
                         if ($call->c_from) {

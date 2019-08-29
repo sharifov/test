@@ -63,7 +63,7 @@ class AgentCallQueueJob extends BaseObject implements JobInterface
 //            $this->clientManageService = Yii::createObject(ClientManageService::class);
 //            $this->casesRepository = Yii::createObject(CasesRepository::class);
 
-            Yii::info('UserId: ' . $this->user_id ,'info\AgentCallQueueJob');
+            Yii::info('AgentCallQueueJob - UserId: ' . $this->user_id ,'info\AgentCallQueueJob');
 
             //sleep(4);
 
@@ -106,7 +106,7 @@ class AgentCallQueueJob extends BaseObject implements JobInterface
                                 $user_id = (int) $userItem['tbl_user_id'];
                                 Call::applyCallToAgentAccess($call, $user_id);
                             }
-                            Yii::info('UserId: ' . $this->user_id . ', Call Id: ' . $call->c_id . ', Users: '. VarDumper::dumpAsString($users),'info\AgentCallQueueJob:getUsersForCallQueue');
+                            Yii::info('AgentCallQueueJob - UserId: ' . $this->user_id . ', Call Id: ' . $call->c_id . ', Users: '. VarDumper::dumpAsString($users),'info\AgentCallQueueJob:getUsersForCallQueue');
                         }
                     }
                 }

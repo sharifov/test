@@ -65,7 +65,7 @@ class CallUserAccessJob extends BaseObject implements JobInterface
             $this->clientManageService = Yii::createObject(ClientManageService::class);
             $this->casesRepository = Yii::createObject(CasesRepository::class);
 
-            Yii::info('CallId: ' . $this->call_id ,'info\CallQueueJob');
+            Yii::info('CallUserAccessJob - CallId: ' . $this->call_id ,'info\CallUserAccessJob');
 
             if($this->delay) {
                 sleep($this->delay);
@@ -81,7 +81,7 @@ class CallUserAccessJob extends BaseObject implements JobInterface
 
                     //$originalAgentId = $call->c_created_user_id;
 
-                    Yii::info('CallId: ' . $this->call_id . ', c_call_status: ' . $call->c_call_status . ', ' . VarDumper::dumpAsString($call->attributes),'info\CallUserAccessJob-call');
+                    Yii::info('CallUserAccessJob - CallId: ' . $this->call_id . ', c_call_status: ' . $call->c_call_status . ', ' . VarDumper::dumpAsString($call->attributes),'info\CallUserAccessJob-call');
 
 
                     $last_hours = (int)(Yii::$app->params['settings']['general_line_last_hours'] ?? 1);
