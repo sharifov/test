@@ -69,7 +69,7 @@ class AgentCallQueueJob extends BaseObject implements JobInterface
 
             $last_hours = (int)(Yii::$app->params['settings']['general_line_last_hours'] ?? 1);
 
-            $calls = Call::find()->where(['c_call_status' => Call::CALL_STATUS_QUEUE])->orderBy(['c_id' => SORT_ASC])->limit(10)->all();
+            $calls = Call::find()->where(['c_call_status' => Call::CALL_STATUS_QUEUE, 'c_source_type_id' => Call::SOURCE_GENERAL_LINE])->orderBy(['c_id' => SORT_ASC])->limit(10)->all();
 
             if($calls) {
                 foreach ($calls as $call) {
