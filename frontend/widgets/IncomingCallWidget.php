@@ -96,7 +96,7 @@ class IncomingCallWidget extends \yii\bootstrap\Widget
         $generalCallUserAccessList = CallUserAccess::find()
             ->innerJoin('call', 'call.c_id = call_user_access.cua_call_id')
             ->where(['cua_user_id' => $userModel->id, 'cua_status_id' => CallUserAccess::STATUS_TYPE_PENDING])
-            ->andWhere(['<>', 'c_created_user_id', $userModel->id])
+            ->andWhere(['OR', ['c_created_user_id' => null], ['<>', 'c_created_user_id', $userModel->id]])
             ->orderBy(['cua_created_dt' => SORT_ASC])
             ->limit(1)
             ->all();
