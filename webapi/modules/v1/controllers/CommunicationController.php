@@ -1146,6 +1146,10 @@ class CommunicationController extends ApiBaseController
                 }
             }
 
+            if(!$call) {
+                $call = Call::find()->where(['c_call_sid' => $post['callData']['CallSid']])->one();
+            }
+
 
             if($childCall) {
                 if(!$call) {
@@ -1484,7 +1488,7 @@ class CommunicationController extends ApiBaseController
 
                 if (isset($customData['play_direct_message'])) {
                     if($customData['play_direct_message']) {
-                        $responseTwml->play($customData['play_direct_message']);
+                        $responseTwml->play($customData['play_direct_message'], ['loop' => 0]);
                     } else  {
                         if (isset($customData['say_direct_message']) && $customData['say_direct_message']) {
                             $responseTwml->say($customData['say_direct_message'], [
@@ -1562,7 +1566,7 @@ class CommunicationController extends ApiBaseController
 
                 if(isset($customData['play_redirect_message'])) {
                     if($customData['play_redirect_message']) {
-                        $responseTwml->play($customData['play_redirect_message']);
+                        $responseTwml->play($customData['play_redirect_message'], ['loop' => 0]);
                     } else  {
                         if(isset($customData['say_redirect_message']) && $customData['say_redirect_message']) {
                             $responseTwml->say($customData['say_redirect_message'], [
@@ -1574,7 +1578,7 @@ class CommunicationController extends ApiBaseController
                 }
 
                 if(isset($customData['url_music_play_hold']) && $customData['url_music_play_hold']) {
-                    $responseTwml->play($customData['url_music_play_hold']);
+                    $responseTwml->play($customData['url_music_play_hold'], ['loop' => 0]);
                 }
 
             }
@@ -1650,7 +1654,7 @@ class CommunicationController extends ApiBaseController
             if(isset($choice['say'])) {
                 $responseTwml->say($choice['say'], ['language' => $choice['language'], 'voice' => $choice['voice']]);
             }
-            $responseTwml->play($choice['play']);
+            $responseTwml->play($choice['play'], ['loop' => 0]);
         }
 
         if(isset($stepParams['after_say']) && $stepParams['after_say']) {
@@ -1813,7 +1817,7 @@ class CommunicationController extends ApiBaseController
                 }
 
                 if(isset($ivrParams['hold_play']) && $ivrParams['hold_play']) {
-                    $responseTwml->play($ivrParams['hold_play']);
+                    $responseTwml->play($ivrParams['hold_play'], ['loop' => 0]);
                 }
 
             }
