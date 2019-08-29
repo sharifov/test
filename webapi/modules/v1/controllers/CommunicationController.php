@@ -1488,7 +1488,7 @@ class CommunicationController extends ApiBaseController
 
                 if (isset($customData['play_direct_message'])) {
                     if($customData['play_direct_message']) {
-                        $responseTwml->play($customData['play_direct_message'], ['loop' => 0]);
+                        $responseTwml->play($customData['play_direct_message']);
                     } else  {
                         if (isset($customData['say_direct_message']) && $customData['say_direct_message']) {
                             $responseTwml->say($customData['say_direct_message'], [
@@ -1566,7 +1566,7 @@ class CommunicationController extends ApiBaseController
 
                 if(isset($customData['play_redirect_message'])) {
                     if($customData['play_redirect_message']) {
-                        $responseTwml->play($customData['play_redirect_message'], ['loop' => 0]);
+                        $responseTwml->play($customData['play_redirect_message']);
                     } else  {
                         if(isset($customData['say_redirect_message']) && $customData['say_redirect_message']) {
                             $responseTwml->say($customData['say_redirect_message'], [
