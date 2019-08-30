@@ -315,7 +315,7 @@ class PhoneController extends FController
     /**
      * @return string
      */
-    public function actionAjaxCallGetAgents()
+    public function actionAjaxCallGetAgents(): string
     {
         $sid = Yii::$app->request->post('sid');
         $userId = (int) Yii::$app->request->post('user_id');
@@ -325,9 +325,9 @@ class PhoneController extends FController
         try {
             $call = Call::findOne(['c_call_sid' => $sid]);
 
-            /*if(!$call) {
+            if(!$call) {
                 $call = Call::find()->where(['c_created_user_id' => $userId])->orderBy(['c_id' => SORT_DESC])->limit(1)->one();
-            }*/
+            }
 
             if(!$call) {
                 throw new \Exception('Call not found by callId: ' . $sid);

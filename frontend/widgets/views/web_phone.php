@@ -533,7 +533,7 @@ echo '<div class="container" id="container-redirect-agents"></div>';
             modal.modal('show').find('.modal-body').html('<div style="text-align:center"><img width="200px" src="https://loading.io/spinners/gear-set/index.triple-gears-loading-icon.svg"></div>');
             modal.modal('show').find('.modal-header').html('<h3>Redirect Call ' + '<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button></h3>');
 
-            $.get(ajaxCallRedirectGetAgents, { sid: connection.parameters.CallSid, user_id: c_user_id })
+            $.post(ajaxCallRedirectGetAgents, { sid: connection.parameters.CallSid, user_id: c_user_id })
                 .done(function(data) {
                     modal.find('.modal-body').html(data);
                 });
