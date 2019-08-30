@@ -72,7 +72,7 @@ use yii\widgets\Pjax;
 
 
                 ?>
-                <div class="row" style="margin-top: 4px;  margin-right: 0px; margin-left: 1px; background-color: rgba(58,199,200,0.26)">
+                <div class="row" style="margin-top: 4px;  margin-right: 0px; margin-left: 1px; /*background-color: rgba(58,199,200,0.26)*/">
                     <div class="col-md-4" style="padding-top: 5px;">
                         <?//=$call->c_id?>
                         <?php if($call->cProject):?> <span class="badge badge-info"><?=\yii\helpers\Html::encode($call->cProject->name)?></span> <?php endif; ?>
@@ -80,6 +80,19 @@ use yii\widgets\Pjax;
                         <?php if($call->c_source_type_id):?> <span class="label label-warning"><?=\yii\helpers\Html::encode($call->getSourceName())?></span> <?php endif; ?>
                     </div>
                     <div class="col-md-4 text-right" style="padding-top: 3px; padding-bottom: 4px; ">
+
+                        <?php
+                            if($call->c_lead_id && $call->cLead2 && $call->cLead2->employee_id === $userModel->id) {
+                                echo '<span class="label label-info">You Lead</span>';
+                            }
+                        ?>
+
+                        <?php
+                            if($call->c_case_id && $call->cCase && $call->cCase->cs_user_id === $userModel->id) {
+                                echo '<span class="label label-info">You Case</span>';
+                            }
+                        ?>
+
                         <span class="badge badge-awake" style="font-size: 14px"><span class="fa fa-phone fa-spin"></span> <?=\yii\helpers\Html::encode($call->c_from)?></span>
                         <?php
                         $durationSec =  $directCallUserAccess->cua_created_dt ? (time() - strtotime($directCallUserAccess->cua_created_dt)) : 0;
@@ -128,13 +141,26 @@ use yii\widgets\Pjax;
                 }
 
                 ?>
-                <div class="row" style="margin-top: 4px;  margin-right: 0px; margin-left: 1px; background-color: rgba(135,200,72,0.26)">
+                <div class="row" style="margin-top: 4px;  margin-right: 0px; margin-left: 1px; /*background-color: rgba(135,200,72,0.26)*/">
                     <div class="col-md-4" style="padding-top: 5px;">
                         <?php if($call->cProject):?> <span class="badge badge-info"><?=\yii\helpers\Html::encode($call->cProject->name)?></span> <?php endif; ?>
                         <?php if($call->cDep):?> <span class="badge badge-info"><?=\yii\helpers\Html::encode($call->cDep->dep_name)?></span> <?php endif; ?>
                         <?php if($call->c_source_type_id):?> <span class="label label-warning"><?=\yii\helpers\Html::encode($call->getSourceName())?></span> <?php endif; ?>
                     </div>
                     <div class="col-md-4 text-right" style="padding-top: 3px; padding-bottom: 4px; ">
+
+                        <?php
+                        if($call->c_lead_id && $call->cLead2 && $call->cLead2->employee_id === $userModel->id) {
+                            echo '<span class="label label-info">You Lead</span>';
+                        }
+                        ?>
+
+                        <?php
+                        if($call->c_case_id && $call->cCase && $call->cCase->cs_user_id === $userModel->id) {
+                            echo '<span class="label label-info">You Case</span>';
+                        }
+                        ?>
+
                         <span class="badge badge-awake" style="font-size: 14px"><span class="fa fa-phone fa-spin"></span> <?=\yii\helpers\Html::encode($call->c_from)?></span>
                         <?php
                         $durationSec =  $generalCallUserAccess->cua_created_dt ? (time() - strtotime($generalCallUserAccess->cua_created_dt)) : 0;
