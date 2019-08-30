@@ -1747,6 +1747,41 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     /**
      * @param int $project_id
      * @param int|null $department_id
+     * @return array
+     */
+    public static function getUsersForRedirectCall(int $project_id, ?int $department_id = null): array
+    {
+        $query = UserConnection::find();
+        $subQuery1 = UserProfile::find()->select(['up_call_type_id'])->where('up_user_id = user_connection.uc_user_id');
+
+        $query->select([
+            'tbl_user_id' => 'user_connection.uc_user_id',
+            'tbl_call_type_id' => $subQuery1
+        ]);
+
+        $subQuery = ProjectEmployeeAccess::find()->select(['DISTINCT(employee_id)'])->where(['project_id' => $project_id]);
+        $query->andWhere(['IN', 'user_connection.uc_user_id', $subQuery]);
+        $query->groupBy(['user_connection.uc_user_id']);
+
+        if ($department_id) {
+            $subQueryUd = UserDepartment::find()->usersByDep($department_id);
+            $query->andWhere(['IN', 'user_connection.uc_user_id', $subQueryUd]);
+        }
+
+        $generalQuery = new Query();
+        $generalQuery->from(['tbl' => $query]);
+        $generalQuery->andWhere(['AND', ['<>', 'tbl_call_type_id', UserProfile::CALL_TYPE_OFF], ['IS NOT', 'tbl_call_type_id', null]]);
+
+        //$sqlRaw = $generalQuery->createCommand()->getRawSql();
+        //VarDumper::dump($sqlRaw, 10, true); exit;
+        $users = $generalQuery->all();
+        return $users;
+    }
+
+
+    /**
+     * @param int $project_id
+     * @param int|null $department_id
      * @param int $limit
      * @param int $hours
      * @param array|null $exceptUserIds

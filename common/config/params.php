@@ -11,6 +11,7 @@ return [
     'appName' => 'Sales',
 
     'url_address'      => 'https://sales.travelinsides.com',
+    'url_api_address'  => 'https://sales.api.travelinsides.com/v1',
 
     'email_from' => [
         'sales' => 'sales@travelinsides.com',

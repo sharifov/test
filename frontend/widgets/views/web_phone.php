@@ -65,16 +65,6 @@
                     <td>From: <i class="fa fa-phone"></i> <span id="web-call-from-number"></span></td>
 
                     <td>To: <i class="fa fa-phone"></i> <span id="web-call-to-number"></span></td>
-                    <?/*<td>
-                        <table class="table table-bordered">
-                            <tr>
-                                <td>From:</td><td> <i class="fa fa-phone"></i> <span id="web-call-from-number"></span></td>
-                            </tr>
-                            <tr>
-                                <td>To:</td><td> <i class="fa fa-phone"></i> <span id="web-call-to-number"></span></td>
-                            </tr>
-                        </table>
-                    </td>*/?>
                     <td width="120px">
                         <div class="text-right">
                             <?//=\yii\helpers\Html::button('<i class="fa fa-tumblr"></i>', ['class' => 'btn btn-xs btn-primary', 'id' => 'btn-webphone-token', 'onclick' => 'alert($("#web-phone-token").text())'])?>
@@ -115,20 +105,11 @@
                                         </li>
                                     <?php endforeach; ?>
                                 <?php endif;?>
-                                <?php /*
-                                    <li><a href="#" class="forward-event" data-type="general" data-value="+37378966164">Forward to general line ()</a></li>
-                                    <li><a href="#" onclick="return false;">Forward to agent</a></li>
-                                    <li role="separator" class="divider"></li>
-                                    <li><a href="#" class="forward-event" data-type="seller" data-value="seller1">seller1</a></li>
-                                    <li><a href="#" class="forward-event" data-type="seller" data-value="seller1">seller240</a></li>
-                                    <li><a href="#" class="forward-event" data-type="seller" data-value="seller1">seller500</a></li>
-                                    <li role="separator" class="divider"></li>
-                                    */?>
                             </ul>
                         </div>
 
                         <div class="btn-group" id="btn-group-id-redirect" style="display: none;">
-                            <?=\yii\helpers\Html::button('<i class="fa fa-forward"></i> To Agents ', ['class' => 'btn btn-sm btn-info button-redirect-to-agents','id' => 'button-redirect-to-agents'])?>
+                            <?=\yii\helpers\Html::button('<i class="fa fa-forward"></i> To Agents ', ['class' => 'btn btn-sm btn-info button-redirect-to-agents'])?>
                         </div>
 
 
@@ -149,7 +130,7 @@
                                 <button class="btn btn-xs btn-danger forward-event" data-type="hold" data-value="+15596489977"><i class="fa fa-pause"></i> Hold</button>
                             </div>*/?>
                             <div class="btn-group" id="btn-group-id-redirect2">
-                                <?=\yii\helpers\Html::button('<i class="fa fa-forward"></i> To Agents ', ['class' => 'btn btn-sm btn-info button-redirect-to-agents','id' => 'button-redirect-to-agents2'])?>
+                                <?=\yii\helpers\Html::button('<i class="fa fa-forward"></i> To Agents ', ['class' => 'btn btn-sm btn-info button-redirect-to-agents'])?>
                             </div>
                         </div>
                     </td>
@@ -249,11 +230,15 @@ echo '<div class="container" id="container-redirect-agents"></div>';
     $ajaxSaveCallUrl = \yii\helpers\Url::to(['phone/ajax-save-call']);
     $ajaxRedirectCallUrl = \yii\helpers\Url::to(['phone/ajax-call-redirect']);
     $ajaxCallRedirectGetAgents = \yii\helpers\Url::to(['phone/ajax-call-get-agents']);
+    $ajaxRedirectCallUrlToAgent = \yii\helpers\Url::to(['phone/ajax-call-redirect-to-agent']);
 ?>
 <script type="text/javascript">
 
     const ajaxSaveCallUrl = '<?=$ajaxSaveCallUrl?>';
     const ajaxCallRedirectUrl = '<?=$ajaxRedirectCallUrl?>';
+
+    const ajaxCallRedirectUrlToAgent = '<?=$ajaxRedirectCallUrlToAgent?>';
+
     const ajaxCallRedirectGetAgents = '<?=$ajaxCallRedirectGetAgents;?>';
     const c_user_id = '<?=Yii::$app->user->id?>';
     use_browser_call_access =  <?= ($use_browser_call_access) ? 'true' : 'false' ?>;
@@ -540,17 +525,28 @@ echo '<div class="container" id="container-redirect-agents"></div>';
     };
 
 
-    function initredirectToAgent()
+    function initRedirectToAgent()
     {
         if (connection && connection.parameters.CallSid) {
-            $.ajax({
+
+            var modal = $('#web-phone-redirect-agents-modal');
+            modal.modal('show').find('.modal-body').html('<div style="text-align:center"><img width="200px" src="https://loading.io/spinners/gear-set/index.triple-gears-loading-icon.svg"></div>');
+            modal.modal('show').find('.modal-header').html('<h3>Redirect Call ' + '<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button></h3>');
+
+            $.post(ajaxCallRedirectGetAgents, { sid: connection.parameters.CallSid, user_id: c_user_id })
+                .done(function(data) {
+                    modal.find('.modal-body').html(data);
+                });
+
+
+            /*$.ajax({
                 type: 'post',
                 data: {
                     'sid': connection.parameters.CallSid,
-                    'type': 'client',
-                    'from': connection.parameters.From,
-                    'to': connection.parameters.To,
-                    'agent_id' : c_user_id,
+                    //'type': 'client',
+                    //'from': connection.parameters.From,
+                    //'to': connection.parameters.To,
+                    'user_id' : c_user_id,
                 },
                 url: ajaxCallRedirectGetAgents,
                 success: function (response) {
@@ -563,8 +559,11 @@ echo '<div class="container" id="container-redirect-agents"></div>';
                 error: function (error) {
                     console.error(error);
                 }
-            });
+            });*/
+        } else {
+            alert('Error: Not found Call connection or Call SID!');
         }
+        return false;
     }
 
     // TODO redirect call
@@ -838,9 +837,8 @@ $js = <<<JS
         //setInterval('clearAgentStatus(connection)', 1000);
        
         $(document).on('click', '.button-redirect-to-agents', function(e) {
-            
             e.preventDefault();
-            initredirectToAgent();
+            initRedirectToAgent();
         });
 
 
@@ -851,6 +849,7 @@ $js = <<<JS
             data_agent_to_redirect.attr("disabled", true);
             $("#redirect-agent-table").hide();
             $("#redirect-agent-info").html('<h3>Redirecting to: ' + data_agent_to_redirect.data('agent') + '</h3>').show();
+            
             if(connection) {
                 updateAgentStatus(connection, false, 1);
                 
@@ -887,7 +886,7 @@ $js = <<<JS
                                     }
                                     $("#redirect-agent-info").html('<h3 class="danger">' + error_message +'</h3>').show();
                                     $("#redirect-agent-table").show();
-                                    setTimeout('initredirectToAgent();', 5000);
+                                    setTimeout('initRedirectToAgent();', 5000);
                                 }
                                 else {
                                     $('#web-phone-dial-modal').modal('hide');
@@ -908,9 +907,75 @@ $js = <<<JS
                     } else {
                         $("#redirect-agent-info").html('<h3 class="danger">The user (' +  data_agent_to_redirect.data('agent') + ') is not available for the call</h3>').show();
                         $("#redirect-agent-table").show();
-                        setTimeout('initredirectToAgent();', 5000);
+                        setTimeout('initRedirectToAgent();', 5000);
                     }
                 }, 'json');
+            } else {
+                alert('Error: not found Call connection!');
+            }
+        });
+        
+        $(document).on('click', '.redirect-agent-data2', function(e) {
+            e.preventDefault();
+           
+            var data_agent_to_redirect = $(e.target);
+            data_agent_to_redirect.attr("disabled", true);
+            $("#redirect-agent-table").hide();
+            $("#redirect-agent-info").html('<h3>Redirecting to: ' + data_agent_to_redirect.data('agent') + '</h3>').show();
+            
+            if(connection) {
+                updateAgentStatus(connection, false, 1);
+                    
+                if(r && r.is_ready) {
+                
+                    if(connection.status() !== 'open') {
+                        connection.accept();
+                    }
+                    $.ajax({
+                        type: 'post',
+                        data: {
+                            'sid': connection.parameters.CallSid,
+                            'user_id': data_agent_to_redirect.data('agentid'),
+                        },
+                        url: ajaxCallRedirectUrlToAgent,
+                        success: function (res) {
+                             console.log(res);
+                            if(res.error) {
+                                $('#web-phone-dial-modal').modal('hide');
+                                document.getElementById('call-controls2').style.display = 'none';
+                                data_agent_to_redirect.removeAttr("disabled");
+                                var error_message = 'Error redirect.';
+                                if(res.message) {
+                                    error_message = res.message;
+                                }
+                                $("#redirect-agent-info").html('<h3 class="danger">' + error_message +'</h3>').show();
+                                $("#redirect-agent-table").show();
+                                setTimeout('initRedirectToAgent();', 5000);
+                            }
+                            else {
+                                $('#web-phone-dial-modal').modal('hide');
+                                document.getElementById('call-controls2').style.display = 'none';
+                                $("#web-phone-redirect-agents-modal").modal('hide');
+                                data_agent_to_redirect.removeAttr("disabled");
+                                $("#redirect-agent-info").html('').hide();
+                                $("#redirect-agent-table").show();
+                            }
+                        },
+                        error: function (error) {
+                            console.error(error);
+                            data_agent_to_redirect.removeAttr("disabled");
+                            $("#redirect-agent-info").html('').hide();
+                            $("#redirect-agent-table").show();
+                        }
+                    });
+                } else {
+                    $("#redirect-agent-info").html('<h3 class="danger">The user (' +  data_agent_to_redirect.data('agent') + ') is not available for the call</h3>').show();
+                    $("#redirect-agent-table").show();
+                    setTimeout('initRedirectToAgent();', 5000);
+                }
+
+            } else {
+                alert('Error: not found Call connection!');
             }
         });
 
