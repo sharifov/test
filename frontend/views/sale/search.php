@@ -13,33 +13,33 @@ $this->params['breadcrumbs'][] = $this->title;
 
 ?>
 <style>
-.dropdown-menu {
-	z-index: 1010;
-}
+    .dropdown-menu {
+        z-index: 1010;
+    }
 </style>
 <div class="sale-search">
 
-	<h1 title="<?=Yii::$app->params['backOffice']['serverUrl']?>"><?= Html::encode($this->title) ?></h1>
+    <h1 title="<?=Yii::$app->params['backOffice']['serverUrl']?>"><?= Html::encode($this->title) ?></h1>
 
     <?php Pjax::begin(['id' => 'sale-pjax-list', 'timeout' => 15000, 'enablePushState' => true]); ?>
 
 
     <?php
-        //if(Yii::$app->request->isAjax) {
-            echo \yiister\gentelella\widgets\FlashAlert::widget();
-        //}
+    //if(Yii::$app->request->isAjax) {
+    echo \yiister\gentelella\widgets\FlashAlert::widget();
+    //}
 
-        echo $this->render('_search', [
-            'model' => $searchModel
-        ]);
+    echo $this->render('_search', [
+        'model' => $searchModel
+    ]);
 
-        //\yii\helpers\VarDumper::dump($dataProvider->allModels, 10, true);
+    //\yii\helpers\VarDumper::dump($dataProvider->allModels, 10, true);
 
 
-        echo GridView::widget([
-            'dataProvider' => $dataProvider,
-            'filterModel' => null, //$searchModel,
-            'columns' => [
+    echo GridView::widget([
+        'dataProvider' => $dataProvider,
+        'filterModel' => null, //$searchModel,
+        'columns' => [
             // ['class' => 'yii\grid\SerialColumn'],
             [
                 'attribute' => 'sale_id',
@@ -55,14 +55,13 @@ $this->params['breadcrumbs'][] = $this->title;
                 ],
                 'filter' => false
             ],
-
-                [
-                    'label' => 'Project',
-                    'value' => function ($model) {
-                        return $model['project'] ? '<span class="badge badge-info">'.Html::encode($model['project']).'</span>': '-';
-                    },
-                    'format' => 'raw'
-                ],
+            [
+                'label' => 'Project',
+                'value' => function ($model) {
+                    return $model['project'] ? '<span class="badge badge-info">'.Html::encode($model['project']).'</span>': '-';
+                },
+                'format' => 'raw'
+            ],
 
             /*[
                 'label' => 'Air Routing Id',
@@ -71,9 +70,15 @@ $this->params['breadcrumbs'][] = $this->title;
                 },
             ],*/
             [
-                'label' => 'Confirmation Number',
+                'label' => 'Confirmation Number (Booking ID)',
                 'value' => function ($model) {
                     return $model['confirmationNumber'] ?: '-';
+                },
+            ],
+            [
+                'label' => 'Airline Confirmation Number',
+                'value' => function ($model) {
+                    return $model['airlineConfirmationNumber'][array_key_first($model['airlineConfirmationNumber'])] ?: '---';
                 },
             ],
 
@@ -100,12 +105,12 @@ $this->params['breadcrumbs'][] = $this->title;
                 'format' => 'raw'
             ],
 
-                [
-                    'label' => 'PNR Number',
-                    'value' => function ($model) {
-                        return $model['pnr'] ?: '-';
-                    },
-                ],
+            [
+                'label' => 'PNR Number',
+                'value' => function ($model) {
+                    return $model['pnr'] ?: '-';
+                },
+            ],
 
             [
                 'label' => 'Passengers',
@@ -152,28 +157,28 @@ $this->params['breadcrumbs'][] = $this->title;
             ]
         ],
 
-        ]);
-        // }
+    ]);
+    // }
 
-        ?>
+    ?>
     <?php Pjax::end(); ?>
-<?php
+    <?php
 
-/*$js = <<<JS
+    /*$js = <<<JS
 
-    $(document).on('pjax:start', function() {
-        $("#modalUpdate .close").click();
-    });
+        $(document).on('pjax:start', function() {
+            $("#modalUpdate .close").click();
+        });
 
-    $(document).on('pjax:end', function() {
-         $('[data-toggle="tooltip"]').tooltip();
-    });
-
-
-   $('[data-toggle="tooltip"]').tooltip();
+        $(document).on('pjax:end', function() {
+             $('[data-toggle="tooltip"]').tooltip();
+        });
 
 
-JS;
-$this->registerJs($js, \yii\web\View::POS_READY);*/
-?>
+       $('[data-toggle="tooltip"]').tooltip();
+
+
+    JS;
+    $this->registerJs($js, \yii\web\View::POS_READY);*/
+    ?>
 </div>
