@@ -108,13 +108,13 @@
                             </ul>
                         </div>
 
-                        <div class="btn-group" id="btn-group-id-redirect" style="display: block;">
+                        <div class="btn-group" id="btn-group-id-redirect" style="display: none;">
                             <?=\yii\helpers\Html::button('<i class="fa fa-forward"></i> To Agents ', ['class' => 'btn btn-sm btn-info button-redirect-to-agents','id' => 'button-redirect-to-agents'])?>
                         </div>
 
 
                         <?/*=\yii\helpers\Html::button('<i class="fa fa-phone"></i> Call', ['class' => 'btn btn-xs btn-success', 'id' => 'button-call'])*/?>
-                        <div id="call-controls2" style="display: block;">
+                        <div id="call-controls2" style="display: none;">
                             <div class="btn-group">
                                 <?=\yii\helpers\Html::button('<i class="fa fa-phone"></i> Answer', ['class' => 'btn btn-xs btn-success', 'id' => 'button-answer'])?>
                             </div>
