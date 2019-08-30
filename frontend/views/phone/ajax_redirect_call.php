@@ -24,7 +24,7 @@ use yii\helpers\Html;
                 ?>
                 <tr>
                     <td><?=Html::encode($userModel->username)?></td>
-                    <td><?=implode(', ', $roles)?></td>
+                    <td><?=( is_array($roles) ? implode(', ', $roles) : '-')?></td>
                     <td><?=Html::button('Redirect', [
                                 'class' => 'btn btn-sm btn-primary redirect-agent-data2',
                                 'data-agentid' => $userModel->id,
