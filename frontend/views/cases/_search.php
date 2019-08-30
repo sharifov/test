@@ -76,18 +76,20 @@ use yii\widgets\ActiveForm;
         <div class="col-md-2">
             <?= $form->field($model, 'clientEmail') ?>
         </div>
+        <div class="col-md-2">
+            <?= $form->field($model, 'airlineConfirmationNumber') ?>
+        </div>
+        <div class="col-md-1">
+            <?= $form->field($model, 'ticketNumber') ?>
+        </div>
     </div>
 
 </div>
 
 <div class="form-group text-center">
-    <?/*= Html::submitButton('Search', ['class' => 'btn btn-primary']) */?><!--
-    --><?/*= Html::resetButton('Reset form', ['class' => 'btn btn-outline-secondary']) */?>
-
     <?= Html::submitButton('<i class="fa fa-search"></i> Search cases', ['class' => 'btn btn-primary']) ?>
     <?= Html::a('<i class="glyphicon glyphicon-repeat"></i> Reset form', ['cases/index'], ['class' => 'btn btn-warning']) ?>
 </div>
 
 <?php ActiveForm::end(); ?>
-
 </div>

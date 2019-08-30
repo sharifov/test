@@ -20,6 +20,8 @@ class CasesSearch extends Cases
     public $salePNR;
     public $clientPhone;
     public $clientEmail;
+    public $ticketNumber;
+    public $airlineConfirmationNumber;
 
     /**
      * @return array
@@ -39,7 +41,7 @@ class CasesSearch extends Cases
             ['cs_client_id', 'integer'],
             ['cs_project_id', 'safe'],
             ['cssSaleId', 'integer'],
-            [['cssBookId', 'salePNR', 'clientPhone', 'clientEmail'], 'string']
+            [['cssBookId', 'salePNR', 'clientPhone', 'clientEmail', 'ticketNumber', 'airlineConfirmationNumber'], 'string']
 
         ];
     }
@@ -101,6 +103,16 @@ class CasesSearch extends Cases
             $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['css_sale_id' => $this->cssSaleId])]);
         }
 
+        if ($this->ticketNumber){
+            $saleId = self::getSaleIdByTicket($this->ticketNumber);
+            $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['css_sale_id' => $saleId])]);
+        }
+
+        if ($this->airlineConfirmationNumber){
+            $saleId = self::getSaleIdByAcn($this->airlineConfirmationNumber);
+            $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['css_sale_id' => $saleId])]);
+        }
+
         if ($this->cssBookId){
             $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['css_sale_book_id' => $this->cssBookId])]);
         }
@@ -112,6 +124,7 @@ class CasesSearch extends Cases
         if ($this->clientPhone){
             $query->andWhere(['cs_client_id' => ClientPhone::find()->select('client_id')->andWhere(['phone' => $this->clientPhone])]);
         }
+
         if ($this->clientEmail){
             $query->andWhere(['cs_client_id' => ClientEmail::find()->select('client_id')->andWhere(['email' => $this->clientEmail])]);
         }
@@ -138,12 +151,41 @@ class CasesSearch extends Cases
             'cs_category' => 'Category',
             'cs_status' => 'Status',
             'cs_user_id' => 'User',
-            'cs_lead_id' => 'Lead',
+            'cs_lead_id' => 'Lead ID',
             'cs_dep_id' => 'Department',
             'cs_created_dt' => 'Created',
             'cssSaleId' => 'Sale ID',
             'cssBookId' => 'Booking ID',
-            'salePNR' => 'Sale PNR'
+            'salePNR' => 'Quote PNR'
         ];
     }
+
+    public static function getSaleIdByTicket($tickerNum)
+    {
+        $saleDataJson = CaseSale::find()->select(['css_sale_data'])->all();
+        foreach ($saleDataJson as $sale){
+            $decodeSale = json_decode($sale['css_sale_data']);
+            foreach ($decodeSale->passengers as $passenger){
+                if ($passenger->ticket_number == $tickerNum){
+                    return $decodeSale->saleId;
+                }
+            }
+        }
+    }
+
+    public static function getSaleIdByAcn($acn)
+    {
+        $saleDataJson = CaseSale::find()->select(['css_sale_data'])->all();
+        foreach ($saleDataJson as $sale){
+            $decodeSale = json_decode($sale['css_sale_data']);
+            foreach ($decodeSale->itinerary as $itinerary){
+                foreach ($itinerary->segments as $segment){
+                    if ($segment->airlineRecordLocator == $acn){
+                        return $decodeSale->saleId;
+                    }
+                }
+            }
+        }
+    }
+
 }
