@@ -109,7 +109,7 @@
                         </div>
 
                         <div class="btn-group" id="btn-group-id-redirect" style="display: none;">
-                            <?=\yii\helpers\Html::button('<i class="fa fa-forward"></i> To Agents ', ['class' => 'btn btn-sm btn-info button-redirect-to-agents','id' => 'button-redirect-to-agents'])?>
+                            <?=\yii\helpers\Html::button('<i class="fa fa-forward"></i> To Agents ', ['class' => 'btn btn-sm btn-info button-redirect-to-agents'])?>
                         </div>
 
 
@@ -130,7 +130,7 @@
                                 <button class="btn btn-xs btn-danger forward-event" data-type="hold" data-value="+15596489977"><i class="fa fa-pause"></i> Hold</button>
                             </div>*/?>
                             <div class="btn-group" id="btn-group-id-redirect2">
-                                <?=\yii\helpers\Html::button('<i class="fa fa-forward"></i> To Agents ', ['class' => 'btn btn-sm btn-info button-redirect-to-agents','id' => 'button-redirect-to-agents2'])?>
+                                <?=\yii\helpers\Html::button('<i class="fa fa-forward"></i> To Agents ', ['class' => 'btn btn-sm btn-info button-redirect-to-agents'])?>
                             </div>
                         </div>
                     </td>
@@ -525,17 +525,27 @@ echo '<div class="container" id="container-redirect-agents"></div>';
     };
 
 
-    function initredirectToAgent()
+    function initRedirectToAgent()
     {
-
         if (connection && connection.parameters.CallSid) {
-            $.ajax({
+
+            var modal = $('#web-phone-redirect-agents-modal');
+            modal.modal('show').find('.modal-body').html('<div style="text-align:center"><img width="200px" src="https://loading.io/spinners/gear-set/index.triple-gears-loading-icon.svg"></div>');
+            modal.modal('show').find('.modal-header').html('<h3>Redirect Call ' + '<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button></h3>');
+
+            $.get(ajaxCallRedirectGetAgents, { sid: connection.parameters.CallSid, user_id: c_user_id })
+                .done(function(data) {
+                    modal.find('.modal-body').html(data);
+                });
+
+
+            /*$.ajax({
                 type: 'post',
                 data: {
                     'sid': connection.parameters.CallSid,
                     //'type': 'client',
-                    'from': connection.parameters.From,
-                    'to': connection.parameters.To,
+                    //'from': connection.parameters.From,
+                    //'to': connection.parameters.To,
                     'user_id' : c_user_id,
                 },
                 url: ajaxCallRedirectGetAgents,
@@ -549,10 +559,11 @@ echo '<div class="container" id="container-redirect-agents"></div>';
                 error: function (error) {
                     console.error(error);
                 }
-            });
+            });*/
         } else {
             alert('Error: Not found Call connection or Call SID!');
         }
+        return false;
     }
 
     // TODO redirect call
@@ -826,9 +837,8 @@ $js = <<<JS
         //setInterval('clearAgentStatus(connection)', 1000);
        
         $(document).on('click', '.button-redirect-to-agents', function(e) {
-            
             e.preventDefault();
-            initredirectToAgent();
+            initRedirectToAgent();
         });
 
 
@@ -876,7 +886,7 @@ $js = <<<JS
                                     }
                                     $("#redirect-agent-info").html('<h3 class="danger">' + error_message +'</h3>').show();
                                     $("#redirect-agent-table").show();
-                                    setTimeout('initredirectToAgent();', 5000);
+                                    setTimeout('initRedirectToAgent();', 5000);
                                 }
                                 else {
                                     $('#web-phone-dial-modal').modal('hide');
@@ -897,7 +907,7 @@ $js = <<<JS
                     } else {
                         $("#redirect-agent-info").html('<h3 class="danger">The user (' +  data_agent_to_redirect.data('agent') + ') is not available for the call</h3>').show();
                         $("#redirect-agent-table").show();
-                        setTimeout('initredirectToAgent();', 5000);
+                        setTimeout('initRedirectToAgent();', 5000);
                     }
                 }, 'json');
             } else {
@@ -940,7 +950,7 @@ $js = <<<JS
                                 }
                                 $("#redirect-agent-info").html('<h3 class="danger">' + error_message +'</h3>').show();
                                 $("#redirect-agent-table").show();
-                                setTimeout('initredirectToAgent();', 5000);
+                                setTimeout('initRedirectToAgent();', 5000);
                             }
                             else {
                                 $('#web-phone-dial-modal').modal('hide');
@@ -961,7 +971,7 @@ $js = <<<JS
                 } else {
                     $("#redirect-agent-info").html('<h3 class="danger">The user (' +  data_agent_to_redirect.data('agent') + ') is not available for the call</h3>').show();
                     $("#redirect-agent-table").show();
-                    setTimeout('initredirectToAgent();', 5000);
+                    setTimeout('initRedirectToAgent();', 5000);
                 }
 
             } else {

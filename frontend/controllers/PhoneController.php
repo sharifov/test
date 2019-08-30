@@ -11,6 +11,7 @@ use common\models\Project;
 use common\models\UserProfile;
 use common\models\UserProjectParams;
 use yii\base\Exception;
+use yii\helpers\Html;
 use yii\web\BadRequestHttpException;
 use yii\web\NotAcceptableHttpException;
 use const Grpc\CALL_ERROR;
@@ -311,96 +312,63 @@ class PhoneController extends FController
         return $result;
     }
 
+    /**
+     * @return string
+     */
     public function actionAjaxCallGetAgents()
     {
+        $sid = Yii::$app->request->post('sid');
+        $userId = (int) Yii::$app->request->post('user_id');
+        $users = [];
+        $error = null;
+
         try {
-            \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
-            $call = null;
-
-            $sid = Yii::$app->request->post('sid');
-            // $type = Yii::$app->request->post('type');
-            $from = Yii::$app->request->post('from');
-            $to = Yii::$app->request->post('to');
-            $userId = (int) Yii::$app->request->post('user_id');
-
-            $callAgents = [];
-
-
             $call = Call::findOne(['c_call_sid' => $sid]);
-            if(!$call) {
+
+            /*if(!$call) {
                 $call = Call::find()->where(['c_created_user_id' => $userId])->orderBy(['c_id' => SORT_DESC])->limit(1)->one();
-            }
+            }*/
 
             if(!$call) {
                 throw new \Exception('Call not found by callId: ' . $sid);
             }
 
             $project_id =  $call->c_project_id;
+
             if(!$project_id) {
                 throw new \Exception('Project id not found in call by callId: ' . $sid);
             }
 
-            //$agents_for_call = Employee::getAgentsForCall($agent_id, $project_id);
-            $agents_for_call = Employee::getAgentsForGeneralLineCall($project_id, '', 50000);
-            $lead_id = $call->c_lead_id ?: 0;
-            $case_id = $call->c_case_id ?: 0;
+            $userList = Employee::getUsersForRedirectCall($call->c_project_id, $call->c_dep_id);
 
-            $html = '<div>';
-            if($agents_for_call) {
-                $html .= '<div id="redirect-agent-info" style="display: none;"><h3></h3></div>';
-                $html .= '<table class="table" style="margin: 0" id="redirect-agent-table"><tr><th>Username</th><th>Roles</th><th>Action</th></tr>';
-                foreach ($agents_for_call AS $agentForCall) {
-                    $agentId = (int)$agentForCall['tbl_user_id'];
+            if($userList) {
+                foreach ($userList as $userItem) {
+                    $agentId = (int) $userItem['tbl_user_id'];
                     if($agentId === $userId) {
                         continue;
                     }
-                    $agentObject = Employee::findOne($agentId);
-                    if(!$agentObject || !$agentObject->userProfile) {
-                        continue;
-                    }
-                    if( $agentObject->userProfile && $agentObject->userProfile->up_call_type_id !== UserProfile::CALL_TYPE_WEB ) {
-                        continue;
-                    }
-                    $agents_ids[] = $agentObject->id . ' : '. $agentObject->username . ' - '. print_r($agentObject->getRolesRaw(), true);
-                    $roles = $agentObject->getRolesRaw();
-                    if(array_key_exists('agent', $roles) || array_key_exists('supervision', $roles)) {
-                        $callAgents[] = [
-                            'id' => $agentObject->id,
-                            'name' => $agentObject->username,
-                            'roles' => '('.implode(",", $roles).')',
-                        ];
-
-                        $html .= '<tr>';
-                        $html .= '<td>'.$agentObject->username.'</td><td>'.implode(",", $roles).'</td>';
-                        $html .= '<td><button class="btn btn-sm btn-primary redirect-agent-data2" 
-                            data-agentid="'.$agentObject->id.'" data-called="'.$from.'" data-agent="seller'.$agentObject->id.'" 
-                            data-projectid="'.$project_id.'" data-leadid="'.$lead_id.'" data-caseid="'.$case_id.'" >Redirect</button></td>';
-                        $html .= '</tr>';
+                    $userModel = \common\models\Employee::findOne($agentId);
+                    if ($userModel->isAgent() || $userModel->isSupAgent() || $userModel->isExAgent() || $userModel->isSupervision() || $userModel->isSupSuper() || $userModel->isExSuper()) {
+                        $users[] = $userModel;
                     }
                 }
-                $html .= '</table>';
             }
-            $html .= '</div>';
-            $result = [
-                'status' => 'ok',
-                'sid' => $sid,
-                'project_id' => $project_id,
-                'user_id' => $userId,
-                'to' => $to,
-                'from' => $from,
-                'items' => $callAgents,
-                'html' => $html,
-                'call' => $call ? $call->c_id : 0,
-                'agents_for_call' => $agents_for_call,
-            ];
+
+//            $lead_id = $call->c_lead_id ?: 0;
+//            $case_id = $call->c_case_id ?: 0;
+
         } catch (\Throwable $e) {
-            $result = [
-                'status' => 'error',
-                'message' => $e->getMessage(),
-            ];
+            $call = null;
+            $error = $e->getMessage();
         }
 
-        return $result;
+
+        return $this->renderAjax('ajax_redirect_call', [
+            'users' => $users,
+            'call' => $call,
+            'error' => $error
+        ]);
+
     }
 
     /**
