@@ -412,6 +412,12 @@ class PhoneController extends FController
 
             $result = $communication->updateCall($sid, $updateData);
 
+            if(!isset($result['error'])) {
+                $result['error'] = false;
+            }
+
+           // \Yii::info(VarDumper::dumpAsString([$result, \Yii::$app->request->post()]), 'PhoneController:actionAjaxCallRedirectToAgent');
+
 
 
                 /*$call = Call::findOne(['c_id' => $sid]);
@@ -450,7 +456,7 @@ class PhoneController extends FController
                 }*/
 
 
-            \Yii::info(VarDumper::dumpAsString([$result, \Yii::$app->request->post()]), 'PhoneController:actionAjaxCallRedirectToAgent');
+            \Yii::info(VarDumper::dumpAsString(['sid' => $sid, 'updateData' => $updateData, 'result' => $result, 'post' => \Yii::$app->request->post()]), 'info\PhoneController:actionAjaxCallRedirectToAgent');
 
         } catch (\Throwable $e) {
             $result = [

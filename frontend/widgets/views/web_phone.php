@@ -924,12 +924,12 @@ $js = <<<JS
             $("#redirect-agent-info").html('<h3>Redirecting to: ' + data_agent_to_redirect.data('agent') + '</h3>').show();
             
             
-            console.log('Click redirect-agent-data2');
+            //console.log('Click redirect-agent-data2');
             
             if(connection) {
                 updateAgentStatus(connection, false, 1);
                 
-                console.log('connection redirect-agent-data2');
+                //console.log('connection redirect-agent-data2');
                     
                 //if(r && r.is_ready) {
                 
@@ -949,6 +949,9 @@ $js = <<<JS
                         success: function (res) {
                              console.log(res);
                             if(res.error) {
+                                
+                                console.error(res.error);
+                                
                                 $('#web-phone-dial-modal').modal('hide');
                                 document.getElementById('call-controls2').style.display = 'none';
                                 data_agent_to_redirect.removeAttr("disabled");
@@ -961,6 +964,9 @@ $js = <<<JS
                                 setTimeout('initRedirectToAgent();', 5000);
                             }
                             else {
+                                console.info('------- AJAX response ----------');
+                                console.info(res);
+                                
                                 $('#web-phone-dial-modal').modal('hide');
                                 document.getElementById('call-controls2').style.display = 'none';
                                 $("#web-phone-redirect-agents-modal").modal('hide');
