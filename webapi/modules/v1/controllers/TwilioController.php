@@ -178,7 +178,8 @@ class TwilioController extends ApiBaseNoAuthController
 
 
         $userId = Yii::$app->request->get('user_id');
-        $sid = Yii::$app->request->get('CallSid');
+        $sid = Yii::$app->request->post('CallSid');
+        $post = Yii::$app->request->post();
 
         if(!$sid) {
             throw new BadRequestHttpException('Params "CALL SID" is empty', 1);
@@ -192,6 +193,26 @@ class TwilioController extends ApiBaseNoAuthController
                     $call->c_call_status = Call::CALL_STATUS_QUEUE;
                     if ($userId) {
                         $call->c_created_user_id = (int) $userId;
+                    }
+
+                    if (isset($post['AccountSid']) && !$call->c_account_sid) {
+                        $call->c_account_sid = $post['AccountSid'];
+                    }
+
+                    if (isset($post['Direction']) && !$call->c_direction) {
+                        $call->c_direction = $post['Direction'];
+                    }
+
+                    if (isset($post['ParentCallSid']) && !$call->c_parent_call_sid) {
+                        $call->c_parent_call_sid = $post['ParentCallSid'];
+                    }
+
+                    if (isset($post['ApiVersion']) && !$call->c_api_version) {
+                        $call->c_api_version = $post['ApiVersion'];
+                    }
+
+                    if (isset($post['ApiVersion']) && !$call->c_forwarded_from) {
+                        $call->c_forwarded_from = $post['ForwardedFrom'];
                     }
 
                     $callUserAccessAny = $call->callUserAccesses; //CallUserAccess::find()->where(['cua_status_id' => [CallUserAccess::STATUS_TYPE_PENDING], 'cua_call_id' => $this->c_id])->all();
