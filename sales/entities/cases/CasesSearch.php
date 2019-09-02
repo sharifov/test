@@ -22,6 +22,8 @@ class CasesSearch extends Cases
     public $clientEmail;
     public $ticketNumber;
     public $airlineConfirmationNumber;
+    public $paxFirstName;
+    public $paxLastName;
 
     /**
      * @return array
@@ -41,7 +43,8 @@ class CasesSearch extends Cases
             ['cs_client_id', 'integer'],
             ['cs_project_id', 'safe'],
             ['cssSaleId', 'integer'],
-            [['cssBookId', 'salePNR', 'clientPhone', 'clientEmail', 'ticketNumber', 'airlineConfirmationNumber'], 'string']
+            [['cssBookId', 'salePNR', 'clientPhone', 'clientEmail', 'ticketNumber', 'airlineConfirmationNumber'], 'string'],
+            [['paxFirstName', 'paxLastName',], 'string']
 
         ];
     }
@@ -108,6 +111,16 @@ class CasesSearch extends Cases
             $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['css_sale_id' => $saleId])]);
         }
 
+        if ($this->paxFirstName){
+            $saleId = self::getPaxFirstName($this->paxFirstName);
+            $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['css_sale_id' => $saleId])]);
+        }
+
+        if ($this->paxLastName){
+            $saleId = self::getPaxLastName($this->paxLastName);
+            $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['css_sale_id' => $saleId])]);
+        }
+
         if ($this->airlineConfirmationNumber){
             $saleId = self::getSaleIdByAcn($this->airlineConfirmationNumber);
             $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['css_sale_id' => $saleId])]);
@@ -167,6 +180,32 @@ class CasesSearch extends Cases
             $decodeSale = json_decode($sale['css_sale_data']);
             foreach ($decodeSale->passengers as $passenger){
                 if ($passenger->ticket_number == $tickerNum){
+                    return $decodeSale->saleId;
+                }
+            }
+        }
+    }
+
+    public static function getPaxFirstName($firstName)
+    {
+        $saleDataJson = CaseSale::find()->select(['css_sale_data'])->all();
+        foreach ($saleDataJson as $sale){
+            $decodeSale = json_decode($sale['css_sale_data']);
+            foreach ($decodeSale->passengers as $passenger){
+                if ($passenger->first_name == strtoupper($firstName)){
+                    return $decodeSale->saleId;
+                }
+            }
+        }
+    }
+
+    public static function getPaxLastName($lastName)
+    {
+        $saleDataJson = CaseSale::find()->select(['css_sale_data'])->all();
+        foreach ($saleDataJson as $sale){
+            $decodeSale = json_decode($sale['css_sale_data']);
+            foreach ($decodeSale->passengers as $passenger){
+                if ($passenger->last_name == strtoupper($lastName)){
                     return $decodeSale->saleId;
                 }
             }
