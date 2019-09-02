@@ -138,7 +138,7 @@ class TwilioController extends ApiBaseNoAuthController
     public function actionRedirectCallUser()
     {
 
-        $this->checkPost();
+        //$this->checkPost();
         $apiLog = $this->startApiLog($this->action->uniqueId);
 
         $out = [
@@ -231,7 +231,7 @@ class TwilioController extends ApiBaseNoAuthController
             ]);
         }
         $responseData['request'] = $out;
-        $responseData['responseTwml'] = $responseTwml;
+        $responseData['responseTwml'] = (string) $responseTwml;
 
         $apiLog->endApiLog($responseData);
 

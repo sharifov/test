@@ -923,14 +923,22 @@ $js = <<<JS
             $("#redirect-agent-table").hide();
             $("#redirect-agent-info").html('<h3>Redirecting to: ' + data_agent_to_redirect.data('agent') + '</h3>').show();
             
+            
+            console.log('Click redirect-agent-data2');
+            
             if(connection) {
                 updateAgentStatus(connection, false, 1);
+                
+                console.log('connection redirect-agent-data2');
                     
                 if(r && r.is_ready) {
                 
                     if(connection.status() !== 'open') {
                         connection.accept();
                     }
+                    
+                    console.log('ajax redirect-agent-data2');
+                    
                     $.ajax({
                         type: 'post',
                         data: {
