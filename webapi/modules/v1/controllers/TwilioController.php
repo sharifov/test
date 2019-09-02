@@ -211,7 +211,7 @@ class TwilioController extends ApiBaseNoAuthController
                         $call->c_api_version = $post['ApiVersion'];
                     }
 
-                    if (isset($post['ApiVersion']) && !$call->c_forwarded_from) {
+                    if (isset($post['ForwardedFrom']) && !$call->c_forwarded_from) {
                         $call->c_forwarded_from = $post['ForwardedFrom'];
                     }
 
