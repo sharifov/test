@@ -34,7 +34,6 @@ use yii\helpers\Html;
                 </tr>
             <?php endforeach;?>
             </table>
-        }
         <?php endif;?>
     <?php endif;?>
 </div>
