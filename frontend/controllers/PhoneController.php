@@ -391,6 +391,12 @@ class PhoneController extends FController
                 throw new BadRequestHttpException('Not found User Id in request', 2);
             }
 
+            $originCall = Call::find()->where(['c_call_sid' => $sid])->one();
+
+            if (!$originCall) {
+                throw new BadRequestHttpException('Not found Call', 5);
+            }
+
             $user = Employee::findOne($userId);
 
             if (!$user) {
@@ -432,6 +438,7 @@ class PhoneController extends FController
             $call->c_project_id = $projectId;
             $call->c_timestamp = $timestamp;*/
 
+            $call = null;
 
             if(!isset($result['error'])) {
                 $result['error'] = false;
@@ -442,7 +449,7 @@ class PhoneController extends FController
 
 
                 //$call = Call::findOne(['c_id' => $sid]);
-                if ($result && isset($result['data'], $result['data']['result'], $result['data']['result']['sid'])) {
+                if ($result && isset($result['data'], $result['data']['call'], $result['data']['call']['sid'])) {
 
                     $dataCall = $result['data']['call'];
 
@@ -460,6 +467,10 @@ class PhoneController extends FController
                     // $call->c_direction = $dataCall['direction'] ?? null;
                     // $call->c_parent_call_sid = $result['data']['result']['sid']; // $call_parent->c_parent_call_sid;
                     // $call->c_project_id = $projectid;
+
+                    $call->c_project_id = $originCall->c_project_id;
+                    $call->c_dep_id = $originCall->c_dep_id;
+
                     $call->c_is_new = true;
                     $call->c_api_version = $dataCall['apiVersion'] ?? null;
                     $call->c_created_dt = date('Y-m-d H:i:s');
@@ -480,7 +491,7 @@ class PhoneController extends FController
                 }*/
 
 
-            \Yii::info(VarDumper::dumpAsString(['sid' => $sid, 'updateData' => $updateData, 'result' => $result, 'post' => \Yii::$app->request->post()]), 'info\PhoneController:actionAjaxCallRedirectToAgent');
+            \Yii::info(VarDumper::dumpAsString(['call' => $call ? $call->attributes  : null, 'sid' => $sid, 'updateData' => $updateData, 'result' => $result, 'post' => \Yii::$app->request->post()]), 'info\PhoneController:actionAjaxCallRedirectToAgent');
 
         } catch (\Throwable $e) {
             $result = [
