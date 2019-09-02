@@ -391,7 +391,14 @@ class PhoneController extends FController
                 throw new BadRequestHttpException('Not found User Id in request', 2);
             }
 
-            $originCall = Call::find()->where(['c_call_sid' => $sid])->one();
+
+            $originCall = Call::find()->where(['c_created_user_id' => Yii::$app->user->id, 'c_call_status' => [Call::CALL_STATUS_IN_PROGRESS]])->orderBy(['c_id' => SORT_DESC])->limit(1)->one();
+
+            /*$originCall = Call::find()->where(['c_call_sid' => $sid])->one();
+
+            if (!$originCall) {
+                $originCall = Call::find()->where(['c_call_sid' => $sid])->one();
+            }*/
 
             if (!$originCall) {
                 throw new BadRequestHttpException('Not found Call', 5);
@@ -416,6 +423,7 @@ class PhoneController extends FController
                 'url'       =>  Yii::$app->params['url_api_address'] . '/twilio/redirect-call-user?user_id='.$user->id
             ];
 
+            $sid = $originCall->c_call_sid;
             $result = $communication->updateCall($sid, $updateData);
 
 
@@ -472,7 +480,7 @@ class PhoneController extends FController
                     $call->c_dep_id = $originCall->c_dep_id;
 
                     $call->c_is_new = true;
-                    $call->c_api_version = $dataCall['apiVersion'] ?? null;
+                    //$call->c_api_version = $dataCall['apiVersion'] ?? null;
                     $call->c_created_dt = date('Y-m-d H:i:s');
                     $call->c_from = $dataCall['from']; //$from;
                     // $call->c_sip = null;
