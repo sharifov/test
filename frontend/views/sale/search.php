@@ -78,7 +78,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'label' => 'Airline Confirmation Number',
                 'value' => function ($model) {
-                    return $model['airlineConfirmationNumber'][array_key_first($model['airlineConfirmationNumber'])] ?: '---';
+                    return reset($model['airlineConfirmationNumber']) ?: '---';
                 },
             ],
 
