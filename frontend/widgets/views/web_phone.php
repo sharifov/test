@@ -108,9 +108,9 @@
                             </ul>
                         </div>
 
-<!--                        <div class="btn-group" id="btn-group-id-redirect" style="display: none;">-->
-                            <?//=\yii\helpers\Html::button('<i class="fa fa-forward"></i> To Agents ', ['class' => 'btn btn-sm btn-info button-redirect-to-agents'])?>
-<!--                        </div>-->
+                        <div class="btn-group" id="btn-group-id-redirect" style="display: none;">
+                            <?=\yii\helpers\Html::button('<i class="fa fa-forward"></i> To Agents ', ['class' => 'btn btn-sm btn-info button-redirect-to-agents'])?>
+                        </div>
 
 
                         <?/*=\yii\helpers\Html::button('<i class="fa fa-phone"></i> Call', ['class' => 'btn btn-xs btn-success', 'id' => 'button-call'])*/?>
@@ -129,9 +129,9 @@
                             <?/*<div class="btn-group">
                                 <button class="btn btn-xs btn-danger forward-event" data-type="hold" data-value="+15596489977"><i class="fa fa-pause"></i> Hold</button>
                             </div>*/?>
-                            <div class="btn-group" id="btn-group-id-redirect2">
-                                <?=\yii\helpers\Html::button('<i class="fa fa-forward"></i> To Agents ', ['class' => 'btn btn-sm btn-info button-redirect-to-agents'])?>
-                            </div>
+<!--                            <div class="btn-group" id="btn-group-id-redirect2">-->
+<!--                                --><?//=\yii\helpers\Html::button('<i class="fa fa-forward"></i> To Agents ', ['class' => 'btn btn-sm btn-info button-redirect-to-agents'])?>
+<!--                            </div>-->
                         </div>
                     </td>
                 </tr>
