@@ -931,7 +931,7 @@ $js = <<<JS
                 
                 console.log('connection redirect-agent-data2');
                     
-                if(r && r.is_ready) {
+                //if(r && r.is_ready) {
                 
                     if(connection.status() !== 'open') {
                         connection.accept();
@@ -976,11 +976,11 @@ $js = <<<JS
                             $("#redirect-agent-table").show();
                         }
                     });
-                } else {
+                /*} else {
                     $("#redirect-agent-info").html('<h3 class="danger">The user (' +  data_agent_to_redirect.data('agent') + ') is not available for the call</h3>').show();
                     $("#redirect-agent-table").show();
                     setTimeout('initRedirectToAgent();', 5000);
-                }
+                }*/
 
             } else {
                 alert('Error: not found Call connection!');
