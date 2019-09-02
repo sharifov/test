@@ -412,6 +412,27 @@ class PhoneController extends FController
 
             $result = $communication->updateCall($sid, $updateData);
 
+
+            /*if ($result['result'][])
+            $call->c_call_sid = $callSid;
+            $call->c_account_sid = $accountSid;
+            $call->c_call_type_id = $callTypeId;
+            $call->c_uri = $uri;
+            $call->c_from = $from;
+            $call->c_to = $to;
+            $call->c_created_dt = $createdDt;
+            $call->c_updated_dt = date('Y-m-d H:i:s');
+            $call->c_recording_url = $recordingUrl;
+            $call->c_recording_sid = $recordingSid;
+            $call->c_recording_duration = $recordingDuration;
+            $call->c_caller_name = $callerName;
+            $call->c_direction = $direction;
+            $call->c_api_version = $apiVersion;
+            $call->c_sip = $sip;
+            $call->c_project_id = $projectId;
+            $call->c_timestamp = $timestamp;*/
+
+
             if(!isset($result['error'])) {
                 $result['error'] = false;
             }
@@ -420,36 +441,39 @@ class PhoneController extends FController
 
 
 
-                /*$call = Call::findOne(['c_id' => $sid]);
-                if (!$call && $result && isset($result['data'], $result['data']['result'], $result['data']['result']['sid'])) {
+                //$call = Call::findOne(['c_id' => $sid]);
+                if ($result && isset($result['data'], $result['data']['result'], $result['data']['result']['sid'])) {
 
+                    $dataCall = $result['data']['call'];
 
-                    $dataCall = $result['data']['result'];
+                    $call = Call::findOne(['c_call_sid' => $dataCall['sid']/*, 'c_created_user_id' => $userId*/]);
 
-                    $call = Call::findOne(['c_call_sid' => $result['data']['result']['sid'], 'c_created_user_id' => $to_id]);
                     if (!$call) {
                         $call = new Call();
                     }
-                    $call->c_call_sid = $result['data']['result']['sid'];
-                    $call->c_account_sid = $dataCall['accountSid'] ?? null;
+
+                    $call->c_call_sid = $dataCall['sid'];
+                    //$call->c_account_sid = $dataCall['accountSid'] ?? null;
                     $call->c_call_type_id = Call::CALL_TYPE_IN;
-                    $call->c_call_status = Call::CALL_STATUS_RINGING;
-                    $call->c_com_call_id = null;
-                    $call->c_direction = $dataCall['direction'] ?? null;
-                    $call->c_parent_call_sid = $result['data']['result']['sid']; // $call_parent->c_parent_call_sid;
-                    $call->c_project_id = $projectid;
+                    $call->c_call_status = Call::CALL_STATUS_IVR;
+                    // $call->c_com_call_id = null;
+                    // $call->c_direction = $dataCall['direction'] ?? null;
+                    // $call->c_parent_call_sid = $result['data']['result']['sid']; // $call_parent->c_parent_call_sid;
+                    // $call->c_project_id = $projectid;
                     $call->c_is_new = true;
                     $call->c_api_version = $dataCall['apiVersion'] ?? null;
                     $call->c_created_dt = date('Y-m-d H:i:s');
-                    $call->c_from = $from;
-                    $call->c_sip = null;
-                    $call->c_to = $result['data']['result']['forwardedFrom'] ?? null;
-                    $call->c_created_user_id = $to_id;
-                    $call->c_lead_id = ($lead_id > 0) ? $lead_id : null;
-                    $call->c_case_id = ($case_id > 0) ? $case_id : null;
-                    $call->save();
+                    $call->c_from = $dataCall['from']; //$from;
+                    // $call->c_sip = null;
+                    $call->c_to = 'client:seller' . $userId;//$result['data']['result']['forwardedFrom'] ?? null;
+                    $call->c_created_user_id = $userId;
+                    // $call->c_lead_id = ($lead_id > 0) ? $lead_id : null;
+                    // $call->c_case_id = ($case_id > 0) ? $case_id : null;
+                    if (!$call->save()) {
+                        Yii::error(VarDumper::dumpAsString($call->errors), 'PhoneController:actionAjaxCallRedirectToAgent');
+                    }
 
-                }*/
+                }
 
                 /*if($call) {
                     Notifications::socket(null, $call->c_lead_id, 'incomingCall', ['status' => $call->c_call_status, 'duration' => $call->c_call_duration, 'snr' => $call->c_sequence_number], true);
