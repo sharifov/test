@@ -79,7 +79,7 @@ use yii\widgets\Pjax;
                         <?php if($call->cDep):?> <span class="badge badge-info"><?=\yii\helpers\Html::encode($call->cDep->dep_name)?></span> <?php endif; ?>
                         <?php if($call->c_source_type_id):?> <span class="label label-warning"><?=\yii\helpers\Html::encode($call->getSourceName())?></span> <?php endif; ?>
                     </div>
-                    <div class="col-md-4 text-right" style="padding-top: 3px; padding-bottom: 4px; ">
+                    <div class="col-md-5 text-right" style="padding-top: 3px; padding-bottom: 4px; ">
 
                         <?php
                             if($call->c_lead_id && $call->cLead2 && $call->cLead2->employee_id === $userModel->id) {
@@ -106,9 +106,9 @@ use yii\widgets\Pjax;
                         <span class="badge badge-warning"><i class="fa fa-clock-o"></i> <span class="timer" data-sec="<?=$durationSec?>" data-control="start" data-format="%M:%S" title="<?=Yii::$app->formatter->asDuration($durationSec)?>"> 00:00 </span></span>
 
                     </div>
-                    <div class="col-md-4 text-right">
+                    <div class="col-md-3 text-right">
 
-                        <?=\yii\helpers\Html::a('<i class="fa fa-check"></i> Accept', ['call/incoming-call-widget', 'act' => 'accept', 'call_id' => $call->c_id], ['class' => 'btn btn-sm btn-success btn-incoming-call-access'])?>
+                        <?=\yii\helpers\Html::a('<i class="fa fa-check"></i> Accept', ['call/incoming-call-widget', 'act' => 'accept', 'call_id' => $call->c_id], ['class' => 'btn btn-sm btn-success btn-incoming-call-accept'])?>
                         <?//=\yii\helpers\Html::a('<i class="fa fa-angle-double-right"></i> Skip', ['call/incoming-call-widget', 'act' => 'skip', 'call_id' => $call->c_id], ['class' => 'btn btn-sm btn-info', 'id' => 'btn-incoming-call-skip'])?>
                         <?//=\yii\helpers\Html::a('<i class="fa fa-close"></i> Busy', ['call/incoming-call-widget', 'act' => 'busy', 'call_id' => $call->c_id], ['class' => 'btn btn-sm btn-danger', 'id' => 'btn-incoming-call-busy'])?>
                     </div>
@@ -288,7 +288,7 @@ $js = <<<JS
         initIncomingCallWidget();
     });
     
-    $(document).on('click', '.btn-incoming-call-access', function() {
+    $(document).on('click', '.btn-incoming-call-accept', function() {
         var btn = $(this);
         btn.addClass('disabled');
         btn.find('i').removeClass('fa-check').addClass('fa-spinner fa-spin');

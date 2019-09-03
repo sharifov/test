@@ -884,6 +884,7 @@ class CommunicationController extends ApiBaseController
             }
 
             $callData = $post['call'];
+            $callOriginalData = $post['callData'] ?? [];
 
             if(!$call) {
                 $call = new Call();
@@ -925,10 +926,9 @@ class CommunicationController extends ApiBaseController
                         }
                     }
 
-                    if (!$call->c_dep_id && $call->c_project_id && isset($callData['FromAgentPhone']) && $callData['FromAgentPhone']) {
-                        $upp = UserProjectParams::find()->where(['upp_tw_phone_number' => $callData['FromAgentPhone'], 'upp_project_id' => $call->c_project_id])->limit(1)->one();
+                    if (!$call->c_dep_id && $call->c_project_id && isset($callOriginalData['FromAgentPhone']) && $callOriginalData['FromAgentPhone']) {
+                        $upp = UserProjectParams::find()->where(['upp_tw_phone_number' => $callOriginalData['FromAgentPhone'], 'upp_project_id' => $call->c_project_id])->limit(1)->one();
                         if ($upp && $upp->upp_dep_id) {
-                            // $depId = $upp->upp_dep_id;
                             $call->c_dep_id = $upp->upp_dep_id;
                         }
                     }
