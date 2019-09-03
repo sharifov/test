@@ -917,28 +917,22 @@ class CommunicationController extends ApiBaseController
                     $call->c_project_id = $callData['c_project_id'];
                 }
 
-                if (!$call->c_client_id) {
-                    $clientPhone = null;
-                    if (isset($callData['From']) && $callData['From']) {
-                        $clientPhoneNumber = $callData['From'];
-                        if ($clientPhoneNumber) {
-                            $clientPhone = ClientPhone::find()->where(['phone' => $clientPhoneNumber])->orderBy(['id' => SORT_DESC])->limit(1)->one();
-                            if ($clientPhone && $clientPhone->client_id) {
-                                $call->c_client_id = $clientPhone->client_id;
-                            }
+                if ((int) $call->c_call_type_id === Call::CALL_TYPE_OUT) {
+                    if (!$call->c_client_id && $call->c_to) {
+                        $clientPhone = ClientPhone::find()->where(['phone' => $call->c_to])->orderBy(['id' => SORT_DESC])->limit(1)->one();
+                        if ($clientPhone && $clientPhone->client_id) {
+                            $call->c_client_id = $clientPhone->client_id;
+                        }
+                    }
+
+                    if (!$call->c_dep_id && $call->c_project_id && isset($callData['FromAgentPhone']) && $callData['FromAgentPhone']) {
+                        $upp = UserProjectParams::find()->where(['upp_tw_phone_number' => $callData['FromAgentPhone'], 'upp_project_id' => $call->c_project_id])->limit(1)->one();
+                        if ($upp && $upp->upp_dep_id) {
+                            // $depId = $upp->upp_dep_id;
+                            $call->c_dep_id = $upp->upp_dep_id;
                         }
                     }
                 }
-
-//                if (!$call->c_dep_id) {
-//                    if ($call->c_from && $call->c_project_id) {
-//                        $upp = UserProjectParams::find()->where(['upp_tw_phone_number' => $call->c_from, 'upp_project_id' => $call->c_project_id])->limit(1)->one();
-//                        if ($upp && $upp->upp_dep_id) {
-//                            // $depId = $upp->upp_dep_id;
-//                            $call->c_dep_id = $upp->upp_dep_id;
-//                        }
-//                    }
-//                }
 
                 $upp = null;
 
@@ -1231,14 +1225,14 @@ class CommunicationController extends ApiBaseController
 
                     $call->c_updated_dt = date('Y-m-d H:i:s');
 
-                    if (!$call->c_dep_id && (int) $post['call']['c_call_type_id'] === Call::CALL_TYPE_OUT) {
+                    /*if (!$call->c_dep_id && (int) $post['call']['c_call_type_id'] === Call::CALL_TYPE_OUT) {
                         if ($call->c_from && $call->c_project_id) {
                             $upp = UserProjectParams::find()->where(['upp_tw_phone_number' => $call->c_from, 'upp_project_id' => $call->c_project_id])->limit(1)->one();
                             if ($upp && $upp->upp_dep_id) {
                                 $call->c_dep_id = $upp->upp_dep_id;
                             }
                         }
-                    }
+                    }*/
 
                     if(!$call->save()) {
                         Yii::error(VarDumper::dumpAsString($call->errors), 'API:Communication:voiceDefault:Call2:save');
