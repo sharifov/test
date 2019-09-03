@@ -53,9 +53,11 @@ use yii\helpers\VarDumper;
  * @property int $c_source_type_id
  * @property int $c_dep_id
  * @property int $c_case_id
+ * @property int $c_client_id
  *
  * @property Employee $cCreatedUser
  * @property Cases $cCase
+ * @property Client $cClient
  * @property Department $cDep
  * @property Lead $cLead
  * @property Lead2 $cLead2
@@ -271,7 +273,7 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
     {
         return [
             [['c_call_sid'], 'required'],
-            [['c_call_type_id', 'c_lead_id', 'c_created_user_id', 'c_com_call_id', 'c_project_id', 'c_call_duration', 'c_recording_duration', 'c_dep_id', 'c_case_id'], 'integer'],
+            [['c_call_type_id', 'c_lead_id', 'c_created_user_id', 'c_com_call_id', 'c_project_id', 'c_call_duration', 'c_recording_duration', 'c_dep_id', 'c_case_id', 'c_client_id'], 'integer'],
             [['c_price'], 'number'],
             [['c_is_new'], 'default', 'value' => true],
             [['c_is_new', 'c_is_deleted'], 'boolean'],
@@ -285,6 +287,7 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
             [['c_timestamp', 'c_sequence_number'], 'string', 'max' => 40],
             [['c_error_message'], 'string', 'max' => 500],
             [['c_case_id'], 'exist', 'skipOnError' => true, 'targetClass' => Cases::class, 'targetAttribute' => ['c_case_id' => 'cs_id']],
+            [['c_client_id'], 'exist', 'skipOnError' => true, 'targetClass' => Client::class, 'targetAttribute' => ['c_client_id' => 'id']],
             [['c_created_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['c_created_user_id' => 'id']],
             [['c_dep_id'], 'exist', 'skipOnError' => true, 'targetClass' => Department::class, 'targetAttribute' => ['c_dep_id' => 'dep_id']],
             [['c_lead_id'], 'exist', 'skipOnError' => true, 'targetClass' => Lead::class, 'targetAttribute' => ['c_lead_id' => 'id']],
@@ -332,6 +335,7 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
             'c_source_type_id' => 'Source Type',
             'c_dep_id' => 'Department ID',
             'c_case_id' => 'Case ID',
+            'c_client_id' => 'Client',
         ];
     }
 
@@ -378,6 +382,14 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
     public function getCCase()
     {
         return $this->hasOne(Cases::class, ['cs_id' => 'c_case_id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getCClient()
+    {
+        return $this->hasOne(Client::class, ['id' => 'c_client_id']);
     }
 
     /**
