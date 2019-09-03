@@ -177,6 +177,16 @@ class PhoneController extends FController
         $case_id = Yii::$app->request->post('case_id');
         $project_id = Yii::$app->request->post('project_id');
 
+        $depId = null;
+
+        if ($call_from && $project_id) {
+            $upp = UserProjectParams::find()->where(['upp_tw_phone_number' => $call_from, 'upp_project_id' => $project_id])->limit(1)->one();
+            if ($upp && $upp->upp_dep_id) {
+                $depId = $upp->upp_dep_id;
+            }
+        }
+
+
         if($call_sid && $call_from && $call_to) {
             $call = Call::find()->where(['c_call_sid' => $call_sid])->limit(1)->one();
             if(!$call) {
@@ -187,7 +197,12 @@ class PhoneController extends FController
                 $call->c_created_dt = date('Y-m-d H:i:s');
                 $call->c_created_user_id = Yii::$app->user->id;
                 $call->c_call_type_id = Call::CALL_TYPE_OUT;
-                $call->c_call_status = Call::CALL_STATUS_RINGING;
+
+                // $call->c_call_status = Call::CALL_STATUS_RINGING;
+
+                if ($depId) {
+                    $call->c_dep_id = $depId;
+                }
 
                 if($call_acc_sid) {
                     $call->c_account_sid = $call_acc_sid;
