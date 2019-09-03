@@ -49,6 +49,14 @@ $this->params['breadcrumbs'][] = $this->title;
                 'c_to',
                 'c_sip',
                 'c_call_status',
+                [
+                    'attribute' => 'c_client_id',
+                    'value' => function (\common\models\Call $model) {
+                        return  $model->c_client_id ?: '-';
+                    },
+                ],
+
+                //'format' => 'raw'
                 //'c_api_version',
                 //'c_direction',
                 //'c_forwarded_from',

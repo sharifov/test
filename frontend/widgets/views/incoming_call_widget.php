@@ -157,17 +157,24 @@ use yii\widgets\Pjax;
 
                         <?php
                         if($call->c_lead_id && $call->cLead2 && $call->cLead2->employee_id === $userModel->id) {
-                            echo '<span class="label label-info">You Lead</span>';
+                            echo '<span class="label label-info">Your Lead</span>';
                         }
                         ?>
 
                         <?php
                         if($call->c_case_id && $call->cCase && $call->cCase->cs_user_id === $userModel->id) {
-                            echo '<span class="label label-info">You Case</span>';
+                            echo '<span class="label label-info">Your Case</span>';
                         }
                         ?>
 
-                        <span class="badge badge-awake" style="font-size: 14px"><span class="fa fa-phone fa-spin"></span> <?=\yii\helpers\Html::encode($call->c_from)?></span>
+                        <span class="badge badge-awake" style="font-size: 14px"><span class="fa fa-phone fa-spin"></span>
+                            <?php if ($call->c_client_id && $call->cClient && $call->cClient->first_name !== 'ClientName'): ?>
+                                <i title="phone: <?=\yii\helpers\Html::encode($call->c_from)?>"><?=\yii\helpers\Html::encode($call->cClient->full_name)?></i>
+                            <?php else: ?>
+                                <?=\yii\helpers\Html::encode($call->c_from)?>
+                            <?php endif;?>
+                        </span>
+
                         <?php
                         $durationSec =  $generalCallUserAccess->cua_created_dt ? (time() - strtotime($generalCallUserAccess->cua_created_dt)) : 0;
                         ?>

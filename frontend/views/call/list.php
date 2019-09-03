@@ -216,6 +216,15 @@ $this->params['breadcrumbs'][] = $this->title;
                 },
                 'format' => 'raw'
             ],
+
+            /*[
+                'attribute' => 'c_client_id',
+                'value' => function (\common\models\Call $model) {
+                    return  $model->c_client_id ?: '-';
+                },
+                //'format' => 'raw'
+            ],*/
+
             //'c_api_version',
             //'c_direction',
             //'c_forwarded_from',
