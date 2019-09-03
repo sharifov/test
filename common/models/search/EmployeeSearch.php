@@ -111,9 +111,6 @@ class EmployeeSearch extends Employee
             $query->andWhere(['IN', 'employees.id', $subQuery]);
         }
 
-
-
-
         if ($this->user_params_project_id > 0) {
             $subQuery = UserProjectParams::find()->select(['DISTINCT(upp_user_id)'])->where(['=', 'upp_project_id', $this->user_params_project_id]);
             $query->andWhere(['IN', 'employees.id', $subQuery]);

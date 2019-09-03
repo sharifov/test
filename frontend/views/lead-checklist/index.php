@@ -14,7 +14,6 @@ $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="lead-checklist-index">
     <h1><?= Html::encode($this->title) ?></h1>
-
     <p>
         <?= Html::a('<i class="fa fa-plus"></i> Create Lead Checklist', ['create'], ['class' => 'btn btn-success']) ?>
         <?php if(Yii::$app->user->can('/lead-checklist-type/index') || Yii::$app->user->can('/lead-checklist-type/*') || Yii::$app->user->can('/*')):?>
@@ -45,10 +44,11 @@ $this->params['breadcrumbs'][] = $this->title;
                 'startAttribute' => 'datetime_start',
                 'endAttribute' => 'datetime_end',
                 'pluginOptions'=>[
-                    'timePicker'=> false,
-                    'timePickerIncrement'=>15,
+                    'timePicker'=> true,
+                    'timePickerIncrement'=>1,
+                    'timePicker24Hour' => true,
                     'locale'=>[
-                        'format'=>'Y-m-d',
+                        'format'=>'Y-m-d H:i',
                         'separator' => ' - '
                     ]
                 ]

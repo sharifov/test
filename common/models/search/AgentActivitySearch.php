@@ -99,8 +99,8 @@ class AgentActivitySearch extends Call
         $this->load($params);
 
         if (!$this->validate()) {
-            $this->date_from = date('Y-m-d 00:00');
-            $this->date_to = date('Y-m-d 23:59');
+            $this->date_from = date('Y-m-d H:i');
+            $this->date_to = date('Y-m-d H:i');
         }
 
         $query = new Query();

@@ -21,7 +21,7 @@ class AgentReportController extends FController
 
     public function validateDateParams($params)
     {
-        if(!isset($params['AgentActivitySearch']['date_from'])){
+       /* if(!isset($params['AgentActivitySearch']['date_from'])){
             $params['AgentActivitySearch']['date_from'] = date('Y-m-d 00:00');
         }else{
             $params['AgentActivitySearch']['date_from'] = date('Y-m-d 00:00:00', strtotime($params['AgentActivitySearch']['date_from']));
@@ -30,7 +30,7 @@ class AgentReportController extends FController
             $params['AgentActivitySearch']['date_to'] = date('Y-m-d 23:59');
         }else{
             $params['AgentActivitySearch']['date_to'] = date('Y-m-d 23:59', strtotime($params['AgentActivitySearch']['date_to']));
-        }
+        }*/
 
         return $params;
     }

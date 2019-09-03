@@ -32,9 +32,12 @@ use yii\widgets\ActiveForm;
                     'startAttribute' => 'date_from',
                     'endAttribute' => 'date_to',
                     'pluginOptions'=>[
-                        'timePicker'=> false,
-                        'timePickerIncrement'=>15,
-                        'locale'=>['format'=>'Y-m-d']
+                        'timePicker'=> true,
+                        'timePickerIncrement'=>1,
+                        'timePicker24Hour'=> true,
+                        'locale'=>[
+                                'format'=>'Y-m-d H:i'
+                        ]
                     ]
                 ]);
                 ?>

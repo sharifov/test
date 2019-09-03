@@ -47,8 +47,8 @@ class StatsController extends FController
 
         $dataProvider = $searchModel->searchByUserGroups($params);
 
-        $searchModel->datetime_start = date('Y-m-d', strtotime('-0 day'));
-        $searchModel->datetime_end = date('Y-m-d');
+        $searchModel->timeStart = date('Y-m-d', strtotime('-0 day'));
+        $searchModel->timeEnd = date('Y-m-d');
 
         //$searchModel->date_range = $searchModel->datetime_start.' - '. $searchModel->datetime_end;
 
@@ -87,18 +87,6 @@ class StatsController extends FController
         $searchModel->datetime_start = date('Y-m-d', strtotime('-0 day'));
         $searchModel->datetime_end = date('Y-m-d');*/
 
-
-
-        //$datetime_start = date('Y-m-d', strtotime('-0 day'));
-        //$datetime_end = date('Y-m-d');
-
-
-        //$datetime_start = Yii::$app->request->get('datetime_start', date('Y-m-d', strtotime('-0 day')));
-        //$datetime_end = Yii::$app->request->get('datetime_end', date('Y-m-d'));
-
-
-
-        //$searchModel->date_range = $searchModel->datetime_start.' - '. $searchModel->datetime_end;
 
         $params = Yii::$app->request->queryParams;
 

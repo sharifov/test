@@ -69,8 +69,8 @@ class NotificationsSearch extends Notifications
         }
 
         if(empty($this->n_created_dt) && isset($params['NotificationsSearch']['date_range'])){
-            $query->andFilterWhere(['>=', 'DATE(n_created_dt)', $this->datetime_start])
-                ->andFilterWhere(['<=', 'DATE(n_created_dt)', $this->datetime_end]);
+            $query->andFilterWhere(['>=', 'n_created_dt', $this->datetime_start])
+                ->andFilterWhere(['<=', 'n_created_dt', $this->datetime_end]);
         }
 
         if (isset($params['NotificationsSearch']['n_created_dt'])) {
