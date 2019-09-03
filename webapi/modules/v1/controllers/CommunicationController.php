@@ -830,18 +830,6 @@ class CommunicationController extends ApiBaseController
                     Notifications::socket($call->c_created_user_id, $call->c_lead_id, 'webCallUpdate', ['status' => $call->c_call_status, 'duration' => $call->c_call_duration, 'debug' => 'TYPE_VOIP_FINISH'], true);
                 }
 
-                /*if($post['callData']['RecordingUrl']) {
-                    $call->c_recording_url = $post['callData']['RecordingUrl'];
-                    $call->c_recording_duration = $post['callData']['RecordingDuration'];
-                    $call->c_recording_sid = $post['callData']['RecordingSid'];
-                    $call->c_updated_dt = date('Y-m-d H:i:s');
-
-
-                    if(!$call->save()) {
-                        Yii::error(VarDumper::dumpAsString($call->errors), 'API:CommunicationController:actionVoice:TYPE_VOIP_FINISH:Call:save');
-                    }
-
-                }*/
             } else {
                 Yii::error('Communication Request: Not found Call SID: ' . $post['callData']['sid'], 'API:Communication:voiceFinish:Call:find');
             }
@@ -1025,23 +1013,6 @@ class CommunicationController extends ApiBaseController
                     Yii::error(VarDumper::dumpAsString($call->errors), 'API:Communication:voiceClient:Call:save');
                 }
 
-
-//                if($call->c_created_user_id || $call->c_lead_id) {
-//                    Notifications::socket($call->c_created_user_id, $call->c_lead_id, 'webCallUpdate', ['status' => $call->c_call_status, 'duration' => $call->c_call_duration, 'debug' => 'TYPE_VOIP_FINISH'], true);
-//                }
-
-                /*if($post['callData']['RecordingUrl']) {
-                    $call->c_recording_url = $post['callData']['RecordingUrl'];
-                    $call->c_recording_duration = $post['callData']['RecordingDuration'];
-                    $call->c_recording_sid = $post['callData']['RecordingSid'];
-                    $call->c_updated_dt = date('Y-m-d H:i:s');
-
-
-                    if(!$call->save()) {
-                        Yii::error(VarDumper::dumpAsString($call->errors), 'API:CommunicationController:actionVoice:TYPE_VOIP_FINISH:Call:save');
-                    }
-
-                }*/
             } else {
                 Yii::error('Communication Request: Not found Call SID: ' . $callSid, 'API:Communication:voiceClient:Call:find');
             }
@@ -1058,7 +1029,6 @@ class CommunicationController extends ApiBaseController
      */
     private function voiceDefault(): array
     {
-
 
         $response = ['trace' => ''];
         $trace = [];
@@ -1101,11 +1071,9 @@ class CommunicationController extends ApiBaseController
 
             if($agentId) {
                 $call = Call::find()->where(['c_call_sid' => $post['callData']['CallSid']])->andWhere(['c_created_user_id' => $agentId])->limit(1)->one();
-                //$trace[] = 'call 1812' .  ($call && $call->c_id) ? $call->c_id : 0;
             } else {
                 if(isset($post['call'], $post['call']['c_call_type_id']) && $post['call']['c_call_type_id'] && (int) $post['call']['c_call_type_id'] === Call::CALL_TYPE_OUT) {
                     $call = Call::find()->where(['c_call_sid' => $post['callData']['CallSid']])->limit(1)->one();
-                    //$trace[] = 'call 1818' .  ($call && $call->c_id) ? $call->c_id : 0;
                 }
             }
 

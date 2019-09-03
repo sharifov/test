@@ -505,6 +505,47 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
                         }
                     }
                 }
+
+
+
+                if ($this->isCompleted() || $this->isCanceled() || $this->isNoAnswer() || $this->isBusy()) {
+
+                    $callAcceptExist = CallUserAccess::find()->where(['cua_status_id' => CallUserAccess::STATUS_TYPE_ACCEPT, 'cua_call_id' => $this->c_id])->exists();
+                    if (!$callAcceptExist) {
+                        if ($this->c_created_user_id) {
+                            Notifications::create(
+                                $this->c_created_user_id,
+                                'Missing Call (' . $this->getSourceName() . ')',
+                                'Missing Call (' . $this->getSourceName() . ')  from ' . $this->c_from . ' to ' . $this->c_to,
+                                Notifications::TYPE_WARNING,
+                                true);
+
+                            Notifications::socket($this->c_created_user_id, null, 'getNewNotification', [], true);
+                        }
+
+                        if ($this->c_lead_id && $this->cLead2 && $this->cLead2->employee_id) {
+                            Notifications::create(
+                                $this->cLead2->employee_id,
+                                'Missing Call (' . $this->getSourceName() . ')',
+                                'Missing Call (' . $this->getSourceName() . ')  from ' . $this->c_from . ' to ' . $this->c_to . ' <br>Lead ID: ' . $this->c_lead_id,
+                                Notifications::TYPE_WARNING,
+                                true);
+                            Notifications::socket($this->cLead2->employee_id, null, 'getNewNotification', [], true);
+                        }
+
+                        if ($this->c_case_id && $this->cCase && $this->cCase->cs_user_id) {
+                            Notifications::create(
+                                $this->cCase->cs_user_id,
+                                'Missing Call (' . $this->getSourceName() . ')',
+                                'Missing Call (' . $this->getSourceName() . ') from ' . $this->c_from . ' to ' . $this->c_to . ' <br>Case ID: ' . $this->c_case_id,
+                                Notifications::TYPE_WARNING,
+                                true);
+                            Notifications::socket($this->cCase->cs_user_id, null, 'getNewNotification', [], true);
+                        }
+
+
+                    }
+                }
             }
 
 
@@ -525,17 +566,17 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
 
             if(isset($changedAttributes['c_call_status']) && $this->c_call_type_id == self::CALL_TYPE_IN && $this->c_lead_id && in_array($this->c_call_status, [self::CALL_STATUS_NO_ANSWER, self::CALL_STATUS_COMPLETED])) { //self::CALL_STATUS_BUSY,
 
-                if($this->c_call_status == self::CALL_STATUS_NO_ANSWER) {
-                    if ($this->c_created_user_id) {
-                        Notifications::create(
-                            $this->c_created_user_id,
-                            'Missing Call (' . $this->getSourceName() . ')',
-                            'Missing Call (' . $this->getSourceName() . ')  from ' . $this->c_from . ' to ' . $this->c_to . ' <br>Lead ID: ' . $this->c_lead_id,
-                            Notifications::TYPE_WARNING,
-                            true);
-                        Notifications::socket($this->c_created_user_id, null, 'getNewNotification', [], true);
-                    }
-                }
+//                if($this->c_call_status == self::CALL_STATUS_NO_ANSWER) {
+//                    if ($this->c_created_user_id) {
+//                        Notifications::create(
+//                            $this->c_created_user_id,
+//                            'Missing Call (' . $this->getSourceName() . ')',
+//                            'Missing Call (' . $this->getSourceName() . ')  from ' . $this->c_from . ' to ' . $this->c_to . ' <br>Lead ID: ' . $this->c_lead_id,
+//                            Notifications::TYPE_WARNING,
+//                            true);
+//                        Notifications::socket($this->c_created_user_id, null, 'getNewNotification', [], true);
+//                    }
+//                }
 
                 if(in_array($this->c_call_status, [self::CALL_STATUS_NO_ANSWER, self::CALL_STATUS_COMPLETED]) && $lead = $this->cLead2) {
                     if($lead->l_call_status_id == Lead::CALL_STATUS_QUEUE) {
@@ -1010,4 +1051,77 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
         }
         return $callStats;
     }
+
+    /**
+     * @return bool
+     */
+    public function isRinging(): bool
+    {
+        return $this->c_call_status === self::CALL_STATUS_RINGING;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isInProgress(): bool
+    {
+        return $this->c_call_status === self::CALL_STATUS_IN_PROGRESS;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isIvr(): bool
+    {
+        return $this->c_call_status === self::CALL_STATUS_IVR;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isQueue(): bool
+    {
+        return $this->c_call_status === self::CALL_STATUS_QUEUE;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isBusy(): bool
+    {
+        return $this->c_call_status === self::CALL_STATUS_BUSY;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isCanceled(): bool
+    {
+        return $this->c_call_status === self::CALL_STATUS_CANCELED;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isCompleted(): bool
+    {
+        return $this->c_call_status === self::CALL_STATUS_COMPLETED;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isNoAnswer(): bool
+    {
+        return $this->c_call_status === self::CALL_STATUS_NO_ANSWER;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isFailed(): bool
+    {
+        return $this->c_call_status === self::CALL_STATUS_FAILED;
+    }
+
 }
