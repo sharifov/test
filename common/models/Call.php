@@ -13,6 +13,7 @@ use DateTime;
 use common\components\ChartTools;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
+use yii\helpers\Html;
 use yii\helpers\VarDumper;
 
 
@@ -506,8 +507,6 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
                     }
                 }
 
-
-
                 if ($this->isCompleted() || $this->isCanceled() || $this->isNoAnswer() || $this->isBusy()) {
 
                     $callAcceptExist = CallUserAccess::find()->where(['cua_status_id' => CallUserAccess::STATUS_TYPE_ACCEPT, 'cua_call_id' => $this->c_id])->exists();
@@ -515,8 +514,8 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
                         if ($this->c_created_user_id) {
                             Notifications::create(
                                 $this->c_created_user_id,
-                                'Missing Call (' . $this->getSourceName() . ')',
-                                'Missing Call (' . $this->getSourceName() . ')  from ' . $this->c_from . ' to ' . $this->c_to,
+                                'Missed Call (' . $this->getSourceName() . ')',
+                                'Missed Call (' . $this->getSourceName() . ')  from ' . $this->c_from . ' to ' . $this->c_to,
                                 Notifications::TYPE_WARNING,
                                 true);
 
@@ -526,8 +525,8 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
                         if ($this->c_lead_id && $this->cLead2 && $this->cLead2->employee_id) {
                             Notifications::create(
                                 $this->cLead2->employee_id,
-                                'Missing Call (' . $this->getSourceName() . ')',
-                                'Missing Call (' . $this->getSourceName() . ')  from ' . $this->c_from . ' to ' . $this->c_to . ' <br>Lead ID: ' . $this->c_lead_id,
+                                'Missed Call (' . $this->getSourceName() . ')',
+                                'Missed Call (' . $this->getSourceName() . ')  from ' . $this->c_from . ' to ' . $this->c_to . ' <br>Lead ID: ' . $this->c_lead_id,
                                 Notifications::TYPE_WARNING,
                                 true);
                             Notifications::socket($this->cLead2->employee_id, null, 'getNewNotification', [], true);
@@ -536,8 +535,8 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
                         if ($this->c_case_id && $this->cCase && $this->cCase->cs_user_id) {
                             Notifications::create(
                                 $this->cCase->cs_user_id,
-                                'Missing Call (' . $this->getSourceName() . ')',
-                                'Missing Call (' . $this->getSourceName() . ') from ' . $this->c_from . ' to ' . $this->c_to . ' <br>Case ID: ' . $this->c_case_id,
+                                'Missed Call (' . $this->getSourceName() . ')',
+                                'Missed Call (' . $this->getSourceName() . ') from ' . $this->c_from . ' to ' . $this->c_to . ' <br>Case ID: ' . $this->c_case_id,
                                 Notifications::TYPE_WARNING,
                                 true);
                             Notifications::socket($this->cCase->cs_user_id, null, 'getNewNotification', [], true);
@@ -570,8 +569,8 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
 //                    if ($this->c_created_user_id) {
 //                        Notifications::create(
 //                            $this->c_created_user_id,
-//                            'Missing Call (' . $this->getSourceName() . ')',
-//                            'Missing Call (' . $this->getSourceName() . ')  from ' . $this->c_from . ' to ' . $this->c_to . ' <br>Lead ID: ' . $this->c_lead_id,
+//                            'Missed Call (' . $this->getSourceName() . ')',
+//                            'Missed Call (' . $this->getSourceName() . ')  from ' . $this->c_from . ' to ' . $this->c_to . ' <br>Lead ID: ' . $this->c_lead_id,
 //                            Notifications::TYPE_WARNING,
 //                            true);
 //                        Notifications::socket($this->c_created_user_id, null, 'getNewNotification', [], true);
@@ -588,7 +587,7 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
                 }
 
                 /*if($this->cLead && $this->cLead->employee_id && $this->c_created_user_id !== $this->cLead->employee_id) {
-                    Notifications::create($this->c_created_user_id, 'On your Lead Missing Call ('.$this->getSourceName().')  from ' . $this->c_from . ' to ' . $this->c_to . ' <br>Lead ID: ' . $this->c_lead_id , Notifications::TYPE_WARNING, true);
+                    Notifications::create($this->c_created_user_id, 'On your Lead Missed Call ('.$this->getSourceName().')  from ' . $this->c_from . ' to ' . $this->c_to . ' <br>Lead ID: ' . $this->c_lead_id , Notifications::TYPE_WARNING, true);
                     Notifications::socket($this->c_created_user_id, null, 'getNewNotification', [], true);
                 }*/
 
@@ -770,6 +769,22 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
 
                 if($call->c_created_user_id && (int) $call->c_created_user_id !== $user_id) {
                     $call->c_source_type_id = self::SOURCE_REDIRECT_CALL;
+
+
+                    $user = Employee::findOne($user_id);
+
+                    Notifications::create(
+                        $call->c_created_user_id,
+                        'Missed Call (' . $call->getSourceName() . ')',
+                        'Missed Call (' . $call->getSourceName() . ')  from ' . $call->c_from . ' to ' . $call->c_to . '. Taken by Agent: ' . ($user ? Html::encode($user->username) : '-'),
+                        Notifications::TYPE_WARNING,
+                        true);
+
+                    Notifications::socket($call->c_created_user_id, null, 'getNewNotification', [], true);
+
+                    //Notifications::create($call->c_source_type_id, 'New incoming Call (' . $this->cua_call_id . ')', 'New incoming Call (' . $this->cua_call_id . ')', Notifications::TYPE_SUCCESS, true);
+                    //Notifications::socket($this->cua_user_id, null, 'getNewNotification', [], true);
+
                 }
 
                 $call->c_created_user_id = $user_id;
