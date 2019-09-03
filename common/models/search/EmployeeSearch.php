@@ -29,9 +29,9 @@ class EmployeeSearch extends Employee
     public $user_call_type_id;
     public $user_sip;
 
-    public $datetime_start;
-    public $datetime_end;
-    public $date_range;
+    public $timeStart;
+    public $timeEnd;
+    public $timeRange;
 
     public $online;
     public $pageSize;
@@ -45,8 +45,8 @@ class EmployeeSearch extends Employee
         return [
             [['id', 'status', 'acl_rules_activated', 'supervision_id', 'user_group_id', 'user_project_id', 'user_params_project_id', 'online', 'user_call_type_id', 'user_department_id'], 'integer'],
             [['username', 'full_name', 'auth_key', 'password_hash', 'password_reset_token', 'email', 'last_activity', 'created_at', 'updated_at', 'user_sip', 'pageSize'], 'safe'],
-            [['datetime_start', 'datetime_end'], 'safe'],
-            [['date_range'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
+            [['timeStart', 'timeEnd'], 'safe'],
+            [['timeRange'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
         ];
     }
 
@@ -110,9 +110,6 @@ class EmployeeSearch extends Employee
             $subQuery = UserDepartment::find()->usersByDep($this->user_department_id);
             $query->andWhere(['IN', 'employees.id', $subQuery]);
         }
-
-
-
 
         if ($this->user_params_project_id > 0) {
             $subQuery = UserProjectParams::find()->select(['DISTINCT(upp_user_id)'])->where(['=', 'upp_project_id', $this->user_params_project_id]);
@@ -228,8 +225,8 @@ class EmployeeSearch extends Employee
             ->andFilterWhere(['like', 'email', $this->email]);
 
 
-        /*$query->andFilterWhere(['>=', 'createdAt', $this->createTimeStart])
-            ->andFilterWhere(['<', 'createdAt', $this->createTimeEnd]);*/
+        /*$query->andFilterWhere(['>=', 'createdAt', $this->timeStart])
+            ->andFilterWhere(['<', 'createdAt', $this->timeEnd]);*/
 
         return $dataProvider;
     }

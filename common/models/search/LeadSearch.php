@@ -1415,11 +1415,11 @@ class LeadSearch extends Lead
         }
 
         if ($this->created) {
-            $query->andFilterWhere(['=', 'DATE(created)', date('Y-m-d', strtotime($this->created))]);
+            $query->andFilterWhere(['=', 'created', date('Y-m-d H:i', strtotime($this->created))]);
         } elseif ($this->date_range && $this->datetime_start && $this->datetime_end) {
             $query
-                ->andFilterWhere(['>=', 'DATE(created)', date('Y-m-d', strtotime($this->datetime_start))])
-                ->andFilterWhere(['<=', 'DATE(created)', date('Y-m-d', strtotime($this->datetime_end))]);
+                ->andFilterWhere(['>=', 'created', date('Y-m-d H:i', strtotime($this->datetime_start))])
+                ->andFilterWhere(['<=', 'created', date('Y-m-d H:i', strtotime($this->datetime_end))]);
         }
 
         // grid filtering conditions

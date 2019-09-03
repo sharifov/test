@@ -41,10 +41,11 @@ $this->params['breadcrumbs'][] = $this->title;
                 'startAttribute' => 'datetime_start',
                 'endAttribute' => 'datetime_end',
                 'pluginOptions'=>[
-                    'timePicker'=> false,
-                    'timePickerIncrement'=>15,
+                    'timePicker'=> true,
+                    'timePickerIncrement'=>1,
+                    'timePicker24Hour' => true,
                     'locale'=>[
-                        'format'=>'Y-m-d',
+                        'format'=>'Y-m-d H:i',
                         'separator' => ' - '
                     ]
                 ]
