@@ -50,17 +50,11 @@ class StatsController extends FController
         $searchModel->timeStart = date('Y-m-d', strtotime('-0 day'));
         $searchModel->timeEnd = date('Y-m-d');
 
-        //$searchModel->date_range = $searchModel->datetime_start.' - '. $searchModel->datetime_end;
-
-
         return $this->render('index', [
             'dataProvider' => $dataProvider,
             'searchModel' => $searchModel,
         ]);
-
-
     }
-
 
     /**
      * Call-Sms.
