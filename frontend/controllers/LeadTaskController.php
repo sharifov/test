@@ -42,8 +42,8 @@ class LeadTaskController extends FController
             unset($params['LeadTaskSearch']['date_range']);
         }
 
-        $searchModel->datetime_start = date('Y-m-d', strtotime('-0 day'));
-        $searchModel->datetime_end = date('Y-m-d');
+        $searchModel->datetime_start = date('Y-m-d H:i', strtotime('-0 day'));
+        $searchModel->datetime_end = date('Y-m-d H:i');
         $dataProvider = $searchModel->search($params);
 
         return $this->render('index', [

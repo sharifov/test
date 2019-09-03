@@ -13,9 +13,7 @@ use common\models\LeadFlow;
 class LeadFlowChecklistSearch extends LeadFlow
 {
     public $statuses = [];
-    public $created_date_from;
-    public $created_date_to;
-
+    public $dateRange;
 
     public $supervision_id;
 
@@ -26,7 +24,7 @@ class LeadFlowChecklistSearch extends LeadFlow
     {
         return [
             [['id', 'employee_id', 'lead_id', 'status', 'supervision_id', 'lf_from_status_id'], 'integer'],
-            [['created', 'created_date_from', 'created_date_to', 'statuses'], 'safe'],
+            [['created', 'statuses', 'dateRange'], 'safe'],
         ];
     }
 
@@ -37,6 +35,13 @@ class LeadFlowChecklistSearch extends LeadFlow
     {
         // bypass scenarios() implementation in the parent class
         return Model::scenarios();
+    }
+
+    public function attributeLabels()
+    {
+        return [
+            'dateRange' => 'Create date from / to'
+        ];
     }
 
     /**
@@ -76,18 +81,11 @@ class LeadFlowChecklistSearch extends LeadFlow
             $query->andWhere(['lead_flow.status' => $this->statuses]);
         }
 
-
-        if($this->created_date_from || $this->created_date_to) {
-
-            if ($this->created_date_from) {
-                $query->andFilterWhere(['>=', 'DATE(lead_flow.created)', date('Y-m-d', strtotime($this->created_date_from))]);
-            }
-            if ($this->created_date_to) {
-                $query->andFilterWhere(['<=', 'DATE(lead_flow.created)', date('Y-m-d', strtotime($this->created_date_to))]);
-            }
-
+        if($this->dateRange) {
+            $dates = explode(' - ', $this->dateRange);
+            $query->andFilterWhere(['>=', 'lead_flow.created', date('Y-m-d H:i', strtotime($dates[0]))]);
+            $query->andFilterWhere(['<=', 'lead_flow.created', date('Y-m-d H:i', strtotime($dates[1]))]);
         } else {
-
             if($this->created) {
                 $query->andFilterWhere(['DATE(lead_flow.created)'=> date('Y-m-d', strtotime($this->created))]);
             }

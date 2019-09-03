@@ -410,15 +410,9 @@ $userId = Yii::$app->user->id;
 
     <?php Pjax::begin(); ?>
     <div class="panel panel-default">
-        <div class="panel-heading">Agents Stats <?=$searchModel->date_range ? '(' . $searchModel->date_range . ')' : ''?></div>
+        <div class="panel-heading">Agents Stats <?=$searchModel->timeRange ? '(' . $searchModel->timeRange . ')' : ''?></div>
         <div class="panel-body">
-
-
-
-
-
             <div class="row">
-
                 <?php $form = ActiveForm::begin([
                     'action' => ['index'],
                     'method' => 'get',
@@ -431,21 +425,24 @@ $userId = Yii::$app->user->id;
                     <?php
                     echo  \kartik\daterange\DateRangePicker::widget([
                         'model'=> $searchModel,
-                        'attribute' => 'date_range',
+                        'attribute' => 'timeRange',
                         //'name'=>'date_range',
                         'useWithAddon'=>true,
                         //'value'=>'2015-10-19 12:00 AM - 2015-11-03 01:00 PM',
                         'presetDropdown'=>true,
                         'hideInput'=>true,
                         'convertFormat'=>true,
-                        'startAttribute' => 'datetime_start',
-                        'endAttribute' => 'datetime_end',
+                        'startAttribute' => 'timeStart',
+                        'endAttribute' => 'timeEnd',
                         //'startInputOptions' => ['value' => date('Y-m-d', strtotime('-5 days'))],
                         //'endInputOptions' => ['value' => '2017-07-20'],
                         'pluginOptions'=>[
-                            'timePicker'=> false,
-                            'timePickerIncrement'=>15,
-                            'locale'=>['format'=>'Y-m-d']
+                            'timePicker'=> true,
+                            'timePickerIncrement'=>1,
+                            'timePicker24Hour' => true,
+                            'locale'=>[
+                                    'format'=>'Y-m-d H:i'
+                            ]
                         ]
                     ]);
                     ?>
@@ -528,7 +525,7 @@ $userId = Yii::$app->user->id;
                     [
                         'label' => 'Tasks Result for Period',
                         'value' => function(\common\models\Employee $model) use ($searchModel) {
-                            return $model->getTaskStats($searchModel->datetime_start, $searchModel->datetime_end);
+                            return $model->getTaskStats($searchModel->timeStart, $searchModel->timeEnd);
                         },
                         'format' => 'raw',
                         'contentOptions' => ['class' => 'text-left'],
@@ -557,12 +554,12 @@ $userId = Yii::$app->user->id;
                     [
                         'label' => 'Processing',
                         'value' => function (\common\models\Employee $model) use ($searchModel) {
-                            $cnt = $model->getLeadCountByStatus([\common\models\Lead::STATUS_PROCESSING], $searchModel->datetime_start, $searchModel->datetime_end);
+                            $cnt = $model->getLeadCountByStatus([\common\models\Lead::STATUS_PROCESSING], $searchModel->timeStart, $searchModel->timeEnd);
                             return $cnt ? Html::a($cnt, ['lead-flow/index',
                                 'LeadFlowSearch[employee_id]' => $model->id,
                                 'LeadFlowSearch[status]' => \common\models\Lead::STATUS_PROCESSING,
-                                'LeadFlowSearch[created_date_from]' => $searchModel->datetime_start,
-                                'LeadFlowSearch[created_date_to]' => $searchModel->datetime_end
+                                'LeadFlowSearch[created_date_from]' => $searchModel->timeStart,
+                                'LeadFlowSearch[created_date_to]' => $searchModel->timeEnd
                             ], ['data-pjax' => 0, 'target' => '_blank']) : '-';
                         },
                         'format' => 'raw',
@@ -583,12 +580,12 @@ $userId = Yii::$app->user->id;
                     [
                         'label' => 'Booked',
                         'value' => function (\common\models\Employee $model) use ($searchModel) {
-                            $cnt = $model->getLeadCountByStatus([\common\models\Lead::STATUS_BOOKED], $searchModel->datetime_start, $searchModel->datetime_end);
+                            $cnt = $model->getLeadCountByStatus([\common\models\Lead::STATUS_BOOKED], $searchModel->timeStart, $searchModel->timeEnd);
                             return $cnt ? Html::a($cnt, ['lead-flow/index',
                                 'LeadFlowSearch[employee_id]' => $model->id,
                                 'LeadFlowSearch[status]' => \common\models\Lead::STATUS_BOOKED,
-                                'LeadFlowSearch[created_date_from]' => $searchModel->datetime_start,
-                                'LeadFlowSearch[created_date_to]' => $searchModel->datetime_end
+                                'LeadFlowSearch[created_date_from]' => $searchModel->timeStart,
+                                'LeadFlowSearch[created_date_to]' => $searchModel->timeEnd
                             ], ['data-pjax' => 0, 'target' => '_blank']) : '-';
                         },
                         'format' => 'raw',
@@ -596,12 +593,12 @@ $userId = Yii::$app->user->id;
                     [
                         'label' => 'Sold',
                         'value' => function (\common\models\Employee $model) use ($searchModel) {
-                            $cnt = $model->getLeadCountByStatus([\common\models\Lead::STATUS_SOLD], $searchModel->datetime_start, $searchModel->datetime_end);
+                            $cnt = $model->getLeadCountByStatus([\common\models\Lead::STATUS_SOLD], $searchModel->timeStart, $searchModel->timeEnd);
                             return $cnt ? Html::a($cnt, ['lead-flow/index',
                                 'LeadFlowSearch[employee_id]' => $model->id,
                                 'LeadFlowSearch[status]' => \common\models\Lead::STATUS_SOLD,
-                                'LeadFlowSearch[created_date_from]' => $searchModel->datetime_start,
-                                'LeadFlowSearch[created_date_to]' => $searchModel->datetime_end
+                                'LeadFlowSearch[created_date_from]' => $searchModel->timeStart,
+                                'LeadFlowSearch[created_date_to]' => $searchModel->timeEnd
                             ], ['data-pjax' => 0, 'target' => '_blank']) : '-';
                         },
                         'format' => 'raw',
@@ -609,12 +606,12 @@ $userId = Yii::$app->user->id;
                     [
                         'label' => 'Follow Up',
                         'value' => function (\common\models\Employee $model) use ($searchModel) {
-                            $cnt = $model->getLeadCountByStatus([\common\models\Lead::STATUS_FOLLOW_UP], $searchModel->datetime_start, $searchModel->datetime_end);
+                            $cnt = $model->getLeadCountByStatus([\common\models\Lead::STATUS_FOLLOW_UP], $searchModel->timeStart, $searchModel->timeEnd);
                             return $cnt ? Html::a($cnt, ['lead-flow/index',
                                 'LeadFlowSearch[employee_id]' => $model->id,
                                 'LeadFlowSearch[status]' => \common\models\Lead::STATUS_FOLLOW_UP,
-                                'LeadFlowSearch[created_date_from]' => $searchModel->datetime_start,
-                                'LeadFlowSearch[created_date_to]' => $searchModel->datetime_end
+                                'LeadFlowSearch[created_date_from]' => $searchModel->timeStart,
+                                'LeadFlowSearch[created_date_to]' => $searchModel->timeEnd
                             ], ['data-pjax' => 0, 'target' => '_blank']) : '-';
                         },
                         'format' => 'raw',
@@ -622,12 +619,12 @@ $userId = Yii::$app->user->id;
                     [
                         'label' => 'Trash',
                         'value' => function (\common\models\Employee $model) use ($searchModel) {
-                            $cnt = $model->getLeadCountByStatus([\common\models\Lead::STATUS_TRASH], $searchModel->datetime_start, $searchModel->datetime_end);
+                            $cnt = $model->getLeadCountByStatus([\common\models\Lead::STATUS_TRASH], $searchModel->timeStart, $searchModel->timeEnd);
                             return $cnt ? Html::a($cnt, ['lead-flow/index',
                                 'LeadFlowSearch[employee_id]' => $model->id,
                                 'LeadFlowSearch[status]' => \common\models\Lead::STATUS_TRASH,
-                                'LeadFlowSearch[created_date_from]' => $searchModel->datetime_start,
-                                'LeadFlowSearch[created_date_to]' => $searchModel->datetime_end
+                                'LeadFlowSearch[created_date_from]' => $searchModel->timeStart,
+                                'LeadFlowSearch[created_date_to]' => $searchModel->timeEnd
                             ], ['data-pjax' => 0, 'target' => '_blank']) : '-';
                         },
                         'format' => 'raw',
