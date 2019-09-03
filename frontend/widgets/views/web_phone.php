@@ -108,9 +108,9 @@
                             </ul>
                         </div>
 
-                        <div class="btn-group" id="btn-group-id-redirect" style="display: none;">
-                            <?=\yii\helpers\Html::button('<i class="fa fa-forward"></i> To Agents ', ['class' => 'btn btn-sm btn-info button-redirect-to-agents'])?>
-                        </div>
+<!--                        <div class="btn-group" id="btn-group-id-redirect" style="display: none;">-->
+<!--                            --><?//=\yii\helpers\Html::button('<i class="fa fa-forward"></i> To Agents ', ['class' => 'btn btn-sm btn-info button-redirect-to-agents'])?>
+<!--                        </div>-->
 
 
                         <?/*=\yii\helpers\Html::button('<i class="fa fa-phone"></i> Call', ['class' => 'btn btn-xs btn-success', 'id' => 'button-call'])*/?>
@@ -129,9 +129,6 @@
                             <?/*<div class="btn-group">
                                 <button class="btn btn-xs btn-danger forward-event" data-type="hold" data-value="+15596489977"><i class="fa fa-pause"></i> Hold</button>
                             </div>*/?>
-<!--                            <div class="btn-group" id="btn-group-id-redirect2">-->
-<!--                                --><?//=\yii\helpers\Html::button('<i class="fa fa-forward"></i> To Agents ', ['class' => 'btn btn-sm btn-info button-redirect-to-agents'])?>
-<!--                            </div>-->
                         </div>
                     </td>
                 </tr>
@@ -681,7 +678,7 @@ echo '<div class="container" id="container-redirect-agents"></div>';
                     //document.getElementById('button-hangup').style.display = 'inline';
                     document.getElementById('btn-group-id-forward').style.display = 'inline';
                     document.getElementById('btn-group-id-hangup').style.display = 'inline';
-                    document.getElementById('btn-group-id-redirect').style.display = 'inline';
+                    //document.getElementById('btn-group-id-redirect').style.display = 'inline';
 
                     volumeIndicators.style.display = 'block';
                     bindVolumeIndicators(conn);
@@ -702,7 +699,7 @@ echo '<div class="container" id="container-redirect-agents"></div>';
                     //document.getElementById('button-hangup').style.display = 'none';
                     document.getElementById('btn-group-id-forward').style.display = 'none';
                     document.getElementById('btn-group-id-hangup').style.display = 'none';
-                    document.getElementById('btn-group-id-redirect').style.display = 'none';
+                    //document.getElementById('btn-group-id-redirect').style.display = 'none';
 
                     volumeIndicators.style.display = 'none';
 
@@ -761,7 +758,7 @@ echo '<div class="container" id="container-redirect-agents"></div>';
 
                     //document.getElementById('call-controls').style.display = 'block';
                     document.getElementById('call-controls2').style.display = 'none';
-                    document.getElementById('btn-group-id-redirect').style.display = 'none';
+                    //document.getElementById('btn-group-id-redirect').style.display = 'none';
                 });
 
 
@@ -811,7 +808,7 @@ echo '<div class="container" id="container-redirect-agents"></div>';
             createNotify('Calling', 'Calling ' + params.To + '...', 'success');
             updateAgentStatus(connection, false, 0);
             connection = device.connect(params);
-            document.getElementById('btn-group-id-redirect').style.display = 'none';
+            //document.getElementById('btn-group-id-redirect').style.display = 'none';
         }
     }
 

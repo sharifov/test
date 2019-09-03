@@ -102,7 +102,7 @@ use yii\widgets\Pjax;
                     </div>
                     <div class="col-md-4 text-right">
 
-                        <?=\yii\helpers\Html::a('<i class="fa fa-check"></i> Accept', ['call/incoming-call-widget', 'act' => 'accept', 'call_id' => $call->c_id], ['class' => 'btn btn-sm btn-success', 'id' => 'btn-incoming-call-success'])?>
+                        <?=\yii\helpers\Html::a('<i class="fa fa-check"></i> Accept', ['call/incoming-call-widget', 'act' => 'accept', 'call_id' => $call->c_id], ['class' => 'btn btn-sm btn-success btn-incoming-call-access'])?>
                         <?//=\yii\helpers\Html::a('<i class="fa fa-angle-double-right"></i> Skip', ['call/incoming-call-widget', 'act' => 'skip', 'call_id' => $call->c_id], ['class' => 'btn btn-sm btn-info', 'id' => 'btn-incoming-call-skip'])?>
                         <?//=\yii\helpers\Html::a('<i class="fa fa-close"></i> Busy', ['call/incoming-call-widget', 'act' => 'busy', 'call_id' => $call->c_id], ['class' => 'btn btn-sm btn-danger', 'id' => 'btn-incoming-call-busy'])?>
                     </div>
@@ -170,13 +170,13 @@ use yii\widgets\Pjax;
                     </div>
                     <div class="col-md-4 text-right">
 
-                        <?=\yii\helpers\Html::a('<i class="fa fa-ban"></i> Busy', ['call/incoming-call-widget', 'act' => 'busy', 'call_id' => $call->c_id], ['class' => 'btn btn-sm btn-danger', 'id' => 'btn-incoming-call-busy'
+                        <?=\yii\helpers\Html::a('<i class="fa fa-ban"></i> Busy', ['call/incoming-call-widget', 'act' => 'busy', 'call_id' => $call->c_id], ['class' => 'btn btn-sm btn-danger btn-incoming-call-busy'
                             ,
                             /*'data' => [
                                 'confirm' => 'Are you sure you want to set BUSY status for all Incoming Calls?',
                             ]*/
                         ])?>
-                        <?=\yii\helpers\Html::a('<i class="fa fa-check"></i> Accept', ['call/incoming-call-widget', 'act' => 'accept', 'call_id' => $call->c_id], ['class' => 'btn btn-sm btn-success', 'id' => 'btn-incoming-call-success'])?>
+                        <?=\yii\helpers\Html::a('<i class="fa fa-check"></i> Accept', ['call/incoming-call-widget', 'act' => 'accept', 'call_id' => $call->c_id], ['class' => 'btn btn-sm btn-success btn-incoming-call-accept'])?>
                         <?//=\yii\helpers\Html::a('<i class="fa fa-angle-double-right"></i> Skip', ['call/incoming-call-widget', 'act' => 'skip', 'call_id' => $call->c_id], ['class' => 'btn btn-sm btn-info', 'id' => 'btn-incoming-call-skip'])?>
 
                     </div>
@@ -273,6 +273,18 @@ $js = <<<JS
     
     $("#incoming-call-pjax").on("pjax:end", function() {
         initIncomingCallWidget();
+    });
+    
+    $(document).on('click', '.btn-incoming-call-access', function() {
+        var btn = $(this);
+        btn.addClass('disabled');
+        btn.find('i').removeClass('fa-check').addClass('fa-spinner fa-spin');
+    });
+    
+    $(document).on('click', '.btn-incoming-call-busy', function() {
+        var btn = $(this);
+        btn.addClass('disabled');
+        btn.find('i').removeClass('fa-ban').addClass('fa-spinner fa-spin');
     });
     
     function initIncomingCallWidget()
