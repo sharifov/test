@@ -47,8 +47,8 @@ class StatsController extends FController
 
         $dataProvider = $searchModel->searchByUserGroups($params);
 
-        $searchModel->timeStart = date('Y-m-d', strtotime('-0 day'));
-        $searchModel->timeEnd = date('Y-m-d');
+        $searchModel->timeStart = date('Y-m-d H:i', strtotime('-0 day'));
+        $searchModel->timeEnd = date('Y-m-d H:i');
 
         return $this->render('index', [
             'dataProvider' => $dataProvider,
