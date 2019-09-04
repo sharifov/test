@@ -94,7 +94,7 @@ use \common\models\Call;
                                 $label = 'danger';
                                 break;
                             default:
-                                $label = 'info';
+                                $label = 'default';
                         }
 
                         ?>
