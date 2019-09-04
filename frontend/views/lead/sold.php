@@ -299,7 +299,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'attribute' => 'last_ticket_date',
             'value' => function (Lead $model) {
 //                return ($model->appliedQuote && $model->appliedQuote->last_ticket_date) ? Yii::$app->formatter->asDate($model->appliedQuote->last_ticket_date) : '-';
-                return ( $model->leadFlowSold && $model->leadFlowSold->created ) ? Yii::$app->formatter->asDate(strtotime($model->leadFlowSold->created)): '';
+                return ( $model->leadFlowSold && $model->leadFlowSold->created ) ? Yii::$app->formatter->asDatetime(strtotime($model->leadFlowSold->created)): '';
             },
             //'format' => 'datetime',
             'filter' => DatePicker::widget([
