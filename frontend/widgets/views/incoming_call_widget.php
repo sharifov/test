@@ -238,6 +238,8 @@ use yii\widgets\Pjax;
             //$("#incomingCallAudio").prop("currentTime", time);
 
             $("#incomingCallAudio").trigger('play');
+            $('#incoming-sound-indicator').prop('data-status', 1).html('<i class="fa fa-volume-up text-success"></i>');
+
         } else {
             // console.log('No Visible');
             //window.localStorage.setItem('incomingCallAudio_currentTime', $("#incomingCallAudio").prop("currentTime"));
@@ -299,6 +301,25 @@ $js = <<<JS
         btn.addClass('disabled');
         btn.find('i').removeClass('fa-ban').addClass('fa-spinner fa-spin');
     });
+    
+    $(document).on('click', '#incoming-sound-indicator', function() {
+        var obj = $(this);
+       
+        if(obj.prop('data-status') == 1) {
+            obj.prop('data-status', 0);
+            obj.html('<i class="fa fa-volume-off text-danger"></i>');
+            obj.attr('title', 'Incominf Call - Volume OFF');
+            $("#incomingCallAudio").prop('muted', true);
+        } else {
+            obj.prop('data-status', 1);
+            obj.html('<i class="fa fa-volume-up text-success"></i>');
+            obj.attr('title', 'Incominf Call - Volume ON');
+            $("#incomingCallAudio").prop('muted', false);
+        }
+        //btn.find('i').removeClass('fa-ban').addClass('fa-spinner fa-spin');
+    });
+    
+    
     
     function initIncomingCallWidget()
     {
