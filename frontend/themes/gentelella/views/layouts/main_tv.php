@@ -91,6 +91,12 @@ $bundle = \frontend\themes\gentelella\assets\Asset::register($this);
                 </li>
                 <?//= frontend\widgets\Notifications::widget(); ?>
                 <?= frontend\widgets\OnlineConnection::widget() ?>
+
+                <li>
+                    <a href="javascript:;" class="info-number" title="Incoming Call - Volume ON" id="incoming-sound-indicator">
+                    </a>
+                </li>
+
             </ul>
         </nav>
         <!-- /top navigation -->
