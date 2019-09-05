@@ -172,13 +172,14 @@ if ($isAdmin || $isSuperAdmin) {
                 ],
 
                 [
-                    //'attribute' => 'username',
+                    'attribute' => 'roles',
                     'label' => 'Role',
                     'value' => function (\common\models\Employee $model) {
                         $roles = $model->getRoles();
                         return $roles ? implode(', ', $roles) : '-';
                     },
-                    'format' => 'raw'
+                    'format' => 'raw',
+                    'filter' => \common\models\Employee::getAllRoles()
                 ],
 
                 'email:email',
