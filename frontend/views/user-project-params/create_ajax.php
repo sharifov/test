@@ -60,24 +60,24 @@ $this->title = 'Create Project Params';
 
                 <?= $form->field($model, 'upp_project_id')->dropDownList($projectList, ['prompt' => '-']) ?>
 
+                <?= $form->field($model, 'upp_dep_id')->dropDownList(\common\models\Department::getList(), ['prompt' => '-']) ?>
+
                 <?= $form->field($model, 'upp_email')->input('email', ['maxlength' => true]) ?>
 
-                <?//= $form->field($model, 'upp_phone_number')->textInput(['maxlength' => true]) ?>
 
                 <?//= $form->field($model, 'upp_tw_phone_number')->textInput(['maxlength' => true]) ?>
 
 
-                <?= $form->field($model, 'upp_phone_number')->widget(\borales\extensions\phoneInput\PhoneInput::class, [
+                <?= $form->field($model, 'upp_tw_phone_number')->widget(\borales\extensions\phoneInput\PhoneInput::class, [
                     'jsOptions' => [
+                        'autoPlaceholder' => 'off',
+                        'customPlaceholder' => '',
+                        'allowDropdown' => false,
                         'preferredCountries' => ['us'],
                     ]
                 ]) ?>
 
-                <?= $form->field($model, 'upp_tw_phone_number')->widget(\borales\extensions\phoneInput\PhoneInput::class, [
-                    'jsOptions' => [
-                        'preferredCountries' => ['us'],
-                    ]
-                ]) ?>
+
 
                 <?= $form->field($model, 'upp_allow_general_line')->checkbox() ?>
 
@@ -85,8 +85,8 @@ $this->title = 'Create Project Params';
 
                 <?//= Html::input('hidden', 'redirect', Yii::$app->request->get('redirect')) ?>
 
-                <div class="form-group">
-                    <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
+                <div class="form-group text-center">
+                    <?= Html::submitButton('Save Params', ['class' => 'btn btn-success']) ?>
                 </div>
             </div>
 

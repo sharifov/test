@@ -10,7 +10,6 @@ use yii\web\ForbiddenHttpException;
 use yii\web\Response;
 use Yii;
 
-
 /**
  * Class CasesQCountersController
  * @property CasesQRepository $casesQRepository
@@ -19,6 +18,8 @@ class CasesQCountersController extends FController
 {
 
     private $casesQRepository;
+
+    public $enableCsrfValidation = false;
 
     /**
      * CasesQCountersController constructor.
@@ -49,125 +50,131 @@ class CasesQCountersController extends FController
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
 
-    /**
-     * @param $type
-     * @return array
-     * @throws ForbiddenHttpException
-     */
-    public function actionGetQCount($type): array
+
+    public function actionGetQCount(): array
     {
-        switch ($type) {
-            case 'pending':
-                $count = $this->getPending();
-                break;
-            case 'inbox':
-                $count = $this->getInbox();
-                break;
-            case 'followup':
-                $count = $this->getFollowup();
-                break;
-            case 'processing':
-                $count = $this->getProcessing();
-                break;
-            case 'solved':
-                $count = $this->getSolved();
-                break;
-            case 'trash':
-                $count = $this->getTrash();
-                break;
-            default: $count = null;
+        $types = Yii::$app->request->post('types');
+
+        if (!is_array($types)) {
+            return [];
         }
-        return $count;
+
+        $result = [];
+
+        foreach ($types as $type) {
+            switch ($type) {
+                case 'pending':
+                    if ($count = $this->getPending()) {
+                        $result['pending'] = $count;
+                    }
+                    break;
+                case 'inbox':
+                    if ($count = $this->getInbox()) {
+                        $result['inbox'] = $count;
+                    }
+                    break;
+                case 'follow-up':
+                    if ($count = $this->getFollowUp()) {
+                        $result['follow-up'] = $count;
+                    }
+                    break;
+                case 'processing':
+                    if ($count = $this->getProcessing()) {
+                        $result['processing'] = $count;
+                    }
+                    break;
+                case 'solved':
+                    if ($count = $this->getSolved()) {
+                        $result['solved'] = $count;
+                    }
+                    break;
+                case 'trash':
+                    if ($count = $this->getTrash()) {
+                        $result['trash'] = $count;
+                    }
+                    break;
+            }
+        }
+
+        return $result;
     }
 
     /**
-     * @return array
-     * @throws ForbiddenHttpException
+     * @return int|null
      */
-    private function getPending(): array
+    private function getPending(): ?int
     {
         if (!Yii::$app->user->can('/cases-q/pending')) {
-            throw new ForbiddenHttpException();
+            return null;
         }
         /** @var Employee $user */
         $user = Yii::$app->user->identity;
-        $count = $this->casesQRepository->getPendingCount($user);
-        return ['result' => 'success', 'count' => $count];
+        return $this->casesQRepository->getPendingCount($user);
     }
 
     /**
-     * @return array
-     * @throws ForbiddenHttpException
+     * @return int|null
      */
-    private function getInbox(): array
+    private function getInbox(): ?int
     {
         if (!Yii::$app->user->can('/cases-q/inbox')) {
-            throw new ForbiddenHttpException();
+            return null;
         }
         /** @var Employee $user */
         $user = Yii::$app->user->identity;
-        $count = $this->casesQRepository->getInboxCount($user);
-        return ['result' => 'success', 'count' => $count];
+        return $this->casesQRepository->getInboxCount($user);
     }
 
     /**
-     * @return array
-     * @throws ForbiddenHttpException
+     * @return int|null
      */
-    private function getFollowup(): array
+    private function getFollowUp(): ?int
     {
-        if (!Yii::$app->user->can('/cases-q/followup')) {
-            throw new ForbiddenHttpException();
+        if (!Yii::$app->user->can('/cases-q/follow-up')) {
+            return null;
         }
         /** @var Employee $user */
         $user = Yii::$app->user->identity;
-        $count = $this->casesQRepository->getFollowUpCount($user);
-        return ['result' => 'success', 'count' => $count];
+        return $this->casesQRepository->getFollowUpCount($user);
     }
 
     /**
-     * @return array
-     * @throws ForbiddenHttpException
+     * @return int|null
      */
-    private function getProcessing(): array
+    private function getProcessing(): ?int
     {
         if (!Yii::$app->user->can('/cases-q/processing')) {
-            throw new ForbiddenHttpException();
+            return null;
         }
         /** @var Employee $user */
         $user = Yii::$app->user->identity;
-        $count = $this->casesQRepository->getProcessingCount($user);
-        return ['result' => 'success', 'count' => $count];
+        return $this->casesQRepository->getProcessingCount($user);
     }
 
     /**
-     * @return array
-     * @throws ForbiddenHttpException
+     * @return int|null
      */
-    private function getSolved(): array
+    private function getSolved(): ?int
     {
         if (!Yii::$app->user->can('/cases-q/solved')) {
-            throw new ForbiddenHttpException();
+            return null;
         }
         /** @var Employee $user */
         $user = Yii::$app->user->identity;
-        $count = $this->casesQRepository->getSolvedCount($user);
-        return ['result' => 'success', 'count' => $count];
+        return $this->casesQRepository->getSolvedCount($user);
     }
 
     /**
-     * @return array
-     * @throws ForbiddenHttpException
+     * @return int|null
      */
-    private function getTrash(): array
+    private function getTrash(): ?int
     {
         if (!Yii::$app->user->can('/cases-q/trash')) {
-            throw new ForbiddenHttpException();
+            return null;
         }
         /** @var Employee $user */
         $user = Yii::$app->user->identity;
-        $count = $this->casesQRepository->getTrashCount($user);
-        return ['result' => 'success', 'count' => $count];
+        return $this->casesQRepository->getTrashCount($user);
     }
 
 }

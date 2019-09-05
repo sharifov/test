@@ -23,7 +23,7 @@ $userProjectParams = \common\models\UserProjectParams::findOne([
 
 
 
-if ($userProjectParams === null || empty($userProjectParams->upp_phone_number) || empty($userProjectParams->upp_email)) {
+if ($userProjectParams === null || empty($userProjectParams->upp_tw_phone_number) || empty($userProjectParams->upp_email)) {
     $alert = true;
 } else {
     $alert = false;

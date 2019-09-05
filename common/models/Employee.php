@@ -984,11 +984,13 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
 
 
         $taskListAllQuery->joinWith(['ltLead' => function ($q) {
-            $q->where(['NOT IN', 'leads.status', [Lead::STATUS_TRASH, Lead::STATUS_SNOOZE]]);
+//            $q->where(['NOT IN', 'leads.status', [Lead::STATUS_TRASH, Lead::STATUS_SNOOZE]]);
+            $q->where(['leads.status' => Lead::STATUS_PROCESSING]);
         }]);
 
         $taskListCheckedQuery->joinWith(['ltLead' => function ($q) {
-            $q->where(['NOT IN', 'leads.status', [Lead::STATUS_TRASH, Lead::STATUS_SNOOZE]]);
+//            $q->where(['NOT IN', 'leads.status', [Lead::STATUS_TRASH, Lead::STATUS_SNOOZE]]);
+            $q->where(['leads.status' => Lead::STATUS_PROCESSING]);
         }]);
 
 
@@ -1261,11 +1263,11 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     public function getLeadCountByStatus(array $statusList = [], string $startDate = null, string $endDate = null): int
     {
         if ($startDate) {
-            $startDate = date('Y-m-d', strtotime($startDate));
+            $startDate = date('Y-m-d H:i', strtotime($startDate));
         }
 
         if ($endDate) {
-            $endDate = date('Y-m-d', strtotime($endDate));
+            $endDate = date('Y-m-d H:i', strtotime($endDate));
         }
 
         $query = LeadFlow::find()->select('COUNT(DISTINCT(lead_id))')->where(['employee_id' => $this->id, 'status' => $statusList]);
@@ -1286,11 +1288,11 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     public function getLeadCountByStatuses(array $statusList = [], int $from_status_id = null, string $startDate = null, string $endDate = null): int
     {
         if ($startDate) {
-            $startDate = date('Y-m-d', strtotime($startDate));
+            $startDate = date('Y-m-d H:i', strtotime($startDate));
         }
 
         if ($endDate) {
-            $endDate = date('Y-m-d', strtotime($endDate));
+            $endDate = date('Y-m-d H:i', strtotime($endDate));
         }
 
         $query = LeadFlow::find()->select('COUNT(DISTINCT(lead_id))')->where(['employee_id' => $this->id, 'status' => $statusList]);
@@ -1548,26 +1550,15 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     public static function getPhoneList(int $user_id) : array
     {
         $phoneList = [];
-        $phoneList2 = [];
 
-        $phones = UserProjectParams::find()->select(['DISTINCT(upp_phone_number)'])->where(['upp_user_id' => $user_id])
-            ->andWhere(['and', ['<>', 'upp_phone_number', ''], ['IS NOT', 'upp_phone_number', null]])
-            ->asArray()->all();
 
-        if($phones) {
-            $phoneList = ArrayHelper::map($phones, 'upp_phone_number', 'upp_phone_number');
-        }
-
-        $phones2 = UserProjectParams::find()->select(['DISTINCT(upp_tw_phone_number)'])->where(['upp_user_id' => $user_id])
+        $phones = UserProjectParams::find()->select(['DISTINCT(upp_tw_phone_number)'])->where(['upp_user_id' => $user_id])
             ->andWhere(['and', ['<>', 'upp_tw_phone_number', ''], ['IS NOT', 'upp_tw_phone_number', null]])
             ->asArray()->all();
 
-        //VarDumper::dump($phones2); //->createCommand()->rawSql);  exit();
-
-        if($phones2) {
-            $phoneList2 = ArrayHelper::map($phones2, 'upp_tw_phone_number', 'upp_tw_phone_number');
+        if($phones) {
+            $phoneList = ArrayHelper::map($phones, 'upp_tw_phone_number', 'upp_tw_phone_number');
         }
-        $phoneList = array_merge($phoneList, $phoneList2);
 
         return $phoneList;
     }
@@ -1605,7 +1596,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         $isFree = true;
         //$call = Call::find()->where(['c_created_user_id' => $this->id])->orderBy(['c_id' => SORT_DESC])->limit(1)->one();
 
-        $callExist = Call::find()->where(['c_created_user_id' => $this->id, 'c_call_status' => [Call::CALL_STATUS_QUEUE, Call::CALL_STATUS_RINGING, Call::CALL_STATUS_IN_PROGRESS]])->limit(1)->exists();
+        $callExist = Call::find()->where(['c_created_user_id' => $this->id, 'c_call_status' => [Call::CALL_STATUS_RINGING, Call::CALL_STATUS_IN_PROGRESS]])->limit(1)->exists(); //Call::CALL_STATUS_QUEUE,
 
         if($callExist) {
             //if(in_array($call->c_call_type_id, [Call::CALL_STATUS_QUEUE, Call::CALL_STATUS_RINGING, Call::CALL_STATUS_IN_PROGRESS])) {
@@ -1753,7 +1744,50 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     }
 
 
-    public static function getUsersForCallQueue( int $project_id, ?int $department_id = null, int $limit = 0, int $hours = 1)
+    /**
+     * @param int $project_id
+     * @param int|null $department_id
+     * @return array
+     */
+    public static function getUsersForRedirectCall(int $project_id, ?int $department_id = null): array
+    {
+        $query = UserConnection::find();
+        $subQuery1 = UserProfile::find()->select(['up_call_type_id'])->where('up_user_id = user_connection.uc_user_id');
+
+        $query->select([
+            'tbl_user_id' => 'user_connection.uc_user_id',
+            'tbl_call_type_id' => $subQuery1
+        ]);
+
+        $subQuery = ProjectEmployeeAccess::find()->select(['DISTINCT(employee_id)'])->where(['project_id' => $project_id]);
+        $query->andWhere(['IN', 'user_connection.uc_user_id', $subQuery]);
+        $query->groupBy(['user_connection.uc_user_id']);
+
+        if ($department_id) {
+            $subQueryUd = UserDepartment::find()->usersByDep($department_id);
+            $query->andWhere(['IN', 'user_connection.uc_user_id', $subQueryUd]);
+        }
+
+        $generalQuery = new Query();
+        $generalQuery->from(['tbl' => $query]);
+        $generalQuery->andWhere(['AND', ['<>', 'tbl_call_type_id', UserProfile::CALL_TYPE_OFF], ['IS NOT', 'tbl_call_type_id', null]]);
+
+        //$sqlRaw = $generalQuery->createCommand()->getRawSql();
+        //VarDumper::dump($sqlRaw, 10, true); exit;
+        $users = $generalQuery->all();
+        return $users;
+    }
+
+
+    /**
+     * @param int $project_id
+     * @param int|null $department_id
+     * @param int $limit
+     * @param int $hours
+     * @param array|null $exceptUserIds
+     * @return array
+     */
+    public static function getUsersForCallQueue(int $project_id, ?int $department_id = null, int $limit = 0, int $hours = 1, ?array $exceptUserIds = null): array
     {
         $query = UserConnection::find();
         $date_time = date('Y-m-d H:i:s', strtotime('-' . $hours .' hours'));
@@ -1781,11 +1815,18 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         //$subQuery = ProjectEmployeeAccess::find()->select(['DISTINCT(employee_id)'])->where(['project_id' => $project_id]);
         //$query->andWhere(['IN', 'user_connection.uc_user_id', $subQuery]);
 
+        $subQuery = CallUserAccess::find()->select(['DISTINCT(cua_user_id)'])->where(['cua_status_id' => CallUserAccess::STATUS_TYPE_PENDING]);
+        $query->andWhere(['NOT IN', 'user_connection.uc_user_id', $subQuery]);
+
         $subQueryUpp = UserProjectParams::find()->select(['DISTINCT(upp_user_id)'])->where(['upp_project_id' => $project_id, 'upp_allow_general_line' => true]);
         $query->andWhere(['IN', 'user_connection.uc_user_id', $subQueryUpp]);
 
+        if($exceptUserIds) {
+            $query->andWhere(['NOT IN', 'user_connection.uc_user_id', $exceptUserIds]);
+        }
+
         if($department_id) {
-            $subQueryUd = UserDepartment::find()->select(['DISTINCT(ud_user_id)'])->where(['ud_dep_id' => $department_id]);
+            $subQueryUd = UserDepartment::find()->usersByDep($department_id);
             $query->andWhere(['IN', 'user_connection.uc_user_id', $subQueryUd]);
         }
 

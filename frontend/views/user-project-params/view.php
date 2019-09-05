@@ -44,8 +44,14 @@ $this->params['breadcrumbs'][] = $this->title;
                 },
             ],
 
+            [
+                'attribute' => 'upp_dep_id',
+                'value' => function(\common\models\UserProjectParams $model) {
+                    return $model->uppDep ? ''.$model->uppDep->dep_name.'' : '-';
+                },
+            ],
+
             'upp_email:email',
-            'upp_phone_number',
             'upp_tw_phone_number',
             [
                 'attribute' => 'upp_allow_general_line',

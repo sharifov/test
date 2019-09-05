@@ -88,7 +88,7 @@ class UserCallStatus extends \yii\db\ActiveRecord
     {
         parent::afterSave($insert, $changedAttributes);
 
-        if( $this->us_type_id === self::STATUS_TYPE_READY) {
+        if ((int) $this->us_type_id === self::STATUS_TYPE_READY) {
             //Call::applyHoldCallToAgent($this->us_user_id);
             $job = new AgentCallQueueJob();
             $job->user_id = $this->us_user_id;

@@ -44,6 +44,7 @@ class LeadSearch extends Lead
     public $sold_date_from;
     public $sold_date_to;
     public $processing_filter;
+    public $createTimeRange;
 
     public $supervision_id;
 
@@ -95,6 +96,7 @@ class LeadSearch extends Lead
             }],
 
             ['last_ticket_date', 'safe'],
+            [['createTimeRange'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
 
         ];
     }
@@ -710,7 +712,7 @@ class LeadSearch extends Lead
 //        $projectIds = array_keys(ProjectEmployeeAccess::getProjectsByEmployee());
 //        $query = Lead::find()->with('project', 'source');
 
-        $query = $this->leadBadgesRepository->getSoldQuery($user)->with('project', 'source')->joinWith('appliedQuote');
+        $query = $this->leadBadgesRepository->getSoldQuery($user)->with('project', 'source')->joinWith('leadFlowSold' );
 
         $this->load($params);
 
@@ -731,8 +733,8 @@ class LeadSearch extends Lead
                     'project_id',
                     'source_id',
                     'last_ticket_date' => [
-                        'asc' => [Quote::tableName() . '.last_ticket_date' => SORT_ASC],
-                        'desc' => [Quote::tableName() . '.last_ticket_date' => SORT_DESC],
+                        'asc' => [LeadFlow::tableName() . '.created' => SORT_ASC],
+                        'desc' => [LeadFlow::tableName() . '.created' => SORT_DESC],
                     ],
                 ],
                 'defaultOrder' => ['id' => SORT_DESC],
@@ -770,18 +772,23 @@ class LeadSearch extends Lead
         }
 
         if ($this->last_ticket_date) {
-            $query->andWhere(['=', 'DATE(' . Quote::tableName() . '.last_ticket_date)', date('Y-m-d', strtotime($this->last_ticket_date))]);
+//            $query->andWhere(['=', 'DATE(' . Quote::tableName() . '.last_ticket_date)', date('Y-m-d', strtotime($this->last_ticket_date))]);
+            $subQuery = LeadFlow::find()->select(['lead_flow.lead_id'])->distinct('lead_flow.lead_id')->where('lead_flow.status = leads.status AND lead_flow.lead_id = leads.id');
+            $subQuery->andFilterWhere(['=', 'DATE(lead_flow.created)', date('Y-m-d', strtotime($this->last_ticket_date))]);
+            $query->andWhere(['IN', 'leads.id', $subQuery]);
+
         }
 
         if($this->sold_date_from || $this->sold_date_to) {
 
-            $subQuery = LeadFlow::find()->select(['DISTINCT(lead_flow.lead_id)'])->where('lead_flow.status = leads.status AND lead_flow.lead_id = leads.id');
+            $subQuery = LeadFlow::find()->select(['lead_flow.lead_id'])->distinct('lead_flow.lead_id')->where('lead_flow.status = leads.status AND lead_flow.lead_id = leads.id');
 
             if ($this->sold_date_from) {
-                $subQuery->andFilterWhere(['>=', 'DATE(lead_flow.created)', date('Y-m-d', strtotime($this->sold_date_from))]);
+                $subQuery->andFilterWhere(['>=', 'lead_flow.created', date('Y-m-d H:i', strtotime($this->sold_date_from))]);
             }
             if ($this->sold_date_to) {
-                $subQuery->andFilterWhere(['<=', 'DATE(lead_flow.created)', date('Y-m-d', strtotime($this->sold_date_to))]);
+//                $subQuery->andFilterWhere(['<=', 'lead_flow.created', strtotime($this->sold_date_to)]);
+                $subQuery->andFilterWhere(['<', 'lead_flow.created', date('Y-m-d H:i', strtotime('+1 minutes', strtotime($this->sold_date_to)))]);
             }
 
             $query->andWhere(['IN', 'leads.id', $subQuery]);
@@ -1408,11 +1415,11 @@ class LeadSearch extends Lead
         }
 
         if ($this->created) {
-            $query->andFilterWhere(['=', 'DATE(created)', date('Y-m-d', strtotime($this->created))]);
+            $query->andFilterWhere(['=', 'created', date('Y-m-d H:i', strtotime($this->created))]);
         } elseif ($this->date_range && $this->datetime_start && $this->datetime_end) {
             $query
-                ->andFilterWhere(['>=', 'DATE(created)', date('Y-m-d', strtotime($this->datetime_start))])
-                ->andFilterWhere(['<=', 'DATE(created)', date('Y-m-d', strtotime($this->datetime_end))]);
+                ->andFilterWhere(['>=', 'created', date('Y-m-d H:i', strtotime($this->datetime_start))])
+                ->andFilterWhere(['<=', 'created', date('Y-m-d H:i', strtotime($this->datetime_end))]);
         }
 
         // grid filtering conditions

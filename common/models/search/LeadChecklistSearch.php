@@ -66,8 +66,8 @@ class LeadChecklistSearch extends LeadChecklist
         }
 
         if(empty($this->lc_created_dt) && isset($params['LeadChecklistSearch']['date_range'])){
-            $query->andFilterWhere(['>=', 'DATE(lc_created_dt)', $this->datetime_start])
-                ->andFilterWhere(['<=', 'DATE(lc_created_dt)', $this->datetime_end]);
+            $query->andFilterWhere(['>=', 'lc_created_dt', $this->datetime_start])
+                ->andFilterWhere(['<=', 'lc_created_dt', $this->datetime_end]);
         }
 
         if (isset($params['LeadChecklistSearch']['lc_created_dt'])) {

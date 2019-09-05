@@ -66,8 +66,8 @@ class LeadCallExpertSearch extends LeadCallExpert
         }
 
         if(empty($this->lce_request_dt) && isset($params['LeadCallExpertSearch']['date_range'])){
-            $query->andFilterWhere(['>=', 'DATE(lce_request_dt)', $this->datetime_start])
-                ->andFilterWhere(['<=', 'DATE(lce_request_dt)', $this->datetime_end]);
+            $query->andFilterWhere(['>=', 'lce_request_dt', $this->datetime_start])
+                ->andFilterWhere(['<=', 'lce_request_dt', $this->datetime_end]);
         }
 
         if (isset($params['LeadCallExpertSearch']['lce_request_dt'])) {

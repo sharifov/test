@@ -62,39 +62,34 @@ $this->title = 'Update Project Params';
                     <?=Html::input('text', 'project', $model->uppProject->name, ['class' => 'form-control', 'readonly' => true, 'disabled' => true]); ?>
                 </div>
 
+
+                <?= $form->field($model, 'upp_dep_id')->dropDownList(\common\models\Department::getList(), ['prompt' => '-']) ?>
+
+
                 <?//= $form->field($model, 'upp_project_id')->dropDownList($projectList, ['disabled' => true]) ?>
 
                 <?= $form->field($model, 'upp_email')->input('email', ['maxlength' => true]) ?>
 
-                <?= $form->field($model, 'upp_phone_number')->widget(\borales\extensions\phoneInput\PhoneInput::class, [
-                        'class' => 'form-control',
-                    'jsOptions' => [
-                        'allowExtensions' => true,
-                        'preferredCountries' => ['us'],
-                    ],
-                    'defaultOptions' => [
-                        'class' => 'form-control'
-                    ]
-                ]) ?>
-
                 <?= $form->field($model, 'upp_tw_phone_number')->widget(\borales\extensions\phoneInput\PhoneInput::class, [
                     'jsOptions' => [
+                        'formatOnDisplay' => false,
+                        'autoPlaceholder' => 'off',
+                        'customPlaceholder' => '',
+                        'allowDropdown' => false,
                         'preferredCountries' => ['us'],
                     ]
                 ]) ?>
 
                 <?= $form->field($model, 'upp_allow_general_line')->checkbox() ?>
 
-                <?/*= $form->field($model, 'upp_phone_number')->textInput(['maxlength' => true]) ?>
+                <?//= $form->field($model, 'upp_tw_phone_number')->textInput(['maxlength' => true]) ?>
 
-                <?= $form->field($model, 'upp_tw_phone_number')->textInput(['maxlength' => true])*/ ?>
-
-                <? //= $form->field($model, 'upp_tw_sip_id')->textInput(['maxlength' => true]) ?>
+                <?//= $form->field($model, 'upp_tw_sip_id')->textInput(['maxlength' => true]) ?>
 
                 <?= Html::input('hidden', 'redirect', Yii::$app->request->get('redirect')) ?>
 
-                <div class="form-group">
-                    <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
+                <div class="form-group text-center">
+                    <?= Html::submitButton('Save Params', ['class' => 'btn btn-success']) ?>
                 </div>
             </div>
 

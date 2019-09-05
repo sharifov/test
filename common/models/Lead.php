@@ -993,6 +993,14 @@ class Lead extends ActiveRecord implements AggregateRoot
     /**
      * @return \yii\db\ActiveQuery
      */
+    public function getLeadFlowSold()
+    {
+        return $this->hasOne(LeadFlow::class, ['lead_id' => 'id'])->onCondition([LeadFlow::tableName() . '.status' => static::STATUS_SOLD]);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
     public function getLeadLogs()
     {
         return $this->hasMany(LeadLog::class, ['lead_id' => 'id']);
@@ -1304,8 +1312,7 @@ class Lead extends ActiveRecord implements AggregateRoot
      */
     public static function getCabin($cabin = null)
     {
-        $mapping = self::CABIN_LIST;
-        return isset($mapping[$cabin]) ? $mapping[$cabin] : $cabin;
+        return self::CABIN_LIST[$cabin] ?? $cabin;
     }
 
     /**
@@ -2845,7 +2852,7 @@ New lead {lead_id}
         $content_data['agent'] = [
             'name'  => Yii::$app->user->identity->full_name,
             'username'  => Yii::$app->user->identity->username,
-            'phone' => $upp && $upp->upp_phone_number ? $upp->upp_phone_number : '',
+            'phone' => $upp && $upp->upp_tw_phone_number ? $upp->upp_tw_phone_number : '',
             'email' => $upp && $upp->upp_email ? $upp->upp_email : '',
         ];
 

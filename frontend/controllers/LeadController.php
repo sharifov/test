@@ -2015,8 +2015,8 @@ class LeadController extends FController
 
         $params = array_merge($params, $params2);
 
-        $searchModel->datetime_start = date('Y-m-d', strtotime('-0 day'));
-        $searchModel->datetime_end = date('Y-m-d');
+        $searchModel->datetime_start = date('Y-m-d H:i', strtotime('-0 day'));
+        $searchModel->datetime_end = date('Y-m-d H:i');
 
         /** @var Employee $user */
         $user = Yii::$app->user->identity;

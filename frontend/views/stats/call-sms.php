@@ -53,21 +53,18 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$
                         echo  \kartik\daterange\DateRangePicker::widget([
                             'model'=> $searchModel,
                             'attribute' => 'date_range',
-                            //'name'=>'date_range',
                             'useWithAddon'=>true,
-                            //'value' => $datetime_start . ' - ' . $datetime_end,
                             'presetDropdown'=>true,
                             'hideInput'=>true,
                             'convertFormat'=>true,
                             'startAttribute' => 'datetime_start',
                             'endAttribute' => 'datetime_end',
-                            //'startInputOptions' => ['value' => $datetime_start],
-                            //'endInputOptions' => ['value' => $datetime_end],
                             'pluginOptions'=>[
-                                'timePicker'=> false,
-                                'timePickerIncrement'=>15,
+                                'timePicker'=> true,
+                                'timePickerIncrement'=>1,
+                                'timePicker24Hour'=>true,
                                 'locale'=>[
-                                    'format'=>'Y-m-d',
+                                    'format'=>'Y-m-d H:i',
                                     'separator' => ' - '
                                 ]
                             ]
@@ -180,8 +177,6 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$
                                         }*/
                                     }
                                 }
-
-
                                 return $type . ' / '.$statusTitle.'';
                             },
                             'format' => 'raw',

@@ -80,7 +80,6 @@ class UserProjectParamsSearch extends UserProjectParams
         }
 
         $query->andFilterWhere(['like', 'upp_email', $this->upp_email])
-            ->andFilterWhere(['like', 'upp_phone_number', $this->upp_phone_number])
             ->andFilterWhere(['like', 'upp_tw_phone_number', $this->upp_tw_phone_number]);
 
         return $dataProvider;

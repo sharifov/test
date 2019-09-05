@@ -13,6 +13,7 @@ use yii\helpers\ArrayHelper;
 use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
 use common\models\LoginForm;
+use yii\helpers\VarDumper;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use Da\QrCode\QrCode;
@@ -72,25 +73,27 @@ class SiteController extends FController
      */
     public function actionIndex(): string
     {
-        $userId = Yii::$app->user->id;
 
-        if (Yii::$app->user->identity->canRole('supervision')) {
+        /** @var Employee $user */
+        $user = Yii::$app->user->identity;
+
+        if ($user->isSupervision() || $user->isExSuper() || $user->isSupSuper()) {
             return $this->dashboardSupervision();
         }
 
-        if (Yii::$app->user->identity->canRole('admin')) {
+        if ($user->isAdmin()) {
             return $this->dashboardAdmin();
         }
 
-        if (Yii::$app->user->identity->canRole('qa')) {
+        if ($user->isQa()) {
             return $this->dashboardQa();
         }
 
-        if (Yii::$app->user->identity->canRole('userManager')) {
+        if ($user->isUserManager()) {
             return $this->dashboardUM();
         }
 
-        if (Yii::$app->user->identity->canRole('superadmin')) {
+        if ($user->isSuperAdmin()) {
             return $this->dashboardAdmin();
         }
 
@@ -101,24 +104,39 @@ class SiteController extends FController
     public function dashboardSupervision(): string
     {
 
-        $userId = Yii::$app->user->id;
+        /** @var Employee $user */
+        $user = Yii::$app->user->identity;
 
         $searchModel = new EmployeeSearch();
         $params = Yii::$app->request->queryParams;
 
 
-        $params['EmployeeSearch']['supervision_id'] = $userId;
+        $params['EmployeeSearch']['supervision_id'] = $user->id;
         $params['EmployeeSearch']['status'] = Employee::STATUS_ACTIVE;
 
 
 
         $dataProvider = $searchModel->searchByUserGroups($params);
 
-        $searchModel->datetime_start = date('Y-m-d', strtotime('-0 day'));
-        $searchModel->datetime_end = date('Y-m-d');
+        $searchModel->timeStart = date('Y-m-d H:i', strtotime('-0 day'));
+        $searchModel->timeEnd = date('Y-m-d H:i');
 
         //$searchModel->date_range = $searchModel->datetime_start.' - '. $searchModel->datetime_end;
 
+        $newModels = [];
+        foreach($dataProvider->getModels() as $model) {
+            /**@var Employee $model */
+            if ($user->isSupervision() && $model->isAgent()) {
+                $newModels[] = $model;
+            } elseif ($user->isExSuper() && $model->isExAgent()) {
+                $newModels[] = $model;
+            } elseif ($user->isSupSuper() && $model->isSupAgent()) {
+                $newModels[] = $model;
+            } elseif ($model->id === $user->id) {
+                $newModels[] = $model;
+            }
+        }
+        $dataProvider->setModels($newModels);
 
         return $this->render('index_supervision', [
             'dataProvider' => $dataProvider,
@@ -348,8 +366,10 @@ class SiteController extends FController
 
         $dataProvider = $searchModel->searchByUserGroups($params);
 
-        $searchModel->datetime_start = date('Y-m-d', strtotime('-0 day'));
-        $searchModel->datetime_end = date('Y-m-d');
+        $searchModel->timeStart = date('Y-m-d H:i', strtotime('-0 day'));
+        $searchModel->timeEnd = date('Y-m-d H:i');
+
+        //var_dump($searchModel);
 
         //$searchModel->date_range = $searchModel->datetime_start.' - '. $searchModel->datetime_end;
 
@@ -454,8 +474,8 @@ class SiteController extends FController
 
         $dataProvider = $searchModel->searchByUserGroups($params);
 
-        $searchModel->datetime_start = date('Y-m-d', strtotime('-0 day'));
-        $searchModel->datetime_end = date('Y-m-d');
+        $searchModel->timeStart = date('Y-m-d H:i', strtotime('-0 day'));
+        $searchModel->timeEnd = date('Y-m-d H:i');
 
 
         return $this->render('index', [

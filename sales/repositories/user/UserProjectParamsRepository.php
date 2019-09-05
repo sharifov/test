@@ -14,8 +14,7 @@ class UserProjectParamsRepository
     public function getByPhone(string $phone): ?UserProjectParams
     {
         return UserProjectParams::find()
-            ->where(['upp_phone_number' => $phone])
-            ->orWhere(['upp_tw_phone_number' => $phone])
+            ->where(['upp_tw_phone_number' => $phone])
             ->limit(1)
             ->one();
     }

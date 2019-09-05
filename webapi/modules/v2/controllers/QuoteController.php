@@ -421,7 +421,7 @@ class QuoteController extends ApiBaseController
 
             $response['agentName'] = ($model->lead && $model->lead->employee) ? $model->lead->employee->username : null;
             $response['agentEmail'] = $userProjectParams ? $userProjectParams->upp_email : $model->lead->project->contactInfo->email;
-            $response['agentDirectLine'] = $userProjectParams ? $userProjectParams->upp_phone_number : sprintf('%s', $model->lead->project->contactInfo->phone);
+            $response['agentDirectLine'] = $userProjectParams ? $userProjectParams->upp_tw_phone_number : sprintf('%s', $model->lead->project->contactInfo->phone);
             $response['generalEmail'] = $model->lead->project->contactInfo->email;
             $response['generalDirectLine'] = sprintf('%s', $model->lead->project->contactInfo->phone);
 

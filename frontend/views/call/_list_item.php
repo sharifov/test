@@ -36,14 +36,17 @@ use \common\models\Call;
             </td>
             <td class="text-center" width="130">
                 <?php if($model->c_call_type_id === Call::CALL_TYPE_IN):?>
-                    Incoming
+                    In
                 <?php else:?>
-                    Outgoing
+                    Out
                 <?php endif;?>
                 <br>
                 <span class="badge badge-info"><?=$model->cProject ? $model->cProject->name : '-'?></span><br>
                 <?php if($model->cDep):?>
                     <span class="label label-warning"><?=$model->cDep ? Html::encode($model->cDep->dep_name) : '-'?></span>
+                <?php endif; ?>
+                <?php if ($model->c_source_type_id):?>
+                    <span class="label label-info"><?=$model->getShortSourceName()?></span>
                 <?php endif; ?>
             </td>
 
@@ -51,7 +54,7 @@ use \common\models\Call;
 
                 <td class="text-left">
                     <?php if($model->c_lead_id && $model->cLead):?>
-                        <i><?=Html::a($model->c_lead_id, ['lead/view', 'gid' => $model->cLead->gid], ['data-pjax' => 0, 'target' => '_blank'])?><?=$model->cLead->l_init_price ? ' - ' . number_format($model->cLead->l_init_price, 0) : ''?></i><br>
+                        <i>l:<?=Html::a($model->c_lead_id, ['lead/view', 'gid' => $model->cLead->gid], ['data-pjax' => 0, 'target' => '_blank'])?><?=$model->cLead->l_init_price ? ' - ' . number_format($model->cLead->l_init_price, 0) : ''?></i><br>
                         <?php
                             $segments = $model->cLead->leadFlightSegments;
                             $segmentData = [];
@@ -68,8 +71,37 @@ use \common\models\Call;
 
                         <?//=$model->c_lead_id?>
                     <?php endif; ?>
+
+                    <?php if($model->c_case_id && $model->cCase):?>
+                        <i>c:<?=Html::a($model->c_case_id, ['cases/view', 'gid' => $model->cCase->cs_gid], ['data-pjax' => 0, 'target' => '_blank'])?></i><br>
+                    <?php endif; ?>
+
                 </td>
             <?php //endif; ?>
+
+            <td class="text-left">
+                <?php if($model->cuaUsers):?>
+                    <?php foreach ($model->callUserAccesses as $cua):
+
+                        switch ((int) $cua->cua_status_id) {
+                            case \common\models\CallUserAccess::STATUS_TYPE_PENDING:
+                                $label = 'warning';
+                                break;
+                            case \common\models\CallUserAccess::STATUS_TYPE_ACCEPT:
+                                $label = 'success';
+                                break;
+                            case \common\models\CallUserAccess::STATUS_TYPE_BUSY:
+                                $label = 'danger';
+                                break;
+                            default:
+                                $label = 'default';
+                        }
+
+                        ?>
+                        <span class="label label-<?=$label?>"><i class="fa fa-user"></i> <?=Html::encode($cua->cuaUser->username)?></span>&nbsp;
+                    <?php endforeach;?>
+                <?php endif; ?>
+            </td>
 
             <td class="text-center" width="160">
                 <?php
@@ -120,6 +152,10 @@ use \common\models\Call;
             <td class="text-center" width="110">
                 <?php if($model->c_call_type_id === Call::CALL_TYPE_IN):?>
                     <div>
+                        <?php if((int) $model->c_source_type_id === Call::SOURCE_GENERAL_LINE):?>
+                            <i class="fa fa-fax fa-2x fa-border"></i>
+                        <?php endif;?>
+
                         <?php if($model->c_created_user_id):?>
                             <i class="fa fa-user fa-2x fa-border"></i><br>
                             <?=Html::encode($model->cCreatedUser->username)?>

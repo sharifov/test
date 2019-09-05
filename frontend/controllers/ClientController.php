@@ -2,16 +2,20 @@
 
 namespace frontend\controllers;
 
-use common\models\Lead;
+use common\models\Employee;
+use common\models\ProjectEmployeeAccess;
 use common\models\search\LeadSearch;
+use common\models\UserDepartment;
+use sales\entities\cases\CasesSearch;
 use Yii;
 use common\models\Client;
 use common\models\search\ClientSearch;
-use yii\filters\AccessControl;
+use yii\data\ActiveDataProvider;
 use yii\helpers\ArrayHelper;
-use yii\web\Controller;
+use yii\helpers\VarDumper;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+use yii\web\Response;
 
 /**
  * ClientController implements the CRUD actions for Client model.
@@ -19,7 +23,10 @@ use yii\filters\VerbFilter;
 class ClientController extends FController
 {
 
-    public function behaviors()
+    /**
+     * @return array
+     */
+    public function behaviors(): array
     {
         $behaviors = [
             'verbs' => [
@@ -33,10 +40,9 @@ class ClientController extends FController
     }
 
     /**
-     * Lists all Client models.
-     * @return mixed
+     * @return string
      */
-    public function actionIndex()
+    public function actionIndex(): string
     {
         $searchModel = new ClientSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
@@ -48,12 +54,11 @@ class ClientController extends FController
     }
 
     /**
-     * Displays a single Client model.
-     * @param integer $id
-     * @return mixed
-     * @throws NotFoundHttpException if the model cannot be found
+     * @param $id
+     * @return string
+     * @throws NotFoundHttpException
      */
-    public function actionView($id)
+    public function actionView($id): string
     {
         return $this->render('view', [
             'model' => $this->findModel($id),
@@ -61,9 +66,7 @@ class ClientController extends FController
     }
 
     /**
-     * Creates a new Client model.
-     * If creation is successful, the browser will be redirected to the 'view' page.
-     * @return mixed
+     * @return string|Response
      */
     public function actionCreate()
     {
@@ -79,11 +82,9 @@ class ClientController extends FController
     }
 
     /**
-     * Updates an existing Client model.
-     * If update is successful, the browser will be redirected to the 'view' page.
-     * @param integer $id
-     * @return mixed
-     * @throws NotFoundHttpException if the model cannot be found
+     * @param $id
+     * @return string|Response
+     * @throws NotFoundHttpException
      */
     public function actionUpdate($id)
     {
@@ -99,13 +100,13 @@ class ClientController extends FController
     }
 
     /**
-     * Deletes an existing Client model.
-     * If deletion is successful, the browser will be redirected to the 'index' page.
-     * @param integer $id
-     * @return mixed
-     * @throws NotFoundHttpException if the model cannot be found
+     * @param $id
+     * @return Response
+     * @throws NotFoundHttpException
+     * @throws \Throwable
+     * @throws yii\db\StaleObjectException
      */
-    public function actionDelete($id)
+    public function actionDelete($id): Response
     {
         $this->findModel($id)->delete();
 
@@ -113,40 +114,73 @@ class ClientController extends FController
     }
 
     /**
-     * Finds the Client model based on its primary key value.
-     * If the model is not found, a 404 HTTP exception will be thrown.
-     * @param integer $id
-     * @return Client the loaded model
-     * @throws NotFoundHttpException if the model cannot be found
+     * @param $id
+     * @return Client
+     * @throws NotFoundHttpException
      */
-    protected function findModel($id)
+    protected function findModel($id): Client
     {
         if (($model = Client::findOne($id)) !== null) {
             return $model;
         }
-
         throw new NotFoundHttpException('The requested page does not exist.');
     }
 
-    public function actionAjaxGetInfo()
+    /**
+     * @return string
+     * @throws NotFoundHttpException
+     */
+    public function actionAjaxGetInfo(): string
     {
-        $client_id = (int) Yii::$app->request->post('client_id');
+        $model = $this->findModel((int) Yii::$app->request->post('client_id'));
 
-        $model = $this->findModel($client_id);
+        $providers = [];
 
-        if(Yii::$app->user->identity->canRole('agent')) {
-            $isAgent = true;
-        } else {
-            $isAgent = false;
+        if (Yii::$app->user->can('leadSection')) {
+            $providers['leadsDataProvider'] = $this->getLeadsDataProvider($model->id);
+        }
+        if (Yii::$app->user->can('caseSection')) {
+            $providers['casesDataProvider'] = $this->getCasesDataProvider($model->id);
         }
 
+        return $this->renderPartial('ajax_info', ArrayHelper::merge(
+            ['model' => $model],
+            $providers)
+        );
+    }
+
+    /**
+     * @param int $clientId
+     * @return ActiveDataProvider
+     */
+    private function getCasesDataProvider(int $clientId): ActiveDataProvider
+    {
+        $searchModel = new CasesSearch();
+
+        $params['CasesSearch']['cs_client_id'] = $clientId;
+        $params['CasesSearch']['cs_project_id'] = array_keys(ProjectEmployeeAccess::getProjectsByEmployee(Yii::$app->user->id));
+        $params['CasesSearch']['cs_dep_id'] = array_keys(UserDepartment::getDepartmentsAccess(Yii::$app->user->id));
+
+        $dataProvider = $searchModel->search($params);
+
+        $dataProvider->sort = false;
+
+        return $dataProvider;
+    }
+
+    /**
+     * @param int $clientId
+     * @return ActiveDataProvider
+     */
+    private function getLeadsDataProvider(int $clientId): ActiveDataProvider
+    {
         $searchModel = new LeadSearch();
 
-        $params = Yii::$app->request->queryParams;
+        $params['LeadSearch']['client_id'] = $clientId;
 
-        $params['LeadSearch']['client_id'] = $model->id;
-
-        if($isAgent) {
+        /** @var Employee $user */
+        $user = Yii::$app->user->identity;
+        if($user->isAgent()) {
             $dataProvider = $searchModel->searchAgent($params);
         } else {
             $dataProvider = $searchModel->search($params);
@@ -154,12 +188,7 @@ class ClientController extends FController
 
         $dataProvider->sort = false;
 
-        return $this->renderPartial('ajax_info', [
-            'model' => $model,
-            'searchModel' => $searchModel,
-            'dataProvider' => $dataProvider,
-            'isAgent' => $isAgent
-        ]);
+        return $dataProvider;
     }
 
 }

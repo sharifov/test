@@ -74,8 +74,8 @@ class SmsSearch extends Sms
         }
 
         if(empty($this->s_created_dt) && isset($params['SmsSearch']['date_range'])){
-            $query->andFilterWhere(['>=', 'DATE(s_created_dt)', $this->datetime_start])
-                ->andFilterWhere(['<=', 'DATE(s_created_dt)', $this->datetime_end]);
+            $query->andFilterWhere(['>=', 's_created_dt', $this->datetime_start])
+                ->andFilterWhere(['<=', 's_created_dt', $this->datetime_end]);
         } elseif (isset($params['SmsSearch']['s_created_dt'])) {
             $query->andFilterWhere(['=','DATE(s_created_dt)', $this->s_created_dt]);
         }
@@ -194,11 +194,11 @@ class SmsSearch extends Sms
             $subQuery = UserProjectParams::find()->select(['DISTINCT(upp_tw_phone_number)'])->where(['upp_user_id' => $params['SmsSearch']['user_id']])
                 ->andWhere(['and', ['<>', 'upp_tw_phone_number', ''], ['IS NOT', 'upp_tw_phone_number', null]]);
 
-            $subQuery2 = UserProjectParams::find()->select(['DISTINCT(upp_phone_number)'])->where(['upp_user_id' => $params['SmsSearch']['user_id']])
-                ->andWhere(['and', ['<>', 'upp_phone_number', ''], ['IS NOT', 'upp_phone_number', null]]);
+            //$subQuery2 = UserProjectParams::find()->select(['DISTINCT(upp_phone_number)'])->where(['upp_user_id' => $params['SmsSearch']['user_id']])
+            //    ->andWhere(['and', ['<>', 'upp_phone_number', ''], ['IS NOT', 'upp_phone_number', null]]);
 
             $query->andWhere(['or', ['IN', 's_phone_from', $subQuery], ['and', ['IN', 's_phone_to', $subQuery], ['s_type_id' => Sms::TYPE_INBOX]]]);
-            $query->orWhere(['or', ['IN', 's_phone_from', $subQuery2], ['and', ['IN', 's_phone_to', $subQuery2], ['s_type_id' => Sms::TYPE_INBOX]]]);
+            //$query->orWhere(['or', ['IN', 's_phone_from', $subQuery2], ['and', ['IN', 's_phone_to', $subQuery2], ['s_type_id' => Sms::TYPE_INBOX]]]);
         }
 
 

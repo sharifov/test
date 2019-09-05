@@ -1,5 +1,9 @@
 <?php
 
+use common\models\Department;
+use common\models\Project;
+use sales\entities\cases\CasesCategory;
+use sales\entities\cases\CasesStatus;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
@@ -9,37 +13,89 @@ use yii\widgets\ActiveForm;
 ?>
 
 <div class="cases-search">
-
     <?php $form = ActiveForm::begin([
         'action' => ['index'],
         'method' => 'get',
     ]); ?>
-
-    <?= $form->field($model, 'cs_id') ?>
-
-    <?= $form->field($model, 'cs_subject') ?>
-
-    <?= $form->field($model, 'cs_description') ?>
-
-    <?= $form->field($model, 'cs_category') ?>
-
-    <?= $form->field($model, 'cs_status') ?>
-
-    <?php // echo $form->field($model, 'cs_user_id') ?>
-
-    <?php // echo $form->field($model, 'cs_lead_id') ?>
-
-    <?php // echo $form->field($model, 'cs_call_id') ?>
-
-    <?php // echo $form->field($model, 'cs_depart_id') ?>
-
-    <?php // echo $form->field($model, 'cs_created_dt') ?>
-
-    <div class="form-group">
-        <?= Html::submitButton('Search', ['class' => 'btn btn-primary']) ?>
-        <?= Html::resetButton('Reset', ['class' => 'btn btn-outline-secondary']) ?>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="row">
+                <div class="col-md-1">
+                    <?= $form->field($model, 'cs_id') ?>
+                </div>
+                <div class="col-md-2">
+                    <?= $form->field($model, 'cs_gid') ?>
+                </div>
+                <div class="col-md-1">
+                    <?= $form->field($model, 'cs_project_id')->dropDownList(Project::getList(), ['prompt' => '-']) ?>
+                </div>
+                <div class="col-md-1">
+                    <?= $form->field($model, 'cs_dep_id')->dropDownList(Department::getList(), ['prompt' => '-']) ?>
+                </div>
+                <div class="col-md-1">
+                    <?= $form->field($model, 'cs_category')->dropDownList(CasesCategory::getList(), ['prompt' => '-']) ?>
+                </div>
+                <div class="col-md-1">
+                    <?= $form->field($model, 'cs_status')->dropDownList(CasesStatus::STATUS_LIST, ['prompt' => '-']) ?>
+                </div>
+                <div class="col-md-1">
+                    <?= $form->field($model, 'cs_subject') ?>
+                </div>
+                <div class="col-md-1">
+                    <?= $form->field($model, 'cs_user_id') ?>
+                </div>
+                <div class="col-md-1">
+                    <?= $form->field($model, 'cs_lead_id') ?>
+                </div>
+                <div class="col-md-1">
+                    <?= $form->field($model, 'cs_created_dt')->widget(
+                        \dosamigos\datepicker\DatePicker::class, [
+                        'inline' => false,
+                        'clientOptions' => [
+                            'autoclose' => true,
+                            'format' => 'dd-M-yyyy',
+                        ]
+                    ]);?>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-1">
+            <?= $form->field($model, 'cssSaleId') ?>
+        </div>
+        <div class="col-md-1">
+            <?= $form->field($model, 'cssBookId') ?>
+        </div>
+        <div class="col-md-1">
+            <?= $form->field($model, 'salePNR') ?>
+        </div>
+        <div class="col-md-1">
+            <?= $form->field($model, 'paxFirstName') ?>
+        </div>
+        <div class="col-md-1">
+            <?= $form->field($model, 'paxLastName') ?>
+        </div>
+        <div class="col-md-1">
+            <?= $form->field($model, 'clientPhone') ?>
+        </div>
+        <div class="col-md-2">
+            <?= $form->field($model, 'clientEmail') ?>
+        </div>
+        <div class="col-md-2">
+            <?= $form->field($model, 'airlineConfirmationNumber') ?>
+        </div>
+        <div class="col-md-1">
+            <?= $form->field($model, 'ticketNumber') ?>
+        </div>
     </div>
 
-    <?php ActiveForm::end(); ?>
+</div>
 
+<div class="form-group text-center">
+    <?= Html::submitButton('<i class="fa fa-search"></i> Search cases', ['class' => 'btn btn-primary']) ?>
+    <?= Html::a('<i class="glyphicon glyphicon-repeat"></i> Reset form', ['cases/index'], ['class' => 'btn btn-warning']) ?>
+</div>
+
+<?php ActiveForm::end(); ?>
 </div>

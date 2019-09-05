@@ -5461,3 +5461,7 @@ input[disabled] + .radio-tab__text {
 .multiple-input-list.table {
   background-color: transparent;
 }
+
+.modal-body{
+  overflow: visible !important;
+}

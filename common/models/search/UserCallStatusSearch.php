@@ -69,8 +69,8 @@ class UserCallStatusSearch extends UserCallStatus
         }
 
         if(empty($this->us_created_dt) && isset($params['UserCallStatusSearch']['date_range'])){
-            $query->andFilterWhere(['>=', 'DATE(us_created_dt)', $this->datetime_start])
-                ->andFilterWhere(['<=', 'DATE(us_created_dt)', $this->datetime_end]);
+            $query->andFilterWhere(['>=', 'us_created_dt', $this->datetime_start])
+                ->andFilterWhere(['<=', 'us_created_dt', $this->datetime_end]);
         }
 
         if (isset($params['UserCallStatusSearch']['us_created_dt'])) {

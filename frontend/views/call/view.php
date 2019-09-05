@@ -54,6 +54,12 @@ $this->params['breadcrumbs'][] = $this->title;
                 'c_caller_name',
                 'c_parent_call_sid',
                 'c_call_duration',
+                [
+                    'attribute' => 'c_client_id',
+                    'value' => function (\common\models\Call $model) {
+                        return  $model->c_client_id ?: '-';
+                    },
+                ],
 
 
 

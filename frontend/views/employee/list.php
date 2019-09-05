@@ -255,7 +255,7 @@ if ($isAdmin || $isSuperAdmin) {
                         $valueArr = [];
 
                         foreach ($list as $item) {
-                            $valueArr[] = '<div class="col-md-4">'.Html::tag('div', /*Html::tag('i', '', ['class' => 'fa fa-users']) . ' ' .*/ Html::encode($item), ['class' => 'label label-info']).'</div>';
+                            $valueArr[] = '<div class="col-md-4">'.Html::tag('div', /*Html::tag('i', '', ['class' => 'fa fa-users']) . ' ' .*/ Html::encode($item), ['class' => 'label label-default']).'</div>';
                         }
 
                         $value = '<div class="row">'.implode(' ', $valueArr).'</div>';
@@ -347,15 +347,16 @@ if ($isAdmin || $isSuperAdmin) {
 
                         if($projectParams) {
                             foreach ($projectParams as $projectParam) {
-                                $str.='<tr>';
+                                $str .= '<tr>';
 //                                $str.='<td>'.Html::encode($projectParam->upp_project_id).'</td>';
-                                $str.='<td>'.Html::encode($projectParam->uppProject->name).'</td>';
-                                $str.='<td>'.Html::encode($projectParam->upp_tw_phone_number).'</td>';
+                                $str .= '<td>'.Html::encode($projectParam->uppProject->name).'</td>';
+                                $str .= '<td>'.Html::encode($projectParam->upp_tw_phone_number).'</td>';
+                                $str .= '<td title="' . ($projectParam->uppDep ? $projectParam->uppDep->dep_name : '-') . '">' . Html::encode($projectParam->upp_dep_id) . '</td>';
 
                                 if ($projectParam->upp_allow_general_line) {
-                                    $str.='<td><span class="label label-success">Yes</span></td>';
+                                    $str .= '<td><span class="label label-success">Yes</span></td>';
                                 } else {
-                                    $str.='<td><span class="label label-danger">No</span></td>';
+                                    $str .= '<td><span class="label label-danger">No</span></td>';
                                 }
 
                                 //$str.='<td>'.Html::encode($projectParam->upp_tw_sip_id).'</td>';

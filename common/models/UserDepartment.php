@@ -2,9 +2,10 @@
 
 namespace common\models;
 
-use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
+use yii\db\ActiveQuery;
+use yii\helpers\ArrayHelper;
 
 /**
  * This is the model class for table "user_department".
@@ -16,20 +17,21 @@ use yii\db\ActiveRecord;
  * @property Department $udDep
  * @property Employee $udUser
  */
-class UserDepartment extends \yii\db\ActiveRecord
+class UserDepartment extends ActiveRecord
 {
+
     /**
-     * {@inheritdoc}
+     * @return string
      */
-    public static function tableName()
+    public static function tableName(): string
     {
-        return 'user_department';
+        return '{{%user_department}}';
     }
 
     /**
-     * {@inheritdoc}
+     * @return array
      */
-    public function rules()
+    public function rules(): array
     {
         return [
             [['ud_user_id', 'ud_dep_id'], 'required'],
@@ -42,9 +44,9 @@ class UserDepartment extends \yii\db\ActiveRecord
     }
 
     /**
-     * {@inheritdoc}
+     * @return array
      */
-    public function attributeLabels()
+    public function attributeLabels(): array
     {
         return [
             'ud_user_id' => 'User ID',
@@ -53,6 +55,9 @@ class UserDepartment extends \yii\db\ActiveRecord
         ];
     }
 
+    /**
+     * @return array
+     */
     public function behaviors(): array
     {
         return [
@@ -68,26 +73,48 @@ class UserDepartment extends \yii\db\ActiveRecord
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
-    public function getUdDep()
+    public function getUdDep(): ActiveQuery
     {
         return $this->hasOne(Department::class, ['dep_id' => 'ud_dep_id']);
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
-    public function getUdUser()
+    public function getUdUser(): ActiveQuery
     {
         return $this->hasOne(Employee::class, ['id' => 'ud_user_id']);
     }
 
     /**
-     * {@inheritdoc}
-     * @return UserDepartmentQuery the active query used by this AR class.
+     * @param int $userId
+     * @return array
      */
-    public static function find()
+    public static function getDepartmentsAccess(int $userId): array
+    {
+        $conditions = [];
+
+        /** @var Employee $user */
+        if (isset(\Yii::$app->user->identity) && \Yii::$app->user->identity instanceof Employee && \Yii::$app->user->id === $userId ) {
+            $user = \Yii::$app->user->identity;
+        } elseif ((!$user = Employee::findOne($userId)) || !$user->isActive()) {
+            throw new \DomainException('User not found or user is inactive');
+        }
+
+        if (!$user->isAdmin()) {
+            $conditions = ['dep_id' => static::find()->depsByUser($userId)];
+        }
+
+        $departments = Department::find()->select(['dep_id', 'dep_name'])->andWhere($conditions)->asArray()->all();
+        return ArrayHelper::map($departments, 'dep_id', 'dep_name');
+    }
+
+    /**
+     * @return UserDepartmentQuery
+     */
+    public static function find(): UserDepartmentQuery
     {
         return new UserDepartmentQuery(get_called_class());
     }

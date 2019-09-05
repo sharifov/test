@@ -47,6 +47,12 @@ $this->title = 'Call Id: ' . $model->c_id;
                         return $model->getCallTypeName();
                     },
                 ],
+                [
+                    'attribute' => 'c_client_id',
+                    'value' => function (\common\models\Call $model) {
+                        return  $model->c_client_id ?: '-';
+                    },
+                ],
                 'c_from',
                 'c_to',
                 //'c_sip',

@@ -103,12 +103,6 @@ class CommunicationSearch extends Model
             ->from(['union_table' => $query1->union($query2)]) //->union($query3)
         ; //->orderBy(['created_dt' => SORT_DESC, 'id' => SORT_DESC]);
 
-        //$datetime_start = '2019-02-11';
-        //$datetime_end = '2019-02-25';
-
-        /*$query->andFilterWhere(['>=', 'DATE(created_dt)', $datetime_start])
-            ->andFilterWhere(['<=', 'DATE(created_dt)', $datetime_end]);*/
-
         // add conditions that should always apply here
 
         $dataProvider = new ActiveDataProvider([
@@ -189,13 +183,11 @@ class CommunicationSearch extends Model
             'communication_type_id' => $this->communication_type_id,
             'created_user_id'   => $this->created_user_id,
             //'user_group_id' => $this->user_group_id,
-
-
         ]);
 
         if(empty($this->created_dt)){
-            $query->andFilterWhere(['>=', 'DATE(created_dt)', $this->datetime_start])
-                ->andFilterWhere(['<=', 'DATE(created_dt)', $this->datetime_end]);
+            $query->andFilterWhere(['>=', 'created_dt', $this->datetime_start])
+                ->andFilterWhere(['<=', 'created_dt', $this->datetime_end]);
         } else {
             $query->andFilterWhere(['=','DATE(created_dt)', $this->created_dt]);
         }

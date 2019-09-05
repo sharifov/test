@@ -155,7 +155,7 @@ class Notifications extends ActiveRecord
      */
     public static function findNew($user_id = 0)
     {
-        $list = self::find()->where(['n_user_id' => $user_id, 'n_new' => true, 'n_deleted' => false])->all();
+        $list = self::find()->where(['n_user_id' => $user_id, 'n_new' => true, 'n_deleted' => false])->limit(10)->orderBy(['n_id' => SORT_DESC])->all();
         return $list;
     }
 
@@ -274,6 +274,9 @@ class Notifications extends ActiveRecord
     }
 
 
+    /**
+     *
+     */
     public static function pingUserMap(): void
     {
         $users = UserConnection::find()

@@ -3,12 +3,11 @@
 namespace common\models\search;
 
 use common\models\Employee;
-use common\models\UserGroupAssign;
 use kartik\daterange\DateRangeBehavior;
+use sales\repositories\call\CallSearchRepository;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use common\models\Call;
-use yii\helpers\VarDumper;
 
 /**
  * CallSearch represents the model behind the search form of `common\models\Call`.
@@ -19,6 +18,8 @@ use yii\helpers\VarDumper;
  * @property string $createTimeRange
  * @property int $createTimeStart
  * @property int $createTimeEnd
+ *
+ * @property CallSearchRepository $callSearchRepository
  */
 class CallSearch extends Call
 {
@@ -36,13 +37,26 @@ class CallSearch extends Call
 
     public $dep_ids = [];
 
+    private $callSearchRepository;
+
+    /**
+     * CallSearch constructor.
+     * @param array $config
+     * @throws \yii\base\InvalidConfigException
+     */
+    public function __construct($config = [])
+    {
+        $this->callSearchRepository = \Yii::createObject(CallSearchRepository::class);
+        parent::__construct($config);
+    }
+
     /**
      * {@inheritdoc}
      */
     public function rules()
     {
         return [
-            [['c_id', 'c_call_type_id', 'c_lead_id', 'c_created_user_id', 'c_com_call_id', 'c_project_id', 'c_is_new', 'c_is_deleted', 'supervision_id', 'limit', 'c_recording_duration', 'c_source_type_id', 'call_duration_from', 'call_duration_to', 'c_case_id'], 'integer'],
+            [['c_id', 'c_call_type_id', 'c_lead_id', 'c_created_user_id', 'c_com_call_id', 'c_project_id', 'c_is_new', 'c_is_deleted', 'supervision_id', 'limit', 'c_recording_duration', 'c_source_type_id', 'call_duration_from', 'call_duration_to', 'c_case_id', 'c_client_id'], 'integer'],
             [['c_call_sid', 'c_account_sid', 'c_from', 'c_to', 'c_sip', 'c_call_status', 'c_api_version', 'c_direction', 'c_forwarded_from', 'c_caller_name', 'c_parent_call_sid', 'c_call_duration', 'c_sip_response_code', 'c_recording_url', 'c_recording_sid',
                 'c_timestamp', 'c_uri', 'c_sequence_number', 'c_created_dt', 'c_updated_dt', 'c_error_message', 'c_price', 'statuses', 'limit', 'dep_ids'], 'safe'],
             [['createTimeRange'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
@@ -73,14 +87,14 @@ class CallSearch extends Call
     }
 
     /**
-     * Creates data provider instance with search query applied
-     *
-     * @param array $params
+     * @param $params
+     * @param Employee $user
      * @return ActiveDataProvider
+     * @throws \Exception
      */
-    public function search($params)
+    public function search($params, Employee $user): ActiveDataProvider
     {
-        $query = Call::find()->with('cCreatedUser', 'cProject');
+        $query = $this->callSearchRepository->getSearchQuery($user);
 
         // add conditions that should always apply here
 
@@ -120,14 +134,6 @@ class CallSearch extends Call
         $query->andFilterWhere(['<=','c_call_duration', $this->call_duration_to]);
 
 
-
-        if($this->supervision_id > 0) {
-            $subQuery1 = UserGroupAssign::find()->select(['ugs_group_id'])->where(['ugs_user_id' => $this->supervision_id]);
-            $subQuery = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->where(['IN', 'ugs_group_id', $subQuery1]);
-            $query->andWhere(['IN', 'c_created_user_id', $subQuery]);
-        }
-
-
         // grid filtering conditions
         $query->andFilterWhere([
             'c_id' => $this->c_id,
@@ -145,6 +151,7 @@ class CallSearch extends Call
             'c_source_type_id' => $this->c_source_type_id,
             'c_call_sid' => $this->c_call_sid,
             'c_parent_call_sid' => $this->c_parent_call_sid,
+            'c_client_id' => $this->c_client_id
 
         ]);
 
@@ -236,7 +243,8 @@ class CallSearch extends Call
             'c_source_type_id' => $this->c_source_type_id,
             'c_call_sid' => $this->c_call_sid,
             'c_parent_call_sid' => $this->c_parent_call_sid,
-            'c_call_status' => $this->c_call_status
+            'c_call_status' => $this->c_call_status,
+            'c_client_id' => $this->c_client_id
         ]);
 
         $query->andFilterWhere(['like', 'c_account_sid', $this->c_account_sid])
@@ -306,7 +314,7 @@ class CallSearch extends Call
         }
 
 
-        $query->with(['cProject', 'cLead', 'cLead.leadFlightSegments', 'cCreatedUser', 'cDep']);
+        $query->with(['cProject', 'cLead', 'cLead.leadFlightSegments', 'cCreatedUser', 'cDep', 'callUserAccesses', 'cuaUsers']);
 
         return $dataProvider;
     }

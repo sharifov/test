@@ -13,6 +13,7 @@ use DateTime;
 use common\components\ChartTools;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
+use yii\helpers\Html;
 use yii\helpers\VarDumper;
 
 
@@ -53,14 +54,18 @@ use yii\helpers\VarDumper;
  * @property int $c_source_type_id
  * @property int $c_dep_id
  * @property int $c_case_id
+ * @property int $c_client_id
  *
  * @property Employee $cCreatedUser
  * @property Cases $cCase
+ * @property Client $cClient
  * @property Department $cDep
  * @property Lead $cLead
  * @property Lead2 $cLead2
  * @property Project $cProject
  * @property Cases[] $cases
+ * @property CallUserAccess[] $callUserAccesses
+ * @property Employee[] $cuaUsers
  */
 class Call extends \yii\db\ActiveRecord implements AggregateRoot
 {
@@ -132,6 +137,13 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
         self::SOURCE_DIRECT_CALL  => 'Direct Call',
         self::SOURCE_REDIRECT_CALL  => 'Redirect Call',
         self::SOURCE_TRANSFER_CALL  => 'Transfer Call',
+    ];
+
+    public const SHORT_SOURCE_LIST = [
+        self::SOURCE_GENERAL_LINE => 'GL',
+        self::SOURCE_DIRECT_CALL  => 'DC',
+        self::SOURCE_REDIRECT_CALL  => 'RC',
+        self::SOURCE_TRANSFER_CALL  => 'TC',
     ];
 
     /**
@@ -269,7 +281,7 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
     {
         return [
             [['c_call_sid'], 'required'],
-            [['c_call_type_id', 'c_lead_id', 'c_created_user_id', 'c_com_call_id', 'c_project_id', 'c_call_duration', 'c_recording_duration', 'c_dep_id', 'c_case_id'], 'integer'],
+            [['c_call_type_id', 'c_lead_id', 'c_created_user_id', 'c_com_call_id', 'c_project_id', 'c_call_duration', 'c_recording_duration', 'c_dep_id', 'c_case_id', 'c_client_id'], 'integer'],
             [['c_price'], 'number'],
             [['c_is_new'], 'default', 'value' => true],
             [['c_is_new', 'c_is_deleted'], 'boolean'],
@@ -283,6 +295,7 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
             [['c_timestamp', 'c_sequence_number'], 'string', 'max' => 40],
             [['c_error_message'], 'string', 'max' => 500],
             [['c_case_id'], 'exist', 'skipOnError' => true, 'targetClass' => Cases::class, 'targetAttribute' => ['c_case_id' => 'cs_id']],
+            [['c_client_id'], 'exist', 'skipOnError' => true, 'targetClass' => Client::class, 'targetAttribute' => ['c_client_id' => 'id']],
             [['c_created_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['c_created_user_id' => 'id']],
             [['c_dep_id'], 'exist', 'skipOnError' => true, 'targetClass' => Department::class, 'targetAttribute' => ['c_dep_id' => 'dep_id']],
             [['c_lead_id'], 'exist', 'skipOnError' => true, 'targetClass' => Lead::class, 'targetAttribute' => ['c_lead_id' => 'id']],
@@ -330,6 +343,7 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
             'c_source_type_id' => 'Source Type',
             'c_dep_id' => 'Department ID',
             'c_case_id' => 'Case ID',
+            'c_client_id' => 'Client',
         ];
     }
 
@@ -347,6 +361,24 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
         ];
     }
 
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getCallUserAccesses()
+    {
+        return $this->hasMany(CallUserAccess::class, ['cua_call_id' => 'c_id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getCuaUsers()
+    {
+        return $this->hasMany(Employee::class, ['id' => 'cua_user_id'])->viaTable('call_user_access', ['cua_call_id' => 'c_id']);
+    }
+
+
     public function getCases()
     {
         return $this->hasMany(Cases::class, ['cs_call_id' => 'c_id']);
@@ -358,6 +390,14 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
     public function getCCase()
     {
         return $this->hasOne(Cases::class, ['cs_id' => 'c_case_id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getCClient()
+    {
+        return $this->hasOne(Client::class, ['id' => 'c_client_id']);
     }
 
     /**
@@ -433,6 +473,11 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
         return self::SOURCE_LIST[$this->c_source_type_id] ?? '-';
     }
 
+    public function getShortSourceName()
+    {
+        return self::SHORT_SOURCE_LIST[$this->c_source_type_id] ?? '-';
+    }
+
     /**
      * @return mixed|string
      */
@@ -462,6 +507,60 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
 //                }
 //            }
 
+
+            if(isset($changedAttributes['c_call_status']) && $this->c_call_type_id == self::CALL_TYPE_IN && in_array($this->c_call_status, [self::CALL_STATUS_NO_ANSWER, self::CALL_STATUS_COMPLETED, self::CALL_STATUS_BUSY, self::CALL_STATUS_IN_PROGRESS, self::CALL_STATUS_CANCELED])) { //self::CALL_STATUS_BUSY,
+                $callUserAccessAny = CallUserAccess::find()->where(['cua_status_id' => [CallUserAccess::STATUS_TYPE_PENDING], 'cua_call_id' => $this->c_id])->all();
+                if ($callUserAccessAny) {
+                    foreach ($callUserAccessAny as $callAccess) {
+                        $callAccess->noAnsweredCall();
+                        if (!$callAccess->update()) {
+                            Yii::error(VarDumper::dumpAsString($callAccess->errors), 'IncomingCallWidget:acceptCall:UserCallStatus:save');
+                        }
+                    }
+                }
+
+                if ($this->isCompleted() || $this->isCanceled() || $this->isNoAnswer() || $this->isBusy()) {
+
+                    $callAcceptExist = CallUserAccess::find()->where(['cua_status_id' => CallUserAccess::STATUS_TYPE_ACCEPT, 'cua_call_id' => $this->c_id])->exists();
+                    if (!$callAcceptExist) {
+                        if ($this->c_created_user_id) {
+                            Notifications::create(
+                                $this->c_created_user_id,
+                                'Missed Call (' . $this->getSourceName() . ')',
+                                'Missed Call (' . $this->getSourceName() . ')  from ' . $this->c_from . ' to ' . $this->c_to,
+                                Notifications::TYPE_WARNING,
+                                true);
+
+                            Notifications::socket($this->c_created_user_id, null, 'getNewNotification', [], true);
+                        }
+
+                        if ($this->c_lead_id && $this->cLead2 && $this->cLead2->employee_id) {
+                            Notifications::create(
+                                $this->cLead2->employee_id,
+                                'Missed Call (' . $this->getSourceName() . ')',
+                                'Missed Call (' . $this->getSourceName() . ')  from ' . $this->c_from . ' to ' . $this->c_to . ' <br>Lead ID: ' . $this->c_lead_id,
+                                Notifications::TYPE_WARNING,
+                                true);
+                            Notifications::socket($this->cLead2->employee_id, null, 'getNewNotification', [], true);
+                        }
+
+                        if ($this->c_case_id && $this->cCase && $this->cCase->cs_user_id) {
+                            Notifications::create(
+                                $this->cCase->cs_user_id,
+                                'Missed Call (' . $this->getSourceName() . ')',
+                                'Missed Call (' . $this->getSourceName() . ') from ' . $this->c_from . ' to ' . $this->c_to . ' <br>Case ID: ' . $this->c_case_id,
+                                Notifications::TYPE_WARNING,
+                                true);
+                            Notifications::socket($this->cCase->cs_user_id, null, 'getNewNotification', [], true);
+                        }
+
+
+                    }
+                }
+            }
+
+
+
             if(isset($changedAttributes['c_call_status']) && (int) $this->c_call_type_id === self::CALL_TYPE_IN && $this->c_case_id && $this->c_call_status === self::CALL_STATUS_IN_PROGRESS) {
                 if($this->c_created_user_id && $this->cCase && $this->c_created_user_id !== $this->cCase->cs_user_id) {
                     try {
@@ -478,17 +577,17 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
 
             if(isset($changedAttributes['c_call_status']) && $this->c_call_type_id == self::CALL_TYPE_IN && $this->c_lead_id && in_array($this->c_call_status, [self::CALL_STATUS_NO_ANSWER, self::CALL_STATUS_COMPLETED])) { //self::CALL_STATUS_BUSY,
 
-                if($this->c_call_status == self::CALL_STATUS_NO_ANSWER) {
-                    if ($this->c_created_user_id) {
-                        Notifications::create(
-                            $this->c_created_user_id,
-                            'Missing Call (' . $this->getSourceName() . ')',
-                            'Missing Call (' . $this->getSourceName() . ')  from ' . $this->c_from . ' to ' . $this->c_to . ' <br>Lead ID: ' . $this->c_lead_id,
-                            Notifications::TYPE_WARNING,
-                            true);
-                        Notifications::socket($this->c_created_user_id, null, 'getNewNotification', [], true);
-                    }
-                }
+//                if($this->c_call_status == self::CALL_STATUS_NO_ANSWER) {
+//                    if ($this->c_created_user_id) {
+//                        Notifications::create(
+//                            $this->c_created_user_id,
+//                            'Missed Call (' . $this->getSourceName() . ')',
+//                            'Missed Call (' . $this->getSourceName() . ')  from ' . $this->c_from . ' to ' . $this->c_to . ' <br>Lead ID: ' . $this->c_lead_id,
+//                            Notifications::TYPE_WARNING,
+//                            true);
+//                        Notifications::socket($this->c_created_user_id, null, 'getNewNotification', [], true);
+//                    }
+//                }
 
                 if(in_array($this->c_call_status, [self::CALL_STATUS_NO_ANSWER, self::CALL_STATUS_COMPLETED]) && $lead = $this->cLead2) {
                     if($lead->l_call_status_id == Lead::CALL_STATUS_QUEUE) {
@@ -500,7 +599,7 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
                 }
 
                 /*if($this->cLead && $this->cLead->employee_id && $this->c_created_user_id !== $this->cLead->employee_id) {
-                    Notifications::create($this->c_created_user_id, 'On your Lead Missing Call ('.$this->getSourceName().')  from ' . $this->c_from . ' to ' . $this->c_to . ' <br>Lead ID: ' . $this->c_lead_id , Notifications::TYPE_WARNING, true);
+                    Notifications::create($this->c_created_user_id, 'On your Lead Missed Call ('.$this->getSourceName().')  from ' . $this->c_from . ' to ' . $this->c_to . ' <br>Lead ID: ' . $this->c_lead_id , Notifications::TYPE_WARNING, true);
                     Notifications::socket($this->c_created_user_id, null, 'getNewNotification', [], true);
                 }*/
 
@@ -668,8 +767,36 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
     {
         try {
             if ($call) {
-                if ($call->c_created_user_id) {
+
+                /*if ($call->c_created_user_id) {
                     return false;
+                }*/
+
+                if($call->c_call_status !== self::CALL_STATUS_QUEUE) {
+                    \Yii::warning('Error: Call ('.$call->c_call_status.') not in status QUEUE: ' . $call->c_id. ',  User: ' . $user_id, 'Call:applyCallToAgent:callRedirect');
+                    return false;
+                }
+
+                $call->c_call_status = self::CALL_STATUS_RINGING;
+
+                if($call->c_created_user_id && (int) $call->c_created_user_id !== $user_id) {
+                    $call->c_source_type_id = self::SOURCE_REDIRECT_CALL;
+
+
+                    $user = Employee::findOne($user_id);
+
+                    Notifications::create(
+                        $call->c_created_user_id,
+                        'Missed Call (' . $call->getSourceName() . ')',
+                        'Missed Call (' . $call->getSourceName() . ')  from ' . $call->c_from . ' to ' . $call->c_to . '. Taken by Agent: ' . ($user ? Html::encode($user->username) : '-'),
+                        Notifications::TYPE_WARNING,
+                        true);
+
+                    Notifications::socket($call->c_created_user_id, null, 'getNewNotification', [], true);
+
+                    //Notifications::create($call->c_source_type_id, 'New incoming Call (' . $this->cua_call_id . ')', 'New incoming Call (' . $this->cua_call_id . ')', Notifications::TYPE_SUCCESS, true);
+                    //Notifications::socket($this->cua_user_id, null, 'getNewNotification', [], true);
+
                 }
 
                 $call->c_created_user_id = $user_id;
@@ -686,9 +813,9 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
                         return false;
                     }
 
-                    $call->c_call_status = self::CALL_STATUS_RINGING;
+                    /*$call->c_call_status = self::CALL_STATUS_RINGING;
                     $call->c_created_user_id = $user_id;
-                    $call->update();
+                    $call->update();*/
 
                     \Yii::info(VarDumper::dumpAsString($res), 'info\Call:applyCallToAgent:callRedirect');
                     return true;
@@ -696,6 +823,35 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
                 \Yii::warning('Error: ' . VarDumper::dumpAsString($res), 'Call:applyCallToAgent:callRedirect');
             }
 
+        } catch (\Throwable $e) {
+            \Yii::error(VarDumper::dumpAsString([$e->getMessage(), $e->getFile(), $e->getLine()]), 'Call:applyCallToAgent');
+        }
+        return false;
+    }
+
+
+    /**
+     * @param Call $call
+     * @param int $user_id
+     * @return bool
+     */
+    public static function applyCallToAgentAccess(Call $call, int $user_id): bool
+    {
+        try {
+            if ($call) {
+                $exist = CallUserAccess::find()->where(['cua_user_id' => $user_id, 'cua_call_id' => $call->c_id])->exists();
+                if(!$exist) {
+                    $callUserAccess = new CallUserAccess();
+                    $callUserAccess->cua_call_id = $call->c_id;
+                    $callUserAccess->cua_user_id = $user_id;
+                    $callUserAccess->acceptPending();
+                    if(!$callUserAccess->save()) {
+                        Yii::error(VarDumper::dumpAsString($callUserAccess->errors), 'CallQueueJob:execute:CallUserAccess:save');
+                    } else {
+                        return true;
+                    }
+                }
+            }
         } catch (\Throwable $e) {
             \Yii::error(VarDumper::dumpAsString([$e->getMessage(), $e->getFile(), $e->getLine()]), 'Call:applyCallToAgent');
         }
@@ -747,7 +903,7 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
             }
 
             //$subQuery = ProjectEmployeeAccess::find()->select(['DISTINCT(project_id)'])->where(['employee_id' => $user->id]);
-            $subQueryUd = UserDepartment::find()->select(['DISTINCT(ud_dep_id)'])->where(['ud_user_id' => $user->id]);
+            $subQueryUd = UserDepartment::find()->depsByUser($user->id);
 
             $calls = self::find()->where(['c_call_status' => self::CALL_STATUS_QUEUE])
                 //->andWhere(['IN', 'c_project_id', $subQuery])
@@ -922,4 +1078,77 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
         }
         return $callStats;
     }
+
+    /**
+     * @return bool
+     */
+    public function isRinging(): bool
+    {
+        return $this->c_call_status === self::CALL_STATUS_RINGING;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isInProgress(): bool
+    {
+        return $this->c_call_status === self::CALL_STATUS_IN_PROGRESS;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isIvr(): bool
+    {
+        return $this->c_call_status === self::CALL_STATUS_IVR;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isQueue(): bool
+    {
+        return $this->c_call_status === self::CALL_STATUS_QUEUE;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isBusy(): bool
+    {
+        return $this->c_call_status === self::CALL_STATUS_BUSY;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isCanceled(): bool
+    {
+        return $this->c_call_status === self::CALL_STATUS_CANCELED;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isCompleted(): bool
+    {
+        return $this->c_call_status === self::CALL_STATUS_COMPLETED;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isNoAnswer(): bool
+    {
+        return $this->c_call_status === self::CALL_STATUS_NO_ANSWER;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isFailed(): bool
+    {
+        return $this->c_call_status === self::CALL_STATUS_FAILED;
+    }
+
 }

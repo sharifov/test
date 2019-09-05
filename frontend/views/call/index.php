@@ -1,5 +1,6 @@
 <?php
 
+use common\models\Call;
 use dosamigos\datepicker\DatePicker;
 use yii\helpers\Html;
 use yii\grid\GridView;
@@ -12,7 +13,7 @@ use yii\widgets\Pjax;
 $this->title = 'Call List';
 $this->params['breadcrumbs'][] = $this->title;
 
-if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$app->authManager->getAssignment('qa', Yii::$app->user->id)) {
+if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
     $userList = \common\models\Employee::getList();
     $projectList = \common\models\Project::getList();
 } else {
@@ -208,6 +209,20 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$
                     return  $model->c_case_id ? Html::a($model->c_case_id, ['cases/view', 'gid' => $model->cCase->cs_gid], ['target' => '_blank', 'data-pjax' => 0]) : '-';
                 },
                 'format' => 'raw'
+            ],
+            [
+                'label' => 'Department',
+                'attribute' => 'c_dep_id',
+                'value' => function (Call $model) {
+                    return $model->cDep ? $model->cDep->dep_name : '-';
+                },
+            ],
+
+            [
+                'attribute' => 'c_client_id',
+                'value' => function (\common\models\Call $model) {
+                    return  $model->c_client_id ?: '-';
+                },
             ],
 
             'c_from',

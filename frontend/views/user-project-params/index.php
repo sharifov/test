@@ -58,10 +58,19 @@ if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
                 //'contentOptions' => ['class' => 'text-right']
             ],
 
+            [
+                'attribute' => 'upp_dep_id',
+                'value' => function(\common\models\UserProjectParams $model) {
+                    return $model->uppDep ? ''.$model->uppDep->dep_name.'' : '-';
+                },
+                'filter' => \common\models\Department::getList()
+                //'format' => 'raw'
+                //'contentOptions' => ['class' => 'text-right']
+            ],
+
             //'upp_user_id',
             //'upp_project_id',
             'upp_email:email',
-            'upp_phone_number',
             'upp_tw_phone_number',
             [
                 'attribute' => 'upp_allow_general_line',
