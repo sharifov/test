@@ -139,6 +139,13 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
         self::SOURCE_TRANSFER_CALL  => 'Transfer Call',
     ];
 
+    public const SHORT_SOURCE_LIST = [
+        self::SOURCE_GENERAL_LINE => 'GL',
+        self::SOURCE_DIRECT_CALL  => 'DC',
+        self::SOURCE_REDIRECT_CALL  => 'RC',
+        self::SOURCE_TRANSFER_CALL  => 'TC',
+    ];
+
     /**
      * @param $callSid
      * @param $accountSid
@@ -464,6 +471,11 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
     public function getSourceName()
     {
         return self::SOURCE_LIST[$this->c_source_type_id] ?? '-';
+    }
+
+    public function getShortSourceName()
+    {
+        return self::SHORT_SOURCE_LIST[$this->c_source_type_id] ?? '-';
     }
 
     /**

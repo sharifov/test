@@ -45,6 +45,9 @@ use \common\models\Call;
                 <?php if($model->cDep):?>
                     <span class="label label-warning"><?=$model->cDep ? Html::encode($model->cDep->dep_name) : '-'?></span>
                 <?php endif; ?>
+                <?php if ($model->c_source_type_id):?>
+                    <span class="label label-info"><?=$model->getShortSourceName()?></span>
+                <?php endif; ?>
             </td>
 
             <?php //if($model->c_call_status === Call::CALL_STATUS_RINGING || $model->c_call_status === Call::CALL_STATUS_IN_PROGRESS): ?>
@@ -91,7 +94,7 @@ use \common\models\Call;
                                 $label = 'danger';
                                 break;
                             default:
-                                $label = 'info';
+                                $label = 'default';
                         }
 
                         ?>
@@ -149,6 +152,10 @@ use \common\models\Call;
             <td class="text-center" width="110">
                 <?php if($model->c_call_type_id === Call::CALL_TYPE_IN):?>
                     <div>
+                        <?php if((int) $model->c_source_type_id === Call::SOURCE_GENERAL_LINE):?>
+                            <i class="fa fa-fax fa-2x fa-border"></i>
+                        <?php endif;?>
+
                         <?php if($model->c_created_user_id):?>
                             <i class="fa fa-user fa-2x fa-border"></i><br>
                             <?=Html::encode($model->cCreatedUser->username)?>
