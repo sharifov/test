@@ -25,12 +25,22 @@ class CasesQController extends FController
 
     public function actionInbox()
     {
+        /** @var Employee $user */
+        $user = Yii::$app->user->identity;
+
+        if ($user->isAgent()) {
+            $isAgent = true;
+        } else {
+            $isAgent = false;
+        }
+
         $searchModel = new CasesQSearch();
         $dataProvider = $searchModel->searchInbox(Yii::$app->request->queryParams, Yii::$app->user->identity);
 
         return $this->render('inbox', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
+            'isAgent' => $isAgent,
         ]);
     }
 
