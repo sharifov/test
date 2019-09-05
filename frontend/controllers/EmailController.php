@@ -306,15 +306,16 @@ class EmailController extends FController
      * @throws ForbiddenHttpException
      * @throws NotFoundHttpException
      */
-    public function actionView($id)
+    public function actionView($id): string
     {
 
         $model =$this->findModel($id);
 
-        $is_admin = Yii::$app->user->identity->canRole('admin');
-        $is_supervision = Yii::$app->user->identity->canRole('supervision');
+        /** @var Employee $user */
+        $user = Yii::$app->user->identity;
+        $roleAccess = ($user->isAdmin() || $user->isSupervision() || $user->isExSuper() || $user->isSupSuper() || $user->isQa());
 
-        if(!$is_admin && !$is_supervision) {
+        if(!$roleAccess) {
             $userAccess = UserProjectParams::find()->where(['or', ['upp_email' => $model->e_email_from], ['upp_email' => $model->e_email_to]])->andWhere(['upp_user_id' => Yii::$app->user->id])->exists();
             if(!$userAccess) {
                 throw new ForbiddenHttpException('Access Denied. Email ID:'.$model->e_id);
