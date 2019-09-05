@@ -36,7 +36,6 @@ class EmployeeSearch extends Employee
     public $online;
     public $pageSize;
 
-
     /**
      * {@inheritdoc}
      */
@@ -45,7 +44,7 @@ class EmployeeSearch extends Employee
         return [
             [['id', 'status', 'acl_rules_activated', 'supervision_id', 'user_group_id', 'user_project_id', 'user_params_project_id', 'online', 'user_call_type_id', 'user_department_id'], 'integer'],
             [['username', 'full_name', 'auth_key', 'password_hash', 'password_reset_token', 'email', 'last_activity', 'created_at', 'updated_at', 'user_sip', 'pageSize'], 'safe'],
-            [['timeStart', 'timeEnd'], 'safe'],
+            [['timeStart', 'timeEnd', 'roles'], 'safe'],
             [['timeRange'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
         ];
     }
@@ -98,8 +97,12 @@ class EmployeeSearch extends Employee
             'last_activity' => $this->last_activity,
             'acl_rules_activated' => $this->acl_rules_activated,
             'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at
+            'updated_at' => $this->updated_at,
         ]);
+
+        if ($this->roles){
+            $query->andWhere(['IN', 'employees.id', array_keys(Employee::getListByRole($this->roles))]);
+        }
 
         if ($this->user_group_id > 0) {
             $subQuery = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->where(['=', 'ugs_group_id', $this->user_group_id]);
@@ -115,9 +118,6 @@ class EmployeeSearch extends Employee
             $subQuery = UserProjectParams::find()->select(['DISTINCT(upp_user_id)'])->where(['=', 'upp_project_id', $this->user_params_project_id]);
             $query->andWhere(['IN', 'employees.id', $subQuery]);
         }
-
-
-        //echo $this->user_call_type_id.'+++';
 
         if ($this->user_call_type_id > 0 || $this->user_call_type_id === '0') {
             $subQuery = UserProfile::find()->select(['DISTINCT(up_user_id)'])->where(['=', 'up_call_type_id', $this->user_call_type_id]);
@@ -140,7 +140,6 @@ class EmployeeSearch extends Employee
             $query->andWhere(['IN', 'employees.id', $subQuery]);
         }
 
-
         if ($this->online > 0) {
             if ($this->online == 1) {
                 $subQuery = UserConnection::find()->select(['DISTINCT(uc_user_id)']);
@@ -160,7 +159,6 @@ class EmployeeSearch extends Employee
 
         return $dataProvider;
     }
-
 
     /**
      * Creates data provider instance with search query applied

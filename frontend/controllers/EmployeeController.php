@@ -143,10 +143,9 @@ class EmployeeController extends FController
 
             //VarDumper::dump(json_decode($multipleForm->user_list_json)); exit;
             //VarDumper::dump($multipleForm->user_list); exit;
-
+            //var_dump($multipleForm->timeZone); die();
             if (\is_array($multipleForm->user_list)) {
                 foreach ($multipleForm->user_list as $user_id) {
-
                     $user_id = (int) $user_id;
                     $user = Employee::findOne($user_id);
 
@@ -157,7 +156,6 @@ class EmployeeController extends FController
 //                                $lead->status = $multipleForm->status_id;
 //                                $is_save = true;
 //                            }
-//
 
                         if (is_numeric($multipleForm->up_call_expert_limit)) {
                             $up = $user->userParams;
@@ -169,14 +167,142 @@ class EmployeeController extends FController
                             }
                         }
 
+                        if ($multipleForm->workStart != ""){
+                            $upWT = $user->userParams;
+                            if($upWT) {
+                                $upWT->up_work_start_tm = $multipleForm->workStart . ':00';
+                                if(!$upWT->save()) {
+                                    Yii::error(VarDumper::dumpAsString($upWT->errors), 'Employee:list:multipleupdate:userParams:save');
+                                }
+                            }
+                        }
+
+                        if ($multipleForm->timeZone != ""){
+                            $upTZ = $user->userParams;
+                            if($upTZ) {
+                                $upTZ->up_timezone = $multipleForm->timeZone;
+                                if(!$upTZ->save()) {
+                                    Yii::error(VarDumper::dumpAsString($upTZ->errors), 'Employee:list:multipleupdate:userParams:save');
+                                }
+                            }
+                        }
+
+                        if (is_numeric($multipleForm->workMinutes)) {
+                            $upWM = $user->userParams;
+                            if($upWM) {
+                                $upWM->up_work_minutes = (int)$multipleForm->workMinutes;
+                                if(!$upWM->save()) {
+                                    Yii::error(VarDumper::dumpAsString($upWM->errors), 'Employee:list:multipleupdate:userParams:save');
+                                }
+                            }
+                        }
+
+                        if (is_numeric($multipleForm->inboxShowLimitLeads)) {
+                            $upSLL = $user->userParams;
+                            if($upSLL) {
+                                $upSLL->up_inbox_show_limit_leads = (int)$multipleForm->inboxShowLimitLeads;
+                                if(!$upSLL->save()) {
+                                    Yii::error(VarDumper::dumpAsString($upSLL->errors), 'Employee:list:multipleupdate:userParams:save');
+                                }
+                            }
+                        }
+
+                        if (is_numeric($multipleForm->defaultTakeLimitLeads)) {
+                            $upDTLL = $user->userParams;
+                            if($upDTLL) {
+                                $upDTLL->up_default_take_limit_leads = (int)$multipleForm->defaultTakeLimitLeads;
+                                if(!$upDTLL->save()) {
+                                    Yii::error(VarDumper::dumpAsString($upDTLL->errors), 'Employee:list:multipleupdate:userParams:save');
+                                }
+                            }
+                        }
+
+                        if (is_numeric($multipleForm->minPercentForTakeLeads)) {
+                            $upMPTL = $user->userParams;
+                            if($upMPTL) {
+                                $upMPTL->up_min_percent_for_take_leads = (int)$multipleForm->minPercentForTakeLeads;
+                                if(!$upMPTL->save()) {
+                                    Yii::error(VarDumper::dumpAsString($upMPTL->errors), 'Employee:list:multipleupdate:userParams:save');
+                                }
+                            }
+                        }
+
+                        if (is_numeric($multipleForm->frequencyMinutes)) {
+                            $upFM = $user->userParams;
+                            if($upFM) {
+                                $upFM->up_frequency_minutes = (int)$multipleForm->frequencyMinutes;
+                                if(!$upFM->save()) {
+                                    Yii::error(VarDumper::dumpAsString($upFM->errors), 'Employee:list:multipleupdate:userParams:save');
+                                }
+                            }
+                        }
+
+                        if (is_numeric($multipleForm->baseAmount)) {
+                            $upBA = $user->userParams;
+                            if($upBA) {
+                                $upBA->up_base_amount = $multipleForm->baseAmount;
+                                if(!$upBA->save()) {
+                                    Yii::error(VarDumper::dumpAsString($upBA->errors), 'Employee:list:multipleupdate:userParams:save');
+                                }
+                            }
+                        }
+
+                        if (is_numeric($multipleForm->autoRedial)) {
+                            $upAR = $user->userProfile;
+                            if($upAR) {
+                                $upAR->up_auto_redial = $multipleForm->autoRedial;
+                                if(!$upAR->save()) {
+                                    Yii::error(VarDumper::dumpAsString($upAR->errors), 'Employee:list:multipleupdate:userProfileSettings:save');
+                                }
+                            }
+                        }
+
+                        if (is_numeric($multipleForm->kpiEnable)) {
+                            $upKpi = $user->userProfile;
+                            if($upKpi) {
+                                $upKpi->up_kpi_enable = $multipleForm->kpiEnable;
+                                if(!$upKpi->save()) {
+                                    Yii::error(VarDumper::dumpAsString($upKpi->errors), 'Employee:list:multipleupdate:userProfileSettings:save');
+                                }
+                            }
+                        }
+
+                        if (is_numeric($multipleForm->commissionPercent)) {
+                            $upCP = $user->userParams;
+                            if($upCP) {
+                                $upCP->up_commission_percent = $multipleForm->commissionPercent;
+                                if(!$upCP->save()) {
+                                    Yii::error(VarDumper::dumpAsString($upCP->errors), 'Employee:list:multipleupdate:userParams:save');
+                                }
+                            }
+                        }
+
+                        if(is_numeric($multipleForm->userDepartment)){
+                            $uD = $user->userDepartments[0];
+                            $uD->ud_dep_id = $multipleForm->userDepartment;
+                            if(!$uD->save()) {
+                                Yii::error(VarDumper::dumpAsString($uD->errors), 'Employee:list:multipleupdate:userDepartment:save');
+                            }
+                        }
+
+                        if ($multipleForm->userRole){
+                            Employee::roleUpdate($user->id, $multipleForm->userRole);
+                        }
+
+                        if (is_numeric($multipleForm->status)){
+                            $user->status = $multipleForm->status;
+                            $user->form_roles = ArrayHelper::map(Yii::$app->authManager->getRolesByUser($user->id), 'name', 'name');
+                            if(!$user->save()) {
+                                Yii::error(VarDumper::dumpAsString($user->errors), 'Employee:list:multipleupdate:userParams:save');
+                            }
+                        }
+
                         if ($is_save) {
                             $user->save();
                         }
                     }
                 }
             }
-
-
         }
 
         $searchModel = new EmployeeSearch();
@@ -188,15 +314,12 @@ class EmployeeController extends FController
 
         $dataProvider = $searchModel->search($params);
 
-
-
         return $this->render('list', [
             'dataProvider' => $dataProvider,
             'searchModel' => $searchModel,
             'multipleForm' => $multipleForm,
         ]);
     }
-
 
     /**
      * @return string|Response
