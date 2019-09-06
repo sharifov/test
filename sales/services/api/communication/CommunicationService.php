@@ -361,21 +361,14 @@ class CommunicationService
 
             $call = Call::create(
                 $finishForm->call->c_call_sid,
-                $finishForm->call->c_account_sid,
                 $finishForm->call->c_call_type_id,
-                $finishForm->call->c_uri,
                 $finishForm->call->c_from,
                 $finishForm->call->c_to,
                 $finishForm->call->c_created_dt,
                 $finishForm->call->c_recording_url,
-                $finishForm->call->c_recording_sid,
                 $finishForm->call->c_recording_duration,
                 $finishForm->call->c_caller_name,
-                $finishForm->call->c_direction,
-                $finishForm->call->c_api_version,
-                $finishForm->call->c_sip,
                 $finishForm->call->c_project_id,
-                $finishForm->call->c_timestamp
             );
 
             $upp = $this->userProjectParamsRepository->find($call->c_project_id, $call->c_from, $call->c_to);
@@ -514,19 +507,13 @@ class CommunicationService
 
             $call = Call::create(
                 $clientForm->call->c_call_sid,
-                $clientForm->call->c_account_sid,
                 $clientForm->call->c_call_type_id,
-                $clientForm->call->c_uri,
                 $clientForm->call->c_from,
                 $clientForm->call->c_to,
                 $clientForm->call->c_created_dt,
                 $clientForm->call->c_recording_url,
-                $clientForm->call->c_recording_sid,
                 $clientForm->call->c_recording_duration,
                 $clientForm->call->c_caller_name,
-                $clientForm->call->c_direction,
-                $clientForm->call->c_api_version,
-                $clientForm->call->c_sip,
                 $clientForm->call->c_project_id
             );
 
@@ -1077,17 +1064,13 @@ class CommunicationService
             foreach ($call_employee AS $key => $userCall) {
                 $call = new Call();
                 $call->c_call_sid = $post['call']['CallSid'] ?? null;
-                $call->c_account_sid = $post['call']['AccountSid'] ?? null;
                 $call->c_call_type_id = Call::CALL_TYPE_IN;
                 $call->c_call_status = $post['call']['CallStatus'] ?? Call::CALL_STATUS_RINGING;
                 $call->c_com_call_id = $post['call_id'] ?? null;
-                $call->c_direction = $post['call']['Direction'] ?? null;
                 $call->c_project_id = $call_project_id;
                 $call->c_is_new = true;
-                $call->c_api_version = $post['call']['ApiVersion'] ?? null;
                 $call->c_created_dt = date('Y-m-d H:i:s');
                 $call->c_from = $incomingForm->call->callerPhone;
-                $call->c_sip = null;
                 $call->c_to = $incomingForm->call->calledPhone; //$userCall->username ? $userCall->username : null;
                 $call->c_created_user_id = $userCall->id;
                 $call->c_source_type_id = Call::SOURCE_REDIRECT_CALL;
@@ -1105,17 +1088,13 @@ class CommunicationService
         } elseif ($isOnHold) {
             $call = new Call();
             $call->c_call_sid = $post['call']['CallSid'] ?? null;
-            $call->c_account_sid = $post['call']['AccountSid'] ?? null;
             $call->c_call_type_id = Call::CALL_TYPE_IN;
             $call->c_call_status = Call::CALL_STATUS_QUEUE;
             $call->c_com_call_id = $post['call_id'] ?? null;
-            $call->c_direction = $post['call']['Direction'] ?? null;
             $call->c_project_id = $call_project_id;
             $call->c_is_new = true;
-            $call->c_api_version = $post['call']['ApiVersion'] ?? null;
             $call->c_created_dt = date('Y-m-d H:i:s');
             $call->c_from = $incomingForm->call->callerPhone;
-            $call->c_sip = null;
             $call->c_to = $incomingForm->call->calledPhone;
             $call->c_created_user_id = null;
             $call->c_source_type_id = $callSourceTypeId;
@@ -1180,17 +1159,13 @@ class CommunicationService
         } elseif ($callGeneralNumber) {
             $call = new Call();
             $call->c_call_sid = $post['call']['CallSid'] ?? null;
-            $call->c_account_sid = $post['call']['AccountSid'] ?? null;
             $call->c_call_type_id = Call::CALL_TYPE_IN;
             $call->c_call_status = $post['call']['CallStatus'] ?? Call::CALL_STATUS_RINGING;
             $call->c_com_call_id = $post['call_id'] ?? null;
-            $call->c_direction = $post['call']['Direction'] ?? null;
             $call->c_project_id = $call_project_id;
             $call->c_is_new = true;
-            $call->c_api_version = $post['call']['ApiVersion'] ?? null;
             $call->c_created_dt = date('Y-m-d H:i:s');
             $call->c_from = $incomingForm->call->callerPhone;
-            $call->c_sip = null;
             $call->c_to = $settings->generalLineNumber;
             $call->c_created_user_id = null;
             $call->c_source_type_id = $callSourceTypeId;
@@ -1573,17 +1548,14 @@ class CommunicationService
 //            foreach ($call_employee AS $key => $userCall) {
 //                $call = new Call();
 //                $call->c_call_sid = $post['call']['CallSid'] ?? null;
-//                $call->c_account_sid = $post['call']['AccountSid'] ?? null;
 //                $call->c_call_type_id = Call::CALL_TYPE_IN;
 //                $call->c_call_status = $post['call']['CallStatus'] ?? Call::CALL_STATUS_RINGING;
 //                $call->c_com_call_id = $post['call_id'] ?? null;
 //                $call->c_direction = $post['call']['Direction'] ?? null;
 //                $call->c_project_id = $call_project_id;
 //                $call->c_is_new = true;
-//                $call->c_api_version = $post['call']['ApiVersion'] ?? null;
 //                $call->c_created_dt = date('Y-m-d H:i:s');
 //                $call->c_from = $incomingCallForm->callerPhone;
-//                $call->c_sip = null;
 //                $call->c_to = $incomingCallForm->calledPhone; //$userCall->username ? $userCall->username : null;
 //                $call->c_created_user_id = $userCall->id;
 //                $call->c_source_type_id = Call::SOURCE_REDIRECT_CALL;
@@ -1601,17 +1573,14 @@ class CommunicationService
 //        } elseif ($isOnHold) {
 //            $call = new Call();
 //            $call->c_call_sid = $post['call']['CallSid'] ?? null;
-//            $call->c_account_sid = $post['call']['AccountSid'] ?? null;
 //            $call->c_call_type_id = Call::CALL_TYPE_IN;
 //            $call->c_call_status = Call::CALL_STATUS_QUEUE;
 //            $call->c_com_call_id = $post['call_id'] ?? null;
 //            $call->c_direction = $post['call']['Direction'] ?? null;
 //            $call->c_project_id = $call_project_id;
 //            $call->c_is_new = true;
-//            $call->c_api_version = $post['call']['ApiVersion'] ?? null;
 //            $call->c_created_dt = date('Y-m-d H:i:s');
 //            $call->c_from = $incomingCallForm->callerPhone;
-//            $call->c_sip = null;
 //            $call->c_to = $incomingCallForm->calledPhone;
 //            $call->c_created_user_id = null;
 //            $call->c_source_type_id = $callSourceTypeId;
@@ -1676,17 +1645,14 @@ class CommunicationService
 //        } elseif ($callGeneralNumber) {
 //            $call = new Call();
 //            $call->c_call_sid = $post['call']['CallSid'] ?? null;
-//            $call->c_account_sid = $post['call']['AccountSid'] ?? null;
 //            $call->c_call_type_id = Call::CALL_TYPE_IN;
 //            $call->c_call_status = $post['call']['CallStatus'] ?? Call::CALL_STATUS_RINGING;
 //            $call->c_com_call_id = $post['call_id'] ?? null;
 //            $call->c_direction = $post['call']['Direction'] ?? null;
 //            $call->c_project_id = $call_project_id;
 //            $call->c_is_new = true;
-//            $call->c_api_version = $post['call']['ApiVersion'] ?? null;
 //            $call->c_created_dt = date('Y-m-d H:i:s');
 //            $call->c_from = $incomingCallForm->callerPhone;
-//            $call->c_sip = null;
 //            $call->c_to = $generalLineNumber;
 //            $call->c_created_user_id = null;
 //            $call->c_source_type_id = $callSourceTypeId;

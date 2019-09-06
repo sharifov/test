@@ -2,7 +2,6 @@
 
 namespace common\models;
 
-use common\components\jobs\AgentCallQueueJob;
 use sales\entities\AggregateRoot;
 use sales\entities\cases\Cases;
 use sales\entities\cases\CasesStatus;
@@ -22,24 +21,16 @@ use yii\helpers\VarDumper;
  *
  * @property int $c_id
  * @property string $c_call_sid
- * @property string $c_account_sid
  * @property int $c_call_type_id
  * @property string $c_from
  * @property string $c_to
- * @property string $c_sip
  * @property string $c_call_status
- * @property string $c_api_version
- * @property string $c_direction
  * @property string $c_forwarded_from
  * @property string $c_caller_name
  * @property string $c_parent_call_sid
  * @property int $c_call_duration
- * @property string $c_sip_response_code
  * @property string $c_recording_url
- * @property string $c_recording_sid
  * @property int $c_recording_duration
- * @property string $c_timestamp
- * @property string $c_uri
  * @property string $c_sequence_number
  * @property int $c_lead_id
  * @property int $c_created_user_id
@@ -55,6 +46,8 @@ use yii\helpers\VarDumper;
  * @property int $c_dep_id
  * @property int $c_case_id
  * @property int $c_client_id
+ * @property int $c_status_id
+ * @property int $c_parent_id
  *
  * @property Employee $cCreatedUser
  * @property Cases $cCase
@@ -62,6 +55,8 @@ use yii\helpers\VarDumper;
  * @property Department $cDep
  * @property Lead $cLead
  * @property Lead2 $cLead2
+ * @property Call $cParent
+ * @property Call[] $calls
  * @property Project $cProject
  * @property Cases[] $cases
  * @property CallUserAccess[] $callUserAccesses
@@ -186,22 +181,15 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
     {
         $call = new static();
         $call->c_call_sid = $callSid;
-        $call->c_account_sid = $accountSid;
         $call->c_call_type_id = $callTypeId;
-        $call->c_uri = $uri;
         $call->c_from = $from;
         $call->c_to = $to;
         $call->c_created_dt = $createdDt;
         $call->c_updated_dt = date('Y-m-d H:i:s');
         $call->c_recording_url = $recordingUrl;
-        $call->c_recording_sid = $recordingSid;
         $call->c_recording_duration = $recordingDuration;
         $call->c_caller_name = $callerName;
-        $call->c_direction = $direction;
-        $call->c_api_version = $apiVersion;
-        $call->c_sip = $sip;
         $call->c_project_id = $projectId;
-        $call->c_timestamp = $timestamp;
         return $call;
     }
 
@@ -213,7 +201,6 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
     public function updateRecordingData(string $recordingUrl, string $recordingSid, int $recordingDuration): void
     {
         $this->c_recording_url = $recordingUrl;
-        $this->c_recording_sid = $recordingSid;
         $this->c_recording_duration = $recordingDuration;
         $this->c_updated_dt = date('Y-m-d H:i:s');
     }
@@ -281,24 +268,24 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
     {
         return [
             [['c_call_sid'], 'required'],
-            [['c_call_type_id', 'c_lead_id', 'c_created_user_id', 'c_com_call_id', 'c_project_id', 'c_call_duration', 'c_recording_duration', 'c_dep_id', 'c_case_id', 'c_client_id'], 'integer'],
+            [['c_call_type_id', 'c_lead_id', 'c_created_user_id', 'c_com_call_id', 'c_project_id', 'c_call_duration', 'c_recording_duration', 'c_dep_id', 'c_case_id', 'c_client_id', 'c_status_id', 'c_parent_id'], 'integer'],
             [['c_price'], 'number'],
             [['c_is_new'], 'default', 'value' => true],
             [['c_is_new', 'c_is_deleted'], 'boolean'],
             [['c_created_dt', 'c_updated_dt'], 'safe'],
-            [['c_call_sid', 'c_account_sid', 'c_parent_call_sid', 'c_recording_sid'], 'string', 'max' => 34],
-            [['c_from', 'c_to', 'c_sip', 'c_forwarded_from'], 'string', 'max' => 100],
-            [['c_call_status', 'c_direction'], 'string', 'max' => 15],
-            [['c_api_version', 'c_sip_response_code'], 'string', 'max' => 10],
+            [['c_call_sid', 'c_parent_call_sid'], 'string', 'max' => 34],
+            [['c_from', 'c_to', 'c_forwarded_from'], 'string', 'max' => 100],
+            [['c_call_status'], 'string', 'max' => 15],
             [['c_caller_name'], 'string', 'max' => 50],
-            [['c_recording_url', 'c_uri'], 'string', 'max' => 200],
-            [['c_timestamp', 'c_sequence_number'], 'string', 'max' => 40],
+            [['c_recording_url'], 'string', 'max' => 200],
+            [['c_sequence_number'], 'string', 'max' => 40],
             [['c_error_message'], 'string', 'max' => 500],
             [['c_case_id'], 'exist', 'skipOnError' => true, 'targetClass' => Cases::class, 'targetAttribute' => ['c_case_id' => 'cs_id']],
             [['c_client_id'], 'exist', 'skipOnError' => true, 'targetClass' => Client::class, 'targetAttribute' => ['c_client_id' => 'id']],
             [['c_created_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['c_created_user_id' => 'id']],
             [['c_dep_id'], 'exist', 'skipOnError' => true, 'targetClass' => Department::class, 'targetAttribute' => ['c_dep_id' => 'dep_id']],
             [['c_lead_id'], 'exist', 'skipOnError' => true, 'targetClass' => Lead::class, 'targetAttribute' => ['c_lead_id' => 'id']],
+            [['c_parent_id'], 'exist', 'skipOnError' => true, 'targetClass' => self::class, 'targetAttribute' => ['c_parent_id' => 'c_id']],
             [['c_project_id'], 'exist', 'skipOnError' => true, 'targetClass' => Project::class, 'targetAttribute' => ['c_project_id' => 'id']],
         ];
     }
@@ -311,24 +298,16 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
         return [
             'c_id' => 'ID',
             'c_call_sid' => 'Call Sid',
-            'c_account_sid' => 'Account Sid',
             'c_call_type_id' => 'Call Type ID',
             'c_from' => 'From',
             'c_to' => 'To',
-            'c_sip' => 'Sip',
             'c_call_status' => 'Call Status',
-            'c_api_version' => 'Api Version',
-            'c_direction' => 'Direction',
             'c_forwarded_from' => 'Forwarded From',
             'c_caller_name' => 'Caller Name',
             'c_parent_call_sid' => 'Parent Call Sid',
             'c_call_duration' => 'Call Duration',
-            'c_sip_response_code' => 'Sip Response Code',
             'c_recording_url' => 'Recording Url',
-            'c_recording_sid' => 'Recording Sid',
             'c_recording_duration' => 'Recording Duration',
-            'c_timestamp' => 'Timestamp',
-            'c_uri' => 'Uri',
             'c_sequence_number' => 'Sequence Number',
             'c_lead_id' => 'Lead ID',
             'c_created_user_id' => 'Created User ID',
@@ -344,6 +323,8 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
             'c_dep_id' => 'Department ID',
             'c_case_id' => 'Case ID',
             'c_client_id' => 'Client',
+            'c_status_id' => 'Status ID',
+            'c_parent_id' => 'Parent ID',
         ];
     }
 
@@ -441,6 +422,21 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
     }
 
     /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getCParent()
+    {
+        return $this->hasOne(self::class, ['c_id' => 'c_parent_id']);
+    }
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getCalls()
+    {
+        return $this->hasMany(self::class, ['c_parent_id' => 'c_id']);
+    }
+
+    /**
      * {@inheritdoc}
      * @return CallQuery the active query used by this AR class.
      */
@@ -508,7 +504,7 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
 //            }
 
 
-            if(isset($changedAttributes['c_call_status']) && $this->c_call_type_id == self::CALL_TYPE_IN && in_array($this->c_call_status, [self::CALL_STATUS_NO_ANSWER, self::CALL_STATUS_COMPLETED, self::CALL_STATUS_BUSY, self::CALL_STATUS_IN_PROGRESS, self::CALL_STATUS_CANCELED])) { //self::CALL_STATUS_BUSY,
+            if(isset($changedAttributes['c_call_status']) && $this->isIn() && ($this->isCompleted() || $this->isNoAnswer() || $this->isBusy() || $this->isInProgress() || $this->isCanceled())) {
                 $callUserAccessAny = CallUserAccess::find()->where(['cua_status_id' => [CallUserAccess::STATUS_TYPE_PENDING], 'cua_call_id' => $this->c_id])->all();
                 if ($callUserAccessAny) {
                     foreach ($callUserAccessAny as $callAccess) {
@@ -561,7 +557,7 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
 
 
 
-            if(isset($changedAttributes['c_call_status']) && (int) $this->c_call_type_id === self::CALL_TYPE_IN && $this->c_case_id && $this->c_call_status === self::CALL_STATUS_IN_PROGRESS) {
+            if(isset($changedAttributes['c_call_status']) && $this->isIn() && $this->c_case_id && $this->isInProgress()) {
                 if($this->c_created_user_id && $this->cCase && $this->c_created_user_id !== $this->cCase->cs_user_id) {
                     try {
                         $casesManageService = Yii::createObject(CasesManageService::class);
@@ -575,7 +571,7 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
 
             //Yii::info(VarDumper::dumpAsString($this->attributes), 'info\Call:afterSave');
 
-            if(isset($changedAttributes['c_call_status']) && $this->c_call_type_id == self::CALL_TYPE_IN && $this->c_lead_id && in_array($this->c_call_status, [self::CALL_STATUS_NO_ANSWER, self::CALL_STATUS_COMPLETED])) { //self::CALL_STATUS_BUSY,
+            if(isset($changedAttributes['c_call_status']) && $this->isIn() && $this->c_lead_id && ($this->isNoAnswer() || $this->isCompleted())) {
 
 //                if($this->c_call_status == self::CALL_STATUS_NO_ANSWER) {
 //                    if ($this->c_created_user_id) {
@@ -589,7 +585,7 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
 //                    }
 //                }
 
-                if(in_array($this->c_call_status, [self::CALL_STATUS_NO_ANSWER, self::CALL_STATUS_COMPLETED]) && $lead = $this->cLead2) {
+                if ($lead = $this->cLead2) {
                     if($lead->l_call_status_id == Lead::CALL_STATUS_QUEUE) {
                         $lead->l_call_status_id = Lead::CALL_STATUS_READY;
                         if(!$lead->save()) {
@@ -613,7 +609,7 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
 
             //Yii::info(VarDumper::dumpAsString(['changedAttributes' => $changedAttributes, 'Call' => $this->attributes, 'Lead' => $lead->attributes]), 'info\Call:afterSave');
 
-            if($this->c_call_status === self::CALL_STATUS_IN_PROGRESS && $this->c_call_type_id === self::CALL_TYPE_IN && ( $this->c_lead_id || $this->c_case_id ) && isset($changedAttributes['c_call_status'])
+            if($this->isInProgress() && $this->isIn() && ( $this->c_lead_id || $this->c_case_id ) && isset($changedAttributes['c_call_status'])
                 && ($changedAttributes['c_call_status'] === self::CALL_STATUS_RINGING || $changedAttributes['c_call_status'] === self::CALL_STATUS_QUEUE)) {
 
                 if($this->c_lead_id && (int) $this->c_dep_id === Department::DEPARTMENT_SALES) {
@@ -1150,5 +1146,23 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
     {
         return $this->c_call_status === self::CALL_STATUS_FAILED;
     }
+
+    /**
+     * @return bool
+     */
+    public function isIn(): bool
+    {
+        return $this->c_call_type_id === self::CALL_TYPE_IN;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isOut(): bool
+    {
+        return $this->c_call_type_id === self::CALL_TYPE_OUT;
+    }
+
+
 
 }

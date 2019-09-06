@@ -195,21 +195,10 @@ class TwilioController extends ApiBaseNoAuthController
                         $call->c_created_user_id = (int) $userId;
                     }
 
-                    if (isset($post['AccountSid']) && !$call->c_account_sid) {
-                        $call->c_account_sid = $post['AccountSid'];
-                    }
-
-                    if (isset($post['Direction']) && !$call->c_direction) {
-                        $call->c_direction = $post['Direction'];
-                    }
-
                     if (isset($post['ParentCallSid']) && !$call->c_parent_call_sid) {
                         $call->c_parent_call_sid = $post['ParentCallSid'];
                     }
 
-                    if (isset($post['ApiVersion']) && !$call->c_api_version) {
-                        $call->c_api_version = $post['ApiVersion'];
-                    }
 
                     if (isset($post['ForwardedFrom']) && !$call->c_forwarded_from) {
                         $call->c_forwarded_from = $post['ForwardedFrom'];

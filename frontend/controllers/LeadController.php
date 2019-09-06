@@ -793,16 +793,11 @@ class LeadController extends FController
 
                                     $call->c_call_type_id = 1;
                                     $call->c_call_sid = $dataCall['sid'];
-                                    $call->c_account_sid = $dataCall['account_sid'];
 
                                     $call->c_to = $comForm->c_phone_number; //$dataCall['to'];
                                     $call->c_from = $upp->upp_tw_phone_number; //$dataCall['from'];
-                                    $call->c_sip = $userModel->userProfile->up_sip;
                                     $call->c_caller_name = $dataCall['from'];
                                     $call->c_call_status = $dataCall['status'];
-                                    $call->c_api_version = $dataCall['api_version'];
-                                    $call->c_direction = $dataCall['direction'];
-                                    $call->c_uri = $dataCall['uri'];
                                     $call->c_lead_id = $lead->id;
                                     $call->c_project_id = $lead->project_id;
 

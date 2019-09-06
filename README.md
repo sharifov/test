@@ -86,24 +86,24 @@ sudo service mysql restart
 
 
 
-Prod Hosts:
+Prod Host:
 -------------------
- - [https://sales.travelinsides.com](https://sales.travelinsides.com) - Frontend
- - [https://sales.travelinsides.com/admin](https://sales.travelinsides.com/admin) - Backend
- - [https://sales.api.travelinsides.com](https://sales.api.travelinsides.com) - API
- - [https://sales.api.travelinsides.com/doc/index.html](https://sales.api.travelinsides.com/doc/index.html) - API Documentation
+ - [sales.travelinsides.com](https://sales.travelinsides.com) - Frontend
+ - [sales.api.travelinsides.com](https://sales.api.travelinsides.com) - API
+ 
+Stage Host:
+-------------------
+ - [stage-sales.travel-dev.com](https://stage-sales.travel-dev.com) - Frontend
+ - [stage-sales-api.travel-dev.com](https://stage-sales-api.travel-dev.com) - API
 
- Dev Hosts:
- -------------------
-  - [http://sales.dev.travelinsides.com](http://sales.dev.travelinsides.com) - Frontend
-  - [http://sales.dev.travelinsides.com/admin](http://sales.dev.travelinsides.com/admin) - Backend
-  - [http://api-sales.dev.travelinsides.com](http://api-sales.dev.travelinsides.com) - API
-  - [http://api-sales.dev.travelinsides.com/doc/index.html](http://api-sales.dev.travelinsides.com/doc/index.html) - API Documentation
-
- New Dev Hosts:
- -------------------
- - [https://sales-dev.travelinsides.com](https://sales-dev.travelinsides.com) - Frontend
- - [https://sales-dev.travelinsides.com/admin](https://sales-dev.travelinsides.com/admin) - Backend
+Dev Host:
+-------------------
+ - [sales.dev.travelinsides.com](https://sales.dev.travelinsides.com) - Frontend
+ - [api-sales.dev.travelinsides.com](https://api-sales.dev.travelinsides.com) - API
+  
+API Documentation
+-------------------
+ [https://sales.api.travelinsides.com/doc/index.html](https://sales.api.travelinsides.com/doc/index.html)
 
  Generate API Documentation (apiDoc):
  ```

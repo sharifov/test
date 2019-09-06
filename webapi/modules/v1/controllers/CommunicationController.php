@@ -615,7 +615,6 @@ class CommunicationController extends ApiBaseController
                 if($post['callData']['RecordingUrl']) {
                     $call->c_recording_url = $post['callData']['RecordingUrl'];
                     $call->c_recording_duration = $post['callData']['RecordingDuration'];
-                    $call->c_recording_sid = $post['callData']['RecordingSid'];
                     $call->c_updated_dt = date('Y-m-d H:i:s');
 
 
@@ -668,30 +667,21 @@ class CommunicationController extends ApiBaseController
             if(!$call) {
                 $call = new Call();
                 $call->c_call_sid = $callData['c_call_sid'];
-                $call->c_account_sid = $callData['c_account_sid'];
                 $call->c_call_type_id = $callData['c_call_type_id'];
-                $call->c_uri = $callData['c_uri'];
 
                 $call->c_from = $callData['c_from'];
                 $call->c_to = $callData['c_to'];
 
-                $call->c_timestamp = $callData['c_timestamp'];
                 $call->c_created_dt = $callData['c_created_dt'];
                 $call->c_updated_dt = date('Y-m-d H:i:s');
 
                 $call->c_recording_url = $callData['c_recording_url'];
-                $call->c_recording_sid = $callData['c_recording_sid'];
                 $call->c_recording_duration = $callData['c_recording_duration'];
 
                 $call->c_caller_name = $callData['c_caller_name'];
-                $call->c_direction = $callData['c_direction'];
-                $call->c_api_version = $callData['c_api_version'];
-
 
                 //$call->c_call_status = $post['callData']['CallStatus'] ?? '';
                 //$call->c_sequence_number = $post['callData']['SequenceNumber'] ?? 0;
-
-                $call->c_sip = $callData['c_sip'];
 
                 if($callData['c_project_id']) {
                     $call->c_project_id = $callData['c_project_id'];
@@ -877,30 +867,21 @@ class CommunicationController extends ApiBaseController
             if(!$call) {
                 $call = new Call();
                 $call->c_call_sid = $callData['c_call_sid'];
-                $call->c_account_sid = $callData['c_account_sid'];
                 $call->c_call_type_id = $callData['c_call_type_id'];
-                $call->c_uri = $callData['c_uri'] ?? null;
 
                 $call->c_from = $callData['c_from'] ?? null;
                 $call->c_to = $callData['c_to'] ?? null;
 
-                // $call->c_timestamp = $callData['c_timestamp'] ?? null;
                 $call->c_created_dt = $callData['c_created_dt'];
                 $call->c_updated_dt = date('Y-m-d H:i:s');
 
                 $call->c_recording_url = $callData['c_recording_url'] ?? null;
-                $call->c_recording_sid = $callData['c_recording_sid'] ?? null;
                 $call->c_recording_duration = $callData['c_recording_duration'] ?? null;
 
                 $call->c_caller_name = $callData['c_caller_name'] ?? null;
-                $call->c_direction = $callData['c_direction'] ?? null;
-                $call->c_api_version = $callData['c_api_version'] ?? null;
-
 
                 //$call->c_call_status = $post['callData']['CallStatus'] ?? '';
                 //$call->c_sequence_number = $post['callData']['SequenceNumber'] ?? 0;
-
-                $call->c_sip = $callData['c_sip'] ?? null;
 
                 if(isset($callData['c_project_id']) && $callData['c_project_id']) {
                     $call->c_project_id = $callData['c_project_id'];
@@ -1386,11 +1367,9 @@ class CommunicationController extends ApiBaseController
 
             $call = new Call();
             $call->c_call_sid = $calData['CallSid'] ?? null;
-            $call->c_account_sid = $calData['AccountSid'] ?? null;
             $call->c_call_type_id = Call::CALL_TYPE_IN;
             $call->c_call_status = Call::CALL_STATUS_IVR; //$calData['CallStatus'] ?? Call::CALL_STATUS_QUEUE;
             $call->c_com_call_id = $calData['c_com_call_id'] ?? null;
-            $call->c_direction = $calData['Direction'] ?? null;
             $call->c_parent_call_sid = $calData['ParentCallSid'] ?? null;
 
             if($call_project_id) {
@@ -1401,10 +1380,8 @@ class CommunicationController extends ApiBaseController
             }
 
             $call->c_is_new = true;
-            $call->c_api_version = $calData['ApiVersion'] ?? null;
             $call->c_created_dt = date('Y-m-d H:i:s');
             $call->c_from = $calData['From'];
-            $call->c_sip = null;
             $call->c_to = $calData['To']; //Called
             $call->c_created_user_id = null;
 

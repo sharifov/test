@@ -204,9 +204,7 @@ class PhoneController extends FController
                     $call->c_dep_id = $depId;
                 }
 
-                if($call_acc_sid) {
-                    $call->c_account_sid = $call_acc_sid;
-                }
+
             }
 
             if(!$call->c_lead_id && $lead_id) {
@@ -292,18 +290,14 @@ class PhoneController extends FController
                         $call = new Call();
                     }
                     $call->c_call_sid = $result['data']['result']['sid'];
-                    $call->c_account_sid = $dataCall['accountSid'] ?? null;
                     $call->c_call_type_id = Call::CALL_TYPE_IN;
                     $call->c_call_status = Call::CALL_STATUS_RINGING;
                     $call->c_com_call_id = null;
-                    $call->c_direction = $dataCall['direction'] ?? null;
                     $call->c_parent_call_sid = $result['data']['result']['sid']; // $call_parent->c_parent_call_sid;
                     $call->c_project_id = $projectid;
                     $call->c_is_new = true;
-                    $call->c_api_version = $dataCall['apiVersion'] ?? null;
                     $call->c_created_dt = date('Y-m-d H:i:s');
                     $call->c_from = $from;
-                    $call->c_sip = null;
                     $call->c_to = $result['data']['result']['forwardedFrom'] ?? null;
                     $call->c_created_user_id = $to_id;
                     $call->c_lead_id = ($lead_id > 0) ? $lead_id : null;
@@ -444,22 +438,16 @@ class PhoneController extends FController
 
             /*if ($result['result'][])
             $call->c_call_sid = $callSid;
-            $call->c_account_sid = $accountSid;
             $call->c_call_type_id = $callTypeId;
-            $call->c_uri = $uri;
             $call->c_from = $from;
             $call->c_to = $to;
             $call->c_created_dt = $createdDt;
             $call->c_updated_dt = date('Y-m-d H:i:s');
             $call->c_recording_url = $recordingUrl;
-            $call->c_recording_sid = $recordingSid;
             $call->c_recording_duration = $recordingDuration;
             $call->c_caller_name = $callerName;
-            $call->c_direction = $direction;
-            $call->c_api_version = $apiVersion;
-            $call->c_sip = $sip;
-            $call->c_project_id = $projectId;
-            $call->c_timestamp = $timestamp;*/
+            $call->c_project_id = $projectId;*/
+
 
             $call = null;
 
@@ -483,11 +471,9 @@ class PhoneController extends FController
                     }
 
                     $call->c_call_sid = $dataCall['sid'];
-                    //$call->c_account_sid = $dataCall['accountSid'] ?? null;
                     $call->c_call_type_id = Call::CALL_TYPE_IN;
                     $call->c_call_status = Call::CALL_STATUS_IVR;
                     // $call->c_com_call_id = null;
-                    // $call->c_direction = $dataCall['direction'] ?? null;
                     // $call->c_parent_call_sid = $result['data']['result']['sid']; // $call_parent->c_parent_call_sid;
                     // $call->c_project_id = $projectid;
 
@@ -495,10 +481,8 @@ class PhoneController extends FController
                     $call->c_dep_id = $originCall->c_dep_id;
 
                     $call->c_is_new = true;
-                    //$call->c_api_version = $dataCall['apiVersion'] ?? null;
                     $call->c_created_dt = date('Y-m-d H:i:s');
                     $call->c_from = $dataCall['from']; //$from;
-                    // $call->c_sip = null;
                     $call->c_to = 'client:seller' . $userId;//$result['data']['result']['forwardedFrom'] ?? null;
                     $call->c_created_user_id = $userId;
                     // $call->c_lead_id = ($lead_id > 0) ? $lead_id : null;

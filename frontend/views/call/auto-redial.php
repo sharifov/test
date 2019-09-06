@@ -823,7 +823,6 @@ $duration = 10;
                     },
                     'format' => 'raw'
                 ],
-                //'c_recording_sid',
                 'c_recording_duration',
                 /*[
                     'attribute' => 'c_created_user_id',

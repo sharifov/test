@@ -57,8 +57,8 @@ class CallSearch extends Call
     {
         return [
             [['c_id', 'c_call_type_id', 'c_lead_id', 'c_created_user_id', 'c_com_call_id', 'c_project_id', 'c_is_new', 'c_is_deleted', 'supervision_id', 'limit', 'c_recording_duration', 'c_source_type_id', 'call_duration_from', 'call_duration_to', 'c_case_id', 'c_client_id'], 'integer'],
-            [['c_call_sid', 'c_account_sid', 'c_from', 'c_to', 'c_sip', 'c_call_status', 'c_api_version', 'c_direction', 'c_forwarded_from', 'c_caller_name', 'c_parent_call_sid', 'c_call_duration', 'c_sip_response_code', 'c_recording_url', 'c_recording_sid',
-                'c_timestamp', 'c_uri', 'c_sequence_number', 'c_created_dt', 'c_updated_dt', 'c_error_message', 'c_price', 'statuses', 'limit', 'dep_ids'], 'safe'],
+            [['c_call_sid', 'c_from', 'c_to', 'c_call_status', 'c_forwarded_from', 'c_caller_name', 'c_parent_call_sid', 'c_call_duration', 'c_sip_response_code', 'c_recording_url',
+                'c_sequence_number', 'c_created_dt', 'c_updated_dt', 'c_error_message', 'c_price', 'statuses', 'limit', 'dep_ids'], 'safe'],
             [['createTimeRange'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
         ];
     }
@@ -155,22 +155,15 @@ class CallSearch extends Call
 
         ]);
 
-        $query->andFilterWhere(['like', 'c_account_sid', $this->c_account_sid])
+        $query
             ->andFilterWhere(['like', 'c_from', $this->c_from])
             ->andFilterWhere(['like', 'c_to', $this->c_to])
-            ->andFilterWhere(['like', 'c_sip', $this->c_sip])
             ->andFilterWhere(['like', 'c_call_status', $this->c_call_status])
-            ->andFilterWhere(['like', 'c_api_version', $this->c_api_version])
-            ->andFilterWhere(['like', 'c_direction', $this->c_direction])
             ->andFilterWhere(['like', 'c_forwarded_from', $this->c_forwarded_from])
             ->andFilterWhere(['like', 'c_caller_name', $this->c_caller_name])
             ->andFilterWhere(['like', 'c_call_duration', $this->c_call_duration])
-            ->andFilterWhere(['like', 'c_sip_response_code', $this->c_sip_response_code])
             ->andFilterWhere(['like', 'c_recording_url', $this->c_recording_url])
-            ->andFilterWhere(['like', 'c_recording_sid', $this->c_recording_sid])
             ->andFilterWhere(['like', 'c_recording_duration', $this->c_recording_duration])
-            ->andFilterWhere(['like', 'c_timestamp', $this->c_timestamp])
-            ->andFilterWhere(['like', 'c_uri', $this->c_uri])
             ->andFilterWhere(['like', 'c_sequence_number', $this->c_sequence_number])
             ->andFilterWhere(['like', 'c_error_message', $this->c_error_message]);
 
@@ -247,22 +240,15 @@ class CallSearch extends Call
             'c_client_id' => $this->c_client_id
         ]);
 
-        $query->andFilterWhere(['like', 'c_account_sid', $this->c_account_sid])
+        $query
             ->andFilterWhere(['like', 'c_from', $this->c_from])
             ->andFilterWhere(['like', 'c_to', $this->c_to])
-            ->andFilterWhere(['like', 'c_sip', $this->c_sip])
             //->andFilterWhere(['like', 'c_call_status', $this->c_call_status])
-            ->andFilterWhere(['like', 'c_api_version', $this->c_api_version])
-            ->andFilterWhere(['like', 'c_direction', $this->c_direction])
             ->andFilterWhere(['like', 'c_forwarded_from', $this->c_forwarded_from])
             ->andFilterWhere(['like', 'c_caller_name', $this->c_caller_name])
             ->andFilterWhere(['like', 'c_call_duration', $this->c_call_duration])
-            ->andFilterWhere(['like', 'c_sip_response_code', $this->c_sip_response_code])
             ->andFilterWhere(['like', 'c_recording_url', $this->c_recording_url])
-            ->andFilterWhere(['like', 'c_recording_sid', $this->c_recording_sid])
             ->andFilterWhere(['like', 'c_recording_duration', $this->c_recording_duration])
-            ->andFilterWhere(['like', 'c_timestamp', $this->c_timestamp])
-            ->andFilterWhere(['like', 'c_uri', $this->c_uri])
             ->andFilterWhere(['like', 'c_sequence_number', $this->c_sequence_number])
             ->andFilterWhere(['like', 'c_error_message', $this->c_error_message]);
 

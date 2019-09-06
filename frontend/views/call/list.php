@@ -157,7 +157,6 @@ $this->params['breadcrumbs'][] = $this->title;
             'c_is_new:boolean',
             //'c_com_call_id',
             //'c_call_sid',
-            //'c_account_sid',
             //'c_call_type_id',
 
             [
@@ -190,7 +189,6 @@ $this->params['breadcrumbs'][] = $this->title;
             'c_from',
             'c_to',
 
-            //'c_sip',
             //'c_call_status',
             [
                 'attribute' => 'c_call_status',
@@ -225,13 +223,10 @@ $this->params['breadcrumbs'][] = $this->title;
                 //'format' => 'raw'
             ],*/
 
-            //'c_api_version',
-            //'c_direction',
             //'c_forwarded_from',
             //'c_caller_name',
             //'c_parent_call_sid',
             'c_call_duration',
-            //'c_sip_response_code',
             //'c_recording_url:url',
             /*[
                 'attribute' => 'c_recording_url',
@@ -253,10 +248,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
             ],
 
-            //'c_recording_sid',
             'c_recording_duration',
-            //'c_timestamp',
-            //'c_uri',
             //'c_sequence_number',
 
             //'c_created_user_id',
