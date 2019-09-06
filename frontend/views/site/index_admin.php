@@ -426,16 +426,12 @@ $userId = Yii::$app->user->id;
                     echo  \kartik\daterange\DateRangePicker::widget([
                         'model'=> $searchModel,
                         'attribute' => 'timeRange',
-                        //'name'=>'date_range',
                         'useWithAddon'=>true,
-                        //'value'=>'2015-10-19 12:00 AM - 2015-11-03 01:00 PM',
                         'presetDropdown'=>true,
                         'hideInput'=>true,
                         'convertFormat'=>true,
                         'startAttribute' => 'timeStart',
                         'endAttribute' => 'timeEnd',
-                        //'startInputOptions' => ['value' => date('Y-m-d', strtotime('-5 days'))],
-                        //'endInputOptions' => ['value' => '2017-07-20'],
                         'pluginOptions'=>[
                             'timePicker'=> true,
                             'timePickerIncrement'=>1,

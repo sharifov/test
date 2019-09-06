@@ -2,6 +2,7 @@
 
 namespace common\models\search;
 
+use common\models\Employee;
 use common\models\UserGroupAssign;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
@@ -83,8 +84,11 @@ class LeadFlowChecklistSearch extends LeadFlow
 
         if($this->dateRange) {
             $dates = explode(' - ', $this->dateRange);
-            $query->andFilterWhere(['>=', 'lead_flow.created', date('Y-m-d H:i', strtotime($dates[0]))]);
-            $query->andFilterWhere(['<=', 'lead_flow.created', date('Y-m-d H:i', strtotime($dates[1]))]);
+            $query->andFilterWhere(['>=', 'lead_flow.created', Employee::convertDtTimezone(strtotime($dates[0]))]);
+            $query->andFilterWhere(['<=', 'lead_flow.created', Employee::convertDtTimezone(strtotime($dates[1]))]);
+
+            /*$query->andFilterWhere(['>=', 'lead_flow.created', date('Y-m-d H:i', strtotime($dates[0]))]);
+            $query->andFilterWhere(['<=', 'lead_flow.created', date('Y-m-d H:i', strtotime($dates[1]))]);*/
         } else {
             if($this->created) {
                 $query->andFilterWhere(['DATE(lead_flow.created)'=> date('Y-m-d', strtotime($this->created))]);

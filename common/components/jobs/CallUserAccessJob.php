@@ -89,7 +89,7 @@ class CallUserAccessJob extends BaseObject implements JobInterface
 
                     $exceptUserIds = ArrayHelper::map($call->callUserAccesses, 'cua_user_id', 'cua_user_id');
 
-                    $users = Employee::getUsersForCallQueue($call->c_project_id, $call->c_dep_id, $limitCallUsers, $last_hours, $exceptUserIds);
+                    $users = Employee::getUsersForCallQueue($call, $limitCallUsers, $last_hours, $exceptUserIds);
 
                     if ($users) {
                         foreach ($users as $userItem) {

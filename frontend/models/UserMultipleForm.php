@@ -13,6 +13,20 @@ class UserMultipleForm extends Model
     public $user_list;
     public $user_list_json;
     public $up_call_expert_limit;
+    public $userDepartment;
+    public $userRole;
+    public $status;
+    public $workStart;
+    public $workMinutes;
+    public $timeZone;
+    public $inboxShowLimitLeads;
+    public $defaultTakeLimitLeads;
+    public $minPercentForTakeLeads;
+    public $frequencyMinutes;
+    public $baseAmount;
+    public $commissionPercent;
+    public $autoRedial;
+    public $kpiEnable;
     public $status_id;
 
     /**
@@ -21,9 +35,11 @@ class UserMultipleForm extends Model
     public function rules()
     {
         return [
+            [['userRole', 'status'], 'string'],
             [['user_list_json'], 'required'],
-            [['up_call_expert_limit', 'status_id'], 'integer'],
-            [['user_list_json'], 'safe'],
+            [['baseAmount', 'commissionPercent'], 'number'],
+            [['up_call_expert_limit', 'status_id', 'inboxShowLimitLeads', 'defaultTakeLimitLeads', 'minPercentForTakeLeads', 'frequencyMinutes'], 'integer'],
+            [['user_list_json', 'userDepartment', 'userRole', 'workStart', 'workMinutes', 'timeZone', 'autoRedial', 'kpiEnable'], 'safe'],
             [['user_list_json'], 'filter', 'filter' => function ($value) {
                 try {
                     $data = \yii\helpers\Json::decode($value);
@@ -49,8 +65,6 @@ class UserMultipleForm extends Model
                     return null;
                 }
             }],
-
-
         ];
     }
 
@@ -61,8 +75,14 @@ class UserMultipleForm extends Model
     {
         return [
             'user_list'             => 'Selected Users',
-            'user_list_json'          => 'Selected Users JSON',
+            'user_list_json'        => 'Selected Users JSON',
             'up_call_expert_limit'  => 'Call Expert Limit',
+            'userRole' => 'Role',
+            'workStart' => 'Work Start Time',
+            'timeZone' => 'Timezone',
+            'frequencyMinutes' => 'Take Frequency Minutes',
+            'autoRedial' => 'Auto redial',
+            'kpiEnable' => 'KPI enable'
         ];
     }
 }

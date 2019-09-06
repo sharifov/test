@@ -218,6 +218,21 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
             ],
 
             [
+                'label' => 'UserGroups',
+                //'attribute' => 'c_dep_id',
+                'value' => function (Call $model) {
+                    $userGroupList = [];
+                    if ($model->cugUgs) {
+                        foreach ($model->cugUgs as $userGroup) {
+                            $userGroupList[] =  '<span class="label label-info"><i class="fa fa-users"></i> ' . Html::encode($userGroup->ug_name) . '</span>';
+                        }
+                    }
+                    return $userGroupList ? implode(' ', $userGroupList) : '-';
+                },
+                'format' => 'raw'
+            ],
+
+            [
                 'attribute' => 'c_client_id',
                 'value' => function (\common\models\Call $model) {
                     return  $model->c_client_id ?: '-';

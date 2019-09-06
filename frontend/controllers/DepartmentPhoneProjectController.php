@@ -2,6 +2,7 @@
 
 namespace frontend\controllers;
 
+use common\models\DepartmentPhoneProjectUserGroup;
 use Yii;
 use common\models\DepartmentPhoneProject;
 use common\models\search\DepartmentPhoneProjectSearch;
@@ -67,8 +68,22 @@ class DepartmentPhoneProjectController extends FController
         $model = new DepartmentPhoneProject();
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
+
+            if ($model->user_group_list) {
+                foreach ($model->user_group_list as $userGroupId) {
+                    $dug = new DepartmentPhoneProjectUserGroup();
+                    $dug->dug_ug_id = $userGroupId;
+                    //$dug->dug_dpp_id = $model->dpp_id;
+                    $dug->link('dugDpp', $model);
+                    //$dug->save();
+                }
+            }
+
             return $this->redirect(['view', 'id' => $model->dpp_id]);
         } else {
+
+            $model->user_group_list = [];
+
             $model->dpp_params = '{
   "ivr": {
     "voice_gather_callback_url": "/v1/twilio/voice-gather/",
@@ -153,7 +168,22 @@ class DepartmentPhoneProjectController extends FController
         $model = $this->findModel($id);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
+
+            DepartmentPhoneProjectUserGroup::deleteAll(['dug_dpp_id' => $model->dpp_id]);
+
+            if ($model->user_group_list) {
+                foreach ($model->user_group_list as $userGroupId) {
+                    $dug = new DepartmentPhoneProjectUserGroup();
+                    $dug->dug_ug_id = $userGroupId;
+                    //$dug->dug_dpp_id = $model->dpp_id;
+                    $dug->link('dugDpp', $model);
+                    //$dug->save();
+                }
+            }
+
             return $this->redirect(['view', 'id' => $model->dpp_id]);
+        } else {
+            $model->user_group_list = ArrayHelper::map($model->dugUgs, 'ug_id', 'ug_id');
         }
 
         return $this->render('update', [

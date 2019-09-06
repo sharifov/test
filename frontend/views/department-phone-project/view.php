@@ -1,5 +1,6 @@
 <?php
 
+use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\widgets\DetailView;
 
@@ -51,6 +52,21 @@ $this->params['breadcrumbs'][] = $this->title;
                     return $model->dppSource ? $model->dppSource->name : '-';
                 },
             ],
+
+            [
+                'label' => 'User Groups',
+                'value' => function (\common\models\DepartmentPhoneProject $model) {
+                    $userGroupList = [];
+                    if ($model->dugUgs) {
+                        foreach ($model->dugUgs as $userGroup) {
+                            $userGroupList[] =  '<span class="label label-info">' . Html::encode($userGroup->ug_name) . '</span>';
+                        }
+                    }
+                    return $userGroupList ? implode(' ', $userGroupList) : '-';
+                },
+                'format' => 'raw',
+            ],
+
             //'dpp_params',
             'dpp_ivr_enable:boolean',
             'dpp_enable:boolean',

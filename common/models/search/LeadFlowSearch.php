@@ -2,6 +2,7 @@
 
 namespace common\models\search;
 
+use common\models\Employee;
 use common\models\UserGroupAssign;
 use Yii;
 use yii\base\Model;
@@ -77,18 +78,16 @@ class LeadFlowSearch extends LeadFlow
             $query->andWhere(['lead_flow.status' => $this->statuses]);
         }
 
-
         if($this->created_date_from || $this->created_date_to) {
 
             if ($this->created_date_from) {
-                $query->andFilterWhere(['>=', 'DATE(lead_flow.created)', date('Y-m-d', strtotime($this->created_date_from))]);
+                $query->andFilterWhere(['>=', 'lead_flow.created', Employee::convertDtTimezone(strtotime($this->created_date_from))]);
             }
             if ($this->created_date_to) {
-                $query->andFilterWhere(['<=', 'DATE(lead_flow.created)', date('Y-m-d', strtotime($this->created_date_to))]);
+                $query->andFilterWhere(['<=', 'lead_flow.created', Employee::convertDtTimezone(strtotime($this->created_date_to))]);
             }
 
         } else {
-
             if($this->created) {
                 $query->andFilterWhere(['DATE(lead_flow.created)'=> date('Y-m-d', strtotime($this->created))]);
             }
