@@ -79,7 +79,7 @@ use \common\models\Call;
                         <i>c:<?=Html::a($model->c_case_id, ['cases/view', 'gid' => $model->cCase->cs_gid], ['data-pjax' => 0, 'target' => '_blank'])?></i><br>
                     <?php endif; ?>
 
-                    <?php if($model->c_call_type_id === Call::CALL_TYPE_OUT && $model->cugUgs):?>
+                    <?php if($model->c_call_type_id === Call::CALL_TYPE_IN && $model->cugUgs):?>
                         <?php $userGroupList = [];
                             if ($model->cugUgs) {
                                 foreach ($model->cugUgs as $userGroup) {
