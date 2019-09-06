@@ -518,9 +518,11 @@ class CommunicationController extends ApiBaseController
                     foreach ($departmentPhone->dugUgs as $userGroup) {
                         $cug = new CallUserGroup();
                         $cug->cug_ug_id = $userGroup->ug_id;
-                        //$cug->dug_dpp_id = $model->dpp_id;
-                        $cug->link('cugUg', $callModel);
-                        //$cug->save();
+                        $cug->cug_c_id = $callModel->c_id;
+                        //$cug->link('cugUg', $callModel);
+                        if (!$cug->save()) {
+                            Yii::error(VarDumper::dumpAsString($cug->errors), 'API:Communication:voiceIncoming:CallUserGroup:save');
+                        }
                     }
                 }
 
