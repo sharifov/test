@@ -36,3 +36,6 @@ phpunit.phar
 /.vagrant
 /logs/
 /tmp_offer.php
+
+# visual studio code
+.vscode

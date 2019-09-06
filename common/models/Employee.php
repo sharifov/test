@@ -5,6 +5,7 @@ namespace common\models;
 use borales\extensions\phoneInput\PhoneInput;
 use borales\extensions\phoneInput\PhoneInputValidator;
 use common\components\BackOffice;
+use frontend\controllers\UserGroupAssignController;
 use Yii;
 use yii\base\NotSupportedException;
 use yii\behaviors\TimestampBehavior;
@@ -802,6 +803,10 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         return $this->rolesName;
     }
 
+    public function roleUpdate($uID, $role){
+        Yii::$app->db->createCommand()->update('auth_assignment', ['item_name' => $role], "user_id = $uID" )->execute();
+    }
+
     public function getRolesRaw()
     {
         if(!$this->id) return [];
@@ -1019,12 +1024,12 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     public function getLastTakenLeadDt():string
     {
         $leadFlow = LeadFlow::find()
-                        ->where(['employee_id' => $this->id])
-                        ->andWhere(['status' => 2, 'lf_from_status_id' => 1])
-                        ->orderBy(['created' => SORT_DESC])
-                        ->one();
+            ->where(['employee_id' => $this->id])
+            ->andWhere(['status' => 2, 'lf_from_status_id' => 1])
+            ->orderBy(['created' => SORT_DESC])
+            ->one();
 
-       return ($leadFlow)?$leadFlow->created:'';
+        return ($leadFlow)?$leadFlow->created:'';
     }
 
 
@@ -1186,13 +1191,13 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
             'minus_percent_tips' => 'SUM(ts.ts_percent)',
             'split_percent_tips' => "SUM(CASE WHEN ts.ts_user_id = $this->id THEN ts.ts_percent ELSE 0 END)"
         ])
-        ->from(Lead::tableName() . ' l')
-        ->leftJoin(Quote::tableName() . ' q', 'q.lead_id = l.id')
-        ->leftJoin(ProfitSplit::tableName() . ' ps', 'ps.ps_lead_id = l.id')
-        ->leftJoin(TipsSplit::tableName() . ' ts', 'ts.ts_lead_id = l.id')
-        ->where(['l.status' => Lead::STATUS_SOLD, 'q.status' => Quote::STATUS_APPLIED])
-        ->andWhere('l.employee_id = ' . $this->id . ' OR ps.ps_user_id = ' . $this->id. ' OR ts.ts_user_id = ' . $this->id)
-        ->groupBy(['q.id', 'l.id']);
+            ->from(Lead::tableName() . ' l')
+            ->leftJoin(Quote::tableName() . ' q', 'q.lead_id = l.id')
+            ->leftJoin(ProfitSplit::tableName() . ' ps', 'ps.ps_lead_id = l.id')
+            ->leftJoin(TipsSplit::tableName() . ' ts', 'ts.ts_lead_id = l.id')
+            ->where(['l.status' => Lead::STATUS_SOLD, 'q.status' => Quote::STATUS_APPLIED])
+            ->andWhere('l.employee_id = ' . $this->id . ' OR ps.ps_user_id = ' . $this->id. ' OR ts.ts_user_id = ' . $this->id)
+            ->groupBy(['q.id', 'l.id']);
 
         if ($startDate !== null || $endDate !== null) {
             $subQuery = LeadFlow::find()->select(['DISTINCT(lead_flow.lead_id)'])->where('lead_flow.status = l.status AND lead_flow.lead_id = l.id');
@@ -1600,7 +1605,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
 
         if($callExist) {
             //if(in_array($call->c_call_type_id, [Call::CALL_STATUS_QUEUE, Call::CALL_STATUS_RINGING, Call::CALL_STATUS_IN_PROGRESS])) {
-                $isFree = false;
+            $isFree = false;
             //}
         }
         return $isFree;
@@ -1780,15 +1785,19 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
 
 
     /**
-     * @param int $project_id
-     * @param int|null $department_id
+     * @param Call $call
      * @param int $limit
      * @param int $hours
      * @param array|null $exceptUserIds
      * @return array
      */
-    public static function getUsersForCallQueue(int $project_id, ?int $department_id = null, int $limit = 0, int $hours = 1, ?array $exceptUserIds = null): array
+    public static function getUsersForCallQueue(Call $call, int $limit = 0, int $hours = 1, ?array $exceptUserIds = null): array
     {
+
+        $project_id = $call->c_project_id;
+        $department_id = $call->c_dep_id;
+
+
         $query = UserConnection::find();
         $date_time = date('Y-m-d H:i:s', strtotime('-' . $hours .' hours'));
 
@@ -1828,6 +1837,14 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         if($department_id) {
             $subQueryUd = UserDepartment::find()->usersByDep($department_id);
             $query->andWhere(['IN', 'user_connection.uc_user_id', $subQueryUd]);
+        }
+
+        if ($call->cugUgs) {
+            $groupIds = ArrayHelper::map($call->cugUgs, 'ug_id', 'ug_id');
+            if ($groupIds) {
+                $subQueryUGroup = UserGroupAssign::find()->select('ugs_user_id')->distinct('ugs_user_id')->where(['ugs_group_id' => $groupIds]);
+                $query->andWhere(['IN', 'user_connection.uc_user_id', $subQueryUGroup]);
+            }
         }
 
 

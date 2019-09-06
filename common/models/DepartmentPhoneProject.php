@@ -21,13 +21,20 @@ use yii\db\ActiveRecord;
  * @property int $dpp_updated_user_id
  * @property string $dpp_updated_dt
  *
+ * @property array $user_group_list
+ *
  * @property Department $dppDep
  * @property Project $dppProject
  * @property Sources $dppSource
  * @property Employee $dppUpdatedUser
+ * @property DepartmentPhoneProjectUserGroup[] $departmentPhoneProjectUserGroups
+ * @property UserGroup[] $dugUgs
  */
 class DepartmentPhoneProject extends \yii\db\ActiveRecord
 {
+
+    public $user_group_list = [];
+
     /**
      * {@inheritdoc}
      */
@@ -46,7 +53,7 @@ class DepartmentPhoneProject extends \yii\db\ActiveRecord
             [['dpp_dep_id', 'dpp_project_id', 'dpp_source_id', 'dpp_updated_user_id'], 'integer'],
             [['dpp_phone_number'], 'unique'],
             [['dpp_ivr_enable', 'dpp_enable'], 'boolean'],
-            [['dpp_params', 'dpp_updated_dt'], 'safe'],
+            [['dpp_params', 'dpp_updated_dt', 'user_group_list'], 'safe'],
             [['dpp_phone_number'], 'string', 'max' => 18],
             [['dpp_dep_id', 'dpp_project_id', 'dpp_phone_number'], 'unique', 'targetAttribute' => ['dpp_dep_id', 'dpp_project_id', 'dpp_phone_number']],
             [['dpp_dep_id'], 'exist', 'skipOnError' => true, 'targetClass' => Department::class, 'targetAttribute' => ['dpp_dep_id' => 'dep_id']],
@@ -127,6 +134,22 @@ class DepartmentPhoneProject extends \yii\db\ActiveRecord
     public function getDppUpdatedUser()
     {
         return $this->hasOne(Employee::class, ['id' => 'dpp_updated_user_id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getDepartmentPhoneProjectUserGroups()
+    {
+        return $this->hasMany(DepartmentPhoneProjectUserGroup::class, ['dug_dpp_id' => 'dpp_id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getDugUgs()
+    {
+        return $this->hasMany(UserGroup::class, ['ug_id' => 'dug_ug_id'])->viaTable('department_phone_project_user_group', ['dug_dpp_id' => 'dpp_id']);
     }
 
     /**

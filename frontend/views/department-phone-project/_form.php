@@ -22,10 +22,19 @@ use yii\widgets\ActiveForm;
         <?//= $form->field($model, 'dpp_source_id')->dropDownList(Sour) ?>
 
         <?php
-        echo $form->field($model, 'dpp_source_id')->widget(\kartik\select2\Select2::class, [
-            'data' => \common\models\Sources::getList(true),
+            echo $form->field($model, 'dpp_source_id')->widget(\kartik\select2\Select2::class, [
+                'data' => \common\models\Sources::getList(true),
+                'size' => \kartik\select2\Select2::SMALL,
+                'options' => ['placeholder' => 'Select market', 'multiple' => false],
+                'pluginOptions' => ['allowClear' => true],
+            ]);
+        ?>
+
+        <?php
+        echo $form->field($model, 'user_group_list')->widget(\kartik\select2\Select2::class, [
+            'data' => \common\models\UserGroup::getList(),
             'size' => \kartik\select2\Select2::SMALL,
-            'options' => ['placeholder' => 'Select market', 'multiple' => false],
+            'options' => ['placeholder' => 'Select User Groups', 'multiple' => true],
             'pluginOptions' => ['allowClear' => true],
         ]);
         ?>
