@@ -2,6 +2,7 @@
 
 namespace common\models\search;
 
+use common\models\Employee;
 use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
@@ -66,8 +67,8 @@ class QuoteSearch extends Quote
         }
 
         if(empty($this->created) && isset($params['QuoteSearch']['date_range'])){
-            $query->andFilterWhere(['>=', 'DATE(created)', $this->datetime_start])
-                ->andFilterWhere(['<=', 'DATE(created)', $this->datetime_end]);
+            $query->andFilterWhere(['>=', 'created', Employee::convertDtTimezone(strtotime($this->datetime_start))])
+                ->andFilterWhere(['<=', 'created', Employee::convertDtTimezone(strtotime($this->datetime_end))]);
         }
 
         if (isset($params['QuoteSearch']['created'])) {

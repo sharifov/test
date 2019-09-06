@@ -2,6 +2,7 @@
 
 namespace common\models\search;
 
+use common\models\Employee;
 use common\models\UserGroupAssign;
 use common\models\UserProjectParams;
 use Yii;
@@ -74,8 +75,8 @@ class SmsSearch extends Sms
         }
 
         if(empty($this->s_created_dt) && isset($params['SmsSearch']['date_range'])){
-            $query->andFilterWhere(['>=', 's_created_dt', $this->datetime_start])
-                ->andFilterWhere(['<=', 's_created_dt', $this->datetime_end]);
+            $query->andFilterWhere(['>=', 's_created_dt', Employee::convertDtTimezone(strtotime($this->datetime_start))])
+                ->andFilterWhere(['<=', 's_created_dt', Employee::convertDtTimezone(strtotime($this->datetime_end))]);
         } elseif (isset($params['SmsSearch']['s_created_dt'])) {
             $query->andFilterWhere(['=','DATE(s_created_dt)', $this->s_created_dt]);
         }
