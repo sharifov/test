@@ -5,6 +5,7 @@ namespace common\models;
 use borales\extensions\phoneInput\PhoneInput;
 use borales\extensions\phoneInput\PhoneInputValidator;
 use common\components\BackOffice;
+use phpDocumentor\Reflection\Types\Self_;
 use Yii;
 use yii\base\NotSupportedException;
 use yii\behaviors\TimestampBehavior;
@@ -1267,11 +1268,11 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     public function getLeadCountByStatus(array $statusList = [], string $startDate = null, string $endDate = null): int
     {
         if ($startDate) {
-            $startDate = date('Y-m-d H:i', strtotime($startDate));
+            $startDate = self::convertDtTimezone(strtotime($startDate));
         }
 
         if ($endDate) {
-            $endDate = date('Y-m-d H:i', strtotime($endDate));
+            $endDate = self::convertDtTimezone(strtotime($endDate));
         }
 
         $query = LeadFlow::find()->select('COUNT(DISTINCT(lead_id))')->where(['employee_id' => $this->id, 'status' => $statusList]);
@@ -1292,11 +1293,11 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     public function getLeadCountByStatuses(array $statusList = [], int $from_status_id = null, string $startDate = null, string $endDate = null): int
     {
         if ($startDate) {
-            $startDate = date('Y-m-d H:i', strtotime($startDate));
+            $startDate = self::convertDtTimezone(strtotime($startDate));
         }
 
         if ($endDate) {
-            $endDate = date('Y-m-d H:i', strtotime($endDate));
+            $endDate = self::convertDtTimezone(strtotime($endDate));
         }
 
         $query = LeadFlow::find()->select('COUNT(DISTINCT(lead_id))')->where(['employee_id' => $this->id, 'status' => $statusList]);
