@@ -100,7 +100,7 @@ class AgentCallQueueJob extends BaseObject implements JobInterface
                         $limitCallUsers = (int) (Yii::$app->params['settings']['general_line_user_limit'] ?? 1); //direct_agent_user_limit
 
                         $exceptUserIds = ArrayHelper::map($call->callUserAccesses, 'cua_user_id', 'cua_user_id');
-                        $users = Employee::getUsersForCallQueue($call->c_project_id, $call->c_dep_id, $limitCallUsers, $last_hours, $exceptUserIds);
+                        $users = Employee::getUsersForCallQueue($call, $limitCallUsers, $last_hours, $exceptUserIds);
                         if ($users) {
                             foreach ($users as $userItem) {
                                 $user_id = (int) $userItem['tbl_user_id'];

@@ -24,6 +24,16 @@ $this->params['breadcrumbs'][] = $this->title;
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
+        'tableOptions' => ['class' => 'table table-bordered table-hover'],
+        'rowOptions' => function (\common\models\DepartmentPhoneProject $model) {
+            if (!$model->dpp_enable) {
+                return ['class' => 'danger'];
+            }
+            if (!$model->dpp_ivr_enable) {
+                return ['class' => 'warning'];
+            }
+            return [];
+        },
         'columns' => [
             //['class' => 'yii\grid\SerialColumn'],
 
@@ -33,9 +43,10 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'dpp_project_id',
                 'value' => function (\common\models\DepartmentPhoneProject $model) {
-                    return $model->dppProject ? $model->dppProject->name : '-';
+                    return $model->dppProject ? '<span class="badge">' . Html::encode($model->dppProject->name) . '</span>' : '-';
                 },
-                'filter' => \common\models\Project::getList(true)
+                'filter' => \common\models\Project::getList(true),
+                'format' => 'raw',
             ],
             'dpp_phone_number',
             [
@@ -46,6 +57,21 @@ $this->params['breadcrumbs'][] = $this->title;
                 'filter' => \common\models\Department::getList()
             ],
             //'dpp_source_id',
+
+            [
+                'label' => 'User Groups',
+                'value' => function (\common\models\DepartmentPhoneProject $model) {
+                    $userGroupList = [];
+                    if ($model->dugUgs) {
+                        foreach ($model->dugUgs as $userGroup) {
+                            $userGroupList[] =  '<span class="label label-info"><i class="fa fa-users"></i> ' . Html::encode($userGroup->ug_name) . '</span>';
+                        }
+                    }
+                    return $userGroupList ? implode(' ', $userGroupList) : '-';
+                },
+                'format' => 'raw',
+            ],
+
             [
                 'attribute' => 'dpp_source_id',
                 'value' => function (\common\models\DepartmentPhoneProject $model) {
@@ -53,6 +79,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 },
                 'filter' => \common\models\Sources::getList(true)
             ],
+
             //'dpp_params',
             'dpp_ivr_enable:boolean',
             'dpp_enable:boolean',

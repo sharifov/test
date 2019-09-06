@@ -54,18 +54,21 @@ use \common\models\Call;
 
                 <td class="text-left">
                     <?php if($model->c_lead_id && $model->cLead):?>
-                        <i>l:<?=Html::a($model->c_lead_id, ['lead/view', 'gid' => $model->cLead->gid], ['data-pjax' => 0, 'target' => '_blank'])?><?=$model->cLead->l_init_price ? ' - ' . number_format($model->cLead->l_init_price, 0) : ''?></i><br>
-                        <?php
+                        <i>l:<?=Html::a($model->c_lead_id, ['lead/view', 'gid' => $model->cLead->gid], ['data-pjax' => 0, 'target' => '_blank'])?>
+
+                            <?//=$model->cLead->l_init_price ? ' - ' . number_format($model->cLead->l_init_price, 0) : ''?>
+                        </i><br>
+                        <?/*php
                             $segments = $model->cLead->leadFlightSegments;
                             $segmentData = [];
                             if ($segments) {
                                 foreach ($segments as $sk => $segment) {
-                                    $segmentData[] = /*($sk + 1) .*/ '<small>' . $segment->origin . ' <i class="fa fa-long-arrow-right"></i> ' . $segment->destination . '</small>';
+                                    $segmentData[] =  '<small>' . $segment->origin . ' <i class="fa fa-long-arrow-right"></i> ' . $segment->destination . '</small>';
                                 }
                             }
 
                             $segmentStr = implode('<br>', $segmentData);
-                            echo $segmentStr;
+                            echo $segmentStr;*/
                         ?>
 
 
@@ -74,6 +77,17 @@ use \common\models\Call;
 
                     <?php if($model->c_case_id && $model->cCase):?>
                         <i>c:<?=Html::a($model->c_case_id, ['cases/view', 'gid' => $model->cCase->cs_gid], ['data-pjax' => 0, 'target' => '_blank'])?></i><br>
+                    <?php endif; ?>
+
+                    <?php if($model->c_call_type_id === Call::CALL_TYPE_OUT && $model->cugUgs):?>
+                        <?php $userGroupList = [];
+                            if ($model->cugUgs) {
+                                foreach ($model->cugUgs as $userGroup) {
+                                    $userGroupList[] =  '<span class="label label-info"><i class="fa fa-users"></i> ' . Html::encode($userGroup->ug_name) . '</span>';
+                                }
+                            }
+                            echo $userGroupList ? implode('<br>', $userGroupList) : '-';
+                        ?>
                     <?php endif; ?>
 
                 </td>

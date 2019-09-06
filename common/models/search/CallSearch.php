@@ -314,7 +314,7 @@ class CallSearch extends Call
         }
 
 
-        $query->with(['cProject', 'cLead', 'cLead.leadFlightSegments', 'cCreatedUser', 'cDep', 'callUserAccesses', 'cuaUsers']);
+        $query->with(['cProject', 'cLead', /*'cLead.leadFlightSegments',*/ 'cCreatedUser', 'cDep', 'callUserAccesses', 'cuaUsers', 'cugUgs']);
 
         return $dataProvider;
     }

@@ -4,9 +4,11 @@ namespace webapi\modules\v1\controllers;
 use common\components\jobs\CallQueueJob;
 use common\models\Call;
 use common\models\CallSession;
+use common\models\CallUserGroup;
 use common\models\ClientPhone;
 use common\models\Department;
 use common\models\DepartmentPhoneProject;
+use common\models\DepartmentPhoneProjectUserGroup;
 use common\models\Email;
 use common\models\Employee;
 use common\models\Lead;
@@ -511,6 +513,17 @@ class CommunicationController extends ApiBaseController
                 $ivrEnable = (bool) $departmentPhone->dpp_ivr_enable;
 
                 $callModel = $this->findOrCreateCall($callSid, $post['call'], $call_project_id, $call_dep_id);
+
+                if ($departmentPhone->dugUgs) {
+                    foreach ($departmentPhone->dugUgs as $userGroup) {
+                        $cug = new CallUserGroup();
+                        $cug->cug_ug_id = $userGroup->ug_id;
+                        //$cug->dug_dpp_id = $model->dpp_id;
+                        $cug->link('cugUg', $callModel);
+                        //$cug->save();
+                    }
+                }
+
                 $callModel->c_source_type_id = Call::SOURCE_GENERAL_LINE;
 
                 if($ivrEnable) {
