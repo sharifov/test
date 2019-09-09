@@ -368,7 +368,7 @@ class CommunicationService
                 $finishForm->call->c_recording_url,
                 $finishForm->call->c_recording_duration,
                 $finishForm->call->c_caller_name,
-                $finishForm->call->c_project_id,
+                $finishForm->call->c_project_id
             );
 
             $upp = $this->userProjectParamsRepository->find($call->c_project_id, $call->c_from, $call->c_to);
