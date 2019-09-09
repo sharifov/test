@@ -273,40 +273,26 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
 
     /**
      * @param $callSid
-     * @param $accountSid
      * @param $callTypeId
-     * @param $uri
      * @param $from
      * @param $to
      * @param $createdDt
      * @param $recordingUrl
-     * @param $recordingSid
      * @param $recordingDuration
      * @param $callerName
-     * @param $direction
-     * @param $apiVersion
-     * @param $sip
      * @param $projectId
-     * @param $timestamp
      * @return Call
      */
     public static function create(
         $callSid,
-        $accountSid,
         $callTypeId,
-        $uri,
         $from,
         $to,
         $createdDt,
         $recordingUrl,
-        $recordingSid,
         $recordingDuration,
         $callerName,
-        $direction,
-        $apiVersion,
-        $sip,
-        $projectId,
-        $timestamp = null
+        $projectId
     ): self
     {
         $call = new static();
