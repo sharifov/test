@@ -277,7 +277,7 @@ class CommunicationController extends ApiBaseController
 
         switch ($type) {
             case self::TYPE_VOIP_INCOMING:
-//            case self::TYPE_VOIP_GATHER:
+            case self::TYPE_VOIP_GATHER:
                 $response = $this->voiceIncoming($post, $type);
 //                $response = $this->communicationService->voiceIncoming($type, Yii::$app->request->post());
                 break;
