@@ -435,34 +435,19 @@ class CommunicationController extends ApiBaseController
     {
         $response = [];
         $post = Yii::$app->request->post();
-        $settings = \Yii::$app->params['settings'];
 
-        Yii::info(VarDumper::dumpAsString($post), 'info\API:Communication:voiceIncoming');
-
-        $callSourceTypeId = null;
-        $lead2 = null;
-
-        $general_line_call_distribution = \Yii::$app->params['general_line_call_distribution'];
-
-//        $use_new_general_line_distribution = $settings['use_general_line_distribution'] ?? $general_line_call_distribution['use_general_line_distribution'];
-//        $general_line_leads_limit = $settings['general_line_leads_limit'] ?? $general_line_call_distribution['general_line_leads_limit'];
-//        $general_line_role_priority = $settings['general_line_role_priority'] ?? $general_line_call_distribution['general_line_role_priority'];
-//        $general_line_last_hours = $settings['general_line_last_hours'] ?? $general_line_call_distribution['general_line_last_hours'];
-//        $general_line_user_limit = $settings['general_line_user_limit'] ?? $general_line_call_distribution['general_line_user_limit'];
-//        $direct_agent_user_limit = $settings['direct_agent_user_limit'] ?? $general_line_call_distribution['direct_agent_user_limit'];
-
+        // Yii::info(VarDumper::dumpAsString($post), 'info\API:Communication:voiceIncoming');
 
         $clientPhone = null;
-        $ciscoPhoneNumber = \Yii::$app->params['global_phone'];
+        // $ciscoPhoneNumber = \Yii::$app->params['global_phone'];
 
-        //VarDumper::dump($avrEnable); exit;
+        if (isset($post['call']) && $post['call']) {
 
-        if(isset($post['call']) && $post['call']) {
             $client_phone_number = null;
             $incoming_phone_number = null;
 
-            $callSid = $post['call']['CallSid'] ?? false;
-            $parentCallSid = $post['call']['ParentCallSid'] ?? false;
+            $callSid = $post['call']['CallSid'] ?? null;
+            $parentCallSid = $post['call']['ParentCallSid'] ?? null;
 
 
             if (isset($post['call_id'])) {
@@ -492,17 +477,13 @@ class CommunicationController extends ApiBaseController
 
             $departmentPhone = DepartmentPhoneProject::find()->where(['dpp_phone_number' => $incoming_phone_number, 'dpp_enable' => true])->limit(1)->one();
 
-            $call_dep_id = null;
-            $callModel = null;
-            $upp = null;
-
-            if($departmentPhone) {
+            if ($departmentPhone) {
 
                 $project = $departmentPhone->dppProject;
                 $source = $departmentPhone->dppSource;
-                if($project && !$source) {
+                if ($project && !$source) {
                     $source = Sources::find()->where(['project_id' => $project->id, 'default' => true])->one();
-                    if($source) {
+                    if ($source) {
                         $departmentPhone->dpp_source_id = $source->id;
                     }
                 }
@@ -510,9 +491,9 @@ class CommunicationController extends ApiBaseController
                 $call_project_id = $departmentPhone->dpp_project_id;
                 $call_dep_id = $departmentPhone->dpp_dep_id;
 
-                $ivrEnable = (bool) $departmentPhone->dpp_ivr_enable;
+                $ivrEnable = (bool)$departmentPhone->dpp_ivr_enable;
 
-                $callModel = $this->findOrCreateCall($callSid, $post['call'], $call_project_id, $call_dep_id);
+                $callModel = $this->findOrCreateCall($callSid, $parentCallSid, $post['call'], $call_project_id, $call_dep_id);
 
                 if ($departmentPhone->dugUgs) {
                     foreach ($departmentPhone->dugUgs as $userGroup) {
@@ -528,63 +509,53 @@ class CommunicationController extends ApiBaseController
 
                 $callModel->c_source_type_id = Call::SOURCE_GENERAL_LINE;
 
-                if($ivrEnable) {
-                    $ivrSelectedDigit = isset($post['call']['Digits']) ? (int) $post['call']['Digits'] : null;
-                    $ivrStep = (int) Yii::$app->request->get('step', 1);
+                if ($ivrEnable) {
+                    $ivrSelectedDigit = isset($post['call']['Digits']) ? (int)$post['call']['Digits'] : null;
+                    $ivrStep = (int)Yii::$app->request->get('step', 1);
                     return $this->ivrService($callModel, $departmentPhone, $ivrStep, $ivrSelectedDigit);
                 }
 
-            } else {
+                $response['error'] = 'Not enable IVR';
+                $response['error_code'] = 13;
 
+            } else {
 
                 $upp = UserProjectParams::find()->where(['upp_tw_phone_number' => $incoming_phone_number])->limit(1)->one();
                 if ($upp) {
 
-                    $call_project_id = $upp->upp_project_id;
-                    if($upp->upp_dep_id) {
+                    if ($upp->upp_dep_id) {
                         $call_dep_id = $upp->upp_dep_id;
+                    } elseif ($upp->uppUser && $upp->uppUser->userDepartments && isset($upp->uppUser->userDepartments[0])) {
+                        $call_dep_id = $upp->uppUser->userDepartments[0]->ud_dep_id;
+
+                        /*foreach ($upp->uppUser->userDepartments as $userDepartment) {
+                            $call_dep_id = $userDepartment->ud_dep_id;
+                            break;
+                        }*/
                     } else {
-                        if ($upp->uppUser && $upp->uppUser->userDepartments) {
-                            foreach ($upp->uppUser->userDepartments as $userDepartment) {
-                                $call_dep_id = $userDepartment->ud_dep_id;
-                                break;
-                            }
-                        }
+                        $call_dep_id = null;
                     }
 
-                    $callModel = $this->findOrCreateCall($callSid, $post['call'], $call_project_id, $call_dep_id);
+                    $callModel = $this->findOrCreateCall($callSid, $parentCallSid, $post['call'], $upp->upp_project_id, $call_dep_id);
                     $callModel->c_source_type_id = Call::SOURCE_DIRECT_CALL;
-
 
                     $user = $upp->uppUser;
 
-                    if ($user->isOnline()) {
-                        //if ($user->isCallStatusReady()) {
-                            //if ($user->isCallFree()) {
-                                Yii::info('DIRECT CALL - User (' . $user->username . ') Id: ' . $user->id . ', phone: ' . $incoming_phone_number, 'info\API:Communication:Incoming:DirectCall');
-                                return $this->createDirectCall($callModel, $user);
+                    if ($user) {
+                        if ($user->isOnline()) {
+                            Yii::info('DIRECT CALL - User (' . $user->username . ') Id: ' . $user->id . ', phone: ' . $incoming_phone_number, 'info\API:Communication:Incoming:DirectCall');
+                            return $this->createDirectCall($callModel, $user);
+                        }
 
-                                /*if ($user->userProfile && (int) $user->userProfile->up_call_type_id === UserProfile::CALL_TYPE_WEB) {
-                                    $call_employee[] = $user;
-                                    $call_agent_username[] = 'seller' . $user->id;
-                                }*/
-
-                            /*} else {
-                                Yii::info('Call Occupied - User (' . $user->username . ') Id: ' . $user->id . ', phone: ' . $incoming_phone_number, 'info\API:Communication:Incoming:Occupied');
-                                Notifications::create($user->id, 'Missing Call [Occupied]', 'Missing Call from ' . $client_phone_number . ' to ' . $incoming_phone_number . "\r\n Reason: Agent Occupied", Notifications::TYPE_WARNING, true);
-                            }
-                        } else {
-                            Yii::info('Call Status not Ready - User (' . $user->username . ') Id: ' . $user->id . ', phone: ' . $incoming_phone_number, 'info\API:Communication:Incoming:notReady');
-                            Notifications::create($user->id, 'Missing Call [not Ready]', 'Missing Call from ' . $client_phone_number . ' to ' . $incoming_phone_number . "\r\n Reason: Call Status not Ready", Notifications::TYPE_WARNING, true);
-                        }*/
-                    } else {
                         Yii::info('Offline - User (' . $user->username . ') Id: ' . $user->id . ', phone: ' . $incoming_phone_number, 'info\API:Communication:Incoming:Offline');
                         Notifications::create($user->id, 'Missing Call [Offline]', 'Missing Call from ' . $client_phone_number . ' to ' . $incoming_phone_number . "\r\n Reason: Agent offline", Notifications::TYPE_WARNING, true);
+                        Notifications::socket($user->id, null, 'getNewNotification', [], true);
+                        $callModel->c_source_type_id = Call::SOURCE_REDIRECT_CALL;
+                        return $this->createHoldCall($callModel, $user);
                     }
 
-                    Notifications::socket($user->id, null, 'getNewNotification', [], true);
-                    $callModel->c_source_type_id = Call::SOURCE_REDIRECT_CALL;
-                    return $this->createHoldCall($callModel, $user);
+                    $response['error'] = 'Not found "user" for Call';
+                    $response['error_code'] = 14;
 
                 }
 
@@ -592,10 +563,10 @@ class CommunicationController extends ApiBaseController
 
             return $this->createExceptionCall($incoming_phone_number); //$ciscoPhoneNumber
 
-        } else {
-            $response['error'] = 'Not found "call" array';
-            $response['error_code'] = 12;
         }
+
+        $response['error'] = 'Not found "call" array';
+        $response['error_code'] = 12;
         return $response;
     }
 
@@ -1356,15 +1327,17 @@ class CommunicationController extends ApiBaseController
 
     /**
      * @param string $callSid
+     * @param string|null $parentCallSid
      * @param array $calData
      * @param int $call_project_id
      * @param int|null $call_dep_id
      * @return Call
      * @throws \Exception
      */
-    protected function findOrCreateCall(string $callSid, array $calData, int $call_project_id, ?int $call_dep_id): Call
+    protected function findOrCreateCall(string $callSid, ?string $parentCallSid, array $calData, int $call_project_id, ?int $call_dep_id): Call
     {
         $call = null;
+        $parentCall = null;
         $clientPhone = null;
 
         if (isset($calData['From']) && $calData['From']) {
@@ -1378,6 +1351,11 @@ class CommunicationController extends ApiBaseController
             $call = Call::find()->where(['c_call_sid' => $callSid])->limit(1)->one();
         }
 
+        if ($parentCallSid) {
+            $parentCall = Call::find()->where(['c_call_sid' => $parentCallSid])->orderBy(['c_id' => SORT_DESC])->limit(1)->one();
+        }
+
+
         if (!$call) {
 
             $call = new Call();
@@ -1387,10 +1365,14 @@ class CommunicationController extends ApiBaseController
             $call->c_com_call_id = $calData['c_com_call_id'] ?? null;
             $call->c_parent_call_sid = $calData['ParentCallSid'] ?? null;
 
-            if($call_project_id) {
+            if ($parentCall) {
+                $call->c_parent_id = $parentCall->c_id;
+            }
+
+            if ($call_project_id) {
                 $call->c_project_id = $call_project_id;
             }
-            if($call_dep_id) {
+            if ($call_dep_id) {
                 $call->c_dep_id = $call_dep_id;
             }
 
