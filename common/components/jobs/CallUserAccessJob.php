@@ -65,7 +65,7 @@ class CallUserAccessJob extends BaseObject implements JobInterface
             $this->clientManageService = Yii::createObject(ClientManageService::class);
             $this->casesRepository = Yii::createObject(CasesRepository::class);
 
-            Yii::info('CallUserAccessJob - CallId: ' . $this->call_id ,'info\CallUserAccessJob');
+            // Yii::info('CallUserAccessJob - CallId: ' . $this->call_id ,'info\CallUserAccessJob');
 
             if($this->delay) {
                 sleep($this->delay);

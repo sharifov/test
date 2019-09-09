@@ -69,7 +69,7 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
     
     use EventTrait;
 
-    public const CALL_STATUS_IVR          = 'ivr';
+    public const CALL_STATUS_IVR            = 'ivr';
     public const CALL_STATUS_QUEUE          = 'queued';
     public const CALL_STATUS_RINGING        = 'ringing';
     public const CALL_STATUS_IN_PROGRESS    = 'in-progress';
@@ -91,6 +91,29 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
         self::CALL_STATUS_CANCELED      => 'Canceled',
     ];
 
+
+    public const STATUS_IVR            = 1;
+    public const STATUS_QUEUE          = 2;
+    public const STATUS_RINGING        = 3;
+    public const STATUS_IN_PROGRESS    = 4;
+    public const STATUS_COMPLETED      = 5;
+    public const STATUS_BUSY           = 6;
+    public const STATUS_NO_ANSWER      = 7;
+    public const STATUS_FAILED         = 8;
+    public const STATUS_CANCELED       = 9;
+
+    public const STATUS_LIST = [
+        self::STATUS_IVR           => 'IVR',
+        self::STATUS_QUEUE         => 'Queued',
+        self::STATUS_RINGING       => 'Ringing',
+        self::STATUS_IN_PROGRESS   => 'In progress',
+        self::STATUS_COMPLETED     => 'Completed',
+        self::STATUS_BUSY          => 'Busy',
+        self::STATUS_NO_ANSWER     => 'No answer',
+        self::STATUS_FAILED        => 'Failed',
+        self::STATUS_CANCELED      => 'Canceled',
+    ];
+
     public const CALL_STATUS_LABEL_LIST = [
         self::CALL_STATUS_IVR         => '<span class="label label-warning"><i class="fa fa-refresh fa-spin"></i> ' . self::CALL_STATUS_LIST[self::CALL_STATUS_IVR] . '</span>',
         self::CALL_STATUS_QUEUE         => '<span class="label label-warning"><i class="fa fa-refresh fa-spin"></i> ' . self::CALL_STATUS_LIST[self::CALL_STATUS_QUEUE] . '</span>',
@@ -101,6 +124,19 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
         self::CALL_STATUS_NO_ANSWER     => '<span class="label label-danger"><i class="fa fa-times-circle"></i> ' . self::CALL_STATUS_LIST[self::CALL_STATUS_NO_ANSWER] . '</span>',
         self::CALL_STATUS_FAILED        => '<span class="label label-danger"><i class="fa fa-window-close"></i> ' . self::CALL_STATUS_LIST[self::CALL_STATUS_FAILED] . '</span>',
         self::CALL_STATUS_CANCELED      => '<span class="label label-danger"><i class="fa fa-close"></i> ' . self::CALL_STATUS_LIST[self::CALL_STATUS_CANCELED] . '</span>',
+    ];
+
+
+    public const STATUS_LABEL_LIST = [
+        self::STATUS_IVR         => '<span class="label label-warning"><i class="fa fa-refresh fa-spin"></i> ' . self::STATUS_LIST[self::STATUS_IVR] . '</span>',
+        self::STATUS_QUEUE         => '<span class="label label-warning"><i class="fa fa-refresh fa-spin"></i> ' . self::STATUS_LIST[self::STATUS_QUEUE] . '</span>',
+        self::STATUS_RINGING       => '<span class="label label-warning"><i class="fa fa-spinner fa-spin"></i> ' . self::STATUS_LIST[self::STATUS_RINGING] . '</span>',
+        self::STATUS_IN_PROGRESS   => '<span class="label label-success"><i class="fa fa-volume-control-phone"></i> ' . self::STATUS_LIST[self::STATUS_IN_PROGRESS] . '</span>',
+        self::STATUS_COMPLETED     => '<span class="label label-info"><i class="fa fa-check"></i> ' . self::STATUS_LIST[self::STATUS_COMPLETED] . '</span>',
+        self::STATUS_BUSY          => '<span class="label label-danger"><i class="fa fa-ban"></i> ' . self::STATUS_LIST[self::STATUS_BUSY] . '</span>',
+        self::STATUS_NO_ANSWER     => '<span class="label label-danger"><i class="fa fa-times-circle"></i> ' . self::STATUS_LIST[self::STATUS_NO_ANSWER] . '</span>',
+        self::STATUS_FAILED        => '<span class="label label-danger"><i class="fa fa-window-close"></i> ' . self::STATUS_LIST[self::STATUS_FAILED] . '</span>',
+        self::STATUS_CANCELED      => '<span class="label label-danger"><i class="fa fa-close"></i> ' . self::STATUS_LIST[self::STATUS_CANCELED] . '</span>',
     ];
 
     public const CALL_STATUS_DESCRIPTION_LIST = [
@@ -142,6 +178,98 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
         self::SOURCE_REDIRECT_CALL  => 'RC',
         self::SOURCE_TRANSFER_CALL  => 'TC',
     ];
+
+
+    /**
+     * {@inheritdoc}
+     */
+    public static function tableName()
+    {
+        return 'call';
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function rules()
+    {
+        return [
+            [['c_call_sid'], 'required'],
+            [['c_call_type_id', 'c_lead_id', 'c_created_user_id', 'c_com_call_id', 'c_project_id', 'c_call_duration', 'c_recording_duration', 'c_dep_id', 'c_case_id', 'c_client_id', 'c_status_id', 'c_parent_id'], 'integer'],
+            [['c_price'], 'number'],
+            [['c_is_new'], 'default', 'value' => true],
+            [['c_is_new', 'c_is_deleted'], 'boolean'],
+            [['c_created_dt', 'c_updated_dt'], 'safe'],
+            [['c_call_sid', 'c_parent_call_sid'], 'string', 'max' => 34],
+            [['c_from', 'c_to', 'c_forwarded_from'], 'string', 'max' => 100],
+            [['c_call_status'], 'string', 'max' => 15],
+            [['c_caller_name'], 'string', 'max' => 50],
+            [['c_recording_url'], 'string', 'max' => 200],
+            [['c_sequence_number'], 'string', 'max' => 40],
+            [['c_error_message'], 'string', 'max' => 500],
+            [['c_case_id'], 'exist', 'skipOnError' => true, 'targetClass' => Cases::class, 'targetAttribute' => ['c_case_id' => 'cs_id']],
+            [['c_client_id'], 'exist', 'skipOnError' => true, 'targetClass' => Client::class, 'targetAttribute' => ['c_client_id' => 'id']],
+            [['c_created_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['c_created_user_id' => 'id']],
+            [['c_dep_id'], 'exist', 'skipOnError' => true, 'targetClass' => Department::class, 'targetAttribute' => ['c_dep_id' => 'dep_id']],
+            [['c_lead_id'], 'exist', 'skipOnError' => true, 'targetClass' => Lead::class, 'targetAttribute' => ['c_lead_id' => 'id']],
+            [['c_parent_id'], 'exist', 'skipOnError' => true, 'targetClass' => self::class, 'targetAttribute' => ['c_parent_id' => 'c_id']],
+            [['c_project_id'], 'exist', 'skipOnError' => true, 'targetClass' => Project::class, 'targetAttribute' => ['c_project_id' => 'id']],
+        ];
+    }
+
+
+    /**
+     * {@inheritdoc}
+     */
+    public function attributeLabels()
+    {
+        return [
+            'c_id' => 'ID',
+            'c_call_sid' => 'Call Sid',
+            'c_call_type_id' => 'Call Type ID',
+            'c_from' => 'From',
+            'c_to' => 'To',
+            'c_call_status' => 'Call Status',
+            'c_forwarded_from' => 'Forwarded From',
+            'c_caller_name' => 'Caller Name',
+            'c_parent_call_sid' => 'Parent Call Sid',
+            'c_call_duration' => 'Call Duration',
+            'c_recording_url' => 'Recording Url',
+            'c_recording_duration' => 'Recording Duration',
+            'c_sequence_number' => 'Sequence Number',
+            'c_lead_id' => 'Lead ID',
+            'c_created_user_id' => 'Created User ID',
+            'c_created_dt' => 'Created Dt',
+            'c_com_call_id' => 'Com Call ID',
+            'c_updated_dt' => 'Updated Dt',
+            'c_project_id' => 'Project ID',
+            'c_error_message' => 'Error Message',
+            'c_is_new' => 'Is New',
+            'c_is_deleted' => 'Is Deleted',
+            'c_price' => 'Price',
+            'c_source_type_id' => 'Source Type',
+            'c_dep_id' => 'Department ID',
+            'c_case_id' => 'Case ID',
+            'c_client_id' => 'Client',
+            'c_status_id' => 'Status ID',
+            'c_parent_id' => 'Parent ID',
+        ];
+    }
+
+    public function behaviors()
+    {
+        return [
+            'timestamp' => [
+                'class' => TimestampBehavior::class,
+                'attributes' => [
+                    ActiveRecord::EVENT_BEFORE_INSERT => ['c_created_dt', 'c_updated_dt'],
+                    ActiveRecord::EVENT_BEFORE_UPDATE => ['c_updated_dt'],
+                ],
+                'value' => date('Y-m-d H:i:s') //new Expression('NOW()'),
+            ],
+        ];
+    }
+
 
     /**
      * @param $callSid
@@ -255,94 +383,6 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
         $this->c_call_duration = $duration;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public static function tableName()
-    {
-        return 'call';
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function rules()
-    {
-        return [
-            [['c_call_sid'], 'required'],
-            [['c_call_type_id', 'c_lead_id', 'c_created_user_id', 'c_com_call_id', 'c_project_id', 'c_call_duration', 'c_recording_duration', 'c_dep_id', 'c_case_id', 'c_client_id', 'c_status_id', 'c_parent_id'], 'integer'],
-            [['c_price'], 'number'],
-            [['c_is_new'], 'default', 'value' => true],
-            [['c_is_new', 'c_is_deleted'], 'boolean'],
-            [['c_created_dt', 'c_updated_dt'], 'safe'],
-            [['c_call_sid', 'c_parent_call_sid'], 'string', 'max' => 34],
-            [['c_from', 'c_to', 'c_forwarded_from'], 'string', 'max' => 100],
-            [['c_call_status'], 'string', 'max' => 15],
-            [['c_caller_name'], 'string', 'max' => 50],
-            [['c_recording_url'], 'string', 'max' => 200],
-            [['c_sequence_number'], 'string', 'max' => 40],
-            [['c_error_message'], 'string', 'max' => 500],
-            [['c_case_id'], 'exist', 'skipOnError' => true, 'targetClass' => Cases::class, 'targetAttribute' => ['c_case_id' => 'cs_id']],
-            [['c_client_id'], 'exist', 'skipOnError' => true, 'targetClass' => Client::class, 'targetAttribute' => ['c_client_id' => 'id']],
-            [['c_created_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['c_created_user_id' => 'id']],
-            [['c_dep_id'], 'exist', 'skipOnError' => true, 'targetClass' => Department::class, 'targetAttribute' => ['c_dep_id' => 'dep_id']],
-            [['c_lead_id'], 'exist', 'skipOnError' => true, 'targetClass' => Lead::class, 'targetAttribute' => ['c_lead_id' => 'id']],
-            [['c_parent_id'], 'exist', 'skipOnError' => true, 'targetClass' => self::class, 'targetAttribute' => ['c_parent_id' => 'c_id']],
-            [['c_project_id'], 'exist', 'skipOnError' => true, 'targetClass' => Project::class, 'targetAttribute' => ['c_project_id' => 'id']],
-        ];
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function attributeLabels()
-    {
-        return [
-            'c_id' => 'ID',
-            'c_call_sid' => 'Call Sid',
-            'c_call_type_id' => 'Call Type ID',
-            'c_from' => 'From',
-            'c_to' => 'To',
-            'c_call_status' => 'Call Status',
-            'c_forwarded_from' => 'Forwarded From',
-            'c_caller_name' => 'Caller Name',
-            'c_parent_call_sid' => 'Parent Call Sid',
-            'c_call_duration' => 'Call Duration',
-            'c_recording_url' => 'Recording Url',
-            'c_recording_duration' => 'Recording Duration',
-            'c_sequence_number' => 'Sequence Number',
-            'c_lead_id' => 'Lead ID',
-            'c_created_user_id' => 'Created User ID',
-            'c_created_dt' => 'Created Dt',
-            'c_com_call_id' => 'Com Call ID',
-            'c_updated_dt' => 'Updated Dt',
-            'c_project_id' => 'Project ID',
-            'c_error_message' => 'Error Message',
-            'c_is_new' => 'Is New',
-            'c_is_deleted' => 'Is Deleted',
-            'c_price' => 'Price',
-            'c_source_type_id' => 'Source Type',
-            'c_dep_id' => 'Department ID',
-            'c_case_id' => 'Case ID',
-            'c_client_id' => 'Client',
-            'c_status_id' => 'Status ID',
-            'c_parent_id' => 'Parent ID',
-        ];
-    }
-
-    public function behaviors()
-    {
-        return [
-            'timestamp' => [
-                'class' => TimestampBehavior::class,
-                'attributes' => [
-                    ActiveRecord::EVENT_BEFORE_INSERT => ['c_created_dt', 'c_updated_dt'],
-                    ActiveRecord::EVENT_BEFORE_UPDATE => ['c_updated_dt'],
-                ],
-                'value' => date('Y-m-d H:i:s') //new Expression('NOW()'),
-            ],
-        ];
-    }
 
 
     /**
@@ -477,6 +517,14 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
     public function getStatusName()
     {
         return self::CALL_STATUS_LIST[$this->c_call_status] ?? '-';
+    }
+
+    /**
+     * @return mixed|string
+     */
+    public function getStatusName2()
+    {
+        return self::STATUS_LIST[$this->c_status_id] ?? '-';
     }
 
     /**
@@ -1179,6 +1227,129 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
     public function isOut(): bool
     {
         return $this->c_call_type_id === self::CALL_TYPE_OUT;
+    }
+
+
+    /**
+     * @param string $statusName
+     * @return int|null
+     */
+    public static function getStatusByTwilioStatus(string $statusName): ?int
+    {
+        $statusId = null;
+        switch ($statusName) {
+            case self::CALL_STATUS_IVR:
+                $statusId = self::STATUS_IVR;
+                break;
+            case self::CALL_STATUS_QUEUE:
+                $statusId = self::STATUS_QUEUE;
+                break;
+            case self::CALL_STATUS_RINGING:
+                $statusId = self::STATUS_RINGING;
+                break;
+            case self::CALL_STATUS_COMPLETED:
+                $statusId = self::STATUS_COMPLETED;
+                break;
+            case self::CALL_STATUS_CANCELED:
+                $statusId = self::STATUS_CANCELED;
+                break;
+            case self::CALL_STATUS_FAILED:
+                $statusId = self::STATUS_FAILED;
+                break;
+            case self::CALL_STATUS_BUSY:
+                $statusId = self::STATUS_BUSY;
+                break;
+            case self::CALL_STATUS_IN_PROGRESS:
+                $statusId = self::STATUS_IN_PROGRESS;
+                break;
+            case self::CALL_STATUS_NO_ANSWER:
+                $statusId = self::STATUS_NO_ANSWER;
+                break;
+        }
+        return $statusId;
+    }
+
+    /**
+     * @param string $statusName
+     * @return int|null
+     */
+    public function setStatusByTwilioStatus(string $statusName): ?int
+    {
+        $this->c_status_id = self::getStatusByTwilioStatus($statusName);
+        return $this->c_status_id;
+    }
+
+
+    /**
+     * @return bool
+     */
+    public function isStatusRinging(): bool
+    {
+        return $this->c_status_id === self::STATUS_RINGING;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isStatusInProgress(): bool
+    {
+        return $this->c_status_id === self::STATUS_IN_PROGRESS;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isStatusIvr(): bool
+    {
+        return $this->c_status_id === self::STATUS_IVR;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isStatusQueue(): bool
+    {
+        return $this->c_status_id === self::STATUS_QUEUE;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isStatusBusy(): bool
+    {
+        return $this->c_status_id === self::STATUS_BUSY;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isStatusCanceled(): bool
+    {
+        return $this->c_status_id === self::STATUS_CANCELED;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isStatusCompleted(): bool
+    {
+        return $this->c_status_id === self::STATUS_COMPLETED;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isStatusNoAnswer(): bool
+    {
+        return $this->c_status_id === self::STATUS_NO_ANSWER;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isStatusFailed(): bool
+    {
+        return $this->c_status_id === self::STATUS_FAILED;
     }
 
 

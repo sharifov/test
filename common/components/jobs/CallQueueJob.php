@@ -64,7 +64,7 @@ class CallQueueJob extends BaseObject implements JobInterface
             $this->clientManageService = Yii::createObject(ClientManageService::class);
             $this->casesRepository = Yii::createObject(CasesRepository::class);
 
-            Yii::info('CallQueueJob - CallId: ' . $this->call_id ,'info\CallQueueJob');
+            // Yii::info('CallQueueJob - CallId: ' . $this->call_id ,'info\CallQueueJob');
 
             if($this->delay) {
                 sleep($this->delay);
@@ -80,7 +80,7 @@ class CallQueueJob extends BaseObject implements JobInterface
 
                     $originalAgentId = $call->c_created_user_id;
 
-                    Yii::info('CallQueueJob - CallId: ' . $this->call_id . ', c_call_status: ' . $call->c_call_status . ', ' . VarDumper::dumpAsString($call->attributes),'info\CallQueueJob-call');
+                    // Yii::info('CallQueueJob - CallId: ' . $this->call_id . ', c_call_status: ' . $call->c_call_status . ', ' . VarDumper::dumpAsString($call->attributes),'info\CallQueueJob-call');
 
                     if($call->c_call_status === Call::CALL_STATUS_IVR) {
                         Yii::info('CallId: ' . $this->call_id . ', CALL_STATUS_IVR' ,'info\CallQueueJob-CALL_STATUS_IVR');
@@ -140,7 +140,7 @@ class CallQueueJob extends BaseObject implements JobInterface
                         if($user && $user->isOnline() /*&& $user->isCallStatusReady() && $user->isCallFree()*/) {
                             $isCalled = Call::applyCallToAgentAccess($call, $user->id);
 
-                            Yii::info('Accept one user ('. ($isCalled ? 'isCalled' : 'NotIsCalled' ) .') - CallId: ' . $this->call_id . ', c_call_status: ' . $call->c_call_status . ', ' . VarDumper::dumpAsString($call->attributes),'info\CallQueueJob-Accept-one');
+                            // Yii::info('Accept one user ('. ($isCalled ? 'isCalled' : 'NotIsCalled' ) .') - CallId: ' . $this->call_id . ', c_call_status: ' . $call->c_call_status . ', ' . VarDumper::dumpAsString($call->attributes),'info\CallQueueJob-Accept-one');
 
 
                             if ((int) $call->c_source_type_id === Call::SOURCE_GENERAL_LINE) {

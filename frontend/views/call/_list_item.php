@@ -1,5 +1,6 @@
 <?php
 
+use common\models\CallUserAccess;
 use yii\helpers\Html;
 use \common\models\Call;
 
@@ -9,19 +10,31 @@ use \common\models\Call;
 ?>
 
 <div class="col-md-12">
-    <table class="table <?=($model->c_call_status === Call::CALL_STATUS_CANCELED || $model->c_call_status === Call::CALL_STATUS_NO_ANSWER || $model->c_call_status === Call::CALL_STATUS_BUSY) ? '' : 'table-striped'?>">
-        <tr <?=($model->c_call_status === Call::CALL_STATUS_CANCELED || $model->c_call_status === Call::CALL_STATUS_NO_ANSWER || $model->c_call_status === Call::CALL_STATUS_BUSY) ? 'class="danger"' : ''?>>
-            <td width="50">
-                <u><?=$model->c_id?></u><br>
-                <?php if($model->c_call_type_id === Call::CALL_TYPE_IN):?>
+    <?php
+        $trClass = '';
+        if ($model->isIn() && ($model->isNoAnswer() || $model->isCanceled() || $model->isBusy())) {
+            $trClass = 'danger';
+        }
+
+        if ($model->c_parent_id) {
+            $trClass = 'warning';
+        }
+    ?>
+
+    <table class="table <?=($model->isIn() && ($model->isNoAnswer() || $model->isCanceled() || $model->isBusy())) ? '' : 'table-striped'?>">
+        <tr class="<?=$trClass?>">
+            <td style="width:50px">
+                <u><?=Html::a($model->c_id, ['call/view', 'id' => $model->c_id], ['target' => '_blank', 'data-pjax' => 0])?></u><br>
+                <?= $model->c_parent_id ? 'p:' . Html::a($model->c_parent_id, ['call/view', 'id' => $model->c_parent_id], ['target' => '_blank', 'data-pjax' => 0]) . '<br>' : ''?>
+                <?php if ($model->c_call_type_id === Call::CALL_TYPE_IN):?>
                     <?=Html::tag('i', '', ['class' => 'fa fa-arrow-circle-o-right fa-lg text-success'])?>
                 <?php else: ?>
                     <?=Html::tag('i', '', ['class' => 'fa fa-arrow-circle-o-left fa-lg text-info'])?>
                 <?php endif; ?>
             </td>
-            <td class="text-center" width="100">
+            <td class="text-center" style="width:100px">
 
-                <?php if($model->c_call_type_id === Call::CALL_TYPE_IN):?>
+                <?php if($model->isIn()):?>
                     <div><i class="fa fa-male text-info fa-2x fa-border"></i></div>
                     <?=$model->c_from?>
                 <?php else: ?>
@@ -34,8 +47,8 @@ use \common\models\Call;
                     <?php endif; ?>
                 <?php endif; ?>
             </td>
-            <td class="text-center" width="130">
-                <?php if($model->c_call_type_id === Call::CALL_TYPE_IN):?>
+            <td class="text-center" style="width:130px">
+                <?php if ($model->isIn()):?>
                     In
                 <?php else:?>
                     Out
@@ -50,7 +63,7 @@ use \common\models\Call;
                 <?php endif; ?>
             </td>
 
-            <?php //if($model->c_call_status === Call::CALL_STATUS_RINGING || $model->c_call_status === Call::CALL_STATUS_IN_PROGRESS): ?>
+            <?php  ?>
 
                 <td class="text-left">
                     <?php if($model->c_lead_id && $model->cLead):?>
@@ -79,12 +92,10 @@ use \common\models\Call;
                         <i>c:<?=Html::a($model->c_case_id, ['cases/view', 'gid' => $model->cCase->cs_gid], ['data-pjax' => 0, 'target' => '_blank'])?></i><br>
                     <?php endif; ?>
 
-                    <?php if($model->c_call_type_id === Call::CALL_TYPE_IN && $model->cugUgs):?>
+                    <?php if($model->isIn() && $model->cugUgs):?>
                         <?php $userGroupList = [];
-                            if ($model->cugUgs) {
-                                foreach ($model->cugUgs as $userGroup) {
-                                    $userGroupList[] =  '<span class="label label-info"><i class="fa fa-users"></i> ' . Html::encode($userGroup->ug_name) . '</span>';
-                                }
+                            foreach ($model->cugUgs as $userGroup) {
+                                $userGroupList[] =  '<span class="label label-info"><i class="fa fa-users"></i> ' . Html::encode($userGroup->ug_name) . '</span>';
                             }
                             echo $userGroupList ? implode('<br>', $userGroupList) : '-';
                         ?>
@@ -98,13 +109,13 @@ use \common\models\Call;
                     <?php foreach ($model->callUserAccesses as $cua):
 
                         switch ((int) $cua->cua_status_id) {
-                            case \common\models\CallUserAccess::STATUS_TYPE_PENDING:
+                            case CallUserAccess::STATUS_TYPE_PENDING:
                                 $label = 'warning';
                                 break;
-                            case \common\models\CallUserAccess::STATUS_TYPE_ACCEPT:
+                            case CallUserAccess::STATUS_TYPE_ACCEPT:
                                 $label = 'success';
                                 break;
-                            case \common\models\CallUserAccess::STATUS_TYPE_BUSY:
+                            case CallUserAccess::STATUS_TYPE_BUSY:
                                 $label = 'danger';
                                 break;
                             default:
@@ -117,39 +128,37 @@ use \common\models\Call;
                 <?php endif; ?>
             </td>
 
-            <td class="text-center" width="160">
+            <td class="text-center" style="width:160px">
                 <?php
-                    if($model->c_call_status === Call::CALL_STATUS_RINGING) {
+                    if($model->isRinging()) {
                         $icon = 'fa fa-refresh fa-pulse fa-fw text-danger';
-                    } elseif($model->c_call_status === Call::CALL_STATUS_IN_PROGRESS) {
+                    } elseif($model->isInProgress()) {
                         $icon = 'fa fa-spinner fa-pulse fa-fw';
-                    } elseif($model->c_call_status === Call::CALL_STATUS_QUEUE) {
+                    } elseif($model->isQueue()) {
                         $icon = 'fa fa-pause';
-                    } elseif($model->c_call_status === Call::CALL_STATUS_COMPLETED) {
+                    } elseif($model->isCompleted()) {
                         $icon = 'fa fa-trophy text-success';
-                    } elseif($model->c_call_status === Call::CALL_STATUS_CANCELED || $model->c_call_status === Call::CALL_STATUS_NO_ANSWER || $model->c_call_status === Call::CALL_STATUS_BUSY) {
+                    } elseif($model->isCanceled() || $model->isNoAnswer() || $model->isBusy()) {
                         $icon = 'fa fa-times-circle text-danger';
                     } else {
                         $icon = '';
                     }
                 ?>
-                <i class="<?=$icon?>"></i> <?=$model->getStatusName()?><br>
+                <i class="<?=$icon?>"></i>
+                <?=$model->getStatusName()?><br>
                 <?php
                     $sec = 0;
                     if($model->c_updated_dt) {
 
-                        if(in_array($model->c_call_status, [Call::CALL_STATUS_RINGING, Call::CALL_STATUS_IN_PROGRESS, Call::CALL_STATUS_QUEUE])) {
+                        if($model->isIvr() || $model->isRinging() || $model->isInProgress() || $model->isQueue()) {
                             $sec = time() - strtotime($model->c_updated_dt);
                         } else {
                             $sec = $model->c_call_duration ?: strtotime($model->c_updated_dt) - strtotime($model->c_created_dt);
                         }
                     }
+             ?>
 
-                    //echo $sec;
-
-                ?>
-
-                <?php if(in_array($model->c_call_status, [Call::CALL_STATUS_RINGING, Call::CALL_STATUS_IN_PROGRESS, Call::CALL_STATUS_QUEUE])):?>
+                <?php if ($model->isIvr() || $model->isRinging() || $model->isInProgress() || $model->isQueue()):?>
                     <span class="badge badge-warning timer" data-sec="<?=$sec?>" data-control="start" data-format="%M:%S" title="<?=Yii::$app->formatter->asDuration($sec)?>">
                         00:00
                     </span>
@@ -159,12 +168,14 @@ use \common\models\Call;
                     </span>
                     &nbsp;&nbsp;&nbsp;<?=Yii::$app->formatter->asRelativeTime(strtotime($model->c_created_dt))?>
                 <?php endif;?>
+
+                <br><?=$model->getStatusName2()?><br>
             </td>
 
 
 
-            <td class="text-center" width="110">
-                <?php if($model->c_call_type_id === Call::CALL_TYPE_IN):?>
+            <td class="text-center" style="width:110px">
+                <?php if($model->isIn()):?>
                     <div>
                         <?php if((int) $model->c_source_type_id === Call::SOURCE_GENERAL_LINE):?>
                             <i class="fa fa-fax fa-2x fa-border"></i>
