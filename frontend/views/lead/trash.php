@@ -124,6 +124,31 @@ $this->params['breadcrumbs'][] = $this->title;
             ]),
         ],
 
+        [
+            'attribute' => 'update',
+            'label' => 'Trash Date',
+            'value' => function (\common\models\Lead $model) {
+                $str = Yii::$app->formatter->asRelativeTime(strtotime($model->updated));
+                $str .= $model->updated ? '<br><i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->updated), 'php: Y-m-d [H:i:s]')  : '-';
+                return $str;
+            },
+            'options' => [
+                'style' => 'width:160px'
+            ],
+            'format' => 'raw',
+            'filter' => DatePicker::widget([
+                'model' => $searchModel,
+                'attribute' => 'updated',
+                'clientOptions' => [
+                    'autoclose' => true,
+                    'format' => 'yyyy-mm-dd',
+                ],
+                'options' => [
+                    'autocomplete' => 'off'
+                ],
+            ]),
+        ],
+
         /*[
             'attribute' => 'created',
             'value' => function (\common\models\Lead $model) {
