@@ -28,6 +28,7 @@ use http\Exception\InvalidArgumentException;
 use sales\entities\cases\CasesStatus;
 use sales\entities\cases\CasesStatusLogSearch;
 use sales\forms\cases\CasesAddEmailForm;
+use sales\forms\cases\CasesAddPhoneForm;
 use sales\forms\cases\CasesChangeStatusForm;
 use sales\forms\cases\CasesClientUpdateForm;
 use sales\forms\cases\CasesCreateByWebForm;
@@ -938,6 +939,43 @@ class CasesController extends FController
         ]);
     }
 
+    public function actionAddPhone()
+    {
+        $gid = (string)Yii::$app->request->get('gid');
+        $case = $this->findModelByGid($gid);
+        $form = new CasesAddPhoneForm($case);
+
+        try {
+            if ($form->load(Yii::$app->request->post()) && $form->validate()) {
+
+                if($case->client) {
+                    $existClientPhone = ClientPhone::find()->where(['client_id' => $case->client->id, 'phone' => $form->phone])->exists();
+                    if($existClientPhone) {
+                        Yii::$app->session->setFlash('warning', 'This phone already exists ("' . $form->phone . '"), Client Id: '.$case->client->id);
+                    } else {
+                        $clientPhone = new ClientPhone();
+                        $clientPhone->client_id = $case->client->id;
+                        $clientPhone->phone = $form->phone;
+                        if($clientPhone->save()) {
+                            Yii::$app->session->setFlash('success', 'Added new Phone ("' . $form->phone . '")');
+                        } else {
+                            Yii::$app->session->setFlash('error', VarDumper::dumpAsString($clientPhone->errors));
+                        }
+                    }
+                } else {
+                    Yii::$app->session->setFlash('warning', 'Client not found (Client Id: '.$case->cs_client_id.')');
+                }
+                return $this->redirect(['cases/view', 'gid' => $case->cs_gid]);
+            }
+
+        } catch (\Throwable $exception) {
+            $form->addError('phone', $exception->getMessage());
+        }
+
+        return $this->renderAjax('partial/_add_phone', [
+            'model' => $form,
+        ]);
+    }
 
     /**
      * @return string|Response
