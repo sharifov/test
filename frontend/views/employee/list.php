@@ -622,5 +622,5 @@ JS;
     });', \yii\web\View::POS_READY);*/
 
         ?>
-
     </div>
+</div>
