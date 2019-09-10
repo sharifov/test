@@ -1381,8 +1381,8 @@ class LeadSearch extends Lead
         }
 
         if ($this->date_range && $this->datetime_start && $this->datetime_end && empty($this->created) && empty($this->updated)) {
-            $query->andFilterWhere(['>=', 'created', Employee::convertDtTimezone(strtotime($this->datetime_start))])
-                ->andFilterWhere(['<=', 'created', Employee::convertDtTimezone(strtotime($this->datetime_end))]);
+            $query->andFilterWhere(['>=', 'updated', Employee::convertDtTimezone(strtotime($this->datetime_start))])
+                ->andFilterWhere(['<=', 'updated', Employee::convertDtTimezone(strtotime($this->datetime_end))]);
         }
 
         // grid filtering conditions
