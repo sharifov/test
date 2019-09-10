@@ -290,7 +290,6 @@ SearchResult = function(props) {
     this.filterStops = function() {
         $(".filter--connections .custom-radio").on("click", function() {
             var radio = $(this).find('input[type="radio"]');
-            console.log(radio);
             radio.prop('checked', true);
             if (radio.attr("id") !== "any") {
                 $('.filter--connections').addClass("selected")
