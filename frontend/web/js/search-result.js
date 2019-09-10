@@ -109,27 +109,28 @@ SearchResult = function(props) {
     };
 
     this.filterApply = function() {
-    	if (Object.keys(filterList).length) {
-    		var filterApplied = false;
-        	$('.search-result__quote').removeClass('filtered');
-	    	for (var filter in filterList) {
-	    		if (!filterList.hasOwnProperty(filter)) continue;
-   			 	var selector = '.search-result__quote';
-   			 	if(filterApplied === true){
-   			 		selector = '.search-result__quote.filtered';
-   			 	}
+        if (Object.keys(filterList).length) {
+            var filterApplied = false;
+            $('.search-result__quote').removeClass('filtered');
+            for (var filter in filterList) {
+                if (!filterList.hasOwnProperty(filter)) continue;
+                var selector = '.search-result__quote';
+                if(filterApplied === true){
+                    selector = '.search-result__quote.filtered';
+                }
 
-   	        	$(selector).addClass('hide');
-	    		switch (filter) {
-		    		 case 'price':
-		    			 $(selector).each(function(idx){
-		    			 	if(+$(this)[0].getAttribute('data-price') <= filterList[filter] * 1){
-		    			 		$(this).removeClass('hide');
-		    			 		$(this).addClass('filtered');
-		    			 		filterApplied = true;
-		    			 	}
-		    		 	 });
-	                     break;
+                $(selector).addClass('hide');
+                let cnt = 0;
+                switch (filter) {
+                    case 'price':
+                        $(selector).each(function(idx){
+                            if(+$(this)[0].getAttribute('data-price') <= filterList[filter] * 1){
+                                $(this).removeClass('hide');
+                                $(this).addClass('filtered');
+                                filterApplied = true;
+                            }
+                        });
+                        break;
                     case 'stops':
                         var stops = 0;
                         switch (filterList[filter]) {
@@ -147,110 +148,149 @@ SearchResult = function(props) {
                                 break;
                         }
                         $(selector).each(function(idx){
-	                        var stopsData = $(this).data('stop');
-	                		var obj = $(this);
-	                		var cnt = 0;
+                            var stopsData = $(this).data('stop');
+                            var obj = $(this);
+                            cnt = 0;
+                            stopsData.forEach(function(stop){
+                                if(stop <= stops){
+                                    cnt++;
+                                }
+                            });
 
-	                		stopsData.forEach(function(stop){
-		    			 		if(stop <= stops){
-			    			 		cnt++;
-		    			 		}
-		    			 	});
-
-	                		if(stopsData.length == cnt){
-	                			$(obj).removeClass('hide');
-		    			 		$(obj).addClass('filtered');
-		    			 		filterApplied = true;
-	                		}
-		    		 	});
+                            if(stopsData.length == cnt){
+                                $(obj).removeClass('hide');
+                                $(obj).addClass('filtered');
+                                filterApplied = true;
+                            }
+                        });
                         break;
-		    		case 'fareType':
-		    			filterList[filter].forEach(function(fareType) {
-		    				var obj = $(selector+'[data-fareType="'+fareType+'"]');
-		    				$(obj).removeClass('hide');
-		    				$(obj).addClass('filtered');
-		    				filterApplied = true;
-		    			});
+                    case 'airlineChange':
+                        cnt = 0;
+                        $(selector).each(function(idx){
+                            let hasAirportchange = $(this).data('changeairport');
+                            let obj = $(selector+'[data-changeairport="'+hasAirportchange+'"]');
+                            if (hasAirportchange != 1){
+                                cnt++;
+                                $(obj).removeClass('hide');
+                                $(obj).addClass('filtered');
+                                filterApplied = true;
+                            }
+                        });
+                        break;
+                    case 'baggage' :
+                        let baggage = 0;
+                        switch (filterList[filter]) {
+                            case 'pcs1':
+                                baggage = 1;
+                                cnt = 0;
+                                $(selector).each(function(idx){
+                                    let obj = $(selector+'[data-baggage="'+baggage+'"]');
+                                    cnt++;
+                                    $(obj).removeClass('hide');
+                                    $(obj).addClass('filtered');
+                                    filterApplied = true;
+                                });
+                                break;
+                            case 'pcs2':
+                                baggage = 2;
+                                cnt = 0;
+                                $(selector).each(function(idx){
+                                    let obj = $(selector+'[data-baggage="'+baggage+'"]');
+                                    cnt++;
+                                    $(obj).removeClass('hide');
+                                    $(obj).addClass('filtered');
+                                    filterApplied = true;
+                                });
+                                break;
+                        }
+                        break;
+                    case 'fareType':
+                        filterList[filter].forEach(function(fareType) {
+                            var obj = $(selector+'[data-fareType="'+fareType+'"]');
+                            $(obj).removeClass('hide');
+                            $(obj).addClass('filtered');
+                            filterApplied = true;
+                        });
+                        break;
+                    case 'airline':
+                        filterList[filter].forEach(function(airline) {
+                            var obj = $(selector+'[data-airline="'+airline+'"]');
+                            $(obj).removeClass('hide');
+                            $(obj).addClass('filtered');
+                            filterApplied = true;
+                        });
+                        break;
+                    case 'travelTime':
+                        $(selector).each(function(idx){
+                            var obj = $(this);
+                            var time = $(this).data('time');
+                            var cnt = 0;
+                            var cntTrue = 0;
 
-		                break;
-		    		case 'airline':
-		    			filterList[filter].forEach(function(airline) {
-		    				var obj = $(selector+'[data-airline="'+airline+'"]');
-		    				$(obj).removeClass('hide');
-		    				$(obj).addClass('filtered');
-		    				filterApplied = true;
-		    			});
-		                break;
-		    		case 'travelTime':
-		    			$(selector).each(function(idx){
-                    		var obj = $(this);
-                    		var time = $(this).data('time');
-	                		var cnt = 0;
-	                		var cntTrue = 0;
+                            for(var i in filterList[filter]){
+                                if(!filterList[filter].hasOwnProperty(i)) continue;
+                                cnt++;
 
-	                		for(var i in filterList[filter]){
-	                			if(!filterList[filter].hasOwnProperty(i)) continue;
-	                			cnt++;
-
-	                			if (filterList[filter][i].depart && filterList[filter][i].arrival) {
+                                if (filterList[filter][i].depart && filterList[filter][i].arrival) {
                                     if(scope.helper.dateBetweenToTimes(filterList[filter][i].depart, time[i].departure) &&
                                         scope.helper.dateBetweenToTimes(filterList[filter][i].arrival, time[i].arrival)){
-                                    	cntTrue++;
+                                        cntTrue++;
                                     }
                                 }else{
-                                	if(filterList[filter][i].depart && scope.helper.dateBetweenToTimes(filterList[filter][i].depart, time[i].departure) ||
-                                            filterList[filter][i].arrival && scope.helper.dateBetweenToTimes(filterList[filter][i].arrival, time[i].arrival)){
-                                    	cntTrue++;
+                                    if(filterList[filter][i].depart && scope.helper.dateBetweenToTimes(filterList[filter][i].depart, time[i].departure) ||
+                                        filterList[filter][i].arrival && scope.helper.dateBetweenToTimes(filterList[filter][i].arrival, time[i].arrival)){
+                                        cntTrue++;
                                     }
                                 }
-	                		}
-	                		if(cnt == cntTrue){
-	                			$(obj).removeClass('hide');
-		    			 		$(obj).addClass('filtered');
-		    			 		filterApplied = true;
-		    			 		return;
-	                		}
-		    		 	});
-		    			break;
-                    case 'duration':
-                    	$(selector).each(function(idx){
-                    		var obj = $(this);
-                    		/*var duration = $(this).data('totalduration');
-                    		if(duration <= filterList[filter]){
-	    			 			$(obj).removeClass('hide');
-		    			 		$(obj).addClass('filtered');
-		    			 		filterApplied = true;
-	    			 		}*/
-                    		var durations = $(this).data('duration');
-	                		var cnt = 0;
-
-		    			 	durations.forEach(function(duration){
-		    			 		if(duration <= filterList[filter]){
-		    			 			cnt++;
-
-		    			 		}
-		    			 	});
-
-		    			 	if(durations.length == cnt){
-		    			 		$(obj).removeClass('hide');
-		    			 		$(obj).addClass('filtered');
-		    			 		filterApplied = true;
-		    			 		return;
-	                		}
-
-		    		 	});
+                            }
+                            if(cnt == cntTrue){
+                                $(obj).removeClass('hide');
+                                $(obj).addClass('filtered');
+                                filterApplied = true;
+                                return;
+                            }
+                        });
                         break;
-	    		}
-	    	}
-    	}else{
-    		$('.search-result__quote').removeClass('hide');
-    	}
-    	$('#search-results__cnt').html($('.search-result__quote:not(.hide)').length);
+                    case 'duration':
+                        $(selector).each(function(idx){
+                            var obj = $(this);
+                            /*var duration = $(this).data('totalduration');
+                            if(duration <= filterList[filter]){
+                                 $(obj).removeClass('hide');
+                                 $(obj).addClass('filtered');
+                                 filterApplied = true;
+                             }*/
+                            var durations = $(this).data('duration');
+                            var cnt = 0;
+
+                            durations.forEach(function(duration){
+                                if(duration <= filterList[filter]){
+                                    cnt++;
+
+                                }
+                            });
+
+                            if(durations.length == cnt){
+                                $(obj).removeClass('hide');
+                                $(obj).addClass('filtered');
+                                filterApplied = true;
+                                return;
+                            }
+
+                        });
+                        break;
+                }
+            }
+        }else{
+            $('.search-result__quote').removeClass('hide');
+        }
+        $('#search-results__cnt').html($('.search-result__quote:not(.hide)').length);
     };
 
     this.filterStops = function() {
         $(".filter--connections .custom-radio").on("click", function() {
             var radio = $(this).find('input[type="radio"]');
+            console.log(radio);
             radio.prop('checked', true);
             if (radio.attr("id") !== "any") {
                 $('.filter--connections').addClass("selected")
@@ -275,19 +315,73 @@ SearchResult = function(props) {
         });
     };
 
+    this.filterAirlineChange = function() {
+        $(".filter--airportChange .custom-radio").on("click", function() {
+            var radio = $(this).find('input[type="radio"]');
+            radio.prop('checked', true);
+            if (radio.attr("id") !== "anyAirport") {
+                $('.filter--airportChange').addClass("selected")
+                    .find('[data-toggle="dropdown"] span').html(radio.parent().find('label:last').html());
+                scope.addFilterParams({
+                    name: 'airlineChange',
+                    value: radio.attr("id")
+                });
+            } else {
+                $('.filter--airportChange').removeClass("selected")
+                    .find('[data-toggle="dropdown"] span').html(/*locale.filterStops.stops*/);
+                scope.unsetFilterParams('airlineChange');
+            }
+        });
+
+        $(".filter--airportChange .js-clear-filter").on("click", function(e) {
+            e.stopImmediatePropagation();
+            $('.filter--airportChange').removeClass("selected")
+                .find('[data-toggle="dropdown"] span').html(/*locale.filterStops.stops*/);
+            $(".filter--airportChange .custom-radio").find('input[type="radio"]:first').prop('checked', true);
+            scope.unsetFilterParams("airlineChange");
+        });
+    };
+
+    this.filterBaggage = function() {
+        $(".filter--baggage .custom-radio").on("click", function() {
+            var radio = $(this).find('input[type="radio"]');
+            radio.prop('checked', true);
+            if (radio.attr("id") !== "anyBaggage") {
+                $('.filter--baggage').addClass("selected")
+                    .find('[data-toggle="dropdown"] span').html(radio.parent().find('label:last').html());
+                scope.addFilterParams({
+                    name: 'baggage',
+                    value: radio.attr("id")
+                });
+            } else {
+                $('.filter--baggage').removeClass("selected")
+                    .find('[data-toggle="dropdown"] span').html(/*locale.filterStops.stops*/);
+                scope.unsetFilterParams('baggage');
+            }
+        });
+
+        $(".filter--baggage .js-clear-filter").on("click", function(e) {
+            e.stopImmediatePropagation();
+            $('.filter--baggage').removeClass("selected")
+                .find('[data-toggle="dropdown"] span').html(/*locale.filterStops.stops*/);
+            $(".filter--baggage .custom-radio").find('input[type="radio"]:first').prop('checked', true);
+            scope.unsetFilterParams("baggage");
+        });
+    };
+
     this.filterDuration = function() {
         //= DURATION
         // get max duration
         var max = 0, min = Number.MAX_SAFE_INTEGER;
 
         $('.search-result__quote').each(function(idx){
-        	var durations = $(this).data('duration');
-        	durations.forEach(function(duration) {
-        		if (duration > max)
+            var durations = $(this).data('duration');
+            durations.forEach(function(duration) {
+                if (duration > max)
                     max = duration;
                 if (duration < min)
                     min = duration;
-        	})
+            })
         });
 
         if (max < min) {
@@ -345,7 +439,7 @@ SearchResult = function(props) {
         //= PRICE
         // get min, max price
         var max = Math.round($('#price-slider')[0].getAttribute('data-max')),
-        min = Math.round($('#price-slider')[0].getAttribute('data-min')), step = 10;
+            min = Math.round($('#price-slider')[0].getAttribute('data-min')), step = 10;
         max = Math.floor(max / step +1) * step;
         if (max < min)
             min = 0;
@@ -500,78 +594,77 @@ SearchResult = function(props) {
 
     this.filterTravelTime = function() {
 
-    	var sliderFlightTime = [],
-        filterTime = ".filter--travel-time",
-        jsFilterReset = ".filter--travel-time .js-filter-reset",
-        jsClearFilter = ".filter--travel-time i.js-clear-filter";
+        var sliderFlightTime = [],
+            filterTime = ".filter--travel-time",
+            jsFilterReset = ".filter--travel-time .js-filter-reset",
+            jsClearFilter = ".filter--travel-time i.js-clear-filter";
 
-	    if ($('[data-id="landing-slider-time"]').length) {
-	        var el = $('[data-id="landing-slider-time"]');
-	        for (var i=0, l=el.length; i<l; i++) {
+        if ($('[data-id="landing-slider-time"]').length) {
+            var el = $('[data-id="landing-slider-time"]');
+            for (var i=0, l=el.length; i<l; i++) {
 
-	            sliderFlightTime.push(el[i]);
-	            noUiSlider.create(el[i], {
-	                start: [0, 1440],
-	                connect: [false, true, false],
-	                tooltips: [
-	                    {to: function(value) {return scope.helper.toHHMM(value * 60);}},
-	                    {to: function(value) {return scope.helper.toHHMM(value * 60);}}
-	                ],
-	                step: 60,
-	                range: {
-	                    'min': 0,
-	                    'max': 1440
-	                }
-	            });
+                sliderFlightTime.push(el[i]);
+                noUiSlider.create(el[i], {
+                    start: [0, 1440],
+                    connect: [false, true, false],
+                    tooltips: [
+                        {to: function(value) {return scope.helper.toHHMM(value * 60);}},
+                        {to: function(value) {return scope.helper.toHHMM(value * 60);}}
+                    ],
+                    step: 60,
+                    range: {
+                        'min': 0,
+                        'max': 1440
+                    }
+                });
 
-	            el[i].noUiSlider.on('update', function (values, handle) {
-	                var selectedDate = scope.helper.toHHMM(values[0] * 60) + ' - ' + scope.helper.toHHMM(values[1] * 60);
-	                $(this.target).parents('[data-id="landing-time"]').find('[data-id="landing-value-time"] span').html(selectedDate);
-	            });
+                el[i].noUiSlider.on('update', function (values, handle) {
+                    var selectedDate = scope.helper.toHHMM(values[0] * 60) + ' - ' + scope.helper.toHHMM(values[1] * 60);
+                    $(this.target).parents('[data-id="landing-time"]').find('[data-id="landing-value-time"] span').html(selectedDate);
+                });
 
-	            el[i].noUiSlider.on('change', function(values, handle, unencoded, tap, positions) {
-	                if (tap) {
-	                    $(jsFilterReset).removeClass('hidden');
-	                    scope.addFilterParams({
-	                        name: 'travelTime',
-	                        value: values,
-	                        index: $(this.target).parents('.tab-pane').attr('data-index'),
-	                        direction: $(this.target).attr('data-direction')
-	                    });
+                el[i].noUiSlider.on('change', function(values, handle, unencoded, tap, positions) {
+                    if (tap) {
+                        $(jsFilterReset).removeClass('hidden');
+                        scope.addFilterParams({
+                            name: 'travelTime',
+                            value: values,
+                            index: $(this.target).parents('.tab-pane').attr('data-index'),
+                            direction: $(this.target).attr('data-direction')
+                        });
 
-	                    $(filterTime).addClass('selected').find('a[data-toggle="dropdown"] span').html(scope.filterTravelTimeSelectedTitleText());
-	                }
-	            });
+                        $(filterTime).addClass('selected').find('a[data-toggle="dropdown"] span').html(scope.filterTravelTimeSelectedTitleText());
+                    }
+                });
 
-	            el[i].noUiSlider.on('end', function(values) {
-	                $(jsFilterReset).removeClass('hidden');
-	                scope.addFilterParams({
-	                    name: 'travelTime',
-	                    value: values,
-	                    index: $(this.target).parents('.tab-pane').attr('data-index'),
-	                    direction: $(this.target).attr('data-direction')
-	                });
-	                $(filterTime).addClass('selected').find('a[data-toggle="dropdown"] span').html(scope.filterTravelTimeSelectedTitleText());
-	            });
+                el[i].noUiSlider.on('end', function(values) {
+                    $(jsFilterReset).removeClass('hidden');
+                    scope.addFilterParams({
+                        name: 'travelTime',
+                        value: values,
+                        index: $(this.target).parents('.tab-pane').attr('data-index'),
+                        direction: $(this.target).attr('data-direction')
+                    });
+                    $(filterTime).addClass('selected').find('a[data-toggle="dropdown"] span').html(scope.filterTravelTimeSelectedTitleText());
+                });
 
-	            $(jsClearFilter + ", " + jsFilterReset).on("click", function(e) {
-	                e.preventDefault();
-	                e.stopImmediatePropagation();
-	                $(jsFilterReset).addClass('hidden');
-	                $(filterTime).removeClass('selected').find('a[data-toggle="dropdown"] span').html(locale.time);
-	                sliderFlightTime.forEach(function(item) {
-	                    item.noUiSlider.reset();
-	                });
-	                scope.unsetFilterParams("travelTime");
-	            });
-	        }
-	    }
+                $(jsClearFilter + ", " + jsFilterReset).on("click", function(e) {
+                    e.preventDefault();
+                    e.stopImmediatePropagation();
+                    $(jsFilterReset).addClass('hidden');
+                    $(filterTime).removeClass('selected').find('a[data-toggle="dropdown"] span').html(locale.time);
+                    sliderFlightTime.forEach(function(item) {
+                        item.noUiSlider.reset();
+                    });
+                    scope.unsetFilterParams("travelTime");
+                });
+            }
+        }
     }
 
     this.filterInit = function() {
         //= fare filter
         scope.filterFareType();
-        //=# fare filter
         //= airline filter
         scope.filterAirline();
         //=# airline filter
@@ -581,10 +674,12 @@ SearchResult = function(props) {
         //= duration filter
         scope.filterDuration();
         //=# duration filter
-
         //= stops filter
         scope.filterStops();
-        //=# stops filter
+        //= airline change
+        scope.filterAirlineChange();
+        //= baggage filter
+        scope.filterBaggage();
 
         //= time filter
         if ($('.filter--travel-time .nav-tabs').length) {
@@ -636,5 +731,4 @@ SearchResult = function(props) {
             return new Date(a[0], a[1]-1 || 0, a[2] || 1, a[3] || 0, a[4] || 0, a[5] || 0, a[6] || 0);
         }
     };
-
 };
