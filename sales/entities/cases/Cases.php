@@ -20,6 +20,8 @@ use sales\entities\cases\events\CasesTrashStatusEvent;
 use sales\entities\EventTrait;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
+use yii\helpers\Html;
+use Yii;
 
 /**
  * Class Cases
@@ -409,5 +411,49 @@ class Cases extends ActiveRecord
     public static function tableName(): string
     {
         return '{{%cases}}';
+    }
+
+    /**
+     * Check if user is agent
+     * 
+     * @return bool
+     */
+    public static function isUserAgent(): bool
+    {
+        /** @var Employee $user */
+        $user = Yii::$app->user->identity;
+
+        return $user->isAgent();
+    }
+
+    /**
+     * Returns current client Time in 24-hour format;
+     * If c_offset_gmt field is null then returns "-";
+     * 
+     * @return string
+     */
+    public function getClientTime(): string
+    {
+        $clientTime = '-';
+        $offset = $this->call->c_offset_gmt ?? false;
+
+        if ($offset) {
+            if(is_numeric($offset) && $offset > 0) {
+                $offset = '+' . $offset;
+            }
+
+            $timezoneName = timezone_name_from_abbr('',intval($offset) * 60 * 60,0);
+
+            $dt = new \DateTime();
+            if($timezoneName) {
+                $timezone = new \DateTimeZone($timezoneName);
+                $dt->setTimezone($timezone);
+            }
+            $clientTime =  $dt->format('H:i');
+
+            $clientTime = '<b title="TZ ('.$offset.')"><i class="fa fa-clock-o '.($this->call->c_offset_gmt ? 'success': '').'"></i> ' . Html::encode($clientTime) . '</b>';
+        }
+
+        return $clientTime;
     }
 }

@@ -74,6 +74,13 @@ $this->params['breadcrumbs'][] = $this->title;
                 'visible' => ! $isAgent,
             ],
             [
+                'header' => 'Client time',
+                'format' => 'raw',
+                'value' => function(Cases $model) {
+                    return $model->getClientTime();
+                },
+            ],
+            [
                 'header' => 'Agent',
                 'format' => 'raw',
                 'value' => function (Cases $model) {

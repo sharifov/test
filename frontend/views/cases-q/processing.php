@@ -69,6 +69,48 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             'cs_created_dt',
             [
+                'label' => 'Pending Time',
+                'value' => function (Cases $model) {
+                    $createdTS = strtotime($model->cs_created_dt);
+    
+                    $diffTime = time() - $createdTS;
+                    $diffHours = (int) ($diffTime / (60 * 60));
+    
+                    return ($diffHours > 3 && $diffHours < 73 ) ? $diffHours.' hours' : Yii::$app->formatter->asRelativeTime($createdTS);
+                },
+                'options' => [
+                    'style' => 'width:180px'
+                ],
+                'format' => 'raw',
+                'visible' => ! $isAgent,
+            ],
+            [
+                'header' => 'Client time',
+                'format' => 'raw',
+                'value' => function(Cases $model) {
+                    return $model->getClientTime();
+                },
+            ],
+            [
+                'header' => 'Agent',
+                'format' => 'raw',
+                'value' => function (Cases $model) {
+                    return $model->owner ? '<i class="fa fa-user"></i> ' . $model->owner->username : '-';
+                },
+            ],
+            [
+                'header' => 'Last Action',
+                'format' => 'raw',
+                'value' => function (Cases $model) {
+                    $createdTS = strtotime($model->cs_updated_dt);
+    
+                    $diffTime = time() - $createdTS;
+                    $diffHours = (int) ($diffTime / (60 * 60));
+    
+                    return ($diffHours > 3 && $diffHours < 73 ) ? $diffHours.' hours' : Yii::$app->formatter->asRelativeTime($createdTS);
+                }
+            ],
+            [
                 'class' => 'yii\grid\ActionColumn',
                 'template' => '{view} {take-over}',
                 'visibleButtons' => [

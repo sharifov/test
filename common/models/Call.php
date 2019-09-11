@@ -15,6 +15,8 @@ use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
 use yii\helpers\Html;
 use yii\helpers\VarDumper;
+use DateTimeZone;
+use Locale;
 
 
 /**
@@ -1095,6 +1097,71 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
             $cc_Duration = $cc_TotalPrice= 0;
         }
         return $callStats;
+    }
+
+    /**
+     * Returns client TimeZone 
+     * 
+     * @param array $callData
+     * 
+     * @return string
+     */
+    public static function getClientTime(array $callData): ?string
+    {
+        $country = $callData['FromCountry'] ?? '';
+        $city = $callData['FromCity'] ?? '';
+        $state = $callData['FromState'] ?? '';
+
+        if (empty($country)) return null;
+
+        $region = !empty($state) ? $state : (!empty($city) ? $city : '');
+
+        $timezone = geoip_time_zone_by_country_and_region($country, $region);
+        
+        $timezone = ($timezone == false) ? (self::getTimezoneByCountryCode($country) ?? false) : $timezone;
+
+        if ($timezone === false) return null;
+
+        $date = new DateTime('now', new DateTimeZone($timezone));
+
+        return $date->format('P');
+    }
+
+    /**
+     * @param string $code CountryCode;
+     * 
+     * @return null:string
+     * 
+     * @throws \Exception
+     */
+    private static function getTimezoneByCountryCode(string $code): ?string
+    {
+        if (empty($code)) throw new \Exception('Country code is empty');
+
+        $timezone = null;
+
+        $countriesTimeZone = DateTimeZone::listIdentifiers(DateTimeZone::PER_COUNTRY, $code);
+
+        $countTimeZones = count($countriesTimeZone);
+        
+        if ($countTimeZones == 3) $timezone = $countriesTimeZone[1];
+        elseif ($countTimeZones < 3) $timezone = $countTimeZones[0] ?? null;
+
+        return $timezone;
+    }
+
+    /**
+     * Return Country Name by ISO Country Code
+     * 
+     * @param string $countryCode
+     * 
+     * @return string|null
+     */
+    public static function getDisplayRegion(string $countryCode): ?string
+    {
+        if (empty($countryCode)) return null;
+
+        return Locale::getDisplayRegion("-$countryCode", 'en');
     }
 
     /**
