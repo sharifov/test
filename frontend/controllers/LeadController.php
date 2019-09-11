@@ -1548,11 +1548,17 @@ class LeadController extends FController
 
         if (Yii::$app->request->isAjax && Yii::$app->request->get('over')) {
             if ($lead->isAvailableToTakeOver()) {
+                if ($activeLeads = $this->leadRepository->getActiveAll($lead->id)) {
+                    $activeLeadIds = ArrayHelper::map($activeLeads, 'id', 'id');
+                } else {
+                    $activeLeadIds = [];
+                }
                 $reason = new Reason();
                 $reason->queue = 'processing-over';
                 return $this->renderAjax('partial/_reason', [
                     'reason' => $reason,
-                    'lead' => $lead
+                    'lead' => $lead,
+                    'activeLeadIds' => $activeLeadIds
                 ]);
             }
             Yii::$app->getSession()->setFlash('warning', 'Lead is unavailable to "Take Over" now!');
