@@ -794,14 +794,13 @@ class CasesController extends FController
 
     /**
      * @param $gid
-     * @param $uid
      * @return Response
      * @throws NotFoundHttpException
      */
-    public function actionTake($gid, $uid): Response
+    public function actionTake($gid): Response
     {
         $gId = (string) $gid;
-        $userId = (int) $uid;
+        $userId = Yii::$app->user->id;
         $case = $this->findModelByGid($gId);
         try {
             $user = $this->userRepository->find($userId);
