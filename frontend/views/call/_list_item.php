@@ -105,6 +105,12 @@ use \common\models\Call;
             <?php //endif; ?>
 
             <td class="text-left">
+
+                sid: <b><?=$model->c_call_sid?></b><br>
+                <?php if($model->c_parent_call_sid):?>
+                    pid: <?=$model->c_parent_call_sid?><br>
+                <?php endif; ?>
+
                 <?php if($model->cuaUsers):?>
                     <?php foreach ($model->callUserAccesses as $cua):
 

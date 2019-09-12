@@ -239,7 +239,7 @@ echo '<div class="container" id="container-redirect-agents"></div>';
     const ajaxCallRedirectUrlToAgent = '<?=$ajaxRedirectCallUrlToAgent?>';
 
     const ajaxCallRedirectGetAgents = '<?=$ajaxCallRedirectGetAgents;?>';
-    const c_user_id = '<?=Yii::$app->user->id?>';
+    const userId = '<?=Yii::$app->user->id?>';
     use_browser_call_access =  <?= ($use_browser_call_access) ? 'true' : 'false' ?>;
     agentId = <?= $user_id;?>;
     call_access_log = [];
@@ -498,7 +498,7 @@ echo '<div class="container" id="container-redirect-agents"></div>';
     {
         if(connection) {
             connection.sendDigits(number);
-            console.log("digit:" + number + ' sent');
+            // console.log("digit:" + number + ' sent');
         }
         return false;
     }
@@ -508,7 +508,8 @@ echo '<div class="container" id="container-redirect-agents"></div>';
 
         if (connection) {
             connection.accept();
-            document.getElementById('call-controls2').style.display = 'none';
+            //document.getElementById('call-controls2').style.display = 'none';
+            $('#call-controls2').hide();
         }
     };
 
@@ -519,46 +520,24 @@ echo '<div class="container" id="container-redirect-agents"></div>';
                 $.get(ajaxSaveCallUrl + '?sid=' + connection.parameters.CallSid + '&user_id=' + agentId, function (r) {
                 console.log(r);
             });
-            document.getElementById('call-controls2').style.display = 'none';
+            //document.getElementById('call-controls2').style.display = 'none';
+            $('#call-controls2').hide();
         }
     };
 
 
-    function initRedirectToAgent()
-    {
-        if (connection && connection.parameters.CallSid) {
+    function initRedirectToAgent() {
 
+        if (connection && connection.parameters.CallSid) {
+            var callSid = connection.parameters.CallSid;
             var modal = $('#web-phone-redirect-agents-modal');
             modal.modal('show').find('.modal-body').html('<div style="text-align:center"><img width="200px" src="https://loading.io/spinners/gear-set/index.triple-gears-loading-icon.svg"></div>');
             modal.modal('show').find('.modal-header').html('<h3>Redirect Call ' + '<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button></h3>');
 
-            $.post(ajaxCallRedirectGetAgents, { sid: connection.parameters.CallSid, user_id: c_user_id })
+            $.post(ajaxCallRedirectGetAgents, { sid: callSid, user_id: userId })
                 .done(function(data) {
                     modal.find('.modal-body').html(data);
                 });
-
-
-            /*$.ajax({
-                type: 'post',
-                data: {
-                    'sid': connection.parameters.CallSid,
-                    //'type': 'client',
-                    //'from': connection.parameters.From,
-                    //'to': connection.parameters.To,
-                    'user_id' : c_user_id,
-                },
-                url: ajaxCallRedirectGetAgents,
-                success: function (response) {
-                    if(response.status == 'ok') {
-                        //connection.accept();
-                        $("#container-redirect-agents").html(response.html);
-                        $("#web-phone-redirect-agents-modal").modal();
-                    }
-                },
-                error: function (error) {
-                    console.error(error);
-                }
-            });*/
         } else {
             alert('Error: Not found Call connection or Call SID!');
         }
@@ -671,16 +650,15 @@ echo '<div class="container" id="container-redirect-agents"></div>';
                     var access = updateAgentStatus(connection, true, 0);
                     connection = conn;
                     console.log({"action":"connect", "cid":connection.parameters.CallSid, "access": access});
-                    log('Successfully established call!');
+                    //log('Successfully established call!');
                     console.warn(conn);
                     //console.info(conn.parameters);
                     //console.log(conn.parameters.CallSid);
                     //saveDbCall(conn.parameters.CallSid, conn.message.FromAgentPhone, conn.message.To, 'queued');
-                    //document.getElementById('button-call').style.display = 'none';
-                    //document.getElementById('button-hangup').style.display = 'inline';
-                    document.getElementById('btn-group-id-forward').style.display = 'inline';
-                    document.getElementById('btn-group-id-hangup').style.display = 'inline';
-                    document.getElementById('btn-group-id-redirect').style.display = 'inline';
+
+                    $('#btn-group-id-forward').show();
+                    $('#btn-group-id-hangup').show();
+                    $('#btn-group-id-redirect').show();
 
                     volumeIndicators.style.display = 'block';
                     bindVolumeIndicators(conn);
@@ -697,11 +675,9 @@ echo '<div class="container" id="container-redirect-agents"></div>';
 
                     saveDbCall(conn.parameters.CallSid, conn.message.FromAgentPhone, conn.message.To, 'completed');
 
-                    //document.getElementById('button-call').style.display = 'inline';
-                    //document.getElementById('button-hangup').style.display = 'none';
-                    document.getElementById('btn-group-id-forward').style.display = 'none';
-                    document.getElementById('btn-group-id-hangup').style.display = 'none';
-                    document.getElementById('btn-group-id-redirect').style.display = 'none';
+                    $('#btn-group-id-forward').hide();
+                    $('#btn-group-id-hangup').hide();
+                    $('#btn-group-id-redirect').hide();
 
                     volumeIndicators.style.display = 'none';
 
@@ -711,7 +687,14 @@ echo '<div class="container" id="container-redirect-agents"></div>';
 
                 device.on('incoming', function (conn) {
 
-                    var access =  updateAgentStatus(connection, true, 0);
+
+                    //alert(conn.parameters.CallSid);
+
+                    connection = conn;
+                    $('#call-controls2').hide();
+                    conn.accept();
+
+                    /*var access =  updateAgentStatus(connection, true, 0);
                     console.log({"action":"incoming", "cid":conn.parameters.CallSid, "access": access});
 
                     if(!access) {
@@ -728,12 +711,15 @@ echo '<div class="container" id="container-redirect-agents"></div>';
                     }
                     connection = conn;
                     //updateAgentStatus(connection, true);
-                    log('Incoming connection from ' + conn.parameters.From);
+                    // log('Incoming connection from ' + conn.parameters.From);
                     createNotify('Incoming connection', 'Incoming connection from ' + conn.parameters.From, 'success');
 
                     var archEnemyPhoneNumber = tw_configs.client;
                     //document.getElementById('call-controls').style.display = 'none';
-                    document.getElementById('call-controls2').style.display = 'block';
+                    // document.getElementById('call-controls2').style.display = 'block';
+                    $('#call-controls2').show();
+
+                    connection.accept();*/
                     /*
                     if (conn.parameters.From === archEnemyPhoneNumber || conn.parameters.From === 'client:' + archEnemyPhoneNumber) {
                         conn.reject();
@@ -759,8 +745,10 @@ echo '<div class="container" id="container-redirect-agents"></div>';
                     saveDbCall(conn.parameters.CallSid, conn.message.FromAgentPhone, conn.message.To, 'canceled');
 
                     //document.getElementById('call-controls').style.display = 'block';
-                    document.getElementById('call-controls2').style.display = 'none';
-                    document.getElementById('btn-group-id-redirect').style.display = 'none';
+                    //document.getElementById('call-controls2').style.display = 'none';
+                    $('#call-controls2').hide();
+                    //document.getElementById('btn-group-id-redirect').style.display = 'none';
+                    $('#btn-group-id-redirect').hide();
                 });
 
 
@@ -770,7 +758,8 @@ echo '<div class="container" id="container-redirect-agents"></div>';
                 device.audio.on('deviceChange', updateAllDevices.bind(device));
                 // Show audio selection UI if it is supported by the browser.
                 if (device.audio.isOutputSelectionSupported) {
-                    document.getElementById('output-selection').style.display = 'block';
+                    //document.getElementById('output-selection').style.display = 'block';
+                    $('#output-selection').show();
                 }
             })
             .catch(function (err) {
@@ -796,7 +785,7 @@ echo '<div class="container" id="container-redirect-agents"></div>';
             return false;
         }*/
 
-        var params = {'To': phone_to, 'FromAgentPhone': phone_from, 'project_id': project_id, 'lead_id': lead_id, 'case_id': case_id, 'c_type': type, 'c_user_id': c_user_id};
+        var params = {'To': phone_to, 'FromAgentPhone': phone_from, 'project_id': project_id, 'lead_id': lead_id, 'case_id': case_id, 'c_type': type, 'c_user_id': userId};
         webPhoneParams = params;
 
         //console.log(params); return false;
@@ -810,7 +799,8 @@ echo '<div class="container" id="container-redirect-agents"></div>';
             createNotify('Calling', 'Calling ' + params.To + '...', 'success');
             updateAgentStatus(connection, false, 0);
             connection = device.connect(params);
-            document.getElementById('btn-group-id-redirect').style.display = 'none';
+            //document.getElementById('btn-group-id-redirect').style.display = 'none';
+            $('#btn-group-id-redirect').hide();
         }
     }
 
@@ -877,7 +867,8 @@ $js = <<<JS
                                  console.log(res);
                                 if(res.error) {
                                     $('#web-phone-dial-modal').modal('hide');
-                                    document.getElementById('call-controls2').style.display = 'none';
+                                    $('#call-controls2').hide();
+                                    
                                     data_agent_to_redirect.removeAttr("disabled");
                                     var error_message = 'Error redirect.';
                                     if(res.message) {
@@ -889,7 +880,7 @@ $js = <<<JS
                                 }
                                 else {
                                     $('#web-phone-dial-modal').modal('hide');
-                                    document.getElementById('call-controls2').style.display = 'none';
+                                    $('#call-controls2').hide();
                                     $("#web-phone-redirect-agents-modal").modal('hide');
                                     data_agent_to_redirect.removeAttr("disabled");
                                     $("#redirect-agent-info").html('').hide();
@@ -936,7 +927,7 @@ $js = <<<JS
                         connection.accept();
                     }
                     
-                    console.log('ajax redirect-agent-data2');
+                    //console.log('ajax redirect-agent-data2');
                     
                     $.ajax({
                         type: 'post',
@@ -952,7 +943,8 @@ $js = <<<JS
                                 console.error(res.error);
                                 
                                 $('#web-phone-dial-modal').modal('hide');
-                                document.getElementById('call-controls2').style.display = 'none';
+                                $('#call-controls2').hide();
+                                
                                 data_agent_to_redirect.removeAttr("disabled");
                                 var error_message = 'Error redirect.';
                                 if(res.message) {
@@ -967,7 +959,7 @@ $js = <<<JS
                                 console.info(res);
                                 
                                 $('#web-phone-dial-modal').modal('hide');
-                                document.getElementById('call-controls2').style.display = 'none';
+                                $('#call-controls2').hide();
                                 $("#web-phone-redirect-agents-modal").modal('hide');
                                 data_agent_to_redirect.removeAttr("disabled");
                                 $("#redirect-agent-info").html('').hide();
@@ -1066,7 +1058,7 @@ $js = <<<JS
     $(document).on('click', '#btn-make-call', function(e) {
         e.preventDefault();
         
-        $.post(ajaxCallRedirectUrl + '?check_user=1', {to_id:c_user_id}, function(r) {
+        $.post(ajaxCallRedirectUrl + '?check_user=1', {to_id: userId}, function(r) {
             if(r && r.is_ready) {
                 var phone_to = $('#call-to-number').val();
                 var phone_from = $('#call-from-number').val();

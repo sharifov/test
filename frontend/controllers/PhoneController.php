@@ -326,15 +326,32 @@ class PhoneController extends FController
      */
     public function actionAjaxCallGetAgents(): string
     {
+
+        if (!Yii::$app->request->isPost) {
+            throw new BadRequestHttpException('Not POST data', 1);
+        }
+
         $sid = Yii::$app->request->post('sid');
-        $userId = (int) Yii::$app->request->post('user_id');
+        // $userId = (int) Yii::$app->request->post('user_id');
+
+        $userId = Yii::$app->user->id;
         $users = [];
         $error = null;
 
+
         try {
+
+            if (!$sid) {
+                throw new \Exception('Error: CallSID is empty', 2);
+            }
+
+            if (!$userId) {
+                throw new \Exception('Error: UserID is empty', 3);
+            }
+
             $call = Call::findOne(['c_call_sid' => $sid]);
 
-            if(!$call) {
+            if (!$call) {
                 $call = Call::find()->where(['c_created_user_id' => $userId])->orderBy(['c_id' => SORT_DESC])->limit(1)->one();
             }
 
@@ -348,7 +365,7 @@ class PhoneController extends FController
                 throw new \Exception('Project id not found in call by callId: ' . $sid);
             }
 
-            $userList = Employee::getUsersForRedirectCall($call->c_project_id, $call->c_dep_id);
+            $userList = Employee::getUsersForRedirectCall($call);
 
             if($userList) {
                 foreach ($userList as $userItem) {
@@ -389,25 +406,26 @@ class PhoneController extends FController
         $result = [];
 
         try {
+
             $sid = Yii::$app->request->post('sid');
             $userId = Yii::$app->request->post('user_id');
 
             if (!$sid) {
-                throw new BadRequestHttpException('Not found Call SID in request', 1);
+                throw new BadRequestHttpException('Not found Call SID in request', 2);
             }
 
             if (!$userId) {
-                throw new BadRequestHttpException('Not found User Id in request', 2);
+                throw new BadRequestHttpException('Not found User Id in request', 3);
             }
 
 
-            $originCall = Call::find()->where(['c_created_user_id' => Yii::$app->user->id, 'c_call_status' => [Call::CALL_STATUS_IN_PROGRESS]])->orderBy(['c_id' => SORT_DESC])->limit(1)->one();
+            //$originCall = Call::find()->where(['c_created_user_id' => Yii::$app->user->id/*, 'c_call_status' => Call::CALL_STATUS_IN_PROGRESS*/])->orderBy(['c_id' => SORT_DESC])->limit(1)->one();
 
-            /*$originCall = Call::find()->where(['c_call_sid' => $sid])->one();
+            $originCall = Call::find()->where(['c_call_sid' => $sid])->one();
 
             if (!$originCall) {
                 $originCall = Call::find()->where(['c_call_sid' => $sid])->one();
-            }*/
+            }
 
             if (!$originCall) {
                 throw new BadRequestHttpException('Not found Call', 5);
@@ -427,13 +445,23 @@ class PhoneController extends FController
             $communication = \Yii::$app->communication;
 
             //$updateData = ['status' => 'completed'];
-            $updateData = [
+            /*$updateData = [
                 'method'    =>  'POST',
                 'url'       =>  Yii::$app->params['url_api_address'] . '/twilio/redirect-call-user?user_id='.$user->id
-            ];
+            ];*/
 
-            $sid = $originCall->c_call_sid;
-            $result = $communication->updateCall($sid, $updateData);
+
+
+            if ($originCall->cParent) {
+
+                $callSid = $originCall->cParent->c_call_sid;
+                $callbackUrl = Yii::$app->params['url_api_address'] . '/twilio/redirect-call-user?user_id='.$user->id;
+                $data['user_id'] = $user->id;
+
+                $result = $communication->redirectCall($callSid, $data, $callbackUrl);
+            } else {
+                $result['error'] = 'Not found originCall->cParent';
+            }
 
 
             /*if ($result['result'][])
@@ -460,45 +488,46 @@ class PhoneController extends FController
 
 
                 //$call = Call::findOne(['c_id' => $sid]);
-                if ($result && isset($result['data'], $result['data']['call'], $result['data']['call']['sid'])) {
-
-                    $dataCall = $result['data']['call'];
-
-                    $call = Call::findOne(['c_call_sid' => $dataCall['sid']/*, 'c_created_user_id' => $userId*/]);
-
-                    if (!$call) {
-                        $call = new Call();
-                    }
-
-                    $call->c_call_sid = $dataCall['sid'];
-                    $call->c_call_type_id = Call::CALL_TYPE_IN;
-                    $call->c_call_status = Call::CALL_STATUS_IVR;
-                    // $call->c_com_call_id = null;
-                    // $call->c_parent_call_sid = $result['data']['result']['sid']; // $call_parent->c_parent_call_sid;
-                    // $call->c_project_id = $projectid;
-
-                    $call->c_project_id = $originCall->c_project_id;
-                    $call->c_dep_id = $originCall->c_dep_id;
-
-                    $call->c_is_new = true;
-                    $call->c_created_dt = date('Y-m-d H:i:s');
-                    $call->c_from = $dataCall['from']; //$from;
-                    $call->c_to = 'client:seller' . $userId;//$result['data']['result']['forwardedFrom'] ?? null;
-                    $call->c_created_user_id = $userId;
-                    // $call->c_lead_id = ($lead_id > 0) ? $lead_id : null;
-                    // $call->c_case_id = ($case_id > 0) ? $case_id : null;
-                    if (!$call->save()) {
-                        Yii::error(VarDumper::dumpAsString($call->errors), 'PhoneController:actionAjaxCallRedirectToAgent');
-                    }
-
-                }
+//                if ($result && isset($result['data'], $result['data']['call'], $result['data']['call']['sid'])) {
+//
+//                    $dataCall = $result['data']['call'];
+//
+//                    $call = Call::findOne(['c_call_sid' => $dataCall['sid']/*, 'c_created_user_id' => $userId*/]);
+//
+//                    if (!$call) {
+//                        $call = new Call();
+//                    }
+//
+//                    $call->c_call_sid = $dataCall['sid'];
+//                    $call->c_call_type_id = Call::CALL_TYPE_IN;
+//                    $call->c_call_status = Call::CALL_STATUS_IVR;
+//                    $call->c_status_id = $call->setStatusByTwilioStatus($call->c_call_status);
+//                    // $call->c_com_call_id = null;
+//                    // $call->c_parent_call_sid = $result['data']['result']['sid']; // $call_parent->c_parent_call_sid;
+//                    // $call->c_project_id = $projectid;
+//
+//                    $call->c_project_id = $originCall->c_project_id;
+//                    $call->c_dep_id = $originCall->c_dep_id;
+//
+//                    $call->c_is_new = true;
+//                    $call->c_created_dt = date('Y-m-d H:i:s');
+//                    $call->c_from = $dataCall['from']; //$from;
+//                    $call->c_to = 'client:seller' . $userId;//$result['data']['result']['forwardedFrom'] ?? null;
+//                    $call->c_created_user_id = $userId;
+//                    // $call->c_lead_id = ($lead_id > 0) ? $lead_id : null;
+//                    // $call->c_case_id = ($case_id > 0) ? $case_id : null;
+//                    if (!$call->save()) {
+//                        Yii::error(VarDumper::dumpAsString($call->errors), 'PhoneController:actionAjaxCallRedirectToAgent');
+//                    }
+//
+//                }
 
                 /*if($call) {
                     Notifications::socket(null, $call->c_lead_id, 'incomingCall', ['status' => $call->c_call_status, 'duration' => $call->c_call_duration, 'snr' => $call->c_sequence_number], true);
                 }*/
 
 
-            \Yii::info(VarDumper::dumpAsString(['call' => $call ? $call->attributes  : null, 'sid' => $sid, 'updateData' => $updateData, 'result' => $result, 'post' => \Yii::$app->request->post()]), 'info\PhoneController:actionAjaxCallRedirectToAgent');
+           // \Yii::info(VarDumper::dumpAsString(['call' => $call ? $call->attributes  : null, 'sid' => $sid, 'updateData' => $updateData, 'result' => $result, 'post' => \Yii::$app->request->post()]), 'info\PhoneController:actionAjaxCallRedirectToAgent');
 
         } catch (\Throwable $e) {
             $result = [
