@@ -328,20 +328,16 @@ GeoIP Installation
 -------------------
 sudo apt-get install php-geoip
 
+restart php-fpm
+
 Test extension:
 
-1) Create a test.php file in the user's home directory or anywhere else
-
-2) Paste the following code in the file
+Paste the following code in the console
 
 ```
-<?php 
-
-echo geoip_time_zone_by_country_and_region('US', 'CA') . PHP_EOL;
+php -r "echo geoip_time_zone_by_country_and_region('US', 'CA') . PHP_EOL;"
 
 ```
-
-3) run sudo php test.php in the console
 
 Command must return the time zone of the USA - California ---> America/Los_Angeles
 

@@ -2187,7 +2187,7 @@ New lead {lead_id}
 
             //$offset = '-2';
 
-            $timezoneName = timezone_name_from_abbr('',intval($offset) * 60 * 60,0);
+            $timezoneName = timezone_name_from_abbr('',intval($offset) * 3600, true);
 
             /*$date = new \DateTime(time(), new \DateTimeZone($timezoneName));
            // $clientTime = Yii::$app->formatter->asTime() $date->format('H:i');
