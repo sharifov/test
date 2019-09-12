@@ -442,7 +442,7 @@ class Cases extends ActiveRecord
                 $offset = '+' . $offset;
             }
 
-            $timezoneName = timezone_name_from_abbr('',intval($offset) * 60 * 60,0);
+            $timezoneName = timezone_name_from_abbr('',intval($offset) * 3600, true);
 
             $dt = new \DateTime();
             if($timezoneName) {
