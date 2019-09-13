@@ -182,17 +182,16 @@
     'header' => '<h4 class="modal-title">Send digit</h4>',
     'size' => 'modal-sm',
 ]);
-    echo '<div class="container container-digit" id="container-digit">
+?>
+    <div class="container container-digit" id="container-digit">
         <div id="output"></div>
         <div class="row">
             <div class="digit" id="one">1</div>
             <div class="digit" id="two">2</div>
-            <div class="digit" id="three">3
-            </div>
+            <div class="digit" id="three">3</div>
         </div>
         <div class="row">
-            <div class="digit" id="four">4
-            </div>
+            <div class="digit" id="four">4</div>
             <div class="digit" id="five">5</div>
             <div class="digit">6</div>
         </div>
@@ -202,18 +201,15 @@
             <div class="digit">9</div>
         </div>
         <div class="row">
-            <div class="digit">*
-            </div>
-            <div class="digit">0
-            </div>
-            <div class="digit">#
-            </div>
+            <div class="digit">*</div>
+            <div class="digit">0</div>
+            <div class="digit">#</div>
         </div>
         <div class="row">
             <i class="fa fa-eraser dig reset-digit" aria-hidden="true"></i>
         </div>
-    </div>';
-\yii\bootstrap\Modal::end(); ?>
+    </div>
+<?php \yii\bootstrap\Modal::end(); ?>
 
 
 
@@ -690,9 +686,15 @@ echo '<div class="container" id="container-redirect-agents"></div>';
 
                     //alert(conn.parameters.CallSid);
 
+
                     connection = conn;
                     $('#call-controls2').hide();
-                    conn.accept();
+
+                    if (document.visibilityState == 'visible') {
+                        conn.accept();
+                    } else {
+                        $('#call-controls2').show();
+                    }
 
                     /*var access =  updateAgentStatus(connection, true, 0);
                     console.log({"action":"incoming", "cid":conn.parameters.CallSid, "access": access});
