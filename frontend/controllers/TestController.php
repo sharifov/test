@@ -22,6 +22,7 @@ use sales\entities\cases\Cases;
 use sales\forms\api\communication\voice\finish\FinishForm;
 use sales\forms\api\communication\voice\record\RecordForm;
 use sales\forms\lead\ClientCreateForm;
+use sales\forms\lead\EmailCreateForm;
 use sales\forms\lead\PhoneCreateForm;
 use sales\repositories\airport\AirportRepository;
 use sales\repositories\cases\CasesRepository;
@@ -100,9 +101,23 @@ class TestController extends FController
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
 
-    public function test(Lead $lead)
+    public function actionTest()
     {
-        $lead->client->first_name = '1';
+        $emails = [
+
+            new EmailCreateForm(['email' => '']),
+
+        ];
+
+        VarDumper::dump($emails);
+
+        $e = array_filter($emails, function (EmailCreateForm $e) {
+            return $e->email;
+        });
+
+        if (!$e) {
+            echo 'no';
+        }
 
     }
 

@@ -2159,6 +2159,7 @@ class LeadController extends FController
             } catch (\Throwable $e) {
                 Yii::$app->errorHandler->logException($e);
                 Yii::$app->session->setFlash('error', $e->getMessage());
+                return $this->redirect(['/lead/create']);
             }
         }
         return $this->render('create', ['leadForm' => $form]);
@@ -2188,6 +2189,7 @@ class LeadController extends FController
             } catch (\Throwable $e) {
                 Yii::$app->errorHandler->logException($e);
                 Yii::$app->session->setFlash('error', $e->getMessage());
+                return $this->redirect(['/lead/create-case', 'case_gid' => $case->cs_gid]);
             }
         }
         return $this->render('create', ['leadForm' => $form]);
