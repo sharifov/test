@@ -1,7 +1,6 @@
 <?php
 
 use yii\helpers\Html;
-use yii\widgets\ActiveForm;
 use \common\models\Email;
 use \common\models\Sms;
 use \common\models\Call;
@@ -22,10 +21,10 @@ use \common\models\Call;
     $call = Call::findOne($model['id']);
     if($call):
 
-        if($call->c_call_status == Call::CALL_STATUS_COMPLETED) {
+        if($call->isCompleted()) {
             $statusClass = 'success';
             $statusTitle = 'COMPLETED - ' . Yii::$app->formatter->asDatetime(strtotime($call->c_created_dt) + (int) $call->c_call_duration);
-        } elseif($call->c_call_status == Call::CALL_STATUS_CANCELED) {
+        } elseif($call->isCanceled()) {
             $statusClass = 'error';
             $statusTitle = 'CANCELED';
         } else {
@@ -37,7 +36,7 @@ use \common\models\Call;
             $statusTitle .= ' - Call ID: '. $call->c_id;
         }
 
-        if($call->c_call_type_id == Call::CALL_TYPE_IN) {
+        if($call->isIn()) {
             $fromType = 'client';
         } else {
             $fromType = 'system';
@@ -48,24 +47,129 @@ use \common\models\Call;
         <i class="chat__status chat__status--<?=$statusClass?> fa fa-circle" data-toggle="tooltip" title="<?=Html::encode($statusTitle)?>" data-placement="right" data-original-title="<?=Html::encode($statusTitle)?>"></i>
         <div class="chat__message-heading">
 
-            <?php if($call->c_call_type_id == Call::CALL_TYPE_IN):?>
-                <div class="chat__sender">Call from (<strong><?=Html::encode($call->c_from)?>) </strong> to (<strong><?=Html::encode($call->c_to)?></strong>)</div>
-            <? else: ?>
+            <?php if($call->isIn()):?>
+                <div class="chat__sender">
+                    <i class="fa fa-phone" title="<?=Html::encode($call->c_from)?>"></i> <?//php $call->cClient ? Html::encode($call->cClient->full_name) : ''?>
+                    to <b><?=($call->cCreatedUser ? '<i class="fa fa-user"></i> '.Html::encode($call->cCreatedUser->username) : '-') ?></b>
+                </div>
+            <?php else: ?>
                 <div class="chat__sender">Call from <b><?=($call->cCreatedUser ? Html::encode($call->cCreatedUser->username) : '-') ?></b>, (<strong><?=Html::encode($call->c_from)?>) </strong> to (<strong><?=Html::encode($call->c_to)?></strong>)</div>
             <?php endif;?>
 
-            <div class="chat__date"><?=Yii::$app->formatter->asDatetime(strtotime($call->c_created_dt))?></div> <?php //11:01AM | June 9?>
+            <div class="chat__date">
+                <?php if(Yii::$app->user->identity->isAdmin()):?>
+                    Id: <u title="SID: <?=Html::encode($call->c_call_sid)?>"><?=Html::a($call->c_id, ['call/view', 'id' => $call->c_id], ['target' => '_blank', 'data-pjax' => 0])?></u>,
+                <?php endif; ?>
+                <i class="fa fa-calendar"></i> <?=Yii::$app->formatter->asDatetime(strtotime($call->c_created_dt))?></div>
         </div>
         <div class="panel-body">
             <?php if($call->c_recording_url):?>
-                <audio controls="controls" controlsList="nodownload" class="chat__audio">
+                <audio controls="controls" controlsList="nodownload" class="chat__audio" style="height: 25px; width: 100%">
                     <source src="<?=$call->c_recording_url?>" type="audio/mpeg">
                     Your browser does not support the audio element
                 </audio>
-            <? else: ?>
+            <?php else: ?>
                 <div><i class="fa fa-volume-off"></i> ... <?=$call->c_call_status?></div>
             <?php endif;?>
             <div><?=$call->c_call_duration > 0 ? 'Duration: ' . Yii::$app->formatter->asDuration($call->c_call_duration) : ''?></div>
+
+            <?php if ($call->calls):?>
+
+               <table class="table table-bordered table-hover">
+                            <?php foreach ($call->calls as $callItem):?>
+                                <tr>
+                                    <?php if(Yii::$app->user->identity->isAdmin()):?>
+                                    <td style="width:50px">
+                                        <u><?=Html::a($callItem->c_id, ['call/view', 'id' => $callItem->c_id], ['target' => '_blank', 'data-pjax' => 0])?></u><br>
+                                    </td>
+                                    <?php endif; ?>
+                                    <td class="text-center">
+                                        <i class="fa fa-clock-o"></i> <?=Yii::$app->formatter->asDatetime(strtotime($callItem->c_created_dt), 'php:H:i:s')?>
+                                        <br>&nbsp;&nbsp;<?=Yii::$app->formatter->asRelativeTime(strtotime($callItem->c_created_dt))?>
+                                    </td>
+                                    <td class="text-left">
+                                        <?php if($callItem->c_recording_url):?>
+                                            <audio controls="controls" controlsList="nodownload" class="chat__audio" style="height: 25px; width: 100%">
+                                                <source src="<?=$call->c_recording_url?>" type="audio/mpeg">
+                                                Your browser does not support the audio element
+                                            </audio>
+                                        <?php else: ?>
+
+                                        <?php endif;?>
+                                        <div><?=$callItem->c_call_duration > 0 ? Yii::$app->formatter->asDuration($callItem->c_call_duration) : ''?></div>
+                                    </td>
+                                    <td class="text-center" style="width:160px">
+                                        <?php
+                                        if($callItem->isRinging()) {
+                                            $icon = 'fa fa-refresh fa-pulse fa-fw text-danger';
+                                        } elseif($callItem->isInProgress()) {
+                                            $icon = 'fa fa-spinner fa-pulse fa-fw';
+                                        } elseif($callItem->isQueue()) {
+                                            $icon = 'fa fa-pause';
+                                        } elseif($callItem->isCompleted()) {
+                                            $icon = 'fa fa-trophy text-success';
+                                        } elseif($callItem->isCanceled() || $callItem->isNoAnswer() || $callItem->isBusy()) {
+                                            $icon = 'fa fa-times-circle text-danger';
+                                        } else {
+                                            $icon = '';
+                                        }
+                                        ?>
+                                        <i class="<?=$icon?>"></i>
+                                        <?=$callItem->getStatusName()?>
+<!--                                        <br>--><?//=$callItem->getStatusName2()?><!--<br>-->
+
+                                    </td>
+<!--                                    <td class="text-center">-->
+<!---->
+<!--                                        --><?php
+//                                        $sec = 0;
+//                                        if($callItem->c_updated_dt) {
+//
+//                                            if($callItem->isIvr() || $callItem->isRinging() || $callItem->isInProgress() || $callItem->isQueue()) {
+//                                                $sec = time() - strtotime($callItem->c_updated_dt);
+//                                            } else {
+//                                                $sec = $callItem->c_call_duration ?: strtotime($callItem->c_updated_dt) - strtotime($callItem->c_created_dt);
+//                                            }
+//                                        }
+//                                        ?>
+<!---->
+<!--                                        --><?php //if ($callItem->isIvr() || $callItem->isRinging() || $callItem->isInProgress() || $callItem->isQueue()):?>
+<!--                                            <span class="badge badge-warning timer" data-sec="--><?//=$sec?><!--" data-control="start" data-format="%M:%S" title="--><?//=Yii::$app->formatter->asDuration($sec)?><!--">-->
+<!--                        00:00-->
+<!--                    </span>-->
+<!--                                        --><?php //else: ?>
+<!--                                            <span class="badge badge-primary timer" data-sec="--><?//=$sec?><!--" data-control="pause" data-format="%M:%S" title="--><?//=Yii::$app->formatter->asDuration($sec)?><!--">-->
+<!--                        00:00-->
+<!--                    </span>-->
+<!---->
+<!--                                        --><?php //endif;?>
+<!---->
+<!--                                    </td>-->
+                                    <td class="text-center" style="width:110px">
+                                        <?php if($callItem->isIn()):?>
+                                            <div>
+                                                <?php if($callItem->c_created_user_id):?>
+                                                    <i class="fa fa-user fa-border"></i><br>
+                                                    <?=Html::encode($callItem->cCreatedUser->username)?>
+                                                <?php else: ?>
+                                                    <i class="fa fa-phone fa-border"></i><br>
+                                                    <?=$callItem->c_to?>
+                                                <?php endif; ?>
+                                            </div>
+                                        <?php else: ?>
+                                            <div>
+                                                <i class="fa fa-male text-info fa-border"></i>
+                                            </div>
+                                            <?=$callItem->c_to?>
+                                        <?php endif; ?>
+                                    </td>
+                                </tr>
+                            <?php endforeach;?>
+                        </table>
+
+            <?php endif;?>
+
+
         </div>
     </div>
     <?php endif;?>
@@ -94,7 +198,7 @@ use \common\models\Call;
                 <?php if($mail->e_type_id == Email::TYPE_INBOX):?>
                     <div class="chat__sender">Email from (<?=Html::encode($mail->e_email_from_name)?> <<strong><?=Html::encode($mail->e_email_from)?>> )</strong>
                             to (<?=Html::encode($mail->e_email_to_name)?> <<strong><?=Html::encode($mail->e_email_to)?></strong>>)</div>
-                <? else: ?>
+                <?php else: ?>
                     <div class="chat__sender">Email from <?=($mail->eCreatedUser ? Html::encode($mail->eCreatedUser->username) : '-') ?>, (<?=Html::encode($mail->e_email_from_name)?> <<strong><?=Html::encode($mail->e_email_from)?></strong>>) to
                         (<?=Html::encode($mail->e_email_to_name)?> <<strong><?=Html::encode($mail->e_email_to)?></strong>>)</div>
                 <?php endif;?>

@@ -951,7 +951,7 @@ class LeadController extends FController
         $query3 = (new \yii\db\Query())
             ->select(['c_id AS id', new Expression('"voice" AS type'), 'c_lead_id AS lead_id', 'c_created_dt AS created_dt'])
             ->from('call')
-            ->where(['c_lead_id' => $lead->id]);
+            ->where(['c_lead_id' => $lead->id, 'c_parent_id' => null]);
 
 
         $unionQuery = (new \yii\db\Query())
