@@ -778,17 +778,13 @@ class CommunicationController extends ApiBaseController
 
                 $call = new Call();
                 $call->c_call_sid = $post['call']['CallSid'] ?? null;
-                $call->c_account_sid = $post['call']['AccountSid'] ?? null;
                 $call->c_call_type_id = Call::CALL_TYPE_IN;
                 $call->c_call_status = $post['call']['CallStatus'] ?? Call::CALL_STATUS_RINGING;
                 $call->c_com_call_id = $post['call_id'] ?? null;
-                $call->c_direction = $post['call']['Direction'] ?? null;
                 $call->c_project_id = $call_project_id;
                 $call->c_is_new = true;
-                $call->c_api_version = $post['call']['ApiVersion'] ?? null;
                 $call->c_created_dt = date('Y-m-d H:i:s');
                 $call->c_from = $client_phone_number;
-                $call->c_sip = null;
                 $call->c_to = $agent_phone_number; //$userCall->username ? $userCall->username : null;
                 $call->c_created_user_id = null;
                 $call->c_source_type_id = Call::SOURCE_REDIRECT_CALL;
@@ -816,7 +812,6 @@ class CommunicationController extends ApiBaseController
                     $call->c_api_version = $post['call']['ApiVersion'] ?? null;
                     $call->c_created_dt = date('Y-m-d H:i:s');
                     $call->c_from = $client_phone_number;
-                    $call->c_sip = null;
                     $call->c_to = $agent_phone_number; //$userCall->username ? $userCall->username : null;
                     $call->c_created_user_id = $userCall->id;
                     $call->c_source_type_id = Call::SOURCE_REDIRECT_CALL;
@@ -835,17 +830,16 @@ class CommunicationController extends ApiBaseController
             } elseif($isOnHold) {
                 $call = new Call();
                 $call->c_call_sid = $post['call']['CallSid'] ?? null;
-                $call->c_account_sid = $post['call']['AccountSid'] ?? null;
+
                 $call->c_call_type_id = Call::CALL_TYPE_IN;
                 $call->c_call_status =  Call::CALL_STATUS_QUEUE;
                 $call->c_com_call_id = $post['call_id'] ?? null;
                 $call->c_direction = $post['call']['Direction'] ?? null;
                 $call->c_project_id = $call_project_id;
                 $call->c_is_new = true;
-                $call->c_api_version = $post['call']['ApiVersion'] ?? null;
+
                 $call->c_created_dt = date('Y-m-d H:i:s');
                 $call->c_from = $client_phone_number;
-                $call->c_sip = null;
                 $call->c_to = $agent_phone_number;
                 $call->c_created_user_id = null;
                 $call->c_source_type_id = $callSourceTypeId;
@@ -910,17 +904,16 @@ class CommunicationController extends ApiBaseController
             } elseif($callGeneralNumber){
                 $call = new Call();
                 $call->c_call_sid = $post['call']['CallSid'] ?? null;
-                $call->c_account_sid = $post['call']['AccountSid'] ?? null;
+
                 $call->c_call_type_id = Call::CALL_TYPE_IN;
                 $call->c_call_status = $post['call']['CallStatus'] ?? Call::CALL_STATUS_RINGING;
                 $call->c_com_call_id = $post['call_id'] ?? null;
                 $call->c_direction = $post['call']['Direction'] ?? null;
                 $call->c_project_id = $call_project_id;
                 $call->c_is_new = true;
-                $call->c_api_version = $post['call']['ApiVersion'] ?? null;
+
                 $call->c_created_dt = date('Y-m-d H:i:s');
                 $call->c_from = $client_phone_number;
-                $call->c_sip = null;
                 $call->c_to = $generalLineNumber;
                 $call->c_created_user_id = null;
                 $call->c_source_type_id = $callSourceTypeId;
@@ -990,7 +983,6 @@ class CommunicationController extends ApiBaseController
                 if($post['callData']['RecordingUrl']) {
                     $call->c_recording_url = $post['callData']['RecordingUrl'];
                     $call->c_recording_duration = $post['callData']['RecordingDuration'];
-                    $call->c_recording_sid = $post['callData']['RecordingSid'];
                     $call->c_updated_dt = date('Y-m-d H:i:s');
 
 
@@ -1055,7 +1047,6 @@ class CommunicationController extends ApiBaseController
                 $call->c_updated_dt = date('Y-m-d H:i:s');
 
                 $call->c_recording_url = $callData['c_recording_url'] ?? null;
-                $call->c_recording_sid = $callData['c_recording_sid'] ?? null;
                 $call->c_recording_duration = $callData['c_recording_duration'] ?? null;
 
                 $call->c_caller_name = $callData['c_caller_name'] ?? null;
@@ -1210,7 +1201,6 @@ class CommunicationController extends ApiBaseController
                 /*if($post['callData']['RecordingUrl']) {
                     $call->c_recording_url = $post['callData']['RecordingUrl'];
                     $call->c_recording_duration = $post['callData']['RecordingDuration'];
-                    $call->c_recording_sid = $post['callData']['RecordingSid'];
                     $call->c_updated_dt = date('Y-m-d H:i:s');
 
 
@@ -1281,7 +1271,6 @@ class CommunicationController extends ApiBaseController
                 $call->c_updated_dt = date('Y-m-d H:i:s');
 
                 $call->c_recording_url = $callData['c_recording_url'] ?? null;
-                $call->c_recording_sid = $callData['c_recording_sid'] ?? null;
                 $call->c_recording_duration = $callData['c_recording_duration'] ?? null;
 
                 $call->c_caller_name = $callData['c_caller_name'] ?? null;
@@ -1435,7 +1424,6 @@ class CommunicationController extends ApiBaseController
                 /*if($post['callData']['RecordingUrl']) {
                     $call->c_recording_url = $post['callData']['RecordingUrl'];
                     $call->c_recording_duration = $post['callData']['RecordingDuration'];
-                    $call->c_recording_sid = $post['callData']['RecordingSid'];
                     $call->c_updated_dt = date('Y-m-d H:i:s');
 
 
@@ -1509,7 +1497,6 @@ class CommunicationController extends ApiBaseController
                 $call = new Call();
             }
                 $call->c_call_sid = $callSid;
-                $call->c_account_sid = $callData['c_account_sid'];
                 $call->c_call_type_id = $callData['c_call_type_id'];
                 $call->c_uri = $callData['c_uri'];
                 $call->c_from = $callData['c_from'];
@@ -1518,11 +1505,8 @@ class CommunicationController extends ApiBaseController
                 $call->c_created_dt = $callData['c_created_dt'];
                 $call->c_updated_dt = date('Y-m-d H:i:s');
                 $call->c_recording_url = $callData['c_recording_url'] ?? null;
-                $call->c_recording_sid = $callData['c_recording_sid'] ?? null;
                 $call->c_recording_duration = $callData['c_recording_duration'] ?? null;
                 $call->c_caller_name = $callData['c_caller_name'] ?? null;
-                $call->c_direction = $callData['c_direction'] ?? null;
-                $call->c_api_version = $callData['c_api_version'] ?? null;
                 $call->c_parent_call_sid = $callTwData['ParentCallSid'] ?? null;
                 $call->c_call_status = $callTwData['CallStatus'] ?? Call::CALL_STATUS_RINGING;
                 $call->c_sequence_number = $callTwData['SequenceNumber'] ?? 0;

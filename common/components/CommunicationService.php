@@ -534,6 +534,38 @@ class CommunicationService extends Component
 
 
     /**
+     * @param string $sid
+     * @param array $data
+     * @param string $callBackUrl
+     * @return array
+     * @throws \yii\httpclient\Exception
+     */
+    public function redirectCall(string $sid, array $data = [], string $callBackUrl = '') : array
+    {
+        $out = ['error' => false, 'data' => []];
+
+        $data['sid'] = $sid;
+        $data['data'] = $data;
+        $data['callBackUrl'] = $callBackUrl;
+
+        $response = $this->sendRequest('voice/redirect-call', $data);
+
+        if ($response->isOk) {
+            if(isset($response->data['data']['response'])) {
+                $out['data'] = $response->data['data']['response'];
+            } else {
+                $out['error'] = 'Not found in response array data key [data][response]';
+            }
+        } else {
+            $out['error'] = $response->content;
+            \Yii::error(VarDumper::dumpAsString($out['error']), 'Component:CommunicationService::updateCallTunnel');
+        }
+
+        return $out;
+    }
+
+
+    /**
      * @param string $username
      * @return array
      * @throws \yii\httpclient\Exception
@@ -616,7 +648,10 @@ class CommunicationService extends Component
 
         $response = $this->sendRequest('twilio-jwt/redirect-call', $data);
 
+
+
         if ($response->isOk) {
+            \Yii::warning(VarDumper::dumpAsString(['cid' => $cid, 'type' => $type, 'from' => $from, 'to' => $to, 'content' => $response->data]), 'Component:CommunicationService::callRedirect');
             if(isset($response->data['data'])) {
                 $out['data'] = $response->data['data'];
             } else {

@@ -1749,12 +1749,12 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
 
 
     /**
-     * @param int $project_id
-     * @param int|null $department_id
+     * @param Call $call
      * @return array
      */
-    public static function getUsersForRedirectCall(int $project_id, ?int $department_id = null): array
+    public static function getUsersForRedirectCall(Call $call): array
     {
+
         $query = UserConnection::find();
         $subQuery1 = UserProfile::find()->select(['up_call_type_id'])->where('up_user_id = user_connection.uc_user_id');
 
@@ -1763,12 +1763,12 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
             'tbl_call_type_id' => $subQuery1
         ]);
 
-        $subQuery = ProjectEmployeeAccess::find()->select(['DISTINCT(employee_id)'])->where(['project_id' => $project_id]);
+        $subQuery = ProjectEmployeeAccess::find()->select(['DISTINCT(employee_id)'])->where(['project_id' => $call->c_project_id]);
         $query->andWhere(['IN', 'user_connection.uc_user_id', $subQuery]);
         $query->groupBy(['user_connection.uc_user_id']);
 
-        if ($department_id) {
-            $subQueryUd = UserDepartment::find()->usersByDep($department_id);
+        if ($call->c_dep_id) {
+            $subQueryUd = UserDepartment::find()->usersByDep($call->c_dep_id);
             $query->andWhere(['IN', 'user_connection.uc_user_id', $subQueryUd]);
         }
 
