@@ -172,7 +172,6 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
             ],
             //'c_call_sid',
             //'c_parent_call_sid',
-            //'c_account_sid',
 
             [
                 'attribute' => 'c_call_type_id',
@@ -242,13 +241,7 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
 
             'c_from',
             'c_to',
-            // 'c_sip',
             //'c_call_status',
-
-
-
-            //'c_api_version',
-            //'c_direction',
             //'c_forwarded_from',
             //'c_caller_name',
             //'c_parent_call_sid',
@@ -260,15 +253,8 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
                     return $model->c_price ? '$'.number_format($model->c_price, 5) : '-';
                 },
             ],*/
-            //'c_sip_response_code',
             //'c_recording_url:url',
 
-
-
-            //'c_recording_sid',
-
-            //'c_timestamp',
-            //'c_uri',
             //'c_sequence_number',
 
             //'c_created_user_id',

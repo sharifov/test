@@ -38,7 +38,6 @@ $this->params['breadcrumbs'][] = $this->title;
                 'c_id',
                 'c_call_sid',
                 'c_parent_call_sid',
-                'c_account_sid',
                 [
                     'attribute' => 'c_call_type_id',
                     'value' => function (\common\models\Call $model) {
@@ -47,10 +46,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 ],
                 'c_from',
                 'c_to',
-                'c_sip',
                 'c_call_status',
-                'c_api_version',
-                'c_direction',
                 'c_forwarded_from',
                 'c_caller_name',
                 'c_parent_call_sid',
@@ -94,19 +90,16 @@ $this->params['breadcrumbs'][] = $this->title;
     <?= DetailView::widget([
         'model' => $model,
         'attributes' => [
-            'c_sip_response_code',
             'c_recording_url:url',
-            'c_recording_sid',
             'c_recording_duration',
-            'c_timestamp',
-            //'c_uri',
-            [
+
+            /*[
                 'attribute' => 'c_uri',
                 'value' => function (\common\models\Call $model) {
                     return $model->c_uri ? Html::a('Link', 'https://api.twilio.com'.$model->c_uri, ['target' => '_blank']) : '-';
                 },
                 'format' => 'raw'
-            ],
+            ],*/
             'c_sequence_number',
             'c_lead_id',
 

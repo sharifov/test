@@ -39,7 +39,6 @@ $this->title = 'Call Id: ' . $model->c_id;
                 ],
                 'c_call_sid',
                 'c_parent_call_sid',
-                //'c_account_sid',
                 //'c_call_type_id',
                 [
                     'attribute' => 'c_call_type_id',
@@ -55,10 +54,7 @@ $this->title = 'Call Id: ' . $model->c_id;
                 ],
                 'c_from',
                 'c_to',
-                //'c_sip',
                 'c_call_status',
-                //'c_api_version',
-                //'c_direction',
                 //'c_forwarded_from',
 
                 //'c_parent_call_sid',
@@ -73,12 +69,8 @@ $this->title = 'Call Id: ' . $model->c_id;
         'attributes' => [
             'c_caller_name',
             'c_call_duration',
-            //'c_sip_response_code',
             //'c_recording_url:url',
-            //'c_recording_sid',
             'c_recording_duration',
-            //'c_timestamp',
-            //'c_uri',
             //'c_sequence_number',
             'c_lead_id',
             //'c_created_user_id',
