@@ -255,6 +255,17 @@ class CallController extends FController
             $accessDepartments = [];
         }
 
+        $userGroupsModel = $user->ugsGroups;
+        
+        if ($userGroupsModel) {
+            $userGroups = ArrayHelper::map($userGroupsModel, 'ug_id', 'ug_id');
+        } else {
+            $userGroups = [];
+        }
+
+        $params['UserConnectionSearch']['ug_ids'] = $params['CallSearch']['ug_ids'] = $userGroups;
+        $params['UserConnectionSearch']['isSuper'] = $params['CallSearch']['isSuper'] = ($user->isSupervision() || $user->isExSuper() || $user->isSupSuper()) ? 1 : 0;
+
         //VarDumper::dump($accessDepartments, 10, true); exit;
 
 

@@ -7,6 +7,8 @@ use common\models\UserDepartment;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use common\models\UserConnection;
+use common\models\UserGroupAssign;
+use Yii;
 
 /**
  * UserConnectionSearch represents the model behind the search form of `common\models\UserConnection`.
@@ -16,14 +18,30 @@ use common\models\UserConnection;
 class UserConnectionSearch extends UserConnection
 {
     public $dep_id;
+
+    /**
+     * user groups id's
+     *
+     * @var array
+     */
+    public $ug_ids = [];
+
+    /**
+     * is user supervisor
+     *
+     * @var bool
+     */
+    public $isSuper;
+
     /**
      * {@inheritdoc}
      */
     public function rules()
     {
         return [
-            [['uc_id', 'uc_connection_id', 'uc_user_id', 'uc_lead_id', 'uc_case_id', 'dep_id'], 'integer'],
+            [['uc_id', 'uc_connection_id', 'uc_user_id', 'uc_lead_id', 'uc_case_id', 'dep_id', 'isSuper'], 'integer'],
             [['uc_user_agent', 'uc_controller_id', 'uc_action_id', 'uc_page_url', 'uc_ip', 'uc_created_dt'], 'safe'],
+            ['ug_ids', 'each', 'rule' => ['integer']],
         ];
     }
 
@@ -120,6 +138,11 @@ class UserConnectionSearch extends UserConnection
         } elseif ($this->dep_id == 0) {
             $subQuery = UserDepartment::find()->select(['DISTINCT(ud_user_id)'])->where(['ud_dep_id' => [Department::DEPARTMENT_SALES, Department::DEPARTMENT_EXCHANGE, Department::DEPARTMENT_SUPPORT]]);
             $query->andWhere(['NOT IN', 'uc_user_id', $subQuery]);
+        }
+
+        if ($this->isSuper) {
+            $subQuery = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->where(['IN', 'ugs_group_id', $this->ug_ids]);
+            $query->andWhere(['IN', 'uc_user_id', $subQuery]);
         }
 
         $query->cache(5);

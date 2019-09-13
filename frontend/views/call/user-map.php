@@ -218,6 +218,65 @@ $dtNow = date('Y-m-d H:i:s');
 
             <div class="col-md-5">
                 <div class="panel panel-default">
+                    <div class="panel-heading"><i class="fa fa-list"></i> User info</div>
+                    <div class="panel-body">
+                        <table class="table table-bordered">
+                            <tr>
+                                <th>My Role:</th>
+                                <td><?=implode(', ', Yii::$app->user->identity->getRoles())?></td>
+                            </tr>
+                            <tr>
+                                <th>My Departments:</th>
+                                <td><i class="fa fa-users"></i>
+                                    <?php
+                                        $departmentsValue = '';
+                                        $departments = Yii::$app->user->identity->getUserDepartmentList();
+                                        foreach ($departments as $department) {
+                                            echo Html::tag('span', Html::encode($department), ['class' => 'label label-default']) . ' ';
+                                        }
+                                    ?>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>My User Groups:</th>
+                                <td><i class="fa fa-users"></i>
+                                    <?php
+                                        $groupsValue = '';
+                                        if( $groupsModel =  Yii::$app->user->identity->ugsGroups) {
+                                            $groups = \yii\helpers\ArrayHelper::map($groupsModel, 'ug_id', 'ug_name');
+                                            $groupsValueArr = [];
+                                            foreach ($groups as $group) {
+                                                $groupsValueArr[] = Html::tag('span', Html::encode($group), ['class' => 'label label-default']);
+                                            }
+                                            $groupsValue = implode(' ', $groupsValueArr);
+                                        }
+                                        echo $groupsValue;
+                                    ?>
+                                </td>
+                            </tr>
+                            <!-- <tr>
+                                <th>My Project Access:</th>
+                                <td><i class="fa fa-list"></i>
+                                    <?php
+                                        /* $projectsValue = '';
+                                        $projectList = Yii::$app->user->identity->projects;
+
+                                        if($projectList) {
+                                            $groupsValueArr = [];
+                                            foreach ($projectList as $project) {
+                                                $groupsValueArr[] = Html::tag('span', Html::encode($project->name), ['class' => 'label label-default']);
+                                            }
+                                            $projectsValue = implode(' ', $groupsValueArr);
+                                        }
+                                        echo $projectsValue;*/
+                                    ?>
+                                </td>
+                            </tr> -->
+                        </table>
+                    </div>
+                </div>
+
+                <div class="panel panel-default">
                     <div class="panel-heading"><i class="fa fa-list"></i> Calls in IVR, QUEUE, RINGING, PROGRESS (Last update: <?=Yii::$app->formatter->asTime(time(), 'php:H:i:s')?>)</div>
                     <div class="panel-body">
                         <?= \yii\widgets\ListView::widget([

@@ -414,19 +414,6 @@ class Cases extends ActiveRecord
     }
 
     /**
-     * Check if user is agent
-     * 
-     * @return bool
-     */
-    public static function isUserAgent(): bool
-    {
-        /** @var Employee $user */
-        $user = Yii::$app->user->identity;
-
-        return $user->isAgent();
-    }
-
-    /**
      * Returns current client Time in 24-hour format;
      * If c_offset_gmt field is null then returns "-";
      * 

@@ -14,7 +14,7 @@ class CasesQController extends FController
 
     public function actionPending()
     {
-        $isAgent = CasesQSearch::isUserAgent();
+        $isAgent = $this->isUserAgent();
 
         $searchModel = new CasesQSearch();
         $dataProvider = $searchModel->searchPending(Yii::$app->request->queryParams, Yii::$app->user->identity);
@@ -28,7 +28,7 @@ class CasesQController extends FController
 
     public function actionInbox()
     {
-        $isAgent = CasesQSearch::isUserAgent();
+        $isAgent = $this->isUserAgent();
 
         $searchModel = new CasesQSearch();
         $dataProvider = $searchModel->searchInbox(Yii::$app->request->queryParams, Yii::$app->user->identity);
@@ -42,7 +42,7 @@ class CasesQController extends FController
 
     public function actionFollowUp()
     {
-        $isAgent = CasesQSearch::isUserAgent();
+        $isAgent = $this->isUserAgent();
 
         $searchModel = new CasesQSearch();
         $dataProvider = $searchModel->searchFollowUp(Yii::$app->request->queryParams, Yii::$app->user->identity);
@@ -56,7 +56,7 @@ class CasesQController extends FController
 
     public function actionProcessing()
     {
-        $isAgent = CasesQSearch::isUserAgent();
+        $isAgent = $this->isUserAgent();
 
         $searchModel = new CasesQSearch();
         $dataProvider = $searchModel->searchProcessing(Yii::$app->request->queryParams, Yii::$app->user->identity);
@@ -88,6 +88,17 @@ class CasesQController extends FController
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
         ]);
+    }
+
+    /**
+     * @return bool
+     */
+    private function isUserAgent(): bool
+    {
+        /** @var Employee $user */
+        $user = Yii::$app->user->identity;
+
+        return $user->isAgent();
     }
 
 }

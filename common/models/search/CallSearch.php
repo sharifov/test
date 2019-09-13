@@ -8,6 +8,8 @@ use sales\repositories\call\CallSearchRepository;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use common\models\Call;
+use common\models\UserGroupAssign;
+use Yii;
 
 /**
  * CallSearch represents the model behind the search form of `common\models\Call`.
@@ -40,6 +42,20 @@ class CallSearch extends Call
     private $callSearchRepository;
 
     /**
+     * user groups id's
+     *
+     * @var array
+     */
+    public $ug_ids = [];
+
+    /**
+     * is user supervisor
+     *
+     * @var bool
+     */
+    public $isSuper;
+
+    /**
      * CallSearch constructor.
      * @param array $config
      * @throws \yii\base\InvalidConfigException
@@ -56,10 +72,11 @@ class CallSearch extends Call
     public function rules()
     {
         return [
-            [['c_id', 'c_call_type_id', 'c_lead_id', 'c_created_user_id', 'c_com_call_id', 'c_project_id', 'c_is_new', 'c_is_deleted', 'supervision_id', 'limit', 'c_recording_duration', 'c_source_type_id', 'call_duration_from', 'call_duration_to', 'c_case_id', 'c_client_id'], 'integer'],
-            [['c_call_sid', 'c_from', 'c_to', 'c_call_status', 'c_forwarded_from', 'c_caller_name', 'c_parent_call_sid', 'c_call_duration', 'c_sip_response_code', 'c_recording_url',
-                'c_sequence_number', 'c_created_dt', 'c_updated_dt', 'c_error_message', 'c_price', 'statuses', 'limit', 'dep_ids'], 'safe'],
+            [['c_id', 'c_call_type_id', 'c_lead_id', 'c_created_user_id', 'c_com_call_id', 'c_project_id', 'c_is_new', 'c_is_deleted', 'supervision_id', 'limit', 'c_recording_duration', 'c_source_type_id', 'call_duration_from', 'call_duration_to', 'c_case_id', 'c_client_id', 'isSuper'], 'integer'],
+            [['c_call_sid', 'c_account_sid', 'c_from', 'c_to', 'c_sip', 'c_call_status', 'c_api_version', 'c_direction', 'c_forwarded_from', 'c_caller_name', 'c_parent_call_sid', 'c_call_duration', 'c_sip_response_code', 'c_recording_url', 'c_recording_sid',
+                'c_timestamp', 'c_uri', 'c_sequence_number', 'c_created_dt', 'c_updated_dt', 'c_error_message', 'c_price', 'statuses', 'limit', 'dep_ids', 'isSuper', 'ug_ids'], 'safe'],
             [['createTimeRange'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
+            ['ug_ids', 'each', 'rule' => ['integer']],
         ];
     }
 
@@ -303,6 +320,10 @@ class CallSearch extends Call
             $query->andWhere(['c_dep_id' => $this->dep_ids]);
         }
 
+        if ($this->isSuper) {
+            $subQuery = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->where(['IN', 'ugs_group_id', $this->ug_ids]);
+            $query->andWhere(['IN', 'c_created_user_id', $subQuery]);
+        }
 
         $query->with(['cProject', 'cLead', /*'cLead.leadFlightSegments',*/ 'cCreatedUser', 'cDep', 'callUserAccesses', 'cuaUsers', 'cugUgs', 'calls']);
 
