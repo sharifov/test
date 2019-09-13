@@ -324,6 +324,24 @@ Create a Cert
 ./self-signed-tls.sh -c=MD -s=Chisinau -l=Chisinau -o=Kivork -u=Kivork -n=sales.zeit.test -e=alex.connor@techork.com
 ```
 
+GeoIP Installation
+-------------------
+sudo apt-get install php-geoip
+
+restart php-fpm
+
+Test extension:
+
+Paste the following code in the console
+
+```
+php -r "echo geoip_time_zone_by_country_and_region('US', 'CA') . PHP_EOL;"
+
+```
+
+Command must return the time zone of the USA - California ---> America/Los_Angeles
+
+
 DIRECTORY STRUCTURE
 -------------------
 

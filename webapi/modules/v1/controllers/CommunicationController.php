@@ -1097,6 +1097,8 @@ class CommunicationController extends ApiBaseController
         $call = null;
         $parentCall = null;
         $clientPhone = null;
+        
+        error_log("Call Data: " . print_r($calData, true));
 
         if (isset($calData['From']) && $calData['From']) {
             $clientPhoneNumber = $calData['From'];
@@ -1124,6 +1126,10 @@ class CommunicationController extends ApiBaseController
 
             $call->c_com_call_id = $calData['c_com_call_id'] ?? null;
             $call->c_parent_call_sid = $calData['ParentCallSid'] ?? null;
+            $call->c_offset_gmt = Call::getClientTime($calData);
+            $call->c_from_country = Call::getDisplayRegion($calData['FromCountry'] ?? '');
+            $call->c_from_state = $calData['FromState'] ?? null;
+            $call->c_from_city = $calData['FromCity'] ?? null;
 
             if ($parentCall) {
                 $call->c_parent_id = $parentCall->c_id;
