@@ -67,13 +67,16 @@ class ClientManageService
 
     /**
      * @param Client $client
-     * @param PhoneCreateForm $phone
+     * @param PhoneCreateForm $phoneForm
      */
-    public function addPhone(Client $client, PhoneCreateForm $phone): void
+    public function addPhone(Client $client, PhoneCreateForm $phoneForm): void
     {
-        if (!$this->clientPhoneRepository->exists($client->id, $phone->phone)) {
+        if (!$phoneForm->phone) {
+            return;
+        }
+        if (!$this->clientPhoneRepository->exists($client->id, $phoneForm->phone)) {
             $phone = ClientPhone::create(
-                $phone->phone,
+                $phoneForm->phone,
                 $client->id
             );
             $this->clientPhoneRepository->save($phone);
@@ -93,13 +96,16 @@ class ClientManageService
 
     /**
      * @param Client $client
-     * @param EmailCreateForm $email
+     * @param EmailCreateForm $emailForm
      */
-    private function addEmail(Client $client, EmailCreateForm $email): void
+    private function addEmail(Client $client, EmailCreateForm $emailForm): void
     {
-        if (!$this->clientEmailRepository->exists($client->id, $email->email)) {
+        if (!$emailForm->email) {
+            return;
+        }
+        if (!$this->clientEmailRepository->exists($client->id, $emailForm->email)) {
             $email = ClientEmail::create(
-                $email->email,
+                $emailForm->email,
                 $client->id
             );
             $this->clientEmailRepository->save($email);
@@ -113,8 +119,10 @@ class ClientManageService
      * @param ClientCreateForm|null $clientForm
      * @return Client
      */
-    public function getOrCreate(array $phones, ?ClientCreateForm $clientForm = null): Client
+    public function getOrCreateByPhones(array $phones, ?ClientCreateForm $clientForm = null): Client
     {
+        $phones = $this->guardNotEmptyPhones($phones);
+
         foreach ($phones as $phone) {
             if (($clientPhone = $this->clientPhoneRepository->getByPhone($phone->phone)) && ($client = $clientPhone->client)) {
                 return $client;
@@ -127,7 +135,94 @@ class ClientManageService
         $client = $this->create($clientForm);
         $this->addPhones($client, $phones);
 
+        if (!$client->clientPhones) {
+            throw new \DomainException('Cannot create client. Not added phones.');
+        }
+
         return $client;
+    }
+
+    /**
+     * Find or create Client
+     *
+     * @param EmailCreateForm[] $emails
+     * @param ClientCreateForm|null $clientForm
+     * @return Client
+     */
+    public function getOrCreateByEmails(array $emails, ?ClientCreateForm $clientForm = null): Client
+    {
+        $emails = $this->guardNotEmptyEmails($emails);
+
+        foreach ($emails as $email) {
+            if (($clientEmail = $this->clientEmailRepository->getByEmail($email->email)) && ($client = $clientEmail->client)) {
+                return $client;
+            }
+        }
+
+        if (!$clientForm) {
+            $clientForm = new ClientCreateForm(['firstName' => 'ClientName']);
+        }
+
+        $client = $this->create($clientForm);
+        $this->addEmails($client, $emails);
+
+        if (!$client->clientEmails) {
+            throw new \DomainException('Cannot create client. Not added emails.');
+        }
+
+        return $client;
+    }
+
+    /**
+     * Find or create Client
+     *
+     * @param PhoneCreateForm[] $phones
+     * @param EmailCreateForm[] $emails
+     * @param ClientCreateForm|null $clientForm
+     * @return Client
+     */
+    public function getOrCreate(array $phones, array $emails, ?ClientCreateForm $clientForm = null): Client
+    {
+        try {
+            $client = $this->getOrCreateByPhones($phones, $clientForm);
+        } catch (\DomainException $e) {
+            $client = $this->getOrCreateByEmails($emails, $clientForm);
+        }
+        return $client;
+    }
+
+    /**
+     * @param PhoneCreateForm[] $clientPhones
+     * @return array
+     */
+    private function guardNotEmptyPhones(array $clientPhones): array
+    {
+        $phones = array_filter($clientPhones, function (PhoneCreateForm $element) {
+            return $element->phone;
+        });
+
+        if (!$phones) {
+            throw new \DomainException('Phones is empty');
+        }
+
+        return $phones;
+    }
+
+    /**
+     * @param EmailCreateForm[] $clientEmails
+     * @return array
+     */
+    private function guardNotEmptyEmails(array $clientEmails): array
+    {
+        $emails = array_filter($clientEmails, function (EmailCreateForm $element) {
+            return $element->email;
+        });
+
+        if (!$emails) {
+            throw new \DomainException('Emails is empty');
+        }
+
+        return $emails;
     }
 
 }

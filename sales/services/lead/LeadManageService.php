@@ -2,7 +2,6 @@
 
 namespace sales\services\lead;
 
-use common\models\Department;
 use common\models\Lead;
 use common\models\LeadFlightSegment;
 use common\models\LeadPreferences;
@@ -130,7 +129,7 @@ class LeadManageService
     private function createLead(LeadCreateForm $form, int $employeeId): Lead
     {
 
-        $client = $this->clientManageService->getOrCreate($form->phones, $form->client);
+        $client = $this->clientManageService->getOrCreate($form->phones, $form->emails, $form->client);
 
         $lead = Lead::create(
             $client->id,
