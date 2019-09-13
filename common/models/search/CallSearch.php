@@ -271,6 +271,8 @@ class CallSearch extends Call
             $query->limit($this->limit);
         }
 
+
+
         // add conditions that should always apply here
 
         $dataProvider = new ActiveDataProvider([
@@ -291,6 +293,8 @@ class CallSearch extends Call
         $query->orWhere(['c_call_status' => [Call::CALL_STATUS_IN_PROGRESS]]);
         $query->orWhere(['c_call_status' => [Call::CALL_STATUS_QUEUE]]);*/
 
+        $query->andWhere(['c_parent_id' => null]);
+
         if($this->statuses) {
             $query->andWhere(['c_call_status' => $this->statuses]);
         }
@@ -300,7 +304,7 @@ class CallSearch extends Call
         }
 
 
-        $query->with(['cProject', 'cLead', /*'cLead.leadFlightSegments',*/ 'cCreatedUser', 'cDep', 'callUserAccesses', 'cuaUsers', 'cugUgs']);
+        $query->with(['cProject', 'cLead', /*'cLead.leadFlightSegments',*/ 'cCreatedUser', 'cDep', 'callUserAccesses', 'cuaUsers', 'cugUgs', 'calls']);
 
         return $dataProvider;
     }

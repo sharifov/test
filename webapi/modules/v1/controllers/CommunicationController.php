@@ -1321,6 +1321,13 @@ class CommunicationController extends ApiBaseController
             $call->c_call_duration = (int) $callData['CallDuration'];
         }
 
+        if (isset($callData['ForwardedFrom']) && $callData['ForwardedFrom']) {
+            $call->c_forwarded_from = $callData['ForwardedFrom'];
+            // $call->c_source_type_id = Call::SOURCE_TRANSFER_CALL;
+        }
+
+
+
         return $call;
     }
 
