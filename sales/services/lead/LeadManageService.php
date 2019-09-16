@@ -145,7 +145,8 @@ class LeadManageService
             $form->notesForExperts,
             $form->clientPhone,
             $form->clientEmail,
-            $form->depId
+            $form->depId,
+            $form->delayedCharge
         );
 
         $lead->take($employeeId);

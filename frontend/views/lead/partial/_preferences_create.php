@@ -39,5 +39,10 @@ use yii\widgets\ActiveForm;
             <?= $form->field($leadForm->preferences, 'numberStops')->dropDownList(LeadPreferencesHelper::listNumberStops(), ['prompt' => '-']) ?>
         </div>
     </div>
+    <div class="row">
+        <div class="col-md-12">
+            <?= $form->field($leadForm, 'delayedCharge')->radioList([false => 'No', true => 'Yes'])?>
+        </div>
+    </div>
     <?= $form->field($leadForm, 'notesForExperts')->textarea(['rows' => 7]) ?>
 </div>

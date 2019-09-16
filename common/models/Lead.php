@@ -86,6 +86,7 @@ use common\components\SearchService;
  * @property double $l_init_price
  * @property string $l_last_action_dt
  * @property int $l_dep_id
+ * @property boolean $l_delayed_charge
  *
  * @property double $finalProfit
  * @property int $quotesCount
@@ -294,6 +295,9 @@ class Lead extends ActiveRecord implements AggregateRoot
             [['employee_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['employee_id' => 'id']],
             [['l_duplicate_lead_id'], 'exist', 'skipOnError' => true, 'targetClass' => self::class, 'targetAttribute' => ['l_duplicate_lead_id' => 'id']],
             [['l_dep_id'], 'exist', 'skipOnError' => true, 'targetClass' => Department::class, 'targetAttribute' => ['l_dep_id' => 'dep_id']],
+
+            ['l_delayed_charge', 'boolean'],
+            ['l_delayed_charge', 'default', 'value' => false],
         ];
     }
 
@@ -312,6 +316,7 @@ class Lead extends ActiveRecord implements AggregateRoot
      * @param $clientPhone
      * @param $clientEmail
      * @param $depId
+     * @param $delayedCharge
      * @return Lead
      */
     public static function create(
@@ -328,7 +333,8 @@ class Lead extends ActiveRecord implements AggregateRoot
         $notesForExperts,
         $clientPhone,
         $clientEmail,
-        $depId
+        $depId,
+        $delayedCharge
     ): self
     {
         $lead = new static();
@@ -348,6 +354,7 @@ class Lead extends ActiveRecord implements AggregateRoot
         $lead->l_client_phone = $clientPhone;
         $lead->l_client_email = $clientEmail;
         $lead->l_dep_id = $depId;
+        $lead->l_delayed_charge = $delayedCharge;
         $lead->status = self::STATUS_PENDING;
         $lead->recordEvent(new LeadCreatedEvent($lead));
         return $lead;
@@ -922,6 +929,7 @@ class Lead extends ActiveRecord implements AggregateRoot
             'l_init_price' => 'Init Price',
             'l_last_action_dt' => 'Last Action',
             'l_dep_id' => 'Department ID',
+            'l_delayed_charge' => 'Delayed charge',
 
         ];
     }

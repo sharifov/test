@@ -194,6 +194,7 @@ class LeadForm extends Model
             $leadModel->uid = uniqid();
             $leadModel->id = 0;
             $leadModel->status = Lead::STATUS_PENDING;
+            $leadModel->l_delayed_charge = false;
         }
         $this->_lead = $leadModel;
     }

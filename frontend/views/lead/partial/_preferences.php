@@ -55,6 +55,11 @@ $formId = sprintf('%s-form', $leadForm->getLeadPreferences()->formName());
             <?= $formPreferences->field($leadForm->getLeadPreferences(), 'number_stops')->dropDownList(array_combine(range(0, 7), range(0, 7)), ['prompt' => '-'])->label('Stops') ?>
         </div>
     </div>
+    <div class="row">
+        <div class="col-md-12">
+            <?= $formPreferences->field($leadForm->getLead(), 'l_delayed_charge')->radioList([false => 'No', true => 'Yes'])?>
+        </div>
+    </div>
 
     <?php if($leadForm->getLead()->isNewRecord): ?>
         <?php echo $formPreferences->field($leadForm->getLead(), 'notes_for_experts')->textarea(['rows' => 7, 'id' => 'lead-notes_for_experts']); ?>
