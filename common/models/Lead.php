@@ -542,7 +542,7 @@ class Lead extends ActiveRecord implements AggregateRoot
      * @param int|null $userId
      * @return bool
      */
-    private function isOwner(?int $userId): bool
+    public function isOwner(?int $userId): bool
     {
         if ($userId === null) {
             return false;

@@ -138,7 +138,8 @@ $this->registerJs($js);
 
 // Menu clone
 if ($leadForm->getLead()->isProcessing()) {
-    $js = <<<JS
+    if ($is_manager || $leadForm->getLead()->isOwner(Yii::$app->user->id)) {
+        $js = <<<JS
  $(document).on('click','.add-clone-alt-quote', function (e) {
         e.preventDefault();
         var url = $(this).data('url');
@@ -159,9 +160,9 @@ if ($leadForm->getLead()->isProcessing()) {
         });
     });
 JS;
-    $this->registerJs($js);
+        $this->registerJs($js);
+    }
 }
-
 
 if ($leadForm->mode !== $leadForm::VIEW_MODE || $is_manager) {
     $js = <<<JS
