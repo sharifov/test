@@ -25,6 +25,7 @@ use sales\repositories\NotFoundException;
  * @property string $status
  * @property string $caseGid
  * @property int $depId
+ * @property boolean $delayedCharge
  * @property ClientCreateForm $client
  * @property EmailCreateForm[] $emails
  * @property PhoneCreateForm[] $phones
@@ -46,6 +47,7 @@ class LeadCreateForm extends CompositeForm
     public $status;
     public $caseGid;
     public $depId;
+    public $delayedCharge = 0;
 
     public $jivoChatId;
 
@@ -170,6 +172,9 @@ class LeadCreateForm extends CompositeForm
 
             ['depId', 'required'],
             ['depId', 'in', 'range' => [Department::DEPARTMENT_SALES, Department::DEPARTMENT_EXCHANGE]],
+
+            ['delayedCharge', 'boolean'],
+            ['delayedCharge', 'default', 'value' => false],
 
         ];
     }

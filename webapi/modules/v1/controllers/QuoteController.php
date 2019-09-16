@@ -168,6 +168,7 @@ class QuoteController extends ApiBaseController
      * "uid": "5b7424e858e91",
      * "lead_id": 123456,
      * "lead_uid": "00jhk0017",
+     * "lead_delayed_charge": 0,
      * "lead_status": "sold",
      * "booked_quote_uid": "5b8ddfc56a15c",
      * "agentName": "admin",
@@ -244,6 +245,7 @@ class QuoteController extends ApiBaseController
             $response['uid'] = $uid;
             $response['lead_id'] = $model->lead->id;
             $response['lead_uid'] = $model->lead->uid;
+            $response['lead_delayed_charge'] = $model->lead->l_delayed_charge;
             $response['lead_status'] = null;
             $response['booked_quote_uid'] = null;
 
