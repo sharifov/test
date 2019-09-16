@@ -14,7 +14,16 @@ class m190916_073134_add_column_tbl_call extends Migration
     {
         $this->addColumn('{{%call}}', 'c_recording_sid', $this->string(34));
         $this->createIndex('IND-call_c_recording_sid', '{{%call}}', 'c_recording_sid', true);
-        $this->alterColumn('{{%call}}', 'c_sequence_number', $this->smallInteger());
+
+
+        $this->dropColumn('{{%call}}', 'c_sequence_number');
+        $this->addColumn('{{%call}}', 'c_sequence_number', $this->smallInteger());
+
+        Yii::$app->db->getSchema()->refreshTableSchema('{{%call}}');
+
+        if (Yii::$app->cache) {
+            Yii::$app->cache->flush();
+        }
     }
 
     /**
@@ -24,6 +33,12 @@ class m190916_073134_add_column_tbl_call extends Migration
     {
         $this->dropIndex('IND-call_c_recording_sid', '{{%call}}');
         $this->dropColumn('{{%call}}', 'c_recording_sid');
+
+        Yii::$app->db->getSchema()->refreshTableSchema('{{%call}}');
+
+        if (Yii::$app->cache) {
+            Yii::$app->cache->flush();
+        }
     }
 
 }
