@@ -53,7 +53,7 @@ use \common\models\Call;
                     to <b><?=($call->cCreatedUser ? '<i class="fa fa-user"></i> '.Html::encode($call->cCreatedUser->username) : '-') ?></b>
                 </div>
             <?php else: ?>
-                <div class="chat__sender">Call from <b><?=($call->cCreatedUser ? Html::encode($call->cCreatedUser->username) : '-') ?></b>, (<strong><?=Html::encode($call->c_from)?>) </strong> to (<strong><?=Html::encode($call->c_to)?></strong>)</div>
+                <div class="chat__sender">from "<b title="<?=Html::encode($call->c_from)?>"><?=($call->cCreatedUser ? Html::encode($call->cCreatedUser->username) : '-') ?></b>" to <i class="fa fa-phone" title="<?=Html::encode($call->c_to)?>"></i></div>
             <?php endif;?>
 
             <div class="chat__date">
@@ -64,12 +64,16 @@ use \common\models\Call;
         </div>
         <div class="panel-body">
             <?php if($call->c_recording_url):?>
-                <audio controls="controls" controlsList="nodownload" class="chat__audio" style="height: 25px; width: 100%">
+
+
+                <?=Html::button(gmdate('i:s', $call->c_recording_duration) . ' <i class="fa fa-volume-up"></i>',
+                    ['class' => 'btn btn-' . ($call->c_recording_duration < 30 ? 'warning' : 'success') . ' btn-xs btn-recording_url', 'data-source_src' => $call->c_recording_url]) ?>
+
+                <?/*<audio controls="controls" controlsList="nodownload" class="chat__audio" style="height: 25px; width: 100%">
                     <source src="<?=$call->c_recording_url?>" type="audio/mpeg">
-                    Your browser does not support the audio element
-                </audio>
+                </audio>*/?>
             <?php else: ?>
-                <div><i class="fa fa-volume-off"></i> ... <?=$call->c_call_status?></div>
+                <div><?=$call->getStatusIcon()?>  <?=$call->getStatusName()?></div>
             <?php endif;?>
             <div><?=$call->c_call_duration > 0 ? 'Duration: ' . Yii::$app->formatter->asDuration($call->c_call_duration) : ''?></div>
 
@@ -78,44 +82,35 @@ use \common\models\Call;
                <table class="table table-bordered table-hover">
                             <?php foreach ($call->calls as $callItem):?>
                                 <tr>
-                                    <?php if(Yii::$app->user->identity->isAdmin()):?>
-                                    <td style="width:50px">
-                                        <u><?=Html::a($callItem->c_id, ['call/view', 'id' => $callItem->c_id], ['target' => '_blank', 'data-pjax' => 0])?></u><br>
-                                    </td>
+                                    <?php if (Yii::$app->user->identity->isAdmin()):?>
+                                        <td style="width:50px" rowspan="2">
+                                            <u title="SID: <?=Html::encode($callItem->c_call_sid)?>"><?=Html::a($callItem->c_id, ['call/view', 'id' => $callItem->c_id], ['target' => '_blank', 'data-pjax' => 0])?></u><br>
+                                        </td>
                                     <?php endif; ?>
+                                    <td colspan="3">
+                                        <?php if ($callItem->c_recording_url):?>
+                                            <?=Html::button(gmdate('i:s', $callItem->c_recording_duration) . ' <i class="fa fa-volume-up"></i>',
+                                                ['class' => 'btn btn-' . ($callItem->c_recording_duration < 30 ? 'warning' : 'success') . ' btn-xs btn-recording_url', 'data-source_src' => $callItem->c_recording_url]) ?>
+                                        
+                                            <?/*<audio controls="controls" controlsList="nodownload" class="chat__audio" style="height: 25px; width: 100%">
+                                                <source src="<?=$callItem->c_recording_url?>" type="audio/mpeg">
+                                            </audio>*/?>
+                                        <?php else: ?>
+
+                                        <?php endif;?>
+                                    </td>
+                                </tr>
+                                <tr>
+
                                     <td class="text-center">
                                         <i class="fa fa-clock-o"></i> <?=Yii::$app->formatter->asDatetime(strtotime($callItem->c_created_dt), 'php:H:i:s')?>
                                         <br>&nbsp;&nbsp;<?=Yii::$app->formatter->asRelativeTime(strtotime($callItem->c_created_dt))?>
                                     </td>
                                     <td class="text-left">
-                                        <?php if($callItem->c_recording_url):?>
-                                            <audio controls="controls" controlsList="nodownload" class="chat__audio" style="height: 25px; width: 100%">
-                                                <source src="<?=$call->c_recording_url?>" type="audio/mpeg">
-                                                Your browser does not support the audio element
-                                            </audio>
-                                        <?php else: ?>
 
-                                        <?php endif;?>
-                                        <div><?=$callItem->c_call_duration > 0 ? Yii::$app->formatter->asDuration($callItem->c_call_duration) : ''?></div>
-                                    </td>
-                                    <td class="text-center" style="width:160px">
-                                        <?php
-                                        if($callItem->isRinging()) {
-                                            $icon = 'fa fa-refresh fa-pulse fa-fw text-danger';
-                                        } elseif($callItem->isInProgress()) {
-                                            $icon = 'fa fa-spinner fa-pulse fa-fw';
-                                        } elseif($callItem->isQueue()) {
-                                            $icon = 'fa fa-pause';
-                                        } elseif($callItem->isCompleted()) {
-                                            $icon = 'fa fa-trophy text-success';
-                                        } elseif($callItem->isCanceled() || $callItem->isNoAnswer() || $callItem->isBusy()) {
-                                            $icon = 'fa fa-times-circle text-danger';
-                                        } else {
-                                            $icon = '';
-                                        }
-                                        ?>
-                                        <i class="<?=$icon?>"></i>
-                                        <?=$callItem->getStatusName()?>
+                                        <div><?=$callItem->c_call_duration > 0 ? 'duration: ' . Yii::$app->formatter->asDuration($callItem->c_call_duration) : ''?></div>
+
+                                        <?=$callItem->getStatusIcon()?>  <?=$callItem->getStatusName()?>
 <!--                                        <br>--><?//=$callItem->getStatusName2()?><!--<br>-->
 
                                     </td>

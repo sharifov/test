@@ -33,7 +33,7 @@ use Locale;
  * @property int $c_call_duration
  * @property string $c_recording_url
  * @property int $c_recording_duration
- * @property string $c_sequence_number
+ * @property int $c_sequence_number
  * @property int $c_lead_id
  * @property int $c_created_user_id
  * @property string $c_created_dt
@@ -50,6 +50,7 @@ use Locale;
  * @property int $c_client_id
  * @property int $c_status_id
  * @property int $c_parent_id
+ * @property string $c_recording_sid
  *
  * @property Employee $cCreatedUser
  * @property Cases $cCase
@@ -197,17 +198,16 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
     {
         return [
             [['c_call_sid'], 'required'],
-            [['c_call_type_id', 'c_lead_id', 'c_created_user_id', 'c_com_call_id', 'c_project_id', 'c_call_duration', 'c_recording_duration', 'c_dep_id', 'c_case_id', 'c_client_id', 'c_status_id', 'c_parent_id'], 'integer'],
+            [['c_call_type_id', 'c_lead_id', 'c_created_user_id', 'c_com_call_id', 'c_project_id', 'c_call_duration', 'c_recording_duration', 'c_dep_id', 'c_case_id', 'c_client_id', 'c_status_id', 'c_parent_id', 'c_sequence_number'], 'integer'],
             [['c_price'], 'number'],
             [['c_is_new'], 'default', 'value' => true],
             [['c_is_new', 'c_is_deleted'], 'boolean'],
             [['c_created_dt', 'c_updated_dt'], 'safe'],
-            [['c_call_sid', 'c_parent_call_sid'], 'string', 'max' => 34],
+            [['c_call_sid', 'c_parent_call_sid', 'c_recording_sid'], 'string', 'max' => 34],
             [['c_from', 'c_to', 'c_forwarded_from'], 'string', 'max' => 100],
             [['c_call_status'], 'string', 'max' => 15],
             [['c_caller_name'], 'string', 'max' => 50],
             [['c_recording_url'], 'string', 'max' => 200],
-            [['c_sequence_number'], 'string', 'max' => 40],
             [['c_error_message'], 'string', 'max' => 500],
             [['c_case_id'], 'exist', 'skipOnError' => true, 'targetClass' => Cases::class, 'targetAttribute' => ['c_case_id' => 'cs_id']],
             [['c_client_id'], 'exist', 'skipOnError' => true, 'targetClass' => Client::class, 'targetAttribute' => ['c_client_id' => 'id']],
@@ -227,14 +227,14 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
     {
         return [
             'c_id' => 'ID',
-            'c_call_sid' => 'Call Sid',
+            'c_call_sid' => 'Call SID',
             'c_call_type_id' => 'Call Type ID',
             'c_from' => 'From',
             'c_to' => 'To',
             'c_call_status' => 'Call Status',
             'c_forwarded_from' => 'Forwarded From',
             'c_caller_name' => 'Caller Name',
-            'c_parent_call_sid' => 'Parent Call Sid',
+            'c_parent_call_sid' => 'Parent Call SID',
             'c_call_duration' => 'Call Duration',
             'c_recording_url' => 'Recording Url',
             'c_recording_duration' => 'Recording Duration',
@@ -255,6 +255,7 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
             'c_client_id' => 'Client',
             'c_status_id' => 'Status ID',
             'c_parent_id' => 'Parent ID',
+            'c_recording_sid' => 'Recording SID'
         ];
     }
 
@@ -513,6 +514,28 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
     public function getStatusName2()
     {
         return self::STATUS_LIST[$this->c_status_id] ?? '-';
+    }
+
+    /**
+     * @return string
+     */
+    public function getStatusIcon(): string
+    {
+        if ($this->isRinging()) {
+            $icon = 'fa fa-refresh fa-pulse fa-fw text-danger';
+        } elseif ($this->isInProgress()) {
+            $icon = 'fa fa-spinner fa-pulse fa-fw';
+        } elseif ($this->isQueue()) {
+            $icon = 'fa fa-pause';
+        } elseif ($this->isCompleted()) {
+            $icon = 'fa fa-trophy text-success';
+        } elseif ($this->isCanceled() || $this->isNoAnswer() || $this->isBusy()) {
+            $icon = 'fa fa-times-circle text-danger';
+        } else {
+            $icon = '';
+        }
+
+        return '<i class="' . $icon . '"></i>';
     }
 
     /**

@@ -168,7 +168,9 @@ class CallSearch extends Call
             'c_source_type_id' => $this->c_source_type_id,
             'c_call_sid' => $this->c_call_sid,
             'c_parent_call_sid' => $this->c_parent_call_sid,
-            'c_client_id' => $this->c_client_id
+            'c_client_id' => $this->c_client_id,
+            'c_sequence_number' => $this->c_sequence_number,
+            'c_recording_sid' => $this->c_recording_sid
 
         ]);
 
@@ -181,7 +183,6 @@ class CallSearch extends Call
             ->andFilterWhere(['like', 'c_call_duration', $this->c_call_duration])
             ->andFilterWhere(['like', 'c_recording_url', $this->c_recording_url])
             ->andFilterWhere(['like', 'c_recording_duration', $this->c_recording_duration])
-            ->andFilterWhere(['like', 'c_sequence_number', $this->c_sequence_number])
             ->andFilterWhere(['like', 'c_error_message', $this->c_error_message]);
 
         return $dataProvider;
@@ -254,7 +255,8 @@ class CallSearch extends Call
             'c_call_sid' => $this->c_call_sid,
             'c_parent_call_sid' => $this->c_parent_call_sid,
             'c_call_status' => $this->c_call_status,
-            'c_client_id' => $this->c_client_id
+            'c_client_id' => $this->c_client_id,
+            'c_sequence_number' => $this->c_sequence_number
         ]);
 
         $query
@@ -266,7 +268,6 @@ class CallSearch extends Call
             ->andFilterWhere(['like', 'c_call_duration', $this->c_call_duration])
             ->andFilterWhere(['like', 'c_recording_url', $this->c_recording_url])
             ->andFilterWhere(['like', 'c_recording_duration', $this->c_recording_duration])
-            ->andFilterWhere(['like', 'c_sequence_number', $this->c_sequence_number])
             ->andFilterWhere(['like', 'c_error_message', $this->c_error_message]);
 
         return $dataProvider;

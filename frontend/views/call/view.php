@@ -38,6 +38,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'c_id',
                 'c_call_sid',
                 'c_parent_call_sid',
+                'c_recording_sid',
                 [
                     'attribute' => 'c_call_type_id',
                     'value' => function (\common\models\Call $model) {
@@ -47,9 +48,14 @@ $this->params['breadcrumbs'][] = $this->title;
                 'c_from',
                 'c_to',
                 'c_call_status',
+                [
+                    'attribute' => 'c_status_id',
+                    'value' => function (\common\models\Call $model) {
+                        return $model->getStatusName2();
+                    },
+                ],
                 'c_forwarded_from',
                 'c_caller_name',
-                'c_parent_call_sid',
                 'c_call_duration',
                 [
                     'attribute' => 'c_client_id',

@@ -38,7 +38,7 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'c_recording_duration')->textInput(['maxlength' => true]) ?>
 
-    <?= $form->field($model, 'c_sequence_number')->textInput(['maxlength' => true]) ?>
+    <?= $form->field($model, 'c_sequence_number')->input('number') ?>
 
     <?= $form->field($model, 'c_lead_id')->textInput() ?>
 

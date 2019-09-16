@@ -266,7 +266,7 @@ class CommunicationService
             }
 
             if (!$childCall) {
-                $call->c_sequence_number = $post['callData']['SequenceNumber'] ?? 0;
+                $call->c_sequence_number = (int) $post['callData']['SequenceNumber'] ?? 0;
 
                 if (isset($post['callData']['CallDuration'])) {
                     $call->c_call_duration = (int)$post['callData']['CallDuration'];

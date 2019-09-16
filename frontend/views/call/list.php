@@ -346,7 +346,7 @@ $(document).on('click', '.btn-recording_url', function() {
 
 $('#modalCallRecording').on('hidden.bs.modal', function () {
     $('#audio_recording').html('');
-})
+});
 
 JS;
 $this->registerJs($js, \yii\web\View::POS_READY);

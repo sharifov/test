@@ -491,7 +491,7 @@ class CommunicationController extends ApiBaseController
 
         //Yii::info(VarDumper::dumpAsString($post), 'info\API:Communication:voiceRecord');
 
-        if ($callData && isset($callData['CallSid'])) {
+        if ($callData && isset($callData['CallSid'], $callData['RecordingSid']) ) {
 
             //$call = Call::find()->where(['c_call_sid' => $callData['CallSid']])->one();
 
@@ -508,7 +508,11 @@ class CommunicationController extends ApiBaseController
 //                $call = Call::find()->where(['c_call_sid' => $callData['CallSid']])->orderBy(['c_id' => SORT_ASC])->limit(1)->one();
 //            }
 
-            $call = Call::find()->where(['c_call_sid' => $callData['CallSid']])->orderBy(['c_id' => SORT_ASC])->limit(1)->one();
+            $call = Call::find()->where(['c_recording_sid' => $callData['RecordingSid']])->limit(1)->one();
+
+            if (!$call) {
+                $call = Call::find()->where(['c_call_sid' => $callData['CallSid']])->orderBy(['c_id' => SORT_ASC])->limit(1)->one();
+            }
 
             if ($call && $callData['RecordingUrl']) {
 
@@ -527,7 +531,7 @@ class CommunicationController extends ApiBaseController
                 }
             }
         } else {
-            $response['error'] = 'Not found callData[CallSid] in voiceRecord';
+            $response['error'] = 'Not found callData[CallSid] or callData[RecordingSid] in voiceRecord';
         }
 
         return $response;
@@ -1320,7 +1324,7 @@ class CommunicationController extends ApiBaseController
         }
 
         if (isset($callData['SequenceNumber'])) {
-            $call->c_sequence_number = $callData['SequenceNumber'] ?? 0;
+            $call->c_sequence_number = (int) ( $callData['SequenceNumber'] ?? 0 );
         }
 
         if (isset($callData['CallDuration'])) {
@@ -1331,6 +1335,12 @@ class CommunicationController extends ApiBaseController
             $call->c_forwarded_from = $callData['ForwardedFrom'];
             // $call->c_source_type_id = Call::SOURCE_TRANSFER_CALL;
         }
+
+        if (!$call->c_recording_sid && isset($callData['RecordingSid']) && $callData['RecordingSid']) {
+            $call->c_recording_sid = $callData['RecordingSid'];
+        }
+
+
 
 
 
