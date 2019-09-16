@@ -97,6 +97,7 @@ $lead = $leadForm->getLead();
         ?>
 
         <div class="col-md-12">
+            <br>
             <?= \common\widgets\Alert::widget() ?>
             <br>
         </div>
