@@ -269,28 +269,28 @@ class CallController extends FController
         //VarDumper::dump($accessDepartments, 10, true); exit;
 
 
-        if(in_array(Department::DEPARTMENT_SALES, $accessDepartments, true) || !$accessDepartments) {
+        if (in_array(Department::DEPARTMENT_SALES, $accessDepartments, true) || !$accessDepartments) {
             $params['UserConnectionSearch']['dep_id'] = Department::DEPARTMENT_SALES;
             $dataProviderOnlineDep1 = $searchModel2->searchUserCallMap($params);
         } else {
             $dataProviderOnlineDep1 = null;
         }
 
-        if(in_array(Department::DEPARTMENT_EXCHANGE, $accessDepartments, true) || !$accessDepartments) {
+        if (in_array(Department::DEPARTMENT_EXCHANGE, $accessDepartments, true) || !$accessDepartments) {
             $params['UserConnectionSearch']['dep_id'] = Department::DEPARTMENT_EXCHANGE;
             $dataProviderOnlineDep2 = $searchModel2->searchUserCallMap($params);
         } else {
             $dataProviderOnlineDep2 = null;
         }
 
-        if(in_array(Department::DEPARTMENT_SUPPORT, $accessDepartments, true) || !$accessDepartments) {
+        if (in_array(Department::DEPARTMENT_SUPPORT, $accessDepartments, true) || !$accessDepartments) {
             $params['UserConnectionSearch']['dep_id'] = Department::DEPARTMENT_SUPPORT;
             $dataProviderOnlineDep3 = $searchModel2->searchUserCallMap($params);
         } else {
             $dataProviderOnlineDep3 = null;
         }
 
-        if(!$accessDepartments) {
+        if (!$accessDepartments) {
             $params['UserConnectionSearch']['dep_id'] = 0;
             $dataProviderOnline = $searchModel2->searchUserCallMap($params);
         } else {
