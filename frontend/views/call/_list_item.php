@@ -21,9 +21,9 @@ use \common\models\Call;
         }
     ?>
 
-    <table class="table <?=($model->isIn() && ($model->isNoAnswer() || $model->isCanceled() || $model->isBusy())) ? '' : 'table-striped'?>">
+    <table class="table table-bordered <?=($model->isIn() && ($model->isNoAnswer() || $model->isCanceled() || $model->isBusy())) ? '' : 'table-striped'?>">
         <tr class="<?=$trClass?>">
-            <td style="width:50px">
+            <td rowspan="2" style="width:50px">
                 <u><?=Html::a($model->c_id, ['call/view', 'id' => $model->c_id], ['target' => '_blank', 'data-pjax' => 0])?></u><br>
                 <?= $model->c_parent_id ? 'p:' . Html::a($model->c_parent_id, ['call/view', 'id' => $model->c_parent_id], ['target' => '_blank', 'data-pjax' => 0]) . '<br>' : ''?>
                 <?php if ($model->c_call_type_id === Call::CALL_TYPE_IN):?>
@@ -65,7 +65,7 @@ use \common\models\Call;
                     <span class="label label-info" title="Forwarded from: <?=Html::encode($model->c_forwarded_from)?>">F</span>
                 <?php endif; ?>
             </td>
-            <td class="text-left">
+            <td class="text-left" style="width:100px">
                 <?php if($model->c_lead_id && $model->cLead):?>
                     <i>l:<?=Html::a($model->c_lead_id, ['lead/view', 'gid' => $model->cLead->gid], ['data-pjax' => 0, 'target' => '_blank'])?>
 
@@ -104,10 +104,10 @@ use \common\models\Call;
             </td>
             <td class="text-left">
 
-                sid: <b><?=$model->c_call_sid?></b><br>
-                <?php if($model->c_parent_call_sid):?>
-                    pid: <?=$model->c_parent_call_sid?><br>
-                <?php endif; ?>
+<!--                sid: <b>--><?//=$model->c_call_sid?><!--</b><br>-->
+<!--                --><?php //if($model->c_parent_call_sid):?>
+<!--                    pid: --><?//=$model->c_parent_call_sid?><!--<br>-->
+<!--                --><?php //endif; ?>
 
                 <?php if($model->cuaUsers):?>
                     <?php foreach ($model->callUserAccesses as $cua):
@@ -132,23 +132,7 @@ use \common\models\Call;
                 <?php endif; ?>
             </td>
             <td class="text-center" style="width:160px">
-                <?php
-                    if($model->isRinging()) {
-                        $icon = 'fa fa-refresh fa-pulse fa-fw text-danger';
-                    } elseif($model->isInProgress()) {
-                        $icon = 'fa fa-spinner fa-pulse fa-fw';
-                    } elseif($model->isQueue()) {
-                        $icon = 'fa fa-pause';
-                    } elseif($model->isCompleted()) {
-                        $icon = 'fa fa-trophy text-success';
-                    } elseif($model->isCanceled() || $model->isNoAnswer() || $model->isBusy()) {
-                        $icon = 'fa fa-times-circle text-danger';
-                    } else {
-                        $icon = '';
-                    }
-                ?>
-                <i class="<?=$icon?>"></i>
-                <?=$model->getStatusName()?><br>
+                <?=$model->getStatusIcon()?>  <?=$model->getStatusName()?><br>
                 <?php
                     $sec = 0;
                     if($model->c_updated_dt) {
@@ -199,48 +183,50 @@ use \common\models\Call;
         </tr>
         <?php if ($model->calls):?>
             <tr>
-                <td></td>
+
                 <td colspan="6">
-                    <table class="table table-bordered table-striped">
+                    <table class="table table-bordered">
                         <?php foreach ($model->calls as $callItem):?>
                         <tr>
                             <td style="width:50px">
                                 <u><?=Html::a($callItem->c_id, ['call/view', 'id' => $callItem->c_id], ['target' => '_blank', 'data-pjax' => 0])?></u><br>
-                                <?//= $callItem->c_parent_id ? 'p:' . Html::a($callItem->c_parent_id, ['call/view', 'id' => $callItem->c_parent_id], ['target' => '_blank', 'data-pjax' => 0]) . '<br>' : ''?>
-                            </td>
-                            <td class="text-center" style="width:100px">
-
-                                <?php if($callItem->isIn()):?>
-                                    <div><i class="fa fa-male text-info fa-2x fa-border"></i></div>
-                                    <?=$callItem->c_from?>
-                                <?php else: ?>
-                                    <?php if($callItem->c_created_user_id):?>
-                                        <i class="fa fa-user fa-2x fa-border"></i><br>
-                                        <?=Html::encode($callItem->cCreatedUser->username)?>
-                                    <?php else: ?>
-                                        <i class="fa fa-phone fa-2x fa-border"></i><br>
-                                        <?=$callItem->c_from?>
-                                    <?php endif; ?>
-                                <?php endif; ?>
-                            </td>
-                            <td class="text-center" style="width:130px">
-                                <?php if ($callItem->isIn()):?>
-                                    In
-                                <?php else:?>
-                                    Out
-                                <?php endif;?>
-                                <br>
-                                <span class="badge badge-info"><?=$callItem->cProject ? $callItem->cProject->name : '-'?></span><br>
-                                <?php if($callItem->cDep):?>
-                                    <span class="label label-warning"><?=$callItem->cDep ? Html::encode($callItem->cDep->dep_name) : '-'?></span>
-                                <?php endif; ?>
                                 <?php if ($callItem->c_source_type_id):?>
                                     <span class="label label-info"><?=$callItem->getShortSourceName()?></span>
                                 <?php endif; ?>
-                                <?php if ($callItem->c_forwarded_from):?>
-                                    <span class="label label-info" title="Forwarded from: <?=Html::encode($callItem->c_forwarded_from)?>">F</span>
-                                <?php endif; ?>
                             </td>
+<!--                            <td class="text-center" style="width:100px">-->
+<!---->
+<!--                                --><?php //if($callItem->isIn()):?>
+<!--                                    <div><i class="fa fa-male text-info fa-border"></i></div>-->
+<!--                                    --><?//=$callItem->c_from?>
+<!--                                --><?php //else: ?>
+<!--                                    --><?php //if($callItem->c_created_user_id):?>
+<!--                                        <i class="fa fa-user fa-border"></i><br>-->
+<!--                                        --><?//=Html::encode($callItem->cCreatedUser->username)?>
+<!--                                    --><?php //else: ?>
+<!--                                        <i class="fa fa-phone fa-border"></i><br>-->
+<!--                                        --><?//=$callItem->c_from?>
+<!--                                    --><?php //endif; ?>
+<!--                                --><?php //endif; ?>
+<!--                            </td>-->
+<!--                            <td class="text-center" style="width:130px">-->
+<!--                                --><?php //if ($callItem->isIn()):?>
+<!--                                    In-->
+<!--                                --><?php //else:?>
+<!--                                    Out-->
+<!--                                --><?php //endif;?>
+<!--                                <br>-->
+<!--                                <span class="badge badge-info">--><?//=$callItem->cProject ? $callItem->cProject->name : '-'?><!--</span><br>-->
+<!--                                --><?php //if($callItem->cDep):?>
+<!--                                    <span class="label label-warning">--><?//=$callItem->cDep ? Html::encode($callItem->cDep->dep_name) : '-'?><!--</span>-->
+<!--                                --><?php //endif; ?>
+<!--                                --><?php //if ($callItem->c_source_type_id):?>
+<!--                                    <span class="label label-info">--><?//=$callItem->getShortSourceName()?><!--</span>-->
+<!--                                --><?php //endif; ?>
+<!--                                --><?php //if ($callItem->c_forwarded_from):?>
+<!--                                    <span class="label label-info" title="Forwarded from: --><?//=Html::encode($callItem->c_forwarded_from)?><!--">F</span>-->
+<!--                                --><?php //endif; ?>
+<!--                            </td>-->
 <!--                            <td class="text-left">-->
 <!--                                --><?php //if($callItem->c_lead_id && $callItem->cLead):?>
 <!--                                    <i>l:--><?//=Html::a($callItem->c_lead_id, ['lead/view', 'gid' => $callItem->cLead->gid], ['data-pjax' => 0, 'target' => '_blank'])?>
@@ -280,7 +266,8 @@ use \common\models\Call;
 <!--                            </td>-->
                             <td class="text-left">
 
-                                sid: <b><?=$callItem->c_call_sid?></b><br>
+                                <i class="fa fa-clock-o"></i> <?=Yii::$app->formatter->asDatetime(strtotime($callItem->c_created_dt), 'php:H:i:s')?>
+<!--                                sid: <b>--><?//=$callItem->c_call_sid?><!--</b><br>-->
                                 <?php if($callItem->cuaUsers):?>
                                     <?php foreach ($callItem->callUserAccesses as $cua):
 
@@ -303,24 +290,8 @@ use \common\models\Call;
                                     <?php endforeach;?>
                                 <?php endif; ?>
                             </td>
-                            <td class="text-center" style="width:160px">
-                                <?php
-                                if($callItem->isRinging()) {
-                                    $icon = 'fa fa-refresh fa-pulse fa-fw text-danger';
-                                } elseif($callItem->isInProgress()) {
-                                    $icon = 'fa fa-spinner fa-pulse fa-fw';
-                                } elseif($callItem->isQueue()) {
-                                    $icon = 'fa fa-pause';
-                                } elseif($callItem->isCompleted()) {
-                                    $icon = 'fa fa-trophy text-success';
-                                } elseif($callItem->isCanceled() || $callItem->isNoAnswer() || $callItem->isBusy()) {
-                                    $icon = 'fa fa-times-circle text-danger';
-                                } else {
-                                    $icon = '';
-                                }
-                                ?>
-                                <i class="<?=$icon?>"></i>
-                                <?=$callItem->getStatusName()?><br>
+                            <td class="text-center" style="width:260px">
+                                <?=$callItem->getStatusIcon()?> <?=$callItem->getStatusName2()?><br>
                                 <?php
                                 $sec = 0;
                                 if($callItem->c_updated_dt) {
@@ -344,26 +315,22 @@ use \common\models\Call;
                                     &nbsp;&nbsp;&nbsp;<?=Yii::$app->formatter->asRelativeTime(strtotime($callItem->c_created_dt))?>
                                 <?php endif;?>
 
-                                <br><?=$callItem->getStatusName2()?><br>
+<!--                                <br>--><?//=$callItem->getStatusName2()?><!--<br>-->
                             </td>
                             <td class="text-center" style="width:110px">
                                 <?php if($callItem->isIn()):?>
                                     <div>
-                                        <?php if((int) $callItem->c_source_type_id === Call::SOURCE_GENERAL_LINE):?>
-                                            <i class="fa fa-fax fa-2x fa-border"></i>
-                                        <?php endif;?>
-
                                         <?php if($callItem->c_created_user_id):?>
-                                            <i class="fa fa-user fa-2x fa-border"></i><br>
+                                            <i class="fa fa-user fa-border"></i><br>
                                             <?=Html::encode($callItem->cCreatedUser->username)?>
                                         <?php else: ?>
-                                            <i class="fa fa-phone fa-2x fa-border"></i><br>
+                                            <i class="fa fa-phone fa-border"></i><br>
                                             <?=$callItem->c_to?>
                                         <?php endif; ?>
                                     </div>
                                 <?php else: ?>
                                     <div>
-                                        <i class="fa fa-male text-info fa-2x fa-border"></i>
+                                        <i class="fa fa-male text-info fa-border"></i>
                                     </div>
                                     <?=$callItem->c_to?>
                                 <?php endif; ?>
