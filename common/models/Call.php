@@ -885,10 +885,8 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
                 }
 
                 $call->c_created_user_id = $user_id;
-                $call->update();
 
-
-                $callUserAccessAny = CallUserAccess::find()->where(['cua_status_id' => CallUserAccess::STATUS_TYPE_PENDING, 'cua_call_id' => $call->c_id])->all();
+                $callUserAccessAny = CallUserAccess::find()->where(['cua_status_id' => CallUserAccess::STATUS_TYPE_PENDING, 'cua_call_id' => $call->c_id])->andWhere(['!=', 'cua_user_id', $call->c_created_user_id])->all();
                 if ($callUserAccessAny) {
                     foreach ($callUserAccessAny as $callAccess) {
                         $callAccess->noAnsweredCall();
@@ -897,6 +895,8 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
                         }
                     }
                 }
+
+                $call->update();
 
 
                 $agent = 'seller' . $user_id;

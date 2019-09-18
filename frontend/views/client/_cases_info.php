@@ -19,10 +19,14 @@ $isAgent = true;
                 [
                     'attribute' => 'cs_gid',
                     'value' => function (Cases $model) {
-                        return Html::a($model->cs_gid, ['cases/view', 'gid' => $model->cs_gid]);
+                        return Html::a($model->cs_gid, ['cases/view', 'gid' => $model->cs_gid, [
+                            'data-pjax' => 0,
+                            'target' => '_blank'
+                        ]]);
                     },
                     'format' => 'raw'
                 ],
+
                 [
                     'attribute' => 'cs_project_id',
                     'value' => function (Cases $model) {
