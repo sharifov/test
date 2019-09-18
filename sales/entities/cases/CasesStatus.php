@@ -36,6 +36,21 @@ class CasesStatus
         self::STATUS_TRASH          => [self::STATUS_FOLLOW_UP],
     ];
 
+    public const STATUS_REASON_LIST = [
+        self::STATUS_FOLLOW_UP => [
+            'No Answer' => 'No Answer',
+            'Customer Reply Required' => 'Customer Reply Required',
+            'TS Reply Required' => 'TS Reply Required',
+            'Investigation Needed' => 'Investigation Needed',
+            'Other' => 'Other'
+        ],
+        self::STATUS_TRASH => [
+            'Wrong Number' => 'Wrong Number',
+            'No assistance needed' => 'No assistance needed',
+            'Other' => 'Other'
+        ]
+    ];
+
     /**
      * @param int|null $status
      * @return array
@@ -93,4 +108,12 @@ class CasesStatus
         return Html::tag('span', self::getName($status), ['class' => 'label ' . self::getClass($status), 'style' => 'font-size: 13px']);
     }
 
+    /**
+     * @param int|null $status
+     * @return array
+     */
+    public static function getReasonListByStatus(?int $status = null): array
+    {
+        return !empty(self::STATUS_REASON_LIST[$status]) ? self::STATUS_REASON_LIST[$status] : [];
+    }
 }

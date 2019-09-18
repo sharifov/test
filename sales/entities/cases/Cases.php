@@ -416,8 +416,9 @@ class Cases extends ActiveRecord
     /**
      * Returns current client Time in 24-hour format;
      * If c_offset_gmt field is null then returns "-";
-     * 
+     *
      * @return string
+     * @throws \Exception
      */
     public function getClientTime(): string
     {

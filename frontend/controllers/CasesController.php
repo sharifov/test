@@ -883,8 +883,16 @@ class CasesController extends FController
 
         $form = new CasesChangeStatusForm($case);
 
+        $statusReasons = CasesStatus::STATUS_REASON_LIST;
+
         try {
             if ($form->load(Yii::$app->request->post()) && $form->validate()) {
+
+                $isAgent = Yii::$app->user->identity->isAgent();
+
+                if ($isAgent && empty($case->cs_category)) {
+                    throw new \Exception('Status of a case without a category cannot be changed!');
+                }
 
                 switch ((int)$form->status) {
                     case CasesStatus::STATUS_FOLLOW_UP :
@@ -914,6 +922,7 @@ class CasesController extends FController
 
         return $this->renderAjax('partial/_change_status', [
             'model' => $form,
+            'statusReasons' => $statusReasons
         ]);
     }
 

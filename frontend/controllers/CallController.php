@@ -256,7 +256,7 @@ class CallController extends FController
         }
 
         $userGroupsModel = $user->ugsGroups;
-        
+
         if ($userGroupsModel) {
             $userGroups = ArrayHelper::map($userGroupsModel, 'ug_id', 'ug_id');
         } else {
@@ -298,12 +298,13 @@ class CallController extends FController
         }
 
 
+        $params['CallSearch']['excludeDep'] = Department::DEPARTMENT_SUPPORT;
         $params['CallSearch']['dep_ids'] = $accessDepartments;
         $params['CallSearch']['statuses'] = [Call::CALL_STATUS_IN_PROGRESS, Call::CALL_STATUS_RINGING, Call::CALL_STATUS_QUEUE, Call::CALL_STATUS_IVR];
         $dataProvider3 = $searchModel->searchUserCallMap($params);
 
         $params['CallSearch']['statuses'] = [Call::CALL_STATUS_COMPLETED, Call::CALL_STATUS_BUSY, Call::CALL_STATUS_FAILED, Call::CALL_STATUS_NO_ANSWER, Call::CALL_STATUS_CANCELED];
-        $params['CallSearch']['limit'] = 6;
+        $params['CallSearch']['limit'] =20;
         $dataProvider2 = $searchModel->searchUserCallMap($params);
 
         //$searchModel->datetime_start = date('Y-m-d', strtotime('-0 day'));

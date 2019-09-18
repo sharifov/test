@@ -140,7 +140,7 @@ class UserConnectionSearch extends UserConnection
             $query->andWhere(['NOT IN', 'uc_user_id', $subQuery]);
         }
 
-        if ($this->isSuper) {
+        if ($this->isSuper && $this->dep_id != Department::DEPARTMENT_SUPPORT) {
             $subQuery = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->where(['IN', 'ugs_group_id', $this->ug_ids]);
             $query->andWhere(['IN', 'uc_user_id', $subQuery]);
         }

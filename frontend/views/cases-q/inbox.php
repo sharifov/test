@@ -27,6 +27,7 @@ $this->params['breadcrumbs'][] = $this->title;
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'columns' => [
+            'cs_id',
             'cs_gid',
             [
                 'attribute' => 'cs_project_id',

@@ -12,12 +12,14 @@ use yii\base\Model;
  * @property int $status
  * @property string $message
  * @property int $caseStatus
+ * @property array $statusList
  * @property string $caseGid
  */
 class CasesChangeStatusForm extends Model
 {
 
     public $status;
+    public $reason;
     public $message;
 
     public $caseGid;
@@ -42,8 +44,11 @@ class CasesChangeStatusForm extends Model
     {
         return [
             ['status', 'required'],
-            ['status', 'integer'],
+            [['status'], 'integer'],
             ['status', 'in', 'range' => array_keys($this->getStatusList()), 'message' => 'This status disallow'],
+            ['status', 'validateReason'],
+
+            ['reason', 'string'],
 
             ['message', 'string'],
         ];
@@ -56,6 +61,7 @@ class CasesChangeStatusForm extends Model
     {
         return [
             'status' => 'Status',
+            'reason' => 'Reason',
             'message' => 'Message',
         ];
     }
@@ -70,6 +76,48 @@ class CasesChangeStatusForm extends Model
             unset($list[CasesStatus::STATUS_PROCESSING]);
         }
         return $list;
+    }
+
+    /**
+     * @return array
+     */
+    public function getReasonsList(): array
+    {
+        return CasesStatus::getReasonListByStatus($this->status == '' ? null : $this->status);
+    }
+
+    /**
+     * @param $attribute_name
+     * @param $params
+     * @return bool
+     */
+    public function validateReason($attribute_name, $params): bool
+    {
+        if (!empty(CasesStatus::STATUS_REASON_LIST[$this->status])) {
+
+            if (!empty(CasesStatus::STATUS_REASON_LIST[$this->status][$this->reason])) {
+
+                if ($this->reason == 'Other' && empty($this->message)) {
+                    $this->addError('message', 'Type the reason');
+                    return false;
+                }
+
+            } else {
+                $this->addError('reason', 'Unknown Reason');
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public function afterValidate(): void
+    {
+        if (!empty(CasesStatus::STATUS_REASON_LIST[$this->status]) && !empty($this->message)) {
+            $this->message = sprintf('%s: %s', $this->reason, $this->message);
+        } else {
+            $this->message = $this->reason;
+        }
     }
 
 }
