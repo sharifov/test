@@ -152,6 +152,40 @@ class CasesSearch extends Cases
     }
 
     /**
+     * @param $params
+     * @return ActiveDataProvider
+     */
+    public function searchClient($params): ActiveDataProvider
+    {
+        $query = Cases::find();
+
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+            'sort'=> ['defaultOrder' => ['cs_id' => SORT_DESC]],
+            'pagination' => [
+                'pageSize' => 20,
+            ],
+        ]);
+
+        $this->load($params);
+
+        if (!$this->validate()) {
+            $query->where('0=1');
+            return $dataProvider;
+        }
+
+        $query->andWhere(['cs_client_id' => $this->cs_client_id]);
+
+        $query->andFilterWhere([
+            'cs_project_id' => $this->cs_project_id,
+            'cs_dep_id' => $this->cs_dep_id,
+        ]);
+
+        return $dataProvider;
+    }
+
+
+    /**
      * @return array
      */
     public function attributeLabels(): array
