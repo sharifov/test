@@ -785,8 +785,9 @@ class CommunicationController extends ApiBaseController
 
             if(!$call) {
                 $call = new Call();
-                $call->c_call_sid = $callData['c_call_sid'];
+                $call->c_call_sid = $callSid;
                 $call->c_call_type_id = $callData['c_call_type_id'];
+                //$call->c_call_status = Call::CALL_STATUS_RINGING;
 
                 if (isset($callOriginalData['ParentCallSid'])) {
                     $call->c_parent_call_sid = $callOriginalData['ParentCallSid'];
@@ -850,15 +851,13 @@ class CommunicationController extends ApiBaseController
                     //Notifications::socket($upp->uppUser->id, null, 'getNewNotification', [], true);
                 }
 
-                Yii::warning('Not found Call: ' . $callSid, 'API:Communication:voiceClient:Call::find');
+                // Yii::warning('Not found Call: ' . $callSid, 'API:Communication:voiceClient:Call::find');
 
             }
 
             if ($call) {
 
-                if(isset($post['callData']['price']) && $post['callData']['price']) {
-                    $call->c_price = abs((float) $post['callData']['price']);
-                }
+
 
 //                if(!$call->c_call_status && isset($post['callData']['status'])) {
 //                    $call->c_call_status = $post['callData']['status'];
@@ -870,29 +869,41 @@ class CommunicationController extends ApiBaseController
                     }
                 }*/
 
-                if(isset($post['callData']['status']) && $post['callData']['status']) {
+                if(isset($callOriginalData['status']) && $callOriginalData['status']) {
                     // if(!in_array($call->c_call_status, [Call::CALL_STATUS_CANCELED, Call::CALL_STATUS_BUSY, Call::CALL_STATUS_NO_ANSWER])) {
-                        $call->c_call_status = $post['callData']['status'];
-                        $call->setStatusByTwilioStatus($post['callData']['status']);
+                        $call->c_call_status = $callOriginalData['status'];
+                        $call->setStatusByTwilioStatus($call->c_call_status);
                     // }
                 }
 
-                if(isset($post['callData']['duration']) && $post['callData']['duration']) {
-                    $call->c_call_duration = (int) $post['callData']['duration'];
+                if (!$call->c_call_status) {
+                    Yii::warning('Not found status Call: ' . $callSid . ', ' . VarDumper::dumpAsString($callOriginalData), 'API:Communication:voiceClient:Call::status');
                 }
 
-                if(isset($callOriginalData['ParentCallSid']) && $callOriginalData['ParentCallSid']) {
 
-                    $parentCall = Call::find()->where(['c_call_sid' => $callOriginalData['ParentCallSid']])->limit(1)->one();
+                if ($call->c_parent_call_sid) {
 
-                    Yii::info('voiceClient - Find parent call - ' . $callOriginalData['ParentCallSid'] . ', sid: ' . $call->c_call_sid,
-                        'info\API:Communication:voiceClient:ParentCallSid');
+                    $parentCall = Call::find()->where(['c_call_sid' => $call->c_parent_call_sid])->limit(1)->one();
+
+                    //Yii::info('voiceClient - Find parent call - ' . $call->c_parent_call_sid . ', sid: ' . $call->c_call_sid, 'info\API:Communication:voiceClient:ParentCallSid');
 
                     if ($parentCall) {
                         $call->c_parent_id = $parentCall->c_id;
                         $call->c_project_id = $parentCall->c_project_id;
-                        $call->c_dep_id = $parentCall->c_dep_id;
+
+                        if (!$call->c_dep_id) {
+                            $call->c_dep_id = $parentCall->c_dep_id;
+                        }
+
                         $call->c_source_type_id = $parentCall->c_source_type_id;
+
+                        if (!$call->c_lead_id) {
+                            $call->c_lead_id = $parentCall->c_lead_id;
+                        }
+
+                        if (!$call->c_case_id) {
+                            $call->c_case_id = $parentCall->c_case_id;
+                        }
 
                         if ($parentCall->callUserGroups && !$call->callUserGroups) {
                             foreach ($parentCall->callUserGroups as $cugItem) {
