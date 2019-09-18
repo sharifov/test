@@ -857,16 +857,16 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
                     return false;
                 }*/
 
-                if($call->c_call_status !== self::CALL_STATUS_QUEUE) {
+                if (!$call->isStatusQueue()) {
                     \Yii::warning('Error: Call ('.$call->c_call_status.') not in status QUEUE: ' . $call->c_id. ',  User: ' . $user_id, 'Call:applyCallToAgent:callRedirect');
                     return false;
                 }
 
                 $call->c_call_status = self::CALL_STATUS_RINGING;
+                $call->setStatusByTwilioStatus($call->c_call_status);
 
                 if($call->c_created_user_id && (int) $call->c_created_user_id !== $user_id) {
                     $call->c_source_type_id = self::SOURCE_REDIRECT_CALL;
-
 
                     $user = Employee::findOne($user_id);
 
@@ -887,12 +887,25 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
                 $call->c_created_user_id = $user_id;
                 $call->update();
 
+
+                $callUserAccessAny = CallUserAccess::find()->where(['cua_status_id' => CallUserAccess::STATUS_TYPE_PENDING, 'cua_call_id' => $call->c_id])->all();
+                if ($callUserAccessAny) {
+                    foreach ($callUserAccessAny as $callAccess) {
+                        $callAccess->noAnsweredCall();
+                        if (!$callAccess->update()) {
+                            Yii::error(VarDumper::dumpAsString($callAccess->errors), 'Call:applyCallToAgent:CallUserAccess:save');
+                        }
+                    }
+                }
+
+
                 $agent = 'seller' . $user_id;
                 $res = \Yii::$app->communication->callRedirect($call->c_call_sid, 'client', $call->c_from, $agent);
 
                 if ($res && isset($res['error']) && $res['error'] === false) {
                     if (isset($res['data']['is_error']) && $res['data']['is_error'] === true) {
                         $call->c_call_status = self::CALL_STATUS_CANCELED;
+                        $call->setStatusByTwilioStatus($call->c_call_status);
                         $call->c_created_user_id = null;
                         $call->update();
                         return false;
