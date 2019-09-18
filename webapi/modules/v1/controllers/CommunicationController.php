@@ -844,6 +844,7 @@ class CommunicationController extends ApiBaseController
 
                     $call->c_created_user_id = $upp->uppUser->id;
                     $call->c_project_id = $upp->upp_project_id;
+                    $call->c_dep_id = $upp->upp_dep_id;
 
                     //Notifications::create($upp->uppUser->id, 'Call ID-'.$call->c_id.' completed', 'Call ID-'.$call->c_id.' completed. From ' . $call->c_from .' to '.$call->c_to, Notifications::TYPE_INFO, true);
                     //Notifications::socket($upp->uppUser->id, null, 'getNewNotification', [], true);
@@ -869,7 +870,7 @@ class CommunicationController extends ApiBaseController
                     }
                 }*/
 
-                if($call->c_call_status && isset($post['callData']['status'])) {
+                if(isset($post['callData']['status']) && $post['callData']['status']) {
                     // if(!in_array($call->c_call_status, [Call::CALL_STATUS_CANCELED, Call::CALL_STATUS_BUSY, Call::CALL_STATUS_NO_ANSWER])) {
                         $call->c_call_status = $post['callData']['status'];
                         $call->setStatusByTwilioStatus($post['callData']['status']);
