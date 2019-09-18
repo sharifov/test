@@ -1159,14 +1159,14 @@ class CommunicationController extends ApiBaseController
     {
         $call = null;
         $parentCall = null;
-        $clientPhone = null;
+        // $clientPhone = null;
 
-        if (isset($callData['From']) && $callData['From']) {
-            $clientPhoneNumber = $callData['From'];
-            if ($clientPhoneNumber) {
-                $clientPhone = ClientPhone::find()->where(['phone' => $clientPhoneNumber])->orderBy(['id' => SORT_DESC])->limit(1)->one();
-            }
-        }
+//        if (isset($callData['From']) && $callData['From']) {
+//            $clientPhoneNumber = $callData['From'];
+//            if ($clientPhoneNumber) {
+//                $clientPhone = ClientPhone::find()->where(['phone' => $clientPhoneNumber])->orderBy(['id' => SORT_DESC])->limit(1)->one();
+//            }
+//        }
 
         $callSid = $callData['CallSid'] ?? '';
         $parentCallSid = $callData['ParentCallSid'] ?? '';
@@ -1201,6 +1201,8 @@ class CommunicationController extends ApiBaseController
                 $call->c_client_id = $parentCall->c_client_id;
 
                 $call->c_created_user_id = $parentCall->c_created_user_id;
+
+                $call->c_call_type_id = $parentCall->c_call_type_id;
 
                 /*if ($parentCall->c_lead_id) {
 
@@ -1281,6 +1283,10 @@ class CommunicationController extends ApiBaseController
 
         if ($agentId) {
             $call->c_created_user_id = $agentId;
+        }
+
+        if (!$call->c_created_user_id && $parentCall && $call->isOut()) {
+            $call->c_created_user_id = $parentCall->c_created_user_id;
         }
 
         if (isset($callData['SequenceNumber'])) {

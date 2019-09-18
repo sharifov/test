@@ -19,10 +19,10 @@ $isAgent = true;
                 [
                     'attribute' => 'cs_gid',
                     'value' => function (Cases $model) {
-                        return Html::a($model->cs_gid, ['cases/view', 'gid' => $model->cs_gid, [
+                        return Html::a($model->cs_id, ['cases/view', 'gid' => $model->cs_gid], [
                             'data-pjax' => 0,
                             'target' => '_blank'
-                        ]]);
+                        ]);
                     },
                     'format' => 'raw'
                 ],
@@ -59,7 +59,14 @@ $isAgent = true;
                         return $model->department ? $model->department->dep_name : '';
                     },
                 ],
-                'cs_created_dt',
+                // 'cs_created_dt',
+                [
+                    'attribute' => 'cs_created_dt',
+                    'value' => function (Cases $model) {
+                        return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->cs_created_dt));
+                    },
+                    'format' => 'raw'
+                ],
             ],
         ]); ?>
 
