@@ -7,6 +7,7 @@ use common\models\ClientEmail;
 use common\models\ClientPhone;
 use common\models\Employee;
 use common\models\UserGroupAssign;
+use sales\access\EmployeeProjectAccess;
 use sales\repositories\lead\LeadBadgesRepository;
 use Yii;
 use yii\base\Model;
@@ -373,7 +374,7 @@ class LeadSearch extends Lead
 
     public function searchAgent($params)
     {
-        $projectIds = array_keys(ProjectEmployeeAccess::getProjectsByEmployee());
+        $projectIds = array_keys(EmployeeProjectAccess::getProjects());
         $query = Lead::find();
         $query->select(['*', 'l_client_time' => new Expression("TIME( CONVERT_TZ(NOW(), '+00:00', offset_gmt) )")]);
 
@@ -514,7 +515,7 @@ class LeadSearch extends Lead
 
     public function searchByCase($params)
     {
-        $projectIds = array_keys(ProjectEmployeeAccess::getProjectsByEmployee());
+        $projectIds = array_keys(EmployeeProjectAccess::getProjects());
         $query = Lead::find();
         $query->select(['*', 'l_client_time' => new Expression("TIME( CONVERT_TZ(NOW(), '+00:00', offset_gmt) )")]);
 
@@ -680,7 +681,7 @@ class LeadSearch extends Lead
      */
     public function searchSold($params, Employee $user): ActiveDataProvider
     {
-//        $projectIds = array_keys(ProjectEmployeeAccess::getProjectsByEmployee());
+//        $projectIds = array_keys(EmployeeAccess::getProjects());
 //        $query = Lead::find()->with('project', 'source');
 
         $query = $this->leadBadgesRepository->getSoldQuery($user)->with('project', 'source')->joinWith('leadFlowSold' );
@@ -779,7 +780,7 @@ class LeadSearch extends Lead
      */
     public function searchSoldKpi($params)
     {
-        $projectIds = array_keys(ProjectEmployeeAccess::getProjectsByEmployee());
+//        $projectIds = array_keys(EmployeeAccess::getProjects());
         $query = Lead::find();
         $query->select(['*', 'l_client_time' => new Expression("TIME( CONVERT_TZ(NOW(), '+00:00', offset_gmt) )")]);
         $leadTable = Lead::tableName();
@@ -865,7 +866,7 @@ class LeadSearch extends Lead
      */
     public function searchBooked($params, Employee $user): ActiveDataProvider
     {
-//        $projectIds = array_keys(ProjectEmployeeAccess::getProjectsByEmployee());
+//        $projectIds = array_keys(EmployeeAccess::getProjects());
 //        $query = Lead::find()->with('project');
         $query = $this->leadBadgesRepository->getBookedQuery($user)->with('project');
 
@@ -914,7 +915,7 @@ class LeadSearch extends Lead
      */
     public function searchProcessing($params, Employee $user): ActiveDataProvider
     {
-//        $projectIds = array_keys(ProjectEmployeeAccess::getProjectsByEmployee());
+//        $projectIds = array_keys(EmployeeAccess::getProjects());
 //        $query = Lead::find()->with('project');
         $query = $this->leadBadgesRepository->getProcessingQuery($user)->with('project');
         $query->select(['*', 'l_client_time' => new Expression("TIME( CONVERT_TZ(NOW(), '+00:00', offset_gmt) )")]);
@@ -1000,7 +1001,7 @@ class LeadSearch extends Lead
      */
     public function searchFollowUp($params, Employee $user): ActiveDataProvider
     {
-//        $projectIds = array_keys(ProjectEmployeeAccess::getProjectsByEmployee());
+//        $projectIds = array_keys(EmployeeAccess::getProjects());
         $query = $this->leadBadgesRepository->getFollowUpQuery($user)->with('project');
         $query->select(['*', 'l_client_time' => new Expression("TIME( CONVERT_TZ(NOW(), '+00:00', offset_gmt) )")]);
 
@@ -1090,7 +1091,7 @@ class LeadSearch extends Lead
 //     */
 //    public function searchFollowUp($params)
 //    {
-//        $projectIds = array_keys(ProjectEmployeeAccess::getProjectsByEmployee());
+//        $projectIds = array_keys(EmployeeAccess::getProjects());
 //        $query = Lead::find()->with('project');
 //        $query->select(['*', 'l_client_time' => new Expression("TIME( CONVERT_TZ(NOW(), '+00:00', offset_gmt) )")]);
 //
@@ -1284,7 +1285,7 @@ class LeadSearch extends Lead
 //     */
 //    public function searchInbox($params)
 //    {
-//        $projectIds = array_keys(ProjectEmployeeAccess::getProjectsByEmployee());
+//        $projectIds = array_keys(EmployeeAccess::getProjects());
 //        $query = Lead::find();
 //        $query->select(['*', 'l_client_time' => new Expression("TIME( CONVERT_TZ(NOW(), '+00:00', offset_gmt) )")]);
 //        $leadTable = Lead::tableName();
@@ -1347,7 +1348,7 @@ class LeadSearch extends Lead
      */
     public function searchTrash($params, Employee $user): ActiveDataProvider
     {
-//        $projectIds = array_keys(ProjectEmployeeAccess::getProjectsByEmployee());
+//        $projectIds = array_keys(EmployeeAccess::getProjects());
 //        $query = Lead::find()->with('project', 'leadFlightSegments');
 
         $query = $this->leadBadgesRepository->getTrashQuery($user)->with('project', 'leadFlightSegments');
@@ -1415,7 +1416,7 @@ class LeadSearch extends Lead
      */
     public function searchDuplicate($params, Employee $user): ActiveDataProvider
     {
-        //$projectIds = array_keys(ProjectEmployeeAccess::getProjectsByEmployee());
+//        $projectIds = array_keys(EmployeeAccess::getProjects());
 //        $query = Lead::find();
         $query = $this->leadBadgesRepository->getDuplicateQuery($user);
         $query->select(['*', 'l_client_time' => new Expression("TIME( CONVERT_TZ(NOW(), '+00:00', offset_gmt) )")]);

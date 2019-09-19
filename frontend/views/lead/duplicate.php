@@ -1,4 +1,6 @@
 <?php
+
+use sales\access\EmployeeProjectAccess;
 use yii\helpers\Html;
 use yii\widgets\Pjax;
 use kartik\grid\GridView;
@@ -14,12 +16,12 @@ $this->title = 'Duplicate Queue';
 if (Yii::$app->user->identity->canRole('admin')) {
     $isAdmin = true;
     $userList = \common\models\Employee::getList();
-    $projectList = \common\models\Project::getList();
 } else {
     $isAdmin = false;
     $userList = \common\models\Employee::getListByUserId(Yii::$app->user->id);
-    $projectList = \common\models\ProjectEmployeeAccess::getProjectsByEmployee();
 }
+
+$projectList = EmployeeProjectAccess::getProjects(Yii::$app->user->id);
 
 $this->params['breadcrumbs'][] = $this->title;
 $this->registerCssFile('/css/style-duplicate.css');

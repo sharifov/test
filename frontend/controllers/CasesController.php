@@ -4,7 +4,6 @@ namespace frontend\controllers;
 
 use common\components\BackOffice;
 use common\components\CommunicationService;
-use common\models\Call;
 use common\models\CaseNote;
 use common\models\CaseSale;
 use common\models\ClientEmail;
@@ -24,7 +23,6 @@ use frontend\models\CaseCommunicationForm;
 use frontend\models\CasePreviewEmailForm;
 use frontend\models\CasePreviewSmsForm;
 use frontend\models\CommunicationForm;
-use http\Exception\InvalidArgumentException;
 use sales\entities\cases\CasesStatus;
 use sales\entities\cases\CasesStatusLogSearch;
 use sales\forms\cases\CasesAddEmailForm;
@@ -50,10 +48,8 @@ use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
 use yii\web\NotFoundHttpException;
-use yii\filters\VerbFilter;
 use yii\web\Response;
 use yii\widgets\ActiveForm;
-use function GuzzleHttp\Psr7\str;
 
 /**
  * Class CasesController
@@ -115,22 +111,19 @@ class CasesController extends FController
     public function actionIndex()
     {
         $searchModel = new CasesSearch();
-        if(Yii::$app->user->identity->canRole('agent')) {
-            $isAgent = true;
-        } else {
-            $isAgent = false;
-        }
 
+        /** @var Employee $user */
+        $user = Yii::$app->user->identity;
         $params = Yii::$app->request->queryParams;
-        $dataProvider = $searchModel->search($params, $isAgent);
+
+        $dataProvider = $searchModel->search($params, $user);
 
         return $this->render('index', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
-            'isAgent' => $isAgent
+            'user' => $user
         ]);
     }
-
 
     /**
      * Displays a single Cases model.

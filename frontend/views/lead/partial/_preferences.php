@@ -3,7 +3,6 @@
 use kartik\editable\Editable;
 use yii\widgets\ActiveForm;
 use frontend\models\LeadForm;
-use common\models\ProjectEmployeeAccess;
 use common\models\ClientPhone;
 use yii\helpers\Html;
 
@@ -22,19 +21,7 @@ $formId = sprintf('%s-form', $leadForm->getLeadPreferences()->formName());
     //'enableClientValidation' => false,
     'id' => $formId
 ]); ?>
-<div class="sidebar__section">
-	<?php if ($leadForm->getLead()->isNewRecord) : ?>
-    <h3 class="sidebar__subtitle">Lead Info</h3>
-    <?= $formPreferences->field($leadForm->getLead(), 'source_id')
-                ->dropDownList(ProjectEmployeeAccess::getAllSourceByEmployee(), [
-                    'prompt' => 'Select'
-                ])->label('Marketing Info:') ?>
-    <?/*= $formPreferences->field($leadForm->getLead(), 'uid')
-                ->textInput([
-                    'class' => 'form-control lead-form-input-element'
-                ])*/ ?>
-    <?php endif; ?>
-</div>
+
 <div class="sidebar__section">
     <h3 class="sidebar__subtitle">Lead Preferences</h3>
     <div class="row">
@@ -57,7 +44,7 @@ $formId = sprintf('%s-form', $leadForm->getLeadPreferences()->formName());
     </div>
     <div class="row">
         <div class="col-md-12">
-            <?= $formPreferences->field($leadForm->getLead(), 'l_delayed_charge')->radioList([false => 'No', true => 'Yes'])?>
+            <?= $formPreferences->field($leadForm->getLead(), 'l_delayed_charge')->checkbox()?>
         </div>
     </div>
 

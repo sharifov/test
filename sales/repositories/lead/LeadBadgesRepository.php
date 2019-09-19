@@ -5,10 +5,9 @@ namespace sales\repositories\lead;
 use common\models\Employee;
 use common\models\Lead;
 use common\models\ProfitSplit;
-use common\models\Project;
-use common\models\ProjectEmployeeAccess;
 use common\models\TipsSplit;
-use common\models\UserGroupAssign;
+use sales\access\EmployeeGroupAccess;
+use sales\access\EmployeeProjectAccess;
 use yii\db\ActiveQuery;
 
 class LeadBadgesRepository
@@ -284,12 +283,7 @@ class LeadBadgesRepository
      */
     private function inProject($userId): array
     {
-        return [
-            'project_id' => Project::find()->select(Project::tableName() . '.id')->andWhere([
-                'closed' => false,
-                'id' => ProjectEmployeeAccess::find()->select(ProjectEmployeeAccess::tableName() . '.project_id')->andWhere([ProjectEmployeeAccess::tableName() . '.employee_id' => $userId])
-            ])
-        ];
+        return ['project_id' => EmployeeProjectAccess::getProjectsSubQuery($userId)];
     }
 
     /**
@@ -306,9 +300,7 @@ class LeadBadgesRepository
      */
     private function usersIdsInCommonGroups($userId): ActiveQuery
     {
-        return UserGroupAssign::find()->select('ugs_user_id')->distinct()->andWhere([
-            'ugs_group_id' => UserGroupAssign::find()->select(['ugs_group_id'])->andWhere(['ugs_user_id' => $userId])
-        ]);
+        return EmployeeGroupAccess::usersIdsInCommonGroupsSubQuery($userId);
     }
 
     /**

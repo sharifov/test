@@ -7,10 +7,25 @@ use common\models\ClientEmail;
 use common\models\ClientPhone;
 use common\models\Employee;
 use common\models\Lead;
+use sales\access\EmployeeDepartmentAccess;
+use sales\access\EmployeeProjectAccess;
 use yii\data\ActiveDataProvider;
+use yii\helpers\VarDumper;
 
 /**
  * Class CasesSearch
+ *
+ * @property $cssSaleId
+ * @property $cssBookId
+ * @property $salePNR
+ * @property $clientPhone
+ * @property $clientEmail
+ * @property $ticketNumber
+ * @property $airlineConfirmationNumber
+ * @property $paxFirstName
+ * @property $paxLastName
+ *
+ * @property array $cacheSaleData
  */
 class CasesSearch extends Cases
 {
@@ -25,6 +40,8 @@ class CasesSearch extends Cases
     public $paxFirstName;
     public $paxLastName;
 
+    private $cacheSaleData = [];
+
     /**
      * @return array
      */
@@ -36,109 +53,137 @@ class CasesSearch extends Cases
             ['cs_subject', 'string'],
             ['cs_category', 'string'],
             ['cs_status', 'integer'],
-            ['cs_user_id', 'string'],
+            ['cs_user_id', 'integer'],
             ['cs_lead_id', 'string'],
-            ['cs_dep_id', 'safe'],
+            ['cs_dep_id', 'integer'],
             ['cs_created_dt', 'string'],
             ['cs_client_id', 'integer'],
-            ['cs_project_id', 'safe'],
-            ['cssSaleId', 'integer'],
-            [['cssBookId', 'salePNR', 'clientPhone', 'clientEmail', 'ticketNumber', 'airlineConfirmationNumber'], 'string'],
-            [['paxFirstName', 'paxLastName',], 'string']
+            ['cs_project_id', 'integer'],
 
+            ['cssSaleId', 'integer'],
+            ['cssBookId', 'string'],
+            ['salePNR', 'string'],
+            ['clientPhone', 'string'],
+            ['clientEmail', 'string'],
+            ['ticketNumber', 'string'],
+            ['airlineConfirmationNumber', 'string'],
+            ['paxFirstName', 'string'],
+            ['paxLastName', 'string'],
         ];
     }
 
     /**
      * @param $params
-     * @param $isAgent
+     * @param Employee $user
      * @return ActiveDataProvider
      */
-    public function search($params, $isAgent): ActiveDataProvider
+    public function search($params, $user): ActiveDataProvider
     {
-        $query = Cases::find();
+        if ($user->isAdmin()) {
+            return $this->searchByAdmin($params);
+        }
+        return $this->searchByAgent($params, $user);
+    }
 
-        // add conditions that should always apply here
+    /**
+     * @param $params
+     * @param Employee $user
+     * @return ActiveDataProvider
+     */
+    public function searchByAgent($params, $user): ActiveDataProvider
+    {
+        $query = Cases::find()->with(['project', 'department', 'category']);
+
+        $query->andWhere(['cs_dep_id' => array_keys(EmployeeDepartmentAccess::getDepartments())]);
+        $query->andWhere(['cs_project_id' => array_keys(EmployeeProjectAccess::getProjects())]);
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> ['defaultOrder' => ['cs_id' => SORT_DESC]],
+            'sort' => [
+                'defaultOrder' => [
+                    'cs_id' => SORT_DESC
+                ]
+            ],
             'pagination' => [
                 'pageSize' => 20,
             ],
         ]);
 
+        unset($dataProvider->sort->attributes['cs_lead_id']);
+
         $this->load($params);
 
-        if (empty($params) && $isAgent === true){
-            $query->where('0=1');
-        }
-
         if (!$this->validate()) {
-            // uncomment the following line if you do not want to return any records when validation fails
             $query->where('0=1');
             return $dataProvider;
         }
 
-        if ($this->cs_client_id) {
-            $query->andWhere(['cs_client_id' => $this->cs_client_id]);
-        }
-
-        // grid filtering conditions
         $query->andFilterWhere([
             'cs_id' => $this->cs_id,
             'cs_gid' => $this->cs_gid,
             'cs_project_id' => $this->cs_project_id,
+            'cs_dep_id' => $this->cs_dep_id,
             'cs_category' => $this->cs_category,
             'cs_status' => $this->cs_status,
-            'cs_dep_id' => $this->cs_dep_id,
         ]);
 
-        if ($this->cs_user_id) {
-            $query->andWhere(['cs_user_id' => Employee::find()->select('id')->andWhere(['like', 'username', $this->cs_user_id])]);
+        $query->andFilterWhere(['like', 'cs_subject', $this->cs_subject]);
+
+        if ($user->isExSuper() || $user->isSupSuper()) {
+            if ($this->cs_user_id) {
+                $query->andWhere(['cs_user_id' => Employee::find()->select(Employee::tableName() . '.id')->andWhere([Employee::tableName() . '.id' => $this->cs_user_id])]);
+            }
         }
 
-        if ($this->cs_lead_id) {
-            $query->andWhere(['cs_lead_id' => Lead::find()->select('id')->andWhere(['uid' => $this->cs_lead_id])]);
-        }
-
-        if ($this->cssSaleId){
+        if ($this->cssSaleId) {
             $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['css_sale_id' => $this->cssSaleId])]);
         }
 
-        if ($this->ticketNumber){
-            $saleId = self::getSaleIdByTicket($this->ticketNumber);
-            $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['css_sale_id' => $saleId])]);
+        if ($this->ticketNumber) {
+            if ($saleId = $this->getSaleIdByTicket($this->ticketNumber)) {
+                $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['css_sale_id' => $saleId])]);
+            } else {
+                $query->where('0=1');
+            }
         }
 
-        if ($this->paxFirstName){
-            $saleId = self::getPaxFirstName($this->paxFirstName);
-            $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['css_sale_id' => $saleId])]);
+        if ($this->paxFirstName) {
+            if ($saleId = $this->getSaleIdByPaxFirstName($this->paxFirstName)) {
+                $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['css_sale_id' => $saleId])]);
+            } else {
+                $query->where('0=1');
+            }
         }
 
-        if ($this->paxLastName){
-            $saleId = self::getPaxLastName($this->paxLastName);
-            $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['css_sale_id' => $saleId])]);
+        if ($this->paxLastName) {
+            if ($saleId = $this->getSaleIdByPaxLastName($this->paxLastName)) {
+                $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['css_sale_id' => $saleId])]);
+            } else {
+                $query->where('0=1');
+            }
         }
 
-        if ($this->airlineConfirmationNumber){
-            $saleId = self::getSaleIdByAcn($this->airlineConfirmationNumber);
-            $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['css_sale_id' => $saleId])]);
+        if ($this->airlineConfirmationNumber) {
+            if ($saleId = $this->getSaleIdByAcn($this->airlineConfirmationNumber)) {
+                $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['css_sale_id' => $saleId])]);
+            } else {
+                $query->where('0=1');
+            }
         }
 
-        if ($this->cssBookId){
+        if ($this->cssBookId) {
             $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['css_sale_book_id' => $this->cssBookId])]);
         }
 
-        if ($this->salePNR){
+        if ($this->salePNR) {
             $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['css_sale_pnr' => $this->salePNR])]);
         }
 
-        if ($this->clientPhone){
+        if ($this->clientPhone) {
             $query->andWhere(['cs_client_id' => ClientPhone::find()->select('client_id')->andWhere(['phone' => $this->clientPhone])]);
         }
 
-        if ($this->clientEmail){
+        if ($this->clientEmail) {
             $query->andWhere(['cs_client_id' => ClientEmail::find()->select('client_id')->andWhere(['email' => $this->clientEmail])]);
         }
 
@@ -146,7 +191,116 @@ class CasesSearch extends Cases
             $query->andFilterWhere(['DATE(cs_created_dt)' => date('Y-m-d', strtotime($this->cs_created_dt))]);
         }
 
+
+        return $dataProvider;
+    }
+
+    /**
+     * @param $params
+     * @return ActiveDataProvider
+     */
+    private function searchByAdmin($params): ActiveDataProvider
+    {
+        $query = Cases::find()->with(['project', 'department', 'category']);
+
+        $query->andWhere(['cs_dep_id' => array_keys(EmployeeDepartmentAccess::getDepartments())]);
+        $query->andWhere(['cs_project_id' => array_keys(EmployeeProjectAccess::getProjects())]);
+
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+            'sort' => [
+                'defaultOrder' => [
+                    'cs_id' => SORT_DESC
+                ]
+            ],
+            'pagination' => [
+                'pageSize' => 20,
+            ],
+        ]);
+
+        unset($dataProvider->sort->attributes['cs_lead_id']);
+
+        $this->load($params);
+
+        if (!$this->validate()) {
+            $query->where('0=1');
+            return $dataProvider;
+        }
+
+        $query->andFilterWhere([
+            'cs_id' => $this->cs_id,
+            'cs_gid' => $this->cs_gid,
+            'cs_project_id' => $this->cs_project_id,
+            'cs_dep_id' => $this->cs_dep_id,
+            'cs_category' => $this->cs_category,
+            'cs_status' => $this->cs_status,
+            'cs_client_id' => $this->cs_client_id
+        ]);
+
         $query->andFilterWhere(['like', 'cs_subject', $this->cs_subject]);
+
+        if ($this->cs_user_id) {
+            $query->andWhere(['cs_user_id' => Employee::find()->select(Employee::tableName() . '.id')->andWhere([Employee::tableName() . '.id' => $this->cs_user_id])]);
+        }
+        if ($this->cs_lead_id) {
+            $query->andWhere(['cs_lead_id' => Lead::find()->select(Lead::tableName() . '.id')->andWhere([Lead::tableName() . '.id' => $this->cs_lead_id])]);
+        }
+
+        if ($this->cssSaleId) {
+            $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['css_sale_id' => $this->cssSaleId])]);
+        }
+
+        if ($this->ticketNumber) {
+            if ($saleId = $this->getSaleIdByTicket($this->ticketNumber)) {
+                $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['css_sale_id' => $saleId])]);
+            } else {
+                $query->where('0=1');
+            }
+        }
+
+        if ($this->paxFirstName) {
+            if ($saleId = $this->getSaleIdByPaxFirstName($this->paxFirstName)) {
+                $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['css_sale_id' => $saleId])]);
+            } else {
+                $query->where('0=1');
+            }
+        }
+
+        if ($this->paxLastName) {
+            if ($saleId = $this->getSaleIdByPaxLastName($this->paxLastName)) {
+                $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['css_sale_id' => $saleId])]);
+            } else {
+                $query->where('0=1');
+            }
+        }
+
+        if ($this->airlineConfirmationNumber) {
+            if ($saleId = $this->getSaleIdByAcn($this->airlineConfirmationNumber)) {
+                $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['css_sale_id' => $saleId])]);
+            } else {
+                $query->where('0=1');
+            }
+        }
+
+        if ($this->cssBookId) {
+            $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['css_sale_book_id' => $this->cssBookId])]);
+        }
+
+        if ($this->salePNR) {
+            $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['css_sale_pnr' => $this->salePNR])]);
+        }
+
+        if ($this->clientPhone) {
+            $query->andWhere(['cs_client_id' => ClientPhone::find()->select('client_id')->andWhere(['phone' => $this->clientPhone])]);
+        }
+
+        if ($this->clientEmail) {
+            $query->andWhere(['cs_client_id' => ClientEmail::find()->select('client_id')->andWhere(['email' => $this->clientEmail])]);
+        }
+
+        if ($this->cs_created_dt) {
+            $query->andFilterWhere(['DATE(cs_created_dt)' => date('Y-m-d', strtotime($this->cs_created_dt))]);
+        }
 
         return $dataProvider;
     }
@@ -161,7 +315,6 @@ class CasesSearch extends Cases
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> ['defaultOrder' => ['cs_id' => SORT_DESC]],
             'pagination' => [
                 'pageSize' => 20,
             ],
@@ -174,9 +327,12 @@ class CasesSearch extends Cases
             return $dataProvider;
         }
 
-        $query->andWhere(['cs_client_id' => $this->cs_client_id]);
+        if (!$this->cs_client_id) {
+            throw new \InvalidArgumentException('cs_client_id must be set');
+        }
 
-        $query->andFilterWhere([
+        $query->andWhere([
+            'cs_client_id' => $this->cs_client_id,
             'cs_project_id' => $this->cs_project_id,
             'cs_dep_id' => $this->cs_dep_id,
         ]);
@@ -207,58 +363,86 @@ class CasesSearch extends Cases
         ];
     }
 
-    public static function getSaleIdByTicket($tickerNum)
+    /**
+     * @return array
+     */
+    private function getCaseSaleData(): array
     {
-        $saleDataJson = CaseSale::find()->select(['css_sale_data'])->all();
-        foreach ($saleDataJson as $sale){
-            $decodeSale = json_decode($sale['css_sale_data']);
-            foreach ($decodeSale->passengers as $passenger){
-                if ($passenger->ticket_number == $tickerNum){
+        if ($this->cacheSaleData) {
+            return $this->cacheSaleData;
+        }
+        $this->cacheSaleData = CaseSale::find()->select(['css_sale_data'])->all();
+        return $this->cacheSaleData;
+    }
+
+    /**
+     * @param $tickerNum
+     * @return int|null
+     */
+    private function getSaleIdByTicket($tickerNum): ?int
+    {
+        foreach ($this->getCaseSaleData() as $sale) {
+            $decodeSale = json_decode($sale['css_sale_data'], false);
+            foreach ($decodeSale->passengers as $passenger) {
+                if (strcasecmp($passenger->ticket_number, $tickerNum) === 0) {
                     return $decodeSale->saleId;
                 }
             }
         }
+        return null;
     }
 
-    public static function getPaxFirstName($firstName)
+    /**
+     * @param $firstName
+     * @return int|null
+     */
+    private function getSaleIdByPaxFirstName($firstName): ?int
     {
-        $saleDataJson = CaseSale::find()->select(['css_sale_data'])->all();
-        foreach ($saleDataJson as $sale){
-            $decodeSale = json_decode($sale['css_sale_data']);
-            foreach ($decodeSale->passengers as $passenger){
-                if ($passenger->first_name == strtoupper($firstName)){
+        foreach ($this->getCaseSaleData() as $sale) {
+            $decodeSale = json_decode($sale['css_sale_data'], false);
+            foreach ($decodeSale->passengers as $passenger) {
+                if (strcasecmp($passenger->first_name, $firstName) === 0) {
                     return $decodeSale->saleId;
                 }
             }
         }
+        return null;
     }
 
-    public static function getPaxLastName($lastName)
+    /**
+     * @param $lastName
+     * @return int|null
+     */
+    private function getSaleIdByPaxLastName($lastName): ?int
     {
-        $saleDataJson = CaseSale::find()->select(['css_sale_data'])->all();
-        foreach ($saleDataJson as $sale){
-            $decodeSale = json_decode($sale['css_sale_data']);
-            foreach ($decodeSale->passengers as $passenger){
-                if ($passenger->last_name == strtoupper($lastName)){
+        foreach ($this->getCaseSaleData() as $sale) {
+            $decodeSale = json_decode($sale['css_sale_data'], false);
+            foreach ($decodeSale->passengers as $passenger) {
+                if (strcasecmp($passenger->last_name, $lastName) === 0) {
                     return $decodeSale->saleId;
                 }
             }
         }
+        return null;
     }
 
-    public static function getSaleIdByAcn($acn)
+    /**
+     * @param $acn
+     * @return int|null
+     */
+    private function getSaleIdByAcn($acn): ?int
     {
-        $saleDataJson = CaseSale::find()->select(['css_sale_data'])->all();
-        foreach ($saleDataJson as $sale){
-            $decodeSale = json_decode($sale['css_sale_data']);
-            foreach ($decodeSale->itinerary as $itinerary){
-                foreach ($itinerary->segments as $segment){
-                    if ($segment->airlineRecordLocator == $acn){
+        foreach ($this->getCaseSaleData() as $sale) {
+            $decodeSale = json_decode($sale['css_sale_data'], false);
+            foreach ($decodeSale->itinerary as $itinerary) {
+                foreach ($itinerary->segments as $segment) {
+                    if (strcasecmp($segment->airlineRecordLocator, $acn) === 0) {
                         return $decodeSale->saleId;
                     }
                 }
             }
         }
+        return null;
     }
 
 }

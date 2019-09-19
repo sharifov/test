@@ -1,5 +1,6 @@
 <?php
 
+use sales\access\EmployeeProjectAccess;
 use yii\helpers\Html;
 use yii\widgets\Pjax;
 use yii\grid\GridView;
@@ -9,11 +10,7 @@ use yii\grid\GridView;
 /* @var $searchModel common\models\search\AgentActivitySearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
-    $projectList = \common\models\Project::getList();
-} else {
-    $projectList = \common\models\ProjectEmployeeAccess::getProjectsByEmployee();
-}
+$projectList = EmployeeProjectAccess::getProjects(Yii::$app->user->id);
 
 ?>
 

@@ -5,6 +5,7 @@ namespace common\models;
 use borales\extensions\phoneInput\PhoneInput;
 use borales\extensions\phoneInput\PhoneInputValidator;
 use common\components\BackOffice;
+use sales\access\EmployeeGroupAccess;
 use Yii;
 use yii\base\NotSupportedException;
 use yii\behaviors\TimestampBehavior;
@@ -827,8 +828,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
      */
     public static function getList(): array
     {
-        $data = self::find()->orderBy(['username' => SORT_ASC])->asArray()->all();
-        return ArrayHelper::map($data, 'id', 'username');
+        return self::find()->select(['username', 'id'])->orderBy(['username' => SORT_ASC])->indexBy('id')->asArray()->column();
     }
 
     /**
@@ -840,23 +840,16 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         return ArrayHelper::map($data, 'id', 'username');
     }
 
-
     /**
-     * @param int|null $user_id
+     * @param int $userId
      * @return array
      */
-    public static function getListByUserId(int $user_id = null): array
+    public static function getListByUserId(int $userId): array
     {
-        $subQuery1 = UserGroupAssign::find()->select(['ugs_group_id'])->where(['ugs_user_id' => $user_id]);
-        $subQuery = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->where(['IN', 'ugs_group_id', $subQuery1]);
-
-        $query = self::find()->orderBy(['username' => SORT_ASC])->asArray();
-        $query->andWhere(['IN', 'employees.id', $subQuery]);
-
-        $data = $query->all();
-        return ArrayHelper::map($data, 'id', 'username');
+        return self::find()->select(['username', 'id'])
+            ->andWhere(['id' => EmployeeGroupAccess::usersIdsInCommonGroupsSubQuery($userId)])
+            ->orderBy(['username' => SORT_ASC])->asArray()->indexBy('id')->column();
     }
-
 
     /**
      * @return array

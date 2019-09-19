@@ -1,5 +1,6 @@
 <?php
 
+use sales\access\EmployeeProjectAccess;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
@@ -88,7 +89,7 @@ $userId = Yii::$app->user->id;
                         <?php
                         $projectsValue = '';
 
-                        if($projectList = \common\models\ProjectEmployeeAccess::getProjectsByEmployee()) {
+                        if($projectList = EmployeeProjectAccess::getProjects(Yii::$app->user->id)) {
 
                             $groupsValueArr = [];
                             foreach ($projectList as $project) {

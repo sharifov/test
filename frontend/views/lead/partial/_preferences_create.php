@@ -17,7 +17,7 @@ use yii\widgets\ActiveForm;
 
     <?php
         echo $form->field($leadForm, 'sourceId')->widget(\kartik\select2\Select2::class, [
-            'data' => $leadForm->listSourceId(),
+            'data' => $leadForm->listSources(),
             'size' => \kartik\select2\Select2::SMALL,
             'options' => ['placeholder' => 'Select market', 'multiple' => false],
             'pluginOptions' => ['allowClear' => true],
@@ -41,7 +41,7 @@ use yii\widgets\ActiveForm;
     </div>
     <div class="row">
         <div class="col-md-12">
-            <?= $form->field($leadForm, 'delayedCharge')->radioList([false => 'No', true => 'Yes'])?>
+            <?= $form->field($leadForm, 'delayedCharge')->checkbox()?>
         </div>
     </div>
     <?= $form->field($leadForm, 'notesForExperts')->textarea(['rows' => 7]) ?>

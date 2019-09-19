@@ -11,14 +11,22 @@ use common\models\Lead;
 use common\models\Lead2;
 use common\models\Notifications;
 use common\models\Project;
+use common\models\ProjectEmployeeAccess;
 use common\models\Sources;
 use common\models\Test1;
 use common\models\UserConnection;
 use common\models\UserDepartment;
+use common\models\UserGroupAssign;
 use common\models\UserProfile;
+use sales\access\EmployeeDepartmentAccess;
+use sales\access\EmployeeAccessQuery;
+use sales\access\EmployeeGroupAccess;
+use sales\access\EmployeeProjectAccess;
+use sales\access\EmployeeSourceAccess;
 use sales\dispatchers\DeferredEventDispatcher;
 use sales\dispatchers\EventDispatcher;
 use sales\entities\cases\Cases;
+use sales\entities\cases\CasesCategory;
 use sales\forms\api\communication\voice\finish\FinishForm;
 use sales\forms\api\communication\voice\record\RecordForm;
 use sales\forms\lead\ClientCreateForm;
@@ -103,28 +111,24 @@ class TestController extends FController
 
     public function actionTest()
     {
-        $emails = [
 
-            new EmailCreateForm(['email' => '']),
 
-        ];
+       $q = Employee::getList();
+        VarDumper::dump($q);
+//
+//
+//        die;
+//        $projects = EmployeeProjectAccess::getProjects($userId, [], [Employee::ROLE_ADMIN], [Employee::ROLE_AGENT]);
+//        VarDumper::dump($projects, 10, true);
 
-        VarDumper::dump($emails);
-
-        $e = array_filter($emails, function (EmailCreateForm $e) {
-            return $e->email;
-        });
-
-        if (!$e) {
-            echo 'no';
-        }
+        return $this->render('blank');
 
     }
 
     public function actionT()
     {
 
-      VarDumper::dump(UserDepartment::getDepartmentsAccess(48));
+
 
 die;
 

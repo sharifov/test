@@ -3,10 +3,10 @@
 namespace sales\repositories\cases;
 
 use common\models\Employee;
-use common\models\Project;
-use common\models\ProjectEmployeeAccess;
-use common\models\UserDepartment;
 use common\models\UserGroupAssign;
+use sales\access\EmployeeDepartmentAccess;
+use sales\access\EmployeeGroupAccess;
+use sales\access\EmployeeProjectAccess;
 use sales\entities\cases\Cases;
 use sales\entities\cases\CasesStatus;
 use yii\db\ActiveQuery;
@@ -208,9 +208,7 @@ class CasesQRepository
      */
     private function usersIdsInCommonGroups($userId): ActiveQuery
     {
-        return UserGroupAssign::find()->select('ugs_user_id')->distinct()->andWhere([
-            'ugs_group_id' => UserGroupAssign::find()->select(['ugs_group_id'])->andWhere(['ugs_user_id' => $userId])
-        ]);
+        return EmployeeGroupAccess::usersIdsInCommonGroupsSubQuery($userId);
     }
 
     /**
@@ -236,12 +234,7 @@ class CasesQRepository
      */
     private function inProject($userId): array
     {
-        return [
-            'cs_project_id' => Project::find()->select(Project::tableName() . '.id')->andWhere([
-                'closed' => false,
-                'id' => ProjectEmployeeAccess::find()->select(ProjectEmployeeAccess::tableName() . '.project_id')->andWhere([ProjectEmployeeAccess::tableName() . '.employee_id' => $userId])
-            ])
-        ];
+        return ['cs_project_id' => EmployeeProjectAccess::getProjectsSubQuery($userId)];
     }
 
     /**
@@ -251,7 +244,7 @@ class CasesQRepository
     private function inDepartment($userId): array
     {
         return [
-            'cs_dep_id' => UserDepartment::find()->depsByUser($userId)
+            'cs_dep_id' => EmployeeDepartmentAccess::getDepartmentsSubQuery($userId)
         ];
     }
 

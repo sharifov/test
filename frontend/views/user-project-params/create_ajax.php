@@ -1,5 +1,6 @@
 <?php
 
+use sales\access\EmployeeProjectAccess;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
@@ -26,15 +27,15 @@ $this->title = 'Create Project Params';
         <?php
 
             //$userList = [];
-            $projectList = [];
 
             if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) || Yii::$app->authManager->getAssignment('userManager', Yii::$app->user->id)) {
                 //$userList = \common\models\Employee::getList();
-                $projectList = \common\models\Project::getList();
             } else {
                 //$userList = \common\models\Employee::getListByUserId(Yii::$app->user->id);
-                $projectList = \common\models\ProjectEmployeeAccess::getProjectsByEmployee();
+
             }
+
+            $projectList = EmployeeProjectAccess::getProjects(Yii::$app->user->id);
 
             //Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) ? \common\models\UserGroup::getList() : Yii::$app->user->identity->getUserGroupList()
 

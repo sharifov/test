@@ -4,12 +4,15 @@ namespace sales\forms\lead;
 
 use common\models\Department;
 use common\models\Lead;
-use common\models\ProjectEmployeeAccess;
+use common\models\Project;
 use common\models\Sources;
+use sales\access\EmployeeDepartmentAccess;
+use sales\access\EmployeeProjectAccess;
 use sales\forms\CompositeForm;
 use sales\helpers\lead\LeadHelper;
 use sales\repositories\cases\CasesRepository;
 use sales\repositories\NotFoundException;
+use yii\helpers\VarDumper;
 
 /**
  * @property string $cabin
@@ -26,6 +29,8 @@ use sales\repositories\NotFoundException;
  * @property string $caseGid
  * @property int $depId
  * @property boolean $delayedCharge
+ * @property int $jivoChatId
+ * @property int|null $userId
  * @property ClientCreateForm $client
  * @property EmailCreateForm[] $emails
  * @property PhoneCreateForm[] $phones
@@ -51,14 +56,17 @@ class LeadCreateForm extends CompositeForm
 
     public $jivoChatId;
 
+    private $userId;
+
     /**
      * LeadCreateForm constructor.
      * @param int $countEmails
      * @param int $countPhones
      * @param int $countSegments
+     * @param int|null $userId
      * @param array $config
      */
-    public function __construct(int $countEmails = 1, int $countPhones = 1, int $countSegments = 1, $config = [])
+    public function __construct(int $countEmails = 1, int $countPhones = 1, int $countSegments = 1, ?int $userId = null, $config = [])
     {
         $this->adults = 1;
         $this->children = 0;
@@ -86,6 +94,8 @@ class LeadCreateForm extends CompositeForm
         if (!$this->jivoChatId) {
             \Yii::error('Jivo chat Id not found');
         }
+
+        $this->userId = $userId;
 
         parent::__construct($config);
     }
@@ -123,8 +133,11 @@ class LeadCreateForm extends CompositeForm
             ['sourceId', 'integer'],
             ['sourceId', 'exist', 'skipOnError' => true, 'targetClass' => Sources::class, 'targetAttribute' => ['sourceId' => 'id']],
             ['sourceId', function () {
-                if ($projectId = Sources::find()->where(['id' => $this->sourceId])->select('project_id')->asArray()->limit(1)->one()) {
+                if ($projectId = Sources::find()->select('project_id')->where(['id' => $this->sourceId])->asArray()->limit(1)->one()) {
                     $this->projectId = $projectId['project_id'];
+                    if (!EmployeeProjectAccess::isInProject($this->projectId, $this->userId)) {
+                        $this->addError('sourceId', 'Access denied for this project');
+                    }
                 } else {
                     $this->addError('sourceId', 'Project not found');
                 }
@@ -304,9 +317,27 @@ class LeadCreateForm extends CompositeForm
     /**
      * @return array
      */
-    public function listSourceId(): array
+    public function listSources(): array
     {
-        return ProjectEmployeeAccess::getAllSourceByEmployee();
+
+        $projects = Project::find()->andWhere(['id' => array_keys(EmployeeProjectAccess::getProjects($this->userId))])->with('sources')->all();
+
+        $sources = [];
+
+        foreach ($projects as $project) {
+            $map = [];
+            foreach ($project->sources as $source) {
+                if ($source->hidden) {
+                    continue;
+                }
+                $map[$source->id] = $source->name;
+            }
+            if ($map) {
+                $sources[$project->name] = $map;
+            }
+        }
+
+        return $sources;
     }
 
     /**

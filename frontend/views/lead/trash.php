@@ -1,6 +1,7 @@
 <?php
 
 use dosamigos\datepicker\DatePicker;
+use sales\access\EmployeeProjectAccess;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 use yii\widgets\Pjax;
@@ -15,11 +16,11 @@ $this->title = 'Trash Queue';
 
 if ($user->isAdmin()) {
     $userList = \common\models\Employee::getList();
-    $projectList = \common\models\Project::getList();
 } else {
     $userList = \common\models\Employee::getListByUserId($user->id);
-    $projectList = \common\models\ProjectEmployeeAccess::getProjectsByEmployee($user->id);
 }
+
+$projectList = EmployeeProjectAccess::getProjects(Yii::$app->user->id);
 
 $this->params['breadcrumbs'][] = $this->title;
 ?>

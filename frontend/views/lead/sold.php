@@ -1,5 +1,6 @@
 <?php
 
+use sales\access\EmployeeProjectAccess;
 use yii\helpers\Html;
 use yii\widgets\Pjax;
 use kartik\grid\GridView;
@@ -21,11 +22,11 @@ $this->title = 'Sold Queue';
 
 if (Yii::$app->user->identity->canRole('admin')) {
     $userList = \common\models\Employee::getList();
-    $projectList = \common\models\Project::getList();
 } else {
     $userList = \common\models\Employee::getListByUserId(Yii::$app->user->id);
-    $projectList = \common\models\ProjectEmployeeAccess::getProjectsByEmployee();
 }
+
+$projectList = EmployeeProjectAccess::getProjects(Yii::$app->user->id);
 
 $this->params['breadcrumbs'][] = $this->title;
 

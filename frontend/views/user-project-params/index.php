@@ -1,5 +1,6 @@
 <?php
 
+use sales\access\EmployeeProjectAccess;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
@@ -15,11 +16,12 @@ $projectList = [];
 
 if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
     $userList = \common\models\Employee::getList();
-    $projectList = \common\models\Project::getList();
 } else {
     $userList = \common\models\Employee::getListByUserId(Yii::$app->user->id);
-    $projectList = \common\models\ProjectEmployeeAccess::getProjectsByEmployee();
 }
+
+$projectList = EmployeeProjectAccess::getProjects(Yii::$app->user->id);
+
 
 ?>
 <div class="user-project-params-index">

@@ -3,16 +3,15 @@
 namespace frontend\controllers;
 
 use common\models\Employee;
-use common\models\ProjectEmployeeAccess;
 use common\models\search\LeadSearch;
-use common\models\UserDepartment;
+use sales\access\EmployeeDepartmentAccess;
+use sales\access\EmployeeProjectAccess;
 use sales\entities\cases\CasesSearch;
 use Yii;
 use common\models\Client;
 use common\models\search\ClientSearch;
 use yii\data\ActiveDataProvider;
 use yii\helpers\ArrayHelper;
-use yii\helpers\VarDumper;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\web\Response;
@@ -132,19 +131,19 @@ class ClientController extends FController
      */
     public function actionAjaxGetInfo(): string
     {
-        $model = $this->findModel((int) Yii::$app->request->post('client_id'));
+        $client = $this->findModel((int) Yii::$app->request->post('client_id'));
 
         $providers = [];
 
         if (Yii::$app->user->can('leadSection')) {
-            $providers['leadsDataProvider'] = $this->getLeadsDataProvider($model->id);
+            $providers['leadsDataProvider'] = $this->getLeadsDataProvider($client->id);
         }
         if (Yii::$app->user->can('caseSection')) {
-            $providers['casesDataProvider'] = $this->getCasesDataProvider($model->id);
+            $providers['casesDataProvider'] = $this->getCasesDataProvider($client->id);
         }
 
         return $this->renderPartial('ajax_info', ArrayHelper::merge(
-            ['model' => $model],
+            ['model' => $client],
             $providers)
         );
     }
@@ -158,8 +157,8 @@ class ClientController extends FController
         $searchModel = new CasesSearch();
 
         $params['CasesSearch']['cs_client_id'] = $clientId;
-        $params['CasesSearch']['cs_project_id'] = array_keys(ProjectEmployeeAccess::getProjectsByEmployee(Yii::$app->user->id));
-        $params['CasesSearch']['cs_dep_id'] = array_keys(UserDepartment::getDepartmentsAccess(Yii::$app->user->id));
+        $params['CasesSearch']['cs_project_id'] = array_keys(EmployeeProjectAccess::getProjects(Yii::$app->user->id));
+        $params['CasesSearch']['cs_dep_id'] = array_keys(EmployeeDepartmentAccess::getDepartments(Yii::$app->user->id));
 
         $dataProvider = $searchModel->searchClient($params);
 
@@ -180,7 +179,7 @@ class ClientController extends FController
 
         /** @var Employee $user */
         $user = Yii::$app->user->identity;
-        if($user->isAgent()) {
+        if ($user->isAgent()) {
             $dataProvider = $searchModel->searchAgent($params);
         } else {
             $dataProvider = $searchModel->search($params);

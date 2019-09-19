@@ -8,6 +8,7 @@
 /* @var $dataProvider yii\data\ActiveDataProvider */
 /* @var $model common\models\Employee */
 
+use sales\access\EmployeeProjectAccess;
 use yii\bootstrap\Html;
 use yii\bootstrap\ActiveForm;
 use common\models\Employee;
@@ -30,11 +31,12 @@ $this->params['breadcrumbs'][] = $this->title;
 
 if (Yii::$app->user->identity->canRoles(['admin', 'userManager', 'superadmin'])) {
     $userList = \common\models\Employee::getList();
-    $projectList = \common\models\Project::getList();
 } else {
     $userList = \common\models\Employee::getListByUserId(Yii::$app->user->id);
-    $projectList = \common\models\ProjectEmployeeAccess::getProjectsByEmployee();
 }
+
+$projectList = EmployeeProjectAccess::getProjects(Yii::$app->user->id);
+
 ?>
 
 

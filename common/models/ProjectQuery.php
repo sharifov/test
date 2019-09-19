@@ -2,25 +2,23 @@
 
 namespace common\models;
 
-/**
- * This is the ActiveQuery class for [[Sources]].
- *
- * @see Sources
- */
-class SourcesQuery extends \yii\db\ActiveQuery
-{
+use yii\db\ActiveQuery;
 
+/**
+ * Class ProjectQuery
+ */
+class ProjectQuery extends ActiveQuery
+{
     /**
-     * @return $this
+     * @return ProjectQuery
      */
-    public function active(): self
+    public function active(): ProjectQuery
     {
-        return $this->andWhere(['hidden' => false]);
+        return $this->andWhere(['closed' => false]);
     }
 
     /**
      * {@inheritdoc}
-     * @return Sources[]|array
      */
     public function all($db = null)
     {
@@ -29,7 +27,6 @@ class SourcesQuery extends \yii\db\ActiveQuery
 
     /**
      * {@inheritdoc}
-     * @return Sources|array|null
      */
     public function one($db = null)
     {

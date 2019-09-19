@@ -1,5 +1,7 @@
 <?php
 
+
+use sales\access\EmployeeProjectAccess;
 use yii\helpers\Html;
 
 /* @var $this yii\web\View */
@@ -70,7 +72,7 @@ $userId = Yii::$app->user->id;
                         <?php
                         $projectsValue = '';
 
-                        if ($projectList = \common\models\ProjectEmployeeAccess::getProjectsByEmployee()) {
+                        if ($projectList = EmployeeProjectAccess::getProjects(Yii::$app->user->id)) {
 
                             $groupsValueArr = [];
                             foreach ($projectList as $project) {

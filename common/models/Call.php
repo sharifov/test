@@ -2,6 +2,7 @@
 
 namespace common\models;
 
+use sales\access\EmployeeDepartmentAccess;
 use sales\entities\AggregateRoot;
 use sales\entities\cases\Cases;
 use sales\entities\cases\CasesStatus;
@@ -993,7 +994,7 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
             }
 
             //$subQuery = ProjectEmployeeAccess::find()->select(['DISTINCT(project_id)'])->where(['employee_id' => $user->id]);
-            $subQueryUd = UserDepartment::find()->depsByUser($user->id);
+            $subQueryUd = EmployeeDepartmentAccess::getDepartmentsSubQuery($user->id);
 
             $calls = self::find()->where(['c_call_status' => self::CALL_STATUS_QUEUE])
                 //->andWhere(['IN', 'c_project_id', $subQuery])
