@@ -19,6 +19,7 @@ use Yii;
  * @property array $dep_ids
  * @property array $statuses
  * @property array $status_ids
+ * @property array $ug_ids
  *
  * @property string $createTimeRange
  * @property int $createTimeStart
@@ -44,8 +45,6 @@ class CallSearch extends Call
 
     public $dep_ids = [];
 
-    public $excludeDep;
-
     private $callSearchRepository;
 
     /**
@@ -55,12 +54,6 @@ class CallSearch extends Call
      */
     public $ug_ids = [];
 
-    /**
-     * is user supervisor
-     *
-     * @var bool
-     */
-    public $isSuper;
 
     /**
      * CallSearch constructor.
@@ -80,11 +73,11 @@ class CallSearch extends Call
     {
         return [
             [['c_id', 'c_call_type_id', 'c_lead_id', 'c_created_user_id', 'c_com_call_id', 'c_project_id', 'c_is_new', 'c_is_deleted', 'supervision_id', 'limit', 'c_recording_duration',
-                'c_source_type_id', 'call_duration_from', 'call_duration_to', 'c_case_id', 'c_client_id', 'isSuper', 'c_status_id', 'excludeDep'], 'integer'],
+                'c_source_type_id', 'call_duration_from', 'call_duration_to', 'c_case_id', 'c_client_id', 'c_status_id'], 'integer'],
             [['c_call_sid', 'c_account_sid', 'c_from', 'c_to', 'c_sip', 'c_call_status', 'c_api_version', 'c_direction', 'c_forwarded_from', 'c_caller_name', 'c_parent_call_sid', 'c_call_duration', 'c_sip_response_code', 'c_recording_url', 'c_recording_sid',
-                'c_timestamp', 'c_uri', 'c_sequence_number', 'c_created_dt', 'c_updated_dt', 'c_error_message', 'c_price', 'statuses', 'limit', 'dep_ids', 'isSuper', 'ug_ids', 'status_ids'], 'safe'],
+                'c_timestamp', 'c_uri', 'c_sequence_number', 'c_created_dt', 'c_updated_dt', 'c_error_message', 'c_price', 'statuses', 'limit'], 'safe'],
             [['createTimeRange'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
-            [['ug_ids', 'status_ids'], 'each', 'rule' => ['integer']],
+            [['ug_ids', 'status_ids', 'dep_ids'], 'each', 'rule' => ['integer']],
         ];
     }
 
@@ -297,7 +290,6 @@ class CallSearch extends Call
             $query->limit($this->limit);
         }
 
-
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
             'sort'=> ['defaultOrder' => ['c_id' => SORT_DESC]],
@@ -322,12 +314,14 @@ class CallSearch extends Call
             $query->andWhere(['c_status_id' => $this->status_ids]);
         }
 
-        if($this->dep_ids) {
+        if ($this->dep_ids) {
             $query->andWhere(['c_dep_id' => $this->dep_ids]);
         }
 
-        if ($this->isSuper) {
-            $subQuery = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->join('JOIN', 'user_department', 'ud_user_id = ugs_user_id and ud_dep_id <> :depId', ['depId' => $this->excludeDep ?? 'ud_dep_id'])->where(['IN', 'ugs_group_id', $this->ug_ids]);
+        if ($this->ug_ids) {
+            $subQuery = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])
+                //->join('JOIN', 'user_department', 'ud_user_id = ugs_user_id and ud_dep_id <> :depId', ['depId' => 'ud_dep_id'])
+                ->where(['ugs_group_id' => $this->ug_ids]);
             $query->andWhere(['IN', 'c_created_user_id', $subQuery]);
         }
 

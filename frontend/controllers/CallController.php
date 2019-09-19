@@ -255,35 +255,39 @@ class CallController extends FController
             $accessDepartments = [];
         }
 
-        $userGroupsModel = $user->ugsGroups;
+        $isSuper = ($user->isSupervision() || $user->isExSuper() || $user->isSupSuper());
 
-        if ($userGroupsModel) {
-            $userGroups = ArrayHelper::map($userGroupsModel, 'ug_id', 'ug_id');
-        } else {
-            $userGroups = [];
+        if ($isSuper && !in_array(Department::DEPARTMENT_SUPPORT, $accessDepartments, true)) {
+            $userGroupsModel = $user->ugsGroups;
+
+            if ($userGroupsModel) {
+                $userGroups = ArrayHelper::map($userGroupsModel, 'ug_id', 'ug_id');
+            } else {
+                $userGroups = [];
+            }
+
+            $params['UserConnectionSearch']['ug_ids'] = $userGroups;
+            $params['CallSearch']['ug_ids'] = $userGroups;
         }
-
-        $params['UserConnectionSearch']['ug_ids'] = $params['CallSearch']['ug_ids'] = $userGroups;
-        $params['UserConnectionSearch']['isSuper'] = $params['CallSearch']['isSuper'] = ($user->isSupervision() || $user->isExSuper() || $user->isSupSuper()) ? 1 : 0;
 
         //VarDumper::dump($accessDepartments, 10, true); exit;
 
 
-        if (in_array(Department::DEPARTMENT_SALES, $accessDepartments, true) || !$accessDepartments) {
+        if (!$accessDepartments || in_array(Department::DEPARTMENT_SALES, $accessDepartments, true)) {
             $params['UserConnectionSearch']['dep_id'] = Department::DEPARTMENT_SALES;
             $dataProviderOnlineDep1 = $searchModel2->searchUserCallMap($params);
         } else {
             $dataProviderOnlineDep1 = null;
         }
 
-        if (in_array(Department::DEPARTMENT_EXCHANGE, $accessDepartments, true) || !$accessDepartments) {
+        if (!$accessDepartments || in_array(Department::DEPARTMENT_EXCHANGE, $accessDepartments, true)) {
             $params['UserConnectionSearch']['dep_id'] = Department::DEPARTMENT_EXCHANGE;
             $dataProviderOnlineDep2 = $searchModel2->searchUserCallMap($params);
         } else {
             $dataProviderOnlineDep2 = null;
         }
 
-        if (in_array(Department::DEPARTMENT_SUPPORT, $accessDepartments, true) || !$accessDepartments) {
+        if (!$accessDepartments || in_array(Department::DEPARTMENT_SUPPORT, $accessDepartments, true)) {
             $params['UserConnectionSearch']['dep_id'] = Department::DEPARTMENT_SUPPORT;
             $dataProviderOnlineDep3 = $searchModel2->searchUserCallMap($params);
         } else {
@@ -297,14 +301,12 @@ class CallController extends FController
             $dataProviderOnline = null;
         }
 
-
-        $params['CallSearch']['excludeDep'] = Department::DEPARTMENT_SUPPORT;
         $params['CallSearch']['dep_ids'] = $accessDepartments;
         $params['CallSearch']['status_ids'] = [Call::STATUS_IN_PROGRESS, Call::STATUS_RINGING, Call::STATUS_QUEUE, Call::STATUS_IVR, Call::STATUS_DELAY];
         $dataProvider3 = $searchModel->searchUserCallMap($params);
 
         $params['CallSearch']['status_ids'] = [Call::STATUS_COMPLETED, Call::STATUS_BUSY, Call::STATUS_FAILED, Call::STATUS_NO_ANSWER, Call::STATUS_CANCELED];
-        $params['CallSearch']['limit'] = 6;
+        $params['CallSearch']['limit'] = 8;
         $dataProvider2 = $searchModel->searchUserCallMap($params);
 
         //$searchModel->datetime_start = date('Y-m-d', strtotime('-0 day'));
