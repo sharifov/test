@@ -113,7 +113,7 @@ class PhoneController extends FController
 
         $dataProvider->sort = false;*/
 
-        $currentCall = Call::find()->where(['c_created_user_id' => Yii::$app->user->id, 'c_call_status' => [Call::CALL_STATUS_RINGING, Call::CALL_STATUS_QUEUE, Call::CALL_STATUS_IN_PROGRESS]])->orderBy(['c_id' => SORT_DESC])->limit(1)->one();
+        $currentCall = Call::find()->where(['c_created_user_id' => Yii::$app->user->id, 'c_status_id' => [Call::STATUS_RINGING, Call::STATUS_QUEUE, Call::STATUS_IN_PROGRESS]])->orderBy(['c_id' => SORT_DESC])->limit(1)->one();
         //$currentCall = Call::find()->orderBy(['c_id' => SORT_DESC])->limit(1)->one();
 
 
@@ -155,7 +155,7 @@ class PhoneController extends FController
 
             $call = Call::find()->where(['c_created_user_id' => $userId])->orderBy(['c_id' => SORT_DESC])->limit(1)->one();
             if ($call) {
-                $call->c_call_status = Call::CALL_STATUS_NO_ANSWER;
+                $call->c_status_id = Call::STATUS_NO_ANSWER;
                 if (!$call->save()) {
                     $out['error'] = VarDumper::dumpAsString($call->errors);
                     Yii::error($out['error'], 'PhoneController:actionAjaxSaveCall:Call:save_1');
@@ -171,7 +171,7 @@ class PhoneController extends FController
 
         $call_from = Yii::$app->request->post('call_from');
         $call_to = Yii::$app->request->post('call_to');
-        $call_status = Yii::$app->request->post('call_status', Call::CALL_STATUS_RINGING);
+        $call_status = Yii::$app->request->post('call_status', Call::TW_STATUS_RINGING);
 
         $lead_id = Yii::$app->request->post('lead_id');
         $case_id = Yii::$app->request->post('case_id');
@@ -220,7 +220,7 @@ class PhoneController extends FController
             }
 
             $call->c_call_status = $call_status;
-            $call->c_updated_dt = date('Y-m-d H:i:s');
+            $call->setStatusByTwilioStatus($call->c_call_status);
 
             if(!$call->save()) {
                 $out['error'] = VarDumper::dumpAsString($call->errors);
@@ -291,7 +291,10 @@ class PhoneController extends FController
                     }
                     $call->c_call_sid = $result['data']['result']['sid'];
                     $call->c_call_type_id = Call::CALL_TYPE_IN;
-                    $call->c_call_status = Call::CALL_STATUS_RINGING;
+
+                    // $call->c_call_status = Call::TW_STATUS_RINGING;
+                    $call->c_status_id = Call::STATUS_RINGING;
+
                     $call->c_com_call_id = null;
                     $call->c_parent_call_sid = $result['data']['result']['sid']; // $call_parent->c_parent_call_sid;
                     $call->c_project_id = $projectid;

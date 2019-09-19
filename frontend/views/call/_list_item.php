@@ -12,7 +12,7 @@ use \common\models\Call;
 <div class="col-md-12">
     <?php
         $trClass = '';
-        if ($model->isIn() && ($model->isNoAnswer() || $model->isCanceled() || $model->isBusy())) {
+        if ($model->isIn() && ($model->isStatusNoAnswer() || $model->isStatusCanceled() || $model->isStatusBusy())) {
             $trClass = 'danger';
         }
 
@@ -21,7 +21,7 @@ use \common\models\Call;
         }
     ?>
 
-    <table class="table table-bordered <?=($model->isIn() && ($model->isNoAnswer() || $model->isCanceled() || $model->isBusy())) ? '' : 'table-striped'?>">
+    <table class="table table-bordered <?=($model->isIn() && ($model->isStatusNoAnswer() || $model->isStatusCanceled() || $model->isStatusBusy())) ? '' : 'table-striped'?>">
         <tr class="<?=$trClass?>">
             <td rowspan="2" style="width:50px">
                 <u><?=Html::a($model->c_id, ['call/view', 'id' => $model->c_id], ['target' => '_blank', 'data-pjax' => 0])?></u><br>
@@ -137,7 +137,7 @@ use \common\models\Call;
                     $sec = 0;
                     if($model->c_updated_dt) {
 
-                        if($model->isIvr() || $model->isRinging() || $model->isInProgress() || $model->isQueue()) {
+                        if($model->isStatusIvr() || $model->isStatusRinging() || $model->isStatusInProgress() || $model->isStatusQueue()) {
                             $sec = time() - strtotime($model->c_updated_dt);
                         } else {
                             $sec = $model->c_call_duration ?: strtotime($model->c_updated_dt) - strtotime($model->c_created_dt);
@@ -145,7 +145,7 @@ use \common\models\Call;
                     }
              ?>
 
-                <?php if ($model->isIvr() || $model->isRinging() || $model->isInProgress() || $model->isQueue()):?>
+                <?php if ($model->isStatusIvr() || $model->isStatusRinging() || $model->isStatusInProgress() || $model->isStatusQueue()):?>
                     <span class="badge badge-warning timer" data-sec="<?=$sec?>" data-control="start" data-format="%M:%S" title="<?=Yii::$app->formatter->asDuration($sec)?>">
                         00:00
                     </span>
@@ -156,7 +156,7 @@ use \common\models\Call;
                     &nbsp;&nbsp;&nbsp;<?=Yii::$app->formatter->asRelativeTime(strtotime($model->c_created_dt))?>
                 <?php endif;?>
 
-                <br><?=$model->getStatusName2()?><br>
+                <br><?=$model->getStatusName()?><br>
             </td>
             <td class="text-center" style="width:110px">
                 <?php if($model->isIn()):?>
@@ -291,12 +291,12 @@ use \common\models\Call;
                                 <?php endif; ?>
                             </td>
                             <td class="text-center" style="width:260px">
-                                <?=$callItem->getStatusIcon()?> <?=$callItem->getStatusName2()?><br>
+                                <?=$callItem->getStatusIcon()?> <?=$callItem->getStatusName()?><br>
                                 <?php
                                 $sec = 0;
                                 if($callItem->c_updated_dt) {
 
-                                    if($callItem->isIvr() || $callItem->isRinging() || $callItem->isInProgress() || $callItem->isQueue()) {
+                                    if ($callItem->isStatusIvr() || $callItem->isStatusRinging() || $callItem->isStatusInProgress() || $callItem->isStatusQueue()) {
                                         $sec = time() - strtotime($callItem->c_updated_dt);
                                     } else {
                                         $sec = $callItem->c_call_duration ?: strtotime($callItem->c_updated_dt) - strtotime($callItem->c_created_dt);
@@ -304,7 +304,7 @@ use \common\models\Call;
                                 }
                                 ?>
 
-                                <?php if ($callItem->isIvr() || $callItem->isRinging() || $callItem->isInProgress() || $callItem->isQueue()):?>
+                                <?php if ($callItem->isStatusIvr() || $callItem->isStatusRinging() || $callItem->isStatusInProgress() || $callItem->isStatusQueue()):?>
                                     <span class="badge badge-warning timer" data-sec="<?=$sec?>" data-control="start" data-format="%M:%S" title="<?=Yii::$app->formatter->asDuration($sec)?>">
                         00:00
                     </span>

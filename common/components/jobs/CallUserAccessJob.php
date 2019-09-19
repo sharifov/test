@@ -77,11 +77,11 @@ class CallUserAccessJob extends BaseObject implements JobInterface
 
                 $call = Call::find()->where(['c_id' => $this->call_id])->limit(1)->one();
 
-                if($call && $call->c_call_status === Call::CALL_STATUS_QUEUE) {
+                if($call && $call->isStatusQueue()) {
 
                     //$originalAgentId = $call->c_created_user_id;
 
-                    Yii::info('CallUserAccessJob - CallId: ' . $this->call_id . ', c_call_status: ' . $call->c_call_status . ', ' . VarDumper::dumpAsString($call->attributes),'info\CallUserAccessJob-call');
+                    Yii::info('CallUserAccessJob - CallId: ' . $this->call_id . ', c_status_id: ' . $call->c_status_id . ', ' . VarDumper::dumpAsString($call->attributes),'info\CallUserAccessJob-call');
 
 
                     $last_hours = (int)(Yii::$app->params['settings']['general_line_last_hours'] ?? 1);

@@ -131,15 +131,13 @@ $this->params['breadcrumbs'][] = $this->title;
         'filterModel' => $searchModel,
         'tableOptions' => ['class' => 'table table-bordered table-condensed table-hover'],
         'rowOptions' => function (\common\models\Call $model, $index, $widget, $grid) {
-            if ($model->c_call_status === \common\models\Call::CALL_STATUS_BUSY) {
+            if ($model->isStatusBusy() || $model->isStatusNoAnswer()) {
                 return ['class' => 'danger'];
-            } elseif ($model->c_call_status === \common\models\Call::CALL_STATUS_NO_ANSWER) {
-                return ['class' => 'danger'];
-            } elseif ($model->c_call_status === \common\models\Call::CALL_STATUS_RINGING || $model->c_call_status === \common\models\Call::CALL_STATUS_QUEUE) {
+            } elseif ($model->isStatusRinging() || $model->isStatusQueue()) {
                 return ['class' => 'warning'];
-            } /*elseif ($model->c_call_status === \common\models\Call::CALL_STATUS_COMPLETED) {
-                return ['class' => 'success'];
-            }*/
+            } elseif ($model->isStatusCompleted()) {
+                // return ['class' => 'success'];
+            }
         },
         'columns' => [
             //['class' => 'yii\grid\SerialColumn'],
@@ -191,12 +189,12 @@ $this->params['breadcrumbs'][] = $this->title;
 
             //'c_call_status',
             [
-                'attribute' => 'c_call_status',
+                'attribute' => 'c_status_id',
                 'value' => function (\common\models\Call $model) {
                     return $model->getStatusLabel();
                 },
                 'format' => 'raw',
-                'filter' => \common\models\Call::CALL_STATUS_LIST
+                'filter' => \common\models\Call::STATUS_LIST
             ],
             //'c_lead_id',
             [

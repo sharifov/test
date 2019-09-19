@@ -82,11 +82,11 @@ class CallQueueJob extends BaseObject implements JobInterface
 
                     // Yii::info('CallQueueJob - CallId: ' . $this->call_id . ', c_call_status: ' . $call->c_call_status . ', ' . VarDumper::dumpAsString($call->attributes),'info\CallQueueJob-call');
 
-                    if($call->isIvr()) {
-                        Yii::info('CallId: ' . $this->call_id . ', CALL_STATUS_IVR' ,'info\CallQueueJob-CALL_STATUS_IVR');
-                        $call->c_call_status = Call::CALL_STATUS_QUEUE;
-                        $call->c_status_id = Call::STATUS_QUEUE;
-                        if(!$call->update()) {
+                    if($call->isStatusIvr()) {
+                        Yii::info('CallId: ' . $this->call_id . ', STATUS_IVR' ,'info\CallQueueJob-STATUS_IVR');
+                        // $call->c_call_status = Call::TW_STATUS_QUEUE;
+                        $call->setStatusQueue();
+                        if (!$call->update()) {
                             Yii::error(VarDumper::dumpAsString($call->errors), 'CallQueueJob:execute:Call:update');
                         }
                     }

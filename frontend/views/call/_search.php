@@ -128,7 +128,7 @@ use \kartik\form\ActiveForm;
             <?php echo $form->field($model, 'c_project_id')->dropDownList(\common\models\Project::getList(), ['prompt' => '-']) ?>
         </div>
         <div class="col-md-2">
-            <?php echo $form->field($model, 'c_call_status')->dropDownList(\common\models\Call::CALL_STATUS_LIST, ['prompt' => '-']) ?>
+            <?php echo $form->field($model, 'c_status_id')->dropDownList(\common\models\Call::STATUS_LIST, ['prompt' => '-']) ?>
         </div>
         <div class="col-md-2">
             <?php echo $form->field($model, 'c_call_type_id')->dropDownList(\common\models\Call::CALL_TYPE_LIST, ['prompt' => '-']) ?>

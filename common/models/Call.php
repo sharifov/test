@@ -72,26 +72,25 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
     
     use EventTrait;
 
-    public const CALL_STATUS_IVR            = 'ivr';
-    public const CALL_STATUS_QUEUE          = 'queued';
-    public const CALL_STATUS_RINGING        = 'ringing';
-    public const CALL_STATUS_IN_PROGRESS    = 'in-progress';
-    public const CALL_STATUS_COMPLETED      = 'completed';
-    public const CALL_STATUS_BUSY           = 'busy';
-    public const CALL_STATUS_NO_ANSWER      = 'no-answer';
-    public const CALL_STATUS_FAILED         = 'failed';
-    public const CALL_STATUS_CANCELED       = 'canceled';
+    public const TW_STATUS_IVR            = 'ivr';
+    public const TW_STATUS_QUEUE          = 'queued';
+    public const TW_STATUS_RINGING        = 'ringing';
+    public const TW_STATUS_IN_PROGRESS    = 'in-progress';
+    public const TW_STATUS_COMPLETED      = 'completed';
+    public const TW_STATUS_BUSY           = 'busy';
+    public const TW_STATUS_NO_ANSWER      = 'no-answer';
+    public const TW_STATUS_FAILED         = 'failed';
+    public const TW_STATUS_CANCELED       = 'canceled';
 
-    public const CALL_STATUS_LIST = [
-        self::CALL_STATUS_IVR         => 'IVR',
-        self::CALL_STATUS_QUEUE         => 'Queued',
-        self::CALL_STATUS_RINGING       => 'Ringing',
-        self::CALL_STATUS_IN_PROGRESS   => 'In progress',
-        self::CALL_STATUS_COMPLETED     => 'Completed',
-        self::CALL_STATUS_BUSY          => 'Busy',
-        self::CALL_STATUS_NO_ANSWER     => 'No answer',
-        self::CALL_STATUS_FAILED        => 'Failed',
-        self::CALL_STATUS_CANCELED      => 'Canceled',
+    public const TW_STATUS_LIST = [
+        self::TW_STATUS_QUEUE           => 'Queued',
+        self::TW_STATUS_RINGING         => 'Ringing',
+        self::TW_STATUS_IN_PROGRESS     => 'In progress',
+        self::TW_STATUS_COMPLETED       => 'Completed',
+        self::TW_STATUS_BUSY            => 'Busy',
+        self::TW_STATUS_NO_ANSWER       => 'No answer',
+        self::TW_STATUS_FAILED          => 'Failed',
+        self::TW_STATUS_CANCELED        => 'Canceled',
     ];
 
 
@@ -104,6 +103,7 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
     public const STATUS_NO_ANSWER      = 7;
     public const STATUS_FAILED         = 8;
     public const STATUS_CANCELED       = 9;
+    public const STATUS_DELAY          = 10;
 
     public const STATUS_LIST = [
         self::STATUS_IVR           => 'IVR',
@@ -115,44 +115,23 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
         self::STATUS_NO_ANSWER     => 'No answer',
         self::STATUS_FAILED        => 'Failed',
         self::STATUS_CANCELED      => 'Canceled',
-    ];
-
-    public const CALL_STATUS_LABEL_LIST = [
-        self::CALL_STATUS_IVR         => '<span class="label label-warning"><i class="fa fa-refresh fa-spin"></i> ' . self::CALL_STATUS_LIST[self::CALL_STATUS_IVR] . '</span>',
-        self::CALL_STATUS_QUEUE         => '<span class="label label-warning"><i class="fa fa-refresh fa-spin"></i> ' . self::CALL_STATUS_LIST[self::CALL_STATUS_QUEUE] . '</span>',
-        self::CALL_STATUS_RINGING       => '<span class="label label-warning"><i class="fa fa-spinner fa-spin"></i> ' . self::CALL_STATUS_LIST[self::CALL_STATUS_RINGING] . '</span>',
-        self::CALL_STATUS_IN_PROGRESS   => '<span class="label label-success"><i class="fa fa-volume-control-phone"></i> ' . self::CALL_STATUS_LIST[self::CALL_STATUS_IN_PROGRESS] . '</span>',
-        self::CALL_STATUS_COMPLETED     => '<span class="label label-info"><i class="fa fa-check"></i> ' . self::CALL_STATUS_LIST[self::CALL_STATUS_COMPLETED] . '</span>',
-        self::CALL_STATUS_BUSY          => '<span class="label label-danger"><i class="fa fa-ban"></i> ' . self::CALL_STATUS_LIST[self::CALL_STATUS_BUSY] . '</span>',
-        self::CALL_STATUS_NO_ANSWER     => '<span class="label label-danger"><i class="fa fa-times-circle"></i> ' . self::CALL_STATUS_LIST[self::CALL_STATUS_NO_ANSWER] . '</span>',
-        self::CALL_STATUS_FAILED        => '<span class="label label-danger"><i class="fa fa-window-close"></i> ' . self::CALL_STATUS_LIST[self::CALL_STATUS_FAILED] . '</span>',
-        self::CALL_STATUS_CANCELED      => '<span class="label label-danger"><i class="fa fa-close"></i> ' . self::CALL_STATUS_LIST[self::CALL_STATUS_CANCELED] . '</span>',
+        self::STATUS_DELAY          => 'Delay',
     ];
 
 
     public const STATUS_LABEL_LIST = [
-        self::STATUS_IVR         => '<span class="label label-warning"><i class="fa fa-refresh fa-spin"></i> ' . self::STATUS_LIST[self::STATUS_IVR] . '</span>',
-        self::STATUS_QUEUE         => '<span class="label label-warning"><i class="fa fa-refresh fa-spin"></i> ' . self::STATUS_LIST[self::STATUS_QUEUE] . '</span>',
-        self::STATUS_RINGING       => '<span class="label label-warning"><i class="fa fa-spinner fa-spin"></i> ' . self::STATUS_LIST[self::STATUS_RINGING] . '</span>',
-        self::STATUS_IN_PROGRESS   => '<span class="label label-success"><i class="fa fa-volume-control-phone"></i> ' . self::STATUS_LIST[self::STATUS_IN_PROGRESS] . '</span>',
-        self::STATUS_COMPLETED     => '<span class="label label-info"><i class="fa fa-check"></i> ' . self::STATUS_LIST[self::STATUS_COMPLETED] . '</span>',
-        self::STATUS_BUSY          => '<span class="label label-danger"><i class="fa fa-ban"></i> ' . self::STATUS_LIST[self::STATUS_BUSY] . '</span>',
-        self::STATUS_NO_ANSWER     => '<span class="label label-danger"><i class="fa fa-times-circle"></i> ' . self::STATUS_LIST[self::STATUS_NO_ANSWER] . '</span>',
-        self::STATUS_FAILED        => '<span class="label label-danger"><i class="fa fa-window-close"></i> ' . self::STATUS_LIST[self::STATUS_FAILED] . '</span>',
-        self::STATUS_CANCELED      => '<span class="label label-danger"><i class="fa fa-close"></i> ' . self::STATUS_LIST[self::STATUS_CANCELED] . '</span>',
+        self::STATUS_IVR            => '<span class="label label-warning"><i class="fa fa-refresh fa-spin"></i> ' . self::STATUS_LIST[self::STATUS_IVR] . '</span>',
+        self::STATUS_QUEUE          => '<span class="label label-warning"><i class="fa fa-refresh fa-spin"></i> ' . self::STATUS_LIST[self::STATUS_QUEUE] . '</span>',
+        self::STATUS_RINGING        => '<span class="label label-warning"><i class="fa fa-spinner fa-spin"></i> ' . self::STATUS_LIST[self::STATUS_RINGING] . '</span>',
+        self::STATUS_IN_PROGRESS    => '<span class="label label-success"><i class="fa fa-volume-control-phone"></i> ' . self::STATUS_LIST[self::STATUS_IN_PROGRESS] . '</span>',
+        self::STATUS_COMPLETED      => '<span class="label label-info"><i class="fa fa-check"></i> ' . self::STATUS_LIST[self::STATUS_COMPLETED] . '</span>',
+        self::STATUS_BUSY           => '<span class="label label-danger"><i class="fa fa-ban"></i> ' . self::STATUS_LIST[self::STATUS_BUSY] . '</span>',
+        self::STATUS_NO_ANSWER      => '<span class="label label-danger"><i class="fa fa-times-circle"></i> ' . self::STATUS_LIST[self::STATUS_NO_ANSWER] . '</span>',
+        self::STATUS_FAILED         => '<span class="label label-danger"><i class="fa fa-window-close"></i> ' . self::STATUS_LIST[self::STATUS_FAILED] . '</span>',
+        self::STATUS_CANCELED       => '<span class="label label-danger"><i class="fa fa-close"></i> ' . self::STATUS_LIST[self::STATUS_CANCELED] . '</span>',
+        self::STATUS_DELAY          => '<span class="label label-danger"><i class="fa fa-pause"></i> ' . self::STATUS_LIST[self::STATUS_DELAY] . '</span>',
     ];
 
-    public const CALL_STATUS_DESCRIPTION_LIST = [
-        self::CALL_STATUS_IVR           => 'The call is IVR.',
-        self::CALL_STATUS_QUEUE         => 'The call is ready and waiting in line before going out.',
-        self::CALL_STATUS_RINGING       => 'The call is currently ringing.',
-        self::CALL_STATUS_IN_PROGRESS   => 'The call was answered and is actively in progress.',
-        self::CALL_STATUS_COMPLETED     => 'The call was answered and has ended normally.',
-        self::CALL_STATUS_BUSY          => 'The caller received a busy signal.',
-        self::CALL_STATUS_FAILED        => 'The call could not be completed as dialed, most likely because the phone number was non-existent.',
-        self::CALL_STATUS_NO_ANSWER     => 'The call ended without being answered.',
-        self::CALL_STATUS_CANCELED      => 'The call was canceled via the REST API while queued or ringing.',
-    ];
 
     public const CALL_TYPE_OUT  = 1;
     public const CALL_TYPE_IN   = 2;
@@ -503,15 +482,15 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
     /**
      * @return mixed|string
      */
-    public function getStatusName()
+    public function getTwilioStatusName()
     {
-        return self::CALL_STATUS_LIST[$this->c_call_status] ?? '-';
+        return self::TW_STATUS_LIST[$this->c_call_status] ?? '-';
     }
 
     /**
      * @return mixed|string
      */
-    public function getStatusName2()
+    public function getStatusName()
     {
         return self::STATUS_LIST[$this->c_status_id] ?? '-';
     }
@@ -521,15 +500,17 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
      */
     public function getStatusIcon(): string
     {
-        if ($this->isRinging()) {
+        if ($this->isStatusRinging()) {
             $icon = 'fa fa-refresh fa-pulse fa-fw text-danger';
-        } elseif ($this->isInProgress()) {
+        } elseif ($this->isStatusInProgress()) {
             $icon = 'fa fa-spinner fa-pulse fa-fw';
-        } elseif ($this->isQueue()) {
+        } elseif ($this->isStatusQueue()) {
             $icon = 'fa fa-pause';
-        } elseif ($this->isCompleted()) {
+        } elseif ($this->isStatusCompleted()) {
             $icon = 'fa fa-trophy text-success';
-        } elseif ($this->isCanceled() || $this->isNoAnswer() || $this->isBusy()) {
+        } elseif ($this->isStatusDelay()) {
+            $icon = 'fa fa-pause text-success';
+        } elseif ($this->isStatusCanceled() || $this->isStatusNoAnswer() || $this->isStatusBusy()) {
             $icon = 'fa fa-times-circle text-danger';
         } else {
             $icon = '';
@@ -556,7 +537,7 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
      */
     public function getStatusLabel()
     {
-        return self::CALL_STATUS_LABEL_LIST[$this->c_call_status] ?? '-';
+        return self::STATUS_LABEL_LIST[$this->c_status_id] ?? '-';
     }
 
 
@@ -570,7 +551,7 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
     {
         parent::afterSave($insert, $changedAttributes);
 
-        if(!$insert) {
+        if (!$insert) {
 //            if(isset($changedAttributes['c_call_status']) && in_array($this->c_call_status, [self::CALL_STATUS_COMPLETED, self::CALL_STATUS_BUSY, self::CALL_STATUS_NO_ANSWER], false)) {
 //                if($this->c_created_user_id) {
 //                    // self::applyHoldCallToAgent($this->c_created_user_id);
@@ -581,9 +562,9 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
 //            }
 
 
-            if(isset($changedAttributes['c_call_status']) && $this->isIn() && ($this->isCompleted() || $this->isNoAnswer() || $this->isBusy() || $this->isInProgress() || $this->isCanceled())) {
+            if (isset($changedAttributes['c_status_id']) && $this->isIn() && ($this->isStatusCompleted() || $this->isStatusNoAnswer() || $this->isStatusBusy() || $this->isStatusInProgress() || $this->isStatusCanceled())) {
 
-                $callUserAccessAny = CallUserAccess::find()->where(['cua_status_id' => [CallUserAccess::STATUS_TYPE_PENDING], 'cua_call_id' => $this->c_id])->all();
+                $callUserAccessAny = CallUserAccess::find()->where(['cua_status_id' => CallUserAccess::STATUS_TYPE_PENDING, 'cua_call_id' => $this->c_id])->all();
                 if ($callUserAccessAny) {
                     foreach ($callUserAccessAny as $callAccess) {
                         $callAccess->noAnsweredCall();
@@ -595,16 +576,17 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
 
                 if (!$this->c_parent_id) {
                     $isCallUserAccepted = CallUserAccess::find()->where([
-                        'cua_status_id' => [CallUserAccess::STATUS_TYPE_ACCEPT],
+                        'cua_status_id' => CallUserAccess::STATUS_TYPE_ACCEPT,
                         'cua_call_id' => $this->c_id
                     ])->exists();
+
                     if (!$isCallUserAccepted) {
                         $this->c_status_id = self::STATUS_NO_ANSWER;
                         self::updateAll(['c_status_id' => self::STATUS_NO_ANSWER], ['c_id' => $this->c_id]);
                     }
                 }
 
-                if ($this->isCompleted() || $this->isCanceled() || $this->isNoAnswer() || $this->isBusy()) {
+                if ($this->isStatusCompleted() || $this->isStatusCanceled() || $this->isStatusNoAnswer() || $this->isStatusBusy()) {
 
                     $callAcceptExist = CallUserAccess::find()->where(['cua_status_id' => CallUserAccess::STATUS_TYPE_ACCEPT, 'cua_call_id' => $this->c_id])->exists();
                     if (!$callAcceptExist) {
@@ -646,21 +628,20 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
 
 
 
-            if(isset($changedAttributes['c_call_status']) && $this->isIn() && $this->c_case_id && $this->isInProgress()) {
-                if($this->c_created_user_id && $this->cCase && $this->c_created_user_id !== $this->cCase->cs_user_id) {
+            if ($this->c_case_id && isset($changedAttributes['c_call_status']) && $this->isIn() && $this->isStatusInProgress()) {
+                if ($this->c_created_user_id && $this->cCase && $this->c_created_user_id !== $this->cCase->cs_user_id) {
                     try {
                         $casesManageService = Yii::createObject(CasesManageService::class);
                         $casesManageService->take($this->c_case_id, $this->c_created_user_id);
                     } catch (\Throwable $exception) {
                         Yii::error(VarDumper::dumpAsString($exception), 'Call:afterSave:CasesManageService:Case:Take');
                     }
-
                 }
             }
 
             //Yii::info(VarDumper::dumpAsString($this->attributes), 'info\Call:afterSave');
 
-            if(isset($changedAttributes['c_call_status']) && $this->isIn() && $this->c_lead_id && ($this->isNoAnswer() || $this->isCompleted())) {
+            if ($this->c_lead_id && isset($changedAttributes['c_call_status']) && $this->isIn() && ($this->isStatusNoAnswer() || $this->isStatusCompleted())) {
 
 //                if($this->c_call_status == self::CALL_STATUS_NO_ANSWER) {
 //                    if ($this->c_created_user_id) {
@@ -674,12 +655,11 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
 //                    }
 //                }
 
-                if ($lead = $this->cLead2) {
-                    if($lead->l_call_status_id == Lead::CALL_STATUS_QUEUE) {
-                        $lead->l_call_status_id = Lead::CALL_STATUS_READY;
-                        if(!$lead->save()) {
-                            Yii::error(VarDumper::dumpAsString($lead->errors), 'Call:afterSave:Lead2:update');
-                        }
+                if ($this->cLead2 && (int) $this->cLead2->l_call_status_id === Lead::CALL_STATUS_QUEUE) {
+                    $lead = $this->cLead2;
+                    $lead->l_call_status_id = Lead::CALL_STATUS_READY;
+                    if(!$lead->save()) {
+                        Yii::error(VarDumper::dumpAsString($lead->errors), 'Call:afterSave:Lead2:update');
                     }
                 }
 
@@ -688,18 +668,13 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
                     Notifications::socket($this->c_created_user_id, null, 'getNewNotification', [], true);
                 }*/
 
-
-
                 //Yii::info(VarDumper::dumpAsString($this->attributes), 'info\Call:afterSave:createNewLead');
                 //$this->createNewLead();
             }
 
-
-
-            //Yii::info(VarDumper::dumpAsString(['changedAttributes' => $changedAttributes, 'Call' => $this->attributes, 'Lead' => $lead->attributes]), 'info\Call:afterSave');
-
-            if($this->isInProgress() && $this->isIn() && ( $this->c_lead_id || $this->c_case_id ) && isset($changedAttributes['c_call_status'])
-                && ($changedAttributes['c_call_status'] === self::CALL_STATUS_RINGING || $changedAttributes['c_call_status'] === self::CALL_STATUS_QUEUE)) {
+            if(( $this->c_lead_id || $this->c_case_id ) && isset($changedAttributes['c_status_id'])
+                && ($changedAttributes['c_status_id'] === self::STATUS_RINGING || $changedAttributes['c_status_id'] === self::STATUS_QUEUE)
+                && $this->isStatusInProgress() && $this->isIn()) {
 
                 if($this->c_lead_id && (int) $this->c_dep_id === Department::DEPARTMENT_SALES) {
                     $lead = $this->cLead2;
@@ -741,27 +716,11 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
                         }
                     }
                 }
-
             }
-
-
-
-
         }
 
-        if (($insert && $this->c_created_user_id) || (isset($changedAttributes['c_call_status']) && $this->c_created_user_id))  {
-
-            Notifications::socket($this->c_created_user_id, $this->c_lead_id, 'callUpdate', ['id' => $this->c_id, 'status' => $this->c_call_status, 'duration' => $this->c_call_duration, 'snr' => $this->c_sequence_number], true);
-
-            /*
-            if($this->c_call_type_id === self::CALL_TYPE_OUT && NULL === $this->c_parent_call_sid) {
-                Notifications::socket($this->c_created_user_id, $this->c_lead_id, 'callUpdate', ['id' => $this->c_id, 'status' => $this->c_call_status, 'duration' => $this->c_call_duration, 'snr' => $this->c_sequence_number], true);
-            }
-
-            if($this->c_call_type_id === self::CALL_TYPE_IN && $this->c_parent_call_sid) {
-                Notifications::socket($this->c_created_user_id, $this->c_lead_id, 'incomingCall', ['id' => $this->c_id, 'status' => $this->c_call_status, 'duration' => $this->c_call_duration, 'snr' => $this->c_sequence_number], true);
-            }*/
-
+        if (($insert && $this->c_created_user_id) || (isset($changedAttributes['c_status_id']) && $this->c_created_user_id))  {
+            Notifications::socket($this->c_created_user_id, $this->c_lead_id, 'callUpdate', ['id' => $this->c_id, 'status' => $this->getStatusName(), 'duration' => $this->c_call_duration, 'snr' => $this->c_sequence_number], true);
         }
 
         if($this->c_call_type_id === self::CALL_TYPE_OUT && $this->c_lead_id && $this->cLead) {
@@ -862,8 +821,8 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
                     return false;
                 }
 
-                $call->c_call_status = self::CALL_STATUS_RINGING;
-                $call->setStatusByTwilioStatus($call->c_call_status);
+                //$call->c_call_status = self::CALL_STATUS_IN_PROGRESS;
+                $call->setStatusDelay();
 
                 if($call->c_created_user_id && (int) $call->c_created_user_id !== $user_id) {
                     $call->c_source_type_id = self::SOURCE_REDIRECT_CALL;
@@ -904,7 +863,7 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
 
                 if ($res && isset($res['error']) && $res['error'] === false) {
                     if (isset($res['data']['is_error']) && $res['data']['is_error'] === true) {
-                        $call->c_call_status = self::CALL_STATUS_CANCELED;
+                        $call->c_call_status = self::TW_STATUS_CANCELED;
                         $call->setStatusByTwilioStatus($call->c_call_status);
                         $call->c_created_user_id = null;
                         $call->update();
@@ -962,75 +921,6 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
     }
 
 
-    /**
-     * @param int $agentId
-     * @return bool
-     */
-    public static function applyHoldCallToAgent(int $agentId): bool
-    {
-        try {
-
-            $callsCount = self::find()->where(['c_call_status' => self::CALL_STATUS_QUEUE])->count(); //cache(10)
-            \Yii::info(VarDumper::dumpAsString($callsCount, 10, false), 'info\Call:applyHoldCallToAgent:callRedirect_$callsCount');
-            if (!$callsCount) {
-                return false;
-            }
-
-            $user = Employee::findOne($agentId);
-            if (!$user) {
-                throw new \Exception('Agent not found by id. Call:applyHoldCallToAgent:$user:' . $agentId);
-            }
-
-            if (!$user->isOnline()) {
-                throw new \Exception('Agent is not isOnline Call:applyHoldCallToAgent:isOnline:$user:' . $agentId);
-            }
-
-            if (!$user->isCallStatusReady()) {
-                throw new \Exception('Agent is not isCallStatusReady. Call:applyHoldCallToAgent:isCallStatusReady:$user:' . $agentId);
-            }
-
-            if (!$user->isCallFree()) {
-                throw new \Exception('Agent is not isCallFree. Call:applyHoldCallToAgent:isCallFree:$user:' . $agentId);
-            }
-
-            $project_employee_access = ProjectEmployeeAccess::find()->select(['project_id'])->where(['employee_id' => $user->id])->all();
-            if (!$project_employee_access) {
-                throw new \Exception('Not found ProjectEmployeeAccess. Call:applyHoldCallToAgent:$project_employee_access:$user:' . $agentId);
-            }
-
-            $projectsIds = [];
-            if($project_employee_access) {
-                foreach ($project_employee_access AS $pea) {
-                    $projectsIds[] = $pea->project_id;
-                }
-            }
-
-            //$subQuery = ProjectEmployeeAccess::find()->select(['DISTINCT(project_id)'])->where(['employee_id' => $user->id]);
-            $subQueryUd = UserDepartment::find()->depsByUser($user->id);
-
-            $calls = self::find()->where(['c_call_status' => self::CALL_STATUS_QUEUE])
-                //->andWhere(['IN', 'c_project_id', $subQuery])
-                ->andWhere(['c_project_id' => $projectsIds])
-                ->andWhere(['IN', 'c_dep_id', $subQueryUd])
-                ->orderBy(['c_id' => SORT_ASC])
-                ->limit(5)
-                ->all();
-
-            //->andWhere(['c_project_id' => $projectsIds])
-
-            if ($calls) {
-                foreach ($calls as $call) {
-                    $isCalled = self::applyCallToAgent($call, $user->id);
-                    if($isCalled) {
-                        return true;
-                    }
-                }
-            }
-        } catch (\Throwable $e) {
-            \Yii::warning(VarDumper::dumpAsString([$e->getMessage(), $e->getFile(), $e->getLine()], 10, false), 'Call:applyHoldCallToAgent');
-        }
-        return false;
-    }
 
     /**
      * @param string $startDate
@@ -1054,9 +944,9 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
                 break;
             case 'hours':
                 if (strtotime($startDate) == strtotime($endDate)){
-                    $hoursRange = ChartTools::getHoursRange($startDate, $endDate." 23:59:59", $step = '+1 hour', $format = 'H:i:s');
+                    $hoursRange = ChartTools::getHoursRange($startDate, $endDate . ' 23:59:59', $step = '+1 hour', $format = 'H:i:s');
                 } else {
-                    $hoursRange = ChartTools::getHoursRange($startDate, $endDate." 23:59:59", $step = '+1 hour', $format = 'Y-m-d H:i:s');
+                    $hoursRange = ChartTools::getHoursRange($startDate, $endDate . ' 23:59:59', $step = '+1 hour', $format = 'Y-m-d H:i:s');
                 }
                 break;
             case 'days':
@@ -1149,25 +1039,25 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
                 if ($callUpdatedTime >= $timeSignature && $callUpdatedTime <= $EndPoint)
                 {
                     switch ($callItem->c_call_status){
-                        case self::CALL_STATUS_COMPLETED :
+                        case self::TW_STATUS_COMPLETED :
                             $completed++;
-                            $cc_Duration = $cc_Duration + $callItem->c_call_duration;
-                            $cc_TotalPrice = $cc_TotalPrice + $callItem->c_price;
+                            $cc_Duration += $callItem->c_call_duration;
+                            $cc_TotalPrice += $callItem->c_price;
                             break;
-                        case self::CALL_STATUS_NO_ANSWER :
+                        case self::TW_STATUS_NO_ANSWER :
                             $noAnswer++;
                             break;
-                        case self::CALL_STATUS_BUSY :
+                        case self::TW_STATUS_BUSY :
                             $busy++;
                             break;
-                        case self::CALL_STATUS_CANCELED :
+                        case self::TW_STATUS_CANCELED :
                             $canceled++;
                             break;
                     }
                 }
             }
             $item['time'] = $timeSignature;
-            $item['weeksInterval'] = (count($weekInterval) == 2) ? $EndPoint : null;
+            $item['weeksInterval'] = (count($weekInterval) === 2) ? $EndPoint : null;
             $item['completed'] = $completed;
             $item['no-answer'] = $noAnswer;
             $item['busy'] = $busy;
@@ -1175,19 +1065,20 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
             $item['cc_Duration'] = $cc_Duration;
             $item['cc_TotalPrice'] = round($cc_TotalPrice, 2);
 
-            array_push($callStats, $item);
+            $callStats[] = $item;
+
+            // array_push($callStats, $item);
             $completed = $noAnswer = $busy = $canceled = 0;
             $cc_Duration = $cc_TotalPrice= 0;
         }
         return $callStats;
     }
 
+
     /**
-     * Returns client TimeZone 
-     * 
      * @param array $callData
-     * 
-     * @return string
+     * @return string|null
+     * @throws \Exception
      */
     public static function getClientTime(array $callData): ?string
     {
@@ -1195,128 +1086,122 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
         $city = $callData['FromCity'] ?? '';
         $state = $callData['FromState'] ?? '';
 
-        if (empty($country)) return null;
+        if (empty($country)) {
+            return null;
+        }
 
-        $region = !empty($state) ? $state : (!empty($city) ? $city : '');
-
+        $region = $state ?: $city ?: '';
         $timezone = geoip_time_zone_by_country_and_region($country, $region);
-        
-        $timezone = ($timezone == false) ? (self::getTimezoneByCountryCode($country) ?? false) : $timezone;
+        $timezone = $timezone ?: self::getTimezoneByCountryCode($country) ?: false;
 
-        if ($timezone === false) return null;
+        if (!$timezone) {
+            return null;
+        }
 
         $date = new DateTime('now', new DateTimeZone($timezone));
-
         return $date->format('P');
     }
 
+
     /**
-     * @param string $code CountryCode;
-     * 
-     * @return null:string
-     * 
+     * @param string $code
+     * @return string|null
      * @throws \Exception
      */
     private static function getTimezoneByCountryCode(string $code): ?string
     {
-        if (empty($code)) throw new \Exception('Country code is empty');
+        if (empty($code)) {
+            throw new \Exception('Country code is empty');
+        }
 
         $timezone = null;
-
         $countriesTimeZone = DateTimeZone::listIdentifiers(DateTimeZone::PER_COUNTRY, $code);
-
         $countTimeZones = count($countriesTimeZone);
         
-        if ($countTimeZones == 3) $timezone = $countriesTimeZone[1];
-        elseif ($countTimeZones < 3) $timezone = $countTimeZones[0] ?? null;
-
+        if ($countTimeZones === 3) {
+            $timezone = $countriesTimeZone[1] ?? null;
+        } elseif ($countTimeZones < 3) {
+            $timezone = $countTimeZones[0] ?? null;
+        }
         return $timezone;
     }
 
+
     /**
-     * Return Country Name by ISO Country Code
-     * 
      * @param string $countryCode
-     * 
      * @return string|null
      */
     public static function getDisplayRegion(string $countryCode): ?string
     {
-        if (empty($countryCode)) return null;
+        if (empty($countryCode)) {
+            return null;
+        }
 
-        return Locale::getDisplayRegion("-$countryCode", 'en');
+        return Locale::getDisplayRegion('-' . $countryCode, 'en');
     }
 
     /**
      * @return bool
      */
-    public function isRinging(): bool
+    public function isRingingTw(): bool
     {
-        return $this->c_call_status === self::CALL_STATUS_RINGING;
+        return $this->c_call_status === self::TW_STATUS_RINGING;
     }
 
     /**
      * @return bool
      */
-    public function isInProgress(): bool
+    public function isInProgressTw(): bool
     {
-        return $this->c_call_status === self::CALL_STATUS_IN_PROGRESS;
+        return $this->c_call_status === self::TW_STATUS_IN_PROGRESS;
     }
 
     /**
      * @return bool
      */
-    public function isIvr(): bool
+    public function isQueueTw(): bool
     {
-        return $this->c_call_status === self::CALL_STATUS_IVR;
+        return $this->c_call_status === self::TW_STATUS_QUEUE;
     }
 
     /**
      * @return bool
      */
-    public function isQueue(): bool
+    public function isBusyTw(): bool
     {
-        return $this->c_call_status === self::CALL_STATUS_QUEUE;
+        return $this->c_call_status === self::TW_STATUS_BUSY;
     }
 
     /**
      * @return bool
      */
-    public function isBusy(): bool
+    public function isCanceledTw(): bool
     {
-        return $this->c_call_status === self::CALL_STATUS_BUSY;
+        return $this->c_call_status === self::TW_STATUS_CANCELED;
     }
 
     /**
      * @return bool
      */
-    public function isCanceled(): bool
+    public function isCompletedTw(): bool
     {
-        return $this->c_call_status === self::CALL_STATUS_CANCELED;
+        return $this->c_call_status === self::TW_STATUS_COMPLETED;
     }
 
     /**
      * @return bool
      */
-    public function isCompleted(): bool
+    public function isNoAnswerTw(): bool
     {
-        return $this->c_call_status === self::CALL_STATUS_COMPLETED;
+        return $this->c_call_status === self::TW_STATUS_NO_ANSWER;
     }
 
     /**
      * @return bool
      */
-    public function isNoAnswer(): bool
+    public function isFailedTw(): bool
     {
-        return $this->c_call_status === self::CALL_STATUS_NO_ANSWER;
-    }
-
-    /**
-     * @return bool
-     */
-    public function isFailed(): bool
-    {
-        return $this->c_call_status === self::CALL_STATUS_FAILED;
+        return $this->c_call_status === self::TW_STATUS_FAILED;
     }
 
     /**
@@ -1344,31 +1229,28 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
     {
         $statusId = null;
         switch ($statusName) {
-            case self::CALL_STATUS_IVR:
-                $statusId = self::STATUS_IVR;
-                break;
-            case self::CALL_STATUS_QUEUE:
+            case self::TW_STATUS_QUEUE:
                 $statusId = self::STATUS_QUEUE;
                 break;
-            case self::CALL_STATUS_RINGING:
+            case self::TW_STATUS_RINGING:
                 $statusId = self::STATUS_RINGING;
                 break;
-            case self::CALL_STATUS_COMPLETED:
+            case self::TW_STATUS_COMPLETED:
                 $statusId = self::STATUS_COMPLETED;
                 break;
-            case self::CALL_STATUS_CANCELED:
+            case self::TW_STATUS_CANCELED:
                 $statusId = self::STATUS_CANCELED;
                 break;
-            case self::CALL_STATUS_FAILED:
+            case self::TW_STATUS_FAILED:
                 $statusId = self::STATUS_FAILED;
                 break;
-            case self::CALL_STATUS_BUSY:
+            case self::TW_STATUS_BUSY:
                 $statusId = self::STATUS_BUSY;
                 break;
-            case self::CALL_STATUS_IN_PROGRESS:
+            case self::TW_STATUS_IN_PROGRESS:
                 $statusId = self::STATUS_IN_PROGRESS;
                 break;
-            case self::CALL_STATUS_NO_ANSWER:
+            case self::TW_STATUS_NO_ANSWER:
                 $statusId = self::STATUS_NO_ANSWER;
                 break;
         }
@@ -1411,11 +1293,27 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
     }
 
     /**
+     * @return int
+     */
+    public function setStatusIvr(): int
+    {
+        return $this->c_status_id = self::STATUS_IVR;
+    }
+
+    /**
      * @return bool
      */
     public function isStatusQueue(): bool
     {
         return $this->c_status_id === self::STATUS_QUEUE;
+    }
+
+    /**
+     * @return int
+     */
+    public function setStatusQueue(): int
+    {
+        return $this->c_status_id = self::STATUS_QUEUE;
     }
 
     /**
@@ -1457,6 +1355,32 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
     {
         return $this->c_status_id === self::STATUS_FAILED;
     }
+
+    /**
+     * @return int
+     */
+    public function setStatusFailed(): int
+    {
+        return $this->c_status_id = self::STATUS_FAILED;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isStatusDelay(): bool
+    {
+        return $this->c_status_id === self::STATUS_DELAY;
+    }
+
+    /**
+     * @return int
+     */
+    public function setStatusDelay(): int
+    {
+        return $this->c_status_id = self::STATUS_DELAY;
+    }
+
+
 
 
 
