@@ -122,7 +122,7 @@ $js = <<<JS
 
     const notifyUrl = '$notifyUrl';
     function updatePjaxNotify() {
-        $.pjax.reload({url: notifyUrl, container : '#notify-pjax', push: false, replace: false, timeout: 10000, scrollTo: false, async: true});
+        $.pjax({url: notifyUrl, container : '#notify-pjax', push: false, replace: false, timeout: 10000, scrollTo: false, async: true});
     }
 
     $("#notify-pjax").on("pjax:beforeSend", function() {

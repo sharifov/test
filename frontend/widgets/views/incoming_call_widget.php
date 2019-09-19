@@ -225,7 +225,7 @@ use yii\widgets\Pjax;
     function refreshInboxCallWidget(obj)
     {
         // console.log(obj);
-        $.pjax.reload({url: incomingCallUrl, container: '#incoming-call-pjax', push: false, replace: false, 'scrollTo': false, timeout: 5000, async: true}); // , data: {id: obj.id, status: obj.status}
+        $.pjax({url: incomingCallUrl, container: '#incoming-call-pjax', push: false, replace: false, 'scrollTo': false, timeout: 5000, async: true}); // , data: {id: obj.id, status: obj.status}
     }
 
     function getVisible (evt) {
