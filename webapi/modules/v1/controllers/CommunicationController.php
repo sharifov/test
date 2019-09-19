@@ -2,6 +2,7 @@
 namespace webapi\modules\v1\controllers;
 
 use common\components\jobs\CallQueueJob;
+use common\models\ApiLog;
 use common\models\Call;
 use common\models\CallUserGroup;
 use common\models\ClientPhone;
@@ -80,17 +81,12 @@ class CommunicationController extends ApiBaseController
         $this->checkPost();
         $apiLog = $this->startApiLog($this->action->uniqueId);
 
-        //$action = Yii::$app->request->post('action');
         $type = Yii::$app->request->post('type');
         $last_id = Yii::$app->request->post('last_email_id', NULL);
-        /*if(!$action) {
-            throw new NotFoundHttpException('Not found action', 1);
-        }*/
 
         if(!$type) {
             throw new NotFoundHttpException('Not found Email type', 1);
         }
-
 
         switch ($type) {
             case self::TYPE_UPDATE_EMAIL_STATUS : $response = $this->updateEmailStatus();
@@ -100,33 +96,7 @@ class CommunicationController extends ApiBaseController
             default: throw new BadRequestHttpException('Invalid Email type', 2);
         }
 
-        $responseData = [];
-
-        if (isset($response['error']) && $response['error']) {
-
-        } else {
-            $responseData = [
-                'status'    => 200,
-                'name'      => 'Success',
-                'code'      => 0,
-                'message'   => ''
-            ];
-        }
-
-        $responseData['data']['response'] = $response;
-        // $responseData['data']['request']                = $modelLead;
-        $responseData = $apiLog->endApiLog($responseData);
-
-        if (isset($response['error']) && $response['error']) {
-            $json = @json_encode($response['error']);
-            if (isset($response['error_code']) && $response['error_code']) {
-                $error_code = $response['error_code'];
-            } else {
-                $error_code = 0;
-            }
-            throw new UnprocessableEntityHttpException($json, $error_code);
-        }
-
+        $responseData = $this->getResponseData($response, $apiLog);
         return $responseData;
     }
 
@@ -164,18 +134,11 @@ class CommunicationController extends ApiBaseController
     {
         $this->checkPost();
         $apiLog = $this->startApiLog($this->action->uniqueId);
-
-        //$action = Yii::$app->request->post('action');
         $type = Yii::$app->request->post('type');
-
-        /*if(!$action) {
-            throw new NotFoundHttpException('Not found action', 1);
-        }*/
 
         if(!$type) {
             throw new NotFoundHttpException('Not found type', 1);
         }
-
 
         switch ($type) {
             case self::TYPE_UPDATE_SMS_STATUS :
@@ -191,32 +154,7 @@ class CommunicationController extends ApiBaseController
                 throw new BadRequestHttpException('Invalid type', 2);
         }
 
-
-
-        if (isset($response['error']) && $response['error']) {
-            $responseData = [];
-        } else {
-            $responseData = [
-                'status'    => 200,
-                'name'      => 'Success',
-                'code'      => 0,
-                'message'   => ''
-            ];
-        }
-
-        $responseData['data']['response'] = $response;
-        $responseData = $apiLog->endApiLog($responseData);
-
-        if (isset($response['error']) && $response['error']) {
-            $json = @json_encode($response['error']);
-            if (isset($response['error_code']) && $response['error_code']) {
-                $error_code = $response['error_code'];
-            } else {
-                $error_code = 0;
-            }
-            throw new UnprocessableEntityHttpException($json, $error_code);
-        }
-
+        $responseData = $this->getResponseData($response, $apiLog);
         return $responseData;
     }
 
@@ -276,30 +214,7 @@ class CommunicationController extends ApiBaseController
                 $response = $this->voiceDefault($post);
         }
 
-        if (isset($response['error']) && $response['error']) {
-            $responseData = [];
-        } else {
-            $responseData = [
-                'status'    => 200,
-                'name'      => 'Success',
-                'code'      => 0,
-                'message'   => ''
-            ];
-        }
-
-        $responseData['data']['response'] = $response;
-        $responseData = $apiLog->endApiLog($responseData);
-
-        if (isset($response['error']) && $response['error']) {
-            $json = @json_encode($response['error']);
-            if (isset($response['error_code']) && $response['error_code']) {
-                $error_code = $response['error_code'];
-            } else {
-                $error_code = 0;
-            }
-            throw new UnprocessableEntityHttpException($json, $error_code);
-        }
-
+        $responseData = $this->getResponseData($response, $apiLog);
         return $responseData;
     }
 
@@ -318,29 +233,23 @@ class CommunicationController extends ApiBaseController
         // Yii::info(VarDumper::dumpAsString($post), 'info\API:Communication:voiceIncoming');
 
         $clientPhone = null;
+
+        $postCall = $post['call'] ?? [];
+
         // $ciscoPhoneNumber = \Yii::$app->params['global_phone'];
 
-        if (isset($post['call']) && $post['call']) {
+        if ($postCall) {
 
             $client_phone_number = null;
             $incoming_phone_number = null;
 
-            $callSid = $post['call']['CallSid'] ?? null;
-            $parentCallSid = $post['call']['ParentCallSid'] ?? null;
+            $callSid = $postCall['CallSid'] ?? null;
+            $parentCallSid = $postCall['ParentCallSid'] ?? null;
 
+            $postCall['c_com_call_id'] = $post['call_id'] ?? null;
+            $client_phone_number = $postCall['From'] ?? null;
+            $incoming_phone_number = $postCall['Called'] ?? null;
 
-            if (isset($post['call_id'])) {
-                $post['call']['c_com_call_id'] = $post['call_id'];
-            }
-
-
-            if (isset($post['call']['From']) && $post['call']['From']) {
-                $client_phone_number = $post['call']['From'];
-            }
-
-            if (isset($post['call']['To']) && $post['call']['To']) {
-                $incoming_phone_number = $post['call']['Called'];
-            }
 
             if (!$client_phone_number) {
                 $response['error'] = 'Not found Call From (Client phone number)';
@@ -372,7 +281,7 @@ class CommunicationController extends ApiBaseController
 
                 $ivrEnable = (bool)$departmentPhone->dpp_ivr_enable;
 
-                $callModel = $this->findOrCreateCall($callSid, $parentCallSid, $post['call'], $call_project_id,
+                $callModel = $this->findOrCreateCall($callSid, $parentCallSid, $postCall, $call_project_id,
                     $call_dep_id);
 
                 if ($departmentPhone->dugUgs) {
@@ -391,7 +300,7 @@ class CommunicationController extends ApiBaseController
                 $callModel->c_source_type_id = Call::SOURCE_GENERAL_LINE;
 
                 if ($ivrEnable) {
-                    $ivrSelectedDigit = isset($post['call']['Digits']) ? (int)$post['call']['Digits'] : null;
+                    $ivrSelectedDigit = isset($postCall['Digits']) ? (int)$postCall['Digits'] : null;
                     $ivrStep = (int)Yii::$app->request->get('step', 1);
                     return $this->ivrService($callModel, $departmentPhone, $ivrStep, $ivrSelectedDigit);
                 }
@@ -417,7 +326,7 @@ class CommunicationController extends ApiBaseController
                         $call_dep_id = null;
                     }
 
-                    $callModel = $this->findOrCreateCall($callSid, $parentCallSid, $post['call'], $upp->upp_project_id,
+                    $callModel = $this->findOrCreateCall($callSid, $parentCallSid, $postCall, $upp->upp_project_id,
                         $call_dep_id);
                     $callModel->c_source_type_id = Call::SOURCE_DIRECT_CALL;
 
@@ -1296,13 +1205,13 @@ class CommunicationController extends ApiBaseController
         $response = [];
 
 
-        Yii::info(VarDumper::dumpAsString([
+        /*Yii::info(VarDumper::dumpAsString([
             'callModel' => $callModel->attributes,
             'department' => $department->attributes,
             'ivrSelectedDigit' => $ivrSelectedDigit,
             'ivrStep' => $ivrStep,
 
-        ], 10, false), 'info\API:Communication:ivrService');
+        ], 10, false), 'info\API:Communication:ivrService');*/
 
 
         try {
@@ -1930,5 +1839,39 @@ class CommunicationController extends ApiBaseController
         }
 
         return $response;
+    }
+
+    /**
+     * @param array $response
+     * @param ApiLog $apiLog
+     * @return array
+     * @throws UnprocessableEntityHttpException
+     */
+    private function getResponseData(array $response, ApiLog $apiLog): array
+    {
+        if (isset($response['error']) && $response['error']) {
+            $responseData = [];
+        } else {
+            $responseData = [
+                'status'    => 200,
+                'name'      => 'Success',
+                'code'      => 0,
+                'message'   => ''
+            ];
+        }
+
+        $responseData['data']['response'] = $response;
+        $responseData = $apiLog->endApiLog($responseData);
+
+        if (isset($response['error']) && $response['error']) {
+            $json = @json_encode($response['error']);
+            if (isset($response['error_code']) && $response['error_code']) {
+                $error_code = $response['error_code'];
+            } else {
+                $error_code = 0;
+            }
+            throw new UnprocessableEntityHttpException($json, $error_code);
+        }
+        return $responseData;
     }
 }
