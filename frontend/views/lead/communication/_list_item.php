@@ -21,10 +21,10 @@ use \common\models\Call;
     $call = Call::findOne($model['id']);
     if($call):
 
-        if($call->isCompleted()) {
+        if ($call->isStatusCompleted()) {
             $statusClass = 'success';
             $statusTitle = 'COMPLETED - ' . Yii::$app->formatter->asDatetime(strtotime($call->c_created_dt) + (int) $call->c_call_duration);
-        } elseif($call->isCanceled()) {
+        } elseif ($call->isStatusCanceled()) {
             $statusClass = 'error';
             $statusTitle = 'CANCELED';
         } else {
@@ -32,11 +32,11 @@ use \common\models\Call;
             $statusTitle = $call->c_call_status; //'INIT';
         }
 
-        if($call->c_id) {
+        if ($call->c_id) {
             $statusTitle .= ' - Call ID: '. $call->c_id;
         }
 
-        if($call->isIn()) {
+        if ($call->isIn()) {
             $fromType = 'client';
         } else {
             $fromType = 'system';

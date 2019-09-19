@@ -1469,7 +1469,6 @@ die;
             $call->c_created_dt = date('Y-m-d H:i:s');
             $call->c_created_user_id = Yii::$app->user->id;
             $call->c_call_type_id = Call::CALL_TYPE_OUT;
-            $call->c_call_status = Call::CALL_STATUS_RINGING;
 
         }
 

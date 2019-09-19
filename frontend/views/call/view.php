@@ -51,7 +51,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 [
                     'attribute' => 'c_status_id',
                     'value' => function (\common\models\Call $model) {
-                        return $model->getStatusName2();
+                        return $model->getStatusName();
                     },
                 ],
                 'c_forwarded_from',

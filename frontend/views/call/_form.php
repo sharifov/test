@@ -22,7 +22,9 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'c_to')->textInput(['maxlength' => true]) ?>
 
-    <?= $form->field($model, 'c_call_status')->dropDownList(\common\models\Call::CALL_STATUS_LIST) ?>
+    <?= $form->field($model, 'c_call_status')->dropDownList(\common\models\Call::TW_STATUS_LIST) ?>
+
+    <?= $form->field($model, 'c_status_id')->dropDownList(\common\models\Call::STATUS_LIST) ?>
 
     <?= $form->field($model, 'c_forwarded_from')->textInput(['maxlength' => true]) ?>
 

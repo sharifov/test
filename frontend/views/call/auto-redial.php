@@ -698,7 +698,7 @@ $duration = 10;
                                 </div>
 
                                 <div class="col-md-12 text-center">
-                                    <?php if($callModel->cLead && $callModel->cLead->status === Lead::STATUS_PENDING && $callModel->c_call_status === \common\models\Call::CALL_STATUS_IN_PROGRESS): ?>
+                                    <?php if($callModel->cLead && $callModel->cLead->status === Lead::STATUS_PENDING && $callModel->isStatusInProgress()): ?>
                                         <?=Html::a('<i class="fa fa-download"></i> Take Lead <b id="auto_take_timer" data-name="'.$callModel->cLead->id.'"></b>', ['lead/auto-take', 'gid' => $callModel->cLead->gid], [
                                             'class' => 'btn btn-success',
                                             'target' => '_blank',
@@ -761,13 +761,11 @@ $duration = 10;
             //'filterModel' => false, //$searchModelCall,
             //'tableOptions' => ['class' => 'table table-bordered table-condensed table-hover'],
             'rowOptions' => function (\common\models\Call $model, $index, $widget, $grid) {
-                if ($model->c_call_status === \common\models\Call::CALL_STATUS_BUSY || $model->c_call_status === \common\models\Call::CALL_STATUS_NO_ANSWER) {
+                if ($model->isStatusBusy() || $model->isStatusNoAnswer()) {
                     return ['class' => 'danger'];
-                } elseif ($model->c_call_status === \common\models\Call::CALL_STATUS_RINGING || $model->c_call_status === \common\models\Call::CALL_STATUS_QUEUE ) {
+                } elseif ($model->isStatusRinging() || $model->isStatusQueue()) {
                     return ['class' => 'warning'];
-                } /*elseif ($model->c_call_status === \common\models\Call::CALL_STATUS_COMPLETED) {
-                    return ['class' => 'success'];
-                }*/
+                }
             },
             'columns' => [
                 //['class' => 'yii\grid\SerialColumn'],
@@ -806,12 +804,12 @@ $duration = 10;
                 'c_from',
                 'c_to',
                 [
-                    'attribute' => 'c_call_status',
+                    'attribute' => 'c_status_id',
                     'value' => function (\common\models\Call $model) {
                         return $model->getStatusLabel();
                     },
                     'format' => 'raw',
-                    'filter' => \common\models\Call::CALL_STATUS_LIST
+                    'filter' => \common\models\Call::STATUS_LIST
                 ],
 
                 //'c_caller_name',

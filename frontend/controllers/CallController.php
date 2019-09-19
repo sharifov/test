@@ -300,11 +300,11 @@ class CallController extends FController
 
         $params['CallSearch']['excludeDep'] = Department::DEPARTMENT_SUPPORT;
         $params['CallSearch']['dep_ids'] = $accessDepartments;
-        $params['CallSearch']['statuses'] = [Call::CALL_STATUS_IN_PROGRESS, Call::CALL_STATUS_RINGING, Call::CALL_STATUS_QUEUE, Call::CALL_STATUS_IVR];
+        $params['CallSearch']['status_ids'] = [Call::STATUS_IN_PROGRESS, Call::STATUS_RINGING, Call::STATUS_QUEUE, Call::STATUS_IVR, Call::STATUS_DELAY];
         $dataProvider3 = $searchModel->searchUserCallMap($params);
 
-        $params['CallSearch']['statuses'] = [Call::CALL_STATUS_COMPLETED, Call::CALL_STATUS_BUSY, Call::CALL_STATUS_FAILED, Call::CALL_STATUS_NO_ANSWER, Call::CALL_STATUS_CANCELED];
-        $params['CallSearch']['limit'] =20;
+        $params['CallSearch']['status_ids'] = [Call::STATUS_COMPLETED, Call::STATUS_BUSY, Call::STATUS_FAILED, Call::STATUS_NO_ANSWER, Call::STATUS_CANCELED];
+        $params['CallSearch']['limit'] = 6;
         $dataProvider2 = $searchModel->searchUserCallMap($params);
 
         //$searchModel->datetime_start = date('Y-m-d', strtotime('-0 day'));
@@ -369,7 +369,7 @@ class CallController extends FController
         $myPendingLeadsCount = $query->count();
 
 
-        $callModel = Call::find()->where(['c_call_status' => [Call::CALL_STATUS_RINGING, Call::CALL_STATUS_IN_PROGRESS]])->andWhere(['c_created_user_id' => $user->id])->orderBy(['c_id' => SORT_DESC])->limit(1)->one();
+        $callModel = Call::find()->where(['c_status_id' => [Call::STATUS_RINGING, Call::STATUS_IN_PROGRESS]])->andWhere(['c_created_user_id' => $user->id])->orderBy(['c_id' => SORT_DESC])->limit(1)->one();
 
         //echo Call::find()->where(['c_call_status' => [Call::CALL_STATUS_RINGING, Call::CALL_STATUS_IN_PROGRESS]])->andWhere(['c_created_user_id' => Yii::$app->user->id])->orderBy(['c_id' => SORT_DESC])->limit(1)->createCommand()->getRawSql(); exit;
 
@@ -619,6 +619,10 @@ class CallController extends FController
     }
 
 
+    /**
+     * @return string
+     * @throws \yii\base\InvalidConfigException
+     */
     public function actionAjaxMissedCalls()
     {
         $searchModel = new CallSearch();
@@ -626,7 +630,8 @@ class CallController extends FController
         $params = Yii::$app->request->queryParams;
         $params['CallSearch']['c_created_user_id'] = Yii::$app->user->id;
         $params['CallSearch']['c_call_type_id'] = Call::CALL_TYPE_IN;
-        $params['CallSearch']['c_call_status'] = Call::CALL_STATUS_NO_ANSWER;
+        // $params['CallSearch']['c_call_status'] = Call::TW_STATUS_NO_ANSWER;
+        $params['CallSearch']['c_status_id'] = Call::STATUS_NO_ANSWER;
         $params['CallSearch']['c_call_type_id'] = Call::CALL_TYPE_IN;
 
         $params['CallSearch']['limit'] = 20;
@@ -648,6 +653,13 @@ class CallController extends FController
         ]);
     }
 
+    /**
+     * @return string
+     * @throws ForbiddenHttpException
+     * @throws NotFoundHttpException
+     * @throws \Throwable
+     * @throws \yii\db\StaleObjectException
+     */
     public function actionAjaxCallInfo()
     {
         $id = (int) Yii::$app->request->post('id');
@@ -666,14 +678,21 @@ class CallController extends FController
         ]);
     }
 
+    /**
+     * @return \yii\web\Response
+     * @throws ForbiddenHttpException
+     * @throws NotFoundHttpException
+     * @throws \Throwable
+     * @throws \yii\db\StaleObjectException
+     */
     public function actionAjaxCallCancel()
     {
         $id = (int) Yii::$app->request->get('id');
         $model = $this->findModel($id);
         $this->checkAccess($model);
 
-        if($model->c_call_status == Call::CALL_STATUS_RINGING || $model->c_call_status == Call::CALL_STATUS_IN_PROGRESS || $model->c_call_status == Call::CALL_STATUS_QUEUE) {
-            $model->c_call_status = Call::CALL_STATUS_FAILED;
+        if ($model->isStatusRinging() || $model->isStatusInProgress() || $model->isStatusQueue()) {
+            $model->setStatusFailed();
             $model->update();
         }
 

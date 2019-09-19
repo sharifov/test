@@ -39,6 +39,8 @@
 		"ext-gd" : "*",
 		"ext-zip" : "*",
 		"ext-pdo" : "*",
+		"ext-geoip" : "*",
+		"ext-intl" : "*",
 		"lajax/yii2-translate-manager" : "^1.7",
 		"webvimark/module-user-management" : "^1.0",
 		"yiister/yii2-gentelella" : "~1.3",

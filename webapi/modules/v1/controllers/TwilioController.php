@@ -200,8 +200,10 @@ class TwilioController extends ApiBaseNoAuthController
                 Yii::info(VarDumper::dumpAsString($callData), 'info\API:Twilio:RedirectCalUser:callData');
 
                 if ($call) {
-                    $call->c_call_status = Call::CALL_STATUS_QUEUE;
-                    $call->setStatusByTwilioStatus($call->c_call_status);
+                    //$call->c_call_status = Call::TW_STATUS_QUEUE;
+                    //$call->setStatusByTwilioStatus($call->c_call_status);
+
+                    $call->setStatusQueue();
 
                     if ($userId) {
                         $call->c_created_user_id = (int) $userId;
