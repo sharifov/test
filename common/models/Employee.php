@@ -1659,7 +1659,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
 
         $generalQuery = new Query();
         $generalQuery->from(['tbl' => $query]);
-        $generalQuery->andWhere(['OR', ['NOT IN', 'tbl_last_status_id', [Call::STATUS_RINGING, Call::STATUS_IN_PROGRESS]], ['tbl_last_call_status' => null]]);
+        $generalQuery->andWhere(['OR', ['NOT IN', 'tbl_last_status_id', [Call::STATUS_RINGING, Call::STATUS_IN_PROGRESS]], ['tbl_last_status_id' => null]]);
         $generalQuery->andWhere(['OR', ['tbl_call_status_id' => UserCallStatus::STATUS_TYPE_READY], ['tbl_call_status_id' => null]]);
         $generalQuery->andWhere(['AND', ['<>', 'tbl_call_type_id', UserProfile::CALL_TYPE_OFF], ['IS NOT', 'tbl_call_type_id', null]]);
         $generalQuery->orderBy(['tbl_calls_count' => SORT_ASC]);
@@ -1775,7 +1775,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
 
         $generalQuery = new Query();
         $generalQuery->from(['tbl' => $query]);
-        $generalQuery->andWhere(['OR', ['NOT IN', 'tbl_last_status_id', [Call::STATUS_RINGING, Call::STATUS_IN_PROGRESS]], ['tbl_last_call_status' => null]]);
+        $generalQuery->andWhere(['OR', ['NOT IN', 'tbl_last_status_id', [Call::STATUS_RINGING, Call::STATUS_IN_PROGRESS]], ['tbl_last_status_id' => null]]);
         $generalQuery->andWhere(['OR', ['tbl_call_status_id' => UserCallStatus::STATUS_TYPE_READY], ['tbl_call_status_id' => null]]);
         $generalQuery->andWhere(['AND', ['=', 'tbl_call_type_id', UserProfile::CALL_TYPE_WEB], ['IS NOT', 'tbl_call_type_id', null]]);
         $generalQuery->orderBy(['tbl_calls_count' => SORT_ASC]);
