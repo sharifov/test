@@ -93,8 +93,12 @@ class AgentActivitySearch extends Call
         return Model::scenarios();
     }
 
-
-    public function searchAgentLeads($params)
+    /**
+     * @param $params
+     * @param $user Employee
+     * @return SqlDataProvider
+     */
+    public function searchAgentLeads($params, $user)
     {
         $this->load($params);
 
@@ -140,16 +144,25 @@ class AgentActivitySearch extends Call
 
         $query->from('employees AS e');
 
-        if ($this->supervision_id > 0) {
+        /*if ($this->supervision_id > 0) {
             $subQuery1 = UserGroupAssign::find()->select(['ugs_group_id'])->where(['ugs_user_id' => $this->supervision_id]);
             $subQuery = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->where(['IN', 'ugs_group_id', $subQuery1]);
             $query->andWhere(['IN', 'e.id', $subQuery]);
+        }*/
+
+        if ($user->isSupervision()) {
+            $subQuery1 = UserGroupAssign::find()->select(['ugs_group_id'])->where(['ugs_user_id' => $user->id]);
+            $subQuery = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->where(['IN', 'ugs_group_id', $subQuery1])
+                ->leftJoin('auth_assignment', 'auth_assignment.user_id = ugs_user_id')
+                ->andWhere(['auth_assignment.item_name' => Employee::ROLE_AGENT])
+                ->orWhere(['auth_assignment.user_id' => $user->id]);
+            $query->andWhere(['IN', 'e.id', $subQuery]);
         }
+
         if (!empty($this->user_groups)){
             $subQuery = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->where(['IN', 'ugs_group_id', $this->user_groups]);
             $query->andWhere(['IN', 'e.id', $subQuery]);
         }
-
 
         //$totalCount = 20;
 
