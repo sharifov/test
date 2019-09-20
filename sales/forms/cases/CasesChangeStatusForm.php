@@ -87,11 +87,11 @@ class CasesChangeStatusForm extends Model
     }
 
     /**
-     * @param $attribute_name
+     * @param $attributeName
      * @param $params
      * @return bool
      */
-    public function validateReason($attribute_name, $params): bool
+    public function validateReason($attributeName, $params): bool
     {
         if (!empty(CasesStatus::STATUS_REASON_LIST[$this->status])) {
 
@@ -114,9 +114,9 @@ class CasesChangeStatusForm extends Model
     public function afterValidate(): void
     {
         if (!empty(CasesStatus::STATUS_REASON_LIST[$this->status]) && !empty($this->message)) {
-            $this->message = sprintf('%s: %s', $this->reason, $this->message);
+            $this->message = $this->reason . ': ' . $this->message;
         } else {
-            $this->message = $this->reason;
+            $this->message = $this->reason ?? '';
         }
     }
 

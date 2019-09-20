@@ -45,6 +45,7 @@ use yii\data\ActiveDataProvider;
 use yii\data\ArrayDataProvider;
 use yii\db\Expression;
 use yii\helpers\ArrayHelper;
+use yii\helpers\Html;
 use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
 use yii\web\NotFoundHttpException;
@@ -764,6 +765,33 @@ class CasesController extends FController
             return ActiveForm::validate($form);
         }
         throw new BadRequestHttpException();
+    }
+
+    /**
+     * @return array
+     * @throws BadRequestHttpException
+     */
+    public function actionCheckPhoneForExistence(): array
+    {
+    	try {
+			$response = [];
+			$clientPhone = Yii::$app->request->post('clientPhone') ?? null;
+			Yii::$app->response->format = Response::FORMAT_JSON;
+			if (Yii::$app->request->isAjax && $clientPhone) {
+
+				if ($cases = $this->casesRepository->findOpenCasesByPhone($clientPhone)) {
+					$casesLink = '';
+					foreach ($cases as $case) {
+						$casesLink .= Html::a('Case ' . $case->cs_id, '/cases/view/' . $case->cs_gid, ['target' => '_blank']) . ' ';
+					}
+					$response['clientPhoneResponse'] = 'This number is already used in ' . $casesLink;
+				}
+				return $response;
+			}
+		} catch (\Throwable $exception) {
+    		return $response;
+		}
+		throw new BadRequestHttpException();
     }
 
     /**

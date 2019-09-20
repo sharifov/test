@@ -6,9 +6,12 @@ use borales\extensions\phoneInput\PhoneInputValidator;
 use common\models\Department;
 use common\models\Employee;
 use common\models\Project;
+//use sales\entities\cases\Cases;
 use sales\entities\cases\CasesCategory;
+//use sales\entities\cases\CasesStatus;
 use yii\base\Model;
 use yii\helpers\ArrayHelper;
+//use yii\helpers\Html;
 
 /**
  * Class CasesCreateByWebForm
@@ -75,6 +78,7 @@ class CasesCreateByWebForm extends Model
             ['clientPhone', 'filter', 'filter' => function($value) {
                 return str_replace('-', '', trim($value));
             }],
+//			['clientPhone', 'checkPhoneForExistence']
         ];
     }
 
@@ -124,6 +128,28 @@ class CasesCreateByWebForm extends Model
         $categories = CasesCategory::find()->select(['cc_key'])->andWhere(['cc_dep_id' => $depId])->asArray()->all();
         return array_column($categories, 'cc_key');
     }
+
+//	/**
+//	 * @return bool
+//	 */
+//	public function checkPhoneForExistence()
+//	{
+//		$cases = Cases::find()
+//			->join('join', 'client_phone', 'cs_client_id = client_id and phone = :phone', ['phone' => $this->clientPhone])
+//			->where(['cs_status' => [CasesStatus::STATUS_PENDING, CasesStatus::STATUS_PROCESSING, CasesStatus::STATUS_FOLLOW_UP]])
+//			->all();
+//
+//		if ($cases) {
+//			$casesLink = '';
+//			foreach ($cases as $case) {
+//				$casesLink .= Html::a('Case ' . $case->cs_id, '/cases/view/' . $case->cs_gid, ['target' => '_blank']) . ' ';
+//			}
+//			$this->addError('clientPhone', 'This number is already used in ' . $casesLink);
+//			return false;
+//		}
+//
+//		return true;
+//	}
 
     /**
      * @return array

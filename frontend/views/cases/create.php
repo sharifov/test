@@ -55,6 +55,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         'preferredCountries' => ['us'],
                     ]
                 ]) ?>
+                <div class="phone-notify"></div>
 
                 <?= $form->field($model, 'subject')->textInput(['maxlength' => true]) ?>
 
@@ -83,3 +84,31 @@ if (count($model->getDepartments()) === 1) {
     $js = '$( "#' . Html::getInputId($model, 'depId') . '" ).val("' . $keyDepartment . '").change();';
     $this->registerJs($js);
 }
+
+$phoneFieldId = Html::getInputId($model, 'clientPhone');
+$js = <<<JS
+    $(document).ready( function () {
+        $('#$phoneFieldId').on('keyup', delay(function (e) {
+            $('.phone-notify').html('');
+            $.post('/cases/check-phone-for-existence', {clientPhone: $(this).val()}).done( function (response) {
+                    if (response.clientPhoneResponse) {
+                        $('.phone-notify').html(response.clientPhoneResponse);
+                    }
+            });
+        }, 1200));
+        
+        function delay(callback, ms) {
+              var timer = 0;
+              
+              return function() {
+                    var context = this, args = arguments;
+                    
+                    clearTimeout(timer);
+                    timer = setTimeout(function () {
+                      callback.apply(context, args);
+                    }, ms || 0);
+              };
+        }
+    });
+JS;
+$this->registerJs($js);
