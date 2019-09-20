@@ -26,7 +26,7 @@ use \common\models\Call;
             <td rowspan="2" style="width:50px">
                 <u><?=Html::a($model->c_id, ['call/view', 'id' => $model->c_id], ['target' => '_blank', 'data-pjax' => 0])?></u><br>
                 <?= $model->c_parent_id ? 'p:' . Html::a($model->c_parent_id, ['call/view', 'id' => $model->c_parent_id], ['target' => '_blank', 'data-pjax' => 0]) . '<br>' : ''?>
-                <?php if ($model->c_call_type_id === Call::CALL_TYPE_IN):?>
+                <?php if ($model->isIn()):?>
                     <?=Html::tag('i', '', ['class' => 'fa fa-arrow-circle-o-right fa-lg text-success'])?>
                 <?php else: ?>
                     <?=Html::tag('i', '', ['class' => 'fa fa-arrow-circle-o-left fa-lg text-info'])?>
@@ -146,17 +146,11 @@ use \common\models\Call;
              ?>
 
                 <?php if ($model->isStatusIvr() || $model->isStatusRinging() || $model->isStatusInProgress() || $model->isStatusQueue()):?>
-                    <span class="badge badge-warning timer" data-sec="<?=$sec?>" data-control="start" data-format="%M:%S" title="<?=Yii::$app->formatter->asDuration($sec)?>">
-                        00:00
-                    </span>
+                    <span class="badge badge-warning timer" data-sec="<?=$sec?>" data-control="start" data-format="%M:%S" title="<?=Yii::$app->formatter->asDuration($sec)?>">00:00</span>
                 <?php else: ?>
-                    <span class="badge badge-primary timer" data-sec="<?=$sec?>" data-control="pause" data-format="%M:%S" title="<?=Yii::$app->formatter->asDuration($sec)?>">
-                        00:00
-                    </span>
+                    <span class="badge badge-primary timer" data-sec="<?=$sec?>" data-control="pause" data-format="%M:%S" title="<?=Yii::$app->formatter->asDuration($sec)?>">00:00</span>
                     &nbsp;&nbsp;&nbsp;<?=Yii::$app->formatter->asRelativeTime(strtotime($model->c_created_dt))?>
                 <?php endif;?>
-
-                <br><?=$model->getStatusName()?><br>
             </td>
             <td class="text-center" style="width:110px">
                 <?php if($model->isIn()):?>
@@ -170,7 +164,7 @@ use \common\models\Call;
                             <?=Html::encode($model->cCreatedUser->username)?>
                         <?php else: ?>
                             <i class="fa fa-phone fa-2x fa-border"></i><br>
-                            <?=$model->c_to?>
+                            <?=Html::encode($model->c_to)?>
                         <?php endif; ?>
                     </div>
                 <?php else: ?>
