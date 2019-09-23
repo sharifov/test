@@ -181,12 +181,16 @@ class AgentActivitySearch extends Call
             //'params' => [':publish' => 1],
             //'totalCount' => $totalCount,
             'sort' => [
-                'defaultOrder' => ['id' => SORT_ASC],
+                'defaultOrder' => ['username' => SORT_ASC],
                 'attributes' => [
                     'id' => [
                         'asc' => ['id' => SORT_ASC],
                         'desc' => ['id' => SORT_DESC],
                     ],
+                    'username' => [
+                        'asc' => ['username' => SORT_ASC],
+                        'desc' => ['username' => SORT_DESC],
+                        ],
                     'inbound_calls' => [
                         'asc' => ['inbound_calls' => SORT_ASC],
                         'desc' => ['inbound_calls' => SORT_DESC],
