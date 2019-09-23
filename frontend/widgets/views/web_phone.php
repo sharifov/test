@@ -93,20 +93,21 @@
                         <div class="btn-group" id="btn-group-id-hangup" style="display:none;">
                             <?=\yii\helpers\Html::button('<i class="fa fa-close"></i> Hangup', ['class' => 'btn btn-sm btn-danger','id' => 'button-hangup'])?>
                         </div>
-                        <div class="btn-group dropup" style="display:none;" id="btn-group-id-forward">
-                            <button type="button" class="btn btn-sm btn-info dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <i class="fa fa-forward"></i> To Support <span class="caret"></span>
-                            </button>
-                            <ul class="dropdown-menu">
-                                <?php if($supportGeneralPhones): ?>
-                                    <?php foreach ($supportGeneralPhones AS $projectName => $projectPhone): ?>
-                                        <li>
-                                            <a href="#" class="btn-transfer" data-type="number" data-value="<?=\yii\helpers\Html::encode($projectPhone)?>"><?php echo \yii\helpers\Html::encode($projectName) . ' ('.\yii\helpers\Html::encode($projectPhone).')';?></a>
-                                        </li>
-                                    <?php endforeach; ?>
-                                <?php endif;?>
-                            </ul>
-                        </div>
+
+<!--                        <div class="btn-group dropup" style="display:none;" id="btn-group-id-forward">-->
+<!--                            <button type="button" class="btn btn-sm btn-info dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">-->
+<!--                                <i class="fa fa-forward"></i> To Support <span class="caret"></span>-->
+<!--                            </button>-->
+<!--                            <ul class="dropdown-menu">-->
+<!--                                --><?php //if($supportGeneralPhones): ?>
+<!--                                    --><?php //foreach ($supportGeneralPhones AS $projectName => $projectPhone): ?>
+<!--                                        <li>-->
+<!--                                            <a href="#" class="btn-transfer" data-type="number" data-value="--><?//=\yii\helpers\Html::encode($projectPhone)?><!--">--><?php //echo \yii\helpers\Html::encode($projectName) . ' ('.\yii\helpers\Html::encode($projectPhone).')';?><!--</a>-->
+<!--                                        </li>-->
+<!--                                    --><?php //endforeach; ?>
+<!--                                --><?php //endif;?>
+<!--                            </ul>-->
+<!--                        </div>-->
 
                         <div class="btn-group" id="btn-group-id-redirect" style="display: none;">
                             <?=\yii\helpers\Html::button('<i class="fa fa-forward"></i> Transfer Call', ['id' => 'btn-show-transfer-call', 'class' => 'btn btn-sm btn-info'])?>
@@ -614,7 +615,7 @@ echo '<div class="container" id="container-redirect-agents"></div>';
                     //console.log(conn.parameters.CallSid);
                     //saveDbCall(conn.parameters.CallSid, conn.message.FromAgentPhone, conn.message.To, 'queued');
 
-                    $('#btn-group-id-forward').show();
+                   // $('#btn-group-id-forward').show();
                     $('#btn-group-id-hangup').show();
                     $('#btn-group-id-redirect').show();
 
@@ -633,7 +634,7 @@ echo '<div class="container" id="container-redirect-agents"></div>';
 
                     saveDbCall(conn.parameters.CallSid, conn.message.FromAgentPhone, conn.message.To, 'completed');
 
-                    $('#btn-group-id-forward').hide();
+                    //$('#btn-group-id-forward').hide();
                     $('#btn-group-id-hangup').hide();
                     $('#btn-group-id-redirect').hide();
 

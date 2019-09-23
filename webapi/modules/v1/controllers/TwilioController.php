@@ -279,6 +279,16 @@ class TwilioController extends ApiBaseNoAuthController
                             $dParams = @json_decode($depPhone->dpp_params, true);
                             $ivrParams = $dParams['ivr'] ?? [];
 
+                           // Your call has been forwarded to the sales department. Please wait for a response from the agent.
+
+                            if ($depPhone->dppDep) {
+                                $responseTwml->say('Your call has been forwarded to the ' . strtolower($depPhone->dppDep->dep_name) . ' department. Please wait for an answer',
+                                    [
+                                        'language' => 'en-US',
+                                        'voice' => 'alice'
+                                    ]);
+                            }
+
                             if(isset($ivrParams['hold_play']) && $ivrParams['hold_play']) {
                                 $responseTwml->play($ivrParams['hold_play'], ['loop' => 0]);
                             }
@@ -338,148 +348,5 @@ class TwilioController extends ApiBaseNoAuthController
 
         return $responseData;
     }
-
-
-//    protected function findOrCreateCallByData(array $callData): Call
-//    {
-//        $call = null;
-//        $parentCall = null;
-//        $clientPhone = null;
-//
-//        if (isset($callData['From']) && $callData['From']) {
-//            $clientPhoneNumber = $callData['From'];
-//            if ($clientPhoneNumber) {
-//                $clientPhone = ClientPhone::find()->where(['phone' => $clientPhoneNumber])->orderBy(['id' => SORT_DESC])->limit(1)->one();
-//            }
-//        }
-//
-//        $callSid = $callData['CallSid'] ?? '';
-//        $parentCallSid = $callData['ParentCallSid'] ?? '';
-//
-//        if ($callSid) {
-//            $call = Call::find()->where(['c_call_sid' => $callSid])->limit(1)->one();
-//        }
-//
-//        if ($parentCallSid) {
-//            $parentCall = Call::find()->where(['c_call_sid' => $parentCallSid])->orderBy(['c_id' => SORT_DESC])->limit(1)->one();
-//        }
-//
-//
-//        if (!$call) {
-//
-//            $call = new Call();
-//            $call->c_call_sid = $callData['CallSid'] ?? null;
-//            $call->c_parent_call_sid = $callData['ParentCallSid'] ?? null;
-//            $call->c_com_call_id = $callData['c_com_call_id'] ?? null;
-//            $call->c_call_type_id = Call::CALL_TYPE_IN;
-//
-//
-//            if ($parentCall) {
-//                $call->c_parent_id = $parentCall->c_id;
-//                $call->c_project_id = $parentCall->c_project_id;
-//                $call->c_dep_id = $parentCall->c_dep_id;
-//                $call->c_source_type_id = $parentCall->c_source_type_id;
-//
-//
-//                $call->c_lead_id = $parentCall->c_lead_id;
-//                $call->c_case_id = $parentCall->c_case_id;
-//                $call->c_client_id = $parentCall->c_client_id;
-//
-//                $call->c_created_user_id = $parentCall->c_created_user_id;
-//
-//                /*if ($parentCall->c_lead_id) {
-//
-//                }*/
-//
-//                if ($parentCall->callUserGroups && !$call->callUserGroups) {
-//                    foreach ($parentCall->callUserGroups as $cugItem) {
-//                        $cug = new CallUserGroup();
-//                        $cug->cug_ug_id = $cugItem->cug_ug_id;
-//                        $cug->cug_c_id = $call->c_id;
-//                        if (!$cug->save()) {
-//                            \Yii::error(VarDumper::dumpAsString($cug->errors), 'API:CommunicationController:findOrCreateCall:CallUserGroup:save');
-//                        }
-//                    }
-//                }
-//                //$call->c_u_id = $parentCall->c_dep_id;
-//            }
-//
-////            if ($call_project_id) {
-////                $call->c_project_id = $call_project_id;
-////            }
-////            if ($call_dep_id) {
-////                $call->c_dep_id = $call_dep_id;
-////            }
-//
-//            $call->c_is_new = true;
-//            $call->c_created_dt = date('Y-m-d H:i:s');
-//            $call->c_from = $callData['From'];
-//            $call->c_to = $callData['To']; //Called
-//            $call->c_created_user_id = null;
-//
-//            /*if ($clientPhone && $clientPhone->client_id) {
-//                $call->c_client_id = $clientPhone->client_id;
-//            }*/
-//
-////            if ($call->c_dep_id === Department::DEPARTMENT_SALES) {
-////                /*$lead = Lead2::findLastLeadByClientPhone($call->c_from, $call->c_project_id);
-////                if ($lead) {
-////                    $call->c_lead_id = $lead->id;
-////                }*////
-////            } elseif ($call->c_dep_id === Department::DEPARTMENT_EXCHANGE || $call->c_dep_id === Department::DEPARTMENT_SUPPORT) {
-////
-////            }
-//
-//            /*if (!$call->save()) {
-//                \Yii::error(VarDumper::dumpAsString($call->errors), 'API:CommunicationController:findOrCreateCallByData:Call:save');
-//                throw new \Exception('findOrCreateCallByData: Can not save call in db', 1);
-//            }*/
-//        }
-//
-//
-//
-//        if ($call->isFailed() || $call->isNoAnswer() || $call->isBusy() || $call->isCanceled()) {
-//            $call->c_call_status = $callData['CallStatus'];
-//
-//        } else {
-//
-//            $call->c_call_status = $callData['CallStatus'];
-//            $statusId = $call->setStatusByTwilioStatus($call->c_call_status);
-//            $call->c_status_id = $statusId;
-//        }
-//
-//
-//        $agentId = null;
-//
-//        if (isset($callData['Called']) && $callData['Called']) {
-//            if(strpos($callData['Called'], 'client:seller') !== false) {
-//                $agentId = (int) str_replace('client:seller', '', $callData['Called']);
-//            }
-//        }
-//
-//        if (!$agentId) {
-//            if (isset($callData['c_user_id']) && $callData['c_user_id']) {
-//                $agentId = (int) $callData['c_user_id'];
-//            }
-//        }
-//
-//        if ($agentId) {
-//            $call->c_created_user_id = $agentId;
-//        }
-//
-//        if (isset($callData['SequenceNumber'])) {
-//            $call->c_sequence_number = $callData['SequenceNumber'] ?? 0;
-//        }
-//
-//        if (isset($callData['CallDuration'])) {
-//            $call->c_call_duration = (int) $callData['CallDuration'];
-//        }
-//
-//        if (!$call->c_forwarded_from && isset($callData['ForwardedFrom'])) {
-//            $call->c_forwarded_from = $callData['ForwardedFrom'];
-//        }
-//
-//        return $call;
-//    }
 
 }
