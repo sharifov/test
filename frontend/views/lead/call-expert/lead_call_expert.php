@@ -87,7 +87,7 @@ $user = Yii::$app->user->identity;
                 <?//=Html::a('<i class="fa fa-comment"></i>', ['lead/view', 'gid' => $lead->gid, 'act' => 'call-expert-message'], ['class' => ''])?>
                 <?php if($lead->leadFlightSegmentsCount):?>
                     <?php if(!$lastModel || $lastModel->lce_status_id === LeadCallExpert::STATUS_DONE):?>
-                        <?php if($user->isEnableCallExpert()): ?>
+                        <?php if($user->isEnableCallExpert() && $lead->isProcessing()): ?>
                             <?=Html::a('<i class="fa fa-plus-circle success"></i> new Call', null, ['id' => 'btn-call-expert-form'])?>
                         <?php endif; ?>
                     <?php endif; ?>
