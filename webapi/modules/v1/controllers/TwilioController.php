@@ -258,7 +258,7 @@ class TwilioController extends ApiBaseNoAuthController
                         }
                         $call->c_dep_id = $depPhone->dpp_dep_id;
 
-                        DepartmentPhoneProjectUserGroup::deleteAll(['cug_c_id' => $call->c_id]);
+                        CallUserGroup::deleteAll(['cug_c_id' => $call->c_id]);
 
                         if ($depPhone->departmentPhoneProjectUserGroups) {
 
@@ -323,7 +323,7 @@ class TwilioController extends ApiBaseNoAuthController
 
         } catch (\Throwable $throwable) {
 
-            Yii::error($throwable->getTraceAsString(), 'API:Twilio:RedirectCall:Throwable');
+            Yii::error('Message: ' . $throwable->getMessage() . ', file: ' . $throwable->getFile().' (' . $throwable->getLine().')', 'API:Twilio:RedirectCall:Throwable');
 
             $responseTwml = new VoiceResponse();
             $responseTwml->say('Sorry, communication error', [
