@@ -81,10 +81,10 @@ class LeadFlowSearch extends LeadFlow
         if($this->created_date_from || $this->created_date_to) {
 
             if ($this->created_date_from) {
-                $query->andFilterWhere(['>=', 'lead_flow.created', Employee::convertDtTimezone(strtotime($this->created_date_from))]);
+                $query->andFilterWhere(['>=', 'lead_flow.created', Employee::convertTimeFromUserDtToUTC(strtotime($this->created_date_from))]);
             }
             if ($this->created_date_to) {
-                $query->andFilterWhere(['<=', 'lead_flow.created', Employee::convertDtTimezone(strtotime($this->created_date_to))]);
+                $query->andFilterWhere(['<=', 'lead_flow.created', Employee::convertTimeFromUserDtToUTC(strtotime($this->created_date_to))]);
             }
 
         } else {

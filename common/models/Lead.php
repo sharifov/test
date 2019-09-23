@@ -354,7 +354,6 @@ class Lead extends ActiveRecord implements AggregateRoot
         $lead->l_client_email = $clientEmail;
         $lead->l_dep_id = $depId;
         $lead->l_delayed_charge = $delayedCharge;
-        $lead->status = self::STATUS_PENDING;
         $lead->recordEvent(new LeadCreatedEvent($lead));
         return $lead;
     }
@@ -859,7 +858,7 @@ class Lead extends ActiveRecord implements AggregateRoot
      */
     public function isAvailableToTake(): bool
     {
-        return in_array($this->status, [self::STATUS_PENDING, self::STATUS_FOLLOW_UP, self::STATUS_SNOOZE], true);
+        return in_array($this->status, [null, self::STATUS_TRASH, self::STATUS_PENDING, self::STATUS_FOLLOW_UP, self::STATUS_SNOOZE], true);
     }
 
     /**

@@ -33,6 +33,7 @@ use sales\forms\api\communication\voice\record\RecordForm;
 use sales\forms\lead\ClientCreateForm;
 use sales\forms\lead\EmailCreateForm;
 use sales\forms\lead\PhoneCreateForm;
+use sales\helpers\user\UserFinder;
 use sales\repositories\airport\AirportRepository;
 use sales\repositories\cases\CasesRepository;
 use sales\repositories\cases\CasesStatusLogRepository;
@@ -114,13 +115,8 @@ class TestController extends FController
     {
         $userId = 295;
 
-        $projects = EmployeeDepartmentAccess::getDepartments($userId, [], [Employee::ROLE_AGENT]);
-        $projects = EmployeeDepartmentAccess::getDepartments($userId, [], [Employee::ROLE_AGENT]);
-        $projects = EmployeeDepartmentAccess::getDepartments($userId);
-        $projects = EmployeeDepartmentAccess::getDepartments($userId);
-        $projects = EmployeeDepartmentAccess::getDepartments();
-        $projects = EmployeeDepartmentAccess::getDepartments();
-
+        $employee = UserFinder::find($userId);
+        var_dump($employee->accessTakeLeadByFrequencyMinutes());die;
 
 //        $projects = EmployeeProjectAccess::getProjects($userId);
 //        $projects = EmployeeProjectAccess::getProjects($userId);

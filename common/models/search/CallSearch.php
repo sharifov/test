@@ -137,11 +137,11 @@ class CallSearch extends Call
         $dateTimeStart = $dateTimeEnd = null;
 
         if ($this->createTimeStart) {
-            $dateTimeStart = Employee::convertDtTimezone($this->createTimeStart);
+            $dateTimeStart = Employee::convertTimeFromUserDtToUTC($this->createTimeStart);
         }
 
         if ($this->createTimeEnd) {
-            $dateTimeEnd = Employee::convertDtTimezone($this->createTimeEnd);
+            $dateTimeEnd = Employee::convertTimeFromUserDtToUTC($this->createTimeEnd);
         }
 
         $query->andFilterWhere(['>=', 'c_created_dt', $dateTimeStart])
@@ -228,11 +228,11 @@ class CallSearch extends Call
         $dateTimeStart = $dateTimeEnd = null;
 
         if ($this->createTimeStart) {
-            $dateTimeStart = Employee::convertDtTimezone($this->createTimeStart);
+            $dateTimeStart = Employee::convertTimeFromUserDtToUTC($this->createTimeStart);
         }
 
         if ($this->createTimeEnd) {
-            $dateTimeEnd = Employee::convertDtTimezone($this->createTimeEnd);
+            $dateTimeEnd = Employee::convertTimeFromUserDtToUTC($this->createTimeEnd);
         }
 
         $query->andFilterWhere(['>=', 'c_created_dt', $dateTimeStart])

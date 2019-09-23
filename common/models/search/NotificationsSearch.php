@@ -70,8 +70,8 @@ class NotificationsSearch extends Notifications
         }
 
         if(empty($this->n_created_dt) && isset($params['NotificationsSearch']['date_range'])){
-            $query->andFilterWhere(['>=', 'n_created_dt', Employee::convertDtTimezone(strtotime($this->datetime_start))])
-                ->andFilterWhere(['<=', 'n_created_dt', Employee::convertDtTimezone(strtotime($this->datetime_end))]);
+            $query->andFilterWhere(['>=', 'n_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->datetime_start))])
+                ->andFilterWhere(['<=', 'n_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->datetime_end))]);
         }
 
         if (isset($params['NotificationsSearch']['n_created_dt'])) {

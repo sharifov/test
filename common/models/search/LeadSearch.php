@@ -749,10 +749,10 @@ class LeadSearch extends Lead
             $subQuery = LeadFlow::find()->select(['lead_flow.lead_id'])->distinct('lead_flow.lead_id')->where('lead_flow.status = leads.status AND lead_flow.lead_id = leads.id');
 
             if ($this->sold_date_from) {
-                $subQuery->andFilterWhere(['>=', 'lead_flow.created', Employee::convertDtTimezone(strtotime($this->sold_date_from))]);
+                $subQuery->andFilterWhere(['>=', 'lead_flow.created', Employee::convertTimeFromUserDtToUTC(strtotime($this->sold_date_from))]);
             }
             if ($this->sold_date_to) {
-                $subQuery->andFilterWhere(['<', 'lead_flow.created', Employee::convertDtTimezone(strtotime($this->sold_date_to))]);
+                $subQuery->andFilterWhere(['<', 'lead_flow.created', Employee::convertTimeFromUserDtToUTC(strtotime($this->sold_date_to))]);
             }
             $query->andWhere(['IN', 'leads.id', $subQuery]);
         }
@@ -1382,8 +1382,8 @@ class LeadSearch extends Lead
         }
 
         if ($this->date_range && $this->datetime_start && $this->datetime_end && empty($this->created) && empty($this->updated)) {
-            $query->andFilterWhere(['>=', 'updated', Employee::convertDtTimezone(strtotime($this->datetime_start))])
-                ->andFilterWhere(['<=', 'updated', Employee::convertDtTimezone(strtotime($this->datetime_end))]);
+            $query->andFilterWhere(['>=', 'updated', Employee::convertTimeFromUserDtToUTC(strtotime($this->datetime_start))])
+                ->andFilterWhere(['<=', 'updated', Employee::convertTimeFromUserDtToUTC(strtotime($this->datetime_end))]);
         }
 
         // grid filtering conditions

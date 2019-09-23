@@ -67,8 +67,8 @@ class QuoteSearch extends Quote
         }
 
         if(empty($this->created) && isset($params['QuoteSearch']['date_range'])){
-            $query->andFilterWhere(['>=', 'created', Employee::convertDtTimezone(strtotime($this->datetime_start))])
-                ->andFilterWhere(['<=', 'created', Employee::convertDtTimezone(strtotime($this->datetime_end))]);
+            $query->andFilterWhere(['>=', 'created', Employee::convertTimeFromUserDtToUTC(strtotime($this->datetime_start))])
+                ->andFilterWhere(['<=', 'created', Employee::convertTimeFromUserDtToUTC(strtotime($this->datetime_end))]);
         }
 
         if (isset($params['QuoteSearch']['created'])) {

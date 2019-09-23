@@ -1099,17 +1099,13 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     /**
      * @return string
      */
-    public function getLastTakenLeadDt():string
+    public function getLastTakenLeadDt(): string
     {
-        $leadFlow = LeadFlow::find()
-            ->where(['employee_id' => $this->id])
-            ->andWhere(['status' => 2, 'lf_from_status_id' => 1])
-            ->orderBy(['created' => SORT_DESC])
-            ->one();
-
-        return ($leadFlow)?$leadFlow->created:'';
+        if ($leadFlow = LeadFlow::find()->lastTakenByUserId($this->id)->one()) {
+            return $leadFlow['created'];
+        }
+        return '';
     }
-
 
     /**
      * @param string|null $start_dt
@@ -1583,6 +1579,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
 
     /**
      * @return array
+     * @throws \Exception
      */
     public function accessTakeLeadByFrequencyMinutes(): array
     {
@@ -1590,29 +1587,25 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         $takeDt = new \DateTime();
         $timeZone = $this->userParams->up_timezone ?: 'UTC';
 
-        $params = $this->userParams;
-        if($params){
-            if($params->up_frequency_minutes){
-                $lastTakenDt = $this->getLastTakenLeadDt();
+        if (
+            ($params = $this->userParams)
+            && ($frequencyMinutes = $params->up_frequency_minutes)
+            && ($lastTakenDt = $this->getLastTakenLeadDt())
+        ) {
 
-                if(!empty($lastTakenDt)){
-                    $lastTakenUTC = new \DateTime($lastTakenDt);
-                    $lastTakenUTC->setTimezone(new \DateTimeZone('UTC'));
+            $lastTakenUTC = new \DateTime($lastTakenDt);
+            $lastTakenUTC->setTimezone(new \DateTimeZone('UTC'));
 
-                    $nowUTC = new \DateTime();
-                    $nowUTC->setTimezone(new \DateTimeZone('UTC'));
+            $nowUTC = new \DateTime();
+            $nowUTC->setTimezone(new \DateTimeZone('UTC'));
 
-                    $frequencyMinutes = $params->up_frequency_minutes;
+            $nextTakeUTC = $lastTakenUTC->add(new \DateInterval('PT' . $frequencyMinutes . 'M'));
 
-                    $nextTakeUTC = $lastTakenUTC->add(new \DateInterval('PT' . $frequencyMinutes . 'M'));
-
-                    if($nextTakeUTC > $nowUTC){
-                        $access = false;
-                        $takeDt = $nextTakeUTC;
-                    }
-
-                }
+            if ($nextTakeUTC > $nowUTC) {
+                $access = false;
+                $takeDt = $nextTakeUTC;
             }
+
         }
 
         $takeDt->setTimezone(new \DateTimeZone($timeZone));
@@ -1951,7 +1944,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
      * @return string
      * @throws \Exception
      */
-    public static function convertDtTimezone(int $time): string
+    public static function convertTimeFromUserDtToUTC(int $time): string
     {
         $dateTime = '';
 
