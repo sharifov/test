@@ -101,7 +101,7 @@
                                 <?php if($supportGeneralPhones): ?>
                                     <?php foreach ($supportGeneralPhones AS $projectName => $projectPhone): ?>
                                         <li>
-                                            <a href="#" class="forward-event" data-type="number" data-value="<?=\yii\helpers\Html::encode($projectPhone);?>"><?php echo \yii\helpers\Html::encode($projectName) . ' ('.\yii\helpers\Html::encode($projectPhone).')';?></a>
+                                            <a href="#" class="btn-transfer" data-type="number" data-value="<?=\yii\helpers\Html::encode($projectPhone)?>"><?php echo \yii\helpers\Html::encode($projectName) . ' ('.\yii\helpers\Html::encode($projectPhone).')';?></a>
                                         </li>
                                     <?php endforeach; ?>
                                 <?php endif;?>
@@ -109,7 +109,7 @@
                         </div>
 
                         <div class="btn-group" id="btn-group-id-redirect" style="display: none;">
-                            <?=\yii\helpers\Html::button('<i class="fa fa-forward"></i> To Agents ', ['class' => 'btn btn-sm btn-info button-redirect-to-agents'])?>
+                            <?=\yii\helpers\Html::button('<i class="fa fa-forward"></i> Transfer Call', ['id' => 'btn-show-transfer-call', 'class' => 'btn btn-sm btn-info'])?>
                         </div>
 
 
@@ -121,16 +121,6 @@
                             <div class="btn-group">
                                 <?=\yii\helpers\Html::button('<i class="fa fa-forward"></i> Reject', ['class' => 'btn btn-xs btn-danger','id' => 'button-reject'])?>
                             </div>
-
-<!--                            <div class="btn-group">-->
-<!--                                --><?//=\yii\helpers\Html::button('<i class="fa fa-forward"></i> Forward', ['class' => 'btn btn-sm btn-info button-redirect-to-agents','id' => 'button-redirect'])?>
-<!--                            </div>-->
-                            <?//=\yii\helpers\Html::input('text', 'redirect-to', '',  ['class' => 'form-control','id' => 'redirect-to'])?>
-
-
-                            <?/*<div class="btn-group">
-                                <button class="btn btn-xs btn-danger forward-event" data-type="hold" data-value="+15596489977"><i class="fa fa-pause"></i> Hold</button>
-                            </div>*/?>
                         </div>
                     </td>
                 </tr>
@@ -215,7 +205,7 @@
 
 <?php \yii\bootstrap\Modal::begin([
     'id' => 'web-phone-redirect-agents-modal',
-    'header' => '<h4 class="modal-title">Redirect to Agents</h4>',
+    'header' => '<h4 class="modal-title">Transfer Call</h4>',
     //'size' => 'modal-sm',
 ]);
 echo '<div class="container" id="container-redirect-agents"></div>';
@@ -225,28 +215,29 @@ echo '<div class="container" id="container-redirect-agents"></div>';
     $ajaxSaveCallUrl = \yii\helpers\Url::to(['phone/ajax-save-call']);
     $ajaxRedirectCallUrl = \yii\helpers\Url::to(['phone/ajax-call-redirect']);
     $ajaxCallRedirectGetAgents = \yii\helpers\Url::to(['phone/ajax-call-get-agents']);
-    $ajaxRedirectCallUrlToAgent = \yii\helpers\Url::to(['phone/ajax-call-redirect-to-agent']);
+    $ajaxCallTransferUrl = \yii\helpers\Url::to(['phone/ajax-call-transfer']);
+    $ajaxCheckUserForCallUrl = \yii\helpers\Url::to(['phone/ajax-check-user-for-call']);
 ?>
 <script type="text/javascript">
 
+    const ajaxCheckUserForCallUrl = '<?=$ajaxCheckUserForCallUrl?>';
     const ajaxSaveCallUrl = '<?=$ajaxSaveCallUrl?>';
     const ajaxCallRedirectUrl = '<?=$ajaxRedirectCallUrl?>';
+    const ajaxCallTransferUrl = '<?=$ajaxCallTransferUrl?>';
+    const ajaxCallRedirectGetAgents = '<?=$ajaxCallRedirectGetAgents?>';
 
-    const ajaxCallRedirectUrlToAgent = '<?=$ajaxRedirectCallUrlToAgent?>';
-
-    const ajaxCallRedirectGetAgents = '<?=$ajaxCallRedirectGetAgents;?>';
     const userId = '<?=Yii::$app->user->id?>';
-    use_browser_call_access =  <?= ($use_browser_call_access) ? 'true' : 'false' ?>;
-    agentId = <?= $user_id;?>;
+    use_browser_call_access =  <?= $use_browser_call_access ? 'true' : 'false' ?>;
+    agentId = <?= $user_id?>;
     call_access_log = [];
 
     if(window.localStorage.agent_tab_conn_state === undefined) {
-        var agent_tab_conn_state = [{"user":agentId, "items":[]}];
+        var agent_tab_conn_state = [{"user": agentId, "items": []}];
         window.localStorage.setItem('agent_tab_conn_state', JSON.stringify(agent_tab_conn_state));
     }
 
     if(window.localStorage.agent_tab_conn_access === undefined) {
-        var agent_tab_conn_access = [{"user":agentId, "access":1}];
+        var agent_tab_conn_access = [{"user": agentId, "access": 1}];
         window.localStorage.setItem('agent_tab_conn_access', JSON.stringify(agent_tab_conn_access));
     }
 
@@ -524,50 +515,21 @@ echo '<div class="container" id="container-redirect-agents"></div>';
 
     function initRedirectToAgent() {
 
-        if (connection && connection.parameters.CallSid) {
-            var callSid = connection.parameters.CallSid;
+        //if (connection && connection.parameters.CallSid) {
+            var callSid = '123'; //connection.parameters.CallSid;
             var modal = $('#web-phone-redirect-agents-modal');
             modal.modal('show').find('.modal-body').html('<div style="text-align:center"><img width="200px" src="https://loading.io/spinners/gear-set/index.triple-gears-loading-icon.svg"></div>');
-            modal.modal('show').find('.modal-header').html('<h3>Redirect Call ' + '<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button></h3>');
+            modal.modal('show').find('.modal-header').html('<h3>Transfer Call ' + '<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button></h3>');
 
             $.post(ajaxCallRedirectGetAgents, { sid: callSid, user_id: userId })
                 .done(function(data) {
                     modal.find('.modal-body').html(data);
                 });
-        } else {
-            alert('Error: Not found Call connection or Call SID!');
-        }
+        // } else {
+        //     alert('Error: Not found Call connection or Call SID!');
+        // }
         return false;
     }
-
-    // TODO redirect call
-    /*document.getElementById('button-redirect').onclick = function () {
-        console.log("button-redirect: " + connection);
-        if (connection && connection.parameters.CallSid) {
-            connection.accept();
-            redirectToClient = document.getElementById('redirect-to').value;
-            if(redirectToClient.length < 2) {
-                return false;
-            }
-            $.ajax({
-                type: 'post',
-                data: {
-                    'sid': connection.parameters.CallSid,
-                    'type': 'client',
-                    'from': connection.parameters.To,
-                    'to':redirectToClient,
-                },
-                url: ajaxCallRedirectUrl,
-                success: function (data) {
-                    console.log(data);
-
-                },
-                error: function (error) {
-                    console.error(error);
-                }
-            });
-        }
-    };*/
 
 
     function saveDbCall(call_sid, call_from, call_to, call_status) {
@@ -817,191 +779,123 @@ echo '<div class="container" id="container-redirect-agents"></div>';
 </script>
 
 <?php
-
-//$callStatusUrl = \yii\helpers\Url::to(['user-call-status/update-status']);
 $ajaxPhoneDialUrl = \yii\helpers\Url::to(['phone/ajax-phone-dial']);
-
 $userId = Yii::$app->user->id;
 
 $js = <<<JS
 
+        const ajaxPhoneDialUrl = '$ajaxPhoneDialUrl';
+        const webPhoneWidget = $('#web-phone-widget');
+
         //setInterval('clearAgentStatus(connection)', 1000);
        
-        $(document).on('click', '.button-redirect-to-agents', function(e) {
+        $(document).on('click', '#btn-show-transfer-call', function(e) {
             e.preventDefault();
             initRedirectToAgent();
         });
-
-
-        $(document).on('click', '.redirect-agent-data', function(e) {
+        
+        $(document).on('click', '.btn-transfer', function(e) {
             e.preventDefault();
-           
-            var data_agent_to_redirect = $(e.target);
-            data_agent_to_redirect.attr("disabled", true);
-            $("#redirect-agent-table").hide();
-            $("#redirect-agent-info").html('<h3>Redirecting to: ' + data_agent_to_redirect.data('agent') + '</h3>').show();
             
-            if(connection) {
+            let obj = $(e.target);
+            let objType  = obj.data('type');
+            let objValue = obj.data('value');
+            
+            obj.attr('disabled', true);
+            
+            let modal = $('#web-phone-redirect-agents-modal');
+            modal.find('.modal-body').html('<div style="text-align:center"><img width="200px" src="https://loading.io/spinners/gear-set/index.triple-gears-loading-icon.svg"></div>');
+            
+            if(connection && connection.parameters.CallSid) {
                 updateAgentStatus(connection, false, 1);
                 
-                $.post(ajaxCallRedirectUrl + '?check_user=1', {to_id:data_agent_to_redirect.data('agentid')}, function(r) {
-                    
-                    
-                    if(r && r.is_ready) {
-                    
-                        if(connection.status() !== 'open') {
-                            connection.accept();
+                if(connection.status() !== 'open') {
+                    connection.accept();
+                }
+                               
+                $.ajax({
+                    type: 'post',
+                    data: {
+                        'sid': connection.parameters.CallSid,
+                        'id': objValue,
+                        'type': objType
+                    },
+                    url: ajaxCallTransferUrl,
+                    success: function (data) {
+                        if (data.error) {
+                            alert(data.message);
                         }
-                        $.ajax({
-                            type: 'post',
-                            data: {
-                                'sid': connection.parameters.CallSid,
-                                'type': 'client',
-                                'from': connection.parameters.From,
-                                'to':data_agent_to_redirect.data('agent'),
-                                'to_id': data_agent_to_redirect.data('agentid'),
-                                'project_id': data_agent_to_redirect.data('projectid'), 
-                                'lead_id':  data_agent_to_redirect.data('leadid'),
-                                'case_id':  data_agent_to_redirect.data('caseid'),
-                            },
-                            url: ajaxCallRedirectUrl,
-                            success: function (res) {
-                                 console.log(res);
-                                if(res.error) {
-                                    $('#web-phone-dial-modal').modal('hide');
-                                    $('#call-controls2').hide();
-                                    
-                                    data_agent_to_redirect.removeAttr("disabled");
-                                    var error_message = 'Error redirect.';
-                                    if(res.message) {
-                                        error_message = res.message;
-                                    }
-                                    $("#redirect-agent-info").html('<h3 class="danger">' + error_message +'</h3>').show();
-                                    $("#redirect-agent-table").show();
-                                    setTimeout('initRedirectToAgent();', 5000);
-                                }
-                                else {
-                                    $('#web-phone-dial-modal').modal('hide');
-                                    $('#call-controls2').hide();
-                                    $("#web-phone-redirect-agents-modal").modal('hide');
-                                    data_agent_to_redirect.removeAttr("disabled");
-                                    $("#redirect-agent-info").html('').hide();
-                                    $("#redirect-agent-table").show();
-                                }
-                            },
-                            error: function (error) {
-                                console.error(error);
-                                data_agent_to_redirect.removeAttr("disabled");
-                                $("#redirect-agent-info").html('').hide();
-                                $("#redirect-agent-table").show();
-                            }
-                        });
-                    } else {
-                        $("#redirect-agent-info").html('<h3 class="danger">The user (' +  data_agent_to_redirect.data('agent') + ') is not available for the call</h3>').show();
-                        $("#redirect-agent-table").show();
-                        setTimeout('initRedirectToAgent();', 5000);
+                        modal.modal('hide').find('.modal-body').html('');
+                    },
+                    error: function (error) {
+                        console.error(error);
+                        modal.modal('hide').find('.modal-body').html('');
                     }
-                }, 'json');
+                });
+
             } else {
-                alert('Error: not found Call connection!');
+                alert('Error: Not found active connection or CallSid');
             }
         });
         
-        $(document).on('click', '.redirect-agent-data2', function(e) {
+        
+        $(document).on('click',  '.btn-transfer-number',  function (e) {
             e.preventDefault();
-           
-            var data_agent_to_redirect = $(e.target);
-            data_agent_to_redirect.attr("disabled", true);
-            $("#redirect-agent-table").hide();
-            $("#redirect-agent-info").html('<h3>Redirecting to: ' + data_agent_to_redirect.data('agent') + '</h3>').show();
+            let obj = $(e.target);
+            let objType  = obj.data('type');
+            let objValue = obj.data('value');
             
+            obj.attr('disabled', true);
             
-            //console.log('Click redirect-agent-data2');
-            
-            if(connection) {
-                updateAgentStatus(connection, false, 1);
+            if(connection && connection.parameters.CallSid) {
+                if(objValue.length < 2) {
+                    console.error('Error call forward param TO');
+                    return false;
+                }
                 
-                //console.log('connection redirect-agent-data2');
-                    
-                //if(r && r.is_ready) {
+                let modal = $('#web-phone-redirect-agents-modal');
+                modal.find('.modal-body').html('<div style="text-align:center"><img width="200px" src="https://loading.io/spinners/gear-set/index.triple-gears-loading-icon.svg"></div>');
+                // connection.accept();
+                //console.error(connection.parameters);
                 
-                    if(connection.status() !== 'open') {
-                        connection.accept();
-                    }
-                    
-                    //console.log('ajax redirect-agent-data2');
-                    
-                    $.ajax({
-                        type: 'post',
-                        data: {
-                            'sid': connection.parameters.CallSid,
-                            'user_id': data_agent_to_redirect.data('agentid'),
-                        },
-                        url: ajaxCallRedirectUrlToAgent,
-                        success: function (res) {
-                             console.log(res);
-                            if(res.error) {
-                                
-                                console.error(res.error);
-                                
-                                $('#web-phone-dial-modal').modal('hide');
-                                $('#call-controls2').hide();
-                                
-                                data_agent_to_redirect.removeAttr("disabled");
-                                var error_message = 'Error redirect.';
-                                if(res.message) {
-                                    error_message = res.message;
-                                }
-                                $("#redirect-agent-info").html('<h3 class="danger">' + error_message +'</h3>').show();
-                                $("#redirect-agent-table").show();
-                                setTimeout('initRedirectToAgent();', 5000);
-                            }
-                            else {
-                                console.info('------- AJAX response ----------');
-                                console.info(res);
-                                
-                                $('#web-phone-dial-modal').modal('hide');
-                                $('#call-controls2').hide();
-                                $("#web-phone-redirect-agents-modal").modal('hide');
-                                data_agent_to_redirect.removeAttr("disabled");
-                                $("#redirect-agent-info").html('').hide();
-                                $("#redirect-agent-table").show();
-                            }
-                        },
-                        error: function (error) {
-                            console.error(error);
-                            data_agent_to_redirect.removeAttr("disabled");
-                            $("#redirect-agent-info").html('').hide();
-                            $("#redirect-agent-table").show();
+                $.ajax({
+                    type: 'post',
+                    data: {
+                        'sid': connection.parameters.CallSid,
+                        'type': objType,
+                        'from': connection.parameters.To,
+                        'to': objValue,
+                    },
+                    url: ajaxCallRedirectUrl,
+                    success: function (data) {
+                        // updateAgentStatus(connection, false, 1);
+                        //console.log(data);
+                        if (data.error) {
+                            alert(data.message);
                         }
-                    });
-                /*} else {
-                    $("#redirect-agent-info").html('<h3 class="danger">The user (' +  data_agent_to_redirect.data('agent') + ') is not available for the call</h3>').show();
-                    $("#redirect-agent-table").show();
-                    setTimeout('initRedirectToAgent();', 5000);
-                }*/
-
+                        modal.modal('hide').find('.modal-body').html('');
+                    },
+                    error: function (error) {
+                        console.error(error);
+                        modal.modal('hide').find('.modal-body').html('');
+                    }
+                });
             } else {
-                alert('Error: not found Call connection!');
+                alert('Error: Not found active connection or CallSid');
             }
         });
 
 
-        $(".digit").on('click', function() {
-            var num = ($(this).clone().children().remove().end().text());
-            $("#output").append('<span>' + num.trim() + '</span>');
-            sendNumberToCall(num.trim());
-            ion.sound.play("button_tiny");
-        });
+    $(".digit").on('click', function() {
+        let num = ($(this).clone().children().remove().end().text());
+        $("#output").append('<span>' + num.trim() + '</span>');
+        sendNumberToCall(num.trim());
+        ion.sound.play("button_tiny");
+    });
 
-        $('.reset-digit').on('click', function() {
-            $('#output').html('');
-        });
-
-
-
-    const ajaxPhoneDialUrl = '$ajaxPhoneDialUrl';
-
+    $('.reset-digit').on('click', function() {
+        $('#output').html('');
+    });
     
     $('#btn-send-digit').on('click', function() {
         $('#web-phone-send-digit-modal').modal();
@@ -1013,10 +907,9 @@ $js = <<<JS
     });
      
     $('#btn-nin-max-webphone').on('click', function() {
-        var iTag = $(this).find('i');
+        let iTag = $(this).find('i');
         if(iTag.hasClass('fa-angle-double-down')) {
             iTag.removeClass('fa-angle-double-down').addClass('fa-angle-double-up');    
-            
             $('.webphone-controls').slideUp();
         } else {
             iTag.removeClass('fa-angle-double-up').addClass('fa-angle-double-down');
@@ -1026,24 +919,24 @@ $js = <<<JS
     });
     
     $('#btn-webphone-close').on('click', function() {
-        $('#web-phone-widget').slideUp('fast');
+        webPhoneWidget.slideUp('fast');
         $('.fabs2').show();
         setCookie('web-phone-widget-close', 1, {expires: 3600 * 24, path: "/"});
         //$(this).find('i').addClass('fa-angle-double-up');
     });
     
     $('#prime2').on('click', function() {
-        $('#web-phone-widget').slideDown();
+        webPhoneWidget.slideDown();
         $('.fabs2').hide();
         //deleteCookie('web-phone-widget-close');
         setCookie('web-phone-widget-close', '', {expires: -1, path: "/"});
     });
     
     $('.call-phone').on('click', function(e) {
-        var phone_number = $(this).data('phone');
-        var project_id = $(this).data('project-id');
-        var lead_id = $(this).data('lead-id');
-        var case_id = $(this).data('case-id');
+        let phone_number = $(this).data('phone');
+        let project_id = $(this).data('project-id');
+        let lead_id = $(this).data('lead-id');
+        let case_id = $(this).data('case-id');
         //alert(phoneNumber);
         e.preventDefault();
         
@@ -1060,18 +953,18 @@ $js = <<<JS
     $(document).on('click', '#btn-make-call', function(e) {
         e.preventDefault();
         
-        $.post(ajaxCallRedirectUrl + '?check_user=1', {to_id: userId}, function(r) {
+        $.post(ajaxCheckUserForCallUrl, {user_id: userId}, function(r) {
             if(r && r.is_ready) {
-                var phone_to = $('#call-to-number').val();
-                var phone_from = $('#call-from-number').val();
+                let phone_to = $('#call-to-number').val();
+                let phone_from = $('#call-from-number').val();
                 
-                var project_id = $('#call-project-id').val();
-                var lead_id = $('#call-lead-id').val();
-                var case_id = $('#call-case-id').val();
+                let project_id = $('#call-project-id').val();
+                let lead_id = $('#call-lead-id').val();
+                let case_id = $('#call-case-id').val();
                 
                 $('#web-phone-dial-modal').modal('hide');
                 //alert(phone_from + ' - ' + phone_to);
-                $('#web-phone-widget').slideDown();
+                webPhoneWidget.slideDown();
                 $('.fabs2').hide();
                 
                 webCall(phone_from, phone_to, project_id, lead_id, case_id, 'web-call');
@@ -1083,44 +976,10 @@ $js = <<<JS
         
     });
     
-    $('#web-phone-widget').css({left:'50%', 'margin-left':'-'+($('#web-phone-widget').width() / 2)+'px'}); //.slideDown();
-    
-    //console.log(tw_configs);
+    webPhoneWidget.css({left:'50%', 'margin-left':'-' + (webPhoneWidget.width() / 2) + 'px'}); //.slideDown();
     initDevice();
     //setInterval('renewTwDevice();', 50000);
-    $(document).on('click',  '.forward-event',  function (e) {
-        e.preventDefault();
-        var elForwardSelected = $(e.target);
-        var elForwardSelectedType  = elForwardSelected.data('type');
-        var elForwardSelectedValue = elForwardSelected.data('value');
-        
-        if(connection && connection.parameters.CallSid && elForwardSelectedType) {
-            if(elForwardSelectedValue.length < 2) {
-                console.log('Error call forward param TO');
-                return false;
-            }
-            updateAgentStatus(connection, false, 1);
-            connection.accept();
-            console.error(connection.parameters);
-            $.ajax({
-                type: 'post',
-                data: {
-                    'sid': connection.parameters.CallSid,
-                    'type': elForwardSelectedType,
-                    'from': connection.parameters.To,
-                    'to':elForwardSelectedValue,
-                },
-                url: ajaxCallRedirectUrl,
-                success: function (data) {
-                    console.log(data);
-
-                },
-                error: function (error) {
-                    console.error(error);
-                }
-            });
-        }
-    });
+    
 
 
 

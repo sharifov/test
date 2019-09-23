@@ -299,6 +299,10 @@ class CommunicationController extends ApiBaseController
 
                 $callModel->c_source_type_id = Call::SOURCE_GENERAL_LINE;
 
+                if ($departmentPhone->dpp_source_id) {
+                    $callModel->c_source_type_id = $departmentPhone->dpp_source_id;
+                }
+
                 if ($ivrEnable) {
                     $ivrSelectedDigit = isset($postCall['Digits']) ? (int)$postCall['Digits'] : null;
                     $ivrStep = (int)Yii::$app->request->get('step', 1);
@@ -711,7 +715,7 @@ class CommunicationController extends ApiBaseController
         $parentCall = null;
         $clientPhone = null;
         
-        error_log("Call Data: " . print_r($calData, true));
+        //error_log("Call Data: " . print_r($calData, true));
 
         if (isset($calData['From']) && $calData['From']) {
             $clientPhoneNumber = $calData['From'];

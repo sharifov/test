@@ -1,11 +1,15 @@
 <?php
 namespace webapi\modules\v1\controllers;
 
+use common\components\jobs\CallQueueJob;
 use common\models\Call;
 use common\models\CallUserGroup;
 use common\models\ClientPhone;
+use common\models\DepartmentPhoneProject;
+use common\models\DepartmentPhoneProjectUserGroup;
 use Twilio\TwiML\VoiceResponse;
 use Yii;
+use yii\base\Exception;
 use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
 
@@ -136,22 +140,21 @@ class TwilioController extends ApiBaseNoAuthController
 
     /**
      * @return mixed
-     * @throws BadRequestHttpException
      */
-    public function actionRedirectCallUser()
+    public function actionRedirectCall()
     {
 
         //$this->checkPost();
         $apiLog = $this->startApiLog($this->action->uniqueId);
 
-//        $out = [
+        $out = [
 //            'dateTime'      => date('Y-m-d H:i:s'),
 //            'ip'        => Yii::$app->request->getUserIP(),
-//            'get'       => Yii::$app->request->get(),
-//            'post'      => Yii::$app->request->post(),
-//        ];
-//
-//        Yii::info(VarDumper::dumpAsString($out), 'info\API:Twilio:RedirectCalUser');
+            'get'       => Yii::$app->request->get(),
+            'post'      => Yii::$app->request->post(),
+        ];
+
+        Yii::info(VarDumper::dumpAsString($out), 'info\API:Twilio:RedirectCal');
 
 
 
@@ -179,66 +182,148 @@ class TwilioController extends ApiBaseNoAuthController
 //    ]
 
 
-        $userId = Yii::$app->request->post('user_id');
+        $id = (int) Yii::$app->request->post('id');
+
+        // "user", "department"
+        $type = Yii::$app->request->post('type');
+
         $callData = Yii::$app->request->post('CallData');
         $sid = $callData['CallSid'] ?? null;
 
-        if (!$sid) {
-            throw new BadRequestHttpException('Params "CALL SID" is empty', 1);
-        }
-
         try {
+
+            if (!$callData) {
+                throw new Exception('Params "CallData" is empty', 1);
+            }
+
+            if (!$sid) {
+                throw new Exception('Params "CallData.CallSid" is empty', 2);
+            }
+
+            if (!$id) {
+                throw new Exception('Params "id" is empty', 3);
+            }
+
+            if (!$type) {
+                throw new Exception('Params "type" is empty', 4);
+            }
+
 //            if ($sid) {
                 //$call = $this->findOrCreateCallByData($callData); //Call::find()->where(['c_call_sid' => $sid])->limit(1)->one();
 
                 //$callSid = $callData['CallSid'] ?? '';
                 //$parentCallSid = $callData['ParentCallSid'] ?? '';
 
-                $call = Call::find()->where(['c_call_sid' => $sid])->limit(1)->one();
+            $call = Call::find()->where(['c_call_sid' => $sid])->orderBy(['c_id' => SORT_DESC])->limit(1)->one();
+            Yii::info(VarDumper::dumpAsString($callData), 'info\API:Twilio:RedirectCall:callData');
 
+            $responseTwml = new VoiceResponse();
 
-                Yii::info(VarDumper::dumpAsString($callData), 'info\API:Twilio:RedirectCalUser:callData');
+            if ($call) {
+                //$call->c_call_status = Call::TW_STATUS_QUEUE;
+                //$call->setStatusByTwilioStatus($call->c_call_status);
 
-                if ($call) {
-                    //$call->c_call_status = Call::TW_STATUS_QUEUE;
-                    //$call->setStatusByTwilioStatus($call->c_call_status);
+                $call->setStatusQueue();
 
-                    $call->setStatusQueue();
-
-                    if ($userId) {
-                        $call->c_created_user_id = (int) $userId;
-                    }
-
-                    $callUserAccessAny = $call->callUserAccesses; //CallUserAccess::find()->where(['cua_status_id' => [CallUserAccess::STATUS_TYPE_PENDING], 'cua_call_id' => $this->c_id])->all();
-                    if ($callUserAccessAny) {
-                        foreach ($callUserAccessAny as $callAccess) {
-                            if ((int) $callAccess->cua_status_id === $callAccess::STATUS_TYPE_PENDING) {
-                                $callAccess->delete();
-                            }
+                $callUserAccessAny = $call->callUserAccesses; //CallUserAccess::find()->where(['cua_status_id' => [CallUserAccess::STATUS_TYPE_PENDING], 'cua_call_id' => $this->c_id])->all();
+                if ($callUserAccessAny) {
+                    foreach ($callUserAccessAny as $callAccess) {
+                        if ((int)$callAccess->cua_status_id === $callAccess::STATUS_TYPE_PENDING) {
+                            $callAccess->delete();
                         }
                     }
-
-                    Call::applyCallToAgentAccess($call, $userId);
-
-                    if (!$call->save()) {
-                        Yii::error(VarDumper::dumpAsString($call->errors), 'API:Twilio:RedirectCalUser:Call:update');
-                    }
                 }
+
+
+                if ($type === 'user') {
+                    if ($id) {
+                        $call->c_created_user_id = $id;
+                        Call::applyCallToAgentAccess($call, $id);
+                    }
+
+                    $responseTwml->say('You have been redirected to a call to another agent. Please wait for an answer', [
+                        'language' => 'en-US',
+                        'voice' => 'alice'
+                    ]);
+
+                    $url_music = 'https://talkdeskapp.s3.amazonaws.com/production/audio_messages/folk_hold_music.mp3';
+                    $responseTwml->play($url_music, ['loop' => 0]);
+
+                } elseif ($type === 'department') {
+                    $depPhone = DepartmentPhoneProject::findOne($id);
+                    if ($depPhone) {
+
+                        if ($call->c_project_id !== $depPhone->dpp_project_id) {
+                            $call->c_project_id = $depPhone->dpp_project_id;
+                        }
+                        $call->c_dep_id = $depPhone->dpp_dep_id;
+
+                        DepartmentPhoneProjectUserGroup::deleteAll(['cug_c_id' => $call->c_id]);
+
+                        if ($depPhone->departmentPhoneProjectUserGroups) {
+
+                            foreach ($depPhone->departmentPhoneProjectUserGroups as $dUg) {
+                                $callUg = new CallUserGroup();
+                                $callUg->cug_c_id = $call->c_id;
+                                $callUg->cug_ug_id = $dUg->dug_ug_id;
+                                $callUg->save();
+                                if (!$callUg->save()) {
+                                    Yii::error(VarDumper::dumpAsString($callUg->errors), 'API:Twilio:RedirectCall:CallUserGroup:save');
+                                }
+                            }
+                        }
+
+
+                        if ($depPhone->dpp_params) {
+                            // $ivrStep = 2;
+                            $dParams = @json_decode($depPhone->dpp_params, true);
+                            $ivrParams = $dParams['ivr'] ?? [];
+
+                            if(isset($ivrParams['hold_play']) && $ivrParams['hold_play']) {
+                                $responseTwml->play($ivrParams['hold_play'], ['loop' => 0]);
+                            }
+                        } else {
+                            $responseTwml->say('You have been redirected to a call to another department. Please wait for an answer', [
+                                'language' => 'en-US',
+                                'voice' => 'alice'
+                            ]);
+
+                            $url_music = 'https://talkdeskapp.s3.amazonaws.com/production/audio_messages/folk_hold_music.mp3';
+                            $responseTwml->play($url_music, ['loop' => 0]);
+                        }
+
+
+                        $job = new CallQueueJob();
+                        $job->call_id = $call->c_id;
+                        $job->delay = 0;
+                        $jobId = Yii::$app->queue_job->delay(7)->priority(80)->push($job);
+                    } else {
+                        throw new Exception('Not found DepartmentPhoneProject', 10);
+                    }
+
+
+                }
+
+                if (!$call->save()) {
+                    Yii::error(VarDumper::dumpAsString($call->errors), 'API:Twilio:RedirectCall:Call:update');
+                }
+            }
 //            } else {
 //                Yii::error('Not found CallSid', 'API:Twilio:RedirectCalUser');
 //            }
 
-            $responseTwml = new VoiceResponse();
-            $responseTwml->say('You have been redirected to a call to another agent. Please wait for an answer', [
-                'language' => 'en-US',
-                'voice' => 'alice'
-            ]);
-            $url_music = 'https://talkdeskapp.s3.amazonaws.com/production/audio_messages/folk_hold_music.mp3';
-            $responseTwml->play($url_music, ['loop' => 0]);
+
+//            $responseTwml->say('You have been redirected to a call to another agent. Please wait for an answer', [
+//                'language' => 'en-US',
+//                'voice' => 'alice'
+//            ]);
+//
+//            $url_music = 'https://talkdeskapp.s3.amazonaws.com/production/audio_messages/folk_hold_music.mp3';
+//            $responseTwml->play($url_music, ['loop' => 0]);
 
         } catch (\Throwable $throwable) {
 
-            Yii::error($throwable->getTraceAsString(), 'API:Twilio:RedirectCalUser:Throwable');
+            Yii::error($throwable->getTraceAsString(), 'API:Twilio:RedirectCall:Throwable');
 
             $responseTwml = new VoiceResponse();
             $responseTwml->say('Sorry, communication error', [
