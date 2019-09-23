@@ -6,14 +6,16 @@ use sales\repositories\NotFoundException;
 use Yii;
 use common\models\Employee;
 
-class UserHelper
+class UserFinder
 {
 
     /**
+     * Search only active user
+     *
      * @param int|null $userId
      * @return Employee
      */
-    public static function getUser(?int $userId = null): Employee
+    public static function find(?int $userId = null): Employee
     {
         /** @var Employee $user */
         if ($userId) {

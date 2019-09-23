@@ -3,7 +3,6 @@
 namespace common\models;
 
 use common\components\EmailService;
-use common\components\jobs\QuickSearchInitPriceJob;
 use common\components\jobs\UpdateLeadBOJob;
 use common\models\local\LeadAdditionalInformation;
 use common\models\local\LeadLogMessage;
@@ -355,7 +354,6 @@ class Lead extends ActiveRecord implements AggregateRoot
         $lead->l_client_email = $clientEmail;
         $lead->l_dep_id = $depId;
         $lead->l_delayed_charge = $delayedCharge;
-        $lead->status = self::STATUS_PENDING;
         $lead->recordEvent(new LeadCreatedEvent($lead));
         return $lead;
     }
@@ -388,6 +386,14 @@ class Lead extends ActiveRecord implements AggregateRoot
         $clone->take($ownerId);
         $clone->recordEvent(new LeadCreatedCloneEvent($clone));
         return $clone;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isAvailableForMultiUpdate(): bool
+    {
+        return $this->isProcessing() || $this->isFollowUp() || $this->isOnHold() || $this->isTrash() || $this->isSnooze();
     }
 
     /**
@@ -547,14 +553,18 @@ class Lead extends ActiveRecord implements AggregateRoot
 
     /**
      * @param int|null $userId
+     * @param bool $useRelation
      * @return bool
      */
-    public function isOwner(?int $userId): bool
+    public function isOwner(?int $userId, bool $useRelation = true): bool
     {
         if ($userId === null) {
             return false;
         }
-        return $this->employee && $this->employee->id === $userId;
+        if ($useRelation) {
+            return $this->employee && $this->employee->id === $userId;
+        }
+        return $this->employee_id === $userId;
     }
 
     /**
@@ -848,7 +858,7 @@ class Lead extends ActiveRecord implements AggregateRoot
      */
     public function isAvailableToTake(): bool
     {
-        return in_array($this->status, [self::STATUS_PENDING, self::STATUS_FOLLOW_UP, self::STATUS_SNOOZE, self::STATUS_TRASH], true);
+        return in_array($this->status, [null, self::STATUS_TRASH, self::STATUS_PENDING, self::STATUS_FOLLOW_UP, self::STATUS_SNOOZE], true);
     }
 
     /**

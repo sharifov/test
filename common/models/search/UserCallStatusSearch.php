@@ -70,8 +70,8 @@ class UserCallStatusSearch extends UserCallStatus
         }
 
         if(empty($this->us_created_dt) && isset($params['UserCallStatusSearch']['date_range'])){
-            $query->andFilterWhere(['>=', 'us_created_dt', Employee::convertDtTimezone(strtotime($this->datetime_start))])
-                ->andFilterWhere(['<=', 'us_created_dt', Employee::convertDtTimezone(strtotime($this->datetime_end))]);
+            $query->andFilterWhere(['>=', 'us_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->datetime_start))])
+                ->andFilterWhere(['<=', 'us_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->datetime_end))]);
         }
 
         if (isset($params['UserCallStatusSearch']['us_created_dt'])) {

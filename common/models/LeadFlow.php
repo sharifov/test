@@ -218,4 +218,12 @@ class LeadFlow extends \yii\db\ActiveRecord implements AggregateRoot
         }
         return $stateFlow->save();
     }
+
+    /**
+     * @return LeadFlowQuery
+     */
+    public static function find(): LeadFlowQuery
+    {
+        return new LeadFlowQuery(get_called_class());
+    }
 }

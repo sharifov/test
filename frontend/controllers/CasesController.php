@@ -740,7 +740,7 @@ class CasesController extends FController
         if ($form->load(Yii::$app->request->post()) && $form->validate()) {
             try {
                 $case = $this->casesCreateService->createByWeb($form);
-                $this->casesManageService->processing($case, Yii::$app->user->id);
+                $this->casesManageService->processing($case->cs_id, Yii::$app->user->id);
                 Yii::$app->session->setFlash('success', 'Case created');
                 return $this->redirect(['view', 'gid' => $case->cs_gid]);
             } catch (\Throwable $e){
@@ -825,7 +825,7 @@ class CasesController extends FController
         $case = $this->findModelByGid($gId);
         try {
             $user = $this->userRepository->find($userId);
-            $this->casesManageService->processing($case, $user->id);
+            $this->casesManageService->take($case->cs_id, $user->id);
             Yii::$app->session->setFlash('success', 'Success');
         } catch (\Throwable $e) {
             Yii::$app->session->setFlash('error', $e->getMessage());

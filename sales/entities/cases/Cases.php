@@ -128,9 +128,9 @@ class Cases extends ActiveRecord
     }
 
     /**
-     * @param string $description
+     * @param string|null $description
      */
-    public function pending(string $description = ''): void
+    public function pending(?string $description = ''): void
     {
         CasesStatus::guard($this->cs_status, CasesStatus::STATUS_PENDING);
         $this->recordEvent(new CasesPendingStatusEvent($this, $this->cs_status, $this->cs_user_id, $description));
@@ -147,9 +147,9 @@ class Cases extends ActiveRecord
 
     /**
      * @param int $userId
-     * @param string $description
+     * @param string|null $description
      */
-    public function processing(int $userId, string $description = ''): void
+    public function processing(int $userId, ?string $description = ''): void
     {
         CasesStatus::guard($this->cs_status, CasesStatus::STATUS_PROCESSING);
         if ($this->isProcessing() && $this->isOwner($userId)) {
@@ -173,9 +173,9 @@ class Cases extends ActiveRecord
     }
 
     /**
-     * @param string $description
+     * @param string|null $description
      */
-    public function followUp(string $description = ''): void
+    public function followUp(?string $description = ''): void
     {
         CasesStatus::guard($this->cs_status, CasesStatus::STATUS_FOLLOW_UP);
         $this->recordEvent(new CasesFollowUpStatusEvent($this, $this->cs_status, $this->cs_user_id, $description));
@@ -194,9 +194,9 @@ class Cases extends ActiveRecord
     }
 
     /**
-     * @param string $description
+     * @param string|null $description
      */
-    public function solved(string $description = ''): void
+    public function solved(?string $description = ''): void
     {
         CasesStatus::guard($this->cs_status, CasesStatus::STATUS_SOLVED);
         $this->recordEvent(new CasesSolvedStatusEvent($this, $this->cs_status, $this->cs_user_id, $description));
@@ -212,9 +212,9 @@ class Cases extends ActiveRecord
     }
 
     /**
-     * @param string $description
+     * @param string|null $description
      */
-    public function trash(string $description = ''): void
+    public function trash(?string $description = ''): void
     {
         CasesStatus::guard($this->cs_status, CasesStatus::STATUS_TRASH);
         $this->recordEvent(new CasesTrashStatusEvent($this, $this->cs_status, $this->cs_user_id, $description));

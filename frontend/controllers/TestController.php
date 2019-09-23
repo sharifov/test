@@ -18,6 +18,7 @@ use common\models\UserConnection;
 use common\models\UserDepartment;
 use common\models\UserGroupAssign;
 use common\models\UserProfile;
+use sales\access\EmployeeAccessHelper;
 use sales\access\EmployeeDepartmentAccess;
 use sales\access\EmployeeAccessQuery;
 use sales\access\EmployeeGroupAccess;
@@ -32,6 +33,7 @@ use sales\forms\api\communication\voice\record\RecordForm;
 use sales\forms\lead\ClientCreateForm;
 use sales\forms\lead\EmailCreateForm;
 use sales\forms\lead\PhoneCreateForm;
+use sales\helpers\user\UserFinder;
 use sales\repositories\airport\AirportRepository;
 use sales\repositories\cases\CasesRepository;
 use sales\repositories\cases\CasesStatusLogRepository;
@@ -111,14 +113,15 @@ class TestController extends FController
 
     public function actionTest()
     {
+        $userId = 295;
 
+        $employee = UserFinder::find($userId);
+        var_dump($employee->accessTakeLeadByFrequencyMinutes());die;
 
-       $q = Employee::getList();
-        VarDumper::dump($q);
-//
-//
-//        die;
-//        $projects = EmployeeProjectAccess::getProjects($userId, [], [Employee::ROLE_ADMIN], [Employee::ROLE_AGENT]);
+//        $projects = EmployeeProjectAccess::getProjects($userId);
+//        $projects = EmployeeProjectAccess::getProjects($userId);
+//        $projects = EmployeeProjectAccess::getProjects($userId);
+//        $projects = EmployeeProjectAccess::getProjects($userId);
 //        VarDumper::dump($projects, 10, true);
 
         return $this->render('blank');

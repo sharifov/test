@@ -5,7 +5,7 @@ namespace sales\access;
 use common\models\UserDepartment;
 use common\models\Department;
 use common\models\Employee;
-use sales\helpers\user\UserHelper;
+use sales\helpers\user\UserFinder;
 use common\models\UserDepartmentQuery;
 
 class EmployeeDepartmentAccess
@@ -40,21 +40,32 @@ class EmployeeDepartmentAccess
      */
     public static function getDepartments(?int $userId = null, ?array $roles = [], array $excludeRoles = [], array $includeRoles = []): array
     {
-        $user = UserHelper::getUser($userId);
+        $user = UserFinder::find($userId);
 
-        if ($roles === null) {
-            return Department::find()->select(['dep_name', 'dep_id'])->andWhere(['dep_id' => self::getDepartmentsSubQuery($user->id)])->indexBy('dep_id')->asArray()->column();
+        $hash = EmployeeAccessHelper::generateHash($userId, $roles, $excludeRoles, $includeRoles);
+        if (($departments = $user->getDepartmentAccess($hash)) !== null) {
+            return $departments;
         }
 
-        if ($roles = EmployeeAccessHelper::getRoles(self::$defaultRolesForViewAllDepartments, $roles, $excludeRoles, $includeRoles)) {
+        $departments = null;
+
+        if ($roles = EmployeeAccessHelper::getRoles($roles, self::$defaultRolesForViewAllDepartments, $excludeRoles, $includeRoles)) {
             foreach ($user->getRoles(true) as $role) {
                 if (in_array($role, $roles, false)) {
-                    return Department::find()->select(['dep_name', 'dep_id'])->indexBy('dep_id')->asArray()->column();
+                    $departments = Department::find()->select(['dep_name', 'dep_id'])
+                        ->orderBy('dep_name')->indexBy('dep_id')->asArray()->column();
+                    break;
                 }
             }
         }
 
-        return Department::find()->select(['dep_name', 'dep_id'])->andWhere(['dep_id' => self::getDepartmentsSubQuery($user->id)])->indexBy('dep_id')->asArray()->column();
+        if ($departments === null) {
+            $departments = Department::find()->select(['dep_name', 'dep_id'])->andWhere(['dep_id' => self::getDepartmentsSubQuery($user->id)])
+                ->orderBy('dep_name')->indexBy('dep_id')->asArray()->column();
+        }
+
+        $user->setDepartmentAccess($departments, $hash);
+        return $departments;
     }
 
     /**

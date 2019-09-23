@@ -37,6 +37,8 @@ use yii\web\NotFoundHttpException;
  * @property array $roles_raw
  * @property array $rolesName
  * @property array $form_roles
+ * @property array $departmentAccess
+ * @property array $projectAccess
  *
  * @property Lead[] $leads
  * @property Department[] $departments
@@ -105,6 +107,52 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     private $_isAllowCallExpert;
     private $_callExpertCountByShiftTime;
 
+    private $departmentAccess = [];
+    private $projectAccess = [];
+
+    /**
+     * @param string $hash
+     * @return array|null
+     */
+    public function getProjectAccess(string $hash):? array
+    {
+        if (isset($this->projectAccess['data']) && !empty($this->projectAccess['hash']) && $hash === $this->projectAccess['hash']) {
+            return $this->projectAccess['data'];
+        }
+        return null;
+    }
+
+    /**
+     * @param array $data
+     * @param string $hash
+     */
+    public function setProjectAccess(array $data, string $hash): void
+    {
+        $this->projectAccess['data'] = $data;
+        $this->projectAccess['hash'] = $hash;
+    }
+
+    /**
+     * @param string $hash
+     * @return array|null
+     */
+    public function getDepartmentAccess(string $hash):? array
+    {
+        if (isset($this->departmentAccess['data']) && !empty($this->departmentAccess['hash']) && $hash === $this->departmentAccess['hash']) {
+            return $this->departmentAccess['data'];
+        }
+        return null;
+    }
+
+    /**
+     * @param array $data
+     * @param string $hash
+     */
+    public function setDepartmentAccess(array $data, string $hash): void
+    {
+        $this->departmentAccess['data'] = $data;
+        $this->departmentAccess['hash'] = $hash;
+    }
 
     /**
      * @return bool
@@ -165,9 +213,25 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     /**
      * @return bool
      */
+    public function isAnyAgent(): bool
+    {
+        return $this->isAgent() || $this->isExAgent() || $this->isSupAgent();
+    }
+
+    /**
+     * @return bool
+     */
     public function isSupervision(): bool
     {
         return in_array(self::ROLE_SUPERVISION, $this->getRoles(true), true);
+    }
+
+    /**
+     * @return bool
+     */
+    public function isAnySupervision(): bool
+    {
+        return $this->isSupervision() || $this->isExSuper() || $this->isSupSuper();
     }
 
     /**
@@ -854,6 +918,28 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     /**
      * @return array
      */
+    public static function getActiveUsersList(): array
+    {
+        return self::find()->select(['username', 'id', 'status'])
+            ->active()
+            ->orderBy(['username' => SORT_ASC])
+            ->indexBy('id')->asArray()->column();
+    }
+
+    /**
+     * @param int $userId
+     * @return array
+     */
+    public static function getActiveUsersListFromCommonGroups(int $userId): array
+    {
+        return self::find()->select(['username', 'id', 'status'])->active()
+            ->andWhere(['id' => EmployeeGroupAccess::usersIdsInCommonGroupsSubQuery($userId)])
+            ->orderBy(['username' => SORT_ASC])->asArray()->indexBy('id')->column();
+    }
+
+    /**
+     * @return array
+     */
     public static function getListByProject($projectId, $withExperts = false): array
     {
         if (Yii::$app->user->identity->canRoles(['admin', 'supervision'])) {
@@ -1013,17 +1099,13 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     /**
      * @return string
      */
-    public function getLastTakenLeadDt():string
+    public function getLastTakenLeadDt(): string
     {
-        $leadFlow = LeadFlow::find()
-            ->where(['employee_id' => $this->id])
-            ->andWhere(['status' => 2, 'lf_from_status_id' => 1])
-            ->orderBy(['created' => SORT_DESC])
-            ->one();
-
-        return ($leadFlow)?$leadFlow->created:'';
+        if ($leadFlow = LeadFlow::find()->lastTakenByUserId($this->id)->one()) {
+            return $leadFlow['created'];
+        }
+        return '';
     }
-
 
     /**
      * @param string|null $start_dt
@@ -1497,6 +1579,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
 
     /**
      * @return array
+     * @throws \Exception
      */
     public function accessTakeLeadByFrequencyMinutes(): array
     {
@@ -1504,29 +1587,25 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         $takeDt = new \DateTime();
         $timeZone = $this->userParams->up_timezone ?: 'UTC';
 
-        $params = $this->userParams;
-        if($params){
-            if($params->up_frequency_minutes){
-                $lastTakenDt = $this->getLastTakenLeadDt();
+        if (
+            ($params = $this->userParams)
+            && ($frequencyMinutes = $params->up_frequency_minutes)
+            && ($lastTakenDt = $this->getLastTakenLeadDt())
+        ) {
 
-                if(!empty($lastTakenDt)){
-                    $lastTakenUTC = new \DateTime($lastTakenDt);
-                    $lastTakenUTC->setTimezone(new \DateTimeZone('UTC'));
+            $lastTakenUTC = new \DateTime($lastTakenDt);
+            $lastTakenUTC->setTimezone(new \DateTimeZone('UTC'));
 
-                    $nowUTC = new \DateTime();
-                    $nowUTC->setTimezone(new \DateTimeZone('UTC'));
+            $nowUTC = new \DateTime();
+            $nowUTC->setTimezone(new \DateTimeZone('UTC'));
 
-                    $frequencyMinutes = $params->up_frequency_minutes;
+            $nextTakeUTC = $lastTakenUTC->add(new \DateInterval('PT' . $frequencyMinutes . 'M'));
 
-                    $nextTakeUTC = $lastTakenUTC->add(new \DateInterval('PT' . $frequencyMinutes . 'M'));
-
-                    if($nextTakeUTC > $nowUTC){
-                        $access = false;
-                        $takeDt = $nextTakeUTC;
-                    }
-
-                }
+            if ($nextTakeUTC > $nowUTC) {
+                $access = false;
+                $takeDt = $nextTakeUTC;
             }
+
         }
 
         $takeDt->setTimezone(new \DateTimeZone($timeZone));
@@ -1796,7 +1875,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
      * @return string
      * @throws \Exception
      */
-    public static function convertDtTimezone(int $time): string
+    public static function convertTimeFromUserDtToUTC(int $time): string
     {
         $dateTime = '';
 
@@ -1816,5 +1895,13 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         }
 
         return $dateTime;
+    }
+
+    /**
+     * @return EmployeeQuery
+     */
+    public static function find(): EmployeeQuery
+    {
+        return new EmployeeQuery(get_called_class());
     }
 }

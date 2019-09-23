@@ -2,6 +2,7 @@
 
 use dosamigos\datepicker\DatePicker;
 use sales\access\EmployeeProjectAccess;
+use sales\ui\user\ListsAccess;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 use yii\widgets\Pjax;
@@ -14,13 +15,7 @@ use common\models\Lead;
 
 $this->title = 'Trash Queue';
 
-if ($user->isAdmin()) {
-    $userList = \common\models\Employee::getList();
-} else {
-    $userList = \common\models\Employee::getListByUserId($user->id);
-}
-
-$projectList = EmployeeProjectAccess::getProjects(Yii::$app->user->id);
+$lists = new ListsAccess(Yii::$app->user->id);
 
 $this->params['breadcrumbs'][] = $this->title;
 ?>
@@ -98,7 +93,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'options' => [
                 'style' => 'width:120px'
             ],
-            'filter' => $projectList,
+            'filter' => $lists->getProjects(),
         ],
         [
             'attribute' => 'pending',
@@ -301,7 +296,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'value' => function (\common\models\Lead $model) {
                 return $model->employee ? '<i class="fa fa-user"></i> ' . $model->employee->username : '-';
             },
-            'filter' => $userList,
+            'filter' => $lists->getEmployees(),
         ],
         /*[
             'attribute' => 'update',
