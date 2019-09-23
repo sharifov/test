@@ -1,41 +1,71 @@
 <?php
+
+use yii\helpers\Url;
+use common\models\Email;
+use common\models\Sms;
+use common\models\Employee;
+use sales\ui\user\ListsAccess;
 use yii\helpers\Html;
+use yii\helpers\VarDumper;
 use yii\widgets\Pjax;
 use kartik\grid\GridView;
+use common\models\Lead;
+use yii\bootstrap\ActiveForm;
+use yii\bootstrap\Modal;
+use yii\web\View;
+use yii\helpers\ArrayHelper;
+use common\models\Reason;
+use common\models\LeadFlow;
+use common\models\Call;
 
-/* @var $this yii\web\View */
+/* @var $this View */
 /* @var $searchModel common\models\search\LeadSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
-/* @var $multipleForm \frontend\models\LeadMultipleForm */
+/* @var $multipleForm frontend\models\LeadMultipleForm */
 /* @var $isAgent bool */
+/** @var array $report */
 
 $this->title = 'Search Leads';
 $this->params['breadcrumbs'][] = $this->title;
 
+$statusList = Lead::STATUS_LIST;
 
-$statusList = \common\models\Lead::STATUS_LIST;
+/** @var Employee $user */
+$user = Yii::$app->user->identity;
 
-if(Yii::$app->user->identity->canRole('admin')) {
-    $userList = \common\models\Employee::getList();
+if ($user->isAdmin()) {
+
 } else {
-    $userList = \common\models\Employee::getListByUserId(Yii::$app->user->id);
-    if($isAgent) {
-        $statusList = \common\models\Lead::STATUS_LIST;
-        unset($statusList[\common\models\Lead::STATUS_PENDING]);
+    if ($isAgent) {
+        unset($statusList[Lead::STATUS_PENDING]);
     }
 }
 
+$lists = new ListsAccess($user->id);
+
 ?>
 <style>
-.dropdown-menu {
-	z-index: 1010;
-}
+    .dropdown-menu {
+        z-index: 1010;
+    }
 </style>
 <div class="lead-index">
 
-	<h1><?= Html::encode($this->title) ?></h1>
+    <h1><?= Html::encode($this->title) ?></h1>
+
 
     <?php Pjax::begin(['id' => 'lead-pjax-list', 'timeout' => 7000, 'enablePushState' => true]); //['id' => 'lead-pjax-list', 'timeout' => 5000, 'enablePushState' => true, 'clientOptions' => ['method' => 'GET']]); ?>
+
+    <?php if ($report): ?>
+        <div class="error-summary">
+            <ul>
+            <?php foreach ($report as $item): ?>
+                <li><?= $item ?></li>
+            <?php endforeach;?>
+            </ul>
+        </div>
+    <?php endif;?>
+
     <?php
 
     if ($isAgent) {
@@ -46,20 +76,19 @@ if(Yii::$app->user->identity->canRole('admin')) {
 
     echo $this->render($searchTpl, [
         'model' => $searchModel,
-        'action' => 'index'
+        'action' => 'index',
+        'lists' => $lists
     ]);
     ?>
 
-
-    <?php if(Yii::$app->user->identity->canRoles(['admin', 'supervision'])) : ?>
+    <?php if ($user->isAdmin() || $user->isSupervision()) : ?>
         <p>
-            <?//= Html::a('Create Lead', ['create'], ['class' => 'btn btn-success']) ?>
-            <?= Html::button('<i class="fa fa-edit"></i> Multiple update', ['class' => 'btn btn-info', 'data-toggle'=> "modal", 'data-target'=>"#modalUpdate" ])?>
+            <? //= Html::a('Create Lead', ['create'], ['class' => 'btn btn-success']) ?>
+            <?= Html::button('<i class="fa fa-edit"></i> Multiple update', ['class' => 'btn btn-info', 'data-toggle' => "modal", 'data-target' => "#modalUpdate"]) ?>
         </p>
     <?php endif; ?>
 
-
-    <?php $form = \yii\bootstrap\ActiveForm::begin(['options' => ['data-pjax' => true]]); // ['action' => ['leads/update-multiple'] ?>
+    <?php $form = ActiveForm::begin(['options' => ['data-pjax' => true]]); // ['action' => ['leads/update-multiple'] ?>
 
     <?php
 
@@ -71,50 +100,50 @@ if(Yii::$app->user->identity->canRole('admin')) {
             'name' => 'LeadMultipleForm[lead_list]',
             'pageSummary' => true,
             'rowSelectedClass' => GridView::TYPE_INFO,
-            'checkboxOptions' => function(\common\models\Lead $model) {
+            'checkboxOptions' => function (Lead $model) {
                 $can = Yii::$app->user->can('leadSearchMultipleUpdate', ['lead' => $model]);
                 return ['style' => 'display:' . ($can ? 'visible' : 'none')];
             },
             'visible' => Yii::$app->user->can('leadSearchMultipleSelect')
         ],
 
-            /*[
-                    'class' => 'yii\grid\CheckboxColumn',
-                    'name' => 'LeadMultipleForm[lead_list]'
-                    'checkboxOptions' => function(\common\models\Lead $model) {
-                        return ['value' => $model->id];
-                    },
-            ],*/
-
-            /*[
-
-                'header'=>Html::checkbox('selection_all', false, ['class'=>'select-on-check-all', 'value'=>1,
-                    'onclick'=>'
-                        $(".kv-row-checkbox").prop("checked", $(this).is(":checked"));
-                        if($(".kv-row-checkbox").prop("checked") === true) $(".delete_ready").attr("class","delete_ready warning");
-                        if($(".kv-row-checkbox").prop("checked") === false) $(".delete_ready").attr("class","delete_ready");
-
-
-                        ']),
-                'contentOptions'=>['class'=>'kv-row-select'],
-                'content'=>function($model, $key){
-
-
-                        return Html::checkbox('id[]', false, ['class'=>'kv-row-checkbox ',
-                            'value'=>$key, 'onclick'=>'$(this).closest("tr").toggleClass("warning");']);
-
-                    //return Html::checkbox('selection[]', false, ['class'=>'kv-row-checkbox', 'value'=>$key, 'onclick'=>'$(this).closest("tr").toggleClass("danger");', 'disabled'=> isset($model->stopDelete)&&!($model->stopDelete===1)]);
+        /*[
+                'class' => 'yii\grid\CheckboxColumn',
+                'name' => 'LeadMultipleForm[lead_list]'
+                'checkboxOptions' => function(Lead $model) {
+                    return ['value' => $model->id];
                 },
-                'hAlign'=>'center',
-                'vAlign'=>'middle',
-                'hiddenFromExport'=>true,
-                'mergeHeader'=>true,
-                'width'=>'50px'
-            ],*/
+        ],*/
 
-            [
+        /*[
+
+            'header'=>Html::checkbox('selection_all', false, ['class'=>'select-on-check-all', 'value'=>1,
+                'onclick'=>'
+                    $(".kv-row-checkbox").prop("checked", $(this).is(":checked"));
+                    if($(".kv-row-checkbox").prop("checked") === true) $(".delete_ready").attr("class","delete_ready warning");
+                    if($(".kv-row-checkbox").prop("checked") === false) $(".delete_ready").attr("class","delete_ready");
+
+
+                    ']),
+            'contentOptions'=>['class'=>'kv-row-select'],
+            'content'=>function($model, $key){
+
+
+                    return Html::checkbox('id[]', false, ['class'=>'kv-row-checkbox ',
+                        'value'=>$key, 'onclick'=>'$(this).closest("tr").toggleClass("warning");']);
+
+                //return Html::checkbox('selection[]', false, ['class'=>'kv-row-checkbox', 'value'=>$key, 'onclick'=>'$(this).closest("tr").toggleClass("danger");', 'disabled'=> isset($model->stopDelete)&&!($model->stopDelete===1)]);
+            },
+            'hAlign'=>'center',
+            'vAlign'=>'middle',
+            'hiddenFromExport'=>true,
+            'mergeHeader'=>true,
+            'width'=>'50px'
+        ],*/
+
+        [
             'attribute' => 'id',
-            'value' => function (\common\models\Lead $model) {
+            'value' => function (Lead $model) {
                 return Html::a('<i class="fa fa-file-o"></i> ' . $model->id, [
                     'lead/view', 'gid' => $model->gid
                 ], [
@@ -143,7 +172,7 @@ if(Yii::$app->user->identity->canRole('admin')) {
 
         [
             'attribute' => 'client_id',
-            'value' => function (\common\models\Lead $model) {
+            'value' => function (Lead $model) {
                 return $model->client_id ? Html::a($model->client_id, ['client/index', 'ClientSearch[id]' => $model->client_id], ['data-pjax' => 0, 'target' => '_blank']) : '-';
             },
             'format' => 'raw',
@@ -158,7 +187,7 @@ if(Yii::$app->user->identity->canRole('admin')) {
             // 'attribute' => 'client_id',
             'header' => 'Client name',
             'format' => 'raw',
-            'value' => function (\common\models\Lead $model) {
+            'value' => function (Lead $model) {
 
                 if ($model->client) {
                     $clientName = $model->client->first_name . ' ' . $model->client->last_name;
@@ -182,10 +211,10 @@ if(Yii::$app->user->identity->canRole('admin')) {
         [
             'header' => 'Client / Emails / Phones',
             'format' => 'raw',
-            'value' => function (\common\models\Lead $model) {
+            'value' => function (Lead $lead) use ($user) {
 
-                if ($model->client) {
-                    $clientName = $model->client->first_name . ' ' . $model->client->last_name;
+                if ($lead->client) {
+                    $clientName = $lead->client->first_name . ' ' . $lead->client->last_name;
                     if ($clientName === 'Client Name') {
                         $clientName = '- - - ';
                     } else {
@@ -195,19 +224,19 @@ if(Yii::$app->user->identity->canRole('admin')) {
                     $clientName = '-';
                 }
 
-                $str = $clientName.'<br>';
+                $str = $clientName . '<br>';
 
-                if (Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id) && Yii::$app->user->id !== $model->employee_id) {
+                if ($user->isAgent() && $lead->isOwner($user->id, false)) {
                     $str .= '- // - // - // -';
-                } else {
-                    $str .= $model->client && $model->client->clientEmails ? '<i class="fa fa-envelope"></i> ' . implode(' <br><i class="fa fa-envelope"></i> ', \yii\helpers\ArrayHelper::map($model->client->clientEmails, 'email', 'email')) . '' : '';
-                    $str .= $model->client && $model->client->clientPhones ? '<br><i class="fa fa-phone"></i> ' . implode(' <br><i class="fa fa-phone"></i> ', \yii\helpers\ArrayHelper::map($model->client->clientPhones, 'phone', 'phone')) . '' : '';
+                } elseif ($lead->client) {
+                    $str .= $lead->client->clientEmails ? '<i class="fa fa-envelope"></i> ' . implode(' <br><i class="fa fa-envelope"></i> ', ArrayHelper::map($lead->client->clientEmails, 'email', 'email')) . '' : '';
+                    $str .= $lead->client->clientPhones ? '<br><i class="fa fa-phone"></i> ' . implode(' <br><i class="fa fa-phone"></i> ', ArrayHelper::map($lead->client->clientPhones, 'phone', 'phone')) . '' : '';
                 }
 
                 /*$str .= '<br>';
-                $str .= '<span title="Calls Out / In"><i class="fa fa-phone"></i> '. $model->getCountCalls(\common\models\Call::CALL_TYPE_OUT) .'/'.  $model->getCountCalls(\common\models\Call::CALL_TYPE_IN) .'</span> | ';
-                $str .= '<span title="SMS Out / In"><i class="fa fa-comments"></i> '. $model->getCountSms(\common\models\Sms::TYPE_OUTBOX) .'/'.  $model->getCountCalls(\common\models\Sms::TYPE_INBOX) .'</span> | ';
-                $str .= '<span title="Email Out / In"><i class="fa fa-envelope"></i> '. $model->getCountEmails(\common\models\Email::TYPE_OUTBOX) .'/'.  $model->getCountEmails(\common\models\Email::TYPE_INBOX) .'</span>';*/
+                $str .= '<span title="Calls Out / In"><i class="fa fa-phone"></i> '. $lead->getCountCalls(Call::CALL_TYPE_OUT) .'/'.  $lead->getCountCalls(Call::CALL_TYPE_IN) .'</span> | ';
+                $str .= '<span title="SMS Out / In"><i class="fa fa-comments"></i> '. $lead->getCountSms(Sms::TYPE_OUTBOX) .'/'.  $lead->getCountCalls(Sms::TYPE_INBOX) .'</span> | ';
+                $str .= '<span title="Email Out / In"><i class="fa fa-envelope"></i> '. $lead->getCountEmails(Email::TYPE_OUTBOX) .'/'.  $lead->getCountEmails(Email::TYPE_INBOX) .'</span>';*/
 
                 //$strArr[] = $str;
 
@@ -220,40 +249,40 @@ if(Yii::$app->user->identity->canRole('admin')) {
             ]
         ],
 
-            /*[
-                'header' => 'Client Phones',
-                'value' => function(\common\models\Lead $model) {
-                    return $model->client && $model->client->clientPhones ? implode(', ', \yii\helpers\ArrayHelper::map($model->client->clientPhones, 'phone', 'phone')) : '-';
-                },
-            ],*/
+        /*[
+            'header' => 'Client Phones',
+            'value' => function(Lead $model) {
+                return $model->client && $model->client->clientPhones ? implode(', ', ArrayHelper::map($model->client->clientPhones, 'phone', 'phone')) : '-';
+            },
+        ],*/
 
-            //'employee_id',
-            //'status',
-            [
+        //'employee_id',
+        //'status',
+        [
             'attribute' => 'status',
-            'value' => function (\common\models\Lead $model) {
-                $statusValue = $model->getStatusName(true);
+            'value' => function (Lead $lead) {
+                $statusValue = $lead->getStatusName(true);
 
-                if ($model->status === \common\models\Lead::STATUS_TRASH) {
-                    $reason = \common\models\Reason::find()->where([
-                        'lead_id' => $model->id
+                if ($lead->isTrash()) {
+                    $reason = Reason::find()->where([
+                        'lead_id' => $lead->id
                     ])
                         ->orderBy([
-                        'id' => SORT_DESC
-                    ])
+                            'id' => SORT_DESC
+                        ])
                         ->one();
                     if ($reason) {
                         $statusValue .= ' <span data-toggle="tooltip" data-placement="top" title="' . Html::encode($reason->reason) . '"><i class="fa fa-warning"></i></span>';
                     }
                 }
 
-                $statusLog = \common\models\LeadFlow::find()->where([
-                    'lead_id' => $model->id,
-                    'status' => $model->status
+                $statusLog = LeadFlow::find()->where([
+                    'lead_id' => $lead->id,
+                    'status' => $lead->status
                 ])
                     ->orderBy([
-                    'id' => SORT_DESC
-                ])
+                        'id' => SORT_DESC
+                    ])
                     ->one();
 
                 if ($statusLog) {
@@ -265,7 +294,7 @@ if(Yii::$app->user->identity->canRole('admin')) {
                 return $statusValue;
             },
             'format' => 'raw',
-            'filter' => \common\models\Lead::STATUS_LIST,
+            'filter' => Lead::STATUS_LIST,
             'options' => [
                 'style' => 'width:100px'
             ],
@@ -277,7 +306,7 @@ if(Yii::$app->user->identity->canRole('admin')) {
         [
             'attribute' => 'created',
             'label' => 'Pending Time',
-            'value' => function (\common\models\Lead $model) {
+            'value' => function (Lead $model) {
                 return Yii::$app->formatter->asRelativeTime(strtotime($model->created)); // Lead::getPendingAfterCreate($model->created);
             },
             'visible' => !$isAgent,
@@ -285,17 +314,18 @@ if(Yii::$app->user->identity->canRole('admin')) {
         ],
         [
             'attribute' => 'project_id',
-            'value' => function (\common\models\Lead $model) {
+            'value' => function (Lead $model) {
                 return $model->project ? $model->project->name : '-';
             },
-            'filter' => \common\models\Project::getList()
+            'filter' => $lists->getProjects(),
+            'label' => 'Project'
         ],
 
         // 'project_id',
         // 'source_id',
         /*[
             'attribute' => 'source_id',
-            'value' => function (\common\models\Lead $model) {
+            'value' => function (Lead $model) {
                 return $model->source ? $model->source->name : '-';
             },
             'filter' => \common\models\Source::getList(),
@@ -304,18 +334,18 @@ if(Yii::$app->user->identity->canRole('admin')) {
 
         [
             'attribute' => 'trip_type',
-            'value' => function (\common\models\Lead $model) {
-                return \common\models\Lead::getFlightType($model->trip_type) ?? '-';
+            'value' => function (Lead $model) {
+                return Lead::getFlightType($model->trip_type) ?? '-';
             },
-            'filter' => \common\models\Lead::TRIP_TYPE_LIST
+            'filter' => Lead::TRIP_TYPE_LIST
         ],*/
 
         [
             'attribute' => 'cabin',
-            'value' => function (\common\models\Lead $model) {
+            'value' => function (Lead $model) {
                 return $model->getCabinClassName();
             },
-            'filter' => \common\models\Lead::CABIN_LIST
+            'filter' => Lead::CABIN_LIST
         ],
 
         // 'trip_type',
@@ -324,7 +354,7 @@ if(Yii::$app->user->identity->canRole('admin')) {
 
         /*[
             'label' => 'Pax',
-            'value' => function (\common\models\Lead $model) {
+            'value' => function (Lead $model) {
                 return '<i class="fa fa-male"></i> <span title="adult">'. $model->adults .'</span> / <span title="child">' . $model->children . '</span> / <span title="infant">' . $model->infants.'</span>';
             },
             'format' => 'raw',
@@ -335,12 +365,12 @@ if(Yii::$app->user->identity->canRole('admin')) {
 
         [
             'label' => 'Pax / Communication',
-            'value' => function (\common\models\Lead $model) {
+            'value' => function (Lead $model) {
                 //$str = '';
-                $str = '<i class="fa fa-male"></i> <span title="adult">'. $model->adults .'</span> / <span title="child">' . $model->children . '</span> / <span title="infant">' . $model->infants.'</span><br>';
-                $str .= '<span title="Calls Out / In"><i class="fa fa-phone success"></i> '. $model->getCountCalls(\common\models\Call::CALL_TYPE_OUT) .'/'.  $model->getCountCalls(\common\models\Call::CALL_TYPE_IN) .'</span> | ';
-                $str .= '<span title="SMS Out / In"><i class="fa fa-comments info"></i> '. $model->getCountSms(\common\models\Sms::TYPE_OUTBOX) .'/'.  $model->getCountCalls(\common\models\Sms::TYPE_INBOX) .'</span> | ';
-                $str .= '<span title="Email Out / In"><i class="fa fa-envelope danger"></i> '. $model->getCountEmails(\common\models\Email::TYPE_OUTBOX) .'/'.  $model->getCountEmails(\common\models\Email::TYPE_INBOX) .'</span>';
+                $str = '<i class="fa fa-male"></i> <span title="adult">' . $model->adults . '</span> / <span title="child">' . $model->children . '</span> / <span title="infant">' . $model->infants . '</span><br>';
+                $str .= '<span title="Calls Out / In"><i class="fa fa-phone success"></i> ' . $model->getCountCalls(Call::CALL_TYPE_OUT) . '/' . $model->getCountCalls(Call::CALL_TYPE_IN) . '</span> | ';
+                $str .= '<span title="SMS Out / In"><i class="fa fa-comments info"></i> ' . $model->getCountSms(Sms::TYPE_OUTBOX) . '/' . $model->getCountCalls(Sms::TYPE_INBOX) . '</span> | ';
+                $str .= '<span title="Email Out / In"><i class="fa fa-envelope danger"></i> ' . $model->getCountEmails(Email::TYPE_OUTBOX) . '/' . $model->getCountEmails(Email::TYPE_INBOX) . '</span>';
                 return $str;
             },
             'format' => 'raw',
@@ -351,7 +381,7 @@ if(Yii::$app->user->identity->canRole('admin')) {
 
         /*[
             'attribute' => 'adults',
-            'value' => function (\common\models\Lead $model) {
+            'value' => function (Lead $model) {
                 return $model->adults ?: 0;
             },
             'filter' => array_combine(range(0, 9), range(0, 9)),
@@ -362,7 +392,7 @@ if(Yii::$app->user->identity->canRole('admin')) {
 
         [
             'attribute' => 'children',
-            'value' => function (\common\models\Lead $model) {
+            'value' => function (Lead $model) {
                 return $model->children ?: '-';
             },
             'filter' => array_combine(range(0, 9), range(0, 9)),
@@ -371,32 +401,32 @@ if(Yii::$app->user->identity->canRole('admin')) {
             ]
         ],*/
 
-            /*[
-                'attribute' => 'infants',
-                'value' => function(\common\models\Lead $model) {
-                    return $model->infants ?: '-';
-                },
-                'filter' => array_combine(range(0, 9), range(0, 9)),
-                'contentOptions' => ['class' => 'text-center'],
-            ],*/
+        /*[
+            'attribute' => 'infants',
+            'value' => function(Lead $model) {
+                return $model->infants ?: '-';
+            },
+            'filter' => array_combine(range(0, 9), range(0, 9)),
+            'contentOptions' => ['class' => 'text-center'],
+        ],*/
 
-            [
+        [
             // 'header' => 'Grade',
             'attribute' => 'l_grade',
-            'value' => function (\common\models\Lead $model) use ($isAgent) {
+            'value' => function (Lead $model) {
                 return $model->l_grade;
             },
             'filter' => array_combine(range(0, 9), range(0, 9)),
             'contentOptions' => [
                 'class' => 'text-center'
             ],
-            'visible' => ! $isAgent
+            'visible' => !$isAgent
         ],
 
         [
             // 'header' => 'Grade',
             'attribute' => 'l_answered',
-            'value' => function (\common\models\Lead $model) use ($isAgent) {
+            'value' => function (Lead $model) {
                 return $model->l_answered ? '<span class="label label-success">Yes</span>' : '<span class="label label-danger">No</span>';
             },
             'filter' => [
@@ -413,7 +443,7 @@ if(Yii::$app->user->identity->canRole('admin')) {
 
         /*[
             'header' => 'Task Info',
-            'value' => function (\common\models\Lead $model) use ($isAgent) {
+            'value' => function (Lead $model) use ($isAgent) {
                 return '<small style="font-size: 10px">' . $model->getTaskInfo() . '</small>';
             },
             'format' => 'raw',
@@ -428,14 +458,14 @@ if(Yii::$app->user->identity->canRole('admin')) {
 
         [
             'header' => 'CheckList',
-            'value' => function (\common\models\Lead $model) use ($isAgent) {
+            'value' => function (Lead $model) {
                 return '<small style="font-size: 10px">' . $model->getCheckListInfo() . '</small>';
             },
             'format' => 'raw',
             'contentOptions' => [
                 'class' => 'text-left'
             ],
-            'visible' => ! $isAgent,
+            'visible' => !$isAgent,
             'options' => [
                 'style' => 'width:200px'
             ]
@@ -443,14 +473,20 @@ if(Yii::$app->user->identity->canRole('admin')) {
 
         [
             'header' => 'Quotes',
-            'value' => function (\common\models\Lead $model) use ($isAgent) {
-                return $model->quotesCount ? ($isAgent ? $model->quotesCount : Html::a($model->quotesCount, [
-                    'quotes/index',
-                    'QuoteSearch[lead_id]' => $model->id
-                ], [
-                    'target' => '_blank',
-                    'data-pjax' => 0
-                ])) : '-';
+            'value' => function (Lead $model) use ($isAgent) {
+                if ($model->quotesCount) {
+                    if ($isAgent) {
+                        return $model->quotesCount;
+                    }
+                    return Html::a($model->quotesCount, [
+                        'quotes/index',
+                        'QuoteSearch[lead_id]' => $model->id
+                    ], [
+                        'target' => '_blank',
+                        'data-pjax' => 0
+                    ]);
+                }
+                return '-';
             },
             'format' => 'raw',
             'contentOptions' => [
@@ -459,7 +495,7 @@ if(Yii::$app->user->identity->canRole('admin')) {
         ],
         [
             'header' => 'Expert Quotes',
-            'value' => function (\common\models\Lead $model) use ($isAgent) {
+            'value' => function (Lead $model) {
                 return $model->quotesExpertCount ? Html::a($model->quotesExpertCount, [
                     'quotes/index',
                     "QuoteSearch[lead_id]" => $model->id
@@ -467,31 +503,26 @@ if(Yii::$app->user->identity->canRole('admin')) {
                     'target' => '_blank',
                     'data-pjax' => 0
                 ]) : '-';
-                },
-                'format' => 'raw',
-                'contentOptions' => [
-                    'class' => 'text-center'
-                ],
-                'visible' => ! $isAgent,
+            },
+            'format' => 'raw',
+            'contentOptions' => [
+                'class' => 'text-center'
+            ],
+            'visible' => !$isAgent,
         ],
         [
             'header' => 'Segments',
-            'value' => function (\common\models\Lead $model) {
-
-                $segments = $model->leadFlightSegments;
+            'value' => function (Lead $model) {
                 $segmentData = [];
-                if ($segments) {
-                    foreach ($segments as $sk => $segment) {
-                        $segmentData[] = ($sk + 1) . '. <code>' . Html::a($segment->origin . ' <i class="fa fa-long-arrow-right"></i> ' . $segment->destination, [
+                foreach ($model->leadFlightSegments as $sk => $segment) {
+                    $segmentData[] = ($sk + 1) . '. <code>' . Html::a($segment->origin . ' <i class="fa fa-long-arrow-right"></i> ' . $segment->destination, [
                             'lead-flight-segment/view',
                             'id' => $segment->id
                         ], [
                             'target' => '_blank',
                             'data-pjax' => 0
                         ]) . '</code>';
-                    }
                 }
-
                 $segmentStr = implode('<br>', $segmentData);
                 return '' . $segmentStr . '';
                 // return $model->leadFlightSegmentsCount ? Html::a($model->leadFlightSegmentsCount, ['lead-flight-segment/index', "LeadFlightSegmentSearch[lead_id]" => $model->id], ['target' => '_blank', 'data-pjax' => 0]) : '-' ;
@@ -507,17 +538,11 @@ if(Yii::$app->user->identity->canRole('admin')) {
 
         [
             'header' => 'Depart',
-            'value' => function (\common\models\Lead $model) {
-
-                $segments = $model->leadFlightSegments;
-
-                if ($segments) {
-                    foreach ($segments as $sk => $segment) {
-                        return date('d-M-Y', strtotime($segment->departure));
-                    }
+            'value' => function (Lead $model) {
+                foreach ($model->leadFlightSegments as $sk => $segment) {
+                    return date('d-M-Y', strtotime($segment->departure));
                 }
                 return '-';
-
             },
             'format' => 'raw',
             'contentOptions' => [
@@ -538,10 +563,10 @@ if(Yii::$app->user->identity->canRole('admin')) {
         [
             'attribute' => 'employee_id',
             'format' => 'raw',
-            'value' => function (\common\models\Lead $model) {
+            'value' => function (Lead $model) {
                 return $model->employee ? '<i class="fa fa-user"></i> ' . Html::encode($model->employee->username) : '-';
             },
-            'filter' => $userList
+            'filter' => $lists->getEmployees() ?: false
         ],
 
         // 'rating',
@@ -558,7 +583,7 @@ if(Yii::$app->user->identity->canRole('admin')) {
         // 'created',
         [
             'attribute' => 'created',
-            'value' => function (\common\models\Lead $model) {
+            'value' => function (Lead $model) {
                 return $model->created ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->created)) : '-';
             },
             'format' => 'raw'
@@ -567,9 +592,9 @@ if(Yii::$app->user->identity->canRole('admin')) {
 
         [
             'attribute' => 'updated',
-            'value' => function(\common\models\Lead $model) {
+            'value' => function (Lead $model) {
                 $str = '-';
-                if($model->updated) {
+                if ($model->updated) {
                     $str = '<b>' . Yii::$app->formatter->asRelativeTime(strtotime($model->updated)) . '</b>';
                     $str .= '<br><i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->updated));
                 }
@@ -583,9 +608,9 @@ if(Yii::$app->user->identity->canRole('admin')) {
 
         [
             'attribute' => 'l_last_action_dt',
-            'value' => function(\common\models\Lead $model) {
+            'value' => function (Lead $model) {
                 $str = '-';
-                if($model->l_last_action_dt) {
+                if ($model->l_last_action_dt) {
                     $str = '<b>' . Yii::$app->formatter->asRelativeTime(strtotime($model->l_last_action_dt)) . '</b>';
                     $str .= '<br><i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->l_last_action_dt));
                 }
@@ -609,97 +634,95 @@ if(Yii::$app->user->identity->canRole('admin')) {
 
 
 
-<?php
-
-/*
- * if(Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id)) {
- *
- *
- * echo \yii\grid\GridView::widget([
- * 'dataProvider' => $dataProvider,
- * //'filterModel' => Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id) ? false : $searchModel,
- * 'columns' => $gridColumns,
- *
- * ]);
- * } else {
- */
-
-echo GridView::widget([
-    'dataProvider' => $dataProvider,
-    'filterModel' => $isAgent ? false : $searchModel,
-    // 'containerOptions' => ['style'=>'overflow: auto'], // only set when $responsive = false
+    <?php
 
     /*
-     * 'export' => [
-     * 'label' => 'Page',
-     * 'fontAwesome' => true,
-     * 'itemsAfter'=> [
-     * '<li role="presentation" class="divider"></li>',
-     * '<li class="dropdown-header">Export All Data</li>',
-     * $fullExportMenu
-     * ]
-     * ],
+     * if(Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id)) {
+     *
+     *
+     * echo \yii\grid\GridView::widget([
+     * 'dataProvider' => $dataProvider,
+     * //'filterModel' => Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id) ? false : $searchModel,
+     * 'columns' => $gridColumns,
+     *
+     * ]);
+     * } else {
      */
 
-    'columns' => $gridColumns,
+    echo GridView::widget([
+        'dataProvider' => $dataProvider,
+        'filterModel' => $isAgent ? false : $searchModel,
+        // 'containerOptions' => ['style'=>'overflow: auto'], // only set when $responsive = false
 
-    'toolbar' => [
-        [
-            'content' =>
-            // Html::button('<i class="glyphicon glyphicon-plus"></i>', ['type'=>'button', 'title'=>'Add Lead', 'class'=>'btn btn-success', 'onclick'=>'alert("This will launch the book creation form.\n\nDisabled for this demo!");']) . ' '.
-            Html::a('<i class="glyphicon glyphicon-repeat"></i>', [
-                'leads/index'
-            ], [
-                'data-pjax' => 0,
-                'class' => 'btn btn-default',
-                'title' => 'Reset Grid'
-            ])
+        /*
+         * 'export' => [
+         * 'label' => 'Page',
+         * 'fontAwesome' => true,
+         * 'itemsAfter'=> [
+         * '<li role="presentation" class="divider"></li>',
+         * '<li class="dropdown-header">Export All Data</li>',
+         * $fullExportMenu
+         * ]
+         * ],
+         */
 
+        'columns' => $gridColumns,
+
+        'toolbar' => [
+            [
+                'content' =>
+                // Html::button('<i class="glyphicon glyphicon-plus"></i>', ['type'=>'button', 'title'=>'Add Lead', 'class'=>'btn btn-success', 'onclick'=>'alert("This will launch the book creation form.\n\nDisabled for this demo!");']) . ' '.
+                    Html::a('<i class="glyphicon glyphicon-repeat"></i>', [
+                        'leads/index'
+                    ], [
+                        'data-pjax' => 0,
+                        'class' => 'btn btn-default',
+                        'title' => 'Reset Grid'
+                    ])
+
+            ]
+            // '{export}',
+            // $fullExportMenu,
+            // '{toggleData}'
+        ],
+        'pjax' => false,
+        /*'pjaxSettings' => [
+            'options' => [
+                'id' => 'lead-pjax-list2',
+                'enablePushState' => true,
+                'clientOptions' => ['method' => 'get']
+            ],
+        ],*/
+
+        //'bordered' => true,
+        'striped' => false,
+        'condensed' => false,
+        'responsive' => true,
+        'hover' => true,
+        'floatHeader' => true,
+        'floatHeaderOptions' => [
+            'scrollingTop' => 20
+        ],
+        /*'showPageSummary' => true,*/
+        'panel' => [
+            'type' => GridView::TYPE_PRIMARY,
+            'heading' => '<h3 class="panel-title"><i class="glyphicon glyphicon-list"></i> Leads</h3>'
         ]
-        // '{export}',
-        // $fullExportMenu,
-        // '{toggleData}'
-    ],
-    'pjax' => false,
-            /*'pjaxSettings' => [
-                'options' => [
-                    'id' => 'lead-pjax-list2',
-                    'enablePushState' => true,
-                    'clientOptions' => ['method' => 'get']
-                ],
-            ],*/
 
-            //'bordered' => true,
-            'striped' => false,
-    'condensed' => false,
-    'responsive' => true,
-    'hover' => true,
-    'floatHeader' => true,
-    'floatHeaderOptions' => [
-        'scrollingTop' => 20
-    ],
-            /*'showPageSummary' => true,*/
-            'panel' => [
-        'type' => GridView::TYPE_PRIMARY,
-        'heading' => '<h3 class="panel-title"><i class="glyphicon glyphicon-list"></i> Leads</h3>'
-    ]
+    ]);
+    // }
 
-]);
-// }
-
-?>
+    ?>
 
 
-    <?php if(Yii::$app->user->identity->canRoles(['admin', 'supervision'])) : ?>
+    <?php if ($user->isAdmin() || $user->isSupervision()) : ?>
         <p>
-            <?=Html::button('<i class="fa fa-edit"></i> Multiple update', ['class' => 'btn btn-info','data-toggle' => "modal",'data-target' => "#modalUpdate"])?>
+            <?= Html::button('<i class="fa fa-edit"></i> Multiple update', ['class' => 'btn btn-info', 'data-toggle' => "modal", 'data-target' => "#modalUpdate"]) ?>
         </p>
-
-        <?= $form->errorSummary($multipleForm); ?>
 
         <?php
 
-\yii\bootstrap\Modal::begin([
+        Modal::begin([
             'header' => '<b>Multiple update selected Leads</b>',
             // 'toggleButton' => ['label' => 'click me'],
             'id' => 'modalUpdate'
@@ -707,61 +730,64 @@ echo GridView::widget([
         ]);
         ?>
 
+        <?= $form->errorSummary($multipleForm) ?>
 
         <div class="row">
-		<div class="col-md-12">
-			<div class="panel panel-default">
-				<div class="panel-body">
+            <div class="col-md-12">
+                <div class="panel panel-default">
+                    <div class="panel-body">
                         <?php
-        $role = null;
 
-        if (\Yii::$app->authManager->getAssignment('supervision', Yii::$app->user->id)) {
-            $role = 'supervision';
-        } elseif (\Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
-            $role = 'admin';
-        }
-        ?>
-                        <?= $form->field($multipleForm, 'status_id')->dropDownList(\common\models\Lead::getStatusList($role), ['prompt' => '-', 'id' => 'status_id']) ?>
+                        if ($user->isAdmin()) {
+                            $role = 'admin';
+                        } elseif ($user->isSupervision()) {
+                            $role = 'supervision';
+                        } else {
+                            $role = null;
+                        }
+
+                        ?>
+                        <?= $form->field($multipleForm, 'status_id')->dropDownList(Lead::getStatusList($role), ['prompt' => '-', 'id' => 'status_id']) ?>
 
                         <div id="reason_id_div" style="display: none">
-                            <?= $form->field($multipleForm, 'reason_id')->dropDownList(\common\models\Reason::getReasonListByStatus(\common\models\Lead::STATUS_PROCESSING), ['prompt' => '-', 'id' => 'reason_id']) // \common\models\Lead::STATUS_REASON_LIST ?>
+                            <?= $form->field($multipleForm, 'reason_id')->dropDownList(Reason::getReasonListByStatus(Lead::STATUS_PROCESSING), ['prompt' => '-', 'id' => 'reason_id']) // Lead::STATUS_REASON_LIST  ?>
 
                             <div id="reason_description_div"
-							style="display: none">
+                                 style="display: none">
                                 <?= $form->field($multipleForm, 'reason_description')->textarea(['rows' => '3']) ?>
                             </div>
-					</div>
+                        </div>
 
                         <?php
-        $emplData = \common\models\Employee::getList();
-        $emplData[-1] = '--- REMOVE EMPLOYEE ---';
+                            if ($employees = $lists->getEmployees()) {
+                                $employees[-1] = '--- REMOVE EMPLOYEE ---';
+                                echo $form->field($multipleForm, 'employee_id')->dropDownList($employees, ['prompt' => '-']);
+                            }
+                        ?>
 
-        // $emplData = array_merge(['-1' => '--- REMOVE EMPLOYEE ---'], $emplData);
-        ?>
-                        <?= $form->field($multipleForm, 'employee_id')->dropDownList($emplData, ['prompt' => '-']) ?>
                         <div class="form-group text-right">
                             <?= Html::submitButton('<i class="fa fa-check-square"></i> Update selected Leads', ['class' => 'btn btn-info']) ?>
                         </div>
-				</div>
-			</div>
-		</div>
-	</div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-        <?php \yii\bootstrap\Modal::end(); ?>
+        <?php Modal::end(); ?>
     <?php endif; ?>
 
-    <?php \yii\bootstrap\ActiveForm::end(); ?>
+    <?php ActiveForm::end(); ?>
 
 
 
     <?php Pjax::end(); ?>
 
 
-<?php
-$ajaxUrl = \yii\helpers\Url::to([
-    "leads/ajax-reason-list"
-]);
-$js = <<<JS
+    <?php
+    $ajaxUrl = Url::to([
+        "leads/ajax-reason-list"
+    ]);
+    $js = <<<JS
 
     $(document).on('pjax:start', function() {
         $("#modalUpdate .close").click();
@@ -798,8 +824,8 @@ $js = <<<JS
 
 
 JS;
-$this->registerJs($js, \yii\web\View::POS_READY);
-?>
+    $this->registerJs($js, View::POS_READY);
+    ?>
 
 
 </div>

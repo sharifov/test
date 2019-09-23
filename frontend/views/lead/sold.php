@@ -1,32 +1,22 @@
 <?php
 
-use sales\access\EmployeeProjectAccess;
+use sales\ui\user\ListsAccess;
 use yii\helpers\Html;
 use yii\widgets\Pjax;
-use kartik\grid\GridView;
 use common\models\Lead;
-use common\models\Quote;
-use yii\helpers\Url;
 use common\models\Airport;
 use dosamigos\datepicker\DatePicker;
 
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\LeadSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
-/* @var $multipleForm \frontend\models\LeadMultipleForm */
 /* @var $isAgent bool */
 /* @var $salary float */
 /* @var $salaryBy string */
 
 $this->title = 'Sold Queue';
 
-if (Yii::$app->user->identity->canRole('admin')) {
-    $userList = \common\models\Employee::getList();
-} else {
-    $userList = \common\models\Employee::getListByUserId(Yii::$app->user->id);
-}
-
-$projectList = EmployeeProjectAccess::getProjects(Yii::$app->user->id);
+$lists = new ListsAccess(Yii::$app->user->id);
 
 $this->params['breadcrumbs'][] = $this->title;
 
@@ -97,7 +87,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'options' => [
                 'style' => 'width:120px'
             ],
-            'filter' => $projectList,
+            'filter' => $lists->getProjects(),
         ],
 
         [
@@ -221,8 +211,8 @@ $this->params['breadcrumbs'][] = $this->title;
             'value' => function (\common\models\Lead $model) {
                 return $model->employee ? '<i class="fa fa-user"></i> ' . $model->employee->username : '-';
             },
-            'filter' => $userList,
-            'visible' => !$isAgent
+            'filter' => $lists->getEmployees(),
+            'visible' => $lists->getEmployees()
         ],
         [
             'label' => 'Profit',

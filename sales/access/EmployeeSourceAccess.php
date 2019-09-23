@@ -24,6 +24,7 @@ class EmployeeSourceAccess
         return Sources::find()
             ->active()
             ->andWhere(['project_id' => array_keys(EmployeeProjectAccess::getProjects($userId, $roles, $excludeRoles, $includeRoles))])
+            ->orderBy('name')
             ->indexBy('id')
             ->all();
     }

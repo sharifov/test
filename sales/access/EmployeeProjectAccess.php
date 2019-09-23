@@ -6,7 +6,8 @@ use common\models\ProjectQuery;
 use common\models\ProjectEmployeeAccess;
 use common\models\Employee;
 use common\models\Project;
-use sales\helpers\user\UserHelper;
+use sales\helpers\user\UserFinder;
+use yii\helpers\VarDumper;
 
 class EmployeeProjectAccess
 {
@@ -40,21 +41,33 @@ class EmployeeProjectAccess
      */
     public static function getProjects(?int $userId = null, ?array $roles = [], array $excludeRoles = [], array $includeRoles = []): array
     {
-        $user = UserHelper::getUser($userId);
+        $user = UserFinder::find($userId);
 
-        if ($roles === null) {
-            return Project::find()->select(['name', 'id'])->andWhere(['id' => self::getProjectsSubQuery($user->id)])->indexBy('id')->asArray()->column();
+        $hash = EmployeeAccessHelper::generateHash($userId, $roles, $excludeRoles, $includeRoles);
+        if (($projects = $user->getProjectAccess($hash)) !== null) {
+            return $projects;
         }
 
-        if ($roles = EmployeeAccessHelper::getRoles(self::$defaultRolesForViewAllProjects, $roles, $excludeRoles, $includeRoles)) {
+        $projects = null;
+
+        if ($roles = EmployeeAccessHelper::getRoles($roles, self::$defaultRolesForViewAllProjects, $excludeRoles, $includeRoles)) {
             foreach ($user->getRoles(true) as $role) {
                 if (in_array($role, $roles, false)) {
-                    return Project::find()->select(['name', 'id'])->active()->indexBy('id')->asArray()->column();
+                    $projects = Project::find()->select(['name', 'id'])->active()
+                        ->orderBy('name')->indexBy('id')->asArray()->column();
+                    break;
                 }
             }
         }
 
-        return Project::find()->select(['name', 'id'])->andWhere(['id' => self::getProjectsSubQuery($user->id)])->indexBy('id')->asArray()->column();
+        if ($projects === null) {
+            $projects = Project::find()->select(['name', 'id'])
+                ->andWhere(['id' => self::getProjectsSubQuery($user->id)])
+                ->orderBy('name')->indexBy('id')->asArray()->column();
+        }
+
+        $user->setProjectAccess($projects, $hash);
+        return $projects;
     }
 
     /**

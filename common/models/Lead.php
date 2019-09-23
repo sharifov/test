@@ -3,7 +3,6 @@
 namespace common\models;
 
 use common\components\EmailService;
-use common\components\jobs\QuickSearchInitPriceJob;
 use common\components\jobs\UpdateLeadBOJob;
 use common\models\local\LeadAdditionalInformation;
 use common\models\local\LeadLogMessage;
@@ -391,6 +390,14 @@ class Lead extends ActiveRecord implements AggregateRoot
     }
 
     /**
+     * @return bool
+     */
+    public function isAvailableForMultiUpdate(): bool
+    {
+        return $this->isProcessing() || $this->isFollowUp() || $this->isOnHold() || $this->isTrash() || $this->isSnooze();
+    }
+
+    /**
      * @return string
      */
     private static function generateUid(): string
@@ -547,14 +554,18 @@ class Lead extends ActiveRecord implements AggregateRoot
 
     /**
      * @param int|null $userId
+     * @param bool $useRelation
      * @return bool
      */
-    public function isOwner(?int $userId): bool
+    public function isOwner(?int $userId, bool $useRelation = true): bool
     {
         if ($userId === null) {
             return false;
         }
-        return $this->employee && $this->employee->id === $userId;
+        if ($useRelation) {
+            return $this->employee && $this->employee->id === $userId;
+        }
+        return $this->employee_id === $userId;
     }
 
     /**

@@ -7,6 +7,13 @@ use yii\base\Model;
 
 /**
  * LeadMultipleForm form
+ *
+ * @property array $lead_list
+ * @property int $employee_id
+ * @property int $status_id
+ * @property int $rating
+ * @property int $reason_id
+ * @property string $reason_description
  */
 class LeadMultipleForm extends Model
 {
@@ -18,26 +25,42 @@ class LeadMultipleForm extends Model
     public $reason_id;
     public $reason_description;
 
-
     /**
-     * @inheritdoc
+     * @return array
      */
-    public function rules()
+    public function rules(): array
     {
         return [
-            [['lead_list'], 'required'],
-            [['employee_id', 'status_id', 'rating', 'reason_id'], 'integer'],
-            [['reason_description'], 'string'],
-            [['employee_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['employee_id' => 'id'], 'when' => function (self $model) {
+            ['lead_list', 'required'],
+            ['lead_list', 'leadListValidate'],
+
+            ['employee_id', 'integer'],
+
+            ['status_id', 'integer'],
+
+            ['rating', 'integer'],
+
+            ['reason_id', 'integer'],
+
+            ['reason_description', 'string'],
+
+            ['employee_id', 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['employee_id' => 'id'], 'when' => function (self $model) {
                 return $model->employee_id > 0;
             }],
         ];
     }
 
+    public function leadListValidate(): void
+    {
+        if (!is_array($this->lead_list)) {
+            $this->addError('lead_list', 'Error format lead list');
+        }
+    }
+
     /**
-     * @inheritdoc
+     * @return array
      */
-    public function attributeLabels()
+    public function attributeLabels(): array
     {
         return [
             'lead_list'             => 'Selected Leads',

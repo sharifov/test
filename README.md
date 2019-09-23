@@ -70,6 +70,7 @@ Create MySQL Dump:
 ```
 mysqldump -Q -c -e -v -u USER -p DATABASE | gzip > /var/www/backups/sql.gz
 gunzip < /var/www/sale/sql.gz | mysql -v -u USER -pPASSWORD DATABASE
+gunzip < /var/www/sale/sql.gz | time mysql -u USER -pPASSWORD DATABASE --force
 mysqlshow -u USER -pPASSWORD DATABASE
 ```
 Create Pg Dump:

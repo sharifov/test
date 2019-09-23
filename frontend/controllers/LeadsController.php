@@ -2,22 +2,20 @@
 
 namespace frontend\controllers;
 
-use common\models\LeadFlow;
-use common\models\LeadTask;
+use common\models\Employee;
 use common\models\Reason;
 use common\models\search\LeadFlightSegmentSearch;
 use common\models\search\LeadSearch;
 use common\models\search\QuoteSearch;
-use common\models\Task;
 use frontend\models\LeadMultipleForm;
+use sales\services\lead\LeadMultiUpdateService;
 use Yii;
 use common\models\Lead;
-use yii\filters\AccessControl;
 use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
-use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+use yii\widgets\ActiveForm;
 
 /**
  * LeadsController implements the CRUD actions for Lead model.
@@ -54,7 +52,7 @@ class LeadsController extends FController
 
         $params = ArrayHelper::merge($params, $params2);
 
-        if(isset($params['reset'])){
+        if (isset($params['reset'])){
             $params = [];
             $session->remove('LeadSearch');
         }
@@ -68,22 +66,24 @@ class LeadsController extends FController
             $session->set('LeadSearch', $params);
         }
 
+        /** @var Employee $user */
+        $user = Yii::$app->user->identity;
 
-        if(Yii::$app->user->identity->canRole('agent')) {
+        if ($user->isAgent()) {
             $isAgent = true;
         } else {
             $isAgent = false;
         }
 
-        if(Yii::$app->user->identity->canRole('supervision')) {
-            $params['LeadSearch']['supervision_id'] = Yii::$app->user->id;
+        if ($user->isSupervision()) {
+            $params['LeadSearch']['supervision_id'] = $user->id;
         }
 
-        if(!$params && $isAgent) {
-            $params['LeadSearch']['employee_id'] = Yii::$app->user->id;
+        if (!$params && $isAgent) {
+            $params['LeadSearch']['employee_id'] = $user->id;
         }
 
-        if($isAgent) {
+        if ($isAgent) {
             $dataProvider = $searchModel->searchAgent($params);
         } else {
             $dataProvider = $searchModel->search($params);
@@ -97,99 +97,26 @@ class LeadsController extends FController
 
         $multipleForm = new LeadMultipleForm();
 
-        if(Yii::$app->user->identity->canRoles(['admin', 'supervision'])) {
-            if ($multipleForm->load(Yii::$app->request->post()) && $multipleForm->lead_list) {
+        $report = [];
+
+        if ($user->isAdmin() || $user->isSupervision()) {
+            if ($multipleForm->load(Yii::$app->request->post())) {
                 if ($multipleForm->validate()) {
-
-                    if (\is_array($multipleForm->lead_list)) {
-                        foreach ($multipleForm->lead_list as $lead_id) {
-                            $lead = Lead::findOne($lead_id);
-
-
-                            if ($lead && Yii::$app->user->can('leadSearchMultipleUpdate', ['lead' => $lead])) {
-                                //$lead->scenario = Lead::SCENARIO_MULTIPLE_UPDATE;
-                                $is_save = false;
-
-                                if ($multipleForm->employee_id) {
-                                    if($multipleForm->employee_id == -1) {
-                                        $lead->employee_id = null;
-                                    } else {
-                                        $lead->employee_id = $multipleForm->employee_id;
-                                    }
-                                    $is_save = true;
-                                }
-
-                                if ($multipleForm->status_id) {
-                                    $lead->status = $multipleForm->status_id;
-                                    $is_save = true;
-                                }
-
-                                if ($multipleForm->rating) {
-                                    $lead->rating = $multipleForm->rating;
-                                    $is_save = true;
-                                }
-
-
-                                $reasonValue = null;
-
-                                if ($multipleForm->status_id && is_numeric($multipleForm->reason_id)) {
-
-
-                                    if($multipleForm->reason_id > 0) {
-                                        $reasonValue = Reason::getReasonByStatus($multipleForm->status_id, $multipleForm->reason_id);
-                                    } else {
-                                        $reasonValue = $multipleForm->reason_description;
-                                    }
-
-                                    if($reasonValue) {
-                                        $reason = new Reason();
-                                        $reason->employee_id = Yii::$app->user->id;
-                                        $reason->lead_id = $lead->id;
-                                        $reason->reason = $reasonValue;
-                                        $reason->created = date('Y-m-d H:i:s');
-
-                                        if(!$reason->save()) {
-                                            Yii::error($reason->errors, 'Leads/Index:Reason:save');
-                                        }
-                                    }
-
-                                }
-
-                                /* if($multipleForm->status_id == Lead::STATUS_PROCESSING && $multipleForm->employee_id > 0 ) {
-                                    if($lead->l_answered) {
-                                        $taskType = Task::CAT_ANSWERED_PROCESS;
-                                    } else {
-                                        $taskType = Task::CAT_NOT_ANSWERED_PROCESS;
-                                    }
-
-                                    LeadTask::deleteUnnecessaryTasks(date('Y-m-d'));
-
-                                    LeadTask::createTaskList($lead->id, $multipleForm->employee_id, 1, '', $taskType);
-                                    LeadTask::createTaskList($lead->id, $multipleForm->employee_id, 2, '', $taskType);
-                                    LeadTask::createTaskList($lead->id, $multipleForm->employee_id, 3, '', $taskType);
-                                } */
-
-
-                                if ($is_save) {
-                                    $lead->save();
-                                }
-                            }
-                        }
-                    }
-
+                    /** @var LeadMultiUpdateService $service */
+                    $service = Yii::createObject(LeadMultiUpdateService::class);
+                    $report = $service->update($multipleForm, $user->id);
                 }
             }
         }
-
 
         return $this->render('index', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
             'multipleForm' => $multipleForm,
-            'isAgent' => $isAgent
+            'isAgent' => $isAgent,
+            'report' => $report
         ]);
     }
-
 
     /**
      * @return string

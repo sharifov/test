@@ -37,6 +37,8 @@ use yii\web\NotFoundHttpException;
  * @property array $roles_raw
  * @property array $rolesName
  * @property array $form_roles
+ * @property array $departmentAccess
+ * @property array $projectAccess
  *
  * @property Lead[] $leads
  * @property Department[] $departments
@@ -105,6 +107,52 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     private $_isAllowCallExpert;
     private $_callExpertCountByShiftTime;
 
+    private $departmentAccess = [];
+    private $projectAccess = [];
+
+    /**
+     * @param string $hash
+     * @return array|null
+     */
+    public function getProjectAccess(string $hash):? array
+    {
+        if (isset($this->projectAccess['data']) && !empty($this->projectAccess['hash']) && $hash === $this->projectAccess['hash']) {
+            return $this->projectAccess['data'];
+        }
+        return null;
+    }
+
+    /**
+     * @param array $data
+     * @param string $hash
+     */
+    public function setProjectAccess(array $data, string $hash): void
+    {
+        $this->projectAccess['data'] = $data;
+        $this->projectAccess['hash'] = $hash;
+    }
+
+    /**
+     * @param string $hash
+     * @return array|null
+     */
+    public function getDepartmentAccess(string $hash):? array
+    {
+        if (isset($this->departmentAccess['data']) && !empty($this->departmentAccess['hash']) && $hash === $this->departmentAccess['hash']) {
+            return $this->departmentAccess['data'];
+        }
+        return null;
+    }
+
+    /**
+     * @param array $data
+     * @param string $hash
+     */
+    public function setDepartmentAccess(array $data, string $hash): void
+    {
+        $this->departmentAccess['data'] = $data;
+        $this->departmentAccess['hash'] = $hash;
+    }
 
     /**
      * @return bool
@@ -165,9 +213,25 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     /**
      * @return bool
      */
+    public function isAnyAgent(): bool
+    {
+        return $this->isAgent() || $this->isExAgent() || $this->isSupAgent();
+    }
+
+    /**
+     * @return bool
+     */
     public function isSupervision(): bool
     {
         return in_array(self::ROLE_SUPERVISION, $this->getRoles(true), true);
+    }
+
+    /**
+     * @return bool
+     */
+    public function isAnySupervision(): bool
+    {
+        return $this->isSupervision() || $this->isExSuper() || $this->isSupSuper();
     }
 
     /**
@@ -847,6 +911,28 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     public static function getListByUserId(int $userId): array
     {
         return self::find()->select(['username', 'id'])
+            ->andWhere(['id' => EmployeeGroupAccess::usersIdsInCommonGroupsSubQuery($userId)])
+            ->orderBy(['username' => SORT_ASC])->asArray()->indexBy('id')->column();
+    }
+
+    /**
+     * @return array
+     */
+    public static function getActiveUsersList(): array
+    {
+        return self::find()->select(['username', 'id', 'status'])
+            ->active()
+            ->orderBy(['username' => SORT_ASC])
+            ->indexBy('id')->asArray()->column();
+    }
+
+    /**
+     * @param int $userId
+     * @return array
+     */
+    public static function getActiveUsersListFromCommonGroups(int $userId): array
+    {
+        return self::find()->select(['username', 'id', 'status'])->active()
             ->andWhere(['id' => EmployeeGroupAccess::usersIdsInCommonGroupsSubQuery($userId)])
             ->orderBy(['username' => SORT_ASC])->asArray()->indexBy('id')->column();
     }
@@ -1885,5 +1971,13 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         }
 
         return $dateTime;
+    }
+
+    /**
+     * @return EmployeeQuery
+     */
+    public static function find(): EmployeeQuery
+    {
+        return new EmployeeQuery(get_called_class());
     }
 }

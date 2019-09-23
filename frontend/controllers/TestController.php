@@ -18,6 +18,7 @@ use common\models\UserConnection;
 use common\models\UserDepartment;
 use common\models\UserGroupAssign;
 use common\models\UserProfile;
+use sales\access\EmployeeAccessHelper;
 use sales\access\EmployeeDepartmentAccess;
 use sales\access\EmployeeAccessQuery;
 use sales\access\EmployeeGroupAccess;
@@ -111,14 +112,20 @@ class TestController extends FController
 
     public function actionTest()
     {
+        $userId = 295;
+
+        $projects = EmployeeDepartmentAccess::getDepartments($userId, [], [Employee::ROLE_AGENT]);
+        $projects = EmployeeDepartmentAccess::getDepartments($userId, [], [Employee::ROLE_AGENT]);
+        $projects = EmployeeDepartmentAccess::getDepartments($userId);
+        $projects = EmployeeDepartmentAccess::getDepartments($userId);
+        $projects = EmployeeDepartmentAccess::getDepartments();
+        $projects = EmployeeDepartmentAccess::getDepartments();
 
 
-       $q = Employee::getList();
-        VarDumper::dump($q);
-//
-//
-//        die;
-//        $projects = EmployeeProjectAccess::getProjects($userId, [], [Employee::ROLE_ADMIN], [Employee::ROLE_AGENT]);
+//        $projects = EmployeeProjectAccess::getProjects($userId);
+//        $projects = EmployeeProjectAccess::getProjects($userId);
+//        $projects = EmployeeProjectAccess::getProjects($userId);
+//        $projects = EmployeeProjectAccess::getProjects($userId);
 //        VarDumper::dump($projects, 10, true);
 
         return $this->render('blank');

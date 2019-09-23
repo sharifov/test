@@ -1,12 +1,18 @@
 <?php
 
+use kartik\select2\Select2;
+use sales\ui\user\ListsAccess;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
+use common\models\Lead;
+use frontend\extensions\DatePicker;
 
 /* @var $this yii\web\View */
 /* @var $model common\models\search\LeadSearch */
 /* @var $form yii\widgets\ActiveForm */
 /* @var $action string */
+/** @var ListsAccess $lists */
+
 ?>
 
 <div class="lead-search">
@@ -74,20 +80,20 @@ use yii\widgets\ActiveForm;
 
             <div class="row">
                 <div class="col-md-6">
-                    <?php  echo $form->field($model, 'trip_type')->dropDownList(\common\models\Lead::TRIP_TYPE_LIST, ['prompt' => '-']) ?>
+                    <?php  echo $form->field($model, 'trip_type')->dropDownList(Lead::TRIP_TYPE_LIST, ['prompt' => '-']) ?>
                 </div>
                 <div class="col-md-6">
-                    <?php  echo $form->field($model, 'cabin')->dropDownList(\common\models\Lead::CABIN_LIST, ['prompt' => '-']) ?>
+                    <?php  echo $form->field($model, 'cabin')->dropDownList(Lead::CABIN_LIST, ['prompt' => '-']) ?>
                 </div>
             </div>
 
             <div class="row">
                 <div class="col-md-12">
-                    <?//= $form->field($model, 'status')->dropDownList(\common\models\Lead::STATUS_LIST, ['prompt' => '-']) ?>
+                    <?//= $form->field($model, 'status')->dropDownList(Lead::STATUS_LIST, ['prompt' => '-']) ?>
                     <?php
-                        echo $form->field($model, 'statuses')->widget(\kartik\select2\Select2::class, [
-                            'data' => \common\models\Lead::STATUS_LIST,
-                            'size' => \kartik\select2\Select2::SMALL,
+                        echo $form->field($model, 'statuses')->widget(Select2::class, [
+                            'data' => Lead::STATUS_LIST,
+                            'size' => Select2::SMALL,
                             'options' => ['placeholder' => 'Select status', 'multiple' => true],
                             'pluginOptions' => ['allowClear' => true],
                         ]);
@@ -134,75 +140,27 @@ use yii\widgets\ActiveForm;
 
         	<div class="row">
 				<div class="col-md-6">
-				<?= $form->field($model, 'depart_date_from')->widget(
-                        \dosamigos\datepicker\DatePicker::class, [
-                        'inline' => false,
-                        //'template' => '<div class="well well-sm" style="background-color: #fff; width:250px">{input}</div>',
-                        'clientOptions' => [
-                            'autoclose' => true,
-                            'format' => 'dd-M-yyyy',
-                            'todayBtn' => true
-                        ]
-                    ]);?>
+				    <?= $form->field($model, 'depart_date_from')->widget(DatePicker::class) ?>
 				</div>
 				<div class="col-md-6">
-				 <?= $form->field($model, 'depart_date_to')->widget(
-                        \dosamigos\datepicker\DatePicker::class, [
-                        'inline' => false,
-                        //'template' => '<div class="well well-sm" style="background-color: #fff; width:250px">{input}</div>',
-                        'clientOptions' => [
-                            'autoclose' => true,
-                            'format' => 'dd-M-yyyy',
-                            'todayBtn' => true
-                        ]
-                    ]);?>
+				 <?= $form->field($model, 'depart_date_to')->widget(DatePicker::class) ?>
 				</div>
 			</div>
 
 			<div class="row">
-
-                <?php
-                    if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
-                        $projectList = \common\models\Project::getList();
-                    } else {
-                        $projectList = \common\models\Project::getList();
-                    }
-                ?>
-
-				<div class="col-md-6"><?php  echo $form->field($model, 'project_id')->dropDownList($projectList, ['prompt' => '-']) ?></div>
-				<div class="col-md-6"><?php  echo $form->field($model, 'source_id')->dropDownList(\common\models\Sources::getList(), ['prompt' => '-']) ?></div>
+				<div class="col-md-6"><?php  echo $form->field($model, 'project_id')->dropDownList($lists->getProjects(), ['prompt' => '-']) ?></div>
+				<div class="col-md-6"><?php  echo $form->field($model, 'source_id')->dropDownList($lists->getSources(), ['prompt' => '-']) ?></div>
 			</div>
-
 
             <div class="row">
                 <div class="col-md-6">
                     <?//php  echo $form->field($model, 'created_date_from') ?>
-
-                    <?= $form->field($model, 'created_date_from')->widget(
-                        \dosamigos\datepicker\DatePicker::class, [
-                        'inline' => false,
-                        //'template' => '<div class="well well-sm" style="background-color: #fff; width:250px">{input}</div>',
-                        'clientOptions' => [
-                            'autoclose' => true,
-                            'format' => 'dd-M-yyyy',
-                            'todayBtn' => true
-                        ]
-                    ]);?>
-
+                    <?= $form->field($model, 'created_date_from')->widget(DatePicker::class) ?>
                 </div>
 
                 <div class="col-md-6">
                     <?//php  echo $form->field($model, 'created_date_to') ?>
-                    <?= $form->field($model, 'created_date_to')->widget(
-                        \dosamigos\datepicker\DatePicker::class, [
-                        'inline' => false,
-                        //'template' => '<div class="well well-sm" style="background-color: #fff; width:250px">{input}</div>',
-                        'clientOptions' => [
-                            'autoclose' => true,
-                            'format' => 'dd-M-yyyy',
-                            'todayBtn' => true
-                        ]
-                    ]);?>
+                    <?= $form->field($model, 'created_date_to')->widget(DatePicker::class) ?>
                 </div>
             </div>
 
@@ -210,32 +168,12 @@ use yii\widgets\ActiveForm;
             <div class="row">
                 <div class="col-md-6">
                     <?//php  echo $form->field($model, 'created_date_from') ?>
-
-                    <?= $form->field($model, 'sold_date_from')->widget(
-                        \dosamigos\datepicker\DatePicker::class, [
-                        'inline' => false,
-                        //'template' => '<div class="well well-sm" style="background-color: #fff; width:250px">{input}</div>',
-                        'clientOptions' => [
-                            'autoclose' => true,
-                            'format' => 'dd-M-yyyy',
-                            'todayBtn' => true
-                        ]
-                    ])->label('Status Date from');?>
-
+                    <?= $form->field($model, 'sold_date_from')->widget(DatePicker::class)->label('Status Date from') ?>
                 </div>
 
                 <div class="col-md-6">
                     <?//php  echo $form->field($model, 'created_date_to') ?>
-                    <?= $form->field($model, 'sold_date_to')->widget(
-                        \dosamigos\datepicker\DatePicker::class, [
-                        'inline' => false,
-                        //'template' => '<div class="well well-sm" style="background-color: #fff; width:250px">{input}</div>',
-                        'clientOptions' => [
-                            'autoclose' => true,
-                            'format' => 'dd-M-yyyy',
-                            'todayBtn' => true
-                        ]
-                    ])->label('Status Date to');?>
+                    <?= $form->field($model, 'sold_date_to')->widget(DatePicker::class)->label('Status Date to') ?>
                 </div>
             </div>
 
@@ -258,16 +196,7 @@ use yii\widgets\ActiveForm;
 
                 <?//php  echo $form->field($model, 'called_expert') ?>
                 <div class="col-md-6">
-                    <?php
-                        if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
-                            $userList = \common\models\Employee::getList();
-                        } else {
-                            $userList = \common\models\Employee::getListByUserId(Yii::$app->user->id);
-                        }
-                    ?>
-
-
-                    <?php  echo $form->field($model, 'employee_id')->dropDownList($userList, ['prompt' => '-']) ?>
+                    <?php  echo $form->field($model, 'employee_id')->dropDownList($lists->getEmployees(), ['prompt' => '-']) ?>
                 </div>
             </div>
 

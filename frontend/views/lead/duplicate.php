@@ -1,11 +1,9 @@
 <?php
 
-use sales\access\EmployeeProjectAccess;
+use sales\ui\user\ListsAccess;
 use yii\helpers\Html;
 use yii\widgets\Pjax;
-use kartik\grid\GridView;
 use common\models\Lead;
-use yii\helpers\Url;
 
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\LeadSearch */
@@ -15,13 +13,11 @@ $this->title = 'Duplicate Queue';
 
 if (Yii::$app->user->identity->canRole('admin')) {
     $isAdmin = true;
-    $userList = \common\models\Employee::getList();
 } else {
     $isAdmin = false;
-    $userList = \common\models\Employee::getListByUserId(Yii::$app->user->id);
 }
 
-$projectList = EmployeeProjectAccess::getProjects(Yii::$app->user->id);
+$lists = new ListsAccess(Yii::$app->user->id);
 
 $this->params['breadcrumbs'][] = $this->title;
 $this->registerCssFile('/css/style-duplicate.css');
@@ -79,7 +75,7 @@ $this->registerCssFile('/css/style-duplicate.css');
             'options' => [
                 'style' => 'width:120px'
             ],
-            'filter' => $projectList,
+            'filter' => $lists->getProjects(),
             //'visible' => ! $isAgent
         ],
         [
@@ -410,8 +406,8 @@ $this->registerCssFile('/css/style-duplicate.css');
             'value' => function (\common\models\Lead $model) {
                 return $model->employee ? '<i class="fa fa-user"></i> ' . $model->employee->username : '-';
             },
-            'filter' => $userList,
-            //'visible' => ! $isAgent
+            'filter' => $lists->getEmployees(),
+            'visible' => $lists->getEmployees(),
         ],
         /*[
             'attribute' => 'update',

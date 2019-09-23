@@ -21,13 +21,6 @@ use yii\helpers\Url;
 
 $this->title = 'Inbox Queue';
 
-if (Yii::$app->user->identity->canRole('admin')) {
-    $userList = \common\models\Employee::getList();
-} else {
-    $userList = \common\models\Employee::getListByUserId(Yii::$app->user->id);
-}
-
-
 $this->registerJsFile('https://cdnjs.cloudflare.com/ajax/libs/jQuery-Knob/1.2.13/jquery.knob.min.js', [
     //'position' => \yii\web\View::POS_HEAD,
     'depends' => [

@@ -10,6 +10,7 @@ use sales\access\EmployeeDepartmentAccess;
 use sales\access\EmployeeProjectAccess;
 use sales\forms\CompositeForm;
 use sales\helpers\lead\LeadHelper;
+use sales\ui\user\ListsAccess;
 use sales\repositories\cases\CasesRepository;
 use sales\repositories\NotFoundException;
 use yii\helpers\VarDumper;
@@ -319,25 +320,7 @@ class LeadCreateForm extends CompositeForm
      */
     public function listSources(): array
     {
-
-        $projects = Project::find()->andWhere(['id' => array_keys(EmployeeProjectAccess::getProjects($this->userId))])->with('sources')->all();
-
-        $sources = [];
-
-        foreach ($projects as $project) {
-            $map = [];
-            foreach ($project->sources as $source) {
-                if ($source->hidden) {
-                    continue;
-                }
-                $map[$source->id] = $source->name;
-            }
-            if ($map) {
-                $sources[$project->name] = $map;
-            }
-        }
-
-        return $sources;
+        return  (new ListsAccess($this->userId))->getSources();
     }
 
     /**
