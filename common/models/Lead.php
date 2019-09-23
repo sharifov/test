@@ -848,7 +848,7 @@ class Lead extends ActiveRecord implements AggregateRoot
      */
     public function isAvailableToTake(): bool
     {
-        return in_array($this->status, [self::STATUS_PENDING, self::STATUS_FOLLOW_UP, self::STATUS_SNOOZE], true);
+        return in_array($this->status, [self::STATUS_PENDING, self::STATUS_FOLLOW_UP, self::STATUS_SNOOZE, self::STATUS_TRASH], true);
     }
 
     /**
