@@ -3,6 +3,8 @@
 namespace sales\forms\lead;
 
 use borales\extensions\phoneInput\PhoneInputValidator;
+use common\models\DepartmentPhoneProject;
+use common\models\UserProjectParams;
 use yii\base\Model;
 
 /**
@@ -32,7 +34,8 @@ class PhoneCreateForm extends Model
             ['phone', PhoneInputValidator::class],
             ['phone', 'filter', 'filter' => function($value) {
                 return str_replace(['-', ' '], '', trim($value));
-            }]
+            }],
+			['phone', 'checkForExistence']
         ];
     }
 
@@ -42,5 +45,18 @@ class PhoneCreateForm extends Model
             $this->addError($attribute, $this->message);
         }
     }
+
+	/**
+	 * @param $attribute
+	 * @param $params
+	 */
+	public function checkForExistence($attribute, $params): void
+	{
+		if (DepartmentPhoneProject::find()->where(['dpp_phone_number' => $this->phone])->limit(1)->one()) {
+			$this->addError($attribute, 'Phone number is General');
+		} elseif (UserProjectParams::find()->where(['upp_phone_number' => $this->phone])->orWhere(['upp_tw_phone_number' => $this->phone])->limit(1)->one()) {
+			$this->addError($attribute, 'Phone Number is Direct');
+		}
+	}
 
 }
