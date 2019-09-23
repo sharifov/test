@@ -42,7 +42,7 @@ $this->registerJs("$(function() {
         Pjax::begin(['id' => 'agent-activity']);
         echo GridView::widget([
             'dataProvider' => $dataProvider,
-            //'filterModel' => $searchModel,
+            'filterModel' => $searchModel,
             //'containerOptions' => ['style'=>'overflow: auto'], // only set when $responsive = false
 
 
@@ -60,7 +60,7 @@ $this->registerJs("$(function() {
                             return '<b>'.Html::encode($data['username']).'</b>';
                         },
                         'format' => 'raw',
-                        'filter' => false,
+                        'filter' => true,
                     ],
                     [
                         'label' => 'Inbound calls',
@@ -315,6 +315,7 @@ $this->registerJs("$(function() {
                     ],
                     [
                         'label' => 'Tasks Completed Nr+%',
+                        'attribute' => 'completed_tasks',
                         'value' => function($data) {
                             if($data['total_tasks'] > 0) {
                                 return $data['completed_tasks'].' ('. round($data['completed_tasks']*100/$data['total_tasks']).'%)';
