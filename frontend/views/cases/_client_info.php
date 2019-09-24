@@ -1,5 +1,6 @@
 <?php
 
+use sales\entities\cases\Cases;
 use yii\helpers\Html;
 
 /* @var $this yii\web\View */
@@ -50,6 +51,13 @@ use yii\helpers\Html;
                                 'first_name',
                                 'middle_name',
                                 'last_name',
+                                [
+                                    'attribute' => 'Client Time',
+                                    'value' => function () use ($caseModel) {
+                                        return $caseModel->getClientTime();
+                                    },
+                                    'format' => 'html'
+                                ]
                             ],
                         ]) ?>
                     </div>
@@ -111,7 +119,7 @@ use yii\helpers\Html;
                                         return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->updated));
                                     },
                                     'format' => 'html',
-                                ],
+                                ]
                             ],
                         ]) ?>
                     </div>
