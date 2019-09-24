@@ -909,9 +909,9 @@ class CasesController extends FController
         try {
             if ($form->load(Yii::$app->request->post()) && $form->validate()) {
 
-                $isAgent = Yii::$app->user->identity->isAgent();
+                $isSimpleAgent = Yii::$app->user->identity->isSimpleAgent();
 
-                if ($isAgent && empty($case->cs_category)) {
+                if ($isSimpleAgent && empty($case->cs_category)) {
                     throw new \Exception('Status of a case without a category cannot be changed!');
                 }
 

@@ -210,6 +210,16 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         return in_array(self::ROLE_AGENT, $this->getRoles(true), true);
     }
 
+    public function isSimpleAgent(): bool
+	{
+		return !$this->canRoles([
+			self::ROLE_SUPER_ADMIN,
+			self::ROLE_ADMIN,
+			self::ROLE_SUP_SUPER,
+			self::ROLE_EX_SUPER
+		]);
+	}
+
     /**
      * @return bool
      */
