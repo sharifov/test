@@ -169,7 +169,7 @@ class Notifications extends ActiveRecord
                 break;
             case self::TYPE_INFO: $str = 'info';
                 break;
-            case self::TYPE_WARNING: $str = '';
+            case self::TYPE_WARNING: $str = 'notice';
                 break;
             case self::TYPE_DANGER: $str = 'error';
                 break;
