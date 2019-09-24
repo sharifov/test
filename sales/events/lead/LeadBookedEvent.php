@@ -6,18 +6,26 @@ use common\models\Lead;
 
 /**
  * Class LeadBookedEvent
+ *
  * @property Lead $lead
+ * @property int|null $oldStatus
+ * @property int|null $ownerId
  */
 class LeadBookedEvent
 {
     public $lead;
+    public $oldStatus;
+    public $ownerId;
 
     /**
-     * LeadBookedEvent constructor.
      * @param Lead $lead
+     * @param int|null $oldStatus
+     * @param int|null $ownerId
      */
-    public function __construct(Lead $lead)
+    public function __construct(Lead $lead, ?int $oldStatus, ?int $ownerId)
     {
         $this->lead = $lead;
+        $this->oldStatus = $oldStatus;
+        $this->ownerId = $ownerId;
     }
 }

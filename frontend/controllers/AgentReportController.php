@@ -2,16 +2,12 @@
 
 namespace frontend\controllers;
 
+use common\models\Employee;
 use Yii;
-use yii\filters\AccessControl;
-use yii\filters\VerbFilter;
-use yii\base\DynamicModel;
 use common\models\search\AgentActivitySearch;
 use common\models\Call;
 use common\models\Sms;
 use common\models\Email;
-use yii\helpers\ArrayHelper;
-
 
 /**
  * AgentActivityController.

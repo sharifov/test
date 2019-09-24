@@ -34,9 +34,10 @@ class LeadBookedEventListener
     {
 
         $lead = $event->lead;
+        $ownerId = $event->ownerId ?: $lead->employee_id;
 
         try {
-            $owner = $this->userRepository->find($lead->employee_id);
+            $owner = $this->userRepository->find($ownerId);
         } catch (NotFoundException $e) {
             Yii::warning(
                 'Not found owner for booked lead: ' . $lead->id,

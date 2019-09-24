@@ -5,13 +5,13 @@ namespace sales\events\lead;
 use common\models\Lead;
 
 /**
- * Class LeadSnoozeEvent
+ * Class LeadTrashEvent
  *
  * @property Lead $lead
  * @property int|null $oldStatus
  * @property int|null $ownerId
  */
-class LeadSnoozeEvent
+class LeadTrashEvent
 {
     public $lead;
     public $oldStatus;

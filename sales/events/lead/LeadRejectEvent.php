@@ -5,14 +5,15 @@ namespace sales\events\lead;
 use common\models\Lead;
 
 /**
- * Class LeadSnoozeEvent
+ * Class LeadRejectEvent
  *
  * @property Lead $lead
  * @property int|null $oldStatus
  * @property int|null $ownerId
  */
-class LeadSnoozeEvent
+class LeadRejectEvent
 {
+
     public $lead;
     public $oldStatus;
     public $ownerId;
@@ -28,4 +29,5 @@ class LeadSnoozeEvent
         $this->oldStatus = $oldStatus;
         $this->ownerId = $ownerId;
     }
+
 }

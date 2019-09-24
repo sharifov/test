@@ -313,6 +313,9 @@ class CasesSearch extends Cases
     {
         $query = Cases::find();
 
+        $query->andWhere(['cs_dep_id' => array_keys(EmployeeDepartmentAccess::getDepartments())]);
+        $query->andWhere(['cs_project_id' => array_keys(EmployeeProjectAccess::getProjects())]);
+
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
             'pagination' => [
@@ -331,15 +334,10 @@ class CasesSearch extends Cases
             throw new \InvalidArgumentException('cs_client_id must be set');
         }
 
-        $query->andWhere([
-            'cs_client_id' => $this->cs_client_id,
-            'cs_project_id' => $this->cs_project_id,
-            'cs_dep_id' => $this->cs_dep_id,
-        ]);
+        $query->andWhere(['cs_client_id' => $this->cs_client_id]);
 
         return $dataProvider;
     }
-
 
     /**
      * @return array

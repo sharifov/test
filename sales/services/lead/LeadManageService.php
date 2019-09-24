@@ -149,7 +149,7 @@ class LeadManageService
             $form->delayedCharge
         );
 
-        $lead->take($employeeId);
+        $lead->processing($employeeId);
 
         $this->clientManageService->addPhones($client, $form->phones);
 

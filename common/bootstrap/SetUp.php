@@ -13,7 +13,7 @@ use sales\entities\cases\events\CasesStatusChangeEvent;
 use sales\entities\cases\events\CasesTrashStatusEvent;
 use sales\events\lead\LeadBookedEvent;
 use sales\events\lead\LeadCallExpertRequestEvent;
-use sales\events\lead\LeadCreatedCloneEvent;
+use sales\events\lead\LeadCreatedCloneByUserEvent;
 use sales\events\lead\LeadCreatedEvent;
 use sales\events\lead\LeadDuplicateDetectedEvent;
 use sales\events\lead\LeadFollowUpEvent;
@@ -31,7 +31,7 @@ use sales\listeners\cases\CasesStatusChangeEventListener;
 use sales\listeners\cases\CasesTrashStatusEventLogListener;
 use sales\listeners\lead\LeadBookedEventListener;
 use sales\listeners\lead\LeadCallExpertRequestEventListener;
-use sales\listeners\lead\LeadCreatedCloneEventListener;
+use sales\listeners\lead\LeadCreatedCloneByUserEventListener;
 use sales\listeners\lead\LeadCreatedEventListener;
 use sales\listeners\lead\LeadDuplicateDetectedEventListener;
 use sales\listeners\lead\LeadFlowListener;
@@ -65,7 +65,7 @@ class SetUp implements BootstrapInterface
                 LeadCallExpertRequestEvent::class => [LeadCallExpertRequestEventListener::class],
                 LeadTaskEvent::class => [LeadTaskEventListener::class],
                 LeadCountPassengersChangedEvent::class => [LeadCountPassengersChangedEventListener::class],
-                LeadCreatedCloneEvent::class => [LeadCreatedCloneEventListener::class],
+                LeadCreatedCloneByUserEvent::class => [LeadCreatedCloneByUserEventListener::class],
 
                 //CasesStatusChangeEvent::class => [CasesStatusChangeEventListener::class]
                 CasesPendingStatusEvent::class => [CasesPendingStatusEventLogListener::class],

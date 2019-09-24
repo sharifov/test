@@ -7,8 +7,8 @@ use common\models\Lead;
 /**
  * Class LeadOwnerChangedEvent
  * @property Lead $lead
- * @property $oldOwnerId
- * @property $newOwnerId
+ * @property int|null $oldOwnerId
+ * @property int $newOwnerId
  */
 class LeadOwnerChangedEvent
 {
@@ -19,10 +19,10 @@ class LeadOwnerChangedEvent
     /**
      * LeadOwnerChangedEvent constructor.
      * @param Lead $lead
-     * @param $oldOwnerId
-     * @param $newOwnerId
+     * @param int|null $oldOwnerId
+     * @param int $newOwnerId
      */
-    public function __construct(Lead $lead, $oldOwnerId, $newOwnerId)
+    public function __construct(Lead $lead, ?int $oldOwnerId, int $newOwnerId)
     {
         $this->lead = $lead;
         $this->oldOwnerId = $oldOwnerId;
