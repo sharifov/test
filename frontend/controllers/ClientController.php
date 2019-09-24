@@ -157,8 +157,6 @@ class ClientController extends FController
         $searchModel = new CasesSearch();
 
         $params['CasesSearch']['cs_client_id'] = $clientId;
-        $params['CasesSearch']['cs_project_id'] = array_keys(EmployeeProjectAccess::getProjects(Yii::$app->user->id));
-        $params['CasesSearch']['cs_dep_id'] = array_keys(EmployeeDepartmentAccess::getDepartments(Yii::$app->user->id));
 
         $dataProvider = $searchModel->searchClient($params);
 
