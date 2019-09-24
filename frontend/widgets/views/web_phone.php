@@ -1,83 +1,42 @@
 <?php
-/* @var $user_id integer */
 /* @var $clientId string */
 /* @var $token string */
 /* @var $fromAgentPhone string */
 /* @var $supportGeneralPhones array */
 /* @var $use_browser_call_access bool */
 
-
+use yii\helpers\Url;
+use yii\bootstrap\Modal;
+use yii\helpers\Html;
 
 \frontend\assets\WebPhoneAsset::register($this);
 ?>
-
-<style>
-    .digit,
-    .dig {
-        float: left;
-        padding: 10px 30px;
-        width: 30px;
-        font-size: 2rem;
-        cursor: pointer;
-    }
-
-    #output {
-        font-family: "Exo";
-        font-size: 2rem;
-        height: 30px;
-        font-weight: bold;
-        color: #292726;
-        background-color: #d2d4e3;
-        padding: 0 2px 0 2px;
-    }
-    .digit:active,
-    .dig:active {
-        background-color: #e6e6e6;
-    }
-
-    .dig {
-        float: left;
-        padding: 10px 20px;
-        margin: 10px;
-        width: 30px;
-        cursor: pointer;
-    }
-    .container-digit {
-        border: solid 1px #0d3349;
-        max-width: 200px;
-        padding: 5px;
-    }
-</style>
 
 <div class="fabs2" style="<?=((isset($_COOKIE['web-phone-widget-close']) && $_COOKIE['web-phone-widget-close']) ? '' : 'display: none')?>">
     <a id="prime2" class="fab2"><i class="fa fa-phone"></i></a>
 </div>
 
-<div id="web-phone-widget" style="background-color: rgba(255,255,255,.3);">
-
+<div id="web-phone-widget">
     <?php if($token): ?>
-
         <div id="web-phone-token" style="display: none"><?=$token?></div>
             <table class="table" style="margin: 0; background-color: rgba(255,255,255,.3);">
                 <tr>
                     <?/*<td style="display: none"><i title="<?=$token?>">Token</i></td>*/?>
-                    <td width="100"><i class="fa fa-user"></i> <span><?=$clientId?></span></td>
+                    <td style="width: 100px"><i class="fa fa-user"></i> <span><?=$clientId?></span></td>
                     <td>From: <i class="fa fa-phone"></i> <span id="web-call-from-number"></span></td>
-
                     <td>To: <i class="fa fa-phone"></i> <span id="web-call-to-number"></span></td>
-                    <td width="120px">
+                    <td style="width: 120px">
                         <div class="text-right">
-                            <?//=\yii\helpers\Html::button('<i class="fa fa-tumblr"></i>', ['class' => 'btn btn-xs btn-primary', 'id' => 'btn-webphone-token', 'onclick' => 'alert($("#web-phone-token").text())'])?>
-                            <?=\yii\helpers\Html::button('<i class="fa fa-building-o text-warning"></i>', ['class' => 'btn btn-xs btn-primary', 'id' => 'btn-send-digit'])?>
-                            <?=\yii\helpers\Html::button('<i class="fa fa-angle-double-up"></i>', ['class' => 'btn btn-xs btn-primary', 'id' => 'btn-nin-max-webphone'])?>
-                            <?=\yii\helpers\Html::button('<i class="fa fa-close"></i>', ['class' => 'btn btn-xs btn-primary', 'id' => 'btn-webphone-close'])?>
+                            <?=Html::button('<i class="fa fa-building-o text-warning"></i>', ['class' => 'btn btn-xs btn-primary', 'id' => 'btn-send-digit'])?>
+                            <?=Html::button('<i class="fa fa-angle-double-up"></i>', ['class' => 'btn btn-xs btn-primary', 'id' => 'btn-nin-max-webphone'])?>
+                            <?=Html::button('<i class="fa fa-close"></i>', ['class' => 'btn btn-xs btn-primary', 'id' => 'btn-webphone-close'])?>
                         </div>
                     </td>
                 </tr>
             </table>
             <table class="table" style="margin: 0">
                 <tr>
-                    <td width="250">
+                    <td style="width: 250px">
                         <table id="volume-indicators" style="display: none">
                             <tr title="Mic Volume">
                                 <td><i class="fa fa-microphone"></i> </td>
@@ -91,7 +50,7 @@
                     </td>
                     <td>
                         <div class="btn-group" id="btn-group-id-hangup" style="display:none;">
-                            <?=\yii\helpers\Html::button('<i class="fa fa-close"></i> Hangup', ['class' => 'btn btn-sm btn-danger','id' => 'button-hangup'])?>
+                            <?=Html::button('<i class="fa fa-close"></i> Hangup', ['class' => 'btn btn-sm btn-danger','id' => 'button-hangup'])?>
                         </div>
 
 <!--                        <div class="btn-group dropup" style="display:none;" id="btn-group-id-forward">-->
@@ -102,7 +61,7 @@
 <!--                                --><?php //if($supportGeneralPhones): ?>
 <!--                                    --><?php //foreach ($supportGeneralPhones AS $projectName => $projectPhone): ?>
 <!--                                        <li>-->
-<!--                                            <a href="#" class="btn-transfer" data-type="number" data-value="--><?//=\yii\helpers\Html::encode($projectPhone)?><!--">--><?php //echo \yii\helpers\Html::encode($projectName) . ' ('.\yii\helpers\Html::encode($projectPhone).')';?><!--</a>-->
+<!--                                            <a href="#" class="btn-transfer" data-type="number" data-value="--><?//=Html::encode($projectPhone)?><!--">--><?php //echo Html::encode($projectName) . ' ('.Html::encode($projectPhone).')';?><!--</a>-->
 <!--                                        </li>-->
 <!--                                    --><?php //endforeach; ?>
 <!--                                --><?php //endif;?>
@@ -110,17 +69,17 @@
 <!--                        </div>-->
 
                         <div class="btn-group" id="btn-group-id-redirect" style="display: none;">
-                            <?=\yii\helpers\Html::button('<i class="fa fa-forward"></i> Transfer Call', ['id' => 'btn-show-transfer-call', 'class' => 'btn btn-sm btn-info'])?>
+                            <?=Html::button('<i class="fa fa-forward"></i> Transfer Call', ['id' => 'btn-show-transfer-call', 'class' => 'btn btn-sm btn-info'])?>
                         </div>
 
 
-                        <?/*=\yii\helpers\Html::button('<i class="fa fa-phone"></i> Call', ['class' => 'btn btn-xs btn-success', 'id' => 'button-call'])*/?>
+                        <?/*=Html::button('<i class="fa fa-phone"></i> Call', ['class' => 'btn btn-xs btn-success', 'id' => 'button-call'])*/?>
                         <div id="call-controls2" style="display: none;">
                             <div class="btn-group">
-                                <?=\yii\helpers\Html::button('<i class="fa fa-phone"></i> Answer', ['class' => 'btn btn-xs btn-success', 'id' => 'button-answer'])?>
+                                <?=Html::button('<i class="fa fa-phone"></i> Answer', ['class' => 'btn btn-xs btn-success', 'id' => 'button-answer'])?>
                             </div>
                             <div class="btn-group">
-                                <?=\yii\helpers\Html::button('<i class="fa fa-forward"></i> Reject', ['class' => 'btn btn-xs btn-danger','id' => 'button-reject'])?>
+                                <?=Html::button('<i class="fa fa-forward"></i> Reject', ['class' => 'btn btn-xs btn-danger','id' => 'button-reject'])?>
                             </div>
                         </div>
                     </td>
@@ -128,11 +87,10 @@
             </table>
 
 
-            <div class="webphone-controls" id="controls" style="display: none">
-
+            <div class="webphone-controls" id="controls">
                 <table class="table">
                     <tr>
-                        <td width="250">
+                        <td style="width: 250px">
                             <div id="info">
                                 <?/*<div id="client-name"></div>*/ ?>
                                 <div id="output-selection">
@@ -160,15 +118,15 @@
 </div>
 
 
-<?php \yii\bootstrap\Modal::begin([
+<?php Modal::begin([
     'id' => 'web-phone-dial-modal',
     'header' => '<h4 class="modal-title">Phone Dial</h4>',
     'footer' => '<a href="#" class="btn btn-primary" data-dismiss="modal">Close</a>',
 ]); ?>
-<?php \yii\bootstrap\Modal::end(); ?>
+<?php Modal::end(); ?>
 
 
-<?php \yii\bootstrap\Modal::begin([
+<?php Modal::begin([
     'id' => 'web-phone-send-digit-modal',
     'header' => '<h4 class="modal-title">Send digit</h4>',
     'size' => 'modal-sm',
@@ -200,24 +158,23 @@
             <i class="fa fa-eraser dig reset-digit" aria-hidden="true"></i>
         </div>
     </div>
-<?php \yii\bootstrap\Modal::end(); ?>
+<?php Modal::end(); ?>
 
-
-
-<?php \yii\bootstrap\Modal::begin([
+<?php Modal::begin([
     'id' => 'web-phone-redirect-agents-modal',
     'header' => '<h4 class="modal-title">Transfer Call</h4>',
     //'size' => 'modal-sm',
 ]);
-echo '<div class="container" id="container-redirect-agents"></div>';
-\yii\bootstrap\Modal::end(); ?>
+?>
+<?php Modal::end(); ?>
 
 <?php
-    $ajaxSaveCallUrl = \yii\helpers\Url::to(['phone/ajax-save-call']);
-    $ajaxRedirectCallUrl = \yii\helpers\Url::to(['phone/ajax-call-redirect']);
-    $ajaxCallRedirectGetAgents = \yii\helpers\Url::to(['phone/ajax-call-get-agents']);
-    $ajaxCallTransferUrl = \yii\helpers\Url::to(['phone/ajax-call-transfer']);
-    $ajaxCheckUserForCallUrl = \yii\helpers\Url::to(['phone/ajax-check-user-for-call']);
+    $ajaxSaveCallUrl = Url::to(['phone/ajax-save-call']);
+    $ajaxRedirectCallUrl = Url::to(['phone/ajax-call-redirect']);
+    $ajaxCallRedirectGetAgents = Url::to(['phone/ajax-call-get-agents']);
+    $ajaxCallTransferUrl = Url::to(['phone/ajax-call-transfer']);
+    $ajaxCheckUserForCallUrl = Url::to(['phone/ajax-check-user-for-call']);
+    $ajaxPhoneDialUrl = Url::to(['phone/ajax-phone-dial']);
 ?>
 <script type="text/javascript">
 
@@ -226,19 +183,19 @@ echo '<div class="container" id="container-redirect-agents"></div>';
     const ajaxCallRedirectUrl = '<?=$ajaxRedirectCallUrl?>';
     const ajaxCallTransferUrl = '<?=$ajaxCallTransferUrl?>';
     const ajaxCallRedirectGetAgents = '<?=$ajaxCallRedirectGetAgents?>';
+    const ajaxPhoneDialUrl = '<?=$ajaxPhoneDialUrl?>';
 
     const userId = '<?=Yii::$app->user->id?>';
     use_browser_call_access =  <?= $use_browser_call_access ? 'true' : 'false' ?>;
-    agentId = <?= $user_id?>;
     call_access_log = [];
 
     if(window.localStorage.agent_tab_conn_state === undefined) {
-        var agent_tab_conn_state = [{"user": agentId, "items": []}];
+        var agent_tab_conn_state = [{"user": userId, "items": []}];
         window.localStorage.setItem('agent_tab_conn_state', JSON.stringify(agent_tab_conn_state));
     }
 
     if(window.localStorage.agent_tab_conn_access === undefined) {
-        var agent_tab_conn_access = [{"user": agentId, "access": 1}];
+        var agent_tab_conn_access = [{"user": userId, "access": 1}];
         window.localStorage.setItem('agent_tab_conn_access', JSON.stringify(agent_tab_conn_access));
     }
 
@@ -265,7 +222,7 @@ echo '<div class="container" id="container-redirect-agents"></div>';
         var agent_tab_conn_access = [];
         if (!use_browser_call_access) {
             if (window.localStorage.agent_tab_conn_access !== undefined) {
-                agent_tab_conn_access = [{"user": agentId, "access": 1}];
+                agent_tab_conn_access = [{"user": userId, "access": 1}];
                 window.localStorage.setItem('agent_tab_conn_access', JSON.stringify(agent_tab_conn_access));
             }
             return true;
@@ -275,14 +232,14 @@ echo '<div class="container" id="container-redirect-agents"></div>';
         try {
             agent_tab_conn_access = JSON.parse(window.localStorage.agent_tab_conn_access);
         } catch (e) {
-            agent_tab_conn_access = [{"user": agentId, "access": 1}];
+            agent_tab_conn_access = [{"user": userId, "access": 1}];
         }
 
         var key_index = 0;
         if (agent_tab_conn_access.length > 0) {
             for (var i = 0; i < agent_tab_conn_access.length; i++) {
                 var agentData = agent_tab_conn_access[i];
-                if (agentData && agentData.user && agentData.user === agentId) {
+                if (agentData && agentData.user && agentData.user === userId) {
                     agent_access = agentData.access;
                     key_index = i;
                 }
@@ -296,7 +253,7 @@ echo '<div class="container" id="container-redirect-agents"></div>';
                 return false;
             }
         } else {
-            agent_tab_conn_access[key_index] = {"user": agentId, "access": status}
+            agent_tab_conn_access[key_index] = {"user": userId, "access": status}
         }
         window.localStorage.setItem('agent_tab_conn_access', JSON.stringify(agent_tab_conn_access));
         return (agent_access > 0);
@@ -310,11 +267,13 @@ echo '<div class="container" id="container-redirect-agents"></div>';
             title: title,
             type: type,
             text: message,
-            hide: true
+            icon: true,
+            hide: true,
+            delay: 3000,
+            mouse_reset: false
         });
     }
 
-    var tw_configs = {"client":"<?= $clientId;?>"};
     var webPhoneParams = {};
     var call_acc_sid = '';
 
@@ -323,32 +282,17 @@ echo '<div class="container" id="container-redirect-agents"></div>';
     var device;
     var connection;
 
-    var speakerDevices = document.getElementById('speaker-devices');
-    var ringtoneDevices = document.getElementById('ringtone-devices');
-    var outputVolumeBar = document.getElementById('output-volume');
-    var inputVolumeBar = document.getElementById('input-volume');
-    var volumeIndicators = document.getElementById('volume-indicators');
+    const speakerDevices = document.getElementById('speaker-devices');
+    const ringtoneDevices = document.getElementById('ringtone-devices');
+    const outputVolumeBar = document.getElementById('output-volume');
+    const inputVolumeBar = document.getElementById('input-volume');
+    const volumeIndicators = document.getElementById('volume-indicators');
 
     if (!Array.prototype.inArray) {
         Array.prototype.inArray = function (element) {
             return this.indexOf(element) > -1;
         };
     }
-
-
-    // Bind button to make call
-    /*document.getElementById('button-call').onclick = function () {
-        // get the phone number to connect the call to
-        var params = {
-            To: document.getElementById('phone-number').value,
-            FromAgentPhone: tw_configs.FromAgentPhone
-        };
-
-        console.log('Calling ' + params.To + '...');
-        if (device) {
-            device.connect(params);
-        }
-    };*/
 
     // Bind button to hangup call
     document.getElementById('button-hangup').onclick = function () {
@@ -365,7 +309,7 @@ echo '<div class="container" id="container-redirect-agents"></div>';
     }*/
 
     speakerDevices.addEventListener('change', function () {
-        var selectedDevices = [].slice.call(speakerDevices.children)
+        let selectedDevices = [].slice.call(speakerDevices.children)
             .filter(function (node) {
                 return node.selected;
             })
@@ -377,7 +321,7 @@ echo '<div class="container" id="container-redirect-agents"></div>';
     });
 
     ringtoneDevices.addEventListener('change', function () {
-        var selectedDevices = [].slice.call(ringtoneDevices.children)
+        let selectedDevices = [].slice.call(ringtoneDevices.children)
             .filter(function (node) {
                 return node.selected;
             })
@@ -390,7 +334,7 @@ echo '<div class="container" id="container-redirect-agents"></div>';
 
 
     function volumeIndicatorsChange(inputVolume, outputVolume) {
-        var inputColor = 'red';
+        let inputColor = 'red';
         if (inputVolume < .50) {
             inputColor = 'green';
         } else if (inputVolume < .75) {
@@ -400,7 +344,7 @@ echo '<div class="container" id="container-redirect-agents"></div>';
         inputVolumeBar.style.width = Math.floor(inputVolume * 300) + 'px';
         inputVolumeBar.style.background = inputColor;
 
-        var outputColor = 'red';
+        let outputColor = 'red';
         if (outputVolume < .50) {
             outputColor = 'green';
         } else if (outputVolume < .75) {
@@ -431,14 +375,14 @@ echo '<div class="container" id="container-redirect-agents"></div>';
         selectEl.innerHTML = '';
 
         device.audio.availableOutputDevices.forEach(function (device, id) {
-            var isActive = (selectedDevices.size === 0 && id === 'default');
+            let isActive = (selectedDevices.size === 0 && id === 'default');
             selectedDevices.forEach(function (device) {
                 if (device.deviceId === id) {
                     isActive = true;
                 }
             });
 
-            var option = document.createElement('option');
+            let option = document.createElement('option');
             option.label = device.label;
             option.setAttribute('data-id', id);
             if (isActive) {
@@ -450,14 +394,14 @@ echo '<div class="container" id="container-redirect-agents"></div>';
 
     // Activity log
     function log(message) {
-        var logDiv = document.getElementById('call-log');
+        let logDiv = document.getElementById('call-log');
         logDiv.innerHTML += '<p>&gt;&nbsp;' + message + '</p>';
         logDiv.scrollTop = logDiv.scrollHeight;
     }
 
 
     function clearLog() {
-        var logDiv = document.getElementById('call-log');
+        let logDiv = document.getElementById('call-log');
         logDiv.innerHTML = '';
         logDiv.scrollTop = logDiv.scrollHeight;
     }
@@ -474,9 +418,9 @@ echo '<div class="container" id="container-redirect-agents"></div>';
         if (!device) {
             initDevice();
         } else {
-            var status = device.status();
-            var refrash_device_statuses = ['pending', 'closed', 'offline', 'error'];
-            if (refrash_device_statuses.inArray(status)) {
+            let status = device.status();
+            let device_statuses = ['pending', 'closed', 'offline', 'error'];
+            if (device_statuses.inArray(status)) {
                 initDevice();
             }
         }
@@ -505,7 +449,7 @@ echo '<div class="container" id="container-redirect-agents"></div>';
         if (connection) {
             console.log("button-reject: " + JSON.stringify(connection.parameters));
             connection.reject();
-                $.get(ajaxSaveCallUrl + '?sid=' + connection.parameters.CallSid + '&user_id=' + agentId, function (r) {
+                $.get(ajaxSaveCallUrl + '?sid=' + connection.parameters.CallSid + '&user_id=' + userId, function (r) {
                 console.log(r);
             });
             //document.getElementById('call-controls2').style.display = 'none';
@@ -516,29 +460,28 @@ echo '<div class="container" id="container-redirect-agents"></div>';
 
     function initRedirectToAgent() {
 
-        //if (connection && connection.parameters.CallSid) {
-            var callSid = '123'; //connection.parameters.CallSid;
-            var modal = $('#web-phone-redirect-agents-modal');
+        if (connection && connection.parameters.CallSid) {
+            let callSid = connection.parameters.CallSid;
+            let modal = $('#web-phone-redirect-agents-modal');
             modal.modal('show').find('.modal-body').html('<div style="text-align:center"><img width="200px" src="https://loading.io/spinners/gear-set/index.triple-gears-loading-icon.svg"></div>');
             modal.modal('show').find('.modal-header').html('<h3>Transfer Call ' + '<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button></h3>');
 
-            $.post(ajaxCallRedirectGetAgents, { sid: callSid, user_id: userId })
+            $.post(ajaxCallRedirectGetAgents, { sid: callSid }) // , user_id: userId
                 .done(function(data) {
                     modal.find('.modal-body').html(data);
                 });
-        // } else {
-        //     alert('Error: Not found Call connection or Call SID!');
-        // }
+        } else {
+             alert('Error: Not found Call connection or Call SID!');
+        }
         return false;
     }
 
 
     function saveDbCall(call_sid, call_from, call_to, call_status) {
 
-        var project_id = webPhoneParams.project_id;
-        var lead_id = webPhoneParams.lead_id;
-        var case_id = webPhoneParams.case_id;
-        //var call_acc_sid =
+        let project_id = webPhoneParams.project_id;
+        let lead_id = webPhoneParams.lead_id;
+        let case_id = webPhoneParams.case_id;
 
         console.info('saveDbCall - sid: ' + call_sid + ' : ' + call_from + ' : ' + call_to + ' : ' + call_status + ' : ' + project_id + ' : ' + lead_id + ' : ' + case_id);
 
@@ -579,23 +522,20 @@ echo '<div class="container" id="container-redirect-agents"></div>';
 
 
     function initDevice() {
-
         clearLog();
         log('Requesting Capability Token...');
         $.getJSON('/phone/get-token')
-            .then(function (data_res) {
-                var data = data_res.data;
+            .then(function (response) {
+                let data = response.data;
                 log('Got a token.');
-                console.log('app_sid: ' + data.app_sid + 'account_sid: ' + data.account_sid);
+                // console.log('app_sid: ' + data.app_sid + 'account_sid: ' + data.account_sid);
                 call_acc_sid = data.account_sid;
                 //console.log('Token: ' + data.token);
-                // Setup Twilio.Device
                 device = new Twilio.Device(data.token, {codecPreferences: ['opus', 'pcmu'], debug: true});
 
                 //console.log([data, device]);
                 device.on('ready', function (device) {
                     log('Twilio.Device Ready!');
-                    //document.getElementById('call-controls').style.display = 'block';
                 });
 
                 device.on('error', function (error) {
@@ -606,16 +546,13 @@ echo '<div class="container" id="container-redirect-agents"></div>';
                 device.on('connect', function (conn) {
                     //console.log("connect call: status: " + connection.status() + "\n" + 'connection: ' + JSON.stringify(connection) + "\n conn:" + JSON.stringify(conn));
                     //updateAgentStatus(connection, true);
-                    var access = updateAgentStatus(connection, true, 0);
+                    let access = updateAgentStatus(connection, true, 0);
                     connection = conn;
                     console.log({"action":"connect", "cid":connection.parameters.CallSid, "access": access});
                     //log('Successfully established call!');
-                    console.warn(conn);
+                    // console.warn(conn);
                     //console.info(conn.parameters);
-                    //console.log(conn.parameters.CallSid);
-                    //saveDbCall(conn.parameters.CallSid, conn.message.FromAgentPhone, conn.message.To, 'queued');
 
-                   // $('#btn-group-id-forward').show();
                     $('#btn-group-id-hangup').show();
                     $('#btn-group-id-redirect').show();
 
@@ -625,35 +562,23 @@ echo '<div class="container" id="container-redirect-agents"></div>';
 
                 device.on('disconnect', function (conn) {
                     //updateAgentStatus(connection, true);
-                    var access = updateAgentStatus(connection, false, 1);
+                    let access = updateAgentStatus(connection, false, 1);
                     console.log({"action":"disconnect", "cid":conn.parameters.CallSid, "access": access});
                     connection = conn;
-                    log('Call ended');
                     createNotify('Call ended', 'Call ended', 'warning');
-                    console.warn(conn);
-
+                    //console.warn(conn);
                     saveDbCall(conn.parameters.CallSid, conn.message.FromAgentPhone, conn.message.To, 'completed');
 
-                    //$('#btn-group-id-forward').hide();
                     $('#btn-group-id-hangup').hide();
                     $('#btn-group-id-redirect').hide();
-
                     volumeIndicators.style.display = 'none';
-
                     cleanPhones();
-
                 });
 
                 device.on('incoming', function (conn) {
-
-
-                    //alert(conn.parameters.CallSid);
-
-
                     connection = conn;
                     $('#call-controls2').hide();
-
-                    if (document.visibilityState == 'visible') {
+                    if (document.visibilityState === 'visible') {
                         conn.accept();
                     } else {
                         $('#call-controls2').show();
@@ -702,33 +627,24 @@ echo '<div class="container" id="container-redirect-agents"></div>';
 
                 device.on('cancel', function (conn) {
                     //var  access = updateAgentStatus(conn, true, true);
-                    var access = updateAgentStatus(connection, false, 1);
+                    let access = updateAgentStatus(connection, false, 1);
                     console.log({"action":"cancel", "cid":conn.parameters.CallSid, "access": access});
                     connection = conn;
                     log('Cancel call');
                     createNotify('Cancel call', 'Cancel call', 'warning');
                     saveDbCall(conn.parameters.CallSid, conn.message.FromAgentPhone, conn.message.To, 'canceled');
-
-                    //document.getElementById('call-controls').style.display = 'block';
-                    //document.getElementById('call-controls2').style.display = 'none';
                     $('#call-controls2').hide();
-                    //document.getElementById('btn-group-id-redirect').style.display = 'none';
                     $('#btn-group-id-redirect').hide();
                 });
-
-
-
                 //setClientNameUI(data.client);
-
                 device.audio.on('deviceChange', updateAllDevices.bind(device));
-                // Show audio selection UI if it is supported by the browser.
+
                 if (device.audio.isOutputSelectionSupported) {
-                    //document.getElementById('output-selection').style.display = 'block';
                     $('#output-selection').show();
                 }
             })
             .catch(function (err) {
-                var access = updateAgentStatus(connection, false, 1);
+                updateAgentStatus(connection, false, 1);
                 console.log(err);
                 log('Could not get a token from server!');
                 createNotify('Call Token error!', 'Could not get a token from server!', 'error');
@@ -750,13 +666,10 @@ echo '<div class="container" id="container-redirect-agents"></div>';
             return false;
         }*/
 
-        var params = {'To': phone_to, 'FromAgentPhone': phone_from, 'project_id': project_id, 'lead_id': lead_id, 'case_id': case_id, 'c_type': type, 'c_user_id': userId};
+        let params = {'To': phone_to, 'FromAgentPhone': phone_from, 'project_id': project_id, 'lead_id': lead_id, 'case_id': case_id, 'c_type': type, 'c_user_id': userId};
         webPhoneParams = params;
 
-        //console.log(params); return false;
-
         if (device) {
-
             $('#web-call-from-number').text(params.FromAgentPhone);
             $('#web-call-to-number').text(params.To);
 
@@ -764,127 +677,118 @@ echo '<div class="container" id="container-redirect-agents"></div>';
             createNotify('Calling', 'Calling ' + params.To + '...', 'success');
             updateAgentStatus(connection, false, 0);
             connection = device.connect(params);
-            //document.getElementById('btn-group-id-redirect').style.display = 'none';
             $('#btn-group-id-redirect').hide();
         }
     }
 
-    function cleanPhones()
-    {
+    function cleanPhones() {
         $('#web-call-from-number').text('');
         $('#web-call-to-number').text('');
     }
-
-
-
 </script>
 
 <?php
-$ajaxPhoneDialUrl = \yii\helpers\Url::to(['phone/ajax-phone-dial']);
-$userId = Yii::$app->user->id;
+
 
 $js = <<<JS
+    const webPhoneWidget = $('#web-phone-widget');
+    //setInterval('clearAgentStatus(connection)', 1000);
 
-        const ajaxPhoneDialUrl = '$ajaxPhoneDialUrl';
-        const webPhoneWidget = $('#web-phone-widget');
-
-        //setInterval('clearAgentStatus(connection)', 1000);
-       
-        $(document).on('click', '#btn-show-transfer-call', function(e) {
-            e.preventDefault();
-            initRedirectToAgent();
-        });
+    $(document).on('click', '#btn-show-transfer-call', function(e) {
+        e.preventDefault();
+        initRedirectToAgent();
+    });
+    
+    $(document).on('click', '.btn-transfer', function(e) {
+        e.preventDefault();
         
-        $(document).on('click', '.btn-transfer', function(e) {
-            e.preventDefault();
+        let obj = $(e.target);
+        let objType  = obj.data('type');
+        let objValue = obj.data('value');
+        
+        obj.attr('disabled', true);
+        
+        let modal = $('#web-phone-redirect-agents-modal');
+        modal.find('.modal-body').html('<div style="text-align:center"><img width="200px" src="https://loading.io/spinners/gear-set/index.triple-gears-loading-icon.svg"></div>');
+        
+        if(connection && connection.parameters.CallSid) {
+            updateAgentStatus(connection, false, 1);
             
-            let obj = $(e.target);
-            let objType  = obj.data('type');
-            let objValue = obj.data('value');
-            
-            obj.attr('disabled', true);
+            if(connection.status() !== 'open') {
+                connection.accept();
+            }
+                           
+            $.ajax({
+                type: 'post',
+                data: {
+                    'sid': connection.parameters.CallSid,
+                    'id': objValue,
+                    'type': objType
+                },
+                url: ajaxCallTransferUrl,
+                success: function (data) {
+                    if (data.error) {
+                        alert(data.message);
+                    }
+                    modal.modal('hide').find('.modal-body').html('');
+                },
+                error: function (error) {
+                    console.error(error);
+                    modal.modal('hide').find('.modal-body').html('');
+                }
+            });
+
+        } else {
+            alert('Error: Not found active connection or CallSid');
+        }
+    });
+        
+        
+    $(document).on('click',  '.btn-transfer-number',  function (e) {
+        e.preventDefault();
+        let obj = $(e.target);
+        let objType  = obj.data('type');
+        let objValue = obj.data('value');
+        
+        obj.attr('disabled', true);
+        
+        if(connection && connection.parameters.CallSid) {
+            if(objValue.length < 2) {
+                console.error('Error call forward param TO');
+                return false;
+            }
             
             let modal = $('#web-phone-redirect-agents-modal');
             modal.find('.modal-body').html('<div style="text-align:center"><img width="200px" src="https://loading.io/spinners/gear-set/index.triple-gears-loading-icon.svg"></div>');
+            // connection.accept();
+            //console.error(connection.parameters);
             
-            if(connection && connection.parameters.CallSid) {
-                updateAgentStatus(connection, false, 1);
-                
-                if(connection.status() !== 'open') {
-                    connection.accept();
-                }
-                               
-                $.ajax({
-                    type: 'post',
-                    data: {
-                        'sid': connection.parameters.CallSid,
-                        'id': objValue,
-                        'type': objType
-                    },
-                    url: ajaxCallTransferUrl,
-                    success: function (data) {
-                        if (data.error) {
-                            alert(data.message);
-                        }
-                        modal.modal('hide').find('.modal-body').html('');
-                    },
-                    error: function (error) {
-                        console.error(error);
-                        modal.modal('hide').find('.modal-body').html('');
+            $.ajax({
+                type: 'post',
+                data: {
+                    'sid': connection.parameters.CallSid,
+                    'type': objType,
+                    'from': connection.parameters.To,
+                    'to': objValue,
+                },
+                url: ajaxCallRedirectUrl,
+                success: function (data) {
+                    // updateAgentStatus(connection, false, 1);
+                    //console.log(data);
+                    if (data.error) {
+                        alert(data.message);
                     }
-                });
-
-            } else {
-                alert('Error: Not found active connection or CallSid');
-            }
-        });
-        
-        
-        $(document).on('click',  '.btn-transfer-number',  function (e) {
-            e.preventDefault();
-            let obj = $(e.target);
-            let objType  = obj.data('type');
-            let objValue = obj.data('value');
-            
-            obj.attr('disabled', true);
-            
-            if(connection && connection.parameters.CallSid) {
-                if(objValue.length < 2) {
-                    console.error('Error call forward param TO');
-                    return false;
+                    modal.modal('hide').find('.modal-body').html('');
+                },
+                error: function (error) {
+                    console.error(error);
+                    modal.modal('hide').find('.modal-body').html('');
                 }
-                
-                let modal = $('#web-phone-redirect-agents-modal');
-                modal.find('.modal-body').html('<div style="text-align:center"><img width="200px" src="https://loading.io/spinners/gear-set/index.triple-gears-loading-icon.svg"></div>');
-                // connection.accept();
-                //console.error(connection.parameters);
-                
-                $.ajax({
-                    type: 'post',
-                    data: {
-                        'sid': connection.parameters.CallSid,
-                        'type': objType,
-                        'from': connection.parameters.To,
-                        'to': objValue,
-                    },
-                    url: ajaxCallRedirectUrl,
-                    success: function (data) {
-                        // updateAgentStatus(connection, false, 1);
-                        //console.log(data);
-                        if (data.error) {
-                            alert(data.message);
-                        }
-                        modal.modal('hide').find('.modal-body').html('');
-                    },
-                    error: function (error) {
-                        console.error(error);
-                        modal.modal('hide').find('.modal-body').html('');
-                    }
-                });
-            } else {
-                alert('Error: Not found active connection or CallSid');
-            }
-        });
+            });
+        } else {
+            alert('Error: Not found active connection or CallSid');
+        }
+    });
 
 
     $(".digit").on('click', function() {
@@ -954,8 +858,8 @@ $js = <<<JS
     $(document).on('click', '#btn-make-call', function(e) {
         e.preventDefault();
         
-        $.post(ajaxCheckUserForCallUrl, {user_id: userId}, function(r) {
-            if(r && r.is_ready) {
+        $.post(ajaxCheckUserForCallUrl, {user_id: userId}, function(data) {
+            if(data && data.is_ready) {
                 let phone_to = $('#call-to-number').val();
                 let phone_from = $('#call-from-number').val();
                 
@@ -980,9 +884,6 @@ $js = <<<JS
     webPhoneWidget.css({left:'50%', 'margin-left':'-' + (webPhoneWidget.width() / 2) + 'px'}); //.slideDown();
     initDevice();
     //setInterval('renewTwDevice();', 50000);
-    
-
-
 
 JS;
 

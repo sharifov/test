@@ -403,7 +403,6 @@ class PhoneController extends FController
         $users = [];
         $error = null;
 
-
         try {
 
             if (!$sid) {
@@ -420,13 +419,13 @@ class PhoneController extends FController
                 $call = Call::find()->where(['c_created_user_id' => $userId])->orderBy(['c_id' => SORT_DESC])->limit(1)->one();
             }
 
-            if(!$call) {
-                throw new \Exception('Call not found by callSID: ' . $sid);
+            if (!$call) {
+                throw new \Exception('Call not found by callSID: ' . $sid, 5);
             }
 
             $project_id =  $call->c_project_id;
 
-            if(!$project_id) {
+            if (!$project_id) {
                 throw new \Exception('Project id not found in call by callSID: ' . $sid);
             }
 

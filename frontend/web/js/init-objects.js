@@ -3,6 +3,9 @@ favicon = new Favico({
 });
 
 PNotify.prototype.options.styling = "bootstrap3";
+PNotify.defaults.styling = 'bootstrap3'; // Bootstrap version 3
+PNotify.defaults.icons = 'bootstrap3'; // glyphicons
+
 PNotify.desktop.permission();
 
 ion.sound({
