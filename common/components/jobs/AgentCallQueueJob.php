@@ -92,7 +92,10 @@ class AgentCallQueueJob extends BaseObject implements JobInterface
                     if($originalAgentId) {
                         $user = Employee::findOne($originalAgentId);
                         if($user && $user->isOnline() /*&& $user->isCallStatusReady() && $user->isCallFree()*/) {
-                            $isCalled = Call::applyCallToAgentAccess($call, $user->id);
+                            $depListIds = array_keys($user->getUserDepartmentList());
+                            if (in_array($call->c_dep_id, $depListIds, true)) {
+                                $isCalled = Call::applyCallToAgentAccess($call, $user->id);
+                            }
                         }
                     }
 
