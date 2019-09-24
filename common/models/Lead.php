@@ -3102,7 +3102,8 @@ New lead {lead_id}
             'market_price' => $this->leadPreferences ? $this->leadPreferences->market_price : '',
             'itinerary' => [],
             'agent_name' => $this->employee ? $this->employee->username : 'N/A',
-            'agent_id' => $this->employee_id
+            'agent_id' => $this->employee_id,
+            'delayed_charge' => $this->l_delayed_charge
         ];
 
         $itinerary = [];
