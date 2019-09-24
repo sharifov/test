@@ -642,7 +642,7 @@ JS;
     const currentUrl = '<?=$currentUrl?>';
 
     function updateCommunication() {
-        $.pjax.reload({url: currentUrl, container: '#pjax-lead-communication', push: false, replace: false, timeout: 6000});
+        $.pjax.reload({url: currentUrl, container: '#pjax-lead-communication', push: false, replace: false, timeout: 6000, async: false});
     }
 
     function stopCall(duration) {
