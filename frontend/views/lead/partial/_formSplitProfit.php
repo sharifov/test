@@ -11,11 +11,53 @@ use yii\widgets\ActiveForm;
 use yii\helpers\Html;
 
 $js = <<<JS
+var leadId = $leadId || null;
+function checkPercentageOfSplit () {
+    var form = document.getElementById('split-form');
+    var formData = new FormData(form);
+    formData.append('leadId', leadId);
+    
+    $.ajax({
+        type: 'post',
+        url: '/lead/check-percentage-of-split-validation',
+        dataType: 'json',
+        data: formData,
+        processData: false,
+        contentType: false,
+        beforeSend: function () {
+            $('#save-btn').attr('disabled', true);    
+        },
+        success: function (data) {
+            var html = '';
+            for (var key in data) {
+                html += data[key];
+            }
+            $('#split-form-notification').html(html);
+            $('#save-btn').removeAttr('disabled');
+        },
+        error: function () {
+            $('#save-btn').removeAttr('disabled');    
+        }
+    })
+}
+
+function delay(callback, ms) {
+      var timer = 0;
+      return function() {
+            var context = this, args = arguments;
+           
+            clearTimeout(timer);
+            timer = setTimeout(function () {
+              callback.apply(context, args);
+            }, ms || 0);
+      };
+}
+
 function calcProfitByPercent(obj, total){
     var amount;
     var percent = parseInt($(obj).val());
-    amount = total * percent / 100;
-    $(obj).parents('.split-row').find('.profit-amount').val(amount);
+    amount = (+(total * percent / 100).toFixed(4));
+    $(obj).parents('.split-row').find('.profit-amount').html(amount);
     mainAgentProfit();
 }
 JS;
@@ -41,12 +83,15 @@ $this->registerJs($js);
         'class' => 'form-control',
         'placeholder' => 'Percent',
         'onchange' => "calcProfitByPercent(this, $totalProfit);",
+        'onkeydown' => "delay(checkPercentageOfSplit, 500)();"
     ]);?>
 	</div>
-	<div class="col-md-3">
-		<input type="text" class="profit-amount form-control" readonly value="<?= (!empty($split->ps_percent))?$totalProfit*$split->ps_percent/100:'0'?>"/>
-	</div>
 	<div class="col-md-1">
+        <div class="profit-amount" style="display: flex; width: 70px; border: 1px solid #e4e9ee; justify-content: center; align-items: center; height: 30px;">
+			<?= (!empty($split->ps_percent))?$totalProfit*$split->ps_percent/100:'0'?>
+        </div>
+	</div>
+	<div class="col-md-3">
 		<?= Html::button('<i class="fa fa-trash"></i>', [
             'class' => 'btn btn-danger pull-right remove-split-button' ,
         ]); ?>

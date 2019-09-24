@@ -34,7 +34,7 @@ function mainAgentProfit(){
     var agentProfit = 0;
     var sum = 0;
     $.each($('.profit-amount'), function( key, obj ) {
-      sum += parseFloat($(obj).val());
+      sum += parseFloat($(obj).html());
     });
     $('#main-agent-profit').html(total-sum);
 }
@@ -51,6 +51,7 @@ $this->registerJs($js);?>
 <?php endif;?>
 </div>
 <?php endif;?>
+<div id="split-form-notification"></div>
  <?php $form = ActiveForm::begin([
      'options' => ['data-pjax' => true, 'id' => 'split-form'],
      'enableClientValidation' => false,
@@ -82,6 +83,7 @@ $this->registerJs($js);?>
                 'split' => $_split,
                 'userList' => $userList,
                 'totalProfit' => $totalProfit,
+                'leadId' => $lead->id
             ]);
         }
     }
@@ -94,7 +96,8 @@ $this->registerJs($js);?>
             'split' => $newSplit,
             'userList' => $userList,
             'totalProfit' => $totalProfit,
-        ]) ?>
+			'leadId' => $lead->id
+		]) ?>
     </div>
 </div>
 <?php ob_start(); // output buffer the javascript to register later ?>

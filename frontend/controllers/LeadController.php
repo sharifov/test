@@ -30,6 +30,7 @@ use frontend\models\LeadForm;
 use frontend\models\LeadPreviewEmailForm;
 use frontend\models\LeadPreviewSmsForm;
 use frontend\models\SendEmailForm;
+use PHPUnit\Framework\Warning;
 use sales\entities\cases\Cases;
 use sales\forms\CompositeFormHelper;
 use sales\forms\lead\ItineraryEditForm;
@@ -2498,6 +2499,28 @@ class LeadController extends FController
         }
         return null;
     }
+
+	/**
+	 * @throws BadRequestHttpException
+	 */
+	public function actionCheckPercentageOfSplitValidation()
+	{
+		if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
+			Yii::$app->response->format = Response::FORMAT_JSON;
+			$data = Yii::$app->request->post();
+			$lead = Lead::findOne(['id' => $data['leadId'] ?? null]);
+
+			if ($lead) {
+				$splitForm = new ProfitSplitForm($lead);
+				$splitForm->setScenario(ProfitSplitForm::SCENARIO_CHECK_PERCENTAGE);
+
+				$load = $splitForm->loadModels($data);
+				return ActiveForm::validate($splitForm)['profitsplitform-warnings'][0] ?? null;
+			}
+		}
+
+		throw new BadRequestHttpException();
+	}
 
     public function actionSplitTips($id)
     {
