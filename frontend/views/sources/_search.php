@@ -28,7 +28,6 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'last_update') ?>
 
-    <?php // echo $form->field($model, 'phone_number') ?>
 
     <?php // echo $form->field($model, 'default') ?>
 

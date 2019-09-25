@@ -3,6 +3,7 @@
 namespace frontend\controllers;
 
 use common\models\Department;
+use common\models\DepartmentPhoneProject;
 use common\models\Employee;
 use common\models\Lead;
 use common\models\Project;
@@ -412,11 +413,11 @@ class CallController extends FController
 
                     //$callData['phone_from'] = $upp->upp_tw_phone_number;
 
-                    $source = Sources::find()->where(['project_id' => $leadModel->project_id, 'default' => true])->andWhere(['OR', ['IS NOT', 'phone_number', null], ['<>', 'phone_number', '']])->limit(1)->one();
-                    if($source && $source->phone_number) {
-                        $callData['phone_from'] = $source->phone_number;
+                    $dpp = DepartmentPhoneProject::find()->where(['dpp_project_id' => $leadModel->project_id])->limit(1)->one();
+                    if($dpp && $dpp->dpp_phone_number) {
+                        $callData['phone_from'] = $dpp->dpp_phone_number;
                     } else {
-                        Yii::error('Not found Project Source or Source Phone is empty, Project Id: '. $leadModel->project_id, 'CallController:actionAutoRedial:Source');
+                        Yii::error('Not found Project Source, Project Id: '. $leadModel->project_id, 'CallController:actionAutoRedial:DepartmentPhoneProject');
                     }
 
                     if(!$callData['phone_from']) {
