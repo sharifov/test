@@ -185,6 +185,8 @@ use yii\helpers\Html;
     const ajaxCallRedirectGetAgents = '<?=$ajaxCallRedirectGetAgents?>';
     const ajaxPhoneDialUrl = '<?=$ajaxPhoneDialUrl?>';
 
+    const clientId = '<?=$clientId?>';
+
     const userId = '<?=Yii::$app->user->id?>';
     use_browser_call_access =  <?= $use_browser_call_access ? 'true' : 'false' ?>;
     call_access_log = [];
@@ -552,9 +554,14 @@ use yii\helpers\Html;
                     //log('Successfully established call!');
                     // console.warn(conn);
                     //console.info(conn.parameters);
-
+                    //alert(clientId + ' - ' + conn.parameters.From);
                     $('#btn-group-id-hangup').show();
-                    $('#btn-group-id-redirect').show();
+
+                    if (conn.parameters.From === undefined) {
+                        $('#btn-group-id-redirect').hide();
+                    } else {
+                        $('#btn-group-id-redirect').show();
+                    }
 
                     volumeIndicators.style.display = 'block';
                     bindVolumeIndicators(conn);
