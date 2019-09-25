@@ -50,7 +50,7 @@ class CasesCreateService
     {
         $case = $this->transaction->wrap(function () use ($form) {
 
-            $client = $this->clientManageService->getOrCreate([new PhoneCreateForm(['phone' => $form->clientPhone])]);
+            $client = $this->clientManageService->getOrCreateByPhones([new PhoneCreateForm(['phone' => $form->clientPhone])]);
             $case = Cases::createByWeb(
                 $form->projectId,
                 $form->category,
@@ -79,7 +79,7 @@ class CasesCreateService
     {
         $case = $this->transaction->wrap(function () use ($clientPhones, $callId, $projectId, $depId) {
 
-            $client = $this->clientManageService->getOrCreate($clientPhones);
+            $client = $this->clientManageService->getOrCreateByPhones($clientPhones);
             $case = Cases::createByCall(
                 $client->id,
                 $callId,
@@ -107,7 +107,7 @@ class CasesCreateService
 
         $case = $this->transaction->wrap(function () use ($clientPhones, $callId, $projectId, $depId) {
 
-            $client = $this->clientManageService->getOrCreate($clientPhones);
+            $client = $this->clientManageService->getOrCreateByPhones($clientPhones);
             if (!$case = $this->casesRepository->getByClientProjectDepartment($client->id, $projectId, $depId)) {
                 \Yii::info('Not found case:  ' . VarDumper::dumpAsString(['ClientId' => $client->id, 'projectId' => $projectId, 'depId' => $depId]), 'info\getByClientProjectDepartment');
                 $case = Cases::createByCall(

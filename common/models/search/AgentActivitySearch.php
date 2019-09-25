@@ -29,6 +29,7 @@ class AgentActivitySearch extends Call
     public $date_from;
     public $date_to;
     public $id;
+    public $username;
 
     public $s_project_id;
     public $s_type_id;
@@ -47,7 +48,7 @@ class AgentActivitySearch extends Call
     public function rules()
     {
         return [
-            [['date_range','date_from', 'date_to', 'user_groups','id','c_project_id','c_call_type_id','s_type_id','s_project_id','project_id'], 'safe'],
+            [['date_range','date_from', 'date_to', 'user_groups', 'id', 'username', 'c_project_id','c_call_type_id','s_type_id','s_project_id','project_id'], 'safe'],
             [['to_status', 'from_status'], 'safe'],
         ];
     }
@@ -93,8 +94,12 @@ class AgentActivitySearch extends Call
         return Model::scenarios();
     }
 
-
-    public function searchAgentLeads($params)
+    /**
+     * @param $params
+     * @param $user Employee
+     * @return SqlDataProvider
+     */
+    public function searchAgentLeads($params, $user)
     {
         $this->load($params);
 
@@ -104,6 +109,7 @@ class AgentActivitySearch extends Call
         }
 
         $query = new Query();
+
         $query->select(['e.id', 'e.username']);
 
         $between_condition = " BETWEEN '{$this->date_from}' AND '{$this->date_to}'";
@@ -140,18 +146,30 @@ class AgentActivitySearch extends Call
 
         $query->from('employees AS e');
 
-        if ($this->supervision_id > 0) {
+        /*if ($this->supervision_id > 0) {
             $subQuery1 = UserGroupAssign::find()->select(['ugs_group_id'])->where(['ugs_user_id' => $this->supervision_id]);
             $subQuery = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->where(['IN', 'ugs_group_id', $subQuery1]);
             $query->andWhere(['IN', 'e.id', $subQuery]);
+        }*/
+
+        if ($user->isSupervision()) {
+            $subQuery1 = UserGroupAssign::find()->select(['ugs_group_id'])->where(['ugs_user_id' => $user->id]);
+            $subQuery = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->where(['IN', 'ugs_group_id', $subQuery1])
+                ->leftJoin('auth_assignment', 'auth_assignment.user_id = ugs_user_id')
+                ->andWhere(['auth_assignment.item_name' => Employee::ROLE_AGENT])
+                ->orWhere(['auth_assignment.user_id' => $user->id]);
+            $query->andWhere(['IN', 'e.id', $subQuery]);
         }
+
         if (!empty($this->user_groups)){
             $subQuery = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->where(['IN', 'ugs_group_id', $this->user_groups]);
             $query->andWhere(['IN', 'e.id', $subQuery]);
         }
 
-
         //$totalCount = 20;
+
+        // grid filtering conditions
+        $query->andFilterWhere(['like', 'username', $this->username]);
 
         $command = $query->createCommand();
         $sql = $command->rawSql;
@@ -165,12 +183,94 @@ class AgentActivitySearch extends Call
             'sort' => [
                 'defaultOrder' => ['username' => SORT_ASC],
                 'attributes' => [
+                    'id' => [
+                        'asc' => ['id' => SORT_ASC],
+                        'desc' => ['id' => SORT_DESC],
+                    ],
                     'username' => [
                         'asc' => ['username' => SORT_ASC],
                         'desc' => ['username' => SORT_DESC],
-                        'label' => 'Agent',
+                        ],
+                    'inbound_calls' => [
+                        'asc' => ['inbound_calls' => SORT_ASC],
+                        'desc' => ['inbound_calls' => SORT_DESC],
                     ],
-
+                    'outbound_calls' => [
+                        'asc' => ['outbound_calls' => SORT_ASC],
+                        'desc' => ['outbound_calls' => SORT_DESC],
+                    ],
+                    'call_duration' => [
+                        'asc' => ['call_duration' => SORT_ASC],
+                        'desc' => ['call_duration' => SORT_DESC],
+                    ],
+                    'sms_sent' => [
+                        'asc' => ['sms_sent' => SORT_ASC],
+                        'desc' => ['sms_sent' => SORT_DESC],
+                    ],
+                    'sms_received' => [
+                        'asc' => ['sms_received' => SORT_ASC],
+                        'desc' => ['sms_received' => SORT_DESC],
+                    ],
+                    'email_sent' => [
+                        'asc' => ['email_sent' => SORT_ASC],
+                        'desc' => ['email_sent' => SORT_DESC],
+                    ],
+                    'email_received' => [
+                        'asc' => ['email_received' => SORT_ASC],
+                        'desc' => ['email_received' => SORT_DESC],
+                    ],
+                    'quotes_sent' => [
+                        'asc' => ['quotes_sent' => SORT_ASC],
+                        'desc' => ['quotes_sent' => SORT_DESC],
+                    ],
+                    'st_processing' => [
+                        'asc' => ['st_processing' => SORT_ASC],
+                        'desc' => ['st_processing' => SORT_DESC],
+                    ],
+                    'st_snooze' => [
+                        'asc' => ['st_snooze' => SORT_ASC],
+                        'desc' => ['st_snooze' => SORT_DESC],
+                    ],
+                    'inbox_processing' => [
+                        'asc' => ['inbox_processing' => SORT_ASC],
+                        'desc' => ['inbox_processing' => SORT_DESC],
+                    ],
+                    'followup_processing' => [
+                        'asc' => ['followup_processing' => SORT_ASC],
+                        'desc' => ['followup_processing' => SORT_DESC],
+                    ],
+                    'processing_trash' => [
+                        'asc' => ['processing_trash' => SORT_ASC],
+                        'desc' => ['processing_trash' => SORT_DESC],
+                    ],
+                    'processing_followup' => [
+                        'asc' => ['processing_followup' => SORT_ASC],
+                        'desc' => ['processing_followup' => SORT_DESC],
+                    ],
+                    'processing_snooze' => [
+                        'asc' => ['processing_snooze' => SORT_ASC],
+                        'desc' => ['processing_snooze' => SORT_DESC],
+                    ],
+                    'cloned_leads' => [
+                        'asc' => ['cloned_leads' => SORT_ASC],
+                        'desc' => ['cloned_leads' => SORT_DESC],
+                    ],
+                    'tasks_pending' => [
+                        'asc' => ['tasks_pending' => SORT_ASC],
+                        'desc' => ['tasks_pending' => SORT_DESC],
+                    ],
+                    'completed_tasks' => [
+                        'asc' => ['completed_tasks' => SORT_ASC],
+                        'desc' => ['completed_tasks' => SORT_DESC],
+                    ],
+                    'st_sold' => [
+                        'asc' => ['st_sold' => SORT_ASC],
+                        'desc' => ['st_sold' => SORT_DESC],
+                    ],
+                    'created_leads' => [
+                        'asc' => ['created_leads' => SORT_ASC],
+                        'desc' => ['created_leads' => SORT_DESC],
+                    ]
                 ],
             ],
             'pagination' => [

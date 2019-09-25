@@ -7,15 +7,26 @@ use common\models\UserDepartment;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use common\models\UserConnection;
+use common\models\UserGroupAssign;
+use Yii;
 
 /**
  * UserConnectionSearch represents the model behind the search form of `common\models\UserConnection`.
  *
  * @property int $dep_id
+ * @property array $ug_ids
  */
 class UserConnectionSearch extends UserConnection
 {
     public $dep_id;
+
+    /**
+     * user groups id's
+     *
+     * @var array
+     */
+    public $ug_ids = [];
+
     /**
      * {@inheritdoc}
      */
@@ -24,6 +35,7 @@ class UserConnectionSearch extends UserConnection
         return [
             [['uc_id', 'uc_connection_id', 'uc_user_id', 'uc_lead_id', 'uc_case_id', 'dep_id'], 'integer'],
             [['uc_user_agent', 'uc_controller_id', 'uc_action_id', 'uc_page_url', 'uc_ip', 'uc_created_dt'], 'safe'],
+            ['ug_ids', 'each', 'rule' => ['integer']],
         ];
     }
 
@@ -82,14 +94,12 @@ class UserConnectionSearch extends UserConnection
         return $dataProvider;
     }
 
+
     /**
-     * Creates data provider instance with search query applied
-     *
-     * @param array $params
-     *
+     * @param $params
      * @return ActiveDataProvider
      */
-    public function searchUserCallMap($params)
+    public function searchUserCallMap($params): ActiveDataProvider
     {
         $query = UserConnection::find();
 
@@ -117,9 +127,14 @@ class UserConnectionSearch extends UserConnection
         if ($this->dep_id > 0) {
             $subQuery = UserDepartment::find()->select(['DISTINCT(ud_user_id)'])->where(['ud_dep_id' => $this->dep_id]);
             $query->andWhere(['IN', 'uc_user_id', $subQuery]);
-        } elseif ($this->dep_id == 0) {
+        } elseif ($this->dep_id === 0) {
             $subQuery = UserDepartment::find()->select(['DISTINCT(ud_user_id)'])->where(['ud_dep_id' => [Department::DEPARTMENT_SALES, Department::DEPARTMENT_EXCHANGE, Department::DEPARTMENT_SUPPORT]]);
             $query->andWhere(['NOT IN', 'uc_user_id', $subQuery]);
+        }
+
+        if ($this->ug_ids) {
+            $subQuery = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->where(['ugs_group_id' => $this->ug_ids]);
+            $query->andWhere(['IN', 'uc_user_id', $subQuery]);
         }
 
         $query->cache(5);

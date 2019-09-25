@@ -4,7 +4,6 @@ namespace frontend\controllers;
 
 use common\components\BackOffice;
 use common\components\CommunicationService;
-use common\models\Call;
 use common\models\CaseNote;
 use common\models\CaseSale;
 use common\models\ClientEmail;
@@ -24,10 +23,10 @@ use frontend\models\CaseCommunicationForm;
 use frontend\models\CasePreviewEmailForm;
 use frontend\models\CasePreviewSmsForm;
 use frontend\models\CommunicationForm;
-use http\Exception\InvalidArgumentException;
 use sales\entities\cases\CasesStatus;
 use sales\entities\cases\CasesStatusLogSearch;
 use sales\forms\cases\CasesAddEmailForm;
+use sales\forms\cases\CasesAddPhoneForm;
 use sales\forms\cases\CasesChangeStatusForm;
 use sales\forms\cases\CasesClientUpdateForm;
 use sales\forms\cases\CasesCreateByWebForm;
@@ -46,13 +45,12 @@ use yii\data\ActiveDataProvider;
 use yii\data\ArrayDataProvider;
 use yii\db\Expression;
 use yii\helpers\ArrayHelper;
+use yii\helpers\Html;
 use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
 use yii\web\NotFoundHttpException;
-use yii\filters\VerbFilter;
 use yii\web\Response;
 use yii\widgets\ActiveForm;
-use function GuzzleHttp\Psr7\str;
 
 /**
  * Class CasesController
@@ -114,22 +112,19 @@ class CasesController extends FController
     public function actionIndex()
     {
         $searchModel = new CasesSearch();
-        if(Yii::$app->user->identity->canRole('agent')) {
-            $isAgent = true;
-        } else {
-            $isAgent = false;
-        }
 
+        /** @var Employee $user */
+        $user = Yii::$app->user->identity;
         $params = Yii::$app->request->queryParams;
-        $dataProvider = $searchModel->search($params, $isAgent);
+
+        $dataProvider = $searchModel->search($params, $user);
 
         return $this->render('index', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
-            'isAgent' => $isAgent
+            'user' => $user
         ]);
     }
-
 
     /**
      * Displays a single Cases model.
@@ -745,7 +740,7 @@ class CasesController extends FController
         if ($form->load(Yii::$app->request->post()) && $form->validate()) {
             try {
                 $case = $this->casesCreateService->createByWeb($form);
-                $this->casesManageService->processing($case, Yii::$app->user->id);
+                $this->casesManageService->processing($case->cs_id, Yii::$app->user->id);
                 Yii::$app->session->setFlash('success', 'Case created');
                 return $this->redirect(['view', 'gid' => $case->cs_gid]);
             } catch (\Throwable $e){
@@ -773,6 +768,33 @@ class CasesController extends FController
     }
 
     /**
+     * @return array
+     * @throws BadRequestHttpException
+     */
+    public function actionCheckPhoneForExistence(): array
+    {
+    	try {
+			$response = [];
+			$clientPhone = Yii::$app->request->post('clientPhone') ?? null;
+			Yii::$app->response->format = Response::FORMAT_JSON;
+			if (Yii::$app->request->isAjax && $clientPhone) {
+
+				if ($cases = $this->casesRepository->findOpenCasesByPhone($clientPhone)) {
+					$casesLink = '';
+					foreach ($cases as $case) {
+						$casesLink .= Html::a('Case ' . $case->cs_id, '/cases/view/' . $case->cs_gid, ['target' => '_blank']) . ' ';
+					}
+					$response['clientPhoneResponse'] = 'This number is already used in ' . $casesLink;
+				}
+				return $response;
+			}
+		} catch (\Throwable $exception) {
+    		return $response;
+		}
+		throw new BadRequestHttpException();
+    }
+
+    /**
      * @param $id
      * @return string
      */
@@ -793,18 +815,17 @@ class CasesController extends FController
 
     /**
      * @param $gid
-     * @param $uid
      * @return Response
      * @throws NotFoundHttpException
      */
-    public function actionTake($gid, $uid): Response
+    public function actionTake($gid): Response
     {
         $gId = (string) $gid;
-        $userId = (int) $uid;
+        $userId = Yii::$app->user->id;
         $case = $this->findModelByGid($gId);
         try {
             $user = $this->userRepository->find($userId);
-            $this->casesManageService->processing($case, $user->id);
+            $this->casesManageService->take($case->cs_id, $user->id);
             Yii::$app->session->setFlash('success', 'Success');
         } catch (\Throwable $e) {
             Yii::$app->session->setFlash('error', $e->getMessage());
@@ -883,8 +904,16 @@ class CasesController extends FController
 
         $form = new CasesChangeStatusForm($case);
 
+        $statusReasons = CasesStatus::STATUS_REASON_LIST;
+
         try {
             if ($form->load(Yii::$app->request->post()) && $form->validate()) {
+
+                $isSimpleAgent = Yii::$app->user->identity->isSimpleAgent();
+
+                if ($isSimpleAgent && empty($case->cs_category)) {
+                    throw new \Exception('Status of a case without a category cannot be changed!');
+                }
 
                 switch ((int)$form->status) {
                     case CasesStatus::STATUS_FOLLOW_UP :
@@ -914,6 +943,7 @@ class CasesController extends FController
 
         return $this->renderAjax('partial/_change_status', [
             'model' => $form,
+            'statusReasons' => $statusReasons
         ]);
     }
 
@@ -938,6 +968,43 @@ class CasesController extends FController
         ]);
     }
 
+    public function actionAddPhone()
+    {
+        $gid = (string)Yii::$app->request->get('gid');
+        $case = $this->findModelByGid($gid);
+        $form = new CasesAddPhoneForm($case);
+
+        try {
+            if ($form->load(Yii::$app->request->post()) && $form->validate()) {
+
+                if($case->client) {
+                    $existClientPhone = ClientPhone::find()->where(['client_id' => $case->client->id, 'phone' => $form->phone])->exists();
+                    if($existClientPhone) {
+                        Yii::$app->session->setFlash('warning', 'This phone already exists ("' . $form->phone . '"), Client Id: '.$case->client->id);
+                    } else {
+                        $clientPhone = new ClientPhone();
+                        $clientPhone->client_id = $case->client->id;
+                        $clientPhone->phone = $form->phone;
+                        if($clientPhone->save()) {
+                            Yii::$app->session->setFlash('success', 'Added new Phone ("' . $form->phone . '")');
+                        } else {
+                            Yii::$app->session->setFlash('error', VarDumper::dumpAsString($clientPhone->errors));
+                        }
+                    }
+                } else {
+                    Yii::$app->session->setFlash('warning', 'Client not found (Client Id: '.$case->cs_client_id.')');
+                }
+                return $this->redirect(['cases/view', 'gid' => $case->cs_gid]);
+            }
+
+        } catch (\Throwable $exception) {
+            $form->addError('phone', $exception->getMessage());
+        }
+
+        return $this->renderAjax('partial/_add_phone', [
+            'model' => $form,
+        ]);
+    }
 
     /**
      * @return string|Response

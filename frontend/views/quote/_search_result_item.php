@@ -19,6 +19,9 @@ if(isset($result['passengers']['ADT'])){
     $price = $result['passengers']['INF']['price'];
 }
 
+$preSegment = null;
+$airportChange = false;
+$freeBaggage = false;
 foreach ($result['trips'] as $trip){
     if(isset($trip['duration'])){
         $totalDuration[] = $trip['duration'];
@@ -29,17 +32,31 @@ foreach ($result['trips'] as $trip){
         if(isset($segment['stop']) && $segment['stop'] > 0){
             $stopCnt += $segment['stop'];
         }
+        if($preSegment !== null && $segment['departureAirportCode'] != $preSegment['arrivalAirportCode']){
+            $airportChange = true;
+        }
+
+        if(isset($segment['baggage']) && $freeBaggage == false){
+            foreach ($segment['baggage'] as $baggage){
+                if(isset($baggage['allowPieces']) && $baggage['allowPieces'] > 0){
+                    $cntBaggageInfo = $baggage['allowPieces'];
+                }
+            }
+        }
+        $preSegment = $segment;
     }
     $firstSegment = $trip['segments'][0];
     $lastSegment = end($trip['segments']);
     $time[] = ['departure' => $firstSegment['departureTime'],'arrival' => $lastSegment['arrivalTime']];
     $stops[] = $stopCnt;
 }
+
+
 ?>
 <div class="quote search-result__quote" data-price="<?= $price?>"
 data-durationmax="<?= max($totalDuration)?>" data-duration="<?= json_encode($totalDuration)?>" data-totalduration="<?= $totalDurationSum?>"
 data-stop="<?= json_encode($stops)?>" data-time='<?= json_encode($time)?>' data-fareType="<?= (isset($result['fareType']))?$result['fareType']:''?>"
-data-airline="<?= $result['validatingCarrier']?>" id="search-result__quote-<?= $resultKey?>">
+data-airline="<?= $result['validatingCarrier']?>" id="search-result__quote-<?= $resultKey?>" data-changeairport="<?= $airportChange ?>" data-baggage="<?= isset($cntBaggageInfo)?$cntBaggageInfo:'' ?>">
 	<div class="quote__heading">
 		<div class="quote__heading-left">
 			<span class="quote__id"><strong># <?= $resultKey+1 ?></strong></span>

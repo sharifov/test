@@ -1,6 +1,8 @@
 <?php
 
 use dosamigos\datepicker\DatePicker;
+use sales\access\EmployeeProjectAccess;
+use sales\ui\user\ListsAccess;
 use yii\helpers\Html;
 use yii\widgets\Pjax;
 use kartik\grid\GridView;
@@ -14,13 +16,7 @@ use common\models\Lead;
 
 $this->title = 'Processing Queue';
 
-if (Yii::$app->user->identity->canRole('admin')) {
-    $userList = \common\models\Employee::getList();
-    $projectList = \common\models\Project::getList();
-} else {
-    $userList = \common\models\Employee::getListByUserId(Yii::$app->user->id);
-    $projectList = \common\models\ProjectEmployeeAccess::getProjectsByEmployee();
-}
+$lists = new ListsAccess(Yii::$app->user->id);
 
 $this->params['breadcrumbs'][] = $this->title;
 ?>
@@ -60,7 +56,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'options' => [
                 'style' => 'width:120px'
             ],
-            'filter' => $projectList,
+            'filter' => $lists->getProjects(),
         ],
 
 
@@ -206,8 +202,8 @@ $this->params['breadcrumbs'][] = $this->title;
             'value' => function (\common\models\Lead $model) {
                 return $model->employee ? '<i class="fa fa-user"></i> ' . $model->employee->username : '-';
             },
-            'filter' => $userList,
-            'visible' => ! $isAgent
+            'filter' => $lists->getEmployees(),
+            'visible' => $lists->getEmployees()
         ],
         [
             'attribute' => 'status',
@@ -351,14 +347,6 @@ $this->params['breadcrumbs'][] = $this->title;
                 return Lead::getSnoozeCountdown($model->id, $model->snooze_for);
             },
             'format' => 'raw'
-        ],*/
-        /*[
-            'attribute' => 'project_id',
-            'value' => function(\common\models\Lead $model) {
-                return $model->project ? $model->project->name : '-';
-            },
-            'filter' => $projectList,
-            'visible' => ! $isAgent
         ],*/
         [
             'label' => 'Rating',

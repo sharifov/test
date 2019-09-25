@@ -32,6 +32,7 @@ $this->params['breadcrumbs'][] = $this->title;
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'columns' => [
+            'cs_id',
             'cs_gid',
             [
                 'attribute' => 'cs_project_id',
@@ -63,6 +64,48 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             'cs_created_dt',
             [
+                'label' => 'Pending Time',
+                'value' => function (Cases $model) {
+                    $createdTS = strtotime($model->cs_created_dt);
+    
+                    $diffTime = time() - $createdTS;
+                    $diffHours = (int) ($diffTime / (60 * 60));
+    
+                    return ($diffHours > 3 && $diffHours < 73 ) ? $diffHours.' hours' : Yii::$app->formatter->asRelativeTime($createdTS);
+                },
+                'options' => [
+                    'style' => 'width:180px'
+                ],
+                'format' => 'raw',
+                'visible' => ! $isAgent,
+            ],
+            [
+                'header' => 'Client time',
+                'format' => 'raw',
+                'value' => function(Cases $model) {
+                    return $model->getClientTime();
+                },
+            ],
+            [
+                'header' => 'Agent',
+                'format' => 'raw',
+                'value' => function (Cases $model) {
+                    return $model->owner ? '<i class="fa fa-user"></i> ' . $model->owner->username : '-';
+                },
+            ],
+            [
+                'header' => 'Last Action',
+                'format' => 'raw',
+                'value' => function (Cases $model) {
+                    $createdTS = strtotime($model->cs_updated_dt);
+    
+                    $diffTime = time() - $createdTS;
+                    $diffHours = (int) ($diffTime / (60 * 60));
+    
+                    return ($diffHours > 3 && $diffHours < 73 ) ? $diffHours.' hours' : Yii::$app->formatter->asRelativeTime($createdTS);
+                }
+            ],
+            [
                 'class' => 'yii\grid\ActionColumn',
                 'template' => '{view} {take}',
                 'buttons' => [
@@ -78,7 +121,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         ]);
                     },
                     'take' => function ($url, Cases $model) {
-                        return Html::a('<i class="fa fa-download"></i> Take', ['cases/take', 'gid' => $model->cs_gid, 'uid' => Yii::$app->user->id], [
+                        return Html::a('<i class="fa fa-download"></i> Take', ['cases/take', 'gid' => $model->cs_gid], [
                             'class' => 'btn btn-primary btn-xs take-processing-btn',
                             'data-pjax' => 0,
                             /*'data' => [

@@ -4,14 +4,16 @@ namespace sales\forms\lead;
 
 use common\models\Department;
 use common\models\Lead;
-use common\models\ProjectEmployeeAccess;
+use common\models\Project;
 use common\models\Sources;
-use sales\entities\cases\Cases;
+use sales\access\EmployeeDepartmentAccess;
+use sales\access\EmployeeProjectAccess;
 use sales\forms\CompositeForm;
 use sales\helpers\lead\LeadHelper;
+use sales\ui\user\ListsAccess;
 use sales\repositories\cases\CasesRepository;
 use sales\repositories\NotFoundException;
-use function GuzzleHttp\Psr7\str;
+use yii\helpers\VarDumper;
 
 /**
  * @property string $cabin
@@ -27,6 +29,9 @@ use function GuzzleHttp\Psr7\str;
  * @property string $status
  * @property string $caseGid
  * @property int $depId
+ * @property boolean $delayedCharge
+ * @property int $jivoChatId
+ * @property int|null $userId
  * @property ClientCreateForm $client
  * @property EmailCreateForm[] $emails
  * @property PhoneCreateForm[] $phones
@@ -48,15 +53,21 @@ class LeadCreateForm extends CompositeForm
     public $status;
     public $caseGid;
     public $depId;
+    public $delayedCharge = 0;
+
+    public $jivoChatId;
+
+    private $userId;
 
     /**
      * LeadCreateForm constructor.
      * @param int $countEmails
      * @param int $countPhones
      * @param int $countSegments
+     * @param int|null $userId
      * @param array $config
      */
-    public function __construct(int $countEmails = 1, int $countPhones = 1, int $countSegments = 1, $config = [])
+    public function __construct(int $countEmails = 1, int $countPhones = 1, int $countSegments = 1, ?int $userId = null, $config = [])
     {
         $this->adults = 1;
         $this->children = 0;
@@ -65,19 +76,27 @@ class LeadCreateForm extends CompositeForm
 
         $this->client = new ClientCreateForm();
 
-        $this->emails = array_map(function() {
+        $this->emails = array_map(function () {
             return new EmailCreateForm();
         }, self::createCountMultiField($countEmails));
 
-        $this->phones = array_map(function() {
+        $this->phones = array_map(function () {
             return new PhoneCreateForm();
         }, self::createCountMultiField($countPhones));
 
-        $this->segments = array_map(function() {
+        $this->segments = array_map(function () {
             return new SegmentCreateForm();
         }, self::createCountMultiField($countSegments));
 
         $this->preferences = new PreferencesCreateForm();
+
+        $this->jivoChatId = \Yii::$app->params['settings']['jivo_chat_id'] ?? null;
+
+        if (!$this->jivoChatId) {
+            \Yii::error('Jivo chat Id not found');
+        }
+
+        $this->userId = $userId;
 
         parent::__construct($config);
     }
@@ -114,12 +133,16 @@ class LeadCreateForm extends CompositeForm
             ['sourceId', 'required'],
             ['sourceId', 'integer'],
             ['sourceId', 'exist', 'skipOnError' => true, 'targetClass' => Sources::class, 'targetAttribute' => ['sourceId' => 'id']],
-            ['sourceId', function() {
-                if ($projectId = Sources::find()->where(['id' => $this->sourceId])->select('project_id')->asArray()->limit(1)->one()) {
+            ['sourceId', function () {
+                if ($projectId = Sources::find()->select('project_id')->where(['id' => $this->sourceId])->asArray()->limit(1)->one()) {
                     $this->projectId = $projectId['project_id'];
+                    if (!EmployeeProjectAccess::isInProject($this->projectId, $this->userId)) {
+                        $this->addError('sourceId', 'Access denied for this project');
+                    }
                 } else {
                     $this->addError('sourceId', 'Project not found');
                 }
+                $this->validateJivoChat();
             }],
 
             ['notesForExperts', 'string'],
@@ -164,7 +187,50 @@ class LeadCreateForm extends CompositeForm
             ['depId', 'required'],
             ['depId', 'in', 'range' => [Department::DEPARTMENT_SALES, Department::DEPARTMENT_EXCHANGE]],
 
+            ['delayedCharge', 'boolean'],
+            ['delayedCharge', 'default', 'value' => false],
+
         ];
+    }
+
+    public function validateJivoChat(): void
+    {
+        if ((int)$this->sourceId !== $this->jivoChatId) {
+            return;
+        }
+
+        $oneEmailIsNotEmpty = false;
+        $onePhoneIsNotEmpty = false;
+
+        foreach ($this->emails as $email) {
+            if ($email->email) {
+                $oneEmailIsNotEmpty = true;
+            }
+        }
+        foreach ($this->phones as $phone) {
+            if ($phone->phone) {
+                $onePhoneIsNotEmpty = true;
+            }
+        }
+
+        if (!$oneEmailIsNotEmpty && !$onePhoneIsNotEmpty) {
+            foreach ($this->emails as $email) {
+                $email->emailIsRequired = true;
+                $email->message = 'Email or Phone cannot be blank.';
+            }
+            foreach ($this->phones as $phone) {
+                $phone->phoneIsRequired = true;
+                $phone->message = 'Phone or Email cannot be blank.';
+            }
+        } else {
+            foreach ($this->emails as $email) {
+                $email->emailIsRequired = false;
+            }
+            foreach ($this->phones as $phone) {
+                $phone->phoneIsRequired = false;
+            }
+        }
+
     }
 
     /**
@@ -183,9 +249,22 @@ class LeadCreateForm extends CompositeForm
         $this->caseGid = $caseGid;
     }
 
-    public function afterValidate()
+    public function validate($attributeNames = null, $clearErrors = true): bool
     {
-        parent::afterValidate();
+        if (parent::validate($attributeNames, $clearErrors)) {
+            $this->loadClientData();
+            $this->checkEmptyPhones();
+            $this->checkEmptyEmails();
+            return true;
+        }
+        $this->checkEmptyPhones();
+        $this->checkEmptyEmails();
+        return false;
+    }
+
+    private function loadClientData(): void
+    {
+
         if (!$this->hasErrors()) {
             if (isset($this->emails[0]) && $this->emails[0]->email) {
                 $this->clientEmail = $this->emails[0]->email;
@@ -200,12 +279,48 @@ class LeadCreateForm extends CompositeForm
         }
     }
 
+    private function checkEmptyPhones(): void
+    {
+        $errors = false;
+        foreach ($this->phones as $key => $phone) {
+            if ($key > 0 && !$phone->phone) {
+                if (!$this->getErrors('phones.' . $key . '.phone')) {
+                    $errors = true;
+                    $this->addError('phones.' . $key . '.phone', 'Phone cannot be blank.');
+                }
+            }
+        }
+        if (!$errors && count($this->phones) > 1  &&  isset($this->phones[0]->phone) && !$this->phones[0]->phone) {
+            if (!$this->getErrors('phones.0.phone')) {
+                $this->addError('phones.0.phone', 'Phone cannot be blank.');
+            }
+        }
+    }
+
+    private function checkEmptyEmails(): void
+    {
+        $errors = false;
+        foreach ($this->emails as $key => $email) {
+            if ($key > 0 && !$email->email) {
+                if (!$this->getErrors('emails.' . $key . '.email')) {
+                    $errors = true;
+                    $this->addError('emails.' . $key . '.email', 'Email cannot be blank.');
+                }
+            }
+        }
+        if (!$errors && count($this->emails) > 1  &&  isset($this->emails[0]->email) && !$this->emails[0]->email) {
+            if (!$this->getErrors('emails.0.email')) {
+                $this->addError('emails.0.email', 'Email cannot be blank.');
+            }
+        }
+    }
+
     /**
      * @return array
      */
-    public function listSourceId(): array
+    public function listSources(): array
     {
-        return ProjectEmployeeAccess::getAllSourceByEmployee();
+        return  (new ListsAccess($this->userId))->getSources();
     }
 
     /**

@@ -8,12 +8,8 @@
 namespace common\components\jobs;
 
 use common\models\Call;
-use common\models\CallUserAccess;
-use common\models\Department;
 use common\models\Employee;
-use common\models\Lead2;
 use common\models\Notifications;
-use sales\forms\lead\PhoneCreateForm;
 use sales\repositories\cases\CasesRepository;
 use sales\services\cases\CasesCreateService;
 use sales\services\client\ClientManageService;
@@ -44,14 +40,6 @@ class CallUserAccessJob extends BaseObject implements JobInterface
     private $casesRepository;
     private $clientManageService;
 
-    /*public function __construct(CasesCreateService $casesCreateService, ClientManageService $clientManageService, $config = [])
-    {
-        parent::__construct($config);
-        $this->casesCreateService = Yii::createObject(CasesCreateService::class);
-        $this->clientManageService = Yii::createObject(ClientManageService::class);
-    }*/
-
-
     /**
      * @param Queue $queue
      * @return bool
@@ -65,7 +53,7 @@ class CallUserAccessJob extends BaseObject implements JobInterface
             $this->clientManageService = Yii::createObject(ClientManageService::class);
             $this->casesRepository = Yii::createObject(CasesRepository::class);
 
-            Yii::info('CallUserAccessJob - CallId: ' . $this->call_id ,'info\CallUserAccessJob');
+            // Yii::info('CallUserAccessJob - CallId: ' . $this->call_id ,'info\CallUserAccessJob');
 
             if($this->delay) {
                 sleep($this->delay);
@@ -77,11 +65,11 @@ class CallUserAccessJob extends BaseObject implements JobInterface
 
                 $call = Call::find()->where(['c_id' => $this->call_id])->limit(1)->one();
 
-                if($call && $call->c_call_status === Call::CALL_STATUS_QUEUE) {
+                if($call && $call->isStatusQueue()) {
 
                     //$originalAgentId = $call->c_created_user_id;
 
-                    Yii::info('CallUserAccessJob - CallId: ' . $this->call_id . ', c_call_status: ' . $call->c_call_status . ', ' . VarDumper::dumpAsString($call->attributes),'info\CallUserAccessJob-call');
+                    // Yii::info('CallUserAccessJob - CallId: ' . $this->call_id . ', c_status_id: ' . $call->c_status_id . ', ' . VarDumper::dumpAsString($call->attributes),'info\CallUserAccessJob-call');
 
 
                     $last_hours = (int)(Yii::$app->params['settings']['general_line_last_hours'] ?? 1);
@@ -118,6 +106,9 @@ class CallUserAccessJob extends BaseObject implements JobInterface
         return false;
     }
 
+    /**
+     * @return float|int
+     */
     public function getTtr()
     {
         return 1 * 5;

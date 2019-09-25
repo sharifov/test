@@ -2,6 +2,9 @@
 
 namespace sales\services\cases;
 
+use common\models\Employee;
+use sales\access\EmployeeDepartmentAccess;
+use sales\access\EmployeeProjectAccess;
 use sales\entities\cases\Cases;
 use sales\repositories\cases\CasesCategoryRepository;
 use sales\repositories\cases\CasesRepository;
@@ -54,61 +57,47 @@ class CasesManageService
         $case->assignLead($lead->id);
         $this->casesRepository->save($case);
     }
-    
-    /**
-     * For system
-     *
-     * @param int $caseId
-     * @param int $userId
-     */
-    public function assignUser(int $caseId, int $userId): void
-    {
-        $case = $this->casesRepository->find($caseId);
-        $user = $this->userRepository->find($userId);
-        $case->processing($user->id);
-        $this->casesRepository->save($case);
-    }
 
     /**
      * @param int $caseId
      * @param int $userId
-     * @param string $description
+     * @param string|null $description
      */
-    public function take(int $caseId, int $userId, string $description = ''): void
+    public function take(int $caseId, int $userId, ?string $description = ''): void
     {
-        $case = $this->casesRepository->find($caseId);
-        $user = $this->userRepository->find($userId);
-        $this->processing($case, $user->id, $description);
+        $this->processing($caseId, $userId, $description);
     }
 
     /**
      * @param string $caseGid
      * @param int $userId
-     * @param string $description
+     * @param string|null $description
      */
-    public function takeByGid(string $caseGid, int $userId, string $description = ''): void
+    public function takeByGid(string $caseGid, int $userId, ?string $description = ''): void
     {
         $case = $this->casesRepository->findByGid($caseGid);
-        $user = $this->userRepository->find($userId);
-        $this->processing($case, $user->id, $description);
+        $this->processing($case->cs_id, $userId, $description);
     }
 
     /**
-     * @param Cases $case
+     * @param int $caseId
      * @param int $userId
-     * @param string $description
+     * @param string|null $description
      */
-    public function processing(Cases $case, int $userId, string $description = ''): void
+    public function processing(int $caseId, int $userId, ?string $description = ''): void
     {
-        $case->processing($userId, $description);
+        $case = $this->casesRepository->find($caseId);
+        $user = $this->userRepository->find($userId);
+        $this->guardAccessUserToCase($case, $user);
+        $case->processing($user->id, $description);
         $this->casesRepository->save($case);
     }
 
     /**
      * @param int $caseId
-     * @param string $description
+     * @param string|null $description
      */
-    public function pending(int $caseId, string $description = ''): void
+    public function pending(int $caseId, ?string $description = ''): void
     {
         $case = $this->casesRepository->find($caseId);
         $case->pending($description);
@@ -117,9 +106,9 @@ class CasesManageService
 
     /**
      * @param int $caseId
-     * @param string $description
+     * @param string|null $description
      */
-    public function followUp(int $caseId, string $description = ''): void
+    public function followUp(int $caseId, ?string $description = ''): void
     {
         $case = $this->casesRepository->find($caseId);
         $case->followUp($description);
@@ -128,9 +117,9 @@ class CasesManageService
 
     /**
      * @param int $caseId
-     * @param string $description
+     * @param string|null $description
      */
-    public function solved(int $caseId, string $description = ''): void
+    public function solved(int $caseId, ?string $description = ''): void
     {
         $case = $this->casesRepository->find($caseId);
         $case->solved($description);
@@ -139,9 +128,9 @@ class CasesManageService
 
     /**
      * @param int $caseId
-     * @param string $description
+     * @param string|null $description
      */
-    public function trash(int $caseId, string $description = ''): void
+    public function trash(int $caseId, ?string $description = ''): void
     {
         $case = $this->casesRepository->find($caseId);
         $case->trash($description);
@@ -167,6 +156,24 @@ class CasesManageService
         $category = $this->casesCategoryRepository->findByKey($categoryKey);
         $case->updateCategory($category->cc_key);
         $this->casesRepository->save($case);
+    }
+
+    /**
+     * @param Cases $case
+     * @param Employee $user
+     */
+    private function guardAccessUserToCase(Cases $case, Employee $user): void
+    {
+        if ($case->cs_dep_id) {
+            if (!EmployeeDepartmentAccess::isInDepartment($case->cs_dep_id, $user->id)) {
+                throw new \DomainException('This user cannot access to case department');
+            }
+        }
+        if ($case->cs_project_id) {
+            if (!EmployeeProjectAccess::isInProject($case->cs_project_id, $user->id)) {
+                throw new \DomainException('This user cannot access to case project');
+            }
+        }
     }
 
 }

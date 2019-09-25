@@ -3,7 +3,6 @@
 namespace common\models;
 
 use common\components\EmailService;
-use common\components\jobs\QuickSearchInitPriceJob;
 use common\components\jobs\UpdateLeadBOJob;
 use common\models\local\LeadAdditionalInformation;
 use common\models\local\LeadLogMessage;
@@ -86,6 +85,7 @@ use common\components\SearchService;
  * @property double $l_init_price
  * @property string $l_last_action_dt
  * @property int $l_dep_id
+ * @property boolean $l_delayed_charge
  *
  * @property double $finalProfit
  * @property int $quotesCount
@@ -294,6 +294,9 @@ class Lead extends ActiveRecord implements AggregateRoot
             [['employee_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['employee_id' => 'id']],
             [['l_duplicate_lead_id'], 'exist', 'skipOnError' => true, 'targetClass' => self::class, 'targetAttribute' => ['l_duplicate_lead_id' => 'id']],
             [['l_dep_id'], 'exist', 'skipOnError' => true, 'targetClass' => Department::class, 'targetAttribute' => ['l_dep_id' => 'dep_id']],
+
+            ['l_delayed_charge', 'boolean'],
+            ['l_delayed_charge', 'default', 'value' => false],
         ];
     }
 
@@ -312,6 +315,7 @@ class Lead extends ActiveRecord implements AggregateRoot
      * @param $clientPhone
      * @param $clientEmail
      * @param $depId
+     * @param $delayedCharge
      * @return Lead
      */
     public static function create(
@@ -328,7 +332,8 @@ class Lead extends ActiveRecord implements AggregateRoot
         $notesForExperts,
         $clientPhone,
         $clientEmail,
-        $depId
+        $depId,
+        $delayedCharge
     ): self
     {
         $lead = new static();
@@ -348,7 +353,7 @@ class Lead extends ActiveRecord implements AggregateRoot
         $lead->l_client_phone = $clientPhone;
         $lead->l_client_email = $clientEmail;
         $lead->l_dep_id = $depId;
-        $lead->status = self::STATUS_PENDING;
+        $lead->l_delayed_charge = $delayedCharge;
         $lead->recordEvent(new LeadCreatedEvent($lead));
         return $lead;
     }
@@ -381,6 +386,14 @@ class Lead extends ActiveRecord implements AggregateRoot
         $clone->take($ownerId);
         $clone->recordEvent(new LeadCreatedCloneEvent($clone));
         return $clone;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isAvailableForMultiUpdate(): bool
+    {
+        return $this->isProcessing() || $this->isFollowUp() || $this->isOnHold() || $this->isTrash() || $this->isSnooze();
     }
 
     /**
@@ -540,14 +553,18 @@ class Lead extends ActiveRecord implements AggregateRoot
 
     /**
      * @param int|null $userId
+     * @param bool $useRelation
      * @return bool
      */
-    private function isOwner(?int $userId): bool
+    public function isOwner(?int $userId, bool $useRelation = true): bool
     {
         if ($userId === null) {
             return false;
         }
-        return $this->employee && $this->employee->id === $userId;
+        if ($useRelation) {
+            return $this->employee && $this->employee->id === $userId;
+        }
+        return $this->employee_id === $userId;
     }
 
     /**
@@ -841,7 +858,7 @@ class Lead extends ActiveRecord implements AggregateRoot
      */
     public function isAvailableToTake(): bool
     {
-        return in_array($this->status, [self::STATUS_PENDING, self::STATUS_FOLLOW_UP, self::STATUS_SNOOZE], true);
+        return in_array($this->status, [null, self::STATUS_TRASH, self::STATUS_PENDING, self::STATUS_FOLLOW_UP, self::STATUS_SNOOZE], true);
     }
 
     /**
@@ -922,6 +939,7 @@ class Lead extends ActiveRecord implements AggregateRoot
             'l_init_price' => 'Init Price',
             'l_last_action_dt' => 'Last Action',
             'l_dep_id' => 'Department ID',
+            'l_delayed_charge' => 'Delayed charge',
 
         ];
     }
@@ -2187,7 +2205,7 @@ New lead {lead_id}
 
             //$offset = '-2';
 
-            $timezoneName = timezone_name_from_abbr('',intval($offset) * 60 * 60,0);
+            $timezoneName = timezone_name_from_abbr('',intval($offset) * 3600, true);
 
             /*$date = new \DateTime(time(), new \DateTimeZone($timezoneName));
            // $clientTime = Yii::$app->formatter->asTime() $date->format('H:i');
@@ -3084,7 +3102,8 @@ New lead {lead_id}
             'market_price' => $this->leadPreferences ? $this->leadPreferences->market_price : '',
             'itinerary' => [],
             'agent_name' => $this->employee ? $this->employee->username : 'N/A',
-            'agent_id' => $this->employee_id
+            'agent_id' => $this->employee_id,
+            'delayed_charge' => $this->l_delayed_charge
         ];
 
         $itinerary = [];

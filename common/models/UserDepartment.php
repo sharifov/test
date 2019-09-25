@@ -5,7 +5,6 @@ namespace common\models;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
 use yii\db\ActiveQuery;
-use yii\helpers\ArrayHelper;
 
 /**
  * This is the model class for table "user_department".
@@ -86,29 +85,6 @@ class UserDepartment extends ActiveRecord
     public function getUdUser(): ActiveQuery
     {
         return $this->hasOne(Employee::class, ['id' => 'ud_user_id']);
-    }
-
-    /**
-     * @param int $userId
-     * @return array
-     */
-    public static function getDepartmentsAccess(int $userId): array
-    {
-        $conditions = [];
-
-        /** @var Employee $user */
-        if (isset(\Yii::$app->user->identity) && \Yii::$app->user->identity instanceof Employee && \Yii::$app->user->id === $userId ) {
-            $user = \Yii::$app->user->identity;
-        } elseif ((!$user = Employee::findOne($userId)) || !$user->isActive()) {
-            throw new \DomainException('User not found or user is inactive');
-        }
-
-        if (!$user->isAdmin()) {
-            $conditions = ['dep_id' => static::find()->depsByUser($userId)];
-        }
-
-        $departments = Department::find()->select(['dep_id', 'dep_name'])->andWhere($conditions)->asArray()->all();
-        return ArrayHelper::map($departments, 'dep_id', 'dep_name');
     }
 
     /**

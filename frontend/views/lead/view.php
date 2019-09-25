@@ -97,6 +97,7 @@ $lead = $leadForm->getLead();
         ?>
 
         <div class="col-md-12">
+            <br>
             <?= \common\widgets\Alert::widget() ?>
             <br>
         </div>
@@ -233,7 +234,7 @@ $lead = $leadForm->getLead();
     </div>
 
 	<aside class="sidebar right-sidebar sl-right-sidebar">
-    	 <?php if($leadForm->mode === $leadForm::VIEW_MODE && (!$is_admin && !$is_qa && !$is_supervision)):?>
+    	 <?php if($leadForm->mode === $leadForm::VIEW_MODE && (!$is_admin && !$is_qa && !$is_supervision) && $leadForm->getLead()->employee_id != Yii::$app->user->identity->getId()):?>
 			<div class="alert alert-warning" role="alert">
                 <h4 class="alert-heading">Warning!</h4>
                 <p>Client information is not available in VIEW MODE, please take lead!</p>

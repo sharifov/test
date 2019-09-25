@@ -16,21 +16,15 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'c_call_sid')->textInput(['maxlength' => true]) ?>
 
-    <?= $form->field($model, 'c_account_sid')->textInput(['maxlength' => true]) ?>
-
     <?= $form->field($model, 'c_call_type_id')->dropDownList(\common\models\Call::CALL_TYPE_LIST) ?>
 
     <?= $form->field($model, 'c_from')->textInput(['maxlength' => true]) ?>
 
     <?= $form->field($model, 'c_to')->textInput(['maxlength' => true]) ?>
 
-    <?= $form->field($model, 'c_sip')->textInput(['maxlength' => true]) ?>
+    <?= $form->field($model, 'c_call_status')->dropDownList(\common\models\Call::TW_STATUS_LIST) ?>
 
-    <?= $form->field($model, 'c_call_status')->dropDownList(\common\models\Call::CALL_STATUS_LIST) ?>
-
-    <?= $form->field($model, 'c_api_version')->textInput(['maxlength' => true]) ?>
-
-    <?= $form->field($model, 'c_direction')->textInput(['maxlength' => true]) ?>
+    <?= $form->field($model, 'c_status_id')->dropDownList(\common\models\Call::STATUS_LIST) ?>
 
     <?= $form->field($model, 'c_forwarded_from')->textInput(['maxlength' => true]) ?>
 
@@ -42,19 +36,11 @@ use yii\widgets\ActiveForm;
     </div>
     <div class="col-md-6">
 
-    <?= $form->field($model, 'c_sip_response_code')->textInput(['maxlength' => true]) ?>
-
     <?= $form->field($model, 'c_recording_url')->textInput(['maxlength' => true]) ?>
-
-    <?= $form->field($model, 'c_recording_sid')->textInput(['maxlength' => true]) ?>
 
     <?= $form->field($model, 'c_recording_duration')->textInput(['maxlength' => true]) ?>
 
-    <?= $form->field($model, 'c_timestamp')->textInput(['maxlength' => true]) ?>
-
-    <?= $form->field($model, 'c_uri')->textInput(['maxlength' => true]) ?>
-
-    <?= $form->field($model, 'c_sequence_number')->textInput(['maxlength' => true]) ?>
+    <?= $form->field($model, 'c_sequence_number')->input('number') ?>
 
     <?= $form->field($model, 'c_lead_id')->textInput() ?>
 

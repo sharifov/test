@@ -1,7 +1,7 @@
 <?php
 
-use common\models\Department;
-use common\models\Project;
+use sales\access\EmployeeDepartmentAccess;
+use sales\access\EmployeeProjectAccess;
 use sales\entities\cases\CasesCategory;
 use sales\entities\cases\CasesStatus;
 use yii\helpers\Html;
@@ -27,22 +27,19 @@ use yii\widgets\ActiveForm;
                     <?= $form->field($model, 'cs_gid') ?>
                 </div>
                 <div class="col-md-1">
-                    <?= $form->field($model, 'cs_project_id')->dropDownList(Project::getList(), ['prompt' => '-']) ?>
+                    <?= $form->field($model, 'cs_project_id')->dropDownList(EmployeeProjectAccess::getProjects(), ['prompt' => '-']) ?>
                 </div>
                 <div class="col-md-1">
-                    <?= $form->field($model, 'cs_dep_id')->dropDownList(Department::getList(), ['prompt' => '-']) ?>
+                    <?= $form->field($model, 'cs_dep_id')->dropDownList(EmployeeDepartmentAccess::getDepartments(), ['prompt' => '-']) ?>
                 </div>
                 <div class="col-md-1">
-                    <?= $form->field($model, 'cs_category')->dropDownList(CasesCategory::getList(), ['prompt' => '-']) ?>
+                    <?= $form->field($model, 'cs_category')->dropDownList(CasesCategory::getList(array_keys(EmployeeDepartmentAccess::getDepartments())), ['prompt' => '-']) ?>
                 </div>
                 <div class="col-md-1">
                     <?= $form->field($model, 'cs_status')->dropDownList(CasesStatus::STATUS_LIST, ['prompt' => '-']) ?>
                 </div>
                 <div class="col-md-1">
                     <?= $form->field($model, 'cs_subject') ?>
-                </div>
-                <div class="col-md-1">
-                    <?= $form->field($model, 'cs_user_id') ?>
                 </div>
                 <div class="col-md-1">
                     <?= $form->field($model, 'cs_lead_id') ?>

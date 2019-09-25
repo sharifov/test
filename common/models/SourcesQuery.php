@@ -9,10 +9,14 @@ namespace common\models;
  */
 class SourcesQuery extends \yii\db\ActiveQuery
 {
-    /*public function active()
+
+    /**
+     * @return $this
+     */
+    public function active(): self
     {
-        return $this->andWhere('[[status]]=1');
-    }*/
+        return $this->andWhere(['hidden' => false]);
+    }
 
     /**
      * {@inheritdoc}

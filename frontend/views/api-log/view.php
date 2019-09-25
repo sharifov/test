@@ -24,13 +24,14 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
         ]) ?>
     </p>
-
+    <div class="row">
     <div class="col-md-4">
 
     <?= DetailView::widget([
         'model' => $model,
         'attributes' => [
             'al_id',
+            'al_action',
             //'al_request_data:ntext',
             'al_request_dt',
             //'al_response_data:ntext',
@@ -77,6 +78,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 ],
             ],
         ]) ?>
+    </div>
     </div>
 
     <div class="row">

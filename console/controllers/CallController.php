@@ -27,16 +27,8 @@ class CallController extends Controller
 
         $items = [];
 
-        /*
-        $items = Call::find()
-            ->where(['c_call_status' => [Call::CALL_STATUS_QUEUE, Call::CALL_STATUS_RINGING, Call::CALL_STATUS_IN_PROGRESS]])
-            ->andWhere(['<=', 'c_created_dt', $dt1Hour])
-            ->orderBy(['c_id' => SORT_ASC])
-            ->all();
-        */
-
         $items_queued = Call::find()
-            ->where(['c_call_status' => Call::CALL_STATUS_QUEUE])
+            ->where(['c_status_id' => Call::STATUS_QUEUE])
             ->andWhere(['<=', 'c_created_dt', $dt20Min])
             ->orderBy(['c_id' => SORT_ASC])
             ->all();
@@ -48,7 +40,7 @@ class CallController extends Controller
         }
 
         $items_ringing = Call::find()
-            ->where(['c_call_status' => Call::CALL_STATUS_RINGING])
+            ->where(['c_status_id' => Call::STATUS_RINGING])
             ->andWhere(['<=', 'c_created_dt', $dt5Min])
             ->orderBy(['c_id' => SORT_ASC])
             ->all();
@@ -59,7 +51,7 @@ class CallController extends Controller
 
 
         $items_inprogress = Call::find()
-            ->where(['c_call_status' =>  Call::CALL_STATUS_IN_PROGRESS])
+            ->where(['c_status_id' =>  Call::STATUS_IN_PROGRESS])
             ->andWhere(['<=', 'c_created_dt', $dt1Hour])
             ->orderBy(['c_id' => SORT_ASC])
             ->all();
@@ -73,15 +65,20 @@ class CallController extends Controller
 
         $out = [];
         $errors = [];
-        if (count($items) > 0) {
+        if ($items) {
             echo $this->ansiFormat('Find ' . count($items) . ' items for update' . PHP_EOL, Console::FG_GREEN);
+
+            /** @var Call $call */
             foreach ($items AS $call) {
-                $old_status = $call->c_call_status;
-                $call->c_call_status = Call::CALL_STATUS_FAILED;
+                $old_status = $call->getStatusName();
+                //$call->c_call_status = Call::TW_STATUS_FAILED;
+
+                $call->setStatusFailed();
+
                 if ($call->save()) {
                     $out[] = ['c_id' => $call->c_id,
                         'old_status' => $old_status,
-                        'new_status' => Call::CALL_STATUS_FAILED,
+                        'new_status' => $call->getStatusName(),
                     ];
                 } else {
                     $errors[] = $call->errors;
@@ -147,7 +144,7 @@ class CallController extends Controller
             //echo VarDumper::dumpAsString($dateNowString, 10, false) . PHP_EOL;
             // get calls with status queued
             $itemsInHold = Call::find()->where(['>', 'c_created_dt', $dateNowString])
-                            ->andWhere(['=', 'c_call_status', Call::CALL_STATUS_QUEUE])
+                            ->andWhere(['c_status_id', Call::STATUS_QUEUE])
                             ->orderBy(['c_id' => SORT_ASC])
                             ->all();
 

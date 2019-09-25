@@ -5,6 +5,7 @@
 /* @var $dataProvider yii\data\ActiveDataProvider */
 /* @var $employees [] */
 
+use sales\access\EmployeeProjectAccess;
 use yii\bootstrap\Html;
 use yii\grid\GridView;
 
@@ -13,11 +14,11 @@ $this->params['breadcrumbs'][] = $this->title;
 
 if (Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
     $userList = \common\models\Employee::getList();
-    $projectList = \common\models\Project::getList();
 } else {
     $userList = \common\models\Employee::getListByUserId(Yii::$app->user->id);
-    $projectList = \common\models\ProjectEmployeeAccess::getProjectsByEmployee();
 }
+
+$projectList = EmployeeProjectAccess::getProjects(Yii::$app->user->id);
 
 //Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) ? \common\models\UserGroup::getList() : Yii::$app->user->identity->getUserGroupList()
 

@@ -24,7 +24,7 @@ class Asset extends \yii\web\AssetBundle
 
     public $js = [
         'js/custom.js',
-        'js/util.js'
+        'js/util.js',
     ];
 
     /*public $depends = [

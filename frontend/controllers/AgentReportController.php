@@ -47,12 +47,16 @@ class AgentReportController extends FController
             $params = [];
         }
 
-        if(Yii::$app->user->identity->canRole('supervision')) {
+        /** @var Employee $user */
+        $user = Yii::$app->user->identity;
+
+        /*if(Yii::$app->user->identity->canRole('supervision')) {
             $params['AgentActivitySearch']['supervision_id'] = Yii::$app->user->id;
         }
-
         $params = $this->validateDateParams($params);
-        $dataProvider = $searchModel->searchAgentLeads($params);
+        */
+
+        $dataProvider = $searchModel->searchAgentLeads($params, $user);
 
         return $this->render('index', [
             'searchModel' => $searchModel,

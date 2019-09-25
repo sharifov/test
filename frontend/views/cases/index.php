@@ -1,7 +1,8 @@
 <?php
 
-use common\models\Department;
-use common\models\Project;
+use common\models\Employee;
+use sales\access\EmployeeDepartmentAccess;
+use sales\access\EmployeeProjectAccess;
 use sales\entities\cases\CasesCategory;
 use yii\helpers\Html;
 use yii\grid\GridView;
@@ -12,10 +13,18 @@ use yii\helpers\Url;
 /* @var $this yii\web\View */
 /* @var $searchModel sales\entities\cases\CasesSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
-/* @var $isAgent bool */
+/* @var Employee $user */
 
 $this->title = 'Search Cases';
 $this->params['breadcrumbs'][] = $this->title;
+
+if ($user->isAdmin()) {
+    $userFilter = Employee::getList();
+} elseif ($user->isSupSuper() || $user->isExSuper()) {
+    $userFilter = Employee::getListByUserId($user->id);
+} else {
+    $userFilter = false;
+}
 ?>
 <div class="cases-index">
     <h1><i class=""></i> <?= Html::encode($this->title) ?></h1>
@@ -33,10 +42,10 @@ $this->params['breadcrumbs'][] = $this->title;
             </div>
             <div class="x_content" style="display: block">
                 <?php
-                if ($isAgent) {
-                    $searchTpl = '_search_agents';
-                } else {
+                if ($user->isAdmin()) {
                     $searchTpl = '_search';
+                } else {
+                    $searchTpl = '_search_agents';
                 }
                 ?>
                 <?= $this->render($searchTpl, ['model' => $searchModel]); ?>
@@ -64,21 +73,21 @@ $this->params['breadcrumbs'][] = $this->title;
                     return $model->project ? '<span class="badge badge-info">' . Html::encode($model->project->name) . '</span>' : '-';
                 },
                 'format' => 'raw',
-                'filter' => Project::getList()
+                'filter' => EmployeeProjectAccess::getProjects()
             ],
             [
                 'attribute' => 'cs_dep_id',
                 'value' => function (Cases $model) {
                     return $model->department ? $model->department->dep_name : '';
                 },
-                'filter' => Department::getList()
+                'filter' => EmployeeDepartmentAccess::getDepartments()
             ],
             [
                 'attribute' => 'cs_category',
                 'value' => function (Cases $model) {
                     return $model->category ? $model->category->cc_name : '';
                 },
-                'filter' => CasesCategory::getList()
+                'filter' => CasesCategory::getList(array_keys(EmployeeDepartmentAccess::getDepartments()))
             ],
             [
                 'attribute' => 'cs_status',
@@ -104,15 +113,16 @@ $this->params['breadcrumbs'][] = $this->title;
                 'value' => function (Cases $model) {
                     return $model->owner ? '<i class="fa fa-user"></i> ' .Html::encode($model->owner->username) : '-';
                 },
-                'format' => 'raw'
+                'format' => 'raw',
+                'filter' => $userFilter
             ],
             [
                 'attribute' => 'cs_lead_id',
                 'value' => function (Cases $model) {
                     return $model->lead ? $model->lead->uid : '-';
                 },
+                'filter' => false
             ],
-
             [
                 'attribute' => 'cs_created_dt',
                 'value' => function (Cases $model) {

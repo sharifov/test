@@ -16,16 +16,15 @@ class UserDepartmentQuery extends ActiveQuery
      */
     public function usersByDep($depId): self
     {
-        return $this->select('ud_user_id')->distinct('ud_user_id')->andWhere(['ud_dep_id' => $depId]);
+        return $this->select('ud_user_id')->andWhere(['ud_dep_id' => $depId]);
     }
 
     /**
-     * @param $userId
+     * @param int $userId
      * @return UserDepartmentQuery
      */
-    public function depsByUser($userId): self
+    public function depsByUser(int $userId): self
     {
-        return $this->select('ud_dep_id')->distinct('ud_dep_id')->andWhere(['ud_user_id' => $userId]);
+        return $this->select('ud_dep_id')->andWhere(['ud_user_id' => $userId]);
     }
-
 }

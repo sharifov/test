@@ -86,11 +86,11 @@ class UserSiteActivitySearch extends UserSiteActivity
         $dateTimeStart = $dateTimeEnd = null;
 
         if ($this->createTimeStart) {
-            $dateTimeStart = Employee::convertDtTimezone($this->createTimeStart);
+            $dateTimeStart = Employee::convertTimeFromUserDtToUTC($this->createTimeStart);
         }
 
         if ($this->createTimeEnd) {
-            $dateTimeEnd = Employee::convertDtTimezone($this->createTimeEnd);
+            $dateTimeEnd = Employee::convertTimeFromUserDtToUTC($this->createTimeEnd);
         }
 
         $query->andFilterWhere(['>=', 'usa_created_dt', $dateTimeStart])
@@ -178,11 +178,11 @@ class UserSiteActivitySearch extends UserSiteActivity
 
 
         if ($this->createTimeStart) {
-            $dateTimeStart = Employee::convertDtTimezone($this->createTimeStart);
+            $dateTimeStart = Employee::convertTimeFromUserDtToUTC($this->createTimeStart);
         }
 
         if ($this->createTimeEnd) {
-            $dateTimeEnd = Employee::convertDtTimezone($this->createTimeEnd);
+            $dateTimeEnd = Employee::convertTimeFromUserDtToUTC($this->createTimeEnd);
         }
 
         $query->andFilterWhere(['>=', 'usa_created_dt', $dateTimeStart])
@@ -200,11 +200,11 @@ class UserSiteActivitySearch extends UserSiteActivity
         $query->andFilterWhere(['usa_user_id' => $this->usa_user_id]);
 
         if ($this->createTimeStart) {
-            $dateTimeStart = Employee::convertDtTimezone($this->createTimeStart);
+            $dateTimeStart = Employee::convertTimeFromUserDtToUTC($this->createTimeStart);
         }
 
         if ($this->createTimeEnd) {
-            $dateTimeEnd = Employee::convertDtTimezone($this->createTimeEnd);
+            $dateTimeEnd = Employee::convertTimeFromUserDtToUTC($this->createTimeEnd);
         }
 
         $query->andFilterWhere(['>=', 'usa_created_dt', $dateTimeStart])
@@ -224,11 +224,11 @@ class UserSiteActivitySearch extends UserSiteActivity
         $query->andFilterWhere(['usa_user_id' => $this->usa_user_id]);
 
         if ($this->createTimeStart) {
-            $dateTimeStart = Employee::convertDtTimezone($this->createTimeStart);
+            $dateTimeStart = Employee::convertTimeFromUserDtToUTC($this->createTimeStart);
         }
 
         if ($this->createTimeEnd) {
-            $dateTimeEnd = Employee::convertDtTimezone($this->createTimeEnd);
+            $dateTimeEnd = Employee::convertTimeFromUserDtToUTC($this->createTimeEnd);
         }
 
         $query->andFilterWhere(['>=', 'usa_created_dt', $dateTimeStart])

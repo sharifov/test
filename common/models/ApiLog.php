@@ -220,7 +220,7 @@ class ApiLog extends \yii\db\ActiveRecord
         if($selectedAction != ''){
             $apiStatsQuery->andWhere(['=', 'al_action', $selectedAction]);
         }
-        $apiStatsQuery->groupBy(["al_action, DATE_FORMAT(al_request_dt, '$queryDateFormat')"]);
+        $apiStatsQuery->groupBy(["al_action, create_date, DATE_FORMAT(al_request_dt, '$queryDateFormat')"]);
         $apiStatsQuery->orderBy('create_date ASC, execution_time DESC, timeLine ASC');
         $result = $apiStatsQuery->all();
 

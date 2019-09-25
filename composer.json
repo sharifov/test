@@ -39,6 +39,8 @@
 		"ext-gd" : "*",
 		"ext-zip" : "*",
 		"ext-pdo" : "*",
+		"ext-geoip" : "*",
+		"ext-intl" : "*",
 		"lajax/yii2-translate-manager" : "^1.7",
 		"webvimark/module-user-management" : "^1.0",
 		"yiister/yii2-gentelella" : "~1.3",
@@ -58,7 +60,8 @@
 		"2amigos/qrcode-library": "~1.1",
 		"aki/yii2-bot-telegram": "*",
 		"yii2mod/yii2-rbac": "*",
-		"unclead/yii2-multiple-input": "~2.0"
+		"unclead/yii2-multiple-input": "~2.0",
+		"kartik-v/yii2-widget-activeform": "dev-master"
 	},
 	"require-dev" : {
 		"yiisoft/yii2-debug" : "~2.1",

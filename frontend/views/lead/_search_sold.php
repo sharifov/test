@@ -1,12 +1,12 @@
 <?php
 
+use frontend\extensions\DateRangePicker;
 use yii\helpers\Html;
-use \kartik\form\ActiveForm;
-
+use kartik\form\ActiveForm;
 
 /* @var $this yii\web\View */
 /* @var $model common\models\search\CallSearch */
-/* @var $form yii\widgets\ActiveForm */
+/* @var $form ActiveForm */
 ?>
 <p>
 
@@ -41,22 +41,9 @@ use \kartik\form\ActiveForm;
                     echo $form->field($model, 'createTimeRange', [
                         //'addon'=>['prepend'=>['content'=>'<i class="fa fa-calendar"></i>']],
                         'options' => ['class' => 'form-group']
-                    ])->widget(\kartik\daterange\DateRangePicker::class, [
-                        'useWithAddon' => true,
-                        'presetDropdown' => true,
-                        'hideInput' => true,
-                        'convertFormat' => true,
+                    ])->widget(DateRangePicker::class, [
                         'startAttribute' => 'sold_date_from',
                         'endAttribute' => 'sold_date_to',
-                        'pluginOptions' => [
-                            'timePicker' => true,
-                            'timePickerIncrement' => 1,
-                            'timePicker24Hour' => true,
-                            'locale' => [
-                                'format' => 'Y-m-d H:i',
-                                'separator' => ' - '
-                            ]
-                        ]
                     ])->label('Created DateTime Range');
                     ?>
                 </div>

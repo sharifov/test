@@ -2,6 +2,7 @@
 
 namespace common\models\search;
 
+use common\models\Employee;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use common\models\LeadChecklist;
@@ -66,8 +67,8 @@ class LeadChecklistSearch extends LeadChecklist
         }
 
         if(empty($this->lc_created_dt) && isset($params['LeadChecklistSearch']['date_range'])){
-            $query->andFilterWhere(['>=', 'lc_created_dt', $this->datetime_start])
-                ->andFilterWhere(['<=', 'lc_created_dt', $this->datetime_end]);
+            $query->andFilterWhere(['>=', 'lc_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->datetime_start))])
+                ->andFilterWhere(['<=', 'lc_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->datetime_end))]);
         }
 
         if (isset($params['LeadChecklistSearch']['lc_created_dt'])) {

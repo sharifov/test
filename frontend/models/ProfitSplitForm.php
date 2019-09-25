@@ -2,6 +2,7 @@
 
 namespace frontend\models;
 
+use sales\forms\NotificationsFormHelper;
 use yii\base\Model;
 use common\models\Lead;
 use common\models\ProfitSplit;
@@ -29,6 +30,8 @@ class ProfitSplitForm extends Model
      */
     private $_profitSplit;
 
+    public const SCENARIO_CHECK_PERCENTAGE = 'checkPercentageOfSplit';
+
 
     /**
      * {@inheritdoc}
@@ -40,29 +43,34 @@ class ProfitSplitForm extends Model
             [['ProfitSplit'], 'checkSumPercentage'],
             [['ProfitSplit'], 'checkMainAgent'],
             [['ProfitSplit'], 'safe'],
+			[['ProfitSplit'], 'checkSumPercent', 'on' => self::SCENARIO_CHECK_PERCENTAGE]
         ];
     }
 
     public function checkSumPercentage($attribute, $params)
     {
-        $profitSplit = $this->getProfitSplit();
-        if(!empty($profitSplit)){
-            $sum = 0;
-            foreach ($profitSplit as $entry){
-                if(!empty($entry->ps_percent)){
-                    $sum += $entry->ps_percent;
-                }
-            }
-        }
+        $sum = $this->getSumProfitSplit();
         if($sum > 100){
             $this->addError('sumPercent', \Yii::t('user', 'Sum of percent more than 100'));
-            return false;
-        }elseif($sum == 100){
-            $this->addError('sumPercent', \Yii::t('user', 'Sum of percent is 100. The main agent was left without profit.'));
             return false;
         }
         return true;
     }
+
+	/**
+	 * @param $attribute
+	 * @param $params
+	 * @return bool
+	 */
+	public function checkSumPercent($attribute, $params): bool
+	{
+		$sum = $this->getSumProfitSplit();
+		if ($sum === 100){
+			NotificationsFormHelper::addNotification('sumPercent', \Yii::t('user', 'Sum of percent is 100. The main agent was left without profit.'));
+			return false;
+		}
+		return true;
+	}
 
     public function checkMainAgent($attribute, $params)
     {
@@ -121,6 +129,10 @@ class ProfitSplitForm extends Model
         if (!$this->hasErrors('ProfitSplit') && $this->hasErrors('ProfitSplit')) {
             $this->clearErrors('ProfitSplit');
         }
+
+		if (NotificationsFormHelper::hasNotifications()) {
+			$this->addError('warnings', NotificationsFormHelper::getAlertsNotifications('alert-warning', 'asdasd'));
+		}
 
         parent::afterValidate();
     }
@@ -291,4 +303,20 @@ class ProfitSplitForm extends Model
         }
     }
 
+	/**
+	 * @return int
+	 */
+	private function getSumProfitSplit(): int
+	{
+		$profitSplit = $this->getProfitSplit();
+		$sum = 0;
+		if(!empty($profitSplit)){
+			foreach ($profitSplit as $entry){
+				if(!empty($entry->ps_percent)){
+					$sum += $entry->ps_percent;
+				}
+			}
+		}
+		return $sum;
+	}
 }

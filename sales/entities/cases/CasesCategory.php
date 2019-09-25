@@ -115,12 +115,24 @@ class CasesCategory extends ActiveRecord
     }
 
     /**
+     * @param array|null $departments
      * @return array
      */
-    public static function getList() : array
+    public static function getList(?array $departments = null) : array
     {
-        $data = self::find()->orderBy(['cc_created_dt' => SORT_ASC])->asArray()->all();
-        return ArrayHelper::map($data,'cc_key', 'cc_name');
+        $conditions = [];
+
+        if ($departments) {
+            $conditions = ['cc_dep_id' => $departments];
+        }
+
+        $data = self::find()->select(['cc_name', 'cc_dep_id', 'cc_key'])
+            ->andWhere($conditions)
+            ->indexBy('cc_key')
+            ->orderBy(['cc_created_dt' => SORT_ASC])
+            ->asArray()
+            ->column();
+        return $data;
     }
 
     /**

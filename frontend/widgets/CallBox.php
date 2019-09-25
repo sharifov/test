@@ -38,37 +38,35 @@ class CallBox extends \yii\bootstrap\Widget
         return static::$instance;
     }
 
+    /**
+     *
+     */
     public function init()
     {
         parent::init();
     }
 
+    /**
+     * @return string
+     */
     public function run()
     {
         $user_id = \Yii::$app->user->id;
-        //$newCount = 0; //\common\models\Notifications::findNewCount($user_id);
-        //$model = \common\models\Notifications::findNew($user_id);
-
         /** @var Employee $userModel */
         $userModel = \Yii::$app->user->identity;
-        //$sipExist = $sipExist = ($userModel->userProfile->up_sip && strlen($userModel->userProfile->up_sip) > 2); // \common\models\UserProjectParams::find()->where(['upp_user_id' => $user_id])->andWhere(['AND', ['IS NOT', 'upp_tw_sip_id', null], ['!=', 'upp_tw_sip_id', '']])->one();
-
-        //VarDumper::dump($sipExist->attributes, 10, true);
 
         if(!$userModel) {
             return '';
         }
 
-        if(!$userModel->userProfile || $userModel->userProfile->up_call_type_id == \common\models\UserProfile::CALL_TYPE_OFF) {
+        if(!$userModel->userProfile || (int) $userModel->userProfile->up_call_type_id === \common\models\UserProfile::CALL_TYPE_OFF) {
             return '';
         }
 
         $lastCall = Call::find()->where(['c_created_user_id' => $user_id])->orderBy(['c_id' => SORT_DESC])->limit(1)->one();
         $userCallStatus = UserCallStatus::find()->where(['us_user_id' => $user_id])->orderBy(['us_id' => SORT_DESC])->limit(1)->one();
-        $countMissedCalls = Call::find()->where(['c_created_user_id' => $user_id, 'c_call_status' => Call::CALL_STATUS_NO_ANSWER, 'c_call_type_id' => Call::CALL_TYPE_IN, 'c_is_new' => true])->count();
+        $countMissedCalls = Call::find()->where(['c_created_user_id' => $user_id, 'c_status_id' => Call::STATUS_NO_ANSWER, 'c_call_type_id' => Call::CALL_TYPE_IN, 'c_is_new' => true])->count();
         //$countMissedCalls = 10;
-
-
         return $this->render('call_box', ['lastCall' => $lastCall, 'userCallStatus' => $userCallStatus, 'countMissedCalls' => $countMissedCalls]);
     }
 }

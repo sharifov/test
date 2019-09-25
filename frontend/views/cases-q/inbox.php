@@ -27,6 +27,7 @@ $this->params['breadcrumbs'][] = $this->title;
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'columns' => [
+            'cs_id',
             'cs_gid',
             [
                 'attribute' => 'cs_project_id',
@@ -74,6 +75,13 @@ $this->params['breadcrumbs'][] = $this->title;
                 'visible' => ! $isAgent,
             ],
             [
+                'header' => 'Client time',
+                'format' => 'raw',
+                'value' => function(Cases $model) {
+                    return $model->getClientTime();
+                },
+            ],
+            [
                 'header' => 'Agent',
                 'format' => 'raw',
                 'value' => function (Cases $model) {
@@ -113,7 +121,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         ]);
                     },
                     'take' => function ($url, Cases $model) {
-                        return Html::a('<i class="fa fa-download"></i> Take', ['cases/take', 'gid' => $model->cs_gid, 'uid' => Yii::$app->user->id], [
+                        return Html::a('<i class="fa fa-download"></i> Take', ['cases/take', 'gid' => $model->cs_gid], [
                             'class' => 'btn btn-primary btn-xs take-processing-btn',
                             'data-pjax' => 0,
                             /*'data' => [

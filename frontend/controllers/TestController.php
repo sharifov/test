@@ -11,18 +11,29 @@ use common\models\Lead;
 use common\models\Lead2;
 use common\models\Notifications;
 use common\models\Project;
+use common\models\ProjectEmployeeAccess;
 use common\models\Sources;
 use common\models\Test1;
 use common\models\UserConnection;
 use common\models\UserDepartment;
+use common\models\UserGroupAssign;
 use common\models\UserProfile;
+use sales\access\EmployeeAccessHelper;
+use sales\access\EmployeeDepartmentAccess;
+use sales\access\EmployeeAccessQuery;
+use sales\access\EmployeeGroupAccess;
+use sales\access\EmployeeProjectAccess;
+use sales\access\EmployeeSourceAccess;
 use sales\dispatchers\DeferredEventDispatcher;
 use sales\dispatchers\EventDispatcher;
 use sales\entities\cases\Cases;
+use sales\entities\cases\CasesCategory;
 use sales\forms\api\communication\voice\finish\FinishForm;
 use sales\forms\api\communication\voice\record\RecordForm;
 use sales\forms\lead\ClientCreateForm;
+use sales\forms\lead\EmailCreateForm;
 use sales\forms\lead\PhoneCreateForm;
+use sales\helpers\user\UserFinder;
 use sales\repositories\airport\AirportRepository;
 use sales\repositories\cases\CasesRepository;
 use sales\repositories\cases\CasesStatusLogRepository;
@@ -100,16 +111,27 @@ class TestController extends FController
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
 
-    public function test(Lead $lead)
+    public function actionTest()
     {
-        $lead->client->first_name = '1';
+        $userId = 295;
+
+        $employee = UserFinder::find($userId);
+        var_dump($employee->accessTakeLeadByFrequencyMinutes());die;
+
+//        $projects = EmployeeProjectAccess::getProjects($userId);
+//        $projects = EmployeeProjectAccess::getProjects($userId);
+//        $projects = EmployeeProjectAccess::getProjects($userId);
+//        $projects = EmployeeProjectAccess::getProjects($userId);
+//        VarDumper::dump($projects, 10, true);
+
+        return $this->render('blank');
 
     }
 
     public function actionT()
     {
 
-      VarDumper::dump(UserDepartment::getDepartmentsAccess(48));
+
 
 die;
 
@@ -1450,7 +1472,6 @@ die;
             $call->c_created_dt = date('Y-m-d H:i:s');
             $call->c_created_user_id = Yii::$app->user->id;
             $call->c_call_type_id = Call::CALL_TYPE_OUT;
-            $call->c_call_status = Call::CALL_STATUS_RINGING;
 
         }
 

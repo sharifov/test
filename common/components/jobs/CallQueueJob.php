@@ -64,47 +64,48 @@ class CallQueueJob extends BaseObject implements JobInterface
             $this->clientManageService = Yii::createObject(ClientManageService::class);
             $this->casesRepository = Yii::createObject(CasesRepository::class);
 
-            Yii::info('CallQueueJob - CallId: ' . $this->call_id ,'info\CallQueueJob');
+            // Yii::info('CallQueueJob - CallId: ' . $this->call_id ,'info\CallQueueJob');
 
-            if($this->delay) {
+            if ($this->delay) {
                 sleep($this->delay);
             }
 
-            if($this->call_id) {
+            if ($this->call_id) {
 
                 $originalAgentId = null;
 
                 $call = Call::find()->where(['c_id' => $this->call_id])->limit(1)->one();
 
-                if($call) {
+                if ($call) {
 
                     $originalAgentId = $call->c_created_user_id;
 
-                    Yii::info('CallQueueJob - CallId: ' . $this->call_id . ', c_call_status: ' . $call->c_call_status . ', ' . VarDumper::dumpAsString($call->attributes),'info\CallQueueJob-call');
+                    // Yii::info('CallQueueJob - CallId: ' . $this->call_id . ', c_call_status: ' . $call->c_call_status . ', ' . VarDumper::dumpAsString($call->attributes),'info\CallQueueJob-call');
 
-                    if($call->c_call_status === Call::CALL_STATUS_IVR) {
-                        Yii::info('CallId: ' . $this->call_id . ', CALL_STATUS_IVR' ,'info\CallQueueJob-CALL_STATUS_IVR');
-                        $call->c_call_status = Call::CALL_STATUS_QUEUE;
-                        if(!$call->update()) {
+                    if ($call->isStatusIvr()) {
+                        Yii::info('CallId: ' . $this->call_id . ', STATUS_IVR' ,'info\CallQueueJob-STATUS_IVR');
+                        // $call->c_call_status = Call::TW_STATUS_QUEUE;
+                        $call->setStatusQueue();
+                        if (!$call->update()) {
                             Yii::error(VarDumper::dumpAsString($call->errors), 'CallQueueJob:execute:Call:update');
                         }
                     }
 
 
-                    if((int) $call->c_dep_id === Department::DEPARTMENT_SALES) {
+                    if ((int) $call->c_dep_id === Department::DEPARTMENT_SALES) {
                         if ($call->c_from) {
                             $lead = Lead2::findLastLeadByClientPhone($call->c_from, $call->c_project_id);
                             if (!$lead) {
                                 $lead = Lead2::createNewLeadByPhone($call->c_from, $call->c_project_id);
                             }
-                            if($lead) {
+                            if ($lead) {
                                 $call->c_lead_id = $lead->id;
                                 if(!$call->update()) {
                                     Yii::error(VarDumper::dumpAsString($call->errors), 'CallQueueJob:execute:Call:update2');
                                 }
                             }
 
-                            if(!$originalAgentId && $lead && $lead->employee_id) {
+                            if (!$originalAgentId && $lead && $lead->employee_id) {
                                 $originalAgentId = $lead->employee_id;
                             }
                         }
@@ -119,11 +120,11 @@ class CallQueueJob extends BaseObject implements JobInterface
                                 $call->c_dep_id
                             );
                             $call->c_case_id = $case->cs_id;
-                            if(!$call->update()) {
+                            if (!$call->update()) {
                                 Yii::error(VarDumper::dumpAsString($call->errors), 'CallQueueJob:execute:Call:update3');
                             }
 
-                            if(!$originalAgentId && $case && $case->cs_user_id) {
+                            if (!$originalAgentId && $case && $case->cs_user_id) {
                                 $originalAgentId = $case->cs_user_id;
                             }
 
@@ -134,30 +135,36 @@ class CallQueueJob extends BaseObject implements JobInterface
 
                     $isCalled = false;
 
-                    if($originalAgentId) {
+                    if ($originalAgentId) {
 
                         $user = Employee::findOne($originalAgentId);
-                        if($user && $user->isOnline() /*&& $user->isCallStatusReady() && $user->isCallFree()*/) {
-                            $isCalled = Call::applyCallToAgentAccess($call, $user->id);
 
-                            Yii::info('Accept one user ('. ($isCalled ? 'isCalled' : 'NotIsCalled' ) .') - CallId: ' . $this->call_id . ', c_call_status: ' . $call->c_call_status . ', ' . VarDumper::dumpAsString($call->attributes),'info\CallQueueJob-Accept-one');
+                        if ($user && $user->isOnline() /*&& $user->isCallStatusReady() && $user->isCallFree()*/) {
+
+                            $depListIds = array_keys($user->getUserDepartmentList());
+                            if (in_array($call->c_dep_id, $depListIds, true)) {
+
+                                $isCalled = Call::applyCallToAgentAccess($call, $user->id);
+
+                                // Yii::info('Accept one user ('. ($isCalled ? 'isCalled' : 'NotIsCalled' ) .') - CallId: ' . $this->call_id . ', c_call_status: ' . $call->c_call_status . ', ' . VarDumper::dumpAsString($call->attributes),'info\CallQueueJob-Accept-one');
 
 
-                            if ((int) $call->c_source_type_id === Call::SOURCE_GENERAL_LINE) {
-                                $timeStartCallUserAccess = (int) Yii::$app->params['settings']['time_start_call_user_access_general'] ?? 0;
-                            } else {
-                                $timeStartCallUserAccess = (int) Yii::$app->params['settings']['time_start_call_user_access_direct'] ?? 0;
-                            }
+                                if ((int)$call->c_source_type_id === Call::SOURCE_GENERAL_LINE) {
+                                    $timeStartCallUserAccess = (int)Yii::$app->params['settings']['time_start_call_user_access_general'] ?? 0;
+                                } else {
+                                    $timeStartCallUserAccess = (int)Yii::$app->params['settings']['time_start_call_user_access_direct'] ?? 0;
+                                }
 
-                            if($timeStartCallUserAccess) {
-                                $job = new CallUserAccessJob();
-                                $job->call_id = $call->c_id;
-                                $jobId = Yii::$app->queue_job->delay($timeStartCallUserAccess)->priority(100)->push($job);
+                                if ($timeStartCallUserAccess) {
+                                    $job = new CallUserAccessJob();
+                                    $job->call_id = $call->c_id;
+                                    $jobId = Yii::$app->queue_job->delay($timeStartCallUserAccess)->priority(100)->push($job);
+                                }
                             }
                         }
                     }
 
-                    if(!$isCalled) {
+                    if (!$isCalled) {
 
                         Yii::info('Accept multiple users - CallId: ' . $call->c_id . ', c_call_status: ' . $call->c_call_status . ', ' . VarDumper::dumpAsString($call->attributes),'info\CallQueueJob-Accept-multi');
 
@@ -176,7 +183,7 @@ class CallQueueJob extends BaseObject implements JobInterface
 
                         $timeStartCallUserAccess = (int) Yii::$app->params['settings']['time_start_call_user_access_general'] ?? 0;
 
-                        if($timeStartCallUserAccess) {
+                        if ($timeStartCallUserAccess) {
                             $job = new CallUserAccessJob();
                             $job->call_id = $call->c_id;
                             $jobId = Yii::$app->queue_job->delay($timeStartCallUserAccess)->priority(100)->push($job);

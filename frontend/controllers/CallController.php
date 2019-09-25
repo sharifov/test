@@ -3,6 +3,7 @@
 namespace frontend\controllers;
 
 use common\models\Department;
+use common\models\DepartmentPhoneProject;
 use common\models\Employee;
 use common\models\Lead;
 use common\models\Project;
@@ -255,44 +256,58 @@ class CallController extends FController
             $accessDepartments = [];
         }
 
+        $isSuper = ($user->isSupervision() || $user->isExSuper() || $user->isSupSuper());
+
+        if ($isSuper && !in_array(Department::DEPARTMENT_SUPPORT, $accessDepartments, true)) {
+            $userGroupsModel = $user->ugsGroups;
+
+            if ($userGroupsModel) {
+                $userGroups = ArrayHelper::map($userGroupsModel, 'ug_id', 'ug_id');
+            } else {
+                $userGroups = [];
+            }
+
+            $params['UserConnectionSearch']['ug_ids'] = $userGroups;
+            $params['CallSearch']['ug_ids'] = $userGroups;
+        }
+
         //VarDumper::dump($accessDepartments, 10, true); exit;
 
 
-        if(in_array(Department::DEPARTMENT_SALES, $accessDepartments, true) || !$accessDepartments) {
+        if (!$accessDepartments || in_array(Department::DEPARTMENT_SALES, $accessDepartments, true)) {
             $params['UserConnectionSearch']['dep_id'] = Department::DEPARTMENT_SALES;
             $dataProviderOnlineDep1 = $searchModel2->searchUserCallMap($params);
         } else {
             $dataProviderOnlineDep1 = null;
         }
 
-        if(in_array(Department::DEPARTMENT_EXCHANGE, $accessDepartments, true) || !$accessDepartments) {
+        if (!$accessDepartments || in_array(Department::DEPARTMENT_EXCHANGE, $accessDepartments, true)) {
             $params['UserConnectionSearch']['dep_id'] = Department::DEPARTMENT_EXCHANGE;
             $dataProviderOnlineDep2 = $searchModel2->searchUserCallMap($params);
         } else {
             $dataProviderOnlineDep2 = null;
         }
 
-        if(in_array(Department::DEPARTMENT_SUPPORT, $accessDepartments, true) || !$accessDepartments) {
+        if (!$accessDepartments || in_array(Department::DEPARTMENT_SUPPORT, $accessDepartments, true)) {
             $params['UserConnectionSearch']['dep_id'] = Department::DEPARTMENT_SUPPORT;
             $dataProviderOnlineDep3 = $searchModel2->searchUserCallMap($params);
         } else {
             $dataProviderOnlineDep3 = null;
         }
 
-        if(!$accessDepartments) {
+        if (!$accessDepartments) {
             $params['UserConnectionSearch']['dep_id'] = 0;
             $dataProviderOnline = $searchModel2->searchUserCallMap($params);
         } else {
             $dataProviderOnline = null;
         }
 
-
         $params['CallSearch']['dep_ids'] = $accessDepartments;
-        $params['CallSearch']['statuses'] = [Call::CALL_STATUS_IN_PROGRESS, Call::CALL_STATUS_RINGING, Call::CALL_STATUS_QUEUE, Call::CALL_STATUS_IVR];
+        $params['CallSearch']['status_ids'] = [Call::STATUS_IN_PROGRESS, Call::STATUS_RINGING, Call::STATUS_QUEUE, Call::STATUS_IVR, Call::STATUS_DELAY];
         $dataProvider3 = $searchModel->searchUserCallMap($params);
 
-        $params['CallSearch']['statuses'] = [Call::CALL_STATUS_COMPLETED, Call::CALL_STATUS_BUSY, Call::CALL_STATUS_FAILED, Call::CALL_STATUS_NO_ANSWER, Call::CALL_STATUS_CANCELED];
-        $params['CallSearch']['limit'] = 14;
+        $params['CallSearch']['status_ids'] = [Call::STATUS_COMPLETED, Call::STATUS_BUSY, Call::STATUS_FAILED, Call::STATUS_NO_ANSWER, Call::STATUS_CANCELED];
+        $params['CallSearch']['limit'] = 8;
         $dataProvider2 = $searchModel->searchUserCallMap($params);
 
         //$searchModel->datetime_start = date('Y-m-d', strtotime('-0 day'));
@@ -357,7 +372,7 @@ class CallController extends FController
         $myPendingLeadsCount = $query->count();
 
 
-        $callModel = Call::find()->where(['c_call_status' => [Call::CALL_STATUS_RINGING, Call::CALL_STATUS_IN_PROGRESS]])->andWhere(['c_created_user_id' => $user->id])->orderBy(['c_id' => SORT_DESC])->limit(1)->one();
+        $callModel = Call::find()->where(['c_status_id' => [Call::STATUS_RINGING, Call::STATUS_IN_PROGRESS]])->andWhere(['c_created_user_id' => $user->id])->orderBy(['c_id' => SORT_DESC])->limit(1)->one();
 
         //echo Call::find()->where(['c_call_status' => [Call::CALL_STATUS_RINGING, Call::CALL_STATUS_IN_PROGRESS]])->andWhere(['c_created_user_id' => Yii::$app->user->id])->orderBy(['c_id' => SORT_DESC])->limit(1)->createCommand()->getRawSql(); exit;
 
@@ -398,11 +413,11 @@ class CallController extends FController
 
                     //$callData['phone_from'] = $upp->upp_tw_phone_number;
 
-                    $source = Sources::find()->where(['project_id' => $leadModel->project_id, 'default' => true])->andWhere(['OR', ['IS NOT', 'phone_number', null], ['<>', 'phone_number', '']])->limit(1)->one();
-                    if($source && $source->phone_number) {
-                        $callData['phone_from'] = $source->phone_number;
+                    $dpp = DepartmentPhoneProject::find()->where(['dpp_project_id' => $leadModel->project_id])->limit(1)->one();
+                    if($dpp && $dpp->dpp_phone_number) {
+                        $callData['phone_from'] = $dpp->dpp_phone_number;
                     } else {
-                        Yii::error('Not found Project Source or Source Phone is empty, Project Id: '. $leadModel->project_id, 'CallController:actionAutoRedial:Source');
+                        Yii::error('Not found Project Source, Project Id: '. $leadModel->project_id, 'CallController:actionAutoRedial:DepartmentPhoneProject');
                     }
 
                     if(!$callData['phone_from']) {
@@ -607,6 +622,10 @@ class CallController extends FController
     }
 
 
+    /**
+     * @return string
+     * @throws \yii\base\InvalidConfigException
+     */
     public function actionAjaxMissedCalls()
     {
         $searchModel = new CallSearch();
@@ -614,7 +633,8 @@ class CallController extends FController
         $params = Yii::$app->request->queryParams;
         $params['CallSearch']['c_created_user_id'] = Yii::$app->user->id;
         $params['CallSearch']['c_call_type_id'] = Call::CALL_TYPE_IN;
-        $params['CallSearch']['c_call_status'] = Call::CALL_STATUS_NO_ANSWER;
+        // $params['CallSearch']['c_call_status'] = Call::TW_STATUS_NO_ANSWER;
+        $params['CallSearch']['c_status_id'] = Call::STATUS_NO_ANSWER;
         $params['CallSearch']['c_call_type_id'] = Call::CALL_TYPE_IN;
 
         $params['CallSearch']['limit'] = 20;
@@ -636,6 +656,13 @@ class CallController extends FController
         ]);
     }
 
+    /**
+     * @return string
+     * @throws ForbiddenHttpException
+     * @throws NotFoundHttpException
+     * @throws \Throwable
+     * @throws \yii\db\StaleObjectException
+     */
     public function actionAjaxCallInfo()
     {
         $id = (int) Yii::$app->request->post('id');
@@ -654,14 +681,21 @@ class CallController extends FController
         ]);
     }
 
+    /**
+     * @return \yii\web\Response
+     * @throws ForbiddenHttpException
+     * @throws NotFoundHttpException
+     * @throws \Throwable
+     * @throws \yii\db\StaleObjectException
+     */
     public function actionAjaxCallCancel()
     {
         $id = (int) Yii::$app->request->get('id');
         $model = $this->findModel($id);
         $this->checkAccess($model);
 
-        if($model->c_call_status == Call::CALL_STATUS_RINGING || $model->c_call_status == Call::CALL_STATUS_IN_PROGRESS || $model->c_call_status == Call::CALL_STATUS_QUEUE) {
-            $model->c_call_status = Call::CALL_STATUS_FAILED;
+        if ($model->isStatusRinging() || $model->isStatusInProgress() || $model->isStatusQueue()) {
+            $model->setStatusFailed();
             $model->update();
         }
 

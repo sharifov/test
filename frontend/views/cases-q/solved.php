@@ -32,6 +32,7 @@ $this->params['breadcrumbs'][] = $this->title;
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'columns' => [
+            'cs_id',
             'cs_gid',
             [
                 'attribute' => 'cs_project_id',
@@ -69,6 +70,18 @@ $this->params['breadcrumbs'][] = $this->title;
 //                'filter' => Department::getList()
             ],
             'cs_created_dt',
+            [
+                'header' => 'Last Action',
+                'format' => 'raw',
+                'value' => function (Cases $model) {
+                    $createdTS = strtotime($model->cs_updated_dt);
+    
+                    $diffTime = time() - $createdTS;
+                    $diffHours = (int) ($diffTime / (60 * 60));
+    
+                    return ($diffHours > 3 && $diffHours < 73 ) ? $diffHours.' hours' : Yii::$app->formatter->asRelativeTime($createdTS);
+                }
+            ],
             [
                 'class' => 'yii\grid\ActionColumn',
                 'template' => '{view}',

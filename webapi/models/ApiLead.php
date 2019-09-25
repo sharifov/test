@@ -3,9 +3,11 @@
 namespace webapi\models;
 
 use common\models\Client;
+use common\models\DepartmentPhoneProject;
 use common\models\Employee;
 use common\models\Lead;
 use common\models\Sources;
+use common\models\UserProjectParams;
 use Yii;
 use yii\base\Model;
 
@@ -110,6 +112,12 @@ class ApiLead extends Model
             [['client_first_name', 'client_last_name', 'client_middle_name'], 'string', 'max' => 100],
             [['emails'], 'each', 'rule' => ['email']],
             [['phones'], 'each', 'rule' => ['string', 'max' => 20]],
+			[['phones'], 'filter', 'filter' => function ($phones) {
+        		return array_map(function ($phone) {
+					return preg_replace("/[^0-9\+]/", '', $phone);
+				}, $phones);
+			}],
+            [['phones'], 'checkForExistence'],
             [['source_id'], 'checkEmailAndPhone', 'except' => [self::SCENARIO_UPDATE, self::SCENARIO_GET]],
 
             [['adults', 'children', 'infants'], 'integer', 'min' => 0, 'max' => 9],
@@ -207,6 +215,21 @@ class ApiLead extends Model
         }
 
     }
+
+	/**
+	 * @param $attribute
+	 * @param $params
+	 */
+	public function checkForExistence($attribute, $params): void
+	{
+		foreach ($this->phones as $phone) {
+			if (DepartmentPhoneProject::find()->where(['dpp_phone_number' => $phone])->exists()) {
+				$this->addError($attribute, $phone . ' - This phone number is not allowed (General)');
+			} elseif (UserProjectParams::find()->where(['upp_tw_phone_number' => $phone])->exists()) {
+				$this->addError($attribute, $phone . ' - This phone number is not allowed (Direct)');
+			}
+		}
+	}
 
 
     /**

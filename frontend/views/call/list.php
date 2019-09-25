@@ -131,15 +131,13 @@ $this->params['breadcrumbs'][] = $this->title;
         'filterModel' => $searchModel,
         'tableOptions' => ['class' => 'table table-bordered table-condensed table-hover'],
         'rowOptions' => function (\common\models\Call $model, $index, $widget, $grid) {
-            if ($model->c_call_status === \common\models\Call::CALL_STATUS_BUSY) {
+            if ($model->isStatusBusy() || $model->isStatusNoAnswer()) {
                 return ['class' => 'danger'];
-            } elseif ($model->c_call_status === \common\models\Call::CALL_STATUS_NO_ANSWER) {
-                return ['class' => 'danger'];
-            } elseif ($model->c_call_status === \common\models\Call::CALL_STATUS_RINGING || $model->c_call_status === \common\models\Call::CALL_STATUS_QUEUE) {
+            } elseif ($model->isStatusRinging() || $model->isStatusQueue()) {
                 return ['class' => 'warning'];
-            } /*elseif ($model->c_call_status === \common\models\Call::CALL_STATUS_COMPLETED) {
-                return ['class' => 'success'];
-            }*/
+            } elseif ($model->isStatusCompleted()) {
+                // return ['class' => 'success'];
+            }
         },
         'columns' => [
             //['class' => 'yii\grid\SerialColumn'],
@@ -157,7 +155,6 @@ $this->params['breadcrumbs'][] = $this->title;
             'c_is_new:boolean',
             //'c_com_call_id',
             //'c_call_sid',
-            //'c_account_sid',
             //'c_call_type_id',
 
             [
@@ -190,15 +187,14 @@ $this->params['breadcrumbs'][] = $this->title;
             'c_from',
             'c_to',
 
-            //'c_sip',
             //'c_call_status',
             [
-                'attribute' => 'c_call_status',
+                'attribute' => 'c_status_id',
                 'value' => function (\common\models\Call $model) {
                     return $model->getStatusLabel();
                 },
                 'format' => 'raw',
-                'filter' => \common\models\Call::CALL_STATUS_LIST
+                'filter' => \common\models\Call::STATUS_LIST
             ],
             //'c_lead_id',
             [
@@ -225,13 +221,10 @@ $this->params['breadcrumbs'][] = $this->title;
                 //'format' => 'raw'
             ],*/
 
-            //'c_api_version',
-            //'c_direction',
             //'c_forwarded_from',
             //'c_caller_name',
             //'c_parent_call_sid',
             'c_call_duration',
-            //'c_sip_response_code',
             //'c_recording_url:url',
             /*[
                 'attribute' => 'c_recording_url',
@@ -253,10 +246,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
             ],
 
-            //'c_recording_sid',
             'c_recording_duration',
-            //'c_timestamp',
-            //'c_uri',
             //'c_sequence_number',
 
             //'c_created_user_id',
@@ -354,7 +344,7 @@ $(document).on('click', '.btn-recording_url', function() {
 
 $('#modalCallRecording').on('hidden.bs.modal', function () {
     $('#audio_recording').html('');
-})
+});
 
 JS;
 $this->registerJs($js, \yii\web\View::POS_READY);

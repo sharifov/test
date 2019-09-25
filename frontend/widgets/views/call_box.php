@@ -43,7 +43,7 @@ if($clientPhone && $client = $clientPhone->client) {
 
 
 $iconClass = 'fa fa-list';
-if ($lastCall && in_array($lastCall->c_call_status, [\common\models\Call::CALL_STATUS_RINGING, \common\models\Call::CALL_STATUS_IN_PROGRESS], true)) {
+if ($lastCall && ($lastCall->isStatusRinging() || $lastCall->isStatusInProgress())) {
     $isVisible = true;
 } else {
     $isVisible = false;
@@ -87,7 +87,7 @@ use yii\widgets\Pjax; ?>
                     <span class="label label-default"><?=$lastCall->cDep ? \yii\helpers\Html::encode($lastCall->cDep->dep_name) : '-'?></span><br>
                     <?=$lastCall->getCallTypeName()?>
                 </h4>
-                <?php if (in_array($lastCall->c_call_status, [\common\models\Call::CALL_STATUS_RINGING, \common\models\Call::CALL_STATUS_IN_PROGRESS], true)): ?>
+                <?php if ($lastCall->isStatusRinging() || $lastCall->isStatusInProgress()): ?>
                     <?php
                         if($lastCall->c_updated_dt) {
                             $timerSeconds = time() - strtotime($lastCall->c_updated_dt);
@@ -235,9 +235,9 @@ use yii\widgets\Pjax; ?>
             $iconClass = 'fa fa-list';
 
             if($lastCall) {
-                if ($lastCall->c_call_status === \common\models\Call::CALL_STATUS_RINGING) {
+                if ($lastCall->isStatusRinging()) {
                     $iconClass = 'fa fa-spinner fa-spin';
-                } elseif ($lastCall->c_call_status === \common\models\Call::CALL_STATUS_IN_PROGRESS) {
+                } elseif ($lastCall->isStatusInProgress()) {
                     $iconClass = 'fa fa-refresh fa-spin';
                 }
             }
@@ -332,7 +332,7 @@ use yii\widgets\Pjax; ?>
 
     function refreshCallBox(obj) {
         // console.log(obj);
-        $.pjax.reload({url: callBoxUrl, container: '#call-box-pjax', push: false, replace: false, 'scrollTo': false, timeout: 10000, async: false, data: {id: obj.id, status: obj.status}});
+        $.pjax.reload({url: callBoxUrl, container: '#call-box-pjax', push: false, replace: false, 'scrollTo': false, timeout: 7000, async: false, data: {id: obj.id, status: obj.status}});
     }
 
 </script>

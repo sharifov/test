@@ -3,9 +3,9 @@
 namespace common\models;
 
 use borales\extensions\phoneInput\PhoneInputValidator;
+use sales\access\EmployeeProjectAccess;
 use sales\entities\AggregateRoot;
 use sales\entities\EventTrait;
-use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
 use yii\helpers\ArrayHelper;
@@ -19,7 +19,6 @@ use yii\helpers\VarDumper;
  * @property string $name
  * @property string $cid
  * @property string $last_update
- * @property string $phone_number
  * @property boolean $default
  * @property boolean $hidden
  *
@@ -132,7 +131,8 @@ class Sources extends \yii\db\ActiveRecord implements AggregateRoot
          */
         $map = [];
         $projects = Project::findAll([
-            'id' => array_keys(ProjectEmployeeAccess::getProjectsByEmployee())
+//            'id' => array_keys(ProjectEmployeeAccess::getProjectsByEmployee())
+            'id' => array_keys(EmployeeProjectAccess::getProjects())
         ]);
         foreach ($projects as $project) {
             $child_map = [];

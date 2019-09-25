@@ -2,6 +2,7 @@
 
 namespace common\models;
 
+use borales\extensions\phoneInput\PhoneInputValidator;
 use sales\entities\AggregateRoot;
 use sales\entities\EventTrait;
 use Yii;
@@ -65,7 +66,10 @@ class ClientPhone extends \yii\db\ActiveRecord implements AggregateRoot
             [['phone'], 'required'],
             [['client_id', 'is_sms'], 'integer'],
             [['created', 'updated', 'comments', 'validate_dt'], 'safe'],
-            [['phone'], 'string', 'max' => 100],
+
+            [['phone'], 'string', 'max' => 20],
+            [['phone'], PhoneInputValidator::class],
+
             [['client_id'], 'exist', 'skipOnError' => true, 'targetClass' => Client::class, 'targetAttribute' => ['client_id' => 'id']],
             [['phone', 'client_id'], 'unique', 'targetAttribute' => ['phone', 'client_id']]
         ];

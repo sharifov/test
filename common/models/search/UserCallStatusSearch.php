@@ -2,6 +2,7 @@
 
 namespace common\models\search;
 
+use common\models\Employee;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use common\models\UserCallStatus;
@@ -69,8 +70,8 @@ class UserCallStatusSearch extends UserCallStatus
         }
 
         if(empty($this->us_created_dt) && isset($params['UserCallStatusSearch']['date_range'])){
-            $query->andFilterWhere(['>=', 'us_created_dt', $this->datetime_start])
-                ->andFilterWhere(['<=', 'us_created_dt', $this->datetime_end]);
+            $query->andFilterWhere(['>=', 'us_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->datetime_start))])
+                ->andFilterWhere(['<=', 'us_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->datetime_end))]);
         }
 
         if (isset($params['UserCallStatusSearch']['us_created_dt'])) {

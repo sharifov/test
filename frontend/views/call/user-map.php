@@ -133,9 +133,11 @@ $dtNow = date('Y-m-d H:i:s');
                 <?/*<h1><i class="fa fa-bar-chart"></i> <?=$this->title?></h1>*/?>
 
 
+
+
                 <?php if($dataProviderOnlineDep1):?>
                 <div class="panel panel-default">
-                    <div class="panel-heading"><i class="fa fa-users"></i> OnLine Users - Department SALES (<?=$dataProviderOnlineDep1->totalCount?>)</div>
+                    <div class="panel-heading"><i class="fa fa-users"></i> OnLine - Department SALES (<?=$dataProviderOnlineDep1->totalCount?>)</div>
                     <div class="panel-body">
                         <?= \yii\widgets\ListView::widget([
                             'dataProvider' => $dataProviderOnlineDep1,
@@ -156,7 +158,7 @@ $dtNow = date('Y-m-d H:i:s');
 
                 <?php if($dataProviderOnlineDep2):?>
                 <div class="panel panel-default">
-                    <div class="panel-heading"><i class="fa fa-users"></i> OnLine Users - Department EXCHANGE (<?=$dataProviderOnlineDep2->totalCount?>)</div>
+                    <div class="panel-heading"><i class="fa fa-users"></i> OnLine - Department EXCHANGE (<?=$dataProviderOnlineDep2->totalCount?>)</div>
                     <div class="panel-body">
                         <?= \yii\widgets\ListView::widget([
                             'dataProvider' => $dataProviderOnlineDep2,
@@ -176,7 +178,7 @@ $dtNow = date('Y-m-d H:i:s');
 
                 <?php if($dataProviderOnlineDep3):?>
                 <div class="panel panel-default">
-                    <div class="panel-heading"><i class="fa fa-users"></i> OnLine Users - Department SUPPORT (<?=$dataProviderOnlineDep3->totalCount?>)</div>
+                    <div class="panel-heading"><i class="fa fa-users"></i> OnLine - Department SUPPORT (<?=$dataProviderOnlineDep3->totalCount?>)</div>
                     <div class="panel-body">
                         <?= \yii\widgets\ListView::widget([
                             'dataProvider' => $dataProviderOnlineDep3,
@@ -196,7 +198,7 @@ $dtNow = date('Y-m-d H:i:s');
 
                 <?php if($dataProviderOnline):?>
                 <div class="panel panel-default">
-                    <div class="panel-heading"><i class="fa fa-users"></i> OnLine Users - W/O Department (<?=$dataProviderOnline->totalCount?>)</div>
+<!--                    <div class="panel-heading"><i class="fa fa-users"></i> OnLine Users - W/O Department (--><?//=$dataProviderOnline->totalCount?><!--)</div>-->
                     <div class="panel-body">
                         <?= \yii\widgets\ListView::widget([
                             'dataProvider' => $dataProviderOnline,
@@ -217,6 +219,65 @@ $dtNow = date('Y-m-d H:i:s');
             </div>
 
             <div class="col-md-5">
+                <div class="panel panel-default">
+
+                    <div class="panel-body">
+                        <table class="table table-bordered">
+                            <tr>
+                                <th style="width: 150px">My Role:</th>
+                                <td><?=implode(', ', Yii::$app->user->identity->getRoles())?></td>
+                            </tr>
+                            <tr>
+                                <th>My Departments:</th>
+                                <td><i class="fa fa-users"></i>
+                                    <?php
+                                    $departmentsValue = '';
+                                    $departments = Yii::$app->user->identity->getUserDepartmentList();
+                                    foreach ($departments as $department) {
+                                        echo Html::tag('span', Html::encode($department), ['class' => 'label label-default']) . ' ';
+                                    }
+                                    ?>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>My User Groups:</th>
+                                <td><i class="fa fa-users"></i>
+                                    <?php
+                                    $groupsValue = '';
+                                    if( $groupsModel =  Yii::$app->user->identity->ugsGroups) {
+                                        $groups = \yii\helpers\ArrayHelper::map($groupsModel, 'ug_id', 'ug_name');
+                                        $groupsValueArr = [];
+                                        foreach ($groups as $group) {
+                                            $groupsValueArr[] = Html::tag('span', Html::encode($group), ['class' => 'label label-default']);
+                                        }
+                                        $groupsValue = implode(' ', $groupsValueArr);
+                                    }
+                                    echo $groupsValue;
+                                    ?>
+                                </td>
+                            </tr>
+                            <!-- <tr>
+                                <th>My Project Access:</th>
+                                <td><i class="fa fa-list"></i>
+                                    <?php
+                            /* $projectsValue = '';
+                            $projectList = Yii::$app->user->identity->projects;
+
+                            if($projectList) {
+                                $groupsValueArr = [];
+                                foreach ($projectList as $project) {
+                                    $groupsValueArr[] = Html::tag('span', Html::encode($project->name), ['class' => 'label label-default']);
+                                }
+                                $projectsValue = implode(' ', $groupsValueArr);
+                            }
+                            echo $projectsValue;*/
+                            ?>
+                                </td>
+                            </tr> -->
+                        </table>
+                    </div>
+                </div>
+
                 <div class="panel panel-default">
                     <div class="panel-heading"><i class="fa fa-list"></i> Calls in IVR, QUEUE, RINGING, PROGRESS (Last update: <?=Yii::$app->formatter->asTime(time(), 'php:H:i:s')?>)</div>
                     <div class="panel-body">
@@ -239,7 +300,7 @@ $dtNow = date('Y-m-d H:i:s');
             <div class="col-md-5">
                 <?/*<h1><i class="fa fa-bar-chart"></i> <?=$this->title?></h1>*/?>
                 <div class="panel panel-default">
-                    <div class="panel-heading"><i class="fa fa-list"></i> Last 10 Calls</div>
+                    <div class="panel-heading"><i class="fa fa-list"></i> Last <?=$dataProvider2->count?> ended Calls</div>
                     <div class="panel-body">
                         <?= \yii\widgets\ListView::widget([
                             'dataProvider' => $dataProvider2,

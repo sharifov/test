@@ -254,4 +254,11 @@ class Project extends \yii\db\ActiveRecord
         return implode('.', [md5($md5), $expired, $md5]);
     }
 
+    /**
+     * @return ProjectQuery the active query used by this AR class.
+     */
+    public static function find(): ProjectQuery
+    {
+        return new ProjectQuery(static::class);
+    }
 }

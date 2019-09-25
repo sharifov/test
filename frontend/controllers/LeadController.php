@@ -30,6 +30,7 @@ use frontend\models\LeadForm;
 use frontend\models\LeadPreviewEmailForm;
 use frontend\models\LeadPreviewSmsForm;
 use frontend\models\SendEmailForm;
+use PHPUnit\Framework\Warning;
 use sales\entities\cases\Cases;
 use sales\forms\CompositeFormHelper;
 use sales\forms\lead\ItineraryEditForm;
@@ -793,16 +794,11 @@ class LeadController extends FController
 
                                     $call->c_call_type_id = 1;
                                     $call->c_call_sid = $dataCall['sid'];
-                                    $call->c_account_sid = $dataCall['account_sid'];
 
                                     $call->c_to = $comForm->c_phone_number; //$dataCall['to'];
                                     $call->c_from = $upp->upp_tw_phone_number; //$dataCall['from'];
-                                    $call->c_sip = $userModel->userProfile->up_sip;
                                     $call->c_caller_name = $dataCall['from'];
                                     $call->c_call_status = $dataCall['status'];
-                                    $call->c_api_version = $dataCall['api_version'];
-                                    $call->c_direction = $dataCall['direction'];
-                                    $call->c_uri = $dataCall['uri'];
                                     $call->c_lead_id = $lead->id;
                                     $call->c_project_id = $lead->project_id;
 
@@ -956,7 +952,7 @@ class LeadController extends FController
         $query3 = (new \yii\db\Query())
             ->select(['c_id AS id', new Expression('"voice" AS type'), 'c_lead_id AS lead_id', 'c_created_dt AS created_dt'])
             ->from('call')
-            ->where(['c_lead_id' => $lead->id]);
+            ->where(['c_lead_id' => $lead->id, 'c_parent_id' => null]);
 
 
         $unionQuery = (new \yii\db\Query())
@@ -994,6 +990,9 @@ class LeadController extends FController
             } elseif ($is_supervision) {
                 if ($leadFormEmployee_id = $leadForm->getLead()->employee_id) {
                     $enableCommunication = Employee::isSupervisionAgent($leadFormEmployee_id);
+                }
+                if (!$leadForm->getLead()->isGetOwner()) {
+                    $enableCommunication = true;
                 }
             } elseif ($is_agent) {
                 if ($leadForm->getLead()->employee_id == Yii::$app->user->id) {
@@ -1548,11 +1547,17 @@ class LeadController extends FController
 
         if (Yii::$app->request->isAjax && Yii::$app->request->get('over')) {
             if ($lead->isAvailableToTakeOver()) {
+                if ($activeLeads = $this->leadRepository->getActiveAll($lead->id)) {
+                    $activeLeadIds = ArrayHelper::map($activeLeads, 'id', 'id');
+                } else {
+                    $activeLeadIds = [];
+                }
                 $reason = new Reason();
                 $reason->queue = 'processing-over';
                 return $this->renderAjax('partial/_reason', [
                     'reason' => $reason,
-                    'lead' => $lead
+                    'lead' => $lead,
+                    'activeLeadIds' => $activeLeadIds
                 ]);
             }
             Yii::$app->getSession()->setFlash('warning', 'Lead is unavailable to "Take Over" now!');
@@ -2153,6 +2158,7 @@ class LeadController extends FController
             } catch (\Throwable $e) {
                 Yii::$app->errorHandler->logException($e);
                 Yii::$app->session->setFlash('error', $e->getMessage());
+                return $this->redirect(['/lead/create']);
             }
         }
         return $this->render('create', ['leadForm' => $form]);
@@ -2182,6 +2188,7 @@ class LeadController extends FController
             } catch (\Throwable $e) {
                 Yii::$app->errorHandler->logException($e);
                 Yii::$app->session->setFlash('error', $e->getMessage());
+                return $this->redirect(['/lead/create-case', 'case_gid' => $case->cs_gid]);
             }
         }
         return $this->render('create', ['leadForm' => $form]);
@@ -2495,6 +2502,28 @@ class LeadController extends FController
         }
         return null;
     }
+
+	/**
+	 * @throws BadRequestHttpException
+	 */
+	public function actionCheckPercentageOfSplitValidation()
+	{
+		if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
+			Yii::$app->response->format = Response::FORMAT_JSON;
+			$data = Yii::$app->request->post();
+			$lead = Lead::findOne(['id' => $data['leadId'] ?? null]);
+
+			if ($lead) {
+				$splitForm = new ProfitSplitForm($lead);
+				$splitForm->setScenario(ProfitSplitForm::SCENARIO_CHECK_PERCENTAGE);
+
+				$load = $splitForm->loadModels($data);
+				return ActiveForm::validate($splitForm)['profitsplitform-warnings'][0] ?? null;
+			}
+		}
+
+		throw new BadRequestHttpException();
+	}
 
     public function actionSplitTips($id)
     {

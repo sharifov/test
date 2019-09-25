@@ -1,12 +1,10 @@
 <?php
 
+use sales\ui\user\ListsAccess;
 use yii\helpers\Html;
 use yii\widgets\Pjax;
 use kartik\grid\GridView;
 use common\models\Lead;
-use common\models\Quote;
-use yii\helpers\Url;
-use common\models\Airport;
 use dosamigos\datepicker\DatePicker;
 
 /* @var $this yii\web\View */
@@ -15,8 +13,7 @@ use dosamigos\datepicker\DatePicker;
 
 $this->title = 'QA Sold Queue';
 
-$userList = \common\models\Employee::getList();
-$projectList = \common\models\Project::getList();
+$lists = new ListsAccess(Yii::$app->user->id);
 
 $this->params['breadcrumbs'][] = $this->title;
 
@@ -64,7 +61,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'options' => [
                 'style' => 'width:120px'
             ],
-            'filter' => $projectList,
+            'filter' => $lists->getProjects(),
         ],
 
         [
@@ -123,7 +120,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'value' => function (\common\models\Lead $model) {
                 return $model->employee ? '<i class="fa fa-user"></i> ' . $model->employee->username : '-';
             },
-            'filter' => $userList,
+            'filter' => $lists->getEmployees(),
         ],
         [
             'label' => 'Date of Issue',

@@ -1,15 +1,4 @@
-﻿/*div#controls button {
-  width: 15em;
-  height: 2.5em;
-  margin-top: 1.75em;
-  border-radius: 1em;
-  font-family: "Helvetica Light", Helvetica, sans-serif;
-  font-size: .8em;
-  font-weight: lighter;
-  outline: 0;
-}*/
-
-#web-phone-widget {
+﻿#web-phone-widget {
   position: fixed;
   width: 100%;
   max-width: 800px;
@@ -22,15 +11,15 @@
   z-index: 999;
   display: none;
   /*height: 600px;*/
-  background-color: rgba(255, 255, 255, 0.7);
+  background-color: rgba(255, 255, 255, .3);
   border-radius: 8px;
   /*margin-left: -50px;*/
   /*margin-left: calc(100% - calc(width / 2));*/
-
-
-
 }
 
+#controls {
+  display: none;
+}
 
 div#call-controls {
   display: none;
@@ -39,7 +28,6 @@ div#call-controls {
 div#call-controls2 {
   display: none;
 }
-
 
 div#call-controls input {
   font-family: Helvetica-LightOblique, Helvetica, sans-serif;
@@ -50,7 +38,6 @@ div#call-controls input {
   padding: .5em;
   display: block;
 }
-
 
 /*button#button-hangup {
   display: none;
@@ -119,4 +106,40 @@ div#call-controls input {
   -webkit-transition: all .2s ease-out;
   -webkit-transition: all .2s ease-in-out;
   transition: all .2s ease-in-out;
+}
+
+.digit,
+.dig {
+  float: left;
+  padding: 10px 30px;
+  width: 30px;
+  font-size: 2rem;
+  cursor: pointer;
+}
+
+#output {
+  font-family: Helvetica-LightOblique, Helvetica, sans-serif;
+  font-size: 2rem;
+  height: 30px;
+  font-weight: bold;
+  color: #292726;
+  background-color: #d2d4e3;
+  padding: 0 2px 0 2px;
+}
+.digit:active,
+.dig:active {
+  background-color: #e6e6e6;
+}
+
+.dig {
+  float: left;
+  padding: 10px 20px;
+  margin: 10px;
+  width: 30px;
+  cursor: pointer;
+}
+.container-digit {
+  border: solid 1px #0d3349;
+  max-width: 200px;
+  padding: 5px;
 }

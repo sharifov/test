@@ -5,7 +5,7 @@ namespace common\models;
 use borales\extensions\phoneInput\PhoneInput;
 use borales\extensions\phoneInput\PhoneInputValidator;
 use common\components\BackOffice;
-use frontend\controllers\UserGroupAssignController;
+use sales\access\EmployeeGroupAccess;
 use Yii;
 use yii\base\NotSupportedException;
 use yii\behaviors\TimestampBehavior;
@@ -37,6 +37,8 @@ use yii\web\NotFoundHttpException;
  * @property array $roles_raw
  * @property array $rolesName
  * @property array $form_roles
+ * @property array $departmentAccess
+ * @property array $projectAccess
  *
  * @property Lead[] $leads
  * @property Department[] $departments
@@ -105,6 +107,52 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     private $_isAllowCallExpert;
     private $_callExpertCountByShiftTime;
 
+    private $departmentAccess = [];
+    private $projectAccess = [];
+
+    /**
+     * @param string $hash
+     * @return array|null
+     */
+    public function getProjectAccess(string $hash):? array
+    {
+        if (isset($this->projectAccess['data']) && !empty($this->projectAccess['hash']) && $hash === $this->projectAccess['hash']) {
+            return $this->projectAccess['data'];
+        }
+        return null;
+    }
+
+    /**
+     * @param array $data
+     * @param string $hash
+     */
+    public function setProjectAccess(array $data, string $hash): void
+    {
+        $this->projectAccess['data'] = $data;
+        $this->projectAccess['hash'] = $hash;
+    }
+
+    /**
+     * @param string $hash
+     * @return array|null
+     */
+    public function getDepartmentAccess(string $hash):? array
+    {
+        if (isset($this->departmentAccess['data']) && !empty($this->departmentAccess['hash']) && $hash === $this->departmentAccess['hash']) {
+            return $this->departmentAccess['data'];
+        }
+        return null;
+    }
+
+    /**
+     * @param array $data
+     * @param string $hash
+     */
+    public function setDepartmentAccess(array $data, string $hash): void
+    {
+        $this->departmentAccess['data'] = $data;
+        $this->departmentAccess['hash'] = $hash;
+    }
 
     /**
      * @return bool
@@ -162,12 +210,38 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         return in_array(self::ROLE_AGENT, $this->getRoles(true), true);
     }
 
+    public function isSimpleAgent(): bool
+	{
+		return !$this->canRoles([
+			self::ROLE_SUPER_ADMIN,
+			self::ROLE_ADMIN,
+			self::ROLE_SUP_SUPER,
+			self::ROLE_EX_SUPER
+		]);
+	}
+
+    /**
+     * @return bool
+     */
+    public function isAnyAgent(): bool
+    {
+        return $this->isAgent() || $this->isExAgent() || $this->isSupAgent();
+    }
+
     /**
      * @return bool
      */
     public function isSupervision(): bool
     {
         return in_array(self::ROLE_SUPERVISION, $this->getRoles(true), true);
+    }
+
+    /**
+     * @return bool
+     */
+    public function isAnySupervision(): bool
+    {
+        return $this->isSupervision() || $this->isExSuper() || $this->isSupSuper();
     }
 
     /**
@@ -828,8 +902,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
      */
     public static function getList(): array
     {
-        $data = self::find()->orderBy(['username' => SORT_ASC])->asArray()->all();
-        return ArrayHelper::map($data, 'id', 'username');
+        return self::find()->select(['username', 'id'])->orderBy(['username' => SORT_ASC])->indexBy('id')->asArray()->column();
     }
 
     /**
@@ -841,23 +914,38 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         return ArrayHelper::map($data, 'id', 'username');
     }
 
-
     /**
-     * @param int|null $user_id
+     * @param int $userId
      * @return array
      */
-    public static function getListByUserId(int $user_id = null): array
+    public static function getListByUserId(int $userId): array
     {
-        $subQuery1 = UserGroupAssign::find()->select(['ugs_group_id'])->where(['ugs_user_id' => $user_id]);
-        $subQuery = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->where(['IN', 'ugs_group_id', $subQuery1]);
-
-        $query = self::find()->orderBy(['username' => SORT_ASC])->asArray();
-        $query->andWhere(['IN', 'employees.id', $subQuery]);
-
-        $data = $query->all();
-        return ArrayHelper::map($data, 'id', 'username');
+        return self::find()->select(['username', 'id'])
+            ->andWhere(['id' => EmployeeGroupAccess::usersIdsInCommonGroupsSubQuery($userId)])
+            ->orderBy(['username' => SORT_ASC])->asArray()->indexBy('id')->column();
     }
 
+    /**
+     * @return array
+     */
+    public static function getActiveUsersList(): array
+    {
+        return self::find()->select(['username', 'id', 'status'])
+            ->active()
+            ->orderBy(['username' => SORT_ASC])
+            ->indexBy('id')->asArray()->column();
+    }
+
+    /**
+     * @param int $userId
+     * @return array
+     */
+    public static function getActiveUsersListFromCommonGroups(int $userId): array
+    {
+        return self::find()->select(['username', 'id', 'status'])->active()
+            ->andWhere(['id' => EmployeeGroupAccess::usersIdsInCommonGroupsSubQuery($userId)])
+            ->orderBy(['username' => SORT_ASC])->asArray()->indexBy('id')->column();
+    }
 
     /**
      * @return array
@@ -1021,17 +1109,13 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     /**
      * @return string
      */
-    public function getLastTakenLeadDt():string
+    public function getLastTakenLeadDt(): string
     {
-        $leadFlow = LeadFlow::find()
-            ->where(['employee_id' => $this->id])
-            ->andWhere(['status' => 2, 'lf_from_status_id' => 1])
-            ->orderBy(['created' => SORT_DESC])
-            ->one();
-
-        return ($leadFlow)?$leadFlow->created:'';
+        if ($leadFlow = LeadFlow::find()->lastTakenByUserId($this->id)->one()) {
+            return $leadFlow['created'];
+        }
+        return '';
     }
-
 
     /**
      * @param string|null $start_dt
@@ -1505,6 +1589,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
 
     /**
      * @return array
+     * @throws \Exception
      */
     public function accessTakeLeadByFrequencyMinutes(): array
     {
@@ -1512,29 +1597,25 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         $takeDt = new \DateTime();
         $timeZone = $this->userParams->up_timezone ?: 'UTC';
 
-        $params = $this->userParams;
-        if($params){
-            if($params->up_frequency_minutes){
-                $lastTakenDt = $this->getLastTakenLeadDt();
+        if (
+            ($params = $this->userParams)
+            && ($frequencyMinutes = $params->up_frequency_minutes)
+            && ($lastTakenDt = $this->getLastTakenLeadDt())
+        ) {
 
-                if(!empty($lastTakenDt)){
-                    $lastTakenUTC = new \DateTime($lastTakenDt);
-                    $lastTakenUTC->setTimezone(new \DateTimeZone('UTC'));
+            $lastTakenUTC = new \DateTime($lastTakenDt);
+            $lastTakenUTC->setTimezone(new \DateTimeZone('UTC'));
 
-                    $nowUTC = new \DateTime();
-                    $nowUTC->setTimezone(new \DateTimeZone('UTC'));
+            $nowUTC = new \DateTime();
+            $nowUTC->setTimezone(new \DateTimeZone('UTC'));
 
-                    $frequencyMinutes = $params->up_frequency_minutes;
+            $nextTakeUTC = $lastTakenUTC->add(new \DateInterval('PT' . $frequencyMinutes . 'M'));
 
-                    $nextTakeUTC = $lastTakenUTC->add(new \DateInterval('PT' . $frequencyMinutes . 'M'));
-
-                    if($nextTakeUTC > $nowUTC){
-                        $access = false;
-                        $takeDt = $nextTakeUTC;
-                    }
-
-                }
+            if ($nextTakeUTC > $nowUTC) {
+                $access = false;
+                $takeDt = $nextTakeUTC;
             }
+
         }
 
         $takeDt->setTimezone(new \DateTimeZone($timeZone));
@@ -1599,83 +1680,14 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     public function isCallFree() : bool
     {
         $isFree = true;
-        //$call = Call::find()->where(['c_created_user_id' => $this->id])->orderBy(['c_id' => SORT_DESC])->limit(1)->one();
-
-        $callExist = Call::find()->where(['c_created_user_id' => $this->id, 'c_call_status' => [Call::CALL_STATUS_RINGING, Call::CALL_STATUS_IN_PROGRESS]])->limit(1)->exists(); //Call::CALL_STATUS_QUEUE,
+        $callExist = Call::find()->where(['c_created_user_id' => $this->id, 'c_status_id' => [Call::STATUS_RINGING, Call::STATUS_IN_PROGRESS]])->limit(1)->exists(); //Call::CALL_STATUS_QUEUE, andWhere(['<>', 'c_parent_id', null])
 
         if($callExist) {
-            //if(in_array($call->c_call_type_id, [Call::CALL_STATUS_QUEUE, Call::CALL_STATUS_RINGING, Call::CALL_STATUS_IN_PROGRESS])) {
             $isFree = false;
-            //}
         }
         return $isFree;
     }
 
-
-    /**
-     * @param int $user_id
-     * @param int $project_id
-     * @param int $hours
-     * @return UserConnectionQuery
-     */
-    public static function getQueryAgentOnlineStatus(int $user_id, int $project_id = 0, int $hours = 1) : UserConnectionQuery
-    {
-        $query = UserConnection::find();
-        $date_time = date('Y-m-d H:i:s', strtotime('-' . $hours .' hours'));
-
-        $subQuery2 = UserCallStatus::find()->select(['us_type_id'])->where('us_user_id = user_connection.uc_user_id')->orderBy(['us_id' => SORT_DESC])->limit(1);
-        $subQuery3 = Call::find()->select(['c_call_status'])->where('c_created_user_id = user_connection.uc_user_id')->orderBy(['c_id' => SORT_DESC])->limit(1);
-        //$subQuery4 = UserProjectParams::find()->select(['upp_tw_sip_id'])->where('upp_user_id = user_connection.uc_user_id')->andWhere(['upp_project_id' => $project_id]);
-        $subQuery4 = UserProfile::find()->select(['up_call_type_id'])->where('up_user_id = user_connection.uc_user_id');
-        $subQuery6 = UserProjectParams::find()->select(['upp_tw_phone_number'])->where('upp_user_id = user_connection.uc_user_id')->andWhere(['upp_project_id' => $project_id]);
-
-
-
-        $subQuery5 = Call::find()->select(['COUNT(*)'])->where('c_created_user_id = user_connection.uc_user_id')->andWhere(['c_call_type_id' => Call::CALL_TYPE_IN])->andWhere(['>=', 'c_created_dt', $date_time]);
-
-        $query->select([
-                'tbl_user_id' => 'user_connection.uc_user_id',
-                'tbl_call_status_id' => $subQuery2,
-                'tbl_last_call_status' => $subQuery3,
-                'tbl_call_type_id' => $subQuery4,
-                'tbl_phone' => $subQuery6,
-                'tbl_calls_count' => $subQuery5
-            ]
-        );
-
-        $subQuery1 = UserGroupAssign::find()->select(['ugs_group_id'])->where(['ugs_user_id' => $user_id]);
-        $subQuery = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->where(['IN', 'ugs_group_id', $subQuery1]);
-        $query->andWhere(['IN', 'user_connection.uc_user_id', $subQuery]);
-        $query->groupBy(['user_connection.uc_user_id']);
-        $query->orderBy(['tbl_calls_count' => SORT_ASC]);
-
-        return $query;
-    }
-
-    /**
-     * @param int $user_id
-     * @param int $project_id
-     * @return array
-     */
-    public static function getAgentsForCall(int $user_id, int $project_id) : array
-    {
-
-        $subQuery = self::getQueryAgentOnlineStatus($user_id, $project_id, 10);
-        $generalQuery = new Query();
-        $generalQuery->from(['tbl' => $subQuery]);
-        //$generalQuery->andWhere(['<>', 'tbl_user_id', $user_id]);
-        $generalQuery->andWhere(['OR', ['NOT IN', 'tbl_last_call_status', [Call::CALL_STATUS_RINGING, Call::CALL_STATUS_IN_PROGRESS]], ['tbl_last_call_status' => null]]);
-        $generalQuery->andWhere(['OR', ['tbl_call_status_id' => UserCallStatus::STATUS_TYPE_READY], ['tbl_call_status_id' => null]]);
-        $generalQuery->andWhere(['AND', ['<>', 'tbl_call_type_id', UserProfile::CALL_TYPE_OFF], ['IS NOT', 'tbl_call_type_id', null]]);
-        $generalQuery->orderBy(['tbl_calls_count' => SORT_ASC]);
-
-        //$sqlRaw = $generalQuery->createCommand()->getRawSql();
-        //echo $sqlRaw;
-        //VarDumper::dump($sqlRaw, 10, true);
-        //exit;
-        $users = $generalQuery->all();
-        return $users;
-    }
 
 
     /**
@@ -1708,12 +1720,12 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         $date_time = date('Y-m-d H:i:s', strtotime('-' . $hours .' hours'));
 
         $subQuery2 = UserCallStatus::find()->select(['us_type_id'])->where('us_user_id = user_connection.uc_user_id')->orderBy(['us_id' => SORT_DESC])->limit(1);
-        $subQuery3 = Call::find()->select(['c_call_status'])->where('c_created_user_id = user_connection.uc_user_id')->orderBy(['c_id' => SORT_DESC])->limit(1);
+        $subQuery3 = Call::find()->select(['c_status_id'])->where('c_created_user_id = user_connection.uc_user_id')->orderBy(['c_id' => SORT_DESC])->limit(1);
         $subQuery4 = UserProfile::find()->select(['up_call_type_id'])->where('up_user_id = user_connection.uc_user_id');
         $subQuery5 = Call::find()->select(['COUNT(*)'])
             ->where('c_created_user_id = user_connection.uc_user_id')
             ->andWhere(['c_call_type_id' => Call::CALL_TYPE_IN])
-            ->andWhere(['c_call_status' => Call::CALL_STATUS_COMPLETED])
+            ->andWhere(['c_status_id' => Call::STATUS_COMPLETED])
             ->andWhere(['c_project_id' => $project_id])
             ->andWhere(['>=', 'c_created_dt', $date_time]);
         if($called_phone != '') {
@@ -1723,7 +1735,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         $query->select([
                 'tbl_user_id' => 'user_connection.uc_user_id',
                 'tbl_call_status_id' => $subQuery2,
-                'tbl_last_call_status' => $subQuery3,
+                'tbl_last_status_id' => $subQuery3,
                 'tbl_call_type_id' => $subQuery4,
                 'tbl_calls_count' => $subQuery5,
             ]
@@ -1736,7 +1748,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
 
         $generalQuery = new Query();
         $generalQuery->from(['tbl' => $query]);
-        $generalQuery->andWhere(['OR', ['NOT IN', 'tbl_last_call_status', [Call::CALL_STATUS_RINGING, Call::CALL_STATUS_IN_PROGRESS]], ['tbl_last_call_status' => null]]);
+        $generalQuery->andWhere(['OR', ['NOT IN', 'tbl_last_status_id', [Call::STATUS_RINGING, Call::STATUS_IN_PROGRESS]], ['tbl_last_status_id' => null]]);
         $generalQuery->andWhere(['OR', ['tbl_call_status_id' => UserCallStatus::STATUS_TYPE_READY], ['tbl_call_status_id' => null]]);
         $generalQuery->andWhere(['AND', ['<>', 'tbl_call_type_id', UserProfile::CALL_TYPE_OFF], ['IS NOT', 'tbl_call_type_id', null]]);
         $generalQuery->orderBy(['tbl_calls_count' => SORT_ASC]);
@@ -1750,12 +1762,12 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
 
 
     /**
-     * @param int $project_id
-     * @param int|null $department_id
+     * @param Call $call
      * @return array
      */
-    public static function getUsersForRedirectCall(int $project_id, ?int $department_id = null): array
+    public static function getUsersForRedirectCall(Call $call): array
     {
+
         $query = UserConnection::find();
         $subQuery1 = UserProfile::find()->select(['up_call_type_id'])->where('up_user_id = user_connection.uc_user_id');
 
@@ -1764,12 +1776,12 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
             'tbl_call_type_id' => $subQuery1
         ]);
 
-        $subQuery = ProjectEmployeeAccess::find()->select(['DISTINCT(employee_id)'])->where(['project_id' => $project_id]);
+        $subQuery = ProjectEmployeeAccess::find()->select(['DISTINCT(employee_id)'])->where(['project_id' => $call->c_project_id]);
         $query->andWhere(['IN', 'user_connection.uc_user_id', $subQuery]);
         $query->groupBy(['user_connection.uc_user_id']);
 
-        if ($department_id) {
-            $subQueryUd = UserDepartment::find()->usersByDep($department_id);
+        if ($call->c_dep_id) {
+            $subQueryUd = UserDepartment::find()->usersByDep($call->c_dep_id);
             $query->andWhere(['IN', 'user_connection.uc_user_id', $subQueryUd]);
         }
 
@@ -1782,7 +1794,6 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         $users = $generalQuery->all();
         return $users;
     }
-
 
     /**
      * @param Call $call
@@ -1802,12 +1813,12 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         $date_time = date('Y-m-d H:i:s', strtotime('-' . $hours .' hours'));
 
         $subQuery2 = UserCallStatus::find()->select(['us_type_id'])->where('us_user_id = user_connection.uc_user_id')->orderBy(['us_id' => SORT_DESC])->limit(1);
-        $subQuery3 = Call::find()->select(['c_call_status'])->where('c_created_user_id = user_connection.uc_user_id')->orderBy(['c_id' => SORT_DESC])->limit(1);
+        $subQuery3 = Call::find()->select(['c_status_id'])->where('c_created_user_id = user_connection.uc_user_id')->orderBy(['c_id' => SORT_DESC])->limit(1);
         $subQuery4 = UserProfile::find()->select(['up_call_type_id'])->where('up_user_id = user_connection.uc_user_id');
         $subQuery5 = Call::find()->select(['COUNT(*)'])
             ->where('c_created_user_id = user_connection.uc_user_id')
             ->andWhere(['c_call_type_id' => Call::CALL_TYPE_IN])
-            ->andWhere(['c_call_status' => Call::CALL_STATUS_COMPLETED])
+            ->andWhere(['c_status_id' => Call::STATUS_COMPLETED])
             ->andWhere(['c_project_id' => $project_id])
             ->andWhere(['>=', 'c_created_dt', $date_time]);
 
@@ -1815,7 +1826,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         $query->select([
                 'tbl_user_id' => 'user_connection.uc_user_id',
                 'tbl_call_status_id' => $subQuery2,
-                'tbl_last_call_status' => $subQuery3,
+                'tbl_last_status_id' => $subQuery3,
                 'tbl_call_type_id' => $subQuery4,
                 'tbl_calls_count' => $subQuery5,
             ]
@@ -1853,7 +1864,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
 
         $generalQuery = new Query();
         $generalQuery->from(['tbl' => $query]);
-        $generalQuery->andWhere(['OR', ['NOT IN', 'tbl_last_call_status', [Call::CALL_STATUS_RINGING, Call::CALL_STATUS_IN_PROGRESS]], ['tbl_last_call_status' => null]]);
+        $generalQuery->andWhere(['OR', ['NOT IN', 'tbl_last_status_id', [Call::STATUS_RINGING, Call::STATUS_IN_PROGRESS]], ['tbl_last_status_id' => null]]);
         $generalQuery->andWhere(['OR', ['tbl_call_status_id' => UserCallStatus::STATUS_TYPE_READY], ['tbl_call_status_id' => null]]);
         $generalQuery->andWhere(['AND', ['=', 'tbl_call_type_id', UserProfile::CALL_TYPE_WEB], ['IS NOT', 'tbl_call_type_id', null]]);
         $generalQuery->orderBy(['tbl_calls_count' => SORT_ASC]);
@@ -1874,7 +1885,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
      * @return string
      * @throws \Exception
      */
-    public static function convertDtTimezone(int $time): string
+    public static function convertTimeFromUserDtToUTC(int $time): string
     {
         $dateTime = '';
 
@@ -1894,5 +1905,13 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         }
 
         return $dateTime;
+    }
+
+    /**
+     * @return EmployeeQuery
+     */
+    public static function find(): EmployeeQuery
+    {
+        return new EmployeeQuery(get_called_class());
     }
 }

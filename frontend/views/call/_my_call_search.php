@@ -46,21 +46,13 @@ use \kartik\form\ActiveForm;
 
     <?= $form->field($model, 'c_call_sid') ?>
 
-    <?= $form->field($model, 'c_account_sid') ?>
-
     <?= $form->field($model, 'c_call_type_id') ?>
 
     <?= $form->field($model, 'c_from')*/ ?>
 
     <?php // echo $form->field($model, 'c_to') ?>
 
-    <?php // echo $form->field($model, 'c_sip') ?>
-
     <?php // echo $form->field($model, 'c_call_status') ?>
-
-    <?php // echo $form->field($model, 'c_api_version') ?>
-
-    <?php // echo $form->field($model, 'c_direction') ?>
 
     <?php // echo $form->field($model, 'c_forwarded_from') ?>
 
@@ -70,17 +62,9 @@ use \kartik\form\ActiveForm;
 
     <?php // echo $form->field($model, 'c_call_duration') ?>
 
-    <?php // echo $form->field($model, 'c_sip_response_code') ?>
-
     <?php // echo $form->field($model, 'c_recording_url') ?>
 
-    <?php // echo $form->field($model, 'c_recording_sid') ?>
-
     <?php // echo $form->field($model, 'c_recording_duration') ?>
-
-    <?php // echo $form->field($model, 'c_timestamp') ?>
-
-    <?php // echo $form->field($model, 'c_uri') ?>
 
     <?php // echo $form->field($model, 'c_sequence_number') ?>
 
@@ -143,7 +127,7 @@ use \kartik\form\ActiveForm;
             <?php echo $form->field($model, 'c_project_id')->dropDownList(\common\models\Project::getListByUser(Yii::$app->user->id), ['prompt' => '-']) ?>
         </div>
         <div class="col-md-2">
-            <?php echo $form->field($model, 'c_call_status')->dropDownList(\common\models\Call::CALL_STATUS_LIST, ['prompt' => '-']) ?>
+            <?php echo $form->field($model, 'c_status_id')->dropDownList(\common\models\Call::STATUS_LIST, ['prompt' => '-']) ?>
         </div>
         <div class="col-md-2">
             <?php echo $form->field($model, 'c_call_type_id')->dropDownList(\common\models\Call::CALL_TYPE_LIST, ['prompt' => '-']) ?>

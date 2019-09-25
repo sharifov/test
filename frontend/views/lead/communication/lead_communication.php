@@ -618,6 +618,22 @@ JS;
 
 
 <?php
+\yii\bootstrap\Modal::begin([
+    'header' => '<b>Call Recording</b>',
+    // 'toggleButton' => ['label' => 'click me'],
+    'id' => 'modalCallRecording',
+    'size' => \yii\bootstrap\Modal::SIZE_LARGE,
+]);
+?>
+    <div class="row">
+        <div class="col-md-12" id="audio_recording">
+
+        </div>
+    </div>
+<?php \yii\bootstrap\Modal::end(); ?>
+
+
+<?php
     $currentUrl = \yii\helpers\Url::current();
     $jsPath = Yii::$app->request->baseUrl.'/js/sounds/';
 ?>
@@ -626,7 +642,7 @@ JS;
     const currentUrl = '<?=$currentUrl?>';
 
     function updateCommunication() {
-        $.pjax.reload({url: currentUrl, container: '#pjax-lead-communication', push: false, replace: false, timeout: 6000});
+        $.pjax.reload({url: currentUrl, container: '#pjax-lead-communication', push: false, replace: false, timeout: 6000, async: false});
     }
 
     function stopCall(duration) {
@@ -815,6 +831,16 @@ $js = <<<JS
         $('[data-toggle="popover"]').not(this).popover('hide');
     });*/
 
+     $(document).on('click', '.btn-recording_url', function() {
+         var source_src = $(this).data('source_src');
+         $('#audio_recording').html('<audio controls="controls" controlsList="nodownload" autoplay="true" id="audio_controls" style="width: 100%;"><source src="'+ source_src +'" type="audio/mpeg"></audio>');
+         $('#modalCallRecording').modal('show');
+    });
+    
+    $('#modalCallRecording').on('hidden.bs.modal', function () {
+        $('#audio_recording').html('');
+    });
+    
 JS;
 
 $this->registerJs($js);

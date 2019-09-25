@@ -89,6 +89,81 @@ $previewEmailUrl = \yii\helpers\Url::to(['quote/preview-send-quotes']);
 $leadId = $leadForm->getLead()->id;?>
 
 <?php
+
+// Menu details
+
+$js = <<<JS
+$(document).on('click','.btn-quote-details', function (e) {
+        e.preventDefault();
+        var url = $(this).data('url');
+        var modal = $('#modal-info-d');
+        modal.find('.modal-header h2').text($(this).data('title'));
+        modal.find('.modal-body').html('');
+        $('#preloader').removeClass('hidden');
+        modal.find('.modal-body').load(url, function( response, status, xhr ) {
+            $('#preloader').addClass('hidden');
+            modal.modal('show');
+        });
+    });
+JS;
+$this->registerJs($js);
+
+// Menu status log
+
+$js = <<<JS
+ $(document).on('click', '.view-status-log', function(e){
+        e.preventDefault();
+        $('#preloader').removeClass('hidden');
+        var editBlock = $('#get-quote-status-log');
+        editBlock.find('.modal-body').html('');
+        var id = $(this).attr('data-id');
+        editBlock.find('.modal-body').load('$statusLogUrl?quoteId='+id, function( response, status, xhr ) {
+            $('#preloader').addClass('hidden');
+            editBlock.modal('show');
+        });
+    });
+JS;
+$this->registerJs($js);
+
+//Menu esc for Reservation dump
+
+$js = <<<JS
+ $(document).keyup(function (event) {
+        if (event.which === 27) {
+            $('.popover-class').popover('hide');
+        }
+    });
+JS;
+$this->registerJs($js);
+
+// Menu clone
+if ($leadForm->getLead()->isProcessing()) {
+    if ($is_manager || $leadForm->getLead()->isOwner(Yii::$app->user->id)) {
+        $js = <<<JS
+ $(document).on('click','.add-clone-alt-quote', function (e) {
+        e.preventDefault();
+        var url = $(this).data('url');
+        var uid = $(this).data('uid');
+        var editBlock = $('#create-quote');
+        if (uid != 0) {
+            editBlock.find('.modal-title').html('Clone quote #' + uid);
+        } else {
+             editBlock.find('.modal-title').html('Add quote');
+        }
+        editBlock.find('.modal-body').html('');
+        editBlock.find('.modal-body').load(url, function( response, status, xhr ) {
+            $('#cancel-alt-quote').attr('data-type', 'direct');
+            editBlock.modal({
+              backdrop: 'static',
+              show: true
+            });
+        });
+    });
+JS;
+        $this->registerJs($js);
+    }
+}
+
 if ($leadForm->mode !== $leadForm::VIEW_MODE || $is_manager) {
     $js = <<<JS
 
@@ -124,19 +199,7 @@ if ($leadForm->mode !== $leadForm::VIEW_MODE || $is_manager) {
             }
         });
     });
-
-    $(document).on('click', '.view-status-log', function(e){
-        e.preventDefault();
-        $('#preloader').removeClass('hidden');
-        var editBlock = $('#get-quote-status-log');
-        editBlock.find('.modal-body').html('');
-        var id = $(this).attr('data-id');
-        editBlock.find('.modal-body').load('$statusLogUrl?quoteId='+id, function( response, status, xhr ) {
-            $('#preloader').addClass('hidden');
-            editBlock.modal('show');
-        });
-    });
-
+    
     $('#btn-declined-quotes').on('click', function() {
         var quotes = Array();
         $('.quotes-uid:checked').each(function(idx, elm){
@@ -163,7 +226,6 @@ if ($leadForm->mode !== $leadForm::VIEW_MODE || $is_manager) {
         });
     });
     
-    
     $(document).on('click','.quote_details__btn', function (e) {
         e.preventDefault();
         var modal = $('#flight-details__modal');
@@ -180,47 +242,7 @@ if ($leadForm->mode !== $leadForm::VIEW_MODE || $is_manager) {
             $(this).parents('.quote').removeClass("quote--selected");
         }
     });
-    
-    
-     /***  Add/Clone quote  ***/
-    $(document).on('click','.add-clone-alt-quote', function (e) {
-        e.preventDefault();
-        var url = $(this).data('url');
-        var uid = $(this).data('uid');
-        var editBlock = $('#create-quote');
-        if (uid != 0) {
-            editBlock.find('.modal-title').html('Clone quote #' + uid);
-        } else {
-             editBlock.find('.modal-title').html('Add quote');
-        }
-        editBlock.find('.modal-body').html('');
-        editBlock.find('.modal-body').load(url, function( response, status, xhr ) {
-            $('#cancel-alt-quote').attr('data-type', 'direct');
-            editBlock.modal({
-              backdrop: 'static',
-              show: true
-            });
-        });
-    });
-    
-    $(document).on('click','.btn-quote-details', function (e) {
-        e.preventDefault();
-        var url = $(this).data('url');
-        var modal = $('#modal-info-d');
-        modal.find('.modal-header h2').text($(this).data('title'));
-        modal.find('.modal-body').html('');
-        $('#preloader').removeClass('hidden');
-        modal.find('.modal-body').load(url, function( response, status, xhr ) {
-            $('#preloader').addClass('hidden');
-            modal.modal('show');
-        });
-    });
-    
-     $(document).keyup(function (event) {
-        if (event.which === 27) {
-            $('.popover-class').popover('hide');
-        }
-     });
+
 JS;
     $this->registerJs($js);
 }

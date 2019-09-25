@@ -1,6 +1,8 @@
 <?php
 
 use dosamigos\datepicker\DatePicker;
+use sales\access\EmployeeProjectAccess;
+use sales\ui\user\ListsAccess;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 use yii\widgets\Pjax;
@@ -13,13 +15,7 @@ use common\models\Lead;
 
 $this->title = 'Trash Queue';
 
-if ($user->isAdmin()) {
-    $userList = \common\models\Employee::getList();
-    $projectList = \common\models\Project::getList();
-} else {
-    $userList = \common\models\Employee::getListByUserId($user->id);
-    $projectList = \common\models\ProjectEmployeeAccess::getProjectsByEmployee($user->id);
-}
+$lists = new ListsAccess(Yii::$app->user->id);
 
 $this->params['breadcrumbs'][] = $this->title;
 ?>
@@ -97,7 +93,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'options' => [
                 'style' => 'width:120px'
             ],
-            'filter' => $projectList,
+            'filter' => $lists->getProjects(),
         ],
         [
             'attribute' => 'pending',
@@ -114,6 +110,31 @@ $this->params['breadcrumbs'][] = $this->title;
             'filter' => DatePicker::widget([
                 'model' => $searchModel,
                 'attribute' => 'created',
+                'clientOptions' => [
+                    'autoclose' => true,
+                    'format' => 'yyyy-mm-dd',
+                ],
+                'options' => [
+                    'autocomplete' => 'off'
+                ],
+            ]),
+        ],
+
+        [
+            'attribute' => 'update',
+            'label' => 'Trash Date',
+            'value' => function (\common\models\Lead $model) {
+                $str = Yii::$app->formatter->asRelativeTime(strtotime($model->updated));
+                $str .= $model->updated ? '<br><i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->updated), 'php: Y-m-d [H:i:s]')  : '-';
+                return $str;
+            },
+            'options' => [
+                'style' => 'width:160px'
+            ],
+            'format' => 'raw',
+            'filter' => DatePicker::widget([
+                'model' => $searchModel,
+                'attribute' => 'updated',
                 'clientOptions' => [
                     'autoclose' => true,
                     'format' => 'yyyy-mm-dd',
@@ -275,7 +296,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'value' => function (\common\models\Lead $model) {
                 return $model->employee ? '<i class="fa fa-user"></i> ' . $model->employee->username : '-';
             },
-            'filter' => $userList,
+            'filter' => $lists->getEmployees(),
         ],
         /*[
             'attribute' => 'update',

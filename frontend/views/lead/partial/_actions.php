@@ -455,7 +455,7 @@ if (!$leadForm->getLead()->isNewRecord) {
         $leadForm->getLead()->status == Lead::STATUS_PROCESSING &&
         $leadForm->getLead()->getAppliedAlternativeQuotes() === null
         );
-    $unSnoozeConditions = ($leadForm->getLead()->employee_id == Yii::$app->user->identity->getId() &&
+    $unSnoozeConditions = (/*$leadForm->getLead()->employee_id == Yii::$app->user->identity->getId() &&*/
         $leadForm->getLead()->status == Lead::STATUS_SNOOZE
         );
     $unTrashConditions = ($leadForm->getLead()->status == Lead::STATUS_TRASH);

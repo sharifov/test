@@ -9,13 +9,11 @@ use yii\data\ActiveDataProvider;
 use common\models\Employee;
 use yii\db\Expression;
 
-
 /**
  * CommunicationSearch represents the model behind the search form
  */
 class CommunicationSearch extends Model
 {
-
     public const COMM_TYPE_SMS      = 1;
     public const COMM_TYPE_VOICE    = 2;
     public const COMM_TYPE_EMAIL    = 3;
@@ -38,14 +36,11 @@ class CommunicationSearch extends Model
     public $agent_phone;
     public $client_phone;
 
-
-
     public $datetime_start;
     public $datetime_end;
     public $date_range;
 
     //public $online;
-
 
     /**
      * {@inheritdoc}
@@ -75,6 +70,7 @@ class CommunicationSearch extends Model
      * @param array $params
      *
      * @return ActiveDataProvider
+     * @throws \Exception
      */
     public function search($params)
     {
@@ -96,8 +92,6 @@ class CommunicationSearch extends Model
             ->from('email')
             ->orderBy(['e_id' => SORT_DESC]);*/
         //->where(['e_lead_id' => $lead->id]);
-
-
 
         $query = (new \yii\db\Query())
             ->from(['union_table' => $query1->union($query2)]) //->union($query3)
@@ -146,8 +140,6 @@ class CommunicationSearch extends Model
                         'label' => 'Communication type',
                     ],
 
-
-
                     'lead_id' => [
                         'asc' => ['lead_id' => SORT_ASC],
                         'desc' => ['lead_id' => SORT_DESC],
@@ -185,9 +177,9 @@ class CommunicationSearch extends Model
             //'user_group_id' => $this->user_group_id,
         ]);
 
-        if(empty($this->created_dt)){
-            $query->andFilterWhere(['>=', 'created_dt', $this->datetime_start])
-                ->andFilterWhere(['<=', 'created_dt', $this->datetime_end]);
+        if(empty($this->created_dt) && isset($params['CommunicationSearch']['date_range'])){
+            $query->andFilterWhere(['>=', 'created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->datetime_start))])
+                ->andFilterWhere(['<=', 'created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->datetime_end))]);
         } else {
             $query->andFilterWhere(['=','DATE(created_dt)', $this->created_dt]);
         }
@@ -202,20 +194,15 @@ class CommunicationSearch extends Model
             $query->andWhere(['IN', 'employees.id', $subQuery]);
         }
 
-
         if ($this->user_call_type_id > 0) {
             $subQuery = UserProfile::find()->select(['DISTINCT(up_user_id)'])->where(['=', 'up_call_type_id', $this->user_call_type_id]);
             $query->andWhere(['IN', 'employees.id', $subQuery]);
         }
 
-
         if ($this->user_project_id > 0) {
             $subQuery = ProjectEmployeeAccess::find()->select(['DISTINCT(employee_id)'])->where(['=', 'project_id', $this->user_project_id]);
             $query->andWhere(['IN', 'employees.id', $subQuery]);
         }
-
-
-
 
         if ($this->online > 0) {
             if ($this->online == 1) {
@@ -237,11 +224,6 @@ class CommunicationSearch extends Model
             $subQuery = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->where(['IN', 'ugs_group_id', $subQuery1]);
             $query->andWhere(['IN', 'created_user_id', $subQuery]);
         }
-
-
         return $dataProvider;
     }
-
-
-
 }

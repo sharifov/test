@@ -63,9 +63,7 @@ class StatsController extends FController
      */
     public function actionCallSms(): string
     {
-
         $searchModel = new CommunicationSearch();
-
         $userId = Yii::$app->user->id;
 
         //$searchModel = new EmployeeSearch();
@@ -81,7 +79,6 @@ class StatsController extends FController
         $searchModel->datetime_start = date('Y-m-d', strtotime('-0 day'));
         $searchModel->datetime_end = date('Y-m-d');*/
 
-
         $params = Yii::$app->request->queryParams;
 
         if (Yii::$app->user->identity->canRole('supervision')) {
@@ -92,7 +89,6 @@ class StatsController extends FController
 
         $searchModel->datetime_start = date('Y-m-d', strtotime('-0 day'));
         $searchModel->datetime_end = date('Y-m-d');
-
 
         /*$query1 = (new \yii\db\Query())
             ->select(['s_id AS id', new Expression('"sms" AS type'), 's_lead_id AS lead_id', 's_created_dt AS created_dt'])
@@ -112,8 +108,6 @@ class StatsController extends FController
             ->from('email')
             ->orderBy(['e_id' => SORT_DESC]);
         //->where(['e_lead_id' => $lead->id]);
-
-
 
         $unionQuery = (new \yii\db\Query())
             ->from(['union_table' => $query1->union($query2)]) //->union($query3)

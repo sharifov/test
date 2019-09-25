@@ -70,6 +70,7 @@ Create MySQL Dump:
 ```
 mysqldump -Q -c -e -v -u USER -p DATABASE | gzip > /var/www/backups/sql.gz
 gunzip < /var/www/sale/sql.gz | mysql -v -u USER -pPASSWORD DATABASE
+gunzip < /var/www/sale/sql.gz | time mysql -u USER -pPASSWORD DATABASE --force
 mysqlshow -u USER -pPASSWORD DATABASE
 ```
 Create Pg Dump:
@@ -86,24 +87,24 @@ sudo service mysql restart
 
 
 
-Prod Hosts:
+Prod Host:
 -------------------
- - [https://sales.travelinsides.com](https://sales.travelinsides.com) - Frontend
- - [https://sales.travelinsides.com/admin](https://sales.travelinsides.com/admin) - Backend
- - [https://sales.api.travelinsides.com](https://sales.api.travelinsides.com) - API
- - [https://sales.api.travelinsides.com/doc/index.html](https://sales.api.travelinsides.com/doc/index.html) - API Documentation
+ - [sales.travelinsides.com](https://sales.travelinsides.com) - Frontend
+ - [sales.api.travelinsides.com](https://sales.api.travelinsides.com) - API
+ 
+Stage Host:
+-------------------
+ - [stage-sales.travel-dev.com](https://stage-sales.travel-dev.com) - Frontend
+ - [stage-sales-api.travel-dev.com](https://stage-sales-api.travel-dev.com) - API
 
- Dev Hosts:
- -------------------
-  - [http://sales.dev.travelinsides.com](http://sales.dev.travelinsides.com) - Frontend
-  - [http://sales.dev.travelinsides.com/admin](http://sales.dev.travelinsides.com/admin) - Backend
-  - [http://api-sales.dev.travelinsides.com](http://api-sales.dev.travelinsides.com) - API
-  - [http://api-sales.dev.travelinsides.com/doc/index.html](http://api-sales.dev.travelinsides.com/doc/index.html) - API Documentation
-
- New Dev Hosts:
- -------------------
- - [https://sales-dev.travelinsides.com](https://sales-dev.travelinsides.com) - Frontend
- - [https://sales-dev.travelinsides.com/admin](https://sales-dev.travelinsides.com/admin) - Backend
+Dev Host:
+-------------------
+ - [sales.dev.travelinsides.com](https://sales.dev.travelinsides.com) - Frontend
+ - [api-sales.dev.travelinsides.com](https://api-sales.dev.travelinsides.com) - API
+  
+API Documentation
+-------------------
+ [https://sales.api.travelinsides.com/doc/index.html](https://sales.api.travelinsides.com/doc/index.html)
 
  Generate API Documentation (apiDoc):
  ```
@@ -323,6 +324,24 @@ Create a Cert
 # https://github.com/loganstellway/self-signed-ssl
 ./self-signed-tls.sh -c=MD -s=Chisinau -l=Chisinau -o=Kivork -u=Kivork -n=sales.zeit.test -e=alex.connor@techork.com
 ```
+
+GeoIP Installation
+-------------------
+sudo apt-get install php-geoip
+
+restart php-fpm
+
+Test extension:
+
+Paste the following code in the console
+
+```
+php -r "echo geoip_time_zone_by_country_and_region('US', 'CA') . PHP_EOL;"
+
+```
+
+Command must return the time zone of the USA - California ---> America/Los_Angeles
+
 
 DIRECTORY STRUCTURE
 -------------------

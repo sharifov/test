@@ -131,4 +131,19 @@ class CasesRepository extends Repository
         }
         $this->eventDispatcher->dispatchAll($case->releaseEvents());
     }
+
+	/**
+	 * @param string $phone
+	 * @return array
+	 */
+	public function findOpenCasesByPhone(string $phone)
+	{
+		if ($cases = Cases::find()
+			->join('join', 'client_phone', 'cs_client_id = client_id and phone = :phone', ['phone' => $phone])
+			->where(['cs_status' => [CasesStatus::STATUS_PENDING, CasesStatus::STATUS_PROCESSING, CasesStatus::STATUS_FOLLOW_UP]])
+			->all()) {
+			return $cases;
+		}
+		throw new NotFoundException('Cases is not found');
+	}
 }

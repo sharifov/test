@@ -1,11 +1,11 @@
 <?php
 
 use dosamigos\datepicker\DatePicker;
+use sales\access\EmployeeProjectAccess;
+use sales\ui\user\ListsAccess;
 use yii\helpers\Html;
 use yii\widgets\Pjax;
-use kartik\grid\GridView;
 use common\models\Lead;
-use yii\helpers\Url;
 use common\models\Airport;
 
 /* @var $this yii\web\View */
@@ -15,13 +15,7 @@ use common\models\Airport;
 
 $this->title = 'Booked Queue';
 
-if (Yii::$app->user->identity->canRole('admin')) {
-    $userList = \common\models\Employee::getList();
-    $projectList = \common\models\Project::getList();
-} else {
-    $userList = \common\models\Employee::getListByUserId(Yii::$app->user->id);
-    $projectList = \common\models\ProjectEmployeeAccess::getProjectsByEmployee();
-}
+$lists = new ListsAccess(Yii::$app->user->id);
 
 $this->params['breadcrumbs'][] = $this->title;
 ?>
@@ -105,7 +99,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'options' => [
                 'style' => 'width:120px'
             ],
-            'filter' => $projectList,
+            'filter' => $lists->getProjects(),
         ],
         [
             'attribute' => 'pending',
@@ -205,8 +199,8 @@ $this->params['breadcrumbs'][] = $this->title;
             'value' => function (\common\models\Lead $model) {
                 return $model->employee ? '<i class="fa fa-user"></i> ' . $model->employee->username : '-';
             },
-            'filter' => $userList,
-            'visible' => !$isAgent
+            'filter' => $lists->getEmployees(),
+            'visible' => $lists->getEmployees()
             ],
             [
                 'label' => 'Profit',

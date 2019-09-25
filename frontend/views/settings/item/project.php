@@ -89,7 +89,6 @@ $this->registerJs($js);
                                 <td><?= $subSource->id ?></td>
                                 <td><?= $subSource->name ?></td>
                                 <td><?= $subSource->cid ?></td>
-                                <td><?= $subSource->phone_number ?></td>
                             </tr>
                         <?php endforeach; ?>
                         </tbody>
