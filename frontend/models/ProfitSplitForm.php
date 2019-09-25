@@ -131,7 +131,7 @@ class ProfitSplitForm extends Model
         }
 
 		if (NotificationsFormHelper::hasNotifications()) {
-			$this->addError('warnings', NotificationsFormHelper::getAlertsNotifications('alert-warning', 'asdasd'));
+			$this->addError('warnings', NotificationsFormHelper::getAllAlertsNotifications('alert-warning'));
 		}
 
         parent::afterValidate();

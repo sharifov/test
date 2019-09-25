@@ -54,10 +54,10 @@ class NotificationsFormHelper {
 	/**
 	 * @param string $alertClass
 	 * @param string|null $attribute
-	 * @return array|string
+	 * @return string|null
 	 * @throws \Exception
 	 */
-	public static function getAlertsNotifications(string $alertClass, string $attribute = null)
+	public static function getAlertNotification(string $alertClass, string $attribute = null): ?string
 	{
 		if ($attribute && isset(self::$notifications[$attribute])) {
 			return self::$notifications[$attribute] = Alert::widget([
@@ -68,6 +68,16 @@ class NotificationsFormHelper {
 			]);
 		}
 
+		return null;
+	}
+
+	/**
+	 * @param string $alertClass
+	 * @return array
+	 * @throws \Exception
+	 */
+	public static function getAllAlertsNotifications(string $alertClass): array
+	{
 		$notifications = [];
 		foreach (self::$notifications as $key => $notification) {
 			$notifications[$key] = Alert::widget([
