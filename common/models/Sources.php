@@ -19,7 +19,6 @@ use yii\helpers\VarDumper;
  * @property string $name
  * @property string $cid
  * @property string $last_update
- * @property string $phone_number
  * @property boolean $default
  * @property boolean $hidden
  *

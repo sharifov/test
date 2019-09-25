@@ -223,10 +223,10 @@ class ApiLead extends Model
 	public function checkForExistence($attribute, $params): void
 	{
 		foreach ($this->phones as $phone) {
-			if (DepartmentPhoneProject::find()->where(['dpp_phone_number' => $phone])->limit(1)->one()) {
-				$this->addError($attribute, $phone . ' - Phone number is General');
-			} elseif (UserProjectParams::find()->where(['upp_phone_number' => $phone])->orWhere(['upp_tw_phone_number' => $phone])->limit(1)->one()) {
-				$this->addError($attribute, $phone . ' - Phone number is Direct');
+			if (DepartmentPhoneProject::find()->where(['dpp_phone_number' => $phone])->exists()) {
+				$this->addError($attribute, $phone . ' - This phone number is not allowed (General)');
+			} elseif (UserProjectParams::find()->where(['upp_tw_phone_number' => $phone])->exists()) {
+				$this->addError($attribute, $phone . ' - This phone number is not allowed (Direct)');
 			}
 		}
 	}

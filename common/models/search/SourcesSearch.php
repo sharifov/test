@@ -18,7 +18,7 @@ class SourcesSearch extends Sources
     {
         return [
             [['id', 'project_id', 'default', 'hidden'], 'integer'],
-            [['name', 'cid', 'last_update', 'phone_number'], 'safe'],
+            [['name', 'cid', 'last_update'], 'safe'],
         ];
     }
 
@@ -70,8 +70,8 @@ class SourcesSearch extends Sources
         ]);
 
         $query->andFilterWhere(['like', 'name', $this->name])
-            ->andFilterWhere(['like', 'cid', $this->cid])
-            ->andFilterWhere(['like', 'phone_number', $this->phone_number]);
+            ->andFilterWhere(['like', 'cid', $this->cid]);
+
 
         return $dataProvider;
     }

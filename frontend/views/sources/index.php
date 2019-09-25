@@ -17,7 +17,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
 
     <p>
-        <?= Html::a('Create Sources', ['create'], ['class' => 'btn btn-success']) ?>
+        <?//= Html::a('Create Sources', ['create'], ['class' => 'btn btn-success']) ?>
     </p>
 
     <?= GridView::widget([
@@ -68,19 +68,12 @@ $this->params['breadcrumbs'][] = $this->title;
                 },
                 'format' => 'raw'
             ],
-
-            [
-                'attribute' => 'phone_number',
-                'value' => function (\common\models\Sources $model) {
-                    return $model->phone_number ? '<i class="fa fa-phone"></i> ' . $model->phone_number : '-';
-                },
-                'format' => 'raw'
-            ],
-            //'phone_number',
             'default:boolean',
             'hidden:boolean',
 
-            ['class' => 'yii\grid\ActionColumn'],
+            ['class' => 'yii\grid\ActionColumn',
+                'template' => '{view} {update}'
+            ],
         ],
     ]); ?>
     <?php Pjax::end(); ?>

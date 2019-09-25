@@ -52,10 +52,10 @@ class PhoneCreateForm extends Model
 	 */
 	public function checkForExistence($attribute, $params): void
 	{
-		if (DepartmentPhoneProject::find()->where(['dpp_phone_number' => $this->phone])->limit(1)->one()) {
-			$this->addError($attribute, 'Phone number is General');
-		} elseif (UserProjectParams::find()->where(['upp_phone_number' => $this->phone])->orWhere(['upp_tw_phone_number' => $this->phone])->limit(1)->one()) {
-			$this->addError($attribute, 'Phone Number is Direct');
+		if (DepartmentPhoneProject::find()->where(['dpp_phone_number' => $this->phone])->exists()) {
+			$this->addError($attribute, 'This phone number is not allowed (General)');
+		} elseif (UserProjectParams::find()->where(['upp_tw_phone_number' => $this->phone])->exists()) {
+			$this->addError($attribute, 'This phone number is not allowed (Direct)');
 		}
 	}
 
