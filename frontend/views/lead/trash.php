@@ -317,6 +317,16 @@ $this->params['breadcrumbs'][] = $this->title;
             },
             'format' => 'raw'
         ],
+        [
+            'label' => 'LeadFlow Reason',
+            'contentOptions' => [
+                'style' => 'max-width: 250px;'
+            ],
+            'value' => function (\common\models\Lead $model) {
+                return '<pre>'. $model->getLastReasonFromLeadFlow()  . '</pre>';
+            },
+            'format' => 'raw'
+        ],
         /*[
             'label' => 'Rating',
             'contentOptions' => [

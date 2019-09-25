@@ -113,16 +113,8 @@ class TestController extends FController
 
     public function actionTest()
     {
-        $userId = 295;
 
-        $employee = UserFinder::find($userId);
-        var_dump($employee->accessTakeLeadByFrequencyMinutes());die;
 
-//        $projects = EmployeeProjectAccess::getProjects($userId);
-//        $projects = EmployeeProjectAccess::getProjects($userId);
-//        $projects = EmployeeProjectAccess::getProjects($userId);
-//        $projects = EmployeeProjectAccess::getProjects($userId);
-//        VarDumper::dump($projects, 10, true);
 
         return $this->render('blank');
 

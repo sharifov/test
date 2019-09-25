@@ -110,6 +110,7 @@ use common\components\SearchService;
  * @property LeadLog[] $leadLogs
  * @property LeadFlightSegment[] $leadFlightSegments
  * @property LeadFlow[] $leadFlows
+ * @property LeadFlow $lastLeadFlow
  * @property LeadPreferences $leadPreferences
  * @property Client $client
  * @property Employee $employee
@@ -483,69 +484,6 @@ class Lead extends ActiveRecord implements AggregateRoot
         $this->called_expert = $value;
     }
 
-    /**
-     * @param int $userId
-     * @return bool
-     */
-    public function isAlreadyTakenUser(int $userId): bool
-    {
-        return $this->isOwner($userId) && $this->isProcessing();
-    }
-
-    /**
-     * @param int $userId
-     */
-    public function take(int $userId): void
-    {
-        if ($this->isCompleted()) {
-            throw new \DomainException('Lead is completed!');
-        }
-
-        if ($this->isAlreadyTakenUser($userId)) {
-            throw new \DomainException('Lead is already taken to this user!');
-        }
-
-        if (!$this->isAvailableToTake()) {
-            throw new \DomainException('Lead is unavailable to "Take" now!');
-        }
-
-        $this->assign($userId, self::STATUS_PROCESSING);
-    }
-
-    /**
-     * @param int $userId
-     */
-    public function takeOver(int $userId): void
-    {
-        if ($this->isCompleted()) {
-            throw new \DomainException('Lead is completed!');
-        }
-
-        if ($this->isAlreadyTakenUser($userId)) {
-            throw new \DomainException('Lead is already taken to this user!');
-        }
-
-        if (!$this->isAvailableToTakeOver()) {
-            throw new \DomainException('Lead is unavailable to "Take Over" now!');
-        }
-
-        $this->assign($userId, self::STATUS_PROCESSING);
-    }
-
-    /**
-     * @param int|null $userId
-     * @param int $status
-     */
-    private function assign(?int $userId, int $status): void
-    {
-        if ($this->status === $status && $this->isOwner($userId)) {
-            throw new \DomainException('Lead is already assigned to this user!');
-        }
-//        $this->recordEvent(new LeadAssignedEvent($this, $this->employee_id, $userId, $this->status, $status));
-        $this->setStatus($status);
-        $this->setOwner($userId);
-    }
-
     public function isGetOwner(): bool
     {
         return $this->employee_id ? true : false;
@@ -766,7 +704,7 @@ class Lead extends ActiveRecord implements AggregateRoot
     public function processing(int $userId): void
     {
         self::guardStatus($this->status, self::STATUS_PROCESSING);
-        if ($this->isProcessing() && $this->isOwner($userId)) {
+        if ($this->isAlreadyProcessingUser($userId)) {
             throw new \DomainException('Lead is already processing to this user');
         }
         $this->recordEvent(new LeadProcessingEvent($this, $this->status, $userId, $this->employee_id));
@@ -776,6 +714,15 @@ class Lead extends ActiveRecord implements AggregateRoot
         if (!$this->isProcessing()) {
             $this->setStatus(self::STATUS_PROCESSING);
         }
+    }
+
+    /**
+     * @param int $userId
+     * @return bool
+     */
+    private function isAlreadyProcessingUser(int $userId): bool
+    {
+        return $this->isOwner($userId) && $this->isProcessing();
     }
 
     public function pending(): void
@@ -1063,13 +1010,20 @@ class Lead extends ActiveRecord implements AggregateRoot
         return $this->hasMany(self::class, ['l_duplicate_lead_id' => 'id']);
     }
 
-
     /**
      * @return \yii\db\ActiveQuery
      */
     public function getLeadFlows()
     {
         return $this->hasMany(LeadFlow::class, ['lead_id' => 'id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getLastLeadFlow()
+    {
+        return $this->hasOne(LeadFlow::class, ['lead_id' => 'id'])->orderBy([LeadFlow::tableName() . '.created' => SORT_DESC]);
     }
 
     /**
@@ -3497,6 +3451,14 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
         }
 
         return '-';
+    }
+
+    /**
+     * @return string
+     */
+    public function getLastReasonFromLeadFlow(): ?string
+    {
+        return $this->lastLeadFlow ? $this->lastLeadFlow->lf_description : '';
     }
 
     /**

@@ -77,7 +77,7 @@ class LeadUnassignService
                     break;
                 case 'processing-over':
                     $oldOwnerUsername = $lead->employee ? $lead->employee->username : '-';
-                    $lead->takeOver($reason->employee_id);
+                    $lead->processing($reason->employee_id);
                     $note = Note::create($userId, $lead->id, 'Take Over in PROCESSING status.<br>Reason: ' . $reason->reason . '<br>Last Agent: ' . $oldOwnerUsername);
                     $this->noteRepository->save($note);
                     $url = ['lead/view', 'gid' => $lead->gid];

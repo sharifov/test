@@ -59,16 +59,11 @@ class LeadAssignService
             throw new \DomainException('Lead is completed!');
         }
 
-        if ($lead->isAlreadyTakenUser($userId)) {
-            throw new \DomainException('Lead is already taken to this user!');
-        }
-
         if (!$lead->isAvailableToTake()) {
             throw new \DomainException('Lead is unavailable to "Take" now!');
         }
 
         $lead->processing($user->id);
-
 
         $this->leadRepository->save($lead);
     }
@@ -85,7 +80,16 @@ class LeadAssignService
 
         $this->checkAccess($lead, $user);
 
-        $lead->takeOver($user->id);
+        if ($lead->isCompleted()) {
+            throw new \DomainException('Lead is completed!');
+        }
+
+        if (!$lead->isAvailableToTakeOver()) {
+            throw new \DomainException('Lead is unavailable to "Take Over" now!');
+        }
+
+        $lead->processing($user->id);
+
         $this->leadRepository->save($lead);
     }
 
