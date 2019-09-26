@@ -8,7 +8,7 @@ use yii\helpers\Html;
 ?>
 
 <div class="navbar nav_title" style="border: 0;">
-    <a href="/" class="site_title"><span title="<?=$host?>"><i class="fa fa-dollar"></i> Sales</span></a>
+    <?=Html::a('<span title="' . $host . '"><i class="fa fa-slideshare"></i> Sales CRM</span>', ['/site/index'], ['class' => 'site_title'])?>
 </div>
 <div class="clearfix"></div>
 
