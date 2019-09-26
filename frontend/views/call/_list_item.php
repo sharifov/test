@@ -21,7 +21,7 @@ use \common\models\Call;
         }
     ?>
 
-    <table class="table table-bordered <?=($model->isIn() && ($model->isStatusNoAnswer() || $model->isStatusCanceled() || $model->isStatusBusy())) ? '' : 'table-striped'?>">
+    <table class="table table-condensed <?=($model->isIn() && ($model->isStatusNoAnswer() || $model->isStatusCanceled() || $model->isStatusBusy())) ? '' : 'table-striped'?>">
         <tr class="<?=$trClass?>">
             <td rowspan="2" style="width:50px">
                 <u><?=Html::a($model->c_id, ['call/view', 'id' => $model->c_id], ['target' => '_blank', 'data-pjax' => 0])?></u><br>
@@ -179,7 +179,7 @@ use \common\models\Call;
             <tr>
 
                 <td colspan="6">
-                    <table class="table table-bordered">
+                    <table class="table table-condensed">
                         <?php foreach ($model->calls as $callItem):?>
                         <tr>
                             <td style="width:50px">

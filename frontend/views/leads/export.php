@@ -1,5 +1,7 @@
 <?php
 
+use common\models\Employee;
+use sales\ui\user\ListsAccess;
 use yii\helpers\Html;
 use yii\widgets\Pjax;
 use kartik\grid\GridView;
@@ -10,7 +12,7 @@ use kartik\grid\GridView;
 
 $this->title = 'Export Leads';
 $this->params['breadcrumbs'][] = $this->title;
-
+$lists =  new ListsAccess(Yii::$app->user->id);
 ?>
 <style>
 .dropdown-menu {
@@ -22,9 +24,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <h1><?= Html::encode($this->title) ?></h1>
 
     <?php Pjax::begin(); ?>
-    <?php echo $this->render('_search', ['model' => $searchModel, 'action' => 'export']); ?>
-
-
+    <?php echo $this->render('_search', ['model' => $searchModel, 'action' => 'export', 'lists' => $lists]); ?>
 
     <p>
         <?//= Html::a('Create Lead', ['create'], ['class' => 'btn btn-success']) ?>
