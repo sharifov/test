@@ -15,13 +15,15 @@ class LeadCallExpertSearch extends LeadCallExpert
     public $datetime_start;
     public $datetime_end;
     public $date_range;
+    public $employeeRole;
+
     /**
      * {@inheritdoc}
      */
     public function rules()
     {
         return [
-            [['datetime_start', 'datetime_end'], 'safe'],
+            [['datetime_start', 'datetime_end', 'employeeRole'], 'safe'],
             [['date_range'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
             [['lce_id', 'lce_lead_id', 'lce_status_id', 'lce_agent_user_id', 'lce_expert_user_id'], 'integer'],
             [['lce_request_text', 'lce_request_dt', 'lce_response_text', 'lce_response_lead_quotes', 'lce_response_dt', 'lce_expert_username', 'lce_updated_dt'], 'safe'],
@@ -43,6 +45,7 @@ class LeadCallExpertSearch extends LeadCallExpert
      * @param array $params
      *
      * @return ActiveDataProvider
+     * @throws \Exception
      */
     public function search($params)
     {
@@ -52,7 +55,7 @@ class LeadCallExpertSearch extends LeadCallExpert
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> ['defaultOrder' => ['lce_id' => SORT_DESC]],
+            'sort' => ['defaultOrder' => ['lce_id' => SORT_DESC]],
             'pagination' => [
                 'pageSize' => 30,
             ],
@@ -66,21 +69,27 @@ class LeadCallExpertSearch extends LeadCallExpert
             return $dataProvider;
         }
 
-        if(empty($this->lce_request_dt) && isset($params['LeadCallExpertSearch']['date_range'])){
+        if (empty($this->lce_request_dt) && isset($params['LeadCallExpertSearch']['date_range'])) {
             $query->andFilterWhere(['>=', 'lce_request_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->datetime_start))])
                 ->andFilterWhere(['<=', 'lce_request_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->datetime_end))]);
         }
 
         if (isset($params['LeadCallExpertSearch']['lce_request_dt'])) {
-            $query->andFilterWhere(['=','DATE(lce_request_dt)', $this->lce_request_dt]);
+            $query->andFilterWhere(['=', 'DATE(lce_request_dt)', $this->lce_request_dt]);
         }
 
         if (isset($params['LeadCallExpertSearch']['lce_response_dt'])) {
-            $query->andFilterWhere(['=','DATE(lce_updated_dt)', $this->lce_response_dt]);
+            $query->andFilterWhere(['=', 'DATE(lce_updated_dt)', $this->lce_response_dt]);
         }
 
         if (isset($params['LeadCallExpertSearch']['lce_updated_dt'])) {
-            $query->andFilterWhere(['=','DATE(lce_updated_dt)', $this->lce_updated_dt]);
+            $query->andFilterWhere(['=', 'DATE(lce_updated_dt)', $this->lce_updated_dt]);
+        }
+
+        if (!empty($this->employeeRole)) {
+            $subQuery = Employee::find()->select(['id'])->leftJoin('auth_assignment', 'auth_assignment.user_id = id')
+                ->andWhere(['auth_assignment.item_name' => $this->employeeRole]);
+            $query->andWhere(['IN', 'lce_agent_user_id', $subQuery]);
         }
 
         // grid filtering conditions
@@ -115,7 +124,7 @@ class LeadCallExpertSearch extends LeadCallExpert
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> ['defaultOrder' => ['lce_id' => SORT_ASC]],
+            'sort' => ['defaultOrder' => ['lce_id' => SORT_ASC]],
             'pagination' => [
                 'pageSize' => 30,
             ],
