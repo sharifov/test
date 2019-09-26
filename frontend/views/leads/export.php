@@ -1,5 +1,7 @@
 <?php
 
+use common\models\Employee;
+use sales\ui\user\ListsAccess;
 use yii\helpers\Html;
 use yii\widgets\Pjax;
 use kartik\grid\GridView;
@@ -10,21 +12,19 @@ use kartik\grid\GridView;
 
 $this->title = 'Export Leads';
 $this->params['breadcrumbs'][] = $this->title;
-
+$lists =  new ListsAccess(Yii::$app->user->id);
 ?>
 <style>
-.dropdown-menu {
-    z-index: 1010;
-}
+    .dropdown-menu {
+        z-index: 1010;
+    }
 </style>
 <div class="lead-index">
 
     <h1><?= Html::encode($this->title) ?></h1>
 
     <?php Pjax::begin(); ?>
-    <?php echo $this->render('_search', ['model' => $searchModel, 'action' => 'export']); ?>
-
-
+    <?php echo $this->render('_search', ['model' => $searchModel, 'action' => 'export', 'lists' => $lists]); ?>
 
     <p>
         <?//= Html::a('Create Lead', ['create'], ['class' => 'btn btn-success']) ?>
@@ -34,7 +34,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <?php
 
-        $gridColumnsExport = [
+    $gridColumnsExport = [
         ['class' => 'yii\grid\SerialColumn'],
 
         [
@@ -320,11 +320,11 @@ $this->params['breadcrumbs'][] = $this->title;
             'contentOptions' => [
                 'class' => 'text-center'
             ]
-            ],
+        ],
 
-            [
-                'header' => 'Expert Quotes',
-                'value' => function (\common\models\Lead $model) {
+        [
+            'header' => 'Expert Quotes',
+            'value' => function (\common\models\Lead $model) {
                 return $model->quotesExpertCount ? $model->quotesExpertCount: '-';
             },
             'format' => 'raw',
@@ -350,7 +350,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'value' => function(\common\models\Lead $model) {
                 return $model->project ? $model->project->name : '-';
             },
-         ],
+        ],
 
         [
             'header' => 'Market info',
@@ -428,29 +428,29 @@ $this->params['breadcrumbs'][] = $this->title;
     ];
 
 
-        Yii::$app->state = Yii::$app::STATE_END;
+    Yii::$app->state = Yii::$app::STATE_END;
 
 
 
-        $fullExportMenu = \kartik\export\ExportMenu::widget([
-            'dataProvider' => $dataProvider,
-            'columns' => $gridColumnsExport,
-            'fontAwesome' => true,
-            //'stream' => false, // this will automatically save file to a folder on web server
-            //'deleteAfterSave' => false, // this will delete the saved web file after it is streamed to browser,
-            //'batchSize' => 10,
-            'target' => \kartik\export\ExportMenu::TARGET_BLANK,
-            'linkPath' => '/assets/',
-            'folder' => '@webroot/assets', // this is default save folder on server
-            'dropdownOptions' => [
-                'label' => 'Full Export'
-            ],
-            'columnSelectorOptions' => [
-                'label' => 'Export Fields'
-            ]
-        ]);
+    $fullExportMenu = \kartik\export\ExportMenu::widget([
+        'dataProvider' => $dataProvider,
+        'columns' => $gridColumnsExport,
+        'fontAwesome' => true,
+        //'stream' => false, // this will automatically save file to a folder on web server
+        //'deleteAfterSave' => false, // this will delete the saved web file after it is streamed to browser,
+        //'batchSize' => 10,
+        'target' => \kartik\export\ExportMenu::TARGET_BLANK,
+        'linkPath' => '/assets/',
+        'folder' => '@webroot/assets', // this is default save folder on server
+        'dropdownOptions' => [
+            'label' => 'Full Export'
+        ],
+        'columnSelectorOptions' => [
+            'label' => 'Export Fields'
+        ]
+    ]);
 
-        unset($gridColumnsExport['reason']);
+    unset($gridColumnsExport['reason']);
 
     /*$fullExportMenu = ExportMenu::widget([
         'dataProvider' => $dataProvider,
@@ -464,9 +464,9 @@ $this->params['breadcrumbs'][] = $this->title;
         ],
     ]);*/
 
-?>
+    ?>
 
-<?php
+    <?php
 
     echo GridView::widget([
         'dataProvider' => $dataProvider,
@@ -488,7 +488,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
         'toolbar' =>  [
             ['content'=>
-                //Html::button('<i class="glyphicon glyphicon-plus"></i>', ['type'=>'button', 'title'=>'Add Lead', 'class'=>'btn btn-success', 'onclick'=>'alert("This will launch the book creation form.\n\nDisabled for this demo!");']) . ' '.
+            //Html::button('<i class="glyphicon glyphicon-plus"></i>', ['type'=>'button', 'title'=>'Add Lead', 'class'=>'btn btn-success', 'onclick'=>'alert("This will launch the book creation form.\n\nDisabled for this demo!");']) . ' '.
                 Html::a('<i class="glyphicon glyphicon-repeat"></i>', ['leads/index'], ['data-pjax'=>0, 'class' => 'btn btn-default', 'title'=>'Reset Grid'])
             ],
             '{export}',
