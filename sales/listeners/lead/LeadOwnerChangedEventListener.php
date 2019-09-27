@@ -65,7 +65,8 @@ Your Lead (ID: {lead_id}) has been reassigned to another agent ({name}).
             ]);
 
         if (Notifications::create($oldOwner->id, $subject, $body, Notifications::TYPE_INFO, true)) {
-            Notifications::socket($oldOwner->id, null, 'getNewNotification', [], true);
+            //Notifications::socket($oldOwner->id, null, 'getNewNotification', [], true);
+            Notifications::sendSocket('getNewNotification', ['user_id' => $oldOwner->id]);
         } else {
             Yii::warning(
                 'Not created Email notification to employee_id: ' . $oldOwner->id . ', lead: ' . $lead->id,

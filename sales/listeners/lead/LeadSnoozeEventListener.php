@@ -70,7 +70,8 @@ Reason: {reason}
             ]);
 
         if (Notifications::create($owner->id, $subject, $body, Notifications::TYPE_INFO, true)) {
-            Notifications::socket($owner->id, null, 'getNewNotification', [], true);
+            //Notifications::socket($owner->id, null, 'getNewNotification', [], true);
+            Notifications::sendSocket('getNewNotification', ['user_id' => $owner->id]);
         } else {
             Yii::warning(
                 'Not created Email notification to employee_id: ' . $owner->id . ', lead: ' . $lead->id,

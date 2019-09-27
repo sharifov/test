@@ -347,7 +347,8 @@ class CommunicationController extends ApiBaseController
                         Notifications::create($user->id, 'Missing Call [Offline]',
                             'Missing Call from ' . $client_phone_number . ' to ' . $incoming_phone_number . "\r\n Reason: Agent offline",
                             Notifications::TYPE_WARNING, true);
-                        Notifications::socket($user->id, null, 'getNewNotification', [], true);
+                        // Notifications::socket($user->id, null, 'getNewNotification', [], true);
+                        Notifications::sendSocket('getNewNotification', ['user_id' => $user->id]);
                         $callModel->c_source_type_id = Call::SOURCE_REDIRECT_CALL;
                         return $this->createHoldCall($callModel, $user);
                     }
@@ -417,7 +418,9 @@ class CommunicationController extends ApiBaseController
                     //if ($call->c_created_user_id) {
                         // Notifications::create($call->c_created_user_id, 'Call Recording Completed  from ' . $call->c_from . ' to ' . $call->c_to . ' <br>Lead ID: ' . $call->c_lead_id , Notifications::TYPE_INFO, true);
                     //}
-                    Notifications::socket(null, $call->c_lead_id, 'recordingUpdate', ['url' => $call->c_recording_url], true);
+                    // Notifications::socket(null, $call->c_lead_id, 'recordingUpdate', ['url' => $call->c_recording_url], true);
+
+                    Notifications::sendSocket('recordingUpdate', ['lead_id' => $call->c_lead_id], ['url' => $call->c_recording_url]);
                 }
             }
         } else {
@@ -1818,7 +1821,9 @@ class CommunicationController extends ApiBaseController
 
                             Notifications::create($user_id, 'New SMS '.$sms->s_phone_from, 'SMS from ' . $sms->s_phone_from .' ('.$clientName.') to '.$sms->s_phone_to.' <br> '.nl2br(Html::encode($sms->s_sms_text))
                             . ($lead_id ? '<br>Lead ID: '.$lead_id : ''), Notifications::TYPE_INFO, true);
-                            Notifications::socket($user_id, null, 'getNewNotification', ['sms_id' => $sms->s_id], true);
+                            //Notifications::socket($user_id, null, 'getNewNotification', ['sms_id' => $sms->s_id], true);
+
+                            Notifications::sendSocket('getNewNotification', ['user_id' => $user_id], ['sms_id' => $sms->s_id]);
                         }
                     }
 
@@ -1828,7 +1833,8 @@ class CommunicationController extends ApiBaseController
                     }
 
                     if($lead_id) {
-                        Notifications::socket(null, $lead_id, 'updateCommunication', ['sms_id' => $sms->s_id], true);
+                        // Notifications::socket(null, $lead_id, 'updateCommunication', ['sms_id' => $sms->s_id], true);
+                        Notifications::sendSocket('getNewNotification', ['lead_id' => $lead_id], ['sms_id' => $sms->s_id]);
                     }
 
                     $response = $sms->attributes;

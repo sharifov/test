@@ -198,7 +198,8 @@ class IncomingCallWidget extends \yii\bootstrap\Widget
         $ucs->us_created_dt = date('Y-m-d H:i:s');
         if($ucs->save()) {
             $callUserAccess->update();
-            Notifications::socket($ucs->us_user_id, null, 'updateUserCallStatus', ['id' => 'ucs'.$ucs->us_id, 'type_id' => $ucs->us_type_id]);
+            // Notifications::socket($ucs->us_user_id, null, 'updateUserCallStatus', ['id' => 'ucs'.$ucs->us_id, 'type_id' => $ucs->us_type_id]);
+            Notifications::sendSocket('updateUserCallStatus', ['user_id' =>$ucs->us_user_id], ['id' => 'ucs'.$ucs->us_id, 'type_id' => $ucs->us_type_id]);
             Notifications::pingUserMap();
         } else {
             Yii::error(VarDumper::dumpAsString($ucs->errors), 'IncomingCallWidget:busyCall:UserCallStatus:save');

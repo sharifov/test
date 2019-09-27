@@ -684,7 +684,10 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
                             Notifications::create($lead->employee_id, 'AutoCreated new Lead (' . $lead->id . ')', 'A new lead (' . $lead->id . ') has been created for you. Call Id: ' . $this->c_id, Notifications::TYPE_SUCCESS, true);
                             //Notifications::socket($lead->employee_id, null, 'getNewNotification', [], true);
                             $userListSocketNotification[$lead->employee_id] = $lead->employee_id;
-                            Notifications::socket($lead->employee_id, null, 'openUrl', ['url' => $host . '/lead/view/' . $lead->gid], false);
+                            // Notifications::socket($lead->employee_id, null, 'openUrl', ['url' => $host . '/lead/view/' . $lead->gid], false);
+
+                            Notifications::sendSocket('openUrl', ['user_id' => $lead->employee_id], ['url' => $host . '/lead/view/' . $lead->gid], false);
+
                         } else {
                             Yii::error(VarDumper::dumpAsString($lead->errors), 'Call:afterSave:Lead:update');
                         }
@@ -707,7 +710,8 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
                             //Notifications::socket($case->cs_user_id, null, 'getNewNotification', [], true);
 
                             $userListSocketNotification[$case->cs_user_id] = $case->cs_user_id;
-                            Notifications::socket($case->cs_user_id, null, 'openUrl', ['url' => $host . '/cases/view/' . $case->cs_gid], false);
+                            //Notifications::socket($case->cs_user_id, null, 'openUrl', ['url' => $host . '/cases/view/' . $case->cs_gid], false);
+                            Notifications::sendSocket('openUrl', ['user_id' => $case->cs_user_id], ['url' => $host . '/cases/view/' . $case->cs_gid], false);
                         } else {
                             Yii::error(VarDumper::dumpAsString($case->errors), 'Call:afterSave:Case:update');
                         }
@@ -721,16 +725,20 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
         }
 
         if (($insert && $this->c_created_user_id) || (isset($changedAttributes['c_status_id']) && $this->c_created_user_id))  {
-            Notifications::socket($this->c_created_user_id, $this->c_lead_id, 'callUpdate', ['id' => $this->c_id, 'status' => $this->getStatusName(), 'duration' => $this->c_call_duration, 'snr' => $this->c_sequence_number], true);
+            //Notifications::socket($this->c_created_user_id, $this->c_lead_id, 'callUpdate', ['id' => $this->c_id, 'status' => $this->getStatusName(), 'duration' => $this->c_call_duration, 'snr' => $this->c_sequence_number], true);
+
+            Notifications::sendSocket('callUpdate', ['user_id' => $this->c_created_user_id, 'lead_id' => $this->c_lead_id], ['id' => $this->c_id, 'status' => $this->getStatusName(), 'duration' => $this->c_call_duration, 'snr' => $this->c_sequence_number]);
         }
 
         if ($this->c_lead_id) {
-            Notifications::socket(null, $this->c_lead_id, 'updateCommunication', ['lead_id' => $this->c_lead_id, 'status_id' => $this->c_status_id, 'status' => $this->getStatusName()], true);
+            //Notifications::socket(null, $this->c_lead_id, 'updateCommunication', ['lead_id' => $this->c_lead_id, 'status_id' => $this->c_status_id, 'status' => $this->getStatusName()], true);
+            Notifications::sendSocket('updateCommunication', ['lead_id' => $this->c_lead_id], ['lead_id' => $this->c_lead_id, 'status_id' => $this->c_status_id, 'status' => $this->getStatusName()]);
         }
 
         if ($userListSocketNotification) {
             foreach ($userListSocketNotification as $userId) {
-                Notifications::socket($userId, null, 'getNewNotification', [], true);
+                // Notifications::socket($userId, null, 'getNewNotification', [], true);
+                Notifications::sendSocket('getNewNotification', ['user_id' => $userId]);
             }
             unset($userListSocketNotification);
         }
@@ -844,7 +852,9 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
                         Notifications::TYPE_WARNING,
                         true);
 
-                    Notifications::socket($call->c_created_user_id, null, 'getNewNotification', [], true);
+                    // Notifications::socket($call->c_created_user_id, null, 'getNewNotification', [], true);
+                    Notifications::sendSocket('getNewNotification', ['user_id' => $call->c_created_user_id]);
+
 
                     //Notifications::create($call->c_source_type_id, 'New incoming Call (' . $this->cua_call_id . ')', 'New incoming Call (' . $this->cua_call_id . ')', Notifications::TYPE_SUCCESS, true);
                     //Notifications::socket($this->cua_user_id, null, 'getNewNotification', [], true);
