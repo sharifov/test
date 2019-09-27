@@ -1359,7 +1359,15 @@ class LeadSearch extends Lead
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> ['defaultOrder' => ['created' => SORT_DESC]],
+            'sort'=> [
+                'defaultOrder' => ['updated' => SORT_DESC],
+                'attributes' => [
+                    'id',
+                    'project_id',
+                    'created',
+                    'updated'
+                ]
+            ],
             'pagination' => [
                 'pageSize' => 30,
             ],
@@ -1374,11 +1382,13 @@ class LeadSearch extends Lead
         }
 
         if ($this->created) {
-            $query->andFilterWhere(['=', 'date(created)', date('Y-m-d', strtotime($this->created))]);
+            $query->andFilterWhere(['>=', 'created', Employee::convertTimeFromUserDtToUTC(strtotime($this->created))])
+                ->andFilterWhere(['<=', 'created', Employee::convertTimeFromUserDtToUTC(strtotime($this->created) + 3600 * 24)]);
         }
 
         if ($this->updated) {
-            $query->andFilterWhere(['=', 'date(updated)', date('Y-m-d', strtotime($this->updated))]);
+            $query->andFilterWhere(['>=', 'updated', Employee::convertTimeFromUserDtToUTC(strtotime($this->updated))])
+                ->andFilterWhere(['<=', 'updated', Employee::convertTimeFromUserDtToUTC(strtotime($this->updated) + 3600 * 24)]);
         }
 
         if ($this->date_range && $this->datetime_start && $this->datetime_end && empty($this->created) && empty($this->updated)) {

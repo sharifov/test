@@ -2010,6 +2010,7 @@ class LeadController extends FController
 
     /**
      * @return string
+     * @throws \Exception
      */
     public function actionTrash(): string
     {
@@ -2019,9 +2020,6 @@ class LeadController extends FController
         $params2 = Yii::$app->request->post();
 
         $params = array_merge($params, $params2);
-
-        $searchModel->datetime_start = date('Y-m-d H:i', strtotime('-0 day'));
-        $searchModel->datetime_end = date('Y-m-d H:i');
 
         /** @var Employee $user */
         $user = Yii::$app->user->identity;
