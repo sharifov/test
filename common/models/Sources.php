@@ -49,10 +49,10 @@ class Sources extends \yii\db\ActiveRecord implements AggregateRoot
             [['default', 'hidden'], 'boolean'],
             [['last_update'], 'safe'],
             [['name', 'cid'], 'string', 'max' => 255],
-            [['phone_number'], 'string', 'max' => 20],
-            [['phone_number'], 'default', 'value' => null],
-            [['phone_number'], 'unique'],
-            [['phone_number'], PhoneInputValidator::class],
+//            [['phone_number'], 'string', 'max' => 20],
+//            [['phone_number'], 'default', 'value' => null],
+//            [['phone_number'], 'unique'],
+//            [['phone_number'], PhoneInputValidator::class],
 
             [['project_id'], 'exist', 'skipOnError' => true, 'targetClass' => Project::class, 'targetAttribute' => ['project_id' => 'id']],
         ];
