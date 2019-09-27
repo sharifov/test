@@ -233,45 +233,45 @@ class Notifications extends ActiveRecord
     }
 
 
-    /**
-     * @param int|null $user_id
-     * @param int|null $lead_id
-     * @param string|null $command
-     * @param array $data
-     * @param bool $multiple
-     * @return bool
-     */
-    public static function socket(int $user_id = null, int $lead_id = null, string $command = null, array $data = [], bool $multiple = true) : bool
-    {
-        $socket = 'tcp://127.0.0.1:1234';
-        if($command) {
-            $data['command'] = $command;
-        }
-        $jsonData = [];
-
-        if($user_id) {
-            $jsonData['user_id'] = $user_id;
-        }
-
-        if($lead_id) {
-            $jsonData['lead_id'] = $lead_id;
-        }
-
-        $jsonData['multiple'] = $multiple;
-        $jsonData['data'] = $data;
-
-        try {
-            // connect tcp-server
-            $instance = stream_socket_client($socket);
-            // send message
-            if (fwrite($instance, Json::encode($jsonData) . "\n")) {
-                return true;
-            }
-        } catch (\Throwable $exception) {
-            Yii::error(VarDumper::dumpAsString($exception->getMessage(), 10), 'Notifications:socket:stream_socket_client');
-        }
-        return false;
-    }
+//    /**
+//     * @param int|null $user_id
+//     * @param int|null $lead_id
+//     * @param string|null $command
+//     * @param array $data
+//     * @param bool $multiple
+//     * @return bool
+//     */
+//    public static function socket(int $user_id = null, int $lead_id = null, string $command = null, array $data = [], bool $multiple = true) : bool
+//    {
+//        $socket = 'tcp://127.0.0.1:1234';
+//        if($command) {
+//            $data['command'] = $command;
+//        }
+//        $jsonData = [];
+//
+//        if($user_id) {
+//            $jsonData['user_id'] = $user_id;
+//        }
+//
+//        if($lead_id) {
+//            $jsonData['lead_id'] = $lead_id;
+//        }
+//
+//        $jsonData['multiple'] = $multiple;
+//        $jsonData['data'] = $data;
+//
+//        try {
+//            // connect tcp-server
+//            $instance = stream_socket_client($socket);
+//            // send message
+//            if (fwrite($instance, Json::encode($jsonData) . "\n")) {
+//                return true;
+//            }
+//        } catch (\Throwable $exception) {
+//            Yii::error(VarDumper::dumpAsString($exception->getMessage(), 10), 'Notifications:socket:stream_socket_client');
+//        }
+//        return false;
+//    }
 
 
     /**
@@ -333,7 +333,7 @@ class Notifications extends ActiveRecord
         if($users) {
             foreach ($users as $user_id) {
                 // self::socket($user_id, null, 'callMapUpdate', [], true);
-                self::sendSocket('getNewNotification', ['user_id' => $user_id]);
+                self::sendSocket('callMapUpdate', ['user_id' => $user_id]);
             }
         }
     }

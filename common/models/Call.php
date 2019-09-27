@@ -727,12 +727,23 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
         if (($insert && $this->c_created_user_id) || (isset($changedAttributes['c_status_id']) && $this->c_created_user_id))  {
             //Notifications::socket($this->c_created_user_id, $this->c_lead_id, 'callUpdate', ['id' => $this->c_id, 'status' => $this->getStatusName(), 'duration' => $this->c_call_duration, 'snr' => $this->c_sequence_number], true);
 
-            Notifications::sendSocket('callUpdate', ['user_id' => $this->c_created_user_id, 'lead_id' => $this->c_lead_id], ['id' => $this->c_id, 'status' => $this->getStatusName(), 'duration' => $this->c_call_duration, 'snr' => $this->c_sequence_number]);
+            Notifications::sendSocket('callUpdate', ['user_id' => $this->c_created_user_id, 'lead_id' => $this->c_lead_id, 'case_id' => $this->c_case_id],
+                ['id' => $this->c_id, 'status' => $this->getStatusName(), 'duration' => $this->c_call_duration, 'snr' => $this->c_sequence_number]);
         }
 
-        if ($this->c_lead_id) {
+        if ($this->c_lead_id || $this->c_case_id) {
             //Notifications::socket(null, $this->c_lead_id, 'updateCommunication', ['lead_id' => $this->c_lead_id, 'status_id' => $this->c_status_id, 'status' => $this->getStatusName()], true);
-            Notifications::sendSocket('updateCommunication', ['lead_id' => $this->c_lead_id], ['lead_id' => $this->c_lead_id, 'status_id' => $this->c_status_id, 'status' => $this->getStatusName()]);
+
+            $socketParams = [];
+            if ($this->c_lead_id) {
+                $socketParams['lead_id'] = $this->c_lead_id;
+            }
+
+            if ($this->c_case_id) {
+                $socketParams['case_id'] = $this->c_case_id;
+            }
+
+            Notifications::sendSocket('updateCommunication', $socketParams, ['lead_id' => $this->c_lead_id, 'case_id' => $this->c_case_id, 'status_id' => $this->c_status_id, 'status' => $this->getStatusName()]);
         }
 
         if ($userListSocketNotification) {
