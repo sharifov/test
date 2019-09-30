@@ -705,7 +705,8 @@ class Quote extends \yii\db\ActiveRecord implements AggregateRoot
                     if ($depDateTime == false) {
                         continue;
                     }
-                    if ($now->format('m') > $depDateTime->format('m')) {
+                    /*$now->format('m') > $depDateTime->format('m')*/
+                    if ($now->getTimestamp() > $depDateTime->getTimestamp()) {
                         $depDateTime->add(\DateInterval::createFromDateString('+1 year'));
                     }
 
@@ -730,8 +731,8 @@ class Quote extends \yii\db\ActiveRecord implements AggregateRoot
                     if ($matches[4][1] != '') {
                         $arrDateTime->add(new \DateInterval('P' . $matches[4][1] . 'D'));
                     }
-
-                    if ($now->format('m') > $arrDateTime->format('m')) {
+                    /*$now->format('m') > $arrDateTime->format('m')*/
+                    if ($now->getTimestamp() > $arrDateTime->getTimestamp()) {
                         $arrDateTime->add(\DateInterval::createFromDateString('+1 year'));
                     }
 
@@ -938,7 +939,8 @@ class Quote extends \yii\db\ActiveRecord implements AggregateRoot
                 if ($depDateTime == false) {
                     continue;
                 }
-                if ($now->format('m') > $depDateTime->format('m')) {
+                /*$now->format('m') > $depDateTime->format('m')*/
+                if ($now->getTimestamp() > $depDateTime->getTimestamp()) {
                     $depDateTime->add(\DateInterval::createFromDateString('+1 year'));
                 }
 
@@ -963,8 +965,8 @@ class Quote extends \yii\db\ActiveRecord implements AggregateRoot
                 if ($matches[4][1] != '') {
                     $arrDateTime->add(new \DateInterval('P' . $matches[4][1] . 'D'));
                 }
-
-                if ($now->format('m') > $arrDateTime->format('m')) {
+                /*$now->format('m') > $arrDateTime->format('m')*/
+                if ($now->getTimestamp() > $arrDateTime->getTimestamp()) {
                     $arrDateTime->add(\DateInterval::createFromDateString('+1 year'));
                 }
 
