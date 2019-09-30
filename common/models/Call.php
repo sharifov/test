@@ -634,7 +634,7 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
             }
 
 
-            if ($this->c_case_id && isset($changedAttributes['c_call_status']) && $this->isIn() && $this->isStatusInProgress()) {
+            if ($this->c_case_id && isset($changedAttributes['c_status_id']) && $this->isIn() && $this->isStatusInProgress()) {
                 if ($this->c_created_user_id && $this->cCase && $this->c_created_user_id !== $this->cCase->cs_user_id) {
                     try {
                         $casesManageService = Yii::createObject(CasesManageService::class);
@@ -647,7 +647,7 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
 
             //Yii::info(VarDumper::dumpAsString($this->attributes), 'info\Call:afterSave');
 
-            if ($this->c_lead_id && isset($changedAttributes['c_call_status']) && $this->isIn() && ($this->isStatusNoAnswer() || $this->isStatusCompleted())) {
+            if ($this->c_lead_id && isset($changedAttributes['c_status_id']) && $this->isIn() && ($this->isStatusCanceled() || $this->isStatusNoAnswer() || $this->isStatusBusy() || $this->isStatusCompleted())) {
 
                 if ($this->cLead2 && (int) $this->cLead2->l_call_status_id === Lead::CALL_STATUS_QUEUE) {
                     $lead = $this->cLead2;
