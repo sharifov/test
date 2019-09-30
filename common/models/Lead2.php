@@ -500,12 +500,13 @@ class Lead2 extends \yii\db\ActiveRecord
     }
 
 
-    /**
-     * @param string $phoneNumber
-     * @param int $project_id
-     * @return Lead2
-     */
-    public static function createNewLeadByPhone(string $phoneNumber = '', int $project_id = 0): Lead2
+	/**
+	 * @param string $phoneNumber
+	 * @param int $project_id
+	 * @param int $source_id
+	 * @return Lead2
+	 */
+    public static function createNewLeadByPhone(string $phoneNumber = '', int $project_id = 0, int $source_id = 0): Lead2
     {
         $lead = new self();
         $clientPhone = ClientPhone::find()->where(['phone' => $phoneNumber])->orderBy(['id' => SORT_DESC])->limit(1)->one();
@@ -534,12 +535,15 @@ class Lead2 extends \yii\db\ActiveRecord
             //$lead->employee_id = $this->c_created_user_id;
             $lead->client_id = $client->id;
             $lead->project_id = $project_id;
+            $lead->source_id = $source_id;
             $lead->l_call_status_id = Lead::CALL_STATUS_QUEUE;
 
             //$source = Source::find()->select('id')->where(['phone_number' => $this->c_to])->limit(1)->one();
+			$source = Sources::findOne(['id' => $lead->source_id]);
 
-            $source = Sources::find()->select('id')->where(['project_id' => $lead->project_id, 'default' => true])->one();
-
+			if (!$source) {
+				$source = Sources::find()->select('id')->where(['project_id' => $lead->project_id, 'default' => true])->one();
+			}
 
             if($source) {
                 $lead->source_id = $source->id;

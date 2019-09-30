@@ -264,7 +264,6 @@ class CommunicationController extends ApiBaseController
             //$clientPhone = ClientPhone::find()->where(['phone' => $client_phone_number])->orderBy(['id' => SORT_DESC])->limit(1)->one();
 
             $departmentPhone = DepartmentPhoneProject::find()->where(['dpp_phone_number' => $incoming_phone_number, 'dpp_enable' => true])->limit(1)->one();
-
             if ($departmentPhone) {
 
                 $project = $departmentPhone->dppProject;
@@ -278,11 +277,12 @@ class CommunicationController extends ApiBaseController
 
                 $call_project_id = $departmentPhone->dpp_project_id;
                 $call_dep_id = $departmentPhone->dpp_dep_id;
+                $call_source_id = $departmentPhone->dpp_source_id;
 
                 $ivrEnable = (bool)$departmentPhone->dpp_ivr_enable;
 
                 $callModel = $this->findOrCreateCall($callSid, $parentCallSid, $postCall, $call_project_id,
-                    $call_dep_id);
+                    $call_dep_id, $call_source_id);
 
                 if ($departmentPhone->dugUgs) {
                     foreach ($departmentPhone->dugUgs as $userGroup) {
@@ -703,21 +703,22 @@ class CommunicationController extends ApiBaseController
     }
 
 
-    /**
-     * @param string $callSid
-     * @param string|null $parentCallSid
-     * @param array $calData
-     * @param int $call_project_id
-     * @param int|null $call_dep_id
-     * @return Call
-     * @throws \Exception
-     */
-    protected function findOrCreateCall(string $callSid, ?string $parentCallSid, array $calData, int $call_project_id, ?int $call_dep_id): Call
+	/**
+	 * @param string $callSid
+	 * @param string|null $parentCallSid
+	 * @param array $calData
+	 * @param int $call_project_id
+	 * @param int|null $call_dep_id
+	 * @param int|null $call_source_id
+	 * @return Call
+	 * @throws \Exception
+	 */
+    protected function findOrCreateCall(string $callSid, ?string $parentCallSid, array $calData, int $call_project_id, ?int $call_dep_id, ?int $call_source_id = null): Call
     {
         $call = null;
         $parentCall = null;
         $clientPhone = null;
-        
+
         //error_log("Call Data: " . print_r($calData, true));
 
         if (isset($calData['From']) && $calData['From']) {
@@ -782,6 +783,7 @@ class CommunicationController extends ApiBaseController
             $call->c_from = $calData['From'];
             $call->c_to = $calData['To']; //Called
             $call->c_created_user_id = null;
+            $call->c_source_id = $call_source_id;
 
             if ($clientPhone && $clientPhone->client_id) {
                 $call->c_client_id = $clientPhone->client_id;

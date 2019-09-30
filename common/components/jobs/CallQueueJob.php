@@ -96,7 +96,7 @@ class CallQueueJob extends BaseObject implements JobInterface
                         if ($call->c_from) {
                             $lead = Lead2::findLastLeadByClientPhone($call->c_from, $call->c_project_id);
                             if (!$lead) {
-                                $lead = Lead2::createNewLeadByPhone($call->c_from, $call->c_project_id);
+                                $lead = Lead2::createNewLeadByPhone($call->c_from, $call->c_project_id, $call->c_source_id);
                             }
                             if ($lead) {
                                 $call->c_lead_id = $lead->id;
