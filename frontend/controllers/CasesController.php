@@ -620,7 +620,7 @@ class CasesController extends FController
         $query3 = (new \yii\db\Query())
             ->select(['c_id AS id', new Expression('"voice" AS type'), 'c_case_id AS case_id', 'c_created_dt AS created_dt'])
             ->from('call')
-            ->where(['c_case_id' => $model->cs_id]);
+            ->where(['c_case_id' => $model->cs_id, 'c_parent_id' => null]);
 
 
         $unionQuery = (new \yii\db\Query())
