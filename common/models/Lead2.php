@@ -7,6 +7,7 @@ use common\components\jobs\UpdateLeadBOJob;
 use common\models\local\LeadLogMessage;
 use Yii;
 use yii\behaviors\TimestampBehavior;
+use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 use yii\helpers\VarDumper;
 
@@ -86,6 +87,9 @@ use yii\helpers\VarDumper;
  * @property TipsSplit[] $tipsSplits
  * @property Employee[] $tsUsers
  * @property UserConnection[] $userConnections
+ * @property LeadQcall $leadQcall
+ *
+ * @property LeadFlow $lastLeadFlow
  */
 class Lead2 extends \yii\db\ActiveRecord
 {
@@ -413,6 +417,22 @@ class Lead2 extends \yii\db\ActiveRecord
     }
 
     /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getLeadQcall(): ActiveQuery
+    {
+        return $this->hasOne(LeadQcall::class, ['lqc_lead_id' => 'id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getLastLeadFlow(): ActiveQuery
+    {
+        return $this->hasOne(LeadFlow::class, ['lead_id' => 'id'])->orderBy([LeadFlow::tableName() . '.id' => SORT_DESC])->limit(1);
+    }
+
+    /**
      * {@inheritdoc}
      * @return LeadsQuery the active query used by this AR class.
      */
@@ -445,6 +465,47 @@ class Lead2 extends \yii\db\ActiveRecord
     }
 
     /**
+     * @return bool
+     */
+    public function createOrUpdateQCall(): bool
+    {
+
+        if ($this->lastLeadFlow) {
+            $callCount = (int) $this->lastLeadFlow->lf_out_calls;
+        } else {
+            $callCount = 0;
+        }
+
+        $qcConfig = QcallConfig::getByStatusCall($this->status, $callCount);
+        $lq = $this->leadQcall;
+
+        if ($qcConfig) {
+            if (!$lq) {
+                $lq = new LeadQcall();
+                $lq->lqc_lead_id = $this->id;
+                $lq->lqc_weight = $this->project_id * 10;
+            }
+
+            $lq->lqc_dt_from = date('Y-m-d H:i:s', (time() + ((int) $qcConfig->qc_time_from * 60)));
+            $lq->lqc_dt_to = date('Y-m-d H:i:s', (time() + ((int) $qcConfig->qc_time_to * 60)));
+
+            if (!$lq->save()) {
+                Yii::error(VarDumper::dumpAsString($lq->errors), 'Lead2:createOrUpdateQCall:LeadQcall:save');
+                return true;
+            }
+        } else {
+            if ($lq) {
+                try {
+                    $lq->delete();
+                } catch (\Throwable $throwable) {
+                    Yii::error($throwable->getMessage(), 'Lead2:createOrUpdateQCall:Throwable');
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
      * @param bool $insert
      * @param array $changedAttributes
      */
@@ -454,6 +515,11 @@ class Lead2 extends \yii\db\ActiveRecord
 
         if ($insert) {
             LeadFlow::addStateFlow2($this, $insert);
+
+            //if ($this->scenario === self::SCENARIO_API) {
+                $this->createOrUpdateQCall();
+            //}
+
         } else {
             if (isset($changedAttributes['status']) && $changedAttributes['status'] !== $this->status) {
                 LeadFlow::addStateFlow2($this, $insert);
@@ -573,6 +639,14 @@ class Lead2 extends \yii\db\ActiveRecord
         }
 
         return $lead;
+    }
+
+    /**
+     * @return int
+     */
+    public function updateLastAction() : int
+    {
+        return self::updateAll(['l_last_action_dt' => date('Y-m-d H:i:s')], ['id' => $this->id]);
     }
 
 }

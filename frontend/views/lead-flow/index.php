@@ -167,6 +167,8 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
                 //'filter' => Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) ? \common\models\UserGroup::getList() : Yii::$app->user->identity->getUserGroupList()
             ],
 
+            'lf_out_calls',
+
             //'employee_id',
             //'status',
             //['class' => 'yii\grid\ActionColumn'],
