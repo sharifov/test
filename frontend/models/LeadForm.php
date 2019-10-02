@@ -9,6 +9,7 @@ use common\models\LeadFlightSegment;
 use common\models\LeadPreferences;
 use yii\base\Exception;
 use yii\base\Model;
+use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
 
 /**
@@ -82,6 +83,7 @@ class LeadForm extends Model
 
             if ($lead->leadPreferences === null) {
                 $this->setLeadPreferences(new LeadPreferences());
+
             } else {
                 $this->setLeadPreferences($lead->leadPreferences);
             }
@@ -203,11 +205,12 @@ class LeadForm extends Model
     /**
      * @return LeadPreferences
      */
-    public function getLeadPreferences(): LeadPreferences
+    public function getLeadPreferences()
     {
         return ($this->_leadPreferences !== null)
             ? $this->_leadPreferences
             : new LeadPreferences();
+
     }
 
     /**

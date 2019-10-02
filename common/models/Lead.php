@@ -108,7 +108,7 @@ use common\components\SearchService;
  * @property LeadLog[] $leadLogs
  * @property LeadFlightSegment[] $leadFlightSegments
  * @property LeadFlow[] $leadFlows
- * @property LeadPreferences[] $leadPreferences
+ * @property LeadPreferences $leadPreferences
  * @property LeadQcall $leadQcall
  * @property Client $client
  * @property Employee $employee
@@ -1099,7 +1099,7 @@ class Lead extends ActiveRecord implements AggregateRoot
      */
     public function getLeadPreferences(): ActiveQuery
     {
-        return $this->hasMany(LeadPreferences::class, ['lead_id' => 'id']);
+        return $this->hasOne(LeadPreferences::class, ['lead_id' => 'id']);
     }
 
     /**
