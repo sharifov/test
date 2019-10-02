@@ -52,8 +52,7 @@ class LeadSoldEventListener
         $airlineName = '-';
         $profit = 0;
         if (!empty($quote)) {
-            $airline = Airline::findOne(['iata' => $quote->main_airline_code]);
-            if (!empty($airline)) {
+            if ($airline = Airline::findOne(['iata' => $quote->main_airline_code])) {
                 $airlineName = $airline->name;
             }
             $profit = number_format(Quote::countProfit($quote->id), 2);

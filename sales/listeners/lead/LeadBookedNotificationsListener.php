@@ -11,6 +11,7 @@ use Yii;
 
 /**
  * Class LeadBookedEventListener
+ *
  * @property UserRepository $userRepository
  */
 class LeadBookedEventListener

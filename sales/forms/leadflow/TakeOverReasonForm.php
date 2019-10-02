@@ -5,6 +5,12 @@ namespace sales\forms\leadflow;
 use common\models\Lead;
 use yii\base\Model;
 
+/**
+ * Class ReasonForm
+ *
+ * @property int $leadId
+ * @property int $duplicateId
+ */
 class ReasonForm extends Model
 {
 
@@ -49,6 +55,36 @@ class ReasonForm extends Model
             0 => 'Other'
         ],
     ];
+
+    public $leadId;
+
+    public $duplicateId;
+
+    /**
+     * @return array
+     */
+    public function rules(): array
+    {
+        return [
+            ['leadId', 'required'],
+            ['leadId', 'integer'],
+
+            ['duplicateId', 'integer'],
+            ['duplicateId', 'duplicateExist'],
+
+
+        ];
+    }
+
+    /**
+     * @return bool
+     */
+    public function duplicateExist(): void
+    {
+        if (!Lead::find()->active()->andWhere(['id' => $this->duplicateId])->exists()) {
+            $this->addError('duplicateId', 'Lead: ' . $this->duplicateId . ' not found');
+        }
+    }
 
     /**
      * @param int $statusId

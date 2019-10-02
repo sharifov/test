@@ -10,6 +10,7 @@ use Yii;
 
 /**
  * Class LeadOwnerChangedEventListener
+ *
  * @property UserRepository $userRepository
  */
 class LeadOwnerChangedEventListener
@@ -18,7 +19,6 @@ class LeadOwnerChangedEventListener
     private $userRepository;
 
     /**
-     * LeadOwnerChangedEventListener constructor.
      * @param UserRepository $userRepository
      */
     public function __construct(UserRepository $userRepository)
