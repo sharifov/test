@@ -9,29 +9,36 @@ use common\models\Lead;
  *
  * @property Lead $lead
  * @property int|null $oldStatus
- * @property int $newOwnerId
+ * @property int|null $ownerId
  * @property int|null $oldOwnerId
+ * @property string|null $description
+ * @property string $created
  */
 class LeadProcessingEvent
 {
 
     public $lead;
     public $oldStatus;
-    public $newOwnerId;
+    public $ownerId;
     public $oldOwnerId;
+    public $description;
+    public $created;
 
     /**
      * @param Lead $lead
      * @param int|null $oldStatus
-     * @param int $newOwnerId
+     * @param int $ownerId
      * @param int|null $oldOwnerId
+     * @param string|null $description
      */
-    public function __construct(Lead $lead, ?int $oldStatus, int $newOwnerId, ?int $oldOwnerId)
+    public function __construct(Lead $lead, ?int $oldStatus, int $ownerId, ?int $oldOwnerId, ?string $description)
     {
         $this->lead = $lead;
         $this->oldStatus = $oldStatus;
-        $this->newOwnerId = $newOwnerId;
+        $this->ownerId = $ownerId;
         $this->oldOwnerId = $oldOwnerId;
+        $this->description = $description;
+        $this->created = date('Y-m-d H:i:s');
     }
 
 }
