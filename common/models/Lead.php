@@ -167,14 +167,6 @@ class Lead extends ActiveRecord implements AggregateRoot
         self::STATUS_SNOOZE         => 'Snooze',
     ];
 
-    public const CLONE_REASONS = [
-        1 => 'Group travel',
-        2 => 'Alternative credit card',
-        3 => 'Different flight',
-        4 => 'Flight adjustments',
-        0 => 'Other',
-    ];
-
     public const STATUS_MULTIPLE_UPDATE_LIST = [
         self::STATUS_FOLLOW_UP      => self::STATUS_LIST[self::STATUS_FOLLOW_UP],
         self::STATUS_ON_HOLD        => self::STATUS_LIST[self::STATUS_ON_HOLD],
@@ -357,6 +349,7 @@ class Lead extends ActiveRecord implements AggregateRoot
         $lead->l_client_email = $clientEmail;
         $lead->l_dep_id = $depId;
         $lead->l_delayed_charge = $delayedCharge;
+        $lead->status = null;
         $lead->recordEvent(new LeadCreatedEvent($lead));
         return $lead;
     }
@@ -506,15 +499,12 @@ class Lead extends ActiveRecord implements AggregateRoot
     }
 
     /**
-     * @param int|null $userId
+     * @param int $userId
      */
-    private function setOwner(?int $userId): void
+    private function setOwner(int $userId): void
     {
         if (!$this->isOwner($userId)) {
             $this->recordEvent(new LeadOwnerChangedEvent($this, $this->employee_id, $userId));
-            if ($this->isProcessing()) {
-                $this->recordEvent(new LeadTaskEvent($this), LeadTaskEvent::class);
-            }
         }
         $this->employee_id = $userId;
     }
@@ -544,10 +534,6 @@ class Lead extends ActiveRecord implements AggregateRoot
         if ($this->status !== $status) {
 
             $this->recordEvent(new LeadStatusChangedEvent($this, $this->status, $status, $this->employee_id));
-
-            if ($status === self::STATUS_PROCESSING) {
-                $this->recordEvent(new LeadTaskEvent($this), LeadTaskEvent::class);
-            }
 
             if ($this->isCalledExpert() && in_array($status, [self::STATUS_TRASH, self::STATUS_FOLLOW_UP, self::STATUS_SNOOZE, self::STATUS_PROCESSING], true)) {
                 $this->recordEvent(new LeadCallExpertRequestEvent($this));
@@ -612,13 +598,16 @@ class Lead extends ActiveRecord implements AggregateRoot
         $this->trip_type = '';
     }
 
-    public function sold(): void
+    /**
+     * @param string|null $description
+     */
+    public function sold(?string $description = ''): void
     {
         self::guardStatus($this->status, self::STATUS_SOLD);
         if ($this->isSold()) {
             throw new \DomainException('Lead is already sold!');
         }
-        $this->recordEvent(new LeadSoldEvent($this, $this->status, $this->employee_id));
+        $this->recordEvent(new LeadSoldEvent($this, $this->status, $this->employee_id, $description));
         $this->setStatus(self::STATUS_SOLD);
     }
 
@@ -630,13 +619,16 @@ class Lead extends ActiveRecord implements AggregateRoot
         return $this->status === self::STATUS_SOLD;
     }
 
-    public function booked(): void
+    /**
+     * @param string|null $description
+     */
+    public function booked(?string $description = ''): void
     {
         self::guardStatus($this->status, self::STATUS_BOOKED);
         if ($this->isBooked()) {
             throw new \DomainException('Lead is already booked!');
         }
-        $this->recordEvent(new LeadBookedEvent($this, $this->status, $this->employee_id));
+        $this->recordEvent(new LeadBookedEvent($this, $this->status, $this->employee_id, $description));
         $this->setStatus(self::STATUS_BOOKED);
     }
 
@@ -649,17 +641,22 @@ class Lead extends ActiveRecord implements AggregateRoot
     }
 
     /**
-     * @param $snoozeFor
+     * @param string|null $snoozeFor
+     * @param string|null $description
      */
-    public function snooze($snoozeFor): void
+    public function snooze(?string $snoozeFor, ?string $description = ''): void
     {
         self::guardStatus($this->status, self::STATUS_SNOOZE);
         if ($this->isSnooze()) {
             throw new \DomainException('Lead is already snooze!');
         }
-        $snoozeFor = $snoozeFor ? date('Y-m-d H:i:s', strtotime($snoozeFor)) : null;
+        if ($snoozeFor) {
+            $snoozeFor = date('Y-m-d H:i:s', strtotime($snoozeFor));
+        } else {
+            $snoozeFor = null;
+        }
         $this->snooze_for = $snoozeFor;
-        $this->recordEvent(new LeadSnoozeEvent($this, $this->status, $this->employee_id));
+        $this->recordEvent(new LeadSnoozeEvent($this, $this->status, $this->employee_id, $snoozeFor, $description));
         $this->setStatus(self::STATUS_SNOOZE);
     }
 
@@ -671,13 +668,16 @@ class Lead extends ActiveRecord implements AggregateRoot
         return $this->status === self::STATUS_SNOOZE;
     }
 
-    public function followUp(): void
+    /**
+     * @param string|null $description
+     */
+    public function followUp(?string $description = ''): void
     {
         self::guardStatus($this->status, self::STATUS_FOLLOW_UP);
         if ($this->isFollowUp()) {
             throw new \DomainException('Lead is already follow up!');
         }
-        $this->recordEvent(new LeadFollowUpEvent($this, $this->status, $this->employee_id));
+        $this->recordEvent(new LeadFollowUpEvent($this, $this->status, $this->employee_id, $description));
         $this->freedOwner();
         $this->setStatus(self::STATUS_FOLLOW_UP);
     }
@@ -700,14 +700,16 @@ class Lead extends ActiveRecord implements AggregateRoot
 
     /**
      * @param int $userId
+     * @param string|null $description
      */
-    public function processing(int $userId): void
+    public function processing(int $userId, ?string $description = ''): void
     {
         self::guardStatus($this->status, self::STATUS_PROCESSING);
         if ($this->isAlreadyProcessingUser($userId)) {
             throw new \DomainException('Lead is already processing to this user');
         }
-        $this->recordEvent(new LeadProcessingEvent($this, $this->status, $userId, $this->employee_id));
+        $this->recordEvent(new LeadProcessingEvent($this, $this->status, $userId, $this->employee_id, $description));
+        $this->recordEvent(new LeadTaskEvent($this), LeadTaskEvent::class);
         if (!$this->isOwner($userId)) {
             $this->setOwner($userId);
         }
@@ -725,10 +727,13 @@ class Lead extends ActiveRecord implements AggregateRoot
         return $this->isOwner($userId) && $this->isProcessing();
     }
 
-    public function pending(): void
+    /**
+     * @param string|null $description
+     */
+    public function pending(?string $description = ''): void
     {
         self::guardStatus($this->status, self::STATUS_PENDING);
-        $this->recordEvent(new LeadPendingEvent($this, $this->status, $this->employee_id));
+        $this->recordEvent(new LeadPendingEvent($this, $this->status, $this->employee_id, $description));
         $this->setStatus(self::STATUS_PENDING);
     }
 
@@ -749,13 +754,16 @@ class Lead extends ActiveRecord implements AggregateRoot
         return $this->status === self::STATUS_PENDING;
     }
 
-    public function trash(): void
+    /**
+     * @param string|null $description
+     */
+    public function trash(?string $description = ''): void
     {
         self::guardStatus($this->status, self::STATUS_TRASH);
         if ($this->isTrash()) {
             throw new \DomainException('Lead is already trash!');
         }
-        $this->recordEvent(new LeadTrashEvent($this, $this->status, $this->employee_id));
+        $this->recordEvent(new LeadTrashEvent($this, $this->status, $this->employee_id, $description));
         $this->setStatus(self::STATUS_TRASH);
     }
 
@@ -767,10 +775,13 @@ class Lead extends ActiveRecord implements AggregateRoot
         return $this->status === self::STATUS_TRASH;
     }
 
-    public function onHold(): void
+    /**
+     * @param string|null $description
+     */
+    public function onHold(?string $description = ''): void
     {
         self::guardStatus($this->status, self::STATUS_ON_HOLD);
-        $this->recordEvent(new LeadOnHoldEvent($this, $this->status, $this->employee_id));
+        $this->recordEvent(new LeadOnHoldEvent($this, $this->status, $this->employee_id, $description));
         $this->setStatus(self::STATUS_ON_HOLD);
     }
 
@@ -782,10 +793,13 @@ class Lead extends ActiveRecord implements AggregateRoot
         return $this->status === self::STATUS_ON_HOLD;
     }
 
-    public function reject(): void
+    /**
+     * @param string|null $description
+     */
+    public function reject(?string $description = ''): void
     {
         self::guardStatus($this->status, self::STATUS_REJECT);
-        $this->recordEvent(new LeadRejectEvent($this, $this->status, $this->employee_id));
+        $this->recordEvent(new LeadRejectEvent($this, $this->status, $this->employee_id, $description));
         $this->setStatus(self::STATUS_REJECT);
     }
 
@@ -841,10 +855,10 @@ class Lead extends ActiveRecord implements AggregateRoot
         $this->l_request_hash = $hash;
     }
 
-    public function setDuplicate(int $originId): void
+    public function duplicate(int $originId, ?string $description = ''): void
     {
         $this->l_duplicate_lead_id = $originId;
-        $this->trash();
+        $this->trash($description ?: 'Duplicate. OriginId: ' . $originId);
         $this->recordEvent(new LeadDuplicateDetectedEvent($this));
     }
 
@@ -870,6 +884,14 @@ class Lead extends ActiveRecord implements AggregateRoot
     public function isAvailableToTake(): bool
     {
         return in_array($this->status, [null, self::STATUS_TRASH, self::STATUS_PENDING, self::STATUS_FOLLOW_UP, self::STATUS_SNOOZE], true);
+    }
+
+    /**
+     * @return bool
+     */
+    public function isAvailableToProcessing(): bool
+    {
+        return $this->isAvailableToTake() || $this->isAvailableToTakeOver();
     }
 
     /**
@@ -1522,7 +1544,7 @@ class Lead extends ActiveRecord implements AggregateRoot
 
     public function getFlowTransition()
     {
-        return LeadFlow::findAll(['lead_id' => $this->id]);
+        return LeadFlow::find()->andWhere(['lead_id' => $this->id])->orderBy(['created' => SORT_ASC, 'id' => SORT_ASC])->all();
     }
 
     public function getPendingAfterCreate($created = null)
@@ -3442,6 +3464,11 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
         return $this->updated;
     }
 
+    public function getReasons()
+    {
+        return $this->hasMany(Reason::class, ['lead_id' => 'id']);
+    }
+    
     public function getLastReason()
     {
         $lastReason = Reason::find()->where(['lead_id' => $this->id])->orderBy(['created' => SORT_DESC])->one();
@@ -3607,7 +3634,12 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
         return $min;
     }
 
-
-
+    /**
+     * @return LeadQuery
+     */
+    public static function find(): LeadQuery
+    {
+        return new LeadQuery(get_called_class());
+    }
 
 }
