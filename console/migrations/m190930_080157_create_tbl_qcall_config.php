@@ -20,11 +20,11 @@ class m190930_080157_create_tbl_qcall_config extends Migration
 //    ];
 
     public $routes = [
-        '/lead_qcall/*',
+        '/lead-qcall/*',
     ];
 
     public $routes2 = [
-        '/qcall_config/*',
+        '/qcall-config/*',
     ];
 
     public $roles = [
@@ -48,26 +48,25 @@ class m190930_080157_create_tbl_qcall_config extends Migration
             $tableOptions = 'CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ENGINE=InnoDB';
         }
 
-
         $this->createTable('{{%qcall_config}}',	[
             'qc_status_id'              => $this->integer()->notNull(),
             'qc_call_att'               => $this->integer()->notNull(),
-            'qt_client_time_enable'     => $this->boolean()->defaultValue(false),
-            'qt_time_from'              => $this->integer()->notNull(),
-            'qt_time_to'                => $this->integer()->notNull(),
-            'qt_created_dt'             => $this->dateTime(),
-            'qt_updated_dt'             => $this->dateTime(),
-            'qt_created_user_id'        => $this->integer(),
-            'qt_updated_user_id'        => $this->integer(),
+            'qc_client_time_enable'     => $this->boolean()->defaultValue(false),
+            'qc_time_from'              => $this->integer()->notNull(),
+            'qc_time_to'                => $this->integer()->notNull(),
+            'qc_created_dt'             => $this->dateTime(),
+            'qc_updated_dt'             => $this->dateTime(),
+            'qc_created_user_id'        => $this->integer(),
+            'qc_updated_user_id'        => $this->integer(),
 
         ], $tableOptions);
 
-        $this->addPrimaryKey('PK-qcall_config', '{{%qcall_config}}', ['qc_status_id', 'qc_call_att', 'qt_client_time_enable']);
+        $this->addPrimaryKey('PK-qcall_config', '{{%qcall_config}}', ['qc_status_id', 'qc_call_att']);
 
         $this->addForeignKey(
-            'FK-qcall_config_qt_created_user_id',
+            'FK-qcall_config_qc_created_user_id',
             '{{%qcall_config}}',
-            'qt_created_user_id',
+            'qc_created_user_id',
             '{{%employees}}',
             'id',
             'SET NULL',
@@ -75,9 +74,9 @@ class m190930_080157_create_tbl_qcall_config extends Migration
         );
 
         $this->addForeignKey(
-            'FK-qcall_config_qt_updated_user_id',
+            'FK-qcall_config_qc_updated_user_id',
             '{{%qcall_config}}',
-            'qt_updated_user_id',
+            'qc_updated_user_id',
             '{{%employees}}',
             'id',
             'SET NULL',
@@ -90,9 +89,11 @@ class m190930_080157_create_tbl_qcall_config extends Migration
             'lqc_lead_id'   => $this->integer()->notNull(),
             'lqc_dt_from'   => $this->dateTime()->notNull(),
             'lqc_dt_to'     => $this->dateTime()->notNull(),
+            'lqc_weight'     => $this->integer()->defaultValue(0),
         ], $tableOptions);
 
         $this->addPrimaryKey('PK-lead_qcall_lqc_lead_id', '{{%lead_qcall}}', ['lqc_lead_id']);
+        $this->addForeignKey('FK-lead_qcall_lqc_lead_id', '{{%lead_qcall}}', ['lqc_lead_id'], '{{%leads}}', ['id'], 'CASCADE', 'CASCADE');
 
 
         $auth = Yii::$app->authManager;

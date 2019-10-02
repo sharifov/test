@@ -571,4 +571,12 @@ class Lead2 extends \yii\db\ActiveRecord
         return $lead;
     }
 
+    /**
+     * @return int
+     */
+    public function updateLastAction() : int
+    {
+        return self::updateAll(['l_last_action_dt' => date('Y-m-d H:i:s')], ['id' => $this->id]);
+    }
+
 }

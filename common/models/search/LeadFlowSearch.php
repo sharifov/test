@@ -27,7 +27,7 @@ class LeadFlowSearch extends LeadFlow
     public function rules()
     {
         return [
-            [['id', 'employee_id', 'lead_id', 'status', 'supervision_id', 'lf_from_status_id'], 'integer'],
+            [['id', 'employee_id', 'lead_id', 'status', 'supervision_id', 'lf_from_status_id', 'lf_out_calls'], 'integer'],
             [['created', 'created_date_from', 'created_date_to', 'statuses'], 'safe'],
         ];
     }
@@ -105,7 +105,8 @@ class LeadFlowSearch extends LeadFlow
             'employee_id' => $this->employee_id,
             'lead_id' => $this->lead_id,
             'status' => $this->status,
-            'lf_from_status_id' => $this->lf_from_status_id
+            'lf_from_status_id' => $this->lf_from_status_id,
+            'lf_out_calls' => $this->lf_out_calls
         ]);
 
         return $dataProvider;
