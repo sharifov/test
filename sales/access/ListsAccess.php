@@ -1,11 +1,9 @@
 <?php
 
-namespace sales\ui\user;
+namespace sales\access;
 
 use common\models\Employee;
 use common\models\Project;
-use sales\access\EmployeeDepartmentAccess;
-use sales\access\EmployeeProjectAccess;
 use sales\helpers\user\UserFinder;
 
 /**
