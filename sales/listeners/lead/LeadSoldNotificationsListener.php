@@ -12,16 +12,16 @@ use sales\repositories\user\UserRepository;
 use Yii;
 
 /**
- * Class LeadSoldEventListener
+ * Class LeadSoldNotificationsListener
+ *
  * @property UserRepository $userRepository
  */
-class LeadSoldEventListener
+class LeadSoldNotificationsListener
 {
 
     private $userRepository;
 
     /**
-     * LeadSoldEventListener constructor.
      * @param UserRepository $userRepository
      */
     public function __construct(UserRepository $userRepository)
@@ -34,19 +34,25 @@ class LeadSoldEventListener
      */
     public function handle(LeadSoldEvent $event): void
     {
-
-        $lead = $event->lead;
-        $ownerId = $event->ownerId ?: $lead->employee_id;
-        try {
-            $owner = $this->userRepository->find($ownerId);
-        } catch (NotFoundException $e) {
+        if (!$event->ownerId) {
             Yii::warning(
-                'Not found owner for sold lead: ' . $lead->id,
-                self::class . ':ownerNotFound'
+                'Not found ownerId on LeadSoldEvent Lead: ' . $event->lead->id,
+                'LeadSoldNotificationsListener:ownerIdNotFound'
             );
             return;
         }
 
+        try {
+            $owner = $this->userRepository->find($event->ownerId);
+        } catch (NotFoundException $e) {
+            Yii::warning(
+                'Not found owner for sold lead: ' . $event->lead->id,
+                'LeadSoldNotificationsListener:ownerNotFound'
+            );
+            return;
+        }
+
+        $lead = $event->lead;
         $quote = Quote::find()->where(['lead_id' => $lead->id, 'status' => Quote::STATUS_APPLIED])->orderBy(['id' => SORT_DESC])->one();
         $flightSegment = LeadFlightSegment::find()->where(['lead_id' => $lead->id])->orderBy(['id' => SORT_ASC])->one();
         $airlineName = '-';
@@ -81,7 +87,7 @@ Lead ID: {lead_id} ({url})
         } else {
             Yii::warning(
                 'Not created Email notification to employee_id: ' . $owner->id . ', lead: ' . $lead->id,
-                self::class . ':sendNotification'
+                'LeadSoldNotificationsListener:sendNotification'
             );
         }
 
