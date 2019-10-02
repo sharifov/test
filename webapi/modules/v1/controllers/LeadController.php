@@ -476,7 +476,7 @@ class LeadController extends ApiBaseController
         );
 
         if ($duplicate = $this->leadRepository->getByRequestHash($request_hash)) {
-            $lead->setDuplicate($duplicate->id);
+            $lead->duplicate($duplicate->id);
             Yii::info('Warning: detected duplicate Lead (Origin id: ' . $duplicate->id . ', Hash: ' . $request_hash . ')', 'nfo\API:Lead:duplicate');
         }
 
