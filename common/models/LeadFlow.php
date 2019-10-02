@@ -2,10 +2,10 @@
 
 namespace common\models;
 
-use sales\entities\AggregateRoot;
 use sales\entities\EventTrait;
 use Yii;
 use yii\helpers\VarDumper;
+use yii\validators\DateValidator;
 
 /**
  * This is the model class for table "lead_flow".
@@ -19,47 +19,63 @@ use yii\helpers\VarDumper;
  * @property string $lf_end_dt
  * @property int $lf_time_duration
  * @property int $lf_description
+ * @property int $lf_owner_id
  *
+ * @property Employee $owner
  * @property Employee $employee
  * @property Lead $lead
  * @property LeadFlowChecklist[] $leadFlowChecklist
  */
-class LeadFlow extends \yii\db\ActiveRecord implements AggregateRoot
+class LeadFlow extends \yii\db\ActiveRecord
 {
 
     use EventTrait;
 
     /**
-     * {@inheritdoc}
+     * @return string
      */
-    public static function tableName()
+    public static function tableName(): string
     {
-        return 'lead_flow';
+        return '{{%lead_flow}}';
     }
 
     /**
-     * @param $leadId
-     * @param $oldStatus
-     * @param $newStatus
-     * @param null $userId
-     * @param null $description
+     * @param int $leadId
+     * @param int|null $newStatus
+     * @param int|null $oldStatus
+     * @param int|null $ownerId
+     * @param int|null $createdUserId
+     * @param string|null $description
+     * @param string|null $created
      * @return LeadFlow
      */
-    public static function create($leadId, $oldStatus, $newStatus, $userId = null, $description = null): self
+    public static function create(
+        int $leadId,
+        int $newStatus,
+        ?int $oldStatus,
+        ?int $ownerId = null,
+        ?int $createdUserId = null,
+        ?string $description = null,
+        ?string $created = null
+    ): self
     {
         $leadFlow = new static();
         $leadFlow->lead_id = $leadId;
-        $leadFlow->lf_from_status_id = $oldStatus;
         $leadFlow->status = $newStatus;
-        $leadFlow->employee_id = $userId;
+        $leadFlow->lf_from_status_id = $oldStatus;
+        $leadFlow->lf_owner_id = $ownerId;
+        $leadFlow->employee_id = $createdUserId;
         $leadFlow->lf_description = $description;
-        $leadFlow->created = date('Y-m-d H:i:s');
+        $leadFlow->created = $created ? date('Y-m-d H:i:s', strtotime($created)) : date('Y-m-d H:i:s');
         return $leadFlow;
     }
 
-    public function setEndedTime()
+    /**
+     * @param string|null $nextCreated
+     */
+    public function end(?string $nextCreated = null): void
     {
-        $this->lf_end_dt = date('Y-m-d H:i:s');
+        $this->lf_end_dt = $nextCreated ? date('Y-m-d H:i:s', strtotime($nextCreated)) : date('Y-m-d H:i:s');
         $this->lf_time_duration = (int) (strtotime($this->lf_end_dt) - strtotime($this->created));
     }
 
@@ -102,6 +118,14 @@ class LeadFlow extends \yii\db\ActiveRecord implements AggregateRoot
     public function getEmployee()
     {
         return $this->hasOne(Employee::class, ['id' => 'employee_id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getOwner()
+    {
+        return $this->hasOne(Employee::class, ['id' => 'lf_owner_id']);
     }
 
     /**
