@@ -32,4 +32,18 @@ class UserFinder
         }
         throw new NotFoundException('User not found');
     }
+
+    /**
+     * @return int|null
+     */
+    public static function getCurrentUserId(): ?int
+    {
+        try {
+            $createdUserId = self::find()->id;
+        } catch (NotFoundException $e) {
+            $createdUserId = null;
+        }
+        return $createdUserId;
+    }
+
 }
