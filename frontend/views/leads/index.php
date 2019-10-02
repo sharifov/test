@@ -4,7 +4,7 @@ use yii\helpers\Url;
 use common\models\Email;
 use common\models\Sms;
 use common\models\Employee;
-use sales\ui\user\ListsAccess;
+use sales\access\ListsAccess;
 use yii\helpers\Html;
 use yii\helpers\VarDumper;
 use yii\widgets\Pjax;
@@ -750,7 +750,7 @@ $lists = new ListsAccess($user->id);
                         <?= $form->field($multipleForm, 'status_id')->dropDownList(Lead::getStatusList($role), ['prompt' => '-', 'id' => 'status_id']) ?>
 
                         <div id="reason_id_div" style="display: none">
-                            <?= $form->field($multipleForm, 'reason_id')->dropDownList(Reason::getReasonListByStatus(Lead::STATUS_PROCESSING), ['prompt' => '-', 'id' => 'reason_id']) // Lead::STATUS_REASON_LIST  ?>
+                            <?= $form->field($multipleForm, 'reason_id')->dropDownList([], ['prompt' => '-', 'id' => 'reason_id']) // Lead::STATUS_REASON_LIST  ?>
 
                             <div id="reason_description_div"
                                  style="display: none">
