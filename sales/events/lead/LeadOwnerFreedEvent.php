@@ -12,6 +12,7 @@ use common\models\Lead;
  */
 class LeadOwnerFreedEvent
 {
+
     public $lead;
     public $oldOwnerId;
 

@@ -12,6 +12,7 @@ use common\models\Lead;
  */
 class LeadCreatedCloneByUserEvent
 {
+
     public $lead;
     public $ownerId;
 
@@ -24,4 +25,5 @@ class LeadCreatedCloneByUserEvent
         $this->lead = $lead;
         $this->ownerId = $ownerId;
     }
+
 }

@@ -6,18 +6,19 @@ use common\models\Lead;
 
 /**
  * Class LeadOwnerChangedEvent
+ *
  * @property Lead $lead
  * @property int|null $oldOwnerId
  * @property int $newOwnerId
  */
 class LeadOwnerChangedEvent
 {
+
     public $lead;
     public $oldOwnerId;
     public $newOwnerId;
 
     /**
-     * LeadOwnerChangedEvent constructor.
      * @param Lead $lead
      * @param int|null $oldOwnerId
      * @param int $newOwnerId
@@ -28,4 +29,5 @@ class LeadOwnerChangedEvent
         $this->oldOwnerId = $oldOwnerId;
         $this->newOwnerId = $newOwnerId;
     }
+
 }

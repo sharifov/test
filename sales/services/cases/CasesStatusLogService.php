@@ -16,7 +16,6 @@ class CasesStatusLogService
     private $casesStatusLogRepository;
 
     /**
-     * CasesStatusLogService constructor.
      * @param CasesStatusLogRepository $casesStatusLogRepository
      */
     public function __construct(CasesStatusLogRepository $casesStatusLogRepository)
