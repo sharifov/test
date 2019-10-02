@@ -563,7 +563,10 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
                     Yii::error(VarDumper::dumpAsString($lf->errors), 'Call:afterSave:LeadFlow:update');
                 }
             }
+            $this->cLead2->createOrUpdateQCall();
         }
+
+
 
         if (!$insert) {
 

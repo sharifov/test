@@ -76,7 +76,7 @@ class QcallConfig extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'qc_status_id' => 'Status ID',
+            'qc_status_id' => 'Lead Status',
             'qc_call_att' => 'Call Att',
             'qc_client_time_enable' => 'Client Time Enable',
             'qc_time_from' => 'Time From',
@@ -111,5 +111,18 @@ class QcallConfig extends \yii\db\ActiveRecord
     public static function find()
     {
         return new QcallConfigQuery(get_called_class());
+    }
+
+
+    /**
+     * @param int|null $statusId
+     * @param int $callCount
+     * @return array|QcallConfig|null
+     */
+    public static function getByStatusCall(?int $statusId, int $callCount = 0)
+    {
+        return self::find()->where(['qc_status_id' => $statusId])
+            ->andWhere(['>=', 'qc_call_att', $callCount])
+            ->orderBy(['qc_call_att' => SORT_ASC])->limit(1)->one();
     }
 }
