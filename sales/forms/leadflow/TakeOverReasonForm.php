@@ -4,61 +4,53 @@ namespace sales\forms\leadflow;
 
 use common\models\Lead;
 use yii\base\Model;
+use yii\helpers\Html;
 
 /**
- * Class ReasonForm
+ * Class TakeOverReasonForm
  *
  * @property int $leadId
- * @property int $duplicateId
+ * @property int $leadGid
+ * @property int $originId
+ * @property string $reason
+ * @property string $other
+ * @property string $description
+ * @property array $origin
  */
-class ReasonForm extends Model
+class TakeOverReasonForm extends Model
 {
 
-    public const STATUS_REASON_LIST = [
-        Lead::STATUS_TRASH => [
-            1 => 'Purchased elsewhere',
-            2 => 'Duplicate',
-            3 => 'Travel dates passed',
-            4 => 'Invalid phone number',
-            5 => 'Canceled trip',
-            6 => 'Test',
-            0 => 'Other'
-        ],
-        Lead::STATUS_REJECT => [
-            1 => 'Purchased elsewhere',
-            2 => 'Flight date > 10 months',
-            3 => 'Not interested',
-            4 => 'Duplicate',
-            5 => 'Too late',
-            6 => 'Test',
-            0 => 'Other'
-        ],
-        Lead::STATUS_FOLLOW_UP => [
-            1 => 'Proper Follow Up Done',
-            2 => "Didn't get in touch",
-            0 => 'Other'
-        ],
-        Lead::STATUS_PROCESSING => [
-            1 => 'N/A',
-            2 => 'No Available',
-            3 => 'Voice Mail Send',
-            4 => 'Will call back',
-            5 => 'Waiting the option',
-            0 => 'Other'
-        ],
-        Lead::STATUS_ON_HOLD => [
-            0 => 'Other'
-        ],
-        Lead::STATUS_SNOOZE => [
-            1 => 'Travelling dates > 12 months',
-            2 => 'Not ready to buy now',
-            0 => 'Other'
-        ],
+    public const REASON_CLIENT_ASKED_FOR_ASSISTANCE = 'Client asked for assistance';
+    public const REASON_DUPLICATE = 'Duplicate';
+    public const REASON_I_AM_ORIGINAL_AGENT = 'I am original agent';
+    public const REASON_OTHER = 'Other';
+
+    public const REASON_LIST = [
+        self::REASON_CLIENT_ASKED_FOR_ASSISTANCE => self::REASON_CLIENT_ASKED_FOR_ASSISTANCE,
+        self::REASON_DUPLICATE => self::REASON_DUPLICATE,
+        self::REASON_I_AM_ORIGINAL_AGENT => self::REASON_I_AM_ORIGINAL_AGENT,
+        self::REASON_OTHER => self::REASON_OTHER,
     ];
 
     public $leadId;
+    public $leadGid;
+    public $originId;
+    public $reason;
+    public $other;
+    public $description;
 
-    public $duplicateId;
+    private $origin;
+
+    /**
+     * @param Lead $lead
+     * @param array $config
+     */
+    public function __construct(Lead $lead, $config = [])
+    {
+        parent::__construct($config);
+        $this->leadId = $lead->id;
+        $this->leadGid = $lead->gid;
+    }
 
     /**
      * @return array
@@ -68,41 +60,86 @@ class ReasonForm extends Model
         return [
             ['leadId', 'required'],
             ['leadId', 'integer'],
+            ['leadId', 'actualLeadValidate'],
 
-            ['duplicateId', 'integer'],
-            ['duplicateId', 'duplicateExist'],
+            ['reason', 'required'],
+            ['reason', 'in', 'range' => array_keys(self::REASON_LIST)],
 
+            ['originId', 'required', 'when' => function () {
+                return $this->reason === self::REASON_DUPLICATE;
+            }],
+            ['originId', 'integer'],
+            ['originId', 'originExist'],
 
+            ['other', 'required', 'when' => function () {
+                return $this->reason === self::REASON_OTHER;
+            }],
+            ['other', 'filter', 'filter' => 'trim', 'skipOnArray' => true],
+            ['other', 'string']
         ];
+    }
+
+    public function actualLeadValidate(): void
+    {
+        if ($lead = Lead::find()->select(['id', 'gid'])->andWhere(['id' => $this->leadId])->asArray()->one()) {
+            if ($lead['gid'] !== $this->leadGid) {
+                $this->addError('leadId', 'Different leadGid');
+            }
+            return;
+        }
+        $this->addError('leadId', 'Not found Lead: ' . $this->leadId);
+    }
+
+    public function originExist(): void
+    {
+        $this->origin = Lead::find()->select(['id', 'gid', 'status'])->active()
+            ->andWhere(['id' => $this->originId])
+            ->andWhere(['<>', 'id', $this->leadId])
+            ->asArray()->one();
+        if (!$this->origin) {
+            $this->addError('originId', 'Lead with Id: ' . $this->originId . ' not found');
+        }
     }
 
     /**
      * @return bool
      */
-    public function duplicateExist(): void
+    public function isOtherReason(): bool
     {
-        if (!Lead::find()->active()->andWhere(['id' => $this->duplicateId])->exists()) {
-            $this->addError('duplicateId', 'Lead: ' . $this->duplicateId . ' not found');
+        return $this->reason === self::REASON_OTHER;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isDuplicateReason(): bool
+    {
+        return $this->reason === self::REASON_DUPLICATE;
+    }
+
+    /**
+     * @param null $attributeNames
+     * @param bool $clearErrors
+     * @return bool
+     */
+    public function validate($attributeNames = null, $clearErrors = true): bool
+    {
+        if (parent::validate($attributeNames, $clearErrors)) {
+            if ($this->isOtherReason()) {
+                $this->description = $this->other;
+            } elseif ($this->isDuplicateReason()) {
+                if (isset($this->origin['gid'])) {
+                    $this->description = self::REASON_LIST[$this->reason] . '. Origin: ' . Html::a($this->originId, [
+                            'lead/view','gid' => $this->origin['gid']], ['data-pjax' => 0]);
+                } else {
+                    $this->description = self::REASON_LIST[$this->reason] . ': undefined GID';
+                }
+            } else {
+                $this->description = self::REASON_LIST[$this->reason];
+            }
+            return true;
         }
-    }
-
-    /**
-     * @param int $statusId
-     * @param int $reasonId
-     * @return string
-     */
-    public static function getReasonByStatus(int $statusId = 0, int $reasonId = 0): string
-    {
-        return self::STATUS_REASON_LIST[$statusId][$reasonId] ?? '-';
-    }
-
-    /**
-     * @param int $statusId
-     * @return array
-     */
-    public static function getReasonListByStatus(int $statusId = 0): array
-    {
-        return self::STATUS_REASON_LIST[$statusId] ?? [];
+        return false;
     }
 
 }
