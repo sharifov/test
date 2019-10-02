@@ -32,8 +32,10 @@ use frontend\models\LeadPreviewSmsForm;
 use frontend\models\SendEmailForm;
 use sales\entities\cases\Cases;
 use sales\forms\CompositeFormHelper;
+use sales\forms\lead\CloneReasonForm;
 use sales\forms\lead\ItineraryEditForm;
 use sales\forms\lead\LeadCreateForm;
+use sales\forms\leadflow\TakeOverReasonForm;
 use sales\repositories\cases\CasesRepository;
 use sales\repositories\lead\LeadRepository;
 use sales\repositories\NotFoundException;
@@ -1530,11 +1532,9 @@ class LeadController extends FController
 //        return null;
     }
 
-
     /**
      * @param string $gid
      * @return string|Response
-     * @throws ForbiddenHttpException
      * @throws NotFoundHttpException
      */
     public function actionTake(string $gid)
@@ -1543,17 +1543,9 @@ class LeadController extends FController
 
         if (Yii::$app->request->isAjax && Yii::$app->request->get('over')) {
             if ($lead->isAvailableToTakeOver()) {
-                if ($activeLeads = $this->leadRepository->getActiveAll($lead->id)) {
-                    $activeLeadIds = ArrayHelper::map($activeLeads, 'id', 'id');
-                } else {
-                    $activeLeadIds = [];
-                }
-                $reason = new Reason();
-                $reason->queue = 'processing-over';
-                return $this->renderAjax('partial/_reason', [
-                    'reason' => $reason,
-                    'lead' => $lead,
-                    'activeLeadIds' => $activeLeadIds
+                $reasonForm = new TakeOverReasonForm($lead);
+                return $this->renderAjax('/lead-change-state/reason_take_over', [
+                    'reasonForm' => $reasonForm,
                 ]);
             }
             Yii::$app->getSession()->setFlash('warning', 'Lead is unavailable to "Take Over" now!');
@@ -1561,7 +1553,7 @@ class LeadController extends FController
         }
 
         try {
-            $this->leadAssignService->take($lead->id, Yii::$app->user->identity->getId());
+            $this->leadAssignService->take($lead->id, Yii::$app->user->identity->getId(), 'Take');
             Yii::$app->getSession()->setFlash('success', 'Lead taken!');
         } catch (\Exception $e) {
             Yii::$app->errorHandler->logException($e);
@@ -2320,53 +2312,32 @@ class LeadController extends FController
     public function actionClone($id)
     {
         $id = (int)$id;
+        $lead = $this->findLeadById($id);
+        $form = new CloneReasonForm($lead);
 
-        try {
-            $lead = $this->leadRepository->find($id);
-        } catch (\Exception $e) {
-            Yii::$app->errorHandler->logException($e);
-            return null;
+        if (Yii::$app->request->isAjax && $form->load(Yii::$app->request->post())) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            return ActiveForm::validate($form);
         }
-
-        if (Yii::$app->request->isAjax) {
-            return $this->renderAjax('partial/_clone', [
-                'lead' => $lead,
-                'errors' => [],
-            ]);
-        } elseif (Yii::$app->request->isPost) {
-
-            $data = Yii::$app->request->post();
-
-            $description = '';
-            if (isset($data['Lead']['description']) && $data['Lead']['description'] != 0 && isset(Lead::CLONE_REASONS[$data['Lead']['description']])) {
-                    $description = Lead::CLONE_REASONS[$data['Lead']['description']];
-            } elseif (isset($data['other'])) {
-                $description = trim($data['other']);
-            }
-
-            $validator = new StringValidator(['max' => 255]);
-            $error = '';
-            if (!$validator->validate($description, $error)) {
-                return $this->renderAjax('partial/_clone', [
-                    'lead' => $lead,
-                    'errors' => $error,
-                ]);
-            }
-
+        if ($form->load(Yii::$app->request->post()) && $form->validate()) {
             try {
-                $clone = $this->leadCloneService->cloneLead($lead->id, Yii::$app->user->id, $description);
+                $clone = $this->leadCloneService->cloneLead($form->leadId, Yii::$app->user->id, $form->description);
+                Yii::$app->session->setFlash('success', 'Success');
                 return $this->redirect(['lead/view', 'gid' => $clone->gid]);
-            } catch (\Exception $e) {
+            } catch (\DomainException $e) {
                 Yii::$app->errorHandler->logException($e);
-                return $this->renderAjax('partial/_clone', [
-                    'lead' => $lead,
-                    'errors' => $e->getMessage(),
-                ]);
+                Yii::$app->session->setFlash('error', $e->getMessage());
+                return $this->redirect(['lead/view', 'gid' => $form->leadGid]);
+            } catch (\Throwable $e) {
+                Yii::$app->errorHandler->logException($e);
+                Yii::$app->session->setFlash('error', 'Error');
+                return $this->redirect(['lead/view', 'gid' => $form->leadGid]);
             }
         }
-        return null;
+        return $this->renderAjax('partial/_clone', [
+            'reasonForm' => $form
+        ]);
     }
-
 
 //    public function actionClone($id)
 //    {
