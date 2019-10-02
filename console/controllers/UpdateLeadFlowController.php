@@ -4,59 +4,72 @@
 namespace console\controllers;
 
 
-use common\models\Lead;
+use common\models\Lead2;
 use sales\temp\LeadFlowUpdate;
 use yii\console\Controller;
 
-class UpdateLeadFlow extends Controller
+class UpdateLeadFlowController extends Controller
 {
-    public function actionUpdate()
+
+    public function actionUpdate($limit = null, $offset = null)
     {
 
-        /*
-        $lead = Lead::find()->andWhere(['id' => 269691])
-            ->with([
-                'leadLogs' => function($query) {
-                $query->orderBy(['created' => SORT_ASC, 'id' => SORT_ASC])->asArray();
-                },
-                'leadFlows' => function($query) {
-                    $query->orderBy(['created' => SORT_ASC, 'id' => SORT_ASC])->indexBy('created');
-                },
-                'reasons' => function($query) {
-                    $query->orderBy(['created' => SORT_ASC, 'id' => SORT_ASC])->indexBy('created')->asArray();
-                },
-            ])
-            ->one();
-
-        LeadFlowUpdate::update($lead);
-*/
+        $limit = (int)$limit;
+        $offset = (int)$offset;
 
         $start = time();
 
-        $query = Lead::find()
+        $query = Lead2::find()
             ->orderBy(['created' => SORT_ASC])
             ->with([
-                'leadLogs' => function($query) {
+                'leadLogs' => function ($query) {
                     $query->orderBy(['created' => SORT_ASC, 'id' => SORT_ASC])->asArray();
                 },
-                'leadFlows' => function($query) {
+                'leadFlows' => function ($query) {
                     $query->orderBy(['created' => SORT_ASC, 'id' => SORT_ASC])->indexBy('created');
                 },
-                'reasons' => function($query) {
+                'reasons' => function ($query) {
                     $query->orderBy(['created' => SORT_ASC, 'id' => SORT_ASC])->indexBy('created')->asArray();
                 },
-            ])
-            ->limit(10)->offset(3);
+            ]);
 
-        foreach ($query->each(500) as $lead) {
-            $timeStart = time();
-            LeadFlowUpdate::update($lead);
-            $duration = time() - $timeStart;
-            echo 'Update LeadFLow for Lead: ' . $lead->id . ' :Duration: ' . $duration . '<br>';
+        if ($offset) {
+            $query->offset($offset);
+        }
+        if ($limit) {
+            $query->limit($limit);
         }
 
-        echo 'All Duration: ' . (time() - $start) . '<br>';
-        die;
+        $count = (clone $query)->count();
+
+        echo 'All count: ' . $count . PHP_EOL;
+
+        $number = 0;
+        $already = 0;
+        $timer1 = time();
+        echo 'Begin. ';
+        foreach ($query->each(500) as $lead) {
+            if ($number === 1000) {
+                $number = 0;
+                echo 'Done: ' . (time() - $timer1) . ' sec' . PHP_EOL .  'Remaining: ' . ($count - $already) .  PHP_EOL;
+                $timer1 = time();
+                echo 'Begin. ';
+            }
+            $number++;
+            $timeStart = time();
+            $report = LeadFlowUpdate::update($lead);
+            $duration = time() - $timeStart;
+          //  echo 'Update LeadFLow for Lead: ' . $lead->id . ' :Duration: ' . $duration . PHP_EOL;
+            if ($report) {
+                echo PHP_EOL . 'Errors: ' . PHP_EOL;
+                foreach ($report as $item) {
+                    echo $item . PHP_EOL;
+                }
+            }
+            $already++;
+        }
+        echo 'Done: ' . (time() - $timer1) . ' sec' . PHP_EOL;
+        echo 'All Duration: ' . (time() - $start) . PHP_EOL;
     }
 
 }

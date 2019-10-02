@@ -1,6 +1,6 @@
 <?php
 
-namespace sales;
+namespace sales\temp;
 
 /**
  * Class StatusLog
