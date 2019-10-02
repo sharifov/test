@@ -556,7 +556,7 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
         $userListSocketNotification = [];
         $isChangedStatus = isset($changedAttributes['c_status_id']);
 
-        if ($this->c_lead_id && $this->isOut() && $this->isEnded()) {
+        if (($insert || $isChangedStatus) && $this->c_lead_id && $this->isOut() && $this->isEnded()) {
             $lf = LeadFlow::find()->where(['lead_id' => $this->c_lead_id])->orderBy(['id' => SORT_DESC])->limit(1)->one();
             if ($lf) {
                 $lf->lf_out_calls = (int) $lf->lf_out_calls + 1;
