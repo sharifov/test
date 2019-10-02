@@ -57,14 +57,14 @@ class LeadsController extends FController
             $session->remove('LeadSearch');
         }
 
-        if (empty($params) && $session->has('LeadSearch')){
+        /*if (empty($params) && $session->has('LeadSearch')){
             $params = $session->get('LeadSearch');
 
             //VarDumper::dump($params, 10, true);
 
         } elseif (!empty($params)){
             $session->set('LeadSearch', $params);
-        }
+        }*/
 
         /** @var Employee $user */
         $user = Yii::$app->user->identity;

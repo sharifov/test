@@ -586,7 +586,8 @@ $lists = new ListsAccess($user->id);
             'value' => function (Lead $model) {
                 return $model->created ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->created)) : '-';
             },
-            'format' => 'raw'
+            'format' => 'raw',
+            'filter' => false
         ],
         // 'created:date',
 
@@ -601,6 +602,7 @@ $lists = new ListsAccess($user->id);
                 return $str;
             },
             'format' => 'raw',
+            'filter' => false,
             'contentOptions' => [
                 'class' => 'text-center'
             ],
@@ -617,6 +619,7 @@ $lists = new ListsAccess($user->id);
                 return $str;
             },
             'format' => 'raw',
+            'filter' => false,
             'contentOptions' => [
                 'class' => 'text-center'
             ],
