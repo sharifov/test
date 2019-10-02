@@ -13,6 +13,7 @@ use sales\services\TransactionManager;
 
 /**
  * Class LeadUnassignService
+ *
  * @property LeadRepository $leadRepository
  * @property UserRepository $userRepository
  * @property ReasonRepository $reasonRepository
@@ -58,7 +59,7 @@ class LeadUnassignService
                     break;
                 case 'trash':
                     if ($reason->duplicateLeadId) {
-                        $lead->setDuplicate($reason->duplicateLeadId);
+                        $lead->duplicate($reason->duplicateLeadId);
                     } else {
                         $lead->trash();
                     }
