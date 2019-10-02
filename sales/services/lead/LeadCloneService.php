@@ -50,7 +50,7 @@ class LeadCloneService
         $clone = $this->transactionManager->wrap(function () use ($lead, $ownerId, $description) {
 
             $clone = $lead->createClone($description);
-            $clone->processing($ownerId);
+            $clone->processing($ownerId, $description);
 
             $this->leadRepository->save($clone);
 
