@@ -392,17 +392,17 @@ $buttonClone = Html::a('<i class="fa fa-copy"></i> Clone lead', '#', [
 
 $buttonFollowUp = Html::a('<i class="fa fa-share-square fa-rotate-180"></i> Follow Up', '#', [
     'class' => 'add-reason',
-    'data-url' => Url::to(['lead/change-state', 'queue' => 'follow-up', 'id' => $leadForm->getLead()->id]),
+    'data-url' => Url::to(['lead-change-state/follow-up', 'gid' => $leadForm->getLead()->gid]),
 ]);
 
 $buttonTrash = Html::a('<i class="fa fa-trash"></i> Trash', '#', [
     'class' => 'add-reason',
-    'data-url' => Url::to(['lead/change-state', 'queue' => 'trash', 'id' => $leadForm->getLead()->id]),
+    'data-url' => Url::to(['lead-change-state/trash', 'gid' => $leadForm->getLead()->gid]),
 ]);
 
 $buttonSnooze = Html::a('<i class="fa fa-clock-o"></i> Snooze', '#', [
     'class' => 'add-reason',
-    'data-url' => Url::to(['lead/change-state', 'queue' => 'snooze', 'id' => $leadForm->getLead()->id]),
+    'data-url' => Url::to(['lead-change-state/snooze', 'gid' => $leadForm->getLead()->gid]),
 ]);
 
 /*$buttonSendEmail = Html::a('<i class="fa fa-envelope"></i> Send email', '#', [
@@ -417,12 +417,12 @@ $buttonOnWake = Html::a('<i class="fa fa-street-view"></i> On Wake', Url::to([
 
 $buttonReturnLead = Html::a('<i class="fa fa-share fa-rotate-180"></i> Return Lead', '#', [
     'class' => 'add-reason',
-    'data-url' => \yii\helpers\Url::to(['lead/change-state', 'queue' => 'return', 'id' => $leadForm->getLead()->id]),
+    'data-url' => \yii\helpers\Url::to(['lead-change-state/return', 'gid' => $leadForm->getLead()->gid]),
 ]);
 
 $buttonReject = Html::a('<i class="fa fa-times"></i> Reject', '#', [
     'class' => 'add-reason',
-    'data-url' => \yii\helpers\Url::to(['lead/change-state', 'queue' => 'reject', 'id' => $leadForm->getLead()->id]),
+    'data-url' => \yii\helpers\Url::to(['lead-change-state/reject', 'gid' => $leadForm->getLead()->gid]),
 ]);
 
 /*$buttonAddQuote = Html::button('<span class="btn-icon"><i class="fa fa-plus"></i></span><span class="btn-text">Add Quote</span>', [

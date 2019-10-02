@@ -1,10 +1,330 @@
 <?php
 
-
 namespace frontend\controllers;
 
+use common\models\Lead;
+use sales\forms\leadflow\FollowUpReasonForm;
+use sales\forms\leadflow\RejectReasonForm;
+use sales\forms\leadflow\ReturnReasonForm;
+use sales\forms\leadflow\SnoozeReasonForm;
+use sales\forms\leadflow\TrashReasonForm;
+use sales\services\lead\LeadAssignService;
+use sales\services\lead\LeadStateService;
+use Yii;
+use sales\forms\leadflow\TakeOverReasonForm;
+use yii\helpers\VarDumper;
+use yii\web\BadRequestHttpException;
+use yii\web\NotFoundHttpException;
+use yii\web\Response;
+use yii\widgets\ActiveForm;
 
-class LeadChangeStateController
+/**
+ * Class LeadChangeStateController
+ *
+ * @property LeadAssignService $assignService
+ * @property LeadStateService $stateService
+ *
+ */
+class LeadChangeStateController extends FController
 {
+
+    private $assignService;
+    private $stateService;
+
+    /**
+     * @param $id
+     * @param $module
+     * @param LeadAssignService $assignService
+     * @param LeadStateService $stateService
+     * @param array $config
+     */
+    public function __construct(
+        $id,
+        $module,
+        LeadAssignService $assignService,
+        LeadStateService $stateService,
+        $config = []
+    )
+    {
+        parent::__construct($id, $module, $config);
+        $this->assignService = $assignService;
+        $this->stateService = $stateService;
+    }
+
+    /**
+     * @return Response
+     * @throws NotFoundHttpException
+     * @throws \Throwable
+     */
+    public function actionTakeOver(): Response
+    {
+        $lead = $this->getLead();
+        $form = new TakeOverReasonForm($lead);
+        if ($form->load(Yii::$app->request->post()) && $form->validate()) {
+            try {
+                $this->assignService->takeOver($form->leadId, Yii::$app->user->id, $form->description);
+                Yii::$app->getSession()->setFlash('success', 'Success');
+            } catch (\DomainException $e) {
+                Yii::$app->errorHandler->logException($e);
+                Yii::$app->getSession()->setFlash('warning', $e->getMessage());
+            } catch (\Throwable $e) {
+                Yii::$app->errorHandler->logException($e);
+                throw $e;
+            }
+        } elseif ($form->getErrors()) {
+            Yii::$app->getSession()->setFlash('error', 'Error validate form.');
+            Yii::warning(VarDumper::dumpAsString($form->getErrors()), 'LeadChangeStateController:TakeOverReasonForm:Validate');
+        }
+        return $this->redirect(['lead/view', 'gid' => $lead->gid]);
+    }
+
+    /**
+     * @return array
+     * @throws BadRequestHttpException
+     * @throws NotFoundHttpException
+     */
+    public function actionValidateTakeOver(): array
+    {
+        $lead = $this->getLead();
+        $form = new TakeOverReasonForm($lead);
+        if (Yii::$app->request->isAjax && $form->load(Yii::$app->request->post())) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            return ActiveForm::validate($form);
+        }
+        throw new BadRequestHttpException();
+    }
+
+    /**
+     * @return string|Response
+     * @throws NotFoundHttpException
+     */
+    public function actionFollowUp()
+    {
+        $lead = $this->getLead();
+        $form = new FollowUpReasonForm($lead);
+        if ($form->load(Yii::$app->request->post()) && $form->validate()) {
+            try {
+                $this->stateService->followUp($form->leadId, $form->description);
+                Yii::$app->getSession()->setFlash('success', 'Success');
+            } catch (\DomainException $e) {
+                Yii::$app->errorHandler->logException($e);
+                Yii::$app->getSession()->setFlash('warning', $e->getMessage());
+            }
+        } else {
+            return $this->renderAjax('reason_follow_up', [
+                'reasonForm' => $form
+            ]);
+        }
+        return $this->redirect(['lead/view', 'gid' => $lead->gid]);
+    }
+
+    /**
+     * @return array
+     * @throws BadRequestHttpException
+     * @throws NotFoundHttpException
+     */
+    public function actionValidateFollowUp(): array
+    {
+        $lead = $this->getLead();
+        $form = new FollowUpReasonForm($lead);
+        if (Yii::$app->request->isAjax && $form->load(Yii::$app->request->post())) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            return ActiveForm::validate($form);
+        }
+        throw new BadRequestHttpException();
+    }
+
+    /**
+     * @return string|Response
+     * @throws NotFoundHttpException
+     */
+    public function actionTrash()
+    {
+        $lead = $this->getLead();
+        $form = new TrashReasonForm($lead);
+        if ($form->load(Yii::$app->request->post()) && $form->validate()) {
+            try {
+                if ($form->isDuplicateReason()) {
+                    $this->stateService->duplicate($form->leadId, $form->originId, $form->description);
+                } else {
+                    $this->stateService->trash($form->leadId, $form->description);
+                }
+                Yii::$app->getSession()->setFlash('success', 'Success');
+            } catch (\DomainException $e) {
+                Yii::$app->errorHandler->logException($e);
+                Yii::$app->getSession()->setFlash('warning', $e->getMessage());
+            }
+        } else {
+            return $this->renderAjax('reason_trash', [
+                'reasonForm' => $form
+            ]);
+        }
+        return $this->redirect(['lead/view', 'gid' => $lead->gid]);
+    }
+
+    /**
+     * @return array
+     * @throws BadRequestHttpException
+     * @throws NotFoundHttpException
+     */
+    public function actionValidateTrash(): array
+    {
+        $lead = $this->getLead();
+        $form = new TrashReasonForm($lead);
+        if (Yii::$app->request->isAjax && $form->load(Yii::$app->request->post())) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            return ActiveForm::validate($form);
+        }
+        throw new BadRequestHttpException();
+    }
+
+    /**
+     * @return string|Response
+     * @throws NotFoundHttpException
+     */
+    public function actionSnooze()
+    {
+        $lead = $this->getLead();
+        $form = new SnoozeReasonForm($lead);
+        if ($form->load(Yii::$app->request->post()) && $form->validate()) {
+            try {
+                $this->stateService->snooze($form->leadId, $form->snoozeFor, $form->description);
+                Yii::$app->getSession()->setFlash('success', 'Success');
+            } catch (\DomainException $e) {
+                Yii::$app->errorHandler->logException($e);
+                Yii::$app->getSession()->setFlash('warning', $e->getMessage());
+            }
+        } else {
+            return $this->renderAjax('reason_snooze', [
+                'reasonForm' => $form
+            ]);
+        }
+        return $this->redirect(['lead/view', 'gid' => $lead->gid]);
+    }
+
+    /**
+     * @return array
+     * @throws BadRequestHttpException
+     * @throws NotFoundHttpException
+     */
+    public function actionValidateSnooze(): array
+    {
+        $lead = $this->getLead();
+        $form = new SnoozeReasonForm($lead);
+        if (Yii::$app->request->isAjax && $form->load(Yii::$app->request->post())) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            return ActiveForm::validate($form);
+        }
+        throw new BadRequestHttpException();
+    }
+
+    /**
+     * @return string|Response
+     * @throws NotFoundHttpException
+     */
+    public function actionReturn()
+    {
+        $lead = $this->getLead();
+        $form = new ReturnReasonForm($lead);
+        if ($form->load(Yii::$app->request->post()) && $form->validate()) {
+            try {
+               if ($form->isReturnToFollowUp()) {
+                   $this->stateService->followUp($form->leadId, $form->description);
+                   Yii::$app->getSession()->setFlash('success', 'Success');
+               } elseif ($form->isReturnToProcessing()) {
+                   $this->assignService->processing($form->leadId, $form->userId, $form->description);
+                   Yii::$app->getSession()->setFlash('success', 'Success');
+               } else {
+                   Yii::$app->getSession()->setFlash('error', 'Error');
+               }
+            } catch (\DomainException $e) {
+                Yii::$app->errorHandler->logException($e);
+                Yii::$app->getSession()->setFlash('warning', $e->getMessage());
+            }
+        } else {
+            return $this->renderAjax('reason_return', [
+                'reasonForm' => $form
+            ]);
+        }
+        return $this->redirect(['lead/view', 'gid' => $lead->gid]);
+    }
+
+    /**
+     * @return array
+     * @throws BadRequestHttpException
+     * @throws NotFoundHttpException
+     */
+    public function actionValidateReturn(): array
+    {
+        $lead = $this->getLead();
+        $form = new ReturnReasonForm($lead);
+        if (Yii::$app->request->isAjax && $form->load(Yii::$app->request->post())) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            return ActiveForm::validate($form);
+        }
+        throw new BadRequestHttpException();
+    }
+
+    /**
+     * @return string|Response
+     * @throws NotFoundHttpException
+     */
+    public function actionReject()
+    {
+        $lead = $this->getLead();
+        $form = new RejectReasonForm($lead);
+        if ($form->load(Yii::$app->request->post()) && $form->validate()) {
+            try {
+                $this->stateService->reject($form->leadId, $form->description);
+                Yii::$app->getSession()->setFlash('success', 'Success');
+            } catch (\DomainException $e) {
+                Yii::$app->errorHandler->logException($e);
+                Yii::$app->getSession()->setFlash('warning', $e->getMessage());
+            }
+        } else {
+            return $this->renderAjax('reason_reject', [
+                'reasonForm' => $form
+            ]);
+        }
+        return $this->redirect(['lead/view', 'gid' => $lead->gid]);
+    }
+
+    /**
+     * @return array
+     * @throws BadRequestHttpException
+     * @throws NotFoundHttpException
+     */
+    public function actionValidateReject(): array
+    {
+        $lead = $this->getLead();
+        $form = new RejectReasonForm($lead);
+        if (Yii::$app->request->isAjax && $form->load(Yii::$app->request->post())) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            return ActiveForm::validate($form);
+        }
+        throw new BadRequestHttpException();
+    }
+
+    /**
+     * @return Lead
+     * @throws NotFoundHttpException
+     */
+    private function getLead(): Lead
+    {
+        return $this->findLeadByGid(Yii::$app->request->get('gid'));
+    }
+
+    /**
+     * @param $gid
+     * @return Lead
+     * @throws NotFoundHttpException
+     */
+    protected function findLeadByGid($gid): Lead
+    {
+        if ($model = Lead::findOne(['gid' => $gid])) {
+            return $model;
+        }
+        throw new NotFoundHttpException('The requested page does not exist.');
+    }
 
 }
