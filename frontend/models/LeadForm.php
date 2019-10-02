@@ -199,12 +199,15 @@ class LeadForm extends Model
         $this->_lead = $leadModel;
     }
 
+
     /**
      * @return LeadPreferences
      */
-    public function getLeadPreferences()
+    public function getLeadPreferences(): LeadPreferences
     {
-        return $this->_leadPreferences;
+        return ($this->_leadPreferences !== null)
+            ? $this->_leadPreferences
+            : new LeadPreferences();
     }
 
     /**
