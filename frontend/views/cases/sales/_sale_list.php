@@ -69,9 +69,9 @@ use yii\widgets\Pjax;
 
                     $content = '';
 
-                    $dataSale = @json_decode($item->css_sale_data, true);
+                    $dataSale = @json_decode($item->css_sale_data_updated, true);
                     if(is_array($dataSale)) {
-                        $content = $this->render('/sale/view', ['data' => $dataSale]);
+                        $content = $this->render('/sale/view', ['data' => $dataSale, 'csId' => $caseModel->cs_id, 'caseSaleModel' => $item]);
                         //echo '******';
                         //\yii\helpers\VarDumper::dump($content); exit;
                     }

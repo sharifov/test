@@ -1,9 +1,13 @@
 <?php
 
+use common\models\CaseSale;
+use kartik\editable\Editable;
 use yii\helpers\Html;
 
 /* @var $this yii\web\View */
 /* @var $data array */
+/* @var $csId int */
+/* @var $caseSaleModel common\models\CaseSale */
 
 
 if(Yii::$app->request->isPjax) {
@@ -15,6 +19,17 @@ if(Yii::$app->request->isPjax) {
 $title = 'Sale ID: ' . $data['saleId'] . ', BookId: ' . $data['bookingId'];
 
 //$isAgent = Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id);
+
+$js = <<<JS
+function activateButtonSync(data) {
+    if (data.output === '' && data.message === '') {
+        $('#sync-with-bo').removeClass('hidden');
+    }else {
+        $('#sync-with-bo').addClass('hidden');
+    }
+}
+JS;
+$this->registerJs($js);
 
 ?>
 <div class="sale-view">
@@ -79,31 +94,6 @@ $title = 'Sale ID: ' . $data['saleId'] . ', BookId: ' . $data['bookingId'];
         </div>
 
         <div class="col-md-4">
-            <h2>Passengers</h2>
-            <?php if(isset($data['passengers']) && $data['passengers']): ?>
-                <table class="table table-bordered table-hover">
-                    <tr>
-                        <th>Type</th>
-                        <th>First name</th>
-                        <th>Middle name</th>
-                        <th>Last name</th>
-                        <th>Birth date</th>
-                        <th>Gender</th>
-                        <th>Ticket number</th>
-                    </tr>
-                <?php foreach($data['passengers'] as $passenger): ?>
-                    <tr>
-                        <td><?=Html::encode($passenger['type'])?></td>
-                        <td><?=Html::encode($passenger['first_name'])?></td>
-                        <td><?=Html::encode($passenger['middle_name'])?></td>
-                        <td><?=Html::encode($passenger['last_name'])?></td>
-                        <td><?=Html::encode($passenger['birth_date'])?></td>
-                        <td><?=Html::encode($passenger['gender'])?></td>
-                        <td><?=Html::encode($passenger['ticket_number'])?></td>
-                    </tr>
-                <?php endforeach;?>
-                </table>
-            <?php endif;?>
 
             <h2>Processing Teams Status</h2>
             <?php if(isset($data['processingTeamsStatus']) && $data['processingTeamsStatus']): ?>
@@ -219,6 +209,170 @@ $title = 'Sale ID: ' . $data['saleId'] . ', BookId: ' . $data['bookingId'];
 
     <div class="row">
         <div class="col-md-12">
+            <h2>Passengers</h2>
+			<?php if(isset($data['passengers']) && $data['passengers']): ?>
+                <table class="table table-bordered table-hover" id="passengers">
+                    <thead>
+                    <tr>
+                        <th>First name</th>
+                        <th>Ticket number</th>
+                        <th>Type</th>
+                        <th>Birth date</th>
+                        <th>Gender</th>
+                        <th>Meal</th>
+                        <th>Wheelchair</th>
+                        <th>Frequent Fayer</th>
+                        <th>KTN</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+					<?php foreach($data['passengers'] as $key => $passenger): ?>
+                        <tr>
+                            <td>
+								<?php
+								/*
+									$editable = Editable::begin([
+										'name' => 'cssSaleData[passengers]['.$key.'][last_name]',
+										'asPopover' => true,
+										'displayValue' => Html::encode($passenger['last_name'] . ' ' . $passenger['first_name'] . $passenger['middle_name']),
+										'inputType' => Editable::INPUT_TEXT,
+										'value' => Html::encode($passenger['last_name']),
+										'header' => 'Name',
+										'formOptions' => [ 'action' => ['/cases/ajax-sale-list-edit-info/' . $csId . '/' . $data['saleId']] ],
+									]);
+									$form = $editable->getForm();
+									$editable->beforeInput = Html::label('Last Name', 'editable_last_name');
+									$editable->afterInput = $this->render('partial/_editable_name_field', ['passenger' => $passenger, 'key' => $key]);
+									Editable::end();
+								*/
+								?>
+								<?= Html::encode($passenger['first_name'] . ' ' . $passenger['last_name'] . ' ' . $passenger['middle_name']) ?>
+                            </td>
+                            <td><?=Html::encode($passenger['ticket_number'])?></td>
+                            <td><?=Html::encode($passenger['type'])?></td>
+                            <td>
+								<?=
+								Editable::widget([
+									'name' => 'cssSaleData[passengers]['.$key.'][birth_date]',
+									'header' => 'Date of Birth',
+									'asPopover' => true,
+									'inputType' => Editable::INPUT_DATE,
+									'displayValue' => Yii::$app->formatter->asDate(Html::encode($passenger['birth_date']), 'php:d M Y'),
+									'value' => Yii::$app->formatter->asDate(Html::encode($passenger['birth_date']), 'php:d M Y'),
+									'formOptions' => [ 'action' => [\yii\helpers\Url::to(['/cases/ajax-sale-list-edit-info/', 'caseId' => $csId, 'caseSaleId' => $data['saleId']])] ],
+									'options' => [
+										'convertFormat'=>true,
+										'pluginOptions'=>['format'=>'php:d M Y']
+									],
+									'pluginEvents' => [
+										"editableSuccess"=>"function (event, val, form, data) {
+										    console.log(form);
+										    activateButtonSync(data);
+										}",
+									]
+								]);
+								?>
+                            </td>
+                            <td>
+								<?=
+								Editable::widget([
+									'name' => 'cssSaleData[passengers]['.$key.'][gender]',
+									'header' => 'Gender',
+									'asPopover' => true,
+									'inputType' => Editable::INPUT_DROPDOWN_LIST,
+									'data' => ['F' => 'Female', 'M' => 'Male'],
+									'value' => Html::encode($passenger['gender']),
+									'formOptions' => [ 'action' => [\yii\helpers\Url::to(['/cases/ajax-sale-list-edit-info/', 'caseId' => $csId, 'caseSaleId' => $data['saleId']])] ],
+									'pluginEvents' => [
+										"editableSuccess"=>"function (event, val, form, data) {
+										    activateButtonSync(data);
+										}",
+									]
+								]);
+								?>
+                            </td>
+                            <td>
+								<?=
+								Editable::widget([
+									'name' => 'cssSaleData[passengers]['.$key.'][meal]',
+									'header' => 'Meal',
+									'asPopover' => true,
+									'inputType' => Editable::INPUT_DROPDOWN_LIST,
+									'data' => CaseSale::PASSENGER_MEAL,
+									'options' => ['prompt'=>'Select meal...'],
+									'value' => Html::encode($passenger['meal'] ?? null),
+									'formOptions' => [ 'action' => [\yii\helpers\Url::to(['/cases/ajax-sale-list-edit-info/', 'caseId' => $csId, 'caseSaleId' => $data['saleId']])] ],
+									'pluginEvents' => [
+										"editableSuccess"=>"function (event, val, form, data) {
+										    activateButtonSync(data);
+										}",
+									]
+								]);
+								?>
+                            </td>
+                            <td>
+								<?=
+								Editable::widget([
+									'name' => 'cssSaleData[passengers]['.$key.'][wheelchair]',
+									'header' => 'Wheelchair',
+									'asPopover' => true,
+									'inputType' => Editable::INPUT_DROPDOWN_LIST,
+									'data' => CaseSale::PASSENGER_WHEELCHAIR,
+									'value' => Html::encode($passenger['wheelchair'] ?? null),
+									'formOptions' => [ 'action' => [\yii\helpers\Url::to(['/cases/ajax-sale-list-edit-info/', 'caseId' => $csId, 'caseSaleId' => $data['saleId']])] ],
+									'options' => ['prompt'=>'Select wheelchair...'],
+									'pluginEvents' => [
+										"editableSuccess"=>"function (event, val, form, data) {
+										    activateButtonSync(data);
+										}",
+									]
+								]);
+								?>
+                            </td>
+                            <td>
+								<?=
+								Editable::widget([
+									'name' => 'cssSaleData[passengers]['.$key.'][ff_numbers]',
+									'header' => 'Frequent Fayer',
+									'asPopover' => true,
+									'inputType' => Editable::INPUT_TEXT,
+									'value' => Html::encode($passenger['ff_numbers'] ?? null),
+									'formOptions' => [ 'action' => [\yii\helpers\Url::to(['/cases/ajax-sale-list-edit-info/', 'caseId' => $csId, 'caseSaleId' => $data['saleId']])] ],
+									'pluginEvents' => [
+										"editableSuccess"=>"function (event, val, form, data) {
+										    activateButtonSync(data);
+										}",
+									]
+								]);
+								?>
+                            </td>
+                            <td>
+								<?=
+								Editable::widget([
+									'name' => 'cssSaleData[passengers]['.$key.'][ktn_numbers]',
+									'header' => 'KTN',
+									'asPopover' => true,
+									'inputType' => Editable::INPUT_TEXT,
+									'value' => Html::encode($passenger['ktn_numbers'] ?? null),
+									'formOptions' => [ 'action' => [\yii\helpers\Url::to(['/cases/ajax-sale-list-edit-info/', 'caseId' => $csId, 'caseSaleId' => $data['saleId']])] ],
+									'pluginEvents' => [
+										"editableSuccess"=>"function (event, val, form, data) {
+										    activateButtonSync(data);
+										}",
+									]
+								]);
+								?>
+                            </td>
+                        </tr>
+					<?php endforeach;?>
+                    </tbody>
+                </table>
+			<?php endif;?>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12" style="overflow-x: auto;">
             <?php if(isset($data['itinerary']) && $data['itinerary']): ?>
                 <?php foreach($data['itinerary'] as $itNr => $itinerary): ?>
                 <h4>Itinerary <?=($itNr + 1)?></h4>
@@ -286,7 +440,29 @@ $title = 'Sale ID: ' . $data['saleId'] . ', BookId: ' . $data['bookingId'];
         </div>
     </div>
 
-    <div class="row">
+    <div class="row" style="margin-top: 20px;">
+        <div class="col-md-12">
+            <?php
+                $hiddenClass = $caseSaleModel->css_need_sync_bo ?: 'hidden';
+            ?>
+            <?= Html::button('Sync with B/O', ['class' => 'btn btn-warning ' . $hiddenClass, 'id' => 'sync-with-bo', 'onclick' => '( function (event, obj) {
+                $(obj).attr("disabled", true);
+                $.ajax({
+                    type: "post",
+                    url: "'. \yii\helpers\Url::to(['/cases/ajax-sync-with-back-office/', 'caseId' => $csId, 'caseSaleId' => $data['saleId']]) .'",
+                    data: {},
+                    dataType: "json",
+                    success: function (response) {
+                        console.log(response);
+                        $(obj).removeAttr("disabled");
+                    },
+                    error: function (text) {
+                        console.log(text);
+                        $(obj).removeAttr("disabled");
+                    } 
+                });
+            })(event, this)']); ?>
+        </div>
         <?php
             //\yii\helpers\VarDumper::dump($data, 10, true);
         ?>

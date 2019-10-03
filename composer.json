@@ -61,7 +61,8 @@
 		"aki/yii2-bot-telegram": "*",
 		"yii2mod/yii2-rbac": "*",
 		"unclead/yii2-multiple-input": "~2.0",
-		"kartik-v/yii2-widget-activeform": "dev-master"
+		"kartik-v/yii2-widget-activeform": "dev-master",
+		"kartik-v/yii2-widget-datepicker": "@dev"
 	},
 	"require-dev" : {
 		"yiisoft/yii2-debug" : "~2.1",
