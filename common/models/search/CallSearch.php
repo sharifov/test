@@ -145,8 +145,10 @@ class CallSearch extends Call
         $query->andFilterWhere(['>=', 'c_created_dt', $dateTimeStart])
             ->andFilterWhere(['<=', 'c_created_dt', $dateTimeEnd]);
 
-
-        $query->andFilterWhere(['=','DATE(c_created_dt)', $this->c_created_dt]);
+        if ($this->c_created_dt) {
+            $query->andFilterWhere(['>=', 'c_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->c_created_dt))])
+                ->andFilterWhere(['<=', 'c_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->c_created_dt) + 3600 * 24)]);
+        }
 
         $query->andFilterWhere(['>=','c_call_duration', $this->call_duration_from]);
         $query->andFilterWhere(['<=','c_call_duration', $this->call_duration_to]);

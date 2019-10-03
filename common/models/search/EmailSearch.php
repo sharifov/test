@@ -78,7 +78,8 @@ class EmailSearch extends Email
             $query->andFilterWhere(['>=', 'e_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->datetime_start))])
                 ->andFilterWhere(['<=', 'e_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->datetime_end))]);
         } elseif (isset($params['EmailSearch']['e_created_dt'])) {
-            $query->andFilterWhere(['=','DATE(e_created_dt)', $this->e_created_dt]);
+            $query->andFilterWhere(['>=', 'e_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->e_created_dt))])
+                ->andFilterWhere(['<=', 'e_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->e_created_dt) + 3600 * 24)]);
         }
 
         if($this->supervision_id > 0) {
