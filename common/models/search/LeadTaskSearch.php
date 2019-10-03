@@ -2,6 +2,7 @@
 
 namespace common\models\search;
 
+use common\models\Employee;
 use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
@@ -78,13 +79,21 @@ class LeadTaskSearch extends LeadTask
             $query->andFilterWhere(['=','DATE(lt_date)', $this->lt_date]);
         }
 
+        if ($this->lt_completed_dt) {
+            $query->andFilterWhere(['>=', 'lt_completed_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->lt_completed_dt))])
+                ->andFilterWhere(['<=', 'lt_completed_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->lt_completed_dt) + 3600 * 24)]);
+        }
+
+        if ($this->lt_updated_dt) {
+            $query->andFilterWhere(['>=', 'lt_updated_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->lt_updated_dt))])
+                ->andFilterWhere(['<=', 'lt_updated_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->lt_updated_dt) + 3600 * 24)]);
+        }
+
         // grid filtering conditions
         $query->andFilterWhere([
             'lt_lead_id' => $this->lt_lead_id,
             'lt_task_id' => $this->lt_task_id,
             'lt_user_id' => $this->lt_user_id,
-            'lt_completed_dt' => $this->lt_completed_dt,
-            'lt_updated_dt' => $this->lt_updated_dt,
         ]);
 
         $query->andFilterWhere(['like', 'lt_notes', $this->lt_notes]);

@@ -2,6 +2,7 @@
 
 namespace common\models\search;
 
+use common\models\Employee;
 use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
@@ -57,12 +58,16 @@ class ApiUserSearch extends ApiUser
             return $dataProvider;
         }
 
+        if ($this->au_updated_dt) {
+            $query->andFilterWhere(['>=', 'au_updated_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->au_updated_dt))])
+                ->andFilterWhere(['<=', 'au_updated_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->au_updated_dt) + 3600 * 24)]);
+        }
+
         // grid filtering conditions
         $query->andFilterWhere([
             'au_id' => $this->au_id,
             'au_project_id' => $this->au_project_id,
             'au_enabled' => $this->au_enabled,
-            'au_updated_dt' => $this->au_updated_dt,
             'au_updated_user_id' => $this->au_updated_user_id,
         ]);
 

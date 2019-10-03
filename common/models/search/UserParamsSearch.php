@@ -2,6 +2,7 @@
 
 namespace common\models\search;
 
+use common\models\Employee;
 use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
@@ -58,12 +59,16 @@ class UserParamsSearch extends UserParams
             return $dataProvider;
         }
 
+        if ($this->up_updated_dt){
+            $query->andFilterWhere(['>=', 'up_updated_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->up_updated_dt))])
+                ->andFilterWhere(['<=', 'up_updated_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->up_updated_dt) + 3600 * 24)]);
+        }
+
         // grid filtering conditions
         $query->andFilterWhere([
             'up_user_id' => $this->up_user_id,
             'up_commission_percent' => $this->up_commission_percent,
             'up_base_amount' => $this->up_base_amount,
-            'up_updated_dt' => $this->up_updated_dt,
             'up_bonus_active' => $this->up_bonus_active,
             'up_updated_user_id' => $this->up_updated_user_id,
             'up_inbox_show_limit_leads' => $this->up_inbox_show_limit_leads,

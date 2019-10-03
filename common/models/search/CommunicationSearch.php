@@ -181,7 +181,9 @@ class CommunicationSearch extends Model
             $query->andFilterWhere(['>=', 'created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->datetime_start))])
                 ->andFilterWhere(['<=', 'created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->datetime_end))]);
         } else {
-            $query->andFilterWhere(['=','DATE(created_dt)', $this->created_dt]);
+            //$query->andFilterWhere(['=','DATE(created_dt)', $this->created_dt]);
+            $query->andFilterWhere(['>=', 'created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->created_dt))])
+                ->andFilterWhere(['<=', 'created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->created_dt) + 3600 * 24)]);
         }
 
         if ($this->user_group_id > 0) {

@@ -3,6 +3,7 @@
 namespace common\models\search;
 
 use common\models\Department;
+use common\models\Employee;
 use common\models\UserDepartment;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
@@ -74,7 +75,8 @@ class UserConnectionSearch extends UserConnection
         }
 
         if (isset($params['UserConnectionSearch']['uc_created_dt'])) {
-            $query->andFilterWhere(['=','DATE(uc_created_dt)', $this->uc_created_dt]);
+            $query->andFilterWhere(['>=','uc_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->uc_created_dt))])
+                ->andFilterWhere(['<=', 'uc_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->uc_created_dt) + 3600 * 24)]);
         }
         // grid filtering conditions
         $query->andFilterWhere([

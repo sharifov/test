@@ -67,6 +67,7 @@ class LeadSearch extends Lead
     public $updatedRangeTime;
     public $lastActionRangeTime;
     public $soldRangeTime;
+    public $createTimeRange;
 
     public $last_ticket_date;
 
@@ -753,7 +754,8 @@ class LeadSearch extends Lead
         if ($this->last_ticket_date) {
 //            $query->andWhere(['=', 'DATE(' . Quote::tableName() . '.last_ticket_date)', date('Y-m-d', strtotime($this->last_ticket_date))]);
             $subQuery = LeadFlow::find()->select(['lead_flow.lead_id'])->distinct('lead_flow.lead_id')->where('lead_flow.status = leads.status AND lead_flow.lead_id = leads.id');
-            $subQuery->andFilterWhere(['=', 'DATE(lead_flow.created)', date('Y-m-d', strtotime($this->last_ticket_date))]);
+            $subQuery->andFilterWhere(['>=', 'lead_flow.created', Employee::convertTimeFromUserDtToUTC(strtotime($this->last_ticket_date))])
+                ->andFilterWhere(['<=', 'lead_flow.created', Employee::convertTimeFromUserDtToUTC(strtotime($this->last_ticket_date) + 3600 *24)]);
             $query->andWhere(['IN', 'leads.id', $subQuery]);
         }
 
@@ -915,7 +917,8 @@ class LeadSearch extends Lead
         ]);
 
         if ($this->created) {
-            $query->andFilterWhere(['=', 'DATE(leads.created)', date('Y-m-d', strtotime($this->created))]);
+            $query->andFilterWhere(['>=', 'leads.created', Employee::convertTimeFromUserDtToUTC(strtotime($this->created))])
+                ->andFilterWhere(['<=', 'leads.created', Employee::convertTimeFromUserDtToUTC(strtotime($this->created) + 3600 * 24)]);
         }
 
         return $dataProvider;
@@ -953,12 +956,14 @@ class LeadSearch extends Lead
             return $dataProvider;
         }
 
-        if ($this->l_last_action_dt) {
-            $query->andFilterWhere(['=','DATE(l_last_action_dt)', date('Y-m-d', strtotime($this->l_last_action_dt))]);
+        if ($this->created) {
+            $query->andFilterWhere(['>=', 'created', Employee::convertTimeFromUserDtToUTC(strtotime($this->created))])
+            ->andFilterWhere(['<=', 'created', Employee::convertTimeFromUserDtToUTC(strtotime($this->created) + 3600 * 24)]);
         }
 
-        if ($this->created) {
-            $query->andFilterWhere(['=','DATE(created)', date('Y-m-d', strtotime($this->created))]);
+        if ($this->l_last_action_dt) {
+            $query->andFilterWhere(['>=', 'l_last_action_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->l_last_action_dt))])
+                ->andFilterWhere(['<=', 'l_last_action_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->l_last_action_dt) + 3600 * 24)]);
         }
 
         // grid filtering conditions
@@ -1039,11 +1044,15 @@ class LeadSearch extends Lead
         }
 
         if ($this->created) {
-            $query->andFilterWhere(['=','DATE(created)', date('Y-m-d', strtotime($this->created))]);
+            //$query->andFilterWhere(['=','DATE(created)', date('Y-m-d', strtotime($this->created))]);
+            $query->andFilterWhere(['>=', 'created', Employee::convertTimeFromUserDtToUTC(strtotime($this->created))])
+                ->andFilterWhere(['<=', 'created', Employee::convertTimeFromUserDtToUTC(strtotime($this->created) + 3600 * 24)]);
         }
 
         if ($this->l_last_action_dt) {
-            $query->andFilterWhere(['=','DATE(l_last_action_dt)', date('Y-m-d', strtotime($this->l_last_action_dt))]);
+            //$query->andFilterWhere(['=','DATE(l_last_action_dt)', date('Y-m-d', strtotime($this->l_last_action_dt))]);
+            $query->andFilterWhere(['>=', 'l_last_action_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->l_last_action_dt))])
+                ->andFilterWhere(['<=', 'l_last_action_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->l_last_action_dt) + 3600 * 24)]);
         }
 
         // grid filtering conditions
@@ -1269,7 +1278,8 @@ class LeadSearch extends Lead
         }
 
         if ($this->created) {
-            $query->andFilterWhere(['=', 'DATE(created)', date('Y-m-d', strtotime($this->created))]);
+            $query->andFilterWhere(['>=', 'created', Employee::convertTimeFromUserDtToUTC(strtotime($this->created))])
+                ->andFilterWhere(['<=', 'created', Employee::convertTimeFromUserDtToUTC(strtotime($this->created) + 3600 * 24)]);
         }
 
         // grid filtering conditions

@@ -2,6 +2,7 @@
 
 namespace common\models\search;
 
+use common\models\Employee;
 use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
@@ -57,11 +58,15 @@ class UserGroupAssignSearch extends UserGroupAssign
             return $dataProvider;
         }
 
+        if ($this->ugs_updated_dt){
+            $query->andFilterWhere(['>=', 'ugs_updated_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->ugs_updated_dt))])
+                ->andFilterWhere(['<=', 'ugs_updated_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->ugs_updated_dt) + 3600 * 24)]);
+        }
+
         // grid filtering conditions
         $query->andFilterWhere([
             'ugs_user_id' => $this->ugs_user_id,
             'ugs_group_id' => $this->ugs_group_id,
-            'ugs_updated_dt' => $this->ugs_updated_dt,
         ]);
 
         return $dataProvider;

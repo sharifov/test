@@ -72,7 +72,8 @@ class LeadChecklistSearch extends LeadChecklist
         }
 
         if (isset($params['LeadChecklistSearch']['lc_created_dt'])) {
-            $query->andFilterWhere(['=','DATE(lc_created_dt)', $this->lc_created_dt]);
+            $query->andFilterWhere(['>=', 'lc_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->lc_created_dt))])
+                ->andFilterWhere(['<=', 'lc_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->lc_created_dt) + 3600 *24)]);
         }
 
         // grid filtering conditions

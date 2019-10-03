@@ -2,6 +2,7 @@
 
 namespace common\models\search;
 
+use common\models\Employee;
 use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
@@ -57,14 +58,22 @@ class EmailTemplateTypeSearch extends EmailTemplateType
             return $dataProvider;
         }
 
+        if ($this->etp_created_dt) {
+            $query->andFilterWhere(['>=', 'etp_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->etp_created_dt))])
+                ->andFilterWhere(['<=', 'etp_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->etp_created_dt) + 3600 * 24)]);
+        }
+
+        if ($this->etp_updated_dt) {
+            $query->andFilterWhere(['>=', 'etp_updated_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->etp_updated_dt))])
+                ->andFilterWhere(['<=', 'etp_updated_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->etp_updated_dt) + 3600 * 24)]);
+        }
+
         // grid filtering conditions
         $query->andFilterWhere([
             'etp_id' => $this->etp_id,
             'etp_hidden' => $this->etp_hidden,
             'etp_created_user_id' => $this->etp_created_user_id,
             'etp_updated_user_id' => $this->etp_updated_user_id,
-            'etp_created_dt' => $this->etp_created_dt,
-            'etp_updated_dt' => $this->etp_updated_dt,
             'etp_dep_id'    => $this->etp_dep_id
         ]);
 

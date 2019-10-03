@@ -2,6 +2,7 @@
 
 namespace common\models\search;
 
+use common\models\Employee;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use common\models\ClientPhone;
@@ -62,14 +63,24 @@ class ClentPhoneSearch extends ClientPhone
             return $dataProvider;
         }
 
+        if ($this->created) {
+            $query->andFilterWhere(['>=', 'created', Employee::convertTimeFromUserDtToUTC(strtotime($this->created))])
+                ->andFilterWhere(['<=', 'created', Employee::convertTimeFromUserDtToUTC(strtotime($this->created) + 3600 * 24)]);
+        }
+
+        if ($this->validate_dt) {
+            $query->andFilterWhere(['>=', 'validate_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->validate_dt))])
+                ->andFilterWhere(['<=', 'validate_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->validate_dt) + 3600 * 24)]);
+        }
+
         // grid filtering conditions
         $query->andFilterWhere([
             'id' => $this->id,
             'client_id' => $this->client_id,
-            'created' => $this->created,
+            //'created' => $this->created,
             //'updated' => $this->updated,
             'is_sms' => $this->is_sms,
-            'validate_dt' => $this->validate_dt,
+            //'validate_dt' => $this->validate_dt,
         ]);
 
         $query->andFilterWhere(['like', 'phone', $this->phone])

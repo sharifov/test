@@ -75,7 +75,8 @@ class UserCallStatusSearch extends UserCallStatus
         }
 
         if (isset($params['UserCallStatusSearch']['us_created_dt'])) {
-            $query->andFilterWhere(['=','DATE(us_created_dt)', $this->us_created_dt]);
+            $query->andFilterWhere(['>=', 'us_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->us_created_dt))])
+                ->andFilterWhere(['<=', 'us_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->us_created_dt) + 3600 * 24)]);
         }
 
         // grid filtering conditions

@@ -15,10 +15,7 @@ use common\models\LeadFlow;
 class LeadFlowSearch extends LeadFlow
 {
     public $statuses = [];
-    public $created_date_from;
-    public $created_date_to;
-
-
+    public $createdRangeTime;
     public $supervision_id;
 
     /**
@@ -28,7 +25,7 @@ class LeadFlowSearch extends LeadFlow
     {
         return [
             [['id', 'employee_id', 'lead_id', 'status', 'supervision_id', 'lf_from_status_id', 'lf_out_calls'], 'integer'],
-            [['created', 'created_date_from', 'created_date_to', 'statuses'], 'safe'],
+            [['created', 'statuses', 'lf_end_dt', 'createdRangeTime'], 'safe'],
         ];
     }
 
@@ -78,19 +75,23 @@ class LeadFlowSearch extends LeadFlow
             $query->andWhere(['lead_flow.status' => $this->statuses]);
         }
 
-        if($this->created_date_from || $this->created_date_to) {
+        if ($this->createdRangeTime) {
+            $createdRange = explode(" - ", $this->createdRangeTime);
+            if ($createdRange[0]) {
+                $query->andFilterWhere(['>=', 'lead_flow.created', Employee::convertTimeFromUserDtToUTC(strtotime($createdRange[0]))]);
+            }
+            if ($createdRange[1]) {
+                $query->andFilterWhere(['<=', 'lead_flow.created', Employee::convertTimeFromUserDtToUTC(strtotime($createdRange[1]))]);
+            }
+        }
 
-            if ($this->created_date_from) {
-                $query->andFilterWhere(['>=', 'lead_flow.created', Employee::convertTimeFromUserDtToUTC(strtotime($this->created_date_from))]);
-            }
-            if ($this->created_date_to) {
-                $query->andFilterWhere(['<=', 'lead_flow.created', Employee::convertTimeFromUserDtToUTC(strtotime($this->created_date_to))]);
-            }
-
-        } else {
-            if($this->created) {
-                $query->andFilterWhere(['DATE(lead_flow.created)'=> date('Y-m-d', strtotime($this->created))]);
-            }
+        if($this->created) {
+            $query->andFilterWhere(['>=', 'created', Employee::convertTimeFromUserDtToUTC(strtotime($this->created))])
+                ->andFilterWhere(['<=', 'created', Employee::convertTimeFromUserDtToUTC(strtotime($this->created) + 3600 * 24)]);
+        }
+        if($this->lf_end_dt) {
+            $query->andFilterWhere(['>=', 'lead_flow.lf_end_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->lf_end_dt))])
+                ->andFilterWhere(['<=', 'lead_flow.lf_end_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->lf_end_dt) + 3600 * 24)]);
         }
 
         if($this->supervision_id > 0) {
