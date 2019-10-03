@@ -41,6 +41,13 @@ $this->params['breadcrumbs'][] = $this->title;
             'stp_origin_name',
             'stp_name',
             'stp_hidden:boolean',
+            [
+                'attribute' => 'stp_dep_id',
+                'value' => function (\common\models\SmsTemplateType $model) {
+                    return $model->stpDep ? $model->stpDep->dep_name : '-';
+                },
+                'filter' => \common\models\Department::getList()
+            ],
 
             [
                 'attribute' => 'stp_updated_user_id',

@@ -97,7 +97,7 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
 
             [
-                'label' => 'Calls',
+                'label' => 'Out Calls',
                 'value' => function (\common\models\LeadQcall $model) {
                     $cnt = $model->lqcLead->getCountCalls(\common\models\Call::CALL_TYPE_OUT);
                     return $cnt ?: '-';
