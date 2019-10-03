@@ -109,6 +109,7 @@ use common\components\SearchService;
  * @property LeadFlightSegment[] $leadFlightSegments
  * @property LeadFlow[] $leadFlows
  * @property LeadPreferences $leadPreferences
+ * @property LeadQcall $leadQcall
  * @property Client $client
  * @property Employee $employee
  * @property Lead $lDuplicateLead
@@ -121,6 +122,8 @@ use common\components\SearchService;
  * @property ProfitSplit[] $profitSplits
  * @property TipsSplit[] $tipsSplits
  * @property UserConnection[] $userConnections
+ *
+ * @property LeadFlow $lastLeadFlow
  *
  */
 class Lead extends ActiveRecord implements AggregateRoot
@@ -1019,6 +1022,14 @@ class Lead extends ActiveRecord implements AggregateRoot
     /**
      * @return \yii\db\ActiveQuery
      */
+    public function getLastLeadFlow(): ActiveQuery
+    {
+        return $this->hasOne(LeadFlow::class, ['lead_id' => 'id'])->orderBy([LeadFlow::tableName() . '.id' => SORT_DESC])->limit(1);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
     public function getLeadLogs()
     {
         return $this->hasMany(LeadLog::class, ['lead_id' => 'id']);
@@ -1089,6 +1100,14 @@ class Lead extends ActiveRecord implements AggregateRoot
     public function getLeadPreferences(): ActiveQuery
     {
         return $this->hasOne(LeadPreferences::class, ['lead_id' => 'id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getLeadQcall(): ActiveQuery
+    {
+        return $this->hasOne(LeadQcall::class, ['lqc_lead_id' => 'id']);
     }
 
     /**
@@ -1914,6 +1933,71 @@ New lead {lead_id}
         $this->enableActiveRecordEvents = false;
     }
 
+
+//    /**
+//     * @return bool
+//     */
+//    public function createQCall(): bool
+//    {
+//        $qcConfig = QcallConfig::getByStatusCall($this->status, 0);
+//
+//        if ($qcConfig) {
+//            $lq = new LeadQcall();
+//            $lq->lqc_lead_id = $this->id;
+//            $lq->lqc_dt_from = date('Y-m-d H:i:s', (time() + ((int) $qcConfig->qc_time_from * 60)));
+//            $lq->lqc_dt_to = date('Y-m-d H:i:s', (time() + ((int) $qcConfig->qc_time_to * 60)));
+//            $lq->lqc_weight = $this->project_id * 10;
+//            if (!$lq->save()) {
+//                Yii::error(VarDumper::dumpAsString($lq->errors), 'Lead:createQCall:LeadQcall:save');
+//                return true;
+//            }
+//        }
+//        return false;
+//    }
+
+
+    /**
+     * @return bool
+     */
+    public function createOrUpdateQCall(): bool
+    {
+
+        if ($this->lastLeadFlow) {
+            $callCount = (int) $this->lastLeadFlow->lf_out_calls;
+        } else {
+            $callCount = 0;
+        }
+
+        $qcConfig = QcallConfig::getByStatusCall($this->status, $callCount);
+        $lq = $this->leadQcall;
+
+        if ($qcConfig) {
+            if (!$lq) {
+                $lq = new LeadQcall();
+                $lq->lqc_lead_id = $this->id;
+                $lq->lqc_weight = $this->project_id * 10;
+            }
+
+            $lq->lqc_dt_from = date('Y-m-d H:i:s', (time() + ((int) $qcConfig->qc_time_from * 60)));
+            $lq->lqc_dt_to = date('Y-m-d H:i:s', (time() + ((int) $qcConfig->qc_time_to * 60)));
+
+            if (!$lq->save()) {
+                Yii::error(VarDumper::dumpAsString($lq->errors), 'Lead:createOrUpdateQCall:LeadQcall:save');
+                return true;
+            }
+        } else {
+           if ($lq) {
+               try {
+                   $lq->delete();
+               } catch (\Throwable $throwable) {
+                   Yii::error($throwable->getMessage(), 'Lead:createOrUpdateQCall:Throwable');
+               }
+           }
+        }
+        return false;
+    }
+
+
     public function afterSave($insert, $changedAttributes)
     {
 
@@ -1923,6 +2007,10 @@ New lead {lead_id}
 
             if ($insert) {
                 LeadFlow::addStateFlow($this);
+
+                if ($this->scenario === self::SCENARIO_API) {
+                    $this->createOrUpdateQCall();
+                }
 
                 /*$job = new QuickSearchInitPriceJob();
                 $job->lead_id = $this->id;

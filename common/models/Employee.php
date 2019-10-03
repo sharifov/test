@@ -1880,10 +1880,10 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         return $users;
     }
 
+
     /**
      * @param int $time
      * @return string
-     * @throws \Exception
      */
     public static function convertTimeFromUserDtToUTC(int $time): string
     {
@@ -1897,10 +1897,14 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
 
             $dateTime = date('Y-m-d H:i:s', $time);
 
-            if ($timezone) {
-                $date = new \DateTime($dateTime, new \DateTimeZone($timezone));
-                $date->setTimezone(new \DateTimeZone('UTC'));
-                $dateTime = $date->format('Y-m-d H:i:s');
+            try {
+                if ($timezone) {
+                    $date = new \DateTime($dateTime, new \DateTimeZone($timezone));
+                    $date->setTimezone(new \DateTimeZone('UTC'));
+                    $dateTime = $date->format('Y-m-d H:i:s');
+                }
+            } catch (\Throwable $throwable) {
+                $dateTime = '';
             }
         }
 
