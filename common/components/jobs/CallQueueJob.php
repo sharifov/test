@@ -28,6 +28,7 @@ use yii\queue\Queue;
  *
  * @property int $call_id
  * @property int $delay
+ * @property int $source_id
  *
  * @property CasesCreateService $casesCreateService
  * @property ClientManageService $clientManageService
@@ -37,6 +38,7 @@ use yii\queue\Queue;
 class CallQueueJob extends BaseObject implements JobInterface
 {
     public $call_id;
+    public $source_id = 0;
     public $delay;
 
     private $casesCreateService;
@@ -96,7 +98,7 @@ class CallQueueJob extends BaseObject implements JobInterface
                         if ($call->c_from) {
                             $lead = Lead2::findLastLeadByClientPhone($call->c_from, $call->c_project_id);
                             if (!$lead) {
-                                $lead = Lead2::createNewLeadByPhone($call->c_from, $call->c_project_id, $call->c_source_id);
+                                $lead = Lead2::createNewLeadByPhone($call->c_from, $call->c_project_id, $this->source_id);
                             }
                             if ($lead) {
                                 $call->c_lead_id = $lead->id;

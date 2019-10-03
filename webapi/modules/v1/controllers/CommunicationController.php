@@ -299,10 +299,6 @@ class CommunicationController extends ApiBaseController
 
                 $callModel->c_source_type_id = Call::SOURCE_GENERAL_LINE;
 
-                if ($departmentPhone->dpp_source_id) {
-                    $callModel->c_source_type_id = $departmentPhone->dpp_source_id;
-                }
-
                 if ($ivrEnable) {
                     $ivrSelectedDigit = isset($postCall['Digits']) ? (int)$postCall['Digits'] : null;
                     $ivrStep = (int)Yii::$app->request->get('step', 1);
@@ -783,7 +779,6 @@ class CommunicationController extends ApiBaseController
             $call->c_from = $calData['From'];
             $call->c_to = $calData['To']; //Called
             $call->c_created_user_id = null;
-            $call->c_source_id = $call_source_id;
 
             if ($clientPhone && $clientPhone->client_id) {
                 $call->c_client_id = $clientPhone->client_id;
@@ -1159,6 +1154,7 @@ class CommunicationController extends ApiBaseController
 
             $job = new CallQueueJob();
             $job->call_id = $callModel->c_id;
+            $job->source_id = $department->dpp_source_id;
             $job->delay = 0;
             $jobId = Yii::$app->queue_job->delay(7)->priority(100)->push($job);
         }
