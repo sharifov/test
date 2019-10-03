@@ -2,6 +2,7 @@
 
 namespace common\models\search;
 
+use common\models\Employee;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use common\models\CaseNote;
@@ -60,12 +61,16 @@ class CaseNoteSearch extends CaseNote
             return $dataProvider;
         }
 
+        if ($this->cn_created_dt) {
+            $query->andFilterWhere(['>=', 'cn_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->cn_created_dt))])
+                ->andFilterWhere(['<=', 'cn_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->cn_created_dt) + 3600 * 24)]);
+        }
+
         // grid filtering conditions
         $query->andFilterWhere([
             'cn_id' => $this->cn_id,
             'cn_cs_id' => $this->cn_cs_id,
             'cn_user_id' => $this->cn_user_id,
-            'cn_created_dt' => $this->cn_created_dt,
             'cn_updated_dt' => $this->cn_updated_dt,
         ]);
 

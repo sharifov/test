@@ -2,6 +2,7 @@
 
 namespace common\models\search;
 
+use common\models\Employee;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use common\models\Project;
@@ -56,11 +57,15 @@ class ProjectSearch extends Project
             return $dataProvider;
         }
 
+        if ($this->last_update) {
+            $query->andFilterWhere(['>=', 'last_update', Employee::convertTimeFromUserDtToUTC(strtotime($this->last_update))])
+                ->andFilterWhere(['<=', 'last_update', Employee::convertTimeFromUserDtToUTC(strtotime($this->last_update) + 3600 * 24)]);
+        }
+
         // grid filtering conditions
         $query->andFilterWhere([
             'id' => $this->id,
             'closed' => $this->closed,
-            'last_update' => $this->last_update,
         ]);
 
         $query->andFilterWhere(['like', 'name', $this->name])

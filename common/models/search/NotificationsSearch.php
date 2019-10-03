@@ -74,8 +74,14 @@ class NotificationsSearch extends Notifications
                 ->andFilterWhere(['<=', 'n_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->datetime_end))]);
         }
 
-        if (isset($params['NotificationsSearch']['n_created_dt'])) {
-            $query->andFilterWhere(['=','DATE(n_created_dt)', $this->n_created_dt]);
+        if ($this->n_created_dt) {
+            $query->andFilterWhere(['>=', 'n_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->n_created_dt))])
+                ->andFilterWhere(['<=', 'n_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->n_created_dt) + 3600 * 24)]);
+        }
+
+        if ($this->n_read_dt) {
+            $query->andFilterWhere(['>=', 'n_read_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->n_read_dt))])
+                ->andFilterWhere(['<=', 'n_read_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->n_read_dt) + 3600 * 24)]);
         }
 
         // grid filtering conditions
@@ -87,7 +93,6 @@ class NotificationsSearch extends Notifications
             'n_deleted' => $this->n_deleted,
             'n_popup' => $this->n_popup,
             'n_popup_show' => $this->n_popup_show,
-            'n_read_dt' => $this->n_read_dt,
         ]);
 
         $query->andFilterWhere(['like', 'n_title', $this->n_title])

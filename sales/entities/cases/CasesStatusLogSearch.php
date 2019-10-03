@@ -2,6 +2,7 @@
 
 namespace sales\entities\cases;
 
+use common\models\Employee;
 use yii\data\ActiveDataProvider;
 
 /**
@@ -98,11 +99,15 @@ class CasesStatusLogSearch extends CasesStatusLog
         }
 
         if ($this->csl_start_dt) {
-            $query->andFilterWhere(['DATE(csl_start_dt)'=> date('Y-m-d', strtotime($this->csl_start_dt))]);
+            if ($this->csl_start_dt) {
+                $query->andFilterWhere(['>=', 'csl_start_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->csl_start_dt))])
+                    ->andFilterWhere(['<=', 'csl_start_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->csl_start_dt) + 3600 * 24)]);
+            }
         }
 
         if ($this->csl_end_dt) {
-            $query->andFilterWhere(['DATE(csl_end_dt)'=> date('Y-m-d', strtotime($this->csl_end_dt))]);
+                $query->andFilterWhere(['>=', 'csl_end_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->csl_end_dt))])
+                    ->andFilterWhere(['<=', 'csl_end_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->csl_end_dt) + 3600 * 24)]);
         }
 
         if ($this->statuses && is_array($this->statuses)) {

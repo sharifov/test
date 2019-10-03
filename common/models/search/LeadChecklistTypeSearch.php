@@ -2,6 +2,7 @@
 
 namespace common\models\search;
 
+use common\models\Employee;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use common\models\LeadChecklistType;
@@ -56,12 +57,16 @@ class LeadChecklistTypeSearch extends LeadChecklistType
             return $dataProvider;
         }
 
+        if ($this->lct_updated_dt) {
+            $query->andFilterWhere(['>=', 'lct_updated_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->lct_updated_dt))])
+                ->andFilterWhere(['<=', 'lct_updated_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->lct_updated_dt) + 3600 *24)]);
+        }
+
         // grid filtering conditions
         $query->andFilterWhere([
             'lct_id' => $this->lct_id,
             'lct_enabled' => $this->lct_enabled,
             'lct_sort_order' => $this->lct_sort_order,
-            'lct_updated_dt' => $this->lct_updated_dt,
             'lct_updated_user_id' => $this->lct_updated_user_id,
         ]);
 

@@ -78,7 +78,8 @@ class SmsSearch extends Sms
             $query->andFilterWhere(['>=', 's_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->datetime_start))])
                 ->andFilterWhere(['<=', 's_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->datetime_end))]);
         } elseif (isset($params['SmsSearch']['s_created_dt'])) {
-            $query->andFilterWhere(['=','DATE(s_created_dt)', $this->s_created_dt]);
+            $query->andFilterWhere(['>=', 's_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->s_created_dt))])
+                ->andFilterWhere(['<=', 's_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->s_created_dt) + 3600 * 24)]);
         }
 
         if($this->supervision_id > 0) {

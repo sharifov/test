@@ -2,6 +2,7 @@
 
 namespace common\models\search;
 
+use common\models\Employee;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use common\models\Department;
@@ -56,11 +57,15 @@ class DepartmentSearch extends Department
             return $dataProvider;
         }
 
+        if ($this->dep_updated_dt) {
+            $query->andFilterWhere(['>=', 'dep_updated_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->dep_updated_dt))])
+                ->andFilterWhere(['<=', 'dep_updated_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->dep_updated_dt) + 3600 * 24)]);
+        }
+
         // grid filtering conditions
         $query->andFilterWhere([
             'dep_id' => $this->dep_id,
             'dep_updated_user_id' => $this->dep_updated_user_id,
-            'dep_updated_dt' => $this->dep_updated_dt,
         ]);
 
         $query->andFilterWhere(['like', 'dep_key', $this->dep_key])

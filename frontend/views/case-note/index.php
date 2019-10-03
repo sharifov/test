@@ -1,8 +1,11 @@
 <?php
 
+use common\models\CaseNote;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
+use dosamigos\datepicker\DatePicker;
+
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\CaseNoteSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -25,13 +28,29 @@ $this->params['breadcrumbs'][] = $this->title;
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'columns' => [
-            //['class' => 'yii\grid\SerialColumn'],
-
             'cn_id',
             'cn_cs_id',
             'cn_user_id',
             'cn_text:ntext',
-            'cn_created_dt',
+            [
+                'attribute' => 'cn_created_dt',
+                'value' => function(\common\models\CaseNote $model) {
+                    return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->cn_created_dt));
+                },
+                'format' => 'raw',
+                'filter' => DatePicker::widget([
+                    'model' => $searchModel,
+                    'attribute' => 'cn_created_dt',
+                    'clientOptions' => [
+                        'autoclose' => true,
+                        'format' => 'yyyy-mm-dd',
+                    ],
+                    'options' => [
+                        'autocomplete' => 'off',
+                        'placeholder' =>'Choose Date'
+                    ],
+                ]),
+            ],
             //'cn_updated_dt',
 
             ['class' => 'yii\grid\ActionColumn'],

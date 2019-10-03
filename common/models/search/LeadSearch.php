@@ -44,7 +44,6 @@ class LeadSearch extends Lead
     public $sold_date_from;
     public $sold_date_to;
     public $processing_filter;
-    public $createTimeRange;
 
     public $supervision_id;
 
@@ -62,6 +61,13 @@ class LeadSearch extends Lead
     public $datetime_start;
     public $datetime_end;
     public $date_range;
+
+    public $departRangeTime;
+    public $createdRangeTime;
+    public $updatedRangeTime;
+    public $lastActionRangeTime;
+    public $soldRangeTime;
+    public $createTimeRange;
 
     public $last_ticket_date;
 
@@ -96,7 +102,7 @@ class LeadSearch extends Lead
             }],
 
             ['last_ticket_date', 'safe'],
-            [['createTimeRange'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
+            [['departRangeTime', 'createdRangeTime', 'soldRangeTime', 'updatedRangeTime', 'lastActionRangeTime'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
 
         ];
     }
@@ -202,49 +208,58 @@ class LeadSearch extends Lead
             $query->andWhere(['status' => $this->statuses]);
         }
 
-        if($this->created_date_from || $this->created_date_to) {
-            if ($this->created_date_from) {
-                $query->andFilterWhere(['>=', 'DATE(leads.created)', date('Y-m-d', strtotime($this->created_date_from))]);
+        if ($this->createdRangeTime) {
+            $createdRange = explode(" - ", $this->createdRangeTime);
+            if ($createdRange[0]) {
+                $query->andFilterWhere(['>=', 'leads.created', Employee::convertTimeFromUserDtToUTC(strtotime($createdRange[0]))]);
             }
-            if ($this->created_date_to) {
-                $query->andFilterWhere(['<=', 'DATE(leads.created)', date('Y-m-d', strtotime($this->created_date_to))]);
-            }
-        } else {
-            if($this->created) {
-                $query->andFilterWhere(['DATE(created)'=> date('Y-m-d', strtotime($this->created))]);
+            if ($createdRange[1]) {
+                $query->andFilterWhere(['<=', 'leads.created', Employee::convertTimeFromUserDtToUTC(strtotime($createdRange[1]))]);
             }
         }
 
-        if($this->depart_date_from || $this->depart_date_to) {
+        if ($this->updatedRangeTime) {
+            $updatedRange = explode(" - ", $this->updatedRangeTime);
+            if ($updatedRange[0]) {
+                $query->andFilterWhere(['>=', 'leads.updated', Employee::convertTimeFromUserDtToUTC(strtotime($updatedRange[0]))]);
+            }
+            if ($updatedRange[1]) {
+                $query->andFilterWhere(['<=', 'leads.updated', Employee::convertTimeFromUserDtToUTC(strtotime($updatedRange[1]))]);
+            }
+        }
+
+        if ($this->lastActionRangeTime) {
+            $lastActionRange = explode(" - ", $this->lastActionRangeTime);
+            if ($lastActionRange[0]) {
+                $query->andFilterWhere(['>=', 'leads.l_last_action_dt', Employee::convertTimeFromUserDtToUTC(strtotime($lastActionRange[0]))]);
+            }
+            if ($lastActionRange[1]) {
+                $query->andFilterWhere(['<=', 'leads.l_last_action_dt', Employee::convertTimeFromUserDtToUTC(strtotime($lastActionRange[1]))]);
+            }
+        }
+
+        if($this->departRangeTime) {
+            $departRange = explode(" - ", $this->departRangeTime);
             $having = [];
-            if ($this->depart_date_from) {
-                $having[] = "MIN(departure) >= '".date('Y-m-d', strtotime($this->depart_date_from))."'";
+            if ($departRange[0]) {
+                $having[] = "MIN(departure) >= '".date('Y-m-d', strtotime($departRange[0]))."'";
             }
-            if ($this->depart_date_to) {
-                $having[] = "MIN(departure) <= '".date('Y-m-d', strtotime($this->depart_date_to))."'";
+            if ($departRange[1]) {
+                $having[] = "MIN(departure) <= '".date('Y-m-d', strtotime($departRange[1]))."'";
             }
-
             $subQuery = LeadFlightSegment::find()->select(['DISTINCT(lead_id)'])->groupBy('lead_id')->having(implode(" AND ", $having));
-
             $query->andWhere(['IN', 'leads.id', $subQuery]);
         }
 
-        if($this->sold_date_from || $this->sold_date_to) {
-
-            /*if ($this->sold_date_from) {
-             $query->andFilterWhere(['>=', 'DATE(leads.updated)', date('Y-m-d', strtotime($this->sold_date_from))]);
-             }
-             if ($this->sold_date_to) {
-             $query->andFilterWhere(['<=', 'DATE(leads.updated)', date('Y-m-d', strtotime($this->sold_date_to))]);
-             }*/
-
+        if($this->soldRangeTime) {
+            $soldRange = explode(" - ", $this->soldRangeTime);
             $subQuery = LeadFlow::find()->select(['DISTINCT(lead_flow.lead_id)'])->where('lead_flow.status = leads.status AND lead_flow.lead_id = leads.id');
 
-            if ($this->sold_date_from) {
-                $subQuery->andFilterWhere(['>=', 'DATE(lead_flow.created)', date('Y-m-d', strtotime($this->sold_date_from))]);
+            if ($soldRange[0]) {
+                $subQuery->andFilterWhere(['>=', 'lead_flow.created', Employee::convertTimeFromUserDtToUTC(strtotime($soldRange[0]))]);
             }
-            if ($this->sold_date_to) {
-                $subQuery->andFilterWhere(['<=', 'DATE(lead_flow.created)', date('Y-m-d', strtotime($this->sold_date_to))]);
+            if ($soldRange[1]) {
+                $subQuery->andFilterWhere(['<=', 'lead_flow.created', Employee::convertTimeFromUserDtToUTC(strtotime($soldRange[1]))]);
             }
 
             $query->andWhere(['IN', 'leads.id', $subQuery]);
@@ -463,17 +478,16 @@ class LeadSearch extends Lead
             }
         }
 
-        if($this->depart_date_from || $this->depart_date_to) {
+        if($this->departRangeTime) {
+            $departRange = explode(" - ", $this->departRangeTime);
             $having = [];
-            if ($this->depart_date_from) {
-                $having[] = "MIN(departure) >= '".date('Y-m-d', strtotime($this->depart_date_from))."'";
+            if ($departRange[0]) {
+                $having[] = "MIN(departure) >= '".date('Y-m-d', strtotime($departRange[0]))."'";
             }
-            if ($this->depart_date_to) {
-                $having[] = "MIN(departure) <= '".date('Y-m-d', strtotime($this->depart_date_to))."'";
+            if ($departRange[1]) {
+                $having[] = "MIN(departure) <= '".date('Y-m-d', strtotime($departRange[1]))."'";
             }
-
             $subQuery = LeadFlightSegment::find()->select(['DISTINCT(lead_id)'])->groupBy('lead_id')->having(implode(" AND ", $having));
-
             $query->andWhere(['IN', 'leads.id', $subQuery]);
         }
 
@@ -740,7 +754,8 @@ class LeadSearch extends Lead
         if ($this->last_ticket_date) {
 //            $query->andWhere(['=', 'DATE(' . Quote::tableName() . '.last_ticket_date)', date('Y-m-d', strtotime($this->last_ticket_date))]);
             $subQuery = LeadFlow::find()->select(['lead_flow.lead_id'])->distinct('lead_flow.lead_id')->where('lead_flow.status = leads.status AND lead_flow.lead_id = leads.id');
-            $subQuery->andFilterWhere(['=', 'DATE(lead_flow.created)', date('Y-m-d', strtotime($this->last_ticket_date))]);
+            $subQuery->andFilterWhere(['>=', 'lead_flow.created', Employee::convertTimeFromUserDtToUTC(strtotime($this->last_ticket_date))])
+                ->andFilterWhere(['<=', 'lead_flow.created', Employee::convertTimeFromUserDtToUTC(strtotime($this->last_ticket_date) + 3600 *24)]);
             $query->andWhere(['IN', 'leads.id', $subQuery]);
         }
 
@@ -815,7 +830,7 @@ class LeadSearch extends Lead
 
         $query
             ->andWhere(['leads.status' => Lead::STATUS_SOLD]);
-            //->andWhere(['IN', $leadTable . '.project_id', $projectIds])
+        //->andWhere(['IN', $leadTable . '.project_id', $projectIds])
 
         if(!empty($this->updated)){
             $query->andFilterWhere(['=','DATE(leads.updated)', date('Y-m-d', strtotime($this->updated))]);
@@ -902,7 +917,8 @@ class LeadSearch extends Lead
         ]);
 
         if ($this->created) {
-            $query->andFilterWhere(['=', 'DATE(leads.created)', date('Y-m-d', strtotime($this->created))]);
+            $query->andFilterWhere(['>=', 'leads.created', Employee::convertTimeFromUserDtToUTC(strtotime($this->created))])
+                ->andFilterWhere(['<=', 'leads.created', Employee::convertTimeFromUserDtToUTC(strtotime($this->created) + 3600 * 24)]);
         }
 
         return $dataProvider;
@@ -940,12 +956,14 @@ class LeadSearch extends Lead
             return $dataProvider;
         }
 
-        if ($this->l_last_action_dt) {
-            $query->andFilterWhere(['=','DATE(l_last_action_dt)', date('Y-m-d', strtotime($this->l_last_action_dt))]);
+        if ($this->created) {
+            $query->andFilterWhere(['>=', 'created', Employee::convertTimeFromUserDtToUTC(strtotime($this->created))])
+            ->andFilterWhere(['<=', 'created', Employee::convertTimeFromUserDtToUTC(strtotime($this->created) + 3600 * 24)]);
         }
 
-        if ($this->created) {
-            $query->andFilterWhere(['=','DATE(created)', date('Y-m-d', strtotime($this->created))]);
+        if ($this->l_last_action_dt) {
+            $query->andFilterWhere(['>=', 'l_last_action_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->l_last_action_dt))])
+                ->andFilterWhere(['<=', 'l_last_action_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->l_last_action_dt) + 3600 * 24)]);
         }
 
         // grid filtering conditions
@@ -1026,11 +1044,15 @@ class LeadSearch extends Lead
         }
 
         if ($this->created) {
-            $query->andFilterWhere(['=','DATE(created)', date('Y-m-d', strtotime($this->created))]);
+            //$query->andFilterWhere(['=','DATE(created)', date('Y-m-d', strtotime($this->created))]);
+            $query->andFilterWhere(['>=', 'created', Employee::convertTimeFromUserDtToUTC(strtotime($this->created))])
+                ->andFilterWhere(['<=', 'created', Employee::convertTimeFromUserDtToUTC(strtotime($this->created) + 3600 * 24)]);
         }
 
         if ($this->l_last_action_dt) {
-            $query->andFilterWhere(['=','DATE(l_last_action_dt)', date('Y-m-d', strtotime($this->l_last_action_dt))]);
+            //$query->andFilterWhere(['=','DATE(l_last_action_dt)', date('Y-m-d', strtotime($this->l_last_action_dt))]);
+            $query->andFilterWhere(['>=', 'l_last_action_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->l_last_action_dt))])
+                ->andFilterWhere(['<=', 'l_last_action_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->l_last_action_dt) + 3600 * 24)]);
         }
 
         // grid filtering conditions
@@ -1256,7 +1278,8 @@ class LeadSearch extends Lead
         }
 
         if ($this->created) {
-            $query->andFilterWhere(['=', 'DATE(created)', date('Y-m-d', strtotime($this->created))]);
+            $query->andFilterWhere(['>=', 'created', Employee::convertTimeFromUserDtToUTC(strtotime($this->created))])
+                ->andFilterWhere(['<=', 'created', Employee::convertTimeFromUserDtToUTC(strtotime($this->created) + 3600 * 24)]);
         }
 
         // grid filtering conditions

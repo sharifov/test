@@ -74,16 +74,19 @@ class LeadCallExpertSearch extends LeadCallExpert
                 ->andFilterWhere(['<=', 'lce_request_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->datetime_end))]);
         }
 
-        if (isset($params['LeadCallExpertSearch']['lce_request_dt'])) {
-            $query->andFilterWhere(['=', 'DATE(lce_request_dt)', $this->lce_request_dt]);
+        if ($this->lce_request_dt) {
+            $query->andFilterWhere(['>=', 'lce_request_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->lce_request_dt))])
+                ->andFilterWhere(['<=', 'lce_request_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->lce_request_dt) + 3600 * 24)]);
         }
 
-        if (isset($params['LeadCallExpertSearch']['lce_response_dt'])) {
-            $query->andFilterWhere(['=', 'DATE(lce_updated_dt)', $this->lce_response_dt]);
+        if ($this->lce_response_dt) {
+            $query->andFilterWhere(['>=', 'lce_response_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->lce_response_dt))])
+                ->andFilterWhere(['<=', 'lce_response_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->lce_response_dt) + 3600 * 24)]);
         }
 
-        if (isset($params['LeadCallExpertSearch']['lce_updated_dt'])) {
-            $query->andFilterWhere(['=', 'DATE(lce_updated_dt)', $this->lce_updated_dt]);
+        if ($this->lce_updated_dt) {
+            $query->andFilterWhere(['>=', 'lce_updated_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->lce_updated_dt))])
+                ->andFilterWhere(['<=', 'lce_updated_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->lce_updated_dt) + 3600 * 24)]);
         }
 
         if (!empty($this->employeeRole)) {
