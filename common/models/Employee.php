@@ -1352,11 +1352,11 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     public function getLeadCountByStatus(array $statusList = [], string $startDate = null, string $endDate = null): int
     {
         if ($startDate) {
-            $startDate = date('Y-m-d H:i', strtotime($startDate));
+            $startDate = Employee::convertTimeFromUserDtToUTC(strtotime($startDate));
         }
 
         if ($endDate) {
-            $endDate = date('Y-m-d H:i', strtotime($endDate));
+            $endDate = Employee::convertTimeFromUserDtToUTC(strtotime($endDate));
         }
 
         $query = LeadFlow::find()->select('COUNT(DISTINCT(lead_id))')->where(['employee_id' => $this->id, 'status' => $statusList]);
@@ -1377,11 +1377,11 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     public function getLeadCountByStatuses(array $statusList = [], int $from_status_id = null, string $startDate = null, string $endDate = null): int
     {
         if ($startDate) {
-            $startDate = date('Y-m-d H:i', strtotime($startDate));
+            $startDate = Employee::convertTimeFromUserDtToUTC(strtotime($startDate));
         }
 
         if ($endDate) {
-            $endDate = date('Y-m-d H:i', strtotime($endDate));
+            $endDate = Employee::convertTimeFromUserDtToUTC(strtotime($endDate));
         }
 
         $query = LeadFlow::find()->select('COUNT(DISTINCT(lead_id))')->where(['employee_id' => $this->id, 'status' => $statusList]);
