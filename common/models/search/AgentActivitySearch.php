@@ -112,7 +112,9 @@ class AgentActivitySearch extends Call
 
         $query->select(['e.id', 'e.username']);
 
-        $between_condition = " BETWEEN '{$this->date_from}' AND '{$this->date_to}'";
+        $date_from = Employee::convertTimeFromUserDtToUTC(strtotime($this->date_from));
+        $date_to = Employee::convertTimeFromUserDtToUTC(strtotime($this->date_to));
+        $between_condition = " BETWEEN '{$date_from}' AND '{$date_to}'";
 
         $query->addSelect(['(SELECT COUNT(*) FROM `call` WHERE (c_created_dt '.$between_condition.') AND c_created_user_id=e.id AND c_call_type_id = '.Call::CALL_TYPE_IN.') AS inbound_calls ']);
         $query->addSelect(['(SELECT COUNT(*) FROM `call` WHERE (c_created_dt '.$between_condition.') AND c_created_user_id=e.id AND c_call_type_id = '.Call::CALL_TYPE_OUT.') AS outbound_calls ']);
