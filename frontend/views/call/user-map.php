@@ -221,7 +221,7 @@ $dtNow = date('Y-m-d H:i:s');
             <div class="col-md-5">
 
                 <div class="panel panel-default">
-                    <div class="panel-heading"><i class="fa fa-list"></i> Calls in IVR, DELAY, QUEUE, RINGING, PROGRESS</div>
+                    <div class="panel-heading"><i class="fa fa-list"></i> Calls in IVR, DELAY, QUEUE, RINGING, PROGRESS (Updated: <i class="fa fa-clock-o"></i> <?= Yii::$app->formatter->asTime(time(), 'php:H:i:s') ?>)</div>
                     <div class="panel-body">
                         <?= \yii\widgets\ListView::widget([
                             'dataProvider' => $dataProvider3,
