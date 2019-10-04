@@ -2401,7 +2401,6 @@ class LeadController extends FController
 //                $newLead->rating = 0;
 //                $newLead->additional_information = null;
 //                $newLead->l_answered = 0;
-//                $newLead->l_grade = 0;
 //                $newLead->snooze_for = null;
 //                $newLead->called_expert = false;
 //                $newLead->created = null;

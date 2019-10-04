@@ -37,12 +37,6 @@ class LeadFollowUpEventListener
 
         $lead = $event->lead;
 
-        $l_grade = (int)$lead->l_grade + 1;
-        Yii::$app->db->createCommand('UPDATE ' . Lead::tableName() . ' SET l_grade = :grade WHERE id = :id', [
-            ':grade' => $l_grade,
-            ':id' => $lead->id
-        ])->execute();
-
         if ($lead->status_description) {
             $reason = new Reason();
             $reason->lead_id = $lead->id;

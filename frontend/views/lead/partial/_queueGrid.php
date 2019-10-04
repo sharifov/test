@@ -342,16 +342,6 @@ if(Yii::$app->user->identity->canRoles(['admin', 'supervision'])) {
         ],
 
         [
-            'header' => 'Grade',
-            //'attribute' => 'l_grade',
-            'value' => function($model){
-                return $model['l_grade'];
-            },
-            'contentOptions' => ['class' => 'text-center'],
-            'visible' => $is_manager && in_array($queueType, ['follow-up', 'processing', 'processing-all'])
-        ],
-
-        [
             'header' => 'Task Info',
             'value' => function($model){
                 return '<small style="font-size: 10px">'.Lead::getTaskInfo2($model['id']).'</small>';
