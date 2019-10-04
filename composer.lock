@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "6d062af109dcca20b5494780bb03b626",
+    "content-hash": "d3ee17610b29519fd9f9688f52af1fc9",
     "packages": [
         {
             "name": "2amigos/qrcode-library",
@@ -546,20 +546,20 @@
         },
         {
             "name": "borales/yii2-phone-input",
-            "version": "0.1.2",
+            "version": "0.2.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Borales/yii2-phone-input.git",
-                "reference": "3df49ca980d7ed164296a1974c50d860b78f5f2f"
+                "reference": "8b9e3a5036549926c75e18beee77dfd3e9a48829"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Borales/yii2-phone-input/zipball/3df49ca980d7ed164296a1974c50d860b78f5f2f",
-                "reference": "3df49ca980d7ed164296a1974c50d860b78f5f2f",
+                "url": "https://api.github.com/repos/Borales/yii2-phone-input/zipball/8b9e3a5036549926c75e18beee77dfd3e9a48829",
+                "reference": "8b9e3a5036549926c75e18beee77dfd3e9a48829",
                 "shasum": ""
             },
             "require": {
-                "bower-asset/intl-tel-input": "^12",
+                "bower-asset/intl-tel-input": "^16",
                 "giggsey/libphonenumber-for-php": "^8",
                 "yiisoft/yii2": ">=2.0.1"
             },
@@ -587,7 +587,7 @@
                 "libphonenumber",
                 "yii2"
             ],
-            "time": "2018-06-17T11:29:34+00:00"
+            "time": "2019-08-22T09:12:04+00:00"
         },
         {
             "name": "bower-asset/bootstrap",
@@ -600,7 +600,8 @@
             "dist": {
                 "type": "zip",
                 "url": "https://api.github.com/repos/twbs/bootstrap/zipball/68b0d231a13201eb14acd3dc84e51543d16e5f7e",
-                "reference": "68b0d231a13201eb14acd3dc84e51543d16e5f7e"
+                "reference": "68b0d231a13201eb14acd3dc84e51543d16e5f7e",
+                "shasum": null
             },
             "require": {
                 "bower-asset/jquery": ">=1.9.1,<4.0"
@@ -621,7 +622,8 @@
             "dist": {
                 "type": "zip",
                 "url": "https://api.github.com/repos/uxsolutions/bootstrap-datepicker/zipball/d364be5b066b38f3675a5a1dc174ce1ab1f3360e",
-                "reference": "d364be5b066b38f3675a5a1dc174ce1ab1f3360e"
+                "reference": "d364be5b066b38f3675a5a1dc174ce1ab1f3360e",
+                "shasum": null
             },
             "require": {
                 "bower-asset/jquery": ">=1.7.1,<4.0.0"
@@ -642,7 +644,8 @@
             "dist": {
                 "type": "zip",
                 "url": "https://api.github.com/repos/FortAwesome/Font-Awesome/zipball/a8386aae19e200ddb0f6845b5feeee5eb7013687",
-                "reference": "a8386aae19e200ddb0f6845b5feeee5eb7013687"
+                "reference": "a8386aae19e200ddb0f6845b5feeee5eb7013687",
+                "shasum": null
             },
             "type": "bower-asset",
             "license": [
@@ -662,7 +665,8 @@
             "dist": {
                 "type": "zip",
                 "url": "https://api.github.com/repos/ColorlibHQ/gentelella/zipball/3448fdfdf16a41707d6e2a8154d592a88d85c41c",
-                "reference": "3448fdfdf16a41707d6e2a8154d592a88d85c41c"
+                "reference": "3448fdfdf16a41707d6e2a8154d592a88d85c41c",
+                "shasum": null
             },
             "type": "bower-asset",
             "license": [
@@ -680,7 +684,8 @@
             "dist": {
                 "type": "zip",
                 "url": "https://api.github.com/repos/RobinHerbots/Inputmask/zipball/5e670ad62f50c738388d4dcec78d2888505ad77b",
-                "reference": "5e670ad62f50c738388d4dcec78d2888505ad77b"
+                "reference": "5e670ad62f50c738388d4dcec78d2888505ad77b",
+                "shasum": null
             },
             "require": {
                 "bower-asset/jquery": ">=1.7"
@@ -692,19 +697,17 @@
         },
         {
             "name": "bower-asset/intl-tel-input",
-            "version": "v12.4.0",
+            "version": "v16.0.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/jackocnr/intl-tel-input.git",
-                "reference": "2afde58af3d7db953ba505946a5aac3c3176ed0b"
+                "reference": "6f5077883e50f4475af605730cdb565ccf623ef2"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/jackocnr/intl-tel-input/zipball/2afde58af3d7db953ba505946a5aac3c3176ed0b",
-                "reference": "2afde58af3d7db953ba505946a5aac3c3176ed0b"
-            },
-            "require": {
-                "bower-asset/jquery": ">=1.7"
+                "url": "https://api.github.com/repos/jackocnr/intl-tel-input/zipball/6f5077883e50f4475af605730cdb565ccf623ef2",
+                "reference": "6f5077883e50f4475af605730cdb565ccf623ef2",
+                "shasum": null
             },
             "type": "bower-asset"
         },
@@ -719,7 +722,8 @@
             "dist": {
                 "type": "zip",
                 "url": "https://api.github.com/repos/jquery/jquery-dist/zipball/15bc73803f76bc53b654b9fdbbbc096f56d7c03d",
-                "reference": "15bc73803f76bc53b654b9fdbbbc096f56d7c03d"
+                "reference": "15bc73803f76bc53b654b9fdbbbc096f56d7c03d",
+                "shasum": null
             },
             "type": "bower-asset",
             "license": [
@@ -737,7 +741,8 @@
             "dist": {
                 "type": "zip",
                 "url": "https://api.github.com/repos/components/jqueryui/zipball/44ecf3794cc56b65954cc19737234a3119d036cc",
-                "reference": "44ecf3794cc56b65954cc19737234a3119d036cc"
+                "reference": "44ecf3794cc56b65954cc19737234a3119d036cc",
+                "shasum": null
             },
             "require": {
                 "bower-asset/jquery": ">=1.6"
@@ -758,7 +763,8 @@
             "dist": {
                 "type": "zip",
                 "url": "https://api.github.com/repos/stripe/jquery.payment/zipball/88fcc8a48a7f1d2e77bb6cf90089ea7cfa59765e",
-                "reference": "88fcc8a48a7f1d2e77bb6cf90089ea7cfa59765e"
+                "reference": "88fcc8a48a7f1d2e77bb6cf90089ea7cfa59765e",
+                "shasum": null
             },
             "require": {
                 "bower-asset/jquery": ">=1.5"
@@ -776,7 +782,8 @@
             "dist": {
                 "type": "zip",
                 "url": "https://api.github.com/repos/bestiejs/punycode.js/zipball/38c8d3131a82567bfef18da09f7f4db68c84f8a3",
-                "reference": "38c8d3131a82567bfef18da09f7f4db68c84f8a3"
+                "reference": "38c8d3131a82567bfef18da09f7f4db68c84f8a3",
+                "shasum": null
             },
             "type": "bower-asset"
         },
@@ -791,7 +798,8 @@
             "dist": {
                 "type": "zip",
                 "url": "https://api.github.com/repos/smalot/bootstrap-datetimepicker/zipball/32143c8b45575e51c92a8e29997cbe556d1bbba3",
-                "reference": "32143c8b45575e51c92a8e29997cbe556d1bbba3"
+                "reference": "32143c8b45575e51c92a8e29997cbe556d1bbba3",
+                "shasum": null
             },
             "type": "bower-asset"
         },
@@ -806,7 +814,8 @@
             "dist": {
                 "type": "zip",
                 "url": "https://api.github.com/repos/yiisoft/jquery-pjax/zipball/aef7b953107264f00234902a3880eb50dafc48be",
-                "reference": "aef7b953107264f00234902a3880eb50dafc48be"
+                "reference": "aef7b953107264f00234902a3880eb50dafc48be",
+                "shasum": null
             },
             "require": {
                 "bower-asset/jquery": ">=1.8"
@@ -919,16 +928,16 @@
         },
         {
             "name": "doctrine/annotations",
-            "version": "v1.7.0",
+            "version": "v1.8.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/doctrine/annotations.git",
-                "reference": "fa4c4e861e809d6a1103bd620cce63ed91aedfeb"
+                "reference": "904dca4eb10715b92569fbcd79e201d5c349b6bc"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/doctrine/annotations/zipball/fa4c4e861e809d6a1103bd620cce63ed91aedfeb",
-                "reference": "fa4c4e861e809d6a1103bd620cce63ed91aedfeb",
+                "url": "https://api.github.com/repos/doctrine/annotations/zipball/904dca4eb10715b92569fbcd79e201d5c349b6bc",
+                "reference": "904dca4eb10715b92569fbcd79e201d5c349b6bc",
                 "shasum": ""
             },
             "require": {
@@ -937,7 +946,7 @@
             },
             "require-dev": {
                 "doctrine/cache": "1.*",
-                "phpunit/phpunit": "^7.5@dev"
+                "phpunit/phpunit": "^7.5"
             },
             "type": "library",
             "extra": {
@@ -983,7 +992,7 @@
                 "docblock",
                 "parser"
             ],
-            "time": "2019-08-08T18:11:40+00:00"
+            "time": "2019-10-01T18:55:10+00:00"
         },
         {
             "name": "doctrine/instantiator",
@@ -1258,16 +1267,16 @@
         },
         {
             "name": "giggsey/libphonenumber-for-php",
-            "version": "8.10.19",
+            "version": "8.10.20",
             "source": {
                 "type": "git",
                 "url": "https://github.com/giggsey/libphonenumber-for-php.git",
-                "reference": "b8f2341692df067028445fee35ca7144d009e251"
+                "reference": "aed1229bef97cd4abc6f67cbc064cf832d259327"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/giggsey/libphonenumber-for-php/zipball/b8f2341692df067028445fee35ca7144d009e251",
-                "reference": "b8f2341692df067028445fee35ca7144d009e251",
+                "url": "https://api.github.com/repos/giggsey/libphonenumber-for-php/zipball/aed1229bef97cd4abc6f67cbc064cf832d259327",
+                "reference": "aed1229bef97cd4abc6f67cbc064cf832d259327",
                 "shasum": ""
             },
             "require": {
@@ -1322,7 +1331,7 @@
                 "phonenumber",
                 "validation"
             ],
-            "time": "2019-09-18T15:37:43+00:00"
+            "time": "2019-10-02T20:06:44+00:00"
         },
         {
             "name": "giggsey/locale",
@@ -2378,16 +2387,16 @@
         },
         {
             "name": "jms/serializer",
-            "version": "3.2.0",
+            "version": "3.3.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/schmittjoh/serializer.git",
-                "reference": "89fc2a7f53ae63b513e2339fdb6db6e49bfbc749"
+                "reference": "4c1e4296734385af7718ca71ec0febb4815b4a87"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/schmittjoh/serializer/zipball/89fc2a7f53ae63b513e2339fdb6db6e49bfbc749",
-                "reference": "89fc2a7f53ae63b513e2339fdb6db6e49bfbc749",
+                "url": "https://api.github.com/repos/schmittjoh/serializer/zipball/4c1e4296734385af7718ca71ec0febb4815b4a87",
+                "reference": "4c1e4296734385af7718ca71ec0febb4815b4a87",
                 "shasum": ""
             },
             "require": {
@@ -2427,7 +2436,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "3.2-dev"
+                    "dev-master": "3.3-dev"
                 }
             },
             "autoload": {
@@ -2458,7 +2467,7 @@
                 "serialization",
                 "xml"
             ],
-            "time": "2019-09-04T10:17:24+00:00"
+            "time": "2019-09-20T14:24:07+00:00"
         },
         {
             "name": "kartik-v/bootstrap-popover-x",
@@ -3690,7 +3699,9 @@
             "version": "6.10.2",
             "dist": {
                 "type": "tar",
-                "url": "https://registry.npmjs.org/ajv/-/ajv-6.10.2.tgz"
+                "url": "https://registry.npmjs.org/ajv/-/ajv-6.10.2.tgz",
+                "reference": null,
+                "shasum": null
             },
             "require": {
                 "npm-asset/fast-deep-equal": ">=2.0.1,<3.0.0",
@@ -3708,7 +3719,9 @@
             "version": "0.11.1",
             "dist": {
                 "type": "tar",
-                "url": "https://registry.npmjs.org/brace/-/brace-0.11.1.tgz"
+                "url": "https://registry.npmjs.org/brace/-/brace-0.11.1.tgz",
+                "reference": null,
+                "shasum": null
             },
             "type": "npm-asset",
             "license": [
@@ -3720,7 +3733,9 @@
             "version": "2.0.1",
             "dist": {
                 "type": "tar",
-                "url": "https://registry.npmjs.org/fast-deep-equal/-/fast-deep-equal-2.0.1.tgz"
+                "url": "https://registry.npmjs.org/fast-deep-equal/-/fast-deep-equal-2.0.1.tgz",
+                "reference": null,
+                "shasum": null
             },
             "type": "npm-asset",
             "license": [
@@ -3732,7 +3747,9 @@
             "version": "2.0.0",
             "dist": {
                 "type": "tar",
-                "url": "https://registry.npmjs.org/fast-json-stable-stringify/-/fast-json-stable-stringify-2.0.0.tgz"
+                "url": "https://registry.npmjs.org/fast-json-stable-stringify/-/fast-json-stable-stringify-2.0.0.tgz",
+                "reference": null,
+                "shasum": null
             },
             "type": "npm-asset",
             "license": [
@@ -3744,7 +3761,9 @@
             "version": "0.7.1",
             "dist": {
                 "type": "tar",
-                "url": "https://registry.npmjs.org/javascript-natural-sort/-/javascript-natural-sort-0.7.1.tgz"
+                "url": "https://registry.npmjs.org/javascript-natural-sort/-/javascript-natural-sort-0.7.1.tgz",
+                "reference": null,
+                "shasum": null
             },
             "type": "npm-asset",
             "license": [
@@ -3756,7 +3775,9 @@
             "version": "0.15.0",
             "dist": {
                 "type": "tar",
-                "url": "https://registry.npmjs.org/jmespath/-/jmespath-0.15.0.tgz"
+                "url": "https://registry.npmjs.org/jmespath/-/jmespath-0.15.0.tgz",
+                "reference": null,
+                "shasum": null
             },
             "type": "npm-asset"
         },
@@ -3765,7 +3786,9 @@
             "version": "0.4.1",
             "dist": {
                 "type": "tar",
-                "url": "https://registry.npmjs.org/json-schema-traverse/-/json-schema-traverse-0.4.1.tgz"
+                "url": "https://registry.npmjs.org/json-schema-traverse/-/json-schema-traverse-0.4.1.tgz",
+                "reference": null,
+                "shasum": null
             },
             "type": "npm-asset",
             "license": [
@@ -3777,7 +3800,9 @@
             "version": "0.6.1",
             "dist": {
                 "type": "tar",
-                "url": "https://registry.npmjs.org/json-source-map/-/json-source-map-0.6.1.tgz"
+                "url": "https://registry.npmjs.org/json-source-map/-/json-source-map-0.6.1.tgz",
+                "reference": null,
+                "shasum": null
             },
             "type": "npm-asset",
             "license": [
@@ -3789,7 +3814,9 @@
             "version": "7.0.4",
             "dist": {
                 "type": "tar",
-                "url": "https://registry.npmjs.org/jsoneditor/-/jsoneditor-7.0.4.tgz"
+                "url": "https://registry.npmjs.org/jsoneditor/-/jsoneditor-7.0.4.tgz",
+                "reference": null,
+                "shasum": null
             },
             "require": {
                 "npm-asset/ajv": "6.10.2",
@@ -3811,7 +3838,9 @@
             "version": "2.4.13",
             "dist": {
                 "type": "tar",
-                "url": "https://registry.npmjs.org/mobius1-selectr/-/mobius1-selectr-2.4.13.tgz"
+                "url": "https://registry.npmjs.org/mobius1-selectr/-/mobius1-selectr-2.4.13.tgz",
+                "reference": null,
+                "shasum": null
             },
             "type": "npm-asset",
             "license": [
@@ -3823,7 +3852,9 @@
             "version": "3.0.0",
             "dist": {
                 "type": "tar",
-                "url": "https://registry.npmjs.org/picomodal/-/picomodal-3.0.0.tgz"
+                "url": "https://registry.npmjs.org/picomodal/-/picomodal-3.0.0.tgz",
+                "reference": null,
+                "shasum": null
             },
             "type": "npm-asset",
             "license": [
@@ -3835,7 +3866,9 @@
             "version": "2.1.1",
             "dist": {
                 "type": "tar",
-                "url": "https://registry.npmjs.org/punycode/-/punycode-2.1.1.tgz"
+                "url": "https://registry.npmjs.org/punycode/-/punycode-2.1.1.tgz",
+                "reference": null,
+                "shasum": null
             },
             "type": "npm-asset",
             "license": [
@@ -3847,7 +3880,9 @@
             "version": "2.2.2",
             "dist": {
                 "type": "tar",
-                "url": "https://registry.npmjs.org/@sphinxxxx/color-conversion/-/color-conversion-2.2.2.tgz"
+                "url": "https://registry.npmjs.org/@sphinxxxx/color-conversion/-/color-conversion-2.2.2.tgz",
+                "reference": null,
+                "shasum": null
             },
             "type": "npm-asset",
             "license": [
@@ -3859,7 +3894,9 @@
             "version": "4.2.2",
             "dist": {
                 "type": "tar",
-                "url": "https://registry.npmjs.org/uri-js/-/uri-js-4.2.2.tgz"
+                "url": "https://registry.npmjs.org/uri-js/-/uri-js-4.2.2.tgz",
+                "reference": null,
+                "shasum": null
             },
             "require": {
                 "npm-asset/punycode": ">=2.1.0,<3.0.0"
@@ -3874,7 +3911,9 @@
             "version": "2.9.2",
             "dist": {
                 "type": "tar",
-                "url": "https://registry.npmjs.org/vanilla-picker/-/vanilla-picker-2.9.2.tgz"
+                "url": "https://registry.npmjs.org/vanilla-picker/-/vanilla-picker-2.9.2.tgz",
+                "reference": null,
+                "shasum": null
             },
             "require": {
                 "npm-asset/sphinxxxx--color-conversion": ">=2.2.1,<3.0.0"
@@ -4771,16 +4810,16 @@
         },
         {
             "name": "twilio/sdk",
-            "version": "5.36.0",
+            "version": "5.36.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/twilio/twilio-php.git",
-                "reference": "ad4093a19762b76b1ec316ebdb6e0766539859ff"
+                "reference": "a62f726b07725d320f87f4aed43da35693fe14f1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/twilio/twilio-php/zipball/ad4093a19762b76b1ec316ebdb6e0766539859ff",
-                "reference": "ad4093a19762b76b1ec316ebdb6e0766539859ff",
+                "url": "https://api.github.com/repos/twilio/twilio-php/zipball/a62f726b07725d320f87f4aed43da35693fe14f1",
+                "reference": "a62f726b07725d320f87f4aed43da35693fe14f1",
                 "shasum": ""
             },
             "require": {
@@ -4817,7 +4856,7 @@
                 "sms",
                 "twilio"
             ],
-            "time": "2019-09-18T22:10:18+00:00"
+            "time": "2019-10-02T21:08:39+00:00"
         },
         {
             "name": "unclead/yii2-multiple-input",
@@ -6519,22 +6558,22 @@
         },
         {
             "name": "phpspec/prophecy",
-            "version": "1.8.1",
+            "version": "1.9.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpspec/prophecy.git",
-                "reference": "1927e75f4ed19131ec9bcc3b002e07fb1173ee76"
+                "reference": "f6811d96d97bdf400077a0cc100ae56aa32b9203"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpspec/prophecy/zipball/1927e75f4ed19131ec9bcc3b002e07fb1173ee76",
-                "reference": "1927e75f4ed19131ec9bcc3b002e07fb1173ee76",
+                "url": "https://api.github.com/repos/phpspec/prophecy/zipball/f6811d96d97bdf400077a0cc100ae56aa32b9203",
+                "reference": "f6811d96d97bdf400077a0cc100ae56aa32b9203",
                 "shasum": ""
             },
             "require": {
                 "doctrine/instantiator": "^1.0.2",
                 "php": "^5.3|^7.0",
-                "phpdocumentor/reflection-docblock": "^2.0|^3.0.2|^4.0",
+                "phpdocumentor/reflection-docblock": "^2.0|^3.0.2|^4.0|^5.0",
                 "sebastian/comparator": "^1.1|^2.0|^3.0",
                 "sebastian/recursion-context": "^1.0|^2.0|^3.0"
             },
@@ -6578,7 +6617,7 @@
                 "spy",
                 "stub"
             ],
-            "time": "2019-06-13T12:50:23+00:00"
+            "time": "2019-10-03T11:07:50+00:00"
         },
         {
             "name": "phpunit/php-code-coverage",
@@ -8429,7 +8468,9 @@
         "ext-curl": "*",
         "ext-gd": "*",
         "ext-zip": "*",
-        "ext-pdo": "*"
+        "ext-pdo": "*",
+        "ext-geoip": "*",
+        "ext-intl": "*"
     },
     "platform-dev": []
 }
