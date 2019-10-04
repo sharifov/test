@@ -52,7 +52,7 @@ use frontend\models\LeadForm;
         $params = Yii::$app->request->queryParams;
         $params['ClientSearch']['client_email'] = $email->email;
         $params['ClientSearch']['not_in_client_id'] = $email->client_id;
-        $dataProvider = $searchModel->search($params);
+        $dataProvider = $searchModel->searchFromLead($params);
 
         $emailCount = $dataProvider->count;
 
