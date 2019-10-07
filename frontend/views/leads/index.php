@@ -369,7 +369,7 @@ $lists = new ListsAccess($user->id);
                 //$str = '';
                 $str = '<i class="fa fa-male"></i> <span title="adult">' . $model->adults . '</span> / <span title="child">' . $model->children . '</span> / <span title="infant">' . $model->infants . '</span><br>';
                 $str .= '<span title="Calls Out / In"><i class="fa fa-phone success"></i> ' . $model->getCountCalls(Call::CALL_TYPE_OUT) . '/' . $model->getCountCalls(Call::CALL_TYPE_IN) . '</span> | ';
-                $str .= '<span title="SMS Out / In"><i class="fa fa-comments info"></i> ' . $model->getCountSms(Sms::TYPE_OUTBOX) . '/' . $model->getCountCalls(Sms::TYPE_INBOX) . '</span> | ';
+                $str .= '<span title="SMS Out / In"><i class="fa fa-comments info"></i> ' . $model->getCountSms(Sms::TYPE_OUTBOX) . '/' . $model->getCountSms(Sms::TYPE_INBOX) . '</span> | ';
                 $str .= '<span title="Email Out / In"><i class="fa fa-envelope danger"></i> ' . $model->getCountEmails(Email::TYPE_OUTBOX) . '/' . $model->getCountEmails(Email::TYPE_INBOX) . '</span>';
                 return $str;
             },

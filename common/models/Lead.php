@@ -3559,48 +3559,63 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
         return $key;
     }
 
+
     /**
      * @param int $type_id
-     * @return int|string
+     * @param bool|null $onlyParent
+     * @return int
      */
-    public function getCountCalls(int $type_id = 0)
+    public function getCountCalls(int $type_id = 0, ?bool $onlyParent = true): int
     {
-        if($type_id === 0) {
-            $count = Call::find()->where(['c_lead_id' => $this->id, 'c_is_deleted' => false])->count();
-        } else {
-            $count = Call::find()->where(['c_lead_id' => $this->id, 'c_is_deleted' => false, 'c_call_type_id' => $type_id])->count();
+        $query = Call::find();
+        $query->where(['c_lead_id' => $this->id, 'c_is_deleted' => false]);
+
+        if($type_id !== 0) {
+            $query->andWhere(['c_call_type_id' => $type_id]);
         }
-        return $count;
+
+        if ($onlyParent) {
+            $query->andWhere(['c_parent_id' => null]);
+        }
+        $count = $query->count();
+
+        return (int) $count;
     }
 
 
     /**
      * @param int $type_id
-     * @return int|string
+     * @return int
      */
-    public function getCountSms(int $type_id = 0)
+    public function getCountSms(int $type_id = 0): int
     {
-        if($type_id === 0) {
-            $count = Sms::find()->where(['s_lead_id' => $this->id, 's_is_deleted' => false])->count();
-        } else {
-            $count = Sms::find()->where(['s_lead_id' => $this->id, 's_type_id' => $type_id, 's_is_deleted' => false])->count();
+        $query = Sms::find();
+        $query->where(['s_lead_id' => $this->id, 's_is_deleted' => false]);
+
+        if($type_id !== 0) {
+            $query->andWhere(['s_type_id' => $type_id]);
         }
-        return $count;
+
+        $count = $query->count();
+        return (int) $count;
     }
 
 
     /**
      * @param int $type_id
-     * @return int|string
+     * @return int
      */
-    public function getCountEmails(int $type_id = 0)
+    public function getCountEmails(int $type_id = 0): int
     {
-        if($type_id === 0) {
-            $count = Email::find()->where(['e_lead_id' => $this->id, 'e_is_deleted' => false])->count();
-        } else {
-            $count = Email::find()->where(['e_lead_id' => $this->id, 'e_type_id' => $type_id, 'e_is_deleted' => false])->count();
+        $query = Email::find();
+        $query->where(['e_lead_id' => $this->id, 'e_is_deleted' => false]);
+
+        if($type_id !== 0) {
+            $query->andWhere(['e_type_id' => $type_id]);
         }
-        return $count;
+        $count = $query->count();
+
+        return (int) $count;
     }
 
 

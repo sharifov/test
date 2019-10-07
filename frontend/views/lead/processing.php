@@ -144,7 +144,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
                 $str = '<br><br>';
                 $str .= '<span title="Calls Out / In"><i class="fa fa-phone success"></i> '. $model->getCountCalls(\common\models\Call::CALL_TYPE_OUT) .'/'.  $model->getCountCalls(\common\models\Call::CALL_TYPE_IN) .'</span> | ';
-                $str .= '<span title="SMS Out / In"><i class="fa fa-comments info"></i> '. $model->getCountSms(\common\models\Sms::TYPE_OUTBOX) .'/'.  $model->getCountCalls(\common\models\Sms::TYPE_INBOX) .'</span> | ';
+                $str .= '<span title="SMS Out / In"><i class="fa fa-comments info"></i> '. $model->getCountSms(\common\models\Sms::TYPE_OUTBOX) .'/'.  $model->getCountSms(\common\models\Sms::TYPE_INBOX) .'</span> | ';
                 $str .= '<span title="Email Out / In"><i class="fa fa-envelope danger"></i> '. $model->getCountEmails(\common\models\Email::TYPE_OUTBOX) .'/'.  $model->getCountEmails(\common\models\Email::TYPE_INBOX) .'</span>';
 
 
@@ -179,9 +179,14 @@ $this->params['breadcrumbs'][] = $this->title;
             'content' => function (\common\models\Lead $model) {
                 $content = '';
                 $content .= $model->getFlightDetails();
-                $content .= ' (<i class="fa fa-male"></i> x' . ($model->adults .'/'. $model->children .'/'. $model->infants) . ')<br/>';
 
-                $content .= sprintf('<strong>Cabin:</strong> %s', $model->getCabinClassName());
+                if ($model->adults || $model->children || $model->infants) {
+                    $content .= ' (<i class="fa fa-male"></i> x' . ($model->adults . '/' . $model->children . '/' . $model->infants) . ')<br/>';
+                }
+
+                if ($cabinClassName = $model->getCabinClassName()) {
+                    $content .= '<strong>Cabin:</strong> ' . $cabinClassName;
+                }
 
                 return $content;
             },
