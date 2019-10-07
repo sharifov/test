@@ -81,9 +81,7 @@ class SetUp implements BootstrapInterface
                 LeadFollowUpEvent::class => [
                     LeadFollowUpEventLogListener::class,
                     LeadFollowUpNotificationsListener::class,
-                    LeadFollowUpCounterListener::class,
                 ],
-                LeadOnHoldEvent::class => [LeadOnHoldEventLogListener::class],
                 LeadSoldEvent::class => [
                     LeadSoldEventLogListener::class,
                     LeadSoldNotificationsListener::class,
