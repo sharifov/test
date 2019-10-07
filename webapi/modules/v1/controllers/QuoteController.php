@@ -279,7 +279,8 @@ class QuoteController extends ApiBaseController
                             if ($lead->employee_id) {
                                 $isSend = Notifications::create($lead->employee_id, $subject, $message, Notifications::TYPE_INFO, true);
                                 if ($isSend) {
-                                    Notifications::socket($lead->employee_id, null, 'getNewNotification', [], true);
+                                    // Notifications::socket($lead->employee_id, null, 'getNewNotification', [], true);
+                                    Notifications::sendSocket('getNewNotification', ['user_id' => $lead->employee_id]);
                                 }
                             }
                         }

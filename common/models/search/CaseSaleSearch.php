@@ -2,6 +2,7 @@
 
 namespace common\models\search;
 
+use common\models\Employee;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use common\models\CaseSale;
@@ -57,16 +58,31 @@ class CaseSaleSearch extends CaseSale
             return $dataProvider;
         }
 
+        if ($this->css_sale_created_dt){
+            $query->andFilterWhere(['>=', 'css_sale_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->css_sale_created_dt))])
+                ->andFilterWhere(['<=', 'css_sale_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->css_sale_created_dt) + 3600 * 24)]);
+        }
+
+        if ($this->css_created_dt){
+            $query->andFilterWhere(['>=', 'css_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->css_created_dt))])
+                ->andFilterWhere(['<=', 'css_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->css_created_dt) + 3600 * 24)]);
+        }
+
+        if ($this->css_updated_dt){
+            $query->andFilterWhere(['>=', 'css_updated_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->css_updated_dt))])
+                ->andFilterWhere(['<=', 'css_updated_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->css_updated_dt) + 3600 * 24)]);
+        }
+
         // grid filtering conditions
         $query->andFilterWhere([
             'css_cs_id' => $this->css_cs_id,
             'css_sale_id' => $this->css_sale_id,
             'css_sale_pax' => $this->css_sale_pax,
-            'css_sale_created_dt' => $this->css_sale_created_dt,
+            //'css_sale_created_dt' => $this->css_sale_created_dt,
             'css_created_user_id' => $this->css_created_user_id,
             'css_updated_user_id' => $this->css_updated_user_id,
-            'css_created_dt' => $this->css_created_dt,
-            'css_updated_dt' => $this->css_updated_dt,
+            //'css_created_dt' => $this->css_created_dt,
+            //'css_updated_dt' => $this->css_updated_dt,
         ]);
 
         $query->andFilterWhere(['like', 'css_sale_book_id', $this->css_sale_book_id])

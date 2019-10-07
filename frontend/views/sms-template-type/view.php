@@ -34,6 +34,12 @@ $this->params['breadcrumbs'][] = $this->title;
             'stp_name',
             'stp_hidden:boolean',
             [
+                'attribute' => 'stp_dep_id',
+                'value' => function (\common\models\SmsTemplateType $model) {
+                    return $model->stpDep ? $model->stpDep->dep_name : '-';
+                },
+            ],
+            [
                 'attribute' => 'stp_updated_user_id',
                 'value' => function (\common\models\SmsTemplateType $model) {
                     return ($model->stpUpdatedUser ? '<i class="fa fa-user"></i> ' .Html::encode($model->stpUpdatedUser->username) : $model->stp_updated_user_id);

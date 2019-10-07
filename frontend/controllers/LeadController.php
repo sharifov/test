@@ -28,6 +28,7 @@ use frontend\models\LeadForm;
 use frontend\models\LeadPreviewEmailForm;
 use frontend\models\LeadPreviewSmsForm;
 use frontend\models\SendEmailForm;
+use PHPUnit\Framework\Warning;
 use sales\entities\cases\Cases;
 use sales\forms\CompositeFormHelper;
 use sales\forms\lead\CloneReasonForm;
@@ -981,6 +982,9 @@ class LeadController extends FController
             } elseif ($is_supervision) {
                 if ($leadFormEmployee_id = $leadForm->getLead()->employee_id) {
                     $enableCommunication = Employee::isSupervisionAgent($leadFormEmployee_id);
+                }
+                if (!$leadForm->getLead()->isGetOwner()) {
+                    $enableCommunication = true;
                 }
             } elseif ($is_agent) {
                 if ($leadForm->getLead()->employee_id == Yii::$app->user->id) {
@@ -1973,6 +1977,7 @@ class LeadController extends FController
 
     /**
      * @return string
+     * @throws \Exception
      */
     public function actionTrash(): string
     {
@@ -1982,9 +1987,6 @@ class LeadController extends FController
         $params2 = Yii::$app->request->post();
 
         $params = array_merge($params, $params2);
-
-        $searchModel->datetime_start = date('Y-m-d H:i', strtotime('-0 day'));
-        $searchModel->datetime_end = date('Y-m-d H:i');
 
         /** @var Employee $user */
         $user = Yii::$app->user->identity;
@@ -2345,7 +2347,6 @@ class LeadController extends FController
 //                $newLead->rating = 0;
 //                $newLead->additional_information = null;
 //                $newLead->l_answered = 0;
-//                $newLead->l_grade = 0;
 //                $newLead->snooze_for = null;
 //                $newLead->called_expert = false;
 //                $newLead->created = null;
@@ -2444,6 +2445,28 @@ class LeadController extends FController
         }
         return null;
     }
+
+	/**
+	 * @throws BadRequestHttpException
+	 */
+	public function actionCheckPercentageOfSplitValidation()
+	{
+		if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
+			Yii::$app->response->format = Response::FORMAT_JSON;
+			$data = Yii::$app->request->post();
+			$lead = Lead::findOne(['id' => $data['leadId'] ?? null]);
+
+			if ($lead) {
+				$splitForm = new ProfitSplitForm($lead);
+				$splitForm->setScenario(ProfitSplitForm::SCENARIO_CHECK_PERCENTAGE);
+
+				$load = $splitForm->loadModels($data);
+				return ActiveForm::validate($splitForm)['profitsplitform-warnings'][0] ?? null;
+			}
+		}
+
+		throw new BadRequestHttpException();
+	}
 
     public function actionSplitTips($id)
     {

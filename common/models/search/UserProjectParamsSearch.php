@@ -2,6 +2,7 @@
 
 namespace common\models\search;
 
+use common\models\Employee;
 use common\models\UserGroupAssign;
 use Yii;
 use yii\base\Model;
@@ -63,12 +64,17 @@ class UserProjectParamsSearch extends UserProjectParams
             return $dataProvider;
         }
 
+        if ($this->upp_updated_dt){
+            $query->andFilterWhere(['>=', 'upp_updated_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->upp_updated_dt))])
+                ->andFilterWhere(['<=', 'upp_updated_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->upp_updated_dt) + 3600 * 24)]);
+        }
+
         // grid filtering conditions
         $query->andFilterWhere([
             'upp_user_id' => $this->upp_user_id,
             'upp_project_id' => $this->upp_project_id,
             'upp_created_dt' => $this->upp_created_dt ? date('Y-m-d', strtotime($this->upp_created_dt)) : null,
-            'upp_updated_dt' => $this->upp_updated_dt ? date('Y-m-d', strtotime($this->upp_updated_dt)) : null,
+            //'upp_updated_dt' => $this->upp_updated_dt ? date('Y-m-d', strtotime($this->upp_updated_dt)) : null,
             'upp_updated_user_id' => $this->upp_updated_user_id,
             'upp_allow_general_line' => $this->upp_allow_general_line,
         ]);

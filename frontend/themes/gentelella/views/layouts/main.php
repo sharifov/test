@@ -96,6 +96,16 @@ $bundle = \frontend\themes\gentelella\assets\Asset::register($this);
                         <a id="menu_toggle"><i class="fa fa-bars"></i></a>
                     </div>
 
+<!--                    <div class="nav" style="padding-top: 14px; float: left" >-->
+<!--                        --><?php //if (Yii::$app->user->can('/lead/create')): ?>
+<!--                            --><?//=Html::a('<i class="fa fa-plus"></i> new Lead', ['/lead/create'], ['class' => 'btn btn-sm btn-primary', 'style' => 'margin:0'])?>
+<!--                        --><?php //endif; ?>
+<!---->
+<!--                        --><?php //if (Yii::$app->user->can('/lead/create')): ?>
+<!--                            --><?//=Html::a('<i class="fa fa-plus"></i> new Case', ['/cases/create'], ['class' => 'btn btn-sm btn-primary', 'style' => 'margin:0'])?>
+<!--                        --><?php //endif; ?>
+<!--                    </div>-->
+
                     <ul class="nav navbar-nav navbar-right">
                         <li>
                             <a href="javascript:;" class="user-profile dropdown-toggle" data-toggle="dropdown" aria-expanded="false">

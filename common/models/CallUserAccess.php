@@ -162,11 +162,14 @@ class CallUserAccess extends \yii\db\ActiveRecord
 
         if ($insert) {
             Notifications::create($this->cua_user_id, 'New incoming Call (' . $this->cua_call_id . ')', 'New incoming Call (' . $this->cua_call_id . ')', Notifications::TYPE_SUCCESS, true);
-            Notifications::socket($this->cua_user_id, null, 'getNewNotification', [], true);
+            //Notifications::socket($this->cua_user_id, null, 'getNewNotification', [], true);
+            Notifications::sendSocket('getNewNotification', ['user_id' => $this->cua_user_id]);
+
         }
 
         if($insert || isset($changedAttributes['cua_status_id'])) {
-            Notifications::socket($this->cua_user_id, null, 'updateIncomingCall', $this->attributes);
+            //Notifications::socket($this->cua_user_id, null, 'updateIncomingCall', $this->attributes);
+            Notifications::sendSocket('updateIncomingCall', ['user_id' => $this->cua_user_id], $this->attributes);
         }
     }
 }

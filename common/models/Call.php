@@ -52,6 +52,7 @@ use Locale;
  * @property int $c_status_id
  * @property int $c_parent_id
  * @property string $c_recording_sid
+ * @property int $c_source_id
  *
  * @property Employee $cCreatedUser
  * @property Cases $cCase
@@ -552,25 +553,35 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
     {
         parent::afterSave($insert, $changedAttributes);
 
+        $userListSocketNotification = [];
+        $isChangedStatus = isset($changedAttributes['c_status_id']);
+
+        if (($insert || $isChangedStatus) && $this->c_lead_id && $this->isOut() && $this->isEnded()) {
+            $lf = LeadFlow::find()->where(['lead_id' => $this->c_lead_id])->orderBy(['id' => SORT_DESC])->limit(1)->one();
+            if ($lf) {
+                $lf->lf_out_calls = (int) $lf->lf_out_calls + 1;
+                if (!$lf->update()) {
+                    Yii::error(VarDumper::dumpAsString($lf->errors), 'Call:afterSave:LeadFlow:update');
+                }
+            }
+
+            if ($this->cLead2->leadQcall) {
+                $this->cLead2->createOrUpdateQCall();
+            }
+        }
+
+
+
         if (!$insert) {
-//            if(isset($changedAttributes['c_call_status']) && in_array($this->c_call_status, [self::CALL_STATUS_COMPLETED, self::CALL_STATUS_BUSY, self::CALL_STATUS_NO_ANSWER], false)) {
-//                if($this->c_created_user_id) {
-//                    // self::applyHoldCallToAgent($this->c_created_user_id);
-//                    $job = new AgentCallQueueJob();
-//                    $job->user_id = $this->c_created_user_id;
-//                    $jobId = Yii::$app->queue_job->push($job);
-//                }
-//            }
 
-
-            if (isset($changedAttributes['c_status_id']) && $this->isIn() && ($this->isStatusCompleted() || $this->isStatusNoAnswer() || $this->isStatusBusy() || $this->isStatusInProgress() || $this->isStatusCanceled())) {
+            if ($isChangedStatus && $this->isIn() && ($this->isStatusInProgress() || $this->isEnded())) {
 
                 $callUserAccessAny = CallUserAccess::find()->where(['cua_status_id' => CallUserAccess::STATUS_TYPE_PENDING, 'cua_call_id' => $this->c_id])->all();
                 if ($callUserAccessAny) {
                     foreach ($callUserAccessAny as $callAccess) {
                         $callAccess->noAnsweredCall();
                         if (!$callAccess->update()) {
-                            Yii::error(VarDumper::dumpAsString($callAccess->errors), 'IncomingCallWidget:acceptCall:UserCallStatus:save');
+                            Yii::error(VarDumper::dumpAsString($callAccess->errors), 'Call:afterSave:CallUserAccess:update');
                         }
                     }
                 }
@@ -587,49 +598,14 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
                     }
                 }
 
-                if ($this->isStatusCompleted() || $this->isStatusCanceled() || $this->isStatusNoAnswer() || $this->isStatusBusy()) {
 
-                    $callAcceptExist = CallUserAccess::find()->where(['cua_status_id' => CallUserAccess::STATUS_TYPE_ACCEPT, 'cua_call_id' => $this->c_id])->exists();
-                    if (!$callAcceptExist) {
-                        if ($this->c_created_user_id) {
-                            Notifications::create(
-                                $this->c_created_user_id,
-                                'Missed Call (' . $this->getSourceName() . ')',
-                                'Missed Call (' . $this->getSourceName() . ')  from ' . $this->c_from . ' to ' . $this->c_to,
-                                Notifications::TYPE_WARNING,
-                                true);
-
-                            Notifications::socket($this->c_created_user_id, null, 'getNewNotification', [], true);
-                        }
-
-                        if ($this->c_lead_id && $this->cLead2 && $this->cLead2->employee_id) {
-                            Notifications::create(
-                                $this->cLead2->employee_id,
-                                'Missed Call (' . $this->getSourceName() . ')',
-                                'Missed Call (' . $this->getSourceName() . ')  from ' . $this->c_from . ' to ' . $this->c_to . ' <br>Lead ID: ' . $this->c_lead_id,
-                                Notifications::TYPE_WARNING,
-                                true);
-                            Notifications::socket($this->cLead2->employee_id, null, 'getNewNotification', [], true);
-                        }
-
-                        if ($this->c_case_id && $this->cCase && $this->cCase->cs_user_id) {
-                            Notifications::create(
-                                $this->cCase->cs_user_id,
-                                'Missed Call (' . $this->getSourceName() . ')',
-                                'Missed Call (' . $this->getSourceName() . ') from ' . $this->c_from . ' to ' . $this->c_to . ' <br>Case ID: ' . $this->c_case_id,
-                                Notifications::TYPE_WARNING,
-                                true);
-                            Notifications::socket($this->cCase->cs_user_id, null, 'getNewNotification', [], true);
-                        }
+                //|| ($this->isStatusCompleted() && !$this->c_parent_id && !CallUserAccess::find()->where(['cua_status_id' => CallUserAccess::STATUS_TYPE_ACCEPT, 'cua_call_id' => $this->c_id])->exists()))
 
 
-                    }
-                }
             }
 
 
-
-            if ($this->c_case_id && isset($changedAttributes['c_call_status']) && $this->isIn() && $this->isStatusInProgress()) {
+            if ($this->c_case_id && $isChangedStatus && $this->isIn() && $this->isStatusInProgress()) {
                 if ($this->c_created_user_id && $this->cCase && $this->c_created_user_id !== $this->cCase->cs_user_id) {
                     try {
                         $casesManageService = Yii::createObject(CasesManageService::class);
@@ -642,40 +618,11 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
 
             //Yii::info(VarDumper::dumpAsString($this->attributes), 'info\Call:afterSave');
 
-            if ($this->c_lead_id && isset($changedAttributes['c_call_status']) && $this->isIn() && ($this->isStatusNoAnswer() || $this->isStatusCompleted())) {
 
-//                if($this->c_call_status == self::CALL_STATUS_NO_ANSWER) {
-//                    if ($this->c_created_user_id) {
-//                        Notifications::create(
-//                            $this->c_created_user_id,
-//                            'Missed Call (' . $this->getSourceName() . ')',
-//                            'Missed Call (' . $this->getSourceName() . ')  from ' . $this->c_from . ' to ' . $this->c_to . ' <br>Lead ID: ' . $this->c_lead_id,
-//                            Notifications::TYPE_WARNING,
-//                            true);
-//                        Notifications::socket($this->c_created_user_id, null, 'getNewNotification', [], true);
-//                    }
-//                }
 
-                if ($this->cLead2 && (int) $this->cLead2->l_call_status_id === Lead::CALL_STATUS_QUEUE) {
-                    $lead = $this->cLead2;
-                    $lead->l_call_status_id = Lead::CALL_STATUS_READY;
-                    if(!$lead->save()) {
-                        Yii::error(VarDumper::dumpAsString($lead->errors), 'Call:afterSave:Lead2:update');
-                    }
-                }
+            if(( $this->c_lead_id || $this->c_case_id ) && $isChangedStatus && $this->isIn() && $this->isStatusInProgress() && in_array($changedAttributes['c_status_id'], [self::STATUS_RINGING, self::STATUS_QUEUE], true)) {
 
-                /*if($this->cLead && $this->cLead->employee_id && $this->c_created_user_id !== $this->cLead->employee_id) {
-                    Notifications::create($this->c_created_user_id, 'On your Lead Missed Call ('.$this->getSourceName().')  from ' . $this->c_from . ' to ' . $this->c_to . ' <br>Lead ID: ' . $this->c_lead_id , Notifications::TYPE_WARNING, true);
-                    Notifications::socket($this->c_created_user_id, null, 'getNewNotification', [], true);
-                }*/
-
-                //Yii::info(VarDumper::dumpAsString($this->attributes), 'info\Call:afterSave:createNewLead');
-                //$this->createNewLead();
-            }
-
-            if(( $this->c_lead_id || $this->c_case_id ) && isset($changedAttributes['c_status_id'])
-                && ($changedAttributes['c_status_id'] === self::STATUS_RINGING || $changedAttributes['c_status_id'] === self::STATUS_QUEUE)
-                && $this->isStatusInProgress() && $this->isIn()) {
+                $host = \Yii::$app->params['url_address'] ?? '';
 
                 if($this->c_lead_id && (int) $this->c_dep_id === Department::DEPARTMENT_SALES) {
                     $lead = $this->cLead2;
@@ -687,10 +634,9 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
                         // $lead->l_call_status_id = Lead::CALL_STATUS_PROCESS;
                         $lead->l_answered = true;
                         if ($lead->save()) {
-                            $host = \Yii::$app->params['url_address'] ?? '';
                             Notifications::create($lead->employee_id, 'AutoCreated new Lead (' . $lead->id . ')', 'A new lead (' . $lead->id . ') has been created for you. Call Id: ' . $this->c_id, Notifications::TYPE_SUCCESS, true);
-                            Notifications::socket($lead->employee_id, null, 'getNewNotification', [], true);
-                            Notifications::socket($lead->employee_id, null, 'openUrl', ['url' => $host . '/lead/view/' . $lead->gid], false);
+                            $userListSocketNotification[$lead->employee_id] = $lead->employee_id;
+                            Notifications::sendSocket('openUrl', ['user_id' => $lead->employee_id], ['url' => $host . '/lead/view/' . $lead->gid], false);
                         } else {
                             Yii::error(VarDumper::dumpAsString($lead->errors), 'Call:afterSave:Lead:update');
                         }
@@ -706,12 +652,10 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
                         $case->cs_user_id = $this->c_created_user_id;
                         //$case->processing($this->c_created_user_id);
                         $case->cs_status = CasesStatus::STATUS_PROCESSING;
-
                         if ($case->save()) {
-                            $host = \Yii::$app->params['url_address'] ?? '';
                             Notifications::create($case->cs_user_id, 'AutoCreated new Case (' . $case->cs_id . ')', 'A new Case (' . $case->cs_id . ') has been created for you. Call Id: ' . $this->c_id, Notifications::TYPE_SUCCESS, true);
-                            Notifications::socket($case->cs_user_id, null, 'getNewNotification', [], true);
-                            Notifications::socket($case->cs_user_id, null, 'openUrl', ['url' => $host . '/cases/view/' . $case->cs_gid], false);
+                            $userListSocketNotification[$case->cs_user_id] = $case->cs_user_id;
+                            Notifications::sendSocket('openUrl', ['user_id' => $case->cs_user_id], ['url' => $host . '/cases/view/' . $case->cs_gid], false);
                         } else {
                             Yii::error(VarDumper::dumpAsString($case->errors), 'Call:afterSave:Case:update');
                         }
@@ -720,88 +664,93 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
             }
         }
 
-        if (($insert && $this->c_created_user_id) || (isset($changedAttributes['c_status_id']) && $this->c_created_user_id))  {
-            Notifications::socket($this->c_created_user_id, $this->c_lead_id, 'callUpdate', ['id' => $this->c_id, 'status' => $this->getStatusName(), 'duration' => $this->c_call_duration, 'snr' => $this->c_sequence_number], true);
+        if (($insert || $isChangedStatus) && $this->isIn() && ($this->isStatusCanceled() || $this->isStatusNoAnswer() || $this->isStatusBusy())) {
+
+//                    $callAcceptExist = CallUserAccess::find()->where(['cua_status_id' => CallUserAccess::STATUS_TYPE_ACCEPT, 'cua_call_id' => $this->c_id])->exists();
+//                    if (!$callAcceptExist) {
+
+            $userListNotifications = [];
+
+            if ($this->c_created_user_id) {
+                $userListNotifications[$this->c_created_user_id] = $this->c_created_user_id;
+            }
+
+            if ($this->c_lead_id && $this->cLead2 && $this->cLead2->employee_id) {
+                $userListNotifications[$this->cLead2->employee_id] = $this->cLead2->employee_id;
+            }
+
+            if ($this->c_case_id && $this->cCase && $this->cCase->cs_user_id) {
+                $userListNotifications[$this->cCase->cs_user_id] = $this->cCase->cs_user_id;
+            }
+
+            if ($userListNotifications) {
+                $title = 'Missed Call (' . $this->getSourceName() . ')';
+                $message = 'Missed Call (' . $this->getSourceName() . ')  from ' . $this->c_from . ' to ' . $this->c_to;
+                if ($this->c_lead_id) {
+                    $message .= ', LeadId: ' . $this->c_lead_id;
+                }
+
+                if ($this->c_case_id) {
+                    $message .= ', CaseId: ' . $this->c_case_id;
+                }
+
+                foreach ($userListNotifications as $userId) {
+                    Notifications::create($userId, $title, $message,Notifications::TYPE_WARNING,true);
+                    // Notifications::socket($userId, null, 'getNewNotification', [], true);
+                    $userListSocketNotification[$userId] = $userId;
+                }
+            }
+
+            //}
         }
 
-        if($this->c_call_type_id === self::CALL_TYPE_OUT && $this->c_lead_id && $this->cLead) {
-            $this->cLead->updateLastAction();
+        if($this->c_lead_id && $this->cLead2) {
+            if (($isChangedStatus || $insert) && $this->isIn() && $this->isEnded()) {
+                if ((int) $this->cLead2->l_call_status_id === Lead::CALL_STATUS_QUEUE) {
+                    $lead = $this->cLead2;
+                    $lead->l_call_status_id = Lead::CALL_STATUS_READY;
+                    if(!$lead->update()) {
+                        Yii::error(VarDumper::dumpAsString($lead->errors), 'Call:afterSave:Lead2:update');
+                    }
+                }
+            }
+
+            if ($this->isOut()) {
+                $this->cLead2->updateLastAction();
+            }
+        }
+
+        if ($this->c_created_user_id && ($insert || $isChangedStatus))  {
+            //Notifications::socket($this->c_created_user_id, $this->c_lead_id, 'callUpdate', ['id' => $this->c_id, 'status' => $this->getStatusName(), 'duration' => $this->c_call_duration, 'snr' => $this->c_sequence_number], true);
+
+            Notifications::sendSocket('callUpdate', ['user_id' => $this->c_created_user_id, 'lead_id' => $this->c_lead_id, 'case_id' => $this->c_case_id],
+                ['id' => $this->c_id, 'status' => $this->getStatusName(), 'duration' => $this->c_call_duration, 'snr' => $this->c_sequence_number]);
+        }
+
+        if ($this->c_lead_id || $this->c_case_id) {
+            //Notifications::socket(null, $this->c_lead_id, 'updateCommunication', ['lead_id' => $this->c_lead_id, 'status_id' => $this->c_status_id, 'status' => $this->getStatusName()], true);
+
+            $socketParams = [];
+            if ($this->c_lead_id) {
+                $socketParams['lead_id'] = $this->c_lead_id;
+            }
+
+            if ($this->c_case_id) {
+                $socketParams['case_id'] = $this->c_case_id;
+            }
+
+            Notifications::sendSocket('updateCommunication', $socketParams, ['lead_id' => $this->c_lead_id, 'case_id' => $this->c_case_id, 'status_id' => $this->c_status_id, 'status' => $this->getStatusName()]);
+        }
+
+        if ($userListSocketNotification) {
+            foreach ($userListSocketNotification as $userId) {
+                Notifications::sendSocket('getNewNotification', ['user_id' => $userId]);
+            }
+            unset($userListSocketNotification);
         }
 
         Notifications::pingUserMap();
     }
-
-
-    /**
-     * @return int|null
-     */
-    /*protected function createNewLead(): ?int
-    {
-        $lead = new Lead2();
-
-        $clientPhone = ClientPhone::find()->where(['phone' => $this->c_from])->orderBy(['id' => SORT_DESC])->limit(1)->one();
-
-        if($clientPhone) {
-            $client = $clientPhone->client;
-        } else {
-            $client = new Client();
-            $client->first_name = 'ClientName';
-            $client->created = date('Y-m-d H:i:s');
-
-            if($client->save()) {
-                $clientPhone = new ClientPhone();
-                $clientPhone->phone = $this->c_from;
-                $clientPhone->client_id = $client->id;
-                $clientPhone->comments = 'incoming';
-                if (!$clientPhone->save()) {
-                    Yii::error(VarDumper::dumpAsString($clientPhone->errors), 'Model:Call:createNewLead:ClientPhone:save');
-                }
-            }
-        }
-
-        if($client) {
-
-            $lead->status = Lead::STATUS_PENDING;
-            $lead->employee_id = $this->c_created_user_id;
-            $lead->client_id = $client->id;
-            $lead->project_id = $this->c_project_id;
-
-            $source = Source::find()->select('id')->where(['phone_number' => $this->c_to])->limit(1)->one();
-
-            if(!$source) {
-                $source = Source::find()->select('id')->where(['project_id' => $lead->project_id, 'default' => true])->one();
-            }
-
-            if($source) {
-                $lead->source_id = $source->id;
-            }
-
-            if ($lead->save()) {
-                self::updateAll(['c_lead_id' => $lead->id], ['c_id' => $this->c_id]);
-
-                if($lead->employee_id) {
-                    $task = Task::find()->where(['t_key' => Task::TYPE_MISSED_CALL])->limit(1)->one();
-
-                    if ($task) {
-                        $lt = new LeadTask();
-                        $lt->lt_lead_id = $lead->id;
-                        $lt->lt_task_id = $task->t_id;
-                        $lt->lt_user_id = $lead->employee_id;
-                        $lt->lt_date = date('Y-m-d');
-                        if (!$lt->save()) {
-                            Yii::error(VarDumper::dumpAsString($lt->errors), 'Model:Call:createNewLead:LeadTask:save');
-                        }
-                    }
-                }
-
-            } else {
-                Yii::error(VarDumper::dumpAsString($lead->errors), 'Model:Call:createNewLead:Lead2:save');
-            }
-        }
-
-        return $lead ? $lead->id : null;
-    }*/
-
 
     /**
      * @param Call $call
@@ -837,7 +786,9 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
                         Notifications::TYPE_WARNING,
                         true);
 
-                    Notifications::socket($call->c_created_user_id, null, 'getNewNotification', [], true);
+                    // Notifications::socket($call->c_created_user_id, null, 'getNewNotification', [], true);
+                    Notifications::sendSocket('getNewNotification', ['user_id' => $call->c_created_user_id]);
+
 
                     //Notifications::create($call->c_source_type_id, 'New incoming Call (' . $this->cua_call_id . ')', 'New incoming Call (' . $this->cua_call_id . ')', Notifications::TYPE_SUCCESS, true);
                     //Notifications::socket($this->cua_user_id, null, 'getNewNotification', [], true);
@@ -1382,6 +1333,13 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
     }
 
 
+    /**
+     * @return bool
+     */
+    public function isEnded(): bool
+    {
+        return $this->isStatusCompleted() || $this->isStatusBusy() || $this->isStatusNoAnswer() || $this->isStatusCanceled() || $this->isStatusFailed();
+    }
 
 
 

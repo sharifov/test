@@ -1105,7 +1105,7 @@ die;
         foreach ($statuses as $status) {
             sleep(random_int(2, 3));
             $n++;
-            Notifications::socket($user_id, null, 'callUpdate', ['id' => 123, 'status' => $status, 'duration' =>  ($status == 'completed' ? random_int(51, 180) : 0), 'snr' => $n], true);
+            // Notifications::socket($user_id, null, 'callUpdate', ['id' => 123, 'status' => $status, 'duration' =>  ($status == 'completed' ? random_int(51, 180) : 0), 'snr' => $n], true);
         }
     }
 
@@ -1141,7 +1141,7 @@ die;
             sleep(random_int(3, 5));
             $data['status'] = $status;
             $n++;
-            Notifications::socket($user_id, $lead_id = null, 'incomingCall', $data, true);
+            // Notifications::socket($user_id, $lead_id = null, 'incomingCall', $data, true);
             echo '<br>'.$status;
         }
 
@@ -1405,7 +1405,7 @@ die;
     public function actionNotify()
     {
         $host = \Yii::$app->params['url_address'] ?? '';
-        Notifications::socket(Yii::$app->user->id, null, 'openUrl', ['url' => $host . '/lead/view/b5d963c9241dd741e22b37d1fa80a9b6'], false);
+        // Notifications::socket(Yii::$app->user->id, null, 'openUrl', ['url' => $host . '/lead/view/b5d963c9241dd741e22b37d1fa80a9b6'], false);
     }
 
     public function actionNotify2()

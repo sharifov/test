@@ -1317,7 +1317,9 @@ class LeadController extends ApiBaseController
 
             if($leadCallExpert->lce_agent_user_id) {
                 Notifications::create($leadCallExpert->lce_agent_user_id, 'Expert Response', 'Expert ('.Html::encode($leadCallExpert->lce_expert_username).') Response ('.$leadCallExpert->getStatusName().'). Lead ID: ' . $leadCallExpert->lce_lead_id, Notifications::TYPE_INFO, true);
-                Notifications::socket($leadCallExpert->lce_agent_user_id, $leadCallExpert->lce_lead_id, 'getNewNotification', [], true);
+                // Notifications::socket($leadCallExpert->lce_agent_user_id, $leadCallExpert->lce_lead_id, 'getNewNotification', [], true);
+
+                Notifications::sendSocket('getNewNotification', ['user_id' => $leadCallExpert->lce_agent_user_id, 'lead_id' => $leadCallExpert->lce_lead_id]);
             }
 
             $response = $leadCallExpert->attributes;

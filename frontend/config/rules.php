@@ -69,6 +69,10 @@ return [
         'pattern' => 'queue/booked',
         'route' => 'lead/booked',
     ],
+    [
+        'pattern' => '/',
+        'route' => 'site/index',
+    ],
 
 
 ];

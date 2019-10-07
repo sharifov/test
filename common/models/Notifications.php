@@ -169,7 +169,7 @@ class Notifications extends ActiveRecord
                 break;
             case self::TYPE_INFO: $str = 'info';
                 break;
-            case self::TYPE_WARNING: $str = '';
+            case self::TYPE_WARNING: $str = 'notice';
                 break;
             case self::TYPE_DANGER: $str = 'error';
                 break;
@@ -233,15 +233,55 @@ class Notifications extends ActiveRecord
     }
 
 
+//    /**
+//     * @param int|null $user_id
+//     * @param int|null $lead_id
+//     * @param string|null $command
+//     * @param array $data
+//     * @param bool $multiple
+//     * @return bool
+//     */
+//    public static function socket(int $user_id = null, int $lead_id = null, string $command = null, array $data = [], bool $multiple = true) : bool
+//    {
+//        $socket = 'tcp://127.0.0.1:1234';
+//        if($command) {
+//            $data['command'] = $command;
+//        }
+//        $jsonData = [];
+//
+//        if($user_id) {
+//            $jsonData['user_id'] = $user_id;
+//        }
+//
+//        if($lead_id) {
+//            $jsonData['lead_id'] = $lead_id;
+//        }
+//
+//        $jsonData['multiple'] = $multiple;
+//        $jsonData['data'] = $data;
+//
+//        try {
+//            // connect tcp-server
+//            $instance = stream_socket_client($socket);
+//            // send message
+//            if (fwrite($instance, Json::encode($jsonData) . "\n")) {
+//                return true;
+//            }
+//        } catch (\Throwable $exception) {
+//            Yii::error(VarDumper::dumpAsString($exception->getMessage(), 10), 'Notifications:socket:stream_socket_client');
+//        }
+//        return false;
+//    }
+
+
     /**
-     * @param int|null $user_id
-     * @param int|null $lead_id
-     * @param string|null $command
+     * @param string $command
+     * @param array $params
      * @param array $data
      * @param bool $multiple
      * @return bool
      */
-    public static function socket(int $user_id = null, int $lead_id = null, string $command = null, array $data = [], bool $multiple = true) : bool
+    public static function sendSocket(string $command, array $params = [], array $data = [], bool $multiple = true) : bool
     {
         $socket = 'tcp://127.0.0.1:1234';
         if($command) {
@@ -249,12 +289,16 @@ class Notifications extends ActiveRecord
         }
         $jsonData = [];
 
-        if($user_id) {
-            $jsonData['user_id'] = $user_id;
+        if (isset($params['user_id'])) {
+            $jsonData['user_id'] = $params['user_id'];
         }
 
-        if($lead_id) {
-            $jsonData['lead_id'] = $lead_id;
+        if(isset($params['lead_id'])) {
+            $jsonData['lead_id'] = $params['lead_id'];
+        }
+
+        if(isset($params['case_id'])) {
+            $jsonData['case_id'] = $params['case_id'];
         }
 
         $jsonData['multiple'] = $multiple;
@@ -288,7 +332,8 @@ class Notifications extends ActiveRecord
 
         if($users) {
             foreach ($users as $user_id) {
-                self::socket($user_id, null, 'callMapUpdate', [], true);
+                // self::socket($user_id, null, 'callMapUpdate', [], true);
+                self::sendSocket('callMapUpdate', ['user_id' => $user_id]);
             }
         }
     }

@@ -620,7 +620,7 @@ class CasesController extends FController
         $query3 = (new \yii\db\Query())
             ->select(['c_id AS id', new Expression('"voice" AS type'), 'c_case_id AS case_id', 'c_created_dt AS created_dt'])
             ->from('call')
-            ->where(['c_case_id' => $model->cs_id]);
+            ->where(['c_case_id' => $model->cs_id, 'c_parent_id' => null]);
 
 
         $unionQuery = (new \yii\db\Query())
@@ -909,9 +909,9 @@ class CasesController extends FController
         try {
             if ($form->load(Yii::$app->request->post()) && $form->validate()) {
 
-                $isAgent = Yii::$app->user->identity->isAgent();
+                $isSimpleAgent = Yii::$app->user->identity->isSimpleAgent();
 
-                if ($isAgent && empty($case->cs_category)) {
+                if ($isSimpleAgent && empty($case->cs_category)) {
                     throw new \Exception('Status of a case without a category cannot be changed!');
                 }
 

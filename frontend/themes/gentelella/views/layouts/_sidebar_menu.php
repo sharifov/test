@@ -31,7 +31,7 @@ $isSuperAdmin = $user->canRole('superadmin');
             $menuItems[] = ['label' => 'Auto redial', 'url' => ['/call/auto-redial'], 'icon' => 'tty'];
         }
 
-        $menuItems[] = ['label' => 'Dashboard', 'url' => ['/'], 'icon' => 'area-chart'];
+        $menuItems[] = ['label' => 'Dashboard', 'url' => ['/dashboard/index'], 'icon' => 'area-chart'];
         $menuItems[] = ['label' => 'Search Leads', 'url' => ['/leads/index'], 'icon' => 'search'];
         $menuItems[] = ['label' => 'Search Sale', 'url' => ['/sale/search'], 'icon' => 'search'];
         $menuItems[] = ['label' => 'Search Cases', 'url' => ['/cases/index'], 'icon' => 'search'];
@@ -95,6 +95,17 @@ $isSuperAdmin = $user->canRole('superadmin');
         ];
 
         $menuItems[] = [
+            'label' => 'QCall',
+            'url' => 'javascript:',
+            'icon' => 'list',
+            'items' => [
+                ['label' => 'Lead QCall List', 'url' => ['/lead-qcall/list'], 'icon' => 'list'],
+                ['label' => 'Lead QCall All', 'url' => ['/lead-qcall/index'], 'icon' => 'list'],
+                ['label' => 'QCall Config', 'url' => ['/qcall-config/index'], 'icon' => 'list'],
+            ]
+        ];
+
+        $menuItems[] = [
             'label' => 'Additional',
             'url' => 'javascript:',
             'icon' => 'list',
@@ -110,6 +121,7 @@ $isSuperAdmin = $user->canRole('superadmin');
                 ['label' => 'Lead Status History', 'url' => ['/lead-flow/index'], 'icon' => 'list'],
                 ['label' => 'Lead Check Lists', 'url' => ['/lead-checklist/index'], 'icon' => 'list', 'visible' => Yii::$app->user->can('manageLeadChecklist')],
                 ['label' => 'LF Checklist Status History', 'url' => ['/lead-flow-checklist/index'], 'icon' => 'list', 'visible' => Yii::$app->user->can('viewLeadFlowChecklist')],
+                ['label' => 'Call User Access', 'url' => ['/call-user-access/index'], 'icon' => 'list'],
                 ['label' => 'Call User Access', 'url' => ['/call-user-access/index'], 'icon' => 'list'],
             ]
         ];

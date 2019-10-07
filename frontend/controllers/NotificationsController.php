@@ -123,7 +123,8 @@ class NotificationsController extends FController
         $model = new Notifications();
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            Notifications::socket($model->n_user_id, null, 'getNewNotification', [], true);
+            //Notifications::socket($model->n_user_id, null, 'getNewNotification', [], true);
+            Notifications::sendSocket('getNewNotification', ['user_id' => $model->n_user_id]);
             return $this->redirect(['view', 'id' => $model->n_id]);
         } else {
             return $this->render('create', [

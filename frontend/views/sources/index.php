@@ -3,6 +3,8 @@
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
+use dosamigos\datepicker\DatePicker;
+
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\SourcesSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -17,7 +19,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
 
     <p>
-        <?= Html::a('Create Sources', ['create'], ['class' => 'btn btn-success']) ?>
+        <?//= Html::a('Create Sources', ['create'], ['class' => 'btn btn-success']) ?>
     </p>
 
     <?= GridView::widget([
@@ -66,21 +68,26 @@ $this->params['breadcrumbs'][] = $this->title;
                 'value' => function (\common\models\Sources $model) {
                     return $model->last_update ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->last_update)) : '-';
                 },
-                'format' => 'raw'
+                'format' => 'raw',
+                'filter' => DatePicker::widget([
+                    'model' => $searchModel,
+                    'attribute' => 'last_update',
+                    'clientOptions' => [
+                        'autoclose' => true,
+                        'format' => 'yyyy-mm-dd',
+                    ],
+                    'options' => [
+                        'autocomplete' => 'off',
+                        'placeholder' =>'Choose Date'
+                    ],
+                ]),
             ],
-
-            [
-                'attribute' => 'phone_number',
-                'value' => function (\common\models\Sources $model) {
-                    return $model->phone_number ? '<i class="fa fa-phone"></i> ' . $model->phone_number : '-';
-                },
-                'format' => 'raw'
-            ],
-            //'phone_number',
             'default:boolean',
             'hidden:boolean',
 
-            ['class' => 'yii\grid\ActionColumn'],
+            ['class' => 'yii\grid\ActionColumn',
+                'template' => '{view} {update}'
+            ],
         ],
     ]); ?>
     <?php Pjax::end(); ?>

@@ -360,9 +360,7 @@ $lists = new ListsAccess($user->id);
             'value' => function (Lead $model) {
                 //$str = '';
                 $str = '<i class="fa fa-male"></i> <span title="adult">' . $model->adults . '</span> / <span title="child">' . $model->children . '</span> / <span title="infant">' . $model->infants . '</span><br>';
-                $str .= '<span title="Calls Out / In"><i class="fa fa-phone success"></i> ' . $model->getCountCalls(Call::CALL_TYPE_OUT) . '/' . $model->getCountCalls(Call::CALL_TYPE_IN) . '</span> | ';
-                $str .= '<span title="SMS Out / In"><i class="fa fa-comments info"></i> ' . $model->getCountSms(Sms::TYPE_OUTBOX) . '/' . $model->getCountCalls(Sms::TYPE_INBOX) . '</span> | ';
-                $str .= '<span title="Email Out / In"><i class="fa fa-envelope danger"></i> ' . $model->getCountEmails(Email::TYPE_OUTBOX) . '/' . $model->getCountEmails(Email::TYPE_INBOX) . '</span>';
+                $str .= $model->getCommunicationInfo();
                 return $str;
             },
             'format' => 'raw',
@@ -401,20 +399,6 @@ $lists = new ListsAccess($user->id);
             'filter' => array_combine(range(0, 9), range(0, 9)),
             'contentOptions' => ['class' => 'text-center'],
         ],*/
-
-        [
-            // 'header' => 'Grade',
-            'attribute' => 'l_grade',
-            'value' => function (Lead $model) {
-                return $model->l_grade;
-            },
-            'filter' => array_combine(range(0, 9), range(0, 9)),
-            'contentOptions' => [
-                'class' => 'text-center'
-            ],
-            'visible' => !$isAgent
-        ],
-
         [
             // 'header' => 'Grade',
             'attribute' => 'l_answered',
@@ -578,7 +562,8 @@ $lists = new ListsAccess($user->id);
             'value' => function (Lead $model) {
                 return $model->created ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->created)) : '-';
             },
-            'format' => 'raw'
+            'format' => 'raw',
+            'filter' => false
         ],
         // 'created:date',
 
@@ -593,6 +578,7 @@ $lists = new ListsAccess($user->id);
                 return $str;
             },
             'format' => 'raw',
+            'filter' => false,
             'contentOptions' => [
                 'class' => 'text-center'
             ],
@@ -609,6 +595,7 @@ $lists = new ListsAccess($user->id);
                 return $str;
             },
             'format' => 'raw',
+            'filter' => false,
             'contentOptions' => [
                 'class' => 'text-center'
             ],

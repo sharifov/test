@@ -2,6 +2,7 @@
 
 namespace common\models\search;
 
+use common\models\Employee;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use common\models\Sources;
@@ -18,7 +19,7 @@ class SourcesSearch extends Sources
     {
         return [
             [['id', 'project_id', 'default', 'hidden'], 'integer'],
-            [['name', 'cid', 'last_update', 'phone_number'], 'safe'],
+            [['name', 'cid', 'last_update'], 'safe'],
         ];
     }
 
@@ -60,18 +61,21 @@ class SourcesSearch extends Sources
             return $dataProvider;
         }
 
+        if ($this->last_update) {
+            $query->andFilterWhere(['>=', 'last_update', Employee::convertTimeFromUserDtToUTC(strtotime($this->last_update))])
+                ->andFilterWhere(['<=', 'last_update', Employee::convertTimeFromUserDtToUTC(strtotime($this->last_update) + 3600 * 24)]);
+        }
+
         // grid filtering conditions
         $query->andFilterWhere([
             'id' => $this->id,
             'project_id' => $this->project_id,
-            'last_update' => $this->last_update,
             'default' => $this->default,
             'hidden' => $this->hidden,
         ]);
 
         $query->andFilterWhere(['like', 'name', $this->name])
-            ->andFilterWhere(['like', 'cid', $this->cid])
-            ->andFilterWhere(['like', 'phone_number', $this->phone_number]);
+            ->andFilterWhere(['like', 'cid', $this->cid]);
 
         return $dataProvider;
     }

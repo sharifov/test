@@ -132,7 +132,7 @@ $js = <<<JS
                     }
                     
                     if(obj.command === 'updateCommunication') {
-                        updatePjaxNotify();
+                        // updatePjaxNotify();
                         updateCommunication();
                     }
                     

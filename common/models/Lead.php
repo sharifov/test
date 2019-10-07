@@ -68,7 +68,6 @@ use common\components\SearchService;
  * @property int $bo_flight_id
  * @property string $additional_information
  * @property int $l_answered
- * @property int $l_grade
  * @property int $clone_id
  * @property string $description
  * @property double $final_profit
@@ -111,6 +110,7 @@ use common\components\SearchService;
  * @property LeadFlow[] $leadFlows
  * @property LeadFlow $lastLeadFlow
  * @property LeadPreferences $leadPreferences
+ * @property LeadQcall $leadQcall
  * @property Client $client
  * @property Employee $employee
  * @property Lead $lDuplicateLead
@@ -123,6 +123,8 @@ use common\components\SearchService;
  * @property ProfitSplit[] $profitSplits
  * @property TipsSplit[] $tipsSplits
  * @property UserConnection[] $userConnections
+ *
+ * @property LeadFlow $lastLeadFlow
  *
  */
 class Lead extends ActiveRecord implements AggregateRoot
@@ -263,7 +265,7 @@ class Lead extends ActiveRecord implements AggregateRoot
             [['adults', 'children', 'source_id'], 'required', 'on' => self::SCENARIO_API], //'except' => self::SCENARIO_API],
             [['adults'], 'integer', 'min' => 1, 'on' => self::SCENARIO_API],
 
-            [['client_id', 'employee_id', 'status', 'project_id', 'source_id', 'rating', 'bo_flight_id', 'l_grade', 'clone_id', 'l_call_status_id', 'l_duplicate_lead_id', 'l_dep_id'], 'integer'],
+            [['client_id', 'employee_id', 'status', 'project_id', 'source_id', 'rating', 'bo_flight_id', 'clone_id', 'l_call_status_id', 'l_duplicate_lead_id', 'l_dep_id'], 'integer'],
             [['adults', 'children', 'infants'], 'integer', 'max' => 9],
 
             [['notes_for_experts', 'request_ip_detail', 'l_client_ua'], 'string'],
@@ -366,7 +368,6 @@ class Lead extends ActiveRecord implements AggregateRoot
         $clone->rating = 0;
         $clone->additional_information = null;
         $clone->l_answered = 0;
-        $clone->l_grade = 0;
         $clone->snooze_for = null;
         $clone->called_expert = false;
         $clone->created = null;
@@ -1136,7 +1137,6 @@ class Lead extends ActiveRecord implements AggregateRoot
             'created' => 'Created',
             'updated' => 'Updated',
             'l_answered' => 'Answered',
-            'l_grade' => 'Grade',
             'bo_flight_id' => '(BO) Flight ID',
             'agents_processing_fee' => 'Agents Processing Fee',
             'origin_country' => 'Origin Country code',
@@ -1243,6 +1243,14 @@ class Lead extends ActiveRecord implements AggregateRoot
     /**
      * @return \yii\db\ActiveQuery
      */
+    public function getLastLeadFlow(): ActiveQuery
+    {
+        return $this->hasOne(LeadFlow::class, ['lead_id' => 'id'])->orderBy([LeadFlow::tableName() . '.id' => SORT_DESC])->limit(1);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
     public function getLeadLogs()
     {
         return $this->hasMany(LeadLog::class, ['lead_id' => 'id']);
@@ -1313,6 +1321,14 @@ class Lead extends ActiveRecord implements AggregateRoot
     public function getLeadPreferences(): ActiveQuery
     {
         return $this->hasOne(LeadPreferences::class, ['lead_id' => 'id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getLeadQcall(): ActiveQuery
+    {
+        return $this->hasOne(LeadQcall::class, ['lqc_lead_id' => 'id']);
     }
 
     /**
@@ -2077,7 +2093,8 @@ Reason: {reason}
                     //Notifications::create()
 
                     $isSend = Notifications::create($user->id, $subject, $body, Notifications::TYPE_INFO, true);
-                    Notifications::socket($user->id, null, 'getNewNotification', [], true);
+                    // Notifications::socket($user->id, null, 'getNewNotification', [], true);
+                    Notifications::sendSocket('getNewNotification', ['user_id' => $user->id]);
 
 
                     if (!$isSend) {
@@ -2103,6 +2120,71 @@ Reason: {reason}
         $this->enableActiveRecordEvents = false;
     }
 
+
+//    /**
+//     * @return bool
+//     */
+//    public function createQCall(): bool
+//    {
+//        $qcConfig = QcallConfig::getByStatusCall($this->status, 0);
+//
+//        if ($qcConfig) {
+//            $lq = new LeadQcall();
+//            $lq->lqc_lead_id = $this->id;
+//            $lq->lqc_dt_from = date('Y-m-d H:i:s', (time() + ((int) $qcConfig->qc_time_from * 60)));
+//            $lq->lqc_dt_to = date('Y-m-d H:i:s', (time() + ((int) $qcConfig->qc_time_to * 60)));
+//            $lq->lqc_weight = $this->project_id * 10;
+//            if (!$lq->save()) {
+//                Yii::error(VarDumper::dumpAsString($lq->errors), 'Lead:createQCall:LeadQcall:save');
+//                return true;
+//            }
+//        }
+//        return false;
+//    }
+
+
+    /**
+     * @return bool
+     */
+    public function createOrUpdateQCall(): bool
+    {
+
+        if ($this->lastLeadFlow) {
+            $callCount = (int) $this->lastLeadFlow->lf_out_calls;
+        } else {
+            $callCount = 0;
+        }
+
+        $qcConfig = QcallConfig::getByStatusCall($this->status, $callCount);
+        $lq = $this->leadQcall;
+
+        if ($qcConfig) {
+            if (!$lq) {
+                $lq = new LeadQcall();
+                $lq->lqc_lead_id = $this->id;
+                $lq->lqc_weight = $this->project_id * 10;
+            }
+
+            $lq->lqc_dt_from = date('Y-m-d H:i:s', (time() + ((int) $qcConfig->qc_time_from * 60)));
+            $lq->lqc_dt_to = date('Y-m-d H:i:s', (time() + ((int) $qcConfig->qc_time_to * 60)));
+
+            if (!$lq->save()) {
+                Yii::error(VarDumper::dumpAsString($lq->errors), 'Lead:createOrUpdateQCall:LeadQcall:save');
+                return true;
+            }
+        } else {
+           if ($lq) {
+               try {
+                   $lq->delete();
+               } catch (\Throwable $throwable) {
+                   Yii::error($throwable->getMessage(), 'Lead:createOrUpdateQCall:Throwable');
+               }
+           }
+        }
+        return false;
+    }
+
+
     public function afterSave($insert, $changedAttributes)
     {
 
@@ -2112,6 +2194,10 @@ Reason: {reason}
 
             if ($insert) {
                 LeadFlow::addStateFlow($this);
+
+                if ($this->scenario === self::SCENARIO_API) {
+                    $this->createOrUpdateQCall();
+                }
 
                 /*$job = new QuickSearchInitPriceJob();
                 $job->lead_id = $this->id;
@@ -2163,12 +2249,6 @@ Reason: {reason}
                             Yii::warning('Not send Email notification to employee_id: ' . $this->employee_id . ', lead: ' . $this->id, 'Lead:afterSave:sendNotification');
                         }
                     } elseif ($this->status == self::STATUS_FOLLOW_UP) {
-
-                        $this->l_grade = (int)$this->l_grade + 1;
-                        Yii::$app->db->createCommand('UPDATE ' . Lead::tableName() . ' SET l_grade = :grade WHERE id = :id', [
-                            ':grade' => $this->l_grade,
-                            ':id' => $this->id
-                        ])->execute();
 
                         if ($this->status_description) {
                             $reason = new Reason();
@@ -3663,48 +3743,63 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
         return $key;
     }
 
+
     /**
      * @param int $type_id
-     * @return int|string
+     * @param bool|null $onlyParent
+     * @return int
      */
-    public function getCountCalls(int $type_id = 0)
+    public function getCountCalls(int $type_id = 0, ?bool $onlyParent = true): int
     {
-        if($type_id === 0) {
-            $count = Call::find()->where(['c_lead_id' => $this->id, 'c_is_deleted' => false])->count();
-        } else {
-            $count = Call::find()->where(['c_lead_id' => $this->id, 'c_is_deleted' => false, 'c_call_type_id' => $type_id])->count();
+        $query = Call::find();
+        $query->where(['c_lead_id' => $this->id, 'c_is_deleted' => false]);
+
+        if($type_id !== 0) {
+            $query->andWhere(['c_call_type_id' => $type_id]);
         }
-        return $count;
+
+        if ($onlyParent) {
+            $query->andWhere(['c_parent_id' => null]);
+        }
+        $count = $query->count();
+
+        return (int) $count;
     }
 
 
     /**
      * @param int $type_id
-     * @return int|string
+     * @return int
      */
-    public function getCountSms(int $type_id = 0)
+    public function getCountSms(int $type_id = 0): int
     {
-        if($type_id === 0) {
-            $count = Sms::find()->where(['s_lead_id' => $this->id, 's_is_deleted' => false])->count();
-        } else {
-            $count = Sms::find()->where(['s_lead_id' => $this->id, 's_type_id' => $type_id, 's_is_deleted' => false])->count();
+        $query = Sms::find();
+        $query->where(['s_lead_id' => $this->id, 's_is_deleted' => false]);
+
+        if($type_id !== 0) {
+            $query->andWhere(['s_type_id' => $type_id]);
         }
-        return $count;
+
+        $count = $query->count();
+        return (int) $count;
     }
 
 
     /**
      * @param int $type_id
-     * @return int|string
+     * @return int
      */
-    public function getCountEmails(int $type_id = 0)
+    public function getCountEmails(int $type_id = 0): int
     {
-        if($type_id === 0) {
-            $count = Email::find()->where(['e_lead_id' => $this->id, 'e_is_deleted' => false])->count();
-        } else {
-            $count = Email::find()->where(['e_lead_id' => $this->id, 'e_type_id' => $type_id, 'e_is_deleted' => false])->count();
+        $query = Email::find();
+        $query->where(['e_lead_id' => $this->id, 'e_is_deleted' => false]);
+
+        if($type_id !== 0) {
+            $query->andWhere(['e_type_id' => $type_id]);
         }
-        return $count;
+        $count = $query->count();
+
+        return (int) $count;
     }
 
 
@@ -3773,6 +3868,18 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
     public static function find(): LeadQuery
     {
         return new LeadQuery(get_called_class());
+    }
+    
+    /**
+     * @return string
+     */
+    public function getCommunicationInfo(): string
+    {
+        $str = '';
+        $str .= '<span title="Calls Out / In"><i class="fa fa-phone success"></i> '. $this->getCountCalls(\common\models\Call::CALL_TYPE_OUT) .'/'.  $this->getCountCalls(\common\models\Call::CALL_TYPE_IN) .'</span> | ';
+        $str .= '<span title="SMS Out / In"><i class="fa fa-comments info"></i> '. $this->getCountSms(\common\models\Sms::TYPE_OUTBOX) .'/'.  $this->getCountSms(\common\models\Sms::TYPE_INBOX) .'</span> | ';
+        $str .= '<span title="Email Out / In"><i class="fa fa-envelope danger"></i> '. $this->getCountEmails(\common\models\Email::TYPE_OUTBOX) .'/'.  $this->getCountEmails(\common\models\Email::TYPE_INBOX) .'</span>';
+        return $str;
     }
 
 }

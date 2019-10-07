@@ -97,8 +97,13 @@ class EmployeeSearch extends Employee
             'last_activity' => $this->last_activity,
             'acl_rules_activated' => $this->acl_rules_activated,
             'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at,
+            //'updated_at' => $this->updated_at,
         ]);
+
+        if ($this->updated_at){
+            $query->andFilterWhere(['>=', 'updated_at', Employee::convertTimeFromUserDtToUTC(strtotime($this->updated_at))])
+                ->andFilterWhere(['<=', 'updated_at', Employee::convertTimeFromUserDtToUTC(strtotime($this->updated_at) + 3600 * 24)]);
+        }
 
         if ($this->roles){
             $query->andWhere(['IN', 'employees.id', array_keys(Employee::getListByRole($this->roles))]);

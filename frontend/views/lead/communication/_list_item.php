@@ -79,41 +79,28 @@ use \common\models\Call;
 
             <?php if ($call->calls):?>
 
-               <table class="table table-bordered table-hover">
+               <table class="table table-condensed" style="background-color: rgba(255, 255,255, .7)">
                             <?php foreach ($call->calls as $callItem):?>
                                 <tr>
                                     <?php if (Yii::$app->user->identity->isAdmin()):?>
-                                        <td style="width:50px" rowspan="2">
+                                        <td style="width:50px">
                                             <u title="SID: <?=Html::encode($callItem->c_call_sid)?>"><?=Html::a($callItem->c_id, ['call/view', 'id' => $callItem->c_id], ['target' => '_blank', 'data-pjax' => 0])?></u><br>
                                         </td>
                                     <?php endif; ?>
-                                    <td colspan="3">
+                                    <td class="text-left">
+                                        <?=$callItem->getStatusIcon()?>  <?=$callItem->getStatusName()?>
+                                    </td>
+                                    <td class="text-center" style="width: 70px">
+<!--                                        <div>--><?//=$callItem->c_call_duration > 0 ? 'duration: ' . Yii::$app->formatter->asDuration($callItem->c_call_duration) : ''?><!--</div>-->
+                                        <span class="badge badge-warning" title="Duration: <?=Yii::$app->formatter->asDuration($callItem->c_call_duration)?>"><?=gmdate('i:s', $callItem->c_call_duration)?></span>
+                                    </td>
+                                    <td>
                                         <?php if ($callItem->c_recording_url):?>
                                             <?=Html::button(gmdate('i:s', $callItem->c_recording_duration) . ' <i class="fa fa-volume-up"></i>',
                                                 ['class' => 'btn btn-' . ($callItem->c_recording_duration < 30 ? 'warning' : 'success') . ' btn-xs btn-recording_url', 'data-source_src' => $callItem->c_recording_url]) ?>
-                                        
-                                            <?/*<audio controls="controls" controlsList="nodownload" class="chat__audio" style="height: 25px; width: 100%">
-                                                <source src="<?=$callItem->c_recording_url?>" type="audio/mpeg">
-                                            </audio>*/?>
-                                        <?php else: ?>
-
                                         <?php endif;?>
                                     </td>
-                                </tr>
-                                <tr>
 
-                                    <td class="text-center">
-                                        <i class="fa fa-clock-o"></i> <?=Yii::$app->formatter->asDatetime(strtotime($callItem->c_created_dt), 'php:H:i:s')?>
-                                        <br>&nbsp;&nbsp;<?=Yii::$app->formatter->asRelativeTime(strtotime($callItem->c_created_dt))?>
-                                    </td>
-                                    <td class="text-left">
-
-                                        <div><?=$callItem->c_call_duration > 0 ? 'duration: ' . Yii::$app->formatter->asDuration($callItem->c_call_duration) : ''?></div>
-
-                                        <?=$callItem->getStatusIcon()?>  <?=$callItem->getStatusName()?>
-<!--                                        <br>--><?//=$callItem->getStatusName2()?><!--<br>-->
-
-                                    </td>
 <!--                                    <td class="text-center">-->
 <!---->
 <!--                                        --><?php
@@ -140,15 +127,22 @@ use \common\models\Call;
 <!--                                        --><?php //endif;?>
 <!---->
 <!--                                    </td>-->
-                                    <td class="text-center" style="width:110px">
+
+                                    <td class="text-center">
+                                        <?=Yii::$app->formatter->asRelativeTime(strtotime($callItem->c_created_dt))?>
+                                    </td>
+
+                                    <td class="text-center" style="width: 90px">
+                                        <i class="fa fa-clock-o"></i> <?=Yii::$app->formatter->asDatetime(strtotime($callItem->c_created_dt), 'php:H:i:s')?>
+                                    </td>
+
+                                    <td class="text-left" style="width:150px">
                                         <?php if($callItem->isIn()):?>
                                             <div>
                                                 <?php if($callItem->c_created_user_id):?>
-                                                    <i class="fa fa-user fa-border"></i><br>
-                                                    <?=Html::encode($callItem->cCreatedUser->username)?>
+                                                    <i class="fa fa-user fa-border"></i> <?=Html::encode($callItem->cCreatedUser->username)?>
                                                 <?php else: ?>
-                                                    <i class="fa fa-phone fa-border"></i><br>
-                                                    <?=$callItem->c_to?>
+                                                    <i class="fa fa-phone fa-border"></i> <?=Html::encode($callItem->c_to)?>
                                                 <?php endif; ?>
                                             </div>
                                         <?php else: ?>

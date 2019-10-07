@@ -210,6 +210,16 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         return in_array(self::ROLE_AGENT, $this->getRoles(true), true);
     }
 
+    public function isSimpleAgent(): bool
+	{
+		return !$this->canRoles([
+			self::ROLE_SUPER_ADMIN,
+			self::ROLE_ADMIN,
+			self::ROLE_SUP_SUPER,
+			self::ROLE_EX_SUPER
+		]);
+	}
+
     /**
      * @return bool
      */
@@ -1342,11 +1352,11 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     public function getLeadCountByStatus(array $statusList = [], string $startDate = null, string $endDate = null): int
     {
         if ($startDate) {
-            $startDate = date('Y-m-d H:i', strtotime($startDate));
+            $startDate = Employee::convertTimeFromUserDtToUTC(strtotime($startDate));
         }
 
         if ($endDate) {
-            $endDate = date('Y-m-d H:i', strtotime($endDate));
+            $endDate = Employee::convertTimeFromUserDtToUTC(strtotime($endDate));
         }
 
         $query = LeadFlow::find()->select('COUNT(DISTINCT(lead_id))')->where(['employee_id' => $this->id, 'status' => $statusList]);
@@ -1367,11 +1377,11 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     public function getLeadCountByStatuses(array $statusList = [], int $from_status_id = null, string $startDate = null, string $endDate = null): int
     {
         if ($startDate) {
-            $startDate = date('Y-m-d H:i', strtotime($startDate));
+            $startDate = Employee::convertTimeFromUserDtToUTC(strtotime($startDate));
         }
 
         if ($endDate) {
-            $endDate = date('Y-m-d H:i', strtotime($endDate));
+            $endDate = Employee::convertTimeFromUserDtToUTC(strtotime($endDate));
         }
 
         $query = LeadFlow::find()->select('COUNT(DISTINCT(lead_id))')->where(['employee_id' => $this->id, 'status' => $statusList]);
@@ -1870,10 +1880,10 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         return $users;
     }
 
+
     /**
      * @param int $time
      * @return string
-     * @throws \Exception
      */
     public static function convertTimeFromUserDtToUTC(int $time): string
     {
@@ -1887,10 +1897,14 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
 
             $dateTime = date('Y-m-d H:i:s', $time);
 
-            if ($timezone) {
-                $date = new \DateTime($dateTime, new \DateTimeZone($timezone));
-                $date->setTimezone(new \DateTimeZone('UTC'));
-                $dateTime = $date->format('Y-m-d H:i:s');
+            try {
+                if ($timezone) {
+                    $date = new \DateTime($dateTime, new \DateTimeZone($timezone));
+                    $date->setTimezone(new \DateTimeZone('UTC'));
+                    $dateTime = $date->format('Y-m-d H:i:s');
+                }
+            } catch (\Throwable $throwable) {
+                $dateTime = '';
             }
         }
 

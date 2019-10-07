@@ -67,7 +67,12 @@ $this->params['breadcrumbs'][] = $this->title;
                 },
 //                'filter' => Department::getList()
             ],
-            'cs_created_dt',
+            [
+                'attribute' => 'cs_created_dt',
+                'value' => function (Cases $model) {
+                    return $model->cs_created_dt ? Yii::$app->formatter->asDatetime(strtotime($model->cs_created_dt)) : '-';
+                },
+            ],
             [
                 'header' => 'Last Action',
                 'format' => 'raw',

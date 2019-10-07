@@ -264,7 +264,6 @@ class CommunicationController extends ApiBaseController
             //$clientPhone = ClientPhone::find()->where(['phone' => $client_phone_number])->orderBy(['id' => SORT_DESC])->limit(1)->one();
 
             $departmentPhone = DepartmentPhoneProject::find()->where(['dpp_phone_number' => $incoming_phone_number, 'dpp_enable' => true])->limit(1)->one();
-
             if ($departmentPhone) {
 
                 $project = $departmentPhone->dppProject;
@@ -278,11 +277,12 @@ class CommunicationController extends ApiBaseController
 
                 $call_project_id = $departmentPhone->dpp_project_id;
                 $call_dep_id = $departmentPhone->dpp_dep_id;
+                $call_source_id = $departmentPhone->dpp_source_id;
 
                 $ivrEnable = (bool)$departmentPhone->dpp_ivr_enable;
 
                 $callModel = $this->findOrCreateCall($callSid, $parentCallSid, $postCall, $call_project_id,
-                    $call_dep_id);
+                    $call_dep_id, $call_source_id);
 
                 if ($departmentPhone->dugUgs) {
                     foreach ($departmentPhone->dugUgs as $userGroup) {
@@ -343,7 +343,8 @@ class CommunicationController extends ApiBaseController
                         Notifications::create($user->id, 'Missing Call [Offline]',
                             'Missing Call from ' . $client_phone_number . ' to ' . $incoming_phone_number . "\r\n Reason: Agent offline",
                             Notifications::TYPE_WARNING, true);
-                        Notifications::socket($user->id, null, 'getNewNotification', [], true);
+                        // Notifications::socket($user->id, null, 'getNewNotification', [], true);
+                        Notifications::sendSocket('getNewNotification', ['user_id' => $user->id]);
                         $callModel->c_source_type_id = Call::SOURCE_REDIRECT_CALL;
                         return $this->createHoldCall($callModel, $user);
                     }
@@ -413,7 +414,9 @@ class CommunicationController extends ApiBaseController
                     //if ($call->c_created_user_id) {
                         // Notifications::create($call->c_created_user_id, 'Call Recording Completed  from ' . $call->c_from . ' to ' . $call->c_to . ' <br>Lead ID: ' . $call->c_lead_id , Notifications::TYPE_INFO, true);
                     //}
-                    Notifications::socket(null, $call->c_lead_id, 'recordingUpdate', ['url' => $call->c_recording_url], true);
+                    // Notifications::socket(null, $call->c_lead_id, 'recordingUpdate', ['url' => $call->c_recording_url], true);
+
+                    Notifications::sendSocket('recordingUpdate', ['lead_id' => $call->c_lead_id], ['url' => $call->c_recording_url]);
                 }
             }
         } else {
@@ -696,22 +699,23 @@ class CommunicationController extends ApiBaseController
     }
 
 
-    /**
-     * @param string $callSid
-     * @param string|null $parentCallSid
-     * @param array $calData
-     * @param int $call_project_id
-     * @param int|null $call_dep_id
-     * @return Call
-     * @throws \Exception
-     */
-    protected function findOrCreateCall(string $callSid, ?string $parentCallSid, array $calData, int $call_project_id, ?int $call_dep_id): Call
+	/**
+	 * @param string $callSid
+	 * @param string|null $parentCallSid
+	 * @param array $calData
+	 * @param int $call_project_id
+	 * @param int|null $call_dep_id
+	 * @param int|null $call_source_id
+	 * @return Call
+	 * @throws \Exception
+	 */
+    protected function findOrCreateCall(string $callSid, ?string $parentCallSid, array $calData, int $call_project_id, ?int $call_dep_id, ?int $call_source_id = null): Call
     {
         $call = null;
         $parentCall = null;
         $clientPhone = null;
-        
-        error_log("Call Data: " . print_r($calData, true));
+
+        //error_log("Call Data: " . print_r($calData, true));
 
         if (isset($calData['From']) && $calData['From']) {
             $clientPhoneNumber = $calData['From'];
@@ -1150,6 +1154,7 @@ class CommunicationController extends ApiBaseController
 
             $job = new CallQueueJob();
             $job->call_id = $callModel->c_id;
+            $job->source_id = $department->dpp_source_id;
             $job->delay = 0;
             $jobId = Yii::$app->queue_job->delay(7)->priority(100)->push($job);
         }
@@ -1814,7 +1819,9 @@ class CommunicationController extends ApiBaseController
 
                             Notifications::create($user_id, 'New SMS '.$sms->s_phone_from, 'SMS from ' . $sms->s_phone_from .' ('.$clientName.') to '.$sms->s_phone_to.' <br> '.nl2br(Html::encode($sms->s_sms_text))
                             . ($lead_id ? '<br>Lead ID: '.$lead_id : ''), Notifications::TYPE_INFO, true);
-                            Notifications::socket($user_id, null, 'getNewNotification', ['sms_id' => $sms->s_id], true);
+                            //Notifications::socket($user_id, null, 'getNewNotification', ['sms_id' => $sms->s_id], true);
+
+                            Notifications::sendSocket('getNewNotification', ['user_id' => $user_id], ['sms_id' => $sms->s_id]);
                         }
                     }
 
@@ -1824,7 +1831,8 @@ class CommunicationController extends ApiBaseController
                     }
 
                     if($lead_id) {
-                        Notifications::socket(null, $lead_id, 'updateCommunication', ['sms_id' => $sms->s_id], true);
+                        // Notifications::socket(null, $lead_id, 'updateCommunication', ['sms_id' => $sms->s_id], true);
+                        Notifications::sendSocket('getNewNotification', ['lead_id' => $lead_id], ['sms_id' => $sms->s_id]);
                     }
 
                     $response = $sms->attributes;

@@ -39,38 +39,48 @@
                     if($item->n_popup && !$item->n_popup_show):
                     $soundPlay = true;
 
+                    $desktopMessage = strip_tags($item->n_message);
+                    $desktopMessage = str_replace('"', '\"', $desktopMessage);
+
                     $message = str_replace("\r\n", '', $item->n_message);
                     $message = str_replace("\n", '', $message);
                     $message = str_replace('"', '\"', $message);
 
                     $type = $item->getNotifyType();
 
-                    if($n == 0) {
+                    if ($n === 0) {
 
                         $js2 = '
                             new PNotify({
                                 title: "'.\yii\helpers\Html::encode($item->n_title).'",
                                 type: "'.$type.'",
                                 text: "'.$message.'",
+                                icon: true,
                                 desktop: {
-                                    desktop: true
+                                    desktop: true,
+                                    fallback: true,
+                                    text: "' . $desktopMessage . '"
                                 },
-                                /*nonblock: {
-                                    nonblock: true
-                                },*/
-                                delay: 30000,
-                                hide: true
-                            }).get().click(function(e) {
-                    
-                            });
-                            
-                            new PNotify({
-                                title: "'.\yii\helpers\Html::encode($item->n_title).'",
-                                type: "'.$type.'",
-                                text: "'.$message.'",
+                                delay: 10000,
+                                mouse_reset: false, 
                                 hide: true
                             });
                             ';
+
+//                            .get().click(function(e) {
+//                            });
+
+                        /*nonblock: {
+                                   nonblock: true
+                               },*/
+                            
+//                            new PNotify({
+//                                title: "'.\yii\helpers\Html::encode($item->n_title).'",
+//                                type: "'.$type.'",
+//                                text: "'.$message.'",
+//                                hide: true
+//                            });
+//                            ';
 
                         $this->registerJs($js2, \yii\web\View::POS_READY);
 //                        break;
@@ -122,7 +132,7 @@ $js = <<<JS
 
     const notifyUrl = '$notifyUrl';
     function updatePjaxNotify() {
-        $.pjax({url: notifyUrl, container : '#notify-pjax', push: false, replace: false, timeout: 10000, scrollTo: false, async: true});
+        $.pjax.reload({url: notifyUrl, container : '#notify-pjax', push: false, replace: false, timeout: 10000, scrollTo: false, async: false});
     }
 
     $("#notify-pjax").on("pjax:beforeSend", function() {

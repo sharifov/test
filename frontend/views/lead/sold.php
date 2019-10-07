@@ -299,6 +299,9 @@ $this->params['breadcrumbs'][] = $this->title;
                 'clientOptions' => [
                     'autoclose' => true,
                     'format' => 'dd-mm-yyyy'
+                ],
+                'options' => [
+                    'autocomplete' => 'off'
                 ]
             ]),
             'contentOptions' => [

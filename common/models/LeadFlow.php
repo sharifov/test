@@ -20,6 +20,7 @@ use yii\validators\DateValidator;
  * @property int $lf_time_duration
  * @property int $lf_description
  * @property int $lf_owner_id
+ * @property int $lf_out_calls
  *
  * @property Employee $owner
  * @property Employee $employee
@@ -86,7 +87,7 @@ class LeadFlow extends \yii\db\ActiveRecord
     {
         return [
             [['created', 'lf_end_dt'], 'safe'],
-            [['employee_id', 'lead_id', 'status', 'lf_from_status_id', 'lf_time_duration'], 'integer'],
+            [['employee_id', 'lead_id', 'status', 'lf_from_status_id', 'lf_time_duration', 'lf_out_calls'], 'integer'],
             [['lf_description'], 'string', 'max' => 250],
             [['employee_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['employee_id' => 'id']],
             [['lead_id'], 'exist', 'skipOnError' => true, 'targetClass' => Lead::class, 'targetAttribute' => ['lead_id' => 'id']],
@@ -108,7 +109,8 @@ class LeadFlow extends \yii\db\ActiveRecord
             'lf_end_dt' => 'End DateTime',
             'lf_time_duration' => 'Duration',
             'lf_description' => 'Description',
-            'leadFlowChecklist' => 'Lead Flow Checklist'
+            'leadFlowChecklist' => 'Lead Flow Checklist',
+            'lf_out_calls' => 'Out Calls'
         ];
     }
 

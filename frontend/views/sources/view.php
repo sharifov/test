@@ -30,7 +30,6 @@ $this->params['breadcrumbs'][] = $this->title;
         'model' => $model,
         'attributes' => [
             'id',
-            'phone_number',
             'default:boolean',
             'hidden:boolean',
             [

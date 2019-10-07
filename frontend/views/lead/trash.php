@@ -96,7 +96,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'filter' => $lists->getProjects(),
         ],
         [
-            'attribute' => 'pending',
+            'attribute' => 'created',
             'label' => 'Pending Time',
             'value' => function (\common\models\Lead $model) {
                 $str = Yii::$app->formatter->asRelativeTime(strtotime($model->created));
@@ -121,7 +121,7 @@ $this->params['breadcrumbs'][] = $this->title;
         ],
 
         [
-            'attribute' => 'update',
+            'attribute' => 'updated',
             'label' => 'Trash Date',
             'value' => function (\common\models\Lead $model) {
                 $str = Yii::$app->formatter->asRelativeTime(strtotime($model->updated));

@@ -8,12 +8,8 @@
 namespace common\components\jobs;
 
 use common\models\Call;
-use common\models\CallUserAccess;
-use common\models\Department;
 use common\models\Employee;
-use common\models\Lead2;
 use common\models\Notifications;
-use sales\forms\lead\PhoneCreateForm;
 use sales\repositories\cases\CasesRepository;
 use sales\services\cases\CasesCreateService;
 use sales\services\client\ClientManageService;
@@ -44,14 +40,6 @@ class CallUserAccessJob extends BaseObject implements JobInterface
     private $casesRepository;
     private $clientManageService;
 
-    /*public function __construct(CasesCreateService $casesCreateService, ClientManageService $clientManageService, $config = [])
-    {
-        parent::__construct($config);
-        $this->casesCreateService = Yii::createObject(CasesCreateService::class);
-        $this->clientManageService = Yii::createObject(ClientManageService::class);
-    }*/
-
-
     /**
      * @param Queue $queue
      * @return bool
@@ -81,7 +69,7 @@ class CallUserAccessJob extends BaseObject implements JobInterface
 
                     //$originalAgentId = $call->c_created_user_id;
 
-                    Yii::info('CallUserAccessJob - CallId: ' . $this->call_id . ', c_status_id: ' . $call->c_status_id . ', ' . VarDumper::dumpAsString($call->attributes),'info\CallUserAccessJob-call');
+                    // Yii::info('CallUserAccessJob - CallId: ' . $this->call_id . ', c_status_id: ' . $call->c_status_id . ', ' . VarDumper::dumpAsString($call->attributes),'info\CallUserAccessJob-call');
 
 
                     $last_hours = (int)(Yii::$app->params['settings']['general_line_last_hours'] ?? 1);
@@ -118,6 +106,9 @@ class CallUserAccessJob extends BaseObject implements JobInterface
         return false;
     }
 
+    /**
+     * @return float|int
+     */
     public function getTtr()
     {
         return 1 * 5;
