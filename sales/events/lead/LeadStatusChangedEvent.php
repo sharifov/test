@@ -6,20 +6,23 @@ use common\models\Lead;
 
 /**
  * Class LeadStatusChangedEvent
+ *
  * @property Lead $lead
  * @property int|null $oldStatus
  * @property int $newStatus
  * @property int|null $ownerId
+ * @property string $created
  */
 class LeadStatusChangedEvent
 {
+
     public $lead;
     public $oldStatus;
     public $newStatus;
     public $ownerId;
+    public $created;
 
     /**
-     * LeadStatusChangedEvent constructor.
      * @param Lead $lead
      * @param int|null $oldStatus
      * @param int $newStatus
@@ -31,5 +34,7 @@ class LeadStatusChangedEvent
         $this->oldStatus = $oldStatus;
         $this->newStatus = $newStatus;
         $this->ownerId = $ownerId;
+        $this->created = date('Y-m-d H:i:s');
     }
+
 }

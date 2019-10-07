@@ -4,7 +4,7 @@ use yii\helpers\Url;
 use common\models\Email;
 use common\models\Sms;
 use common\models\Employee;
-use sales\ui\user\ListsAccess;
+use sales\access\ListsAccess;
 use yii\helpers\Html;
 use yii\helpers\VarDumper;
 use yii\widgets\Pjax;
@@ -14,7 +14,6 @@ use yii\bootstrap\ActiveForm;
 use yii\bootstrap\Modal;
 use yii\web\View;
 use yii\helpers\ArrayHelper;
-use common\models\Reason;
 use common\models\LeadFlow;
 use common\models\Call;
 
@@ -263,16 +262,9 @@ $lists = new ListsAccess($user->id);
             'value' => function (Lead $lead) {
                 $statusValue = $lead->getStatusName(true);
 
-                if ($lead->isTrash()) {
-                    $reason = Reason::find()->where([
-                        'lead_id' => $lead->id
-                    ])
-                        ->orderBy([
-                            'id' => SORT_DESC
-                        ])
-                        ->one();
-                    if ($reason) {
-                        $statusValue .= ' <span data-toggle="tooltip" data-placement="top" title="' . Html::encode($reason->reason) . '"><i class="fa fa-warning"></i></span>';
+                if ($lead->isTrash() && ($lastLeadFlow = $lead->lastLeadFlow)) {
+                    if ($lastLeadFlow->status === $lead->status && $lastLeadFlow->lf_description) {
+                        $statusValue .= ' <span data-toggle="tooltip" data-placement="top" title="' . Html::encode($lastLeadFlow->lf_description) . '"><i class="fa fa-warning"></i></span>';
                     }
                 }
 
@@ -737,7 +729,7 @@ $lists = new ListsAccess($user->id);
                         <?= $form->field($multipleForm, 'status_id')->dropDownList(Lead::getStatusList($role), ['prompt' => '-', 'id' => 'status_id']) ?>
 
                         <div id="reason_id_div" style="display: none">
-                            <?= $form->field($multipleForm, 'reason_id')->dropDownList(Reason::getReasonListByStatus(Lead::STATUS_PROCESSING), ['prompt' => '-', 'id' => 'reason_id']) // Lead::STATUS_REASON_LIST  ?>
+                            <?= $form->field($multipleForm, 'reason_id')->dropDownList([], ['prompt' => '-', 'id' => 'reason_id']) // Lead::STATUS_REASON_LIST  ?>
 
                             <div id="reason_description_div"
                                  style="display: none">

@@ -20,7 +20,7 @@ class EmployeeDepartmentAccess
     ];
 
     /**
-     * @param int|null $userId
+     * @param int|Employee|null $user
      * @param array|null $roles | for this roles return all departments | if null, then return only self departments
      * @param array $excludeRoles
      * @param array $includeRoles
@@ -38,11 +38,11 @@ class EmployeeDepartmentAccess
      * $projects = EmployeeDepartmentAccess::getDepartments($userId, null);
      * $projects = EmployeeDepartmentAccess::getDepartments($userId, [], [Employee::ROLE_ADMIN], [Employee::ROLE_AGENT]);
      */
-    public static function getDepartments(?int $userId = null, ?array $roles = [], array $excludeRoles = [], array $includeRoles = []): array
+    public static function getDepartments($user = null, ?array $roles = [], array $excludeRoles = [], array $includeRoles = []): array
     {
-        $user = UserFinder::find($userId);
+        $user = UserFinder::getOrFind($user);
 
-        $hash = EmployeeAccessHelper::generateHash($userId, $roles, $excludeRoles, $includeRoles);
+        $hash = EmployeeAccessHelper::generateHash($user->id, $roles, $excludeRoles, $includeRoles);
         if (($departments = $user->getDepartmentAccess($hash)) !== null) {
             return $departments;
         }

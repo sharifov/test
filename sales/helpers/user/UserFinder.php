@@ -32,4 +32,33 @@ class UserFinder
         }
         throw new NotFoundException('User not found');
     }
+
+    /**
+     * @return int|null
+     */
+    public static function getCurrentUserId(): ?int
+    {
+        try {
+            $createdUserId = self::find()->id;
+        } catch (NotFoundException $e) {
+            $createdUserId = null;
+        }
+        return $createdUserId;
+    }
+
+    /**
+     * @param int|Employee|null $user
+     * @return Employee
+     */
+    public static function getOrFind($user): Employee
+    {
+        if (is_int($user) || $user === null) {
+            return self::find($user);
+        }
+        if ($user instanceof Employee) {
+            return $user;
+        }
+        throw new \InvalidArgumentException('$user must be integer, Employee or null');
+    }
+
 }

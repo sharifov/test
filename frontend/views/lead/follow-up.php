@@ -2,7 +2,7 @@
 
 use dosamigos\datepicker\DatePicker;
 use sales\access\EmployeeProjectAccess;
-use sales\ui\user\ListsAccess;
+use sales\access\ListsAccess;
 use yii\helpers\Html;
 use yii\widgets\Pjax;
 use kartik\grid\GridView;
@@ -217,7 +217,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'style' => 'text-align:center;'
             ],
             'value' => function (\common\models\Lead $model) {
-                return '<span style="cursor:help;" class="label label-warning" title="'.Html::encode($model->getLastReason()).'">&nbsp;<i class="fa fa-info-circle"></i>&nbsp;</span>';
+                return '<span style="cursor:help;" class="label label-warning" title="'.Html::encode($model->getLastReasonFromLeadFlow()).'">&nbsp;<i class="fa fa-info-circle"></i>&nbsp;</span>';
             },
             'format' => 'raw'
         ],

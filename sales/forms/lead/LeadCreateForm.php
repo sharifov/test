@@ -10,7 +10,7 @@ use sales\access\EmployeeDepartmentAccess;
 use sales\access\EmployeeProjectAccess;
 use sales\forms\CompositeForm;
 use sales\helpers\lead\LeadHelper;
-use sales\ui\user\ListsAccess;
+use sales\access\ListsAccess;
 use sales\repositories\cases\CasesRepository;
 use sales\repositories\NotFoundException;
 use yii\helpers\VarDumper;

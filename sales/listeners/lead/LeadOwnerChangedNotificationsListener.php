@@ -9,16 +9,16 @@ use sales\repositories\user\UserRepository;
 use Yii;
 
 /**
- * Class LeadOwnerChangedEventListener
+ * Class LeadOwnerChangedNotificationsListener
+ *
  * @property UserRepository $userRepository
  */
-class LeadOwnerChangedEventListener
+class LeadOwnerChangedNotificationsListener
 {
 
     private $userRepository;
 
     /**
-     * LeadOwnerChangedEventListener constructor.
      * @param UserRepository $userRepository
      */
     public function __construct(UserRepository $userRepository)
@@ -39,13 +39,13 @@ class LeadOwnerChangedEventListener
         try {
             $oldOwner = $this->userRepository->find($event->oldOwnerId);
         } catch (NotFoundException $e) {
-            Yii::warning('Not found employee (' . $event->oldOwnerId . ')', self::class . ':sendNotification:oldOwner');
+            Yii::warning('Not found employee (' . $event->oldOwnerId . ')', 'LeadOwnerChangedNotificationsListener:sendNotification:oldOwner');
             return;
         }
         try {
             $newOwner = $this->userRepository->find($event->newOwnerId);
         } catch (NotFoundException $e) {
-            Yii::warning('Not found employee (' . $event->newOwnerId . ')', self::class . ':sendNotification:newOwner');
+            Yii::warning('Not found employee (' . $event->newOwnerId . ')', 'LeadOwnerChangedNotificationsListener:sendNotification:newOwner');
             return;
         }
 
@@ -59,9 +59,9 @@ class LeadOwnerChangedEventListener
 Your Lead (ID: {lead_id}) has been reassigned to another agent ({name}).
 {url}",
             [
+                'lead_id' => $lead->id,
                 'name' => $newOwner->username,
                 'url' => $host . '/lead/view/' . $lead->gid,
-                'lead_id' => $lead->id
             ]);
 
         if (Notifications::create($oldOwner->id, $subject, $body, Notifications::TYPE_INFO, true)) {
@@ -70,7 +70,7 @@ Your Lead (ID: {lead_id}) has been reassigned to another agent ({name}).
         } else {
             Yii::warning(
                 'Not created Email notification to employee_id: ' . $oldOwner->id . ', lead: ' . $lead->id,
-                self::class . ':sendNotification'
+                'LeadOwnerChangedNotificationsListener:sendNotification'
             );
         }
     }

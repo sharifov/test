@@ -4,25 +4,87 @@ namespace sales\services\lead;
 
 use common\models\Employee;
 use common\models\Lead;
-use common\models\LeadFlow;
+use sales\access\EmployeeAccess;
 use sales\repositories\lead\LeadRepository;
 use sales\repositories\user\UserRepository;
+use sales\services\ServiceFinder;
 use yii\web\ForbiddenHttpException;
 
 /**
  * Class LeadAssignService
+ *
  * @property LeadRepository $leadRepository
  * @property UserRepository $userRepository
+ * @property ServiceFinder $serviceFinder
  */
 class LeadAssignService
 {
+
     private $leadRepository;
     private $userRepository;
+    private $serviceFinder;
 
-    public function __construct(LeadRepository $leadRepository, UserRepository $userRepository)
+    public function __construct(LeadRepository $leadRepository, UserRepository $userRepository, ServiceFinder $serviceFinder)
     {
         $this->leadRepository = $leadRepository;
         $this->userRepository = $userRepository;
+        $this->serviceFinder = $serviceFinder;
+    }
+
+    /**
+     * @param int|Lead $lead
+     * @param int|Employee $user
+     * @param int|null $creatorId
+     * @param string|null $reason
+     * @throws ForbiddenHttpException
+     */
+    public function take($lead, $user, ?int $creatorId = null, ?string $reason = ''): void
+    {
+        $lead = $this->serviceFinder->leadFind($lead);
+        $user = $this->serviceFinder->userFind($user);
+
+        EmployeeAccess::leadAccess($lead, $user);
+        self::checkAccess($lead, $user);
+
+        if ($lead->isCompleted()) {
+            throw new \DomainException('Lead is completed!');
+        }
+
+        if (!$lead->isAvailableToTake()) {
+            throw new \DomainException('Lead is unavailable to "Take" now!');
+        }
+
+        $lead->processing($user->id, $creatorId, $reason);
+
+        $this->leadRepository->save($lead);
+    }
+
+    /**
+     * @param int|Lead $lead
+     * @param int|Employee $user
+     * @param int|null $creatorId
+     * @param string|null $reason
+     * @throws ForbiddenHttpException
+     */
+    public function takeOver($lead, $user, ?int $creatorId = null, ?string $reason = ''): void
+    {
+        $lead = $this->serviceFinder->leadFind($lead);
+        $user = $this->serviceFinder->userFind($user);
+
+        EmployeeAccess::leadAccess($lead, $user);
+        self::checkAccess($lead, $user);
+
+        if ($lead->isCompleted()) {
+            throw new \DomainException('Lead is completed!');
+        }
+
+        if (!$lead->isAvailableToTakeOver()) {
+            throw new \DomainException('Lead is unavailable to "Take Over" now!');
+        }
+
+        $lead->processing($user->id, $creatorId, $reason);
+
+        $this->leadRepository->save($lead);
     }
 
     /**
@@ -30,7 +92,7 @@ class LeadAssignService
      * @param Employee $user
      * @throws ForbiddenHttpException
      */
-    private function checkAccess(Lead $lead, Employee $user): void
+    private static function checkAccess(Lead $lead, Employee $user): void
     {
         if ($lead->isPending() && $user->isAgent()) {
             $isAccessNewLead = $user->accessTakeNewLead();
@@ -42,58 +104,6 @@ class LeadAssignService
                 throw new ForbiddenHttpException('Access is denied (frequency) - "Take lead"');
             }
         }
-    }
-
-    /**
-     * @param int $leadId
-     * @param int $userId
-     * @throws ForbiddenHttpException
-     */
-    public function take(int $leadId, int $userId): void
-    {
-        $lead = $this->leadRepository->find($leadId);
-        $user = $this->userRepository->find($userId);
-
-        $this->checkAccess($lead, $user);
-//
-//        if ($lead->isFollowUp()) {
-//            $checkProcessingByAgent = LeadFlow::findOne([
-//                'lead_id' => $lead->id,
-//                'status' => Lead::STATUS_PROCESSING,
-//                'employee_id' => $user->id
-//            ]);
-//            if ($checkProcessingByAgent === null) {
-//                $lead->setCalledExpert(false);
-//            }
-//        }
-        $lead->take($user->id);
-        $this->leadRepository->save($lead);
-    }
-
-    /**
-     * @param int $leadId
-     * @param int $userId
-     * @throws ForbiddenHttpException
-     */
-    public function takeOver(int $leadId, int $userId): void
-    {
-        $lead = $this->leadRepository->find($leadId);
-        $user = $this->userRepository->find($userId);
-
-        $this->checkAccess($lead, $user);
-
-//        if ($lead->isFollowUp()) {
-//            $checkProcessingByAgent = LeadFlow::findOne([
-//                'lead_id' => $lead->id,
-//                'status' => Lead::STATUS_PROCESSING,
-//                'employee_id' => $user->id
-//            ]);
-//            if ($checkProcessingByAgent === null) {
-//                $lead->setCalledExpert(false);
-//            }
-//        }
-        $lead->takeOver($user->id);
-        $this->leadRepository->save($lead);
     }
 
 }

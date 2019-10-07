@@ -2,7 +2,7 @@
 
 use dosamigos\datepicker\DatePicker;
 use sales\access\EmployeeProjectAccess;
-use sales\ui\user\ListsAccess;
+use sales\access\ListsAccess;
 use yii\helpers\Html;
 use yii\widgets\Pjax;
 use kartik\grid\GridView;
@@ -210,7 +210,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'attribute' => 'status',
             'value' => function (\common\models\Lead $model) {
                 $statusValue = $model->getStatusName(true);
-                $reasonValue =  $model->getLastReason();
+                $reasonValue =  $model->getLastReasonFromLeadFlow();
 
                 if($reasonValue) {
                     $reasonValue = '<br><pre>'.$reasonValue.'</pre>';
@@ -271,18 +271,6 @@ $this->params['breadcrumbs'][] = $this->title;
                 ],
             ]),
         ],
-
-        /*[
-            'attribute' => 'reason',
-            'label' => 'Reason',
-            'contentOptions' => [
-                'style' => 'max-width: 250px;'
-            ],
-            'value' => function (\common\models\Lead $model) {
-                return $model->getLastReason();
-            },
-            'format' => 'raw'
-        ],*/
 
         [
             'header' => 'Answered',
