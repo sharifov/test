@@ -14,29 +14,46 @@ use yii\helpers\VarDumper;
 class SearchService
 {
 
-    const GDS_SABRE = 'S', GDS_AMADEUS = 'A', GDS_TRAVELPORT = 'W';
-    const GDS_AIRWANDER = 'G';
+    public const GDS_SABRE         = 'S';
+    public const GDS_AMADEUS       = 'A';
+    public const GDS_TRAVELPORT    = 'T';
+    public const GDS_AIRWANDER     = 'G';
+    public const GDS_TRAVELFUSION  = 'F';
+    public const GDS_COCKPIT       = 'C';
+    public const GDS_ONEPOINT      = 'M';
 
 
-    const CABIN_ECONOMY = 'Y', CABIN_PREMIUM_ECONOMY = 'S', CABIN_BUSINESS = 'C',
+    public const CABIN_ECONOMY = 'Y', CABIN_PREMIUM_ECONOMY = 'S', CABIN_BUSINESS = 'C',
     CABIN_PREMIUM_BUSINESS = 'J', CABIN_FIRST = 'F', CABIN_PREMIUM_FIRST = 'P';
 
+    /**
+     * @param $minutes
+     * @return string
+     */
     public static function durationInMinutes($minutes)
     {
         $hours = floor($minutes / 60);
-        $minutes = $minutes % 60;
-        if ($hours > 0)
+        $minutes %= 60;
+        if ($hours > 0) {
             return $hours . 'h ' . $minutes . 'm';
-            return $minutes . 'm';
+        }
+        return $minutes . 'm';
     }
 
+    /**
+     * @param null $gds
+     * @return array|mixed|null
+     */
     public static function getGDSName($gds = null)
     {
         $mapping = [
-            self::GDS_SABRE => 'Sabre',
-            self::GDS_AMADEUS => 'Amadeus',
-            self::GDS_TRAVELPORT => 'TravelPort',
-            self::GDS_AIRWANDER => 'AirWander'
+            self::GDS_SABRE         => 'Sabre',
+            self::GDS_AMADEUS       => 'Amadeus',
+            self::GDS_TRAVELPORT    => 'TravelPort',
+            self::GDS_AIRWANDER     => 'AirWander',
+            self::GDS_TRAVELFUSION  => 'TravelFusion',
+            self::GDS_COCKPIT       => 'Cockpit',
+            self::GDS_ONEPOINT      => 'OnePoint',
         ];
 
         if ($gds === null) {
