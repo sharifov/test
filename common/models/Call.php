@@ -574,7 +574,7 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
 
         if (!$insert) {
 
-            if ($isChangedStatus && $this->isIn() && ($this->isStatusCompleted() || $this->isStatusNoAnswer() || $this->isStatusBusy() || $this->isStatusInProgress() || $this->isStatusCanceled())) {
+            if ($isChangedStatus && $this->isIn() && ($this->isStatusInProgress() || $this->isEnded())) {
 
                 $callUserAccessAny = CallUserAccess::find()->where(['cua_status_id' => CallUserAccess::STATUS_TYPE_PENDING, 'cua_call_id' => $this->c_id])->all();
                 if ($callUserAccessAny) {
