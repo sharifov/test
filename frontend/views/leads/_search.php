@@ -66,7 +66,6 @@ use frontend\extensions\DatePicker;
 
             <div class="row">
                 <div class="col-md-4">
-                    <?= $form->field($model, 'l_grade')->dropDownList(array_combine(range(0, 10), range(0, 10)), ['prompt' => '-']) ?>
                 </div>
                 <div class="col-md-4">
                     <?= $form->field($model, 'l_answered')->dropDownList([1 => 'Yes', 0 => 'No'], ['prompt' => '-']) ?>

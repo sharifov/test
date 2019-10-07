@@ -226,7 +226,6 @@ $formId = sprintf('%s-form', $leadForm->getClient()->formName());
                     $searchModel = new \common\models\search\LeadSearch();
                     $params = Yii::$app->request->queryParams;
                     $params['LeadSearch']['request_ip'] = $leadForm->getLead()->request_ip;
-                    //$params['ClientSearch']['not_in_client_id'] = $email->client_id;
                     $dataProvider = $searchModel->search($params);
 
                     $ipCount = $dataProvider->count;

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "d3ee17610b29519fd9f9688f52af1fc9",
+    "content-hash": "0cbd4a9441c24de6cc37af0b1a808b50",
     "packages": [
         {
             "name": "2amigos/qrcode-library",
@@ -546,20 +546,20 @@
         },
         {
             "name": "borales/yii2-phone-input",
-            "version": "0.2.1",
+            "version": "0.1.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Borales/yii2-phone-input.git",
-                "reference": "8b9e3a5036549926c75e18beee77dfd3e9a48829"
+                "reference": "3df49ca980d7ed164296a1974c50d860b78f5f2f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Borales/yii2-phone-input/zipball/8b9e3a5036549926c75e18beee77dfd3e9a48829",
-                "reference": "8b9e3a5036549926c75e18beee77dfd3e9a48829",
+                "url": "https://api.github.com/repos/Borales/yii2-phone-input/zipball/3df49ca980d7ed164296a1974c50d860b78f5f2f",
+                "reference": "3df49ca980d7ed164296a1974c50d860b78f5f2f",
                 "shasum": ""
             },
             "require": {
-                "bower-asset/intl-tel-input": "^16",
+                "bower-asset/intl-tel-input": "^12",
                 "giggsey/libphonenumber-for-php": "^8",
                 "yiisoft/yii2": ">=2.0.1"
             },
@@ -587,7 +587,7 @@
                 "libphonenumber",
                 "yii2"
             ],
-            "time": "2019-08-22T09:12:04+00:00"
+            "time": "2018-06-17T11:29:34+00:00"
         },
         {
             "name": "bower-asset/bootstrap",
@@ -697,17 +697,20 @@
         },
         {
             "name": "bower-asset/intl-tel-input",
-            "version": "v16.0.4",
+            "version": "v12.4.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/jackocnr/intl-tel-input.git",
-                "reference": "6f5077883e50f4475af605730cdb565ccf623ef2"
+                "reference": "2afde58af3d7db953ba505946a5aac3c3176ed0b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/jackocnr/intl-tel-input/zipball/6f5077883e50f4475af605730cdb565ccf623ef2",
-                "reference": "6f5077883e50f4475af605730cdb565ccf623ef2",
+                "url": "https://api.github.com/repos/jackocnr/intl-tel-input/zipball/2afde58af3d7db953ba505946a5aac3c3176ed0b",
+                "reference": "2afde58af3d7db953ba505946a5aac3c3176ed0b",
                 "shasum": null
+            },
+            "require": {
+                "bower-asset/jquery": ">=1.7"
             },
             "type": "bower-asset"
         },
@@ -3510,30 +3513,29 @@
         },
         {
             "name": "markbaker/matrix",
-            "version": "1.1.4",
+            "version": "1.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/MarkBaker/PHPMatrix.git",
-                "reference": "6ea97472b5baf12119b4f31f802835b820dd6d64"
+                "reference": "5348c5a67e3b75cd209d70103f916a93b1f1ed21"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/MarkBaker/PHPMatrix/zipball/6ea97472b5baf12119b4f31f802835b820dd6d64",
-                "reference": "6ea97472b5baf12119b4f31f802835b820dd6d64",
+                "url": "https://api.github.com/repos/MarkBaker/PHPMatrix/zipball/5348c5a67e3b75cd209d70103f916a93b1f1ed21",
+                "reference": "5348c5a67e3b75cd209d70103f916a93b1f1ed21",
                 "shasum": ""
             },
             "require": {
                 "php": "^5.6.0|^7.0.0"
             },
             "require-dev": {
-                "dealerdirect/phpcodesniffer-composer-installer": "^0.4.3",
-                "phpcompatibility/php-compatibility": "^8.0",
-                "phpdocumentor/phpdocumentor": "2.*",
-                "phploc/phploc": "2.*",
-                "phpmd/phpmd": "2.*",
-                "phpunit/phpunit": "^4.8.35|^5.4.0",
-                "sebastian/phpcpd": "2.*",
-                "squizlabs/php_codesniffer": "^3.3.0"
+                "dealerdirect/phpcodesniffer-composer-installer": "dev-master",
+                "phpcompatibility/php-compatibility": "dev-master",
+                "phploc/phploc": "^4",
+                "phpmd/phpmd": "dev-master",
+                "phpunit/phpunit": "^5.7",
+                "sebastian/phpcpd": "^3.0",
+                "squizlabs/php_codesniffer": "^3.0@dev"
             },
             "type": "library",
             "autoload": {
@@ -3576,7 +3578,7 @@
                 "matrix",
                 "vector"
             ],
-            "time": "2018-11-04T22:12:12+00:00"
+            "time": "2019-10-06T11:29:25+00:00"
         },
         {
             "name": "mpdf/mpdf",

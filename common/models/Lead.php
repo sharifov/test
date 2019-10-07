@@ -67,7 +67,6 @@ use common\components\SearchService;
  * @property int $bo_flight_id
  * @property string $additional_information
  * @property int $l_answered
- * @property int $l_grade
  * @property int $clone_id
  * @property string $description
  * @property double $final_profit
@@ -272,7 +271,7 @@ class Lead extends ActiveRecord implements AggregateRoot
             [['adults', 'children', 'source_id'], 'required', 'on' => self::SCENARIO_API], //'except' => self::SCENARIO_API],
             [['adults'], 'integer', 'min' => 1, 'on' => self::SCENARIO_API],
 
-            [['client_id', 'employee_id', 'status', 'project_id', 'source_id', 'rating', 'bo_flight_id', 'l_grade', 'clone_id', 'l_call_status_id', 'l_duplicate_lead_id', 'l_dep_id'], 'integer'],
+            [['client_id', 'employee_id', 'status', 'project_id', 'source_id', 'rating', 'bo_flight_id', 'clone_id', 'l_call_status_id', 'l_duplicate_lead_id', 'l_dep_id'], 'integer'],
             [['adults', 'children', 'infants'], 'integer', 'max' => 9],
 
             [['notes_for_experts', 'request_ip_detail', 'l_client_ua'], 'string'],
@@ -375,7 +374,6 @@ class Lead extends ActiveRecord implements AggregateRoot
         $clone->rating = 0;
         $clone->additional_information = null;
         $clone->l_answered = 0;
-        $clone->l_grade = 0;
         $clone->snooze_for = null;
         $clone->called_expert = false;
         $clone->created = null;
@@ -922,7 +920,6 @@ class Lead extends ActiveRecord implements AggregateRoot
             'created' => 'Created',
             'updated' => 'Updated',
             'l_answered' => 'Answered',
-            'l_grade' => 'Grade',
             'bo_flight_id' => '(BO) Flight ID',
             'agents_processing_fee' => 'Agents Processing Fee',
             'origin_country' => 'Origin Country code',
@@ -2062,12 +2059,6 @@ New lead {lead_id}
                             Yii::warning('Not send Email notification to employee_id: ' . $this->employee_id . ', lead: ' . $this->id, 'Lead:afterSave:sendNotification');
                         }
                     } elseif ($this->status == self::STATUS_FOLLOW_UP) {
-
-                        $this->l_grade = (int)$this->l_grade + 1;
-                        Yii::$app->db->createCommand('UPDATE ' . Lead::tableName() . ' SET l_grade = :grade WHERE id = :id', [
-                            ':grade' => $this->l_grade,
-                            ':id' => $this->id
-                        ])->execute();
 
                         if ($this->status_description) {
                             $reason = new Reason();

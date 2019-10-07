@@ -87,7 +87,7 @@ class LeadSearch extends Lead
         return [
             [['datetime_start', 'datetime_end'], 'safe'],
             [['date_range'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
-            [['id', 'client_id', 'employee_id', 'status', 'project_id', 'adults', 'children', 'infants', 'rating', 'called_expert', 'cnt', 'l_grade', 'l_answered', 'supervision_id', 'limit', 'bo_flight_id', 'l_duplicate_lead_id'], 'integer'],
+            [['id', 'client_id', 'employee_id', 'status', 'project_id', 'adults', 'children', 'infants', 'rating', 'called_expert', 'cnt', 'l_answered', 'supervision_id', 'limit', 'bo_flight_id', 'l_duplicate_lead_id'], 'integer'],
             [['email_status', 'quote_status'], 'integer'],
 
             [['client_name', 'client_email', 'client_phone','quote_pnr', 'gid', 'origin_airport','destination_airport', 'origin_country', 'destination_country', 'l_request_hash'], 'string'],
@@ -197,7 +197,6 @@ class LeadSearch extends Lead
             'bo_flight_id' => $this->bo_flight_id,
             'rating' => $this->rating,
             'called_expert' => $this->called_expert,
-            'l_grade' => $this->l_grade,
             'l_answered'    => $this->l_answered,
             'l_duplicate_lead_id' => $this->l_duplicate_lead_id,
             'l_init_price'  => $this->l_init_price,
@@ -453,7 +452,6 @@ class LeadSearch extends Lead
             'cabin' => $this->cabin,
             'request_ip' => $this->request_ip,
             'discount_id' => $this->discount_id,
-            'l_grade' => $this->l_grade,
             'l_answered'    => $this->l_answered
         ]);
 
@@ -973,7 +971,6 @@ class LeadSearch extends Lead
             $leadTable . '.employee_id' => $this->employee_id,
             $leadTable . '.status' => $this->status,
             $leadTable . '.l_answered' => $this->l_answered,
-            $leadTable . '.l_grade' => $this->l_grade,
             $leadTable . '.l_init_price' => $this->l_init_price,
         ]);
 
@@ -1059,7 +1056,6 @@ class LeadSearch extends Lead
         $query->andFilterWhere([
             $leadTable.'.id' => $this->id,
             $leadTable.'.l_answered' => $this->l_answered,
-            $leadTable.'.l_grade' => $this->l_grade,
             $leadTable.'.project_id' => $this->project_id,
         ]);
 
@@ -1155,7 +1151,6 @@ class LeadSearch extends Lead
 //            $leadTable.'.bo_flight_id' => $this->bo_flight_id,
 //            $leadTable.'.rating' => $this->rating,
 //            $leadTable.'.status' => $this->status,
-//            $leadTable.'.l_grade' => $this->l_grade,
 //            $leadTable.'.l_answered' => $this->l_answered,
 //        ]);
 //

@@ -245,18 +245,6 @@ $this->params['breadcrumbs'][] = $this->title;
         ],
 
         [
-            'header' => 'Grade',
-            'attribute' => 'l_grade',
-            'value' => function (\common\models\Lead $model) {
-                return $model->l_grade;
-            },
-            'contentOptions' => [
-                'class' => 'text-center',
-            ],
-            'visible' => ! $isAgent
-        ],
-
-        [
             'header' => 'Task Info',
             'value' => function (\common\models\Lead $model) {
                 return '<small style="font-size: 10px">' . Lead::getTaskInfo2($model->id) . '</small>';

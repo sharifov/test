@@ -409,20 +409,6 @@ $lists = new ListsAccess($user->id);
             'filter' => array_combine(range(0, 9), range(0, 9)),
             'contentOptions' => ['class' => 'text-center'],
         ],*/
-
-        [
-            // 'header' => 'Grade',
-            'attribute' => 'l_grade',
-            'value' => function (Lead $model) {
-                return $model->l_grade;
-            },
-            'filter' => array_combine(range(0, 9), range(0, 9)),
-            'contentOptions' => [
-                'class' => 'text-center'
-            ],
-            'visible' => !$isAgent
-        ],
-
         [
             // 'header' => 'Grade',
             'attribute' => 'l_answered',

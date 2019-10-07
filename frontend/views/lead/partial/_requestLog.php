@@ -75,9 +75,15 @@ $this->registerJs($js);
     <table class="table table-neutral">
         <tbody>
         <?php if (!empty($activity)) :
-            foreach ($activity as $item) : ?>
+            foreach ($activity as $item):
+
+                if (!isset($item->created)) {
+                    break;
+                }
+
+                ?>
                 <tr>
-                    <th class="text-bold"><?= $item->created ?></th>
+                    <th class="text-bold"><?= Html::encode($item->created)?></th>
                     <td><?= Html::a($item->referer, $item->referer) ?></td>
                 </tr>
             <?php endforeach;
