@@ -4,7 +4,6 @@ namespace console\controllers;
 
 use common\models\Lead;
 use common\models\Quote;
-use common\models\Reason;
 use yii\console\Controller;
 use Yii;
 use yii\db\Expression;
@@ -153,11 +152,6 @@ class MonitorFlowController extends Controller
                     echo $lead->id . ' - status: ' . $lead->status . PHP_EOL;
                 }
 
-                $reason = new Reason();
-                $reason->reason = 'No activity for more than 48 hours';
-                $reason->employee_id = null;
-                $reason->lead_id = $lead->id;
-                $reason->save();
             } else {
                 Yii::error('Lead: ' . $lead->id . ', ' . VarDumper::dumpAsString($lead->errors), 'console:MonitorFlowController:actionFollowUp:Lead:save');
                 if ($test) {

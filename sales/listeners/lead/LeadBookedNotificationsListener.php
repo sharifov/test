@@ -33,7 +33,7 @@ class LeadBookedNotificationsListener
     public function handle(LeadBookedEvent $event): void
     {
 
-        if (!$event->ownerId) {
+        if (!$event->newOwnerId) {
             Yii::warning(
                 'Not found ownerId on LeadBookedEvent Lead: ' . $event->lead->id,
                 'LeadBookedNotificationsListener:ownerIdNotFound'
@@ -42,7 +42,7 @@ class LeadBookedNotificationsListener
         }
 
         try {
-            $owner = $this->userRepository->find($event->ownerId);
+            $owner = $this->userRepository->find($event->newOwnerId);
         } catch (NotFoundException $e) {
             Yii::warning(
                 'Not found owner for book lead: ' . $event->lead->id,

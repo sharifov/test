@@ -2,7 +2,6 @@
 
 namespace sales\listeners\lead;
 
-use sales\helpers\user\UserFinder;
 use Yii;
 use common\models\Lead;
 use sales\events\lead\LeadProcessingEvent;
@@ -36,9 +35,9 @@ class LeadProcessingEventLogListener
                 $event->lead->id,
                 Lead::STATUS_PROCESSING,
                 $event->oldStatus,
-                $event->ownerId,
-                UserFinder::getCurrentUserId(),
-                $event->description,
+                $event->newOwnerId,
+                $event->creatorId,
+                $event->reason,
                 $event->created
             );
         } catch (\Throwable $e) {

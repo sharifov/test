@@ -43,18 +43,18 @@ class LeadFlowLogService
      * @param int $leadId
      * @param int $newStatus
      * @param int|null $oldStatus
-     * @param int|null $ownerId
-     * @param int|null $createdUserId
-     * @param string|null $description
+     * @param int|null $newOwnerId
+     * @param int|null $creatorId
+     * @param string|null $reason
      * @param string|null $created
      */
     public function log(int $leadId,
                         int $newStatus,
-                        ?int $oldStatus = null,
-                        ?int $ownerId = null,
-                        ?int $createdUserId = null,
-                        ?string $description = '',
-                        ?string $created = ''): void
+                        ?int $oldStatus,
+                        ?int $newOwnerId,
+                        ?int $creatorId,
+                        ?string $reason,
+                        ?string $created): void
     {
         if ($previous = $this->leadFlowRepository->getPrevious($leadId)) {
             $previous->end($created);
@@ -64,15 +64,15 @@ class LeadFlowLogService
             $leadId,
             $newStatus,
             $oldStatus,
-            $ownerId,
-            $createdUserId,
-            $description,
+            $newOwnerId,
+            $creatorId,
+            $reason,
             $created
         );
         $this->leadFlowRepository->save($current);
 
         if ($oldStatus !== $newStatus) {
-            if ($ownerId && $checkLists = $this->leadChecklistRepository->getAll($ownerId, $leadId)) {
+            if ($newOwnerId && $checkLists = $this->leadChecklistRepository->getAll($newOwnerId, $leadId)) {
                 foreach ($checkLists as $checkList) {
                     $leadFlowChecklist = LeadFlowChecklist::create($current->id, $checkList->lc_type_id, $checkList->lc_user_id);
                     try {

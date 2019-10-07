@@ -43,9 +43,9 @@ class LeadFlow extends \yii\db\ActiveRecord
      * @param int $leadId
      * @param int|null $newStatus
      * @param int|null $oldStatus
-     * @param int|null $ownerId
-     * @param int|null $createdUserId
-     * @param string|null $description
+     * @param int|null $newOwnerId
+     * @param int|null $creatorId
+     * @param string|null $reason
      * @param string|null $created
      * @return LeadFlow
      */
@@ -53,9 +53,9 @@ class LeadFlow extends \yii\db\ActiveRecord
         int $leadId,
         int $newStatus,
         ?int $oldStatus,
-        ?int $ownerId = null,
-        ?int $createdUserId = null,
-        ?string $description = null,
+        ?int $newOwnerId = null,
+        ?int $creatorId = null,
+        ?string $reason = null,
         ?string $created = null
     ): self
     {
@@ -63,9 +63,9 @@ class LeadFlow extends \yii\db\ActiveRecord
         $leadFlow->lead_id = $leadId;
         $leadFlow->status = $newStatus;
         $leadFlow->lf_from_status_id = $oldStatus;
-        $leadFlow->lf_owner_id = $ownerId;
-        $leadFlow->employee_id = $createdUserId;
-        $leadFlow->lf_description = $description;
+        $leadFlow->lf_owner_id = $newOwnerId;
+        $leadFlow->employee_id = $creatorId;
+        $leadFlow->lf_description = $reason;
         $leadFlow->created = $created ? date('Y-m-d H:i:s', strtotime($created)) : date('Y-m-d H:i:s');
         return $leadFlow;
     }

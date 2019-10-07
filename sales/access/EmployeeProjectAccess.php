@@ -20,7 +20,7 @@ class EmployeeProjectAccess
     ];
 
     /**
-     * @param int|null $userId
+     * @param int|Employee|null $user
      * @param array|null $roles | for this roles return all projects | if null, then return only self projects
      * @param array $excludeRoles
      * @param array $includeRoles
@@ -38,11 +38,11 @@ class EmployeeProjectAccess
      * $projects = EmployeeProjectAccess::getProjects($userId, null);
      * $projects = EmployeeProjectAccess::getProjects($userId, [], [Employee::ROLE_ADMIN], [Employee::ROLE_AGENT]);
      */
-    public static function getProjects(?int $userId = null, ?array $roles = [], array $excludeRoles = [], array $includeRoles = []): array
+    public static function getProjects($user = null, ?array $roles = [], array $excludeRoles = [], array $includeRoles = []): array
     {
-        $user = UserFinder::find($userId);
+        $user = UserFinder::getOrFind($user);
 
-        $hash = EmployeeAccessHelper::generateHash($userId, $roles, $excludeRoles, $includeRoles);
+        $hash = EmployeeAccessHelper::generateHash($user->id, $roles, $excludeRoles, $includeRoles);
         if (($projects = $user->getProjectAccess($hash)) !== null) {
             return $projects;
         }

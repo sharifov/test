@@ -147,12 +147,14 @@ class LeadController extends Controller
 
                    if(!$leadItem['l_answered']) {
                        $lead->status = Lead::STATUS_FOLLOW_UP;
-                       $lead->status_description = 'System AutoChange status to FOLLOW_UP ('.$leadItem['checked_cnt'] .'/'. $leadItem['all_cnt'] . ' tasks completed)';
 
 
-                       if ($lead->employee_id && !$lead->sendNotification('lead-status-follow-up', $lead->employee_id, null, $lead)) {
-                           Yii::warning('Not send Email notification to employee_id: ' . $lead->employee_id . ', lead: ' . $lead->id, 'Console:LeadController:UpdateByTasks:sendNotification');
-                       }
+
+                                                    //    status_description - Was deleted
+//                       $lead->status_description = 'System AutoChange status to FOLLOW_UP ('.$leadItem['checked_cnt'] .'/'. $leadItem['all_cnt'] . ' tasks completed)';
+//                       if ($lead->employee_id && !$lead->sendNotification('lead-status-follow-up', $lead->employee_id, null, $lead)) {
+//                           Yii::warning('Not send Email notification to employee_id: ' . $lead->employee_id . ', lead: ' . $lead->id, 'Console:LeadController:UpdateByTasks:sendNotification');
+//                       }
 
                    }
 
@@ -174,7 +176,9 @@ class LeadController extends Controller
                     if($leadItem['l_answered']) {
                         $lead->status = Lead::STATUS_SNOOZE;
                         $lead->snooze_for = date('Y-m-d', strtotime('+3 days'));
-                        $lead->status_description = 'System AutoChange status to SNOOZE ('.$leadItem['checked_cnt'] .'/'. $leadItem['all_cnt'] . ' tasks completed)';
+
+                                                // status_description-  Was deleted
+//                        $lead->status_description = 'System AutoChange status to SNOOZE ('.$leadItem['checked_cnt'] .'/'. $leadItem['all_cnt'] . ' tasks completed)';
                     }
                     /*else {
                         $lead->status = Lead::STATUS_FOLLOW_UP;

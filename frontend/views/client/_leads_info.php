@@ -4,7 +4,6 @@ use common\models\Employee;
 use yii\grid\GridView;
 use yii\helpers\Html;
 use common\models\Lead;
-use common\models\Reason;
 use common\models\LeadFlow;
 
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -39,17 +38,9 @@ use common\models\LeadFlow;
                 'attribute' => 'status',
                 'value' => function (Lead $model) {
                     $statusValue = $model->getStatusName(true);
-                    if ($model->isTrash()) {
-                        $reason = Reason::find()->where([
-                            'lead_id' => $model->id
-                        ])
-                            ->orderBy([
-                                'id' => SORT_DESC
-                            ])
-                            ->one();
-                        if ($reason) {
-                            $statusValue .= ' <span data-toggle="tooltip" data-placement="top"
-                                title="' . Html::encode($reason->reason) . '"><i class="fa fa-warning"></i></span>';
+                    if ($model->isTrash() && ($lastLeadFlow = $model->lastLeadFlow)) {
+                        if ($lastLeadFlow->status === $model->status && $lastLeadFlow->lf_description) {
+                            $statusValue .= ' <span data-toggle="tooltip" data-placement="top" title="' . Html::encode($lastLeadFlow->lf_description) . '"><i class="fa fa-warning"></i></span>';
                         }
                     }
                     $statusLog = LeadFlow::find()->where([

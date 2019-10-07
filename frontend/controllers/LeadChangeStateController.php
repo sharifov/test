@@ -2,6 +2,7 @@
 
 namespace frontend\controllers;
 
+use common\models\Employee;
 use common\models\Lead;
 use sales\forms\leadflow\FollowUpReasonForm;
 use sales\forms\leadflow\RejectReasonForm;
@@ -62,7 +63,9 @@ class LeadChangeStateController extends FController
         $form = new TakeOverReasonForm($lead);
         if ($form->load(Yii::$app->request->post()) && $form->validate()) {
             try {
-                $this->assignService->takeOver($form->leadId, Yii::$app->user->id, $form->description);
+                /** @var Employee $user */
+                $user = Yii::$app->user->identity;
+                $this->assignService->takeOver($lead, $user, Yii::$app->user->id, $form->description);
                 Yii::$app->getSession()->setFlash('success', 'Success');
             } catch (\DomainException $e) {
                 Yii::$app->errorHandler->logException($e);
@@ -104,7 +107,7 @@ class LeadChangeStateController extends FController
         $form = new FollowUpReasonForm($lead);
         if ($form->load(Yii::$app->request->post()) && $form->validate()) {
             try {
-                $this->stateService->followUp($form->leadId, $form->description);
+                $this->stateService->followUp($lead, null, Yii::$app->user->id, $form->description);
                 Yii::$app->getSession()->setFlash('success', 'Success');
             } catch (\DomainException $e) {
                 Yii::$app->errorHandler->logException($e);
@@ -145,9 +148,9 @@ class LeadChangeStateController extends FController
         if ($form->load(Yii::$app->request->post()) && $form->validate()) {
             try {
                 if ($form->isDuplicateReason()) {
-                    $this->stateService->duplicate($form->leadId, $form->originId, $form->description);
+                    $this->stateService->duplicate($lead, $lead->employee_id, $form->originId, Yii::$app->user->id, $form->description);
                 } else {
-                    $this->stateService->trash($form->leadId, $form->description);
+                    $this->stateService->trash($lead, $lead->employee_id, Yii::$app->user->id, $form->description);
                 }
                 Yii::$app->getSession()->setFlash('success', 'Success');
             } catch (\DomainException $e) {
@@ -188,7 +191,7 @@ class LeadChangeStateController extends FController
         $form = new SnoozeReasonForm($lead);
         if ($form->load(Yii::$app->request->post()) && $form->validate()) {
             try {
-                $this->stateService->snooze($form->leadId, $form->snoozeFor, $form->description);
+                $this->stateService->snooze($lead, $lead->employee_id, $form->snoozeFor, Yii::$app->user->id, $form->description);
                 Yii::$app->getSession()->setFlash('success', 'Success');
             } catch (\DomainException $e) {
                 Yii::$app->errorHandler->logException($e);
@@ -229,10 +232,10 @@ class LeadChangeStateController extends FController
         if ($form->load(Yii::$app->request->post()) && $form->validate()) {
             try {
                if ($form->isReturnToFollowUp()) {
-                   $this->stateService->followUp($form->leadId, $form->description);
+                   $this->stateService->followUp($lead, $lead->employee_id, Yii::$app->user->id, $form->description);
                    Yii::$app->getSession()->setFlash('success', 'Success');
                } elseif ($form->isReturnToProcessing()) {
-                   $this->assignService->processing($form->leadId, $form->userId, $form->description);
+                   $this->stateService->processing($lead, $form->userId, Yii::$app->user->id, $form->description);
                    Yii::$app->getSession()->setFlash('success', 'Success');
                } else {
                    Yii::$app->getSession()->setFlash('error', 'Error');
@@ -275,7 +278,7 @@ class LeadChangeStateController extends FController
         $form = new RejectReasonForm($lead);
         if ($form->load(Yii::$app->request->post()) && $form->validate()) {
             try {
-                $this->stateService->reject($form->leadId, $form->description);
+                $this->stateService->reject($lead, $lead->employee_id, Yii::$app->user->id, $form->description);
                 Yii::$app->getSession()->setFlash('success', 'Success');
             } catch (\DomainException $e) {
                 Yii::$app->errorHandler->logException($e);

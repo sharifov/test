@@ -7,6 +7,7 @@ use common\models\Lead;
 use sales\access\EmployeeAccess;
 use sales\repositories\lead\LeadRepository;
 use sales\repositories\user\UserRepository;
+use sales\services\ServiceFinder;
 use yii\web\ForbiddenHttpException;
 
 /**
@@ -14,53 +15,33 @@ use yii\web\ForbiddenHttpException;
  *
  * @property LeadRepository $leadRepository
  * @property UserRepository $userRepository
+ * @property ServiceFinder $serviceFinder
  */
 class LeadAssignService
 {
 
     private $leadRepository;
     private $userRepository;
+    private $serviceFinder;
 
-    public function __construct(LeadRepository $leadRepository, UserRepository $userRepository)
+    public function __construct(LeadRepository $leadRepository, UserRepository $userRepository, ServiceFinder $serviceFinder)
     {
         $this->leadRepository = $leadRepository;
         $this->userRepository = $userRepository;
+        $this->serviceFinder = $serviceFinder;
     }
 
     /**
-     * @param int $leadId
-     * @param int $userId
-     * @param string|null $description
-     */
-    public function processing(int $leadId, int $userId, ?string $description = ''): void
-    {
-        $lead = $this->leadRepository->find($leadId);
-        $user = $this->userRepository->find($userId);
-
-        EmployeeAccess::leadAccess($lead, $user);
-
-        if ($lead->isCompleted()) {
-            throw new \DomainException('Lead is completed!');
-        }
-
-        if (!$lead->isAvailableToProcessing()) {
-            throw new \DomainException('Lead is unavailable to "Processing" now!');
-        }
-
-        $lead->processing($user->id, $description);
-        $this->leadRepository->save($lead);
-    }
-
-    /**
-     * @param int $leadId
-     * @param int $userId
-     * @param string|null $description
+     * @param int|Lead $lead
+     * @param int|Employee $user
+     * @param int|null $creatorId
+     * @param string|null $reason
      * @throws ForbiddenHttpException
      */
-    public function take(int $leadId, int $userId, ?string $description = ''): void
+    public function take($lead, $user, ?int $creatorId = null, ?string $reason = ''): void
     {
-        $lead = $this->leadRepository->find($leadId);
-        $user = $this->userRepository->find($userId);
+        $lead = $this->serviceFinder->leadFind($lead);
+        $user = $this->serviceFinder->userFind($user);
 
         EmployeeAccess::leadAccess($lead, $user);
         self::checkAccess($lead, $user);
@@ -73,21 +54,22 @@ class LeadAssignService
             throw new \DomainException('Lead is unavailable to "Take" now!');
         }
 
-        $lead->processing($user->id, $description);
+        $lead->processing($user->id, $creatorId, $reason);
 
         $this->leadRepository->save($lead);
     }
 
     /**
-     * @param int $leadId
-     * @param int $userId
-     * @param string|null $description
+     * @param int|Lead $lead
+     * @param int|Employee $user
+     * @param int|null $creatorId
+     * @param string|null $reason
      * @throws ForbiddenHttpException
      */
-    public function takeOver(int $leadId, int $userId, ?string $description = ''): void
+    public function takeOver($lead, $user, ?int $creatorId = null, ?string $reason = ''): void
     {
-        $lead = $this->leadRepository->find($leadId);
-        $user = $this->userRepository->find($userId);
+        $lead = $this->serviceFinder->leadFind($lead);
+        $user = $this->serviceFinder->userFind($user);
 
         EmployeeAccess::leadAccess($lead, $user);
         self::checkAccess($lead, $user);
@@ -100,7 +82,7 @@ class LeadAssignService
             throw new \DomainException('Lead is unavailable to "Take Over" now!');
         }
 
-        $lead->processing($user->id, $description);
+        $lead->processing($user->id, $creatorId, $reason);
 
         $this->leadRepository->save($lead);
     }

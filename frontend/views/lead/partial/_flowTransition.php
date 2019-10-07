@@ -33,11 +33,11 @@ use common\models\LeadFlow;
                         <?=($nr + 1)?>
                     </td>
                     <td class="text-center">
-                        <?= $item->lf_from_status_id ? Lead::getStatusLabel($item->lf_from_status_id) : '-'?><br>
+                        <?= $item->lf_from_status_id ? Lead::getStatusLabelForLeadFlow($item->lf_from_status_id) : '-'?><br>
                         <?= $item->created ? Yii::$app->formatter->asDatetime(strtotime($item->created)) : '-' ?>
                     </td>
                     <td class="text-center">
-                        <?= Lead::getStatusLabel($item->status) ?><br>
+                        <?= Lead::getStatusLabelForLeadFlow($item->status) ?><br>
                         <?= $item->lf_end_dt ? Yii::$app->formatter->asDatetime(strtotime($item->lf_end_dt)) : '-' ?>
                     </td>
                     <td> <?= $item->owner ? '<span class="fa fa-user"></span> ' . $item->owner->username : '' ?></td>

@@ -8,31 +8,33 @@ use sales\access\ListsAccess;
 use yii\base\Model;
 
 /**
- * Class ReturnReasonForm
+ * Class ProcessingReasonForm
  *
  * @property int $leadId
  * @property int $leadGid
+ * @property int $originId
  * @property string $reason
  * @property string $other
  * @property string $description
- * @property string $return
  * @property int $userId
  */
-class ReturnReasonForm extends Model
+class ProcessingReasonForm extends Model
 {
 
+    public const REASON_NA = 'N/A';
+    public const REASON_NO_AVAILABLE = 'No Available';
+    public const REASON_VOICE_MAIL_SEND = 'Voice Mail Send';
+    public const REASON_WILL_CALL_BACK = 'Will call back';
+    public const REASON_WAITING_THE_OPTION = 'Waiting the option';
     public const REASON_OTHER = 'Other';
 
     public const REASON_LIST = [
+        self::REASON_NA => self::REASON_NA,
+        self::REASON_NO_AVAILABLE => self::REASON_NO_AVAILABLE,
+        self::REASON_VOICE_MAIL_SEND => self::REASON_VOICE_MAIL_SEND,
+        self::REASON_WILL_CALL_BACK => self::REASON_WILL_CALL_BACK,
+        self::REASON_WAITING_THE_OPTION => self::REASON_WAITING_THE_OPTION,
         self::REASON_OTHER => self::REASON_OTHER,
-    ];
-
-    public const RETURN_FOLLOW_UP = 'Follow Up';
-    public const RETURN_PROCESSING = 'Processing';
-
-    public const RETURN_LIST = [
-        self::RETURN_FOLLOW_UP => self::RETURN_FOLLOW_UP,
-        self::RETURN_PROCESSING => self::RETURN_PROCESSING,
     ];
 
     public $leadId;
@@ -40,7 +42,6 @@ class ReturnReasonForm extends Model
     public $reason;
     public $other;
     public $description;
-    public $return;
     public $userId;
 
     /**
@@ -68,17 +69,12 @@ class ReturnReasonForm extends Model
             ['reason', 'in', 'range' => array_keys(self::REASON_LIST)],
 
             ['other', 'required', 'when' => function () {
-                return $this->isOtherReason();
+                return $this->reason === self::REASON_OTHER;
             }],
             ['other', 'filter', 'filter' => 'trim', 'skipOnArray' => true],
             ['other', 'string'],
 
-            ['return', 'required'],
-            ['return', 'in', 'range' => array_keys(self::RETURN_LIST)],
-
-            ['userId', 'required', 'when' => function () {
-                return $this->isReturnToProcessing();
-            }, 'message' => 'Agent cannot be blank'],
+            ['userId', 'required'],
             ['userId', 'integer'],
             ['userId', 'exist', 'targetClass' => Employee::class, 'targetAttribute' => ['userId' => 'id']],
             ['userId', function () {
@@ -111,22 +107,6 @@ class ReturnReasonForm extends Model
     }
 
     /**
-     * @return bool
-     */
-    public function isReturnToProcessing(): bool
-    {
-        return $this->return === self::RETURN_PROCESSING;
-    }
-
-    /**
-     * @return bool
-     */
-    public function isReturnToFollowUp(): bool
-    {
-        return $this->return === self::RETURN_FOLLOW_UP;
-    }
-
-    /**
      * @param null $attributeNames
      * @param bool $clearErrors
      * @return bool
@@ -136,7 +116,7 @@ class ReturnReasonForm extends Model
         if (parent::validate($attributeNames, $clearErrors)) {
             if ($this->isOtherReason()) {
                 $this->description = $this->other;
-            } else {
+            }  else {
                 $this->description = self::REASON_LIST[$this->reason];
             }
             return true;

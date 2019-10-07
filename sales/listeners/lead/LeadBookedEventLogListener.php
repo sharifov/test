@@ -3,7 +3,6 @@
 namespace sales\listeners\lead;
 
 use sales\events\lead\LeadBookedEvent;
-use sales\helpers\user\UserFinder;
 use Yii;
 use common\models\Lead;
 use sales\services\lead\LeadFlowLogService;
@@ -36,9 +35,9 @@ class LeadBookedEventLogListener
                 $event->lead->id,
                 Lead::STATUS_BOOKED,
                 $event->oldStatus,
-                $event->ownerId,
-                UserFinder::getCurrentUserId(),
-                $event->description,
+                $event->newOwnerId,
+                $event->creatorId,
+                $event->reason,
                 $event->created
             );
         } catch (\Throwable $e) {

@@ -369,16 +369,9 @@ echo $this->render('_search_lead_form', [
             'value' => function (\common\models\Lead $model) {
                 $statusValue = $model->getStatusName(true);
 
-                if ($model->status === \common\models\Lead::STATUS_TRASH) {
-                    $reason = \common\models\Reason::find()->where([
-                        'lead_id' => $model->id
-                    ])
-                        ->orderBy([
-                        'id' => SORT_DESC
-                    ])
-                        ->one();
-                    if ($reason) {
-                        $statusValue .= ' <span data-toggle="tooltip" data-placement="top" title="' . Html::encode($reason->reason) . '"><i class="fa fa-warning"></i></span>';
+                if ($model->isTrash() && ($lastLeadFlow = $model->lastLeadFlow)) {
+                    if ($lastLeadFlow->status === $model->status && $lastLeadFlow->lf_description) {
+                        $statusValue .= ' <span data-toggle="tooltip" data-placement="top" title="' . Html::encode($lastLeadFlow->lf_description) . '"><i class="fa fa-warning"></i></span>';
                     }
                 }
 

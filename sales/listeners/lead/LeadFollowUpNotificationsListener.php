@@ -31,11 +31,11 @@ class LeadFollowUpNotificationsListener
      */
     public function handle(LeadFollowUpEvent $event): void
     {
-        if (!$event->oldOwnerId) {
+        if (!$event->newOwnerId || ($event->newOwnerId === $event->creatorId)) {
             return;
         }
         try {
-            $oldOwner = $this->userRepository->find($event->oldOwnerId);
+            $newOwner = $this->userRepository->find($event->newOwnerId);
         } catch (NotFoundException $e) {
             Yii::warning(
                 'Not found owner for follow up lead: ' . $event->lead->id,
@@ -52,15 +52,15 @@ Reason: {reason}
 {url}',
             [
                 'lead_id' => $event->lead->id,
-                'reason' => $event->description ?: '-',
+                'reason' => $event->reason ?: '-',
                 'url' => $host . '/lead/view/' . $event->lead->gid,
             ]);
 
-        if (Notifications::create($oldOwner->id, $subject, $body, Notifications::TYPE_INFO, true)) {
-            Notifications::socket($oldOwner->id, null, 'getNewNotification', [], true);
+        if (Notifications::create($newOwner->id, $subject, $body, Notifications::TYPE_INFO, true)) {
+            Notifications::socket($newOwner->id, null, 'getNewNotification', [], true);
         } else {
             Yii::warning(
-                'Not created Email notification to employee_id: ' . $oldOwner->id . ', lead: ' . $event->lead->id,
+                'Not created Email notification to employee_id: ' . $newOwner->id . ', lead: ' . $event->lead->id,
                 'LeadFollowUpNotificationsListener:sendNotification'
             );
         }

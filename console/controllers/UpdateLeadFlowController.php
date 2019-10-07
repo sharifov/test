@@ -11,7 +11,7 @@ use yii\console\Controller;
 class UpdateLeadFlowController extends Controller
 {
 
-    public function actionUpdate($limit = null, $offset = null)
+    public function actionUpdate($offset = null, $limit = null)
     {
 
         $limit = (int)$limit;
@@ -20,6 +20,7 @@ class UpdateLeadFlowController extends Controller
         $start = time();
 
         $query = Lead2::find()
+            ->andWhere(['id' => 271672])
             ->orderBy(['created' => SORT_ASC])
             ->with([
                 'leadLogs' => function ($query) {
@@ -42,7 +43,15 @@ class UpdateLeadFlowController extends Controller
 
         $count = (clone $query)->count();
 
-        echo 'All count: ' . $count . PHP_EOL;
+        echo 'All count in DB: ' . $count . PHP_EOL;
+
+        if (($limit + $offset) >= $count) {
+            $count -= $offset;
+        } else {
+            $count = $limit ?: ($count - $offset);
+        }
+
+        echo 'Remaining for update: ' . $count . PHP_EOL;
 
         $number = 0;
         $already = 0;

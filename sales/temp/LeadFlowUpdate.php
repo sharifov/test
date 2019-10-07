@@ -5,6 +5,7 @@ namespace sales\temp;
 use common\models\Lead2;
 use common\models\LeadFlow;
 use yii\helpers\Json;
+use yii\helpers\VarDumper;
 
 class LeadFlowUpdate
 {
@@ -22,6 +23,8 @@ class LeadFlowUpdate
         $reasons = $lead->reasons;
 
         $statuses = self::createStatuses($logs);
+
+//        VarDumper::dump($statuses);die;
 
         if ($debug) {
             echo 'Status before: ' . PHP_EOL;
@@ -225,6 +228,21 @@ class LeadFlowUpdate
                     }
                 }
             }
+        }
+
+
+        $previous = new StatusLog(null, null, null, null, null, null);
+        /** @var StatusLog $status */
+        foreach ($statuses as $status) {
+            if (!$status->oldStatus && !$status->newStatus) {
+                $status->oldStatus = $previous->newStatus;
+                $status->newStatus = $status->oldStatus;
+            }
+            if (!$status->oldOwner && !$status->newOwner) {
+                $status->oldOwner = $previous->newOwner;
+                $status->newOwner = $status->oldOwner;
+            }
+            $previous = $status;
         }
 
         return $statuses;

@@ -82,15 +82,17 @@ class LeadManageService
     /**
      * @param LeadCreateForm $form
      * @param int $employeeId
+     * @param int|null $creatorId
+     * @param string|null $reason
      * @return Lead
      * @throws \Exception
      */
-    public function create(LeadCreateForm $form, int $employeeId): Lead
+    public function create(LeadCreateForm $form, int $employeeId, ?int $creatorId = null, ?string $reason = ''): Lead
     {
 
-        $lead = $this->transaction->wrap(function () use ($form, $employeeId) {
+        $lead = $this->transaction->wrap(function () use ($form, $employeeId, $creatorId, $reason) {
 
-           return $this->createLead($form, $employeeId);
+           return $this->createLead($form, $employeeId, $creatorId, $reason);
 
         });
 
@@ -100,17 +102,19 @@ class LeadManageService
     /**
      * @param LeadCreateForm $form
      * @param int $employeeId
+     * @param int|null $creatorId
+     * @param string|null $reason
      * @return Lead
      * @throws \Exception
      */
-    public function createWithCase(LeadCreateForm $form, int $employeeId): Lead
+    public function createWithCase(LeadCreateForm $form, int $employeeId, ?int $creatorId = null, ?string $reason = ''): Lead
     {
 
-        $lead = $this->transaction->wrap(function () use ($form, $employeeId) {
+        $lead = $this->transaction->wrap(function () use ($form, $employeeId, $creatorId, $reason) {
 
             $case = $this->casesRepository->findFreeByGid($form->caseGid);
 
-            $lead = $this->createLead($form, $employeeId);
+            $lead = $this->createLead($form, $employeeId, $creatorId, $reason);
 
             $this->casesManageService->assignLead($case->cs_id, $lead->id);
 
@@ -124,9 +128,11 @@ class LeadManageService
     /**
      * @param LeadCreateForm $form
      * @param int $employeeId
+     * @param int|null $creatorId
+     * @param string|null $reason
      * @return Lead
      */
-    private function createLead(LeadCreateForm $form, int $employeeId): Lead
+    private function createLead(LeadCreateForm $form, int $employeeId, ?int $creatorId = null, ?string $reason = ''): Lead
     {
 
         $client = $this->clientManageService->getOrCreate($form->phones, $form->emails, $form->client);
@@ -149,7 +155,7 @@ class LeadManageService
             $form->delayedCharge
         );
 
-        $lead->processing($employeeId);
+        $lead->processing($employeeId, $creatorId, $reason);
 
         $this->clientManageService->addPhones($client, $form->phones);
 
@@ -176,7 +182,7 @@ class LeadManageService
         $lead->setRequestHash($hash);
 
         if ($origin = $this->leadRepository->getByRequestHash($lead->l_request_hash)) {
-            $lead->duplicate($origin->id);
+            $lead->duplicate($origin->id, $employeeId, $creatorId);
         }
 
         $lead->setTripType($this->calculateTripType($form->segments));

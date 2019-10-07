@@ -2,94 +2,188 @@
 
 namespace sales\services\lead;
 
+use common\models\Employee;
+use common\models\Lead;
+use sales\access\EmployeeAccess;
 use sales\repositories\lead\LeadRepository;
-use sales\repositories\user\UserRepository;
-use sales\services\TransactionManager;
+use sales\services\ServiceFinder;
+use yii\helpers\VarDumper;
 
 /**
  * Class LeadStateService
  *
+ * @property ServiceFinder $serviceFinder
  * @property LeadRepository $leadRepository
- * @property UserRepository $userRepository
- * @property TransactionManager $transactionManager
  */
 class LeadStateService
 {
+
+    private $serviceFinder;
     private $leadRepository;
-    private $userRepository;
-    private $transactionManager;
 
     /**
+     * @param ServiceFinder $serviceFinder
      * @param LeadRepository $leadRepository
-     * @param UserRepository $userRepository
-     * @param TransactionManager $transactionManager
      */
     public function __construct(
-        LeadRepository $leadRepository,
-        UserRepository $userRepository,
-        TransactionManager $transactionManager
+        ServiceFinder $serviceFinder,
+        LeadRepository $leadRepository
     )
     {
+        $this->serviceFinder = $serviceFinder;
         $this->leadRepository = $leadRepository;
-        $this->userRepository = $userRepository;
-        $this->transactionManager = $transactionManager;
     }
 
     /**
-     * @param int $leadId
-     * @param string|null $description
+     * @param int|Lead $lead
+     * @param int|Employee|null $newOwner
+     * @param int|null $creatorId
+     * @param string|null $reason
      */
-    public function followUp(int $leadId, ?string $description = ''): void
+    public function processing($lead, $newOwner, ?int $creatorId = null, ?string $reason = ''): void
     {
-        $lead = $this->leadRepository->find($leadId);
-        $lead->followUp($description);
+        $lead = $this->serviceFinder->leadFind($lead);
+        $newOwnerId = $this->newOwnerFind($newOwner, $lead);
+
+        if ($lead->isCompleted()) {
+            throw new \DomainException('Lead is completed!');
+        }
+
+        if (!$lead->isAvailableToProcessing()) {
+            throw new \DomainException('Lead is unavailable to "Processing" now!');
+        }
+
+        $lead->processing($newOwnerId, $creatorId, $reason);
         $this->leadRepository->save($lead);
     }
 
     /**
-     * @param int $leadId
-     * @param string|null $description
+     * @param int|Lead $lead
+     * @param int|Employee|null $newOwner
+     * @param int|null $creatorId
+     * @param string|null $reason
      */
-    public function trash(int $leadId, ?string $description = ''): void
+    public function booked($lead, $newOwner, ?int $creatorId = null, ?string $reason = ''): void
     {
-        $lead = $this->leadRepository->find($leadId);
-        $lead->trash($description);
+        $lead = $this->serviceFinder->leadFind($lead);
+        $newOwnerId = $this->newOwnerFind($newOwner, $lead);
+        $lead->booked($newOwnerId, $creatorId, $reason);
         $this->leadRepository->save($lead);
     }
 
     /**
-     * @param int $leadId
+     * @param int|Lead $lead
+     * @param int|Employee|null $newOwner
+     * @param int|null $creatorId
+     * @param string|null $reason
+     */
+    public function sold($lead, $newOwner, ?int $creatorId = null, ?string $reason = ''): void
+    {
+        $lead = $this->serviceFinder->leadFind($lead);
+        $newOwnerId = $this->newOwnerFind($newOwner, $lead);
+        $lead->sold($newOwnerId, $creatorId, $reason);
+        $this->leadRepository->save($lead);
+    }
+
+    /**
+     * @param int|Lead $lead
+     * @param int|Employee|null $newOwner
+     * @param int|null $creatorId
+     * @param string|null $reason
+     */
+    public function pending($lead, $newOwner, ?int $creatorId = null, ?string $reason = ''): void
+    {
+        $lead = $this->serviceFinder->leadFind($lead);
+        $newOwnerId = $this->newOwnerFind($newOwner, $lead);
+        $lead->pending($newOwnerId, $creatorId, $reason);
+        $this->leadRepository->save($lead);
+    }
+
+    /**
+     * @param int|Lead $lead
+     * @param int|Employee|null $newOwner
+     * @param int|null $creatorId
+     * @param string|null $reason
+     */
+    public function followUp($lead, $newOwner, ?int $creatorId = null, ?string $reason = ''): void
+    {
+        $lead = $this->serviceFinder->leadFind($lead);
+        $newOwnerId = $this->newOwnerFind($newOwner, $lead);
+        $lead->followUp($newOwnerId, $creatorId, $reason);
+        $this->leadRepository->save($lead);
+    }
+
+    /**
+     * @param int|Lead $lead
+     * @param int|Employee|null $newOwner
+     * @param int|null $creatorId
+     * @param string|null $reason
+     */
+    public function trash($lead, $newOwner, ?int $creatorId = null, ?string $reason = ''): void
+    {
+        $lead = $this->serviceFinder->leadFind($lead);
+        $newOwnerId = $this->newOwnerFind($newOwner, $lead);
+        $lead->trash($newOwnerId, $creatorId, $reason);
+        $this->leadRepository->save($lead);
+    }
+
+    /**
+     * @param int|Lead $lead
+     * @param int|Employee|null $newOwner
      * @param int $originId
-     * @param string|null $description
+     * @param int|null $creatorId
+     * @param string|null $reason
      */
-    public function duplicate(int $leadId, int $originId, ?string $description = ''): void
+    public function duplicate($lead, $newOwner, int $originId, ?int $creatorId = null, ?string $reason = ''): void
     {
-        $lead = $this->leadRepository->find($leadId);
-        $lead->duplicate($originId, $description);
+        $lead = $this->serviceFinder->leadFind($lead);
+        $newOwnerId = $this->newOwnerFind($newOwner, $lead);
+        $lead->duplicate($originId, $newOwnerId, $creatorId, $reason);
         $this->leadRepository->save($lead);
     }
 
     /**
-     * @param int $leadId
+     * @param int|Lead $lead
+     * @param int|Employee|null $newOwner
      * @param string|null $snoozeFor
-     * @param string|null $description
+     * @param int|null $creatorId
+     * @param string|null $reason
      */
-    public function snooze(int $leadId, ?string $snoozeFor = '', ?string $description = ''): void
+    public function snooze($lead, $newOwner, ?string $snoozeFor = '', ?int $creatorId = null, ?string $reason = ''): void
     {
-        $lead = $this->leadRepository->find($leadId);
-        $lead->snooze($snoozeFor, $description);
+        $lead = $this->serviceFinder->leadFind($lead);
+        $newOwnerId = $this->newOwnerFind($newOwner, $lead);
+        $lead->snooze($snoozeFor, $newOwnerId, $creatorId, $reason);
         $this->leadRepository->save($lead);
     }
 
     /**
-     * @param int $leadId
-     * @param string|null $description
+     * @param int|Lead $lead
+     * @param int|Employee|null $newOwner
+     * @param int|null $creatorId
+     * @param string|null $reason
      */
-    public function reject(int $leadId, ?string $description = ''): void
+    public function reject($lead, $newOwner, ?int $creatorId = null, ?string $reason = ''): void
     {
-        $lead = $this->leadRepository->find($leadId);
-        $lead->reject($description);
+        $lead = $this->serviceFinder->leadFind($lead);
+        $newOwnerId = $this->newOwnerFind($newOwner, $lead);
+        $lead->reject($newOwnerId, $creatorId, $reason);
         $this->leadRepository->save($lead);
+    }
+
+    /**
+     * @param $newOwner
+     * @param Lead $lead
+     * @return int|null
+     */
+    private function newOwnerFind($newOwner, Lead $lead): ?int
+    {
+        if ($newOwner !== null) {
+            $owner = $this->serviceFinder->userFind($newOwner);
+            EmployeeAccess::leadAccess($lead, $owner);
+            return $owner->id;
+        }
+        return $newOwner;
     }
 
 }

@@ -32,7 +32,7 @@ class LeadSnoozeNotificationsListener
      */
     public function handle(LeadSnoozeEvent $event): void
     {
-        if (!$event->ownerId) {
+        if (!$event->newOwnerId) {
             Yii::warning(
                 'Not found ownerId on LeadSnoozeEvent Lead: ' . $event->lead->id,
                 'LeadSnoozeNotificationsListener:ownerIdNotFound'
@@ -41,7 +41,7 @@ class LeadSnoozeNotificationsListener
         }
 
         try {
-            $owner = $this->userRepository->find($event->ownerId);
+            $owner = $this->userRepository->find($event->newOwnerId);
         } catch (NotFoundException $e) {
             Yii::warning(
                 'Not found owner for snooze lead: ' . $event->lead->id,
@@ -63,7 +63,7 @@ Reason: {reason}
             [
                 'lead_id' => $lead->id,
                 'datetime' => Yii::$app->formatter->asDatetime(strtotime($event->snoozeFor)),
-                'reason' => $event->description ?: '-',
+                'reason' => $event->reason ?: '-',
                 'url' => $host . '/lead/view/' . $lead->gid,
             ]);
 

@@ -385,11 +385,6 @@ $buttonClone = Html::a('<i class="fa fa-copy"></i> Clone lead', '#', [
     'data-url' => Url::to(['lead/clone', 'id' => $leadForm->getLead()->id])
 ]);
 
-/*$buttonHoldOn = Html::a('<i class="fa fa-share fa-rotate-180"></i></span> Hold On', '#', [
-    'class' => 'add-reason',
-    'data-url' => Url::to(['lead/change-state', 'queue' => 'processing', 'id' => $leadForm->getLead()->id]),
-]);*/
-
 $buttonFollowUp = Html::a('<i class="fa fa-share-square fa-rotate-180"></i> Follow Up', '#', [
     'class' => 'add-reason',
     'data-url' => Url::to(['lead-change-state/follow-up', 'gid' => $leadForm->getLead()->gid]),

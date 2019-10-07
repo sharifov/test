@@ -36,9 +36,9 @@ class LeadFollowUpEventLogListener
                 $event->lead->id,
                 Lead::STATUS_FOLLOW_UP,
                 $event->oldStatus,
-                null,
-                UserFinder::getCurrentUserId(),
-                $event->description,
+                $event->newOwnerId,
+                $event->creatorId,
+                $event->reason,
                 $event->created
             );
         } catch (\Throwable $e) {

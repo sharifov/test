@@ -1,5 +1,6 @@
 <?php
 
+use sales\access\ListsAccess;
 use yii\helpers\Html;
 use yii\widgets\Pjax;
 use kartik\grid\GridView;
@@ -22,7 +23,13 @@ $this->params['breadcrumbs'][] = $this->title;
     <h1><?= Html::encode($this->title) ?></h1>
 
     <?php Pjax::begin(); ?>
-    <?php echo $this->render('_search', ['model' => $searchModel, 'action' => 'export']); ?>
+
+    <?php echo $this->render('_search', [
+            'model' => $searchModel,
+        'action' => 'export',
+        'lists' => new ListsAccess()
+
+    ]); ?>
 
 
 
@@ -52,7 +59,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'header' => 'Trash/Reject reason.',
             'value' => function(\common\models\Lead $model) {
                 if ($model->status === \common\models\Lead::STATUS_REJECT || $model->status === \common\models\Lead::STATUS_TRASH) {
-                    return $model->getLastReason();
+                    return $model->getLastReasonFromLeadFlow();
                 }
                 return '';
             },
