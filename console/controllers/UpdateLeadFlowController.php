@@ -20,7 +20,6 @@ class UpdateLeadFlowController extends Controller
         $start = time();
 
         $query = Lead2::find()
-            ->andWhere(['id' => 271672])
             ->orderBy(['created' => SORT_ASC])
             ->with([
                 'leadLogs' => function ($query) {
