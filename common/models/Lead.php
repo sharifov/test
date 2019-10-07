@@ -108,7 +108,6 @@ use common\components\SearchService;
  * @property LeadLog[] $leadLogs
  * @property LeadFlightSegment[] $leadFlightSegments
  * @property LeadFlow[] $leadFlows
- * @property LeadFlow $lastLeadFlow
  * @property LeadPreferences $leadPreferences
  * @property LeadQcall $leadQcall
  * @property Client $client
@@ -1227,25 +1226,18 @@ class Lead extends ActiveRecord implements AggregateRoot
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getLastLeadFlow()
-    {
-        return $this->hasOne(LeadFlow::class, ['lead_id' => 'id'])->orderBy([LeadFlow::tableName() . '.created' => SORT_DESC]);
-    }
-
-    /**
-     * @return \yii\db\ActiveQuery
-     */
     public function getLeadFlowSold()
     {
         return $this->hasOne(LeadFlow::class, ['lead_id' => 'id'])->onCondition([LeadFlow::tableName() . '.status' => static::STATUS_SOLD]);
     }
 
+    // TODO: update LeadFlow SORT created -> id
     /**
      * @return \yii\db\ActiveQuery
      */
     public function getLastLeadFlow(): ActiveQuery
     {
-        return $this->hasOne(LeadFlow::class, ['lead_id' => 'id'])->orderBy([LeadFlow::tableName() . '.id' => SORT_DESC])->limit(1);
+        return $this->hasOne(LeadFlow::class, ['lead_id' => 'id'])->orderBy([LeadFlow::tableName() . '.created' => SORT_DESC])->limit(1);
     }
 
     /**
