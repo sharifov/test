@@ -87,7 +87,7 @@ class CasesStatus
      */
     public static function getName(?int $status): string
     {
-        return self::STATUS_LIST[$status] ?? ($status ? 'Undefined' : 'Null');
+        return self::STATUS_LIST[$status] ?? ($status ? 'Undefined' : '');
     }
 
     /**
@@ -96,7 +96,7 @@ class CasesStatus
      */
     public static function getClass(?int $status): string
     {
-        return self::STATUS_LIST_CLASS[$status] ?? 'll-default';
+        return self::STATUS_LIST_CLASS[$status] ?? 'll-trash';
     }
 
     /**
