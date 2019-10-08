@@ -78,7 +78,7 @@ class CallQueueJob extends BaseObject implements JobInterface
 
                 $call = Call::find()->where(['c_id' => $this->call_id])->limit(1)->one();
 
-                if ($call) {
+                if ($call && ($call->isStatusQueue() || $call->isStatusIvr())) {
 
                     $originalAgentId = $call->c_created_user_id;
 
@@ -92,7 +92,6 @@ class CallQueueJob extends BaseObject implements JobInterface
                             Yii::error(VarDumper::dumpAsString($call->errors), 'CallQueueJob:execute:Call:update');
                         }
                     }
-
 
                     if ((int) $call->c_dep_id === Department::DEPARTMENT_SALES) {
                         if ($call->c_from) {
