@@ -275,7 +275,7 @@ class QuoteController extends ApiBaseController
                         if ($lead) {
                             $project_name = $lead->project ? $lead->project->name : '';
                             $subject = 'Quote- ' . $model->uid . ' OPENED';
-                            $message = 'Your Quote (UID: ' . $model->uid . ") has been OPENED by client! \r\nProject: " . Html::encode($project_name) . "! \r\n lead: " . $host . '/lead/view/' . $lead->gid;
+                            $message = 'Your Quote (UID: ' . $model->uid . ") has been OPENED by client! \r\nProject: " . Html::encode($project_name) . "! \r\nlead: " . $host . '/lead/view/' . $lead->gid;
 
                             if ($lead->employee_id) {
                                 $isSend = Notifications::create($lead->employee_id, $subject, $message, Notifications::TYPE_INFO, true);
@@ -287,6 +287,21 @@ class QuoteController extends ApiBaseController
                         }
                     }
                     //exec(dirname(Yii::getAlias('@app')) . '/yii quote/send-opened-notification '.$uid.'  > /dev/null 2>&1 &');
+                }
+            } elseif ($model->isDeclined()) {
+                if ($lead = $model->lead) {
+                    $project_name = $lead->project ? $lead->project->name : '';
+                    $subject = 'Quote- ' . $model->uid . ' OPENED';
+                    $host = Yii::$app->params['url_address'];
+                    $message = 'Your Declined Quote (UID: ' . $model->uid . ") has been OPENED by client! \r\nProject: " . Html::encode($project_name) . "! \r\nlead: " . $host . '/lead/view/' . $lead->gid;
+
+                    if ($lead->employee_id) {
+                        $isSend = Notifications::create($lead->employee_id, $subject, $message, Notifications::TYPE_INFO, true);
+                        if ($isSend) {
+                            // Notifications::socket($lead->employee_id, null, 'getNewNotification', [], true);
+                            Notifications::sendSocket('getNewNotification', ['user_id' => $lead->employee_id]);
+                        }
+                    }
                 }
             }
 
