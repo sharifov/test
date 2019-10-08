@@ -4,17 +4,26 @@ namespace sales\services\cases;
 
 use common\models\CaseSale;
 use sales\repositories\cases\CasesSaleRepository;
+use yii\helpers\ArrayHelper;
 
 class CasesSaleService
 {
-	private const FORMAT_PASSENGERS_ATTRIBUTES = [
-		'meal' => ''
+	private const FORMAT_PASSENGERS_DATA = [
+		'meal' => 'formatByCountSegments',
+		'wheelchair' => 'formatByCountSegments',
+		'ff_numbers' => 'formatByAirline',
+		'ktn_numbers' => 'formatByAirline',
 	];
 
 	/**
 	 * @var CasesSaleRepository
 	 */
 	private $casesSaleRepository;
+
+	/**
+	 * @var array
+	 */
+	private $segments = [];
 
 	/**
 	 * CasesSaleService constructor.
@@ -26,86 +35,102 @@ class CasesSaleService
 	}
 
 	/**
-	 * @param int $caseId
-	 * @param int $caseSaleId
+	 * @param CaseSale $caseSale
 	 * @return array
 	 */
-	public function getSaleData(int $caseId, int $caseSaleId): array
+	public function prepareSaleData(CaseSale $caseSale): array
 	{
-		$caseSale = $this->casesSaleRepository->getSaleByPrimaryKeys($caseId, $caseSaleId);
-
-		$originalData = $this->casesSaleRepository->decodeSaleData((string)$caseSale->css_sale_data);
-		$updatedData = $this->casesSaleRepository->decodeSaleData((string)$caseSale->css_sale_data_updated);
+		$originalData = json_decode( (string)$caseSale->css_sale_data, true );
+		$updatedData = json_decode( (string)$caseSale->css_sale_data_updated, true );
 
 		$difference = $this->compareSaleData($originalData, $updatedData);
 
-		$this->preparePassengersData($difference, $updatedData);
+		$this->segments = $this->getSegments($caseSale);
 
-		print_r($difference);die;
+		$this->preparePassengersData($difference);
 
 		return $difference;
 	}
 
 	/**
-	 * @param array $saleData
-	 * @param array $updatedData
-	 *
-	 * @example {array} Request-Example:
-	 *
-	 * 	[
-	 * 		[1.1] => [
-	 * 			["birth_date"] => "1969-11-26",
-	 * 			["gender"] => "M",
-	 * 			["meal"] => [
-	 * 					[1] => "VGML",
-	 * 					[2] => "VGML",
-	 * 					[3] => "VGML"
-	 * 				]
-	 * 		],
-	 * 		[2.1] =>  [
-	 * 			["birth_date"] => "1994-03-27"
-	 * 		]
-	 * 	]
-	 *
+	 * @param CaseSale $caseSale
+	 * @return array
 	 */
-	private function preparePassengersData(array &$saleData, array $updatedData): void
+	public function getSegments(CaseSale $caseSale): array
 	{
-		if ($saleData['passengers']) {
-			foreach ($saleData['passengers'] as $key => $passenger) {
-				if ($passenger['meal']) {
-					$this->formatPassengersMeal($saleData['passengers'][$key], $updatedData['itinerary']);
-				}
+		$updatedData = json_decode((string)$caseSale->css_sale_data_updated, true);
 
-				unset($saleData['passengers'][$key]);
-				$saleData['passengers'][++$key . '.1'] = $passenger;
+		$segments = [];
+
+		foreach ($updatedData['itinerary'] as $itinerary) {
+			foreach ($itinerary['segments'] as $segment) {
+				$segments[] = $segment;
+			}
+		}
+
+		return $segments;
+	}
+
+	/**
+	 * @param array $saleDataDiff
+	 */
+	private function preparePassengersData(array &$saleDataDiff): void
+	{
+		if (isset($saleDataDiff['passengers'])) {
+			foreach ($saleDataDiff['passengers'] as $key => $passenger) {
+				$this->formatPassengersData($passenger);
+
+				unset($saleDataDiff['passengers'][$key]);
+				$saleDataDiff['passengers'][++$key . '.1'] = $passenger;
 			}
 		}
 	}
 
 	/**
-	 * @param array $passengerData
-	 * @param array $itinerary
+	 * @param array $passenger
 	 */
-	private function formatPassengersMeal(array &$passengerData, array $itinerary): void
+	private function formatPassengersData(array &$passenger): void
 	{
-		$meal = $passengerData['meal'];
-		if (!is_array($passengerData['meal'])) $passengerData['meal'] = [];
-		$passengerData['meal'] = 'asdads';
-//		foreach ($itinerary as $key => $item) {
-//			if ($item['segments']) {
-//				for($i = 1; $i <= count($item['segments']); $i++) {
-//					$passengerData['meal'][$i] = $meal;
-//				}
-//			}
-//		}
+		foreach ($passenger as $key => $value) {
+			if (key_exists($key, self::FORMAT_PASSENGERS_DATA) && method_exists($this, self::FORMAT_PASSENGERS_DATA[$key])) {
+				$this->{self::FORMAT_PASSENGERS_DATA[$key]}($passenger, $key);
+			}
+		}
+	}
+
+	/**
+	 * @param array $passenger
+	 * @param string $key
+	 */
+	private function formatByCountSegments(array &$passenger, string $key): void
+	{
+		$value = $passenger[$key];
+		$passenger[$key] = [];
+		foreach ($this->segments as $segmentKey => $segment) {
+			$passenger[$key][$segmentKey+1] = $value;
+		}
+	}
+
+	/**
+	 * @param array $passenger
+	 * @param string $key
+	 */
+	private function formatByAirline(array &$passenger, string $key): void
+	{
+		$value = $passenger[$key];
+		$passenger[$key] = [];
+		foreach ($this->segments as $segmentKey => $segment) {
+			$passenger[$key][$segment['airline']] = $value;
+		}
 	}
 
 	/**
 	 * @param array $oldData
 	 * @param array $newData
+	 * @param bool $checkForEmpty
 	 * @return array
 	 */
-	private function compareSaleData(array $oldData, array $newData): array
+	public function compareSaleData(array $oldData, array $newData, bool $checkForEmpty = true): array
 	{
 		$difference = [];
 		foreach ($newData as $firstKey => $firstValue) {
@@ -113,7 +138,7 @@ class CasesSaleService
 				if (!array_key_exists($firstKey, $oldData) || !is_array($oldData[$firstKey])) {
 					$difference[$firstKey] = '';
 				} else {
-					$newDiff = $this->compareSaleData($firstValue, $oldData[$firstKey]);
+					$newDiff = $this->compareSaleData($oldData[$firstKey], $firstValue);
 					if (!empty($newDiff)) {
 						$difference[$firstKey] = $newDiff;
 					}

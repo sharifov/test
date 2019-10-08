@@ -44,7 +44,8 @@ class CasesSaleForm extends Model
 	 * @var array
 	 */
 	private $validators = [
-		'ff_numbers' => 'onlyNumbers'
+		'ff_numbers' => 'onlyNumbers',
+		'ktn_numbers' => 'onlyNumbersAndLetters',
 	];
 
 	/**
@@ -69,7 +70,13 @@ class CasesSaleForm extends Model
 		return [
 			[['passengers'], 'each', 'rule' => ['filter', 'filter' => function ($value) {
 				foreach ($value as $key => $item) {
-					if (isset($this->filters[$key]) && is_callable($this->{$this->filters[$key]})) {
+
+					if (empty($value[$key])) {
+						$value[$key] = '';
+					}
+
+					if (isset($this->filters[$key]) && method_exists($this, $this->filters[$key])) {
+						$value[$key] = trim($value[$key]);
 						$this->{$this->filters[$key]}($value, $key);
 					}
 				}
@@ -78,7 +85,7 @@ class CasesSaleForm extends Model
 			[['passengers'], 'each', 'rule' =>[function () {
 				if (is_array($this->passengers)) {
 					foreach ($this->passengers as $key => $passenger) {
-						if (isset($this->validators[$key]) && is_callable($this->{$this->validators[$key]}) && !empty($passenger)) {
+						if (isset($this->validators[$key]) && method_exists($this, $this->validators[$key]) && !empty($passenger)) {
 							$this->{$this->validators[$key]}($key, $passenger);
 						}
 					}
@@ -110,7 +117,8 @@ class CasesSaleForm extends Model
 	 * @param $key
 	 * @throws \yii\base\InvalidConfigException
 	 */
-	private function birthDateFilter(&$value, $key) {
+	private function birthDateFilter(&$value, $key)
+	{
 		$value[$key] = Yii::$app->formatter->asDate(Html::encode($value[$key]), $this->dateFormat);
 	}
 
@@ -118,7 +126,8 @@ class CasesSaleForm extends Model
 	 * @param $attribute
 	 * @param $value
 	 */
-	private function onlyNumbers($attribute, $value) {
+	private function onlyNumbers($attribute, $value)
+	{
 		if (!preg_match('/^[0-9]+$/', Html::encode($value))) {
 			$this->addError($attribute, $this->getAttributeLabel($attribute) . ' should contain only numbers.');
 		}
@@ -128,7 +137,8 @@ class CasesSaleForm extends Model
 	 * @param $attribute
 	 * @param $value
 	 */
-	private function onlyNumbersAndLetters($attribute, $value) {
+	private function onlyNumbersAndLetters($attribute, $value)
+	{
 		if (!preg_match('/^[0-9A-Za-z]+$/', Html::encode($value))) {
 			$this->addError($attribute, $this->getAttributeLabel($attribute) . ' should contain only numbers and letters.');
 		}

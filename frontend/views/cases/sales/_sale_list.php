@@ -47,6 +47,7 @@ use yii\widgets\Pjax;
                     <td style="width: 10%">Pax</td>
                     <td>Sale Created Date</td>
                     <td>Added Date</td>
+                    <td>Sync with B/O</td>
                 </tr>
             </table>
 
@@ -65,6 +66,14 @@ use yii\widgets\Pjax;
                         <td style="width: 10%">'.Html::encode($item->css_sale_pax).'</td>
                         <td>'.Yii::$app->formatter->asDatetime($item->css_sale_created_dt).'</td>
                         <td>'.Yii::$app->formatter->asDatetime($item->css_created_dt).'</td>
+                        <td>'. Html::button('<i class="fa fa-refresh"></i> Sync with B/O', [
+							'class' => 'sync-with-bo btn btn-warning ' . $item->css_need_sync_bo,
+							'disabled' => !$item->css_need_sync_bo ? true : false,
+							'id' => 'sync-with-bo-' . $item->css_sale_id,
+                            'data-case-id' => $item->css_cs_id,
+                            'data-case-sale-id' => $item->css_sale_id
+                            ])
+					.'</td>
                     </tr></table>';
 
                     $content = '';

@@ -19,6 +19,7 @@ use common\models\search\SaleSearch;
 use common\models\Sms;
 use common\models\SmsTemplateType;
 use common\models\UserProjectParams;
+use common\widgets\Alert;
 use frontend\models\CaseCommunicationForm;
 use frontend\models\CasePreviewEmailForm;
 use frontend\models\CasePreviewSmsForm;
@@ -1168,9 +1169,13 @@ class CasesController extends FController
 
 		$out = [
 			'output' => '',
-			'message' => ''
+			'message' => '',
+			'caseId' => $caseId,
+			'caseSaleId' => $caseSaleId
 		];
 		try {
+
+			$user = Yii::$app->user->identity;
 
 			if (Yii::$app->request->isAjax &&
 				Yii::$app->request->isPost &&
@@ -1178,18 +1183,36 @@ class CasesController extends FController
 
 				$caseSale = $this->casesSaleRepository->getSaleByPrimaryKeys((int)$caseId, (int)$caseSaleId);
 
+				if (
+					!$caseSale->cssCs->isOwner($user->getId()) &&
+					!$user->isAdmin() &&
+					!$user->isSuperAdmin() &&
+					!$user->isExSuper() &&
+					!$user->isSupSuper()
+				) {
+					throw new \Exception('Access Denied');
+				}
+
 				$form = new CasesSaleForm();
 
 				if ($form->load(Yii::$app->request->post(), 'cssSaleData') && $form->validate()) {
 
-					$decodedSaleData = $this->casesSaleRepository->decodeSaleData((string)$caseSale->css_sale_data_updated);
+					$decodedSaleData = json_decode( (string)$caseSale->css_sale_data_updated, true );
+
+					$difference = $this->casesSaleService->compareSaleData($decodedSaleData, $form->validatedData, false);
+					if (!$difference) {
+						throw new \Exception('Cannot save because value has not been changed');
+					}
+
 					$this->casesSaleRepository->updateSaleData($caseSale, $decodedSaleData, $form->validatedData);
-					$this->casesSaleRepository->needSyncWithBO($caseSale);
+					$this->casesSaleRepository->updateSyncWithBOField($caseSale, true);
 
 					if (!$caseSale->save()) {
 						Yii::error(VarDumper::dumpAsString($caseSale->errors), 'CasesController:actionAjaxSaleListEditInfo:CaseSale:save');
 						throw new \Exception('Unsuccessful update');
 					}
+
+					$out['success_message'] = 'Sale: '. $caseSaleId .'; Now, you can sync data with b/o';
 				} else {
 					$out['message'] = implode("; ", $form->getErrorSummary(false));
 				}
@@ -1197,6 +1220,7 @@ class CasesController extends FController
 
 		} catch (\Throwable $exception) {
 			$out['message'] = $exception->getMessage();
+			Yii::error($exception->getMessage() . '; File: ' . $exception->getFile() . '; On Line: ' . $exception->getLine(), 'CasesController:actionAjaxSaleListEditInfo:catch:Throwable');
 		}
 
 		return $out;
@@ -1205,35 +1229,62 @@ class CasesController extends FController
 	/**
 	 * @param $caseId
 	 * @param $caseSaleId
+	 * @return array|mixed
 	 * @throws BadRequestHttpException
 	 */
 	public function actionAjaxSyncWithBackOffice($caseId, $caseSaleId)
 	{
-		try {
-			if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
-
-				Yii::$app->response->format = Response::FORMAT_JSON;
-
-				$updatedData = $this->casesSaleService->getSaleData((int)$caseId, (int)$caseSaleId);
-
-				$response = BackOffice::sendRequest2('', $updatedData);
-
-				if ($response->isOk) {
-					$result = $response->data;
-
-					print_r($result);die;
-//					if ($result && is_array($result)) {
-//						return $result;
-//					}
-				} else {
-					throw new Exception('BO request Error: ' . VarDumper::dumpAsString($response->content), 10);
-				}
-
-			}
-		} catch (\Exception $exception) {
-			throw new BadRequestHttpException($exception->getMessage());
+		if (!Yii::$app->request->isAjax && !Yii::$app->request->isPost) {
+			throw new BadRequestHttpException();
 		}
 
-		throw new BadRequestHttpException();
+		try {
+
+			Yii::$app->response->format = Response::FORMAT_JSON;
+
+			$user = Yii::$app->user->identity;
+
+			$out = [
+				'error' => 0,
+				'message' => ''
+			];
+
+			$caseSale = $this->casesSaleRepository->getSaleByPrimaryKeys((int)$caseId, (int)$caseSaleId);
+
+			if (
+				!$caseSale->cssCs->isOwner($user->getId()) &&
+				!$user->isAdmin() &&
+				!$user->isSuperAdmin() &&
+				!$user->isExSuper() &&
+				!$user->isSupSuper()
+			) {
+				throw new \Exception('Access Denied.');
+			} else if (!$caseSale->css_need_sync_bo) {
+				throw new \Exception('Data is already synchronized.');
+			}
+
+			$updatedData = $this->casesSaleService->prepareSaleData($caseSale);
+
+//			$response = BackOffice::sendRequest2('', $updatedData);
+
+//			if ($response->isOk) {
+			if (true) {
+				$this->casesSaleRepository->updateSyncWithBOField($caseSale, false);
+				$this->casesSaleRepository->updateOriginalSaleData($caseSale);
+				$this->casesSaleRepository->save($caseSale);
+
+				$out['message'] = 'Sale: '. $caseSaleId .' data was successfully synchronized with b/o.';
+			} else {
+				$out['error'] = 1;
+				$out['message'] = 'BO request Error: ' . VarDumper::dumpAsString($response->content);
+			}
+
+		} catch (\Exception $exception) {
+			$out['error'] = 1;
+			$out['message'] = $exception->getMessage();
+			Yii::error($exception->getMessage() . '; File: ' . $exception->getFile() . '; On Line: ' . $exception->getLine(), 'CaseController:actionAjaxSyncWithBackOffice:catch:Exception');
+		}
+
+		return $out;
 	}
 }

@@ -21,15 +21,6 @@ class CasesSaleRepository
 	}
 
 	/**
-	 * @param string $jsonCaseSaleData
-	 * @return array
-	 */
-	public function decodeSaleData(string $jsonCaseSaleData): array
-	{
-		return json_decode($jsonCaseSaleData, true);
-	}
-
-	/**
 	 * @param CaseSale $caseSale
 	 * @param array $oldCaseSaleData
 	 * @param array $newCaseSaleData
@@ -40,8 +31,37 @@ class CasesSaleRepository
 		$caseSale->css_sale_data_updated = json_encode( array_replace_recursive($oldCaseSaleData, $newCaseSaleData) );
 	}
 
-	public function needSyncWithBO(CaseSale $caseSale): void
+	/**
+	 * @param CaseSale $caseSale
+	 * @param bool $value
+	 */
+	public function updateSyncWithBOField(CaseSale $caseSale, bool $value): void
 	{
-		$caseSale->css_need_sync_bo = 1;
+		$caseSale->css_need_sync_bo = $value ? 1 : 0;
+	}
+
+	/**
+	 * @param CaseSale $caseSale
+	 * @param string $newData
+	 */
+	public function updateOriginalSaleData(CaseSale $caseSale, string $newData = ''): void
+	{
+		if (!empty($newData)) {
+			$caseSale->css_sale_data = $newData;
+		} else {
+			$caseSale->css_sale_data = $caseSale->css_sale_data_updated;
+		}
+	}
+
+	/**
+	 * @param CaseSale $caseSale
+	 * @return CaseSale
+	 */
+	public function save(CaseSale $caseSale): CaseSale
+	{
+		if (!$caseSale->save()) {
+			throw new \RuntimeException('Saving error');
+		}
+		return $caseSale;
 	}
 }

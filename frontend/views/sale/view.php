@@ -2,6 +2,7 @@
 
 use common\models\CaseSale;
 use kartik\editable\Editable;
+use kartik\popover\PopoverX;
 use yii\helpers\Html;
 
 /* @var $this yii\web\View */
@@ -23,9 +24,19 @@ $title = 'Sale ID: ' . $data['saleId'] . ', BookId: ' . $data['bookingId'];
 $js = <<<JS
 function activateButtonSync(data) {
     if (data.output === '' && data.message === '') {
-        $('#sync-with-bo').removeClass('hidden');
+        $('#sync-with-bo-'+data.caseSaleId).removeAttr('disabled');
     }else {
-        $('#sync-with-bo').addClass('hidden');
+        $('#sync-with-bo-'+data.caseSaleId).attr('disabled', true);
+    }
+    
+    if (data.success_message !== '') {
+        new PNotify({
+            title: 'Success',
+            type: 'success',
+            text: data.success_message,
+            hide: true,
+            delay: 2000
+        });
     }
 }
 JS;
@@ -112,24 +123,26 @@ $this->registerJs($js);
             <?php endif;?>
 
             <h2>Notes</h2>
-            <?php if(isset($data['notes']) && $data['notes']): ?>
-                <table class="table table-bordered table-hover">
-                    <tr>
-                        <th>Created</th>
-                        <th>Message</th>
-                        <th>Agent</th>
-                        <th>Team</th>
-                    </tr>
-                    <?php foreach($data['notes'] as $note): ?>
+            <div style="width: 100%;overflow-x: auto;">
+                <?php if(isset($data['notes']) && $data['notes']): ?>
+                    <table class="table table-bordered table-hover">
                         <tr>
-                            <td><?=Yii::$app->formatter->asDatetime(strtotime($note['created']))?></td>
-                            <td><?=Html::encode($note['message'])?></td>
-                            <td><?=Html::encode($note['agent'])?></td>
-                            <td><?=Html::encode($note['team'])?></td>
+                            <th>Created</th>
+                            <th>Message</th>
+                            <th>Agent</th>
+                            <th>Team</th>
                         </tr>
-                    <?php endforeach;?>
-                </table>
-            <?php endif;?>
+                        <?php foreach($data['notes'] as $note): ?>
+                            <tr>
+                                <td><?=Yii::$app->formatter->asDatetime(strtotime($note['created']))?></td>
+                                <td><?=Html::encode($note['message'])?></td>
+                                <td><?=Html::encode($note['agent'])?></td>
+                                <td><?=Html::encode($note['team'])?></td>
+                            </tr>
+                        <?php endforeach;?>
+                    </table>
+                <?php endif;?>
+            </div>
 
         </div>
 
@@ -262,7 +275,7 @@ $this->registerJs($js);
 									'formOptions' => [ 'action' => [\yii\helpers\Url::to(['/cases/ajax-sale-list-edit-info/', 'caseId' => $csId, 'caseSaleId' => $data['saleId']])] ],
 									'options' => [
 										'convertFormat'=>true,
-										'pluginOptions'=>['format'=>'php:d M Y']
+										'pluginOptions'=>['format'=>'php:d M Y', 'autoclose'=>true]
 									],
 									'pluginEvents' => [
 										"editableSuccess"=>"function (event, val, form, data) {
@@ -306,7 +319,8 @@ $this->registerJs($js);
 										"editableSuccess"=>"function (event, val, form, data) {
 										    activateButtonSync(data);
 										}",
-									]
+									],
+									'placement' => PopoverX::ALIGN_TOP_LEFT
 								]);
 								?>
                             </td>
@@ -325,7 +339,8 @@ $this->registerJs($js);
 										"editableSuccess"=>"function (event, val, form, data) {
 										    activateButtonSync(data);
 										}",
-									]
+									],
+									'placement' => PopoverX::ALIGN_TOP_LEFT
 								]);
 								?>
                             </td>
@@ -342,7 +357,8 @@ $this->registerJs($js);
 										"editableSuccess"=>"function (event, val, form, data) {
 										    activateButtonSync(data);
 										}",
-									]
+									],
+                                    'placement' => PopoverX::ALIGN_TOP_LEFT
 								]);
 								?>
                             </td>
@@ -359,7 +375,8 @@ $this->registerJs($js);
 										"editableSuccess"=>"function (event, val, form, data) {
 										    activateButtonSync(data);
 										}",
-									]
+									],
+                                    'placement' => PopoverX::ALIGN_LEFT
 								]);
 								?>
                             </td>
@@ -441,30 +458,70 @@ $this->registerJs($js);
     </div>
 
     <div class="row" style="margin-top: 20px;">
-        <div class="col-md-12">
-            <?php
-                $hiddenClass = $caseSaleModel->css_need_sync_bo ?: 'hidden';
-            ?>
-            <?= Html::button('Sync with B/O', ['class' => 'btn btn-warning ' . $hiddenClass, 'id' => 'sync-with-bo', 'onclick' => '( function (event, obj) {
-                $(obj).attr("disabled", true);
-                $.ajax({
-                    type: "post",
-                    url: "'. \yii\helpers\Url::to(['/cases/ajax-sync-with-back-office/', 'caseId' => $csId, 'caseSaleId' => $data['saleId']]) .'",
-                    data: {},
-                    dataType: "json",
-                    success: function (response) {
-                        console.log(response);
-                        $(obj).removeAttr("disabled");
-                    },
-                    error: function (text) {
-                        console.log(text);
-                        $(obj).removeAttr("disabled");
-                    } 
-                });
-            })(event, this)']); ?>
+        <div class="col-md-1">
+            <div class="spinner-border" role="status">
+                <span class="sr-only">Loading...</span>
+            </div>
+<!--            --><?//=
+//            Html::button('<i class="fa fa-refresh"></i> Sync with B/O', [
+//                'class' => 'btn btn-warning '. $caseSaleModel->css_need_sync_bo,
+//                'disabled' => !$caseSaleModel->css_need_sync_bo ? true : false,
+//                'id' => 'sync-with-bo']);
+//            ?>
         </div>
+        <div class="col-md-11" id="sale-info-message"></div>
         <?php
-            //\yii\helpers\VarDumper::dump($data, 10, true);
+            $url = \yii\helpers\Url::to(['/cases/ajax-sync-with-back-office/']);
+            $js = <<<JS
+                    $(".sync-with-bo").on('click', function (e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        var obj = $(this),
+                            caseId = obj.attr('data-case-id'),
+                            caseSaleId = obj.attr('data-case-sale-id');
+                            
+                        console.log("$url/" + caseId + '/' + caseSaleId);
+                        
+                        $.ajax({
+                            type: "post",
+                            url: "$url/" + caseId + '/' + caseSaleId,
+                            data: {},
+                            dataType: "json",
+                            beforeSend: function () {
+                                obj.attr('disabled', true).find('i').toggleClass('fa-spin');
+                            },
+                            success: function (json) {
+                                var title = !json.error ? 'Updated' : 'Error',
+                                    type = !json.error ? 'success' : 'error',
+                                    text = json.message;
+                                
+                                new PNotify({
+                                    title: title,
+                                    type: type,
+                                    text: text,
+                                    hide: true
+                                });
+                                
+                                if (json.error) {
+                                    obj.removeAttr('disabled');    
+                                } else {
+                                    obj.attr('disabled', true);
+                                }
+                                obj.find('i').toggleClass('fa-spin');
+                            },
+                            error: function (text) {
+                                new PNotify({
+                                    title: "Error",
+                                    type: "error",
+                                    text: "Internal Server Error. Try again letter.",
+                                    hide: true
+                                });
+                                obj.removeAttr('disabled').find('i').toggleClass('fa-spin');
+                            }
+                        });
+                    });
+JS;
+            $this->registerJs($js);
         ?>
     </div>
 </div>
