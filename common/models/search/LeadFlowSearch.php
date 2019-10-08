@@ -24,7 +24,7 @@ class LeadFlowSearch extends LeadFlow
     public function rules()
     {
         return [
-            [['id', 'employee_id', 'lead_id', 'status', 'supervision_id', 'lf_from_status_id', 'lf_out_calls'], 'integer'],
+            [['id', 'employee_id', 'lead_id', 'status', 'supervision_id', 'lf_from_status_id', 'lf_out_calls', 'lf_owner_id'], 'integer'],
             [['created', 'statuses', 'lf_end_dt', 'createdRangeTime'], 'safe'],
         ];
     }
@@ -47,7 +47,7 @@ class LeadFlowSearch extends LeadFlow
      */
     public function search($params)
     {
-        $query = LeadFlow::find()->with('employee', 'lead');
+        $query = LeadFlow::find()->with('employee', 'lead', 'owner');
 
         // add conditions that should always apply here
 
@@ -104,6 +104,7 @@ class LeadFlowSearch extends LeadFlow
         $query->andFilterWhere([
             'id' => $this->id,
             'employee_id' => $this->employee_id,
+            'lf_owner_id' => $this->lf_owner_id,
             'lead_id' => $this->lead_id,
             'status' => $this->status,
             'lf_from_status_id' => $this->lf_from_status_id,
