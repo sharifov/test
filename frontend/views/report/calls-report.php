@@ -9,7 +9,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
 /**
  * @var $this yii\web\View
- * @var $searchModel common\models\search\CallSearch;
+ * @var $searchModel common\models\search\EmployeeSearch;
  * @var $dataProvider yii\data\ActiveDataProvider
  */
 $list = new ListsAccess(Yii::$app->user->id);
@@ -36,8 +36,8 @@ $list = new ListsAccess(Yii::$app->user->id);
                             } else {
                                 $searchTpl = '_search_agents';
                             }
-                            */ ?><!--
-            --><? /*= $this->render($searchTpl, ['model' => $searchModel]); */ ?>
+                            */ ?>
+            <?= $this->render('_search_calls', ['model' => $searchModel]);  ?>
             </div>
         </div>
     </div>
@@ -55,56 +55,56 @@ $list = new ListsAccess(Yii::$app->user->id);
         ],
         [
             'label' => 'Outgoing Calls Duration',
-            'value' => function(\common\models\Employee $model){
-                $data = $model->getCallsCount($model->id, \common\models\Call::CALL_TYPE_OUT, null, null);
+            'value' => function(\common\models\Employee $model) use ($searchModel){
+                $data = $model->getCallsCount($model->id, \common\models\Call::CALL_TYPE_OUT, null, null, $searchModel);
                 return $data[0]['duration'];
             },
             'format' => 'raw'
         ],
         [
             'label' => 'Outgoing Calls',
-            'value' => function(\common\models\Employee $model){
-                $data = $model->getCallsCount($model->id, \common\models\Call::CALL_TYPE_OUT, null, null);
+            'value' => function(\common\models\Employee $model) use ($searchModel){
+                $data = $model->getCallsCount($model->id, \common\models\Call::CALL_TYPE_OUT, null, null, $searchModel);
                 return $data[0]['cnt'];
             },
             'format' => 'raw'
         ],
         [
             'label' => 'Outgoing Calls Completed',
-            'value' => function(\common\models\Employee $model){
-                $data = $model->getCallsCount($model->id, \common\models\Call::CALL_TYPE_OUT, \common\models\Call::TW_STATUS_COMPLETED, null);
+            'value' => function(\common\models\Employee $model) use ($searchModel){
+                $data = $model->getCallsCount($model->id, \common\models\Call::CALL_TYPE_OUT, \common\models\Call::TW_STATUS_COMPLETED, null, $searchModel);
                 return $data[0]['cnt'];
             },
             'format' => 'raw'
         ],
         [
             'label' => 'Outgoing Calls No-Answer',
-            'value' => function(\common\models\Employee $model){
-                $data = $model->getCallsCount($model->id, \common\models\Call::CALL_TYPE_OUT, \common\models\Call::TW_STATUS_NO_ANSWER, null);
+            'value' => function(\common\models\Employee $model) use ($searchModel){
+                $data = $model->getCallsCount($model->id, \common\models\Call::CALL_TYPE_OUT, \common\models\Call::TW_STATUS_NO_ANSWER, null, $searchModel);
                 return $data[0]['cnt'];
             },
             'format' => 'raw'
         ],
         [
             'label' => 'Outgoing Calls Canceled',
-            'value' => function(\common\models\Employee $model){
-                $data = $model->getCallsCount($model->id, \common\models\Call::CALL_TYPE_OUT, \common\models\Call::TW_STATUS_CANCELED, null);
+            'value' => function(\common\models\Employee $model) use ($searchModel){
+                $data = $model->getCallsCount($model->id, \common\models\Call::CALL_TYPE_OUT, \common\models\Call::TW_STATUS_CANCELED, null, $searchModel);
                 return $data[0]['cnt'];
             },
             'format' => 'raw'
         ],
         [
             'label' => 'Incoming Calls Duration',
-            'value' => function(\common\models\Employee $model){
-                $data = $model->getCallsCount($model->id, \common\models\Call::CALL_TYPE_IN, null, null);
+            'value' => function(\common\models\Employee $model) use ($searchModel){
+                $data = $model->getCallsCount($model->id, \common\models\Call::CALL_TYPE_IN, null, null, $searchModel);
                 return $data[0]['duration'];
             },
             'format' => 'raw'
         ],
         [
             'label' => 'Incoming Calls',
-            'value' => function(\common\models\Employee $model){
-                $data = $model->getCallsCount($model->id, \common\models\Call::CALL_TYPE_IN, null, null);
+            'value' => function(\common\models\Employee $model) use ($searchModel){
+                $data = $model->getCallsCount($model->id, \common\models\Call::CALL_TYPE_IN, null, null, $searchModel);
                 return $data[0]['cnt'];
             },
             'format' => 'raw'
@@ -135,16 +135,16 @@ $list = new ListsAccess(Yii::$app->user->id);
         ],*/
         [
             'label' => 'Incoming Direct line',
-            'value' => function(\common\models\Employee $model){
-                $data = $model->getCallsCount($model->id, \common\models\Call::CALL_TYPE_IN, null, \common\models\Call::SOURCE_DIRECT_CALL);
+            'value' => function(\common\models\Employee $model) use ($searchModel){
+                $data = $model->getCallsCount($model->id, \common\models\Call::CALL_TYPE_IN, null, \common\models\Call::SOURCE_DIRECT_CALL, $searchModel);
                 return $data[0]['cnt'];
             },
             'format' => 'raw'
         ],
         [
             'label' => 'Incoming General line',
-            'value' => function(\common\models\Employee $model){
-                $data = $model->getCallsCount($model->id, \common\models\Call::CALL_TYPE_IN, null, \common\models\Call::SOURCE_GENERAL_LINE);
+            'value' => function(\common\models\Employee $model) use ($searchModel){
+                $data = $model->getCallsCount($model->id, \common\models\Call::CALL_TYPE_IN, null, \common\models\Call::SOURCE_GENERAL_LINE, $searchModel);
                 return $data[0]['cnt'];
             },
             'format' => 'raw'
@@ -159,7 +159,7 @@ $list = new ListsAccess(Yii::$app->user->id);
         //'deleteAfterSave' => false, // this will delete the saved web file after it is streamed to browser,
         //'batchSize' => 10,
         'target' => \kartik\export\ExportMenu::TARGET_BLANK,
-        'linkPath' => '/assets/',
+        //'linkPath' => '/assets/',
         //'folder' => '@webroot/assets', // this is default save folder on server
         'dropdownOptions' => [
             'label' => 'Full Export'

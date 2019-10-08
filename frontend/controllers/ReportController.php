@@ -108,6 +108,7 @@ class ReportController extends FController
     {
         $searchModel = new EmployeeSearch();
         $params = Yii::$app->request->queryParams;
+        //var_dump($params); die();
 
         /** @var Employee $user */
         $user = Yii::$app->user->identity;

@@ -5,6 +5,7 @@ namespace common\models;
 use borales\extensions\phoneInput\PhoneInput;
 use borales\extensions\phoneInput\PhoneInputValidator;
 use common\components\BackOffice;
+use common\models\search\EmployeeSearch;
 use sales\access\EmployeeGroupAccess;
 use Yii;
 use yii\base\NotSupportedException;
@@ -1366,7 +1367,15 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         return $count;
     }
 
-    public function getCallsCount($employeeId, $callType, $status, $source)
+    /**
+     * @param $employeeId
+     * @param $callType
+     * @param $status
+     * @param $source
+     * @param $searchModel EmployeeSearch;
+     * @return array|Call[]
+     */
+    public function getCallsCount($employeeId, $callType, $status, $source, $searchModel)
     {
         $query = Call::find();
         $query->select("COUNT(*) AS cnt, SUM(c_call_duration) AS duration")
@@ -1390,7 +1399,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
             ]);
         }
 
-        $count= $query->asArray()->all();
+        $count = $query->asArray()->all();
 
         return $count;
     }
