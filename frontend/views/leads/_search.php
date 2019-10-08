@@ -135,7 +135,7 @@ use frontend\extensions\DatePicker;
         <div class="col-md-3">
             <div class="row">
                 <div class="col-md-6"><?php echo $form->field($model, 'project_id')->dropDownList($lists->getProjects(), ['prompt' => '-']) ?></div>
-                <div class="col-md-6"><?php echo $form->field($model, 'source_id')->dropDownList($lists->getSources(), ['prompt' => '-']) ?></div>
+                <div class="col-md-6"><?php echo $form->field($model, 'source_id')->dropDownList($lists->getSources(true), ['prompt' => '-']) ?></div>
             </div>
             <div class="row">
                 <div class="col-md-12">

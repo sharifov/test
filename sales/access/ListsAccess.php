@@ -58,9 +58,10 @@ class ListsAccess
     }
 
     /**
+     * @param bool $showHidden
      * @return array
      */
-    public function getSources(): array
+    public function getSources($showHidden = false): array
     {
         if ($this->sources !== null) {
             return $this->sources;
@@ -72,7 +73,7 @@ class ListsAccess
             foreach (Project::find()->andWhere(['id' => $projectsIds])->orderBy('name')->with('sources')->all() as $project) {
                 $map = [];
                 foreach ($project->sources as $source) {
-                    if ($source->hidden) {
+                    if ($showHidden === false && $source->hidden) {
                         continue;
                     }
                     $map[$source->id] = $source->name;
