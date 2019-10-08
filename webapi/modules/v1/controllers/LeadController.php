@@ -1101,9 +1101,9 @@ class LeadController extends ApiBaseController
                         $lead->sold($lead->employee_id, null);
                     } elseif (!$isReject && $lead->isReject()) {
                         $lead->status = $lastStatus;
-                        $lead->reject($lead->employee_id, null);
-                    } else {
-                        Yii::error('Undefined Status', 'API:LeadSoldUpdate:Status');
+                        $lead->reject($lead->employee_id, null, 'BO rejected');
+                    } elseif (!isset($leadAttributes['status'])) {
+                        Yii::warning('Lead: ' . $lead->id . ' Void Status', 'API:LeadSoldUpdate:Status');
                     }
 
                     $this->leadRepository->save($lead);
