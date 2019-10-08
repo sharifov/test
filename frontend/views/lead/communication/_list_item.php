@@ -91,8 +91,9 @@ use \common\models\Call;
                                         <?=$callItem->getStatusIcon()?>  <?=$callItem->getStatusName()?>
                                     </td>
                                     <td class="text-center" style="width: 70px">
-<!--                                        <div>--><?//=$callItem->c_call_duration > 0 ? 'duration: ' . Yii::$app->formatter->asDuration($callItem->c_call_duration) : ''?><!--</div>-->
+                                        <?php if ($callItem->c_call_duration):?>
                                         <span class="badge badge-warning" title="Duration: <?=Yii::$app->formatter->asDuration($callItem->c_call_duration)?>"><?=gmdate('i:s', $callItem->c_call_duration)?></span>
+                                        <?php endif;?>
                                     </td>
                                     <td>
                                         <?php if ($callItem->c_recording_url):?>
