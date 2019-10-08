@@ -1081,20 +1081,26 @@ class LeadController extends ApiBaseController
         ];
 
         try {
+
             $isSold = $lead->isSold();
             $isReject = $lead->isReject();
+            $lastStatus = $lead->status;
+
             $lead->attributes = $leadAttributes;
+
             if (!$lead->validate()) {
                 $response['errors'][] = $lead->getErrors();
             } else {
 
-                $result = $this->transactionManager->wrap(function() use ($lead, $leadAttributes, $isSold, $isReject) {
+                $result = $this->transactionManager->wrap(function() use ($lead, $leadAttributes, $isSold, $isReject, $lastStatus) {
 
                     $response = [];
 
                     if (!$isSold && $lead->isSold()) {
+                        $lead->status = $lastStatus;
                         $lead->sold($lead->employee_id, null);
                     } elseif (!$isReject && $lead->isReject()) {
+                        $lead->status = $lastStatus;
                         $lead->reject($lead->employee_id, null);
                     } else {
                         Yii::error('Undefined Status', 'API:LeadSoldUpdate:Status');
@@ -1141,7 +1147,7 @@ class LeadController extends ApiBaseController
 
             }
         } catch (\Throwable $e) {
-            Yii::error($e->getTraceAsString(), 'API:Quote:create:try');
+            Yii::error($e->getTraceAsString(), 'API:LeadSoldUpdate:try');
             if (Yii::$app->request->get('debug')) {
                 $message = ($e->getTraceAsString());
             } else {
