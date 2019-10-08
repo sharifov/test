@@ -12,6 +12,7 @@ use common\models\Notifications;
 use common\models\Sources;
 use sales\repositories\lead\LeadRepository;
 use sales\services\lead\LeadHashGenerator;
+use sales\services\TransactionManager;
 use webapi\models\ApiLead;
 use webapi\models\ApiLeadCallExpert;
 use Yii;
@@ -25,12 +26,19 @@ class LeadController extends ApiBaseController
 {
     private $leadHashGenerator;
     private $leadRepository;
+    private $transactionManager;
 
-    public function __construct($id, $module, LeadHashGenerator $leadHashGenerator, LeadRepository $leadRepository, $config = [])
+    public function __construct($id,
+                                $module,
+                                LeadHashGenerator $leadHashGenerator,
+                                LeadRepository $leadRepository,
+                                TransactionManager $transactionManager,
+                                $config = [])
     {
         parent::__construct($id, $module, $config);
         $this->leadHashGenerator = $leadHashGenerator;
         $this->leadRepository = $leadRepository;
+        $this->transactionManager = $transactionManager;
     }
 
     /**
@@ -1072,54 +1080,127 @@ class LeadController extends ApiBaseController
             'errors' => []
         ];
 
-        $transaction = Yii::$app->db->beginTransaction();
         try {
-
+            $isSold = $lead->isSold();
+            $isReject = $lead->isReject();
             $lead->attributes = $leadAttributes;
-            if (!$lead->save()) {
+            if (!$lead->validate()) {
                 $response['errors'][] = $lead->getErrors();
-                $transaction->rollBack();
             } else {
 
-                if (!empty($leadAttributes['additional_information']) &&
-                    !empty($leadAttributes['additional_information']['pnr'])
-                ) {
-                    $aplliend = $lead->getAppliedAlternativeQuotes();
-                    if ($aplliend !== null) {
-                        $aplliend->record_locator = $leadAttributes['additional_information']['pnr'];
-                        $aplliend->save(false);
-                        if ($aplliend->hasErrors()) {
-                            $response['errors'][] = $aplliend->getErrors();
+                $result = $this->transactionManager->wrap(function() use ($lead, $leadAttributes, $isSold, $isReject) {
+
+                    $response = [];
+
+                    if (!$isSold && $lead->isSold()) {
+                        $lead->sold($lead->employee_id, null);
+                    } elseif (!$isReject && $lead->isReject()) {
+                        $lead->reject($lead->employee_id, null);
+                    } else {
+                        Yii::error('Undefined Status', 'API:LeadSoldUpdate:Status');
+                    }
+
+                    $this->leadRepository->save($lead);
+
+                    if (!empty($leadAttributes['additional_information']) &&
+                        !empty($leadAttributes['additional_information']['pnr'])
+                    ) {
+                        $aplliend = $lead->getAppliedAlternativeQuotes();
+                        if ($aplliend !== null) {
+                            $aplliend->record_locator = $leadAttributes['additional_information']['pnr'];
+                            $aplliend->save(false);
+                            if ($aplliend->hasErrors()) {
+                                $response['errors'] = $aplliend->getErrors();
+                            }
                         }
                     }
-                }
 
-                if (!empty($leadAttributes['info_tickets'])) {
-                    $result = $lead->sendSoldEmail($leadAttributes['info_tickets']);
-                    if (!$result['status']) {
-                        $response['errors'][] = $result['errors'];
-                        $transaction->rollBack();
+//                    if (!empty($leadAttributes['info_tickets'])) {
+//                        $result = $lead->sendSoldEmail($leadAttributes['info_tickets']);
+//                        if (!$result['status']) {
+//                            $response['errors'][] = $result['errors'];
+//                            $transaction->rollBack();
+//                        }
+//                    }
+
+                    if (empty($response['errors'])) {
+                        $response['status'] = 'Success';
                     }
+
+                    return $response;
+
+                });
+
+                if (isset($result['status'])) {
+                    $response['status'] = $result['status'];
                 }
 
-                if (empty($response['errors'])) {
-                    $response['status'] = 'Success';
-                    $transaction->commit();
+                if (isset($result['errors'])) {
+                    $response['errors'][] = $result['errors'];
                 }
+
             }
-
         } catch (\Throwable $e) {
-
             Yii::error($e->getTraceAsString(), 'API:Quote:create:try');
-            if (Yii::$app->request->get('debug')) $message = ($e->getTraceAsString());
-            else $message = $e->getMessage() . ' (code:' . $e->getCode() . ', line: ' . $e->getLine() . ')';
-
+            if (Yii::$app->request->get('debug')) {
+                $message = ($e->getTraceAsString());
+            } else {
+                $message = $e->getMessage() . ' (code:' . $e->getCode() . ', line: ' . $e->getLine() . ')';
+            }
             $response['error'] = $message;
             $response['errors'] = $message;
             $response['error_code'] = 30;
-
-            $transaction->rollBack();
         }
+
+
+//        $transaction = Yii::$app->db->beginTransaction();
+//        try {
+//
+//            $lead->attributes = $leadAttributes;
+//            if (!$lead->save()) {
+//                $response['errors'][] = $lead->getErrors();
+//                $transaction->rollBack();
+//            } else {
+//
+//                if (!empty($leadAttributes['additional_information']) &&
+//                    !empty($leadAttributes['additional_information']['pnr'])
+//                ) {
+//                    $aplliend = $lead->getAppliedAlternativeQuotes();
+//                    if ($aplliend !== null) {
+//                        $aplliend->record_locator = $leadAttributes['additional_information']['pnr'];
+//                        $aplliend->save(false);
+//                        if ($aplliend->hasErrors()) {
+//                            $response['errors'][] = $aplliend->getErrors();
+//                        }
+//                    }
+//                }
+//
+//                if (!empty($leadAttributes['info_tickets'])) {
+//                    $result = $lead->sendSoldEmail($leadAttributes['info_tickets']);
+//                    if (!$result['status']) {
+//                        $response['errors'][] = $result['errors'];
+//                        $transaction->rollBack();
+//                    }
+//                }
+//
+//                if (empty($response['errors'])) {
+//                    $response['status'] = 'Success';
+//                    $transaction->commit();
+//                }
+//            }
+//
+//        } catch (\Throwable $e) {
+//
+//            Yii::error($e->getTraceAsString(), 'API:Quote:create:try');
+//            if (Yii::$app->request->get('debug')) $message = ($e->getTraceAsString());
+//            else $message = $e->getMessage() . ' (code:' . $e->getCode() . ', line: ' . $e->getLine() . ')';
+//
+//            $response['error'] = $message;
+//            $response['errors'] = $message;
+//            $response['error_code'] = 30;
+//
+//            $transaction->rollBack();
+//        }
 
         $responseData = $response;
         $responseData = $apiLog->endApiLog($responseData);
