@@ -2,6 +2,7 @@
 
 namespace common\models\search;
 
+use common\models\Call;
 use common\models\ProjectEmployeeAccess;
 use common\models\UserConnection;
 use common\models\UserDepartment;
@@ -360,4 +361,34 @@ class EmployeeSearch extends Employee
         return $dataProvider;
     }
 
+    public function searchCallsReport($params, $user):ActiveDataProvider
+    {
+        $query = Employee::find();
+        // add conditions that should always apply here
+
+        $this->load($params);
+
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+            'sort'=> [
+                'defaultOrder' => ['id' => SORT_ASC]
+            ],
+            'pagination' => [
+                'pageSize' => 30,
+            ],
+        ]);
+
+        if (!$this->validate()) {
+            // uncomment the following line if you do not want to return any records when validation fails
+            // $query->where('0=1');
+            return $dataProvider;
+        }
+
+        $query->andFilterWhere([
+           'id' => $this->username,
+        ]);
+
+        return $dataProvider;
+
+    }
 }

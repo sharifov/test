@@ -211,14 +211,14 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     }
 
     public function isSimpleAgent(): bool
-	{
-		return !$this->canRoles([
-			self::ROLE_SUPER_ADMIN,
-			self::ROLE_ADMIN,
-			self::ROLE_SUP_SUPER,
-			self::ROLE_EX_SUPER
-		]);
-	}
+    {
+        return !$this->canRoles([
+            self::ROLE_SUPER_ADMIN,
+            self::ROLE_ADMIN,
+            self::ROLE_SUP_SUPER,
+            self::ROLE_EX_SUPER
+        ]);
+    }
 
     /**
      * @return bool
@@ -1366,6 +1366,34 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         return $count;
     }
 
+    public function getCallsCount($employeeId, $callType, $status, $source)
+    {
+        $query = Call::find();
+        $query->select("COUNT(*) AS cnt, SUM(c_call_duration) AS duration")
+            ->where([
+                'c_created_user_id' => $employeeId,
+                'c_call_type_id' => $callType,
+            ]);
+        if ($status != null){
+            $query->andWhere([
+                'c_call_status' => $status
+            ]);
+        }
+
+        /*if ($callType == Call::CALL_TYPE_IN){
+            $query->andWhere(['NOT',['c_parent_id' => null]]);
+        }*/
+
+        if ($source != null){
+            $query->andWhere([
+                'c_source_type_id' => $source
+            ]);
+        }
+
+        $count= $query->asArray()->all();
+
+        return $count;
+    }
 
     /**
      * @param array $statusList

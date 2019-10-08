@@ -61,7 +61,7 @@ $js = <<<JS
      }
 JS;
 $this->registerJs($js, \yii\web\View::POS_READY);
-$this->title = 'Calls Report';
+$this->title = 'Calls Stats';
 ?>
 <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 
