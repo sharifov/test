@@ -1277,12 +1277,9 @@ class CasesController extends FController
 
 			$updatedData = $this->casesSaleService->prepareSaleData($caseSale);
 
- 			print_r($updatedData);die;
+			$response = BackOffice::sendRequest2('', $updatedData);
 
-//			$response = BackOffice::sendRequest2('', $updatedData);
-
-//			if ($response->isOk) {
-			if (true) {
+			if ($response->isOk) {
 				$this->casesSaleRepository->updateSyncWithBOField($caseSale, false);
 				$this->casesSaleRepository->updateOriginalSaleData($caseSale);
 				$this->casesSaleRepository->save($caseSale);
