@@ -542,7 +542,7 @@ $lists = new ListsAccess($user->id);
             'value' => function (Lead $model) {
                 return $model->employee ? '<i class="fa fa-user"></i> ' . Html::encode($model->employee->username) : '-';
             },
-            'filter' => $lists->getEmployees() ?: false
+            'filter' => $lists->getEmployees(true) ?: false
         ],
 
         // 'rating',
@@ -738,7 +738,7 @@ $lists = new ListsAccess($user->id);
                         </div>
 
                         <?php
-                            if ($employees = $lists->getEmployees()) {
+                            if ($employees = $lists->getEmployees(true)) {
                                 $employees[-1] = '--- REMOVE EMPLOYEE ---';
                                 echo $form->field($multipleForm, 'employee_id')->dropDownList($employees, ['prompt' => '-']);
                             }

@@ -121,6 +121,8 @@ class TestController extends FController
     {
 
 
+        $u = Employee::getActiveUsersListWithRoles();
+        VarDumper::dump($u);
         return $this->render('blank');
 
     }

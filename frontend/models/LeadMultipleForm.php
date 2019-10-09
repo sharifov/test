@@ -34,8 +34,6 @@ class LeadMultipleForm extends Model
             ['lead_list', 'required'],
             ['lead_list', 'leadListValidate'],
 
-            ['employee_id', 'integer'],
-
             ['status_id', 'integer'],
 
             ['rating', 'integer'],
@@ -44,9 +42,12 @@ class LeadMultipleForm extends Model
 
             ['reason_description', 'string'],
 
+            ['employee_id', 'integer'],
             ['employee_id', 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['employee_id' => 'id'], 'when' => function (self $model) {
                 return $model->employee_id > 0;
             }],
+            ['employee_id', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
+            ['employee_id', 'default', 'value' => null],
         ];
     }
 
