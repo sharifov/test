@@ -13,6 +13,7 @@ use yii\base\Model;
  * @property string $reason
  * @property string $other
  * @property string $description
+ * @property bool $answered
  */
 class FollowUpReasonForm extends Model
 {
@@ -33,6 +34,8 @@ class FollowUpReasonForm extends Model
     public $other;
     public $description;
 
+    private $answered;
+
     /**
      * @param Lead $lead
      * @param array $config
@@ -42,6 +45,7 @@ class FollowUpReasonForm extends Model
         parent::__construct($config);
         $this->leadId = $lead->id;
         $this->leadGid = $lead->gid;
+        $this->answered = $lead->l_answered;
     }
 
     /**

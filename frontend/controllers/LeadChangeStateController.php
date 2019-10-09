@@ -9,6 +9,7 @@ use sales\forms\leadflow\RejectReasonForm;
 use sales\forms\leadflow\ReturnReasonForm;
 use sales\forms\leadflow\SnoozeReasonForm;
 use sales\forms\leadflow\TrashReasonForm;
+use sales\guards\FollowUpGuard;
 use sales\services\lead\LeadAssignService;
 use sales\services\lead\LeadStateService;
 use Yii;
@@ -24,6 +25,7 @@ use yii\widgets\ActiveForm;
  *
  * @property LeadAssignService $assignService
  * @property LeadStateService $stateService
+ * @property FollowUpGuard $followUpGuard
  *
  */
 class LeadChangeStateController extends FController
@@ -31,12 +33,14 @@ class LeadChangeStateController extends FController
 
     private $assignService;
     private $stateService;
+    private $followUpGuard;
 
     /**
      * @param $id
      * @param $module
      * @param LeadAssignService $assignService
      * @param LeadStateService $stateService
+     * @param FollowUpGuard $followUpGuard
      * @param array $config
      */
     public function __construct(
@@ -44,12 +48,14 @@ class LeadChangeStateController extends FController
         $module,
         LeadAssignService $assignService,
         LeadStateService $stateService,
+        FollowUpGuard $followUpGuard,
         $config = []
     )
     {
         parent::__construct($id, $module, $config);
         $this->assignService = $assignService;
         $this->stateService = $stateService;
+        $this->followUpGuard = $followUpGuard;
     }
 
     /**
@@ -107,10 +113,14 @@ class LeadChangeStateController extends FController
         $form = new FollowUpReasonForm($lead);
         if ($form->load(Yii::$app->request->post()) && $form->validate()) {
             try {
+                /** @var Employee $user */
+                $user = Yii::$app->user->identity;
+                $this->followUpGuard->guard($user, $lead);
+
                 $this->stateService->followUp($lead, null, Yii::$app->user->id, $form->description);
                 Yii::$app->getSession()->setFlash('success', 'Success');
             } catch (\DomainException $e) {
-                Yii::$app->errorHandler->logException($e);
+                Yii::warning($e->getMessage(), 'LeadChangeState:FollowUp');
                 Yii::$app->getSession()->setFlash('warning', $e->getMessage());
             }
         } else {
