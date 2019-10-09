@@ -3705,7 +3705,7 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
         if (!$this->lastLeadFlow) {
             return '';
         }
-        return $this->status === $this->lastLeadFlow->status ? $this->lastLeadFlow->lf_description : '';
+        return $this->lastLeadFlow->lf_description; //$this->status === $this->lastLeadFlow->status ? $this->lastLeadFlow->lf_description : '';
     }
 
     /**
