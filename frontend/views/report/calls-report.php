@@ -9,7 +9,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
 /**
  * @var $this yii\web\View
- * @var $searchModel common\models\search\EmployeeSearch;
+ * @var $searchModel common\models\search\CallSearch;
  * @var $dataProvider yii\data\ActiveDataProvider
  */
 $list = new ListsAccess(Yii::$app->user->id);
@@ -45,9 +45,32 @@ $list = new ListsAccess(Yii::$app->user->id);
     <?php
     $gridColumns = [
         //['class' => 'yii\grid\SerialColumn'],
-        /*[
-            'attribute' => 'id',
-        ],*/
+        [
+            'label' => 'Username',
+            'attribute' => 'c_created_user_id',
+            'value' => function ($searchModel) {
+                $employee = \common\models\Employee::findone($searchModel['c_created_user_id']);
+                return $employee->username;
+            },
+        ],
+        [
+            'attribute' => 'createdDate',
+        ],
+        [
+            'attribute' => 'outgoingCalls',
+        ],
+        [
+            'attribute' => 'outgoingCallsCompleted',
+        ],
+        [
+            'attribute' => 'outgoingCallsNoAnswer',
+        ],
+        [
+            'attribute' => 'outgoingCallsCanceled',
+        ],
+        [
+            'attribute' => 'incomingCalls',
+        ],
     ];
 
     $fullExportMenu = \kartik\export\ExportMenu::widget([

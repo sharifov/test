@@ -334,23 +334,35 @@ class CallSearch extends Call
         return $dataProvider;
     }
 
-     public function searchCallsReport($params, $user):SqlDataProvider
+    public function searchCallsReport($params, $user):SqlDataProvider
     {
         $this->load($params);
+        $employees = "'" . implode("', '", array_keys(Employee::getList())) . "'";
 
-       /* $query = new Query();
+        $query = new Query();
 
-        $query->from('call');
-        $query->select(['c_created_user_id, DATE(c_created_dt)']);
-        $query->addSelect(['(SELECT COUNT(*) FROM `call` WHERE c_call_type_id = '.Call::CALL_TYPE_IN.' and c_created_user_id=444) AS inbound_calls ']);
+        $query->select(['
+            SUM(CASE WHEN c_call_type_id='.self::CALL_TYPE_OUT.' THEN 1 ELSE 0 END) AS outgoingCalls, 
+            SUM(CASE WHEN c_call_type_id='.self::CALL_TYPE_OUT.' AND c_call_status="'.self::TW_STATUS_COMPLETED.'" THEN 1 ELSE 0 END) AS outgoingCallsCompleted, 
+            SUM(CASE WHEN c_call_type_id='.self::CALL_TYPE_OUT.' AND c_call_status="'.self::TW_STATUS_NO_ANSWER.'" THEN 1 ELSE 0 END) AS outgoingCallsNoAnswer, 
+            SUM(CASE WHEN c_call_type_id='.self::CALL_TYPE_OUT.' AND c_call_status="'.self::TW_STATUS_CANCELED.'" THEN 1 ELSE 0 END) AS outgoingCallsCanceled, 
+            SUM(CASE WHEN c_call_type_id='.self::CALL_TYPE_IN.' THEN 1 ELSE 0 END) AS incomingCalls,
+            c_created_user_id, date(c_created_dt) AS createdDate FROM `call` WHERE c_created_user_id in (' .$employees. ')
+        ']);
+
+        //$query->andWhere(['IN', 'c_created_user_id', $subQuery]);
 
         $query->groupBy(['c_created_user_id, DATE(c_created_dt)']);
+        //$query->orderBy(['c_created_user_id' => SORT_ASC]);
+
 
         $command = $query->createCommand();
-        $sql = $command->rawSql;*/
-       $sql = 'SELECT COUNT(*) AS outCalls, c_created_user_id,  date(c_created_dt) AS createdDate FROM crm_sale_updated.`call` WHERE c_call_type_id=2 and c_created_user_id in (\'444\',\'445\') group by date(c_created_dt), c_created_user_id';
-
+        $sql = $command->sql;
         //var_dump($sql); die();
+
+
+
+        //$sql = 'SELECT COUNT(*) AS outCalls, c_created_user_id,  date(c_created_dt) AS createdDate FROM crm_sale_updated.`call` WHERE c_call_type_id=2 and c_created_user_id in (\'444\',\'445\') group by date(c_created_dt), c_created_user_id';
 
         $paramsData = [
             'sql' => $sql,
@@ -359,10 +371,33 @@ class CallSearch extends Call
             'sort' => [
                 //'defaultOrder' => ['username' => SORT_ASC],
                 'attributes' => [
-
-                    'inbound_calls' => [
-                        'asc' => ['inbound_calls' => SORT_ASC],
-                        'desc' => ['inbound_calls' => SORT_DESC],
+                    'c_created_user_id' => [
+                        'asc' => ['c_created_user_id' => SORT_ASC],
+                        'desc' => ['c_created_user_id' => SORT_DESC],
+                    ],
+                    'createdDate' => [
+                        'asc' => ['createdDate' => SORT_ASC],
+                        'desc' => ['createdDate' => SORT_DESC],
+                    ],
+                    'outgoingCalls' => [
+                        'asc' => ['outgoingCalls' => SORT_ASC],
+                        'desc' => ['outgoingCalls' => SORT_DESC],
+                    ],
+                    'outgoingCallsCompleted' => [
+                        'asc' => ['outgoingCallsCompleted' => SORT_ASC],
+                        'desc' => ['outgoingCallsCompleted' => SORT_DESC],
+                    ],
+                    'outgoingCallsNoAnswer' => [
+                        'asc' => ['outgoingCallsNoAnswer' => SORT_ASC],
+                        'desc' => ['outgoingCallsNoAnswer' => SORT_DESC],
+                    ],
+                    'outgoingCallsCanceled' => [
+                        'asc' => ['outgoingCallsCanceled' => SORT_ASC],
+                        'desc' => ['outgoingCallsCanceled' => SORT_DESC],
+                    ],
+                    'incomingCalls' => [
+                        'asc' => ['incomingCalls' => SORT_ASC],
+                        'desc' => ['incomingCalls' => SORT_DESC],
                     ],
 
                 ],
