@@ -11,6 +11,7 @@ use common\models\Call;
 use common\models\CallUserAccess;
 use common\models\Department;
 use common\models\Employee;
+use common\models\Lead;
 use common\models\Lead2;
 use common\models\Notifications;
 use sales\forms\lead\PhoneCreateForm;
@@ -90,7 +91,6 @@ class CallQueueJob extends BaseObject implements JobInterface
                     Yii::info('CallId: ' . $this->call_id . ', STATUS_IVR' ,'info\CallQueueJob-STATUS_IVR');
                     // $call->c_call_status = Call::TW_STATUS_QUEUE;
                     $call->setStatusQueue();
-
                 }
 
 
@@ -102,6 +102,14 @@ class CallQueueJob extends BaseObject implements JobInterface
                         }
                         if ($lead) {
                             $call->c_lead_id = $lead->id;
+
+                            if ((int)$lead->l_call_status_id !== Lead::CALL_STATUS_READY && $call->isEnded()) {
+                                $lead->l_call_status_id = Lead::CALL_STATUS_READY;
+                                if (!$lead->update()) {
+                                    Yii::error('CallId: ' . $this->call_id . ' ' . VarDumper::dumpAsString($lead->errors) ,'JOB:CallQueueJob:Lead:update');
+                                }
+                            }
+
 //                            if(!$call->update()) {
 //                                Yii::error(VarDumper::dumpAsString($call->errors), 'CallQueueJob:execute:Call:update2');
 //                            }
