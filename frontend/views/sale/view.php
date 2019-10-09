@@ -265,125 +265,131 @@ $this->registerJs($js);
                             <td><?=Html::encode($passenger['type'])?></td>
                             <td>
 								<?=
-								Editable::widget([
-									'name' => 'cssSaleData[passengers]['.$key.'][birth_date]',
-									'header' => 'Date of Birth',
-									'asPopover' => true,
-									'inputType' => Editable::INPUT_DATE,
-									'displayValue' => Yii::$app->formatter->asDate(Html::encode($passenger['birth_date']), 'php:d M Y'),
-									'value' => Yii::$app->formatter->asDate(Html::encode($passenger['birth_date']), 'php:d M Y'),
-									'formOptions' => [ 'action' => [\yii\helpers\Url::to(['/cases/ajax-sale-list-edit-info/', 'caseId' => $csId, 'caseSaleId' => $data['saleId']])] ],
-									'options' => [
-										'convertFormat'=>true,
-										'pluginOptions'=>['format'=>'php:d M Y', 'autoclose'=>true]
-									],
-									'pluginEvents' => [
-										"editableSuccess"=>"function (event, val, form, data) {
-										    console.log(form);
-										    activateButtonSync(data);
-										}",
-									],
-                                    'pjaxContainerId' => 'pjax-sale-list'
-								]);
+//								Editable::widget([
+//									'name' => 'cssSaleData[passengers]['.$key.'][birth_date]',
+//									'header' => 'Date of Birth',
+//									'asPopover' => true,
+//									'inputType' => Editable::INPUT_DATE,
+//									'displayValue' => Yii::$app->formatter->asDate(Html::encode($passenger['birth_date']), 'php:d M Y'),
+//									'value' => Yii::$app->formatter->asDate(Html::encode($passenger['birth_date']), 'php:d M Y'),
+//									'formOptions' => [ 'action' => [\yii\helpers\Url::to(['/cases/ajax-sale-list-edit-info/', 'caseId' => $csId, 'caseSaleId' => $data['saleId']])] ],
+//									'options' => [
+//										'convertFormat'=>true,
+//										'pluginOptions'=>['format'=>'php:d M Y', 'autoclose'=>true]
+//									],
+//									'pluginEvents' => [
+//										"editableSuccess"=>"function (event, val, form, data) {
+//										    console.log(form);
+//										    activateButtonSync(data);
+//										}",
+//									],
+//                                    'pjaxContainerId' => 'pjax-sale-list'
+//								]);
+								Yii::$app->formatter->asDate(Html::encode($passenger['birth_date']), 'php:d M Y')
 								?>
                             </td>
                             <td>
 								<?=
-								Editable::widget([
-									'name' => 'cssSaleData[passengers]['.$key.'][gender]',
-									'header' => 'Gender',
-									'asPopover' => true,
-									'inputType' => Editable::INPUT_DROPDOWN_LIST,
-									'data' => ['F' => 'Female', 'M' => 'Male'],
-									'value' => Html::encode($passenger['gender']),
-									'formOptions' => [ 'action' => [\yii\helpers\Url::to(['/cases/ajax-sale-list-edit-info/', 'caseId' => $csId, 'caseSaleId' => $data['saleId']])] ],
-									'pluginEvents' => [
-										"editableSuccess"=>"function (event, val, form, data) {
-										    activateButtonSync(data);
-										}",
-									],
-									'pjaxContainerId' => 'pjax-sale-list'
-								]);
+//								Editable::widget([
+//									'name' => 'cssSaleData[passengers]['.$key.'][gender]',
+//									'header' => 'Gender',
+//									'asPopover' => true,
+//									'inputType' => Editable::INPUT_DROPDOWN_LIST,
+//									'data' => ['F' => 'Female', 'M' => 'Male'],
+//									'value' => Html::encode($passenger['gender']),
+//									'formOptions' => [ 'action' => [\yii\helpers\Url::to(['/cases/ajax-sale-list-edit-info/', 'caseId' => $csId, 'caseSaleId' => $data['saleId']])] ],
+//									'pluginEvents' => [
+//										"editableSuccess"=>"function (event, val, form, data) {
+//										    activateButtonSync(data);
+//										}",
+//									],
+//									'pjaxContainerId' => 'pjax-sale-list'
+//								]);
+								Html::encode($passenger['gender'])
 								?>
                             </td>
                             <td>
 								<?=
-								Editable::widget([
-									'name' => 'cssSaleData[passengers]['.$key.'][meal]',
-									'header' => 'Meal',
-									'asPopover' => true,
-									'inputType' => Editable::INPUT_DROPDOWN_LIST,
-									'data' => CaseSale::PASSENGER_MEAL,
-									'options' => ['prompt'=>'Select meal...'],
-									'value' => Html::encode($passenger['meal'] ?? null),
-									'formOptions' => [ 'action' => [\yii\helpers\Url::to(['/cases/ajax-sale-list-edit-info/', 'caseId' => $csId, 'caseSaleId' => $data['saleId']])] ],
-									'pluginEvents' => [
-										"editableSuccess"=>"function (event, val, form, data) {
-										    activateButtonSync(data);
-										}",
-									],
-									'placement' => PopoverX::ALIGN_TOP_LEFT,
-									'pjaxContainerId' => 'pjax-sale-list'
-								]);
+//								Editable::widget([
+//									'name' => 'cssSaleData[passengers]['.$key.'][meal]',
+//									'header' => 'Meal',
+//									'asPopover' => true,
+//									'inputType' => Editable::INPUT_DROPDOWN_LIST,
+//									'data' => CaseSale::PASSENGER_MEAL,
+//									'options' => ['prompt'=>'Select meal...'],
+//									'value' => Html::encode($passenger['meal'] ?? null),
+//									'formOptions' => [ 'action' => [\yii\helpers\Url::to(['/cases/ajax-sale-list-edit-info/', 'caseId' => $csId, 'caseSaleId' => $data['saleId']])] ],
+//									'pluginEvents' => [
+//										"editableSuccess"=>"function (event, val, form, data) {
+//										    activateButtonSync(data);
+//										}",
+//									],
+//									'placement' => PopoverX::ALIGN_TOP_LEFT,
+//									'pjaxContainerId' => 'pjax-sale-list'
+//								]);
+								Html::encode($passenger['meal'] ?? null)
 								?>
                             </td>
                             <td>
 								<?=
-								Editable::widget([
-									'name' => 'cssSaleData[passengers]['.$key.'][wheelchair]',
-									'header' => 'Wheelchair',
-									'asPopover' => true,
-									'inputType' => Editable::INPUT_DROPDOWN_LIST,
-									'data' => CaseSale::PASSENGER_WHEELCHAIR,
-									'value' => Html::encode($passenger['wheelchair'] ?? null),
-									'formOptions' => [ 'action' => [\yii\helpers\Url::to(['/cases/ajax-sale-list-edit-info/', 'caseId' => $csId, 'caseSaleId' => $data['saleId']])] ],
-									'options' => ['prompt'=>'Select wheelchair...'],
-									'pluginEvents' => [
-										"editableSuccess"=>"function (event, val, form, data) {
-										    activateButtonSync(data);
-										}",
-									],
-									'placement' => PopoverX::ALIGN_TOP_LEFT,
-									'pjaxContainerId' => 'pjax-sale-list'
-								]);
+//								Editable::widget([
+//									'name' => 'cssSaleData[passengers]['.$key.'][wheelchair]',
+//									'header' => 'Wheelchair',
+//									'asPopover' => true,
+//									'inputType' => Editable::INPUT_DROPDOWN_LIST,
+//									'data' => CaseSale::PASSENGER_WHEELCHAIR,
+//									'value' => Html::encode($passenger['wheelchair'] ?? null),
+//									'formOptions' => [ 'action' => [\yii\helpers\Url::to(['/cases/ajax-sale-list-edit-info/', 'caseId' => $csId, 'caseSaleId' => $data['saleId']])] ],
+//									'options' => ['prompt'=>'Select wheelchair...'],
+//									'pluginEvents' => [
+//										"editableSuccess"=>"function (event, val, form, data) {
+//										    activateButtonSync(data);
+//										}",
+//									],
+//									'placement' => PopoverX::ALIGN_TOP_LEFT,
+//									'pjaxContainerId' => 'pjax-sale-list'
+//								]);
+								Html::encode($passenger['wheelchair'] ?? null)
 								?>
                             </td>
                             <td>
 								<?=
-								Editable::widget([
-									'name' => 'cssSaleData[passengers]['.$key.'][ff_numbers]',
-									'header' => 'Frequent Fayer',
-									'asPopover' => true,
-									'inputType' => Editable::INPUT_TEXT,
-									'value' => Html::encode($passenger['ff_numbers'] ?? null),
-									'formOptions' => [ 'action' => [\yii\helpers\Url::to(['/cases/ajax-sale-list-edit-info/', 'caseId' => $csId, 'caseSaleId' => $data['saleId']])] ],
-									'pluginEvents' => [
-										"editableSuccess"=>"function (event, val, form, data) {
-										    activateButtonSync(data);
-										}",
-									],
-                                    'placement' => PopoverX::ALIGN_TOP_LEFT,
-									'pjaxContainerId' => 'pjax-sale-list'
-								]);
+//								Editable::widget([
+//									'name' => 'cssSaleData[passengers]['.$key.'][ff_numbers]',
+//									'header' => 'Frequent Fayer',
+//									'asPopover' => true,
+//									'inputType' => Editable::INPUT_TEXT,
+//									'value' => Html::encode($passenger['ff_numbers'] ?? null),
+//									'formOptions' => [ 'action' => [\yii\helpers\Url::to(['/cases/ajax-sale-list-edit-info/', 'caseId' => $csId, 'caseSaleId' => $data['saleId']])] ],
+//									'pluginEvents' => [
+//										"editableSuccess"=>"function (event, val, form, data) {
+//										    activateButtonSync(data);
+//										}",
+//									],
+//                                    'placement' => PopoverX::ALIGN_TOP_LEFT,
+//									'pjaxContainerId' => 'pjax-sale-list'
+//								]);
+								Html::encode($passenger['ff_numbers'] ?? null)
 								?>
                             </td>
                             <td>
 								<?=
-								Editable::widget([
-									'name' => 'cssSaleData[passengers]['.$key.'][ktn_numbers]',
-									'header' => 'KTN',
-									'asPopover' => true,
-									'inputType' => Editable::INPUT_TEXT,
-									'value' => Html::encode($passenger['ktn_numbers'] ?? null),
-									'formOptions' => [ 'action' => [\yii\helpers\Url::to(['/cases/ajax-sale-list-edit-info/', 'caseId' => $csId, 'caseSaleId' => $data['saleId']])] ],
-									'pluginEvents' => [
-										"editableSuccess"=>"function (event, val, form, data) {
-										    activateButtonSync(data);
-										}",
-									],
-                                    'placement' => PopoverX::ALIGN_LEFT,
-									'pjaxContainerId' => 'pjax-sale-list'
-								]);
+//								Editable::widget([
+//									'name' => 'cssSaleData[passengers]['.$key.'][ktn_numbers]',
+//									'header' => 'KTN',
+//									'asPopover' => true,
+//									'inputType' => Editable::INPUT_TEXT,
+//									'value' => Html::encode($passenger['ktn_numbers'] ?? null),
+//									'formOptions' => [ 'action' => [\yii\helpers\Url::to(['/cases/ajax-sale-list-edit-info/', 'caseId' => $csId, 'caseSaleId' => $data['saleId']])] ],
+//									'pluginEvents' => [
+//										"editableSuccess"=>"function (event, val, form, data) {
+//										    activateButtonSync(data);
+//										}",
+//									],
+//                                    'placement' => PopoverX::ALIGN_LEFT,
+//									'pjaxContainerId' => 'pjax-sale-list'
+//								]);
+								Html::encode($passenger['ktn_numbers'] ?? null)
 								?>
                             </td>
                         </tr>
