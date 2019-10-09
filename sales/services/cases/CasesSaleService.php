@@ -26,6 +26,11 @@ class CasesSaleService
 	private $segments = [];
 
 	/**
+	 * @var array
+	 */
+	private $editedData = [];
+
+	/**
 	 * CasesSaleService constructor.
 	 * @param CasesSaleRepository $casesSaleRepository
 	 */
@@ -69,6 +74,19 @@ class CasesSaleService
 		}
 
 		return $segments;
+	}
+
+	/**
+	 * @param CaseSale $caseSale
+	 * @return bool
+	 */
+	public function isDataBackedUpToOriginal(CaseSale $caseSale): bool
+	{
+		$oldData = json_decode((string)$caseSale->css_sale_data, true);
+		$newData = json_decode((string)$caseSale->css_sale_data_updated, true);
+		$difference = $this->compareSaleData($oldData, $newData);
+
+		return !$difference ? true : false;
 	}
 
 	/**
@@ -127,10 +145,9 @@ class CasesSaleService
 	/**
 	 * @param array $oldData
 	 * @param array $newData
-	 * @param bool $checkForEmpty
 	 * @return array
 	 */
-	public function compareSaleData(array $oldData, array $newData, bool $checkForEmpty = true): array
+	public function compareSaleData(array $oldData, array $newData): array
 	{
 		$difference = [];
 		foreach ($newData as $firstKey => $firstValue) {
@@ -143,9 +160,9 @@ class CasesSaleService
 						$difference[$firstKey] = $newDiff;
 					}
 				}
-			} else {
-				if ((!array_key_exists($firstKey, $oldData) || $oldData[$firstKey] != $firstValue) && !empty($newData[$firstKey])) {
-					$difference[$firstKey] = $newData[$firstKey];
+			} elseif ((!array_key_exists($firstKey, $oldData) || $oldData[$firstKey] != $firstValue)) {
+				if (!empty($firstValue) || !empty($oldData[$firstKey])) {
+					$difference[$firstKey] = $firstValue;
 				}
 			}
 		}

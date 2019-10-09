@@ -23,19 +23,19 @@ $title = 'Sale ID: ' . $data['saleId'] . ', BookId: ' . $data['bookingId'];
 
 $js = <<<JS
 function activateButtonSync(data) {
-    if (data.output === '' && data.message === '') {
-        $('#sync-with-bo-'+data.caseSaleId).removeAttr('disabled');
+    if (data.output === '' && data.message === '' && data.sync) {
+        $('#sync-with-bo-'+data.caseSaleId).removeAttr('disabled').removeClass('btn-warning').addClass('btn-success');
     }else {
-        $('#sync-with-bo-'+data.caseSaleId).attr('disabled', true);
+        $('#sync-with-bo-'+data.caseSaleId).attr('disabled', true).removeClass('btn-success').addClass('btn-warning');
     }
     
     if (data.success_message !== '') {
         new PNotify({
-            title: 'Success',
-            type: 'success',
+            title: data.sync ? 'Updated' : 'Warning',
+            type: data.sync ? 'success' : 'warning',
             text: data.success_message,
             hide: true,
-            delay: 2000
+            delay: data.sync ? 2000 : 4000,
         });
     }
 }
@@ -282,7 +282,8 @@ $this->registerJs($js);
 										    console.log(form);
 										    activateButtonSync(data);
 										}",
-									]
+									],
+                                    'pjaxContainerId' => 'pjax-sale-list'
 								]);
 								?>
                             </td>
@@ -300,7 +301,8 @@ $this->registerJs($js);
 										"editableSuccess"=>"function (event, val, form, data) {
 										    activateButtonSync(data);
 										}",
-									]
+									],
+									'pjaxContainerId' => 'pjax-sale-list'
 								]);
 								?>
                             </td>
@@ -320,7 +322,8 @@ $this->registerJs($js);
 										    activateButtonSync(data);
 										}",
 									],
-									'placement' => PopoverX::ALIGN_TOP_LEFT
+									'placement' => PopoverX::ALIGN_TOP_LEFT,
+									'pjaxContainerId' => 'pjax-sale-list'
 								]);
 								?>
                             </td>
@@ -340,7 +343,8 @@ $this->registerJs($js);
 										    activateButtonSync(data);
 										}",
 									],
-									'placement' => PopoverX::ALIGN_TOP_LEFT
+									'placement' => PopoverX::ALIGN_TOP_LEFT,
+									'pjaxContainerId' => 'pjax-sale-list'
 								]);
 								?>
                             </td>
@@ -358,7 +362,8 @@ $this->registerJs($js);
 										    activateButtonSync(data);
 										}",
 									],
-                                    'placement' => PopoverX::ALIGN_TOP_LEFT
+                                    'placement' => PopoverX::ALIGN_TOP_LEFT,
+									'pjaxContainerId' => 'pjax-sale-list'
 								]);
 								?>
                             </td>
@@ -376,7 +381,8 @@ $this->registerJs($js);
 										    activateButtonSync(data);
 										}",
 									],
-                                    'placement' => PopoverX::ALIGN_LEFT
+                                    'placement' => PopoverX::ALIGN_LEFT,
+									'pjaxContainerId' => 'pjax-sale-list'
 								]);
 								?>
                             </td>

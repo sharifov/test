@@ -1191,6 +1191,8 @@ class CasesController extends FController
 					!$user->isSupSuper()
 				) {
 					throw new \Exception('Access Denied');
+				} elseif (!$caseSale->cssCs->isProcessing()) {
+					throw new \Exception('Case is not in status: Processing');
 				}
 
 				$form = new CasesSaleForm();
@@ -1199,20 +1201,28 @@ class CasesController extends FController
 
 					$decodedSaleData = json_decode( (string)$caseSale->css_sale_data_updated, true );
 
-					$difference = $this->casesSaleService->compareSaleData($decodedSaleData, $form->validatedData, false);
+					$difference = $this->casesSaleService->compareSaleData($decodedSaleData, $form->validatedData);
 					if (!$difference) {
 						throw new \Exception('Cannot save because value has not been changed');
 					}
 
 					$this->casesSaleRepository->updateSaleData($caseSale, $decodedSaleData, $form->validatedData);
-					$this->casesSaleRepository->updateSyncWithBOField($caseSale, true);
+
+					$sync = !$this->casesSaleService->isDataBackedUpToOriginal($caseSale);
+					$this->casesSaleRepository->updateSyncWithBOField($caseSale, $sync);
 
 					if (!$caseSale->save()) {
 						Yii::error(VarDumper::dumpAsString($caseSale->errors), 'CasesController:actionAjaxSaleListEditInfo:CaseSale:save');
 						throw new \Exception('Unsuccessful update');
 					}
 
-					$out['success_message'] = 'Sale: '. $caseSaleId .'; Now, you can sync data with b/o';
+					if ($sync) {
+						$out['success_message'] = 'Sale: '. $caseSaleId .'; Now, you can sync data with b/o';
+					}else {
+						$out['success_message'] = 'Sale: '. $caseSaleId .'; The data has been returned to its original form.';
+					}
+
+					$out['sync'] = $sync;
 				} else {
 					$out['message'] = implode("; ", $form->getErrorSummary(false));
 				}
@@ -1261,9 +1271,13 @@ class CasesController extends FController
 				throw new \Exception('Access Denied.');
 			} else if (!$caseSale->css_need_sync_bo) {
 				throw new \Exception('Data is already synchronized.');
+			} else if (!$caseSale->cssCs->isProcessing()) {
+				throw new \Exception('Case is not in status: Processing');
 			}
 
 			$updatedData = $this->casesSaleService->prepareSaleData($caseSale);
+
+ 			print_r($updatedData);die;
 
 //			$response = BackOffice::sendRequest2('', $updatedData);
 

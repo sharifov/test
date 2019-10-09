@@ -67,7 +67,7 @@ use yii\widgets\Pjax;
                         <td>'.Yii::$app->formatter->asDatetime($item->css_sale_created_dt).'</td>
                         <td>'.Yii::$app->formatter->asDatetime($item->css_created_dt).'</td>
                         <td>'. Html::button('<i class="fa fa-refresh"></i> Sync with B/O', [
-							'class' => 'sync-with-bo btn btn-warning ' . $item->css_need_sync_bo,
+							'class' => 'sync-with-bo btn ' . ($item->css_need_sync_bo ? 'btn-success' : 'btn-warning'),
 							'disabled' => !$item->css_need_sync_bo ? true : false,
 							'id' => 'sync-with-bo-' . $item->css_sale_id,
                             'data-case-id' => $item->css_cs_id,

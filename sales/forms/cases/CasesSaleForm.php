@@ -71,15 +71,12 @@ class CasesSaleForm extends Model
 			[['passengers'], 'each', 'rule' => ['filter', 'filter' => function ($value) {
 				foreach ($value as $key => $item) {
 
-					if (empty($value[$key])) {
-						$value[$key] = '';
-					}
-
 					if (isset($this->filters[$key]) && method_exists($this, $this->filters[$key])) {
 						$value[$key] = trim($value[$key]);
 						$this->{$this->filters[$key]}($value, $key);
 					}
 				}
+
 				return $value;
 			}]],
 			[['passengers'], 'each', 'rule' =>[function () {
