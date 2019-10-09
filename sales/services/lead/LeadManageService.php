@@ -185,9 +185,9 @@ class LeadManageService
 
         $lead->setRequestHash($hash);
 
-        if ($origin = $this->leadRepository->getByRequestHash($lead->l_request_hash)) {
-            $lead->duplicate($origin->id, $employeeId, $creatorId);
-        }
+//        if ($origin = $this->leadRepository->getByRequestHash($lead->l_request_hash)) {
+//            $lead->duplicate($origin->id, $employeeId, $creatorId);
+//        }
 
         $lead->setTripType($this->calculateTripType($form->segments));
 
