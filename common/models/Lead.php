@@ -1252,7 +1252,7 @@ class Lead extends ActiveRecord implements AggregateRoot
      */
     public function getLastLeadFlow(): ActiveQuery
     {
-        return $this->hasOne(LeadFlow::class, ['lead_id' => 'id'])->orderBy([LeadFlow::tableName() . '.created' => SORT_DESC])->limit(1);
+        return $this->hasOne(LeadFlow::class, ['lead_id' => 'id'])->orderBy([LeadFlow::tableName() . '.created' => SORT_DESC, LeadFlow::tableName() . '.id' => SORT_DESC])->limit(1);
     }
 
     /**
