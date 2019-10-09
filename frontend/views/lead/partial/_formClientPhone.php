@@ -11,7 +11,8 @@ use yii\widgets\ActiveForm;
 use common\models\ClientPhone;
 use yii\helpers\Html;
 use frontend\models\LeadForm;
-use borales\extensions\phoneInput\PhoneInput;
+//use borales\extensions\phoneInput\PhoneInput;
+use frontend\extensions\PhoneInput;
 
 ?>
 <div class="sl-client-field">

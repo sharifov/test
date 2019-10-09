@@ -2,7 +2,6 @@
 
 namespace common\models;
 
-use borales\extensions\phoneInput\PhoneInput;
 use borales\extensions\phoneInput\PhoneInputValidator;
 use common\components\BackOffice;
 use sales\access\EmployeeGroupAccess;

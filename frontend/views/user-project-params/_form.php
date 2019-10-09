@@ -3,6 +3,8 @@
 use sales\access\EmployeeProjectAccess;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
+//use borales\extensions\phoneInput\PhoneInput;
+use frontend\extensions\PhoneInput;
 
 /* @var $this yii\web\View */
 /* @var $model common\models\UserProjectParams */
@@ -38,7 +40,7 @@ $projectList = EmployeeProjectAccess::getProjects(Yii::$app->user->id);
 
 
 
-        <?= $form->field($model, 'upp_tw_phone_number')->widget(\borales\extensions\phoneInput\PhoneInput::class, [
+        <?= $form->field($model, 'upp_tw_phone_number')->widget(PhoneInput::class, [
             'jsOptions' => [
                 'formatOnDisplay' => false,
                 'autoPlaceholder' => 'off',
