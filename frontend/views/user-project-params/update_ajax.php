@@ -2,7 +2,8 @@
 
 use yii\helpers\Html;
 use yii\bootstrap\ActiveForm;
-
+//use borales\extensions\phoneInput\PhoneInput;
+use frontend\extensions\PhoneInput;
 
 /* @var $this yii\web\View */
 /* @var $model common\models\UserProjectParams */
@@ -70,7 +71,7 @@ $this->title = 'Update Project Params';
 
                 <?= $form->field($model, 'upp_email')->input('email', ['maxlength' => true]) ?>
 
-                <?= $form->field($model, 'upp_tw_phone_number')->widget(\borales\extensions\phoneInput\PhoneInput::class, [
+                <?= $form->field($model, 'upp_tw_phone_number')->widget(PhoneInput::class, [
                     'jsOptions' => [
                         'formatOnDisplay' => false,
                         'autoPlaceholder' => 'off',
