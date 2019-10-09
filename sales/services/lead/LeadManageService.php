@@ -10,6 +10,7 @@ use sales\forms\lead\LeadCreateForm;
 use sales\forms\lead\PreferencesCreateForm;
 use sales\forms\lead\SegmentCreateForm;
 use sales\forms\lead\SegmentEditForm;
+use sales\forms\lead\SegmentForm;
 use sales\repositories\airport\AirportRepository;
 use sales\repositories\cases\CasesRepository;
 use sales\repositories\client\ClientEmailRepository;
@@ -20,7 +21,10 @@ use sales\repositories\lead\LeadRepository;
 use sales\repositories\lead\LeadSegmentRepository;
 use sales\services\cases\CasesManageService;
 use sales\services\client\ClientManageService;
+use sales\services\lead\calculator\LeadTripTypeCalculator;
+use sales\services\lead\calculator\SegmentDTO;
 use sales\services\TransactionManager;
+use yii\helpers\VarDumper;
 
 /**
  * @property LeadRepository $leadRepository
@@ -285,35 +289,14 @@ class LeadManageService
      */
     private function calculateTripType(array $segments): string
     {
-        $countSegments = count($segments);
-        if ($countSegments === 0) {
-            return '';
-        }
-        if ($countSegments === 1) {
-            return Lead::TRIP_TYPE_ONE_WAY;
-        }
-        if ($countSegments === 2) {
+        $segmentsDTO = [];
 
-            $airport1 = $segments[0]->origin;
-            $airport2 = $segments[0]->destination;
-            $airport3 = $segments[1]->origin;
-            $airport4 = $segments[1]->destination;
-            if ($airport1 == $airport4 && $airport3 == $airport2) {
-                return Lead::TRIP_TYPE_ROUND_TRIP;
-            }
-            if (
-                ($airport1 = $this->airportRepository->getByIata($segments[0]->origin)) &&
-                ($airport2 = $this->airportRepository->getByIata($segments[0]->destination)) &&
-                ($airport3 = $this->airportRepository->getByIata($segments[1]->origin)) &&
-                ($airport4 = $this->airportRepository->getByIata($segments[1]->destination))
-            ) {
-                if ($airport1->city == $airport4->city && $airport3->city == $airport2->city) {
-                    return Lead::TRIP_TYPE_ROUND_TRIP;
-                }
-            }
-
+        /** @var SegmentForm $segment */
+        foreach ($segments as $segment) {
+            $segmentsDTO[] = new SegmentDTO($segment->origin, $segment->destination);
         }
-        return Lead::TRIP_TYPE_MULTI_DESTINATION;
+
+        return LeadTripTypeCalculator::calculate(...$segmentsDTO);
     }
 
     /**

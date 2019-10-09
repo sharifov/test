@@ -11,6 +11,8 @@ use common\models\LeadFlightSegment;
 use common\models\Notifications;
 use common\models\Sources;
 use sales\repositories\lead\LeadRepository;
+use sales\services\lead\calculator\LeadTripTypeCalculator;
+use sales\services\lead\calculator\SegmentDTO;
 use sales\services\lead\LeadHashGenerator;
 use sales\services\TransactionManager;
 use webapi\models\ApiLead;
@@ -417,21 +419,18 @@ class LeadController extends ApiBaseController
             $lead->uid = uniqid();
         }
 
-        if (!$lead->trip_type) {
-            $lead->trip_type = Lead::TRIP_TYPE_ROUND_TRIP;
-        }
-
-        if ($modelLead->flights) {
-            $flightCount = count($modelLead->flights);
-
-            if ($flightCount === 1) {
-                $lead->trip_type = Lead::TRIP_TYPE_ONE_WAY;
-            } elseif ($flightCount === 2) {
-                $lead->trip_type = Lead::TRIP_TYPE_ROUND_TRIP;
-            } else {
-                $lead->trip_type = Lead::TRIP_TYPE_MULTI_DESTINATION;
-            }
-        }
+//
+//        if ($modelLead->flights) {
+//            $flightCount = count($modelLead->flights);
+//
+//            if ($flightCount === 1) {
+//                $lead->trip_type = Lead::TRIP_TYPE_ONE_WAY;
+//            } elseif ($flightCount === 2) {
+//                $lead->trip_type = Lead::TRIP_TYPE_ROUND_TRIP;
+//            } else {
+//                $lead->trip_type = Lead::TRIP_TYPE_MULTI_DESTINATION;
+//            }
+//        }
 
 
         if (!$lead->cabin) {
@@ -527,8 +526,14 @@ class LeadController extends ApiBaseController
             throw new UnprocessableEntityHttpException($this->errorToString($modelLead->errors), 8);
         }
 
+        if (!$lead->trip_type) {
+            $lead->trip_type = Lead::TRIP_TYPE_ROUND_TRIP;
+        }
 
         if ($modelLead->flights) {
+
+            $segmentsDTO = [];
+
             foreach ($modelLead->flights as $flight) {
                 $flightModel = new LeadFlightSegment();
                 $flightModel->scenario = LeadFlightSegment::SCENARIO_CREATE_API;
@@ -539,12 +544,16 @@ class LeadController extends ApiBaseController
                 $flightModel->destination = $flight['destination'];
                 $flightModel->departure = $flight['departure'];
 
+                $segmentsDTO[] = new SegmentDTO($flight['origin'], $flight['destination']);
+
                 if (!$flightModel->save()) {
                     Yii::error(print_r($flightModel->errors, true), 'API:Lead:create:LeadFlightSegment:save');
                     $transaction->rollBack();
                     throw new UnprocessableEntityHttpException($this->errorToString($flightModel->errors), 10);
                 }
             }
+
+            $lead->setTripType(LeadTripTypeCalculator::calculate(...$segmentsDTO));
         }
 
 

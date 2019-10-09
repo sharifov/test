@@ -27,6 +27,8 @@ use sales\events\lead\LeadStatusChangedEvent;
 use sales\events\lead\LeadTaskEvent;
 use sales\events\lead\LeadTrashEvent;
 use sales\helpers\lead\LeadHelper;
+use sales\services\lead\calculator\LeadTripTypeCalculator;
+use sales\services\lead\calculator\SegmentDTO;
 use Yii;
 use yii\base\InvalidArgumentException;
 use yii\behaviors\TimestampBehavior;
@@ -606,6 +608,19 @@ class Lead extends ActiveRecord implements AggregateRoot
             }
         }
         $this->trip_type = '';
+    }
+
+    public function recalculateTripType()
+    {
+        $segmentsDTO = [];
+
+        foreach ($this->leadFlightSegments as $segment) {
+            $segmentsDTO[] = new SegmentDTO($segment->origin, $segment->destination);
+        }
+
+        $type = LeadTripTypeCalculator::calculate(...$segmentsDTO);
+
+        $this->setTripType($type);
     }
 
     /**
