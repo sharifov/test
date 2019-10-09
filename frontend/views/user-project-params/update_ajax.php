@@ -2,8 +2,8 @@
 
 use yii\helpers\Html;
 use yii\bootstrap\ActiveForm;
-//use borales\extensions\phoneInput\PhoneInput;
-use frontend\extensions\PhoneInput;
+use borales\extensions\phoneInput\PhoneInput;
+//use frontend\extensions\PhoneInput;
 
 /* @var $this yii\web\View */
 /* @var $model common\models\UserProjectParams */

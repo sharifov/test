@@ -12,8 +12,8 @@ use yii\helpers\ArrayHelper;
 use common\models\EmployeeContactInfo;
 use common\models\Employee;
 use common\models\Project;
-//use borales\extensions\phoneInput\PhoneInput;
-use frontend\extensions\PhoneInput;
+use borales\extensions\phoneInput\PhoneInput;
+//use frontend\extensions\PhoneInput;
 
 $employeeAccess = ArrayHelper::map($model->projectEmployeeAccesses, 'project_id', 'project_id');
 $availableProjects = $employeeAccess;

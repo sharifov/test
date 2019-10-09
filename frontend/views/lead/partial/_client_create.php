@@ -3,8 +3,8 @@
 use unclead\multipleinput\MultipleInput;
 use yii\widgets\ActiveForm;
 use unclead\multipleinput\MultipleInputColumn;
-//use borales\extensions\phoneInput\PhoneInput;
-use frontend\extensions\PhoneInput;
+use borales\extensions\phoneInput\PhoneInput;
+//use frontend\extensions\PhoneInput;
 
 /**
  * @var $this yii\web\View
