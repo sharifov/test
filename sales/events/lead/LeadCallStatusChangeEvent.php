@@ -6,6 +6,7 @@ use common\models\Lead;
 
 /**
  * Class LeadCallStatusChangeEvent
+ *
  * @property Lead $lead
  * @property int|null $oldCallStatus
  * @property int $newCallStatus
@@ -13,8 +14,13 @@ use common\models\Lead;
  */
 class LeadCallStatusChangeEvent
 {
+
+    public $lead;
+    public $oldCallStatus;
+    public $newCallStatus;
+    public $ownerId;
+
     /**
-     * LeadCallStatusChangeEvent constructor.
      * @param Lead $lead
      * @param int|null $oldCallStatus
      * @param int $newCallStatus
@@ -27,4 +33,5 @@ class LeadCallStatusChangeEvent
         $this->newCallStatus = $newCallStatus;
         $this->ownerId = $ownerId;
     }
+
 }

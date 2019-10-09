@@ -15,10 +15,7 @@ use common\models\LeadFlow;
 class LeadFlowSearch extends LeadFlow
 {
     public $statuses = [];
-    public $created_date_from;
-    public $created_date_to;
-
-
+    public $createdRangeTime;
     public $supervision_id;
 
     /**
@@ -27,8 +24,8 @@ class LeadFlowSearch extends LeadFlow
     public function rules()
     {
         return [
-            [['id', 'employee_id', 'lead_id', 'status', 'supervision_id', 'lf_from_status_id'], 'integer'],
-            [['created', 'created_date_from', 'created_date_to', 'statuses'], 'safe'],
+            [['id', 'employee_id', 'lead_id', 'status', 'supervision_id', 'lf_from_status_id', 'lf_out_calls', 'lf_owner_id'], 'integer'],
+            [['created', 'statuses', 'lf_end_dt', 'createdRangeTime'], 'safe'],
         ];
     }
 
@@ -50,7 +47,7 @@ class LeadFlowSearch extends LeadFlow
      */
     public function search($params)
     {
-        $query = LeadFlow::find()->with('employee', 'lead');
+        $query = LeadFlow::find()->with('employee', 'lead', 'owner');
 
         // add conditions that should always apply here
 
@@ -78,19 +75,23 @@ class LeadFlowSearch extends LeadFlow
             $query->andWhere(['lead_flow.status' => $this->statuses]);
         }
 
-        if($this->created_date_from || $this->created_date_to) {
+        if ($this->createdRangeTime) {
+            $createdRange = explode(" - ", $this->createdRangeTime);
+            if ($createdRange[0]) {
+                $query->andFilterWhere(['>=', 'lead_flow.created', Employee::convertTimeFromUserDtToUTC(strtotime($createdRange[0]))]);
+            }
+            if ($createdRange[1]) {
+                $query->andFilterWhere(['<=', 'lead_flow.created', Employee::convertTimeFromUserDtToUTC(strtotime($createdRange[1]))]);
+            }
+        }
 
-            if ($this->created_date_from) {
-                $query->andFilterWhere(['>=', 'lead_flow.created', Employee::convertTimeFromUserDtToUTC(strtotime($this->created_date_from))]);
-            }
-            if ($this->created_date_to) {
-                $query->andFilterWhere(['<=', 'lead_flow.created', Employee::convertTimeFromUserDtToUTC(strtotime($this->created_date_to))]);
-            }
-
-        } else {
-            if($this->created) {
-                $query->andFilterWhere(['DATE(lead_flow.created)'=> date('Y-m-d', strtotime($this->created))]);
-            }
+        if($this->created) {
+            $query->andFilterWhere(['>=', 'created', Employee::convertTimeFromUserDtToUTC(strtotime($this->created))])
+                ->andFilterWhere(['<=', 'created', Employee::convertTimeFromUserDtToUTC(strtotime($this->created) + 3600 * 24)]);
+        }
+        if($this->lf_end_dt) {
+            $query->andFilterWhere(['>=', 'lead_flow.lf_end_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->lf_end_dt))])
+                ->andFilterWhere(['<=', 'lead_flow.lf_end_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->lf_end_dt) + 3600 * 24)]);
         }
 
         if($this->supervision_id > 0) {
@@ -103,9 +104,11 @@ class LeadFlowSearch extends LeadFlow
         $query->andFilterWhere([
             'id' => $this->id,
             'employee_id' => $this->employee_id,
+            'lf_owner_id' => $this->lf_owner_id,
             'lead_id' => $this->lead_id,
             'status' => $this->status,
-            'lf_from_status_id' => $this->lf_from_status_id
+            'lf_from_status_id' => $this->lf_from_status_id,
+            'lf_out_calls' => $this->lf_out_calls
         ]);
 
         return $dataProvider;

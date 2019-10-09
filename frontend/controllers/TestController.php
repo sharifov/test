@@ -33,6 +33,7 @@ use sales\forms\api\communication\voice\record\RecordForm;
 use sales\forms\lead\ClientCreateForm;
 use sales\forms\lead\EmailCreateForm;
 use sales\forms\lead\PhoneCreateForm;
+use sales\forms\leadflow\TakeOverReasonForm;
 use sales\helpers\user\UserFinder;
 use sales\repositories\airport\AirportRepository;
 use sales\repositories\cases\CasesRepository;
@@ -45,14 +46,19 @@ use sales\services\api\communication\CommunicationService;
 use sales\services\cases\CasesManageService;
 use sales\services\client\ClientManageService;
 use sales\services\TransactionManager;
+use sales\StatusLog;
+use sales\temp\LeadFlowUpdate;
 use SebastianBergmann\CodeCoverage\Report\PHP;
 use Twilio\TwiML\VoiceResponse;
 use Yii;
+use yii\base\Event;
 use yii\caching\DbDependency;
+use yii\db\ActiveRecord;
 use yii\helpers\ArrayHelper;
 use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
 use yii\helpers\Inflector;
+use yii\helpers\Json;
 use yii\helpers\VarDumper;
 use common\components\ReceiveEmailsJob;
 use yii\queue\Queue;
@@ -113,16 +119,7 @@ class TestController extends FController
 
     public function actionTest()
     {
-        $userId = 295;
 
-        $employee = UserFinder::find($userId);
-        var_dump($employee->accessTakeLeadByFrequencyMinutes());die;
-
-//        $projects = EmployeeProjectAccess::getProjects($userId);
-//        $projects = EmployeeProjectAccess::getProjects($userId);
-//        $projects = EmployeeProjectAccess::getProjects($userId);
-//        $projects = EmployeeProjectAccess::getProjects($userId);
-//        VarDumper::dump($projects, 10, true);
 
         return $this->render('blank');
 
@@ -130,7 +127,6 @@ class TestController extends FController
 
     public function actionT()
     {
-
 
 
 die;
@@ -1109,7 +1105,7 @@ die;
         foreach ($statuses as $status) {
             sleep(random_int(2, 3));
             $n++;
-            Notifications::socket($user_id, null, 'callUpdate', ['id' => 123, 'status' => $status, 'duration' =>  ($status == 'completed' ? random_int(51, 180) : 0), 'snr' => $n], true);
+            // Notifications::socket($user_id, null, 'callUpdate', ['id' => 123, 'status' => $status, 'duration' =>  ($status == 'completed' ? random_int(51, 180) : 0), 'snr' => $n], true);
         }
     }
 
@@ -1145,7 +1141,7 @@ die;
             sleep(random_int(3, 5));
             $data['status'] = $status;
             $n++;
-            Notifications::socket($user_id, $lead_id = null, 'incomingCall', $data, true);
+            // Notifications::socket($user_id, $lead_id = null, 'incomingCall', $data, true);
             echo '<br>'.$status;
         }
 
@@ -1409,7 +1405,7 @@ die;
     public function actionNotify()
     {
         $host = \Yii::$app->params['url_address'] ?? '';
-        Notifications::socket(Yii::$app->user->id, null, 'openUrl', ['url' => $host . '/lead/view/b5d963c9241dd741e22b37d1fa80a9b6'], false);
+        // Notifications::socket(Yii::$app->user->id, null, 'openUrl', ['url' => $host . '/lead/view/b5d963c9241dd741e22b37d1fa80a9b6'], false);
     }
 
     public function actionNotify2()

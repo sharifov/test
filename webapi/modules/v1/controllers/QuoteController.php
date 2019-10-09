@@ -11,6 +11,7 @@ use common\models\Notifications;
 use common\models\Quote;
 use common\models\QuotePrice;
 use common\models\UserProjectParams;
+use sales\repositories\lead\LeadRepository;
 use Yii;
 use yii\helpers\Html;
 use yii\helpers\VarDumper;
@@ -274,17 +275,33 @@ class QuoteController extends ApiBaseController
                         if ($lead) {
                             $project_name = $lead->project ? $lead->project->name : '';
                             $subject = 'Quote- ' . $model->uid . ' OPENED';
-                            $message = 'Your Quote (UID: ' . $model->uid . ") has been OPENED by client! \r\nProject: " . Html::encode($project_name) . "! \r\n lead: " . $host . '/lead/view/' . $lead->gid;
+                            $message = 'Your Quote (UID: ' . $model->uid . ") has been OPENED by client! \r\nProject: " . Html::encode($project_name) . "! \r\nlead: " . $host . '/lead/view/' . $lead->gid;
 
                             if ($lead->employee_id) {
                                 $isSend = Notifications::create($lead->employee_id, $subject, $message, Notifications::TYPE_INFO, true);
                                 if ($isSend) {
-                                    Notifications::socket($lead->employee_id, null, 'getNewNotification', [], true);
+                                    // Notifications::socket($lead->employee_id, null, 'getNewNotification', [], true);
+                                    Notifications::sendSocket('getNewNotification', ['user_id' => $lead->employee_id]);
                                 }
                             }
                         }
                     }
                     //exec(dirname(Yii::getAlias('@app')) . '/yii quote/send-opened-notification '.$uid.'  > /dev/null 2>&1 &');
+                }
+            } elseif ($model->isDeclined()) {
+                if ($lead = $model->lead) {
+                    $project_name = $lead->project ? $lead->project->name : '';
+                    $subject = 'Quote- ' . $model->uid . ' OPENED';
+                    $host = Yii::$app->params['url_address'];
+                    $message = 'Your Declined Quote (UID: ' . $model->uid . ") has been OPENED by client! \r\nProject: " . Html::encode($project_name) . "! \r\nlead: " . $host . '/lead/view/' . $lead->gid;
+
+                    if ($lead->employee_id) {
+                        $isSend = Notifications::create($lead->employee_id, $subject, $message, Notifications::TYPE_INFO, true);
+                        if ($isSend) {
+                            // Notifications::socket($lead->employee_id, null, 'getNewNotification', [], true);
+                            Notifications::sendSocket('getNewNotification', ['user_id' => $lead->employee_id]);
+                        }
+                    }
                 }
             }
 
@@ -451,8 +468,17 @@ class QuoteController extends ApiBaseController
                         }
                     }
                     if ($model->status == Quote::STATUS_APPLIED) {
-                        $model->lead->status = Lead::STATUS_BOOKED;
-                        $model->lead->save(false, ['status']);
+                        if (!$model->lead->isBooked()) {
+                            try {
+                                $repo = Yii::createObject(LeadRepository::class);
+                                $model->lead->booked($model->lead->employee_id, null);
+                                $repo->save($model->lead);
+                            } catch (\Throwable $e) {
+                                Yii::error($e->getMessage(), 'API:Quote:Lead:Booked');
+                            }
+                        }
+//                        $model->lead->status = Lead::STATUS_BOOKED;
+//                        $model->lead->save(false, ['status']);
                     }
                     $response['status'] = 'Success';
                     $transaction->commit();

@@ -1,6 +1,6 @@
 <?php
 
-use sales\ui\user\ListsAccess;
+use sales\access\ListsAccess;
 use yii\helpers\Html;
 use yii\widgets\Pjax;
 use kartik\grid\GridView;

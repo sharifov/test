@@ -2,7 +2,7 @@
 
 use dosamigos\datepicker\DatePicker;
 use sales\access\EmployeeProjectAccess;
-use sales\ui\user\ListsAccess;
+use sales\access\ListsAccess;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 use yii\widgets\Pjax;
@@ -96,7 +96,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'filter' => $lists->getProjects(),
         ],
         [
-            'attribute' => 'pending',
+            'attribute' => 'created',
             'label' => 'Pending Time',
             'value' => function (\common\models\Lead $model) {
                 $str = Yii::$app->formatter->asRelativeTime(strtotime($model->created));
@@ -121,7 +121,7 @@ $this->params['breadcrumbs'][] = $this->title;
         ],
 
         [
-            'attribute' => 'update',
+            'attribute' => 'updated',
             'label' => 'Trash Date',
             'value' => function (\common\models\Lead $model) {
                 $str = Yii::$app->formatter->asRelativeTime(strtotime($model->updated));
@@ -307,13 +307,12 @@ $this->params['breadcrumbs'][] = $this->title;
             'format' => 'raw'
         ],*/
         [
-            //'attribute' => 'reason',
             'label' => 'Reason',
             'contentOptions' => [
                 'style' => 'max-width: 250px;'
             ],
             'value' => function (\common\models\Lead $model) {
-                return '<pre>' . $model->getLastReason() . '</pre>';
+                return '<pre>'. $model->getLastReasonFromLeadFlow()  . '</pre>';
             },
             'format' => 'raw'
         ],

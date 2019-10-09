@@ -1,7 +1,6 @@
 <?php
 
-use common\models\Employee;
-use sales\ui\user\ListsAccess;
+use sales\access\ListsAccess;
 use yii\helpers\Html;
 use yii\widgets\Pjax;
 use kartik\grid\GridView;
@@ -24,7 +23,15 @@ $lists =  new ListsAccess(Yii::$app->user->id);
     <h1><?= Html::encode($this->title) ?></h1>
 
     <?php Pjax::begin(); ?>
-    <?php echo $this->render('_search', ['model' => $searchModel, 'action' => 'export', 'lists' => $lists]); ?>
+
+    <?php echo $this->render('_search', [
+            'model' => $searchModel,
+        'action' => 'export',
+        'lists' => new ListsAccess()
+
+    ]); ?>
+
+
 
     <p>
         <?//= Html::a('Create Lead', ['create'], ['class' => 'btn btn-success']) ?>
@@ -52,7 +59,7 @@ $lists =  new ListsAccess(Yii::$app->user->id);
             'header' => 'Trash/Reject reason.',
             'value' => function(\common\models\Lead $model) {
                 if ($model->status === \common\models\Lead::STATUS_REJECT || $model->status === \common\models\Lead::STATUS_TRASH) {
-                    return $model->getLastReason();
+                    return $model->getLastReasonFromLeadFlow();
                 }
                 return '';
             },

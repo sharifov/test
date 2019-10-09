@@ -155,7 +155,10 @@ class TelegramController extends Controller
 
                                     } else {
                                         Notifications::create($user->id, 'Telegram Auth', 'Hi, '.$result['message']['chat']['first_name'] ?? ''.' ('.$result['message']['chat']['username'] ?? ''.')! Your Telegram Account is activated. ', Notifications::TYPE_SUCCESS, true);
-                                        Notifications::socket($user->id, null, 'getNewNotification', [], true);
+                                        // Notifications::socket($user->id, null, 'getNewNotification', [], true);
+                                        Notifications::sendSocket('getNewNotification', ['user_id' => $user->id]);
+
+
 
                                         Yii::$app->telegram->sendMessage([
                                             'chat_id' => $chat_id,

@@ -22,9 +22,11 @@ use yii\helpers\VarDumper;
  * @property int $stp_updated_user_id
  * @property string $stp_created_dt
  * @property string $stp_updated_dt
+ * @property int $stp_dep_id
  *
  * @property Sms[] $sms
  * @property Employee $stpCreatedUser
+ * @property Department $stpDep
  * @property Employee $stpUpdatedUser
  */
 class SmsTemplateType extends \yii\db\ActiveRecord
@@ -44,12 +46,13 @@ class SmsTemplateType extends \yii\db\ActiveRecord
     {
         return [
             [['stp_key', 'stp_origin_name', 'stp_name'], 'required'],
-            [['stp_hidden', 'stp_created_user_id', 'stp_updated_user_id'], 'integer'],
+            [['stp_hidden', 'stp_created_user_id', 'stp_updated_user_id', 'stp_dep_id'], 'integer'],
             [['stp_created_dt', 'stp_updated_dt'], 'safe'],
             [['stp_key'], 'string', 'max' => 50],
             [['stp_origin_name', 'stp_name'], 'string', 'max' => 100],
             [['stp_key'], 'unique'],
             [['stp_created_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['stp_created_user_id' => 'id']],
+            [['stp_dep_id'], 'exist', 'skipOnError' => true, 'targetClass' => Department::class, 'targetAttribute' => ['stp_dep_id' => 'dep_id']],
             [['stp_updated_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['stp_updated_user_id' => 'id']],
         ];
     }
@@ -69,6 +72,7 @@ class SmsTemplateType extends \yii\db\ActiveRecord
             'stp_updated_user_id' => 'Updated User ID',
             'stp_created_dt' => 'Created Dt',
             'stp_updated_dt' => 'Updated Dt',
+            'stp_dep_id' => 'Department',
         ];
     }
 
@@ -108,6 +112,15 @@ class SmsTemplateType extends \yii\db\ActiveRecord
     public function getStpCreatedUser()
     {
         return $this->hasOne(Employee::class, ['id' => 'stp_created_user_id']);
+    }
+
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getStpDep()
+    {
+        return $this->hasOne(Department::class, ['dep_id' => 'stp_dep_id']);
     }
 
     /**
@@ -185,7 +198,7 @@ class SmsTemplateType extends \yii\db\ActiveRecord
      * @param bool $withHidden
      * @return array
      */
-    public static function getList($withHidden = true) : array
+    public static function getList($withHidden = true): array
     {
         $query = self::find()->orderBy(['stp_name' => SORT_ASC]);
         if(!$withHidden) {
@@ -193,5 +206,25 @@ class SmsTemplateType extends \yii\db\ActiveRecord
         }
         $data = $query->asArray()->all();
         return ArrayHelper::map($data, 'stp_id', 'stp_name');
+    }
+
+
+    /**
+     * @param bool $withHidden
+     * @param int|null $dep_id
+     * @return array
+     */
+    public static function getKeyList($withHidden = true, ?int $dep_id = null ): array
+    {
+        $query = self::find()->orderBy(['stp_name' => SORT_ASC]);
+        if(!$withHidden) {
+            $query->andWhere(['stp_hidden' => false]);
+        }
+
+        if($dep_id !== null) {
+            $query->andWhere(['stp_dep_id' => $dep_id]);
+        }
+        $data = $query->asArray()->all();
+        return ArrayHelper::map($data, 'stp_key', 'stp_name');
     }
 }

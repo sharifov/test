@@ -346,11 +346,13 @@ $c_type_id = $comForm->c_type_id;
                             </div>
 
                             <div class="col-sm-3 form-group message-field-sms" id="sms-template-group">
-                                <?= $form->field($comForm, 'c_sms_tpl_id')->dropDownList(\common\models\SmsTemplateType::getList(false), ['prompt' => '---', 'class' => 'form-control', 'id' => 'c_sms_tpl_id']) ?>
+                                <?//= $form->field($comForm, 'c_sms_tpl_id')->dropDownList(\common\models\SmsTemplateType::getList(false), ['prompt' => '---', 'class' => 'form-control', 'id' => 'c_sms_tpl_id']) ?>
+                                <?= $form->field($comForm, 'c_sms_tpl_key')->dropDownList(\common\models\SmsTemplateType::getKeyList(false, $model->cs_dep_id), ['prompt' => '---', 'class' => 'form-control', 'id' => 'c_sms_tpl_key']) ?>
                             </div>
 
                             <div class="col-sm-3 form-group message-field-email" id="email-template-group" style="display: none;">
-                                <?= $form->field($comForm, 'c_email_tpl_id')->dropDownList(\common\models\EmailTemplateType::getList(false, $model->cs_dep_id), ['prompt' => '---', 'class' => 'form-control', 'id' => 'c_email_tpl_id']) ?>
+                                <?//= $form->field($comForm, 'c_email_tpl_id')->dropDownList(\common\models\EmailTemplateType::getList(false, \common\models\Department::DEPARTMENT_SALES), ['prompt' => '---', 'class' => 'form-control', 'id' => 'c_email_tpl_id']) ?>
+                                <?= $form->field($comForm, 'c_email_tpl_key')->dropDownList(\common\models\EmailTemplateType::getKeyList(false, $model->cs_dep_id), ['prompt' => '---', 'class' => 'form-control', 'id' => 'c_email_tpl_key']) ?>
                             </div>
 
                             <div class="col-sm-3 form-group message-field-sms message-field-email" id="language-group" style="display: block;">
@@ -671,12 +673,13 @@ JS;
 <?php
 
 
-$tpl_email_blank_id = \frontend\models\CommunicationForm::TPL_TYPE_EMAIL_BLANK;
-
+$tpl_email_blank_key = \frontend\models\CommunicationForm::TPL_TYPE_EMAIL_BLANK_KEY;
+$tpl_sms_blank_key = \frontend\models\CommunicationForm::TPL_TYPE_SMS_BLANK_KEY;
 
 $js = <<<JS
 
-    const tpl_email_blank_id = '$tpl_email_blank_id';
+    const tpl_email_blank_key = '$tpl_email_blank_key';
+    const tpl_sms_blank_key = '$tpl_sms_blank_key';
 
     $('body').on("change", '#c_type_id', function () {
         initializeMessageType($(this).val());
@@ -686,11 +689,11 @@ $js = <<<JS
         $('#div-call-phone-number').text($(this).val());
     });
     
-    $('body').on("change", '#c_sms_tpl_id', function () {
-        if($(this).val() == 2) {
-            $('#sms-textarea-div').hide();
-        } else {
+     $('body').on("change", '#c_sms_tpl_key', function () {
+        if($(this).val() == tpl_sms_blank_key) {
             $('#sms-textarea-div').show();
+        } else {
+            $('#sms-textarea-div').hide();
         }
     });
     
@@ -720,19 +723,21 @@ $js = <<<JS
         
     });
     
-    $('body').on("change", '#c_email_tpl_id', function () {
+    $('body').on("change", '#c_email_tpl_key', function () {
                 
-        var type_id = $('#c_type_id').val();
+        //var type_id = $('#c_type_id').val();
         
-        if(type_id != tpl_email_blank_id) {
-            if($(this).val() != tpl_email_blank_id) {
-                $('#email-textarea-div').hide();
-                $('#email-subtitle-group').hide();
-            } else {
+        //alert($(this).val());
+        
+        //if(type_id != 2) {
+            if($(this).val() == tpl_email_blank_key) {
                 $('#email-textarea-div').show();
                 $('#email-subtitle-group').show();
+            } else {
+                $('#email-textarea-div').hide();
+                $('#email-subtitle-group').hide();
             }
-        }
+        //}
     });
 
 

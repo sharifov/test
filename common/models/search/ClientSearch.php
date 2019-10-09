@@ -4,6 +4,7 @@ namespace common\models\search;
 
 use common\models\ClientEmail;
 use common\models\ClientPhone;
+use common\models\Employee;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use common\models\Client;
@@ -56,11 +57,19 @@ class ClientSearch extends Client
             return $dataProvider;
         }
 
+        if ($this->created){
+            $query->andFilterWhere(['>=', 'created', Employee::convertTimeFromUserDtToUTC(strtotime($this->created))])
+                ->andFilterWhere(['<=', 'created', Employee::convertTimeFromUserDtToUTC(strtotime($this->created) + 3600 *24)]);
+        }
+
+        if ($this->updated){
+            $query->andFilterWhere(['>=', 'updated', Employee::convertTimeFromUserDtToUTC(strtotime($this->updated))])
+                ->andFilterWhere(['<=', 'updated', Employee::convertTimeFromUserDtToUTC(strtotime($this->updated) + 3600 *24)]);
+        }
+
         // grid filtering conditions
         $query->andFilterWhere([
             'id' => $this->id,
-            'DATE(created)' => $this->created,
-            'DATE(updated)' => $this->updated,
         ]);
 
         if($this->not_in_client_id) {

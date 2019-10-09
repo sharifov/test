@@ -10,7 +10,7 @@ use sales\repositories\Repository;
 /**
  * Class LeadFlowRepository
  * @method null|LeadFlow get($id)
- * @method null|LeadFlow getPreview($leadId)
+ * @method null|LeadFlow getPrevious($leadId)
  */
 class LeadFlowRepository extends Repository
 {
@@ -29,7 +29,7 @@ class LeadFlowRepository extends Repository
      * @param $leadId
      * @return LeadFlow
      */
-    public function findPreview($leadId): LeadFlow
+    public function findPrevious($leadId): LeadFlow
     {
         if ($leadFlow = LeadFlow::find()->where(['lead_id' => $leadId])->orderBy(['id' => SORT_DESC])->limit(1)->one()) {
             return $leadFlow;

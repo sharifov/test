@@ -3,6 +3,8 @@
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
+use dosamigos\datepicker\DatePicker;
+
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\ClientSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -102,14 +104,38 @@ $this->params['breadcrumbs'][] = $this->title;
                 'value' => function(\common\models\Client $model) {
                 return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->created));
                 },
-                'format' => 'html',
+                'format' => 'raw',
+                'filter' => DatePicker::widget([
+                    'model' => $searchModel,
+                    'attribute' => 'created',
+                    'clientOptions' => [
+                        'autoclose' => true,
+                        'format' => 'yyyy-mm-dd',
+                    ],
+                    'options' => [
+                        'autocomplete' => 'off',
+                        'placeholder' =>'Choose Date'
+                    ],
+                ]),
             ],
             [
                 'attribute' => 'updated',
                 'value' => function(\common\models\Client $model) {
                 return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->updated));
                 },
-                'format' => 'html',
+                'format' => 'raw',
+                'filter' => DatePicker::widget([
+                    'model' => $searchModel,
+                    'attribute' => 'updated',
+                    'clientOptions' => [
+                        'autoclose' => true,
+                        'format' => 'yyyy-mm-dd',
+                    ],
+                    'options' => [
+                        'autocomplete' => 'off',
+                        'placeholder' =>'Choose Date'
+                    ],
+                ]),
             ],
 
             ['class' => 'yii\grid\ActionColumn', 'template' => '{view}'],

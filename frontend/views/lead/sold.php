@@ -1,6 +1,6 @@
 <?php
 
-use sales\ui\user\ListsAccess;
+use sales\access\ListsAccess;
 use yii\helpers\Html;
 use yii\widgets\Pjax;
 use common\models\Lead;
@@ -299,6 +299,9 @@ $this->params['breadcrumbs'][] = $this->title;
                 'clientOptions' => [
                     'autoclose' => true,
                     'format' => 'dd-mm-yyyy'
+                ],
+                'options' => [
+                    'autocomplete' => 'off'
                 ]
             ]),
             'contentOptions' => [

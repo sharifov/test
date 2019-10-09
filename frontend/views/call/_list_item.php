@@ -21,7 +21,7 @@ use \common\models\Call;
         }
     ?>
 
-    <table class="table table-bordered <?=($model->isIn() && ($model->isStatusNoAnswer() || $model->isStatusCanceled() || $model->isStatusBusy())) ? '' : 'table-striped'?>">
+    <table class="table table-condensed <?=($model->isIn() && ($model->isStatusNoAnswer() || $model->isStatusCanceled() || $model->isStatusBusy())) ? '' : 'table-striped'?>">
         <tr class="<?=$trClass?>">
             <td rowspan="2" style="width:50px">
                 <u><?=Html::a($model->c_id, ['call/view', 'id' => $model->c_id], ['target' => '_blank', 'data-pjax' => 0])?></u><br>
@@ -146,9 +146,9 @@ use \common\models\Call;
              ?>
 
                 <?php if ($model->isStatusIvr() || $model->isStatusRinging() || $model->isStatusInProgress() || $model->isStatusQueue()):?>
-                    <span class="badge badge-warning timer" data-sec="<?=$sec?>" data-control="start" data-format="%M:%S" title="<?=Yii::$app->formatter->asDuration($sec)?>">00:00</span>
+                    <span class="badge badge-warning timer" data-sec="<?=$sec?>" data-control="start" data-format="%M:%S"><?=gmdate('i:s', $sec)?></span>
                 <?php else: ?>
-                    <span class="badge badge-primary timer" data-sec="<?=$sec?>" data-control="pause" data-format="%M:%S" title="<?=Yii::$app->formatter->asDuration($sec)?>">00:00</span>
+                    <span class="badge badge-primary"><?=gmdate('i:s', $sec)?></span> <?//data-sec="<?=$sec" data-control="pause" data-format="%M:%S"?>
                     &nbsp;&nbsp;&nbsp;<?=Yii::$app->formatter->asRelativeTime(strtotime($model->c_created_dt))?>
                 <?php endif;?>
             </td>
@@ -179,89 +179,33 @@ use \common\models\Call;
             <tr>
 
                 <td colspan="6">
-                    <table class="table table-bordered">
+                    <table class="table table-condensed">
                         <?php foreach ($model->calls as $callItem):?>
                         <tr>
-                            <td style="width:50px">
+                            <td style="width:70px; border: none">
                                 <u><?=Html::a($callItem->c_id, ['call/view', 'id' => $callItem->c_id], ['target' => '_blank', 'data-pjax' => 0])?></u><br>
+                            </td>
+                            <td style="width: 50px">
                                 <?php if ($callItem->c_source_type_id):?>
                                     <span class="label label-info"><?=$callItem->getShortSourceName()?></span>
                                 <?php endif; ?>
                             </td>
-<!--                            <td class="text-center" style="width:100px">-->
-<!---->
-<!--                                --><?php //if($callItem->isIn()):?>
-<!--                                    <div><i class="fa fa-male text-info fa-border"></i></div>-->
-<!--                                    --><?//=$callItem->c_from?>
-<!--                                --><?php //else: ?>
-<!--                                    --><?php //if($callItem->c_created_user_id):?>
-<!--                                        <i class="fa fa-user fa-border"></i><br>-->
-<!--                                        --><?//=Html::encode($callItem->cCreatedUser->username)?>
-<!--                                    --><?php //else: ?>
-<!--                                        <i class="fa fa-phone fa-border"></i><br>-->
-<!--                                        --><?//=$callItem->c_from?>
-<!--                                    --><?php //endif; ?>
-<!--                                --><?php //endif; ?>
-<!--                            </td>-->
-<!--                            <td class="text-center" style="width:130px">-->
-<!--                                --><?php //if ($callItem->isIn()):?>
-<!--                                    In-->
-<!--                                --><?php //else:?>
-<!--                                    Out-->
-<!--                                --><?php //endif;?>
-<!--                                <br>-->
-<!--                                <span class="badge badge-info">--><?//=$callItem->cProject ? $callItem->cProject->name : '-'?><!--</span><br>-->
-<!--                                --><?php //if($callItem->cDep):?>
-<!--                                    <span class="label label-warning">--><?//=$callItem->cDep ? Html::encode($callItem->cDep->dep_name) : '-'?><!--</span>-->
-<!--                                --><?php //endif; ?>
-<!--                                --><?php //if ($callItem->c_source_type_id):?>
-<!--                                    <span class="label label-info">--><?//=$callItem->getShortSourceName()?><!--</span>-->
-<!--                                --><?php //endif; ?>
-<!--                                --><?php //if ($callItem->c_forwarded_from):?>
-<!--                                    <span class="label label-info" title="Forwarded from: --><?//=Html::encode($callItem->c_forwarded_from)?><!--">F</span>-->
-<!--                                --><?php //endif; ?>
-<!--                            </td>-->
-<!--                            <td class="text-left">-->
-<!--                                --><?php //if($callItem->c_lead_id && $callItem->cLead):?>
-<!--                                    <i>l:--><?//=Html::a($callItem->c_lead_id, ['lead/view', 'gid' => $callItem->cLead->gid], ['data-pjax' => 0, 'target' => '_blank'])?>
-<!---->
-<!--                                        --><?////=$callItem->cLead->l_init_price ? ' - ' . number_format($callItem->cLead->l_init_price, 0) : ''?>
-<!--                                    </i><br>-->
-<!--                                    --><?///*php
-//                        $segments = $callItem->cLead->leadFlightSegments;
-//                        $segmentData = [];
-//                        if ($segments) {
-//                            foreach ($segments as $sk => $segment) {
-//                                $segmentData[] =  '<small>' . $segment->origin . ' <i class="fa fa-long-arrow-right"></i> ' . $segment->destination . '</small>';
-//                            }
-//                        }
-//
-//                        $segmentStr = implode('<br>', $segmentData);
-//                        echo $segmentStr;*/
-//                                    ?>
-<!---->
-<!---->
-<!--                                    --><?////=$callItem->c_lead_id?>
-<!--                                --><?php //endif; ?>
-<!---->
-<!--                                --><?php //if($callItem->c_case_id && $callItem->cCase):?>
-<!--                                    <i>c:--><?//=Html::a($callItem->c_case_id, ['cases/view', 'gid' => $callItem->cCase->cs_gid], ['data-pjax' => 0, 'target' => '_blank'])?><!--</i><br>-->
-<!--                                --><?php //endif; ?>
-<!---->
-<!--                                --><?php //if($callItem->isIn() && $callItem->cugUgs):?>
-<!--                                    --><?php //$userGroupList = [];
-//                                    foreach ($callItem->cugUgs as $userGroup) {
-//                                        $userGroupList[] =  '<span class="label label-info"><i class="fa fa-users"></i> ' . Html::encode($userGroup->ug_name) . '</span>';
-//                                    }
-//                                    echo $userGroupList ? implode('<br>', $userGroupList) : '-';
-//                                    ?>
-<!--                                --><?php //endif; ?>
-<!---->
-<!--                            </td>-->
-                            <td class="text-left">
+                            <td style="width: 120px">
+                                <?=$callItem->getStatusIcon()?> <?=$callItem->getStatusName()?>
+                            </td>
+                            <td style="width: 80px" class="text-center">
+                                <?php if($callItem->c_updated_dt): ?>
+                                    <?php if ($callItem->isEnded()):?>
+                                        <?php $sec = $callItem->c_call_duration ?: strtotime($callItem->c_updated_dt) - strtotime($callItem->c_created_dt); ?>
+                                        <span class="badge badge-primary timer" data-sec="<?=$sec?>" data-control="pause" data-format="%M:%S" style="font-size: 10px"><?=gmdate('i:s', $sec)?></span>
+                                    <?php else: ?>
+                                        <?php $sec = time() - strtotime($callItem->c_updated_dt); ?>
+                                        <span class="badge badge-warning timer" data-sec="<?=$sec?>" data-control="start" data-format="%M:%S"><?=gmdate('i:s', $sec)?></span>
+                                    <?php endif;?>
+                                <?php endif;?>
+                            </td>
 
-                                <i class="fa fa-clock-o"></i> <?=Yii::$app->formatter->asDatetime(strtotime($callItem->c_created_dt), 'php:H:i:s')?>
-<!--                                sid: <b>--><?//=$callItem->c_call_sid?><!--</b><br>-->
+                            <td class="text-left">
                                 <?php if($callItem->cuaUsers):?>
                                     <?php foreach ($callItem->callUserAccesses as $cua):
 
@@ -284,49 +228,31 @@ use \common\models\Call;
                                     <?php endforeach;?>
                                 <?php endif; ?>
                             </td>
-                            <td class="text-center" style="width:260px">
-                                <?=$callItem->getStatusIcon()?> <?=$callItem->getStatusName()?><br>
-                                <?php
-                                $sec = 0;
-                                if($callItem->c_updated_dt) {
-
-                                    if ($callItem->isStatusIvr() || $callItem->isStatusRinging() || $callItem->isStatusInProgress() || $callItem->isStatusQueue()) {
-                                        $sec = time() - strtotime($callItem->c_updated_dt);
-                                    } else {
-                                        $sec = $callItem->c_call_duration ?: strtotime($callItem->c_updated_dt) - strtotime($callItem->c_created_dt);
-                                    }
-                                }
-                                ?>
-
-                                <?php if ($callItem->isStatusIvr() || $callItem->isStatusRinging() || $callItem->isStatusInProgress() || $callItem->isStatusQueue()):?>
-                                    <span class="badge badge-warning timer" data-sec="<?=$sec?>" data-control="start" data-format="%M:%S" title="<?=Yii::$app->formatter->asDuration($sec)?>">
-                        00:00
-                    </span>
-                                <?php else: ?>
-                                    <span class="badge badge-primary timer" data-sec="<?=$sec?>" data-control="pause" data-format="%M:%S" title="<?=Yii::$app->formatter->asDuration($sec)?>">
-                        00:00
-                    </span>
-                                    &nbsp;&nbsp;&nbsp;<?=Yii::$app->formatter->asRelativeTime(strtotime($callItem->c_created_dt))?>
-                                <?php endif;?>
-
-<!--                                <br>--><?//=$callItem->getStatusName2()?><!--<br>-->
+                            <td class="text-center" style="width:90px">
+                                <i class="fa fa-clock-o"></i> <?=Yii::$app->formatter->asDatetime(strtotime($callItem->c_created_dt), 'php:H:i')?>
                             </td>
-                            <td class="text-center" style="width:110px">
+                            <td class="text-center" style="width:180px">
+                                <?php if($callItem->c_updated_dt): ?>
+                                <small>
+                                    <?php if ($callItem->isEnded()):?>
+                                        <?=Yii::$app->formatter->asRelativeTime(strtotime($callItem->c_created_dt))?>
+                                    <?php endif;?>
+                                </small>
+                                <?php endif;?>
+                            </td>
+                            <td class="text-left" style="width:130px">
                                 <?php if($callItem->isIn()):?>
                                     <div>
                                         <?php if($callItem->c_created_user_id):?>
-                                            <i class="fa fa-user fa-border"></i><br>
-                                            <?=Html::encode($callItem->cCreatedUser->username)?>
+                                            <i class="fa fa-user fa-border"></i> <?=Html::encode($callItem->cCreatedUser->username)?>
                                         <?php else: ?>
-                                            <i class="fa fa-phone fa-border"></i><br>
-                                            <?=$callItem->c_to?>
+                                            <i class="fa fa-phone fa-border"></i> <?=Html::encode($callItem->c_to)?>
                                         <?php endif; ?>
                                     </div>
                                 <?php else: ?>
                                     <div>
-                                        <i class="fa fa-male text-info fa-border"></i>
+                                        <i class="fa fa-male text-info fa-border"></i> <?=Html::encode($callItem->c_to)?>
                                     </div>
-                                    <?=$callItem->c_to?>
                                 <?php endif; ?>
                             </td>
                         </tr>

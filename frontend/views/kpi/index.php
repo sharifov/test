@@ -25,19 +25,30 @@ $this->params['breadcrumbs'][] = $this->title;
     <h1><?= Html::encode($this->title) ?></h1>
     <?php Pjax::begin(); ?>
     <?php if(!$isAgent):?>
-    	<div class="form-inline">
+        <div class="form-inline">
             <?php
             $form = ActiveForm::begin([
                 'method' => 'post',
             ]);
             ?>
-            	<?= $form->field($model, 'date_dt', ['template' => "{label}{input}"])
-            	->widget(\dosamigos\datepicker\DatePicker::class,
-            	    ['inline' => false,'clientOptions' => ['autoclose' => true,'format' => 'M-yyyy','todayBtn' => true]])
-            	->label('Date');?>
-            	<div class="form-group">
-            		<?= Html::submitButton('<i class="fa fa-search"></i> Calculate salary by month', ['class' => 'btn btn-info','style'=>'margin-bottom:10px;']) ?>
-            	</div>
+            <?= $form->field($model, 'date_dt', ['template' => "{label}{input}"])
+                ->widget(\dosamigos\datepicker\DatePicker::class,
+                    [
+                        'inline' => false,
+                        'clientOptions' => [
+                            'autoclose' => true,
+                            'format' => 'M-yyyy',
+                            'todayBtn' => false,
+                            'minViewMode' => 1
+                        ],
+                        'options' => [
+                            'autocomplete' => 'off',
+                            'placeholder' =>'Choose Date'
+                        ],
+                    ])->label('Date');?>
+            <div class="form-group">
+                <?= Html::submitButton('<i class="fa fa-search"></i> Calculate salary by month', ['class' => 'btn btn-info','style'=>'margin-bottom:10px;']) ?>
+            </div>
             <?php ActiveForm::end(); ?>
         </div>
     <?php endif;?>
@@ -58,7 +69,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'label' => 'Employee',
                 'value' => function (\common\models\KpiHistory $model) {
                     return Html::tag('i', '', ['class' => 'fa fa-user']).' '.Html::encode($model->khUser->username);
-                    },
+                },
                 'format' => 'raw',
                 'filter' => $userList,
                 'visible' => !$isAgent
@@ -75,8 +86,13 @@ $this->params['breadcrumbs'][] = $this->title;
                     'attribute' => 'kh_date_dt',
                     'clientOptions' => [
                         'autoclose' => true,
-                        'format' => 'M-yyyy'
-                    ]
+                        'format' => 'M-yyyy',
+                        'minViewMode' => 1
+                    ],
+                    'options' => [
+                        'autocomplete' => 'off',
+                        'placeholder' =>'Choose Date'
+                    ],
                 ]),
                 'contentOptions' => [
                     'style' => 'width: 180px;text-align:center;'
@@ -99,7 +115,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'kh_estimation_profit',
                 'visible' => !$isAgent,
-                ],
+            ],
             [
                 'label' => 'Salary',
                 'value' => function (\common\models\KpiHistory $model) {
@@ -120,7 +136,11 @@ $this->params['breadcrumbs'][] = $this->title;
                     'clientOptions' => [
                         'autoclose' => true,
                         'format' => 'yyyy-mm-dd'
-                    ]
+                    ],
+                    'options' => [
+                        'autocomplete' => 'off',
+                        'placeholder' =>'Choose Date'
+                    ],
                 ]),
                 'contentOptions' => [
                     'style' => 'width: 180px;text-align:center;'
@@ -131,7 +151,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'attribute' => 'kh_super_approved_dt',
                 'value' => function ($model) {
                     return $model['kh_super_approved_dt'];
-                    },
+                },
                 'format' => 'datetime',
                 'filter' => DatePicker::widget([
                     'model' => $searchModel,
@@ -139,7 +159,11 @@ $this->params['breadcrumbs'][] = $this->title;
                     'clientOptions' => [
                         'autoclose' => true,
                         'format' => 'yyyy-mm-dd'
-                    ]
+                    ],
+                    'options' => [
+                        'autocomplete' => 'off',
+                        'placeholder' =>'Choose Date'
+                    ],
                 ]),
                 'contentOptions' => [
                     'style' => 'width: 180px;text-align:center;'
@@ -150,15 +174,15 @@ $this->params['breadcrumbs'][] = $this->title;
                 'template' => '{action}',
                 'buttons' => [
                     'action' => function ($url, $model, $key) {
-                            return Html::a('Details', Url::to([
-                                'kpi/details',
-                                'id' => $model['kh_id']
-                            ]), [
-                                'class' => 'btn btn-info btn-xs',
-                                'target' => '_blank',
-                                'data-pjax' => 0,
-                                'title' => 'View details'
-                            ]);
+                        return Html::a('Details', Url::to([
+                            'kpi/details',
+                            'id' => $model['kh_id']
+                        ]), [
+                            'class' => 'btn btn-info btn-xs',
+                            'target' => '_blank',
+                            'data-pjax' => 0,
+                            'title' => 'View details'
+                        ]);
                     }
                 ]
             ]

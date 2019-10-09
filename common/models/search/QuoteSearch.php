@@ -71,12 +71,14 @@ class QuoteSearch extends Quote
                 ->andFilterWhere(['<=', 'created', Employee::convertTimeFromUserDtToUTC(strtotime($this->datetime_end))]);
         }
 
-        if (isset($params['QuoteSearch']['created'])) {
-            $query->andFilterWhere(['=','DATE(created)', $this->created]);
+        if ($this->created) {
+            $query->andFilterWhere(['>=', 'created', Employee::convertTimeFromUserDtToUTC(strtotime($this->created))])
+                ->andFilterWhere(['<=', 'created', Employee::convertTimeFromUserDtToUTC(strtotime($this->created) + 3600 * 24)]);
         }
 
-        if (isset($params['QuoteSearch']['updated'])) {
-            $query->andFilterWhere(['=','DATE(updated)', $this->updated]);
+        if ($this->updated) {
+            $query->andFilterWhere(['>=', 'updated', Employee::convertTimeFromUserDtToUTC(strtotime($this->updated))])
+                ->andFilterWhere(['<=', 'updated', Employee::convertTimeFromUserDtToUTC(strtotime($this->updated) + 3600 * 24)]);
         }
 
         // grid filtering conditions

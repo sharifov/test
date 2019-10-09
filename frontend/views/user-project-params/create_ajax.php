@@ -3,7 +3,8 @@
 use sales\access\EmployeeProjectAccess;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
-
+use borales\extensions\phoneInput\PhoneInput;
+//use frontend\extensions\PhoneInput;
 
 /* @var $this yii\web\View */
 /* @var $model common\models\UserProjectParams */
@@ -69,7 +70,7 @@ $this->title = 'Create Project Params';
                 <?//= $form->field($model, 'upp_tw_phone_number')->textInput(['maxlength' => true]) ?>
 
 
-                <?= $form->field($model, 'upp_tw_phone_number')->widget(\borales\extensions\phoneInput\PhoneInput::class, [
+                <?= $form->field($model, 'upp_tw_phone_number')->widget(PhoneInput::class, [
                     'jsOptions' => [
                         'autoPlaceholder' => 'off',
                         'customPlaceholder' => '',

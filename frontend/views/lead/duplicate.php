@@ -1,6 +1,6 @@
 <?php
 
-use sales\ui\user\ListsAccess;
+use sales\access\ListsAccess;
 use yii\helpers\Html;
 use yii\widgets\Pjax;
 use common\models\Lead;
@@ -417,14 +417,13 @@ $this->registerCssFile('/css/style-duplicate.css');
             },
             'format' => 'raw'
         ],*/
-        [
-            //'attribute' => 'reason',
+       [
             'label' => 'Reason',
             'contentOptions' => [
                 'style' => 'max-width: 250px;'
             ],
             'value' => function (\common\models\Lead $model) {
-                return '<pre>'.$model->getLastReason().'</pre>';
+                return '<pre>'. $model->getLastReasonFromLeadFlow()  . '</pre>';
             },
             'format' => 'raw'
         ],

@@ -6,8 +6,7 @@
 use frontend\widgets\OnlineConnection;
 use yii\helpers\Html;
 
-$bundle = \frontend\themes\gentelella\assets\Asset::register($this);
-//$isAdmin = Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id);
+\frontend\themes\gentelella\assets\Asset::register($this);
 \frontend\assets\NotifyAsset::register($this);
 
 
@@ -39,6 +38,13 @@ $bundle = \frontend\themes\gentelella\assets\Asset::register($this);
     <div class="main_container">
         <!-- top navigation -->
         <nav class="" role="navigation">
+            <ul class="nav navbar-nav navbar-left">
+                <li>
+<!--                    <a href="javascript:;" class="user-profile dropdown-toggle" data-toggle="dropdown" aria-expanded="false">-->
+                        <?= frontend\widgets\UserInfoWidget::widget() ?>
+<!--                    </a>-->
+                </li>
+            </ul>
             <ul class="nav navbar-nav navbar-right">
                 <li class="">
                     <a href="javascript:;" class="user-profile dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
@@ -64,7 +70,7 @@ $bundle = \frontend\themes\gentelella\assets\Asset::register($this);
                         <span class=" fa fa-angle-down"></span>
                     </a>
                     <ul class="dropdown-menu dropdown-usermenu pull-right">
-                        <? /*<li><a href="javascript:;">  Profile</a>
+                        <?/*<li><a href="javascript:;">  Profile</a>
                         </li>
                         <li>
                             <a href="javascript:;">

@@ -4,6 +4,7 @@ namespace console\controllers;
 
 use common\models\Lead;
 use common\models\Task;
+use sales\repositories\lead\LeadRepository;
 use yii\console\Controller;
 use yii\helpers\Console;
 use yii\helpers\VarDumper;
@@ -132,6 +133,7 @@ class LeadController extends Controller
         'last_task_date' => '2018-10-06'
        */
 
+        $repo = Yii::createObject(LeadRepository::class);
 
        $leadsData = Lead::getEndTaskLeads(Task::CAT_NOT_ANSWERED_PROCESS);
 
@@ -146,17 +148,19 @@ class LeadController extends Controller
                    } else*/
 
                    if(!$leadItem['l_answered']) {
-                       $lead->status = Lead::STATUS_FOLLOW_UP;
-                       $lead->status_description = 'System AutoChange status to FOLLOW_UP ('.$leadItem['checked_cnt'] .'/'. $leadItem['all_cnt'] . ' tasks completed)';
-
-
-                       if ($lead->employee_id && !$lead->sendNotification('lead-status-follow-up', $lead->employee_id, null, $lead)) {
-                           Yii::warning('Not send Email notification to employee_id: ' . $lead->employee_id . ', lead: ' . $lead->id, 'Console:LeadController:UpdateByTasks:sendNotification');
+                       try {
+                           $lead->followUp($lead->employee_id, null, 'System AutoChange status to FOLLOW UP');
+                           $repo->save($lead);
+                       } catch (\Throwable $e) {
+                           Yii::error($e->getMessage(), 'ConsoleLeadController:UpdateByTask:FollowUp');
                        }
+                                                    //    status_description - Was deleted
+//                       $lead->status_description = 'System AutoChange status to FOLLOW_UP ('.$leadItem['checked_cnt'] .'/'. $leadItem['all_cnt'] . ' tasks completed)';
+//                       if ($lead->employee_id && !$lead->sendNotification('lead-status-follow-up', $lead->employee_id, null, $lead)) {
+//                           Yii::warning('Not send Email notification to employee_id: ' . $lead->employee_id . ', lead: ' . $lead->id, 'Console:LeadController:UpdateByTasks:sendNotification');
+//                       }
 
                    }
-
-                   $lead->update();
 
                    echo ' - Lead: '.$lead->id. ' - ' .$leadItem['checked_cnt'] .'/'. $leadItem['all_cnt'] . " tasks completed \r\n";
                }
@@ -172,16 +176,23 @@ class LeadController extends Controller
                 $lead = Lead::findOne($leadItem['lt_lead_id']);
                 if($lead) {
                     if($leadItem['l_answered']) {
-                        $lead->status = Lead::STATUS_SNOOZE;
-                        $lead->snooze_for = date('Y-m-d', strtotime('+3 days'));
-                        $lead->status_description = 'System AutoChange status to SNOOZE ('.$leadItem['checked_cnt'] .'/'. $leadItem['all_cnt'] . ' tasks completed)';
+//                        $lead->status = Lead::STATUS_SNOOZE;
+//                        $lead->snooze_for = date('Y-m-d', strtotime('+3 days'));
+
+                        try {
+                            $lead->snooze(date('Y-m-d', strtotime('+3 days')), $lead->employee_id, null, 'System AutoChange status to SNOOZE');
+                            $repo->save($lead);
+                        } catch (\Throwable $e) {
+                            Yii::error($e->getMessage(), 'ConsoleLeadController:UpdateByTask:Snooze');
+                        }
+
+                                                // status_description-  Was deleted
+//                        $lead->status_description = 'System AutoChange status to SNOOZE ('.$leadItem['checked_cnt'] .'/'. $leadItem['all_cnt'] . ' tasks completed)';
                     }
                     /*else {
                         $lead->status = Lead::STATUS_FOLLOW_UP;
                         $lead->status_description = 'System AutoChange status to FOLLOW_UP ('.$leadItem['checked_cnt'] .'/'. $leadItem['all_cnt'] . ' tasks completed)';
                     }*/
-
-                    $lead->update();
 
                     echo ' - Lead: '.$lead->id. ' - ' .$leadItem['checked_cnt'] .'/'. $leadItem['all_cnt'] . " tasks completed \r\n";
                 }

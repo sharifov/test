@@ -2,7 +2,7 @@
 
 use dosamigos\datepicker\DatePicker;
 use sales\access\EmployeeProjectAccess;
-use sales\ui\user\ListsAccess;
+use sales\access\ListsAccess;
 use yii\helpers\Html;
 use yii\widgets\Pjax;
 use kartik\grid\GridView;
@@ -106,12 +106,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     $clientName = '-';
                 }
 
-                $str = '';
-                /*$str .= '<span title="Calls Out / In"><i class="fa fa-phone success"></i> '. $model->getCountCalls(\common\models\Call::CALL_TYPE_OUT) .'/'.  $model->getCountCalls(\common\models\Call::CALL_TYPE_IN) .'</span> | ';
-                $str .= '<span title="SMS Out / In"><i class="fa fa-comments info"></i> '. $model->getCountSms(\common\models\Sms::TYPE_OUTBOX) .'/'.  $model->getCountCalls(\common\models\Sms::TYPE_INBOX) .'</span> | ';
-                $str .= '<span title="Email Out / In"><i class="fa fa-envelope danger"></i> '. $model->getCountEmails(\common\models\Email::TYPE_OUTBOX) .'/'.  $model->getCountEmails(\common\models\Email::TYPE_INBOX) .'</span>';*/
-
-                return $clientName.'<br/>'.$model->getClientTime2().$str;
+                return $clientName.'<br/>'.$model->getClientTime2();
             },
             'options' => [
                 'style' => 'width:160px'
@@ -121,11 +116,7 @@ $this->params['breadcrumbs'][] = $this->title;
         [
             'label' => 'Communication',
             'value' => function (\common\models\Lead $model) {
-                $str = '';
-                $str .= '<span title="Calls Out / In"><i class="fa fa-phone success"></i> '. $model->getCountCalls(\common\models\Call::CALL_TYPE_OUT) .'/'.  $model->getCountCalls(\common\models\Call::CALL_TYPE_IN) .'</span> | ';
-                $str .= '<span title="SMS Out / In"><i class="fa fa-comments info"></i> '. $model->getCountSms(\common\models\Sms::TYPE_OUTBOX) .'/'.  $model->getCountCalls(\common\models\Sms::TYPE_INBOX) .'</span> | ';
-                $str .= '<span title="Email Out / In"><i class="fa fa-envelope danger"></i> '. $model->getCountEmails(\common\models\Email::TYPE_OUTBOX) .'/'.  $model->getCountEmails(\common\models\Email::TYPE_INBOX) .'</span>';
-                return $str;
+                return $model->getCommunicationInfo();
             },
             'format' => 'raw',
             'contentOptions' => [
@@ -226,7 +217,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'style' => 'text-align:center;'
             ],
             'value' => function (\common\models\Lead $model) {
-                return '<span style="cursor:help;" class="label label-warning" title="'.Html::encode($model->getLastReason()).'">&nbsp;<i class="fa fa-info-circle"></i>&nbsp;</span>';
+                return '<span style="cursor:help;" class="label label-warning" title="'.Html::encode($model->getLastReasonFromLeadFlow()).'">&nbsp;<i class="fa fa-info-circle"></i>&nbsp;</span>';
             },
             'format' => 'raw'
         ],
@@ -242,18 +233,6 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             'filter' => [1 => 'Yes', 0 => 'No'],
             'format' => 'raw'
-        ],
-
-        [
-            'header' => 'Grade',
-            'attribute' => 'l_grade',
-            'value' => function (\common\models\Lead $model) {
-                return $model->l_grade;
-            },
-            'contentOptions' => [
-                'class' => 'text-center',
-            ],
-            'visible' => ! $isAgent
         ],
 
         [

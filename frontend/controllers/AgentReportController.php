@@ -2,16 +2,12 @@
 
 namespace frontend\controllers;
 
+use common\models\Employee;
 use Yii;
-use yii\filters\AccessControl;
-use yii\filters\VerbFilter;
-use yii\base\DynamicModel;
 use common\models\search\AgentActivitySearch;
 use common\models\Call;
 use common\models\Sms;
 use common\models\Email;
-use yii\helpers\ArrayHelper;
-
 
 /**
  * AgentActivityController.
@@ -72,7 +68,7 @@ class AgentReportController extends FController
         $params = $this->validateDateParams($params);
         $dataProvider = $searchModel->searchCalls($params);
 
-        $title = ($params['AgentActivitySearch']['c_call_type_id'] == Call::CALL_TYPE_OUT)?'Inbound calls':'Outbound calls';
+        $title = ($params['AgentActivitySearch']['c_call_type_id'] == Call::CALL_TYPE_OUT) ? 'Outbound calls' : 'Inbound calls';
 
         return $this->render('_calls', [
             'title' => $title,

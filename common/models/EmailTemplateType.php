@@ -216,4 +216,24 @@ class EmailTemplateType extends \yii\db\ActiveRecord
         return ArrayHelper::map($data, 'etp_id', 'etp_name');
     }
 
+    /**
+     * @param bool $withHidden
+     * @param int|null $dep_id
+     * @return array
+     */
+    public static function getKeyList(?bool $withHidden = true, ?int $dep_id) : array
+    {
+        $query = self::find()->orderBy(['etp_name' => SORT_ASC]);
+        if(!$withHidden) {
+            $query->andWhere(['etp_hidden' => false]);
+        }
+
+        if($dep_id !== null) {
+            $query->andWhere(['etp_dep_id' => $dep_id]);
+        }
+
+        $data = $query->asArray()->all();
+        return ArrayHelper::map($data, 'etp_key', 'etp_name');
+    }
+
 }

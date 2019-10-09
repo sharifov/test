@@ -7,6 +7,7 @@ use common\components\jobs\UpdateLeadBOJob;
 use common\models\local\LeadLogMessage;
 use Yii;
 use yii\behaviors\TimestampBehavior;
+use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 use yii\helpers\VarDumper;
 
@@ -38,7 +39,6 @@ use yii\helpers\VarDumper;
  * @property int $bo_flight_id
  * @property string $additional_information
  * @property bool $l_answered
- * @property int $l_grade
  * @property int $clone_id
  * @property string $description
  * @property double $final_profit
@@ -86,6 +86,9 @@ use yii\helpers\VarDumper;
  * @property TipsSplit[] $tipsSplits
  * @property Employee[] $tsUsers
  * @property UserConnection[] $userConnections
+ * @property LeadQcall $leadQcall
+ *
+ * @property LeadFlow $lastLeadFlow
  */
 class Lead2 extends \yii\db\ActiveRecord
 {
@@ -103,7 +106,7 @@ class Lead2 extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['client_id', 'employee_id', 'status', 'project_id', 'source_id', 'rating', 'bo_flight_id', 'l_grade', 'clone_id', 'l_call_status_id', 'l_duplicate_lead_id', 'l_dep_id'], 'integer'],
+            [['client_id', 'employee_id', 'status', 'project_id', 'source_id', 'rating', 'bo_flight_id', 'clone_id', 'l_call_status_id', 'l_duplicate_lead_id', 'l_dep_id'], 'integer'],
             [['adults', 'children', 'infants'], 'integer', 'max' => 9],
             [['notes_for_experts', 'request_ip_detail', 'additional_information', 'l_client_ua'], 'string'],
             [['created', 'updated', 'snooze_for', 'l_pending_delay_dt', 'l_last_action_dt'], 'safe'],
@@ -159,7 +162,6 @@ class Lead2 extends \yii\db\ActiveRecord
             'bo_flight_id' => 'Bo Flight ID',
             'additional_information' => 'Additional Information',
             'l_answered' => 'Answered',
-            'l_grade' => 'Grade',
             'clone_id' => 'Clone ID',
             'description' => 'Description',
             'final_profit' => 'Final Profit',
@@ -413,6 +415,22 @@ class Lead2 extends \yii\db\ActiveRecord
     }
 
     /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getLeadQcall(): ActiveQuery
+    {
+        return $this->hasOne(LeadQcall::class, ['lqc_lead_id' => 'id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getLastLeadFlow(): ActiveQuery
+    {
+        return $this->hasOne(LeadFlow::class, ['lead_id' => 'id'])->orderBy([LeadFlow::tableName() . '.id' => SORT_DESC])->limit(1);
+    }
+
+    /**
      * {@inheritdoc}
      * @return LeadsQuery the active query used by this AR class.
      */
@@ -445,6 +463,50 @@ class Lead2 extends \yii\db\ActiveRecord
     }
 
     /**
+     * @return bool
+     */
+    public function createOrUpdateQCall(): bool
+    {
+
+        if ($this->lastLeadFlow) {
+            $callCount = (int) $this->lastLeadFlow->lf_out_calls;
+        } else {
+            $callCount = 0;
+        }
+
+        $qcConfig = QcallConfig::getByStatusCall($this->status, $callCount);
+
+        Yii::info(VarDumper::dumpAsString(['lead_id' => $this->id, 'status' => $this->status, 'callCount' => $callCount, 'qcConfig' => $qcConfig ? $qcConfig->attributes : null]), 'info\createOrUpdateQCall');
+
+        $lq = $this->leadQcall;
+
+        if ($qcConfig) {
+            if (!$lq) {
+                $lq = new LeadQcall();
+                $lq->lqc_lead_id = $this->id;
+                $lq->lqc_weight = $this->project_id * 10;
+            }
+
+            $lq->lqc_dt_from = date('Y-m-d H:i:s', (time() + ((int) $qcConfig->qc_time_from * 60)));
+            $lq->lqc_dt_to = date('Y-m-d H:i:s', (time() + ((int) $qcConfig->qc_time_to * 60)));
+
+            if (!$lq->save()) {
+                Yii::error(VarDumper::dumpAsString($lq->errors), 'Lead2:createOrUpdateQCall:LeadQcall:save');
+                return true;
+            }
+        } else {
+            if ($lq) {
+                try {
+                    $lq->delete();
+                } catch (\Throwable $throwable) {
+                    Yii::error($throwable->getMessage(), 'Lead2:createOrUpdateQCall:Throwable');
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
      * @param bool $insert
      * @param array $changedAttributes
      */
@@ -454,6 +516,11 @@ class Lead2 extends \yii\db\ActiveRecord
 
         if ($insert) {
             LeadFlow::addStateFlow2($this, $insert);
+
+            //if ($this->scenario === self::SCENARIO_API) {
+                $this->createOrUpdateQCall();
+            //}
+
         } else {
             if (isset($changedAttributes['status']) && $changedAttributes['status'] !== $this->status) {
                 LeadFlow::addStateFlow2($this, $insert);
@@ -500,12 +567,13 @@ class Lead2 extends \yii\db\ActiveRecord
     }
 
 
-    /**
-     * @param string $phoneNumber
-     * @param int $project_id
-     * @return Lead2
-     */
-    public static function createNewLeadByPhone(string $phoneNumber = '', int $project_id = 0): Lead2
+	/**
+	 * @param string $phoneNumber
+	 * @param int $project_id
+	 * @param int $source_id
+	 * @return Lead2
+	 */
+    public static function createNewLeadByPhone(string $phoneNumber = '', int $project_id = 0, int $source_id = 0): Lead2
     {
         $lead = new self();
         $clientPhone = ClientPhone::find()->where(['phone' => $phoneNumber])->orderBy(['id' => SORT_DESC])->limit(1)->one();
@@ -534,12 +602,17 @@ class Lead2 extends \yii\db\ActiveRecord
             //$lead->employee_id = $this->c_created_user_id;
             $lead->client_id = $client->id;
             $lead->project_id = $project_id;
+            $lead->source_id = $source_id;
             $lead->l_call_status_id = Lead::CALL_STATUS_QUEUE;
+            $source = null;
 
-            //$source = Source::find()->select('id')->where(['phone_number' => $this->c_to])->limit(1)->one();
+			if ($source_id) {
+				$source = Sources::findOne(['id' => $lead->source_id]);
+			}
 
-            $source = Sources::find()->select('id')->where(['project_id' => $lead->project_id, 'default' => true])->one();
-
+			if (!$source) {
+				$source = Sources::find()->select('id')->where(['project_id' => $lead->project_id, 'default' => true])->one();
+			}
 
             if($source) {
                 $lead->source_id = $source->id;
@@ -569,6 +642,14 @@ class Lead2 extends \yii\db\ActiveRecord
         }
 
         return $lead;
+    }
+
+    /**
+     * @return int
+     */
+    public function updateLastAction() : int
+    {
+        return self::updateAll(['l_last_action_dt' => date('Y-m-d H:i:s')], ['id' => $this->id]);
     }
 
 }

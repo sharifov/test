@@ -11,7 +11,10 @@ use common\models\LeadFlightSegment;
 use common\models\Notifications;
 use common\models\Sources;
 use sales\repositories\lead\LeadRepository;
+use sales\services\lead\calculator\LeadTripTypeCalculator;
+use sales\services\lead\calculator\SegmentDTO;
 use sales\services\lead\LeadHashGenerator;
+use sales\services\TransactionManager;
 use webapi\models\ApiLead;
 use webapi\models\ApiLeadCallExpert;
 use Yii;
@@ -25,12 +28,19 @@ class LeadController extends ApiBaseController
 {
     private $leadHashGenerator;
     private $leadRepository;
+    private $transactionManager;
 
-    public function __construct($id, $module, LeadHashGenerator $leadHashGenerator, LeadRepository $leadRepository, $config = [])
+    public function __construct($id,
+                                $module,
+                                LeadHashGenerator $leadHashGenerator,
+                                LeadRepository $leadRepository,
+                                TransactionManager $transactionManager,
+                                $config = [])
     {
         parent::__construct($id, $module, $config);
         $this->leadHashGenerator = $leadHashGenerator;
         $this->leadRepository = $leadRepository;
+        $this->transactionManager = $transactionManager;
     }
 
     /**
@@ -409,21 +419,18 @@ class LeadController extends ApiBaseController
             $lead->uid = uniqid();
         }
 
-        if (!$lead->trip_type) {
-            $lead->trip_type = Lead::TRIP_TYPE_ROUND_TRIP;
-        }
-
-        if ($modelLead->flights) {
-            $flightCount = count($modelLead->flights);
-
-            if ($flightCount === 1) {
-                $lead->trip_type = Lead::TRIP_TYPE_ONE_WAY;
-            } elseif ($flightCount === 2) {
-                $lead->trip_type = Lead::TRIP_TYPE_ROUND_TRIP;
-            } else {
-                $lead->trip_type = Lead::TRIP_TYPE_MULTI_DESTINATION;
-            }
-        }
+//
+//        if ($modelLead->flights) {
+//            $flightCount = count($modelLead->flights);
+//
+//            if ($flightCount === 1) {
+//                $lead->trip_type = Lead::TRIP_TYPE_ONE_WAY;
+//            } elseif ($flightCount === 2) {
+//                $lead->trip_type = Lead::TRIP_TYPE_ROUND_TRIP;
+//            } else {
+//                $lead->trip_type = Lead::TRIP_TYPE_MULTI_DESTINATION;
+//            }
+//        }
 
 
         if (!$lead->cabin) {
@@ -476,7 +483,7 @@ class LeadController extends ApiBaseController
         );
 
         if ($duplicate = $this->leadRepository->getByRequestHash($request_hash)) {
-            $lead->setDuplicate($duplicate->id);
+            $lead->duplicate($duplicate->id, $modelLead->employee_id, null);
             Yii::info('Warning: detected duplicate Lead (Origin id: ' . $duplicate->id . ', Hash: ' . $request_hash . ')', 'nfo\API:Lead:duplicate');
         }
 
@@ -519,8 +526,14 @@ class LeadController extends ApiBaseController
             throw new UnprocessableEntityHttpException($this->errorToString($modelLead->errors), 8);
         }
 
+        if (!$lead->trip_type) {
+            $lead->trip_type = Lead::TRIP_TYPE_ROUND_TRIP;
+        }
 
         if ($modelLead->flights) {
+
+            $segmentsDTO = [];
+
             foreach ($modelLead->flights as $flight) {
                 $flightModel = new LeadFlightSegment();
                 $flightModel->scenario = LeadFlightSegment::SCENARIO_CREATE_API;
@@ -531,12 +544,16 @@ class LeadController extends ApiBaseController
                 $flightModel->destination = $flight['destination'];
                 $flightModel->departure = $flight['departure'];
 
+                $segmentsDTO[] = new SegmentDTO($flight['origin'], $flight['destination']);
+
                 if (!$flightModel->save()) {
                     Yii::error(print_r($flightModel->errors, true), 'API:Lead:create:LeadFlightSegment:save');
                     $transaction->rollBack();
                     throw new UnprocessableEntityHttpException($this->errorToString($flightModel->errors), 10);
                 }
             }
+
+            $lead->setTripType(LeadTripTypeCalculator::calculate(...$segmentsDTO));
         }
 
 
@@ -1072,54 +1089,133 @@ class LeadController extends ApiBaseController
             'errors' => []
         ];
 
-        $transaction = Yii::$app->db->beginTransaction();
         try {
 
+            $isSold = $lead->isSold();
+            $isReject = $lead->isReject();
+            $lastStatus = $lead->status;
+
             $lead->attributes = $leadAttributes;
-            if (!$lead->save()) {
+
+            if (!$lead->validate()) {
                 $response['errors'][] = $lead->getErrors();
-                $transaction->rollBack();
             } else {
 
-                if (!empty($leadAttributes['additional_information']) &&
-                    !empty($leadAttributes['additional_information']['pnr'])
-                ) {
-                    $aplliend = $lead->getAppliedAlternativeQuotes();
-                    if ($aplliend !== null) {
-                        $aplliend->record_locator = $leadAttributes['additional_information']['pnr'];
-                        $aplliend->save(false);
-                        if ($aplliend->hasErrors()) {
-                            $response['errors'][] = $aplliend->getErrors();
+                $result = $this->transactionManager->wrap(function() use ($lead, $leadAttributes, $isSold, $isReject, $lastStatus) {
+
+                    $response = [];
+
+                    if (!$isSold && $lead->isSold()) {
+                        $lead->status = $lastStatus;
+                        $lead->sold($lead->employee_id, null);
+                    } elseif (!$isReject && $lead->isReject()) {
+                        $lead->status = $lastStatus;
+                        $lead->reject($lead->employee_id, null, 'BO rejected');
+                    } elseif (!isset($leadAttributes['status'])) {
+                        Yii::warning('Lead: ' . $lead->id . ' Void Status', 'API:LeadSoldUpdate:Status');
+                    }
+
+                    $this->leadRepository->save($lead);
+
+                    if (!empty($leadAttributes['additional_information']) &&
+                        !empty($leadAttributes['additional_information']['pnr'])
+                    ) {
+                        $aplliend = $lead->getAppliedAlternativeQuotes();
+                        if ($aplliend !== null) {
+                            $aplliend->record_locator = $leadAttributes['additional_information']['pnr'];
+                            $aplliend->save(false);
+                            if ($aplliend->hasErrors()) {
+                                $response['errors'] = $aplliend->getErrors();
+                            }
                         }
                     }
-                }
 
-                if (!empty($leadAttributes['info_tickets'])) {
-                    $result = $lead->sendSoldEmail($leadAttributes['info_tickets']);
-                    if (!$result['status']) {
-                        $response['errors'][] = $result['errors'];
-                        $transaction->rollBack();
+//                    if (!empty($leadAttributes['info_tickets'])) {
+//                        $result = $lead->sendSoldEmail($leadAttributes['info_tickets']);
+//                        if (!$result['status']) {
+//                            $response['errors'][] = $result['errors'];
+//                            $transaction->rollBack();
+//                        }
+//                    }
+
+                    if (empty($response['errors'])) {
+                        $response['status'] = 'Success';
                     }
+
+                    return $response;
+
+                });
+
+                if (isset($result['status'])) {
+                    $response['status'] = $result['status'];
                 }
 
-                if (empty($response['errors'])) {
-                    $response['status'] = 'Success';
-                    $transaction->commit();
+                if (isset($result['errors'])) {
+                    $response['errors'][] = $result['errors'];
                 }
+
             }
-
         } catch (\Throwable $e) {
-
-            Yii::error($e->getTraceAsString(), 'API:Quote:create:try');
-            if (Yii::$app->request->get('debug')) $message = ($e->getTraceAsString());
-            else $message = $e->getMessage() . ' (code:' . $e->getCode() . ', line: ' . $e->getLine() . ')';
-
+            Yii::error($e->getTraceAsString(), 'API:LeadSoldUpdate:try');
+            if (Yii::$app->request->get('debug')) {
+                $message = ($e->getTraceAsString());
+            } else {
+                $message = $e->getMessage() . ' (code:' . $e->getCode() . ', line: ' . $e->getLine() . ')';
+            }
             $response['error'] = $message;
             $response['errors'] = $message;
             $response['error_code'] = 30;
-
-            $transaction->rollBack();
         }
+
+
+//        $transaction = Yii::$app->db->beginTransaction();
+//        try {
+//
+//            $lead->attributes = $leadAttributes;
+//            if (!$lead->save()) {
+//                $response['errors'][] = $lead->getErrors();
+//                $transaction->rollBack();
+//            } else {
+//
+//                if (!empty($leadAttributes['additional_information']) &&
+//                    !empty($leadAttributes['additional_information']['pnr'])
+//                ) {
+//                    $aplliend = $lead->getAppliedAlternativeQuotes();
+//                    if ($aplliend !== null) {
+//                        $aplliend->record_locator = $leadAttributes['additional_information']['pnr'];
+//                        $aplliend->save(false);
+//                        if ($aplliend->hasErrors()) {
+//                            $response['errors'][] = $aplliend->getErrors();
+//                        }
+//                    }
+//                }
+//
+//                if (!empty($leadAttributes['info_tickets'])) {
+//                    $result = $lead->sendSoldEmail($leadAttributes['info_tickets']);
+//                    if (!$result['status']) {
+//                        $response['errors'][] = $result['errors'];
+//                        $transaction->rollBack();
+//                    }
+//                }
+//
+//                if (empty($response['errors'])) {
+//                    $response['status'] = 'Success';
+//                    $transaction->commit();
+//                }
+//            }
+//
+//        } catch (\Throwable $e) {
+//
+//            Yii::error($e->getTraceAsString(), 'API:Quote:create:try');
+//            if (Yii::$app->request->get('debug')) $message = ($e->getTraceAsString());
+//            else $message = $e->getMessage() . ' (code:' . $e->getCode() . ', line: ' . $e->getLine() . ')';
+//
+//            $response['error'] = $message;
+//            $response['errors'] = $message;
+//            $response['error_code'] = 30;
+//
+//            $transaction->rollBack();
+//        }
 
         $responseData = $response;
         $responseData = $apiLog->endApiLog($responseData);
@@ -1317,7 +1413,9 @@ class LeadController extends ApiBaseController
 
             if($leadCallExpert->lce_agent_user_id) {
                 Notifications::create($leadCallExpert->lce_agent_user_id, 'Expert Response', 'Expert ('.Html::encode($leadCallExpert->lce_expert_username).') Response ('.$leadCallExpert->getStatusName().'). Lead ID: ' . $leadCallExpert->lce_lead_id, Notifications::TYPE_INFO, true);
-                Notifications::socket($leadCallExpert->lce_agent_user_id, $leadCallExpert->lce_lead_id, 'getNewNotification', [], true);
+                // Notifications::socket($leadCallExpert->lce_agent_user_id, $leadCallExpert->lce_lead_id, 'getNewNotification', [], true);
+
+                Notifications::sendSocket('getNewNotification', ['user_id' => $leadCallExpert->lce_agent_user_id, 'lead_id' => $leadCallExpert->lce_lead_id]);
             }
 
             $response = $leadCallExpert->attributes;

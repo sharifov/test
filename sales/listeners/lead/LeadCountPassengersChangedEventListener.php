@@ -7,6 +7,7 @@ use sales\repositories\quote\QuoteRepository;
 
 /**
  * Class LeadCountPassengersChangedEventListener
+ *
  * @property QuoteRepository $quoteRepository
  */
 class LeadCountPassengersChangedEventListener
@@ -15,7 +16,6 @@ class LeadCountPassengersChangedEventListener
     private $quoteRepository;
 
     /**
-     * LeadCountPassengersChangedEventListener constructor.
      * @param QuoteRepository $quoteRepository
      */
     public function __construct(QuoteRepository $quoteRepository)

@@ -2,6 +2,8 @@
 
 namespace frontend\controllers;
 
+use common\models\Employee;
+use sales\access\EmployeeGroupAccess;
 use Yii;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
@@ -11,6 +13,7 @@ use common\models\search\KpiHistorySearch;
 use yii\base\DynamicModel;
 use common\components\KpiService;
 use yii\helpers\ArrayHelper;
+use yii\helpers\VarDumper;
 
 /**
  * KpiController.
@@ -23,7 +26,10 @@ class KpiController extends FController
      */
     public function actionIndex()
     {
-        $isAgent = Yii::$app->user->identity->canRole('agent');
+        /** @var Employee $user */
+        $user = Yii::$app->user->identity;
+        $isAgent = $user->isAgent();
+
         $searchModel = new KpiHistorySearch();
         $params = Yii::$app->request->queryParams;
         $params2 = Yii::$app->request->post();
@@ -50,7 +56,10 @@ class KpiController extends FController
 
         $params = array_merge($params, $params2);
         if($isAgent) {
-            $params['KpiHistorySearch']['kh_user_id'] = Yii::$app->user->id;
+            $params['KpiHistorySearch']['kh_user_id'] = $user->id;
+        } elseif ($user->isSupervision()) {
+            $userIds = EmployeeGroupAccess::getUsersIdsInCommonGroups($user->id);
+            $params['KpiHistorySearch']['usersIdsInCommonGroups'] = array_keys($userIds);
         }
         $dataProvider = $searchModel->search($params);
 
@@ -61,7 +70,6 @@ class KpiController extends FController
             'model' => $model,
         ]);
     }
-
 
     /**
      * @param $id

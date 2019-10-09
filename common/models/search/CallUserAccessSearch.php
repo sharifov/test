@@ -2,6 +2,7 @@
 
 namespace common\models\search;
 
+use common\models\Employee;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use common\models\CallUserAccess;
@@ -56,13 +57,23 @@ class CallUserAccessSearch extends CallUserAccess
             return $dataProvider;
         }
 
+        if ($this->cua_created_dt){
+            $query->andFilterWhere(['>=', 'cua_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->cua_created_dt))])
+                ->andFilterWhere(['<=', 'cua_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->cua_created_dt) + 3600 *24)]);
+        }
+
+        if ($this->cua_updated_dt){
+            $query->andFilterWhere(['>=', 'cua_updated_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->cua_updated_dt))])
+                ->andFilterWhere(['<=', 'cua_updated_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->cua_updated_dt) + 3600 *24)]);
+        }
+
         // grid filtering conditions
         $query->andFilterWhere([
             'cua_call_id' => $this->cua_call_id,
             'cua_user_id' => $this->cua_user_id,
             'cua_status_id' => $this->cua_status_id,
-            'cua_created_dt' => $this->cua_created_dt,
-            'cua_updated_dt' => $this->cua_updated_dt,
+            //'cua_created_dt' => $this->cua_created_dt,
+            //'cua_updated_dt' => $this->cua_updated_dt,
         ]);
 
         return $dataProvider;

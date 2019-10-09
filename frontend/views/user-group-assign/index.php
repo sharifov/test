@@ -3,6 +3,8 @@
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
+use dosamigos\datepicker\DatePicker;
+
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\UserGroupAssignSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -51,6 +53,18 @@ $this->params['breadcrumbs'][] = $this->title;
                     return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->ugs_updated_dt));
                 },
                 'format' => 'raw',
+                'filter' => DatePicker::widget([
+                    'model' => $searchModel,
+                    'attribute' => 'ugs_updated_dt',
+                    'clientOptions' => [
+                        'autoclose' => true,
+                        'format' => 'yyyy-mm-dd',
+                    ],
+                    'options' => [
+                        'autocomplete' => 'off',
+                        'placeholder' =>'Choose Date'
+                    ],
+                ]),
             ],
 
             ['class' => 'yii\grid\ActionColumn'],

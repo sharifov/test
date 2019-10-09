@@ -49,6 +49,7 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
             ],
 
             [
+                    'label' => 'To Status',
                 'attribute' => 'status',
                 'value' => function(\common\models\LeadFlow $model) {
                     return '<span class="label label-info">'.\common\models\Lead::getStatus($model->status).'</span></h5>';
@@ -92,7 +93,7 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
             ],
             [
                 'label' => 'Status end date',
-                'attribute' => 'created',
+                'attribute' => 'lf_end_dt',
                 'value' => function(\common\models\LeadFlow $model) {
                     return $model->lf_end_dt ? '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->lf_end_dt)) : '-';
                 },
@@ -100,7 +101,7 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
                 'options' => ['style' => 'width:180px'],
                 'filter' => DatePicker::widget([
                     'model' => $searchModel,
-                    'attribute' => 'created',
+                    'attribute' => 'lf_end_dt',
                     'clientOptions' => [
                         'autoclose' => true,
                         'format' => 'yyyy-mm-dd',
@@ -122,6 +123,7 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
 
             ],
             [
+                    'label' => 'Created',
                 'attribute' => 'employee_id',
                 'value' => function(\common\models\LeadFlow $model) {
                     return $model->employee ? '<i class="fa fa-user"></i> '. Html::encode($model->employee->username) : '-';
@@ -130,11 +132,20 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
                 'filter' => $userList
             ],
             [
+                    'label' => 'Owner',
+                'attribute' => 'lf_owner_id',
+                'value' => function(\common\models\LeadFlow $model) {
+                    return $model->owner ? '<i class="fa fa-user"></i> '. Html::encode($model->owner->username) : '-';
+                },
+                'format' => 'raw',
+                'filter' => $userList
+            ],
+            [
                 //'attribute' => 'username',
-                'label' => 'User Role',
+                'label' => 'Owner Role',
                 'value' => function (\common\models\LeadFlow $model) {
-                    if($model->employee) {
-                        $roles = $model->employee->getRoles();
+                    if($model->owner) {
+                        $roles = $model->owner->getRoles();
                     } else {
                         $roles = [];
                     }
@@ -166,6 +177,8 @@ if(Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id)) {
                 'format' => 'raw',
                 //'filter' => Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id) ? \common\models\UserGroup::getList() : Yii::$app->user->identity->getUserGroupList()
             ],
+
+            'lf_out_calls',
 
             //'employee_id',
             //'status',

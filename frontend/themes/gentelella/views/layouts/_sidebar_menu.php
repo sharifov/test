@@ -95,6 +95,17 @@ $isSuperAdmin = $user->canRole('superadmin');
         ];
 
         $menuItems[] = [
+            'label' => 'QCall',
+            'url' => 'javascript:',
+            'icon' => 'list',
+            'items' => [
+                ['label' => 'Lead QCall List', 'url' => ['/lead-qcall/list'], 'icon' => 'list'],
+                ['label' => 'Lead QCall All', 'url' => ['/lead-qcall/index'], 'icon' => 'list'],
+                ['label' => 'QCall Config', 'url' => ['/qcall-config/index'], 'icon' => 'list'],
+            ]
+        ];
+
+        $menuItems[] = [
             'label' => 'Additional',
             'url' => 'javascript:',
             'icon' => 'list',

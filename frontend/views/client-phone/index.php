@@ -3,6 +3,7 @@
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
+use dosamigos\datepicker\DatePicker;
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\ClentPhoneSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -47,12 +48,43 @@ $this->params['breadcrumbs'][] = $this->title;
                 'value' => function (\common\models\ClientPhone $model) {
                     return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->created));
                 },
-                'format' => 'raw'
+                'format' => 'raw',
+                'filter' => DatePicker::widget([
+                    'model' => $searchModel,
+                    'attribute' => 'created',
+                    'clientOptions' => [
+                        'autoclose' => true,
+                        'format' => 'yyyy-mm-dd',
+                    ],
+                    'options' => [
+                        'autocomplete' => 'off',
+                        'placeholder' =>'Choose Date'
+                    ],
+                ]),
             ],
             //'updated',
             //'comments:ntext',
             'is_sms:boolean',
-            'validate_dt',
+            //'validate_dt',
+            [
+                'attribute' => 'validate_dt',
+                'value' => function (\common\models\ClientPhone $model) {
+                    return $model->validate_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->validate_dt)) : null;
+                },
+                'format' => 'raw',
+                'filter' => DatePicker::widget([
+                    'model' => $searchModel,
+                    'attribute' => 'validate_dt',
+                    'clientOptions' => [
+                        'autoclose' => true,
+                        'format' => 'yyyy-mm-dd',
+                    ],
+                    'options' => [
+                        'autocomplete' => 'off',
+                        'placeholder' =>'Choose Date'
+                    ],
+                ]),
+            ],
 
             ['class' => 'yii\grid\ActionColumn'],
         ],

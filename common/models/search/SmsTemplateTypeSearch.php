@@ -2,6 +2,7 @@
 
 namespace common\models\search;
 
+use common\models\Employee;
 use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
@@ -57,14 +58,22 @@ class SmsTemplateTypeSearch extends SmsTemplateType
             return $dataProvider;
         }
 
+        if ($this->stp_created_dt) {
+            $query->andFilterWhere(['>=', 'stp_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->stp_created_dt))])
+                ->andFilterWhere(['<=', 'stp_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->stp_created_dt) + 3600 * 24)]);
+        }
+
+        if ($this->stp_updated_dt) {
+            $query->andFilterWhere(['>=', 'stp_updated_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->stp_updated_dt))])
+                ->andFilterWhere(['<=', 'stp_updated_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->stp_updated_dt) + 3600 * 24)]);
+        }
+
         // grid filtering conditions
         $query->andFilterWhere([
             'stp_id' => $this->stp_id,
             'stp_hidden' => $this->stp_hidden,
             'stp_created_user_id' => $this->stp_created_user_id,
             'stp_updated_user_id' => $this->stp_updated_user_id,
-            'stp_created_dt' => $this->stp_created_dt,
-            'stp_updated_dt' => $this->stp_updated_dt,
         ]);
 
         $query->andFilterWhere(['like', 'stp_key', $this->stp_key])

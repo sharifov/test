@@ -6,12 +6,18 @@ use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use common\models\KpiHistory;
+use yii\helpers\VarDumper;
 
 /**
  * KpiHistorySearch represents the model behind the search form of `common\models\KpiHistory`.
+ *
+ * @property $usersIdsInCommonGroups
  */
 class KpiHistorySearch extends KpiHistory
 {
+
+    public $usersIdsInCommonGroups;
+
     /**
      * {@inheritdoc}
      */
@@ -21,6 +27,8 @@ class KpiHistorySearch extends KpiHistory
             [['kh_id', 'kh_user_id', 'kh_super_id', 'kh_bonus_active', 'kh_commission_percent'], 'integer'],
             [['kh_date_dt', 'kh_created_dt', 'kh_updated_dt', 'kh_agent_approved_dt', 'kh_super_approved_dt', 'kh_description'], 'safe'],
             [['kh_base_amount', 'kh_profit_bonus', 'kh_manual_bonus', 'kh_estimation_profit'], 'number'],
+
+            ['usersIdsInCommonGroups', 'safe']
         ];
     }
 
@@ -84,6 +92,10 @@ class KpiHistorySearch extends KpiHistory
         $query->andFilterWhere(['like', 'kh_description', $this->kh_description]);
         $query->andFilterWhere(['=', 'DATE(kh_agent_approved_dt)', $this->kh_agent_approved_dt]);
         $query->andFilterWhere(['=', 'DATE(kh_super_approved_dt)', $this->kh_super_approved_dt]);
+
+        if ($this->usersIdsInCommonGroups) {
+            $query->andFilterWhere(['kh_user_id' => $this->usersIdsInCommonGroups]);
+        }
 
         return $dataProvider;
     }

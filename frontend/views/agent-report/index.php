@@ -70,7 +70,11 @@ $this->registerJs("$(function() {
                                 return '-';
                             }
                             return \yii\bootstrap\Html::a($data['inbound_calls'],
-                                ['/agent-report/calls', $searchModel->formName().'[c_call_type_id]' => Call::CALL_TYPE_IN, $searchModel->formName().'[id]' => $data['id'],$searchModel->formName().'[date_from]' => $searchModel->date_from, $searchModel->formName().'[date_to]' => $searchModel->date_to],
+                                ['/agent-report/calls',
+                                    $searchModel->formName() . '[c_call_type_id]' => Call::CALL_TYPE_IN,
+                                    $searchModel->formName() . '[id]' => $data['id'],
+                                    $searchModel->formName() . '[date_from]' => Employee::convertTimeFromUserDtToUTC(strtotime($searchModel->date_from)),
+                                    $searchModel->formName() . '[date_to]' => Employee::convertTimeFromUserDtToUTC(strtotime($searchModel->date_to))],
                                 ['target' => '_blank', 'data-pjax' => 0]);
                         },
                         'contentOptions' => ['class' => 'text-center'],
@@ -85,7 +89,11 @@ $this->registerJs("$(function() {
                                 return '-';
                             }
                             return \yii\bootstrap\Html::a($data['outbound_calls'],
-                                ['/agent-report/calls', $searchModel->formName().'[c_call_type_id]' => Call::CALL_TYPE_OUT, $searchModel->formName().'[id]' => $data['id'],$searchModel->formName().'[date_from]' => $searchModel->date_from, $searchModel->formName().'[date_to]' => $searchModel->date_to],
+                                ['/agent-report/calls',
+                                    $searchModel->formName() . '[c_call_type_id]' => Call::CALL_TYPE_OUT,
+                                    $searchModel->formName() . '[id]' => $data['id'],
+                                    $searchModel->formName() . '[date_from]' => Employee::convertTimeFromUserDtToUTC(strtotime($searchModel->date_from)),
+                                    $searchModel->formName() . '[date_to]' => Employee::convertTimeFromUserDtToUTC(strtotime($searchModel->date_to))],
                                 ['target' => '_blank', 'data-pjax' => 0]);
                             },
                         'contentOptions' => ['class' => 'text-center'],
@@ -133,7 +141,11 @@ $this->registerJs("$(function() {
                                 return '-';
                             }
                             return \yii\bootstrap\Html::a($data['sms_sent'],
-                                ['/agent-report/sms', $searchModel->formName().'[s_type_id]' => Sms::TYPE_OUTBOX, $searchModel->formName().'[id]' => $data['id'],$searchModel->formName().'[date_from]' => $searchModel->date_from, $searchModel->formName().'[date_to]' => $searchModel->date_to],
+                                ['/agent-report/sms',
+                                    $searchModel->formName() . '[s_type_id]' => Sms::TYPE_OUTBOX,
+                                    $searchModel->formName() . '[id]' => $data['id'],
+                                    $searchModel->formName() . '[date_from]' => Employee::convertTimeFromUserDtToUTC(strtotime($searchModel->date_from)),
+                                    $searchModel->formName() . '[date_to]' => Employee::convertTimeFromUserDtToUTC(strtotime($searchModel->date_to))],
                                 ['target' => '_blank', 'data-pjax' => 0]);
                             },
                         'contentOptions' => ['class' => 'text-center'],
@@ -148,7 +160,11 @@ $this->registerJs("$(function() {
                                 return '-';
                             }
                             return \yii\bootstrap\Html::a($data['sms_received'],
-                                ['/agent-report/sms', $searchModel->formName().'[s_type_id]' => Sms::TYPE_INBOX, $searchModel->formName().'[id]' => $data['id'],$searchModel->formName().'[date_from]' => $searchModel->date_from, $searchModel->formName().'[date_to]' => $searchModel->date_to],
+                                ['/agent-report/sms',
+                                    $searchModel->formName() . '[s_type_id]' => Sms::TYPE_INBOX,
+                                    $searchModel->formName() . '[id]' => $data['id'],
+                                    $searchModel->formName() . '[date_from]' => Employee::convertTimeFromUserDtToUTC(strtotime($searchModel->date_from)),
+                                    $searchModel->formName() . '[date_to]' => Employee::convertTimeFromUserDtToUTC(strtotime($searchModel->date_to))],
                                 ['target' => '_blank', 'data-pjax' => 0]);
 
                         },
@@ -164,7 +180,11 @@ $this->registerJs("$(function() {
                                 return '-';
                             }
                             return \yii\bootstrap\Html::a($data['email_sent'],
-                                ['/agent-report/email', $searchModel->formName().'[e_type_id]' => Email::TYPE_OUTBOX, $searchModel->formName().'[id]' => $data['id'],$searchModel->formName().'[date_from]' => $searchModel->date_from, $searchModel->formName().'[date_to]' => $searchModel->date_to],
+                                ['/agent-report/email',
+                                    $searchModel->formName() . '[e_type_id]' => Email::TYPE_OUTBOX,
+                                    $searchModel->formName() . '[id]' => $data['id'],
+                                    $searchModel->formName() . '[date_from]' => Employee::convertTimeFromUserDtToUTC(strtotime($searchModel->date_from)),
+                                    $searchModel->formName() . '[date_to]' => Employee::convertTimeFromUserDtToUTC(strtotime($searchModel->date_to))],
                                 ['target' => '_blank', 'data-pjax' => 0]);
                         },
                         'contentOptions' => ['class' => 'text-center'],
@@ -179,7 +199,11 @@ $this->registerJs("$(function() {
                                 return '-';
                             }
                             return \yii\bootstrap\Html::a($data['email_received'],
-                                ['/agent-report/email', $searchModel->formName().'[e_type_id]' => Email::TYPE_INBOX, $searchModel->formName().'[id]' => $data['id'],$searchModel->formName().'[date_from]' => $searchModel->date_from, $searchModel->formName().'[date_to]' => $searchModel->date_to],
+                                ['/agent-report/email',
+                                    $searchModel->formName() . '[e_type_id]' => Email::TYPE_INBOX,
+                                    $searchModel->formName() . '[id]' => $data['id'],
+                                    $searchModel->formName() . '[date_from]' => Employee::convertTimeFromUserDtToUTC(strtotime($searchModel->date_from)),
+                                    $searchModel->formName() . '[date_to]' => Employee::convertTimeFromUserDtToUTC(strtotime($searchModel->date_to))],
                                 ['target' => '_blank', 'data-pjax' => 0]);
                         },
                         'contentOptions' => ['class' => 'text-center'],
@@ -221,7 +245,13 @@ $this->registerJs("$(function() {
                                 return '-';
                             }
                             return \yii\bootstrap\Html::a($data['inbox_processing'],
-                                ['/agent-report/from-to-leads', 'title' => 'From Inbox to Processing', $searchModel->formName().'[from_status]' => Lead::STATUS_PENDING,  $searchModel->formName().'[to_status]' => Lead::STATUS_PROCESSING, $searchModel->formName().'[id]' => $data['id'],$searchModel->formName().'[date_from]' => $searchModel->date_from, $searchModel->formName().'[date_to]' => $searchModel->date_to],
+                                ['/agent-report/from-to-leads',
+                                    'title' => 'From Inbox to Processing',
+                                    $searchModel->formName() . '[from_status]' => Lead::STATUS_PENDING,
+                                    $searchModel->formName() . '[to_status]' => Lead::STATUS_PROCESSING,
+                                    $searchModel->formName() . '[id]' => $data['id'],
+                                    $searchModel->formName() . '[date_from]' => Employee::convertTimeFromUserDtToUTC(strtotime($searchModel->date_from)),
+                                    $searchModel->formName() . '[date_to]' => Employee::convertTimeFromUserDtToUTC(strtotime($searchModel->date_to))],
                                 ['target' => '_blank', 'data-pjax' => 0]);
                         },
                         'contentOptions' => ['class' => 'text-center'],
@@ -236,7 +266,13 @@ $this->registerJs("$(function() {
                                     return '-';
                                 }
                                 return \yii\bootstrap\Html::a($data['followup_processing'],
-                                    ['/agent-report/from-to-leads', 'title' => 'From Follow-up to Processing', $searchModel->formName().'[from_status]' => Lead::STATUS_FOLLOW_UP,  $searchModel->formName().'[to_status]' => Lead::STATUS_PROCESSING, $searchModel->formName().'[id]' => $data['id'],$searchModel->formName().'[date_from]' => $searchModel->date_from, $searchModel->formName().'[date_to]' => $searchModel->date_to],
+                                    ['/agent-report/from-to-leads',
+                                        'title' => 'From Follow-up to Processing',
+                                        $searchModel->formName() . '[from_status]' => Lead::STATUS_FOLLOW_UP,
+                                        $searchModel->formName() . '[to_status]' => Lead::STATUS_PROCESSING,
+                                        $searchModel->formName() . '[id]' => $data['id'],
+                                        $searchModel->formName() . '[date_from]' => Employee::convertTimeFromUserDtToUTC(strtotime($searchModel->date_from)),
+                                        $searchModel->formName() . '[date_to]' => Employee::convertTimeFromUserDtToUTC(strtotime($searchModel->date_to))],
                                     ['target' => '_blank', 'data-pjax' => 0]);
                         },
                         'contentOptions' => ['class' => 'text-center'],
@@ -251,7 +287,13 @@ $this->registerJs("$(function() {
                                     return '-';
                                 }
                                 return \yii\bootstrap\Html::a($data['processing_trash'],
-                                    ['/agent-report/from-to-leads', 'title' => 'From Processing to Trash', $searchModel->formName().'[from_status]' => Lead::STATUS_PROCESSING,  $searchModel->formName().'[to_status]' => Lead::STATUS_TRASH, $searchModel->formName().'[id]' => $data['id'],$searchModel->formName().'[date_from]' => $searchModel->date_from, $searchModel->formName().'[date_to]' => $searchModel->date_to],
+                                    ['/agent-report/from-to-leads',
+                                        'title' => 'From Processing to Trash',
+                                        $searchModel->formName() . '[from_status]' => Lead::STATUS_PROCESSING,
+                                        $searchModel->formName() . '[to_status]' => Lead::STATUS_TRASH,
+                                        $searchModel->formName() . '[id]' => $data['id'],
+                                        $searchModel->formName() . '[date_from]' => Employee::convertTimeFromUserDtToUTC(strtotime($searchModel->date_from)),
+                                        $searchModel->formName() . '[date_to]' => Employee::convertTimeFromUserDtToUTC(strtotime($searchModel->date_to))],
                                     ['target' => '_blank', 'data-pjax' => 0]);
                         },
                         'contentOptions' => ['class' => 'text-center'],
@@ -266,7 +308,13 @@ $this->registerJs("$(function() {
                                     return '-';
                                 }
                                 return \yii\bootstrap\Html::a($data['processing_followup'],
-                                    ['/agent-report/from-to-leads', 'title' => 'From Processing to Follow-up', $searchModel->formName().'[from_status]' => Lead::STATUS_PROCESSING,  $searchModel->formName().'[to_status]' => Lead::STATUS_FOLLOW_UP, $searchModel->formName().'[id]' => $data['id'],$searchModel->formName().'[date_from]' => $searchModel->date_from, $searchModel->formName().'[date_to]' => $searchModel->date_to],
+                                    ['/agent-report/from-to-leads',
+                                        'title' => 'From Processing to Follow-up',
+                                        $searchModel->formName() . '[from_status]' => Lead::STATUS_PROCESSING,
+                                        $searchModel->formName() . '[to_status]' => Lead::STATUS_FOLLOW_UP,
+                                        $searchModel->formName() . '[id]' => $data['id'],
+                                        $searchModel->formName() . '[date_from]' => Employee::convertTimeFromUserDtToUTC(strtotime($searchModel->date_from)),
+                                        $searchModel->formName() . '[date_to]' => Employee::convertTimeFromUserDtToUTC(strtotime($searchModel->date_to))],
                                     ['target' => '_blank', 'data-pjax' => 0]);
                         },
                         'contentOptions' => ['class' => 'text-center'],
@@ -281,7 +329,13 @@ $this->registerJs("$(function() {
                                     return '-';
                                 }
                                 return \yii\bootstrap\Html::a($data['processing_snooze'],
-                                    ['/agent-report/from-to-leads', 'title' => 'From Processing to Snooze', $searchModel->formName().'[from_status]' => Lead::STATUS_PROCESSING,  $searchModel->formName().'[to_status]' => Lead::STATUS_SNOOZE, $searchModel->formName().'[id]' => $data['id'],$searchModel->formName().'[date_from]' => $searchModel->date_from, $searchModel->formName().'[date_to]' => $searchModel->date_to],
+                                    ['/agent-report/from-to-leads',
+                                        'title' => 'From Processing to Snooze',
+                                        $searchModel->formName() . '[from_status]' => Lead::STATUS_PROCESSING,
+                                        $searchModel->formName() . '[to_status]' => Lead::STATUS_SNOOZE,
+                                        $searchModel->formName() . '[id]' => $data['id'],
+                                        $searchModel->formName() . '[date_from]' => Employee::convertTimeFromUserDtToUTC(strtotime($searchModel->date_from)),
+                                        $searchModel->formName() . '[date_to]' => Employee::convertTimeFromUserDtToUTC(strtotime($searchModel->date_to))],
                                     ['target' => '_blank', 'data-pjax' => 0]);
                         },
                         'contentOptions' => ['class' => 'text-center'],
@@ -297,7 +351,10 @@ $this->registerJs("$(function() {
                                 return '-';
                             }
                             return \yii\bootstrap\Html::a($data['cloned_leads'],
-                                ['/agent-report/cloned', $searchModel->formName().'[id]' => $data['id'],$searchModel->formName().'[date_from]' => $searchModel->date_from, $searchModel->formName().'[date_to]' => $searchModel->date_to],
+                                ['/agent-report/cloned',
+                                    $searchModel->formName() . '[id]' => $data['id'],
+                                    $searchModel->formName() . '[date_from]' => Employee::convertTimeFromUserDtToUTC(strtotime($searchModel->date_from)),
+                                    $searchModel->formName() . '[date_to]' => Employee::convertTimeFromUserDtToUTC(strtotime($searchModel->date_to))],
                                 ['target' => '_blank', 'data-pjax' => 0]);
                         },
                         'contentOptions' => ['class' => 'text-center'],
@@ -333,7 +390,10 @@ $this->registerJs("$(function() {
                                 return '-';
                             }
                             return \yii\bootstrap\Html::a($data['st_sold'],
-                                ['/agent-report/sold', $searchModel->formName().'[id]' => $data['id'],$searchModel->formName().'[date_from]' => $searchModel->date_from, $searchModel->formName().'[date_to]' => $searchModel->date_to],
+                                ['/agent-report/sold',
+                                    $searchModel->formName() . '[id]' => $data['id'],
+                                    $searchModel->formName() . '[date_from]' => Employee::convertTimeFromUserDtToUTC(strtotime($searchModel->date_from)),
+                                    $searchModel->formName() . '[date_to]' => Employee::convertTimeFromUserDtToUTC(strtotime($searchModel->date_to))],
                                 ['target' => '_blank', 'data-pjax' => 0]);
                         },
                         'contentOptions' => ['class' => 'text-center'],
@@ -360,7 +420,10 @@ $this->registerJs("$(function() {
                                 return '-';
                             }
                             return \yii\bootstrap\Html::a($data['created_leads'],
-                                ['/agent-report/created', $searchModel->formName().'[id]' => $data['id'],$searchModel->formName().'[date_from]' => $searchModel->date_from, $searchModel->formName().'[date_to]' => $searchModel->date_to],
+                                ['/agent-report/created',
+                                    $searchModel->formName() . '[id]' => $data['id'],
+                                    $searchModel->formName() . '[date_from]' => Employee::convertTimeFromUserDtToUTC(strtotime($searchModel->date_from)),
+                                    $searchModel->formName() . '[date_to]' => Employee::convertTimeFromUserDtToUTC(strtotime($searchModel->date_to))],
                                 ['target' => '_blank', 'data-pjax' => 0]);
                         },
                         'contentOptions' => ['class' => 'text-center'],

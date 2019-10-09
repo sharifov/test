@@ -25,7 +25,7 @@ class LeadFlowChecklistSearch extends LeadFlow
     {
         return [
             [['id', 'employee_id', 'lead_id', 'status', 'supervision_id', 'lf_from_status_id'], 'integer'],
-            [['created', 'statuses', 'dateRange'], 'safe'],
+            [['created', 'statuses', 'dateRange', 'lf_end_dt'], 'safe'],
         ];
     }
 
@@ -74,10 +74,6 @@ class LeadFlowChecklistSearch extends LeadFlow
             return $dataProvider;
         }
 
-        if (isset($params['NotificationsSearch']['created'])) {
-            $query->andFilterWhere(['=','DATE(created)', $this->created]);
-        }
-
         if($this->statuses) {
             $query->andWhere(['lead_flow.status' => $this->statuses]);
         }
@@ -86,12 +82,14 @@ class LeadFlowChecklistSearch extends LeadFlow
             $dates = explode(' - ', $this->dateRange);
             $query->andFilterWhere(['>=', 'lead_flow.created', Employee::convertTimeFromUserDtToUTC(strtotime($dates[0]))]);
             $query->andFilterWhere(['<=', 'lead_flow.created', Employee::convertTimeFromUserDtToUTC(strtotime($dates[1]))]);
-
-            /*$query->andFilterWhere(['>=', 'lead_flow.created', date('Y-m-d H:i', strtotime($dates[0]))]);
-            $query->andFilterWhere(['<=', 'lead_flow.created', date('Y-m-d H:i', strtotime($dates[1]))]);*/
         } else {
             if($this->created) {
-                $query->andFilterWhere(['DATE(lead_flow.created)'=> date('Y-m-d', strtotime($this->created))]);
+                $query->andFilterWhere(['>=', 'lead_flow.created', Employee::convertTimeFromUserDtToUTC(strtotime($this->created))])
+                    ->andFilterWhere(['<=', 'lead_flow.created', Employee::convertTimeFromUserDtToUTC(strtotime($this->created) + 3600 * 24)]);
+            }
+            if($this->lf_end_dt) {
+                $query->andFilterWhere(['>=', 'lead_flow.lf_end_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->lf_end_dt))])
+                    ->andFilterWhere(['<=', 'lead_flow.lf_end_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->lf_end_dt) + 3600 * 24)]);
             }
         }
 

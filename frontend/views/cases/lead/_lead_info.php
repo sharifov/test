@@ -186,11 +186,7 @@ $isAgent = false;
                         [
                             'label' => 'Communication',
                             'value' => function (\common\models\Lead $model) {
-                                $str = '';
-                                $str .= '<span title="Calls Out / In"><i class="fa fa-phone success"></i> '. $model->getCountCalls(\common\models\Call::CALL_TYPE_OUT) .'/'.  $model->getCountCalls(\common\models\Call::CALL_TYPE_IN) .'</span> | ';
-                                $str .= '<span title="SMS Out / In"><i class="fa fa-comments info"></i> '. $model->getCountSms(\common\models\Sms::TYPE_OUTBOX) .'/'.  $model->getCountCalls(\common\models\Sms::TYPE_INBOX) .'</span> | ';
-                                $str .= '<span title="Email Out / In"><i class="fa fa-envelope danger"></i> '. $model->getCountEmails(\common\models\Email::TYPE_OUTBOX) .'/'.  $model->getCountEmails(\common\models\Email::TYPE_INBOX) .'</span>';
-                                return $str;
+                                return $model->getCommunicationInfo();
                             },
                             'format' => 'raw',
                         ],
@@ -369,16 +365,9 @@ echo $this->render('_search_lead_form', [
             'value' => function (\common\models\Lead $model) {
                 $statusValue = $model->getStatusName(true);
 
-                if ($model->status === \common\models\Lead::STATUS_TRASH) {
-                    $reason = \common\models\Reason::find()->where([
-                        'lead_id' => $model->id
-                    ])
-                        ->orderBy([
-                        'id' => SORT_DESC
-                    ])
-                        ->one();
-                    if ($reason) {
-                        $statusValue .= ' <span data-toggle="tooltip" data-placement="top" title="' . Html::encode($reason->reason) . '"><i class="fa fa-warning"></i></span>';
+                if ($model->isTrash() && ($lastLeadFlow = $model->lastLeadFlow)) {
+                    if ($lastLeadFlow->status === $model->status && $lastLeadFlow->lf_description) {
+                        $statusValue .= ' <span data-toggle="tooltip" data-placement="top" title="' . Html::encode($lastLeadFlow->lf_description) . '"><i class="fa fa-warning"></i></span>';
                     }
                 }
 
@@ -441,9 +430,7 @@ echo $this->render('_search_lead_form', [
             'value' => function (\common\models\Lead $model) {
                 //$str = '';
                 $str = '<i class="fa fa-male"></i> <span title="adult">'. $model->adults .'</span> / <span title="child">' . $model->children . '</span> / <span title="infant">' . $model->infants.'</span><br>';
-                $str .= '<span title="Calls Out / In"><i class="fa fa-phone success"></i> '. $model->getCountCalls(\common\models\Call::CALL_TYPE_OUT) .'/'.  $model->getCountCalls(\common\models\Call::CALL_TYPE_IN) .'</span> | ';
-                $str .= '<span title="SMS Out / In"><i class="fa fa-comments info"></i> '. $model->getCountSms(\common\models\Sms::TYPE_OUTBOX) .'/'.  $model->getCountCalls(\common\models\Sms::TYPE_INBOX) .'</span> | ';
-                $str .= '<span title="Email Out / In"><i class="fa fa-envelope danger"></i> '. $model->getCountEmails(\common\models\Email::TYPE_OUTBOX) .'/'.  $model->getCountEmails(\common\models\Email::TYPE_INBOX) .'</span>';
+                $str .= $model->getCommunicationInfo();
                 return $str;
             },
             'format' => 'raw',

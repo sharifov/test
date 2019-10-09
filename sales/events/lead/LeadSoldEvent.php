@@ -6,18 +6,48 @@ use common\models\Lead;
 
 /**
  * Class LeadSoldEvent
+ *
  * @property Lead $lead
+ * @property int|null $oldStatus
+ * @property int|null $oldOwnerId
+ * @property int|null $newOwnerId
+ * @property int|null $creatorId
+ * @property string|null $reason
+ * @property string $created
  */
 class LeadSoldEvent
 {
+
     public $lead;
+    public $oldStatus;
+    public $oldOwnerId;
+    public $newOwnerId;
+    public $creatorId;
+    public $reason;
+    public $created;
 
     /**
-     * LeadSoldEvent constructor.
      * @param Lead $lead
+     * @param int|null $oldStatus
+     * @param int|null $oldOwnerId
+     * @param int|null $newOwnerId
+     * @param int|null $creatorId
+     * @param string|null $reason
      */
-    public function __construct(Lead $lead)
+    public function __construct(Lead $lead,
+                                ?int $oldStatus,
+                                ?int $oldOwnerId,
+                                ?int $newOwnerId,
+                                ?int $creatorId,
+                                ?string $reason)
     {
         $this->lead = $lead;
+        $this->oldStatus = $oldStatus;
+        $this->oldOwnerId = $oldOwnerId;
+        $this->newOwnerId = $newOwnerId;
+        $this->creatorId = $creatorId;
+        $this->reason = $reason;
+        $this->created = date('Y-m-d H:i:s');
     }
+
 }

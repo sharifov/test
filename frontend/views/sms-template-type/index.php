@@ -3,6 +3,7 @@
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
+use dosamigos\datepicker\DatePicker;
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\SmsTemplateTypeSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -41,6 +42,13 @@ $this->params['breadcrumbs'][] = $this->title;
             'stp_origin_name',
             'stp_name',
             'stp_hidden:boolean',
+            [
+                'attribute' => 'stp_dep_id',
+                'value' => function (\common\models\SmsTemplateType $model) {
+                    return $model->stpDep ? $model->stpDep->dep_name : '-';
+                },
+                'filter' => \common\models\Department::getList()
+            ],
 
             [
                 'attribute' => 'stp_updated_user_id',
@@ -54,7 +62,19 @@ $this->params['breadcrumbs'][] = $this->title;
                 'value' => function (\common\models\SmsTemplateType $model) {
                     return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->stp_updated_dt));
                 },
-                'format' => 'raw'
+                'format' => 'raw',
+                'filter' => DatePicker::widget([
+                    'model' => $searchModel,
+                    'attribute' => 'stp_updated_dt',
+                    'clientOptions' => [
+                        'autoclose' => true,
+                        'format' => 'yyyy-mm-dd',
+                    ],
+                    'options' => [
+                        'autocomplete' => 'off',
+                        'placeholder' =>'Choose Date'
+                    ],
+                ]),
             ],
 
             [
@@ -69,7 +89,19 @@ $this->params['breadcrumbs'][] = $this->title;
                 'value' => function (\common\models\SmsTemplateType $model) {
                     return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->stp_created_dt));
                 },
-                'format' => 'raw'
+                'format' => 'raw',
+                'filter' => DatePicker::widget([
+                    'model' => $searchModel,
+                    'attribute' => 'stp_created_dt',
+                    'clientOptions' => [
+                        'autoclose' => true,
+                        'format' => 'yyyy-mm-dd',
+                    ],
+                    'options' => [
+                        'autocomplete' => 'off',
+                        'placeholder' =>'Choose Date'
+                    ],
+                ]),
             ],
             
             //'stp_created_user_id',

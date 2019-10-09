@@ -2,10 +2,10 @@
 
 namespace common\models;
 
-use sales\entities\AggregateRoot;
 use sales\entities\EventTrait;
 use Yii;
 use yii\helpers\VarDumper;
+use yii\validators\DateValidator;
 
 /**
  * This is the model class for table "lead_flow".
@@ -19,47 +19,64 @@ use yii\helpers\VarDumper;
  * @property string $lf_end_dt
  * @property int $lf_time_duration
  * @property int $lf_description
+ * @property int $lf_owner_id
+ * @property int $lf_out_calls
  *
+ * @property Employee $owner
  * @property Employee $employee
  * @property Lead $lead
  * @property LeadFlowChecklist[] $leadFlowChecklist
  */
-class LeadFlow extends \yii\db\ActiveRecord implements AggregateRoot
+class LeadFlow extends \yii\db\ActiveRecord
 {
 
     use EventTrait;
 
     /**
-     * {@inheritdoc}
+     * @return string
      */
-    public static function tableName()
+    public static function tableName(): string
     {
-        return 'lead_flow';
+        return '{{%lead_flow}}';
     }
 
     /**
-     * @param $leadId
-     * @param $oldStatus
-     * @param $newStatus
-     * @param null $userId
-     * @param null $description
+     * @param int $leadId
+     * @param int|null $newStatus
+     * @param int|null $oldStatus
+     * @param int|null $newOwnerId
+     * @param int|null $creatorId
+     * @param string|null $reason
+     * @param string|null $created
      * @return LeadFlow
      */
-    public static function create($leadId, $oldStatus, $newStatus, $userId = null, $description = null): self
+    public static function create(
+        int $leadId,
+        int $newStatus,
+        ?int $oldStatus,
+        ?int $newOwnerId = null,
+        ?int $creatorId = null,
+        ?string $reason = null,
+        ?string $created = null
+    ): self
     {
         $leadFlow = new static();
         $leadFlow->lead_id = $leadId;
-        $leadFlow->lf_from_status_id = $oldStatus;
         $leadFlow->status = $newStatus;
-        $leadFlow->employee_id = $userId;
-        $leadFlow->lf_description = $description;
-        $leadFlow->created = date('Y-m-d H:i:s');
+        $leadFlow->lf_from_status_id = $oldStatus;
+        $leadFlow->lf_owner_id = $newOwnerId;
+        $leadFlow->employee_id = $creatorId;
+        $leadFlow->lf_description = $reason;
+        $leadFlow->created = $created ? date('Y-m-d H:i:s', strtotime($created)) : date('Y-m-d H:i:s');
         return $leadFlow;
     }
 
-    public function setEndedTime()
+    /**
+     * @param string|null $nextCreated
+     */
+    public function end(?string $nextCreated = null): void
     {
-        $this->lf_end_dt = date('Y-m-d H:i:s');
+        $this->lf_end_dt = $nextCreated ? date('Y-m-d H:i:s', strtotime($nextCreated)) : date('Y-m-d H:i:s');
         $this->lf_time_duration = (int) (strtotime($this->lf_end_dt) - strtotime($this->created));
     }
 
@@ -70,7 +87,7 @@ class LeadFlow extends \yii\db\ActiveRecord implements AggregateRoot
     {
         return [
             [['created', 'lf_end_dt'], 'safe'],
-            [['employee_id', 'lead_id', 'status', 'lf_from_status_id', 'lf_time_duration'], 'integer'],
+            [['employee_id', 'lead_id', 'status', 'lf_from_status_id', 'lf_time_duration', 'lf_out_calls'], 'integer'],
             [['lf_description'], 'string', 'max' => 250],
             [['employee_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['employee_id' => 'id']],
             [['lead_id'], 'exist', 'skipOnError' => true, 'targetClass' => Lead::class, 'targetAttribute' => ['lead_id' => 'id']],
@@ -92,7 +109,8 @@ class LeadFlow extends \yii\db\ActiveRecord implements AggregateRoot
             'lf_end_dt' => 'End DateTime',
             'lf_time_duration' => 'Duration',
             'lf_description' => 'Description',
-            'leadFlowChecklist' => 'Lead Flow Checklist'
+            'leadFlowChecklist' => 'Lead Flow Checklist',
+            'lf_out_calls' => 'Out Calls'
         ];
     }
 
@@ -102,6 +120,14 @@ class LeadFlow extends \yii\db\ActiveRecord implements AggregateRoot
     public function getEmployee()
     {
         return $this->hasOne(Employee::class, ['id' => 'employee_id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getOwner()
+    {
+        return $this->hasOne(Employee::class, ['id' => 'lf_owner_id']);
     }
 
     /**
