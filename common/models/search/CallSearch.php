@@ -342,11 +342,15 @@ class CallSearch extends Call
         $query = new Query();
 
         $query->select(['
+            SUM(CASE WHEN c_call_type_id='.self::CALL_TYPE_OUT.' THEN c_call_duration ELSE 0 END) AS outgoingCallsDuration, 
             SUM(CASE WHEN c_call_type_id='.self::CALL_TYPE_OUT.' THEN 1 ELSE 0 END) AS outgoingCalls, 
             SUM(CASE WHEN c_call_type_id='.self::CALL_TYPE_OUT.' AND c_call_status="'.self::TW_STATUS_COMPLETED.'" THEN 1 ELSE 0 END) AS outgoingCallsCompleted, 
             SUM(CASE WHEN c_call_type_id='.self::CALL_TYPE_OUT.' AND c_call_status="'.self::TW_STATUS_NO_ANSWER.'" THEN 1 ELSE 0 END) AS outgoingCallsNoAnswer, 
             SUM(CASE WHEN c_call_type_id='.self::CALL_TYPE_OUT.' AND c_call_status="'.self::TW_STATUS_CANCELED.'" THEN 1 ELSE 0 END) AS outgoingCallsCanceled, 
+            SUM(CASE WHEN c_call_type_id='.self::CALL_TYPE_IN.' THEN c_call_duration ELSE 0 END) AS incomingCallsDuration,
             SUM(CASE WHEN c_call_type_id='.self::CALL_TYPE_IN.' THEN 1 ELSE 0 END) AS incomingCalls,
+            SUM(CASE WHEN c_call_type_id='.self::CALL_TYPE_IN.' AND c_source_type_id='.self::SOURCE_DIRECT_CALL.' THEN 1 ELSE 0 END) AS incomingDirectLine,
+            SUM(CASE WHEN c_call_type_id='.self::CALL_TYPE_IN.' AND c_source_type_id='.self::SOURCE_GENERAL_LINE.' THEN 1 ELSE 0 END) AS incomingGeneralLine,
             c_created_user_id, date(c_created_dt) AS createdDate FROM `call` WHERE c_created_user_id in (' .$employees. ')
         ']);
 
@@ -379,6 +383,10 @@ class CallSearch extends Call
                         'asc' => ['createdDate' => SORT_ASC],
                         'desc' => ['createdDate' => SORT_DESC],
                     ],
+                    'outgoingCallsDuration' => [
+                        'asc' => ['outgoingCallsDuration' => SORT_ASC],
+                        'desc' => ['outgoingCallsDuration' => SORT_DESC],
+                    ],
                     'outgoingCalls' => [
                         'asc' => ['outgoingCalls' => SORT_ASC],
                         'desc' => ['outgoingCalls' => SORT_DESC],
@@ -395,9 +403,21 @@ class CallSearch extends Call
                         'asc' => ['outgoingCallsCanceled' => SORT_ASC],
                         'desc' => ['outgoingCallsCanceled' => SORT_DESC],
                     ],
+                    'incomingCallsDuration' => [
+                        'asc' => ['incomingCallsDuration' => SORT_ASC],
+                        'desc' => ['incomingCallsDuration' => SORT_DESC],
+                    ],
                     'incomingCalls' => [
                         'asc' => ['incomingCalls' => SORT_ASC],
                         'desc' => ['incomingCalls' => SORT_DESC],
+                    ],
+                    'incomingDirectLine' => [
+                        'asc' => ['incomingDirectLine' => SORT_ASC],
+                        'desc' => ['incomingDirectLine' => SORT_DESC],
+                    ],
+                    'incomingGeneralLine' => [
+                        'asc' => ['incomingGeneralLine' => SORT_ASC],
+                        'desc' => ['incomingGeneralLine' => SORT_DESC],
                     ],
 
                 ],

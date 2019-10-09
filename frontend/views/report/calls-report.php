@@ -57,6 +57,9 @@ $list = new ListsAccess(Yii::$app->user->id);
             'attribute' => 'createdDate',
         ],
         [
+            'attribute' => 'outgoingCallsDuration',
+        ],
+        [
             'attribute' => 'outgoingCalls',
         ],
         [
@@ -69,7 +72,16 @@ $list = new ListsAccess(Yii::$app->user->id);
             'attribute' => 'outgoingCallsCanceled',
         ],
         [
+            'attribute' => 'incomingCallsDuration',
+        ],
+        [
             'attribute' => 'incomingCalls',
+        ],
+        [
+            'attribute' => 'incomingDirectLine',
+        ],
+        [
+            'attribute' => 'incomingGeneralLine',
         ],
     ];
 
