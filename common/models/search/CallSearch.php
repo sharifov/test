@@ -11,6 +11,8 @@ use yii\data\ActiveDataProvider;
 use common\models\Call;
 use common\models\UserGroupAssign;
 use Yii;
+use yii\data\SqlDataProvider;
+use yii\db\Query;
 
 /**
  * CallSearch represents the model behind the search form of `common\models\Call`.
@@ -330,5 +332,48 @@ class CallSearch extends Call
         $query->with(['cProject', 'cLead', /*'cLead.leadFlightSegments',*/ 'cCreatedUser', 'cDep', 'callUserAccesses', 'cuaUsers', 'cugUgs', 'calls']);
 
         return $dataProvider;
+    }
+
+     public function searchCallsReport($params, $user):SqlDataProvider
+    {
+        $this->load($params);
+
+       /* $query = new Query();
+
+        $query->from('call');
+        $query->select(['c_created_user_id, DATE(c_created_dt)']);
+        $query->addSelect(['(SELECT COUNT(*) FROM `call` WHERE c_call_type_id = '.Call::CALL_TYPE_IN.' and c_created_user_id=444) AS inbound_calls ']);
+
+        $query->groupBy(['c_created_user_id, DATE(c_created_dt)']);
+
+        $command = $query->createCommand();
+        $sql = $command->rawSql;*/
+       $sql = 'SELECT COUNT(*) AS outCalls, c_created_user_id,  date(c_created_dt) AS createdDate FROM crm_sale_updated.`call` WHERE c_call_type_id=2 and c_created_user_id in (\'444\',\'445\') group by date(c_created_dt), c_created_user_id';
+
+        //var_dump($sql); die();
+
+        $paramsData = [
+            'sql' => $sql,
+            //'params' => [':publish' => 1],
+            //'totalCount' => $totalCount,
+            'sort' => [
+                //'defaultOrder' => ['username' => SORT_ASC],
+                'attributes' => [
+
+                    'inbound_calls' => [
+                        'asc' => ['inbound_calls' => SORT_ASC],
+                        'desc' => ['inbound_calls' => SORT_DESC],
+                    ],
+
+                ],
+            ],
+            'pagination' => [
+                'pageSize' => 25,
+            ],
+        ];
+
+        $dataProvider = new SqlDataProvider($paramsData);
+        return $dataProvider;
+
     }
 }

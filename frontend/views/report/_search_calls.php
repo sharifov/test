@@ -17,7 +17,7 @@ use yii\widgets\ActiveForm;
         <div class="col-md-3">
             <div class="row">
                 <div class="col-md-12">
-                    <?= $form->field($model, 'timeRange', [
+                    <?= $form->field($model, 'createTimeRange', [
                         'options' => ['class' => 'form-group']
                     ])->widget(\kartik\daterange\DateRangePicker::class, [
                         'presetDropdown' => false,

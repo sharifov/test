@@ -106,7 +106,7 @@ class ReportController extends FController
 
     public function actionCallsReport()
     {
-        $searchModel = new EmployeeSearch();
+        $searchModel = new CallSearch();
         $params = Yii::$app->request->queryParams;
         //var_dump($params); die();
 

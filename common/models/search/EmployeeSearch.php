@@ -361,7 +361,7 @@ class EmployeeSearch extends Employee
         return $dataProvider;
     }
 
-    public function searchCallsReport($params, $user):ActiveDataProvider
+   /* public function searchCallsReport($params, $user):ActiveDataProvider
     {
         $query = Employee::find();
         // add conditions that should always apply here
@@ -390,5 +390,5 @@ class EmployeeSearch extends Employee
 
         return $dataProvider;
 
-    }
+    }*/
 }
