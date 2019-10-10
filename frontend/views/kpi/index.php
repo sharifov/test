@@ -1,5 +1,6 @@
 <?php
 
+use common\models\Employee;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
@@ -127,9 +128,8 @@ $this->params['breadcrumbs'][] = $this->title;
                 'label' => 'Agent approved',
                 'attribute' => 'kh_agent_approved_dt',
                 'value' => function ($model) {
-                    return $model['kh_agent_approved_dt'];
+                    return $model->kh_agent_approved_dt ? Yii::$app->formatter->asDatetime(strtotime($model->kh_agent_approved_dt)) : '-';
                 },
-                'format' => 'datetime',
                 'filter' => DatePicker::widget([
                     'model' => $searchModel,
                     'attribute' => 'kh_agent_approved_dt',
@@ -150,9 +150,8 @@ $this->params['breadcrumbs'][] = $this->title;
                 'label' => 'Super approved',
                 'attribute' => 'kh_super_approved_dt',
                 'value' => function ($model) {
-                    return $model['kh_super_approved_dt'];
+                    return $model->kh_super_approved_dt ? Yii::$app->formatter->asDatetime(strtotime($model->kh_super_approved_dt)) : '-';
                 },
-                'format' => 'datetime',
                 'filter' => DatePicker::widget([
                     'model' => $searchModel,
                     'attribute' => 'kh_super_approved_dt',
