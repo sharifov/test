@@ -49,6 +49,7 @@ return [
             'targets' => [
                 [
                     'class' => 'yii\log\FileTarget',
+                    'logVars' => [],
                     'levels' => ['error', 'warning'],
                 ],
                 [
@@ -56,6 +57,7 @@ return [
                     'levels' => ['error', 'warning'],
                     'except' => [
                         'yii\web\HttpException:404',
+                        'yii\web\HttpException:403'
                     ],
                     'logVars' => [],
                     'prefix' => function () {
@@ -67,9 +69,6 @@ return [
                 [
                     'class' => 'yii\log\DbTarget',
                     'levels' => ['info'],
-                    'except' => [
-                        'yii\web\HttpException:404',
-                    ],
                     'logVars' => [],
                     'categories' => ['info\*'],
                     'prefix' => function () {
@@ -77,12 +76,13 @@ return [
                         $ip = $_SERVER['REMOTE_ADDR'];
                         return "[frontend][$ip][$userID]";
                     },
-                 ],
+                ],
                 [
                     'class' => \common\components\logger\AirFileTarget::class,
                     'levels' => ['error', 'warning'],
                     'except' => [
                         'yii\web\HttpException:404',
+                        'yii\web\HttpException:403'
                     ],
                     //'logVars' => YII_DEBUG ? ['_GET', '_POST', '_FILES', '_COOKIE', '_SESSION', '_SERVER'] : [],
                     'logVars' => [],
