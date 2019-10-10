@@ -307,7 +307,7 @@ class CallController extends FController
         $dataProvider3 = $searchModel->searchUserCallMap($params);
 
         $params['CallSearch']['status_ids'] = [Call::STATUS_COMPLETED, Call::STATUS_BUSY, Call::STATUS_FAILED, Call::STATUS_NO_ANSWER, Call::STATUS_CANCELED];
-        $params['CallSearch']['limit'] = 8;
+        $params['CallSearch']['limit'] = 12;
         $dataProvider2 = $searchModel->searchUserCallMap($params);
 
         //$searchModel->datetime_start = date('Y-m-d', strtotime('-0 day'));
