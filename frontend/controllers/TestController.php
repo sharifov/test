@@ -1314,92 +1314,15 @@ die;
         return $this->render('blank');
     }
 
-    public function actionSenea()
-    {
-        //VarDumper::dump(\Yii::$app->params, 10, true); exit;
-
-        $client_phone_number = '+919967117253';
-        $agent_phone_number = '+15596489977';
-
-        $clientIds = [];
-
-        $clientIds = ClientPhone::find()->select(['client_id'])->where(['phone' => $client_phone_number])->column();
-        VarDumper::dump($clientIds, 10, true); exit;
-
-        $clientIdsQuery = ClientPhone::findBySql("SELECT GROUP_CONCAT(client_id) AS client_ids FROM client_phone WHERE phone = '{$client_phone_number}' ")->asArray()->one();
-        //VarDumper::dump($clientIds, 10, true); exit;
-        if(isset($clientIdsQuery['client_ids']) && $clientIdsQuery['client_ids'] ) {
-            $clientIds = explode(',', $clientIdsQuery['client_ids']);
-        }
-
-        $source = Sources::findOne(['phone_number' => $agent_phone_number]);
-        $project = $source->project;
-        $call_project_id = $project->id;
-
-
-
-        $agents = [];
-        $only_agents = [];
-        $only_supervisors = [];
-        $agents_for_call = Employee::getAgentsForGeneralLineCall($call_project_id, $agent_phone_number, 5000);
-        if($agents_for_call) {
-            foreach ($agents_for_call AS $agentForCall) {
-                $agentId = $agentForCall['tbl_user_id'];
-                $agentObject = Employee::findOne($agentId);
-                $agents[] = $agentObject->id . ' : '. $agentObject->username . ' - '. print_r($agentObject->getRoles(), true);
-                $roles = $agentObject->getRoles();
-                if(array_key_exists('agent',$roles)) {
-                    $only_agents[] = $agentObject;
-                }
-
-                if(array_key_exists('supervision',$roles)) {
-                    $only_supervisors[] = $agentObject;
-                }
-            }
-        }
-
-        VarDumper::dump([$only_agents, $only_supervisors], 10, true); exit;
-
-
-        /*$latest_client_leads = Lead::find()
-            ->select(['employee_id'])
-            ->where(['IN', 'client_id', $clientIds])
-            //->andWhere(['project_id' => $call_project_id])
-            ->orderBy(['employee_id' => SORT_DESC])
-            ->limit( 50 )->all();*/
-
-
-        $latest_client_leads = Lead::find()
-            ->select(['DISTINCT(employee_id)', 'updated'])
-            ->where(['IN', 'client_id', $clientIds])
-            //->andWhere(['project_id' => $call_project_id])
-            ->orderBy(['updated' => SORT_DESC])
-            ->limit(50)->all();
-
-        $items = [];
-        $callAgents = [];
-        if($latest_client_leads) {
-            foreach ($latest_client_leads AS $client_lead) {
-                if($client_lead->employee && $client_lead->employee->userProfile->up_call_type_id === UserProfile::CALL_TYPE_WEB) {
-                    //if($client_lead->employee->isOnline() && $client_lead->employee->isCallStatusReady() && $client_lead->employee->isCallFree()) {
-                        $callAgents[] = $client_lead->employee;
-                    $items[] = $client_lead->employee->id . ' : ' . $client_lead->employee->username;
-                    //}
-                }
-            }
-        }
-
-        //VarDumper::dump($callAgents, 10, true); exit;
-
-
-        VarDumper::dump($items, 10, true); exit;
-    }
-
     public function actionTest2()
     {
-        $lead = Lead::find()->innerJoinWith(['client.clientPhones'])->where(['l_client_phone' => '123'])->andWhere(['<>', 'leads.status', Lead::STATUS_TRASH])->orderBy(['leads.id' => SORT_DESC])->limit(1);
 
-        echo $lead->createCommand()->getRawSql();
+        $call = new Call();
+        $call->c_project_id = 6;
+        $call->c_dep_id = null;
+
+        Employee::getUsersForCallQueue($call, 6);
+
     }
 
     public function actionNotify()
