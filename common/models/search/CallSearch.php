@@ -78,7 +78,7 @@ class CallSearch extends Call
                 'c_source_type_id', 'call_duration_from', 'call_duration_to', 'c_case_id', 'c_client_id', 'c_status_id'], 'integer'],
             [['c_call_sid', 'c_account_sid', 'c_from', 'c_to', 'c_sip', 'c_call_status', 'c_api_version', 'c_direction', 'c_forwarded_from', 'c_caller_name', 'c_parent_call_sid', 'c_call_duration', 'c_sip_response_code', 'c_recording_url', 'c_recording_sid',
                 'c_timestamp', 'c_uri', 'c_sequence_number', 'c_created_dt', 'c_updated_dt', 'c_error_message', 'c_price', 'statuses', 'limit'], 'safe'],
-            [['createTimeRange'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
+            [['createTimeRange', 'createTimeStart', 'createTimeEnd'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
             [['ug_ids', 'status_ids', 'dep_ids'], 'each', 'rule' => ['integer']],
         ];
     }
@@ -337,6 +337,17 @@ class CallSearch extends Call
     public function searchCallsReport($params, $user):SqlDataProvider
     {
         $this->load($params);
+
+        if ($this->createTimeRange != null){
+            $dates = explode(' - ', $this->createTimeRange);
+            $date_from = Employee::convertTimeFromUserDtToUTC(strtotime($dates[0]));
+            $date_to = Employee::convertTimeFromUserDtToUTC(strtotime($dates[1]));
+            $between_condition = " BETWEEN '{$date_from}' AND '{$date_to}'";
+        } else {
+            $date_from = Employee::convertTimeFromUserDtToUTC(strtotime(date('Y-m-d 00:00')));
+            $date_to = Employee::convertTimeFromUserDtToUTC(strtotime(date('Y-m-d 23:59')));
+            $between_condition = " BETWEEN '{$date_from}' AND '{$date_to}'";
+        }
         $employees = "'" . implode("', '", array_keys(Employee::getList())) . "'";
 
         $query = new Query();
@@ -351,27 +362,17 @@ class CallSearch extends Call
             SUM(CASE WHEN c_call_type_id='.self::CALL_TYPE_IN.' THEN 1 ELSE 0 END) AS incomingCalls,
             SUM(CASE WHEN c_call_type_id='.self::CALL_TYPE_IN.' AND c_source_type_id='.self::SOURCE_DIRECT_CALL.' THEN 1 ELSE 0 END) AS incomingDirectLine,
             SUM(CASE WHEN c_call_type_id='.self::CALL_TYPE_IN.' AND c_source_type_id='.self::SOURCE_GENERAL_LINE.' THEN 1 ELSE 0 END) AS incomingGeneralLine,
-            c_created_user_id, date(c_created_dt) AS createdDate FROM `call` WHERE c_created_user_id in (' .$employees. ')
+            c_created_user_id, DATE(c_created_dt) AS createdDate FROM `call` WHERE (c_created_dt '.$between_condition.') AND c_created_user_id in (' .$employees. ')
         ']);
-
-        //$query->andWhere(['IN', 'c_created_user_id', $subQuery]);
 
         $query->groupBy(['c_created_user_id, DATE(c_created_dt)']);
         //$query->orderBy(['c_created_user_id' => SORT_ASC]);
 
-
         $command = $query->createCommand();
         $sql = $command->sql;
-        //var_dump($sql); die();
-
-
-
-        //$sql = 'SELECT COUNT(*) AS outCalls, c_created_user_id,  date(c_created_dt) AS createdDate FROM crm_sale_updated.`call` WHERE c_call_type_id=2 and c_created_user_id in (\'444\',\'445\') group by date(c_created_dt), c_created_user_id';
 
         $paramsData = [
             'sql' => $sql,
-            //'params' => [':publish' => 1],
-            //'totalCount' => $totalCount,
             'sort' => [
                 //'defaultOrder' => ['username' => SORT_ASC],
                 'attributes' => [

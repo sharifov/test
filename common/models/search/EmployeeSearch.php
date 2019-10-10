@@ -360,35 +360,4 @@ class EmployeeSearch extends Employee
         $dataProvider = new SqlDataProvider($paramsData);
         return $dataProvider;
     }
-
-   /* public function searchCallsReport($params, $user):ActiveDataProvider
-    {
-        $query = Employee::find();
-        // add conditions that should always apply here
-
-        $this->load($params);
-
-        $dataProvider = new ActiveDataProvider([
-            'query' => $query,
-            'sort'=> [
-                'defaultOrder' => ['id' => SORT_ASC]
-            ],
-            'pagination' => [
-                'pageSize' => 30,
-            ],
-        ]);
-
-        if (!$this->validate()) {
-            // uncomment the following line if you do not want to return any records when validation fails
-            // $query->where('0=1');
-            return $dataProvider;
-        }
-
-        $query->andFilterWhere([
-           'id' => $this->username,
-        ]);
-
-        return $dataProvider;
-
-    }*/
 }
