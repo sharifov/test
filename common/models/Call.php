@@ -845,7 +845,7 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
                     $call->c_created_user_id = $user_id;
                     $call->update();*/
 
-                    \Yii::info(VarDumper::dumpAsString($res), 'info\Call:applyCallToAgent:callRedirect');
+                    // \Yii::info(VarDumper::dumpAsString($res), 'info\Call:applyCallToAgent:callRedirect');
                     return true;
                 }
                 \Yii::warning('Error: ' . VarDumper::dumpAsString($res), 'Call:applyCallToAgent:callRedirect');

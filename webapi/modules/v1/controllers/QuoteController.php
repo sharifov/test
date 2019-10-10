@@ -255,7 +255,7 @@ class QuoteController extends ApiBaseController
                 $response['booked_quote_uid'] = $model->lead->getBookedQuoteUid();
             }
 
-            $response['agentName'] = $model->lead->employee->username;
+            $response['agentName'] = $model->lead->employee ? $model->lead->employee->username : '';
             $response['agentEmail'] = $userProjectParams ? $userProjectParams->upp_email : $model->lead->project->contactInfo->email;
             $response['agentDirectLine'] = $userProjectParams ? $userProjectParams->upp_tw_phone_number : sprintf('%s', $model->lead->project->contactInfo->phone);
             $response['generalEmail'] = $model->lead->project->contactInfo->email;

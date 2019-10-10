@@ -1371,7 +1371,7 @@ class LeadSearch extends Lead
 
         $query = $this->leadBadgesRepository->getTrashQuery($user)->with('project', 'leadFlightSegments');
         $query->select(['*', 'l_client_time' => new Expression("TIME( CONVERT_TZ(NOW(), '+00:00', offset_gmt) )")]);
-        $query->with('lastLeadFlow');
+        //$query->with('lastLeadFlow');
         $leadTable = Lead::tableName();
 
         // add conditions that should always apply here
