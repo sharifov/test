@@ -76,6 +76,7 @@ class RejectReasonForm extends Model
             }],
             ['originId', 'integer'],
             ['originId', 'originExist'],
+            ['originId', 'filter', 'filter' => 'intval'],
 
             ['other', 'required', 'when' => function () {
                 return $this->reason === self::REASON_OTHER;
