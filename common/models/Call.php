@@ -667,7 +667,7 @@ class Call extends \yii\db\ActiveRecord implements AggregateRoot
                     $case = $this->cCase;
 
                     if ($case && !$case->cs_user_id && $this->c_created_user_id && $case->isPending()) {
-                        Yii::info(VarDumper::dumpAsString(['changedAttributes' => $changedAttributes, 'Call' => $this->attributes, 'Case' => $case->attributes]), 'info\Call:Case:afterSave');
+                        // Yii::info(VarDumper::dumpAsString(['changedAttributes' => $changedAttributes, 'Call' => $this->attributes, 'Case' => $case->attributes]), 'info\Call:Case:afterSave');
                         $case->cs_user_id = $this->c_created_user_id;
                         //$case->processing($this->c_created_user_id);
                         $case->cs_status = CasesStatus::STATUS_PROCESSING;
