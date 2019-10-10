@@ -294,7 +294,7 @@ class CallSearch extends Call
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> ['defaultOrder' => ['c_id' => SORT_DESC]],
+            'sort'=> ['defaultOrder' => ['c_updated_dt' => SORT_DESC]],
             'pagination' => $this->limit > 0 ? false : [
                 'pageSize' => 100,
             ]
