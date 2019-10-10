@@ -88,7 +88,7 @@ class CallQueueJob extends BaseObject implements JobInterface
                 $originalAgentId = $call->c_created_user_id;
 
                 if ($call->isStatusIvr()) {
-                    Yii::info('CallId: ' . $this->call_id . ', STATUS_IVR' ,'info\CallQueueJob-STATUS_IVR');
+                    // Yii::info('CallId: ' . $this->call_id . ', STATUS_IVR' ,'info\CallQueueJob-STATUS_IVR');
                     // $call->c_call_status = Call::TW_STATUS_QUEUE;
                     $call->setStatusQueue();
                 }
@@ -187,7 +187,7 @@ class CallQueueJob extends BaseObject implements JobInterface
 
                     if (!$isCalled) {
 
-                        Yii::info('Accept multiple users - CallId: ' . $call->c_id . ', c_call_status: ' . $call->c_call_status . ', ' . VarDumper::dumpAsString($call->attributes),'info\CallQueueJob-Accept-multi');
+                        // Yii::info('Accept multiple users - CallId: ' . $call->c_id . ', c_call_status: ' . $call->c_call_status . ', ' . VarDumper::dumpAsString($call->attributes),'info\CallQueueJob-Accept-multi');
 
                         $last_hours = (int)(Yii::$app->params['settings']['general_line_last_hours'] ?? 1);
 

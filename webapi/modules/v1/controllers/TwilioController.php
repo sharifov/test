@@ -250,6 +250,7 @@ class TwilioController extends ApiBaseNoAuthController
                     $responseTwml->play($url_music, ['loop' => 0]);
 
                 } elseif ($type === 'department') {
+                    $call->c_created_user_id = null;
                     $depPhone = DepartmentPhoneProject::findOne($id);
                     if ($depPhone) {
 
