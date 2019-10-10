@@ -299,7 +299,7 @@ class CasesController extends FController
 
         if ($comForm->load(Yii::$app->request->post())) {
 
-            $comForm->c_case_id = $model->cs_id;
+//            $comForm->c_case_id = $model->cs_id;
 
             if ($comForm->validate()) {
 
