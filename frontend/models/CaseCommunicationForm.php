@@ -104,7 +104,7 @@ class CaseCommunicationForm extends Model
     public function rules() : array
     {
         return [
-            [['c_type_id', 'c_lead_id'], 'required'],
+            [['c_type_id'], 'required'], // 'c_lead_id'
 
             [['c_email_to', 'c_language_id', 'c_email_tpl_key'], 'required', 'when' => function (CommunicationForm $model) {
                 return (int) $model->c_type_id === self::TYPE_EMAIL;
