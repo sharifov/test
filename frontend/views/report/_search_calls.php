@@ -4,7 +4,6 @@ use yii\widgets\ActiveForm;
 ?>
 
 <div class="calls-search">
-
     <?php $form = ActiveForm::begin([
         'action' => ['report/calls-report'],
         'method' => 'get',
@@ -34,6 +33,13 @@ use yii\widgets\ActiveForm;
                         ]
                     ])->label('Calls Updated Date');
                     ?>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="row">
+                <div class="col-md-6">
+                    <?php echo $form->field($model, 'c_created_user_id')->dropDownList($list->getEmployees(), ['prompt' => '-'])->label('Username') ?>
                 </div>
             </div>
         </div>

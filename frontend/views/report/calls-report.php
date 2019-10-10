@@ -30,14 +30,7 @@ $list = new ListsAccess(Yii::$app->user->id);
                 <div class="clearfix"></div>
             </div>
             <div class="x_content" style="display: block">
-                <?php
-                /*            if ($user->isAdmin()) {
-                                $searchTpl = '_search';
-                            } else {
-                                $searchTpl = '_search_agents';
-                            }
-                            */ ?>
-            <?= $this->render('_search_calls', ['model' => $searchModel]);  ?>
+                <?= $this->render('_search_calls', ['model' => $searchModel, 'list' => $list]);  ?>
             </div>
         </div>
     </div>
@@ -52,6 +45,8 @@ $list = new ListsAccess(Yii::$app->user->id);
                 $employee = \common\models\Employee::findone($searchModel['c_created_user_id']);
                 return $employee->username;
             },
+            'format' => 'raw',
+            'filter' => $list->getEmployees()
         ],
         [
             'attribute' => 'createdDate',
@@ -91,7 +86,7 @@ $list = new ListsAccess(Yii::$app->user->id);
         'fontAwesome' => true,
         //'stream' => false, // this will automatically save file to a folder on web server
         //'deleteAfterSave' => false, // this will delete the saved web file after it is streamed to browser,
-        //'batchSize' => 10,
+        'batchSize' => 10,
         'target' => \kartik\export\ExportMenu::TARGET_BLANK,
         //'linkPath' => '/assets/',
         //'folder' => '@webroot/assets', // this is default save folder on server
@@ -114,11 +109,11 @@ $list = new ListsAccess(Yii::$app->user->id);
             'heading' => '<h3 class="panel-title"><i class="glyphicon glyphicon-list"></i> Calls Data</h3>',
         ],
         'export' => [
-                'label' => 'Page'
+            'label' => 'Page'
         ],
         'toolbar' => [
-                'content' => Html::a('<i class="glyphicon glyphicon-repeat"></i>', ['report/calls-report'], ['data-pjax'=>0, 'class' => 'btn btn-default', 'title'=>'Reset Grid']),
-                '{export}',
+            'content' => Html::a('<i class="glyphicon glyphicon-repeat"></i>', ['report/calls-report'], [/*'data-pjax'=>0,*/ 'class' => 'btn btn-default', 'title'=>'Reset Grid']),
+            '{export}',
             $fullExportMenu,
         ]
     ]);

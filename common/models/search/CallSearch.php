@@ -348,7 +348,12 @@ class CallSearch extends Call
             $date_to = Employee::convertTimeFromUserDtToUTC(strtotime(date('Y-m-d 23:59')));
             $between_condition = " BETWEEN '{$date_from}' AND '{$date_to}'";
         }
-        $employees = "'" . implode("', '", array_keys(Employee::getList())) . "'";
+
+        if (isset($params['CallSearch']['c_created_user_id']) && $params['CallSearch']['c_created_user_id'] != ""){
+            $employees = $params['CallSearch']['c_created_user_id'];
+        } else {
+            $employees = "'" . implode("', '", array_keys(Employee::getList())) . "'";
+        }
 
         $query = new Query();
 
@@ -420,11 +425,10 @@ class CallSearch extends Call
                         'asc' => ['incomingGeneralLine' => SORT_ASC],
                         'desc' => ['incomingGeneralLine' => SORT_DESC],
                     ],
-
                 ],
             ],
             'pagination' => [
-                'pageSize' => 25,
+                'pageSize' => 30,
             ],
         ];
 
