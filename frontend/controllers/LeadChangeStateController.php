@@ -9,7 +9,7 @@ use sales\forms\leadflow\RejectReasonForm;
 use sales\forms\leadflow\ReturnReasonForm;
 use sales\forms\leadflow\SnoozeReasonForm;
 use sales\forms\leadflow\TrashReasonForm;
-use sales\guards\FollowUpGuard;
+use sales\guards\lead\FollowUpGuard;
 use sales\services\lead\LeadAssignService;
 use sales\services\lead\LeadStateService;
 use Yii;

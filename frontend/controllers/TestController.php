@@ -120,9 +120,6 @@ class TestController extends FController
     public function actionTest()
     {
 
-
-        $u = Employee::getActiveUsersListWithRoles();
-        VarDumper::dump($u);
         return $this->render('blank');
 
     }

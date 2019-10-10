@@ -1,6 +1,6 @@
 <?php
 
-namespace sales\guards;
+namespace sales\guards\lead;
 
 use Yii;
 use common\models\Call;

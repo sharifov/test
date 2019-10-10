@@ -2,6 +2,7 @@
 
 namespace common\models\search;
 
+use common\models\Employee;
 use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
@@ -90,8 +91,19 @@ class KpiHistorySearch extends KpiHistory
             $query->andFilterWhere(['BETWEEN', 'DATE(kh_date_dt)', $start->format('Y-m-d'), $end->format('Y-m-d')]);
         }
         $query->andFilterWhere(['like', 'kh_description', $this->kh_description]);
-        $query->andFilterWhere(['=', 'DATE(kh_agent_approved_dt)', $this->kh_agent_approved_dt]);
-        $query->andFilterWhere(['=', 'DATE(kh_super_approved_dt)', $this->kh_super_approved_dt]);
+
+        if ($this->kh_agent_approved_dt) {
+            $from = Employee::convertTimeFromUserDtToUTC(strtotime($this->kh_agent_approved_dt));
+            $to = (new \DateTime($from . ' +1 day'))->format('Y-m-d H:i:s');
+            $query->andWhere(['>=', 'kh_agent_approved_dt', $from]);
+            $query->andWhere(['<', 'kh_agent_approved_dt', $to]);
+        }
+        if ($this->kh_super_approved_dt) {
+            $from = Employee::convertTimeFromUserDtToUTC(strtotime($this->kh_super_approved_dt));
+            $to = (new \DateTime($from . ' +1 day'))->format('Y-m-d H:i:s');
+            $query->andWhere(['>=', 'kh_super_approved_dt', $from]);
+            $query->andWhere(['<', 'kh_super_approved_dt', $to]);
+        }
 
         if ($this->usersIdsInCommonGroups) {
             $query->andFilterWhere(['kh_user_id' => $this->usersIdsInCommonGroups]);
