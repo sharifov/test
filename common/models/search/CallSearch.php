@@ -334,9 +334,18 @@ class CallSearch extends Call
         return $dataProvider;
     }
 
+    /**
+     * @param $params
+     * @param $user Employee
+     * @return SqlDataProvider
+     * @throws \Exception
+     */
     public function searchCallsReport($params, $user):SqlDataProvider
     {
         $this->load($params);
+
+        $timezone = $user->timezone;
+        $userTZ = Employee::timezoneList(false)[$timezone];
 
         if ($this->createTimeRange != null){
             $dates = explode(' - ', $this->createTimeRange);
@@ -367,15 +376,15 @@ class CallSearch extends Call
             SUM(CASE WHEN c_call_type_id='.self::CALL_TYPE_IN.' THEN 1 ELSE 0 END) AS incomingCalls,
             SUM(CASE WHEN c_call_type_id='.self::CALL_TYPE_IN.' AND c_source_type_id='.self::SOURCE_DIRECT_CALL.' THEN 1 ELSE 0 END) AS incomingDirectLine,
             SUM(CASE WHEN c_call_type_id='.self::CALL_TYPE_IN.' AND c_source_type_id='.self::SOURCE_GENERAL_LINE.' THEN 1 ELSE 0 END) AS incomingGeneralLine,
-            c_created_user_id, DATE(c_created_dt) AS createdDate FROM `call` WHERE (c_created_dt '.$between_condition.') AND c_created_user_id in (' .$employees. ')
+            c_created_user_id, DATE(CONVERT_TZ(c_created_dt, "+00:00", "'.$userTZ.'")) AS createdDate FROM `call` WHERE (c_created_dt '.$between_condition.') AND c_created_user_id in (' .$employees. ')
         ']);
 
-        $query->groupBy(['c_created_user_id, DATE(c_created_dt)']);
+        $query->groupBy(['c_created_user_id, DATE(CONVERT_TZ(c_created_dt, "+00:00", "'.$userTZ.'"))']);
         //$query->orderBy(['c_created_user_id' => SORT_ASC]);
 
         $command = $query->createCommand();
         $sql = $command->sql;
-
+//var_dump($sql); die();
         $paramsData = [
             'sql' => $sql,
             'sort' => [

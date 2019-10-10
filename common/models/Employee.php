@@ -1444,9 +1444,11 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     }
 
     /**
+     * @param $formatShort
      * @return array
+     * @throws \Exception
      */
-    public static function timezoneList(): array
+    public static function timezoneList($formatLong): array
     {
         $timezoneIdentifiers = \DateTimeZone::listIdentifiers(\DateTimeZone:: ALL);
         $utcTime = new \DateTime('now', new \DateTimeZone('UTC'));
@@ -1472,8 +1474,9 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         foreach ($tempTimezones as $tz) {
             $sign = ($tz['offset'] > 0) ? '+' : '-';
             $offset = gmdate('H:i', abs($tz['offset']));
-            $timezoneList[$tz['identifier']] = '(UTC ' . $sign . $offset . ') ' .
-                $tz['identifier'];
+            $timezoneList[$tz['identifier']] = ($formatLong)
+                ? '(UTC ' . $sign . $offset . ') ' . $tz['identifier']
+            : $sign . $offset;
         }
 
         return $timezoneList;
