@@ -23,7 +23,6 @@ use common\widgets\Alert;
 use frontend\models\CaseCommunicationForm;
 use frontend\models\CasePreviewEmailForm;
 use frontend\models\CasePreviewSmsForm;
-use frontend\models\CommunicationForm;
 use sales\entities\cases\CasesStatus;
 use sales\entities\cases\CasesStatusLogSearch;
 use sales\forms\cases\CasesAddEmailForm;
@@ -314,13 +313,13 @@ class CasesController extends FController
 
         if ($comForm->load(Yii::$app->request->post())) {
 
-//            $comForm->c_case_id = $model->cs_id;
+            $comForm->c_case_id = $model->cs_id;
 
             if ($comForm->validate()) {
 
                 $project = $model->project;
 
-                if ($comForm->c_type_id == CommunicationForm::TYPE_EMAIL) {
+                if ((int)$comForm->c_type_id === CaseCommunicationForm::TYPE_EMAIL) {
 
 
                     //VarDumper::dump($comForm->quoteList, 10, true); exit;
@@ -428,7 +427,7 @@ class CasesController extends FController
                 }
 
 
-                if ($comForm->c_type_id == CommunicationForm::TYPE_SMS) {
+                if ((int)$comForm->c_type_id === CaseCommunicationForm::TYPE_SMS) {
 
                     $comForm->c_preview_sms = 1;
 
@@ -515,11 +514,6 @@ class CasesController extends FController
 
                 }
 
-//                if ($comForm->c_type_id == CommunicationForm::TYPE_VOICE) {
-//
-//
-//
-//                }
 
             }
             //return $this->redirect(['view', 'id' => $model->al_id]);
