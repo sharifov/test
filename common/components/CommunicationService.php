@@ -651,7 +651,7 @@ class CommunicationService extends Component
 
 
         if ($response->isOk) {
-            \Yii::warning(VarDumper::dumpAsString(['cid' => $cid, 'type' => $type, 'from' => $from, 'to' => $to, 'content' => $response->data]), 'Component:CommunicationService::callRedirect');
+            // \Yii::warning(VarDumper::dumpAsString(['cid' => $cid, 'type' => $type, 'from' => $from, 'to' => $to, 'content' => $response->data]), 'Component:CommunicationService::callRedirect');
             if(isset($response->data['data'])) {
                 $out['data'] = $response->data['data'];
             } else {

@@ -137,7 +137,7 @@ class SearchService
 
         //VarDumper::dump($fields)
 
-        Yii::info($url, 'info\CURL:getOnlineQuotes:quickSearch');
+        // Yii::info($url, 'info\CURL:getOnlineQuotes:quickSearch');
 
         if ($response->isOk) {
             return $response->data;

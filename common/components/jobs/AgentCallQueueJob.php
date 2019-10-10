@@ -63,7 +63,7 @@ class AgentCallQueueJob extends BaseObject implements JobInterface
 //            $this->clientManageService = Yii::createObject(ClientManageService::class);
 //            $this->casesRepository = Yii::createObject(CasesRepository::class);
 
-            Yii::info('AgentCallQueueJob - UserId: ' . $this->user_id ,'info\AgentCallQueueJob');
+            // Yii::info('AgentCallQueueJob - UserId: ' . $this->user_id ,'info\AgentCallQueueJob');
 
             //sleep(4);
 

@@ -1273,7 +1273,7 @@ class Quote extends \yii\db\ActiveRecord implements AggregateRoot
         $quote = self::findOne($this->id);
         $data = $quote->getQuoteInformationForExpert(true);
 
-        Yii::info(VarDumper::dumpAsString($data), 'info\Quote:sendUpdateBO');
+        // Yii::info(VarDumper::dumpAsString($data), 'info\Quote:sendUpdateBO');
 
         return BackOffice::sendRequest('lead/update-quote', 'POST', json_encode($data));
     }
