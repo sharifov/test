@@ -294,6 +294,62 @@ class CallSearch extends Call
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+            'sort'=> ['defaultOrder' => ['c_id' => SORT_DESC]],
+            'pagination' => $this->limit > 0 ? false : [
+                'pageSize' => 100,
+            ]
+        ]);
+
+        if (!$this->validate()) {
+            // uncomment the following line if you do not want to return any records when validation fails
+            $query->where('0=1');
+            return $dataProvider;
+        }
+
+        /*$query->andWhere(['c_call_status' => [Call::CALL_STATUS_RINGING]]);
+        $query->orWhere(['c_call_status' => [Call::CALL_STATUS_IN_PROGRESS]]);
+        $query->orWhere(['c_call_status' => [Call::CALL_STATUS_QUEUE]]);*/
+
+        $query->andWhere(['c_parent_id' => null]);
+
+        if ($this->status_ids) {
+            $query->andWhere(['c_status_id' => $this->status_ids]);
+        }
+
+        if ($this->dep_ids) {
+            $query->andWhere(['c_dep_id' => $this->dep_ids]);
+        }
+
+        if ($this->ug_ids) {
+            $subQuery = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])
+                //->join('JOIN', 'user_department', 'ud_user_id = ugs_user_id and ud_dep_id <> :depId', ['depId' => 'ud_dep_id'])
+                ->where(['ugs_group_id' => $this->ug_ids]);
+            $query->andWhere(['IN', 'c_created_user_id', $subQuery]);
+        }
+
+        $query->with(['cProject', 'cLead', /*'cLead.leadFlightSegments',*/ 'cCreatedUser', 'cDep', 'callUserAccesses', 'cuaUsers', 'cugUgs', 'calls']);
+
+        return $dataProvider;
+    }
+
+    /**
+     * @param $params
+     * @return ActiveDataProvider
+     */
+    public function searchUserCallMapHystory($params): ActiveDataProvider
+    {
+        $query = Call::find();
+
+        $this->load($params);
+
+        //$query->limit(5);
+
+        if($this->limit > 0) {
+            $query->limit($this->limit);
+        }
+
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
             'sort'=> ['defaultOrder' => ['c_updated_dt' => SORT_DESC]],
             'pagination' => $this->limit > 0 ? false : [
                 'pageSize' => 100,
