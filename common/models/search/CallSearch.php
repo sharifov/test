@@ -366,13 +366,7 @@ class CallSearch extends Call
             $employees = "'" . implode("', '", array_map(function ($entry) {
                     return $entry['ugs_user_id'];
                 }, $userIdsByGroup)) . "'";
-            //var_dump($employees); die();
         } else if (!empty($this->c_created_user_id) && !empty($this->userGroupId)) {
-            /*$employees = "'" . implode("', '",array_map(function ($entry) {
-                    if($entry['ugs_user_id'] == $this->c_created_user_id){
-                        return $entry['ugs_user_id'];
-                    }
-                }, $userIdsByGroup)) . "'";*/
             foreach ($userIdsByGroup as $userIdInGroup){
                 if($userIdInGroup['ugs_user_id'] == $this->c_created_user_id){
                     $employees =  $userIdInGroup['ugs_user_id'];
