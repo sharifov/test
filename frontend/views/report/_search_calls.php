@@ -43,7 +43,17 @@ use sales\access\EmployeeDepartmentAccess;
                     <?= $form->field($model, 'c_created_user_id')->dropDownList($list->getEmployees(), ['prompt' => '-'])->label('Username') ?>
                 </div>
                 <div class="col-md-6">
-                <?= $form->field($model, 'callDepId')->dropDownList(EmployeeDepartmentAccess::getDepartments(), ['prompt' => '-'])->label('Department') ?>
+                    <?= $form->field($model, 'callDepId')->dropDownList(EmployeeDepartmentAccess::getDepartments(), ['prompt' => '-'])->label('Department') ?>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="row">
+                <div class="col-md-6">
+                    <?= $form->field($model, 'call_duration_from')->input('number', ['min' => 0]) ?>
+                </div>
+                <div class="col-md-6">
+                    <?= $form->field($model, 'call_duration_to')->input('number', ['min' => 0]) ?>
                 </div>
             </div>
         </div>
