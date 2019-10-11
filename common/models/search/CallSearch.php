@@ -11,6 +11,8 @@ use yii\data\ActiveDataProvider;
 use common\models\Call;
 use common\models\UserGroupAssign;
 use Yii;
+use yii\data\SqlDataProvider;
+use yii\db\Query;
 
 /**
  * CallSearch represents the model behind the search form of `common\models\Call`.
@@ -42,6 +44,8 @@ class CallSearch extends Call
 
     public $call_duration_from;
     public $call_duration_to;
+    public $callDepId;
+    public $userGroupId;
 
     public $dep_ids = [];
 
@@ -73,7 +77,7 @@ class CallSearch extends Call
     {
         return [
             [['c_id', 'c_call_type_id', 'c_lead_id', 'c_created_user_id', 'c_com_call_id', 'c_project_id', 'c_is_new', 'c_is_deleted', 'supervision_id', 'limit', 'c_recording_duration',
-                'c_source_type_id', 'call_duration_from', 'call_duration_to', 'c_case_id', 'c_client_id', 'c_status_id'], 'integer'],
+                'c_source_type_id', 'call_duration_from', 'call_duration_to', 'c_case_id', 'c_client_id', 'c_status_id', 'callDepId', 'userGroupId'], 'integer'],
             [['c_call_sid', 'c_account_sid', 'c_from', 'c_to', 'c_sip', 'c_call_status', 'c_api_version', 'c_direction', 'c_forwarded_from', 'c_caller_name', 'c_parent_call_sid', 'c_call_duration', 'c_sip_response_code', 'c_recording_url', 'c_recording_sid',
                 'c_timestamp', 'c_uri', 'c_sequence_number', 'c_created_dt', 'c_updated_dt', 'c_error_message', 'c_price', 'statuses', 'limit'], 'safe'],
             [['createTimeRange'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
@@ -329,6 +333,153 @@ class CallSearch extends Call
 
         $query->with(['cProject', 'cLead', /*'cLead.leadFlightSegments',*/ 'cCreatedUser', 'cDep', 'callUserAccesses', 'cuaUsers', 'cugUgs', 'calls']);
 
+        return $dataProvider;
+    }
+
+    /**
+     * @param $params
+     * @param $user Employee
+     * @return SqlDataProvider
+     * @throws \Exception
+     */
+    public function searchCallsReport($params, $user):SqlDataProvider
+    {
+        $this->load($params);
+
+        $timezone = $user->timezone;
+        $userTZ = Employee::timezoneList(false)[$timezone];
+
+        if ($this->createTimeRange != null) {
+            $dates = explode(' - ', $this->createTimeRange);
+            $date_from = Employee::convertTimeFromUserDtToUTC(strtotime($dates[0]));
+            $date_to = Employee::convertTimeFromUserDtToUTC(strtotime($dates[1]));
+            $between_condition = " BETWEEN '{$date_from}' AND '{$date_to}'";
+        } else {
+            $date_from = Employee::convertTimeFromUserDtToUTC(strtotime(date('Y-m-d 00:00')));
+            $date_to = Employee::convertTimeFromUserDtToUTC(strtotime(date('Y-m-d 23:59')));
+            $between_condition = " BETWEEN '{$date_from}' AND '{$date_to}'";
+        }
+        $userIdsByGroup = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->where(['=', 'ugs_group_id', $this->userGroupId])->asArray()->all();
+        if (isset($params['CallSearch']['c_created_user_id']) && $params['CallSearch']['c_created_user_id'] != "" && empty($this->userGroupId)) {
+            $employees = $params['CallSearch']['c_created_user_id'];
+        } else if (isset($params['CallSearch']['userGroupId']) && $params['CallSearch']['userGroupId'] != "" && empty($this->c_created_user_id)) {
+            $employees = "'" . implode("', '", array_map(function ($entry) {
+                    return $entry['ugs_user_id'];
+                }, $userIdsByGroup)) . "'";
+        } else if (!empty($this->c_created_user_id) && !empty($this->userGroupId)) {
+            foreach ($userIdsByGroup as $userIdInGroup) {
+                if ($userIdInGroup['ugs_user_id'] == $this->c_created_user_id) {
+                    $employees = $userIdInGroup['ugs_user_id'];
+                }
+            }
+        } else {
+            $employees = "'" . implode("', '", array_keys(Employee::getList())) . "'";
+        }
+
+        if (isset($params['CallSearch']['callDepId']) && $params['CallSearch']['callDepId'] != "") {
+            $queryByDepartament = 'AND c_dep_id=' . $params['CallSearch']['callDepId'];
+        } else {
+            $queryByDepartament = '';
+        }
+
+        if(!empty($this->c_project_id)){
+            $queryByProject = ' AND c_project_id=' . $this->c_project_id;
+        } else {
+            $queryByProject = '';
+        }
+
+        if (!empty($this->call_duration_from) && empty($this->call_duration_to)) {
+            $queryByDuration = ' AND c_call_duration >=' . $this->call_duration_from;
+        } elseif (!empty($this->call_duration_to) && empty($this->call_duration_from)) {
+            $queryByDuration = ' AND c_call_duration <=' . $this->call_duration_to;
+        } elseif (!empty($this->call_duration_from) && !empty($this->call_duration_to)){
+            $queryByDuration = ' AND c_call_duration BETWEEN ' . $this->call_duration_from . ' AND '. $this->call_duration_to;
+        }else {
+            $queryByDuration = '';
+        }
+
+        if (!isset($employees)) {
+            $employees = 0;
+        }
+        $query = new Query();
+
+        $query->select(['
+            SUM(CASE WHEN c_call_type_id=' . self::CALL_TYPE_OUT . ' THEN c_call_duration ELSE 0 END) AS outgoingCallsDuration, 
+            SUM(CASE WHEN c_call_type_id=' . self::CALL_TYPE_OUT . ' THEN 1 ELSE 0 END) AS outgoingCalls, 
+            SUM(CASE WHEN c_call_type_id=' . self::CALL_TYPE_OUT . ' AND c_status_id="' . self::STATUS_COMPLETED . '" THEN 1 ELSE 0 END) AS outgoingCallsCompleted, 
+            SUM(CASE WHEN c_call_type_id=' . self::CALL_TYPE_OUT . ' AND c_status_id="' . self::STATUS_NO_ANSWER . '" THEN 1 ELSE 0 END) AS outgoingCallsNoAnswer, 
+            SUM(CASE WHEN c_call_type_id=' . self::CALL_TYPE_OUT . ' AND c_status_id="' . self::STATUS_CANCELED . '" THEN 1 ELSE 0 END) AS outgoingCallsCanceled, 
+            SUM(CASE WHEN c_call_type_id=' . self::CALL_TYPE_IN . ' THEN c_call_duration ELSE 0 END) AS incomingCallsDuration,
+            SUM(CASE WHEN c_call_type_id=' . self::CALL_TYPE_IN . ' THEN 1 ELSE 0 END) AS incomingCalls,
+            SUM(CASE WHEN c_call_type_id=' . self::CALL_TYPE_IN . ' AND c_source_type_id=' . self::SOURCE_DIRECT_CALL . ' THEN 1 ELSE 0 END) AS incomingDirectLine,
+            SUM(CASE WHEN c_call_type_id=' . self::CALL_TYPE_IN . ' AND c_source_type_id=' . self::SOURCE_GENERAL_LINE . ' THEN 1 ELSE 0 END) AS incomingGeneralLine,
+            c_created_user_id, DATE(CONVERT_TZ(c_created_dt, "+00:00", "' . $userTZ . '")) AS createdDate 
+            FROM `call` WHERE (c_created_dt ' . $between_condition . ') ' . $queryByDepartament . $queryByDuration . $queryByProject . ' AND c_created_user_id in (' . $employees . ')
+        ']);
+
+        $query->groupBy(['c_created_user_id, DATE(CONVERT_TZ(c_created_dt, "+00:00", "' . $userTZ . '"))']);
+        //$query->orderBy(['c_created_user_id' => SORT_ASC]);
+
+        $command = $query->createCommand();
+        $sql = $command->sql;
+
+        $paramsData = [
+            'sql' => $sql,
+            'sort' => [
+                //'defaultOrder' => ['username' => SORT_ASC],
+                'attributes' => [
+                    'c_created_user_id' => [
+                        'asc' => ['c_created_user_id' => SORT_ASC],
+                        'desc' => ['c_created_user_id' => SORT_DESC],
+                    ],
+                    'createdDate' => [
+                        'asc' => ['createdDate' => SORT_ASC],
+                        'desc' => ['createdDate' => SORT_DESC],
+                    ],
+                    'outgoingCallsDuration' => [
+                        'asc' => ['outgoingCallsDuration' => SORT_ASC],
+                        'desc' => ['outgoingCallsDuration' => SORT_DESC],
+                    ],
+                    'outgoingCalls' => [
+                        'asc' => ['outgoingCalls' => SORT_ASC],
+                        'desc' => ['outgoingCalls' => SORT_DESC],
+                    ],
+                    'outgoingCallsCompleted' => [
+                        'asc' => ['outgoingCallsCompleted' => SORT_ASC],
+                        'desc' => ['outgoingCallsCompleted' => SORT_DESC],
+                    ],
+                    'outgoingCallsNoAnswer' => [
+                        'asc' => ['outgoingCallsNoAnswer' => SORT_ASC],
+                        'desc' => ['outgoingCallsNoAnswer' => SORT_DESC],
+                    ],
+                    'outgoingCallsCanceled' => [
+                        'asc' => ['outgoingCallsCanceled' => SORT_ASC],
+                        'desc' => ['outgoingCallsCanceled' => SORT_DESC],
+                    ],
+                    'incomingCallsDuration' => [
+                        'asc' => ['incomingCallsDuration' => SORT_ASC],
+                        'desc' => ['incomingCallsDuration' => SORT_DESC],
+                    ],
+                    'incomingCalls' => [
+                        'asc' => ['incomingCalls' => SORT_ASC],
+                        'desc' => ['incomingCalls' => SORT_DESC],
+                    ],
+                    'incomingDirectLine' => [
+                        'asc' => ['incomingDirectLine' => SORT_ASC],
+                        'desc' => ['incomingDirectLine' => SORT_DESC],
+                    ],
+                    'incomingGeneralLine' => [
+                        'asc' => ['incomingGeneralLine' => SORT_ASC],
+                        'desc' => ['incomingGeneralLine' => SORT_DESC],
+                    ],
+                ],
+            ],
+            'pagination' => [
+                'pageSize' => 30,
+            ],
+        ];
+
+        $dataProvider = new SqlDataProvider($paramsData);
         return $dataProvider;
     }
 

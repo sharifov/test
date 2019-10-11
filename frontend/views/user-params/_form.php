@@ -34,7 +34,7 @@ use common\models\Employee;
         <?= $form->field($model, 'up_default_take_limit_leads')->input('number', ['step' => 1, 'min' => 0, 'max' => 100])?>
         <?= $form->field($model, 'up_min_percent_for_take_leads')->input('number', ['step' => 1, 'min' => 0, 'max' => 100])?>
 
-		<?= $form->field($model, 'up_timezone')->dropDownList(Employee::timezoneList(),['prompt' =>'-'])?>
+		<?= $form->field($model, 'up_timezone')->dropDownList(Employee::timezoneList(true),['prompt' =>'-'])?>
 
         <?= $form->field($model, 'up_call_expert_limit')->input('number', ['step' => 1, 'min' => -1, 'max' => 1000])?>
 

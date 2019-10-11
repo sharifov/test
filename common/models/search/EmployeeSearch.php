@@ -2,6 +2,7 @@
 
 namespace common\models\search;
 
+use common\models\Call;
 use common\models\ProjectEmployeeAccess;
 use common\models\UserConnection;
 use common\models\UserDepartment;
@@ -359,5 +360,4 @@ class EmployeeSearch extends Employee
         $dataProvider = new SqlDataProvider($paramsData);
         return $dataProvider;
     }
-
 }
