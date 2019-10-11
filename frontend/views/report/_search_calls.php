@@ -47,17 +47,20 @@ use sales\access\EmployeeDepartmentAccess;
         <div class="col-md-3">
             <div class="row">
                 <div class="col-md-6">
-                    <?= $form->field($model, 'call_duration_from')->input('number', ['min' => 0]) ?>
+                    <?= $form->field($model, 'c_project_id')->dropDownList(\common\models\Project::getList(), ['prompt' => '-'])->label('Project') ?>
                 </div>
                 <div class="col-md-6">
-                    <?= $form->field($model, 'call_duration_to')->input('number', ['min' => 0]) ?>
+                    <?= $form->field($model, 'userGroupId')->dropDownList(\common\models\UserGroup::getList(), ['prompt' => '-'])->label('User Group') ?>
                 </div>
             </div>
         </div>
         <div class="col-md-3">
             <div class="row">
                 <div class="col-md-6">
-                    <?= $form->field($model, 'userGroupId')->dropDownList(\common\models\UserGroup::getList(), ['prompt' => '-'])->label('User Group') ?>
+                    <?= $form->field($model, 'call_duration_from')->input('number', ['min' => 0]) ?>
+                </div>
+                <div class="col-md-6">
+                    <?= $form->field($model, 'call_duration_to')->input('number', ['min' => 0]) ?>
                 </div>
             </div>
         </div>

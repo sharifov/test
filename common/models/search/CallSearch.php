@@ -382,6 +382,12 @@ class CallSearch extends Call
             $queryByDepartament = '';
         }
 
+        if(!empty($this->c_project_id)){
+            $queryByProject = ' AND c_project_id=' . $this->c_project_id;
+        } else {
+            $queryByProject = '';
+        }
+
         if (!empty($this->call_duration_from) && empty($this->call_duration_to)) {
             $queryByDuration = ' AND c_call_duration >=' . $this->call_duration_from;
         } elseif (!empty($this->call_duration_to) && empty($this->call_duration_from)) {
@@ -408,7 +414,7 @@ class CallSearch extends Call
             SUM(CASE WHEN c_call_type_id=' . self::CALL_TYPE_IN . ' AND c_source_type_id=' . self::SOURCE_DIRECT_CALL . ' THEN 1 ELSE 0 END) AS incomingDirectLine,
             SUM(CASE WHEN c_call_type_id=' . self::CALL_TYPE_IN . ' AND c_source_type_id=' . self::SOURCE_GENERAL_LINE . ' THEN 1 ELSE 0 END) AS incomingGeneralLine,
             c_created_user_id, DATE(CONVERT_TZ(c_created_dt, "+00:00", "' . $userTZ . '")) AS createdDate 
-            FROM `call` WHERE (c_created_dt ' . $between_condition . ') ' . $queryByDepartament . $queryByDuration . ' AND c_created_user_id in (' . $employees . ')
+            FROM `call` WHERE (c_created_dt ' . $between_condition . ') ' . $queryByDepartament . $queryByDuration . $queryByProject . ' AND c_created_user_id in (' . $employees . ')
         ']);
 
         $query->groupBy(['c_created_user_id, DATE(CONVERT_TZ(c_created_dt, "+00:00", "' . $userTZ . '"))']);
