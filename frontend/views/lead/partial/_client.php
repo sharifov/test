@@ -1,4 +1,6 @@
 <?php
+
+use frontend\widgets\client\ClientCounterWidget;
 use yii\bootstrap\ActiveForm;
 use frontend\models\LeadForm;
 use common\models\ClientEmail;
@@ -186,10 +188,18 @@ $formId = sprintf('%s-form', $leadForm->getClient()->formName());
         </div>
         <?php if(!$leadForm->getLead()->isNewRecord) :?>
             <div class="btn-group" id="user-actions-block">
-                <?= Html::button('<i class="fa fa-history"></i> Actions', [
+
+                <?php /*  Html::button('<i class="fa fa-history"></i> Actions', [
                     'id' => 'view-client-actions-btn',
                     'class' => 'btn btn-default'
+                ]) */ ?>
+
+                <?= Html::button('<i class="fa fa-user"></i> Client Info', [
+                    'class' => 'btn btn-default',
+                    'id' => 'btn-client-details',
+                    'data-client-id' => $leadForm->getClient()->id
                 ]) ?>
+
                 <?php if (!empty($leadForm->getLead()->request_ip)) : ?>
                     <?php
                     $ipData = @json_decode($leadForm->getLead()->request_ip_detail, true);
@@ -434,9 +444,12 @@ $formId = sprintf('%s-form', $leadForm->getClient()->formName());
             </div>
         <?php endif; ?>
 
+        <?= ClientCounterWidget::widget(['clientId' => $leadForm->getClient()->id]) ?>
+
     </div>
 
 <?php ActiveForm::end(); ?>
+
 
     <style type="text/css">
         @media screen and (min-width: 768px) {
