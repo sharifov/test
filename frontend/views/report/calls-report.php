@@ -2,7 +2,7 @@
 
 use yii\helpers\Html;
 use kartik\grid\GridView;
-use sales\ui\user\ListsAccess;
+use sales\access\ListsAccess;
 
 $this->title = 'Calls Report';
 $this->params['breadcrumbs'][] = $this->title;
