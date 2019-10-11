@@ -376,8 +376,6 @@ class CallSearch extends Call
             $employees = "'" . implode("', '", array_keys(Employee::getList())) . "'";
         }
 
-        //var_dump($params['CallSearch']['callDepId']); die();
-
         if (isset($params['CallSearch']['callDepId']) && $params['CallSearch']['callDepId'] != "") {
             $queryByDepartament = 'AND c_dep_id=' . $params['CallSearch']['callDepId'];
         } else {
@@ -389,7 +387,6 @@ class CallSearch extends Call
         } elseif (!empty($this->call_duration_to) && empty($this->call_duration_from)) {
             $queryByDuration = ' AND c_call_duration <=' . $this->call_duration_to;
         } elseif (!empty($this->call_duration_from) && !empty($this->call_duration_to)){
-            //$queryByDuration = ' AND c_call_duration <=' . $this->call_duration_to;
             $queryByDuration = ' AND c_call_duration BETWEEN ' . $this->call_duration_from . ' AND '. $this->call_duration_to;
         }else {
             $queryByDuration = '';
@@ -403,9 +400,9 @@ class CallSearch extends Call
         $query->select(['
             SUM(CASE WHEN c_call_type_id=' . self::CALL_TYPE_OUT . ' THEN c_call_duration ELSE 0 END) AS outgoingCallsDuration, 
             SUM(CASE WHEN c_call_type_id=' . self::CALL_TYPE_OUT . ' THEN 1 ELSE 0 END) AS outgoingCalls, 
-            SUM(CASE WHEN c_call_type_id=' . self::CALL_TYPE_OUT . ' AND c_call_status="' . self::TW_STATUS_COMPLETED . '" THEN 1 ELSE 0 END) AS outgoingCallsCompleted, 
-            SUM(CASE WHEN c_call_type_id=' . self::CALL_TYPE_OUT . ' AND c_call_status="' . self::TW_STATUS_NO_ANSWER . '" THEN 1 ELSE 0 END) AS outgoingCallsNoAnswer, 
-            SUM(CASE WHEN c_call_type_id=' . self::CALL_TYPE_OUT . ' AND c_call_status="' . self::TW_STATUS_CANCELED . '" THEN 1 ELSE 0 END) AS outgoingCallsCanceled, 
+            SUM(CASE WHEN c_call_type_id=' . self::CALL_TYPE_OUT . ' AND c_status_id="' . self::STATUS_COMPLETED . '" THEN 1 ELSE 0 END) AS outgoingCallsCompleted, 
+            SUM(CASE WHEN c_call_type_id=' . self::CALL_TYPE_OUT . ' AND c_status_id="' . self::STATUS_NO_ANSWER . '" THEN 1 ELSE 0 END) AS outgoingCallsNoAnswer, 
+            SUM(CASE WHEN c_call_type_id=' . self::CALL_TYPE_OUT . ' AND c_status_id="' . self::STATUS_CANCELED . '" THEN 1 ELSE 0 END) AS outgoingCallsCanceled, 
             SUM(CASE WHEN c_call_type_id=' . self::CALL_TYPE_IN . ' THEN c_call_duration ELSE 0 END) AS incomingCallsDuration,
             SUM(CASE WHEN c_call_type_id=' . self::CALL_TYPE_IN . ' THEN 1 ELSE 0 END) AS incomingCalls,
             SUM(CASE WHEN c_call_type_id=' . self::CALL_TYPE_IN . ' AND c_source_type_id=' . self::SOURCE_DIRECT_CALL . ' THEN 1 ELSE 0 END) AS incomingDirectLine,
@@ -419,7 +416,7 @@ class CallSearch extends Call
 
         $command = $query->createCommand();
         $sql = $command->sql;
-//var_dump($sql); die();
+
         $paramsData = [
             'sql' => $sql,
             'sort' => [

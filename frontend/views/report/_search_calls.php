@@ -8,9 +8,6 @@ use sales\access\EmployeeDepartmentAccess;
     <?php $form = ActiveForm::begin([
         'action' => ['report/calls-report'],
         'method' => 'get',
-        /*'options' => [
-            'data-pjax' => 1
-        ],*/
     ]); ?>
 
     <div class="row">
@@ -71,7 +68,7 @@ use sales\access\EmployeeDepartmentAccess;
             <br>
             <div class="form-group text-center">
                 <?= Html::submitButton('<i class="fa fa-search"></i> Search', ['name' => 'search', 'class' => 'btn btn-primary']) ?>
-                <?= Html::submitButton('<i class="fa fa-close"></i> Reset form', ['name' => 'reset', 'class' => 'btn btn-warning']) ?>
+                <?= Html::a('<i class="glyphicon glyphicon-repeat"></i> Reset form', ['report/calls-report'], ['class' => 'btn btn-warning']) ?>
             </div>
         </div>
     </div>

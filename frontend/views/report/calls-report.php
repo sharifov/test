@@ -112,7 +112,7 @@ $list = new ListsAccess(Yii::$app->user->id);
             'label' => 'Page'
         ],
         'toolbar' => [
-            'content' => Html::a('<i class="glyphicon glyphicon-repeat"></i>', ['report/calls-report'], [/*'data-pjax'=>0,*/ 'class' => 'btn btn-default', 'title'=>'Reset Grid']),
+            'content' => Html::a('<i class="glyphicon glyphicon-repeat"></i>', ['report/calls-report'], ['class' => 'btn btn-default', 'title'=>'Reset Grid']),
             '{export}',
             $fullExportMenu,
         ]
