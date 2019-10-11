@@ -22,7 +22,7 @@ class CallController extends Controller
     {
         echo $this->ansiFormat('starting console script...' . PHP_EOL, Console::FG_GREEN);
         $dt5Min = (new \DateTime('now'))->modify('-5 minutes')->format('Y-m-d H:i:s');
-        $dt20Min = (new \DateTime('now'))->modify('-20 minutes')->format('Y-m-d H:i:s');
+        $dt20Min = (new \DateTime('now'))->modify('-60 minutes')->format('Y-m-d H:i:s');
         $dt1Hour= (new \DateTime('now'))->modify('-1 hour')->format('Y-m-d H:i:s');
 
         $items = [];
@@ -42,6 +42,7 @@ class CallController extends Controller
         $items_ringing = Call::find()
             ->where(['c_status_id' => Call::STATUS_RINGING])
             ->andWhere(['<=', 'c_created_dt', $dt5Min])
+            ->andWhere(['IS NOT', 'c_parent_id', null])
             ->orderBy(['c_id' => SORT_ASC])
             ->all();
 
@@ -53,6 +54,7 @@ class CallController extends Controller
         $items_inprogress = Call::find()
             ->where(['c_status_id' =>  Call::STATUS_IN_PROGRESS])
             ->andWhere(['<=', 'c_created_dt', $dt1Hour])
+            ->andWhere(['IS NOT', 'c_parent_id', null])
             ->orderBy(['c_id' => SORT_ASC])
             ->all();
 
